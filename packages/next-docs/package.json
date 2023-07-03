@@ -1,0 +1,45 @@
+{
+    "name": "next-docs",
+    "files": [
+        "dist",
+        "components.js",
+        "components.d.ts",
+        "mdx.js",
+        "mdx.d.ts",
+        "api.js",
+        "api.d.ts",
+        "lib.js",
+        "lib.d.ts"
+    ],
+    "scripts": {
+        "build": "tsup",
+        "clean": "rmdir /q/s dist",
+        "dev": "tsup --watch",
+        "prepublishOnly": "pnpm build",
+        "types": "tsup --dts-only",
+        "types:check": "tsc --noEmit"
+    },
+    "dependencies": {
+        "class-variance-authority": "^0.6.0",
+        "clsx": "^1.2.1",
+        "cmdk": "^0.2.0",
+        "flexsearch": "0.7.21",
+        "lucide-react": "^0.190.0",
+        "mdast-util-toc": "^6.1.1",
+        "remark": "^14.0.2",
+        "swr": "^2.1.5",
+        "unist-util-visit": "^4.1.2"
+    },
+    "peerDependencies": {
+        "next": "13.x",
+        "react": "18.x",
+        "react-dom": "18.x"
+    },
+    "devDependencies": {
+        "@types/flexsearch": "0.7.3",
+        "@types/node": "18.16.3",
+        "@types/react": "18.2.0",
+        "@types/react-dom": "18.2.1",
+        "next": "13.4.1"
+    }
+}

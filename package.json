@@ -1,0 +1,24 @@
+{
+    "name": "root",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "build": "turbo run build:tailwind build",
+        "clean": "turbo run clean",
+        "dev": "turbo run dev",
+        "lint": "eslint --cache --ignore-path .gitignore --max-warnings 0 .",
+        "lint:prettier": "prettier --cache --check --ignore-path .gitignore --ignore-path .prettierignore .",
+        "prettier": "prettier --cache --write --list-different --ignore-path .gitignore --ignore-path .prettierignore .",
+        "release": "changeset publish",
+        "test": "turbo run test",
+        "types:check": "turbo run types:check",
+        "version": "changeset version"
+    },
+    "devDependencies": {
+        "changeset": "^0.2.6",
+        "concurrently": "^8.0.1",
+        "tsup": "6.7.0",
+        "turbo": "v1.9.9",
+        "typescript": "5.0.4"
+    }
+}

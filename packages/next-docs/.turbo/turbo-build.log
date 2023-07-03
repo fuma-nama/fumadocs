@@ -1,0 +1,22 @@
+
+> next-docs@ build D:\Dev\frameworks\next-docs\packages\next-docs
+> tsup
+
+[2m[[22mNEXT-DOCS[2m][22m [34mCLI[39m Building entry: src/server/index.ts, src/client/index.ts
+[2m[[22mNEXT-DOCS[2m][22m [34mCLI[39m Using tsconfig: tsconfig.json
+[2m[[22mNEXT-DOCS[2m][22m [34mCLI[39m tsup v6.7.0
+[2m[[22mNEXT-DOCS[2m][22m [34mCLI[39m Using tsup config: D:\Dev\frameworks\next-docs\packages\next-docs\tsup.config.ts
+[2m[[22mNEXT-DOCS[2m][22m [34mCLI[39m Target: es2016
+[2m[[22mNEXT-DOCS[2m][22m [34mESM[39m Build start
+[2m[[22mNEXT-DOCS[2m][22m [32mESM[39m [1mdist\client\index.js    [22m[32m20.42 KB[39m
+[2m[[22mNEXT-DOCS[2m][22m [32mESM[39m [1mdist\server\index.js    [22m[32m5.50 KB[39m
+[2m[[22mNEXT-DOCS[2m][22m [32mESM[39m [1mdist\chunk-B7VGEL6M.js  [22m[32m1.38 KB[39m
+[2m[[22mNEXT-DOCS[2m][22m [32mESM[39m [1mdist\search-D42LO2UY.js [22m[32m136.00 B[39m
+[2m[[22mNEXT-DOCS[2m][22m [32mESM[39m [1mdist\chunk-WX73S7CG.js  [22m[32m10.96 KB[39m
+[2m[[22mNEXT-DOCS[2m][22m [32mESM[39m [1mdist\chunk-WUPNYEAP.js  [22m[32m2.83 KB[39m
+[2m[[22mNEXT-DOCS[2m][22m [32mESM[39m ⚡️ Build success in 68ms
+[2m[[22mNEXT-DOCS[2m][22m [34mDTS[39m Build start
+[2m[[22mNEXT-DOCS[2m][22m [32mDTS[39m ⚡️ Build success in 4856ms
+[2m[[22mNEXT-DOCS[2m][22m [32mDTS[39m [1mdist\server\index.d.ts     [22m[32m3.49 KB[39m
+[2m[[22mNEXT-DOCS[2m][22m [32mDTS[39m [1mdist\client\index.d.ts     [22m[32m7.96 KB[39m
+[2m[[22mNEXT-DOCS[2m][22m [32mDTS[39m [1mdist\get-toc-b6a7f3e6.d.ts [22m[32m634.00 B[39m

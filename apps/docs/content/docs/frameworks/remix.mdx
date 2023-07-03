@@ -1,0 +1,50 @@
+---
+title: Remix
+description: Deploy Remix app to No Deploy
+---
+
+Remix is a server-rendered, high-performance [React](https://react.dev) Framework. It has built-in support for Nested routes, error boundaries and more which creates an insane developer experience.
+
+No Deploy supports hosting Remix app with zero configurations and also brings the powerful feature of No Deploy into your app.
+
+## Server Side Rendering (SSR)
+
+Server side rendering is supported by default, you don't have to specific any properties in order to get Remix App works.
+
+-   Scale automatically
+-   Instant load speed
+-   Zero configurations
+
+## Serverless Functions
+
+All the Routes of your Remix app will be deployed as Serverless Function.
+
+For example, the code below will display the teams that user has joined before:
+
+```tsx
+export async function loader() {
+    return json(await getTeams());
+}
+
+export default function Teams() {
+    return <TeamsView teams={useLoaderData<typeof loader>()} />;
+}
+```
+
+-   Fast, Low latency
+-   No Cost and Limit
+-   Extremely Reliable and scalable
+
+### Edge Runtime
+
+Edge runtime isn't currently supported yet.
+
+## More Resources
+
+<Cards>
+    <Card
+        href="https://remix.run/docs"
+        title="Remix Documentation"
+        description="Learn More about Remix"
+    />
+</Cards>

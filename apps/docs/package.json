@@ -1,0 +1,44 @@
+{
+    "name": "docs",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev": "next dev",
+        "build": "next build",
+        "start": "next start",
+        "lint": "next lint"
+    },
+    "dependencies": {
+        "autoprefixer": "10.4.14",
+        "class-variance-authority": "^0.6.0",
+        "clsx": "^1.2.1",
+        "contentlayer": "^0.3.3",
+        "lucide-react": "^0.190.0",
+        "next": "13.4.1",
+        "next-contentlayer": "^0.3.3",
+        "next-themes": "^0.2.1",
+        "next-docs": "workspace:*",
+        "postcss": "8.4.23",
+        "@radix-ui/react-accordion": "^1.1.1",
+        "@radix-ui/react-dialog": "^1.0.3",
+        "@radix-ui/react-select": "^1.2.1",
+        "cmdk": "^0.2.0",
+        "react": "18.2.0",
+        "react-dom": "18.2.0",
+        "rehype-pretty-code": "^0.9.5",
+        "rehype-slug": "^5.1.0",
+        "remark-gfm": "^3.0.1",
+        "swr": "^2.1.5",
+        "tailwind-merge": "^1.12.0"
+    },
+    "devDependencies": {
+        "@types/node": "18.16.3",
+        "@types/react": "18.2.0",
+        "@types/react-dom": "18.2.1",
+        "@next/bundle-analyzer": "^13.4.1",
+        "@tailwindcss/typography": "^0.5.9",
+        "@types/flexsearch": "0.7.3",
+        "tailwindcss": "3.3.2",
+        "tailwindcss-animate": "^1.0.5"
+    }
+}
