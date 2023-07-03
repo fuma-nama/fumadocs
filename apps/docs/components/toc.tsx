@@ -9,7 +9,7 @@ export function TOCItem({ item }: { item: Item }) {
             <TOC.TOCItem
                 href={item.url}
                 item={item}
-                className="text-sm text-muted-foreground data-[active=true]:font-semibold data-[active=true]:text-foreground"
+                className="text-sm text-muted-foreground transition-colors data-[active=true]:font-semibold data-[active=true]:text-foreground"
             >
                 {item.title}
             </TOC.TOCItem>

@@ -13,6 +13,7 @@ import { Card, Cards } from "@/components/mdx/card";
 import { ExternalLink, WithLink } from "@/components/mdx/link";
 import { Pre } from "@/components/mdx/pre";
 import { TOCItem, TOCProvider } from "@/components/toc";
+import { Accordion } from "@/components/ui/accordion";
 
 export default async function Page({ params }: { params: Param }) {
     const path = (params.slug ?? []).join("/");
@@ -56,6 +57,7 @@ function MdxContent({ code }: { code: string }) {
                 Card,
                 Cards,
                 a: ExternalLink,
+                accordion: Accordion,
                 pre: (props) => <Pre {...props} />,
                 h1: (props) => (
                     <h1 {...props} className={cn("group", props.className)}>

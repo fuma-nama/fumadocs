@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { SidebarList, SidebarProvider } from "@/components/sidebar";
+import { SidebarProvider, SidebarList } from "@/components/sidebar";
 import clsx from "clsx";
 import { tree } from "@/utils/page-tree";
 

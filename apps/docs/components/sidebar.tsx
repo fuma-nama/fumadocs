@@ -88,7 +88,7 @@ export function SidebarList({ items }: { items: TreeNode[] }) {
             )}
         >
             <button
-                className="flex flex-row items-center border-[1px] rounded-md text-muted-foreground cursor-pointer px-4 py-2 text-left text-sm"
+                className="flex flex-row items-center border-[1px] rounded-md text-muted-foreground bg-background cursor-pointer px-4 py-2 text-left text-sm"
                 onClick={() => setOpenSearch(true)}
             >
                 Search Docs...
