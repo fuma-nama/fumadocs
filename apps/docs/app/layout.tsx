@@ -12,7 +12,14 @@ export default function RootLayout({
 }) {
     return (
         <html lang="en" className="dark">
-            <body>{children}</body>
+            <body>
+                <nav className="sticky flex flex-row items-center top-0 left-0 right-0 h-12 bg-gradient-to-t from-background to-accent to-[150%] z-50">
+                    <p className="text-sm text-muted-foreground mx-auto text-center">
+                        next-docs
+                    </p>
+                </nav>
+                {children}
+            </body>
         </html>
     );
 }
