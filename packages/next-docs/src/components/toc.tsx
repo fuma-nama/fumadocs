@@ -1,5 +1,5 @@
 import { Item, TableOfContents } from "@/lib/get-toc";
-import { useAnchorObserver } from "@/lib/use-anchor-observer";
+import { useAnchorObserver } from "./use-anchor-observer";
 import { ReactNode, useMemo } from "react";
 import { createContext, useContext } from "react";
 import { ComponentPropsWithoutRef, forwardRef } from "react";
