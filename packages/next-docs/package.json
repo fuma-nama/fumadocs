@@ -9,7 +9,9 @@
         "api.js",
         "api.d.ts",
         "lib.js",
-        "lib.d.ts"
+        "lib.d.ts",
+        "search.js",
+        "search.d.ts"
     ],
     "scripts": {
         "build": "tsup",
