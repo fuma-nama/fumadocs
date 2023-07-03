@@ -9,6 +9,7 @@ node_modules
 /coverage
 
 # outputs
+.turbo
 .next
 out
 dist
