@@ -18,11 +18,11 @@ export default function HomePage() {
             <div className="absolute top-0 left-0 max-xl:hidden">
                 <div className="w-6 ml-72 h-[500px] -rotate-45 rounded-full bg-gradient-to-b from-transparent via-purple-400/50 via-60% to-cyan-200" />
             </div>
-            <Star className="absolute top-40 left-[10%] text-cyan-100 max-lg:hidden" />
-            <Star className="absolute top-72 left-[30%] scale-[.25] text-cyan-100" />
-            <Star className="absolute top-64 right-[10%] scale-50 text-pink-200 md:top-20" />
-            <Star className="absolute top-96 right-[15%] text-pink-200 max-lg:hidden" />
-            <Star className="absolute top-64 right-[30%] scale-50 text-pink-200 max-lg:hidden" />
+            <Star className="absolute top-40 left-[10%] text-cyan-100 animate-star delay-200 max-lg:hidden" />
+            <Star className="absolute top-72 left-[30%] scale-[.25] text-cyan-100 delay-700 animate-star" />
+            <Star className="absolute top-64 right-[10%] scale-50 text-pink-200 animate-star md:top-20" />
+            <Star className="absolute top-96 right-[15%] text-pink-200 delay-1000 animate-star max-lg:hidden" />
+            <Star className="absolute top-64 right-[30%] scale-50 animate-star text-pink-200 max-lg:hidden" />
 
             <div className="pt-40 z-[2] flex flex-col gap-4 text-center container">
                 <div className="relative mx-auto">
@@ -64,7 +64,7 @@ export default function HomePage() {
                 </div>
                 <div className="relative md:col-span-2 p-8 border rounded-2xl flex flex-col overflow-hidden bg-background z-[2]">
                     <div className="-z-[1] mx-auto mb-20 relative">
-                        <div className="bg-cyan-400/30 inset-0 absolute blur-3xl -z-[1]" />
+                        <div className="bg-cyan-400/30 inset-0 absolute blur-3xl -z-[1] animate-pulse" />
                         <Rocket className="mx-auto text-cyan-200" />
                     </div>
                     <div className="absolute inset-0 flex flex-col bg-gradient-to-b from-background/30 to-blue-500/30 p-8 from-10%">
@@ -139,6 +139,8 @@ function Heart(props: ComponentPropsWithoutRef<"svg">) {
                     stroke="#E1FBFF"
                     strokeWidth="2"
                     strokeLinecap="round"
+                    className="animate-heart"
+                    strokeDasharray={200}
                 />
             </g>
             <defs>
