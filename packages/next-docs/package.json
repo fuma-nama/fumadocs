@@ -24,6 +24,10 @@
             "import": "./dist/server/index.mjs",
             "types": "./dist/server/index.d.ts"
         },
+        "./link": {
+            "import": "./dist/link/index.mjs",
+            "types": "./dist/link/index.d.ts"
+        },
         "./*": {
             "import": "./dist/*.mjs",
             "types": "./dist/*.d.ts"
@@ -45,6 +49,9 @@
             ],
             "server": [
                 "./dist/server/index.d.ts"
+            ],
+            "link": [
+                "./dist/link/index.d.ts"
             ]
         }
     },
