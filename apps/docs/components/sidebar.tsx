@@ -1,44 +1,32 @@
 "use client";
 import clsx from "clsx";
 import { ChevronDownIcon, MenuIcon } from "lucide-react";
-import {
-    ReactNode,
-    createContext,
-    useContext,
-    useEffect,
-    useState,
-} from "react";
+import { ReactNode, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { TreeNode, FileNode, FolderNode } from "next-docs/lib";
 import dynamic from "next/dynamic";
 import { CommandShortcut } from "./ui/command";
 import { MouseEvent } from "react";
+import * as Base from "next-docs/components";
 
 const SearchDialog = dynamic(() => import("./dialog/search"));
 
-const SidebarContext = createContext({
-    open: false,
-    setOpenSearch: (v: boolean) => {},
-});
-
 export function SidebarProvider({ children }: { children: ReactNode }) {
-    const [open, setOpen] = useState(false);
+    return (
+        <Base.SidebarProvider>
+            <Base.SidebarTrigger className="sticky flex flex-row w-full top-12 gap-2 h-12 text-sm bg-background border-b-[1px] px-8 items-center z-50 sm:px-14 lg:hidden">
+                <MenuIcon className="w-4 h-4" />
+                Menu
+            </Base.SidebarTrigger>
+
+            {children}
+        </Base.SidebarProvider>
+    );
+}
+
+export function Sidebar({ items }: { items: TreeNode[] }) {
     const [openSearch, setOpenSearch] = useState(false);
-
-    const pathname = usePathname();
-
-    useEffect(() => {
-        setOpen(false);
-    }, [pathname]);
-
-    useEffect(() => {
-        if (open) {
-            document.body.classList.add("max-lg:overflow-hidden");
-        } else {
-            document.body.classList.remove("max-lg:overflow-hidden");
-        }
-    }, [open]);
 
     useEffect(() => {
         const handler = (e: KeyboardEvent) => {
@@ -51,40 +39,17 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
         window.addEventListener("keydown", handler);
 
         return () => {
-            document.body.classList.remove("max-lg:overflow-hidden");
             window.removeEventListener("keydown", handler);
         };
     }, []);
 
     return (
-        <SidebarContext.Provider value={{ open, setOpenSearch }}>
-            <button
-                className={clsx(
-                    "w-full h-8 bg-background border-b-[1px] px-8 sm:px-14",
-                    "flex flex-row gap-2 items-center text-sm",
-                    "sticky inset-x-0 top-12 z-50 lg:hidden"
-                )}
-                onClick={() => setOpen((prev) => !prev)}
-            >
-                <MenuIcon className="w-4 h-4" />
-                Menu
-            </button>
-            {openSearch && <SearchDialog open onOpenChange={setOpenSearch} />}
-            {children}
-        </SidebarContext.Provider>
-    );
-}
-
-export function SidebarList({ items }: { items: TreeNode[] }) {
-    const { open, setOpenSearch } = useContext(SidebarContext);
-
-    return (
-        <aside
+        <Base.SidebarList
+            minWidth={1024} // lg
             className={clsx(
-                "flex flex-col gap-3 fixed inset-0 top-20 overflow-auto",
+                "flex flex-col gap-3 fixed inset-0 top-24 overflow-auto",
                 "lg:sticky lg:top-12 lg:py-16 lg:max-h-[calc(100vh-3rem)]",
-                "max-lg:py-4 max-lg:px-8 max-lg:sm:px-14 max-lg:bg-background/50 max-lg:backdrop-blur-xl max-lg:z-50",
-                !open && "max-lg:hidden"
+                "max-lg:py-4 max-lg:px-8 max-lg:sm:px-14 max-lg:bg-background/50 max-lg:backdrop-blur-xl max-lg:z-50 max-lg:data-[open=false]:hidden"
             )}
         >
             <button
@@ -94,10 +59,11 @@ export function SidebarList({ items }: { items: TreeNode[] }) {
                 Search Docs...
                 <CommandShortcut className="ml-auto">⌘K</CommandShortcut>
             </button>
+            {openSearch && <SearchDialog open onOpenChange={setOpenSearch} />}
             {items.map((item, i) => (
                 <Node key={i} item={item} />
             ))}
-        </aside>
+        </Base.SidebarList>
     );
 }
 
@@ -139,51 +105,44 @@ function Folder({ item }: { item: FolderNode }) {
     const childActive = pathname.startsWith(item.url + "/");
     const [extend, setExtend] = useState(active || childActive);
 
-    const styles = clsx(
-        "text-sm flex flex-row justify-between cursor-pointer",
-        active
-            ? "font-semibold rounded-xl text-purple-400"
-            : "text-muted-foreground hover:text-foreground"
-    );
-
-    const icon = (
-        <ChevronDownIcon
-            className={clsx("w-5 h-5", extend ? "rotate-0" : "-rotate-90")}
-            onClick={(e) => {
-                setExtend((prev) => !prev);
-                e.preventDefault();
-                e.stopPropagation();
-            }}
-        />
-    );
-
     useEffect(() => {
         if (active || childActive) {
             setExtend(true);
         }
     }, [active, childActive]);
 
-    const onClick = (e: MouseEvent) => {
+    const onClick = () => {
         if (item.index == null || active) {
             setExtend((prev) => !prev);
-            e.stopPropagation();
-            e.preventDefault();
         }
     };
 
+    const As = index == null ? "p" : Link;
     return (
         <div className="w-full">
-            {index == null ? (
-                <h4 className={styles} onClick={onClick}>
+            <div
+                className={clsx(
+                    "flex flex-row text-sm rounded-xl cursor-pointer",
+                    active
+                        ? "font-semibold text-purple-400"
+                        : "text-muted-foreground hover:text-foreground"
+                )}
+            >
+                <As
+                    href={index?.url as any}
+                    className="flex-1"
+                    onClick={onClick}
+                >
                     {name}
-                    {icon}
-                </h4>
-            ) : (
-                <Link href={index.url} className={styles} onClick={onClick}>
-                    {name}
-                    {icon}
-                </Link>
-            )}
+                </As>
+                <ChevronDownIcon
+                    className={clsx(
+                        "w-5 h-5",
+                        extend ? "rotate-0" : "-rotate-90"
+                    )}
+                    onClick={() => setExtend((prev) => !prev)}
+                />
+            </div>
             <ul
                 className={clsx(
                     "flex-col mt-3 transition-all overflow-hidden",

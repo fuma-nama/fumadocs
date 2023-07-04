@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { SidebarProvider, SidebarList } from "@/components/sidebar";
+import { SidebarProvider, Sidebar } from "@/components/sidebar";
 import clsx from "clsx";
 import { tree } from "@/utils/page-tree";
 
@@ -17,7 +17,7 @@ export default function DocsLayout({ children }: { children: ReactNode }) {
                     "sm:px-14 xl:px-24"
                 )}
             >
-                <SidebarList items={tree} />
+                <Sidebar items={tree} />
                 {children}
             </div>
         </SidebarProvider>
