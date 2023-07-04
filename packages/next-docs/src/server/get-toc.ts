@@ -13,14 +13,14 @@ function flattenNode(node: any) {
     return p.join(``);
 }
 
-export interface Item {
+export interface TOCItemType {
     title: string;
     url: string;
-    items?: Item[];
+    items?: TOCItemType[];
 }
 
 interface Items {
-    items?: Item[];
+    items?: TOCItemType[];
 }
 
 function getItems(node: any, current: any): Items {
@@ -65,7 +65,7 @@ const getToc = () => (node: any, file: any) => {
     file.data = getItems(table.map, {});
 };
 
-export type TableOfContents = Item[];
+export type TableOfContents = TOCItemType[];
 
 export async function getTableOfContents(
     content: string

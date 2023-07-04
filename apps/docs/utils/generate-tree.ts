@@ -1,5 +1,5 @@
 import { Meta, allDocs, allMeta } from "contentlayer/generated";
-import type { TreeNode } from "next-docs/lib";
+import type { TreeNode } from "next-docs/server";
 
 export function buildPageTree(meta: Meta): TreeNode[] {
     const folder = meta._raw.sourceFileDir.split("/").filter((c) => c !== ".");

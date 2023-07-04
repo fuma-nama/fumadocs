@@ -1,18 +1,20 @@
-import { TreeNode } from "@/lib/generate-tree";
+import { TreeNode } from "@/server/types";
 import { useMemo } from "react";
-import { usePathname } from "next/navigation";
 
 type Item = {
     name: string;
     url: string | null;
 };
 
-export function useBreadcrumb({ tree }: { tree: TreeNode[] }) {
-    const pathname = usePathname();
-
-    return useMemo(() => searchPath(tree, pathname) ?? [], [tree, pathname]);
+export function useBreadcrumb(url: string, tree: TreeNode[]) {
+    return useMemo(() => searchPath(tree, url) ?? [], [tree, url]);
 }
 
+/**
+ * Search a node in the tree by a specified url
+ *
+ * @returns The path to the target node from root
+ */
 function searchPath(nodes: TreeNode[], url: string): Item[] | null {
     for (let i = 0; i < nodes.length; i++) {
         const node = nodes[i];

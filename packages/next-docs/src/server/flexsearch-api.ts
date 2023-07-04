@@ -1,17 +1,11 @@
 import { NextResponse } from "next/server";
 import FlexSearch from "flexsearch";
+import { IndexPage } from "./types";
 
-type Page = {
-    title: string;
-    content: string;
-    url: string;
-    keywords?: string;
-};
-
-export function initAPI(indexes: Page[]): {
+export function initSearchAPI(indexes: IndexPage[]): {
     GET: (request: Request) => Response | Promise<Response>;
 } {
-    const index = new FlexSearch.Document<Page, ["title", "url"]>({
+    const index = new FlexSearch.Document<IndexPage, ["title", "url"]>({
         tokenize: "forward",
         optimize: true,
         resolution: 9,
@@ -71,6 +65,3 @@ export function initAPI(indexes: Page[]): {
         },
     };
 }
-
-export type SearchDocsResult =
-    FlexSearch.EnrichedDocumentSearchResultSetUnitResultUnit<Page>[];

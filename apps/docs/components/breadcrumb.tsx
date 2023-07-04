@@ -1,15 +1,17 @@
 "use client";
-import type { TreeNode } from "next-docs/lib";
-import { useBreadcrumb } from "next-docs/dist/components/index";
+import type { TreeNode } from "next-docs/server";
+import { useBreadcrumb } from "next-docs/breadcrumb";
 import clsx from "clsx";
 import { ChevronRightIcon } from "lucide-react";
 import Link from "next/link";
 import { Fragment } from "react";
+import { usePathname } from "next/navigation";
 
 const itemStyles = "overflow-hidden overflow-ellipsis whitespace-nowrap";
 
 export function Breadcrumb({ tree }: { tree: TreeNode[] }) {
-    const items = useBreadcrumb({ tree });
+    const pathname = usePathname();
+    const items = useBreadcrumb(pathname, tree);
 
     return (
         <div className="flex flex-row gap-1 text-sm text-muted-foreground items-center">

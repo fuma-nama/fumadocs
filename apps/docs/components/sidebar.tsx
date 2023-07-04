@@ -4,11 +4,10 @@ import { ChevronDownIcon, MenuIcon } from "lucide-react";
 import { ReactNode, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { TreeNode, FileNode, FolderNode } from "next-docs/lib";
+import type { TreeNode, FileNode, FolderNode } from "next-docs/server";
 import dynamic from "next/dynamic";
 import { CommandShortcut } from "./ui/command";
-import { MouseEvent } from "react";
-import * as Base from "next-docs/components";
+import * as Base from "next-docs/sidebar";
 
 const SearchDialog = dynamic(() => import("./dialog/search"));
 

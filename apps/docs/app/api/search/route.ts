@@ -1,7 +1,7 @@
 import { allDocs } from "contentlayer/generated";
-import { initAPI } from "next-docs/api";
+import { initSearchAPI } from "next-docs/server";
 
-export const { GET } = initAPI(
+export const { GET } = initSearchAPI(
     allDocs.map((docs) => ({
         title: docs.title,
         content: docs.body.raw,

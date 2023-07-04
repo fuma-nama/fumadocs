@@ -1,4 +1,4 @@
-import { SearchDocsResult } from "@/api/route";
+import type { SearchDocsResult } from "@/server/types";
 import { useState, useEffect } from "react";
 import useSWR from "swr";
 

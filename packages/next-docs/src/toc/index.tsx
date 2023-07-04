@@ -1,4 +1,4 @@
-import { Item, TableOfContents } from "@/lib/get-toc";
+import type { TOCItemType, TableOfContents } from "@/server/get-toc";
 import { useAnchorObserver } from "./use-anchor-observer";
 import { ReactNode, useMemo } from "react";
 import { createContext, useContext } from "react";
@@ -40,15 +40,15 @@ export function TOCProvider({
     );
 }
 
-function getHeadings(item: Item): string[] {
+function getHeadings(item: TOCItemType): string[] {
     const children = item.items?.flatMap((item) => getHeadings(item)) ?? [];
 
     return [item.url, ...children];
 }
 
-export type TOCItemProps = ComponentPropsWithoutRef<"a"> & { item: Item };
-
-export const ItemContext = createContext({});
+export type TOCItemProps = ComponentPropsWithoutRef<"a"> & {
+    item: TOCItemType;
+};
 
 export const TOCItem = forwardRef<HTMLAnchorElement, TOCItemProps>(
     ({ item, ...props }, ref) => {

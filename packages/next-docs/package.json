@@ -1,18 +1,53 @@
 {
     "name": "next-docs",
     "files": [
-        "dist",
-        "components.js",
-        "components.d.ts",
-        "mdx.js",
-        "mdx.d.ts",
-        "api.js",
-        "api.d.ts",
-        "lib.js",
-        "lib.d.ts",
-        "search.js",
-        "search.d.ts"
+        "dist/*"
     ],
+    "exports": {
+        "./sidebar": {
+            "import": "./dist/sidebar/index.mjs",
+            "types": "./dist/sidebar/index.d.ts"
+        },
+        "./breadcrumb": {
+            "import": "./dist/breadcrumb/index.mjs",
+            "types": "./dist/breadcrumb/index.d.ts"
+        },
+        "./toc": {
+            "import": "./dist/toc/index.mjs",
+            "types": "./dist/toc/index.d.ts"
+        },
+        "./search": {
+            "import": "./dist/search/index.mjs",
+            "types": "./dist/search/index.d.ts"
+        },
+        "./server": {
+            "import": "./dist/server/index.mjs",
+            "types": "./dist/server/index.d.ts"
+        },
+        "./*": {
+            "import": "./dist/*.mjs",
+            "types": "./dist/*.d.ts"
+        }
+    },
+    "typesVersions": {
+        "*": {
+            "sidebar": [
+                "./dist/sidebar/index.d.ts"
+            ],
+            "breadcrumb": [
+                "./dist/breadcrumb/index.d.ts"
+            ],
+            "toc": [
+                "./dist/toc/index.d.ts"
+            ],
+            "search": [
+                "./dist/search/index.d.ts"
+            ],
+            "server": [
+                "./dist/server/index.d.ts"
+            ]
+        }
+    },
     "scripts": {
         "build": "tsup",
         "clean": "rmdir /q/s dist",

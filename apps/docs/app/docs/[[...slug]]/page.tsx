@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { Param } from "../layout";
 
 import type { Metadata } from "next";
-import { getTableOfContents } from "next-docs/lib";
+import { getTableOfContents } from "next-docs/server";
 import { useMDXComponent } from "next-contentlayer/hooks";
 import { tree } from "@/utils/page-tree";
 import React from "react";
@@ -12,7 +12,7 @@ import { cn } from "@/utils/cn";
 import { Card, Cards } from "@/components/mdx/card";
 import { ExternalLink, WithLink } from "@/components/mdx/link";
 import { Pre } from "@/components/mdx/pre";
-import { TOCItem, TOCProvider } from "@/components/toc";
+import { TOC } from "@/components/toc";
 
 export default async function Page({ params }: { params: Param }) {
     const path = (params.slug ?? []).join("/");
@@ -38,11 +38,7 @@ export default async function Page({ params }: { params: Param }) {
                     {toc.length > 0 && (
                         <h3 className="font-semibold">On this page</h3>
                     )}
-                    <TOCProvider toc={toc}>
-                        {toc.map((item) => (
-                            <TOCItem item={item} />
-                        ))}
-                    </TOCProvider>
+                    <TOC items={toc} />
                 </div>
             </div>
         </>

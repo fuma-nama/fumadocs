@@ -1,18 +1,27 @@
 "use client";
-import * as TOC from "next-docs/components";
-import type { Item } from "next-docs/lib";
+import { TOCItem as BaseTOCItem, TOCProvider } from "next-docs/toc";
+import type { TOCItemType } from "next-docs/server";
 
-export const TOCProvider = TOC.TOCProvider;
-export function TOCItem({ item }: { item: Item }) {
+export function TOC({ items }: { items: TOCItemType[] }) {
+    return (
+        <TOCProvider toc={items}>
+            {items.map((item, i) => (
+                <TOCItem key={i} item={item} />
+            ))}
+        </TOCProvider>
+    );
+}
+
+function TOCItem({ item }: { item: TOCItemType }) {
     return (
         <div>
-            <TOC.TOCItem
+            <BaseTOCItem
                 href={item.url}
                 item={item}
                 className="text-sm text-muted-foreground transition-colors data-[active=true]:font-semibold data-[active=true]:text-foreground"
             >
                 {item.title}
-            </TOC.TOCItem>
+            </BaseTOCItem>
             <div className="flex flex-col pl-4">
                 {item.items?.map((item, i) => (
                     <TOCItem key={i} item={item} />
