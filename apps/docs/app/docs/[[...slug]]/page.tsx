@@ -13,7 +13,6 @@ import { Card, Cards } from "@/components/mdx/card";
 import { ExternalLink, WithLink } from "@/components/mdx/link";
 import { Pre } from "@/components/mdx/pre";
 import { TOCItem, TOCProvider } from "@/components/toc";
-import { Accordion } from "@/components/ui/accordion";
 
 export default async function Page({ params }: { params: Param }) {
     const path = (params.slug ?? []).join("/");
@@ -26,7 +25,7 @@ export default async function Page({ params }: { params: Param }) {
     const toc = await getTableOfContents(page.body.raw);
 
     return (
-        <TOCProvider toc={toc}>
+        <>
             <article className="flex flex-col gap-6 py-8 lg:py-16">
                 <Breadcrumb tree={tree} />
                 <h1 className="text-4xl font-bold">{page.title}</h1>
@@ -39,12 +38,14 @@ export default async function Page({ params }: { params: Param }) {
                     {toc.length > 0 && (
                         <h3 className="font-semibold">On this page</h3>
                     )}
-                    {toc.map((item) => (
-                        <TOCItem item={item} />
-                    ))}
+                    <TOCProvider toc={toc}>
+                        {toc.map((item) => (
+                            <TOCItem item={item} />
+                        ))}
+                    </TOCProvider>
                 </div>
             </div>
-        </TOCProvider>
+        </>
     );
 }
 
@@ -57,7 +58,6 @@ function MdxContent({ code }: { code: string }) {
                 Card,
                 Cards,
                 a: ExternalLink,
-                accordion: Accordion,
                 pre: (props) => <Pre {...props} />,
                 h1: (props) => (
                     <h1 {...props} className={cn("group", props.className)}>
