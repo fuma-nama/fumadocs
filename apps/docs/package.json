@@ -14,7 +14,7 @@
         "clsx": "^1.2.1",
         "contentlayer": "^0.3.3",
         "lucide-react": "^0.190.0",
-        "next": "13.4.1",
+        "next": "13.4.8",
         "next-contentlayer": "^0.3.3",
         "next-themes": "^0.2.1",
         "next-docs": "workspace:*",
