@@ -15,8 +15,8 @@ export default function DocsLayout({ children }: { children: ReactNode }) {
             </div>
             <div
                 className={clsx(
-                    "grid grid-cols-1 gap-12 mx-auto w-full max-w-wider min-h-screen px-8",
-                    "lg:grid-cols-[250px_auto] xl:grid-cols-[300px_auto_150px] 2xl:grid-cols-[300px_auto_300px]",
+                    "grid grid-cols-1 gap-12 w-full container max-w-[1400px]",
+                    "lg:grid-cols-[250px_auto] xl:grid-cols-[250px_auto_150px] 2xl:grid-cols-[250px_auto_250px]",
                     "sm:px-14 xl:px-24"
                 )}
             >
