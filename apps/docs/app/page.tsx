@@ -1,9 +1,11 @@
+import { CopyIcon, GithubIcon, LinkIcon } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { ComponentPropsWithRef, ComponentPropsWithoutRef } from "react";
 
 export default function HomePage() {
     return (
-        <div className="flex flex-col relative">
+        <div className="flex flex-col relative text-[#84BDDD]">
             <div className="flex absolute top-0 inset-x-0">
                 <div className="w-[1500px] max-w-[100vw] h-[300px] mx-auto bg-gradient-radial-top from-blue-500/10 to-80%" />
             </div>
@@ -30,7 +32,7 @@ export default function HomePage() {
                         className="absolute top-0 -left-20 -right-20 h-full bg-gradient-to-l from-cyan-200/30 to-purple-400/30 blur-3xl -z-[1] max-w-[100vw]"
                         aria-hidden
                     />
-                    <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-purple-200 leading-normal from-20% to-cyan-300 sm:text-5xl">
+                    <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-purple-200 from-20% to-cyan-300 sm:text-5xl sm:leading-snug">
                         The Headless UI for
                         <br /> Next.js Docs
                     </h1>
@@ -41,9 +43,12 @@ export default function HomePage() {
                     documentation websites
                 </p>
                 <div className="flex flex-row justify-center mt-4">
-                    <button className="rounded-full bg-gradient-to-b from-cyan-200 to-cyan-300 px-8 py-2 text-cyan-950 font-medium">
+                    <Link
+                        href="/docs"
+                        className="rounded-full bg-gradient-to-b from-cyan-200 to-cyan-300 px-8 py-2 text-cyan-950 font-medium"
+                    >
                         Get Started -&gt;
-                    </button>
+                    </Link>
                 </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-5 container mt-24 gap-10">
@@ -64,8 +69,8 @@ export default function HomePage() {
                 </div>
                 <div className="relative md:col-span-2 p-8 border rounded-2xl flex flex-col overflow-hidden bg-background z-[2]">
                     <div className="-z-[1] mx-auto mb-20 relative">
-                        <div className="bg-cyan-400/30 inset-0 absolute blur-3xl -z-[1] animate-pulse" />
-                        <Rocket className="mx-auto text-cyan-200" />
+                        <div className="bg-cyan-300/50 inset-8 absolute blur-3xl -z-[1] animate-pulse" />
+                        <Rocket className="mx-auto text-cyan-200 [mask-image:linear-gradient(to_bottom,white_50%,transparent_90%)]" />
                     </div>
                     <div className="absolute inset-0 flex flex-col bg-gradient-to-b from-background/30 to-blue-500/30 p-8 from-10%">
                         <div className="mt-auto text-center">
@@ -79,7 +84,42 @@ export default function HomePage() {
                     </div>
                 </div>
             </div>
-            <div className="bg-gradient-to-b from-transparent via-blue-500/10 to-transparent h-[400px] -mt-[200px]" />
+            <div className="bg-gradient-to-b from-transparent via-blue-500/10 to-transparent h-[400px] -mt-[300px]" />
+            <div className="container flex flex-col items-center text-center gap-2 mt-20">
+                <h2 className="text-3xl font-semibold text-cyan-200">
+                    Install Now
+                </h2>
+                <p className="text-[#84BDDD] text-sm">
+                    Stop waiting, go type it.
+                </p>
+                <pre className="relative pl-4 pr-20 py-1.5 rounded-full border text-cyan-200 bg-blue-500/20 border-blue-200/20 mt-4">
+                    npm install next-docs
+                    <button className="absolute top-2 bottom-2 right-2 rounded-full">
+                        <CopyIcon className="w-4 h-4" />
+                    </button>
+                </pre>
+            </div>
+            <footer className="mt-40 border-t py-8 pb-20 bg-gradient-to-b from-blue-500/20">
+                <div className="container flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="text-cyan-200 font-bold">NEXT DOCS</p>
+                    <div className="flex flex-row gap-20 items-center">
+                        <a
+                            href="https://github.com/SonMooSans/next-docs"
+                            className="flex flex-row items-center text-sm"
+                        >
+                            <GithubIcon className="w-5 h-5 mr-1" />
+                            Github
+                        </a>
+                        <a
+                            href="https://github.com/SonMooSans/next-docs"
+                            className="flex flex-row items-center text-sm"
+                        >
+                            <LinkIcon className="w-5 h-5 mr-1" />
+                            NPM
+                        </a>
+                    </div>
+                </div>
+            </footer>
         </div>
     );
 }
@@ -153,7 +193,6 @@ function Heart(props: ComponentPropsWithoutRef<"svg">) {
                     filterUnits="userSpaceOnUse"
                     colorInterpolationFilters="sRGB"
                 >
-                    <feFlood floodOpacity="0" result="BackgroundImageFix" />
                     <feColorMatrix
                         in="SourceAlpha"
                         type="matrix"
@@ -162,15 +201,9 @@ function Heart(props: ComponentPropsWithoutRef<"svg">) {
                     />
                     <feOffset dy="4" />
                     <feGaussianBlur stdDeviation="21" />
-                    <feComposite in2="hardAlpha" operator="out" />
                     <feColorMatrix
                         type="matrix"
                         values="0 0 0 0 0.7875 0 0 0 0 0.9745 0 0 0 0 1 0 0 0 1 0"
-                    />
-                    <feBlend
-                        mode="normal"
-                        in2="BackgroundImageFix"
-                        result="effect1_dropShadow_2_135"
                     />
                     <feBlend
                         mode="normal"

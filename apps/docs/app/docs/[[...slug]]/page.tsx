@@ -73,17 +73,18 @@ export function generateMetadata({ params }: { params: Param }): Metadata {
     if (page == null) return {};
 
     const description =
-        page.description ?? "The hosting platform that supports Nothing";
+        page.description ??
+        "The headless ui library for building documentation websites";
 
     return {
         title: page.title,
         description: description,
         openGraph: {
-            url: "https://nodeploy-neon.vercel.app",
+            url: "https://next-docs-zeta.vercel.app",
             title: page.title,
             description: description,
             images: "/banner.png",
-            siteName: "No Deploy",
+            siteName: "Next Docs",
         },
         twitter: {
             card: "summary_large_image",
