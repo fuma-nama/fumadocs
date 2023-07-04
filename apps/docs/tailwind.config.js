@@ -11,18 +11,15 @@ module.exports = {
             center: true,
             padding: "2rem",
             screens: {
-                "2xl": "1400px",
+                "2xl": "1200px",
             },
         },
         extend: {
-            maxWidth: {
-                wide: "1800px",
-                wider: "1500px",
-                normal: "1300px",
-            },
             backgroundImage: {
                 "gradient-radial":
                     "radial-gradient(circle, var(--tw-gradient-stops))",
+                "gradient-radial-top":
+                    "radial-gradient(40% 60% at top, var(--tw-gradient-stops))",
                 "gradient-conic":
                     "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
             },
