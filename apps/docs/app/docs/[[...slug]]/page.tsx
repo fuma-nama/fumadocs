@@ -8,10 +8,10 @@ import { useMDXComponent } from "next-contentlayer/hooks";
 import { tree } from "@/utils/page-tree";
 import React from "react";
 import { Breadcrumb } from "@/components/breadcrumb";
-import { cn } from "@/utils/cn";
 import { Card, Cards } from "@/components/mdx/card";
-import { ExternalLink, WithLink } from "@/components/mdx/link";
+import { Heading } from "@/components/mdx/heading";
 import { Pre } from "@/components/mdx/pre";
+import { SafeLink } from "next-docs/link";
 import { TOC } from "@/components/toc";
 
 export default async function Page({ params }: { params: Param }) {
@@ -53,38 +53,14 @@ function MdxContent({ code }: { code: string }) {
             components={{
                 Card,
                 Cards,
-                a: ExternalLink,
+                a: SafeLink,
                 pre: (props) => <Pre {...props} />,
-                h1: (props) => (
-                    <h1 {...props} className={cn("group", props.className)}>
-                        <WithLink id={props.id}>{props.children}</WithLink>
-                    </h1>
-                ),
-                h2: (props) => (
-                    <h2 {...props} className={cn("group", props.className)}>
-                        <WithLink id={props.id}>{props.children}</WithLink>
-                    </h2>
-                ),
-                h3: (props) => (
-                    <h3 {...props} className={cn("group", props.className)}>
-                        <WithLink id={props.id}>{props.children}</WithLink>
-                    </h3>
-                ),
-                h4: (props) => (
-                    <h4 {...props} className={cn("group", props.className)}>
-                        <WithLink id={props.id}>{props.children}</WithLink>
-                    </h4>
-                ),
-                h5: (props) => (
-                    <h5 {...props} className={cn("group", props.className)}>
-                        <WithLink id={props.id}>{props.children}</WithLink>
-                    </h5>
-                ),
-                h6: (props) => (
-                    <h6 {...props} className={cn("group", props.className)}>
-                        <WithLink id={props.id}>{props.children}</WithLink>
-                    </h6>
-                ),
+                h1: (props) => <Heading as="h1" {...props} />,
+                h2: (props) => <Heading as="h2" {...props} />,
+                h3: (props) => <Heading as="h3" {...props} />,
+                h4: (props) => <Heading as="h4" {...props} />,
+                h5: (props) => <Heading as="h5" {...props} />,
+                h6: (props) => <Heading as="h6" {...props} />,
             }}
         />
     );

@@ -56,7 +56,6 @@ export default function SearchDialog(props: DialogProps) {
                         {[
                             ["Home", "/"],
                             ["Documentation", "/docs"],
-                            ["Pricing", "/pricing"],
                         ].map(([name, url], i) => (
                             <CommandItem key={i} value={url} onSelect={onOpen}>
                                 <BookOpenIcon className="w-5 h-5 mr-2" />
