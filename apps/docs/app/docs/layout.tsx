@@ -10,6 +10,9 @@ export type Param = {
 export default function DocsLayout({ children }: { children: ReactNode }) {
     return (
         <SidebarProvider>
+            <div className="absolute inset-0 -z-[1] overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-br from-purple-400/20 to-background to-50%" />
+            </div>
             <div
                 className={clsx(
                     "grid grid-cols-1 gap-12 mx-auto w-full max-w-wider min-h-screen px-8",
