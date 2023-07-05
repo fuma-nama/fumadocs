@@ -1,0 +1,114 @@
+---
+title: Search
+description: Document searching makes easy
+---
+
+Next Docs supports searching document based on [Flexsearch](https://github.com/nextapps-de/flexsearch).
+
+## Usage
+
+Note: If you're using a CMS, you should use the API provided by the CMS instead.
+
+Assumes you're using Contentlayer.
+
+1. Create API Route: `/app/api/search/route.ts`:
+
+```tsx
+import { allDocs } from "contentlayer/generated";
+import { initSearchAPI } from "next-docs/server";
+
+export const { GET } = initSearchAPI(
+    allDocs.map((docs) => ({
+        title: docs.title,
+        content: docs.body.raw,
+        url: docs.url,
+    }))
+);
+```
+
+2. Create a Search Dialog with [Shadcn UI Command](https://ui.shadcn.com/docs/components/command)
+
+```tsx
+import type { DialogProps } from "@radix-ui/react-dialog";
+import { useDocsSearch } from "next-docs/search";
+import {
+    CommandDialog,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+    CommandSeparator,
+} from "../ui/command";
+import { useRouter } from "next/navigation";
+import { useCallback } from "react";
+import { BookOpenIcon } from "lucide-react";
+
+export default function SearchDialog(props: DialogProps) {
+    const router = useRouter();
+    const { search, setSearch, query } = useDocsSearch();
+
+    const onOpen = useCallback(
+        (v: string) => {
+            router.push(v);
+            props.onOpenChange?.(false);
+        },
+        [router]
+    );
+
+    return (
+        <CommandDialog {...props}>
+            <CommandInput
+                placeholder="Type a command or search..."
+                value={search}
+                onValueChange={setSearch}
+            />
+            <CommandList>
+                <CommandEmpty>No results found.</CommandEmpty>
+
+                {query.data != "empty" &&
+                    query.data != null &&
+                    query.data.length !== 0 && (
+                        <CommandGroup heading="Documents">
+                            {query.data.map((item) => (
+                                <CommandItem
+                                    key={item.id[0]}
+                                    value={item.doc.url}
+                                    onSelect={onOpen}
+                                >
+                                    {item.doc.title}
+                                </CommandItem>
+                            ))}
+                        </CommandGroup>
+                    )}
+                <CommandSeparator />
+            </CommandList>
+        </CommandDialog>
+    );
+}
+```
+
+### initSearchAPI
+
+Create a GET route handler.
+
+It inputs an array of `IndexPage` and returns the handler.
+
+### useDocsSearch
+
+A hook that combined debounce value and `useSWR`.
+
+#### Return Type
+
+| Prop        | Type                  | Description                    |
+| ----------- | --------------------- | ------------------------------ |
+| `query`     | `SWRResponse`         | SWR Query                      |
+| `search`    | `string`              | Searching text (not debounced) |
+| `setSearch` | `(v: string) => void` | Set searching text             |
+
+#### Response Data
+
+| Type               |                                                              |
+| ------------------ | ------------------------------------------------------------ |
+| `empty`            | If the searching text is empty or blank                      |
+| `SearchDocsResult` | Return Type of Flexsearch, includes array of matching pages. |
