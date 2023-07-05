@@ -1,13 +1,20 @@
 import { TreeNode } from "@/server/types";
 import { useMemo } from "react";
 
-type Item = {
+export type BreadcrumbItem = {
     name: string;
     url: string | null;
 };
 
-export function useBreadcrumb(url: string, tree: TreeNode[]) {
-    return useMemo(() => searchPath(tree, url) ?? [], [tree, url]);
+export function useBreadcrumb(url: string, tree: TreeNode[]): BreadcrumbItem[] {
+    return useMemo(() => getBreadcrumbItems(url, tree), [tree, url]);
+}
+
+export function getBreadcrumbItems(
+    url: string,
+    tree: TreeNode[]
+): BreadcrumbItem[] {
+    return searchPath(tree, url) ?? [];
 }
 
 /**
@@ -15,7 +22,7 @@ export function useBreadcrumb(url: string, tree: TreeNode[]) {
  *
  * @returns The path to the target node from root
  */
-function searchPath(nodes: TreeNode[], url: string): Item[] | null {
+function searchPath(nodes: TreeNode[], url: string): BreadcrumbItem[] | null {
     for (let i = 0; i < nodes.length; i++) {
         const node = nodes[i];
 
