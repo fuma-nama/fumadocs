@@ -142,10 +142,15 @@ function Folder({ item }: { item: FolderNode }) {
                     onClick={() => setExtend((prev) => !prev)}
                 />
             </div>
-            <ul
+            <Base.SidebarCollapsible
+                as="ul"
+                open={extend}
+                heightProperty="--radix-accordion-content-height"
                 className={clsx(
-                    "flex-col mt-3 transition-all overflow-hidden",
-                    extend ? "flex" : "hidden"
+                    "flex flex-col overflow-hidden",
+                    extend
+                        ? "animate-accordion-down"
+                        : "animate-accordion-up h-[0]"
                 )}
             >
                 {children.map((item, i) => {
@@ -156,7 +161,7 @@ function Folder({ item }: { item: FolderNode }) {
                         <li
                             key={i}
                             className={clsx(
-                                "flex pl-4 py-1.5 border-l-2 border-border",
+                                "flex ml-2 pl-4 py-1.5 border-l first:mt-2",
                                 active ? "border-purple-400" : "border-border"
                             )}
                         >
@@ -164,7 +169,7 @@ function Folder({ item }: { item: FolderNode }) {
                         </li>
                     );
                 })}
-            </ul>
+            </Base.SidebarCollapsible>
         </div>
     );
 }
