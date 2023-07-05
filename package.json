@@ -12,7 +12,7 @@
         "release": "changeset publish",
         "test": "turbo run test",
         "types:check": "turbo run types:check",
-        "version": "changeset version"
+        "version:packages": "changeset version"
     },
     "devDependencies": {
         "changeset": "^0.2.6",
