@@ -193,6 +193,7 @@ function Heart(props: ComponentPropsWithoutRef<"svg">) {
                     filterUnits="userSpaceOnUse"
                     colorInterpolationFilters="sRGB"
                 >
+                    <feFlood floodOpacity="0" result="BackgroundImageFix" />
                     <feColorMatrix
                         in="SourceAlpha"
                         type="matrix"
@@ -201,9 +202,15 @@ function Heart(props: ComponentPropsWithoutRef<"svg">) {
                     />
                     <feOffset dy="4" />
                     <feGaussianBlur stdDeviation="21" />
+                    <feComposite in2="hardAlpha" operator="out" />
                     <feColorMatrix
                         type="matrix"
                         values="0 0 0 0 0.7875 0 0 0 0 0.9745 0 0 0 0 1 0 0 0 1 0"
+                    />
+                    <feBlend
+                        mode="normal"
+                        in2="BackgroundImageFix"
+                        result="effect1_dropShadow_2_135"
                     />
                     <feBlend
                         mode="normal"
