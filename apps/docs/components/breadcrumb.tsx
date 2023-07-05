@@ -1,16 +1,19 @@
-"use client";
 import type { TreeNode } from "next-docs/server";
 import { useBreadcrumb } from "next-docs/breadcrumb";
 import clsx from "clsx";
 import { ChevronRightIcon } from "lucide-react";
 import Link from "next/link";
 import { Fragment } from "react";
-import { usePathname } from "next/navigation";
 
 const itemStyles = "overflow-hidden overflow-ellipsis whitespace-nowrap";
 
-export function Breadcrumb({ tree }: { tree: TreeNode[] }) {
-    const pathname = usePathname();
+export function Breadcrumb({
+    pathname,
+    tree,
+}: {
+    pathname: string;
+    tree: TreeNode[];
+}) {
     const items = useBreadcrumb(pathname, tree);
 
     return (

@@ -4,7 +4,7 @@ import { Param } from "../layout";
 
 import type { Metadata } from "next";
 import { getTableOfContents } from "next-docs/server";
-import { useMDXComponent } from "next-contentlayer/hooks";
+import { getMDXComponent } from "next-contentlayer/hooks";
 import { tree } from "@/utils/page-tree";
 import React from "react";
 import { Breadcrumb } from "@/components/breadcrumb";
@@ -22,12 +22,13 @@ export default async function Page({ params }: { params: Param }) {
         notFound();
     }
 
+    const pathname = path.length === 0 ? "/docs" : "/docs/" + path;
     const toc = await getTableOfContents(page.body.raw);
 
     return (
         <>
             <article className="flex flex-col gap-6 py-8 lg:py-16">
-                <Breadcrumb tree={tree} />
+                <Breadcrumb pathname={pathname} tree={tree} />
                 <h1 className="text-4xl font-bold">{page.title}</h1>
                 <div className="prose prose-text prose-pre:grid prose-pre:border-[1px] prose-code:bg-secondary prose-code:p-1 max-w-none">
                     <MdxContent code={page.body.code} />
@@ -46,7 +47,7 @@ export default async function Page({ params }: { params: Param }) {
 }
 
 function MdxContent({ code }: { code: string }) {
-    const MDX = useMDXComponent(code);
+    const MDX = getMDXComponent(code);
 
     return (
         <MDX
