@@ -1,0 +1,91 @@
+---
+title: Sidebar
+description: The navigation bar at aside of viewport
+---
+
+Handles device resizing and remove scroll bar automatically.
+
+```
+next-docs/sidebar
+```
+
+## Usage
+
+```tsx
+import * as Base from "next-docs/sidebar";
+
+return (
+    <Base.SidebarProvider>
+        <Base.SidebarTrigger />
+        <Base.SidebarList />
+    </Base.SidebarProvider>
+);
+```
+
+### Sidebar Provider
+
+| Prop           | Type                   | Description |
+| -------------- | ---------------------- | ----------- |
+| `open`         | `boolean?`             | -           |
+| `onOpenChange` | `(v: boolean) => void` | -           |
+
+### Sidebar Trigger
+
+Opens the sidebar on click.
+
+| Prop | Type          | Description |
+| ---- | ------------- | ----------- |
+| `as` | `ElementType` | -           |
+
+### Sidebar List
+
+| Data Attribute | Values        | Description        |
+| -------------- | ------------- | ------------------ |
+| `data-open`    | `true, false` | Is sidebar opening |
+
+## Example
+
+Using `@radix-ui/react-collapsible` and `lucide-react`:
+
+```tsx
+"use client";
+import clsx from "clsx";
+import { ChevronDownIcon, MenuIcon } from "lucide-react";
+import { ReactNode, useEffect, useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import type { TreeNode, FileNode, FolderNode } from "next-docs/server";
+import * as Base from "next-docs/sidebar";
+import * as Collapsible from "@radix-ui/react-collapsible";
+
+export function SidebarProvider({ children }: { children: ReactNode }) {
+    return (
+        <Base.SidebarProvider>
+            <Base.SidebarTrigger className="flex flex-row gap-2 text-sm px-8 items-center">
+                <MenuIcon className="w-4 h-4" />
+                Menu
+            </Base.SidebarTrigger>
+            {children}
+        </Base.SidebarProvider>
+    );
+}
+
+export function Sidebar({ items }: { items: TreeNode[] }) {
+    return (
+        <Base.SidebarList
+            minWidth={1024} // when should it being displayed (ignore the trigger)
+            className={clsx(
+                "flex flex-col gap-3 fixed inset-0 top-24 overflow-auto",
+                "lg:sticky lg:top-12 lg:py-16 lg:max-h-[calc(100vh-3rem)]",
+                "max-lg:py-4 max-lg:px-8 max-lg:sm:px-14 max-lg:bg-background/50 max-lg:backdrop-blur-xl max-lg:z-40 max-lg:data-[open=false]:hidden"
+            )}
+        >
+            {items.map((item, i) => (
+                <SidebarItem key={i} item={item} />
+            ))}
+        </Base.SidebarList>
+    );
+}
+```
+
+_It doesn't include the implementation of `SidebarItem`_
