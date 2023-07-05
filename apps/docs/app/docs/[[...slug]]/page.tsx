@@ -27,7 +27,7 @@ export default async function Page({ params }: { params: Param }) {
 
     return (
         <>
-            <article className="flex flex-col gap-6 py-8 lg:py-16">
+            <article className="flex flex-col gap-6 py-8 overflow-x-hidden lg:py-16">
                 <Breadcrumb pathname={pathname} tree={tree} />
                 <h1 className="text-4xl font-bold">{page.title}</h1>
                 <div className="prose prose-text prose-pre:grid prose-pre:border-[1px] prose-code:bg-secondary prose-code:p-1 max-w-none">
