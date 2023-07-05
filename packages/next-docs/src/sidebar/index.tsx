@@ -4,8 +4,6 @@ import {
     createContext,
     useContext,
     useEffect,
-    useLayoutEffect,
-    useRef,
     useState,
 } from "react";
 import { usePathname } from "next/navigation";
@@ -89,57 +87,4 @@ export function SidebarList<T extends ElementType = "aside">({
             {props.children}
         </RemoveScroll>
     );
-}
-
-export type SidebarCollapsiableProps<T extends ElementType> = WithAs<
-    T,
-    {
-        open: boolean;
-        /**
-         * Name of the css property for animating the height, default: --item-height
-         */
-        heightProperty?: string;
-    }
->;
-
-export function SidebarCollapsible<T extends ElementType = "div">({
-    as,
-    open,
-    heightProperty = "--item-height",
-    ...props
-}: SidebarCollapsiableProps<T>) {
-    const As = as || "div";
-    const ref = useRef<HTMLElement | null>(null);
-    const originalStylesRef = useRef<Record<string, string>>();
-    const isMountAnimationPreventedRef = useRef(true);
-
-    useEffect(() => {
-        const rAF = requestAnimationFrame(
-            () => (isMountAnimationPreventedRef.current = false)
-        );
-        return () => cancelAnimationFrame(rAF);
-    }, []);
-
-    useLayoutEffect(() => {
-        const node = ref.current;
-        if (node == null) return;
-
-        if (isMountAnimationPreventedRef.current) {
-            originalStylesRef.current = originalStylesRef.current || {
-                transitionDuration: node.style.transitionDuration,
-                animationName: node.style.animationName,
-            };
-
-            node.style.transitionDuration = "0s";
-            node.style.animationName = "none";
-        } else if (originalStylesRef.current != null) {
-            node.style.transitionDuration =
-                originalStylesRef.current.transitionDuration;
-            node.style.animationName = originalStylesRef.current.animationName;
-        }
-
-        node.style.setProperty(heightProperty, `${node.scrollHeight}px`);
-    }, [open]);
-
-    return <As ref={ref as any} {...props} />;
 }

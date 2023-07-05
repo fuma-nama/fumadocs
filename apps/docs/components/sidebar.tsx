@@ -8,6 +8,7 @@ import type { TreeNode, FileNode, FolderNode } from "next-docs/server";
 import dynamic from "next/dynamic";
 import { CommandShortcut } from "./ui/command";
 import * as Base from "next-docs/sidebar";
+import * as Collapsible from "@radix-ui/react-collapsible";
 
 const SearchDialog = dynamic(() => import("./dialog/search"));
 
@@ -48,7 +49,7 @@ export function Sidebar({ items }: { items: TreeNode[] }) {
             className={clsx(
                 "flex flex-col gap-3 fixed inset-0 top-24 overflow-auto",
                 "lg:sticky lg:top-12 lg:py-16 lg:max-h-[calc(100vh-3rem)]",
-                "max-lg:py-4 max-lg:px-8 max-lg:sm:px-14 max-lg:bg-background/50 max-lg:backdrop-blur-xl max-lg:z-50 max-lg:data-[open=false]:hidden"
+                "max-lg:py-4 max-lg:px-8 max-lg:sm:px-14 max-lg:bg-background/50 max-lg:backdrop-blur-xl max-lg:z-40 max-lg:data-[open=false]:hidden"
             )}
         >
             <button
@@ -118,10 +119,14 @@ function Folder({ item }: { item: FolderNode }) {
 
     const As = index == null ? "p" : Link;
     return (
-        <div className="w-full">
-            <div
+        <Collapsible.Root
+            className="w-full"
+            open={extend}
+            onOpenChange={setExtend}
+        >
+            <Collapsible.Trigger
                 className={clsx(
-                    "flex flex-row text-sm rounded-xl cursor-pointer",
+                    "flex flex-row text-sm w-full rounded-xl text-start",
                     active
                         ? "font-semibold text-purple-400"
                         : "text-muted-foreground hover:text-foreground"
@@ -139,20 +144,9 @@ function Folder({ item }: { item: FolderNode }) {
                         "w-5 h-5",
                         extend ? "rotate-0" : "-rotate-90"
                     )}
-                    onClick={() => setExtend((prev) => !prev)}
                 />
-            </div>
-            <Base.SidebarCollapsible
-                as="ul"
-                open={extend}
-                heightProperty="--radix-accordion-content-height"
-                className={clsx(
-                    "flex flex-col overflow-hidden",
-                    extend
-                        ? "animate-accordion-down"
-                        : "animate-accordion-up h-[0]"
-                )}
-            >
+            </Collapsible.Trigger>
+            <Collapsible.Content className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
                 {children.map((item, i) => {
                     const active =
                         item.type !== "separator" && pathname === item.url;
@@ -169,7 +163,7 @@ function Folder({ item }: { item: FolderNode }) {
                         </li>
                     );
                 })}
-            </Base.SidebarCollapsible>
-        </div>
+            </Collapsible.Content>
+        </Collapsible.Root>
     );
 }

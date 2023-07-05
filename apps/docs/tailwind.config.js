@@ -64,6 +64,14 @@ module.exports = {
                 sm: "calc(var(--radius) - 4px)",
             },
             keyframes: {
+                "collapsible-down": {
+                    from: { height: 0 },
+                    to: { height: "var(--radix-collapsible-content-height)" },
+                },
+                "collapsible-up": {
+                    from: { height: "var(--radix-collapsible-content-height)" },
+                    to: { height: 0 },
+                },
                 "accordion-down": {
                     from: { height: 0 },
                     to: { height: "var(--radix-accordion-content-height)" },
@@ -96,6 +104,8 @@ module.exports = {
                 heart: "heart 1s linear infinite",
                 "accordion-down": "accordion-down 0.2s ease-out",
                 "accordion-up": "accordion-up 0.2s ease-out",
+                "collapsible-down": "collapsible-down 0.2s ease-out",
+                "collapsible-up": "collapsible-up 0.2s ease-out",
             },
             typography: ({ theme }) => ({
                 text: {
