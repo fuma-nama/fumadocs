@@ -28,6 +28,10 @@
             "import": "./dist/link/index.mjs",
             "types": "./dist/link/index.d.ts"
         },
+        "./contentlayer": {
+            "import": "./dist/contentlayer/index.mjs",
+            "types": "./dist/contentlayer/index.d.ts"
+        },
         "./*": {
             "import": "./dist/*.mjs",
             "types": "./dist/*.d.ts"
@@ -52,6 +56,9 @@
             ],
             "link": [
                 "./dist/link/index.d.ts"
+            ],
+            "contentlayer": [
+                "./dist/contentlayer/index.d.ts"
             ]
         }
     },
@@ -77,6 +84,7 @@
         "react-dom": "18.x"
     },
     "devDependencies": {
+        "contentlayer": "^0.3.3",
         "@types/flexsearch": "0.7.3",
         "@types/node": "18.16.3",
         "@types/react": "18.2.0",

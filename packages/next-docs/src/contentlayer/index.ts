@@ -1,6 +1,40 @@
 import type { TreeNode } from "../server/types";
+import type { RawDocumentData } from "contentlayer/source-files";
 
-export function buildPageTree(metaPages: any, docsPages: any): TreeNode[] {
+export type MetaPageBase = {
+    /** File path relative to `contentDirPath` */
+    _id: string;
+    _raw: RawDocumentData;
+    type: "Meta";
+    /** The title of the folder */
+    title?: string | undefined;
+    /** Pages of the folder */
+    pages: string[];
+    url: string;
+};
+
+export type DocsPageBase = {
+    /** File path relative to `contentDirPath` */
+    _id: string;
+    _raw: RawDocumentData;
+    type: "Docs";
+    /** The title of the document */
+    title: string;
+    /** The description of the document */
+    description?: string | undefined;
+    url: string;
+    slug: string;
+};
+
+export function buildPageTree(
+    metaPages: MetaPageBase[],
+    docsPages: DocsPageBase[],
+    startFrom?: MetaPageBase
+): TreeNode[] {
+    const meta =
+        startFrom ??
+        metaPages.find((meta) => meta._raw.flattenedPath === "docs/meta")!;
+
     const folder = meta._raw.sourceFileDir.split("/").filter((c) => c !== ".");
 
     return meta.pages.flatMap<TreeNode>((item) => {
@@ -15,14 +49,14 @@ export function buildPageTree(metaPages: any, docsPages: any): TreeNode[] {
             };
 
         const path = [...folder, item].join("/");
-        const page = allDocs.find((page) => {
+        const page = docsPages.find((page) => {
             return (
                 page._raw.flattenedPath === path ||
                 (item === "index" &&
                     page._raw.flattenedPath === folder.join("/"))
             );
         });
-        const meta = allMeta.find((meta) => meta._raw.sourceFileDir === path);
+        const meta = metaPages.find((meta) => meta._raw.sourceFileDir === path);
 
         if (meta != null)
             return {
@@ -37,7 +71,7 @@ export function buildPageTree(metaPages: any, docsPages: any): TreeNode[] {
                           }
                         : undefined,
                 name: meta.title ?? "",
-                children: buildPageTree(meta),
+                children: buildPageTree(metaPages, docsPages, meta),
             };
 
         if (page != null)

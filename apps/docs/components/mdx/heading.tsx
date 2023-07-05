@@ -21,14 +21,16 @@ export function Heading<T extends Types>({
             className: clsx("group", props.className),
         },
         [
-            <span id={id} className="absolute -mt-20" />,
-            props.children,
-            <a
-                href={`#${id}`}
-                className="opacity-0 group-hover:opacity-100 inline-block ml-2 text-muted-foreground"
-            >
-                <LinkIcon className="w-4 h-4" />
-            </a>,
+            <>
+                <span id={id} className="absolute -mt-20" />
+                {props.children}
+                <a
+                    href={`#${id}`}
+                    className="opacity-0 group-hover:opacity-100 inline-block ml-2 text-muted-foreground"
+                >
+                    <LinkIcon className="w-4 h-4" />
+                </a>
+            </>,
         ]
     );
 }

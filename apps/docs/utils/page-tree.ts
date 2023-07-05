@@ -1,8 +1,4 @@
-import { allMeta } from "@/.contentlayer/generated";
-import { buildPageTree } from "./generate-tree";
+import { allDocs, allMeta } from "@/.contentlayer/generated";
+import { buildPageTree } from "next-docs/contentlayer";
 
-const rootMeta = allMeta.find(
-    (meta) => meta._raw.flattenedPath === "docs/meta"
-)!;
-
-export const tree = buildPageTree(rootMeta);
+export const tree = buildPageTree(allMeta, allDocs);
