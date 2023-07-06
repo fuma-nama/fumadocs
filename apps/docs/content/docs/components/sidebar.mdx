@@ -45,18 +45,17 @@ Opens the sidebar on click.
 
 ## Example
 
-Using `@radix-ui/react-collapsible` and `lucide-react`:
+Using `lucide-react` for icons:
 
 ```tsx
 "use client";
 import clsx from "clsx";
-import { ChevronDownIcon, MenuIcon } from "lucide-react";
-import { ReactNode, useEffect, useState } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import type { TreeNode, FileNode, FolderNode } from "next-docs/server";
+import { MenuIcon } from "lucide-react";
+import { ReactNode } from "react";
 import * as Base from "next-docs/sidebar";
-import * as Collapsible from "@radix-ui/react-collapsible";
+import { SidebarItem } from "./item";
+
+import type { TreeNode } from "next-docs/server";
 
 export function SidebarProvider({ children }: { children: ReactNode }) {
     return (
