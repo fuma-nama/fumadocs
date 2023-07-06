@@ -93,7 +93,11 @@ function buildFileNode(page: DocsPageBase): FileNode {
     };
 }
 
-function buildFolderNode(path: string, ctx: Context): FolderNode {
+function buildFolderNode(
+    path: string,
+    ctx: Context,
+    keepIndex: boolean = false
+): FolderNode {
     const segments = path.split("/");
     let index: FileNode | undefined = undefined;
 
@@ -111,7 +115,7 @@ function buildFolderNode(path: string, ctx: Context): FolderNode {
 
             if (page._raw.flattenedPath === path) {
                 index = node;
-                return [];
+                if (!keepIndex) return [];
             }
 
             return node;
@@ -157,10 +161,16 @@ export function buildPageTree(
     docsPages: DocsPageBase[],
     root: string = "docs"
 ): TreeNode[] {
-    return buildFolderNode(root, {
-        docs: docsPages,
-        meta: metaPages,
-    }).children;
+    const folder = buildFolderNode(
+        root,
+        {
+            docs: docsPages,
+            meta: metaPages,
+        },
+        true
+    );
+
+    return folder.children;
 }
 
 function pathToName(path: string): string {
