@@ -1,4 +1,4 @@
-import type { TreeNode } from "../server/types";
+import type { FolderNode, FileNode, TreeNode } from "../server/types";
 import type { RawDocumentData } from "contentlayer/source-files";
 
 export type MetaPageBase = {
@@ -26,20 +26,18 @@ export type DocsPageBase = {
     slug: string;
 };
 
-export function buildPageTree(
-    metaPages: MetaPageBase[],
-    docsPages: DocsPageBase[],
-    startFrom?: MetaPageBase
-): TreeNode[] {
-    const meta =
-        startFrom ??
-        metaPages.find((meta) => meta._raw.flattenedPath === "docs/meta")!;
+type Context = {
+    docs: DocsPageBase[];
+    meta: MetaPageBase[];
+};
 
-    const folder = meta._raw.sourceFileDir.split("/").filter((c) => c !== ".");
+const separator = /---(.*?)---/;
 
-    return meta.pages.flatMap<TreeNode>((item) => {
-        const separator = /---(.*?)---/;
+function buildMeta(meta: MetaPageBase, ctx: Context): FolderNode {
+    const segments = meta._raw.sourceFileDir.split("/");
+    let index: FileNode | undefined = undefined;
 
+    const children = meta.pages.flatMap<TreeNode>((item) => {
         const result = separator.exec(item);
 
         if (result != null)
@@ -48,39 +46,123 @@ export function buildPageTree(
                 name: result[1],
             };
 
-        const path = [...folder, item].join("/");
-        const page = docsPages.find((page) => {
-            return (
-                page._raw.flattenedPath === path ||
-                (item === "index" &&
-                    page._raw.flattenedPath === folder.join("/"))
-            );
-        });
-        const meta = metaPages.find((meta) => meta._raw.sourceFileDir === path);
+        const path =
+            item === "index"
+                ? meta._raw.sourceFileDir
+                : meta._raw.sourceFileDir + "/" + item;
 
-        if (meta != null)
-            return {
-                type: "folder",
-                url: meta.url,
-                index:
-                    page != null
-                        ? {
-                              name: page.title,
-                              url: page.url,
-                              type: "page",
-                          }
-                        : undefined,
-                name: meta.title ?? "",
-                children: buildPageTree(metaPages, docsPages, meta),
-            };
+        const page = ctx.docs.find((page) => page._raw.flattenedPath === path);
 
-        if (page != null)
-            return {
-                type: "page",
-                name: page.title,
-                url: page.url,
-            };
+        if (page != null) {
+            const node = buildFileNode(page);
 
-        return [];
+            if (item === "index") index = node;
+            return node;
+        }
+
+        //folder can't be index
+        if (item === "index") {
+            return [];
+        }
+
+        return buildFolderNode(path, ctx);
     });
+
+    if (index == null) {
+        const page = ctx.docs.find(
+            (page) => page._raw.flattenedPath === meta._raw.sourceFileDir
+        );
+
+        if (page != null) index = buildFileNode(page);
+    }
+
+    return {
+        name: meta.title ?? pathToName(segments[segments.length - 1] ?? "docs"),
+        index: index,
+        type: "folder",
+        url: meta.url,
+        children: children,
+    };
+}
+
+function buildFileNode(page: DocsPageBase): FileNode {
+    return {
+        type: "page",
+        name: page.title,
+        url: page.url,
+    };
+}
+
+function buildFolderNode(path: string, ctx: Context): FolderNode {
+    const segments = path.split("/");
+    let index: FileNode | undefined = undefined;
+
+    const meta = ctx.meta.find((meta) => meta._raw.sourceFileDir === path);
+
+    if (meta != null) {
+        return buildMeta(meta, ctx);
+    }
+
+    // files under the directory
+    const children: TreeNode[] = ctx.docs
+        .filter((page) => page._raw.sourceFileDir === path)
+        .flatMap((page) => {
+            const node = buildFileNode(page);
+
+            if (page._raw.flattenedPath === path) {
+                index = node;
+                return [];
+            }
+
+            return node;
+        });
+
+    // find folders under the directory
+    const folders = new Set<string>(
+        ctx.docs
+            .filter(
+                (page) =>
+                    page._raw.sourceFileDir.startsWith(path + "/") &&
+                    page._raw.sourceFileDir.split("/").length ===
+                        segments.length + 1
+            )
+            .map((page) => page._raw.sourceFileDir)
+    );
+
+    for (const folder of folders) {
+        children.push(buildFolderNode(folder, ctx));
+    }
+
+    return {
+        name:
+            index != null
+                ? (index as FileNode).name
+                : pathToName(segments[segments.length - 1] ?? "docs"),
+        type: "folder",
+        url: "/" + path,
+        index,
+        children,
+    };
+}
+
+/**
+ *
+ * @param metaPages All meta
+ * @param docsPages All docs
+ * @param root The root folder to scan files
+ * @returns A page tree
+ */
+export function buildPageTree(
+    metaPages: MetaPageBase[],
+    docsPages: DocsPageBase[],
+    root: string = "docs"
+): TreeNode[] {
+    return buildFolderNode(root, {
+        docs: docsPages,
+        meta: metaPages,
+    }).children;
+}
+
+function pathToName(path: string): string {
+    return path.slice(0, 1).toUpperCase() + path.slice(1);
 }
