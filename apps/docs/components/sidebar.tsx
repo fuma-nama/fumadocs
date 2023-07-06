@@ -146,23 +146,27 @@ function Folder({ item }: { item: FolderNode }) {
                     )}
                 />
             </Collapsible.Trigger>
-            <Collapsible.Content className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
-                {children.map((item, i) => {
-                    const active =
-                        item.type !== "separator" && pathname === item.url;
+            <Collapsible.Content asChild>
+                <ul className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
+                    {children.map((item, i) => {
+                        const active =
+                            item.type !== "separator" && pathname === item.url;
 
-                    return (
-                        <li
-                            key={i}
-                            className={clsx(
-                                "flex ml-2 pl-4 py-1.5 border-l first:mt-2",
-                                active ? "border-purple-400" : "border-border"
-                            )}
-                        >
-                            <Node item={item} />
-                        </li>
-                    );
-                })}
+                        return (
+                            <li
+                                key={i}
+                                className={clsx(
+                                    "flex ml-2 pl-4 py-1.5 border-l first:mt-2",
+                                    active
+                                        ? "border-purple-400"
+                                        : "border-border"
+                                )}
+                            >
+                                <Node item={item} />
+                            </li>
+                        );
+                    })}
+                </ul>
             </Collapsible.Content>
         </Collapsible.Root>
     );
