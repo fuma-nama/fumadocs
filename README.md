@@ -38,7 +38,7 @@ I also prefer [Shadcn UI](https://ui.shadcn.com) If you don't want to write any 
 
 Next Docs has native support for ContentLayer, but any kind of formats and sources are allowed.
 
-[Learn More ->](/docs/adapters/contentlayer)
+[Learn More](https://next-docs-zeta.vercel.app/docs/adapters/contentlayer)
 
 ### Build Page Tree
 
@@ -183,16 +183,7 @@ export async function generateStaticParams() {
 
 ### Create MDX file
 
-Define the root meta at `/content/docs/meta.json`:
-
-```json
-{
-    "title": "root",
-    "pages": ["index"] // the order of pages
-}
-```
-
-Create `index.mdx`:
+Create `/content/docs/index.mdx`:
 
 ```mdx
 ---
