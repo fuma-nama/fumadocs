@@ -93,3 +93,48 @@ export default makeSource({
     },
 });
 ```
+
+3. Build the [Page Tree](/docs#build-page-tree) using `next-docs/contentlayer`:
+
+```ts
+import { allDocs, allMeta } from "@/.contentlayer/generated";
+import { buildPageTree } from "next-docs/contentlayer";
+
+export const tree = buildPageTree(allMeta, allDocs);
+```
+
+## Pages Structure
+
+All files are located in `/content` and `/content/docs` for documentation pages.
+
+### File
+
+By default, it uses [MDX](https://mdxjs.com) and supports `title` and `description` frontmatter:
+
+```mdx
+---
+title: My Page
+description: Best document ever
+---
+
+## Learn More
+```
+
+You may edit the configuration file to add additional properties.
+
+### Folder
+
+You can use folders to organize multiple pages, the uppercased name of the folder will be used as the display name.
+
+### Meta
+
+You can also customize the order of pages or add a separator by creating a `meta.json` in the folder:
+
+```json
+{
+    "title": "Name of Folder",
+    "pages": ["guide", "---Separator---", "components"] // file name of pages
+}
+```
+
+As you see, you can define a separator by adding a item surrounded by `---`.
