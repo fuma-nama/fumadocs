@@ -144,9 +144,6 @@ importers:
       '@types/flexsearch':
         specifier: 0.7.3
         version: 0.7.3
-      '@types/node':
-        specifier: 18.16.3
-        version: 18.16.3
       '@types/react':
         specifier: 18.2.0
         version: 18.2.0
