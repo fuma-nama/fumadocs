@@ -1,6 +1,6 @@
 # Next Docs
 
-The headless ui library for building documentation websites.
+The headless ui library for building documentation websites in Next.js.
 
 📘 Learn More: [Documentation](https://next-docs-zeta.vercel.app)
 
@@ -9,6 +9,12 @@ Next Docs Provides:
 -   Search (Supported: flexsearch)
 -   Breadcrumb, Sidebar, TOC Components
 -   Additional utilities (getTOC, buildPageTree)
+
+## Installation
+
+```
+npm install next-docs-zeta
+```
 
 ## Getting Started
 
