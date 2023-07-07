@@ -1,6 +1,7 @@
 import { Inter } from "next/font/google";
 import "./style.css";
 import Link from "next/link";
+import { GithubIcon } from "lucide-react";
 
 export const metadata = {
     title: {
@@ -47,7 +48,9 @@ export default function RootLayout({
 }) {
     return (
         <html lang="en" className="dark">
-            <body className={`relative min-h-screen ${inter.className}`}>
+            <body
+                className={`relative flex flex-col min-h-screen ${inter.className}`}
+            >
                 <nav className="sticky flex flex-row items-center top-0 left-0 right-0 h-12 bg-gradient-to-t from-background/50 to-accent to-[150%] z-50 backdrop-blur-xl">
                     <Link
                         href="/"
@@ -58,7 +61,35 @@ export default function RootLayout({
                     </Link>
                 </nav>
                 {children}
+                <Footer />
             </body>
         </html>
+    );
+}
+
+function Footer() {
+    return (
+        <footer className="mt-auto border-t py-8 pb-20 bg-gradient-to-b from-blue-500/20">
+            <div className="container flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-cyan-200 font-bold">NEXT DOCS</p>
+                <div className="flex flex-row gap-20 items-center text-[#84BDDD]">
+                    <a
+                        href="https://github.com/SonMooSans/next-docs"
+                        rel="noreferrer noopener"
+                        className="flex flex-row items-center text-sm"
+                    >
+                        <GithubIcon className="w-5 h-5 mr-1" />
+                        Github
+                    </a>
+                    <a
+                        href="https://www.npmjs.com/package/next-docs-zeta"
+                        rel="noreferrer noopener"
+                        className="flex flex-row items-center text-sm"
+                    >
+                        NPM -&gt;
+                    </a>
+                </div>
+            </div>
+        </footer>
     );
 }

@@ -1,4 +1,4 @@
-import { CopyIcon, GithubIcon, LinkIcon } from "lucide-react";
+import { CopyIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { ComponentPropsWithRef, ComponentPropsWithoutRef } from "react";
@@ -85,7 +85,7 @@ export default function HomePage() {
                 </div>
             </div>
             <div className="bg-gradient-to-b from-transparent via-blue-500/10 to-transparent h-[400px] -mt-[300px]" />
-            <div className="container flex flex-col items-center text-center gap-2 mt-20">
+            <div className="container flex flex-col items-center text-center gap-2 mt-20 mb-40">
                 <h2 className="text-3xl font-semibold text-cyan-200">
                     Install Now
                 </h2>
@@ -99,27 +99,6 @@ export default function HomePage() {
                     </button>
                 </pre>
             </div>
-            <footer className="mt-40 border-t py-8 pb-20 bg-gradient-to-b from-blue-500/20">
-                <div className="container flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="text-cyan-200 font-bold">NEXT DOCS</p>
-                    <div className="flex flex-row gap-20 items-center">
-                        <a
-                            href="https://github.com/SonMooSans/next-docs"
-                            className="flex flex-row items-center text-sm"
-                        >
-                            <GithubIcon className="w-5 h-5 mr-1" />
-                            Github
-                        </a>
-                        <a
-                            href="https://www.npmjs.com/package/next-docs-zeta"
-                            className="flex flex-row items-center text-sm"
-                        >
-                            <LinkIcon className="w-5 h-5 mr-1" />
-                            NPM
-                        </a>
-                    </div>
-                </div>
-            </footer>
         </div>
     );
 }
