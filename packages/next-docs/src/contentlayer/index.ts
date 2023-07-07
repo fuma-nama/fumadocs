@@ -65,7 +65,12 @@ function buildMeta(meta: MetaPageBase, ctx: Context): FolderNode {
             return [];
         }
 
-        return buildFolderNode(path, ctx);
+        const node = buildFolderNode(path, ctx);
+
+        // if item doesn't exist
+        if (node.index == null && node.children.length === 0) return [];
+
+        return node;
     });
 
     if (index == null) {
@@ -170,7 +175,7 @@ export function buildPageTree(
         true
     );
 
-    return folder.children;
+    return folder?.children ?? [];
 }
 
 function pathToName(path: string): string {
