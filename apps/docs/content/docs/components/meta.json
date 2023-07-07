@@ -1,4 +1,4 @@
 {
     "title": "Components",
-    "pages": ["breadcrumb", "sidebar", "toc"]
+    "pages": ["breadcrumb", "sidebar", "toc", "safe-link"]
 }
