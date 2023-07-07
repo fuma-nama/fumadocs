@@ -26,6 +26,7 @@
         "postcss": "8.4.23",
         "react": "18.2.0",
         "react-dom": "18.2.0",
+        "rehype-img-size": "^1.0.1",
         "rehype-pretty-code": "^0.9.5",
         "rehype-slug": "^5.1.0",
         "remark-gfm": "^3.0.1",

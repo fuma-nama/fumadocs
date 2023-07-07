@@ -2,6 +2,7 @@ import { defineDocumentType, makeSource } from "contentlayer/source-files";
 import rehypePrettycode from "rehype-pretty-code";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
+import rehypeImgSize from "rehype-img-size";
 
 const Docs = defineDocumentType(() => ({
     name: "Docs",
@@ -74,6 +75,12 @@ export default makeSource({
                 },
             ],
             rehypeSlug,
+            [
+                rehypeImgSize as any,
+                {
+                    dir: "./public",
+                },
+            ],
         ],
         remarkPlugins: [remarkGfm],
     },

@@ -13,6 +13,7 @@ import { Heading } from "@/components/mdx/heading";
 import { Pre } from "@/components/mdx/pre";
 import { SafeLink } from "next-docs-zeta/link";
 import { TOC } from "@/components/toc";
+import Image from "next/image";
 
 export default async function Page({ params }: { params: Param }) {
     const path = (params.slug ?? []).join("/");
@@ -56,6 +57,7 @@ function MdxContent({ code }: { code: string }) {
                 Cards,
                 a: SafeLink,
                 pre: (props) => <Pre {...props} />,
+                img: (props) => <Image {...(props as any)} />,
                 h1: (props) => <Heading as="h1" {...props} />,
                 h2: (props) => <Heading as="h2" {...props} />,
                 h3: (props) => <Heading as="h3" {...props} />,
