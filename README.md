@@ -45,7 +45,7 @@ Next Docs has native support for ContentLayer, but any kind of formats and sourc
 A page tree refers to structured data of all pages.
 
 ```ts
-import type { TreeNode } from "next-docs/server";
+import type { TreeNode } from "next-docs-zeta/server";
 
 const tree: TreeNode[] = [
     {
@@ -76,7 +76,7 @@ Moreover, It supports Contentlayer natively:
 
 ```ts
 import { allDocs, allMeta } from "contentlayer/generated";
-import { buildPageTree } from "next-docs/contentlayer";
+import { buildPageTree } from "next-docs-zeta/contentlayer";
 
 export const tree = buildPageTree(allMeta, allDocs);
 ```
@@ -122,12 +122,12 @@ Create `/app/docs/[[...slug]]/page.tsx`:
 import { allDocs } from "contentlayer/generated";
 import { notFound } from "next/navigation";
 
-import { getTableOfContents } from "next-docs/server";
+import { getTableOfContents } from "next-docs-zeta/server";
 import { getMDXComponent } from "next-contentlayer/hooks";
 import { tree } from "@/utils/page-tree";
 import React from "react";
 import { Breadcrumb } from "@/components/breadcrumb";
-import { SafeLink } from "next-docs/link";
+import { SafeLink } from "next-docs-zeta/link";
 import { TOC } from "@/components/toc";
 
 export default async function Page({

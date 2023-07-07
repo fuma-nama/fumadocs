@@ -1,5 +1,5 @@
 import { allDocs } from "contentlayer/generated";
-import { initSearchAPI } from "next-docs/server";
+import { initSearchAPI } from "next-docs-zeta/server";
 
 export const { GET } = initSearchAPI(
     allDocs.map((docs) => ({

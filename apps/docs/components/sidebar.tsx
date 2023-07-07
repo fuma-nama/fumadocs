@@ -4,10 +4,10 @@ import { ChevronDownIcon, MenuIcon } from "lucide-react";
 import { ReactNode, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { TreeNode, FileNode, FolderNode } from "next-docs/server";
+import type { TreeNode, FileNode, FolderNode } from "next-docs-zeta/server";
 import dynamic from "next/dynamic";
 import { CommandShortcut } from "./ui/command";
-import * as Base from "next-docs/sidebar";
+import * as Base from "next-docs-zeta/sidebar";
 import * as Collapsible from "@radix-ui/react-collapsible";
 
 const SearchDialog = dynamic(() => import("./dialog/search"));

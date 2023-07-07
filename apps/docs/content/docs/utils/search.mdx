@@ -15,7 +15,7 @@ Assumes you're using Contentlayer.
 
 ```tsx
 import { allDocs } from "contentlayer/generated";
-import { initSearchAPI } from "next-docs/server";
+import { initSearchAPI } from "next-docs-zeta/server";
 
 export const { GET } = initSearchAPI(
     allDocs.map((docs) => ({
@@ -30,7 +30,7 @@ export const { GET } = initSearchAPI(
 
 ```tsx
 import type { DialogProps } from "@radix-ui/react-dialog";
-import { useDocsSearch } from "next-docs/search";
+import { useDocsSearch } from "next-docs-zeta/search";
 import {
     CommandDialog,
     CommandEmpty,

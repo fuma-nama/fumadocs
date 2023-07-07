@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { Param } from "../layout";
 
 import type { Metadata } from "next";
-import { getTableOfContents } from "next-docs/server";
+import { getTableOfContents } from "next-docs-zeta/server";
 import { getMDXComponent } from "next-contentlayer/hooks";
 import { tree } from "@/utils/page-tree";
 import React from "react";
@@ -11,7 +11,7 @@ import { Breadcrumb } from "@/components/breadcrumb";
 import { Card, Cards } from "@/components/mdx/card";
 import { Heading } from "@/components/mdx/heading";
 import { Pre } from "@/components/mdx/pre";
-import { SafeLink } from "next-docs/link";
+import { SafeLink } from "next-docs-zeta/link";
 import { TOC } from "@/components/toc";
 
 export default async function Page({ params }: { params: Param }) {

@@ -1,5 +1,5 @@
-import type { TreeNode } from "next-docs/server";
-import { useBreadcrumb } from "next-docs/breadcrumb";
+import type { TreeNode } from "next-docs-zeta/server";
+import { useBreadcrumb } from "next-docs-zeta/breadcrumb";
 import clsx from "clsx";
 import { ChevronRightIcon } from "lucide-react";
 import Link from "next/link";

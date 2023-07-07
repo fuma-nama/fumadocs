@@ -1,5 +1,5 @@
 import { DialogProps } from "@radix-ui/react-dialog";
-import { useDocsSearch } from "next-docs/search";
+import { useDocsSearch } from "next-docs-zeta/search";
 import {
     CommandDialog,
     CommandEmpty,

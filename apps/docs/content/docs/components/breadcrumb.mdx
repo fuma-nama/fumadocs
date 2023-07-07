@@ -14,7 +14,7 @@ next-docs/breadcrumb
 it exports a `useBreadcrumb` hook:
 
 ```tsx
-import { useBreadcrumb } from "next-docs/breadcrumb";
+import { useBreadcrumb } from "next-docs-zeta/breadcrumb";
 
 const tree: TreeNode[] = buildPageTree(allMeta, allDocs);
 const pathname = usePathname();
@@ -35,8 +35,8 @@ Using `lucide-react` for icons.
 
 ```tsx
 import { usePathname } from "next/navigation";
-import type { TreeNode } from "next-docs/server";
-import { useBreadcrumb } from "next-docs/breadcrumb";
+import type { TreeNode } from "next-docs-zeta/server";
+import { useBreadcrumb } from "next-docs-zeta/breadcrumb";
 import clsx from "clsx";
 import { ChevronRightIcon } from "lucide-react";
 import Link from "next/link";

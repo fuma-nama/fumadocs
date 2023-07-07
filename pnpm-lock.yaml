@@ -58,7 +58,7 @@ importers:
       next-contentlayer:
         specifier: ^0.3.3
         version: 0.3.3(esbuild@0.17.19)(next@13.4.8)(react-dom@18.2.0)(react@18.2.0)
-      next-docs:
+      next-docs-zeta:
         specifier: workspace:*
         version: link:../../packages/next-docs
       next-themes:

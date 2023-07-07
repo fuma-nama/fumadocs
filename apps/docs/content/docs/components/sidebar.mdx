@@ -12,7 +12,7 @@ next-docs/sidebar
 ## Usage
 
 ```tsx
-import * as Base from "next-docs/sidebar";
+import * as Base from "next-docs-zeta/sidebar";
 
 return (
     <Base.SidebarProvider>
@@ -52,10 +52,10 @@ Using `lucide-react` for icons:
 import clsx from "clsx";
 import { MenuIcon } from "lucide-react";
 import { ReactNode } from "react";
-import * as Base from "next-docs/sidebar";
+import * as Base from "next-docs-zeta/sidebar";
 import { SidebarItem } from "./item";
 
-import type { TreeNode } from "next-docs/server";
+import type { TreeNode } from "next-docs-zeta/server";
 
 export function SidebarProvider({ children }: { children: ReactNode }) {
     return (

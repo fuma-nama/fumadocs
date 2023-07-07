@@ -21,7 +21,7 @@
         "lucide-react": "^0.190.0",
         "next": "13.4.8",
         "next-contentlayer": "^0.3.3",
-        "next-docs": "workspace:*",
+        "next-docs-zeta": "workspace:*",
         "next-themes": "^0.2.1",
         "postcss": "8.4.23",
         "react": "18.2.0",

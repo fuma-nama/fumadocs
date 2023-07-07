@@ -1,6 +1,6 @@
 "use client";
-import * as Primitive from "next-docs/toc";
-import type { TOCItemType } from "next-docs/server";
+import * as Primitive from "next-docs-zeta/toc";
+import type { TOCItemType } from "next-docs-zeta/server";
 
 export function TOC({ items }: { items: TOCItemType[] }) {
     return (
