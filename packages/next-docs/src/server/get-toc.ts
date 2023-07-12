@@ -67,6 +67,11 @@ const getToc = () => (node: any, file: any) => {
 
 export type TableOfContents = TOCItemType[];
 
+/**
+ * Get Table of Contents from markdown/mdx document (using remark)
+ *
+ * @param content Markdown content
+ */
 export async function getTableOfContents(
     content: string
 ): Promise<TableOfContents> {

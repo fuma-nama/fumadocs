@@ -1,0 +1,28 @@
+---
+title: Get TOC
+description: Parse Table of contents from markdown/mdx content
+---
+
+Parse Table of contents from markdown/mdx content.
+
+## Usage
+
+Note: If you're using a CMS, you should use the API provided by the CMS instead.
+
+```ts
+import { getTableOfContents } from "next-docs-zeta/server";
+
+const toc = await getTableOfContents(page.body.raw);
+```
+
+### getTableOfContents
+
+Parse markdown content and return an array of TOC items.
+
+### TOCItemType
+
+| Prop    | Type                         | Description      |
+| ------- | ---------------------------- | ---------------- |
+| `title` | `string`                     | Title of heading |
+| `url`   | `string`                     | Href url         |
+| `items` | `TOCItemType[] \| undefined` | Children         |
