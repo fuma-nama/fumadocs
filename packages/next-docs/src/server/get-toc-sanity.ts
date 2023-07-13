@@ -51,7 +51,7 @@ function dfs(block: Block, list: Item[], slugFn: SlugFn) {
         const text = flattenNode(block);
         const item = {
             title: text,
-            url: slugFn(text),
+            url: "#" + slugFn(text),
             level,
         };
 
