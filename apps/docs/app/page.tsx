@@ -6,6 +6,14 @@ import { ComponentPropsWithRef, ComponentPropsWithoutRef } from "react";
 export default function HomePage() {
     return (
         <div className="flex flex-col relative text-[#84BDDD]">
+            <nav className="sticky flex flex-row items-center top-0 left-0 right-0 h-12 bg-gradient-to-t from-background/50 to-accent to-[150%] z-50 backdrop-blur-xl">
+                <Link
+                    href="/"
+                    className="text-sm text-muted-foreground text-center mx-auto"
+                >
+                    next-docs
+                </Link>
+            </nav>
             <div className="flex absolute top-0 inset-x-0">
                 <div className="w-[1500px] max-w-[100vw] h-[300px] mx-auto bg-gradient-radial-top from-blue-500/10 to-80%" />
             </div>

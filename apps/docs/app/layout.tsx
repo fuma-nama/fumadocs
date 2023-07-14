@@ -1,6 +1,5 @@
 import { Inter } from "next/font/google";
 import "./style.css";
-import Link from "next/link";
 import { GithubIcon } from "lucide-react";
 
 export const metadata = {
@@ -51,15 +50,6 @@ export default function RootLayout({
             <body
                 className={`relative flex flex-col min-h-screen ${inter.className}`}
             >
-                <nav className="sticky flex flex-row items-center top-0 left-0 right-0 h-12 bg-gradient-to-t from-background/50 to-accent to-[150%] z-50 backdrop-blur-xl">
-                    <Link
-                        href="/"
-                        prefetch={false}
-                        className="text-sm text-muted-foreground text-center mx-auto"
-                    >
-                        next-docs
-                    </Link>
-                </nav>
                 {children}
                 <Footer />
             </body>
