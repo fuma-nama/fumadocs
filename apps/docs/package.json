@@ -19,7 +19,7 @@
         "cmdk": "^0.2.0",
         "contentlayer": "^0.3.3",
         "lucide-react": "^0.190.0",
-        "next": "13.4.8",
+        "next": "13.4.9",
         "next-contentlayer": "^0.3.3",
         "next-docs-zeta": "workspace:*",
         "next-themes": "^0.2.1",
