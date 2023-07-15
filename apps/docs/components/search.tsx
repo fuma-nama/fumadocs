@@ -18,12 +18,12 @@ const SearchContext = createContext({
 });
 
 export function SearchProvider({ children }: { children: ReactNode }) {
-    const [openSearch, setOpenSearch] = useState(false);
+    const [isOpen, setOpen] = useState<boolean>();
 
     useEffect(() => {
         const handler = (e: KeyboardEvent) => {
             if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
-                setOpenSearch(true);
+                setOpen(true);
                 e.preventDefault();
             }
         };
@@ -36,8 +36,10 @@ export function SearchProvider({ children }: { children: ReactNode }) {
     }, []);
 
     return (
-        <SearchContext.Provider value={{ setOpenSearch }}>
-            {openSearch && <SearchDialog open onOpenChange={setOpenSearch} />}
+        <SearchContext.Provider value={{ setOpenSearch: setOpen }}>
+            {isOpen !== undefined && (
+                <SearchDialog open={isOpen} onOpenChange={setOpen} />
+            )}
             {children}
         </SearchContext.Provider>
     );
