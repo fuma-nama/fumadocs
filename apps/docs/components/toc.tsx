@@ -14,11 +14,11 @@ export function TOC({ items }: { items: TOCItemType[] }) {
 
 function TOCItem({ item }: { item: TOCItemType }) {
     return (
-        <div>
+        <div className="flex flex-col">
             <Primitive.TOCItem
                 href={item.url}
                 item={item}
-                className="text-sm text-muted-foreground transition-colors data-[active=true]:font-semibold data-[active=true]:text-foreground"
+                className="text-sm text-muted-foreground transition-colors text-ellipsis overflow-hidden data-[active=true]:font-semibold data-[active=true]:text-foreground"
             >
                 {item.title}
             </Primitive.TOCItem>
