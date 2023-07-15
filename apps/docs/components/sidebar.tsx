@@ -14,21 +14,24 @@ export const SidebarTrigger = Base.SidebarTrigger;
 
 export function Sidebar({ items }: { items: TreeNode[] }) {
     return (
-        <div className="relative">
-            <Base.SidebarList
-                minWidth={1024} // lg
+        <Base.SidebarList
+            as="div"
+            minWidth={1024} // lg
+            className="relative group max-lg:data-[open=false]:hidden"
+        >
+            <aside
                 className={clsx(
                     "flex flex-col gap-3 fixed inset-0 overflow-auto",
                     "lg:sticky lg:top-12 lg:py-16 lg:max-h-[calc(100vh-3rem)]",
-                    "max-lg:pt-24 max-lg:pb-4 max-lg:px-8 max-lg:bg-background/50 max-lg:backdrop-blur-xl max-lg:z-40 max-lg:data-[open=false]:hidden"
+                    "max-lg:pt-24 max-lg:pb-4 max-lg:px-8 max-lg:bg-background/50 max-lg:backdrop-blur-xl max-lg:z-40"
                 )}
             >
                 <SearchBar className="sm:hidden" />
                 {items.map((item, i) => (
                     <Node key={i} item={item} />
                 ))}
-            </Base.SidebarList>
-        </div>
+            </aside>
+        </Base.SidebarList>
     );
 }
 

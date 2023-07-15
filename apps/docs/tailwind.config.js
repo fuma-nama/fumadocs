@@ -20,8 +20,6 @@ module.exports = {
                     "radial-gradient(circle, var(--tw-gradient-stops))",
                 "gradient-radial-top":
                     "radial-gradient(40% 60% at top, var(--tw-gradient-stops))",
-                "gradient-conic":
-                    "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
             },
             colors: {
                 border: "hsl(var(--border))",
