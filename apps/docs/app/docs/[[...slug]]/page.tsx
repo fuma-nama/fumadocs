@@ -31,7 +31,7 @@ export default async function Page({ params }: { params: Param }) {
             <article className="flex flex-col gap-6 py-8 overflow-x-hidden lg:py-16">
                 <Breadcrumb pathname={pathname} tree={tree} />
                 <h1 className="text-4xl font-bold">{page.title}</h1>
-                <div className="prose prose-text prose-pre:grid prose-pre:border-[1px] prose-code:bg-secondary prose-code:p-1 max-w-none">
+                <div className="prose prose-text prose-pre:grid prose-pre:border-[1px] prose-code:bg-secondary prose-code:p-1 max-w-none prose-table:whitespace-nowrap">
                     <MdxContent code={page.body.code} />
                 </div>
             </article>
@@ -64,6 +64,11 @@ function MdxContent({ code }: { code: string }) {
                 h4: (props) => <Heading as="h4" {...props} />,
                 h5: (props) => <Heading as="h5" {...props} />,
                 h6: (props) => <Heading as="h6" {...props} />,
+                table: (props) => (
+                    <div className="relative overflow-auto">
+                        <table {...props} />
+                    </div>
+                ),
             }}
         />
     );
