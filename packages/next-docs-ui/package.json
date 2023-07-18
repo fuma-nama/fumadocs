@@ -1,0 +1,86 @@
+{
+    "name": "next-docs-ui",
+    "description": "The framework for building a documentation website in Next.js",
+    "version": "0.1.0",
+    "homepage": "https://next-docs-zeta.vercel.app",
+    "author": "Money SonMooSans",
+    "repository": "github:SonMooSans/next-docs",
+    "license": "MIT",
+    "files": [
+        "dist/*"
+    ],
+    "exports": {
+        "./style.css": "./dist/style.css",
+        "./contentlayer": {
+            "import": "./dist/contentlayer/index.mjs",
+            "types": "./dist/contentlayer/index.d.ts"
+        },
+        "./layout": {
+            "import": "./dist/layout/index.mjs",
+            "types": "./dist/layout/index.d.ts"
+        },
+        "./*": {
+            "import": "./dist/*.mjs",
+            "types": "./dist/*.d.ts"
+        }
+    },
+    "typesVersions": {
+        "*": {
+            "contentlayer": [
+                "./dist/contentlayer/index.d.ts"
+            ],
+            "layout": [
+                "./dist/layout/index.d.ts"
+            ]
+        }
+    },
+    "scripts": {
+        "build": "tsup && postcss css/styles.css -o ./dist/style.css",
+        "clean": "rmdir /q/s dist",
+        "dev": "concurrently \"pnpm dev:layout\" \"pnpm dev:tailwind\"",
+        "dev:layout": "tsup --watch",
+        "dev:tailwind": "postcss css/styles.css -o ./dist/style.css --watch",
+        "prepublishOnly": "pnpm build",
+        "types": "tsup --dts-only",
+        "types:check": "tsc --noEmit"
+    },
+    "dependencies": {
+        "@radix-ui/react-collapsible": "^1.0.3",
+        "@radix-ui/react-dialog": "^1.0.3",
+        "clsx": "^1.2.1",
+        "cmdk": "^0.2.0",
+        "lucide-react": "^0.190.0",
+        "next-docs-zeta": "workspace:*",
+        "rehype-pretty-code": "^0.9.5",
+        "rehype-slug": "^5.1.0",
+        "remark-gfm": "^3.0.1",
+        "tailwind-merge": "^1.12.0"
+    },
+    "peerDependencies": {
+        "contentlayer": "0.3.x",
+        "next": "13.x",
+        "react": "18.x",
+        "react-dom": "18.x"
+    },
+    "devDependencies": {
+        "contentlayer": "^0.3.3",
+        "@types/react": "18.2.0",
+        "@types/react-dom": "18.2.1",
+        "next": "13.4.8",
+        "@tailwindcss/typography": "^0.5.9",
+        "tailwindcss": "3.3.2",
+        "tailwindcss-animate": "^1.0.5",
+        "postcss": "8.4.23",
+        "postcss-cli": "^10.1.0",
+        "postcss-import": "^15.1.0",
+        "postcss-lightningcss": "^0.9.0",
+        "autoprefixer": "10.4.14"
+    },
+    "keywords": [
+        "NextJs",
+        "Docs"
+    ],
+    "publishConfig": {
+        "access": "public"
+    }
+}
