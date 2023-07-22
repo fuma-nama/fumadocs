@@ -50,10 +50,12 @@
     "dependencies": {
         "@radix-ui/react-collapsible": "^1.0.3",
         "@radix-ui/react-dialog": "^1.0.3",
+        "@radix-ui/react-dropdown-menu": "^2.0.5",
         "clsx": "^1.2.1",
         "cmdk": "^0.2.0",
         "lucide-react": "^0.190.0",
         "next-docs-zeta": "workspace:*",
+        "next-themes": "^0.2.1",
         "rehype-pretty-code": "^0.9.5",
         "rehype-slug": "^5.1.0",
         "remark-gfm": "^3.0.1",
@@ -66,18 +68,18 @@
         "react-dom": "18.x"
     },
     "devDependencies": {
-        "contentlayer": "^0.3.3",
+        "@tailwindcss/typography": "^0.5.9",
         "@types/react": "18.2.0",
         "@types/react-dom": "18.2.1",
+        "autoprefixer": "10.4.14",
+        "contentlayer": "^0.3.3",
         "next": "13.4.8",
-        "@tailwindcss/typography": "^0.5.9",
-        "tailwindcss": "3.3.2",
-        "tailwindcss-animate": "^1.0.5",
         "postcss": "8.4.23",
         "postcss-cli": "^10.1.0",
         "postcss-import": "^15.1.0",
         "postcss-lightningcss": "^0.9.0",
-        "autoprefixer": "10.4.14"
+        "tailwindcss": "3.3.2",
+        "tailwindcss-animate": "^1.0.5"
     },
     "keywords": [
         "NextJs",
