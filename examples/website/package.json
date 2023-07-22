@@ -13,6 +13,7 @@
         "next": "13.4.9",
         "react": "18.2.0",
         "react-dom": "18.2.0",
-        "contentlayer": "^0.3.3"
+        "contentlayer": "^0.3.3",
+        "next-contentlayer": "^0.3.3"
     }
 }
