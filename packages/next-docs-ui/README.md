@@ -72,6 +72,7 @@ Make sure you've generated documents correctly before moving to next step.
 import { DocsLayout } from "next-docs-ui/layout";
 import { tree } from "./tree";
 import { Inter } from "next/font/google";
+import { ThemeProvider } from "next-docs-ui/theme-provider";
 import type { Metadata } from "next";
 
 import "next-docs-ui/style.css";
@@ -100,9 +101,11 @@ export default function RootLayout({
                     minHeight: "100vh",
                 }}
             >
-                <DocsLayout tree={tree} navTitle="My App">
-                    {children}
-                </DocsLayout>
+                <ThemeProvider>
+                    <DocsLayout tree={tree} navTitle="My App">
+                        {children}
+                    </DocsLayout>
+                </ThemeProvider>
             </body>
         </html>
     );
