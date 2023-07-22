@@ -19,7 +19,38 @@ export default function RootLayout({
 }) {
     return (
         <html lang="en" className={`dark ${inter.className}`}>
-            <body style={{ minHeight: "100vh" }}>
+            <body style={{ position: "relative", minHeight: "100vh" }}>
+                <div
+                    style={{
+                        position: "absolute",
+                        inset: 0,
+                        zIndex: -1,
+                        overflow: "hidden",
+                    }}
+                >
+                    <div
+                        style={{
+                            position: "absolute",
+                            top: 0,
+                            right: 0,
+                            width: "100%",
+                            height: 500,
+                            background:
+                                "linear-gradient(to bottom left, hsl(630 50% 50% / 0.5), hsl(var(--background)) 50%)",
+                        }}
+                    />
+                    <div
+                        style={{
+                            position: "absolute",
+                            bottom: 0,
+                            left: 0,
+                            width: "100%",
+                            height: 500,
+                            background:
+                                "linear-gradient(to top right, hsl(650 50% 50% / 0.2), transparent 30%)",
+                        }}
+                    />
+                </div>
                 <DocsLayout tree={tree} navTitle="My App">
                     {children}
                 </DocsLayout>

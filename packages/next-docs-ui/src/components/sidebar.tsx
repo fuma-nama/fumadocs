@@ -37,7 +37,9 @@ export function Sidebar({ items }: { items: TreeNode[] }) {
 function Node({ item }: { item: TreeNode }) {
     if (item.type === "separator")
         return (
-            <p className="font-semibold text-sm mt-3 first:mt-0">{item.name}</p>
+            <p className="font-semibold text-sm mt-3 first-of-type:mt-0">
+                {item.name}
+            </p>
         );
     if (item.type === "folder") return <Folder item={item} />;
 

@@ -1,3 +1,9 @@
 {
-    "pages": ["---Guide---", "index", "install", "components"]
+    "pages": [
+        "---Guide---",
+        "index",
+        "install",
+        "---API Reference---",
+        "components"
+    ]
 }
