@@ -47,7 +47,7 @@ export default function RootLayout({
     children: React.ReactNode;
 }) {
     return (
-        <html lang="en" className="dark">
+        <html lang="en">
             <body
                 className={`relative flex flex-col min-h-screen ${inter.className}`}
             >
@@ -62,8 +62,8 @@ function Footer() {
     return (
         <footer className="mt-auto border-t py-8 pb-20 bg-gradient-to-b from-blue-500/20">
             <div className="container flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-cyan-200 font-bold">NEXT DOCS</p>
-                <div className="flex flex-row gap-20 items-center text-[#84BDDD]">
+                <p className="text-foreground font-bold">NEXT DOCS</p>
+                <div className="flex flex-row gap-20 items-center text-muted-foreground">
                     <a
                         href="https://github.com/SonMooSans/next-docs"
                         rel="noreferrer noopener"

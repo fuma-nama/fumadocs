@@ -1,3 +1,4 @@
+import { cn } from "@/utils/cn";
 import { CopyIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -5,7 +6,12 @@ import { ComponentPropsWithRef, ComponentPropsWithoutRef } from "react";
 
 export default function HomePage() {
     return (
-        <div className="flex flex-col relative text-[#84BDDD]">
+        <div
+            className={cn(
+                "flex flex-col relative text-muted-foreground",
+                "[--foreground:186_93%_30%] dark:[--foreground:186_93%_81%] [--muted-foreground:202_57%_49%] dark:[--muted-foreground:202_57%_69%]"
+            )}
+        >
             <nav className="sticky flex flex-row items-center top-0 left-0 right-0 h-12 bg-gradient-to-t from-background/50 to-accent to-[150%] z-50 backdrop-blur-xl">
                 <Link
                     href="/"
@@ -22,7 +28,7 @@ export default function HomePage() {
                 alt="stars"
                 width={650 / 1.2}
                 height={627 / 1.2}
-                className="absolute right-0 top-0"
+                className="absolute right-0 top-0 hidden dark:block"
                 priority
             />
             <div className="absolute top-0 left-0 max-xl:hidden">
@@ -37,16 +43,15 @@ export default function HomePage() {
             <div className="pt-40 z-[2] flex flex-col gap-4 text-center container">
                 <div className="relative mx-auto">
                     <div
-                        className="absolute top-0 -left-20 -right-20 h-full bg-gradient-to-l from-cyan-200/30 to-purple-400/30 blur-3xl -z-[1] max-w-[100vw]"
+                        className="absolute top-0 -left-20 -right-20 h-full bg-gradient-to-l from-foreground/30 to-purple-400/30 blur-3xl -z-[1] max-w-[100vw]"
                         aria-hidden
                     />
-                    <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-purple-200 from-20% to-cyan-300 sm:text-5xl sm:leading-snug">
+                    <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-purple-400 from-20% to-cyan-300 dark:from-purple-200 dark:from-20% dark:to-cyan-300 sm:text-5xl sm:leading-snug">
                         The Headless UI for
                         <br /> Next.js Docs
                     </h1>
                 </div>
-
-                <p className="text-[#84BDDD]">
+                <p>
                     Next Docs is a headless ui library built for building
                     documentation websites
                 </p>
@@ -66,10 +71,10 @@ export default function HomePage() {
                     </div>
                     <div className="absolute inset-0 flex flex-col bg-gradient-to-b from-background/30 to-blue-500/30 p-8 from-10%">
                         <div className="mt-auto text-center">
-                            <p className="text-xl font-medium text-cyan-200 mb-2">
+                            <p className="text-xl font-medium text-foreground mb-2">
                                 First class Developer Experience
                             </p>
-                            <p className="text-[#84BDDD] text-sm">
+                            <p className="text-sm">
                                 Install, Code, Deploy within seconds
                             </p>
                         </div>
@@ -78,14 +83,14 @@ export default function HomePage() {
                 <div className="relative md:col-span-2 p-8 border rounded-2xl flex flex-col overflow-hidden bg-background z-[2]">
                     <div className="-z-[1] mx-auto mb-20 relative">
                         <div className="bg-cyan-300/50 inset-8 absolute blur-3xl -z-[1] animate-pulse" />
-                        <Rocket className="mx-auto text-cyan-200 [mask-image:linear-gradient(to_bottom,white_50%,transparent_90%)]" />
+                        <Rocket className="mx-auto text-foreground [mask-image:linear-gradient(to_bottom,white_50%,transparent_90%)]" />
                     </div>
                     <div className="absolute inset-0 flex flex-col bg-gradient-to-b from-background/30 to-blue-500/30 p-8 from-10%">
                         <div className="mt-auto text-center">
-                            <p className="text-xl font-medium text-cyan-200 mb-2">
+                            <p className="text-xl font-medium text-foreground mb-2">
                                 Lightening Fast
                             </p>
-                            <p className="text-[#84BDDD] text-sm">
+                            <p className="text-sm">
                                 Built for App Router and work with Pages Router
                             </p>
                         </div>
@@ -94,13 +99,11 @@ export default function HomePage() {
             </div>
             <div className="bg-gradient-to-b from-transparent via-blue-500/10 to-transparent h-[400px] -mt-[300px]" />
             <div className="container flex flex-col items-center text-center gap-2 mt-20 mb-40">
-                <h2 className="text-3xl font-semibold text-cyan-200">
+                <h2 className="text-3xl font-semibold text-foreground">
                     Install Now
                 </h2>
-                <p className="text-[#84BDDD] text-sm">
-                    Stop waiting, go type it.
-                </p>
-                <pre className="relative pl-4 pr-20 py-1.5 rounded-full border text-cyan-200 bg-blue-500/20 border-blue-200/20 mt-4">
+                <p className="text-sm">Stop waiting, go type it.</p>
+                <pre className="relative pl-4 pr-20 py-1.5 rounded-full border text-foreground bg-blue-200/30 dark:bg-blue-500/20 border-blue-200/20 mt-4">
                     npm install next-docs-zeta
                     <button className="absolute top-2 bottom-2 right-2 rounded-full">
                         <CopyIcon className="w-4 h-4" />
@@ -163,10 +166,9 @@ function Heart(props: ComponentPropsWithoutRef<"svg">) {
             <g filter="url(#filter0_d_2_135)">
                 <path
                     d="M52 39H76M46 45.5L80 45.5M44 51.5L84 51.5M43 57.5H135M44 63.5H134M45 69.5H133M49 75.5H129M53 81.5H125M57 87.5H121M62 93.5H116M68 99.5H110M75 105.5H103M82.5 111.5H97.5M126 39H102M132 45.5L98 45.5M134 51.5L94 51.5"
-                    stroke="#E1FBFF"
                     strokeWidth="2"
                     strokeLinecap="round"
-                    className="animate-heart"
+                    className="animate-heart stroke-foreground"
                     strokeDasharray={200}
                 />
             </g>
