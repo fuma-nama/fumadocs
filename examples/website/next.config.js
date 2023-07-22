@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const config = {
-    pageExtensions: ["ts", "tsx", "js", "jsx", "md", "mdx"],
+    pageExtensions: ["ts", "tsx", "js", "jsx"],
     reactStrictMode: true,
     images: {
         domains: ["i.pravatar.cc"],
