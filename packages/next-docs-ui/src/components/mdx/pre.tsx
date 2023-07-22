@@ -11,11 +11,11 @@ export function Pre(props: ComponentProps<"pre">) {
     };
 
     return (
-        <div className="relative">
+        <div className="nd-relative">
             <CopyButton onCopy={onCopy} />
             <pre
                 {...props}
-                className={clsx(props.className, "not-prose")}
+                className={clsx(props.className, "nd-not-prose")}
                 ref={ref}
             >
                 {props.children}
@@ -46,13 +46,13 @@ function CopyButton({ onCopy }: { onCopy: () => void }) {
 
     return (
         <button
-            className="absolute top-1 right-1 p-2 border bg-secondary text-secondary-foreground transition-colors rounded-md hover:bg-accent"
+            className="nd-absolute nd-top-1 nd-right-1 nd-p-2 nd-border nd-bg-secondary nd-text-secondary-foreground nd-transition-colors nd-rounded-md hover:nd-bg-accent"
             onClick={onClick}
         >
             {checked ? (
-                <CheckIcon className="w-3 h-3" />
+                <CheckIcon className="nd-w-3 nd-h-3" />
             ) : (
-                <CopyIcon className="w-3 h-3" />
+                <CopyIcon className="nd-w-3 nd-h-3" />
             )}
         </button>
     );

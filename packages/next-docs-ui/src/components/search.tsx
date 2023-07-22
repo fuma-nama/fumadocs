@@ -51,14 +51,14 @@ export function SearchBar(props: ComponentPropsWithoutRef<"button">) {
         <button
             {...props}
             className={cn(
-                "flex flex-row items-center border border-input rounded-md text-muted-foreground bg-background/50 px-4 py-2 text-sm",
+                "nd-flex nd-flex-row nd-items-center nd-border nd-border-input nd-rounded-md nd-text-muted-foreground nd-bg-background/50 nd-px-3 nd-py-2 nd-text-sm",
                 props.className
             )}
             onClick={() => setOpenSearch(true)}
         >
-            <SearchIcon className="w-4 h-4 mr-2" />
+            <SearchIcon className="nd-w-4 nd-h-4 nd-mr-2" />
             Search...
-            <CommandShortcut className="ml-auto">⌘ K</CommandShortcut>
+            <CommandShortcut className="nd-ml-auto">Ctrl K</CommandShortcut>
         </button>
     );
 }
@@ -70,7 +70,7 @@ const CommandShortcut = ({
     return (
         <span
             className={cn(
-                "text-xs px-2 py-0.5 border rounded-md bg-secondary text-secondary-foreground",
+                "nd-text-xs nd-px-2 nd-py-0.5 nd-border nd-rounded-md nd-bg-secondary nd-text-secondary-foreground",
                 className
             )}
             {...props}

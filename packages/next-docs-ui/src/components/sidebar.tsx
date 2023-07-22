@@ -16,16 +16,16 @@ export function Sidebar({ items }: { items: TreeNode[] }) {
         <Base.SidebarList
             as="div"
             minWidth={1024} // lg
-            className="relative group max-lg:data-[open=false]:hidden"
+            className="nd-relative nd-group max-lg:data-[open=false]:nd-hidden"
         >
             <aside
                 className={clsx(
-                    "flex flex-col gap-3 fixed inset-0 overflow-auto",
-                    "lg:sticky lg:top-12 lg:py-16 lg:max-h-[calc(100vh-3rem)]",
-                    "max-lg:pt-20 max-lg:pb-4 max-lg:px-8 max-lg:bg-background/50 max-lg:backdrop-blur-xl max-lg:z-40"
+                    "nd-flex nd-flex-col nd-gap-3 nd-fixed nd-inset-0 nd-overflow-auto",
+                    "lg:nd-sticky lg:nd-top-12 lg:nd-py-16 lg:nd-max-h-[calc(100vh-3rem)]",
+                    "max-lg:nd-pt-20 max-lg:nd-pb-4 max-lg:nd-px-8 max-lg:nd-bg-background/50 max-lg:nd-backdrop-blur-xl max-lg:nd-z-40"
                 )}
             >
-                <SearchBar className="mb-4 sm:hidden" />
+                <SearchBar className="nd-mb-4 sm:nd-hidden" />
                 {items.map((item, i) => (
                     <Node key={i} item={item} />
                 ))}
@@ -37,7 +37,7 @@ export function Sidebar({ items }: { items: TreeNode[] }) {
 function Node({ item }: { item: TreeNode }) {
     if (item.type === "separator")
         return (
-            <p className="font-semibold text-sm mt-3 first-of-type:mt-0">
+            <p className="nd-font-semibold nd-text-sm nd-mt-3 first-of-type:nd-mt-0">
                 {item.name}
             </p>
         );
@@ -55,10 +55,10 @@ function Item({ item }: { item: FileNode }) {
         <Link
             href={url}
             className={clsx(
-                "text-sm w-full",
+                "nd-text-sm nd-w-full",
                 active
-                    ? "text-purple-400 font-semibold"
-                    : "text-muted-foreground hover:text-foreground"
+                    ? "nd-text-purple-400 nd-font-semibold"
+                    : "nd-text-muted-foreground hover:nd-text-foreground"
             )}
         >
             {name}
@@ -89,34 +89,34 @@ function Folder({ item }: { item: FolderNode }) {
     const As = index == null ? "p" : Link;
     return (
         <Collapsible.Root
-            className="w-full"
+            className="nd-w-full"
             open={extend}
             onOpenChange={setExtend}
         >
             <Collapsible.Trigger
                 className={clsx(
-                    "flex flex-row text-sm w-full rounded-xl text-start",
+                    "nd-flex nd-flex-row nd-text-sm nd-w-full nd-rounded-xl nd-text-start",
                     active
-                        ? "font-semibold text-purple-400"
-                        : "text-muted-foreground hover:text-foreground"
+                        ? "nd-font-semibold nd-text-purple-400"
+                        : "nd-text-muted-foreground hover:nd-text-foreground"
                 )}
             >
                 <As
                     href={index?.url as any}
-                    className="flex-1"
+                    className="nd-flex-1"
                     onClick={onClick}
                 >
                     {name}
                 </As>
                 <ChevronDownIcon
                     className={clsx(
-                        "w-5 h-5",
-                        extend ? "rotate-0" : "-rotate-90"
+                        "nd-w-5 nd-h-5",
+                        extend ? "nd-rotate-0" : "-nd-rotate-90"
                     )}
                 />
             </Collapsible.Trigger>
             <Collapsible.Content asChild>
-                <ul className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
+                <ul className="nd-overflow-hidden data-[state=closed]:nd-animate-collapsible-up data-[state=open]:nd-animate-collapsible-down">
                     {children.map((item, i) => {
                         const active =
                             item.type !== "separator" && pathname === item.url;
@@ -125,10 +125,10 @@ function Folder({ item }: { item: FolderNode }) {
                             <li
                                 key={i}
                                 className={clsx(
-                                    "flex ml-2 pl-4 py-1.5 border-l first:mt-2",
+                                    "nd-flex nd-ml-2 nd-pl-4 nd-py-1.5 nd-border-l first:nd-mt-2",
                                     active
-                                        ? "border-purple-400"
-                                        : "border-border"
+                                        ? "nd-border-purple-400"
+                                        : "nd-border-border"
                                 )}
                             >
                                 <Node item={item} />

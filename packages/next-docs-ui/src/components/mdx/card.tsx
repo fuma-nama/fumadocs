@@ -3,7 +3,7 @@ import { ReactNode } from "react";
 
 export function Cards({ children }: { children: ReactNode }) {
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 not-prose">
+        <div className="nd-grid nd-grid-cols-1 md:nd-grid-cols-2 nd-gap-5 nd-not-prose">
             {children}
         </div>
     );
@@ -25,10 +25,10 @@ export function Card({
             href={href}
             target={external ? "_blank" : "_self"}
             rel={external ? "noreferrer" : ""}
-            className="flex flex-col gap-2 shadow-lg rounded-xl p-4 border bg-background/50 transition-colors hover:border-purple-400 hover:shadow-purple-400/20"
+            className="nd-flex nd-flex-col nd-gap-2 nd-shadow-lg nd-rounded-xl nd-p-4 nd-border nd-bg-background/50 nd-transition-colors hover:nd-border-purple-400 hover:nd-shadow-purple-400/20"
         >
-            <h3 className="text-foreground font-semibold">{title}</h3>
-            <p className="text-muted-foreground text-sm">{description}</p>
+            <h3 className="nd-text-foreground nd-font-semibold">{title}</h3>
+            <p className="nd-text-muted-foreground nd-text-sm">{description}</p>
         </Link>
     );
 }

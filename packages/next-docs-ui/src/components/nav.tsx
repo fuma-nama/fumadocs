@@ -19,17 +19,17 @@ export function Nav({
     children: ReactNode;
 }) {
     return (
-        <nav className="sticky top-0 left-0 right-0 bg-background/10 z-50 backdrop-blur-xl">
-            <div className="container flex flex-row items-center h-14 gap-4 max-w-[1400px]">
+        <nav className="nd-sticky nd-top-0 nd-inset-x-0 nd-bg-background/10 nd-z-50 nd-backdrop-blur-xl">
+            <div className="nd-container nd-flex nd-flex-row nd-items-center nd-h-14 nd-gap-4 nd-max-w-[1400px]">
                 <div>{children}</div>
-                <div className="flex flex-row items-center gap-2 ml-auto">
-                    <SearchBar className="w-[280px] max-w-xs max-sm:hidden" />
+                <div className="nd-flex nd-flex-row nd-items-center nd-gap-2 nd-ml-auto">
+                    <SearchBar className="nd-w-[280px] nd-max-w-xs max-sm:nd-hidden" />
                     {links?.map((item, key) => (
                         <NavLink key={key} {...item} />
                     ))}
                     <ModeToggle />
-                    <SidebarTrigger className="p-1 rounded-md hover:bg-accent lg:hidden">
-                        <MenuIcon className="w-5 h-5" />
+                    <SidebarTrigger className="nd-p-1 nd-rounded-md hover:nd-bg-accent lg:nd-hidden">
+                        <MenuIcon className="nd-w-5 nd-h-5" />
                     </SidebarTrigger>
                 </div>
             </div>
@@ -43,7 +43,7 @@ export function NavLink(props: NavLinkProps) {
             href={props.href}
             target={props.external ? "_blank" : "_self"}
             rel={props.external ? "noreferrer noopener" : undefined}
-            className="p-1 hover:bg-accent hover:text-accent-foreground"
+            className="nd-p-1 hover:nd-bg-accent hover:nd-text-accent-foreground"
         >
             {props.icon}
         </Link>

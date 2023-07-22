@@ -37,7 +37,7 @@ export function DocsLayout(props: DocsLayoutProps) {
         ? [
               {
                   href: props.githubUrl,
-                  icon: <GithubIcon className="w-5 h-5" />,
+                  icon: <GithubIcon className="nd-w-5 nd-h-5" />,
                   external: true,
               },
           ]
@@ -53,7 +53,7 @@ export function DocsLayout(props: DocsLayoutProps) {
                         <Nav links={links}>
                             <Link
                                 href="/"
-                                className="font-semibold hover:text-muted-foreground"
+                                className="nd-font-semibold hover:nd-text-muted-foreground"
                             >
                                 {props.navTitle}
                             </Link>
@@ -61,8 +61,8 @@ export function DocsLayout(props: DocsLayoutProps) {
                     )}
                     <div
                         className={clsx(
-                            "grid grid-cols-1 gap-12 w-full container max-w-[1400px] mb-32",
-                            "lg:grid-cols-[250px_auto] xl:grid-cols-[250px_auto_150px] 2xl:grid-cols-[250px_auto_250px]"
+                            "nd-grid nd-grid-cols-1 nd-gap-12 nd-w-full nd-container nd-max-w-[1400px] nd-mb-32",
+                            "lg:nd-grid-cols-[250px_auto] xl:nd-grid-cols-[250px_auto_150px] 2xl:nd-grid-cols-[250px_auto_250px]"
                         )}
                     >
                         <Sidebar items={props.tree} />

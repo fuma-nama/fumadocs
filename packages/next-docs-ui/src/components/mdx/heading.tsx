@@ -15,12 +15,12 @@ export function Heading<T extends Types = "h1">({
     const As = as ?? "h1";
 
     return (
-        <As {...props} className={clsx("group", props.className)}>
-            <span id={id} className="absolute -mt-20" />
+        <As {...props} className={clsx("nd-group", props.className)}>
+            <span id={id} className="nd-absolute -nd-mt-20" />
             {props.children}
             <a
                 href={`#${id}`}
-                className="opacity-0 group-hover:opacity-100 inline-block ml-2 text-muted-foreground"
+                className="nd-opacity-0 group-hover:nd-opacity-100 nd-inline-block nd-ml-2 nd-text-muted-foreground"
             >
                 <LinkIcon className="w-4 h-4" />
             </a>

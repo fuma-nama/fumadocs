@@ -25,7 +25,7 @@ const DialogOverlay = React.forwardRef<
     <DialogPrimitive.Overlay
         ref={ref}
         className={cn(
-            "fixed inset-0 z-50 bg-background/80 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+            "nd-fixed nd-inset-0 nd-z-50 nd-bg-background/80 nd-backdrop-blur-sm data-[state=open]:nd-animate-in data-[state=closed]:nd-animate-out data-[state=closed]:nd-fade-out-0 data-[state=open]:nd-fade-in-0",
             className
         )}
         {...props}
@@ -42,15 +42,15 @@ const DialogContent = React.forwardRef<
         <DialogPrimitive.Content
             ref={ref}
             className={cn(
-                "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg md:w-full",
+                "nd-fixed nd-left-[50%] nd-top-[50%] nd-z-50 nd-grid nd-w-full nd-max-w-lg nd-translate-x-[-50%] nd-translate-y-[-50%] nd-gap-4 nd-border nd-bg-background nd-p-6 nd-shadow-lg nd-duration-200 data-[state=open]:nd-animate-in data-[state=closed]:nd-animate-out data-[state=closed]:nd-fade-out-0 data-[state=open]:nd-fade-in-0 data-[state=closed]:nd-zoom-out-95 data-[state=open]:nd-zoom-in-95 data-[state=closed]:nd-slide-out-to-left-1/2 data-[state=closed]:nd-slide-out-to-top-[48%] data-[state=open]:nd-slide-in-from-left-1/2 data-[state=open]:nd-slide-in-from-top-[48%] sm:nd-rounded-lg md:nd-w-full",
                 className
             )}
             {...props}
         >
             {children}
-            <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
-                <X className="h-4 w-4" />
-                <span className="sr-only">Close</span>
+            <DialogPrimitive.Close className="nd-absolute nd-right-4 nd-top-4 nd-rounded-sm nd-opacity-70 nd-ring-offset-background nd-transition-opacity hover:nd-opacity-100 focus:nd-outline-none focus:nd-ring-2 focus:nd-ring-ring focus:nd-ring-offset-2 disabled:nd-pointer-events-none data-[state=open]:nd-bg-accent data-[state=open]:nd-text-muted-foreground">
+                <X className="nd-h-4 nd-w-4" />
+                <span className="nd-sr-only">Close</span>
             </DialogPrimitive.Close>
         </DialogPrimitive.Content>
     </DialogPortal>
@@ -63,7 +63,7 @@ const DialogHeader = ({
 }: React.HTMLAttributes<HTMLDivElement>) => (
     <div
         className={cn(
-            "flex flex-col space-y-1.5 text-center sm:text-left",
+            "nd-flex nd-flex-col nd-space-y-1.5 nd-text-center sm:nd-text-left",
             className
         )}
         {...props}
@@ -77,7 +77,7 @@ const DialogFooter = ({
 }: React.HTMLAttributes<HTMLDivElement>) => (
     <div
         className={cn(
-            "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
+            "nd-flex nd-flex-col-reverse sm:nd-flex-row sm:nd-justify-end sm:nd-space-x-2",
             className
         )}
         {...props}
@@ -92,7 +92,7 @@ const DialogTitle = React.forwardRef<
     <DialogPrimitive.Title
         ref={ref}
         className={cn(
-            "text-lg font-semibold leading-none tracking-tight",
+            "nd-text-lg nd-font-semibold nd-leading-none nd-tracking-tight",
             className
         )}
         {...props}
@@ -106,7 +106,7 @@ const DialogDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <DialogPrimitive.Description
         ref={ref}
-        className={cn("text-sm text-muted-foreground", className)}
+        className={cn("nd-text-sm nd-text-muted-foreground", className)}
         {...props}
     />
 ));

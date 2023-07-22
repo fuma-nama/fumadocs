@@ -15,7 +15,7 @@ const Command = React.forwardRef<
     <CommandPrimitive
         ref={ref}
         className={cn(
-            "flex h-full w-full flex-col overflow-hidden rounded-md bg-popover text-popover-foreground",
+            "nd-flex nd-h-full nd-w-full nd-flex-col nd-overflow-hidden nd-rounded-md nd-bg-popover nd-text-popover-foreground",
             className
         )}
         {...props}
@@ -28,9 +28,9 @@ interface CommandDialogProps extends DialogProps {}
 const CommandDialog = ({ children, ...props }: CommandDialogProps) => {
     return (
         <Dialog {...props}>
-            <DialogContent className="overflow-hidden p-0 shadow-2xl">
+            <DialogContent className="nd-overflow-hidden nd-p-0 nd-shadow-2xl">
                 <Command
-                    className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5"
+                    className="[&_[cmdk-group-heading]]:nd-px-2 [&_[cmdk-group-heading]]:nd-font-medium [&_[cmdk-group-heading]]:nd-text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:nd-pt-0 [&_[cmdk-group]]:nd-px-2 [&_[cmdk-input-wrapper]_svg]:nd-h-5 [&_[cmdk-input-wrapper]_svg]:nd-w-5 [&_[cmdk-input]]:nd-h-12 [&_[cmdk-item]]:nd-px-2 [&_[cmdk-item]]:nd-py-3 [&_[cmdk-item]_svg]:nd-h-5 [&_[cmdk-item]_svg]:nd-w-5"
                     shouldFilter={false}
                 >
                     {children}
@@ -44,12 +44,15 @@ const CommandInput = React.forwardRef<
     React.ElementRef<typeof CommandPrimitive.Input>,
     React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>
 >(({ className, ...props }, ref) => (
-    <div className="flex items-center border-b px-3" cmdk-input-wrapper="">
-        <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+    <div
+        className="nd-flex nd-items-center nd-border-b nd-px-3"
+        cmdk-input-wrapper=""
+    >
+        <Search className="nd-mr-2 nd-h-4 nd-w-4 nd-shrink-0 nd-opacity-50" />
         <CommandPrimitive.Input
             ref={ref}
             className={cn(
-                "placeholder:text-foreground-muted flex h-11 w-full rounded-md bg-transparent py-3 text-sm outline-none disabled:cursor-not-allowed disabled:opacity-50",
+                "placeholder:nd-text-foreground-muted nd-flex nd-h-11 nd-w-full nd-rounded-md nd-bg-transparent nd-py-3 nd-text-sm nd-outline-none disabled:nd-cursor-not-allowed disabled:nd-opacity-50",
                 className
             )}
             {...props}
@@ -66,7 +69,7 @@ const CommandList = React.forwardRef<
     <CommandPrimitive.List
         ref={ref}
         className={cn(
-            "max-h-[300px] overflow-y-auto overflow-x-hidden",
+            "nd-max-h-[300px] nd-overflow-y-auto nd-overflow-x-hidden",
             className
         )}
         {...props}
@@ -81,7 +84,7 @@ const CommandEmpty = React.forwardRef<
 >((props, ref) => (
     <CommandPrimitive.Empty
         ref={ref}
-        className="py-6 text-center text-sm"
+        className="nd-py-6 nd-text-center nd-text-sm"
         {...props}
     />
 ));
@@ -95,7 +98,7 @@ const CommandGroup = React.forwardRef<
     <CommandPrimitive.Group
         ref={ref}
         className={cn(
-            "overflow-hidden p-1 text-foreground [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground",
+            "nd-overflow-hidden nd-p-1 nd-text-foreground [&_[cmdk-group-heading]]:nd-px-2 [&_[cmdk-group-heading]]:nd-py-1.5 [&_[cmdk-group-heading]]:nd-text-xs [&_[cmdk-group-heading]]:nd-font-medium [&_[cmdk-group-heading]]:nd-text-muted-foreground",
             className
         )}
         {...props}
@@ -110,7 +113,7 @@ const CommandSeparator = React.forwardRef<
 >(({ className, ...props }, ref) => (
     <CommandPrimitive.Separator
         ref={ref}
-        className={cn("-mx-1 h-px bg-border", className)}
+        className={cn("-nd-mx-1 nd-h-px nd-bg-border", className)}
         {...props}
     />
 ));
@@ -123,7 +126,7 @@ const CommandItem = React.forwardRef<
     <CommandPrimitive.Item
         ref={ref}
         className={cn(
-            "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+            "nd-relative nd-flex nd-cursor-pointer nd-select-none nd-items-center nd-rounded-sm nd-px-2 nd-py-1.5 nd-text-sm nd-outline-none aria-selected:nd-bg-accent aria-selected:nd-text-accent-foreground data-[disabled]:nd-pointer-events-none data-[disabled]:nd-opacity-50",
             className
         )}
         {...props}

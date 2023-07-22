@@ -12,14 +12,14 @@ export const Image = ({ alt, ...props }: ComponentPropsWithoutRef<"img">) => (
 );
 
 export const Table = (props: ComponentPropsWithoutRef<"table">) => (
-    <div className="relative overflow-auto">
+    <div className="nd-relative nd-overflow-auto">
         <table {...props} />
     </div>
 );
 
 export function MDXContent({ children }: { children: ReactNode }) {
     return (
-        <div className="prose prose-text prose-pre:grid prose-pre:border prose-code:p-1 prose-code:rounded-md prose-code:bg-secondary prose-table:whitespace-nowrap max-w-none">
+        <div className="nd-prose nd-prose-text prose-pre:nd-grid prose-pre:nd-border prose-code:nd-p-1 prose-code:nd-rounded-md prose-code:nd-bg-secondary prose-table:nd-whitespace-nowrap nd-max-w-none">
             {children}
         </div>
     );

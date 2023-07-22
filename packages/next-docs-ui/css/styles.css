@@ -6,11 +6,11 @@
 
 @layer base {
     * {
-        @apply border-border;
+        @apply nd-border-border;
     }
 
     body {
-        @apply bg-background text-foreground;
+        @apply nd-bg-background nd-text-foreground;
         font-feature-settings: "rlig" 1, "calt" 1;
     }
 }

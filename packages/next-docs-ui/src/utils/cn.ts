@@ -1,1 +1,6 @@
-export { twMerge as cn } from "tailwind-merge";
+import { createTailwindMerge, getDefaultConfig } from "tailwind-merge";
+
+export const cn = createTailwindMerge(getDefaultConfig, (config) => ({
+    ...config,
+    prefix: "nd-",
+}));

@@ -14,10 +14,10 @@ export function ModeToggle() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <button className="w-7 h-7 inline-flex justify-center items-center rounded-md hover:bg-accent hover:text-accent-foreground focus-visible:outline-none">
-                    <SunIcon className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                    <MoonIcon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                    <span className="sr-only">Toggle theme</span>
+                <button className="nd-w-7 h-7 nd-inline-flex nd-justify-center nd-items-center nd-rounded-md hover:nd-bg-accent hover:nd-text-accent-foreground focus-visible:nd-outline-none">
+                    <SunIcon className="nd-h-5 nd-w-5 nd-rotate-0 nd-scale-100 nd-transition-all dark:-nd-rotate-90 dark:nd-scale-0" />
+                    <MoonIcon className="nd-absolute nd-h-5 nd-w-5 nd-rotate-90 nd-scale-0 nd-transition-all dark:nd-rotate-0 dark:nd-scale-100" />
+                    <span className="nd-sr-only">Toggle theme</span>
                 </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
