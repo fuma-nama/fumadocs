@@ -3,9 +3,40 @@ import rehypePrettycode from "rehype-pretty-code";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 
+/**
+ * Base url
+ */
+let urlBase = "/docs";
+
+/**
+ * Where the docs files located
+ */
+let docsPattern = "docs";
+
+function removeSlash(path: string) {
+    let start = 0,
+        end = path.length;
+    while (path.charAt(start) == "/") start++;
+    while (path.charAt(end - 1) == "/" && end > start) end--;
+
+    return path.slice(start, end);
+}
+
+function removePattern(path: string, pattern: string) {
+    if (!path.startsWith(pattern)) {
+        return path;
+    }
+
+    return removeSlash(path.slice(pattern.length));
+}
+
+function pathToUrl(base: string, path: string, prefix: string): string {
+    return [base + removePattern(path, prefix)].join("/");
+}
+
 export const Docs = defineDocumentType(() => ({
     name: "Docs",
-    filePathPattern: `docs/**/*.mdx`,
+    filePathPattern: `${docsPattern}/**/*.mdx`,
     contentType: "mdx",
     fields: {
         title: {
@@ -23,13 +54,13 @@ export const Docs = defineDocumentType(() => ({
         url: {
             type: "string",
             resolve: (post) => {
-                return "/" + post._raw.flattenedPath;
+                return pathToUrl(urlBase, post._raw.flattenedPath, docsPattern);
             },
         },
         slug: {
             type: "string",
             resolve: (post) => {
-                return post._raw.flattenedPath.split("/").slice(1).join("/");
+                return removePattern(post._raw.flattenedPath, docsPattern);
             },
         },
     },
@@ -37,7 +68,7 @@ export const Docs = defineDocumentType(() => ({
 
 export const Meta = defineDocumentType(() => ({
     name: "Meta",
-    filePathPattern: `docs/**/meta.json`,
+    filePathPattern: `${docsPattern}/**/meta.json`,
     contentType: "data",
     fields: {
         title: {
@@ -57,7 +88,8 @@ export const Meta = defineDocumentType(() => ({
     computedFields: {
         url: {
             type: "string",
-            resolve: (post) => "/" + post._raw.sourceFileDir,
+            resolve: (post) =>
+                pathToUrl(urlBase, post._raw.sourceFileDir, docsPattern),
         },
     },
 }));
@@ -87,3 +119,15 @@ export const defaultConfig: Args = {
         remarkPlugins: [remarkGfm],
     },
 };
+
+/**
+ *
+ * @param url Base url, default '/docs'
+ * @param pattern Where the docs files located, default 'docs' (no leading slash)
+ */
+export function createConfig(url?: string, pattern?: string) {
+    urlBase = url ?? urlBase;
+    docsPattern = pattern ?? docsPattern;
+
+    return defaultConfig;
+}

@@ -12,7 +12,7 @@ import {
 import { getTableOfContents } from "next-docs-zeta/server";
 import { allDocs } from "contentlayer/generated";
 import { notFound } from "next/navigation";
-import { tree } from "../../tree";
+import { tree } from "../tree";
 import { getMDXComponent } from "next-contentlayer/hooks";
 
 export default async function Page({
