@@ -6,6 +6,7 @@
         "build": "turbo run build:tailwind build",
         "clean": "turbo run clean",
         "dev": "turbo run dev",
+        "dev:ui": "turbo run dev --filter=website...",
         "lint": "eslint --cache --ignore-path .gitignore --max-warnings 0 .",
         "lint:prettier": "prettier --cache --check --ignore-path .gitignore --ignore-path .prettierignore .",
         "prettier": "prettier --cache --write --list-different --ignore-path .gitignore --ignore-path .prettierignore .",

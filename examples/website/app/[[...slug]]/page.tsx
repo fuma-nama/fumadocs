@@ -14,6 +14,7 @@ import { allDocs } from "contentlayer/generated";
 import { notFound } from "next/navigation";
 import { tree } from "../tree";
 import { getMDXComponent } from "next-contentlayer/hooks";
+import type { Metadata } from "next";
 
 export default async function Page({
     params,
@@ -59,4 +60,16 @@ export async function generateStaticParams(): Promise<{ slug: string[] }[]> {
     return allDocs.map((docs) => ({
         slug: docs.slug.split("/"),
     }));
+}
+
+export function generateMetadata({ params }: { params: { slug?: string[] } }) {
+    const path = (params.slug ?? []).join("/");
+    const page = allDocs.find((page) => page.slug === path);
+
+    if (page == null) return;
+
+    return {
+        title: page.title,
+        description: page.description,
+    } satisfies Metadata;
 }
