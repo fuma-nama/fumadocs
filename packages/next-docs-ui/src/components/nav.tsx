@@ -22,13 +22,13 @@ export function Nav({
         <nav className="nd-sticky nd-top-0 nd-inset-x-0 nd-bg-background/10 nd-z-50 nd-backdrop-blur-xl">
             <div className="nd-container nd-flex nd-flex-row nd-items-center nd-h-14 nd-gap-4 nd-max-w-[1400px]">
                 <div>{children}</div>
-                <div className="nd-flex nd-flex-row nd-items-center nd-gap-2 nd-ml-auto">
-                    <SearchBar className="nd-w-[280px] nd-max-w-xs max-sm:nd-hidden" />
+                <div className="nd-flex nd-flex-row nd-items-center nd-ml-auto">
+                    <SearchBar className="nd-w-[280px] nd-max-w-xs max-sm:nd-hidden nd-mr-3" />
                     {links?.map((item, key) => (
                         <NavLink key={key} {...item} />
                     ))}
                     <ModeToggle />
-                    <SidebarTrigger className="nd-p-1 nd-rounded-md hover:nd-bg-accent lg:nd-hidden">
+                    <SidebarTrigger className="nd-p-2 nd-rounded-md hover:nd-bg-accent lg:nd-hidden">
                         <MenuIcon className="nd-w-5 nd-h-5" />
                     </SidebarTrigger>
                 </div>
@@ -43,7 +43,7 @@ export function NavLink(props: NavLinkProps) {
             href={props.href}
             target={props.external ? "_blank" : "_self"}
             rel={props.external ? "noreferrer noopener" : undefined}
-            className="nd-p-1 hover:nd-bg-accent hover:nd-text-accent-foreground"
+            className="nd-p-2 nd-rounded-md hover:nd-bg-accent"
         >
             {props.icon}
         </Link>
