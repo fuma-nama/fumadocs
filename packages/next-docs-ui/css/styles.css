@@ -4,15 +4,13 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-    * {
-        @apply nd-border-border;
-    }
+* {
+    @apply nd-border-border;
+}
 
-    body {
-        @apply nd-bg-background nd-text-foreground;
-        font-feature-settings: "rlig" 1, "calt" 1;
-    }
+body {
+    @apply nd-bg-background nd-text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
 }
 
 :root {

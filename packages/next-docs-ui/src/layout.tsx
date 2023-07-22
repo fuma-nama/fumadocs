@@ -6,7 +6,6 @@ import { SearchProvider } from "@/components/search";
 import { Nav } from "@/components/nav";
 import Link from "next/link";
 import { TreeNode } from "next-docs-zeta/server";
-import { ThemeProvider } from "next-themes";
 import { GithubIcon } from "lucide-react";
 
 export type DocsLayoutProps = {
@@ -44,32 +43,30 @@ export function DocsLayout(props: DocsLayoutProps) {
         : [];
 
     return (
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <SidebarProvider>
-                <SearchProvider>
-                    {props.nav ? (
-                        props.nav
-                    ) : (
-                        <Nav links={links}>
-                            <Link
-                                href="/"
-                                className="nd-font-semibold hover:nd-text-muted-foreground"
-                            >
-                                {props.navTitle}
-                            </Link>
-                        </Nav>
+        <SidebarProvider>
+            <SearchProvider>
+                {props.nav ? (
+                    props.nav
+                ) : (
+                    <Nav links={links}>
+                        <Link
+                            href="/"
+                            className="nd-font-semibold hover:nd-text-muted-foreground"
+                        >
+                            {props.navTitle}
+                        </Link>
+                    </Nav>
+                )}
+                <div
+                    className={clsx(
+                        "nd-grid nd-grid-cols-1 nd-gap-12 nd-w-full nd-container nd-max-w-[1400px] nd-mb-32",
+                        "lg:nd-grid-cols-[250px_auto] xl:nd-grid-cols-[250px_auto_150px] 2xl:nd-grid-cols-[250px_auto_250px]"
                     )}
-                    <div
-                        className={clsx(
-                            "nd-grid nd-grid-cols-1 nd-gap-12 nd-w-full nd-container nd-max-w-[1400px] nd-mb-32",
-                            "lg:nd-grid-cols-[250px_auto] xl:nd-grid-cols-[250px_auto_150px] 2xl:nd-grid-cols-[250px_auto_250px]"
-                        )}
-                    >
-                        <Sidebar items={props.tree} />
-                        {props.children}
-                    </div>
-                </SearchProvider>
-            </SidebarProvider>
-        </ThemeProvider>
+                >
+                    <Sidebar items={props.tree} />
+                    {props.children}
+                </div>
+            </SearchProvider>
+        </SidebarProvider>
     );
 }
