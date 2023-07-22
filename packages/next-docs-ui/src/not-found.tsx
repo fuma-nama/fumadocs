@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export function NotFound() {
+export default function NotFound() {
     return (
         <div className="py-8 lg:py-16">
             <h1 className="text-4xl font-bold mb-2">Not Found</h1>

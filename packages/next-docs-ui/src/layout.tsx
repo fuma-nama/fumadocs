@@ -1,3 +1,4 @@
+"use client";
 import { ReactNode } from "react";
 import { SidebarProvider, Sidebar } from "@/components/sidebar";
 import clsx from "clsx";

@@ -1,4 +1,4 @@
-import { DocsPage } from "next-docs-ui/layout";
+import { DocsPage } from "next-docs-ui/page";
 import {
     Heading,
     Image,

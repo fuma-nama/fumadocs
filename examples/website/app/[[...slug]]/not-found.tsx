@@ -1,1 +1,1 @@
-export { NotFound as default } from "next-docs-ui/layout";
+export { default } from "next-docs-ui/not-found";

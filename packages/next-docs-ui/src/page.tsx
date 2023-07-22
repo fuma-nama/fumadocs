@@ -1,3 +1,4 @@
+"use client";
 import { TableOfContents, TreeNode } from "next-docs-zeta/server";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { TOC } from "@/components/toc";

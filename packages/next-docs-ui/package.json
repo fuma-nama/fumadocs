@@ -15,10 +15,6 @@
             "import": "./dist/contentlayer/index.mjs",
             "types": "./dist/contentlayer/index.d.ts"
         },
-        "./layout": {
-            "import": "./dist/layout/index.mjs",
-            "types": "./dist/layout/index.d.ts"
-        },
         "./mdx": {
             "import": "./dist/mdx/index.mjs",
             "types": "./dist/mdx/index.d.ts"
@@ -33,11 +29,11 @@
             "contentlayer": [
                 "./dist/contentlayer/index.d.ts"
             ],
-            "layout": [
-                "./dist/layout/index.d.ts"
-            ],
             "mdx": [
                 "./dist/mdx/index.d.ts"
+            ],
+            "*": [
+                "./dist/*.d.ts"
             ]
         }
     },
