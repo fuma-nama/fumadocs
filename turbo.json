@@ -14,10 +14,6 @@
                 "dist/**/*.css"
             ]
         },
-        "build:tailwind": {
-            "dependsOn": [],
-            "outputs": ["style.css"]
-        },
         "test": {},
         "types:check": {
             "dependsOn": [],
