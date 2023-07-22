@@ -46,12 +46,17 @@ function buildMeta(meta: MetaPageBase, ctx: Context): FolderNode {
                 name: result[1],
             };
 
-        const path =
-            item === "index"
-                ? meta._raw.sourceFileDir
-                : meta._raw.sourceFileDir + "/" + item;
+        const path = meta._raw.sourceFileDir + "/" + item;
+        const page = ctx.docs.find((page) => {
+            if (item === "index") {
+                return meta._raw.sourceFileDir === page._raw.flattenedPath;
+            }
 
-        const page = ctx.docs.find((page) => page._raw.flattenedPath === path);
+            return (
+                path === page._raw.flattenedPath &&
+                page._raw.sourceFileDir !== page._raw.flattenedPath
+            );
+        });
 
         if (page != null) {
             const node = buildFileNode(page);
