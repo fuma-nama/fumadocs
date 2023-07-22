@@ -1,6 +1,7 @@
 import { Inter } from "next/font/google";
-import "./style.css";
 import { GithubIcon } from "lucide-react";
+import "next-docs-ui/style.css";
+import "./style.css";
 
 export const metadata = {
     title: {
