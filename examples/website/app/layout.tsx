@@ -64,7 +64,11 @@ export default function RootLayout({
                         }}
                     />
                 </div>
-                <DocsLayout tree={tree} navTitle="My App">
+                <DocsLayout
+                    tree={tree}
+                    navTitle="My App"
+                    githubUrl="https://github.com/SonMooSans/next-docs"
+                >
                     {children}
                 </DocsLayout>
             </body>

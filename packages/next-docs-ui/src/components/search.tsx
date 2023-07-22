@@ -6,9 +6,9 @@ import {
     useEffect,
     useState,
 } from "react";
-import { CommandShortcut } from "@/components/ui/command";
 import dynamic from "next/dynamic";
 import { cn } from "@/utils/cn";
+import { SearchIcon } from "lucide-react";
 
 const SearchDialog = dynamic(() => import("./dialog/search"));
 
@@ -51,13 +51,31 @@ export function SearchBar(props: ComponentPropsWithoutRef<"button">) {
         <button
             {...props}
             className={cn(
-                "flex flex-row items-center border rounded-md text-muted-foreground bg-background cursor-pointer px-4 py-2 text-left text-sm",
+                "flex flex-row items-center border border-input rounded-md text-muted-foreground bg-background/50 px-4 py-2 text-sm",
                 props.className
             )}
             onClick={() => setOpenSearch(true)}
         >
-            Search Docs...
-            <CommandShortcut className="ml-auto">⌘K</CommandShortcut>
+            <SearchIcon className="w-4 h-4 mr-2" />
+            Search...
+            <CommandShortcut className="ml-auto">⌘ K</CommandShortcut>
         </button>
     );
 }
+
+const CommandShortcut = ({
+    className,
+    ...props
+}: React.HTMLAttributes<HTMLSpanElement>) => {
+    return (
+        <span
+            className={cn(
+                "text-xs px-2 py-0.5 border rounded-md bg-secondary text-secondary-foreground",
+                className
+            )}
+            {...props}
+        />
+    );
+};
+
+CommandShortcut.displayName = "CommandShortcut";

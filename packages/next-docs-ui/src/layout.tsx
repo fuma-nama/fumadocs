@@ -7,23 +7,42 @@ import { Nav } from "@/components/nav";
 import Link from "next/link";
 import { TreeNode } from "next-docs-zeta/server";
 import { ThemeProvider } from "next-themes";
+import { GithubIcon } from "lucide-react";
 
 export type DocsLayoutProps = {
+    /**
+     * Navbar title
+     */
+    navTitle: string | ReactNode;
+
     tree: TreeNode[];
+
     /**
      * Replace navbar
      */
     nav?: ReactNode;
+
     /**
-     * Customise navbar title
+     * Github url displayed on the navbar
      */
-    navTitle?: string;
+    githubUrl?: string;
+
     children: ReactNode;
 };
 
-export { Nav } from "@/components/nav";
+export { Nav, NavLink } from "@/components/nav";
 
 export function DocsLayout(props: DocsLayoutProps) {
+    const links = props.githubUrl
+        ? [
+              {
+                  href: props.githubUrl,
+                  icon: <GithubIcon className="w-5 h-5" />,
+                  external: true,
+              },
+          ]
+        : [];
+
     return (
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <SidebarProvider>
@@ -31,7 +50,7 @@ export function DocsLayout(props: DocsLayoutProps) {
                     {props.nav ? (
                         props.nav
                     ) : (
-                        <Nav>
+                        <Nav links={links}>
                             <Link
                                 href="/"
                                 className="font-semibold hover:text-muted-foreground"
