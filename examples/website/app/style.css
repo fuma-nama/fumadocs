@@ -1,0 +1,7 @@
+:root {
+    --gradient: 200 90% 85%;
+}
+
+.dark {
+    --gradient: 630 50% 50%;
+}

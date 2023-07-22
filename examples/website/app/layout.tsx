@@ -2,6 +2,7 @@ import { DocsLayout } from "next-docs-ui/layout";
 import { tree } from "./tree";
 import { Inter } from "next/font/google";
 import "next-docs-ui/style.css";
+import "./style.css";
 
 export const metadata = {
     title: "My App",
@@ -18,8 +19,15 @@ export default function RootLayout({
     children: React.ReactNode;
 }) {
     return (
-        <html lang="en" className={`dark ${inter.className}`}>
-            <body style={{ position: "relative", minHeight: "100vh" }}>
+        <html lang="en" className={inter.className}>
+            <body
+                style={{
+                    position: "relative",
+                    display: "flex",
+                    flexDirection: "column",
+                    minHeight: "100vh",
+                }}
+            >
                 <div
                     style={{
                         position: "absolute",
@@ -36,7 +44,7 @@ export default function RootLayout({
                             width: "100%",
                             height: 500,
                             background:
-                                "linear-gradient(to bottom left, hsl(630 50% 50% / 0.5), hsl(var(--background)) 50%)",
+                                "linear-gradient(to bottom left, hsl(var(--gradient) / 0.5), hsl(var(--background)) 50%)",
                         }}
                     />
                     <div
