@@ -4,16 +4,12 @@ import clsx from "clsx";
 import { ChevronRightIcon } from "lucide-react";
 import Link from "next/link";
 import { Fragment } from "react";
+import { usePathname } from "next/navigation";
 
 const itemStyles = "overflow-hidden overflow-ellipsis whitespace-nowrap";
 
-export function Breadcrumb({
-    pathname,
-    tree,
-}: {
-    pathname: string;
-    tree: TreeNode[];
-}) {
+export function Breadcrumb({ tree }: { tree: TreeNode[] }) {
+    const pathname = usePathname();
     const items = useBreadcrumb(pathname, tree);
 
     return (

@@ -6,7 +6,7 @@ import {
     useEffect,
     useState,
 } from "react";
-import { CommandShortcut } from "@/components/command";
+import { CommandShortcut } from "@/components/ui/command";
 import dynamic from "next/dynamic";
 import { cn } from "@/utils/cn";
 

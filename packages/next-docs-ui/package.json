@@ -19,6 +19,10 @@
             "import": "./dist/layout/index.mjs",
             "types": "./dist/layout/index.d.ts"
         },
+        "./mdx": {
+            "import": "./dist/mdx/index.mjs",
+            "types": "./dist/mdx/index.d.ts"
+        },
         "./*": {
             "import": "./dist/*.mjs",
             "types": "./dist/*.d.ts"
@@ -31,6 +35,9 @@
             ],
             "layout": [
                 "./dist/layout/index.d.ts"
+            ],
+            "mdx": [
+                "./dist/mdx/index.d.ts"
             ]
         }
     },

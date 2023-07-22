@@ -1,4 +1,3 @@
-"use client";
 import { DialogProps } from "@radix-ui/react-dialog";
 import { useDocsSearch } from "next-docs-zeta/search";
 import {
@@ -9,7 +8,7 @@ import {
     CommandItem,
     CommandList,
     CommandSeparator,
-} from "@/components/command";
+} from "@/components/ui/command";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import { BookOpenIcon } from "lucide-react";
