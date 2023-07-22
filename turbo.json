@@ -4,11 +4,14 @@
         "build": {
             "dependsOn": ["^build"],
             "outputs": [
+                ".contentlayer/**",
+                "!.contentlayer/.cache/**",
+                ".next/**",
+                "!.next/cache/**",
                 "dist/**/*.d.ts",
                 "dist/**/*.mjs",
                 "dist/**/*.js",
-                "dist/**/*.css",
-                "index.js"
+                "dist/**/*.css"
             ]
         },
         "build:tailwind": {
