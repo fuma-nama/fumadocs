@@ -1,8 +1,7 @@
 "use client";
 import { ReactNode } from "react";
-import { SidebarProvider, Sidebar } from "@/components/sidebar";
+import { Sidebar } from "@/components/sidebar";
 import clsx from "clsx";
-import { SearchProvider } from "@/components/search";
 import { Nav } from "@/components/nav";
 import Link from "next/link";
 import { TreeNode } from "next-docs-zeta/server";
@@ -12,14 +11,14 @@ export type DocsLayoutProps = {
     /**
      * Navbar title
      */
-    navTitle: string | ReactNode;
+    navTitle?: string | ReactNode;
 
     tree: TreeNode[];
 
     /**
      * Replace navbar
      */
-    nav?: ReactNode;
+    nav?: ReactNode | false;
 
     /**
      * Github url displayed on the navbar
@@ -28,8 +27,6 @@ export type DocsLayoutProps = {
 
     children: ReactNode;
 };
-
-export { Nav, NavLink } from "@/components/nav";
 
 export function DocsLayout(props: DocsLayoutProps) {
     const links = props.githubUrl
@@ -43,30 +40,28 @@ export function DocsLayout(props: DocsLayoutProps) {
         : [];
 
     return (
-        <SidebarProvider>
-            <SearchProvider>
-                {props.nav ? (
-                    props.nav
-                ) : (
-                    <Nav links={links}>
-                        <Link
-                            href="/"
-                            className="nd-font-semibold hover:nd-text-muted-foreground"
-                        >
-                            {props.navTitle}
-                        </Link>
-                    </Nav>
+        <>
+            {props.nav ? (
+                props.nav
+            ) : (
+                <Nav links={links}>
+                    <Link
+                        href="/"
+                        className="nd-font-semibold hover:nd-text-muted-foreground"
+                    >
+                        {props.navTitle}
+                    </Link>
+                </Nav>
+            )}
+            <div
+                className={clsx(
+                    "nd-grid nd-grid-cols-1 nd-gap-12 nd-w-full nd-container nd-max-w-[1400px] nd-mb-32",
+                    "lg:nd-grid-cols-[250px_auto] xl:nd-grid-cols-[250px_auto_150px] 2xl:nd-grid-cols-[250px_auto_250px]"
                 )}
-                <div
-                    className={clsx(
-                        "nd-grid nd-grid-cols-1 nd-gap-12 nd-w-full nd-container nd-max-w-[1400px] nd-mb-32",
-                        "lg:nd-grid-cols-[250px_auto] xl:nd-grid-cols-[250px_auto_150px] 2xl:nd-grid-cols-[250px_auto_250px]"
-                    )}
-                >
-                    <Sidebar items={props.tree} />
-                    {props.children}
-                </div>
-            </SearchProvider>
-        </SidebarProvider>
+            >
+                <Sidebar items={props.tree} />
+                {props.children}
+            </div>
+        </>
     );
 }
