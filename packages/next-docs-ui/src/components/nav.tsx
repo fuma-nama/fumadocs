@@ -13,9 +13,11 @@ type NavLinkProps = {
 
 export function Nav({
     links,
+    enableSidebar = true,
     children,
 }: {
     links?: NavLinkProps[];
+    enableSidebar?: boolean;
     children: ReactNode;
 }) {
     return (
@@ -28,9 +30,11 @@ export function Nav({
                         <NavLink key={key} {...item} />
                     ))}
                     <ThemeToggle />
-                    <SidebarTrigger className="nd-p-2 nd-rounded-md hover:nd-bg-accent lg:nd-hidden">
-                        <MenuIcon className="nd-w-5 nd-h-5" />
-                    </SidebarTrigger>
+                    {enableSidebar && (
+                        <SidebarTrigger className="nd-p-2 nd-rounded-md hover:nd-bg-accent lg:nd-hidden">
+                            <MenuIcon className="nd-w-5 nd-h-5" />
+                        </SidebarTrigger>
+                    )}
                 </div>
             </div>
         </nav>

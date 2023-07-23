@@ -20,6 +20,7 @@ const item = cva(
 export function Nav({ mode }: { mode?: "ui" | "headless" | string }) {
     return (
         <OriginalNav
+            enableSidebar={mode === "headless" || mode === "ui"}
             links={[
                 {
                     icon: <GithubIcon className="w-5 h-5" />,
