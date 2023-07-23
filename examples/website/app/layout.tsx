@@ -1,7 +1,7 @@
 import { DocsLayout } from "next-docs-ui/layout";
 import { tree } from "./tree";
 import { Inter } from "next/font/google";
-import { ThemeProvider } from "next-docs-ui/theme-provider";
+import { RootProvider } from "next-docs-ui/provider";
 import type { Metadata } from "next";
 
 import "next-docs-ui/style.css";
@@ -34,7 +34,7 @@ export default function RootLayout({
                     minHeight: "100vh",
                 }}
             >
-                <ThemeProvider>
+                <RootProvider>
                     <div
                         style={{
                             position: "absolute",
@@ -73,7 +73,7 @@ export default function RootLayout({
                     >
                         {children}
                     </DocsLayout>
-                </ThemeProvider>
+                </RootProvider>
             </body>
         </html>
     );
