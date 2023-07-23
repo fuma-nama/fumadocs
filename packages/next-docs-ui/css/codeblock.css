@@ -49,7 +49,7 @@
 .dark {
     --shiki-color-text: oklch(86.07% 0 0);
     --shiki-token-constant: oklch(76.85% 0.121 252.34);
-    --shiki-token-string: oklch(81.11% 0.124 55.08);
+    --shiki-token-string: oklch(81.11% 0.124 0);
     --shiki-token-comment: oklch(55.18% 0.017 251.27);
     --shiki-token-keyword: oklch(72.14% 0.162 15.49);
     /*--shiki-token-parameter: #ff9800; is same as in light mode */
