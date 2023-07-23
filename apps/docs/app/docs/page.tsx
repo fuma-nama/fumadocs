@@ -5,7 +5,7 @@ import { LayoutIcon, LibraryIcon } from "lucide-react";
 import Link from "next/link";
 
 const item = cva(
-    "group relative overflow-hidden rounded-xl z-[2] p-px after:absolute after:-inset-px after:-z-[1] after:transition-transform"
+    "group relative overflow-hidden rounded-xl z-[2] p-px after:absolute after:-inset-px after:-z-[1] after:duration-300 after:transition-rotate-angle after:[--rotate-angle:-20deg] hover:after:[--rotate-angle:135deg]"
 );
 
 export default function DocsRoot() {
@@ -22,7 +22,7 @@ export default function DocsRoot() {
                         href="/docs/headless"
                         className={cn(
                             item(),
-                            "after:bg-gradient-to-tl after:from-blue-500/30 after:to-purple-400 hover:after:rotate-45"
+                            "after:bg-gradient-to-animated after:from-blue-500/30 after:to-purple-400"
                         )}
                     >
                         <div className="rounded-xl h-full bg-background p-6 bg-gradient-to-br from-purple-400/20 group-hover:from-purple-400/10">
@@ -41,7 +41,7 @@ export default function DocsRoot() {
                         href="/docs/ui"
                         className={cn(
                             item(),
-                            "after:bg-gradient-to-tl after:from-pink-500/20 after:to-blue-400 hover:after:rotate-45"
+                            "after:bg-gradient-to-animated after:from-pink-500/20 after:to-blue-400"
                         )}
                     >
                         <div className="rounded-xl bg-background p-6 h-full bg-gradient-to-br from-blue-400/20 group-hover:from-blue-400/10">

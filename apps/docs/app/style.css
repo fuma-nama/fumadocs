@@ -5,3 +5,9 @@
 * {
     @apply border-border;
 }
+
+@property --rotate-angle {
+    syntax: "<angle>";
+    inherits: false;
+    initial-value: -45deg;
+}

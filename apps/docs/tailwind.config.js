@@ -16,6 +16,8 @@ module.exports = {
         },
         extend: {
             backgroundImage: {
+                "gradient-to-animated":
+                    "linear-gradient(var(--rotate-angle),var(--tw-gradient-stops))",
                 "gradient-radial":
                     "radial-gradient(circle, var(--tw-gradient-stops))",
                 "gradient-radial-top":
@@ -55,6 +57,9 @@ module.exports = {
                     DEFAULT: "hsl(var(--card))",
                     foreground: "hsl(var(--card-foreground))",
                 },
+            },
+            transitionProperty: {
+                "rotate-angle": "--rotate-angle",
             },
             borderRadius: {
                 lg: "var(--radius)",
