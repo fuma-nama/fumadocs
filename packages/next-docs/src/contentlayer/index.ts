@@ -163,7 +163,7 @@ function buildFolderNode(
  *
  * @param metaPages All meta
  * @param docsPages All docs
- * @param root The root folder to scan files
+ * @param root The root folder to scan files, default: 'docs'
  * @returns A page tree
  */
 export function buildPageTree(
