@@ -3,23 +3,25 @@ import { CopyIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { ComponentPropsWithRef, ComponentPropsWithoutRef } from "react";
+import { Nav } from "@/components/nav";
 
 export default function HomePage() {
     return (
+        <main className="relative">
+            <Nav />
+            <Content />
+        </main>
+    );
+}
+
+function Content() {
+    return (
         <div
             className={cn(
-                "flex flex-col relative text-muted-foreground",
+                "flex flex-col text-muted-foreground",
                 "[--foreground:186_93%_30%] dark:[--foreground:186_93%_81%] [--muted-foreground:202_57%_49%] dark:[--muted-foreground:202_57%_69%]"
             )}
         >
-            <nav className="sticky flex flex-row items-center top-0 left-0 right-0 h-12 bg-gradient-to-t from-background/50 to-accent to-[150%] z-50 backdrop-blur-xl">
-                <Link
-                    href="/"
-                    className="text-sm text-muted-foreground text-center mx-auto"
-                >
-                    next-docs
-                </Link>
-            </nav>
             <div className="flex absolute top-0 inset-x-0">
                 <div className="w-[1500px] max-w-[100vw] h-[300px] mx-auto bg-gradient-radial-top from-blue-500/10 to-80%" />
             </div>
@@ -47,13 +49,13 @@ export default function HomePage() {
                         aria-hidden
                     />
                     <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-purple-400 from-20% to-cyan-300 dark:from-purple-200 dark:from-20% dark:to-cyan-300 sm:text-5xl sm:leading-snug">
-                        The Headless UI for
-                        <br /> Next.js Docs
+                        Build Next.js Docs
+                        <br /> With Speed
                     </h1>
                 </div>
                 <p>
-                    Next Docs is a headless ui library built for building
-                    documentation websites
+                    Next Docs is a framework built for building documentation
+                    websites in Next.js
                 </p>
                 <div className="flex flex-row justify-center mt-4">
                     <Link

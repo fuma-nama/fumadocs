@@ -1,9 +1,9 @@
 import { allDocs } from "contentlayer/generated";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { getTree } from "@/utils/page-tree";
 
 import { getTableOfContents } from "next-docs-zeta/server";
 import { getMDXComponent } from "next-contentlayer/hooks";
-import { tree } from "@/utils/page-tree";
 import React from "react";
 import { DocsPage } from "next-docs-ui/page";
 import {
@@ -20,12 +20,18 @@ import {
 import type { Metadata } from "next";
 
 type Param = {
+    mode: string;
     slug?: string[];
 };
 
 export default async function Page({ params }: { params: Param }) {
-    const path = (params.slug ?? []).join("/");
+    const tree = getTree(params.mode);
+    const path = [params.mode, ...(params.slug ?? [])].join("/");
     const page = allDocs.find((page) => page.slug === path);
+
+    if (params.mode !== "ui" && params.mode !== "headless") {
+        redirect(`/docs/headless/${path}`);
+    }
 
     if (page == null) {
         notFound();
@@ -89,8 +95,9 @@ export function generateMetadata({ params }: { params: Param }): Metadata {
     };
 }
 
-export async function generateStaticParams(): Promise<Param[]> {
+export function generateStaticParams({ params }: { params: { mode: string } }) {
     return allDocs.map((docs) => ({
         slug: docs.slug.split("/"),
+        ...params,
     }));
 }

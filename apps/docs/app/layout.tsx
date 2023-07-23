@@ -1,6 +1,6 @@
 import { Inter } from "next/font/google";
 import { GithubIcon } from "lucide-react";
-import { ThemeProvider } from "next-docs-ui/theme-provider";
+import { RootProvider } from "next-docs-ui/provider";
 
 import "next-docs-ui/style.css";
 import "./style.css";
@@ -49,14 +49,12 @@ export default function RootLayout({
     children: React.ReactNode;
 }) {
     return (
-        <html lang="en">
-            <body
-                className={`relative flex flex-col min-h-screen ${inter.className}`}
-            >
-                <ThemeProvider>
+        <html lang="en" className={inter.className}>
+            <body className="relative flex flex-col min-h-screen">
+                <RootProvider>
                     {children}
                     <Footer />
-                </ThemeProvider>
+                </RootProvider>
             </body>
         </html>
     );
