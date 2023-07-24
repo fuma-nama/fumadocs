@@ -15,14 +15,16 @@ export function DocsPage({
 }) {
     return (
         <>
-            <article className="nd-flex nd-flex-col nd-gap-6 nd-py-8 nd-overflow-x-hidden lg:nd-py-16">
+            <article className="nd-flex nd-flex-col nd-gap-6 nd-py-8 nd-max-w-full lg:nd-py-16">
                 <Breadcrumb tree={tree} />
                 {children}
             </article>
             <div className="nd-relative nd-flex nd-flex-col nd-gap-3 nd-py-16 max-xl:nd-hidden">
-                <div className="nd-sticky nd-top-28 nd-flex nd-flex-col nd-gap-3 nd-overflow-auto nd-max-h-[calc(100vh-4rem-3rem)]">
+                <div className="nd-sticky nd-top-28 nd-flex nd-flex-col nd-gap-1 nd-overflow-auto nd-max-h-[calc(100vh-4rem-3rem)]">
                     {toc.length > 0 && (
-                        <h3 className="nd-font-semibold">On this page</h3>
+                        <h3 className="nd-font-semibold nd-mb-2">
+                            On this page
+                        </h3>
                     )}
                     <TOC items={toc} />
                 </div>

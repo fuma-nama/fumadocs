@@ -57,7 +57,7 @@ function Item({ item }: { item: FileNode }) {
             className={clsx(
                 "nd-text-sm nd-w-full",
                 active
-                    ? "nd-text-purple-400 nd-font-semibold"
+                    ? "nd-text-primary nd-font-semibold"
                     : "nd-text-muted-foreground hover:nd-text-foreground"
             )}
         >
@@ -97,7 +97,7 @@ function Folder({ item }: { item: FolderNode }) {
                 className={clsx(
                     "nd-flex nd-flex-row nd-text-sm nd-w-full nd-rounded-xl nd-text-start",
                     active
-                        ? "nd-font-semibold nd-text-purple-400"
+                        ? "nd-font-semibold nd-text-primary"
                         : "nd-text-muted-foreground hover:nd-text-foreground"
                 )}
             >
@@ -127,7 +127,7 @@ function Folder({ item }: { item: FolderNode }) {
                                 className={clsx(
                                     "nd-flex nd-ml-2 nd-pl-4 nd-py-1.5 nd-border-l first:nd-mt-2",
                                     active
-                                        ? "nd-border-purple-400"
+                                        ? "nd-border-primary"
                                         : "nd-border-border"
                                 )}
                             >

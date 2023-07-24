@@ -25,9 +25,9 @@ export function Card({
             href={href}
             target={external ? "_blank" : "_self"}
             rel={external ? "noreferrer" : ""}
-            className="nd-flex nd-flex-col nd-gap-2 nd-shadow-lg nd-rounded-xl nd-p-4 nd-border nd-bg-background/50 nd-transition-colors hover:nd-border-purple-400 hover:nd-shadow-purple-400/20"
+            className="nd-flex nd-flex-col nd-gap-2 nd-shadow-lg nd-rounded-xl nd-p-4 nd-border nd-bg-card nd-text-card-foreground nd-transition-colors hover:nd-border-primary hover:nd-shadow-primary/20"
         >
-            <h3 className="nd-text-foreground nd-font-semibold">{title}</h3>
+            <h3 className="nd-font-semibold">{title}</h3>
             <p className="nd-text-muted-foreground nd-text-sm">{description}</p>
         </Link>
     );
