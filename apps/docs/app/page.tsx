@@ -3,20 +3,10 @@ import { CopyIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { ComponentPropsWithRef, ComponentPropsWithoutRef } from "react";
-import { Nav } from "@/components/nav";
 
 export default function HomePage() {
     return (
-        <main className="relative">
-            <Nav />
-            <Content />
-        </main>
-    );
-}
-
-function Content() {
-    return (
-        <div
+        <main
             className={cn(
                 "flex flex-col text-muted-foreground",
                 "[--foreground:186_93%_30%] dark:[--foreground:186_93%_81%] [--muted-foreground:202_57%_49%] dark:[--muted-foreground:202_57%_69%]"
@@ -112,7 +102,7 @@ function Content() {
                     </button>
                 </pre>
             </div>
-        </div>
+        </main>
     );
 }
 

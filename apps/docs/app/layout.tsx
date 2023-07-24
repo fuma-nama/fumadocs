@@ -1,6 +1,7 @@
 import { Inter } from "next/font/google";
 import { GithubIcon } from "lucide-react";
 import { RootProvider } from "next-docs-ui/provider";
+import { Nav } from "@/components/nav";
 
 import "next-docs-ui/style.css";
 import "./style.css";
@@ -52,6 +53,7 @@ export default function RootLayout({
         <html lang="en" className={inter.className}>
             <body className="relative flex flex-col min-h-screen">
                 <RootProvider>
+                    <Nav />
                     {children}
                     <Footer />
                 </RootProvider>

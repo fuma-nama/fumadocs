@@ -2,6 +2,7 @@
 import { cn } from "@/utils/cn";
 import { cva } from "class-variance-authority";
 import { GithubIcon } from "lucide-react";
+import { useParams } from "next/navigation";
 import { Nav as OriginalNav } from "next-docs-ui/components";
 import Link from "next/link";
 
@@ -17,7 +18,9 @@ const item = cva(
     }
 );
 
-export function Nav({ mode }: { mode?: "ui" | "headless" | string }) {
+export function Nav() {
+    const { mode } = useParams();
+
     return (
         <OriginalNav
             enableSidebar={mode === "headless" || mode === "ui"}

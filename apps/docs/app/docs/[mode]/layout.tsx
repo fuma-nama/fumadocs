@@ -1,7 +1,6 @@
 import { ReactNode } from "react";
 import { getTree } from "@/utils/page-tree";
 import { DocsLayout } from "next-docs-ui/layout";
-import { Nav } from "@/components/nav";
 import { cn } from "@/utils/cn";
 
 export default function Layout({
@@ -14,7 +13,7 @@ export default function Layout({
     const filteredTree = getTree(params.mode);
 
     return (
-        <DocsLayout tree={filteredTree} nav={<Nav mode={params.mode} />}>
+        <DocsLayout tree={filteredTree} nav={false}>
             <div className="absolute inset-0 -z-[1] overflow-hidden">
                 <div
                     className={cn(
