@@ -41,7 +41,7 @@ export function DocsLayout(props: DocsLayoutProps) {
 
     return (
         <>
-            {props.nav ? (
+            {props.nav !== undefined ? (
                 props.nav
             ) : (
                 <Nav links={links}>
