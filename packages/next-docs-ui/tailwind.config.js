@@ -61,13 +61,13 @@ module.exports = {
                 "collapsible-down": "collapsible-down 0.2s ease-out",
                 "collapsible-up": "collapsible-up 0.2s ease-out",
             },
-            typography: ({ theme }) => ({
+            typography: () => ({
                 text: {
                     css: {
                         "--tw-prose-body": "hsl(var(--foreground))",
                         "--tw-prose-headings": "hsl(var(--foreground))",
                         "--tw-prose-lead": "hsl(var(--foreground))",
-                        "--tw-prose-links": theme("colors.purple[400]"),
+                        "--tw-prose-links": "hsl(var(--primary))",
                         "--tw-prose-bold": "hsl(var(--foreground))",
                         "--tw-prose-counters": "hsl(var(--muted-foreground))",
                         "--tw-prose-bullets": "hsl(var(--foreground))",
@@ -80,6 +80,13 @@ module.exports = {
                         "--tw-prose-pre-bg": "hsl(var(--secondary)/0.5)",
                         "--tw-prose-th-borders": "hsl(var(--border))",
                         "--tw-prose-td-borders": "hsl(var(--border))",
+                        a: {
+                            "font-weight": "400",
+                            "text-decoration": "none",
+                            "&:hover": {
+                                "text-decoration": "underline",
+                            },
+                        },
                     },
                 },
             }),
