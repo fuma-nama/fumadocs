@@ -56,7 +56,7 @@ export const TOCItem = forwardRef<HTMLAnchorElement, TOCItemProps>(
         const active = activeAnchor[item.url.split("#")[1]]?.isActive === true;
 
         return (
-            <a ref={ref} data-active={active} {...props}>
+            <a ref={ref} aria-selected={active} {...props}>
                 {props.children}
             </a>
         );

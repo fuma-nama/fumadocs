@@ -13,17 +13,24 @@ export default function Layout({
     const filteredTree = getTree(params.mode);
 
     return (
-        <DocsLayout tree={filteredTree} nav={false}>
-            <div className="absolute inset-0 -z-[1] overflow-hidden">
-                <div
-                    className={cn(
-                        "absolute top-0 left-0 w-full h-[500px] bg-gradient-to-br from-purple-400/20 to-background to-50%",
-                        params.mode === "ui" && "from-blue-400/30"
-                    )}
-                />
-            </div>
-            {children}
-        </DocsLayout>
+        <main
+            className={cn(
+                params.mode === "ui" && "[--primary:213_94%_68%]",
+                params.mode === "headless" && "[--primary:270_95%_75%]"
+            )}
+        >
+            <DocsLayout tree={filteredTree} nav={false}>
+                <div className="absolute inset-0 -z-[1] overflow-hidden">
+                    <div
+                        className={cn(
+                            "absolute top-0 left-0 w-full h-[500px] bg-gradient-to-br from-purple-400/20 to-background to-50%",
+                            params.mode === "ui" && "from-blue-400/30"
+                        )}
+                    />
+                </div>
+                {children}
+            </DocsLayout>
+        </main>
     );
 }
 
