@@ -87,6 +87,11 @@ module.exports = {
                                 "text-decoration": "underline",
                             },
                         },
+                        code: {
+                            padding: "0.3rem",
+                            "border-radius": "15px",
+                            background: "hsl(var(--secondary))",
+                        },
                     },
                 },
             }),

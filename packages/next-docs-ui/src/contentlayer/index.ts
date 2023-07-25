@@ -1,5 +1,5 @@
 import { Args, defineDocumentType } from "contentlayer/source-files";
-import rehypePrettycode from "rehype-pretty-code";
+import rehypePrettycode, { Options as CodeOptions } from "rehype-pretty-code";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 
@@ -103,19 +103,27 @@ export const mdxPlugins = {
     rehypeSlug,
 };
 
+export const codeOptions: Partial<CodeOptions> = {
+    theme: "css-variables",
+    keepBackground: false,
+    onVisitLine(node) {
+        if (node.children.length === 0) {
+            node.children = [{ type: "text", value: " " }];
+        }
+    },
+    onVisitHighlightedLine(node) {
+        node.properties.className.push("highlighted");
+    },
+    onVisitHighlightedWord(node) {
+        node.properties.className = ["highlighted"];
+    },
+};
+
 export const defaultConfig: Args = {
     contentDirPath: "content",
     documentTypes: [Docs, Meta],
     mdx: {
-        rehypePlugins: [
-            [
-                rehypePrettycode,
-                {
-                    theme: "css-variables",
-                },
-            ],
-            rehypeSlug,
-        ],
+        rehypePlugins: [[rehypePrettycode, codeOptions], rehypeSlug],
         remarkPlugins: [remarkGfm],
     },
 };

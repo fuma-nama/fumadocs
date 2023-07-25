@@ -11,11 +11,11 @@ export function Pre(props: ComponentProps<"pre">) {
     };
 
     return (
-        <div className="nd-relative">
+        <div className="nd-not-prose" data-rehype-pretty-code-block>
             <CopyButton onCopy={onCopy} />
             <pre
                 {...props}
-                className={clsx(props.className, "nd-not-prose")}
+                className={clsx("nd-codeblock", props.className)}
                 ref={ref}
             >
                 {props.children}

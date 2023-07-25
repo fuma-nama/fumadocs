@@ -19,7 +19,7 @@ export const Table = (props: ComponentPropsWithoutRef<"table">) => (
 
 export function MDXContent({ children }: { children: ReactNode }) {
     return (
-        <div className="nd-prose nd-prose-text prose-pre:nd-grid prose-pre:nd-border prose-code:nd-p-1 prose-code:nd-rounded-md prose-code:nd-bg-secondary prose-table:nd-whitespace-nowrap nd-max-w-none">
+        <div className="nd-prose nd-prose-text prose-table:nd-whitespace-nowrap nd-max-w-none">
             {children}
         </div>
     );
