@@ -46,9 +46,7 @@ export default makeSource({
 
 **Add Contentlayer Plugin**
 
-> in `next.config.js`
-
-```js
+```js title="next.config.js"
 /** @type {import('next').NextConfig} */
 const config = {
     reactStrictMode: true,
@@ -63,12 +61,13 @@ Make sure you've generated documents correctly before moving to next step.
 
 ### Creating Routes
 
-<details>
-  <summary>Root Layout</summary>
-  
-> in `app/layout.tsx`
+<Accordion type="single" collapsible>
 
-```tsx
+<AccordionItem value="root-layout">
+<AccordionTrigger>Root Layout</AccordionTrigger>
+<AccordionContent>
+
+```tsx title="app/layout.tsx"
 import { DocsLayout } from "next-docs-ui/layout";
 import { tree } from "./tree";
 import { Inter } from "next/font/google";
@@ -112,14 +111,14 @@ export default function RootLayout({
 }
 ```
 
-</details>
+</AccordionContent>
+</AccordionItem>
 
-<details>
-  <summary>Docs Page</summary>
+<AccordionItem value="docs-page">
+<AccordionTrigger>Docs Page</AccordionTrigger>
+<AccordionContent>
 
-> in `app/docs/[[...slug]]/page.tsx`
-
-```tsx
+```tsx title="app/docs/[[...slug]]/page.tsx"
 import { DocsPage } from "next-docs-ui/page";
 import {
     Heading,
@@ -186,25 +185,25 @@ export async function generateStaticParams(): Promise<{ slug: string[] }[]> {
 }
 ```
 
-</details>
+</AccordionContent>
+</AccordionItem>
 
-<details>
-    <summary>Not Found Page</summary>
+<AccordionItem value="not-found">
+<AccordionTrigger>Not Found Page</AccordionTrigger>
+<AccordionContent>
 
-> in `app/docs/[[...slug]]/not-found.tsx`
-
-```tsx
+```tsx title="app/docs/[[...slug]]/not-found.tsx"
 export { default } from "next-docs-ui/not-found";
 ```
 
-</details>
+</AccordionContent>
+</AccordionItem>
 
-<details>
-    <summary>Search API Route</summary>
+<AccordionItem value="api-route">
+<AccordionTrigger>Search API Route</AccordionTrigger>
+<AccordionContent>
 
-> in `app/api/search/route.ts`
-
-```tsx
+```tsx title="app/api/search/route.ts"
 import { allDocs } from "contentlayer/generated";
 import { initSearchAPI } from "next-docs-zeta/server";
 
@@ -217,7 +216,10 @@ export const { GET } = initSearchAPI(
 );
 ```
 
-</details>
+</AccordionContent>
+</AccordionItem>
+
+</Accordion>
 
 ## Advanced
 

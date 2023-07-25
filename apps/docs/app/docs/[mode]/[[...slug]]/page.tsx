@@ -16,6 +16,12 @@ import {
     Table,
     Image,
 } from "next-docs-ui/mdx";
+import {
+    Accordion,
+    AccordionTrigger,
+    AccordionItem,
+    AccordionContent,
+} from "@/components/ui/accordion";
 
 import type { Metadata } from "next";
 
@@ -58,6 +64,14 @@ export default async function Page({ params }: { params: Param }) {
                         h5: (props) => <Heading as="h5" {...props} />,
                         h6: (props) => <Heading as="h6" {...props} />,
                         table: (props) => <Table {...props} />,
+                        Accordion: (props) => <Accordion {...props} />,
+                        AccordionTrigger: (props) => (
+                            <AccordionTrigger {...props} />
+                        ),
+                        AccordionItem: (props) => <AccordionItem {...props} />,
+                        AccordionContent: (props) => (
+                            <AccordionContent {...props} />
+                        ),
                     }}
                 />
             </MDXContent>
