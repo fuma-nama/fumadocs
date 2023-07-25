@@ -1,3 +1,11 @@
 {
-    "pages": ["---Guide---", "index"]
+    "pages": [
+        "---Guide---",
+        "index",
+        "theme",
+        "---Components---",
+        "components/codeblock",
+        "components/card",
+        "components/heading"
+    ]
 }
