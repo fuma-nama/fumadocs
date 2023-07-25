@@ -44,7 +44,7 @@ export default function DocsRoot() {
                     <div className="rounded-xl bg-background p-6 h-full bg-gradient-to-br from-blue-400/20 group-hover:from-blue-400/10">
                         <LayoutIcon className="text-cyan-400 dark:text-cyan-200 w-9 h-9 mb-2" />
                         <span className="absolute top-4 right-4 text-xs rounded-full px-2 py-1 border border-blue-400 dark:border-blue-200/50 dark:text-cyan-100">
-                            Work in progress
+                            Beta
                         </span>
                         <p className="font-semibold text-lg mb-2">
                             Next Docs UI
