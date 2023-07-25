@@ -1,5 +1,6 @@
 import { defineDocumentType, makeSource } from "contentlayer/source-files";
 import rehypePrettycode from "rehype-pretty-code";
+import { codeOptions } from "next-docs-ui/contentlayer";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
 import rehypeImgSize from "rehype-img-size";
@@ -68,12 +69,7 @@ export default makeSource({
     documentTypes: [Docs, Meta],
     mdx: {
         rehypePlugins: [
-            [
-                rehypePrettycode,
-                {
-                    theme: "css-variables",
-                },
-            ],
+            [rehypePrettycode, codeOptions],
             rehypeSlug,
             [
                 rehypeImgSize as any,

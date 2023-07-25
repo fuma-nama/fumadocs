@@ -35,9 +35,7 @@ pnpm add contentlayer next-contentlayer
 
 You can customise the default configuration.
 
-> in `contentlayer.config.ts`
-
-```ts {1-4} /createConfig/#i
+```ts {4} title="contentlayer.config.ts"
 import { createConfig } from "next-docs-ui/contentlayer";
 import { makeSource } from "contentlayer/source-files";
 
@@ -50,7 +48,7 @@ export default makeSource({
 
 > in `next.config.js`
 
-```js {1-3}
+```js
 /** @type {import('next').NextConfig} */
 const config = {
     reactStrictMode: true,
