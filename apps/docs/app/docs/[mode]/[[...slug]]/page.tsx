@@ -80,7 +80,7 @@ export default async function Page({ params }: { params: Param }) {
 }
 
 export function generateMetadata({ params }: { params: Param }): Metadata {
-    const path = (params.slug ?? []).join("/");
+    const path = [params.mode, ...(params.slug ?? [])].join("/");
     const page = allDocs.find((page) => page.slug === path);
 
     if (page == null) return {};

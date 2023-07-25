@@ -1,5 +1,5 @@
 import { Inter } from "next/font/google";
-import { ExternalLinkIcon, GithubIcon, Star } from "lucide-react";
+import { ExternalLinkIcon, Star } from "lucide-react";
 import { RootProvider } from "next-docs-ui/provider";
 import { Nav } from "@/components/nav";
 
