@@ -112,10 +112,10 @@ export const codeOptions: Partial<CodeOptions> = {
         }
     },
     onVisitHighlightedLine(node) {
-        node.properties.className.push("highlighted");
+        node.properties.className.push("line-highlighted");
     },
     onVisitHighlightedWord(node) {
-        node.properties.className = ["highlighted"];
+        node.properties.className = ["word-highlighted"];
     },
 };
 
