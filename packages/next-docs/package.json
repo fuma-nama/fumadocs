@@ -69,7 +69,7 @@
         }
     },
     "scripts": {
-        "build": "tsup",
+        "build": "tsup --clean",
         "clean": "rmdir /q/s dist",
         "dev": "tsup --watch",
         "prepublishOnly": "pnpm build",

@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
-        "build": "turbo run build:tailwind build",
+        "build": "turbo run build --filter=./packages/\\*",
         "clean": "turbo run clean",
         "dev": "turbo run dev",
         "dev:ui": "turbo run dev --filter=website...",
@@ -13,7 +13,7 @@
         "release": "changeset publish",
         "test": "turbo run test",
         "types:check": "turbo run types:check",
-        "version:packages": "changeset version"
+        "version": "changeset version"
     },
     "devDependencies": {
         "changeset": "^0.2.6",
