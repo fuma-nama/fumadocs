@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 0.2.1
+
+### Patch Changes
+
+- 67cd8ab: Remove unused files in dist
+
 ## 0.2.0
 
 ### Minor Changes
