@@ -1,5 +1,15 @@
 # next-docs-zeta
 
+## 0.2.0
+
+### Minor Changes
+
+- 5ff94af: Replace TOC data attribute `data-active` with `aria-selected`
+
+### Patch Changes
+
+- 5ff94af: Fix contentlayer parser bugs
+
 ## 0.1.0
 
 ### Minor Changes
