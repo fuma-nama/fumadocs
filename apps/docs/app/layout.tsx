@@ -1,5 +1,5 @@
 import { Inter } from "next/font/google";
-import { GithubIcon } from "lucide-react";
+import { ExternalLinkIcon, GithubIcon, Star } from "lucide-react";
 import { RootProvider } from "next-docs-ui/provider";
 import { Nav } from "@/components/nav";
 
@@ -64,24 +64,29 @@ export default function RootLayout({
 
 function Footer() {
     return (
-        <footer className="mt-auto border-t py-8 pb-20 bg-gradient-to-b from-blue-500/20">
-            <div className="container flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-foreground font-bold">NEXT DOCS</p>
-                <div className="flex flex-row gap-20 items-center text-muted-foreground">
+        <footer className="mt-auto border-t py-12 bg-secondary text-secondary-foreground">
+            <div className="container flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <p className="text-sm font-semibold mb-1">NEXT DOCS</p>
+                    <p className="text-xs">Built with ❤️ by Fuma</p>
+                </div>
+
+                <div className="flex flex-row gap-20 items-center">
                     <a
                         href="https://github.com/SonMooSans/next-docs"
                         rel="noreferrer noopener"
                         className="flex flex-row items-center text-sm"
                     >
-                        <GithubIcon className="w-5 h-5 mr-1" />
-                        Github
+                        <Star className="w-4 h-4 mr-2" />
+                        Give us a star
                     </a>
                     <a
                         href="https://www.npmjs.com/package/next-docs-zeta"
                         rel="noreferrer noopener"
                         className="flex flex-row items-center text-sm"
                     >
-                        NPM -&gt;
+                        <ExternalLinkIcon className="w-4 h-4 mr-2" />
+                        NPM registry
                     </a>
                 </div>
             </div>
