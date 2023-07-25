@@ -36,7 +36,7 @@ body {
 }
 
 .nd-codeblock .line-highlighted {
-    @apply nd-bg-primary/10 nd-pl-2 -nd-ml-2 nd-border-l-2 nd-border-l-primary;
+    @apply nd-bg-primary/10 nd-pl-4 -nd-ml-4 nd-border-l-2 nd-border-l-primary;
 }
 
 :root {

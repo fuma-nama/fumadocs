@@ -20,7 +20,7 @@ export function Sidebar({ items }: { items: TreeNode[] }) {
         >
             <aside
                 className={clsx(
-                    "nd-flex nd-flex-col nd-gap-3 nd-fixed nd-inset-0 nd-overflow-auto",
+                    "nd-flex nd-flex-col nd-gap-2 nd-fixed nd-inset-0 nd-overflow-auto",
                     "lg:nd-sticky lg:nd-top-12 lg:nd-py-16 lg:nd-max-h-[calc(100vh-3rem)]",
                     "max-lg:nd-pt-20 max-lg:nd-pb-4 max-lg:nd-px-8 max-lg:nd-bg-background/50 max-lg:nd-backdrop-blur-xl max-lg:nd-z-40"
                 )}
@@ -37,7 +37,7 @@ export function Sidebar({ items }: { items: TreeNode[] }) {
 function Node({ item }: { item: TreeNode }) {
     if (item.type === "separator")
         return (
-            <p className="nd-font-semibold nd-text-sm nd-mt-3 first-of-type:nd-mt-0">
+            <p className="nd-font-semibold nd-text-sm nd-mt-3 nd-mb-2 first-of-type:nd-mt-0">
                 {item.name}
             </p>
         );
