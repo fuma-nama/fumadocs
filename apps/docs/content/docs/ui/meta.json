@@ -3,6 +3,7 @@
         "---Guide---",
         "index",
         "theme",
+        "images",
         "---Components---",
         "components/codeblock",
         "components/card",
