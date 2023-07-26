@@ -67,7 +67,7 @@ export default function HomePage() {
                                 First class Developer Experience
                             </p>
                             <p className="text-sm">
-                                Install, Code, Deploy within seconds
+                                Install, Code, Deploy within a minute
                             </p>
                         </div>
                     </div>
@@ -80,7 +80,7 @@ export default function HomePage() {
                     <div className="absolute inset-0 flex flex-col bg-gradient-to-b from-background/30 to-blue-500/30 p-8 from-10%">
                         <div className="mt-auto text-center">
                             <p className="text-xl font-medium text-foreground mb-2">
-                                Lightening Fast
+                                Lightning Fast
                             </p>
                             <p className="text-sm">
                                 Built for App Router and work with Pages Router
