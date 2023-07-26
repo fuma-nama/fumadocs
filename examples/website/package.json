@@ -11,10 +11,10 @@
     "dependencies": {
         "next-docs-zeta": "workspace:*",
         "next-docs-ui": "workspace:*",
-        "next": "13.4.11",
+        "next": "13.4.12",
         "react": "18.2.0",
         "react-dom": "18.2.0",
-        "contentlayer": "^0.3.3",
-        "next-contentlayer": "^0.3.3"
+        "contentlayer": "^0.3.4",
+        "next-contentlayer": "^0.3.4"
     }
 }
