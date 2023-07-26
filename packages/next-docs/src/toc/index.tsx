@@ -4,19 +4,22 @@ import { ReactNode, useMemo } from "react";
 import { createContext, useContext } from "react";
 import { ComponentPropsWithoutRef, forwardRef } from "react";
 
-type ActiveAnchor = Record<
-    string,
-    {
-        isActive?: boolean;
-        aboveHalfViewport: boolean;
-        index: number;
-        insideHalfViewport: boolean;
-    }
->;
+type ActiveAnchors = Record<string, Anchor>;
 
-const ActiveAnchorContext = createContext<ActiveAnchor>({});
+type Anchor = {
+    isActive?: boolean;
+    aboveHalfViewport: boolean;
+    index: number;
+    insideHalfViewport: boolean;
+};
 
-export const useActiveAnchor = () => useContext(ActiveAnchorContext);
+const ActiveAnchorContext = createContext<ActiveAnchors>({});
+
+export const useActiveAnchor = (url: string): Anchor | null => {
+    const context = useContext(ActiveAnchorContext);
+
+    return context[url.split("#")[1]];
+};
 
 export function TOCProvider({
     toc,
@@ -52,8 +55,8 @@ export type TOCItemProps = ComponentPropsWithoutRef<"a"> & {
 
 export const TOCItem = forwardRef<HTMLAnchorElement, TOCItemProps>(
     ({ item, ...props }, ref) => {
-        const activeAnchor = useActiveAnchor();
-        const active = activeAnchor[item.url.split("#")[1]]?.isActive === true;
+        const activeAnchor = useActiveAnchor(item.url);
+        const active = activeAnchor?.isActive === true;
 
         return (
             <a ref={ref} aria-selected={active} {...props}>
