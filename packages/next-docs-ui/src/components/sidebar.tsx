@@ -15,14 +15,14 @@ export function Sidebar({ items }: { items: TreeNode[] }) {
     return (
         <Base.SidebarList
             as="div"
-            minWidth={1024} // lg
-            className="nd-relative nd-group max-lg:data-[open=false]:nd-hidden"
+            minWidth={768} // md
+            className="nd-relative nd-group max-md:data-[open=false]:nd-hidden"
         >
             <aside
                 className={clsx(
                     "nd-flex nd-flex-col nd-gap-2 nd-fixed nd-inset-0 nd-overflow-auto",
-                    "lg:nd-sticky lg:nd-top-12 lg:nd-py-16 lg:nd-max-h-[calc(100vh-3rem)]",
-                    "max-lg:nd-pt-20 max-lg:nd-pb-4 max-lg:nd-px-8 max-lg:nd-bg-background/50 max-lg:nd-backdrop-blur-xl max-lg:nd-z-40"
+                    "md:nd-sticky md:nd-top-12 md:nd-py-16 md:nd-max-h-[calc(100vh-3rem)]",
+                    "max-md:nd-pt-20 max-md:nd-pb-4 max-md:nd-px-8 max-md:nd-bg-background/50 max-md:nd-backdrop-blur-xl max-md:nd-z-40"
                 )}
             >
                 <SearchBar className="nd-mb-4 sm:nd-hidden" />
