@@ -21,4 +21,4 @@ Next Docs UI provides many features out of the box.
 -   Great Flexibility
 -   Light & Fast
 
-[Read Documentation](https://next-docs-zeta/docs/ui)
+[Read Documentation](https://next-docs-zeta.vercel.app/docs/ui)
