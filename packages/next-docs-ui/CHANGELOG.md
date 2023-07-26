@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 0.3.2
+
+### Patch Changes
+
+- Fix unexpected trailing slash on Contentlayer v0.3.4
+- Add Auto scroll for TOC
+  - next-docs-zeta@0.3.2
+
 ## 0.3.1
 
 ### Patch Changes
