@@ -15,7 +15,7 @@ export function DocsPage({
 }) {
     return (
         <>
-            <article className="nd-flex nd-flex-col nd-gap-6 nd-py-8 nd-max-w-full lg:nd-py-16">
+            <article className="nd-flex nd-flex-col nd-gap-6 nd-py-8 nd-max-w-full md:nd-py-16">
                 <Breadcrumb tree={tree} />
                 {children}
             </article>

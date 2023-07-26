@@ -7,6 +7,7 @@ import type { TreeNode, FileNode, FolderNode } from "next-docs-zeta/server";
 import * as Base from "next-docs-zeta/sidebar";
 import * as Collapsible from "@radix-ui/react-collapsible";
 import { SearchBar } from "./search";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export const SidebarProvider = Base.SidebarProvider;
 export const SidebarTrigger = Base.SidebarTrigger;
@@ -16,19 +17,23 @@ export function Sidebar({ items }: { items: TreeNode[] }) {
         <Base.SidebarList
             as="div"
             minWidth={768} // md
-            className="nd-relative nd-group max-md:data-[open=false]:nd-hidden"
+            className="nd-relative max-md:data-[open=false]:nd-hidden"
         >
             <aside
                 className={clsx(
-                    "nd-flex nd-flex-col nd-gap-2 nd-fixed nd-inset-0 nd-overflow-auto",
-                    "md:nd-sticky md:nd-top-14 md:nd-py-16 md:nd-max-h-[calc(100vh-3.5rem)]",
-                    "max-md:nd-pt-20 max-md:nd-pb-4 max-md:nd-px-8 max-md:nd-bg-background/50 max-md:nd-backdrop-blur-xl max-md:nd-z-40"
+                    "nd-flex",
+                    "md:nd-sticky md:nd-top-14 md:nd-max-h-[calc(100vh-3.5rem)]",
+                    "max-md:nd-fixed max-md:nd-inset-0 max-md:nd-px-8 max-md:nd-bg-background/50 max-md:nd-backdrop-blur-xl max-md:nd-z-40"
                 )}
             >
-                <SearchBar className="nd-mb-4 sm:nd-hidden" />
-                {items.map((item, i) => (
-                    <Node key={i} item={item} />
-                ))}
+                <ScrollArea className="nd-flex-1 [mask-image:linear-gradient(to_top,transparent,white_80px)]">
+                    <div className="nd-flex nd-flex-col nd-gap-2 nd-pr-2 md:nd-py-16 max-md:nd-py-20">
+                        <SearchBar className="nd-mb-4 sm:nd-hidden" />
+                        {items.map((item, i) => (
+                            <Node key={i} item={item} />
+                        ))}
+                    </div>
+                </ScrollArea>
             </aside>
         </Base.SidebarList>
     );
