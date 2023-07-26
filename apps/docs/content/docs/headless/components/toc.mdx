@@ -5,10 +5,6 @@ description: Table of Content
 
 A Table of Contents with active anchor observer.
 
-```
-next-docs/toc
-```
-
 ## Usage
 
 ```tsx
@@ -37,6 +33,20 @@ return (
 | Data Attribute  | Values        | Description      |
 | --------------- | ------------- | ---------------- |
 | `aria-selected` | `true, false` | Is active anchor |
+
+### Use Active Anchor
+
+A hook for getting info of an anchor. It accepts the item url and return an `Anchor` object, must be called under the TOC Provider.
+
+Helpful for implementing auto scroll or advanced usages.
+
+#### Usage
+
+```ts
+import { useActiveAnchor } from "next-docs-zeta/toc";
+
+const anchor = useActiveAnchor(item.url);
+```
 
 ## Example
 
