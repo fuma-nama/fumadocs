@@ -1,5 +1,15 @@
 # next-docs-ui
 
+## 0.3.0
+
+### Minor Changes
+
+- Support next.js images in MDX files
+
+### Patch Changes
+
+- next-docs-zeta@0.3.0
+
 ## 0.1.2
 
 ### Patch Changes
