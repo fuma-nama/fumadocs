@@ -21,7 +21,7 @@ export function Sidebar({ items }: { items: TreeNode[] }) {
             <aside
                 className={clsx(
                     "nd-flex nd-flex-col nd-gap-2 nd-fixed nd-inset-0 nd-overflow-auto",
-                    "md:nd-sticky md:nd-top-12 md:nd-py-16 md:nd-max-h-[calc(100vh-3rem)]",
+                    "md:nd-sticky md:nd-top-14 md:nd-py-16 md:nd-max-h-[calc(100vh-3.5rem)]",
                     "max-md:nd-pt-20 max-md:nd-pb-4 max-md:nd-px-8 max-md:nd-bg-background/50 max-md:nd-backdrop-blur-xl max-md:nd-z-40"
                 )}
             >
