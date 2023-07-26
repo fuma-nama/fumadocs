@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 0.3.1
+
+### Patch Changes
+
+- Use Radix UI scroll area
+- d91de39: Fix sticky position for TOC and Sidebar
+  - next-docs-zeta@0.3.1
+
 ## 0.3.0
 
 ### Minor Changes
