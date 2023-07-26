@@ -21,8 +21,11 @@ function removePattern(path: string, pattern: string) {
     return removeSlash(path.slice(pattern.length));
 }
 
-function pathToUrl(base: string, path: string, prefix: string): string {
-    return [base, removePattern(path, prefix)].join("/");
+function pathToUrl(base: string, path: string, pattern: string): string {
+    const url = removePattern(path, pattern);
+    if (url.length === 0) return base;
+
+    return base + "/" + url;
 }
 
 type Options = {
