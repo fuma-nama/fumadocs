@@ -2,16 +2,7 @@ import { Args, defineDocumentType } from "contentlayer/source-files";
 import rehypePrettycode, { Options as CodeOptions } from "rehype-pretty-code";
 import remarkGfm from "remark-gfm";
 import rehypeSlug from "rehype-slug";
-
-/**
- * Base url
- */
-let urlBase = "/docs";
-
-/**
- * Where the docs files located
- */
-let docsPattern = "docs";
+import rehypeImgSize, { Options as ImgSizeOptions } from "rehype-img-size";
 
 function removeSlash(path: string) {
     let start = 0,
@@ -31,68 +22,124 @@ function removePattern(path: string, pattern: string) {
 }
 
 function pathToUrl(base: string, path: string, prefix: string): string {
-    return [base + removePattern(path, prefix)].join("/");
+    return [base, removePattern(path, prefix)].join("/");
 }
 
-export const Docs = defineDocumentType(() => ({
-    name: "Docs",
-    filePathPattern: `${docsPattern}/**/*.mdx`,
-    contentType: "mdx",
-    fields: {
-        title: {
-            type: "string",
-            description: "The title of the document",
-            required: true,
-        },
-        description: {
-            type: "string",
-            description: "The description of the document",
-            required: false,
-        },
-    },
-    computedFields: {
-        url: {
-            type: "string",
-            resolve: (post) => {
-                return pathToUrl(urlBase, post._raw.flattenedPath, docsPattern);
-            },
-        },
-        slug: {
-            type: "string",
-            resolve: (post) => {
-                return removePattern(post._raw.flattenedPath, docsPattern);
-            },
-        },
-    },
-}));
+type Options = {
+    /**
+     * Base URL of documents
+     * @default "/docs"
+     */
+    urlBase: string;
 
-export const Meta = defineDocumentType(() => ({
-    name: "Meta",
-    filePathPattern: `${docsPattern}/**/meta.json`,
-    contentType: "data",
-    fields: {
-        title: {
-            type: "string",
-            description: "The title of the folder",
-            required: false,
-        },
-        pages: {
-            type: "list",
-            of: {
+    /**
+     * Where the docs files located
+     * @default "docs"
+     */
+    docsPattern: string;
+
+    /**
+     * @default "content"
+     */
+    contentDirPath: string;
+
+    /**
+     * The directory path for images
+     * @default "./public"
+     */
+    imgDirPath: string;
+};
+
+export function createConfig(options: Partial<Options> = {}): Args {
+    const {
+        docsPattern = "docs",
+        urlBase = "/docs",
+        contentDirPath = "content",
+        imgDirPath = "./public",
+    } = options;
+
+    const Docs = defineDocumentType(() => ({
+        name: "Docs",
+        filePathPattern: `${docsPattern}/**/*.mdx`,
+        contentType: "mdx",
+        fields: {
+            title: {
                 type: "string",
+                description: "The title of the document",
+                required: true,
             },
-            description: "Pages of the folder",
-            default: [],
+            description: {
+                type: "string",
+                description: "The description of the document",
+                required: false,
+            },
         },
-    },
-    computedFields: {
-        url: {
-            type: "string",
-            resolve: (post) =>
-                pathToUrl(urlBase, post._raw.sourceFileDir, docsPattern),
+        computedFields: {
+            url: {
+                type: "string",
+                resolve: (post) => {
+                    return pathToUrl(
+                        urlBase,
+                        post._raw.flattenedPath,
+                        docsPattern
+                    );
+                },
+            },
+            slug: {
+                type: "string",
+                resolve: (post) => {
+                    return removePattern(post._raw.flattenedPath, docsPattern);
+                },
+            },
         },
-    },
-}));
+    }));
+
+    const Meta = defineDocumentType(() => ({
+        name: "Meta",
+        filePathPattern: `${docsPattern}/**/meta.json`,
+        contentType: "data",
+        fields: {
+            title: {
+                type: "string",
+                description: "The title of the folder",
+                required: false,
+            },
+            pages: {
+                type: "list",
+                of: {
+                    type: "string",
+                },
+                description: "Pages of the folder",
+                default: [],
+            },
+        },
+        computedFields: {
+            url: {
+                type: "string",
+                resolve: (post) =>
+                    pathToUrl(urlBase, post._raw.sourceFileDir, docsPattern),
+            },
+        },
+    }));
+
+    return {
+        contentDirPath: contentDirPath,
+        documentTypes: [Docs, Meta],
+        mdx: {
+            rehypePlugins: [
+                [rehypePrettycode, codeOptions],
+                rehypeSlug,
+                [
+                    rehypeImgSize as any,
+                    {
+                        dir: imgDirPath,
+                    } as ImgSizeOptions,
+                ],
+            ],
+            remarkPlugins: [remarkGfm],
+        },
+    };
+}
 
 /**
  * MDX Plugins
@@ -101,6 +148,7 @@ export const mdxPlugins = {
     rehypePrettycode,
     remarkGfm,
     rehypeSlug,
+    rehypeImgSize: rehypeImgSize as any, // fix tsc errors
 };
 
 export const codeOptions: Partial<CodeOptions> = {
@@ -119,23 +167,4 @@ export const codeOptions: Partial<CodeOptions> = {
     },
 };
 
-export const defaultConfig: Args = {
-    contentDirPath: "content",
-    documentTypes: [Docs, Meta],
-    mdx: {
-        rehypePlugins: [[rehypePrettycode, codeOptions], rehypeSlug],
-        remarkPlugins: [remarkGfm],
-    },
-};
-
-/**
- *
- * @param url Base url, default '/docs'
- * @param pattern Where the docs files located, default 'docs' (no leading slash)
- */
-export function createConfig(url?: string, pattern?: string) {
-    urlBase = url ?? urlBase;
-    docsPattern = pattern ?? docsPattern;
-
-    return defaultConfig;
-}
+export const defaultConfig: Args = createConfig();

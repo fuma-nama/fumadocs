@@ -216,6 +216,9 @@ importers:
       react-dom:
         specifier: 18.x
         version: 18.2.0(react@18.2.0)
+      rehype-img-size:
+        specifier: ^1.0.1
+        version: 1.0.1
       rehype-pretty-code:
         specifier: ^0.9.5
         version: 0.9.5(shiki@0.14.2)

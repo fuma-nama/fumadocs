@@ -63,6 +63,7 @@
         "lucide-react": "^0.190.0",
         "next-docs-zeta": "workspace:*",
         "next-themes": "^0.2.1",
+        "rehype-img-size": "^1.0.1",
         "rehype-pretty-code": "^0.9.5",
         "rehype-slug": "^5.1.0",
         "remark-gfm": "^3.0.1",

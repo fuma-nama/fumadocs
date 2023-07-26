@@ -8,7 +8,11 @@ export { Heading } from "@/components/mdx/heading";
 export { SafeLink as Link } from "next-docs-zeta/link";
 
 export const Image = ({ alt, ...props }: ComponentPropsWithoutRef<"img">) => (
-    <NextImage alt={alt ?? "image"} sizes="90vw" {...(props as any)} />
+    <NextImage
+        alt={alt ?? "image"}
+        sizes="(max-width: 768px) 90vw, (max-width: 1280px) 70vw, 60vw"
+        {...(props as any)}
+    />
 );
 
 export const Table = (props: ComponentPropsWithoutRef<"table">) => (
