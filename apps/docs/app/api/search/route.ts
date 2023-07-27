@@ -5,6 +5,6 @@ export const { GET } = initSearchAPI(
     allDocs.map((docs) => ({
         title: docs.title,
         content: docs.body.raw,
-        url: docs.url,
+        url: "/docs/" + docs.slug,
     }))
 );
