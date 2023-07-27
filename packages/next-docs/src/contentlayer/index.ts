@@ -25,12 +25,15 @@ type DocsPageBase = {
     slug: string;
 };
 
-type Context = {
+type Context = PagesContext & {
+    getUrl: (slug: string, locale?: string) => string;
+    lang?: string;
+};
+
+type PagesContext = {
     docs: DocsPageBase[];
     docsMap: Map<string, DocsPageBase>;
     metaMap: Map<string, MetaPageBase>;
-    getUrl: (slug: string, locale?: string) => string;
-    lang?: string;
 };
 
 type Options = {
@@ -47,6 +50,8 @@ type Options = {
 
     /**
      * Get page url from slug and locale
+     *
+     * @default '/baseUrl/locale/slug'
      */
     getUrl: (slug: string[], baseUrl: string, locale?: string) => string;
 };
@@ -191,27 +196,16 @@ function buildFolderNode(
     };
 }
 
-function buildPageTreeWithContext(
-    root: string = "docs",
-    ctx: Context
-): TreeNode[] {
+function build(root: string, ctx: Context): TreeNode[] {
     const folder = buildFolderNode(root, ctx, true);
 
     return folder?.children ?? [];
 }
 
-/**
- * @returns A page tree
- */
-export function buildPageTree(
+export function preloadContext(
     metaPages: MetaPageBase[],
-    docsPages: DocsPageBase[],
-    {
-        root = "docs",
-        baseUrl = "/docs",
-        getUrl = defaultGetUrl,
-    }: Partial<Options> = {}
-): TreeNode[] {
+    docsPages: DocsPageBase[]
+): PagesContext {
     const docsMap = new Map<string, DocsPageBase>();
     const metaMap = new Map<string, MetaPageBase>();
 
@@ -223,20 +217,37 @@ export function buildPageTree(
         metaMap.set(meta._raw.flattenedPath, meta);
     }
 
-    const folder = buildFolderNode(
-        root,
-        {
-            docs: docsPages,
-            docsMap,
-            metaMap,
-            getUrl: (slug, locale) => {
-                return getUrl(slug.split("/"), baseUrl, locale);
-            },
-        },
-        true
-    );
+    return {
+        docs: docsPages,
+        docsMap,
+        metaMap,
+    };
+}
 
-    return folder?.children ?? [];
+export function buildPageTree(
+    metaPages: MetaPageBase[],
+    docsPages: DocsPageBase[],
+    options: Partial<Options> = {}
+): TreeNode[] {
+    const ctx = preloadContext(metaPages, docsPages);
+
+    return buildPageTreeWithContext(ctx, options);
+}
+
+export function buildPageTreeWithContext(
+    context: PagesContext,
+    {
+        root = "docs",
+        baseUrl = "/docs",
+        getUrl = defaultGetUrl,
+    }: Partial<Options> = {}
+): TreeNode[] {
+    return build(root, {
+        ...context,
+        getUrl: (slug, locale) => {
+            return getUrl(slug.split("/"), baseUrl, locale);
+        },
+    });
 }
 
 /**
@@ -246,7 +257,7 @@ export function buildPageTree(
  * @param docs Docs files
  * @param languages All supported languages
  */
-export function buildMultiLangPageTree<Languages extends string>(
+export function buildI18nPageTree<Languages extends string>(
     metas: MetaPageBase[],
     docs: DocsPageBase[],
     languages: Languages[],
@@ -256,22 +267,11 @@ export function buildMultiLangPageTree<Languages extends string>(
         getUrl = defaultGetUrl,
     }: Partial<Options> = {}
 ): Record<Languages, TreeNode[]> {
-    const docsMap = new Map<string, DocsPageBase>();
-    const metaMap = new Map<string, MetaPageBase>();
-
-    for (const page of docs) {
-        docsMap.set(getKey(page), page);
-    }
-
-    for (const meta of metas) {
-        metaMap.set(meta._raw.flattenedPath, meta);
-    }
+    const ctx = preloadContext(metas, docs);
 
     const entries = languages.map((lang) => {
-        const tree = buildPageTreeWithContext(root, {
-            docs,
-            docsMap,
-            metaMap,
+        const tree = build(root, {
+            ...ctx,
             lang,
             getUrl: (slug, locale) => {
                 return getUrl(slug.split("/"), baseUrl, locale);

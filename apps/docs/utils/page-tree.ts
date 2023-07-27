@@ -1,11 +1,15 @@
 import { allDocs, allMeta } from "contentlayer/generated";
-import { buildPageTree } from "next-docs-zeta/contentlayer";
+import {
+    buildPageTreeWithContext,
+    preloadContext,
+} from "next-docs-zeta/contentlayer";
 import type { TreeNode } from "next-docs-zeta/server";
 
-export const uiTree = buildPageTree(allMeta, allDocs, {
+const ctx = preloadContext(allMeta, allDocs);
+export const uiTree = buildPageTreeWithContext(ctx, {
     root: "docs/ui",
 });
-export const headlessTree = buildPageTree(allMeta, allDocs, {
+export const headlessTree = buildPageTreeWithContext(ctx, {
     root: "docs/headless",
 });
 
