@@ -16,5 +16,9 @@
         "react-dom": "18.2.0",
         "contentlayer": "^0.3.4",
         "next-contentlayer": "^0.3.4"
+    },
+    "devDependencies": {
+        "@types/react": "18.2.0",
+        "@types/react-dom": "18.2.1"
     }
 }

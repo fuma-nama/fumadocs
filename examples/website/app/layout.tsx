@@ -1,5 +1,3 @@
-import { DocsLayout } from "next-docs-ui/layout";
-import { tree } from "./tree";
 import { Inter } from "next/font/google";
 import { RootProvider } from "next-docs-ui/provider";
 import type { Metadata } from "next";
@@ -66,13 +64,7 @@ export default function RootLayout({
                             }}
                         />
                     </div>
-                    <DocsLayout
-                        tree={tree}
-                        navTitle="My App"
-                        githubUrl="https://github.com/SonMooSans/next-docs"
-                    >
-                        {children}
-                    </DocsLayout>
+                    {children}
                 </RootProvider>
             </body>
         </html>

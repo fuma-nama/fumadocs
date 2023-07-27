@@ -12,17 +12,21 @@ import {
 import { getTableOfContents } from "next-docs-zeta/server";
 import { allDocs } from "contentlayer/generated";
 import { notFound } from "next/navigation";
-import { tree } from "../tree";
+import { getPage, languages, trees } from "../../tree";
 import { getMDXComponent } from "next-contentlayer/hooks";
 import type { Metadata } from "next";
 
 export default async function Page({
     params,
 }: {
-    params: { slug?: string[] };
+    params: { lang: string; slug?: string[] };
 }) {
-    const path = (params.slug ?? []).join("/");
-    const page = allDocs.find((page) => page.slug === path);
+    if (!languages.includes(params.lang)) {
+        notFound();
+    }
+
+    const tree = trees[params.lang];
+    const page = getPage(params.lang, params.slug);
 
     if (page == null) {
         notFound();
@@ -56,15 +60,23 @@ export default async function Page({
     );
 }
 
-export async function generateStaticParams(): Promise<{ slug: string[] }[]> {
-    return allDocs.map((docs) => ({
-        slug: docs.slug.split("/"),
-    }));
+export async function generateStaticParams(): Promise<
+    { lang: string; slug: string[] }[]
+> {
+    return languages.flatMap((lang) =>
+        allDocs.map((docs) => ({
+            slug: docs.slug.split("/"),
+            lang: lang,
+        }))
+    );
 }
 
-export function generateMetadata({ params }: { params: { slug?: string[] } }) {
-    const path = (params.slug ?? []).join("/");
-    const page = allDocs.find((page) => page.slug === path);
+export function generateMetadata({
+    params,
+}: {
+    params: { lang: string; slug?: string[] };
+}) {
+    const page = getPage(params.lang, params.slug);
 
     if (page == null) return;
 

@@ -14,6 +14,10 @@ function removeSlash(path: string) {
 }
 
 function removePattern(path: string, pattern: string) {
+    if (path.endsWith("/index") || path === "index") {
+        path = path.slice(0, path.length - "index".length);
+    }
+
     if (!path.startsWith(pattern)) {
         return path;
     }
@@ -21,21 +25,7 @@ function removePattern(path: string, pattern: string) {
     return removeSlash(path.slice(pattern.length));
 }
 
-function pathToUrl(base: string, path: string, pattern: string): string {
-    const url = removePattern(path, pattern);
-    if (url.length === 0) return base;
-    if (base === "/") return base + url;
-
-    return base + "/" + url;
-}
-
 type Options = {
-    /**
-     * Base URL of documents
-     * @default "/docs"
-     */
-    urlBase: string;
-
     /**
      * Where the docs files located
      * @default "docs"
@@ -57,7 +47,6 @@ type Options = {
 export function createConfig(options: Partial<Options> = {}): Args {
     const {
         docsPattern = "docs",
-        urlBase = "/docs",
         contentDirPath = "content",
         imgDirPath = "./public",
     } = options;
@@ -79,20 +68,19 @@ export function createConfig(options: Partial<Options> = {}): Args {
             },
         },
         computedFields: {
-            url: {
+            locale: {
                 type: "string",
                 resolve: (post) => {
-                    return pathToUrl(
-                        urlBase,
-                        post._raw.flattenedPath,
-                        docsPattern
-                    );
+                    return post._raw.flattenedPath.split(".")[1];
                 },
             },
             slug: {
                 type: "string",
                 resolve: (post) => {
-                    return removePattern(post._raw.flattenedPath, docsPattern);
+                    return removePattern(
+                        post._raw.flattenedPath.split(".")[0],
+                        docsPattern
+                    );
                 },
             },
         },
@@ -100,16 +88,12 @@ export function createConfig(options: Partial<Options> = {}): Args {
 
     const Meta = defineDocumentType(() => ({
         name: "Meta",
-        filePathPattern: `${docsPattern}/**/meta.json`,
+        filePathPattern: `${docsPattern}/**/*.json`,
         contentType: "data",
         fields: {
             title: {
                 type: "string",
                 description: "The title of the folder",
-                required: false,
-            },
-            conditions: {
-                type: "json",
                 required: false,
             },
             pages: {
@@ -122,10 +106,10 @@ export function createConfig(options: Partial<Options> = {}): Args {
             },
         },
         computedFields: {
-            url: {
+            slug: {
                 type: "string",
                 resolve: (post) =>
-                    pathToUrl(urlBase, post._raw.sourceFileDir, docsPattern),
+                    removePattern(post._raw.sourceFileDir, docsPattern),
             },
         },
     }));
