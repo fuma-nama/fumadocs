@@ -220,7 +220,7 @@ export function buildPageTree(
     }
 
     for (const meta of metaPages) {
-        metaMap.set(meta._raw.sourceFileDir, meta);
+        metaMap.set(meta._raw.flattenedPath, meta);
     }
 
     const folder = buildFolderNode(
@@ -230,9 +230,7 @@ export function buildPageTree(
             docsMap,
             metaMap,
             getUrl: (slug, locale) => {
-                const segments = slug.split("/");
-
-                return getUrl(segments, baseUrl, locale);
+                return getUrl(slug.split("/"), baseUrl, locale);
             },
         },
         true
@@ -276,9 +274,7 @@ export function buildMultiLangPageTree<Languages extends string>(
             metaMap,
             lang,
             getUrl: (slug, locale) => {
-                const segments = slug.split("/");
-
-                return getUrl(segments, baseUrl, locale);
+                return getUrl(slug.split("/"), baseUrl, locale);
             },
         });
 
