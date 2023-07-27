@@ -1,6 +1,6 @@
 import clsx from "clsx";
-import { ChevronDownIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ChevronDown } from "lucide-react";
+import { ReactNode, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { TreeNode, FileNode, FolderNode } from "next-docs-zeta/server";
@@ -12,7 +12,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 export const SidebarProvider = Base.SidebarProvider;
 export const SidebarTrigger = Base.SidebarTrigger;
 
-export function Sidebar({ items }: { items: TreeNode[] }) {
+export type SidebarProps = { items: TreeNode[]; children?: ReactNode };
+
+export function Sidebar({ items, children }: SidebarProps) {
     return (
         <Base.SidebarList
             as="div"
@@ -21,8 +23,11 @@ export function Sidebar({ items }: { items: TreeNode[] }) {
         >
             <aside
                 className={clsx(
-                    "nd-flex",
-                    "md:nd-sticky md:nd-top-14 md:nd-max-h-[calc(100vh-3.5rem)]",
+                    "nd-flex nd-flex-col",
+                    children
+                        ? "md:nd-h-[calc(100vh-3.5rem)]"
+                        : "md:nd-max-h-[calc(100vh-3.5rem)]",
+                    "md:nd-sticky md:nd-top-14",
                     "max-md:nd-fixed max-md:nd-inset-0 max-md:nd-px-8 max-md:nd-bg-background/50 max-md:nd-backdrop-blur-xl max-md:nd-z-40"
                 )}
             >
@@ -34,6 +39,11 @@ export function Sidebar({ items }: { items: TreeNode[] }) {
                         ))}
                     </div>
                 </ScrollArea>
+                {children && (
+                    <div className="nd-border-t nd-pt-4 nd-pb-6">
+                        {children}
+                    </div>
+                )}
             </aside>
         </Base.SidebarList>
     );
@@ -75,7 +85,7 @@ function Folder({ item }: { item: FolderNode }) {
     const { name, children, index } = item;
 
     const pathname = usePathname();
-    const active = pathname === item.url;
+    const active = index && pathname === index.url;
     const childActive = pathname.startsWith(item.url + "/");
     const [extend, setExtend] = useState(active || childActive);
 
@@ -113,9 +123,9 @@ function Folder({ item }: { item: FolderNode }) {
                 >
                     {name}
                 </As>
-                <ChevronDownIcon
+                <ChevronDown
                     className={clsx(
-                        "nd-w-5 nd-h-5",
+                        "nd-w-4 nd-h-4 nd-transition-transform",
                         extend ? "nd-rotate-0" : "-nd-rotate-90"
                     )}
                 />
