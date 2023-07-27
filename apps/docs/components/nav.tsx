@@ -27,7 +27,7 @@ export function Nav() {
             links={[
                 {
                     icon: <GithubIcon className="w-5 h-5" />,
-                    href: "https://www.npmjs.com/package/next-docs-zeta",
+                    href: "https://github.com/SonMooSans/next-docs",
                     external: true,
                 },
             ]}

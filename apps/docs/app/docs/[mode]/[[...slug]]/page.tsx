@@ -47,7 +47,22 @@ export default async function Page({ params }: { params: Param }) {
     const MDX = getMDXComponent(page.body.code);
 
     return (
-        <DocsPage toc={toc} tree={tree}>
+        <DocsPage
+            toc={toc}
+            tree={tree}
+            tocContent={
+                <div className="pt-4 mt-4 border-t">
+                    <a
+                        href={`https://github.com/SonMooSans/next-docs/blob/main/apps/docs/content/${page._raw.sourceFilePath}`}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        className="text-xs text-muted-foreground font-medium hover:text-foreground"
+                    >
+                        Edit this Page -&gt;
+                    </a>
+                </div>
+            }
+        >
             <MDXContent>
                 <h1>{page.title}</h1>
                 <MDX
