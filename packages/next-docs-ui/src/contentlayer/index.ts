@@ -24,6 +24,7 @@ function removePattern(path: string, pattern: string) {
 function pathToUrl(base: string, path: string, pattern: string): string {
     const url = removePattern(path, pattern);
     if (url.length === 0) return base;
+    if (base === "/") return base + url;
 
     return base + "/" + url;
 }
@@ -105,6 +106,10 @@ export function createConfig(options: Partial<Options> = {}): Args {
             title: {
                 type: "string",
                 description: "The title of the folder",
+                required: false,
+            },
+            conditions: {
+                type: "json",
                 required: false,
             },
             pages: {
