@@ -24,15 +24,15 @@ body {
 }
 
 [data-rehype-pretty-code-title] {
-    @apply nd-text-sm nd-text-muted-foreground nd-bg-muted nd-px-4 nd-py-2 nd-border-b;
+    @apply nd-text-sm nd-text-muted-foreground nd-bg-muted nd-pl-4 nd-pr-12 nd-py-2 nd-border-b;
 }
 
 .nd-codeblock {
-    @apply nd-overflow-auto nd-p-4 nd-bg-secondary/50 nd-text-sm;
+    @apply nd-overflow-auto nd-bg-secondary/50 nd-text-sm;
 }
 
 .nd-codeblock > code {
-    @apply nd-grid;
+    @apply nd-grid nd-p-4 nd-pr-8 nd-w-fit;
 }
 
 .nd-codeblock .line-highlighted {
