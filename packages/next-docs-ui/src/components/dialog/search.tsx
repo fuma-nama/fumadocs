@@ -1,4 +1,3 @@
-import { DialogProps } from "@radix-ui/react-dialog";
 import { useDocsSearch } from "next-docs-zeta/search";
 import {
     CommandDialog,
@@ -10,12 +9,26 @@ import {
     CommandSeparator,
 } from "@/components/ui/command";
 import { useRouter } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useContext } from "react";
 import { BookOpenIcon } from "lucide-react";
+import { I18nContext } from "@/contexts/i18n";
 
-export default function SearchDialog(props: DialogProps) {
+import type { DialogProps } from "@radix-ui/react-dialog";
+
+export type SearchOptions = {
+    /**
+     * links to be displayed in Search Dialog
+     */
+    links?: [name: string, link: string][];
+};
+
+export default function SearchDialog({
+    links = [],
+    ...props
+}: DialogProps & SearchOptions) {
     const router = useRouter();
-    const { search, setSearch, query } = useDocsSearch();
+    const locale = useContext(I18nContext)?.locale;
+    const { search, setSearch, query } = useDocsSearch(locale);
 
     const onOpen = useCallback(
         (v: string) => {
@@ -51,12 +64,9 @@ export default function SearchDialog(props: DialogProps) {
                         </CommandGroup>
                     )}
                 <CommandSeparator />
-                {query.data === "empty" && (
+                {query.data === "empty" && links.length > 0 && (
                     <CommandGroup heading="Links">
-                        {[
-                            ["Home", "/"],
-                            ["Documentation", "/docs"],
-                        ].map(([name, url], i) => (
+                        {links.map(([name, url], i) => (
                             <CommandItem key={i} value={url} onSelect={onOpen}>
                                 <BookOpenIcon className="nd-w-5 nd-h-5 nd-mr-2" />
                                 {name}
