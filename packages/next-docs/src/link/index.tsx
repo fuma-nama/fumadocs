@@ -1,12 +1,38 @@
+"use client";
 import Link from "next/link";
-import { ComponentPropsWithoutRef } from "react";
+import { useParams } from "next/navigation";
+import { AnchorHTMLAttributes } from "react";
+
+type SafeLinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
+    /**
+     * Enable dynamic href
+     *
+     * @default false
+     */
+    dynamicHrefs?: boolean;
+};
 
 /**
- * A Component that is safe to use in mdx documents, based on `next/link`
+ * Wraps `next/link` and safe to use in mdx documents
+ *
+ * It also supports dynamic hrefs, which means you can use `/[lang]/my-page` with `dynamicHrefs` enabled
  */
-export const SafeLink = (props: ComponentPropsWithoutRef<"a">) => {
-    const url = props.href ?? "/";
-    const isExternalUrl = !(url.startsWith("/") || url.startsWith("#"));
+export function SafeLink({ dynamicHrefs = false, ...props }: SafeLinkProps) {
+    let url = props.href ?? "/";
+    const isExternalUrl = !(
+        url.startsWith("/") ||
+        url.startsWith("#") ||
+        url.startsWith(".")
+    );
+    const params = useParams();
+
+    if (!isExternalUrl && dynamicHrefs) {
+        url = url.replace(/\[.*\]/, (key) => {
+            const value = params[key.slice(1, -1)] ?? "undefined";
+
+            return typeof value === "string" ? value : value.join("/");
+        });
+    }
 
     return (
         <Link
@@ -17,4 +43,4 @@ export const SafeLink = (props: ComponentPropsWithoutRef<"a">) => {
             rel={isExternalUrl ? "noreferrer noopener" : undefined}
         />
     );
-};
+}
