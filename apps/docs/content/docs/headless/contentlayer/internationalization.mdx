@@ -1,0 +1,142 @@
+---
+title: Internationalization
+description: Support multiple languages in your documentation
+---
+
+Next Docs has built-in support for internationalized routing in Contentlayer. You can define a list of supported languages and pass it to i18n utilities. Read the [Next.js Docs](https://nextjs.org/docs/app/building-your-application/routing/internationalization) to learn more about implementing I18n in Next.js.
+
+## Setup
+
+1. Put all supported languages in a file.
+
+```ts title="i18n.ts"
+export const defaultLanguage = "en";
+export const languages = ["en", "cn"];
+```
+
+2. Change your current configurations.
+
+```ts title="tree.ts"
+import { allMeta, allDocs } from "contentlayer/generated";
+import {
+    buildI18nPageTree,
+    createUtils,
+    loadContext,
+} from "next-docs-zeta/contentlayer";
+import { languages } from "./i18n";
+
+const ctx = loadContext(allMeta, allDocs, languages);
+// Use 'buildI18nPageTree' instead
+export const trees = buildI18nPageTree(ctx, languages);
+
+// utilities for i18n routing
+export const { getPage, getPages } = createUtils(ctx);
+```
+
+3. Create i18n middleware.
+
+```ts title="middleware.ts"
+import { NextRequest } from "next/server";
+import { defaultLanguage, languages } from "@/i18n";
+import { createI18nMiddleware } from "next-docs-zeta/server";
+
+export function middleware(request: NextRequest) {
+    return createI18nMiddleware(
+        request,
+        languages,
+        defaultLanguage,
+        (locale, slug) => `/${locale}/docs/${slug}` // the format of redirected url
+    );
+}
+
+export const config = {
+    // Matcher ignoring `/_next/` and `/api/`
+    matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+};
+```
+
+4. Create a dynamic route, ensure all special files are nested under `/app/[lang]`.
+
+```tsx title="/app/[lang]/layout.tsx"
+export default function Layout({ params }: { params: { lang: string } }) {
+    return (
+        <html lang={params.lang}>
+            <body>{children}</body>
+        </html>
+    );
+}
+```
+
+### Get Pages
+
+To get the pages with specific languages, use the utilities exported from `tree.ts`.
+
+```ts
+import { getPages, getPage, trees } from "@/tree";
+
+// in the page
+const page = getPage(params.lang, params.slug);
+
+// in generate static params
+const pages = getPages(lang);
+```
+
+### Docs Search
+
+You will need some extra configurations in order to implement international document searching.
+
+The default `initSearchAPI` doesn't provide functionality for i18n. Instead, you can use `initI18nSearchAPI`.
+
+1. Update the route handler.
+
+```ts title="/api/search/route.ts"
+import { languages } from "@/app/i18n";
+import { getPages } from "@/app/tree";
+import { getPageUrl } from "next-docs-zeta/contentlayer";
+import { initI18nSearchAPI } from "next-docs-zeta/server";
+
+export const { GET } = initI18nSearchAPI(
+    languages.map((lang) => {
+        const pages = getPages(lang)!.map((page) => ({
+            title: page.title,
+            content: page.body.raw,
+            // get page url
+            url: getPageUrl(page.slug.split("/"), "/docs", lang),
+        }));
+
+        return [lang, pages];
+    })
+);
+```
+
+2. Add `locale` to search dialog, this will only allow pages with specified locale to being searched by the user.
+
+```tsx
+function Dialog() {
+    const { search, setSearch, query } = useDocsSearch(locale);
+
+    //...
+}
+```
+
+## Pages Structure
+
+You can create a page by adding `.{locale}` to your MDX file name. Pages can't be language-specific unless you have created the same page for default locale.
+
+For meta files, you can add `-{locale}` to the file name instead (`meta-cn.json`).
+
+If it's the default language, just leave it empty like `get-started.mdx`. **Do not use add locale code to file name**.
+
+### Example
+
+Assume your default language is `en`.
+
+| Name               |             |
+| ------------------ | ----------- |
+| meta.json          | Allowed     |
+| meta-cn.json       | Allowed     |
+| meta-en.json       | Not Allowed |
+| get-started.mdx    | Allowed     |
+| get-started.cn.mdx | Allowed     |
+| get-started.en.mdx | Not Allowed |
+| components.cn.mdx  | Not Allowed |
