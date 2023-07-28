@@ -6,6 +6,8 @@
         "---API References---",
         "components",
         "utils",
-        "adapters"
+        "---Contentlayer---",
+        "contentlayer/index",
+        "contentlayer/internationalization"
     ]
 }

@@ -4,6 +4,7 @@
         "index",
         "theme",
         "images",
+        "internationalization",
         "---Components---",
         "components/codeblock",
         "components/card",
