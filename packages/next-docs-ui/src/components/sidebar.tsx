@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import type { TreeNode, FileNode, FolderNode } from "next-docs-zeta/server";
 import * as Base from "next-docs-zeta/sidebar";
 import * as Collapsible from "@radix-ui/react-collapsible";
-import { SearchBar } from "./search";
+import { SearchBar } from "./search-toggle";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 export const SidebarProvider = Base.SidebarProvider;

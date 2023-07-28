@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { SearchBar } from "./search";
+import { SearchBar } from "./search-toggle";
 import { SidebarTrigger } from "./sidebar";
 import { MenuIcon } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";

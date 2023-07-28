@@ -6,36 +6,22 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { usePathname, useRouter } from "next/navigation";
-import { useCallback } from "react";
+import { useContext } from "react";
+import { I18nContext } from "./contexts/i18n";
 
 export type LanguageSelectProps = {
-    value: string;
     languages: { name: string; locale: string }[];
-
-    /**
-     * Where the `lang` parameter located, starting from 1.
-     *
-     * For example: `/[lang]/docs` is 1 and `/somewhere/[lang]/docs` is 2
-     */
-    paramIndex: number;
 };
 
 export function LanguageSelect(props: LanguageSelectProps) {
-    const router = useRouter();
-    const pathname = usePathname();
+    const context = useContext(I18nContext);
 
-    const onChange = useCallback(
-        (locale: string) => {
-            const segments = pathname.split("/");
-            segments[props.paramIndex] = locale;
-            router.push(segments.join("/"));
-        },
-        [router, pathname]
-    );
+    if (context == null) {
+        return <></>;
+    }
 
     return (
-        <Select value={props.value} onValueChange={onChange}>
+        <Select value={context.locale} onValueChange={context.onChange}>
             <SelectTrigger>
                 <SelectValue />
             </SelectTrigger>
@@ -49,3 +35,5 @@ export function LanguageSelect(props: LanguageSelectProps) {
         </Select>
     );
 }
+
+export const I18nProvider = I18nContext.Provider;

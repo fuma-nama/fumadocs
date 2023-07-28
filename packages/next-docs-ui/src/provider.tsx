@@ -1,19 +1,22 @@
 "use client";
 import { ThemeProvider } from "next-themes";
-import { ThemeProviderProps } from "next-themes/dist/types";
 import { SidebarProvider } from "./components/sidebar";
-import { SearchProvider } from "./components/search";
+import { SearchProvider } from "./contexts/search";
+import { type ReactNode } from "react";
+import type { SearchOptions } from "./components/dialog/search";
 
-export function RootProvider(props: ThemeProviderProps) {
+export type RootProviderProps = {
+    search?: SearchOptions;
+    children: ReactNode;
+};
+
+export function RootProvider(props: RootProviderProps) {
     return (
-        <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            {...props}
-        >
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <SidebarProvider>
-                <SearchProvider>{props.children}</SearchProvider>
+                <SearchProvider search={props.search}>
+                    {props.children}
+                </SearchProvider>
             </SidebarProvider>
         </ThemeProvider>
     );
