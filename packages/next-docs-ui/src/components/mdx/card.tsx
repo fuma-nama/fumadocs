@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { SafeLink } from "next-docs-zeta/link";
 import { ReactNode } from "react";
 
 export function Cards({ children }: { children: ReactNode }) {
@@ -18,17 +18,13 @@ export function Card({
     title: string;
     description: string;
 }) {
-    const external = !href.startsWith("/");
-
     return (
-        <Link
+        <SafeLink
             href={href}
-            target={external ? "_blank" : "_self"}
-            rel={external ? "noreferrer" : ""}
             className="nd-flex nd-flex-col nd-gap-2 nd-shadow-lg nd-rounded-xl nd-p-4 nd-border nd-bg-card nd-text-card-foreground nd-transition-colors hover:nd-border-primary hover:nd-shadow-primary/20"
         >
             <h3 className="nd-font-semibold">{title}</h3>
             <p className="nd-text-muted-foreground nd-text-sm">{description}</p>
-        </Link>
+        </SafeLink>
     );
 }
