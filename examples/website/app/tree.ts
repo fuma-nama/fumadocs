@@ -1,21 +1,14 @@
 import { allMeta, allDocs } from "contentlayer/generated";
-import { buildMultiLangPageTree } from "next-docs-zeta/contentlayer";
+import {
+    buildI18nPageTree,
+    createUtils,
+    loadContext,
+} from "next-docs-zeta/contentlayer";
+import { languages } from "./i18n";
 
-export const languages = ["en", "cn"];
-
-export const trees = buildMultiLangPageTree(allMeta, allDocs, languages, {
+const ctx = loadContext(allMeta, allDocs, languages);
+export const trees = buildI18nPageTree(ctx, languages, {
     baseUrl: "/",
 });
 
-export function getPage(lang: string, slugs?: string[]) {
-    const path = (slugs ?? []).join("/");
-
-    return (
-        allDocs.find((page) => {
-            return (
-                page.slug === path &&
-                (lang === "en" ? page.locale == null : page.locale === lang)
-            );
-        }) ?? allDocs.find((page) => page.slug === path)
-    );
-}
+export const { getPage, getPages } = createUtils(ctx);

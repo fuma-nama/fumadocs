@@ -10,10 +10,11 @@ import {
     Cards,
 } from "next-docs-ui/mdx";
 import { getTableOfContents } from "next-docs-zeta/server";
-import { allDocs } from "contentlayer/generated";
 import { notFound } from "next/navigation";
-import { getPage, languages, trees } from "../../tree";
+import { getPages, getPage, trees } from "../../tree";
 import { getMDXComponent } from "next-contentlayer/hooks";
+import { languages } from "@/app/i18n";
+
 import type { Metadata } from "next";
 
 export default async function Page({
@@ -64,7 +65,7 @@ export async function generateStaticParams(): Promise<
     { lang: string; slug: string[] }[]
 > {
     return languages.flatMap((lang) =>
-        allDocs.map((docs) => ({
+        getPages(lang)!.map((docs) => ({
             slug: docs.slug.split("/"),
             lang: lang,
         }))

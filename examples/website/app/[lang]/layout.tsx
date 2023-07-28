@@ -19,8 +19,6 @@ export default function Layout({
             githubUrl="https://github.com/SonMooSans/next-docs"
             sidebarContent={
                 <LanguageSelect
-                    paramIndex={1}
-                    value={params.lang}
                     languages={[
                         {
                             name: "English",
