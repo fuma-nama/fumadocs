@@ -124,9 +124,13 @@ export function generateMetadata({ params }: { params: Param }): Metadata {
     };
 }
 
-export function generateStaticParams({ params }: { params: { mode: string } }) {
-    return allDocs.map((docs) => ({
-        slug: docs.slug.split("/"),
-        ...params,
-    }));
+export function generateStaticParams() {
+    return allDocs.map((docs) => {
+        const [mode, ...slugs] = docs.slug.split("/");
+
+        return {
+            slug: slugs,
+            mode,
+        };
+    });
 }

@@ -52,7 +52,15 @@ export default function RootLayout({
     return (
         <html lang="en" className={inter.className}>
             <body className="relative flex flex-col min-h-screen">
-                <RootProvider>
+                <RootProvider
+                    search={{
+                        links: [
+                            ["Home", "/"],
+                            ["UI Docs", "/docs/ui"],
+                            ["Headless Docs", "/docs/headless"],
+                        ],
+                    }}
+                >
                     <Nav />
                     {children}
                     <Footer />
