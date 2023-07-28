@@ -244,9 +244,37 @@ export const { GET } = initSearchAPI(
 
 </Accordion>
 
+## Enjoy!
+
+Now, Create your first mdx file in the docs folder.
+
+```mdx title="/content/docs/index.mdx"
+---
+title: Hello World
+---
+
+## Yo what's up
+```
+
+Run the app in development mode and see http://localhost:3000/docs.
+
+```bash
+npm run dev
+```
+
 ## Learn More
 
 <Cards>
+    <Card
+        href="/docs/headless/contentlayer#pages-structure"
+        title="Page Structure"
+        description="Learn how to structure your pages"
+    />
+    <Card
+        href="/docs/ui/internationalization"
+        title="Learn I18n"
+        description="Learn how to implement I18n"
+    />
     <Card
         href="/docs/ui/theme"
         title="Theming"
