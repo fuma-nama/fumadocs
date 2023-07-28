@@ -14,6 +14,7 @@ Next Docs UI provides many features out of the box.
 -   Full-text Search
 -   Table of Contents
 -   Built-in Components
+-   Internationalization (I18n)
 -   Image Optimization
 -   Code Syntax highlighting powered by Shiki
 -   Well Designed UI & Accessibility
@@ -42,9 +43,9 @@ Next Docs UI doesn't provide static generation directly. Instead, it uses [Conte
 npm install contentlayer next-contentlayer
 ```
 
-**Configure Contentlayer**
+1. **Configure Contentlayer**
 
-You can customise the default configuration.
+    You can modify the configuration by copying code from [here](https://github.com/SonMooSans/next-docs/blob/main/packages/next-docs-ui/src/contentlayer/index.ts).
 
 ```ts {4} title="contentlayer.config.ts"
 import { createConfig } from "next-docs-ui/contentlayer";
@@ -55,7 +56,7 @@ export default makeSource({
 });
 ```
 
-**Add Contentlayer Plugin**
+2. **Add Contentlayer Plugin**
 
 ```js title="next.config.js"
 /** @type {import('next').NextConfig} */
@@ -66,6 +67,17 @@ const config = {
 const { withContentlayer } = require("next-contentlayer");
 
 module.exports = withContentlayer(config);
+```
+
+3. **Build Page Tree**
+
+```ts title="tree.ts"
+import { allDocs, allMeta } from "contentlayer/generated";
+import { buildPageTree, loadContext } from "next-docs-zeta/contentlayer";
+
+const ctx = loadContext(allMeta, allDocs);
+
+export const tree = buildPageTree(ctx);
 ```
 
 Make sure you've generated documents correctly before moving to next step.
@@ -80,7 +92,7 @@ Make sure you've generated documents correctly before moving to next step.
 
 ```tsx title="app/layout.tsx"
 import { DocsLayout } from "next-docs-ui/layout";
-import { tree } from "./tree";
+import { tree } from "@/tree";
 import { Inter } from "next/font/google";
 import { RootProvider } from "next-docs-ui/provider";
 import type { Metadata } from "next";
@@ -144,7 +156,7 @@ import {
 import { getTableOfContents } from "next-docs-zeta/server";
 import { allDocs } from "contentlayer/generated";
 import { notFound } from "next/navigation";
-import { tree } from "../tree";
+import { tree } from "@/tree";
 import { getMDXComponent } from "next-contentlayer/hooks";
 import type { Metadata } from "next";
 

@@ -16,30 +16,21 @@ Next Docs is built for Next.js App Router. Hence, this guide will use App Router
 
 It's recommended to use Next Docs with [Tailwind CSS](https://tailwindcss.com) + [Radix UI](https://www.radix-ui.com), and [Contentlayer](https://www.contentlayer.dev) (or any CMS).
 
+> For normal usages, you can use [Next Docs UI](/docs/ui) instead.
+
 ```bash
 npm install next-docs-zeta
 ```
 
 ### Example
 
-<a
-    href="https://githubbox.com/SonMooSans/next-docs-template"
-    target="blank"
-    rel="noreferrer noopener"
->
-    <img
-        alt="Open in Codesandbox"
-        src="https://img.shields.io/badge/Open%20in-CodeSandbox-blue?style=flat-square&logo=codesandbox"
-    />
-</a>
-
-View the [Template](https://github.com/SonMooSans/next-docs-template) repository on Github.
+Open in [CodeSandbox](https://githubbox.com/SonMooSans/next-docs-template).
 
 ### ContentLayer
 
 Follow this [guide](https://www.contentlayer.dev/docs/getting-started) to setup ContentLayer.
 
-```
+```bash
 npm install contentlayer next-contentlayer
 ```
 
@@ -47,7 +38,7 @@ npm install contentlayer next-contentlayer
 
 Follow this [guide](https://tailwindcss.com/docs/guides/nextjs) to setup Tailwind CSS.
 
-```
+```bash
 npm install clsx postcss tailwindcss @tailwindcss/typography
 ```
 
@@ -57,7 +48,7 @@ I also prefer [Shadcn UI](https://ui.shadcn.com) If you don't want to write any 
 
 Next Docs has native support for ContentLayer, but any kind of formats and sources are allowed.
 
-[Learn More ->](/docs/adapters/contentlayer)
+You can refer to this [guide](/docs/headless/contentlayer) to learn how to use Contentlayer with Next Docs.
 
 ### Build Page Tree
 
@@ -98,20 +89,13 @@ const tree: TreeNode[] = [
 
 You can convert the data fetched from any CMS to a page tree and pass into Next Docs's components.
 
-Moreover, It supports Contentlayer natively:
-
-```ts
-import { allDocs, allMeta } from "contentlayer/generated";
-import { buildPageTree } from "next-docs-zeta/contentlayer";
-
-export const tree = buildPageTree(allMeta, allDocs);
-```
+Moreover, It supports [Contentlayer](/docs/headless/contentlayer) natively.
 
 ---
 
 ### Create Root Layout
 
-implementation of certain components won't be shown but you will learn it later.
+implementation of certain components won't be shown, you will learn it later.
 
 ```tsx
 import { ReactNode } from "react";
@@ -122,12 +106,9 @@ import { tree } from "@/utils/page-tree";
 export default function DocsLayout({ children }: { children: ReactNode }) {
     return (
         <SidebarProvider>
-            <div className="absolute inset-0 -z-[1] overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-br from-purple-400/20 to-background to-50%" />
-            </div>
             <div
                 className={clsx(
-                    "grid grid-cols-1 gap-12 w-full container max-w-[1400px]",
+                    "grid grid-cols-1 gap-12 container",
                     "lg:grid-cols-[250px_auto] xl:grid-cols-[250px_auto_150px] 2xl:grid-cols-[250px_auto_250px]",
                     "sm:px-14 xl:px-24"
                 )}

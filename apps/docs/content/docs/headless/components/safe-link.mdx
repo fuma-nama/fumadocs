@@ -3,14 +3,26 @@ title: Safe Link
 description: A component that wraps next/link
 ---
 
-A component that wraps next/link, it handles external links in the document.
+A component that wraps next/link and handles external links in the document.
 
 ## Usage
+
+Same as using `<a>`.
 
 ```tsx
 import { SafeLink } from "next-docs-zeta/link";
 
 <SafeLink href="/docs/components">Click Me</SafeLink>;
+```
+
+### Dynamic hrefs
+
+Dynamic hrefs are no longer supported in Next.js App Router. Safe Link can handle dynamic hrefs by enabling `dynamicHrefs`.
+
+```tsx
+<SafeLink href="/[lang]/components" dynamicHrefs>
+    Click Me
+</SafeLink>
 ```
 
 ### Contentlayer
