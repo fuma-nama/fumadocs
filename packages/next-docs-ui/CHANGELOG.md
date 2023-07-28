@@ -1,5 +1,19 @@
 # next-docs-ui
 
+## 1.0.0
+
+### Minor Changes
+
+- d30d57f: Support optional I18n context provider
+
+### Patch Changes
+
+- Improve codeblock styles
+- Updated dependencies [8e4a001]
+- Updated dependencies [4fa45c0]
+- Updated dependencies [0983891]
+  - next-docs-zeta@1.0.0
+
 ## 0.3.2
 
 ### Patch Changes

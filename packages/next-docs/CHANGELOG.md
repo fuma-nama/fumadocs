@@ -1,5 +1,16 @@
 # next-docs-zeta
 
+## 1.0.0
+
+### Major Changes
+
+- 8e4a001: Rewrite Contentlayer tree builder + Support Context API
+
+### Minor Changes
+
+- 4fa45c0: Add support for dynamic hrefs and relative paths to `<SafeLink />` component
+- 0983891: Add international Docs search
+
 ## 0.3.2
 
 ## 0.3.1
