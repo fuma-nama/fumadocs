@@ -2,13 +2,39 @@ import { NextResponse } from "next/server";
 import FlexSearch from "flexsearch";
 import { IndexPage } from "./types";
 
-export function initSearchAPI(indexes: IndexPage[]): {
-    GET: (request: Request) => Response | Promise<Response>;
-} {
+type Result = {
+    GET: (request: Request, options?: any) => Response | Promise<Response>;
+};
+
+export function initI18nSearchAPI(
+    entries: [language: string, indexes: IndexPage[]][]
+): Result {
+    const map = new Map<string, Result>();
+
+    for (const [k, v] of entries) {
+        map.set(k, initSearchAPI(v, k));
+    }
+
+    return {
+        GET(request, options) {
+            const { searchParams } = new URL(request.url);
+            const locale = searchParams.get("locale");
+
+            if (locale && map.has(locale)) {
+                return map.get(locale)!.GET(request, options);
+            }
+
+            return NextResponse.json([]);
+        },
+    };
+}
+
+export function initSearchAPI(indexes: IndexPage[], language?: string): Result {
     const index = new FlexSearch.Document<IndexPage, ["title", "url"]>({
         tokenize: "forward",
         optimize: true,
         resolution: 9,
+        language,
         cache: 100,
         document: {
             id: "url",
@@ -54,7 +80,7 @@ export function initSearchAPI(indexes: IndexPage[]): {
             const { searchParams } = new URL(request.url);
             const query = searchParams.get("query");
 
-            if (query == null) return NextResponse.error();
+            if (query == null) return NextResponse.json([]);
 
             const results = index.search(query, 5, {
                 enrich: true,
