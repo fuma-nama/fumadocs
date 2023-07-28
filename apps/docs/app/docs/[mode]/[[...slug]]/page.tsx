@@ -64,7 +64,11 @@ export default async function Page({ params }: { params: Param }) {
             }
         >
             <MDXContent>
-                <h1>{page.title}</h1>
+                <div className="nd-not-prose">
+                    <h1 className="text-3xl sm:text-4xl mb-8 font-bold">
+                        {page.title}
+                    </h1>
+                </div>
                 <MDX
                     components={{
                         Card: (props) => <Card {...props} />,

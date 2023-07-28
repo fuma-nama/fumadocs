@@ -32,11 +32,15 @@ body {
 }
 
 .nd-codeblock > code {
-    @apply nd-grid nd-p-4 nd-pr-8 nd-w-fit;
+    @apply nd-grid nd-py-4;
+}
+
+.nd-codeblock .line {
+    @apply nd-pl-4 nd-pr-8;
 }
 
 .nd-codeblock .line-highlighted {
-    @apply nd-bg-primary/10 nd-pl-4 -nd-ml-4 nd-border-l-2 nd-border-l-primary;
+    @apply nd-bg-primary/10 nd-border-l-2 nd-border-l-primary;
 }
 
 :root {
