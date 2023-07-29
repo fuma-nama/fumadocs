@@ -32,6 +32,7 @@ export function RollButton({ percentage = 0.2 }: RollButtonProps) {
 
     return (
         <button
+            aria-label="Scroll to Top"
             className={clsx(
                 !show && "nd-translate-y-20 nd-opacity-0",
                 "nd-rounded-full nd-p-4 nd-transition-all nd-text-foreground nd-bg-background nd-border nd-fixed nd-bottom-12 nd-right-12 nd-z-50 2xl:nd-right-[20vw]"
