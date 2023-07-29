@@ -46,7 +46,7 @@ function TOCItem({ item }: { item: TOCItemType }) {
                 ref={ref}
                 href={item.url}
                 item={item}
-                className="nd-text-sm nd-text-muted-foreground nd-transition-colors nd-text-ellipsis nd-overflow-hidden data-[active]:nd-font-medium data-[active]:nd-text-primary"
+                className="nd-text-sm nd-text-muted-foreground nd-transition-colors nd-text-ellipsis nd-overflow-hidden data-[active=true]:nd-font-medium data-[active=true]:nd-text-primary"
             >
                 {item.title}
             </Primitive.TOCItem>
