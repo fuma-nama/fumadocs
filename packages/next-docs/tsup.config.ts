@@ -3,7 +3,7 @@ import tsconfig from "./tsconfig.json";
 
 export default defineConfig({
     entry: [
-        "src/{server,breadcrumb,sidebar,toc,search,link,contentlayer}/index.{ts,tsx}",
+        "src/{server,breadcrumb,sidebar,toc,search,link,contentlayer,middleware}/index.{ts,tsx}",
     ],
     format: "esm",
     dts: true,

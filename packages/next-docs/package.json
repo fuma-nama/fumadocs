@@ -38,6 +38,10 @@
             "import": "./dist/contentlayer/index.mjs",
             "types": "./dist/contentlayer/index.d.ts"
         },
+        "./middleware": {
+            "import": "./dist/middleware/index.mjs",
+            "types": "./dist/middleware/index.d.ts"
+        },
         "./*": {
             "import": "./dist/*.mjs",
             "types": "./dist/*.d.ts"
@@ -65,6 +69,9 @@
             ],
             "contentlayer": [
                 "./dist/contentlayer/index.d.ts"
+            ],
+            "middleware": [
+                "./dist/middleware/index.d.ts"
             ]
         }
     },
