@@ -26,7 +26,9 @@ export function Nav() {
             enableSidebar={mode === "headless" || mode === "ui"}
             links={[
                 {
-                    icon: <GithubIcon className="w-5 h-5" />,
+                    icon: (
+                        <GithubIcon aria-label="Github" className="w-5 h-5" />
+                    ),
                     href: "https://github.com/SonMooSans/next-docs",
                     external: true,
                 },

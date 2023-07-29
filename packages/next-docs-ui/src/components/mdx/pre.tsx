@@ -54,6 +54,7 @@ function CopyButton({ onCopy }: { onCopy: () => void }) {
     return (
         <button
             className="nd-absolute nd-top-1 nd-right-1 nd-p-2 nd-border nd-bg-secondary nd-text-secondary-foreground nd-transition-colors nd-rounded-md hover:nd-bg-accent"
+            aria-label="Copy Text"
             onClick={onClick}
         >
             {checked ? (

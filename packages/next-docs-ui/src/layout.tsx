@@ -35,7 +35,12 @@ export function DocsLayout(props: DocsLayoutProps) {
         ? [
               {
                   href: props.githubUrl,
-                  icon: <GithubIcon className="nd-w-5 nd-h-5" />,
+                  icon: (
+                      <GithubIcon
+                          aria-label="Github"
+                          className="nd-w-5 nd-h-5"
+                      />
+                  ),
                   external: true,
               },
           ]
