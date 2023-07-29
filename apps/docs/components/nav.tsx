@@ -1,22 +1,12 @@
 "use client";
-import { cn } from "@/utils/cn";
-import { cva } from "class-variance-authority";
 import { GithubIcon } from "lucide-react";
 import { useParams } from "next/navigation";
 import { Nav as OriginalNav } from "next-docs-ui/components";
 import Link from "next/link";
+import clsx from "clsx";
 
-const item = cva(
-    "px-2 py-1 rounded-md text-muted-foreground transition-colors hover:text-accent-foreground",
-    {
-        variants: {
-            active: {
-                true: "bg-accent text-accent-foreground",
-                false: "",
-            },
-        },
-    }
-);
+const item =
+    "px-2 py-1 rounded-md text-muted-foreground transition-colors hover:text-accent-foreground";
 
 export function Nav() {
     const { mode } = useParams();
@@ -44,13 +34,20 @@ export function Nav() {
                 <div className="text-sm border border-input p-1 rounded-md bg-background">
                     <Link
                         href="/docs/headless"
-                        className={cn(item({ active: mode === "headless" }))}
+                        className={clsx(
+                            item,
+                            mode === "headless" &&
+                                "bg-accent text-accent-foreground"
+                        )}
                     >
                         Zeta
                     </Link>
                     <Link
                         href="/docs/ui"
-                        className={cn(item({ active: mode === "ui" }))}
+                        className={clsx(
+                            item,
+                            mode === "ui" && "bg-accent text-accent-foreground"
+                        )}
                     >
                         UI
                     </Link>

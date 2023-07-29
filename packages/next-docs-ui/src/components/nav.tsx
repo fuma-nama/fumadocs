@@ -31,7 +31,10 @@ export function Nav({
                     ))}
                     <ThemeToggle />
                     {enableSidebar && (
-                        <SidebarTrigger className="nd-p-2 nd-rounded-md hover:nd-bg-accent md:nd-hidden">
+                        <SidebarTrigger
+                            aria-label="Toggle Sidebar"
+                            className="nd-p-2 nd-rounded-md hover:nd-bg-accent md:nd-hidden"
+                        >
                             <MenuIcon className="nd-w-5 nd-h-5" />
                         </SidebarTrigger>
                     )}
