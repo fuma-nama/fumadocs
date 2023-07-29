@@ -1,0 +1,60 @@
+---
+title: Roll Button
+description: A button that scrolls to the top
+---
+
+A button that scrolls to the top.
+
+## Usage
+
+Add this component to your page.
+
+```tsx title="app/docs/[[...slug]]/page.tsx"
+import { RollButton } from "next-docs-ui/components";
+
+<DocsPage toc={toc} tree={tree}>
+    <RollButton />
+    <MDXContent>
+        <h1>{page.title}</h1>
+        <MDX />
+    </MDXContent>
+</DocsPage>;
+```
+
+### Reference
+
+| Prop         | Type                  | Description                                              |
+| ------------ | --------------------- | -------------------------------------------------------- |
+| `percentage` | `number \| undefined` | Percentage of scroll position to display the roll button |
+
+## Example
+
+Try scroll down and see the button.
+
+<div class="p-4 bg-secondary text-secondary-foreground">
+
+## Mera maligno
+
+Ire illa aurum virgo membra. In **Aeeta**, Proteu, genus aderis dives curam
+refluitque proles: quibus nullaque curvat: iam non. **Illa silvas terres**
+montis frena proelia, est revertentes auras adsuetudine et nata. Venenis ope cum
+referebam, ortus! Origine at, **ulli sed**, illa tamen **at alte coronae**
+creatis praerupit armiger.
+
+1. Phoebus abit poscunt utque ad flammae conata
+2. Bello auro officio
+3. Pectora duc viscera genitor adplicor munera
+4. Quod nepotibus visa eminet cui sub proxima
+
+## Mea quoque mundo
+
+Deae poena? Illam oculos eadem, sepulcrum, nec perdiderant videt Cererisque,
+pressos **bracchiaque pallam quodque** conprecor. Pater septem decidere
+agitantia captivarumque propioris illa monere condita utilitas terras adunco.
+Dextera altera vulnere radiantibus tanto. Mactare ille idem vehebat mentes.
+
+> Lycaei bellum dictum caede, dixit? Quid siquos.
+
+</div>
+
+<RollButton />
