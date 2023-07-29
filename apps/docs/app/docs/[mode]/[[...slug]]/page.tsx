@@ -91,6 +91,11 @@ export default async function Page({ params }: { params: Param }) {
                         AccordionContent: (props) => (
                             <AccordionContent {...props} />
                         ),
+                        blockquote: (props) => (
+                            <div className="border rounded-lg p-3 nd-not-prose my-4 text-sm">
+                                {props.children}
+                            </div>
+                        ),
                     }}
                 />
             </MDXContent>
