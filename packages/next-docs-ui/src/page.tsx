@@ -2,8 +2,9 @@
 import { TableOfContents, TreeNode } from "next-docs-zeta/server";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { TOC } from "@/components/toc";
-import { ReactNode } from "react";
-import { Footer, FooterProps } from "./components/mdx/footer";
+import { Footer, FooterProps } from "@/components/mdx/footer";
+
+import type { ReactNode } from "react";
 
 export type DocsPageProps = {
     toc: TableOfContents;
