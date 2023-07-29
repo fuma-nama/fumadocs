@@ -1,5 +1,18 @@
 # next-docs-ui
 
+## 1.1.0
+
+### Minor Changes
+
+- 524ca9a: Support page footer
+
+### Patch Changes
+
+- d810bbd: Improve codeblock styles
+- d810bbd: Add `<RollButton />` component
+- Updated dependencies [255fc92]
+  - next-docs-zeta@1.1.0
+
 ## 1.0.0
 
 ### Minor Changes

@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 1.1.0
+
+### Patch Changes
+
+- 255fc92: Support finding neighbours of a page & Flatten page tree
+
 ## 1.0.0
 
 ### Major Changes
