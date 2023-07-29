@@ -24,10 +24,7 @@ export function Sidebar({ items, children }: SidebarProps) {
             <aside
                 className={clsx(
                     "nd-flex nd-flex-col",
-                    children
-                        ? "md:nd-h-[calc(100vh-3.5rem)]"
-                        : "md:nd-max-h-[calc(100vh-3.5rem)]",
-                    "md:nd-sticky md:nd-top-14",
+                    "md:nd-sticky md:nd-top-14 md:nd-h-[calc(100vh-3.5rem)]",
                     "max-md:nd-fixed max-md:nd-inset-0 max-md:nd-px-8 max-md:nd-bg-background/50 max-md:nd-backdrop-blur-xl max-md:nd-z-40"
                 )}
             >
