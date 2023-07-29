@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 1.1.1
+
+### Patch Changes
+
+- Fix codeblocks not being generated correctly
+  - next-docs-zeta@1.1.1
+
 ## 1.1.0
 
 ### Minor Changes
