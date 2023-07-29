@@ -25,7 +25,7 @@ export function Footer({ next, previous }: FooterProps) {
                 </Link>
             )}
             {next && (
-                <Link href={next.url} className={clsx(item, "ml-auto")}>
+                <Link href={next.url} className={clsx(item, "nd-ml-auto")}>
                     <div>
                         <p className="nd-text-xs">Next</p>
                         <p className="font-medium nd-text-foreground">
