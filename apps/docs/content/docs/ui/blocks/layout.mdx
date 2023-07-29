@@ -1,0 +1,86 @@
+---
+title: Docs Layout
+description: The layout of documentation pages
+---
+
+The layout of documentation pages, it must be nested under the Root Provider.
+
+## Usage
+
+Wrap the children and pass your page tree to the component.
+
+```tsx
+import { DocsLayout } from "next-docs-ui/layout";
+
+<DocsLayout tree={tree}>{children}</DocsLayout>;
+```
+
+| Prop             | Type                  | Description                        |
+| ---------------- | --------------------- | ---------------------------------- |
+| `navTitle`       | `string \| ReactNode` | Navbar title                       |
+| `tree`           | `TreeNode[]`          | The page tree                      |
+| `nav`            | `ReactNode \| false`  | Replace or disable default navbar  |
+| `githubUrl`      | `string`              | Github url displayed on the navbar |
+| `sidebarContent` | `ReactNode`           | Extra content on sidebar           |
+| `children`       | `ReactNode`           | -                                  |
+
+### Disabling Navbar
+
+It is common to share a navbar across all the pages (not just the docs layout). To achieve this, you may disable the default navbar by passing `false` to the `nav` prop.
+
+The default navbar is exported from `next-docs-ui/component`, you can add it to the root layout (under the root provider).
+
+<Accordion type="single" collapsible>
+<AccordionItem value="custom-navbar">
+<AccordionTrigger>Custom Navbar</AccordionTrigger>
+<AccordionContent>
+
+Example for custom navbar using Tailwind CSS.
+
+```tsx
+"use client";
+import { GithubIcon } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Nav as OriginalNav } from "next-docs-ui/components";
+import Link from "next/link";
+
+export function Nav() {
+    const pathname = usePathname();
+    const inDocs = pathname.startsWith("/docs/") || pathname === "/docs";
+
+    return (
+        <OriginalNav
+            enableSidebar={inDocs}
+            links={[
+                {
+                    icon: <GithubIcon className="w-5 h-5" />,
+                    href: "https://github.com/SonMooSans/next-docs",
+                    external: true,
+                },
+            ]}
+        >
+            <Link
+                href="/"
+                className="font-semibold whitespace-nowrap hover:text-muted-foreground"
+            >
+                Next Docs
+            </Link>
+        </OriginalNav>
+    );
+}
+```
+
+</AccordionContent>
+</AccordionItem>
+</Accordion>
+
+## Example
+
+```tsx title="app/docs/[[...slug]]/layout.tsx"
+import { ReactNode } from "react";
+import { DocsLayout } from "next-docs-ui/layout";
+
+export default function Layout({ children }: { children: ReactNode }) {
+    return <DocsLayout tree={tree}>{children}</DocsLayout>;
+}
+```

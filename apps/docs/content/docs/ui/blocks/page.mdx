@@ -1,0 +1,74 @@
+---
+title: Docs Page
+description: A single page in your documentation
+---
+
+Page is the base element of a documentation, it includes Table of contents, Footer, and Breadcrumb.
+
+## Usage
+
+Pass the table of contents and page tree to the component.
+
+```tsx
+import { DocsPage } from "next-docs-ui/page";
+
+<DocsPage toc={toc} tree={tree}>
+    <MDXContent>...</MDXContent>
+</DocsPage>;
+```
+
+| Prop         | Type                       | Description                     |
+| ------------ | -------------------------- | ------------------------------- |
+| `tocContent` | `ReactNode \| undefined`   | Extra content to display in TOC |
+| `toc`        | `TableOfContents`          | -                               |
+| `footer`     | `FooterProps \| undefined` | -                               |
+| `children`   | `ReactNode`                | -                               |
+
+> **Note:** Footer is not enabled by default
+
+### Table of Contents
+
+It is a tree with all the headings in your document. For Markdown or MDX documents, You can parse TOC by using the [TOC Utility](/docs/headless/utils/get-toc).
+
+Here is an example using Contentlayer.
+
+```tsx
+const path = (params.slug ?? []).join("/");
+const page = allDocs.find((page) => page.slug === path);
+
+if (page == null) {
+    notFound();
+}
+
+const toc = await getTableOfContents(page.body.raw);
+```
+
+### Footer
+
+You need to manually enable it by passing the previous and next page to the `footer` prop.
+
+To get those pages, it's recommended to use the [Get Neighbours](/docs/headless/utils/find-neighbour) Utility.
+
+| Prop       | Type                                         | Description |
+| ---------- | -------------------------------------------- | ----------- |
+| `next`     | `{ name: string, url: string } \| undefined` | -           |
+| `previous` | `{ name: string, url: string } \| undefined` | -           |
+
+#### Example
+
+```tsx
+import { getPageUrl } from "next-docs-zeta/contentlayer";
+import { findNeighbour } from "next-docs-zeta/server";
+
+// Get the url of page
+const url = getPageUrl(page.slug.split("/"), "/docs");
+const neighbours = findNeighbour(tree, url);
+
+<DocsPage toc={toc} tree={tree} footer={neighbours}>
+    ...
+</DocsPage>;
+```
+
+### Breadcrumb
+
+For now, You can't control the behaviours of breadcrumb.
