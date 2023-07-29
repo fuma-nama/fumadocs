@@ -2,7 +2,7 @@ import { allDocs } from "contentlayer/generated";
 import { notFound, redirect } from "next/navigation";
 import { getTree } from "@/utils/page-tree";
 
-import { getTableOfContents } from "next-docs-zeta/server";
+import { findNeighbour, getTableOfContents } from "next-docs-zeta/server";
 import { getMDXComponent } from "next-contentlayer/hooks";
 import React from "react";
 import { DocsPage } from "next-docs-ui/page";
@@ -22,6 +22,8 @@ import {
     AccordionItem,
     AccordionContent,
 } from "@/components/ui/accordion";
+import { RollButton } from "next-docs-ui/components";
+import { getPageUrl } from "next-docs-zeta/contentlayer";
 
 import type { Metadata } from "next";
 
@@ -29,7 +31,6 @@ type Param = {
     mode: string;
     slug?: string[];
 };
-
 export default async function Page({ params }: { params: Param }) {
     const tree = getTree(params.mode);
     const path = [params.mode, ...(params.slug ?? [])].join("/");
@@ -45,11 +46,14 @@ export default async function Page({ params }: { params: Param }) {
 
     const toc = await getTableOfContents(page.body.raw);
     const MDX = getMDXComponent(page.body.code);
+    const url = getPageUrl(page.slug.split("/"), "/docs");
+    const neighbours = findNeighbour(tree, url);
 
     return (
         <DocsPage
             toc={toc}
             tree={tree}
+            footer={neighbours}
             tocContent={
                 <div className="pt-4 mt-4 border-t">
                     <a
@@ -96,6 +100,7 @@ export default async function Page({ params }: { params: Param }) {
                                 {props.children}
                             </div>
                         ),
+                        RollButton: (props) => <RollButton {...props} />,
                     }}
                 />
             </MDXContent>
