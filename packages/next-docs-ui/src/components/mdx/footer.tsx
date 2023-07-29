@@ -1,4 +1,3 @@
-import clsx from "clsx";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import Link from "next/link";
 
@@ -15,24 +14,24 @@ export function Footer({ next, previous }: FooterProps) {
         <div className="nd-flex nd-flex-row nd-mt-8 nd-gap-4 nd-flex-wrap">
             {previous && (
                 <Link href={previous.url} className={item}>
-                    <ChevronLeftIcon className="w-5 h-5" />
+                    <ChevronLeftIcon className="nd-w-5 nd-h-5" />
                     <div>
                         <p className="nd-text-xs">Previous</p>
-                        <p className="font-medium nd-text-foreground">
+                        <p className="nd-font-medium nd-text-foreground">
                             {previous.name}
                         </p>
                     </div>
                 </Link>
             )}
             {next && (
-                <Link href={next.url} className={clsx(item, "nd-ml-auto")}>
+                <Link href={next.url} className={`${item} nd-ml-auto`}>
                     <div>
                         <p className="nd-text-xs">Next</p>
-                        <p className="font-medium nd-text-foreground">
+                        <p className="nd-font-medium nd-text-foreground">
                             {next.name}
                         </p>
                     </div>
-                    <ChevronRightIcon className="w-5 h-5" />
+                    <ChevronRightIcon className="nd-w-5 nd-h-5" />
                 </Link>
             )}
         </div>

@@ -23,7 +23,7 @@ export function Heading<T extends Types = "h1">({
                 className="nd-opacity-0 group-hover:nd-opacity-100 nd-inline-block nd-ml-2 nd-text-muted-foreground"
                 aria-label="Link to section"
             >
-                <LinkIcon className="w-4 h-4" />
+                <LinkIcon className="nd-w-4 nd-h-4" />
             </a>
         </As>
     );
