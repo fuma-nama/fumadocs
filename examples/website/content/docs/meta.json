@@ -2,8 +2,30 @@
     "pages": [
         "---Guide---",
         "index",
-        "install",
-        "---API Reference---",
-        "components"
+        "playground",
+        "---Installation---",
+        "installation/next",
+        "installation/remix",
+        "installation/qwik",
+        "installation/vite",
+        "---Migrate---",
+        "migrate/1",
+        "migrate/2",
+        "---Components---",
+        "components/input",
+        "components/select",
+        "components/avatar",
+        "components/cards",
+        "components/button",
+        "components/tabs",
+        "components/progress",
+        "components/spinner",
+        "components/calendar",
+        "components/checkbox",
+        "components/combobox",
+        "components/accordion",
+        "components/date-picker",
+        "components/form",
+        "ssr"
     ]
 }
