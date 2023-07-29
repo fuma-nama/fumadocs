@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 1.1.2
+
+### Patch Changes
+
+- Fix aria attributes
+
 ## 1.1.1
 
 ## 1.1.0

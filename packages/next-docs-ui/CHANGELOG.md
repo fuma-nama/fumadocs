@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 1.1.2
+
+### Patch Changes
+
+- Fix aria attributes
+- Improve footer styles
+- Updated dependencies
+  - next-docs-zeta@1.1.2
+
 ## 1.1.1
 
 ### Patch Changes
