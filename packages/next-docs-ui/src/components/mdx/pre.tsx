@@ -1,7 +1,7 @@
 import { CheckIcon, CopyIcon } from "lucide-react";
 import { ComponentProps, useRef, useState, useEffect } from "react";
 
-export function Pre(props: ComponentProps<"pre">) {
+export function Pre({ title, ...props }: ComponentProps<"pre">) {
     const ref = useRef<HTMLPreElement>(null);
     const onCopy = () => {
         if (ref.current == null || ref.current.textContent == null) return;
@@ -14,6 +14,11 @@ export function Pre(props: ComponentProps<"pre">) {
             className="nd-relative nd-border nd-rounded-lg nd-not-prose"
             data-rehype-pretty-code-fragment
         >
+            {title && (
+                <div className="nd-text-sm nd-text-muted-foreground nd-bg-muted nd-pl-4 nd-pr-12 nd-py-2 nd-border-b">
+                    {title}
+                </div>
+            )}
             <CopyButton onCopy={onCopy} />
             <pre
                 {...props}

@@ -13,10 +13,6 @@ body {
     font-feature-settings: "rlig" 1, "calt" 1;
 }
 
-[data-rehype-pretty-code-title] {
-    @apply nd-text-sm nd-text-muted-foreground nd-bg-muted nd-pl-4 nd-pr-12 nd-py-2 nd-border-b;
-}
-
 [data-rehype-pretty-code-fragment] code {
     @apply nd-grid nd-py-4;
 }

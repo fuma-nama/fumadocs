@@ -52,8 +52,21 @@ const rehypeCodeBlocksPreProcess = () => (tree: any) => {
 const rehypeCodeBlocksPostProcess = () => (tree: any) => {
     visit(tree, ["div"], (node: any) => {
         // Remove default fragment div
+        // Add title to pre element
         if ("data-rehype-pretty-code-fragment" in node.properties) {
-            Object.assign(node, node.children[0]);
+            if (node.children.length === 0) return;
+
+            let preEl = node.children[0];
+
+            if ("data-rehype-pretty-code-title" in preEl.properties) {
+                const title = preEl.children[0].value;
+                preEl = node.children[1];
+
+                if (!preEl) return;
+                preEl.properties.title = title;
+            }
+
+            Object.assign(node, preEl);
         }
     });
 };
