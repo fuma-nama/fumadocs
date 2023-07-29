@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 1.1.3
+
+### Patch Changes
+
+- 0998b1b: Support edge runtime middlewares
+
 ## 1.1.2
 
 ### Patch Changes

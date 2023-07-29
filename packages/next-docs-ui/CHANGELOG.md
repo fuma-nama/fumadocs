@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 1.1.3
+
+### Patch Changes
+
+- 10d31e6: Fix sidebar scrollbars disappeared
+- Updated dependencies [0998b1b]
+  - next-docs-zeta@1.1.3
+
 ## 1.1.2
 
 ### Patch Changes
