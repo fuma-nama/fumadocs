@@ -8,6 +8,10 @@
         "---Components---",
         "components/codeblock",
         "components/card",
-        "components/heading"
+        "components/heading",
+        "components/roll-button",
+        "---Blocks---",
+        "blocks/page",
+        "blocks/layout"
     ]
 }
