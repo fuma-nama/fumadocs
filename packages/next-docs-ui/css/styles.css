@@ -13,33 +13,19 @@ body {
     font-feature-settings: "rlig" 1, "calt" 1;
 }
 
-[data-rehype-pretty-code-fragment],
-[data-rehype-pretty-code-block]:not(
-        :where(
-                [data-rehype-pretty-code-fragment]
-                    [data-rehype-pretty-code-block]
-            )
-    ) {
-    @apply nd-relative nd-border nd-rounded-lg;
-}
-
 [data-rehype-pretty-code-title] {
     @apply nd-text-sm nd-text-muted-foreground nd-bg-muted nd-pl-4 nd-pr-12 nd-py-2 nd-border-b;
 }
 
-.nd-codeblock {
-    @apply nd-overflow-auto nd-bg-secondary/50 nd-text-sm;
-}
-
-.nd-codeblock > code {
+[data-rehype-pretty-code-fragment] code {
     @apply nd-grid nd-py-4;
 }
 
-.nd-codeblock .line {
+[data-rehype-pretty-code-fragment] .line {
     @apply nd-pl-4 nd-pr-8;
 }
 
-.nd-codeblock .line-highlighted {
+[data-rehype-pretty-code-fragment] .line-highlighted {
     @apply nd-bg-primary/10 nd-border-l-2 nd-border-l-primary;
 }
 

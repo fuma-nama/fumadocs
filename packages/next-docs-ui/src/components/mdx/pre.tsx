@@ -1,4 +1,3 @@
-import clsx from "clsx";
 import { CheckIcon, CopyIcon } from "lucide-react";
 import { ComponentProps, useRef, useState, useEffect } from "react";
 
@@ -11,11 +10,14 @@ export function Pre(props: ComponentProps<"pre">) {
     };
 
     return (
-        <div className="nd-not-prose" data-rehype-pretty-code-block>
+        <div
+            className="nd-relative nd-border nd-rounded-lg nd-not-prose"
+            data-rehype-pretty-code-fragment
+        >
             <CopyButton onCopy={onCopy} />
             <pre
                 {...props}
-                className={clsx("nd-codeblock", props.className)}
+                className="nd-overflow-auto nd-bg-secondary/50 nd-text-sm"
                 ref={ref}
             >
                 {props.children}

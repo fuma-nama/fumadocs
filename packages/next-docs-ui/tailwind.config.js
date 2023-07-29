@@ -76,8 +76,6 @@ module.exports = {
                         "--tw-prose-quote-borders": "hsl(var(--border))",
                         "--tw-prose-captions": "hsl(var(--foreground))",
                         "--tw-prose-code": "hsl(var(--foreground))",
-                        "--tw-prose-pre-code": "hsl(var(--foreground))",
-                        "--tw-prose-pre-bg": "hsl(var(--secondary)/0.5)",
                         "--tw-prose-th-borders": "hsl(var(--border))",
                         "--tw-prose-td-borders": "hsl(var(--border))",
                         a: {
@@ -88,9 +86,15 @@ module.exports = {
                             },
                         },
                         code: {
-                            padding: "0.3rem",
-                            "border-radius": "15px",
+                            padding: "0.4rem",
+                            "border-radius": "5px",
                             background: "hsl(var(--secondary))",
+                            "&::before": {
+                                content: "none",
+                            },
+                            "&::after": {
+                                content: "none",
+                            },
                         },
                     },
                 },

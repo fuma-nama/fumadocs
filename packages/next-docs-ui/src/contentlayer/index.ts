@@ -25,6 +25,39 @@ function removePattern(path: string, pattern: string) {
     return removeSlash(path.slice(pattern.length));
 }
 
+function visit(node: any, tagNames: any, handler: any) {
+    if (tagNames.includes(node.tagName)) {
+        handler(node);
+        return;
+    }
+
+    node.children?.forEach((n: any) => visit(n, tagNames, handler));
+}
+
+/**
+ * Should be added before rehype-pretty-code
+ */
+const rehypeCodeBlocksPreProcess = () => (tree: any) => {
+    visit(tree, ["pre"], (preEl: any) => {
+        const [codeEl] = preEl.children;
+
+        // Add default language `text` for code-blocks
+        codeEl.properties.className ||= ["language-text"];
+    });
+};
+
+/**
+ * Should be added after rehype-pretty-code
+ */
+const rehypeCodeBlocksPostProcess = () => (tree: any) => {
+    visit(tree, ["div"], (node: any) => {
+        // Remove default fragment div
+        if ("data-rehype-pretty-code-fragment" in node.properties) {
+            Object.assign(node, node.children[0]);
+        }
+    });
+};
+
 type Options = {
     /**
      * Where the docs files located
@@ -119,7 +152,9 @@ export function createConfig(options: Partial<Options> = {}): Args {
         documentTypes: [Docs, Meta],
         mdx: {
             rehypePlugins: [
+                rehypeCodeBlocksPreProcess,
                 [rehypePrettycode, codeOptions],
+                rehypeCodeBlocksPostProcess,
                 rehypeSlug,
                 [
                     rehypeImgSize as any,
@@ -137,10 +172,12 @@ export function createConfig(options: Partial<Options> = {}): Args {
  * MDX Plugins
  */
 export const mdxPlugins = {
+    rehypeCodeBlocksPreProcess,
     rehypePrettycode,
-    remarkGfm,
+    rehypeCodeBlocksPostProcess,
     rehypeSlug,
     rehypeImgSize: rehypeImgSize as any, // fix tsc errors
+    remarkGfm,
 };
 
 export const codeOptions: Partial<CodeOptions> = {
