@@ -9,10 +9,12 @@ The layout of documentation pages, it must be nested under the Root Provider.
 
 Wrap the children and pass your page tree to the component.
 
-```tsx
+```jsx
 import { DocsLayout } from 'next-docs-ui/layout'
 
-;<DocsLayout tree={tree}>{children}</DocsLayout>
+export default function Layout({ children }) {
+  return <DocsLayout tree={tree}>{children}</DocsLayout>
+}
 ```
 
 | Prop             | Type                  | Description                        |

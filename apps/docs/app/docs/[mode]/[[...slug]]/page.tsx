@@ -73,7 +73,7 @@ export default async function Page({ params }: { params: Param }) {
             Card: props => <Card {...props} />,
             Cards: props => <Cards {...props} />,
             a: props => <Link {...props} />,
-            pre: props => <Pre {...props} />,
+            pre: props => <Pre className="max-h-[300px]" {...props} />,
             img: props => <Image {...props} />,
             h1: props => <Heading as="h1" {...props} />,
             h2: props => <Heading as="h2" {...props} />,

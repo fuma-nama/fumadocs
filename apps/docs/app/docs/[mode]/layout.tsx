@@ -23,7 +23,7 @@ export default function Layout({
         <div className="absolute inset-0 z-[-1] overflow-hidden">
           <div
             className={cn(
-              'to-background absolute left-0 top-0 h-[500px] w-full bg-gradient-to-br from-purple-400/20 to-50%',
+              'to-background absolute left-0 top-0 h-[500px] w-full bg-gradient-to-br from-purple-400/30 to-50%',
               params.mode === 'ui' && 'from-blue-400/30'
             )}
           />
