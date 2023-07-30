@@ -1,0 +1,10 @@
+{
+  "semi": false,
+  "singleQuote": true,
+  "trailingComma": "none",
+  "arrowParens": "avoid",
+  "proseWrap": "always",
+  "plugins": [
+    "prettier-plugin-tailwindcss", "@ianvs/prettier-plugin-sort-imports"
+  ]
+}
