@@ -1,67 +1,68 @@
-import type { TOCItemType, TableOfContents } from "@/server/get-toc";
-import { useAnchorObserver } from "./use-anchor-observer";
-import { ReactNode, useMemo } from "react";
-import { createContext, useContext } from "react";
-import { ComponentPropsWithoutRef, forwardRef } from "react";
+import type { TableOfContents, TOCItemType } from '@/server/get-toc'
+import type { ComponentPropsWithoutRef, ReactNode } from 'react'
+import { createContext, forwardRef, useContext, useMemo } from 'react'
+import { useAnchorObserver } from './use-anchor-observer'
 
-type ActiveAnchors = Record<string, Anchor>;
+type ActiveAnchors = Record<string, Anchor>
 
 type Anchor = {
-    isActive?: boolean;
-    aboveHalfViewport: boolean;
-    index: number;
-    insideHalfViewport: boolean;
-};
+  isActive?: boolean
+  aboveHalfViewport: boolean
+  index: number
+  insideHalfViewport: boolean
+}
 
-const ActiveAnchorContext = createContext<ActiveAnchors>({});
+const ActiveAnchorContext = createContext<ActiveAnchors>({})
 
 export const useActiveAnchor = (url: string): Anchor | null => {
-    const context = useContext(ActiveAnchorContext);
+  const context = useContext(ActiveAnchorContext)
 
-    return context[url.split("#")[1]];
-};
+  return context[url.split('#')[1]]
+}
 
 export function TOCProvider({
-    toc,
-    children,
+  toc,
+  children
 }: {
-    toc: TableOfContents;
-    children: ReactNode;
+  toc: TableOfContents
+  children: ReactNode
 }) {
-    const headings = useMemo(() => {
-        return toc
-            .flatMap((item) => getHeadings(item))
-            .map((item) => item.split("#")[1]);
-    }, [toc]);
+  const headings = useMemo(() => {
+    return toc
+      .flatMap(item => getHeadings(item))
+      .map(item => item.split('#')[1])
+  }, [toc])
 
-    const activeAnchor = useAnchorObserver(headings);
+  const activeAnchor = useAnchorObserver(headings)
 
-    return (
-        <ActiveAnchorContext.Provider value={activeAnchor}>
-            {children}
-        </ActiveAnchorContext.Provider>
-    );
+  return (
+    <ActiveAnchorContext.Provider value={activeAnchor}>
+      {children}
+    </ActiveAnchorContext.Provider>
+  )
 }
 
 function getHeadings(item: TOCItemType): string[] {
-    const children = item.items?.flatMap((item) => getHeadings(item)) ?? [];
+  const children = item.items?.flatMap(item => getHeadings(item)) ?? []
 
-    return [item.url, ...children];
+  return [item.url, ...children]
 }
 
-export type TOCItemProps = ComponentPropsWithoutRef<"a"> & {
-    item: TOCItemType;
-};
+export type TOCItemProps = ComponentPropsWithoutRef<'a'> & {
+  item: TOCItemType
+}
 
 export const TOCItem = forwardRef<HTMLAnchorElement, TOCItemProps>(
-    ({ item, ...props }, ref) => {
-        const activeAnchor = useActiveAnchor(item.url);
-        const active = activeAnchor?.isActive === true;
+  ({ item, ...props }, ref) => {
+    const activeAnchor = useActiveAnchor(item.url)
+    const active = activeAnchor?.isActive === true
 
-        return (
-            <a ref={ref} data-active={active} {...props}>
-                {props.children}
-            </a>
-        );
-    }
-);
+    return (
+      <a ref={ref} data-active={active} {...props}>
+        {props.children}
+      </a>
+    )
+  }
+)
+
+TOCItem.displayName = 'TOCItem'

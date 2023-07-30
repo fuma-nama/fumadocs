@@ -1,4 +1,4 @@
-import { defaultConfig } from "next-docs-ui/contentlayer";
-import { makeSource } from "contentlayer/source-files";
+import { makeSource } from 'contentlayer/source-files'
+import { defaultConfig } from 'next-docs-ui/contentlayer'
 
-export default makeSource(defaultConfig);
+export default makeSource(defaultConfig)

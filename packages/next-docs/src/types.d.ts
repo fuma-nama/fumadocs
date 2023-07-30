@@ -1,9 +1,9 @@
-import type { ComponentPropsWithoutRef, ElementType } from "react";
+import type { ComponentPropsWithoutRef, ElementType } from 'react'
 
-export type WithAs<T extends ElementType, Extend = {}> = Omit<
-    ComponentPropsWithoutRef<T>,
-    "as" | keyof Extend
+export type WithAs<T extends ElementType, Extend = object> = Omit<
+  ComponentPropsWithoutRef<T>,
+  'as' | keyof Extend
 > &
-    Extend & {
-        as?: T;
-    };
+  Extend & {
+    as?: T
+  }

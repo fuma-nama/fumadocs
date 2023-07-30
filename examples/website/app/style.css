@@ -1,8 +1,8 @@
 :root {
-    --gradient: 200 90% 85%;
-    --primary: 270 95% 75% !important;
+  --gradient: 200 90% 85%;
+  --primary: 270 95% 75% !important;
 }
 
 .dark {
-    --gradient: 630 50% 50%;
+  --gradient: 630 50% 50%;
 }

@@ -28,7 +28,8 @@
 
 ### Minor Changes
 
-- 4fa45c0: Add support for dynamic hrefs and relative paths to `<SafeLink />` component
+- 4fa45c0: Add support for dynamic hrefs and relative paths to `<SafeLink />`
+  component
 - 0983891: Add international Docs search
 
 ## 0.3.2

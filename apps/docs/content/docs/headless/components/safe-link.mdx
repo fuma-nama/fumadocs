@@ -10,18 +10,19 @@ A component that wraps next/link and handles external links in the document.
 Same as using `<a>`.
 
 ```tsx
-import { SafeLink } from "next-docs-zeta/link";
+import { SafeLink } from 'next-docs-zeta/link'
 
-<SafeLink href="/docs/components">Click Me</SafeLink>;
+;<SafeLink href="/docs/components">Click Me</SafeLink>
 ```
 
 ### Dynamic hrefs
 
-Dynamic hrefs are no longer supported in Next.js App Router. Safe Link can handle dynamic hrefs by enabling `dynamicHrefs`.
+Dynamic hrefs are no longer supported in Next.js App Router. Safe Link can
+handle dynamic hrefs by enabling `dynamicHrefs`.
 
 ```tsx
 <SafeLink href="/[lang]/components" dynamicHrefs>
-    Click Me
+  Click Me
 </SafeLink>
 ```
 
@@ -31,15 +32,15 @@ You can pass it as a component in `<MDX>`.
 
 ```tsx
 //in a server component
-import { SafeLink } from "next-docs-zeta/link";
+import { SafeLink } from 'next-docs-zeta/link'
 
-const MDX = getMDXComponent(code);
+const MDX = getMDXComponent(code)
 
 return (
-    <MDX
-        components={{
-            a: SafeLink,
-        }}
-    />
-);
+  <MDX
+    components={{
+      a: SafeLink
+    }}
+  />
+)
 ```

@@ -1,58 +1,56 @@
-import { ReactNode } from "react";
-import { SearchBar } from "./search-toggle";
-import { SidebarTrigger } from "./sidebar";
-import { MenuIcon } from "lucide-react";
-import { ThemeToggle } from "./theme-toggle";
-import Link from "next/link";
+import { MenuIcon } from 'lucide-react'
+import Link from 'next/link'
+import type { ReactNode } from 'react'
+import { SearchBar } from './search-toggle'
+import { SidebarTrigger } from './sidebar'
+import { ThemeToggle } from './theme-toggle'
 
 type NavLinkProps = {
-    icon: ReactNode;
-    href: string;
-    external?: boolean;
-};
+  icon: ReactNode
+  href: string
+  external?: boolean
+}
 
 export function Nav({
-    links,
-    enableSidebar = true,
-    children,
+  links,
+  enableSidebar = true,
+  children
 }: {
-    links?: NavLinkProps[];
-    enableSidebar?: boolean;
-    children: ReactNode;
+  links?: NavLinkProps[]
+  enableSidebar?: boolean
+  children: ReactNode
 }) {
-    return (
-        <nav className="nd-sticky nd-top-0 nd-inset-x-0 nd-bg-background/10 nd-z-50 nd-backdrop-blur-xl">
-            <div className="nd-container nd-flex nd-flex-row nd-items-center nd-h-14 nd-gap-4 nd-max-w-[1400px]">
-                {children}
-                <div className="nd-flex nd-flex-row nd-items-center nd-ml-auto">
-                    <SearchBar className="nd-w-[280px] nd-max-w-xs max-sm:nd-hidden nd-mr-3" />
-                    {links?.map((item, key) => (
-                        <NavLink key={key} {...item} />
-                    ))}
-                    <ThemeToggle />
-                    {enableSidebar && (
-                        <SidebarTrigger
-                            aria-label="Toggle Sidebar"
-                            className="nd-p-2 nd-rounded-md hover:nd-bg-accent md:nd-hidden"
-                        >
-                            <MenuIcon className="nd-w-5 nd-h-5" />
-                        </SidebarTrigger>
-                    )}
-                </div>
-            </div>
-        </nav>
-    );
+  return (
+    <nav className="nd-sticky nd-top-0 nd-inset-x-0 nd-bg-background/10 nd-z-50 nd-backdrop-blur-xl">
+      <div className="nd-container nd-flex nd-flex-row nd-items-center nd-h-14 nd-gap-4 nd-max-w-[1400px]">
+        {children}
+        <div className="nd-flex nd-flex-row nd-items-center nd-ml-auto">
+          <SearchBar className="nd-w-[280px] nd-max-w-xs max-sm:nd-hidden nd-mr-3" />
+          {links?.map((item, key) => <NavLink key={key} {...item} />)}
+          <ThemeToggle />
+          {enableSidebar && (
+            <SidebarTrigger
+              aria-label="Toggle Sidebar"
+              className="nd-p-2 nd-rounded-md hover:nd-bg-accent md:nd-hidden"
+            >
+              <MenuIcon className="nd-w-5 nd-h-5" />
+            </SidebarTrigger>
+          )}
+        </div>
+      </div>
+    </nav>
+  )
 }
 
 export function NavLink(props: NavLinkProps) {
-    return (
-        <Link
-            href={props.href}
-            target={props.external ? "_blank" : "_self"}
-            rel={props.external ? "noreferrer noopener" : undefined}
-            className="nd-p-2 nd-rounded-md hover:nd-bg-accent max-sm:nd-hidden"
-        >
-            {props.icon}
-        </Link>
-    );
+  return (
+    <Link
+      href={props.href}
+      target={props.external ? '_blank' : '_self'}
+      rel={props.external ? 'noreferrer noopener' : undefined}
+      className="nd-p-2 nd-rounded-md hover:nd-bg-accent max-sm:nd-hidden"
+    >
+      {props.icon}
+    </Link>
+  )
 }

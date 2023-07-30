@@ -3,43 +3,48 @@ title: Internationalization
 description: Learn more implement internationalization in Next Docs UI
 ---
 
-Next Docs UI supports I18n routing based on **Zeta**. Please refer to this [guide](/docs/headless/contentlayer/internationalization) to setup basic configurations and learn how to structure the documents.
+Next Docs UI supports I18n routing based on **Zeta**. Please refer to this
+[guide](/docs/headless/contentlayer/internationalization) to setup basic
+configurations and learn how to structure the documents.
 
-Ensure you have your page tree, layout and middleware ready before getting started.
+Ensure you have your page tree, layout and middleware ready before getting
+started.
 
 ## Create Provider
 
 A `I18nProvider` is needed for internationalization.
 
-Assume your files are nested under `/app/[lang]`, where the 'lang' parameter is at index 1.
+Assume your files are nested under `/app/[lang]`, where the 'lang' parameter is
+at index 1.
 
 ```tsx
-"use client";
-import { I18nProvider } from "next-docs-ui/i18n";
-import { useParams, usePathname, useRouter } from "next/navigation";
-import { ReactNode, useCallback } from "react";
-import { defaultLanguage } from "@/i18n";
+'use client'
+
+import { defaultLanguage } from '@/i18n'
+import { I18nProvider } from 'next-docs-ui/i18n'
+import { useParams, usePathname, useRouter } from 'next/navigation'
+import { ReactNode, useCallback } from 'react'
 
 export function ClientI18nProvider({ children }: { children: ReactNode }) {
-    const router = useRouter();
-    const pathname = usePathname();
-    const { lang } = useParams() as { lang?: string };
-    const onChange = useCallback(
-        (v: string) => {
-            const segments = pathname.split("/");
+  const router = useRouter()
+  const pathname = usePathname()
+  const { lang } = useParams() as { lang?: string }
+  const onChange = useCallback(
+    (v: string) => {
+      const segments = pathname.split('/')
 
-            segments[1] = v; // update parameter
+      segments[1] = v // update parameter
 
-            router.push(segments.join("/"));
-        },
-        [router, pathname]
-    );
+      router.push(segments.join('/'))
+    },
+    [router, pathname]
+  )
 
-    return (
-        <I18nProvider value={{ locale: lang ?? defaultLanguage, onChange }}>
-            {children}
-        </I18nProvider>
-    );
+  return (
+    <I18nProvider value={{ locale: lang ?? defaultLanguage, onChange }}>
+      {children}
+    </I18nProvider>
+  )
 }
 ```
 
@@ -47,57 +52,59 @@ Then, wrap the root provider inside of your i18n provider.
 
 ```tsx
 <ClientI18nProvider>
-    <RootProvider>...</RootProvider>
+  <RootProvider>...</RootProvider>
 </ClientI18nProvider>
 ```
 
 ## Add Language Switch
 
-To allow users changing their language, you can put the `<LanguageSelect />` component to sidebar same as following:
+To allow users changing their language, you can put the `<LanguageSelect />`
+component to sidebar same as following:
 
 ```tsx title="/[lang]/docs/layout.tsx"
-import { DocsLayout } from "next-docs-ui/layout";
-import { trees } from "@/tree";
-import { ReactNode } from "react";
-import { LanguageSelect } from "next-docs-ui/i18n";
+import { trees } from '@/tree'
+import { LanguageSelect } from 'next-docs-ui/i18n'
+import { DocsLayout } from 'next-docs-ui/layout'
+import { ReactNode } from 'react'
 
 export default function Layout({
-    params,
-    children,
+  params,
+  children
 }: {
-    params: { lang: string };
-    children: ReactNode;
+  params: { lang: string }
+  children: ReactNode
 }) {
-    const tree = trees[params.lang];
+  const tree = trees[params.lang]
 
-    return (
-        <DocsLayout
-            tree={tree ?? []}
-            navTitle="My App"
-            sidebarContent={
-                <LanguageSelect
-                    languages={[
-                        {
-                            name: "English",
-                            locale: "en",
-                        },
-                        {
-                            name: "Chinese",
-                            locale: "cn",
-                        },
-                    ]}
-                />
+  return (
+    <DocsLayout
+      tree={tree ?? []}
+      navTitle="My App"
+      sidebarContent={
+        <LanguageSelect
+          languages={[
+            {
+              name: 'English',
+              locale: 'en'
+            },
+            {
+              name: 'Chinese',
+              locale: 'cn'
             }
-        >
-            {children}
-        </DocsLayout>
-    );
+          ]}
+        />
+      }
+    >
+      {children}
+    </DocsLayout>
+  )
 }
 ```
 
 ## Final Step
 
-Replace all usage to original `tree` with `trees[lang]` and check if there's any legacy usage.
+Replace all usage to original `tree` with `trees[lang]` and check if there's any
+legacy usage.
 
 **Before**
 
@@ -117,13 +124,13 @@ Generate parameters for every language and page.
 
 ```tsx
 export async function generateStaticParams(): Promise<
-    { lang: string; slug: string[] }[]
+  { lang: string; slug: string[] }[]
 > {
-    return languages.flatMap((lang) =>
-        getPages(lang)!.map((docs) => ({
-            slug: docs.slug.split("/"),
-            lang: lang,
-        }))
-    );
+  return languages.flatMap(lang =>
+    getPages(lang)!.map(docs => ({
+      slug: docs.slug.split('/'),
+      lang: lang
+    }))
+  )
 }
 ```

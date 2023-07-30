@@ -1,14 +1,14 @@
-import { allMeta, allDocs } from "contentlayer/generated";
+import { allDocs, allMeta } from 'contentlayer/generated'
 import {
-    buildI18nPageTree,
-    createUtils,
-    loadContext,
-} from "next-docs-zeta/contentlayer";
-import { languages } from "./i18n";
+  buildI18nPageTree,
+  createUtils,
+  loadContext
+} from 'next-docs-zeta/contentlayer'
+import { languages } from './i18n'
 
-const ctx = loadContext(allMeta, allDocs, languages);
+const ctx = loadContext(allMeta, allDocs, languages)
 export const trees = buildI18nPageTree(ctx, languages, {
-    baseUrl: "/",
-});
+  baseUrl: '/'
+})
 
-export const { getPage, getPages } = createUtils(ctx);
+export const { getPage, getPages } = createUtils(ctx)

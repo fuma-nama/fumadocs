@@ -1,17 +1,17 @@
 {
-    "pages": [
-        "---Guide---",
-        "index",
-        "theme",
-        "images",
-        "internationalization",
-        "---Components---",
-        "components/codeblock",
-        "components/card",
-        "components/heading",
-        "components/roll-button",
-        "---Blocks---",
-        "blocks/page",
-        "blocks/layout"
-    ]
+  "pages": [
+    "---Guide---",
+    "index",
+    "theme",
+    "images",
+    "internationalization",
+    "---Components---",
+    "components/codeblock",
+    "components/card",
+    "components/heading",
+    "components/roll-button",
+    "---Blocks---",
+    "blocks/page",
+    "blocks/layout"
+  ]
 }

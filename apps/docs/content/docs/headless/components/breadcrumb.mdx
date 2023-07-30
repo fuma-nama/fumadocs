@@ -14,12 +14,12 @@ next-docs/breadcrumb
 it exports a `useBreadcrumb` hook:
 
 ```tsx
-import { useBreadcrumb } from "next-docs-zeta/breadcrumb";
+import { useBreadcrumb } from 'next-docs-zeta/breadcrumb'
 
-const tree: TreeNode[] = buildPageTree(allMeta, allDocs);
-const pathname = usePathname();
+const tree: TreeNode[] = buildPageTree(allMeta, allDocs)
+const pathname = usePathname()
 
-const items = useBreadcrumb(pathname, tree);
+const items = useBreadcrumb(pathname, tree)
 ```
 
 ### Breadcrumb Item
@@ -34,42 +34,42 @@ const items = useBreadcrumb(pathname, tree);
 Using `lucide-react` for icons.
 
 ```tsx
-import { usePathname } from "next/navigation";
-import type { TreeNode } from "next-docs-zeta/server";
-import { useBreadcrumb } from "next-docs-zeta/breadcrumb";
-import clsx from "clsx";
-import { ChevronRightIcon } from "lucide-react";
-import Link from "next/link";
-import { Fragment } from "react";
+import clsx from 'clsx'
+import { ChevronRightIcon } from 'lucide-react'
+import { useBreadcrumb } from 'next-docs-zeta/breadcrumb'
+import type { TreeNode } from 'next-docs-zeta/server'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { Fragment } from 'react'
 
-const itemStyles = "overflow-hidden overflow-ellipsis whitespace-nowrap";
+const itemStyles = 'overflow-hidden overflow-ellipsis whitespace-nowrap'
 
 export function Breadcrumb({ tree }: { tree: TreeNode[] }) {
-    const pathname = usePathname();
-    //get breadcrumb items
-    const items = useBreadcrumb(pathname, tree);
+  const pathname = usePathname()
+  //get breadcrumb items
+  const items = useBreadcrumb(pathname, tree)
 
-    return (
-        <div className="flex flex-row gap-1 text-sm text-muted-foreground items-center">
-            <p className={itemStyles}>Docs</p>
-            {items.map((item, i) => {
-                const active = items.length === i + 1;
-                const style = clsx(itemStyles, active && "text-foreground");
+  return (
+    <div className="text-muted-foreground flex flex-row items-center gap-1 text-sm">
+      <p className={itemStyles}>Docs</p>
+      {items.map((item, i) => {
+        const active = items.length === i + 1
+        const style = clsx(itemStyles, active && 'text-foreground')
 
-                return (
-                    <Fragment key={i}>
-                        <ChevronRightIcon className="w-4 h-4 flex-shrink-0" />
-                        {item.url != null ? (
-                            <Link href={item.url} className={style}>
-                                {item.name}
-                            </Link>
-                        ) : (
-                            <p className={style}>{item.name}</p>
-                        )}
-                    </Fragment>
-                );
-            })}
-        </div>
-    );
+        return (
+          <Fragment key={i}>
+            <ChevronRightIcon className="h-4 w-4 flex-shrink-0" />
+            {item.url != null ? (
+              <Link href={item.url} className={style}>
+                {item.name}
+              </Link>
+            ) : (
+              <p className={style}>{item.name}</p>
+            )}
+          </Fragment>
+        )
+      })}
+    </div>
+  )
 }
 ```

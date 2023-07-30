@@ -8,13 +8,13 @@ A Table of Contents with active anchor observer.
 ## Usage
 
 ```tsx
-import * as Base from "next-docs-zeta/toc";
+import * as Base from 'next-docs-zeta/toc'
 
 return (
-    <Base.TOCProvider>
-        <Base.TOCItem />
-    </Base.TOCProvider>
-);
+  <Base.TOCProvider>
+    <Base.TOCItem />
+  </Base.TOCProvider>
+)
 ```
 
 ### TOC Provider
@@ -36,51 +36,51 @@ return (
 
 ### Use Active Anchor
 
-A hook for getting info of an anchor. It accepts the item url and return an `Anchor` object, must be called under the TOC Provider.
+A hook for getting info of an anchor. It accepts the item url and return an
+`Anchor` object, must be called under the TOC Provider.
 
 Helpful for implementing auto scroll or advanced usages.
 
 #### Usage
 
 ```ts
-import { useActiveAnchor } from "next-docs-zeta/toc";
+import { useActiveAnchor } from 'next-docs-zeta/toc'
 
-const anchor = useActiveAnchor(item.url);
+const anchor = useActiveAnchor(item.url)
 ```
 
 ## Example
 
 ```tsx
-"use client";
-import * as Primitive from "next-docs-zeta/toc";
-import type { TOCItemType } from "next-docs-zeta/server";
+'use client'
+
+import type { TOCItemType } from 'next-docs-zeta/server'
+import * as Primitive from 'next-docs-zeta/toc'
 
 export function TOC({ items }: { items: TOCItemType[] }) {
-    return (
-        <Primitive.TOCProvider toc={items}>
-            {items.map((item, i) => (
-                <TOCItem key={i} item={item} />
-            ))}
-        </Primitive.TOCProvider>
-    );
+  return (
+    <Primitive.TOCProvider toc={items}>
+      {items.map((item, i) => (
+        <TOCItem key={i} item={item} />
+      ))}
+    </Primitive.TOCProvider>
+  )
 }
 
 function TOCItem({ item }: { item: TOCItemType }) {
-    return (
-        <div>
-            <Primitive.TOCItem
-                href={item.url}
-                item={item}
-                className="text-sm text-muted-foreground transition-colors data-[active=true]:font-semibold data-[active=true]:text-foreground"
-            >
-                {item.title}
-            </Primitive.TOCItem>
-            <div className="flex flex-col pl-4">
-                {item.items?.map((item, i) => (
-                    <TOCItem key={i} item={item} />
-                ))}
-            </div>
-        </div>
-    );
+  return (
+    <div>
+      <Primitive.TOCItem
+        href={item.url}
+        item={item}
+        className="text-muted-foreground data-[active=true]:text-foreground text-sm transition-colors data-[active=true]:font-semibold"
+      >
+        {item.title}
+      </Primitive.TOCItem>
+      <div className="flex flex-col pl-4">
+        {item.items?.map((item, i) => <TOCItem key={i} item={item} />)}
+      </div>
+    </div>
+  )
 }
 ```

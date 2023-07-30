@@ -8,14 +8,14 @@ description: Use the Card component in your MDX documentation
 Add it to your MDX components.
 
 ```tsx {5-6}
-import { Card, Cards } from "next-docs-ui/mdx";
+import { Card, Cards } from 'next-docs-ui/mdx'
 
-<MDX
-    components={{
-        Card: (props) => <Card {...props} />,
-        Cards: (props) => <Cards {...props} />,
-    }}
-/>;
+;<MDX
+  components={{
+    Card: props => <Card {...props} />,
+    Cards: props => <Cards {...props} />
+  }}
+/>
 ```
 
 ### Cards
@@ -36,11 +36,11 @@ The component to redirect users.
 
 ```mdx
 <Cards>
-    <Card href="/" title="Home" description="Go back to home" />
+  <Card href="/" title="Home" description="Go back to home" />
 </Cards>
 ```
 
 <br />
 <Cards>
-    <Card href="/" title="Home" description="Go back to home" />
+  <Card href="/" title="Home" description="Go back to home" />
 </Cards>

@@ -1,6 +1,6 @@
 {
-    "compilerOptions": {
-        "noEmit": true
-    },
-    "exclude": []
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "exclude": []
 }

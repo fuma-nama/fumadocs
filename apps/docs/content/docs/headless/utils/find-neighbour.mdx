@@ -3,8 +3,8 @@ title: Find Neighbours
 description: Find the neighbours of a page from the page tree
 ---
 
-Find the neighbours of a page from the page tree, it returns the next and previous page of a given page.
-It is useful for implementing a footer.
+Find the neighbours of a page from the page tree, it returns the next and
+previous page of a given page. It is useful for implementing a footer.
 
 For example:
 
@@ -19,11 +19,11 @@ For example:
 It requires a page tree and the url of page.
 
 ```ts
-import { getPageUrl } from "next-docs-zeta/contentlayer";
-import { findNeighbour } from "next-docs-zeta/server";
+import { getPageUrl } from 'next-docs-zeta/contentlayer'
+import { findNeighbour } from 'next-docs-zeta/server'
 
-const url = getPageUrl(params.slug.split("/"), "/docs");
-const neighbours = findNeighbour(tree, url);
+const url = getPageUrl(params.slug.split('/'), '/docs')
+const neighbours = findNeighbour(tree, url)
 ```
 
 | Parameter | Type         | Description     |

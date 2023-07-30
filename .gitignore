@@ -14,6 +14,7 @@ node_modules
 out
 dist
 .contentlayer
+.eslintcache
 
 # production
 /build

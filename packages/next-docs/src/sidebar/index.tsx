@@ -1,90 +1,85 @@
-import {
-    ElementType,
-    ReactNode,
-    createContext,
-    useContext,
-    useEffect,
-    useState,
-} from "react";
-import { usePathname } from "next/navigation";
-import { RemoveScroll } from "react-remove-scroll";
-import { WithAs } from "@/types";
+import type { WithAs } from '@/types'
+import { usePathname } from 'next/navigation'
+import type { ElementType, ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
+import { RemoveScroll } from 'react-remove-scroll'
 
-const SidebarContext = createContext({
-    open: false,
-    setOpen: (_: boolean) => {},
-});
+const SidebarContext = createContext<{
+  open: boolean
+  setOpen: (value: boolean) => void
+}>({
+  open: false,
+  setOpen: () => {}
+})
 
 export type SidebarProviderProps = {
-    open?: boolean;
-    onOpenChange?: (v: boolean) => void;
-    children: ReactNode;
-};
-
-export function SidebarProvider(props: SidebarProviderProps) {
-    const [open, setOpen] =
-        props.open == null
-            ? useState(false)
-            : [props.open, props.onOpenChange!!];
-    const pathname = usePathname();
-
-    useEffect(() => {
-        setOpen(false);
-    }, [pathname]);
-
-    return (
-        <SidebarContext.Provider value={{ open, setOpen }}>
-            {props.children}
-        </SidebarContext.Provider>
-    );
+  open?: boolean
+  onOpenChange?: (v: boolean) => void
+  children: ReactNode
 }
 
-export type SidebarTriggerProps<T extends ElementType> = WithAs<T>;
+export function SidebarProvider(props: SidebarProviderProps) {
+  const [open, setOpen] =
+    props.open == null ? useState(false) : [props.open, props.onOpenChange!]
+  const pathname = usePathname()
 
-export function SidebarTrigger<T extends ElementType = "button">({
-    as,
-    ...props
+  useEffect(() => {
+    setOpen(false)
+  }, [pathname])
+
+  return (
+    <SidebarContext.Provider value={{ open, setOpen }}>
+      {props.children}
+    </SidebarContext.Provider>
+  )
+}
+
+export type SidebarTriggerProps<T extends ElementType> = WithAs<T>
+
+export function SidebarTrigger<T extends ElementType = 'button'>({
+  as,
+  ...props
 }: SidebarTriggerProps<T>) {
-    const { open, setOpen } = useContext(SidebarContext);
-    const As = as ?? "button";
+  const { open, setOpen } = useContext(SidebarContext)
+  const As = as ?? 'button'
 
-    return <As data-open={open} onClick={() => setOpen(!open)} {...props} />;
+  return <As data-open={open} onClick={() => setOpen(!open)} {...props} />
 }
 
 export type SidebarContentProps<T extends ElementType> = WithAs<
-    T,
-    {
-        minWidth?: number;
-    }
->;
+  T,
+  {
+    minWidth?: number
+  }
+>
 
-export function SidebarList<T extends ElementType = "aside">({
-    as,
-    minWidth,
-    ...props
+export function SidebarList<T extends ElementType = 'aside'>({
+  as,
+  minWidth,
+  ...props
 }: SidebarContentProps<T>) {
-    const { open } = useContext(SidebarContext);
-    const [isMobileLayout, setIsMobileLayout] = useState(false);
+  const { open } = useContext(SidebarContext)
+  const [isMobileLayout, setIsMobileLayout] = useState(false)
 
-    useEffect(() => {
-        if (minWidth == null) return;
-        const mediaQueryList = window.matchMedia(`(min-width: ${minWidth}px)`);
+  useEffect(() => {
+    if (minWidth == null) return
+    const mediaQueryList = window.matchMedia(`(min-width: ${minWidth}px)`)
 
-        const handleChange = () => setIsMobileLayout(!mediaQueryList.matches);
-        handleChange();
+    const handleChange = () => setIsMobileLayout(!mediaQueryList.matches)
+    handleChange()
 
-        mediaQueryList.addEventListener("change", handleChange);
-        return () => mediaQueryList.removeEventListener("change", handleChange);
-    }, [minWidth]);
+    mediaQueryList.addEventListener('change', handleChange)
+    return () => mediaQueryList.removeEventListener('change', handleChange)
+  }, [minWidth])
 
-    return (
-        <RemoveScroll
-            as={as}
-            data-open={isMobileLayout && open}
-            enabled={isMobileLayout && open}
-            {...props}
-        >
-            {props.children}
-        </RemoveScroll>
-    );
+  return (
+    <RemoveScroll
+      as={as}
+      data-open={isMobileLayout && open}
+      enabled={isMobileLayout && open}
+      {...props}
+    >
+      {props.children}
+    </RemoveScroll>
+  )
 }

@@ -3,11 +3,11 @@
 @tailwind utilities;
 
 * {
-    @apply border-border;
+  @apply border-border;
 }
 
 @property --rotate-angle {
-    syntax: "<angle>";
-    inherits: false;
-    initial-value: -45deg;
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: -45deg;
 }

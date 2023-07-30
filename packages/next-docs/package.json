@@ -1,116 +1,115 @@
 {
-    "name": "next-docs-zeta",
-    "description": "The library for building a documentation website in Next.js",
-    "version": "1.1.3",
-    "homepage": "https://next-docs-zeta.vercel.app",
-    "author": "Money SonMooSans",
-    "repository": "github:SonMooSans/next-docs",
-    "license": "MIT",
-    "files": [
-        "dist/*"
-    ],
-    "exports": {
-        "./sidebar": {
-            "import": "./dist/sidebar/index.mjs",
-            "types": "./dist/sidebar/index.d.ts"
-        },
-        "./breadcrumb": {
-            "import": "./dist/breadcrumb/index.mjs",
-            "types": "./dist/breadcrumb/index.d.ts"
-        },
-        "./toc": {
-            "import": "./dist/toc/index.mjs",
-            "types": "./dist/toc/index.d.ts"
-        },
-        "./search": {
-            "import": "./dist/search/index.mjs",
-            "types": "./dist/search/index.d.ts"
-        },
-        "./server": {
-            "import": "./dist/server/index.mjs",
-            "types": "./dist/server/index.d.ts"
-        },
-        "./link": {
-            "import": "./dist/link/index.mjs",
-            "types": "./dist/link/index.d.ts"
-        },
-        "./contentlayer": {
-            "import": "./dist/contentlayer/index.mjs",
-            "types": "./dist/contentlayer/index.d.ts"
-        },
-        "./middleware": {
-            "import": "./dist/middleware/index.mjs",
-            "types": "./dist/middleware/index.d.ts"
-        },
-        "./*": {
-            "import": "./dist/*.mjs",
-            "types": "./dist/*.d.ts"
-        }
+  "name": "next-docs-zeta",
+  "description": "The library for building a documentation website in Next.js",
+  "version": "1.1.3",
+  "homepage": "https://next-docs-zeta.vercel.app",
+  "author": "Money SonMooSans",
+  "repository": "github:SonMooSans/next-docs",
+  "license": "MIT",
+  "files": [
+    "dist/*"
+  ],
+  "exports": {
+    "./sidebar": {
+      "import": "./dist/sidebar/index.mjs",
+      "types": "./dist/sidebar/index.d.ts"
     },
-    "typesVersions": {
-        "*": {
-            "sidebar": [
-                "./dist/sidebar/index.d.ts"
-            ],
-            "breadcrumb": [
-                "./dist/breadcrumb/index.d.ts"
-            ],
-            "toc": [
-                "./dist/toc/index.d.ts"
-            ],
-            "search": [
-                "./dist/search/index.d.ts"
-            ],
-            "server": [
-                "./dist/server/index.d.ts"
-            ],
-            "link": [
-                "./dist/link/index.d.ts"
-            ],
-            "contentlayer": [
-                "./dist/contentlayer/index.d.ts"
-            ],
-            "middleware": [
-                "./dist/middleware/index.d.ts"
-            ]
-        }
+    "./breadcrumb": {
+      "import": "./dist/breadcrumb/index.mjs",
+      "types": "./dist/breadcrumb/index.d.ts"
     },
-    "scripts": {
-        "build": "tsup --clean",
-        "clean": "rmdir /q/s dist",
-        "dev": "tsup --watch",
-        "prepublishOnly": "pnpm build",
-        "types": "tsup --dts-only",
-        "types:check": "tsc --noEmit"
+    "./toc": {
+      "import": "./dist/toc/index.mjs",
+      "types": "./dist/toc/index.d.ts"
     },
-    "dependencies": {
-        "@formatjs/intl-localematcher": "^0.4.0",
-        "flexsearch": "0.7.21",
-        "mdast-util-toc": "^6.1.1",
-        "negotiator": "^0.6.3",
-        "react-remove-scroll": "^2.5.6",
-        "remark": "^14.0.2",
-        "swr": "^2.1.5",
-        "unist-util-visit": "^4.1.2"
+    "./search": {
+      "import": "./dist/search/index.mjs",
+      "types": "./dist/search/index.d.ts"
     },
-    "peerDependencies": {
-        "next": "13.x",
-        "react": "18.x",
-        "react-dom": "18.x"
+    "./server": {
+      "import": "./dist/server/index.mjs",
+      "types": "./dist/server/index.d.ts"
     },
-    "devDependencies": {
-        "@types/flexsearch": "0.7.3",
-        "@types/negotiator": "^0.6.1",
-        "@types/react": "18.2.0",
-        "@types/react-dom": "18.2.1",
-        "contentlayer": "^0.3.4",
-        "next": "13.4.12"
+    "./link": {
+      "import": "./dist/link/index.mjs",
+      "types": "./dist/link/index.d.ts"
     },
-    "keywords": [
-        "NextJs",
-        "Docs"
-    ],
-    "publishConfig": {
-        "access": "public"
+    "./contentlayer": {
+      "import": "./dist/contentlayer/index.mjs",
+      "types": "./dist/contentlayer/index.d.ts"
+    },
+    "./middleware": {
+      "import": "./dist/middleware/index.mjs",
+      "types": "./dist/middleware/index.d.ts"
+    },
+    "./*": {
+      "import": "./dist/*.mjs",
+      "types": "./dist/*.d.ts"
     }
+  },
+  "typesVersions": {
+    "*": {
+      "sidebar": [
+        "./dist/sidebar/index.d.ts"
+      ],
+      "breadcrumb": [
+        "./dist/breadcrumb/index.d.ts"
+      ],
+      "toc": [
+        "./dist/toc/index.d.ts"
+      ],
+      "search": [
+        "./dist/search/index.d.ts"
+      ],
+      "server": [
+        "./dist/server/index.d.ts"
+      ],
+      "link": [
+        "./dist/link/index.d.ts"
+      ],
+      "contentlayer": [
+        "./dist/contentlayer/index.d.ts"
+      ],
+      "middleware": [
+        "./dist/middleware/index.d.ts"
+      ]
+    }
+  },
+  "scripts": {
+    "build": "tsup --clean",
+    "clean": "rmdir /q/s dist",
+    "dev": "tsup --watch",
+    "prepublishOnly": "pnpm build",
+    "types:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@formatjs/intl-localematcher": "^0.4.0",
+    "flexsearch": "0.7.21",
+    "mdast-util-toc": "^6.1.1",
+    "negotiator": "^0.6.3",
+    "react-remove-scroll": "^2.5.6",
+    "remark": "^14.0.2",
+    "swr": "^2.1.5",
+    "unist-util-visit": "^4.1.2"
+  },
+  "peerDependencies": {
+    "next": "13.x",
+    "react": "18.x",
+    "react-dom": "18.x"
+  },
+  "devDependencies": {
+    "@types/flexsearch": "0.7.3",
+    "@types/negotiator": "^0.6.1",
+    "@types/react": "18.2.0",
+    "@types/react-dom": "18.2.1",
+    "contentlayer": "^0.3.4",
+    "next": "13.4.12"
+  },
+  "keywords": [
+    "NextJs",
+    "Docs"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }

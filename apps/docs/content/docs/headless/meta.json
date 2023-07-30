@@ -1,13 +1,13 @@
 {
-    "title": "Docs",
-    "pages": [
-        "---Guide---",
-        "index",
-        "---API References---",
-        "components",
-        "utils",
-        "---Contentlayer---",
-        "contentlayer/index",
-        "contentlayer/internationalization"
-    ]
+  "title": "Docs",
+  "pages": [
+    "---Guide---",
+    "index",
+    "---API References---",
+    "components",
+    "utils",
+    "---Contentlayer---",
+    "contentlayer/index",
+    "contentlayer/internationalization"
+  ]
 }

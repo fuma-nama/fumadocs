@@ -1,9 +1,9 @@
 {
-    "pages": [
-        "---指南---",
-        "index",
-        "install",
-        "---API Reference---",
-        "components"
-    ]
+  "pages": [
+    "---指南---",
+    "index",
+    "install",
+    "---API Reference---",
+    "components"
+  ]
 }

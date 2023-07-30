@@ -9,25 +9,26 @@ Next Docs has native support for Contentlayer.
 
 1. Install `rehype-pretty-code remark-gfm rehype-slug rehype-img-size`.
 
-2. Copy the code from [Example Configuration](https://github.com/SonMooSans/next-docs/blob/main/packages/next-docs-ui/src/contentlayer/index.ts).
+2. Copy the code from
+   [Example Configuration](https://github.com/SonMooSans/next-docs/blob/main/packages/next-docs-ui/src/contentlayer/index.ts).
 
 3. Edit your configuration.
 
 ```ts title="contentlayer.config.ts"
 // copied code...
 
-export default makeSource(defaultConfig);
+export default makeSource(defaultConfig)
 ```
 
 4. Build the [Page Tree](/docs#build-page-tree).
 
 ```ts
-import { allDocs, allMeta } from "contentlayer/generated";
-import { buildPageTree } from "next-docs-zeta/contentlayer";
+import { allDocs, allMeta } from 'contentlayer/generated'
+import { buildPageTree } from 'next-docs-zeta/contentlayer'
 
 // load pages
-const ctx = loadContext(allMeta, allDocs);
-export const tree = buildPageTree(ctx);
+const ctx = loadContext(allMeta, allDocs)
+export const tree = buildPageTree(ctx)
 ```
 
 ## Pages Structure
@@ -36,7 +37,8 @@ All files are located in `/content` and `/content/docs` for documentation pages.
 
 ### File
 
-By default, it uses [MDX](https://mdxjs.com) and supports `title` and `description` frontmatter:
+By default, it uses [MDX](https://mdxjs.com) and supports `title` and
+`description` frontmatter:
 
 ```mdx
 ---
@@ -51,19 +53,22 @@ You may edit the configuration file to add additional properties.
 
 ### Folder
 
-You can use folders to organize multiple pages, the uppercased name of the folder will be used as the display name.
+You can use folders to organize multiple pages, the uppercased name of the
+folder will be used as the display name.
 
 ### Meta
 
-You can also customize the folder name, the order of pages, or adding a separator by creating a `meta.json` in the folder.
+You can also customize the folder name, the order of pages, or adding a
+separator by creating a `meta.json` in the folder.
 
 ```json
 {
-    "title": "Name of Folder",
-    "pages": ["guide", "---Separator---", "components"] // file name of pages
+  "title": "Name of Folder",
+  "pages": ["guide", "---Separator---", "components"] // file name of pages
 }
 ```
 
 ### Separator
 
-As you see, you can define a separator in meta by adding a item surrounded by `---`.
+As you see, you can define a separator in meta by adding a item surrounded by
+`---`.

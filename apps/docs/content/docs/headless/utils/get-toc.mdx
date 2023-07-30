@@ -12,21 +12,21 @@ Note: If you're using a CMS, you should use the API provided by the CMS instead.
 ### Markdown/MDX
 
 ```ts
-import { getTableOfContents } from "next-docs-zeta/server";
+import { getTableOfContents } from 'next-docs-zeta/server'
 
-const toc = await getTableOfContents(page.body.raw);
+const toc = await getTableOfContents(page.body.raw)
 ```
 
 ### Portable Text (Sanity)
 
 ```ts
-import { getTableOfContentsFromPortableText } from "next-docs-zeta/server";
+import { getTableOfContentsFromPortableText } from 'next-docs-zeta/server'
 
-const posts = await client.fetch(query);
+const posts = await client.fetch(query)
 
-const toc = await getTableOfContentsFromPortableText(posts[0].body, (s) =>
-    generateSlug(s)
-);
+const toc = await getTableOfContentsFromPortableText(posts[0].body, s =>
+  generateSlug(s)
+)
 ```
 
 ### getTableOfContents
@@ -35,7 +35,8 @@ Parse markdown content and return an array of TOC items.
 
 ### getTableOfContentsFromPortableText
 
-Takes a portable text and slug function, return an array of TOC items with their slug generated using the slug function.
+Takes a portable text and slug function, return an array of TOC items with their
+slug generated using the slug function.
 
 ### TOCItemType
 

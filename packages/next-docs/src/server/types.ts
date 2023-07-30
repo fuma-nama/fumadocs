@@ -1,32 +1,32 @@
-import type FlexSearch from "flexsearch";
+import type FlexSearch from 'flexsearch'
 
-export type TreeNode = FileNode | Separator | FolderNode;
+export type TreeNode = FileNode | Separator | FolderNode
 
 export type FileNode = {
-    type: "page";
-    name: string;
-    url: string;
-};
+  type: 'page'
+  name: string
+  url: string
+}
 
 export type Separator = {
-    type: "separator";
-    name: string;
-};
+  type: 'separator'
+  name: string
+}
 
 export type FolderNode = {
-    type: "folder";
-    name: string;
-    url: string;
-    index?: FileNode;
-    children: TreeNode[];
-};
+  type: 'folder'
+  name: string
+  url: string
+  index?: FileNode
+  children: TreeNode[]
+}
 
 export type IndexPage = {
-    title: string;
-    content: string;
-    url: string;
-    keywords?: string;
-};
+  title: string
+  content: string
+  url: string
+  keywords?: string
+}
 
 export type SearchDocsResult =
-    FlexSearch.EnrichedDocumentSearchResultSetUnitResultUnit<IndexPage>[];
+  FlexSearch.EnrichedDocumentSearchResultSetUnitResultUnit<IndexPage>[]

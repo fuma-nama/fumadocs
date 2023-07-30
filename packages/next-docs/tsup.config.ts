@@ -1,11 +1,11 @@
-import { defineConfig } from "tsup";
-import tsconfig from "./tsconfig.json";
+import { defineConfig } from 'tsup'
+import tsconfig from './tsconfig.json'
 
 export default defineConfig({
-    entry: [
-        "src/{server,breadcrumb,sidebar,toc,search,link,contentlayer,middleware}/index.{ts,tsx}",
-    ],
-    format: "esm",
-    dts: true,
-    target: tsconfig.compilerOptions.target as "es2016",
-});
+  entry: [
+    'src/{server,breadcrumb,sidebar,toc,search,link,contentlayer,middleware}/index.{ts,tsx}'
+  ],
+  format: 'esm',
+  dts: true,
+  target: tsconfig.compilerOptions.target as 'es2016'
+})

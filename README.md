@@ -20,7 +20,8 @@ npm install next-docs-zeta
 
 ### Next Docs UI
 
-The framework built on top of Next Docs Zeta. It offers many out-of-the-box features along with a well-designed user interface.
+The framework built on top of Next Docs Zeta. It offers many out-of-the-box
+features along with a well-designed user interface.
 
 ```bash
 npm install next-docs-ui
@@ -30,7 +31,8 @@ npm install next-docs-ui
 
 [![Open in CodeSandbox](https://img.shields.io/badge/Open%20in-CodeSandbox-blue?style=flat-square&logo=codesandbox)](https://githubbox.com/SonMooSans/next-docs-ui-template)
 
-View the [Template](https://github.com/SonMooSans/next-docs-ui-template) repository on Github.
+View the [Template](https://github.com/SonMooSans/next-docs-ui-template)
+repository on Github.
 
 ### Sources
 

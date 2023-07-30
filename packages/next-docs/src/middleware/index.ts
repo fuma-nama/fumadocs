@@ -1,47 +1,45 @@
-import { match as matchLocale } from "@formatjs/intl-localematcher";
-import { NextRequest, NextResponse } from "next/server";
-import Negotiator from "negotiator";
+import { match as matchLocale } from '@formatjs/intl-localematcher'
+import Negotiator from 'negotiator'
+import type { NextRequest } from 'next/server'
+import { NextResponse } from 'next/server'
 
 function getLocale(
-    request: NextRequest,
-    locales: string[],
-    defaultLanguage: string
+  request: NextRequest,
+  locales: string[],
+  defaultLanguage: string
 ): string {
-    // Negotiator expects plain object so we need to transform headers
-    const negotiatorHeaders: Record<string, string> = {};
-    request.headers.forEach((value, key) => (negotiatorHeaders[key] = value));
+  // Negotiator expects plain object so we need to transform headers
+  const negotiatorHeaders: Record<string, string> = {}
+  request.headers.forEach((value, key) => (negotiatorHeaders[key] = value))
 
-    // Use negotiator and intl-localematcher to get best locale
-    const languages = new Negotiator({ headers: negotiatorHeaders }).languages(
-        locales
-    );
+  // Use negotiator and intl-localematcher to get best locale
+  const languages = new Negotiator({ headers: negotiatorHeaders }).languages(
+    locales
+  )
 
-    return matchLocale(languages, locales, defaultLanguage);
+  return matchLocale(languages, locales, defaultLanguage)
 }
 
 export function createI18nMiddleware(
-    request: NextRequest,
-    languages: string[],
-    defaultLanguage: string,
-    format: (locale: string, slug: string) => string
+  request: NextRequest,
+  languages: string[],
+  defaultLanguage: string,
+  format: (locale: string, slug: string) => string
 ) {
-    const pathname = request.nextUrl.pathname;
+  const { pathname } = request.nextUrl
 
-    const pathnameIsMissingLocale = languages.every(
-        (locale) =>
-            !pathname.startsWith(`/${locale}/`) && pathname !== `/${locale}`
-    );
+  const pathnameIsMissingLocale = languages.every(
+    locale => !pathname.startsWith(`/${locale}/`) && pathname !== `/${locale}`
+  )
 
-    if (pathnameIsMissingLocale) {
-        const locale = getLocale(request, languages, defaultLanguage);
-        let path = pathname;
+  if (pathnameIsMissingLocale) {
+    const locale = getLocale(request, languages, defaultLanguage)
+    let path = pathname
 
-        while (path.startsWith("/")) {
-            path = path.slice(1);
-        }
-
-        return NextResponse.redirect(
-            new URL(format(locale, path), request.url)
-        );
+    while (path.startsWith('/')) {
+      path = path.slice(1)
     }
+
+    return NextResponse.redirect(new URL(format(locale, path), request.url))
+  }
 }

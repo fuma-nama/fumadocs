@@ -4,22 +4,22 @@ title: Code Block
 
 Display code blocks, required by default.
 
--   Syntax highlighting powered by [Shiki](https://github.com/shikijs/shiki).
--   Copy button
--   Custom Titles
+- Syntax highlighting powered by [Shiki](https://github.com/shikijs/shiki).
+- Copy button
+- Custom Titles
 
 ## Usage
 
 You can add this component to `mdxComponents`.
 
 ```tsx {1,5}
-import { Pre } from "next-docs-ui/mdx";
+import { Pre } from 'next-docs-ui/mdx'
 
-<MDX
-    components={{
-        pre: (props) => <Pre {...props} />,
-    }}
-/>;
+;<MDX
+  components={{
+    pre: props => <Pre {...props} />
+  }}
+/>
 ```
 
 ### Highlight Lines
@@ -43,16 +43,16 @@ Add `title="x"` to the codeblock meta.
 ```js title="next.config.js"
 /** @type {import('next').NextConfig} */
 const config = {
-    pageExtensions: ["ts", "tsx", "js", "jsx", "md", "mdx"],
-    reactStrictMode: true,
-    images: {
-        domains: ["i.pravatar.cc"],
-    },
-};
+  pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
+  reactStrictMode: true,
+  images: {
+    domains: ['i.pravatar.cc']
+  }
+}
 
-const { withContentlayer } = require("next-contentlayer");
+const { withContentlayer } = require('next-contentlayer')
 
-module.exports = withContentlayer(config);
+module.exports = withContentlayer(config)
 ```
 ````
 
@@ -61,14 +61,14 @@ module.exports = withContentlayer(config);
 ```js title="next.config.js" {10}
 /** @type {import('next').NextConfig} */
 const config = {
-    pageExtensions: ["ts", "tsx", "js", "jsx", "md", "mdx"],
-    reactStrictMode: true,
-    images: {
-        domains: ["i.pravatar.cc"],
-    },
-};
+  pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
+  reactStrictMode: true,
+  images: {
+    domains: ['i.pravatar.cc']
+  }
+}
 
-const { withContentlayer } = require("next-contentlayer");
+const { withContentlayer } = require('next-contentlayer')
 
-module.exports = withContentlayer(config);
+module.exports = withContentlayer(config)
 ```
