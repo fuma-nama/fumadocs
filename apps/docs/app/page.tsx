@@ -1,5 +1,5 @@
+import ExampleImage from '@/public/example.png'
 import { cn } from '@/utils/cn'
-import { CopyIcon } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import type { ComponentPropsWithoutRef, ComponentPropsWithRef } from 'react'
@@ -27,8 +27,8 @@ export default function HomePage() {
         <div className="ml-72 h-[500px] w-6 -rotate-45 rounded-full bg-gradient-to-b from-transparent via-purple-400/50 via-60% to-cyan-200" />
       </div>
       <Star className="animate-star absolute left-[10%] top-40 text-cyan-100 delay-200 max-lg:hidden" />
-      <Star className="animate-star absolute left-[30%] top-72 scale-[.25] text-cyan-100 delay-700" />
-      <Star className="animate-star absolute right-[10%] top-64 scale-50 text-pink-200 md:top-20" />
+      <Star className="animate-star absolute left-[30%] top-72 scale-[.25] text-cyan-100 delay-700 max-lg:hidden" />
+      <Star className="animate-star absolute right-[10%] top-64 scale-50 text-pink-200 max-lg:hidden" />
       <Star className="animate-star absolute right-[15%] top-96 text-pink-200 delay-1000 max-lg:hidden" />
       <Star className="animate-star absolute right-[30%] top-64 scale-50 text-pink-200 max-lg:hidden" />
 
@@ -88,15 +88,104 @@ export default function HomePage() {
         </div>
       </div>
       <div className="mt-[-300px] h-[400px] bg-gradient-to-b from-transparent via-blue-500/10 to-transparent" />
-      <div className="container mb-40 mt-20 flex flex-col items-center gap-2 text-center">
+      <div className="px-8">
+        <h2 className="text-5xl sm:text-6xl md:text-7xl text-center mt-20 text-foreground mb-4">
+          Moreover
+        </h2>
+        <p className="text-center sm:text-lg">
+          Next Docs UI is the next-gen framework for your documentation website
+        </p>
+      </div>
+
+      <div className="relative z-[-1] mt-12">
+        <div className="absolute top-12 left-0 bg-gradient-to-l from-transparent to-transparent via-cyan-300 dark:via-cyan-400 w-full h-[500px] blur-3xl" />
+      </div>
+
+      <div className="container max-w-[1400px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 py-8 mt-10">
+        <div className="relative z-[2] p-8 rounded-3xl bg-gradient-to-br from-cyan-400 to-pink-400 text-center text-cyan-50 overflow-hidden sm:p-12 max-sm:max-h-[400px] md:col-span-2 lg:col-span-3">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-4">
+            Everything from Next.js
+          </h2>
+          <p className="text-sm mb-12 md:text-base">
+            Built for Next.js App Router, with the full power of React Server
+            Components.
+          </p>
+          <Image
+            alt="example"
+            src={ExampleImage}
+            className="rounded-3xl shadow-lg shadow-black min-w-[500px] w-full max-w-[1000px] m-auto"
+          />
+          <div className="absolute w-[90%] h-[60%] bg-gradient-to-br from-white/50 border border-white rounded-3xl left-[50%] translate-x-[-50%] translate-y-[-50%] top-[80%] sm:top-[60%] z-[-1]" />
+        </div>
+
+        <div className="border p-12 rounded-3xl text-center flex flex-col items-center bg-gradient-to-br from-background md:col-span-2">
+          <h2 className="text-2xl font-semibold text-foreground mb-4">
+            Light and Fast
+          </h2>
+          <p>
+            Full powered documentation website with ~150 KB first load js size
+          </p>
+        </div>
+        <div className="border p-12 rounded-3xl text-center flex flex-col justify-center bg-gradient-to-br from-background">
+          <h2 className="text-2xl font-semibold mb-4 text-foreground">
+            Optimized
+          </h2>
+          <p>Optimize your images and links by default</p>
+        </div>
+        <div className="border p-12 rounded-3xl text-center flex flex-col justify-center bg-gradient-to-br from-background">
+          <h2 className="text-2xl font-semibold mb-4 text-foreground">
+            A11y & UX
+          </h2>
+          <p>Focus on user experience and accessibility</p>
+        </div>
+        <div className="border p-12 rounded-3xl text-center flex flex-col justify-center bg-gradient-to-br from-background">
+          <h2 className="text-2xl font-semibold text-foreground mb-4">
+            Light and Dark
+          </h2>
+          <p>Let your eyes rest</p>
+        </div>
+        <div className="border p-12 rounded-3xl text-center flex flex-col justify-center bg-gradient-to-br from-background">
+          <h2 className="text-2xl font-semibold text-foreground mb-4">
+            And More...
+          </h2>
+          <p>Remote source, Components, and Utilities</p>
+        </div>
+      </div>
+      <div className="h-[300px] mt-[-300px] bg-gradient-to-r from-cyan-400/50 to-pink-400/50 z-[-1] blur-3xl" />
+      <div className="container my-40 flex flex-col gap-2 text-center">
         <h2 className="text-foreground text-3xl font-semibold">Install Now</h2>
         <p className="text-sm">Stop waiting, go type it.</p>
-        <pre className="text-foreground relative mt-4 rounded-full border border-blue-200/20 bg-blue-200/30 py-1.5 pl-4 pr-20 dark:bg-blue-500/20">
-          npm install next-docs-zeta
-          <button className="absolute inset-y-2 right-2 rounded-full">
-            <CopyIcon className="h-4 w-4" />
-          </button>
-        </pre>
+        <div className="mt-8 grid grid-cols-1 gap-8 md:grid-cols-2">
+          <Link
+            href="/docs/headless"
+            className={cn(
+              'group relative overflow-hidden rounded-xl z-[2] p-px',
+              'after:absolute after:-inset-px after:z-[-1] after:bg-gradient-to-br after:from-blue-500/30 after:to-purple-400'
+            )}
+          >
+            <div className="bg-background h-full rounded-xl bg-gradient-to-tl from-purple-400/20 text-purple-700 dark:text-purple-200 p-6 group-hover:from-purple-400/10">
+              <p className="mb-2 text-lg font-semibold">Next Docs Zeta</p>
+              <pre className="text-sm opacity-80">
+                npm install next-docs-zeta
+              </pre>
+            </div>
+          </Link>
+
+          <Link
+            href="/docs/ui"
+            className={cn(
+              'group relative overflow-hidden rounded-xl z-[2] p-px',
+              'after:absolute after:-inset-px after:z-[-1] after:bg-gradient-to-tl after:from-pink-500/20 after:to-blue-400'
+            )}
+          >
+            <div className="bg-background h-full rounded-xl bg-gradient-to-br from-blue-400/20 p-6 group-hover:from-blue-400/10">
+              <p className="mb-2 text-lg font-semibold text-foreground">
+                Next Docs UI
+              </p>
+              <pre className="text-sm">npm install next-docs-ui</pre>
+            </div>
+          </Link>
+        </div>
       </div>
     </main>
   )
