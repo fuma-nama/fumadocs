@@ -1,0 +1,54 @@
+---
+title: Navbar
+description: The default Navbar component with a sidebar trigger and searchbar.
+---
+
+The default Navbar component with a sidebar toggle and search dialog trigger.
+
+> **Note:** It has been included in the `<DocsLayout />` by default.
+
+## Usage
+
+```tsx
+import { Nav as OriginalNav } from 'next-docs-ui/components'
+import Link from 'next/link'
+
+export function Nav() {
+  return (
+    <OriginalNav>
+      <Link
+        href="/"
+        className="hover:text-muted-foreground whitespace-nowrap font-semibold"
+      >
+        Next Docs
+      </Link>
+    </OriginalNav>
+  )
+}
+```
+
+### Enable Sidebar
+
+As your navbar can be displayed in any pages without a sidebar, you may want to
+hide the sidebar trigger in specific pages.
+
+```tsx
+<Nav enableSidebar={pathname.startsWith('/docs/') || pathname === '/docs'}>
+  ...
+</Nav>
+```
+
+### Links
+
+You can pass an array of links to the component, it needs an icon with
+`aria-label`.
+
+```tsx
+const links = [
+  {
+    icon: <GithubIcon aria-label="Github" className="h-5 w-5" />,
+    href: 'https://github.com/SonMooSans/next-docs',
+    external: true
+  }
+]
+```

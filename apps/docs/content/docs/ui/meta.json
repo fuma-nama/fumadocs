@@ -12,6 +12,8 @@
     "components/roll-button",
     "---Blocks---",
     "blocks/page",
-    "blocks/layout"
+    "blocks/layout",
+    "blocks/nav",
+    "blocks/root-provider"
   ]
 }

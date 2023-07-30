@@ -1,0 +1,44 @@
+---
+title: Root Provider
+description: The context provider of Next Docs UI.
+---
+
+The context provider of all the components, including `next-themes` and context
+for search dialog. It should be located at the root layout.
+
+## Usage
+
+```jsx
+import { RootProvider } from 'next-docs-ui/provider'
+
+export default function Layout({ children }) {
+  return (
+    <html lang="en">
+      <body>
+        <RootProvider>{children}</RootProvider>
+      </body>
+    </html>
+  )
+}
+```
+
+### Search Dialog
+
+You can customise search dialog from the root provider.
+
+| Prop    | Type                 | Description           |
+| ------- | -------------------- | --------------------- |
+| `links` | `[string, string][]` | Default items to show |
+
+```jsx
+<RootProvider
+  search={{
+    links: [
+      ['Home', '/'],
+      ['Docs', '/docs']
+    ]
+  }}
+>
+  ...
+</RootProvider>
+```
