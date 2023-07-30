@@ -1,6 +1,6 @@
 ---
-title: Docs Page
-description: A single page in your documentation
+title: Page
+description: A page in your documentation
 ---
 
 Page is the base element of a documentation, it includes Table of contents,
@@ -10,10 +10,10 @@ Footer, and Breadcrumb.
 
 Pass the table of contents and page tree to the component.
 
-```tsx
+```mdx
 import { DocsPage } from 'next-docs-ui/page'
 
-DocsPage toc={toc} tree={tree}>
+<DocsPage toc={toc} tree={tree}>
   <MDXContent>...</MDXContent>
 </DocsPage>
 ```
