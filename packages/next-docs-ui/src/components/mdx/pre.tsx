@@ -1,3 +1,4 @@
+import clsx from 'clsx'
 import { CheckIcon, CopyIcon } from 'lucide-react'
 import type { ComponentProps } from 'react'
 import { useEffect, useRef, useState } from 'react'
@@ -23,7 +24,10 @@ export function Pre({ title, ...props }: ComponentProps<'pre'>) {
       <CopyButton onCopy={onCopy} />
       <pre
         {...props}
-        className="nd-overflow-auto nd-bg-secondary/50 nd-text-sm"
+        className={clsx(
+          'nd-overflow-auto nd-bg-secondary/50 nd-text-sm',
+          props.className
+        )}
         ref={ref}
       >
         {props.children}
