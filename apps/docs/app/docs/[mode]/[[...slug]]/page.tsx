@@ -87,7 +87,7 @@ export default async function Page({ params }: { params: Param }) {
             AccordionItem: props => <AccordionItem {...props} />,
             AccordionContent: props => <AccordionContent {...props} />,
             blockquote: props => (
-              <div className="nd-not-prose my-4 rounded-lg border p-3 text-sm">
+              <div className="my-4 rounded-lg border px-3 text-sm shadow-md">
                 {props.children}
               </div>
             ),
