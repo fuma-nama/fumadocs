@@ -3,11 +3,8 @@ title: Breadcrumb
 description: The navigation component at the top of screen
 ---
 
-The navigation component at the top of screen.
-
-```
-next-docs/breadcrumb
-```
+A hook for implementing Breadcrumb in your documentation, it returns the path to
+a page based on the given page tree.
 
 ## Usage
 
@@ -28,48 +25,3 @@ const items = useBreadcrumb(pathname, tree)
 | ------ | ---------------- | ------------ |
 | `name` | `string`         | Name of item |
 | `url`  | `string \| null` | Href link    |
-
-## Example
-
-Using `lucide-react` for icons.
-
-```tsx
-import clsx from 'clsx'
-import { ChevronRightIcon } from 'lucide-react'
-import { useBreadcrumb } from 'next-docs-zeta/breadcrumb'
-import type { TreeNode } from 'next-docs-zeta/server'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { Fragment } from 'react'
-
-const itemStyles = 'overflow-hidden overflow-ellipsis whitespace-nowrap'
-
-export function Breadcrumb({ tree }: { tree: TreeNode[] }) {
-  const pathname = usePathname()
-  //get breadcrumb items
-  const items = useBreadcrumb(pathname, tree)
-
-  return (
-    <div className="text-muted-foreground flex flex-row items-center gap-1 text-sm">
-      <p className={itemStyles}>Docs</p>
-      {items.map((item, i) => {
-        const active = items.length === i + 1
-        const style = clsx(itemStyles, active && 'text-foreground')
-
-        return (
-          <Fragment key={i}>
-            <ChevronRightIcon className="h-4 w-4 flex-shrink-0" />
-            {item.url != null ? (
-              <Link href={item.url} className={style}>
-                {item.name}
-              </Link>
-            ) : (
-              <p className={style}>{item.name}</p>
-            )}
-          </Fragment>
-        )
-      })}
-    </div>
-  )
-}
-```

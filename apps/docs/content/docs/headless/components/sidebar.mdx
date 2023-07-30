@@ -3,11 +3,8 @@ title: Sidebar
 description: The navigation bar at aside of viewport
 ---
 
-Handles device resizing and remove scroll bar automatically.
-
-```
-next-docs/sidebar
-```
+A sidebar component which handles device resizing and remove scroll bar
+automatically.
 
 ## Usage
 
@@ -42,49 +39,3 @@ Opens the sidebar on click.
 | Data Attribute | Values        | Description        |
 | -------------- | ------------- | ------------------ |
 | `data-open`    | `true, false` | Is sidebar opening |
-
-## Example
-
-Using `lucide-react` for icons:
-
-```tsx
-'use client'
-
-import clsx from 'clsx'
-import { MenuIcon } from 'lucide-react'
-import type { TreeNode } from 'next-docs-zeta/server'
-import * as Base from 'next-docs-zeta/sidebar'
-import { ReactNode } from 'react'
-import { SidebarItem } from './item'
-
-export function SidebarProvider({ children }: { children: ReactNode }) {
-  return (
-    <Base.SidebarProvider>
-      <Base.SidebarTrigger className="flex flex-row items-center gap-2 px-8 text-sm">
-        <MenuIcon className="h-4 w-4" />
-        Menu
-      </Base.SidebarTrigger>
-      {children}
-    </Base.SidebarProvider>
-  )
-}
-
-export function Sidebar({ items }: { items: TreeNode[] }) {
-  return (
-    <Base.SidebarList
-      minWidth={1024} // when should it being displayed (ignore the trigger)
-      className={clsx(
-        'fixed inset-0 top-24 flex flex-col gap-3 overflow-auto',
-        'lg:sticky lg:top-12 lg:max-h-[calc(100vh-3rem)] lg:py-16',
-        'max-lg:bg-background/50 max-lg:z-40 max-lg:px-8 max-lg:py-4 max-lg:backdrop-blur-xl max-lg:data-[open=false]:hidden max-lg:sm:px-14'
-      )}
-    >
-      {items.map((item, i) => (
-        <SidebarItem key={i} item={item} />
-      ))}
-    </Base.SidebarList>
-  )
-}
-```
-
-_It doesn't include the implementation of `SidebarItem`_
