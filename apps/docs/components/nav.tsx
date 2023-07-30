@@ -1,13 +1,10 @@
 'use client'
 
-import clsx from 'clsx'
+import { cn } from '@/utils/cn'
 import { GithubIcon } from 'lucide-react'
 import { Nav as OriginalNav } from 'next-docs-ui/components'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-
-const item =
-  'px-2 py-1 rounded-md text-muted-foreground transition-colors hover:text-accent-foreground'
 
 export function Nav() {
   const { mode } = useParams()
@@ -33,8 +30,8 @@ export function Nav() {
         <div className="border-input bg-background rounded-md border p-1 text-sm">
           <Link
             href="/docs/headless"
-            className={clsx(
-              item,
+            className={cn(
+              'px-2 py-1 rounded-md text-muted-foreground transition-colors hover:text-accent-foreground',
               mode === 'headless' && 'bg-accent text-accent-foreground'
             )}
           >
@@ -42,8 +39,8 @@ export function Nav() {
           </Link>
           <Link
             href="/docs/ui"
-            className={clsx(
-              item,
+            className={cn(
+              'px-2 py-1 rounded-md text-muted-foreground transition-colors hover:text-accent-foreground',
               mode === 'ui' && 'bg-accent text-accent-foreground'
             )}
           >
