@@ -7,14 +7,14 @@ export type FooterProps = {
 }
 
 const item =
-  'nd-flex nd-flex-row nd-gap-2 nd-items-end nd-text-sm nd-text-muted-foreground'
+  'nd-flex nd-flex-row nd-gap-2 nd-items-end nd-text-muted-foreground'
 
 export function Footer({ next, previous }: FooterProps) {
   return (
-    <div className="nd-flex nd-flex-row nd-mt-8 nd-gap-4 nd-flex-wrap">
+    <div className="nd-flex nd-flex-row nd-mt-12 nd-gap-4 nd-flex-wrap nd-border-t nd-py-12">
       {previous && (
         <Link href={previous.url} className={item}>
-          <ChevronLeftIcon className="nd-w-5 nd-h-5" />
+          <ChevronLeftIcon className="nd-w-5 nd-h-5 nd-my-1" />
           <div>
             <p className="nd-text-xs">Previous</p>
             <p className="nd-font-medium nd-text-foreground">{previous.name}</p>
@@ -27,7 +27,7 @@ export function Footer({ next, previous }: FooterProps) {
             <p className="nd-text-xs">Next</p>
             <p className="nd-font-medium nd-text-foreground">{next.name}</p>
           </div>
-          <ChevronRightIcon className="nd-w-5 nd-h-5" />
+          <ChevronRightIcon className="nd-w-5 nd-h-5 nd-my-1" />
         </Link>
       )}
     </div>
