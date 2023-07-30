@@ -2,8 +2,9 @@
 const config = {
   pageExtensions: ['ts', 'tsx', 'js', 'jsx'],
   reactStrictMode: true,
-  images: {
-    domains: ['i.pravatar.cc']
+  eslint: {
+    // Replaced by root workspace command
+    ignoreDuringBuilds: true
   }
 }
 
