@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 1.1.4
+
+### Patch Changes
+
+- 496a6b0: Improve footer design
+- 496a6b0: Configure eslint + prettier
+- Updated dependencies [496a6b0]
+  - next-docs-zeta@1.1.4
+
 ## 1.1.3
 
 ### Patch Changes

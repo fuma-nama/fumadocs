@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 1.1.4
+
+### Patch Changes
+
+- 496a6b0: Configure eslint + prettier
+
 ## 1.1.3
 
 ### Patch Changes
