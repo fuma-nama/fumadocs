@@ -1,0 +1,50 @@
+---
+title: Comparisons
+description: How does Next Docs UI different from other existing frameworks
+---
+
+How does Next Docs UI different from other existing frameworks? It is a
+fraquently asked question and here's an answer.
+
+## Is it a Nextra Clone?
+
+Someone asked me this question on Discord, it is a fact that it's highly
+inspired by Nextra. For example, the Routing Conventions. That is why
+`meta.json` also exists in Next Docs if you're using Contentlayer.
+
+But Next Docs is not a clone of Nextra. While Nextra is more opinionated and
+supporting a lot of advanced usages, Next Docs is less opinionated and it's
+built for App Router. As a result, It provides many server-side functions but
+you have to configure things manually.
+
+Next Docs UI works great if you want more control over everything, such as
+adding it to an existing codebase or implementing advanced routing.
+
+### The Core Model
+
+Although Next Docs strongly rely on other libraries, the model of Next Docs is a
+backend library + frontend framework, it accepts different sources and gives you
+a great looking UI.
+
+The only reasion I build Next Docs is that I used to look for an alternative to
+Nextra that allows me to fully customise the UI. I came up with Next Docs Zeta,
+a headless ui library. Next Docs UI laterly released as an example of Next Docs
+Zeta.
+
+### A Table
+
+| Feature             | Next Docs UI | Nextra            |
+| ------------------- | ------------ | ----------------- |
+| Static Generation   | Yes          | Yes               |
+| Cached              | Yes          | Yes               |
+| Light/Dark Mode     | Yes          | Yes               |
+| Syntax Highlighting | Yes          | Yes               |
+| Table of Contents   | Yes          | Yes               |
+| Full-text Search    | Yes          | Yes               |
+| I18n                | Yes          | Yes               |
+| RSC                 | Yes          | Pages Router Only |
+| Remote Source       | Yes          | Not Documented    |
+| SEO                 | Via Metadata | Yes               |
+| RTL Layout          | No           | Yes               |
+| Last Git Edit Time  | NO           | Yes               |
+| Built-in Components | Less         | More              |

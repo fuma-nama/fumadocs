@@ -5,6 +5,7 @@
     "theme",
     "images",
     "internationalization",
+    "comparisons",
     "---Components---",
     "components/codeblock",
     "components/card",
