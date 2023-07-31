@@ -14,7 +14,7 @@ import {
 import { DocsPage } from 'next-docs-ui/page'
 import { getTableOfContents } from 'next-docs-zeta/server'
 import { notFound } from 'next/navigation'
-import { getPage, getPages, trees } from '../../tree'
+import { getPage, getPages } from '../../tree'
 
 export default async function Page({
   params
@@ -24,8 +24,6 @@ export default async function Page({
   if (!languages.includes(params.lang)) {
     notFound()
   }
-
-  const tree = trees[params.lang]
   const page = getPage(params.lang, params.slug)
 
   if (page == null) {
@@ -36,7 +34,7 @@ export default async function Page({
   const MDX = getMDXComponent(page.body.code)
 
   return (
-    <DocsPage toc={toc} tree={tree}>
+    <DocsPage toc={toc}>
       <MDXContent>
         <h1>{page.title}</h1>
         <MDX

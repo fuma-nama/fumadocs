@@ -3,7 +3,7 @@ title: TOC
 description: Table of Content
 ---
 
-A Table of Contents with active anchor observer.
+A Table of Contents with active anchor observer and auto scroll.
 
 ## Usage
 
@@ -19,12 +19,17 @@ return (
 
 ### TOC Provider
 
+Contains all anchor items. By default, it automatically scrolls to the active
+anchor.
+
 | Prop       | Type              | Description       |
 | ---------- | ----------------- | ----------------- |
 | `toc`      | `TableOfContents` | Table of contents |
 | `children` | `ReactNode`       | -                 |
 
 ### TOC Item
+
+The anchor item.
 
 | Prop   | Type          | Description |
 | ------ | ------------- | ----------- |
@@ -36,15 +41,13 @@ return (
 
 ### Use Active Anchor
 
-A hook for getting info of an anchor. It accepts the item url and return an
-`Anchor` object, must be called under the TOC Provider.
+A hook for getting the active anchor. It accepts the item url and return a
+boolean value, must be called under the TOC Provider.
 
-Helpful for implementing auto scroll or advanced usages.
-
-#### Usage
+Useful for implementing advanced styling.
 
 ```ts
 import { useActiveAnchor } from 'next-docs-zeta/toc'
 
-const anchor = useActiveAnchor(item.url)
+const isActive = useActiveAnchor(item.url)
 ```
