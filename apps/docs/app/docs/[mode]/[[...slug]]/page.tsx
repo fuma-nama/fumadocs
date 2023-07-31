@@ -49,7 +49,6 @@ export default async function Page({ params }: { params: Param }) {
   return (
     <DocsPage
       toc={toc}
-      tree={tree}
       footer={neighbours}
       tocContent={
         <div className="mt-4 border-t pt-4">

@@ -10,7 +10,7 @@ export default function Layout({
   params: { mode: string }
   children: ReactNode
 }) {
-  const filteredTree = getTree(params.mode)
+  const tree = getTree(params.mode)
 
   return (
     <main
@@ -19,7 +19,7 @@ export default function Layout({
         params.mode === 'headless' && '[--primary:270_95%_75%]'
       )}
     >
-      <DocsLayout tree={filteredTree} nav={false}>
+      <DocsLayout tree={tree} nav={false}>
         <div className="absolute inset-0 z-[-1] overflow-hidden">
           <div
             className={cn(
