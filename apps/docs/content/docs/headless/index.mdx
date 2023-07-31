@@ -3,17 +3,16 @@ title: Quick Start
 description: Getting Started with Next Docs
 ---
 
-Next Docs is a library for building documentation websites.
+Welcome to our documentation!
+
+## Introduction
+
+Next Docs is a library that makes developing a Next.js docs easier, built for
+App Router. It offers server-side functions and headless components.
 
 - Search (using flexsearch)
 - Breadcrumb, Sidebar, TOC Components
 - Additional utilities
-- Built for Next.js App Router and works fine on Pages Router
-
-## Getting Started
-
-Next Docs is built for Next.js App Router. Hence, this guide will use App
-Router.
 
 It's recommended to use Next Docs with [Tailwind CSS](https://tailwindcss.com) +
 [Radix UI](https://www.radix-ui.com), and
@@ -22,198 +21,84 @@ It's recommended to use Next Docs with [Tailwind CSS](https://tailwindcss.com) +
 > **Tip:** For normal usages, you can use [Next Docs UI](/docs/ui) instead.
 
 ```bash
-npm install next-docs-zeta
+npm install next-docs-zeta shiki
 ```
 
-### Example
+### Demo
 
 Open in [CodeSandbox](https://githubbox.com/SonMooSans/next-docs-template).
 
-### ContentLayer
+## Guide
 
-Follow this [guide](https://www.contentlayer.dev/docs/getting-started) to setup
-ContentLayer.
+1. #### Choose a Source
 
-```bash
-npm install contentlayer next-contentlayer
-```
+   Next Docs has native support for ContentLayer, but any kind of formats and
+   sources are allowed.
 
-### Tailwind CSS
+   You can refer to this [guide](/docs/headless/contentlayer) to learn how to
+   use Contentlayer with Next Docs.
 
-Follow this [guide](https://tailwindcss.com/docs/guides/nextjs) to setup
-Tailwind CSS.
+2. #### Build Page Tree
 
-```bash
-npm install clsx postcss tailwindcss @tailwindcss/typography
-```
+   A page tree refers to structured data of all pages.
 
-I also prefer [Shadcn UI](https://ui.shadcn.com) If you don't want to write any
-components.
+   ```js
+   export const tree = [
+     {
+       type: 'page',
+       name: 'Quick Start',
+       url: '/docs'
+     },
+     {
+       type: 'separator',
+       name: 'Guides'
+     },
+     {
+       type: 'page',
+       name: 'Example',
+       url: '/docs/example'
+     }
+   ]
+   ```
 
-### Choose a Source
+   You can generate the tree using our Contentlayer adapter, or end up with
+   writing your own.
 
-Next Docs has native support for ContentLayer, but any kind of formats and
-sources are allowed.
+3. #### Create MDX file
 
-You can refer to this [guide](/docs/headless/contentlayer) to learn how to use
-Contentlayer with Next Docs.
+   Create `/content/docs/index.mdx`:
 
-### Build Page Tree
+   ```mdx
+   ---
+   title: Quick Start
+   description: My cool docs
+   ---
 
-A page tree refers to structured data of all pages.
+   Hello World
+   ```
 
-```ts
-import type { TreeNode } from 'next-docs-zeta/server'
+4. #### Styling & Fun
 
-const tree: TreeNode[] = [
-  {
-    type: 'folder',
-    name: 'Components',
-    url: '/docs/components',
-    index: {
-      type: 'page',
-      name: 'Quick Start',
-      url: '/docs/components'
-    },
-    children: [
-      {
-        type: 'page',
-        name: 'Button',
-        url: '/docs/components/button'
-      }
-    ]
-  },
-  {
-    type: 'separator',
-    name: 'Guides'
-  },
-  {
-    type: 'page',
-    name: 'Example',
-    url: '/docs/example'
-  }
-]
-```
+   Start styling your docs with headless components provided by Next Docs.
 
-You can convert the data fetched from any CMS to a page tree and pass into Next
-Docs's components.
-
-Moreover, It supports [Contentlayer](/docs/headless/contentlayer) natively.
-
----
-
-### Create Root Layout
-
-implementation of certain components won't be shown, you will learn it later.
-
-```tsx
-import { Sidebar, SidebarProvider } from '@/components/sidebar'
-import { tree } from '@/utils/page-tree'
-import clsx from 'clsx'
-import { ReactNode } from 'react'
-
-export default function DocsLayout({ children }: { children: ReactNode }) {
-  return (
-    <SidebarProvider>
-      <div
-        className={clsx(
-          'container grid grid-cols-1 gap-12',
-          'lg:grid-cols-[250px_auto] xl:grid-cols-[250px_auto_150px] 2xl:grid-cols-[250px_auto_250px]',
-          'sm:px-14 xl:px-24'
-        )}
-      >
-        <Sidebar items={tree} />
-        {children}
-      </div>
-    </SidebarProvider>
-  )
-}
-```
-
-### Create Page
-
-Create `/app/docs/[[...slug]]/page.tsx`:
-
-```tsx
-import { Breadcrumb } from '@/components/breadcrumb'
-import { TOC } from '@/components/toc'
-import { tree } from '@/utils/page-tree'
-import { allDocs } from 'contentlayer/generated'
-import { getMDXComponent } from 'next-contentlayer/hooks'
-import { SafeLink } from 'next-docs-zeta/link'
-import { getTableOfContents } from 'next-docs-zeta/server'
-import { notFound } from 'next/navigation'
-import React from 'react'
-
-export default async function Page({
-  params
-}: {
-  params: { slug?: string[] }
-}) {
-  const path = (params.slug ?? []).join('/')
-  const page = allDocs.find(page => page.slug === path)
-
-  if (page == null) {
-    notFound()
-  }
-
-  const toc = await getTableOfContents(page.body.raw)
-  const MDX = getMDXComponent(page.body.code)
-
-  return (
-    <>
-      <article className="flex flex-col gap-6 overflow-x-hidden py-8 lg:py-16">
-        <Breadcrumb tree={tree} />
-        <h1 className="text-4xl font-bold">{page.title}</h1>
-        <div className="prose prose-text prose-pre:grid prose-pre:border-[1px] prose-code:bg-secondary prose-code:p-1 max-w-none">
-          <MDX
-            components={{
-              a: SafeLink // handles external links correctly
-            }}
-          />
-        </div>
-      </article>
-      <div className="relative flex flex-col gap-3 py-16 max-xl:hidden">
-        <div className="sticky top-28 flex max-h-[calc(100vh-4rem-3rem)] flex-col gap-3 overflow-auto">
-          {toc.length > 0 && <h3 className="font-semibold">On this page</h3>}
-          <TOC items={toc} />
-        </div>
-      </div>
-    </>
-  )
-}
-```
-
-You can generate static params as well:
-
-```ts
-export async function generateStaticParams() {
-  return allDocs.map(docs => ({
-    slug: docs.slug.split('/')
-  }))
-}
-```
-
-### Create MDX file
-
-Create `/content/docs/index.mdx`:
-
-```mdx
----
-title: Quick Start
-description: My cool docs
----
-
-Hello World
-```
+   ```mdx
+   <article>
+     <nav>
+       <p>My App</p>
+       <SearchToggle />
+     </nav>
+     <Sidebar />
+     <MDXContent />
+     <TOC />
+   </article>
+   ```
 
 ### Enjoy!
 
-We've just created the prototype of the website but many components are missing.
+Next Docs offers simple document searching as well as components for building a
+good docs. It is made for flexibility and speed.
 
-**Next Docs** offers simple document searching as well as components for
-building a good docs. You can click on the cards below and they will tell you
-how to use them.
+Explore the full power of Next Docs:
 
 <Cards>
 
