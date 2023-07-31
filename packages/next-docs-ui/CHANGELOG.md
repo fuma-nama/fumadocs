@@ -1,5 +1,17 @@
 # next-docs-ui
 
+## 1.2.0
+
+### Minor Changes
+
+- Remove `tree` prop from Docs Page, replaced by pages context.
+
+### Patch Changes
+
+- 5f248fb: Support Auto Scroll in TOC for headless docs
+- Updated dependencies [5f248fb]
+  - next-docs-zeta@1.2.0
+
 ## 1.1.4
 
 ### Patch Changes

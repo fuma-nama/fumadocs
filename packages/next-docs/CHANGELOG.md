@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 1.2.0
+
+### Patch Changes
+
+- 5f248fb: Support Auto Scroll in TOC for headless docs
+
 ## 1.1.4
 
 ### Patch Changes
