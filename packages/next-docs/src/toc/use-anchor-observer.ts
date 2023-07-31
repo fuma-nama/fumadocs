@@ -11,15 +11,21 @@ export function useAnchorObserver(watch: string[]): string | undefined {
   useEffect(() => {
     const observer = new IntersectionObserver(
       entries => {
-        for (const entry of entries) {
-          // If above half the viewport
-          const aboveHalf = window.innerHeight / 2 > entry.boundingClientRect.y
-          const active = aboveHalf && entry.isIntersecting
+        setActiveAnchor(f => {
+          for (const entry of entries) {
+            // If above half the viewport
+            const aboveHalf =
+              window.innerHeight / 2 > entry.boundingClientRect.y
+            const active = aboveHalf && entry.isIntersecting
 
-          if (active) {
-            setActiveAnchor(entry.target.id)
+            if (active) {
+              return entry.target.id
+            }
           }
-        }
+
+          // use the first item if not found
+          return f ?? watch[0]
+        })
       },
       { rootMargin: `0% 0% -80% 0%` }
     )
