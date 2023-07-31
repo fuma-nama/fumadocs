@@ -6,6 +6,7 @@ import { GithubIcon } from 'lucide-react'
 import type { TreeNode } from 'next-docs-zeta/server'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
+import { PagesContext } from './contexts/tree'
 
 export type DocsLayoutProps = {
   /**
@@ -42,7 +43,7 @@ export function DocsLayout(props: DocsLayoutProps) {
     : []
 
   return (
-    <>
+    <PagesContext.Provider value={{ tree: props.tree }}>
       {props.nav !== undefined ? (
         props.nav
       ) : (
@@ -59,6 +60,6 @@ export function DocsLayout(props: DocsLayoutProps) {
         <Sidebar items={props.tree}>{props.sidebarContent}</Sidebar>
         {props.children}
       </div>
-    </>
+    </PagesContext.Provider>
   )
 }
