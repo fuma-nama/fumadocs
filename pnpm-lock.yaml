@@ -204,6 +204,9 @@ importers:
       remark:
         specifier: ^14.0.2
         version: 14.0.2
+      scroll-into-view-if-needed:
+        specifier: ^3.0.10
+        version: 3.0.10
       swr:
         specifier: ^2.1.5
         version: 2.1.5(react@18.2.0)
@@ -280,9 +283,6 @@ importers:
       remark-gfm:
         specifier: ^3.0.1
         version: 3.0.1
-      scroll-into-view-if-needed:
-        specifier: ^3.0.10
-        version: 3.0.10
       tailwind-merge:
         specifier: ^1.12.0
         version: 1.12.0

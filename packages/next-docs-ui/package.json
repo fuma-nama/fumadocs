@@ -68,7 +68,6 @@
     "rehype-pretty-code": "^0.9.5",
     "rehype-slug": "^5.1.0",
     "remark-gfm": "^3.0.1",
-    "scroll-into-view-if-needed": "^3.0.10",
     "tailwind-merge": "^1.12.0"
   },
   "peerDependencies": {
