@@ -16,7 +16,6 @@ export type Separator = {
 export type FolderNode = {
   type: 'folder'
   name: string
-  url: string
   index?: FileNode
   children: TreeNode[]
 }

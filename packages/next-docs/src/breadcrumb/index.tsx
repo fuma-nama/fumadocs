@@ -27,11 +27,11 @@ function searchPath(nodes: TreeNode[], url: string): BreadcrumbItem[] | null {
     const node = nodes[i]
 
     if (node.type === 'folder') {
-      if (node.url === url) {
+      if (node.index && node.index.url === url) {
         return [
           {
             name: node.name,
-            url: node.index?.url ?? null
+            url: node.index.url
           }
         ]
       }

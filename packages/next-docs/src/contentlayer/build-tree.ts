@@ -75,7 +75,6 @@ function buildMeta(meta: MetaPageBase, ctx: Context): FolderNode {
     name: meta.title ?? pathToName(segments[segments.length - 1] ?? 'docs'),
     index,
     type: 'folder',
-    url: ctx.getUrl(meta.slug, ctx.lang),
     children
   }
 }
@@ -144,7 +143,6 @@ function buildFolderNode(
         ? (index as FileNode).name
         : pathToName(segments[segments.length - 1] ?? 'docs'),
     type: 'folder',
-    url: '/' + path,
     index,
     children
   }
