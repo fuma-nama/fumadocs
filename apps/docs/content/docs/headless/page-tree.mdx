@@ -1,0 +1,87 @@
+---
+title: Page Tree
+description: The structure of page tree.
+---
+
+Page tree is a tree that includes all the pages, separator and folders.
+
+It will be sent to the client and required for sidebar and breadcrumb. Hence,
+you shouldn't store any sensitive or large data in page tree.
+
+> **Note:** Unserializable data such as functions can't be passed to page tree.
+
+## Conventions
+
+Items can be either a separator, page or folder.
+
+### Page
+
+It contains a url and display name.
+
+```json
+{
+  "type": "page",
+  "name": "Quick Start",
+  "url": "/docs"
+}
+```
+
+### Folder
+
+It contains a display name, a list of items and an optional index page
+
+```json
+{
+    "type": "folder",
+    "name": "Guide",
+    "index": {
+        "type": "page",
+        ...
+    }
+    "children": [
+        ...
+    ]
+}
+```
+
+### Separator
+
+It only contains a display name.
+
+```json
+{
+  "type": "separator",
+  "name": "Components"
+}
+```
+
+### Example
+
+```js
+export const tree = [
+  {
+    type: 'page',
+    name: 'Quick Start',
+    url: '/docs'
+  },
+  {
+    type: 'separator',
+    name: 'Guides'
+  },
+  {
+    type: 'page',
+    name: 'Example',
+    url: '/docs/example'
+  }
+]
+```
+
+### Type Bindings
+
+You can import the type from server package.
+
+```ts
+import type { TreeNode } from 'next-docs-zeta/server'
+
+const tree: TreeNode[] = []
+```

@@ -3,6 +3,7 @@
   "pages": [
     "---Guide---",
     "index",
+    "page-tree",
     "---API References---",
     "components",
     "utils",
