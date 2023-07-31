@@ -6,13 +6,13 @@ description: Use Next.js image optimization in your MDX documents
 Next Docs UI uses the built-in `next/image` component. You can enjoy the
 benefits of Next.js Image Optimization without extra configurations.
 
-Under the hood, It gets the image size using `rehype-img-size`, then use
-`next/image` to display it.
+Under the hood, It gets the image size using `rehype-img-size`, then display it
+via `next/image`.
 
 ## Usage
 
-Use the `<Image />` component from `next-docs-ui/mdx`. It wrapped `next/image`
-and will pass the default `sizes` property.
+Use the `<Image />` component from `next-docs-ui/mdx`. It wraps `next/image` and
+passes the default sizes property.
 
 ```mdx {5}
 import { Image } from 'next-docs-ui/mdx'
