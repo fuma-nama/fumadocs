@@ -22,10 +22,10 @@ export function Nav({
 }) {
   return (
     <nav className="nd-sticky nd-top-0 nd-inset-x-0 nd-bg-background/10 nd-z-50 nd-backdrop-blur-xl">
-      <div className="nd-container nd-flex nd-flex-row nd-items-center nd-h-14 nd-gap-4 nd-max-w-[1400px]">
+      <div className="nd-container nd-flex nd-flex-row nd-items-center nd-h-16 nd-gap-4 nd-max-w-[1400px]">
         {children}
-        <div className="nd-flex nd-flex-row nd-items-center nd-ml-auto">
-          <SearchBar className="nd-w-[280px] nd-max-w-xs max-sm:nd-hidden nd-mr-3" />
+        <div className="nd-flex nd-flex-row nd-justify-end nd-items-center nd-flex-1">
+          <SearchBar className="nd-w-full nd-max-w-[280px] nd-mr-3 max-md:nd-hidden" />
           {links?.map((item, key) => <NavLink key={key} {...item} />)}
           <ThemeToggle />
           {enableSidebar && (

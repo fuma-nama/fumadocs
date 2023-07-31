@@ -29,7 +29,7 @@ export function DocsPage(props: DocsPageProps) {
         )}
       </article>
       <div className="nd-relative max-xl:nd-hidden">
-        <div className="nd-sticky nd-flex nd-flex-col nd-top-14 nd-py-16 nd-max-h-[calc(100vh-3.5rem)]">
+        <div className="nd-sticky nd-flex nd-flex-col nd-top-16 nd-py-16 nd-max-h-[calc(100vh-3.5rem)]">
           <TOC items={props.toc} />
           {props.tocContent}
         </div>
