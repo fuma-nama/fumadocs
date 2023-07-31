@@ -31,6 +31,10 @@ function searchPath(nodes: TreeNode[], url: string): BreadcrumbItem[] | null {
         return [
           {
             name: node.name,
+            url: null
+          },
+          {
+            name: node.index.name,
             url: node.index.url
           }
         ]
