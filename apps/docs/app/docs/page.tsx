@@ -13,7 +13,10 @@ export default function DocsRoot() {
       <div className="absolute right-0 top-0 z-[-1] h-[500px] w-full max-w-[1000px] translate-x-[-50%] translate-y-[-50%] blur-3xl">
         <div className="h-full w-full bg-gradient-to-r from-purple-400 to-blue-400 [mask-image:linear-gradient(to_bottom,white,transparent)]" />
       </div>
-      <h1 className="text-3xl font-bold sm:text-4xl">Choose One.</h1>
+      <h1 className="text-3xl font-bold mb-2 sm:text-4xl">Choose One.</h1>
+      <p className="text-muted-foreground sm:text-lg">
+        Next Docs can be either a library or a full-powered framework.
+      </p>
       <div className="mt-8 grid grid-cols-1 gap-8 md:grid-cols-2">
         <Link
           href="/docs/headless"

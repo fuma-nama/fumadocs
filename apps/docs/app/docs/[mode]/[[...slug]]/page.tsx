@@ -1,3 +1,4 @@
+import { Pre } from '@/components/pre'
 import {
   Accordion,
   AccordionContent,
@@ -16,7 +17,6 @@ import {
   Image,
   Link,
   MDXContent,
-  Pre,
   Table
 } from 'next-docs-ui/mdx'
 import { DocsPage } from 'next-docs-ui/page'
@@ -72,7 +72,7 @@ export default async function Page({ params }: { params: Param }) {
             Card: props => <Card {...props} />,
             Cards: props => <Cards {...props} />,
             a: props => <Link {...props} />,
-            pre: props => <Pre className="max-h-[300px]" {...props} />,
+            pre: props => <Pre {...props} />,
             img: props => <Image {...props} />,
             h1: props => <Heading as="h1" {...props} />,
             h2: props => <Heading as="h2" {...props} />,

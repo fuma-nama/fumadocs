@@ -22,7 +22,7 @@ export function Nav() {
     >
       <Link
         href="/"
-        className="hover:text-muted-foreground whitespace-nowrap font-semibold"
+        className="whitespace-nowrap font-medium hover:text-muted-foreground"
       >
         Next Docs
       </Link>

@@ -61,6 +61,9 @@ importers:
       '@radix-ui/react-dialog':
         specifier: ^1.0.3
         version: 1.0.3(@types/react@18.2.0)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-scroll-area':
+        specifier: ^1.0.4
+        version: 1.0.4(@types/react-dom@18.2.1)(@types/react@18.2.0)(react-dom@18.2.0)(react@18.2.0)
       '@radix-ui/react-select':
         specifier: ^1.2.1
         version: 1.2.1(@types/react@18.2.0)(react-dom@18.2.0)(react@18.2.0)
