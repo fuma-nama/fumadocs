@@ -7,7 +7,7 @@ import * as Base from 'next-docs-zeta/sidebar'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { ReactNode } from 'react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { SearchBar } from './search-toggle'
 
 export const { SidebarProvider } = Base
@@ -19,19 +19,19 @@ export function Sidebar({ items, children }: SidebarProps) {
   return (
     <Base.SidebarList
       as="div"
-      minWidth={768} // md
-      className="nd-relative max-md:data-[open=false]:nd-hidden"
+      minWidth={1024} // lg
+      className="nd-relative max-lg:data-[open=false]:nd-hidden"
     >
       <aside
         className={clsx(
           'nd-flex nd-flex-col',
-          'md:nd-sticky md:nd-top-16 md:nd-h-[calc(100vh-3.5rem)]',
-          'max-md:nd-fixed max-md:nd-inset-0 max-md:nd-px-8 max-md:nd-bg-background/50 max-md:nd-backdrop-blur-xl max-md:nd-z-40'
+          'lg:nd-sticky lg:nd-top-16 lg:nd-h-[calc(100vh-3.5rem)] lg:nd-border-r',
+          'max-lg:nd-fixed max-lg:nd-inset-0 max-lg:nd-px-8 max-lg:nd-bg-background/50 max-lg:nd-backdrop-blur-xl max-lg:nd-z-40'
         )}
       >
         <ScrollArea className="nd-flex-1 [mask-image:linear-gradient(to_top,transparent,white_80px)]">
-          <div className="nd-flex nd-flex-col nd-gap-2 nd-pr-2 md:nd-py-16 max-md:nd-py-20">
-            <SearchBar className="nd-mb-4 md:nd-hidden" />
+          <div className="nd-flex nd-flex-col nd-pr-4 lg:nd-py-16 max-lg:nd-py-24">
+            <SearchBar className="md:nd-hidden" />
             {items.map((item, i) => (
               <Node key={i} item={item} />
             ))}
@@ -48,7 +48,7 @@ export function Sidebar({ items, children }: SidebarProps) {
 function Node({ item }: { item: TreeNode }) {
   if (item.type === 'separator')
     return (
-      <p className="nd-font-semibold nd-text-sm nd-mt-3 nd-mb-2 first-of-type:nd-mt-0">
+      <p className="nd-font-semibold nd-text-sm nd-mt-8 nd-mb-2 md:first-of-type:nd-mt-0">
         {item.name}
       </p>
     )
@@ -66,10 +66,10 @@ function Item({ item }: { item: FileNode }) {
     <Link
       href={url}
       className={clsx(
-        'nd-text-sm nd-w-full',
+        'nd-text-sm nd-w-full nd-px-2 nd-py-1.5 nd-rounded-md nd-transition-colors',
         active
-          ? 'nd-text-primary nd-font-semibold'
-          : 'nd-text-muted-foreground hover:nd-text-foreground'
+          ? 'nd-text-primary nd-bg-primary/10 nd-font-medium'
+          : 'nd-text-muted-foreground hover:nd-text-accent-foreground'
       )}
     >
       {name}
@@ -77,12 +77,23 @@ function Item({ item }: { item: FileNode }) {
   )
 }
 
+function hasActive(items: TreeNode[], url: string): boolean {
+  return items.some(item => {
+    if (item.type === 'page') {
+      return item.url === url
+    }
+    if (item.type === 'folder') return hasActive(item.children, url)
+
+    return false
+  })
+}
+
 function Folder({ item }: { item: FolderNode }) {
   const { name, children, index } = item
 
   const pathname = usePathname()
   const active = index && pathname === index.url
-  const childActive = pathname.startsWith(item.url + '/')
+  const childActive = useMemo(() => hasActive(children, pathname), [pathname])
   const [extend, setExtend] = useState(active || childActive)
 
   useEffect(() => {
@@ -105,10 +116,10 @@ function Folder({ item }: { item: FolderNode }) {
     >
       <Collapsible.Trigger
         className={clsx(
-          'nd-flex nd-flex-row nd-text-sm nd-w-full nd-rounded-xl nd-text-start',
+          'nd-flex nd-flex-row nd-text-sm nd-w-full nd-px-2 nd-py-1.5 nd-transition-colors nd-text-left nd-rounded-md',
           active
-            ? 'nd-font-semibold nd-text-primary'
-            : 'nd-text-muted-foreground hover:nd-text-foreground'
+            ? 'nd-font-medium nd-text-primary nd-bg-primary/10'
+            : 'nd-text-muted-foreground hover:nd-text-accent-foreground'
         )}
       >
         {index ? (
@@ -128,21 +139,9 @@ function Folder({ item }: { item: FolderNode }) {
         />
       </Collapsible.Trigger>
       <Collapsible.Content asChild>
-        <ul className="nd-overflow-hidden data-[state=closed]:nd-animate-collapsible-up data-[state=open]:nd-animate-collapsible-down">
+        <ul className="nd-overflow-hidden nd-flex nd-flex-col nd-ml-4 nd-pl-2 nd-border-l nd-mt-2 data-[state=closed]:nd-animate-collapsible-up data-[state=open]:nd-animate-collapsible-down">
           {children.map((item, i) => {
-            const active = item.type !== 'separator' && pathname === item.url
-
-            return (
-              <li
-                key={i}
-                className={clsx(
-                  'nd-flex nd-ml-2 nd-pl-4 nd-py-1.5 nd-border-l first:nd-mt-2',
-                  active ? 'nd-border-primary' : 'nd-border-border'
-                )}
-              >
-                <Node item={item} />
-              </li>
-            )
+            return <Node key={i} item={item} />
           })}
         </ul>
       </Collapsible.Content>

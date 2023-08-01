@@ -56,7 +56,7 @@ export function DocsLayout(props: DocsLayoutProps) {
           </Link>
         </Nav>
       )}
-      <div className="nd-grid nd-grid-cols-1 nd-container nd-max-w-[1400px] md:nd-gap-x-8 md:nd-grid-cols-[200px_minmax(0,1fr)] lg:nd-grid-cols-[250px_minmax(0,1fr)] xl:nd-grid-cols-[250px_minmax(0,1fr)_200px] 2xl:nd-grid-cols-[250px_minmax(0,1fr)_250px]">
+      <div className="nd-grid nd-grid-cols-1 nd-container nd-max-w-[1300px] lg:nd-gap-x-14 lg:nd-grid-cols-[250px_minmax(0,1fr)] xl:nd-grid-cols-[250px_minmax(0,1fr)_200px]">
         <Sidebar items={props.tree}>{props.sidebarContent}</Sidebar>
         {props.children}
       </div>

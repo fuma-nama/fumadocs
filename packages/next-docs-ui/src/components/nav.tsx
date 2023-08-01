@@ -22,7 +22,7 @@ export function Nav({
 }) {
   return (
     <nav className="nd-sticky nd-top-0 nd-inset-x-0 nd-bg-background/10 nd-z-50 nd-backdrop-blur-xl">
-      <div className="nd-container nd-flex nd-flex-row nd-items-center nd-h-16 nd-gap-4 nd-max-w-[1400px]">
+      <div className="nd-container nd-flex nd-flex-row nd-items-center nd-h-16 nd-gap-4 nd-max-w-[1300px]">
         {children}
         <div className="nd-flex nd-flex-row nd-justify-end nd-items-center nd-flex-1">
           <SearchBar className="nd-w-full nd-max-w-[280px] nd-mr-3 max-md:nd-hidden" />
@@ -31,7 +31,7 @@ export function Nav({
           {enableSidebar && (
             <SidebarTrigger
               aria-label="Toggle Sidebar"
-              className="nd-p-2 nd-rounded-md hover:nd-bg-accent md:nd-hidden"
+              className="nd-p-2 nd-rounded-md hover:nd-bg-accent lg:nd-hidden"
             >
               <MenuIcon className="nd-w-5 nd-h-5" />
             </SidebarTrigger>

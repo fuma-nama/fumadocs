@@ -8,7 +8,9 @@ export function TOC({ items }: { items: TOCItemType[] }) {
       className="nd-flex nd-flex-col nd-gap-1 nd-overflow-hidden nd-flex-1"
     >
       {items.length > 0 && (
-        <h3 className="nd-font-semibold nd-mb-2">On this page</h3>
+        <h3 className="nd-flex nd-flex-row nd-items-center nd-font-medium nd-text-sm nd-mb-2">
+          On This Page
+        </h3>
       )}
       {items.map((item, i) => (
         <TOCItem key={i} item={item} />
