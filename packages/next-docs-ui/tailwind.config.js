@@ -81,6 +81,7 @@ module.exports = {
             a: {
               'border-bottom': '1px hsl(var(--primary)) solid',
               transition: 'opacity 0.3s',
+              'font-weight': '400',
               'text-decoration': 'none',
               '&:hover': {
                 opacity: '80%'
@@ -93,7 +94,7 @@ module.exports = {
               'font-weight': '500'
             },
             code: {
-              padding: '0.4rem',
+              padding: '4px',
               'border-radius': '5px',
               'font-weight': '400',
               background: 'hsl(var(--muted))',

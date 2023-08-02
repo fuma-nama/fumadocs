@@ -82,6 +82,8 @@ Make sure you've generated documents correctly before moving to next step.
 
 ### Creating Routes
 
+Copy & Paste required files.
+
 <Accordion type="single" collapsible>
 
 <AccordionItem value="root-layout">
@@ -139,8 +141,8 @@ export default function RootLayout({
 <AccordionContent>
 
 ```tsx title="app/docs/[[...slug]]/page.tsx"
+import { tree } from '@/tree'
 import { allDocs } from 'contentlayer/generated'
-import type { Metadata } from 'next'
 import { getMDXComponent } from 'next-contentlayer/hooks'
 import {
   Card,
@@ -153,7 +155,8 @@ import {
   Table
 } from 'next-docs-ui/mdx'
 import { DocsPage } from 'next-docs-ui/page'
-import { getTableOfContents } from 'next-docs-zeta/server'
+import { getPageUrl } from 'next-docs-zeta/contentlayer'
+import { findNeighbour, getTableOfContents } from 'next-docs-zeta/server'
 import { notFound } from 'next/navigation'
 
 export default async function Page({
@@ -170,10 +173,12 @@ export default async function Page({
 
   const toc = await getTableOfContents(page.body.raw)
   const MDX = getMDXComponent(page.body.code)
+  const url = getPageUrl(page.slug.split('/'), '/docs')
+  const neighbours = findNeighbour(tree, url)
 
   // We don't provide MDX components by default
   return (
-    <DocsPage toc={toc}>
+    <DocsPage toc={toc} footer={neighbours}>
       <MDXContent>
         <h1>{page.title}</h1>
         <MDX
