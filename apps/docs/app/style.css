@@ -1,10 +1,5 @@
-@tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-* {
-  @apply border-border;
-}
 
 @property --rotate-angle {
   syntax: '<angle>';
