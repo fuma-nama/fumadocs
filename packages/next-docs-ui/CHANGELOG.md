@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 1.2.1
+
+### Patch Changes
+
+- 1b626c9: Redesign UI
+- ce10df9: Support custom sidebar banner
+- Updated dependencies [b15895f]
+  - next-docs-zeta@1.2.1
+
 ## 1.2.0
 
 ### Minor Changes

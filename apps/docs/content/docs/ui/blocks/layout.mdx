@@ -24,7 +24,8 @@ export default function Layout({ children }) {
 | `tree`           | `TreeNode[]`          | The page tree                      |
 | `nav`            | `ReactNode \| false`  | Replace or disable default navbar  |
 | `githubUrl`      | `string`              | Github url displayed on the navbar |
-| `sidebarContent` | `ReactNode`           | Extra content on sidebar           |
+| `sidebarBanner`  | `ReactNode`           | Content at the top of sidebar      |
+| `sidebarContent` | `ReactNode`           | Content at the bottom of sidebar   |
 | `children`       | `ReactNode`           | -                                  |
 
 ### Disabling Navbar
@@ -35,6 +36,8 @@ To achieve this, you may disable the default navbar by passing `false` to the
 
 The default navbar is exported from `next-docs-ui/component`, you can add it to
 the root layout (under the root provider).
+
+<br />
 
 <Accordion type="single" collapsible>
 <AccordionItem value="custom-navbar">

@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 1.2.1
+
+### Patch Changes
+
+- b15895f: Remove url prop from page tree folders
+
 ## 1.2.0
 
 ### Patch Changes
