@@ -70,7 +70,7 @@ module.exports = {
             '--tw-prose-links': 'hsl(var(--primary))',
             '--tw-prose-bold': 'hsl(var(--foreground))',
             '--tw-prose-counters': 'hsl(var(--muted-foreground))',
-            '--tw-prose-bullets': 'hsl(var(--foreground))',
+            '--tw-prose-bullets': 'hsl(var(--muted-foreground))',
             '--tw-prose-hr': 'hsl(var(--foreground))',
             '--tw-prose-quotes': 'hsl(var(--foreground))',
             '--tw-prose-quote-borders': 'hsl(var(--border))',
@@ -95,6 +95,13 @@ module.exports = {
               '&::after': {
                 content: 'none'
               }
+            },
+            ul: {
+              'padding-left': '1rem'
+            },
+            'ul>li': {
+              'list-style': 'circle',
+              'font-size': '0.9rem'
             }
           }
         }
