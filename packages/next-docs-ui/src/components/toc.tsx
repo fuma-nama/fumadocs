@@ -24,7 +24,7 @@ function TOCItem({ item, level }: { item: TOCItemType; level: number }) {
         href={item.url}
         item={item}
         className={cn(
-          'nd-border-l-2 nd-text-sm nd-py-0.5 nd-text-muted-foreground nd-transition-colors nd-text-ellipsis nd-overflow-hidden data-[active=true]:nd-font-medium data-[active=true]:nd-text-primary data-[active=true]:nd-border-primary',
+          'nd-border-l-2 nd-text-sm nd-py-1 nd-text-muted-foreground nd-transition-colors nd-text-ellipsis nd-overflow-hidden data-[active=true]:nd-font-medium data-[active=true]:nd-text-primary data-[active=true]:nd-border-primary',
           level === 0 && 'nd-pl-3',
           level === 1 && 'nd-pl-6',
           level >= 2 && 'nd-pl-9'
