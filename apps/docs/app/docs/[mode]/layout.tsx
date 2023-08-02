@@ -15,7 +15,7 @@ export default function Layout({
 
   const [Icon, title, description] =
     params.mode === 'ui'
-      ? [LayoutIcon, 'Next Docs UI', 'The headless library']
+      ? [LayoutIcon, 'Next Docs UI', 'The framework']
       : [LibraryIcon, 'Next Docs Zeta', 'The headless library']
 
   return (
