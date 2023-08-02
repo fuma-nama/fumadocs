@@ -26,6 +26,8 @@ export type DocsLayoutProps = {
    */
   githubUrl?: string
 
+  sidebarBanner?: ReactNode
+
   sidebarContent?: ReactNode
 
   children: ReactNode
@@ -57,7 +59,9 @@ export function DocsLayout(props: DocsLayoutProps) {
         </Nav>
       )}
       <div className="nd-grid nd-grid-cols-1 nd-container nd-max-w-[1300px] lg:nd-gap-x-14 lg:nd-grid-cols-[250px_minmax(0,1fr)] xl:nd-grid-cols-[250px_minmax(0,1fr)_200px]">
-        <Sidebar items={props.tree}>{props.sidebarContent}</Sidebar>
+        <Sidebar banner={props.sidebarBanner} items={props.tree}>
+          {props.sidebarContent}
+        </Sidebar>
         {props.children}
       </div>
     </PagesContext.Provider>
