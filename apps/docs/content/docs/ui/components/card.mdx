@@ -3,6 +3,8 @@ title: Card
 description: Use the Card component in your MDX documentation
 ---
 
+import { HomeIcon } from 'lucide-react'
+
 ## Usage
 
 Add it to your MDX components.
@@ -42,5 +44,10 @@ The component to redirect users.
 
 <br />
 <Cards>
-  <Card href="/" title="Home" description="Go back to home" />
+  <Card
+    icon={<HomeIcon />}
+    href="/"
+    title="Home"
+    description="Go back to home"
+  />
 </Cards>
