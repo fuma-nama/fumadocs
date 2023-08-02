@@ -48,7 +48,7 @@ export function Sidebar({ items, children }: SidebarProps) {
 function Node({ item }: { item: TreeNode }) {
   if (item.type === 'separator')
     return (
-      <p className="nd-font-semibold nd-text-sm nd-mt-8 nd-mb-2 md:first-of-type:nd-mt-0">
+      <p className="nd-font-medium nd-text-sm nd-px-2 nd-mt-8 nd-mb-2 md:first-of-type:nd-mt-0">
         {item.name}
       </p>
     )
