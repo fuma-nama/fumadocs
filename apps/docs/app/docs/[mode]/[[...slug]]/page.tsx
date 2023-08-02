@@ -1,4 +1,5 @@
 import { Pre } from '@/components/pre'
+import { ThemeSwitch } from '@/components/ThemeSwitch'
 import {
   Accordion,
   AccordionContent,
@@ -89,7 +90,8 @@ export default async function Page({ params }: { params: Param }) {
                 {props.children}
               </div>
             ),
-            RollButton: props => <RollButton {...props} />
+            RollButton: props => <RollButton {...props} />,
+            ThemeSwitch: props => <ThemeSwitch {...props} />
           }}
         />
       </MDXContent>

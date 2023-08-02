@@ -3,10 +3,16 @@ title: Theming
 description: Add Theme to Next Docs UI
 ---
 
-The styling system is based on [Shadcn UI](https://ui.shadcn.com), allowing you
+The design system is based on [Shadcn UI](https://ui.shadcn.com), allowing you
 to overwrite css variables.
 
 ## Example
+
+You can easily customise all the properties using css variables.
+
+<div className="mb-4">
+  <ThemeSwitch />
+</div>
 
 ```css title="global.css"
 :root {
@@ -41,7 +47,7 @@ to overwrite css variables.
   --popover: 0 0% 100%;
   --popover-foreground: 222.2 47.4% 11.2%;
 
-  --card: 0 0% 100%;
+  --card: 210 40% 98%;
   --card-foreground: 222.2 47.4% 11.2%;
 
   --border: 214.3 31.8% 91.4%;
@@ -74,7 +80,7 @@ to overwrite css variables.
   --popover: 224 71% 4%;
   --popover-foreground: 215 20.2% 65.1%;
 
-  --card: 224 71% 4%;
+  --card: 216 71% 6%;
   --card-foreground: 213 31% 91%;
 
   --border: 216 34% 17%;
@@ -86,7 +92,7 @@ to overwrite css variables.
   --secondary: 222.2 47.4% 11.2%;
   --secondary-foreground: 210 40% 98%;
 
-  --accent: 216 34% 17%;
+  --accent: 216 34% 12%;
   --accent-foreground: 210 40% 98%;
 
   --destructive: 0 63% 31%;
@@ -122,10 +128,10 @@ all classes in order to prevent conflicts.
 Some global styles might be overwritten by
 [Tailwind CSS Preflight](https://tailwindcss.com/docs/preflight).
 
-Please add the following to your `style.css`.
+Since Next Docs UI already perform the preflight, you can remove
+`@tailwind base` from your stylesheet.
 
 ```css
-* {
-  border-color: hsl(var(--border));
-}
+@tailwind components;
+@tailwind utilities;
 ```

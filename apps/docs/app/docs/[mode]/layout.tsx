@@ -25,7 +25,10 @@ export default function Layout({
         params.mode === 'headless' && '[--primary:270_95%_75%]'
       )}
     >
-      <div className="absolute inset-x-0 top-0 overflow-hidden z-[-1]">
+      <div
+        id="docs-gradient"
+        className="absolute inset-x-0 top-0 overflow-hidden z-[-1]"
+      >
         <div className="bg-gradient-radial-top mx-auto h-[700px] w-[1500px] from-primary/20 to-80%" />
       </div>
       <DocsLayout
