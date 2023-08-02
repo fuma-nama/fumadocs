@@ -22,7 +22,7 @@ import {
 import { DocsPage } from 'next-docs-ui/page'
 import { getPageUrl } from 'next-docs-zeta/contentlayer'
 import { findNeighbour, getTableOfContents } from 'next-docs-zeta/server'
-import { notFound, redirect } from 'next/navigation'
+import { notFound } from 'next/navigation'
 
 type Param = {
   mode: string
@@ -32,10 +32,6 @@ export default async function Page({ params }: { params: Param }) {
   const tree = getTree(params.mode)
   const path = [params.mode, ...(params.slug ?? [])].join('/')
   const page = allDocs.find(page => page.slug === path)
-
-  if (params.mode !== 'ui' && params.mode !== 'headless') {
-    redirect(`/docs/headless/${path}`)
-  }
 
   if (page == null) {
     notFound()
