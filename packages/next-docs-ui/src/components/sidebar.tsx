@@ -24,14 +24,14 @@ export function Sidebar({ items, banner, children }: SidebarProps) {
       minWidth={1024} // lg
       className={clsx(
         'nd-flex nd-flex-col',
-        'lg:nd-sticky lg:nd-top-16 lg:nd-h-[calc(100vh-3.5rem)] lg:nd-border-r lg:nd-pr-4 lg:nd-pt-16',
+        'lg:nd-sticky lg:nd-top-16 lg:nd-h-[calc(100vh-4rem)] lg:nd-border-r lg:nd-pr-4 lg:nd-pt-16',
         'max-lg:nd-fixed max-lg:nd-inset-0 max-lg:nd-px-8 max-lg:nd-bg-background/50 max-lg:nd-backdrop-blur-xl max-lg:nd-z-40 max-lg:nd-pt-20 max-lg:data-[open=false]:nd-hidden'
       )}
     >
       <SearchBar className="nd-py-2 md:nd-hidden" />
       {banner}
-      <ScrollArea className="nd-flex-1 [mask-image:linear-gradient(to_top,transparent,white_80px)]">
-        <div className="nd-flex nd-flex-col nd-pb-24">
+      <ScrollArea className="nd-flex-1 -nd-mr-4 [mask-image:linear-gradient(to_top,transparent,white_80px)]">
+        <div className="nd-flex nd-flex-col nd-pb-24 nd-pr-4">
           {items.map((item, i) => (
             <Node key={i} item={item} />
           ))}
