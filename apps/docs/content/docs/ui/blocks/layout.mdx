@@ -30,7 +30,8 @@ export default function Layout({ children }) {
 
 ### Disabling Navbar
 
-It is common to share a navbar across all the pages (not just the docs layout).
+It is common to share a navbar across all the pages.
+
 To achieve this, you may disable the default navbar by passing `false` to the
 `nav` prop.
 
@@ -84,7 +85,7 @@ export function Nav() {
 </AccordionItem>
 </Accordion>
 
-## Example
+### Example
 
 ```tsx title="app/docs/[[...slug]]/layout.tsx"
 import { DocsLayout } from 'next-docs-ui/layout'

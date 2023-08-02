@@ -64,10 +64,10 @@ module.exports = {
       typography: () => ({
         text: {
           css: {
-            '--tw-prose-body': 'hsl(var(--foreground))',
+            '--tw-prose-body': 'hsl(var(--foreground)/0.9)',
             '--tw-prose-headings': 'hsl(var(--foreground))',
             '--tw-prose-lead': 'hsl(var(--foreground))',
-            '--tw-prose-links': 'hsl(var(--primary))',
+            '--tw-prose-links': 'hsl(var(--foreground))',
             '--tw-prose-bold': 'hsl(var(--foreground))',
             '--tw-prose-counters': 'hsl(var(--muted-foreground))',
             '--tw-prose-bullets': 'hsl(var(--muted-foreground))',
@@ -79,20 +79,25 @@ module.exports = {
             '--tw-prose-th-borders': 'hsl(var(--border))',
             '--tw-prose-td-borders': 'hsl(var(--border))',
             a: {
-              'font-weight': '400',
+              'border-bottom': '1px hsl(var(--primary)) solid',
+              transition: 'opacity 0.3s',
               'text-decoration': 'none',
               '&:hover': {
-                'text-decoration': 'underline'
+                opacity: '80%'
               }
+            },
+            h1: {
+              'font-weight': '600'
+            },
+            'h2, h3, h4, h5, h6, h7': {
+              'font-weight': '500'
             },
             code: {
               padding: '0.4rem',
               'border-radius': '5px',
-              background: 'hsl(var(--secondary))',
-              '&::before': {
-                content: 'none'
-              },
-              '&::after': {
+              'font-weight': '400',
+              background: 'hsl(var(--muted))',
+              '&::before, &::after': {
                 content: 'none'
               }
             },
