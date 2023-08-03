@@ -25,7 +25,7 @@ export function Pre({ title, ...props }: ComponentProps<'pre'>) {
       )}
       <CopyButton onCopy={onCopy} />
       <ScrollArea>
-        <pre {...props} className="max-h-[400px]" ref={ref}>
+        <pre {...props} ref={ref} className="max-h-[400px]">
           {props.children}
         </pre>
       </ScrollArea>
