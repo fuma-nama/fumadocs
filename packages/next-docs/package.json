@@ -38,13 +38,17 @@
       "import": "./dist/contentlayer/index.mjs",
       "types": "./dist/contentlayer/index.d.ts"
     },
+    "./contentlayer/configuration": {
+      "import": "./dist/contentlayer/configuration.mjs",
+      "types": "./dist/contentlayer/configuration.d.ts"
+    },
     "./middleware": {
       "import": "./dist/middleware/index.mjs",
       "types": "./dist/middleware/index.d.ts"
     },
-    "./*": {
-      "import": "./dist/*.mjs",
-      "types": "./dist/*.d.ts"
+    "./mdx-plugins": {
+      "import": "./dist/mdx-plugins/index.mjs",
+      "types": "./dist/mdx-plugins/index.d.ts"
     }
   },
   "typesVersions": {
@@ -70,6 +74,12 @@
       "contentlayer": [
         "./dist/contentlayer/index.d.ts"
       ],
+      "contentlayer/configuration": [
+        "./dist/contentlayer/configuration.d.ts"
+      ],
+      "mdx-plugins": [
+        "./dist/mdx-plugins/index.d.ts"
+      ],
       "middleware": [
         "./dist/middleware/index.d.ts"
       ]
@@ -91,12 +101,17 @@
     "remark": "^14.0.2",
     "scroll-into-view-if-needed": "^3.0.10",
     "swr": "^2.1.5",
-    "unist-util-visit": "^4.1.2"
+    "unist-util-visit": "^4.1.2",
+    "rehype-img-size": "^1.0.1",
+    "rehype-pretty-code": "^0.9.5",
+    "rehype-slug": "^5.1.0",
+    "remark-gfm": "^3.0.1"
   },
   "peerDependencies": {
     "next": "13.x",
     "react": "18.x",
-    "react-dom": "18.x"
+    "react-dom": "18.x",
+    "contentlayer": "0.3.x"
   },
   "devDependencies": {
     "@types/flexsearch": "0.7.3",

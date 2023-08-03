@@ -1,3 +1,11 @@
+// @ts-nocheck
+import rehypeImgSize from 'rehype-img-size'
+import rehypePrettycode, {
+  type Options as CodeOptions
+} from 'rehype-pretty-code'
+import rehypeSlug from 'rehype-slug'
+import remarkGfm from 'remark-gfm'
+
 function visit(node, tagNames, handler) {
   if (tagNames.includes(node.tagName)) {
     handler(node)
@@ -7,12 +15,12 @@ function visit(node, tagNames, handler) {
   node.children?.forEach(n => visit(n, tagNames, handler))
 }
 
-export const customMetaRegex = /custom="([^"]+)"/
+const customMetaRegex = /custom="([^"]+)"/
 
 /**
  * Should be added before rehype-pretty-code
  */
-export const rehypeCodeBlocksPreProcess = () => tree => {
+const rehypeCodeBlocksPreprocess = () => tree => {
   visit(tree, ['pre'], preEl => {
     const [codeEl] = preEl.children
 
@@ -29,7 +37,7 @@ export const rehypeCodeBlocksPreProcess = () => tree => {
 /**
  * Should be added after rehype-pretty-code
  */
-export const rehypeCodeBlocksPostProcess = () => tree => {
+const rehypeCodeBlocksPostprocess = () => tree => {
   visit(tree, ['div', 'pre'], node => {
     // Remove default fragment div
     // Add title to pre element
@@ -52,4 +60,36 @@ export const rehypeCodeBlocksPostProcess = () => tree => {
     // Add custom meta to properties
     node.properties.custom = node.nd_custom
   })
+}
+
+/**
+ * Default options for rehype-pretty-code
+ */
+const rehypePrettyCodeOptions: Partial<CodeOptions> = {
+  theme: 'css-variables',
+  keepBackground: false,
+  onVisitLine(node) {
+    if (node.children.length === 0) {
+      node.children = [{ type: 'text', value: ' ' }]
+    }
+  },
+  filterMetaString(s) {
+    return s.replace(customMetaRegex, '')
+  },
+  onVisitHighlightedLine(node) {
+    node.properties.className.push('line-highlighted')
+  },
+  onVisitHighlightedWord(node) {
+    node.properties.className = ['word-highlighted']
+  }
+}
+
+export {
+  rehypeCodeBlocksPostprocess,
+  rehypeCodeBlocksPreprocess,
+  rehypePrettycode,
+  rehypeImgSize,
+  rehypeSlug,
+  remarkGfm,
+  rehypePrettyCodeOptions
 }

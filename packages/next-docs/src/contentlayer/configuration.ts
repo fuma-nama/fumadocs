@@ -1,16 +1,23 @@
+/**
+ * Default configuration generator
+ *
+ * Feel free to copy and modify the code
+ *
+ * Warning: Shouldn't be imported in Next.js, this can cause problem. Put it in contentlayer.config.ts only
+ */
+
+import {
+  rehypeCodeBlocksPostprocess,
+  rehypeCodeBlocksPreprocess,
+  rehypeImgSize,
+  rehypePrettycode,
+  rehypePrettyCodeOptions,
+  rehypeSlug,
+  remarkGfm
+} from '@/mdx-plugins'
 import type { Args } from 'contentlayer/source-files'
 import { defineDocumentType } from 'contentlayer/source-files'
 import type { Options as ImgSizeOptions } from 'rehype-img-size'
-import rehypeImgSize from 'rehype-img-size'
-import type { Options as CodeOptions } from 'rehype-pretty-code'
-import rehypePrettycode from 'rehype-pretty-code'
-import rehypeSlug from 'rehype-slug'
-import remarkGfm from 'remark-gfm'
-import {
-  customMetaRegex,
-  rehypeCodeBlocksPostProcess,
-  rehypeCodeBlocksPreProcess
-} from './mdx-plugins'
 
 function removeSlash(path: string) {
   let start = 0,
@@ -126,9 +133,9 @@ export function createConfig(options: Partial<Options> = {}): Args {
     documentTypes: [Docs, Meta],
     mdx: {
       rehypePlugins: [
-        rehypeCodeBlocksPreProcess,
-        [rehypePrettycode, codeOptions],
-        rehypeCodeBlocksPostProcess,
+        rehypeCodeBlocksPreprocess,
+        [rehypePrettycode, rehypePrettyCodeOptions],
+        rehypeCodeBlocksPostprocess,
         rehypeSlug,
         [
           /* eslint-disable */
@@ -140,37 +147,6 @@ export function createConfig(options: Partial<Options> = {}): Args {
       ],
       remarkPlugins: [remarkGfm]
     }
-  }
-}
-
-/**
- * MDX Plugins
- */
-export const mdxPlugins = {
-  rehypeCodeBlocksPreProcess,
-  rehypePrettycode,
-  rehypeCodeBlocksPostProcess,
-  rehypeSlug,
-  rehypeImgSize: rehypeImgSize as any, // fix tsc errors
-  remarkGfm
-}
-
-export const codeOptions: Partial<CodeOptions> = {
-  theme: 'css-variables',
-  keepBackground: false,
-  onVisitLine(node) {
-    if (node.children.length === 0) {
-      node.children = [{ type: 'text', value: ' ' }]
-    }
-  },
-  filterMetaString(s) {
-    return s.replace(customMetaRegex, '')
-  },
-  onVisitHighlightedLine(node) {
-    node.properties.className.push('line-highlighted')
-  },
-  onVisitHighlightedWord(node) {
-    node.properties.className = ['word-highlighted']
   }
 }
 

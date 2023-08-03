@@ -11,10 +11,6 @@
   ],
   "exports": {
     "./style.css": "./dist/style.css",
-    "./contentlayer": {
-      "import": "./dist/contentlayer/index.mjs",
-      "types": "./dist/contentlayer/index.d.ts"
-    },
     "./components": {
       "import": "./dist/components/index.mjs",
       "types": "./dist/components/index.d.ts"
@@ -30,9 +26,6 @@
   },
   "typesVersions": {
     "*": {
-      "contentlayer": [
-        "./dist/contentlayer/index.d.ts"
-      ],
       "components": [
         "./dist/components/index.d.ts"
       ],
@@ -64,10 +57,6 @@
     "lucide-react": "^0.190.0",
     "next-docs-zeta": "workspace:*",
     "next-themes": "^0.2.1",
-    "rehype-img-size": "^1.0.1",
-    "rehype-pretty-code": "^0.9.5",
-    "rehype-slug": "^5.1.0",
-    "remark-gfm": "^3.0.1",
     "tailwind-merge": "^1.12.0"
   },
   "peerDependencies": {
