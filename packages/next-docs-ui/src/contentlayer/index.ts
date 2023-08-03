@@ -7,6 +7,7 @@ import rehypePrettycode from 'rehype-pretty-code'
 import rehypeSlug from 'rehype-slug'
 import remarkGfm from 'remark-gfm'
 import {
+  customMetaRegex,
   rehypeCodeBlocksPostProcess,
   rehypeCodeBlocksPreProcess
 } from './mdx-plugins'
@@ -161,6 +162,9 @@ export const codeOptions: Partial<CodeOptions> = {
     if (node.children.length === 0) {
       node.children = [{ type: 'text', value: ' ' }]
     }
+  },
+  filterMetaString(s) {
+    return s.replace(customMetaRegex, '')
   },
   onVisitHighlightedLine(node) {
     node.properties.className.push('line-highlighted')

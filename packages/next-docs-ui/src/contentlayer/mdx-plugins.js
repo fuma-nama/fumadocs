@@ -7,12 +7,19 @@ function visit(node, tagNames, handler) {
   node.children?.forEach(n => visit(n, tagNames, handler))
 }
 
+export const customMetaRegex = /custom="([^"]+)"/
+
 /**
  * Should be added before rehype-pretty-code
  */
 export const rehypeCodeBlocksPreProcess = () => tree => {
   visit(tree, ['pre'], preEl => {
     const [codeEl] = preEl.children
+
+    // Allow custom code meta
+    if (typeof codeEl.data?.meta === 'string') {
+      preEl.nd_custom = codeEl.data.meta.match(customMetaRegex)?.[1]
+    }
 
     // Add default language `text` for code-blocks
     codeEl.properties.className ||= ['language-text']
@@ -23,7 +30,7 @@ export const rehypeCodeBlocksPreProcess = () => tree => {
  * Should be added after rehype-pretty-code
  */
 export const rehypeCodeBlocksPostProcess = () => tree => {
-  visit(tree, ['div'], node => {
+  visit(tree, ['div', 'pre'], node => {
     // Remove default fragment div
     // Add title to pre element
     if ('data-rehype-pretty-code-fragment' in node.properties) {
@@ -41,5 +48,8 @@ export const rehypeCodeBlocksPostProcess = () => tree => {
 
       Object.assign(node, preEl)
     }
+
+    // Add custom meta to properties
+    node.properties.custom = node.nd_custom
   })
 }
