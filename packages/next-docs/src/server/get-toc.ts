@@ -1,8 +1,11 @@
 /* eslint-disable */
-import { toc } from 'mdast-util-toc'
+
+import Slugger from 'github-slugger'
 import { remark } from 'remark'
 import { visit } from 'unist-util-visit'
+import type { TableOfContents, TOCItemType } from './types'
 
+const slugger = new Slugger()
 const textTypes = ['text', 'emphasis', 'strong', 'inlineCode']
 
 function flattenNode(node: any) {
@@ -14,60 +17,30 @@ function flattenNode(node: any) {
   return p.join(``)
 }
 
-export interface TOCItemType {
-  title: string
-  url: string
-  items?: TOCItemType[]
-}
+function scan(node: any, items: TOCItemType[]) {
+  if (node.type === 'heading') {
+    const text = flattenNode(node)
 
-interface Items {
-  items?: TOCItemType[]
-}
-
-function getItems(node: any, current: any): Items {
-  if (!node) {
-    return {}
-  }
-
-  if (node.type === 'paragraph') {
-    visit(node, item => {
-      if (item.type === 'link') {
-        current.url = item.url
-        current.title = flattenNode(node)
-      }
-
-      if (item.type === 'text') {
-        current.title = flattenNode(node)
-      }
+    items.push({
+      title: text,
+      url: '#' + slugger.slug(text),
+      depth: node.depth ?? 1
     })
-
-    return current
+  } else {
+    node.children?.forEach((item: any) => scan(item, items))
   }
-
-  if (node.type === 'list') {
-    current.items = node.children.map((i: number) => getItems(i, {}))
-
-    return current
-  }
-  if (node.type === 'listItem') {
-    const heading = getItems(node.children[0], {})
-
-    if (node.children.length > 1) {
-      getItems(node.children[1], heading)
-    }
-
-    return heading
-  }
-
-  return {}
 }
 
 const getToc = () => (node: any, file: any) => {
-  const table = toc(node)
-  file.data = getItems(table.map, {})
-}
+  const toc: TOCItemType[] = []
+  slugger.reset()
 
-export type TableOfContents = TOCItemType[]
+  scan(node, toc)
+
+  file.data = {
+    items: toc
+  }
+}
 
 /**
  * Get Table of Contents from markdown/mdx document (using remark)
@@ -79,5 +52,5 @@ export async function getTableOfContents(
 ): Promise<TableOfContents> {
   const result = await remark().use(getToc).process(content)
 
-  return (result.data as Items).items ?? []
+  return (result.data.items as TableOfContents) ?? []
 }

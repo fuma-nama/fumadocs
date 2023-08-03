@@ -13,31 +13,27 @@ export function TOC({ items }: { items: TOCItemType[] }) {
       )}
       <div className="nd-flex nd-flex-col">
         {items.map((item, i) => (
-          <TOCItem key={i} item={item} level={0} />
+          <TOCItem key={i} item={item} />
         ))}
       </div>
     </Primitive.TOCProvider>
   )
 }
 
-function TOCItem({ item, level }: { item: TOCItemType; level: number }) {
+function TOCItem({ item }: { item: TOCItemType }) {
   return (
-    <>
-      <Primitive.TOCItem
-        href={item.url}
-        item={item}
-        className={cn(
-          'nd-border-l-2 nd-text-sm nd-py-1 nd-text-muted-foreground nd-transition-colors nd-text-ellipsis nd-overflow-hidden data-[active=true]:nd-font-medium data-[active=true]:nd-text-primary data-[active=true]:nd-border-primary',
-          level === 0 && 'nd-pl-3',
-          level === 1 && 'nd-pl-6',
-          level >= 2 && 'nd-pl-9'
-        )}
-      >
-        {item.title}
-      </Primitive.TOCItem>
-      {item.items?.map((item, i) => (
-        <TOCItem key={i} item={item} level={level + 1} />
-      ))}
-    </>
+    <Primitive.TOCItem
+      href={item.url}
+      item={item}
+      className={cn(
+        'nd-border-l-2 nd-text-sm nd-py-1 nd-text-muted-foreground nd-transition-colors nd-text-ellipsis nd-overflow-hidden data-[active=true]:nd-font-medium data-[active=true]:nd-text-primary data-[active=true]:nd-border-primary',
+        item.depth === 1 && 'nd-border-l-0',
+        item.depth === 2 && 'nd-pl-3',
+        item.depth === 3 && 'nd-pl-6',
+        item.depth >= 4 && 'nd-pl-9'
+      )}
+    >
+      {item.title}
+    </Primitive.TOCItem>
   )
 }

@@ -189,6 +189,12 @@ importers:
       flexsearch:
         specifier: 0.7.21
         version: 0.7.21
+      github-slugger:
+        specifier: ^2.0.0
+        version: 2.0.0
+      hast-util-to-string:
+        specifier: ^2.0.0
+        version: 2.0.0
       mdast-util-toc:
         specifier: ^6.1.1
         version: 6.1.1
@@ -210,9 +216,6 @@ importers:
       rehype-pretty-code:
         specifier: ^0.9.5
         version: 0.9.5(shiki@0.14.2)
-      rehype-slug:
-        specifier: ^5.1.0
-        version: 5.1.0
       remark:
         specifier: ^14.0.2
         version: 14.0.2

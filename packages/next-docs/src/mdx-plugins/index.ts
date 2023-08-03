@@ -3,8 +3,8 @@ import rehypeImgSize from 'rehype-img-size'
 import rehypePrettycode, {
   type Options as CodeOptions
 } from 'rehype-pretty-code'
-import rehypeSlug from 'rehype-slug'
 import remarkGfm from 'remark-gfm'
+import rehypeSlug from './rehype-slug'
 
 function visit(node, tagNames, handler) {
   if (tagNames.includes(node.tagName)) {

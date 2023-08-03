@@ -1,5 +1,5 @@
 import { mergeRefs } from '@/merge-refs'
-import type { TableOfContents, TOCItemType } from '@/server/get-toc'
+import type { TableOfContents, TOCItemType } from '@/server/types'
 import type { ComponentPropsWithoutRef, HTMLAttributes, RefObject } from 'react'
 import {
   createContext,
@@ -30,9 +30,7 @@ type TOCProviderProps = HTMLAttributes<HTMLDivElement> & {
 export const TOCProvider = forwardRef<HTMLDivElement, TOCProviderProps>(
   ({ toc, ...props }, ref) => {
     const headings = useMemo(() => {
-      return toc
-        .flatMap(item => getHeadings(item))
-        .map(item => item.split('#')[1])
+      return toc.map(item => item.url.split('#')[1])
     }, [toc])
 
     const containerRef = useRef<HTMLDivElement>(null)
@@ -51,12 +49,6 @@ export const TOCProvider = forwardRef<HTMLDivElement, TOCProviderProps>(
 )
 
 TOCProvider.displayName = 'TOCProvider'
-
-function getHeadings(item: TOCItemType): string[] {
-  const children = item.items?.flatMap(item => getHeadings(item)) ?? []
-
-  return [item.url, ...children]
-}
 
 export type TOCItemProps = ComponentPropsWithoutRef<'a'> & {
   item: TOCItemType

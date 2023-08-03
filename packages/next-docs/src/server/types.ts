@@ -29,3 +29,11 @@ export type IndexPage = {
 
 export type SearchDocsResult =
   FlexSearch.EnrichedDocumentSearchResultSetUnitResultUnit<IndexPage>[]
+
+export type TOCItemType = {
+  title: string
+  url: string
+  depth: number
+}
+
+export type TableOfContents = TOCItemType[]

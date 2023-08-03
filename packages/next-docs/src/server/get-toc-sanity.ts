@@ -1,20 +1,14 @@
 /* eslint-disable */
-import type { TableOfContents } from './get-toc'
+import Slugger from 'github-slugger'
+import type { TableOfContents, TOCItemType } from './types'
+
+const slugger = new Slugger()
 
 type Block = {
   _type: string
   children?: Block[]
   style?: string
   text?: string
-}
-
-type SlugFn = (text: string) => string
-
-type Item = {
-  title: string
-  url: string
-  level: number
-  children?: Item[]
 }
 
 /**
@@ -24,64 +18,43 @@ type Item = {
  * @param slugFn A function that generates slug from title
  */
 export function getTableOfContentsFromPortableText(
-  value: any,
-  slugFn: SlugFn
+  value: any
 ): TableOfContents {
   if (!Array.isArray(value)) {
     throw new Error('Invalid body type')
   }
 
-  const result: Item[] = []
+  slugger.reset()
+  const result: TOCItemType[] = []
 
   for (const block of value) {
-    dfs(block, result, slugFn)
+    dfs(block, result)
   }
 
   return result
 }
 
-function dfs(block: Block, list: Item[], slugFn: SlugFn) {
+function dfs(block: Block, list: TOCItemType[]) {
   if (
     block.style != null &&
     block.style.length === 2 &&
     block.style[0] === 'h'
   ) {
-    const level = Number(block.style[1])
+    const depth = Number(block.style[1])
 
-    if (Number.isNaN(level)) return
+    if (Number.isNaN(depth)) return
     const text = flattenNode(block)
-    const item = {
+
+    list.push({
       title: text,
-      url: '#' + slugFn(text),
-      level
-    }
-
-    let lastElement = list[list.length - 1]
-
-    if (lastElement != null && lastElement.level < level) {
-      while (lastElement.children != null) {
-        const lastChild = lastElement.children[lastElement.children.length - 1]
-
-        if (lastChild == null || lastChild.level >= level) {
-          break
-        }
-
-        lastElement = lastChild
-      }
-
-      lastElement.children ??= []
-
-      lastElement.children.push(item)
-    } else {
-      list.push(item)
-    }
+      url: slugger.slug(text),
+      depth: depth
+    })
 
     return
   }
 
-  block.children?.forEach(child => {
-    dfs(child, list, slugFn)
-  })
+  block.children?.forEach(child => dfs(child, list))
 }
 
 function flattenNode(block: Block): string {
