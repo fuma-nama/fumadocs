@@ -60,7 +60,6 @@
     "tailwind-merge": "^1.12.0"
   },
   "peerDependencies": {
-    "contentlayer": "0.3.x",
     "next": "13.x",
     "react": "18.x",
     "react-dom": "18.x"
