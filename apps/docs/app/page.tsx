@@ -178,29 +178,33 @@ export default function HomePage() {
         </div>
         <div className="col-span-full h-[300px] mt-[-300px] bg-gradient-to-r from-cyan-400/50 to-pink-400/50 z-[-1] blur-3xl" />
       </div>
-      <div className="relative top-20 z-[-1]">
-        <Image
-          alt="stars"
-          src="/stars.png"
-          width="500"
-          height="500"
-          className="absolute top-0 right-0"
-        />
+
+      <div className="bg-gradient-to-r from-purple-400/30 blur-xl h-[100px] translate-y-[150%]" />
+      <div className="relative border-t bg-background mt-20 z-[2]">
+        <div className="relative z-[-1]">
+          <Image
+            alt="stars"
+            src="/stars.png"
+            width="500"
+            height="500"
+            className="absolute top-0 right-0 hidden dark:block"
+          />
+        </div>
+        <div className="container my-40 flex flex-col gap-2 items-center text-center">
+          <h2 className="text-3xl font-semibold">Install Now</h2>
+          <p className="text-muted-foreground">Stop waiting, go play it.</p>
+          <a
+            href="https://githubbox.com/SonMooSans/next-docs-ui-template"
+            rel="noreferrer noopener"
+            target="_blank"
+            className={cn(buttonVariants({ className: 'mt-4 max-w-xl' }))}
+          >
+            Open in CodeSandbox
+            <ExternalLinkIcon className="w-4 h-4 ml-2" />
+          </a>
+        </div>
+        <div className="h-[120px] bg-gradient-to-r from-purple-400 to-blue-400 opacity-30 [mask-image:linear-gradient(to_top,white,transparent)] md:via-transparent md:to-blue-400" />
       </div>
-      <div className="container my-40 flex flex-col gap-2 items-center text-center">
-        <h2 className="text-3xl font-semibold">Install Now</h2>
-        <p className="text-muted-foreground">Stop waiting, go play it.</p>
-        <a
-          href="https://githubbox.com/SonMooSans/next-docs-ui-template"
-          rel="noreferrer noopener"
-          target="_blank"
-          className={cn(buttonVariants({ className: 'mt-4 max-w-xl' }))}
-        >
-          Open in CodeSandbox
-          <ExternalLinkIcon className="w-4 h-4 ml-2" />
-        </a>
-      </div>
-      <div className="h-[120px] bg-gradient-to-r from-purple-400 to-blue-400 opacity-30 [mask-image:linear-gradient(to_top,white,transparent)] md:via-transparent md:to-blue-400" />
     </main>
   )
 }
