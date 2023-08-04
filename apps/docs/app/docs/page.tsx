@@ -49,7 +49,7 @@ export default function DocsRoot() {
               <div className="border p-3 bg-gradient-to-b from-blue-400/50 border-blue-500 shadow-xl shadow-blue-400/50 mb-6 rounded-xl">
                 <LayoutIcon className="h-9 w-9 text-blue-400 dark:text-cyan-200" />
               </div>
-              <p className="mb-2 text-xl font-medium">Next Docs UI</p>
+              <p className="mb-2 text-xl font-medium">Next Docs Zeta</p>
               <p className="text-muted-foreground">
                 The Framework for building documentation websites with well
                 designed UI.
