@@ -7,7 +7,7 @@ import * as Base from 'next-docs-zeta/sidebar'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { ReactNode } from 'react'
-import { useEffect, useMemo, useState } from 'react'
+import { cloneElement, useEffect, useMemo, useState } from 'react'
 import { SearchBar } from './search-toggle'
 
 export const { SidebarProvider, SidebarTrigger } = Base
@@ -24,7 +24,7 @@ export function Sidebar({ items, banner, children }: SidebarProps) {
       minWidth={1024} // lg
       className={clsx(
         'nd-flex nd-flex-col',
-        'lg:nd-sticky lg:nd-top-16 lg:nd-h-[calc(100vh-4rem)] lg:nd-pr-4 lg:nd-pt-16',
+        'lg:nd-sticky lg:nd-top-16 lg:nd-w-[250px] lg:nd-h-[calc(100vh-4rem)] lg:nd-pr-4 lg:nd-pt-16',
         'max-lg:nd-fixed max-lg:nd-inset-0 max-lg:nd-px-8 max-lg:nd-bg-background/50 max-lg:nd-backdrop-blur-xl max-lg:nd-z-40 max-lg:nd-pt-20 max-lg:data-[open=false]:nd-hidden'
       )}
     >
@@ -57,21 +57,24 @@ function Node({ item }: { item: TreeNode }) {
 }
 
 function Item({ item }: { item: FileNode }) {
-  const { url, name } = item
   const pathname = usePathname()
-  const active = pathname === url
+  const active = pathname === item.url
 
   return (
     <Link
-      href={url}
+      href={item.url}
       className={clsx(
-        'nd-text-sm nd-px-2 nd-py-1.5 nd-rounded-md nd-transition-colors',
+        'nd-inline-flex nd-flex-row nd-items-center nd-text-sm nd-px-2 nd-py-1.5 nd-rounded-md nd-transition-colors',
         active
           ? 'nd-text-primary nd-bg-primary/10 nd-font-medium'
           : 'nd-text-muted-foreground hover:nd-text-accent-foreground'
       )}
     >
-      {name}
+      {item.icon &&
+        cloneElement(item.icon, {
+          className: 'nd-w-4 nd-h-4 nd-mr-2'
+        })}
+      {item.name}
     </Link>
   )
 }

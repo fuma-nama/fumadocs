@@ -1,4 +1,5 @@
 import type { RawDocumentData } from 'contentlayer/source-files'
+import type { ReactElement } from 'react'
 
 export type MetaPageBase = {
   /** File path relative to `contentDirPath` */
@@ -22,6 +23,7 @@ export type DocsPageBase = {
   /** The description of the document */
   description?: string | undefined
   locale?: string
+  icon?: string
   slug: string
 }
 
@@ -35,4 +37,5 @@ export type PagesContext<
   pages: Map<string, Docs[]>
   docsMap: Map<string, Docs>
   metaMap: Map<string, Meta>
+  resolveIcon?: (icon: string) => ReactElement | undefined
 }

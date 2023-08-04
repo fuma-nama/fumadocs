@@ -87,7 +87,8 @@ function buildFileNode(page: DocsPageBase, ctx: Context): FileNode {
   return {
     type: 'page',
     name: page.title,
-    url: ctx.getUrl(page.slug, ctx.lang)
+    url: ctx.getUrl(page.slug, ctx.lang),
+    icon: page.icon && ctx.resolveIcon ? ctx.resolveIcon(page.icon) : undefined
   }
 }
 

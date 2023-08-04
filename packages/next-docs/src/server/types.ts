@@ -1,4 +1,5 @@
 import type FlexSearch from 'flexsearch'
+import type { ReactElement } from 'react'
 
 export type TreeNode = FileNode | Separator | FolderNode
 
@@ -6,6 +7,7 @@ export type FileNode = {
   type: 'page'
   name: string
   url: string
+  icon?: ReactElement
 }
 
 export type Separator = {

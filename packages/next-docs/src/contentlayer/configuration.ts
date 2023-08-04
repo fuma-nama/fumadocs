@@ -72,6 +72,10 @@ export function createConfig(options: Partial<Options> = {}): Args {
         type: 'string',
         description: 'The description of the document',
         required: false
+      },
+      icon: {
+        type: 'string',
+        required: false
       }
     },
     computedFields: {
