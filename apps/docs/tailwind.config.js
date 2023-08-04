@@ -16,8 +16,6 @@ module.exports = {
     },
     extend: {
       backgroundImage: {
-        'gradient-to-animated':
-          'linear-gradient(var(--rotate-angle),var(--tw-gradient-stops))',
         'gradient-radial': 'radial-gradient(circle, var(--tw-gradient-stops))',
         'gradient-radial-top':
           'radial-gradient(40% 60% at top, var(--tw-gradient-stops))'
@@ -57,15 +55,20 @@ module.exports = {
           foreground: 'hsl(var(--card-foreground))'
         }
       },
-      transitionProperty: {
-        'rotate-angle': '--rotate-angle'
-      },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)'
       },
       keyframes: {
+        'infinite-rotate': {
+          from: {
+            transform: 'rotateZ(0deg)'
+          },
+          to: {
+            transform: 'rotateZ(360deg)'
+          }
+        },
         'accordion-down': {
           from: { height: 0 },
           to: { height: 'var(--radix-accordion-content-height)' }
@@ -94,6 +97,7 @@ module.exports = {
         }
       },
       animation: {
+        'infinite-rotate': 'infinite-rotate 4s linear infinite',
         star: 'star 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         heart: 'heart 1s linear infinite',
         'accordion-down': 'accordion-down 0.2s ease-out',

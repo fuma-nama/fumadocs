@@ -1,8 +1,2 @@
 @tailwind components;
 @tailwind utilities;
-
-@property --rotate-angle {
-  syntax: '<angle>';
-  inherits: false;
-  initial-value: -45deg;
-}
