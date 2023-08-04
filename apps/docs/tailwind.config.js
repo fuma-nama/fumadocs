@@ -97,7 +97,7 @@ module.exports = {
         }
       },
       animation: {
-        'infinite-rotate': 'infinite-rotate 4s linear infinite',
+        'infinite-rotate': 'infinite-rotate 6s linear infinite',
         star: 'star 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         heart: 'heart 1s linear infinite',
         'accordion-down': 'accordion-down 0.2s ease-out',

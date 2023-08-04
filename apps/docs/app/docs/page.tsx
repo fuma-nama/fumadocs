@@ -19,7 +19,7 @@ export default function DocsRoot() {
         <p className="text-muted-foreground sm:text-lg">
           Next Docs can be either a library or a full-powered framework.
         </p>
-        <div className="mt-14 grid grid-cols-1 gap-8 md:grid-cols-2">
+        <div className="mt-14 grid grid-cols-1 gap-8 animate-in fade-in slide-out-to-bottom-20 duration-1000 md:grid-cols-2">
           <Link
             href="/docs/headless"
             className="group relative overflow-hidden rounded-xl p-px z-[2] bg-border"
