@@ -1,5 +1,18 @@
 # next-docs-ui
 
+## 1.3.0
+
+### Minor Changes
+
+- 98226d9: Rewrite slugger and TOC utilities
+
+### Patch Changes
+
+- 6999268: Support custom codeblock meta in Codeblocks
+- Change default typography
+- Updated dependencies [98226d9]
+  - next-docs-zeta@1.3.0
+
 ## 1.2.1
 
 ### Patch Changes

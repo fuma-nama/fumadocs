@@ -3,24 +3,23 @@ title: Configuration
 description: Use Next Docs with ContentLayer
 ---
 
-Next Docs has native support for Contentlayer.
+Next Docs has native support for Contentlayer, and provides default
+configuration with required MDX plugins.
 
 ## Setup
 
-1. Install `rehype-pretty-code remark-gfm rehype-slug rehype-img-size`.
-
-2. Copy the code from
-   [Example Configuration](https://github.com/SonMooSans/next-docs/blob/main/packages/next-docs-ui/src/contentlayer/index.ts).
-
-3. Edit your configuration.
+1. Edit your configuration.
 
 ```ts title="contentlayer.config.ts"
-// copied code...
+import { makeSource } from 'contentlayer/source-files'
+import { defaultConfig } from 'next-docs-zeta/contentlayer/configuration'
 
 export default makeSource(defaultConfig)
 ```
 
-4. Build the [Page Tree](/docs/headless/page-tree).
+> **Note:** Configuration file shouldn't be imported anywhere.
+
+2. Build the [Page Tree](/docs/headless/page-tree).
 
 ```ts
 import { allDocs, allMeta } from 'contentlayer/generated'

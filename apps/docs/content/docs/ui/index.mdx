@@ -42,16 +42,11 @@ npm install contentlayer next-contentlayer
 
 1. **Configure Contentlayer**
 
-   You can modify the configuration by copying
-   [Example Configuration](https://github.com/SonMooSans/next-docs/blob/main/packages/next-docs-ui/src/contentlayer/index.ts).
-
 ```ts {4} title="contentlayer.config.ts"
 import { makeSource } from 'contentlayer/source-files'
-import { createConfig } from 'next-docs-ui/contentlayer'
+import { defaultConfig } from 'next-docs-zeta/contentlayer/configuration'
 
-export default makeSource({
-  ...createConfig()
-})
+export default makeSource(defaultConfig)
 ```
 
 2. **Add Contentlayer Plugin**

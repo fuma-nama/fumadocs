@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 1.3.0
+
+### Minor Changes
+
+- 98226d9: Rewrite slugger and TOC utilities
+
 ## 1.2.1
 
 ### Patch Changes
