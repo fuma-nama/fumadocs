@@ -21,8 +21,8 @@ export function Nav({
   children: ReactNode
 }) {
   return (
-    <nav className="nd-sticky nd-top-0 nd-inset-x-0 nd-bg-background/10 nd-z-50 nd-backdrop-blur-xl">
-      <div className="nd-container nd-flex nd-flex-row nd-items-center nd-h-16 nd-gap-4 nd-max-w-[1300px]">
+    <nav className="nd-sticky nd-top-0 nd-inset-x-0 nd-z-50 nd-backdrop-blur-xl">
+      <div className="nd-container nd-flex nd-flex-row nd-items-center nd-h-16 nd-gap-4 nd-border-b nd-border-foreground/10 nd-max-w-[1300px]">
         {children}
         <div className="nd-flex nd-flex-row nd-justify-end nd-items-center nd-flex-1">
           <SearchBar className="nd-w-full nd-max-w-[280px] nd-mr-3 max-md:nd-hidden" />
