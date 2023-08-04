@@ -132,7 +132,7 @@ export default function HomePage() {
       </div>
 
       <div className="container max-w-[1400px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 py-8 mt-10">
-        <div className="relative z-[2] p-8 col-span-full rounded-3xl bg-gradient-to-br from-cyan-400 to-pink-400 text-center text-cyan-50 overflow-hidden sm:p-12 max-sm:max-h-[400px]">
+        <div className="relative z-[2] p-8 col-span-full rounded-3xl bg-gradient-to-bl from-cyan-400 to-pink-400 text-center text-cyan-50 overflow-hidden sm:p-12 max-sm:max-h-[400px] dark:from-cyan-700 dark:to-purple-900">
           <h2 className="text-2xl sm:text-3xl font-bold mb-4">
             Everything from Next.js
           </h2>
@@ -176,7 +176,7 @@ export default function HomePage() {
             Remote source, Components, and Utilities
           </p>
         </div>
-        <div className="col-span-full h-[300px] mt-[-300px] bg-gradient-to-r from-cyan-400/50 to-pink-400/50 z-[-1] blur-3xl" />
+        <div className="col-span-full h-[300px] mt-[-300px] bg-gradient-to-r from-purple-400/50 to-cyan-400/50 z-[-1] blur-3xl" />
       </div>
 
       <div className="bg-gradient-to-r from-purple-400/30 blur-xl h-[100px] translate-y-[150%]" />

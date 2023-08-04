@@ -27,7 +27,7 @@ export function Nav() {
         Next Docs
       </Link>
       <div className="max-sm:absolute max-sm:left-[50%] max-sm:top-[50%] max-sm:translate-x-[-50%] max-sm:translate-y-[-50%]">
-        <div className="border-input bg-background rounded-md border p-1 text-sm">
+        <div className="border-input bg-secondary/50 rounded-md border p-1 text-sm">
           <Link
             href="/docs/headless"
             className={cn(

@@ -29,6 +29,7 @@ type Param = {
   mode: string
   slug?: string[]
 }
+
 export default async function Page({ params }: { params: Param }) {
   const tree = getTree(params.mode)
   const path = [params.mode, ...(params.slug ?? [])].join('/')
