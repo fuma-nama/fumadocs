@@ -6,15 +6,7 @@
  * Warning: Shouldn't be imported in Next.js, this can cause problem. Put it in contentlayer.config.ts only
  */
 
-import {
-  rehypeCodeBlocksPostprocess,
-  rehypeCodeBlocksPreprocess,
-  rehypeImgSize,
-  rehypePrettycode,
-  rehypePrettyCodeOptions,
-  rehypeSlug,
-  remarkGfm
-} from '@/mdx-plugins'
+import { rehypeImgSize, rehypeNextDocs, remarkGfm } from '@/mdx-plugins'
 import type { Args } from 'contentlayer/source-files'
 import { defineDocumentType } from 'contentlayer/source-files'
 import type { Options as ImgSizeOptions } from 'rehype-img-size'
@@ -133,10 +125,7 @@ export function createConfig(options: Partial<Options> = {}): Args {
     documentTypes: [Docs, Meta],
     mdx: {
       rehypePlugins: [
-        rehypeCodeBlocksPreprocess,
-        [rehypePrettycode, rehypePrettyCodeOptions],
-        rehypeCodeBlocksPostprocess,
-        rehypeSlug,
+        rehypeNextDocs,
         [
           /* eslint-disable */
           rehypeImgSize as any,
