@@ -3,4 +3,4 @@
 'next-docs-zeta': patch
 ---
 
-Support custom page icons
+Support custom page & folder icons

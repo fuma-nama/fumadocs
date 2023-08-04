@@ -10,6 +10,7 @@ export type MetaPageBase = {
   title?: string | undefined
   /** Pages of the folder */
   pages: string[]
+  icon?: string
   slug: string
 }
 

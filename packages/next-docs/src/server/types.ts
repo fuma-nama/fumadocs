@@ -19,6 +19,7 @@ export type FolderNode = {
   type: 'folder'
   name: string
   index?: FileNode
+  icon?: ReactElement
   children: TreeNode[]
 }
 

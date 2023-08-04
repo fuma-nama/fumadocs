@@ -75,6 +75,7 @@ function buildMeta(meta: MetaPageBase, ctx: Context): FolderNode {
     name: meta.title ?? pathToName(segments[segments.length - 1] ?? 'docs'),
     index,
     type: 'folder',
+    icon: meta.icon && ctx.resolveIcon ? ctx.resolveIcon(meta.icon) : undefined,
     children
   }
 }

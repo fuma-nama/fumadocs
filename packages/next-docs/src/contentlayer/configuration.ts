@@ -114,6 +114,10 @@ export function createConfig(options: Partial<Options> = {}): Args {
         },
         description: 'Pages of the folder',
         default: []
+      },
+      icon: {
+        type: 'string',
+        required: false
       }
     },
     computedFields: {

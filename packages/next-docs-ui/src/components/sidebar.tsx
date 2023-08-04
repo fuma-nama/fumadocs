@@ -108,6 +108,16 @@ function Folder({ item }: { item: FolderNode }) {
     setExtend(prev => (item.index == null || active ? !prev : prev))
   }
 
+  const content = (
+    <>
+      {item.icon &&
+        cloneElement(item.icon, {
+          className: 'nd-w-4 nd-h-4 nd-mr-2'
+        })}
+      {name}
+    </>
+  )
+
   return (
     <Collapsible.Root open={extend} onOpenChange={setExtend}>
       <Collapsible.Trigger
@@ -119,11 +129,15 @@ function Folder({ item }: { item: FolderNode }) {
         )}
       >
         {index ? (
-          <Link href={index.url} className="nd-flex-1" onClick={onClick}>
-            {name}
+          <Link
+            href={index.url}
+            className="nd-inline-flex nd-flex-row nd-items-center nd-flex-1"
+            onClick={onClick}
+          >
+            {content}
           </Link>
         ) : (
-          name
+          content
         )}
         <ChevronDown
           className={clsx(
