@@ -44,7 +44,7 @@ export default function HomePage() {
           </h1>
         </div>
         <p>
-          Next Docs is a framework built for building documentation websites in
+          Next Docs is a library built for building documentation websites in
           Next.js
         </p>
         <div className="mt-4 flex flex-row justify-center">
