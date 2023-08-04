@@ -1,108 +1,138 @@
+import { buttonVariants } from '@/components/ui/button'
+import ExampleImage2 from '@/public/example-2.png'
 import ExampleImage from '@/public/example.png'
 import { cn } from '@/utils/cn'
+import {
+  ExternalLinkIcon,
+  LayoutIcon,
+  LibraryIcon,
+  StarIcon
+} from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import type { ComponentPropsWithoutRef, ComponentPropsWithRef } from 'react'
 
 export default function HomePage() {
   return (
-    <main
-      className={cn(
-        'text-muted-foreground flex flex-col',
-        '[--foreground:186_93%_30%] [--muted-foreground:202_57%_49%] dark:[--foreground:186_93%_81%] dark:[--muted-foreground:202_57%_69%]'
-      )}
-    >
-      <div className="absolute inset-x-0 top-0 flex">
-        <div className="bg-gradient-radial-top mx-auto h-[300px] w-[1500px] max-w-[100vw] from-blue-500/10 to-80%" />
+    <main>
+      <div className="absolute inset-x-0 top-0 h-[400px] w-full -translate-y-8 z-[-1]">
+        <div className="h-full w-full mx-auto max-w-[1000px] bg-gradient-to-r from-purple-400 to-blue-400 [mask-image:radial-gradient(500px_100%_at_top_center,white,transparent)] animate-in fade-in duration-1000 dark:opacity-50" />
       </div>
-      <Image
-        src="/stars.png"
-        alt="stars"
-        width={650 / 1.2}
-        height={627 / 1.2}
-        className="absolute right-0 top-0 hidden dark:block"
-        priority
-      />
-      <div className="absolute left-0 top-0 max-xl:hidden">
-        <div className="ml-72 h-[500px] w-6 -rotate-45 rounded-full bg-gradient-to-b from-transparent via-purple-400/50 via-60% to-cyan-200" />
-      </div>
-      <Star className="animate-star absolute left-[10%] top-40 text-cyan-100 delay-200 max-lg:hidden" />
-      <Star className="animate-star absolute left-[30%] top-72 scale-[.25] text-cyan-100 delay-700 max-lg:hidden" />
-      <Star className="animate-star absolute right-[10%] top-64 scale-50 text-pink-200 max-lg:hidden" />
-      <Star className="animate-star absolute right-[15%] top-96 text-pink-200 delay-1000 max-lg:hidden" />
-      <Star className="animate-star absolute right-[30%] top-64 scale-50 text-pink-200 max-lg:hidden" />
-
-      <div className="container z-[2] flex flex-col gap-4 pt-40 text-center">
-        <div className="relative mx-auto">
-          <div
-            className="from-foreground/30 absolute -inset-x-20 top-0 z-[-1] h-full max-w-[100vw] bg-gradient-to-l to-purple-400/30 blur-3xl"
-            aria-hidden
-          />
-          <h1 className="bg-gradient-to-b from-purple-400 from-20% to-cyan-300 bg-clip-text text-3xl font-bold text-transparent dark:from-purple-200 dark:from-20% dark:to-cyan-300 sm:text-5xl sm:leading-snug">
-            Build Next.js Docs
-            <br /> With Speed
-          </h1>
+      <div className="container py-20 flex flex-col items-center text-center">
+        <div className="bg-gradient-to-b from-blue-300 shadow-md shadow-purple-400/50 rounded-lg mb-6">
+          <StarIcon className="m-px p-3 w-12 h-12 bg-secondary text-foreground rounded-[inherit]" />
         </div>
-        <p>
-          Next Docs is a library built for building documentation websites in
-          Next.js
+        <h1 className="text-2xl font-semibold mb-4 sm:text-4xl">
+          Build Your Docs
+        </h1>
+        <p className="text-muted-foreground max-w-xl sm:text-lg">
+          Next Docs is a library and full-powered framework for building
+          documentation websites.
         </p>
-        <div className="mt-4 flex flex-row justify-center">
+        <div className="mt-14 grid grid-cols-1 max-w-4xl gap-8 animate-in fade-in slide-in-from-bottom-10 duration-1000 md:grid-cols-2">
           <Link
-            href="/docs"
-            className="rounded-full bg-gradient-to-b from-cyan-200 to-cyan-300 px-8 py-2 font-medium text-cyan-950"
+            href="/docs/headless"
+            className="group relative overflow-hidden rounded-xl p-px z-[2] bg-border"
           >
-            Get Started -&gt;
+            <i className="absolute opacity-0 transition-opacity top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] w-[130%] h-auto aspect-square z-[-1] group-hover:opacity-100">
+              <div className="w-full h-full bg-[conic-gradient(var(--tw-gradient-stops))] from-purple-400 via-pink-400 animate-infinite-rotate" />
+            </i>
+            <div className="flex flex-col items-center bg-background rounded-xl h-full bg-gradient-to-t from-purple-400/20 p-6 sm:p-12">
+              <div className="border p-3 bg-gradient-to-b from-purple-400/50 border-purple-500 shadow-xl shadow-purple-400/50 mb-6 rounded-xl">
+                <LibraryIcon className="h-9 w-9 text-purple-400 dark:text-purple-200" />
+              </div>
+              <p className="mb-2 text-xl font-medium">Next Docs Zeta</p>
+              <p className="text-muted-foreground">
+                The Headless UI Library with maximized flexibility and
+                functionality.
+              </p>
+            </div>
+          </Link>
+
+          <Link
+            href="/docs/ui"
+            className="group relative overflow-hidden rounded-xl p-px z-[2] bg-border"
+          >
+            <i className="absolute opacity-0 transition-opacity top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] w-[130%] h-auto aspect-square z-[-1] group-hover:opacity-100">
+              <div className="w-full h-full bg-[conic-gradient(var(--tw-gradient-stops))] from-purple-400 via-blue-400 animate-infinite-rotate" />
+            </i>
+            <div className="flex flex-col items-center bg-background rounded-xl h-full bg-gradient-to-t from-blue-400/20 p-6 sm:p-12">
+              <div className="border p-3 bg-gradient-to-b from-blue-400/50 border-blue-500 shadow-xl shadow-blue-400/50 mb-6 rounded-xl">
+                <LayoutIcon className="h-9 w-9 text-blue-400 dark:text-cyan-200" />
+              </div>
+              <p className="mb-2 text-xl font-medium">Next Docs UI</p>
+              <p className="text-muted-foreground">
+                The Framework for building documentation websites with excellent
+                UI.
+              </p>
+            </div>
           </Link>
         </div>
       </div>
-      <div className="container mt-24 grid grid-cols-1 gap-10 md:grid-cols-5">
-        <div className="bg-background relative z-[2] flex flex-col overflow-hidden rounded-2xl border p-8 md:col-span-3">
-          <div className="z-[-1] mx-auto mb-28 flex rounded-3xl border bg-gradient-to-b from-transparent to-cyan-500/30 px-24 shadow-2xl shadow-cyan-400/30">
-            <Heart className="mx-auto" />
-          </div>
-          <div className="from-background/30 absolute inset-0 flex flex-col bg-gradient-to-b from-10% to-blue-500/30 p-8">
-            <div className="mt-auto text-center">
-              <p className="text-foreground mb-2 text-xl font-medium">
-                First class Developer Experience
-              </p>
-              <p className="text-sm">Install, Code, Deploy within a minute</p>
-            </div>
-          </div>
+
+      <section className="[perspective:2000px] overflow-hidden">
+        <div className="relative [transform:rotateX(40deg)] min-w-[600px] max-w-[1200px] mx-auto animate-in duration-1000 fade-in">
+          <div className="absolute inset-0 bg-gradient-to-t from-background to-50%" />
+          <div className="absolute -inset-6 bottom-20 bg-gradient-to-r from-purple-400/30 to-blue-300/30 blur-xl z-[-1] animate-pulse" />
+          <Image
+            alt="example"
+            src={ExampleImage}
+            className="rounded-2xl bg-background"
+            priority
+          />
         </div>
-        <div className="bg-background relative z-[2] flex flex-col overflow-hidden rounded-2xl border p-8 md:col-span-2">
+      </section>
+      <div className="container mt-24 grid grid-cols-1 gap-10 lg:grid-cols-2">
+        <div className="bg-background relative z-[2] flex flex-col overflow-hidden rounded-2xl border p-8">
           <div className="relative z-[-1] mx-auto mb-20">
-            <div className="absolute inset-8 z-[-1] animate-pulse bg-cyan-300/50 blur-3xl" />
-            <Rocket className="text-foreground mx-auto [mask-image:linear-gradient(to_bottom,white_50%,transparent_90%)]" />
+            <div className="absolute inset-8 z-[-1] animate-pulse bg-purple-300/50 blur-3xl" />
+            <Rocket className="text-purple-400 dark:text-purple-200 mx-auto [mask-image:linear-gradient(to_bottom,white_50%,transparent_90%)]" />
           </div>
-          <div className="from-background/30 absolute inset-0 flex flex-col bg-gradient-to-b from-10% to-blue-500/30 p-8">
+          <div className="from-background/30 absolute inset-0 flex flex-col bg-gradient-to-b from-10% to-purple-500/20 p-8">
             <div className="mt-auto text-center">
-              <p className="text-foreground mb-2 text-xl font-medium">
-                Lightning Fast
-              </p>
-              <p className="text-sm">
+              <p className="mb-2 text-xl font-medium">Lightning Fast</p>
+              <p className="text-muted-foreground max-sm:text-sm">
                 Built for App Router and work with Pages Router
               </p>
             </div>
           </div>
         </div>
+        <div className="bg-background relative z-[2] flex flex-col overflow-hidden rounded-2xl border p-8">
+          <div className="z-[-1] mx-auto mb-28 flex rounded-3xl border bg-gradient-to-b from-transparent to-cyan-500/30 px-24 shadow-2xl shadow-cyan-400/30">
+            <Heart className="mx-auto" />
+          </div>
+          <div className="from-background/30 absolute inset-0 flex flex-col bg-gradient-to-b from-10% to-blue-500/20 p-8">
+            <div className="mt-auto text-center">
+              <p className="mb-2 text-xl font-medium">
+                First-class Developer Experience
+              </p>
+              <p className="text-muted-foreground max-sm:text-sm">
+                Install, Code, Deploy within a minute
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
-      <div className="mt-[-300px] h-[400px] bg-gradient-to-b from-transparent via-blue-500/10 to-transparent" />
-      <div className="px-8">
-        <h2 className="text-5xl sm:text-6xl md:text-7xl text-center mt-20 text-foreground mb-4">
-          Moreover
+      <div className="mt-[-300px] h-[400px] bg-gradient-to-r from-purple-400 to-blue-400 opacity-30 [mask-image:linear-gradient(to_top,white,transparent)] lg:via-transparent lg:to-blue-400" />
+      <div className="container text-center mt-20 max-w-4xl">
+        <div className="mx-auto w-fit border border-blue-400 shadow-lg shadow-blue-400/50 rounded-md p-2 mb-6">
+          <LayoutIcon />
+        </div>
+        <h2 className="text-2xl text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-400 font-semibold mb-4 sm:text-4xl sm:leading-snug">
+          Next Framework for Your&nbsp;Docs
         </h2>
-        <p className="text-center sm:text-lg">
-          Next Docs UI is the next-gen framework for your documentation website
+        <p className="text-muted-foreground mx-auto max-w-2xl sm:text-lg">
+          Next Docs UI focus on performance and DX, allowing you to customise
+          everything with less configuration.
         </p>
       </div>
 
-      <div className="relative z-[-1] mt-12">
-        <div className="absolute top-12 left-0 bg-gradient-to-l from-transparent to-transparent via-cyan-300 dark:via-cyan-400 w-full h-[500px] blur-3xl" />
+      <div className="relative z-[-1] mt-14">
+        <div className="absolute top-12 left-0 bg-gradient-to-l from-transparent to-transparent via-cyan-300 dark:via-cyan-400 w-full h-[400px] blur-3xl" />
       </div>
 
       <div className="container max-w-[1400px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 py-8 mt-10">
-        <div className="relative z-[2] p-8 rounded-3xl bg-gradient-to-br from-cyan-400 to-pink-400 text-center text-cyan-50 overflow-hidden sm:p-12 max-sm:max-h-[400px] md:col-span-2 lg:col-span-3">
+        <div className="relative z-[2] p-8 col-span-full rounded-3xl bg-gradient-to-br from-cyan-400 to-pink-400 text-center text-cyan-50 overflow-hidden sm:p-12 max-sm:max-h-[400px]">
           <h2 className="text-2xl sm:text-3xl font-bold mb-4">
             Everything from Next.js
           </h2>
@@ -112,93 +142,66 @@ export default function HomePage() {
           </p>
           <Image
             alt="example"
-            src={ExampleImage}
+            src={ExampleImage2}
             className="rounded-3xl shadow-lg shadow-black min-w-[500px] w-full max-w-[1000px] m-auto"
           />
           <div className="absolute w-[90%] h-[60%] bg-gradient-to-br from-white/50 border border-white rounded-3xl left-[50%] translate-x-[-50%] translate-y-[-50%] top-[80%] sm:top-[60%] z-[-1]" />
         </div>
 
         <div className="border p-12 rounded-3xl text-center flex flex-col items-center bg-gradient-to-br from-background md:col-span-2">
-          <h2 className="text-2xl font-semibold text-foreground mb-4">
-            Light and Fast
-          </h2>
-          <p>
+          <h2 className="text-2xl font-semibold mb-4">Light and Fast</h2>
+          <p className="text-muted-foreground">
             Full powered documentation website with ~150 KB first load js size
           </p>
         </div>
         <div className="border p-12 rounded-3xl text-center flex flex-col justify-center bg-gradient-to-br from-background">
-          <h2 className="text-2xl font-semibold mb-4 text-foreground">
-            Optimized
-          </h2>
-          <p>Optimize your images and links by default</p>
+          <h2 className="text-2xl font-semibold mb-4">Optimized</h2>
+          <p className="text-muted-foreground">
+            Optimize your images and links by default
+          </p>
         </div>
         <div className="border p-12 rounded-3xl text-center flex flex-col justify-center bg-gradient-to-br from-background">
-          <h2 className="text-2xl font-semibold mb-4 text-foreground">
-            A11y & UX
-          </h2>
-          <p>Focus on user experience and accessibility</p>
+          <h2 className="text-2xl font-semibold mb-4">A11y & UX</h2>
+          <p className="text-muted-foreground">
+            Focus on user experience and accessibility
+          </p>
         </div>
         <div className="border p-12 rounded-3xl text-center flex flex-col justify-center bg-gradient-to-br from-background">
-          <h2 className="text-2xl font-semibold text-foreground mb-4">
-            Light and Dark
-          </h2>
-          <p>Let your eyes rest</p>
+          <h2 className="text-2xl font-semibold mb-4">Light and Dark</h2>
+          <p className="text-muted-foreground">Let your eyes rest</p>
         </div>
         <div className="border p-12 rounded-3xl text-center flex flex-col justify-center bg-gradient-to-br from-background">
-          <h2 className="text-2xl font-semibold text-foreground mb-4">
-            And More...
-          </h2>
-          <p>Remote source, Components, and Utilities</p>
+          <h2 className="text-2xl font-semibold mb-4">And More...</h2>
+          <p className="text-muted-foreground">
+            Remote source, Components, and Utilities
+          </p>
         </div>
+        <div className="col-span-full h-[300px] mt-[-300px] bg-gradient-to-r from-cyan-400/50 to-pink-400/50 z-[-1] blur-3xl" />
       </div>
-      <div className="h-[300px] mt-[-300px] bg-gradient-to-r from-cyan-400/50 to-pink-400/50 z-[-1] blur-3xl" />
-      <div className="container my-40 flex flex-col gap-2 text-center">
-        <h2 className="text-foreground text-3xl font-semibold">Install Now</h2>
-        <p className="text-sm">Stop waiting, go type it.</p>
-        <div className="mt-8 grid grid-cols-1 gap-8 md:grid-cols-2">
-          <Link
-            href="/docs/headless"
-            className={cn(
-              'group relative overflow-hidden rounded-xl z-[2] p-px',
-              'after:absolute after:-inset-px after:z-[-1] after:bg-gradient-to-br after:from-blue-500/30 after:to-purple-400'
-            )}
-          >
-            <div className="bg-background h-full rounded-xl bg-gradient-to-tl from-purple-400/20 text-purple-700 dark:text-purple-200 p-6 group-hover:from-purple-400/10">
-              <p className="mb-2 text-lg font-semibold">Next Docs Zeta</p>
-              <pre className="text-sm opacity-80">
-                npm install next-docs-zeta
-              </pre>
-            </div>
-          </Link>
-
-          <Link
-            href="/docs/ui"
-            className={cn(
-              'group relative overflow-hidden rounded-xl z-[2] p-px',
-              'after:absolute after:-inset-px after:z-[-1] after:bg-gradient-to-tl after:from-pink-500/20 after:to-blue-400'
-            )}
-          >
-            <div className="bg-background h-full rounded-xl bg-gradient-to-br from-blue-400/20 p-6 group-hover:from-blue-400/10">
-              <p className="mb-2 text-lg font-semibold text-foreground">
-                Next Docs UI
-              </p>
-              <pre className="text-sm">npm install next-docs-ui</pre>
-            </div>
-          </Link>
-        </div>
+      <div className="relative top-20 z-[-1]">
+        <Image
+          alt="stars"
+          src="/stars.png"
+          width="500"
+          height="500"
+          className="absolute top-0 right-0"
+        />
       </div>
+      <div className="container my-40 flex flex-col gap-2 items-center text-center">
+        <h2 className="text-3xl font-semibold">Install Now</h2>
+        <p className="text-muted-foreground">Stop waiting, go play it.</p>
+        <a
+          href="https://githubbox.com/SonMooSans/next-docs-ui-template"
+          rel="noreferrer noopener"
+          target="_blank"
+          className={cn(buttonVariants({ className: 'mt-4 max-w-xl' }))}
+        >
+          Open in CodeSandbox
+          <ExternalLinkIcon className="w-4 h-4 ml-2" />
+        </a>
+      </div>
+      <div className="h-[120px] bg-gradient-to-r from-purple-400 to-blue-400 opacity-30 [mask-image:linear-gradient(to_top,white,transparent)] md:via-transparent md:to-blue-400" />
     </main>
-  )
-}
-
-function Star(props: ComponentPropsWithoutRef<'svg'>) {
-  return (
-    <svg width="91" height="268" viewBox="0 0 91 268" fill="none" {...props}>
-      <path
-        d="M91 134.177C58.7846 134.177 47.4533 48.4036 45.5 0.560455C43.5467 48.4036 32.2154 134.177 0 134.177C32.2154 134.177 43.5467 219.949 45.5 267.793C47.4533 219.949 58.7846 134.177 91 134.177Z"
-        fill="currentColor"
-      />
-    </svg>
   )
 }
 
@@ -233,7 +236,7 @@ function Heart(props: ComponentPropsWithoutRef<'svg'>) {
           d="M52 39H76M46 45.5L80 45.5M44 51.5L84 51.5M43 57.5H135M44 63.5H134M45 69.5H133M49 75.5H129M53 81.5H125M57 87.5H121M62 93.5H116M68 99.5H110M75 105.5H103M82.5 111.5H97.5M126 39H102M132 45.5L98 45.5M134 51.5L94 51.5"
           strokeWidth="2"
           strokeLinecap="round"
-          className="animate-heart stroke-foreground"
+          className="animate-heart stroke-cyan-600 dark:stroke-cyan-200"
           strokeDasharray={200}
         />
       </g>

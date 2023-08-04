@@ -17,6 +17,10 @@ export default function middleware(req: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  if (pathname === '/docs') {
+    return NextResponse.redirect(new URL('/docs/headless', req.url))
+  }
+
   return NextResponse.next()
 }
 
