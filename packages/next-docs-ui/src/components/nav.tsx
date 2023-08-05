@@ -21,7 +21,7 @@ export function Nav({
   children: ReactNode
 }) {
   return (
-    <nav className="nd-sticky nd-top-0 nd-inset-x-0 nd-z-50 nd-backdrop-blur-xl">
+    <nav className="nd-sticky nd-top-0 nd-inset-x-0 nd-z-50 nd-backdrop-blur-lg">
       <div className="nd-container nd-flex nd-flex-row nd-items-center nd-h-16 nd-gap-4 nd-border-b nd-border-foreground/10 nd-max-w-[1300px]">
         {children}
         <div className="nd-flex nd-flex-row nd-justify-end nd-items-center nd-flex-1">
