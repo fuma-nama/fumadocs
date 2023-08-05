@@ -57,8 +57,8 @@ folder will be used as the display name.
 
 ### Meta
 
-You can also customize the folder name, the order of pages, or adding a
-separator by creating a `meta.json` in the folder.
+You can also customize the folder name, order of pages, or adding a separator by
+creating a `meta.json` in the folder.
 
 ```json
 {
@@ -71,3 +71,27 @@ separator by creating a `meta.json` in the folder.
 
 As you see, you can define a separator in meta by adding a item surrounded by
 `---`.
+
+## Advanced
+
+### Adding Icons
+
+It is supported to have custom icons for a page or a folder. Add an `icon`
+property to the frontmatter or `meta.json`, and configure icon handler by
+setting `resolveIcon` on page context.
+
+```ts
+import { buildPageTree, loadContext } from 'next-docs-zeta/contentlayer'
+import { createElement } from 'react'
+
+const ctx = loadContext(allMeta, allDocs)
+
+ctx.resolveIcon = icon => {
+  // load icon from library
+  const res = require('lucide-react')
+  icon = icon.trim()
+
+  if (res[icon]) return createElement(res[icon])
+  return undefined
+}
+```

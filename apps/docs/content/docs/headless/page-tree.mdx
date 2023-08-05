@@ -16,7 +16,7 @@ Items can be either a separator, page or folder.
 
 ### Page
 
-It contains a url and display name.
+It contains a url, an optional icon and display name.
 
 ```json
 {
@@ -28,7 +28,8 @@ It contains a url and display name.
 
 ### Folder
 
-It contains a display name, a list of items and an optional index page
+It contains a display name, an optional icon, a list of items and an optional
+index page
 
 ```json
 {
@@ -54,6 +55,10 @@ It only contains a display name.
   "name": "Components"
 }
 ```
+
+### Icons
+
+Icon is a `ReactElement`, supported by pages and folders.
 
 ### Example
 
