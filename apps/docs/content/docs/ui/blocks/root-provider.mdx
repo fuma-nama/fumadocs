@@ -27,9 +27,10 @@ export default function Layout({ children }) {
 
 You can customise search dialog from the root provider.
 
-| Prop    | Type                 | Description           |
-| ------- | -------------------- | --------------------- |
-| `links` | `[string, string][]` | Default items to show |
+| Prop           | Type                 | Description                |
+| -------------- | -------------------- | -------------------------- |
+| `SearchDialog` | `React.FC`           | Replace the default dialog |
+| `links`        | `[string, string][]` | Default items to show      |
 
 ```jsx
 <RootProvider
