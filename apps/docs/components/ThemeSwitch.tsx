@@ -72,15 +72,62 @@ const neturalTheme = `
     --ring: 0 0% 14.9%;
   }`
 
+const fullLayoutTheme = `
+.nd-container.nd-max-w-\\[1300px\\] {
+  max-width: none;
+}
+
+main > div:nth-of-type(2) > div:nth-of-type(1) {
+  top: 0;
+  height: 100vh;
+  border-right-width: 1px;
+}
+
+main > div:nth-of-type(2) > div:nth-child(3) {
+  width: 250px;
+}
+
+main > div:nth-of-type(2) > div:nth-child(3) > div {
+  top: 0;
+  max-height: 100vh;
+}
+
+@media (min-width: 1024px) {
+  nav {
+    display: none;
+  }
+
+  main > div:nth-of-type(2) > div:nth-child(1) > button:first-of-type {
+    display: flex;
+    margin-bottom: 1rem;
+  }
+}
+
+article {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 700px;
+}
+
+article > div:first-of-type {
+  display: none;
+}
+`
+
 export function ThemeSwitch() {
   const [netural, setNetural] = useState(false)
+  const [fullLayout, setFullLayout] = useState(false)
 
   return (
-    <>
+    <div className="flex flex-row gap-3">
       <Button variant="secondary" onClick={() => setNetural(prev => !prev)}>
         Toggle Netural Theme
       </Button>
+      <Button variant="secondary" onClick={() => setFullLayout(prev => !prev)}>
+        Toggle Full Layout
+      </Button>
       {netural && <style>{neturalTheme}</style>}
-    </>
+      {fullLayout && <style>{fullLayoutTheme}</style>}
+    </div>
   )
 }
