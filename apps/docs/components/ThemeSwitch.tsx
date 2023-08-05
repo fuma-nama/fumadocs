@@ -114,20 +114,40 @@ article > div:first-of-type {
 }
 `
 
+const hideSidebarTheme = `
+@media (min-width: 1024px) {
+  main > div:nth-child(2) > div:nth-child(1) {
+    width: 0px;
+    padding-left: 0;
+    padding-right: 0;
+    overflow: hidden;
+    transition-property: width padding opacity;
+    transition-duration: 0.5s;
+    opacity: 0;
+    white-space: pre;
+  }
+}
+`
+
 export function ThemeSwitch() {
   const [netural, setNetural] = useState(false)
   const [fullLayout, setFullLayout] = useState(false)
+  const [hideSidebar, setHideSidebar] = useState(false)
 
   return (
-    <div className="flex flex-row gap-3">
+    <div className="flex flex-row gap-3 flex-wrap">
       <Button variant="secondary" onClick={() => setNetural(prev => !prev)}>
         Toggle Netural Theme
       </Button>
       <Button variant="secondary" onClick={() => setFullLayout(prev => !prev)}>
         Toggle Full Layout
       </Button>
+      <Button variant="secondary" onClick={() => setHideSidebar(prev => !prev)}>
+        Toggle Sidebar
+      </Button>
       {netural && <style>{neturalTheme}</style>}
       {fullLayout && <style>{fullLayoutTheme}</style>}
+      {hideSidebar && <style>{hideSidebarTheme}</style>}
     </div>
   )
 }

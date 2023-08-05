@@ -36,7 +36,7 @@ export default function Layout({
         nav={false}
         sidebarBanner={
           <div className="flex flex-row gap-2 items-center p-2 rounded-lg border bg-card text-card-foreground transition-colors lg:mb-6 max-lg:mt-6 shadow-lg shadow-background z-[2] hover:bg-accent">
-            <Icon className="w-9 h-9 p-1 border rounded-md text-primary bg-background" />
+            <Icon className="w-9 h-9 p-1 shrink-0 border rounded-md text-primary bg-background" />
             <div>
               <p className="font-medium text-sm">{title}</p>
               <p className="text-muted-foreground text-xs">{description}</p>
