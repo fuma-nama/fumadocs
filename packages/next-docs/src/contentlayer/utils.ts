@@ -15,7 +15,7 @@ export function getPageUrl(slug: string[], baseUrl: string, locale?: string) {
     .filter(segment => segment != null && segment.length > 0)
     .join('/')
 
-  if (baseUrl === '/') {
+  if (url.startsWith('//')) {
     return url.slice(1)
   }
 
