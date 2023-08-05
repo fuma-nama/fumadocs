@@ -1,9 +1,25 @@
 import dynamic from 'next/dynamic'
-import type { ReactNode } from 'react'
+import type { FC, ReactNode } from 'react'
 import { createContext, useEffect, useState } from 'react'
 import type { SearchOptions } from '../components/dialog/search'
 
-const SearchDialog = dynamic(() => import('../components/dialog/search'))
+const DefaultSearchDialog = dynamic(() => import('../components/dialog/search'))
+
+export type SearchProviderProps = SearchOptions & {
+  /**
+   * Replace default search dialog, allowing you to use other solutions such as Algolia Search
+   *
+   * It receives the `open` and `onOpenChange` prop, lazy loaded with `next/dynamic`
+   */
+  SearchDialog?: FC<
+    {
+      open: boolean
+      onOpenChange: (value: boolean) => void
+    } & SearchOptions
+  >
+
+  children: ReactNode
+}
 
 export const SearchContext = createContext<{
   setOpenSearch: (value: boolean) => void
@@ -11,13 +27,7 @@ export const SearchContext = createContext<{
   setOpenSearch: () => {}
 })
 
-export function SearchProvider({
-  search,
-  children
-}: {
-  search?: SearchOptions
-  children: ReactNode
-}) {
+export function SearchProvider(props: SearchProviderProps) {
   const [isOpen, setOpen] = useState<boolean>()
 
   useEffect(() => {
@@ -35,12 +45,18 @@ export function SearchProvider({
     }
   }, [])
 
+  const SearchDialog = props.SearchDialog ?? DefaultSearchDialog
+
   return (
     <SearchContext.Provider value={{ setOpenSearch: setOpen }}>
       {isOpen !== undefined && (
-        <SearchDialog open={isOpen} onOpenChange={setOpen} {...search} />
+        <SearchDialog
+          open={isOpen}
+          onOpenChange={setOpen}
+          links={props.links}
+        />
       )}
-      {children}
+      {props.children}
     </SearchContext.Provider>
   )
 }

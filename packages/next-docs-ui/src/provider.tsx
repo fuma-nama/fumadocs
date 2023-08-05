@@ -2,12 +2,11 @@
 
 import { ThemeProvider } from 'next-themes'
 import { type ReactNode } from 'react'
-import type { SearchOptions } from './components/dialog/search'
 import { SidebarProvider } from './components/sidebar'
-import { SearchProvider } from './contexts/search'
+import { SearchProvider, type SearchProviderProps } from './contexts/search'
 
 export type RootProviderProps = {
-  search?: SearchOptions
+  search?: Omit<SearchProviderProps, 'children'>
   children: ReactNode
 }
 
@@ -15,7 +14,7 @@ export function RootProvider(props: RootProviderProps) {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <SidebarProvider>
-        <SearchProvider search={props.search}>{props.children}</SearchProvider>
+        <SearchProvider {...props.search}>{props.children}</SearchProvider>
       </SidebarProvider>
     </ThemeProvider>
   )
