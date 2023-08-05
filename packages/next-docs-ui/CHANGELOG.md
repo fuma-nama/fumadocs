@@ -1,5 +1,15 @@
 # next-docs-ui
 
+## 1.3.1
+
+### Patch Changes
+
+- 21725e4: Support replacing default search dialog component
+- 7fb2b9e: Support custom page & folder icons
+- Updated dependencies [ff05f5d]
+- Updated dependencies [7fb2b9e]
+  - next-docs-zeta@1.3.1
+
 ## 1.3.0
 
 ### Minor Changes

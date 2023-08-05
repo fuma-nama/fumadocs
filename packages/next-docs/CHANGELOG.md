@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 1.3.1
+
+### Patch Changes
+
+- ff05f5d: Support custom fields in Contentlayer configuration generator
+- 7fb2b9e: Support custom page & folder icons
+
 ## 1.3.0
 
 ### Minor Changes
