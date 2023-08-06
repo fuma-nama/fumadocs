@@ -74,7 +74,7 @@ export function SidebarList<T extends ElementType = 'aside'>({
 
   return (
     <RemoveScroll
-      as={as}
+      as={as ?? 'aside'}
       data-open={isMobileLayout && open}
       enabled={isMobileLayout && open}
       {...props}
