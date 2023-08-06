@@ -4,6 +4,8 @@ description: A page in your documentation
 icon: PaperclipIcon
 ---
 
+import { TypeTable } from 'next-docs-ui/type-table'
+
 Page is the base element of a documentation, it includes Table of contents,
 Footer, and Breadcrumb.
 
@@ -19,12 +21,23 @@ import { DocsPage } from 'next-docs-ui/page'
 </DocsPage>
 ```
 
-| Prop         | Type                       | Description                     |
-| ------------ | -------------------------- | ------------------------------- |
-| `tocContent` | `ReactNode \| undefined`   | Extra content to display in TOC |
-| `toc`        | `TableOfContents`          | -                               |
-| `footer`     | `FooterProps \| undefined` | -                               |
-| `children`   | `ReactNode`                | -                               |
+<TypeTable
+  type={{
+    tocContent: {
+      type: 'ReactNode',
+      description: 'Extra content at the bottom of TOC'
+    },
+    toc: {
+      type: 'TOCItemType[]',
+      typeDescription: `{ title: string, url: string, depth: number }[]`
+    },
+    footer: {
+      type: 'FooterProps',
+      typeDescriptionLink: '#footer'
+    },
+    children: { type: 'ReactNode' }
+  }}
+/>
 
 > **Note:** Footer is not enabled by default
 
@@ -55,10 +68,18 @@ You need to manually enable it by passing the previous and next page to the
 To get those pages, it's recommended to use the
 [Get Neighbours](/docs/headless/utils/find-neighbour) Utility.
 
-| Prop       | Type                                         | Description |
-| ---------- | -------------------------------------------- | ----------- |
-| `next`     | `{ name: string, url: string } \| undefined` | -           |
-| `previous` | `{ name: string, url: string } \| undefined` | -           |
+<TypeTable
+  type={{
+    next: {
+      type: 'object',
+      typeDescription: '{ name: string, url: string }'
+    },
+    previous: {
+      type: 'object',
+      typeDescription: '{ name: string, url: string }'
+    }
+  }}
+/>
 
 #### Example
 

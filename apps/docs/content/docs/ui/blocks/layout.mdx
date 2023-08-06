@@ -4,6 +4,8 @@ description: The layout of documentation
 icon: LayoutIcon
 ---
 
+import { TypeTable } from 'next-docs-ui/type-table'
+
 The layout of documentation pages, it must be nested under the
 [Root Provider](/docs/ui/blocks/root-provider).
 
@@ -19,15 +21,29 @@ export default function Layout({ children }) {
 }
 ```
 
-| Prop             | Type                  | Description                        |
-| ---------------- | --------------------- | ---------------------------------- |
-| `navTitle`       | `string \| ReactNode` | Navbar title                       |
-| `tree`           | `TreeNode[]`          | The page tree                      |
-| `nav`            | `ReactNode \| false`  | Replace or disable default navbar  |
-| `githubUrl`      | `string`              | Github url displayed on the navbar |
-| `sidebarBanner`  | `ReactNode`           | Content at the top of sidebar      |
-| `sidebarContent` | `ReactNode`           | Content at the bottom of sidebar   |
-| `children`       | `ReactNode`           | -                                  |
+<TypeTable
+  type={{
+    navTitle: { description: 'Navbar title', type: 'ReactNode | string' },
+    tree: { type: 'TreeNode[]' },
+    nav: {
+      type: 'ReactNode | false',
+      description: 'Replace or disable default navbar'
+    },
+    githubUrl: {
+      type: 'string',
+      description: 'Github url displayed on the navbar'
+    },
+    sidebarBanner: {
+      type: 'ReactNode',
+      description: 'Content at the top of sidebar'
+    },
+    sidebarContent: {
+      type: 'ReactNode',
+      description: 'Content at the bottom of sidebar'
+    },
+    children: { type: 'ReactNode' }
+  }}
+/>
 
 ### Disabling Navbar
 

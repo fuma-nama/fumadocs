@@ -5,6 +5,7 @@ icon: SquareDotIcon
 ---
 
 import { HomeIcon } from 'lucide-react'
+import { TypeTable } from 'next-docs-ui/type-table'
 
 ## Usage
 
@@ -29,12 +30,23 @@ The container of cards.
 
 The component to redirect users.
 
-| Prop          | Type        | Default            |
-| ------------- | ----------- | ------------------ |
-| `title`       | `string`    | -                  |
-| `description` | `string`    | -                  |
-| `icon`        | `ReactNode` | `ExternalLinkIcon` |
-| `href`        | `string`    | -                  |
+<TypeTable
+  type={{
+    title: {
+      type: 'string'
+    },
+    description: {
+      type: 'string'
+    },
+    icon: {
+      type: 'ReactNode',
+      default: 'ExternalLinkIcon'
+    },
+    href: {
+      type: 'string'
+    }
+  }}
+/>
 
 ## Example
 

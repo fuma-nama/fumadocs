@@ -4,6 +4,9 @@ description: A button that scrolls to the top
 icon: MouseIcon
 ---
 
+import { RollButton } from 'next-docs-ui/components'
+import { TypeTable } from 'next-docs-ui/type-table'
+
 A button that scrolls to the top.
 
 ## Usage
@@ -24,9 +27,16 @@ import { RollButton } from 'next-docs-ui/components'
 
 ### Reference
 
-| Prop         | Type                  | Description                                              |
-| ------------ | --------------------- | -------------------------------------------------------- |
-| `percentage` | `number \| undefined` | Percentage of scroll position to display the roll button |
+<TypeTable
+  type={{
+    percentage: {
+      description:
+        'The percentage of scroll position to display the roll button',
+      type: 'nubmer',
+      default: 0.2
+    }
+  }}
+/>
 
 ## Example
 

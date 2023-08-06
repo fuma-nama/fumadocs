@@ -4,6 +4,8 @@ description: The context provider of Next Docs UI.
 icon: ComponentIcon
 ---
 
+import { TypeTable } from 'next-docs-ui/type-table'
+
 The context provider of all the components, including `next-themes` and context
 for search dialog. It should be located at the root layout.
 
@@ -27,10 +29,15 @@ export default function Layout({ children }) {
 
 You can customise search dialog from the root provider.
 
-| Prop           | Type                 | Description                |
-| -------------- | -------------------- | -------------------------- |
-| `SearchDialog` | `React.FC`           | Replace the default dialog |
-| `links`        | `[string, string][]` | Default items to show      |
+<TypeTable
+  type={{
+    SearchDialog: {
+      description: 'Replace the default dialog',
+      type: 'React.FC<SearchDialogProps>'
+    },
+    links: { type: '[string, string][]', description: 'Default items to show' }
+  }}
+/>
 
 ```jsx
 <RootProvider
