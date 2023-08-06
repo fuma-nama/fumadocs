@@ -1,14 +1,14 @@
 'use client'
 
-import { InfoIcon } from 'lucide-react'
-import Link from 'next/link'
-import type { ReactNode } from 'react'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger
-} from './components/ui/popover'
-import { cn } from './utils/cn'
+} from '@/components/ui/popover'
+import { cn } from '@/utils/cn'
+import { InfoIcon } from 'lucide-react'
+import Link from 'next/link'
+import type { ReactNode } from 'react'
 
 export function Info({ children }: { children: ReactNode }) {
   return (

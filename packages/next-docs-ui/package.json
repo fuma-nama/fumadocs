@@ -15,6 +15,10 @@
       "import": "./dist/components/index.mjs",
       "types": "./dist/components/index.d.ts"
     },
+    "./components/*": {
+      "import": "./dist/components/*.mjs",
+      "types": "./dist/components/*.d.ts"
+    },
     "./mdx": {
       "import": "./dist/mdx/index.mjs",
       "types": "./dist/mdx/index.d.ts"
@@ -28,6 +32,9 @@
     "*": {
       "components": [
         "./dist/components/index.d.ts"
+      ],
+      "components/*": [
+        "./dist/components/*.d.ts"
       ],
       "mdx": [
         "./dist/mdx/index.d.ts"

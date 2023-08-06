@@ -2,7 +2,11 @@ import { defineConfig } from 'tsup'
 import tsconfig from './tsconfig.json'
 
 export default defineConfig({
-  entry: ['./src/{mdx,components}/index.{ts,tsx}', './src/*.{ts,tsx}'],
+  entry: [
+    './src/mdx/index.{ts,tsx}',
+    './src/components/{type-table,roll-button,index}.{ts,tsx}',
+    './src/*.{ts,tsx}'
+  ],
   external: ['next-docs-zeta', 'shiki'],
   format: 'esm',
   dts: true,
