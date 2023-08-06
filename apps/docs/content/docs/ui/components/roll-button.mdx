@@ -7,14 +7,15 @@ icon: MouseIcon
 import { RollButton } from 'next-docs-ui/components/roll-button'
 import { TypeTable } from 'next-docs-ui/components/type-table'
 
-A button that scrolls to the top.
+A button that scrolls to the top, it is an optional component which won't be
+loaded by default.
 
 ## Usage
 
 Add this component to your page.
 
 ```mdx title="app/docs/[[...slug]]/page.tsx"
-import { RollButton } from 'next-docs-ui/components'
+import { RollButton } from 'next-docs-ui/components/roll-button'
 
 <DocsPage toc={toc} tree={tree}>
   <RollButton />

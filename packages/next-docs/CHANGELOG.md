@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 1.4.0
+
+### Patch Changes
+
+- 0f106d9: Fix default sidebar element type
+
 ## 1.3.1
 
 ### Patch Changes

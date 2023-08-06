@@ -1,5 +1,18 @@
 # next-docs-ui
 
+## 1.4.0
+
+### Minor Changes
+
+- 45a174a: Split roll-button into optional component
+
+### Patch Changes
+
+- ed385ab: Add Type Table component
+- 5407360: Improve sidebar layout
+- Updated dependencies [0f106d9]
+  - next-docs-zeta@1.4.0
+
 ## 1.3.1
 
 ### Patch Changes

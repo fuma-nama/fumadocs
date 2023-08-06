@@ -12,6 +12,7 @@
     "components/card",
     "components/heading",
     "components/roll-button",
+    "components/type-table",
     "---Blocks---",
     "blocks/page",
     "blocks/layout",

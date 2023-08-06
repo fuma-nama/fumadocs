@@ -1,0 +1,75 @@
+---
+title: Type Table
+description: A table for documenting types
+icon: TableIcon
+---
+
+import { TypeTable } from 'next-docs-ui/components/type-table'
+
+> it is an optional component which won't be loaded by default.
+
+## Usage
+
+It accepts a `type` property.
+
+```mdx
+import { TypeTable } from 'next-docs-ui/components/type-table'
+
+<TypeTable
+  type={{
+    percentage: {
+      description:
+        'The percentage of scroll position to display the roll button',
+      type: 'nubmer',
+      default: 0.2
+    }
+  }}
+/>
+```
+
+<div className="from-primary bg-secondary mt-4 rounded-lg border px-4">
+  <TypeTable
+    type={{
+      percentage: {
+        description:
+          'The percentage of scroll position to display the roll button',
+        type: 'nubmer',
+        default: 0.2
+      }
+    }}
+  />
+</div>
+
+### Type Table
+
+<TypeTable
+  type={{
+    type: {
+      description: 'The type of object',
+      type: 'Record<string, ObjectType>',
+      typeDescriptionLink: '#object-type'
+    }
+  }}
+/>
+
+### Object Type
+
+<TypeTable
+  type={{
+    description: {
+      type: 'string',
+      description: 'Additional description of the field',
+      default: '"-"'
+    },
+    type: {
+      type: 'string'
+    },
+    typeDescription: {
+      type: 'string'
+    },
+    typeDescriptionLink: {
+      type: 'string',
+      description: 'Optional link to the type'
+    }
+  }}
+/>

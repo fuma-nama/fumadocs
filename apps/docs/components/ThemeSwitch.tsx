@@ -77,7 +77,7 @@ const fullLayoutTheme = `
   max-width: none;
 }
 
-main > div:nth-of-type(2) > div:nth-of-type(1) {
+main > div:nth-of-type(2) > aside:nth-child(1) {
   top: 0;
   height: 100vh;
   border-right-width: 1px;
@@ -111,7 +111,7 @@ article > div:first-of-type {
 
 const hideSidebarTheme = `
 @media (min-width: 1024px) {
-  main > div:nth-child(2) > div:nth-child(1) {
+  main > div:nth-child(2) > aside:nth-child(1) {
     width: 0px;
     padding-left: 0;
     padding-right: 0;
