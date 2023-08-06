@@ -1,3 +1,5 @@
+'use client'
+
 import clsx from 'clsx'
 import { ChevronUpIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
