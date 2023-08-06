@@ -23,7 +23,7 @@ export function Sidebar({ items, banner, children }: SidebarProps) {
       minWidth={1024} // lg
       className={clsx(
         'nd-flex nd-flex-col',
-        'lg:nd-sticky lg:nd-top-16 lg:nd-w-[250px] lg:nd-h-[calc(100vh-4rem)] lg:nd-pr-4 lg:nd-pt-16',
+        'lg:nd-sticky lg:nd-top-16 lg:nd-w-[260px] lg:nd-h-[calc(100vh-4rem)] lg:nd-pr-4 lg:nd-pt-16',
         'max-lg:nd-fixed max-lg:nd-inset-0 max-lg:nd-px-8 max-lg:nd-bg-background/50 max-lg:nd-backdrop-blur-xl max-lg:nd-z-40 max-lg:nd-pt-20 max-lg:data-[open=false]:nd-hidden'
       )}
     >

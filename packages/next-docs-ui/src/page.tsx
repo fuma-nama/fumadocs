@@ -28,7 +28,7 @@ export function DocsPage(props: DocsPageProps) {
           <Footer {...props.footer} />
         )}
       </article>
-      <div className="nd-relative nd-w-[200px] max-xl:nd-hidden">
+      <div className="nd-relative nd-w-[250px] max-xl:nd-hidden">
         <div className="nd-sticky nd-flex nd-flex-col nd-top-16 nd-py-16 nd-max-h-[calc(100vh-4rem)]">
           <TOC items={props.toc} />
           {props.tocContent}
