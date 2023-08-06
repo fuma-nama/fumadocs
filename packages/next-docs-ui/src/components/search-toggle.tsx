@@ -12,7 +12,7 @@ export function SearchToggle(props: ComponentPropsWithoutRef<'button'>) {
       {...props}
       className={cn(
         'nd-w-9 nd-h-9 nd-inline-flex nd-justify-center nd-items-center nd-text-sm nd-rounded-md max-md:hover:nd-bg-accent max-md:hover:nd-text-accent-foreground',
-        'md:nd-w-full md:nd-max-w-[240px] md:nd-h-fit md:nd-px-2 md:nd-border md:nd-py-1.5 md:nd-text-muted-foreground md:nd-bg-secondary/50',
+        'md:nd-w-full md:nd-max-w-[250px] md:nd-h-fit md:nd-px-3 md:nd-border md:nd-py-1.5 md:nd-text-muted-foreground md:nd-bg-secondary/50',
         props.className
       )}
       onClick={() => setOpenSearch(true)}
