@@ -8,7 +8,6 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { ReactNode } from 'react'
 import { cloneElement, useEffect, useMemo, useState } from 'react'
-import { SearchBar } from './search-toggle'
 
 export const { SidebarProvider, SidebarTrigger } = Base
 
@@ -25,13 +24,17 @@ export function Sidebar({ items, banner, children }: SidebarProps) {
       className={clsx(
         'nd-flex nd-flex-col',
         'lg:nd-sticky lg:nd-top-16 lg:nd-w-[250px] lg:nd-h-[calc(100vh-4rem)] lg:nd-pr-4 lg:nd-pt-16',
-        'max-lg:nd-fixed max-lg:nd-inset-0 max-lg:nd-px-8 max-lg:nd-bg-background/50 max-lg:nd-backdrop-blur-xl max-lg:nd-z-40 max-lg:nd-pt-24 max-lg:data-[open=false]:nd-hidden'
+        'max-lg:nd-fixed max-lg:nd-inset-0 max-lg:nd-px-8 max-lg:nd-bg-background/50 max-lg:nd-backdrop-blur-xl max-lg:nd-z-40 max-lg:nd-pt-20 max-lg:data-[open=false]:nd-hidden'
       )}
     >
-      <SearchBar className="nd-py-2 md:nd-hidden" />
       {banner}
-      <ScrollArea className="nd-flex-1 -nd-mr-4 [mask-image:linear-gradient(to_top,transparent,white_80px)]">
-        <div className="nd-flex nd-flex-col nd-pb-24 nd-pr-4">
+      <ScrollArea className="nd-flex-1 -nd-mr-2 [mask-image:linear-gradient(to_top,transparent,white_40px)]">
+        <div
+          className={clsx(
+            'nd-flex nd-flex-col nd-pt-6 nd-pb-10 nd-pr-2',
+            !banner && 'lg:nd-pt-0'
+          )}
+        >
           {items.map((item, i) => (
             <Node key={i} item={item} />
           ))}
@@ -47,7 +50,7 @@ export function Sidebar({ items, banner, children }: SidebarProps) {
 function Node({ item }: { item: TreeNode }) {
   if (item.type === 'separator')
     return (
-      <p className="nd-font-medium nd-text-sm nd-px-2 nd-mt-8 nd-mb-2 lg:first:nd-mt-0">
+      <p className="nd-font-medium nd-text-sm nd-px-2 nd-mt-8 nd-mb-2 first:nd-mt-0">
         {item.name}
       </p>
     )

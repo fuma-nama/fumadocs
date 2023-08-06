@@ -96,11 +96,6 @@ main > div:nth-of-type(2) > div:nth-child(3) > div {
   nav {
     display: none;
   }
-
-  main > div:nth-of-type(2) > div:nth-child(1) > button:first-of-type {
-    display: flex;
-    margin-bottom: 1rem;
-  }
 }
 
 article {

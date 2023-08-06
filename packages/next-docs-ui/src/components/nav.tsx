@@ -1,7 +1,7 @@
 import { MenuIcon } from 'lucide-react'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
-import { SearchBar } from './search-toggle'
+import { SearchToggle } from './search-toggle'
 import { SidebarTrigger } from './sidebar'
 import { ThemeToggle } from './theme-toggle'
 
@@ -25,7 +25,7 @@ export function Nav({
       <div className="nd-container nd-flex nd-flex-row nd-items-center nd-h-16 nd-gap-4 nd-border-b nd-border-foreground/10 nd-max-w-[1300px]">
         {children}
         <div className="nd-flex nd-flex-row nd-justify-end nd-items-center nd-flex-1">
-          <SearchBar className="nd-w-full nd-max-w-[280px] nd-mr-3 max-md:nd-hidden" />
+          <SearchToggle className="md:nd-mr-2" />
           {links?.map((item, key) => <NavLink key={key} {...item} />)}
           <ThemeToggle />
           {enableSidebar && (
@@ -48,7 +48,7 @@ export function NavLink(props: NavLinkProps) {
       href={props.href}
       target={props.external ? '_blank' : '_self'}
       rel={props.external ? 'noreferrer noopener' : undefined}
-      className="nd-p-2 nd-rounded-md hover:nd-bg-accent max-sm:nd-hidden"
+      className="nd-p-2 nd-rounded-md hover:nd-bg-accent max-md:nd-hidden"
     >
       {props.icon}
     </Link>
