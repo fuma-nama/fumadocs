@@ -1,3 +1,4 @@
+/** Generated with Shadcn UI */
 import { cn } from '@/utils/cn'
 import * as SelectPrimitive from '@radix-ui/react-select'
 import { Check, ChevronDown } from 'lucide-react'

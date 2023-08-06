@@ -1,3 +1,4 @@
+/** Generated with Shadcn UI */
 import { cn } from '@/utils/cn'
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu'
 import { CheckIcon, ChevronRightIcon, SquareDotIcon } from 'lucide-react'

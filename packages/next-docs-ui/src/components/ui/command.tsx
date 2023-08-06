@@ -1,5 +1,4 @@
-'use client'
-
+/** Generated with Shadcn UI */
 import { cn } from '@/utils/cn'
 import type { DialogProps } from '@radix-ui/react-dialog'
 import { Command as CommandPrimitive } from 'cmdk'
