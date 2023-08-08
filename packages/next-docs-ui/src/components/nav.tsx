@@ -1,3 +1,4 @@
+import clsx from 'clsx'
 import { MenuIcon } from 'lucide-react'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
@@ -27,7 +28,7 @@ export function Nav({
         <div className="nd-flex nd-flex-row nd-justify-end nd-items-center nd-flex-1">
           <SearchToggle className="md:nd-mr-2" />
           {links?.map((item, key) => <NavLink key={key} {...item} />)}
-          <ThemeToggle className="max-lg:nd-hidden" />
+          <ThemeToggle className={clsx(enableSidebar && 'max-lg:nd-hidden')} />
           {enableSidebar && (
             <SidebarTrigger
               aria-label="Toggle Sidebar"
