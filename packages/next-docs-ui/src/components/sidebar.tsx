@@ -25,7 +25,7 @@ export function Sidebar({ items, banner, children }: SidebarProps) {
       className={clsx(
         'nd-flex nd-flex-col',
         'lg:nd-sticky lg:nd-top-16 lg:nd-w-[260px] lg:nd-h-[calc(100vh-4rem)] lg:nd-pr-4 lg:nd-pt-16',
-        'max-lg:nd-fixed max-lg:nd-inset-y-0 max-lg:nd-right-0 max-lg:nd-w-full max-lg:nd-px-8 max-lg:nd-bg-background/70 max-lg:nd-backdrop-blur-lg max-lg:nd-z-40 max-lg:nd-pt-24 max-lg:data-[open=false]:nd-hidden sm:max-lg:nd-max-w-sm sm:max-lg:nd-border-l'
+        'max-lg:nd-fixed max-lg:nd-inset-y-0 max-lg:nd-right-0 max-lg:nd-w-full max-lg:nd-px-8 max-lg:nd-bg-background/70 max-lg:nd-backdrop-blur-lg max-lg:nd-z-40 max-lg:nd-pt-20 max-lg:data-[open=false]:nd-hidden sm:max-lg:nd-max-w-sm sm:max-lg:nd-border-l'
       )}
     >
       {banner}

@@ -16,7 +16,7 @@ export default function HomePage() {
   return (
     <main>
       <div className="absolute inset-x-0 top-0 h-[400px] w-full -translate-y-8 z-[-1]">
-        <div className="h-full w-full mx-auto max-w-[1000px] bg-gradient-to-r from-purple-400 to-blue-400 [mask-image:radial-gradient(500px_100%_at_top_center,white,transparent)] animate-in fade-in duration-1000 dark:opacity-50" />
+        <div className="h-full w-full mx-auto max-w-[1000px] bg-gradient-to-r from-purple-400 to-blue-400 [mask-image:radial-gradient(500px_100%_at_top_center,white,transparent)] animate-in fade-in duration-1000 opacity-50" />
       </div>
       <div className="container py-20 flex flex-col items-center text-center">
         <div className="bg-gradient-to-b from-blue-300 shadow-md shadow-purple-400/50 rounded-lg mb-6">
