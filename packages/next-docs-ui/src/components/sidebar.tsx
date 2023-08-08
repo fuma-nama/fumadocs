@@ -8,6 +8,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { ReactNode } from 'react'
 import { cloneElement, useEffect, useMemo, useState } from 'react'
+import { ThemeToggle } from './theme-toggle'
 
 export const { SidebarProvider, SidebarTrigger } = Base
 
@@ -24,7 +25,7 @@ export function Sidebar({ items, banner, children }: SidebarProps) {
       className={clsx(
         'nd-flex nd-flex-col',
         'lg:nd-sticky lg:nd-top-16 lg:nd-w-[260px] lg:nd-h-[calc(100vh-4rem)] lg:nd-pr-4 lg:nd-pt-16',
-        'max-lg:nd-fixed max-lg:nd-inset-0 max-lg:nd-px-8 max-lg:nd-bg-background/50 max-lg:nd-backdrop-blur-xl max-lg:nd-z-40 max-lg:nd-pt-20 max-lg:data-[open=false]:nd-hidden'
+        'max-lg:nd-fixed max-lg:nd-inset-y-0 max-lg:nd-right-0 max-lg:nd-w-full max-lg:nd-px-8 max-lg:nd-bg-background/70 max-lg:nd-backdrop-blur-lg max-lg:nd-z-40 max-lg:nd-pt-24 max-lg:data-[open=false]:nd-hidden sm:max-lg:nd-max-w-sm sm:max-lg:nd-border-l'
       )}
     >
       {banner}
@@ -40,9 +41,15 @@ export function Sidebar({ items, banner, children }: SidebarProps) {
           ))}
         </div>
       </ScrollArea>
-      {children && (
-        <div className="nd-border-t nd-pt-4 nd-pb-6">{children}</div>
-      )}
+      <div
+        className={clsx(
+          'nd-flex nd-flex-row nd-items-center nd-gap-2 nd-border-t nd-py-4',
+          !children && 'lg:nd-hidden'
+        )}
+      >
+        {children}
+        <ThemeToggle className="lg:nd-hidden" />
+      </div>
     </Base.SidebarList>
   )
 }
