@@ -10,7 +10,7 @@ export { SafeLink as Link } from 'next-docs-zeta/link'
 
 export const Image = (props: ComponentPropsWithoutRef<'img'>) => (
   <NextImage
-    sizes="(max-width: 768px) 90vw, (max-width: 1280px) 70vw, 60vw"
+    sizes="(max-width: 1024px) 100vw, (max-width: 1280px) 70vw, 800px"
     {...(props as ImageProps)}
   />
 )

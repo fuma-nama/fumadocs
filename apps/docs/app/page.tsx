@@ -127,8 +127,8 @@ export default function HomePage() {
         </p>
       </div>
 
-      <div className="relative z-[-1] mt-14">
-        <div className="absolute top-12 left-0 bg-gradient-to-l from-transparent to-transparent via-cyan-300 dark:via-cyan-400 w-full h-[400px] blur-3xl" />
+      <div className="relative z-[-1] mt-14 blur-3xl">
+        <div className="absolute top-12 left-0 [mask-image:linear-gradient(to_right,transparent,white,transparent)] bg-gradient-to-r from-purple-400 to-blue-400 w-full h-[400px]" />
       </div>
 
       <div className="container max-w-[1400px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 py-8 mt-10">
