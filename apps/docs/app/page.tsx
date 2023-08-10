@@ -151,7 +151,7 @@ export default function HomePage() {
         <div className="border p-12 rounded-3xl text-center flex flex-col items-center bg-gradient-to-br from-background md:col-span-2">
           <h2 className="text-2xl font-semibold mb-4">Light and Fast</h2>
           <p className="text-muted-foreground">
-            Full powered documentation website with ~150 KB first load js size
+            Full powered documentation website with ~130 KB first load js size
           </p>
         </div>
         <div className="border p-12 rounded-3xl text-center flex flex-col justify-center bg-gradient-to-br from-background">
