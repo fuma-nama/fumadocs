@@ -1,9 +1,9 @@
 import { Nav } from '@/components/nav'
 import { ExternalLinkIcon, Star } from 'lucide-react'
-import { RootProvider } from 'next-docs-ui/provider'
 import { Inter } from 'next/font/google'
 import 'next-docs-ui/style.css'
 import './style.css'
+import { Provider } from './provider'
 
 export const metadata = {
   title: {
@@ -49,19 +49,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.className}>
       <body className="relative flex min-h-screen flex-col">
-        <RootProvider
-          search={{
-            links: [
-              ['Home', '/'],
-              ['UI Docs', '/docs/ui'],
-              ['Headless Docs', '/docs/headless']
-            ]
-          }}
-        >
+        <Provider>
           <Nav />
           {children}
           <Footer />
-        </RootProvider>
+        </Provider>
       </body>
     </html>
   )

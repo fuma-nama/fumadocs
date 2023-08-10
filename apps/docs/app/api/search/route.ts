@@ -6,6 +6,7 @@ export const { GET } = await experimental_initSearchAPI(
     id: docs._id,
     title: docs.title,
     content: docs.body.raw,
-    url: '/docs/' + docs.slug
+    url: '/docs/' + docs.slug,
+    tag: docs._raw.flattenedPath.startsWith('docs/ui') ? 'ui' : 'headless'
   }))
 )
