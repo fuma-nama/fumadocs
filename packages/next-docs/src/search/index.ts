@@ -2,7 +2,7 @@ import type { SearchDocsResult } from '@/server/types'
 import { useEffect, useState } from 'react'
 import useSWR from 'swr'
 
-export function useDocsSearch(locale?: string) {
+export function useDocsSearch<Result = SearchDocsResult>(locale?: string) {
   const [search, setSearch] = useState('')
   const debouncedValue = useDebounce(search, 100)
 
@@ -15,10 +15,10 @@ export function useDocsSearch(locale?: string) {
       params.set('query', key[1])
       if (key[2]) params.set('locale', key[2])
 
-      const res = await fetch(`/api/search?query=${params}`)
+      const res = await fetch(`/api/search?${params}`)
 
       if (!res.ok) throw new Error(await res.text())
-      return (await res.json()) as SearchDocsResult
+      return (await res.json()) as Result
     },
     {
       keepPreviousData: true

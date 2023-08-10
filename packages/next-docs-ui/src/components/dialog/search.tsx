@@ -9,8 +9,9 @@ import {
 } from '@/components/ui/command'
 import { I18nContext } from '@/contexts/i18n'
 import type { DialogProps } from '@radix-ui/react-dialog'
-import { BookOpenIcon } from 'lucide-react'
+import { BookOpenIcon, HeadingIcon, TextIcon } from 'lucide-react'
 import { useDocsSearch } from 'next-docs-zeta/search'
+import type { SortedResult } from 'next-docs-zeta/server'
 import { useRouter } from 'next/navigation'
 import { useCallback, useContext } from 'react'
 
@@ -27,7 +28,7 @@ export default function SearchDialog({
 }: DialogProps & SearchOptions) {
   const router = useRouter()
   const locale = useContext(I18nContext)?.locale
-  const { search, setSearch, query } = useDocsSearch(locale)
+  const { search, setSearch, query } = useDocsSearch<SortedResult[]>(locale)
 
   const onOpen = useCallback(
     (v: string) => {
@@ -53,11 +54,18 @@ export default function SearchDialog({
             <CommandGroup heading="Documents">
               {query.data.map(item => (
                 <CommandItem
-                  key={item.id[0]}
-                  value={item.doc.url}
-                  onSelect={onOpen}
+                  key={item.id}
+                  value={item.id}
+                  onSelect={() => onOpen(item.url)}
                 >
-                  {item.doc.title}
+                  {
+                    {
+                      text: <TextIcon className="nd-ml-4 nd-mr-2" />,
+                      heading: <HeadingIcon className="nd-ml-4 nd-mr-2" />,
+                      page: <BookOpenIcon className="nd-mr-2" />
+                    }[item.type]
+                  }
+                  {item.content}
                 </CommandItem>
               ))}
             </CommandGroup>
