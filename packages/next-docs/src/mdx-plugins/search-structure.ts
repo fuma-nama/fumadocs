@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Slugger from 'github-slugger'
 import { remark } from 'remark'
+import remarkGfm from 'remark-gfm'
 import { visit } from 'unist-util-visit'
 
 export type Heading = {
@@ -20,6 +21,7 @@ type StructuredData = {
 
 const slugger = new Slugger()
 const textTypes = ['text', 'emphasis', 'strong', 'inlineCode']
+const skippedTypes = ['table', 'tableRow', 'tableCell']
 
 function flattenNode(node: any) {
   const p: any[] = []
@@ -49,6 +51,11 @@ const structurize = () => (node: any, file: any) => {
   }
 
   visit(node, element => {
+    if (skippedTypes.includes(element.type)) {
+      applyContent()
+      return 'skip'
+    }
+
     if (element.type === 'heading') {
       applyContent()
       const heading = flattenNode(element)
@@ -74,7 +81,7 @@ const structurize = () => (node: any, file: any) => {
 }
 
 export async function structure(content: string) {
-  const result = await remark().use(structurize).process(content)
+  const result = await remark().use(remarkGfm).use(structurize).process(content)
 
   return result.data as StructuredData
 }

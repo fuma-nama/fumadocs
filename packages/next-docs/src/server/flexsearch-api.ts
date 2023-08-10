@@ -118,7 +118,7 @@ export type SortedResult = {
 export async function experimental_initSearchAPI(
   indexes: AdvancedIndexPage[]
 ): Promise<Result> {
-  const store = ['url', 'content', 'page_id', 'type']
+  const store = ['id', 'url', 'content', 'page_id', 'type']
   const index = new FlexSearch.Document<InternalIndex, typeof store>({
     cache: 100,
     tokenize: 'forward',
@@ -195,7 +195,7 @@ export async function experimental_initSearchAPI(
 
         const i: SortedResult = {
           id: item.doc.id,
-          content: splitResult(item.doc.content, 50),
+          content: item.doc.content.slice(0, 70),
           type: item.doc.type,
           url: item.doc.url
         }
@@ -225,12 +225,4 @@ export async function experimental_initSearchAPI(
       return NextResponse.json(sortedResult)
     }
   }
-}
-
-function splitResult(content: string, limit: number) {
-  if (content.length > limit) {
-    return content.slice(0, limit) + '...'
-  }
-
-  return content
 }

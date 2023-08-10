@@ -56,16 +56,22 @@ export default function SearchDialog({
                 <CommandItem
                   key={item.id}
                   value={item.id}
+                  className=""
                   onSelect={() => onOpen(item.url)}
                 >
+                  {item.type !== 'page' && (
+                    <div className="nd-absolute nd-inset-y-0 nd-left-6 nd-w-[2px] nd-bg-border" />
+                  )}
                   {
                     {
-                      text: <TextIcon className="nd-ml-4 nd-mr-2" />,
-                      heading: <HeadingIcon className="nd-ml-4 nd-mr-2" />,
+                      text: <TextIcon className="nd-ml-6 nd-mr-2" />,
+                      heading: <HeadingIcon className="nd-ml-6 nd-mr-2" />,
                       page: <BookOpenIcon className="nd-mr-2" />
                     }[item.type]
                   }
-                  {item.content}
+                  <p className="nd-whitespace-nowrap nd-overflow-hidden nd-overflow-ellipsis">
+                    {item.content}
+                  </p>
                 </CommandItem>
               ))}
             </CommandGroup>

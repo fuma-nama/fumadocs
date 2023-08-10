@@ -26,9 +26,9 @@ interface CommandDialogProps extends DialogProps {}
 const CommandDialog = ({ children, ...props }: CommandDialogProps) => {
   return (
     <Dialog {...props}>
-      <DialogContent className="nd-overflow-hidden nd-p-0 nd-shadow-2xl">
+      <DialogContent className="nd-overflow-hidden nd-p-0 nd-max-w-2xl nd-shadow-2xl">
         <Command
-          className="[&_[cmdk-group-heading]]:nd-px-2 [&_[cmdk-group-heading]]:nd-font-medium [&_[cmdk-group-heading]]:nd-text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:nd-pt-0 [&_[cmdk-group]]:nd-px-2 [&_[cmdk-input-wrapper]_svg]:nd-h-5 [&_[cmdk-input-wrapper]_svg]:nd-w-5 [&_[cmdk-input]]:nd-h-12 [&_[cmdk-item]]:nd-px-2 [&_[cmdk-item]]:nd-py-3 [&_[cmdk-item]_svg]:nd-h-5 [&_[cmdk-item]_svg]:nd-w-5"
+          className="[&_[cmdk-group-heading]]:nd-px-2 [&_[cmdk-group-heading]]:nd-font-medium [&_[cmdk-group-heading]]:nd-text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:nd-pt-0 [&_[cmdk-group]]:nd-px-2 [&_[cmdk-input-wrapper]_svg]:nd-h-5 [&_[cmdk-input-wrapper]_svg]:nd-w-5 [&_[cmdk-input]]:nd-h-12 [&_[cmdk-item]_svg]:nd-h-5 [&_[cmdk-item]_svg]:nd-w-5"
           shouldFilter={false}
         >
           {children}
@@ -67,7 +67,7 @@ const CommandList = React.forwardRef<
   <CommandPrimitive.List
     ref={ref}
     className={cn(
-      'nd-max-h-[300px] nd-overflow-y-auto nd-overflow-x-hidden',
+      'nd-max-h-[400px] nd-overflow-y-auto nd-overflow-x-hidden',
       className
     )}
     {...props}
@@ -124,7 +124,7 @@ const CommandItem = React.forwardRef<
   <CommandPrimitive.Item
     ref={ref}
     className={cn(
-      'nd-relative nd-flex nd-cursor-pointer nd-select-none nd-items-center nd-rounded-sm nd-px-2 nd-py-1.5 nd-text-sm nd-outline-none aria-selected:nd-bg-accent aria-selected:nd-text-accent-foreground data-[disabled]:nd-pointer-events-none data-[disabled]:nd-opacity-50',
+      'nd-relative nd-flex nd-cursor-pointer nd-select-none nd-items-center nd-rounded-sm nd-px-4 nd-py-3 nd-text-sm nd-outline-none aria-selected:nd-bg-accent aria-selected:nd-text-accent-foreground data-[disabled]:nd-pointer-events-none data-[disabled]:nd-opacity-50',
       className
     )}
     {...props}
