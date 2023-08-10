@@ -2,7 +2,7 @@ import { Nav } from '@/components/nav'
 import { ExternalLinkIcon, Star } from 'lucide-react'
 import { Inter } from 'next/font/google'
 import 'next-docs-ui/style.css'
-import 'katex/dist/katex.css'
+import 'katex/dist/katex.min.css'
 import './style.css'
 import { Provider } from './provider'
 
