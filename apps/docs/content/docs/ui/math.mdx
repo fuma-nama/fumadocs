@@ -1,0 +1,66 @@
+---
+title: Math
+description: Writing math equations in Markdown/MDX documents
+icon: EqualIcon
+---
+
+## Getting Started
+
+Next Docs UI doesn't bundle with other plugins, you have to manually install
+those plugins.
+
+```bash
+npm install remark-math rehype-katex katex
+```
+
+### Add Plugins
+
+Add the remark/rehype plugins you have installed above.
+
+Assume you're using the default contentlayer configuration:
+
+```ts
+import { makeSource } from 'contentlayer/source-files'
+import { createConfig } from 'next-docs-zeta/contentlayer/configuration'
+import rehypeKatex from 'rehype-katex'
+import remarkMath from 'remark-math'
+
+const config = createConfig(...)
+
+config.mdx!.remarkPlugins!.push(remarkMath)
+config.mdx!.rehypePlugins!.push(rehypeKatex)
+export default makeSource(config)
+```
+
+### Add Stylesheet
+
+In order to make it looks great on the client, add the following to root layout:
+
+```tsx
+import 'katex/dist/katex.css'
+```
+
+### Done
+
+Type some TeX expression in your documents
+
+```mdx
+$c = \pm\sqrt{a^2 + b^2}$
+```
+
+$c = \pm\sqrt{a^2 + b^2}$
+
+---
+
+**Long equations example**
+
+$$
+\begin{align}
+a^\dagger_1 &= \frac{X - iY}
+{2} \otimes I \otimes I \otimes ... \otimes I \\ a^\dagger_2 &= Z \otimes \frac
+{X - iY}
+{2} \otimes I \otimes ... \otimes I \\ &\vdots \\ a^\dagger_{2n} &= Z \otimes Z \otimes
+Z \otimes ... \otimes \frac{X - iY}
+{2}
+\end{align}
+$$
