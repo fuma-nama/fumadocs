@@ -15,7 +15,7 @@ export default function CustomSearchDialog(props: SearchDialogProps) {
 
   return (
     <SearchDialog {...props} tag={value}>
-      <div className="flex flex-row gap-1 px-4 pt-2">
+      <div className="flex flex-row gap-1 px-4 pt-4">
         <button
           className={cn(
             'border px-2 py-0.5 rounded-md text-xs text-muted-foreground font-medium transition-colors',
