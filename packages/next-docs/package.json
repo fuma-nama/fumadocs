@@ -104,6 +104,7 @@
     "rehype-pretty-code": "^0.9.5",
     "remark": "^14.0.2",
     "remark-gfm": "^3.0.1",
+    "remark-mdx": "^2.3.0",
     "scroll-into-view-if-needed": "^3.0.10",
     "swr": "^2.1.5",
     "unist-util-visit": "^4.1.2"

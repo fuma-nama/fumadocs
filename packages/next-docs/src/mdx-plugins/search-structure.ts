@@ -2,19 +2,20 @@
 import Slugger from 'github-slugger'
 import { remark } from 'remark'
 import remarkGfm from 'remark-gfm'
+import remarkMdx from 'remark-mdx'
 import { visit } from 'unist-util-visit'
 
-export type Heading = {
+type Heading = {
   id: string
   content: string
 }
 
-export type Content = {
+type Content = {
   heading: string | undefined
   content: string
 }
 
-type StructuredData = {
+export type StructuredData = {
   headings: Heading[]
   contents: Content[]
 }
@@ -80,8 +81,15 @@ const structurize = () => (node: any, file: any) => {
   file.data = data
 }
 
-export async function structure(content: string) {
-  const result = await remark().use(remarkGfm).use(structurize).process(content)
+/**
+ * Extract data from markdown/mdx content
+ */
+export async function structure(content: string): Promise<StructuredData> {
+  const result = await remark()
+    .use(remarkGfm)
+    .use(remarkMdx)
+    .use(structurize)
+    .process(content)
 
   return result.data as StructuredData
 }

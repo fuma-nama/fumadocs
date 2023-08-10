@@ -1,5 +1,4 @@
-import rehypeImgSize from 'rehype-img-size'
-import remarkGfm from 'remark-gfm'
-import { rehypeNextDocs } from './rehype-next-docs'
-
-export { rehypeImgSize, rehypeNextDocs, remarkGfm }
+export { default as rehypeImgSize } from 'rehype-img-size'
+export { default as remarkGfm } from 'remark-gfm'
+export { rehypeNextDocs } from './rehype-next-docs'
+export * from './search-structure'
