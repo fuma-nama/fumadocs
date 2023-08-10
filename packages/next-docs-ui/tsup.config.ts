@@ -5,6 +5,7 @@ export default defineConfig({
   entry: [
     './src/mdx/index.{ts,tsx}',
     './src/components/{type-table,roll-button,index}.{ts,tsx}',
+    './src/components/dialog/search.tsx',
     './src/*.{ts,tsx}'
   ],
   external: ['next-docs-zeta', 'shiki'],
