@@ -9,5 +9,6 @@ export const { GET } = await experimental_initSearchAPI(
     url: '/docs/' + docs.slug,
     structuredData: docs.structuredData,
     tag: docs._raw.flattenedPath.startsWith('docs/ui') ? 'ui' : 'headless'
-  }))
+  })),
+  true
 )

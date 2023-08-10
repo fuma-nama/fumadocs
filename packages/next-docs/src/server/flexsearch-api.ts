@@ -135,7 +135,11 @@ export type SortedResult = {
 }
 
 export async function experimental_initSearchAPI(
-  indexes: AdvancedIndexPage[]
+  indexes: AdvancedIndexPage[],
+  /**
+   * Enabled custom tag
+   */
+  tag: boolean = false
 ): Promise<SearchAPI> {
   const store = ['id', 'url', 'content', 'page_id', 'type']
   const index = new FlexSearch.Document<InternalIndex, typeof store>({
@@ -149,7 +153,7 @@ export async function experimental_initSearchAPI(
     },
     document: {
       id: 'id',
-      tag: 'tag',
+      tag: tag ? 'tag' : undefined,
       store,
       index: ['content']
     }
