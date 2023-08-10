@@ -69,7 +69,7 @@ export default function SearchDialog({
                       page: <BookOpenIcon className="nd-mr-2" />
                     }[item.type]
                   }
-                  <p className="nd-whitespace-nowrap nd-overflow-hidden nd-overflow-ellipsis">
+                  <p className="nd-w-0 nd-flex-1 nd-whitespace-nowrap nd-overflow-hidden nd-overflow-ellipsis">
                     {item.content}
                   </p>
                 </CommandItem>
