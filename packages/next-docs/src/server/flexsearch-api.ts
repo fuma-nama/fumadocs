@@ -1,16 +1,24 @@
-import { structure } from '@/mdx-plugins/search-structure'
+import { structure, type StructuredData } from '@/mdx-plugins/search-structure'
 import FlexSearch from 'flexsearch'
 import { NextResponse, type NextRequest } from 'next/server'
-import type { IndexPage } from './types'
 
-type Result = {
-  GET: (request: NextRequest) => Response | Promise<Response>
+type SearchAPI = {
+  GET: (
+    request: NextRequest
+  ) => NextResponse<SortedResult[]> | Promise<NextResponse<SortedResult[]>>
+}
+
+type IndexPage = {
+  title: string
+  content: string
+  url: string
+  keywords?: string
 }
 
 export function initI18nSearchAPI(
   entries: [language: string, indexes: IndexPage[]][]
-): Result {
-  const map = new Map<string, Result>()
+): SearchAPI {
+  const map = new Map<string, SearchAPI>()
 
   for (const [k, v] of entries) {
     map.set(k, initSearchAPI(v, k))
@@ -30,37 +38,35 @@ export function initI18nSearchAPI(
   }
 }
 
-export function initSearchAPI(indexes: IndexPage[], language?: string): Result {
-  const index = new FlexSearch.Document<IndexPage, ['title', 'url']>({
-    tokenize: 'forward',
-    optimize: true,
-    resolution: 9,
+export function initSearchAPI(
+  indexes: IndexPage[],
+  language?: string
+): SearchAPI {
+  const store = ['title', 'url']
+  const index = new FlexSearch.Document<IndexPage, typeof store>({
     language,
+    optimize: true,
     cache: 100,
     document: {
       id: 'url',
-      store: ['title', 'url'],
+      store,
       index: [
         {
           field: 'title',
           tokenize: 'forward',
-          optimize: true,
           resolution: 9
         },
         {
           field: 'content',
           tokenize: 'strict',
-          optimize: true,
-          resolution: 9,
           context: {
             depth: 1,
-            resolution: 3
+            resolution: 9
           }
         },
         {
           field: 'keywords',
           tokenize: 'strict',
-          optimize: true,
           resolution: 9
         }
       ]
@@ -78,7 +84,7 @@ export function initSearchAPI(indexes: IndexPage[], language?: string): Result {
 
   return {
     GET(request) {
-      const { searchParams } = new URL(request.url)
+      const { searchParams } = request.nextUrl
       const query = searchParams.get('query')
 
       if (query == null) return NextResponse.json([])
@@ -88,7 +94,14 @@ export function initSearchAPI(indexes: IndexPage[], language?: string): Result {
         suggest: true
       })
 
-      return NextResponse.json(results[0]?.result ?? [])
+      const pages = results[0]?.result?.map<SortedResult>(page => ({
+        type: 'page',
+        content: page.doc.title,
+        id: page.doc.url,
+        url: page.doc.url
+      }))
+
+      return NextResponse.json(pages ?? [])
     }
   }
 }
@@ -97,6 +110,11 @@ type AdvancedIndexPage = {
   id: string
   title: string
   content: string
+  tag?: string
+  /**
+   * preprocess mdx content with `structure`
+   */
+  structuredData?: StructuredData
   url: string
 }
 
@@ -105,6 +123,7 @@ type InternalIndex = {
   url: string
   page_id: string
   type: 'page' | 'heading' | 'text'
+  tag?: string
   content: string
 }
 
@@ -117,7 +136,7 @@ export type SortedResult = {
 
 export async function experimental_initSearchAPI(
   indexes: AdvancedIndexPage[]
-): Promise<Result> {
+): Promise<SearchAPI> {
   const store = ['id', 'url', 'content', 'page_id', 'type']
   const index = new FlexSearch.Document<InternalIndex, typeof store>({
     cache: 100,
@@ -130,6 +149,7 @@ export async function experimental_initSearchAPI(
     },
     document: {
       id: 'id',
+      tag: 'tag',
       store,
       index: ['content']
     }
@@ -144,6 +164,7 @@ export async function experimental_initSearchAPI(
       page_id: page.id,
       type: 'page',
       content: page.title,
+      tag: page.tag,
       url: page.url
     })
 
@@ -152,6 +173,7 @@ export async function experimental_initSearchAPI(
         id: page.id + id++,
         page_id: page.id,
         type: 'heading',
+        tag: page.tag,
         url: page.url + '#' + heading.id,
         content: heading.content
       })
@@ -161,6 +183,7 @@ export async function experimental_initSearchAPI(
       index.add({
         id: page.id + id++,
         page_id: page.id,
+        tag: page.tag,
         type: 'text',
         url: content.heading ? page.url + '#' + content.heading : page.url,
         content: content.content
@@ -171,11 +194,13 @@ export async function experimental_initSearchAPI(
   return {
     GET(request) {
       const query = request.nextUrl.searchParams.get('query')
+      const tag = request.nextUrl.searchParams.get('tag')
 
       if (query == null) return NextResponse.json([])
 
       const results = index.search(query, 5, {
         enrich: true,
+        tag: tag ?? undefined,
         limit: 5
       })[0]
 
