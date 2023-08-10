@@ -8,12 +8,10 @@ import {
   CommandSeparator
 } from '@/components/ui/command'
 import { I18nContext } from '@/contexts/i18n'
-import type { DialogProps } from '@radix-ui/react-dialog'
-import { BookOpenIcon, HeadingIcon, TextIcon } from 'lucide-react'
+import { FileTextIcon, HashIcon, TextIcon } from 'lucide-react'
 import { useDocsSearch } from 'next-docs-zeta/search'
-import type { SortedResult } from 'next-docs-zeta/server'
 import { useRouter } from 'next/navigation'
-import { useCallback, useContext } from 'react'
+import { useCallback, useContext, type ReactNode } from 'react'
 
 export type SearchOptions = {
   /**
@@ -22,13 +20,24 @@ export type SearchOptions = {
   links?: [name: string, link: string][]
 }
 
+export type SearchDialogProps = SearchOptions & {
+  open: boolean
+  onOpenChange(open: boolean): void
+  /**
+   * Search tag
+   */
+  tag?: string
+  children?: ReactNode
+}
+
 export default function SearchDialog({
   links = [],
+  tag,
   ...props
-}: DialogProps & SearchOptions) {
+}: SearchDialogProps) {
   const router = useRouter()
   const locale = useContext(I18nContext)?.locale
-  const { search, setSearch, query } = useDocsSearch<SortedResult[]>(locale)
+  const { search, setSearch, query } = useDocsSearch(locale, tag)
 
   const onOpen = useCallback(
     (v: string) => {
@@ -40,8 +49,9 @@ export default function SearchDialog({
 
   return (
     <CommandDialog {...props}>
+      {props.children}
       <CommandInput
-        placeholder="Type a command or search..."
+        placeholder="Search"
         value={search}
         onValueChange={setSearch}
       />
@@ -51,12 +61,11 @@ export default function SearchDialog({
         {query.data != 'empty' &&
           query.data != null &&
           query.data.length !== 0 && (
-            <CommandGroup heading="Documents">
+            <CommandGroup>
               {query.data.map(item => (
                 <CommandItem
                   key={item.id}
                   value={item.id}
-                  className=""
                   onSelect={() => onOpen(item.url)}
                 >
                   {item.type !== 'page' && (
@@ -65,8 +74,8 @@ export default function SearchDialog({
                   {
                     {
                       text: <TextIcon className="nd-ml-6 nd-mr-2" />,
-                      heading: <HeadingIcon className="nd-ml-6 nd-mr-2" />,
-                      page: <BookOpenIcon className="nd-mr-2" />
+                      heading: <HashIcon className="nd-ml-6 nd-mr-2" />,
+                      page: <FileTextIcon className="nd-mr-2" />
                     }[item.type]
                   }
                   <p className="nd-w-0 nd-flex-1 nd-whitespace-nowrap nd-overflow-hidden nd-overflow-ellipsis">
@@ -81,7 +90,7 @@ export default function SearchDialog({
           <CommandGroup heading="Links">
             {links.map(([name, url], i) => (
               <CommandItem key={i} value={url} onSelect={onOpen}>
-                <BookOpenIcon className="nd-w-5 nd-h-5 nd-mr-2" />
+                <FileTextIcon className="nd-mr-2" />
                 {name}
               </CommandItem>
             ))}

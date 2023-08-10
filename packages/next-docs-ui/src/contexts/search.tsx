@@ -1,7 +1,10 @@
 import dynamic from 'next/dynamic'
-import type { FC, ReactNode } from 'react'
+import type { ComponentType, ReactNode } from 'react'
 import { createContext, useEffect, useState } from 'react'
-import type { SearchOptions } from '../components/dialog/search'
+import type {
+  SearchDialogProps,
+  SearchOptions
+} from '../components/dialog/search'
 
 const DefaultSearchDialog = dynamic(() => import('../components/dialog/search'))
 
@@ -11,12 +14,7 @@ export type SearchProviderProps = SearchOptions & {
    *
    * It receives the `open` and `onOpenChange` prop, lazy loaded with `next/dynamic`
    */
-  SearchDialog?: FC<
-    {
-      open: boolean
-      onOpenChange: (value: boolean) => void
-    } & SearchOptions
-  >
+  SearchDialog?: ComponentType<SearchDialogProps>
 
   children: ReactNode
 }
