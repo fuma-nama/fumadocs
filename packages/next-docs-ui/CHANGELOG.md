@@ -1,5 +1,16 @@
 # next-docs-ui
 
+## 1.4.1
+
+### Patch Changes
+
+- 8883553: Support tabs component
+- d084de2: Export default search dialog
+- Improve Search Dialog UI
+- Updated dependencies
+- Updated dependencies [3d92c92]
+  - next-docs-zeta@1.4.1
+
 ## 1.4.0
 
 ### Minor Changes

@@ -1,0 +1,109 @@
+---
+title: Tabs
+description: Adding Tabs to your documentation
+icon: PanelTopIcon
+---
+
+import { Tab, Tabs } from 'next-docs-ui/components/tabs'
+
+A Tabs component built with
+[Radix UI](https://www.radix-ui.com/primitives/docs/components/tabs), with
+additional features such as persistent and shared value.
+
+> it is an optional component which won't be loaded by default.
+
+<Tabs
+  defaultValue="Javascript"
+  id="language"
+  persist
+  items={['Javascript', 'Rust']}
+>
+<Tab value="Javascript">
+  
+Hello World in Javascript
+  
+</Tab>
+<Tab value="Rust">
+  
+Hello World in Rust
+
+</Tab>
+
+</Tabs>
+
+<Tabs
+  defaultValue="Javascript"
+  id="language"
+  persist
+  items={['Javascript', 'Rust']}
+>
+<Tab value="Javascript">
+
+Value is shared! Try refresh and see if the value is persisted
+
+</Tab>
+<Tab value="Rust">
+
+Value is shared! Try refresh and see if the value is persisted
+
+</Tab>
+</Tabs>
+
+## Usage
+
+Import it in your MDX documents.
+
+```mdx
+import { Tab, Tabs } from 'next-docs-ui/components/tabs'
+
+<Tabs defaultValue="Javascript" items={['Javascript', 'Rust']}>
+  <Tab value="Javascript">Javascript is weird</Tab>
+  <Tab value="Rust">Rust is fast</Tab>
+</Tabs>
+```
+
+### Shared Value
+
+By passing an `id` property, you can share a value across all tabs with the same
+id.
+
+```mdx
+<Tabs id="language" defaultValue="Javascript" items={['Javascript', 'Rust']}>
+  <Tab value="Javascript">Javascript is weird</Tab>
+  <Tab value="Rust">Rust is fast</Tab>
+</Tabs>
+```
+
+### Persistent
+
+You can enable persistent by passing a `persist` property. The value will be
+stored in `localStorage`, with its id as the key.
+
+```mdx
+<Tabs
+  id="language"
+  defaultValue="Javascript"
+  items={['Javascript', 'Rust']}
+  persist
+>
+  <Tab value="Javascript">Javascript is weird</Tab>
+  <Tab value="Rust">Rust is fast</Tab>
+</Tabs>
+```
+
+> Persistent only works if you have passed an `id`.
+
+### Advanced
+
+You can use the styled Radix UI primitive directly from exported `Primitive`.
+
+```mdx
+import { Primitive } from 'next-docs-ui/components/tabs'
+
+<Primitive.Tabs>
+  <Primitive.TabsList>
+    <Primitive.TabsTrigger />
+  </Primitive.TabsList>
+  <Primitive.TabsContent />
+</Primitive.Tabs>
+```

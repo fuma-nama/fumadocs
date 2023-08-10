@@ -10,6 +10,7 @@
     "comparisons",
     "---Components---",
     "components/codeblock",
+    "components/tabs",
     "components/card",
     "components/heading",
     "components/roll-button",

@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 1.4.1
+
+### Patch Changes
+
+- Support better document search with `experimental_initSearchAPI`
+- 3d92c92: Support custom computed fields in Contentlayer
+
 ## 1.4.0
 
 ### Patch Changes
