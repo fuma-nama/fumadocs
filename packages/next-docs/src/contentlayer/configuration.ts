@@ -7,7 +7,7 @@
  */
 
 import { rehypeImgSize, rehypeNextDocs, remarkGfm } from '@/mdx-plugins'
-import type { Args, FieldDef } from 'contentlayer/source-files'
+import type { Args, ComputedFields, FieldDef } from 'contentlayer/source-files'
 import { defineDocumentType } from 'contentlayer/source-files'
 import type { Options as ImgSizeOptions } from 'rehype-img-size'
 
@@ -51,7 +51,9 @@ type Options = {
   imgDirPath: string
 
   docFields?: Record<string, FieldDef>
+  docsComputedFields?: ComputedFields<'Docs'>
   metaFields?: Record<string, FieldDef>
+  metaComputedFields?: ComputedFields<'Meta'>
 }
 
 export function createConfig(options: Partial<Options> = {}): Args {
@@ -60,7 +62,9 @@ export function createConfig(options: Partial<Options> = {}): Args {
     contentDirPath = 'content',
     imgDirPath = './public',
     docFields,
-    metaFields
+    metaFields,
+    docsComputedFields,
+    metaComputedFields
   } = options
 
   const Docs = defineDocumentType(() => ({
@@ -99,7 +103,8 @@ export function createConfig(options: Partial<Options> = {}): Args {
             docsPattern
           )
         }
-      }
+      },
+      ...docsComputedFields
     }
   }))
 
@@ -131,7 +136,8 @@ export function createConfig(options: Partial<Options> = {}): Args {
       slug: {
         type: 'string',
         resolve: post => removePattern(post._raw.sourceFileDir, docsPattern)
-      }
+      },
+      ...metaComputedFields
     }
   }))
 
