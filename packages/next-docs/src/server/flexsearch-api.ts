@@ -163,7 +163,7 @@ export async function experimental_initSearchAPI(
   })
 
   for (const page of indexes) {
-    const data = await structure(page.content)
+    const data = page.structuredData ?? (await structure(page.content))
     let id = 0
 
     index.add({
