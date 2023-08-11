@@ -1,7 +1,10 @@
 import { allDocs } from 'contentlayer/generated'
 import { experimental_initSearchAPI } from 'next-docs-zeta/server'
+import { type NextRequest } from 'next/server'
 
-export const { GET } = await experimental_initSearchAPI(
+export const runtime = 'edge'
+
+const search = experimental_initSearchAPI(
   allDocs.map(docs => ({
     id: docs._id,
     title: docs.title,
@@ -12,3 +15,7 @@ export const { GET } = await experimental_initSearchAPI(
   })),
   true
 )
+
+export async function GET(request: NextRequest) {
+  return (await search).GET(request)
+}
