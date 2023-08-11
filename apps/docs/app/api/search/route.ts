@@ -1,8 +1,8 @@
 import { allDocs } from 'contentlayer/generated'
-import { experimental_initSearchAPI } from 'next-docs-zeta/server'
+import { createSearchAPI } from 'next-docs-zeta/server'
 
-export const { GET } = await experimental_initSearchAPI(
-  allDocs.map(docs => ({
+export const { GET } = createSearchAPI('advanced', {
+  indexes: allDocs.map(docs => ({
     id: docs._id,
     title: docs.title,
     content: docs.body.raw,
@@ -10,5 +10,5 @@ export const { GET } = await experimental_initSearchAPI(
     structuredData: docs.structuredData,
     tag: docs._raw.flattenedPath.startsWith('docs/ui') ? 'ui' : 'headless'
   })),
-  true
-)
+  tag: true
+})

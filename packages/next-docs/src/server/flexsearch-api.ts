@@ -8,26 +8,56 @@ type SearchAPI = {
   ) => NextResponse<SortedResult[]> | Promise<NextResponse<SortedResult[]>>
 }
 
-type IndexPage = {
-  title: string
-  content: string
-  url: string
-  keywords?: string
+type SimpleOptions = { indexes: Index[]; language?: string }
+
+type AdvancedOptions = {
+  indexes: AdvancedIndex[]
+  /**
+   * Enabled custom tags
+   */
+  tag?: boolean
+  language?: string
 }
 
-export function initI18nSearchAPI(
-  entries: [language: string, indexes: IndexPage[]][]
+type ToI18n<T extends { indexes: unknown }> = Omit<
+  T,
+  'indexes' | 'language'
+> & {
+  indexes: [language: string, indexes: T['indexes']][]
+}
+
+export function createSearchAPI<T extends 'simple' | 'advanced'>(
+  type: T,
+  _options: T extends 'simple' ? SimpleOptions : AdvancedOptions
+): SearchAPI {
+  if (type === 'simple') {
+    return initSearchAPI(_options as SimpleOptions)
+  }
+
+  return initSearchAPIAdvanced(_options as AdvancedOptions)
+}
+
+export function createI18nSearchAPI<T extends 'simple' | 'advanced'>(
+  type: T,
+  options: ToI18n<T extends 'simple' ? SimpleOptions : AdvancedOptions>
 ): SearchAPI {
   const map = new Map<string, SearchAPI>()
 
-  for (const [k, v] of entries) {
-    map.set(k, initSearchAPI(v, k))
+  for (const [k, v] of options.indexes) {
+    map.set(
+      k,
+      createSearchAPI(type, {
+        ...options,
+        language: k,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        indexes: v as any
+      })
+    )
   }
 
   return {
     GET(request) {
-      const { searchParams } = new URL(request.url)
-      const locale = searchParams.get('locale')
+      const locale = request.nextUrl.searchParams.get('locale')
 
       if (locale && map.has(locale)) {
         return map.get(locale)!.GET(request)
@@ -38,12 +68,16 @@ export function initI18nSearchAPI(
   }
 }
 
-export function initSearchAPI(
-  indexes: IndexPage[],
-  language?: string
-): SearchAPI {
+type Index = {
+  title: string
+  content: string
+  url: string
+  keywords?: string
+}
+
+export function initSearchAPI({ indexes, language }: SimpleOptions): SearchAPI {
   const store = ['title', 'url']
-  const index = new FlexSearch.Document<IndexPage, typeof store>({
+  const index = new FlexSearch.Document<Index, typeof store>({
     language,
     optimize: true,
     cache: 100,
@@ -106,7 +140,7 @@ export function initSearchAPI(
   }
 }
 
-type AdvancedIndexPage = {
+type AdvancedIndex = {
   id: string
   title: string
   content: string
@@ -137,15 +171,14 @@ export type SortedResult = {
   content: string
 }
 
-export async function experimental_initSearchAPI(
-  indexes: AdvancedIndexPage[],
-  /**
-   * Enabled custom tag
-   */
-  tag: boolean = false
-): Promise<SearchAPI> {
+export function initSearchAPIAdvanced({
+  indexes,
+  language,
+  tag = false
+}: AdvancedOptions): SearchAPI {
   const store = ['id', 'url', 'content', 'page_id', 'type']
   const index = new FlexSearch.Document<InternalIndex, typeof store>({
+    language,
     cache: 100,
     tokenize: 'forward',
     optimize: true,
@@ -163,7 +196,7 @@ export async function experimental_initSearchAPI(
   })
 
   for (const page of indexes) {
-    const data = page.structuredData ?? (await structure(page.content))
+    const data = page.structuredData ?? structure(page.content)
     let id = 0
 
     index.add({

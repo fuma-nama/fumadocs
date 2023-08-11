@@ -85,16 +85,16 @@ const structurize = () => (node: any, file: any) => {
 /**
  * Extract data from markdown/mdx content
  */
-export async function structure(
+export function structure(
   content: string,
   remarkPlugins: Plugin[] = []
-): Promise<StructuredData> {
-  const result = await remark()
+): StructuredData {
+  const result = remark()
     .use(remarkGfm)
     .use(remarkMdx)
     .use(remarkPlugins)
     .use(structurize)
-    .process(content)
+    .processSync(content)
 
   return result.data as StructuredData
 }
