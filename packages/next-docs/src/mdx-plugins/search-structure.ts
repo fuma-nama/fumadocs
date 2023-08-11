@@ -4,6 +4,7 @@ import { remark } from 'remark'
 import remarkGfm from 'remark-gfm'
 import remarkMdx from 'remark-mdx'
 import { visit } from 'unist-util-visit'
+import type { Plugin } from './types'
 
 type Heading = {
   id: string
@@ -84,10 +85,14 @@ const structurize = () => (node: any, file: any) => {
 /**
  * Extract data from markdown/mdx content
  */
-export async function structure(content: string): Promise<StructuredData> {
+export async function structure(
+  content: string,
+  remarkPlugins: Plugin[] = []
+): Promise<StructuredData> {
   const result = await remark()
     .use(remarkGfm)
     .use(remarkMdx)
+    .use(remarkPlugins)
     .use(structurize)
     .process(content)
 

@@ -9,7 +9,7 @@ const config = createConfig({
     structuredData: {
       type: 'json',
       resolve: page => {
-        return structure(page.body.raw)
+        return structure(page.body.raw, [remarkMath])
       }
     }
   }
