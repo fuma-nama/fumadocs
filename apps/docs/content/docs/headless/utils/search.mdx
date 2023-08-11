@@ -3,6 +3,8 @@ title: Search
 description: Document searching makes easy
 ---
 
+import { TypeTable } from 'next-docs-ui/components/type-table'
+
 Next Docs supports searching document based on
 [Flexsearch](https://github.com/nextapps-de/flexsearch).
 
@@ -38,72 +40,12 @@ export function Dialog() {
 }
 ```
 
-<Accordion type="single" collapsible>
+<Accordion type="single" collapsible className='mt-4'>
 <AccordionItem value="example">
 <AccordionTrigger>Example</AccordionTrigger>
 <AccordionContent>
 
-Using [Shadcn UI Command](https://ui.shadcn.com/docs/components/command).
-
-```tsx
-import type { DialogProps } from '@radix-ui/react-dialog'
-import { BookOpenIcon } from 'lucide-react'
-import { useDocsSearch } from 'next-docs-zeta/search'
-import { useRouter } from 'next/navigation'
-import { useCallback } from 'react'
-import {
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator
-} from '../ui/command'
-
-export default function SearchDialog(props: DialogProps) {
-  const router = useRouter()
-  const { search, setSearch, query } = useDocsSearch()
-
-  const onOpen = useCallback(
-    (v: string) => {
-      router.push(v)
-      props.onOpenChange?.(false)
-    },
-    [router]
-  )
-
-  return (
-    <CommandDialog {...props}>
-      <CommandInput
-        placeholder="Type a command or search..."
-        value={search}
-        onValueChange={setSearch}
-      />
-      <CommandList>
-        <CommandEmpty>No results found.</CommandEmpty>
-
-        {query.data != 'empty' &&
-          query.data != null &&
-          query.data.length !== 0 && (
-            <CommandGroup heading="Documents">
-              {query.data.map(item => (
-                <CommandItem
-                  key={item.id[0]}
-                  value={item.doc.url}
-                  onSelect={onOpen}
-                >
-                  {item.doc.title}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          )}
-        <CommandSeparator />
-      </CommandList>
-    </CommandDialog>
-  )
-}
-```
+You can use the default Search Dialog from [Next Docs UI](/docs/ui/search).
 
 </AccordionContent>
 </AccordionItem>
@@ -119,7 +61,7 @@ It inputs an array of `IndexPage` and returns the handler.
 
 Create a GET route handler with i18n functionality.
 
-[Learn More](/docs/headless/contentlayer/internationalization)
+[Learn how to implement i18n](/docs/headless/contentlayer/internationalization)
 
 ### useDocsSearch
 
@@ -135,7 +77,83 @@ A hook that combined debounce value and `useSWR`.
 
 #### Response Data
 
-| Type               |                                                              |
-| ------------------ | ------------------------------------------------------------ |
-| `empty`            | If the searching text is empty or blank                      |
-| `SearchDocsResult` | Return Type of Flexsearch, includes array of matching pages. |
+| Type             |                                                 |
+| ---------------- | ----------------------------------------------- |
+| `empty`          | If the searching text is empty or blank         |
+| `SortedResult[]` | Array of matching pages, headings and contents. |
+
+### Advanced
+
+You can port your own search algorithm by returning a list of `SortedResult`
+from your custom `/api/search/route.ts` api endpoint, and you can integrate it
+with Next Docs UI.
+
+<TypeTable
+  type={{
+    id: { type: 'string' },
+    url: { type: 'string' },
+    type: { type: 'enum', typeDescription: "'page' | 'heading' | 'text'" },
+    content: { type: 'string' }
+  }}
+/>
+
+## Experimental Search
+
+Currently used by the official documentation, still in beta and might have
+unexpected behavour.
+
+It extracts structured data from a markdown/mdx document, and index it with
+Flexsearch. With the `structure` function exported from
+`next-docs-zeta/mdx-plugins`.
+
+### Known Issues
+
+- Can't extract content from plugin specific content (e.g. remark-math)
+- Memory issue with 3000+ large documents
+
+### Usage
+
+Assume you are using Contentlayer with the default configuration.
+
+```ts
+import { allDocs } from 'contentlayer/generated'
+import { experimental_initSearchAPI } from 'next-docs-zeta/server'
+
+export const { GET } = await experimental_initSearchAPI(
+  allDocs.map(docs => ({
+    id: docs._id,
+    title: docs.title,
+    content: docs.body.raw,
+    url: '/docs/' + docs.slug
+
+    // You can preprocess the content with `structure`
+    //structuredData: docs.structuredData
+  }))
+)
+```
+
+### Tag Filter
+
+It's useful for implementing i18n, versioned docs, or multi-docs similar to this
+documentation.
+
+> Next Docs UI's Search Dialog doesn't support tag filter.
+
+```ts
+import { allDocs } from 'contentlayer/generated'
+import { experimental_initSearchAPI } from 'next-docs-zeta/server'
+
+export const { GET } = await experimental_initSearchAPI(
+  allDocs.map(docs => ({
+    tag: ...
+  })),
+  true
+)
+
+// Pass `tag` in your custom search dialog
+const { search, setSearch, query } = useDocsSearch(locale, tag)
+```
+
+### internationalization
+
+> It's still under development
