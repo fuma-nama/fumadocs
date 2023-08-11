@@ -110,6 +110,9 @@ type AdvancedIndexPage = {
   id: string
   title: string
   content: string
+  /**
+   * Required if `tag` is enabled
+   */
   tag?: string
   /**
    * preprocess mdx content with `structure`
@@ -205,7 +208,7 @@ export async function experimental_initSearchAPI(
       const results = index.search(query, 5, {
         enrich: true,
         tag: tag ?? undefined,
-        limit: 5
+        limit: 6
       })[0]
 
       if (results == null) return NextResponse.json([])
@@ -224,7 +227,7 @@ export async function experimental_initSearchAPI(
 
         const i: SortedResult = {
           id: item.doc.id,
-          content: item.doc.content.slice(0, 70),
+          content: smartSlice(item.doc.content, 70),
           type: item.doc.type,
           url: item.doc.url
         }
@@ -254,4 +257,27 @@ export async function experimental_initSearchAPI(
       return NextResponse.json(sortedResult)
     }
   }
+}
+
+const chars = ['\n', ',', '.']
+
+function smartSlice(content: string, limit: number): string {
+  if (content.length > limit) {
+    content = content.slice(0, limit)
+  }
+
+  let right = content.length - 1
+
+  while (right >= 0) {
+    const char = content.charAt(right)
+    right--
+
+    if (chars.includes(char)) break
+  }
+
+  if (right > 0) {
+    content = content.slice(0, right + 1)
+  }
+
+  return content
 }
