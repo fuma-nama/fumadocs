@@ -105,7 +105,7 @@ module.exports = {
       }
     },
     {
-      files: 'packages/{next-docs-ui,next-docs}/**',
+      files: 'packages/{next-docs-ui,next-docs,create-next-docs}/**',
       rules: {
         '@next/next/no-html-link-for-pages': 'off'
       }
