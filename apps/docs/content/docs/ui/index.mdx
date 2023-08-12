@@ -4,6 +4,8 @@ description: Getting Started with Next Docs UI
 icon: 'HomeIcon'
 ---
 
+import {Tabs, Tab} from "next-docs-ui/components/tabs"
+
 Next Docs UI is a Next.js framework for building documentation website.
 
 It's built on the top of Next.js, Radix UI and **Next Docs**. Styled using
@@ -27,6 +29,24 @@ Next Docs UI provides many features out of the box.
 Open in [CodeSandbox](https://githubbox.com/SonMooSans/next-docs-ui-template).
 
 ### Installation
+
+<Tabs items={["With CLI", "Manual"]}>
+
+<Tab value="With CLI">
+
+Create a new app with the CLI.
+
+```bash
+npx create-next-docs-app
+# or
+pnpx create-next-docs-app
+# or
+yarn create next-docs-app
+```
+
+</Tab>
+
+<Tab value="Manual">
 
 ```bash
 npm install next-docs-ui next-docs-zeta shiki
@@ -73,6 +93,9 @@ const ctx = loadContext(allMeta, allDocs)
 
 export const tree = buildPageTree(ctx)
 ```
+
+</Tab>
+</Tabs>
 
 Make sure you've generated documents correctly before moving to next step.
 
