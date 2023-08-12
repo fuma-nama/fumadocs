@@ -32,8 +32,6 @@ Open in [CodeSandbox](https://githubbox.com/SonMooSans/next-docs-ui-template).
 
 <Tab value="With CLI">
 
-<h3>Installation</h3>
-
 Create a new app with the CLI.
 
 ```bash
@@ -50,7 +48,7 @@ yarn create next-docs-app
 
 <Tab value="Manual">
 
-<h3>Installation</h3>
+Install required dependencies
 
 ```bash
 npm install next-docs-ui next-docs-zeta shiki
@@ -281,6 +279,25 @@ Run the app in development mode and see http://localhost:3000/docs.
 ```bash
 npm run dev
 ```
+
+### FAQ
+
+<Accordion type="single" collapsible>
+<AccordionItem value="fix-error">
+<AccordionTrigger>How to fix 'supports-color' error?</AccordionTrigger>
+<AccordionContent>
+
+If you got this error:
+
+```
+Module not found: Can't resolve 'supports-color' in '.../node_modules/debug/src'
+```
+
+Try installing `supports-color@8.1.1`.
+
+</AccordionContent>
+</AccordionItem>
+</Accordion>
 
 ## Learn More
 
