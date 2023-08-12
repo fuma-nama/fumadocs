@@ -6,7 +6,7 @@ The framework for building documentation websites in Next.js.
 
 ## Installation
 
-This monorepo includes two packages.
+This monorepo includes three packages.
 
 ### Next Docs Zeta
 
@@ -25,6 +25,14 @@ features along with a well-designed user interface.
 
 ```bash
 npm install next-docs-ui
+```
+
+### Create Next Docs App
+
+A CLI tool that generates documentation sites.
+
+```bash
+npx create next-docs-app
 ```
 
 ## Example
