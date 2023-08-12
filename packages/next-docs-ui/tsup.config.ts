@@ -4,7 +4,7 @@ import tsconfig from './tsconfig.json'
 export default defineConfig({
   entry: [
     './src/mdx/index.{ts,tsx}',
-    './src/components/{type-table,roll-button,tabs,index}.{ts,tsx}',
+    './src/components/{type-table,roll-button,tabs,steps,index}.{ts,tsx}',
     './src/components/dialog/search.tsx',
     './src/*.{ts,tsx}'
   ],

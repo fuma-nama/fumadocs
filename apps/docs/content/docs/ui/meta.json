@@ -13,12 +13,15 @@
     "components/tabs",
     "components/card",
     "components/heading",
+    "components/steps",
     "components/roll-button",
     "components/type-table",
     "---Blocks---",
     "blocks/page",
     "blocks/layout",
     "blocks/nav",
-    "blocks/root-provider"
+    "blocks/root-provider",
+    "---Commands---",
+    "commands/create-next-docs-app"
   ]
 }
