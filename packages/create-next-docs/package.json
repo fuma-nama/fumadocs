@@ -1,7 +1,7 @@
 {
   "name": "create-next-docs-app",
   "description": "Create a new documentation site with Next Docs UI",
-  "version": "1.5.0",
+  "version": "1.5.2",
   "homepage": "https://next-docs-zeta.vercel.app",
   "author": "Money SonMooSans",
   "repository": "github:SonMooSans/next-docs",
@@ -15,9 +15,8 @@
   "scripts": {
     "build": "tsup --clean",
     "clean": "rmdir /q/s dist",
-    "postpublish": "node ./scripts/sync.js",
     "dev": "tsup --watch",
-    "prepublishOnly": "pnpm build",
+    "prepublishOnly": "pnpm build && node ./scripts/sync.js",
     "types:check": "tsc --noEmit"
   },
   "keywords": [
