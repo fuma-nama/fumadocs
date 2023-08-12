@@ -1,0 +1,26 @@
+{
+  "name": "advanced-app",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "next-docs-zeta": "1.4.1",
+    "next-docs-ui": "1.4.1",
+    "next": "13.4.13",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "contentlayer": "0.3.4",
+    "next-contentlayer": "0.3.4"
+  },
+  "devDependencies": {
+    "autoprefixer": "10.4.14",
+    "tailwindcss": "3.3.2",
+    "postcss": "8.4.23",
+    "@types/react": "18.2.0",
+    "@types/react-dom": "18.2.1"
+  }
+}

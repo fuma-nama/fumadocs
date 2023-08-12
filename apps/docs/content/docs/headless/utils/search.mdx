@@ -16,17 +16,17 @@ Assumes you're using Contentlayer.
 
 1. Create the API Route.
 
-```tsx title="/app/api/search/route.ts"
+```tsx title="app/api/search/route.ts"
 import { allDocs } from 'contentlayer/generated'
-import { initSearchAPI } from 'next-docs-zeta/server'
+import { createSearchAPI } from 'next-docs-zeta/server'
 
-export const { GET } = initSearchAPI(
-  allDocs.map(docs => ({
+export const { GET } = createSearchAPI('simple', {
+  indexes: allDocs.map(docs => ({
     title: docs.title,
     content: docs.body.raw,
-    url: docs.url
+    url: '/docs/' + docs.slug
   }))
-)
+})
 ```
 
 2. Create a Search Dialog.
@@ -51,13 +51,11 @@ You can use the default Search Dialog from [Next Docs UI](/docs/ui/search).
 </AccordionItem>
 </Accordion>
 
-### initSearchAPI
+### createSearchAPI
 
-Create a GET route handler.
+Create a GET route handler, supports `simple` and `advanced` search.
 
-It inputs an array of `IndexPage` and returns the handler.
-
-### initI18nSearchAPI
+### createI18nSearchAPI
 
 Create a GET route handler with i18n functionality.
 
@@ -82,7 +80,7 @@ A hook that combined debounce value and `useSWR`.
 | `empty`          | If the searching text is empty or blank         |
 | `SortedResult[]` | Array of matching pages, headings and contents. |
 
-### Advanced
+### Custom Algorithm
 
 You can port your own search algorithm by returning a list of `SortedResult`
 from your custom `/api/search/route.ts` api endpoint, and you can integrate it
@@ -97,10 +95,10 @@ with Next Docs UI.
   }}
 />
 
-## Experimental Search
+## Advanced Search
 
-Currently used by the official documentation, still in beta and might have
-unexpected behavour.
+Currently used by the official documentation, returns a more detailed result
+with matching headings and contents.
 
 It extracts structured data from a markdown/mdx document, and index it with
 Flexsearch. With the `structure` function exported from
@@ -108,8 +106,8 @@ Flexsearch. With the `structure` function exported from
 
 ### Known Issues
 
-- Can't extract content from plugin specific content (e.g. remark-math)
-- Memory issue with 3000+ large documents
+- Can't extract content from rehype plugin specific content (you can pass remark
+  plugins)
 
 ### Usage
 
@@ -117,10 +115,10 @@ Assume you are using Contentlayer with the default configuration.
 
 ```ts
 import { allDocs } from 'contentlayer/generated'
-import { experimental_initSearchAPI } from 'next-docs-zeta/server'
+import { createSearchAPI } from 'next-docs-zeta/server'
 
-export const { GET } = await experimental_initSearchAPI(
-  allDocs.map(docs => ({
+export const { GET } = await createSearchAPI('advanced', {
+  indexes: allDocs.map(docs => ({
     id: docs._id,
     title: docs.title,
     content: docs.body.raw,
@@ -129,12 +127,23 @@ export const { GET } = await experimental_initSearchAPI(
     // You can preprocess the content with `structure`
     //structuredData: docs.structuredData
   }))
-)
+})
 ```
+
+> **Tip:** <br/> If you have custom remark plugins enabled, such as
+> `remark-math`, you have to manually structurize the document with these
+> plugins passed into the function:
+>
+> ```ts
+> import { structure } from 'next-docs-zeta/mdx-plugins'
+> import remarkMath from 'remark-math'
+>
+> structure(page.body.raw, [remarkMath])
+> ```
 
 ### Tag Filter
 
-It's useful for implementing i18n, versioned docs, or multi-docs similar to this
+It's useful for implementing versioned docs, or multi-docs similar to this
 documentation.
 
 > Next Docs UI's Search Dialog doesn't support tag filter.
@@ -153,7 +162,3 @@ export const { GET } = await experimental_initSearchAPI(
 // Pass `tag` in your custom search dialog
 const { search, setSearch, query } = useDocsSearch(locale, tag)
 ```
-
-### internationalization
-
-> It's still under development

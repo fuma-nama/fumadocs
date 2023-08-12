@@ -113,11 +113,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={inter.className}>
-      <body
-        style={{
-          minHeight: '100vh'
-        }}
-      >
+      <body>
         <RootProvider>
           <DocsLayout tree={tree} navTitle="My App">
             {children}
@@ -225,15 +221,15 @@ export { default } from 'next-docs-ui/not-found'
 
 ```tsx title="app/api/search/route.ts"
 import { allDocs } from 'contentlayer/generated'
-import { initSearchAPI } from 'next-docs-zeta/server'
+import { createSearchAPI } from 'next-docs-zeta/server'
 
-export const { GET } = initSearchAPI(
-  allDocs.map(docs => ({
+export const { GET } = createSearchAPI('simple', {
+  indexes: allDocs.map(docs => ({
     title: docs.title,
     content: docs.body.raw,
-    url: docs.url
+    url: '/docs/' + docs.slug
   }))
-)
+})
 ```
 
 </AccordionContent>

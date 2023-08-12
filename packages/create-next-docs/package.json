@@ -1,0 +1,40 @@
+{
+  "name": "create-next-docs",
+  "description": "Create a new documentation site with Next Docs UI",
+  "version": "1.4.1",
+  "homepage": "https://next-docs-zeta.vercel.app",
+  "author": "Money SonMooSans",
+  "repository": "github:SonMooSans/next-docs",
+  "license": "MIT",
+  "files": [
+    "templates/*",
+    "dist/*"
+  ],
+  "main": "./dist/index.js",
+  "bin": "./dist/index.js",
+  "scripts": {
+    "build": "tsup --clean",
+    "clean": "rmdir /q/s dist",
+    "postpublish": "node ./scripts/sync.js",
+    "dev": "tsup --watch",
+    "prepublishOnly": "pnpm build",
+    "types:check": "tsc --noEmit"
+  },
+  "keywords": [
+    "NextJs",
+    "next",
+    "react",
+    "Docs"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.7.0",
+    "picocolors": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "18.16.3",
+    "fast-glob": "^3.3.1"
+  }
+}
