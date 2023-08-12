@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 1.5.0
+
+### Minor Changes
+
+- fb2abb3: Rewrite create search API & stabilize experimental Advanced Search
+
 ## 1.4.1
 
 ### Patch Changes
