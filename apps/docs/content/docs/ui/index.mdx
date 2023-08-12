@@ -4,7 +4,7 @@ description: Getting Started with Next Docs UI
 icon: 'HomeIcon'
 ---
 
-import {Tabs, Tab} from "next-docs-ui/components/tabs"
+import { Tab, Tabs } from 'next-docs-ui/components/tabs'
 
 Next Docs UI is a Next.js framework for building documentation website.
 
@@ -28,11 +28,11 @@ Next Docs UI provides many features out of the box.
 
 Open in [CodeSandbox](https://githubbox.com/SonMooSans/next-docs-ui-template).
 
-### Installation
-
-<Tabs items={["With CLI", "Manual"]}>
+<Tabs items={["With CLI", "Manual"]} defaultValue="With CLI">
 
 <Tab value="With CLI">
+
+<h3>Installation</h3>
 
 Create a new app with the CLI.
 
@@ -44,15 +44,19 @@ pnpx create-next-docs-app
 yarn create next-docs-app
 ```
 
+> **Note:** this example uses Contentlayer, but you can use any source you want.
+
 </Tab>
 
 <Tab value="Manual">
+
+<h3>Installation</h3>
 
 ```bash
 npm install next-docs-ui next-docs-zeta shiki
 ```
 
-### Configuration
+<h3>Configuration</h3>
 
 Next Docs UI doesn't provide static generation directly. Instead, it uses
 [Contentlayer](https://www.contentlayer.dev).
@@ -94,12 +98,9 @@ const ctx = loadContext(allMeta, allDocs)
 export const tree = buildPageTree(ctx)
 ```
 
-</Tab>
-</Tabs>
-
 Make sure you've generated documents correctly before moving to next step.
 
-### Creating Routes
+<h3>Creating Routes</h3>
 
 Copy & Paste required files.
 
@@ -259,6 +260,9 @@ export const { GET } = createSearchAPI('simple', {
 </AccordionItem>
 
 </Accordion>
+
+</Tab>
+</Tabs>
 
 ## Enjoy!
 
