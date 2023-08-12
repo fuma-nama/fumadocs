@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 1.5.2
+
+### Patch Changes
+
+- 1906e80: Create steps component
+  - next-docs-zeta@1.5.2
+
 ## 1.5.1
 
 ### Patch Changes
