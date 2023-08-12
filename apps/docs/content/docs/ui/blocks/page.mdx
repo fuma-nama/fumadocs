@@ -31,6 +31,9 @@ import { DocsPage } from 'next-docs-ui/page'
       type: 'TOCItemType[]',
       typeDescription: `{ title: string, url: string, depth: number }[]`
     },
+    replaceToc: {
+      type: 'ReactNode | false'
+    },
     footer: {
       type: 'FooterProps',
       typeDescriptionLink: '#footer'

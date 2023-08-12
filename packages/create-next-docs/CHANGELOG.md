@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 1.5.3
+
+### Patch Changes
+
+- Update next docs
+
 ## 1.5.2
 
 ### Patch Changes

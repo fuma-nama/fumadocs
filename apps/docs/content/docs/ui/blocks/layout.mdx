@@ -33,6 +33,10 @@ export default function Layout({ children }) {
       type: 'string',
       description: 'Github url displayed on the navbar'
     },
+    sidebar: {
+      type: 'ReactNode | false',
+      description: 'Disable or replace default sidebar'
+    },
     sidebarBanner: {
       type: 'ReactNode',
       description: 'Content at the top of sidebar'

@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 1.5.1
+
+### Patch Changes
+
+- d4f718d: Support disabling TOC & Sidebar
+  - next-docs-zeta@1.5.1
+
 ## 1.5.0
 
 ### Patch Changes
