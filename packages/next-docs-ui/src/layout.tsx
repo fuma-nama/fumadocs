@@ -26,6 +26,11 @@ export type DocsLayoutProps = {
    */
   githubUrl?: string
 
+  /**
+   * Replace or disable sidebar
+   */
+  sidebar?: ReactNode | false
+
   sidebarBanner?: ReactNode
 
   sidebarContent?: ReactNode
@@ -43,25 +48,28 @@ export function DocsLayout(props: DocsLayoutProps) {
         }
       ]
     : []
+  const sidebar = props.sidebar ?? (
+    <Sidebar banner={props.sidebarBanner} items={props.tree}>
+      {props.sidebarContent}
+    </Sidebar>
+  )
+
+  const navbar = props.nav ?? (
+    <Nav links={links} enableSidebar={sidebar !== false}>
+      <Link
+        href="/"
+        className="nd-font-semibold hover:nd-text-muted-foreground"
+      >
+        {props.navTitle}
+      </Link>
+    </Nav>
+  )
 
   return (
     <PagesContext.Provider value={{ tree: props.tree }}>
-      {props.nav !== undefined ? (
-        props.nav
-      ) : (
-        <Nav links={links}>
-          <Link
-            href="/"
-            className="nd-font-semibold hover:nd-text-muted-foreground"
-          >
-            {props.navTitle}
-          </Link>
-        </Nav>
-      )}
+      {navbar}
       <div className="nd-flex nd-flex-row nd-container nd-max-w-[1300px] nd-gap-10">
-        <Sidebar banner={props.sidebarBanner} items={props.tree}>
-          {props.sidebarContent}
-        </Sidebar>
+        {sidebar}
         {props.children}
       </div>
     </PagesContext.Provider>
