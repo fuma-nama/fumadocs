@@ -61,7 +61,7 @@
     "@radix-ui/react-scroll-area": "^1.0.4",
     "@radix-ui/react-select": "^1.2.1",
     "@radix-ui/react-tabs": "^1.0.4",
-    "clsx": "^1.2.1",
+    "clsx": "^2.0.0",
     "cmdk": "^0.2.0",
     "lucide-react": "^0.263.1",
     "next-docs-zeta": "workspace:*",
