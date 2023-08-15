@@ -69,6 +69,9 @@ async function main() {
   info.message('Updating README.md')
   generateReadme(path.join(dest, 'README.md'), name)
 
+  info.message('Adding .gitignore')
+  generateGitIgnore(path.join(dest, '.gitignore'))
+
   info.stop('Project Generated')
 
   outro(color.bgGreen(color.bold('Done')))
@@ -132,6 +135,34 @@ function generateReadme(path: string, projectName: string) {
     .join('\n')
 
   fs.writeFileSync(path, content)
+}
+
+function generateGitIgnore(path: string) {
+  const ignores = [
+    // deps
+    '/node_modules',
+    '/.pnp',
+    '.pnp.js',
+    // outputs
+    '.contentlayer',
+    '/coverage',
+    '/.next/',
+    '/out/',
+    '/build',
+    '.DS_Store',
+    '*.pem',
+    // debug logs
+    'npm-debug.log*',
+    'yarn-debug.log*',
+    'yarn-error.log*',
+
+    '.env*.local',
+    '.vercel',
+    '*.tsbuildinfo',
+    'next-env.d.ts'
+  ]
+
+  fs.writeFileSync(path, ignores.join('\n'))
 }
 
 function copy(
