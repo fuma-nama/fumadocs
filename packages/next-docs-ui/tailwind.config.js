@@ -79,10 +79,11 @@ module.exports = {
             '--tw-prose-th-borders': 'hsl(var(--border))',
             '--tw-prose-td-borders': 'hsl(var(--border))',
             a: {
-              'border-bottom': '1px hsl(var(--primary)) solid',
               transition: 'opacity 0.3s',
               'font-weight': '400',
-              'text-decoration': 'none',
+              'text-decoration': 'underline',
+              'text-underline-offset': '2px',
+              'text-decoration-color': 'hsl(var(--primary))',
               '&:hover': {
                 opacity: '80%'
               }
