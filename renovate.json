@@ -8,9 +8,7 @@
       "groupName": "all non-major dependencies",
       "groupSlug": "all-minor-patch",
       "matchPackagePatterns": [
-        "*",
-        "!react",
-        "!@types/react"
+        "^@radix-ui"
       ],
       "matchUpdateTypes": [
         "minor",
