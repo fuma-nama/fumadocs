@@ -94,13 +94,13 @@
   },
   "dependencies": {
     "@formatjs/intl-localematcher": "^0.4.0",
-    "flexsearch": "0.7.21",
+    "flexsearch": "0.7.31",
     "github-slugger": "^2.0.0",
     "hast-util-to-string": "^2.0.0",
     "negotiator": "^0.6.3",
     "react-remove-scroll": "^2.5.6",
     "rehype-img-size": "^1.0.1",
-    "rehype-pretty-code": "^0.9.5",
+    "rehype-pretty-code": "^0.10.0",
     "remark": "^14.0.2",
     "remark-gfm": "^3.0.1",
     "remark-mdx": "^2.3.0",
@@ -116,8 +116,8 @@
   "devDependencies": {
     "@types/flexsearch": "0.7.3",
     "@types/negotiator": "^0.6.1",
-    "@types/react": "18.2.0",
-    "@types/react-dom": "18.2.1",
+    "@types/react": "18.2.20",
+    "@types/react-dom": "18.2.7",
     "contentlayer": "^0.3.4",
     "next": "13.4.16"
   },
