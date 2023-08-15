@@ -12,7 +12,7 @@
     "@radix-ui/react-dialog": "^1.0.3",
     "@radix-ui/react-scroll-area": "^1.0.4",
     "autoprefixer": "10.4.15",
-    "class-variance-authority": "^0.6.0",
+    "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "contentlayer": "^0.3.4",
     "katex": "^0.16.8",
