@@ -5,8 +5,8 @@
   ],
   "packageRules": [
     {
-      "groupName": "all non-major dependencies",
-      "groupSlug": "all-minor-patch",
+      "groupName": "Radix UI",
+      "groupSlug": "radix-minor-patch",
       "matchPackagePatterns": [
         "^@radix-ui"
       ],
@@ -15,5 +15,6 @@
         "patch"
       ]
     }
-  ]
+  ],
+  "ignoreDeps": ["@types/react", "@types/react-dom", "flexsearch"]
 }
