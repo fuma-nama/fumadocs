@@ -23,7 +23,7 @@
     "@typescript-eslint/parser": "^6.2.0",
     "concurrently": "^8.0.1",
     "eslint": "^8.46.0",
-    "eslint-config-prettier": "^8.9.0",
+    "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-react": "^7.33.1",
     "eslint-plugin-tailwindcss": "^3.13.0",
     "prettier": "^3.0.0",
