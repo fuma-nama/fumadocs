@@ -107,7 +107,7 @@
     "remark-mdx": "^2.3.0",
     "scroll-into-view-if-needed": "^3.0.10",
     "swr": "^2.1.5",
-    "unist-util-visit": "^4.1.2"
+    "unist-util-visit": "^5.0.0"
   },
   "peerDependencies": {
     "next": "13.x",
