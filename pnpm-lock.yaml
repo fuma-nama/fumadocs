@@ -37,7 +37,7 @@ importers:
         version: 7.33.1(eslint@8.46.0)
       eslint-plugin-tailwindcss:
         specifier: ^3.13.0
-        version: 3.13.0(tailwindcss@3.3.2)
+        version: 3.13.0(tailwindcss@3.3.3)
       prettier:
         specifier: ^3.0.0
         version: 3.0.0
@@ -127,11 +127,11 @@ importers:
         specifier: 18.2.1
         version: 18.2.1
       tailwindcss:
-        specifier: 3.3.2
-        version: 3.3.2
+        specifier: 3.3.3
+        version: 3.3.3
       tailwindcss-animate:
         specifier: ^1.0.5
-        version: 1.0.5(tailwindcss@3.3.2)
+        version: 1.0.5(tailwindcss@3.3.3)
 
   examples/advanced:
     dependencies:
@@ -349,7 +349,7 @@ importers:
     devDependencies:
       '@tailwindcss/typography':
         specifier: ^0.5.9
-        version: 0.5.9(tailwindcss@3.3.2)
+        version: 0.5.9(tailwindcss@3.3.3)
       '@types/react':
         specifier: 18.2.0
         version: 18.2.0
@@ -378,11 +378,11 @@ importers:
         specifier: ^0.9.0
         version: 0.9.0(postcss@8.4.23)
       tailwindcss:
-        specifier: 3.3.2
-        version: 3.3.2
+        specifier: 3.3.3
+        version: 3.3.3
       tailwindcss-animate:
         specifier: ^1.0.5
-        version: 1.0.5(tailwindcss@3.3.2)
+        version: 1.0.5(tailwindcss@3.3.3)
 
 packages:
 
@@ -2748,7 +2748,7 @@ packages:
     dependencies:
       tslib: 2.5.2
 
-  /@tailwindcss/typography@0.5.9(tailwindcss@3.3.2):
+  /@tailwindcss/typography@0.5.9(tailwindcss@3.3.3):
     resolution: {integrity: sha512-t8Sg3DyynFysV9f4JDOVISGsjazNb48AeIYQwcL+Bsq5uf4RYL75C1giZ43KISjeDGBaTN3Kxh7Xj/vRSMJUUg==}
     peerDependencies:
       tailwindcss: '>=3.0.0 || insiders'
@@ -2757,7 +2757,7 @@ packages:
       lodash.isplainobject: 4.0.6
       lodash.merge: 4.6.2
       postcss-selector-parser: 6.0.10
-      tailwindcss: 3.3.2
+      tailwindcss: 3.3.3
     dev: true
 
   /@types/acorn@4.0.6:
@@ -3900,7 +3900,7 @@ packages:
       string.prototype.matchall: 4.0.8
     dev: true
 
-  /eslint-plugin-tailwindcss@3.13.0(tailwindcss@3.3.2):
+  /eslint-plugin-tailwindcss@3.13.0(tailwindcss@3.3.3):
     resolution: {integrity: sha512-Fcep4KDRLWaK3KmkQbdyKHG0P4GdXFmXdDaweTIPcgOP60OOuWFbh1++dufRT28Q4zpKTKaHwTsXPJ4O/EjU2Q==}
     engines: {node: '>=12.13.0'}
     peerDependencies:
@@ -3908,7 +3908,7 @@ packages:
     dependencies:
       fast-glob: 3.3.1
       postcss: 8.4.23
-      tailwindcss: 3.3.2
+      tailwindcss: 3.3.3
     dev: true
 
   /eslint-scope@7.2.2:
@@ -7290,12 +7290,12 @@ packages:
     resolution: {integrity: sha512-Y17eDp7FtN1+JJ4OY0Bqv9OA41O+MS8c1Iyr3T6JFLnOgLg3EvcyMKZAnQ8AGyvB5Nxm3t9Xb5Mhe139m8QT/g==}
     dev: false
 
-  /tailwindcss-animate@1.0.5(tailwindcss@3.3.2):
+  /tailwindcss-animate@1.0.5(tailwindcss@3.3.3):
     resolution: {integrity: sha512-UU3qrOJ4lFQABY+MVADmBm+0KW3xZyhMdRvejwtXqYOL7YjHYxmuREFAZdmVG5LPe5E9CAst846SLC4j5I3dcw==}
     peerDependencies:
       tailwindcss: '>=3.0.0 || insiders'
     dependencies:
-      tailwindcss: 3.3.2
+      tailwindcss: 3.3.3
     dev: true
 
   /tailwindcss@3.3.2:
@@ -7324,6 +7324,37 @@ packages:
       postcss-nested: 6.0.1(postcss@8.4.23)
       postcss-selector-parser: 6.0.13
       postcss-value-parser: 4.2.0
+      resolve: 1.22.2
+      sucrase: 3.32.0
+    transitivePeerDependencies:
+      - ts-node
+    dev: true
+
+  /tailwindcss@3.3.3:
+    resolution: {integrity: sha512-A0KgSkef7eE4Mf+nKJ83i75TMyq8HqY3qmFIJSWy8bNt0v1lG7jUcpGpoTFxAwYcWOphcTBLPPJg+bDfhDf52w==}
+    engines: {node: '>=14.0.0'}
+    hasBin: true
+    dependencies:
+      '@alloc/quick-lru': 5.2.0
+      arg: 5.0.2
+      chokidar: 3.5.3
+      didyoumean: 1.2.2
+      dlv: 1.1.3
+      fast-glob: 3.3.1
+      glob-parent: 6.0.2
+      is-glob: 4.0.3
+      jiti: 1.18.2
+      lilconfig: 2.1.0
+      micromatch: 4.0.5
+      normalize-path: 3.0.0
+      object-hash: 3.0.0
+      picocolors: 1.0.0
+      postcss: 8.4.23
+      postcss-import: 15.1.0(postcss@8.4.23)
+      postcss-js: 4.0.1(postcss@8.4.23)
+      postcss-load-config: 4.0.1(postcss@8.4.23)
+      postcss-nested: 6.0.1(postcss@8.4.23)
+      postcss-selector-parser: 6.0.13
       resolve: 1.22.2
       sucrase: 3.32.0
     transitivePeerDependencies:
