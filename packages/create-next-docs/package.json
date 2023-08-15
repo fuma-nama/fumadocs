@@ -33,7 +33,7 @@
     "picocolors": "^1.0.0"
   },
   "devDependencies": {
-    "@types/node": "18.16.3",
+    "@types/node": "18.17.5",
     "fast-glob": "^3.3.1"
   }
 }
