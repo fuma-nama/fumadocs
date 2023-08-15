@@ -116,8 +116,8 @@
   "devDependencies": {
     "@types/flexsearch": "0.7.3",
     "@types/negotiator": "^0.6.1",
-    "@types/react": "18.2.0",
-    "@types/react-dom": "18.2.1",
+    "@types/react": "18.2.20",
+    "@types/react-dom": "18.2.7",
     "contentlayer": "^0.3.4",
     "next": "13.4.16"
   },
