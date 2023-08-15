@@ -29,7 +29,7 @@
     "prettier": "^3.0.0",
     "prettier-plugin-tailwindcss": "^0.4.1",
     "tsup": "6.7.0",
-    "turbo": "v1.9.9",
-    "typescript": "5.0.4"
+    "turbo": "v1.10.12",
+    "typescript": "5.1.6"
   }
 }
