@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 1.5.3
+
+### Patch Changes
+
+- fa8d4cf: Update dependencies
+- f0ab1ba: Improve typography
+- Updated dependencies [fa8d4cf]
+  - next-docs-zeta@1.5.3
+
 ## 1.5.2
 
 ### Patch Changes

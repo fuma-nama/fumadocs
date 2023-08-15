@@ -1,5 +1,12 @@
 # create-next-docs-app
 
+## 1.5.5
+
+### Patch Changes
+
+- 3b0f469: Generate .gitignore file by default
+- fa8d4cf: Update dependencies
+
 ## 1.5.4
 
 ### Patch Changes

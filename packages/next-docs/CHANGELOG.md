@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 1.5.3
+
+### Patch Changes
+
+- fa8d4cf: Update dependencies
+
 ## 1.5.2
 
 ## 1.5.1
