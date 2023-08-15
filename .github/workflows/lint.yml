@@ -34,7 +34,7 @@ jobs:
         run: pnpm i
 
       - name: Format Code
-        run: pnpm lint:prettier
+        run: pnpm prettier
 
       - name: Run ESLint
         run: pnpm lint
