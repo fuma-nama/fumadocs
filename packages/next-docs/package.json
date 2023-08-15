@@ -94,7 +94,7 @@
   },
   "dependencies": {
     "@formatjs/intl-localematcher": "^0.4.0",
-    "flexsearch": "0.7.21",
+    "flexsearch": "0.7.31",
     "github-slugger": "^2.0.0",
     "hast-util-to-string": "^2.0.0",
     "mdast-util-toc": "^6.1.1",
