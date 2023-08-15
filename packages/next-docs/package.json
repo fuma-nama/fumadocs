@@ -101,7 +101,7 @@
     "negotiator": "^0.6.3",
     "react-remove-scroll": "^2.5.6",
     "rehype-img-size": "^1.0.1",
-    "rehype-pretty-code": "^0.9.5",
+    "rehype-pretty-code": "^0.10.0",
     "remark": "^14.0.2",
     "remark-gfm": "^3.0.1",
     "remark-mdx": "^2.3.0",
