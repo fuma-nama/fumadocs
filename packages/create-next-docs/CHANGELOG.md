@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 1.5.6
+
+### Patch Changes
+
+- ebfdb88: Fix default warnings
+
 ## 1.5.5
 
 ### Patch Changes
