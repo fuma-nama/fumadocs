@@ -31,8 +31,8 @@
   "devDependencies": {
     "@next/bundle-analyzer": "^13.4.16",
     "@types/node": "18.17.5",
-    "@types/react": "18.2.0",
-    "@types/react-dom": "18.2.1",
+    "@types/react": "18.2.20",
+    "@types/react-dom": "18.2.7",
     "tailwindcss": "3.3.3",
     "tailwindcss-animate": "^1.0.5"
   }
