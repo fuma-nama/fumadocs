@@ -15,19 +15,26 @@
     "types:check": "turbo run types:check",
     "version": "changeset version"
   },
+  "pnpm": {
+    "peerDependencyRules": {
+      "ignoreMissing": [
+        "esbuild"
+      ]
+    }
+  },
   "devDependencies": {
     "@changesets/cli": "^2.26.2",
     "@ianvs/prettier-plugin-sort-imports": "^4.1.0",
     "@next/eslint-plugin-next": "^13.4.16",
-    "@typescript-eslint/eslint-plugin": "^6.2.0",
-    "@typescript-eslint/parser": "^6.2.0",
-    "concurrently": "^8.0.1",
-    "eslint": "^8.46.0",
+    "@typescript-eslint/eslint-plugin": "^6.4.0",
+    "@typescript-eslint/parser": "^6.4.0",
+    "concurrently": "^8.2.0",
+    "eslint": "^8.47.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-react": "^7.33.1",
     "eslint-plugin-tailwindcss": "^3.13.0",
-    "prettier": "^3.0.0",
-    "prettier-plugin-tailwindcss": "^0.5.0",
+    "prettier": "^3.0.2",
+    "prettier-plugin-tailwindcss": "^0.5.3",
     "tsup": "6.7.0",
     "turbo": "v1.10.12",
     "typescript": "5.1.6"
