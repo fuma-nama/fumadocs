@@ -13,7 +13,7 @@
     "@radix-ui/react-scroll-area": "^1.0.4",
     "autoprefixer": "10.4.15",
     "class-variance-authority": "^0.6.0",
-    "clsx": "^1.2.1",
+    "clsx": "^2.0.0",
     "contentlayer": "^0.3.4",
     "katex": "^0.16.8",
     "lucide-react": "^0.263.1",
