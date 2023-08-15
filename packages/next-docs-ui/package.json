@@ -63,7 +63,7 @@
     "@radix-ui/react-tabs": "^1.0.4",
     "clsx": "^1.2.1",
     "cmdk": "^0.2.0",
-    "lucide-react": "^0.263.1",
+    "lucide-react": "^0.268.0",
     "next-docs-zeta": "workspace:*",
     "next-themes": "^0.2.1",
     "tailwind-merge": "^1.12.0"
