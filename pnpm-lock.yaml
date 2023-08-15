@@ -232,8 +232,8 @@ importers:
         specifier: ^0.4.0
         version: 0.4.0
       flexsearch:
-        specifier: 0.7.21
-        version: 0.7.21
+        specifier: 0.7.31
+        version: 0.7.31
       github-slugger:
         specifier: ^2.0.0
         version: 2.0.0
@@ -4165,8 +4165,8 @@ packages:
     resolution: {integrity: sha512-5nqDSxl8nn5BSNxyR3n4I6eDmbolI6WT+QqR547RwxQapgjQBmtktdP+HTBb/a/zLsbzERTONyUB5pefh5TtjQ==}
     dev: true
 
-  /flexsearch@0.7.21:
-    resolution: {integrity: sha512-W7cHV7Hrwjid6lWmy0IhsWDFQboWSng25U3VVywpHOTJnnAZNPScog67G+cVpeX9f7yDD21ih0WDrMMT+JoaYg==}
+  /flexsearch@0.7.31:
+    resolution: {integrity: sha512-XGozTsMPYkm+6b5QL3Z9wQcJjNYxp0CYn3U1gO7dwD6PAqU1SVWZxI9CCg3z+ml3YfqdPnrBehaBrnH2AGKbNA==}
     dev: false
 
   /for-each@0.3.3:
