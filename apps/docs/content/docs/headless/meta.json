@@ -7,6 +7,7 @@
     "---API References---",
     "components",
     "utils",
+    "mdx",
     "---Contentlayer---",
     "contentlayer/index",
     "contentlayer/internationalization"

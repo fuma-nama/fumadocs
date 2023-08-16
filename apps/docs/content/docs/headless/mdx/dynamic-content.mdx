@@ -1,0 +1,27 @@
+---
+title: Dynamic Content
+description: A remark plugin that generates content from files
+---
+
+This plugin isn't included by default, you have to add it to remark plugins
+manually.
+
+```ts
+import { remarkDynamicContent } from 'next-docs-zeta/mdx-plugins'
+
+config.mdx!.remarkPlugins!.push(remarkDynamicContent)
+```
+
+## Syntax
+
+This will copy the content from a specific file, it only can used in code blocks
+& text.
+
+`|reference:` + `path` + `|`
+
+**Example:** `|reference:./path/to/your/file.ts|`
+
+### Options
+
+- `cwd` the root directory to resolve files
+- `trim` enable trim file content
