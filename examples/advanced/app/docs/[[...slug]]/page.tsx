@@ -1,4 +1,4 @@
-import { getPage } from '@/app/tree'
+import { getPage } from '@/app/source'
 import { allDocs } from 'contentlayer/generated'
 import type { Metadata } from 'next'
 import { MDXContent } from 'next-docs-ui/mdx'

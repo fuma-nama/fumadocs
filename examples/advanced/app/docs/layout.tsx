@@ -1,6 +1,6 @@
 import { DocsLayout } from 'next-docs-ui/layout'
 import type { ReactNode } from 'react'
-import { tree } from '../tree'
+import { tree } from '../source'
 
 export default function RootDocsLayout({ children }: { children: ReactNode }) {
   return (
