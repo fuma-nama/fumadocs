@@ -91,6 +91,9 @@ importers:
       next-docs-zeta:
         specifier: workspace:*
         version: link:../../packages/next-docs
+      next-sitemap:
+        specifier: ^4.2.2
+        version: 4.2.2(next@13.4.16)
       postcss:
         specifier: 8.4.28
         version: 8.4.28
@@ -907,6 +910,10 @@ packages:
       oo-ascii-tree: 1.85.0
       ts-pattern: 4.3.0
       type-fest: 3.12.0
+
+  /@corex/deepmerge@4.0.43:
+    resolution: {integrity: sha512-N8uEMrMPL0cu/bdboEWpQYb/0i2K5Qn8eCsxzOmxSggJbbQte7ljMRoXm917AbntqTGOzdTu+vP3KOOzoC70HQ==}
+    dev: false
 
   /@effect-ts/core@0.60.5:
     resolution: {integrity: sha512-qi1WrtJA90XLMnj2hnUszW9Sx4dXP03ZJtCc5DiUBIOhF4Vw7plfb65/bdBySPoC9s7zy995TdUX1XBSxUkl5w==}
@@ -5683,6 +5690,10 @@ packages:
       kind-of: 6.0.3
     dev: true
 
+  /minimist@1.2.8:
+    resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
+    dev: false
+
   /mixme@0.5.9:
     resolution: {integrity: sha512-VC5fg6ySUscaWUpI4gxCBTQMH2RdUpNrk+MsbpCYtIvf9SBJdiUey4qE7BXviJsJR4nDQxCZ+3yaYNW3guz/Pw==}
     engines: {node: '>= 8.0.0'}
@@ -5741,6 +5752,20 @@ packages:
       - esbuild
       - markdown-wasm
       - supports-color
+    dev: false
+
+  /next-sitemap@4.2.2(next@13.4.16):
+    resolution: {integrity: sha512-cz5PyFibUNSJSXOY5mllq5TW0OH6SGG+8GJ9fR9pl1Thu4rvkDye+0N0790h+9kQihDStuVw2xfwC3qihDkflA==}
+    engines: {node: '>=14.18'}
+    hasBin: true
+    peerDependencies:
+      next: '*'
+    dependencies:
+      '@corex/deepmerge': 4.0.43
+      '@next/env': 13.4.16
+      fast-glob: 3.3.1
+      minimist: 1.2.8
+      next: 13.4.16(@babel/core@7.22.9)(@opentelemetry/api@1.4.1)(react-dom@18.2.0)(react@18.2.0)
     dev: false
 
   /next-themes@0.2.1(next@13.4.16)(react-dom@18.2.0)(react@18.2.0):

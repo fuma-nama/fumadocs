@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next-sitemap && next build",
     "start": "next start"
   },
   "dependencies": {
@@ -21,6 +21,7 @@
     "next-contentlayer": "^0.3.4",
     "next-docs-ui": "workspace:*",
     "next-docs-zeta": "workspace:*",
+    "next-sitemap": "^4.2.2",
     "postcss": "8.4.28",
     "react": "18.2.0",
     "react-dom": "18.2.0",
