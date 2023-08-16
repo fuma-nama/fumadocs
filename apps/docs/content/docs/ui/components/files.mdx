@@ -1,0 +1,59 @@
+---
+title: Files
+description: Display file structure in your documentation
+icon: FolderTreeIcon
+---
+
+import { File, Files } from 'next-docs-ui/components/files'
+import { TypeTable } from 'next-docs-ui/components/type-table'
+
+> it is an optional component which won't be loaded by default.
+
+**File Structure**
+
+<Files>
+  <File title="app" defaultOpen>
+    <File title="layout.tsx" />
+    <File title="page.tsx" />
+    <File title="global.css" />
+  </File>
+  <File title="components">
+    <File title="button.tsx" />
+    <File title="tabs.tsx" />
+    <File title="dialog.tsx" />
+  </File>
+  <File title="package.json" />
+</Files>
+
+## Usage
+
+Wrap file components in `Files`.
+
+```mdx
+import { File, Files } from 'next-docs-ui/components/files'
+
+<Files>
+  <File title="app" defaultOpen>
+    <File title="layout.tsx" />
+    <File title="page.tsx" />
+    <File title="global.css" />
+  </File>
+  <File title="components">
+    <File title="button.tsx" />
+    <File title="tabs.tsx" />
+    <File title="dialog.tsx" />
+  </File>
+  <File title="package.json" />
+</Files>
+```
+
+<TypeTable
+  type={{
+    title: { type: 'string' },
+    defaultOpen: { type: 'boolean', description: 'Open folder by default' },
+    children: {
+      type: 'ReactNode',
+      description: 'children files of the folder, consider as file if empty'
+    }
+  }}
+/>

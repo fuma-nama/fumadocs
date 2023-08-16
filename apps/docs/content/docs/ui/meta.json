@@ -14,6 +14,7 @@
     "components/card",
     "components/heading",
     "components/steps",
+    "components/files",
     "components/roll-button",
     "components/type-table",
     "---Blocks---",

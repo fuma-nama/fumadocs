@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 1.6.1
+
+### Patch Changes
+
+- 689c75d: Create Files component
+- Updated dependencies [fc6279e]
+  - next-docs-zeta@1.6.1
+
 ## 1.6.0
 
 ### Patch Changes

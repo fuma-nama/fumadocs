@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 1.6.1
+
+### Patch Changes
+
+- fc6279e: Support get last git edit time
+
 ## 1.6.0
 
 ### Minor Changes
