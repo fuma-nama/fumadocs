@@ -1,5 +1,19 @@
 import type { DocsPageBase, MetaPageBase, PagesContext } from './types'
-import { getKey } from './utils'
+import { getKey, getPageUrl } from './utils'
+
+export type ContextOptions = {
+  languages: string[]
+  /**
+   * @default '/docs'
+   */
+  baseUrl: string
+  /**
+   * Get url from slugs and locale, override the default getUrl function
+   */
+  getUrl: (slugs: string[], locale?: string) => string
+
+  resolveIcon: PagesContext['resolveIcon']
+}
 
 export function loadContext<
   Meta extends MetaPageBase,
@@ -7,7 +21,12 @@ export function loadContext<
 >(
   metaPages: Meta[],
   docsPages: Docs[],
-  languages: string[] = []
+  {
+    languages = [],
+    baseUrl = '/docs',
+    getUrl,
+    resolveIcon
+  }: Partial<ContextOptions> = {}
 ): PagesContext<Meta, Docs> {
   const docsMap = new Map<string, Docs>()
   const metaMap = new Map<string, Meta>()
@@ -21,9 +40,14 @@ export function loadContext<
   }
 
   return {
+    resolveIcon,
+    languages,
     pages: getI18nPages(docsMap, languages),
     docsMap,
-    metaMap
+    metaMap,
+    getUrl(slugs, locale) {
+      return getUrl ? getUrl(slugs, locale) : getPageUrl(slugs, baseUrl, locale)
+    }
   }
 }
 

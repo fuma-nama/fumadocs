@@ -32,14 +32,27 @@ export function createUtils<Docs extends DocsPageBase>(
    */
   getPages: (language?: string) => Docs[] | undefined
 
-  getPage: (language: string, slugs?: string[]) => Docs | undefined
+  /**
+   * @param language If empty, the default language will be used
+   */
+  getPage: (slugs?: string[], language?: string) => Docs | undefined
+
+  getPageUrl: (
+    slugs: string | string[] | undefined,
+    language?: string
+  ) => string
 } {
   return {
     getPages: (language = '') => context.pages.get(language),
-    getPage(language, slugs) {
+    getPage(slugs, language = '') {
       const path = (slugs ?? []).join('/')
 
       return context.pages.get(language)?.find(page => page.slug === path)
+    },
+    getPageUrl(slug, language) {
+      const slugs = typeof slug === 'string' ? slug.split('/') : slug ?? []
+
+      return context.getUrl(slugs, language)
     }
   }
 }

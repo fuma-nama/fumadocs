@@ -36,7 +36,9 @@ export type PagesContext<
    * Language -> Page[]
    */
   pages: Map<string, Docs[]>
+  languages: string[]
   docsMap: Map<string, Docs>
   metaMap: Map<string, Meta>
   resolveIcon?: (icon: string) => ReactElement | undefined
+  getUrl: (slugs: string[], locale?: string) => string
 }

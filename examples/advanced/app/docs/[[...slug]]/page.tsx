@@ -1,3 +1,4 @@
+import { getPage } from '@/app/tree'
 import { allDocs } from 'contentlayer/generated'
 import type { Metadata } from 'next'
 import { MDXContent } from 'next-docs-ui/mdx'
@@ -11,8 +12,7 @@ export default async function Page({
 }: {
   params: { slug?: string[] }
 }) {
-  const path = (params.slug ?? [])?.join('/')
-  const page = allDocs.find(page => page.slug === path)
+  const page = getPage(params.slug)
 
   if (page == null) {
     notFound()
@@ -37,8 +37,7 @@ export async function generateStaticParams(): Promise<{ slug: string[] }[]> {
 }
 
 export function generateMetadata({ params }: { params: { slug?: string[] } }) {
-  const path = (params.slug ?? [])?.join('/')
-  const page = allDocs.find(page => page.slug === path)
+  const page = getPage(params.slug)
 
   if (page == null) return
 

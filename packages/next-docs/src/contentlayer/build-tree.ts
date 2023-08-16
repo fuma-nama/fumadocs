@@ -1,9 +1,8 @@
 import type { FileNode, FolderNode, TreeNode } from '../server'
 import type { DocsPageBase, MetaPageBase, PagesContext } from './types'
-import { getPageUrl as defaultGetUrl, getKey, pathToName } from './utils'
+import { getKey, pathToName } from './utils'
 
 type Context = PagesContext & {
-  getUrl: (slug: string, locale?: string) => string
   lang?: string
 }
 
@@ -13,18 +12,6 @@ type Options = {
    * @default 'docs'
    */
   root: string
-  /**
-   * Base URL of documents
-   * @default "/docs"
-   */
-  baseUrl: string
-
-  /**
-   * Get page url from slug and locale
-   *
-   * @default '/baseUrl/locale/slug'
-   */
-  getUrl: (slug: string[], baseUrl: string, locale?: string) => string
 }
 
 const separator = /---(.*?)---/
@@ -88,7 +75,7 @@ function buildFileNode(page: DocsPageBase, ctx: Context): FileNode {
   return {
     type: 'page',
     name: page.title,
-    url: ctx.getUrl(page.slug, ctx.lang),
+    url: ctx.getUrl(page.slug.split('/'), ctx.lang),
     icon: page.icon && ctx.resolveIcon ? ctx.resolveIcon(page.icon) : undefined
   }
 }
@@ -158,18 +145,9 @@ function build(root: string, ctx: Context): TreeNode[] {
 
 export function buildPageTree(
   context: PagesContext,
-  {
-    root = 'docs',
-    baseUrl = '/docs',
-    getUrl = defaultGetUrl
-  }: Partial<Options> = {}
+  { root = 'docs' }: Partial<Options> = {}
 ): TreeNode[] {
-  return build(root, {
-    ...context,
-    getUrl: (slug, locale) => {
-      return getUrl(slug.split('/'), baseUrl, locale)
-    }
-  })
+  return build(root, context)
 }
 
 /**
@@ -179,22 +157,14 @@ export function buildPageTree(
  * @param docs Docs files
  * @param languages All supported languages
  */
-export function buildI18nPageTree<Languages extends string>(
+export function buildI18nPageTree<Languages extends string = string>(
   context: PagesContext,
-  languages: Languages[],
-  {
-    root = 'docs',
-    baseUrl = '/docs',
-    getUrl = defaultGetUrl
-  }: Partial<Options> = {}
+  { root = 'docs' }: Partial<Options> = {}
 ): Record<Languages, TreeNode[]> {
-  const entries = languages.map(lang => {
+  const entries = context.languages.map(lang => {
     const tree = build(root, {
       ...context,
-      lang,
-      getUrl: (slug, locale) => {
-        return getUrl(slug.split('/'), baseUrl, locale)
-      }
+      lang
     })
 
     return [lang, tree]
