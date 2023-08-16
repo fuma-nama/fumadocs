@@ -19,6 +19,12 @@ export function Nav() {
           external: true
         }
       ]}
+      items={[
+        {
+          href: '/showcase',
+          children: 'Showcase'
+        }
+      ]}
     >
       <Link
         href="/"
