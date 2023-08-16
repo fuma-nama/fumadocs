@@ -4,7 +4,7 @@ import { PlusIcon } from 'lucide-react'
 import Image from 'next/image'
 
 export const metadata = createMetadata({
-  title: 'Showcases',
+  title: 'Showcase',
   description: 'Some cool websites using Next Docs',
   openGraph: {
     url: 'https://next-docs-zeta.vercel.app/showcase'
