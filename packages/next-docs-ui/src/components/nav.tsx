@@ -1,6 +1,7 @@
 import clsx from 'clsx'
 import { MenuIcon } from 'lucide-react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import type { ReactNode } from 'react'
 import { SearchToggle } from './search-toggle'
 import { SidebarTrigger } from './sidebar'
@@ -12,11 +13,19 @@ type NavLinkProps = {
   external?: boolean
 }
 
+type NavItemProps = {
+  href: string
+  children: ReactNode
+  external?: boolean
+}
+
 export function Nav({
   links,
+  items,
   enableSidebar = true,
   children
 }: {
+  items?: NavItemProps[]
   links?: NavLinkProps[]
   enableSidebar?: boolean
   children: ReactNode
@@ -25,6 +34,7 @@ export function Nav({
     <nav className="nd-sticky nd-top-0 nd-inset-x-0 nd-z-50 nd-backdrop-blur-lg">
       <div className="nd-container nd-flex nd-flex-row nd-items-center nd-h-16 nd-gap-4 nd-border-b nd-border-foreground/10 nd-max-w-[1300px]">
         {children}
+        {items?.map((item, key) => <NavItem key={key} {...item} />)}
         <div className="nd-flex nd-flex-row nd-justify-end nd-items-center nd-flex-1">
           <SearchToggle className="md:nd-mr-2" />
           {links?.map((item, key) => <NavLink key={key} {...item} />)}
@@ -40,6 +50,28 @@ export function Nav({
         </div>
       </div>
     </nav>
+  )
+}
+
+export function NavItem(props: NavItemProps) {
+  const pathname = usePathname()
+  const isActive =
+    props.href === pathname || pathname.startsWith(props.href + '/')
+
+  return (
+    <Link
+      href={props.href}
+      target={props.external ? '_blank' : '_self'}
+      rel={props.external ? 'noreferrer noopener' : undefined}
+      className={clsx(
+        'nd-text-sm max-lg:nd-hidden',
+        isActive
+          ? 'nd-text-accent-foreground nd-font-medium'
+          : 'nd-text-muted-foreground nd-transition-colors hover:nd-text-accent-foreground'
+      )}
+    >
+      {props.children}
+    </Link>
   )
 }
 
