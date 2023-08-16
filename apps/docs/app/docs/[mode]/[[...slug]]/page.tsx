@@ -1,3 +1,4 @@
+import { createMetadata } from '@/utils/metadata'
 import { getPage, getPageUrl, getTree } from '@/utils/source'
 import { allDocs } from 'contentlayer/generated'
 import type { Metadata } from 'next'
@@ -68,7 +69,8 @@ export default async function Page({ params }: { params: Param }) {
 }
 
 export function generateMetadata({ params }: { params: Param }): Metadata {
-  const page = getPage([params.mode, ...(params.slug ?? [])])
+  const slugs = [params.mode, ...(params.slug ?? [])]
+  const page = getPage(slugs)
 
   if (page == null) return {}
 
@@ -76,24 +78,13 @@ export function generateMetadata({ params }: { params: Param }): Metadata {
     page.description ??
     'The headless ui library for building documentation websites'
 
-  return {
+  return createMetadata({
     title: page.title,
     description,
     openGraph: {
-      url: 'https://next-docs-zeta.vercel.app',
-      title: page.title,
-      description,
-      images: '/banner.png',
-      siteName: 'Next Docs'
-    },
-    twitter: {
-      card: 'summary_large_image',
-      creator: '@money_is_shark',
-      title: page.title,
-      description,
-      images: '/banner.png'
+      url: `https://next-docs-zeta.vercel.app/docs/${slugs.join('/')}`
     }
-  }
+  })
 }
 
 export function generateStaticParams() {

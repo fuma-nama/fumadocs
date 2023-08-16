@@ -4,39 +4,20 @@ import { Inter } from 'next/font/google'
 import 'next-docs-ui/style.css'
 import 'katex/dist/katex.min.css'
 import './style.css'
+import { createMetadata } from '@/utils/metadata'
 import { Provider } from './provider'
 
-export const metadata = {
+export const metadata = createMetadata({
   title: {
     template: '%s | Next Docs',
     default: 'Next Docs'
   },
   description: 'The headless ui library for building a documentation website',
-  openGraph: {
-    url: 'https://next-docs-zeta.vercel.app',
-    title: {
-      template: '%s | Next Docs',
-      default: 'Next Docs'
-    },
-    description: 'The headless ui library for building a documentation website',
-    images: '/banner.png',
-    siteName: 'Next Docs'
-  },
-  twitter: {
-    card: 'summary_large_image',
-    creator: '@money_is_shark',
-    title: {
-      template: '%s | Next Docs',
-      default: 'Next Docs'
-    },
-    description: 'The headless ui library for building a documentation website',
-    images: '/banner.png'
-  },
   metadataBase:
     process.env.NODE_ENV === 'development'
-      ? 'http://localhost:3000'
-      : `https://${process.env.VERCEL_URL}`
-}
+      ? new URL('http://localhost:3000')
+      : new URL(`https://${process.env.VERCEL_URL}`)
+})
 
 const inter = Inter({
   subsets: ['latin']

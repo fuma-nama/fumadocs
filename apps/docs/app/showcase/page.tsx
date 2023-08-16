@@ -1,6 +1,15 @@
 import NextFAQImage from '@/public/showcases/next-faq.png'
+import { createMetadata } from '@/utils/metadata'
 import { PlusIcon } from 'lucide-react'
 import Image from 'next/image'
+
+export const metadata = createMetadata({
+  title: 'Showcases',
+  description: 'Some cool websites using Next Docs',
+  openGraph: {
+    url: 'https://next-docs-zeta.vercel.app/showcase'
+  }
+})
 
 export default function Showcase() {
   const showcases = [
@@ -8,12 +17,12 @@ export default function Showcase() {
   ] as const
 
   return (
-    <main className="container py-20 animate-in fade-in slide-in-from-bottom-20 duration-700">
+    <main className="container py-20">
       <h1 className="font-bold text-3xl mb-4">Showcase</h1>
       <p className="text-muted-foreground">
         Some cool websites using Next Docs
       </p>
-      <div className="grid grid-cols-1 gap-4 mt-8 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 mt-8 animate-in fade-in slide-in-from-bottom-20 duration-700 md:grid-cols-2 xl:grid-cols-3">
         {showcases.map(([image, name], key) => (
           <a
             key={key}
