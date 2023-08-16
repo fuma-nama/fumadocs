@@ -81,13 +81,19 @@ module.exports = {
       }
     },
     {
+      files: 'examples/simple/**',
+      settings: {
+        next: { rootDir: 'examples/simple' }
+      }
+    },
+    {
       ...TAILWIND_CONFIG,
-      files: 'examples/website/**',
+      files: 'examples/advanced/**',
       settings: {
         tailwindcss: {
-          config: 'examples/website/tailwind.config.js'
+          config: 'examples/advanced/tailwind.config.js'
         },
-        next: { rootDir: 'examples/website' }
+        next: { rootDir: 'examples/advanced' }
       }
     },
     {
@@ -105,7 +111,7 @@ module.exports = {
       }
     },
     {
-      files: 'packages/{next-docs-ui,next-docs,create-next-docs}/**',
+      files: 'packages/**',
       rules: {
         '@next/next/no-html-link-for-pages': 'off'
       }
