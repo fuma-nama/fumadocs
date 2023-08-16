@@ -21,7 +21,7 @@
     "next-contentlayer": "^0.3.4",
     "next-docs-ui": "workspace:*",
     "next-docs-zeta": "workspace:*",
-    "postcss": "8.4.27",
+    "postcss": "8.4.28",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "rehype-katex": "^6.0.3",
