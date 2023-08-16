@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 1.6.0
+
+### Patch Changes
+
+- 037d5e5: Export default mdx components
+- Updated dependencies [cdd30d5]
+- Updated dependencies [edb9930]
+  - next-docs-zeta@1.6.0
+
 ## 1.5.3
 
 ### Patch Changes

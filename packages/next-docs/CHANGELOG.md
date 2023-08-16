@@ -1,5 +1,15 @@
 # next-docs-zeta
 
+## 1.6.0
+
+### Minor Changes
+
+- edb9930: Redesign Contentlayer adapter API
+
+### Patch Changes
+
+- cdd30d5: Create remark-dynamic-content plugin
+
 ## 1.5.3
 
 ### Patch Changes

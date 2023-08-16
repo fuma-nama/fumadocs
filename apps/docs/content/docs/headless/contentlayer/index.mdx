@@ -23,11 +23,12 @@ export default makeSource(defaultConfig)
 
 ```ts
 import { allDocs, allMeta } from 'contentlayer/generated'
-import { buildPageTree } from 'next-docs-zeta/contentlayer'
+import { createContentlayer } from 'next-docs-zeta/contentlayer'
 
-// load pages
-const ctx = loadContext(allMeta, allDocs)
-export const tree = buildPageTree(ctx)
+export const { getPage, getPageUrl, tree } = createContentlayer(
+  allMeta,
+  allDocs
+)
 ```
 
 ## Pages Structure
@@ -77,21 +78,50 @@ As you see, you can define a separator in meta by adding a item surrounded by
 ### Adding Icons
 
 It is supported to have custom icons for a page or a folder. Add an `icon`
-property to the frontmatter or `meta.json`, and configure icon handler by
-setting `resolveIcon` on page context.
+property to the frontmatter or `meta.json`, and configure icon handler via
+`resolveIcon` option.
 
 ```ts
-import { buildPageTree, loadContext } from 'next-docs-zeta/contentlayer'
-import { createElement } from 'react'
+import { allDocs, allMeta } from 'contentlayer/generated'
+import { createContentlayer } from 'next-docs-zeta/contentlayer'
+
+export const { getPage, getPageUrl, tree } = createContentlayer(
+  allMeta,
+  allDocs,
+  {
+    resolveIcon: icon => {
+      // load icon from library
+      const res = require('lucide-react')
+      icon = icon.trim()
+
+      if (res[icon]) return createElement(res[icon])
+      return undefined
+    }
+  }
+)
+```
+
+### Multiple Trees
+
+You can build multiple trees by directly interacting with Pages Context API.
+
+```ts
+import { allDocs, allMeta } from 'contentlayer/generated'
+import {
+  buildPageTree,
+  createUtils,
+  loadContext
+} from 'next-docs-zeta/contentlayer'
 
 const ctx = loadContext(allMeta, allDocs)
 
-ctx.resolveIcon = icon => {
-  // load icon from library
-  const res = require('lucide-react')
-  icon = icon.trim()
+const appTree = buildPageTree(ctx, {
+  root: 'docs/app'
+})
 
-  if (res[icon]) return createElement(res[icon])
-  return undefined
-}
+const pagesTree = buildPageTree(ctx, {
+  root: 'docs/pages'
+})
+
+export const { getPage, getPageUrl } = createUtils(ctx)
 ```

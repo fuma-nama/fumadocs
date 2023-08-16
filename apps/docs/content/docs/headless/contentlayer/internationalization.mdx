@@ -20,21 +20,16 @@ export const languages = ['en', 'cn']
 
 2. Change your current configurations.
 
-```ts title="tree.ts"
+```ts title="source.ts"
 import { allDocs, allMeta } from 'contentlayer/generated'
-import {
-  buildI18nPageTree,
-  createUtils,
-  loadContext
-} from 'next-docs-zeta/contentlayer'
+import { createContentlayer } from 'next-docs-zeta/contentlayer'
 import { languages } from './i18n'
 
-const ctx = loadContext(allMeta, allDocs, languages)
-// Use 'buildI18nPageTree' instead
-export const trees = buildI18nPageTree(ctx, languages)
-
-// utilities for i18n routing
-export const { getPage, getPages } = createUtils(ctx)
+export const { getPage, getPageUrl, tree } = createContentlayer(
+  allMeta,
+  allDocs,
+  { languages }
+)
 ```
 
 3. Create i18n middleware.
@@ -75,16 +70,19 @@ export default function Layout({ params }: { params: { lang: string } }) {
 ### Get Pages
 
 To get the pages with specific languages, use the utilities exported from
-`tree.ts`.
+`source.ts`.
 
 ```ts
-import { getPage, getPages, trees } from '@/tree'
+import { getPage, getPages, tree } from '@/source'
 
-// in the page
-const page = getPage(params.lang, params.slug)
+// get page tree
+const t = tree[params.lang]
 
-// in generate static params
-const pages = getPages(lang)
+// get page
+const page = getPage(params.slug, params.lang)
+
+// get pages
+const pages = getPages(params.lang)
 ```
 
 ### Docs Search
@@ -98,9 +96,8 @@ you can use `createI18nSearchAPI`.
 1. Update the route handler.
 
 ```ts title="/api/search/route.ts"
-import { languages } from '@/app/i18n'
-import { getPages } from '@/app/tree'
-import { getPageUrl } from 'next-docs-zeta/contentlayer'
+import { languages } from '@/i18n'
+import { getPages, getPageUrl } from '@/source'
 import { createI18nSearchAPI } from 'next-docs-zeta/server'
 
 export const { GET } = createI18nSearchAPI('simple', {
@@ -108,8 +105,7 @@ export const { GET } = createI18nSearchAPI('simple', {
     const pages = getPages(lang)!.map(page => ({
       title: page.title,
       content: page.body.raw,
-      // get page url
-      url: getPageUrl(page.slug.split('/'), '/docs', lang)
+      url: getPageUrl(page.slug, lang)
     }))
 
     return [lang, pages]

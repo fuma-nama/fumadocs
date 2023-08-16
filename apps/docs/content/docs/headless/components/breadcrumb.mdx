@@ -10,10 +10,10 @@ a page based on the given page tree.
 
 it exports a `useBreadcrumb` hook:
 
-```tsx
+```ts
 import { useBreadcrumb } from 'next-docs-zeta/breadcrumb'
 
-const tree: TreeNode[] = buildPageTree(allMeta, allDocs)
+const tree: TreeNode[] = ...
 const pathname = usePathname()
 
 const items = useBreadcrumb(pathname, tree)

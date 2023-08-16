@@ -63,7 +63,7 @@ To allow users changing their language, you can put the `<LanguageSelect />`
 component to sidebar same as following:
 
 ```tsx title="/[lang]/docs/layout.tsx"
-import { trees } from '@/tree'
+import { tree } from '@/source'
 import { LanguageSelect } from 'next-docs-ui/i18n'
 import { DocsLayout } from 'next-docs-ui/layout'
 import { ReactNode } from 'react'
@@ -75,11 +75,9 @@ export default function Layout({
   params: { lang: string }
   children: ReactNode
 }) {
-  const tree = trees[params.lang]
-
   return (
     <DocsLayout
-      tree={tree ?? []}
+      tree={tree[params.lang] ?? []}
       navTitle="My App"
       sidebarContent={
         <LanguageSelect
@@ -104,20 +102,8 @@ export default function Layout({
 
 ## Final Step
 
-Replace all usage to original `tree` with `trees[lang]` and check if there's any
-legacy usage.
-
-**Before**
-
-```tsx
-<DocsPage toc={toc} tree={tree}></DocsPage>
-```
-
-**After**
-
-```tsx
-<DocsPage toc={toc} tree={trees[params.lang]}></DocsPage>
-```
+Replace all references of original `tree` with `tree[lang]` and check if there's
+any legacy usage.
 
 ### Static Generation
 

@@ -1,19 +1,12 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:base"
-  ],
+  "extends": ["config:base"],
   "packageRules": [
     {
       "groupName": "Radix UI",
       "groupSlug": "radix-minor-patch",
-      "matchPackagePatterns": [
-        "^@radix-ui"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ]
+      "matchPackagePatterns": ["^@radix-ui"],
+      "matchUpdateTypes": ["minor", "patch"]
     }
   ],
   "ignoreDeps": ["@types/react", "@types/react-dom", "flexsearch"]
