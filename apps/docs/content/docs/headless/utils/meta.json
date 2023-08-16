@@ -1,4 +1,4 @@
 {
   "title": "Utilities",
-  "pages": ["search", "get-toc", "find-neighbour"]
+  "pages": ["search", "get-toc", "find-neighbour", "git-last-edit"]
 }

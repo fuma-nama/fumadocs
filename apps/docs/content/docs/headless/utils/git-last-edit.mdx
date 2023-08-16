@@ -1,0 +1,17 @@
+---
+title: Git Last Edit
+description: Get the last edit time of a file in Git
+---
+
+## Usage
+
+Pass your repository name, and the path to file.
+
+```ts
+import { getGitLastEditTime } from 'next-docs-zeta/server'
+
+const time = await getGitLastEditTime(
+  'SonMooSans/next-docs',
+  'content/' + page._raw.sourceFilePath
+)
+```
