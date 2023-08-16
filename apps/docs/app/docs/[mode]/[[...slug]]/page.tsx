@@ -5,7 +5,7 @@ import { MDXContent } from 'next-docs-ui/mdx'
 import { DocsPage } from 'next-docs-ui/page'
 import { findNeighbour, getTableOfContents } from 'next-docs-zeta/server'
 import { notFound } from 'next/navigation'
-import { DocumentBody } from './body'
+import { Content } from './content'
 
 type Param = {
   mode: string
@@ -48,7 +48,7 @@ export default async function Page({ params }: { params: Param }) {
           </h1>
           <p className="text-muted-foreground sm:text-lg">{page.description}</p>
         </div>
-        <DocumentBody code={page.body.code} />
+        <Content code={page.body.code} />
       </MDXContent>
     </DocsPage>
   )
