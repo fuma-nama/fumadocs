@@ -1,9 +1,8 @@
-import { getTree } from '@/utils/page-tree'
+import { getPage, getPageUrl, getTree } from '@/utils/source'
 import { allDocs } from 'contentlayer/generated'
 import type { Metadata } from 'next'
 import { MDXContent } from 'next-docs-ui/mdx'
 import { DocsPage } from 'next-docs-ui/page'
-import { getPageUrl } from 'next-docs-zeta/contentlayer'
 import { findNeighbour, getTableOfContents } from 'next-docs-zeta/server'
 import { notFound } from 'next/navigation'
 import { DocumentBody } from './body'
@@ -15,15 +14,14 @@ type Param = {
 
 export default async function Page({ params }: { params: Param }) {
   const tree = getTree(params.mode)
-  const path = [params.mode, ...(params.slug ?? [])].join('/')
-  const page = allDocs.find(page => page.slug === path)
+  const page = getPage([params.mode, ...(params.slug ?? [])])
 
   if (page == null) {
     notFound()
   }
 
   const toc = await getTableOfContents(page.body.raw)
-  const url = getPageUrl(page.slug.split('/'), '/docs')
+  const url = getPageUrl(page.slug)
   const neighbours = findNeighbour(tree, url)
 
   return (
@@ -57,8 +55,7 @@ export default async function Page({ params }: { params: Param }) {
 }
 
 export function generateMetadata({ params }: { params: Param }): Metadata {
-  const path = [params.mode, ...(params.slug ?? [])].join('/')
-  const page = allDocs.find(page => page.slug === path)
+  const page = getPage([params.mode, ...(params.slug ?? [])])
 
   if (page == null) return {}
 

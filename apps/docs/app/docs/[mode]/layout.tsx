@@ -1,5 +1,5 @@
 import { cn } from '@/utils/cn'
-import { getTree } from '@/utils/page-tree'
+import { getTree } from '@/utils/source'
 import { LayoutIcon, LibraryIcon } from 'lucide-react'
 import { DocsLayout } from 'next-docs-ui/layout'
 import type { ReactNode } from 'react'
