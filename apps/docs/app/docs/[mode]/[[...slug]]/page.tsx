@@ -3,7 +3,11 @@ import { allDocs } from 'contentlayer/generated'
 import type { Metadata } from 'next'
 import { MDXContent } from 'next-docs-ui/mdx'
 import { DocsPage } from 'next-docs-ui/page'
-import { findNeighbour, getTableOfContents } from 'next-docs-zeta/server'
+import {
+  findNeighbour,
+  getGitLastEditTime,
+  getTableOfContents
+} from 'next-docs-zeta/server'
 import { notFound } from 'next/navigation'
 import { Content } from './content'
 
@@ -23,13 +27,22 @@ export default async function Page({ params }: { params: Param }) {
   const toc = await getTableOfContents(page.body.raw)
   const url = getPageUrl(page.slug)
   const neighbours = findNeighbour(tree, url)
+  const time = await getGitLastEditTime(
+    'SonMooSans/next-docs',
+    'apps/docs/content/' + page._raw.sourceFilePath
+  )
 
   return (
     <DocsPage
       toc={toc}
       footer={neighbours}
       tocContent={
-        <div className="mt-4 border-t pt-4">
+        <div className="mt-4 border-t pt-4 space-y-2">
+          {time && (
+            <p className="text-muted-foreground text-xs font-medium">
+              Last Update: {time.toLocaleDateString()}
+            </p>
+          )}
           <a
             href={`https://github.com/SonMooSans/next-docs/blob/main/apps/docs/content/${page._raw.sourceFilePath}`}
             target="_blank"
