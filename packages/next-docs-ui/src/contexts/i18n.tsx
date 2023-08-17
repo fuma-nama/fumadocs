@@ -6,6 +6,8 @@ export type Translations = {
   dark: string
   toc: string
   system: string
+  footerPrevious: string
+  footerNext: string
 }
 
 export const I18nContext = createContext<
