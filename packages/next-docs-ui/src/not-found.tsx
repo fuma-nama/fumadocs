@@ -11,7 +11,7 @@ export default function NotFound() {
         href="/"
         className="nd-px-4 nd-py-2 nd-bg-primary nd-text-primary-foreground nd-text-sm nd-font-medium nd-rounded-md"
       >
-        Back to Home -&gt;
+        Back to Home
       </Link>
     </div>
   )
