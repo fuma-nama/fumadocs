@@ -7,13 +7,13 @@ import { SearchToggle } from './search-toggle'
 import { SidebarTrigger } from './sidebar'
 import { ThemeToggle } from './theme-toggle'
 
-type NavLinkProps = {
+export type NavLinkProps = {
   icon: ReactNode
   href: string
   external?: boolean
 }
 
-type NavItemProps = {
+export type NavItemProps = {
   href: string
   children: ReactNode
   external?: boolean

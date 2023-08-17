@@ -8,7 +8,7 @@ import {
   SelectValue
 } from '@/components/ui/select'
 import { useContext } from 'react'
-import { I18nContext } from './contexts/i18n'
+import { I18nContext, type Translations } from './contexts/i18n'
 
 export type LanguageSelectProps = {
   languages: { name: string; locale: string }[]
@@ -38,3 +38,4 @@ export function LanguageSelect(props: LanguageSelectProps) {
 }
 
 export const I18nProvider = I18nContext.Provider
+export { Translations }

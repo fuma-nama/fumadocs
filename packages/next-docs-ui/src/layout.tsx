@@ -1,6 +1,6 @@
 'use client'
 
-import { Nav } from '@/components/nav'
+import { Nav, type NavItemProps } from '@/components/nav'
 import { Sidebar } from '@/components/sidebar'
 import { GithubIcon } from 'lucide-react'
 import type { TreeNode } from 'next-docs-zeta/server'
@@ -13,6 +13,7 @@ export type DocsLayoutProps = {
    * Navbar title
    */
   navTitle?: string | ReactNode
+  navItems?: NavItemProps[]
 
   tree: TreeNode[]
 
@@ -55,7 +56,7 @@ export function DocsLayout(props: DocsLayoutProps) {
   )
 
   const navbar = props.nav ?? (
-    <Nav links={links} enableSidebar={sidebar !== false}>
+    <Nav links={links} items={props.navItems} enableSidebar={sidebar !== false}>
       <Link
         href="/"
         className="nd-font-semibold hover:nd-text-muted-foreground"
