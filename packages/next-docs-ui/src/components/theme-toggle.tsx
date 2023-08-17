@@ -4,13 +4,19 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
+import { I18nContext } from '@/contexts/i18n'
 import { cn } from '@/utils/cn'
 import { MoonIcon, SunIcon } from 'lucide-react'
 import { useTheme } from 'next-themes'
-import type { ButtonHTMLAttributes } from 'react'
+import { useContext, type ButtonHTMLAttributes } from 'react'
 
 export function ThemeToggle(props: ButtonHTMLAttributes<HTMLButtonElement>) {
   const { setTheme } = useTheme()
+  const {
+    light = 'Light',
+    dark = 'Dark',
+    system = 'System'
+  } = useContext(I18nContext)?.text ?? {}
 
   return (
     <DropdownMenu>
@@ -29,13 +35,13 @@ export function ThemeToggle(props: ButtonHTMLAttributes<HTMLButtonElement>) {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={() => setTheme('light')}>
-          Light
+          {light}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => setTheme('dark')}>
-          Dark
+          {dark}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => setTheme('system')}>
-          System
+          {system}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
