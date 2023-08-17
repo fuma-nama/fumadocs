@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 1.5.8
+
+### Patch Changes
+
+- 8f6f3c6: Update examples
+
 ## 1.5.7
 
 ### Patch Changes

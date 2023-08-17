@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 1.6.2
+
+### Patch Changes
+
+- 5512300: Support custom navbar items
+- af8720b: Improve default code block
+- 2836799: Support I18n text in built-in components
+  - next-docs-zeta@1.6.2
+
 ## 1.6.1
 
 ### Patch Changes

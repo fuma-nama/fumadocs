@@ -57,6 +57,20 @@ Then, wrap the root provider inside of your i18n provider.
 </ClientI18nProvider>
 ```
 
+### Adding Translations
+
+We won't translate any content by default, you have to pass it to the Context.
+
+```tsx
+<I18nProvider
+  value={{
+    text: {
+      search: 'Translated Content'
+    }
+  }}
+></I18nProvider>
+```
+
 ## Add Language Switch
 
 To allow users changing their language, you can put the `<LanguageSelect />`
