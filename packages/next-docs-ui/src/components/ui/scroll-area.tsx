@@ -15,11 +15,11 @@ const ScrollArea = React.forwardRef<
     <ScrollAreaPrimitive.Viewport className="nd-h-full nd-w-full nd-rounded-[inherit]">
       {children}
     </ScrollAreaPrimitive.Viewport>
-    <ScrollBar />
     <ScrollAreaPrimitive.Corner />
+    <ScrollBar orientation="horizontal" />
+    <ScrollBar orientation="vertical" />
   </ScrollAreaPrimitive.Root>
 ))
-
 ScrollArea.displayName = ScrollAreaPrimitive.Root.displayName
 
 const ScrollBar = React.forwardRef<
@@ -30,9 +30,9 @@ const ScrollBar = React.forwardRef<
     ref={ref}
     orientation={orientation}
     className={cn(
-      'nd-flex nd-touch-none nd-select-none',
-      orientation === 'vertical' && 'nd-h-full nd-w-1',
-      orientation === 'horizontal' && 'nd-h-1',
+      'nd-flex nd-touch-none nd-select-none nd-p-px',
+      orientation === 'vertical' && 'nd-h-full nd-w-2',
+      orientation === 'horizontal' && 'nd-h-2 nd-flex-col',
       className
     )}
     {...props}
@@ -42,4 +42,4 @@ const ScrollBar = React.forwardRef<
 ))
 ScrollBar.displayName = ScrollAreaPrimitive.ScrollAreaScrollbar.displayName
 
-export { ScrollArea, ScrollBar }
+export { ScrollArea }

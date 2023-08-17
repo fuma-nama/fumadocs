@@ -29,10 +29,10 @@ export function Sidebar({ items, banner, children }: SidebarProps) {
       )}
     >
       {banner}
-      <ScrollArea className="nd-flex-1 -nd-mr-2 [mask-image:linear-gradient(to_top,transparent,white_40px)]">
+      <ScrollArea className="nd-flex-1 -nd-mr-4 [mask-image:linear-gradient(to_top,transparent,white_40px)]">
         <div
           className={clsx(
-            'nd-flex nd-flex-col nd-pt-6 nd-pb-10 nd-pr-2',
+            'nd-flex nd-flex-col nd-pt-6 nd-pb-10 nd-pr-4',
             !banner && 'lg:nd-pt-0'
           )}
         >

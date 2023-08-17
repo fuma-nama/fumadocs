@@ -1,6 +1,5 @@
 'use client'
 
-import { Pre } from '@/components/pre'
 import { ThemeSwitch } from '@/components/ThemeSwitch'
 import {
   Accordion,
@@ -10,10 +9,13 @@ import {
 } from '@/components/ui/accordion'
 import { useMDXComponent } from 'next-contentlayer/hooks'
 import defaultComponents from 'next-docs-ui/mdx'
+import type { HTMLAttributes } from 'react'
 
 const components = {
   ...defaultComponents,
-  pre: Pre,
+  pre: (props: HTMLAttributes<HTMLPreElement>) => (
+    <defaultComponents.pre {...props} className="max-h-[400px]" />
+  ),
   Accordion,
   AccordionTrigger,
   AccordionItem,
