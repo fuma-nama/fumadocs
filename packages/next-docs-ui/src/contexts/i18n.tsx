@@ -8,6 +8,7 @@ export const I18nContext = createContext<
         search: string
         light: string
         dark: string
+        toc: string
         system: string
       }>
     }
