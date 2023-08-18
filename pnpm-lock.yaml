@@ -118,8 +118,8 @@ importers:
         specifier: ^13.4.16
         version: 13.4.16
       '@types/node':
-        specifier: 18.17.5
-        version: 18.17.5
+        specifier: 18.17.6
+        version: 18.17.6
       '@types/react':
         specifier: 18.2.0
         version: 18.2.0
@@ -232,8 +232,8 @@ importers:
         version: 1.0.0
     devDependencies:
       '@types/node':
-        specifier: 18.17.5
-        version: 18.17.5
+        specifier: 18.17.6
+        version: 18.17.6
       fast-glob:
         specifier: ^3.3.1
         version: 3.3.1
@@ -1240,7 +1240,7 @@ packages:
     engines: {node: ^8.13.0 || >=10.10.0}
     dependencies:
       '@grpc/proto-loader': 0.7.7
-      '@types/node': 18.17.5
+      '@types/node': 18.17.6
 
   /@grpc/proto-loader@0.7.7:
     resolution: {integrity: sha512-1TIeXOi8TuSCQprPItwoMymZXxWT0CPxUhkrkeCUH+D8U7QDwQ6b7SUz2MaLuWM2llT+J/TVFLmQI5KtML3BhQ==}
@@ -2702,8 +2702,8 @@ packages:
     resolution: {integrity: sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ==}
     dev: true
 
-  /@types/node@18.17.5:
-    resolution: {integrity: sha512-xNbS75FxH6P4UXTPUJp/zNPq6/xsfdJKussCWNOnz4aULWIRwMgP1LgaB5RiBnMX1DPCYenuqGZfnIAx5mbFLA==}
+  /@types/node@18.17.6:
+    resolution: {integrity: sha512-fGmT/P7z7ecA6bv/ia5DlaWCH4YeZvAQMNpUhrJjtAhOhZfoxS1VLUgU2pdk63efSjQaOJWdXMuAJsws+8I6dg==}
 
   /@types/normalize-package-data@2.4.1:
     resolution: {integrity: sha512-Gj7cI7z+98M282Tqmp2K5EIsoouUEzbBJhQQzDE3jSIRk6r9gsz0oUokqIUR4u1R3dMHo0pDHM7sNOHyhulypw==}
@@ -6397,7 +6397,7 @@ packages:
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.0
-      '@types/node': 18.17.5
+      '@types/node': 18.17.6
       long: 5.2.3
 
   /pseudomap@1.0.2:
