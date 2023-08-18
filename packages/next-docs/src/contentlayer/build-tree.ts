@@ -1,4 +1,4 @@
-import type { FileNode, FolderNode, TreeNode } from '../server'
+import type { FileNode, FolderNode, PageTree, TreeNode } from '../server'
 import type { DocsPageBase, MetaPageBase, PagesContext } from './types'
 import { getKey, pathToName } from './utils'
 
@@ -137,16 +137,19 @@ function buildFolderNode(
   }
 }
 
-function build(root: string, ctx: Context): TreeNode[] {
+function build(root: string, ctx: Context): PageTree {
   const folder = buildFolderNode(root, ctx, true)
 
-  return folder?.children ?? []
+  return {
+    name: folder.name,
+    children: folder.children
+  }
 }
 
 export function buildPageTree(
   context: PagesContext,
   { root = 'docs' }: Partial<Options> = {}
-): TreeNode[] {
+): PageTree {
   return build(root, context)
 }
 
@@ -160,7 +163,7 @@ export function buildPageTree(
 export function buildI18nPageTree<Languages extends string = string>(
   context: PagesContext,
   { root = 'docs' }: Partial<Options> = {}
-): Record<Languages, TreeNode[]> {
+): Record<Languages, PageTree> {
   const entries = context.languages.map(lang => {
     const tree = build(root, {
       ...context,

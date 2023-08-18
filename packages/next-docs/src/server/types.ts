@@ -1,5 +1,10 @@
 import type { ReactElement } from 'react'
 
+export type PageTree = {
+  name: string
+  children: TreeNode[]
+}
+
 export type TreeNode = FileNode | Separator | FolderNode
 
 export type FileNode = {

@@ -3,10 +3,14 @@
 import { Nav, type NavItemProps } from '@/components/nav'
 import { Sidebar } from '@/components/sidebar'
 import { GithubIcon } from 'lucide-react'
-import type { TreeNode } from 'next-docs-zeta/server'
+import type { PageTree } from 'next-docs-zeta/server'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { PagesContext } from './contexts/tree'
+import {
+  replaceOrDefault,
+  type ReplaceOrDisable
+} from './utils/replace-or-default'
 
 export type DocsLayoutProps = {
   /**
@@ -15,7 +19,7 @@ export type DocsLayoutProps = {
   navTitle?: string | ReactNode
   navItems?: NavItemProps[]
 
-  tree: TreeNode[]
+  tree: PageTree
 
   /**
    * Replace navbar
@@ -30,7 +34,7 @@ export type DocsLayoutProps = {
   /**
    * Replace or disable sidebar
    */
-  sidebar?: ReactNode | false
+  sidebar?: ReplaceOrDisable
 
   sidebarBanner?: ReactNode
 
@@ -49,14 +53,14 @@ export function DocsLayout(props: DocsLayoutProps) {
         }
       ]
     : []
-  const sidebar = props.sidebar ?? (
-    <Sidebar banner={props.sidebarBanner} items={props.tree}>
-      {props.sidebarContent}
-    </Sidebar>
+  const sidebar = replaceOrDefault(
+    props.sidebar,
+    <Sidebar banner={props.sidebarBanner}>{props.sidebarContent}</Sidebar>
   )
 
-  const navbar = props.nav ?? (
-    <Nav links={links} items={props.navItems} enableSidebar={sidebar !== false}>
+  const navbar = replaceOrDefault(
+    props.nav,
+    <Nav links={links} items={props.navItems} enableSidebar={Boolean(sidebar)}>
       <Link
         href="/"
         className="nd-font-semibold hover:nd-text-muted-foreground"

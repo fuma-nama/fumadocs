@@ -1,4 +1,4 @@
-import type { FileNode, TreeNode } from './types'
+import type { FileNode, PageTree, TreeNode } from './types'
 
 /**
  * Flatten tree to an array of page nodes
@@ -22,13 +22,13 @@ export function flattenTree(tree: TreeNode[]): FileNode[] {
  * Get neighbours of a page, useful for implementing "previous & next" buttons
  */
 export function findNeighbour(
-  tree: TreeNode[],
+  tree: PageTree,
   url: string
 ): {
   previous?: FileNode
   next?: FileNode
 } {
-  const list = flattenTree(tree)
+  const list = flattenTree(tree.children)
 
   for (let i = 0; i < list.length; i++) {
     if (list[i].url === url) {

@@ -1,4 +1,4 @@
-import type { TreeNode } from '@/server/types'
+import type { PageTree, TreeNode } from '@/server/types'
 import { useMemo } from 'react'
 
 export type BreadcrumbItem = {
@@ -6,15 +6,18 @@ export type BreadcrumbItem = {
   url: string | null
 }
 
-export function useBreadcrumb(url: string, tree: TreeNode[]): BreadcrumbItem[] {
+export function useBreadcrumb(url: string, tree: PageTree): BreadcrumbItem[] {
   return useMemo(() => getBreadcrumbItems(url, tree), [tree, url])
 }
 
 export function getBreadcrumbItems(
   url: string,
-  tree: TreeNode[]
+  tree: PageTree
 ): BreadcrumbItem[] {
-  return searchPath(tree, url) ?? []
+  const path = searchPath(tree.children, url) ?? []
+  path.unshift({ name: tree.name, url: null })
+
+  return path
 }
 
 /**

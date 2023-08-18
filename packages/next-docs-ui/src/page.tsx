@@ -6,6 +6,10 @@ import { Footer } from '@/components/mdx/footer'
 import { TOC } from '@/components/toc'
 import type { TableOfContents } from 'next-docs-zeta/server'
 import type { ReactNode } from 'react'
+import {
+  replaceOrDefault,
+  type ReplaceOrDisable
+} from './utils/replace-or-default'
 
 export type DocsPageProps = {
   toc?: TableOfContents
@@ -13,7 +17,12 @@ export type DocsPageProps = {
   /**
    * Replace or disable TOC (by passing false)
    */
-  replaceToc?: ReactNode | false
+  replaceToc?: ReplaceOrDisable
+
+  /**
+   * Replace or disable breadcrumb
+   */
+  breadcrumb?: ReplaceOrDisable
 
   /**
    * Custom content in TOC container
@@ -24,7 +33,8 @@ export type DocsPageProps = {
 }
 
 export function DocsPage(props: DocsPageProps) {
-  const toc = props.replaceToc ?? (
+  const toc = replaceOrDefault(
+    props.replaceToc,
     <div className="nd-relative nd-w-[250px] max-xl:nd-hidden">
       <div className="nd-sticky nd-flex nd-flex-col nd-top-16 nd-py-16 nd-max-h-[calc(100vh-4rem)]">
         {props.toc && props.toc.length > 0 && <TOC items={props.toc} />}
@@ -33,10 +43,12 @@ export function DocsPage(props: DocsPageProps) {
     </div>
   )
 
+  const breadcrumb = replaceOrDefault(props.breadcrumb, <Breadcrumb />)
+
   return (
     <>
       <article className="nd-flex nd-flex-col nd-gap-6 nd-w-0 nd-flex-1 nd-py-8 md:nd-py-16">
-        <Breadcrumb />
+        {breadcrumb}
         {props.children}
         {props.footer != null && props.footer !== false && (
           <Footer {...props.footer} />

@@ -1,8 +1,8 @@
-import type { TreeNode } from 'next-docs-zeta/server'
+import type { PageTree } from 'next-docs-zeta/server'
 import { createContext } from 'react'
 
 export const PagesContext = createContext<{
-  tree: TreeNode[]
+  tree: PageTree
 }>({
-  tree: []
+  tree: { name: 'Docs', children: [] }
 })

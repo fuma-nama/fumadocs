@@ -4,7 +4,7 @@ import {
   createUtils,
   loadContext
 } from 'next-docs-zeta/contentlayer'
-import type { TreeNode } from 'next-docs-zeta/server'
+import type { PageTree } from 'next-docs-zeta/server'
 import { createElement } from 'react'
 
 const ctx = loadContext(allMeta, allDocs, {
@@ -26,7 +26,7 @@ const headlessTree = buildPageTree(ctx, {
   root: 'docs/headless'
 })
 
-export function getTree(mode: 'ui' | 'headless' | string): TreeNode[] {
+export function getTree(mode: 'ui' | 'headless' | string): PageTree {
   if (mode === 'ui') {
     return uiTree
   }

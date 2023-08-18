@@ -1,4 +1,5 @@
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { PagesContext } from '@/contexts/tree'
 import * as Collapsible from '@radix-ui/react-collapsible'
 import clsx from 'clsx'
 import { ChevronDown } from 'lucide-react'
@@ -7,18 +8,19 @@ import * as Base from 'next-docs-zeta/sidebar'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { ReactNode } from 'react'
-import { cloneElement, useEffect, useMemo, useState } from 'react'
+import { cloneElement, useContext, useEffect, useMemo, useState } from 'react'
 import { ThemeToggle } from './theme-toggle'
 
 export const { SidebarProvider, SidebarTrigger } = Base
 
 export type SidebarProps = {
-  items: TreeNode[]
   banner?: ReactNode
   children?: ReactNode
 }
 
-export function Sidebar({ items, banner, children }: SidebarProps) {
+export function Sidebar({ banner, children }: SidebarProps) {
+  const items = useContext(PagesContext).tree.children
+
   return (
     <Base.SidebarList
       minWidth={1024} // lg
