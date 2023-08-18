@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 1.6.3
+
+### Patch Changes
+
+- Support replacing breadcrumb
+- 8d07003: Replace type of `TreeNode[]` with `PageTree`
+- Updated dependencies [8d07003]
+  - next-docs-zeta@1.6.3
+
 ## 1.6.2
 
 ### Patch Changes

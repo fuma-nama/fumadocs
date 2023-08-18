@@ -22,9 +22,9 @@ export type DocsLayoutProps = {
   tree: PageTree
 
   /**
-   * Replace navbar
+   * Replace or disable navbar
    */
-  nav?: ReactNode | false
+  nav?: ReplaceOrDisable
 
   /**
    * Github url displayed on the navbar
@@ -60,7 +60,7 @@ export function DocsLayout(props: DocsLayoutProps) {
 
   const navbar = replaceOrDefault(
     props.nav,
-    <Nav links={links} items={props.navItems} enableSidebar={Boolean(sidebar)}>
+    <Nav links={links} items={props.navItems} enableSidebar={sidebar != null}>
       <Link
         href="/"
         className="nd-font-semibold hover:nd-text-muted-foreground"

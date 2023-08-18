@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 1.6.3
+
+### Patch Changes
+
+- 8d07003: Replace type of `TreeNode[]` with `PageTree`
+
 ## 1.6.2
 
 ## 1.6.1

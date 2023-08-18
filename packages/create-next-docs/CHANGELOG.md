@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 1.5.9
+
+### Patch Changes
+
+- Update dependencies
+
 ## 1.5.8
 
 ### Patch Changes

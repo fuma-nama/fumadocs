@@ -14,5 +14,5 @@ export function replaceOrDefault(
   if (replace === false) return
   if (replace == null) return def
 
-  return def
+  return replace
 }
