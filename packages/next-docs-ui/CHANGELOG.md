@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 1.6.4
+
+### Patch Changes
+
+- e6ebf6a: Rename `sidebarContent` to `sidebarFooter`
+- e01bf3a: Allow `true` to keep default
+- e6ebf6a: Imrove sidebar banner
+  - next-docs-zeta@1.6.4
+
 ## 1.6.3
 
 ### Patch Changes
