@@ -15,10 +15,10 @@ export const { SidebarProvider, SidebarTrigger } = Base
 
 export type SidebarProps = {
   banner?: ReactNode
-  children?: ReactNode
+  footer?: ReactNode
 }
 
-export function Sidebar({ banner, children }: SidebarProps) {
+export function Sidebar({ banner, footer }: SidebarProps) {
   const items = useContext(PagesContext).tree.children
 
   return (
@@ -30,14 +30,9 @@ export function Sidebar({ banner, children }: SidebarProps) {
         'max-lg:nd-fixed max-lg:nd-inset-y-0 max-lg:nd-right-0 max-lg:nd-w-full max-lg:nd-px-8 max-lg:nd-bg-background/70 max-lg:nd-backdrop-blur-lg max-lg:nd-z-40 max-lg:nd-pt-20 max-lg:data-[open=false]:nd-hidden sm:max-lg:nd-max-w-sm sm:max-lg:nd-border-l'
       )}
     >
-      {banner}
       <ScrollArea className="nd-flex-1 -nd-mr-4 [mask-image:linear-gradient(to_top,transparent,white_40px)]">
-        <div
-          className={clsx(
-            'nd-flex nd-flex-col nd-pt-6 nd-pb-10 nd-pr-4',
-            !banner && 'lg:nd-pt-0'
-          )}
-        >
+        <div className="nd-flex nd-flex-col nd-pb-10 nd-pr-4">
+          {banner}
           {items.map((item, i) => (
             <Node key={i} item={item} />
           ))}
@@ -46,10 +41,10 @@ export function Sidebar({ banner, children }: SidebarProps) {
       <div
         className={clsx(
           'nd-flex nd-flex-row nd-items-center nd-gap-2 nd-border-t nd-py-4',
-          !children && 'lg:nd-hidden'
+          !footer && 'lg:nd-hidden'
         )}
       >
-        {children}
+        {footer}
         <ThemeToggle className="lg:nd-hidden" />
       </div>
     </Base.SidebarList>

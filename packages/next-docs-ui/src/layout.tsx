@@ -38,7 +38,7 @@ export type DocsLayoutProps = {
 
   sidebarBanner?: ReactNode
 
-  sidebarContent?: ReactNode
+  sidebarFooter?: ReactNode
 
   children: ReactNode
 }
@@ -55,7 +55,7 @@ export function DocsLayout(props: DocsLayoutProps) {
     : []
   const sidebar = replaceOrDefault(
     props.sidebar,
-    <Sidebar banner={props.sidebarBanner}>{props.sidebarContent}</Sidebar>
+    <Sidebar banner={props.sidebarBanner} footer={props.sidebarFooter} />
   )
 
   const navbar = replaceOrDefault(
