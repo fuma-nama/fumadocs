@@ -12,7 +12,7 @@ export function replaceOrDefault(
   def: ReactNode
 ): ReactNode {
   if (replace === false) return
-  if (replace == null) return def
+  if (replace == null || replace === true) return def
 
   return replace
 }
