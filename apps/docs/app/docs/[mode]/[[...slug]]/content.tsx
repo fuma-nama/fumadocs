@@ -8,11 +8,14 @@ import {
   AccordionTrigger
 } from '@/components/ui/accordion'
 import { useMDXComponent } from 'next-contentlayer/hooks'
+import { ImageZoom } from 'next-docs-ui/components/image-zoom'
 import defaultComponents from 'next-docs-ui/mdx'
 import type { HTMLAttributes } from 'react'
 
 const components = {
   ...defaultComponents,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  img: (props: any) => <ImageZoom {...props} />,
   pre: (props: HTMLAttributes<HTMLPreElement>) => (
     <defaultComponents.pre {...props} className="max-h-[400px]" />
   ),

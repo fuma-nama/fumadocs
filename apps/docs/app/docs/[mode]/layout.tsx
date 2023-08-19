@@ -35,7 +35,7 @@ export default function Layout({
         tree={tree}
         nav={false}
         sidebarBanner={
-          <div className="flex flex-row gap-2 items-center p-2 rounded-lg border bg-secondary/80 text-secondary-foreground transition-colors shadow-lg shadow-background hover:bg-accent">
+          <div className="flex flex-row gap-2 items-center p-2 rounded-lg border bg-secondary/70 text-secondary-foreground transition-colors shadow-lg shadow-background hover:bg-accent">
             <Icon className="w-9 h-9 p-1 shrink-0 border rounded-md text-primary bg-background" />
             <div>
               <p className="font-medium text-sm">{title}</p>
