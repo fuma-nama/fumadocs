@@ -54,7 +54,7 @@ const neturalTheme = `
     --card: 0 0% 8%;
     --card-foreground: 0 0% 98%;
 
-    --border: 0 0% 14.9%;
+    --border: 0 0% 18%;
     --input: 0 0% 14.9%;
 
     --primary: 0 0% 98%;
