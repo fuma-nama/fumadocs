@@ -1,4 +1,4 @@
-import { PagesContext } from '@/contexts/tree'
+import { LayoutContext } from '@/contexts/tree'
 import clsx from 'clsx'
 import { ChevronRightIcon } from 'lucide-react'
 import { useBreadcrumb } from 'next-docs-zeta/breadcrumb'
@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation'
 import { Fragment, useContext } from 'react'
 
 export function Breadcrumb() {
-  const { tree } = useContext(PagesContext)
+  const { tree } = useContext(LayoutContext)
   const pathname = usePathname()
   const items = useBreadcrumb(pathname, tree)
 

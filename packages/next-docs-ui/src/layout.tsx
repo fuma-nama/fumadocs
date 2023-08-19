@@ -6,7 +6,7 @@ import { GithubIcon } from 'lucide-react'
 import type { PageTree } from 'next-docs-zeta/server'
 import Link from 'next/link'
 import { type ReactNode } from 'react'
-import { PagesContext } from './contexts/tree'
+import { LayoutContext } from './contexts/tree'
 import {
   replaceOrDefault,
   type ReplaceOrDisable
@@ -35,6 +35,14 @@ export type DocsLayoutProps = {
    * Replace or disable sidebar
    */
   sidebar?: ReplaceOrDisable
+
+  /**
+   * Open folders by default if their level is lower or equal to a specific level
+   * (Starting from 1)
+   *
+   * @default 1
+   */
+  sidebarDefaultOpenLevel?: number
 
   sidebarCollapsible?: boolean
 
@@ -78,12 +86,17 @@ export function DocsLayout(props: DocsLayoutProps) {
   )
 
   return (
-    <PagesContext.Provider value={{ tree: props.tree }}>
+    <LayoutContext.Provider
+      value={{
+        tree: props.tree,
+        sidebarDefaultOpenLevel: props.sidebarDefaultOpenLevel
+      }}
+    >
       {navbar}
       <div className="nd-flex nd-flex-row nd-container nd-max-w-[1300px] nd-gap-10">
         {sidebar}
         {props.children}
       </div>
-    </PagesContext.Provider>
+    </LayoutContext.Provider>
   )
 }

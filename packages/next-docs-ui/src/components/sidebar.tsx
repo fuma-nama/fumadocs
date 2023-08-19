@@ -1,6 +1,6 @@
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { SidebarContext } from '@/contexts/sidebar'
-import { PagesContext } from '@/contexts/tree'
+import { LayoutContext } from '@/contexts/tree'
 import * as Collapsible from '@radix-ui/react-collapsible'
 import clsx from 'clsx'
 import { ChevronDown } from 'lucide-react'
@@ -12,14 +12,14 @@ import type { ReactNode } from 'react'
 import { cloneElement, useContext, useEffect, useMemo, useState } from 'react'
 import { ThemeToggle } from './theme-toggle'
 
-export type SidebarProps = {
+type SidebarProps = {
   banner?: ReactNode
   footer?: ReactNode
 }
 
 export function Sidebar({ banner, footer }: SidebarProps) {
   const [open] = useContext(SidebarContext)
-  const items = useContext(PagesContext).tree.children
+  const { tree } = useContext(LayoutContext)
 
   return (
     <Base.SidebarList
@@ -34,8 +34,8 @@ export function Sidebar({ banner, footer }: SidebarProps) {
       <ScrollArea className="nd-flex-1 [mask-image:linear-gradient(to_top,transparent,white_40px)] max-lg:-nd-mr-4 lg:nd-w-[260px]">
         <div className="nd-flex nd-flex-col nd-pb-10 nd-pr-4 nd-pt-4 lg:nd-pt-16">
           {banner}
-          {items.map((item, i) => (
-            <Node key={i} item={item} />
+          {tree.children.map((item, i) => (
+            <Node key={i} item={item} level={1} />
           ))}
         </div>
       </ScrollArea>
@@ -52,14 +52,14 @@ export function Sidebar({ banner, footer }: SidebarProps) {
   )
 }
 
-function Node({ item }: { item: TreeNode }) {
+function Node({ item, level }: { item: TreeNode; level: number }) {
   if (item.type === 'separator')
     return (
       <p className="nd-font-medium nd-text-sm nd-px-2 nd-mt-8 nd-mb-2 first:nd-mt-0">
         {item.name}
       </p>
     )
-  if (item.type === 'folder') return <Folder item={item} />
+  if (item.type === 'folder') return <Folder item={item} level={level} />
 
   return <Item item={item} />
 }
@@ -98,13 +98,21 @@ function hasActive(items: TreeNode[], url: string): boolean {
   })
 }
 
-function Folder({ item }: { item: FolderNode }) {
-  const { name, children, index } = item
+function Folder({
+  item: { name, children, index, icon },
+  level
+}: {
+  item: FolderNode
+  level: number
+}) {
+  const { sidebarDefaultOpenLevel = 1 } = useContext(LayoutContext)
 
   const pathname = usePathname()
   const active = index && pathname === index.url
   const childActive = useMemo(() => hasActive(children, pathname), [pathname])
-  const [extend, setExtend] = useState(active || childActive)
+  const [extend, setExtend] = useState(
+    sidebarDefaultOpenLevel >= level || active || childActive
+  )
 
   useEffect(() => {
     if (active || childActive) {
@@ -113,13 +121,13 @@ function Folder({ item }: { item: FolderNode }) {
   }, [active, childActive])
 
   const onClick = () => {
-    setExtend(prev => (item.index == null || active ? !prev : prev))
+    setExtend(prev => (index == null || active ? !prev : prev))
   }
 
   const content = (
     <>
-      {item.icon &&
-        cloneElement(item.icon, {
+      {icon &&
+        cloneElement(icon, {
           className: 'nd-w-4 nd-h-4 nd-mr-2'
         })}
       {name}
@@ -157,7 +165,7 @@ function Folder({ item }: { item: FolderNode }) {
       <Collapsible.Content className="nd-overflow-hidden data-[state=closed]:nd-animate-collapsible-up data-[state=open]:nd-animate-collapsible-down">
         <div className="nd-flex nd-flex-col nd-ml-4 nd-pl-2 nd-border-l nd-py-2">
           {children.map((item, i) => (
-            <Node key={i} item={item} />
+            <Node key={i} item={item} level={level + 1} />
           ))}
         </div>
       </Collapsible.Content>
