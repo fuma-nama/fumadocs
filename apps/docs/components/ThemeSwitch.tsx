@@ -78,7 +78,6 @@ const fullLayoutTheme = `
 }
 
 main > div:nth-of-type(2) > aside:nth-child(1) {
-  top: 0;
   height: 100vh;
   border-right-width: 1px;
 }
@@ -88,15 +87,9 @@ main > div:nth-of-type(2) > div:nth-child(3) {
 }
 
 main > div:nth-of-type(2) > div:nth-child(3) > div {
-  top: 0;
   max-height: 100vh;
 }
 
-@media (min-width: 1024px) {
-  nav {
-    display: none;
-  }
-}
 
 article {
   margin-left: auto;

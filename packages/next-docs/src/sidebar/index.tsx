@@ -4,13 +4,9 @@ import type { ElementType, ReactNode } from 'react'
 import { createContext, useContext, useEffect, useState } from 'react'
 import { RemoveScroll } from 'react-remove-scroll'
 
-const SidebarContext = createContext<{
-  open: boolean
-  setOpen: (value: boolean) => void
-}>({
-  open: false,
-  setOpen: () => {}
-})
+const SidebarContext = createContext<
+  [open: boolean, setOpen: (value: boolean) => void]
+>([false, () => {}])
 
 export type SidebarProviderProps = {
   open?: boolean
@@ -21,6 +17,7 @@ export type SidebarProviderProps = {
 export function SidebarProvider(props: SidebarProviderProps) {
   const [open, setOpen] =
     props.open == null ? useState(false) : [props.open, props.onOpenChange!]
+
   const pathname = usePathname()
 
   useEffect(() => {
@@ -28,7 +25,7 @@ export function SidebarProvider(props: SidebarProviderProps) {
   }, [pathname])
 
   return (
-    <SidebarContext.Provider value={{ open, setOpen }}>
+    <SidebarContext.Provider value={[open, setOpen]}>
       {props.children}
     </SidebarContext.Provider>
   )
@@ -40,7 +37,7 @@ export function SidebarTrigger<T extends ElementType = 'button'>({
   as,
   ...props
 }: SidebarTriggerProps<T>) {
-  const { open, setOpen } = useContext(SidebarContext)
+  const [open, setOpen] = useContext(SidebarContext)
   const As = as ?? 'button'
 
   return <As data-open={open} onClick={() => setOpen(!open)} {...props} />
@@ -58,7 +55,7 @@ export function SidebarList<T extends ElementType = 'aside'>({
   minWidth,
   ...props
 }: SidebarContentProps<T>) {
-  const { open } = useContext(SidebarContext)
+  const [open] = useContext(SidebarContext)
   const [isMobileLayout, setIsMobileLayout] = useState(false)
 
   useEffect(() => {

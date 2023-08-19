@@ -5,7 +5,7 @@ import { Sidebar } from '@/components/sidebar'
 import { GithubIcon } from 'lucide-react'
 import type { PageTree } from 'next-docs-zeta/server'
 import Link from 'next/link'
-import type { ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import { PagesContext } from './contexts/tree'
 import {
   replaceOrDefault,
@@ -36,6 +36,8 @@ export type DocsLayoutProps = {
    */
   sidebar?: ReplaceOrDisable
 
+  sidebarCollapsible?: boolean
+
   sidebarBanner?: ReactNode
 
   sidebarFooter?: ReactNode
@@ -60,7 +62,12 @@ export function DocsLayout(props: DocsLayoutProps) {
 
   const navbar = replaceOrDefault(
     props.nav,
-    <Nav links={links} items={props.navItems} enableSidebar={sidebar != null}>
+    <Nav
+      links={links}
+      items={props.navItems}
+      enableSidebar={sidebar != null}
+      collapsibleSidebar={props.sidebarCollapsible}
+    >
       <Link
         href="/"
         className="nd-font-semibold hover:nd-text-muted-foreground"

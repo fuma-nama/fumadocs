@@ -1,4 +1,5 @@
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { SidebarContext } from '@/contexts/sidebar'
 import { PagesContext } from '@/contexts/tree'
 import * as Collapsible from '@radix-ui/react-collapsible'
 import clsx from 'clsx'
@@ -11,14 +12,13 @@ import type { ReactNode } from 'react'
 import { cloneElement, useContext, useEffect, useMemo, useState } from 'react'
 import { ThemeToggle } from './theme-toggle'
 
-export const { SidebarProvider, SidebarTrigger } = Base
-
 export type SidebarProps = {
   banner?: ReactNode
   footer?: ReactNode
 }
 
 export function Sidebar({ banner, footer }: SidebarProps) {
+  const [open] = useContext(SidebarContext)
   const items = useContext(PagesContext).tree.children
 
   return (
@@ -26,12 +26,13 @@ export function Sidebar({ banner, footer }: SidebarProps) {
       minWidth={1024} // lg
       className={clsx(
         'nd-flex nd-flex-col',
-        'lg:nd-sticky lg:nd-top-16 lg:nd-w-[260px] lg:nd-h-[calc(100vh-4rem)] lg:nd-pr-4 lg:nd-pt-16',
-        'max-lg:nd-fixed max-lg:nd-inset-y-0 max-lg:nd-right-0 max-lg:nd-w-full max-lg:nd-px-8 max-lg:nd-bg-background/70 max-lg:nd-backdrop-blur-lg max-lg:nd-z-40 max-lg:nd-pt-20 max-lg:data-[open=false]:nd-hidden sm:max-lg:nd-max-w-sm sm:max-lg:nd-border-l'
+        open ? 'lg:nd-w-[260px]' : 'lg:nd-w-0',
+        'lg:nd-sticky lg:nd-top-16 lg:nd-h-[calc(100vh-4rem)]',
+        'max-lg:nd-w-full max-lg:nd-px-8 max-lg:nd-fixed max-lg:nd-inset-y-0 max-lg:nd-right-0 max-lg:nd-bg-background/70 max-lg:nd-backdrop-blur-lg max-lg:nd-z-40 max-lg:nd-pt-16 max-lg:data-[open=false]:nd-hidden sm:max-lg:nd-max-w-sm sm:max-lg:nd-border-l'
       )}
     >
-      <ScrollArea className="nd-flex-1 -nd-mr-4 [mask-image:linear-gradient(to_top,transparent,white_40px)]">
-        <div className="nd-flex nd-flex-col nd-pb-10 nd-pr-4">
+      <ScrollArea className="nd-flex-1 [mask-image:linear-gradient(to_top,transparent,white_40px)]">
+        <div className="nd-flex nd-flex-col nd-pb-10 nd-pr-4 nd-pt-4 lg:nd-pt-16">
           {banner}
           {items.map((item, i) => (
             <Node key={i} item={item} />
@@ -40,7 +41,7 @@ export function Sidebar({ banner, footer }: SidebarProps) {
       </ScrollArea>
       <div
         className={clsx(
-          'nd-flex nd-flex-row nd-items-center nd-gap-2 nd-border-t nd-py-4',
+          'nd-flex nd-flex-row nd-items-center nd-gap-2 nd-border-t nd-py-2',
           !footer && 'lg:nd-hidden'
         )}
       >

@@ -1,8 +1,9 @@
 'use client'
 
+import { DesktopSidebarProvider } from '@/contexts/sidebar'
+import { SidebarProvider } from 'next-docs-zeta/sidebar'
 import { ThemeProvider } from 'next-themes'
 import { type ReactNode } from 'react'
-import { SidebarProvider } from './components/sidebar'
 import { SearchProvider, type SearchProviderProps } from './contexts/search'
 
 export type RootProviderProps = {
@@ -14,7 +15,9 @@ export function RootProvider(props: RootProviderProps) {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <SidebarProvider>
-        <SearchProvider {...props.search}>{props.children}</SearchProvider>
+        <DesktopSidebarProvider>
+          <SearchProvider {...props.search}>{props.children}</SearchProvider>
+        </DesktopSidebarProvider>
       </SidebarProvider>
     </ThemeProvider>
   )
