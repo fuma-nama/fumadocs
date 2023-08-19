@@ -22,7 +22,7 @@ export function SearchToggle(props: ComponentPropsWithoutRef<'button'>) {
     >
       <SearchIcon className="nd-w-5 nd-h-5 md:nd-mr-2 md:nd-w-4 md:nd-h-4" />
       <span className="nd-flex-1 nd-text-left max-md:nd-hidden">{search}</span>
-      <span className="nd-text-xs nd-px-2 nd-py-0.5 nd-border nd-rounded-md nd-bg-secondary nd-text-secondary-foreground max-md:nd-hidden">
+      <span className="nd-text-xs nd-px-2 nd-py-0.5 nd-border nd-rounded-md nd-text-secondary-foreground max-md:nd-hidden">
         Ctrl K
       </span>
     </button>

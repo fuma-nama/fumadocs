@@ -77,7 +77,7 @@ function DesktopSidebarToggle() {
   )
 }
 
-export function NavItem(props: NavItemProps) {
+function NavItem(props: NavItemProps) {
   const pathname = usePathname()
   const isActive =
     props.href === pathname || pathname.startsWith(props.href + '/')
@@ -99,7 +99,7 @@ export function NavItem(props: NavItemProps) {
   )
 }
 
-export function NavLink(props: NavLinkProps) {
+function NavLink(props: NavLinkProps) {
   return (
     <Link
       href={props.href}
