@@ -17,6 +17,7 @@
     "components/steps",
     "components/files",
     "components/roll-button",
+    "components/image-zoom",
     "components/type-table",
     "---Blocks---",
     "blocks/page",

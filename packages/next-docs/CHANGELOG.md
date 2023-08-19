@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 1.6.5
+
+### Patch Changes
+
+- 79abe84: Support collapsible sidebar
+
 ## 1.6.4
 
 ## 1.6.3

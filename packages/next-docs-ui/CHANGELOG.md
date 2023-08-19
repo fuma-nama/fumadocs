@@ -1,5 +1,15 @@
 # next-docs-ui
 
+## 1.6.5
+
+### Patch Changes
+
+- b8a76f8: Fix theme toggle wrong icon
+- 7337d59: Create Zoom Image component
+- 79abe84: Support collapsible sidebar
+- Updated dependencies [79abe84]
+  - next-docs-zeta@1.6.5
+
 ## 1.6.4
 
 ### Patch Changes

@@ -24,6 +24,7 @@ export default function Layout({ children }) {
 <TypeTable
   type={{
     navTitle: { description: 'Navbar title', type: 'ReactNode | string' },
+    navItems: { description: 'Navbar items', type: 'NavItemProps[]' },
     tree: { type: 'PageTree' },
     nav: {
       type: 'ReactNode | false',
@@ -36,6 +37,10 @@ export default function Layout({ children }) {
     sidebar: {
       type: 'ReactNode | false',
       description: 'Disable or replace default sidebar'
+    },
+    sidebarCollapsible: {
+      type: 'boolean',
+      description: 'Enable collapsing sidebar'
     },
     sidebarBanner: {
       type: 'ReactNode',

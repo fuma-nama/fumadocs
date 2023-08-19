@@ -1,0 +1,25 @@
+---
+title: Zoom Image
+description: Allow zoom-in images in your documentation
+icon: ZoomInIcon
+---
+
+Click on the image to zoom in. ![banner](/banner.png)
+
+> it is an optional component which won't be loaded by default.
+
+## Usage
+
+Add it to your mdx components.
+
+> A default `sizes` property will be defined if not specified
+
+```tsx
+import { ImageZoom } from 'next-docs-ui/components/image-zoom'
+import defaultComponents from 'next-docs-ui/mdx'
+
+const components = {
+  ...defaultComponents,
+  img: (props: any) => <ImageZoom {...props} />
+}
+```
