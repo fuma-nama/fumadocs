@@ -43,6 +43,12 @@ export default function Layout({ children }) {
       description: 'Enable collapsing sidebar',
       default: 'true'
     },
+    sidebarDefaultOpenLevel: {
+      type: 'number',
+      description:
+        'Open folders by default if their level is lower or equal to a specific level (Starting from 1)',
+      default: '1'
+    },
     sidebarBanner: {
       type: 'ReactNode',
       description: 'Content at the top of sidebar'

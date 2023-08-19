@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 1.6.6
+
+### Patch Changes
+
+- be8a93d: Support sidebar default open level
+  - next-docs-zeta@1.6.6
+
 ## 1.6.5
 
 ### Patch Changes
