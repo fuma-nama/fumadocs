@@ -9,7 +9,7 @@ export default function NotFound() {
       </p>
       <Link
         href="/"
-        className="nd-px-4 nd-py-2 nd-bg-primary nd-text-primary-foreground nd-text-sm nd-font-medium nd-rounded-md"
+        className="nd-px-4 nd-bg-primary nd-py-2 nd-text-primary-foreground nd-text-sm nd-rounded-md nd-font-medium"
       >
         Back to Home
       </Link>

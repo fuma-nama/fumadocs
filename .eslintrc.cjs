@@ -98,6 +98,7 @@ module.exports = {
     },
     {
       files: [
+        'prettier.config.js',
         'postcss.config.js',
         'tailwind.config.js',
         'next.config.js',

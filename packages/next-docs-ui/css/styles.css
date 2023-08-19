@@ -21,7 +21,7 @@ body {
 }
 
 [data-rehype-pretty-code-fragment] .line-highlighted {
-  @apply nd-bg-primary/10 nd-border-l-2 nd-border-l-primary;
+  @apply nd-border-l-2 nd-border-l-primary nd-bg-primary/10;
 }
 
 :root {

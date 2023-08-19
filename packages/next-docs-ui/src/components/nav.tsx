@@ -35,8 +35,6 @@ export function Nav({
   collapsibleSidebar = true,
   children
 }: NavProps) {
-  const [open, setOpen] = useContext(SidebarContext)
-
   return (
     <nav className="nd-sticky nd-top-0 nd-inset-x-0 nd-z-50 nd-backdrop-blur-lg">
       <div className="nd-container nd-flex nd-flex-row nd-items-center nd-h-16 nd-gap-4 nd-border-b nd-border-foreground/10 nd-max-w-[1300px]">
@@ -44,19 +42,7 @@ export function Nav({
         {items?.map((item, key) => <NavItem key={key} {...item} />)}
         <div className="nd-flex nd-flex-row nd-justify-end nd-items-center nd-flex-1">
           <SearchToggle className="md:nd-mr-2" />
-          {enableSidebar && collapsibleSidebar && (
-            <button
-              aria-label="Toggle Sidebar"
-              onClick={() => setOpen(!open)}
-              className="nd-mr-2 nd-p-2 nd-transition-colors nd-rounded-md nd-border nd-bg-secondary nd-text-muted-foreground hover:nd-text-accent-foreground hover:nd-bg-accent max-lg:nd-hidden"
-            >
-              {open ? (
-                <SidebarCloseIcon className="nd-w-5 nd-h-5" />
-              ) : (
-                <SidebarOpenIcon className="nd-w-5 nd-h-5" />
-              )}
-            </button>
-          )}
+          {enableSidebar && collapsibleSidebar && <DesktopSidebarToggle />}
           {links?.map((item, key) => <NavLink key={key} {...item} />)}
           <ThemeToggle className={clsx(enableSidebar && 'max-lg:nd-hidden')} />
           {enableSidebar && (
@@ -70,6 +56,24 @@ export function Nav({
         </div>
       </div>
     </nav>
+  )
+}
+
+function DesktopSidebarToggle() {
+  const [open, setOpen] = useContext(SidebarContext)
+
+  return (
+    <button
+      aria-label="Toggle Sidebar"
+      onClick={() => setOpen(!open)}
+      className="nd-mr-2 nd-p-2 nd-transition-colors nd-rounded-md nd-border nd-bg-secondary nd-text-muted-foreground hover:nd-text-accent-foreground hover:nd-bg-accent max-lg:nd-hidden"
+    >
+      {open ? (
+        <SidebarCloseIcon className="nd-w-5 nd-h-5" />
+      ) : (
+        <SidebarOpenIcon className="nd-w-5 nd-h-5" />
+      )}
+    </button>
   )
 }
 
