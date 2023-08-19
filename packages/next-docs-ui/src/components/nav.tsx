@@ -48,7 +48,7 @@ export function Nav({
             <button
               aria-label="Toggle Sidebar"
               onClick={() => setOpen(!open)}
-              className="nd-mr-2 nd-p-2 nd-transition-colors nd-rounded-md nd-border nd-bg-secondary/50 nd-text-muted-foreground hover:nd-text-accent-foreground hover:nd-bg-accent max-lg:nd-hidden"
+              className="nd-mr-2 nd-p-2 nd-transition-colors nd-rounded-md nd-border nd-bg-secondary nd-text-muted-foreground hover:nd-text-accent-foreground hover:nd-bg-accent max-lg:nd-hidden"
             >
               {open ? (
                 <SidebarCloseIcon className="nd-w-5 nd-h-5" />
