@@ -1,4 +1,5 @@
 'use client'
 export * from './theme-toggle'
-export * from './nav'
+export { Nav } from './nav'
 export * from './search-toggle'
+export { SidebarContext } from '../contexts/sidebar'
