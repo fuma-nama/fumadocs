@@ -16,7 +16,7 @@ export function ThemeToggle(props: ButtonHTMLAttributes<HTMLButtonElement>) {
     light = 'Light',
     dark = 'Dark',
     system = 'System'
-  } = useContext(I18nContext)?.text ?? {}
+  } = useContext(I18nContext).text ?? {}
 
   return (
     <DropdownMenu>

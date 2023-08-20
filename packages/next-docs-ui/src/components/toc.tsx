@@ -6,7 +6,7 @@ import * as Primitive from 'next-docs-zeta/toc'
 import { useContext } from 'react'
 
 export function TOC({ items }: { items: TOCItemType[] }) {
-  const { toc = 'On this page' } = useContext(I18nContext)?.text ?? {}
+  const { toc = 'On this page' } = useContext(I18nContext).text ?? {}
 
   return (
     <Primitive.TOCProvider toc={items} className="nd-overflow-hidden nd-flex-1">

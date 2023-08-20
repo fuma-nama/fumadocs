@@ -13,7 +13,7 @@ const item =
 
 export function Footer({ next, previous }: FooterProps) {
   const { footerNext = 'Next', footerPrevious = 'Previous' } =
-    useContext(I18nContext)?.text ?? {}
+    useContext(I18nContext).text ?? {}
 
   return (
     <div className="nd-flex nd-flex-row nd-mt-12 nd-gap-4 nd-flex-wrap nd-border-t nd-py-12">

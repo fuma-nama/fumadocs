@@ -7,7 +7,7 @@ import { useContext } from 'react'
 
 export function SearchToggle(props: ComponentPropsWithoutRef<'button'>) {
   const { setOpenSearch } = useContext(SearchContext)
-  const { search = 'Search' } = useContext(I18nContext)?.text ?? {}
+  const { search = 'Search' } = useContext(I18nContext).text ?? {}
 
   return (
     <button

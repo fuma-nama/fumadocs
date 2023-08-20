@@ -36,7 +36,7 @@ export default function SearchDialog({
   ...props
 }: SearchDialogProps) {
   const router = useRouter()
-  const locale = useContext(I18nContext)?.locale
+  const { locale, text } = useContext(I18nContext)
   const { search, setSearch, query } = useDocsSearch(locale, tag)
 
   const onOpen = useCallback(
@@ -51,7 +51,7 @@ export default function SearchDialog({
     <CommandDialog {...props}>
       {props.children}
       <CommandInput
-        placeholder="Search"
+        placeholder={text?.search ?? 'Search'}
         value={search}
         onValueChange={setSearch}
       />

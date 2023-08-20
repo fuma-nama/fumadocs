@@ -10,11 +10,10 @@ export type Translations = {
   footerNext: string
 }
 
-export const I18nContext = createContext<
-  | {
-      locale: string
-      onChange: (v: string) => void
-      text?: Partial<Translations>
-    }
-  | undefined
->(undefined)
+export const I18nContext = createContext<{
+  locale?: string
+  onChange: (v: string) => void
+  text?: Partial<Translations>
+}>({
+  onChange: () => {}
+})
