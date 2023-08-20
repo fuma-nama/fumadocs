@@ -1,4 +1,5 @@
 import NextFAQImage from '@/public/showcases/next-faq.png'
+import YeecordImage from '@/public/showcases/yeecord.png'
 import { createMetadata } from '@/utils/metadata'
 import { PlusIcon } from 'lucide-react'
 import Image from 'next/image'
@@ -13,7 +14,12 @@ export const metadata = createMetadata({
 
 export default function Showcase() {
   const showcases = [
-    [NextFAQImage, 'Next.js Discord Common Questions']
+    [
+      NextFAQImage,
+      'Next.js Discord Common Questions',
+      'https://nextjs-discord-common-questions.joulev.dev'
+    ],
+    [YeecordImage, 'Yeecord Docs', 'https://yeecord.com']
   ] as const
 
   return (
@@ -23,10 +29,10 @@ export default function Showcase() {
         Some cool websites using Next Docs
       </p>
       <div className="grid grid-cols-1 gap-4 mt-8 animate-in fade-in slide-in-from-bottom-20 duration-700 md:grid-cols-2 xl:grid-cols-3">
-        {showcases.map(([image, name], key) => (
+        {showcases.map(([image, name, href], key) => (
           <a
             key={key}
-            href="https://nextjs-discord-common-questions.joulev.dev"
+            href={href}
             target="_blank"
             rel="noreferrer noopener"
             className="relative border rounded-lg group overflow-hidden transition-colors shadow-lg hover:shadow-primary/10 hover:border-primary/30"
