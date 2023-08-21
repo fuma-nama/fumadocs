@@ -64,7 +64,7 @@ module.exports = {
       settings: {
         tailwindcss: {
           config: 'packages/next-docs-ui/tailwind.config.js',
-          callees: ['cn', 'clsx']
+          callees: ['cn', 'clsx', 'cva']
         }
       }
     },

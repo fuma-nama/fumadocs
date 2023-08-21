@@ -54,6 +54,7 @@
     "@radix-ui/react-scroll-area": "^1.0.4",
     "@radix-ui/react-select": "^1.2.2",
     "@radix-ui/react-tabs": "^1.0.4",
+    "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "cmdk": "^0.2.0",
     "lucide-react": "^0.268.0",

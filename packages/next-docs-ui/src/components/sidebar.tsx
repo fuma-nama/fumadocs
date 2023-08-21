@@ -1,7 +1,9 @@
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { SidebarContext } from '@/contexts/sidebar'
 import { LayoutContext } from '@/contexts/tree'
+import { cn } from '@/utils/cn'
 import * as Collapsible from '@radix-ui/react-collapsible'
+import { cva } from 'class-variance-authority'
 import clsx from 'clsx'
 import { ChevronDown } from 'lucide-react'
 import type { FileNode, FolderNode, TreeNode } from 'next-docs-zeta/server'
@@ -17,6 +19,19 @@ type SidebarProps = {
   footer?: ReactNode
 }
 
+const itemVariants = cva(
+  'nd-flex nd-flex-row nd-items-center nd-text-sm nd-px-2 nd-py-1.5 nd-rounded-md',
+  {
+    variants: {
+      active: {
+        true: 'nd-text-primary nd-bg-primary/10 nd-font-medium',
+        false:
+          'nd-text-muted-foreground nd-transition-colors hover:nd-text-accent-foreground'
+      }
+    }
+  }
+)
+
 export function Sidebar({ banner, footer }: SidebarProps) {
   const [open] = useContext(SidebarContext)
   const { tree } = useContext(LayoutContext)
@@ -25,9 +40,9 @@ export function Sidebar({ banner, footer }: SidebarProps) {
     <Base.SidebarList
       minWidth={1024} // lg
       className={clsx(
-        'nd-flex nd-flex-col nd-transition-all',
+        'nd-flex nd-flex-col',
         open ? 'lg:nd-w-[260px]' : 'lg:nd-w-0 nd-overflow-hidden nd-opacity-0',
-        'lg:nd-sticky lg:nd-top-16 lg:nd-h-[calc(100vh-4rem)]',
+        'lg:nd-sticky lg:nd-top-16 lg:nd-h-[calc(100vh-4rem)] lg:nd-transition-[width,opacity]',
         'max-lg:nd-w-full max-lg:nd-px-8 max-lg:nd-fixed max-lg:nd-inset-y-0 max-lg:nd-right-0 max-lg:nd-bg-background/70 max-lg:nd-backdrop-blur-lg max-lg:nd-z-40 max-lg:nd-pt-16 max-lg:data-[open=false]:nd-hidden sm:max-lg:nd-max-w-sm sm:max-lg:nd-border-l'
       )}
     >
@@ -69,15 +84,7 @@ function Item({ item }: { item: FileNode }) {
   const active = pathname === item.url
 
   return (
-    <Link
-      href={item.url}
-      className={clsx(
-        'nd-inline-flex nd-flex-row nd-items-center nd-text-sm nd-px-2 nd-py-1.5 nd-rounded-md nd-transition-colors',
-        active
-          ? 'nd-text-primary nd-bg-primary/10 nd-font-medium'
-          : 'nd-text-muted-foreground hover:nd-text-accent-foreground'
-      )}
-    >
+    <Link href={item.url} className={cn(itemVariants({ active }))}>
       {item.icon &&
         cloneElement(item.icon, {
           className: 'nd-w-4 nd-h-4 nd-mr-2'
@@ -108,7 +115,7 @@ function Folder({
   const { sidebarDefaultOpenLevel = 1 } = useContext(LayoutContext)
 
   const pathname = usePathname()
-  const active = index && pathname === index.url
+  const active = index != null && pathname === index.url
   const childActive = useMemo(() => hasActive(children, pathname), [pathname])
   const [extend, setExtend] = useState(
     sidebarDefaultOpenLevel >= level || active || childActive
@@ -137,12 +144,7 @@ function Folder({
   return (
     <Collapsible.Root open={extend} onOpenChange={setExtend}>
       <Collapsible.Trigger
-        className={clsx(
-          'nd-flex nd-flex-row nd-w-full nd-text-sm nd-px-2 nd-py-1.5 nd-transition-colors nd-text-left nd-rounded-md',
-          active
-            ? 'nd-font-medium nd-text-primary nd-bg-primary/10'
-            : 'nd-text-muted-foreground hover:nd-text-accent-foreground'
-        )}
+        className={cn(itemVariants({ active, className: 'nd-w-full' }))}
       >
         {index ? (
           <Link
