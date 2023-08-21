@@ -66,6 +66,30 @@ if (page == null) {
 const toc = await getTableOfContents(page.body.raw)
 ```
 
+### Last Update Time
+
+Since you might have different version controls (e.g. Github) or it's from
+remote sources like Sanity, Next Docs UI doesn't display last updated time by
+default.
+
+For Git hosted documents, you can use
+[`getGitLastEditTime`](/docs/headless/utils/git-last-edit) provided by Next Docs
+Zeta.
+
+```tsx
+import { DocsPage } from 'next-docs-ui/page'
+import { getGitLastEditTime } from 'next-docs-zeta/server'
+
+const time = await getGitLastEditTime(
+  'SonMooSans/next-docs',
+  'apps/docs/content/' + page._raw.sourceFilePath
+)
+
+<DocsPage toc={toc} lastUpdate={time}>
+  ...
+</DocsPage>
+```
+
 ### Footer
 
 You need to manually enable it by passing the previous and next page to the
