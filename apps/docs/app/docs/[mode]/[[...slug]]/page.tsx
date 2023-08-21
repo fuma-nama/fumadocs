@@ -37,13 +37,9 @@ export default async function Page({ params }: { params: Param }) {
     <DocsPage
       toc={toc}
       footer={neighbours}
+      lastUpdate={time}
       tocContent={
         <div className="mt-4 border-t pt-4 space-y-2">
-          {time && (
-            <p className="text-muted-foreground text-xs font-medium">
-              Last Update: {time.toLocaleDateString()}
-            </p>
-          )}
           <a
             href={`https://github.com/SonMooSans/next-docs/blob/main/apps/docs/content/${page._raw.sourceFilePath}`}
             target="_blank"

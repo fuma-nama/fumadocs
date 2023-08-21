@@ -24,6 +24,8 @@ export type DocsPageProps = {
    */
   breadcrumb?: ReplaceOrDisable
 
+  lastUpdate?: Date | string | null
+
   /**
    * Custom content in TOC container
    */
@@ -50,6 +52,11 @@ export function DocsPage(props: DocsPageProps) {
       <article className="nd-flex nd-flex-col nd-gap-6 nd-w-0 nd-flex-1 nd-py-8 md:nd-py-16">
         {breadcrumb}
         {props.children}
+        {props.lastUpdate && (
+          <p className="nd-text-muted-foreground nd-text-xs nd-mt-8">
+            Last Update: {dateToString(props.lastUpdate)}
+          </p>
+        )}
         {props.footer != null && props.footer !== false && (
           <Footer {...props.footer} />
         )}
@@ -57,4 +64,10 @@ export function DocsPage(props: DocsPageProps) {
       {toc}
     </>
   )
+}
+
+function dateToString(date: string | Date): string {
+  return typeof date === 'string'
+    ? date
+    : `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`
 }

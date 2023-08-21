@@ -16,7 +16,7 @@ export function Footer({ next, previous }: FooterProps) {
     useContext(I18nContext).text ?? {}
 
   return (
-    <div className="nd-flex nd-flex-row nd-mt-12 nd-gap-4 nd-flex-wrap nd-border-t nd-py-12">
+    <div className="nd-flex nd-flex-row nd-gap-4 nd-mt-4 nd-flex-wrap nd-border-t nd-py-12">
       {previous && (
         <Link href={previous.url} className={item}>
           <ChevronLeftIcon className="nd-w-5 nd-h-5 nd-my-1" />
