@@ -9,5 +9,10 @@
       "matchUpdateTypes": ["minor", "patch"]
     }
   ],
-  "ignoreDeps": ["@types/react", "@types/react-dom", "flexsearch"]
+  "ignoreDeps": [
+    "@types/react",
+    "@types/react-dom",
+    "flexsearch",
+    "@types/node"
+  ]
 }
