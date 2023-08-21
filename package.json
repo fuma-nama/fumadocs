@@ -13,7 +13,7 @@
     "release": "changeset publish",
     "test": "turbo run test",
     "types:check": "turbo run types:check",
-    "version": "changeset version"
+    "version": "changeset version && pnpm install --lockfile-only"
   },
   "pnpm": {
     "peerDependencyRules": {
