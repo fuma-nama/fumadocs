@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 1.6.7
+
+### Patch Changes
+
+- f72a4c1: Improve animations & layout
+- 88bab2f: Support `lastUpdate` in page
+- f1846e8: Support i18n search dialog placeholder
+  - next-docs-zeta@1.6.7
+
 ## 1.6.6
 
 ### Patch Changes

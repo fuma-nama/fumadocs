@@ -8,9 +8,9 @@
     "start": "next start"
   },
   "dependencies": {
-    "next-docs-zeta": "1.6.6",
-    "next-docs-ui": "1.6.6",
-    "next": "13.4.18",
+    "next-docs-zeta": "1.6.7",
+    "next-docs-ui": "1.6.7",
+    "next": "13.4.19",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "contentlayer": "0.3.4",
