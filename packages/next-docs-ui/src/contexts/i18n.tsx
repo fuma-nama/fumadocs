@@ -8,6 +8,7 @@ export type Translations = {
   system: string
   footerPrevious: string
   footerNext: string
+  lastUpdate: string
 }
 
 export const I18nContext = createContext<{
