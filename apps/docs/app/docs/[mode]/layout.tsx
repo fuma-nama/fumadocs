@@ -28,11 +28,12 @@ export default function Layout({
     >
       <div
         id="docs-gradient"
-        className="absolute right-[20vw] top-0 overflow-hidden z-[-1]"
+        className="absolute right-0 top-0 overflow-hidden z-[-1] sm:right-[20vw]"
       >
         <Image
-          alt="gradient"
+          alt=""
           src="/gradient.png"
+          loading="eager"
           width={800}
           height={800}
           className="min-w-[800px] -mt-44 dark:mt-0"
