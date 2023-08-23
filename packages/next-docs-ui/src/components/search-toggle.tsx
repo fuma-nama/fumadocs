@@ -19,8 +19,8 @@ export function SearchBarToggle(props: ComponentPropsWithoutRef<'button'>) {
       onClick={() => setOpenSearch(true)}
     >
       <SearchIcon aria-label="Open Search" className="nd-mr-2 nd-w-4 nd-h-4" />
-      <span className="nd-flex-1 nd-text-left">{search}</span>
-      <span className="nd-text-xs nd-px-2 nd-py-0.5 nd-border nd-rounded-md nd-bg-secondary nd-text-secondary-foreground">
+      {search}
+      <span className="nd-text-xs nd-ml-auto nd-px-2 nd-py-0.5 nd-border nd-rounded-md nd-bg-secondary nd-text-secondary-foreground">
         Ctrl K
       </span>
     </button>
