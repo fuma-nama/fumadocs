@@ -13,10 +13,9 @@ additional features such as persistent and shared value.
 > it is an optional component which won't be loaded by default.
 
 <Tabs
-  defaultValue="Javascript"
   id="language"
   persist
-  items={['Javascript', 'Rust']}
+  items={['Javascript', 'Rust', 'Typescript']}
 >
 <Tab value="Javascript">
   
@@ -28,11 +27,14 @@ Hello World in Javascript
 Hello World in Rust
 
 </Tab>
+<Tab value="Typescript">
 
+Also works if items are not the same
+
+</Tab>
 </Tabs>
 
 <Tabs
-  defaultValue="Javascript"
   id="language"
   persist
   items={['Javascript', 'Rust']}
@@ -56,7 +58,7 @@ Import it in your MDX documents.
 ```mdx
 import { Tab, Tabs } from 'next-docs-ui/components/tabs'
 
-<Tabs defaultValue="Javascript" items={['Javascript', 'Rust']}>
+<Tabs items={['Javascript', 'Rust']}>
   <Tab value="Javascript">Javascript is weird</Tab>
   <Tab value="Rust">Rust is fast</Tab>
 </Tabs>
@@ -68,7 +70,7 @@ By passing an `id` property, you can share a value across all tabs with the same
 id.
 
 ```mdx
-<Tabs id="language" defaultValue="Javascript" items={['Javascript', 'Rust']}>
+<Tabs id="language" items={['Javascript', 'Rust']}>
   <Tab value="Javascript">Javascript is weird</Tab>
   <Tab value="Rust">Rust is fast</Tab>
 </Tabs>
@@ -80,18 +82,24 @@ You can enable persistent by passing a `persist` property. The value will be
 stored in `localStorage`, with its id as the key.
 
 ```mdx
-<Tabs
-  id="language"
-  defaultValue="Javascript"
-  items={['Javascript', 'Rust']}
-  persist
->
+<Tabs id="language" items={['Javascript', 'Rust']} persist>
   <Tab value="Javascript">Javascript is weird</Tab>
   <Tab value="Rust">Rust is fast</Tab>
 </Tabs>
 ```
 
 > Persistent only works if you have passed an `id`.
+
+### Default Value
+
+Set a default value by passing `defaultIndex`.
+
+```mdx
+<Tabs
+  items={['Javascript', 'Rust']}
+  defaultIndex={1}
+>...</Tab>
+```
 
 ### Advanced
 
