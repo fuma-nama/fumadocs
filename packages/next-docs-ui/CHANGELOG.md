@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 1.6.8
+
+### Patch Changes
+
+- 4cf4552: Fix aria-controls warning & support default index
+  - next-docs-zeta@1.6.8
+
 ## 1.6.7
 
 ### Patch Changes
