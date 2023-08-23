@@ -1,5 +1,6 @@
 'use client'
 
+import type { TabsContentProps } from '@radix-ui/react-tabs'
 import { useEffect, useState, type ReactNode } from 'react'
 import * as Primitive from './ui/tabs'
 
@@ -28,7 +29,7 @@ export function Tabs({
   id,
   items = [],
   persist = false,
-  defaultValue,
+  defaultIndex = 0,
   children
 }: {
   /**
@@ -36,14 +37,23 @@ export function Tabs({
    */
   id?: string
   /**
-   * Enabled persistent
+   * Enable persistent
    */
   persist?: boolean
+  /**
+   * @default 0
+   */
+  defaultIndex?: number
+
+  /**
+   * @deprecated Use `defaultIndex` instead
+   */
   defaultValue?: string
   items?: string[]
   children: ReactNode
 }) {
   const [value, setValue] = useState<string>()
+  const defaultValue = items[defaultIndex]
 
   useEffect(() => {
     if (!id) return
@@ -53,7 +63,9 @@ export function Tabs({
       // Only if item exists
       if (previous && items.includes(previous)) setValue(previous)
     }
-    const listener: ListenerObject = v => setValue(v)
+    const listener: ListenerObject = v => {
+      if (items.includes(v)) setValue(v)
+    }
     add(id, listener)
 
     return () => remove(id, listener)
@@ -69,13 +81,13 @@ export function Tabs({
 
   return (
     <Primitive.Tabs
-      defaultValue={defaultValue}
+      defaultValue={defaultValue ? toValue(defaultValue) : undefined}
       value={value}
       onValueChange={setValue}
     >
       <Primitive.TabsList>
         {items.map(item => (
-          <Primitive.TabsTrigger key={item} value={item}>
+          <Primitive.TabsTrigger key={item} value={toValue(item)}>
             {item}
           </Primitive.TabsTrigger>
         ))}
@@ -85,4 +97,10 @@ export function Tabs({
   )
 }
 
-export const Tab = Primitive.TabsContent
+function toValue(v: string) {
+  return v.toLowerCase().replace(/\s/, '-')
+}
+
+export function Tab(props: TabsContentProps) {
+  return <Primitive.TabsContent {...props} value={toValue(props.value)} />
+}
