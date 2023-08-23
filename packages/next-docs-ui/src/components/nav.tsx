@@ -1,12 +1,18 @@
+import { SearchContext } from '@/contexts/search'
 import { SidebarContext } from '@/contexts/sidebar'
 import { cn } from '@/utils/cn'
 import { cva } from 'class-variance-authority'
-import { MenuIcon, SidebarCloseIcon, SidebarOpenIcon } from 'lucide-react'
+import {
+  MenuIcon,
+  SearchIcon,
+  SidebarCloseIcon,
+  SidebarOpenIcon
+} from 'lucide-react'
 import { SidebarTrigger } from 'next-docs-zeta/sidebar'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useContext, type ReactNode } from 'react'
-import { SearchToggle } from './search-toggle'
+import { SearchBarToggle } from './search-toggle'
 import { ThemeToggle } from './theme-toggle'
 
 export type NavLinkProps = {
@@ -46,7 +52,8 @@ export function Nav({
         {children}
         {items?.map((item, key) => <NavItem key={key} {...item} />)}
         <div className="nd-flex nd-flex-row nd-justify-end nd-items-center nd-flex-1">
-          <SearchToggle className="md:nd-mr-2" />
+          <SearchToggle />
+          <SearchBarToggle className="nd-mr-2 max-md:nd-hidden" />
           {enableSidebar && collapsibleSidebar && <DesktopSidebarToggle />}
           <ThemeToggle className={cn(enableSidebar && 'max-lg:nd-hidden')} />
           {links?.map((item, key) => <NavLink key={key} {...item} />)}
@@ -54,6 +61,20 @@ export function Nav({
         </div>
       </div>
     </nav>
+  )
+}
+
+function SearchToggle() {
+  const { setOpenSearch } = useContext(SearchContext)
+
+  return (
+    <button
+      className={cn(itemVariants({ className: 'md:nd-hidden' }))}
+      aria-label="Open Search"
+      onClick={() => setOpenSearch(true)}
+    >
+      <SearchIcon className="nd-w-5 nd-h-5" />
+    </button>
   )
 }
 
