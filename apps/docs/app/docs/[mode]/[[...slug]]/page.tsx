@@ -1,6 +1,7 @@
 import { createMetadata } from '@/utils/metadata'
 import { getPage, getPageUrl, getTree } from '@/utils/source'
 import { allDocs } from 'contentlayer/generated'
+import { ExternalLinkIcon } from 'lucide-react'
 import type { Metadata } from 'next'
 import { MDXContent } from 'next-docs-ui/mdx'
 import { DocsPage } from 'next-docs-ui/page'
@@ -39,16 +40,14 @@ export default async function Page({ params }: { params: Param }) {
       footer={neighbours}
       lastUpdate={time}
       tocContent={
-        <div className="mt-4 border-t pt-4 space-y-2">
-          <a
-            href={`https://github.com/SonMooSans/next-docs/blob/main/apps/docs/content/${page._raw.sourceFilePath}`}
-            target="_blank"
-            rel="noreferrer noopener"
-            className="text-muted-foreground hover:text-foreground text-xs font-medium"
-          >
-            Edit this Page -&gt;
-          </a>
-        </div>
+        <a
+          href={`https://github.com/SonMooSans/next-docs/blob/main/apps/docs/content/${page._raw.sourceFilePath}`}
+          target="_blank"
+          rel="noreferrer noopener"
+          className="text-xs inline-flex text-muted-foreground items-center hover:text-foreground"
+        >
+          Edit on Github <ExternalLinkIcon className="ml-1 w-3 h-3" />
+        </a>
       }
     >
       <MDXContent>

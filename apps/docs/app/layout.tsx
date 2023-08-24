@@ -43,7 +43,7 @@ export default function RootLayout({
 
 function Footer() {
   return (
-    <footer className="bg-secondary text-secondary-foreground mt-auto border-t py-12">
+    <footer className="bg-secondary/50 text-secondary-foreground mt-auto border-t py-12">
       <div className="container flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="mb-1 text-sm font-semibold">NEXT DOCS</p>
@@ -64,7 +64,7 @@ function Footer() {
           <a
             href="https://github.com/SonMooSans/next-docs"
             rel="noreferrer noopener"
-            className="flex flex-row items-center text-sm"
+            className="flex flex-row items-center text-sm text-muted-foreground transition-colors hover:text-accent-foreground"
           >
             <Star className="mr-2 h-4 w-4" />
             Give us a star
@@ -72,7 +72,7 @@ function Footer() {
           <a
             href="https://www.npmjs.com/package/next-docs-zeta"
             rel="noreferrer noopener"
-            className="flex flex-row items-center text-sm"
+            className="flex flex-row items-center text-sm text-muted-foreground transition-colors hover:text-accent-foreground"
           >
             <ExternalLinkIcon className="mr-2 h-4 w-4" />
             NPM registry

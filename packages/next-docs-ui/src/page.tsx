@@ -41,7 +41,11 @@ export function DocsPage(props: DocsPageProps) {
     <div className="nd-relative nd-w-[250px] max-xl:nd-hidden">
       <div className="nd-sticky nd-flex nd-flex-col nd-top-16 nd-py-16 nd-max-h-[calc(100vh-4rem)]">
         {props.toc && props.toc.length > 0 && <TOC items={props.toc} />}
-        {props.tocContent}
+        {props.tocContent && (
+          <div className="nd-flex nd-flex-col nd-border-t nd-pt-4 nd-mt-4 first:nd-border-t-0 first:nd-mt-0 first:nd-pt-0">
+            {props.tocContent}
+          </div>
+        )}
       </div>
     </div>
   )
