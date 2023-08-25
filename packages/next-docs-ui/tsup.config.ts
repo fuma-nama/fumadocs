@@ -3,7 +3,7 @@ import tsconfig from './tsconfig.json'
 
 export default defineConfig({
   entry: [
-    './src/components/{type-table,roll-button,image-zoom,files,tabs,steps,index}.{ts,tsx}',
+    './src/components/{type-table,roll-button,image-zoom,files,tabs,accordion,steps,index}.{ts,tsx}',
     './src/components/dialog/search.tsx',
     './src/*.{ts,tsx}'
   ],

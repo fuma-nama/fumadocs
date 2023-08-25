@@ -4,6 +4,7 @@ description: Getting Started with Next Docs UI
 icon: 'HomeIcon'
 ---
 
+import { Accordion, Accordions } from 'next-docs-ui/components/accordion'
 import { Tab, Tabs } from 'next-docs-ui/components/tabs'
 
 <div className="w-full rounded-2xl p-1 shadow-xl shadow-blue-800 bg-blue-700">
@@ -98,64 +99,49 @@ Make sure you've generated documents correctly before moving to next step.
 
 Copy & Paste required files.
 
-<Accordion type="single" collapsible>
+<Accordions type="single" collapsible>
 
-<AccordionItem value="root-layout">
-<AccordionTrigger>Docs Layout</AccordionTrigger>
-<AccordionContent>
+<Accordion title="Docs Layout">
 
 ```tsx title="app/docs/layout.tsx"
 |reference:../../examples/simple/app/docs/layout.tsx|
 ```
 
-</AccordionContent>
-</AccordionItem>
+</Accordion>
 
-<AccordionItem value="docs-page">
-<AccordionTrigger>Docs Page</AccordionTrigger>
-<AccordionContent>
+<Accordion title="Docs Page">
 
 ```tsx title="app/docs/[[...slug]]/page.tsx"
 |reference:../../examples/simple/app/docs/[[...slug]]/page.tsx|
 ```
 
-</AccordionContent>
-</AccordionItem>
+</Accordion>
 
-<AccordionItem value="content">
-<AccordionTrigger>MDX Content</AccordionTrigger>
-<AccordionContent>
+<Accordion title="MDX Content">
 
 ```tsx title="app/docs/[[...slug]]/content.tsx"
 |reference:../../examples/simple/app/docs/[[...slug]]/content.tsx|
 ```
 
-</AccordionContent>
-</AccordionItem>
+</Accordion>
 
-<AccordionItem value="not-found">
-<AccordionTrigger>Not Found Page</AccordionTrigger>
-<AccordionContent>
+<Accordion title="Not Found Page">
 
 ```tsx title="app/docs/[[...slug]]/not-found.tsx"
 |reference:../../examples/simple/app/docs/[[...slug]]/not-found.tsx|
 ```
 
-</AccordionContent>
-</AccordionItem>
+</Accordion>
 
-<AccordionItem value="api-route">
-<AccordionTrigger>Search API Route</AccordionTrigger>
-<AccordionContent>
+<Accordion title="Search API Route">
 
 ```tsx title="app/api/search/route.ts"
 |reference:../../examples/simple/app/api/search/route.ts|
 ```
 
-</AccordionContent>
-</AccordionItem>
-
 </Accordion>
+
+</Accordions>
 
 </Tab>
 </Tabs>
@@ -180,10 +166,8 @@ npm run dev
 
 ### FAQ
 
-<Accordion type="single" collapsible>
-<AccordionItem value="fix-error">
-<AccordionTrigger>How to fix 'supports-color' error?</AccordionTrigger>
-<AccordionContent>
+<Accordions type="single" collapsible>
+<Accordion title="How to fix 'supports-color' error?">
 
 If you got this error:
 
@@ -193,9 +177,8 @@ Module not found: Can't resolve 'supports-color' in '.../node_modules/debug/src'
 
 Try installing `supports-color@8.1.1`.
 
-</AccordionContent>
-</AccordionItem>
 </Accordion>
+</Accordions>
 
 ## Learn More
 

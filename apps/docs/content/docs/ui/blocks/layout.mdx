@@ -4,6 +4,7 @@ description: The layout of documentation
 icon: LayoutIcon
 ---
 
+import { Accordion, Accordions } from 'next-docs-ui/components/accordion'
 import { TypeTable } from 'next-docs-ui/components/type-table'
 
 The layout of documentation pages, it must be nested under the
@@ -73,10 +74,8 @@ the root layout (under the root provider).
 
 <br />
 
-<Accordion type="single" collapsible>
-<AccordionItem value="custom-navbar">
-<AccordionTrigger>Custom Navbar</AccordionTrigger>
-<AccordionContent>
+<Accordions type="single" collapsible>
+<Accordion title="Custom Navbar">
 
 Example for custom navbar using Tailwind CSS.
 
@@ -114,9 +113,8 @@ export function Nav() {
 }
 ```
 
-</AccordionContent>
-</AccordionItem>
 </Accordion>
+</Accordions>
 
 ### Example
 

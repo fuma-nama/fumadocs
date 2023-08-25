@@ -4,6 +4,8 @@ description: Add Theme to Next Docs UI
 icon: PencilIcon
 ---
 
+import { Accordion, Accordions } from 'next-docs-ui/components/accordion'
+
 The design system is based on [Shadcn UI](https://ui.shadcn.com), allowing you
 to overwrite css variables.
 
@@ -32,10 +34,8 @@ You can easily customise all the properties using css variables.
 
 <br />
 
-<Accordion type="single" collapsible>
-<AccordionItem value="default"> 
-<AccordionTrigger>Default Styles</AccordionTrigger>
-<AccordionContent>
+<Accordions type="single" collapsible>
+<Accordion title="Default Styles">
 
 ```css
 :root {
@@ -103,9 +103,8 @@ You can easily customise all the properties using css variables.
 }
 ```
 
-</AccordionContent>
-</AccordionItem>
 </Accordion>
+</Accordions>
 
 ## Global Styles
 

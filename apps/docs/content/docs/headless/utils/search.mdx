@@ -3,6 +3,8 @@ title: Search
 description: Document searching makes easy
 ---
 
+import { Accordion, Accordions } from 'next-docs-ui/components/accordion'
+
 import { TypeTable } from 'next-docs-ui/components/type-table'
 
 Next Docs supports searching document based on
@@ -40,16 +42,13 @@ export function Dialog() {
 }
 ```
 
-<Accordion type="single" collapsible className='mt-4'>
-<AccordionItem value="example">
-<AccordionTrigger>Example</AccordionTrigger>
-<AccordionContent>
+<Accordions type="single" collapsible className='mt-4'>
+<Accordion title="Example">
 
 You can use the default Search Dialog from [Next Docs UI](/docs/ui/search).
 
-</AccordionContent>
-</AccordionItem>
 </Accordion>
+</Accordions>
 
 ### createSearchAPI
 
