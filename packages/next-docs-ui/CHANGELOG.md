@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 1.6.9
+
+### Patch Changes
+
+- 5ee874c: Create Accordions component
+- 1630f74: Add default border to TOC content
+  - next-docs-zeta@1.6.9
+
 ## 1.6.8
 
 ### Patch Changes

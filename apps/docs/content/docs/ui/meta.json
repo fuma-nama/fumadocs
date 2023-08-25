@@ -15,6 +15,7 @@
     "components/card",
     "components/heading",
     "components/steps",
+    "components/accordion",
     "components/files",
     "components/roll-button",
     "components/image-zoom",
