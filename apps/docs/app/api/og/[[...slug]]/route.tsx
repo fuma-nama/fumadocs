@@ -43,8 +43,8 @@ export async function GET(
           >
             {isUI ? (
               <svg
-                width="50"
-                height="50"
+                width="48"
+                height="48"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="rgb(165 243 252)"
@@ -58,8 +58,8 @@ export async function GET(
               </svg>
             ) : (
               <svg
-                width="50"
-                height="50"
+                width="48"
+                height="48"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="rgb(233 213 255)"
@@ -75,7 +75,7 @@ export async function GET(
             )}
           </div>
 
-          <p tw="text-gray-200 font-bold text-5xl ml-8">
+          <p tw="text-gray-200 font-bold ml-6" style={{ fontSize: '2.5rem' }}>
             {isUI ? 'Next Docs UI' : 'Next Docs Zeta'}
           </p>
         </div>
