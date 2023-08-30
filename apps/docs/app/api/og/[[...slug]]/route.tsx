@@ -1,6 +1,7 @@
 import { allDocs } from '@/.contentlayer/generated'
 import { base_url } from '@/utils/metadata'
 import { getPage } from '@/utils/source'
+import clsx from 'clsx'
 import { ImageResponse, NextResponse, type NextRequest } from 'next/server'
 
 export async function GET(
@@ -11,8 +12,7 @@ export async function GET(
   if (!page) return NextResponse.json('Not Found', { status: 404 })
 
   const font = await fetch(new URL('/inter.ttf', base_url))
-  const title =
-    params?.slug?.[0] === 'ui' ? 'Next Docs UI' : 'Next Docs Headless'
+  const isUI = params?.slug?.[0] === 'ui'
 
   return new ImageResponse(
     (
@@ -29,36 +29,54 @@ export async function GET(
         />
         <div tw="flex flex-col items-center mb-12 mx-auto">
           <div
-            tw="flex p-3 border-2 border-blue-400 rounded-xl shadow-xl shadow-blue-600"
+            tw={clsx(
+              'flex p-3 border-2 rounded-xl shadow-xl ',
+              isUI
+                ? 'shadow-blue-600 border-blue-400'
+                : 'shadow-purple-600 border-purple-400'
+            )}
             style={{
-              background: 'linear-gradient(to bottom, black, rgb(0,50,150))'
+              background: `linear-gradient(to bottom, black, ${
+                isUI ? 'rgb(0,50,150)' : 'rgb(150,50,150)'
+              })`
             }}
           >
-            <svg
-              width="46"
-              height="46"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="rgb(165 243 252)"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-              <line x1="3" x2="21" y1="9" y2="9" />
-              <line x1="9" x2="9" y1="21" y2="9" />
-            </svg>
+            {isUI ? (
+              <svg
+                width="46"
+                height="46"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="rgb(165 243 252)"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                <line x1="3" x2="21" y1="9" y2="9" />
+                <line x1="9" x2="9" y1="21" y2="9" />
+              </svg>
+            ) : (
+              <svg
+                width="46"
+                height="46"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="rgb(233 213 255)"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="m16 6 4 14" />
+                <path d="M12 6v14" />
+                <path d="M8 8v12" />
+                <path d="M4 4v16" />
+              </svg>
+            )}
           </div>
 
-          <p
-            tw="text-transparent font-bold text-4xl mt-4"
-            style={{
-              backgroundClip: 'text',
-              background:
-                'linear-gradient(to bottom, white, rgba(255,255,255,0.5))'
-            }}
-          >
-            {title}
+          <p tw="text-white font-bold text-4xl mt-8">
+            {isUI ? 'Next Docs UI' : 'Next Docs Zeta'}
           </p>
         </div>
         <div
@@ -70,7 +88,7 @@ export async function GET(
         >
           <p tw="text-white font-bold text-6xl">{page.title}</p>
           <p tw="text-white/70 font-medium text-3xl">
-            The Documentation Framework
+            {page.description ?? 'The Documentation Framework'}
           </p>
         </div>
       </div>
