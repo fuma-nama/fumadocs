@@ -77,7 +77,11 @@ export function generateMetadata({ params }: { params: Param }): Metadata {
     title: page.title,
     description,
     openGraph: {
-      url: `https://next-docs-zeta.vercel.app/docs/${slugs.join('/')}`
+      url: `https://next-docs-zeta.vercel.app/docs/${slugs.join('/')}`,
+      images: `/api/og/${slugs.join('/')}`
+    },
+    twitter: {
+      images: `/api/og/${slugs.join('/')}`
     }
   })
 }
