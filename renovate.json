@@ -12,6 +12,7 @@
   "ignoreDeps": [
     "@types/react",
     "@types/react-dom",
+    "rehype-pretty-code",
     "flexsearch",
     "@types/node"
   ]
