@@ -75,7 +75,7 @@ export async function GET(
             )}
           </div>
 
-          <p tw="text-gray-200 font-bold ml-6" style={{ fontSize: '2.5rem' }}>
+          <p tw="text-gray-200 font-bold ml-8" style={{ fontSize: '2.8rem' }}>
             {isUI ? 'Next Docs UI' : 'Next Docs Zeta'}
           </p>
         </div>
