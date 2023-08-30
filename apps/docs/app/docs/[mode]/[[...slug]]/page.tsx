@@ -73,15 +73,22 @@ export function generateMetadata({ params }: { params: Param }): Metadata {
     page.description ??
     'The headless ui library for building documentation websites'
 
+  const image = {
+    alt: 'Banner',
+    url: `/api/og/${slugs.join('/')}`,
+    width: 1200,
+    height: 630
+  }
+
   return createMetadata({
     title: page.title,
     description,
     openGraph: {
       url: `https://next-docs-zeta.vercel.app/docs/${slugs.join('/')}`,
-      images: `/api/og/${slugs.join('/')}`
+      images: image
     },
     twitter: {
-      images: `/api/og/${slugs.join('/')}`
+      images: image
     }
   })
 }
