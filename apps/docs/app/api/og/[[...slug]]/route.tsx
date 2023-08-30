@@ -1,15 +1,16 @@
 import { allDocs } from '@/.contentlayer/generated'
+import { base_url } from '@/utils/metadata'
 import { getPage } from '@/utils/source'
 import { ImageResponse, NextResponse, type NextRequest } from 'next/server'
 
 export async function GET(
-  request: NextRequest,
+  _: NextRequest,
   { params }: { params: { slug?: string[] } }
 ) {
   const page = getPage(params.slug)
   if (!page) return NextResponse.json('Not Found', { status: 404 })
 
-  const font = await fetch(new URL('/inter.ttf', request.url))
+  const font = await fetch(new URL('/inter.ttf', base_url))
   const title =
     params?.slug?.[0] === 'ui' ? 'Next Docs UI' : 'Next Docs Headless'
 
@@ -21,38 +22,45 @@ export async function GET(
           background: 'linear-gradient(to bottom, black, rgb(20,20,60))'
         }}
       >
-        <div tw="flex flex-row items-center mb-12">
-          <svg
-            width="50"
-            height="50"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="rgb(165 243 252)"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={new URL('/gradient.png', base_url).toString()}
+          tw="absolute inset-0"
+        />
+        <div tw="flex flex-col items-center mb-12 mx-auto">
+          <div
+            tw="flex p-3 border-2 border-blue-400 rounded-xl shadow-xl shadow-blue-600"
+            style={{
+              background: 'linear-gradient(to bottom, black, rgb(0,50,150))'
+            }}
           >
-            <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-            <line x1="3" x2="21" y1="9" y2="9" />
-            <line x1="9" x2="9" y1="21" y2="9" />
-          </svg>
+            <svg
+              width="46"
+              height="46"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="rgb(165 243 252)"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+              <line x1="3" x2="21" y1="9" y2="9" />
+              <line x1="9" x2="9" y1="21" y2="9" />
+            </svg>
+          </div>
+
           <p
-            tw="text-transparent font-bold text-4xl ml-4"
+            tw="text-transparent font-bold text-4xl mt-4"
             style={{
               backgroundClip: 'text',
               background:
-                'linear-gradient(to right, white, rgba(255,255,255,0.7))'
+                'linear-gradient(to bottom, white, rgba(255,255,255,0.5))'
             }}
           >
             {title}
           </p>
         </div>
-
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={new URL('/gradient.png', request.url).toString()}
-          tw="absolute inset-0"
-        />
         <div
           tw="flex flex-col p-10 border border-gray-400/30 rounded-3xl mt-auto"
           style={{

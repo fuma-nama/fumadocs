@@ -4,7 +4,7 @@ import { Inter } from 'next/font/google'
 import 'next-docs-ui/style.css'
 import 'katex/dist/katex.min.css'
 import './style.css'
-import { createMetadata } from '@/utils/metadata'
+import { base_url, createMetadata } from '@/utils/metadata'
 import { Provider } from './provider'
 
 export const metadata = createMetadata({
@@ -13,10 +13,7 @@ export const metadata = createMetadata({
     default: 'Next Docs'
   },
   description: 'The headless ui library for building a documentation website',
-  metadataBase:
-    process.env.NODE_ENV === 'development'
-      ? new URL('http://localhost:3000')
-      : new URL(`https://${process.env.VERCEL_URL}`)
+  metadataBase: base_url
 })
 
 const inter = Inter({
