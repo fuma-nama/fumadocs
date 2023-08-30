@@ -17,7 +17,7 @@ export async function GET(
   return new ImageResponse(
     (
       <div
-        tw="flex flex-col w-full h-full p-12"
+        tw="flex flex-col w-full h-full p-14"
         style={{
           background: 'linear-gradient(to bottom, black, rgb(20,20,60))'
         }}
@@ -27,10 +27,10 @@ export async function GET(
           src={new URL('/gradient.png', base_url).toString()}
           tw="absolute inset-0"
         />
-        <div tw="flex flex-col items-center mb-12 mx-auto">
+        <div tw="flex flex-row items-center mb-12">
           <div
             tw={clsx(
-              'flex p-3 border-2 rounded-xl shadow-xl ',
+              'flex p-4 border-2 rounded-xl shadow-xl ',
               isUI
                 ? 'shadow-blue-600 border-blue-400'
                 : 'shadow-purple-600 border-purple-400'
@@ -43,8 +43,8 @@ export async function GET(
           >
             {isUI ? (
               <svg
-                width="46"
-                height="46"
+                width="50"
+                height="50"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="rgb(165 243 252)"
@@ -58,8 +58,8 @@ export async function GET(
               </svg>
             ) : (
               <svg
-                width="46"
-                height="46"
+                width="50"
+                height="50"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="rgb(233 213 255)"
@@ -75,7 +75,7 @@ export async function GET(
             )}
           </div>
 
-          <p tw="text-white font-bold text-4xl mt-8">
+          <p tw="text-gray-200 font-bold text-5xl ml-8">
             {isUI ? 'Next Docs UI' : 'Next Docs Zeta'}
           </p>
         </div>
@@ -87,7 +87,7 @@ export async function GET(
           }}
         >
           <p tw="text-white font-bold text-6xl">{page.title}</p>
-          <p tw="text-white/70 font-medium text-3xl">
+          <p tw="text-gray-400 font-medium text-3xl">
             {page.description ?? 'The Documentation Framework'}
           </p>
         </div>
