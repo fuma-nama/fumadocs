@@ -3,9 +3,9 @@
   "extends": ["config:base"],
   "packageRules": [
     {
-      "groupName": "Radix UI",
-      "groupSlug": "radix-minor-patch",
-      "matchPackagePatterns": ["^@radix-ui"],
+      "groupName": "Minor and Patch",
+      "groupSlug": "minor-patch",
+      "matchPackagePatterns": ["*"],
       "matchUpdateTypes": ["minor", "patch"]
     }
   ],
