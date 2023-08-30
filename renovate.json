@@ -9,6 +9,9 @@
       "matchUpdateTypes": ["minor", "patch"]
     }
   ],
+  "npm": {
+    "fileMatch": ["(^|/)package\\.json$"]
+  },
   "ignoreDeps": [
     "@types/react",
     "@types/react-dom",
