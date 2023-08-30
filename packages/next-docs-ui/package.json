@@ -58,7 +58,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "cmdk": "^0.2.0",
-    "lucide-react": "^0.268.0",
+    "lucide-react": "^0.271.0",
     "next-docs-zeta": "workspace:*",
     "next-themes": "^0.2.1",
     "tailwind-merge": "^1.14.0"
@@ -75,7 +75,7 @@
     "autoprefixer": "10.4.15",
     "contentlayer": "^0.3.4",
     "next": "13.4.19",
-    "postcss": "8.4.28",
+    "postcss": "8.4.29",
     "postcss-cli": "^10.1.0",
     "postcss-import": "^15.1.0",
     "postcss-lightningcss": "^0.9.0",
