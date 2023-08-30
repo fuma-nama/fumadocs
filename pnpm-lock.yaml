@@ -265,8 +265,8 @@ importers:
         specifier: ^1.0.1
         version: 1.0.1
       rehype-pretty-code:
-        specifier: ^0.9.5
-        version: 0.9.5(shiki@0.14.3)
+        specifier: ^0.10.0
+        version: 0.10.0(shiki@0.14.3)
       remark:
         specifier: ^14.0.3
         version: 14.0.3
@@ -6676,12 +6676,13 @@ packages:
       unist-util-visit: 4.1.2
     dev: false
 
-  /rehype-pretty-code@0.9.5(shiki@0.14.3):
-    resolution: {integrity: sha512-TYA4oDxxn4z/YZ6ZNz7BX5BuyeJzi7D6XxI44T/eqUOBYypwwOd7RZ+IBb1NkERpian/k7sZ1+KsdIbWDRenQw==}
-    engines: {node: ^12.16.0 || >=13.2.0}
+  /rehype-pretty-code@0.10.0(shiki@0.14.3):
+    resolution: {integrity: sha512-qCD071Y+vUxEy9yyrATPk2+W9q7qCbzZgtc9suZhu75bmRQvOlBhJt4d3WvqSMTamkKoFkvqtCjyAk+ggH+aXQ==}
+    engines: {node: '>=16'}
     peerDependencies:
-      shiki: '*'
+      shiki: 0.x
     dependencies:
+      '@types/hast': 2.3.4
       hash-obj: 4.0.0
       parse-numeric-range: 1.3.0
       shiki: 0.14.3
