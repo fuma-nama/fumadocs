@@ -12,6 +12,7 @@ export const metadata = createMetadata({
     template: '%s | Next Docs',
     default: 'Next Docs'
   },
+  themeColor: '#030711',
   description: 'The headless ui library for building a documentation website',
   metadataBase: base_url
 })
