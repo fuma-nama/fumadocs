@@ -19,7 +19,7 @@ export async function GET(
   if (!page) return NextResponse.json('Not Found', { status: 404 })
 
   if (fonts == null) {
-    const regular = await fetch(new URL('/inter-regular.woff', base_url), {
+    const medium = await fetch(new URL('/inter-medium.woff', base_url), {
       cache: 'no-store'
     })
 
@@ -28,8 +28,8 @@ export async function GET(
     })
 
     fonts = [
-      { name: 'Inter', data: await regular.arrayBuffer(), weight: 400 },
-      { name: 'Inter', data: await bold.arrayBuffer(), weight: 600 }
+      { name: 'Inter', data: await medium.arrayBuffer(), weight: 500 },
+      { name: 'Inter', data: await bold.arrayBuffer(), weight: 700 }
     ]
   }
 
@@ -51,7 +51,7 @@ export async function GET(
         <div tw="flex flex-row items-center mb-12">
           <div
             tw={clsx(
-              'flex p-4 border-2 rounded-xl shadow-xl ',
+              'flex p-3 border-2 rounded-xl shadow-xl ',
               isUI
                 ? 'shadow-blue-600 border-blue-400'
                 : 'shadow-purple-600 border-purple-400'
@@ -64,8 +64,8 @@ export async function GET(
           >
             {isUI ? (
               <svg
-                width="48"
-                height="48"
+                width="44"
+                height="44"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="rgb(165 243 252)"
@@ -79,8 +79,8 @@ export async function GET(
               </svg>
             ) : (
               <svg
-                width="48"
-                height="48"
+                width="44"
+                height="44"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="rgb(233 213 255)"
@@ -96,7 +96,14 @@ export async function GET(
             )}
           </div>
 
-          <p tw="text-gray-200 font-bold ml-8 text-5xl">
+          <p
+            tw="text-transparent font-bold ml-6 text-4xl"
+            style={{
+              backgroundClip: 'text',
+              background:
+                'linear-gradient(to bottom, white, rgba(255,255,255,0.5))'
+            }}
+          >
             {isUI ? 'Next Docs UI' : 'Next Docs Zeta'}
           </p>
         </div>
