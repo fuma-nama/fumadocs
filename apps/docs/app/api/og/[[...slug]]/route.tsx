@@ -1,13 +1,15 @@
 import { readFile } from 'fs/promises'
 import path from 'path'
 import { allDocs } from '@/.contentlayer/generated'
-import { base_url } from '@/utils/metadata'
 import { getPage } from '@/utils/source'
 import clsx from 'clsx'
 import { ImageResponse, NextResponse, type NextRequest } from 'next/server'
 
 const medium = readFile(path.resolve('./public/inter-medium.woff'))
 const bold = readFile(path.resolve('./public/inter-bold.woff'))
+const gradientImage = readFile(path.resolve('./public/gradient.png')).then(
+  res => res.toString('base64')
+)
 
 export async function GET(
   _: NextRequest,
@@ -27,7 +29,7 @@ export async function GET(
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={new URL('/gradient.png', base_url).toString()}
+          src={`data:image/png;base64,${await gradientImage}`}
           tw="absolute top-0 right-0"
         />
         <div tw="flex flex-row items-center mb-12">
