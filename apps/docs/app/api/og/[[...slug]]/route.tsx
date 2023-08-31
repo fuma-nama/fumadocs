@@ -40,13 +40,13 @@ export async function GET(
       <div
         tw="flex flex-col w-full h-full p-14"
         style={{
-          background: 'linear-gradient(to bottom, black, rgb(20,20,60))'
+          background: 'linear-gradient(to top, rgb(5,5,30), rgb(20,20,60))'
         }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={new URL('/gradient.png', base_url).toString()}
-          tw="absolute inset-0"
+          tw="absolute top-0 right-0"
         />
         <div tw="flex flex-row items-center mb-12">
           <div
@@ -96,14 +96,7 @@ export async function GET(
             )}
           </div>
 
-          <p
-            tw="text-transparent font-bold ml-6 text-4xl"
-            style={{
-              backgroundClip: 'text',
-              background:
-                'linear-gradient(to bottom, white, rgba(255,255,255,0.5))'
-            }}
-          >
+          <p tw="text-gray-200 font-bold ml-6 text-4xl">
             {isUI ? 'Next Docs UI' : 'Next Docs Zeta'}
           </p>
         </div>
@@ -115,7 +108,7 @@ export async function GET(
           }}
         >
           <p tw="text-white font-bold text-6xl">{page.title}</p>
-          <p tw="text-gray-400 font-medium text-3xl">
+          <p tw="text-gray-300 font-medium text-3xl">
             {page.description ?? 'The Documentation Framework'}
           </p>
         </div>
