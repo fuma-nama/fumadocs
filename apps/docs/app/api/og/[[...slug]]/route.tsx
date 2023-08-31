@@ -2,7 +2,14 @@ import { allDocs } from '@/.contentlayer/generated'
 import { base_url } from '@/utils/metadata'
 import { getPage } from '@/utils/source'
 import clsx from 'clsx'
-import { ImageResponse, NextResponse, type NextRequest } from 'next/server'
+import {
+  ImageResponse,
+  NextResponse,
+  type ImageResponseOptions,
+  type NextRequest
+} from 'next/server'
+
+let fonts: ImageResponseOptions['fonts'] | null = null
 
 export async function GET(
   _: NextRequest,
@@ -11,7 +18,21 @@ export async function GET(
   const page = getPage(params.slug)
   if (!page) return NextResponse.json('Not Found', { status: 404 })
 
-  const font = await fetch(new URL('/inter.ttf', base_url))
+  if (fonts == null) {
+    const regular = await fetch(new URL('/inter-regular.woff', base_url), {
+      cache: 'no-store'
+    })
+
+    const bold = await fetch(new URL('/inter-bold.woff', base_url), {
+      cache: 'no-store'
+    })
+
+    fonts = [
+      { name: 'Inter', data: await regular.arrayBuffer(), weight: 400 },
+      { name: 'Inter', data: await bold.arrayBuffer(), weight: 600 }
+    ]
+  }
+
   const isUI = params?.slug?.[0] === 'ui'
 
   return new ImageResponse(
@@ -75,7 +96,7 @@ export async function GET(
             )}
           </div>
 
-          <p tw="text-gray-200 font-bold ml-8" style={{ fontSize: '2.8rem' }}>
+          <p tw="text-gray-200 font-bold ml-8 text-5xl">
             {isUI ? 'Next Docs UI' : 'Next Docs Zeta'}
           </p>
         </div>
@@ -96,7 +117,7 @@ export async function GET(
     {
       width: 1200,
       height: 630,
-      fonts: [{ name: 'Inter', data: await font.arrayBuffer(), weight: 500 }]
+      fonts
     }
   )
 }
