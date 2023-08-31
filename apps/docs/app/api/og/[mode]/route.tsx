@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { ImageResponse, NextResponse, type NextRequest } from 'next/server'
+import { ImageResponse, type NextRequest } from 'next/server'
 
 export const runtime = 'edge'
 
@@ -14,12 +14,11 @@ export async function GET(
   request: NextRequest,
   { params }: { params: { mode: string } }
 ) {
-  const title = request.nextUrl.searchParams.get('title'),
+  const title = request.nextUrl.searchParams.get('title') ?? 'Next Docs',
     description =
       request.nextUrl.searchParams.get('description') ??
       'The Documentation Framework'
 
-  if (!title) return NextResponse.json('Not Found', { status: 404 })
   const isUI = params.mode === 'ui'
 
   return new ImageResponse(
