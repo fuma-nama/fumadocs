@@ -21,7 +21,7 @@ export async function GET(
       title: title ?? 'Next Docs',
       description: description ?? 'The Documentation Framework',
       isUI: params.mode === 'ui',
-      backgroundImage
+      backgroundImage: await backgroundImage
     }),
     {
       width: 1200,
