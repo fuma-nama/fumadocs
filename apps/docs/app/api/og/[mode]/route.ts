@@ -4,7 +4,7 @@ import { ImageResponse, type NextRequest } from 'next/server'
 
 const medium = readFile(path.resolve('./public/inter-medium.woff'))
 const bold = readFile(path.resolve('./public/inter-bold.woff'))
-const backgroundImage = readFile(path.resolve('./public/gradient.png')).then(
+const backgroundImage = readFile(path.resolve('./public/background.png')).then(
   res => res.buffer
 )
 
