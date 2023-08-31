@@ -1,14 +1,12 @@
+import { readFile } from 'fs/promises'
+import path from 'path'
 import { ImageResponse, type NextRequest } from 'next/server'
 
-export const runtime = 'edge'
-
-const medium = fetch(new URL('./inter-medium.otf', import.meta.url)).then(res =>
-  res.arrayBuffer()
+const medium = readFile(path.resolve('./public/inter-medium.woff'))
+const bold = readFile(path.resolve('./public/inter-bold.woff'))
+const backgroundImage = readFile(path.resolve('./public/gradient.png')).then(
+  res => res.buffer
 )
-
-const backgroundImage = fetch(
-  new URL('./background.png', import.meta.url)
-).then(res => res.arrayBuffer())
 
 export async function GET(
   request: NextRequest,
@@ -27,7 +25,10 @@ export async function GET(
     {
       width: 1200,
       height: 630,
-      fonts: [{ name: 'Inter', data: await medium, weight: 500 }]
+      fonts: [
+        { name: 'Inter', data: await medium, weight: 500 },
+        { name: 'Inter', data: await bold, weight: 700 }
+      ]
     }
   )
 }
