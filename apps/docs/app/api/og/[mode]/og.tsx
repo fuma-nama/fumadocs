@@ -1,3 +1,38 @@
+const UIIcon = (
+  <svg
+    width="44"
+    height="44"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="rgb(165 243 252)"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+    <line x1="3" x2="21" y1="9" y2="9" />
+    <line x1="9" x2="9" y1="21" y2="9" />
+  </svg>
+)
+
+const LayoutIcon = (
+  <svg
+    width="44"
+    height="44"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="rgb(233 213 255)"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <path d="m16 6 4 14" />
+    <path d="M12 6v14" />
+    <path d="M8 8v12" />
+    <path d="M4 4v16" />
+  </svg>
+)
+
 /* eslint-disable  */
 export function OG({
   title,
@@ -8,7 +43,7 @@ export function OG({
   isUI: boolean
   title: string
   description: string
-  backgroundImage: any
+  backgroundImage: ArrayBuffer
 }) {
   return (
     <div
@@ -24,7 +59,7 @@ export function OG({
       <img
         width={1200}
         height={630}
-        src={backgroundImage}
+        src={backgroundImage as any}
         style={{
           position: 'absolute'
         }}
@@ -48,38 +83,7 @@ export function OG({
             })`
           }}
         >
-          {isUI ? (
-            <svg
-              width="44"
-              height="44"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="rgb(165 243 252)"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-              <line x1="3" x2="21" y1="9" y2="9" />
-              <line x1="9" x2="9" y1="21" y2="9" />
-            </svg>
-          ) : (
-            <svg
-              width="44"
-              height="44"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="rgb(233 213 255)"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="m16 6 4 14" />
-              <path d="M12 6v14" />
-              <path d="M8 8v12" />
-              <path d="M4 4v16" />
-            </svg>
-          )}
+          {isUI ? UIIcon : LayoutIcon}
         </div>
 
         <p
