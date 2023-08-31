@@ -73,9 +73,13 @@ export function generateMetadata({ params }: { params: Param }): Metadata {
     page.description ??
     'The headless ui library for building documentation websites'
 
+  const imageParams = new URLSearchParams()
+  imageParams.set('title', page.title)
+  if (page.description) imageParams.set('description', page.description)
+
   const image = {
     alt: 'Banner',
-    url: `/api/og/${slugs.join('/')}`,
+    url: `/api/og/${params.mode}?${imageParams.toString()}`,
     width: 1200,
     height: 630
   }
