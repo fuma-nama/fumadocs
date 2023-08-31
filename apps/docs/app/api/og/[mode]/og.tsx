@@ -1,5 +1,5 @@
 /* eslint-disable  */
-function OG({
+export function OG({
   title,
   description,
   isUI,
