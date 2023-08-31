@@ -1,12 +1,13 @@
 import { readFile } from 'fs/promises'
+import path from 'path'
 import { allDocs } from '@/.contentlayer/generated'
 import { base_url } from '@/utils/metadata'
 import { getPage } from '@/utils/source'
 import clsx from 'clsx'
 import { ImageResponse, NextResponse, type NextRequest } from 'next/server'
 
-const medium = readFile(`${process.cwd()}/public/inter-medium.woff`)
-const bold = readFile(`${process.cwd()}/public/inter-bold.woff`)
+const medium = readFile(path.resolve('./public/inter-medium.woff'))
+const bold = readFile(path.resolve('./public/inter-bold.woff'))
 
 export async function GET(
   _: NextRequest,
