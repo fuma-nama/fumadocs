@@ -2,8 +2,8 @@ import { readFile } from 'fs/promises'
 import path from 'path'
 import { ImageResponse, type NextRequest } from 'next/server'
 
-const medium = readFile(path.resolve('./public/inter-medium.woff'))
-const bold = readFile(path.resolve('./public/inter-bold.woff'))
+const medium = readFile(path.resolve('./public/inter-medium.otf'))
+const bold = readFile(path.resolve('./public/inter-bold.otf'))
 const backgroundImage = readFile(path.resolve('./public/background.png')).then(
   res => res.buffer
 )
