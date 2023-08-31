@@ -1,15 +1,12 @@
+import { readFile } from 'fs/promises'
 import { allDocs } from '@/.contentlayer/generated'
 import { base_url } from '@/utils/metadata'
 import { getPage } from '@/utils/source'
 import clsx from 'clsx'
-import {
-  ImageResponse,
-  NextResponse,
-  type ImageResponseOptions,
-  type NextRequest
-} from 'next/server'
+import { ImageResponse, NextResponse, type NextRequest } from 'next/server'
 
-let fonts: ImageResponseOptions['fonts'] | null = null
+const medium = readFile(`${process.cwd()}/public/inter-medium.woff`)
+const bold = readFile(`${process.cwd()}/public/inter-bold.woff`)
 
 export async function GET(
   _: NextRequest,
@@ -17,22 +14,6 @@ export async function GET(
 ) {
   const page = getPage(params.slug)
   if (!page) return NextResponse.json('Not Found', { status: 404 })
-
-  if (fonts == null) {
-    const medium = await fetch(new URL('/inter-medium.woff', base_url), {
-      cache: 'no-store'
-    })
-
-    const bold = await fetch(new URL('/inter-bold.woff', base_url), {
-      cache: 'no-store'
-    })
-
-    fonts = [
-      { name: 'Inter', data: await medium.arrayBuffer(), weight: 500 },
-      { name: 'Inter', data: await bold.arrayBuffer(), weight: 700 }
-    ]
-  }
-
   const isUI = params?.slug?.[0] === 'ui'
 
   return new ImageResponse(
@@ -104,7 +85,7 @@ export async function GET(
           tw="flex flex-col p-10 border border-gray-400/30 rounded-3xl mt-auto"
           style={{
             background:
-              'linear-gradient(to top, rgba(255,255,255,0.1), transparent)'
+              'linear-gradient(to top, rgba(255,255,255,0.1), rgba(255,255,255,0.02))'
           }}
         >
           <p tw="text-white font-bold text-6xl">{page.title}</p>
@@ -117,7 +98,10 @@ export async function GET(
     {
       width: 1200,
       height: 630,
-      fonts
+      fonts: [
+        { name: 'Inter', data: await medium, weight: 500 },
+        { name: 'Inter', data: await bold, weight: 700 }
+      ]
     }
   )
 }
