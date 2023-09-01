@@ -7,18 +7,16 @@ type HeadingProps<T extends Types> = Omit<ComponentPropsWithoutRef<T>, 'as'> & {
 }
 
 export function Heading<T extends Types = 'h1'>({
-  id,
   as,
   ...props
 }: HeadingProps<T>) {
   const As = as ?? 'h1'
 
   return (
-    <As {...props} className={clsx('nd-group', props.className)}>
-      <span id={id} className="nd-absolute -nd-mt-20" />
+    <As {...props} className={clsx('nd-group nd-scroll-m-20', props.className)}>
       {props.children}
       <div className="nd-not-prose nd-opacity-0 nd-inline nd-font-normal nd-ml-2 nd-transition-opacity nd-text-muted-foreground group-hover:nd-opacity-100">
-        <a href={`#${id}`} aria-label="Link to section">
+        <a href={`#${props.id}`} aria-label="Link to section">
           #
         </a>
       </div>
