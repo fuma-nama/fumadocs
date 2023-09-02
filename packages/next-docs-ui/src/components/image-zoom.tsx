@@ -1,18 +1,19 @@
-import { cn } from '@/utils/cn'
-import { DialogClose } from '@radix-ui/react-dialog'
+'use client'
+
 import Image, { type ImageProps } from 'next/image'
-import { useState } from 'react'
-import { Dialog, DialogContent, DialogTrigger } from './ui/dialog'
+import { type ImgHTMLAttributes } from 'react'
+import Zoom from 'react-medium-image-zoom'
+import 'react-medium-image-zoom/dist/styles.css'
 
 export type ImageZoomProps = ImageProps & {
   /**
    * Image props when zoom in
    */
-  zoomInProps?: ImageProps
+  zoomInProps?: ImgHTMLAttributes<HTMLImageElement>
   /**
    * Image props when zoom out
    */
-  zoomOutProps?: ImageProps
+  zoomOutProps?: Partial<ImageProps>
 }
 
 export function ImageZoom({
@@ -20,31 +21,21 @@ export function ImageZoom({
   zoomOutProps,
   ...props
 }: ImageZoomProps) {
-  const [zoom, setZoom] = useState(false)
-
   return (
-    <Dialog open={zoom} onOpenChange={setZoom}>
-      <DialogTrigger asChild>
-        <Image
-          sizes="(max-width: 1024px) 100vw, (max-width: 1280px) 70vw, 800px"
-          {...props}
-          {...zoomOutProps}
-          className={cn('nd-cursor-zoom-in nd-rounded-lg', props.className)}
-        />
-      </DialogTrigger>
-      <DialogContent className="!nd-w-[90vw] nd-max-w-4xl nd-p-0">
-        <DialogClose asChild>
-          <Image
-            sizes="(max-width: 900px) 90vw, 900px"
-            {...props}
-            {...zoomInProps}
-            className={cn(
-              'nd-cursor-zoom-out nd-w-full nd-rounded-lg',
-              props.className
-            )}
-          />
-        </DialogClose>
-      </DialogContent>
-    </Dialog>
+    <Zoom
+      wrapElement="span"
+      zoomMargin={40}
+      zoomImg={{
+        src: props.src as string,
+        sizes: undefined,
+        ...zoomInProps
+      }}
+    >
+      <Image
+        sizes="(max-width: 1024px) 100vw, (max-width: 1280px) 70vw, 800px"
+        {...props}
+        {...zoomOutProps}
+      />
+    </Zoom>
   )
 }

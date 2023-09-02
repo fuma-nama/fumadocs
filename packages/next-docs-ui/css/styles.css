@@ -24,6 +24,14 @@ body {
   @apply nd-border-l-2 nd-border-l-primary nd-bg-primary/10;
 }
 
+[data-rmiz-modal-overlay='visible'] {
+  @apply !nd-bg-background/50;
+}
+
+[data-rmiz-btn-unzoom] {
+  @apply nd-hidden;
+}
+
 :root {
   --background: 0 0% 100%;
   --foreground: 222.2 47.4% 11.2%;
