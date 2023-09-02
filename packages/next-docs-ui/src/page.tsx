@@ -7,62 +7,53 @@ import { TOC } from '@/components/toc'
 import type { TableOfContents } from 'next-docs-zeta/server'
 import { useContext, useEffect, useState, type ReactNode } from 'react'
 import { I18nContext } from './contexts/i18n'
-import {
-  replaceOrDefault,
-  type ReplaceOrDisable
-} from './utils/replace-or-default'
+import { replaceOrDefault } from './utils/replace-or-default'
 
 export type DocsPageProps = {
   toc?: TableOfContents
 
-  /**
-   * Replace or disable TOC (by passing false)
-   */
-  replaceToc?: ReplaceOrDisable
+  tableOfContent?: Partial<{
+    enabled: boolean
+    component: ReactNode
+    /**
+     * Custom content in TOC container
+     */
+    footer: ReactNode
+  }>
 
   /**
    * Replace or disable breadcrumb
    */
-  breadcrumb?: ReplaceOrDisable
+  breadcrumb?: Partial<{
+    enabled: boolean
+    component: ReactNode
+  }>
 
+  footer?: FooterProps | false
   lastUpdate?: Date | null
 
-  /**
-   * Custom content in TOC container
-   */
-  tocContent?: ReactNode
   children: ReactNode
-  footer?: FooterProps | false
 }
 
-export function DocsPage(props: DocsPageProps) {
-  const toc = replaceOrDefault(
-    props.replaceToc,
-    <div className="nd-relative nd-w-[250px] max-xl:nd-hidden">
-      <div className="nd-sticky nd-flex nd-flex-col nd-top-16 nd-py-16 nd-max-h-[calc(100vh-4rem)]">
-        {props.toc && props.toc.length > 0 && <TOC items={props.toc} />}
-        {props.tocContent && (
-          <div className="nd-flex nd-flex-col nd-border-t nd-pt-4 nd-mt-4 first:nd-border-t-0 first:nd-mt-0 first:nd-pt-0">
-            {props.tocContent}
-          </div>
-        )}
-      </div>
-    </div>
-  )
-
-  const breadcrumb = replaceOrDefault(props.breadcrumb, <Breadcrumb />)
-
+export function DocsPage({
+  tableOfContent = {},
+  breadcrumb = {},
+  ...props
+}: DocsPageProps) {
   return (
     <>
       <article className="nd-flex nd-flex-col nd-gap-6 nd-w-0 nd-flex-1 nd-py-8 md:nd-py-16">
-        {breadcrumb}
+        {replaceOrDefault(breadcrumb, <Breadcrumb />)}
         {props.children}
         {props.lastUpdate && <LastUpdate date={props.lastUpdate} />}
         {props.footer != null && props.footer !== false && (
           <Footer {...props.footer} />
         )}
       </article>
-      {toc}
+      {replaceOrDefault(
+        tableOfContent,
+        <TOC items={props.toc ?? []} footer={tableOfContent.footer} />
+      )}
     </>
   )
 }

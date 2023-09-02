@@ -4,7 +4,7 @@ import { tree } from '../source'
 
 export default function RootDocsLayout({ children }: { children: ReactNode }) {
   return (
-    <DocsLayout tree={tree} navTitle="My App">
+    <DocsLayout tree={tree} nav={{ title: 'My App' }}>
       {children}
     </DocsLayout>
   )

@@ -39,16 +39,18 @@ export default async function Page({ params }: { params: Param }) {
       toc={toc}
       footer={neighbours}
       lastUpdate={time}
-      tocContent={
-        <a
-          href={`https://github.com/SonMooSans/next-docs/blob/main/apps/docs/content/${page._raw.sourceFilePath}`}
-          target="_blank"
-          rel="noreferrer noopener"
-          className="text-xs inline-flex text-muted-foreground items-center hover:text-foreground"
-        >
-          Edit on Github <ExternalLinkIcon className="ml-1 w-3 h-3" />
-        </a>
-      }
+      tableOfContent={{
+        footer: (
+          <a
+            href={`https://github.com/SonMooSans/next-docs/blob/main/apps/docs/content/${page._raw.sourceFilePath}`}
+            target="_blank"
+            rel="noreferrer noopener"
+            className="text-xs inline-flex text-muted-foreground items-center hover:text-foreground"
+          >
+            Edit on Github <ExternalLinkIcon className="ml-1 w-3 h-3" />
+          </a>
+        )
+      }}
     >
       <MDXContent>
         <div className="nd-not-prose mb-12">

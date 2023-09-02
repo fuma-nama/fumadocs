@@ -18,6 +18,7 @@ import { ThemeToggle } from './theme-toggle'
 export type NavLinkProps = {
   icon: ReactNode
   href: string
+  label: string
   external?: boolean
 }
 
@@ -28,11 +29,14 @@ export type NavItemProps = {
 }
 
 type NavProps = {
+  title: ReactNode
+
+  url?: string
   items?: NavItemProps[]
   links?: NavLinkProps[]
   enableSidebar?: boolean
   collapsibleSidebar?: boolean
-  children: ReactNode
+  children?: ReactNode
 }
 
 const itemVariants = cva(
@@ -40,6 +44,8 @@ const itemVariants = cva(
 )
 
 export function Nav({
+  title,
+  url = '/',
   links,
   items,
   enableSidebar = true,
@@ -49,6 +55,12 @@ export function Nav({
   return (
     <nav className="nd-sticky nd-top-0 nd-inset-x-0 nd-z-50 nd-backdrop-blur-lg">
       <div className="nd-container nd-flex nd-flex-row nd-items-center nd-h-16 nd-gap-4 nd-border-b nd-border-foreground/10 nd-max-w-[1300px]">
+        <Link
+          href={url}
+          className="nd-font-medium hover:nd-text-muted-foreground"
+        >
+          {title}
+        </Link>
         {children}
         {items?.map((item, key) => <NavItem key={key} {...item} />)}
         <div className="nd-flex nd-flex-row nd-justify-end nd-items-center nd-flex-1">
@@ -132,6 +144,7 @@ function NavItem(props: NavItemProps) {
 function NavLink(props: NavLinkProps) {
   return (
     <Link
+      aria-label={props.label}
       href={props.href}
       target={props.external ? '_blank' : '_self'}
       rel={props.external ? 'noreferrer noopener' : undefined}

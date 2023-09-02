@@ -1,101 +1,94 @@
 'use client'
 
-import { Nav, type NavItemProps } from '@/components/nav'
-import { Sidebar } from '@/components/sidebar'
+import { Nav, type NavItemProps, type NavLinkProps } from '@/components/nav'
+import { Sidebar, type SidebarProps } from '@/components/sidebar'
 import { GithubIcon } from 'lucide-react'
 import type { PageTree } from 'next-docs-zeta/server'
-import Link from 'next/link'
 import { type ReactNode } from 'react'
 import { LayoutContext } from './contexts/tree'
-import {
-  replaceOrDefault,
-  type ReplaceOrDisable
-} from './utils/replace-or-default'
+import { replaceOrDefault } from './utils/replace-or-default'
 
 export type DocsLayoutProps = {
-  /**
-   * Navbar title
-   */
-  navTitle?: string | ReactNode
-  navItems?: NavItemProps[]
-
   tree: PageTree
 
   /**
    * Replace or disable navbar
    */
-  nav?: ReplaceOrDisable
+  nav?: Partial<{
+    enabled: boolean
+    component: ReactNode
+    title: ReactNode
+    /**
+     * Redirect url of title
+     * @default '/''
+     */
+    url: string
+    items: NavItemProps[]
+    /**
+     * Github url displayed on the navbar
+     */
+    githubUrl: string
+  }>
 
-  /**
-   * Github url displayed on the navbar
-   */
-  githubUrl?: string
+  sidebar?: Partial<
+    SidebarProps & {
+      enabled: boolean
+      component: ReactNode
+      collapsible: boolean
 
-  /**
-   * Replace or disable sidebar
-   */
-  sidebar?: ReplaceOrDisable
-
-  /**
-   * Open folders by default if their level is lower or equal to a specific level
-   * (Starting from 1)
-   *
-   * @default 1
-   */
-  sidebarDefaultOpenLevel?: number
-
-  sidebarCollapsible?: boolean
-
-  sidebarBanner?: ReactNode
-
-  sidebarFooter?: ReactNode
+      /**
+       * Open folders by default if their level is lower or equal to a specific level
+       * (Starting from 1)
+       *
+       * @default 1
+       */
+      defaultOpenLevel: number
+    }
+  >
 
   children: ReactNode
 }
 
-export function DocsLayout(props: DocsLayoutProps) {
-  const links = props.githubUrl
-    ? [
-        {
-          href: props.githubUrl,
-          icon: <GithubIcon aria-label="Github" className="nd-w-5 nd-h-5" />,
-          external: true
-        }
-      ]
-    : []
-  const sidebar = replaceOrDefault(
-    props.sidebar,
-    <Sidebar banner={props.sidebarBanner} footer={props.sidebarFooter} />
-  )
-
-  const navbar = replaceOrDefault(
-    props.nav,
-    <Nav
-      links={links}
-      items={props.navItems}
-      enableSidebar={sidebar != null}
-      collapsibleSidebar={props.sidebarCollapsible}
-    >
-      <Link
-        href="/"
-        className="nd-font-semibold hover:nd-text-muted-foreground"
-      >
-        {props.navTitle}
-      </Link>
-    </Nav>
-  )
+export function DocsLayout({
+  nav = {},
+  sidebar = {},
+  tree,
+  children
+}: DocsLayoutProps) {
+  const links: NavLinkProps[] = []
+  if (nav.githubUrl)
+    links.push({
+      href: nav.githubUrl,
+      label: 'Github',
+      icon: <GithubIcon className="nd-w-5 nd-h-5" />,
+      external: true
+    })
 
   return (
     <LayoutContext.Provider
       value={{
-        tree: props.tree,
-        sidebarDefaultOpenLevel: props.sidebarDefaultOpenLevel
+        tree,
+        sidebarDefaultOpenLevel: sidebar.defaultOpenLevel ?? 1
       }}
     >
-      {navbar}
+      {replaceOrDefault(
+        nav,
+        <Nav
+          title={nav.title}
+          url={nav.url}
+          links={links}
+          items={nav.items}
+          enableSidebar={sidebar.enabled ?? true}
+          collapsibleSidebar={sidebar.collapsible ?? true}
+        />
+      )}
       <div className="nd-flex nd-flex-row nd-container nd-max-w-[1300px] nd-gap-10">
-        {sidebar}
-        {props.children}
+        {replaceOrDefault(
+          sidebar,
+          <Sidebar banner={sidebar.banner} footer={sidebar.footer} />
+        )}
+
+        {children}
       </div>
     </LayoutContext.Provider>
   )

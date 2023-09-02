@@ -14,7 +14,7 @@ import type { ReactNode } from 'react'
 import { cloneElement, useContext, useEffect, useMemo, useState } from 'react'
 import { ThemeToggle } from './theme-toggle'
 
-type SidebarProps = {
+export type SidebarProps = {
   banner?: ReactNode
   footer?: ReactNode
 }

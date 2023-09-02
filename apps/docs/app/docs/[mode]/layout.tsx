@@ -42,16 +42,18 @@ export default function Layout({
       </div>
       <DocsLayout
         tree={tree}
-        nav={false}
-        sidebarBanner={
-          <div className="flex flex-row gap-2 items-center p-2 rounded-lg border bg-card text-card-foreground transition-colors shadow-lg shadow-background hover:bg-muted">
-            <Icon className="w-9 h-9 p-1 shrink-0 border rounded-md text-primary bg-background" />
-            <div>
-              <p className="font-medium text-sm">{title}</p>
-              <p className="text-muted-foreground text-xs">{description}</p>
+        nav={{ enabled: false }}
+        sidebar={{
+          banner: (
+            <div className="flex flex-row gap-2 items-center p-2 rounded-lg border bg-card text-card-foreground transition-colors hover:bg-muted">
+              <Icon className="w-9 h-9 p-1 shrink-0 border rounded-md text-primary bg-background" />
+              <div>
+                <p className="font-medium text-sm">{title}</p>
+                <p className="text-muted-foreground text-xs">{description}</p>
+              </div>
             </div>
-          </div>
-        }
+          )
+        }}
       >
         {children}
       </DocsLayout>

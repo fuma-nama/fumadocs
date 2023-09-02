@@ -3,13 +3,28 @@ import { cn } from '@/utils/cn'
 import { TextIcon } from 'lucide-react'
 import type { TOCItemType } from 'next-docs-zeta/server'
 import * as Primitive from 'next-docs-zeta/toc'
-import { useContext } from 'react'
+import { useContext, type ReactNode } from 'react'
 
-export function TOC({ items }: { items: TOCItemType[] }) {
+export function TOC(props: { items: TOCItemType[]; footer: ReactNode }) {
+  return (
+    <div className="nd-relative nd-w-[250px] max-xl:nd-hidden">
+      <div className="nd-sticky nd-flex nd-flex-col nd-top-16 nd-gap-4 nd-py-16 nd-max-h-[calc(100vh-4rem)]">
+        {props.items.length > 0 && <TOCItems items={props.items} />}
+        {props.footer && (
+          <div className="nd-flex nd-flex-col nd-border-t nd-pt-4 first:nd-border-t-0 first:nd-pt-0">
+            {props.footer}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function TOCItems({ items }: { items: TOCItemType[] }) {
   const { toc = 'On this page' } = useContext(I18nContext).text ?? {}
 
   return (
-    <Primitive.TOCProvider toc={items} className="nd-overflow-hidden nd-flex-1">
+    <Primitive.TOCProvider toc={items} className="nd-overflow-hidden">
       <h3 className="nd-inline-flex nd-flex-row nd-items-center nd-font-medium nd-text-sm nd-mb-4">
         <TextIcon className="nd-inline nd-w-4 nd-h-4 nd-mr-2" /> {toc}
       </h3>
