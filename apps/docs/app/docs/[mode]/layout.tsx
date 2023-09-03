@@ -4,6 +4,8 @@ import { LayoutIcon, LibraryIcon } from 'lucide-react'
 import { DocsLayout } from 'next-docs-ui/layout'
 import Image from 'next/image'
 import type { ReactNode } from 'react'
+import packageJsonUI from '../../../../../packages/next-docs-ui/package.json'
+import packageJsonZeta from '../../../../../packages/next-docs/package.json'
 
 export default function Layout({
   params,
@@ -13,11 +15,15 @@ export default function Layout({
   children: ReactNode
 }) {
   const tree = getTree(params.mode)
-
-  const [Icon, title, description] =
+  const [Icon, title, description, version] =
     params.mode === 'ui'
-      ? [LayoutIcon, 'Next Docs UI', 'The framework']
-      : [LibraryIcon, 'Next Docs Zeta', 'The headless library']
+      ? [LayoutIcon, 'Next Docs UI', 'The framework', packageJsonUI.version]
+      : [
+          LibraryIcon,
+          'Next Docs Zeta',
+          'The headless library',
+          packageJsonZeta.version
+        ]
 
   return (
     <main
@@ -45,7 +51,10 @@ export default function Layout({
         nav={{ enabled: false }}
         sidebar={{
           banner: (
-            <div className="flex flex-row gap-2 items-center p-2 rounded-lg border bg-card text-card-foreground transition-colors hover:bg-muted">
+            <div className="relative flex flex-row gap-2 items-center p-2 rounded-lg border bg-card text-card-foreground transition-colors hover:bg-muted">
+              <p className="absolute right-2 top-2 text-muted-foreground text-xs">
+                {version}
+              </p>
               <Icon className="w-9 h-9 p-1 shrink-0 border rounded-md text-primary bg-background" />
               <div>
                 <p className="font-medium text-sm">{title}</p>
