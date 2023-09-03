@@ -1,5 +1,17 @@
 # next-docs-ui
 
+## 2.0.0
+
+### Major Changes
+
+- 9bf1297: Update API usage
+
+### Patch Changes
+
+- e8b3e50: Use react-medium-image-zoom for zoom images
+- 6c408d0: Change layout width
+  - next-docs-zeta@2.0.0
+
 ## 1.6.9
 
 ### Patch Changes

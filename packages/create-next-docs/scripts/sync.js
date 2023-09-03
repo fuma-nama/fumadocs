@@ -21,6 +21,7 @@ for (const source of sources) {
       '!node_modules',
       '!pnpm-lock.yaml',
       '!next-env.d.ts',
+      '!.turbo',
       '!.next',
       '!.contentlayer'
     ],

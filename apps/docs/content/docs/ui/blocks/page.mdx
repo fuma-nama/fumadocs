@@ -23,25 +23,26 @@ import { DocsPage } from 'next-docs-ui/page'
 
 <TypeTable
   type={{
-    tocContent: {
-      type: 'ReactNode',
-      description: 'Extra content at the bottom of TOC'
+    tableOfContent: {
+      type: 'object',
+      typeDescriptionLink: '#table-of-contents'
+    },
+    breadcrumb: {
+      type: 'object',
+      typeDescriptionLink: '#breadcrumb'
     },
     toc: {
       type: 'TOCItemType[]',
+      description: 'Table of contents in this page',
       typeDescription: `{ title: string, url: string, depth: number }[]`
     },
-    replaceToc: {
-      type: 'ReactNode | false'
-    },
     footer: {
-      type: 'FooterProps',
+      type: 'object',
       typeDescriptionLink: '#footer'
     },
     lastUpdate: {
       type: 'Date'
-    },
-    children: { type: 'ReactNode' }
+    }
   }}
 />
 
@@ -49,22 +50,22 @@ import { DocsPage } from 'next-docs-ui/page'
 
 ### Table of Contents
 
-It is a tree with all the headings in your document. For Markdown or MDX
+It is an array with all the headings in your document. For Markdown or MDX
 documents, You can parse TOC by using the
 [TOC Utility](/docs/headless/utils/get-toc).
 
-Here is an example using Contentlayer.
+Also, you can easily customise or disable TOC in your documentation.
 
-```tsx
-const path = (params.slug ?? []).join('/')
-const page = allDocs.find(page => page.slug === path)
-
-if (page == null) {
-  notFound()
-}
-
-const toc = await getTableOfContents(page.body.raw)
-```
+<TypeTable
+  type={{
+    enabled: { type: 'boolean', default: 'true' },
+    component: { type: 'ReactNode' },
+    footer: {
+      type: 'ReactNode',
+      description: 'Custom content in TOC container'
+    }
+  }}
+/>
 
 ### Last Update Time
 
@@ -77,7 +78,6 @@ For Git hosted documents, you can use
 Zeta.
 
 ```tsx
-import { DocsPage } from 'next-docs-ui/page'
 import { getGitLastEditTime } from 'next-docs-zeta/server'
 
 const time = await getGitLastEditTime(
@@ -85,9 +85,7 @@ const time = await getGitLastEditTime(
   'apps/docs/content/' + page._raw.sourceFilePath
 )
 
-<DocsPage toc={toc} lastUpdate={time}>
-  ...
-</DocsPage>
+<DocsPage lastUpdate={time} />
 ```
 
 ### Footer
@@ -95,7 +93,7 @@ const time = await getGitLastEditTime(
 You need to manually enable it by passing the previous and next page to the
 `footer` prop.
 
-To get those pages, it's recommended to use the
+To obtain these pages, it's recommended to use the
 [Get Neighbours](/docs/headless/utils/find-neighbour) Utility.
 
 <TypeTable
@@ -114,18 +112,22 @@ To get those pages, it's recommended to use the
 #### Example
 
 ```tsx
-import { getPageUrl } from 'next-docs-zeta/contentlayer'
 import { findNeighbour } from 'next-docs-zeta/server'
 
 // Get the url of page
-const url = getPageUrl(page.slug.split('/'), '/docs')
+const url = getPageUrl(page.slug)
 const neighbours = findNeighbour(tree, url)
 
-<DocsPage toc={toc} footer={neighbours}>
-  ...
-</DocsPage>
+<DocsPage footer={neighbours} />
 ```
 
 ### Breadcrumb
 
 For now, You can't control the behaviours of breadcrumb.
+
+<TypeTable
+  type={{
+    enabled: { type: 'boolean', default: 'true' },
+    component: { type: 'ReactNode' }
+  }}
+/>

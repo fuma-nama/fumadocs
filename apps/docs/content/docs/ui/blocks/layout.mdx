@@ -24,97 +24,61 @@ export default function Layout({ children }) {
 
 <TypeTable
   type={{
-    navTitle: { description: 'Navbar title', type: 'ReactNode | string' },
-    navItems: { description: 'Navbar items', type: 'NavItemProps[]' },
     tree: { type: 'PageTree' },
     nav: {
-      type: 'ReactNode | false',
-      description: 'Replace or disable default navbar'
-    },
-    githubUrl: {
-      type: 'string',
-      description: 'Github url displayed on the navbar'
+      type: 'object',
+      typeDescriptionLink: '#navbar'
     },
     sidebar: {
-      type: 'ReactNode | false',
-      description: 'Disable or replace default sidebar'
-    },
-    sidebarCollapsible: {
-      type: 'boolean',
-      description: 'Enable collapsing sidebar',
-      default: 'true'
-    },
-    sidebarDefaultOpenLevel: {
-      type: 'number',
-      description:
-        'Open folders by default if their level is lower or equal to a specific level (Starting from 1)',
-      default: '1'
-    },
-    sidebarBanner: {
-      type: 'ReactNode',
-      description: 'Content at the top of sidebar'
-    },
-    sidebarFooter: {
-      type: 'ReactNode',
-      description: 'Content at the bottom of sidebar'
+      type: 'object',
+      typeDescriptionLink: '#sidebar'
     },
     children: { type: 'ReactNode' }
   }}
 />
 
-### Disabling Navbar
+### Navbar
+
+<TypeTable
+  type={{
+    enabled: { type: 'boolean', default: 'true' },
+    component: { type: 'ReactNode' },
+    title: { type: 'ReactNode' },
+    url: { description: 'Redirect url of title', type: 'string', default: '/' },
+    items: { type: 'NavItemProps[]' },
+    githubUrl: {
+      description: 'Github url displayed on the navbar',
+      type: 'string'
+    }
+  }}
+/>
+
+#### Shared Navbar
 
 It is common to share a navbar across all the pages.
 
-To achieve this, you may disable the default navbar by passing `false` to the
-`nav` prop.
+To achieve this, you may disable the default navbar and place your own instead.
 
 The default navbar is exported from `next-docs-ui/component`, you can add it to
 the root layout (under the root provider).
 
-<br />
+### Sidebar
 
-<Accordions type="single" collapsible>
-<Accordion title="Custom Navbar">
-
-Example for custom navbar using Tailwind CSS.
-
-```tsx
-'use client'
-
-import { GithubIcon } from 'lucide-react'
-import { Nav as OriginalNav } from 'next-docs-ui/components'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-
-export function Nav() {
-  const pathname = usePathname()
-  const inDocs = pathname.startsWith('/docs/') || pathname === '/docs'
-
-  return (
-    <OriginalNav
-      enableSidebar={inDocs}
-      links={[
-        {
-          icon: <GithubIcon className="h-5 w-5" />,
-          href: 'https://github.com/SonMooSans/next-docs',
-          external: true
-        }
-      ]}
-    >
-      <Link
-        href="/"
-        className="hover:text-muted-foreground whitespace-nowrap font-semibold"
-      >
-        Next Docs
-      </Link>
-    </OriginalNav>
-  )
-}
-```
-
-</Accordion>
-</Accordions>
+<TypeTable
+  type={{
+    enabled: { type: 'boolean', default: 'true' },
+    banner: { type: 'ReactNode' },
+    footer: { type: 'ReactNode' },
+    component: { type: 'ReactNode' },
+    collapsible: { type: 'boolean', default: 'true' },
+    defaultOpenLevel: {
+      type: 'number',
+      default: '1',
+      description:
+        'Open folders by default if their level is lower or equal to a specific level'
+    }
+  }}
+/>
 
 ### Example
 

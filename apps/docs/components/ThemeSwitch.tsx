@@ -73,21 +73,16 @@ const neturalTheme = `
   }`
 
 const fullLayoutTheme = `
-.nd-container.nd-max-w-\\[1300px\\] {
+.nd-container {
   max-width: none;
 }
 
 main > div:nth-of-type(2) > aside:nth-child(1) {
-  height: 100vh;
   border-right-width: 1px;
 }
 
 main > div:nth-of-type(2) > div:nth-child(3) {
   width: 250px;
-}
-
-main > div:nth-of-type(2) > div:nth-child(3) > div {
-  max-height: 100vh;
 }
 
 article {

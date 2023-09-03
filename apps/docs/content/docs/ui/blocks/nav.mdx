@@ -4,6 +4,8 @@ description: The default Navbar component with a sidebar trigger and searchbar.
 icon: NavigationIcon
 ---
 
+import { TypeTable } from 'next-docs-ui/components/type-table'
+
 The default Navbar component with a sidebar toggle and search dialog trigger.
 
 > **Note:** It has been included in the `<DocsLayout />` by default.
@@ -12,23 +14,24 @@ The default Navbar component with a sidebar toggle and search dialog trigger.
 
 ```tsx
 import { Nav as OriginalNav } from 'next-docs-ui/components'
-import Link from 'next/link'
 
 export function Nav() {
-  return (
-    <OriginalNav>
-      <Link
-        href="/"
-        className="hover:text-muted-foreground whitespace-nowrap font-semibold"
-      >
-        Next Docs
-      </Link>
-    </OriginalNav>
-  )
+  return <OriginalNav title="Next Docs" />
 }
 ```
 
-### Enable Sidebar
+<TypeTable
+  type={{
+    title: { type: 'ReactNode' },
+    url: { type: 'string', default: '/' },
+    items: { type: 'NavItemProps[]' },
+    links: { type: 'NavLinkProps[]' },
+    enableSidebar: { type: 'boolean' },
+    collapsibleSidebar: { type: 'boolean' }
+  }}
+/>
+
+### Disable Sidebar
 
 As your navbar can be displayed in any pages without a sidebar, you may want to
 hide the sidebar trigger in specific pages.
@@ -39,15 +42,31 @@ hide the sidebar trigger in specific pages.
 </Nav>
 ```
 
-### Links
+### Items
 
-You can pass an array of links to the component, it needs an icon with
-`aria-label`.
+You can pass an array of items to the component, it needs a children, href and a
+boolean indicating whether it is an external link.
 
 ```tsx
 const links = [
   {
-    icon: <GithubIcon aria-label="Github" className="h-5 w-5" />,
+    children: 'Documentation',
+    href: '/docs',
+    external: false
+  }
+]
+```
+
+### Links
+
+You can pass an array of links to the component, it needs an icon and label (for
+`aria-label`).
+
+```tsx
+const links = [
+  {
+    label: 'Github',
+    icon: <GithubIcon className="h-5 w-5" />,
     href: 'https://github.com/SonMooSans/next-docs',
     external: true
   }
