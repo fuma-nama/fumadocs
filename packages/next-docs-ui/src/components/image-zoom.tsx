@@ -10,17 +10,9 @@ export type ImageZoomProps = ImageProps & {
    * Image props when zoom in
    */
   zoomInProps?: ImgHTMLAttributes<HTMLImageElement>
-  /**
-   * Image props when zoom out
-   */
-  zoomOutProps?: Partial<ImageProps>
 }
 
-export function ImageZoom({
-  zoomInProps,
-  zoomOutProps,
-  ...props
-}: ImageZoomProps) {
+export function ImageZoom({ zoomInProps, ...props }: ImageZoomProps) {
   return (
     <Zoom
       wrapElement="span"
@@ -34,7 +26,6 @@ export function ImageZoom({
       <Image
         sizes="(max-width: 1024px) 100vw, (max-width: 1280px) 70vw, 800px"
         {...props}
-        {...zoomOutProps}
       />
     </Zoom>
   )
