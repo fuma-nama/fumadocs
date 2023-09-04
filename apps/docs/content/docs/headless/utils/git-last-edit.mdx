@@ -15,3 +15,33 @@ const time = await getGitLastEditTime(
   'content/' + page._raw.sourceFilePath
 )
 ```
+
+### Github Token
+
+Notice that you may easily reach the rate limit in development mode. Hence, you
+should pass a Github token for a higher rate limit.
+
+Learn more about
+[Authenticating to the REST API](https://docs.github.com/en/rest/overview/authenticating-to-the-rest-api).
+
+```ts
+import { getGitLastEditTime } from 'next-docs-zeta/server'
+
+const time = await getGitLastEditTime(
+  'SonMooSans/next-docs',
+  'content/' + page._raw.sourceFilePath,
+  undefined,
+  {
+    headers: {
+      Authorization: 'Bearer xxx'
+    }
+  }
+)
+```
+
+Also, you can skip this in development mode if you don't need that
+functionality.
+
+```ts
+process.env.NODE_ENV === 'development'? null : getGitLastEditTime(...)
+```
