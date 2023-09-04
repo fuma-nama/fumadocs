@@ -26,7 +26,7 @@ const itemVariants = cva(
       active: {
         true: 'nd-text-primary nd-bg-primary/10 nd-font-medium',
         false:
-          'nd-text-muted-foreground nd-transition-colors hover:nd-text-accent-foreground'
+          'nd-text-muted-foreground nd-transition-colors hover:nd-text-accent-foreground hover:nd-bg-accent/50'
       }
     }
   }
@@ -39,11 +39,13 @@ export function Sidebar({ banner, footer }: SidebarProps) {
   return (
     <Base.SidebarList
       minWidth={1024} // lg
-      className={clsx(
+      className={cn(
         'nd-flex nd-flex-col',
-        open ? 'lg:nd-w-[260px]' : 'lg:nd-w-0 nd-overflow-hidden nd-opacity-0',
+        open
+          ? 'lg:nd-w-[260px]'
+          : 'lg:nd-w-0 lg:nd-overflow-hidden lg:nd-opacity-0',
         'lg:nd-sticky lg:nd-top-16 lg:nd-h-[calc(100vh-4rem)] lg:nd-transition-[width,opacity]',
-        'max-lg:nd-w-full max-lg:nd-px-8 max-lg:nd-fixed max-lg:nd-inset-y-0 max-lg:nd-right-0 max-lg:nd-bg-background/70 max-lg:nd-backdrop-blur-lg max-lg:nd-z-40 max-lg:nd-pt-16 max-lg:data-[open=false]:nd-hidden sm:max-lg:nd-max-w-sm sm:max-lg:nd-border-l'
+        'max-lg:nd-w-full max-lg:nd-px-8 max-lg:nd-fixed max-lg:nd-inset-y-0 max-lg:nd-right-0 max-lg:nd-bg-background/80 max-lg:nd-backdrop-blur-lg max-lg:nd-z-40 max-lg:nd-pt-16 max-lg:data-[open=false]:nd-hidden sm:max-lg:nd-max-w-sm sm:max-lg:nd-border-l'
       )}
     >
       <ScrollArea className="nd-flex-1 [mask-image:linear-gradient(to_top,transparent,white_40px)] max-lg:-nd-mr-4 lg:nd-w-[260px]">
