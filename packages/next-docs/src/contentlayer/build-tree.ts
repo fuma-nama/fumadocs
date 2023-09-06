@@ -97,21 +97,20 @@ function buildFolderNode(
 
   const pages = ctx.pages.get(ctx.lang ?? '') ?? []
 
-  // files under the directory
-  const children: TreeNode[] = pages
-    .filter(page => page._raw.sourceFileDir === path)
-    .flatMap(page => {
-      const node = buildFileNode(page, ctx)
+  const children: TreeNode[] = []
 
-      if (page._raw.flattenedPath === path) {
-        index = node
-        if (!keepIndex) return []
-      }
+  for (const page of pages) {
+    if (page._raw.sourceFileDir !== path) continue
+    const node = buildFileNode(page, ctx)
 
-      return node
-    })
+    if (page._raw.flattenedPath === path) {
+      index = node
+      continue
+    }
 
-  // find folders under the directory
+    children.push(node)
+  }
+
   const folders = new Set<string>(
     pages
       .filter(
@@ -125,6 +124,9 @@ function buildFolderNode(
   for (const folder of folders) {
     children.push(buildFolderNode(folder, ctx))
   }
+
+  children.sort((next, prev) => next.name.localeCompare(prev.name))
+  if (keepIndex && index) children.unshift(index)
 
   return {
     name:
