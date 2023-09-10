@@ -12,20 +12,13 @@ const customMetaRegex = /custom="([^"]+)"/
  */
 const rehypePrettyCodeOptions = {
   theme: 'css-variables',
-  keepBackground: false,
-  onVisitLine(node) {
-    if (node.children.length === 0) {
-      node.children = [{ type: 'text', value: ' ' }]
-    }
+  defaultLang: {
+    block: 'text'
   },
+  grid: true,
+  keepBackground: false,
   filterMetaString(s) {
     return s.replace(customMetaRegex, '')
-  },
-  onVisitHighlightedLine(node) {
-    node.properties.className.push('line-highlighted')
-  },
-  onVisitHighlightedWord(node) {
-    node.properties.className = ['word-highlighted']
   }
 }
 
@@ -51,9 +44,6 @@ export const rehypeNextDocs = () => async tree => {
       if (typeof codeEl.data?.meta === 'string') {
         node.nd_custom = codeEl.data.meta.match(customMetaRegex)?.[1]
       }
-
-      // Add default language `text` for code-blocks
-      codeEl.properties.className ||= ['language-text']
     }
   })
 

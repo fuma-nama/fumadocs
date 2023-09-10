@@ -21,7 +21,7 @@ export function Pre({ title, allowCopy = true, ...props }: PreProps) {
   return (
     <div
       className="nd-relative nd-group nd-border nd-rounded-lg nd-overflow-hidden nd-text-sm nd-bg-secondary/50 nd-not-prose"
-      data-rehype-pretty-code-fragment
+      data-code-fragment
     >
       {title && (
         <div className="nd-text-muted-foreground nd-bg-muted nd-pl-4 nd-pr-12 nd-py-2 nd-border-b nd-z-[2]">
@@ -30,16 +30,12 @@ export function Pre({ title, allowCopy = true, ...props }: PreProps) {
       )}
       {allowCopy && (
         <CopyButton
-          className={
-            title
-              ? 'nd-absolute nd-top-1 nd-right-2'
-              : 'nd-absolute nd-top-2 nd-right-2'
-          }
+          className={cn('nd-absolute nd-top-2 nd-right-2', title && 'nd-top-1')}
           onCopy={onCopy}
         />
       )}
       <ScrollArea>
-        <pre {...props} ref={ref}>
+        <pre ref={ref} {...props} className={cn('nd-py-4', props.className)}>
           {props.children}
         </pre>
       </ScrollArea>

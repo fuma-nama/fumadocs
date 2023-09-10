@@ -12,16 +12,16 @@ body {
   @apply nd-bg-background nd-text-foreground;
 }
 
-[data-rehype-pretty-code-fragment] code {
-  @apply nd-grid nd-py-4;
+[data-line] {
+  @apply nd-px-4 nd-border-l-2 nd-border-transparent;
 }
 
-[data-rehype-pretty-code-fragment] .line {
-  @apply nd-pl-4 nd-pr-8;
+[data-highlighted-line] {
+  @apply nd-border-primary nd-bg-primary/10;
 }
 
-[data-rehype-pretty-code-fragment] .line-highlighted {
-  @apply nd-border-l-2 nd-border-l-primary nd-bg-primary/10;
+[data-highlighted-chars] {
+  @apply nd-bg-primary/10 nd-border-b-2 nd-border-primary;
 }
 
 [data-rmiz-modal-overlay='visible'] {
