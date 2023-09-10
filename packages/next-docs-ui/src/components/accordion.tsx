@@ -37,16 +37,14 @@ export const Accordion = forwardRef<
     )}
     {...props}
   >
-    <div className="nd-not-prose">
-      <AccordionPrimitive.Header>
-        <AccordionPrimitive.Trigger className="nd-flex nd-w-full nd-items-center nd-justify-between nd-p-4 nd-text-sm nd-font-medium [&[data-state=open]>svg]:nd-rotate-180">
-          {title}
-          <ChevronDown className="nd-h-4 nd-w-4 nd-transition-transform nd-duration-200" />
-        </AccordionPrimitive.Trigger>
-      </AccordionPrimitive.Header>
-    </div>
+    <AccordionPrimitive.Header className="nd-not-prose">
+      <AccordionPrimitive.Trigger className="nd-flex nd-w-full nd-items-center nd-justify-between nd-p-4 nd-text-sm nd-font-medium [&[data-state=open]>svg]:nd-rotate-180">
+        {title}
+        <ChevronDown className="nd-h-4 nd-w-4 nd-transition-transform nd-duration-200" />
+      </AccordionPrimitive.Trigger>
+    </AccordionPrimitive.Header>
     <AccordionPrimitive.Content className="nd-px-4 nd-overflow-hidden nd-text-sm data-[state=closed]:nd-animate-accordion-up data-[state=open]:nd-animate-accordion-down">
-      <div className="nd-pb-4 nd-pt-0">{children}</div>
+      <div className="nd-pb-4">{children}</div>
     </AccordionPrimitive.Content>
   </AccordionPrimitive.Item>
 ))

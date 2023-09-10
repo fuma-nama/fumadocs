@@ -15,11 +15,13 @@ export function Heading<T extends Types = 'h1'>({
   return (
     <As {...props} className={clsx('nd-group nd-scroll-m-20', props.className)}>
       {props.children}
-      <div className="nd-not-prose nd-opacity-0 nd-inline nd-font-normal nd-ml-2 nd-transition-opacity nd-text-muted-foreground group-hover:nd-opacity-100">
-        <a href={`#${props.id}`} aria-label="Link to section">
-          #
-        </a>
-      </div>
+      <a
+        href={`#${props.id}`}
+        aria-label="Link to section"
+        className="nd-not-prose nd-opacity-0 nd-font-normal nd-ml-2 nd-transition-opacity nd-text-muted-foreground group-hover:nd-opacity-100"
+      >
+        #
+      </a>
     </As>
   )
 }
