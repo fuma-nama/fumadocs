@@ -23,23 +23,23 @@ const ScrollArea = React.forwardRef<
 ScrollArea.displayName = ScrollAreaPrimitive.Root.displayName
 
 const ScrollBar = React.forwardRef<
-  React.ElementRef<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>,
-  React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>
+  React.ElementRef<typeof ScrollAreaPrimitive.Scrollbar>,
+  React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Scrollbar>
 >(({ className, orientation = 'vertical', ...props }, ref) => (
-  <ScrollAreaPrimitive.ScrollAreaScrollbar
+  <ScrollAreaPrimitive.Scrollbar
     ref={ref}
     orientation={orientation}
     className={cn(
-      'nd-flex nd-touch-none nd-select-none nd-p-px',
-      orientation === 'vertical' && 'nd-h-full nd-w-2',
-      orientation === 'horizontal' && 'nd-h-2 nd-flex-col',
+      'nd-flex nd-touch-none nd-select-none data-[state=hidden]:nd-animate-out data-[state=hidden]:nd-fade-out',
+      orientation === 'vertical' && 'nd-h-full nd-w-1.5',
+      orientation === 'horizontal' && 'nd-h-1.5 nd-flex-col',
       className
     )}
     {...props}
   >
     <ScrollAreaPrimitive.ScrollAreaThumb className="nd-relative nd-flex-1 nd-rounded-full nd-bg-border" />
-  </ScrollAreaPrimitive.ScrollAreaScrollbar>
+  </ScrollAreaPrimitive.Scrollbar>
 ))
-ScrollBar.displayName = ScrollAreaPrimitive.ScrollAreaScrollbar.displayName
+ScrollBar.displayName = ScrollAreaPrimitive.Scrollbar.displayName
 
 export { ScrollArea }

@@ -38,7 +38,7 @@ const SelectContent = React.forwardRef<
     <SelectPrimitive.Content
       ref={ref}
       className={cn(
-        'nd-relative nd-z-50 nd-min-w-[8rem] nd-overflow-hidden nd-rounded-md nd-border nd-bg-popover nd-text-popover-foreground nd-shadow-md data-[state=open]:nd-animate-in data-[state=closed]:nd-animate-out data-[state=closed]:nd-fade-out-0 data-[state=open]:nd-fade-in-0 data-[state=closed]:nd-zoom-out-95 data-[state=open]:nd-zoom-in-95 data-[side=bottom]:nd-slide-in-from-top-2 data-[side=left]:nd-slide-in-from-right-2 data-[side=right]:nd-slide-in-from-left-2 data-[side=top]:nd-slide-in-from-bottom-2',
+        'nd-relative nd-z-50 nd-min-w-[8rem] nd-overflow-hidden nd-rounded-md nd-border nd-bg-popover nd-text-popover-foreground nd-shadow-md data-[state=open]:nd-animate-in data-[state=closed]:nd-animate-out data-[state=closed]:nd-fade-out data-[state=open]:nd-fade-in data-[state=closed]:nd-zoom-out-95 data-[state=open]:nd-zoom-in-95 data-[side=bottom]:nd-slide-in-from-top-2 data-[side=left]:nd-slide-in-from-right-2 data-[side=right]:nd-slide-in-from-left-2 data-[side=top]:nd-slide-in-from-bottom-2',
         position === 'popper' &&
           'data-[side=bottom]:nd-translate-y-1 data-[side=left]:-nd-translate-x-1 data-[side=right]:nd-translate-x-1 data-[side=top]:-nd-translate-y-1',
         className
