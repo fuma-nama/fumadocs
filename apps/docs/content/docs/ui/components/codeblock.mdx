@@ -37,19 +37,27 @@ You spectify highlighted lines by adding a numbric range.
 ```
 ````
 
+### Highlight Words
+
+You can highlight a specific word by wrapping the word in `/`.
+
+````mdx
+```js /config/
+const config = {
+  reactStrictMode: true
+}
+```
+````
+
 ### Title
 
 Add `title="x"` to the codeblock meta.
 
 ````mdx
 ```js title="next.config.js"
-/** @type {import('next').NextConfig} */
 const config = {
   pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
-  reactStrictMode: true,
-  images: {
-    domains: ['i.pravatar.cc']
-  }
+  reactStrictMode: true
 }
 
 const { withContentlayer } = require('next-contentlayer')
@@ -58,16 +66,20 @@ module.exports = withContentlayer(config)
 ```
 ````
 
+### Inline
+
+Inline code is supported too, `console.log("Hello World"){:js}`.
+
+```mdx
+`console.log("Hello World"){:js}`
+```
+
 ## Example
 
 ```js title="next.config.js" {10} /config/
-/** @type {import('next').NextConfig} */
 const config = {
   pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
-  reactStrictMode: true,
-  images: {
-    domains: ['i.pravatar.cc']
-  }
+  reactStrictMode: true
 }
 
 const { withContentlayer } = require('next-contentlayer')

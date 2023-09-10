@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 2.0.1
+
+### Patch Changes
+
+- 8a05955: Improve syntax highlighting
+- Updated dependencies [48c5256]
+  - next-docs-zeta@2.0.1
+
 ## 2.0.0
 
 ### Major Changes

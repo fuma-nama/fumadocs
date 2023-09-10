@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 2.0.1
+
+### Patch Changes
+
+- 48c5256: Contentlayer: Sort pages by default
+
 ## 2.0.0
 
 ## 1.6.9
