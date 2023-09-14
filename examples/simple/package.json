@@ -8,19 +8,19 @@
     "start": "next start"
   },
   "dependencies": {
-    "next-docs-zeta": "2.0.1",
-    "next-docs-ui": "2.0.1",
-    "next": "13.4.19",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
     "contentlayer": "0.3.4",
-    "next-contentlayer": "0.3.4"
+    "next": "13.4.19",
+    "next-contentlayer": "0.3.4",
+    "next-docs-ui": "workspace:*",
+    "next-docs-zeta": "workspace:*",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
   },
   "devDependencies": {
-    "esbuild": "0.17.19",
-    "supports-color": "8.1.1",
     "@types/react": "18.2.0",
     "@types/react-dom": "18.2.1",
+    "esbuild": "0.17.19",
+    "supports-color": "8.1.1",
     "typescript": "5.1.6"
   }
 }

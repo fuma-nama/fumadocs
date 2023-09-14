@@ -81,7 +81,7 @@
     "postcss-import": "^15.1.0",
     "postcss-lightningcss": "^0.9.0",
     "tailwindcss": "3.3.3",
-    "tailwindcss-animate": "^1.0.6"
+    "tailwindcss-animate": "^1.0.7"
   },
   "keywords": [
     "NextJs",

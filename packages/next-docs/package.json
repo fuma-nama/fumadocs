@@ -93,7 +93,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@formatjs/intl-localematcher": "^0.4.0",
+    "@formatjs/intl-localematcher": "^0.4.2",
     "flexsearch": "0.7.21",
     "github-slugger": "^2.0.0",
     "hast-util-to-string": "^3.0.0",
@@ -104,8 +104,8 @@
     "remark": "^14.0.3",
     "remark-gfm": "^3.0.1",
     "remark-mdx": "^2.3.0",
-    "scroll-into-view-if-needed": "^3.0.10",
-    "swr": "^2.2.1",
+    "scroll-into-view-if-needed": "^3.1.0",
+    "swr": "^2.2.2",
     "unist-util-visit": "^5.0.0"
   },
   "peerDependencies": {
