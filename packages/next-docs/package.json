@@ -114,7 +114,7 @@
     "react-dom": "18.x"
   },
   "devDependencies": {
-    "@types/flexsearch": "0.7.3",
+    "@types/flexsearch": "0.7.4",
     "@types/negotiator": "^0.6.1",
     "@types/react": "18.2.0",
     "@types/react-dom": "18.2.1",
