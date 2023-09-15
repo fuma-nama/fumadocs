@@ -1,7 +1,7 @@
 {
   "name": "create-next-docs-app",
   "description": "Create a new documentation site with Next Docs UI",
-  "version": "1.5.17",
+  "version": "1.5.18",
   "homepage": "https://next-docs-zeta.vercel.app",
   "author": "Money SonMooSans",
   "repository": "github:SonMooSans/next-docs",

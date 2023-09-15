@@ -60,9 +60,13 @@ Also, you can easily customise or disable TOC in your documentation.
   type={{
     enabled: { type: 'boolean', default: 'true' },
     component: { type: 'ReactNode' },
+    header: {
+      type: 'ReactNode',
+      description: 'Custom content above TOC'
+    },
     footer: {
       type: 'ReactNode',
-      description: 'Custom content in TOC container'
+      description: 'Custom content below TOC'
     }
   }}
 />

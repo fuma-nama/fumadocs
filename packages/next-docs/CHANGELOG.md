@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 2.0.2
+
+### Patch Changes
+
+- 74e5e85: Contentlayer: Support rest item in meta.json
+- 72e9fdf: Contentlayer: Support extracting folder in meta.json
+
 ## 2.0.1
 
 ### Patch Changes

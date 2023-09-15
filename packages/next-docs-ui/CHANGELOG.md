@@ -1,5 +1,15 @@
 # next-docs-ui
 
+## 2.0.2
+
+### Patch Changes
+
+- 74e5e85: Several UI improvements
+- Support adding header to TOC component
+- Updated dependencies [74e5e85]
+- Updated dependencies [72e9fdf]
+  - next-docs-zeta@2.0.2
+
 ## 2.0.1
 
 ### Patch Changes

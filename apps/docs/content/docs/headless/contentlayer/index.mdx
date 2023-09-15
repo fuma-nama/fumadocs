@@ -68,12 +68,40 @@ creating a `meta.json` in the folder.
 }
 ```
 
+> By default, pages are sorted by `String.localeCompare{:js}`.
+
 ### Separator
 
 As you see, you can define a separator in meta by adding a item surrounded by
 `---`.
 
 ## Advanced
+
+Next Docs Zeta also adds extra functionalities to Contentlayer, making it more
+convenient to use and straightforward.
+
+### Rest
+
+Tired to specify the order of every single page in `meta.json`? You can use
+`...` to automatically add and sort remaining items.
+
+```json
+{
+  "title": "Folder",
+  "pages": ["guide", "---Separator---", "..."]
+}
+```
+
+### Extract
+
+You can extract the items from a folder with `...folder_name`.
+
+```json
+{
+  "title": "Folder",
+  "pages": ["guide", "...folder"]
+}
+```
 
 ### Adding Icons
 
