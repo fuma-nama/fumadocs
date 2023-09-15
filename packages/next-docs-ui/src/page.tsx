@@ -16,7 +16,11 @@ export type DocsPageProps = {
     enabled: boolean
     component: ReactNode
     /**
-     * Custom content in TOC container
+     * Custom content in TOC container, before the main TOC
+     */
+    header: ReactNode
+    /**
+     * Custom content in TOC container, after the main TOC
      */
     footer: ReactNode
   }>
@@ -52,7 +56,7 @@ export function DocsPage({
       </article>
       {replaceOrDefault(
         tableOfContent,
-        <TOC items={props.toc ?? []} footer={tableOfContent.footer} />
+        <TOC items={props.toc ?? []} header={tableOfContent.header} footer={tableOfContent.footer} />
       )}
     </>
   )
