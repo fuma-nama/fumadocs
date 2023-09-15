@@ -4,7 +4,7 @@ import type { ElementType, ReactNode } from 'react'
 import { createContext, useContext, useEffect, useState } from 'react'
 import { RemoveScroll } from 'react-remove-scroll'
 
-const SidebarContext = createContext<
+export const SidebarContext = createContext<
   [open: boolean, setOpen: (value: boolean) => void]
 >([false, () => {}])
 

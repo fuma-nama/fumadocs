@@ -114,23 +114,36 @@ function Folder({
   item: FolderNode
   level: number
 }) {
+  const [open] = useContext(Base.SidebarContext)
   const { sidebarDefaultOpenLevel = 1 } = useContext(LayoutContext)
 
   const pathname = usePathname()
   const active = index != null && pathname === index.url
-  const childActive = useMemo(() => hasActive(children, pathname), [pathname])
-  const [extend, setExtend] = useState(
-    sidebarDefaultOpenLevel >= level || active || childActive
+  const shouldExtend = useMemo(
+    () => sidebarDefaultOpenLevel >= level || hasActive(children, pathname),
+    [sidebarDefaultOpenLevel, level, pathname]
   )
+  const [animated, setAnimated] = useState(false)
+  const [extend, setExtend] = useState(active || shouldExtend)
 
   useEffect(() => {
-    if (active || childActive) {
+    if (!open) setAnimated(false)
+  }, [open])
+
+  useEffect(() => {
+    if (active || shouldExtend) {
       setExtend(true)
     }
-  }, [active, childActive])
+  }, [active, shouldExtend])
+
+  useEffect(() => {
+    setAnimated(true)
+  }, [extend])
 
   const onClick = () => {
-    setExtend(prev => (index == null || active ? !prev : prev))
+    if (index == null || active) {
+      setExtend(!extend)
+    }
   }
 
   const content = (
@@ -166,7 +179,12 @@ function Folder({
           )}
         />
       </Collapsible.Trigger>
-      <Collapsible.Content className="nd-overflow-hidden data-[state=closed]:nd-animate-collapsible-up data-[state=open]:nd-animate-collapsible-down">
+      <Collapsible.Content
+        className={cn(
+          'nd-overflow-hidden data-[state=open]:nd-animate-collapsible-down data-[state=closed]:nd-animate-collapsible-up',
+          !animated && '!nd-duration-0'
+        )}
+      >
         <div className="nd-flex nd-flex-col nd-ml-4 nd-pl-2 nd-border-l nd-py-2">
           {children.map((item, i) => (
             <Node key={i} item={item} level={level + 1} />
