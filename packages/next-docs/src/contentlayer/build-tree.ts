@@ -130,7 +130,6 @@ function getFolderNodes(
   for (const folder of folders) {
     if (!filter(folder)) continue
 
-    console.log('s', folder)
     children.push(buildFolderNode(folder, ctx))
   }
 
