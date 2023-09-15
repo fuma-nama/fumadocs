@@ -9,7 +9,6 @@
     "utils",
     "mdx",
     "---Contentlayer---",
-    "contentlayer/index",
-    "contentlayer/internationalization"
+    "...contentlayer"
   ]
 }

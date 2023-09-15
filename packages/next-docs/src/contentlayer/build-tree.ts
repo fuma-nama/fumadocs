@@ -16,6 +16,7 @@ type Options = {
 
 const separator = /---(.*?)---/
 const rest = '...'
+const extractor = /\.\.\.(.+)/
 
 function buildMeta(meta: MetaPageBase, ctx: Context): FolderNode {
   const segments = meta._raw.sourceFileDir.split('/')
@@ -33,6 +34,13 @@ function buildMeta(meta: MetaPageBase, ctx: Context): FolderNode {
         name: result[1]
       }
 
+    const extract_result = extractor.exec(item)
+    const is_extract = extract_result != null
+
+    if (extract_result != null) {
+      item = extract_result[1]
+    }
+
     const path = meta._raw.sourceFileDir + '/' + item
     const page = ctx.docsMap.get(path)
 
@@ -49,25 +57,26 @@ function buildMeta(meta: MetaPageBase, ctx: Context): FolderNode {
       return []
     }
 
-    const node = buildFolderNode(path, ctx)
+    const node = buildFolderNode(path, ctx, is_extract)
     filtered.add(path)
 
     // if item doesn't exist
     if (node.index == null && node.children.length === 0) return []
+
+    // extract children
+    if (is_extract) return node.children
 
     return node
   })
 
   const children = resolved.flatMap<TreeNode>(item => {
     if (item === '...') {
-      const nodes = getFolderNodes(
+      return getFolderNodes(
         ctx,
         meta._raw.sourceFileDir,
         true,
         path => !filtered.has(path)
-      )
-
-      return nodes.children
+      ).children
     }
 
     return item
@@ -80,7 +89,7 @@ function buildMeta(meta: MetaPageBase, ctx: Context): FolderNode {
   }
 
   return {
-    name: meta.title ?? pathToName(segments[segments.length - 1] ?? 'docs'),
+    name: meta.title ?? pathToName(segments),
     index,
     type: 'folder',
     icon: meta.icon && ctx.resolveIcon ? ctx.resolveIcon(meta.icon) : undefined,
@@ -168,10 +177,7 @@ function buildFolderNode(
   const { index, children } = getFolderNodes(ctx, path, keepIndex)
 
   return {
-    name:
-      index != null
-        ? (index as FileNode).name
-        : pathToName(segments[segments.length - 1] ?? 'docs'),
+    name: index?.name ?? pathToName(segments),
     type: 'folder',
     index: index ?? undefined,
     children
