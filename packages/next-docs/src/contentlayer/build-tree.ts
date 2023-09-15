@@ -15,12 +15,16 @@ type Options = {
 }
 
 const separator = /---(.*?)---/
+const rest = '...'
 
 function buildMeta(meta: MetaPageBase, ctx: Context): FolderNode {
   const segments = meta._raw.sourceFileDir.split('/')
   let index: FileNode | undefined = undefined
+  const filtered = new Set<string>()
 
-  const children = meta.pages.flatMap<TreeNode>(item => {
+  const resolved = meta.pages.flatMap<TreeNode | '...'>(item => {
+    if (item === rest) return '...'
+
     const result = separator.exec(item)
 
     if (result != null)
@@ -34,6 +38,7 @@ function buildMeta(meta: MetaPageBase, ctx: Context): FolderNode {
 
     if (page != null) {
       const node = buildFileNode(page, ctx)
+      filtered.add(page._raw.sourceFilePath)
 
       if (item === 'index') index = node
       return node
@@ -45,11 +50,27 @@ function buildMeta(meta: MetaPageBase, ctx: Context): FolderNode {
     }
 
     const node = buildFolderNode(path, ctx)
+    filtered.add(path)
 
     // if item doesn't exist
     if (node.index == null && node.children.length === 0) return []
 
     return node
+  })
+
+  const children = resolved.flatMap<TreeNode>(item => {
+    if (item === '...') {
+      const nodes = getFolderNodes(
+        ctx,
+        meta._raw.sourceFileDir,
+        true,
+        path => !filtered.has(path)
+      )
+
+      return nodes.children
+    }
+
+    return item
   })
 
   if (index == null) {
@@ -65,6 +86,58 @@ function buildMeta(meta: MetaPageBase, ctx: Context): FolderNode {
     icon: meta.icon && ctx.resolveIcon ? ctx.resolveIcon(meta.icon) : undefined,
     children
   }
+}
+
+/**
+ * Get nodes under specific folder
+ * @param ctx Context
+ * @param path Folder path
+ * @param joinIndex If enabled, join index node into children
+ * @param filter Filter nodes
+ */
+function getFolderNodes(
+  ctx: Context,
+  path: string,
+  joinIndex: boolean,
+  filter: (path: string) => boolean = () => true
+): { index: FileNode | null; children: TreeNode[] } {
+  const pages = ctx.pages.get(ctx.lang ?? '') ?? []
+  let index: FileNode | null = null
+  const children: TreeNode[] = []
+
+  for (const page of pages) {
+    if (page._raw.sourceFileDir !== path || !filter(page._raw.sourceFilePath))
+      continue
+    const node = buildFileNode(page, ctx)
+
+    if (page._raw.flattenedPath === path) {
+      index = node
+      continue
+    }
+
+    children.push(node)
+  }
+
+  const segmentIndex = path.split('/').length
+  const folders = new Set<string>(
+    pages
+      .filter(page => page._raw.sourceFileDir.startsWith(path + '/'))
+      .map(
+        page => path + '/' + page._raw.sourceFileDir.split('/')[segmentIndex]
+      )
+  )
+
+  for (const folder of folders) {
+    if (!filter(folder)) continue
+
+    console.log('s', folder)
+    children.push(buildFolderNode(folder, ctx))
+  }
+
+  children.sort((next, prev) => next.name.localeCompare(prev.name))
+  if (index && joinIndex) children.unshift(index)
+
+  return { index, children }
 }
 
 function buildFileNode(page: DocsPageBase, ctx: Context): FileNode {
@@ -93,40 +166,7 @@ function buildFolderNode(
   }
 
   const segments = path.split('/')
-  let index: FileNode | undefined = undefined
-
-  const pages = ctx.pages.get(ctx.lang ?? '') ?? []
-
-  const children: TreeNode[] = []
-
-  for (const page of pages) {
-    if (page._raw.sourceFileDir !== path) continue
-    const node = buildFileNode(page, ctx)
-
-    if (page._raw.flattenedPath === path) {
-      index = node
-      continue
-    }
-
-    children.push(node)
-  }
-
-  const folders = new Set<string>(
-    pages
-      .filter(
-        page =>
-          page._raw.sourceFileDir.startsWith(path + '/') &&
-          page._raw.sourceFileDir.split('/').length === segments.length + 1
-      )
-      .map(page => page._raw.sourceFileDir)
-  )
-
-  for (const folder of folders) {
-    children.push(buildFolderNode(folder, ctx))
-  }
-
-  children.sort((next, prev) => next.name.localeCompare(prev.name))
-  if (keepIndex && index) children.unshift(index)
+  const { index, children } = getFolderNodes(ctx, path, keepIndex)
 
   return {
     name:
@@ -134,7 +174,7 @@ function buildFolderNode(
         ? (index as FileNode).name
         : pathToName(segments[segments.length - 1] ?? 'docs'),
     type: 'folder',
-    index,
+    index: index ?? undefined,
     children
   }
 }
