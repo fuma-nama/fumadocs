@@ -5,18 +5,20 @@ import type { TOCItemType } from 'next-docs-zeta/server'
 import * as Primitive from 'next-docs-zeta/toc'
 import { useContext, type ReactNode } from 'react'
 
-export function TOC(props: { items: TOCItemType[]; header: ReactNode, footer: ReactNode }) {
+export function TOC(props: {
+  items: TOCItemType[]
+  header: ReactNode
+  footer: ReactNode
+}) {
   return (
     <div className="nd-relative nd-w-[250px] max-xl:nd-hidden">
-      <div className="nd-sticky nd-flex nd-flex-col nd-top-16 nd-gap-4 nd-py-16 nd-max-h-[calc(100vh-4rem)]">
+      <div className="nd-sticky nd-divide-y nd-flex nd-flex-col nd-top-16 nd-gap-4 nd-py-16 nd-max-h-[calc(100vh-4rem)]">
         {props.header && (
-          <div className="nd-flex nd-flex-col nd-border-b nd-pb-4 first:nd-border-b-0 first:nd-pb-0">
-            {props.header}
-          </div>
+          <div className="nd-flex nd-flex-col">{props.header}</div>
         )}
         {props.items.length > 0 && <TOCItems items={props.items} />}
         {props.footer && (
-          <div className="nd-flex nd-flex-col nd-border-t nd-pt-4 first:nd-border-t-0 first:nd-pt-0">
+          <div className="nd-flex nd-flex-col nd-pt-4 first:nd-pt-0">
             {props.footer}
           </div>
         )}
@@ -29,7 +31,10 @@ function TOCItems({ items }: { items: TOCItemType[] }) {
   const { toc = 'On this page' } = useContext(I18nContext).text ?? {}
 
   return (
-    <Primitive.TOCProvider toc={items} className="nd-overflow-hidden">
+    <Primitive.TOCProvider
+      toc={items}
+      className="nd-pt-4 nd-overflow-hidden first:nd-pt-0"
+    >
       <h3 className="nd-inline-flex nd-flex-row nd-items-center nd-font-medium nd-text-sm nd-mb-4">
         <TextIcon className="nd-inline nd-w-4 nd-h-4 nd-mr-2" /> {toc}
       </h3>
