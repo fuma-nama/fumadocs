@@ -4,8 +4,7 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
-  CommandList,
-  CommandSeparator
+  CommandList
 } from '@/components/ui/command'
 import { I18nContext } from '@/contexts/i18n'
 import { FileTextIcon, HashIcon, TextIcon } from 'lucide-react'
@@ -49,14 +48,15 @@ export default function SearchDialog({
 
   return (
     <CommandDialog {...props}>
-      {props.children}
       <CommandInput
         placeholder={text?.search ?? 'Search'}
         value={search}
         onValueChange={setSearch}
       />
       <CommandList>
-        <CommandEmpty>No results found.</CommandEmpty>
+        <CommandEmpty>
+          {text?.searchNoResult ?? 'No results found.'}
+        </CommandEmpty>
 
         {query.data != 'empty' &&
           query.data != null &&
@@ -67,15 +67,13 @@ export default function SearchDialog({
                   key={item.id}
                   value={item.id}
                   onSelect={() => onOpen(item.url)}
+                  nested={item.type !== 'page'}
                 >
-                  {item.type !== 'page' && (
-                    <div className="nd-absolute nd-inset-y-0 nd-left-6 nd-w-[2px] nd-bg-border" />
-                  )}
                   {
                     {
-                      text: <TextIcon className="nd-ml-6 nd-mr-2" />,
-                      heading: <HashIcon className="nd-ml-6 nd-mr-2" />,
-                      page: <FileTextIcon className="nd-mr-2" />
+                      text: <TextIcon />,
+                      heading: <HashIcon />,
+                      page: <FileTextIcon />
                     }[item.type]
                   }
                   <p className="nd-w-0 nd-flex-1 nd-whitespace-nowrap nd-overflow-hidden nd-overflow-ellipsis">
@@ -85,18 +83,18 @@ export default function SearchDialog({
               ))}
             </CommandGroup>
           )}
-        <CommandSeparator />
         {query.data === 'empty' && links.length > 0 && (
           <CommandGroup heading="Links">
             {links.map(([name, url], i) => (
               <CommandItem key={i} value={url} onSelect={onOpen}>
-                <FileTextIcon className="nd-mr-2" />
+                <FileTextIcon />
                 {name}
               </CommandItem>
             ))}
           </CommandGroup>
         )}
       </CommandList>
+      {props.children}
     </CommandDialog>
   )
 }

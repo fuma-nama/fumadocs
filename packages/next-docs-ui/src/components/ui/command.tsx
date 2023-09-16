@@ -1,4 +1,3 @@
-/** Generated with Shadcn UI */
 import { cn } from '@/utils/cn'
 import type { DialogProps } from '@radix-ui/react-dialog'
 import { Command as CommandPrimitive } from 'cmdk'
@@ -26,13 +25,8 @@ interface CommandDialogProps extends DialogProps {}
 const CommandDialog = ({ children, ...props }: CommandDialogProps) => {
   return (
     <Dialog {...props}>
-      <DialogContent className="nd-overflow-hidden nd-p-0 nd-max-w-2xl nd-shadow-2xl">
-        <Command
-          className="[&_[cmdk-group-heading]]:nd-px-2 [&_[cmdk-group-heading]]:nd-font-medium [&_[cmdk-group-heading]]:nd-text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:nd-pt-0 [&_[cmdk-group]]:nd-px-2 [&_[cmdk-input-wrapper]_svg]:nd-h-5 [&_[cmdk-input-wrapper]_svg]:nd-w-5 [&_[cmdk-input]]:nd-h-12 [&_[cmdk-item]_svg]:nd-h-5 [&_[cmdk-item]_svg]:nd-w-5"
-          shouldFilter={false}
-        >
-          {children}
-        </Command>
+      <DialogContent className="nd-overflow-hidden nd-p-0 nd-max-w-2xl">
+        <Command shouldFilter={false}>{children}</Command>
       </DialogContent>
     </Dialog>
   )
@@ -42,15 +36,12 @@ const CommandInput = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Input>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>
 >(({ className, ...props }, ref) => (
-  <div
-    className="nd-flex nd-items-center nd-border-b nd-px-3"
-    cmdk-input-wrapper=""
-  >
-    <Search className="nd-mr-2 nd-h-4 nd-w-4 nd-shrink-0 nd-text-muted-foreground nd-opacity-50" />
+  <div className="nd-flex nd-items-center nd-border-b nd-px-3">
+    <Search className="nd-mr-2 nd-h-4 nd-w-4 nd-shrink-0 nd-text-muted-foreground" />
     <CommandPrimitive.Input
       ref={ref}
       className={cn(
-        'placeholder:nd-text-muted-foreground nd-flex nd-h-11 nd-w-full nd-rounded-md nd-bg-transparent nd-py-3 nd-text-sm nd-outline-none disabled:nd-cursor-not-allowed disabled:nd-opacity-50',
+        'nd-text-foreground nd-flex nd-w-full nd-rounded-md nd-bg-transparent nd-py-3 nd-text-sm nd-outline-none disabled:nd-cursor-not-allowed disabled:nd-opacity-50 placeholder:nd-text-muted-foreground',
         className
       )}
       {...props}
@@ -66,10 +57,7 @@ const CommandList = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <CommandPrimitive.List
     ref={ref}
-    className={cn(
-      'nd-max-h-[400px] nd-overflow-y-auto nd-overflow-x-hidden',
-      className
-    )}
+    className={cn('nd-max-h-[400px] nd-overflow-y-auto', className)}
     {...props}
   />
 ))
@@ -82,7 +70,7 @@ const CommandEmpty = React.forwardRef<
 >((props, ref) => (
   <CommandPrimitive.Empty
     ref={ref}
-    className="nd-py-6 nd-text-center nd-text-sm"
+    className="nd-py-12 nd-text-center nd-text-sm"
     {...props}
   />
 ))
@@ -96,7 +84,7 @@ const CommandGroup = React.forwardRef<
   <CommandPrimitive.Group
     ref={ref}
     className={cn(
-      'nd-overflow-hidden nd-p-1 nd-text-foreground [&_[cmdk-group-heading]]:nd-px-2 [&_[cmdk-group-heading]]:nd-py-1.5 [&_[cmdk-group-heading]]:nd-text-xs [&_[cmdk-group-heading]]:nd-font-medium [&_[cmdk-group-heading]]:nd-text-muted-foreground',
+      'nd-overflow-hidden nd-p-2 [&_[cmdk-group-heading]]:nd-px-3 [&_[cmdk-group-heading]]:nd-py-2 [&_[cmdk-group-heading]]:nd-text-xs [&_[cmdk-group-heading]]:nd-font-medium [&_[cmdk-group-heading]]:nd-text-muted-foreground',
       className
     )}
     {...props}
@@ -111,7 +99,7 @@ const CommandSeparator = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <CommandPrimitive.Separator
     ref={ref}
-    className={cn('-nd-mx-1 nd-h-px nd-bg-border', className)}
+    className={cn('nd-h-px nd-bg-border', className)}
     {...props}
   />
 ))
@@ -119,16 +107,27 @@ CommandSeparator.displayName = CommandPrimitive.Separator.displayName
 
 const CommandItem = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Item>,
-  React.ComponentPropsWithoutRef<typeof CommandPrimitive.Item>
->(({ className, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof CommandPrimitive.Item> & {
+    nested?: boolean
+  }
+>(({ className, nested = false, ...props }, ref) => (
   <CommandPrimitive.Item
     ref={ref}
     className={cn(
-      'nd-relative nd-flex nd-cursor-pointer nd-select-none nd-items-center nd-text-muted-foreground nd-rounded-lg nd-px-4 nd-py-3.5 nd-text-sm nd-outline-none aria-selected:nd-bg-accent aria-selected:nd-text-accent-foreground data-[disabled]:nd-pointer-events-none data-[disabled]:nd-opacity-50',
+      'nd-cursor-pointer nd-select-none nd-rounded-lg nd-text-sm aria-selected:nd-bg-accent aria-selected:nd-text-accent-foreground data-[disabled]:nd-pointer-events-none data-[disabled]:nd-opacity-50 [&_svg]:nd-h-5 [&_svg]:nd-w-5',
       className
     )}
     {...props}
-  />
+  >
+    <div
+      className={cn(
+        'nd-flex nd-gap-2 nd-items-center nd-px-3 nd-py-2.5',
+        nested && 'nd-ml-5 nd-border-l-2'
+      )}
+    >
+      {props.children}
+    </div>
+  </CommandPrimitive.Item>
 ))
 
 CommandItem.displayName = CommandPrimitive.Item.displayName

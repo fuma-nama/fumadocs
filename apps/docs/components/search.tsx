@@ -15,12 +15,11 @@ export default function CustomSearchDialog(props: SearchDialogProps) {
 
   return (
     <SearchDialog {...props} tag={value}>
-      <div className="flex flex-row gap-1 px-4 pt-4">
+      <div className="flex flex-row gap-1 px-4 py-2">
         <button
           className={cn(
             'border px-2 py-0.5 rounded-md text-xs text-muted-foreground font-medium transition-colors',
-            value === 'headless' &&
-              'text-purple-400 bg-purple-400/10 border-purple-400'
+            value === 'headless' && 'text-secondary-foreground bg-secondary'
           )}
           onClick={() => setTag('headless')}
           tabIndex={-1}
@@ -30,7 +29,7 @@ export default function CustomSearchDialog(props: SearchDialogProps) {
         <button
           className={cn(
             'border px-2 py-0.5 rounded-md text-xs text-muted-foreground font-medium transition-colors',
-            value === 'ui' && 'text-blue-400 bg-blue-400/10 border-blue-400'
+            value === 'ui' && 'text-secondary-foreground bg-secondary'
           )}
           onClick={() => setTag('ui')}
           tabIndex={-1}

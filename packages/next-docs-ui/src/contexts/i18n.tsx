@@ -2,6 +2,7 @@ import { createContext } from 'react'
 
 export type Translations = {
   search: string
+  searchNoResult: string
   light: string
   dark: string
   toc: string
