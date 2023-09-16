@@ -4,7 +4,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/utils/cn'
 import { CheckIcon, CopyIcon } from 'lucide-react'
 import type { ComponentPropsWithoutRef } from 'react'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 
 type PreProps = ComponentPropsWithoutRef<'pre'> & {
   allowCopy?: boolean
@@ -51,23 +51,16 @@ function CopyButton({
   onCopy: () => void
 }) {
   const [checked, setChecked] = useState(false)
+  const [currentTimeout, setCurrentTimeout] = useState<NodeJS.Timeout | null>(
+    null
+  )
 
   const onClick = () => {
+    if (currentTimeout) clearTimeout(currentTimeout)
     onCopy()
     setChecked(true)
+    setCurrentTimeout(setTimeout(() => setChecked(false), 1500))
   }
-
-  useEffect(() => {
-    if (!checked) return
-
-    const timer = setTimeout(() => {
-      setChecked(false)
-    }, 1500)
-
-    return () => {
-      clearTimeout(timer)
-    }
-  }, [checked])
 
   return (
     <button
