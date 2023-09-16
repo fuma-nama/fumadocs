@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 2.0.3
+
+### Patch Changes
+
+- caa7e98: Fix sidebar animation problems
+- caa7e98: Improve copy button in codeblocks
+  - next-docs-zeta@2.0.3
+
 ## 2.0.2
 
 ### Patch Changes
