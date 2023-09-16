@@ -13,7 +13,7 @@ export function SearchBarToggle(props: ComponentPropsWithoutRef<'button'>) {
     <button
       {...props}
       className={cn(
-        'nd-inline-flex nd-items-center nd-text-sm nd-rounded-md nd-transition-colors nd-w-full nd-max-w-[250px] nd-px-3 nd-border nd-py-1.5 nd-text-muted-foreground nd-bg-secondary/70 hover:nd-bg-accent',
+        'nd-inline-flex nd-items-center nd-text-sm nd-rounded-md nd-transition-colors nd-w-full nd-max-w-[250px] nd-px-3 nd-border nd-py-1.5 nd-text-muted-foreground nd-bg-secondary/50 hover:nd-bg-accent',
         props.className
       )}
       onClick={() => setOpenSearch(true)}

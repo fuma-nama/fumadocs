@@ -51,7 +51,7 @@ export default function Layout({
         nav={{ enabled: false }}
         sidebar={{
           banner: (
-            <div className="relative flex flex-row gap-2 items-center p-2 rounded-lg border bg-card text-card-foreground transition-colors hover:bg-muted">
+            <div className="relative flex flex-row gap-2 items-center p-2 rounded-lg border bg-card text-card-foreground transition-colors hover:bg-muted/70">
               <p className="absolute right-2 top-2 text-muted-foreground text-xs">
                 {version}
               </p>

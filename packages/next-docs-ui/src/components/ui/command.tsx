@@ -41,7 +41,7 @@ const CommandInput = React.forwardRef<
     <CommandPrimitive.Input
       ref={ref}
       className={cn(
-        'nd-text-foreground nd-flex nd-w-full nd-rounded-md nd-bg-transparent nd-py-3 nd-text-sm nd-outline-none disabled:nd-cursor-not-allowed disabled:nd-opacity-50 placeholder:nd-text-muted-foreground',
+        'nd-flex nd-w-full nd-rounded-md nd-py-3 nd-text-sm nd-bg-transparent nd-outline-none disabled:nd-cursor-not-allowed disabled:nd-opacity-50 placeholder:nd-text-muted-foreground',
         className
       )}
       {...props}
@@ -57,7 +57,10 @@ const CommandList = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <CommandPrimitive.List
     ref={ref}
-    className={cn('nd-max-h-[400px] nd-overflow-y-auto', className)}
+    className={cn(
+      'nd-max-h-[400px] nd-text-muted-foreground nd-overflow-y-auto',
+      className
+    )}
     {...props}
   />
 ))
@@ -84,7 +87,7 @@ const CommandGroup = React.forwardRef<
   <CommandPrimitive.Group
     ref={ref}
     className={cn(
-      'nd-overflow-hidden nd-p-2 [&_[cmdk-group-heading]]:nd-px-3 [&_[cmdk-group-heading]]:nd-py-2 [&_[cmdk-group-heading]]:nd-text-xs [&_[cmdk-group-heading]]:nd-font-medium [&_[cmdk-group-heading]]:nd-text-muted-foreground',
+      'nd-overflow-hidden nd-p-2 [&_[cmdk-group-heading]]:nd-px-3 [&_[cmdk-group-heading]]:nd-py-2 [&_[cmdk-group-heading]]:nd-text-xs [&_[cmdk-group-heading]]:nd-font-medium',
       className
     )}
     {...props}
