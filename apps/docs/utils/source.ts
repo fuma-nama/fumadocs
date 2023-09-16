@@ -5,18 +5,8 @@ import {
   loadContext
 } from 'next-docs-zeta/contentlayer'
 import type { PageTree } from 'next-docs-zeta/server'
-import { createElement } from 'react'
 
-const ctx = loadContext(allMeta, allDocs, {
-  resolveIcon(icon) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const res = require('lucide-react')
-    icon = icon.trim()
-
-    if (res[icon]) return createElement(res[icon])
-    return undefined
-  }
-})
+const ctx = loadContext(allMeta, allDocs)
 
 const uiTree = buildPageTree(ctx, {
   root: 'docs/ui'
