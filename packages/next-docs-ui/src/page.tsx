@@ -56,7 +56,11 @@ export function DocsPage({
       </article>
       {replaceOrDefault(
         tableOfContent,
-        <TOC items={props.toc ?? []} header={tableOfContent.header} footer={tableOfContent.footer} />
+        <TOC
+          items={props.toc ?? []}
+          header={tableOfContent.header}
+          footer={tableOfContent.footer}
+        />
       )}
     </>
   )
