@@ -33,8 +33,8 @@ jobs:
       - name: Install Dependencies
         run: pnpm i
 
-      - name: Format Code
-        run: pnpm prettier
+      - name: Lint Format
+        run: pnpm lint:prettier
 
       - name: Run ESLint
         run: pnpm lint
