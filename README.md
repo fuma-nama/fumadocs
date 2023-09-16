@@ -39,7 +39,7 @@ npx create next-docs-app
 
 [![Open in CodeSandbox](https://img.shields.io/badge/Open%20in-CodeSandbox-blue?style=flat-square&logo=codesandbox)](https://githubbox.com/SonMooSans/next-docs-ui-template)
 
-View the [Template](https://github.com/SonMooSans/next-docs-ui-template)
+View the [Template](https://github.com/fuma-nama/next-docs-ui-template)
 repository on Github.
 
 ### Sources

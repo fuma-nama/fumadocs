@@ -17,7 +17,7 @@ export function Nav() {
         {
           label: 'Github',
           icon: <GithubIcon className="h-5 w-5" />,
-          href: 'https://github.com/SonMooSans/next-docs',
+          href: 'https://github.com/fuma-nama/next-docs',
           external: true
         }
       ]}

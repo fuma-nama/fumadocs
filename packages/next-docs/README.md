@@ -28,7 +28,7 @@ It's recommended to use Next Docs with [Tailwind CSS](https://tailwindcss.com) +
 
 [![Open in CodeSandbox](https://img.shields.io/badge/Open%20in-CodeSandbox-blue?style=flat-square&logo=codesandbox)](https://githubbox.com/SonMooSans/next-docs-template)
 
-View the [Template](https://github.com/SonMooSans/next-docs-template) repository
+View the [Template](https://github.com/fuma-nama/next-docs-template) repository
 on Github.
 
 ### Sources

@@ -42,7 +42,7 @@ export default async function Page({ params }: { params: Param }) {
       tableOfContent={{
         footer: (
           <a
-            href={`https://github.com/SonMooSans/next-docs/blob/main/apps/docs/content/${page._raw.sourceFilePath}`}
+            href={`https://github.com/fuma-nama/next-docs/blob/main/apps/docs/content/${page._raw.sourceFilePath}`}
             target="_blank"
             rel="noreferrer noopener"
             className="text-xs inline-flex text-muted-foreground items-center hover:text-foreground"

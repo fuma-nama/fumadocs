@@ -48,7 +48,7 @@ function Footer() {
           <p className="text-xs">
             Built with ❤️ by{' '}
             <a
-              href="https://github.com/SonMooSans"
+              href="https://fuma-dev.vercel.app"
               rel="noreferrer noopener"
               target="_blank"
               className="font-medium"
@@ -60,7 +60,7 @@ function Footer() {
 
         <div className="flex flex-row items-center gap-20">
           <a
-            href="https://github.com/SonMooSans/next-docs"
+            href="https://github.com/fuma-nama/next-docs"
             rel="noreferrer noopener"
             className="flex flex-row items-center text-sm text-muted-foreground transition-colors hover:text-accent-foreground"
           >

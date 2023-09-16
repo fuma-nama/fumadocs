@@ -45,7 +45,7 @@ export default function Showcase() {
         ))}
 
         <a
-          href="https://github.com/SonMooSans/next-docs/discussions/30"
+          href="https://github.com/fuma-nama/next-docs/discussions/30"
           target="_blank"
           rel="noreferrer noopener"
           className="p-8 flex flex-col items-center text-center justify-center border rounded-lg bg-card text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
