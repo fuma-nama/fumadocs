@@ -16,7 +16,6 @@
     "build": "tsup --clean",
     "clean": "rmdir /q/s dist",
     "dev": "tsup --watch",
-    "example-version": "node ./scripts/update-version.js",
     "prepublishOnly": "pnpm build && node ./scripts/sync.js",
     "types:check": "tsc --noEmit"
   },

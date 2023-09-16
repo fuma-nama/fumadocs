@@ -13,7 +13,8 @@
     "release": "pnpm build && changeset publish",
     "test": "turbo run test",
     "types:check": "turbo run types:check",
-    "version": "changeset version && pnpm install --lockfile-only"
+    "version": "changeset version && pnpm install --lockfile-only",
+    "update-example": "node ./scripts/on-push.js"
   },
   "pnpm": {
     "peerDependencyRules": {

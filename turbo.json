@@ -19,9 +19,6 @@
       "dependsOn": [],
       "outputs": []
     },
-    "example-version": {
-      "cache": false
-    },
     "clean": {
       "cache": false
     },
