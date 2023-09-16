@@ -19,7 +19,7 @@
       "dependsOn": [],
       "outputs": []
     },
-    "format": {
+    "example-version": {
       "cache": false
     },
     "clean": {
