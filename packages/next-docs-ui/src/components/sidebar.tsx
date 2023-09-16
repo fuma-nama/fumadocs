@@ -4,14 +4,20 @@ import { LayoutContext } from '@/contexts/tree'
 import { cn } from '@/utils/cn'
 import * as Collapsible from '@radix-ui/react-collapsible'
 import { cva } from 'class-variance-authority'
-import clsx from 'clsx'
 import { ChevronDown } from 'lucide-react'
 import type { FileNode, FolderNode, TreeNode } from 'next-docs-zeta/server'
 import * as Base from 'next-docs-zeta/sidebar'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { ReactNode } from 'react'
-import { cloneElement, useContext, useEffect, useMemo, useState } from 'react'
+import {
+  cloneElement,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState
+} from 'react'
 import { ThemeToggle } from './theme-toggle'
 
 export type SidebarProps = {
@@ -57,7 +63,7 @@ export function Sidebar({ banner, footer }: SidebarProps) {
         </div>
       </ScrollArea>
       <div
-        className={clsx(
+        className={cn(
           'nd-flex nd-flex-row nd-items-center nd-gap-2 nd-border-t nd-py-2',
           !footer && 'lg:nd-hidden'
         )}
@@ -130,20 +136,18 @@ function Folder({
     if (!open) setAnimated(false)
   }, [open])
 
+  useLayoutEffect(() => {
+    setAnimated(true)
+  }, [extend])
+
   useEffect(() => {
     if (active || shouldExtend) {
       setExtend(true)
     }
   }, [active, shouldExtend])
 
-  useEffect(() => {
-    setAnimated(true)
-  }, [extend])
-
   const onClick = () => {
-    if (index == null || active) {
-      setExtend(!extend)
-    }
+    if (active) setExtend(prev => !prev)
   }
 
   const content = (
@@ -173,9 +177,9 @@ function Folder({
           content
         )}
         <ChevronDown
-          className={clsx(
+          className={cn(
             'nd-w-4 nd-h-4 nd-transition-transform nd-ml-auto',
-            extend ? 'nd-rotate-0' : '-nd-rotate-90'
+            extend && '-nd-rotate-90'
           )}
         />
       </Collapsible.Trigger>

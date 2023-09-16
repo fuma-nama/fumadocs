@@ -77,7 +77,7 @@ export function Nav({
 }
 
 function SearchToggle() {
-  const { setOpenSearch } = useContext(SearchContext)
+  const [setOpenSearch] = useContext(SearchContext)
 
   return (
     <button

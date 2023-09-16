@@ -6,7 +6,7 @@ import type { ComponentPropsWithoutRef } from 'react'
 import { useContext } from 'react'
 
 export function SearchBarToggle(props: ComponentPropsWithoutRef<'button'>) {
-  const { setOpenSearch } = useContext(SearchContext)
+  const [setOpenSearch] = useContext(SearchContext)
   const { search = 'Search' } = useContext(I18nContext).text ?? {}
 
   return (

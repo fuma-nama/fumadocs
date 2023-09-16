@@ -19,11 +19,9 @@ export type SearchProviderProps = SearchOptions & {
   children: ReactNode
 }
 
-export const SearchContext = createContext<{
-  setOpenSearch: (value: boolean) => void
-}>({
-  setOpenSearch: () => {}
-})
+export const SearchContext = createContext<
+  [setOpenSearch: (value: boolean) => void]
+>([() => {}])
 
 export function SearchProvider(props: SearchProviderProps) {
   const [isOpen, setOpen] = useState<boolean>()
@@ -46,7 +44,7 @@ export function SearchProvider(props: SearchProviderProps) {
   const SearchDialog = props.SearchDialog ?? DefaultSearchDialog
 
   return (
-    <SearchContext.Provider value={{ setOpenSearch: setOpen }}>
+    <SearchContext.Provider value={[setOpen]}>
       {isOpen !== undefined && (
         <SearchDialog
           open={isOpen}
