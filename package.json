@@ -10,7 +10,7 @@
     "lint": "eslint --cache --ignore-path .gitignore --max-warnings 0 .",
     "lint:prettier": "prettier --cache --check --ignore-path .gitignore --ignore-path .prettierignore .",
     "prettier": "prettier --cache --write --list-different --ignore-path .gitignore --ignore-path .prettierignore .",
-    "release": "changeset publish",
+    "release": "pnpm build && changeset publish",
     "test": "turbo run test",
     "types:check": "turbo run types:check",
     "version": "changeset version && pnpm install --lockfile-only"
