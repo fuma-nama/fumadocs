@@ -5,9 +5,20 @@ import { GithubIcon } from 'lucide-react'
 import { Nav as OriginalNav } from 'next-docs-ui/components'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
 export function Nav() {
   const { mode } = useParams()
+  const [transparent, setTransparent] = useState(true)
+
+  useEffect(() => {
+    const listener = () => {
+      setTransparent(window.document.scrollingElement!.scrollTop < 30)
+    }
+
+    window.addEventListener('scroll', listener)
+    return () => window.removeEventListener('scroll', listener)
+  })
 
   return (
     <OriginalNav
@@ -27,6 +38,7 @@ export function Nav() {
           children: 'Showcase'
         }
       ]}
+      transparent={transparent}
     >
       <div className="max-sm:absolute max-sm:left-[50%] max-sm:top-[50%] max-sm:translate-x-[-50%] max-sm:translate-y-[-50%]">
         <div className="border-input bg-secondary/50 rounded-md border p-1 text-sm">

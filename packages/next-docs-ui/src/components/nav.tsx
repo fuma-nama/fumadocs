@@ -36,6 +36,7 @@ type NavProps = {
   links?: NavLinkProps[]
   enableSidebar?: boolean
   collapsibleSidebar?: boolean
+  transparent?: boolean
   children?: ReactNode
 }
 
@@ -48,13 +49,19 @@ export function Nav({
   url = '/',
   links,
   items,
+  transparent = false,
   enableSidebar = true,
   collapsibleSidebar = true,
   children
 }: NavProps) {
   return (
-    <nav className="nd-sticky nd-top-0 nd-inset-x-0 nd-z-50 nd-backdrop-blur-lg">
-      <div className="nd-container nd-flex nd-flex-row nd-items-center nd-h-16 nd-gap-4 nd-border-b nd-border-foreground/10">
+    <nav
+      className={cn(
+        'nd-sticky nd-top-0 nd-w-full nd-z-50 nd-transition-colors nd-border-b nd-border-transparent nd-backdrop-blur-sm',
+        !transparent && 'nd-bg-background/50 nd-border-foreground/10'
+      )}
+    >
+      <div className="nd-container nd-flex nd-flex-row nd-items-center nd-h-16 nd-gap-4">
         <Link
           href={url}
           className="nd-font-medium hover:nd-text-muted-foreground"
