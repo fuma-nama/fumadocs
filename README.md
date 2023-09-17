@@ -35,13 +35,8 @@ A CLI tool that generates documentation sites.
 npx create next-docs-app
 ```
 
-## Example
+## Contributions
 
-[![Open in CodeSandbox](https://img.shields.io/badge/Open%20in-CodeSandbox-blue?style=flat-square&logo=codesandbox)](https://githubbox.com/SonMooSans/next-docs-ui-template)
+We are welcome for contributions! You may start with contributing to the docs, it is located in `/apps/docs/content/docs`. 
 
-View the [Template](https://github.com/fuma-nama/next-docs-ui-template)
-repository on Github.
-
-### Sources
-
-Next Docs has native support for [Contentlayer](https://www.contentlayer.dev).
+Notice that this project is a monorepo using Turborepo, pnpm and [Changesets](https://github.com/changesets/changesets). Make sure to format your code with `pnpm run prettier` and add changeset with `pnpm changeset`.
