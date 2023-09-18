@@ -1,6 +1,6 @@
 import { mergeRefs } from '@/merge-refs'
 import type { TableOfContents, TOCItemType } from '@/server/types'
-import type { ComponentPropsWithoutRef, HTMLAttributes, RefObject } from 'react'
+import type { AnchorHTMLAttributes, HTMLAttributes, RefObject } from 'react'
 import {
   createContext,
   forwardRef,
@@ -50,17 +50,18 @@ export const TOCProvider = forwardRef<HTMLDivElement, TOCProviderProps>(
 
 TOCProvider.displayName = 'TOCProvider'
 
-export type TOCItemProps = ComponentPropsWithoutRef<'a'> & {
-  item: TOCItemType
+export type TOCItemProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
+  href: string
+  /** @deprecated You don't need to pass this anymore */
+  item?: TOCItemType
 }
 
 export const TOCItem = forwardRef<HTMLAnchorElement, TOCItemProps>(
-  ({ item, ...props }, ref) => {
-    const { activeAnchor, containerRef } = useContext(ActiveAnchorContext)!
+  (props, ref) => {
+    const { containerRef } = useContext(ActiveAnchorContext)!
+    const active = useActiveAnchor(props.href)
     const anchorRef = useRef<HTMLAnchorElement>(null)
     const mergedRef = mergeRefs(anchorRef, ref)
-
-    const active = activeAnchor === item.url.split('#')[1]
 
     useEffect(() => {
       const element = anchorRef.current
