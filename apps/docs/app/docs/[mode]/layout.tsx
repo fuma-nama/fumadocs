@@ -42,7 +42,7 @@ export default function Layout({
           loading="eager"
           width={800}
           height={800}
-          className="min-w-[800px] -mt-44 dark:mt-0"
+          className="min-w-[800px] opacity-50"
           aria-hidden
         />
       </div>

@@ -11,7 +11,6 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { ReactNode } from 'react'
 import {
-  cloneElement,
   useContext,
   useEffect,
   useLayoutEffect,
@@ -26,13 +25,13 @@ export type SidebarProps = {
 }
 
 const itemVariants = cva(
-  'nd-flex nd-flex-row nd-items-center nd-text-sm nd-px-2 nd-py-1.5 nd-rounded-md',
+  'nd-flex nd-flex-row nd-items-center nd-gap-2 nd-text-sm nd-px-2 nd-py-1.5 nd-rounded-md [&_svg]:nd-w-4 [&_svg]:nd-h-4',
   {
     variants: {
       active: {
         true: 'nd-text-primary nd-bg-primary/10 nd-font-medium',
         false:
-          'nd-text-muted-foreground nd-transition-colors hover:nd-text-accent-foreground hover:nd-bg-accent/50'
+          'nd-text-muted-foreground nd-transition-colors hover:nd-text-accent-foreground'
       }
     }
   }
@@ -93,10 +92,7 @@ function Item({ item }: { item: FileNode }) {
 
   return (
     <Link href={item.url} className={cn(itemVariants({ active }))}>
-      {item.icon &&
-        cloneElement(item.icon, {
-          className: 'nd-w-4 nd-h-4 nd-mr-2'
-        })}
+      {item.icon}
       {item.name}
     </Link>
   )
@@ -150,16 +146,6 @@ function Folder({
     if (active) setExtend(prev => !prev)
   }
 
-  const content = (
-    <>
-      {icon &&
-        cloneElement(icon, {
-          className: 'nd-w-4 nd-h-4 nd-mr-2'
-        })}
-      {name}
-    </>
-  )
-
   return (
     <Collapsible.Root open={extend} onOpenChange={setExtend}>
       <Collapsible.Trigger
@@ -168,17 +154,21 @@ function Folder({
         {index ? (
           <Link
             href={index.url}
-            className="nd-inline-flex nd-flex-row nd-items-center nd-flex-1"
+            className="nd-inline-flex nd-items-center nd-gap-2 nd-flex-1"
             onClick={onClick}
           >
-            {content}
+            {icon}
+            {name}
           </Link>
         ) : (
-          content
+          <>
+            {icon}
+            {name}
+          </>
         )}
         <ChevronDown
           className={cn(
-            'nd-w-4 nd-h-4 nd-transition-transform nd-ml-auto',
+            'nd-transition-transform nd-ml-auto',
             extend && '-nd-rotate-90'
           )}
         />
