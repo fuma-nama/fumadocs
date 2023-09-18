@@ -31,7 +31,7 @@ const itemVariants = cva(
       active: {
         true: 'nd-text-primary nd-bg-primary/10 nd-font-medium',
         false:
-          'nd-text-muted-foreground nd-transition-colors hover:nd-text-accent-foreground'
+          'nd-text-muted-foreground nd-transition-colors hover:nd-bg-accent/50'
       }
     }
   }

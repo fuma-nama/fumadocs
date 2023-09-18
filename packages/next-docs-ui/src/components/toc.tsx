@@ -37,7 +37,7 @@ function TOCItems({ items }: { items: TOCItemType[] }) {
       <h3 className="nd-inline-flex nd-items-center nd-font-medium nd-text-sm nd-mb-4">
         <TextIcon className="nd-inline nd-w-4 nd-h-4 nd-mr-2" /> {toc}
       </h3>
-      <div className="nd-flex nd-flex-col nd-border-l nd-text-sm nd-text-muted-foreground">
+      <div className="nd-flex nd-flex-col nd-border-l-2 nd-text-sm nd-text-muted-foreground">
         <Marker pos={pos} />
         {items.map((item, i) => (
           <TOCItem key={i} item={item} setMarker={setPos} />
@@ -49,17 +49,16 @@ function TOCItems({ items }: { items: TOCItemType[] }) {
 
 function Marker({ pos }: { pos?: PosType }) {
   return (
-    <div
-      className="nd-absolute nd-w-px nd-bg-primary nd-transition-all"
+    <span
+      className={cn(
+        'nd-absolute nd-left-0 nd-border-l-2 nd-border-primary nd-transition-all',
+        !pos && 'nd-opacity-0'
+      )}
       style={
-        pos
-          ? {
-              top: pos[0],
-              height: pos[1]
-            }
-          : {
-              opacity: 0
-            }
+        pos && {
+          top: pos[0],
+          height: pos[1]
+        }
       }
     />
   )
@@ -88,7 +87,7 @@ function TOCItem({
       className={cn(
         'nd-pl-2 nd-py-1 nd-text-ellipsis nd-transition-colors nd-overflow-hidden nd-font-medium data-[active=true]:nd-text-primary',
         item.depth === 2 && 'nd-pl-4',
-        item.depth === 3 && 'nd-pl-7',
+        item.depth === 3 && 'nd-pl-6',
         item.depth >= 4 && 'nd-pl-9'
       )}
     >

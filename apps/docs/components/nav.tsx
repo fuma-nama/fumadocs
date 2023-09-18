@@ -10,7 +10,7 @@ import { useParams } from 'next/navigation'
 import { useContext, useEffect, useState } from 'react'
 
 const item = cva(
-  'px-2 py-1 rounded-md text-muted-foreground transition-colors hover:text-accent-foreground',
+  'px-2 py-1 rounded-md transition-colors hover:text-accent-foreground',
   {
     variants: {
       active: {
@@ -59,18 +59,16 @@ export function Nav() {
       ]}
       transparent={transparent}
     >
-      <div className="max-sm:absolute max-sm:left-[50%] max-sm:translate-x-[-50%]">
-        <div className="bg-secondary/50 rounded-md border p-1 text-sm">
-          <Link
-            href="/docs/headless"
-            className={cn(item({ active: mode === 'headless' }))}
-          >
-            Zeta
-          </Link>
-          <Link href="/docs/ui" className={cn(item({ active: mode === 'ui' }))}>
-            UI
-          </Link>
-        </div>
+      <div className="bg-secondary/50 rounded-md border p-1 text-sm text-muted-foreground max-sm:absolute max-sm:left-[50%] max-sm:translate-x-[-50%]">
+        <Link
+          href="/docs/headless"
+          className={cn(item({ active: mode === 'headless' }))}
+        >
+          Zeta
+        </Link>
+        <Link href="/docs/ui" className={cn(item({ active: mode === 'ui' }))}>
+          UI
+        </Link>
       </div>
     </OriginalNav>
   )
