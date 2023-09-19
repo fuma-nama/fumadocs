@@ -76,7 +76,7 @@
     "autoprefixer": "10.4.15",
     "contentlayer": "^0.3.4",
     "next": "13.4.19",
-    "postcss": "8.4.29",
+    "postcss": "8.4.30",
     "postcss-cli": "^10.1.0",
     "postcss-import": "^15.1.0",
     "postcss-lightningcss": "^1.0.0",
