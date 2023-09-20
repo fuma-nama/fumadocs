@@ -1,2 +1,13 @@
 @tailwind components;
 @tailwind utilities;
+
+
+.animated-border {
+    border-radius: inherit;
+    mask: linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+}
+
+.animated-border::before {
+    content: "";
+    @apply absolute block top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] w-[600px] pb-[600px] bg-[conic-gradient(var(--tw-gradient-stops))] from-purple-400 via-pink-400 animate-infinite-rotate;
+}

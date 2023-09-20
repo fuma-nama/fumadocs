@@ -58,10 +58,10 @@ module.exports = {
       keyframes: {
         'infinite-rotate': {
           from: {
-            transform: 'rotateZ(0deg)'
+            transform: 'translate(-50%,-50%) rotate(1turn)'
           },
           to: {
-            transform: 'rotateZ(360deg)'
+            transform: 'translate(-50%,-50%) rotate(0)'
           }
         },
         star: {

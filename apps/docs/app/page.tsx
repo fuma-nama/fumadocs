@@ -32,13 +32,12 @@ export default function HomePage() {
         <div className="mt-14 grid grid-cols-1 max-w-4xl gap-8 animate-in fade-in slide-in-from-bottom-10 duration-1000 md:grid-cols-2">
           <Link
             href="/docs/headless"
-            className="group relative overflow-hidden rounded-xl p-px z-[2] bg-border"
+            className="group relative overflow-hidden p-px rounded-xl z-[2]"
           >
-            <i className="absolute opacity-0 transition-opacity top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] w-[130%] h-auto aspect-square z-[-1] group-hover:opacity-100">
-              <div className="w-full h-full bg-[conic-gradient(var(--tw-gradient-stops))] from-purple-400 via-pink-400 animate-infinite-rotate" />
-            </i>
-            <div className="flex flex-col items-center bg-background rounded-xl h-full bg-gradient-to-t from-purple-400/20 p-6 sm:p-12">
-              <div className="border p-3 bg-gradient-to-b from-purple-400/50 border-purple-500 shadow-xl shadow-purple-400/50 mb-6 rounded-xl">
+            <i className="absolute inset-0 opacity-0 transition-opacity z-[-1] animated-border group-hover:opacity-100"/>
+            <div className="absolute inset-px bg-background bg-gradient-radial rounded-[inherit] from-purple-400/20 to-purple-400/0 z-[-1]" />
+            <div className="flex flex-col items-center rounded-[inherit] h-full z-[2] p-6 border sm:p-12">
+              <div className="border p-3 bg-gradient-to-b from-purple-400/10 border-foreground/20 shadow-xl shadow-background/50 mb-6 rounded-xl">
                 <LibraryIcon className="h-9 w-9 text-purple-400 dark:text-purple-200" />
               </div>
               <p className="mb-2 text-xl font-medium">Next Docs Zeta</p>
@@ -51,13 +50,12 @@ export default function HomePage() {
 
           <Link
             href="/docs/ui"
-            className="group relative overflow-hidden rounded-xl p-px z-[2] bg-border"
+            className="group relative overflow-hidden rounded-xl p-px z-[2]"
           >
-            <i className="absolute opacity-0 transition-opacity top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] w-[130%] h-auto aspect-square z-[-1] group-hover:opacity-100">
-              <div className="w-full h-full bg-[conic-gradient(var(--tw-gradient-stops))] from-purple-400 via-blue-400 animate-infinite-rotate" />
-            </i>
-            <div className="flex flex-col items-center bg-background rounded-xl h-full bg-gradient-to-t from-blue-400/20 p-6 sm:p-12">
-              <div className="border p-3 bg-gradient-to-b from-blue-400/50 border-blue-500 shadow-xl shadow-blue-400/50 mb-6 rounded-xl">
+            <i className="absolute inset-0 opacity-0 transition-opacity z-[-1] animated-border group-hover:opacity-100"/>
+            <div className="absolute inset-px bg-background bg-gradient-radial from-blue-400/20 to-blue-400/0 rounded-[inherit] z-[-1]" />
+            <div className="flex flex-col items-center rounded-[inherit] h-full p-6 border sm:p-12">
+              <div className="border p-3 bg-gradient-to-b from-blue-400/30 border-blue-500/50 shadow-xl shadow-background/50 mb-6 rounded-xl">
                 <LayoutIcon className="h-9 w-9 text-blue-400 dark:text-cyan-200" />
               </div>
               <p className="mb-2 text-xl font-medium">Next Docs UI</p>
@@ -180,16 +178,7 @@ export default function HomePage() {
       </div>
 
       <div className="bg-gradient-to-r from-purple-400/30 blur-xl h-[100px] translate-y-[150%]" />
-      <div className="relative border-t bg-background mt-20 z-[2]">
-        <div className="relative z-[-1]">
-          <Image
-            alt="stars"
-            src="/stars.png"
-            width="500"
-            height="500"
-            className="absolute top-0 right-0 hidden dark:block"
-          />
-        </div>
+      <div className="relative border-t bg-gradient-to-b from-purple-400/20 mt-20 z-[2]">
         <div className="container my-40 flex flex-col gap-2 items-center text-center">
           <h2 className="text-3xl font-semibold">Install Now</h2>
           <p className="text-muted-foreground">Stop waiting, go play it.</p>
