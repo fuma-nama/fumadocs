@@ -24,7 +24,7 @@ export function Card({
   return (
     <SafeLink
       href={href}
-      className="nd-text-sm nd-rounded-lg nd-p-4 nd-border nd-bg-card nd-text-card-foreground nd-transition-colors hover:nd-bg-muted/70"
+      className="nd-text-sm nd-rounded-lg nd-p-4 nd-border nd-bg-card nd-text-card-foreground nd-transition-colors hover:nd-bg-muted/50"
     >
       <div className="nd-w-fit nd-border nd-p-1 nd-rounded-md nd-bg-background nd-mb-3">
         <div className="nd-flex nd-justify-center nd-items-center nd-w-8 nd-bg-secondary nd-p-2 nd-h-8 nd-rounded-md nd-text-muted-foreground">
