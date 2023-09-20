@@ -60,7 +60,7 @@ export function DocsLayout({
     links.push({
       href: nav.githubUrl,
       label: 'Github',
-      icon: <GithubIcon className="nd-w-5 nd-h-5" />,
+      icon: <GithubIcon />,
       external: true
     })
 

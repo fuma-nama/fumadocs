@@ -176,7 +176,7 @@ export default function HomePage() {
             Remote source, Components, and Utilities
           </p>
         </div>
-        <div className="col-span-full h-[300px] mt-[-300px] bg-gradient-to-r from-purple-400/50 to-cyan-400/50 z-[-1] blur-3xl" />
+        <div className="col-span-full h-[300px] mt-[-300px] bg-gradient-to-r from-purple-400/30 to-cyan-400/30 z-[-1] blur-3xl" />
       </div>
 
       <div className="bg-gradient-to-r from-purple-400/30 blur-xl h-[100px] translate-y-[150%]" />

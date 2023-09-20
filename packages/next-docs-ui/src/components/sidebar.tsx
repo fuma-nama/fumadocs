@@ -10,13 +10,7 @@ import * as Base from 'next-docs-zeta/sidebar'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { ReactNode } from 'react'
-import {
-  useContext,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useState
-} from 'react'
+import { useContext, useEffect, useMemo, useState } from 'react'
 import { ThemeToggle } from './theme-toggle'
 
 export type SidebarProps = {
@@ -25,13 +19,12 @@ export type SidebarProps = {
 }
 
 const itemVariants = cva(
-  'nd-flex nd-flex-row nd-items-center nd-gap-2 nd-text-sm nd-px-2 nd-py-1.5 nd-rounded-md [&_svg]:nd-w-4 [&_svg]:nd-h-4',
+  'nd-flex nd-flex-row nd-items-center nd-gap-2 nd-text-muted-foreground nd-px-2 nd-py-1.5 nd-rounded-md [&_svg]:nd-w-4 [&_svg]:nd-h-4',
   {
     variants: {
       active: {
         true: 'nd-text-primary nd-bg-primary/10 nd-font-medium',
-        false:
-          'nd-text-muted-foreground nd-transition-colors hover:nd-bg-accent/50'
+        false: 'hover:nd-bg-accent/50'
       }
     }
   }
@@ -50,11 +43,11 @@ export function Sidebar({ banner, footer }: SidebarProps) {
           ? 'lg:nd-w-[260px]'
           : 'lg:nd-w-0 lg:nd-overflow-hidden lg:nd-opacity-0',
         'lg:nd-sticky lg:nd-top-16 lg:nd-h-[calc(100vh-4rem)] lg:nd-transition-[width,opacity]',
-        'max-lg:nd-w-full max-lg:nd-px-8 max-lg:nd-fixed max-lg:nd-inset-y-0 max-lg:nd-right-0 max-lg:nd-bg-background/80 max-lg:nd-backdrop-blur-lg max-lg:nd-z-40 max-lg:nd-pt-16 max-lg:data-[open=false]:nd-hidden sm:max-lg:nd-max-w-sm sm:max-lg:nd-border-l'
+        'max-lg:nd-w-full max-lg:nd-px-8 max-lg:nd-fixed max-lg:nd-inset-y-0 max-lg:nd-right-0 max-lg:nd-bg-background max-lg:nd-z-40 max-lg:nd-pt-16 max-lg:data-[open=false]:nd-hidden sm:max-lg:nd-max-w-sm sm:max-lg:nd-border-l'
       )}
     >
       <ScrollArea className="nd-flex-1 [mask-image:linear-gradient(to_top,transparent,white_40px)] max-lg:-nd-mr-4 lg:nd-w-[260px]">
-        <div className="nd-flex nd-flex-col nd-pb-10 nd-pr-4 nd-pt-4 lg:nd-pt-16">
+        <div className="nd-flex nd-flex-col nd-pb-10 nd-pr-4 nd-pt-4 sm:nd-text-sm lg:nd-pt-12">
           {banner}
           {tree.children.map((item, i) => (
             <Node key={i} item={item} level={1} />
@@ -77,7 +70,7 @@ export function Sidebar({ banner, footer }: SidebarProps) {
 function Node({ item, level }: { item: TreeNode; level: number }) {
   if (item.type === 'separator')
     return (
-      <p className="nd-font-medium nd-text-sm nd-px-2 nd-mt-8 nd-mb-2 first:nd-mt-0">
+      <p className="nd-font-medium nd-px-2 nd-mt-8 nd-mb-2 first:nd-mt-0">
         {item.name}
       </p>
     )
@@ -116,7 +109,6 @@ function Folder({
   item: FolderNode
   level: number
 }) {
-  const [open] = useContext(Base.SidebarContext)
   const { sidebarDefaultOpenLevel = 1 } = useContext(LayoutContext)
 
   const pathname = usePathname()
@@ -129,12 +121,8 @@ function Folder({
   const [extend, setExtend] = useState(active || shouldExtend)
 
   useEffect(() => {
-    if (!open) setAnimated(false)
-  }, [open])
-
-  useLayoutEffect(() => {
     setAnimated(true)
-  }, [extend])
+  }, [])
 
   useEffect(() => {
     if (active || shouldExtend) {

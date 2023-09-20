@@ -41,7 +41,7 @@ type NavProps = {
 }
 
 const itemVariants = cva(
-  'nd-p-2 nd-rounded-md hover:nd-bg-accent hover:nd-text-accent-foreground'
+  'nd-p-2 nd-rounded-md [&_svg]:nd-w-5 [&_svg]:nd-h-5 hover:nd-bg-accent hover:nd-text-accent-foreground'
 )
 
 export function Nav({
@@ -57,11 +57,11 @@ export function Nav({
   return (
     <nav
       className={cn(
-        'nd-sticky nd-top-0 nd-w-full nd-z-50 nd-transition-colors nd-border-b nd-border-transparent nd-backdrop-blur-sm',
+        'nd-sticky nd-top-0 nd-h-16 nd-z-50 nd-transition-colors nd-border-b nd-border-transparent nd-backdrop-blur-sm',
         !transparent && 'nd-bg-background/50 nd-border-foreground/10'
       )}
     >
-      <div className="nd-container nd-flex nd-flex-row nd-items-center nd-h-16 nd-gap-4">
+      <div className="nd-container nd-flex nd-flex-row nd-items-center nd-h-full nd-gap-4">
         <Link
           href={url}
           className="nd-font-medium hover:nd-text-muted-foreground"
@@ -92,7 +92,7 @@ function SearchToggle() {
       aria-label="Open Search"
       onClick={() => setOpenSearch(true)}
     >
-      <SearchIcon className="nd-w-5 nd-h-5" />
+      <SearchIcon />
     </button>
   )
 }
@@ -103,7 +103,7 @@ function SidebarToggle() {
       aria-label="Toggle Sidebar"
       className={cn(itemVariants({ className: 'lg:nd-hidden' }))}
     >
-      <MenuIcon className="nd-w-5 nd-h-5" />
+      <MenuIcon />
     </SidebarTrigger>
   )
 }
@@ -117,11 +117,7 @@ function DesktopSidebarToggle() {
       onClick={() => setOpen(!open)}
       className={cn(itemVariants({ className: 'max-lg:nd-hidden' }))}
     >
-      {open ? (
-        <SidebarCloseIcon className="nd-w-5 nd-h-5" />
-      ) : (
-        <SidebarOpenIcon className="nd-w-5 nd-h-5" />
-      )}
+      {open ? <SidebarCloseIcon /> : <SidebarOpenIcon />}
     </button>
   )
 }
@@ -137,10 +133,10 @@ function NavItem(props: NavItemProps) {
       target={props.external ? '_blank' : '_self'}
       rel={props.external ? 'noreferrer noopener' : undefined}
       className={cn(
-        'nd-text-sm max-lg:nd-hidden',
+        'nd-text-sm nd-text-muted-foreground max-lg:nd-hidden',
         isActive
           ? 'nd-text-accent-foreground nd-font-medium'
-          : 'nd-text-muted-foreground nd-transition-colors hover:nd-text-accent-foreground'
+          : 'nd-transition-colors hover:nd-text-accent-foreground'
       )}
     >
       {props.children}

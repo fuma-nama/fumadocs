@@ -4,10 +4,9 @@ import { cn } from '@/utils/cn'
 import { cva } from 'class-variance-authority'
 import { GithubIcon } from 'lucide-react'
 import { Nav as OriginalNav } from 'next-docs-ui/components'
-import { SidebarContext } from 'next-docs-zeta/sidebar'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useContext, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const item = cva(
   'px-2 py-1 rounded-md transition-colors hover:text-accent-foreground',
@@ -21,12 +20,11 @@ const item = cva(
 )
 export function Nav() {
   const { mode } = useParams()
-  const [isSidebarOpen] = useContext(SidebarContext)
   const [transparent, setTransparent] = useState(true)
 
   useEffect(() => {
-    if (isSidebarOpen) {
-      setTransparent(true)
+    if (mode != null) {
+      setTransparent(false)
       return
     }
 
@@ -37,7 +35,7 @@ export function Nav() {
     listener()
     window.addEventListener('scroll', listener)
     return () => window.removeEventListener('scroll', listener)
-  }, [isSidebarOpen])
+  }, [mode])
 
   return (
     <OriginalNav
@@ -46,7 +44,7 @@ export function Nav() {
       links={[
         {
           label: 'Github',
-          icon: <GithubIcon className="h-5 w-5" />,
+          icon: <GithubIcon />,
           href: 'https://github.com/fuma-nama/next-docs',
           external: true
         }

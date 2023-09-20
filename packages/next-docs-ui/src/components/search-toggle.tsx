@@ -1,9 +1,14 @@
 import { I18nContext } from '@/contexts/i18n'
 import { SearchContext } from '@/contexts/search'
 import { cn } from '@/utils/cn'
+import { cva } from 'class-variance-authority'
 import { SearchIcon } from 'lucide-react'
 import type { ComponentPropsWithoutRef } from 'react'
 import { useContext } from 'react'
+
+const shortcut = cva(
+  'nd-inline-flex nd-items-center nd-justify-center nd-border nd-font-medium nd-rounded-md nd-bg-background nd-w-6 nd-h-6'
+)
 
 export function SearchBarToggle(props: ComponentPropsWithoutRef<'button'>) {
   const [setOpenSearch] = useContext(SearchContext)
@@ -13,16 +18,20 @@ export function SearchBarToggle(props: ComponentPropsWithoutRef<'button'>) {
     <button
       {...props}
       className={cn(
-        'nd-inline-flex nd-items-center nd-text-sm nd-rounded-md nd-transition-colors nd-w-full nd-max-w-[250px] nd-px-3 nd-border nd-py-1.5 nd-text-muted-foreground nd-bg-secondary/50 hover:nd-bg-accent',
+        'nd-inline-flex nd-items-center nd-text-sm nd-rounded-md nd-transition-colors nd-w-full nd-max-w-[250px] nd-p-1.5 nd-border nd-text-muted-foreground nd-bg-secondary/50 hover:nd-bg-muted/70 hover:nd-text-accent-foreground',
         props.className
       )}
       onClick={() => setOpenSearch(true)}
     >
-      <SearchIcon aria-label="Open Search" className="nd-mr-2 nd-w-4 nd-h-4" />
+      <SearchIcon
+        aria-label="Open Search"
+        className="nd-ml-1 nd-mr-2 nd-w-4 nd-h-4"
+      />
       {search}
-      <span className="nd-text-xs nd-ml-auto nd-px-2 nd-py-0.5 nd-border nd-rounded-md nd-bg-secondary nd-text-secondary-foreground">
-        Ctrl K
-      </span>
+      <div className="nd-ml-auto">
+        <kbd className={shortcut({ className: 'nd-text-xs' })}>⌘</kbd>
+        <kbd className={shortcut({ className: 'nd-ml-0.5' })}>K</kbd>
+      </div>
     </button>
   )
 }

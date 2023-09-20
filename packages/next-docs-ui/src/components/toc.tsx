@@ -13,14 +13,12 @@ export function TOC(props: {
   footer: ReactNode
 }) {
   return (
-    <div className="nd-relative nd-w-[250px] max-xl:nd-hidden">
-      <div className="nd-sticky nd-divide-y nd-flex nd-flex-col nd-top-16 nd-gap-4 nd-py-16 nd-max-h-[calc(100vh-4rem)]">
-        {props.header && <div>{props.header}</div>}
-        {props.items.length > 0 && <TOCItems items={props.items} />}
-        {props.footer && (
-          <div className="nd-pt-4 first:nd-pt-0">{props.footer}</div>
-        )}
-      </div>
+    <div className="nd-sticky nd-divide-y nd-flex nd-flex-col nd-top-16 nd-gap-4 nd-py-12 nd-w-[250px] nd-h-[calc(100vh-4rem)] max-xl:nd-hidden">
+      {props.header && <div>{props.header}</div>}
+      {props.items.length > 0 && <TOCItems items={props.items} />}
+      {props.footer && (
+        <div className="nd-pt-4 first:nd-pt-0">{props.footer}</div>
+      )}
     </div>
   )
 }
@@ -35,9 +33,9 @@ function TOCItems({ items }: { items: TOCItemType[] }) {
       className="nd-pt-4 nd-overflow-hidden first:nd-pt-0"
     >
       <h3 className="nd-inline-flex nd-items-center nd-font-medium nd-text-sm nd-mb-4">
-        <TextIcon className="nd-inline nd-w-4 nd-h-4 nd-mr-2" /> {toc}
+        <TextIcon className="nd-w-4 nd-h-4 nd-mr-2" /> {toc}
       </h3>
-      <div className="nd-flex nd-flex-col nd-border-l-2 nd-text-sm nd-text-muted-foreground">
+      <div className="nd-flex nd-flex-col nd-border-l-2 nd-text-sm nd-text-muted-foreground nd-font-medium">
         <Marker pos={pos} />
         {items.map((item, i) => (
           <TOCItem key={i} item={item} setMarker={setPos} />
@@ -51,8 +49,8 @@ function Marker({ pos }: { pos?: PosType }) {
   return (
     <span
       className={cn(
-        'nd-absolute nd-left-0 nd-border-l-2 nd-border-primary nd-transition-all',
-        !pos && 'nd-opacity-0'
+        'nd-absolute nd-left-0 nd-border-l-2 nd-transition-all',
+        pos && 'nd-border-primary'
       )}
       style={
         pos && {
@@ -85,10 +83,10 @@ function TOCItem({
       ref={ref}
       href={item.url}
       className={cn(
-        'nd-pl-2 nd-py-1 nd-text-ellipsis nd-transition-colors nd-overflow-hidden nd-font-medium data-[active=true]:nd-text-primary',
+        'nd-pl-2 nd-py-1.5 nd-text-ellipsis nd-transition-colors nd-overflow-hidden data-[active=true]:nd-text-primary',
         item.depth === 2 && 'nd-pl-4',
-        item.depth === 3 && 'nd-pl-6',
-        item.depth >= 4 && 'nd-pl-9'
+        item.depth === 3 && 'nd-pl-7',
+        item.depth >= 4 && 'nd-pl-10'
       )}
     >
       {item.title}

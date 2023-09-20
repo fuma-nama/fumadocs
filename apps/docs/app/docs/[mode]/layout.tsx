@@ -2,7 +2,6 @@ import { cn } from '@/utils/cn'
 import { getTree } from '@/utils/source'
 import { LayoutIcon, LibraryIcon } from 'lucide-react'
 import { DocsLayout } from 'next-docs-ui/layout'
-import Image from 'next/image'
 import type { ReactNode } from 'react'
 import packageJsonUI from '../../../../../packages/next-docs-ui/package.json'
 import packageJsonZeta from '../../../../../packages/next-docs/package.json'
@@ -32,20 +31,6 @@ export default function Layout({
         params.mode === 'headless' && '[--primary:270_95%_75%]'
       )}
     >
-      <div
-        id="docs-gradient"
-        className="absolute right-0 top-0 overflow-hidden z-[-1] sm:right-[20vw]"
-      >
-        <Image
-          alt=""
-          src="/gradient.png"
-          loading="eager"
-          width={800}
-          height={800}
-          className="min-w-[800px] opacity-50"
-          aria-hidden
-        />
-      </div>
       <DocsLayout
         tree={tree}
         nav={{ enabled: false }}
