@@ -1,5 +1,19 @@
 # next-docs-ui
 
+## 2.1.0
+
+### Minor Changes
+
+- db050fc: Redesign default theme & layout
+
+### Patch Changes
+
+- b527988: Files component support custom icons
+- 69a4469: Animate TOC marker
+- dbe1bcf: Support transparent navbar for custom navbar
+- Updated dependencies [a5a661e]
+  - next-docs-zeta@2.1.0
+
 ## 2.0.3
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 2.1.0
+
+### Patch Changes
+
+- a5a661e: Remove `item` prop from TOC items
+
 ## 2.0.3
 
 ## 2.0.2
