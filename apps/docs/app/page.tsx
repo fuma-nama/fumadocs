@@ -175,8 +175,9 @@ export default function HomePage() {
         <div className="col-span-full h-[300px] mt-[-300px] bg-gradient-to-r from-purple-400/30 to-cyan-400/30 z-[-1] blur-3xl" />
       </div>
 
-      <div className="relative border-t bg-gradient-to-b from-muted mt-40 z-[2]">
-        <div className="container my-40 flex flex-col gap-2 items-center text-center">
+      <div className="relative border-t mt-40 z-[2]">
+        <div className="absolute inset-x-0 bottom-0 h-[400px] bg-gradient-to-r from-purple-400 to-blue-400 opacity-20 [mask-image:linear-gradient(to_top,white,transparent)] z-[-1]" />
+        <div className="container py-40 flex flex-col gap-2 items-center text-center">
           <h2 className="text-3xl font-semibold">Install Now</h2>
           <p className="text-muted-foreground">Stop waiting, go play it.</p>
           <a
@@ -189,7 +190,6 @@ export default function HomePage() {
             <ExternalLinkIcon className="w-4 h-4 ml-2" />
           </a>
         </div>
-        <div className="h-[120px] bg-gradient-to-r from-purple-400 to-blue-400 opacity-30 [mask-image:linear-gradient(to_top,white,transparent)] md:via-transparent md:to-blue-400" />
       </div>
     </main>
   )
