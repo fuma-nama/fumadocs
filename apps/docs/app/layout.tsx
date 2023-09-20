@@ -13,7 +13,7 @@ export const metadata = createMetadata({
     default: 'Next Docs'
   },
   themeColor: '#030711',
-  description: 'The headless ui library for building a documentation website',
+  description: 'The Next.js framework for building documentation sites',
   metadataBase: base_url
 })
 
