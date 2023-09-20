@@ -48,7 +48,7 @@ export default function Showcase() {
           href="https://github.com/fuma-nama/next-docs/discussions/30"
           target="_blank"
           rel="noreferrer noopener"
-          className="p-8 flex flex-col items-center text-center justify-center border rounded-lg bg-card text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+          className="p-8 flex flex-col items-center text-center justify-center border rounded-lg bg-card text-muted-foreground transition-colors hover:bg-muted/50 hover:text-accent-foreground"
         >
           <PlusIcon className="w-7 h-7 mb-2" />
           <p className="text-sm">Add Your Own</p>

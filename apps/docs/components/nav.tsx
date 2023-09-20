@@ -20,22 +20,17 @@ const item = cva(
 )
 export function Nav() {
   const { mode } = useParams()
-  const [transparent, setTransparent] = useState(true)
+  const [isDown, setDown] = useState(true)
 
   useEffect(() => {
-    if (mode != null) {
-      setTransparent(false)
-      return
-    }
-
     const listener = () => {
-      setTransparent(window.document.scrollingElement!.scrollTop < 30)
+      setDown(window.document.scrollingElement!.scrollTop < 30)
     }
 
     listener()
     window.addEventListener('scroll', listener)
     return () => window.removeEventListener('scroll', listener)
-  }, [mode])
+  }, [])
 
   return (
     <OriginalNav
@@ -55,7 +50,7 @@ export function Nav() {
           children: 'Showcase'
         }
       ]}
-      transparent={transparent}
+      transparent={mode == null && isDown}
     >
       <div className="bg-secondary/50 rounded-md border p-1 text-sm text-muted-foreground max-sm:absolute max-sm:left-[50%] max-sm:translate-x-[-50%]">
         <Link
