@@ -23,6 +23,11 @@ export function Nav() {
   type={{
     title: { type: 'ReactNode' },
     url: { type: 'string', default: '/' },
+    transparent: {
+      type: 'boolean',
+      description: 'Use transparent background',
+      default: 'false'
+    },
     items: { type: 'NavItemProps[]' },
     links: { type: 'NavLinkProps[]' },
     enableSidebar: { type: 'boolean' },
