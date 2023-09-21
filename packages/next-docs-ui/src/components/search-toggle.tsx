@@ -7,7 +7,7 @@ import type { ComponentPropsWithoutRef } from 'react'
 import { useContext } from 'react'
 
 const shortcut = cva(
-  'nd-inline-flex nd-items-center nd-justify-center nd-border nd-font-medium nd-rounded-md nd-bg-background nd-w-6 nd-h-6'
+  'nd-border nd-rounded-md nd-bg-background nd-px-1.5 nd-py-0.5'
 )
 
 export function SearchBarToggle(props: ComponentPropsWithoutRef<'button'>) {
@@ -28,9 +28,9 @@ export function SearchBarToggle(props: ComponentPropsWithoutRef<'button'>) {
         className="nd-ml-1 nd-mr-2 nd-w-4 nd-h-4"
       />
       {search}
-      <div className="nd-ml-auto">
-        <kbd className={shortcut({ className: 'nd-text-xs' })}>⌘</kbd>
-        <kbd className={shortcut({ className: 'nd-ml-0.5' })}>K</kbd>
+      <div className="nd-inline-flex nd-items-center nd-text-xs nd-gap-0.5 nd-ml-auto">
+        <kbd className={shortcut()}>⌘</kbd>
+        <kbd className={shortcut({ className: 'nd-w-6' })}>K</kbd>
       </div>
     </button>
   )
