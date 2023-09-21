@@ -27,10 +27,8 @@ jobs:
       - name: Install Dependencies
         run: pnpm i
 
-      - name: Update Examples in create-next-docs-app
-        run: pnpm update-example
-
       - name: Create Release Pull Request or Publish to npm
+        id: changesets
         uses: changesets/action@v1
         with:
           publish: pnpm run release
@@ -38,3 +36,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Update create-next-docs-app Version
+        if: steps.changesets.outputs.published == 'true'
+        run: pnpm update-example
