@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 1.5.21
+
+### Patch Changes
+
+- d70fb5b: Update Examples
+
 ## 1.5.20
 
 ### Patch Changes
