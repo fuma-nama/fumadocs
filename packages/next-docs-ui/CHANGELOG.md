@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 2.1.1
+
+### Patch Changes
+
+- 14459cf: Fix image-zoom causes viewport overflow on IOS devices
+- a015445: Improve search toggle
+- 794c2c6: Remove default icon from cards
+  - next-docs-zeta@2.1.1
+
 ## 2.1.0
 
 ### Minor Changes
