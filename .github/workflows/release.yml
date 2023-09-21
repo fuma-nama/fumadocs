@@ -36,7 +36,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Update create-next-docs-app Version
-        if: steps.changesets.outputs.published == 'true'
-        run: pnpm update-example
