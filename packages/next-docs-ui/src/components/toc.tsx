@@ -30,12 +30,12 @@ function TOCItems({ items }: { items: TOCItemType[] }) {
   return (
     <Primitive.TOCProvider
       toc={items}
-      className="nd-pt-4 nd-overflow-hidden first:nd-pt-0"
+      className="nd-pt-4 nd-text-sm nd-overflow-hidden nd-font-medium first:nd-pt-0"
     >
-      <h3 className="nd-inline-flex nd-items-center nd-font-medium nd-text-sm nd-mb-4">
+      <h3 className="nd-inline-flex nd-items-center nd-mb-4">
         <TextIcon className="nd-w-4 nd-h-4 nd-mr-2" /> {toc}
       </h3>
-      <div className="nd-flex nd-flex-col nd-border-l-2 nd-text-sm nd-text-muted-foreground nd-font-medium">
+      <div className="nd-flex nd-flex-col nd-border-l-2 nd-text-muted-foreground">
         <Marker pos={pos} />
         {items.map((item, i) => (
           <TOCItem key={i} item={item} setMarker={setPos} />
