@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.0.4",
-    "autoprefixer": "10.4.15",
+    "autoprefixer": "10.4.16",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "contentlayer": "^0.3.4",
