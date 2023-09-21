@@ -1,4 +1,3 @@
-import { ExternalLinkIcon } from 'lucide-react'
 import { SafeLink } from 'next-docs-zeta/link'
 import type { ReactNode } from 'react'
 
@@ -12,7 +11,7 @@ export function Cards({ children }: { children: ReactNode }) {
 
 export function Card({
   href,
-  icon = <ExternalLinkIcon />,
+  icon,
   title,
   description
 }: {
@@ -26,11 +25,13 @@ export function Card({
       href={href}
       className="nd-text-sm nd-rounded-lg nd-p-4 nd-border nd-bg-card nd-text-card-foreground nd-transition-colors hover:nd-bg-muted/50"
     >
-      <div className="nd-w-fit nd-border nd-p-1 nd-rounded-md nd-bg-background nd-mb-3">
-        <div className="nd-flex nd-justify-center nd-items-center nd-w-8 nd-bg-secondary nd-p-2 nd-h-8 nd-rounded-md nd-text-muted-foreground">
-          {icon}
+      {icon && (
+        <div className="nd-w-fit nd-border nd-p-1 nd-rounded-md nd-bg-background nd-mb-3">
+          <div className="[&_svg]:nd-w-4 [&_svg]:nd-h-4 nd-bg-muted nd-p-2 nd-rounded-md nd-text-muted-foreground">
+            {icon}
+          </div>
         </div>
-      </div>
+      )}
       <h3 className="nd-font-medium nd-mb-1">{title}</h3>
       <p className="nd-text-muted-foreground">{description}</p>
     </SafeLink>

@@ -6,9 +6,7 @@ import { SearchIcon } from 'lucide-react'
 import type { ComponentPropsWithoutRef } from 'react'
 import { useContext } from 'react'
 
-const shortcut = cva(
-  'nd-border nd-rounded-md nd-bg-background nd-px-1.5 nd-py-0.5'
-)
+const shortcut = cva('nd-border nd-rounded-md nd-bg-background nd-py-0.5')
 
 export function SearchBarToggle(props: ComponentPropsWithoutRef<'button'>) {
   const [setOpenSearch] = useContext(SearchContext)
@@ -29,7 +27,7 @@ export function SearchBarToggle(props: ComponentPropsWithoutRef<'button'>) {
       />
       {search}
       <div className="nd-inline-flex nd-items-center nd-text-xs nd-gap-0.5 nd-ml-auto">
-        <kbd className={shortcut()}>⌘</kbd>
+        <kbd className={shortcut({ className: 'nd-w-7' })}>⌘</kbd>
         <kbd className={shortcut({ className: 'nd-w-6' })}>K</kbd>
       </div>
     </button>
