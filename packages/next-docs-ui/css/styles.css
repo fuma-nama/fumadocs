@@ -24,14 +24,6 @@ body {
   @apply nd-bg-primary/10 nd-border-b-2 nd-border-primary;
 }
 
-[data-rmiz-modal-overlay='visible'] {
-  @apply !nd-bg-background/50;
-}
-
-[data-rmiz-btn-unzoom] {
-  @apply nd-hidden;
-}
-
 :root {
   --background: 0 0% 100%;
   --foreground: 0 0% 3.9%;
@@ -74,4 +66,72 @@ body {
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 0 85.7% 97.3%;
   --ring: 0 0% 14.9%;
+}
+
+
+/* image-zoom */
+[data-rmiz] {
+  display: block;
+  position: relative;
+}
+[data-rmiz-ghost] {
+  pointer-events: none;
+  position: absolute;
+}
+[data-rmiz-btn-zoom],
+[data-rmiz-btn-unzoom] {
+  display: none;
+}
+[data-rmiz-content=found] img,
+[data-rmiz-content=found] svg,
+[data-rmiz-content=found] [role=img],
+[data-rmiz-content=found] [data-zoom] {
+  cursor: zoom-in;
+}
+[data-rmiz-modal][open] {
+  width: 100vw;
+  width: 100dvw;
+  height: 100vh;
+  height: 100dvh;
+  background-color: transparent;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  position: fixed;
+  overflow: hidden;
+}
+
+[data-rmiz-modal]:focus-visible {
+  outline: none;
+}
+
+[data-rmiz-modal-overlay] {
+  transition: background-color .3s;
+  position: absolute;
+  inset: 0;
+}
+[data-rmiz-modal-overlay=hidden] {
+  background-color: transparent;
+}
+[data-rmiz-modal-overlay=visible] {
+  background-color: hsl(var(--background)/.5);
+}
+[data-rmiz-modal-content] {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+[data-rmiz-modal-img] {
+  cursor: zoom-out;
+  image-rendering: high-quality;
+  transform-origin: 0 0;
+  transition: transform .3s;
+  position: absolute;
+}
+@media (prefers-reduced-motion:reduce) {
+  [data-rmiz-modal-overlay],
+  [data-rmiz-modal-img] {
+    transition-duration: .01ms !important;
+  }
 }

@@ -1,9 +1,9 @@
 'use client'
 
+import { default_image_sizes } from '@/mdx'
 import Image, { type ImageProps } from 'next/image'
 import { type ImgHTMLAttributes } from 'react'
 import Zoom from 'react-medium-image-zoom'
-import 'react-medium-image-zoom/dist/styles.css'
 
 export type ImageZoomProps = ImageProps & {
   /**
@@ -15,18 +15,15 @@ export type ImageZoomProps = ImageProps & {
 export function ImageZoom({ zoomInProps, ...props }: ImageZoomProps) {
   return (
     <Zoom
+      zoomMargin={20}
       wrapElement="span"
-      zoomMargin={40}
       zoomImg={{
         src: props.src as string,
         sizes: undefined,
         ...zoomInProps
       }}
     >
-      <Image
-        sizes="(max-width: 1024px) 100vw, (max-width: 1280px) 70vw, 800px"
-        {...props}
-      />
+      <Image sizes={default_image_sizes} {...props} />
     </Zoom>
   )
 }
