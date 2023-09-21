@@ -70,7 +70,7 @@ importers:
         version: 2.0.0
       contentlayer:
         specifier: ^0.3.4
-        version: 0.3.4(esbuild@0.17.19)(supports-color@8.1.1)
+        version: 0.3.4
       katex:
         specifier: ^0.16.8
         version: 0.16.8
@@ -82,7 +82,7 @@ importers:
         version: 13.5.2(@babel/core@7.22.17)(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)
       next-contentlayer:
         specifier: ^0.3.4
-        version: 0.3.4(contentlayer@0.3.4)(esbuild@0.17.19)(next@13.5.2)(react-dom@18.2.0)(react@18.2.0)(supports-color@8.1.1)
+        version: 0.3.4(contentlayer@0.3.4)(next@13.5.2)(react-dom@18.2.0)(react@18.2.0)
       next-docs-ui:
         specifier: workspace:*
         version: link:../../packages/next-docs-ui
@@ -134,19 +134,19 @@ importers:
     dependencies:
       contentlayer:
         specifier: 0.3.4
-        version: 0.3.4(esbuild@0.17.19)(supports-color@8.1.1)
+        version: 0.3.4
       next:
         specifier: 13.5.2
         version: 13.5.2(@babel/core@7.22.17)(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)
       next-contentlayer:
         specifier: 0.3.4
-        version: 0.3.4(contentlayer@0.3.4)(esbuild@0.17.19)(next@13.5.2)(react-dom@18.2.0)(react@18.2.0)(supports-color@8.1.1)
+        version: 0.3.4(contentlayer@0.3.4)(next@13.5.2)(react-dom@18.2.0)(react@18.2.0)
       next-docs-ui:
         specifier: 2.1.1
-        version: 2.1.1(@types/react-dom@18.2.1)(@types/react@18.2.0)(next@13.5.2)(react-dom@18.2.0)(react@18.2.0)(shiki@0.14.4)(supports-color@8.1.1)
+        version: link:../../packages/next-docs-ui
       next-docs-zeta:
         specifier: 2.1.1
-        version: 2.1.1(@types/react@18.2.0)(next@13.5.2)(react-dom@18.2.0)(react@18.2.0)(shiki@0.14.4)(supports-color@8.1.1)
+        version: link:../../packages/next-docs
       react:
         specifier: 18.2.0
         version: 18.2.0
@@ -163,15 +163,9 @@ importers:
       autoprefixer:
         specifier: 10.4.14
         version: 10.4.14(postcss@8.4.23)
-      esbuild:
-        specifier: 0.17.19
-        version: 0.17.19
       postcss:
         specifier: 8.4.23
         version: 8.4.23
-      supports-color:
-        specifier: 8.1.1
-        version: 8.1.1
       tailwindcss:
         specifier: 3.3.2
         version: 3.3.2
@@ -183,19 +177,19 @@ importers:
     dependencies:
       contentlayer:
         specifier: 0.3.4
-        version: 0.3.4(esbuild@0.17.19)(supports-color@8.1.1)
+        version: 0.3.4
       next:
         specifier: 13.5.2
         version: 13.5.2(@babel/core@7.22.17)(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)
       next-contentlayer:
         specifier: 0.3.4
-        version: 0.3.4(contentlayer@0.3.4)(esbuild@0.17.19)(next@13.5.2)(react-dom@18.2.0)(react@18.2.0)(supports-color@8.1.1)
+        version: 0.3.4(contentlayer@0.3.4)(next@13.5.2)(react-dom@18.2.0)(react@18.2.0)
       next-docs-ui:
         specifier: 2.1.1
-        version: 2.1.1(@types/react-dom@18.2.1)(@types/react@18.2.0)(next@13.5.2)(react-dom@18.2.0)(react@18.2.0)(shiki@0.14.4)(supports-color@8.1.1)
+        version: link:../../packages/next-docs-ui
       next-docs-zeta:
         specifier: 2.1.1
-        version: 2.1.1(@types/react@18.2.0)(next@13.5.2)(react-dom@18.2.0)(react@18.2.0)(shiki@0.14.4)(supports-color@8.1.1)
+        version: link:../../packages/next-docs
       react:
         specifier: 18.2.0
         version: 18.2.0
@@ -209,12 +203,6 @@ importers:
       '@types/react-dom':
         specifier: 18.2.1
         version: 18.2.1
-      esbuild:
-        specifier: 0.17.19
-        version: 0.17.19
-      supports-color:
-        specifier: 8.1.1
-        version: 8.1.1
       typescript:
         specifier: 5.1.6
         version: 5.1.6
@@ -269,13 +257,13 @@ importers:
         version: 0.10.1(shiki@0.14.4)
       remark:
         specifier: ^14.0.3
-        version: 14.0.3(supports-color@8.1.1)
+        version: 14.0.3
       remark-gfm:
         specifier: ^3.0.1
-        version: 3.0.1(supports-color@8.1.1)
+        version: 3.0.1
       remark-mdx:
         specifier: ^2.3.0
-        version: 2.3.0(supports-color@8.1.1)
+        version: 2.3.0
       scroll-into-view-if-needed:
         specifier: ^3.1.0
         version: 3.1.0
@@ -300,7 +288,7 @@ importers:
         version: 18.2.1
       contentlayer:
         specifier: ^0.3.4
-        version: 0.3.4(esbuild@0.17.19)(supports-color@8.1.1)
+        version: 0.3.4
       next:
         specifier: 13.5.2
         version: 13.5.2(@babel/core@7.22.17)(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)
@@ -376,7 +364,7 @@ importers:
         version: 10.4.16(postcss@8.4.30)
       contentlayer:
         specifier: ^0.3.4
-        version: 0.3.4(esbuild@0.17.19)(supports-color@8.1.1)
+        version: 0.3.4
       next:
         specifier: 13.5.2
         version: 13.5.2(@babel/core@7.22.17)(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)
@@ -444,7 +432,7 @@ packages:
       '@babel/traverse': 7.22.17
       '@babel/types': 7.22.17
       convert-source-map: 1.9.0
-      debug: 4.3.4(supports-color@8.1.1)
+      debug: 4.3.4
       gensync: 1.0.0-beta.2
       json5: 2.2.3
       semver: 6.3.1
@@ -581,7 +569,7 @@ packages:
       '@babel/helper-split-export-declaration': 7.22.6
       '@babel/parser': 7.22.16
       '@babel/types': 7.22.17
-      debug: 4.3.4(supports-color@8.1.1)
+      debug: 4.3.4
       globals: 11.12.0
     transitivePeerDependencies:
       - supports-color
@@ -795,10 +783,10 @@ packages:
     bundledDependencies:
       - is-unicode-supported
 
-  /@contentlayer/cli@0.3.4(esbuild@0.17.19)(supports-color@8.1.1):
+  /@contentlayer/cli@0.3.4:
     resolution: {integrity: sha512-vNDwgLuhYNu+m70NZ3XK9kexKNguuxPXg7Yvzj3B34cEilQjjzSrcTY/i+AIQm9V7uT5GGshx9ukzPf+SmoszQ==}
     dependencies:
-      '@contentlayer/core': 0.3.4(esbuild@0.17.19)(supports-color@8.1.1)
+      '@contentlayer/core': 0.3.4
       '@contentlayer/utils': 0.3.4
       clipanion: 3.2.1(typanion@3.14.0)
       typanion: 3.14.0
@@ -808,17 +796,17 @@ packages:
       - markdown-wasm
       - supports-color
 
-  /@contentlayer/client@0.3.4(esbuild@0.17.19)(supports-color@8.1.1):
+  /@contentlayer/client@0.3.4:
     resolution: {integrity: sha512-QSlLyc3y4PtdC5lFw0L4wTZUH8BQnv2nk37hNCsPAqGf+dRO7TLAzdc+2/mVIRgK+vSH+pSOzjLsQpFxxXRTZA==}
     dependencies:
-      '@contentlayer/core': 0.3.4(esbuild@0.17.19)(supports-color@8.1.1)
+      '@contentlayer/core': 0.3.4
     transitivePeerDependencies:
       - '@effect-ts/otel-node'
       - esbuild
       - markdown-wasm
       - supports-color
 
-  /@contentlayer/core@0.3.4(esbuild@0.17.19)(supports-color@8.1.1):
+  /@contentlayer/core@0.3.4:
     resolution: {integrity: sha512-o68oBLwfYZ+2vtgfk1lgHxOl3LoxvRNiUfeQ8IWFWy/L4wnIkKIqLZX01zlRE5IzYM+ZMMN5V0cKQlO7DsyR9g==}
     peerDependencies:
       esbuild: 0.17.x || 0.18.x
@@ -832,12 +820,11 @@ packages:
       '@contentlayer/utils': 0.3.4
       camel-case: 4.1.2
       comment-json: 4.2.3
-      esbuild: 0.17.19
       gray-matter: 4.0.3
-      mdx-bundler: 9.2.1(esbuild@0.17.19)(supports-color@8.1.1)
+      mdx-bundler: 9.2.1
       rehype-stringify: 9.0.4
       remark-frontmatter: 4.0.1
-      remark-parse: 10.0.2(supports-color@8.1.1)
+      remark-parse: 10.0.2
       remark-rehype: 10.1.0
       source-map-support: 0.5.21
       type-fest: 3.13.1
@@ -846,10 +833,10 @@ packages:
       - '@effect-ts/otel-node'
       - supports-color
 
-  /@contentlayer/source-files@0.3.4(esbuild@0.17.19)(supports-color@8.1.1):
+  /@contentlayer/source-files@0.3.4:
     resolution: {integrity: sha512-4njyn0OFPu7WY4tAjMxiJgWOKeiHuBOGdQ36EYE03iij/pPPRbiWbL+cmLccYXUFEW58mDwpqROZZm6pnxjRDQ==}
     dependencies:
-      '@contentlayer/core': 0.3.4(esbuild@0.17.19)(supports-color@8.1.1)
+      '@contentlayer/core': 0.3.4
       '@contentlayer/utils': 0.3.4
       chokidar: 3.5.3
       fast-glob: 3.3.1
@@ -866,11 +853,11 @@ packages:
       - markdown-wasm
       - supports-color
 
-  /@contentlayer/source-remote-files@0.3.4(esbuild@0.17.19)(supports-color@8.1.1):
+  /@contentlayer/source-remote-files@0.3.4:
     resolution: {integrity: sha512-cyiv4sNUySZvR0uAKlM+kSAELzNd2h2QT1R2e41dRKbwOUVxeLfmGiLugr0aVac6Q3xYcD99dbHyR1xWPV+w9w==}
     dependencies:
-      '@contentlayer/core': 0.3.4(esbuild@0.17.19)(supports-color@8.1.1)
-      '@contentlayer/source-files': 0.3.4(esbuild@0.17.19)(supports-color@8.1.1)
+      '@contentlayer/core': 0.3.4
+      '@contentlayer/source-files': 0.3.4
       '@contentlayer/utils': 0.3.4
     transitivePeerDependencies:
       - '@effect-ts/otel-node'
@@ -967,7 +954,7 @@ packages:
   /@effect-ts/system@0.57.5:
     resolution: {integrity: sha512-/crHGujo0xnuHIYNc1VgP0HGJGFSoSqq88JFXe6FmFyXPpWt8Xu39LyLg7rchsxfXFeEdA9CrIZvLV5eswXV5g==}
 
-  /@esbuild-plugins/node-resolve@0.1.4(esbuild@0.17.19)(supports-color@8.1.1):
+  /@esbuild-plugins/node-resolve@0.1.4:
     resolution: {integrity: sha512-haFQ0qhxEpqtWWY0kx1Y5oE3sMyO1PcoSiWEPrAw6tm/ZOOLXjSs6Q+v1v9eyuVF0nNt50YEvrcrvENmyoMv5g==}
     peerDependencies:
       esbuild: '*'
@@ -976,8 +963,7 @@ packages:
         optional: true
     dependencies:
       '@types/resolve': 1.20.2
-      debug: 4.3.4(supports-color@8.1.1)
-      esbuild: 0.17.19
+      debug: 4.3.4
       escape-string-regexp: 4.0.0
       resolve: 1.22.4
     transitivePeerDependencies:
@@ -989,6 +975,7 @@ packages:
     cpu: [arm64]
     os: [android]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/android-arm@0.17.19:
@@ -997,6 +984,7 @@ packages:
     cpu: [arm]
     os: [android]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/android-x64@0.17.19:
@@ -1005,6 +993,7 @@ packages:
     cpu: [x64]
     os: [android]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/darwin-arm64@0.17.19:
@@ -1013,6 +1002,7 @@ packages:
     cpu: [arm64]
     os: [darwin]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/darwin-x64@0.17.19:
@@ -1021,6 +1011,7 @@ packages:
     cpu: [x64]
     os: [darwin]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/freebsd-arm64@0.17.19:
@@ -1029,6 +1020,7 @@ packages:
     cpu: [arm64]
     os: [freebsd]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/freebsd-x64@0.17.19:
@@ -1037,6 +1029,7 @@ packages:
     cpu: [x64]
     os: [freebsd]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/linux-arm64@0.17.19:
@@ -1045,6 +1038,7 @@ packages:
     cpu: [arm64]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/linux-arm@0.17.19:
@@ -1053,6 +1047,7 @@ packages:
     cpu: [arm]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/linux-ia32@0.17.19:
@@ -1061,6 +1056,7 @@ packages:
     cpu: [ia32]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/linux-loong64@0.17.19:
@@ -1069,6 +1065,7 @@ packages:
     cpu: [loong64]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/linux-mips64el@0.17.19:
@@ -1077,6 +1074,7 @@ packages:
     cpu: [mips64el]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/linux-ppc64@0.17.19:
@@ -1085,6 +1083,7 @@ packages:
     cpu: [ppc64]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/linux-riscv64@0.17.19:
@@ -1093,6 +1092,7 @@ packages:
     cpu: [riscv64]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/linux-s390x@0.17.19:
@@ -1101,6 +1101,7 @@ packages:
     cpu: [s390x]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/linux-x64@0.17.19:
@@ -1109,6 +1110,7 @@ packages:
     cpu: [x64]
     os: [linux]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/netbsd-x64@0.17.19:
@@ -1117,6 +1119,7 @@ packages:
     cpu: [x64]
     os: [netbsd]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/openbsd-x64@0.17.19:
@@ -1125,6 +1128,7 @@ packages:
     cpu: [x64]
     os: [openbsd]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/sunos-x64@0.17.19:
@@ -1133,6 +1137,7 @@ packages:
     cpu: [x64]
     os: [sunos]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/win32-arm64@0.17.19:
@@ -1141,6 +1146,7 @@ packages:
     cpu: [arm64]
     os: [win32]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/win32-ia32@0.17.19:
@@ -1149,6 +1155,7 @@ packages:
     cpu: [ia32]
     os: [win32]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@esbuild/win32-x64@0.17.19:
@@ -1157,6 +1164,7 @@ packages:
     cpu: [x64]
     os: [win32]
     requiresBuild: true
+    dev: true
     optional: true
 
   /@eslint-community/eslint-utils@4.4.0(eslint@8.49.0):
@@ -1179,7 +1187,7 @@ packages:
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     dependencies:
       ajv: 6.12.6
-      debug: 4.3.4(supports-color@8.1.1)
+      debug: 4.3.4
       espree: 9.6.1
       globals: 13.21.0
       ignore: 5.2.4
@@ -1255,7 +1263,7 @@ packages:
     engines: {node: '>=10.10.0'}
     dependencies:
       '@humanwhocodes/object-schema': 1.2.1
-      debug: 4.3.4(supports-color@8.1.1)
+      debug: 4.3.4
       minimatch: 3.1.2
     transitivePeerDependencies:
       - supports-color
@@ -1342,7 +1350,7 @@ packages:
       read-yaml-file: 1.1.0
     dev: true
 
-  /@mdx-js/esbuild@2.3.0(esbuild@0.17.19)(supports-color@8.1.1):
+  /@mdx-js/esbuild@2.3.0:
     resolution: {integrity: sha512-r/vsqsM0E+U4Wr0DK+0EfmABE/eg+8ITW4DjvYdh3ve/tK2safaqHArNnaqbOk1DjYGrhxtoXoGaM3BY8fGBTA==}
     peerDependencies:
       esbuild: '>=0.11.0'
@@ -1350,14 +1358,13 @@ packages:
       esbuild:
         optional: true
     dependencies:
-      '@mdx-js/mdx': 2.3.0(supports-color@8.1.1)
-      esbuild: 0.17.19
+      '@mdx-js/mdx': 2.3.0
       node-fetch: 3.3.2
       vfile: 5.3.7
     transitivePeerDependencies:
       - supports-color
 
-  /@mdx-js/mdx@2.3.0(supports-color@8.1.1):
+  /@mdx-js/mdx@2.3.0:
     resolution: {integrity: sha512-jLuwRlz8DQfQNiUCJR50Y09CGPq3fLtmtUQfVrj79E0JWu3dvsVcxVIcfhR5h0iXu+/z++zDrYeiJqifRynJkA==}
     dependencies:
       '@types/estree-jsx': 1.0.0
@@ -1366,11 +1373,11 @@ packages:
       estree-util-is-identifier-name: 2.1.0
       estree-util-to-js: 1.2.0
       estree-walker: 3.0.3
-      hast-util-to-estree: 2.3.3(supports-color@8.1.1)
+      hast-util-to-estree: 2.3.3
       markdown-extensions: 1.1.1
       periscopic: 3.1.0
-      remark-mdx: 2.3.0(supports-color@8.1.1)
-      remark-parse: 10.0.2(supports-color@8.1.1)
+      remark-mdx: 2.3.0
+      remark-parse: 10.0.2
       remark-rehype: 10.1.0
       unified: 10.1.2
       unist-util-position-from-estree: 1.1.2
@@ -2786,7 +2793,7 @@ packages:
       '@typescript-eslint/type-utils': 6.7.0(eslint@8.49.0)(typescript@5.2.2)
       '@typescript-eslint/utils': 6.7.0(eslint@8.49.0)(typescript@5.2.2)
       '@typescript-eslint/visitor-keys': 6.7.0
-      debug: 4.3.4(supports-color@8.1.1)
+      debug: 4.3.4
       eslint: 8.49.0
       graphemer: 1.4.0
       ignore: 5.2.4
@@ -2812,7 +2819,7 @@ packages:
       '@typescript-eslint/types': 6.7.0
       '@typescript-eslint/typescript-estree': 6.7.0(typescript@5.2.2)
       '@typescript-eslint/visitor-keys': 6.7.0
-      debug: 4.3.4(supports-color@8.1.1)
+      debug: 4.3.4
       eslint: 8.49.0
       typescript: 5.2.2
     transitivePeerDependencies:
@@ -2839,7 +2846,7 @@ packages:
     dependencies:
       '@typescript-eslint/typescript-estree': 6.7.0(typescript@5.2.2)
       '@typescript-eslint/utils': 6.7.0(eslint@8.49.0)(typescript@5.2.2)
-      debug: 4.3.4(supports-color@8.1.1)
+      debug: 4.3.4
       eslint: 8.49.0
       ts-api-utils: 1.0.3(typescript@5.2.2)
       typescript: 5.2.2
@@ -2863,7 +2870,7 @@ packages:
     dependencies:
       '@typescript-eslint/types': 6.7.0
       '@typescript-eslint/visitor-keys': 6.7.0
-      debug: 4.3.4(supports-color@8.1.1)
+      debug: 4.3.4
       globby: 11.1.0
       is-glob: 4.0.3
       semver: 7.5.4
@@ -3402,17 +3409,17 @@ packages:
       yargs: 17.7.2
     dev: true
 
-  /contentlayer@0.3.4(esbuild@0.17.19)(supports-color@8.1.1):
+  /contentlayer@0.3.4:
     resolution: {integrity: sha512-FYDdTUFaN4yqep0waswrhcXjmMJnPD5iXDTtxcUCGdklfuIrXM2xLx51xl748cHmGA6IsC+27YZFxU6Ym13QIA==}
     engines: {node: '>=14.18'}
     hasBin: true
     requiresBuild: true
     dependencies:
-      '@contentlayer/cli': 0.3.4(esbuild@0.17.19)(supports-color@8.1.1)
-      '@contentlayer/client': 0.3.4(esbuild@0.17.19)(supports-color@8.1.1)
-      '@contentlayer/core': 0.3.4(esbuild@0.17.19)(supports-color@8.1.1)
-      '@contentlayer/source-files': 0.3.4(esbuild@0.17.19)(supports-color@8.1.1)
-      '@contentlayer/source-remote-files': 0.3.4(esbuild@0.17.19)(supports-color@8.1.1)
+      '@contentlayer/cli': 0.3.4
+      '@contentlayer/client': 0.3.4
+      '@contentlayer/core': 0.3.4
+      '@contentlayer/source-files': 0.3.4
+      '@contentlayer/source-remote-files': 0.3.4
       '@contentlayer/utils': 0.3.4
     transitivePeerDependencies:
       - '@effect-ts/otel-node'
@@ -3485,7 +3492,7 @@ packages:
       '@babel/runtime': 7.22.15
     dev: true
 
-  /debug@4.3.4(supports-color@8.1.1):
+  /debug@4.3.4:
     resolution: {integrity: sha512-PRWFHuSU3eDtQJPvnNY7Jcket1j0t5OuOsFzPPzsekD52Zl8qUfFIPEiswXqIvHWGVHOgX+7G/vCNNhehwxfkQ==}
     engines: {node: '>=6.0'}
     peerDependencies:
@@ -3495,7 +3502,6 @@ packages:
         optional: true
     dependencies:
       ms: 2.1.2
-      supports-color: 8.1.1
 
   /decamelize-keys@1.1.1:
     resolution: {integrity: sha512-WiPxgEirIV0/eIOMcnFBA3/IJZAZqKnwAwWyvvdi4lsr1WCN22nhdf/3db3DoZcUjTV2SqfzIwNyp6y2xs3nmg==}
@@ -3745,6 +3751,7 @@ packages:
       '@esbuild/win32-arm64': 0.17.19
       '@esbuild/win32-ia32': 0.17.19
       '@esbuild/win32-x64': 0.17.19
+    dev: true
 
   /escalade@3.1.1:
     resolution: {integrity: sha512-k0er2gUkLf8O0zKJiAhmkTnJlTvINGv7ygDNPbeIsX/TJjGJZHuh9B2UxbsaEkmlEo9MfhrSzmhIlhRlI2GXnw==}
@@ -3836,7 +3843,7 @@ packages:
       ajv: 6.12.6
       chalk: 4.1.2
       cross-spawn: 7.0.3
-      debug: 4.3.4(supports-color@8.1.1)
+      debug: 4.3.4
       doctrine: 3.0.0
       escape-string-regexp: 4.0.0
       eslint-scope: 7.2.2
@@ -4336,6 +4343,7 @@ packages:
   /has-flag@4.0.0:
     resolution: {integrity: sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==}
     engines: {node: '>=8'}
+    dev: true
 
   /has-own-prop@2.0.0:
     resolution: {integrity: sha512-Pq0h+hvsVm6dDEa8x82GnLSYHOzNDt7f0ddFa3FqcQlgzEiptPqL+XrOJNavjOzSYiYWIrgeVYYgGlLmnxwilQ==}
@@ -4446,7 +4454,7 @@ packages:
       web-namespaces: 2.0.1
       zwitch: 2.0.4
 
-  /hast-util-to-estree@2.3.3(supports-color@8.1.1):
+  /hast-util-to-estree@2.3.3:
     resolution: {integrity: sha512-ihhPIUPxN0v0w6M5+IiAZZrn0LH2uZomeWwhn7uP7avZC6TE7lIiEh2yBMPr5+zi1aUCXq6VoYRgs2Bw9xmycQ==}
     dependencies:
       '@types/estree': 1.0.1
@@ -4457,8 +4465,8 @@ packages:
       estree-util-attach-comments: 2.1.1
       estree-util-is-identifier-name: 2.1.0
       hast-util-whitespace: 2.0.1
-      mdast-util-mdx-expression: 1.3.2(supports-color@8.1.1)
-      mdast-util-mdxjs-esm: 1.3.1(supports-color@8.1.1)
+      mdast-util-mdx-expression: 1.3.2
+      mdast-util-mdxjs-esm: 1.3.1
       property-information: 6.3.0
       space-separated-tokens: 2.0.2
       style-to-object: 0.4.2
@@ -5212,14 +5220,14 @@ packages:
       unist-util-visit-parents: 5.1.3
     dev: false
 
-  /mdast-util-from-markdown@1.3.1(supports-color@8.1.1):
+  /mdast-util-from-markdown@1.3.1:
     resolution: {integrity: sha512-4xTO/M8c82qBcnQc1tgpNtubGUW/Y1tBQ1B0i5CtSoelOLKFYlElIr3bvgREYYO5iRqbMY1YuqZng0GVOI8Qww==}
     dependencies:
       '@types/mdast': 3.0.12
       '@types/unist': 2.0.8
       decode-named-character-reference: 1.0.2
       mdast-util-to-string: 3.2.0
-      micromark: 3.2.0(supports-color@8.1.1)
+      micromark: 3.2.0
       micromark-util-decode-numeric-character-reference: 1.1.0
       micromark-util-decode-string: 1.1.0
       micromark-util-normalize-identifier: 1.1.0
@@ -5261,12 +5269,12 @@ packages:
       mdast-util-to-markdown: 1.5.0
     dev: false
 
-  /mdast-util-gfm-table@1.0.7(supports-color@8.1.1):
+  /mdast-util-gfm-table@1.0.7:
     resolution: {integrity: sha512-jjcpmNnQvrmN5Vx7y7lEc2iIOEytYv7rTvu+MeyAsSHTASGCCRA79Igg2uKssgOs1i1po8s3plW0sTu1wkkLGg==}
     dependencies:
       '@types/mdast': 3.0.12
       markdown-table: 3.0.3
-      mdast-util-from-markdown: 1.3.1(supports-color@8.1.1)
+      mdast-util-from-markdown: 1.3.1
       mdast-util-to-markdown: 1.5.0
     transitivePeerDependencies:
       - supports-color
@@ -5279,14 +5287,14 @@ packages:
       mdast-util-to-markdown: 1.5.0
     dev: false
 
-  /mdast-util-gfm@2.0.2(supports-color@8.1.1):
+  /mdast-util-gfm@2.0.2:
     resolution: {integrity: sha512-qvZ608nBppZ4icQlhQQIAdc6S3Ffj9RGmzwUKUWuEICFnd1LVkN3EktF7ZHAgfcEdvZB5owU9tQgt99e2TlLjg==}
     dependencies:
-      mdast-util-from-markdown: 1.3.1(supports-color@8.1.1)
+      mdast-util-from-markdown: 1.3.1
       mdast-util-gfm-autolink-literal: 1.0.3
       mdast-util-gfm-footnote: 1.0.2
       mdast-util-gfm-strikethrough: 1.0.3
-      mdast-util-gfm-table: 1.0.7(supports-color@8.1.1)
+      mdast-util-gfm-table: 1.0.7
       mdast-util-gfm-task-list-item: 1.0.2
       mdast-util-to-markdown: 1.5.0
     transitivePeerDependencies:
@@ -5301,18 +5309,18 @@ packages:
       mdast-util-to-markdown: 1.5.0
     dev: false
 
-  /mdast-util-mdx-expression@1.3.2(supports-color@8.1.1):
+  /mdast-util-mdx-expression@1.3.2:
     resolution: {integrity: sha512-xIPmR5ReJDu/DHH1OoIT1HkuybIfRGYRywC+gJtI7qHjCJp/M9jrmBEJW22O8lskDWm562BX2W8TiAwRTb0rKA==}
     dependencies:
       '@types/estree-jsx': 1.0.0
       '@types/hast': 2.3.5
       '@types/mdast': 3.0.12
-      mdast-util-from-markdown: 1.3.1(supports-color@8.1.1)
+      mdast-util-from-markdown: 1.3.1
       mdast-util-to-markdown: 1.5.0
     transitivePeerDependencies:
       - supports-color
 
-  /mdast-util-mdx-jsx@2.1.4(supports-color@8.1.1):
+  /mdast-util-mdx-jsx@2.1.4:
     resolution: {integrity: sha512-DtMn9CmVhVzZx3f+optVDF8yFgQVt7FghCRNdlIaS3X5Bnym3hZwPbg/XW86vdpKjlc1PVj26SpnLGeJBXD3JA==}
     dependencies:
       '@types/estree-jsx': 1.0.0
@@ -5320,7 +5328,7 @@ packages:
       '@types/mdast': 3.0.12
       '@types/unist': 2.0.8
       ccount: 2.0.1
-      mdast-util-from-markdown: 1.3.1(supports-color@8.1.1)
+      mdast-util-from-markdown: 1.3.1
       mdast-util-to-markdown: 1.5.0
       parse-entities: 4.0.1
       stringify-entities: 4.0.3
@@ -5330,24 +5338,24 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
-  /mdast-util-mdx@2.0.1(supports-color@8.1.1):
+  /mdast-util-mdx@2.0.1:
     resolution: {integrity: sha512-38w5y+r8nyKlGvNjSEqWrhG0w5PmnRA+wnBvm+ulYCct7nsGYhFVb0lljS9bQav4psDAS1eGkP2LMVcZBi/aqw==}
     dependencies:
-      mdast-util-from-markdown: 1.3.1(supports-color@8.1.1)
-      mdast-util-mdx-expression: 1.3.2(supports-color@8.1.1)
-      mdast-util-mdx-jsx: 2.1.4(supports-color@8.1.1)
-      mdast-util-mdxjs-esm: 1.3.1(supports-color@8.1.1)
+      mdast-util-from-markdown: 1.3.1
+      mdast-util-mdx-expression: 1.3.2
+      mdast-util-mdx-jsx: 2.1.4
+      mdast-util-mdxjs-esm: 1.3.1
       mdast-util-to-markdown: 1.5.0
     transitivePeerDependencies:
       - supports-color
 
-  /mdast-util-mdxjs-esm@1.3.1(supports-color@8.1.1):
+  /mdast-util-mdxjs-esm@1.3.1:
     resolution: {integrity: sha512-SXqglS0HrEvSdUEfoXFtcg7DRl7S2cwOXc7jkuusG472Mmjag34DUDeOJUZtl+BVnyeO1frIgVpHlNRWc2gk/w==}
     dependencies:
       '@types/estree-jsx': 1.0.0
       '@types/hast': 2.3.5
       '@types/mdast': 3.0.12
-      mdast-util-from-markdown: 1.3.1(supports-color@8.1.1)
+      mdast-util-from-markdown: 1.3.1
       mdast-util-to-markdown: 1.5.0
     transitivePeerDependencies:
       - supports-color
@@ -5387,7 +5395,7 @@ packages:
     dependencies:
       '@types/mdast': 3.0.12
 
-  /mdx-bundler@9.2.1(esbuild@0.17.19)(supports-color@8.1.1):
+  /mdx-bundler@9.2.1:
     resolution: {integrity: sha512-hWEEip1KU9MCNqeH2rqwzAZ1pdqPPbfkx9OTJjADqGPQz4t9BO85fhI7AP9gVYrpmfArf9/xJZUN0yBErg/G/Q==}
     engines: {node: '>=14', npm: '>=6'}
     peerDependencies:
@@ -5397,10 +5405,9 @@ packages:
         optional: true
     dependencies:
       '@babel/runtime': 7.22.15
-      '@esbuild-plugins/node-resolve': 0.1.4(esbuild@0.17.19)(supports-color@8.1.1)
+      '@esbuild-plugins/node-resolve': 0.1.4
       '@fal-works/esbuild-plugin-global-externals': 2.1.2
-      '@mdx-js/esbuild': 2.3.0(esbuild@0.17.19)(supports-color@8.1.1)
-      esbuild: 0.17.19
+      '@mdx-js/esbuild': 2.3.0
       gray-matter: 4.0.3
       remark-frontmatter: 4.0.1
       remark-mdx-frontmatter: 1.1.1
@@ -5743,11 +5750,11 @@ packages:
   /micromark-util-types@1.1.0:
     resolution: {integrity: sha512-ukRBgie8TIAcacscVHSiddHjO4k/q3pnedmzMQ4iwDcK0FtFCohKOlFbaOL/mPgfnPsL3C1ZyxJa4sbWrBl3jg==}
 
-  /micromark@3.2.0(supports-color@8.1.1):
+  /micromark@3.2.0:
     resolution: {integrity: sha512-uD66tJj54JLYq0De10AhWycZWGQNUvDI55xPgk2sQM5kn1JYlhbCMTtEeT27+vAhW2FBQxLlOmS3pmA7/2z4aA==}
     dependencies:
       '@types/debug': 4.1.8
-      debug: 4.3.4(supports-color@8.1.1)
+      debug: 4.3.4
       decode-named-character-reference: 1.0.2
       micromark-core-commonmark: 1.1.0
       micromark-factory-space: 1.1.0
@@ -5841,7 +5848,7 @@ packages:
     engines: {node: '>= 0.6'}
     dev: false
 
-  /next-contentlayer@0.3.4(contentlayer@0.3.4)(esbuild@0.17.19)(next@13.5.2)(react-dom@18.2.0)(react@18.2.0)(supports-color@8.1.1):
+  /next-contentlayer@0.3.4(contentlayer@0.3.4)(next@13.5.2)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-UtUCwgAl159KwfhNaOwyiI7Lg6sdioyKMeh+E7jxx0CJ29JuXGxBEYmCI6+72NxFGIFZKx8lvttbbQhbnYWYSw==}
     peerDependencies:
       contentlayer: 0.3.4
@@ -5849,9 +5856,9 @@ packages:
       react: '*'
       react-dom: '*'
     dependencies:
-      '@contentlayer/core': 0.3.4(esbuild@0.17.19)(supports-color@8.1.1)
+      '@contentlayer/core': 0.3.4
       '@contentlayer/utils': 0.3.4
-      contentlayer: 0.3.4(esbuild@0.17.19)(supports-color@8.1.1)
+      contentlayer: 0.3.4
       next: 13.5.2(@babel/core@7.22.17)(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
@@ -5859,69 +5866,6 @@ packages:
       - '@effect-ts/otel-node'
       - esbuild
       - markdown-wasm
-      - supports-color
-    dev: false
-
-  /next-docs-ui@2.1.1(@types/react-dom@18.2.1)(@types/react@18.2.0)(next@13.5.2)(react-dom@18.2.0)(react@18.2.0)(shiki@0.14.4)(supports-color@8.1.1):
-    resolution: {integrity: sha512-hE0jPZkV7CedWHL8zzKYE1ETw/Da4skMbJ4a/rhEJKGKg/UzWT8YeGNKKoZXwiNGXlMoU+Li8z4JxhYexy6Gxg==}
-    peerDependencies:
-      next: 13.x
-      react: 18.x
-      react-dom: 18.x
-    dependencies:
-      '@radix-ui/react-accordion': 1.1.2(@types/react-dom@18.2.1)(@types/react@18.2.0)(react-dom@18.2.0)(react@18.2.0)
-      '@radix-ui/react-collapsible': 1.0.3(@types/react-dom@18.2.1)(@types/react@18.2.0)(react-dom@18.2.0)(react@18.2.0)
-      '@radix-ui/react-dialog': 1.0.4(@types/react-dom@18.2.1)(@types/react@18.2.0)(react-dom@18.2.0)(react@18.2.0)
-      '@radix-ui/react-dropdown-menu': 2.0.5(@types/react-dom@18.2.1)(@types/react@18.2.0)(react-dom@18.2.0)(react@18.2.0)
-      '@radix-ui/react-popover': 1.0.6(@types/react-dom@18.2.1)(@types/react@18.2.0)(react-dom@18.2.0)(react@18.2.0)
-      '@radix-ui/react-scroll-area': 1.0.4(@types/react-dom@18.2.1)(@types/react@18.2.0)(react-dom@18.2.0)(react@18.2.0)
-      '@radix-ui/react-select': 1.2.2(@types/react-dom@18.2.1)(@types/react@18.2.0)(react-dom@18.2.0)(react@18.2.0)
-      '@radix-ui/react-tabs': 1.0.4(@types/react-dom@18.2.1)(@types/react@18.2.0)(react-dom@18.2.0)(react@18.2.0)
-      class-variance-authority: 0.7.0
-      clsx: 2.0.0
-      cmdk: 0.2.0(@types/react@18.2.0)(react-dom@18.2.0)(react@18.2.0)
-      lucide-react: 0.279.0(react@18.2.0)
-      next: 13.5.2(@babel/core@7.22.17)(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)
-      next-docs-zeta: 2.1.1(@types/react@18.2.0)(next@13.5.2)(react-dom@18.2.0)(react@18.2.0)(shiki@0.14.4)(supports-color@8.1.1)
-      next-themes: 0.2.1(next@13.5.2)(react-dom@18.2.0)(react@18.2.0)
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      react-medium-image-zoom: 5.1.8(react-dom@18.2.0)(react@18.2.0)
-      tailwind-merge: 1.14.0
-    transitivePeerDependencies:
-      - '@types/react'
-      - '@types/react-dom'
-      - shiki
-      - supports-color
-    dev: false
-
-  /next-docs-zeta@2.1.1(@types/react@18.2.0)(next@13.5.2)(react-dom@18.2.0)(react@18.2.0)(shiki@0.14.4)(supports-color@8.1.1):
-    resolution: {integrity: sha512-/ZCH2L1BeVut4kLePIPUo4xb7vkzKSDWbI/itn4acH+zCNriOzvy7O8bHf7PoiqkLpv4Z0R2W1tePo9+OysDhg==}
-    peerDependencies:
-      next: 13.x
-      react: 18.x
-      react-dom: 18.x
-    dependencies:
-      '@formatjs/intl-localematcher': 0.4.2
-      flexsearch: 0.7.21
-      github-slugger: 2.0.0
-      hast-util-to-string: 3.0.0
-      negotiator: 0.6.3
-      next: 13.5.2(@babel/core@7.22.17)(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      react-remove-scroll: 2.5.6(@types/react@18.2.0)(react@18.2.0)
-      rehype-img-size: 1.0.1
-      rehype-pretty-code: 0.10.1(shiki@0.14.4)
-      remark: 14.0.3(supports-color@8.1.1)
-      remark-gfm: 3.0.1(supports-color@8.1.1)
-      remark-mdx: 2.3.0(supports-color@8.1.1)
-      scroll-into-view-if-needed: 3.1.0
-      swr: 2.2.2(react@18.2.0)
-      unist-util-visit: 5.0.0
-    transitivePeerDependencies:
-      - '@types/react'
-      - shiki
       - supports-color
     dev: false
 
@@ -6876,11 +6820,11 @@ packages:
       micromark-extension-frontmatter: 1.1.1
       unified: 10.1.2
 
-  /remark-gfm@3.0.1(supports-color@8.1.1):
+  /remark-gfm@3.0.1:
     resolution: {integrity: sha512-lEFDoi2PICJyNrACFOfDD3JlLkuSbOa5Wd8EPt06HUdptv8Gn0bxYTdbU/XXQ3swAPkEaGxxPN9cbnMHvVu1Ig==}
     dependencies:
       '@types/mdast': 3.0.12
-      mdast-util-gfm: 2.0.2(supports-color@8.1.1)
+      mdast-util-gfm: 2.0.2
       micromark-extension-gfm: 2.0.3
       unified: 10.1.2
     transitivePeerDependencies:
@@ -6905,19 +6849,19 @@ packages:
       js-yaml: 4.1.0
       toml: 3.0.0
 
-  /remark-mdx@2.3.0(supports-color@8.1.1):
+  /remark-mdx@2.3.0:
     resolution: {integrity: sha512-g53hMkpM0I98MU266IzDFMrTD980gNF3BJnkyFcmN+dD873mQeD5rdMO3Y2X+x8umQfbSE0PcoEDl7ledSA+2g==}
     dependencies:
-      mdast-util-mdx: 2.0.1(supports-color@8.1.1)
+      mdast-util-mdx: 2.0.1
       micromark-extension-mdxjs: 1.0.1
     transitivePeerDependencies:
       - supports-color
 
-  /remark-parse@10.0.2(supports-color@8.1.1):
+  /remark-parse@10.0.2:
     resolution: {integrity: sha512-3ydxgHa/ZQzG8LvC7jTXccARYDcRld3VfcgIIFs7bI6vbRSxJJmzgLEIIoYKyrfhaY+ujuWaf/PJiMZXoiCXgw==}
     dependencies:
       '@types/mdast': 3.0.12
-      mdast-util-from-markdown: 1.3.1(supports-color@8.1.1)
+      mdast-util-from-markdown: 1.3.1
       unified: 10.1.2
     transitivePeerDependencies:
       - supports-color
@@ -6938,11 +6882,11 @@ packages:
       unified: 10.1.2
     dev: false
 
-  /remark@14.0.3(supports-color@8.1.1):
+  /remark@14.0.3:
     resolution: {integrity: sha512-bfmJW1dmR2LvaMJuAnE88pZP9DktIFYXazkTfOIKZzi3Knk9lT0roItIA24ydOucI3bV/g/tXBA6hzqq3FV9Ew==}
     dependencies:
       '@types/mdast': 3.0.12
-      remark-parse: 10.0.2(supports-color@8.1.1)
+      remark-parse: 10.0.2
       remark-stringify: 10.0.3
       unified: 10.1.2
     transitivePeerDependencies:
@@ -7403,6 +7347,7 @@ packages:
     engines: {node: '>=10'}
     dependencies:
       has-flag: 4.0.0
+    dev: true
 
   /supports-preserve-symlinks-flag@1.0.0:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
@@ -7604,7 +7549,7 @@ packages:
       bundle-require: 4.0.1(esbuild@0.17.19)
       cac: 6.7.14
       chokidar: 3.5.3
-      debug: 4.3.4(supports-color@8.1.1)
+      debug: 4.3.4
       esbuild: 0.17.19
       execa: 5.1.1
       globby: 11.1.0
