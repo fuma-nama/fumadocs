@@ -102,7 +102,7 @@
     "rehype-img-size": "^1.0.1",
     "rehype-pretty-code": "^0.10.1",
     "remark": "^14.0.3",
-    "remark-gfm": "^3.0.1",
+    "remark-gfm": "^4.0.0",
     "remark-mdx": "^2.3.0",
     "scroll-into-view-if-needed": "^3.1.0",
     "swr": "^2.2.2",
