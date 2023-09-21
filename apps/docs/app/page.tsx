@@ -123,25 +123,22 @@ export default function HomePage() {
         </p>
       </div>
 
-      <div className="relative z-[-1] mt-14 blur-3xl">
-        <div className="absolute top-12 left-0 [mask-image:linear-gradient(to_right,transparent,white,transparent)] bg-gradient-to-r from-purple-400 to-blue-400 w-full h-[400px]" />
-      </div>
-
       <div className="container max-w-[1400px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 py-8 mt-10">
-        <div className="relative z-[2] p-8 col-span-full rounded-3xl bg-gradient-to-bl from-card/30 border border-foreground/10 text-center text-cyan-50 overflow-hidden sm:p-12 max-sm:max-h-[400px]">
+        <div className="relative z-[2] p-8 col-span-full rounded-3xl bg-gradient-to-bl from-card/30 border border-foreground/10 text-center overflow-hidden sm:p-12 max-sm:max-h-[400px]">
+          <div className="absolute inset-0 bg-gradient-radial from-blue-600/30 z-[-1]" />
           <h2 className="text-2xl sm:text-3xl font-bold mb-4">
             Everything from Next.js
           </h2>
-          <p className="text-sm mb-12 md:text-base">
+          <p className="text-sm text-muted-foreground mb-12 md:text-base">
             Built for Next.js App Router, with the full power of React Server
             Components.
           </p>
           <Image
             alt="example"
             src={ExampleImage2}
-            className="rounded-3xl shadow-lg shadow-black min-w-[500px] w-full max-w-[1000px] m-auto"
+            className="rounded-3xl shadow-xl shadow-background/50 min-w-[500px] w-full max-w-[1000px] m-auto"
           />
-          <div className="absolute w-[90%] h-[60%] bg-gradient-to-br from-white/50 border border-white rounded-3xl left-[50%] translate-x-[-50%] translate-y-[-50%] top-[80%] sm:top-[60%] z-[-1]" />
+          <div className="absolute w-[90%] h-[60%] bg-gradient-to-b from-white/30 border border-foreground/10 rounded-3xl left-[50%] translate-x-[-50%] translate-y-[-50%] top-[80%] sm:top-[60%] z-[-1]" />
         </div>
 
         <div className="border p-12 rounded-3xl text-center flex flex-col items-center bg-gradient-to-br from-background md:col-span-2">
