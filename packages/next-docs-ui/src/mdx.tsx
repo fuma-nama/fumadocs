@@ -6,9 +6,7 @@ import { Pre } from '@/components/mdx/pre'
 import { SafeLink } from 'next-docs-zeta/link'
 import NextImage, { type ImageProps } from 'next/image'
 import type { ComponentPropsWithoutRef, ReactNode } from 'react'
-
-const default_image_sizes =
-  '(max-width: 1024px) 100vw, (max-width: 1280px) 70vw, 800px'
+import { default_image_sizes } from './utils/config'
 
 const Image = (props: ComponentPropsWithoutRef<'img'>) => (
   <NextImage sizes={default_image_sizes} {...(props as ImageProps)} />
@@ -64,6 +62,5 @@ export {
   Cards,
   Image,
   Table,
-  MDXContent,
-  default_image_sizes
+  MDXContent
 }

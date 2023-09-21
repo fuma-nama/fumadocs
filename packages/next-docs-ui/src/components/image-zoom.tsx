@@ -1,6 +1,6 @@
 'use client'
 
-import { default_image_sizes } from '@/mdx'
+import { default_image_sizes } from '@/utils/config'
 import Image, { type ImageProps } from 'next/image'
 import { type ImgHTMLAttributes } from 'react'
 import Zoom from 'react-medium-image-zoom'

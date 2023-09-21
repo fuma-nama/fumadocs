@@ -68,7 +68,6 @@ body {
   --ring: 0 0% 14.9%;
 }
 
-
 /* image-zoom */
 [data-rmiz] {
   display: block;
@@ -82,10 +81,10 @@ body {
 [data-rmiz-btn-unzoom] {
   display: none;
 }
-[data-rmiz-content=found] img,
-[data-rmiz-content=found] svg,
-[data-rmiz-content=found] [role=img],
-[data-rmiz-content=found] [data-zoom] {
+[data-rmiz-content='found'] img,
+[data-rmiz-content='found'] svg,
+[data-rmiz-content='found'] [role='img'],
+[data-rmiz-content='found'] [data-zoom] {
   cursor: zoom-in;
 }
 [data-rmiz-modal][open] {
@@ -107,15 +106,15 @@ body {
 }
 
 [data-rmiz-modal-overlay] {
-  transition: background-color .3s;
+  transition: background-color 0.3s;
   position: absolute;
   inset: 0;
 }
-[data-rmiz-modal-overlay=hidden] {
+[data-rmiz-modal-overlay='hidden'] {
   background-color: transparent;
 }
-[data-rmiz-modal-overlay=visible] {
-  background-color: hsl(var(--background)/.5);
+[data-rmiz-modal-overlay='visible'] {
+  background-color: hsl(var(--background) / 0.5);
 }
 [data-rmiz-modal-content] {
   width: 100%;
@@ -126,12 +125,12 @@ body {
   cursor: zoom-out;
   image-rendering: high-quality;
   transform-origin: 0 0;
-  transition: transform .3s;
+  transition: transform 0.3s;
   position: absolute;
 }
-@media (prefers-reduced-motion:reduce) {
+@media (prefers-reduced-motion: reduce) {
   [data-rmiz-modal-overlay],
   [data-rmiz-modal-img] {
-    transition-duration: .01ms !important;
+    transition-duration: 0.01ms !important;
   }
 }

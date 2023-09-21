@@ -37,6 +37,9 @@ npx create next-docs-app
 
 ## Contributions
 
-We are welcome for contributions! You may start with contributing to the docs, it is located in `/apps/docs/content/docs`. 
+We are welcome for contributions! You may start with contributing to the docs,
+it is located in `/apps/docs/content/docs`.
 
-Notice that this project is a monorepo using Turborepo, pnpm and [Changesets](https://github.com/changesets/changesets). Make sure to format your code with `pnpm run prettier` and add changeset with `pnpm changeset`.
+Notice that this project is a monorepo using Turborepo, pnpm and
+[Changesets](https://github.com/changesets/changesets). Make sure to format your
+code with `pnpm run prettier` and add changeset with `pnpm changeset`.
