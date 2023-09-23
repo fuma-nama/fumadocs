@@ -66,7 +66,7 @@ const LayoutIcon = (
   </svg>
 )
 
-export function OG({
+function OG({
   title,
   description,
   isUI
@@ -84,17 +84,12 @@ export function OG({
         height: '100%',
         padding: '3.5rem',
         color: foreground,
+        justifyContent: 'center',
+        gap: '3rem',
         background: 'hsl(0 0% 3.9%)'
       }}
     >
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'center',
-          marginBottom: '3rem'
-        }}
-      >
+      <div tw="flex flex-row items-center">
         <div
           style={{
             display: 'flex',
