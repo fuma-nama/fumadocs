@@ -1,4 +1,5 @@
-import { ImageResponse, type NextRequest } from 'next/server'
+import type { NextApiRequest } from 'next'
+import { ImageResponse } from 'next/server'
 
 export const runtime = 'edge'
 
@@ -12,18 +13,17 @@ const bold = fetch(new URL('./inter-bold.otf', import.meta.url)).then(res =>
 const foreground = 'hsl(0 0% 98%)'
 const mutedForeground = 'hsl(0 0% 63.9%)'
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { mode: string } }
-) {
-  const title = request.nextUrl.searchParams.get('title'),
-    description = request.nextUrl.searchParams.get('description')
+export default async function handler(request: NextApiRequest) {
+  const { searchParams } = new URL(request.url!)
+  const title = searchParams.get('title'),
+    description = searchParams.get('description'),
+    mode = searchParams.get('mode')
 
   return new ImageResponse(
     OG({
       title: title ?? 'Next Docs',
       description: description ?? 'The Documentation Framework',
-      isUI: params.mode === 'ui'
+      isUI: mode === 'ui'
     }),
     {
       width: 1200,
