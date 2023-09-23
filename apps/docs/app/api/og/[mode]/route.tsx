@@ -38,14 +38,12 @@ export async function GET(
 
 const UIIcon = (
   <svg
-    width="48"
-    height="48"
+    width="52"
+    height="52"
     viewBox="0 0 24 24"
     fill="none"
     stroke={mutedForeground}
     stroke-width="2"
-    stroke-linecap="round"
-    stroke-linejoin="round"
   >
     <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
     <line x1="3" x2="21" y1="9" y2="9" />
@@ -55,14 +53,11 @@ const UIIcon = (
 
 const LayoutIcon = (
   <svg
-    width="48"
-    height="48"
+    width="52"
+    height="52"
     viewBox="0 0 24 24"
-    fill="none"
     stroke={mutedForeground}
     stroke-width="2"
-    stroke-linecap="round"
-    stroke-linejoin="round"
   >
     <path d="m16 6 4 14" />
     <path d="M12 6v14" />
@@ -89,7 +84,6 @@ export function OG({
         height: '100%',
         padding: '3.5rem',
         color: foreground,
-        justifyContent: 'space-between',
         background: 'hsl(0 0% 3.9%)'
       }}
     >
