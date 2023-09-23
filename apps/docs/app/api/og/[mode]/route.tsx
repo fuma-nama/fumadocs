@@ -1,13 +1,44 @@
+import { ImageResponse, type NextRequest } from 'next/server'
+
+export const runtime = 'edge'
+
+const medium = fetch(new URL('./inter-medium.otf', import.meta.url)).then(res =>
+  res.arrayBuffer()
+)
+
+const foreground = 'hsl(0 0% 98%)'
+const mutedForeground = 'hsl(0 0% 63.9%)'
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { mode: string } }
+) {
+  const { searchParams } = new URL(request.url!)
+  const title = searchParams.get('title'),
+    description = searchParams.get('description')
+
+  return new ImageResponse(
+    OG({
+      title: title ?? 'Next Docs',
+      description: description ?? 'The Documentation Framework',
+      isUI: params.mode === 'ui'
+    }),
+    {
+      width: 1200,
+      height: 630,
+      fonts: [{ name: 'Inter', data: await medium, weight: 500 }]
+    }
+  )
+}
+
 const UIIcon = (
   <svg
-    width="48"
-    height="48"
+    width="52"
+    height="52"
     viewBox="0 0 24 24"
     fill="none"
-    stroke="rgb(165 243 252)"
+    stroke={mutedForeground}
     stroke-width="2"
-    stroke-linecap="round"
-    stroke-linejoin="round"
   >
     <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
     <line x1="3" x2="21" y1="9" y2="9" />
@@ -17,14 +48,11 @@ const UIIcon = (
 
 const LayoutIcon = (
   <svg
-    width="48"
-    height="48"
+    width="52"
+    height="52"
     viewBox="0 0 24 24"
-    fill="none"
-    stroke="rgb(233 213 255)"
+    stroke={mutedForeground}
     stroke-width="2"
-    stroke-linecap="round"
-    stroke-linejoin="round"
   >
     <path d="m16 6 4 14" />
     <path d="M12 6v14" />
@@ -33,7 +61,7 @@ const LayoutIcon = (
   </svg>
 )
 
-export function OG({
+function OG({
   title,
   description,
   isUI
@@ -42,8 +70,6 @@ export function OG({
   title: string
   description: string
 }) {
-  const mutedForeground = 'rgb(209 213 219)'
-
   return (
     <div
       style={{
@@ -52,27 +78,20 @@ export function OG({
         width: '100%',
         height: '100%',
         padding: '3.5rem',
-        justifyContent: 'space-between',
+        color: foreground,
+        justifyContent: 'center',
+        gap: '3rem',
         background: 'hsl(0 0% 3.9%)'
       }}
     >
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'center',
-          marginBottom: '3rem'
-        }}
-      >
+      <div tw="flex flex-row items-center">
         <div
           style={{
             display: 'flex',
             padding: '0.75rem',
             border: `1px rgba(156,163,175,0.3)`,
             borderRadius: '0.75rem',
-            background: `linear-gradient(to bottom, black, ${
-              isUI ? 'rgb(0,50,150)' : 'rgb(150,50,150)'
-            })`
+            background: `rgb(38, 38, 38)`
           }}
         >
           {isUI ? UIIcon : LayoutIcon}
@@ -80,8 +99,7 @@ export function OG({
 
         <p
           style={{
-            color: mutedForeground,
-            fontWeight: 700,
+            fontWeight: 500,
             marginLeft: '1.5rem',
             fontSize: '2.3rem'
           }}
@@ -102,9 +120,8 @@ export function OG({
       >
         <p
           style={{
-            color: 'white',
             fontWeight: 700,
-            fontSize: '3.75rem'
+            fontSize: '3.5rem'
           }}
         >
           {title}
