@@ -1,10 +1,48 @@
+import { ImageResponse, type NextRequest } from 'next/server'
+
+export const runtime = 'edge'
+
+const medium = fetch(new URL('./inter-medium.otf', import.meta.url)).then(res =>
+  res.arrayBuffer()
+)
+const bold = fetch(new URL('./inter-bold.otf', import.meta.url)).then(res =>
+  res.arrayBuffer()
+)
+
+const foreground = 'hsl(0 0% 98%)'
+const mutedForeground = 'hsl(0 0% 63.9%)'
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { mode: string } }
+) {
+  const title = request.nextUrl.searchParams.get('title'),
+    description = request.nextUrl.searchParams.get('description')
+
+  return new ImageResponse(
+    OG({
+      title: title ?? 'Next Docs',
+      description: description ?? 'The Documentation Framework',
+      isUI: params.mode === 'ui'
+    }),
+    {
+      width: 1200,
+      height: 630,
+      fonts: [
+        { name: 'Inter', data: await medium, weight: 500 },
+        { name: 'Inter', data: await bold, weight: 700 }
+      ]
+    }
+  )
+}
+
 const UIIcon = (
   <svg
     width="48"
     height="48"
     viewBox="0 0 24 24"
     fill="none"
-    stroke="rgb(165 243 252)"
+    stroke={mutedForeground}
     stroke-width="2"
     stroke-linecap="round"
     stroke-linejoin="round"
@@ -21,7 +59,7 @@ const LayoutIcon = (
     height="48"
     viewBox="0 0 24 24"
     fill="none"
-    stroke="rgb(233 213 255)"
+    stroke={mutedForeground}
     stroke-width="2"
     stroke-linecap="round"
     stroke-linejoin="round"
@@ -42,8 +80,6 @@ export function OG({
   title: string
   description: string
 }) {
-  const mutedForeground = 'rgb(209 213 219)'
-
   return (
     <div
       style={{
@@ -52,6 +88,7 @@ export function OG({
         width: '100%',
         height: '100%',
         padding: '3.5rem',
+        color: foreground,
         justifyContent: 'space-between',
         background: 'hsl(0 0% 3.9%)'
       }}
@@ -70,9 +107,7 @@ export function OG({
             padding: '0.75rem',
             border: `1px rgba(156,163,175,0.3)`,
             borderRadius: '0.75rem',
-            background: `linear-gradient(to bottom, black, ${
-              isUI ? 'rgb(0,50,150)' : 'rgb(150,50,150)'
-            })`
+            background: `rgb(38, 38, 38)`
           }}
         >
           {isUI ? UIIcon : LayoutIcon}
@@ -80,8 +115,7 @@ export function OG({
 
         <p
           style={{
-            color: mutedForeground,
-            fontWeight: 700,
+            fontWeight: 500,
             marginLeft: '1.5rem',
             fontSize: '2.3rem'
           }}
@@ -102,7 +136,6 @@ export function OG({
       >
         <p
           style={{
-            color: 'white',
             fontWeight: 700,
             fontSize: '3.75rem'
           }}
