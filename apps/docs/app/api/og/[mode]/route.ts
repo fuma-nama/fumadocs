@@ -1,12 +1,13 @@
-import { readFile } from 'fs/promises'
-import { resolve } from 'path'
 import { ImageResponse, type NextRequest } from 'next/server'
 import { OG } from './og'
 
-const medium = readFile(resolve('./public/inter-medium.otf'))
-const bold = readFile(resolve('./public/inter-bold.otf'))
-const backgroundImage = readFile(resolve('./public/background.png')).then(
-  res => res.buffer
+export const runtime = 'edge'
+
+const medium = fetch(new URL('./inter-medium.otf', import.meta.url)).then(res =>
+  res.arrayBuffer()
+)
+const bold = fetch(new URL('./inter-bold.otf', import.meta.url)).then(res =>
+  res.arrayBuffer()
 )
 
 export async function GET(
@@ -20,8 +21,7 @@ export async function GET(
     OG({
       title: title ?? 'Next Docs',
       description: description ?? 'The Documentation Framework',
-      isUI: params.mode === 'ui',
-      backgroundImage: await backgroundImage
+      isUI: params.mode === 'ui'
     }),
     {
       width: 1200,

@@ -1,7 +1,7 @@
 const UIIcon = (
   <svg
-    width="44"
-    height="44"
+    width="48"
+    height="48"
     viewBox="0 0 24 24"
     fill="none"
     stroke="rgb(165 243 252)"
@@ -17,8 +17,8 @@ const UIIcon = (
 
 const LayoutIcon = (
   <svg
-    width="44"
-    height="44"
+    width="48"
+    height="48"
     viewBox="0 0 24 24"
     fill="none"
     stroke="rgb(233 213 255)"
@@ -33,18 +33,17 @@ const LayoutIcon = (
   </svg>
 )
 
-/* eslint-disable  */
 export function OG({
   title,
   description,
-  isUI,
-  backgroundImage
+  isUI
 }: {
   isUI: boolean
   title: string
   description: string
-  backgroundImage: ArrayBuffer
 }) {
+  const mutedForeground = 'rgb(209 213 219)'
+
   return (
     <div
       style={{
@@ -53,17 +52,10 @@ export function OG({
         width: '100%',
         height: '100%',
         padding: '3.5rem',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
+        background: 'hsl(0 0% 3.9%)'
       }}
     >
-      <img
-        width={1200}
-        height={630}
-        src={backgroundImage as any}
-        style={{
-          position: 'absolute'
-        }}
-      />
       <div
         style={{
           display: 'flex',
@@ -76,7 +68,7 @@ export function OG({
           style={{
             display: 'flex',
             padding: '0.75rem',
-            border: `2px ${isUI ? 'rgb(96 165 250)' : 'rgb(192 132 252)'}`,
+            border: `1px rgba(156,163,175,0.3)`,
             borderRadius: '0.75rem',
             background: `linear-gradient(to bottom, black, ${
               isUI ? 'rgb(0,50,150)' : 'rgb(150,50,150)'
@@ -88,10 +80,10 @@ export function OG({
 
         <p
           style={{
-            color: 'rgb(229 231 235)',
+            color: mutedForeground,
             fontWeight: 700,
             marginLeft: '1.5rem',
-            fontSize: '2.25rem'
+            fontSize: '2.3rem'
           }}
         >
           {isUI ? 'Next Docs UI' : 'Next Docs Zeta'}
@@ -119,9 +111,9 @@ export function OG({
         </p>
         <p
           style={{
-            color: 'rgb(209 213 219)',
+            color: mutedForeground,
             fontWeight: 500,
-            fontSize: '1.875rem'
+            fontSize: '2rem'
           }}
         >
           {description}
