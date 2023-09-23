@@ -3,7 +3,7 @@
 import { cn } from '@/utils/cn'
 import { cva } from 'class-variance-authority'
 import { GithubIcon } from 'lucide-react'
-import { Nav as OriginalNav } from 'next-docs-ui/components'
+import { Nav as OriginalNav } from 'next-docs-ui/nav'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'

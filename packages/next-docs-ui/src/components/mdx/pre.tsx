@@ -13,10 +13,10 @@ type PreProps = ComponentPropsWithoutRef<'pre'> & {
 export function Pre({ title, allowCopy = true, ...props }: PreProps) {
   const ref = useRef<HTMLPreElement>(null)
   const onCopy = useCallback(() => {
-    if (ref.current == null || ref.current.textContent == null) return
+    if (ref.current?.textContent == null) return
 
     navigator.clipboard.writeText(ref.current.textContent)
-  }, [ref.current])
+  }, [])
 
   return (
     <div
