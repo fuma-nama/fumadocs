@@ -114,7 +114,7 @@ body {
   background-color: transparent;
 }
 [data-rmiz-modal-overlay='visible'] {
-  background-color: hsl(var(--background) / 0.5);
+  background-color: hsl(var(--background) / 0.8);
 }
 [data-rmiz-modal-content] {
   width: 100%;

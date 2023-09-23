@@ -57,8 +57,9 @@ export function Nav({
   return (
     <nav
       className={cn(
-        'nd-sticky nd-top-0 nd-h-16 nd-z-50 nd-transition-colors nd-border-b nd-border-transparent nd-backdrop-blur-sm',
-        !transparent && 'nd-bg-background/50 nd-border-foreground/10'
+        'nd-sticky nd-top-0 nd-h-16 nd-z-50 nd-transition-colors',
+        !transparent &&
+          'nd-border-b nd-bg-background/80 nd-border-foreground/10 nd-backdrop-blur-sm'
       )}
     >
       <div className="nd-container nd-flex nd-flex-row nd-items-center nd-h-full nd-gap-4">
