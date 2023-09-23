@@ -75,7 +75,9 @@ export default function HomePage() {
         </div>
       </div>
       <div className="container mt-20 text-center">
-        <p className="mb-4 text-sm">Brought to you by Fuma</p>
+        <p className="mb-4 text-sm text-muted-foreground">
+          Brought to you by Fuma
+        </p>
         <Comments />
       </div>
       <div className={cn(separator(), 'mt-12')} />
@@ -198,7 +200,7 @@ function HeroCards() {
 function Comments() {
   return (
     <div className="bg-gradient-to-b from-card p-6 border rounded-md mx-auto max-w-4xl">
-      <p className="text-muted-foreground">{`"I'm satisfied with it"`}</p>
+      <p>{`"I'm satisfied with it"`}</p>
       <div className="inline-flex items-center gap-2 mt-2">
         <a
           href="https://joulev.dev"

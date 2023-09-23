@@ -27,11 +27,11 @@ body {
 :root {
   --background: 0 0% 100%;
   --foreground: 0 0% 3.9%;
-  --muted: 0 0% 92.1%;
+  --muted: 0 0% 95.1%;
   --muted-foreground: 0 0% 45.1%;
   --popover: 0 0% 100%;
   --popover-foreground: 0 0% 45.1%;
-  --card: 0 0% 98%;
+  --card: 0 0% 99.7%;
   --card-foreground: 0 0% 3.9%;
   --border: 0 0% 89.8%;
   --input: 0 0% 89.8%;
