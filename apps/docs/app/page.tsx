@@ -75,29 +75,32 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div className="container text-center">
-        <h2 className="text-2xl font-medium mb-4 sm:text-4xl">
-          Build in Seconds
-        </h2>
-        <p className="text-muted-foreground">
-          Ceate documentation sites with a command.
-        </p>
-        <section className="[perspective:2000px] mt-12">
-          <div className="relative [transform:rotateX(30deg)] min-w-[600px] mx-auto animate-in duration-1000 fade-in">
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-400/30 to-blue-300/30 blur-xl z-[-1] animate-pulse" />
-            <Image
-              alt="example"
-              src={ExampleImage}
-              className="rounded-2xl bg-background"
-              priority
-            />
-          </div>
-        </section>
+      <div className="h-px bg-gradient-to-r from-transparent via-foreground/50 mt-12" />
+      <div className="overflow-hidden py-20">
+        <div className="container text-center">
+          <h2 className="text-2xl font-medium mb-4 sm:text-4xl">
+            Build in Seconds
+          </h2>
+          <p className="text-muted-foreground">
+            Ceate documentation sites with a command.
+          </p>
+          <section className="[perspective:2000px] mt-12">
+            <div className="relative [transform:rotateX(30deg)] min-w-[600px] mx-auto animate-in duration-1000 fade-in">
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-400/30 to-blue-300/30 blur-xl z-[-1] animate-pulse" />
+              <Image
+                alt="example"
+                src={ExampleImage}
+                className="rounded-2xl bg-background"
+                priority
+              />
+            </div>
+          </section>
+        </div>
       </div>
       <div className="relative z-[-1]">
         <div className="absolute top-0 inset-x-0 h-[800px] bg-gradient-to-r from-purple-600 to-blue-600 opacity-20 [mask-image:linear-gradient(to_top,transparent,white,transparent)]" />
       </div>
-      <div className="container mt-24 grid grid-cols-1 gap-10 lg:grid-cols-2">
+      <div className="container grid grid-cols-1 gap-10 lg:grid-cols-2">
         <div
           className={cn(
             baseCard({
