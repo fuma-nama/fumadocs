@@ -75,18 +75,25 @@ export default function HomePage() {
         </div>
       </div>
 
-      <section className="[perspective:2000px] overflow-hidden">
-        <div className="relative [transform:rotateX(40deg)] min-w-[600px] max-w-[1200px] mx-auto animate-in duration-1000 fade-in">
-          <div className="absolute inset-0 bg-gradient-to-t from-background to-50%" />
-          <div className="absolute -inset-6 bottom-20 bg-gradient-to-r from-purple-400/30 to-blue-300/30 blur-xl z-[-1] animate-pulse" />
-          <Image
-            alt="example"
-            src={ExampleImage}
-            className="rounded-2xl bg-background"
-            priority
-          />
-        </div>
-      </section>
+      <div className="container text-center">
+        <h2 className="text-2xl font-medium mb-4 sm:text-4xl">
+          Build in Seconds
+        </h2>
+        <p className="text-muted-foreground">
+          Ceate documentation sites with a command.
+        </p>
+        <section className="[perspective:2000px] mt-12">
+          <div className="relative [transform:rotateX(30deg)] min-w-[600px] mx-auto animate-in duration-1000 fade-in">
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-400/30 to-blue-300/30 blur-xl z-[-1] animate-pulse" />
+            <Image
+              alt="example"
+              src={ExampleImage}
+              className="rounded-2xl bg-background"
+              priority
+            />
+          </div>
+        </section>
+      </div>
       <div className="relative z-[-1]">
         <div className="absolute top-0 inset-x-0 h-[800px] bg-gradient-to-r from-purple-600 to-blue-600 opacity-20 [mask-image:linear-gradient(to_top,transparent,white,transparent)]" />
       </div>
@@ -165,8 +172,8 @@ export default function HomePage() {
         </div>
         <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-foreground/50" />
       </div>
-      <div className="relative py-40 bg-gradient-radial from-blue-600/20 flex flex-col gap-6 items-center text-center">
-        <h2 className="text-3xl font-medium sm:text-5xl">
+      <div className="relative py-40 bg-gradient-to-b from-card flex flex-col gap-6 items-center text-center">
+        <h2 className="text-3xl font-medium sm:text-4xl">
           Install Now.
           <br />
           Stop waiting, go play it.
