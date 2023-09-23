@@ -41,7 +41,7 @@ export default function RootLayout({
 
 function Footer() {
   return (
-    <footer className="bg-secondary/50 text-secondary-foreground mt-auto border-t py-12">
+    <footer className="bg-card text-secondary-foreground mt-auto border-t py-12">
       <div className="container flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="mb-1 text-sm font-semibold">NEXT DOCS</p>

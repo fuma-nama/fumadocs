@@ -17,10 +17,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import type { ComponentPropsWithoutRef, ComponentPropsWithRef } from 'react'
 
-const baseCard = cva(
-  'border border-foreground/10 bg-gradient-to-t from-white dark:from-white/10'
-)
-
 const separator = cva(
   'h-px bg-gradient-to-r from-transparent via-foreground/30'
 )
@@ -78,12 +74,12 @@ export default function HomePage() {
           </Link>
         </div>
       </div>
-      <div className="container mt-20">
-        <p className="text-center mb-4 text-sm">Brought to you by Fuma</p>
+      <div className="container mt-20 text-center">
+        <p className="mb-4 text-sm">Brought to you by Fuma</p>
         <Comments />
       </div>
       <div className={cn(separator(), 'mt-12')} />
-      <div className="py-40">
+      <div className="relative py-40">
         <div className="container text-center">
           <h2 className="text-2xl font-medium mb-4 sm:text-4xl">
             Build in Seconds
@@ -105,57 +101,14 @@ export default function HomePage() {
             </div>
           </section>
         </div>
-        <div className="relative">
-          <div className="absolute z-[-1] inset-0 bottom-[-200px] bg-gradient-to-r from-purple-600 to-blue-600 opacity-20 [mask-image:linear-gradient(to_top,transparent,white,transparent)]" />
-
-          <div className="container grid grid-cols-1 gap-10 mt-12 md:grid-cols-2">
-            <div
-              className={cn(
-                baseCard({
-                  className:
-                    'relative z-[2] flex flex-col overflow-hidden rounded-2xl p-8'
-                })
-              )}
-            >
-              <div className="relative z-[-1] mx-auto mb-20">
-                <div className="absolute inset-8 z-[-1] animate-pulse bg-purple-300/50 blur-3xl" />
-                <Rocket className="text-purple-400 dark:text-purple-200 p-8 mx-auto" />
-              </div>
-              <div className="absolute inset-x-0 bottom-0 text-center p-8">
-                <p className="mb-2 text-xl font-medium">Lightning Fast</p>
-                <p className="text-muted-foreground max-sm:text-sm">
-                  Built for App Router and work with Pages Router
-                </p>
-              </div>
-            </div>
-            <div
-              className={cn(
-                baseCard({
-                  className:
-                    'relative z-[2] flex flex-col overflow-hidden rounded-2xl p-8'
-                })
-              )}
-            >
-              <div className="z-[-1] mx-auto mb-28 flex rounded-3xl bg-gradient-to-t from-cyan-500/30 px-24 shadow-2xl shadow-cyan-400/30">
-                <Heart className="mx-auto" />
-              </div>
-              <div className="absolute inset-x-0 bottom-0 text-center p-8">
-                <p className="mb-2 text-xl font-medium">
-                  First-class Developer Experience
-                </p>
-                <p className="text-muted-foreground max-sm:text-sm">
-                  Install, Code, Deploy within a minute
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+        <HeroCards />
+        <div className="absolute z-[-1] inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-10 [mask-image:linear-gradient(to_top,transparent,white,transparent)]" />
       </div>
 
       <div className={cn(separator())} />
       <div className="relative from-blue-600/10 py-40 dark:bg-gradient-to-t">
         <div className="container flex flex-col items-center text-center">
-          <h2 className="text-3xl font-medium mb-6 sm:leading-snug sm:text-5xl">
+          <h2 className="text-2xl font-medium mb-6 sm:leading-snug sm:text-4xl">
             Give Your Docs
             <br />
             The Best UI
@@ -167,11 +120,11 @@ export default function HomePage() {
         </div>
 
         <div className="container max-w-[1400px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 py-8 mt-10">
-          <div className="relative z-[2] p-8 col-span-full rounded-3xl bg-gradient-radial from-blue-600/20 border border-foreground/10 text-center overflow-hidden sm:p-12 max-sm:max-h-[400px]">
-            <h2 className="text-xl font-semibold mb-4 sm:text-2xl">
+          <div className="relative z-[2] p-8 col-span-full rounded-3xl bg-gradient-radial border border-foreground/10 text-center overflow-hidden sm:p-12 dark:from-blue-600/20">
+            <h2 className="text-xl font-medium mb-4">
               Everything from Next.js
             </h2>
-            <p className="text-sm text-muted-foreground mb-12 md:text-base">
+            <p className="text-sm text-muted-foreground mb-6">
               Built for Next.js App Router, with the full power of React Server
               Components.
             </p>
@@ -204,6 +157,41 @@ export default function HomePage() {
         </a>
       </div>
     </main>
+  )
+}
+
+function HeroCards() {
+  const card = cva(
+    'relative bg-background border border-foreground/10 z-[2] flex flex-col overflow-hidden rounded-2xl p-8'
+  )
+
+  return (
+    <div className="container grid grid-cols-1 gap-8 mt-12 md:grid-cols-2 lg:grid-cols-3">
+      <div className={cn(card())}>
+        <div className="absolute inset-0 bg-gradient-radial from-purple-600/10 z-[-1]" />
+        <Rocket className="text-purple-400 dark:text-purple-200 p-8 mx-auto" />
+        <div className="text-center mt-auto">
+          <p className="mb-4 text-xl font-medium">Lightning Fast</p>
+          <p className="text-muted-foreground">
+            Built for App Router and work with Pages Router
+          </p>
+        </div>
+      </div>
+      <div className={cn(card({ className: 'lg:col-span-2' }))}>
+        <div className="absolute inset-0 bg-gradient-radial from-blue-600/10 z-[-1]" />
+        <div className="mx-auto rounded-3xl px-24 bg-gradient-to-b from-blue-400/10 border border-foreground/10 mb-12">
+          <Heart />
+        </div>
+        <div className="text-center mt-auto">
+          <p className="mb-4 text-xl font-medium">
+            First-class Developer Experience
+          </p>
+          <p className="text-muted-foreground">
+            Install, Code, Deploy within a minute
+          </p>
+        </div>
+      </div>
+    </div>
   )
 }
 

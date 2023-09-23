@@ -27,11 +27,11 @@ body {
 :root {
   --background: 0 0% 100%;
   --foreground: 0 0% 3.9%;
-  --muted: 0 0% 96.1%;
+  --muted: 0 0% 92.1%;
   --muted-foreground: 0 0% 45.1%;
   --popover: 0 0% 100%;
   --popover-foreground: 0 0% 45.1%;
-  --card: 0 0% 100%;
+  --card: 0 0% 98%;
   --card-foreground: 0 0% 3.9%;
   --border: 0 0% 89.8%;
   --input: 0 0% 89.8%;
@@ -39,7 +39,7 @@ body {
   --primary-foreground: 0 0% 98%;
   --secondary: 0 0% 96.1%;
   --secondary-foreground: 0 0% 9%;
-  --accent: 0 0% 96.1%;
+  --accent: 0 0% 94.1%;
   --accent-foreground: 0 0% 9%;
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 0 0% 98%;
