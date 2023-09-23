@@ -21,6 +21,10 @@ const baseCard = cva(
   'border border-foreground/10 bg-gradient-to-t from-white dark:from-white/10'
 )
 
+const separator = cva(
+  'h-px bg-gradient-to-r from-transparent via-foreground/50'
+)
+
 export default function HomePage() {
   return (
     <main>
@@ -75,7 +79,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div className="h-px bg-gradient-to-r from-transparent via-foreground/50 mt-12" />
+      <div className={cn(separator(), 'mt-12')} />
       <div className="overflow-hidden py-20">
         <div className="container text-center">
           <h2 className="text-2xl font-medium mb-4 sm:text-4xl">
@@ -100,7 +104,7 @@ export default function HomePage() {
       <div className="relative z-[-1]">
         <div className="absolute top-0 inset-x-0 h-[800px] bg-gradient-to-r from-purple-600 to-blue-600 opacity-20 [mask-image:linear-gradient(to_top,transparent,white,transparent)]" />
       </div>
-      <div className="container grid grid-cols-1 gap-10 lg:grid-cols-2">
+      <div className="container grid grid-cols-1 gap-10 pb-20 lg:grid-cols-2">
         <div
           className={cn(
             baseCard({
@@ -141,6 +145,7 @@ export default function HomePage() {
           </div>
         </div>
       </div>
+      <div className={cn(separator(), 'mt-12')} />
       <div className="relative from-blue-600/10 py-40 dark:bg-gradient-to-t">
         <div className="container flex flex-col items-center text-center">
           <h2 className="text-3xl font-medium mb-6 sm:leading-snug sm:text-5xl">
@@ -173,7 +178,7 @@ export default function HomePage() {
 
           <Grid />
         </div>
-        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-foreground/50" />
+        <div className={cn(separator(), 'absolute inset-x-0 bottom-0')} />
       </div>
       <div className="relative py-40 bg-gradient-to-b from-card flex flex-col gap-6 items-center text-center">
         <h2 className="text-3xl font-medium sm:text-4xl">
