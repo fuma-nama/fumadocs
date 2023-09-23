@@ -22,7 +22,7 @@ const baseCard = cva(
 )
 
 const separator = cva(
-  'h-px bg-gradient-to-r from-transparent via-foreground/50'
+  'h-px bg-gradient-to-r from-transparent via-foreground/30'
 )
 
 export default function HomePage() {
@@ -78,9 +78,12 @@ export default function HomePage() {
           </Link>
         </div>
       </div>
-
+      <div className="mx-auto max-w-4xl mt-20">
+        <p className="text-center mb-4 text-sm">Brought to you by Fuma</p>
+        <Comments />
+      </div>
       <div className={cn(separator(), 'mt-12')} />
-      <div className="overflow-hidden py-20">
+      <div className="py-40">
         <div className="container text-center">
           <h2 className="text-2xl font-medium mb-4 sm:text-4xl">
             Build in Seconds
@@ -88,8 +91,10 @@ export default function HomePage() {
           <p className="text-muted-foreground">
             Ceate documentation sites with a command.
           </p>
-          <section className="[perspective:2000px] mt-12">
-            <div className="relative [transform:rotateX(30deg)] min-w-[600px] mx-auto animate-in duration-1000 fade-in">
+        </div>
+        <div className="overflow-hidden h-[400px] mt-12">
+          <section className="container [perspective:2000px]">
+            <div className="relative [transform:rotateX(30deg)] min-w-[600px] mx-auto">
               <div className="absolute inset-0 bg-gradient-to-r from-purple-400/30 to-blue-300/30 blur-xl z-[-1] animate-pulse" />
               <Image
                 alt="example"
@@ -100,52 +105,53 @@ export default function HomePage() {
             </div>
           </section>
         </div>
+        <div className="container grid grid-cols-1 gap-10 mt-12 lg:grid-cols-2">
+          <div
+            className={cn(
+              baseCard({
+                className:
+                  'relative z-[2] flex flex-col overflow-hidden rounded-2xl p-8'
+              })
+            )}
+          >
+            <div className="relative z-[-1] mx-auto mb-20">
+              <div className="absolute inset-8 z-[-1] animate-pulse bg-purple-300/50 blur-3xl" />
+              <Rocket className="text-purple-400 dark:text-purple-200 mx-auto" />
+            </div>
+            <div className="absolute inset-x-0 bottom-0 text-center p-8">
+              <p className="mb-2 text-xl font-medium">Lightning Fast</p>
+              <p className="text-muted-foreground max-sm:text-sm">
+                Built for App Router and work with Pages Router
+              </p>
+            </div>
+          </div>
+          <div
+            className={cn(
+              baseCard({
+                className:
+                  'relative z-[2] flex flex-col overflow-hidden rounded-2xl p-8'
+              })
+            )}
+          >
+            <div className="z-[-1] mx-auto mb-28 flex rounded-3xl border bg-gradient-to-b from-transparent to-cyan-500/30 px-24 shadow-2xl shadow-cyan-400/30">
+              <Heart className="mx-auto" />
+            </div>
+            <div className="absolute inset-x-0 bottom-0 text-center p-8">
+              <p className="mb-2 text-xl font-medium">
+                First-class Developer Experience
+              </p>
+              <p className="text-muted-foreground max-sm:text-sm">
+                Install, Code, Deploy within a minute
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
       <div className="relative z-[-1]">
-        <div className="absolute top-0 inset-x-0 h-[800px] bg-gradient-to-r from-purple-600 to-blue-600 opacity-20 [mask-image:linear-gradient(to_top,transparent,white,transparent)]" />
+        <div className="absolute bottom-[-200px] inset-x-0 h-[800px] bg-gradient-to-r from-purple-600 to-blue-600 opacity-20 [mask-image:linear-gradient(to_top,transparent,white,transparent)]" />
       </div>
-      <div className="container grid grid-cols-1 gap-10 pb-20 lg:grid-cols-2">
-        <div
-          className={cn(
-            baseCard({
-              className:
-                'relative z-[2] flex flex-col overflow-hidden rounded-2xl p-8'
-            })
-          )}
-        >
-          <div className="relative z-[-1] mx-auto mb-20">
-            <div className="absolute inset-8 z-[-1] animate-pulse bg-purple-300/50 blur-3xl" />
-            <Rocket className="text-purple-400 dark:text-purple-200 mx-auto" />
-          </div>
-          <div className="absolute inset-x-0 bottom-0 text-center p-8">
-            <p className="mb-2 text-xl font-medium">Lightning Fast</p>
-            <p className="text-muted-foreground max-sm:text-sm">
-              Built for App Router and work with Pages Router
-            </p>
-          </div>
-        </div>
-        <div
-          className={cn(
-            baseCard({
-              className:
-                'relative z-[2] flex flex-col overflow-hidden rounded-2xl p-8'
-            })
-          )}
-        >
-          <div className="z-[-1] mx-auto mb-28 flex rounded-3xl border bg-gradient-to-b from-transparent to-cyan-500/30 px-24 shadow-2xl shadow-cyan-400/30">
-            <Heart className="mx-auto" />
-          </div>
-          <div className="absolute inset-x-0 bottom-0 text-center p-8">
-            <p className="mb-2 text-xl font-medium">
-              First-class Developer Experience
-            </p>
-            <p className="text-muted-foreground max-sm:text-sm">
-              Install, Code, Deploy within a minute
-            </p>
-          </div>
-        </div>
-      </div>
-      <div className={cn(separator(), 'mt-12')} />
+
+      <div className={cn(separator())} />
       <div className="relative from-blue-600/10 py-40 dark:bg-gradient-to-t">
         <div className="container flex flex-col items-center text-center">
           <h2 className="text-3xl font-medium mb-6 sm:leading-snug sm:text-5xl">
@@ -197,6 +203,27 @@ export default function HomePage() {
         </a>
       </div>
     </main>
+  )
+}
+
+function Comments() {
+  return (
+    <div className="bg-gradient-to-b from-card p-6 border rounded-md">
+      <p className="text-muted-foreground">{`"I'm satisfied with it"`}</p>
+      <div className="inline-flex items-center gap-2 mt-2">
+        <a
+          href="https://joulev.dev"
+          target="_blank"
+          rel="noreferrer noopener"
+          className="text-sm font-medium"
+        >
+          @joulev
+        </a>
+        <p className="text-xs text-muted-foreground">
+          - Moderator at Next.js Discord
+        </p>
+      </div>
+    </div>
   )
 }
 
