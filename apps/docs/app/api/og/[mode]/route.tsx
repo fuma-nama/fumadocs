@@ -2,12 +2,17 @@ import { ImageResponse, type NextRequest } from 'next/server'
 
 export const runtime = 'edge'
 
-const medium = fetch(new URL('./inter-medium.otf', import.meta.url)).then(res =>
+const medium = fetch(new URL('./inter-medium.woff', import.meta.url)).then(
+  res => res.arrayBuffer()
+)
+
+const bold = fetch(new URL('./inter-bold.woff', import.meta.url)).then(res =>
   res.arrayBuffer()
 )
 
 const foreground = 'hsl(0 0% 98%)'
 const mutedForeground = 'hsl(0 0% 63.9%)'
+const background = 'rgba(10, 10, 10)'
 
 export async function GET(
   request: NextRequest,
@@ -26,7 +31,10 @@ export async function GET(
     {
       width: 1200,
       height: 630,
-      fonts: [{ name: 'Inter', data: await medium, weight: 500 }]
+      fonts: [
+        { name: 'Inter', data: await medium, weight: 500 },
+        { name: 'Inter', data: await bold, weight: 700 }
+      ]
     }
   )
 }
@@ -81,7 +89,7 @@ function OG({
         color: foreground,
         justifyContent: 'center',
         gap: '3rem',
-        background: 'hsl(0 0% 3.9%)'
+        background
       }}
     >
       <div tw="flex flex-row items-center">
@@ -114,8 +122,7 @@ function OG({
           padding: '2.5rem',
           border: '1px rgba(156,163,175,0.3)',
           borderRadius: '1.5rem',
-          background:
-            'linear-gradient(to top, rgba(255,255,255,0.1), rgba(255,255,255,0.02))'
+          background: `linear-gradient(to top, rgba(40,40,40), ${background})`
         }}
       >
         <p
