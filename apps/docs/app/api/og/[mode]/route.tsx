@@ -5,9 +5,6 @@ export const runtime = 'edge'
 const medium = fetch(new URL('./inter-medium.otf', import.meta.url)).then(res =>
   res.arrayBuffer()
 )
-const bold = fetch(new URL('./inter-bold.otf', import.meta.url)).then(res =>
-  res.arrayBuffer()
-)
 
 const foreground = 'hsl(0 0% 98%)'
 const mutedForeground = 'hsl(0 0% 63.9%)'
@@ -29,10 +26,7 @@ export async function GET(
     {
       width: 1200,
       height: 630,
-      fonts: [
-        { name: 'Inter', data: await medium, weight: 500 },
-        { name: 'Inter', data: await bold, weight: 700 }
-      ]
+      fonts: [{ name: 'Inter', data: await medium, weight: 500 }]
     }
   )
 }
@@ -49,6 +43,21 @@ const UIIcon = (
     <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
     <line x1="3" x2="21" y1="9" y2="9" />
     <line x1="9" x2="9" y1="21" y2="9" />
+  </svg>
+)
+
+const LayoutIcon = (
+  <svg
+    width="52"
+    height="52"
+    viewBox="0 0 24 24"
+    stroke={mutedForeground}
+    stroke-width="2"
+  >
+    <path d="m16 6 4 14" />
+    <path d="M12 6v14" />
+    <path d="M8 8v12" />
+    <path d="M4 4v16" />
   </svg>
 )
 
@@ -85,7 +94,7 @@ function OG({
             background: `rgb(38, 38, 38)`
           }}
         >
-          {UIIcon}
+          {isUI ? UIIcon : LayoutIcon}
         </div>
 
         <p
