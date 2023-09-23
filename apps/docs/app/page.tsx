@@ -108,10 +108,10 @@ export default function HomePage() {
       <div className={cn(separator())} />
       <div className="relative from-blue-600/10 py-40 dark:bg-gradient-to-t">
         <div className="container flex flex-col items-center text-center">
-          <h2 className="text-2xl font-medium mb-6 sm:leading-snug sm:text-4xl">
-            Give Your Docs
+          <h2 className="text-3xl font-medium mb-6 sm:leading-snug sm:text-5xl">
+            A Mind-blowing UI
             <br />
-            The Best UI
+            Built for Your Docs
           </h2>
           <p className="text-muted-foreground mx-auto max-w-2xl sm:text-lg">
             Next Docs UI focus on performance and DX, allowing you to customise
@@ -141,7 +141,7 @@ export default function HomePage() {
         <div className={cn(separator(), 'absolute inset-x-0 bottom-0')} />
       </div>
       <div className="relative py-40 bg-gradient-to-b from-card flex flex-col gap-6 items-center text-center">
-        <h2 className="text-3xl font-medium sm:text-4xl">
+        <h2 className="text-2xl font-medium sm:text-4xl">
           Install Now.
           <br />
           Stop waiting, go play it.
