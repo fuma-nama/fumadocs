@@ -3,6 +3,7 @@ title: Theming
 description: Add Theme to Next Docs UI
 ---
 
+import { blue_theme, full_layout } from '@/components/themes.js'
 import { Accordion, Accordions } from 'next-docs-ui/components/accordion'
 
 The design system is based on [Shadcn UI](https://ui.shadcn.com), allowing you
@@ -12,8 +13,9 @@ to overwrite css variables.
 
 You can easily customise all the properties using css variables.
 
-<div className="mb-4">
-  <ThemeSwitch />
+<div className="mb-4 flex flex-row flex-wrap gap-2">
+  <ThemeSwitch style={blue_theme}>Blue Theme</ThemeSwitch>
+  <ThemeSwitch style={full_layout}>Full Layout</ThemeSwitch>
 </div>
 
 ```css title="global.css"

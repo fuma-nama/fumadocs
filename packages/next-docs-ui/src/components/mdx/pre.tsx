@@ -24,7 +24,7 @@ export function Pre({ title, allowCopy = true, ...props }: PreProps) {
       data-code-fragment
     >
       {title ? (
-        <div className="nd-flex nd-flex-row nd-items-center nd-bg-muted nd-p-2 nd-border-b">
+        <div className="nd-flex nd-flex-row nd-items-center nd-bg-muted nd-px-2 nd-py-1.5 nd-border-b">
           <span className="nd-pl-2 nd-flex-1 nd-text-muted-foreground">
             {title}
           </span>
