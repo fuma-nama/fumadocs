@@ -78,7 +78,7 @@ export default function HomePage() {
           </Link>
         </div>
       </div>
-      <div className="mx-auto max-w-4xl mt-20">
+      <div className="container mt-20">
         <p className="text-center mb-4 text-sm">Brought to you by Fuma</p>
         <Comments />
       </div>
@@ -92,9 +92,9 @@ export default function HomePage() {
             Ceate documentation sites with a command.
           </p>
         </div>
-        <div className="overflow-hidden h-[400px] mt-12">
+        <div className="overflow-hidden h-[400px] mt-12 max-md:hidden">
           <section className="container [perspective:2000px]">
-            <div className="relative [transform:rotateX(30deg)] min-w-[600px] mx-auto">
+            <div className="relative [transform:rotateX(30deg)] mx-auto">
               <div className="absolute inset-0 bg-gradient-to-r from-purple-400/30 to-blue-300/30 blur-xl z-[-1] animate-pulse" />
               <Image
                 alt="example"
@@ -105,50 +105,51 @@ export default function HomePage() {
             </div>
           </section>
         </div>
-        <div className="container grid grid-cols-1 gap-10 mt-12 lg:grid-cols-2">
-          <div
-            className={cn(
-              baseCard({
-                className:
-                  'relative z-[2] flex flex-col overflow-hidden rounded-2xl p-8'
-              })
-            )}
-          >
-            <div className="relative z-[-1] mx-auto mb-20">
-              <div className="absolute inset-8 z-[-1] animate-pulse bg-purple-300/50 blur-3xl" />
-              <Rocket className="text-purple-400 dark:text-purple-200 mx-auto" />
+        <div className="relative">
+          <div className="absolute z-[-1] inset-0 bottom-[-200px] bg-gradient-to-r from-purple-600 to-blue-600 opacity-20 [mask-image:linear-gradient(to_top,transparent,white,transparent)]" />
+
+          <div className="container grid grid-cols-1 gap-10 mt-12 md:grid-cols-2">
+            <div
+              className={cn(
+                baseCard({
+                  className:
+                    'relative z-[2] flex flex-col overflow-hidden rounded-2xl p-8'
+                })
+              )}
+            >
+              <div className="relative z-[-1] mx-auto mb-20">
+                <div className="absolute inset-8 z-[-1] animate-pulse bg-purple-300/50 blur-3xl" />
+                <Rocket className="text-purple-400 dark:text-purple-200 p-8 mx-auto" />
+              </div>
+              <div className="absolute inset-x-0 bottom-0 text-center p-8">
+                <p className="mb-2 text-xl font-medium">Lightning Fast</p>
+                <p className="text-muted-foreground max-sm:text-sm">
+                  Built for App Router and work with Pages Router
+                </p>
+              </div>
             </div>
-            <div className="absolute inset-x-0 bottom-0 text-center p-8">
-              <p className="mb-2 text-xl font-medium">Lightning Fast</p>
-              <p className="text-muted-foreground max-sm:text-sm">
-                Built for App Router and work with Pages Router
-              </p>
-            </div>
-          </div>
-          <div
-            className={cn(
-              baseCard({
-                className:
-                  'relative z-[2] flex flex-col overflow-hidden rounded-2xl p-8'
-              })
-            )}
-          >
-            <div className="z-[-1] mx-auto mb-28 flex rounded-3xl border bg-gradient-to-b from-transparent to-cyan-500/30 px-24 shadow-2xl shadow-cyan-400/30">
-              <Heart className="mx-auto" />
-            </div>
-            <div className="absolute inset-x-0 bottom-0 text-center p-8">
-              <p className="mb-2 text-xl font-medium">
-                First-class Developer Experience
-              </p>
-              <p className="text-muted-foreground max-sm:text-sm">
-                Install, Code, Deploy within a minute
-              </p>
+            <div
+              className={cn(
+                baseCard({
+                  className:
+                    'relative z-[2] flex flex-col overflow-hidden rounded-2xl p-8'
+                })
+              )}
+            >
+              <div className="z-[-1] mx-auto mb-28 flex rounded-3xl bg-gradient-to-t from-cyan-500/30 px-24 shadow-2xl shadow-cyan-400/30">
+                <Heart className="mx-auto" />
+              </div>
+              <div className="absolute inset-x-0 bottom-0 text-center p-8">
+                <p className="mb-2 text-xl font-medium">
+                  First-class Developer Experience
+                </p>
+                <p className="text-muted-foreground max-sm:text-sm">
+                  Install, Code, Deploy within a minute
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div className="relative z-[-1]">
-        <div className="absolute bottom-[-200px] inset-x-0 h-[800px] bg-gradient-to-r from-purple-600 to-blue-600 opacity-20 [mask-image:linear-gradient(to_top,transparent,white,transparent)]" />
       </div>
 
       <div className={cn(separator())} />
@@ -208,7 +209,7 @@ export default function HomePage() {
 
 function Comments() {
   return (
-    <div className="bg-gradient-to-b from-card p-6 border rounded-md">
+    <div className="bg-gradient-to-b from-card p-6 border rounded-md mx-auto max-w-4xl">
       <p className="text-muted-foreground">{`"I'm satisfied with it"`}</p>
       <div className="inline-flex items-center gap-2 mt-2">
         <a
@@ -278,7 +279,7 @@ function Grid() {
 
 function Rocket(props: ComponentPropsWithRef<'svg'>) {
   return (
-    <svg width="180" height="180" viewBox="0 0 512 512" {...props}>
+    <svg width="200" height="200" viewBox="0 0 512 512" {...props}>
       <path
         fill="none"
         stroke="currentColor"
