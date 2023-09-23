@@ -52,21 +52,6 @@ const UIIcon = (
   </svg>
 )
 
-const LayoutIcon = (
-  <svg
-    width="52"
-    height="52"
-    viewBox="0 0 24 24"
-    stroke={mutedForeground}
-    stroke-width="2"
-  >
-    <path d="m16 6 4 14" />
-    <path d="M12 6v14" />
-    <path d="M8 8v12" />
-    <path d="M4 4v16" />
-  </svg>
-)
-
 function OG({
   title,
   description,
@@ -100,7 +85,7 @@ function OG({
             background: `rgb(38, 38, 38)`
           }}
         >
-          {isUI ? UIIcon : LayoutIcon}
+          {UIIcon}
         </div>
 
         <p
@@ -127,7 +112,7 @@ function OG({
         <p
           style={{
             fontWeight: 700,
-            fontSize: '3.75rem'
+            fontSize: '3.5rem'
           }}
         >
           {title}
