@@ -1,9 +1,9 @@
 import { createMetadata } from '@/utils/metadata'
 import { getPage, getPageUrl, getTree } from '@/utils/source'
-import { allDocs } from 'contentlayer/generated'
+import { allDocs, type Docs } from 'contentlayer/generated'
 import { ExternalLinkIcon } from 'lucide-react'
 import type { Metadata } from 'next'
-import { MDXContent } from 'next-docs-ui/mdx'
+import { Card, Cards, MDXContent } from 'next-docs-ui/mdx'
 import { DocsPage } from 'next-docs-ui/page'
 import {
   findNeighbour,
@@ -59,9 +59,32 @@ export default async function Page({ params }: { params: Param }) {
           </h1>
           <p className="text-muted-foreground sm:text-lg">{page.description}</p>
         </div>
-        <Content code={page.body.code} />
+        {page.index ? (
+          <Category page={page} />
+        ) : (
+          <Content code={page.body.code} />
+        )}
       </MDXContent>
     </DocsPage>
+  )
+}
+
+function Category({ page }: { page: Docs }) {
+  const pages = allDocs.filter(docs =>
+    docs._raw.flattenedPath.startsWith(page._raw.flattenedPath + '/')
+  )
+
+  return (
+    <Cards>
+      {pages.map(page => (
+        <Card
+          key={page._id}
+          title={page.title}
+          description={page.description ?? 'No Description'}
+          href={getPageUrl(page.slug)}
+        />
+      ))}
+    </Cards>
   )
 }
 

@@ -5,6 +5,13 @@ import rehypeKatex from 'rehype-katex'
 import remarkMath from 'remark-math'
 
 const config = createConfig({
+  docFields: {
+    index: {
+      type: 'boolean',
+      default: false,
+      required: false
+    }
+  },
   docsComputedFields: {
     structuredData: {
       type: 'json',
