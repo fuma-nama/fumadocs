@@ -87,7 +87,7 @@ export default function HomePage() {
             Build in Seconds
           </h2>
           <p className="text-muted-foreground">
-            Ceate documentation sites with a command.
+            Create documentation sites with a command.
           </p>
         </div>
         <div className="overflow-hidden h-[400px] mt-12 max-md:hidden">
