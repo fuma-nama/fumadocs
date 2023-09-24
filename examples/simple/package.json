@@ -11,8 +11,8 @@
     "contentlayer": "0.3.4",
     "next": "13.5.2",
     "next-contentlayer": "0.3.4",
-    "next-docs-ui": "2.1.2",
-    "next-docs-zeta": "2.1.2",
+    "next-docs-ui": "2.2.0",
+    "next-docs-zeta": "2.2.0",
     "react": "18.2.0",
     "react-dom": "18.2.0"
   },
