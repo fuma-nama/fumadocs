@@ -1,5 +1,17 @@
 # next-docs-ui
 
+## 2.2.0
+
+### Minor Changes
+
+- 1ff7172: Remove support for importing "next-docs-ui/components", please use
+  "next-docs-ui/nav" instead
+
+### Patch Changes
+
+- e546f4e: Hotfix sidebar collapsible not closing
+  - next-docs-zeta@2.2.0
+
 ## 2.1.2
 
 ### Patch Changes
