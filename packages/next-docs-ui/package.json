@@ -11,10 +11,6 @@
   ],
   "exports": {
     "./style.css": "./dist/style.css",
-    "./components": {
-      "import": "./dist/components/index.mjs",
-      "types": "./dist/components/index.d.ts"
-    },
     "./components/*": {
       "import": "./dist/components/*.mjs",
       "types": "./dist/components/*.d.ts"
@@ -26,9 +22,6 @@
   },
   "typesVersions": {
     "*": {
-      "components": [
-        "./dist/components/index.d.ts"
-      ],
       "components/*": [
         "./dist/components/*.d.ts"
       ],
