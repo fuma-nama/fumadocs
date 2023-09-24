@@ -124,8 +124,8 @@ function Folder({
   }, [])
 
   useEffect(() => {
-    if (childActive) setExtend(true)
-  }, [childActive])
+    if (active || childActive) setExtend(true)
+  }, [active, childActive])
 
   const content = (
     <>
