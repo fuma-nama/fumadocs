@@ -113,22 +113,19 @@ function Folder({
 
   const pathname = usePathname()
   const active = index != null && pathname === index.url
-  const shouldExtend = useMemo(
-    () => sidebarDefaultOpenLevel >= level || hasActive(children, pathname),
-    [sidebarDefaultOpenLevel, level, pathname]
-  )
+  const childActive = useMemo(() => hasActive(children, pathname), [pathname])
   const [animated, setAnimated] = useState(false)
-  const [extend, setExtend] = useState(active || shouldExtend)
+  const [extend, setExtend] = useState(
+    active || childActive || sidebarDefaultOpenLevel >= level
+  )
 
   useEffect(() => {
     setAnimated(true)
   }, [])
 
   useEffect(() => {
-    if (active || shouldExtend) {
-      setExtend(true)
-    }
-  }, [active, shouldExtend])
+    if (childActive) setExtend(true)
+  }, [childActive])
 
   const content = (
     <>
