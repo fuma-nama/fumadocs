@@ -130,36 +130,37 @@ function Folder({
     }
   }, [active, shouldExtend])
 
-  const onClick = () => {
-    if (active) setExtend(prev => !prev)
-  }
+  const content = (
+    <>
+      {icon}
+      {name}
+      <ChevronDown
+        onClick={e => {
+          setExtend(prev => !prev)
+          e.preventDefault()
+        }}
+        className={cn(
+          'nd-transition-transform nd-ml-auto',
+          extend && '-nd-rotate-90'
+        )}
+      />
+    </>
+  )
 
   return (
-    <Collapsible.Root open={extend} onOpenChange={setExtend}>
+    <Collapsible.Root
+      open={extend}
+      onOpenChange={index == null || active ? setExtend : undefined}
+    >
       <Collapsible.Trigger
         className={cn(itemVariants({ active, className: 'nd-w-full' }))}
+        asChild
       >
         {index ? (
-          <Link
-            href={index.url}
-            className="nd-inline-flex nd-items-center nd-gap-2 nd-flex-1"
-            onClick={onClick}
-          >
-            {icon}
-            {name}
-          </Link>
+          <Link href={index.url}>{content}</Link>
         ) : (
-          <>
-            {icon}
-            {name}
-          </>
+          <button>{content}</button>
         )}
-        <ChevronDown
-          className={cn(
-            'nd-transition-transform nd-ml-auto',
-            extend && '-nd-rotate-90'
-          )}
-        />
       </Collapsible.Trigger>
       <Collapsible.Content
         className={cn(
