@@ -8,7 +8,7 @@
     "components",
     "utils",
     "mdx",
-    "---Contentlayer---",
-    "...contentlayer"
+    "---Sources---",
+    "contentlayer"
   ]
 }

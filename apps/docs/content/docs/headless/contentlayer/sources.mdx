@@ -1,0 +1,47 @@
+---
+title: Sources
+description: Different sources for Contentlayer
+---
+
+## Local Files
+
+You can store documents locally in the `content` folder. Next Docs Zeta provides
+the default configuration, with an opinionated file structure.
+
+For advanced usages, you may directly interact with the output configuration.
+
+Read [Files](https://contentlayer.dev/docs/sources/files) on their documentation
+to learn more about the source.
+
+```ts
+const config = createConfig({ ... })
+
+export default makeSource(config)
+```
+
+## Remote Files
+
+Assume your files are stored in a remote Git repository, Contentlayer supports
+remote sources which acts very similar to Files source.
+
+You can see the examples in
+[their docs](https://contentlayer.dev/docs/sources/remote-files).
+
+```ts
+const config = createConfig({ ... })
+
+export default makeSource({
+    syncFiles: syncContentFromGit,
+    ...config
+})
+```
+
+## Learn More
+
+<Cards>
+  <Card
+    href="https://contentlayer.dev"
+    title="Contentlayer"
+    description="The official website of Contentlayer"
+  />
+</Cards>
