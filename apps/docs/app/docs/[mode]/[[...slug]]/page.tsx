@@ -31,7 +31,13 @@ export default async function Page({ params }: { params: Param }) {
   const neighbours = findNeighbour(tree, url)
   const time = await getGitLastEditTime(
     'SonMooSans/next-docs',
-    'apps/docs/content/' + page._raw.sourceFilePath
+    'apps/docs/content/' + page._raw.sourceFilePath,
+    undefined,
+    {
+      headers: {
+        authorization: `Bearer ${process.env.GIT_TOKEN}`
+      }
+    }
   )
 
   return (
