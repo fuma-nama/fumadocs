@@ -138,7 +138,7 @@ function Folder({
         }}
         className={cn(
           'nd-transition-transform nd-ml-auto',
-          extend && '-nd-rotate-90'
+          !extend && '-nd-rotate-90'
         )}
       />
     </>
