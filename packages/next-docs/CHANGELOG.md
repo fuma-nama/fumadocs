@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 2.1.2
+
+### Patch Changes
+
+- dfbbc17: Exclude index page from "..." operator
+- 79227d8: Fix breadcrumb resolve index file
+
 ## 2.1.1
 
 ## 2.1.0

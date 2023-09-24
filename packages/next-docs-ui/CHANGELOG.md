@@ -1,5 +1,17 @@
 # next-docs-ui
 
+## 2.1.2
+
+### Patch Changes
+
+- a3f443f: Improve colors in light mode
+- 2153fc8: Improve navbar transparent mode
+- 4e7e0d2: Replace `next-docs-ui/components` with `next-docs-ui/nav`
+- 4816737: Fix sidebar collapsible button
+- Updated dependencies [dfbbc17]
+- Updated dependencies [79227d8]
+  - next-docs-zeta@2.1.2
+
 ## 2.1.1
 
 ### Patch Changes
