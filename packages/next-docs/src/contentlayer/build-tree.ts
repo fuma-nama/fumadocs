@@ -74,7 +74,7 @@ function buildMeta(meta: MetaPageBase, ctx: Context): FolderNode {
       return getFolderNodes(
         ctx,
         meta._raw.sourceFileDir,
-        true,
+        false,
         path => !filtered.has(path)
       ).children
     }
