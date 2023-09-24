@@ -27,7 +27,7 @@ body {
 :root {
   --background: 0 0% 100%;
   --foreground: 0 0% 3.9%;
-  --muted: 0 0% 95.1%;
+  --muted: 0 0% 96.1%;
   --muted-foreground: 0 0% 45.1%;
   --popover: 0 0% 100%;
   --popover-foreground: 0 0% 45.1%;
@@ -121,6 +121,11 @@ body {
   height: 100%;
   position: relative;
 }
+
+[data-rmiz-modal]::backdrop {
+  display: none;
+}
+
 [data-rmiz-modal-img] {
   cursor: zoom-out;
   image-rendering: high-quality;
