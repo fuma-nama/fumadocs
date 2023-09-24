@@ -23,6 +23,9 @@ export function getBreadcrumbItems(
 /**
  * Search a node in the tree by a specified url
  *
+ * - When an index page presents, use it as the item
+ * - When the page doesn't exist, return null
+ *
  * @returns The path to the target node from root
  */
 function searchPath(nodes: TreeNode[], url: string): BreadcrumbItem[] | null {
@@ -32,10 +35,6 @@ function searchPath(nodes: TreeNode[], url: string): BreadcrumbItem[] | null {
     if (node.type === 'folder') {
       if (node.index && node.index.url === url) {
         return [
-          {
-            name: node.name,
-            url: null
-          },
           {
             name: node.index.name,
             url: node.index.url
