@@ -121,7 +121,6 @@ module.exports = {
               'padding-left': '1rem'
             },
             'ul>li': {
-              'list-style': 'circle',
               'font-size': '0.9rem'
             }
           }
