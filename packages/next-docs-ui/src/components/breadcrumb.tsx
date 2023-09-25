@@ -1,5 +1,5 @@
 import { LayoutContext } from '@/contexts/tree'
-import clsx from 'clsx'
+import { cn } from '@/utils/cn'
 import { ChevronRightIcon } from 'lucide-react'
 import { useBreadcrumb } from 'next-docs-zeta/breadcrumb'
 import Link from 'next/link'
@@ -15,9 +15,9 @@ export function Breadcrumb() {
     <div className="nd-flex nd-flex-row nd-gap-1 nd-text-sm nd-text-muted-foreground nd-items-center">
       {items.map((item, i) => {
         const active = items.length === i + 1
-        const style = clsx(
-          'nd-overflow-hidden nd-overflow-ellipsis nd-whitespace-nowrap',
-          active && 'nd-text-foreground'
+        const style = cn(
+          'nd-whitespace-nowrap nd-overflow-hidden',
+          active ? 'nd-text-foreground nd-font-medium' : 'nd-overflow-ellipsis'
         )
 
         return (
