@@ -14,10 +14,15 @@ export default function Layout({
   children: ReactNode
 }) {
   const tree = getTree(params.mode)
-  const [Icon, title, version] =
+  const [Icon, title, description, version] =
     params.mode === 'ui'
-      ? [LayoutIcon, 'Next Docs UI', packageJsonUI.version]
-      : [LibraryIcon, 'Next Docs Zeta', packageJsonZeta.version]
+      ? [LayoutIcon, 'Next Docs UI', 'The framework', packageJsonUI.version]
+      : [
+          LibraryIcon,
+          'Next Docs Zeta',
+          'The headless library',
+          packageJsonZeta.version
+        ]
 
   return (
     <main
@@ -31,11 +36,13 @@ export default function Layout({
         nav={{ enabled: false }}
         sidebar={{
           banner: (
-            <div className="relative flex flex-row gap-2 items-center p-2 rounded-lg border bg-card text-card-foreground transition-colors hover:bg-muted/80">
-              <Icon className="w-9 h-9 p-1 shrink-0 border rounded-md text-primary bg-background" />
+            <div className="relative flex flex-row gap-2 items-center p-2 rounded-lg border text-xs bg-card text-card-foreground transition-colors hover:bg-muted/80">
+              <Icon className="w-9 h-9 p-2 shrink-0 rounded-md text-primary bg-primary/10 border" />
               <div>
-                <p className="font-medium text-sm">{title}</p>
-                <p className="text-muted-foreground text-xs">v{version}</p>
+                <p className="font-medium max-lg:text-sm">
+                  {title} {version}
+                </p>
+                <p className="text-muted-foreground">{description}</p>
               </div>
             </div>
           )

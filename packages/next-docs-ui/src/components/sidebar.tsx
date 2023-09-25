@@ -19,7 +19,7 @@ export type SidebarProps = {
 }
 
 const itemVariants = cva(
-  'nd-flex nd-flex-row nd-font-medium nd-items-center nd-gap-2 nd-text-muted-foreground nd-p-2 nd-rounded-md [&_svg]:nd-w-4 [&_svg]:nd-h-4',
+  'nd-flex nd-flex-row nd-font-medium nd-items-center nd-gap-2 nd-text-muted-foreground nd-px-2 nd-py-1.5 nd-rounded-md [&_svg]:nd-w-4 [&_svg]:nd-h-4',
   {
     variants: {
       active: {
@@ -40,7 +40,7 @@ export function Sidebar({ banner, footer }: SidebarProps) {
       className={cn(
         'nd-flex nd-flex-col nd-w-full',
         open
-          ? 'lg:nd-w-[250px]'
+          ? 'lg:nd-w-[260px]'
           : 'lg:nd-w-0 lg:nd-overflow-hidden lg:nd-opacity-0',
         'lg:nd-sticky lg:nd-top-16 lg:nd-h-[calc(100vh-4rem)] lg:nd-transition-[width,opacity]',
         'max-lg:nd-fixed max-lg:nd-inset-y-0 max-lg:nd-right-0 max-lg:nd-bg-background max-lg:nd-z-40 max-lg:nd-pt-16 max-lg:data-[open=false]:nd-hidden sm:max-lg:nd-max-w-sm sm:max-lg:nd-border-l'
@@ -48,7 +48,7 @@ export function Sidebar({ banner, footer }: SidebarProps) {
     >
       <ScrollArea
         type="scroll"
-        className="nd-flex-1 [mask-image:linear-gradient(to_top,transparent,white_40px)] lg:nd-w-[250px]"
+        className="nd-flex-1 [mask-image:linear-gradient(to_top,transparent,white_40px)] lg:nd-w-[260px]"
       >
         <div className="nd-flex nd-flex-col nd-pb-10 nd-pt-4 nd-text-medium max-lg:nd-px-8 lg:nd-pr-4 lg:nd-pt-12 lg:nd-text-sm">
           {banner}
