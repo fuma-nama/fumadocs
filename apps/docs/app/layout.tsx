@@ -27,8 +27,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={inter.className}>
-      <body className="relative flex min-h-screen flex-col">
+    <html lang="en" className={inter.className} suppressHydrationWarning>
+      <body className="flex min-h-screen flex-col">
         <Provider>
           <Nav />
           {children}
