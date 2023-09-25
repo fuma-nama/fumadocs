@@ -17,7 +17,7 @@ export function Breadcrumb() {
         const active = items.length === i + 1
         const style = cn(
           'nd-whitespace-nowrap nd-overflow-hidden',
-          active ? 'nd-text-foreground nd-font-medium' : 'nd-overflow-ellipsis'
+          active ? 'nd-text-foreground' : 'nd-overflow-ellipsis'
         )
 
         return (
