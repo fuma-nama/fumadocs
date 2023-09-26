@@ -7,27 +7,27 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select'
+import type { SelectProps } from '@radix-ui/react-select'
 import { useContext } from 'react'
 import { I18nContext, type Translations } from './contexts/i18n'
 
-export type LanguageSelectProps = {
+export type LanguageSelectProps = Omit<
+  SelectProps,
+  'value' | 'onValueChange'
+> & {
   languages: { name: string; locale: string }[]
 }
 
-export function LanguageSelect(props: LanguageSelectProps) {
+export function LanguageSelect({ languages, ...props }: LanguageSelectProps) {
   const context = useContext(I18nContext)
 
-  if (context == null) {
-    return <></>
-  }
-
   return (
-    <Select value={context.locale} onValueChange={context.onChange}>
+    <Select value={context.locale} onValueChange={context.onChange} {...props}>
       <SelectTrigger>
-        <SelectValue />
+        <SelectValue placeholder="Choose a language" />
       </SelectTrigger>
       <SelectContent>
-        {props.languages.map(lang => (
+        {languages.map(lang => (
           <SelectItem key={lang.locale} value={lang.locale}>
             {lang.name}
           </SelectItem>
