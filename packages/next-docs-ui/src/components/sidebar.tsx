@@ -46,10 +46,7 @@ export function Sidebar({ banner, footer }: SidebarProps) {
         'max-lg:nd-fixed max-lg:nd-inset-y-0 max-lg:nd-right-0 max-lg:nd-bg-background max-lg:nd-z-40 max-lg:nd-pt-16 max-lg:data-[open=false]:nd-hidden sm:max-lg:nd-max-w-sm sm:max-lg:nd-border-l'
       )}
     >
-      <ScrollArea
-        type="scroll"
-        className="nd-flex-1 [mask-image:linear-gradient(to_top,transparent,white_40px)] lg:nd-w-[260px]"
-      >
+      <ScrollArea className="nd-flex-1 [mask-image:linear-gradient(to_top,transparent,white_40px)] lg:nd-w-[260px]">
         <div className="nd-flex nd-flex-col nd-pb-10 nd-pt-4 nd-text-medium max-lg:nd-px-8 lg:nd-pr-4 lg:nd-pt-12 lg:nd-text-sm">
           {banner}
           {tree.children.map((item, i) => (
