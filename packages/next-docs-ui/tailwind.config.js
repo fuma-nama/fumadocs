@@ -105,11 +105,8 @@ module.exports = {
                 opacity: '80%'
               }
             },
-            h1: {
+            h2: {
               'font-weight': '600'
-            },
-            'h2, h3, h4, h5, h6, h7': {
-              'font-weight': '500'
             },
             code: {
               padding: '4px',

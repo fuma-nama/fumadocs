@@ -19,7 +19,7 @@ export type SidebarProps = {
 }
 
 const itemVariants = cva(
-  'nd-flex nd-flex-row nd-font-medium nd-items-center nd-gap-2 nd-text-muted-foreground nd-px-2 nd-py-1.5 nd-rounded-md [&_svg]:nd-w-4 [&_svg]:nd-h-4',
+  'nd-flex nd-flex-row nd-items-center nd-gap-2 nd-font-medium nd-text-muted-foreground nd-px-2 nd-py-1.5 nd-rounded-md [&_svg]:nd-w-4 [&_svg]:nd-h-4',
   {
     variants: {
       active: {

@@ -14,7 +14,7 @@ export function TOC(props: {
 }) {
   return (
     <div className="nd-sticky nd-divide-y nd-flex nd-flex-col nd-top-16 nd-gap-4 nd-py-12 nd-w-[250px] nd-h-[calc(100vh-4rem)] max-xl:nd-hidden">
-      {props.header && <div>{props.header}</div>}
+      {props.header}
       {props.items.length > 0 && <TOCItems items={props.items} />}
       {props.footer && (
         <div className="nd-pt-4 first:nd-pt-0">{props.footer}</div>
@@ -30,7 +30,7 @@ function TOCItems({ items }: { items: TOCItemType[] }) {
   return (
     <Primitive.TOCProvider
       toc={items}
-      className="nd-pt-4 nd-text-sm nd-overflow-hidden nd-font-medium first:nd-pt-0"
+      className="nd-pt-4 nd-text-sm nd-font-medium nd-overflow-hidden first:nd-pt-0"
     >
       <h3 className="nd-inline-flex nd-items-center nd-mb-4">
         <TextIcon className="nd-w-4 nd-h-4 nd-mr-2" /> {toc}
@@ -83,10 +83,10 @@ function TOCItem({
       ref={ref}
       href={item.url}
       className={cn(
-        'nd-pl-2 nd-py-1.5 nd-text-ellipsis nd-transition-colors nd-overflow-hidden data-[active=true]:nd-text-primary',
-        item.depth === 2 && 'nd-pl-4',
-        item.depth === 3 && 'nd-pl-7',
-        item.depth >= 4 && 'nd-pl-10'
+        'nd-py-1.5 nd-text-ellipsis nd-transition-colors nd-overflow-hidden data-[active=true]:nd-text-primary',
+        item.depth <= 2 && 'nd-pl-3',
+        item.depth === 3 && 'nd-pl-6',
+        item.depth >= 4 && 'nd-pl-0'
       )}
     >
       {item.title}
