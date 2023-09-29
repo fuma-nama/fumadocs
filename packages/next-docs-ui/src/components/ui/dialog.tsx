@@ -40,7 +40,7 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        'nd-fixed nd-left-[50%] nd-top-[50%] nd-z-50 nd-grid nd-w-[90vw] nd-rounded-lg nd-max-w-2xl nd-translate-x-[-50%] nd-translate-y-[-50%] nd-gap-4 nd-border nd-bg-background nd-p-6 nd-shadow-lg nd-duration-200 data-[state=open]:nd-animate-in data-[state=closed]:nd-animate-out data-[state=closed]:nd-fade-out data-[state=open]:nd-fade-in data-[state=closed]:nd-zoom-out-90 data-[state=open]:nd-zoom-in-90 data-[state=open]:nd-slide-in-from-left-1/2 data-[state=closed]:nd-slide-out-to-left-1/2',
+        'nd-fixed nd-left-[50%] nd-top-[50%] nd-z-50 nd-grid nd-w-[95vw] nd-rounded-lg nd-max-w-2xl nd-translate-x-[-50%] nd-translate-y-[-50%] nd-gap-4 nd-border nd-bg-background nd-p-6 nd-shadow-lg nd-duration-200 data-[state=open]:nd-animate-in data-[state=closed]:nd-animate-out data-[state=closed]:nd-fade-out data-[state=open]:nd-fade-in data-[state=closed]:nd-zoom-out-95 data-[state=open]:nd-zoom-in-95 data-[state=closed]:nd-slide-out-to-left-1/2 data-[state=closed]:nd-slide-out-to-top-[48%] data-[state=open]:nd-slide-in-from-left-1/2 data-[state=open]:nd-slide-in-from-top-[48%]',
         className
       )}
       {...props}
