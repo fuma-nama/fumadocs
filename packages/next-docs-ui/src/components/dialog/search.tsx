@@ -66,9 +66,11 @@ export function InternalDialog({
         onValueChange={setSearch}
       />
       <CommandList>
-        <CommandEmpty>
-          {text?.searchNoResult ?? 'No results found.'}
-        </CommandEmpty>
+        {data != 'empty' && (
+          <CommandEmpty>
+            {text?.searchNoResult ?? 'No results found.'}
+          </CommandEmpty>
+        )}
 
         {data != 'empty' && data != null && data.length !== 0 && (
           <CommandGroup>
@@ -93,7 +95,7 @@ export function InternalDialog({
             ))}
           </CommandGroup>
         )}
-        {data === 'empty' && links.length > 0 && (
+        {data === 'empty' && (
           <CommandGroup>
             {links.map(([name, url], i) => (
               <CommandItem key={i} value={url} onSelect={onOpen}>

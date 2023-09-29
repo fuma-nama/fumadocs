@@ -10,7 +10,7 @@ import {
 import type { BaseIndex } from 'next-docs-zeta/algolia'
 import type { SortedResult } from 'next-docs-zeta/server'
 import { useParams } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import useSWR from 'swr'
 
 const itemVariants = cva(
@@ -30,10 +30,10 @@ const client = algo(
 const index = client.initIndex('document')
 
 async function searchDocs(query: string, tag: string) {
-  const isEmtpy = query.length === 0
+  if (query.length === 0) return 'empty'
   const result = await index.search<BaseIndex>(query, {
     filters: `tag:${tag}`,
-    distinct: isEmtpy ? 1 : 3,
+    distinct: 3,
     hitsPerPage: 8
   })
   const grouped: SortedResult[] = []
@@ -52,13 +52,12 @@ async function searchDocs(query: string, tag: string) {
       })
     }
 
-    if (!isEmtpy)
-      grouped.push({
-        id: hit.objectID,
-        type: hit.content === hit.section ? 'heading' : 'text',
-        url: hit.url + '#' + hit.section_id,
-        content: hit.content
-      })
+    grouped.push({
+      id: hit.objectID,
+      type: hit.content === hit.section ? 'heading' : 'text',
+      url: hit.url + '#' + hit.section_id,
+      content: hit.content
+    })
   }
 
   return grouped
@@ -75,6 +74,10 @@ export default function CustomSearchDialog(props: SearchDialogProps) {
       keepPreviousData: true
     }
   )
+
+  useEffect(() => {
+    setTag(defaultTag)
+  }, [defaultTag])
 
   return (
     <InternalDialog
