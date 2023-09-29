@@ -124,8 +124,8 @@ const CommandItem = React.forwardRef<
   >
     <div
       className={cn(
-        'nd-flex nd-gap-2 nd-items-center nd-px-3 nd-py-2.5',
-        nested && 'nd-ml-5 nd-border-l-2'
+        'nd-flex nd-gap-2 nd-items-center nd-px-4 nd-py-3',
+        nested && 'nd-ml-6 nd-border-l-2'
       )}
     >
       {props.children}

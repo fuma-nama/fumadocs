@@ -18,82 +18,78 @@ type Content = {
 
 export type StructuredData = {
   headings: Heading[]
+  /**
+   * Refer to paragraphs, a heading may contains multiple contents as well
+   */
   contents: Content[]
 }
 
+type Options = {
+  /**
+   * Types to be scanned
+   *
+   * @default ["heading", "blockquote", "paragraph"]
+   */
+  types?: string[]
+}
+
 const slugger = new Slugger()
-const textTypes = ['text', 'emphasis', 'strong', 'inlineCode']
-const skippedTypes = ['table', 'tableRow', 'tableCell']
+const textTypes = ['text', 'inlineCode']
 
 function flattenNode(node: any) {
   const p: any[] = []
-  visit(node, node => {
-    if (!textTypes.includes(node.type)) return
+  visit(node, textTypes, node => {
+    if (typeof node.value !== 'string') return
     p.push(node.value)
   })
   return p.join(``)
 }
 
-const structurize = () => (node: any, file: any) => {
-  slugger.reset()
-  const data: StructuredData = { contents: [], headings: [] }
-  let lastHeading: string | undefined = ''
-  let lastContent: string[] = []
+const structurize =
+  ({ types = ['paragraph', 'blockquote', 'heading'] }: Options = {}) =>
+  (node: any, file: any) => {
+    slugger.reset()
+    const data: StructuredData = { contents: [], headings: [] }
+    let lastHeading: string | undefined = ''
 
-  const applyContent = () => {
-    if (lastContent.length === 0) return
+    visit(node, types, element => {
+      if (element.type === 'heading') {
+        const heading = flattenNode(element)
+        const slug = slugger.slug(heading)
 
-    data.contents.push({
-      content: lastContent.join(''),
-      heading: lastHeading
-    })
+        data.headings.push({
+          id: slug,
+          content: heading
+        })
 
-    lastHeading = undefined
-    lastContent = []
-  }
+        lastHeading = slug
+        return 'skip'
+      }
 
-  visit(node, element => {
-    if (skippedTypes.includes(element.type)) {
-      applyContent()
-      return 'skip'
-    }
-
-    if (element.type === 'heading') {
-      applyContent()
-      const heading = flattenNode(element)
-      const slug = slugger.slug(heading)
-
-      data.headings.push({
-        id: slug,
-        content: heading
+      data.contents.push({
+        heading: lastHeading,
+        content: flattenNode(element)
       })
 
-      lastHeading = slug
       return 'skip'
-    }
+    })
 
-    if (textTypes.includes(element.type)) {
-      lastContent.push(element.value)
-    }
-  })
-
-  applyContent()
-
-  file.data = data
-}
+    file.data = data
+  }
 
 /**
  * Extract data from markdown/mdx content
  */
 export function structure(
   content: string,
-  remarkPlugins: Plugin[] = []
+  remarkPlugins: Plugin[] = [],
+  options: Options = {}
 ): StructuredData {
   const result = remark()
     .use(remarkGfm)
     .use(remarkMdx)
     .use(remarkPlugins)
-    .use(structurize)
+    .use([structurize, options])
     .processSync(content)
 
   return result.data as StructuredData

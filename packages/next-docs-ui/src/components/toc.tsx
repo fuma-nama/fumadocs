@@ -84,9 +84,9 @@ function TOCItem({
       href={item.url}
       className={cn(
         'nd-py-1.5 nd-text-ellipsis nd-transition-colors nd-overflow-hidden data-[active=true]:nd-text-primary',
-        item.depth <= 2 && 'nd-pl-3',
-        item.depth === 3 && 'nd-pl-6',
-        item.depth >= 4 && 'nd-pl-0'
+        item.depth <= 2 && 'nd-pl-4',
+        item.depth === 3 && 'nd-pl-7',
+        item.depth >= 4 && 'nd-pl-10'
       )}
     >
       {item.title}

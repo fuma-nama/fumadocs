@@ -260,7 +260,7 @@ export function initSearchAPIAdvanced({
 
         const i: SortedResult = {
           id: item.doc.id,
-          content: smartSlice(item.doc.content, 70),
+          content: item.doc.content,
           type: item.doc.type,
           url: item.doc.url
         }
@@ -290,27 +290,4 @@ export function initSearchAPIAdvanced({
       return NextResponse.json(sortedResult)
     }
   }
-}
-
-const chars = ['\n', ',', '.']
-
-function smartSlice(content: string, limit: number): string {
-  if (content.length > limit) {
-    content = content.slice(0, limit)
-  }
-
-  let right = content.length - 1
-
-  while (right >= 0) {
-    const char = content.charAt(right)
-    right--
-
-    if (chars.includes(char)) break
-  }
-
-  if (right > 0) {
-    content = content.slice(0, right + 1)
-  }
-
-  return content
 }

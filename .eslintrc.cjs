@@ -101,6 +101,7 @@ module.exports = {
         'prettier.config.js',
         'postcss.config.js',
         'tailwind.config.js',
+        'update-index.mjs',
         'next.config.js',
         '.eslintrc.cjs'
       ],

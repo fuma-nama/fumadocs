@@ -6,10 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "postbuild": "next-sitemap",
-    "start": "next start"
+    "start": "next start",
+    "update-index": "node ./update-index.mjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.0.4",
+    "algoliasearch": "^4.20.0",
     "autoprefixer": "10.4.16",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
@@ -26,6 +28,7 @@
     "react-dom": "18.2.0",
     "rehype-katex": "^6.0.3",
     "remark-math": "^5.1.1",
+    "swr": "^2.2.2",
     "tailwind-merge": "^1.14.0"
   },
   "devDependencies": {
@@ -33,6 +36,7 @@
     "@types/node": "18.17.5",
     "@types/react": "18.2.0",
     "@types/react-dom": "18.2.1",
+    "dotenv": "^16.3.1",
     "tailwindcss": "3.3.3",
     "tailwindcss-animate": "^1.0.7"
   }
