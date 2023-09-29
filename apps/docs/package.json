@@ -22,7 +22,7 @@
     "next-docs-ui": "workspace:*",
     "next-docs-zeta": "workspace:*",
     "next-sitemap": "^4.2.3",
-    "postcss": "8.4.30",
+    "postcss": "8.4.31",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "rehype-katex": "^6.0.3",
