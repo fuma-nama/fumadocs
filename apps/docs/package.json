@@ -5,9 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "postbuild": "next-sitemap",
-    "start": "next start",
-    "update-index": "node ./update-index.mjs"
+    "postbuild": "next-sitemap & node ./update-index.mjs",
+    "start": "next start"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.0.4",

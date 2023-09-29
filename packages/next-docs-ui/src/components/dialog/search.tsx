@@ -95,7 +95,7 @@ export function InternalDialog({
             ))}
           </CommandGroup>
         )}
-        {data === 'empty' && (
+        {data === 'empty' && links.length > 0 && (
           <CommandGroup>
             {links.map(([name, url], i) => (
               <CommandItem key={i} value={url} onSelect={onOpen}>

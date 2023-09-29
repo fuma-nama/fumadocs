@@ -86,7 +86,7 @@ export default function CustomSearchDialog(props: SearchDialogProps) {
       setSearch={setSearch}
       data={data}
     >
-      <div className="flex flex-row gap-1 px-4 py-2">
+      <div className="flex flex-row items-center gap-1 p-4">
         <button
           className={cn(itemVariants({ active: tag === 'headless' }))}
           onClick={() => setTag('headless')}
