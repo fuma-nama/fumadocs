@@ -29,14 +29,17 @@ export default async function Page({ params }: { params: Param }) {
   const toc = await getTableOfContents(page.body.raw)
   const url = getPageUrl(page.slug)
   const neighbours = findNeighbour(tree, url)
+
+  const headers = new Headers()
+  if (process.env.GIT_TOKEN)
+    headers.append('authorization', `Bearer ${process.env.GIT_TOKEN}`)
+
   const time = await getGitLastEditTime(
     'SonMooSans/next-docs',
     'apps/docs/content/' + page._raw.sourceFilePath,
     undefined,
     {
-      headers: {
-        authorization: `Bearer ${process.env.GIT_TOKEN}`
-      }
+      headers
     }
   )
 

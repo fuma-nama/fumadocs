@@ -1,3 +1,5 @@
+import path from 'path'
+import { config } from 'dotenv'
 import {
   initIndex,
   setIndexSettings,
@@ -5,7 +7,8 @@ import {
 } from 'next-docs-zeta/algolia'
 import { createUtils, loadContext } from 'next-docs-zeta/contentlayer'
 import { allDocs, allMeta } from './.contentlayer/generated/index.mjs'
-import 'dotenv/config'
+
+config({ path: path.resolve(process.cwd(), '.env.local') })
 
 const ctx = loadContext(allMeta, allDocs)
 const { getPageUrl } = createUtils(ctx)
