@@ -26,7 +26,9 @@ const CommandDialog = ({ children, ...props }: CommandDialogProps) => {
   return (
     <Dialog {...props}>
       <DialogContent className="nd-overflow-hidden nd-p-0 nd-max-w-2xl">
-        <Command shouldFilter={false}>{children}</Command>
+        <Command shouldFilter={false} loop>
+          {children}
+        </Command>
       </DialogContent>
     </Dialog>
   )
