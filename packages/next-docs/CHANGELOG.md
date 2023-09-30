@@ -1,5 +1,13 @@
 # next-docs-zeta
 
+## 2.3.0
+
+### Minor Changes
+
+- 6664178: Support algolia search
+- a0f9911: Support `useAlgoliaSearch`
+- 6664178: Improve search document structurize algorithm
+
 ## 2.2.0
 
 ## 2.1.2
