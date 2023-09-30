@@ -6,6 +6,7 @@
     "build": "turbo run build --filter=./packages/\\*",
     "clean": "turbo run clean",
     "dev": "turbo run dev",
+    "dev:all": "turbo run dev  --filter=docs...",
     "dev:examples": "turbo run dev --filter=./examples/*",
     "lint": "eslint --cache --ignore-path .gitignore --max-warnings 0 .",
     "lint:prettier": "prettier --cache --check --ignore-path .gitignore --ignore-path .prettierignore .",
