@@ -8,67 +8,57 @@ import {
 } from '@/components/ui/command'
 import { I18nContext } from '@/contexts/i18n'
 import { FileTextIcon, HashIcon, TextIcon } from 'lucide-react'
-import { useDocsSearch } from 'next-docs-zeta/search'
 import type { SortedResult } from 'next-docs-zeta/server'
 import { useRouter } from 'next/navigation'
-import { useCallback, useContext, type ReactNode } from 'react'
+import { useContext, type ReactNode } from 'react'
 
-export type SearchOptions = {
-  /**
-   * links to be displayed in Search Dialog
-   */
+export type SharedProps = {
+  open: boolean
+  onOpenChange(open: boolean): void
   links?: [name: string, link: string][]
 }
 
-export type SearchDialogProps = SearchOptions & {
+export type SearchDialogProps = {
   open: boolean
   onOpenChange(open: boolean): void
-  /**
-   * Search tag
-   */
-  tag?: string
-  children?: ReactNode
-}
-
-export type InternalDialogProps = SearchOptions & {
-  open: boolean
-  onOpenChange(open: boolean): void
-
   search: string
-  setSearch: (v: string) => void
+  onSearchChange: (v: string) => void
   data: SortedResult[] | 'empty' | undefined
+  /**
+   * displayed at bottom
+   */
+  footer?: ReactNode
+  /**
+   * displayed in item list
+   */
   children?: ReactNode
 }
 
-export function InternalDialog({
-  links = [],
+export function SearchDialog({
   search,
-  setSearch,
+  onSearchChange,
   data,
   ...props
-}: InternalDialogProps) {
+}: SearchDialogProps) {
   const router = useRouter()
   const { text } = useContext(I18nContext)
 
-  const onOpen = useCallback(
-    (v: string) => {
-      router.push(v)
-      props.onOpenChange?.(false)
-    },
-    [router]
-  )
+  const onOpen = (url: string) => {
+    router.push(url)
+    props.onOpenChange(false)
+  }
 
   return (
     <CommandDialog {...props}>
       <CommandInput
         placeholder={text?.search ?? 'Search'}
         value={search}
-        onValueChange={setSearch}
+        onValueChange={onSearchChange}
       />
       <CommandList>
         {data != 'empty' && (
           <CommandEmpty>
-            {text?.searchNoResult ?? 'No results found.'}
+            {text?.searchNoResult ?? 'No results found'}
           </CommandEmpty>
         )}
 
@@ -95,32 +85,9 @@ export function InternalDialog({
             ))}
           </CommandGroup>
         )}
-        {data === 'empty' && links.length > 0 && (
-          <CommandGroup>
-            {links.map(([name, url], i) => (
-              <CommandItem key={i} value={url} onSelect={onOpen}>
-                <FileTextIcon />
-                {name}
-              </CommandItem>
-            ))}
-          </CommandGroup>
-        )}
+        {props.children}
       </CommandList>
-      {props.children}
+      {props.footer}
     </CommandDialog>
-  )
-}
-
-export default function SearchDialog({ tag, ...props }: SearchDialogProps) {
-  const { locale } = useContext(I18nContext)
-  const { search, setSearch, query } = useDocsSearch(locale, tag)
-
-  return (
-    <InternalDialog
-      search={search}
-      setSearch={setSearch}
-      data={query.data}
-      {...props}
-    />
   )
 }

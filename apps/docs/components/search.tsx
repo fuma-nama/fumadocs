@@ -4,8 +4,8 @@ import { cn } from '@/utils/cn'
 import algo from 'algoliasearch/lite'
 import { cva } from 'class-variance-authority'
 import {
-  InternalDialog,
-  type SearchDialogProps
+  SearchDialog,
+  type SharedProps
 } from 'next-docs-ui/components/dialog/search'
 import type { BaseIndex } from 'next-docs-zeta/algolia'
 import type { SortedResult } from 'next-docs-zeta/server'
@@ -33,16 +33,15 @@ async function searchDocs(query: string, tag: string) {
   if (query.length === 0) return 'empty'
   const result = await index.search<BaseIndex>(query, {
     filters: `tag:${tag}`,
-    distinct: 3,
-    hitsPerPage: 8
+    distinct: 5,
+    hitsPerPage: 10
   })
   const grouped: SortedResult[] = []
-
-  let last_url: string | null = null
+  const scanned_urls = new Set<string>()
 
   for (const hit of result.hits) {
-    if (last_url !== hit.url) {
-      last_url = hit.url
+    if (!scanned_urls.has(hit.url)) {
+      scanned_urls.add(hit.url)
 
       grouped.push({
         id: hit.url,
@@ -55,14 +54,15 @@ async function searchDocs(query: string, tag: string) {
     grouped.push({
       id: hit.objectID,
       type: hit.content === hit.section ? 'heading' : 'text',
-      url: hit.url + '#' + hit.section_id,
+      url: hit.section_id ? hit.url + '#' + hit.section_id : hit.url,
       content: hit.content
     })
   }
 
   return grouped
 }
-export default function CustomSearchDialog(props: SearchDialogProps) {
+
+export default function CustomSearchDialog(props: SharedProps) {
   const { mode } = useParams()
   const defaultTag = mode === 'headless' ? 'headless' : 'ui'
   const [tag, setTag] = useState(defaultTag)
@@ -80,10 +80,10 @@ export default function CustomSearchDialog(props: SearchDialogProps) {
   }, [defaultTag])
 
   return (
-    <InternalDialog
+    <SearchDialog
       {...props}
       search={search}
-      setSearch={setSearch}
+      onSearchChange={setSearch}
       data={data}
     >
       <div className="flex flex-row items-center gap-1 p-4">
@@ -109,6 +109,6 @@ export default function CustomSearchDialog(props: SearchDialogProps) {
           Search powered by Algolia
         </a>
       </div>
-    </InternalDialog>
+    </SearchDialog>
   )
 }

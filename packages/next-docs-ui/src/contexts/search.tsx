@@ -1,20 +1,24 @@
 import dynamic from 'next/dynamic'
 import type { ComponentType, ReactNode } from 'react'
 import { createContext, useEffect, useState } from 'react'
-import type {
-  SearchDialogProps,
-  SearchOptions
-} from '../components/dialog/search'
+import type { SharedProps } from '../components/dialog/search'
 
-const DefaultSearchDialog = dynamic(() => import('../components/dialog/search'))
+const DefaultSearchDialog = dynamic(
+  () => import('../components/dialog/search-default')
+)
 
-export type SearchProviderProps = SearchOptions & {
+export type SearchProviderProps = {
+  /**
+   * Custom links to be displayed if search is empty
+   */
+  links?: [name: string, link: string][]
+
   /**
    * Replace default search dialog, allowing you to use other solutions such as Algolia Search
    *
    * It receives the `open` and `onOpenChange` prop, lazy loaded with `next/dynamic`
    */
-  SearchDialog?: ComponentType<SearchDialogProps>
+  SearchDialog?: ComponentType<SharedProps>
 
   children: ReactNode
 }
