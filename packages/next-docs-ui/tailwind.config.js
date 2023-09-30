@@ -1,3 +1,34 @@
+const tailwind_steps = ({ addUtilities }) => {
+  addUtilities({
+    '.steps': {
+      'counter-reset': 'step',
+      'border-left-width': '1px',
+      'margin-left': '1rem',
+      'padding-left': '1.75rem',
+      position: 'relative'
+    },
+
+    '.step': {
+      '&:before': {
+        'background-color': 'hsl(var(--secondary))',
+        color: 'hsl(var(--secondary-foreground))',
+        content: 'counter(step)',
+        'counter-increment': 'step',
+        'border-radius': '9999px',
+        'justify-content': 'center',
+        'align-items': 'center',
+        width: '2rem',
+        height: '2rem',
+        'font-size': '.875rem',
+        'line-height': '1.25rem',
+        display: 'flex',
+        position: 'absolute',
+        left: '-1rem'
+      }
+    }
+  })
+}
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ['class', '[class*="dark"]'],
@@ -128,5 +159,9 @@ module.exports = {
       })
     }
   },
-  plugins: [require('tailwindcss-animate'), require('@tailwindcss/typography')]
+  plugins: [
+    require('tailwindcss-animate'),
+    require('@tailwindcss/typography'),
+    tailwind_steps
+  ]
 }
