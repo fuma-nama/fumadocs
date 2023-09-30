@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 2.3.1
+
+### Patch Changes
+
+- cd0b4a3: Support CSS classes usage for steps component
+- cd0b4a3: Fix TOC marker position
+  - next-docs-zeta@2.3.1
+
 ## 2.3.0
 
 ### Minor Changes
