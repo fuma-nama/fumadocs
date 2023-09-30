@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 1.5.24
+
+### Patch Changes
+
+- cd5fb12: Update Examples
+
 ## 1.5.23
 
 ### Patch Changes
