@@ -27,8 +27,10 @@ export default function Layout({
   return (
     <main
       className={cn(
-        params.mode === 'ui' && '[--primary:213_94%_68%]',
-        params.mode === 'headless' && '[--primary:270_95%_75%]'
+        params.mode === 'ui' &&
+          '[--primary:213_98%_60%] dark:[--primary:213_94%_68%]',
+        params.mode === 'headless' &&
+          '[--primary:270_95%_60%] dark:[--primary:270_95%_75%]'
       )}
     >
       <DocsLayout
