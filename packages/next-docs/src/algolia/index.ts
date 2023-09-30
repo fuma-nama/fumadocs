@@ -1,25 +1,9 @@
 import { randomUUID } from 'crypto'
 import type { DocsPageBase } from '@/contentlayer/types'
 import type { StructuredData } from '@/mdx-plugins/search-structure'
-import algo, { type SearchIndex } from 'algoliasearch'
+import type { SearchClient, SearchIndex } from 'algoliasearch'
 
-export function initIndex(appId: string, apiKey: string): SearchIndex {
-  const client = algo(appId, apiKey)
-
-  return client.initIndex('document')
-}
-
-export async function setIndexSettings(index: SearchIndex): Promise<void> {
-  await index.setSettings({
-    attributeForDistinct: 'page_id',
-    attributesToRetrieve: ['title', 'section', 'content', 'url', 'section_id'],
-    searchableAttributes: ['title', 'section', 'content'],
-    attributesToSnippet: [],
-    attributesForFaceting: ['tag']
-  })
-}
-
-type DocsPageIndex = DocsPageBase & {
+type DocumentRecord = DocsPageBase & {
   /**
    * URL to the page
    */
@@ -32,16 +16,39 @@ type DocsPageIndex = DocsPageBase & {
   extra_data?: object
 }
 
+export async function sync(
+  client: SearchClient,
+  {
+    document = 'document',
+    documents
+  }: { document?: string; documents: DocumentRecord[] }
+) {
+  const index = client.initIndex(document)
+  await setIndexSettings(index)
+  await updateDocuments(index, documents)
+}
+
+export async function setIndexSettings(index: SearchIndex): Promise<void> {
+  await index.setSettings({
+    attributeForDistinct: 'page_id',
+    attributesToRetrieve: ['title', 'section', 'content', 'url', 'section_id'],
+    searchableAttributes: ['title', 'section', 'content'],
+    attributesToSnippet: [],
+    attributesForFaceting: ['tag']
+  })
+}
+
 export type BaseIndex = {
   objectID: string
   title: string
   url: string
-  section: string
+
+  section?: string
 
   /**
    * The anchor id
    */
-  section_id: string
+  section_id?: string
 
   /**
    * The id of page, used for distinct
@@ -52,38 +59,48 @@ export type BaseIndex = {
 }
 
 type Section = {
-  section: string
-  section_id: string
+  section?: string
+  section_id?: string
   content: string
 }
 
-function getSections(page: DocsPageIndex): Section[] {
-  return page.structured.headings.flatMap(heading => {
-    const contents = page.structured.contents.filter(
-      c => c.heading === heading.id
-    )
+function getSections(page: DocumentRecord): Section[] {
+  const scanned_headings = new Set<string>()
 
-    const paragraphs = contents.map(p => ({
-      section: heading.content,
-      section_id: heading.id,
+  return page.structured.contents.flatMap(p => {
+    const heading =
+      p.heading != null
+        ? page.structured.headings.find(h => p.heading === h.id)
+        : null
+
+    const section = {
+      section: heading?.content,
+      section_id: heading?.id,
       content: p.content
-    }))
+    }
 
-    paragraphs.unshift({
-      section: heading.content,
-      section_id: heading.id,
-      content: heading.content
-    })
+    if (heading && !scanned_headings.has(heading.id)) {
+      scanned_headings.add(heading.id)
 
-    return paragraphs
+      return [
+        {
+          section: heading.content,
+          section_id: heading.id,
+          content: heading.content
+        },
+        section
+      ]
+    }
+
+    return section
   })
 }
 
 export async function updateDocuments(
   index: SearchIndex,
-  pages: DocsPageIndex[]
+  documents: DocumentRecord[]
 ) {
-  const objects = pages.flatMap(page => {
+  const objects = documents.flatMap(page => {
     return getSections(page).map(
       section =>
         ({
