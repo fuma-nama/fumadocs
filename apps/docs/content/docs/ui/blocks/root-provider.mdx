@@ -26,7 +26,7 @@ export default function Layout({ children }) {
 
 ### Search Dialog
 
-You can customise search dialog from the root provider.
+You can customize the search dialog from the root provider.
 
 <TypeTable
   type={{
@@ -34,7 +34,10 @@ You can customise search dialog from the root provider.
       description: 'Replace the default dialog',
       type: 'React.FC<SearchDialogProps>'
     },
-    links: { type: '[string, string][]', description: 'Default items to show' }
+    links: {
+      type: '[string, string][]',
+      description: 'Default items to show (Only supported by default dialog)'
+    }
   }}
 />
 

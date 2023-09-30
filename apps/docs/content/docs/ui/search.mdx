@@ -9,7 +9,7 @@ default search dialog. You can refer to this
 
 ## Search Dialog
 
-You can customise the search dialog from root provider,
+You can customize the search dialog from the root provider,
 [learn more](/docs/ui/blocks/root-provider).
 
 By default, your dialog will be lazy loaded using
@@ -21,6 +21,8 @@ this allows a better initial loading performance.
 If you want to use other solutions such as Aligo Search or ElasticSearch, you
 can replace the default dialog with your own by passing the `SearchDialog`
 component to the root provider.
+
+> You shall lazy load the dialog with `next/dynamic`
 
 ```jsx
 <RootProvider
