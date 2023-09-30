@@ -1,5 +1,23 @@
 # next-docs-ui
 
+## 2.3.0
+
+### Minor Changes
+
+- 32a4669: Support algolia search dialog
+
+### Patch Changes
+
+- cef6143: Fix toc marker position
+- 32a4669: Improve search API usage
+- b65219c: Separate default and custom search dialog
+- 9c3bc86: Improve i18n language select
+- 6664178: Support custom search function for search dialog
+- Updated dependencies [6664178]
+- Updated dependencies [a0f9911]
+- Updated dependencies [6664178]
+  - next-docs-zeta@2.3.0
+
 ## 2.2.0
 
 ### Minor Changes
