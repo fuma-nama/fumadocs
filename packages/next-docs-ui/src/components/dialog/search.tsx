@@ -15,12 +15,9 @@ import { useContext, type ReactNode } from 'react'
 export type SharedProps = {
   open: boolean
   onOpenChange(open: boolean): void
-  links?: [name: string, link: string][]
 }
 
-export type SearchDialogProps = {
-  open: boolean
-  onOpenChange(open: boolean): void
+export type SearchDialogProps = SharedProps & {
   search: string
   onSearchChange: (v: string) => void
   data: SortedResult[] | 'empty' | undefined

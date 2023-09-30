@@ -2,21 +2,19 @@ import dynamic from 'next/dynamic'
 import type { ComponentType, ReactNode } from 'react'
 import { createContext, useEffect, useState } from 'react'
 import type { SharedProps } from '../components/dialog/search'
+import type { DefaultSearchDialogProps } from '../components/dialog/search-default'
 
 const DefaultSearchDialog = dynamic(
   () => import('../components/dialog/search-default')
 )
 
 export type SearchProviderProps = {
-  /**
-   * Custom links to be displayed if search is empty
-   */
-  links?: [name: string, link: string][]
+  links?: DefaultSearchDialogProps['links']
 
   /**
    * Replace default search dialog, allowing you to use other solutions such as Algolia Search
    *
-   * It receives the `open` and `onOpenChange` prop, lazy loaded with `next/dynamic`
+   * It receives the `open` and `onOpenChange` prop, shall be lazy loaded with `next/dynamic`
    */
   SearchDialog?: ComponentType<SharedProps>
 
@@ -27,7 +25,11 @@ export const SearchContext = createContext<
   [setOpenSearch: (value: boolean) => void]
 >([() => {}])
 
-export function SearchProvider(props: SearchProviderProps) {
+export function SearchProvider({
+  SearchDialog,
+  children,
+  ...props
+}: SearchProviderProps) {
   const [isOpen, setOpen] = useState<boolean>()
 
   useEffect(() => {
@@ -45,18 +47,14 @@ export function SearchProvider(props: SearchProviderProps) {
     }
   }, [])
 
-  const SearchDialog = props.SearchDialog ?? DefaultSearchDialog
+  const Dialog = SearchDialog ?? DefaultSearchDialog
 
   return (
     <SearchContext.Provider value={[setOpen]}>
       {isOpen !== undefined && (
-        <SearchDialog
-          open={isOpen}
-          onOpenChange={setOpen}
-          links={props.links}
-        />
+        <Dialog open={isOpen} onOpenChange={setOpen} {...props} />
       )}
-      {props.children}
+      {children}
     </SearchContext.Provider>
   )
 }

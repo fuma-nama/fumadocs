@@ -8,7 +8,12 @@ import { useRouter } from 'next/navigation'
 import { useContext, type ReactNode } from 'react'
 import { SearchDialog, type SharedProps } from './search'
 
-export type SearchDialogProps = SharedProps & {
+export type DefaultSearchDialogProps = SharedProps & {
+  /**
+   * Custom links to be displayed if search is empty
+   */
+  links?: [name: string, link: string][]
+
   /**
    * Search tag
    */
@@ -20,7 +25,7 @@ export default function DefaultSearchDialog({
   tag,
   links = [],
   ...props
-}: SearchDialogProps) {
+}: DefaultSearchDialogProps) {
   const { locale } = useContext(I18nContext)
   const { search, setSearch, query } = useDocsSearch(locale, tag)
   const router = useRouter()

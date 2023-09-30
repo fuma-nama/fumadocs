@@ -110,9 +110,6 @@ importers:
       remark-math:
         specifier: ^5.1.1
         version: 5.1.1
-      swr:
-        specifier: ^2.2.2
-        version: 2.2.2(react@18.2.0)
       tailwind-merge:
         specifier: ^1.14.0
         version: 1.14.0
@@ -283,6 +280,9 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0
     devDependencies:
+      '@algolia/client-search':
+        specifier: ^4.20.0
+        version: 4.20.0
       '@types/flexsearch':
         specifier: 0.7.4
         version: 0.7.4
@@ -371,6 +371,9 @@ importers:
       '@types/react-dom':
         specifier: 18.2.1
         version: 18.2.1
+      algoliasearch:
+        specifier: ^4.20.0
+        version: 4.20.0
       autoprefixer:
         specifier: 10.4.16
         version: 10.4.16(postcss@8.4.31)
