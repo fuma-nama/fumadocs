@@ -1,0 +1,83 @@
+---
+title: Algolia Search
+description: Integrate Algolia Search with Next Docs
+---
+
+> **Notice:** If you're using Algolia's free tier, you have to
+> [display their logo on your search dialog](https://algolia.com/policies/free-services-terms).
+
+## Indexing
+
+The default behavior creates a record for each paragraph in your document which
+officially recommended by Algolia.
+
+Each record contains searchable attributes `title`, `section`, and `content`.
+`section` is optional, it only exists in paragraphs under headings. Headings and
+paragraphs are all indexed as a record, and the attribute for distinct is
+`page_id`.
+
+Notice that it expects the `url` property of a page to be a unique value and
+won't duplicated. In other words, you shouldn't have two pages with the same
+url.
+
+## Setup
+
+1. Sign up and obtain the required API keys for your search. Store these
+   credentials in environment variables.
+
+2. Create and sync your index with the `sync` function.
+
+   ```js
+   import algosearch from 'algoliasearch'
+   import { sync } from 'next-docs-zeta/algolia'
+   import { structure } from 'next-docs-zeta/mdx-plugins'
+
+   const client = algosearch(...)
+
+   sync(client, {
+     documents: allDocs.map(docs => ({
+       ...docs,
+       url: getPageUrl(docs.slug),
+       structured: structure(docs.body.raw)
+     }))
+   })
+   ```
+
+   You may make it a script and manually sync with `node ./update-index.mjs`, or
+   integrate it with your CI/CD pipeline.
+
+3. To search documents on the client side, you may use the search dialog
+   provided by Next Docs UI, or implement your own for advanced styling.
+
+   In addition, you can use the `useAlgoliaSearch` hook which handles loading
+   states with SWR.
+
+   ```ts
+   import { useAlgoliaSearch } from 'next-docs-zeta/search-algolia'
+
+   const index = algoliasearch(...).initIndex('document')
+
+   const { search, setSearch, query } = useAlgoliaSearch(index, {
+      distinct: 5,
+      hitsPerPage: 10
+   })
+   ```
+
+### Customise Attributes & Settings
+
+While the default attributes might not suit your case, you can pass `extra_data`
+to index options for adding extra fields to each record.
+
+```js
+sync(client, {
+  documents: allDocs.map(docs => ({
+    ...,
+    extra_data: {
+      tag: docs.tag
+    }
+  }))
+})
+```
+
+To customize the default index settings, set index settings, and update
+documents with `updateDocuments(...)` separately.
