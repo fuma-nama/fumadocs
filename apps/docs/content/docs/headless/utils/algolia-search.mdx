@@ -16,16 +16,18 @@ Each record contains searchable attributes `title`, `section`, and `content`.
 paragraphs are all indexed as a record, and the attribute for distinct is
 `page_id`.
 
-Notice that it expects the `url` property of a page to be a unique value and
-won't duplicated. In other words, you shouldn't have two pages with the same
-url.
-
 ## Setup
 
-1. Sign up and obtain the required API keys for your search. Store these
+1. Install `algoliasearch`
+
+   ```bash
+   npm install algoliasearch
+   ```
+
+2. Sign up and obtain the required API keys for your search. Store these
    credentials in environment variables.
 
-2. Create and sync your index with the `sync` function.
+3. Create and sync your index with the `sync` function.
 
    ```js
    import algosearch from 'algoliasearch'
@@ -46,7 +48,7 @@ url.
    You may make it a script and manually sync with `node ./update-index.mjs`, or
    integrate it with your CI/CD pipeline.
 
-3. To search documents on the client side, you may use the search dialog
+4. To search documents on the client side, you may use the search dialog
    provided by Next Docs UI, or implement your own for advanced styling.
 
    In addition, you can use the `useAlgoliaSearch` hook which handles loading
@@ -81,3 +83,7 @@ sync(client, {
 
 To customize the default index settings, set index settings, and update
 documents with `updateDocuments(...)` separately.
+
+> Notice that it expects the `url` property of a page to be a unique value and
+> won't duplicated. In other words, you shouldn't have two pages with the same
+> url.
