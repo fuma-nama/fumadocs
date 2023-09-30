@@ -53,6 +53,10 @@
     "./algolia": {
       "import": "./dist/algolia/index.mjs",
       "types": "./dist/algolia/index.d.ts"
+    },
+    "./search-algolia": {
+      "import": "./dist/search-algolia/index.mjs",
+      "types": "./dist/search-algolia/index.d.ts"
     }
   },
   "typesVersions": {
@@ -89,6 +93,9 @@
       ],
       "algolia": [
         "./dist/algolia/index.d.ts"
+      ],
+      "search-algolia": [
+        "./dist/search-algolia/index.d.ts"
       ]
     }
   },
@@ -121,6 +128,7 @@
     "react-dom": "18.x"
   },
   "devDependencies": {
+    "@algolia/client-search": "^4.20.0",
     "@types/flexsearch": "0.7.4",
     "@types/negotiator": "^0.6.1",
     "@types/react": "18.2.0",
