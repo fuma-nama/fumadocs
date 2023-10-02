@@ -21,7 +21,7 @@ this allows a better initial loading performance.
 
 Next Docs offers first-hand support for [Algolia](https://algolia.com). For
 setup guide, see [Integrate Algolia Search](/docs/headless/search/algolia)
-guide.
+guide. Make sure you have `algoliasearch` installed on your project.
 
 While generally we recommend building your own search with their client-side
 SDK, you can use the built-in dialog from
@@ -56,8 +56,11 @@ export function Provider({ children }: { children: ReactNode }) {
 }
 ```
 
-> **Note:** The built-in implementation doesn't use instant search (their
-> official javascript client).
+> **Note:**
+>
+> - The built-in implementation doesn't use instant search (their official
+>   javascript client).
+> - It already does dynamic import under the hood, lazy load isn't required.
 
 ### Other Solutions
 
@@ -75,4 +78,18 @@ provider.
 >
   ...
 </RootProvider>
+```
+
+### Built-in UI
+
+If you want to use the built-in search dialog UI instead of building your own,
+you may use the `SearchDialog` component.
+
+```tsx
+import {
+  SearchDialog,
+  type SharedProps
+} from 'next-docs-ui/components/dialog/search'
+
+export default function CustomSearchDialog(props: SharedProps) { ... }
 ```
