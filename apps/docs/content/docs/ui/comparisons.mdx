@@ -12,24 +12,24 @@ Someone asked me this question on Discord, it is a fact that it's highly
 inspired by Nextra. For example, the Routing Conventions. That is why
 `meta.json` also exists in Next Docs if you're using Contentlayer.
 
-But Next Docs is not a clone of Nextra. While Nextra is more opinionated and
-supporting a lot of advanced usages, Next Docs is less opinionated and it's
-built for App Router. As a result, It provides many server-side functions but
-you have to configure things manually.
+However, Next Docs is not a clone of Nextra. While we both support a lot of
+advanced usages, Nextra is more opinionated but Next Docs isn't. It is built for
+App Router. As a result, It provides many server-side functions and you have to
+configure things manually compared by simply editing a configuration file.
 
 Next Docs UI works great if you want more control over everything, such as
 adding it to an existing codebase or implementing advanced routing.
 
 ### The Core Model
 
-Although Next Docs strongly rely on other libraries, the model of Next Docs is a
-backend library + frontend framework, it accepts different sources and gives you
-a great looking UI.
+Next Docs also rely on other libraries, the model of Next Docs is a backend
+library + frontend framework, it accepts different sources and gives you a great
+looking, constant UI.
 
 The only reasion I build Next Docs is that I used to look for an alternative to
 Nextra that allows me to fully customise the UI. I came up with Next Docs Zeta,
 a headless ui library. Next Docs UI laterly released as an example of Next Docs
-Zeta.
+Zeta, built on top of Zeta.
 
 ### A Table
 
@@ -49,3 +49,35 @@ Zeta.
 | SEO                 | Via Metadata | Yes               |
 | Built-in Components | Yes          | Yes               |
 | RTL Layout          | No           | Yes               |
+
+## Docusaurus
+
+Docusaurus is a powerful framework based on React.js. It offers many cool
+features via plugins and custom themes.
+
+### Better DX
+
+Since Next Docs is built on the top of Next.js, you'll have to start Next.js dev
+server in order to review changes. And boilerbate code is relatively more
+compared to Docusaurus. For a simple docs, Docusaurus might be a better choice
+if you don't need any Next.js specific functionality.
+
+### Plugins
+
+You can easily achieve many things that will take you a few hours to setup
+manually with plugins. Although the flexiblity of Next Docs is high, their
+eco-system is larger and maintained by many contributors.
+
+### When to use Next Docs?
+
+For most of the web applications, vanilla React.js is no longer enough.
+Nowadays, we also wish to have a blog, a showcase page, a FAQ page, etc. With a
+fancy UI that's breathtaking, in these cases, Next Docs can help you build the
+docs easier, with less boilerbate.
+
+## We are working forward
+
+More and more advanced features will be rolling out. We currently support
+multiple searching solutions including Algolia Search. A good UI and user
+experience is always our priority, welcome to give us some advices via Github
+discussions.
