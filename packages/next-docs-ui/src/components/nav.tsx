@@ -63,10 +63,7 @@ export function Nav({
       )}
     >
       <div className="nd-container nd-flex nd-flex-row nd-items-center nd-h-full nd-gap-4">
-        <Link
-          href={url}
-          className="nd-font-medium hover:nd-text-muted-foreground"
-        >
+        <Link href={url} className="nd-font-medium">
           {title}
         </Link>
         {children}

@@ -2,7 +2,7 @@
 
 import { cn } from '@/utils/cn'
 import { cva } from 'class-variance-authority'
-import { GithubIcon } from 'lucide-react'
+import { GithubIcon, StarsIcon } from 'lucide-react'
 import { Nav as OriginalNav } from 'next-docs-ui/nav'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
@@ -34,7 +34,12 @@ export function Nav() {
 
   return (
     <OriginalNav
-      title="Next Docs"
+      title={
+        <span className="inline-flex items-center gap-1.5 font-semibold">
+          <StarsIcon className="w-5 h-5" fill="currentColor" />
+          Next Docs
+        </span>
+      }
       enableSidebar={mode === 'headless' || mode === 'ui'}
       links={[
         {
