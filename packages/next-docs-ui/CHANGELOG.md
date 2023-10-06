@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 2.3.2
+
+### Patch Changes
+
+- e0ebafa: Improve global padding
+  - next-docs-zeta@2.3.2
+
 ## 2.3.1
 
 ### Patch Changes
