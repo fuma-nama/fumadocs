@@ -7,7 +7,7 @@ export function createMetadata(override: Metadata): Metadata {
       title: override.title ?? undefined,
       description: override.description ?? undefined,
       url: 'https://next-docs-zeta.vercel.app',
-      images: '/features.png',
+      images: '/banner.png',
       siteName: 'Next Docs',
       ...override.openGraph
     },
@@ -16,7 +16,7 @@ export function createMetadata(override: Metadata): Metadata {
       creator: '@money_is_shark',
       title: override.title ?? undefined,
       description: override.description ?? undefined,
-      images: '/features.png',
+      images: '/banner.png',
       ...override.twitter
     }
   }
