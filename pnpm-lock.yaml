@@ -148,10 +148,10 @@ importers:
         specifier: 0.3.4
         version: 0.3.4(contentlayer@0.3.4)(next@13.5.4)(react-dom@18.2.0)(react@18.2.0)
       next-docs-ui:
-        specifier: 2.3.1
+        specifier: 2.3.2
         version: link:../../packages/next-docs-ui
       next-docs-zeta:
-        specifier: 2.3.1
+        specifier: 2.3.2
         version: link:../../packages/next-docs
       react:
         specifier: 18.2.0
@@ -191,10 +191,10 @@ importers:
         specifier: 0.3.4
         version: 0.3.4(contentlayer@0.3.4)(next@13.5.4)(react-dom@18.2.0)(react@18.2.0)
       next-docs-ui:
-        specifier: 2.3.1
+        specifier: 2.3.2
         version: link:../../packages/next-docs-ui
       next-docs-zeta:
-        specifier: 2.3.1
+        specifier: 2.3.2
         version: link:../../packages/next-docs
       react:
         specifier: 18.2.0
