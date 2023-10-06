@@ -10,7 +10,6 @@ import {
   LibraryIcon,
   MoonIcon,
   RocketIcon,
-  StarIcon,
   TimerIcon
 } from 'lucide-react'
 import Image from 'next/image'
@@ -24,13 +23,10 @@ const separator = cva(
 export default function HomePage() {
   return (
     <main>
-      <div className="absolute inset-x-0 top-0 h-[400px] w-full -translate-y-8 z-[-1]">
-        <div className="h-full w-full bg-gradient-radial-top from-blue-600/50 animate-in fade-in duration-1000 opacity-50" />
+      <div className="absolute inset-x-0 top-0 h-[400px] [mask-image:radial-gradient(40%_60%_at_top,rgba(0,0,0,0.5),transparent)] animate-in fade-in duration-1000 opacity-50 z-[-1]">
+        <div className="w-full h-full bg-gradient-to-r from-purple-600 to-blue-600" />
       </div>
       <div className="container py-20 flex flex-col items-center text-center">
-        <div className="bg-gradient-to-b from-blue-300 shadow-md shadow-purple-400/50 rounded-lg mb-6 animate-star">
-          <StarIcon className="m-px p-3 w-12 h-12 bg-background text-foreground rounded-[inherit]" />
-        </div>
         <h1 className="text-3xl font-bold mb-6 sm:text-5xl">Build Your Docs</h1>
         <p className="text-muted-foreground max-w-xl sm:text-lg">
           Next Docs is a library and full-powered framework for building

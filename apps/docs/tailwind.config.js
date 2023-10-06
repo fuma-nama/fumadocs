@@ -64,16 +64,6 @@ module.exports = {
             transform: 'translate(-50%,-50%) rotate(0)'
           }
         },
-        star: {
-          '0%, 100%': {
-            transform: 'translateY(0)',
-            opacity: 1
-          },
-          '50%': {
-            transform: 'translateY(-10px)',
-            opacity: 0.8
-          }
-        },
         heart: {
           '0%': {
             'stroke-dashoffset': 0
