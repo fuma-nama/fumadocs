@@ -10,6 +10,7 @@ import {
   LibraryIcon,
   MoonIcon,
   RocketIcon,
+  StarsIcon,
   TimerIcon
 } from 'lucide-react'
 import Image from 'next/image'
@@ -23,24 +24,30 @@ const separator = cva(
 export default function HomePage() {
   return (
     <main>
-      <div className="absolute inset-x-0 top-0 h-[400px] [mask-image:radial-gradient(40%_60%_at_top,rgba(0,0,0,0.5),transparent)] animate-in fade-in duration-1000 opacity-50 z-[-1]">
-        <div className="w-full h-full bg-gradient-to-r from-purple-600 to-blue-600" />
+      <div className="absolute inset-0 overflow-hidden z-[-1]">
+        <div className="relative mx-auto w-[720px] blur-3xl opacity-10 animate-in fade-in duration-1000 dark:opacity-20">
+          <i className="bg-purple-500 absolute top-52 left-0 w-[400px] h-[400px] rounded-full" />
+          <i className="bg-blue-500 absolute top-0 right-0 w-[400px] h-[400px] rounded-full" />
+        </div>
       </div>
-      <div className="container py-20 flex flex-col items-center text-center">
-        <h1 className="text-3xl font-bold mb-6 sm:text-5xl">Build Your Docs</h1>
+      <div className="container py-20 flex flex-col items-center text-center gap-6">
+        <div className="p-0.5 bg-gradient-to-b from-blue-300 to-purple-400 rounded-lg shadow-lg shadow-purple-400/50 mb-2">
+          <StarsIcon className="w-12 h-12 p-2 bg-background rounded-[inherit]" />
+        </div>
+        <h1 className="text-3xl font-bold sm:text-5xl">Build Your Docs</h1>
         <p className="text-muted-foreground max-w-xl sm:text-lg">
           Next Docs is a library and full-powered framework for building
-          documentation websites.
+          documentation sites based on Next.js.
         </p>
-        <div className="mt-14 grid grid-cols-1 max-w-4xl gap-8 animate-in fade-in slide-in-from-bottom-10 duration-1000 md:grid-cols-2">
+        <div className="mt-8 grid grid-cols-1 max-w-4xl gap-8 animate-in fade-in slide-in-from-bottom-10 duration-1000 sm:grid-cols-2">
           <Link
             href="/docs/headless"
             className="group relative overflow-hidden p-px rounded-xl z-[2]"
           >
             <i className="absolute inset-0 opacity-0 transition-opacity z-[-1] animated-border group-hover:opacity-100" />
-            <div className="absolute inset-px bg-background bg-gradient-radial rounded-[inherit] from-purple-400/20 z-[-1]" />
-            <div className="flex flex-col items-center rounded-[inherit] h-full z-[2] p-6 border sm:p-12">
-              <div className="border p-3 bg-gradient-to-b from-purple-400/30 border-foreground/20 shadow-xl shadow-background/50 mb-6 rounded-xl">
+            <div className="absolute inset-px bg-gradient-to-b from-card/80 to-background rounded-[inherit] z-[-1]" />
+            <div className="flex flex-col items-center rounded-[inherit] h-full z-[2] p-6 border md:p-12">
+              <div className="border p-3 bg-gradient-to-b from-purple-400/30 border-foreground/20 mb-6 rounded-xl">
                 <LibraryIcon className="h-9 w-9 text-purple-400 dark:text-purple-200" />
               </div>
               <p className="mb-2 text-xl font-medium">Next Docs Zeta</p>
@@ -56,9 +63,9 @@ export default function HomePage() {
             className="group relative overflow-hidden rounded-xl p-px z-[2]"
           >
             <i className="absolute inset-0 opacity-0 transition-opacity z-[-1] animated-border group-hover:opacity-100" />
-            <div className="absolute inset-px bg-background bg-gradient-radial from-blue-400/20 rounded-[inherit] z-[-1]" />
-            <div className="flex flex-col items-center rounded-[inherit] h-full p-6 border sm:p-12">
-              <div className="border p-3 bg-gradient-to-b from-blue-400/30 border-blue-500/50 shadow-xl shadow-background/50 mb-6 rounded-xl">
+            <div className="absolute inset-px bg-gradient-to-b from-card/80 to-background rounded-[inherit] z-[-1]" />
+            <div className="flex flex-col items-center rounded-[inherit] h-full p-6 border md:p-12">
+              <div className="border p-3 bg-gradient-to-b from-blue-400/30 border-blue-500/50 mb-6 rounded-xl">
                 <LayoutIcon className="h-9 w-9 text-blue-400 dark:text-cyan-200" />
               </div>
               <p className="mb-2 text-xl font-medium">Next Docs UI</p>
@@ -79,10 +86,10 @@ export default function HomePage() {
       <div className={cn(separator(), 'mt-12')} />
       <div className="relative py-40">
         <div className="container text-center">
-          <h2 className="text-2xl font-medium mb-4 sm:text-4xl">
+          <h2 className="text-3xl font-medium mb-4 sm:text-5xl">
             Build in Seconds
           </h2>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground sm:text-lg">
             Create documentation sites with a command.
           </p>
         </div>
@@ -177,7 +184,7 @@ function HeroCards() {
       </div>
       <div className={cn(card({ className: 'lg:col-span-2' }))}>
         <div className="absolute inset-0 bg-gradient-radial from-blue-600/10 z-[-1]" />
-        <div className="mx-auto rounded-3xl px-24 bg-gradient-to-b from-blue-400/10 border border-foreground/10 mb-12">
+        <div className="mx-auto rounded-3xl px-24 bg-gradient-to-b from-blue-400/10 border border-foreground/10 my-6">
           <Heart />
         </div>
         <div className="text-center mt-auto">
@@ -195,7 +202,7 @@ function HeroCards() {
 
 function Comments() {
   return (
-    <div className="bg-gradient-to-b from-card p-6 border rounded-md mx-auto max-w-4xl">
+    <div className="bg-gradient-to-b from-card p-6 border rounded-md mx-auto max-w-4xl shadow-lg">
       <p>{`"I'm satisfied with it"`}</p>
       <div className="inline-flex items-center gap-2 mt-2">
         <a
@@ -288,7 +295,7 @@ function Rocket(props: ComponentPropsWithRef<'svg'>) {
 
 function Heart(props: ComponentPropsWithoutRef<'svg'>) {
   return (
-    <svg width="178" height="159" viewBox="0 0 178 159" fill="none" {...props}>
+    <svg width="140" height="140" viewBox="0 0 178 159" fill="none" {...props}>
       <g>
         <path
           d="M52 39H76M46 45.5L80 45.5M44 51.5L84 51.5M43 57.5H135M44 63.5H134M45 69.5H133M49 75.5H129M53 81.5H125M57 87.5H121M62 93.5H116M68 99.5H110M75 105.5H103M82.5 111.5H97.5M126 39H102M132 45.5L98 45.5M134 51.5L94 51.5"
