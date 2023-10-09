@@ -16,9 +16,7 @@ module.exports = {
     },
     extend: {
       backgroundImage: {
-        'gradient-radial': 'radial-gradient(circle, var(--tw-gradient-stops))',
-        'gradient-radial-top':
-          'radial-gradient(40% 60% at top, var(--tw-gradient-stops))'
+        'gradient-radial': 'radial-gradient(circle, var(--tw-gradient-stops))'
       },
       colors: {
         border: 'hsl(var(--border))',

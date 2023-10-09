@@ -25,9 +25,9 @@ export default function HomePage() {
   return (
     <main>
       <div className="absolute inset-0 overflow-hidden z-[-1]">
-        <div className="relative mx-auto w-[720px] blur-3xl opacity-10 animate-in fade-in duration-1000 dark:opacity-20">
-          <i className="bg-purple-500 absolute top-52 left-0 w-[400px] h-[400px] rounded-full" />
-          <i className="bg-blue-500 absolute top-0 right-0 w-[400px] h-[400px] rounded-full" />
+        <div className="relative mx-auto w-[720px] opacity-20 animate-in fade-in duration-1000">
+          <i className="bg-gradient-radial from-purple-500 to-70% absolute top-52 left-0 w-[500px] h-[500px] rounded-full" />
+          <i className="bg-gradient-radial from-blue-500 to-70% absolute top-0 right-0 w-[500px] h-[500px] rounded-full" />
         </div>
       </div>
       <div className="container py-20 flex flex-col items-center text-center gap-6">
@@ -202,7 +202,7 @@ function HeroCards() {
 
 function Comments() {
   return (
-    <div className="bg-gradient-to-b from-card p-6 border rounded-md mx-auto max-w-4xl shadow-lg">
+    <div className="bg-gradient-to-b from-card p-6 border rounded-md mx-auto max-w-4xl shadow-lg  ">
       <p>{`"I'm satisfied with it"`}</p>
       <div className="inline-flex items-center gap-2 mt-2">
         <a
