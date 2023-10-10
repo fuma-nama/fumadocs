@@ -3,8 +3,8 @@
   "description": "The library for building a documentation website in Next.js",
   "version": "2.3.2",
   "homepage": "https://next-docs-zeta.vercel.app",
-  "author": "Money SonMooSans",
-  "repository": "github:SonMooSans/next-docs",
+  "author": "Fuma Nama",
+  "repository": "github:fuma-nama/next-docs",
   "license": "MIT",
   "files": [
     "dist/*"

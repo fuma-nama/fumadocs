@@ -3,8 +3,8 @@
   "description": "Create a new documentation site with Next Docs UI",
   "version": "1.5.25",
   "homepage": "https://next-docs-zeta.vercel.app",
-  "author": "Money SonMooSans",
-  "repository": "github:SonMooSans/next-docs",
+  "author": "Fuma Nama",
+  "repository": "github:fuma-nama/next-docs",
   "license": "MIT",
   "files": [
     "templates/*",
