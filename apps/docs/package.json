@@ -16,7 +16,7 @@
     "clsx": "^2.0.0",
     "contentlayer": "^0.3.4",
     "katex": "^0.16.8",
-    "lucide-react": "^0.286.0",
+    "lucide-react": "^0.287.0",
     "next": "13.5.4",
     "next-contentlayer": "^0.3.4",
     "next-docs-ui": "workspace:*",
