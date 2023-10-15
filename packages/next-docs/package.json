@@ -110,7 +110,6 @@
     "@formatjs/intl-localematcher": "^0.4.2",
     "flexsearch": "0.7.21",
     "github-slugger": "^2.0.0",
-    "hast-util-to-string": "^3.0.0",
     "negotiator": "^0.6.3",
     "react-remove-scroll": "^2.5.6",
     "rehype-img-size": "^1.0.1",
@@ -135,7 +134,8 @@
     "@types/react-dom": "18.2.1",
     "algoliasearch": "^4.20.0",
     "contentlayer": "^0.3.4",
-    "next": "13.5.4"
+    "next": "13.5.4",
+    "unified": "^10.1.2"
   },
   "keywords": [
     "NextJs",

@@ -240,9 +240,6 @@ importers:
       github-slugger:
         specifier: ^2.0.0
         version: 2.0.0
-      hast-util-to-string:
-        specifier: ^3.0.0
-        version: 3.0.0
       negotiator:
         specifier: ^0.6.3
         version: 0.6.3
@@ -304,6 +301,9 @@ importers:
       next:
         specifier: 13.5.4
         version: 13.5.4(@babel/core@7.22.17)(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)
+      unified:
+        specifier: ^10.1.2
+        version: 10.1.2
 
   packages/next-docs-ui:
     dependencies:
@@ -2877,12 +2877,6 @@ packages:
     dependencies:
       '@types/unist': 2.0.8
 
-  /@types/hast@3.0.0:
-    resolution: {integrity: sha512-SoytUJRuf68HXYqcXicQIhCrLQjqeYU2anikr4G3p3Iz+OZO5QDQpDj++gv+RenHsnUBwNZ2dumBArF8VLSk2Q==}
-    dependencies:
-      '@types/unist': 3.0.0
-    dev: false
-
   /@types/is-ci@3.0.0:
     resolution: {integrity: sha512-Q0Op0hdWbYd1iahB+IFNQcWXFq4O0Q5MwQP7uN0souuQ4rPg1vEYcnIOfr1gY+M+6rc8FGoRaBO1mOOvL29sEQ==}
     dependencies:
@@ -4692,12 +4686,6 @@ packages:
       space-separated-tokens: 2.0.2
       web-namespaces: 2.0.1
       zwitch: 2.0.4
-
-  /hast-util-to-string@3.0.0:
-    resolution: {integrity: sha512-OGkAxX1Ua3cbcW6EJ5pT/tslVb90uViVkcJ4ZZIMW/R33DX/AkcJcRrPebPwJkHYwlDHXz4aIwvAAaAdtrACFA==}
-    dependencies:
-      '@types/hast': 3.0.0
-    dev: false
 
   /hast-util-to-text@3.1.2:
     resolution: {integrity: sha512-tcllLfp23dJJ+ju5wCCZHVpzsQQ43+moJbqVX3jNWPB7z/KFC4FyZD6R7y94cHL6MQ33YtMZL8Z0aIXXI4XFTw==}

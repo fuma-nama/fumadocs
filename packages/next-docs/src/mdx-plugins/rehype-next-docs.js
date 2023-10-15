@@ -1,7 +1,6 @@
 import Slugger from 'github-slugger'
-import { toString as flattenNode } from 'hast-util-to-string'
 import rehypePrettycode from 'rehype-pretty-code'
-import { visit } from './utils'
+import { flattenNode, visit } from './utils'
 
 const slugger = new Slugger()
 const headings = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']

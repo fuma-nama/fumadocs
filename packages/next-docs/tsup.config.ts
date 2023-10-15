@@ -6,7 +6,7 @@ export default defineConfig({
     'src/{server,breadcrumb,sidebar,toc,search,link,contentlayer,middleware,mdx-plugins,algolia,search-algolia}/index.{ts,tsx}',
     'src/contentlayer/configuration.ts'
   ],
-  external: ['contentlayer', 'algoliasearch'],
+  external: ['contentlayer'],
   format: 'esm',
   dts: true,
   target: tsconfig.compilerOptions.target as 'es2016'

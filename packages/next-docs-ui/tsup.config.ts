@@ -7,7 +7,7 @@ export default defineConfig({
     './src/components/dialog/{search,search-default,search-algolia}.tsx',
     './src/*.{ts,tsx}'
   ],
-  external: ['next-docs-zeta', 'shiki', 'algoliasearch'],
+  external: ['next-docs-zeta'],
   format: 'esm',
   dts: true,
   target: tsconfig.compilerOptions.target as 'es2016'

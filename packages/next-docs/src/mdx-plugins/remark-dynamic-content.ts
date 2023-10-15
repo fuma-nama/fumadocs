@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import fs from 'fs'
 import path from 'path'
+import type { Plugin } from 'unified'
 import { visit } from 'unist-util-visit'
-import type { Plugin } from './types'
 
 const regex = /^\|reference:(.+)\|/
 
