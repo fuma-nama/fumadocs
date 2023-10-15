@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 2.3.3
+
+### Patch Changes
+
+- 634f7d3: Reduce dependencies
+- eac081c: Update github urls & author name
+
 ## 2.3.2
 
 ## 2.3.1
