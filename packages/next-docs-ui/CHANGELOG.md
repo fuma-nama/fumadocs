@@ -1,5 +1,16 @@
 # next-docs-ui
 
+## 2.3.3
+
+### Patch Changes
+
+- 634f7d3: Reduce dependencies
+- 996a914: Create Inline TOC component
+- eac081c: Update github urls & author name
+- Updated dependencies [634f7d3]
+- Updated dependencies [eac081c]
+  - next-docs-zeta@2.3.3
+
 ## 2.3.2
 
 ### Patch Changes

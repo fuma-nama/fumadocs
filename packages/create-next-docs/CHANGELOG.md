@@ -1,5 +1,12 @@
 # create-next-docs-app
 
+## 1.5.26
+
+### Patch Changes
+
+- 65eee50: Use async fs APIs
+- eac081c: Update github urls & author name
+
 ## 1.5.25
 
 ### Patch Changes
