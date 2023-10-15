@@ -257,7 +257,7 @@ importers:
         version: 1.0.1
       rehype-pretty-code:
         specifier: ^0.10.1
-        version: 0.10.1(shiki@0.14.4)
+        version: 0.10.1(shiki@0.14.5)
       remark:
         specifier: ^14.0.3
         version: 14.0.3
@@ -270,6 +270,9 @@ importers:
       scroll-into-view-if-needed:
         specifier: ^3.1.0
         version: 3.1.0
+      shiki:
+        specifier: ^0.14.5
+        version: 0.14.5
       swr:
         specifier: ^2.2.2
         version: 2.2.2(react@18.2.0)
@@ -6907,7 +6910,7 @@ packages:
       unist-util-visit: 4.1.2
     dev: false
 
-  /rehype-pretty-code@0.10.1(shiki@0.14.4):
+  /rehype-pretty-code@0.10.1(shiki@0.14.5):
     resolution: {integrity: sha512-WHjRvGlqPXG8BVRB9mK0255WvIOnzvHivAWhFkA2OG+NTkQWtTbCULZMokOHLf3Yy8q8I8/F8QNjDSQBhjMK5w==}
     engines: {node: '>=16'}
     peerDependencies:
@@ -6916,7 +6919,7 @@ packages:
       '@types/hast': 2.3.5
       hash-obj: 4.0.0
       parse-numeric-range: 1.3.0
-      shiki: 0.14.4
+      shiki: 0.14.5
     dev: false
 
   /rehype-stringify@9.0.4:
@@ -7179,8 +7182,8 @@ packages:
     resolution: {integrity: sha512-6j1W9l1iAs/4xYBI1SYOVZyFcCis9b4KCLQ8fgAGG07QvzaRLVVRQvAy85yNmmZSjYjg4MWh4gNvlPujU/5LpA==}
     dev: true
 
-  /shiki@0.14.4:
-    resolution: {integrity: sha512-IXCRip2IQzKwxArNNq1S+On4KPML3Yyn8Zzs/xRgcgOWIr8ntIK3IKzjFPfjy/7kt9ZMjc+FItfqHRBg8b6tNQ==}
+  /shiki@0.14.5:
+    resolution: {integrity: sha512-1gCAYOcmCFONmErGTrS1fjzJLA7MGZmKzrBNX7apqSwhyITJg2O102uFzXUeBxNnEkDA9vHIKLyeKq0V083vIw==}
     dependencies:
       ansi-sequence-parser: 1.1.1
       jsonc-parser: 3.2.0
