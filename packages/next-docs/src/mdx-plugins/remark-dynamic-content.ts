@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import fs from 'fs'
 import path from 'path'
 import type { Plugin } from 'unified'
@@ -22,7 +21,7 @@ type Options = {
 export function remarkDynamicContent(options: Options = {}): Plugin {
   const { cwd = process.cwd(), trim = true } = options
 
-  return (tree: any) => {
+  return tree => {
     visit(tree, ['text', 'code'], node => {
       const result = regex.exec(node.value)
 

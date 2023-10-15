@@ -3,7 +3,7 @@ import Slugger from 'github-slugger'
 import { remark } from 'remark'
 import remarkGfm from 'remark-gfm'
 import remarkMdx from 'remark-mdx'
-import type { Plugin } from 'unified'
+import type { PluggableList } from 'unified'
 import { visit } from 'unist-util-visit'
 
 type Heading = {
@@ -82,7 +82,7 @@ const structurize =
  */
 export function structure(
   content: string,
-  remarkPlugins: Plugin[] = [],
+  remarkPlugins: PluggableList = [],
   options: Options = {}
 ): StructuredData {
   const result = remark()
