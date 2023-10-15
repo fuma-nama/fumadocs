@@ -1,4 +1,4 @@
-import fs from 'fs'
+import fs from 'fs/promises'
 import path from 'path'
 import {
   cancel,
@@ -37,7 +37,7 @@ async function main() {
   const pathname = name.toLowerCase().replace(/\s/, '-')
   const dest = path.resolve(cwd, pathname)
 
-  if (fs.existsSync(dest)) {
+  if (await exists(dest)) {
     const del = await confirm({
       message: `${pathname} already exists, do you want to delete it?`
     })
@@ -48,7 +48,7 @@ async function main() {
       const info = spinner()
       info.start(`Deleting ${pathname}`)
 
-      fs.rmSync(dest, {
+      await fs.rm(dest, {
         recursive: true,
         force: true
       })
@@ -61,16 +61,16 @@ async function main() {
 
   const info = spinner()
   info.start('Copying files to ' + pathname)
-  copy(path.resolve(__dirname, `../templates/${type}`), dest)
+  await copy(path.resolve(__dirname, `../templates/${type}`), dest)
 
   info.message('Updating package.json')
-  updatePackageJson(path.join(dest, 'package.json'), name)
+  await updatePackageJson(path.join(dest, 'package.json'), name)
 
   info.message('Updating README.md')
-  generateReadme(path.join(dest, 'README.md'), name)
+  await generateReadme(path.join(dest, 'README.md'), name)
 
   info.message('Adding .gitignore')
-  generateGitIgnore(path.join(dest, '.gitignore'))
+  await generateGitIgnore(path.join(dest, '.gitignore'))
 
   info.stop('Project Generated')
 
@@ -95,17 +95,15 @@ async function main() {
   )
 }
 
-main()
-
-function updatePackageJson(path: string, projectName: string) {
-  const packageJson = JSON.parse(fs.readFileSync(path).toString())
+async function updatePackageJson(path: string, projectName: string) {
+  const packageJson = JSON.parse((await fs.readFile(path)).toString())
 
   packageJson.name = projectName
 
-  fs.writeFileSync(path, JSON.stringify(packageJson, undefined, 2))
+  await fs.writeFile(path, JSON.stringify(packageJson, undefined, 2))
 }
 
-function generateReadme(path: string, projectName: string) {
+async function generateReadme(path: string, projectName: string) {
   const content = `
   # ${projectName}
 
@@ -134,10 +132,10 @@ function generateReadme(path: string, projectName: string) {
     .map(s => s.trim())
     .join('\n')
 
-  fs.writeFileSync(path, content)
+  await fs.writeFile(path, content)
 }
 
-function generateGitIgnore(path: string) {
+async function generateGitIgnore(path: string) {
   const ignores = [
     // deps
     '/node_modules',
@@ -162,24 +160,35 @@ function generateGitIgnore(path: string) {
     'next-env.d.ts'
   ]
 
-  fs.writeFileSync(path, ignores.join('\n'))
+  await fs.writeFile(path, ignores.join('\n'))
 }
 
-function copy(
+async function copy(
   from: string,
   to: string,
   rename: (s: string) => string = s => s
 ) {
-  if (!fs.existsSync(from)) return
-
-  const stats = fs.statSync(from)
+  const stats = await fs.stat(from)
 
   if (stats.isDirectory()) {
-    fs.readdirSync(from).forEach(file => {
-      copy(path.join(from, file), path.join(to, rename(file)))
-    })
+    const files = await fs.readdir(from)
+
+    await Promise.all(
+      files.map(file =>
+        copy(path.join(from, file), path.join(to, rename(file)))
+      )
+    )
   } else {
-    fs.mkdirSync(path.dirname(to), { recursive: true })
-    fs.copyFileSync(from, to)
+    await fs.mkdir(path.dirname(to), { recursive: true })
+    await fs.copyFile(from, to)
   }
 }
+
+async function exists(file: string): Promise<boolean> {
+  return fs
+    .access(file, fs.constants.R_OK)
+    .then(() => true)
+    .catch(() => false)
+}
+
+main()

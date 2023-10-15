@@ -10,7 +10,6 @@
     "templates/*",
     "dist/*"
   ],
-  "main": "./dist/index.js",
   "bin": "./dist/index.js",
   "scripts": {
     "build": "tsup --clean",
