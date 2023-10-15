@@ -1,0 +1,88 @@
+---
+title: Inline TOC
+description: Add Inline TOC into your documentation
+---
+
+import { InlineTOC } from 'next-docs-ui/components/inline-toc'
+import { TypeTable } from 'next-docs-ui/components/type-table'
+
+<InlineTOC
+  items={[
+    {
+      title: 'Welcome',
+      url: '#welcome',
+      depth: 2
+    },
+    {
+      title: 'Getting Started',
+      url: '#getting-started',
+      depth: 3
+    },
+    {
+      title: 'Usage',
+      url: '#usage',
+      depth: 3
+    },
+    {
+      title: 'Styling',
+      url: '#styling',
+      depth: 3
+    },
+    {
+      title: 'Reference',
+      url: '#reference',
+      depth: 2
+    },
+    {
+      title: 'Components',
+      url: '#components',
+      depth: 3
+    },
+    {
+      title: 'APIs',
+      url: '#api',
+      depth: 3
+    },
+    {
+      title: 'Credits',
+      url: '#credits',
+      depth: 2
+    }
+  ]}
+/>
+
+## Usage
+
+Pass TOC items to the component.
+
+```mdx
+import { InlineTOC } from 'next-docs-ui/components/inline-toc'
+
+<InlineTOC items={toc} />
+```
+
+### Use in Pages
+
+You can add inline TOC into every page.
+
+```tsx
+<MDXContent>
+  ...
+  <InlineTOC items={toc} />
+  ...
+</MDXContent>
+```
+
+## Reference
+
+<TypeTable
+  type={{
+    defaultOpen: {
+      type: 'boolean',
+      default: 'false'
+    },
+    items: {
+      type: `TOCItemType[]`
+    }
+  }}
+/>
