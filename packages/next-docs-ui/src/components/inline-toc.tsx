@@ -1,7 +1,7 @@
 'use client'
 
-import { cn } from '@/utils/cn'
 import * as Collapsible from '@radix-ui/react-collapsible'
+import { ChevronDown } from 'lucide-react'
 import type { TOCItemType } from 'next-docs-zeta/server'
 import type { ReactNode } from 'react'
 
@@ -21,8 +21,9 @@ export function InlineTOC({
     >
       <Collapsible.Trigger asChild>
         {children ?? (
-          <button className="nd-font-medium nd-p-4 nd-w-full nd-text-left">
+          <button className="nd-inline-flex nd-items-center nd-justify-between nd-font-medium nd-p-4 nd-w-full [&[data-state=open]>svg]:nd-rotate-180">
             Table of Contents
+            <ChevronDown className="nd-h-4 nd-w-4 nd-transition-transform nd-duration-200" />
           </button>
         )}
       </Collapsible.Trigger>
@@ -32,12 +33,10 @@ export function InlineTOC({
             <a
               key={item.url}
               href={item.url}
-              className={cn(
-                'nd-py-1.5 nd-border-l hover:nd-border-primary',
-                item.depth <= 2 && 'nd-pl-4',
-                item.depth === 3 && 'nd-pl-7',
-                item.depth >= 4 && 'nd-pl-10'
-              )}
+              className="nd-py-1.5 nd-border-l hover:nd-border-primary"
+              style={{
+                paddingLeft: 16 * Math.max(item.depth - 1, 1)
+              }}
             >
               {item.title}
             </a>
