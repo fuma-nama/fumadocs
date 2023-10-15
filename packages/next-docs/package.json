@@ -135,7 +135,7 @@
     "algoliasearch": "^4.20.0",
     "contentlayer": "^0.3.4",
     "next": "13.5.4",
-    "unified": "^10.1.2"
+    "unified": "^11.0.0"
   },
   "keywords": [
     "NextJs",
