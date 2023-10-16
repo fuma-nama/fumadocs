@@ -131,16 +131,19 @@ export const { GET } = await createSearchAPI('advanced', {
 })
 ```
 
-> **Tip:** <br/> If you have custom remark plugins enabled, such as
-> `remark-math`, you have to manually structurize the document with these
-> plugins passed into the function:
->
-> ```ts
-> import { structure } from 'next-docs-zeta/mdx-plugins'
-> import remarkMath from 'remark-math'
->
-> structure(page.body.raw, [remarkMath])
-> ```
+<Callout title="Tip" className="mt-4">
+If you have custom remark plugins enabled, such as
+`remark-math`, you have to manually structurize the document with these
+plugins passed into the function:
+
+```ts
+import { structure } from 'next-docs-zeta/mdx-plugins'
+import remarkMath from 'remark-math'
+
+structure(page.body.raw, [remarkMath])
+```
+
+</Callout>
 
 ### Tag Filter
 

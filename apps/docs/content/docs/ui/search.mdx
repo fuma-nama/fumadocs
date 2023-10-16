@@ -56,11 +56,13 @@ export function Provider({ children }: { children: ReactNode }) {
 }
 ```
 
-> **Note:**
->
-> - The built-in implementation doesn't use instant search (their official
->   javascript client).
-> - It already does dynamic import under the hood, lazy load isn't required.
+<Callout title="Note" className='mt-4'>
+
+- The built-in implementation doesn't use instant search (their official
+  javascript client).
+- It already does dynamic import under the hood, lazy load isn't required.
+
+</Callout>
 
 ### Other Solutions
 
@@ -68,7 +70,9 @@ If you want to use other solutions such as ElasticSearch, you can replace the
 default dialog with your own by passing the `SearchDialog` component to the root
 provider.
 
-> **Tip:** You shall lazy load the dialog with `next/dynamic`
+<Callout title="Tip" className="mb-4">
+  You can lazy load the dialog with `next/dynamic`.
+</Callout>
 
 ```jsx
 <RootProvider

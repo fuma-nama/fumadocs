@@ -15,6 +15,7 @@ const components = {
     <defaultComponents.pre {...props} className="max-h-[400px]" />
   ),
   ThemeSwitch,
+  Callout,
   blockquote: (props: React.QuoteHTMLAttributes<HTMLQuoteElement>) => (
     <Callout className="my-4">{props.children}</Callout>
   )
