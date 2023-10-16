@@ -30,8 +30,7 @@ const components = {
 }
 
 export function Content({ code }: { code: string }) {
-  const inject = `if (typeof process === 'undefined') {globalThis.process = { env: {} }}`
-  const MDX = useMDXComponent(inject + code)
+  const MDX = useMDXComponent(code)
 
   return <MDX components={components} />
 }
