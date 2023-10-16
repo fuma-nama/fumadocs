@@ -10,6 +10,10 @@ const config = createConfig({
       type: 'boolean',
       default: false,
       required: false
+    },
+    preview: {
+      type: 'string',
+      required: false
     }
   },
   docsComputedFields: {

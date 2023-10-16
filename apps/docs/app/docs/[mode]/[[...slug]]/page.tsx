@@ -1,3 +1,4 @@
+import Preview from '@/components/preview'
 import { createMetadata } from '@/utils/metadata'
 import { getPage, getPageUrl, getTree } from '@/utils/source'
 import { allDocs, type Docs } from 'contentlayer/generated'
@@ -43,6 +44,8 @@ export default async function Page({ params }: { params: Param }) {
     }
   )
 
+  const preview = page.preview?.trim()
+
   return (
     <DocsPage
       toc={toc}
@@ -68,6 +71,7 @@ export default async function Page({ params }: { params: Param }) {
           </h1>
           <p className="text-muted-foreground sm:text-lg">{page.description}</p>
         </div>
+        {preview != null && preview in Preview && Preview[preview]}
         {page.index ? (
           <Category page={page} />
         ) : (
