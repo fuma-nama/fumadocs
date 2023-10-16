@@ -3,9 +3,6 @@ title: Card
 description: Use the Card component in your MDX documentation
 ---
 
-import { HomeIcon } from 'lucide-react'
-import { TypeTable } from 'next-docs-ui/components/type-table'
-
 ## Usage
 
 Add it to your MDX components.
@@ -84,11 +81,27 @@ import { HomeIcon } from 'lucide-react'
 </Cards>
 ```
 
-<br />
+<Callout title="Tree Shaking" type="warn" className='my-4'>
+
+If you're using Contentlayer, or other libraries for rendering MDX, ensure that
+tree shaking is working properly.
+
+In some cases, you must import icons from MDX Components.
+
+```tsx
+import { HomeIcon } from 'lucide-react'
+
+const components = {
+  ...defaultComponents,
+  HomeIcon
+}
+```
+
+</Callout>
 
 <Cards>
   <Card
-    icon={<HomeIcon />}
+    icon={<Icon name="home" />}
     href="/"
     title="Home"
     description="Go back to home"
