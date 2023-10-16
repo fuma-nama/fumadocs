@@ -2,6 +2,7 @@
 
 import { ThemeSwitch } from '@/components/ThemeSwitch'
 import { useMDXComponent } from 'next-contentlayer/hooks'
+import { Callout } from 'next-docs-ui/components/callout'
 import { ImageZoom } from 'next-docs-ui/components/image-zoom'
 import defaultComponents from 'next-docs-ui/mdx'
 import type { HTMLAttributes } from 'react'
@@ -15,9 +16,7 @@ const components = {
   ),
   ThemeSwitch,
   blockquote: (props: React.QuoteHTMLAttributes<HTMLQuoteElement>) => (
-    <div className="my-4 rounded-lg border px-3 text-sm shadow-md">
-      {props.children}
-    </div>
+    <Callout className="my-4">{props.children}</Callout>
   )
 }
 
