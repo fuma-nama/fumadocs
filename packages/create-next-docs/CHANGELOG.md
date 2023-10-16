@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 1.5.27
+
+### Patch Changes
+
+- 45a4571: Update Examples
+
 ## 1.5.26
 
 ### Patch Changes
