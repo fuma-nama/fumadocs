@@ -1,3 +1,4 @@
+import { Accordion, Accordions } from 'next-docs-ui/components/accordion'
 import { Callout } from 'next-docs-ui/components/callout'
 import { File, Files } from 'next-docs-ui/components/files'
 import { InlineTOC } from 'next-docs-ui/components/inline-toc'
@@ -6,6 +7,13 @@ import { Step, Steps } from 'next-docs-ui/components/steps'
 import type { ReactNode } from 'react'
 
 export default {
+  accordion: (
+    <Wrapper>
+      <Accordions type="single" collapsible>
+        <Accordion title="My Title">My Content</Accordion>
+      </Accordions>
+    </Wrapper>
+  ),
   callout: (
     <Wrapper>
       <Callout title="Title">Hello World</Callout>
