@@ -34,7 +34,7 @@ export const Callout = forwardRef<HTMLDivElement, CalloutProps>(
               <AlertOctagonIcon className="nd-text-card nd-fill-red-500 nd-w-5 nd-h-5" />
             )
           }[type]}
-        <div className="nd-flex-1">
+        <div className="nd-flex-1 nd-w-0">
           {title && (
             <div className="nd-text-card-foreground nd-font-medium nd-mb-0.5">
               {title}
