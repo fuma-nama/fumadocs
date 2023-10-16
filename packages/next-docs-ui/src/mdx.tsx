@@ -19,11 +19,7 @@ const Table = (props: ComponentPropsWithoutRef<'table'>) => (
 )
 
 function MDXContent({ children }: { children: ReactNode }) {
-  return (
-    <div className="nd-prose nd-prose-text prose-table:nd-whitespace-nowrap nd-max-w-none">
-      {children}
-    </div>
-  )
+  return <div className="nd-prose">{children}</div>
 }
 
 const defaultMdxComponents = {

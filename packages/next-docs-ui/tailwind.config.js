@@ -109,8 +109,8 @@ module.exports = {
         'accordion-down': 'accordion-down 200ms ease-out',
         'accordion-up': 'accordion-up 200ms ease-out'
       },
-      typography: () => ({
-        text: {
+      typography: {
+        DEFAULT: {
           css: {
             '--tw-prose-body': 'hsl(var(--foreground)/0.9)',
             '--tw-prose-headings': 'hsl(var(--foreground))',
@@ -126,37 +126,53 @@ module.exports = {
             '--tw-prose-code': 'hsl(var(--foreground))',
             '--tw-prose-th-borders': 'hsl(var(--border))',
             '--tw-prose-td-borders': 'hsl(var(--border))',
+            '--tw-prose-pre-bg': 'hsl(var(--secondary))',
+            '--tw-prose-kbd': 'hsl(var(--foreground))',
+            '--tw-prose-kbd-shadows': 'hsl(var(--primary)/0.5)',
+            // not used
+            '--tw-prose-pre-code': false,
+            maxWidth: 'none',
             a: {
               transition: 'opacity 0.3s',
-              'font-weight': '400',
-              'text-decoration': 'underline',
-              'text-underline-offset': '2px',
-              'text-decoration-color': 'hsl(var(--primary))',
-              '&:hover': {
-                opacity: '80%'
-              }
+              fontWeight: '400',
+              textDecoration: 'underline',
+              textUnderlineOffset: '2px',
+              textDecorationColor: 'hsl(var(--primary))'
+            },
+            'a:hover': {
+              opacity: '80%'
             },
             h2: {
-              'font-weight': '600'
+              fontWeight: '600'
+            },
+            table: {
+              whiteSpace: 'nowrap'
             },
             code: {
               padding: '4px',
-              'border-radius': '5px',
-              'font-weight': '400',
-              background: 'hsl(var(--muted))',
-              '&::before, &::after': {
-                content: 'none'
-              }
+              borderRadius: '5px',
+              fontWeight: '400',
+              background: 'hsl(var(--muted))'
+            },
+            kbd: {
+              boxShadow:
+                '0 0 0 1px var(--tw-prose-kbd-shadows),0 3px 0 var(--tw-prose-kbd-shadows)'
             },
             ul: {
-              'padding-left': '1rem'
+              paddingLeft: '1rem'
             },
-            'ul>li': {
-              'font-size': '0.9rem'
-            }
+            'ul > li': {
+              fontSize: '0.9rem'
+            },
+            // Disabled styles, handled by Next Docs
+            'pre code': false,
+            'pre code::after': false,
+            'pre code::before': false,
+            'code::after': false,
+            'code::before': false
           }
         }
-      })
+      }
     }
   },
   plugins: [
