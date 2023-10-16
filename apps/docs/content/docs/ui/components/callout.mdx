@@ -1,0 +1,50 @@
+---
+title: Callout
+description: Add callout to your docs
+preview: callout
+---
+
+## Usage
+
+Add it to your MDX components, or import it in MDX files.
+
+```mdx
+<Callout title="Title">Hello World</Callout>
+```
+
+### Types
+
+You can specify the type of callout.
+
+```mdx
+<Callout title="Title" type="warn">
+  Hello World
+</Callout>
+```
+
+<Callout title="Title" type="warn" className="my-4">
+  Hello World
+</Callout>
+
+### Without Title
+
+You can create a Callout without title.
+
+<Callout className="my-4">Hello World</Callout>
+
+### Reference
+
+<TypeTable
+  type={{
+    title: {
+      type: 'string'
+    },
+    type: {
+      type: 'info | warn | error',
+      default: 'info'
+    },
+    icon: {
+      type: 'ReactNode'
+    }
+  }}
+/>

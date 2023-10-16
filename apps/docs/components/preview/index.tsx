@@ -1,3 +1,4 @@
+import { Callout } from 'next-docs-ui/components/callout'
 import { File, Files } from 'next-docs-ui/components/files'
 import { InlineTOC } from 'next-docs-ui/components/inline-toc'
 import { RollButton } from 'next-docs-ui/components/roll-button'
@@ -5,6 +6,11 @@ import { Step, Steps } from 'next-docs-ui/components/steps'
 import type { ReactNode } from 'react'
 
 export default {
+  callout: (
+    <Wrapper>
+      <Callout title="Title">Hello World</Callout>
+    </Wrapper>
+  ),
   files: (
     <Wrapper>
       <Files>
