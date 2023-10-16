@@ -17,7 +17,7 @@
     "contentlayer": "^0.3.4",
     "katex": "^0.16.8",
     "lucide-react": "^0.287.0",
-    "next": "13.5.4",
+    "next": "13.5.5",
     "next-contentlayer": "^0.3.4",
     "next-docs-ui": "workspace:*",
     "next-docs-zeta": "workspace:*",

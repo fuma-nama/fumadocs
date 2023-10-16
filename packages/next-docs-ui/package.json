@@ -69,7 +69,7 @@
     "algoliasearch": "^4.20.0",
     "autoprefixer": "10.4.16",
     "contentlayer": "^0.3.4",
-    "next": "13.5.4",
+    "next": "13.5.5",
     "postcss": "8.4.31",
     "postcss-cli": "^10.1.0",
     "postcss-import": "^15.1.0",
