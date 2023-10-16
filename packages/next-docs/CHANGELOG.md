@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 2.4.0
+
+### Patch Changes
+
+- 27ce871: Add missing shiki peer deps
+
 ## 2.3.3
 
 ### Patch Changes
