@@ -1,5 +1,18 @@
 # next-docs-ui
 
+## 2.4.0
+
+### Minor Changes
+
+- 82c4fc6: Override default typography styles
+- 25e6856: Create Callout component
+
+### Patch Changes
+
+- 1cb6385: Improve Inline TOC component
+- Updated dependencies [27ce871]
+  - next-docs-zeta@2.4.0
+
 ## 2.3.3
 
 ### Patch Changes
