@@ -1,8 +1,6 @@
 'use client'
 
 import { ThemeSwitch } from '@/components/ThemeSwitch'
-import type { LucideProps } from 'lucide-react'
-import dynamicIconImports from 'lucide-react/dynamicIconImports'
 import { useMDXComponent } from 'next-contentlayer/hooks'
 import { Accordion, Accordions } from 'next-docs-ui/components/accordion'
 import { Callout } from 'next-docs-ui/components/callout'
@@ -10,8 +8,7 @@ import { ImageZoom } from 'next-docs-ui/components/image-zoom'
 import { Tab, Tabs } from 'next-docs-ui/components/tabs'
 import { TypeTable } from 'next-docs-ui/components/type-table'
 import defaultComponents from 'next-docs-ui/mdx'
-import dynamic from 'next/dynamic'
-import type { HTMLAttributes } from 'react'
+import { type HTMLAttributes } from 'react'
 
 const components = {
   ...defaultComponents,
@@ -27,20 +24,9 @@ const components = {
   Accordions,
   Tab,
   Tabs,
-  Icon,
   blockquote: (props: React.QuoteHTMLAttributes<HTMLQuoteElement>) => (
     <Callout className="my-4">{props.children}</Callout>
   )
-}
-
-interface IconProps extends LucideProps {
-  name: keyof typeof dynamicIconImports
-}
-
-function Icon({ name, ...props }: IconProps) {
-  const LucideIcon = dynamic(dynamicIconImports[name])
-
-  return <LucideIcon {...props} />
 }
 
 export function Content({ code }: { code: string }) {

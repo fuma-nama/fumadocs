@@ -3,6 +3,8 @@ title: Card
 description: Use the Card component in your MDX documentation
 ---
 
+import HomeIcon from 'lucide-react/dist/esm/icons/home'
+
 ## Usage
 
 Add it to your MDX components.
@@ -86,7 +88,13 @@ import { HomeIcon } from 'lucide-react'
 If you're using Contentlayer, or other libraries for rendering MDX, ensure that
 tree shaking is working properly.
 
-In some cases, you must import icons from MDX Components.
+Most of the icon libraries support importing icons individually.
+
+```tsx
+import HomeIcon from 'lucide-react/dist/esm/icons/home'
+```
+
+As a workaround, you can pass icons to MDX Components too.
 
 ```tsx
 import { HomeIcon } from 'lucide-react'
@@ -101,7 +109,7 @@ const components = {
 
 <Cards>
   <Card
-    icon={<Icon name="home" />}
+    icon={<HomeIcon />}
     href="/"
     title="Home"
     description="Go back to home"
