@@ -189,6 +189,7 @@ function build(root: string, ctx: Context): PageTree {
 
   return {
     name: folder.name,
+    url: ctx.getUrl([], ctx.lang),
     children: folder.children
   }
 }

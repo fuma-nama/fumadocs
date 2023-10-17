@@ -14,10 +14,7 @@ export function getBreadcrumbItems(
   url: string,
   tree: PageTree
 ): BreadcrumbItem[] {
-  const path = searchPath(tree.children, url) ?? []
-  path.unshift({ name: tree.name, url: null })
-
-  return path
+  return searchPath(tree.children, url) ?? []
 }
 
 /**

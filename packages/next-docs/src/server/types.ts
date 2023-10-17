@@ -2,6 +2,7 @@ import type { ReactElement } from 'react'
 
 export type PageTree = {
   name: string
+  url?: string
   children: TreeNode[]
 }
 
