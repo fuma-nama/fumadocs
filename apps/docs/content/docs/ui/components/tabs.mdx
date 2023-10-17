@@ -1,52 +1,12 @@
 ---
 title: Tabs
-description: Adding Tabs to your documentation
+description:
+  A Tabs component built with Radix UI, with additional features such as
+  persistent and shared value.
+preview: tabs
 ---
 
-A Tabs component built with
-[Radix UI](https://www.radix-ui.com/primitives/docs/components/tabs), with
-additional features such as persistent and shared value.
-
 > it is an optional component which won't be loaded by default.
-
-<Tabs
-  id="language"
-  persist
-  items={['Javascript', 'Rust', 'Typescript']}
->
-<Tab value="Javascript">
-  
-Hello World in Javascript
-  
-</Tab>
-<Tab value="Rust">
-  
-Hello World in Rust
-
-</Tab>
-<Tab value="Typescript">
-
-Also works if items are not the same
-
-</Tab>
-</Tabs>
-
-<Tabs
-  id="language"
-  persist
-  items={['Javascript', 'Rust']}
->
-<Tab value="Javascript">
-
-Value is shared! Try refresh and see if the value is persisted
-
-</Tab>
-<Tab value="Rust">
-
-Value is shared! Try refresh and see if the value is persisted
-
-</Tab>
-</Tabs>
 
 ## Usage
 

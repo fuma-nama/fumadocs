@@ -1,7 +1,24 @@
 ---
 title: Code Block
-description: Adding codeblocks to your docs
+description: Adding code blocks to your docs
 ---
+
+<div className="rounded-lg p-4 bg-gradient-to-br from-primary to-primary/50">
+<div className="bg-background rounded-lg">
+
+```js title="next.config.js" {10} /config/
+const config = {
+  pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
+  reactStrictMode: true
+}
+
+const { withContentlayer } = require('next-contentlayer')
+
+module.exports = withContentlayer(config)
+```
+
+</div>
+</div>
 
 Display code blocks, required by default.
 
@@ -71,17 +88,4 @@ Inline code is supported too, `console.log("Hello World"){:js}`.
 
 ```mdx
 `console.log("Hello World"){:js}`
-```
-
-## Example
-
-```js title="next.config.js" {10} /config/
-const config = {
-  pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
-  reactStrictMode: true
-}
-
-const { withContentlayer } = require('next-contentlayer')
-
-module.exports = withContentlayer(config)
 ```

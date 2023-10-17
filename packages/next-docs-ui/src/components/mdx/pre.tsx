@@ -20,7 +20,7 @@ export function Pre({ title, allowCopy = true, ...props }: PreProps) {
 
   return (
     <div
-      className="nd-relative nd-group nd-border nd-rounded-lg nd-text-sm nd-bg-secondary/50 nd-not-prose"
+      className="nd-relative nd-group nd-border nd-rounded-lg nd-overflow-hidden nd-text-sm nd-bg-secondary/50 nd-not-prose"
       data-code-fragment
     >
       {title ? (
@@ -69,7 +69,7 @@ function CopyButton({
   return (
     <button
       className={cn(
-        'nd-p-2 nd-rounded-md nd-transition-opacity nd-opacity-0 nd-z-[2] group-hover:nd-opacity-100',
+        'nd-p-2 nd-rounded-md nd-transition-opacity nd-opacity-0 group-hover:nd-opacity-100',
         className
       )}
       aria-label="Copy Text"
