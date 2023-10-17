@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import type { AnchorHTMLAttributes } from 'react'
 
-type SafeLinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
+export type SafeLinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
   /**
    * Enable dynamic href
    *
