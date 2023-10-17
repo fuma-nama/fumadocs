@@ -1,8 +1,7 @@
 const full_layout = `
 .nd-container { max-width: none; }
 main aside { border-right-width: 1px; }
-article { margin-left: auto; margin-right: auto; max-width: 700px; }
-article > div:first-of-type { display: none; }`
+article { margin-left: auto; margin-right: auto; max-width: 700px; }`
 
 const blue_theme = `:root { --background: 0 0% 100%; --foreground: 222.2 47.4%
 11.2%; --muted: 210 40% 96.1%; --muted-foreground: 215.4 16.3% 46.9%; --popover:
