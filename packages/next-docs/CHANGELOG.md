@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 2.4.1
+
+### Patch Changes
+
+- dfc8b44: Remove tree root node from breadcrumb
+- ef4d8cc: Expose props from SafeLink component
+
 ## 2.4.0
 
 ### Patch Changes
