@@ -10,6 +10,7 @@ export function Breadcrumb() {
   const { tree } = useContext(LayoutContext)
   const pathname = usePathname()
   const items = useBreadcrumb(pathname, tree)
+  if (items.length === 1) return <></>
 
   return (
     <div className="nd-flex nd-flex-row nd-gap-1 nd-text-sm nd-text-muted-foreground nd-items-center">
