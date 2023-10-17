@@ -17,8 +17,8 @@ export default {
     <Wrapper>
       <Heading
         id="preview"
-        as="h2"
-        className="bg-background p-4 rounded-xl my-0"
+        as="h3"
+        className="bg-background p-4 rounded-xl !my-0"
       >
         Hello World
       </Heading>
@@ -81,7 +81,7 @@ export default {
       <ImageZoom
         alt="banner"
         src={BannerImage}
-        className="my-0 bg-background rounded-xl"
+        className="!my-0 bg-background rounded-xl"
         priority
       />
     </Wrapper>
