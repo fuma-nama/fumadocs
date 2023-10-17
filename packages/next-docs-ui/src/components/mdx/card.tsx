@@ -1,29 +1,35 @@
-import { SafeLink } from 'next-docs-zeta/link'
-import type { ReactNode } from 'react'
+import { cn } from '@/utils/cn'
+import { SafeLink, type SafeLinkProps } from 'next-docs-zeta/link'
+import type { HTMLAttributes, ReactNode } from 'react'
 
-export function Cards({ children }: { children: ReactNode }) {
+export function Cards(props: HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className="nd-grid nd-grid-cols-1 md:nd-grid-cols-2 nd-gap-4 nd-not-prose">
-      {children}
+    <div
+      {...props}
+      className={cn(
+        'nd-grid nd-grid-cols-1 md:nd-grid-cols-2 nd-gap-4 nd-not-prose',
+        props.className
+      )}
+    >
+      {props.children}
     </div>
   )
 }
 
-export function Card({
-  href,
-  icon,
-  title,
-  description
-}: {
-  href: string
+export type CardProps = {
   icon?: ReactNode
   title: string
   description: string
-}) {
+} & Omit<SafeLinkProps, 'title' | 'description'>
+
+export function Card({ icon, title, description, ...props }: CardProps) {
   return (
     <SafeLink
-      href={href}
-      className="nd-text-sm nd-rounded-lg nd-p-4 nd-border nd-bg-card nd-text-card-foreground nd-transition-colors hover:nd-bg-muted/80"
+      {...props}
+      className={cn(
+        'nd-block nd-text-sm nd-rounded-lg nd-p-4 nd-border nd-bg-card nd-text-card-foreground nd-transition-colors hover:nd-bg-muted/80',
+        props.className
+      )}
     >
       {icon && (
         <div className="nd-w-fit nd-border nd-p-1 nd-rounded-md nd-bg-background nd-mb-3">
