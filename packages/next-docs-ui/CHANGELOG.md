@@ -1,5 +1,15 @@
 # next-docs-ui
 
+## 2.4.1
+
+### Patch Changes
+
+- dc4f10d: Fix Callout component overflow
+- 841a18b: Support passing extra props to Card components
+- Updated dependencies [dfc8b44]
+- Updated dependencies [ef4d8cc]
+  - next-docs-zeta@2.4.1
+
 ## 2.4.0
 
 ### Minor Changes
