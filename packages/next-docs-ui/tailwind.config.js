@@ -46,6 +46,9 @@ module.exports = {
       fontSize: {
         medium: '15px'
       },
+      height: {
+        body: 'calc(100vh - 4rem)'
+      },
       colors: {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
@@ -59,10 +62,6 @@ module.exports = {
         secondary: {
           DEFAULT: 'hsl(var(--secondary))',
           foreground: 'hsl(var(--secondary-foreground))'
-        },
-        destructive: {
-          DEFAULT: 'hsl(var(--destructive))',
-          foreground: 'hsl(var(--destructive-foreground))'
         },
         muted: {
           DEFAULT: 'hsl(var(--muted))',
@@ -131,6 +130,8 @@ module.exports = {
             '--tw-prose-kbd-shadows': 'hsl(var(--primary)/0.5)',
             // not used
             '--tw-prose-pre-code': false,
+            fontSize: '15px',
+            fontHeight: '24px',
             maxWidth: 'none',
             a: {
               transition: 'opacity 0.3s',

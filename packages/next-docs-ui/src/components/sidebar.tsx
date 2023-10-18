@@ -40,14 +40,14 @@ export function Sidebar({ banner, footer }: SidebarProps) {
       className={cn(
         'nd-flex nd-flex-col nd-w-full',
         open
-          ? 'lg:nd-w-[260px]'
-          : 'lg:nd-w-0 lg:nd-overflow-hidden lg:nd-opacity-0',
-        'lg:nd-sticky lg:nd-top-16 lg:nd-h-[calc(100vh-4rem)] lg:nd-transition-[width,opacity]',
-        'max-lg:nd-fixed max-lg:nd-inset-y-0 max-lg:nd-right-0 max-lg:nd-bg-background max-lg:nd-z-40 max-lg:nd-pt-16 max-lg:data-[open=false]:nd-hidden sm:max-lg:nd-max-w-sm sm:max-lg:nd-border-l'
+          ? 'md:nd-w-[260px]'
+          : 'md:nd-w-0 md:nd-overflow-hidden md:nd-opacity-0',
+        'md:nd-sticky md:nd-top-16 md:nd-h-body md:nd-transition-[width,opacity]',
+        'max-md:nd-fixed max-md:nd-inset-y-0 max-md:nd-right-0 max-md:nd-bg-background max-md:nd-z-40 max-md:nd-pt-16 max-md:data-[open=false]:nd-hidden sm:max-md:nd-max-w-sm sm:max-md:nd-border-l'
       )}
     >
-      <ScrollArea className="nd-flex-1 lg:nd-w-[260px]">
-        <div className="nd-flex nd-flex-col nd-pb-10 nd-pt-4 nd-text-medium max-lg:nd-px-6 lg:nd-pr-4 lg:nd-pt-12 lg:nd-text-sm">
+      <ScrollArea className="nd-flex-1 md:nd-w-[260px]">
+        <div className="nd-flex nd-flex-col nd-pb-10 nd-pt-4 nd-text-medium max-md:nd-px-6 md:nd-pr-4 md:nd-pt-12 md:nd-text-sm">
           {banner}
           {tree.children.map((item, i) => (
             <Node key={i} item={item} level={1} />
@@ -56,12 +56,12 @@ export function Sidebar({ banner, footer }: SidebarProps) {
       </ScrollArea>
       <div
         className={cn(
-          'nd-flex nd-flex-row nd-items-center nd-gap-2 nd-border-t nd-py-2 max-lg:nd-px-8',
-          !footer && 'lg:nd-hidden'
+          'nd-flex nd-flex-row nd-items-center nd-gap-2 nd-border-t nd-py-2 max-md:nd-px-8',
+          !footer && 'md:nd-hidden'
         )}
       >
         {footer}
-        <ThemeToggle className="lg:nd-hidden" />
+        <ThemeToggle className="md:nd-hidden" />
       </div>
     </Base.SidebarList>
   )

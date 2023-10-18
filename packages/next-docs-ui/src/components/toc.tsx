@@ -13,7 +13,7 @@ export function TOC(props: {
   footer: ReactNode
 }) {
   return (
-    <div className="nd-sticky nd-divide-y nd-flex nd-flex-col nd-top-16 nd-gap-4 nd-py-12 nd-w-[250px] nd-h-[calc(100vh-4rem)] max-xl:nd-hidden">
+    <div className="nd-sticky nd-divide-y nd-flex nd-flex-col nd-top-16 nd-gap-4 nd-py-12 nd-w-[220px] nd-h-body max-lg:nd-hidden xl:nd-w-[260px]">
       {props.header}
       {props.items.length > 0 && <TOCItems items={props.items} />}
       {props.footer && (
@@ -35,7 +35,7 @@ function TOCItems({ items }: { items: TOCItemType[] }) {
       <h3 className="nd-inline-flex nd-items-center nd-mb-4">
         <TextIcon className="nd-w-4 nd-h-4 nd-mr-2" /> {toc}
       </h3>
-      <div className="nd-flex nd-flex-col nd-border-l-2 nd-text-muted-foreground">
+      <div className="nd-flex nd-flex-col nd-gap-1 nd-border-l-2 nd-text-muted-foreground">
         <Marker pos={pos} />
         {items.map((item, i) => (
           <TOCItem key={i} item={item} setMarker={setPos} />
@@ -83,7 +83,7 @@ function TOCItem({
       ref={ref}
       href={item.url}
       className={cn(
-        'nd-py-1.5 nd-text-ellipsis nd-transition-colors nd-overflow-hidden data-[active=true]:nd-text-primary',
+        'nd-py-1 nd-text-ellipsis nd-transition-colors nd-overflow-hidden data-[active=true]:nd-text-primary',
         item.depth <= 2 && 'nd-pl-4',
         item.depth === 3 && 'nd-pl-7',
         item.depth >= 4 && 'nd-pl-10'

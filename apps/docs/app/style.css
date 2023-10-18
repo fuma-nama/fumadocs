@@ -11,3 +11,13 @@
     @apply animate-infinite-rotate absolute left-[50%] top-[50%] block w-[600px] translate-x-[-50%] translate-y-[-50%] bg-[conic-gradient(var(--tw-gradient-stops))] pb-[600px];
   }
 }
+
+:root {
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+}
+
+.dark {
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 85.7% 97.3%;
+}
