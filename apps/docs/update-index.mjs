@@ -14,7 +14,7 @@ const client = algosearch(
 sync(client, {
   documents: allDocs.map(docs => ({
     ...docs,
-    url: getPageUrl(['docs', ...docs.slug.split('/')]),
+    url: getPageUrl(['/docs', ...docs.slug.split('/')]),
     structured: docs.structuredData,
     extra_data: {
       tag: docs._raw.flattenedPath.startsWith('docs/ui') ? 'ui' : 'headless'
