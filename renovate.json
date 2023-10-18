@@ -13,6 +13,8 @@
   "ignoreDeps": [
     "@types/react",
     "@types/react-dom",
+    "@types/hast",
+    "@types/mdast",
     "flexsearch",
     "@types/node"
   ]
