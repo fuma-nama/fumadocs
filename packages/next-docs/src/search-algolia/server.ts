@@ -2,6 +2,7 @@ import { randomUUID } from 'crypto'
 import type { DocsPageBase } from '@/contentlayer/types'
 import type { StructuredData } from '@/mdx-plugins/search-structure'
 import type { SearchClient, SearchIndex } from 'algoliasearch'
+import type { BaseIndex } from './shared'
 
 type DocumentRecord = DocsPageBase & {
   /**
@@ -36,26 +37,6 @@ export async function setIndexSettings(index: SearchIndex): Promise<void> {
     attributesToSnippet: [],
     attributesForFaceting: ['tag']
   })
-}
-
-export type BaseIndex = {
-  objectID: string
-  title: string
-  url: string
-
-  section?: string
-
-  /**
-   * The anchor id
-   */
-  section_id?: string
-
-  /**
-   * The id of page, used for distinct
-   */
-  page_id: string
-
-  content: string
 }
 
 type Section = {

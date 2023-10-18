@@ -1,6 +1,5 @@
-import type { WithAs } from '@/types'
 import { usePathname } from 'next/navigation'
-import type { ElementType, ReactNode } from 'react'
+import type { ComponentPropsWithoutRef, ElementType, ReactNode } from 'react'
 import { createContext, useContext, useEffect, useState } from 'react'
 import { RemoveScroll } from 'react-remove-scroll'
 
@@ -30,6 +29,14 @@ export function SidebarProvider(props: SidebarProviderProps) {
     </SidebarContext.Provider>
   )
 }
+
+type WithAs<T extends ElementType, Extend = object> = Omit<
+  ComponentPropsWithoutRef<T>,
+  'as' | keyof Extend
+> &
+  Extend & {
+    as?: T
+  }
 
 export type SidebarTriggerProps<T extends ElementType> = WithAs<T>
 

@@ -1,6 +1,7 @@
 import { structure, type StructuredData } from '@/mdx-plugins/search-structure'
 import FlexSearch from 'flexsearch'
 import { NextResponse, type NextRequest } from 'next/server'
+import type { SortedResult } from './shared'
 
 type SearchAPI = {
   GET: (
@@ -161,13 +162,6 @@ type InternalIndex = {
   page_id: string
   type: 'page' | 'heading' | 'text'
   tag?: string
-  content: string
-}
-
-export type SortedResult = {
-  id: string
-  url: string
-  type: 'page' | 'heading' | 'text'
   content: string
 }
 

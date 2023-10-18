@@ -7,7 +7,7 @@ import {
   SearchDialog,
   type SharedProps
 } from 'next-docs-ui/components/dialog/search'
-import { useAlgoliaSearch } from 'next-docs-zeta/search-algolia'
+import { useAlgoliaSearch } from 'next-docs-zeta/search-algolia/client'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 

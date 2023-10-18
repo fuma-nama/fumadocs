@@ -1,6 +1,6 @@
-import type { SortedResult } from '@/server/flexsearch-api'
 import { useEffect, useState } from 'react'
 import useSWR from 'swr'
+import type { SortedResult } from './shared'
 
 export function useDocsSearch<Result = SortedResult[]>(
   locale?: string,

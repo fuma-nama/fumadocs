@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/command'
 import { I18nContext } from '@/contexts/i18n'
 import { FileTextIcon, HashIcon, TextIcon } from 'lucide-react'
-import type { SortedResult } from 'next-docs-zeta/server'
+import type { SortedResult } from 'next-docs-zeta/search/shared'
 import { useRouter } from 'next/navigation'
 import { useContext, type ReactNode } from 'react'
 

@@ -1,7 +1,7 @@
 'use client'
 
 import type { SearchIndex } from 'algoliasearch/lite'
-import { useAlgoliaSearch } from 'next-docs-zeta/search-algolia'
+import { useAlgoliaSearch } from 'next-docs-zeta/search-algolia/client'
 import dynamic from 'next/dynamic'
 import { createContext, useContext, type ReactNode } from 'react'
 import { type SharedProps } from './search'

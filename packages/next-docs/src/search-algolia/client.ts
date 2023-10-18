@@ -1,9 +1,9 @@
-import type { BaseIndex } from '@/algolia'
-import type { SortedResult } from '@/server/flexsearch-api'
+import type { SortedResult } from '@/search/shared'
 import type { Hit, SearchOptions } from '@algolia/client-search'
 import type { SearchIndex } from 'algoliasearch/lite'
 import { useState } from 'react'
 import useSWR from 'swr'
+import type { BaseIndex } from './shared'
 
 export function groupResults(hits: Hit<BaseIndex>[]): SortedResult[] {
   const grouped: SortedResult[] = []

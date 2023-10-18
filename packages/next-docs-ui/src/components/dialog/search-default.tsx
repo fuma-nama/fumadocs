@@ -3,7 +3,7 @@
 import { CommandGroup, CommandItem } from '@/components/ui/command'
 import { I18nContext } from '@/contexts/i18n'
 import { ExternalLinkIcon } from 'lucide-react'
-import { useDocsSearch } from 'next-docs-zeta/search'
+import { useDocsSearch } from 'next-docs-zeta/search/client'
 import { useRouter } from 'next/navigation'
 import { useContext, type ReactNode } from 'react'
 import { SearchDialog, type SharedProps } from './search'
