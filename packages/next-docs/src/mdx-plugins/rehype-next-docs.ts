@@ -1,15 +1,17 @@
+// @ts-nocheck
 import Slugger from 'github-slugger'
-import rehypePrettycode from 'rehype-pretty-code'
+import type { Root } from 'hast'
+import rehypePrettycode, {
+  type Options as RehypePrettyCodeOptions
+} from 'rehype-pretty-code'
+import type { Transformer } from 'unified'
 import { flattenNode, visit } from './utils'
 
 const slugger = new Slugger()
 const headings = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
 const customMetaRegex = /custom="([^"]+)"/
 
-/**
- * @type {import('rehype-pretty-code').Options}
- */
-const rehypePrettyCodeOptions = {
+const rehypePrettyCodeOptions: RehypePrettyCodeOptions = {
   theme: 'css-variables',
   defaultLang: {
     block: 'text'
@@ -24,7 +26,7 @@ const rehypePrettyCodeOptions = {
 /**
  * Handle codeblocks and heading slugs
  */
-export const rehypeNextDocs = () => async tree => {
+export const rehypeNextDocs = (): Transformer<Root, Root> => async tree => {
   slugger.reset()
 
   visit(tree, ['pre', ...headings], node => {

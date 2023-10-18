@@ -286,6 +286,12 @@ importers:
       '@types/flexsearch':
         specifier: 0.7.4
         version: 0.7.4
+      '@types/hast':
+        specifier: ^2.3.5
+        version: 2.3.5
+      '@types/mdast':
+        specifier: ^3.0.12
+        version: 3.0.12
       '@types/negotiator':
         specifier: ^0.6.1
         version: 0.6.1

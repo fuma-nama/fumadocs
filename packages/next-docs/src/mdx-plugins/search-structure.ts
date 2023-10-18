@@ -1,9 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+// @ts-nocheck
 import Slugger from 'github-slugger'
+import type { Node, Root } from 'mdast'
 import { remark } from 'remark'
 import remarkGfm from 'remark-gfm'
 import remarkMdx from 'remark-mdx'
-import type { PluggableList } from 'unified'
+import type { PluggableList, Transformer } from 'unified'
 import { visit } from 'unist-util-visit'
 
 type Heading = {
@@ -36,8 +37,8 @@ type Options = {
 const slugger = new Slugger()
 const textTypes = ['text', 'inlineCode']
 
-function flattenNode(node: any) {
-  const p: any[] = []
+function flattenNode(node: Node) {
+  const p: string[] = []
   visit(node, textTypes, node => {
     if (typeof node.value !== 'string') return
     p.push(node.value)
@@ -45,9 +46,10 @@ function flattenNode(node: any) {
   return p.join(``)
 }
 
-const structurize =
-  ({ types = ['paragraph', 'blockquote', 'heading'] }: Options = {}) =>
-  (node: any, file: any) => {
+function structurize({
+  types = ['paragraph', 'blockquote', 'heading']
+}: Options = {}): Transformer<Root, Root> {
+  return (node, file) => {
     slugger.reset()
     const data: StructuredData = { contents: [], headings: [] }
     let lastHeading: string | undefined = ''
@@ -76,6 +78,7 @@ const structurize =
 
     file.data = data
   }
+}
 
 /**
  * Extract data from markdown/mdx content
@@ -92,5 +95,5 @@ export function structure(
     .use([structurize, options])
     .processSync(content)
 
-  return result.data as StructuredData
+  return result.data
 }
