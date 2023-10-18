@@ -28,12 +28,12 @@ export function InlineTOC({
         )}
       </Collapsible.Trigger>
       <Collapsible.Content className="nd-overflow-hidden data-[state=open]:nd-animate-collapsible-down data-[state=closed]:nd-animate-collapsible-up">
-        <div className="nd-flex nd-flex-col nd-px-4 nd-pb-4">
+        <div className="nd-flex nd-flex-col nd-px-4 nd-pb-4 nd-text-muted-foreground">
           {items.map(item => (
             <a
               key={item.url}
               href={item.url}
-              className="nd-py-1.5 nd-border-l hover:nd-border-primary"
+              className="nd-py-1.5 nd-border-l hover:nd-text-primary hover:nd-border-primary"
               style={{
                 paddingLeft: 16 * Math.max(item.depth - 1, 1)
               }}
