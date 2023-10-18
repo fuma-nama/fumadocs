@@ -1,14 +1,13 @@
 @tailwind components;
 @tailwind utilities;
 
-.animated-border {
-  border-radius: inherit;
-  mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-}
+@layer components {
+  .animated-border {
+    border-radius: inherit;
+  }
 
-.animated-border::before {
-  content: '';
-  @apply animate-infinite-rotate absolute left-[50%] top-[50%] block w-[600px] translate-x-[-50%] translate-y-[-50%] bg-[conic-gradient(var(--tw-gradient-stops))] from-purple-400 via-pink-400 pb-[600px];
+  .animated-border::before {
+    content: '';
+    @apply animate-infinite-rotate absolute left-[50%] top-[50%] block w-[600px] translate-x-[-50%] translate-y-[-50%] bg-[conic-gradient(var(--tw-gradient-stops))] pb-[600px];
+  }
 }

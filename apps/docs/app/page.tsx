@@ -44,8 +44,8 @@ export default function HomePage() {
             href="/docs/headless"
             className="group relative overflow-hidden p-px rounded-xl z-[2]"
           >
-            <i className="absolute inset-0 opacity-0 transition-opacity z-[-1] animated-border group-hover:opacity-100" />
-            <div className="absolute inset-px bg-gradient-to-b from-card/80 to-background rounded-[inherit] z-[-1]" />
+            <i className="absolute inset-0 opacity-0 transition-opacity z-[-1] animated-border group-hover:opacity-100 before:from-purple-400 before:via-pink-400" />
+            <div className="absolute inset-px bg-gradient-to-b from-card/90 to-background rounded-[inherit] z-[-1]" />
             <div className="flex flex-col items-center rounded-[inherit] h-full z-[2] p-6 border md:p-12">
               <div className="border p-3 bg-gradient-to-b from-purple-400/30 border-foreground/20 mb-6 rounded-xl">
                 <LibraryIcon className="h-9 w-9 text-purple-400 dark:text-purple-200" />
@@ -62,8 +62,8 @@ export default function HomePage() {
             href="/docs/ui"
             className="group relative overflow-hidden rounded-xl p-px z-[2]"
           >
-            <i className="absolute inset-0 opacity-0 transition-opacity z-[-1] animated-border group-hover:opacity-100" />
-            <div className="absolute inset-px bg-gradient-to-b from-card/80 to-background rounded-[inherit] z-[-1]" />
+            <i className="absolute inset-0 opacity-0 transition-opacity z-[-1] animated-border group-hover:opacity-100 before:from-blue-400 before:via-cyan-500" />
+            <div className="absolute inset-px bg-gradient-to-b from-card/90 to-background rounded-[inherit] z-[-1]" />
             <div className="flex flex-col items-center rounded-[inherit] h-full p-6 border md:p-12">
               <div className="border p-3 bg-gradient-to-b from-blue-400/30 border-blue-500/50 mb-6 rounded-xl">
                 <LayoutIcon className="h-9 w-9 text-blue-400 dark:text-cyan-200" />
