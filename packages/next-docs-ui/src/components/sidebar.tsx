@@ -2,7 +2,6 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { SidebarContext } from '@/contexts/sidebar'
 import { LayoutContext } from '@/contexts/tree'
 import { cn } from '@/utils/cn'
-import * as Collapsible from '@radix-ui/react-collapsible'
 import { cva } from 'class-variance-authority'
 import { ChevronDown } from 'lucide-react'
 import type { FileNode, FolderNode, TreeNode } from 'next-docs-zeta/server'
@@ -12,6 +11,11 @@ import { usePathname } from 'next/navigation'
 import type { ReactNode } from 'react'
 import { useContext, useEffect, useMemo, useState } from 'react'
 import { ThemeToggle } from './theme-toggle'
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger
+} from './ui/collapsible'
 
 export type SidebarProps = {
   banner?: ReactNode
@@ -145,11 +149,11 @@ function Folder({
   )
 
   return (
-    <Collapsible.Root
+    <Collapsible
       open={extend}
       onOpenChange={index == null || active ? setExtend : undefined}
     >
-      <Collapsible.Trigger
+      <CollapsibleTrigger
         className={cn(itemVariants({ active, className: 'nd-w-full' }))}
         asChild
       >
@@ -158,19 +162,14 @@ function Folder({
         ) : (
           <button>{content}</button>
         )}
-      </Collapsible.Trigger>
-      <Collapsible.Content
-        className={cn(
-          'nd-overflow-hidden data-[state=open]:nd-animate-collapsible-down data-[state=closed]:nd-animate-collapsible-up',
-          !animated && '!nd-duration-0'
-        )}
-      >
+      </CollapsibleTrigger>
+      <CollapsibleContent className={cn(!animated && '!nd-duration-0')}>
         <div className="nd-flex nd-flex-col nd-ml-4 nd-pl-2 nd-border-l nd-py-2">
           {children.map((item, i) => (
             <Node key={i} item={item} level={level + 1} />
           ))}
         </div>
-      </Collapsible.Content>
-    </Collapsible.Root>
+      </CollapsibleContent>
+    </Collapsible>
   )
 }
