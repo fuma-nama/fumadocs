@@ -124,7 +124,7 @@
     "@algolia/client-search": "^4.20.0",
     "@types/flexsearch": "0.7.4",
     "@types/hast": "^2.3.5",
-    "@types/mdast": "^3.0.12",
+    "@types/mdast": "^4.0.0",
     "@types/negotiator": "^0.6.1",
     "@types/react": "18.2.0",
     "@types/react-dom": "18.2.1",
