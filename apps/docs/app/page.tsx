@@ -62,7 +62,7 @@ export default function HomePage() {
             href="/docs/ui"
             className="group relative overflow-hidden rounded-xl p-px z-[2]"
           >
-            <i className="absolute inset-0 opacity-0 transition-opacity z-[-1] animated-border group-hover:opacity-100 before:from-blue-400 before:via-cyan-500" />
+            <i className="absolute inset-0 opacity-0 transition-opacity z-[-1] animated-border group-hover:opacity-100 before:from-cyan-400 before:via-blue-400" />
             <div className="absolute inset-px bg-gradient-to-b from-card/90 to-background rounded-[inherit] z-[-1]" />
             <div className="flex flex-col items-center rounded-[inherit] h-full p-6 border md:p-12">
               <div className="border p-3 bg-gradient-to-b from-blue-400/30 border-blue-500/50 mb-6 rounded-xl">

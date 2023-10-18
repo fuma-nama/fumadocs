@@ -11,6 +11,7 @@ import { Tab, Tabs } from 'next-docs-ui/components/tabs'
 import { TypeTable } from 'next-docs-ui/components/type-table'
 import { Card, Heading } from 'next-docs-ui/mdx'
 import type { ReactNode } from 'react'
+import { Wrapper } from './wrapper'
 
 export default {
   heading: (
@@ -62,7 +63,7 @@ export default {
   ),
   'type-table': (
     <Wrapper>
-      <div className="bg-background p-4 rounded-xl">
+      <div className="bg-background px-4 rounded-xl">
         <TypeTable
           type={{
             percentage: {
@@ -185,11 +186,3 @@ export default {
   ),
   'roll-button': <RollButton />
 } as Record<string, ReactNode>
-
-function Wrapper({ children }: { children: ReactNode }) {
-  return (
-    <div className="rounded-lg p-4 bg-gradient-to-br from-primary to-primary/50">
-      {children}
-    </div>
-  )
-}

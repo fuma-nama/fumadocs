@@ -28,7 +28,7 @@ export default function Layout({
     <main
       className={cn(
         params.mode === 'ui' &&
-          '[--primary:213_98%_60%] dark:[--primary:213_94%_68%]',
+          '[--primary:213_98%_48%] dark:[--primary:213_94%_68%]',
         params.mode === 'headless' &&
           '[--primary:270_95%_60%] dark:[--primary:270_95%_75%]'
       )}

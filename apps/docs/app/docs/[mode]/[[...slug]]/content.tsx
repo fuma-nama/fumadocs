@@ -1,5 +1,6 @@
 'use client'
 
+import { Wrapper } from '@/components/preview/wrapper'
 import { ThemeSwitch } from '@/components/ThemeSwitch'
 import { useMDXComponent } from 'next-contentlayer/hooks'
 import { Accordion, Accordions } from 'next-docs-ui/components/accordion'
@@ -24,6 +25,7 @@ const components = {
   Accordions,
   Tab,
   Tabs,
+  Wrapper,
   blockquote: (props: React.QuoteHTMLAttributes<HTMLQuoteElement>) => (
     <Callout className="my-4">{props.children}</Callout>
   )
