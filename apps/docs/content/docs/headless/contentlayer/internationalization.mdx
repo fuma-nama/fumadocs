@@ -57,7 +57,7 @@ export const config = {
 4. Create a dynamic route, ensure all special files are nested under
    `/app/[lang]`.
 
-```tsx title="/app/[lang]/layout.tsx"
+```tsx title="app/[lang]/layout.tsx"
 export default function Layout({ params }: { params: { lang: string } }) {
   return (
     <html lang={params.lang}>
@@ -95,7 +95,7 @@ you can use `createI18nSearchAPI`.
 
 1. Update the route handler.
 
-```ts title="/api/search/route.ts"
+```ts title="api/search/route.ts"
 import { languages } from '@/i18n'
 import { getPages, getPageUrl } from '@/source'
 import { createI18nSearchAPI } from 'next-docs-zeta/server'
