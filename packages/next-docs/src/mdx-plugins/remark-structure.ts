@@ -87,7 +87,7 @@ export function structure(
     .use(remarkGfm)
     .use(remarkMdx)
     .use(remarkPlugins)
-    .use([remarkStructurize, options])
+    .use([remarkStructure, options])
     .processSync(content)
 
   return result.data.structuredData
