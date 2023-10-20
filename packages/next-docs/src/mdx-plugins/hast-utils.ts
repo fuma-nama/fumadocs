@@ -1,31 +1,36 @@
-// @ts-nocheck
-import type { Node } from 'hast'
+import type { Content, Element, Parent, Root } from 'hast'
 
 /**
  * Visit a node with filtered tag names
  */
 export function visit(
-  node: Node,
+  node: Content | Root,
   tagNames: string[],
-  handler: (node: Node) => void
+  handler: (node: Element) => void
 ): void {
-  if (tagNames.includes(node.tagName)) {
-    handler(node)
-    return
-  }
+  if (node.type === 'element')
+    if (tagNames.includes(node.tagName)) {
+      handler(node)
+      return
+    }
 
-  node.children?.forEach(n => visit(n, tagNames, handler))
+  if ('children' in node)
+    node.children.forEach(n => visit(n, tagNames, handler))
 }
 
-export function flattenNode(node: Node): string {
+export function flattenNode(node: Content): string {
   if ('children' in node) {
     return all(node)
   }
 
-  return 'value' in node ? node.value : ''
+  if (node.type === 'text') {
+    return node.value
+  }
+
+  return ''
 }
 
-function one(node: Node): string {
+function one(node: Content): string {
   if (node.type === 'text') {
     return node.value
   }
@@ -33,7 +38,7 @@ function one(node: Node): string {
   return 'children' in node ? all(node) : ''
 }
 
-function all(node: Node): string {
+function all(node: Parent): string {
   const result: string[] = []
 
   for (let i = 0; i < node.children.length; i++) {

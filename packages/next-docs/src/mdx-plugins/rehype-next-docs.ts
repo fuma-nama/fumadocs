@@ -1,4 +1,3 @@
-// @ts-nocheck
 import Slugger from 'github-slugger'
 import type { Root } from 'hast'
 import rehypePrettycode, {
@@ -31,7 +30,9 @@ export const rehypeNextDocs = (): Transformer<Root, Root> => async tree => {
 
   visit(tree, ['pre', ...headings], node => {
     if (headings.includes(node.tagName)) {
-      if (!node.properties || !('id' in node.properties)) {
+      node.properties ||= {}
+
+      if (!('id' in node.properties)) {
         node.properties.id = slugger.slug(flattenNode(node))
       }
 
@@ -43,33 +44,42 @@ export const rehypeNextDocs = (): Transformer<Root, Root> => async tree => {
 
       // Allow custom code meta
       if (typeof codeEl.data?.meta === 'string') {
+        // @ts-ignore
         node.nd_custom = codeEl.data.meta.match(customMetaRegex)?.[1]
       }
     }
   })
 
+  // @ts-ignore
   await rehypePrettycode(rehypePrettyCodeOptions)(tree)
 
   visit(tree, ['div', 'pre'], node => {
+    node.properties ||= {}
+
     // Remove default fragment div
     // Add title to pre element
     if ('data-rehype-pretty-code-fragment' in node.properties) {
       if (node.children.length === 0) return
+      let title: string | undefined = undefined
 
-      let preEl = node.children[0]
+      for (const child of node.children) {
+        if (child.type !== 'element') continue
+        child.properties ||= {}
 
-      if ('data-rehype-pretty-code-title' in preEl.properties) {
-        const title = preEl.children[0].value
-        preEl = node.children[1]
+        if ('data-rehype-pretty-code-title' in child.properties) {
+          title = flattenNode(child)
+        }
 
-        if (!preEl) return
-        preEl.properties.title = title
+        if (child.tagName === 'pre') {
+          child.properties.title = title
+          Object.assign(node, child)
+          break
+        }
       }
-
-      Object.assign(node, preEl)
     }
 
     // Add custom meta to properties
+    // @ts-ignore
     node.properties.custom = node.nd_custom
   })
 }

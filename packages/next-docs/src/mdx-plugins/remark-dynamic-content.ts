@@ -1,4 +1,3 @@
-// @ts-nocheck
 import fs from 'fs'
 import path from 'path'
 import type { Root } from 'mdast'
@@ -37,7 +36,7 @@ export function remarkDynamicContent(
 
   return tree => {
     visit(tree, filter, node => {
-      if (typeof node.value !== 'string') return
+      if (!('value' in node) || typeof node.value !== 'string') return
       const result = regex.exec(node.value)
 
       if (result && result[1]) {

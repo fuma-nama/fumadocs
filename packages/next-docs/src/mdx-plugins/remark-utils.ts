@@ -1,12 +1,14 @@
-// @ts-nocheck
-import type { Content } from 'mdast'
+import type { Content, Literal } from 'mdast'
 import { visit } from 'unist-util-visit'
 
-export function flattenNode(node: Content, textTypes: string[]): string {
+const textTypes = ['text', 'inlineCode', 'code']
+
+export function flattenNode(node: Content): string {
   const p: string[] = []
-  visit(node, textTypes, node => {
-    if (typeof node.value !== 'string') return
-    p.push(node.value)
+
+  visit(node, textTypes, child => {
+    p.push((child as Literal).value)
   })
+
   return p.join('')
 }

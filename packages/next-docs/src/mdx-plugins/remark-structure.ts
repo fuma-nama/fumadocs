@@ -35,7 +35,6 @@ type Options = {
 }
 
 const slugger = new Slugger()
-const textTypes = ['text', 'inlineCode']
 
 /**
  * Attach structured data to VFile, you can access via `vfile.data.structuredData`.
@@ -49,8 +48,10 @@ export function remarkStructure({
     let lastHeading: string | undefined = ''
 
     visit(node, types, element => {
+      if (element.type === 'root') return
+
       if (element.type === 'heading') {
-        const heading = flattenNode(element, textTypes)
+        const heading = flattenNode(element)
         const slug = slugger.slug(heading)
 
         data.headings.push({
@@ -64,8 +65,7 @@ export function remarkStructure({
 
       data.contents.push({
         heading: lastHeading,
-        // @ts-ignore
-        content: flattenNode(element, textTypes)
+        content: flattenNode(element)
       })
 
       return 'skip'
