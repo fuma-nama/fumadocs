@@ -9,19 +9,24 @@ type HeadingProps<T extends Types> = Omit<ComponentPropsWithoutRef<T>, 'as'> & {
 
 export function Heading<T extends Types = 'h1'>({
   as,
+  className,
   ...props
 }: HeadingProps<T>) {
   const As = as ?? 'h1'
 
   return (
-    <As {...props} className={cn('nd-scroll-m-20', props.className)}>
-      <a href={`#${props.id}`} className="nd-group nd-not-prose">
-        {props.children}
-        <LinkIcon
-          aria-label="Link to section"
-          className="nd-inline nd-w-4 nd-h-4 nd-ml-2 nd-text-muted-foreground nd-opacity-0 nd-transition-opacity group-hover:nd-opacity-100"
-        />
-      </a>
+    <As className={cn('nd-scroll-m-20', className)} {...props}>
+      {props.id ? (
+        <a href={`#${props.id}`} className="nd-group nd-not-prose">
+          {props.children}
+          <LinkIcon
+            aria-label="Link to section"
+            className="nd-inline nd-w-4 nd-h-4 nd-ml-2 nd-text-muted-foreground nd-opacity-0 nd-transition-opacity group-hover:nd-opacity-100"
+          />
+        </a>
+      ) : (
+        props.children
+      )}
     </As>
   )
 }

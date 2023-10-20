@@ -1,0 +1,63 @@
+{
+  "name": "next-docs-mdx",
+  "description": "The library for using native Next.js MDX features in Next Docs",
+  "version": "2.4.1",
+  "homepage": "https://next-docs-zeta.vercel.app",
+  "author": "Fuma Nama",
+  "repository": "github:fuma-nama/next-docs",
+  "license": "MIT",
+  "files": [
+    "dist/*"
+  ],
+  "exports": {
+    "./*": {
+      "import": "./dist/*.mjs",
+      "types": "./dist/*.d.ts"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "config": [
+        "./dist/config.d.ts"
+      ],
+      "map": [
+        "./dist/map.d.ts"
+      ]
+    }
+  },
+  "scripts": {
+    "build": "tsup --clean",
+    "dev": "tsup --watch",
+    "prepublishOnly": "pnpm build",
+    "types:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@next/mdx": "^13.5.6",
+    "chokidar": "^3.5.3",
+    "estree-util-value-to-estree": "^3.0.1",
+    "fast-glob": "^3.3.1",
+    "remark-frontmatter": "^4.0.1",
+    "yaml": "^2.3.3"
+  },
+  "peerDependencies": {
+    "@mdx-js/loader": "2.x",
+    "@mdx-js/react": "2.x",
+    "next-docs-zeta": "2.x"
+  },
+  "devDependencies": {
+    "@mdx-js/loader": "^2.3.0",
+    "@mdx-js/react": "^2.3.0",
+    "@types/mdx": "^2.0.8",
+    "next": "13.5.5",
+    "unified": "^10.1.2",
+    "@types/mdast": "^3.0.12",
+    "next-docs-zeta": "workspace:*"
+  },
+  "keywords": [
+    "NextJs",
+    "Docs"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

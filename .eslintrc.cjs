@@ -103,6 +103,7 @@ module.exports = {
         'tailwind.config.js',
         'update-index.mjs',
         'next.config.js',
+        'next.config.mjs',
         '.eslintrc.cjs'
       ],
       env: {

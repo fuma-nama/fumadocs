@@ -1,11 +1,12 @@
 // @ts-nocheck
 import Slugger from 'github-slugger'
-import type { Node, Root } from 'mdast'
+import type { Root } from 'mdast'
 import { remark } from 'remark'
 import remarkGfm from 'remark-gfm'
 import remarkMdx from 'remark-mdx'
 import type { PluggableList, Transformer } from 'unified'
 import { visit } from 'unist-util-visit'
+import { flattenNode } from './remark-utils'
 
 type Heading = {
   id: string
@@ -37,16 +38,10 @@ type Options = {
 const slugger = new Slugger()
 const textTypes = ['text', 'inlineCode']
 
-function flattenNode(node: Node) {
-  const p: string[] = []
-  visit(node, textTypes, node => {
-    if (typeof node.value !== 'string') return
-    p.push(node.value)
-  })
-  return p.join(``)
-}
-
-function structurize({
+/**
+ * Attach structured data to VFile, you can access via `vfile.data.structuredData`.
+ */
+export function remarkStructurize({
   types = ['paragraph', 'blockquote', 'heading']
 }: Options = {}): Transformer<Root, Root> {
   return (node, file) => {
@@ -70,13 +65,13 @@ function structurize({
 
       data.contents.push({
         heading: lastHeading,
-        content: flattenNode(element)
+        content: flattenNode(element, textTypes)
       })
 
       return 'skip'
     })
 
-    file.data = data
+    file.data.structuredData = data
   }
 }
 
@@ -92,8 +87,8 @@ export function structure(
     .use(remarkGfm)
     .use(remarkMdx)
     .use(remarkPlugins)
-    .use([structurize, options])
+    .use([remarkStructurize, options])
     .processSync(content)
 
-  return result.data
+  return result.data.structuredData
 }

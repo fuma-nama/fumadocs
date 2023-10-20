@@ -5,7 +5,7 @@ import rehypePrettycode, {
   type Options as RehypePrettyCodeOptions
 } from 'rehype-pretty-code'
 import type { Transformer } from 'unified'
-import { flattenNode, visit } from './utils'
+import { flattenNode, visit } from './hast-utils'
 
 const slugger = new Slugger()
 const headings = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']

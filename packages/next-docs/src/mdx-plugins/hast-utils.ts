@@ -8,7 +8,7 @@ export function visit(
   node: Node,
   tagNames: string[],
   handler: (node: Node) => void
-) {
+): void {
   if (tagNames.includes(node.tagName)) {
     handler(node)
     return
@@ -33,7 +33,7 @@ function one(node: Node): string {
   return 'children' in node ? all(node) : ''
 }
 
-function all(node: Node) {
+function all(node: Node): string {
   const result: string[] = []
 
   for (let i = 0; i < node.children.length; i++) {

@@ -1,7 +1,18 @@
-import { structure, type StructuredData } from '@/mdx-plugins/search-structure'
+import type { StructuredData } from '@/mdx-plugins/remark-structure'
 import FlexSearch from 'flexsearch'
 import { NextResponse, type NextRequest } from 'next/server'
 import type { SortedResult } from './shared'
+
+let Response: typeof NextResponse = NextResponse
+
+/**
+ * In some circumstances, importing `NextResponse` in external packages can cause problems
+ *
+ * You can call `setResponse` to replace the one bundled by Next.js
+ */
+export function setResponse(_new: typeof NextResponse) {
+  Response = _new
+}
 
 type SearchAPI = {
   GET: (
@@ -9,7 +20,10 @@ type SearchAPI = {
   ) => NextResponse<SortedResult[]> | Promise<NextResponse<SortedResult[]>>
 }
 
-type SimpleOptions = { indexes: Index[]; language?: string }
+type SimpleOptions = {
+  indexes: Index[]
+  language?: string
+}
 
 type AdvancedOptions = {
   indexes: AdvancedIndex[]
@@ -57,14 +71,14 @@ export function createI18nSearchAPI<T extends 'simple' | 'advanced'>(
   }
 
   return {
-    GET(request) {
+    async GET(request) {
       const locale = request.nextUrl.searchParams.get('locale')
 
       if (locale && map.has(locale)) {
         return map.get(locale)!.GET(request)
       }
 
-      return NextResponse.json([])
+      return Response.json([])
     }
   }
 }
@@ -118,11 +132,11 @@ export function initSearchAPI({ indexes, language }: SimpleOptions): SearchAPI {
   }
 
   return {
-    GET(request) {
+    async GET(request) {
       const { searchParams } = request.nextUrl
       const query = searchParams.get('query')
 
-      if (query == null) return NextResponse.json([])
+      if (query == null) return Response.json([])
 
       const results = index.search(query, 5, {
         enrich: true,
@@ -136,7 +150,7 @@ export function initSearchAPI({ indexes, language }: SimpleOptions): SearchAPI {
         url: page.doc.url
       }))
 
-      return NextResponse.json(pages ?? [])
+      return Response.json(pages ?? [])
     }
   }
 }
@@ -144,7 +158,6 @@ export function initSearchAPI({ indexes, language }: SimpleOptions): SearchAPI {
 type AdvancedIndex = {
   id: string
   title: string
-  content: string
   /**
    * Required if `tag` is enabled
    */
@@ -152,7 +165,7 @@ type AdvancedIndex = {
   /**
    * preprocess mdx content with `structure`
    */
-  structuredData?: StructuredData
+  structuredData: StructuredData
   url: string
 }
 
@@ -190,7 +203,7 @@ export function initSearchAPIAdvanced({
   })
 
   for (const page of indexes) {
-    const data = page.structuredData ?? structure(page.content)
+    const data = page.structuredData
     let id = 0
 
     index.add({
@@ -226,11 +239,11 @@ export function initSearchAPIAdvanced({
   }
 
   return {
-    GET(request) {
+    async GET(request) {
       const query = request.nextUrl.searchParams.get('query')
       const tag = request.nextUrl.searchParams.get('tag')
 
-      if (query == null) return NextResponse.json([])
+      if (query == null) return Response.json([])
 
       const results = index.search(query, 5, {
         enrich: true,
@@ -238,7 +251,7 @@ export function initSearchAPIAdvanced({
         limit: 6
       })[0]
 
-      if (results == null) return NextResponse.json([])
+      if (results == null) return Response.json([])
 
       const map = new Map<string, SortedResult[]>()
       const sortedResult: SortedResult[] = []
@@ -281,7 +294,7 @@ export function initSearchAPIAdvanced({
         sortedResult.push(...items)
       }
 
-      return NextResponse.json(sortedResult)
+      return Response.json(sortedResult)
     }
   }
 }

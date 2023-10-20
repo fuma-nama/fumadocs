@@ -113,7 +113,7 @@
     "scroll-into-view-if-needed": "^3.1.0",
     "shiki": "^0.14.5",
     "swr": "^2.2.2",
-    "unist-util-visit": "^5.0.0"
+    "unist-util-visit": "^4.1.2"
   },
   "peerDependencies": {
     "next": "13.x",

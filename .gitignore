@@ -5,6 +5,9 @@ node_modules
 /.pnp
 .pnp.js
 
+# next-docs-mdx
+_map.ts
+
 # testing
 /coverage
 

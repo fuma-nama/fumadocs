@@ -1,0 +1,28 @@
+{
+  "name": "experimental-mdx",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@mdx-js/loader": "^2.3.0",
+    "@mdx-js/react": "^2.3.0",
+    "contentlayer": "0.3.4",
+    "next": "13.5.5",
+    "next-contentlayer": "0.3.4",
+    "next-docs-ui": "2.4.1",
+    "next-docs-zeta": "2.4.1",
+    "next-docs-mdx": "2.4.1",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  },
+  "devDependencies": {
+    "@types/mdx": "^2.0.8",
+    "@types/react": "18.2.0",
+    "@types/react-dom": "18.2.1",
+    "typescript": "5.2.2"
+  }
+}

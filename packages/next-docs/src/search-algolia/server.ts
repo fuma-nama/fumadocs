@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto'
 import type { DocsPageBase } from '@/contentlayer/types'
-import type { StructuredData } from '@/mdx-plugins/search-structure'
+import type { StructuredData } from '@/mdx-plugins/remark-structure'
 import type { SearchClient, SearchIndex } from 'algoliasearch'
 import type { BaseIndex } from './shared'
 
