@@ -1,4 +1,3 @@
-// @ts-nocheck
 import Slugger from 'github-slugger'
 import type { Root } from 'mdast'
 import { remark } from 'remark'
@@ -51,7 +50,7 @@ export function remarkStructure({
 
     visit(node, types, element => {
       if (element.type === 'heading') {
-        const heading = flattenNode(element)
+        const heading = flattenNode(element, textTypes)
         const slug = slugger.slug(heading)
 
         data.headings.push({
@@ -65,6 +64,7 @@ export function remarkStructure({
 
       data.contents.push({
         heading: lastHeading,
+        // @ts-ignore
         content: flattenNode(element, textTypes)
       })
 
@@ -90,5 +90,5 @@ export function structure(
     .use([remarkStructure, options])
     .processSync(content)
 
-  return result.data.structuredData
+  return result.data.structuredData as StructuredData
 }
