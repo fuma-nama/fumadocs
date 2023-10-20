@@ -11,7 +11,7 @@ import type { Args, ComputedFields, FieldDef } from 'contentlayer/source-files'
 import { defineDocumentType } from 'contentlayer/source-files'
 import type { Options as ImgSizeOptions } from 'rehype-img-size'
 
-function removeSlash(path: string) {
+function removeSlash(path: string): string {
   let start = 0,
     end = path.length
   while (path.charAt(start) == '/') start++
@@ -20,7 +20,7 @@ function removeSlash(path: string) {
   return path.slice(start, end)
 }
 
-function removePattern(path: string, pattern: string) {
+function removePattern(path: string, pattern: string): string {
   if (path.endsWith('/index') || path === 'index') {
     path = path.slice(0, path.length - 'index'.length)
   }
@@ -148,8 +148,8 @@ export function createConfig(options: Partial<Options> = {}): Args {
       rehypePlugins: [
         rehypeNextDocs,
         [
-          /* eslint-disable */
-          rehypeImgSize as any,
+          // @ts-ignore
+          rehypeImgSize,
           {
             dir: imgDirPath
           } as ImgSizeOptions

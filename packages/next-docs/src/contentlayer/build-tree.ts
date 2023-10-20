@@ -6,7 +6,7 @@ type Context = PagesContext & {
   lang?: string
 }
 
-type Options = {
+export type Options = {
   /**
    * The root folder to scan files
    * @default 'docs'

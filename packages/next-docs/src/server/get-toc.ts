@@ -1,4 +1,4 @@
-import { remarkToc } from '@/mdx-plugins'
+import { remarkToc } from '@/mdx-plugins/remark-toc'
 import { remark } from 'remark'
 import type { TableOfContents } from './types'
 

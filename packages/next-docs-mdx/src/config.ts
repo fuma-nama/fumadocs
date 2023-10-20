@@ -7,7 +7,7 @@ import type { NextConfig } from 'next'
 import {
   rehypeNextDocs,
   remarkGfm,
-  remarkStructurize,
+  remarkStructure,
   remarkToc
 } from 'next-docs-zeta/mdx-plugins'
 import remarkFrontmatter, {
@@ -43,7 +43,7 @@ const createNextDocs =
           remarkGfm,
           [remarkFrontmatter, 'yaml' satisfies RemarkFrontmatterOptions],
           remarkMdxFrontmatter,
-          remarkStructurize,
+          remarkStructure,
           remarkToc,
           [remarkMdxExport, { values: dataExports }],
           ...(pluginOptions.options?.remarkPlugins ?? [])

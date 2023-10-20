@@ -43,13 +43,13 @@ type ToI18n<T extends { indexes: unknown }> = Omit<
 
 export function createSearchAPI<T extends 'simple' | 'advanced'>(
   type: T,
-  _options: T extends 'simple' ? SimpleOptions : AdvancedOptions
+  options: T extends 'simple' ? SimpleOptions : AdvancedOptions
 ): SearchAPI {
   if (type === 'simple') {
-    return initSearchAPI(_options as SimpleOptions)
+    return initSearchAPI(options as SimpleOptions)
   }
 
-  return initSearchAPIAdvanced(_options as AdvancedOptions)
+  return initSearchAPIAdvanced(options as AdvancedOptions)
 }
 
 export function createI18nSearchAPI<T extends 'simple' | 'advanced'>(

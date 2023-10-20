@@ -54,7 +54,7 @@ export function loadContext<
 function getI18nPages<Docs extends DocsPageBase>(
   docsMap: Map<string, Docs>,
   languages: string[]
-) {
+): Map<string, Docs[]> {
   const pages = new Map<string, Docs[]>()
 
   pages.set('', [])

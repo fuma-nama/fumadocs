@@ -41,7 +41,7 @@ const textTypes = ['text', 'inlineCode']
 /**
  * Attach structured data to VFile, you can access via `vfile.data.structuredData`.
  */
-export function remarkStructurize({
+export function remarkStructure({
   types = ['paragraph', 'blockquote', 'heading']
 }: Options = {}): Transformer<Root, Root> {
   return (node, file) => {

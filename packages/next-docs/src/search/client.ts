@@ -1,11 +1,23 @@
 import { useEffect, useState } from 'react'
-import useSWR from 'swr'
+import useSWR, { type SWRResponse } from 'swr'
 import type { SortedResult } from './shared'
+
+type UseDocsSearch<Result> = {
+  search: string
+  setSearch: (v: string) => void
+  query: SWRResponse<
+    Result,
+    Error,
+    {
+      keepPreviousData: true
+    }
+  >
+}
 
 export function useDocsSearch<Result = SortedResult[]>(
   locale?: string,
   tag?: string
-) {
+): UseDocsSearch<Result | 'empty'> {
   const [search, setSearch] = useState('')
   const debouncedValue = useDebounce(search, 100)
 
@@ -32,7 +44,7 @@ export function useDocsSearch<Result = SortedResult[]>(
   return { search, setSearch, query: searchQuery }
 }
 
-function useDebounce<T>(value: T, delayMs: number = 1000) {
+function useDebounce<T>(value: T, delayMs: number = 1000): T {
   const [debouncedValue, setDebouncedValue] = useState(value)
 
   useEffect(() => {

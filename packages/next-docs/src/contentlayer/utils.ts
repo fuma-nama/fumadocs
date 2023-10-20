@@ -23,9 +23,7 @@ export function getPageUrl(slug: string[], baseUrl: string, locale?: string) {
   return url
 }
 
-export function createUtils<Docs extends DocsPageBase>(
-  context: PagesContext<MetaPageBase, Docs>
-): {
+export type ContentlayerUtils<Docs extends DocsPageBase> = {
   /**
    * Get list of pages from language
    *
@@ -36,22 +34,28 @@ export function createUtils<Docs extends DocsPageBase>(
   /**
    * @param language If empty, the default language will be used
    */
-  getPage: (slugs?: string[], language?: string) => Docs | undefined
+  getPage: (slugs: string[] | undefined, language?: string) => Docs | undefined
 
   getPageUrl: (
     slugs: string | string[] | undefined,
     language?: string
   ) => string
-} {
+}
+
+export function createUtils<Docs extends DocsPageBase>(
+  context: PagesContext<MetaPageBase, Docs>
+): ContentlayerUtils<Docs> {
   return {
-    getPages: (language = '') => context.pages.get(language),
-    getPage(slugs, language = '') {
-      const path = (slugs ?? []).join('/')
+    getPages(language = '') {
+      return context.pages.get(language)
+    },
+    getPage(slugs = [], language = '') {
+      const path = slugs.join('/')
 
       return context.pages.get(language)?.find(page => page.slug === path)
     },
-    getPageUrl(slug, language) {
-      const slugs = typeof slug === 'string' ? slug.split('/') : slug ?? []
+    getPageUrl(slug = [], language) {
+      const slugs = typeof slug === 'string' ? slug.split('/') : slug
 
       return context.getUrl(slugs, language)
     }

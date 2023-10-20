@@ -1,7 +1,8 @@
+import type { PageTree } from '@/server/types'
 import { buildI18nPageTree, buildPageTree } from './build-tree'
 import { loadContext, type ContextOptions } from './load-context'
 import type { DocsPageBase, MetaPageBase, PagesContext } from './types'
-import { createUtils } from './utils'
+import { createUtils, type ContentlayerUtils } from './utils'
 
 type Options<L extends string[] | undefined> = Omit<
   Partial<ContextOptions>,
@@ -20,10 +21,8 @@ type CreateContentlayer = <
   options?: Options<Langs>
 ) => {
   __pageContext: PagesContext
-  tree: Langs extends string[]
-    ? ReturnType<typeof buildI18nPageTree>
-    : ReturnType<typeof buildPageTree>
-} & ReturnType<typeof createUtils<Docs>>
+  tree: Langs extends string[] ? Record<Langs[number], PageTree> : PageTree
+} & ContentlayerUtils<Docs>
 
 /**
  * Create page tree and utilities for Contentlayer

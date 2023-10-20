@@ -11,28 +11,28 @@
   ],
   "exports": {
     "./sidebar": {
-      "import": "./dist/sidebar/index.mjs",
-      "types": "./dist/sidebar/index.d.ts"
+      "import": "./dist/sidebar.mjs",
+      "types": "./dist/sidebar.d.ts"
     },
     "./breadcrumb": {
-      "import": "./dist/breadcrumb/index.mjs",
-      "types": "./dist/breadcrumb/index.d.ts"
+      "import": "./dist/breadcrumb.mjs",
+      "types": "./dist/breadcrumb.d.ts"
     },
     "./toc": {
-      "import": "./dist/toc/index.mjs",
-      "types": "./dist/toc/index.d.ts"
+      "import": "./dist/toc.mjs",
+      "types": "./dist/toc.d.ts"
     },
     "./search/*": {
       "import": "./dist/search/*.mjs",
       "types": "./dist/search/*.d.ts"
     },
     "./server": {
-      "import": "./dist/server/index.mjs",
-      "types": "./dist/server/index.d.ts"
+      "import": "./dist/server.mjs",
+      "types": "./dist/server.d.ts"
     },
     "./link": {
-      "import": "./dist/link/index.mjs",
-      "types": "./dist/link/index.d.ts"
+      "import": "./dist/link.mjs",
+      "types": "./dist/link.d.ts"
     },
     "./contentlayer": {
       "import": "./dist/contentlayer/index.mjs",
@@ -43,12 +43,12 @@
       "types": "./dist/contentlayer/configuration.d.ts"
     },
     "./middleware": {
-      "import": "./dist/middleware/index.mjs",
-      "types": "./dist/middleware/index.d.ts"
+      "import": "./dist/middleware.mjs",
+      "types": "./dist/middleware.d.ts"
     },
     "./mdx-plugins": {
-      "import": "./dist/mdx-plugins/index.mjs",
-      "types": "./dist/mdx-plugins/index.d.ts"
+      "import": "./dist/mdx-plugins.mjs",
+      "types": "./dist/mdx-plugins.d.ts"
     },
     "./search-algolia/*": {
       "import": "./dist/search-algolia/*.mjs",
@@ -57,23 +57,8 @@
   },
   "typesVersions": {
     "*": {
-      "sidebar": [
-        "./dist/sidebar/index.d.ts"
-      ],
-      "breadcrumb": [
-        "./dist/breadcrumb/index.d.ts"
-      ],
-      "toc": [
-        "./dist/toc/index.d.ts"
-      ],
-      "search/*": [
-        "./dist/search/*.d.ts"
-      ],
-      "server": [
-        "./dist/server/index.d.ts"
-      ],
-      "link": [
-        "./dist/link/index.d.ts"
+      "*": [
+        "./dist/*.d.ts"
       ],
       "contentlayer": [
         "./dist/contentlayer/index.d.ts"
@@ -81,11 +66,8 @@
       "contentlayer/configuration": [
         "./dist/contentlayer/configuration.d.ts"
       ],
-      "mdx-plugins": [
-        "./dist/mdx-plugins/index.d.ts"
-      ],
-      "middleware": [
-        "./dist/middleware/index.d.ts"
+      "search/*": [
+        "./dist/search/*.d.ts"
       ],
       "search-algolia/*": [
         "./dist/search-algolia/*.d.ts"

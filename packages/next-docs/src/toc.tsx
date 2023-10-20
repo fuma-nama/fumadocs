@@ -10,7 +10,7 @@ import {
   useRef
 } from 'react'
 import scrollIntoView from 'scroll-into-view-if-needed'
-import { useAnchorObserver } from './use-anchor-observer'
+import { useAnchorObserver } from './utils/use-anchor-observer'
 
 const ActiveAnchorContext = createContext<{
   activeAnchor: string | undefined

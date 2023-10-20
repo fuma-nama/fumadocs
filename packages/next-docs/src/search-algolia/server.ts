@@ -1,10 +1,15 @@
 import { randomUUID } from 'crypto'
-import type { DocsPageBase } from '@/contentlayer/types'
 import type { StructuredData } from '@/mdx-plugins/remark-structure'
 import type { SearchClient, SearchIndex } from 'algoliasearch'
 import type { BaseIndex } from './shared'
 
-type DocumentRecord = DocsPageBase & {
+type DocumentRecord = {
+  /**
+   * The ID of document, must be unique
+   */
+  _id: string
+
+  title: string
   /**
    * URL to the page
    */
@@ -17,12 +22,11 @@ type DocumentRecord = DocsPageBase & {
   extra_data?: object
 }
 
+type SyncOptions = { document?: string; documents: DocumentRecord[] }
+
 export async function sync(
   client: SearchClient,
-  {
-    document = 'document',
-    documents
-  }: { document?: string; documents: DocumentRecord[] }
+  { document = 'document', documents }: SyncOptions
 ) {
   const index = client.initIndex(document)
   await setIndexSettings(index)

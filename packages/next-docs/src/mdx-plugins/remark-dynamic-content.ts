@@ -7,7 +7,7 @@ import { visit } from 'unist-util-visit'
 
 const regex = /^\|reference:(.+)\|/
 
-type Options = {
+export type Options = {
   /** @default process.cwd() */
   cwd?: string
   /** @default true */

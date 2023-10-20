@@ -1,14 +1,15 @@
 import { defineConfig } from 'tsup'
+import packageJson from './package.json'
 import tsconfig from './tsconfig.json'
 
 export default defineConfig({
   entry: [
-    'src/{server,breadcrumb,sidebar,toc,link,contentlayer,middleware,mdx-plugins}/index.{ts,tsx}',
-    'src/search/{client,server,shared}.ts',
-    'src/search-algolia/{client,server,shared}.ts',
-    'src/contentlayer/configuration.ts'
+    'src/{toc,link,breadcrumb,sidebar}.tsx',
+    'src/{middleware,server,mdx-plugins}.ts',
+    'src/{search,search-algolia}/{client,server,shared}.ts',
+    'src/contentlayer/{index,configuration}.ts'
   ],
-  external: ['@algolia/client-search', 'algoliasearch', 'contentlayer', 'next'],
+  external: [...Object.keys(packageJson.devDependencies)],
   format: 'esm',
   dts: true,
   target: tsconfig.compilerOptions.target as 'es2016'

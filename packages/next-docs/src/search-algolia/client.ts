@@ -2,7 +2,7 @@ import type { SortedResult } from '@/search/shared'
 import type { Hit, SearchOptions } from '@algolia/client-search'
 import type { SearchIndex } from 'algoliasearch/lite'
 import { useState } from 'react'
-import useSWR from 'swr'
+import useSWR, { type SWRResponse } from 'swr'
 import type { BaseIndex } from './shared'
 
 export function groupResults(hits: Hit<BaseIndex>[]): SortedResult[] {
@@ -46,7 +46,20 @@ export async function searchDocs(
   return groupResults(result.hits)
 }
 
-export function useAlgoliaSearch(index: SearchIndex, options?: SearchOptions) {
+type UseAlgoliaSearch = {
+  search: string
+  setSearch: (v: string) => void
+  query: SWRResponse<
+    SortedResult[] | 'empty',
+    Error,
+    { keepPreviousData: true }
+  >
+}
+
+export function useAlgoliaSearch(
+  index: SearchIndex,
+  options?: SearchOptions
+): UseAlgoliaSearch {
   const [search, setSearch] = useState('')
 
   const query = useSWR(
