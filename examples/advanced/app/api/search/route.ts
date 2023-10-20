@@ -8,6 +8,8 @@ export const { GET } = createSearchAPI('advanced', {
     title: page.title,
     content: page.body.raw,
     url: getPageUrl(page.slug),
-    structuredData: page.structuredData
-  }))
+    structuredData: page.structuredData,
+    tag: ''
+  })),
+  tag: true
 })

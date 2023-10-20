@@ -33,7 +33,7 @@ paragraphs are all indexed as a record, and the attribute for distinct is
 
    ```js
    import algosearch from 'algoliasearch'
-   import { sync } from 'next-docs-zeta/algolia'
+   import { sync } from 'next-docs-zeta/algolia/server'
    import { structure } from 'next-docs-zeta/mdx-plugins'
 
    const client = algosearch(...)
@@ -57,7 +57,7 @@ paragraphs are all indexed as a record, and the attribute for distinct is
    states with SWR.
 
    ```ts
-   import { useAlgoliaSearch } from 'next-docs-zeta/search-algolia'
+   import { useAlgoliaSearch } from 'next-docs-zeta/search-algolia/client'
 
    const index = algoliasearch(...).initIndex('document')
 

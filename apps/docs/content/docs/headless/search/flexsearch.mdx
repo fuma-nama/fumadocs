@@ -19,7 +19,7 @@ Assumes you're using Contentlayer.
 
 ```tsx title="app/api/search/route.ts"
 import { allDocs } from 'contentlayer/generated'
-import { createSearchAPI } from 'next-docs-zeta/server'
+import { createSearchAPI } from 'next-docs-zeta/search/server'
 
 export const { GET } = createSearchAPI('simple', {
   indexes: allDocs.map(docs => ({
@@ -33,7 +33,7 @@ export const { GET } = createSearchAPI('simple', {
 2. Create a Search Dialog.
 
 ```tsx
-import { useDocsSearch } from 'next-docs-zeta/search'
+import { useDocsSearch } from 'next-docs-zeta/search/client'
 
 export function Dialog() {
   const { search, setSearch, query } = useDocsSearch()
@@ -113,7 +113,7 @@ Assume you are using Contentlayer with the default configuration.
 
 ```ts
 import { allDocs } from 'contentlayer/generated'
-import { createSearchAPI } from 'next-docs-zeta/server'
+import { createSearchAPI } from 'next-docs-zeta/search/server'
 
 export const { GET } = await createSearchAPI('advanced', {
   indexes: allDocs.map(docs => ({
@@ -151,14 +151,15 @@ documentation.
 
 ```ts
 import { allDocs } from 'contentlayer/generated'
-import { experimental_initSearchAPI } from 'next-docs-zeta/server'
+import { createSearchAPI } from 'next-docs-zeta/search/server'
 
-export const { GET } = await experimental_initSearchAPI(
-  allDocs.map(docs => ({
-    tag: ...
+export const { GET } = createSearchAPI('advanced', {
+  indexes: allDocs.map(page => ({
+    ...page,
+    tag: 'value'
   })),
-  true
-)
+  tag: true
+})
 
 // Pass `tag` in your custom search dialog
 const { search, setSearch, query } = useDocsSearch(locale, tag)
