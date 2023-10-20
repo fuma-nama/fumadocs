@@ -1,5 +1,4 @@
 import { defineConfig } from 'tsup'
-import packageJson from './package.json'
 import tsconfig from './tsconfig.json'
 
 export default defineConfig({
@@ -9,7 +8,13 @@ export default defineConfig({
     'src/{search,search-algolia}/{client,server,shared}.ts',
     'src/contentlayer/{index,configuration}.ts'
   ],
-  external: [...Object.keys(packageJson.devDependencies)],
+  external: [
+    '@algolia/client-search',
+    'algoliasearch',
+    'contentlayer',
+    'next',
+    'unified'
+  ],
   format: 'esm',
   dts: true,
   target: tsconfig.compilerOptions.target as 'es2016'
