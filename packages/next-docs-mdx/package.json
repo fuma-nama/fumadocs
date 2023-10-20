@@ -36,7 +36,7 @@
     "chokidar": "^3.5.3",
     "estree-util-value-to-estree": "^3.0.1",
     "fast-glob": "^3.3.1",
-    "remark-frontmatter": "^4.0.1",
+    "remark-frontmatter": "^5.0.0",
     "yaml": "^2.3.3"
   },
   "peerDependencies": {
