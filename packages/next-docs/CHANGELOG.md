@@ -1,5 +1,27 @@
 # next-docs-zeta
 
+## 3.0.0
+
+### Major Changes
+
+- a4a8120: Update search utilities import paths.
+
+  Search Utilities in `next-docs-zeta/server` is now moved to
+  `next-docs-zeta/search` and `next-docs-zeta/server-algolia`.
+
+  Client-side Changes: `next-docs-zeta/search` -> `next-docs-zeta/search/client`
+  `next-docs-zeta/search-algolia` -> `next-docs-zeta/search-algolia/client`
+
+  If you're using Next Docs UI, make sure to import the correct path.
+
+### Minor Changes
+
+- 7a0690b: Export remark-toc and remark-structure MDX plugins
+
+### Patch Changes
+
+- 1043532: Type MDX Plugins
+
 ## 2.4.1
 
 ### Patch Changes

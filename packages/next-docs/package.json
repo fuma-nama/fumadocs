@@ -1,7 +1,7 @@
 {
   "name": "next-docs-zeta",
   "description": "The library for building a documentation website in Next.js",
-  "version": "2.4.1",
+  "version": "3.0.0",
   "homepage": "https://next-docs-zeta.vercel.app",
   "author": "Fuma Nama",
   "repository": "github:fuma-nama/next-docs",
