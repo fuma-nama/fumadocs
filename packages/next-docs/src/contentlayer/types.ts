@@ -1,5 +1,5 @@
+import type { Context } from '@/build-page-tree'
 import type { RawDocumentData } from 'contentlayer/source-files'
-import type { ReactElement } from 'react'
 
 export type MetaPageBase = {
   /** File path relative to `contentDirPath` */
@@ -28,17 +28,10 @@ export type DocsPageBase = {
   slug: string
 }
 
-export type PagesContext<
-  Meta extends MetaPageBase = MetaPageBase,
-  Docs extends DocsPageBase = DocsPageBase
-> = {
+export type PagesContext<Docs extends DocsPageBase = DocsPageBase> = Context & {
   /**
    * Language -> Page[]
    */
-  pages: Map<string, Docs[]>
-  languages: string[]
-  docsMap: Map<string, Docs>
-  metaMap: Map<string, Meta>
-  resolveIcon?: (icon: string) => ReactElement | undefined
+  i18nMap: Map<string, Docs[]>
   getUrl: (slugs: string[], locale?: string) => string
 }

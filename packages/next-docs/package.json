@@ -18,6 +18,10 @@
       "import": "./dist/breadcrumb.mjs",
       "types": "./dist/breadcrumb.d.ts"
     },
+    "./build-page-tree": {
+      "import": "./dist/build-page-tree.mjs",
+      "types": "./dist/build-page-tree.d.ts"
+    },
     "./toc": {
       "import": "./dist/toc.mjs",
       "types": "./dist/toc.d.ts"

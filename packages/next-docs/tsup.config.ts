@@ -4,7 +4,7 @@ import tsconfig from './tsconfig.json'
 export default defineConfig({
   entry: [
     'src/{toc,link,breadcrumb,sidebar}.tsx',
-    'src/{middleware,server,mdx-plugins}.ts',
+    'src/{middleware,server,mdx-plugins,build-page-tree}.ts',
     'src/{search,search-algolia}/{client,server,shared}.ts',
     'src/contentlayer/{index,configuration}.ts'
   ],

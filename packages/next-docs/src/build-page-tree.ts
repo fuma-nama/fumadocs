@@ -1,9 +1,58 @@
-import type { FileNode, FolderNode, PageTree, TreeNode } from '../server'
-import type { DocsPageBase, MetaPageBase, PagesContext } from './types'
-import { getKey, pathToName } from './utils'
+import type { ReactElement } from 'react'
+import type { FileNode, FolderNode, PageTree, TreeNode } from './server/types'
 
-type Context = PagesContext & {
+export type File = {
+  /**
+   * Original path of file
+   */
+  path: string
+
+  /**
+   * File path without extension & prefix
+   */
+  flattenedPath: string
+
+  /**
+   * File name without extension
+   */
+  name: string
+
+  dirname: string
+}
+
+export type AbstractMeta = {
+  file: File
+  icon?: string
+  title?: string
+  pages: string[]
+}
+
+export type AbstractPage = {
+  file: File
+  icon?: string
+  title: string
+  url: string
+}
+
+export type Context = {
   lang?: string
+
+  getMetaByPath: (flattenPath: string) => AbstractMeta | null
+  getPageByPath: (flattenPath: string) => AbstractPage | null
+
+  resolveIcon: (icon: string) => ReactElement | undefined
+
+  /**
+   * Default pages without specified langauge
+   */
+  basePages: AbstractPage[]
+}
+
+type InternationalizedContext<Languages extends string> = Omit<
+  Context,
+  'lang'
+> & {
+  languages: Languages[]
 }
 
 export type Options = {
@@ -18,8 +67,8 @@ const separator = /---(.*?)---/
 const rest = '...'
 const extractor = /\.\.\.(.+)/
 
-function buildMeta(meta: MetaPageBase, ctx: Context): FolderNode {
-  const segments = meta._raw.sourceFileDir.split('/')
+function buildMeta(meta: AbstractMeta, ctx: Context): FolderNode {
+  const segments = meta.file.dirname.split('/')
   let index: FileNode | undefined = undefined
   const filtered = new Set<string>()
 
@@ -41,12 +90,12 @@ function buildMeta(meta: MetaPageBase, ctx: Context): FolderNode {
       item = extract_result[1]
     }
 
-    const path = meta._raw.sourceFileDir + '/' + item
-    const page = ctx.docsMap.get(path)
+    const path = meta.file.dirname + '/' + item
+    const page = ctx.getPageByPath(path)
 
     if (page != null) {
       const node = buildFileNode(page, ctx)
-      filtered.add(page._raw.sourceFilePath)
+      filtered.add(page.file.path)
 
       if (item === 'index') index = node
       return node
@@ -73,7 +122,7 @@ function buildMeta(meta: MetaPageBase, ctx: Context): FolderNode {
     if (item === '...') {
       return getFolderNodes(
         ctx,
-        meta._raw.sourceFileDir,
+        meta.file.dirname,
         false,
         path => !filtered.has(path)
       ).children
@@ -83,16 +132,16 @@ function buildMeta(meta: MetaPageBase, ctx: Context): FolderNode {
   })
 
   if (index == null) {
-    const page = ctx.docsMap.get(meta._raw.sourceFileDir + '/index')
+    const page = ctx.getPageByPath(meta.file.dirname + '/index')
 
     if (page != null) index = buildFileNode(page, ctx)
   }
 
   return {
-    name: meta.title ?? pathToName(segments),
-    index,
     type: 'folder',
-    icon: meta.icon && ctx.resolveIcon ? ctx.resolveIcon(meta.icon) : undefined,
+    name: meta.title ?? index?.name ?? pathToName(segments),
+    icon: meta.icon ? ctx.resolveIcon(meta.icon) : undefined,
+    index,
     children
   }
 }
@@ -109,17 +158,15 @@ function getFolderNodes(
   path: string,
   joinIndex: boolean,
   filter: (path: string) => boolean = () => true
-): { index: FileNode | null; children: TreeNode[] } {
-  const pages = ctx.pages.get(ctx.lang ?? '') ?? []
-  let index: FileNode | null = null
+): { index?: FileNode; children: TreeNode[] } {
+  let index: FileNode | undefined
   const children: TreeNode[] = []
 
-  for (const page of pages) {
-    if (page._raw.sourceFileDir !== path || !filter(page._raw.sourceFilePath))
-      continue
+  for (const page of ctx.basePages) {
+    if (page.file.dirname !== path || !filter(page.file.path)) continue
     const node = buildFileNode(page, ctx)
 
-    if (page._raw.flattenedPath === path) {
+    if (page.file.name === 'index') {
       index = node
       continue
     }
@@ -127,13 +174,18 @@ function getFolderNodes(
     children.push(node)
   }
 
-  const segmentIndex = path.split('/').length
+  const segments = path.split('/')
   const folders = new Set<string>(
-    pages
-      .filter(page => page._raw.sourceFileDir.startsWith(path + '/'))
-      .map(
-        page => path + '/' + page._raw.sourceFileDir.split('/')[segmentIndex]
-      )
+    ctx.basePages.flatMap(page => {
+      const dirnameSegments = page.file.dirname.split('/')
+
+      if (path.length === 0 && path !== page.file.dirname)
+        return dirnameSegments[0]
+      if (page.file.dirname.startsWith(path + '/'))
+        return path + '/' + dirnameSegments[segments.length]
+
+      return []
+    })
   )
 
   for (const folder of folders) {
@@ -148,16 +200,16 @@ function getFolderNodes(
   return { index, children }
 }
 
-function buildFileNode(page: DocsPageBase, ctx: Context): FileNode {
+function buildFileNode(page: AbstractPage, ctx: Context): FileNode {
   if (ctx.lang) {
-    page = ctx.docsMap.get(getKey(page) + `.${ctx.lang}`) ?? page
+    page = ctx.getPageByPath(page.file.flattenedPath + `.${ctx.lang}`) ?? page
   }
 
   return {
     type: 'page',
     name: page.title,
-    url: ctx.getUrl(page.slug.split('/'), ctx.lang),
-    icon: page.icon && ctx.resolveIcon ? ctx.resolveIcon(page.icon) : undefined
+    icon: page.icon ? ctx.resolveIcon(page.icon) : undefined,
+    url: page.url
   }
 }
 
@@ -166,20 +218,20 @@ function buildFolderNode(
   ctx: Context,
   keepIndex: boolean = false
 ): FolderNode {
-  let meta = ctx.lang ? ctx.metaMap.get(path + `/meta-${ctx.lang}`) : null
-  meta ??= ctx.metaMap.get(path + '/meta')
+  let meta: AbstractMeta | null = null
+  if (ctx.lang) meta = ctx.getMetaByPath(path + `/meta-${ctx.lang}`)
+  meta ??= ctx.getMetaByPath(path + '/meta')
 
   if (meta != null) {
     return buildMeta(meta, ctx)
   }
 
-  const segments = path.split('/')
   const { index, children } = getFolderNodes(ctx, path, keepIndex)
 
   return {
-    name: index?.name ?? pathToName(segments),
     type: 'folder',
-    index: index ?? undefined,
+    name: index?.name ?? pathToName(path.split('/')),
+    index,
     children
   }
 }
@@ -189,13 +241,12 @@ function build(root: string, ctx: Context): PageTree {
 
   return {
     name: folder.name,
-    url: ctx.getUrl([], ctx.lang),
     children: folder.children
   }
 }
 
 export function buildPageTree(
-  context: PagesContext,
+  context: Context,
   { root = 'docs' }: Partial<Options> = {}
 ): PageTree {
   return build(root, context)
@@ -209,10 +260,10 @@ export function buildPageTree(
  * @param languages All supported languages
  */
 export function buildI18nPageTree<Languages extends string = string>(
-  context: PagesContext,
+  { languages, ...context }: InternationalizedContext<Languages>,
   { root = 'docs' }: Partial<Options> = {}
 ): Record<Languages, PageTree> {
-  const entries = context.languages.map(lang => {
+  const entries = languages.map(lang => {
     const tree = build(root, {
       ...context,
       lang
@@ -222,4 +273,9 @@ export function buildI18nPageTree<Languages extends string = string>(
   })
 
   return Object.fromEntries(entries)
+}
+
+function pathToName(path: string[]): string {
+  const name = path[path.length - 1] ?? 'docs'
+  return name.slice(0, 1).toUpperCase() + name.slice(1)
 }
