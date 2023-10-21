@@ -1,180 +1,97 @@
-import path from 'path'
-import type { MDXProps } from 'mdx/types'
-import type { StructuredData } from 'next-docs-zeta/mdx-plugins'
-import type { PageTree, TableOfContents, TreeNode } from 'next-docs-zeta/server'
-
-type Page<T extends MDXExport = MDXExport> = {
-  file: FileInfo
-  slugs: string[]
-  data: T
-  matter: T['frontmatter']
-}
-
-/**
- * Defalt MDX properties, feel free to extend
- */
-export type MDXExport = {
-  default(props: MDXProps): JSX.Element
-  frontmatter: {
-    title: string
-    description: string
-  }
-  toc: TableOfContents
-  structuredData: StructuredData
-}
+import {
+  buildI18nPageTree,
+  buildPageTree
+} from 'next-docs-zeta/build-page-tree'
+import type { PageTree } from 'next-docs-zeta/server'
+import { loadContext, type ContextOptions } from './build-tree'
+import { createPageUtils, type PageUtils } from './page-utils'
+import { resolveFiles } from './resolve-files'
+import type { Meta, Page } from './types'
 
 type UtilsOptions = {
   /**
    * @default '/docs'
    */
-  baseUrl?: string
+  baseUrl: string
+
+  /**
+   * Where to scan nodes
+   * @default 'docs'
+   */
+  root: string
+} & ContextOptions
+
+type I18nUtilsOptions = UtilsOptions & {
+  languages: string[]
 }
 
-type Utils<T extends MDXExport> = {
+type Utils = PageUtils & {
   tree: PageTree
-  getPage(slugs: string | string[] | undefined): Page<T> | null
-  getPageUrl(slugs: string | string[] | undefined): string
-  pages: Page<T>[]
+  pages: Page[]
+  metas: Meta[]
 }
 
-type UtilsContext<T extends MDXExport> = Pick<
-  Utils<T>,
-  'getPageUrl' | 'pages' | 'getPage'
->
-
-type FileInfo = {
-  /**
-   * Directories of file
-   */
-  dirname: string
-
-  /**
-   * File name with extension
-   */
-  base: string
-
-  /**
-   * File name without extension
-   */
-  name: string
-
-  /**
-   * Original path, should be relative to cwd
-   */
-  path: string
-
-  /**
-   * A flatten path without extensions and prefixes, like `dir/file`
-   */
-  flattenedPath: string
-
-  id: string
+type I18nUtils = Omit<Utils, 'tree'> & {
+  tree: Record<string, PageTree>
 }
 
-function parsePath(p: string, prefix = './content'): FileInfo {
-  const subPath = path.relative(prefix, p)
-  const parsed = path.parse(subPath)
-  let flattenedPath = parsed.dir + '/' + parsed.name
-
-  while (flattenedPath.startsWith('/')) {
-    flattenedPath = flattenedPath.slice(1)
-  }
-
-  return {
-    id: subPath,
-    dirname: parsed.dir,
-    base: parsed.base,
-    name: parsed.name,
-    flattenedPath,
-    path: p
-  }
-}
-
-function pathToSlugs(file: FileInfo): string[] {
-  return file.flattenedPath.split('/').filter(p => !['index'].includes(p))
-}
-
-function slugsToUrl(slugs: string[] = []): string {
-  return slugs.join('/')
-}
-
-type RawTreeNode<T extends MDXExport> = TreeNode & {
-  page: T
-}
-
-function buildPageTree<T extends MDXExport>({
-  getPageUrl,
-  pages
-}: UtilsContext<T>): PageTree {
-  const treeMap = new Map<string, RawTreeNode<T>[]>()
-
-  for (const page of pages) {
-    if (!treeMap.has(page.file.dirname)) {
-      treeMap.set(page.file.dirname, [])
-    }
-
-    treeMap.get(page.file.dirname)!.push({
-      type: 'page',
-      name: page.matter.title,
-      url: getPageUrl(page.slugs),
-      page: page.data
-    })
-  }
-
-  return {
-    name: 'Docs',
-    children: [...treeMap.values()].flatMap(nodes => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      return nodes.map(({ page, ...node }) => {
-        return node
-      })
-    })
-  }
-}
-
-function getPage<T extends MDXExport>(
-  pages: Page<T>[],
-  _slugs: string | string[] = []
-): Page<T> | null {
-  let slugs = ''
-  if (typeof _slugs === 'string') slugs = _slugs
-  if (Array.isArray(_slugs)) slugs = _slugs.join('/')
-
-  const result = pages.find(page => page.slugs.join('/') === slugs)
-
-  return result ?? null
-}
-
-function fromMap<T extends MDXExport = MDXExport>(
+function fromMapI18n(
   map: Record<string, unknown>,
-  { baseUrl = '/docs' }: UtilsOptions = {}
-): Utils<T> {
-  const pages = Object.entries(map).map<Page<T>>(([k, v]) => {
-    const path = parsePath(k)
-    const data = v as T
-
-    return {
-      file: path,
-      slugs: pathToSlugs(path),
-      matter: data.frontmatter,
-      data
-    }
+  {
+    baseUrl = '/docs',
+    root = 'docs',
+    getUrl,
+    resolveIcon,
+    languages = []
+  }: Partial<I18nUtilsOptions> = {}
+): I18nUtils {
+  const context = resolveFiles({
+    root,
+    map
   })
 
-  const context: UtilsContext<T> = {
-    getPageUrl: (slugs = []) => {
-      const slugsArray = typeof slugs === 'string' ? slugs.split('/') : slugs
+  const pageUtils = createPageUtils(context, baseUrl, languages)
 
-      return slugsToUrl([baseUrl, ...slugsArray])
-    },
-    getPage: slugs => getPage(pages, slugs),
-    pages
-  }
+  const pageTreeContext = loadContext(context.metas, context.pages, {
+    getUrl: getUrl ?? pageUtils.getPageUrl,
+    resolveIcon
+  })
 
   return {
     ...context,
-    tree: buildPageTree<T>(context)
+    ...pageUtils,
+    getPageUrl: getUrl ?? pageUtils.getPageUrl,
+    tree: buildI18nPageTree({ languages, ...pageTreeContext }, { root })
   }
 }
 
-export { fromMap, getPage, slugsToUrl, buildPageTree }
+function fromMap(
+  map: Record<string, unknown>,
+  {
+    baseUrl = '/docs',
+    root = 'docs',
+    getUrl,
+    resolveIcon
+  }: Partial<UtilsOptions> = {}
+): Utils {
+  const context = resolveFiles({
+    map,
+    root
+  })
+
+  const pageUtils = createPageUtils(context, baseUrl, [])
+
+  const pageTreeContext = loadContext(context.metas, context.pages, {
+    getUrl: getUrl ?? pageUtils.getPageUrl,
+    resolveIcon
+  })
+
+  return {
+    ...context,
+    ...pageUtils,
+    getPageUrl: getUrl ?? pageUtils.getPageUrl,
+    tree: buildPageTree(pageTreeContext, { root })
+  }
+}
+
+export { fromMap, fromMapI18n }

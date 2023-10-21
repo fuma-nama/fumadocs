@@ -13,13 +13,22 @@ import {
 import remarkFrontmatter, {
   type Options as RemarkFrontmatterOptions
 } from 'remark-frontmatter'
+import type { PluggableList } from 'unified'
 import remarkMdxExport from './mdx-plugins/remark-exports'
 import remarkMdxFrontmatter from './mdx-plugins/remark-frontmatter'
 
 const PLUGIN_NAME = 'NextDocsWebpackPlugin'
 let firstLoad = true
 
+type WithMDX = (config: NextConfig) => NextConfig
+type Loader = (options: NextMDXOptions) => WithMDX
+
 type NextDocsMDXOptions = NextMDXOptions & {
+  /**
+   * Custom MDX loader
+   */
+  loader?: Loader
+
   /**
    * Properties to export from `vfile.data`
    */
@@ -27,31 +36,36 @@ type NextDocsMDXOptions = NextMDXOptions & {
 }
 
 const createNextDocs =
-  (pluginOptions: NextDocsMDXOptions = {}) =>
+  ({
+    loader = options => createNextMDX(options),
+    dataExports = [],
+    extension,
+    options = {}
+  }: NextDocsMDXOptions = {}) =>
   (nextConfig: NextConfig = {}) => {
-    const dataExports = [
-      'structuredData',
-      'toc',
-      ...(pluginOptions.dataExports ?? [])
+    const exports = ['structuredData', 'toc', ...dataExports]
+
+    const remarkPlugins: PluggableList = [
+      remarkGfm,
+      [remarkFrontmatter, 'yaml' satisfies RemarkFrontmatterOptions],
+      remarkMdxFrontmatter,
+      remarkStructure,
+      remarkToc,
+      [remarkMdxExport, { values: exports }],
+      ...(options.remarkPlugins ?? [])
     ]
 
-    const withMDX = createNextMDX({
-      ...pluginOptions,
+    const rehypePlugins: PluggableList = [
+      rehypeNextDocs,
+      ...(options.rehypePlugins ?? [])
+    ]
+
+    const withMDX = loader({
+      extension,
       options: {
-        ...pluginOptions.options,
-        remarkPlugins: [
-          remarkGfm,
-          [remarkFrontmatter, 'yaml' satisfies RemarkFrontmatterOptions],
-          remarkMdxFrontmatter,
-          remarkStructure,
-          remarkToc,
-          [remarkMdxExport, { values: dataExports }],
-          ...(pluginOptions.options?.remarkPlugins ?? [])
-        ],
-        rehypePlugins: [
-          rehypeNextDocs,
-          ...(pluginOptions.options?.rehypePlugins ?? [])
-        ]
+        ...options,
+        remarkPlugins,
+        rehypePlugins
       }
     })
 
