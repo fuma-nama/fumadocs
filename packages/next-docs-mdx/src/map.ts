@@ -1,14 +1,12 @@
-import {
-  buildI18nPageTree,
-  buildPageTree
-} from 'next-docs-zeta/build-page-tree'
 import type { PageTree } from 'next-docs-zeta/server'
-import { loadContext, type ContextOptions } from './build-tree'
+import { getPageTreeBuilder, type ContextOptions } from './build-tree'
 import { createPageUtils, type PageUtils } from './page-utils'
 import { resolveFiles } from './resolve-files'
 import type { Meta, Page } from './types'
 
-type UtilsOptions = {
+type UtilsOptions<Langs extends string[] | undefined> = {
+  languages: Langs
+
   /**
    * @default '/docs'
    */
@@ -21,10 +19,6 @@ type UtilsOptions = {
   root: string
 } & ContextOptions
 
-type I18nUtilsOptions = UtilsOptions & {
-  languages: string[]
-}
-
 type Utils = PageUtils & {
   tree: PageTree
   pages: Page[]
@@ -35,53 +29,24 @@ type I18nUtils = Omit<Utils, 'tree'> & {
   tree: Record<string, PageTree>
 }
 
-function fromMapI18n(
+function fromMap<Langs extends string[] | undefined = undefined>(
   map: Record<string, unknown>,
   {
     baseUrl = '/docs',
     root = 'docs',
     getUrl,
     resolveIcon,
-    languages = []
-  }: Partial<I18nUtilsOptions> = {}
-): I18nUtils {
-  const context = resolveFiles({
-    root,
-    map
-  })
-
-  const pageUtils = createPageUtils(context, baseUrl, languages)
-
-  const pageTreeContext = loadContext(context.metas, context.pages, {
-    getUrl: getUrl ?? pageUtils.getPageUrl,
-    resolveIcon
-  })
-
-  return {
-    ...context,
-    ...pageUtils,
-    getPageUrl: getUrl ?? pageUtils.getPageUrl,
-    tree: buildI18nPageTree({ languages, ...pageTreeContext }, { root })
-  }
-}
-
-function fromMap(
-  map: Record<string, unknown>,
-  {
-    baseUrl = '/docs',
-    root = 'docs',
-    getUrl,
-    resolveIcon
-  }: Partial<UtilsOptions> = {}
-): Utils {
+    languages
+  }: Partial<UtilsOptions<Langs>> = {}
+): Langs extends string[] ? I18nUtils : Utils {
   const context = resolveFiles({
     map,
     root
   })
 
-  const pageUtils = createPageUtils(context, baseUrl, [])
+  const pageUtils = createPageUtils(context, baseUrl, languages ?? [])
 
-  const pageTreeContext = loadContext(context.metas, context.pages, {
+  const builder = getPageTreeBuilder(context.metas, context.pages, {
     getUrl: getUrl ?? pageUtils.getPageUrl,
     resolveIcon
   })
@@ -90,8 +55,11 @@ function fromMap(
     ...context,
     ...pageUtils,
     getPageUrl: getUrl ?? pageUtils.getPageUrl,
-    tree: buildPageTree(pageTreeContext, { root })
+    tree: (languages == null
+      ? builder.build({ root })
+      : // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        builder.buildI18n({ languages, root })) as any
   }
 }
 
-export { fromMap, fromMapI18n }
+export { fromMap }

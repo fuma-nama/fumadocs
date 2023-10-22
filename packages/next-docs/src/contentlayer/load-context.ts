@@ -1,4 +1,4 @@
-import type { AbstractMeta, AbstractPage, File } from '@/build-page-tree'
+import { createPageTreeBuilder, type File } from '@/build-page-tree'
 import type { RawDocumentData } from 'contentlayer/source-files'
 import type { ReactElement } from 'react'
 import type { DocsPageBase, MetaPageBase, PagesContext } from './types'
@@ -16,8 +16,6 @@ export type ContextOptions = {
   resolveIcon: (icon: string) => ReactElement | undefined
 }
 
-type MappedPage<Docs extends DocsPageBase> = { page: AbstractPage; ref: Docs }
-
 export function loadContext<Docs extends DocsPageBase>(
   metaPages: MetaPageBase[],
   docsPages: Docs[],
@@ -28,53 +26,33 @@ export function loadContext<Docs extends DocsPageBase>(
     resolveIcon = () => undefined
   }: Partial<ContextOptions> = {}
 ): PagesContext<Docs> {
-  const basePages: AbstractPage[] = []
-  const pageMap = new Map<string, MappedPage<Docs>>()
-  const metaMap = new Map<string, AbstractMeta>()
-
-  for (const page of docsPages) {
-    const file = getFileData(page._raw)
-
-    const mapped: MappedPage<Docs> = {
-      ref: page,
-      page: {
-        file,
-        title: page.title,
-        icon: page.icon,
-        url: getUrl(page.slug.split('/'), page.locale)
-      }
-    }
-
-    if (!page.locale) basePages.push(mapped.page)
-    pageMap.set(file.flattenedPath, mapped)
-  }
-
-  for (const meta of metaPages) {
-    const file = getFileData(meta._raw)
-
-    metaMap.set(file.flattenedPath, {
-      file,
+  const builder = createPageTreeBuilder({
+    pages: docsPages.map(page => ({
+      file: getFileData(page._raw, page.locale),
+      title: page.title,
+      url: getUrl(page.slug.split('/'), page.locale),
+      icon: page.icon
+    })),
+    metas: metaPages.map(meta => ({
+      file: getFileData(meta._raw),
       pages: meta.pages,
       icon: meta.icon,
       title: meta.title
-    })
-  }
+    })),
+    resolveIcon(icon) {
+      if (icon == null) return
+      return resolveIcon(icon)
+    }
+  })
 
   return {
-    i18nMap: getI18nPages(pageMap, languages),
-    getMetaByPath(flattenPath) {
-      return metaMap.get(flattenPath) ?? null
-    },
-    getPageByPath(flattenPath) {
-      return pageMap.get(flattenPath)?.page ?? null
-    },
-    basePages,
-    resolveIcon,
+    builder,
+    i18nMap: getI18nPages(docsPages, languages),
     getUrl
   }
 }
 
-function getFileData(raw: RawDocumentData): File {
+function getFileData(raw: RawDocumentData, locale?: string): File {
   const dotIndex = raw.sourceFileName.lastIndexOf('.')
   const flattenedPath =
     raw.sourceFileDir === raw.flattenedPath
@@ -82,6 +60,7 @@ function getFileData(raw: RawDocumentData): File {
       : raw.flattenedPath
 
   return {
+    locale,
     dirname: raw.sourceFileDir,
     name: raw.sourceFileName.slice(0, dotIndex === -1 ? undefined : dotIndex),
     flattenedPath,
@@ -90,27 +69,32 @@ function getFileData(raw: RawDocumentData): File {
 }
 
 function getI18nPages<Docs extends DocsPageBase>(
-  docsMap: Map<string, MappedPage<Docs>>,
+  pages: Docs[],
   languages: string[]
 ): Map<string, Docs[]> {
-  const pages = new Map<string, Docs[]>()
+  const pageMap = new Map<string, Docs>()
 
-  pages.set('', [])
-  for (const lang of languages) {
-    pages.set(lang, [])
+  for (const page of pages) {
+    pageMap.set(getFileData(page._raw, page.locale).flattenedPath, page)
   }
 
-  for (const [key, value] of docsMap) {
-    if (value.ref.locale) continue
+  const langMap = new Map<string, Docs[]>()
+
+  langMap.set('', [])
+  for (const lang of languages) {
+    langMap.set(lang, [])
+  }
+
+  for (const [key, page] of pageMap) {
+    if (page.locale != null) continue
+    langMap.get('')!.push(page)
 
     for (const lang of languages) {
-      const v = docsMap.get(`${key}.${lang}`) ?? value
+      const v = pageMap.get(`${key}.${lang}`) ?? page
 
-      pages.get(lang)?.push(v.ref)
+      langMap.get(lang)!.push(v)
     }
-
-    pages.get('')?.push(value.ref)
   }
 
-  return pages
+  return langMap
 }

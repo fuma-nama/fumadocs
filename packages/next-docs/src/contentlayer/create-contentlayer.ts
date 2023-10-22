@@ -1,15 +1,13 @@
-import { buildI18nPageTree, buildPageTree } from '@/build-page-tree'
 import type { PageTree } from '@/server/types'
 import { loadContext, type ContextOptions } from './load-context'
 import type { DocsPageBase, MetaPageBase, PagesContext } from './types'
 import { createUtils, type ContentlayerUtils } from './utils'
 
-type Options<L extends string[] | undefined> = Omit<
-  Partial<ContextOptions>,
-  'languages'
-> & {
-  languages?: L
-}
+type Options<L extends string[] | undefined> = Partial<
+  Omit<ContextOptions, 'languages'> & {
+    languages: L
+  }
+>
 
 type CreateContentlayer = <
   Meta extends MetaPageBase,
@@ -21,7 +19,7 @@ type CreateContentlayer = <
   options?: Options<Langs>
 ) => {
   __pageContext: PagesContext
-  tree: Langs extends string[] ? Record<Langs[number], PageTree> : PageTree
+  tree: Langs extends string[] ? Record<string, PageTree> : PageTree
 } & ContentlayerUtils<Docs>
 
 /**
@@ -37,9 +35,9 @@ export const createContentlayer: CreateContentlayer = (
   return {
     __pageContext: ctx,
     tree: (options.languages != null
-      ? buildI18nPageTree({ ...ctx, languages: options.languages })
+      ? ctx.builder.buildI18n({ languages: options.languages })
       : // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        buildPageTree(ctx)) as any,
+        ctx.builder.build()) as any,
     ...createUtils(ctx)
   }
 }

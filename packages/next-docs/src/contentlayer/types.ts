@@ -1,4 +1,4 @@
-import type { Context } from '@/build-page-tree'
+import type { PageTreeBuilder } from '@/build-page-tree'
 import type { RawDocumentData } from 'contentlayer/source-files'
 
 export type MetaPageBase = {
@@ -28,7 +28,9 @@ export type DocsPageBase = {
   slug: string
 }
 
-export type PagesContext<Docs extends DocsPageBase = DocsPageBase> = Context & {
+export type PagesContext<Docs extends DocsPageBase = DocsPageBase> = {
+  builder: PageTreeBuilder
+
   /**
    * Language -> Page[]
    */
