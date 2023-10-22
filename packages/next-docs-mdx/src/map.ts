@@ -45,16 +45,16 @@ function fromMap<Langs extends string[] | undefined = undefined>(
   })
 
   const pageUtils = createPageUtils(context, baseUrl, languages ?? [])
+  if (getUrl) pageUtils.getPageUrl = getUrl
 
   const builder = getPageTreeBuilder(context.metas, context.pages, {
-    getUrl: getUrl ?? pageUtils.getPageUrl,
+    getUrl: pageUtils.getPageUrl,
     resolveIcon
   })
 
   return {
     ...context,
     ...pageUtils,
-    getPageUrl: getUrl ?? pageUtils.getPageUrl,
     tree: (languages == null
       ? builder.build({ root })
       : // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -52,6 +52,7 @@ const defaultMdxComponents = {
 export {
   defaultMdxComponents as default,
   SafeLink as Link,
+  default_image_sizes,
   Heading,
   Pre,
   Card,

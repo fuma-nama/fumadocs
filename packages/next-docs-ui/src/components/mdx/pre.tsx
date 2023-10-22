@@ -1,5 +1,3 @@
-'use client'
-
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/utils/cn'
 import { CheckIcon, CopyIcon } from 'lucide-react'
