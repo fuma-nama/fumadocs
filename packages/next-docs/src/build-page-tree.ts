@@ -283,8 +283,8 @@ export function createPageTreeBuilder({
 
   const context: PageTreeBuilderContext = {
     basePages,
-    getMetaByPath: metaMap.get,
-    getPageByPath: pageMap.get,
+    getMetaByPath: path => metaMap.get(path),
+    getPageByPath: path => pageMap.get(path),
     resolveIcon(icon) {
       if (icon == null) return
       return resolveIcon(icon)
