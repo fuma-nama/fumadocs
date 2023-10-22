@@ -66,6 +66,7 @@
     "@tailwindcss/typography": "^0.5.10",
     "@types/react": "18.2.0",
     "@types/react-dom": "18.2.1",
+    "@types/node": "18.17.5",
     "algoliasearch": "^4.20.0",
     "autoprefixer": "10.4.16",
     "contentlayer": "^0.3.4",
