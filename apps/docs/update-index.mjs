@@ -16,7 +16,7 @@ const client = algosearch(
 )
 
 sync(client, {
-  document: 'document_dev',
+  document: process.env.NEXT_PUBLIC_ALGOLIA_INDEX,
   documents: indexes.map(docs => ({
     _id: docs.id,
     title: docs.title,
