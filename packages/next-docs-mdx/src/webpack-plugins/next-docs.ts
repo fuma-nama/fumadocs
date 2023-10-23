@@ -8,7 +8,7 @@ type Options = {
 }
 
 const content = `
-declare const map: unknown
+declare const map: Record<string, unknown>
 
 export { map }
 `.trim()
