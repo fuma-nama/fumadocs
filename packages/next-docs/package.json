@@ -11,11 +11,11 @@
   ],
   "exports": {
     "./sidebar": {
-      "import": "./dist/sidebar.mjs",
+      "import": "./dist/sidebar.js",
       "types": "./dist/sidebar.d.ts"
     },
     "./breadcrumb": {
-      "import": "./dist/breadcrumb.mjs",
+      "import": "./dist/breadcrumb.js",
       "types": "./dist/breadcrumb.d.ts"
     },
     "./build-page-tree": {
@@ -23,11 +23,11 @@
       "types": "./dist/build-page-tree.d.ts"
     },
     "./toc": {
-      "import": "./dist/toc.mjs",
+      "import": "./dist/toc.js",
       "types": "./dist/toc.d.ts"
     },
     "./search/client": {
-      "import": "./dist/search/client.mjs",
+      "import": "./dist/search/client.js",
       "types": "./dist/search/client.d.ts"
     },
     "./search/server": {
@@ -39,7 +39,7 @@
       "types": "./dist/server.d.ts"
     },
     "./link": {
-      "import": "./dist/link.mjs",
+      "import": "./dist/link.js",
       "types": "./dist/link.d.ts"
     },
     "./contentlayer": {
@@ -59,7 +59,7 @@
       "types": "./dist/mdx-plugins.d.ts"
     },
     "./search-algolia/client": {
-      "import": "./dist/search-algolia/client.mjs",
+      "import": "./dist/search-algolia/client.js",
       "types": "./dist/search-algolia/client.d.ts"
     },
     "./search-algolia/server": {
@@ -87,7 +87,7 @@
     }
   },
   "scripts": {
-    "build": "tsup --clean",
+    "build": "tsup",
     "clean": "rmdir /q/s dist",
     "dev": "tsup --watch",
     "prepublishOnly": "pnpm build",

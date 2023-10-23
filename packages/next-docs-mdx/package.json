@@ -29,7 +29,8 @@
     }
   },
   "scripts": {
-    "build": "tsup --clean",
+    "build": "tsup",
+    "clean": "rmdir /q/s dist",
     "dev": "tsup --watch",
     "prepublishOnly": "pnpm build",
     "types:check": "tsc --noEmit"

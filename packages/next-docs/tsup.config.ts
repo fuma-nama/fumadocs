@@ -16,16 +16,30 @@ const shared = {
 export default defineConfig([
   {
     ...shared,
+    name: 'next-docs-client',
     entry: [
       'src/{toc,link,breadcrumb,sidebar}.tsx',
+      'src/{search,search-algolia}/client.ts'
+    ],
+    outExtension: () => ({ js: '.js' })
+  },
+  {
+    ...shared,
+    name: 'next-docs-esm',
+    entry: [
       'src/{server,mdx-plugins,build-page-tree}.ts',
-      'src/{search,search-algolia}/{client,shared}.ts',
       'src/contentlayer/{index,configuration}.ts'
     ]
   },
   {
     ...shared,
+    name: 'next-docs-cjs',
     entry: ['src/{search,search-algolia}/server.ts', 'src/middleware.ts'],
     format: 'cjs'
+  },
+  {
+    name: 'next-docs-types',
+    entry: ['src/{search,search-algolia}/shared.ts'],
+    dts: { only: true }
   }
 ])
