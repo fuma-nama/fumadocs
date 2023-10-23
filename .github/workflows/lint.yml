@@ -37,7 +37,7 @@ jobs:
         run: pnpm lint:prettier
 
       - name: Check Types
-        run: pnpm types:check
+        run: pnpm build && pnpm types:check
 
       - name: Run ESLint
         run: pnpm lint
