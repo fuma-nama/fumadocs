@@ -56,24 +56,27 @@ importers:
 
   apps/docs:
     dependencies:
-      '@radix-ui/react-dialog':
-        specifier: ^1.0.4
-        version: 1.0.4(@types/react-dom@18.2.1)(@types/react@18.2.0)(react-dom@18.2.0)(react@18.2.0)
+      '@mdx-js/loader':
+        specifier: ^2.3.0
+        version: 2.3.0(webpack@5.89.0)
+      '@mdx-js/react':
+        specifier: ^2.3.0
+        version: 2.3.0(react@18.2.0)
+      '@next/env':
+        specifier: ^13.5.6
+        version: 13.5.6
+      '@next/mdx':
+        specifier: ^13.5.6
+        version: 13.5.6(@mdx-js/loader@2.3.0)(@mdx-js/react@2.3.0)
       algoliasearch:
         specifier: ^4.20.0
         version: 4.20.0
-      autoprefixer:
-        specifier: 10.4.16
-        version: 10.4.16(postcss@8.4.31)
       class-variance-authority:
         specifier: ^0.7.0
         version: 0.7.0
       clsx:
         specifier: ^2.0.0
         version: 2.0.0
-      contentlayer:
-        specifier: ^0.3.4
-        version: 0.3.4
       katex:
         specifier: ^0.16.8
         version: 0.16.8
@@ -83,9 +86,9 @@ importers:
       next:
         specifier: 13.5.6
         version: 13.5.6(@babel/core@7.22.17)(react-dom@18.2.0)(react@18.2.0)
-      next-contentlayer:
-        specifier: ^0.3.4
-        version: 0.3.4(contentlayer@0.3.4)(next@13.5.6)(react-dom@18.2.0)(react@18.2.0)
+      next-docs-mdx:
+        specifier: workspace:*
+        version: link:../../packages/next-docs-mdx
       next-docs-ui:
         specifier: workspace:*
         version: link:../../packages/next-docs-ui
@@ -95,9 +98,6 @@ importers:
       next-sitemap:
         specifier: ^4.2.3
         version: 4.2.3(next@13.5.6)
-      postcss:
-        specifier: 8.4.31
-        version: 8.4.31
       react:
         specifier: 18.2.0
         version: 18.2.0
@@ -117,6 +117,9 @@ importers:
       '@next/bundle-analyzer':
         specifier: ^13.4.19
         version: 13.4.19
+      '@types/mdx':
+        specifier: ^2.0.8
+        version: 2.0.8
       '@types/node':
         specifier: 18.17.5
         version: 18.17.5
@@ -126,15 +129,21 @@ importers:
       '@types/react-dom':
         specifier: 18.2.1
         version: 18.2.1
-      dotenv:
-        specifier: ^16.3.1
-        version: 16.3.1
+      autoprefixer:
+        specifier: 10.4.16
+        version: 10.4.16(postcss@8.4.31)
+      postcss:
+        specifier: 8.4.31
+        version: 8.4.31
       tailwindcss:
         specifier: 3.3.3
         version: 3.3.3
       tailwindcss-animate:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.3.3)
+      webpack:
+        specifier: ^5.89.0
+        version: 5.89.0
 
   examples/advanced:
     dependencies:
@@ -381,6 +390,9 @@ importers:
       '@mdx-js/loader':
         specifier: ^2.3.0
         version: 2.3.0(webpack@5.89.0)
+      '@mdx-js/mdx':
+        specifier: ^2.3.0
+        version: 2.3.0
       '@mdx-js/react':
         specifier: ^2.3.0
         version: 2.3.0(react@18.2.0)
@@ -405,6 +417,9 @@ importers:
       unified:
         specifier: ^10.1.2
         version: 10.1.2
+      webpack:
+        specifier: ^5.89.0
+        version: 5.89.0
 
   packages/next-docs-ui:
     dependencies:
@@ -1625,10 +1640,6 @@ packages:
       - bufferutil
       - utf-8-validate
     dev: true
-
-  /@next/env@13.4.19:
-    resolution: {integrity: sha512-FsAT5x0jF2kkhNkKkukhsyYOrRqtSxrEhfliniIq0bwWbuXLgyt3Gv0Ml+b91XwjwArmuP7NxCiGd++GGKdNMQ==}
-    dev: false
 
   /@next/env@13.5.6:
     resolution: {integrity: sha512-Yac/bV5sBGkkEXmAX5FWPS9Mmo2rthrOPRQQNfycJPkjUAUclomCPH7QFVCDQ4Mp2k2K1SSM6m0zrxYrOwtFQw==}
@@ -3607,6 +3618,7 @@ packages:
       picocolors: 1.0.0
       postcss: 8.4.31
       postcss-value-parser: 4.2.0
+    dev: true
 
   /available-typed-arrays@1.0.5:
     resolution: {integrity: sha512-DMD0KiN46eipeziST1LPP/STfDU0sufISXmjSgvVsoU2tqxctQeASejWcfNtxYKqETM1UxQ8sp2OrSBWpHY6sw==}
@@ -4112,11 +4124,6 @@ packages:
     engines: {node: '>=6.0.0'}
     dependencies:
       esutils: 2.0.3
-    dev: true
-
-  /dotenv@16.3.1:
-    resolution: {integrity: sha512-IPzF4w4/Rd94bA9imS68tZBaYyBWSCE47V1RGuMrB94iyTOIEwRmVL2x/4An+6mETpLrKJ5hQkB8W4kFAadeIQ==}
-    engines: {node: '>=12'}
     dev: true
 
   /duplexer@0.1.2:
@@ -4643,6 +4650,7 @@ packages:
 
   /fraction.js@4.3.6:
     resolution: {integrity: sha512-n2aZ9tNfYDwaHhvFTkhFErqOMIb8uyzSQ+vGJBjZyanAKZVbGUQ1sngfk9FdkBw7G26O7AgNjLcecLffD1c7eg==}
+    dev: true
 
   /fs-extra@11.1.1:
     resolution: {integrity: sha512-MGIE4HOvQCeUCzmlHs0vXpih4ysz4wg9qiSAu6cd42lVwPbTM1TjV7RusoyQqMmk/95gdQZX72u+YW+c3eEpFQ==}
@@ -6434,7 +6442,7 @@ packages:
       next: '*'
     dependencies:
       '@corex/deepmerge': 4.0.43
-      '@next/env': 13.4.19
+      '@next/env': 13.5.6
       fast-glob: 3.3.1
       minimist: 1.2.8
       next: 13.5.6(@babel/core@7.22.17)(react-dom@18.2.0)(react@18.2.0)
@@ -6527,6 +6535,7 @@ packages:
   /normalize-range@0.1.2:
     resolution: {integrity: sha512-bdok/XvKII3nUpklnV6P2hxtMNrCboOjAcyBuQnWEhO665FwrSNRxU+AqpsyvO6LgGYPspN+lu5CLtw4jPRKNA==}
     engines: {node: '>=0.10.0'}
+    dev: true
 
   /npm-run-path@4.0.1:
     resolution: {integrity: sha512-S48WzZW777zhNIrn7gxOlISNAqi9ZC/uQFnRdbeIHhZhCA6UqpkOT8T1G7BvfdgP4Er8gF4sUbaS0i7QvIfCWw==}
@@ -6922,6 +6931,7 @@ packages:
 
   /postcss-value-parser@4.2.0:
     resolution: {integrity: sha512-1NNCs6uurfkVbeXG4S8JFT9t19m45ICnif8zWLd5oPSZ50QnwMfK+H3jv408d4jw/7Bttv5axS5IiHoLaVNHeQ==}
+    dev: true
 
   /postcss@8.4.31:
     resolution: {integrity: sha512-PS08Iboia9mts/2ygV3eLpY5ghnUcfLV/EXTOW1E2qYxJKGGBUtNjN76FYHnMs36RmARn41bC0AZmn+rR0OVpQ==}

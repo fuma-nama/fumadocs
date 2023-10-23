@@ -1,18 +1,14 @@
+import { resolve } from 'url'
 import Preview from '@/components/preview'
 import { createMetadata } from '@/utils/metadata'
-import { getPage, getPageUrl, getTree } from '@/utils/source'
-import { allDocs, type Docs } from 'contentlayer/generated'
+import { getPage, getPageUrl, getTree, pages } from '@/utils/source'
 import { ExternalLinkIcon } from 'lucide-react'
 import type { Metadata } from 'next'
+import type { Page } from 'next-docs-mdx/types'
 import { Card, Cards, MDXContent } from 'next-docs-ui/mdx'
 import { DocsPage } from 'next-docs-ui/page'
-import {
-  findNeighbour,
-  getGitLastEditTime,
-  getTableOfContents
-} from 'next-docs-zeta/server'
+import { findNeighbour, getGitLastEditTime } from 'next-docs-zeta/server'
 import { notFound } from 'next/navigation'
-import { Content } from './content'
 
 type Param = {
   mode: string
@@ -21,14 +17,13 @@ type Param = {
 
 export default async function Page({ params }: { params: Param }) {
   const tree = getTree(params.mode)
-  const page = getPage([params.mode, ...(params.slug ?? [])])
+  const page = getPage([params.mode, ...(params.slug ?? [])]) as Page
 
   if (page == null) {
     notFound()
   }
 
-  const toc = await getTableOfContents(page.body.raw)
-  const url = getPageUrl(page.slug)
+  const url = getPageUrl(page.slugs)
   const neighbours = findNeighbour(tree, url)
 
   const headers = new Headers()
@@ -37,24 +32,28 @@ export default async function Page({ params }: { params: Param }) {
 
   const time = await getGitLastEditTime(
     'SonMooSans/next-docs',
-    'apps/docs/content/' + page._raw.sourceFilePath,
+    resolve('apps/docs/', page.file.path),
     undefined,
     {
       headers
     }
   )
 
-  const preview = page.preview?.trim()
+  const preview = page.matter.preview?.trim()
+  const MDX = page.data.default
 
   return (
     <DocsPage
-      toc={toc}
+      toc={page.data.toc}
       footer={neighbours}
       lastUpdate={time}
       tableOfContent={{
         footer: (
           <a
-            href={`https://github.com/fuma-nama/next-docs/blob/main/apps/docs/content/${page._raw.sourceFilePath}`}
+            href={resolve(
+              `https://github.com/fuma-nama/next-docs/blob/main/apps/docs/content`,
+              page.file.path
+            )}
             target="_blank"
             rel="noreferrer noopener"
             className="text-xs inline-flex text-muted-foreground items-center hover:text-foreground"
@@ -67,34 +66,33 @@ export default async function Page({ params }: { params: Param }) {
       <MDXContent>
         <div className="nd-not-prose mb-12">
           <h1 className="text-foreground mb-4 text-3xl font-semibold sm:text-4xl">
-            {page.title}
+            {page.matter.title}
           </h1>
-          <p className="text-muted-foreground sm:text-lg">{page.description}</p>
+          <p className="text-muted-foreground sm:text-lg">
+            {page.matter.description}
+          </p>
         </div>
         {preview != null && preview in Preview && Preview[preview]}
-        {page.index ? (
-          <Category page={page} />
-        ) : (
-          <Content code={page.body.code} />
-        )}
+        {page.matter.index ? <Category page={page} /> : <MDX />}
       </MDXContent>
     </DocsPage>
   )
 }
 
-function Category({ page }: { page: Docs }) {
-  const pages = allDocs.filter(docs =>
-    docs._raw.flattenedPath.startsWith(page._raw.flattenedPath + '/')
+function Category({ page }: { page: Page }) {
+  const filtered = pages.filter(
+    docs =>
+      docs.file.dirname === page.file.dirname && docs.file.name !== 'index'
   )
 
   return (
     <Cards>
-      {pages.map(page => (
+      {filtered.map(page => (
         <Card
-          key={page._id}
-          title={page.title}
-          description={page.description ?? 'No Description'}
-          href={getPageUrl(page.slug)}
+          key={page.file.id}
+          title={page.matter.title}
+          description={page.matter.description ?? 'No Description'}
+          href={getPageUrl(page.slugs)}
         />
       ))}
     </Cards>
@@ -108,12 +106,11 @@ export function generateMetadata({ params }: { params: Param }): Metadata {
   if (page == null) return {}
 
   const description =
-    page.description ??
-    'The headless ui library for building documentation websites'
+    page.matter.description ?? 'The library for building documentation sites'
 
   const imageParams = new URLSearchParams()
-  imageParams.set('title', page.title)
-  if (page.description) imageParams.set('description', page.description)
+  imageParams.set('title', page.matter.title)
+  imageParams.set('description', description)
 
   const image = {
     alt: 'Banner',
@@ -123,7 +120,7 @@ export function generateMetadata({ params }: { params: Param }): Metadata {
   }
 
   return createMetadata({
-    title: page.title,
+    title: page.matter.title,
     description,
     openGraph: {
       url: `https://next-docs-zeta.vercel.app/docs/${slugs.join('/')}`,
@@ -136,8 +133,8 @@ export function generateMetadata({ params }: { params: Param }): Metadata {
 }
 
 export function generateStaticParams() {
-  return allDocs.map(docs => {
-    const [mode, ...slugs] = docs.slug.split('/')
+  return pages.map(docs => {
+    const [mode, ...slugs] = docs.slugs
 
     return {
       slug: slugs,

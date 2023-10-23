@@ -64,12 +64,12 @@ export interface JsonExport {
   icon?: string
 }
 
-export type Meta = {
+export interface Meta {
   file: FileInfo
   data: JsonExport
 }
 
-export type Page = {
+export interface Page {
   file: FileInfo
   slugs: string[]
   data: MDXExport

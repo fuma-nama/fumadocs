@@ -126,7 +126,7 @@ function SidebarToggle() {
   return (
     <SidebarTrigger
       aria-label="Toggle Sidebar"
-      className={cn(itemVariants({ className: 'lg:nd-hidden' }))}
+      className={cn(itemVariants({ className: 'md:nd-hidden' }))}
     >
       <MenuIcon />
     </SidebarTrigger>
@@ -140,7 +140,7 @@ function DesktopSidebarToggle() {
     <button
       aria-label="Toggle Sidebar"
       onClick={() => setOpen(!open)}
-      className={cn(itemVariants({ className: 'max-lg:nd-hidden' }))}
+      className={cn(itemVariants({ className: 'max-md:nd-hidden' }))}
     >
       {open ? <SidebarCloseIcon /> : <SidebarOpenIcon />}
     </button>

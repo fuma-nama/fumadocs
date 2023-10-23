@@ -14,6 +14,7 @@ import remarkFrontmatter, {
   type Options as RemarkFrontmatterOptions
 } from 'remark-frontmatter'
 import type { PluggableList } from 'unified'
+import type { Compiler } from 'webpack'
 import remarkMdxExport from './mdx-plugins/remark-exports'
 import remarkMdxFrontmatter from './mdx-plugins/remark-frontmatter'
 
@@ -33,6 +34,18 @@ type NextDocsMDXOptions = NextMDXOptions & {
    * Properties to export from `vfile.data`
    */
   dataExports?: string[]
+}
+
+function Plugin(compiler: Compiler) {
+  compiler.hooks.beforeCompile.tap(PLUGIN_NAME, () => {
+    if (firstLoad) {
+      chokidar.watch('./content').on('all', () => {
+        buildMap()
+      })
+
+      firstLoad = false
+    }
+  })
 }
 
 const createNextDocs =
@@ -73,18 +86,7 @@ const createNextDocs =
 
     return Object.assign({}, nextConfig, {
       webpack: (config, options) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        config.plugins.push((compiler: any) => {
-          compiler.hooks.initialize.tap(PLUGIN_NAME, () => {
-            if (firstLoad) {
-              chokidar.watch('./content').on('all', () => {
-                buildMap()
-              })
-
-              firstLoad = false
-            }
-          })
-        })
+        config.plugins.push(Plugin)
 
         if (typeof nextConfig.webpack === 'function') {
           return nextConfig.webpack(config, options)

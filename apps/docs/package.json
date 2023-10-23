@@ -9,20 +9,20 @@
     "start": "next start"
   },
   "dependencies": {
-    "@radix-ui/react-dialog": "^1.0.4",
+    "@mdx-js/loader": "^2.3.0",
+    "@mdx-js/react": "^2.3.0",
+    "@next/mdx": "^13.5.6",
+    "@next/env": "^13.5.6",
     "algoliasearch": "^4.20.0",
-    "autoprefixer": "10.4.16",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
-    "contentlayer": "^0.3.4",
     "katex": "^0.16.8",
     "lucide-react": "^0.288.0",
     "next": "13.5.6",
-    "next-contentlayer": "^0.3.4",
+    "next-docs-mdx": "workspace:*",
     "next-docs-ui": "workspace:*",
     "next-docs-zeta": "workspace:*",
     "next-sitemap": "^4.2.3",
-    "postcss": "8.4.31",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "rehype-katex": "^6.0.3",
@@ -31,11 +31,14 @@
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^13.4.19",
+    "@types/mdx": "^2.0.8",
     "@types/node": "18.17.5",
     "@types/react": "18.2.0",
     "@types/react-dom": "18.2.1",
-    "dotenv": "^16.3.1",
+    "autoprefixer": "10.4.16",
+    "postcss": "8.4.31",
     "tailwindcss": "3.3.3",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "webpack": "^5.89.0"
   }
 }

@@ -12,18 +12,26 @@ export type ImageZoomProps = ImageProps & {
   zoomInProps?: ImgHTMLAttributes<HTMLImageElement>
 }
 
-export function ImageZoom({ zoomInProps, ...props }: ImageZoomProps) {
+function getImageSrc(src: ImageProps['src']): string {
+  return typeof src === 'string'
+    ? src
+    : 'default' in src
+    ? src.default.src
+    : src.src
+}
+
+export function ImageZoom({ zoomInProps, children, ...props }: ImageZoomProps) {
   return (
     <Zoom
       zoomMargin={20}
       wrapElement="span"
       zoomImg={{
-        src: props.src as string,
+        src: getImageSrc(props.src),
         sizes: undefined,
         ...zoomInProps
       }}
     >
-      <Image sizes={default_image_sizes} {...props} />
+      {children ?? <Image sizes={default_image_sizes} {...props} />}
     </Zoom>
   )
 }

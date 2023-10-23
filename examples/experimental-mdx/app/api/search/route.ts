@@ -1,8 +1,5 @@
 import { allPages, getPageUrl } from '@/app/source'
-import { createSearchAPI, setResponse } from 'next-docs-zeta/search/server'
-import { NextResponse } from 'next/server'
-
-setResponse(NextResponse)
+import { createSearchAPI } from 'next-docs-zeta/search/server'
 
 export const { GET } = createSearchAPI('advanced', {
   indexes: allPages.map(page => ({

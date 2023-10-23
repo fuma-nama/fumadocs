@@ -40,18 +40,17 @@ export function Sidebar({ banner, footer }: SidebarProps) {
 
   return (
     <Base.SidebarList
-      minWidth={1024} // lg
+      minWidth={768} // md
       className={cn(
-        'nd-flex nd-flex-col nd-w-full',
+        'nd-flex nd-flex-col nd-w-full nd-text-medium md:nd-text-sm md:nd-sticky md:nd-top-16 md:nd-h-body md:nd-transition-all',
         open
           ? 'md:nd-w-[260px]'
           : 'md:nd-w-0 md:nd-overflow-hidden md:nd-opacity-0',
-        'md:nd-sticky md:nd-top-16 md:nd-h-body md:nd-transition-[width,opacity]',
         'max-md:nd-fixed max-md:nd-inset-y-0 max-md:nd-right-0 max-md:nd-bg-background max-md:nd-z-40 max-md:nd-pt-16 max-md:data-[open=false]:nd-hidden sm:max-md:nd-max-w-sm sm:max-md:nd-border-l'
       )}
     >
       <ScrollArea className="nd-flex-1 md:nd-w-[260px]">
-        <div className="nd-flex nd-flex-col nd-pb-10 nd-pt-4 nd-text-medium max-md:nd-px-6 md:nd-pr-4 md:nd-pt-12 md:nd-text-sm">
+        <div className="nd-flex nd-flex-col nd-pb-10 nd-pt-4 md:nd-pr-4 md:nd-pt-12 max-md:nd-px-body">
           {banner}
           {tree.children.map((item, i) => (
             <Node key={i} item={item} level={1} />
@@ -60,7 +59,7 @@ export function Sidebar({ banner, footer }: SidebarProps) {
       </ScrollArea>
       <div
         className={cn(
-          'nd-flex nd-flex-row nd-items-center nd-gap-2 nd-border-t nd-py-2 max-md:nd-px-8',
+          'nd-flex nd-flex-row nd-items-center nd-gap-2 nd-border-t nd-py-2 max-md:nd-px-body',
           !footer && 'md:nd-hidden'
         )}
       >

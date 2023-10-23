@@ -26,9 +26,13 @@
       "import": "./dist/toc.mjs",
       "types": "./dist/toc.d.ts"
     },
-    "./search/*": {
-      "import": "./dist/search/*.mjs",
-      "types": "./dist/search/*.d.ts"
+    "./search/client": {
+      "import": "./dist/search/client.mjs",
+      "types": "./dist/search/client.d.ts"
+    },
+    "./search/server": {
+      "import": "./dist/search/server.js",
+      "types": "./dist/search/server.d.ts"
     },
     "./server": {
       "import": "./dist/server.mjs",
@@ -47,16 +51,20 @@
       "types": "./dist/contentlayer/configuration.d.ts"
     },
     "./middleware": {
-      "import": "./dist/middleware.mjs",
+      "import": "./dist/middleware.js",
       "types": "./dist/middleware.d.ts"
     },
     "./mdx-plugins": {
       "import": "./dist/mdx-plugins.mjs",
       "types": "./dist/mdx-plugins.d.ts"
     },
-    "./search-algolia/*": {
-      "import": "./dist/search-algolia/*.mjs",
-      "types": "./dist/search-algolia/*.d.ts"
+    "./search-algolia/client": {
+      "import": "./dist/search-algolia/client.mjs",
+      "types": "./dist/search-algolia/client.d.ts"
+    },
+    "./search-algolia/server": {
+      "import": "./dist/search-algolia/server.js",
+      "types": "./dist/search-algolia/server.d.ts"
     }
   },
   "typesVersions": {

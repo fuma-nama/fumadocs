@@ -3,17 +3,6 @@ import FlexSearch from 'flexsearch'
 import { NextResponse, type NextRequest } from 'next/server'
 import type { SortedResult } from './shared'
 
-let Response: typeof NextResponse = NextResponse
-
-/**
- * In some circumstances, importing `NextResponse` in external packages can cause problems
- *
- * You can call `setResponse` to replace the one bundled by Next.js
- */
-export function setResponse(_new: typeof NextResponse) {
-  Response = _new
-}
-
 type SearchAPI = {
   GET: (
     request: NextRequest
@@ -78,7 +67,7 @@ export function createI18nSearchAPI<T extends 'simple' | 'advanced'>(
         return map.get(locale)!.GET(request)
       }
 
-      return Response.json([])
+      return NextResponse.json([])
     }
   }
 }
@@ -136,7 +125,7 @@ export function initSearchAPI({ indexes, language }: SimpleOptions): SearchAPI {
       const { searchParams } = request.nextUrl
       const query = searchParams.get('query')
 
-      if (query == null) return Response.json([])
+      if (query == null) return NextResponse.json([])
 
       const results = index.search(query, 5, {
         enrich: true,
@@ -150,7 +139,7 @@ export function initSearchAPI({ indexes, language }: SimpleOptions): SearchAPI {
         url: page.doc.url
       }))
 
-      return Response.json(pages ?? [])
+      return NextResponse.json(pages ?? [])
     }
   }
 }
@@ -243,7 +232,7 @@ export function initSearchAPIAdvanced({
       const query = request.nextUrl.searchParams.get('query')
       const tag = request.nextUrl.searchParams.get('tag')
 
-      if (query == null) return Response.json([])
+      if (query == null) return NextResponse.json([])
 
       const results = index.search(query, 5, {
         enrich: true,
@@ -251,7 +240,7 @@ export function initSearchAPIAdvanced({
         limit: 6
       })[0]
 
-      if (results == null) return Response.json([])
+      if (results == null) return NextResponse.json([])
 
       const map = new Map<string, SortedResult[]>()
       const sortedResult: SortedResult[] = []
@@ -294,7 +283,7 @@ export function initSearchAPIAdvanced({
         sortedResult.push(...items)
       }
 
-      return Response.json(sortedResult)
+      return NextResponse.json(sortedResult)
     }
   }
 }

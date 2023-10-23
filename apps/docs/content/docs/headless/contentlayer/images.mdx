@@ -3,8 +3,11 @@ title: Image Optimization
 description: Use Next.js image optimization in your MDX documents
 ---
 
-Next Docs UI uses the built-in `next/image` component. You can enjoy the
-benefits of Next.js Image Optimization without extra configurations.
+import Banner from '@/public/banner.png'
+
+Next Docs Zeta supports the built-in `next/image` component by passing `width`
+and `height` property automatically. You can enjoy the benefits of Next.js Image
+Optimization without extra configurations.
 
 Under the hood, It gets the image size using `rehype-img-size`, then display it
 via `next/image`.
@@ -32,4 +35,4 @@ Assume the image is under the `/public` folder.
 ![banner](/banner.png)
 ```
 
-![banner](/banner.png)
+<Image alt="Banner" src={Banner} />

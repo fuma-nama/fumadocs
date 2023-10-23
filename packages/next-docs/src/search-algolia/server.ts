@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto'
+import { randomUUID } from 'node:crypto'
 import type { StructuredData } from '@/mdx-plugins/remark-structure'
 import type { SearchClient, SearchIndex } from 'algoliasearch'
 import type { BaseIndex } from './shared'

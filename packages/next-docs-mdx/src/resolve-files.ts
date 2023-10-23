@@ -12,7 +12,8 @@ export type ResolvedFiles = {
 function parsePath(p: string, prefix = './content'): FileInfo {
   const subPath = path.relative(prefix, p)
   const parsed = path.parse(subPath)
-  let flattenedPath = parsed.dir + '/' + parsed.name
+  const normalizedDirname = parsed.dir.replaceAll('\\', '/')
+  let flattenedPath = normalizedDirname + '/' + parsed.name
 
   while (flattenedPath.startsWith('/')) {
     flattenedPath = flattenedPath.slice(1)
@@ -22,7 +23,7 @@ function parsePath(p: string, prefix = './content'): FileInfo {
 
   return {
     id: subPath,
-    dirname: parsed.dir,
+    dirname: normalizedDirname,
     base: parsed.base,
     name: parsed.name,
     flattenedPath,

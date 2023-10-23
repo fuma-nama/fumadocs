@@ -1,5 +1,5 @@
 import type { PageTree } from 'next-docs-zeta/server'
-import { getPageTreeBuilder, type ContextOptions } from './build-tree'
+import { getPageTreeBuilder, type BuilderOptions } from './build-tree'
 import { createPageUtils, type PageUtils } from './page-utils'
 import { resolveFiles } from './resolve-files'
 import type { Meta, Page } from './types'
@@ -17,7 +17,7 @@ type UtilsOptions<Langs extends string[] | undefined> = {
    * @default 'docs'
    */
   root: string
-} & ContextOptions
+} & BuilderOptions
 
 type Utils = PageUtils & {
   tree: PageTree
@@ -39,21 +39,21 @@ function fromMap<Langs extends string[] | undefined = undefined>(
     languages
   }: Partial<UtilsOptions<Langs>> = {}
 ): Langs extends string[] ? I18nUtils : Utils {
-  const context = resolveFiles({
+  const resolved = resolveFiles({
     map,
     root
   })
 
-  const pageUtils = createPageUtils(context, baseUrl, languages ?? [])
+  const pageUtils = createPageUtils(resolved, baseUrl, languages ?? [])
   if (getUrl) pageUtils.getPageUrl = getUrl
 
-  const builder = getPageTreeBuilder(context.metas, context.pages, {
+  const builder = getPageTreeBuilder(resolved, {
     getUrl: pageUtils.getPageUrl,
     resolveIcon
   })
 
   return {
-    ...context,
+    ...resolved,
     ...pageUtils,
     tree: (languages == null
       ? builder.build({ root })
@@ -62,4 +62,4 @@ function fromMap<Langs extends string[] | undefined = undefined>(
   }
 }
 
-export { fromMap }
+export { fromMap, resolveFiles, createPageUtils, getPageTreeBuilder }

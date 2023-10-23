@@ -3,9 +3,9 @@ import {
   type PageTreeBuilder
 } from 'next-docs-zeta/build-page-tree'
 import type { ReactElement } from 'react'
-import type { Meta, Page } from './types'
+import type { ResolvedFiles } from './resolve-files'
 
-export type ContextOptions = {
+export type BuilderOptions = {
   /**
    * Get url from slugs and locale, override the default getUrl function
    */
@@ -15,9 +15,8 @@ export type ContextOptions = {
 }
 
 export function getPageTreeBuilder(
-  metas: Meta[],
-  pages: Page[],
-  { getUrl, resolveIcon = () => undefined }: ContextOptions
+  { metas, pages }: ResolvedFiles,
+  { getUrl, resolveIcon = () => undefined }: BuilderOptions
 ): PageTreeBuilder {
   return createPageTreeBuilder({
     metas: metas.map(meta => ({
