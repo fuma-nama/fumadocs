@@ -16,17 +16,20 @@ export const { getPage, getPageUrl } = createPageUtils(resolved, '/docs', [])
 const builder = getPageTreeBuilder(resolved, { getUrl: getPageUrl })
 
 const uiTree = builder.build({ root: 'docs/ui' })
-
+const mdxTree = builder.build({ root: 'docs/mdx' })
 const headlessTree = builder.build({
   root: 'docs/headless'
 })
 
-export function getTree(mode: 'ui' | 'headless' | string): PageTree {
-  if (mode === 'ui') {
-    return uiTree
+export function getTree(mode: 'ui' | 'headless' | 'mdx' | string): PageTree {
+  switch (mode) {
+    case 'ui':
+      return uiTree
+    case 'mdx':
+      return mdxTree
+    default:
+      return headlessTree
   }
-
-  return headlessTree
 }
 
 export const { pages, metas } = resolved

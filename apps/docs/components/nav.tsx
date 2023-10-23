@@ -1,6 +1,7 @@
 'use client'
 
 import { cn } from '@/utils/cn'
+import { modes } from '@/utils/modes'
 import { cva } from 'class-variance-authority'
 import { GithubIcon, StarsIcon } from 'lucide-react'
 import { Nav as OriginalNav } from 'next-docs-ui/nav'
@@ -40,7 +41,7 @@ export function Nav() {
           Next Docs
         </span>
       }
-      enableSidebar={mode === 'headless' || mode === 'ui'}
+      enableSidebar={modes.some(m => m.param === mode)}
       links={[
         {
           label: 'Github',
@@ -58,15 +59,15 @@ export function Nav() {
       transparent={mode == null && isDown}
     >
       <div className="bg-secondary/50 rounded-md border p-1 text-sm text-muted-foreground max-sm:absolute max-sm:left-[50%] max-sm:translate-x-[-50%]">
-        <Link
-          href="/docs/headless"
-          className={cn(item({ active: mode === 'headless' }))}
-        >
-          Zeta
-        </Link>
-        <Link href="/docs/ui" className={cn(item({ active: mode === 'ui' }))}>
-          UI
-        </Link>
+        {modes.map(m => (
+          <Link
+            key={m.param}
+            href={`/docs/${m.param}`}
+            className={cn(item({ active: mode === m.param }))}
+          >
+            {m.name.slice('Next Docs '.length)}
+          </Link>
+        ))}
       </div>
     </OriginalNav>
   )

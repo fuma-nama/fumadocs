@@ -1,10 +1,8 @@
 import { cn } from '@/utils/cn'
+import { modes } from '@/utils/modes'
 import { getTree } from '@/utils/source'
-import { LayoutIcon, LibraryIcon } from 'lucide-react'
 import { DocsLayout } from 'next-docs-ui/layout'
 import type { ReactNode } from 'react'
-import packageJsonUI from '../../../../../packages/next-docs-ui/package.json'
-import packageJsonZeta from '../../../../../packages/next-docs/package.json'
 
 export default function Layout({
   params,
@@ -14,15 +12,8 @@ export default function Layout({
   children: ReactNode
 }) {
   const tree = getTree(params.mode)
-  const [Icon, title, description, version] =
-    params.mode === 'ui'
-      ? [LayoutIcon, 'Next Docs UI', 'The framework', packageJsonUI.version]
-      : [
-          LibraryIcon,
-          'Next Docs Zeta',
-          'The headless library',
-          packageJsonZeta.version
-        ]
+  const mode = modes.find(mode => mode.param === params.mode) ?? modes[0]
+  const Icon = mode.icon
 
   return (
     <main
@@ -43,9 +34,9 @@ export default function Layout({
               <Icon className="w-9 h-9 p-2 shrink-0 rounded-md text-primary bg-primary/10 border" />
               <div>
                 <p className="font-medium">
-                  {title} {version}
+                  {mode.name} {mode.version}
                 </p>
-                <p className="text-muted-foreground">{description}</p>
+                <p className="text-muted-foreground">{mode.description}</p>
               </div>
             </div>
           )
@@ -58,12 +49,7 @@ export default function Layout({
 }
 
 export function generateStaticParams() {
-  return [
-    {
-      mode: 'ui'
-    },
-    {
-      mode: 'headless'
-    }
-  ]
+  return modes.map(mode => ({
+    mode: mode.param
+  }))
 }

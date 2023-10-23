@@ -1,0 +1,120 @@
+---
+title: Getting Started
+description: Learn how to use Next Docs MDX in your documentation
+---
+
+## Introduction
+
+Next Docs MDX is a Next.js plugin that enhances the experience of the official
+`next/mdx` package. It parses frontmatter and is bundled with several MDX
+plugins for building a good documentation site.
+
+> This package must be used with `next-docs-zeta`
+
+## Usage
+
+### Install Dependencies
+
+Notice that the package doesn't include loader by default.
+
+```bash
+npm install next-docs-mdx @next/mdx @mdx-js/loader @mdx-js/react @types/mdx
+```
+
+### Configuration
+
+Add this to your `next.config.mjs` file:
+
+```js
+import createNextDocsMDX from 'next-docs-mdx/config'
+
+const withFumaMDX = createNextDocsMDX()
+
+/** @type {import('next').NextConfig} */
+const config = {
+  reactStrictMode: true
+}
+
+export default withFumaMDX(config)
+```
+
+<Callout title="Be Careful" type='warn' className="mt-4">
+
+The Next.js config must be a `.mjs` file since it requires ESM-only modules.
+
+</Callout>
+
+### Define MDX Components
+
+Create `mdx-components.tsx` in your root directory.
+
+```tsx
+import type { MDXComponents } from 'mdx/types'
+// Assume you're using Next Docs UI
+import defaultComponents from 'next-docs-ui/mdx-server'
+
+export function useMDXComponents(components: MDXComponents): MDXComponents {
+  return {
+    ...defaultComponents,
+    ...components
+  }
+}
+```
+
+### Build Page Tree
+
+Create a `source.ts` file to build the page tree. Read
+[Pages Conventions](/docs/headless/utils/build-page-tree#pages-structure) to
+learn how to structure your pages.
+
+```ts title="source.ts"
+import { map } from '@/_map'
+import { fromMap } from 'next-docs-mdx/map'
+
+export const { getPage, getPageUrl, pages, tree } = fromMap(map)
+```
+
+> The `@/_map` file will be generated automatically
+
+### Start Server
+
+Start the dev server
+
+```bash
+next dev
+```
+
+A `_map.ts` file should be created. You can log and see if page tree is built
+correctly.
+
+## Built-in Features
+
+A Table of Contents (`toc`) and Structurized Data (`structuredData`) is parsed
+and exported from MDX files by default, you can use these for implementing a
+search or TOC section in your docs.
+
+## Advanced Usages
+
+### MDX Plugins
+
+You can customise the options passed to `@next/mdx`.
+
+```js
+const withNextDocs = createNextDocs({
+  mdxOptions: {
+    remarkPlugins: [remarkMath],
+    rehypePlugins: [rehypeKatex]
+  }
+})
+```
+
+### Export Properties from `vfile.data`
+
+A remark plugin that turns `vfile.data` properties into exports is applied by
+default, you can pass the property names via `dataExports`.
+
+```js
+const withNextDocs = createNextDocs({
+  dataExports: ['data']
+})
+```
