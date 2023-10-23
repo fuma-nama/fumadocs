@@ -1,5 +1,13 @@
 # next-docs-mdx
 
+## 4.0.0
+
+### Patch Changes
+
+- Updated dependencies [678cd3d]
+- Updated dependencies [24245a3]
+  - next-docs-zeta@4.0.0
+
 ## 3.0.0
 
 ### Patch Changes

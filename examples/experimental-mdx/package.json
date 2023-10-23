@@ -12,9 +12,9 @@
     "@mdx-js/loader": "^2.3.0",
     "@mdx-js/react": "^2.3.0",
     "next": "13.5.6",
-    "next-docs-ui": "3.0.0",
-    "next-docs-zeta": "3.0.0",
-    "next-docs-mdx": "3.0.0",
+    "next-docs-ui": "4.0.0",
+    "next-docs-zeta": "4.0.0",
+    "next-docs-mdx": "4.0.0",
     "react": "18.2.0",
     "react-dom": "18.2.0"
   },
