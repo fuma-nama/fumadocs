@@ -2,16 +2,10 @@
   "$schema": "https://unpkg.com/@changesets/config@2.3.0/schema.json",
   "changelog": "@changesets/cli/changelog",
   "commit": false,
-  "fixed": [["next-docs-zeta", "next-docs-ui"]],
+  "fixed": [["next-docs-zeta", "next-docs-ui", "next-docs-mdx"]],
   "linked": [],
   "access": "restricted",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": [
-    "simple-app",
-    "docs",
-    "advanced-app",
-    "experimental-mdx",
-    "next-docs-mdx"
-  ]
+  "ignore": ["simple-app", "docs", "advanced-app", "experimental-mdx"]
 }
