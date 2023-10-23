@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
-import type { FileNode, FolderNode, PageTree, TreeNode } from './server/types'
+import type { FileNode, FolderNode, PageTree, TreeNode } from './types'
 
-export type File = {
+export type AbstractFile = {
   locale?: string
 
   /**
@@ -23,20 +23,20 @@ export type File = {
 }
 
 export type AbstractMeta = {
-  file: File
+  file: AbstractFile
   icon?: string
   title?: string
   pages: string[]
 }
 
 export type AbstractPage = {
-  file: File
+  file: AbstractFile
   icon?: string
   title: string
   url: string
 }
 
-export type PageTreeBuilderContext = {
+type PageTreeBuilderContext = {
   lang?: string
 
   getMetaByPath: (flattenPath: string) => AbstractMeta | undefined
@@ -50,7 +50,7 @@ export type PageTreeBuilderContext = {
   basePages: AbstractPage[]
 }
 
-export type Options = {
+export type BuildPageTreeOptions = {
   /**
    * The root folder to scan files
    * @default 'docs'
@@ -58,8 +58,25 @@ export type Options = {
   root: string
 }
 
-export type InternationalizedOptions = Options & {
+export type BuildPageTreeOptionsWithI18n = BuildPageTreeOptions & {
   languages: string[]
+}
+
+export type PageTreeBuilder = {
+  build: (options?: Partial<BuildPageTreeOptions>) => PageTree
+
+  /**
+   * Build page tree and fallback to the default language if the page doesn't exist
+   */
+  buildI18n: (
+    options?: Partial<BuildPageTreeOptionsWithI18n>
+  ) => Record<string, PageTree>
+}
+
+export type CreatePageTreeBuilderOptions = {
+  pages: AbstractPage[]
+  metas: AbstractMeta[]
+  resolveIcon?: (icon: string) => ReactElement | undefined
 }
 
 const separator = /---(.*?)---/
@@ -250,24 +267,11 @@ function build(root: string, ctx: PageTreeBuilderContext): PageTree {
   }
 }
 
-export type PageTreeBuilder = {
-  build: (options?: Partial<Options>) => PageTree
-  buildI18n: (
-    options?: Partial<InternationalizedOptions>
-  ) => Record<string, PageTree>
-}
-
-export type PageTreeBuilderOptions = {
-  pages: AbstractPage[]
-  metas: AbstractMeta[]
-  resolveIcon?: (icon: string) => ReactElement | undefined
-}
-
 export function createPageTreeBuilder({
   metas,
   pages,
   resolveIcon = () => undefined
-}: PageTreeBuilderOptions): PageTreeBuilder {
+}: CreatePageTreeBuilderOptions): PageTreeBuilder {
   const basePages: AbstractPage[] = []
   const pageMap = new Map<string, AbstractPage>()
   const metaMap = new Map<string, AbstractMeta>()
@@ -292,43 +296,22 @@ export function createPageTreeBuilder({
   }
 
   return {
-    build(options) {
-      return buildPageTree(context, options)
+    build({ root = 'docs' } = {}) {
+      return build(root, context)
     },
-    buildI18n(options) {
-      return buildI18nPageTree(context, options)
+    buildI18n({ root = 'docs', languages = [] } = {}) {
+      const entries = languages.map(lang => {
+        const tree = build(root, {
+          ...context,
+          lang
+        })
+
+        return [lang, tree]
+      })
+
+      return Object.fromEntries(entries)
     }
   }
-}
-
-export function buildPageTree(
-  context: PageTreeBuilderContext,
-  { root = 'docs' }: Partial<Options> = {}
-): PageTree {
-  return build(root, context)
-}
-
-/**
- * Build page tree and fallback to the default language if the page doesn't exist
- *
- * @param metas Meta files
- * @param docs Docs files
- * @param languages All supported languages
- */
-export function buildI18nPageTree(
-  context: PageTreeBuilderContext,
-  { root = 'docs', languages = [] }: Partial<InternationalizedOptions> = {}
-): Record<string, PageTree> {
-  const entries = languages.map(lang => {
-    const tree = build(root, {
-      ...context,
-      lang
-    })
-
-    return [lang, tree]
-  })
-
-  return Object.fromEntries(entries)
 }
 
 function pathToName(path: string[]): string {

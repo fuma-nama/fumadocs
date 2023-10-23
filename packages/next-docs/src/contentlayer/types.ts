@@ -1,4 +1,4 @@
-import type { PageTreeBuilder } from '@/build-page-tree'
+import type { PageTreeBuilder } from '@/server/page-tree-builder'
 import type { RawDocumentData } from 'contentlayer/source-files'
 
 export type MetaPageBase = {

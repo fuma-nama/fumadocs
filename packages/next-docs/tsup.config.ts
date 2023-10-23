@@ -27,7 +27,7 @@ export default defineConfig([
     ...shared,
     name: 'next-docs-esm',
     entry: [
-      'src/{server,mdx-plugins,build-page-tree}.ts',
+      'src/{server,mdx-plugins}.ts',
       'src/contentlayer/{index,configuration}.ts'
     ]
   },

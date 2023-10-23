@@ -1,7 +1,7 @@
 import {
   createPageTreeBuilder,
   type PageTreeBuilder
-} from 'next-docs-zeta/build-page-tree'
+} from 'next-docs-zeta/server'
 import type { ReactElement } from 'react'
 import type { ResolvedFiles } from './resolve-files'
 
