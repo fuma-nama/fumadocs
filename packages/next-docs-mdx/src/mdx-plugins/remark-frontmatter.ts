@@ -13,9 +13,6 @@ export interface RemarkMdxFrontmatterOptions {
 
 /**
  * A remark plugin to expose frontmatter data as named exports.
- *
- * @param options Optional options to configure the output.
- * @returns A unified transformer.
  */
 function remarkMdxFrontmatter({
   name = 'frontmatter'

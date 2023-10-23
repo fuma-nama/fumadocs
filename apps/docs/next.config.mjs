@@ -19,7 +19,7 @@ const config = {
 }
 
 const withNextDocs = createNextDocs({
-  options: {
+  mdxOptions: {
     remarkPlugins: [remarkMath, remarkDynamicContent],
     rehypePlugins: [rehypeKatex]
   }

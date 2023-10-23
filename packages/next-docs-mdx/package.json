@@ -7,9 +7,11 @@
   "repository": "github:fuma-nama/next-docs",
   "license": "MIT",
   "files": [
-    "dist/*"
+    "dist/*",
+    "loader.js"
   ],
   "exports": {
+    "./loader": "./loader.js",
     "./*": {
       "import": "./dist/*.mjs",
       "types": "./dist/*.d.ts"
@@ -36,7 +38,6 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "chokidar": "^3.5.3",
     "estree-util-value-to-estree": "^3.0.1",
     "fast-glob": "^3.3.1",
     "remark-frontmatter": "^4.0.1",
@@ -51,7 +52,6 @@
   "devDependencies": {
     "@mdx-js/loader": "^2.3.0",
     "@mdx-js/react": "^2.3.0",
-    "@mdx-js/mdx": "^2.3.0",
     "@next/mdx": "13.5.6",
     "@types/mdast": "^3.0.12",
     "@types/mdx": "^2.0.8",

@@ -371,9 +371,6 @@ importers:
 
   packages/next-docs-mdx:
     dependencies:
-      chokidar:
-        specifier: ^3.5.3
-        version: 3.5.3
       estree-util-value-to-estree:
         specifier: ^3.0.1
         version: 3.0.1
@@ -390,9 +387,6 @@ importers:
       '@mdx-js/loader':
         specifier: ^2.3.0
         version: 2.3.0(webpack@5.89.0)
-      '@mdx-js/mdx':
-        specifier: ^2.3.0
-        version: 2.3.0
       '@mdx-js/react':
         specifier: ^2.3.0
         version: 2.3.0(react@18.2.0)

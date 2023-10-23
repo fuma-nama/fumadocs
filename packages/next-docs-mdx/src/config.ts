@@ -1,8 +1,5 @@
-import fs from 'fs'
 import path from 'path'
 import createNextMDX, { type NextMDXOptions } from '@next/mdx'
-import chokidar from 'chokidar'
-import fg from 'fast-glob'
 import type { NextConfig } from 'next'
 import {
   rehypeNextDocs,
@@ -14,17 +11,20 @@ import remarkFrontmatter, {
   type Options as RemarkFrontmatterOptions
 } from 'remark-frontmatter'
 import type { PluggableList } from 'unified'
-import type { Compiler } from 'webpack'
+import type { Configuration } from 'webpack'
+import type { LoaderOptions } from './loader'
 import remarkMdxExport from './mdx-plugins/remark-exports'
 import remarkMdxFrontmatter from './mdx-plugins/remark-frontmatter'
-
-const PLUGIN_NAME = 'NextDocsWebpackPlugin'
-let firstLoad = true
+import { NextDocsWebpackPlugin } from './webpack-plugins/next-docs'
 
 type WithMDX = (config: NextConfig) => NextConfig
 type Loader = (options: NextMDXOptions) => WithMDX
 
-type NextDocsMDXOptions = NextMDXOptions & {
+type NextDocsMDXOptions = {
+  cwd?: string
+
+  mdxOptions?: NextMDXOptions['options']
+
   /**
    * Custom MDX loader
    */
@@ -34,29 +34,34 @@ type NextDocsMDXOptions = NextMDXOptions & {
    * Properties to export from `vfile.data`
    */
   dataExports?: string[]
-}
 
-function Plugin(compiler: Compiler) {
-  compiler.hooks.beforeCompile.tap(PLUGIN_NAME, () => {
-    if (firstLoad) {
-      chokidar.watch('./content').on('all', () => {
-        buildMap()
-      })
+  /**
+   * Where the root `_map.ts` should be, relative to cwd
+   *
+   * @defualt './_map.ts`
+   */
+  rootMapPath?: string
 
-      firstLoad = false
-    }
-  })
+  /**
+   * Where the content directory should be, relative to cwd
+   *
+   * @defualt './content`
+   */
+  rootContentPath?: string
 }
 
 const createNextDocs =
   ({
     loader = options => createNextMDX(options),
     dataExports = [],
-    extension,
-    options = {}
+    mdxOptions = {},
+    cwd = process.cwd(),
+    rootMapPath = './_map.ts',
+    rootContentPath = './content'
   }: NextDocsMDXOptions = {}) =>
   (nextConfig: NextConfig = {}) => {
     const exports = ['structuredData', 'toc', ...dataExports]
+    const _mapPath = path.resolve(cwd, rootMapPath)
 
     const remarkPlugins: PluggableList = [
       remarkGfm,
@@ -65,18 +70,18 @@ const createNextDocs =
       remarkStructure,
       remarkToc,
       [remarkMdxExport, { values: exports }],
-      ...(options.remarkPlugins ?? [])
+      ...(mdxOptions?.remarkPlugins ?? [])
     ]
 
     const rehypePlugins: PluggableList = [
       rehypeNextDocs,
-      ...(options.rehypePlugins ?? [])
+      ...(mdxOptions?.rehypePlugins ?? [])
     ]
 
     const withMDX = loader({
-      extension,
+      extension: /\.mdx?$/,
       options: {
-        ...options,
+        ...mdxOptions,
         remarkPlugins,
         rehypePlugins
       }
@@ -85,42 +90,25 @@ const createNextDocs =
     nextConfig = withMDX(nextConfig)
 
     return Object.assign({}, nextConfig, {
-      webpack: (config, options) => {
-        config.plugins.push(Plugin)
+      webpack: (config: Configuration, options) => {
+        config.module!.rules!.push({
+          test: _mapPath,
+          use: {
+            loader: 'next-docs-mdx/loader',
+            options: {
+              cwd,
+              rootContentPath
+            } satisfies LoaderOptions
+          }
+        })
 
-        if (typeof nextConfig.webpack === 'function') {
-          return nextConfig.webpack(config, options)
-        }
+        config.plugins!.push(
+          new NextDocsWebpackPlugin({ rootMapFile: _mapPath })
+        )
 
-        return config
+        return nextConfig.webpack?.(config, options) ?? config
       }
     } satisfies NextConfig)
   }
-
-function buildMap() {
-  const prefix = './content'
-  const cwd = process.cwd()
-  const _map = path.join(cwd, './_map.ts')
-  const files = fg.sync(`${prefix}/**/*.{md,mdx,json}`, { cwd })
-
-  const entries = files.map(file => {
-    return `"${file}": await import("${file}")`
-  })
-
-  const code = `
-/** Generated automatically */
-
-export const map = {
-    ${entries.join(',')}
-}
-`
-  const exists = fs.existsSync(_map)
-
-  if (!exists || fs.readFileSync(_map).toString() !== code) {
-    fs.writeFileSync(_map, code)
-
-    console.log('Generated Page Map')
-  }
-}
 
 export { createNextDocs as default }
