@@ -69,8 +69,8 @@ const createNextDocs =
       remarkMdxFrontmatter,
       remarkStructure,
       remarkToc,
-      [remarkMdxExport, { values: exports }],
-      ...(mdxOptions?.remarkPlugins ?? [])
+      ...(mdxOptions?.remarkPlugins ?? []),
+      [remarkMdxExport, { values: exports }]
     ]
 
     const rehypePlugins: PluggableList = [
