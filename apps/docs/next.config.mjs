@@ -1,6 +1,6 @@
 import createBundleAnalyzer from '@next/bundle-analyzer'
 import createNextDocs from 'next-docs-mdx/config'
-import { remarkDynamicContent } from 'next-docs-zeta/mdx-plugins'
+import { remarkDynamicContent, remarkInstall } from 'next-docs-zeta/mdx-plugins'
 import rehypeKatex from 'rehype-katex'
 import remarkMath from 'remark-math'
 
@@ -20,7 +20,11 @@ const config = {
 
 const withNextDocs = createNextDocs({
   mdxOptions: {
-    remarkPlugins: [remarkMath, remarkDynamicContent],
+    remarkPlugins: [
+      remarkMath,
+      remarkDynamicContent,
+      [remarkInstall, { Tabs: 'InstallTabs' }]
+    ],
     rehypePlugins: [rehypeKatex]
   }
 })

@@ -13,3 +13,4 @@ export {
 } from './mdx-plugins/remark-dynamic-content'
 export * from './mdx-plugins/remark-structure'
 export { remarkToc } from './mdx-plugins/remark-toc'
+export * from './mdx-plugins/remark-install'
