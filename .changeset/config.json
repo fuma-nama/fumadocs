@@ -5,7 +5,7 @@
   "fixed": [["next-docs-zeta", "next-docs-ui", "next-docs-mdx"]],
   "linked": [],
   "access": "restricted",
-  "baseBranch": "main",
+  "baseBranch": "dev",
   "updateInternalDependencies": "patch",
   "ignore": ["simple-app", "docs", "advanced-app", "experimental-mdx"]
 }
