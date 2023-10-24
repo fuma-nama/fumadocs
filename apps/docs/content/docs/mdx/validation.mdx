@@ -1,0 +1,47 @@
+---
+title: Validation
+description: Validate your files via Zod
+---
+
+## Usage
+
+The file validation is based on [Zod](https://zod.dev). When an invalid file is
+detected, it will throw an error immediately.
+
+To customise the schemas, you have to install `zod`.
+
+```bash
+npm install zod
+```
+
+Now you can override or extend the default zod schemas by passing a `validate`
+options to the `fromMap` function.
+
+### Example
+
+Extend the default frontmatter schema:
+
+```ts title="source.ts"
+import { z } from 'zod'
+
+const frontmatterSchema = defaultValidators.frontmatter.extend({
+  preview: z.string().optional()
+})
+
+export default fromMap(map, {
+  validate: {
+    frontmatter: frontmatterSchema
+  }
+})
+```
+
+### Typescript
+
+Notice that the default type bindings of page and meta file won't be updated
+automatically, you should override it with `declare`.
+
+```ts title="source.ts"
+declare module 'next-docs-mdx/types' {
+  interface Frontmatter extends z.infer<typeof frontmatterSchema> {}
+}
+```
