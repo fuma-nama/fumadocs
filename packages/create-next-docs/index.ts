@@ -26,8 +26,9 @@ async function main() {
   const type = await select({
     message: 'Which example you want to install?',
     options: [
-      { value: 'simple', label: 'Default' },
-      { value: 'advanced', label: 'Advanced' }
+      { value: 'simple', label: 'Default (Contentlayer)' },
+      { value: 'advanced', label: 'Advanced (Contentlayer)' },
+      { value: 'experimental-mdx', label: 'Default (Next Docs MDX)' }
     ]
   })
 
@@ -142,6 +143,7 @@ async function generateGitIgnore(path: string) {
     '/.pnp',
     '.pnp.js',
     // outputs
+    '_map.ts',
     '.contentlayer',
     '/coverage',
     '/.next/',
