@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 1.6.0
+
+### Minor Changes
+
+- c36c395: Support Next Docs MDX example
+
 ## 1.5.28
 
 ### Patch Changes
