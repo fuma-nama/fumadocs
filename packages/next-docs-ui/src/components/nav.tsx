@@ -57,13 +57,17 @@ export function Nav({
   return (
     <nav
       className={cn(
-        'nd-sticky nd-top-0 nd-h-16 nd-z-50 nd-border-b nd-border-transparent nd-transition-colors',
-        !transparent &&
-          'nd-bg-background/80 nd-border-foreground/10 nd-backdrop-blur-sm'
+        'nd-sticky nd-top-0 nd-h-16 nd-z-50 nd-border-b nd-transition-colors',
+        transparent
+          ? 'nd-border-transparent'
+          : 'nd-bg-background/80 nd-backdrop-blur-sm'
       )}
     >
       <div className="nd-container nd-flex nd-flex-row nd-items-center nd-h-full nd-gap-4">
-        <Link href={url} className="nd-font-medium">
+        <Link
+          href={url}
+          className="nd-inline-flex nd-items-center nd-font-medium"
+        >
           {title}
         </Link>
         {children}

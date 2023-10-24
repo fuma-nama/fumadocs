@@ -36,10 +36,10 @@ export function Nav() {
   return (
     <OriginalNav
       title={
-        <span className="inline-flex items-center gap-1.5 font-semibold">
+        <>
           <StarsIcon className="w-5 h-5" fill="currentColor" />
-          Next Docs
-        </span>
+          <span className="font-semibold ml-1.5 max-sm:hidden">Next Docs</span>
+        </>
       }
       enableSidebar={modes.some(m => m.param === mode)}
       links={[
