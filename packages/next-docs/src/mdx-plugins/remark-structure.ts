@@ -1,11 +1,11 @@
 import Slugger from 'github-slugger'
-import type { Root } from 'mdast'
+import type { Content as MdastContent, Root } from 'mdast'
 import { remark } from 'remark'
 import remarkGfm from 'remark-gfm'
 import remarkMdx from 'remark-mdx'
 import type { PluggableList, Transformer } from 'unified'
-import { visit } from 'unist-util-visit'
 import { flattenNode } from './remark-utils'
+import { visit } from './unist-visit'
 
 type Heading = {
   id: string
@@ -47,9 +47,7 @@ export function remarkStructure({
     const data: StructuredData = { contents: [], headings: [] }
     let lastHeading: string | undefined = ''
 
-    visit(node, types, element => {
-      if (element.type === 'root') return
-
+    visit(node, types, (element: MdastContent) => {
       if (element.type === 'heading') {
         const heading = flattenNode(element)
         const slug = slugger.slug(heading)

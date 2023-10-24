@@ -2,8 +2,8 @@ import type { TOCItemType } from '@/server/types'
 import Slugger from 'github-slugger'
 import type { Heading, Root } from 'mdast'
 import type { Transformer } from 'unified'
-import { visit } from 'unist-util-visit'
 import { flattenNode } from './remark-utils'
+import { visit } from './unist-visit'
 
 const slugger = new Slugger()
 
@@ -15,8 +15,7 @@ export function remarkToc(): Transformer<Root, Root> {
     const toc: TOCItemType[] = []
     slugger.reset()
 
-    visit(node, ['heading'], child => {
-      const heading = child as Heading
+    visit(node, ['heading'], (heading: Heading) => {
       const text = flattenNode(heading)
 
       toc.push({

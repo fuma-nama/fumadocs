@@ -1,8 +1,8 @@
 import fs from 'fs'
 import path from 'path'
-import type { Root } from 'mdast'
+import type { Content, Root } from 'mdast'
 import type { Transformer } from 'unified'
-import { visit } from 'unist-util-visit'
+import { visit } from './unist-visit'
 
 const regex = /^\|reference:(.+)\|/
 
@@ -35,7 +35,7 @@ export function remarkDynamicContent(
   } = options
 
   return tree => {
-    visit(tree, filter, node => {
+    visit(tree, filter, (node: Content) => {
       if (!('value' in node) || typeof node.value !== 'string') return
       const result = regex.exec(node.value)
 

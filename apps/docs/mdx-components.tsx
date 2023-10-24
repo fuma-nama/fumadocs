@@ -5,6 +5,7 @@ import { Callout } from 'next-docs-ui/components/callout'
 import { Tab, Tabs } from 'next-docs-ui/components/tabs'
 import { TypeTable } from 'next-docs-ui/components/type-table'
 import defaultComponents from 'next-docs-ui/mdx-server'
+import type { ReactNode } from 'react'
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
@@ -20,6 +21,19 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     Accordion: (p => <Accordion {...p} />) as typeof Accordion,
     Accordions: (p => <Accordions {...p} />) as typeof Accordions,
     Wrapper,
+    InstallTabs: ({
+      items,
+      children
+    }: {
+      items: string[]
+      children: ReactNode
+    }) => {
+      return (
+        <Tabs items={items} id="package-manager" persist>
+          {children}
+        </Tabs>
+      )
+    },
     blockquote: props => <Callout className="my-4">{props.children}</Callout>,
     ...components
   }
