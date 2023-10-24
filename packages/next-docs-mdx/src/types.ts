@@ -1,6 +1,7 @@
 import type { MDXProps } from 'mdx/types'
 import type { StructuredData } from 'next-docs-zeta/mdx-plugins'
 import type { TableOfContents } from 'next-docs-zeta/server'
+import type * as Default from './validate/schema'
 
 export type FileInfo = {
   locale?: string
@@ -51,18 +52,9 @@ export interface MDXExport {
   structuredData: StructuredData
 }
 
-export interface Frontmatter {
-  title: string
-  description: string
-  icon?: string
-}
+export interface Frontmatter extends Default.Frontmatter {}
 
-export interface JsonExport {
-  title: string
-  description: string
-  pages: string[]
-  icon?: string
-}
+export interface JsonExport extends Default.MetaExport {}
 
 export interface Meta {
   file: FileInfo
@@ -73,5 +65,5 @@ export interface Page {
   file: FileInfo
   slugs: string[]
   data: MDXExport
-  matter: MDXExport['frontmatter']
+  matter: Frontmatter
 }

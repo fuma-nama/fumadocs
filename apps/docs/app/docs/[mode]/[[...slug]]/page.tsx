@@ -17,7 +17,7 @@ type Param = {
 
 export default async function Page({ params }: { params: Param }) {
   const tree = getTree(params.mode)
-  const page = getPage([params.mode, ...(params.slug ?? [])]) as Page
+  const page = getPage([params.mode, ...(params.slug ?? [])])
 
   if (page == null) {
     notFound()

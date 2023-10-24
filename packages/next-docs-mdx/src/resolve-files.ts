@@ -1,5 +1,7 @@
 import path from 'path'
+import type { AnyZodObject } from 'zod'
 import type { FileInfo, JsonExport, MDXExport, Meta, Page } from './types'
+import { frontmatterSchema, metaSchema } from './validate/schema'
 
 const pageTypes = ['.md', '.mdx']
 const metaTypes = ['.json']
@@ -7,6 +9,22 @@ const metaTypes = ['.json']
 export type ResolvedFiles = {
   pages: Page[]
   metas: Meta[]
+}
+
+export type ResolveOptions = {
+  map: Record<string, unknown>
+  root: string
+  validate?: ValidateOptions
+}
+
+export type ValidateOptions = Partial<{
+  frontmatter: AnyZodObject
+  meta: AnyZodObject
+}>
+
+export const defaultValidators = {
+  frontmatter: frontmatterSchema,
+  meta: metaSchema
 }
 
 function parsePath(p: string, prefix = './content'): FileInfo {
@@ -43,41 +61,73 @@ function pathToSlugs(file: FileInfo, root: string): string[] {
   return path.split('/').filter(p => !['index', ''].includes(p))
 }
 
-export type ResolveOptions = {
-  map: Record<string, unknown>
-  root: string
+function runValidate(
+  schema: AnyZodObject,
+  object: unknown,
+  errorName: string
+): boolean {
+  const result = schema.safeParse(object)
+
+  if (!result.success) {
+    throw new Error(`Invalid ${errorName}: ${result.error}`)
+  }
+
+  return result.success
 }
 
-export function resolveFiles({ map, root }: ResolveOptions): ResolvedFiles {
+export function resolveFiles({
+  map,
+  root,
+  validate = defaultValidators
+}: ResolveOptions): ResolvedFiles {
   const metas: Meta[] = []
   const pages: Page[] = []
 
-  for (const [k, v] of Object.entries(map)) {
-    const path = parsePath(k)
+  for (const [path, v] of Object.entries(map)) {
+    const file = parsePath(path)
 
-    if (metaTypes.includes(path.type)) {
-      metas.push({
-        file: path,
+    if (metaTypes.includes(file.type)) {
+      const meta: Meta = {
+        file,
         data: v as JsonExport
-      })
+      }
+
+      if (
+        runValidate(
+          validate.meta ?? defaultValidators.meta,
+          meta.data,
+          meta.file.path
+        )
+      ) {
+        metas.push(meta)
+      }
 
       continue
     }
 
-    if (pageTypes.includes(path.type)) {
+    if (pageTypes.includes(file.type)) {
       const data = v as MDXExport
-
-      pages.push({
-        file: path,
-        slugs: pathToSlugs(path, root),
+      const page: Page = {
+        file,
+        slugs: pathToSlugs(file, root),
         matter: data.frontmatter,
         data
-      })
+      }
+
+      if (
+        runValidate(
+          validate.frontmatter ?? defaultValidators.frontmatter,
+          page.matter,
+          page.file.path
+        )
+      ) {
+        pages.push(page)
+      }
 
       continue
     }
 
-    console.warn('Unknown Type: ', path.type)
+    console.warn('Unknown Type: ', file.type)
   }
 
   return {

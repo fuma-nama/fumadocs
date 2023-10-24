@@ -41,17 +41,14 @@
     "estree-util-value-to-estree": "^3.0.1",
     "fast-glob": "^3.3.1",
     "remark-frontmatter": "^4.0.1",
-    "yaml": "^2.3.3"
+    "yaml": "^2.3.3",
+    "zod": "^3.22.4"
   },
   "peerDependencies": {
-    "@mdx-js/loader": "2.x",
-    "@mdx-js/react": "2.x",
     "@next/mdx": "13.x",
     "next-docs-zeta": "4.0.0"
   },
   "devDependencies": {
-    "@mdx-js/loader": "^2.3.0",
-    "@mdx-js/react": "^2.3.0",
     "@next/mdx": "13.5.6",
     "@types/mdast": "^3.0.12",
     "@types/mdx": "^2.0.8",

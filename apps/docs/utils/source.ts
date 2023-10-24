@@ -3,13 +3,26 @@ import path from 'path'
 import { map } from '@/_map'
 import {
   createPageUtils,
+  defaultValidators,
   getPageTreeBuilder,
   resolveFiles
 } from 'next-docs-mdx/map'
 import type { PageTree } from 'next-docs-zeta/server'
 import { PHASE_PRODUCTION_BUILD } from 'next/constants'
+import { z } from 'zod'
 
-const resolved = resolveFiles({ map, root: 'docs' })
+const frontmatterSchema = defaultValidators.frontmatter.extend({
+  preview: z.string().optional(),
+  index: z.boolean().default(false)
+})
+
+const resolved = resolveFiles({
+  map,
+  root: 'docs',
+  validate: {
+    frontmatter: frontmatterSchema
+  }
+})
 
 export const { getPage, getPageUrl } = createPageUtils(resolved, '/docs', [])
 
@@ -33,6 +46,10 @@ export function getTree(mode: 'ui' | 'headless' | 'mdx' | string): PageTree {
 }
 
 export const { pages, metas } = resolved
+
+declare module 'next-docs-mdx/types' {
+  interface Frontmatter extends z.infer<typeof frontmatterSchema> {}
+}
 
 // Access and export MDX pages data to json file
 // So that we can update search indexes after the build
