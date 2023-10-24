@@ -2,7 +2,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/utils/cn'
 import { CheckIcon, CopyIcon } from 'lucide-react'
 import type { ButtonHTMLAttributes, ComponentPropsWithoutRef } from 'react'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 type PreProps = ComponentPropsWithoutRef<'pre'> & {
   allowCopy?: boolean
@@ -17,10 +17,7 @@ export function Pre({ title, allowCopy = true, ...props }: PreProps) {
   }, [])
 
   return (
-    <div
-      className="nd-relative nd-group nd-border nd-rounded-lg nd-overflow-hidden nd-text-sm nd-bg-secondary/50 nd-not-prose"
-      data-code-fragment
-    >
+    <div className="nd-relative nd-group nd-border nd-rounded-lg nd-text-sm nd-bg-secondary/50 nd-not-prose">
       {title ? (
         <div className="nd-flex nd-flex-row nd-items-center nd-bg-muted nd-px-2 nd-py-1.5 nd-border-b">
           <span className="nd-pl-2 nd-flex-1 nd-text-muted-foreground">
@@ -31,7 +28,7 @@ export function Pre({ title, allowCopy = true, ...props }: PreProps) {
       ) : (
         allowCopy && (
           <CopyButton
-            className="nd-absolute nd-top-2 nd-right-2 nd-bg-secondary nd-text-secondary-foreground"
+            className="nd-absolute nd-top-2 nd-right-2 nd-bg-secondary nd-text-secondary-foreground nd-z-[2]"
             onCopy={onCopy}
           />
         )
@@ -53,32 +50,44 @@ function CopyButton({
   onCopy: () => void
 }) {
   const [checked, setChecked] = useState(false)
-  const [currentTimeout, setCurrentTimeout] = useState<NodeJS.Timeout | null>(
-    null
-  )
+  const timeoutRef = useRef<number | null>()
 
   const onClick = () => {
-    if (currentTimeout) clearTimeout(currentTimeout)
+    if (timeoutRef.current != null) window.clearTimeout(timeoutRef.current)
+    timeoutRef.current = window.setTimeout(() => setChecked(false), 1500)
     onCopy()
     setChecked(true)
-    setCurrentTimeout(setTimeout(() => setChecked(false), 1500))
   }
+
+  // Avoid updates after being unmounted
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current != null) window.clearTimeout(timeoutRef.current)
+    }
+  }, [])
 
   return (
     <button
       className={cn(
-        'nd-p-2 nd-rounded-md nd-transition-opacity nd-opacity-0 group-hover:nd-opacity-100',
+        'nd-inline-flex nd-p-2 nd-rounded-md nd-transition-opacity nd-opacity-0 group-hover:nd-opacity-100',
         className
       )}
       aria-label="Copy Text"
       onClick={onClick}
       {...props}
     >
-      {checked ? (
-        <CheckIcon className="nd-w-3.5 nd-h-3.5 nd-animate-in nd-fade-in" />
-      ) : (
-        <CopyIcon className="nd-w-3.5 nd-h-3.5 nd-animate-in nd-fade-in" />
-      )}
+      <CheckIcon
+        className={cn(
+          'nd-h-3.5 nd-w-3.5 nd-transition-transform',
+          !checked && 'nd-scale-0'
+        )}
+      />
+      <CopyIcon
+        className={cn(
+          'nd-absolute nd-h-3.5 nd-w-3.5 nd-transition-transform',
+          checked && 'nd-scale-0'
+        )}
+      />
     </button>
   )
 }

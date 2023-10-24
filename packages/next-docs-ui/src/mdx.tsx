@@ -5,14 +5,14 @@ import { Heading } from '@/components/mdx/heading'
 import { Pre } from '@/components/mdx/pre'
 import { SafeLink } from 'next-docs-zeta/link'
 import NextImage, { type ImageProps } from 'next/image'
-import type { ComponentPropsWithoutRef, ReactNode } from 'react'
+import type { ImgHTMLAttributes, ReactNode, TableHTMLAttributes } from 'react'
 import { default_image_sizes } from './utils/config'
 
-const Image = (props: ComponentPropsWithoutRef<'img'>) => (
+const Image = (props: ImgHTMLAttributes<HTMLImageElement>) => (
   <NextImage sizes={default_image_sizes} {...(props as ImageProps)} />
 )
 
-const Table = (props: ComponentPropsWithoutRef<'table'>) => (
+const Table = (props: TableHTMLAttributes<HTMLTableElement>) => (
   <div className="nd-relative nd-overflow-auto">
     <table {...props} />
   </div>
