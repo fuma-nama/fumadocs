@@ -1,5 +1,25 @@
 import { ImageResponse, type NextRequest } from 'next/server'
 
+type Mode = {
+  param: string
+  name: string
+}
+
+const modes: Mode[] = [
+  {
+    param: 'headless',
+    name: 'Next Docs Zeta'
+  },
+  {
+    param: 'ui',
+    name: 'Next Docs UI'
+  },
+  {
+    param: 'mdx',
+    name: 'Next Docs MDX'
+  }
+]
+
 export const runtime = 'edge'
 
 const medium = fetch(new URL('./inter-medium.woff', import.meta.url)).then(
@@ -26,7 +46,7 @@ export async function GET(
     OG({
       title: title ?? 'Next Docs',
       description: description ?? 'The Documentation Framework',
-      isUI: params.mode === 'ui'
+      mode: modes.find(mode => mode.param === params.mode) ?? modes[0]
     }),
     {
       width: 1200,
@@ -39,108 +59,81 @@ export async function GET(
   )
 }
 
-const UIIcon = (
-  <svg
-    width="52"
-    height="52"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke={mutedForeground}
-    stroke-width="2"
-  >
-    <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-    <line x1="3" x2="21" y1="9" y2="9" />
-    <line x1="9" x2="9" y1="21" y2="9" />
-  </svg>
-)
-
-const LayoutIcon = (
-  <svg
-    width="52"
-    height="52"
-    viewBox="0 0 24 24"
-    stroke={mutedForeground}
-    stroke-width="2"
-  >
-    <path d="m16 6 4 14" />
-    <path d="M12 6v14" />
-    <path d="M8 8v12" />
-    <path d="M4 4v16" />
-  </svg>
-)
-
 function OG({
   title,
   description,
-  isUI
+  mode
 }: {
-  isUI: boolean
+  mode: Mode
   title: string
   description: string
 }) {
   return (
     <div
+      tw="flex flex-col w-full h-full p-12"
       style={{
-        display: 'flex',
-        flexDirection: 'column',
-        width: '100%',
-        height: '100%',
-        padding: '3.5rem',
         color: foreground,
-        justifyContent: 'center',
-        gap: '3rem',
         background
       }}
     >
-      <div tw="flex flex-row items-center">
-        <div
-          style={{
-            display: 'flex',
-            padding: '0.75rem',
-            border: `1px rgba(156,163,175,0.3)`,
-            borderRadius: '0.75rem',
-            background: `rgb(38, 38, 38)`
-          }}
-        >
-          {isUI ? UIIcon : LayoutIcon}
-        </div>
-
-        <p
-          style={{
-            fontWeight: 500,
-            marginLeft: '1.5rem',
-            fontSize: '2.3rem'
-          }}
-        >
-          {isUI ? 'Next Docs UI' : 'Next Docs Zeta'}
-        </p>
-      </div>
       <div
+        tw="flex flex-col justify-center rounded-2xl p-4 shadow-2xl shadow-purple-600"
         style={{
-          display: 'flex',
-          flexDirection: 'column',
-          padding: '2.5rem',
-          border: '1px rgba(156,163,175,0.3)',
-          borderRadius: '1.5rem',
-          background: `linear-gradient(to top, rgba(40,40,40), ${background})`
+          background:
+            'linear-gradient(to right bottom, rgb(150, 200, 255), rgb(200, 100, 255))'
         }}
       >
+        <div
+          tw="flex flex-col rounded-2xl p-12"
+          style={{
+            border: '1px rgba(156,163,175,0.3)',
+            background
+          }}
+        >
+          <p
+            style={{
+              fontWeight: 700,
+              fontSize: '3.5rem'
+            }}
+          >
+            {title}
+          </p>
+          <p
+            style={{
+              color: mutedForeground,
+              fontSize: '2rem'
+            }}
+          >
+            {description}
+          </p>
+        </div>
+      </div>
+
+      <div tw="flex flex-row items-center mt-auto p-4">
+        <svg
+          width="60"
+          height="60"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+          <path d="M5 3v4" />
+          <path d="M19 17v4" />
+          <path d="M3 5h4" />
+          <path d="M17 19h4" />
+        </svg>
         <p
           style={{
             fontWeight: 700,
-            fontSize: '3.5rem'
+            marginLeft: '1rem',
+            fontSize: '2.3rem'
           }}
         >
-          {title}
-        </p>
-        <p
-          style={{
-            color: mutedForeground,
-            fontWeight: 500,
-            fontSize: '2rem'
-          }}
-        >
-          {description}
+          {mode.name}
         </p>
       </div>
     </div>

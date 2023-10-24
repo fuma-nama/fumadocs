@@ -1,4 +1,4 @@
-import { allPages, getPage, getPageUrl, tree } from '@/app/source'
+import { getPage, getPageUrl, pages, tree } from '@/app/source'
 import type { Metadata } from 'next'
 import { MDXContent } from 'next-docs-ui/mdx'
 import { DocsPage } from 'next-docs-ui/page'
@@ -30,7 +30,7 @@ export default async function Page({
 }
 
 export async function generateStaticParams(): Promise<{ slug: string[] }[]> {
-  return allPages.map(page => ({
+  return pages.map(page => ({
     slug: page.slugs
   }))
 }

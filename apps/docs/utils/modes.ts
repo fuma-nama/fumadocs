@@ -8,7 +8,7 @@ import mdx from '../../../packages/next-docs-mdx/package.json'
 import ui from '../../../packages/next-docs-ui/package.json'
 import zeta from '../../../packages/next-docs/package.json'
 
-type Mode = {
+export type Mode = {
   param: string
   name: string
   description: string
