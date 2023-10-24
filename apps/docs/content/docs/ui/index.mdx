@@ -48,8 +48,9 @@ npm install next-docs-ui next-docs-zeta
 
 <h3>Configuration</h3>
 
-Next Docs UI doesn't provide static generation directly. Instead, it uses
-[Contentlayer](https://www.contentlayer.dev).
+Next Docs UI doesn't provide static generation directly. You can use a source
+you prefer, such as [Contentlayer](https://www.contentlayer.dev) which is
+supported by default. **This guide is written for Contentlayer.**
 
 ```bash
 npm install contentlayer next-contentlayer
@@ -79,6 +80,14 @@ Make sure you've generated documents correctly before moving to next step.
 Copy & Paste required files.
 
 <Accordions type="single" collapsible>
+
+<Accordion title="Root Layout">
+
+```tsx title="app/layout.tsx"
+|reference:../../examples/simple/app/layout.tsx|
+```
+
+</Accordion>
 
 <Accordion title="Docs Layout">
 
@@ -175,7 +184,7 @@ Feel free to open the demo in CodeSandbox and see if it suits you.
 
 <Cards>
   <Card
-    href="/docs/headless/contentlayer/config#pages-structure"
+    href="/docs/headless/utils/build-page-tree#pages-structure"
     title="Page Structure"
     description="Learn how to structure your pages"
   />

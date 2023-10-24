@@ -113,6 +113,9 @@ importers:
       tailwind-merge:
         specifier: ^1.14.0
         version: 1.14.0
+      zod:
+        specifier: ^3.22.4
+        version: 3.22.4
     devDependencies:
       '@next/bundle-analyzer':
         specifier: ^13.4.19
@@ -157,10 +160,10 @@ importers:
         specifier: 0.3.4
         version: 0.3.4(contentlayer@0.3.4)(next@13.5.6)(react-dom@18.2.0)(react@18.2.0)
       next-docs-ui:
-        specifier: 3.0.0
+        specifier: 4.0.0
         version: link:../../packages/next-docs-ui
       next-docs-zeta:
-        specifier: 3.0.0
+        specifier: 4.0.0
         version: link:../../packages/next-docs
       react:
         specifier: 18.2.0
@@ -203,13 +206,13 @@ importers:
         specifier: 13.5.6
         version: 13.5.6(@babel/core@7.22.17)(react-dom@18.2.0)(react@18.2.0)
       next-docs-mdx:
-        specifier: 3.0.0
+        specifier: 4.0.0
         version: link:../../packages/next-docs-mdx
       next-docs-ui:
-        specifier: 3.0.0
+        specifier: 4.0.0
         version: link:../../packages/next-docs-ui
       next-docs-zeta:
-        specifier: 3.0.0
+        specifier: 4.0.0
         version: link:../../packages/next-docs
       react:
         specifier: 18.2.0
@@ -243,10 +246,10 @@ importers:
         specifier: 0.3.4
         version: 0.3.4(contentlayer@0.3.4)(next@13.5.6)(react-dom@18.2.0)(react@18.2.0)
       next-docs-ui:
-        specifier: 3.0.0
+        specifier: 4.0.0
         version: link:../../packages/next-docs-ui
       next-docs-zeta:
-        specifier: 3.0.0
+        specifier: 4.0.0
         version: link:../../packages/next-docs
       react:
         specifier: 18.2.0
@@ -383,13 +386,10 @@ importers:
       yaml:
         specifier: ^2.3.3
         version: 2.3.3
+      zod:
+        specifier: ^3.22.4
+        version: 3.22.4
     devDependencies:
-      '@mdx-js/loader':
-        specifier: ^2.3.0
-        version: 2.3.0(webpack@5.89.0)
-      '@mdx-js/react':
-        specifier: ^2.3.0
-        version: 2.3.0(react@18.2.0)
       '@next/mdx':
         specifier: 13.5.6
         version: 13.5.6(@mdx-js/loader@2.3.0)(@mdx-js/react@2.3.0)
@@ -475,9 +475,6 @@ importers:
       '@tailwindcss/typography':
         specifier: ^0.5.10
         version: 0.5.10(tailwindcss@3.3.3)
-      '@types/node':
-        specifier: 18.17.5
-        version: 18.17.5
       '@types/react':
         specifier: 18.2.0
         version: 18.2.0
@@ -1050,7 +1047,7 @@ packages:
       ts-pattern: 4.3.0
       unified: 10.1.2
       yaml: 2.3.2
-      zod: 3.22.2
+      zod: 3.22.4
     transitivePeerDependencies:
       - '@effect-ts/otel-node'
       - esbuild
@@ -8707,8 +8704,8 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  /zod@3.22.2:
-    resolution: {integrity: sha512-wvWkphh5WQsJbVk1tbx1l1Ly4yg+XecD+Mq280uBGt9wa5BKSWf4Mhp6GmrkPixhMxmabYY7RbzlwVP32pbGCg==}
+  /zod@3.22.4:
+    resolution: {integrity: sha512-iC+8Io04lddc+mVqQ9AZ7OQ2MrUKGN+oIQyq1vemgt46jwCwLfhq7/pwnBnNXXXZb8VTVLKwp9EDkx+ryxIWmg==}
 
   /zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}

@@ -16,13 +16,14 @@ const client = algosearch(
 )
 
 sync(client, {
+  document: process.env.NEXT_PUBLIC_ALGOLIA_INDEX,
   documents: indexes.map(docs => ({
     _id: docs.id,
     title: docs.title,
     url: docs.url,
     structured: docs.structuredData,
     extra_data: {
-      tag: docs.url.startsWith('/docs/ui') ? 'ui' : 'headless'
+      tag: docs.url.split('/')[2]
     }
   }))
 }).then(() => {

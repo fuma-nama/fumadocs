@@ -37,83 +37,22 @@ export const { getPage, getPageUrl, tree } = createContentlayer(
 
 All files are located in `/content` and `/content/docs` for documentation pages.
 
-### File
-
-By default, it uses [MDX](https://mdxjs.com) and supports `title` and
-`description` frontmatter:
-
-```mdx
----
-title: My Page
-description: Best document ever
----
-
-## Learn More
-```
-
-You may edit the configuration file to add additional properties.
-
-### Folder
-
-You can use folders to organize multiple pages, the uppercased name of the
-folder will be used as the display name.
-
-### Meta
-
-You can also customize the folder name, order of pages, or adding a separator by
-creating a `meta.json` in the folder.
-
-```json
-{
-  "title": "Name of Folder",
-  "pages": ["guide", "---Separator---", "components"] // file name of pages
-}
-```
-
-> By default, pages are sorted by `String.localeCompare{:js}`.
-
-### Separator
-
-As you see, you can define a separator in meta by adding a item surrounded by
-`---`.
+<Cards>
+  <Card
+    title="Pages Structure"
+    description="Learn how to structure your pages"
+    href="/docs/headless/utils/build-page-tree#pages-structure"
+  />
+</Cards>
 
 ## Advanced
 
 Next Docs Zeta also adds extra functionalities to Contentlayer, making it more
 convenient to use and straightforward.
 
-### Rest
-
-Tired to specify the order of every single page in `meta.json`? You can use
-`...` to automatically add and sort remaining items.
-
-<Callout title="Note" className="mb-4">
-  Index pages won't be included, you must specify the order of `index`.
-</Callout>
-
-```json
-{
-  "title": "Folder",
-  "pages": ["guide", "---Separator---", "..."]
-}
-```
-
-### Extract
-
-You can extract the items from a folder with `...folder_name`.
-
-```json
-{
-  "title": "Folder",
-  "pages": ["guide", "...folder"]
-}
-```
-
 ### Adding Icons
 
-It is supported to have custom icons for a page or a folder. Add an `icon`
-property to the frontmatter or `meta.json`, and configure icon handler via
-`resolveIcon` option.
+Configure icon handler via `resolveIcon` option.
 
 ```ts
 import { allDocs, allMeta } from 'contentlayer/generated'
@@ -133,29 +72,4 @@ export const { getPage, getPageUrl, tree } = createContentlayer(
     }
   }
 )
-```
-
-### Multiple Trees
-
-You can build multiple trees by directly interacting with Pages Context API.
-
-```ts
-import { allDocs, allMeta } from 'contentlayer/generated'
-import {
-  buildPageTree,
-  createUtils,
-  loadContext
-} from 'next-docs-zeta/contentlayer'
-
-const ctx = loadContext(allMeta, allDocs)
-
-const appTree = buildPageTree(ctx, {
-  root: 'docs/app'
-})
-
-const pagesTree = buildPageTree(ctx, {
-  root: 'docs/pages'
-})
-
-export const { getPage, getPageUrl } = createUtils(ctx)
 ```

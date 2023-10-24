@@ -1,7 +1,11 @@
 import type { PageTree } from 'next-docs-zeta/server'
 import { getPageTreeBuilder, type BuilderOptions } from './build-tree'
 import { createPageUtils, type PageUtils } from './page-utils'
-import { resolveFiles } from './resolve-files'
+import {
+  defaultValidators,
+  resolveFiles,
+  type ValidateOptions
+} from './resolve-files'
 import type { Meta, Page } from './types'
 
 type UtilsOptions<Langs extends string[] | undefined> = {
@@ -17,6 +21,8 @@ type UtilsOptions<Langs extends string[] | undefined> = {
    * @default 'docs'
    */
   root: string
+
+  validate: ValidateOptions
 } & BuilderOptions
 
 type Utils = PageUtils & {
@@ -36,12 +42,14 @@ function fromMap<Langs extends string[] | undefined = undefined>(
     root = 'docs',
     getUrl,
     resolveIcon,
-    languages
+    languages,
+    validate
   }: Partial<UtilsOptions<Langs>> = {}
 ): Langs extends string[] ? I18nUtils : Utils {
   const resolved = resolveFiles({
     map,
-    root
+    root,
+    validate
   })
 
   const pageUtils = createPageUtils(resolved, baseUrl, languages ?? [])
@@ -62,4 +70,10 @@ function fromMap<Langs extends string[] | undefined = undefined>(
   }
 }
 
-export { fromMap, resolveFiles, createPageUtils, getPageTreeBuilder }
+export {
+  fromMap,
+  resolveFiles,
+  createPageUtils,
+  getPageTreeBuilder,
+  defaultValidators
+}

@@ -39,7 +39,7 @@ import { defaultLanguage, languages } from '@/i18n'
 import { createI18nMiddleware } from 'next-docs-zeta/middleware'
 import { NextRequest } from 'next/server'
 
-export function middleware(request: NextRequest) {
+export default function middleware(request: NextRequest) {
   return createI18nMiddleware(
     request,
     languages,
@@ -124,27 +124,10 @@ function Dialog() {
 }
 ```
 
-## Pages Structure
-
-You can create a page by adding `.{locale}` to your MDX file name. Pages can't
-be language-specific unless you have created the same page for default locale.
-
-For meta files, you can add `-{locale}` to the file name instead
-(`meta-cn.json`).
-
-If it's the default language, just leave it empty like `get-started.mdx`. **Do
-not use add locale code to file name**.
-
-### Example
-
-Assume your default language is `en`.
-
-| Name               |             |
-| ------------------ | ----------- |
-| meta.json          | Allowed     |
-| meta-cn.json       | Allowed     |
-| meta-en.json       | Not Allowed |
-| get-started.mdx    | Allowed     |
-| get-started.cn.mdx | Allowed     |
-| get-started.en.mdx | Not Allowed |
-| components.cn.mdx  | Not Allowed |
+<Cards className="mt-4">
+  <Card
+    title="Pages Structure"
+    description="Learn to build Internationalized Page Structure"
+    href="/docs/headless/utils/build-page-tree#pages-structure"
+  />
+</Cards>

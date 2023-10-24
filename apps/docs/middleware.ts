@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import { modes } from './utils/modes'
 
-const allowed = ['ui', 'headless']
+const allowed = modes.map(mode => mode.param)
 
 export default function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname

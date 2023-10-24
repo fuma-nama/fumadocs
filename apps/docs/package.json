@@ -11,8 +11,8 @@
   "dependencies": {
     "@mdx-js/loader": "^2.3.0",
     "@mdx-js/react": "^2.3.0",
-    "@next/mdx": "^13.5.6",
     "@next/env": "^13.5.6",
+    "@next/mdx": "^13.5.6",
     "algoliasearch": "^4.20.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
@@ -27,7 +27,8 @@
     "react-dom": "18.2.0",
     "rehype-katex": "^6.0.3",
     "remark-math": "^5.1.1",
-    "tailwind-merge": "^1.14.0"
+    "tailwind-merge": "^1.14.0",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^13.4.19",
