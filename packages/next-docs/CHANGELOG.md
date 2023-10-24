@@ -4,6 +4,44 @@
 
 ### Major Changes
 
+- 6c4a782: Create `PageTreeBuilder` API
+
+  The old `buildPageTree` function provided by 'next-docs-zeta/contentlayer' is
+  now removed. Please use new API directly, or use the built-in
+  `createContentlayer` utility instead.
+
+  ```diff
+  - import { buildPageTree } from 'next-docs-zeta/contentlayer'
+  + import { createPageTreeBuilder } from 'next-docs-zeta/server'
+  ```
+
+### Minor Changes
+
+- 6c4a782: Improve CommonJS/ESM compatibility
+
+  Since this release, all server utilities will be CommonJS by default unless
+  they have referenced ESM modules in the code. For instance,
+  `next-docs-zeta/middleware` is now a CommonJS file. However, some modules,
+  such as `next-docs-zeta/server` requires ESM-only package, hence, they remain
+  a ESM file.
+
+  Notice that the extension of client-side files is now `.js` instead of `.mjs`,
+  but they're still ESM.
+
+  **Why?**
+
+  After migrating to `.mjs` Next.js config file, some imports stopped to work.
+  The built-in Next.js bundler seems can't resolve these `next` imports in
+  external packages, causing errors when modules have imported Next.js itself
+  (e.g. `next/image`) in the code.
+
+  By changing client-side files extension to `.mjs` and using CommonJS for
+  server-side files, this error is solved.
+
+## 4.0.0
+
+### Major Changes
+
 - 24245a3: Create `PageTreeBuilder` API
 
   The old `buildPageTree` function provided by 'next-docs-zeta/contentlayer' is
