@@ -37,7 +37,7 @@ importers:
         version: 7.33.2(eslint@8.49.0)
       eslint-plugin-tailwindcss:
         specifier: ^3.13.0
-        version: 3.13.0(tailwindcss@3.3.3)
+        version: 3.13.0(tailwindcss@3.3.4)
       prettier:
         specifier: ^3.0.3
         version: 3.0.3
@@ -139,11 +139,11 @@ importers:
         specifier: 8.4.31
         version: 8.4.31
       tailwindcss:
-        specifier: 3.3.3
-        version: 3.3.3
+        specifier: 3.3.4
+        version: 3.3.4
       tailwindcss-animate:
         specifier: ^1.0.7
-        version: 1.0.7(tailwindcss@3.3.3)
+        version: 1.0.7(tailwindcss@3.3.4)
       webpack:
         specifier: ^5.89.0
         version: 5.89.0
@@ -185,8 +185,8 @@ importers:
         specifier: 8.4.31
         version: 8.4.31
       tailwindcss:
-        specifier: 3.3.3
-        version: 3.3.3
+        specifier: 3.3.4
+        version: 3.3.4
       typescript:
         specifier: 5.2.2
         version: 5.2.2
@@ -474,7 +474,7 @@ importers:
     devDependencies:
       '@tailwindcss/typography':
         specifier: ^0.5.10
-        version: 0.5.10(tailwindcss@3.3.3)
+        version: 0.5.10(tailwindcss@3.3.4)
       '@types/react':
         specifier: 18.2.0
         version: 18.2.0
@@ -506,11 +506,11 @@ importers:
         specifier: ^1.0.0
         version: 1.0.0(postcss@8.4.31)
       tailwindcss:
-        specifier: 3.3.3
-        version: 3.3.3
+        specifier: 3.3.4
+        version: 3.3.4
       tailwindcss-animate:
         specifier: ^1.0.7
-        version: 1.0.7(tailwindcss@3.3.3)
+        version: 1.0.7(tailwindcss@3.3.4)
 
 packages:
 
@@ -1046,7 +1046,7 @@ packages:
       micromatch: 4.0.5
       ts-pattern: 4.3.0
       unified: 10.1.2
-      yaml: 2.3.2
+      yaml: 2.3.3
       zod: 3.22.4
     transitivePeerDependencies:
       - '@effect-ts/otel-node'
@@ -3042,7 +3042,7 @@ packages:
     dependencies:
       tslib: 2.6.2
 
-  /@tailwindcss/typography@0.5.10(tailwindcss@3.3.3):
+  /@tailwindcss/typography@0.5.10(tailwindcss@3.3.4):
     resolution: {integrity: sha512-Pe8BuPJQJd3FfRnm6H0ulKIGoMEQS+Vq01R6M5aCrFB/ccR/shT+0kXLjouGC1gFLm9hopTFN+DMP0pfwRWzPw==}
     peerDependencies:
       tailwindcss: '>=3.0.0 || insiders'
@@ -3051,7 +3051,7 @@ packages:
       lodash.isplainobject: 4.0.6
       lodash.merge: 4.6.2
       postcss-selector-parser: 6.0.10
-      tailwindcss: 3.3.3
+      tailwindcss: 3.3.4
     dev: true
 
   /@types/acorn@4.0.6:
@@ -4325,7 +4325,7 @@ packages:
       string.prototype.matchall: 4.0.10
     dev: true
 
-  /eslint-plugin-tailwindcss@3.13.0(tailwindcss@3.3.3):
+  /eslint-plugin-tailwindcss@3.13.0(tailwindcss@3.3.4):
     resolution: {integrity: sha512-Fcep4KDRLWaK3KmkQbdyKHG0P4GdXFmXdDaweTIPcgOP60OOuWFbh1++dufRT28Q4zpKTKaHwTsXPJ4O/EjU2Q==}
     engines: {node: '>=12.13.0'}
     peerDependencies:
@@ -4333,7 +4333,7 @@ packages:
     dependencies:
       fast-glob: 3.3.1
       postcss: 8.4.31
-      tailwindcss: 3.3.3
+      tailwindcss: 3.3.4
     dev: true
 
   /eslint-scope@5.1.1:
@@ -6880,7 +6880,7 @@ packages:
     dependencies:
       lilconfig: 2.1.0
       postcss: 8.4.31
-      yaml: 2.3.2
+      yaml: 2.3.3
     dev: true
 
   /postcss-nested@6.0.1(postcss@8.4.31):
@@ -7876,16 +7876,16 @@ packages:
     resolution: {integrity: sha512-3mFKyCo/MBcgyOTlrY8T7odzZFx+w+qKSMAmdFzRvqBfLlSigU6TZnlFHK0lkMwj9Bj8OYU+9yW9lmGuS0QEnQ==}
     dev: false
 
-  /tailwindcss-animate@1.0.7(tailwindcss@3.3.3):
+  /tailwindcss-animate@1.0.7(tailwindcss@3.3.4):
     resolution: {integrity: sha512-bl6mpH3T7I3UFxuvDEXLxy/VuFxBk5bbzplh7tXI68mwMokNYd1t9qPBHlnyTwfa4JGC4zP516I1hYYtQ/vspA==}
     peerDependencies:
       tailwindcss: '>=3.0.0 || insiders'
     dependencies:
-      tailwindcss: 3.3.3
+      tailwindcss: 3.3.4
     dev: true
 
-  /tailwindcss@3.3.3:
-    resolution: {integrity: sha512-A0KgSkef7eE4Mf+nKJ83i75TMyq8HqY3qmFIJSWy8bNt0v1lG7jUcpGpoTFxAwYcWOphcTBLPPJg+bDfhDf52w==}
+  /tailwindcss@3.3.4:
+    resolution: {integrity: sha512-JXZNOkggUAc9T5E7nCrimoXHcSf9h3NWFe5sh36CGD/3M5TRLuQeFnQoDsit2uVTqgoOZHLx5rTykLUu16vsMQ==}
     engines: {node: '>=14.0.0'}
     hasBin: true
     dependencies:
@@ -8649,14 +8649,9 @@ packages:
     engines: {node: '>= 6'}
     dev: true
 
-  /yaml@2.3.2:
-    resolution: {integrity: sha512-N/lyzTPaJasoDmfV7YTrYCI0G/3ivm/9wdG0aHuheKowWQwGTsK0Eoiw6utmzAnI6pkJa0DUVygvp3spqqEKXg==}
-    engines: {node: '>= 14'}
-
   /yaml@2.3.3:
     resolution: {integrity: sha512-zw0VAJxgeZ6+++/su5AFoqBbZbrEakwu+X0M5HmcwUiBL7AzcuPKjj5we4xfQLp78LkEMpD0cOnUhmgOVy3KdQ==}
     engines: {node: '>= 14'}
-    dev: false
 
   /yargs-parser@18.1.3:
     resolution: {integrity: sha512-o50j0JeToy/4K6OZcaQmW6lyXXKhq7csREXcDwk2omFPJEwUNOVtJKvmDr9EI1fAJZUyZcRF7kxGBWmRXudrCQ==}
