@@ -76,7 +76,7 @@ export function Nav({
           <SearchToggle />
           <SearchBarToggle className="nd-mr-2 max-md:nd-hidden" />
           {enableSidebar && collapsibleSidebar && <DesktopSidebarToggle />}
-          <ThemeToggle className={cn(enableSidebar && 'max-lg:nd-hidden')} />
+          <ThemeToggle className={cn(enableSidebar && 'max-md:nd-hidden')} />
           {links?.map((item, key) => <NavLink key={key} {...item} />)}
           {enableSidebar && (
             <SidebarTrigger
