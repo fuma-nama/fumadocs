@@ -13,7 +13,12 @@ export type RootProviderProps = {
 
 export function RootProvider(props: RootProviderProps) {
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
       <SidebarProvider>
         <DesktopSidebarProvider>
           <SearchProvider {...props.search}>{props.children}</SearchProvider>

@@ -40,8 +40,8 @@ type NavProps = {
   children?: ReactNode
 }
 
-const itemVariants = cva(
-  'nd-p-2 nd-rounded-md [&_svg]:nd-w-5 [&_svg]:nd-h-5 hover:nd-bg-accent hover:nd-text-accent-foreground'
+export const itemVariants = cva(
+  'nd-p-1.5 nd-rounded-md [&_svg]:nd-w-5 [&_svg]:nd-h-5 hover:nd-bg-accent hover:nd-text-accent-foreground'
 )
 
 export function Nav({
@@ -55,7 +55,7 @@ export function Nav({
   children
 }: NavProps) {
   return (
-    <nav
+    <header
       className={cn(
         'nd-sticky nd-top-0 nd-h-16 nd-z-50 nd-border-b nd-transition-colors',
         transparent
@@ -63,7 +63,7 @@ export function Nav({
           : 'nd-bg-background/80 nd-border-foreground/10 nd-backdrop-blur-sm'
       )}
     >
-      <div className="nd-container nd-flex nd-flex-row nd-items-center nd-h-full nd-gap-4">
+      <nav className="nd-container nd-flex nd-flex-row nd-items-center nd-h-full nd-gap-4">
         <Link
           href={url}
           className="nd-inline-flex nd-items-center nd-font-medium"
@@ -76,12 +76,19 @@ export function Nav({
           <SearchToggle />
           <SearchBarToggle className="nd-mr-2 max-md:nd-hidden" />
           {enableSidebar && collapsibleSidebar && <DesktopSidebarToggle />}
-          <ThemeToggle className={cn(enableSidebar && 'max-lg:nd-hidden')} />
+          <ThemeToggle className={cn(enableSidebar && 'max-md:nd-hidden')} />
           {links?.map((item, key) => <NavLink key={key} {...item} />)}
-          {enableSidebar && <SidebarToggle />}
+          {enableSidebar && (
+            <SidebarTrigger
+              aria-label="Toggle Sidebar"
+              className={cn(itemVariants({ className: 'md:nd-hidden' }))}
+            >
+              <MenuIcon />
+            </SidebarTrigger>
+          )}
         </div>
-      </div>
-    </nav>
+      </nav>
+    </header>
   )
 }
 
@@ -123,17 +130,6 @@ function SearchBarToggle(props: ButtonHTMLAttributes<HTMLButtonElement>) {
         <kbd className={shortcut()}>K</kbd>
       </div>
     </button>
-  )
-}
-
-function SidebarToggle() {
-  return (
-    <SidebarTrigger
-      aria-label="Toggle Sidebar"
-      className={cn(itemVariants({ className: 'md:nd-hidden' }))}
-    >
-      <MenuIcon />
-    </SidebarTrigger>
   )
 }
 

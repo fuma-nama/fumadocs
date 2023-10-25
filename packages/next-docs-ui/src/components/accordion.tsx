@@ -43,8 +43,10 @@ export const Accordion = forwardRef<
         <ChevronDown className="nd-h-4 nd-w-4 nd-transition-transform nd-duration-200" />
       </AccordionPrimitive.Trigger>
     </AccordionPrimitive.Header>
-    <AccordionPrimitive.Content className="nd-px-4 nd-overflow-hidden nd-text-sm data-[state=closed]:nd-animate-accordion-up data-[state=open]:nd-animate-accordion-down">
-      <div className="nd-pb-4">{children}</div>
+    <AccordionPrimitive.Content className="nd-overflow-hidden data-[state=closed]:nd-animate-accordion-up data-[state=open]:nd-animate-accordion-down">
+      <div className="nd-text-sm nd-p-4 nd-pt-0 nd-prose-no-margin">
+        {children}
+      </div>
     </AccordionPrimitive.Content>
   </AccordionPrimitive.Item>
 ))

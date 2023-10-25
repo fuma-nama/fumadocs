@@ -51,7 +51,6 @@
     "@radix-ui/react-accordion": "^1.1.2",
     "@radix-ui/react-collapsible": "^1.0.3",
     "@radix-ui/react-dialog": "^1.0.4",
-    "@radix-ui/react-dropdown-menu": "^2.0.5",
     "@radix-ui/react-popover": "^1.0.6",
     "@radix-ui/react-scroll-area": "^1.0.4",
     "@radix-ui/react-select": "^2.0.0",
@@ -82,7 +81,7 @@
     "postcss-cli": "^10.1.0",
     "postcss-import": "^15.1.0",
     "postcss-lightningcss": "^1.0.0",
-    "tailwindcss": "3.3.3",
+    "tailwindcss": "3.3.4",
     "tailwindcss-animate": "^1.0.7"
   },
   "keywords": [

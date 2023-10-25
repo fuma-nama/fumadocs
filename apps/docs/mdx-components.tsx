@@ -27,13 +27,11 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     }: {
       items: string[]
       children: ReactNode
-    }) => {
-      return (
-        <Tabs items={items} id="package-manager" persist>
-          {children}
-        </Tabs>
-      )
-    },
+    }) => (
+      <Tabs items={items} id="package-manager">
+        {children}
+      </Tabs>
+    ),
     blockquote: props => <Callout className="my-4">{props.children}</Callout>,
     ...components
   }

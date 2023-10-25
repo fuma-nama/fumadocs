@@ -13,7 +13,7 @@ export function TOC(props: {
   footer: ReactNode
 }) {
   return (
-    <div className="nd-sticky nd-divide-y nd-flex nd-flex-col nd-top-16 nd-gap-4 nd-py-12 nd-w-[220px] nd-h-body max-lg:nd-hidden xl:nd-w-[260px]">
+    <div className="nd-sticky nd-divide-y nd-flex nd-flex-col nd-top-16 nd-gap-4 nd-py-10 nd-w-[220px] nd-h-body max-lg:nd-hidden xl:nd-w-[260px]">
       {props.header}
       {props.items.length > 0 && <TOCItems items={props.items} />}
       {props.footer && (

@@ -46,7 +46,7 @@ export function DocsPage({
 }: DocsPageProps) {
   return (
     <>
-      <article className="nd-flex nd-flex-col nd-gap-6 nd-w-0 nd-flex-1 nd-py-12">
+      <article className="nd-flex nd-flex-col nd-gap-6 nd-w-0 nd-flex-1 nd-py-10">
         {replaceOrDefault(breadcrumb, <Breadcrumb />)}
         {props.children}
         {props.lastUpdate && <LastUpdate date={props.lastUpdate} />}
