@@ -59,10 +59,7 @@ const CommandList = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <CommandPrimitive.List
     ref={ref}
-    className={cn(
-      'nd-max-h-[400px] nd-text-muted-foreground nd-overflow-y-auto',
-      className
-    )}
+    className={cn('nd-max-h-[400px] nd-overflow-y-auto', className)}
     {...props}
   />
 ))
@@ -119,15 +116,15 @@ const CommandItem = React.forwardRef<
   <CommandPrimitive.Item
     ref={ref}
     className={cn(
-      'nd-cursor-pointer nd-select-none nd-rounded-lg nd-text-sm aria-selected:nd-bg-accent aria-selected:nd-text-accent-foreground data-[disabled]:nd-pointer-events-none data-[disabled]:nd-opacity-50 [&_svg]:nd-h-5 [&_svg]:nd-w-5',
+      'nd-cursor-pointer nd-select-none nd-rounded-lg nd-text-sm aria-selected:nd-bg-accent data-[disabled]:nd-pointer-events-none data-[disabled]:nd-opacity-50 [&_svg]:nd-h-4 [&_svg]:nd-w-4',
       className
     )}
     {...props}
   >
     <div
       className={cn(
-        'nd-flex nd-gap-2 nd-items-center nd-p-3.5',
-        nested && 'nd-ml-6 nd-border-l-2'
+        'nd-flex nd-gap-2 nd-items-center nd-p-3',
+        nested && 'nd-ml-5 nd-border-l'
       )}
     >
       {props.children}

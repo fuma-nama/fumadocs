@@ -6,7 +6,8 @@ import * as Primitive from './ui/tabs'
 
 export * as Primitive from './ui/tabs'
 
-type ListenerObject = (v: string) => void
+type ListenerObject = () => void
+const valueMap = new Map<string, string>()
 const listeners: Map<string, ListenerObject[]> = new Map()
 
 function add(id: string, listener: ListenerObject) {
@@ -21,8 +22,9 @@ function remove(id: string, listener: ListenerObject) {
   listeners.set(id, listeners.get(id)?.filter(ltem => listener !== ltem) ?? [])
 }
 
-function fire(id: string, value: string) {
-  listeners.get(id)?.forEach(item => item(value))
+function update(id: string, v: string) {
+  valueMap.set(id, v)
+  listeners.get(id)?.forEach(item => item())
 }
 
 export function Tabs({
@@ -45,48 +47,44 @@ export function Tabs({
    */
   defaultIndex?: number
 
-  /**
-   * @deprecated Use `defaultIndex` instead
-   */
-  defaultValue?: string
   items?: string[]
   children: ReactNode
 }) {
-  const [value, setValue] = useState<string>()
   const values = useMemo(() => items.map(item => toValue(item)), [items])
-  const defaultValue = values[defaultIndex]
+  const [value, setValue] = useState(values[defaultIndex])
 
   useEffect(() => {
     if (!id) return
 
     if (persist) {
       const previous = localStorage.getItem(id)
+
+      if (previous) update(id, previous)
+    }
+
+    const onUpdate = () => {
+      const current = valueMap.get(id)
       // Only if item exists
-      if (previous && values.includes(previous)) setValue(previous)
+      if (current != null && values.includes(current)) setValue(current)
     }
 
-    const listener: ListenerObject = v => {
-      if (values.includes(v)) setValue(v)
-    }
-
-    add(id, listener)
-    return () => remove(id, listener)
+    onUpdate()
+    add(id, onUpdate)
+    return () => remove(id, onUpdate)
   }, [])
 
-  useEffect(() => {
-    if (id && value) {
-      fire(id, value)
+  const onValueChange = (value: string) => {
+    setValue(value)
+
+    if (id) {
+      update(id, value)
 
       if (persist) localStorage.setItem(id, value)
     }
-  }, [value])
+  }
 
   return (
-    <Primitive.Tabs
-      defaultValue={defaultValue}
-      value={value}
-      onValueChange={setValue}
-    >
+    <Primitive.Tabs value={value} onValueChange={onValueChange}>
       <Primitive.TabsList>
         {values.map((v, i) => (
           <Primitive.TabsTrigger key={v} value={v}>

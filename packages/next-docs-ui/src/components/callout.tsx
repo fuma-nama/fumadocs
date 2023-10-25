@@ -40,9 +40,7 @@ export const Callout = forwardRef<HTMLDivElement, CalloutProps>(
               {title}
             </div>
           )}
-          <div className="[&_:first-child]:nd-mt-0 [&_:last-child]:nd-mb-0">
-            {children}
-          </div>
+          <div className="nd-prose-no-margin">{children}</div>
         </div>
       </div>
     )

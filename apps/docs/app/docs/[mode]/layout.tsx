@@ -30,13 +30,10 @@ export default function Layout({
         sidebar={{
           defaultOpenLevel: 0,
           banner: (
-            <div className="relative flex flex-row gap-2 items-center p-2 rounded-lg border text-xs bg-card text-card-foreground transition-colors hover:bg-muted/80">
-              <Icon className="w-9 h-9 p-2 shrink-0 rounded-md text-primary bg-primary/10 border" />
+            <div className="relative flex flex-row gap-3 items-center p-2 rounded-lg border bg-card text-card-foreground transition-colors hover:bg-muted/80">
+              <Icon className="w-7 h-7 p-1 shrink-0 rounded-md text-primary bg-primary/10 border" />
               <div>
-                <p className="font-medium">
-                  {mode.name} {mode.version}
-                </p>
-                <p className="text-muted-foreground">{mode.description}</p>
+                <p className="font-medium">{mode.name}</p>
               </div>
             </div>
           )

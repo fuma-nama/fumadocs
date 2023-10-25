@@ -29,6 +29,19 @@ const tailwind_steps = ({ addUtilities }) => {
   })
 }
 
+const tailwind_prose_no_margin = ({ addUtilities }) => {
+  addUtilities({
+    '.prose-no-margin': {
+      '& > :first-child': {
+        marginTop: 0
+      },
+      '& > :last-child': {
+        marginBottom: 0
+      }
+    }
+  })
+}
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ['class', '[class*="dark"]'],
@@ -182,6 +195,7 @@ module.exports = {
   plugins: [
     require('tailwindcss-animate'),
     require('@tailwindcss/typography'),
-    tailwind_steps
+    tailwind_steps,
+    tailwind_prose_no_margin
   ]
 }
