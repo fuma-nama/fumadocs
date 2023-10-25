@@ -17,7 +17,7 @@ export function Pre({ title, allowCopy = true, ...props }: PreProps) {
   }, [])
 
   return (
-    <div className="nd-relative nd-group nd-border nd-rounded-lg nd-text-sm nd-bg-secondary/50 nd-not-prose">
+    <div className="nd-relative nd-overflow-hidden nd-group nd-border nd-rounded-lg nd-text-sm nd-bg-secondary/50 nd-not-prose">
       {title ? (
         <div className="nd-flex nd-flex-row nd-items-center nd-bg-muted nd-px-2 nd-py-1.5 nd-border-b">
           <span className="nd-pl-2 nd-flex-1 nd-text-muted-foreground">
