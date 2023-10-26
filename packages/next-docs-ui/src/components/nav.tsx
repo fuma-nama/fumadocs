@@ -12,7 +12,7 @@ import {
 import { SidebarTrigger } from 'next-docs-zeta/sidebar'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useContext, type ButtonHTMLAttributes, type ReactNode } from 'react'
+import { useContext, type ReactNode } from 'react'
 import { ThemeToggle } from './theme-toggle'
 
 export type NavLinkProps = {
@@ -72,78 +72,77 @@ export function Nav({
         </Link>
         {children}
         {items?.map((item, key) => <NavItem key={key} {...item} />)}
-        <div className="nd-flex nd-flex-row nd-justify-end nd-items-center nd-flex-1">
+        <div className="nd-flex nd-flex-row nd-ml-auto nd-items-center md:nd-gap-2">
           <SearchToggle />
-          <SearchBarToggle className="nd-mr-2 max-md:nd-hidden" />
-          {enableSidebar && collapsibleSidebar && <DesktopSidebarToggle />}
           <ThemeToggle className={cn(enableSidebar && 'max-md:nd-hidden')} />
-          {links?.map((item, key) => <NavLink key={key} {...item} />)}
-          {enableSidebar && (
-            <SidebarTrigger
-              aria-label="Toggle Sidebar"
-              className={cn(itemVariants({ className: 'md:nd-hidden' }))}
-            >
-              <MenuIcon />
-            </SidebarTrigger>
-          )}
+          {enableSidebar && <SidebarToggle collapsible={collapsibleSidebar} />}
+          <div className="nd-flex nd-flex-row nd-items-center nd-border-l nd-pl-2 max-md:nd-hidden">
+            {links?.map((item, key) => <NavLink key={key} {...item} />)}
+          </div>
         </div>
       </nav>
     </header>
   )
 }
 
+const shortcut = cva('nd-border nd-rounded-md nd-bg-background nd-px-1.5')
+
 function SearchToggle() {
-  const [setOpenSearch] = useContext(SearchContext)
-
-  return (
-    <button
-      className={cn(itemVariants({ className: 'md:nd-hidden' }))}
-      aria-label="Open Search"
-      onClick={() => setOpenSearch(true)}
-    >
-      <SearchIcon />
-    </button>
-  )
-}
-
-const shortcut = cva(
-  'nd-border nd-rounded-md nd-bg-background nd-px-1.5 nd-py-0.5'
-)
-
-function SearchBarToggle(props: ButtonHTMLAttributes<HTMLButtonElement>) {
   const [setOpenSearch] = useContext(SearchContext)
   const { search = 'Search' } = useContext(I18nContext).text ?? {}
 
   return (
-    <button
-      {...props}
-      className={cn(
-        'nd-inline-flex nd-items-center nd-text-sm nd-gap-2 nd-rounded-md nd-transition-colors nd-w-full nd-max-w-[250px] nd-p-1.5 nd-border nd-text-muted-foreground nd-bg-secondary/50 hover:nd-bg-accent hover:nd-text-accent-foreground',
-        props.className
-      )}
-      onClick={() => setOpenSearch(true)}
-    >
-      <SearchIcon aria-label="Open Search" className="nd-ml-1 nd-w-4 nd-h-4" />
-      {search}
-      <div className="nd-inline-flex nd-items-center nd-text-xs nd-gap-0.5 nd-ml-auto">
-        <kbd className={shortcut()}>⌘</kbd>
-        <kbd className={shortcut()}>K</kbd>
-      </div>
-    </button>
+    <>
+      <button
+        className={cn(itemVariants({ className: 'md:nd-hidden' }))}
+        aria-label="Open Search"
+        onClick={() => setOpenSearch(true)}
+      >
+        <SearchIcon />
+      </button>
+      <button
+        className="nd-inline-flex nd-items-center nd-text-sm nd-gap-2 nd-rounded-full nd-transition-colors nd-w-[240px] nd-p-1.5 nd-border nd-text-muted-foreground nd-bg-secondary/50 hover:nd-bg-accent hover:nd-text-accent-foreground max-md:nd-hidden"
+        onClick={() => setOpenSearch(true)}
+      >
+        <SearchIcon
+          aria-label="Open Search"
+          className="nd-ml-1 nd-w-4 nd-h-4"
+        />
+        {search}
+        <div className="nd-inline-flex nd-text-xs nd-gap-0.5 nd-ml-auto">
+          <kbd className={shortcut()}>⌘</kbd>
+          <kbd className={shortcut()}>K</kbd>
+        </div>
+      </button>
+    </>
   )
 }
 
-function DesktopSidebarToggle() {
+function SidebarToggle({ collapsible }: { collapsible: boolean }) {
   const [open, setOpen] = useContext(SidebarContext)
 
   return (
-    <button
-      aria-label="Toggle Sidebar"
-      onClick={() => setOpen(!open)}
-      className={cn(itemVariants({ className: 'max-md:nd-hidden' }))}
-    >
-      {open ? <SidebarCloseIcon /> : <SidebarOpenIcon />}
-    </button>
+    <>
+      <SidebarTrigger
+        aria-label="Toggle Sidebar"
+        className={cn(itemVariants({ className: 'md:nd-hidden' }))}
+      >
+        <MenuIcon />
+      </SidebarTrigger>
+      {collapsible && (
+        <button
+          aria-label="Toggle Sidebar"
+          onClick={() => setOpen(!open)}
+          className="nd-p-1.5 nd-border nd-bg-secondary/50 nd-rounded-full hover:nd-text-accent-foreground hover:nd-bg-accent max-md:nd-hidden"
+        >
+          {open ? (
+            <SidebarCloseIcon className="nd-w-5 nd-h-5" />
+          ) : (
+            <SidebarOpenIcon className="nd-w-5 nd-h-5" />
+          )}
+        </button>
+      )}
+    </>
   )
 }
 
@@ -176,7 +175,7 @@ function NavLink(props: NavLinkProps) {
       href={props.href}
       target={props.external ? '_blank' : '_self'}
       rel={props.external ? 'noreferrer noopener' : undefined}
-      className={cn(itemVariants({ className: 'max-md:nd-hidden' }))}
+      className={cn(itemVariants())}
     >
       {props.icon}
     </Link>
