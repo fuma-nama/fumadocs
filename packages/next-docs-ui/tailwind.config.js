@@ -29,6 +29,10 @@ const tailwind_steps = ({ addUtilities }) => {
   })
 }
 
+const tailwindLightTheme = ({ addVariant }) => {
+  addVariant('light', ':merge([class~=light]) &')
+}
+
 const tailwind_prose_no_margin = ({ addUtilities }) => {
   addUtilities({
     '.prose-no-margin': {
@@ -44,7 +48,7 @@ const tailwind_prose_no_margin = ({ addUtilities }) => {
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: ['class', '[class*="dark"]'],
+  darkMode: ['class', '[class~=dark]'],
   content: ['./src/**/*.{ts,tsx}'],
   prefix: 'nd-',
   theme: {
@@ -193,6 +197,7 @@ module.exports = {
     }
   },
   plugins: [
+    tailwindLightTheme,
     require('tailwindcss-animate'),
     require('@tailwindcss/typography'),
     tailwind_steps,
