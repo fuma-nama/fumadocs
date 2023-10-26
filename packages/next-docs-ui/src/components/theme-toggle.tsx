@@ -4,15 +4,17 @@ import { MoonIcon, SunIcon } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useCallback, type ButtonHTMLAttributes } from 'react'
 
-const buttonVariants = cva('nd-w-7 nd-h-7 nd-p-1.5 nd-rounded-full', {
-  variants: {
-    dark: {
-      true: 'nd-text-muted-foreground dark:nd-text-accent-foreground dark:nd-bg-accent',
-      false:
-        'nd-text-accent-foreground nd-bg-accent dark:nd-text-muted-foreground dark:nd-bg-transparent'
+const buttonVariants = cva(
+  'nd-w-7 nd-h-7 nd-p-1.5 nd-rounded-full nd-text-muted-foreground',
+  {
+    variants: {
+      dark: {
+        true: 'dark:nd-text-accent-foreground dark:nd-bg-accent',
+        false: 'light:nd-text-accent-foreground light:nd-bg-accent'
+      }
     }
   }
-})
+)
 
 export function ThemeToggle({
   className,
