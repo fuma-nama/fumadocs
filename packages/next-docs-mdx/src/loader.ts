@@ -18,7 +18,7 @@ export default function loader(
   const { cwd, rootContentPath } = this.getOptions()
 
   this.cacheable(true)
-  this.addContextDependency(path.resolve('./content'))
+  this.addContextDependency(path.resolve(cwd, rootContentPath))
 
   callback(null, buildMap({ cwd, rootContentPath }))
 }
@@ -31,7 +31,7 @@ function buildMap({ cwd, rootContentPath }: LoaderOptions): string {
   const entries = files.map(file => {
     const importPath = path.join(rootContentPath, file)
 
-    return `${JSON.stringify(importPath)}: await import(${JSON.stringify(
+    return `${JSON.stringify(file)}: await import(${JSON.stringify(
       importPath
     )})`
   })

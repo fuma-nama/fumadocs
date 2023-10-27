@@ -18,7 +18,6 @@ const frontmatterSchema = defaultValidators.frontmatter.extend({
 
 const resolved = resolveFiles({
   map,
-  root: 'docs',
   validate: {
     frontmatter: frontmatterSchema
   }
@@ -28,10 +27,10 @@ export const { getPage, getPageUrl } = createPageUtils(resolved, '/docs', [])
 
 const builder = getPageTreeBuilder(resolved, { getUrl: getPageUrl })
 
-const uiTree = builder.build({ root: 'docs/ui' })
-const mdxTree = builder.build({ root: 'docs/mdx' })
+const uiTree = builder.build({ root: 'ui' })
+const mdxTree = builder.build({ root: 'mdx' })
 const headlessTree = builder.build({
-  root: 'docs/headless'
+  root: 'headless'
 })
 
 export function getTree(mode: 'ui' | 'headless' | 'mdx' | string): PageTree {

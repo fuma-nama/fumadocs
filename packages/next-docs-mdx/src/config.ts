@@ -38,14 +38,14 @@ type NextDocsMDXOptions = {
   /**
    * Where the root `_map.ts` should be, relative to cwd
    *
-   * @defualt './_map.ts`
+   * @default './_map.ts`
    */
   rootMapPath?: string
 
   /**
    * Where the content directory should be, relative to cwd
    *
-   * @defualt './content`
+   * @default './content/docs`
    */
   rootContentPath?: string
 }
@@ -57,7 +57,7 @@ const createNextDocs =
     mdxOptions = {},
     cwd = process.cwd(),
     rootMapPath = './_map.ts',
-    rootContentPath = './content'
+    rootContentPath = './content/docs'
   }: NextDocsMDXOptions = {}) =>
   (nextConfig: NextConfig = {}) => {
     const exports = ['structuredData', 'toc', ...dataExports]

@@ -17,8 +17,8 @@ type UtilsOptions<Langs extends string[] | undefined> = {
   baseUrl: string
 
   /**
-   * Where to scan nodes
-   * @default 'docs'
+   * Where to scan nodes (For building page tree)
+   * @default ''
    */
   root: string
 
@@ -39,7 +39,7 @@ function fromMap<Langs extends string[] | undefined = undefined>(
   map: Record<string, unknown>,
   {
     baseUrl = '/docs',
-    root = 'docs',
+    root = '',
     getUrl,
     resolveIcon,
     languages,
@@ -48,7 +48,6 @@ function fromMap<Langs extends string[] | undefined = undefined>(
 ): Langs extends string[] ? I18nUtils : Utils {
   const resolved = resolveFiles({
     map,
-    root,
     validate
   })
 

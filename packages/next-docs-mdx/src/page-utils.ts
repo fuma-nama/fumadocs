@@ -43,7 +43,7 @@ export function createPageUtils(
       return i18nMap.get(locale)!
     },
     getPageUrl(slugs = [], locale) {
-      return slugsToUrl([baseUrl, locale, ...slugs])
+      return joinPaths(baseUrl, ...slugs, locale ?? null)
     },
     getPage(slugs, locale) {
       return getPage(pages, slugs, locale)
@@ -51,8 +51,21 @@ export function createPageUtils(
   }
 }
 
-function slugsToUrl(slugs: (string | undefined)[] = []): string {
-  return slugs.filter(Boolean).join('/')
+/**
+ * @example
+ * ```
+ * ['a','b','c'] // '/a/b/c'
+ * ['/a'] // '/a'
+ * ```
+ */
+function joinPaths(...paths: (string | null)[]): string {
+  const relative = paths
+    // filter slashes & empty
+    .filter(path => path != null && path.length !== 0 && path !== '/')
+    .join('/')
+
+  if (relative.startsWith('/')) return relative
+  return '/' + relative
 }
 
 function getPage(
