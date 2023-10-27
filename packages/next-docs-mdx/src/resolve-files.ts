@@ -18,6 +18,7 @@ export type ResolvedFiles = {
 
 export type ResolveOptions = {
   map: Record<string, unknown>
+  rootDir?: string
   validate?: ValidateOptions
 }
 
@@ -70,6 +71,7 @@ function parse<T>(schema: AnyZodObject, object: unknown, errorName: string): T {
 
 export function resolveFiles({
   map,
+  rootDir = '',
   validate = defaultValidators
 }: ResolveOptions): ResolvedFiles {
   const metas: Meta[] = []
@@ -77,6 +79,12 @@ export function resolveFiles({
 
   for (const [path, v] of Object.entries(map)) {
     const file = parsePath(path)
+    if (
+      rootDir.length > 0 &&
+      file.dirname != rootDir &&
+      !file.dirname.startsWith(rootDir + '/')
+    )
+      continue
 
     if (metaTypes.includes(file.type)) {
       const meta: Meta = {

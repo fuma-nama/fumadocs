@@ -17,10 +17,16 @@ type UtilsOptions<Langs extends string[] | undefined> = {
   baseUrl: string
 
   /**
-   * Where to scan nodes (For building page tree)
-   * @default ''
+   * @deprecated Use `rootDir` instead
    */
   root: string
+
+  /**
+   * Root directory, files outside of the root directory will be ignored
+   *
+   * @default ''
+   */
+  rootDir: string
 
   validate: ValidateOptions
 } & BuilderOptions
@@ -39,7 +45,7 @@ function fromMap<Langs extends string[] | undefined = undefined>(
   map: Record<string, unknown>,
   {
     baseUrl = '/docs',
-    root = '',
+    rootDir = '',
     getUrl,
     resolveIcon,
     languages,
@@ -48,6 +54,7 @@ function fromMap<Langs extends string[] | undefined = undefined>(
 ): Langs extends string[] ? I18nUtils : Utils {
   const resolved = resolveFiles({
     map,
+    rootDir,
     validate
   })
 
@@ -63,9 +70,9 @@ function fromMap<Langs extends string[] | undefined = undefined>(
     ...resolved,
     ...pageUtils,
     tree: (languages == null
-      ? builder.build({ root })
+      ? builder.build({ root: rootDir })
       : // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        builder.buildI18n({ languages, root })) as any
+        builder.buildI18n({ languages, root: rootDir })) as any
   }
 }
 
