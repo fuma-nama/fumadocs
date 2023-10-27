@@ -14,9 +14,6 @@ importers:
       '@ianvs/prettier-plugin-sort-imports':
         specifier: ^4.1.0
         version: 4.1.0(prettier@3.0.3)
-      '@mayank1513/esbuild-plugin-react18':
-        specifier: ^0.0.5
-        version: 0.0.5
       '@next/eslint-plugin-next':
         specifier: ^14.0.0
         version: 14.0.0
@@ -1564,10 +1561,6 @@ packages:
       fs-extra: 8.1.0
       globby: 11.1.0
       read-yaml-file: 1.1.0
-    dev: true
-
-  /@mayank1513/esbuild-plugin-react18@0.0.5:
-    resolution: {integrity: sha512-/51WklNuoFfl7e7MSFlE0e/R++Zj1Cykc+QjMbckCXPayRr6TVnWzZLgf1w6yTI6El7Z+uMU7VkuV1RD5pVWuw==}
     dev: true
 
   /@mdx-js/esbuild@2.3.0:
