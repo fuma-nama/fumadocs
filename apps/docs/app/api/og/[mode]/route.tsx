@@ -23,10 +23,6 @@ const modes: Mode[] = [
 
 export const runtime = 'edge'
 
-const medium = fetch(new URL('./inter-medium.woff', import.meta.url)).then(
-  res => res.arrayBuffer()
-)
-
 const bold = fetch(new URL('./inter-bold.woff', import.meta.url)).then(res =>
   res.arrayBuffer()
 )
@@ -52,10 +48,7 @@ export async function GET(
     {
       width: 1200,
       height: 630,
-      fonts: [
-        { name: 'Inter', data: await medium, weight: 500 },
-        { name: 'Inter', data: await bold, weight: 700 }
-      ]
+      fonts: [{ name: 'Inter', data: await bold, weight: 700 }]
     }
   )
 }
