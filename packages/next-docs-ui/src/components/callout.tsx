@@ -17,7 +17,7 @@ export const Callout = forwardRef<HTMLDivElement, CalloutProps>(
       <div
         ref={ref}
         className={cn(
-          'nd-flex nd-flex-row nd-gap-2 nd-rounded-lg nd-p-3 nd-border nd-bg-card nd-text-muted-foreground nd-text-sm nd-shadow-md',
+          'nd-flex nd-flex-row nd-gap-2 nd-rounded-lg nd-p-3 nd-border nd-bg-card nd-text-muted-foreground nd-text-sm nd-shadow-md nd-my-6',
           className
         )}
         {...props}

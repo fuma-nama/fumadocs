@@ -1,13 +1,13 @@
-'use client'
-
-import { Breadcrumb } from '@/components/breadcrumb'
-import type { FooterProps } from '@/components/mdx/footer'
-import { Footer } from '@/components/mdx/footer'
-import { TOC } from '@/components/toc'
+import { cva } from 'class-variance-authority'
+import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import type { TableOfContents } from 'next-docs-zeta/server'
-import { useContext, useEffect, useState, type ReactNode } from 'react'
-import { I18nContext } from './contexts/i18n'
+import Link from 'next/link'
+import type { ReactNode } from 'react'
 import { replaceOrDefault } from './utils/replace-or-default'
+
+// We can keep the "use client" directives with dynamic imports
+// Next.js bundler should handle this automatically
+const { TOC, Breadcrumb, LastUpdate } = await import('./page.client')
 
 export type DocsPageProps = {
   toc?: TableOfContents
@@ -66,19 +66,35 @@ export function DocsPage({
   )
 }
 
-function LastUpdate(props: { date: Date }) {
-  const lastUpdate =
-    useContext(I18nContext).text?.lastUpdate ?? 'Last updated on'
-  const [date, setDate] = useState('')
+type FooterProps = {
+  previous?: { name: string; url: string }
+  next?: { name: string; url: string }
+}
 
-  useEffect(() => {
-    // to the timezone of client
-    setDate(props.date.toLocaleDateString())
-  }, [props.date])
+const footerItem = cva(
+  'nd-flex nd-flex-row nd-gap-2 nd-items-center nd-text-muted-foreground nd-transition-colors hover:nd-text-foreground'
+)
 
+function Footer({ next, previous }: FooterProps) {
   return (
-    <p className="nd-text-muted-foreground nd-text-xs nd-mt-8">
-      {lastUpdate} {date}
-    </p>
+    <div className="nd-flex nd-flex-row nd-gap-4 nd-mt-4 nd-flex-wrap nd-border-t nd-py-12">
+      {previous && (
+        <Link href={previous.url} className={footerItem()}>
+          <ChevronLeftIcon className="nd-w-5 nd-h-5 nd-shrink-0" />
+          <p className="nd-font-medium nd-text-foreground">{previous.name}</p>
+        </Link>
+      )}
+      {next && (
+        <Link
+          href={next.url}
+          className={footerItem({ className: 'nd-ml-auto' })}
+        >
+          <p className="nd-text-end nd-font-medium nd-text-foreground">
+            {next.name}
+          </p>
+          <ChevronRightIcon className="nd-w-5 nd-h-5 nd-shrink-0" />
+        </Link>
+      )}
+    </div>
   )
 }

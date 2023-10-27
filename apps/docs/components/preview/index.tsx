@@ -27,7 +27,7 @@ export default {
   ),
   card: (
     <Wrapper>
-      <div className="bg-background rounded-lg nd-not-prose">
+      <div className="bg-background rounded-lg">
         <Card
           href="#"
           icon={<HomeIcon />}

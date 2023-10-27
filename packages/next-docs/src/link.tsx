@@ -1,16 +1,13 @@
-'use client'
-
-import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import Original from 'next/link'
 import type { AnchorHTMLAttributes } from 'react'
 
-export type SafeLinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
+export type LinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
   /**
-   * Enable dynamic href
+   * If the href is an external URL
    *
-   * @default false
+   * automatically determined by default
    */
-  dynamicHrefs?: boolean
+  external?: boolean
 }
 
 /**
@@ -18,30 +15,25 @@ export type SafeLinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
  *
  * It also supports dynamic hrefs, which means you can use `/[lang]/my-page` with `dynamicHrefs` enabled
  */
-export function SafeLink({ dynamicHrefs = false, ...props }: SafeLinkProps) {
-  let url = props.href ?? '/'
-  const isExternalUrl = !(
-    url.startsWith('/') ||
-    url.startsWith('#') ||
-    url.startsWith('.')
-  )
-  const params = useParams()
-
-  if (!isExternalUrl && dynamicHrefs) {
-    url = url.replace(/\[.*\]/, key => {
-      const value = params[key.slice(1, -1)] ?? 'undefined'
-
-      return typeof value === 'string' ? value : value.join('/')
-    })
+export function Link({
+  href = '/',
+  external = !(
+    href.startsWith('/') ||
+    href.startsWith('#') ||
+    href.startsWith('.')
+  ),
+  ...props
+}: LinkProps) {
+  if (external) {
+    return (
+      <a href={href} rel="noreferrer noopener" target="_blank" {...props} />
+    )
   }
 
-  return (
-    <Link
-      {...props}
-      href={url}
-      prefetch={!isExternalUrl} //disable prefetch if it's an external link
-      target={isExternalUrl ? '_blank' : '_self'}
-      rel={isExternalUrl ? 'noreferrer noopener' : undefined}
-    />
-  )
+  return <Original href={href} {...props} />
 }
+
+/**
+ * Legacy exports
+ */
+export { Link as SafeLink, type LinkProps as SafeLinkProps }

@@ -32,7 +32,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
         {children}
       </Tabs>
     ),
-    blockquote: props => <Callout className="my-4">{props.children}</Callout>,
+    blockquote: props => <Callout>{props.children}</Callout>,
     ...components
   }
 }

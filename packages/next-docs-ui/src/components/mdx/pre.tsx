@@ -17,18 +17,16 @@ export function Pre({ title, allowCopy = true, ...props }: PreProps) {
   }, [])
 
   return (
-    <div className="nd-relative nd-overflow-hidden nd-group nd-border nd-rounded-lg nd-text-sm nd-bg-secondary/50 nd-not-prose">
+    <div className="nd-relative nd-overflow-hidden nd-group nd-border nd-rounded-lg nd-text-sm nd-bg-secondary/50 nd-my-6 nd-not-prose">
       {title ? (
-        <div className="nd-flex nd-flex-row nd-items-center nd-bg-muted nd-px-2 nd-py-1.5 nd-border-b">
-          <span className="nd-pl-2 nd-flex-1 nd-text-muted-foreground">
-            {title}
-          </span>
+        <div className="nd-flex nd-flex-row nd-items-center nd-bg-muted nd-text-muted-foreground nd-pl-4 nd-pr-2 nd-py-1.5 nd-border-b">
+          <span className="nd-flex-1">{title}</span>
           {allowCopy && <CopyButton onCopy={onCopy} />}
         </div>
       ) : (
         allowCopy && (
           <CopyButton
-            className="nd-absolute nd-top-2 nd-right-2 nd-bg-secondary nd-text-secondary-foreground nd-z-[2]"
+            className="nd-absolute nd-top-2 nd-right-2 nd-z-[2]"
             onCopy={onCopy}
           />
         )
@@ -69,7 +67,7 @@ function CopyButton({
   return (
     <button
       className={cn(
-        'nd-inline-flex nd-p-2 nd-rounded-md nd-transition-opacity nd-opacity-0 group-hover:nd-opacity-100',
+        'nd-inline-flex nd-p-2 nd-rounded-md nd-text-secondary-foreground nd-bg-muted nd-transition-opacity nd-opacity-0 group-hover:nd-opacity-100',
         className
       )}
       aria-label="Copy Text"

@@ -7,18 +7,13 @@
   "repository": "github:fuma-nama/next-docs",
   "license": "MIT",
   "files": [
-    "dist/*",
-    "server/*"
+    "dist/*"
   ],
   "exports": {
     "./style.css": "./dist/style.css",
     "./components/*": {
       "import": "./dist/components/*.js",
       "types": "./dist/components/*.d.ts"
-    },
-    "./mdx-server": {
-      "import": "./server/mdx-server.js",
-      "types": "./server/mdx-server/d.ts"
     },
     "./*": {
       "import": "./dist/*.js",
@@ -29,9 +24,6 @@
     "*": {
       "components/*": [
         "./dist/components/*.d.ts"
-      ],
-      "mdx-server": [
-        "./server/mdx-server.d.ts"
       ],
       "*": [
         "./dist/*.d.ts"

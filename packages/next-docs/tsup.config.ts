@@ -18,7 +18,7 @@ export default defineConfig([
     ...shared,
     name: 'next-docs-client',
     entry: [
-      'src/{toc,link,breadcrumb,sidebar}.tsx',
+      'src/{toc,link,breadcrumb,sidebar,dynamic-link}.tsx',
       'src/{search,search-algolia}/client.ts'
     ],
     outExtension: () => ({ js: '.js' })

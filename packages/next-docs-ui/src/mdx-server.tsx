@@ -1,6 +1,3 @@
-'use client'
-
-import { Pre } from '@/internal/mdx-client'
 import serverComponents, {
   Card,
   Cards,
@@ -11,6 +8,10 @@ import serverComponents, {
   MDXContent,
   Table
 } from '@/internal/mdx-server'
+
+const client = await import('@/internal/mdx-client')
+
+const Pre = (p => <client.Pre {...p} />) as typeof client.Pre
 
 const defaultMdxComponents = {
   pre: Pre,
