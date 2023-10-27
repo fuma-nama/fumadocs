@@ -31,7 +31,7 @@ type UtilsOptions<Langs extends string[] | undefined> = {
   validate: ValidateOptions
 } & BuilderOptions
 
-type Utils = PageUtils & {
+export type Utils = PageUtils & {
   tree: PageTree
   pages: Page[]
   metas: Meta[]

@@ -1,7 +1,7 @@
 import { resolve } from 'url'
 import Preview from '@/components/preview'
 import { createMetadata } from '@/utils/metadata'
-import { getPage, getPageUrl, getTree, pages } from '@/utils/source'
+import { getPage, getPageUrl, getUtils, pages } from '@/utils/source'
 import { ExternalLinkIcon } from 'lucide-react'
 import type { Metadata } from 'next'
 import type { Page } from 'next-docs-mdx/types'
@@ -16,7 +16,7 @@ type Param = {
 }
 
 export default async function Page({ params }: { params: Param }) {
-  const tree = getTree(params.mode)
+  const tree = getUtils(params.mode).tree
   const page = getPage([params.mode, ...(params.slug ?? [])])
 
   if (page == null) {

@@ -1,6 +1,6 @@
 import { cn } from '@/utils/cn'
 import { modes } from '@/utils/modes'
-import { getTree } from '@/utils/source'
+import { getUtils } from '@/utils/source'
 import { DocsLayout } from 'next-docs-ui/layout'
 import type { ReactNode } from 'react'
 
@@ -11,7 +11,7 @@ export default function Layout({
   params: { mode: string }
   children: ReactNode
 }) {
-  const tree = getTree(params.mode)
+  const tree = getUtils(params.mode).tree
   const mode = modes.find(mode => mode.param === params.mode) ?? modes[0]
   const Icon = mode.icon
 
