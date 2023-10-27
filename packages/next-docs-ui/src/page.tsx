@@ -1,29 +1,23 @@
 import { cva } from 'class-variance-authority'
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
-import type { TableOfContents } from 'next-docs-zeta/server'
+import type { TableOfContents, TOCItemType } from 'next-docs-zeta/server'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { replaceOrDefault } from './utils/replace-or-default'
 
 // We can keep the "use client" directives with dynamic imports
 // Next.js bundler should handle this automatically
-const { TOC, Breadcrumb, LastUpdate } = await import('./page.client')
+const { TOCItems, Breadcrumb, LastUpdate } = await import('./page.client')
 
 export type DocsPageProps = {
   toc?: TableOfContents
 
-  tableOfContent?: Partial<{
-    enabled: boolean
-    component: ReactNode
-    /**
-     * Custom content in TOC container, before the main TOC
-     */
-    header: ReactNode
-    /**
-     * Custom content in TOC container, after the main TOC
-     */
-    footer: ReactNode
-  }>
+  tableOfContent?: Partial<
+    Omit<TOCProps, 'item'> & {
+      enabled: boolean
+      component: ReactNode
+    }
+  >
 
   /**
    * Replace or disable breadcrumb
@@ -63,6 +57,31 @@ export function DocsPage({
         />
       )}
     </>
+  )
+}
+
+type TOCProps = {
+  items: TOCItemType[]
+
+  /**
+   * Custom content in TOC container, before the main TOC
+   */
+  header: ReactNode
+  /**
+   * Custom content in TOC container, after the main TOC
+   */
+  footer: ReactNode
+}
+
+function TOC(props: TOCProps) {
+  return (
+    <div className="nd-sticky nd-divide-y nd-flex nd-flex-col nd-top-16 nd-gap-4 nd-py-10 nd-w-[220px] nd-h-body max-lg:nd-hidden xl:nd-w-[260px]">
+      {props.header}
+      {props.items.length > 0 && <TOCItems items={props.items} />}
+      {props.footer && (
+        <div className="nd-pt-4 first:nd-pt-0">{props.footer}</div>
+      )}
+    </div>
   )
 }
 

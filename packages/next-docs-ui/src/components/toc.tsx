@@ -3,27 +3,11 @@ import { cn } from '@/utils/cn'
 import { TextIcon } from 'lucide-react'
 import type { TOCItemType } from 'next-docs-zeta/server'
 import * as Primitive from 'next-docs-zeta/toc'
-import { useContext, useEffect, useRef, useState, type ReactNode } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 
 type PosType = [top: number, height: number]
 
-export function TOC(props: {
-  items: TOCItemType[]
-  header: ReactNode
-  footer: ReactNode
-}) {
-  return (
-    <div className="nd-sticky nd-divide-y nd-flex nd-flex-col nd-top-16 nd-gap-4 nd-py-10 nd-w-[220px] nd-h-body max-lg:nd-hidden xl:nd-w-[260px]">
-      {props.header}
-      {props.items.length > 0 && <TOCItems items={props.items} />}
-      {props.footer && (
-        <div className="nd-pt-4 first:nd-pt-0">{props.footer}</div>
-      )}
-    </div>
-  )
-}
-
-function TOCItems({ items }: { items: TOCItemType[] }) {
+export function TOCItems({ items }: { items: TOCItemType[] }) {
   const { toc = 'On this page' } = useContext(I18nContext).text ?? {}
   const [pos, setPos] = useState<PosType>()
 
@@ -32,33 +16,27 @@ function TOCItems({ items }: { items: TOCItemType[] }) {
       toc={items}
       className="nd-relative nd-pt-4 nd-text-sm nd-font-medium nd-overflow-hidden first:nd-pt-0"
     >
-      <h3 className="nd-inline-flex nd-items-center nd-mb-4">
-        <TextIcon className="nd-w-4 nd-h-4 nd-mr-2" /> {toc}
+      <h3 className="nd-inline-flex nd-items-center nd-gap-2 nd-mb-4">
+        <TextIcon className="nd-w-4 nd-h-4" />
+        {toc}
       </h3>
       <div className="nd-flex nd-flex-col nd-gap-1 nd-border-l-2 nd-text-muted-foreground">
-        <Marker pos={pos} />
+        <div
+          role="none"
+          className={cn(
+            'nd-absolute nd-left-0 nd-border-l-2 nd-transition-all',
+            pos && 'nd-border-primary'
+          )}
+          style={{
+            top: pos?.[0],
+            height: pos?.[1]
+          }}
+        />
         {items.map((item, i) => (
           <TOCItem key={i} item={item} setMarker={setPos} />
         ))}
       </div>
     </Primitive.TOCProvider>
-  )
-}
-
-function Marker({ pos }: { pos?: PosType }) {
-  return (
-    <span
-      className={cn(
-        'nd-absolute nd-left-0 nd-border-l-2 nd-transition-all',
-        pos && 'nd-border-primary'
-      )}
-      style={
-        pos && {
-          top: pos[0],
-          height: pos[1]
-        }
-      }
-    />
   )
 }
 
