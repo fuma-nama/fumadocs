@@ -29,10 +29,6 @@ const tailwind_steps = ({ addUtilities }) => {
   })
 }
 
-const tailwindLightTheme = ({ addVariant }) => {
-  addVariant('light', ':merge([class~=light]) &')
-}
-
 const tailwind_prose_no_margin = ({ addUtilities }) => {
   addUtilities({
     '.prose-no-margin': {
@@ -197,7 +193,6 @@ module.exports = {
     }
   },
   plugins: [
-    tailwindLightTheme,
     require('tailwindcss-animate'),
     require('@tailwindcss/typography'),
     tailwind_steps,

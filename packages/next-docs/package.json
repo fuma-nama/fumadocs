@@ -106,9 +106,9 @@
     "unist-util-visit": "^4.1.2"
   },
   "peerDependencies": {
-    "next": "13.x",
-    "react": "18.x",
-    "react-dom": "18.x"
+    "next": ">= 13",
+    "react": ">= 18",
+    "react-dom": ">= 18"
   },
   "devDependencies": {
     "@algolia/client-search": "^4.20.0",
@@ -120,7 +120,7 @@
     "@types/react-dom": "18.2.1",
     "algoliasearch": "^4.20.0",
     "contentlayer": "^0.3.4",
-    "next": "13.5.6",
+    "next": "14.0.0",
     "unified": "^10.1.2",
     "@types/node": "18.17.5"
   },

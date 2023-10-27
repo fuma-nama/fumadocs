@@ -1,4 +1,5 @@
-import { ImageResponse, type NextRequest } from 'next/server'
+import { ImageResponse } from 'next/og'
+import type { NextRequest } from 'next/server'
 
 type Mode = {
   param: string
@@ -21,10 +22,6 @@ const modes: Mode[] = [
 ]
 
 export const runtime = 'edge'
-
-const medium = fetch(new URL('./inter-medium.woff', import.meta.url)).then(
-  res => res.arrayBuffer()
-)
 
 const bold = fetch(new URL('./inter-bold.woff', import.meta.url)).then(res =>
   res.arrayBuffer()
@@ -51,10 +48,7 @@ export async function GET(
     {
       width: 1200,
       height: 630,
-      fonts: [
-        { name: 'Inter', data: await medium, weight: 500 },
-        { name: 'Inter', data: await bold, weight: 700 }
-      ]
+      fonts: [{ name: 'Inter', data: await bold, weight: 700 }]
     }
   )
 }
@@ -90,18 +84,11 @@ function OG({
             background
           }}
         >
+          <p tw="font-bold text-6xl">{title}</p>
           <p
+            tw="text-4xl"
             style={{
-              fontWeight: 700,
-              fontSize: '3.5rem'
-            }}
-          >
-            {title}
-          </p>
-          <p
-            style={{
-              color: mutedForeground,
-              fontSize: '2rem'
+              color: mutedForeground
             }}
           >
             {description}
@@ -126,15 +113,7 @@ function OG({
           <path d="M3 5h4" />
           <path d="M17 19h4" />
         </svg>
-        <p
-          style={{
-            fontWeight: 700,
-            marginLeft: '1rem',
-            fontSize: '2.3rem'
-          }}
-        >
-          {mode.name}
-        </p>
+        <p tw="font-bold ml-4 text-4xl">{mode.name}</p>
       </div>
     </div>
   )

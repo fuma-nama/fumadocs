@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "contentlayer": "0.3.4",
-    "next": "13.5.6",
+    "next": "14.0.0",
     "next-contentlayer": "0.3.4",
     "next-docs-ui": "4.0.0",
     "next-docs-zeta": "4.0.0",

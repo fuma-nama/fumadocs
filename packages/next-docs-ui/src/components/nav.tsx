@@ -9,8 +9,8 @@ import {
   SidebarCloseIcon,
   SidebarOpenIcon
 } from 'lucide-react'
+import Link from 'next-docs-zeta/link'
 import { SidebarTrigger } from 'next-docs-zeta/sidebar'
-import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useContext, type ReactNode } from 'react'
 import { ThemeToggle } from './theme-toggle'
@@ -154,8 +154,7 @@ function NavItem(props: NavItemProps) {
   return (
     <Link
       href={props.href}
-      target={props.external ? '_blank' : '_self'}
-      rel={props.external ? 'noreferrer noopener' : undefined}
+      external={props.external}
       className={cn(
         'nd-text-sm nd-text-muted-foreground max-lg:nd-hidden',
         isActive
@@ -173,8 +172,7 @@ function NavLink(props: NavLinkProps) {
     <Link
       aria-label={props.label}
       href={props.href}
-      target={props.external ? '_blank' : '_self'}
-      rel={props.external ? 'noreferrer noopener' : undefined}
+      external={props.external}
       className={cn(itemVariants())}
     >
       {props.icon}

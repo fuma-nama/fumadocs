@@ -1,29 +1,23 @@
-'use client'
-
-import { Breadcrumb } from '@/components/breadcrumb'
-import type { FooterProps } from '@/components/mdx/footer'
-import { Footer } from '@/components/mdx/footer'
-import { TOC } from '@/components/toc'
-import type { TableOfContents } from 'next-docs-zeta/server'
-import { useContext, useEffect, useState, type ReactNode } from 'react'
-import { I18nContext } from './contexts/i18n'
+import { cva } from 'class-variance-authority'
+import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
+import type { TableOfContents, TOCItemType } from 'next-docs-zeta/server'
+import Link from 'next/link'
+import type { ReactNode } from 'react'
 import { replaceOrDefault } from './utils/replace-or-default'
+
+// We can keep the "use client" directives with dynamic imports
+// Next.js bundler should handle this automatically
+const { TOCItems, Breadcrumb, LastUpdate } = await import('./page.client')
 
 export type DocsPageProps = {
   toc?: TableOfContents
 
-  tableOfContent?: Partial<{
-    enabled: boolean
-    component: ReactNode
-    /**
-     * Custom content in TOC container, before the main TOC
-     */
-    header: ReactNode
-    /**
-     * Custom content in TOC container, after the main TOC
-     */
-    footer: ReactNode
-  }>
+  tableOfContent?: Partial<
+    Omit<TOCProps, 'item'> & {
+      enabled: boolean
+      component: ReactNode
+    }
+  >
 
   /**
    * Replace or disable breadcrumb
@@ -66,19 +60,60 @@ export function DocsPage({
   )
 }
 
-function LastUpdate(props: { date: Date }) {
-  const lastUpdate =
-    useContext(I18nContext).text?.lastUpdate ?? 'Last updated on'
-  const [date, setDate] = useState('')
+type TOCProps = {
+  items: TOCItemType[]
 
-  useEffect(() => {
-    // to the timezone of client
-    setDate(props.date.toLocaleDateString())
-  }, [props.date])
+  /**
+   * Custom content in TOC container, before the main TOC
+   */
+  header: ReactNode
+  /**
+   * Custom content in TOC container, after the main TOC
+   */
+  footer: ReactNode
+}
 
+function TOC(props: TOCProps) {
   return (
-    <p className="nd-text-muted-foreground nd-text-xs nd-mt-8">
-      {lastUpdate} {date}
-    </p>
+    <div className="nd-sticky nd-divide-y nd-flex nd-flex-col nd-top-16 nd-gap-4 nd-py-10 nd-w-[220px] nd-h-body max-lg:nd-hidden xl:nd-w-[260px]">
+      {props.header}
+      {props.items.length > 0 && <TOCItems items={props.items} />}
+      {props.footer && (
+        <div className="nd-pt-4 first:nd-pt-0">{props.footer}</div>
+      )}
+    </div>
+  )
+}
+
+type FooterProps = {
+  previous?: { name: string; url: string }
+  next?: { name: string; url: string }
+}
+
+const footerItem = cva(
+  'nd-flex nd-flex-row nd-gap-2 nd-items-center nd-text-muted-foreground nd-transition-colors hover:nd-text-foreground'
+)
+
+function Footer({ next, previous }: FooterProps) {
+  return (
+    <div className="nd-flex nd-flex-row nd-gap-4 nd-mt-4 nd-flex-wrap nd-border-t nd-py-12">
+      {previous && (
+        <Link href={previous.url} className={footerItem()}>
+          <ChevronLeftIcon className="nd-w-5 nd-h-5 nd-shrink-0" />
+          <p className="nd-font-medium nd-text-foreground">{previous.name}</p>
+        </Link>
+      )}
+      {next && (
+        <Link
+          href={next.url}
+          className={footerItem({ className: 'nd-ml-auto' })}
+        >
+          <p className="nd-text-end nd-font-medium nd-text-foreground">
+            {next.name}
+          </p>
+          <ChevronRightIcon className="nd-w-5 nd-h-5 nd-shrink-0" />
+        </Link>
+      )}
+    </div>
   )
 }

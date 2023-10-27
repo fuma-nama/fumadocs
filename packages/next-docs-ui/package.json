@@ -7,18 +7,13 @@
   "repository": "github:fuma-nama/next-docs",
   "license": "MIT",
   "files": [
-    "dist/*",
-    "server/*"
+    "dist/*"
   ],
   "exports": {
     "./style.css": "./dist/style.css",
     "./components/*": {
       "import": "./dist/components/*.js",
       "types": "./dist/components/*.d.ts"
-    },
-    "./mdx-server": {
-      "import": "./server/mdx-server.js",
-      "types": "./server/mdx-server/d.ts"
     },
     "./*": {
       "import": "./dist/*.js",
@@ -29,9 +24,6 @@
     "*": {
       "components/*": [
         "./dist/components/*.d.ts"
-      ],
-      "mdx-server": [
-        "./server/mdx-server.d.ts"
       ],
       "*": [
         "./dist/*.d.ts"
@@ -65,9 +57,9 @@
     "tailwind-merge": "^1.14.0"
   },
   "peerDependencies": {
-    "next": "13.x",
-    "react": "18.x",
-    "react-dom": "18.x"
+    "next": ">= 13",
+    "react": ">= 18",
+    "react-dom": ">= 18"
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.10",
@@ -76,7 +68,7 @@
     "algoliasearch": "^4.20.0",
     "autoprefixer": "10.4.16",
     "contentlayer": "^0.3.4",
-    "next": "13.5.6",
+    "next": "14.0.0",
     "postcss": "8.4.31",
     "postcss-cli": "^10.1.0",
     "postcss-import": "^15.1.0",

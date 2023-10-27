@@ -7,12 +7,22 @@ type PackageManager = (name: string) => {
   command: string
 }
 
-export type RemarkInstallOptions = {
+export type RemarkInstallOptions = Partial<{
   Tabs: string
   Tab: string
   packageManagers: PackageManager[]
-}
+}>
 
+/**
+ * It generates the following structure from a code block with `package-install` as language
+ *
+ * ```tsx
+ * <Tabs items={["pnpm", "npm", "yarn"]}>
+ *  <Tab value="pnpm">...</Tab>
+ *  ...
+ * </Tabs>
+ * ```
+ */
 export function remarkInstall({
   Tab = 'Tab',
   Tabs = 'Tabs',
@@ -21,7 +31,7 @@ export function remarkInstall({
     name => ({ command: `pnpm add ${name}`, packageManager: 'pnpm' }),
     name => ({ command: `yarn add ${name}`, packageManager: 'yarn' })
   ]
-}: Partial<RemarkInstallOptions> = {}): Transformer<Root, Root> {
+}: RemarkInstallOptions = {}): Transformer<Root, Root> {
   return tree => {
     visit(tree, ['code'], (node: Code) => {
       if (node.lang !== 'package-install') return 'skip'

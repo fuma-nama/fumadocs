@@ -25,61 +25,63 @@ const rehypePrettyCodeOptions: RehypePrettyCodeOptions = {
 /**
  * Handle codeblocks and heading slugs
  */
-export const rehypeNextDocs = (): Transformer<Root, Root> => async tree => {
-  slugger.reset()
+export function rehypeNextDocs(): Transformer<Root, Root> {
+  return async tree => {
+    slugger.reset()
 
-  visit(tree, ['pre', ...headings], node => {
-    if (headings.includes(node.tagName)) {
+    visit(tree, ['pre', ...headings], node => {
+      if (headings.includes(node.tagName)) {
+        node.properties ||= {}
+
+        if (!('id' in node.properties)) {
+          node.properties.id = slugger.slug(flattenNode(node))
+        }
+
+        return
+      }
+
+      if (node.tagName === 'pre') {
+        const [codeEl] = node.children
+
+        // Allow custom code meta
+        if (typeof codeEl.data?.meta === 'string') {
+          // @ts-ignore
+          node.nd_custom = codeEl.data.meta.match(customMetaRegex)?.[1]
+        }
+      }
+    })
+
+    // @ts-ignore
+    await rehypePrettycode(rehypePrettyCodeOptions)(tree)
+
+    visit(tree, ['div', 'pre'], node => {
       node.properties ||= {}
 
-      if (!('id' in node.properties)) {
-        node.properties.id = slugger.slug(flattenNode(node))
-      }
+      // Remove default fragment div
+      // Add title to pre element
+      if ('data-rehype-pretty-code-fragment' in node.properties) {
+        if (node.children.length === 0) return
+        let title: string | undefined = undefined
 
-      return
-    }
+        for (const child of node.children) {
+          if (child.type !== 'element') continue
+          child.properties ||= {}
 
-    if (node.tagName === 'pre') {
-      const [codeEl] = node.children
+          if ('data-rehype-pretty-code-title' in child.properties) {
+            title = flattenNode(child)
+          }
 
-      // Allow custom code meta
-      if (typeof codeEl.data?.meta === 'string') {
-        // @ts-ignore
-        node.nd_custom = codeEl.data.meta.match(customMetaRegex)?.[1]
-      }
-    }
-  })
-
-  // @ts-ignore
-  await rehypePrettycode(rehypePrettyCodeOptions)(tree)
-
-  visit(tree, ['div', 'pre'], node => {
-    node.properties ||= {}
-
-    // Remove default fragment div
-    // Add title to pre element
-    if ('data-rehype-pretty-code-fragment' in node.properties) {
-      if (node.children.length === 0) return
-      let title: string | undefined = undefined
-
-      for (const child of node.children) {
-        if (child.type !== 'element') continue
-        child.properties ||= {}
-
-        if ('data-rehype-pretty-code-title' in child.properties) {
-          title = flattenNode(child)
-        }
-
-        if (child.tagName === 'pre') {
-          child.properties.title = title
-          Object.assign(node, child)
-          break
+          if (child.tagName === 'pre') {
+            child.properties.title = title
+            Object.assign(node, child)
+            break
+          }
         }
       }
-    }
 
-    // Add custom meta to properties
-    // @ts-ignore
-    node.properties.custom = node.nd_custom
-  })
+      // Add custom meta to properties
+      // @ts-ignore
+      node.properties.custom = node.nd_custom
+    })
+  }
 }

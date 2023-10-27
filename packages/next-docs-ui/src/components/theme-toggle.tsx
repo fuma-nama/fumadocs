@@ -10,7 +10,8 @@ const buttonVariants = cva(
     variants: {
       dark: {
         true: 'dark:nd-text-accent-foreground dark:nd-bg-accent',
-        false: 'light:nd-text-accent-foreground light:nd-bg-accent'
+        false:
+          'nd-text-accent-foreground nd-bg-accent dark:nd-text-muted-foreground dark:nd-bg-transparent'
       }
     }
   }

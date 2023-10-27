@@ -2,7 +2,7 @@ import { Card, Cards } from '@/components/mdx/card'
 import { Heading } from '@/components/mdx/heading'
 import { cn } from '@/utils/cn'
 import { default_image_sizes } from '@/utils/config'
-import { SafeLink } from 'next-docs-zeta/link'
+import Link from 'next-docs-zeta/link'
 import NextImage, { type ImageProps } from 'next/image'
 import type {
   HTMLAttributes,
@@ -27,7 +27,7 @@ function MDXContent({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
 const defaultMdxComponents = {
   Card,
   Cards,
-  a: SafeLink,
+  a: Link,
   img: Image,
   h1: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
     <Heading as="h1" {...props} />
@@ -52,7 +52,7 @@ const defaultMdxComponents = {
 
 export {
   defaultMdxComponents as default,
-  SafeLink as Link,
+  Link,
   default_image_sizes,
   Heading,
   Card,
