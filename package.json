@@ -28,8 +28,7 @@
   "devDependencies": {
     "@changesets/cli": "^2.26.2",
     "@ianvs/prettier-plugin-sort-imports": "^4.1.0",
-    "@mayank1513/esbuild-plugin-react18": "^0.0.5",
-    "@next/eslint-plugin-next": "^13.4.19",
+    "@next/eslint-plugin-next": "^14.0.0",
     "@typescript-eslint/eslint-plugin": "^6.7.0",
     "@typescript-eslint/parser": "^6.7.0",
     "concurrently": "^8.2.1",
