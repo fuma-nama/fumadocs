@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 1.6.1
+
+### Patch Changes
+
+- 01b23e2: Support Next.js 14
+
 ## 1.6.0
 
 ### Minor Changes

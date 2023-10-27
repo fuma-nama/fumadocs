@@ -1,7 +1,7 @@
 {
   "name": "create-next-docs-app",
   "description": "Create a new documentation site with Next Docs UI",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "homepage": "https://next-docs-zeta.vercel.app",
   "author": "Fuma Nama",
   "repository": "github:fuma-nama/next-docs",
