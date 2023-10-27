@@ -1,5 +1,18 @@
 # next-docs-ui
 
+## 4.0.1
+
+### Patch Changes
+
+- 927714a: Remove dropdown from theme toggle
+- d58e90a: Use await imports to import client components in Server Components
+- cc1fe39: Render TOC header & footer in Server Component
+- 01b23e2: Support Next.js 14
+- d58e90a: Add y margins to Callout and Pre component
+- Updated dependencies [2da93d8]
+- Updated dependencies [01b23e2]
+  - next-docs-zeta@4.0.1
+
 ## 4.0.0
 
 ### Minor Changes
