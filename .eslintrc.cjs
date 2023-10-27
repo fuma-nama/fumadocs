@@ -75,7 +75,7 @@ module.exports = {
         tailwindcss: {
           config: 'apps/docs/tailwind.config.js',
           callees: ['cn', 'clsx', 'cva'],
-          whitelist: ['nd-not-prose']
+          whitelist: ['nd-not-prose', 'nd-prose-no-margin']
         },
         next: { rootDir: 'apps/docs' }
       }
