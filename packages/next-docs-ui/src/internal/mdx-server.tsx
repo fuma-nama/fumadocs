@@ -2,7 +2,7 @@ import { Card, Cards } from '@/components/mdx/card'
 import { Heading } from '@/components/mdx/heading'
 import { cn } from '@/utils/cn'
 import { default_image_sizes } from '@/utils/config'
-import { Link } from 'next-docs-zeta/link'
+import Link from 'next-docs-zeta/link'
 import NextImage, { type ImageProps } from 'next/image'
 import type {
   HTMLAttributes,

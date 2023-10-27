@@ -2,7 +2,7 @@
 
 import { useParams } from 'next/navigation'
 import { useMemo } from 'react'
-import { Link, type LinkProps } from './link'
+import Link, { type LinkProps } from './link'
 
 export type DynamicLinkProps = LinkProps
 

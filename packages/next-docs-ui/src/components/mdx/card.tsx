@@ -1,5 +1,5 @@
 import { cn } from '@/utils/cn'
-import { Link, type LinkProps } from 'next-docs-zeta/link'
+import Link, { type LinkProps } from 'next-docs-zeta/link'
 import type { HTMLAttributes, ReactNode } from 'react'
 
 export function Cards(props: HTMLAttributes<HTMLDivElement>) {

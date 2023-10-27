@@ -13,7 +13,7 @@ export type LinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
 /**
  * Wraps `next/link` and safe to use in mdx documents
  */
-export function Link({
+function Link({
   href = '/',
   external = !(
     href.startsWith('/') ||
@@ -31,7 +31,11 @@ export function Link({
   return <Original href={href} {...props} />
 }
 
-/**
- * Legacy exports
- */
-export { Link as default, Link as SafeLink, type LinkProps as SafeLinkProps }
+export {
+  Link as default,
+  /**
+   * Legacy exports
+   */
+  Link as SafeLink,
+  type LinkProps as SafeLinkProps
+}
