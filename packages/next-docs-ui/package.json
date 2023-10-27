@@ -1,7 +1,7 @@
 {
   "name": "next-docs-ui",
   "description": "The framework for building a documentation website in Next.js",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "homepage": "https://next-docs-zeta.vercel.app",
   "author": "Fuma Nama",
   "repository": "github:fuma-nama/next-docs",
@@ -50,7 +50,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "cmdk": "^0.2.0",
-    "lucide-react": "^0.288.0",
+    "lucide-react": "^0.290.0",
     "next-docs-zeta": "workspace:*",
     "next-themes": "^0.2.1",
     "react-medium-image-zoom": "^5.1.8",
@@ -73,7 +73,7 @@
     "postcss-cli": "^10.1.0",
     "postcss-import": "^15.1.0",
     "postcss-lightningcss": "^1.0.0",
-    "tailwindcss": "3.3.4",
+    "tailwindcss": "3.3.5",
     "tailwindcss-animate": "^1.0.7"
   },
   "keywords": [

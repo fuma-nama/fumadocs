@@ -1,5 +1,14 @@
 # next-docs-mdx
 
+## 4.0.1
+
+### Patch Changes
+
+- 01b23e2: Support Next.js 14
+- Updated dependencies [2da93d8]
+- Updated dependencies [01b23e2]
+  - next-docs-zeta@4.0.1
+
 ## 4.0.0
 
 ### Patch Changes
