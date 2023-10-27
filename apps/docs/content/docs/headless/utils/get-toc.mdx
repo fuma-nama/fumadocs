@@ -5,6 +5,8 @@ description: Parse Table of contents from markdown/mdx content
 
 Parse Table of contents from markdown/mdx content.
 
+> [You can use the remark plugin directly](/docs/headless/mdx/toc)
+
 ## Usage
 
 Note: If you're using a CMS, you should use the API provided by the CMS instead.
@@ -32,12 +34,6 @@ const posts = await client.fetch(query)
 const toc = await getTableOfContentsFromPortableText(posts[0].body)
 ```
 
-## Reference
+### Output
 
-### TOCItemType
-
-| Prop    | Type     | Description      |
-| ------- | -------- | ---------------- |
-| `title` | `string` | Title of heading |
-| `url`   | `string` | Href url         |
-| `depth` | `number` | From 1 to 6      |
+An array of [TOCItemType](/docs/headless/mdx/toc#tocitemtype) is returned.
