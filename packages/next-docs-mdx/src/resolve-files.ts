@@ -1,7 +1,12 @@
 import path from 'path'
 import type { AnyZodObject } from 'zod'
-import type { FileInfo, JsonExport, MDXExport, Meta, Page } from './types'
-import { frontmatterSchema, metaSchema } from './validate/schema'
+import type { FileInfo, MDXExport, Meta, Page } from './types'
+import {
+  frontmatterSchema,
+  metaSchema,
+  type Frontmatter,
+  type MetaExport
+} from './validate/schema'
 
 const pageTypes = ['.md', '.mdx']
 const metaTypes = ['.json']
@@ -13,7 +18,7 @@ export type ResolvedFiles = {
 
 export type ResolveOptions = {
   map: Record<string, unknown>
-  root: string
+  rootDir?: string
   validate?: ValidateOptions
 }
 
@@ -27,9 +32,8 @@ export const defaultValidators = {
   meta: metaSchema
 }
 
-function parsePath(p: string, prefix = './content'): FileInfo {
-  const subPath = path.relative(prefix, p)
-  const parsed = path.parse(subPath)
+function parsePath(p: string): FileInfo {
+  const parsed = path.parse(p)
   const normalizedDirname = parsed.dir.replaceAll('\\', '/')
   let flattenedPath = normalizedDirname + '/' + parsed.name
 
@@ -40,7 +44,7 @@ function parsePath(p: string, prefix = './content'): FileInfo {
   const [, locale] = parsed.name.split('.')
 
   return {
-    id: subPath,
+    id: p,
     dirname: normalizedDirname,
     base: parsed.base,
     name: parsed.name,
@@ -51,33 +55,23 @@ function parsePath(p: string, prefix = './content'): FileInfo {
   }
 }
 
-function pathToSlugs(file: FileInfo, root: string): string[] {
-  let path = file.flattenedPath
-
-  if (path.startsWith(root)) {
-    path = path.slice(root.length)
-  }
-
-  return path.split('/').filter(p => !['index', ''].includes(p))
+function pathToSlugs(file: FileInfo): string[] {
+  return file.flattenedPath.split('/').filter(p => !['index', ''].includes(p))
 }
 
-function runValidate(
-  schema: AnyZodObject,
-  object: unknown,
-  errorName: string
-): boolean {
+function parse<T>(schema: AnyZodObject, object: unknown, errorName: string): T {
   const result = schema.safeParse(object)
 
   if (!result.success) {
     throw new Error(`Invalid ${errorName}: ${result.error}`)
   }
 
-  return result.success
+  return result.data as T
 }
 
 export function resolveFiles({
   map,
-  root,
+  rootDir = '',
   validate = defaultValidators
 }: ResolveOptions): ResolvedFiles {
   const metas: Meta[] = []
@@ -85,22 +79,24 @@ export function resolveFiles({
 
   for (const [path, v] of Object.entries(map)) {
     const file = parsePath(path)
+    if (
+      rootDir.length > 0 &&
+      file.dirname != rootDir &&
+      !file.dirname.startsWith(rootDir + '/')
+    )
+      continue
 
     if (metaTypes.includes(file.type)) {
       const meta: Meta = {
         file,
-        data: v as JsonExport
+        data: parse<MetaExport>(
+          validate.meta ?? defaultValidators.meta,
+          v,
+          file.path
+        )
       }
 
-      if (
-        runValidate(
-          validate.meta ?? defaultValidators.meta,
-          meta.data,
-          meta.file.path
-        )
-      ) {
-        metas.push(meta)
-      }
+      metas.push(meta)
 
       continue
     }
@@ -109,20 +105,16 @@ export function resolveFiles({
       const data = v as MDXExport
       const page: Page = {
         file,
-        slugs: pathToSlugs(file, root),
-        matter: data.frontmatter,
+        slugs: pathToSlugs(file),
+        matter: parse<Frontmatter>(
+          validate.frontmatter ?? defaultValidators.frontmatter,
+          data.frontmatter,
+          file.path
+        ),
         data
       }
 
-      if (
-        runValidate(
-          validate.frontmatter ?? defaultValidators.frontmatter,
-          page.matter,
-          page.file.path
-        )
-      ) {
-        pages.push(page)
-      }
+      pages.push(page)
 
       continue
     }

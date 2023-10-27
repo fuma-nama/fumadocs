@@ -4,10 +4,10 @@ import { map } from '@/_map'
 import {
   createPageUtils,
   defaultValidators,
-  getPageTreeBuilder,
-  resolveFiles
+  fromMap,
+  type Utils
 } from 'next-docs-mdx/map'
-import type { PageTree } from 'next-docs-zeta/server'
+import type { Meta, Page } from 'next-docs-mdx/types'
 import { PHASE_PRODUCTION_BUILD } from 'next/constants'
 import { z } from 'zod'
 
@@ -16,36 +16,45 @@ const frontmatterSchema = defaultValidators.frontmatter.extend({
   index: z.boolean().default(false)
 })
 
-const resolved = resolveFiles({
-  map,
-  root: 'docs',
+const ui = fromMap(map, {
+  rootDir: 'ui',
   validate: {
     frontmatter: frontmatterSchema
   }
 })
 
-export const { getPage, getPageUrl } = createPageUtils(resolved, '/docs', [])
-
-const builder = getPageTreeBuilder(resolved, { getUrl: getPageUrl })
-
-const uiTree = builder.build({ root: 'docs/ui' })
-const mdxTree = builder.build({ root: 'docs/mdx' })
-const headlessTree = builder.build({
-  root: 'docs/headless'
+const headless = fromMap(map, {
+  rootDir: 'headless',
+  validate: {
+    frontmatter: frontmatterSchema
+  }
 })
 
-export function getTree(mode: 'ui' | 'headless' | 'mdx' | string): PageTree {
+const mdx = fromMap(map, {
+  rootDir: 'mdx',
+  validate: {
+    frontmatter: frontmatterSchema
+  }
+})
+
+export const metas: Meta[] = [...mdx.metas, ...headless.metas, ...ui.metas]
+export const pages: Page[] = [...mdx.pages, ...headless.pages, ...ui.pages]
+export const { getPage, getPageUrl } = createPageUtils(
+  { pages, metas },
+  '/docs',
+  []
+)
+
+export function getUtils(mode: 'ui' | 'headless' | 'mdx' | string): Utils {
   switch (mode) {
     case 'ui':
-      return uiTree
+      return ui
     case 'mdx':
-      return mdxTree
+      return mdx
     default:
-      return headlessTree
+      return headless
   }
 }
-
-export const { pages, metas } = resolved
 
 declare module 'next-docs-mdx/types' {
   interface Frontmatter extends z.infer<typeof frontmatterSchema> {}
