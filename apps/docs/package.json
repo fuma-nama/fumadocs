@@ -31,7 +31,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@next/bundle-analyzer": "^13.4.19",
+    "@next/bundle-analyzer": "^14.0.0",
     "@types/mdx": "^2.0.8",
     "@types/node": "18.17.5",
     "@types/react": "18.2.0",
