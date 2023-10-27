@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 4.0.1
+
+### Patch Changes
+
+- 2da93d8: Support generating package install codeblocks automatically
+- 01b23e2: Support Next.js 14
+
 ## 4.0.0
 
 ### Major Changes
