@@ -1,5 +1,14 @@
 # next-docs-mdx
 
+## 4.0.2
+
+### Patch Changes
+
+- 347df32: Fix empty `baseUrl` unexpected behaviours
+- ad7b8a8: Fully support custom root content directory paths
+- 73f985a: Support `rootDir` API
+  - next-docs-zeta@4.0.2
+
 ## 4.0.1
 
 ### Patch Changes
