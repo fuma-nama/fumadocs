@@ -12,8 +12,6 @@ export type LinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
 
 /**
  * Wraps `next/link` and safe to use in mdx documents
- *
- * It also supports dynamic hrefs, which means you can use `/[lang]/my-page` with `dynamicHrefs` enabled
  */
 export function Link({
   href = '/',
@@ -36,4 +34,4 @@ export function Link({
 /**
  * Legacy exports
  */
-export { Link as SafeLink, type LinkProps as SafeLinkProps }
+export { Link as default, Link as SafeLink, type LinkProps as SafeLinkProps }
