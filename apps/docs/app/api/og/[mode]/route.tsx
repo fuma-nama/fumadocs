@@ -1,4 +1,5 @@
-import { ImageResponse, type NextRequest } from 'next/server'
+import { ImageResponse } from 'next/og'
+import type { NextRequest } from 'next/server'
 
 type Mode = {
   param: string

@@ -4,6 +4,7 @@ import { Inter } from 'next/font/google'
 import 'next-docs-ui/style.css'
 import './style.css'
 import { base_url, createMetadata } from '@/utils/metadata'
+import type { Viewport } from 'next'
 import { Provider } from './provider'
 
 export const metadata = createMetadata({
@@ -11,10 +12,16 @@ export const metadata = createMetadata({
     template: '%s | Next Docs',
     default: 'Next Docs'
   },
-  themeColor: '#ffffff',
   description: 'The Next.js framework for building documentation sites',
   metadataBase: base_url
 })
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: dark)', color: '#0A0A0A' },
+    { media: '(prefers-color-scheme: light)', color: '#fff' }
+  ]
+}
 
 const inter = Inter({
   subsets: ['latin']
