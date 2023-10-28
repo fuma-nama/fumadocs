@@ -18,11 +18,26 @@ export type ResolvedFiles = {
 
 export type ResolveOptions = {
   map: Record<string, unknown>
+
+  /**
+   * root directory to resolve files
+   *
+   * @default ''
+   */
   rootDir?: string
+
+  /**
+   * Generate slugs from file info
+   */
+  slugs?: (file: FileInfo) => string[]
+
+  /**
+   * Check frontmatter/meta objects, transform allowed
+   */
   validate?: ValidateOptions
 }
 
-export type ValidateOptions = Partial<{
+type ValidateOptions = Partial<{
   frontmatter: AnyZodObject
   meta: AnyZodObject
 }>
@@ -71,6 +86,7 @@ function parse<T>(schema: AnyZodObject, object: unknown, errorName: string): T {
 
 export function resolveFiles({
   map,
+  slugs = pathToSlugs,
   rootDir = '',
   validate = defaultValidators
 }: ResolveOptions): ResolvedFiles {
@@ -105,7 +121,7 @@ export function resolveFiles({
       const data = v as MDXExport
       const page: Page = {
         file,
-        slugs: pathToSlugs(file),
+        slugs: slugs(file),
         matter: parse<Frontmatter>(
           validate.frontmatter ?? defaultValidators.frontmatter,
           data.frontmatter,

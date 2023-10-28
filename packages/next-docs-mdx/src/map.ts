@@ -4,7 +4,7 @@ import { createPageUtils, type PageUtils } from './page-utils'
 import {
   defaultValidators,
   resolveFiles,
-  type ValidateOptions
+  type ResolveOptions
 } from './resolve-files'
 import type { Meta, Page } from './types'
 
@@ -28,7 +28,8 @@ type UtilsOptions<Langs extends string[] | undefined> = {
    */
   rootDir: string
 
-  validate: ValidateOptions
+  slugs: ResolveOptions['slugs']
+  validate: ResolveOptions['validate']
 } & BuilderOptions
 
 export type Utils = PageUtils & {
@@ -46,6 +47,7 @@ function fromMap<Langs extends string[] | undefined = undefined>(
   {
     baseUrl = '/docs',
     rootDir = '',
+    slugs,
     getUrl,
     resolveIcon,
     languages,
@@ -55,6 +57,7 @@ function fromMap<Langs extends string[] | undefined = undefined>(
   const resolved = resolveFiles({
     map,
     rootDir,
+    slugs,
     validate
   })
 
