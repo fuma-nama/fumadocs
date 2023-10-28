@@ -1,7 +1,7 @@
 {
   "name": "next-docs-mdx",
   "description": "The library for using native Next.js MDX features in Next Docs",
-  "version": "4.0.2",
+  "version": "4.0.3",
   "homepage": "https://next-docs-zeta.vercel.app",
   "author": "Fuma Nama",
   "repository": "github:fuma-nama/next-docs",
@@ -46,7 +46,7 @@
   },
   "peerDependencies": {
     "@next/mdx": ">= 13",
-    "next-docs-zeta": "4.0.2"
+    "next-docs-zeta": "4.0.3"
   },
   "devDependencies": {
     "@next/mdx": "14.0.0",

@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 4.0.3
+
+### Patch Changes
+
+- 0cc10cb: Support custom build page tree options
+
 ## 4.0.2
 
 ## 4.0.1

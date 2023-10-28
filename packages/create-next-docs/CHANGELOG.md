@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 1.6.2
+
+### Patch Changes
+
+- 94075b8: Fix type errors in examples
+
 ## 1.6.1
 
 ### Patch Changes
