@@ -3,6 +3,7 @@ import path from 'path'
 import { map } from '@/_map'
 import { defaultValidators, fromMap, type Utils } from 'next-docs-mdx/map'
 import type { FileInfo } from 'next-docs-mdx/types'
+import type { StructuredData } from 'next-docs-zeta/mdx-plugins'
 import { PHASE_PRODUCTION_BUILD } from 'next/constants'
 import { z } from 'zod'
 
@@ -61,12 +62,20 @@ declare global {
 
 global.__NEXT_DOCS_INDEX_UPDATED = false
 
+type Index = {
+  id: string
+  title: string
+  description?: string
+  url: string
+  structuredData: StructuredData
+}
+
 if (
   process.env.NEXT_PHASE === PHASE_PRODUCTION_BUILD &&
   !global.__NEXT_DOCS_INDEX_UPDATED
 ) {
   const mapPath = path.resolve('./.next/_map_indexes.json')
-  const indexes = Object.values(tabs).map(tab => {
+  const indexes: Index[] = Object.values(tabs).flatMap(tab => {
     return tab.pages.map(page => ({
       id: page.file.id,
       title: page.matter.title,
