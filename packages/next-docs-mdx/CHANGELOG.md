@@ -1,5 +1,14 @@
 # next-docs-mdx
 
+## 4.0.3
+
+### Patch Changes
+
+- ba51a9f: Support custom slugs function
+- 0cc10cb: Support custom build page tree options
+- Updated dependencies [0cc10cb]
+  - next-docs-zeta@4.0.3
+
 ## 4.0.2
 
 ### Patch Changes
