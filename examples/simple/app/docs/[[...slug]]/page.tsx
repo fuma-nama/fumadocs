@@ -40,7 +40,7 @@ export async function generateStaticParams(): Promise<{ slug: string[] }[]> {
 export function generateMetadata({ params }: { params: { slug?: string[] } }) {
   const page = getPage(params.slug)
 
-  if (page == null) return
+  if (page == null) notFound()
 
   return {
     title: page.title,

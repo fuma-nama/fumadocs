@@ -1,9 +1,10 @@
 import { resolve } from 'url'
 import Preview from '@/components/preview'
 import { createMetadata } from '@/utils/metadata'
-import { getPage, getPageUrl, getUtils, pages } from '@/utils/source'
+import { getUtils, tabs } from '@/utils/source'
 import { ExternalLinkIcon } from 'lucide-react'
 import type { Metadata } from 'next'
+import type { Utils } from 'next-docs-mdx/map'
 import type { Page } from 'next-docs-mdx/types'
 import { Card, Cards, MDXContent } from 'next-docs-ui/mdx'
 import { DocsPage } from 'next-docs-ui/page'
@@ -16,15 +17,14 @@ type Param = {
 }
 
 export default async function Page({ params }: { params: Param }) {
-  const tree = getUtils(params.mode).tree
-  const page = getPage([params.mode, ...(params.slug ?? [])])
+  const tab = getUtils(params.mode)
+  const page = tab.getPage(params.slug)
 
   if (page == null) {
     notFound()
   }
 
-  const url = getPageUrl(page.slugs)
-  const neighbours = findNeighbour(tree, url)
+  const neighbours = findNeighbour(tab.tree, tab.getPageUrl(page.slugs))
 
   const headers = new Headers()
   if (process.env.GIT_TOKEN)
@@ -73,14 +73,14 @@ export default async function Page({ params }: { params: Param }) {
           </p>
         </div>
         {preview != null && preview in Preview && Preview[preview]}
-        {page.matter.index ? <Category page={page} /> : <MDX />}
+        {page.matter.index ? <Category page={page} tab={tab} /> : <MDX />}
       </MDXContent>
     </DocsPage>
   )
 }
 
-function Category({ page }: { page: Page }) {
-  const filtered = pages.filter(
+function Category({ page, tab }: { page: Page; tab: Utils }) {
+  const filtered = tab.pages.filter(
     docs =>
       docs.file.dirname === page.file.dirname && docs.file.name !== 'index'
   )
@@ -92,7 +92,7 @@ function Category({ page }: { page: Page }) {
           key={page.file.id}
           title={page.matter.title}
           description={page.matter.description ?? 'No Description'}
-          href={getPageUrl(page.slugs)}
+          href={tab.getPageUrl(page.slugs)}
         />
       ))}
     </Cards>
@@ -100,10 +100,10 @@ function Category({ page }: { page: Page }) {
 }
 
 export function generateMetadata({ params }: { params: Param }): Metadata {
-  const slugs = [params.mode, ...(params.slug ?? [])]
-  const page = getPage(slugs)
+  const utils = getUtils(params.mode)
+  const page = utils.getPage(params.slug)
 
-  if (page == null) return {}
+  if (page == null) notFound()
 
   const description =
     page.matter.description ?? 'The library for building documentation sites'
@@ -123,7 +123,7 @@ export function generateMetadata({ params }: { params: Param }): Metadata {
     title: page.matter.title,
     description,
     openGraph: {
-      url: `https://next-docs-zeta.vercel.app/docs/${slugs.join('/')}`,
+      url: `https://next-docs-zeta.vercel.app/docs/${page.slugs.join('/')}`,
       images: image
     },
     twitter: {
@@ -132,13 +132,11 @@ export function generateMetadata({ params }: { params: Param }): Metadata {
   })
 }
 
-export function generateStaticParams() {
-  return pages.map(docs => {
-    const [mode, ...slugs] = docs.slugs
-
-    return {
-      slug: slugs,
-      mode
-    }
+export function generateStaticParams(): Param[] {
+  return Object.entries(tabs).flatMap(([mode, tab]) => {
+    return tab.pages.map<Param>(page => ({
+      mode,
+      slug: page.slugs
+    }))
   })
 }
