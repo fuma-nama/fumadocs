@@ -1,3 +1,4 @@
+import type { BuildPageTreeOptions } from '@/server'
 import type { PageTree } from '@/server/types'
 import { loadContext, type ContextOptions } from './load-context'
 import type { DocsPageBase, MetaPageBase, PagesContext } from './types'
@@ -5,6 +6,10 @@ import { createUtils, type ContentlayerUtils } from './utils'
 
 type Options<L extends string[] | undefined> = Partial<
   Omit<ContextOptions, 'languages'> & {
+    /**
+     * @default { root: 'docs' }
+     */
+    pageTreeOptions: BuildPageTreeOptions
     languages: L
   }
 >
@@ -31,13 +36,17 @@ export const createContentlayer: CreateContentlayer = (
   options = {}
 ) => {
   const ctx = loadContext(metaPages, docsPages, options)
+  const pageTreeOptions = options.pageTreeOptions ?? { root: 'docs' }
 
   return {
     __pageContext: ctx,
     tree: (options.languages != null
-      ? ctx.builder.buildI18n({ languages: options.languages })
+      ? ctx.builder.buildI18n({
+          ...pageTreeOptions,
+          languages: options.languages
+        })
       : // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ctx.builder.build()) as any,
+        ctx.builder.build(pageTreeOptions)) as any,
     ...createUtils(ctx)
   }
 }
