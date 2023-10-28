@@ -53,7 +53,7 @@ type PageTreeBuilderContext = {
 export type BuildPageTreeOptions = {
   /**
    * The root folder to scan files
-   * @default 'docs'
+   * @default ''
    */
   root: string
 }
@@ -87,7 +87,6 @@ function buildMeta(
   meta: AbstractMeta,
   ctx: PageTreeBuilderContext
 ): FolderNode {
-  const segments = meta.file.dirname.split('/')
   let index: FileNode | undefined = undefined
   const filtered = new Set<string>()
 
@@ -109,7 +108,7 @@ function buildMeta(
       item = extract_result[1]
     }
 
-    const path = meta.file.dirname + '/' + item
+    const path = joinPaths([meta.file.dirname, item])
     const page = ctx.getPageByPath(path)
 
     if (page != null) {
@@ -151,14 +150,14 @@ function buildMeta(
   })
 
   if (index == null) {
-    const page = ctx.getPageByPath(meta.file.dirname + '/index')
+    const page = ctx.getPageByPath(joinPaths([meta.file.dirname, 'index']))
 
     if (page != null) index = buildFileNode(page, ctx)
   }
 
   return {
     type: 'folder',
-    name: meta.title ?? index?.name ?? pathToName(segments),
+    name: meta.title ?? index?.name ?? pathToName(splitPath(meta.file.dirname)),
     icon: ctx.resolveIcon(meta.icon),
     index,
     children
@@ -193,15 +192,15 @@ function getFolderNodes(
     children.push(node)
   }
 
-  const segments = path.split('/')
+  const segments = splitPath(path)
   const folders = new Set<string>(
     ctx.basePages.flatMap(page => {
-      const dirnameSegments = page.file.dirname.split('/')
+      const dirnameSegments = splitPath(page.file.dirname)
 
       if (path.length === 0 && path !== page.file.dirname)
         return dirnameSegments[0]
       if (page.file.dirname.startsWith(path + '/'))
-        return path + '/' + dirnameSegments[segments.length]
+        return joinPaths([path, dirnameSegments[segments.length]])
 
       return []
     })
@@ -241,8 +240,9 @@ function buildFolderNode(
   keepIndex: boolean = false
 ): FolderNode {
   let meta: AbstractMeta | undefined
-  if (ctx.lang) meta = ctx.getMetaByPath(path + `/meta-${ctx.lang}`)
-  meta ??= ctx.getMetaByPath(path + '/meta')
+
+  if (ctx.lang) meta = ctx.getMetaByPath(joinPaths([path, `meta-${ctx.lang}`]))
+  meta ??= ctx.getMetaByPath(joinPaths([path, 'meta']))
 
   if (meta != null) {
     return buildMeta(meta, ctx)
@@ -252,7 +252,7 @@ function buildFolderNode(
 
   return {
     type: 'folder',
-    name: index?.name ?? pathToName(path.split('/')),
+    name: index?.name ?? pathToName(splitPath(path)),
     index,
     children
   }
@@ -296,10 +296,10 @@ export function createPageTreeBuilder({
   }
 
   return {
-    build({ root = 'docs' } = {}) {
+    build({ root = '' } = {}) {
       return build(root, context)
     },
-    buildI18n({ root = 'docs', languages = [] } = {}) {
+    buildI18n({ root = '', languages = [] } = {}) {
       const entries = languages.map(lang => {
         const tree = build(root, {
           ...context,
@@ -317,4 +317,42 @@ export function createPageTreeBuilder({
 function pathToName(path: string[]): string {
   const name = path[path.length - 1] ?? 'docs'
   return name.slice(0, 1).toUpperCase() + name.slice(1)
+}
+
+/**
+ * Split path into segments, trailing/leading slashes are removed
+ */
+export function splitPath(path: string): string[] {
+  return path.split('/').filter(p => p.length > 0)
+}
+
+/**
+ * Convert paths to an array, slashes within the path will be ignored
+ * @param paths
+ * @param slash Add a trailing/leading slash to path
+ * @example
+ * ```
+ * ['a','b','c'] // 'a/b/c'
+ * ['/a'] // 'a'
+ * ['a', '/b'] // 'a/b'
+ * ['a', 'b/c'] // 'a/b/c'
+ * ```
+ */
+export function joinPaths(
+  paths: string[],
+  slash: 'leading' | 'trailing' | 'none' = 'none'
+): string {
+  const joined = paths
+    // avoid slashes in path and filter empty
+    .flatMap(path => splitPath(path))
+    .join('/')
+
+  switch (slash) {
+    case 'leading':
+      return '/' + joined
+    case 'trailing':
+      return joined + '/'
+    default:
+      return joined
+  }
 }

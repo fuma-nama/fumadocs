@@ -1,10 +1,10 @@
-import type { PageTree } from 'next-docs-zeta/server'
+import type { BuildPageTreeOptions, PageTree } from 'next-docs-zeta/server'
 import { getPageTreeBuilder, type BuilderOptions } from './build-tree'
 import { createPageUtils, type PageUtils } from './page-utils'
 import {
   defaultValidators,
   resolveFiles,
-  type ValidateOptions
+  type ResolveOptions
 } from './resolve-files'
 import type { Meta, Page } from './types'
 
@@ -17,18 +17,16 @@ type UtilsOptions<Langs extends string[] | undefined> = {
   baseUrl: string
 
   /**
-   * @deprecated Use `rootDir` instead
-   */
-  root: string
-
-  /**
    * Root directory, files outside of the root directory will be ignored
    *
    * @default ''
    */
   rootDir: string
 
-  validate: ValidateOptions
+  pageTreeOptions: BuildPageTreeOptions
+
+  slugs: ResolveOptions['slugs']
+  validate: ResolveOptions['validate']
 } & BuilderOptions
 
 export type Utils = PageUtils & {
@@ -46,8 +44,10 @@ function fromMap<Langs extends string[] | undefined = undefined>(
   {
     baseUrl = '/docs',
     rootDir = '',
+    slugs,
     getUrl,
     resolveIcon,
+    pageTreeOptions = { root: rootDir },
     languages,
     validate
   }: Partial<UtilsOptions<Langs>> = {}
@@ -55,6 +55,7 @@ function fromMap<Langs extends string[] | undefined = undefined>(
   const resolved = resolveFiles({
     map,
     rootDir,
+    slugs,
     validate
   })
 
@@ -70,9 +71,12 @@ function fromMap<Langs extends string[] | undefined = undefined>(
     ...resolved,
     ...pageUtils,
     tree: (languages == null
-      ? builder.build({ root: rootDir })
-      : // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        builder.buildI18n({ languages, root: rootDir })) as any
+      ? builder.build(pageTreeOptions)
+      : builder.buildI18n({
+          ...pageTreeOptions,
+          languages
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        })) as any
   }
 }
 

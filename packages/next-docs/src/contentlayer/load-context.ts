@@ -42,10 +42,7 @@ export function loadContext<Docs extends DocsPageBase>(
       icon: meta.icon,
       title: meta.title
     })),
-    resolveIcon(icon) {
-      if (icon == null) return
-      return resolveIcon(icon)
-    }
+    resolveIcon
   })
 
   return {

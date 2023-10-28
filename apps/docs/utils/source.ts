@@ -1,13 +1,9 @@
 import { writeFileSync } from 'fs'
 import path from 'path'
 import { map } from '@/_map'
-import {
-  createPageUtils,
-  defaultValidators,
-  fromMap,
-  type Utils
-} from 'next-docs-mdx/map'
-import type { Meta, Page } from 'next-docs-mdx/types'
+import { defaultValidators, fromMap, type Utils } from 'next-docs-mdx/map'
+import type { FileInfo } from 'next-docs-mdx/types'
+import type { StructuredData } from 'next-docs-zeta/mdx-plugins'
 import { PHASE_PRODUCTION_BUILD } from 'next/constants'
 import { z } from 'zod'
 
@@ -16,44 +12,41 @@ const frontmatterSchema = defaultValidators.frontmatter.extend({
   index: z.boolean().default(false)
 })
 
-const ui = fromMap(map, {
-  rootDir: 'ui',
-  validate: {
-    frontmatter: frontmatterSchema
-  }
-})
+const slugs = (file: FileInfo) =>
+  file.flattenedPath
+    .split('/')
+    .filter(p => !['index', ''].includes(p))
+    .slice(1)
 
-const headless = fromMap(map, {
-  rootDir: 'headless',
-  validate: {
-    frontmatter: frontmatterSchema
-  }
-})
-
-const mdx = fromMap(map, {
-  rootDir: 'mdx',
-  validate: {
-    frontmatter: frontmatterSchema
-  }
-})
-
-export const metas: Meta[] = [...mdx.metas, ...headless.metas, ...ui.metas]
-export const pages: Page[] = [...mdx.pages, ...headless.pages, ...ui.pages]
-export const { getPage, getPageUrl } = createPageUtils(
-  { pages, metas },
-  '/docs',
-  []
-)
+export const tabs: Record<string, Utils> = {
+  ui: fromMap(map, {
+    rootDir: 'ui',
+    baseUrl: '/docs/ui',
+    slugs,
+    validate: {
+      frontmatter: frontmatterSchema
+    }
+  }),
+  headless: fromMap(map, {
+    rootDir: 'headless',
+    baseUrl: '/docs/headless',
+    slugs,
+    validate: {
+      frontmatter: frontmatterSchema
+    }
+  }),
+  mdx: fromMap(map, {
+    rootDir: 'mdx',
+    baseUrl: '/docs/mdx',
+    slugs,
+    validate: {
+      frontmatter: frontmatterSchema
+    }
+  })
+}
 
 export function getUtils(mode: 'ui' | 'headless' | 'mdx' | string): Utils {
-  switch (mode) {
-    case 'ui':
-      return ui
-    case 'mdx':
-      return mdx
-    default:
-      return headless
-  }
+  return tabs[mode] ?? tabs['headless']
 }
 
 declare module 'next-docs-mdx/types' {
@@ -69,18 +62,28 @@ declare global {
 
 global.__NEXT_DOCS_INDEX_UPDATED = false
 
+type Index = {
+  id: string
+  title: string
+  description?: string
+  url: string
+  structuredData: StructuredData
+}
+
 if (
   process.env.NEXT_PHASE === PHASE_PRODUCTION_BUILD &&
   !global.__NEXT_DOCS_INDEX_UPDATED
 ) {
   const mapPath = path.resolve('./.next/_map_indexes.json')
-  const indexes = pages.map(page => ({
-    id: page.file.id,
-    title: page.matter.title,
-    description: page.matter.description,
-    url: getPageUrl(page.slugs, page.file.locale),
-    structuredData: page.data.structuredData
-  }))
+  const indexes: Index[] = Object.values(tabs).flatMap(tab => {
+    return tab.pages.map(page => ({
+      id: page.file.id,
+      title: page.matter.title,
+      description: page.matter.description,
+      url: tab.getPageUrl(page.slugs, page.file.locale),
+      structuredData: page.data.structuredData
+    }))
+  })
 
   writeFileSync(mapPath, JSON.stringify(indexes))
 

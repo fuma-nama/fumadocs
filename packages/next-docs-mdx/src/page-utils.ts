@@ -52,11 +52,7 @@ export function createPageUtils(
 }
 
 /**
- * @example
- * ```
- * ['a','b','c'] // '/a/b/c'
- * ['/a'] // '/a'
- * ```
+ * Join paths with leading slash
  */
 function joinPaths(...paths: (string | null)[]): string {
   const relative = paths
