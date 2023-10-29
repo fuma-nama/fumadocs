@@ -54,7 +54,7 @@
     "next-docs-zeta": "workspace:*",
     "next-themes": "^0.2.1",
     "react-medium-image-zoom": "^5.1.8",
-    "tailwind-merge": "^1.14.0"
+    "tailwind-merge": "^2.0.0"
   },
   "peerDependencies": {
     "next": ">= 13",

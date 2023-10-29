@@ -111,8 +111,8 @@ importers:
         specifier: ^5.1.1
         version: 5.1.1
       tailwind-merge:
-        specifier: ^1.14.0
-        version: 1.14.0
+        specifier: ^2.0.0
+        version: 2.0.0
       zod:
         specifier: ^3.22.4
         version: 3.22.4
@@ -466,8 +466,8 @@ importers:
         specifier: ^5.1.8
         version: 5.1.8(react-dom@18.2.0)(react@18.2.0)
       tailwind-merge:
-        specifier: ^1.14.0
-        version: 1.14.0
+        specifier: ^2.0.0
+        version: 2.0.0
     devDependencies:
       '@tailwindcss/typography':
         specifier: ^0.5.10
@@ -746,6 +746,13 @@ packages:
     engines: {node: '>=6.9.0'}
     dependencies:
       regenerator-runtime: 0.14.0
+
+  /@babel/runtime@7.23.2:
+    resolution: {integrity: sha512-mM8eg4yl5D6i3lu2QKPuPH4FArvJ8KhTofbE7jwMUv9KX5mBvwPAqnV3MlyBNqdp9RyRKP6Yck8TrfYrPvX3bg==}
+    engines: {node: '>=6.9.0'}
+    dependencies:
+      regenerator-runtime: 0.14.0
+    dev: false
 
   /@babel/template@7.22.15:
     resolution: {integrity: sha512-QPErUVm4uyJa60rkI73qneDacvdvzxshT3kksGqlGWYdOTIUOwJ7RDUL8sGqslY1uXWSL6xMFKEXDS3ox2uF0w==}
@@ -7808,8 +7815,10 @@ packages:
       use-sync-external-store: 1.2.0(react@18.2.0)
     dev: false
 
-  /tailwind-merge@1.14.0:
-    resolution: {integrity: sha512-3mFKyCo/MBcgyOTlrY8T7odzZFx+w+qKSMAmdFzRvqBfLlSigU6TZnlFHK0lkMwj9Bj8OYU+9yW9lmGuS0QEnQ==}
+  /tailwind-merge@2.0.0:
+    resolution: {integrity: sha512-WO8qghn9yhsldLSg80au+3/gY9E4hFxIvQ3qOmlpXnqpDKoMruKfi/56BbbMg6fHTQJ9QD3cc79PoWqlaQE4rw==}
+    dependencies:
+      '@babel/runtime': 7.23.2
     dev: false
 
   /tailwindcss-animate@1.0.7(tailwindcss@3.3.5):
