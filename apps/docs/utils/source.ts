@@ -62,7 +62,7 @@ declare global {
 
 global.__NEXT_DOCS_INDEX_UPDATED = false
 
-type Index = {
+export type Index = {
   id: string
   title: string
   description?: string

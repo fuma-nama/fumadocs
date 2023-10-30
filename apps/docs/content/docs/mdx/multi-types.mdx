@@ -1,0 +1,42 @@
+---
+title: Multiple Types
+description: Support multiple type of documents in your Next.js app
+---
+
+You can have multiple document types, such as a blog post, or a document. By
+passing the `rootDir` option, the resolved files will be restricted within a
+specified folder, and only use its own validate options.
+
+## Usage
+
+Set a root directory, along with a `slugs` function that generates slugs from
+the file info.
+
+The slugs function can read the `flattenedPath` property from file info, you may
+split it to generate slugs based on its file path.
+
+```ts
+const blog = fromMap(map, {
+  rootDir: 'mdx',
+  baseUrl: '/docs/mdx',
+  slugs,
+  validate: {
+    frontmatter: frontmatterSchema
+  }
+})
+```
+
+<Accordions>
+
+<Accordion title="Example slugs function" value="example">
+
+```ts
+const slugs = (file: FileInfo) =>
+  file.flattenedPath
+    .split('/')
+    .filter(p => !['index', ''].includes(p))
+    .slice(1)
+```
+
+</Accordion>
+</Accordions>
