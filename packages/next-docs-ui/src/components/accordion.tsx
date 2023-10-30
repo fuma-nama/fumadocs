@@ -2,6 +2,10 @@
 
 import { cn } from '@/utils/cn'
 import * as AccordionPrimitive from '@radix-ui/react-accordion'
+import type {
+  AccordionMultipleProps,
+  AccordionSingleProps
+} from '@radix-ui/react-accordion'
 import { ChevronDown } from 'lucide-react'
 import {
   forwardRef,
@@ -11,10 +15,13 @@ import {
 
 export const Accordions = forwardRef<
   ElementRef<typeof AccordionPrimitive.Root>,
-  ComponentPropsWithoutRef<typeof AccordionPrimitive.Root>
->(({ className, ...props }, ref) => (
+  AccordionSingleProps | AccordionMultipleProps
+>(({ className, type = 'single', ...props }, ref) => (
+  // @ts-ignore
   <AccordionPrimitive.Root
     ref={ref}
+    type={type}
+    collapsible
     className={cn('nd-space-y-4', className)}
     {...props}
   />
