@@ -6,6 +6,9 @@ import { sync } from 'next-docs-zeta/search-algolia/server'
 
 env.loadEnvConfig(process.cwd())
 
+/**
+ * @type {Array<import('./utils/source').Index>}
+ */
 const indexes = JSON.parse(
   readFileSync(resolve('./.next/_map_indexes.json')).toString()
 )

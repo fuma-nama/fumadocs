@@ -27,7 +27,7 @@
     "react-dom": "18.2.0",
     "rehype-katex": "^6.0.3",
     "remark-math": "^5.1.1",
-    "tailwind-merge": "^1.14.0",
+    "tailwind-merge": "^2.0.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {

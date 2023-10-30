@@ -61,11 +61,13 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
 }
 ```
 
-### Build Page Tree
+### Resolve Files
 
-Create a `source.ts` file to build the page tree. Read
-[Pages Conventions](/docs/headless/utils/build-page-tree#pages-structure) to
-learn how to structure your pages.
+Create a `source.ts` file, and use the `fromMap` method which returns a
+[Page Tree](/docs/headless/page-tree) and additional utilities.
+
+Read [Pages Conventions](/docs/headless/utils/build-page-tree#pages-structure)
+to learn how to structure your pages.
 
 ```ts title="source.ts"
 import { map } from '@/_map'
