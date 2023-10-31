@@ -18,7 +18,7 @@
     "clsx": "^2.0.0",
     "katex": "^0.16.8",
     "lucide-react": "^0.290.0",
-    "next": "14.0.0",
+    "next": "14.0.1",
     "next-docs-mdx": "workspace:*",
     "next-docs-ui": "workspace:*",
     "next-docs-zeta": "workspace:*",
