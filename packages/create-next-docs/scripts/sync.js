@@ -4,7 +4,7 @@ const { globSync } = require('fast-glob')
 const path = require('path')
 const pc = require('picocolors')
 
-const sources = ['simple', 'advanced', 'experimental-mdx']
+const sources = ['simple', 'advanced', 'simple-mdx']
 
 const cwd = process.cwd()
 
@@ -16,7 +16,14 @@ for (const source of sources) {
 
   const sourceDir = path.resolve(cwd, `../../examples/${source}`)
   const sourceFiles = globSync(
-    ['**/*', '!node_modules', '!pnpm-lock.yaml', '!next-env.d.ts', '!_map.ts'],
+    [
+      '**/*',
+      '!content',
+      '!node_modules',
+      '!pnpm-lock.yaml',
+      '!next-env.d.ts',
+      '!_map.ts'
+    ],
     { dot: false, cwd: sourceDir }
   )
 

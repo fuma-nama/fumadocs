@@ -12,5 +12,4 @@ yarn create next-docs-app
 
 ## Examples
 
-The examples are automatically generated from `./examples`, support `simple` and
-`advanced` types.
+The examples are automatically generated from `./examples`

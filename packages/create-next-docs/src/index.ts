@@ -1,3 +1,4 @@
+import { existsSync } from 'fs'
 import fs from 'fs/promises'
 import path from 'path'
 import {
@@ -11,34 +12,37 @@ import {
   text
 } from '@clack/prompts'
 import * as color from 'picocolors'
+import { autoInstall, getPackageManager } from './auto-install'
 
 async function main() {
+  const cwd = process.cwd()
+  const sourceDir = path.resolve(__dirname, '../')
   intro(color.bgCyan(color.bold('Create Next Docs')))
 
-  const name = await text({
+  const inputName = await text({
     message: 'Project name',
     placeholder: 'my-app',
     defaultValue: 'my-app'
   })
 
-  if (isCancel(name)) return cancel()
+  if (isCancel(inputName)) return cancel()
+
+  const pathname = inputName.toLowerCase().replace(/\s/, '-')
+  const dest = path.resolve(cwd, pathname)
+  const name = path.basename(dest)
 
   const type = await select({
     message: 'Which example you want to install?',
     options: [
       { value: 'simple', label: 'Default (Contentlayer)' },
       { value: 'advanced', label: 'Advanced (Contentlayer)' },
-      { value: 'experimental-mdx', label: 'Default (Next Docs MDX)' }
+      { value: 'simple-mdx', label: 'Default (Next Docs MDX)' }
     ]
   })
 
   if (isCancel(type)) return cancel()
 
-  const cwd = process.cwd()
-  const pathname = name.toLowerCase().replace(/\s/, '-')
-  const dest = path.resolve(cwd, pathname)
-
-  if (await exists(dest)) {
+  if (existsSync(dest)) {
     const del = await confirm({
       message: `${pathname} already exists, do you want to delete it?`
     })
@@ -55,14 +59,17 @@ async function main() {
       })
 
       info.stop(`Deleted ${pathname}`)
-    } else {
-      return cancel('Installation Stopped')
     }
   }
 
   const info = spinner()
-  info.start('Copying files to ' + pathname)
-  await copy(path.resolve(__dirname, `../templates/${type}`), dest)
+  info.start(`Copying files to ${pathname}`)
+
+  await copy(path.join(sourceDir, `templates/${type}`), dest)
+  await copy(
+    path.join(sourceDir, 'static/content'),
+    path.join(dest, 'content/docs')
+  )
 
   info.message('Updating package.json')
   await updatePackageJson(path.join(dest, 'package.json'), name)
@@ -71,9 +78,23 @@ async function main() {
   await generateReadme(path.join(dest, 'README.md'), name)
 
   info.message('Adding .gitignore')
-  await generateGitIgnore(path.join(dest, '.gitignore'))
+  await fs.copyFile(
+    path.join(sourceDir, 'static/example.gitignore'),
+    path.join(dest, '.gitignore')
+  )
 
   info.stop('Project Generated')
+
+  const manager = getPackageManager()
+  const shouldInstall = await confirm({
+    message: `Do you want to install packages automatically? (detected as ${manager})`
+  })
+
+  if (isCancel(shouldInstall)) cancel()
+
+  if (shouldInstall) {
+    await autoInstall(manager, dest)
+  }
 
   outro(color.bgGreen(color.bold('Done')))
 
@@ -85,15 +106,14 @@ async function main() {
   console.log(color.bold('\nOpen the project'))
   console.log(color.cyan(`cd ${pathname}`))
 
-  console.log(color.bold('\nInstall Packages'))
-  console.log(color.cyan('npm install | pnpm install | yarn install'))
-
   console.log(color.bold('\nRun Development Server'))
   console.log(color.cyan('npm run dev | pnpm run dev | yarn dev'))
 
   console.log(
-    color.bold('\nYou can now open the project and start writing documents\n')
+    color.bold('\nYou can now open the project and start writing documents')
   )
+
+  process.exit(0)
 }
 
 async function updatePackageJson(path: string, projectName: string) {
@@ -136,35 +156,6 @@ async function generateReadme(path: string, projectName: string) {
   await fs.writeFile(path, content)
 }
 
-async function generateGitIgnore(path: string) {
-  const ignores = [
-    // deps
-    '/node_modules',
-    '/.pnp',
-    '.pnp.js',
-    // outputs
-    '_map.ts',
-    '.contentlayer',
-    '/coverage',
-    '/.next/',
-    '/out/',
-    '/build',
-    '.DS_Store',
-    '*.pem',
-    // debug logs
-    'npm-debug.log*',
-    'yarn-debug.log*',
-    'yarn-error.log*',
-
-    '.env*.local',
-    '.vercel',
-    '*.tsbuildinfo',
-    'next-env.d.ts'
-  ]
-
-  await fs.writeFile(path, ignores.join('\n'))
-}
-
 async function copy(
   from: string,
   to: string,
@@ -186,11 +177,7 @@ async function copy(
   }
 }
 
-async function exists(file: string): Promise<boolean> {
-  return fs
-    .access(file, fs.constants.R_OK)
-    .then(() => true)
-    .catch(() => false)
-}
-
-main()
+main().catch(e => {
+  console.error(e)
+  throw e
+})
