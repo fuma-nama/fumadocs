@@ -1,21 +1,23 @@
 {
   "name": "create-next-docs-app",
   "description": "Create a new documentation site with Next Docs UI",
-  "version": "1.6.2",
+  "version": "1.7.0",
   "homepage": "https://next-docs-zeta.vercel.app",
   "author": "Fuma Nama",
   "repository": "github:fuma-nama/next-docs",
   "license": "MIT",
   "files": [
     "templates/*",
+    "content/*",
     "dist/*"
   ],
   "bin": "./dist/index.js",
   "scripts": {
     "build": "tsup --clean",
-    "clean": "rmdir /q/s dist",
+    "clean": "rmdir /q/s dist && rmdir /q/s templates",
     "dev": "tsup --watch",
-    "prepublishOnly": "pnpm build && node ./scripts/sync.js",
+    "sync": "node ./scripts/sync.js",
+    "prepublishOnly": "pnpm build && pnpm sync",
     "types:check": "tsc --noEmit"
   },
   "keywords": [
@@ -29,9 +31,11 @@
   },
   "dependencies": {
     "@clack/prompts": "^0.7.0",
+    "cross-spawn": "^7.0.3",
     "picocolors": "^1.0.0"
   },
   "devDependencies": {
+    "@types/cross-spawn": "^6.0.4",
     "@types/node": "18.17.5",
     "fast-glob": "^3.3.1"
   }

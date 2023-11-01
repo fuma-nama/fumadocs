@@ -1,5 +1,15 @@
 # create-next-docs-app
 
+## 1.7.0
+
+### Minor Changes
+
+- 334a960: Support installing packages automatically
+
+### Patch Changes
+
+- 334a960: Support relative paths as project name (e.g. ".")
+
 ## 1.6.2
 
 ### Patch Changes

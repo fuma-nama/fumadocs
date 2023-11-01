@@ -1,5 +1,11 @@
 # next-docs-mdx
 
+## 4.0.4
+
+### Patch Changes
+
+- next-docs-zeta@4.0.4
+
 ## 4.0.3
 
 ### Patch Changes
