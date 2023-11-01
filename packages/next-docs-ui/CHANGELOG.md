@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 4.0.4
+
+### Patch Changes
+
+- 1b10e13: Default accordion type to "single"
+  - next-docs-zeta@4.0.4
+
 ## 4.0.3
 
 ### Patch Changes
