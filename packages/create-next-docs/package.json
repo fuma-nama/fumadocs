@@ -8,7 +8,7 @@
   "license": "MIT",
   "files": [
     "templates/*",
-    "content/*",
+    "static/*",
     "dist/*"
   ],
   "bin": "./dist/index.js",
