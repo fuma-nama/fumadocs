@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 4.0.5
+
+### Patch Changes
+
+- f00e38f: Use `dvh` for sidebar height
+  - next-docs-zeta@4.0.5
+
 ## 4.0.4
 
 ### Patch Changes
