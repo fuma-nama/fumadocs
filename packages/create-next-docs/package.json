@@ -38,5 +38,8 @@
     "@types/cross-spawn": "^6.0.4",
     "@types/node": "18.17.5",
     "fast-glob": "^3.3.1"
+  },
+  "engines": {
+    "node": ">=18.17.0"
   }
 }
