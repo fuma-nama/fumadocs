@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 1.7.2
+
+### Patch Changes
+
+- 0686061: Restrict node.js environment
+
 ## 1.7.1
 
 ### Patch Changes
