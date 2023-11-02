@@ -56,14 +56,11 @@ module.exports = {
       }
     },
     extend: {
-      padding: {
-        body: '1rem'
-      },
       fontSize: {
         medium: '15px'
       },
       height: {
-        body: 'calc(100vh - 4rem)'
+        body: ['calc(100vh - 4rem) /* fallback */', 'calc(100dvh - 4rem)']
       },
       colors: {
         border: 'hsl(var(--border))',

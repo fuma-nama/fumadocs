@@ -48,7 +48,7 @@ export function Sidebar({ banner, footer }: SidebarProps) {
       )}
     >
       <ScrollArea className="nd-flex-1">
-        <div className="nd-flex nd-flex-col nd-pb-10 nd-pt-4 md:nd-pr-4 md:nd-pt-10 max-md:nd-px-body">
+        <div className="nd-flex nd-flex-col nd-pb-10 nd-pt-4 md:nd-pr-4 md:nd-pt-10 max-md:nd-px-4">
           {banner}
           {tree.children.map((item, i) => (
             <Node key={i} item={item} level={1} />
@@ -57,7 +57,7 @@ export function Sidebar({ banner, footer }: SidebarProps) {
       </ScrollArea>
       <div
         className={cn(
-          'nd-flex nd-flex-row nd-items-center nd-gap-2 nd-border-t nd-py-2 max-md:nd-px-body',
+          'nd-flex nd-flex-row nd-items-center nd-gap-2 nd-border-t nd-py-2 max-md:nd-px-4',
           !footer && 'md:nd-hidden'
         )}
       >
