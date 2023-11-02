@@ -52,7 +52,8 @@ convenient to use and straightforward.
 
 ### Adding Icons
 
-Configure icon handler via `resolveIcon` option.
+Configure icon handler via
+[`resolveIcon`](/docs/headless/utils/build-page-tree#icons) option.
 
 ```ts
 import { allDocs, allMeta } from 'contentlayer/generated'
@@ -62,14 +63,7 @@ export const { getPage, getPageUrl, tree } = createContentlayer(
   allMeta,
   allDocs,
   {
-    resolveIcon: icon => {
-      // load icon from library
-      const res = require('lucide-react')
-      icon = icon.trim()
-
-      if (res[icon]) return createElement(res[icon])
-      return undefined
-    }
+    resolveIcon: icon => ...
   }
 )
 ```

@@ -1,7 +1,7 @@
 {
   "name": "next-docs-ui",
   "description": "The framework for building a documentation website in Next.js",
-  "version": "4.0.4",
+  "version": "4.0.5",
   "homepage": "https://next-docs-zeta.vercel.app",
   "author": "Fuma Nama",
   "repository": "github:fuma-nama/next-docs",
