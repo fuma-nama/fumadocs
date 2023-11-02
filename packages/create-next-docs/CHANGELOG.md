@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 1.7.1
+
+### Patch Changes
+
+- 955a575: Fix CLI errors
+
 ## 1.7.0
 
 ### Minor Changes
