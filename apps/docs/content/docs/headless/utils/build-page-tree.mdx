@@ -113,6 +113,13 @@ It is supported to have custom icons for a page or a folder. Add an `icon`
 property to the frontmatter or `meta.json`, and configure icon handler via
 `resolveIcon` option.
 
+```mdx
+---
+title: My Page
+icon: MyIcon
+---
+```
+
 ```ts
 createPageTreeBuilder({
   resolveIcon: icon => {
