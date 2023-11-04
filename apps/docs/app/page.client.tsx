@@ -76,3 +76,22 @@ export function Rain(props: CanvasHTMLAttributes<HTMLCanvasElement>) {
 
   return <canvas width={1000} height={1000} ref={ref} {...props} />
 }
+
+export function Previews() {
+  return (
+    <div className="p-6 rounded-xl border bg-gradient-to-b from-secondary to-muted text-sm">
+      <p className="text-base">I&apos;m satisfied with it</p>
+
+      <a
+        href="https://joulev.dev"
+        rel="noreferrer noopener"
+        className="inline-flex items-center font-medium mt-4"
+      >
+        @joulev
+      </a>
+      <p className="text-muted-foreground text-xs">
+        Moderator at Next.js Discord
+      </p>
+    </div>
+  )
+}

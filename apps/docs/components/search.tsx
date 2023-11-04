@@ -30,7 +30,7 @@ const client = algo(
 const index = client.initIndex(process.env.NEXT_PUBLIC_ALGOLIA_INDEX!)
 
 export default function CustomSearchDialog(props: SharedProps) {
-  const defaultTag = useParams().mode
+  const defaultTag = useParams().mode ?? 'headless'
   const [tag, setTag] = useState(defaultTag)
   const { search, setSearch, query } = useAlgoliaSearch(index, {
     filters: `tag:${tag}`,

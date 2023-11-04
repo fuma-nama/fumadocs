@@ -57,20 +57,12 @@ module.exports = {
         }
       },
       keyframes: {
-        'infinite-rotate': {
-          from: {
-            transform: 'translate(-50%,-50%) rotate(1turn)'
+        updown: {
+          'from, to': {
+            transform: 'translateY(-20px)'
           },
-          to: {
-            transform: 'translate(-50%,-50%) rotate(0)'
-          }
-        },
-        heart: {
-          '0%': {
-            'stroke-dashoffset': 0
-          },
-          '50%, 100%': {
-            'stroke-dashoffset': 400
+          '50%': {
+            transform: 'translateY(20px)'
           }
         },
         stroke: {
@@ -85,9 +77,7 @@ module.exports = {
       },
       animation: {
         stroke: 'stroke 5s linear infinite',
-        'infinite-rotate': 'infinite-rotate 6s linear infinite',
-        star: 'star 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        heart: 'heart 1s linear infinite'
+        updown: 'updown 3s ease-in-out infinite'
       }
     }
   },
