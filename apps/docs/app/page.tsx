@@ -681,14 +681,14 @@ export default function HomePage() {
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-1 border-b divide-border container md:grid-cols-3 md:divide-x">
+      <div className="grid grid-cols-1 border-b divide-border container md:grid-cols-2 md:divide-x lg:grid-cols-3">
         <div className="relative flex flex-col px-8 py-16 overflow-hidden">
           <Rain
             width={500}
             height={1000}
             className="absolute w-full h-auto left-0 bottom-0 z-[-1]"
           />
-          <h2 className="text-4xl font-semibold">
+          <h2 className="text-3xl font-semibold">
             Create your first documentation.
           </h2>
           <ul className="flex flex-col mt-12 gap-6">
@@ -718,7 +718,7 @@ export default function HomePage() {
             </li>
           </ul>
         </div>
-        <div className="relative md:col-span-2">
+        <div className="relative overflow-hidden lg:col-span-2">
           <div className="absolute inset-0 flex flex-col items-center justify-center z-[2]">
             <CodeBlock lang="bash" code="pnpm create next-docs-app" />
             <a
