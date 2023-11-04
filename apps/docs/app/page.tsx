@@ -410,7 +410,7 @@ export default function HomePage() {
   return (
     <main className="relative container px-2 py-20">
       <div
-        className="border-x"
+        className="border-x border-t"
         style={{
           background:
             'repeating-linear-gradient(to bottom, transparent, hsl(var(--secondary)/.4) 500px, transparent 1000px)'
