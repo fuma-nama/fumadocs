@@ -850,14 +850,14 @@ function Hero() {
         className="absolute inset-0 z-[-1]"
         style={{
           backgroundImage:
-            'repeating-radial-gradient(500px at 50% 65%,hsl(var(--background)/.5),hsl(var(--primary)/.2) 56px)'
+            'repeating-radial-gradient(500px at 50% 65%,hsl(var(--primary)/.2),transparent 5px,hsl(var(--background)/.7) 50px,hsl(var(--background)) 70px)'
         }}
       />
       <div
         className="absolute inset-0 z-[-1]"
         style={{
           background:
-            'radial-gradient(500px at 50% 65%, transparent 20%, hsl(var(--background)/.8))'
+            'radial-gradient(500px at 50% 65%, transparent, hsl(var(--background)))'
         }}
       />
     </div>
