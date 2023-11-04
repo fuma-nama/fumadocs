@@ -408,62 +408,59 @@ function Earth(props: SVGProps<SVGSVGElement>) {
 
 export default function HomePage() {
   return (
-    <main className="relative py-20">
+    <main className="relative container px-2 py-20">
       <div
-        className="absolute w-[calc(100%-2rem)] border-x top-0 left-[50%] translate-x-[-50%] h-full z-[-1] max-w-[1200px]"
+        className="border-x"
         style={{
           background:
             'repeating-linear-gradient(to bottom, transparent, hsl(var(--secondary)/.4) 500px, transparent 1000px)'
         }}
-      />
-      <div className="px-4">
+      >
         <Hero />
-      </div>
-      <div className="container border-b px-8">
-        <div className="flex flex-col sm:divide-x sm:divide-border sm:flex-row">
-          <div className="py-8 flex-1 sm:pr-8 sm:py-16">
-            <p className="font-medium text-muted-foreground [&_b]:text-foreground sm:text-lg">
-              Next Docs is the Next.js framework for building documentation
-              sites along with <b>Breathtaking UI</b> and{' '}
-              <b>Excellent User Experience</b>.
-            </p>
-          </div>
-          <div className="grid grid-cols-2 gap-4 py-8 sm:pl-8 sm:py-16 sm:max-md:grid-cols-1">
-            <Link
-              href="/docs"
-              className={cn(
-                buttonVariants({ size: 'lg', className: 'rounded-full' })
-              )}
-            >
-              Getting Started
-            </Link>
-            <a
-              href="https://githubbox.com/SonMooSans/next-docs-ui-template"
-              className={cn(
-                buttonVariants({
-                  size: 'lg',
-                  variant: 'outline',
-                  className: 'rounded-full'
-                })
-              )}
-            >
-              Open Demo
-            </a>
+        <div className="border-b px-8">
+          <div className="flex flex-col sm:divide-x sm:divide-border sm:flex-row">
+            <div className="py-8 flex-1 sm:pr-8 sm:py-16">
+              <p className="font-medium text-muted-foreground [&_b]:text-foreground sm:text-lg">
+                Next Docs is the Next.js framework for building documentation
+                sites along with <b>Breathtaking UI</b> and{' '}
+                <b>Excellent User Experience</b>.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-4 py-8 sm:pl-8 sm:py-16 sm:max-md:grid-cols-1">
+              <Link
+                href="/docs"
+                className={cn(
+                  buttonVariants({ size: 'lg', className: 'rounded-full' })
+                )}
+              >
+                Getting Started
+              </Link>
+              <a
+                href="https://githubbox.com/SonMooSans/next-docs-ui-template"
+                className={cn(
+                  buttonVariants({
+                    size: 'lg',
+                    variant: 'outline',
+                    className: 'rounded-full'
+                  })
+                )}
+              >
+                Open Demo
+              </a>
+            </div>
           </div>
         </div>
-      </div>
-      <div className="container py-24 border-b">
-        <h2 className="text-2xl font-semibold text-center sm:text-4xl">
-          Start instantly.
-          <br />
-          Make it yours, Ship within seconds.
-        </h2>
-      </div>
-      <div className="container px-8 border-b">
+        <div className="container py-24 border-b">
+          <h2 className="text-2xl font-semibold text-center sm:text-4xl">
+            Start instantly.
+            <br />
+            Make it yours, Ship within seconds.
+          </h2>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2">
-          <div className="relative flex flex-col py-16 md:pr-8">
+          <div className="relative flex flex-col px-8 py-12 border-b md:py-16 md:border-r">
             <div className={cn(badgeVariants())}>1</div>
-            <h3 className="font-bold text-xl">Create It.</h3>
+            <h3 className="font-bold text-xl">Create it.</h3>
             <p className="text-muted-foreground">
               Initialize a new docs with a command.
             </p>
@@ -472,7 +469,7 @@ export default function HomePage() {
             </div>
             <LaunchAppWindow className="ml-auto w-fit -mt-14 min-h-[120px] z-[2]" />
           </div>
-          <div className="relative flex flex-col py-16 md:border-l md:pl-8">
+          <div className="relative flex flex-col px-8 py-12 border-b md:py-16">
             <div className={cn(badgeVariants())}>2</div>
             <h3 className="font-bold text-xl">Customise.</h3>
             <p className="text-muted-foreground">
@@ -487,258 +484,258 @@ export default function HomePage() {
             />
           </div>
         </div>
-      </div>
-      <div className="container py-12 border-b flex flex-col text-center items-center">
-        <div className={cn(badgeVariants())}>3</div>
-        <h3 className="font-bold text-2xl">Ship.</h3>
-        <p className="text-muted-foreground mb-2">
-          Deploy your docs easily with Next.js compatible hosting platforms.
-        </p>
-
-        <div className="flex flex-row flex-wrap gap-8 items-center mt-4">
-          <a href="https://vercel.com" rel="noreferrer noopener">
-            <VercelLogo className="w-32 h-auto" />
-          </a>
-          <a href="https://netlify.com" rel="noreferrer noopener">
-            <NetlifyLogo className="w-32 h-auto" />
-          </a>
-        </div>
-
-        <div
-          className="w-full mt-8"
-          style={{
-            backgroundImage:
-              'repeating-linear-gradient(to right,hsl(var(--primary)/.1),hsl(var(--primary)/.1) 1px,transparent 1px,transparent 40px), repeating-linear-gradient(to bottom,hsl(var(--primary)/.1),hsl(var(--primary)/.1) 1px,transparent 1px,transparent 40px)'
-          }}
-        >
-          <Earth className="mx-auto w-60 h-auto -my-8" />
-        </div>
-      </div>
-      <div className="relative container py-32 border-b overflow-hidden">
-        <h2 className="text-2xl font-semibold text-center sm:text-3xl">
-          Loved by users.
-          <br />
-          Built for developers.
-        </h2>
-        <Rain
-          width={1000}
-          height={500}
-          className="absolute w-full h-full inset-0 mix-blend-difference z-[-1]"
-        />
-      </div>
-      <div className="container px-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        <div className="px-8 py-16 border-b md:border-r">
-          <RocketIcon />
-          <h2 className="font-bold inline mr-2">Light and Fast.</h2>
-          <span className="text-muted-foreground font-medium">
-            Full powered documentation site with Next.js App Router.
-          </span>
-        </div>
-        <div className="px-8 py-16 border-b lg:border-r">
-          <TimerIcon />
-          <h2 className="font-bold inline mr-2">Optimized.</h2>
-          <span className="text-muted-foreground font-medium">
-            Less client components, less Javascript, optimized images.
-          </span>
-        </div>
-        <div className="px-8 py-16 border-b md:border-r">
-          <LayoutIcon />
-          <h2 className="font-bold inline mr-2">Accessibility & UX first.</h2>
-          <span className="text-muted-foreground font-medium">
-            Focus on user experience and accessibility, providing an excellent
-            experience for your users.
-          </span>
-        </div>
-        <div className="px-8 py-16 border-b lg:border-r">
-          <SearchIcon />
-          <h2 className="font-bold inline mr-2">Powerful document search.</h2>
-          <span className="text-muted-foreground font-medium">
-            Built-in search implemented with Flexsearch, with high flexibility
-            and performance.
-          </span>
-        </div>
-        <div className="px-8 py-16 border-b md:border-r">
-          <PaperclipIcon />
-          <h2 className="font-bold inline mr-2">Useful MDX Plugins.</h2>
-          <span className="text-muted-foreground font-medium">
-            Bundled with remark and rehype plugins that enhances the developer
-            experience.
-          </span>
-        </div>
-        <div className="px-8 py-16 border-b">
-          <PersonStandingIcon />
-          <h2 className="font-bold inline mr-2">Personalized.</h2>
-          <span className="text-muted-foreground font-medium">
-            Advanced options for customising your theme in a comfortable way.
-          </span>
-        </div>
-      </div>
-      <div className="container px-0 grid grid-cols-1 divide-border md:divide-x md:grid-cols-2">
-        <div className="px-8 py-16 border-b md:py-24">
-          <div className="inline-flex items-center gap-2 text-muted-foreground font-medium mb-4">
-            <PaperclipIcon className="w-5 h-5" />
-            <p>Multiple Sources</p>
-          </div>
-          <h2 className="text-xl font-semibold mb-1">
-            Your source. Your choice.
-          </h2>
-          <p className="text-lg text-muted-foreground font-medium">
-            Native support for different content sources including Contentlayer
-            and the official next/mdx loader.
-          </p>
-          <SourceSVG className="w-full h-auto mt-8" />
-        </div>
-        <div className="px-8 py-16 border-b md:py-24">
-          <div className="inline-flex items-center gap-2 text-muted-foreground font-medium mb-4">
-            <SearchIcon className="w-5 h-5" />
-            <p>Algolia Integration</p>
-          </div>
-          <h2 className="text-xl font-semibold mb-1">
-            Enhance your search experience.
-          </h2>
-          <p className="text-lg text-muted-foreground font-medium">
-            Integrate with Algolia Search in your docs easily.
-          </p>
-          <Link
-            href="/docs/headless/search/algolia"
-            className={cn(
-              buttonVariants({ variant: 'outline', className: 'mt-4' })
-            )}
-          >
-            Learn More
-          </Link>
-          <Search />
-        </div>
-      </div>
-      <div className="container px-0 grid grid-cols-1 divide-border md:grid-cols-2 md:divide-x">
-        <div className="relative px-8 py-16 border-b overflow-hidden">
-          <h2 className="text-2xl font-semibold">Heard of our users.</h2>
-          <p className="text-muted-foreground font-medium text-lg">
-            We are making it better.
-          </p>
-          <Link
-            href="/showcase"
-            className={cn(
-              buttonVariants({ variant: 'outline', className: 'mt-4' })
-            )}
-          >
-            Showcase
-          </Link>
-
-          <div className="absolute top-[20px] left-[280px] w-[200px] h-[200px] z-[-1]">
-            <StarIcon strokeWidth={0.4} className="w-full h-full" />
-            <StarIcon
-              strokeWidth={0.4}
-              className="absolute inset-0 w-full h-full scale-[25%]"
-            />
-            <StarIcon
-              strokeWidth={0.4}
-              className="absolute inset-0 w-full h-full scale-50"
-            />
-            <StarIcon
-              strokeWidth={0.4}
-              className="absolute inset-0 w-full h-full scale-75"
-            />
-          </div>
-          <div className="mt-8">
-            <Previews />
-          </div>
-        </div>
-        <div
-          className="px-8 py-16 border-b"
-          style={{
-            backgroundPositionX: '-2px',
-            backgroundImage:
-              'repeating-linear-gradient(to bottom, hsl(var(--border)), hsl(var(--border)) 1px, transparent 2px, transparent 160px), repeating-linear-gradient(to right, hsl(var(--border)), hsl(var(--border)) 1px, transparent 2px, transparent 160px)'
-          }}
-        >
-          <h2 className="text-2xl font-semibold">
-            Flexibility that cover your needs.
-          </h2>
-          <p className="text-muted-foreground font-medium text-lg">
-            Well documented, separated in packages.
+        <div className="px-8 py-12 border-b flex flex-col text-center items-center">
+          <div className={cn(badgeVariants())}>3</div>
+          <h3 className="font-bold text-2xl">Ship.</h3>
+          <p className="text-muted-foreground mb-2">
+            Deploy your docs easily with Next.js compatible hosting platforms.
           </p>
 
-          <div className="flex flex-col gap-4 mt-8">
-            <div className="p-px bg-gradient-to-br from-primary rounded-xl shadow-lg shadow-primary/20">
-              <div className="p-4 rounded-[inherit] bg-gradient-to-b from-background to-muted">
-                <LayoutIcon />
-                <h3 className="font-semibold">Next Docs UI</h3>
-                <p className="text-muted-foreground">
-                  Full-powered framework with an excellent UI.
-                </p>
-              </div>
-            </div>
-            <div className="p-px bg-gradient-to-br from-secondary rounded-xl shadow-lg">
-              <div className="p-4 rounded-[inherit] bg-background">
-                <LibraryIcon />
-                <h3 className="font-semibold">Next Docs Zeta</h3>
-                <p className="text-muted-foreground">
-                  Headless library with an useful set of utilities.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="grid grid-cols-1 border-b divide-border container md:grid-cols-2 md:divide-x lg:grid-cols-3">
-        <div className="relative flex flex-col px-8 py-16 overflow-hidden">
-          <Rain
-            width={500}
-            height={1000}
-            className="absolute inset-0 mix-blend-difference z-[-1]"
-          />
-          <h2 className="text-3xl font-semibold">
-            Create your first documentation.
-          </h2>
-          <ul className="flex flex-col mt-12 gap-6">
-            <li className="text-lg">
-              <span className="font-medium">
-                <BatteryChargingIcon className="inline" /> Battery guaranteed.
-              </span>
-              <span className="ml-2 text-muted-foreground">
-                Actively maintained, open for contributions.
-              </span>
-            </li>
-            <li className="text-lg">
-              <span className="font-medium">
-                <GithubIcon className="inline" /> Fully open-source.
-              </span>
-              <span className="ml-2 text-muted-foreground">
-                Open source, available on Github.
-              </span>
-            </li>
-            <li className="text-lg">
-              <span className="font-medium">
-                <TimerIcon className="inline" /> Within seconds.
-              </span>
-              <span className="ml-2 text-muted-foreground">
-                Initialize a new project instantly with CLI.
-              </span>
-            </li>
-          </ul>
-        </div>
-        <div className="relative overflow-hidden lg:col-span-2">
-          <div className="absolute inset-0 flex flex-col items-center justify-center z-[2]">
-            <CodeBlock lang="bash" code="pnpm create next-docs-app" />
-            <a
-              href="https://githubbox.com/SonMooSans/next-docs-ui-template"
-              rel="noreferrer noopener"
-              className={cn(
-                buttonVariants({
-                  variant: 'outline',
-                  className: 'bg-background'
-                })
-              )}
-            >
-              Open in CodeSandbox
+          <div className="flex flex-row flex-wrap gap-8 items-center mt-4">
+            <a href="https://vercel.com" rel="noreferrer noopener">
+              <VercelLogo className="w-32 h-auto" />
+            </a>
+            <a href="https://netlify.com" rel="noreferrer noopener">
+              <NetlifyLogo className="w-32 h-auto" />
             </a>
           </div>
-          <Image
-            alt="demo"
-            src={Example}
-            className="invert blur-lg dark:invert-0"
+
+          <div
+            className="w-full mt-8"
+            style={{
+              backgroundImage:
+                'repeating-linear-gradient(to right,hsl(var(--primary)/.1),hsl(var(--primary)/.1) 1px,transparent 1px,transparent 40px), repeating-linear-gradient(to bottom,hsl(var(--primary)/.1),hsl(var(--primary)/.1) 1px,transparent 1px,transparent 40px)'
+            }}
+          >
+            <Earth className="mx-auto w-60 h-auto -my-8" />
+          </div>
+        </div>
+        <div className="relative container py-32 border-b overflow-hidden">
+          <h2 className="text-2xl font-semibold text-center sm:text-3xl">
+            Loved by users.
+            <br />
+            Built for developers.
+          </h2>
+          <Rain
+            width={1000}
+            height={500}
+            className="absolute w-full h-full inset-0 mix-blend-difference z-[-1]"
           />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          <div className="px-8 py-16 border-b md:border-r">
+            <RocketIcon />
+            <h2 className="font-bold inline mr-2">Light and Fast.</h2>
+            <span className="text-muted-foreground font-medium">
+              Full powered documentation site with Next.js App Router.
+            </span>
+          </div>
+          <div className="px-8 py-16 border-b lg:border-r">
+            <TimerIcon />
+            <h2 className="font-bold inline mr-2">Optimized.</h2>
+            <span className="text-muted-foreground font-medium">
+              Less client components, less Javascript, optimized images.
+            </span>
+          </div>
+          <div className="px-8 py-16 border-b md:border-r">
+            <LayoutIcon />
+            <h2 className="font-bold inline mr-2">Accessibility & UX first.</h2>
+            <span className="text-muted-foreground font-medium">
+              Focus on user experience and accessibility, providing an excellent
+              experience for your users.
+            </span>
+          </div>
+          <div className="px-8 py-16 border-b lg:border-r">
+            <SearchIcon />
+            <h2 className="font-bold inline mr-2">Powerful document search.</h2>
+            <span className="text-muted-foreground font-medium">
+              Built-in search implemented with Flexsearch, with high flexibility
+              and performance.
+            </span>
+          </div>
+          <div className="px-8 py-16 border-b md:border-r">
+            <PaperclipIcon />
+            <h2 className="font-bold inline mr-2">Useful MDX Plugins.</h2>
+            <span className="text-muted-foreground font-medium">
+              Bundled with remark and rehype plugins that enhances the developer
+              experience.
+            </span>
+          </div>
+          <div className="px-8 py-16 border-b">
+            <PersonStandingIcon />
+            <h2 className="font-bold inline mr-2">Personalized.</h2>
+            <span className="text-muted-foreground font-medium">
+              Advanced options for customising your theme in a comfortable way.
+            </span>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 divide-border md:divide-x md:grid-cols-2">
+          <div className="px-8 py-16 border-b md:py-24">
+            <div className="inline-flex items-center gap-2 text-muted-foreground font-medium mb-4">
+              <PaperclipIcon className="w-5 h-5" />
+              <p>Multiple Sources</p>
+            </div>
+            <h2 className="text-xl font-semibold mb-1">
+              Your source. Your choice.
+            </h2>
+            <p className="text-lg text-muted-foreground font-medium">
+              Native support for different content sources including
+              Contentlayer and the official next/mdx loader.
+            </p>
+            <SourceSVG className="w-full h-auto mt-8" />
+          </div>
+          <div className="px-8 py-16 border-b md:py-24">
+            <div className="inline-flex items-center gap-2 text-muted-foreground font-medium mb-4">
+              <SearchIcon className="w-5 h-5" />
+              <p>Algolia Integration</p>
+            </div>
+            <h2 className="text-xl font-semibold mb-1">
+              Enhance your search experience.
+            </h2>
+            <p className="text-lg text-muted-foreground font-medium">
+              Integrate with Algolia Search in your docs easily.
+            </p>
+            <Link
+              href="/docs/headless/search/algolia"
+              className={cn(
+                buttonVariants({ variant: 'outline', className: 'mt-4' })
+              )}
+            >
+              Learn More
+            </Link>
+            <Search />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 divide-border overflow-hidden md:grid-cols-2 md:divide-x">
+          <div className="relative px-8 py-16 border-b">
+            <h2 className="text-2xl font-semibold">Heard of our users.</h2>
+            <p className="text-muted-foreground font-medium text-lg">
+              We are making it better.
+            </p>
+            <Link
+              href="/showcase"
+              className={cn(
+                buttonVariants({ variant: 'outline', className: 'mt-4' })
+              )}
+            >
+              Showcase
+            </Link>
+
+            <div className="absolute top-[20px] left-[280px] w-[200px] h-[200px] z-[-1]">
+              <StarIcon strokeWidth={0.4} className="w-full h-full" />
+              <StarIcon
+                strokeWidth={0.4}
+                className="absolute inset-0 w-full h-full scale-[25%]"
+              />
+              <StarIcon
+                strokeWidth={0.4}
+                className="absolute inset-0 w-full h-full scale-50"
+              />
+              <StarIcon
+                strokeWidth={0.4}
+                className="absolute inset-0 w-full h-full scale-75"
+              />
+            </div>
+            <div className="mt-8">
+              <Previews />
+            </div>
+          </div>
+          <div
+            className="px-8 py-16 border-b"
+            style={{
+              backgroundPositionX: '-2px',
+              backgroundImage:
+                'repeating-linear-gradient(to bottom, hsl(var(--border)), hsl(var(--border)) 1px, transparent 2px, transparent 160px), repeating-linear-gradient(to right, hsl(var(--border)), hsl(var(--border)) 1px, transparent 2px, transparent 160px)'
+            }}
+          >
+            <h2 className="text-2xl font-semibold">
+              Flexibility that cover your needs.
+            </h2>
+            <p className="text-muted-foreground font-medium text-lg">
+              Well documented, separated in packages.
+            </p>
+
+            <div className="flex flex-col gap-4 mt-8">
+              <div className="p-px bg-gradient-to-br from-primary rounded-xl shadow-lg shadow-primary/20">
+                <div className="p-4 rounded-[inherit] bg-gradient-to-b from-background to-muted">
+                  <LayoutIcon />
+                  <h3 className="font-semibold">Next Docs UI</h3>
+                  <p className="text-muted-foreground">
+                    Full-powered framework with an excellent UI.
+                  </p>
+                </div>
+              </div>
+              <div className="p-px bg-gradient-to-br from-secondary rounded-xl shadow-lg">
+                <div className="p-4 rounded-[inherit] bg-background">
+                  <LibraryIcon />
+                  <h3 className="font-semibold">Next Docs Zeta</h3>
+                  <p className="text-muted-foreground">
+                    Headless library with an useful set of utilities.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 border-b divide-border md:grid-cols-2 md:divide-x lg:grid-cols-3">
+          <div className="relative flex flex-col px-8 py-16 overflow-hidden">
+            <Rain
+              width={500}
+              height={1000}
+              className="absolute inset-0 mix-blend-difference z-[-1]"
+            />
+            <h2 className="text-3xl font-semibold">
+              Create your first documentation.
+            </h2>
+            <ul className="flex flex-col mt-12 gap-6">
+              <li className="text-lg">
+                <span className="font-medium">
+                  <BatteryChargingIcon className="inline" /> Battery guaranteed.
+                </span>
+                <span className="ml-2 text-muted-foreground">
+                  Actively maintained, open for contributions.
+                </span>
+              </li>
+              <li className="text-lg">
+                <span className="font-medium">
+                  <GithubIcon className="inline" /> Fully open-source.
+                </span>
+                <span className="ml-2 text-muted-foreground">
+                  Open source, available on Github.
+                </span>
+              </li>
+              <li className="text-lg">
+                <span className="font-medium">
+                  <TimerIcon className="inline" /> Within seconds.
+                </span>
+                <span className="ml-2 text-muted-foreground">
+                  Initialize a new project instantly with CLI.
+                </span>
+              </li>
+            </ul>
+          </div>
+          <div className="relative overflow-hidden lg:col-span-2">
+            <div className="absolute inset-0 flex flex-col items-center justify-center z-[2]">
+              <CodeBlock lang="bash" code="pnpm create next-docs-app" />
+              <a
+                href="https://githubbox.com/SonMooSans/next-docs-ui-template"
+                rel="noreferrer noopener"
+                className={cn(
+                  buttonVariants({
+                    variant: 'outline',
+                    className: 'bg-background'
+                  })
+                )}
+              >
+                Open in CodeSandbox
+              </a>
+            </div>
+            <Image
+              alt="demo"
+              src={Example}
+              className="invert blur-lg dark:invert-0"
+            />
+          </div>
         </div>
       </div>
     </main>
@@ -808,19 +805,19 @@ function LaunchAppWindow(props: HTMLAttributes<HTMLDivElement>) {
 
 function Hero() {
   return (
-    <div className="relative flex flex-col items-center text-center container p-6 border z-[2] bg-background">
+    <div className="relative flex flex-col items-center text-center container p-6 border-b z-[2] bg-background">
       <div className="h-fit mt-12 mb-[260px]">
         <h1 className="font-medium text-4xl sm:text-6xl p-2">
           Build Your Docs.
         </h1>
       </div>
       <StarsIcon
-        className="absolute -top-4 -left-4 w-8 h-8"
+        className="absolute -top-2 -left-2 w-4 h-4 xl:scale-[200%]"
         stroke="none"
         fill="currentColor"
       />
       <StarsIcon
-        className="absolute -bottom-4 -right-4 w-8 h-8"
+        className="absolute -bottom-2 -right-2 w-4 h-4 xl:scale-[200%]"
         stroke="none"
         fill="currentColor"
       />
