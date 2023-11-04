@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "build:shaders & next build",
+    "build": "next build",
     "build:shaders": "glslx shaders/rain.frag --output=shaders/rain.min.js --format=js",
     "postbuild": "next-sitemap & node ./update-index.mjs",
     "start": "next start"
