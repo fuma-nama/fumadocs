@@ -1,5 +1,5 @@
 import { CodeBlock, TypingCodeBlock } from '@/components/typing-code-block'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
 import Example from '@/public/example-2.png'
 import { cn } from '@/utils/cn'
 import { cva } from 'class-variance-authority'
@@ -429,10 +429,26 @@ export default function HomePage() {
             </p>
           </div>
           <div className="grid grid-cols-2 gap-4 py-8 sm:pl-8 sm:py-16 sm:max-md:grid-cols-1">
-            <Button size="lg">Getting Started</Button>
-            <Button size="lg" variant="secondary">
+            <Link
+              href="/docs"
+              className={cn(
+                buttonVariants({ size: 'lg', className: 'rounded-full' })
+              )}
+            >
+              Getting Started
+            </Link>
+            <a
+              href="https://githubbox.com/SonMooSans/next-docs-ui-template"
+              className={cn(
+                buttonVariants({
+                  size: 'lg',
+                  variant: 'outline',
+                  className: 'rounded-full'
+                })
+              )}
+            >
               Open Demo
-            </Button>
+            </a>
           </div>
         </div>
       </div>
