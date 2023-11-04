@@ -17,7 +17,9 @@ module.exports = {
     },
     extend: {
       backgroundImage: {
-        'gradient-radial': 'radial-gradient(circle, var(--tw-gradient-stops))'
+        'gradient-radial': 'radial-gradient(circle, var(--tw-gradient-stops))',
+        'repeat-gradient-to-r':
+          'repeating-linear-gradient(to right, var(--tw-gradient-stops))'
       },
       colors: {
         border: 'hsl(var(--border))',
@@ -70,9 +72,19 @@ module.exports = {
           '50%, 100%': {
             'stroke-dashoffset': 400
           }
+        },
+        stroke: {
+          from: {
+            'stroke-dasharray': 1000
+          },
+          to: {
+            'stroke-dasharray': 1000,
+            'stroke-dashoffset': 2000
+          }
         }
       },
       animation: {
+        stroke: 'stroke 5s linear infinite',
         'infinite-rotate': 'infinite-rotate 6s linear infinite',
         star: 'star 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         heart: 'heart 1s linear infinite'

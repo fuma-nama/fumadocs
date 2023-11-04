@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "build:shaders & next build",
+    "build:shaders": "glslx shaders/rain.frag --output=shaders/rain.min.js --format=js",
     "postbuild": "next-sitemap & node ./update-index.mjs",
     "start": "next start"
   },
@@ -23,10 +24,12 @@
     "next-docs-ui": "workspace:*",
     "next-docs-zeta": "workspace:*",
     "next-sitemap": "^4.2.3",
+    "phenomenon": "^1.6.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "rehype-katex": "^6.0.3",
     "remark-math": "^5.1.1",
+    "shiki": "^0.14.5",
     "tailwind-merge": "^2.0.0",
     "zod": "^3.22.4"
   },
@@ -37,6 +40,8 @@
     "@types/react": "18.2.0",
     "@types/react-dom": "18.2.1",
     "autoprefixer": "10.4.16",
+    "glslify": "^7.1.1",
+    "glslx": "^0.2.13",
     "postcss": "8.4.31",
     "tailwindcss": "3.3.5",
     "tailwindcss-animate": "^1.0.7",
