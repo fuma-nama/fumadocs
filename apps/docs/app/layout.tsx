@@ -1,7 +1,6 @@
 import { Nav } from '@/components/nav'
 import { ExternalLinkIcon, Star } from 'lucide-react'
 import { Inter } from 'next/font/google'
-import 'next-docs-ui/style.css'
 import './style.css'
 import { base_url, createMetadata } from '@/utils/metadata'
 import type { Viewport } from 'next'

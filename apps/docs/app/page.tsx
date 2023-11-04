@@ -523,7 +523,7 @@ export default function HomePage() {
         <Rain
           width={1000}
           height={500}
-          className="absolute w-full h-full inset-0 mix-blend-difference"
+          className="absolute w-full h-full inset-0 mix-blend-difference z-[-1]"
         />
       </div>
       <div className="container px-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
@@ -686,7 +686,7 @@ export default function HomePage() {
           <Rain
             width={500}
             height={1000}
-            className="absolute w-full h-auto left-0 bottom-0 z-[-1]"
+            className="absolute inset-0 mix-blend-difference z-[-1]"
           />
           <h2 className="text-3xl font-semibold">
             Create your first documentation.

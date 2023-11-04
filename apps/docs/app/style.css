@@ -1,3 +1,4 @@
+@import 'next-docs-ui/style.css';
 @tailwind components;
 @tailwind utilities;
 
