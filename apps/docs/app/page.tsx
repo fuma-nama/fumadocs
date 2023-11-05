@@ -820,7 +820,7 @@ function LaunchAppWindow(props: HTMLAttributes<HTMLDivElement>) {
 
 function Hero() {
   return (
-    <div className="relative flex flex-col items-center text-center container p-6 border-b z-[2] bg-background overflow-hidden">
+    <div className="relative flex flex-col items-center text-center container p-6 border-b z-[2] bg-background">
       <div className="h-fit mt-12 mb-[260px]">
         <h1 className="font-medium text-4xl sm:text-6xl p-2">
           Build Your Docs.
