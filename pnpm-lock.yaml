@@ -81,8 +81,8 @@ importers:
         specifier: ^0.16.8
         version: 0.16.8
       lucide-react:
-        specifier: ^0.291.0
-        version: 0.291.0(react@18.2.0)
+        specifier: ^0.292.0
+        version: 0.292.0(react@18.2.0)
       next:
         specifier: 14.0.1
         version: 14.0.1(@babel/core@7.22.17)(react-dom@18.2.0)(react@18.2.0)
@@ -145,8 +145,8 @@ importers:
         specifier: ^7.1.1
         version: 7.1.1
       glslx:
-        specifier: ^0.2.13
-        version: 0.2.13
+        specifier: ^0.3.0
+        version: 0.3.0
       postcss:
         specifier: 8.4.31
         version: 8.4.31
@@ -466,8 +466,8 @@ importers:
         specifier: ^0.2.0
         version: 0.2.0(@types/react@18.2.0)(react-dom@18.2.0)(react@18.2.0)
       lucide-react:
-        specifier: ^0.291.0
-        version: 0.291.0(react@18.2.0)
+        specifier: ^0.292.0
+        version: 0.292.0(react@18.2.0)
       next-docs-zeta:
         specifier: workspace:*
         version: link:../next-docs
@@ -5007,8 +5007,8 @@ packages:
       xtend: 4.0.2
     dev: true
 
-  /glslx@0.2.13:
-    resolution: {integrity: sha512-AjvDqcG3JGHFphnDpPraIiIVuNigblOGofr8EZFGlHUbpCuPzS43H3oqgd3m8h0+8a4Wf59fG5AMC1XirJjXfg==}
+  /glslx@0.3.0:
+    resolution: {integrity: sha512-T6RUrpLr7fRXUFWc5nAUN42tEzjYDLEJC1HcjIL7tXAGfsjXXslTmFhsC8cJPnB22r1D1MaXt/JmY/ugrXRj/Q==}
     hasBin: true
     dev: true
 
@@ -5914,8 +5914,8 @@ packages:
     dependencies:
       yallist: 4.0.0
 
-  /lucide-react@0.291.0(react@18.2.0):
-    resolution: {integrity: sha512-79jHlT9Je2PXSvXIBGDkItCK7In2O9iKnnSJ/bJxvIBOFaX2Ex0xEcC4fRS/g0F2uQGFejjmn2qWhwdc5wicMQ==}
+  /lucide-react@0.292.0(react@18.2.0):
+    resolution: {integrity: sha512-rRgUkpEHWpa5VCT66YscInCQmQuPCB1RFRzkkxMxg4b+jaL0V12E3riWWR2Sh5OIiUhCwGW/ZExuEO4Az32E6Q==}
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0
     dependencies:
