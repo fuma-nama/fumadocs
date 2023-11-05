@@ -1,5 +1,5 @@
 precision highp float;
-
+attribute vec3 aPosition;
 uniform vec2 u_resolution;
 uniform float u_time;
 
@@ -42,10 +42,7 @@ vec4 trail_color(vec2 pixel, vec2 pos, vec2 velocity_dir, float width, float siz
     return vec4(fading_dashed_line);
 }
 
-/*
- * The main program
- */
-void main() {
+export void fragmentShader() {
     // Set the total number of rain drops that are visible at a given time
     const float n_drops = 20.0;
 
@@ -87,4 +84,8 @@ void main() {
 
     // Fragment shader output
     gl_FragColor = pixel_color;
+}
+
+export void vertexShader() {
+    gl_Position=vec4(aPosition, 1.0);
 }

@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "build:shaders": "glslx shaders/rain.frag --output=shaders/rain.min.js --format=js",
+    "build:shaders": "glslx shaders/rain.glsl --output=shaders/rain.min.js --format=js",
     "postbuild": "next-sitemap & node ./update-index.mjs",
     "start": "next start"
   },

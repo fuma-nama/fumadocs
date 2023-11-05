@@ -4,14 +4,11 @@
 import {
   GLSLX_NAME_U_RESOLUTION,
   GLSLX_NAME_U_TIME,
-  GLSLX_SOURCE_MAIN
+  GLSLX_SOURCE_FRAGMENT_SHADER,
+  GLSLX_SOURCE_VERTEX_SHADER
 } from '@/shaders/rain.min.js'
 import Phenomenon from 'phenomenon'
 import { useEffect, useRef, type CanvasHTMLAttributes } from 'react'
-
-const vertex = `
-attribute vec3 aPosition;void main(){gl_Position=vec4(aPosition,1.0);}
-`
 
 export function Rain(props: CanvasHTMLAttributes<HTMLCanvasElement>) {
   const ref = useRef<HTMLCanvasElement>(null)
@@ -39,7 +36,7 @@ export function Rain(props: CanvasHTMLAttributes<HTMLCanvasElement>) {
 
     phenomenon.add('', {
       mode: 4,
-      vertex,
+      vertex: GLSLX_SOURCE_VERTEX_SHADER,
       geometry: {
         vertices: [
           { x: -100, y: 100, z: 0 },
@@ -50,7 +47,7 @@ export function Rain(props: CanvasHTMLAttributes<HTMLCanvasElement>) {
           { x: 100, y: 100, z: 0 }
         ]
       },
-      fragment: GLSLX_SOURCE_MAIN,
+      fragment: GLSLX_SOURCE_FRAGMENT_SHADER,
       uniforms: {
         [GLSLX_NAME_U_RESOLUTION]: {
           type: 'vec2',
