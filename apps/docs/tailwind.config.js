@@ -65,6 +65,14 @@ module.exports = {
             transform: 'translateY(20px)'
           }
         },
+        light: {
+          'from, to': {
+            opacity: 0.7
+          },
+          '50%': {
+            opacity: 1
+          }
+        },
         stroke: {
           from: {
             'stroke-dasharray': 1000
@@ -77,6 +85,7 @@ module.exports = {
       },
       animation: {
         stroke: 'stroke 5s linear infinite',
+        light: 'light 2s ease-in-out infinite',
         updown: 'updown 3s ease-in-out infinite'
       }
     }
