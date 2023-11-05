@@ -6,7 +6,7 @@ export function Wrapper(props: HTMLAttributes<HTMLDivElement>) {
     <div
       {...props}
       className={cn(
-        'rounded-xl p-4 bg-gradient-to-br from-blue-300 to-purple-400',
+        'bg-gradient-to-b rounded-xl p-4 from-primary to-primary/10 [&>*]:my-0',
         props.className
       )}
     >

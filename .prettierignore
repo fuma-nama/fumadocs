@@ -1,3 +1,5 @@
 pnpm-lock.yaml
 .changeset/*.md
 .github/**/*.md
+*.frag
+*.glsl
