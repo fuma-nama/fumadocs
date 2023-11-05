@@ -408,7 +408,7 @@ function Earth(props: SVGProps<SVGSVGElement>) {
 
 export default function HomePage() {
   return (
-    <main className="relative container px-2 py-20">
+    <main className="relative container px-2 py-4 sm:py-20">
       <div
         className="border-x border-t"
         style={{
@@ -417,7 +417,7 @@ export default function HomePage() {
         }}
       >
         <Hero />
-        <div className="border-b px-8">
+        <div className="border-b px-6">
           <div className="flex flex-col sm:divide-x sm:divide-border sm:flex-row">
             <div className="py-8 flex-1 sm:pr-8 sm:py-16">
               <p className="font-medium text-muted-foreground [&_b]:text-foreground sm:text-lg">
@@ -426,7 +426,7 @@ export default function HomePage() {
                 <b>Excellent User Experience</b>.
               </p>
             </div>
-            <div className="grid grid-cols-2 gap-4 py-8 sm:pl-8 sm:py-16 sm:max-md:grid-cols-1">
+            <div className="grid grid-cols-1 gap-4 py-8 sm:pl-8 sm:py-16 lg:grid-cols-2">
               <Link
                 href="/docs"
                 className={cn(
@@ -458,7 +458,7 @@ export default function HomePage() {
           </h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2">
-          <div className="relative flex flex-col px-8 py-12 border-b md:py-16 md:border-r">
+          <div className="relative flex flex-col px-6 py-12 border-b md:py-16 md:border-r">
             <div className={cn(badgeVariants())}>1</div>
             <h3 className="font-bold text-xl">Create it.</h3>
             <p className="text-muted-foreground">
@@ -469,7 +469,7 @@ export default function HomePage() {
             </div>
             <LaunchAppWindow className="ml-auto w-fit -mt-14 min-h-[120px] z-[2]" />
           </div>
-          <div className="relative flex flex-col px-8 py-12 border-b md:py-16">
+          <div className="relative flex flex-col px-6 py-12 border-b md:py-16">
             <div className={cn(badgeVariants())}>2</div>
             <h3 className="font-bold text-xl">Customise.</h3>
             <p className="text-muted-foreground">
@@ -484,7 +484,7 @@ export default function HomePage() {
             />
           </div>
         </div>
-        <div className="px-8 py-12 border-b flex flex-col text-center items-center">
+        <div className="px-6 py-12 border-b flex flex-col text-center items-center">
           <div className={cn(badgeVariants())}>3</div>
           <h3 className="font-bold text-2xl">Ship.</h3>
           <p className="text-muted-foreground mb-2">
@@ -523,21 +523,21 @@ export default function HomePage() {
           />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-          <div className="px-8 py-16 border-b md:border-r">
+          <div className="px-6 py-16 border-b md:border-r">
             <RocketIcon />
             <h2 className="font-bold inline mr-2">Light and Fast.</h2>
             <span className="text-muted-foreground font-medium">
               Full powered documentation site with Next.js App Router.
             </span>
           </div>
-          <div className="px-8 py-16 border-b lg:border-r">
+          <div className="px-6 py-16 border-b lg:border-r">
             <TimerIcon />
             <h2 className="font-bold inline mr-2">Optimized.</h2>
             <span className="text-muted-foreground font-medium">
               Less client components, less Javascript, optimized images.
             </span>
           </div>
-          <div className="px-8 py-16 border-b md:border-r">
+          <div className="px-6 py-16 border-b md:border-r">
             <LayoutIcon />
             <h2 className="font-bold inline mr-2">Accessibility & UX first.</h2>
             <span className="text-muted-foreground font-medium">
@@ -545,7 +545,7 @@ export default function HomePage() {
               experience for your users.
             </span>
           </div>
-          <div className="px-8 py-16 border-b lg:border-r">
+          <div className="px-6 py-16 border-b lg:border-r">
             <SearchIcon />
             <h2 className="font-bold inline mr-2">Powerful document search.</h2>
             <span className="text-muted-foreground font-medium">
@@ -553,7 +553,7 @@ export default function HomePage() {
               and performance.
             </span>
           </div>
-          <div className="px-8 py-16 border-b md:border-r">
+          <div className="px-6 py-16 border-b md:border-r">
             <PaperclipIcon />
             <h2 className="font-bold inline mr-2">Useful MDX Plugins.</h2>
             <span className="text-muted-foreground font-medium">
@@ -561,7 +561,7 @@ export default function HomePage() {
               experience.
             </span>
           </div>
-          <div className="px-8 py-16 border-b">
+          <div className="px-6 py-16 border-b">
             <PersonStandingIcon />
             <h2 className="font-bold inline mr-2">Personalized.</h2>
             <span className="text-muted-foreground font-medium">
@@ -570,7 +570,7 @@ export default function HomePage() {
           </div>
         </div>
         <div className="grid grid-cols-1 divide-border md:divide-x md:grid-cols-2">
-          <div className="px-8 py-16 border-b md:py-24">
+          <div className="px-6 py-16 border-b md:py-24">
             <div className="inline-flex items-center gap-2 text-muted-foreground font-medium mb-4">
               <PaperclipIcon className="w-5 h-5" />
               <p>Multiple Sources</p>
@@ -584,7 +584,7 @@ export default function HomePage() {
             </p>
             <SourceSVG className="w-full h-auto mt-8" />
           </div>
-          <div className="px-8 py-16 border-b md:py-24">
+          <div className="px-6 py-16 border-b md:py-24">
             <div className="inline-flex items-center gap-2 text-muted-foreground font-medium mb-4">
               <SearchIcon className="w-5 h-5" />
               <p>Algolia Integration</p>
@@ -607,7 +607,7 @@ export default function HomePage() {
           </div>
         </div>
         <div className="grid grid-cols-1 divide-border overflow-hidden md:grid-cols-2 md:divide-x">
-          <div className="relative px-8 py-16 border-b">
+          <div className="relative px-6 py-16 border-b">
             <h2 className="text-2xl font-semibold">Heard of our users.</h2>
             <p className="text-muted-foreground font-medium text-lg">
               We are making it better.
@@ -641,7 +641,7 @@ export default function HomePage() {
             </div>
           </div>
           <div
-            className="px-8 py-16 border-b"
+            className="px-6 py-16 border-b"
             style={{
               backgroundPositionX: '-2px',
               backgroundImage:
@@ -678,7 +678,7 @@ export default function HomePage() {
           </div>
         </div>
         <div className="grid grid-cols-1 border-b divide-border md:grid-cols-2 md:divide-x lg:grid-cols-3">
-          <div className="relative flex flex-col px-8 py-16 overflow-hidden">
+          <div className="relative flex flex-col px-6 py-16 overflow-hidden">
             <Rain
               width={500}
               height={1000}
