@@ -12,12 +12,14 @@ module.exports = {
       center: true,
       padding: '1.5rem',
       screens: {
-        '2xl': '1200px'
+        '2xl': '1100px'
       }
     },
     extend: {
       backgroundImage: {
-        'gradient-radial': 'radial-gradient(circle, var(--tw-gradient-stops))'
+        'gradient-radial': 'radial-gradient(circle, var(--tw-gradient-stops))',
+        'repeat-gradient-to-r':
+          'repeating-linear-gradient(to right, var(--tw-gradient-stops))'
       },
       colors: {
         border: 'hsl(var(--border))',
@@ -55,27 +57,27 @@ module.exports = {
         }
       },
       keyframes: {
-        'infinite-rotate': {
-          from: {
-            transform: 'translate(-50%,-50%) rotate(1turn)'
+        updown: {
+          'from, to': {
+            transform: 'translateY(-20px)'
           },
-          to: {
-            transform: 'translate(-50%,-50%) rotate(0)'
+          '50%': {
+            transform: 'translateY(20px)'
           }
         },
-        heart: {
-          '0%': {
-            'stroke-dashoffset': 0
+        stroke: {
+          from: {
+            'stroke-dasharray': 1000
           },
-          '50%, 100%': {
-            'stroke-dashoffset': 400
+          to: {
+            'stroke-dasharray': 1000,
+            'stroke-dashoffset': 2000
           }
         }
       },
       animation: {
-        'infinite-rotate': 'infinite-rotate 6s linear infinite',
-        star: 'star 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        heart: 'heart 1s linear infinite'
+        stroke: 'stroke 5s linear infinite',
+        updown: 'updown 3s ease-in-out infinite'
       }
     }
   },
