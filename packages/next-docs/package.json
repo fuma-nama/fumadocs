@@ -112,7 +112,7 @@
   },
   "devDependencies": {
     "@algolia/client-search": "^4.20.0",
-    "@types/flexsearch": "0.7.5",
+    "@types/flexsearch": "0.7.6",
     "@types/hast": "^2.3.5",
     "@types/mdast": "^3.0.12",
     "@types/negotiator": "^0.6.1",
