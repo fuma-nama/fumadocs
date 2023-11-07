@@ -444,7 +444,7 @@ export default function HomePage() {
                   Getting Started
                 </Link>
                 <a
-                  href="https://githubbox.com/SonMooSans/next-docs-ui-template"
+                  href="https://githubbox.com/fuma-nama/next-docs-ui-template"
                   className={cn(
                     buttonVariants({
                       size: 'lg',
@@ -738,7 +738,7 @@ export default function HomePage() {
                   Read docs
                 </Link>
                 <a
-                  href="https://githubbox.com/SonMooSans/next-docs-ui-template"
+                  href="https://githubbox.com/fuma-nama/next-docs-ui-template"
                   rel="noreferrer noopener"
                   className={cn(
                     buttonVariants({
