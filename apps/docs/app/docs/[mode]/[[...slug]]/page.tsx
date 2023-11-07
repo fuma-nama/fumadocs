@@ -31,7 +31,7 @@ export default async function Page({ params }: { params: Param }) {
     headers.append('authorization', `Bearer ${process.env.GIT_TOKEN}`)
 
   const time = await getGitLastEditTime(
-    'SonMooSans/next-docs',
+    'fuma-nama/next-docs',
     resolve('apps/docs/', page.file.path),
     undefined,
     {
