@@ -30,10 +30,10 @@ export default function DocsPage() {
           Next Docs UI
         </Link>
         <Link
-          href="/docs/headless"
+          href="/showcase"
           className={cn(buttonVariants({ variant: 'outline', size: 'lg' }))}
         >
-          Headless
+          Showcase
         </Link>
       </div>
       <div className="grid grid-cols-1 gap-4 mt-16 text-left md:grid-cols-2 lg:grid-cols-3">

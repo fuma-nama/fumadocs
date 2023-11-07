@@ -1,9 +1,10 @@
 import { Nav } from '@/components/nav'
-import { ExternalLinkIcon, Star } from 'lucide-react'
+import { Star } from 'lucide-react'
 import { Inter } from 'next/font/google'
 import './style.css'
 import { base_url, createMetadata } from '@/utils/metadata'
 import type { Viewport } from 'next'
+import Link from 'next/link'
 import { Provider } from './provider'
 
 export const metadata = createMetadata({
@@ -63,7 +64,7 @@ function Footer() {
           </p>
         </div>
 
-        <div className="flex flex-row items-center gap-20">
+        <div className="flex flex-row items-center flex-wrap gap-12">
           <a
             href="https://github.com/fuma-nama/next-docs"
             rel="noreferrer noopener"
@@ -72,14 +73,12 @@ function Footer() {
             <Star className="mr-2 h-4 w-4" />
             Give us a star
           </a>
-          <a
-            href="https://www.npmjs.com/package/next-docs-zeta"
-            rel="noreferrer noopener"
+          <Link
+            href="/showcase"
             className="flex flex-row items-center text-sm text-muted-foreground transition-colors hover:text-accent-foreground"
           >
-            <ExternalLinkIcon className="mr-2 h-4 w-4" />
-            NPM registry
-          </a>
+            Showcase
+          </Link>
         </div>
       </div>
     </footer>
