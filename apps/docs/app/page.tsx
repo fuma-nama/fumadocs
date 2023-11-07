@@ -669,24 +669,30 @@ export default function HomePage() {
               </p>
 
               <div className="flex flex-col gap-4 mt-8">
-                <div className="p-px bg-gradient-to-br from-primary rounded-xl shadow-lg shadow-primary/20">
-                  <div className="p-4 rounded-[inherit] bg-gradient-to-b from-background to-muted">
+                <Link
+                  href="/docs/ui"
+                  className="p-px bg-gradient-to-br from-primary rounded-xl shadow-lg shadow-primary/20"
+                >
+                  <div className="p-4 rounded-[inherit] bg-gradient-to-t from-muted bg-background transition-colors hover:bg-muted">
                     <LayoutIcon />
                     <h3 className="font-semibold">Next Docs UI</h3>
                     <p className="text-muted-foreground">
                       Full-powered framework with an excellent UI.
                     </p>
                   </div>
-                </div>
-                <div className="p-px bg-gradient-to-br from-secondary rounded-xl shadow-lg">
-                  <div className="p-4 rounded-[inherit] bg-background">
+                </Link>
+                <Link
+                  href="/docs/headless"
+                  className="p-px bg-gradient-to-br from-secondary rounded-xl shadow-lg"
+                >
+                  <div className="p-4 rounded-[inherit] bg-background transition-colors hover:bg-muted">
                     <LibraryIcon />
                     <h3 className="font-semibold">Next Docs Zeta</h3>
                     <p className="text-muted-foreground">
                       Headless library with an useful set of utilities.
                     </p>
                   </div>
-                </div>
+                </Link>
               </div>
             </div>
           </div>
