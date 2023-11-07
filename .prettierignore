@@ -1,5 +1,5 @@
 pnpm-lock.yaml
 .changeset/*.md
 .github/**/*.md
-*.frag
-*.glsl
+
+apps/docs/shaders/*

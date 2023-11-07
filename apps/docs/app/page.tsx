@@ -691,17 +691,17 @@ export default function HomePage() {
             </div>
           </div>
           <div className="grid grid-cols-1 border-b divide-border md:grid-cols-2 md:divide-x lg:grid-cols-3">
-            <div className="relative flex flex-col px-6 py-16 overflow-hidden">
+            <div className="relative flex flex-col px-6 py-14 overflow-hidden">
               <Rain
                 width={500}
                 height={1000}
                 className="absolute inset-0 mix-blend-difference z-[-1]"
               />
-              <h2 className="text-3xl font-semibold">
+              <h2 className="text-3xl font-bold">
                 Create your first documentation.
               </h2>
-              <ul className="flex flex-col mt-12 gap-6">
-                <li className="text-lg">
+              <ul className="flex flex-col my-8 gap-6">
+                <li>
                   <span className="font-medium">
                     <BatteryChargingIcon className="inline" /> Battery
                     guaranteed.
@@ -710,7 +710,7 @@ export default function HomePage() {
                     Actively maintained, open for contributions.
                   </span>
                 </li>
-                <li className="text-lg">
+                <li>
                   <span className="font-medium">
                     <GithubIcon className="inline" /> Fully open-source.
                   </span>
@@ -718,7 +718,7 @@ export default function HomePage() {
                     Open source, available on Github.
                   </span>
                 </li>
-                <li className="text-lg">
+                <li>
                   <span className="font-medium">
                     <TimerIcon className="inline" /> Within seconds.
                   </span>
@@ -727,28 +727,30 @@ export default function HomePage() {
                   </span>
                 </li>
               </ul>
-            </div>
-            <div className="relative overflow-hidden lg:col-span-2">
-              <div className="absolute inset-0 flex flex-col items-center justify-center z-[2]">
-                <CodeBlock lang="bash" code="pnpm create next-docs-app" />
+              <div className="flex flex-row gap-2 mt-auto border-t pt-8">
+                <Link href="/docs" className={cn(buttonVariants())}>
+                  Read docs
+                </Link>
                 <a
                   href="https://githubbox.com/SonMooSans/next-docs-ui-template"
                   rel="noreferrer noopener"
                   className={cn(
                     buttonVariants({
-                      variant: 'outline',
-                      className: 'bg-background'
+                      variant: 'outline'
                     })
                   )}
                 >
                   Open in CodeSandbox
                 </a>
               </div>
+            </div>
+            <div className="relative flex flex-col items-center justify-center overflow-hidden p-8 lg:col-span-2">
               <Image
                 alt="demo"
                 src={Example}
-                className="invert blur-lg dark:invert-0"
+                className="absolute inset-0 w-full h-full invert blur-lg object-cover dark:invert-0"
               />
+              <CodeBlock lang="bash" code="pnpm create next-docs-app" />
             </div>
           </div>
         </div>
