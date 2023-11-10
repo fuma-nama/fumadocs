@@ -1,6 +1,6 @@
 ---
-title: Git Last Edit
-description: Get the last edit time of a file in Git
+title: Last Modified Time
+description: Get the last edit time of a file in Github repository
 ---
 
 ## Usage
@@ -8,12 +8,15 @@ description: Get the last edit time of a file in Git
 Pass your repository name, and the path to file.
 
 ```ts
+import { resolve } from 'url'
 import { getGitLastEditTime } from 'next-docs-zeta/server'
 
-const time = await getGitLastEditTime(
-  'fuma-nama/next-docs',
-  'content/' + page._raw.sourceFilePath
-)
+const time = await getGithubLastEdit({
+  owner: 'fuma-nama',
+  repo: 'next-docs',
+  // example: "content/docs/index.mdx"
+  path: resolve('content/docs/', page.file.path)
+})
 ```
 
 ### Github Token
@@ -27,21 +30,15 @@ Learn more about
 ```ts
 import { getGitLastEditTime } from 'next-docs-zeta/server'
 
-const time = await getGitLastEditTime(
-  'fuma-nama/next-docs',
-  'content/' + page._raw.sourceFilePath,
-  undefined,
-  {
-    headers: {
-      Authorization: 'Bearer xxx'
-    }
-  }
-)
+ const time = await getGithubLastEdit({
+    ...,
+    token: `Bearer ${process.env.GIT_TOKEN}`
+  })
 ```
 
 Also, you can skip this in development mode if you don't need that
 functionality.
 
 ```ts
-process.env.NODE_ENV === 'development'? null : getGitLastEditTime(...)
+process.env.NODE_ENV === 'development'? null : getGithubLastEdit(...)
 ```
