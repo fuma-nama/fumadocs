@@ -26,9 +26,13 @@ export default function DocsPage() {
         Different packages for different use cases.
       </p>
       <div className="grid grid-cols-2 gap-4 mt-4">
-        <Link href="/docs/ui" className={cn(buttonVariants({ size: 'lg' }))}>
-          Next Docs UI
-        </Link>
+        <a
+          href="https://github.com/fuma-nama/next-docs"
+          rel="noreferrer noopener"
+          className={cn(buttonVariants({ size: 'lg' }))}
+        >
+          Github
+        </a>
         <Link
           href="/showcase"
           className={cn(buttonVariants({ variant: 'outline', size: 'lg' }))}

@@ -8,7 +8,7 @@ import type { Utils } from 'next-docs-mdx/map'
 import type { Page } from 'next-docs-mdx/types'
 import { Card, Cards, MDXContent } from 'next-docs-ui/mdx'
 import { DocsPage } from 'next-docs-ui/page'
-import { findNeighbour, getGitLastEditTime } from 'next-docs-zeta/server'
+import { findNeighbour, getGithubLastEdit } from 'next-docs-zeta/server'
 import { notFound } from 'next/navigation'
 
 type Param = {
@@ -26,18 +26,12 @@ export default async function Page({ params }: { params: Param }) {
 
   const neighbours = findNeighbour(tab.tree, tab.getPageUrl(page.slugs))
 
-  const headers = new Headers()
-  if (process.env.GIT_TOKEN)
-    headers.append('authorization', `Bearer ${process.env.GIT_TOKEN}`)
-
-  const time = await getGitLastEditTime(
-    'fuma-nama/next-docs',
-    resolve('apps/docs/', page.file.path),
-    undefined,
-    {
-      headers
-    }
-  )
+  const time = await getGithubLastEdit({
+    owner: 'fuma-nama',
+    repo: 'next-docs',
+    path: resolve('apps/docs/content/docs/', page.file.path),
+    token: process.env.GIT_TOKEN ? `Bearer ${process.env.GIT_TOKEN}` : undefined
+  })
 
   const preview = page.matter.preview?.trim()
   const MDX = page.data.default
