@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 4.0.6
+
+### Patch Changes
+
+- Updated dependencies [ff38f6e]
+  - next-docs-zeta@4.0.6
+
 ## 4.0.5
 
 ### Patch Changes
