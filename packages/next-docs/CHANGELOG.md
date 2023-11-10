@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 4.0.6
+
+### Patch Changes
+
+- ff38f6e: Replace `getGitLastEditTime` with new `getGithubLastEdit` API
+
 ## 4.0.5
 
 ## 4.0.4
