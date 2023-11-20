@@ -1,7 +1,7 @@
 {
   "name": "next-docs-ui",
   "description": "The framework for building a documentation website in Next.js",
-  "version": "4.0.5",
+  "version": "4.0.6",
   "homepage": "https://next-docs-zeta.vercel.app",
   "author": "Fuma Nama",
   "repository": "github:fuma-nama/next-docs",
@@ -68,7 +68,7 @@
     "algoliasearch": "^4.20.0",
     "autoprefixer": "10.4.16",
     "contentlayer": "^0.3.4",
-    "next": "14.0.2",
+    "next": "14.0.3",
     "postcss": "8.4.31",
     "postcss-cli": "^10.1.0",
     "postcss-import": "^15.1.0",
