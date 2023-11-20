@@ -13,20 +13,20 @@
     "./style.css": "./dist/style.css",
     "./components/*": {
       "import": "./dist/components/*.js",
-      "types": "./dist/components/*.d.ts"
+      "types": "./dist/components/*.d.mts"
     },
     "./*": {
       "import": "./dist/*.js",
-      "types": "./dist/*.d.ts"
+      "types": "./dist/*.d.mts"
     }
   },
   "typesVersions": {
     "*": {
       "components/*": [
-        "./dist/components/*.d.ts"
+        "./dist/components/*.d.mts"
       ],
       "*": [
-        "./dist/*.d.ts"
+        "./dist/*.d.mts"
       ]
     }
   },

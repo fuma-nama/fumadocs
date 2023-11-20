@@ -14,19 +14,19 @@
     "./loader": "./loader.js",
     "./*": {
       "import": "./dist/*.mjs",
-      "types": "./dist/*.d.ts"
+      "types": "./dist/*.d.mts"
     }
   },
   "typesVersions": {
     "*": {
       "config": [
-        "./dist/config.d.ts"
+        "./dist/config.d.mts"
       ],
       "map": [
-        "./dist/map.d.ts"
+        "./dist/map.d.mts"
       ],
       "types": [
-        "./dist/types.d.ts"
+        "./dist/types.d.mts"
       ]
     }
   },

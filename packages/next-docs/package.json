@@ -12,19 +12,19 @@
   "exports": {
     "./sidebar": {
       "import": "./dist/sidebar.js",
-      "types": "./dist/sidebar.d.ts"
+      "types": "./dist/sidebar.d.mts"
     },
     "./breadcrumb": {
       "import": "./dist/breadcrumb.js",
-      "types": "./dist/breadcrumb.d.ts"
+      "types": "./dist/breadcrumb.d.mts"
     },
     "./toc": {
       "import": "./dist/toc.js",
-      "types": "./dist/toc.d.ts"
+      "types": "./dist/toc.d.mts"
     },
     "./search/client": {
       "import": "./dist/search/client.js",
-      "types": "./dist/search/client.d.ts"
+      "types": "./dist/search/client.d.mts"
     },
     "./search/server": {
       "import": "./dist/search/server.js",
@@ -32,19 +32,19 @@
     },
     "./server": {
       "import": "./dist/server.mjs",
-      "types": "./dist/server.d.ts"
+      "types": "./dist/server.d.mts"
     },
     "./link": {
       "import": "./dist/link.js",
-      "types": "./dist/link.d.ts"
+      "types": "./dist/link.d.mts"
     },
     "./contentlayer": {
       "import": "./dist/contentlayer/index.mjs",
-      "types": "./dist/contentlayer/index.d.ts"
+      "types": "./dist/contentlayer/index.d.mts"
     },
     "./contentlayer/configuration": {
       "import": "./dist/contentlayer/configuration.mjs",
-      "types": "./dist/contentlayer/configuration.d.ts"
+      "types": "./dist/contentlayer/configuration.d.mts"
     },
     "./middleware": {
       "import": "./dist/middleware.js",
@@ -52,11 +52,11 @@
     },
     "./mdx-plugins": {
       "import": "./dist/mdx-plugins.mjs",
-      "types": "./dist/mdx-plugins.d.ts"
+      "types": "./dist/mdx-plugins.d.mts"
     },
     "./search-algolia/client": {
       "import": "./dist/search-algolia/client.js",
-      "types": "./dist/search-algolia/client.d.ts"
+      "types": "./dist/search-algolia/client.d.mts"
     },
     "./search-algolia/server": {
       "import": "./dist/search-algolia/server.js",
@@ -66,19 +66,22 @@
   "typesVersions": {
     "*": {
       "*": [
-        "./dist/*.d.ts"
+        "./dist/*.d.ts",
+        "./dist/*.d.mts"
       ],
       "contentlayer": [
-        "./dist/contentlayer/index.d.ts"
+        "./dist/contentlayer/index.d.mts"
       ],
       "contentlayer/configuration": [
-        "./dist/contentlayer/configuration.d.ts"
+        "./dist/contentlayer/configuration.d.mts"
       ],
       "search/*": [
-        "./dist/search/*.d.ts"
+        "./dist/search/*.d.ts",
+        "./dist/search/*.d.mts"
       ],
       "search-algolia/*": [
-        "./dist/search-algolia/*.d.ts"
+        "./dist/search-algolia/*.d.ts",
+        "./dist/search-algolia/*.d.mts"
       ]
     }
   },
