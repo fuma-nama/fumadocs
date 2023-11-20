@@ -1,7 +1,7 @@
 'use client'
 
 import type { TabsContentProps } from '@radix-ui/react-tabs'
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useLayoutEffect, useMemo, useState, type ReactNode } from 'react'
 import * as Primitive from './ui/tabs'
 
 export * as Primitive from './ui/tabs'
@@ -53,7 +53,7 @@ export function Tabs({
   const values = useMemo(() => items.map(item => toValue(item)), [items])
   const [value, setValue] = useState(values[defaultIndex])
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!id) return
 
     if (persist) {
