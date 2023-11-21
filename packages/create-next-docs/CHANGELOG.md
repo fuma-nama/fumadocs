@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 1.7.3
+
+### Patch Changes
+
+- b9af5ed: Update tsup & dependencies
+
 ## 1.7.2
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 4.0.7
+
+### Patch Changes
+
+- b9af5ed: Update tsup & dependencies
+
 ## 4.0.6
 
 ### Patch Changes
