@@ -65,9 +65,29 @@
   },
   "typesVersions": {
     "*": {
-      "*": [
-        "./dist/*.d.ts",
-        "./dist/*.d.mts"
+      "sidebar": [
+        "./dist/sidebar.d.mts"
+      ],
+      "breadcrumb": [
+        "./dist/breadcrumb.d.mts"
+      ],
+      "toc": [
+        "./dist/toc.d.mts"
+      ],
+      "search/client": [
+        "./dist/search/client.d.mts"
+      ],
+      "search/shared": [
+        "./dist/search/shared.d.ts"
+      ],
+      "search/server": [
+        "./dist/search/server.d.ts"
+      ],
+      "server": [
+        "./dist/server.d.mts"
+      ],
+      "link": [
+        "./dist/link.d.mts"
       ],
       "contentlayer": [
         "./dist/contentlayer/index.d.mts"
@@ -75,13 +95,17 @@
       "contentlayer/configuration": [
         "./dist/contentlayer/configuration.d.mts"
       ],
-      "search/*": [
-        "./dist/search/*.d.ts",
-        "./dist/search/*.d.mts"
+      "middleware": [
+        "./dist/middleware.d.ts"
       ],
-      "search-algolia/*": [
-        "./dist/search-algolia/*.d.ts",
-        "./dist/search-algolia/*.d.mts"
+      "mdx-plugins": [
+        "./dist/mdx-plugins.d.mts"
+      ],
+      "search-algolia/client": [
+        "./dist/search-algolia/client.d.mts"
+      ],
+      "search-algolia/server": [
+        "./dist/search-algolia/server.d.ts"
       ]
     }
   },
@@ -109,7 +133,7 @@
     "unist-util-visit": "^4.1.2"
   },
   "peerDependencies": {
-    "next": ">= 13",
+    "next": ">= 13.4",
     "react": ">= 18",
     "react-dom": ">= 18"
   },
