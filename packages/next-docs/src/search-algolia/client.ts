@@ -3,7 +3,7 @@ import type { Hit, SearchOptions } from '@algolia/client-search'
 import type { SearchIndex } from 'algoliasearch/lite'
 import { useState } from 'react'
 import useSWR, { type SWRResponse } from 'swr'
-import type { BaseIndex } from './shared'
+import type { BaseIndex } from './server'
 
 export function groupResults(hits: Hit<BaseIndex>[]): SortedResult[] {
   const grouped: SortedResult[] = []

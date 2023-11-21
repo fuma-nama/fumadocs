@@ -38,8 +38,8 @@
     "eslint-plugin-tailwindcss": "^3.13.0",
     "prettier": "^3.0.3",
     "prettier-plugin-tailwindcss": "^0.5.4",
-    "tsup": "6.7.0",
+    "tsup": "8.0.1",
     "turbo": "1.10.16",
-    "typescript": "5.2.2"
+    "typescript": "5.3.2"
   }
 }

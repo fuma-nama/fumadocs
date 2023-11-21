@@ -8,7 +8,6 @@ const shared = {
     'contentlayer',
     'unified'
   ],
-  format: 'esm',
   dts: true,
   target: tsconfig.compilerOptions.target as 'es2016'
 }
@@ -16,6 +15,7 @@ const shared = {
 export default defineConfig([
   {
     ...shared,
+    format: 'esm',
     name: 'next-docs-client',
     entry: [
       'src/{toc,link,breadcrumb,sidebar,dynamic-link}.tsx',
@@ -25,6 +25,7 @@ export default defineConfig([
   },
   {
     ...shared,
+    format: 'esm',
     name: 'next-docs-esm',
     entry: [
       'src/{server,mdx-plugins}.ts',
@@ -34,12 +35,11 @@ export default defineConfig([
   {
     ...shared,
     name: 'next-docs-cjs',
-    entry: ['src/{search,search-algolia}/server.ts', 'src/middleware.ts'],
+    entry: [
+      'src/{search,search-algolia}/server.ts',
+      'src/search/shared.ts',
+      'src/middleware.ts'
+    ],
     format: 'cjs'
-  },
-  {
-    name: 'next-docs-types',
-    entry: ['src/{search,search-algolia}/shared.ts'],
-    dts: { only: true }
   }
 ])

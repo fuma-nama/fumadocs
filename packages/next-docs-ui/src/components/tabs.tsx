@@ -1,30 +1,32 @@
 'use client'
 
 import type { TabsContentProps } from '@radix-ui/react-tabs'
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useLayoutEffect, useMemo, useState, type ReactNode } from 'react'
 import * as Primitive from './ui/tabs'
 
 export * as Primitive from './ui/tabs'
 
 type ListenerObject = () => void
 const valueMap = new Map<string, string>()
-const listeners: Map<string, ListenerObject[]> = new Map()
+const listeners: Map<string, Set<ListenerObject>> = new Map()
 
 function add(id: string, listener: ListenerObject) {
   if (listeners.has(id)) {
-    listeners.get(id)!.push(listener)
+    listeners.get(id)!.add(listener)
   } else {
-    listeners.set(id, [listener])
+    listeners.set(id, new Set([listener]))
   }
 }
 
 function remove(id: string, listener: ListenerObject) {
-  listeners.set(id, listeners.get(id)?.filter(ltem => listener !== ltem) ?? [])
+  listeners.get(id)?.delete(listener)
 }
 
-function update(id: string, v: string) {
+function update(id: string, v: string, persist: boolean) {
   valueMap.set(id, v)
   listeners.get(id)?.forEach(item => item())
+
+  if (persist) localStorage.setItem(id, v)
 }
 
 export function Tabs({
@@ -53,13 +55,13 @@ export function Tabs({
   const values = useMemo(() => items.map(item => toValue(item)), [items])
   const [value, setValue] = useState(values[defaultIndex])
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!id) return
 
     if (persist) {
       const previous = localStorage.getItem(id)
 
-      if (previous) update(id, previous)
+      if (previous) update(id, previous, persist)
     }
 
     const onUpdate = () => {
@@ -77,9 +79,7 @@ export function Tabs({
     setValue(value)
 
     if (id) {
-      update(id, value)
-
-      if (persist) localStorage.setItem(id, value)
+      update(id, value, persist)
     }
   }
 

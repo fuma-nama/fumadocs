@@ -11,14 +11,14 @@
     "contentlayer": "0.3.4",
     "next": "14.0.3",
     "next-contentlayer": "0.3.4",
-    "next-docs-ui": "4.0.6",
-    "next-docs-zeta": "4.0.6",
+    "next-docs-ui": "4.0.7",
+    "next-docs-zeta": "4.0.7",
     "react": "18.2.0",
     "react-dom": "18.2.0"
   },
   "devDependencies": {
     "@types/react": "18.2.0",
     "@types/react-dom": "18.2.1",
-    "typescript": "5.2.2"
+    "typescript": "5.3.2"
   }
 }

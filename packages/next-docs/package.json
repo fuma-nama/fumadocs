@@ -1,7 +1,7 @@
 {
   "name": "next-docs-zeta",
   "description": "The library for building a documentation website in Next.js",
-  "version": "4.0.6",
+  "version": "4.0.7",
   "homepage": "https://next-docs-zeta.vercel.app",
   "author": "Fuma Nama",
   "repository": "github:fuma-nama/next-docs",
@@ -12,19 +12,19 @@
   "exports": {
     "./sidebar": {
       "import": "./dist/sidebar.js",
-      "types": "./dist/sidebar.d.ts"
+      "types": "./dist/sidebar.d.mts"
     },
     "./breadcrumb": {
       "import": "./dist/breadcrumb.js",
-      "types": "./dist/breadcrumb.d.ts"
+      "types": "./dist/breadcrumb.d.mts"
     },
     "./toc": {
       "import": "./dist/toc.js",
-      "types": "./dist/toc.d.ts"
+      "types": "./dist/toc.d.mts"
     },
     "./search/client": {
       "import": "./dist/search/client.js",
-      "types": "./dist/search/client.d.ts"
+      "types": "./dist/search/client.d.mts"
     },
     "./search/server": {
       "import": "./dist/search/server.js",
@@ -32,19 +32,19 @@
     },
     "./server": {
       "import": "./dist/server.mjs",
-      "types": "./dist/server.d.ts"
+      "types": "./dist/server.d.mts"
     },
     "./link": {
       "import": "./dist/link.js",
-      "types": "./dist/link.d.ts"
+      "types": "./dist/link.d.mts"
     },
     "./contentlayer": {
       "import": "./dist/contentlayer/index.mjs",
-      "types": "./dist/contentlayer/index.d.ts"
+      "types": "./dist/contentlayer/index.d.mts"
     },
     "./contentlayer/configuration": {
       "import": "./dist/contentlayer/configuration.mjs",
-      "types": "./dist/contentlayer/configuration.d.ts"
+      "types": "./dist/contentlayer/configuration.d.mts"
     },
     "./middleware": {
       "import": "./dist/middleware.js",
@@ -52,11 +52,11 @@
     },
     "./mdx-plugins": {
       "import": "./dist/mdx-plugins.mjs",
-      "types": "./dist/mdx-plugins.d.ts"
+      "types": "./dist/mdx-plugins.d.mts"
     },
     "./search-algolia/client": {
       "import": "./dist/search-algolia/client.js",
-      "types": "./dist/search-algolia/client.d.ts"
+      "types": "./dist/search-algolia/client.d.mts"
     },
     "./search-algolia/server": {
       "import": "./dist/search-algolia/server.js",
@@ -65,20 +65,47 @@
   },
   "typesVersions": {
     "*": {
-      "*": [
-        "./dist/*.d.ts"
+      "sidebar": [
+        "./dist/sidebar.d.mts"
+      ],
+      "breadcrumb": [
+        "./dist/breadcrumb.d.mts"
+      ],
+      "toc": [
+        "./dist/toc.d.mts"
+      ],
+      "search/client": [
+        "./dist/search/client.d.mts"
+      ],
+      "search/shared": [
+        "./dist/search/shared.d.ts"
+      ],
+      "search/server": [
+        "./dist/search/server.d.ts"
+      ],
+      "server": [
+        "./dist/server.d.mts"
+      ],
+      "link": [
+        "./dist/link.d.mts"
       ],
       "contentlayer": [
-        "./dist/contentlayer/index.d.ts"
+        "./dist/contentlayer/index.d.mts"
       ],
       "contentlayer/configuration": [
-        "./dist/contentlayer/configuration.d.ts"
+        "./dist/contentlayer/configuration.d.mts"
       ],
-      "search/*": [
-        "./dist/search/*.d.ts"
+      "middleware": [
+        "./dist/middleware.d.ts"
       ],
-      "search-algolia/*": [
-        "./dist/search-algolia/*.d.ts"
+      "mdx-plugins": [
+        "./dist/mdx-plugins.d.mts"
+      ],
+      "search-algolia/client": [
+        "./dist/search-algolia/client.d.mts"
+      ],
+      "search-algolia/server": [
+        "./dist/search-algolia/server.d.ts"
       ]
     }
   },
@@ -106,7 +133,7 @@
     "unist-util-visit": "^4.1.2"
   },
   "peerDependencies": {
-    "next": ">= 13",
+    "next": ">= 13.4",
     "react": ">= 18",
     "react-dom": ">= 18"
   },
