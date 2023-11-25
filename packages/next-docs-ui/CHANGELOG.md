@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 4.0.7
+
+### Patch Changes
+
+- b9af5ed: Update tsup & dependencies
+- Updated dependencies [b9af5ed]
+  - next-docs-zeta@4.0.7
+
 ## 4.0.6
 
 ### Patch Changes
