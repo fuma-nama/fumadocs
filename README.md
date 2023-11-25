@@ -10,7 +10,7 @@ This monorepo includes three packages.
 
 ### Next Docs Zeta
 
-The headless UI library for building docuementation websites.
+The headless UI library for building documentation websites.
 
 It includes necessary parts such as TOC, Sidebar, and some useful utilities.
 
@@ -20,7 +20,7 @@ npm install next-docs-zeta
 
 ### Next Docs UI
 
-The framework built on top of Next Docs Zeta. It offers many out-of-the-box
+The framework is built on top of Next Docs Zeta. It offers many out-of-the-box
 features along with a well-designed user interface.
 
 ```bash
@@ -34,6 +34,10 @@ A CLI tool that generates documentation sites.
 ```bash
 npx create next-docs-app
 ```
+
+### Compatiability
+
+All packages are **ESM only**.
 
 ## Contributions
 

@@ -8,10 +8,7 @@
         "!.contentlayer/.cache/**",
         ".next/**",
         "!.next/cache/**",
-        "dist/**/*.d.ts",
-        "dist/**/*.mjs",
-        "dist/**/*.js",
-        "dist/**/*.css"
+        "dist/**"
       ]
     },
     "test": {},

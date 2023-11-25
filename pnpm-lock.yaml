@@ -502,9 +502,6 @@ importers:
       autoprefixer:
         specifier: 10.4.16
         version: 10.4.16(postcss@8.4.31)
-      contentlayer:
-        specifier: ^0.3.4
-        version: 0.3.4
       next:
         specifier: 14.0.3
         version: 14.0.3(@babel/core@7.22.17)(react-dom@18.2.0)(react@18.2.0)

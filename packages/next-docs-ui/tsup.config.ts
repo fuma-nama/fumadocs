@@ -8,7 +8,6 @@ export default defineConfig({
     './src/{i18n,layout,mdx,mdx-server,nav,not-found,page,provider}.{ts,tsx}'
   ],
   outExtension: () => ({ js: '.js' }),
-  external: ['next-docs-zeta'],
   format: 'esm',
   dts: true,
   target: tsconfig.compilerOptions.target as 'es2022'
