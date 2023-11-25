@@ -81,8 +81,8 @@ importers:
         specifier: ^0.16.8
         version: 0.16.8
       lucide-react:
-        specifier: ^0.292.0
-        version: 0.292.0(react@18.2.0)
+        specifier: ^0.293.0
+        version: 0.293.0(react@18.2.0)
       next:
         specifier: 14.0.3
         version: 14.0.3(@babel/core@7.22.17)(react-dom@18.2.0)(react@18.2.0)
@@ -172,10 +172,10 @@ importers:
         specifier: 0.3.4
         version: 0.3.4(contentlayer@0.3.4)(next@14.0.3)(react-dom@18.2.0)(react@18.2.0)
       next-docs-ui:
-        specifier: 4.0.7
+        specifier: 4.0.8
         version: link:../../packages/next-docs-ui
       next-docs-zeta:
-        specifier: 4.0.7
+        specifier: 4.0.8
         version: link:../../packages/next-docs
       react:
         specifier: 18.2.0
@@ -215,10 +215,10 @@ importers:
         specifier: 0.3.4
         version: 0.3.4(contentlayer@0.3.4)(next@14.0.3)(react-dom@18.2.0)(react@18.2.0)
       next-docs-ui:
-        specifier: 4.0.7
+        specifier: 4.0.8
         version: link:../../packages/next-docs-ui
       next-docs-zeta:
-        specifier: 4.0.7
+        specifier: 4.0.8
         version: link:../../packages/next-docs
       react:
         specifier: 18.2.0
@@ -252,13 +252,13 @@ importers:
         specifier: 14.0.3
         version: 14.0.3(@babel/core@7.22.17)(react-dom@18.2.0)(react@18.2.0)
       next-docs-mdx:
-        specifier: 4.0.7
+        specifier: 4.0.8
         version: link:../../packages/next-docs-mdx
       next-docs-ui:
-        specifier: 4.0.7
+        specifier: 4.0.8
         version: link:../../packages/next-docs-ui
       next-docs-zeta:
-        specifier: 4.0.7
+        specifier: 4.0.8
         version: link:../../packages/next-docs
       react:
         specifier: 18.2.0
@@ -466,8 +466,8 @@ importers:
         specifier: ^0.2.0
         version: 0.2.0(@types/react@18.2.0)(react-dom@18.2.0)(react@18.2.0)
       lucide-react:
-        specifier: ^0.292.0
-        version: 0.292.0(react@18.2.0)
+        specifier: ^0.293.0
+        version: 0.293.0(react@18.2.0)
       next-docs-zeta:
         specifier: workspace:*
         version: link:../next-docs
@@ -502,9 +502,6 @@ importers:
       autoprefixer:
         specifier: 10.4.16
         version: 10.4.16(postcss@8.4.31)
-      contentlayer:
-        specifier: ^0.3.4
-        version: 0.3.4
       next:
         specifier: 14.0.3
         version: 14.0.3(@babel/core@7.22.17)(react-dom@18.2.0)(react@18.2.0)
@@ -6027,8 +6024,8 @@ packages:
     dependencies:
       yallist: 4.0.0
 
-  /lucide-react@0.292.0(react@18.2.0):
-    resolution: {integrity: sha512-rRgUkpEHWpa5VCT66YscInCQmQuPCB1RFRzkkxMxg4b+jaL0V12E3riWWR2Sh5OIiUhCwGW/ZExuEO4Az32E6Q==}
+  /lucide-react@0.293.0(react@18.2.0):
+    resolution: {integrity: sha512-g3AN0EYITCpAjNgLHrKrFWvIJzZy0Y9OPBaonyKw1cM+nZE6piOM+TiuQdYfha7oa76TMiDaWXQHE44CEqsrzw==}
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0
     dependencies:
