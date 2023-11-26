@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 4.0.8
+
+### Patch Changes
+
+- e0c5c96: Make ESM only
+- Updated dependencies [e0c5c96]
+  - next-docs-zeta@4.0.8
+
 ## 4.0.7
 
 ### Patch Changes
