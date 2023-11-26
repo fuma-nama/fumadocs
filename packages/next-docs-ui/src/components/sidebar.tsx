@@ -1,5 +1,5 @@
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { SidebarContext } from '@/contexts/sidebar'
+import { useSidebarCollapse } from '@/contexts/sidebar'
 import { LayoutContext } from '@/contexts/tree'
 import { cn } from '@/utils/cn'
 import { cva } from 'class-variance-authority'
@@ -35,7 +35,7 @@ const itemVariants = cva(
 )
 
 export function Sidebar({ banner, footer }: SidebarProps) {
-  const [open] = useContext(SidebarContext)
+  const [open] = useSidebarCollapse()
   const { tree } = useContext(LayoutContext)
 
   return (

@@ -69,10 +69,12 @@ body {
   display: block;
   position: relative;
 }
+
 [data-rmiz-ghost] {
   pointer-events: none;
   position: absolute;
 }
+
 [data-rmiz-btn-zoom],
 [data-rmiz-btn-unzoom] {
   display: none;
@@ -109,9 +111,11 @@ body {
 [data-rmiz-modal-overlay='hidden'] {
   background-color: transparent;
 }
+
 [data-rmiz-modal-overlay='visible'] {
   background-color: hsl(var(--background) / 0.8);
 }
+
 [data-rmiz-modal-content] {
   width: 100%;
   height: 100%;
@@ -129,6 +133,7 @@ body {
   transition: transform 0.3s;
   position: absolute;
 }
+
 @media (prefers-reduced-motion: reduce) {
   [data-rmiz-modal-overlay],
   [data-rmiz-modal-img] {

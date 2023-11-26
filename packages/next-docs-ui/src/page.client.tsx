@@ -1,6 +1,6 @@
 'use client'
 
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useLayoutEffect, useState } from 'react'
 import { I18nContext } from './contexts/i18n'
 
 export * from '@/components/toc'
@@ -11,7 +11,7 @@ export function LastUpdate(props: { date: Date }) {
     useContext(I18nContext).text?.lastUpdate ?? 'Last updated on'
   const [date, setDate] = useState('')
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     // to the timezone of client
     setDate(props.date.toLocaleDateString())
   }, [props.date])
