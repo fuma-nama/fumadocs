@@ -27,9 +27,7 @@ export type StructuredData = {
 
 type Options = {
   /**
-   * Types to be scanned
-   *
-   * @default ["heading", "blockquote", "paragraph"]
+   * Types to be scanned, default: `["heading", "blockquote", "paragraph"]`
    */
   types?: string[]
 }
@@ -48,23 +46,25 @@ export function remarkStructure({
     let lastHeading: string | undefined = ''
 
     visit(node, types, (element: MdastContent) => {
+      const content = flattenNode(element).trim()
       if (element.type === 'heading') {
-        const heading = flattenNode(element)
-        const slug = slugger.slug(heading)
+        const slug = slugger.slug(content)
 
         data.headings.push({
           id: slug,
-          content: heading
+          content
         })
 
         lastHeading = slug
         return 'skip'
       }
 
-      data.contents.push({
-        heading: lastHeading,
-        content: flattenNode(element)
-      })
+      if (content.length > 0) {
+        data.contents.push({
+          heading: lastHeading,
+          content
+        })
+      }
 
       return 'skip'
     })

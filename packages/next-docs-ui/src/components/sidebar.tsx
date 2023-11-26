@@ -1,5 +1,5 @@
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { SidebarContext } from '@/contexts/sidebar'
+import { useSidebarCollapse } from '@/contexts/sidebar'
 import { LayoutContext } from '@/contexts/tree'
 import { cn } from '@/utils/cn'
 import { cva } from 'class-variance-authority'
@@ -35,7 +35,7 @@ const itemVariants = cva(
 )
 
 export function Sidebar({ banner, footer }: SidebarProps) {
-  const [open] = useContext(SidebarContext)
+  const [open] = useSidebarCollapse()
   const { tree } = useContext(LayoutContext)
 
   return (
@@ -115,14 +115,9 @@ function Folder({
   const pathname = usePathname()
   const active = index != null && pathname === index.url
   const childActive = useMemo(() => hasActive(children, pathname), [pathname])
-  const [animated, setAnimated] = useState(false)
   const [extend, setExtend] = useState(
     active || childActive || sidebarDefaultOpenLevel >= level
   )
-
-  useEffect(() => {
-    setAnimated(true)
-  }, [])
 
   useEffect(() => {
     if (active || childActive) setExtend(true)
@@ -160,7 +155,7 @@ function Folder({
           <button>{content}</button>
         )}
       </CollapsibleTrigger>
-      <CollapsibleContent className={cn(!animated && '!nd-duration-0')}>
+      <CollapsibleContent>
         <div className="nd-flex nd-flex-col nd-ml-4 nd-pl-2 nd-border-l nd-py-2">
           {children.map((item, i) => (
             <Node key={i} item={item} level={level + 1} />

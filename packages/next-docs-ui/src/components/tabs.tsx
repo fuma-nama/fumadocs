@@ -1,7 +1,7 @@
 'use client'
 
 import type { TabsContentProps } from '@radix-ui/react-tabs'
-import { useLayoutEffect, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import * as Primitive from './ui/tabs'
 
 export * as Primitive from './ui/tabs'
@@ -55,14 +55,8 @@ export function Tabs({
   const values = useMemo(() => items.map(item => toValue(item)), [items])
   const [value, setValue] = useState(values[defaultIndex])
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (!id) return
-
-    if (persist) {
-      const previous = localStorage.getItem(id)
-
-      if (previous) update(id, previous, persist)
-    }
 
     const onUpdate = () => {
       const current = valueMap.get(id)
@@ -70,16 +64,22 @@ export function Tabs({
       if (current != null && values.includes(current)) setValue(current)
     }
 
-    onUpdate()
+    if (persist) {
+      const previous = localStorage.getItem(id)
+
+      if (previous) update(id, previous, persist)
+    }
+
     add(id, onUpdate)
+    onUpdate()
     return () => remove(id, onUpdate)
   }, [])
 
   const onValueChange = (value: string) => {
-    setValue(value)
-
     if (id) {
       update(id, value, persist)
+    } else {
+      setValue(value)
     }
   }
 

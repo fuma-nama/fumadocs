@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 4.0.9
+
+### Patch Changes
+
+- a883009: Fix empty extracted paragraphs in `remark-structure`
+
 ## 4.0.8
 
 ### Patch Changes

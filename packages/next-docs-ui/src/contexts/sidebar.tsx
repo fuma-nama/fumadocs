@@ -1,15 +1,22 @@
-import { createContext, useState, type ReactNode } from 'react'
+import { createContext, useContext, useState, type ReactNode } from 'react'
 
-export const SidebarContext = createContext<
-  [open: boolean, setOpen: (v: boolean) => void]
->([true, () => {}])
+type SidebarCollapseContext = [open: boolean, setOpen: (v: boolean) => void]
 
-export function DesktopSidebarProvider({ children }: { children: ReactNode }) {
+const SidebarCollapseContext = createContext<SidebarCollapseContext>([
+  true,
+  () => {}
+])
+
+export function useSidebarCollapse(): SidebarCollapseContext {
+  return useContext(SidebarCollapseContext)
+}
+
+export function SidebarCollapseProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(true)
 
   return (
-    <SidebarContext.Provider value={[open, setOpen]}>
+    <SidebarCollapseContext.Provider value={[open, setOpen]}>
       {children}
-    </SidebarContext.Provider>
+    </SidebarCollapseContext.Provider>
   )
 }

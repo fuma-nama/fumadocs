@@ -1,6 +1,6 @@
 import { I18nContext } from '@/contexts/i18n'
 import { SearchContext } from '@/contexts/search'
-import { SidebarContext } from '@/contexts/sidebar'
+import { useSidebarCollapse } from '@/contexts/sidebar'
 import { cn } from '@/utils/cn'
 import { cva } from 'class-variance-authority'
 import {
@@ -119,7 +119,7 @@ function SearchToggle() {
 }
 
 function SidebarToggle({ collapsible }: { collapsible: boolean }) {
-  const [open, setOpen] = useContext(SidebarContext)
+  const [open, setOpen] = useSidebarCollapse()
 
   return (
     <>

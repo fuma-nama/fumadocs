@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 4.0.9
+
+### Patch Changes
+
+- 70545e7: Support `enableThemeProvider` option in RootProvider
+- Updated dependencies [a883009]
+  - next-docs-zeta@4.0.9
+
 ## 4.0.8
 
 ### Patch Changes
