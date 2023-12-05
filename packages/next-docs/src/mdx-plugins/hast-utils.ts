@@ -1,10 +1,10 @@
-import type { Content, Element, Parent, Root } from 'hast'
+import type { Element, Parent, Root, RootContent } from 'hast'
 
 /**
  * Visit a node with filtered tag names
  */
 export function visit(
-  node: Content | Root,
+  node: RootContent | Root,
   tagNames: string[],
   handler: (node: Element) => void
 ): void {
@@ -18,7 +18,7 @@ export function visit(
     node.children.forEach(n => visit(n, tagNames, handler))
 }
 
-export function flattenNode(node: Content): string {
+export function flattenNode(node: RootContent): string {
   if ('children' in node) {
     return all(node)
   }
@@ -30,7 +30,7 @@ export function flattenNode(node: Content): string {
   return ''
 }
 
-function one(node: Content): string {
+function one(node: RootContent): string {
   if (node.type === 'text') {
     return node.value
   }

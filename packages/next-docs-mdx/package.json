@@ -40,7 +40,7 @@
   "dependencies": {
     "estree-util-value-to-estree": "^3.0.1",
     "fast-glob": "^3.3.1",
-    "remark-frontmatter": "^4.0.1",
+    "remark-frontmatter": "^5.0.0",
     "yaml": "^2.3.3",
     "zod": "^3.22.4"
   },
@@ -50,12 +50,12 @@
   },
   "devDependencies": {
     "@next/mdx": "14.0.3",
-    "@types/mdast": "^3.0.12",
+    "@types/mdast": "^4.0.3",
     "@types/mdx": "^2.0.8",
     "@types/react": "18.2.0",
     "next": "14.0.3",
     "next-docs-zeta": "workspace:*",
-    "unified": "^10.1.2",
+    "unified": "^11.0.4",
     "webpack": "^5.89.0"
   },
   "keywords": [

@@ -18,6 +18,9 @@
     "update-example": "node ./scripts/on-push.js"
   },
   "pnpm": {
+    "overrides": {
+      "unified": "^11.0.4"
+    },
     "peerDependencyRules": {
       "ignoreMissing": [
         "@opentelemetry/api",

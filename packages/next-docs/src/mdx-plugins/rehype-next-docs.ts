@@ -50,10 +50,14 @@ export function rehypeNextDocs({
       }
 
       if (node.tagName === 'pre') {
-        const [codeEl] = node.children
+        const codeEl = node.children[0] as Element
 
         // Allow custom code meta
-        if (typeof codeEl.data?.meta === 'string') {
+        if (
+          codeEl.data &&
+          'meta' in codeEl.data &&
+          typeof codeEl.data.meta === 'string'
+        ) {
           // @ts-ignore
           node.nd_custom = codeEl.data.meta.match(customMetaRegex)?.[1]
         }

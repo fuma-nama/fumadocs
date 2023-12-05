@@ -1,5 +1,5 @@
 import Slugger from 'github-slugger'
-import type { Content as MdastContent, Root } from 'mdast'
+import type { RootContent as MdastContent, Root } from 'mdast'
 import { remark } from 'remark'
 import remarkGfm from 'remark-gfm'
 import remarkMdx from 'remark-mdx'
@@ -85,7 +85,7 @@ export function structure(
     .use(remarkGfm)
     .use(remarkMdx)
     .use(remarkPlugins)
-    .use([remarkStructure, options])
+    .use(remarkStructure, options)
     .processSync(content)
 
   return result.data.structuredData as StructuredData
