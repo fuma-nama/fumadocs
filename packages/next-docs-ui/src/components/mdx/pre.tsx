@@ -4,7 +4,7 @@ import { CheckIcon, CopyIcon } from 'lucide-react'
 import type { ButtonHTMLAttributes, HTMLAttributes } from 'react'
 import { forwardRef, useCallback, useEffect, useRef, useState } from 'react'
 
-type PreProps = HTMLAttributes<HTMLElement> & {
+export type PreProps = HTMLAttributes<HTMLElement> & {
   allowCopy?: boolean
 }
 
