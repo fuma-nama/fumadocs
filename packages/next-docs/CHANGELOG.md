@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 5.0.0
+
+### Minor Changes
+
+- de44efe: Migrate to Shikiji
+- de44efe: Support code highlighting options
+
 ## 4.0.9
 
 ### Patch Changes
