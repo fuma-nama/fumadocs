@@ -29,7 +29,7 @@
     "react-dom": "18.2.0",
     "rehype-katex": "^6.0.3",
     "remark-math": "^5.1.1",
-    "shiki": "^0.14.5",
+    "shikiji": "^0.7.6",
     "tailwind-merge": "^2.0.0",
     "zod": "^3.22.4"
   },

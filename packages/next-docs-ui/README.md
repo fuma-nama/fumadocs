@@ -2,7 +2,7 @@
 
 The Next.js framework for building documentation website.
 
-It's build on the top of Next.js, Radix UI and **Next Docs**, fully styled using
+It's built on top of Next.js, Radix UI and **Next Docs**, fully styled using
 Tailwind CSS.
 
 ## Features
@@ -13,7 +13,7 @@ Next Docs UI provides many features out of the box.
 - Full-text Search
 - Table of Contents
 - Built-in Components
-- Code Syntax highlighting powered by Shiki
+- Code Syntax highlighting powered by Shikiji
 - Well Designed UI & Accessibility
 
 **Moreover:**

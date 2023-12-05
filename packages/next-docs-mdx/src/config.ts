@@ -5,7 +5,8 @@ import {
   rehypeNextDocs,
   remarkGfm,
   remarkStructure,
-  remarkToc
+  remarkToc,
+  type RehypeNextDocsOptions
 } from 'next-docs-zeta/mdx-plugins'
 import remarkFrontmatter, {
   type Options as RemarkFrontmatterOptions
@@ -48,6 +49,11 @@ type NextDocsMDXOptions = {
    * @default './content/docs`
    */
   rootContentPath?: string
+
+  /**
+   * Options passed to the built-in rehype plugin
+   */
+  pluginOptions?: RehypeNextDocsOptions
 }
 
 const createNextDocs =
@@ -57,7 +63,8 @@ const createNextDocs =
     mdxOptions = {},
     cwd = process.cwd(),
     rootMapPath = './_map.ts',
-    rootContentPath = './content/docs'
+    rootContentPath = './content/docs',
+    pluginOptions
   }: NextDocsMDXOptions = {}) =>
   (nextConfig: NextConfig = {}) => {
     const exports = ['structuredData', 'toc', ...dataExports]
@@ -74,7 +81,7 @@ const createNextDocs =
     ]
 
     const rehypePlugins: PluggableList = [
-      rehypeNextDocs,
+      [rehypeNextDocs, pluginOptions],
       ...(mdxOptions?.rehypePlugins ?? [])
     ]
 

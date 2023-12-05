@@ -30,7 +30,12 @@ export function RootProvider({
   )
 
   return enableThemeProvider ? (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
       {body}
     </ThemeProvider>
   ) : (

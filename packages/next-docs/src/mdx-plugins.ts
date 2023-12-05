@@ -6,7 +6,10 @@ export {
   default as remarkGfm,
   type Options as RemarkGfmOptions
 } from 'remark-gfm'
-export { rehypeNextDocs } from './mdx-plugins/rehype-next-docs'
+export {
+  type RehypeNextDocsOptions,
+  rehypeNextDocs
+} from './mdx-plugins/rehype-next-docs'
 export {
   remarkDynamicContent,
   type Options as RemarkDynamicContentOptions

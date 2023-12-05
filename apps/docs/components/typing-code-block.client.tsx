@@ -1,14 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import type { IThemedToken } from 'shiki'
+import type { ThemedToken } from 'shikiji'
 
 export function TypingCode({
   tokens,
   delay,
   time
 }: {
-  tokens: IThemedToken[]
+  tokens: ThemedToken[]
   /**
    * Delay to start animation (in ms)
    */
@@ -36,7 +36,7 @@ export function TypingCode({
 
   let currentLen = 0
   return (
-    <code data-line>
+    <span data-line>
       {tokens.flatMap((s, j) => {
         if (currentLen > length) return
         const slicedContent = s.content.slice(
@@ -51,6 +51,6 @@ export function TypingCode({
           </span>
         )
       })}
-    </code>
+    </span>
   )
 }

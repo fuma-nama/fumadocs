@@ -7,6 +7,7 @@
  */
 
 import { rehypeImgSize, rehypeNextDocs, remarkGfm } from '@/mdx-plugins'
+import type { RehypeNextDocsOptions } from '@/mdx-plugins/rehype-next-docs'
 import type { Args, ComputedFields, FieldDef } from 'contentlayer/source-files'
 import { defineDocumentType } from 'contentlayer/source-files'
 import type { Options as ImgSizeOptions } from 'rehype-img-size'
@@ -50,10 +51,12 @@ type Options = {
    */
   imgDirPath: string
 
-  docFields?: Record<string, FieldDef>
-  docsComputedFields?: ComputedFields<'Docs'>
-  metaFields?: Record<string, FieldDef>
-  metaComputedFields?: ComputedFields<'Meta'>
+  pluginOptions: RehypeNextDocsOptions
+
+  docFields: Record<string, FieldDef>
+  docsComputedFields: ComputedFields<'Docs'>
+  metaFields: Record<string, FieldDef>
+  metaComputedFields: ComputedFields<'Meta'>
 }
 
 export function createConfig(options: Partial<Options> = {}): Args {
@@ -64,6 +67,7 @@ export function createConfig(options: Partial<Options> = {}): Args {
     docFields,
     metaFields,
     docsComputedFields,
+    pluginOptions,
     metaComputedFields
   } = options
 
@@ -146,7 +150,7 @@ export function createConfig(options: Partial<Options> = {}): Args {
     documentTypes: [Docs, Meta],
     mdx: {
       rehypePlugins: [
-        rehypeNextDocs,
+        [rehypeNextDocs, pluginOptions],
         [
           // @ts-ignore
           rehypeImgSize,
