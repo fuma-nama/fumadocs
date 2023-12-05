@@ -18,7 +18,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "katex": "^0.16.8",
-    "lucide-react": "^0.293.0",
+    "lucide-react": "^0.294.0",
     "next": "14.0.3",
     "next-docs-mdx": "workspace:*",
     "next-docs-ui": "workspace:*",
@@ -29,7 +29,7 @@
     "react-dom": "18.2.0",
     "rehype-katex": "^6.0.3",
     "remark-math": "^5.1.1",
-    "shiki": "^0.14.5",
+    "shikiji": "^0.7.6",
     "tailwind-merge": "^2.0.0",
     "zod": "^3.22.4"
   },
@@ -42,8 +42,8 @@
     "autoprefixer": "10.4.16",
     "glslify": "^7.1.1",
     "glslx": "^0.3.0",
-    "postcss": "8.4.31",
-    "tailwindcss": "3.3.5",
+    "postcss": "8.4.32",
+    "tailwindcss": "3.3.6",
     "tailwindcss-animate": "^1.0.7",
     "webpack": "^5.89.0"
   }

@@ -1,44 +1,55 @@
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/utils/cn'
 import { CheckIcon, CopyIcon } from 'lucide-react'
-import type { ButtonHTMLAttributes, ComponentPropsWithoutRef } from 'react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import type { ButtonHTMLAttributes, HTMLAttributes } from 'react'
+import { forwardRef, useCallback, useEffect, useRef, useState } from 'react'
 
-type PreProps = ComponentPropsWithoutRef<'pre'> & {
+export type PreProps = HTMLAttributes<HTMLElement> & {
   allowCopy?: boolean
 }
 
-export function Pre({ title, allowCopy = true, ...props }: PreProps) {
-  const ref = useRef<HTMLPreElement>(null)
-  const onCopy = useCallback(() => {
-    if (ref.current?.textContent == null) return
+export const Pre = forwardRef<HTMLElement, PreProps>(
+  ({ title, allowCopy = true, className, ...props }, ref) => {
+    const preRef = useRef<HTMLPreElement>(null)
+    const onCopy = useCallback(() => {
+      if (preRef.current?.textContent == null) return
 
-    navigator.clipboard.writeText(ref.current.textContent)
-  }, [])
+      navigator.clipboard.writeText(preRef.current.textContent)
+    }, [])
 
-  return (
-    <div className="nd-relative nd-overflow-hidden nd-group nd-border nd-rounded-lg nd-text-sm nd-bg-secondary/50 nd-my-6 nd-not-prose">
-      {title ? (
-        <div className="nd-flex nd-flex-row nd-items-center nd-bg-muted nd-text-muted-foreground nd-pl-4 nd-pr-2 nd-py-1.5 nd-border-b">
-          <span className="nd-flex-1">{title}</span>
-          {allowCopy && <CopyButton onCopy={onCopy} />}
-        </div>
-      ) : (
-        allowCopy && (
-          <CopyButton
-            className="nd-absolute nd-top-2 nd-right-2 nd-z-[2]"
-            onCopy={onCopy}
-          />
-        )
-      )}
-      <ScrollArea>
-        <pre ref={ref} {...props} className={cn('nd-py-4', props.className)}>
-          {props.children}
-        </pre>
-      </ScrollArea>
-    </div>
-  )
-}
+    return (
+      <figure
+        ref={ref}
+        className={cn(
+          'nd-relative nd-overflow-hidden nd-group nd-border nd-rounded-lg nd-text-sm nd-bg-secondary/50 nd-my-6 nd-not-prose',
+          className
+        )}
+        {...props}
+      >
+        {title ? (
+          <div className="nd-flex nd-flex-row nd-items-center nd-bg-muted nd-text-muted-foreground nd-pl-4 nd-pr-2 nd-py-1.5 nd-border-b">
+            <figcaption className="nd-flex-1">{title}</figcaption>
+            {allowCopy && <CopyButton onCopy={onCopy} />}
+          </div>
+        ) : (
+          allowCopy && (
+            <CopyButton
+              className="nd-absolute nd-top-2 nd-right-2 nd-z-[2]"
+              onCopy={onCopy}
+            />
+          )
+        )}
+        <ScrollArea>
+          <pre data-nd-codeblock ref={preRef} className="nd-py-4">
+            {props.children}
+          </pre>
+        </ScrollArea>
+      </figure>
+    )
+  }
+)
+
+Pre.displayName = 'Pre'
 
 function CopyButton({
   className,

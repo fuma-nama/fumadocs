@@ -26,10 +26,11 @@ export default async function Page({ params }: { params: Param }) {
 
   const neighbours = findNeighbour(tab.tree, tab.getPageUrl(page.slugs))
 
+  const path = resolve('apps/docs/content/docs/', page.file.path)
   const time = await getGithubLastEdit({
     owner: 'fuma-nama',
     repo: 'next-docs',
-    path: resolve('apps/docs/content/docs/', page.file.path),
+    path,
     token: process.env.GIT_TOKEN ? `Bearer ${process.env.GIT_TOKEN}` : undefined
   })
 
@@ -45,8 +46,8 @@ export default async function Page({ params }: { params: Param }) {
         footer: (
           <a
             href={resolve(
-              `https://github.com/fuma-nama/next-docs/blob/main/apps/docs/content`,
-              page.file.path
+              `https://github.com/fuma-nama/next-docs/blob/main`,
+              path
             )}
             target="_blank"
             rel="noreferrer noopener"

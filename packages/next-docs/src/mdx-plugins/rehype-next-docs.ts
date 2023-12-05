@@ -1,5 +1,5 @@
 import Slugger from 'github-slugger'
-import type { Root } from 'hast'
+import type { Element, Root } from 'hast'
 import rehypePrettycode, {
   type Options as RehypePrettyCodeOptions
 } from 'rehype-pretty-code'
@@ -11,7 +11,10 @@ const headings = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
 const customMetaRegex = /custom="([^"]+)"/
 
 const rehypePrettyCodeOptions: RehypePrettyCodeOptions = {
-  theme: 'css-variables',
+  theme: {
+    light: 'github-light',
+    dark: 'github-dark'
+  },
   defaultLang: {
     block: 'text'
   },
@@ -22,10 +25,16 @@ const rehypePrettyCodeOptions: RehypePrettyCodeOptions = {
   }
 }
 
+export type RehypeNextDocsOptions = {
+  codeOptions?: RehypePrettyCodeOptions
+}
+
 /**
  * Handle codeblocks and heading slugs
  */
-export function rehypeNextDocs(): Transformer<Root, Root> {
+export function rehypeNextDocs({
+  codeOptions
+}: RehypeNextDocsOptions = {}): Transformer<Root, Root> {
   return async tree => {
     slugger.reset()
 
@@ -52,31 +61,29 @@ export function rehypeNextDocs(): Transformer<Root, Root> {
     })
 
     // @ts-ignore
-    await rehypePrettycode(rehypePrettyCodeOptions)(tree)
+    await rehypePrettycode({ ...rehypePrettyCodeOptions, ...codeOptions })(tree)
 
-    visit(tree, ['div', 'pre'], node => {
+    visit(tree, ['figure', 'pre'], node => {
       node.properties ||= {}
 
-      // Remove default fragment div
+      // Remove default fragment element
       // Add title to pre element
-      if ('data-rehype-pretty-code-fragment' in node.properties) {
-        if (node.children.length === 0) return
-        let title: string | undefined = undefined
+      if ('data-rehype-pretty-code-figure' in node.properties) {
+        const titleNode = node.children.find(
+          child => child.type === 'element' && child.tagName === 'figcaption'
+        ) as Element | undefined
+        const preNode = node.children.find(
+          child => child.type === 'element' && child.tagName === 'pre'
+        ) as Element | undefined
 
-        for (const child of node.children) {
-          if (child.type !== 'element') continue
-          child.properties ||= {}
+        if (!preNode) return
 
-          if ('data-rehype-pretty-code-title' in child.properties) {
-            title = flattenNode(child)
-          }
-
-          if (child.tagName === 'pre') {
-            child.properties.title = title
-            Object.assign(node, child)
-            break
-          }
+        if (titleNode) {
+          preNode.properties ||= {}
+          preNode.properties.title = flattenNode(titleNode)
         }
+
+        Object.assign(node, preNode)
       }
 
       // Add custom meta to properties
