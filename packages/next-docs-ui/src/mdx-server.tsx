@@ -8,10 +8,13 @@ import serverComponents, {
   MDXContent,
   Table
 } from '@/internal/mdx-server'
+import { ComponentType } from 'react'
 
 const client = await import('@/internal/mdx-client')
 
-const Pre = (p => <client.Pre {...p} />) as typeof client.Pre
+const Pre = (p => <client.Pre {...p} ref={undefined} />) as ComponentType<
+  JSX.IntrinsicElements['pre']
+>
 
 const defaultMdxComponents = {
   pre: Pre,
