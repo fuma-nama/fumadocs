@@ -10,12 +10,14 @@ body {
   @apply nd-bg-background nd-text-foreground;
 }
 
-[data-nd-codeblock] [data-line] {
-  @apply nd-px-4 nd-border-l-2 nd-border-transparent;
-}
+.nd-codeblock {
+  & [data-line] {
+    @apply nd-px-4 nd-border-l-2 nd-border-transparent;
+  }
 
-[data-highlighted-line][data-line] {
-  @apply nd-border-primary nd-bg-primary/10;
+  & [data-highlighted-line] {
+    @apply nd-border-primary nd-bg-primary/10;
+  }
 }
 
 [data-highlighted-chars] {

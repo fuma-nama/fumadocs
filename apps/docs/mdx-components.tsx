@@ -11,7 +11,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
     ...defaultComponents,
     pre: props => (
-      <defaultComponents.pre {...props} className="max-h-[400px]" />
+      <defaultComponents.pre {...props} pre={{ className: 'max-h-[400px]' }} />
     ),
     Image: defaultComponents.img,
     Tabs: (p => <Tabs {...p} />) as typeof Tabs,

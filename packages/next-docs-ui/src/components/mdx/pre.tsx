@@ -4,12 +4,16 @@ import { CheckIcon, CopyIcon } from 'lucide-react'
 import type { ButtonHTMLAttributes, HTMLAttributes } from 'react'
 import { forwardRef, useCallback, useEffect, useRef, useState } from 'react'
 
-export type PreProps = HTMLAttributes<HTMLElement> & {
+export type CodeBlockProps = HTMLAttributes<HTMLElement> & {
   allowCopy?: boolean
+  /**
+   * Custom attributes to the inner `pre` element
+   */
+  pre?: HTMLAttributes<HTMLPreElement>
 }
 
-export const Pre = forwardRef<HTMLElement, PreProps>(
-  ({ title, allowCopy = true, className, ...props }, ref) => {
+export const Pre = forwardRef<HTMLElement, CodeBlockProps>(
+  ({ title, allowCopy = true, pre, className, ...props }, ref) => {
     const preRef = useRef<HTMLPreElement>(null)
     const onCopy = useCallback(() => {
       if (preRef.current?.textContent == null) return
@@ -40,7 +44,11 @@ export const Pre = forwardRef<HTMLElement, PreProps>(
           )
         )}
         <ScrollArea>
-          <pre data-nd-codeblock ref={preRef} className="nd-py-4">
+          <pre
+            ref={preRef}
+            {...pre}
+            className={cn('nd-codeblock nd-py-4', pre?.className)}
+          >
             {props.children}
           </pre>
         </ScrollArea>
@@ -49,7 +57,7 @@ export const Pre = forwardRef<HTMLElement, PreProps>(
   }
 )
 
-Pre.displayName = 'Pre'
+Pre.displayName = 'CodeBlock'
 
 function CopyButton({
   className,
