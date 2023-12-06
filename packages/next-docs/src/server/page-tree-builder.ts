@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react'
 import type { FileNode, FolderNode, PageTree, TreeNode } from './types'
+import { joinPaths, splitPath } from './utils'
 
 export type AbstractFile = {
   locale?: string
@@ -317,42 +318,4 @@ export function createPageTreeBuilder({
 function pathToName(path: string[]): string {
   const name = path[path.length - 1] ?? 'docs'
   return name.slice(0, 1).toUpperCase() + name.slice(1)
-}
-
-/**
- * Split path into segments, trailing/leading slashes are removed
- */
-export function splitPath(path: string): string[] {
-  return path.split('/').filter(p => p.length > 0)
-}
-
-/**
- * Convert paths to an array, slashes within the path will be ignored
- * @param paths
- * @param slash Add a trailing/leading slash to path
- * @example
- * ```
- * ['a','b','c'] // 'a/b/c'
- * ['/a'] // 'a'
- * ['a', '/b'] // 'a/b'
- * ['a', 'b/c'] // 'a/b/c'
- * ```
- */
-export function joinPaths(
-  paths: string[],
-  slash: 'leading' | 'trailing' | 'none' = 'none'
-): string {
-  const joined = paths
-    // avoid slashes in path and filter empty
-    .flatMap(path => splitPath(path))
-    .join('/')
-
-  switch (slash) {
-    case 'leading':
-      return '/' + joined
-    case 'trailing':
-      return joined + '/'
-    default:
-      return joined
-  }
 }

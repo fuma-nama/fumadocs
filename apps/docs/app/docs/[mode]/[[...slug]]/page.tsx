@@ -24,7 +24,7 @@ export default async function Page({ params }: { params: Param }) {
     notFound()
   }
 
-  const neighbours = findNeighbour(tab.tree, tab.getPageUrl(page.slugs))
+  const neighbours = findNeighbour(tab.tree, page.url)
 
   const path = resolve('apps/docs/content/docs/', page.file.path)
   const time = await getGithubLastEdit({
@@ -87,7 +87,7 @@ function Category({ page, tab }: { page: Page; tab: Utils }) {
           key={page.file.id}
           title={page.matter.title}
           description={page.matter.description ?? 'No Description'}
-          href={tab.getPageUrl(page.slugs)}
+          href={page.url}
         />
       ))}
     </Cards>

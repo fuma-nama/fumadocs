@@ -5,16 +5,9 @@ import {
 import type { RawDocumentData } from 'contentlayer/source-files'
 import type { ReactElement } from 'react'
 import type { DocsPageBase, MetaPageBase, PagesContext } from './types'
-import { getPageUrl } from './utils'
 
 export type ContextOptions = {
   languages: string[]
-
-  baseUrl: string
-  /**
-   * Get url from slugs and locale, override the default getUrl function
-   */
-  getUrl: (slugs: string[], locale?: string) => string
 
   resolveIcon: (icon: string) => ReactElement | undefined
 }
@@ -24,8 +17,6 @@ export function loadContext<Docs extends DocsPageBase>(
   docsPages: Docs[],
   {
     languages = [],
-    baseUrl = '/docs',
-    getUrl = (slugs, locale) => getPageUrl(slugs, baseUrl, locale),
     resolveIcon = () => undefined
   }: Partial<ContextOptions> = {}
 ): PagesContext<Docs> {
@@ -33,7 +24,7 @@ export function loadContext<Docs extends DocsPageBase>(
     pages: docsPages.map(page => ({
       file: getFileData(page._raw, page.locale),
       title: page.title,
-      url: getUrl(page.slug.split('/'), page.locale),
+      url: page.url,
       icon: page.icon
     })),
     metas: metaPages.map(meta => ({
@@ -47,8 +38,7 @@ export function loadContext<Docs extends DocsPageBase>(
 
   return {
     builder,
-    i18nMap: getI18nPages(docsPages, languages),
-    getUrl
+    i18nMap: getI18nPages(docsPages, languages)
   }
 }
 

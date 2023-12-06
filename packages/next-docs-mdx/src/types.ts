@@ -66,6 +66,7 @@ export interface Meta {
 
 export interface Page {
   file: FileInfo
+  url: string
   slugs: string[]
   data: MDXExport
   matter: Frontmatter

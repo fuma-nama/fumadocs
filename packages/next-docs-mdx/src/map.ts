@@ -1,4 +1,8 @@
-import type { BuildPageTreeOptions, PageTree } from 'next-docs-zeta/server'
+import {
+  createGetUrl,
+  type BuildPageTreeOptions,
+  type PageTree
+} from 'next-docs-zeta/server'
 import { getPageTreeBuilder, type BuilderOptions } from './build-tree'
 import { createPageUtils, type PageUtils } from './page-utils'
 import {
@@ -25,7 +29,8 @@ type UtilsOptions<Langs extends string[] | undefined> = {
 
   pageTreeOptions: BuildPageTreeOptions
 
-  slugs: ResolveOptions['slugs']
+  getSlugs: ResolveOptions['getSlugs']
+  getUrl?: ResolveOptions['getUrl']
   validate: ResolveOptions['validate']
 } & BuilderOptions
 
@@ -44,8 +49,8 @@ function fromMap<Langs extends string[] | undefined = undefined>(
   {
     baseUrl = '/docs',
     rootDir = '',
-    slugs,
-    getUrl,
+    getSlugs,
+    getUrl = createGetUrl(baseUrl),
     resolveIcon,
     pageTreeOptions = { root: rootDir },
     languages,
@@ -55,15 +60,14 @@ function fromMap<Langs extends string[] | undefined = undefined>(
   const resolved = resolveFiles({
     map,
     rootDir,
-    slugs,
+    getSlugs,
+    getUrl,
     validate
   })
 
-  const pageUtils = createPageUtils(resolved, baseUrl, languages ?? [])
-  if (getUrl) pageUtils.getPageUrl = getUrl
+  const pageUtils = createPageUtils(resolved, languages ?? [])
 
   const builder = getPageTreeBuilder(resolved, {
-    getUrl: pageUtils.getPageUrl,
     resolveIcon
   })
 

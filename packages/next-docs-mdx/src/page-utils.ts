@@ -4,12 +4,10 @@ import type { Page } from './types'
 export type PageUtils = {
   getPages(locale?: string): Page[]
   getPage(slugs: string[] | undefined, locale?: string): Page | null
-  getPageUrl(slugs: string[] | undefined, locale?: string): string
 }
 
 export function createPageUtils(
   { pages }: ResolvedFiles,
-  baseUrl: string,
   languages: string[]
 ): PageUtils {
   const pageMap = new Map<string, Page>()
@@ -42,26 +40,10 @@ export function createPageUtils(
     getPages(locale = '') {
       return i18nMap.get(locale)!
     },
-    getPageUrl(slugs = [], locale) {
-      return joinPaths(baseUrl, ...slugs, locale ?? null)
-    },
     getPage(slugs, locale) {
       return getPage(pages, slugs, locale)
     }
   }
-}
-
-/**
- * Join paths with leading slash
- */
-function joinPaths(...paths: (string | null)[]): string {
-  const relative = paths
-    // filter slashes & empty
-    .filter(path => path != null && path.length !== 0 && path !== '/')
-    .join('/')
-
-  if (relative.startsWith('/')) return relative
-  return '/' + relative
 }
 
 function getPage(

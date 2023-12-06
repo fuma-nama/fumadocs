@@ -1,7 +1,7 @@
 export * from './server/get-toc'
 export * from './server/types'
 export { getTableOfContentsFromPortableText } from './server/get-toc-sanity'
-export * from './server/tree-utils'
+export * from './server/utils'
 export * from './server/git-api'
 export {
   createPageTreeBuilder,

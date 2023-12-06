@@ -8,7 +8,13 @@
 
 import { rehypeImgSize, rehypeNextDocs, remarkGfm } from '@/mdx-plugins'
 import type { RehypeNextDocsOptions } from '@/mdx-plugins/rehype-next-docs'
-import type { Args, ComputedFields, FieldDef } from 'contentlayer/source-files'
+import { createGetUrl } from '@/server/utils'
+import type {
+  Args,
+  ComputedFields,
+  FieldDef,
+  LocalDocument
+} from 'contentlayer/source-files'
 import { defineDocumentType } from 'contentlayer/source-files'
 import type { Options as ImgSizeOptions } from 'rehype-img-size'
 
@@ -33,7 +39,7 @@ function removePattern(path: string, pattern: string): string {
   return removeSlash(path.slice(pattern.length))
 }
 
-type Options = {
+export type Options = Partial<{
   /**
    * Where the docs files located
    * @default "docs"
@@ -51,25 +57,42 @@ type Options = {
    */
   imgDirPath: string
 
+  baseUrl: string
+
+  /**
+   * Get url from slugs and locale, override the default getUrl function
+   */
+  getUrl: (slugs: string[], locale?: string) => string
+
   pluginOptions: RehypeNextDocsOptions
 
   docFields: Record<string, FieldDef>
   docsComputedFields: ComputedFields<'Docs'>
   metaFields: Record<string, FieldDef>
   metaComputedFields: ComputedFields<'Meta'>
-}
+}>
 
-export function createConfig(options: Partial<Options> = {}): Args {
+export function createConfig(options: Options = {}): Args {
   const {
     docsPattern = 'docs',
     contentDirPath = 'content',
     imgDirPath = './public',
     docFields,
     metaFields,
+    baseUrl = '/docs',
+    getUrl = createGetUrl(baseUrl),
     docsComputedFields,
     pluginOptions,
     metaComputedFields
   } = options
+
+  function getSlugs(doc: LocalDocument): string {
+    return removePattern(doc._raw.flattenedPath.split('.')[0], docsPattern)
+  }
+
+  function getLocale(doc: LocalDocument): string {
+    return doc._raw.flattenedPath.split('.')[1]
+  }
 
   const Docs = defineDocumentType(() => ({
     name: 'Docs',
@@ -95,17 +118,16 @@ export function createConfig(options: Partial<Options> = {}): Args {
     computedFields: {
       locale: {
         type: 'string',
-        resolve: post => {
-          return post._raw.flattenedPath.split('.')[1]
-        }
+        resolve: post => getLocale(post)
       },
       slug: {
         type: 'string',
+        resolve: post => getSlugs(post)
+      },
+      url: {
+        type: 'string',
         resolve: post => {
-          return removePattern(
-            post._raw.flattenedPath.split('.')[0],
-            docsPattern
-          )
+          return getUrl(getSlugs(post).split('/'), getLocale(post))
         }
       },
       ...docsComputedFields

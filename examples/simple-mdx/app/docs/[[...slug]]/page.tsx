@@ -1,4 +1,4 @@
-import { getPage, getPageUrl, pages, tree } from '@/app/source'
+import { getPage, pages, tree } from '@/app/source'
 import type { Metadata } from 'next'
 import { MDXContent } from 'next-docs-ui/mdx'
 import { DocsPage } from 'next-docs-ui/page'
@@ -17,7 +17,7 @@ export default async function Page({
   }
 
   const MDX = page.data.default
-  const neighbour = findNeighbour(tree, getPageUrl(params.slug))
+  const neighbour = findNeighbour(tree, page.url)
 
   return (
     <DocsPage toc={page.data.toc} footer={neighbour}>

@@ -12,7 +12,7 @@ const frontmatterSchema = defaultValidators.frontmatter.extend({
   index: z.boolean().default(false)
 })
 
-const slugs = (file: FileInfo) =>
+const getSlugs = (file: FileInfo) =>
   file.flattenedPath
     .split('/')
     .filter(p => !['index', ''].includes(p))
@@ -22,7 +22,7 @@ export const tabs: Record<string, Utils> = {
   ui: fromMap(map, {
     rootDir: 'ui',
     baseUrl: '/docs/ui',
-    slugs,
+    getSlugs,
     validate: {
       frontmatter: frontmatterSchema
     }
@@ -30,7 +30,7 @@ export const tabs: Record<string, Utils> = {
   headless: fromMap(map, {
     rootDir: 'headless',
     baseUrl: '/docs/headless',
-    slugs,
+    getSlugs,
     validate: {
       frontmatter: frontmatterSchema
     }
@@ -38,7 +38,7 @@ export const tabs: Record<string, Utils> = {
   mdx: fromMap(map, {
     rootDir: 'mdx',
     baseUrl: '/docs/mdx',
-    slugs,
+    getSlugs,
     validate: {
       frontmatter: frontmatterSchema
     }
@@ -80,7 +80,7 @@ if (
       id: page.file.id,
       title: page.matter.title,
       description: page.matter.description,
-      url: tab.getPageUrl(page.slugs, page.file.locale),
+      url: page.url,
       structuredData: page.data.structuredData
     }))
   })

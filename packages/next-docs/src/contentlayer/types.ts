@@ -25,6 +25,7 @@ export type DocsPageBase = {
   description?: string | undefined
   locale?: string
   icon?: string
+  url: string
   slug: string
 }
 
@@ -35,5 +36,4 @@ export type PagesContext<Docs extends DocsPageBase = DocsPageBase> = {
    * Language -> Page[]
    */
   i18nMap: Map<string, Docs[]>
-  getUrl: (slugs: string[], locale?: string) => string
 }

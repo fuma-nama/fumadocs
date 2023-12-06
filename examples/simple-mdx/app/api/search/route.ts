@@ -1,4 +1,4 @@
-import { getPageUrl, pages } from '@/app/source'
+import { pages } from '@/app/source'
 import { createSearchAPI } from 'next-docs-zeta/search/server'
 
 export const { GET } = createSearchAPI('advanced', {
@@ -6,6 +6,6 @@ export const { GET } = createSearchAPI('advanced', {
     title: page.matter.title,
     structuredData: page.data.structuredData,
     id: page.file.id,
-    url: getPageUrl(page.slugs)
+    url: page.url
   }))
 })
