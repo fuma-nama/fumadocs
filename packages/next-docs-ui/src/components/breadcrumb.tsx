@@ -13,19 +13,17 @@ export function Breadcrumb() {
   if (items.length === 1) return <></>
 
   return (
-    <div className="nd-flex nd-flex-row nd-gap-1 nd-text-sm nd-text-muted-foreground nd-items-center">
+    <div className="flex flex-row gap-1 text-sm text-muted-foreground items-center">
       {items.map((item, i) => {
         const active = items.length === i + 1
         const style = cn(
-          'nd-whitespace-nowrap nd-overflow-hidden',
-          active ? 'nd-text-foreground' : 'nd-overflow-ellipsis'
+          'whitespace-nowrap overflow-hidden',
+          active ? 'text-foreground' : 'text-ellipsis'
         )
 
         return (
           <Fragment key={i}>
-            {i !== 0 && (
-              <ChevronRightIcon className="nd-w-4 nd-h-4 nd-shrink-0" />
-            )}
+            {i !== 0 && <ChevronRightIcon className="w-4 h-4 shrink-0" />}
             {item.url != null ? (
               <Link href={item.url} className={style}>
                 {item.name}

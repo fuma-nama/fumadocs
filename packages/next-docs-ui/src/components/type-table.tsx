@@ -14,9 +14,9 @@ export function Info({ children }: { children: ReactNode }) {
   return (
     <Popover>
       <PopoverTrigger>
-        <InfoIcon className="nd-w-4 nd-h-4" />
+        <InfoIcon className="w-4 h-4" />
       </PopoverTrigger>
-      <PopoverContent className="nd-text-sm">{children}</PopoverContent>
+      <PopoverContent className="text-sm">{children}</PopoverContent>
     </Popover>
   )
 }
@@ -32,29 +32,27 @@ type ObjectType = {
 }
 
 export function TypeTable({ type }: { type: ObjectType }) {
-  const th = cn('nd-font-medium nd-p-2 first:nd-pl-0 last:nd-pr-0')
-  const td = cn('nd-p-2 first:nd-pl-0 last:nd-pr-0')
-  const field = cn('nd-inline-flex nd-flex-row nd-items-center nd-gap-1')
-  const code = cn('nd-p-1 nd-rounded-md nd-bg-secondary')
+  const th = cn('font-medium p-2 first:pl-0 last:pr-0')
+  const td = cn('p-2 first:pl-0 last:pr-0')
+  const field = cn('inline-flex flex-row items-center gap-1')
+  const code = cn('p-1 rounded-md bg-secondary')
 
   return (
-    <div className="nd-whitespace-nowrap nd-overflow-auto nd-not-prose">
-      <table className="nd-w-full nd-text-left nd-text-sm nd-text-muted-foreground nd-my-4">
-        <thead className="nd-border-b">
+    <div className="whitespace-nowrap overflow-auto not-prose">
+      <table className="w-full text-left text-sm text-muted-foreground my-4">
+        <thead className="border-b">
           <tr>
-            <th className={cn(th, 'nd-w-[45%]')}>Prop</th>
-            <th className={cn(th, 'nd-w-[30%]')}>Type</th>
-            <th className={cn(th, 'nd-w-[25%]')}>Default</th>
+            <th className={cn(th, 'w-[45%]')}>Prop</th>
+            <th className={cn(th, 'w-[30%]')}>Type</th>
+            <th className={cn(th, 'w-[25%]')}>Default</th>
           </tr>
         </thead>
-        <tbody className="nd-border-collapse nd-divide-y nd-divide-border">
+        <tbody className="border-collapse divide-y divide-border">
           {Object.entries(type).map(([key, value]) => (
             <tr key={key}>
               <td className={td}>
                 <div className={field}>
-                  <code
-                    className={cn(code, 'nd-bg-primary/10 nd-text-primary')}
-                  >
+                  <code className={cn(code, 'bg-primary/10 text-primary')}>
                     {key}
                   </code>
                   {value.description && <Info>{value.description}</Info>}
@@ -65,14 +63,14 @@ export function TypeTable({ type }: { type: ObjectType }) {
                   <code className={code}>{value.type}</code>
                   {value.typeDescription && (
                     <Info>
-                      <pre className="nd-overflow-auto nd-text-secondary-foreground nd-bg-secondary">
+                      <pre className="overflow-auto text-secondary-foreground bg-secondary">
                         {value.typeDescription}
                       </pre>
                     </Info>
                   )}
                   {value.typeDescriptionLink && (
                     <Link href={value.typeDescriptionLink}>
-                      <InfoIcon className="nd-w-4 nd-h-4" />
+                      <InfoIcon className="w-4 h-4" />
                     </Link>
                   )}
                 </div>

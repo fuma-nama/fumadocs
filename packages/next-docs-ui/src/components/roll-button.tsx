@@ -35,8 +35,8 @@ export function RollButton({ percentage = 0.2 }: RollButtonProps) {
     <button
       aria-label="Scroll to Top"
       className={cn(
-        !show && 'nd-translate-y-20 nd-opacity-0',
-        'nd-rounded-full nd-p-4 nd-transition-all nd-text-foreground nd-bg-background nd-border nd-fixed nd-bottom-12 nd-right-12 nd-z-50'
+        !show && 'translate-y-20 opacity-0',
+        'rounded-full p-4 transition-all text-foreground bg-background border fixed bottom-12 right-12 z-50'
       )}
       onClick={() => {
         document.scrollingElement!.scrollTo({
@@ -45,7 +45,7 @@ export function RollButton({ percentage = 0.2 }: RollButtonProps) {
         })
       }}
     >
-      <ChevronUpIcon className="nd-w-5 nd-h-5" />
+      <ChevronUpIcon className="w-5 h-5" />
     </button>
   )
 }

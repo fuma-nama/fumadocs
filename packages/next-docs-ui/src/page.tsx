@@ -40,7 +40,7 @@ export function DocsPage({
 }: DocsPageProps) {
   return (
     <>
-      <article className="nd-flex nd-flex-col nd-gap-6 nd-w-0 nd-flex-1 nd-py-10">
+      <article className="flex flex-col gap-6 w-0 flex-1 py-10">
         {replaceOrDefault(breadcrumb, <Breadcrumb />)}
         {props.children}
         {props.lastUpdate && <LastUpdate date={props.lastUpdate} />}
@@ -75,12 +75,10 @@ type TOCProps = {
 
 function TOC(props: TOCProps) {
   return (
-    <div className="nd-sticky nd-divide-y nd-flex nd-flex-col nd-top-16 nd-gap-4 nd-py-10 nd-w-[220px] nd-h-body max-lg:nd-hidden xl:nd-w-[260px]">
+    <div className="sticky divide-y flex flex-col top-16 gap-4 py-10 w-[220px] h-body max-lg:hidden xl:w-[260px]">
       {props.header}
       {props.items.length > 0 && <TOCItems items={props.items} />}
-      {props.footer && (
-        <div className="nd-pt-4 first:nd-pt-0">{props.footer}</div>
-      )}
+      {props.footer && <div className="pt-4 first:pt-0">{props.footer}</div>}
     </div>
   )
 }
@@ -91,27 +89,22 @@ type FooterProps = {
 }
 
 const footerItem = cva(
-  'nd-flex nd-flex-row nd-gap-2 nd-items-center nd-text-muted-foreground nd-transition-colors hover:nd-text-foreground'
+  'flex flex-row gap-2 items-center text-muted-foreground transition-colors hover:text-foreground'
 )
 
 function Footer({ next, previous }: FooterProps) {
   return (
-    <div className="nd-flex nd-flex-row nd-gap-4 nd-mt-4 nd-flex-wrap nd-border-t nd-py-12">
+    <div className="flex flex-row gap-4 mt-4 flex-wrap border-t py-12">
       {previous && (
         <Link href={previous.url} className={footerItem()}>
-          <ChevronLeftIcon className="nd-w-5 nd-h-5 nd-shrink-0" />
-          <p className="nd-font-medium nd-text-foreground">{previous.name}</p>
+          <ChevronLeftIcon className="w-5 h-5 shrink-0" />
+          <p className="font-medium text-foreground">{previous.name}</p>
         </Link>
       )}
       {next && (
-        <Link
-          href={next.url}
-          className={footerItem({ className: 'nd-ml-auto' })}
-        >
-          <p className="nd-text-end nd-font-medium nd-text-foreground">
-            {next.name}
-          </p>
-          <ChevronRightIcon className="nd-w-5 nd-h-5 nd-shrink-0" />
+        <Link href={next.url} className={footerItem({ className: 'ml-auto' })}>
+          <p className="text-end font-medium text-foreground">{next.name}</p>
+          <ChevronRightIcon className="w-5 h-5 shrink-0" />
         </Link>
       )}
     </div>

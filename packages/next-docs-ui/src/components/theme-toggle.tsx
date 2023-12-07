@@ -4,18 +4,15 @@ import { MoonIcon, SunIcon } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useCallback, type ButtonHTMLAttributes } from 'react'
 
-const buttonVariants = cva(
-  'nd-w-7 nd-h-7 nd-p-1.5 nd-rounded-full nd-text-muted-foreground',
-  {
-    variants: {
-      dark: {
-        true: 'dark:nd-text-accent-foreground dark:nd-bg-accent',
-        false:
-          'nd-text-accent-foreground nd-bg-accent dark:nd-text-muted-foreground dark:nd-bg-transparent'
-      }
+const buttonVariants = cva('w-7 h-7 p-1.5 rounded-full text-muted-foreground', {
+  variants: {
+    dark: {
+      true: 'dark:text-accent-foreground dark:bg-accent',
+      false:
+        'text-accent-foreground bg-accent dark:text-muted-foreground dark:bg-transparent'
     }
   }
-)
+})
 
 export function ThemeToggle({
   className,
@@ -30,7 +27,7 @@ export function ThemeToggle({
   return (
     <button
       className={cn(
-        'nd-inline-flex nd-items-center nd-border nd-p-0.5 nd-rounded-full',
+        'inline-flex items-center border p-0.5 rounded-full',
         className
       )}
       aria-label="Toggle Theme"

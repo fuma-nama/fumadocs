@@ -41,7 +41,7 @@ type NavProps = {
 }
 
 export const itemVariants = cva(
-  'nd-p-1.5 nd-rounded-md [&_svg]:nd-w-5 [&_svg]:nd-h-5 hover:nd-bg-accent hover:nd-text-accent-foreground'
+  'p-1.5 rounded-md [&_svg]:w-5 [&_svg]:h-5 hover:bg-accent hover:text-accent-foreground'
 )
 
 export function Nav({
@@ -57,26 +57,23 @@ export function Nav({
   return (
     <header
       className={cn(
-        'nd-sticky nd-top-0 nd-h-16 nd-z-50 nd-border-b nd-transition-colors',
+        'sticky top-0 h-16 z-50 border-b transition-colors',
         transparent
-          ? 'nd-border-transparent'
-          : 'nd-bg-background/80 nd-border-foreground/10 nd-backdrop-blur-sm'
+          ? 'border-transparent'
+          : 'bg-background/80 border-foreground/10 backdrop-blur-sm'
       )}
     >
-      <nav className="nd-container nd-flex nd-flex-row nd-items-center nd-h-full nd-gap-4">
-        <Link
-          href={url}
-          className="nd-inline-flex nd-items-center nd-font-medium"
-        >
+      <nav className="container flex flex-row items-center h-full gap-4">
+        <Link href={url} className="inline-flex items-center font-medium">
           {title}
         </Link>
         {children}
         {items?.map((item, key) => <NavItem key={key} {...item} />)}
-        <div className="nd-flex nd-flex-row nd-ml-auto nd-items-center md:nd-gap-2">
+        <div className="flex flex-row ml-auto items-center md:gap-2">
           <SearchToggle />
-          <ThemeToggle className={cn(enableSidebar && 'max-md:nd-hidden')} />
+          <ThemeToggle className={cn(enableSidebar && 'max-md:hidden')} />
           {enableSidebar && <SidebarToggle collapsible={collapsibleSidebar} />}
-          <div className="nd-flex nd-flex-row nd-items-center nd-border-l nd-pl-2 max-md:nd-hidden">
+          <div className="flex flex-row items-center border-l pl-2 max-md:hidden">
             {links?.map((item, key) => <NavLink key={key} {...item} />)}
           </div>
         </div>
@@ -85,7 +82,7 @@ export function Nav({
   )
 }
 
-const shortcut = cva('nd-border nd-rounded-md nd-bg-background nd-px-1.5')
+const shortcut = cva('border rounded-md bg-background px-1.5')
 
 function SearchToggle() {
   const [setOpenSearch] = useContext(SearchContext)
@@ -94,22 +91,19 @@ function SearchToggle() {
   return (
     <>
       <button
-        className={cn(itemVariants({ className: 'md:nd-hidden' }))}
+        className={cn(itemVariants({ className: 'md:hidden' }))}
         aria-label="Open Search"
         onClick={() => setOpenSearch(true)}
       >
         <SearchIcon />
       </button>
       <button
-        className="nd-inline-flex nd-items-center nd-text-sm nd-gap-2 nd-rounded-full nd-transition-colors nd-w-[240px] nd-p-1.5 nd-border nd-text-muted-foreground nd-bg-secondary/50 hover:nd-bg-accent hover:nd-text-accent-foreground max-md:nd-hidden"
+        className="inline-flex items-center text-sm gap-2 rounded-full transition-colors w-[240px] p-1.5 border text-muted-foreground bg-secondary/50 hover:bg-accent hover:text-accent-foreground max-md:hidden"
         onClick={() => setOpenSearch(true)}
       >
-        <SearchIcon
-          aria-label="Open Search"
-          className="nd-ml-1 nd-w-4 nd-h-4"
-        />
+        <SearchIcon aria-label="Open Search" className="ml-1 w-4 h-4" />
         {search}
-        <div className="nd-inline-flex nd-text-xs nd-gap-0.5 nd-ml-auto">
+        <div className="inline-flex text-xs gap-0.5 ml-auto">
           <kbd className={shortcut()}>⌘</kbd>
           <kbd className={shortcut()}>K</kbd>
         </div>
@@ -125,7 +119,7 @@ function SidebarToggle({ collapsible }: { collapsible: boolean }) {
     <>
       <SidebarTrigger
         aria-label="Toggle Sidebar"
-        className={cn(itemVariants({ className: 'md:nd-hidden' }))}
+        className={cn(itemVariants({ className: 'md:hidden' }))}
       >
         <MenuIcon />
       </SidebarTrigger>
@@ -133,12 +127,12 @@ function SidebarToggle({ collapsible }: { collapsible: boolean }) {
         <button
           aria-label="Toggle Sidebar"
           onClick={() => setOpen(!open)}
-          className="nd-p-1.5 nd-border nd-bg-secondary/50 nd-rounded-full hover:nd-text-accent-foreground hover:nd-bg-accent max-md:nd-hidden"
+          className="p-1.5 border bg-secondary/50 rounded-full hover:text-accent-foreground hover:bg-accent max-md:hidden"
         >
           {open ? (
-            <SidebarCloseIcon className="nd-w-5 nd-h-5" />
+            <SidebarCloseIcon className="w-5 h-5" />
           ) : (
-            <SidebarOpenIcon className="nd-w-5 nd-h-5" />
+            <SidebarOpenIcon className="w-5 h-5" />
           )}
         </button>
       )}
@@ -156,10 +150,10 @@ function NavItem(props: NavItemProps) {
       href={props.href}
       external={props.external}
       className={cn(
-        'nd-text-sm nd-text-muted-foreground max-lg:nd-hidden',
+        'text-sm text-muted-foreground max-lg:hidden',
         isActive
-          ? 'nd-text-accent-foreground nd-font-medium'
-          : 'nd-transition-colors hover:nd-text-accent-foreground'
+          ? 'text-accent-foreground font-medium'
+          : 'transition-colors hover:text-accent-foreground'
       )}
     >
       {props.children}

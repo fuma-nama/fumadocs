@@ -82,7 +82,7 @@ export function DocsLayout({
           collapsibleSidebar={sidebar.collapsible ?? true}
         />
       )}
-      <div className="nd-flex nd-flex-row nd-container nd-gap-6 xl:nd-gap-12">
+      <div className="flex flex-row container gap-6 xl:gap-12">
         {replaceOrDefault(
           sidebar,
           <Sidebar banner={sidebar.banner} footer={sidebar.footer} />

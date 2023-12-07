@@ -15,13 +15,13 @@ const Image = (props: ImgHTMLAttributes<HTMLImageElement>) => (
 )
 
 const Table = (props: TableHTMLAttributes<HTMLTableElement>) => (
-  <div className="nd-relative nd-overflow-auto">
+  <div className="relative overflow-auto">
     <table {...props} />
   </div>
 )
 
 function MDXContent({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn('nd-prose', className)} {...props} />
+  return <div className={cn('prose', className)} {...props} />
 }
 
 const defaultMdxComponents = {

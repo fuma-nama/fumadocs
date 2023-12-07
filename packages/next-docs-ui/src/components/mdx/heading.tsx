@@ -15,13 +15,13 @@ export function Heading<T extends Types = 'h1'>({
   const As = as ?? 'h1'
 
   return (
-    <As className={cn('nd-scroll-m-20', className)} {...props}>
+    <As className={cn('scroll-m-20', className)} {...props}>
       {props.id ? (
-        <a href={`#${props.id}`} className="nd-group nd-not-prose">
+        <a href={`#${props.id}`} className="group not-prose">
           {props.children}
           <LinkIcon
             aria-label="Link to section"
-            className="nd-inline nd-w-4 nd-h-4 nd-ml-2 nd-text-muted-foreground nd-opacity-0 nd-transition-opacity group-hover:nd-opacity-100"
+            className="inline w-4 h-4 ml-2 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
           />
         </a>
       ) : (

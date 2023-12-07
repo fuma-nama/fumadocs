@@ -17,7 +17,7 @@ export function LastUpdate(props: { date: Date }) {
   }, [props.date])
 
   return (
-    <p className="nd-text-muted-foreground nd-text-xs nd-mt-8">
+    <p className="text-muted-foreground text-xs mt-8">
       {lastUpdate} {date}
     </p>
   )

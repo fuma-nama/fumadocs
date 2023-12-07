@@ -22,7 +22,7 @@ export const Accordions = forwardRef<
     ref={ref}
     type={type}
     collapsible
-    className={cn('nd-space-y-4', className)}
+    className={cn('space-y-4', className)}
     {...props}
   />
 ))
@@ -38,22 +38,17 @@ export const Accordion = forwardRef<
   <AccordionPrimitive.Item
     ref={ref}
     value={title}
-    className={cn(
-      'nd-border nd-rounded-xl nd-bg-card nd-text-card-foreground',
-      className
-    )}
+    className={cn('border rounded-xl bg-card text-card-foreground', className)}
     {...props}
   >
-    <AccordionPrimitive.Header className="nd-not-prose">
-      <AccordionPrimitive.Trigger className="nd-flex nd-w-full nd-items-center nd-justify-between nd-p-4 nd-text-sm nd-font-medium [&[data-state=open]>svg]:nd-rotate-180">
+    <AccordionPrimitive.Header className="not-prose">
+      <AccordionPrimitive.Trigger className="flex w-full items-center justify-between p-4 text-sm font-medium [&[data-state=open]>svg]:rotate-180">
         {title}
-        <ChevronDown className="nd-h-4 nd-w-4 nd-transition-transform nd-duration-200" />
+        <ChevronDown className="h-4 w-4 transition-transform duration-200" />
       </AccordionPrimitive.Trigger>
     </AccordionPrimitive.Header>
-    <AccordionPrimitive.Content className="nd-overflow-hidden data-[state=closed]:nd-animate-accordion-up data-[state=open]:nd-animate-accordion-down">
-      <div className="nd-text-sm nd-p-4 nd-pt-0 nd-prose-no-margin">
-        {children}
-      </div>
+    <AccordionPrimitive.Content className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+      <div className="text-sm p-4 pt-0 prose-no-margin">{children}</div>
     </AccordionPrimitive.Content>
   </AccordionPrimitive.Item>
 ))

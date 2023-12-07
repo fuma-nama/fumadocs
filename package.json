@@ -19,7 +19,8 @@
   },
   "pnpm": {
     "overrides": {
-      "unified": "^11.0.4"
+      "unified": "^11.0.4",
+      "mdx-bundler": "^10.0.1"
     },
     "peerDependencyRules": {
       "ignoreMissing": [

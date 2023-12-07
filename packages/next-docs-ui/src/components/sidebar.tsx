@@ -23,12 +23,12 @@ export type SidebarProps = {
 }
 
 const itemVariants = cva(
-  'nd-flex nd-flex-row nd-items-center nd-gap-2 nd-font-medium nd-text-muted-foreground nd-px-2 nd-py-1.5 nd-rounded-md [&_svg]:nd-w-4 [&_svg]:nd-h-4',
+  'flex flex-row items-center gap-2 font-medium text-muted-foreground px-2 py-1.5 rounded-md [&_svg]:w-4 [&_svg]:h-4',
   {
     variants: {
       active: {
-        true: 'nd-text-primary nd-bg-primary/10',
-        false: 'hover:nd-bg-accent/50'
+        true: 'text-primary bg-primary/10',
+        false: 'hover:bg-accent/50'
       }
     }
   }
@@ -42,13 +42,13 @@ export function Sidebar({ banner, footer }: SidebarProps) {
     <Base.SidebarList
       minWidth={768} // md
       className={cn(
-        'nd-flex nd-flex-col nd-w-full nd-text-medium md:nd-text-sm md:nd-sticky md:nd-top-16 md:nd-h-body md:nd-w-[240px] xl:nd-w-[260px]',
-        !open && 'nd-hidden',
-        'max-md:nd-fixed max-md:nd-inset-y-0 max-md:nd-right-0 max-md:nd-bg-background max-md:nd-z-40 max-md:nd-pt-16 max-md:data-[open=false]:nd-hidden sm:max-md:nd-max-w-sm sm:max-md:nd-border-l'
+        'flex flex-col w-full text-medium md:text-sm md:sticky md:top-16 md:h-body md:w-[240px] xl:w-[260px]',
+        !open && 'hidden',
+        'max-md:fixed max-md:inset-y-0 max-md:right-0 max-md:bg-background max-md:z-40 max-md:pt-16 max-md:data-[open=false]:hidden sm:max-md:max-w-sm sm:max-md:border-l'
       )}
     >
-      <ScrollArea className="nd-flex-1">
-        <div className="nd-flex nd-flex-col nd-pb-10 nd-pt-4 md:nd-pr-4 md:nd-pt-10 max-md:nd-px-4">
+      <ScrollArea className="flex-1">
+        <div className="flex flex-col pb-10 pt-4 md:pr-4 md:pt-10 max-md:px-4">
           {banner}
           {tree.children.map((item, i) => (
             <Node key={i} item={item} level={1} />
@@ -57,12 +57,12 @@ export function Sidebar({ banner, footer }: SidebarProps) {
       </ScrollArea>
       <div
         className={cn(
-          'nd-flex nd-flex-row nd-items-center nd-gap-2 nd-border-t nd-py-2 max-md:nd-px-4',
-          !footer && 'md:nd-hidden'
+          'flex flex-row items-center gap-2 border-t py-2 max-md:px-4',
+          !footer && 'md:hidden'
         )}
       >
         {footer}
-        <ThemeToggle className="md:nd-hidden" />
+        <ThemeToggle className="md:hidden" />
       </div>
     </Base.SidebarList>
   )
@@ -70,11 +70,7 @@ export function Sidebar({ banner, footer }: SidebarProps) {
 
 function Node({ item, level }: { item: TreeNode; level: number }) {
   if (item.type === 'separator')
-    return (
-      <p className="nd-font-medium nd-px-2 nd-mt-8 nd-mb-2 first:nd-mt-0">
-        {item.name}
-      </p>
-    )
+    return <p className="font-medium px-2 mt-8 mb-2 first:mt-0">{item.name}</p>
   if (item.type === 'folder') return <Folder item={item} level={level} />
 
   return <Item item={item} />
@@ -132,10 +128,7 @@ function Folder({
           setExtend(prev => !prev)
           e.preventDefault()
         }}
-        className={cn(
-          'nd-transition-transform nd-ml-auto',
-          !extend && '-nd-rotate-90'
-        )}
+        className={cn('transition-transform ml-auto', !extend && '-rotate-90')}
       />
     </>
   )
@@ -146,7 +139,7 @@ function Folder({
       onOpenChange={index == null || active ? setExtend : undefined}
     >
       <CollapsibleTrigger
-        className={cn(itemVariants({ active, className: 'nd-w-full' }))}
+        className={cn(itemVariants({ active, className: 'w-full' }))}
         asChild
       >
         {index ? (
@@ -156,7 +149,7 @@ function Folder({
         )}
       </CollapsibleTrigger>
       <CollapsibleContent>
-        <div className="nd-flex nd-flex-col nd-ml-4 nd-pl-2 nd-border-l nd-py-2">
+        <div className="flex flex-col ml-4 pl-2 border-l py-2">
           {children.map((item, i) => (
             <Node key={i} item={item} level={level + 1} />
           ))}

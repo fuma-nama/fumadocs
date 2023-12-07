@@ -6,10 +6,7 @@ export function Cards(props: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       {...props}
-      className={cn(
-        'nd-grid nd-grid-cols-1 nd-gap-4 sm:nd-grid-cols-2',
-        props.className
-      )}
+      className={cn('grid grid-cols-1 gap-4 sm:grid-cols-2', props.className)}
     >
       {props.children}
     </div>
@@ -27,17 +24,17 @@ export function Card({ icon, title, description, ...props }: CardProps) {
     <Link
       {...props}
       className={cn(
-        'nd-block nd-not-prose nd-text-sm nd-rounded-lg nd-p-4 nd-border nd-shadow-md nd-bg-card nd-text-card-foreground nd-transition-colors hover:nd-bg-muted/80',
+        'block not-prose text-sm rounded-lg p-4 border shadow-md bg-card text-card-foreground transition-colors hover:bg-muted/80',
         props.className
       )}
     >
       {icon && (
-        <div className="nd-w-fit [&_svg]:nd-w-4 [&_svg]:nd-h-4 nd-bg-muted nd-border nd-p-2 nd-rounded-md nd-text-muted-foreground nd-mb-2">
+        <div className="w-fit [&_svg]:w-4 [&_svg]:h-4 bg-muted border p-2 rounded-md text-muted-foreground mb-2">
           {icon}
         </div>
       )}
-      <h3 className="nd-font-medium nd-mb-1">{title}</h3>
-      <p className="nd-text-muted-foreground">{description}</p>
+      <h3 className="font-medium mb-1">{title}</h3>
+      <p className="text-muted-foreground">{description}</p>
     </Link>
   )
 }

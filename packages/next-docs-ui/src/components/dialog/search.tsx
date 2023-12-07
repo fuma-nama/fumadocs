@@ -75,9 +75,7 @@ export function SearchDialog({
                     page: <FileTextIcon />
                   }[item.type]
                 }
-                <p className="nd-w-0 nd-flex-1 nd-whitespace-nowrap nd-overflow-hidden nd-overflow-ellipsis">
-                  {item.content}
-                </p>
+                <p className="w-0 flex-1 truncate">{item.content}</p>
               </CommandItem>
             ))}
           </CommandGroup>

@@ -14,18 +14,18 @@ export function TOCItems({ items }: { items: TOCItemType[] }) {
   return (
     <Primitive.TOCProvider
       toc={items}
-      className="nd-relative nd-pt-4 nd-text-sm nd-font-medium nd-overflow-hidden first:nd-pt-0"
+      className="relative pt-4 text-sm font-medium overflow-hidden first:pt-0"
     >
-      <h3 className="nd-inline-flex nd-items-center nd-gap-2 nd-mb-4">
-        <TextIcon className="nd-w-4 nd-h-4" />
+      <h3 className="inline-flex items-center gap-2 mb-4">
+        <TextIcon className="w-4 h-4" />
         {toc}
       </h3>
-      <div className="nd-flex nd-flex-col nd-gap-1 nd-border-l-2 nd-text-muted-foreground">
+      <div className="flex flex-col gap-1 border-l-2 text-muted-foreground">
         <div
           role="none"
           className={cn(
-            'nd-absolute nd-left-0 nd-border-l-2 nd-transition-all',
-            pos && 'nd-border-primary'
+            'absolute left-0 border-l-2 transition-all',
+            pos && 'border-primary'
           )}
           style={{
             top: pos?.[0],
@@ -61,10 +61,10 @@ function TOCItem({
       ref={ref}
       href={item.url}
       className={cn(
-        'nd-py-1 nd-text-ellipsis nd-transition-colors nd-overflow-hidden data-[active=true]:nd-text-primary',
-        item.depth <= 2 && 'nd-pl-4',
-        item.depth === 3 && 'nd-pl-7',
-        item.depth >= 4 && 'nd-pl-10'
+        'py-1 text-ellipsis transition-colors overflow-hidden data-[active=true]:text-primary',
+        item.depth <= 2 && 'pl-4',
+        item.depth === 3 && 'pl-7',
+        item.depth >= 4 && 'pl-10'
       )}
     >
       {item.title}

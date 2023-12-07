@@ -25,20 +25,20 @@ export const Pre = forwardRef<HTMLElement, CodeBlockProps>(
       <figure
         ref={ref}
         className={cn(
-          'nd-relative nd-overflow-hidden nd-group nd-border nd-rounded-lg nd-text-sm nd-bg-secondary/50 nd-my-6 nd-not-prose',
+          'relative overflow-hidden group border rounded-lg text-sm bg-secondary/50 my-6 not-prose',
           className
         )}
         {...props}
       >
         {title ? (
-          <div className="nd-flex nd-flex-row nd-items-center nd-bg-muted nd-text-muted-foreground nd-pl-4 nd-pr-2 nd-py-1.5 nd-border-b">
-            <figcaption className="nd-flex-1">{title}</figcaption>
+          <div className="flex flex-row items-center bg-muted text-muted-foreground pl-4 pr-2 py-1.5 border-b">
+            <figcaption className="flex-1">{title}</figcaption>
             {allowCopy && <CopyButton onCopy={onCopy} />}
           </div>
         ) : (
           allowCopy && (
             <CopyButton
-              className="nd-absolute nd-top-2 nd-right-2 nd-z-[2]"
+              className="absolute top-2 right-2 z-[2]"
               onCopy={onCopy}
             />
           )
@@ -47,7 +47,7 @@ export const Pre = forwardRef<HTMLElement, CodeBlockProps>(
           <pre
             ref={preRef}
             {...pre}
-            className={cn('nd-codeblock nd-py-4', pre?.className)}
+            className={cn('nd-codeblock py-4', pre?.className)}
           >
             {props.children}
           </pre>
@@ -86,7 +86,7 @@ function CopyButton({
   return (
     <button
       className={cn(
-        'nd-inline-flex nd-p-2 nd-rounded-md nd-text-secondary-foreground nd-bg-muted nd-transition-opacity nd-opacity-0 group-hover:nd-opacity-100',
+        'inline-flex p-2 rounded-md text-secondary-foreground bg-muted transition-opacity opacity-0 group-hover:opacity-100',
         className
       )}
       aria-label="Copy Text"
@@ -95,14 +95,14 @@ function CopyButton({
     >
       <CheckIcon
         className={cn(
-          'nd-h-3.5 nd-w-3.5 nd-transition-transform',
-          !checked && 'nd-scale-0'
+          'h-3.5 w-3.5 transition-transform',
+          !checked && 'scale-0'
         )}
       />
       <CopyIcon
         className={cn(
-          'nd-absolute nd-h-3.5 nd-w-3.5 nd-transition-transform',
-          checked && 'nd-scale-0'
+          'absolute h-3.5 w-3.5 transition-transform',
+          checked && 'scale-0'
         )}
       />
     </button>

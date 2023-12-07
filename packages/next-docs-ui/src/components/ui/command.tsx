@@ -12,7 +12,7 @@ const Command = React.forwardRef<
   <CommandPrimitive
     ref={ref}
     className={cn(
-      'nd-flex nd-h-full nd-w-full nd-flex-col nd-overflow-hidden nd-rounded-md nd-bg-popover nd-text-popover-foreground',
+      'flex h-full w-full flex-col overflow-hidden rounded-md bg-popover text-popover-foreground',
       className
     )}
     {...props}
@@ -25,7 +25,7 @@ interface CommandDialogProps extends DialogProps {}
 const CommandDialog = ({ children, ...props }: CommandDialogProps) => {
   return (
     <Dialog {...props}>
-      <DialogContent className="nd-p-0 nd-overflow-hidden">
+      <DialogContent className="p-0 overflow-hidden">
         <Command shouldFilter={false} loop>
           {children}
         </Command>
@@ -38,12 +38,12 @@ const CommandInput = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Input>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>
 >(({ className, ...props }, ref) => (
-  <div className="nd-flex nd-items-center nd-border-b nd-px-3">
-    <Search className="nd-mr-2 nd-h-4 nd-w-4 nd-shrink-0 nd-text-muted-foreground" />
+  <div className="flex items-center border-b px-3">
+    <Search className="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
     <CommandPrimitive.Input
       ref={ref}
       className={cn(
-        'nd-flex nd-w-full nd-rounded-md nd-py-3 nd-text-sm nd-bg-transparent nd-outline-none disabled:nd-cursor-not-allowed disabled:nd-opacity-50 placeholder:nd-text-muted-foreground',
+        'flex w-full rounded-md py-3 text-sm bg-transparent outline-none disabled:cursor-not-allowed disabled:opacity-50 placeholder:text-muted-foreground',
         className
       )}
       {...props}
@@ -59,7 +59,7 @@ const CommandList = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <CommandPrimitive.List
     ref={ref}
-    className={cn('nd-max-h-[400px] nd-overflow-y-auto', className)}
+    className={cn('max-h-[400px] overflow-y-auto', className)}
     {...props}
   />
 ))
@@ -72,7 +72,7 @@ const CommandEmpty = React.forwardRef<
 >((props, ref) => (
   <CommandPrimitive.Empty
     ref={ref}
-    className="nd-py-12 nd-text-center nd-text-sm"
+    className="py-12 text-center text-sm"
     {...props}
   />
 ))
@@ -86,7 +86,7 @@ const CommandGroup = React.forwardRef<
   <CommandPrimitive.Group
     ref={ref}
     className={cn(
-      'nd-overflow-hidden nd-p-2 [&_[cmdk-group-heading]]:nd-px-3 [&_[cmdk-group-heading]]:nd-py-2 [&_[cmdk-group-heading]]:nd-text-xs [&_[cmdk-group-heading]]:nd-font-medium',
+      'overflow-hidden p-2 [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium',
       className
     )}
     {...props}
@@ -101,7 +101,7 @@ const CommandSeparator = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <CommandPrimitive.Separator
     ref={ref}
-    className={cn('nd-h-px nd-bg-border', className)}
+    className={cn('h-px bg-border', className)}
     {...props}
   />
 ))
@@ -116,16 +116,13 @@ const CommandItem = React.forwardRef<
   <CommandPrimitive.Item
     ref={ref}
     className={cn(
-      'nd-select-none nd-rounded-lg nd-text-sm aria-selected:nd-bg-accent aria-selected:nd-text-accent-foreground data-[disabled]:nd-pointer-events-none data-[disabled]:nd-opacity-50 [&_svg]:nd-h-4 [&_svg]:nd-w-4',
+      'select-none rounded-lg text-sm aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:h-4 [&_svg]:w-4',
       className
     )}
     {...props}
   >
     <div
-      className={cn(
-        'nd-flex nd-gap-2 nd-items-center nd-p-3',
-        nested && 'nd-ml-5 nd-border-l'
-      )}
+      className={cn('flex gap-2 items-center p-3', nested && 'ml-5 border-l')}
     >
       {props.children}
     </div>
