@@ -20,19 +20,9 @@ type UtilsOptions<Langs extends string[] | undefined> = {
    */
   baseUrl: string
 
-  /**
-   * Root directory, files outside of the root directory will be ignored
-   *
-   * @default ''
-   */
-  rootDir: string
-
   pageTreeOptions: BuildPageTreeOptions
-
-  getSlugs: ResolveOptions['getSlugs']
-  getUrl?: ResolveOptions['getUrl']
-  validate: ResolveOptions['validate']
-} & BuilderOptions
+} & BuilderOptions &
+  Pick<ResolveOptions, 'getSlugs' | 'getUrl' | 'validate' | 'rootDir'>
 
 export type Utils = PageUtils & {
   tree: PageTree
@@ -52,7 +42,7 @@ function fromMap<Langs extends string[] | undefined = undefined>(
     getSlugs,
     getUrl = createGetUrl(baseUrl),
     resolveIcon,
-    pageTreeOptions = { root: rootDir },
+    pageTreeOptions = { root: '' },
     languages,
     validate
   }: Partial<UtilsOptions<Langs>> = {}

@@ -3,9 +3,6 @@ import type { StructuredData } from 'next-docs-zeta/mdx-plugins'
 import type { TableOfContents } from 'next-docs-zeta/server'
 import type * as Default from './validate/schema'
 
-/**
- * The file info, relative to root content directory
- */
 export type FileInfo = {
   locale?: string
 
@@ -30,17 +27,19 @@ export type FileInfo = {
   name: string
 
   /**
-   * Original path
+   * Path relative to `rootDir`
    */
   path: string
 
   /**
    * A flatten path without extensions and prefixes, like `dir/file`
+   *
+   * relative to `rootDir`
    */
   flattenedPath: string
 
   /**
-   * Unique ID for each file, based on `path`
+   * Unique ID for each file, based on original path which is not relative to `rootDir`
    */
   id: string
 }

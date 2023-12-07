@@ -2,7 +2,6 @@ import { writeFileSync } from 'fs'
 import path from 'path'
 import { map } from '@/_map'
 import { defaultValidators, fromMap, type Utils } from 'next-docs-mdx/map'
-import type { FileInfo } from 'next-docs-mdx/types'
 import type { StructuredData } from 'next-docs-zeta/mdx-plugins'
 import { PHASE_PRODUCTION_BUILD } from 'next/constants'
 import { z } from 'zod'
@@ -12,17 +11,10 @@ const frontmatterSchema = defaultValidators.frontmatter.extend({
   index: z.boolean().default(false)
 })
 
-const getSlugs = (file: FileInfo) =>
-  file.flattenedPath
-    .split('/')
-    .filter(p => !['index', ''].includes(p))
-    .slice(1)
-
 export const tabs: Record<string, Utils> = {
   ui: fromMap(map, {
     rootDir: 'ui',
     baseUrl: '/docs/ui',
-    getSlugs,
     validate: {
       frontmatter: frontmatterSchema
     }
@@ -30,7 +22,6 @@ export const tabs: Record<string, Utils> = {
   headless: fromMap(map, {
     rootDir: 'headless',
     baseUrl: '/docs/headless',
-    getSlugs,
     validate: {
       frontmatter: frontmatterSchema
     }
@@ -38,7 +29,6 @@ export const tabs: Record<string, Utils> = {
   mdx: fromMap(map, {
     rootDir: 'mdx',
     baseUrl: '/docs/mdx',
-    getSlugs,
     validate: {
       frontmatter: frontmatterSchema
     }

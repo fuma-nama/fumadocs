@@ -1,12 +1,9 @@
-import path from 'path'
-import type { AnyZodObject } from 'zod'
-import type { FileInfo, MDXExport, Meta, Page } from './types'
-import {
-  frontmatterSchema,
-  metaSchema,
-  type Frontmatter,
-  type MetaExport
-} from './validate/schema'
+import path from 'path';
+import { joinPaths, splitPath } from 'next-docs-zeta/server';
+import type { AnyZodObject } from 'zod';
+import type { FileInfo, MDXExport, Meta, Page } from './types';
+import { frontmatterSchema, metaSchema, type Frontmatter, type MetaExport } from './validate/schema';
+
 
 const pageTypes = ['.md', '.mdx']
 const metaTypes = ['.json']
@@ -20,7 +17,7 @@ export type ResolveOptions = {
   map: Record<string, unknown>
 
   /**
-   * root directory to resolve files
+   * root directory to resolve files, all slugs will be relative to the root directory
    *
    * @default ''
    */
@@ -52,15 +49,13 @@ export const defaultValidators = {
   meta: metaSchema
 }
 
-function parsePath(p: string): FileInfo {
-  const parsed = path.parse(p)
+function parsePath(p: string, root: string = ''): FileInfo | false {
+  if (!p.startsWith(root)) return false;
+  const relativePath = splitPath(p.substring(root.length)).join('/')
+
+  const parsed = path.parse(relativePath)
   const normalizedDirname = parsed.dir.replaceAll('\\', '/')
-  let flattenedPath = normalizedDirname + '/' + parsed.name
-
-  while (flattenedPath.startsWith('/')) {
-    flattenedPath = flattenedPath.slice(1)
-  }
-
+  const flattenedPath = joinPaths([normalizedDirname, parsed.name])
   const [, locale] = parsed.name.split('.')
 
   return {
@@ -71,7 +66,7 @@ function parsePath(p: string): FileInfo {
     flattenedPath,
     locale,
     type: parsed.ext,
-    path: p
+    path: relativePath
   }
 }
 
@@ -100,13 +95,8 @@ export function resolveFiles({
   const pages: Page[] = []
 
   for (const [path, v] of Object.entries(map)) {
-    const file = parsePath(path)
-    if (
-      rootDir.length > 0 &&
-      file.dirname != rootDir &&
-      !file.dirname.startsWith(rootDir + '/')
-    )
-      continue
+    const file = parsePath(path, rootDir)
+    if (file === false) continue
 
     if (metaTypes.includes(file.type)) {
       const meta: Meta = {
