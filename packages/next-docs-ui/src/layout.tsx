@@ -1,12 +1,12 @@
-'use client'
-
-import { Nav, type NavItemProps, type NavLinkProps } from '@/components/nav'
-import { Sidebar, type SidebarProps } from '@/components/sidebar'
+import type { NavItemProps, NavLinkProps } from '@/components/nav'
+import type { SidebarProps } from '@/components/sidebar'
 import { GithubIcon } from 'lucide-react'
 import type { PageTree } from 'next-docs-zeta/server'
 import { type ReactNode } from 'react'
-import { LayoutContext } from './contexts/tree'
+import { setPageTree } from './global'
 import { replaceOrDefault } from './utils/replace-or-default'
+
+const { Nav, LayoutContextProvider, Sidebar } = await import('./layout.client')
 
 export type DocsLayoutProps = {
   tree: PageTree
@@ -55,7 +55,9 @@ export function DocsLayout({
   tree,
   children
 }: DocsLayoutProps) {
+  setPageTree(tree)
   const links: NavLinkProps[] = []
+
   if (nav.githubUrl)
     links.push({
       href: nav.githubUrl,
@@ -65,7 +67,7 @@ export function DocsLayout({
     })
 
   return (
-    <LayoutContext.Provider
+    <LayoutContextProvider
       value={{
         tree,
         sidebarDefaultOpenLevel: sidebar.defaultOpenLevel ?? 1
@@ -90,6 +92,6 @@ export function DocsLayout({
 
         {children}
       </div>
-    </LayoutContext.Provider>
+    </LayoutContextProvider>
   )
 }

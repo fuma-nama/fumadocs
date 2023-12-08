@@ -12,15 +12,6 @@ const withAnalyzer = createBundleAnalyzer({
 const config = {
   pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
   reactStrictMode: true,
-  webpack: config => {
-    // Next.js can't load shikiji without this config
-    config.module.rules.push({
-      test: /\.mjs$/,
-      include: /node_modules/,
-      type: 'javascript/auto'
-    })
-    return config
-  },
   eslint: {
     // Replaced by root workspace command
     ignoreDuringBuilds: true
@@ -34,7 +25,7 @@ const withNextDocs = createNextDocs({
       remarkDynamicContent,
       [remarkInstall, { Tabs: 'InstallTabs' }]
     ],
-    rehypePlugins: [rehypeKatex]
+    rehypePlugins: v => [rehypeKatex, ...v]
   }
 })
 

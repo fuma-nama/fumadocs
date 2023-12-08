@@ -1,8 +1,13 @@
 import { cva } from 'class-variance-authority'
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
-import type { TableOfContents, TOCItemType } from 'next-docs-zeta/server'
+import {
+  findNeighbour,
+  type TableOfContents,
+  type TOCItemType
+} from 'next-docs-zeta/server'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
+import { getPageTree } from './global'
 import { replaceOrDefault } from './utils/replace-or-default'
 
 // We can keep the "use client" directives with dynamic imports
@@ -10,6 +15,11 @@ import { replaceOrDefault } from './utils/replace-or-default'
 const { TOCItems, Breadcrumb, LastUpdate } = await import('./page.client')
 
 export type DocsPageProps = {
+  /**
+   * The URL of the current page
+   */
+  url: string
+
   toc?: TableOfContents
 
   tableOfContent?: Partial<
@@ -27,6 +37,9 @@ export type DocsPageProps = {
     component: ReactNode
   }>
 
+  /**
+   * Footer navigation, you can disable it by passing `false`
+   */
   footer?: FooterProps | false
   lastUpdate?: Date | null
 
@@ -36,17 +49,21 @@ export type DocsPageProps = {
 export function DocsPage({
   tableOfContent = {},
   breadcrumb = {},
+  url,
   ...props
 }: DocsPageProps) {
+  const tree = getPageTree()
+  if (tree == null)
+    throw new Error('You must wrap <DocsPage /> under <DocsLayout />')
+  const footer = props.footer ?? findNeighbour(tree, url)
+
   return (
     <>
       <article className="flex flex-col gap-6 w-0 flex-1 py-10">
         {replaceOrDefault(breadcrumb, <Breadcrumb />)}
         {props.children}
         {props.lastUpdate && <LastUpdate date={props.lastUpdate} />}
-        {props.footer != null && props.footer !== false && (
-          <Footer {...props.footer} />
-        )}
+        {props.footer !== false && <Footer {...footer} />}
       </article>
       {replaceOrDefault(
         tableOfContent,
