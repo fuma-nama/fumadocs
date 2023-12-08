@@ -49,11 +49,11 @@
     "next-docs-zeta": "5.0.0"
   },
   "devDependencies": {
-    "@next/mdx": "14.0.3",
+    "@next/mdx": "14.0.4",
     "@types/mdast": "^4.0.3",
     "@types/mdx": "^2.0.8",
     "@types/react": "18.2.0",
-    "next": "14.0.3",
+    "next": "14.0.4",
     "next-docs-zeta": "workspace:*",
     "unified": "^11.0.4",
     "webpack": "^5.89.0"

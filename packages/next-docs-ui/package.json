@@ -76,7 +76,7 @@
     "@types/react-dom": "18.2.1",
     "algoliasearch": "^4.20.0",
     "autoprefixer": "10.4.16",
-    "next": "14.0.3",
+    "next": "14.0.4",
     "postcss": "8.4.32",
     "postcss-cli": "^11.0.0",
     "postcss-import": "^15.1.0",
