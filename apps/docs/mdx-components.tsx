@@ -10,7 +10,9 @@ import type { ReactNode } from 'react'
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
     ...defaultComponents,
-    pre: props => <Pre {...props} pre={{ className: 'max-h-[400px]' }} />,
+    pre: props => (
+      <Pre {...props} ref={undefined} pre={{ className: 'max-h-[400px]' }} />
+    ),
     Image: defaultComponents.img,
     Tabs: (p => <Tabs {...p} />) as typeof Tabs,
     Tab: (p => <Tab {...p} />) as typeof Tab,
