@@ -1,9 +1,13 @@
-import path from 'path';
-import { joinPaths, splitPath } from 'next-docs-zeta/server';
-import type { AnyZodObject } from 'zod';
-import type { FileInfo, MDXExport, Meta, Page } from './types';
-import { frontmatterSchema, metaSchema, type Frontmatter, type MetaExport } from './validate/schema';
-
+import path from 'path'
+import { joinPaths, splitPath } from 'next-docs-zeta/server'
+import type { AnyZodObject } from 'zod'
+import type { FileInfo, MDXExport, Meta, Page } from './types'
+import {
+  frontmatterSchema,
+  metaSchema,
+  type Frontmatter,
+  type MetaExport
+} from './validate/schema'
 
 const pageTypes = ['.md', '.mdx']
 const metaTypes = ['.json']
@@ -50,7 +54,7 @@ export const defaultValidators = {
 }
 
 function parsePath(p: string, root: string = ''): FileInfo | false {
-  if (!p.startsWith(root)) return false;
+  if (!p.startsWith(root)) return false
   const relativePath = splitPath(p.substring(root.length)).join('/')
 
   const parsed = path.parse(relativePath)
