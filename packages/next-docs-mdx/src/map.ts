@@ -16,7 +16,7 @@ type UtilsOptions<Langs extends string[] | undefined> = {
   languages: Langs
 
   /**
-   * @default '/docs'
+   * @default '/'
    */
   baseUrl: string
 
@@ -37,7 +37,7 @@ type I18nUtils = Omit<Utils, 'tree'> & {
 function fromMap<Langs extends string[] | undefined = undefined>(
   map: Record<string, unknown>,
   {
-    baseUrl = '/docs',
+    baseUrl = '/',
     rootDir = '',
     getSlugs,
     getUrl = createGetUrl(baseUrl),

@@ -13,21 +13,21 @@ const frontmatterSchema = defaultValidators.frontmatter.extend({
 
 export const tabs: Record<string, Utils> = {
   ui: fromMap(map, {
-    rootDir: 'ui',
+    rootDir: 'docs/ui',
     baseUrl: '/docs/ui',
     validate: {
       frontmatter: frontmatterSchema
     }
   }),
   headless: fromMap(map, {
-    rootDir: 'headless',
+    rootDir: 'docs/headless',
     baseUrl: '/docs/headless',
     validate: {
       frontmatter: frontmatterSchema
     }
   }),
   mdx: fromMap(map, {
-    rootDir: 'mdx',
+    rootDir: 'docs/mdx',
     baseUrl: '/docs/mdx',
     validate: {
       frontmatter: frontmatterSchema

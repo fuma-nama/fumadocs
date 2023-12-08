@@ -21,10 +21,30 @@ import { NextDocsWebpackPlugin } from './webpack-plugins/next-docs'
 type WithMDX = (config: NextConfig) => NextConfig
 type Loader = (options: NextMDXOptions) => WithMDX
 
+type MDXOptions = Omit<
+  NonNullable<NextMDXOptions['options']>,
+  'rehypePlugins' | 'remarkPlugins'
+> & {
+  rehypePlugins?: ResolvePlugins
+  remarkPlugins?: ResolvePlugins
+
+  /**
+   * Properties to export from `vfile.data`
+   */
+  valueToExport?: string[]
+
+  /**
+   * built-in `next-docs-zeta` rehype plugin options
+   */
+  rehypeNextDocsOptions?: RehypeNextDocsOptions
+}
+
+type ResolvePlugins = PluggableList | ((v: PluggableList) => PluggableList)
+
 type NextDocsMDXOptions = {
   cwd?: string
 
-  mdxOptions?: NextMDXOptions['options']
+  mdxOptions?: MDXOptions
 
   /**
    * Custom MDX loader
@@ -32,58 +52,66 @@ type NextDocsMDXOptions = {
   loader?: Loader
 
   /**
-   * Properties to export from `vfile.data`
-   */
-  dataExports?: string[]
-
-  /**
    * Where the root `_map.ts` should be, relative to cwd
    *
-   * @default './_map.ts`
+   * @default './_map.ts'
    */
   rootMapPath?: string
 
   /**
    * Where the content directory should be, relative to cwd
    *
-   * @default './content/docs`
+   * @default './content'
    */
   rootContentPath?: string
+}
 
-  /**
-   * Options passed to the built-in rehype plugin
-   */
-  pluginOptions?: RehypeNextDocsOptions
+function pluginOption(
+  def: (v: PluggableList) => PluggableList,
+  options: ResolvePlugins = []
+): PluggableList {
+  const list = def(Array.isArray(options) ? options : [])
+
+  if (typeof options === 'function') {
+    return options(list)
+  }
+
+  return list
 }
 
 const createNextDocs =
   ({
     loader = options => createNextMDX(options),
-    dataExports = [],
     mdxOptions = {},
     cwd = process.cwd(),
     rootMapPath = './_map.ts',
-    rootContentPath = './content/docs',
-    pluginOptions
+    rootContentPath = './content'
   }: NextDocsMDXOptions = {}) =>
   (nextConfig: NextConfig = {}) => {
-    const exports = ['structuredData', 'toc', ...dataExports]
+    const valueToExport = [
+      'structuredData',
+      'toc',
+      ...(mdxOptions.valueToExport ?? [])
+    ]
     const _mapPath = path.resolve(cwd, rootMapPath)
 
-    const remarkPlugins: PluggableList = [
-      remarkGfm,
-      [remarkFrontmatter, 'yaml' satisfies RemarkFrontmatterOptions],
-      remarkMdxFrontmatter,
-      remarkStructure,
-      remarkToc,
-      ...(mdxOptions?.remarkPlugins ?? []),
-      [remarkMdxExport, { values: exports }]
-    ]
+    const remarkPlugins = pluginOption(
+      v => [
+        remarkGfm,
+        [remarkFrontmatter, 'yaml' satisfies RemarkFrontmatterOptions],
+        remarkMdxFrontmatter,
+        remarkStructure,
+        remarkToc,
+        ...v,
+        [remarkMdxExport, { values: valueToExport }]
+      ],
+      mdxOptions.remarkPlugins
+    )
 
-    const rehypePlugins: PluggableList = [
-      [rehypeNextDocs, pluginOptions],
-      ...(mdxOptions?.rehypePlugins ?? [])
-    ]
+    const rehypePlugins: PluggableList = pluginOption(
+      v => [[rehypeNextDocs, mdxOptions.rehypeNextDocsOptions], ...v],
+      mdxOptions.rehypePlugins
+    )
 
     const withMDX = loader({
       extension: /\.mdx?$/,
