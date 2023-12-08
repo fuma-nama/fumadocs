@@ -22,7 +22,7 @@ export default async function Page({
   const neighbour = findNeighbour(tree, page.url)
 
   return (
-    <DocsPage toc={toc} footer={neighbour}>
+    <DocsPage url={page.url} toc={toc} footer={neighbour}>
       <MDXContent>
         <h1>{page.title}</h1>
         <Content code={page.body.code} />

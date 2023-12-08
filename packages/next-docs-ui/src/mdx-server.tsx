@@ -8,15 +8,12 @@ import serverComponents, {
   MDXContent,
   Table
 } from '@/internal/mdx-server'
-import type { ComponentType } from 'react'
-import type { CodeBlockProps } from './components/mdx/pre'
+import type { HTMLAttributes } from 'react'
 
-const client = await import('@/internal/mdx-client')
-
-const Pre = (p => <client.Pre {...p} />) as ComponentType<CodeBlockProps>
+const { Pre } = await import('@/internal/mdx-client')
 
 const defaultMdxComponents = {
-  pre: Pre,
+  pre: (p: HTMLAttributes<HTMLPreElement>) => <Pre {...p} />,
   ...serverComponents
 }
 

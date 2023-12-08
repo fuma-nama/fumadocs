@@ -11,9 +11,10 @@ import serverComponents, {
   MDXContent,
   Table
 } from '@/internal/mdx-server'
+import type { HTMLAttributes } from 'react'
 
 const defaultMdxComponents = {
-  pre: Pre,
+  pre: (p: HTMLAttributes<HTMLPreElement>) => <Pre {...p} />,
   ...serverComponents
 }
 
