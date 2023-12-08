@@ -46,16 +46,18 @@ import 'katex/dist/katex.css'
 Type some TeX expression in your documents
 
 ```mdx
-$c = \pm\sqrt{a^2 + b^2}$
+c = \pm\sqrt{a^2 + b^2}
 ```
 
-$c = \pm\sqrt{a^2 + b^2}$
+```math
+c = \pm\sqrt{a^2 + b^2}
+```
 
 ---
 
 **Long equations example**
 
-$$
+```math
 \begin{align}
 a^\dagger_1 &= \frac{X - iY}
 {2} \otimes I \otimes I \otimes ... \otimes I \\ a^\dagger_2 &= Z \otimes \frac
@@ -64,4 +66,4 @@ a^\dagger_1 &= \frac{X - iY}
 Z \otimes ... \otimes \frac{X - iY}
 {2}
 \end{align}
-$$
+```
