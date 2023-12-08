@@ -1,4 +1,4 @@
-import { CodeBlock, TypingCodeBlock } from '@/components/typing-code-block'
+import { CodeBlock } from '@/components/typing-code-block'
 import { buttonVariants } from '@/components/ui/button'
 import Example from '@/public/example-2.png'
 import { cn } from '@/utils/cn'
@@ -18,6 +18,7 @@ import {
   StarsIcon,
   TimerIcon
 } from 'lucide-react'
+import { File, Files } from 'next-docs-ui/components/files'
 import Image from 'next/image'
 import Link from 'next/link'
 import type { HTMLAttributes, SVGProps } from 'react'
@@ -416,7 +417,7 @@ export default function HomePage() {
             'repeating-linear-gradient(to right, hsl(var(--border)), transparent 1px, transparent 50px), repeating-linear-gradient(to bottom, hsl(var(--border)), transparent 1px, transparent 50px)'
         }}
       />
-      <main className="relative container px-2 py-4 sm:py-20">
+      <main className="relative container px-2 py-4 max-w-[1100px] sm:py-20">
         <div
           className="border-x border-t"
           style={{
@@ -484,12 +485,20 @@ export default function HomePage() {
                 Modify the code, in a comfortable way with Typescript
                 auto-complete.
               </p>
-              <TypingCodeBlock
-                title="source.ts"
-                lang="ts"
-                code={code}
-                allowCopy={false}
-              />
+              <div className="relative flex flex-col">
+                <CodeBlock
+                  lang="ts"
+                  className="absolute top-0 inset-x-2"
+                  code={code}
+                />
+                <Files className="z-[2] mt-20 shadow-xl">
+                  <File title="content" defaultOpen>
+                    <File title="index.mdx" />
+                    <File title="hello.mdx" />
+                    <File title="components.mdx" />
+                  </File>
+                </Files>
+              </div>
             </div>
           </div>
           <div className="px-6 py-12 border-b flex flex-col text-center items-center">
@@ -583,7 +592,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="grid grid-cols-1 divide-border md:divide-x md:grid-cols-2">
-            <div className="px-6 py-16 border-b md:py-24">
+            <div className="px-6 py-16 border-b md:py-20">
               <div className="inline-flex items-center gap-2 text-muted-foreground font-medium mb-4">
                 <PaperclipIcon className="w-5 h-5" />
                 <p>Multiple Sources</p>
@@ -597,7 +606,7 @@ export default function HomePage() {
               </p>
               <SourceSVG className="w-full h-auto mt-8" />
             </div>
-            <div className="px-6 py-16 border-b md:py-24">
+            <div className="px-6 py-16 border-b md:py-20">
               <div className="inline-flex items-center gap-2 text-muted-foreground font-medium mb-4">
                 <SearchIcon className="w-5 h-5" />
                 <p>Algolia Integration</p>
