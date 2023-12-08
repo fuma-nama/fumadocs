@@ -4,15 +4,13 @@ import { Accordion, Accordions } from 'next-docs-ui/components/accordion'
 import { Callout } from 'next-docs-ui/components/callout'
 import { Tab, Tabs } from 'next-docs-ui/components/tabs'
 import { TypeTable } from 'next-docs-ui/components/type-table'
-import defaultComponents from 'next-docs-ui/mdx-server'
+import defaultComponents, { Pre } from 'next-docs-ui/mdx-server'
 import type { ReactNode } from 'react'
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
     ...defaultComponents,
-    pre: props => (
-      <defaultComponents.pre {...props} pre={{ className: 'max-h-[400px]' }} />
-    ),
+    pre: props => <Pre {...props} pre={{ className: 'max-h-[400px]' }} />,
     Image: defaultComponents.img,
     Tabs: (p => <Tabs {...p} />) as typeof Tabs,
     Tab: (p => <Tab {...p} />) as typeof Tab,
