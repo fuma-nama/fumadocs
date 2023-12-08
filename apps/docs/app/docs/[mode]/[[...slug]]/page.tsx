@@ -8,7 +8,7 @@ import type { Utils } from 'next-docs-mdx/map'
 import type { Page } from 'next-docs-mdx/types'
 import { Card, Cards, MDXContent } from 'next-docs-ui/mdx'
 import { DocsPage } from 'next-docs-ui/page'
-import { findNeighbour, getGithubLastEdit } from 'next-docs-zeta/server'
+import { getGithubLastEdit } from 'next-docs-zeta/server'
 import { notFound } from 'next/navigation'
 
 type Param = {
@@ -24,9 +24,7 @@ export default async function Page({ params }: { params: Param }) {
     notFound()
   }
 
-  const neighbours = findNeighbour(tab.tree, page.url)
-
-  const path = resolve('apps/docs/content/docs/', page.file.path)
+  const path = resolve('apps/docs/content/', page.file.id)
   const time = await getGithubLastEdit({
     owner: 'fuma-nama',
     repo: 'next-docs',
@@ -39,16 +37,13 @@ export default async function Page({ params }: { params: Param }) {
 
   return (
     <DocsPage
+      url={page.url}
       toc={page.data.toc}
-      footer={neighbours}
       lastUpdate={time}
       tableOfContent={{
         footer: (
           <a
-            href={resolve(
-              `https://github.com/fuma-nama/next-docs/blob/main`,
-              path
-            )}
+            href={`https://github.com/fuma-nama/next-docs/blob/main/${path}`}
             target="_blank"
             rel="noreferrer noopener"
             className="text-xs inline-flex text-muted-foreground items-center hover:text-foreground"
