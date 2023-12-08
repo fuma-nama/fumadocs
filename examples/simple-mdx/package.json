@@ -11,7 +11,7 @@
     "@next/mdx": "^14.0.0",
     "@mdx-js/loader": "^3.0.0",
     "@mdx-js/react": "^3.0.0",
-    "next": "14.0.3",
+    "next": "14.0.4",
     "next-docs-ui": "5.0.0",
     "next-docs-zeta": "5.0.0",
     "next-docs-mdx": "5.0.0",
