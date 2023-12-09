@@ -1,5 +1,5 @@
 ---
-'next-docs-ui': minor
+'next-docs-mdx': minor
 ---
 
 **Use `@mdx-js/mdx` to process MDX/markdown files.**

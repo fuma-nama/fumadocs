@@ -43,15 +43,6 @@ declare module 'next-docs-mdx/types' {
   interface Frontmatter extends z.infer<typeof frontmatterSchema> {}
 }
 
-// Access and export MDX pages data to json file
-// So that we can update search indexes after the build
-declare global {
-  // eslint-disable-next-line no-var
-  var __NEXT_DOCS_INDEX_UPDATED: boolean
-}
-
-global.__NEXT_DOCS_INDEX_UPDATED = false
-
 export type Index = {
   id: string
   title: string
@@ -60,9 +51,15 @@ export type Index = {
   structuredData: StructuredData
 }
 
+// Access and export MDX pages data to json file
+// So that we can update search indexes after the build
+const g = globalThis as unknown as {
+  __NEXT_DOCS_INDEX_UPDATED?: boolean
+}
+
 if (
   process.env.NEXT_PHASE === PHASE_PRODUCTION_BUILD &&
-  !global.__NEXT_DOCS_INDEX_UPDATED
+  !g.__NEXT_DOCS_INDEX_UPDATED
 ) {
   const mapPath = path.resolve('./.next/_map_indexes.json')
   const indexes: Index[] = Object.values(tabs).flatMap(tab => {
@@ -77,5 +74,5 @@ if (
 
   writeFileSync(mapPath, JSON.stringify(indexes))
 
-  global.__NEXT_DOCS_INDEX_UPDATED = true
+  g.__NEXT_DOCS_INDEX_UPDATED = true
 }
