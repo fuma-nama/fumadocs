@@ -1,16 +1,13 @@
 'use client'
 
+import type { SearchOptions } from '@algolia/client-search'
 import type { SearchIndex } from 'algoliasearch/lite'
 import { useAlgoliaSearch } from 'next-docs-zeta/search-algolia/client'
-import dynamic from 'next/dynamic'
 import { createContext, useContext, type ReactNode } from 'react'
-import { type SharedProps } from './search'
-
-const SearchDialog = dynamic(() =>
-  import('./search').then(res => res.SearchDialog)
-)
+import { SearchDialog, type SharedProps } from './search'
 
 export type AlgoliaSearchDialogProps = SharedProps & {
+  searchOptions?: SearchOptions
   footer?: ReactNode
   children?: ReactNode
 }
@@ -26,20 +23,21 @@ export function AlgoliaContextProvider(props: {
   )
 }
 
-export default function AlgoliaSearchDialog_experimental(
-  props: AlgoliaSearchDialogProps
-) {
+export default function AlgoliaSearchDialog({
+  searchOptions,
+  ...props
+}: AlgoliaSearchDialogProps) {
   const index = useContext(Context)
   if (index == null) throw new Error('Missing algolia index context')
 
-  const { search, setSearch, query } = useAlgoliaSearch(index)
+  const { search, setSearch, query } = useAlgoliaSearch(index, searchOptions)
 
   return (
     <SearchDialog
-      {...props}
       search={search}
       onSearchChange={setSearch}
       data={query.data}
+      {...props}
     />
   )
 }

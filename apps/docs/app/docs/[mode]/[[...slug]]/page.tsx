@@ -54,7 +54,7 @@ export default async function Page({ params }: { params: Param }) {
       }}
     >
       <MDXContent>
-        <div className="nd-not-prose mb-12">
+        <div className="not-prose mb-12">
           <h1 className="text-foreground mb-4 text-3xl font-semibold sm:text-4xl">
             {page.matter.title}
           </h1>
