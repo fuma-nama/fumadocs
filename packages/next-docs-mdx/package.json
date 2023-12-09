@@ -12,9 +12,14 @@
   ],
   "exports": {
     "./loader": "./loader.js",
-    "./*": {
-      "import": "./dist/*.mjs",
-      "types": "./dist/*.d.mts"
+    "./loader-mdx": "./loader-mdx.js",
+    "./config": {
+      "import": "./dist/config.mjs",
+      "types": "./dist/config.d.mts"
+    },
+    "./map": {
+      "import": "./dist/map.mjs",
+      "types": "./dist/map.d.mts"
     }
   },
   "typesVersions": {
@@ -38,23 +43,21 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
+    "@mdx-js/mdx": "^3.0.0",
     "estree-util-value-to-estree": "^3.0.1",
     "fast-glob": "^3.3.1",
-    "remark-frontmatter": "^5.0.0",
-    "yaml": "^2.3.3",
+    "gray-matter": "^4.0.3",
+    "next-docs-zeta": "workspace:*",
     "zod": "^3.22.4"
   },
   "peerDependencies": {
-    "@next/mdx": ">= 13",
-    "next-docs-zeta": "5.0.0"
+    "next": ">= 13.4"
   },
   "devDependencies": {
-    "@next/mdx": "14.0.4",
     "@types/mdast": "^4.0.3",
     "@types/mdx": "^2.0.8",
     "@types/react": "18.2.0",
     "next": "14.0.4",
-    "next-docs-zeta": "workspace:*",
     "unified": "^11.0.4",
     "webpack": "^5.89.0"
   },

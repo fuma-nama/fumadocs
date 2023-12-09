@@ -13,7 +13,7 @@ export type LoaderOptions = {
 export default function loader(
   this: LoaderContext<LoaderOptions>,
   _source: string,
-  callback: (err?: null | Error, content?: string | Buffer) => void
+  callback: LoaderContext<LoaderOptions>['callback']
 ) {
   const { cwd, rootContentPath } = this.getOptions()
 

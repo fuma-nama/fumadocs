@@ -1,5 +1,5 @@
 import path from 'path'
-import createNextMDX, { type NextMDXOptions } from '@next/mdx'
+import type { ProcessorOptions } from '@mdx-js/mdx'
 import type { NextConfig } from 'next'
 import {
   rehypeNextDocs,
@@ -8,21 +8,17 @@ import {
   remarkToc,
   type RehypeNextDocsOptions
 } from 'next-docs-zeta/mdx-plugins'
-import remarkFrontmatter, {
-  type Options as RemarkFrontmatterOptions
-} from 'remark-frontmatter'
 import type { PluggableList } from 'unified'
 import type { Configuration } from 'webpack'
 import type { LoaderOptions } from './loader'
 import remarkMdxExport from './mdx-plugins/remark-exports'
-import remarkMdxFrontmatter from './mdx-plugins/remark-frontmatter'
 import { NextDocsWebpackPlugin } from './webpack-plugins/next-docs'
 
 type WithMDX = (config: NextConfig) => NextConfig
-type Loader = (options: NextMDXOptions) => WithMDX
+type Loader = (options: ProcessorOptions) => WithMDX
 
 type MDXOptions = Omit<
-  NonNullable<NextMDXOptions['options']>,
+  NonNullable<ProcessorOptions>,
   'rehypePlugins' | 'remarkPlugins'
 > & {
   rehypePlugins?: ResolvePlugins
@@ -81,7 +77,6 @@ function pluginOption(
 
 const createNextDocs =
   ({
-    loader = options => createNextMDX(options),
     mdxOptions = {},
     cwd = process.cwd(),
     rootMapPath = './_map.ts',
@@ -98,8 +93,6 @@ const createNextDocs =
     const remarkPlugins = pluginOption(
       v => [
         remarkGfm,
-        [remarkFrontmatter, 'yaml' satisfies RemarkFrontmatterOptions],
-        remarkMdxFrontmatter,
         remarkStructure,
         remarkToc,
         ...v,
@@ -113,29 +106,42 @@ const createNextDocs =
       mdxOptions.rehypePlugins
     )
 
-    const withMDX = loader({
-      extension: /\.mdx?$/,
-      options: {
-        ...mdxOptions,
-        remarkPlugins,
-        rehypePlugins
-      }
-    })
-
-    nextConfig = withMDX(nextConfig)
-
     return Object.assign({}, nextConfig, {
       webpack: (config: Configuration, options) => {
-        config.module!.rules!.push({
-          test: _mapPath,
-          use: {
-            loader: 'next-docs-mdx/loader',
-            options: {
-              cwd,
-              rootContentPath
-            } satisfies LoaderOptions
+        const alias = config.resolve!.alias as Record<string, unknown>
+        alias['next-mdx-import-source-file'] = [
+          'private-next-root-dir/src/mdx-components',
+          'private-next-root-dir/mdx-components',
+          '@mdx-js/react'
+        ]
+
+        config.module!.rules!.push(
+          {
+            test: /\.mdx?$/,
+            use: [
+              options.defaultLoaders.babel,
+              {
+                loader: 'next-docs-mdx/loader-mdx',
+                options: {
+                  providerImportSource: 'next-mdx-import-source-file',
+                  ...mdxOptions,
+                  remarkPlugins,
+                  rehypePlugins
+                }
+              }
+            ]
+          },
+          {
+            test: _mapPath,
+            use: {
+              loader: 'next-docs-mdx/loader',
+              options: {
+                cwd,
+                rootContentPath
+              } satisfies LoaderOptions
+            }
           }
-        })
+        )
 
         config.plugins!.push(
           new NextDocsWebpackPlugin({ rootMapFile: _mapPath })

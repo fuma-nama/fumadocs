@@ -60,18 +60,9 @@ importers:
 
   apps/docs:
     dependencies:
-      '@mdx-js/loader':
-        specifier: ^3.0.0
-        version: 3.0.0(webpack@5.89.0)
-      '@mdx-js/react':
-        specifier: ^3.0.0
-        version: 3.0.0(@types/react@18.2.0)(react@18.2.0)
       '@next/env':
         specifier: ^14.0.0
         version: 14.0.0
-      '@next/mdx':
-        specifier: ^14.0.0
-        version: 14.0.0(@mdx-js/loader@3.0.0)(@mdx-js/react@3.0.0)
       algoliasearch:
         specifier: ^4.20.0
         version: 4.20.0
@@ -396,25 +387,25 @@ importers:
 
   packages/next-docs-mdx:
     dependencies:
+      '@mdx-js/mdx':
+        specifier: ^3.0.0
+        version: 3.0.0
       estree-util-value-to-estree:
         specifier: ^3.0.1
         version: 3.0.1
       fast-glob:
         specifier: ^3.3.1
         version: 3.3.1
-      remark-frontmatter:
-        specifier: ^5.0.0
-        version: 5.0.0
-      yaml:
-        specifier: ^2.3.3
-        version: 2.3.3
+      gray-matter:
+        specifier: ^4.0.3
+        version: 4.0.3
+      next-docs-zeta:
+        specifier: workspace:*
+        version: link:../next-docs
       zod:
         specifier: ^3.22.4
         version: 3.22.4
     devDependencies:
-      '@next/mdx':
-        specifier: 14.0.4
-        version: 14.0.4
       '@types/mdast':
         specifier: ^4.0.3
         version: 4.0.3
@@ -427,9 +418,6 @@ importers:
       next:
         specifier: 14.0.4
         version: 14.0.4(@babel/core@7.22.17)(react-dom@18.2.0)(react@18.2.0)
-      next-docs-zeta:
-        specifier: workspace:*
-        version: link:../next-docs
       unified:
         specifier: ^11.0.4
         version: 11.0.4
@@ -497,6 +485,9 @@ importers:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.3.6)
     devDependencies:
+      '@algolia/client-search':
+        specifier: ^4.20.0
+        version: 4.20.0
       '@types/react':
         specifier: 18.2.0
         version: 18.2.0
@@ -506,9 +497,6 @@ importers:
       algoliasearch:
         specifier: ^4.20.0
         version: 4.20.0
-      autoprefixer:
-        specifier: 10.4.16
-        version: 10.4.16(postcss@8.4.32)
       next:
         specifier: 14.0.4
         version: 14.0.4(@babel/core@7.22.17)(react-dom@18.2.0)(react@18.2.0)
@@ -518,9 +506,6 @@ importers:
       postcss-cli:
         specifier: ^11.0.0
         version: 11.0.0(postcss@8.4.32)
-      postcss-import:
-        specifier: ^15.1.0
-        version: 15.1.0(postcss@8.4.32)
       postcss-lightningcss:
         specifier: ^1.0.0
         version: 1.0.0(postcss@8.4.32)
@@ -1687,22 +1672,6 @@ packages:
       glob: 7.1.7
     dev: true
 
-  /@next/mdx@14.0.0(@mdx-js/loader@3.0.0)(@mdx-js/react@3.0.0):
-    resolution: {integrity: sha512-pFSJO81fGoK6wVZPa8j/z+DKY5t3shMY2/hajdhxMjITL4nLzUZenuq42j8cLsN/nNJymaUJCA1SjiRb7jNQ1A==}
-    peerDependencies:
-      '@mdx-js/loader': '>=0.15.0'
-      '@mdx-js/react': '>=0.15.0'
-    peerDependenciesMeta:
-      '@mdx-js/loader':
-        optional: true
-      '@mdx-js/react':
-        optional: true
-    dependencies:
-      '@mdx-js/loader': 3.0.0(webpack@5.89.0)
-      '@mdx-js/react': 3.0.0(@types/react@18.2.0)(react@18.2.0)
-      source-map: 0.7.4
-    dev: false
-
   /@next/mdx@14.0.1(@mdx-js/loader@3.0.0)(@mdx-js/react@3.0.0):
     resolution: {integrity: sha512-9hikFxx1XQOReOp5SBO1o3fGs1Z1GT1flKm1wrjFOwOTNI0M4x9CuQsUx5KJwvbt0FejCS5bsuNGXqxHchcMCQ==}
     peerDependencies:
@@ -1718,20 +1687,6 @@ packages:
       '@mdx-js/react': 3.0.0(@types/react@18.2.0)(react@18.2.0)
       source-map: 0.7.4
     dev: false
-
-  /@next/mdx@14.0.4:
-    resolution: {integrity: sha512-w0b+A2LRdlqqTIzmaeqPOaafid2cYYYjETA+G+3ZFwkNbBQjvZp57P1waOexF3MGHzcCEoXEnhYpAc+FO6S0Rg==}
-    peerDependencies:
-      '@mdx-js/loader': '>=0.15.0'
-      '@mdx-js/react': '>=0.15.0'
-    peerDependenciesMeta:
-      '@mdx-js/loader':
-        optional: true
-      '@mdx-js/react':
-        optional: true
-    dependencies:
-      source-map: 0.7.4
-    dev: true
 
   /@next/swc-darwin-arm64@14.0.4:
     resolution: {integrity: sha512-mF05E/5uPthWzyYDyptcwHptucf/jj09i2SXBPwNzbgBNc+XnwzrL0U6BmPjQeOL+FiB+iG1gwBeq7mlDjSRPg==}
