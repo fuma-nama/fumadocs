@@ -10,13 +10,13 @@ export default defineConfig([
     outExtension: () => ({ js: '.js' }),
     format: 'esm',
     dts: true,
-    target: 'es2017',
+    target: 'es2022',
   },
   {
     entry: ['./src/tailwind-plugin.ts'],
     format: 'cjs',
     external: ['tailwindcss'],
     dts: true,
-    target: 'es6',
+    target: 'node18',
   },
 ]);

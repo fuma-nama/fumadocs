@@ -1,20 +1,21 @@
-import mdx from '../../../packages/next-docs-mdx/package.json';
-import ui from '../../../packages/next-docs-ui/package.json';
-import zeta from '../../../packages/next-docs/package.json';
+/* eslint-disable import/no-relative-packages -- required */
 import {
   LayoutIcon,
   LibraryIcon,
   PaperclipIcon,
   type LucideIcon,
 } from 'lucide-react';
+import mdx from '../../../packages/mdx/package.json';
+import ui from '../../../packages/ui/package.json';
+import zeta from '../../../packages/headless/package.json';
 
-export type Mode = {
+export interface Mode {
   param: string;
   name: string;
   description: string;
   version: string;
   icon: LucideIcon;
-};
+}
 
 export const modes: Mode[] = [
   {

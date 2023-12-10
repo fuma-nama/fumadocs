@@ -35,7 +35,7 @@ export interface RehypeNextDocsOptions {
 export function rehypeNextDocs({
   codeOptions,
 }: RehypeNextDocsOptions = {}): Transformer<Root, Root> {
-  return async (tree, vfile, next) => {
+  return async (tree, vfile) => {
     slugger.reset();
 
     visit(tree, ['pre', ...headings], (node) => {
@@ -67,7 +67,9 @@ export function rehypeNextDocs({
       ...codeOptions,
     }) as Transformer<Root, Root>;
 
-    await plugin(tree, vfile, next);
+    await plugin(tree, vfile, () => {
+      // do nothing
+    });
 
     visit(tree, ['figure', 'pre'], (node) => {
       // Remove default fragment element

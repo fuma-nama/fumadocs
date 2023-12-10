@@ -72,7 +72,7 @@ function colorToCSS(prefix: string, name: string): string {
 }
 
 export const docsUi = plugin.withOptions<NextDocsUIOptions>(
-  ({ prefix = '' }) => {
+  ({ prefix = '' } = {}) => {
     return ({ addBase, addComponents, addUtilities }) => {
       addBase({
         ':root': mapColors(prefix, colors),
@@ -95,7 +95,6 @@ export const docsUi = plugin.withOptions<NextDocsUIOptions>(
             'border-color': 'transparent',
             '& span': {
               color: 'var(--shiki-light)',
-              '@apply dark:text-[var(--shiki-dark]': {},
             },
           },
           '& [data-highlighted-line]': {
@@ -106,6 +105,11 @@ export const docsUi = plugin.withOptions<NextDocsUIOptions>(
             'background-color': `theme('colors.primary.DEFAULT / 10%')`,
             'border-bottom-width': `theme('borderWidth.2')`,
             'border-color': `theme('colors.primary.DEFAULT')`,
+          },
+        },
+        '.dark .nd-codeblock': {
+          '& span': {
+            color: 'var(--shiki-dark)',
           },
         },
         '[data-rmiz]': {
@@ -204,7 +208,7 @@ export const docsUi = plugin.withOptions<NextDocsUIOptions>(
       });
     };
   },
-  ({ prefix = '' }) => ({
+  ({ prefix = '' } = {}) => ({
     theme: {
       extend: {
         container: {
