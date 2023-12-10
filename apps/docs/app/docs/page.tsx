@@ -10,10 +10,10 @@ const cardVariants = cva(
 
 export default function DocsPage() {
   return (
-    <main className="container flex flex-col items-center text-center py-16">
+    <main className="container flex flex-col items-center py-16 text-center">
       <div className="absolute inset-0 z-[-1] overflow-hidden [perspective:2000px]">
         <div
-          className="absolute left-[50%] bottom-[20%] origin-bottom w-[1200px] h-[1200px] opacity-50 bg-primary/30 animate-in fade-in duration-1000"
+          className="bg-primary/30 animate-in fade-in absolute bottom-[20%] left-[50%] h-[1200px] w-[1200px] origin-bottom opacity-50 duration-1000"
           style={{
             transform: 'rotateX(75deg) translate(-50%, 400px)',
             backgroundImage:
@@ -21,11 +21,11 @@ export default function DocsPage() {
           }}
         />
       </div>
-      <h1 className="font-medium text-5xl mb-4">Choose one.</h1>
+      <h1 className="mb-4 text-5xl font-medium">Choose one.</h1>
       <p className="text-muted-foreground">
         Different packages for different use cases.
       </p>
-      <div className="grid grid-cols-2 gap-4 mt-4">
+      <div className="mt-4 grid grid-cols-2 gap-4">
         <a
           href="https://github.com/fuma-nama/next-docs"
           rel="noreferrer noopener"
@@ -40,12 +40,12 @@ export default function DocsPage() {
           Showcase
         </Link>
       </div>
-      <div className="grid grid-cols-1 gap-4 mt-16 text-left md:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-16 grid grid-cols-1 gap-4 text-left md:grid-cols-2 lg:grid-cols-3">
         <Link href="/docs/ui" className={cn(cardVariants())}>
           <LayoutIcon
             stroke="hsl(var(--background))"
             fill="url(#ui-gradient)"
-            className="w-12 h-12"
+            className="h-12 w-12"
           >
             <defs>
               <linearGradient id="ui-gradient" x1={0} x2={0} y1={0} y2={1}>
@@ -63,7 +63,7 @@ export default function DocsPage() {
           <LibrarySquareIcon
             fill="url(#gradient)"
             stroke="hsl(var(--background))"
-            className="w-12 h-12"
+            className="h-12 w-12"
           >
             <defs>
               <linearGradient id="gradient" x1={0} x2={1} y1={0} y2={1}>
@@ -84,7 +84,7 @@ export default function DocsPage() {
           <PaperclipIcon
             fill="url(#mdx-gradient)"
             stroke="hsl(var(--background))"
-            className="w-12 h-12"
+            className="h-12 w-12"
           >
             <defs>
               <linearGradient id="mdx-gradient" x1={0} x2={1} y1={0} y2={1}>

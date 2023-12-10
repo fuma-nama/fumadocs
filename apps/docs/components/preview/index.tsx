@@ -1,3 +1,4 @@
+import { Wrapper } from './wrapper'
 import BannerImage from '@/public/banner.png'
 import { HomeIcon } from 'lucide-react'
 import { Accordion, Accordions } from 'next-docs-ui/components/accordion'
@@ -11,7 +12,6 @@ import { Tab, Tabs } from 'next-docs-ui/components/tabs'
 import { TypeTable } from 'next-docs-ui/components/type-table'
 import { Card, Heading } from 'next-docs-ui/mdx'
 import type { ReactNode } from 'react'
-import { Wrapper } from './wrapper'
 
 export default {
   heading: (
@@ -19,7 +19,7 @@ export default {
       <Heading
         id="preview"
         as="h3"
-        className="bg-background p-4 rounded-xl !my-0"
+        className="bg-background !my-0 rounded-xl p-4"
       >
         Hello World
       </Heading>
@@ -39,7 +39,7 @@ export default {
   ),
   tabs: (
     <Wrapper>
-      <div className="p-4 bg-background rounded-xl text-sm space-y-4">
+      <div className="bg-background space-y-4 rounded-xl p-4 text-sm">
         <Tabs
           id="language"
           persist
@@ -63,7 +63,7 @@ export default {
   ),
   'type-table': (
     <Wrapper>
-      <div className="bg-background px-4 rounded-xl">
+      <div className="bg-background rounded-xl px-4">
         <TypeTable
           type={{
             percentage: {
@@ -82,7 +82,7 @@ export default {
       <ImageZoom
         alt="banner"
         src={BannerImage}
-        className="!my-0 bg-background rounded-xl"
+        className="bg-background !my-0 rounded-xl"
         priority
       />
     </Wrapper>
@@ -166,7 +166,7 @@ export default {
   ),
   steps: (
     <Wrapper>
-      <div className="rounded-xl bg-background p-3">
+      <div className="bg-background rounded-xl p-3">
         <Steps>
           <Step>
             <h4>Buy Coffee</h4>

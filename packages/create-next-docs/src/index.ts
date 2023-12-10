@@ -1,7 +1,5 @@
 #!/usr/bin/env node
-import { existsSync } from 'fs'
-import fs from 'fs/promises'
-import path from 'path'
+import { autoInstall, getPackageManager } from './auto-install'
 import {
   cancel,
   confirm,
@@ -12,8 +10,10 @@ import {
   spinner,
   text
 } from '@clack/prompts'
+import { existsSync } from 'fs'
+import fs from 'fs/promises'
+import path from 'path'
 import * as color from 'picocolors'
-import { autoInstall, getPackageManager } from './auto-install'
 
 async function main() {
   const cwd = process.cwd()

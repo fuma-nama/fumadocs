@@ -1,3 +1,4 @@
+/** @type {import("prettier").Config} */
 module.exports = {
   semi: false,
   tailwindFunctions: ['clsx', 'cn'],
@@ -5,8 +6,8 @@ module.exports = {
   trailingComma: 'none',
   arrowParens: 'avoid',
   plugins: [
-    'prettier-plugin-tailwindcss',
-    '@ianvs/prettier-plugin-sort-imports'
+    '@trivago/prettier-plugin-sort-imports',
+    'prettier-plugin-tailwindcss'
   ],
   proseWrap: 'always'
 }

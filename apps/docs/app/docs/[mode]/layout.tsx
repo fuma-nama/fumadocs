@@ -22,10 +22,10 @@ export default function Layout({
       sidebar={{
         defaultOpenLevel: 0,
         banner: (
-          <div className="flex flex-row gap-2 items-center p-2 -mt-2 rounded-lg text-card-foreground transition-colors hover:bg-muted/80">
+          <div className="text-card-foreground hover:bg-muted/80 -mt-2 flex flex-row items-center gap-2 rounded-lg p-2 transition-colors">
             <Icon
               className={cn(
-                'w-9 h-9 p-1.5 shrink-0 rounded-md text-primary bg-gradient-to-b from-primary/50 border border-primary/50',
+                'text-primary from-primary/50 border-primary/50 h-9 w-9 shrink-0 rounded-md border bg-gradient-to-b p-1.5',
                 params.mode === 'ui' &&
                   '[--primary:213_98%_48%] dark:[--primary:213_94%_68%]',
                 params.mode === 'headless' &&
@@ -34,7 +34,7 @@ export default function Layout({
             />
             <div>
               <p className="font-medium">{mode.name}</p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 {mode.description} - {mode.version}
               </p>
             </div>

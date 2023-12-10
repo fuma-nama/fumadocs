@@ -20,12 +20,12 @@ export function ThemeSwitch(props: { children: ReactNode; style: string }) {
   const [active, setActive] = useState(false)
 
   return (
-    <div className="flex flex-row gap-3 flex-wrap">
+    <div className="flex flex-row flex-wrap gap-3">
       <button
         className={cn(itemVariants({ active }))}
         onClick={() => setActive(prev => !prev)}
       >
-        <Circle className={cn('w-4 h-4', active && 'fill-primary')} />
+        <Circle className={cn('h-4 w-4', active && 'fill-primary')} />
         {props.children}
       </button>
       {active && <style>{props.style}</style>}

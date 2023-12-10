@@ -35,6 +35,7 @@
     "picocolors": "^1.0.0"
   },
   "devDependencies": {
+    "internal-config": "workspace:*",
     "@types/cross-spawn": "^6.0.4",
     "@types/node": "18.17.5",
     "fast-glob": "^3.3.1"

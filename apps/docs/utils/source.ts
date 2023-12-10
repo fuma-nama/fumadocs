@@ -1,9 +1,9 @@
-import { writeFileSync } from 'fs'
-import path from 'path'
 import { map } from '@/_map'
+import { writeFileSync } from 'fs'
 import { defaultValidators, fromMap, type Utils } from 'next-docs-mdx/map'
 import type { StructuredData } from 'next-docs-zeta/mdx-plugins'
 import { PHASE_PRODUCTION_BUILD } from 'next/constants'
+import path from 'path'
 import { z } from 'zod'
 
 const frontmatterSchema = defaultValidators.frontmatter.extend({

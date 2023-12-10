@@ -1,11 +1,11 @@
-import { Nav } from '@/components/nav'
-import { Star } from 'lucide-react'
-import { Inter } from 'next/font/google'
-import './style.css'
-import { base_url, createMetadata } from '@/utils/metadata'
-import type { Viewport } from 'next'
-import Link from 'next/link'
 import { Provider } from './provider'
+import './style.css'
+import { Nav } from '@/components/nav'
+import { base_url, createMetadata } from '@/utils/metadata'
+import { Star } from 'lucide-react'
+import type { Viewport } from 'next'
+import { Inter } from 'next/font/google'
+import Link from 'next/link'
 
 export const metadata = createMetadata({
   title: {
@@ -64,18 +64,18 @@ function Footer() {
           </p>
         </div>
 
-        <div className="flex flex-row items-center flex-wrap gap-12">
+        <div className="flex flex-row flex-wrap items-center gap-12">
           <a
             href="https://github.com/fuma-nama/next-docs"
             rel="noreferrer noopener"
-            className="flex flex-row items-center text-sm text-muted-foreground transition-colors hover:text-accent-foreground"
+            className="text-muted-foreground hover:text-accent-foreground flex flex-row items-center text-sm transition-colors"
           >
             <Star className="mr-2 h-4 w-4" />
             Give us a star
           </a>
           <Link
             href="/showcase"
-            className="flex flex-row items-center text-sm text-muted-foreground transition-colors hover:text-accent-foreground"
+            className="text-muted-foreground hover:text-accent-foreground flex flex-row items-center text-sm transition-colors"
           >
             Showcase
           </Link>

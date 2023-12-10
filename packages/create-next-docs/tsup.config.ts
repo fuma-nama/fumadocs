@@ -1,5 +1,5 @@
-import { defineConfig } from 'tsup'
 import tsconfig from './tsconfig.json'
+import { defineConfig } from 'tsup'
 
 export default defineConfig({
   entry: ['./src/index.ts'],

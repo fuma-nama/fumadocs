@@ -58,7 +58,7 @@ export default function CustomSearchDialog(props: SharedProps) {
             <a
               href="https://algolia.com"
               rel="noreferrer noopener"
-              className="text-muted-foreground text-xs ml-auto"
+              className="text-muted-foreground ml-auto text-xs"
             >
               Search powered by Algolia
             </a>

@@ -37,8 +37,8 @@ export function Nav() {
     <OriginalNav
       title={
         <>
-          <StarsIcon className="w-5 h-5" fill="currentColor" />
-          <span className="font-semibold ml-1.5 max-sm:hidden">Next Docs</span>
+          <StarsIcon className="h-5 w-5" fill="currentColor" />
+          <span className="ml-1.5 font-semibold max-sm:hidden">Next Docs</span>
         </>
       }
       enableSidebar={modes.some(m => m.param === mode)}
@@ -58,7 +58,7 @@ export function Nav() {
       ]}
       transparent={mode == null && isDown}
     >
-      <div className="bg-secondary/50 rounded-md border p-1 text-sm text-muted-foreground max-sm:absolute max-sm:left-[50%] max-sm:translate-x-[-50%]">
+      <div className="bg-secondary/50 text-muted-foreground rounded-md border p-1 text-sm max-sm:absolute max-sm:left-[50%] max-sm:translate-x-[-50%]">
         {modes.map(m => (
           <Link
             key={m.param}

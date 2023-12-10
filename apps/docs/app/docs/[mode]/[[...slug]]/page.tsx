@@ -1,4 +1,3 @@
-import { resolve } from 'url'
 import Preview from '@/components/preview'
 import { createMetadata } from '@/utils/metadata'
 import { getUtils, tabs } from '@/utils/source'
@@ -10,6 +9,7 @@ import { Card, Cards, MDXContent } from 'next-docs-ui/mdx'
 import { DocsPage } from 'next-docs-ui/page'
 import { getGithubLastEdit } from 'next-docs-zeta/server'
 import { notFound } from 'next/navigation'
+import { resolve } from 'url'
 
 type Param = {
   mode: string
@@ -46,9 +46,9 @@ export default async function Page({ params }: { params: Param }) {
             href={`https://github.com/fuma-nama/next-docs/blob/main/${path}`}
             target="_blank"
             rel="noreferrer noopener"
-            className="text-xs inline-flex text-muted-foreground items-center hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground inline-flex items-center text-xs"
           >
-            Edit on Github <ExternalLinkIcon className="ml-1 w-3 h-3" />
+            Edit on Github <ExternalLinkIcon className="ml-1 h-3 w-3" />
           </a>
         )
       }}

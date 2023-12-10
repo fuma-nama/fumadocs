@@ -1,12 +1,12 @@
+import mdx from '../../../packages/next-docs-mdx/package.json'
+import ui from '../../../packages/next-docs-ui/package.json'
+import zeta from '../../../packages/next-docs/package.json'
 import {
   LayoutIcon,
   LibraryIcon,
   PaperclipIcon,
   type LucideIcon
 } from 'lucide-react'
-import mdx from '../../../packages/next-docs-mdx/package.json'
-import ui from '../../../packages/next-docs-ui/package.json'
-import zeta from '../../../packages/next-docs/package.json'
 
 export type Mode = {
   param: string

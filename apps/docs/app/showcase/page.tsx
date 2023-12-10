@@ -29,7 +29,7 @@ export default function Showcase() {
     <main>
       <div className="relative py-16 text-center">
         <div
-          className="absolute inset-0 animate-in fade-in duration-1000 bg-gradient-to-r from-red-500/20 via-purple-500/50 to-blue-500/20 z-[-1]"
+          className="animate-in fade-in absolute inset-0 z-[-1] bg-gradient-to-r from-red-500/20 via-purple-500/50 to-blue-500/20 duration-1000"
           style={{
             maskImage,
             WebkitMaskImage: maskImage
@@ -44,7 +44,7 @@ export default function Showcase() {
           />
         </div>
         <div className="container">
-          <h1 className="font-semibold text-3xl mb-4 lg:text-4xl">Showcase</h1>
+          <h1 className="mb-4 text-3xl font-semibold lg:text-4xl">Showcase</h1>
           <p className="text-muted-foreground">
             Some cool websites using Next Docs
           </p>
@@ -55,24 +55,24 @@ export default function Showcase() {
               rel="noreferrer noopener"
               className={cn(buttonVariants())}
             >
-              <PlusIcon className="w-4 h-4 mr-2" />
+              <PlusIcon className="mr-2 h-4 w-4" />
               Add Your Own
             </a>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 mt-12 container md:grid-cols-2 lg:grid-cols-3">
+      <div className="container mt-12 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {showcases.map(([image, name, href], key) => (
           <a
             key={key}
             href={href}
             target="_blank"
             rel="noreferrer noopener"
-            className="relative border rounded-lg group overflow-hidden transition-all shadow-lg hover:shadow-primary/10 hover:border-primary/30"
+            className="hover:shadow-primary/10 hover:border-primary/30 group relative overflow-hidden rounded-lg border shadow-lg transition-all"
           >
             <Image alt="Preview" src={image} placeholder="blur" />
-            <p className="absolute inset-x-0 bottom-0 p-6 pt-8 mt-2 text-white text-sm font-medium bg-gradient-to-t from-black transition-all group-hover:[background-position-y:50px] bg-no-repeat">
+            <p className="absolute inset-x-0 bottom-0 mt-2 bg-gradient-to-t from-black bg-no-repeat p-6 pt-8 text-sm font-medium text-white transition-all group-hover:[background-position-y:50px]">
               {name}
             </p>
           </a>

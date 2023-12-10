@@ -21,9 +21,9 @@ export const languages = ['en', 'cn']
 2. Change your current configurations.
 
 ```ts title="source.ts"
+import { languages } from './i18n'
 import { allDocs, allMeta } from 'contentlayer/generated'
 import { createContentlayer } from 'next-docs-zeta/contentlayer'
-import { languages } from './i18n'
 
 export const { getPage, getPageUrl, tree } = createContentlayer(
   allMeta,

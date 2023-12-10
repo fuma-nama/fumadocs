@@ -1,3 +1,4 @@
+import { Previews, Rain } from './page.client'
 import { CodeBlock } from '@/components/typing-code-block'
 import { buttonVariants } from '@/components/ui/button'
 import Example from '@/public/example-2.png'
@@ -22,7 +23,6 @@ import { File, Files } from 'next-docs-ui/components/files'
 import Image from 'next/image'
 import Link from 'next/link'
 import type { HTMLAttributes, SVGProps } from 'react'
-import { Previews, Rain } from './page.client'
 
 const badgeVariants = cva(
   'mb-2 w-7 h-7 inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground font-medium'
@@ -411,13 +411,13 @@ export default function HomePage() {
   return (
     <>
       <div
-        className="absolute top-[200px] inset-x-0 h-[250px]"
+        className="absolute inset-x-0 top-[200px] h-[250px]"
         style={{
           background:
             'repeating-linear-gradient(to right, hsl(var(--border)), transparent 1px, transparent 50px), repeating-linear-gradient(to bottom, hsl(var(--border)), transparent 1px, transparent 50px)'
         }}
       />
-      <main className="relative container px-2 py-4 max-w-[1100px] sm:py-20">
+      <main className="container relative max-w-[1100px] px-2 py-4 sm:py-20">
         <div
           className="border-x border-t"
           style={{
@@ -427,15 +427,15 @@ export default function HomePage() {
         >
           <Hero />
           <div className="border-b px-6">
-            <div className="flex flex-col sm:divide-x sm:divide-border sm:flex-row">
-              <div className="py-8 flex-1 sm:pr-8 sm:py-16">
-                <p className="font-medium text-muted-foreground [&_b]:text-foreground sm:text-lg">
+            <div className="sm:divide-border flex flex-col sm:flex-row sm:divide-x">
+              <div className="flex-1 py-8 sm:py-16 sm:pr-8">
+                <p className="text-muted-foreground [&_b]:text-foreground font-medium sm:text-lg">
                   Next Docs is the Next.js framework for building documentation
                   sites along with <b>Breathtaking UI</b> and{' '}
                   <b>Excellent User Experience</b>.
                 </p>
               </div>
-              <div className="grid grid-cols-1 gap-4 py-8 sm:pl-8 sm:py-16 lg:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 py-8 sm:py-16 sm:pl-8 lg:grid-cols-2">
                 <Link
                   href="/docs"
                   className={cn(
@@ -459,28 +459,28 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-          <div className="container py-24 border-b">
-            <h2 className="text-2xl font-semibold text-center sm:text-4xl">
+          <div className="container border-b py-24">
+            <h2 className="text-center text-2xl font-semibold sm:text-4xl">
               Start instantly.
               <br />
               Make it yours, Ship within seconds.
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2">
-            <div className="relative flex flex-col px-6 py-12 border-b md:py-16 md:border-r">
+            <div className="relative flex flex-col border-b px-6 py-12 md:border-r md:py-16">
               <div className={cn(badgeVariants())}>1</div>
-              <h3 className="font-bold text-xl">Create it.</h3>
+              <h3 className="text-xl font-bold">Create it.</h3>
               <p className="text-muted-foreground">
                 Initialize a new docs with a command.
               </p>
               <div className="mr-4">
                 <CodeBlock lang="bash" code="pnpm create next-docs-app" />
               </div>
-              <LaunchAppWindow className="ml-auto w-fit -mt-14 min-h-[120px] z-[2]" />
+              <LaunchAppWindow className="z-[2] -mt-14 ml-auto min-h-[120px] w-fit" />
             </div>
-            <div className="relative flex flex-col px-6 py-12 border-b md:py-16">
+            <div className="relative flex flex-col border-b px-6 py-12 md:py-16">
               <div className={cn(badgeVariants())}>2</div>
-              <h3 className="font-bold text-xl">Customise.</h3>
+              <h3 className="text-xl font-bold">Customise.</h3>
               <p className="text-muted-foreground">
                 Modify the code, in a comfortable way with Typescript
                 auto-complete.
@@ -488,7 +488,7 @@ export default function HomePage() {
               <div className="relative flex flex-col">
                 <CodeBlock
                   lang="ts"
-                  className="absolute top-0 inset-x-2"
+                  className="absolute inset-x-2 top-0"
                   code={code}
                 />
                 <Files className="z-[2] mt-20 shadow-xl">
@@ -501,34 +501,34 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-          <div className="px-6 py-12 border-b flex flex-col text-center items-center">
+          <div className="flex flex-col items-center border-b px-6 py-12 text-center">
             <div className={cn(badgeVariants())}>3</div>
-            <h3 className="font-bold text-2xl">Ship.</h3>
+            <h3 className="text-2xl font-bold">Ship.</h3>
             <p className="text-muted-foreground mb-2">
               Deploy your docs easily with Next.js compatible hosting platforms.
             </p>
 
-            <div className="flex flex-row flex-wrap gap-8 items-center mt-4">
+            <div className="mt-4 flex flex-row flex-wrap items-center gap-8">
               <a href="https://vercel.com" rel="noreferrer noopener">
-                <VercelLogo className="w-32 h-auto" />
+                <VercelLogo className="h-auto w-32" />
               </a>
               <a href="https://netlify.com" rel="noreferrer noopener">
-                <NetlifyLogo className="w-32 h-auto" />
+                <NetlifyLogo className="h-auto w-32" />
               </a>
             </div>
 
             <div
-              className="w-full mt-8"
+              className="mt-8 w-full"
               style={{
                 backgroundImage:
                   'repeating-linear-gradient(to right,hsl(var(--primary)/.1),hsl(var(--primary)/.1) 1px,transparent 1px,transparent 40px), repeating-linear-gradient(to bottom,hsl(var(--primary)/.1),hsl(var(--primary)/.1) 1px,transparent 1px,transparent 40px)'
               }}
             >
-              <Earth className="mx-auto w-60 h-auto -my-8" />
+              <Earth className="-my-8 mx-auto h-auto w-60" />
             </div>
           </div>
-          <div className="relative container py-32 border-b overflow-hidden">
-            <h2 className="text-2xl font-semibold text-center sm:text-3xl">
+          <div className="container relative overflow-hidden border-b py-32">
+            <h2 className="text-center text-2xl font-semibold sm:text-3xl">
               Loved by users.
               <br />
               Built for developers.
@@ -536,27 +536,27 @@ export default function HomePage() {
             <Rain
               width={1000}
               height={500}
-              className="absolute w-full h-full inset-0 mix-blend-difference z-[-1]"
+              className="absolute inset-0 z-[-1] h-full w-full mix-blend-difference"
             />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            <div className="px-6 py-16 border-b md:border-r">
+            <div className="border-b px-6 py-16 md:border-r">
               <RocketIcon />
-              <h2 className="font-bold inline mr-2">Light and Fast.</h2>
+              <h2 className="mr-2 inline font-bold">Light and Fast.</h2>
               <span className="text-muted-foreground font-medium">
                 Full powered documentation site with Next.js App Router.
               </span>
             </div>
-            <div className="px-6 py-16 border-b lg:border-r">
+            <div className="border-b px-6 py-16 lg:border-r">
               <TimerIcon />
-              <h2 className="font-bold inline mr-2">Optimized.</h2>
+              <h2 className="mr-2 inline font-bold">Optimized.</h2>
               <span className="text-muted-foreground font-medium">
                 Less client components, less Javascript, optimized images.
               </span>
             </div>
-            <div className="px-6 py-16 border-b md:border-r">
+            <div className="border-b px-6 py-16 md:border-r">
               <LayoutIcon />
-              <h2 className="font-bold inline mr-2">
+              <h2 className="mr-2 inline font-bold">
                 Accessibility & UX first.
               </h2>
               <span className="text-muted-foreground font-medium">
@@ -564,9 +564,9 @@ export default function HomePage() {
                 excellent experience for your users.
               </span>
             </div>
-            <div className="px-6 py-16 border-b lg:border-r">
+            <div className="border-b px-6 py-16 lg:border-r">
               <SearchIcon />
-              <h2 className="font-bold inline mr-2">
+              <h2 className="mr-2 inline font-bold">
                 Powerful document search.
               </h2>
               <span className="text-muted-foreground font-medium">
@@ -574,47 +574,47 @@ export default function HomePage() {
                 flexibility and performance.
               </span>
             </div>
-            <div className="px-6 py-16 border-b md:border-r">
+            <div className="border-b px-6 py-16 md:border-r">
               <PaperclipIcon />
-              <h2 className="font-bold inline mr-2">Useful MDX Plugins.</h2>
+              <h2 className="mr-2 inline font-bold">Useful MDX Plugins.</h2>
               <span className="text-muted-foreground font-medium">
                 Bundled with remark and rehype plugins that enhances the
                 developer experience.
               </span>
             </div>
-            <div className="px-6 py-16 border-b">
+            <div className="border-b px-6 py-16">
               <PersonStandingIcon />
-              <h2 className="font-bold inline mr-2">Personalized.</h2>
+              <h2 className="mr-2 inline font-bold">Personalized.</h2>
               <span className="text-muted-foreground font-medium">
                 Advanced options for customising your theme in a comfortable
                 way.
               </span>
             </div>
           </div>
-          <div className="grid grid-cols-1 divide-border md:divide-x md:grid-cols-2">
-            <div className="px-6 py-16 border-b md:py-20">
-              <div className="inline-flex items-center gap-2 text-muted-foreground font-medium mb-4">
-                <PaperclipIcon className="w-5 h-5" />
+          <div className="divide-border grid grid-cols-1 md:grid-cols-2 md:divide-x">
+            <div className="border-b px-6 py-16 md:py-20">
+              <div className="text-muted-foreground mb-4 inline-flex items-center gap-2 font-medium">
+                <PaperclipIcon className="h-5 w-5" />
                 <p>Multiple Sources</p>
               </div>
-              <h2 className="text-xl font-semibold mb-1">
+              <h2 className="mb-1 text-xl font-semibold">
                 Your source. Your choice.
               </h2>
-              <p className="text-lg text-muted-foreground font-medium">
+              <p className="text-muted-foreground text-lg font-medium">
                 Native support for different content sources including
                 Contentlayer and the official next/mdx loader.
               </p>
-              <SourceSVG className="w-full h-auto mt-8" />
+              <SourceSVG className="mt-8 h-auto w-full" />
             </div>
-            <div className="px-6 py-16 border-b md:py-20">
-              <div className="inline-flex items-center gap-2 text-muted-foreground font-medium mb-4">
-                <SearchIcon className="w-5 h-5" />
+            <div className="border-b px-6 py-16 md:py-20">
+              <div className="text-muted-foreground mb-4 inline-flex items-center gap-2 font-medium">
+                <SearchIcon className="h-5 w-5" />
                 <p>Algolia Integration</p>
               </div>
-              <h2 className="text-xl font-semibold mb-1">
+              <h2 className="mb-1 text-xl font-semibold">
                 Enhance your search experience.
               </h2>
-              <p className="text-lg text-muted-foreground font-medium">
+              <p className="text-muted-foreground text-lg font-medium">
                 Integrate with Algolia Search in your docs easily.
               </p>
               <Link
@@ -628,10 +628,10 @@ export default function HomePage() {
               <Search />
             </div>
           </div>
-          <div className="grid grid-cols-1 divide-border overflow-hidden md:grid-cols-2 md:divide-x">
-            <div className="relative px-6 py-16 border-b">
+          <div className="divide-border grid grid-cols-1 overflow-hidden md:grid-cols-2 md:divide-x">
+            <div className="relative border-b px-6 py-16">
               <h2 className="text-2xl font-semibold">Heard of our users.</h2>
-              <p className="text-muted-foreground font-medium text-lg">
+              <p className="text-muted-foreground text-lg font-medium">
                 We are making it better.
               </p>
               <Link
@@ -643,19 +643,19 @@ export default function HomePage() {
                 Showcase
               </Link>
 
-              <div className="absolute top-[20px] left-[280px] w-[200px] h-[200px] z-[-1]">
-                <StarIcon strokeWidth={0.4} className="w-full h-full" />
+              <div className="absolute left-[280px] top-[20px] z-[-1] h-[200px] w-[200px]">
+                <StarIcon strokeWidth={0.4} className="h-full w-full" />
                 <StarIcon
                   strokeWidth={0.4}
-                  className="absolute inset-0 w-full h-full scale-[25%]"
+                  className="absolute inset-0 h-full w-full scale-[25%]"
                 />
                 <StarIcon
                   strokeWidth={0.4}
-                  className="absolute inset-0 w-full h-full scale-50"
+                  className="absolute inset-0 h-full w-full scale-50"
                 />
                 <StarIcon
                   strokeWidth={0.4}
-                  className="absolute inset-0 w-full h-full scale-75"
+                  className="absolute inset-0 h-full w-full scale-75"
                 />
               </div>
               <div className="mt-8">
@@ -663,7 +663,7 @@ export default function HomePage() {
               </div>
             </div>
             <div
-              className="px-6 py-16 border-b"
+              className="border-b px-6 py-16"
               style={{
                 backgroundPositionX: '-2px',
                 backgroundImage:
@@ -673,16 +673,16 @@ export default function HomePage() {
               <h2 className="text-2xl font-semibold">
                 Flexibility that cover your needs.
               </h2>
-              <p className="text-muted-foreground font-medium text-lg">
+              <p className="text-muted-foreground text-lg font-medium">
                 Well documented, separated in packages.
               </p>
 
-              <div className="flex flex-col gap-4 mt-8">
+              <div className="mt-8 flex flex-col gap-4">
                 <Link
                   href="/docs/ui"
-                  className="p-px bg-gradient-to-br from-primary rounded-xl shadow-lg shadow-primary/20"
+                  className="from-primary shadow-primary/20 rounded-xl bg-gradient-to-br p-px shadow-lg"
                 >
-                  <div className="p-4 rounded-[inherit] bg-gradient-to-t from-muted bg-background transition-colors hover:bg-muted">
+                  <div className="from-muted bg-background hover:bg-muted rounded-[inherit] bg-gradient-to-t p-4 transition-colors">
                     <LayoutIcon />
                     <h3 className="font-semibold">Next Docs UI</h3>
                     <p className="text-muted-foreground">
@@ -692,9 +692,9 @@ export default function HomePage() {
                 </Link>
                 <Link
                   href="/docs/headless"
-                  className="p-px bg-gradient-to-br from-secondary rounded-xl shadow-lg"
+                  className="from-secondary rounded-xl bg-gradient-to-br p-px shadow-lg"
                 >
-                  <div className="p-4 rounded-[inherit] bg-background transition-colors hover:bg-muted">
+                  <div className="bg-background hover:bg-muted rounded-[inherit] p-4 transition-colors">
                     <LibraryIcon />
                     <h3 className="font-semibold">Next Docs Zeta</h3>
                     <p className="text-muted-foreground">
@@ -705,23 +705,23 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-1 border-b divide-border md:grid-cols-2 md:divide-x lg:grid-cols-3">
-            <div className="relative flex flex-col px-6 py-14 overflow-hidden">
+          <div className="divide-border grid grid-cols-1 border-b md:grid-cols-2 md:divide-x lg:grid-cols-3">
+            <div className="relative flex flex-col overflow-hidden px-6 py-14">
               <Rain
                 width={500}
                 height={1000}
-                className="absolute inset-0 mix-blend-difference z-[-1]"
+                className="absolute inset-0 z-[-1] mix-blend-difference"
               />
               <h2 className="text-3xl font-bold">
                 Create your first documentation.
               </h2>
-              <ul className="flex flex-col my-8 gap-6">
+              <ul className="my-8 flex flex-col gap-6">
                 <li>
                   <span className="font-medium">
                     <BatteryChargingIcon className="inline" /> Battery
                     guaranteed.
                   </span>
-                  <span className="ml-2 text-muted-foreground">
+                  <span className="text-muted-foreground ml-2">
                     Actively maintained, open for contributions.
                   </span>
                 </li>
@@ -729,7 +729,7 @@ export default function HomePage() {
                   <span className="font-medium">
                     <GithubIcon className="inline" /> Fully open-source.
                   </span>
-                  <span className="ml-2 text-muted-foreground">
+                  <span className="text-muted-foreground ml-2">
                     Open source, available on Github.
                   </span>
                 </li>
@@ -737,12 +737,12 @@ export default function HomePage() {
                   <span className="font-medium">
                     <TimerIcon className="inline" /> Within seconds.
                   </span>
-                  <span className="ml-2 text-muted-foreground">
+                  <span className="text-muted-foreground ml-2">
                     Initialize a new project instantly with CLI.
                   </span>
                 </li>
               </ul>
-              <div className="flex flex-row gap-2 mt-auto border-t pt-8">
+              <div className="mt-auto flex flex-row gap-2 border-t pt-8">
                 <Link href="/docs" className={cn(buttonVariants())}>
                   Read docs
                 </Link>
@@ -763,7 +763,7 @@ export default function HomePage() {
               <Image
                 alt="demo"
                 src={Example}
-                className="absolute inset-0 w-full h-full invert blur-lg object-cover dark:invert-0"
+                className="absolute inset-0 h-full w-full object-cover blur-lg invert dark:invert-0"
               />
               <CodeBlock lang="bash" code="pnpm create next-docs-app" />
             </div>
@@ -782,31 +782,31 @@ function Search() {
   const maskImage = 'linear-gradient(to bottom,white 30%,transparent)'
   return (
     <div
-      className="flex flex-col border mt-6 rounded-md bg-popover select-none"
+      className="bg-popover mt-6 flex select-none flex-col rounded-md border"
       style={{
         maskImage,
         WebkitMaskImage: maskImage
       }}
     >
-      <div className="rounded-md text-muted-foreground inline-flex items-center gap-2 text-sm px-4 py-2">
-        <SearchIcon className="w-4 h-4" />
+      <div className="text-muted-foreground inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm">
+        <SearchIcon className="h-4 w-4" />
         Search...
       </div>
       <div className="border-t p-2">
         <div className={cn(searchItemVariants())}>
-          <FileTextIcon className="w-4 h-4" />
+          <FileTextIcon className="h-4 w-4" />
           Getting Started
         </div>
         <div className={cn(searchItemVariants())}>
-          <FileTextIcon className="w-4 h-4" />
+          <FileTextIcon className="h-4 w-4" />
           Components
         </div>
         <div className={cn(searchItemVariants())}>
-          <FileTextIcon className="w-4 h-4" />
+          <FileTextIcon className="h-4 w-4" />
           MDX Content
         </div>
         <div className={cn(searchItemVariants())}>
-          <FileTextIcon className="w-4 h-4" />
+          <FileTextIcon className="h-4 w-4" />
           User Guide
         </div>
       </div>
@@ -819,14 +819,14 @@ function LaunchAppWindow(props: HTMLAttributes<HTMLDivElement>) {
     <div
       {...props}
       className={cn(
-        'bg-background rounded-md border overflow-hidden',
+        'bg-background overflow-hidden rounded-md border',
         props.className
       )}
     >
-      <div className="relative flex flex-row items-center h-6 border-b bg-muted text-muted-foreground text-xs px-4">
+      <div className="bg-muted text-muted-foreground relative flex h-6 flex-row items-center border-b px-4 text-xs">
         <CircleIcon
           aria-label="close"
-          className="fill-red-400 w-2 h-2 text-transparent"
+          className="h-2 w-2 fill-red-400 text-transparent"
         />
         <p className="absolute inset-x-0 text-center">localhost:3000</p>
       </div>
@@ -837,25 +837,25 @@ function LaunchAppWindow(props: HTMLAttributes<HTMLDivElement>) {
 
 function Hero() {
   return (
-    <div className="relative flex flex-col items-center text-center container p-6 border-b z-[2] bg-background">
-      <div className="h-fit mt-12 mb-[260px]">
-        <h1 className="font-medium text-4xl sm:text-6xl p-2">
+    <div className="bg-background container relative z-[2] flex flex-col items-center border-b p-6 text-center">
+      <div className="mb-[260px] mt-12 h-fit">
+        <h1 className="p-2 text-4xl font-medium sm:text-6xl">
           Build Your Docs.
         </h1>
       </div>
       <StarsIcon
-        className="absolute -top-2 -left-2 w-4 h-4 xl:scale-[200%]"
+        className="absolute -left-2 -top-2 h-4 w-4 xl:scale-[200%]"
         stroke="none"
         fill="currentColor"
       />
       <StarsIcon
-        className="absolute -bottom-2 -right-2 w-4 h-4 xl:scale-[200%]"
+        className="absolute -bottom-2 -right-2 h-4 w-4 xl:scale-[200%]"
         stroke="none"
         fill="currentColor"
       />
-      <div className="absolute top-[65%] left-[50%] translate-x-[-50%] translate-y-[-50%] bg-gradient-to-t from-black to-gray-800 p-4 rounded-full">
+      <div className="absolute left-[50%] top-[65%] translate-x-[-50%] translate-y-[-50%] rounded-full bg-gradient-to-t from-black to-gray-800 p-4">
         <StarIcon
-          className="w-16 h-16"
+          className="h-16 w-16"
           stroke="none"
           fill="url(#star-gradient)"
         >
@@ -869,14 +869,14 @@ function Hero() {
         </StarIcon>
       </div>
       <div
-        className="absolute inset-0 z-[-1] animate-light"
+        className="animate-light absolute inset-0 z-[-1]"
         style={{
           backgroundImage:
             'conic-gradient(from 310deg at 50% 65%,transparent 0deg,transparent 100deg,rgba(0, 180, 255, 0.8) 140deg,rgba(50, 50, 255, 0.8) 184deg,rgba(255, 20, 255, 0.8) 216deg,rgba(250, 0, 55, 1) 300deg,rgba(200, 50, 255, 0.8) 340deg,transparent 1turn)'
         }}
       />
       <div
-        className="absolute inset-0 z-[-1] animate-in fade-in duration-1000"
+        className="animate-in fade-in absolute inset-0 z-[-1] duration-1000"
         style={{
           backgroundImage: [
             'radial-gradient(500px at 50% 65%, transparent, hsl(var(--background)))',
