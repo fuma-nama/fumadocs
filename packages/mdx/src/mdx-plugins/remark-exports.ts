@@ -1,12 +1,12 @@
-import { getMdastExport } from './utils'
-import type { Root } from 'mdast'
-import type { Transformer } from 'unified'
+import type { Root } from 'mdast';
+import type { Transformer } from 'unified';
+import { getMdastExport } from './utils';
 
-type Options = {
+interface Options {
   /**
    * Values to export from `vfile.data`
    */
-  values: string[]
+  values: string[];
 }
 
 /**
@@ -15,12 +15,12 @@ type Options = {
 function remarkMdxExport({ values }: Options): Transformer<Root, Root> {
   return (tree, vfile) => {
     for (const name of values) {
-      if (!(name in vfile.data)) return
+      if (!(name in vfile.data)) return;
 
-      // @ts-ignore
-      tree.children.unshift(getMdastExport(name, vfile.data[name]))
+      // @ts-expect-error -- It is a node
+      tree.children.unshift(getMdastExport(name, vfile.data[name]));
     }
-  }
+  };
 }
 
-export { remarkMdxExport as default, Options }
+export { remarkMdxExport as default, type Options };

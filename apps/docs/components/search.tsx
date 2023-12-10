@@ -1,55 +1,63 @@
-'use client'
+'use client';
 
-import { cn } from '@/utils/cn'
-import { modes } from '@/utils/modes'
-import algo from 'algoliasearch/lite'
-import { cva } from 'class-variance-authority'
-import type { SharedProps } from 'next-docs-ui/components/dialog/search'
+import algo from 'algoliasearch/lite';
+import { cva } from 'class-variance-authority';
+import type { SharedProps } from 'next-docs-ui/components/dialog/search';
 import SearchDialog, {
-  AlgoliaContextProvider
-} from 'next-docs-ui/components/dialog/search-algolia'
-import { useParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+  AlgoliaContextProvider,
+} from 'next-docs-ui/components/dialog/search-algolia';
+import { useParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { modes } from '@/utils/modes';
+import { cn } from '@/utils/cn';
 
 const itemVariants = cva(
-  'border px-2 py-0.5 rounded-md text-xs text-muted-foreground font-medium transition-colors',
+  'rounded-md border px-2 py-0.5 text-xs font-medium text-muted-foreground transition-colors',
   {
     variants: {
       active: {
-        true: 'text-accent-foreground bg-accent'
-      }
-    }
-  }
-)
-const client = algo(
-  process.env.NEXT_PUBLIC_ALGOLIA_APP_ID!,
-  process.env.NEXT_PUBLIC_ALGOLIA_API_KEY!
-)
+        true: 'bg-accent text-accent-foreground',
+      },
+    },
+  },
+);
 
-const index = client.initIndex(process.env.NEXT_PUBLIC_ALGOLIA_INDEX!)
+const appId = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID;
+const apiKey = process.env.NEXT_PUBLIC_ALGOLIA_API_KEY;
+const indexName = process.env.NEXT_PUBLIC_ALGOLIA_INDEX;
 
-export default function CustomSearchDialog(props: SharedProps) {
-  const defaultTag = useParams().mode ?? 'headless'
-  const [tag, setTag] = useState(defaultTag)
+if (!appId || !apiKey || !indexName) throw new Error('Algolia credentials');
+
+const client = algo(appId, apiKey);
+
+const index = client.initIndex(indexName);
+
+export default function CustomSearchDialog(props: SharedProps): JSX.Element {
+  const params = useParams();
+  const defaultTag = 'mode' in params ? (params.mode as string) : 'headless';
+  const [tag, setTag] = useState(defaultTag);
 
   useEffect(() => {
-    setTag(defaultTag)
-  }, [defaultTag])
+    setTag(defaultTag);
+  }, [defaultTag]);
 
   return (
     <AlgoliaContextProvider index={index}>
       <SearchDialog
         {...props}
         searchOptions={{
-          filters: `tag:${tag}`
+          filters: `tag:${tag}`,
         }}
         footer={
           <div className="flex flex-row items-center gap-1 p-4">
-            {modes.map(mode => (
+            {modes.map((mode) => (
               <button
                 key={mode.param}
                 className={cn(itemVariants({ active: tag === mode.param }))}
-                onClick={() => setTag(mode.param)}
+                onClick={() => {
+                  setTag(mode.param);
+                }}
+                type="button"
                 tabIndex={-1}
               >
                 {mode.name.slice('Next Docs '.length)}
@@ -58,7 +66,7 @@ export default function CustomSearchDialog(props: SharedProps) {
             <a
               href="https://algolia.com"
               rel="noreferrer noopener"
-              className="text-muted-foreground ml-auto text-xs"
+              className="ml-auto text-xs text-muted-foreground"
             >
               Search powered by Algolia
             </a>
@@ -66,5 +74,5 @@ export default function CustomSearchDialog(props: SharedProps) {
         }
       />
     </AlgoliaContextProvider>
-  )
+  );
 }

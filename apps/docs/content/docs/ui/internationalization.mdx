@@ -18,33 +18,33 @@ Assume your files are nested under `/app/[lang]`, where the 'lang' parameter is
 at index 1.
 
 ```tsx
-'use client'
+'use client';
 
-import { defaultLanguage } from '@/i18n'
-import { I18nProvider } from 'next-docs-ui/i18n'
-import { useParams, usePathname, useRouter } from 'next/navigation'
-import { ReactNode, useCallback } from 'react'
+import { defaultLanguage } from '@/i18n';
+import { I18nProvider } from 'next-docs-ui/i18n';
+import { useParams, usePathname, useRouter } from 'next/navigation';
+import { ReactNode, useCallback } from 'react';
 
 export function ClientI18nProvider({ children }: { children: ReactNode }) {
-  const router = useRouter()
-  const pathname = usePathname()
-  const { lang } = useParams() as { lang?: string }
+  const router = useRouter();
+  const pathname = usePathname();
+  const { lang } = useParams() as { lang?: string };
   const onChange = useCallback(
     (v: string) => {
-      const segments = pathname.split('/')
+      const segments = pathname.split('/');
 
-      segments[1] = v // update parameter
+      segments[1] = v; // update parameter
 
-      router.push(segments.join('/'))
+      router.push(segments.join('/'));
     },
-    [router, pathname]
-  )
+    [router, pathname],
+  );
 
   return (
     <I18nProvider value={{ locale: lang ?? defaultLanguage, onChange }}>
       {children}
     </I18nProvider>
-  )
+  );
 }
 ```
 
@@ -64,8 +64,8 @@ We won't translate any content by default, you have to pass it to the Context.
 <I18nProvider
   value={{
     text: {
-      search: 'Translated Content'
-    }
+      search: 'Translated Content',
+    },
   }}
 ></I18nProvider>
 ```
@@ -76,17 +76,17 @@ To allow users changing their language, you can put the `<LanguageSelect />`
 component to sidebar same as following:
 
 ```tsx title="[lang]/docs/layout.tsx"
-import { tree } from '@/source'
-import { LanguageSelect } from 'next-docs-ui/i18n'
-import { DocsLayout } from 'next-docs-ui/layout'
-import { ReactNode } from 'react'
+import { tree } from '@/source';
+import { LanguageSelect } from 'next-docs-ui/i18n';
+import { DocsLayout } from 'next-docs-ui/layout';
+import { ReactNode } from 'react';
 
 export default function Layout({
   params,
-  children
+  children,
 }: {
-  params: { lang: string }
-  children: ReactNode
+  params: { lang: string };
+  children: ReactNode;
 }) {
   return (
     <DocsLayout
@@ -97,19 +97,19 @@ export default function Layout({
           languages={[
             {
               name: 'English',
-              locale: 'en'
+              locale: 'en',
             },
             {
               name: 'Chinese',
-              locale: 'cn'
-            }
+              locale: 'cn',
+            },
           ]}
         />
       }
     >
       {children}
     </DocsLayout>
-  )
+  );
 }
 ```
 
@@ -126,11 +126,11 @@ Generate parameters for every language and page.
 export async function generateStaticParams(): Promise<
   { lang: string; slug: string[] }[]
 > {
-  return languages.flatMap(lang =>
-    getPages(lang)!.map(docs => ({
+  return languages.flatMap((lang) =>
+    getPages(lang)!.map((docs) => ({
       slug: docs.slug.split('/'),
-      lang: lang
-    }))
-  )
+      lang: lang,
+    })),
+  );
 }
 ```

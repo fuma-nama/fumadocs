@@ -1,16 +1,16 @@
-import type { ReactNode } from 'react'
+import type { ReactNode } from 'react';
 
 export function replaceOrDefault(
   obj:
     | {
-        enabled?: boolean
-        component?: ReactNode
+        enabled?: boolean;
+        component?: ReactNode;
       }
     | undefined,
-  def: ReactNode
+  def: ReactNode,
 ): ReactNode {
-  if (obj?.enabled === false) return
-  if (obj?.component != null) return obj.component
+  if (obj?.enabled === false) return;
+  if (obj?.component !== undefined) return obj.component;
 
-  return def
+  return def;
 }

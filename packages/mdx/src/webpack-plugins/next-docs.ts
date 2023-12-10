@@ -1,33 +1,33 @@
-import fs from 'fs'
-import type { Compiler } from 'webpack'
+import fs from 'node:fs';
+import type { Compiler } from 'webpack';
 
-let firstLoad = true
+let firstLoad = true;
 
-type Options = {
-  rootMapFile: string
+interface Options {
+  rootMapFile: string;
 }
 
 const content = `
 declare const map: Record<string, unknown>
 
 export { map }
-`.trim()
+`.trim();
 
 export class NextDocsWebpackPlugin {
-  options: Options
+  options: Options;
 
   constructor(options: Options) {
-    this.options = options
+    this.options = options;
   }
 
-  apply(compiler: Compiler) {
+  apply(compiler: Compiler): void {
     compiler.hooks.beforeCompile.tap(NextDocsWebpackPlugin.name, () => {
       if (firstLoad && !fs.existsSync(this.options.rootMapFile)) {
-        fs.writeFileSync(this.options.rootMapFile, content)
-        console.log('Created _map.ts file for you automatically')
+        fs.writeFileSync(this.options.rootMapFile, content);
+        console.log('Created _map.ts file for you automatically');
 
-        firstLoad = false
+        firstLoad = false;
       }
-    })
+    });
   }
 }

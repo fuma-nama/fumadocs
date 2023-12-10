@@ -3,6 +3,7 @@
   "display": "Default",
   "compilerOptions": {
     "composite": false,
+    "allowJs": true,
     "declaration": true,
     "declarationMap": true,
     "esModuleInterop": true,
@@ -12,6 +13,7 @@
     "moduleResolution": "node",
     "noUnusedLocals": false,
     "noUnusedParameters": false,
+    "resolveJsonModule": true,
     "preserveWatchOutput": true,
     "skipLibCheck": true,
     "strict": true,

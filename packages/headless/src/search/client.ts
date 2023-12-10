@@ -1,61 +1,69 @@
-import type { SortedResult } from './shared'
-import { useEffect, useState } from 'react'
-import useSWR, { type SWRResponse } from 'swr'
+import { useEffect, useState } from 'react';
+import useSWR, { type SWRResponse } from 'swr';
+import type { SortedResult } from './shared';
 
-type UseDocsSearch<Result> = {
-  search: string
-  setSearch: (v: string) => void
+interface UseDocsSearch<Result> {
+  search: string;
+  setSearch: (v: string) => void;
   query: SWRResponse<
-    Result,
+    Result | 'empty',
     Error,
     {
-      keepPreviousData: true
+      keepPreviousData: true;
     }
-  >
+  >;
+}
+
+async function fetchDocs<Result>(
+  api: string,
+  query: string,
+  locale: string | undefined,
+  tag: string | undefined,
+): Promise<Result | 'empty'> {
+  if (query.length === 0) return 'empty';
+
+  const params = new URLSearchParams();
+  params.set('query', query);
+  if (locale) params.set('locale', locale);
+  if (tag) params.set('tag', tag);
+
+  const res = await fetch(`${api}?${params.toString()}`);
+
+  if (!res.ok) throw new Error(await res.text());
+  return (await res.json()) as Result;
 }
 
 export function useDocsSearch<Result = SortedResult[]>(
   locale?: string,
-  tag?: string
+  tag?: string,
 ): UseDocsSearch<Result | 'empty'> {
-  const [search, setSearch] = useState('')
-  const debouncedValue = useDebounce(search, 100)
+  const [search, setSearch] = useState('');
+  const debouncedValue = useDebounce(search, 100);
 
-  const searchQuery = useSWR(
-    ['/api/search', debouncedValue, locale, tag],
-    async ([url, query, locale, tag]) => {
-      if (query.length === 0) return 'empty'
-
-      const params = new URLSearchParams()
-      params.set('query', query)
-      if (locale) params.set('locale', locale)
-      if (tag) params.set('tag', tag)
-
-      const res = await fetch(`${url}?${params}`)
-
-      if (!res.ok) throw new Error(await res.text())
-      return (await res.json()) as Result
-    },
+  const keys = ['/api/search', debouncedValue, locale, tag] as const;
+  const searchQuery = useSWR<Result | 'empty', Error, typeof keys>(
+    keys,
+    (key) => fetchDocs<Result | 'empty'>(...key),
     {
-      keepPreviousData: true
-    }
-  )
+      keepPreviousData: true,
+    },
+  );
 
-  return { search, setSearch, query: searchQuery }
+  return { search, setSearch, query: searchQuery };
 }
 
-function useDebounce<T>(value: T, delayMs: number = 1000): T {
-  const [debouncedValue, setDebouncedValue] = useState(value)
+function useDebounce<T>(value: T, delayMs = 1000): T {
+  const [debouncedValue, setDebouncedValue] = useState(value);
 
   useEffect(() => {
     const handler = setTimeout(() => {
-      setDebouncedValue(value)
-    }, delayMs)
+      setDebouncedValue(value);
+    }, delayMs);
 
     return () => {
-      clearTimeout(handler)
-    }
-  }, [value, delayMs])
+      clearTimeout(handler);
+    };
+  }, [value, delayMs]);
 
-  return debouncedValue
+  return debouncedValue;
 }

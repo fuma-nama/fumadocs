@@ -1,38 +1,38 @@
-import { getPageTreeBuilder, type BuilderOptions } from './build-tree'
-import { createPageUtils, type PageUtils } from './page-utils'
-import {
-  defaultValidators,
-  resolveFiles,
-  type ResolveOptions
-} from './resolve-files'
-import type { Meta, Page } from './types'
 import {
   createGetUrl,
   type BuildPageTreeOptions,
-  type PageTree
-} from 'next-docs-zeta/server'
+  type PageTree,
+} from 'next-docs-zeta/server';
+import { getPageTreeBuilder, type BuilderOptions } from './build-tree';
+import { createPageUtils, type PageUtils } from './page-utils';
+import {
+  defaultValidators,
+  resolveFiles,
+  type ResolveOptions,
+} from './resolve-files';
+import type { Meta, Page } from './types';
 
 type UtilsOptions<Langs extends string[] | undefined> = {
-  languages: Langs
+  languages: Langs;
 
   /**
-   * @default '/'
+   * @defaultValue `'/'`
    */
-  baseUrl: string
+  baseUrl: string;
 
-  pageTreeOptions: BuildPageTreeOptions
+  pageTreeOptions: BuildPageTreeOptions;
 } & BuilderOptions &
-  Pick<ResolveOptions, 'getSlugs' | 'getUrl' | 'validate' | 'rootDir'>
+  Pick<ResolveOptions, 'getSlugs' | 'getUrl' | 'validate' | 'rootDir'>;
 
 export type Utils = PageUtils & {
-  tree: PageTree
-  pages: Page[]
-  metas: Meta[]
-}
+  tree: PageTree;
+  pages: Page[];
+  metas: Meta[];
+};
 
 type I18nUtils = Omit<Utils, 'tree'> & {
-  tree: Record<string, PageTree>
-}
+  tree: Record<string, PageTree>;
+};
 
 function fromMap<Langs extends string[] | undefined = undefined>(
   map: Record<string, unknown>,
@@ -44,34 +44,36 @@ function fromMap<Langs extends string[] | undefined = undefined>(
     resolveIcon,
     pageTreeOptions = { root: '' },
     languages,
-    validate
-  }: Partial<UtilsOptions<Langs>> = {}
+    validate,
+  }: Partial<UtilsOptions<Langs>> = {},
 ): Langs extends string[] ? I18nUtils : Utils {
   const resolved = resolveFiles({
     map,
     rootDir,
     getSlugs,
     getUrl,
-    validate
-  })
+    validate,
+  });
 
-  const pageUtils = createPageUtils(resolved, languages ?? [])
+  const pageUtils = createPageUtils(resolved, languages ?? []);
 
   const builder = getPageTreeBuilder(resolved, {
-    resolveIcon
-  })
+    resolveIcon,
+  });
+
+  const tree =
+    languages === undefined
+      ? builder.build(pageTreeOptions)
+      : builder.buildI18n({
+          ...pageTreeOptions,
+          languages,
+        });
 
   return {
     ...resolved,
     ...pageUtils,
-    tree: (languages == null
-      ? builder.build(pageTreeOptions)
-      : builder.buildI18n({
-          ...pageTreeOptions,
-          languages
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        })) as any
-  }
+    tree,
+  } as Langs extends string[] ? I18nUtils : Utils;
 }
 
 export {
@@ -79,5 +81,5 @@ export {
   resolveFiles,
   createPageUtils,
   getPageTreeBuilder,
-  defaultValidators
-}
+  defaultValidators,
+};

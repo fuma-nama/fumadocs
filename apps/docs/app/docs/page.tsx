@@ -1,23 +1,23 @@
-import { buttonVariants } from '@/components/ui/button'
-import { cn } from '@/utils/cn'
-import { cva } from 'class-variance-authority'
-import { LayoutIcon, LibrarySquareIcon, PaperclipIcon } from 'lucide-react'
-import Link from 'next/link'
+import { cva } from 'class-variance-authority';
+import { LayoutIcon, LibrarySquareIcon, PaperclipIcon } from 'lucide-react';
+import Link from 'next/link';
+import { buttonVariants } from '@/components/ui/button';
+import { cn } from '@/utils/cn';
 
 const cardVariants = cva(
-  'flex flex-col gap-4 bg-background p-6 rounded-xl border border-transparent transition-colors hover:border-border hover:bg-card'
-)
+  'flex flex-col gap-4 rounded-xl border border-transparent bg-background p-6 transition-colors hover:border-border hover:bg-card',
+);
 
-export default function DocsPage() {
+export default function DocsPage(): JSX.Element {
   return (
     <main className="container flex flex-col items-center py-16 text-center">
       <div className="absolute inset-0 z-[-1] overflow-hidden [perspective:2000px]">
         <div
-          className="bg-primary/30 animate-in fade-in absolute bottom-[20%] left-[50%] h-[1200px] w-[1200px] origin-bottom opacity-50 duration-1000"
+          className="absolute bottom-[20%] left-[50%] h-[1200px] w-[1200px] origin-bottom bg-primary/30 opacity-50 duration-1000 animate-in fade-in"
           style={{
             transform: 'rotateX(75deg) translate(-50%, 400px)',
             backgroundImage:
-              'radial-gradient(50% 50% at center,transparent,hsl(var(--background))), repeating-linear-gradient(to right,hsl(var(--primary)),hsl(var(--primary)) 1px,transparent 2px,transparent 100px), repeating-linear-gradient(to bottom,hsl(var(--primary)),hsl(var(--primary)) 2px,transparent 3px,transparent 100px)'
+              'radial-gradient(50% 50% at center,transparent,hsl(var(--background))), repeating-linear-gradient(to right,hsl(var(--primary)),hsl(var(--primary)) 1px,transparent 2px,transparent 100px), repeating-linear-gradient(to bottom,hsl(var(--primary)),hsl(var(--primary)) 2px,transparent 3px,transparent 100px)',
           }}
         />
       </div>
@@ -100,5 +100,5 @@ export default function DocsPage() {
         </Link>
       </div>
     </main>
-  )
+  );
 }

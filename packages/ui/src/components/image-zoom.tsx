@@ -1,26 +1,28 @@
-'use client'
+'use client';
 
-import { default_image_sizes } from '@/utils/config'
-import Image, { type ImageProps } from 'next/image'
-import { type ImgHTMLAttributes } from 'react'
-import Zoom from 'react-medium-image-zoom'
+import Image, { type ImageProps } from 'next/image';
+import { type ImgHTMLAttributes } from 'react';
+import Zoom from 'react-medium-image-zoom';
+import { defaultImageSizes } from '@/utils/config';
 
 export type ImageZoomProps = ImageProps & {
   /**
    * Image props when zoom in
    */
-  zoomInProps?: ImgHTMLAttributes<HTMLImageElement>
-}
+  zoomInProps?: ImgHTMLAttributes<HTMLImageElement>;
+};
 
 function getImageSrc(src: ImageProps['src']): string {
-  return typeof src === 'string'
-    ? src
-    : 'default' in src
-    ? src.default.src
-    : src.src
+  if (typeof src === 'string') return src;
+  if ('default' in src) return src.default.src;
+  return src.src;
 }
 
-export function ImageZoom({ zoomInProps, children, ...props }: ImageZoomProps) {
+export function ImageZoom({
+  zoomInProps,
+  children,
+  ...props
+}: ImageZoomProps): JSX.Element {
   return (
     <Zoom
       zoomMargin={20}
@@ -28,10 +30,10 @@ export function ImageZoom({ zoomInProps, children, ...props }: ImageZoomProps) {
       zoomImg={{
         src: getImageSrc(props.src),
         sizes: undefined,
-        ...zoomInProps
+        ...zoomInProps,
       }}
     >
-      {children ?? <Image sizes={default_image_sizes} {...props} />}
+      {children ?? <Image sizes={defaultImageSizes} {...props} />}
     </Zoom>
-  )
+  );
 }

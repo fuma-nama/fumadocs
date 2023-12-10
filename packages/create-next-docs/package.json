@@ -1,33 +1,30 @@
 {
   "name": "create-next-docs-app",
-  "description": "Create a new documentation site with Next Docs UI",
   "version": "1.7.3",
-  "homepage": "https://next-docs-zeta.vercel.app",
-  "author": "Fuma Nama",
-  "repository": "github:fuma-nama/next-docs",
-  "license": "MIT",
-  "files": [
-    "templates/*",
-    "static/*",
-    "dist/*"
-  ],
-  "bin": "./dist/index.js",
-  "scripts": {
-    "build": "tsup --clean",
-    "clean": "rmdir /q/s dist && rmdir /q/s templates",
-    "dev": "tsup --watch",
-    "sync": "node ./scripts/sync.js",
-    "prepublishOnly": "pnpm build && pnpm sync",
-    "types:check": "tsc --noEmit"
-  },
+  "description": "Create a new documentation site with Next Docs UI",
   "keywords": [
     "NextJs",
     "next",
     "react",
     "Docs"
   ],
-  "publishConfig": {
-    "access": "public"
+  "homepage": "https://next-docs-zeta.vercel.app",
+  "repository": "github:fuma-nama/next-docs",
+  "license": "MIT",
+  "author": "Fuma Nama",
+  "bin": "./dist/index.js",
+  "files": [
+    "templates/*",
+    "static/*",
+    "dist/*"
+  ],
+  "scripts": {
+    "build": "pnpm sync && tsup",
+    "clean": "rmdir /q/s dist && rmdir /q/s templates",
+    "dev": "tsup --watch",
+    "lint": "eslint .",
+    "sync": "node ./scripts/sync.js",
+    "types:check": "tsc --noEmit"
   },
   "dependencies": {
     "@clack/prompts": "^0.7.0",
@@ -35,12 +32,16 @@
     "picocolors": "^1.0.0"
   },
   "devDependencies": {
-    "internal-config": "workspace:*",
     "@types/cross-spawn": "^6.0.4",
     "@types/node": "18.17.5",
-    "fast-glob": "^3.3.1"
+    "eslint-config-custom": "workspace:*",
+    "fast-glob": "^3.3.1",
+    "tsconfig": "workspace:*"
   },
   "engines": {
     "node": ">=18.17.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

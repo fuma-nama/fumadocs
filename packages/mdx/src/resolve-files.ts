@@ -1,66 +1,66 @@
-import type { FileInfo, MDXExport, Meta, Page } from './types'
+import path from 'node:path';
+import { joinPaths, splitPath } from 'next-docs-zeta/server';
+import type { AnyZodObject } from 'zod';
+import type { FileInfo, MDXExport, Meta, Page } from './types';
 import {
   frontmatterSchema,
   metaSchema,
   type Frontmatter,
-  type MetaExport
-} from './validate/schema'
-import { joinPaths, splitPath } from 'next-docs-zeta/server'
-import path from 'path'
-import type { AnyZodObject } from 'zod'
+  type MetaExport,
+} from './validate/schema';
 
-const pageTypes = ['.md', '.mdx']
-const metaTypes = ['.json']
+const pageTypes = ['.md', '.mdx'];
+const metaTypes = ['.json'];
 
-export type ResolvedFiles = {
-  pages: Page[]
-  metas: Meta[]
+export interface ResolvedFiles {
+  pages: Page[];
+  metas: Meta[];
 }
 
-export type ResolveOptions = {
-  map: Record<string, unknown>
+export interface ResolveOptions {
+  map: Record<string, unknown>;
 
   /**
    * root directory to resolve files, all slugs will be relative to the root directory
    *
-   * @default ''
+   * @defaultValue `''`
    */
-  rootDir?: string
+  rootDir?: string;
 
   /**
    * Generate slugs from file info
    */
-  getSlugs?: (file: FileInfo) => string[]
+  getSlugs?: (file: FileInfo) => string[];
 
   /**
    * Check frontmatter/meta objects, transform allowed
    */
-  validate?: ValidateOptions
+  validate?: ValidateOptions;
 
   /**
    * Get url from slugs and locale, override the default getUrl function
    */
-  getUrl: (slugs: string[], locale?: string) => string
+  getUrl: (slugs: string[], locale?: string) => string;
 }
 
 type ValidateOptions = Partial<{
-  frontmatter: AnyZodObject
-  meta: AnyZodObject
-}>
+  frontmatter: AnyZodObject;
+  meta: AnyZodObject;
+}>;
 
 export const defaultValidators = {
   frontmatter: frontmatterSchema,
-  meta: metaSchema
-}
+  meta: metaSchema,
+};
 
-function parsePath(p: string, root: string = ''): FileInfo | false {
-  if (!p.startsWith(root)) return false
-  const relativePath = splitPath(p.substring(root.length)).join('/')
+function parsePath(p: string, root = ''): FileInfo | false {
+  if (!p.startsWith(root)) return false;
+  const relativePath = splitPath(p.substring(root.length)).join('/');
 
-  const parsed = path.parse(relativePath)
-  const normalizedDirname = parsed.dir.replaceAll('\\', '/')
-  const flattenedPath = joinPaths([normalizedDirname, parsed.name])
-  const [, locale] = parsed.name.split('.')
+  const parsed = path.parse(relativePath);
+  const normalizedDirname = parsed.dir.replace('\\', '/');
+  const flattenedPath = joinPaths([normalizedDirname, parsed.name]);
+  const [, locale] = parsed.name.split('.');
 
   return {
     id: p,
@@ -70,22 +70,24 @@ function parsePath(p: string, root: string = ''): FileInfo | false {
     flattenedPath,
     locale,
     type: parsed.ext,
-    path: relativePath
-  }
+    path: relativePath,
+  };
 }
 
 function pathToSlugs(file: FileInfo): string[] {
-  return file.flattenedPath.split('/').filter(p => !['index', ''].includes(p))
+  return file.flattenedPath
+    .split('/')
+    .filter((p) => !['index', ''].includes(p));
 }
 
 function parse<T>(schema: AnyZodObject, object: unknown, errorName: string): T {
-  const result = schema.safeParse(object)
+  const result = schema.safeParse(object);
 
   if (!result.success) {
-    throw new Error(`Invalid ${errorName}: ${result.error}`)
+    throw new Error(`Invalid ${errorName}: ${result.error.toString()}`);
   }
 
-  return result.data as T
+  return result.data as T;
 }
 
 export function resolveFiles({
@@ -93,33 +95,33 @@ export function resolveFiles({
   getSlugs = pathToSlugs,
   getUrl,
   rootDir = '',
-  validate = defaultValidators
+  validate = defaultValidators,
 }: ResolveOptions): ResolvedFiles {
-  const metas: Meta[] = []
-  const pages: Page[] = []
+  const metas: Meta[] = [];
+  const pages: Page[] = [];
 
-  for (const [path, v] of Object.entries(map)) {
-    const file = parsePath(path, rootDir)
-    if (file === false) continue
+  for (const [key, value] of Object.entries(map)) {
+    const file = parsePath(key, rootDir);
+    if (file === false) continue;
 
     if (metaTypes.includes(file.type)) {
       const meta: Meta = {
         file,
         data: parse<MetaExport>(
           validate.meta ?? defaultValidators.meta,
-          v,
-          file.path
-        )
-      }
+          value,
+          file.path,
+        ),
+      };
 
-      metas.push(meta)
+      metas.push(meta);
 
-      continue
+      continue;
     }
 
     if (pageTypes.includes(file.type)) {
-      const data = v as MDXExport
-      const slugs = getSlugs(file)
+      const data = value as MDXExport;
+      const slugs = getSlugs(file);
 
       const page: Page = {
         file,
@@ -128,21 +130,21 @@ export function resolveFiles({
         matter: parse<Frontmatter>(
           validate.frontmatter ?? defaultValidators.frontmatter,
           data.frontmatter,
-          file.path
+          file.path,
         ),
-        data
-      }
+        data,
+      };
 
-      pages.push(page)
+      pages.push(page);
 
-      continue
+      continue;
     }
 
-    console.warn('Unknown Type: ', file.type)
+    console.warn('Unknown Type: ', file.type);
   }
 
   return {
     pages,
-    metas
-  }
+    metas,
+  };
 }

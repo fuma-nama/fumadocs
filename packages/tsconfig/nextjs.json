@@ -4,7 +4,6 @@
   "extends": "./base.json",
   "compilerOptions": {
     "plugins": [{ "name": "next" }],
-    "allowJs": true,
     "declaration": false,
     "declarationMap": false,
     "incremental": true,
@@ -12,10 +11,8 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "module": "esnext",
     "noEmit": true,
-    "resolveJsonModule": true,
-    "strict": false,
-    "target": "es5"
+    "target": "ES2017"
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": ["next-env.d.ts", "src"],
   "exclude": ["node_modules"]
 }

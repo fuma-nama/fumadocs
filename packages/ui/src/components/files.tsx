@@ -1,48 +1,53 @@
-'use client'
+'use client';
 
+import { cva } from 'class-variance-authority';
+import { FileIcon, FolderIcon, FolderOpenIcon } from 'lucide-react';
+import type { HTMLAttributes, ReactNode } from 'react';
+import { cn } from '@/utils/cn';
 import {
   Collapsible,
   CollapsibleContent,
-  CollapsibleTrigger
-} from './ui/collapsible'
-import { cn } from '@/utils/cn'
-import { cva } from 'class-variance-authority'
-import { FileIcon, FolderIcon, FolderOpenIcon } from 'lucide-react'
-import type { HTMLAttributes, ReactNode } from 'react'
+  CollapsibleTrigger,
+} from './ui/collapsible';
 
 const item = cva(
-  'flex flex-row items-center gap-2 text-sm rounded-md px-2 py-1.5 [&_svg]:w-4 [&_svg]:h-4 transition-colors hover:bg-accent hover:text-accent-foreground'
-)
+  'flex flex-row items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-accent hover:text-accent-foreground [&_svg]:h-4 [&_svg]:w-4',
+);
 
-export function Files({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+export function Files({
+  className,
+  ...props
+}: HTMLAttributes<HTMLDivElement>): JSX.Element {
   return (
     <div
-      className={cn('not-prose bg-card rounded-md border p-2', className)}
+      className={cn('not-prose rounded-md border bg-card p-2', className)}
       {...props}
     >
       {props.children}
     </div>
-  )
+  );
+}
+
+interface FileProps {
+  title: string;
+  icon?: ReactNode;
+  defaultOpen?: boolean;
+  children?: ReactNode;
 }
 
 export function File({
   title,
   icon,
   defaultOpen,
-  children
-}: {
-  title: string
-  icon?: ReactNode
-  defaultOpen?: boolean
-  children?: ReactNode
-}) {
-  if (children == null) {
+  children,
+}: FileProps): JSX.Element {
+  if (!children) {
     return (
       <p className={cn(item())}>
         {icon ?? <FileIcon />}
         {title}
       </p>
-    )
+    );
   }
 
   return (
@@ -56,5 +61,5 @@ export function File({
         <div className="ml-4 flex flex-col border-l py-2 pl-2">{children}</div>
       </CollapsibleContent>
     </Collapsible>
-  )
+  );
 }

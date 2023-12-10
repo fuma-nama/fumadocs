@@ -18,26 +18,26 @@ Assumes you're using Contentlayer.
 1. Create the API Route.
 
 ```tsx title="app/api/search/route.ts"
-import { allDocs } from 'contentlayer/generated'
-import { createSearchAPI } from 'next-docs-zeta/search/server'
+import { allDocs } from 'contentlayer/generated';
+import { createSearchAPI } from 'next-docs-zeta/search/server';
 
 export const { GET } = createSearchAPI('simple', {
-  indexes: allDocs.map(docs => ({
+  indexes: allDocs.map((docs) => ({
     title: docs.title,
     content: docs.body.raw,
-    url: '/docs/' + docs.slug
-  }))
-})
+    url: '/docs/' + docs.slug,
+  })),
+});
 ```
 
 2. Create a Search Dialog.
 
 ```tsx
-import { useDocsSearch } from 'next-docs-zeta/search/client'
+import { useDocsSearch } from 'next-docs-zeta/search/client';
 
 export function Dialog() {
-  const { search, setSearch, query } = useDocsSearch()
-  return <div>...</div>
+  const { search, setSearch, query } = useDocsSearch();
+  return <div>...</div>;
 }
 ```
 
@@ -89,7 +89,7 @@ with Next Docs UI.
     id: { type: 'string' },
     url: { type: 'string' },
     type: { type: 'enum', typeDescription: "'page' | 'heading' | 'text'" },
-    content: { type: 'string' }
+    content: { type: 'string' },
   }}
 />
 
@@ -112,20 +112,20 @@ Flexsearch. With the `structure` function exported from
 Assume you are using Contentlayer with the default configuration.
 
 ```ts
-import { allDocs } from 'contentlayer/generated'
-import { createSearchAPI } from 'next-docs-zeta/search/server'
+import { allDocs } from 'contentlayer/generated';
+import { createSearchAPI } from 'next-docs-zeta/search/server';
 
 export const { GET } = await createSearchAPI('advanced', {
-  indexes: allDocs.map(docs => ({
+  indexes: allDocs.map((docs) => ({
     id: docs._id,
     title: docs.title,
     content: docs.body.raw,
-    url: '/docs/' + docs.slug
+    url: '/docs/' + docs.slug,
 
     // You can preprocess the content with `structure`
     //structuredData: docs.structuredData
-  }))
-})
+  })),
+});
 ```
 
 <Callout title="Tip" className="mt-4">
@@ -134,10 +134,10 @@ If you have custom remark plugins enabled, such as
 plugins passed into the function:
 
 ```ts
-import { structure } from 'next-docs-zeta/mdx-plugins'
-import remarkMath from 'remark-math'
+import { structure } from 'next-docs-zeta/mdx-plugins';
+import remarkMath from 'remark-math';
 
-structure(page.body.raw, [remarkMath])
+structure(page.body.raw, [remarkMath]);
 ```
 
 </Callout>
@@ -150,17 +150,17 @@ documentation.
 > Next Docs UI's Search Dialog doesn't support tag filter.
 
 ```ts
-import { allDocs } from 'contentlayer/generated'
-import { createSearchAPI } from 'next-docs-zeta/search/server'
+import { allDocs } from 'contentlayer/generated';
+import { createSearchAPI } from 'next-docs-zeta/search/server';
 
 export const { GET } = createSearchAPI('advanced', {
-  indexes: allDocs.map(page => ({
+  indexes: allDocs.map((page) => ({
     ...page,
-    tag: 'value'
+    tag: 'value',
   })),
-  tag: true
-})
+  tag: true,
+});
 
 // Pass `tag` in your custom search dialog
-const { search, setSearch, query } = useDocsSearch(locale, tag)
+const { search, setSearch, query } = useDocsSearch(locale, tag);
 ```

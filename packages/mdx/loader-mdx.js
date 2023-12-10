@@ -1,8 +1,8 @@
-/* eslint-env node */
+/* eslint-env node -- Node.js env */
 
-module.exports = function (code) {
-  const callback = this.async()
-  import('./dist/loader-mdx.mjs').then(mod =>
-    mod.default.call(this, code, callback)
-  )
-}
+module.exports = function loader(code) {
+  const callback = this.async();
+  import('./dist/loader-mdx.mjs').then((mod) =>
+    mod.default.call(this, code, callback),
+  );
+};

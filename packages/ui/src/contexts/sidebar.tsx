@@ -1,22 +1,27 @@
-import { createContext, useContext, useState, type ReactNode } from 'react'
+import { createContext, useContext, useState, type ReactNode } from 'react';
 
-type SidebarCollapseContext = [open: boolean, setOpen: (v: boolean) => void]
+type SidebarCollapseContext = [open: boolean, setOpen: (v: boolean) => void];
 
-const SidebarCollapseContext = createContext<SidebarCollapseContext>([
-  true,
-  () => {}
-])
+const SidebarCollapseContext = createContext<
+  SidebarCollapseContext | undefined
+>(undefined);
 
 export function useSidebarCollapse(): SidebarCollapseContext {
-  return useContext(SidebarCollapseContext)
+  const ctx = useContext(SidebarCollapseContext);
+  if (!ctx) throw new Error('Missing root provider');
+  return ctx;
 }
 
-export function SidebarCollapseProvider({ children }: { children: ReactNode }) {
-  const [open, setOpen] = useState(true)
+export function SidebarCollapseProvider({
+  children,
+}: {
+  children: ReactNode;
+}): JSX.Element {
+  const [open, setOpen] = useState(true);
 
   return (
     <SidebarCollapseContext.Provider value={[open, setOpen]}>
       {children}
     </SidebarCollapseContext.Provider>
-  )
+  );
 }

@@ -1,30 +1,30 @@
-import type { DocsPageBase, PagesContext } from './types'
+import type { DocsPageBase, PagesContext } from './types';
 
-export type ContentlayerUtils<Docs extends DocsPageBase> = {
+export interface ContentlayerUtils<Docs extends DocsPageBase> {
   /**
    * Get list of pages from language
    *
-   * @param language If empty, the default language will be used
+   * @param language - If empty, the default language will be used
    */
-  getPages: (language?: string) => Docs[] | undefined
+  getPages: (language?: string) => Docs[] | undefined;
 
   /**
-   * @param language If empty, the default language will be used
+   * @param language - If empty, the default language will be used
    */
-  getPage: (slugs: string[] | undefined, language?: string) => Docs | undefined
+  getPage: (slugs: string[] | undefined, language?: string) => Docs | undefined;
 }
 
 export function createUtils<Docs extends DocsPageBase>(
-  context: PagesContext<Docs>
+  context: PagesContext<Docs>,
 ): ContentlayerUtils<Docs> {
   return {
     getPages(language = '') {
-      return context.i18nMap.get(language)
+      return context.i18nMap.get(language);
     },
     getPage(slugs = [], language = '') {
-      const path = slugs.join('/')
+      const path = slugs.join('/');
 
-      return context.i18nMap.get(language)?.find(page => page.slug === path)
-    }
-  }
+      return context.i18nMap.get(language)?.find((page) => page.slug === path);
+    },
+  };
 }

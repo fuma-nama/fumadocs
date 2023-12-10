@@ -11,7 +11,7 @@ Footer, and Breadcrumb.
 Pass table of contents to the component.
 
 ```mdx
-import { DocsPage } from 'next-docs-ui/page'
+import { DocsPage } from 'next-docs-ui/page';
 
 <DocsPage toc={toc}>
   <MDXContent>...</MDXContent>
@@ -22,24 +22,24 @@ import { DocsPage } from 'next-docs-ui/page'
   type={{
     tableOfContent: {
       type: 'object',
-      typeDescriptionLink: '#table-of-contents'
+      typeDescriptionLink: '#table-of-contents',
     },
     breadcrumb: {
       type: 'object',
-      typeDescriptionLink: '#breadcrumb'
+      typeDescriptionLink: '#breadcrumb',
     },
     toc: {
       type: 'TOCItemType[]',
       description: 'Table of contents in this page',
-      typeDescription: `{ title: string, url: string, depth: number }[]`
+      typeDescription: `{ title: string, url: string, depth: number }[]`,
     },
     footer: {
       type: 'object',
-      typeDescriptionLink: '#footer'
+      typeDescriptionLink: '#footer',
     },
     lastUpdate: {
-      type: 'Date'
-    }
+      type: 'Date',
+    },
   }}
 />
 
@@ -59,12 +59,12 @@ Also, you can easily customise or disable TOC in your documentation.
     component: { type: 'ReactNode' },
     header: {
       type: 'ReactNode',
-      description: 'Custom content above TOC'
+      description: 'Custom content above TOC',
     },
     footer: {
       type: 'ReactNode',
-      description: 'Custom content below TOC'
-    }
+      description: 'Custom content below TOC',
+    },
   }}
 />
 
@@ -101,12 +101,12 @@ To obtain these pages, it's recommended to use the
   type={{
     next: {
       type: 'object',
-      typeDescription: '{ name: string, url: string }'
+      typeDescription: '{ name: string, url: string }',
     },
     previous: {
       type: 'object',
-      typeDescription: '{ name: string, url: string }'
-    }
+      typeDescription: '{ name: string, url: string }',
+    },
   }}
 />
 
@@ -129,6 +129,6 @@ For now, You can't control the behaviours of breadcrumb.
 <TypeTable
   type={{
     enabled: { type: 'boolean', default: 'true' },
-    component: { type: 'ReactNode' }
+    component: { type: 'ReactNode' },
   }}
 />

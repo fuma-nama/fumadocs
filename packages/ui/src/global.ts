@@ -1,19 +1,19 @@
-import type { PageTree } from 'next-docs-zeta/server'
+import type { PageTree } from 'next-docs-zeta/server';
 
-type Global = {
-  [storeKey]?: PageTree
+interface Global {
+  [storeKey]?: PageTree;
 }
 
-const storeKey = '__NEXT_DOCS_PAGE_TREE'
+const storeKey = '__NEXT_DOCS_PAGE_TREE';
 
 export function getPageTree(): PageTree | null {
-  const global = globalThis as Global
+  const global = globalThis as Global;
 
-  return global[storeKey] ?? null
+  return global[storeKey] ?? null;
 }
 
-export function setPageTree(tree: PageTree) {
-  const global = globalThis as Global
+export function setPageTree(tree: PageTree): void {
+  const global = globalThis as Global;
 
-  global[storeKey] = tree
+  global[storeKey] = tree;
 }

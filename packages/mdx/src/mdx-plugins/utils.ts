@@ -1,6 +1,6 @@
-import { valueToEstree } from 'estree-util-value-to-estree'
+import { valueToEstree } from 'estree-util-value-to-estree';
 
-export function getMdastExport(name: string, value: unknown) {
+export function getMdastExport(name: string, value: unknown): object {
   return {
     type: 'mdxjsEsm',
     value: '',
@@ -21,15 +21,15 @@ export function getMdastExport(name: string, value: unknown) {
                   type: 'VariableDeclarator',
                   id: {
                     type: 'Identifier',
-                    name
+                    name,
                   },
-                  init: valueToEstree(value)
-                }
-              ]
-            }
-          }
-        ]
-      }
-    }
-  }
+                  init: valueToEstree(value),
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  };
 }

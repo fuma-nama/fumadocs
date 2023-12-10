@@ -7,6 +7,6 @@
     "jsx": "react-jsx",
     "lib": ["ES2015", "DOM"],
     "module": "ESNext",
-    "target": "es6"
+    "target": "ES2017"
   }
 }

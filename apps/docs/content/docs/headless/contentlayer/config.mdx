@@ -11,10 +11,10 @@ configuration with required MDX plugins.
 1. Edit your configuration.
 
 ```ts title="contentlayer.config.ts"
-import { makeSource } from 'contentlayer/source-files'
-import { defaultConfig } from 'next-docs-zeta/contentlayer/configuration'
+import { makeSource } from 'contentlayer/source-files';
+import { defaultConfig } from 'next-docs-zeta/contentlayer/configuration';
 
-export default makeSource(defaultConfig)
+export default makeSource(defaultConfig);
 ```
 
 <Callout title="Note">
@@ -24,13 +24,13 @@ export default makeSource(defaultConfig)
 2. Build the [Page Tree](/docs/headless/page-tree).
 
 ```ts
-import { allDocs, allMeta } from 'contentlayer/generated'
-import { createContentlayer } from 'next-docs-zeta/contentlayer'
+import { allDocs, allMeta } from 'contentlayer/generated';
+import { createContentlayer } from 'next-docs-zeta/contentlayer';
 
 export const { getPage, getPageUrl, tree } = createContentlayer(
   allMeta,
-  allDocs
-)
+  allDocs,
+);
 ```
 
 ## Pages Structure

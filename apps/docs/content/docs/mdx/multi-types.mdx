@@ -21,9 +21,9 @@ const blog = fromMap(map, {
   baseUrl: '/docs/mdx',
   slugs,
   validate: {
-    frontmatter: frontmatterSchema
-  }
-})
+    frontmatter: frontmatterSchema,
+  },
+});
 ```
 
 <Accordions>
@@ -34,8 +34,8 @@ const blog = fromMap(map, {
 const slugs = (file: FileInfo) =>
   file.flattenedPath
     .split('/')
-    .filter(p => !['index', ''].includes(p))
-    .slice(1)
+    .filter((p) => !['index', ''].includes(p))
+    .slice(1);
 ```
 
 </Accordion>

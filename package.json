@@ -3,19 +3,31 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "turbo run build --filter=./packages/*",
+    "build": "turbo run build",
     "clean": "turbo run clean",
     "dev": "turbo run dev",
     "dev:all": "turbo run dev --filter=!./examples/*",
     "dev:examples": "turbo run dev --filter=./examples/*",
-    "lint": "eslint --cache --ignore-path .gitignore --max-warnings 0 .",
+    "lint": "turbo run lint",
     "lint:prettier": "prettier --cache --check --ignore-path .gitignore --ignore-path .prettierignore .",
     "prettier": "prettier --cache --write --list-different --ignore-path .gitignore --ignore-path .prettierignore .",
-    "release": "pnpm build && changeset publish",
+    "release": "turbo run build --filter=./packages/* && changeset publish",
     "test": "turbo run test",
     "types:check": "turbo run types:check",
-    "version": "changeset version && pnpm install --lockfile-only",
-    "update-example": "node ./scripts/on-push.js"
+    "update-example": "node ./scripts/on-push.js",
+    "version": "changeset version && pnpm install --lockfile-only"
+  },
+  "prettier": "@vercel/style-guide/prettier",
+  "devDependencies": {
+    "@changesets/cli": "^2.26.2",
+    "@typescript-eslint/eslint-plugin": "^6.7.0",
+    "@typescript-eslint/parser": "^6.7.0",
+    "@vercel/style-guide": "^5.1.0",
+    "concurrently": "^8.2.1",
+    "prettier": "^3.0.3",
+    "tsup": "8.0.1",
+    "turbo": "1.11.1",
+    "typescript": "5.3.3"
   },
   "pnpm": {
     "overrides": {
@@ -29,22 +41,5 @@
         "next"
       ]
     }
-  },
-  "devDependencies": {
-    "@changesets/cli": "^2.26.2",
-    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
-    "@next/eslint-plugin-next": "^14.0.0",
-    "@typescript-eslint/eslint-plugin": "^6.7.0",
-    "@typescript-eslint/parser": "^6.7.0",
-    "concurrently": "^8.2.1",
-    "eslint": "^8.49.0",
-    "eslint-config-prettier": "^9.0.0",
-    "eslint-plugin-react": "^7.33.2",
-    "eslint-plugin-tailwindcss": "^3.13.0",
-    "prettier": "^3.0.3",
-    "prettier-plugin-tailwindcss": "^0.5.9",
-    "tsup": "8.0.1",
-    "turbo": "1.11.1",
-    "typescript": "5.3.3"
   }
 }

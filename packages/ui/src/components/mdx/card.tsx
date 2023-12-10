@@ -1,8 +1,8 @@
-import { cn } from '@/utils/cn'
-import Link, { type LinkProps } from 'next-docs-zeta/link'
-import type { HTMLAttributes, ReactNode } from 'react'
+import Link, { type LinkProps } from 'next-docs-zeta/link';
+import type { HTMLAttributes, ReactNode } from 'react';
+import { cn } from '@/utils/cn';
 
-export function Cards(props: HTMLAttributes<HTMLDivElement>) {
+export function Cards(props: HTMLAttributes<HTMLDivElement>): JSX.Element {
   return (
     <div
       {...props}
@@ -10,31 +10,36 @@ export function Cards(props: HTMLAttributes<HTMLDivElement>) {
     >
       {props.children}
     </div>
-  )
+  );
 }
 
 export type CardProps = {
-  icon?: ReactNode
-  title: string
-  description: string
-} & Omit<LinkProps, 'title'>
+  icon?: ReactNode;
+  title: string;
+  description: string;
+} & Omit<LinkProps, 'title'>;
 
-export function Card({ icon, title, description, ...props }: CardProps) {
+export function Card({
+  icon,
+  title,
+  description,
+  ...props
+}: CardProps): JSX.Element {
   return (
     <Link
       {...props}
       className={cn(
-        'not-prose bg-card text-card-foreground hover:bg-muted/80 block rounded-lg border p-4 text-sm shadow-md transition-colors',
-        props.className
+        'not-prose block rounded-lg border bg-card p-4 text-sm text-card-foreground shadow-md transition-colors hover:bg-muted/80',
+        props.className,
       )}
     >
-      {icon && (
-        <div className="bg-muted text-muted-foreground mb-2 w-fit rounded-md border p-2 [&_svg]:h-4 [&_svg]:w-4">
+      {icon ? (
+        <div className="mb-2 w-fit rounded-md border bg-muted p-2 text-muted-foreground [&_svg]:h-4 [&_svg]:w-4">
           {icon}
         </div>
-      )}
+      ) : null}
       <h3 className="mb-1 font-medium">{title}</h3>
       <p className="text-muted-foreground">{description}</p>
     </Link>
-  )
+  );
 }

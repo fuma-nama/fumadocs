@@ -1,51 +1,51 @@
-import type { SortedResult } from './shared'
-import type { StructuredData } from '@/mdx-plugins/remark-structure'
-import FlexSearch from 'flexsearch'
-import { NextResponse, type NextRequest } from 'next/server'
+import { Document } from 'flexsearch';
+import { NextResponse, type NextRequest } from 'next/server';
+import type { StructuredData } from '@/mdx-plugins/remark-structure';
+import type { SortedResult } from './shared';
 
-type SearchAPI = {
+interface SearchAPI {
   GET: (
-    request: NextRequest
-  ) => NextResponse<SortedResult[]> | Promise<NextResponse<SortedResult[]>>
+    request: NextRequest,
+  ) => NextResponse<SortedResult[]> | Promise<NextResponse<SortedResult[]>>;
 }
 
-type SimpleOptions = {
-  indexes: Index[]
-  language?: string
+interface SimpleOptions {
+  indexes: Index[];
+  language?: string;
 }
 
-type AdvancedOptions = {
-  indexes: AdvancedIndex[]
+interface AdvancedOptions {
+  indexes: AdvancedIndex[];
   /**
    * Enabled custom tags
    */
-  tag?: boolean
-  language?: string
+  tag?: boolean;
+  language?: string;
 }
 
 type ToI18n<T extends { indexes: unknown }> = Omit<
   T,
   'indexes' | 'language'
 > & {
-  indexes: [language: string, indexes: T['indexes']][]
-}
+  indexes: [language: string, indexes: T['indexes']][];
+};
 
 export function createSearchAPI<T extends 'simple' | 'advanced'>(
   type: T,
-  options: T extends 'simple' ? SimpleOptions : AdvancedOptions
+  options: T extends 'simple' ? SimpleOptions : AdvancedOptions,
 ): SearchAPI {
   if (type === 'simple') {
-    return initSearchAPI(options as SimpleOptions)
+    return initSearchAPI(options as SimpleOptions);
   }
 
-  return initSearchAPIAdvanced(options as AdvancedOptions)
+  return initSearchAPIAdvanced(options as AdvancedOptions);
 }
 
 export function createI18nSearchAPI<T extends 'simple' | 'advanced'>(
   type: T,
-  options: ToI18n<T extends 'simple' ? SimpleOptions : AdvancedOptions>
+  options: ToI18n<T extends 'simple' ? SimpleOptions : AdvancedOptions>,
 ): SearchAPI {
-  const map = new Map<string, SearchAPI>()
+  const map = new Map<string, SearchAPI>();
 
   for (const [k, v] of options.indexes) {
     map.set(
@@ -53,35 +53,36 @@ export function createI18nSearchAPI<T extends 'simple' | 'advanced'>(
       createSearchAPI(type, {
         ...options,
         language: k,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        indexes: v as any
-      })
-    )
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment -- Avoid complicated types
+        indexes: v as any,
+      }),
+    );
   }
 
   return {
-    async GET(request) {
-      const locale = request.nextUrl.searchParams.get('locale')
+    GET(request) {
+      const locale = request.nextUrl.searchParams.get('locale');
+      if (locale) {
+        const handler = map.get(locale);
 
-      if (locale && map.has(locale)) {
-        return map.get(locale)!.GET(request)
+        if (handler) return handler.GET(request);
       }
 
-      return NextResponse.json([])
-    }
-  }
+      return NextResponse.json([]);
+    },
+  };
 }
 
-type Index = {
-  title: string
-  content: string
-  url: string
-  keywords?: string
+interface Index {
+  title: string;
+  content: string;
+  url: string;
+  keywords?: string;
 }
 
 export function initSearchAPI({ indexes, language }: SimpleOptions): SearchAPI {
-  const store = ['title', 'url']
-  const index = new FlexSearch.Document<Index, typeof store>({
+  const store = ['title', 'url'];
+  const index = new Document<Index, typeof store>({
     language,
     optimize: true,
     cache: 100,
@@ -92,88 +93,88 @@ export function initSearchAPI({ indexes, language }: SimpleOptions): SearchAPI {
         {
           field: 'title',
           tokenize: 'forward',
-          resolution: 9
+          resolution: 9,
         },
         {
           field: 'content',
           tokenize: 'strict',
           context: {
             depth: 1,
-            resolution: 9
-          }
+            resolution: 9,
+          },
         },
         {
           field: 'keywords',
           tokenize: 'strict',
-          resolution: 9
-        }
-      ]
-    }
-  })
+          resolution: 9,
+        },
+      ],
+    },
+  });
 
   for (const page of indexes) {
     index.add({
       title: page.title,
       url: page.url,
       content: page.content,
-      keywords: page.keywords
-    })
+      keywords: page.keywords,
+    });
   }
 
   return {
-    async GET(request) {
-      const { searchParams } = request.nextUrl
-      const query = searchParams.get('query')
+    GET(request) {
+      const { searchParams } = request.nextUrl;
+      const query = searchParams.get('query');
 
-      if (query == null) return NextResponse.json([])
+      if (!query) return NextResponse.json([]);
 
       const results = index.search(query, 5, {
         enrich: true,
-        suggest: true
-      })
+        suggest: true,
+      });
 
-      const pages = results[0]?.result?.map<SortedResult>(page => ({
+      const pages = results[0]?.result?.map<SortedResult>((page) => ({
         type: 'page',
         content: page.doc.title,
         id: page.doc.url,
-        url: page.doc.url
-      }))
+        url: page.doc.url,
+      }));
 
-      return NextResponse.json(pages ?? [])
-    }
-  }
+      return NextResponse.json(pages);
+    },
+  };
 }
 
-type AdvancedIndex = {
-  id: string
-  title: string
+interface AdvancedIndex {
+  id: string;
+  title: string;
   /**
    * Required if `tag` is enabled
    */
-  tag?: string
+  tag?: string;
   /**
    * preprocess mdx content with `structure`
    */
-  structuredData: StructuredData
-  url: string
+  structuredData: StructuredData;
+  url: string;
 }
 
-type InternalIndex = {
-  id: string
-  url: string
-  page_id: string
-  type: 'page' | 'heading' | 'text'
-  tag?: string
-  content: string
+interface InternalIndex {
+  id: string;
+  url: string;
+  page_id: string;
+  type: 'page' | 'heading' | 'text';
+  tag?: string;
+  content: string;
 }
 
 export function initSearchAPIAdvanced({
   indexes,
   language,
-  tag = false
+  tag = false,
 }: AdvancedOptions): SearchAPI {
-  const store = ['id', 'url', 'content', 'page_id', 'type']
-  const index = new FlexSearch.Document<InternalIndex, typeof store>({
+  const store = ['id', 'url', 'content', 'page_id', 'type'];
+  const index = new Document<InternalIndex, typeof store>({
     language,
     cache: 100,
     tokenize: 'forward',
@@ -181,19 +182,19 @@ export function initSearchAPIAdvanced({
     context: {
       depth: 2,
       bidirectional: true,
-      resolution: 9
+      resolution: 9,
     },
     document: {
       id: 'id',
       tag: tag ? 'tag' : undefined,
       store,
-      index: ['content']
-    }
-  })
+      index: ['content'],
+    },
+  });
 
   for (const page of indexes) {
-    const data = page.structuredData
-    let id = 0
+    const data = page.structuredData;
+    let id = 0;
 
     index.add({
       id: page.id,
@@ -201,8 +202,8 @@ export function initSearchAPIAdvanced({
       type: 'page',
       content: page.title,
       tag: page.tag,
-      url: page.url
-    })
+      url: page.url,
+    });
 
     for (const heading of data.headings) {
       index.add({
@@ -210,9 +211,9 @@ export function initSearchAPIAdvanced({
         page_id: page.id,
         type: 'heading',
         tag: page.tag,
-        url: page.url + '#' + heading.id,
-        content: heading.content
-      })
+        url: `${page.url}#${heading.id}`,
+        content: heading.content,
+      });
     }
 
     for (const content of data.contents) {
@@ -221,69 +222,70 @@ export function initSearchAPIAdvanced({
         page_id: page.id,
         tag: page.tag,
         type: 'text',
-        url: content.heading ? page.url + '#' + content.heading : page.url,
-        content: content.content
-      })
+        url: content.heading ? `${page.url}#${content.heading}` : page.url,
+        content: content.content,
+      });
     }
   }
 
   return {
-    async GET(request) {
-      const query = request.nextUrl.searchParams.get('query')
-      const tag = request.nextUrl.searchParams.get('tag')
+    GET(request) {
+      const query = request.nextUrl.searchParams.get('query');
+      const paramTag = request.nextUrl.searchParams.get('tag');
 
-      if (query == null) return NextResponse.json([])
+      if (!query) return NextResponse.json([]);
 
       const results = index.search(query, 5, {
         enrich: true,
-        tag: tag ?? undefined,
-        limit: 6
-      })[0]
+        tag: paramTag ?? undefined,
+        limit: 6,
+      })[0];
 
-      if (results == null) return NextResponse.json([])
-
-      const map = new Map<string, SortedResult[]>()
-      const sortedResult: SortedResult[] = []
+      const map = new Map<string, SortedResult[]>();
+      const sortedResult: SortedResult[] = [];
 
       for (const item of results.result) {
         if (item.doc.type === 'page') {
           if (!map.has(item.doc.page_id)) {
-            map.set(item.doc.page_id, [])
+            map.set(item.doc.page_id, []);
           }
 
-          continue
+          continue;
         }
 
         const i: SortedResult = {
           id: item.doc.id,
           content: item.doc.content,
           type: item.doc.type,
-          url: item.doc.url
-        }
+          url: item.doc.url,
+        };
 
         if (map.has(item.doc.page_id)) {
-          map.get(item.doc.page_id)?.push(i)
+          map.get(item.doc.page_id)?.push(i);
         } else {
-          map.set(item.doc.page_id, [i])
+          map.set(item.doc.page_id, [i]);
         }
       }
 
       for (const [id, items] of map.entries()) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const page: InternalIndex = (index as any).get(id)
+        const page = (
+          index as unknown as {
+            get: (id: string) => InternalIndex | null;
+          }
+        ).get(id);
 
-        if (!page) continue
+        if (!page) continue;
 
         sortedResult.push({
           id: page.id,
           content: page.content,
           type: 'page',
-          url: page.url
-        })
-        sortedResult.push(...items)
+          url: page.url,
+        });
+        sortedResult.push(...items);
       }
 
-      return NextResponse.json(sortedResult)
-    }
-  }
+      return NextResponse.json(sortedResult);
+    },
+  };
 }

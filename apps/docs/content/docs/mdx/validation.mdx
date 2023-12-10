@@ -22,17 +22,17 @@ options to the `fromMap` function.
 Extend the default frontmatter schema:
 
 ```ts title="source.ts"
-import { z } from 'zod'
+import { z } from 'zod';
 
 const frontmatterSchema = defaultValidators.frontmatter.extend({
-  preview: z.string().optional()
-})
+  preview: z.string().optional(),
+});
 
 export default fromMap(map, {
   validate: {
-    frontmatter: frontmatterSchema
-  }
-})
+    frontmatter: frontmatterSchema,
+  },
+});
 ```
 
 ### Typescript

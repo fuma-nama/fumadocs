@@ -1,27 +1,32 @@
-import { Card, Cards } from '@/components/mdx/card'
-import { Heading } from '@/components/mdx/heading'
-import { cn } from '@/utils/cn'
-import { default_image_sizes } from '@/utils/config'
-import Link from 'next-docs-zeta/link'
-import NextImage, { type ImageProps } from 'next/image'
+import Link from 'next-docs-zeta/link';
+import NextImage, { type ImageProps } from 'next/image';
 import type {
   HTMLAttributes,
   ImgHTMLAttributes,
-  TableHTMLAttributes
-} from 'react'
+  TableHTMLAttributes,
+} from 'react';
+import { Card, Cards } from '@/components/mdx/card';
+import { Heading } from '@/components/mdx/heading';
+import { cn } from '@/utils/cn';
+import { defaultImageSizes } from '@/utils/config';
 
-const Image = (props: ImgHTMLAttributes<HTMLImageElement>) => (
-  <NextImage sizes={default_image_sizes} {...(props as ImageProps)} />
-)
+function Image(props: ImgHTMLAttributes<HTMLImageElement>): JSX.Element {
+  return <NextImage sizes={defaultImageSizes} {...(props as ImageProps)} />;
+}
 
-const Table = (props: TableHTMLAttributes<HTMLTableElement>) => (
-  <div className="relative overflow-auto">
-    <table {...props} />
-  </div>
-)
+function Table(props: TableHTMLAttributes<HTMLTableElement>): JSX.Element {
+  return (
+    <div className="relative overflow-auto">
+      <table {...props} />
+    </div>
+  );
+}
 
-function MDXContent({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn('prose', className)} {...props} />
+function MDXContent({
+  className,
+  ...props
+}: HTMLAttributes<HTMLDivElement>): JSX.Element {
+  return <div className={cn('prose', className)} {...props} />;
 }
 
 const defaultMdxComponents = {
@@ -47,17 +52,17 @@ const defaultMdxComponents = {
   h6: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
     <Heading as="h6" {...props} />
   ),
-  table: Table
-}
+  table: Table,
+};
 
 export {
   defaultMdxComponents as default,
   Link,
-  default_image_sizes,
+  defaultImageSizes,
   Heading,
   Card,
   Cards,
   Image,
   Table,
-  MDXContent
-}
+  MDXContent,
+};

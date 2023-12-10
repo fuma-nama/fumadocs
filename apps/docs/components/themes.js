@@ -1,9 +1,4 @@
-const full_layout = `
-.nd-container { max-width: none; }
-main aside { border-right-width: 1px; }
-article { margin-left: auto; margin-right: auto; max-width: 700px; }`
-
-const blue_theme = `:root { --background: 0 0% 100%; --foreground: 222.2 47.4%
+const blueTheme = `:root { --background: 0 0% 100%; --foreground: 222.2 47.4%
 11.2%; --muted: 210 40% 96.1%; --muted-foreground: 215.4 16.3% 46.9%; --popover:
 0 0% 100%; --popover-foreground: 222.2 47.4% 11.2%; --card: 210 40% 98%;
 --card-foreground: 222.2 47.4% 11.2%; --border: 214.3 31.8% 91.4%; --input:
@@ -19,6 +14,6 @@ const blue_theme = `:root { --background: 0 0% 100%; --foreground: 222.2 47.4%
 98%; --primary-foreground: 222.2 47.4% 1.2%; --secondary: 222.2 47.4% 11.2%;
 --secondary-foreground: 210 40% 98%; --accent: 216 34% 14%; --accent-foreground:
 210 40% 98%; --destructive: 0 63% 31%; --destructive-foreground: 210 40% 98%;
---ring: 216 34% 17%; }`
+--ring: 216 34% 17%; }`;
 
-export { full_layout, blue_theme }
+export { blueTheme };

@@ -1,11 +1,10 @@
-/** Generated with Shadcn UI */
-import { cn } from '@/utils/cn'
-import * as PopoverPrimitive from '@radix-ui/react-popover'
-import * as React from 'react'
+import * as PopoverPrimitive from '@radix-ui/react-popover';
+import * as React from 'react';
+import { cn } from '@/utils/cn';
 
-const Popover = PopoverPrimitive.Root
+const Popover = PopoverPrimitive.Root;
 
-const PopoverTrigger = PopoverPrimitive.Trigger
+const PopoverTrigger = PopoverPrimitive.Trigger;
 
 const PopoverContent = React.forwardRef<
   React.ElementRef<typeof PopoverPrimitive.Content>,
@@ -18,13 +17,13 @@ const PopoverContent = React.forwardRef<
       sideOffset={sideOffset}
       side="bottom"
       className={cn(
-        'bg-popover text-popover-foreground data-[state=open]:fade-in data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out z-50 max-w-[90vw] rounded-md border p-2 shadow-md outline-none',
-        className
+        'z-50 max-w-[90vw] rounded-md border bg-popover p-2 text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=open]:fade-in',
+        className,
       )}
       {...props}
     />
   </PopoverPrimitive.Portal>
-))
-PopoverContent.displayName = PopoverPrimitive.Content.displayName
+));
+PopoverContent.displayName = PopoverPrimitive.Content.displayName;
 
-export { Popover, PopoverTrigger, PopoverContent }
+export { Popover, PopoverTrigger, PopoverContent };

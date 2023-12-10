@@ -1,10 +1,10 @@
-import fg from 'fast-glob'
-import path from 'path'
-import type { LoaderContext } from 'webpack'
+import path from 'node:path';
+import { sync } from 'fast-glob';
+import type { LoaderContext } from 'webpack';
 
-export type LoaderOptions = {
-  rootContentPath: string
-  cwd: string
+export interface LoaderOptions {
+  rootContentPath: string;
+  cwd: string;
 }
 
 /**
@@ -13,31 +13,28 @@ export type LoaderOptions = {
 export default function loader(
   this: LoaderContext<LoaderOptions>,
   _source: string,
-  callback: LoaderContext<LoaderOptions>['callback']
-) {
-  const { cwd, rootContentPath } = this.getOptions()
+  callback: LoaderContext<LoaderOptions>['callback'],
+): void {
+  const { cwd, rootContentPath } = this.getOptions();
 
-  this.cacheable(true)
-  this.addContextDependency(path.resolve(cwd, rootContentPath))
+  this.cacheable(true);
+  this.addContextDependency(path.resolve(cwd, rootContentPath));
 
-  callback(null, buildMap({ cwd, rootContentPath }))
+  callback(null, buildMap({ cwd, rootContentPath }));
 }
 
 function buildMap({ cwd, rootContentPath }: LoaderOptions): string {
-  const files = fg.sync('./**/*.{md,mdx,json}', {
-    cwd: path.resolve(cwd, rootContentPath)
-  })
+  const files = sync('./**/*.{md,mdx,json}', {
+    cwd: path.resolve(cwd, rootContentPath),
+  });
 
-  const entries = files.map(file => {
-    const importPath = path.join(rootContentPath, file)
+  const entries = files.map((file) => {
+    const importPath = path.join(rootContentPath, file);
 
     return `${JSON.stringify(file)}: await import(${JSON.stringify(
-      importPath
-    )})`
-  })
+      importPath,
+    )})`;
+  });
 
-  return `
-export const map = {
-    ${entries.join(',')}
-}`
+  return `export const map = {${entries.join(',')}}`;
 }

@@ -4,19 +4,19 @@ description: Use the Card component in your MDX documentation
 preview: card
 ---
 
-import HomeIcon from 'lucide-react/dist/esm/icons/home'
+import HomeIcon from 'lucide-react/dist/esm/icons/home';
 
 ## Usage
 
 Add it to your MDX components.
 
 ```mdx {5-6}
-import { Card, Cards } from 'next-docs-ui/mdx'
+import { Card, Cards } from 'next-docs-ui/mdx';
 
 <MDX
   components={{
-    Card: props => <Card {...props} />,
-    Cards: props => <Cards {...props} />
+    Card: (props) => <Card {...props} />,
+    Cards: (props) => <Cards {...props} />,
   }}
 />
 ```
@@ -32,17 +32,17 @@ The component to redirect users.
 <TypeTable
   type={{
     title: {
-      type: 'string'
+      type: 'string',
     },
     description: {
-      type: 'string'
+      type: 'string',
     },
     icon: {
-      type: 'ReactNode'
+      type: 'ReactNode',
     },
     href: {
-      type: 'string'
-    }
+      type: 'string',
+    },
   }}
 />
 
@@ -71,7 +71,7 @@ Pass the href, title and description.
 ### With Icons
 
 ```mdx
-import { HomeIcon } from 'lucide-react'
+import { HomeIcon } from 'lucide-react';
 
 <Cards>
   <Card
@@ -91,18 +91,18 @@ tree shaking is working properly.
 Most of the icon libraries support importing icons individually.
 
 ```tsx
-import HomeIcon from 'lucide-react/dist/esm/icons/home'
+import HomeIcon from 'lucide-react/dist/esm/icons/home';
 ```
 
 As a workaround, you can pass icons to MDX Components too.
 
 ```tsx
-import { HomeIcon } from 'lucide-react'
+import { HomeIcon } from 'lucide-react';
 
 const components = {
   ...defaultComponents,
-  HomeIcon
-}
+  HomeIcon,
+};
 ```
 
 </Callout>

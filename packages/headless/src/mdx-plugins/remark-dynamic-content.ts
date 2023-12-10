@@ -1,22 +1,22 @@
-import { visit } from './unist-visit'
-import fs from 'fs'
-import type { Root, RootContent } from 'mdast'
-import path from 'path'
-import type { Transformer } from 'unified'
+import fs from 'node:fs';
+import path from 'node:path';
+import type { Root, RootContent } from 'mdast';
+import type { Transformer } from 'unified';
+import { visit } from './unist-visit';
 
-const regex = /^\|reference:(.+)\|/
+const regex = /^\|reference:(?<path>.+)\|/;
 
-export type Options = {
-  /** @default process.cwd() */
-  cwd?: string
-  /** @default true */
-  trim?: boolean
+export interface Options {
+  /** @defaultValue `process.cwd()` */
+  cwd?: string;
+  /** @defaultValue true */
+  trim?: boolean;
 
   /**
    * Filter specific element types
-   * @default ['text','code']
+   * @defaultValue `['text','code']`
    * */
-  visit?: string[]
+  visit?: string[];
 }
 
 /**
@@ -26,26 +26,26 @@ export type Options = {
  * |reference:../path/to/file.ts|
  */
 export function remarkDynamicContent(
-  options: Options = {}
+  options: Options = {},
 ): Transformer<Root, Root> {
   const {
     cwd = process.cwd(),
     trim = true,
-    visit: filter = ['text', 'code']
-  } = options
+    visit: filter = ['text', 'code'],
+  } = options;
 
-  return tree => {
+  return (tree) => {
     visit(tree, filter, (node: RootContent) => {
-      if (!('value' in node) || typeof node.value !== 'string') return
-      const result = regex.exec(node.value)
+      if (!('value' in node) || typeof node.value !== 'string') return;
+      const result = regex.exec(node.value);
 
-      if (result && result[1]) {
-        const dest = path.resolve(cwd, result[1])
-        let value = fs.readFileSync(dest).toString()
-        if (trim) value = value.trim()
+      if (result?.groups?.path) {
+        const dest = path.resolve(cwd, result[1]);
+        let value = fs.readFileSync(dest).toString();
+        if (trim) value = value.trim();
 
-        node.value = value
+        node.value = value;
       }
-    })
-  }
+    });
+  };
 }

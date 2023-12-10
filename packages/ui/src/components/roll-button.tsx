@@ -1,51 +1,57 @@
-'use client'
+'use client';
 
-import { cn } from '@/utils/cn'
-import { ChevronUpIcon } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { ChevronUpIcon } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { cn } from '@/utils/cn';
 
-type RollButtonProps = {
+interface RollButtonProps {
   /**
    * Percentage of scroll position to display the roll button
    *
-   * @default 0.2
+   * @defaultValue 0.2
    */
-  percentage?: number
+  percentage?: number;
 }
 
 /**
  * A button that scrolls to the top
  */
-export function RollButton({ percentage = 0.2 }: RollButtonProps) {
-  const [show, setShow] = useState(false)
+export function RollButton({ percentage = 0.2 }: RollButtonProps): JSX.Element {
+  const [show, setShow] = useState(false);
 
   useEffect(() => {
-    window.addEventListener('scroll', () => {
-      const element = document.scrollingElement
-      if (!element) return
+    const listener = (): void => {
+      const element = document.scrollingElement;
+      if (!element) return;
       const nearTop =
         element.scrollTop / (element.scrollHeight - element.clientHeight) <
-        percentage
+        percentage;
 
-      setShow(!nearTop)
-    })
-  }, [])
+      setShow(!nearTop);
+    };
+
+    window.addEventListener('scroll', listener);
+    return () => {
+      window.removeEventListener('scroll', listener);
+    };
+  }, [percentage]);
 
   return (
     <button
+      type="button"
       aria-label="Scroll to Top"
       className={cn(
         !show && 'translate-y-20 opacity-0',
-        'text-foreground bg-background fixed bottom-12 right-12 z-50 rounded-full border p-4 transition-all'
+        'fixed bottom-12 right-12 z-50 rounded-full border bg-background p-4 text-foreground transition-all',
       )}
       onClick={() => {
-        document.scrollingElement!.scrollTo({
+        document.scrollingElement?.scrollTo({
           top: 0,
-          behavior: 'smooth'
-        })
+          behavior: 'smooth',
+        });
       }}
     >
       <ChevronUpIcon className="h-5 w-5" />
     </button>
-  )
+  );
 }

@@ -1,25 +1,25 @@
-'use client'
+'use client';
 
-import { SearchProvider, type SearchProviderProps } from './contexts/search'
-import { SidebarCollapseProvider } from '@/contexts/sidebar'
-import { SidebarProvider } from 'next-docs-zeta/sidebar'
-import { ThemeProvider } from 'next-themes'
-import { type ReactNode } from 'react'
+import { SidebarProvider } from 'next-docs-zeta/sidebar';
+import { ThemeProvider } from 'next-themes';
+import { type ReactNode } from 'react';
+import { SidebarCollapseProvider } from '@/contexts/sidebar';
+import { SearchProvider, type SearchProviderProps } from './contexts/search';
 
-export type RootProviderProps = {
-  search?: Omit<SearchProviderProps, 'children'>
+export interface RootProviderProps {
+  search?: Omit<SearchProviderProps, 'children'>;
 
   /**
    * Wrap the body in `ThemeProvider` (next-themes), enabled by default
    */
-  enableThemeProvider?: boolean
-  children: ReactNode
+  enableThemeProvider?: boolean;
+  children: ReactNode;
 }
 
 export function RootProvider({
   children,
   enableThemeProvider = true,
-  search
+  search,
 }: RootProviderProps): JSX.Element {
   const body = (
     <SidebarProvider>
@@ -27,7 +27,7 @@ export function RootProvider({
         <SearchProvider {...search}>{children}</SearchProvider>
       </SidebarCollapseProvider>
     </SidebarProvider>
-  )
+  );
 
   return enableThemeProvider ? (
     <ThemeProvider
@@ -40,5 +40,5 @@ export function RootProvider({
     </ThemeProvider>
   ) : (
     body
-  )
+  );
 }

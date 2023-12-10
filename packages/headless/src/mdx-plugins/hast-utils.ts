@@ -1,4 +1,4 @@
-import type { Element, Parent, Root, RootContent } from 'hast'
+import type { Element, Parent, Root, RootContent } from 'hast';
 
 /**
  * Visit a node with filtered tag names
@@ -6,44 +6,46 @@ import type { Element, Parent, Root, RootContent } from 'hast'
 export function visit(
   node: RootContent | Root,
   tagNames: string[],
-  handler: (node: Element) => void
+  handler: (node: Element) => void,
 ): void {
   if (node.type === 'element')
     if (tagNames.includes(node.tagName)) {
-      handler(node)
-      return
+      handler(node);
+      return;
     }
 
   if ('children' in node)
-    node.children.forEach(n => visit(n, tagNames, handler))
+    node.children.forEach((n) => {
+      visit(n, tagNames, handler);
+    });
 }
 
 export function flattenNode(node: RootContent): string {
   if ('children' in node) {
-    return all(node)
+    return all(node);
   }
 
   if (node.type === 'text') {
-    return node.value
+    return node.value;
   }
 
-  return ''
+  return '';
 }
 
 function one(node: RootContent): string {
   if (node.type === 'text') {
-    return node.value
+    return node.value;
   }
 
-  return 'children' in node ? all(node) : ''
+  return 'children' in node ? all(node) : '';
 }
 
 function all(node: Parent): string {
-  const result: string[] = []
+  const result: string[] = [];
 
   for (let i = 0; i < node.children.length; i++) {
-    result[i] = one(node.children[i])
+    result[i] = one(node.children[i]);
   }
 
-  return result.join('')
+  return result.join('');
 }

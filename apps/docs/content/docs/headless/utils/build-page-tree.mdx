@@ -8,14 +8,14 @@ description: Build Page Tree with File System or your own content source
 Create a builder instance, and pass your pages and meta files as options.
 
 ```ts
-import { createPageTreeBuilder } from 'next-docs-zeta/server'
+import { createPageTreeBuilder } from 'next-docs-zeta/server';
 
 const builder = createPageTreeBuilder({
   metas,
-  pages
-})
+  pages,
+});
 
-const pageTree = builder.build()
+const pageTree = builder.build();
 ```
 
 ### Multiple Trees
@@ -23,8 +23,8 @@ const pageTree = builder.build()
 You can build multiple trees with the same builder instance.
 
 ```ts
-builder.build({ root: 'docs/ui' })
-builder.build({ root: 'docs/headless' })
+builder.build({ root: 'docs/ui' });
+builder.build({ root: 'docs/headless' });
 ```
 
 ### Internationalization
@@ -33,7 +33,7 @@ You can also build internationalized page tree with the `buildI18n` method, it
 returns a language-to-page-tree map.
 
 ```ts
-builder.buildI18n({ languages })
+builder.buildI18n({ languages });
 ```
 
 ## Pages Structure
@@ -122,15 +122,15 @@ icon: MyIcon
 
 ```ts
 createPageTreeBuilder({
-  resolveIcon: icon => {
+  resolveIcon: (icon) => {
     // load icon from library
-    const res = require('lucide-react')
-    icon = icon.trim()
+    const res = require('lucide-react');
+    icon = icon.trim();
 
-    if (res[icon]) return createElement(res[icon])
-    return undefined
-  }
-})
+    if (res[icon]) return createElement(res[icon]);
+    return undefined;
+  },
+});
 ```
 
 ### With Locale

@@ -1,9 +1,4 @@
-import { Previews, Rain } from './page.client'
-import { CodeBlock } from '@/components/typing-code-block'
-import { buttonVariants } from '@/components/ui/button'
-import Example from '@/public/example-2.png'
-import { cn } from '@/utils/cn'
-import { cva } from 'class-variance-authority'
+import { cva } from 'class-variance-authority';
 import {
   BatteryChargingIcon,
   CircleIcon,
@@ -17,24 +12,29 @@ import {
   SearchIcon,
   StarIcon,
   StarsIcon,
-  TimerIcon
-} from 'lucide-react'
-import { File, Files } from 'next-docs-ui/components/files'
-import Image from 'next/image'
-import Link from 'next/link'
-import type { HTMLAttributes, SVGProps } from 'react'
+  TimerIcon,
+} from 'lucide-react';
+import { File, Files } from 'next-docs-ui/components/files';
+import Image from 'next/image';
+import Link from 'next/link';
+import type { HTMLAttributes, SVGProps } from 'react';
+import { cn } from '@/utils/cn';
+import Example from '@/public/example-2.png';
+import { buttonVariants } from '@/components/ui/button';
+import { CodeBlock } from '@/components/typing-code-block';
+import { Previews, Rain } from './page.client';
 
 const badgeVariants = cva(
-  'mb-2 w-7 h-7 inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground font-medium'
-)
+  'mb-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary font-medium text-primary-foreground',
+);
 
 const code = `const frontmatterSchema = defaultValidators.frontmatter.extend({
   preview: z.string().optional()
-})`
+})`;
 
-function SourceSVG(props: SVGProps<SVGSVGElement>) {
+function SourceSVG(props: SVGProps<SVGSVGElement>): JSX.Element {
   const maskImage =
-    'radial-gradient(100% 100% at center,white 40%,transparent 50%)'
+    'radial-gradient(100% 100% at center,white 40%,transparent 50%)';
   return (
     <svg
       width="1512"
@@ -186,10 +186,10 @@ function SourceSVG(props: SVGProps<SVGSVGElement>) {
         <path d="M802 658L1076 604" stroke="hsl(var(--primary)/.5)" />
       </g>
     </svg>
-  )
+  );
 }
 
-function VercelLogo(props: SVGProps<SVGSVGElement>) {
+function VercelLogo(props: SVGProps<SVGSVGElement>): JSX.Element {
   return (
     <svg
       aria-label="Vercel logotype"
@@ -204,10 +204,10 @@ function VercelLogo(props: SVGProps<SVGSVGElement>) {
         fill="currentColor"
       />
     </svg>
-  )
+  );
 }
 
-function NetlifyLogo(props: SVGProps<SVGSVGElement>) {
+function NetlifyLogo(props: SVGProps<SVGSVGElement>): JSX.Element {
   return (
     <svg
       aria-label="Netlify"
@@ -271,10 +271,10 @@ function NetlifyLogo(props: SVGProps<SVGSVGElement>) {
         />
       </g>
     </svg>
-  )
+  );
 }
 
-function Earth(props: SVGProps<SVGSVGElement>) {
+function Earth(props: SVGProps<SVGSVGElement>): JSX.Element {
   return (
     <svg width="900" height="900" viewBox="0 0 900 900" fill="none" {...props}>
       <circle cx="450" cy="450" r="450" fill="url(#paint0_linear_26_28)" />
@@ -404,17 +404,17 @@ function Earth(props: SVGProps<SVGSVGElement>) {
         </linearGradient>
       </defs>
     </svg>
-  )
+  );
 }
 
-export default function HomePage() {
+export default function HomePage(): JSX.Element {
   return (
     <>
       <div
         className="absolute inset-x-0 top-[200px] h-[250px]"
         style={{
           background:
-            'repeating-linear-gradient(to right, hsl(var(--border)), transparent 1px, transparent 50px), repeating-linear-gradient(to bottom, hsl(var(--border)), transparent 1px, transparent 50px)'
+            'repeating-linear-gradient(to right, hsl(var(--border)), transparent 1px, transparent 50px), repeating-linear-gradient(to bottom, hsl(var(--border)), transparent 1px, transparent 50px)',
         }}
       />
       <main className="container relative max-w-[1100px] px-2 py-4 sm:py-20">
@@ -422,14 +422,14 @@ export default function HomePage() {
           className="border-x border-t"
           style={{
             background:
-              'repeating-linear-gradient(to bottom, transparent, hsl(var(--secondary)/.4) 500px, transparent 1000px)'
+              'repeating-linear-gradient(to bottom, transparent, hsl(var(--secondary)/.4) 500px, transparent 1000px)',
           }}
         >
           <Hero />
           <div className="border-b px-6">
-            <div className="sm:divide-border flex flex-col sm:flex-row sm:divide-x">
+            <div className="flex flex-col sm:flex-row sm:divide-x sm:divide-border">
               <div className="flex-1 py-8 sm:py-16 sm:pr-8">
-                <p className="text-muted-foreground [&_b]:text-foreground font-medium sm:text-lg">
+                <p className="font-medium text-muted-foreground sm:text-lg [&_b]:text-foreground">
                   Next Docs is the Next.js framework for building documentation
                   sites along with <b>Breathtaking UI</b> and{' '}
                   <b>Excellent User Experience</b>.
@@ -439,7 +439,7 @@ export default function HomePage() {
                 <Link
                   href="/docs"
                   className={cn(
-                    buttonVariants({ size: 'lg', className: 'rounded-full' })
+                    buttonVariants({ size: 'lg', className: 'rounded-full' }),
                   )}
                 >
                   Getting Started
@@ -450,8 +450,8 @@ export default function HomePage() {
                     buttonVariants({
                       size: 'lg',
                       variant: 'outline',
-                      className: 'rounded-full'
-                    })
+                      className: 'rounded-full',
+                    }),
                   )}
                 >
                   Open Demo
@@ -504,7 +504,7 @@ export default function HomePage() {
           <div className="flex flex-col items-center border-b px-6 py-12 text-center">
             <div className={cn(badgeVariants())}>3</div>
             <h3 className="text-2xl font-bold">Ship.</h3>
-            <p className="text-muted-foreground mb-2">
+            <p className="mb-2 text-muted-foreground">
               Deploy your docs easily with Next.js compatible hosting platforms.
             </p>
 
@@ -521,7 +521,7 @@ export default function HomePage() {
               className="mt-8 w-full"
               style={{
                 backgroundImage:
-                  'repeating-linear-gradient(to right,hsl(var(--primary)/.1),hsl(var(--primary)/.1) 1px,transparent 1px,transparent 40px), repeating-linear-gradient(to bottom,hsl(var(--primary)/.1),hsl(var(--primary)/.1) 1px,transparent 1px,transparent 40px)'
+                  'repeating-linear-gradient(to right,hsl(var(--primary)/.1),hsl(var(--primary)/.1) 1px,transparent 1px,transparent 40px), repeating-linear-gradient(to bottom,hsl(var(--primary)/.1),hsl(var(--primary)/.1) 1px,transparent 1px,transparent 40px)',
               }}
             >
               <Earth className="-my-8 mx-auto h-auto w-60" />
@@ -543,14 +543,14 @@ export default function HomePage() {
             <div className="border-b px-6 py-16 md:border-r">
               <RocketIcon />
               <h2 className="mr-2 inline font-bold">Light and Fast.</h2>
-              <span className="text-muted-foreground font-medium">
+              <span className="font-medium text-muted-foreground">
                 Full powered documentation site with Next.js App Router.
               </span>
             </div>
             <div className="border-b px-6 py-16 lg:border-r">
               <TimerIcon />
               <h2 className="mr-2 inline font-bold">Optimized.</h2>
-              <span className="text-muted-foreground font-medium">
+              <span className="font-medium text-muted-foreground">
                 Less client components, less Javascript, optimized images.
               </span>
             </div>
@@ -559,7 +559,7 @@ export default function HomePage() {
               <h2 className="mr-2 inline font-bold">
                 Accessibility & UX first.
               </h2>
-              <span className="text-muted-foreground font-medium">
+              <span className="font-medium text-muted-foreground">
                 Focus on user experience and accessibility, providing an
                 excellent experience for your users.
               </span>
@@ -569,7 +569,7 @@ export default function HomePage() {
               <h2 className="mr-2 inline font-bold">
                 Powerful document search.
               </h2>
-              <span className="text-muted-foreground font-medium">
+              <span className="font-medium text-muted-foreground">
                 Built-in search implemented with Flexsearch, with high
                 flexibility and performance.
               </span>
@@ -577,7 +577,7 @@ export default function HomePage() {
             <div className="border-b px-6 py-16 md:border-r">
               <PaperclipIcon />
               <h2 className="mr-2 inline font-bold">Useful MDX Plugins.</h2>
-              <span className="text-muted-foreground font-medium">
+              <span className="font-medium text-muted-foreground">
                 Bundled with remark and rehype plugins that enhances the
                 developer experience.
               </span>
@@ -585,42 +585,42 @@ export default function HomePage() {
             <div className="border-b px-6 py-16">
               <PersonStandingIcon />
               <h2 className="mr-2 inline font-bold">Personalized.</h2>
-              <span className="text-muted-foreground font-medium">
+              <span className="font-medium text-muted-foreground">
                 Advanced options for customising your theme in a comfortable
                 way.
               </span>
             </div>
           </div>
-          <div className="divide-border grid grid-cols-1 md:grid-cols-2 md:divide-x">
+          <div className="grid grid-cols-1 divide-border md:grid-cols-2 md:divide-x">
             <div className="border-b px-6 py-16 md:py-20">
-              <div className="text-muted-foreground mb-4 inline-flex items-center gap-2 font-medium">
+              <div className="mb-4 inline-flex items-center gap-2 font-medium text-muted-foreground">
                 <PaperclipIcon className="h-5 w-5" />
                 <p>Multiple Sources</p>
               </div>
               <h2 className="mb-1 text-xl font-semibold">
                 Your source. Your choice.
               </h2>
-              <p className="text-muted-foreground text-lg font-medium">
+              <p className="text-lg font-medium text-muted-foreground">
                 Native support for different content sources including
                 Contentlayer and the official next/mdx loader.
               </p>
               <SourceSVG className="mt-8 h-auto w-full" />
             </div>
             <div className="border-b px-6 py-16 md:py-20">
-              <div className="text-muted-foreground mb-4 inline-flex items-center gap-2 font-medium">
+              <div className="mb-4 inline-flex items-center gap-2 font-medium text-muted-foreground">
                 <SearchIcon className="h-5 w-5" />
                 <p>Algolia Integration</p>
               </div>
               <h2 className="mb-1 text-xl font-semibold">
                 Enhance your search experience.
               </h2>
-              <p className="text-muted-foreground text-lg font-medium">
+              <p className="text-lg font-medium text-muted-foreground">
                 Integrate with Algolia Search in your docs easily.
               </p>
               <Link
                 href="/docs/headless/search/algolia"
                 className={cn(
-                  buttonVariants({ variant: 'outline', className: 'mt-4' })
+                  buttonVariants({ variant: 'outline', className: 'mt-4' }),
                 )}
               >
                 Learn More
@@ -628,16 +628,16 @@ export default function HomePage() {
               <Search />
             </div>
           </div>
-          <div className="divide-border grid grid-cols-1 overflow-hidden md:grid-cols-2 md:divide-x">
+          <div className="grid grid-cols-1 divide-border overflow-hidden md:grid-cols-2 md:divide-x">
             <div className="relative border-b px-6 py-16">
               <h2 className="text-2xl font-semibold">Heard of our users.</h2>
-              <p className="text-muted-foreground text-lg font-medium">
+              <p className="text-lg font-medium text-muted-foreground">
                 We are making it better.
               </p>
               <Link
                 href="/showcase"
                 className={cn(
-                  buttonVariants({ variant: 'outline', className: 'mt-4' })
+                  buttonVariants({ variant: 'outline', className: 'mt-4' }),
                 )}
               >
                 Showcase
@@ -667,22 +667,22 @@ export default function HomePage() {
               style={{
                 backgroundPositionX: '-2px',
                 backgroundImage:
-                  'repeating-linear-gradient(to bottom, hsl(var(--border)), hsl(var(--border)) 1px, transparent 2px, transparent 160px), repeating-linear-gradient(to right, hsl(var(--border)), hsl(var(--border)) 1px, transparent 2px, transparent 160px)'
+                  'repeating-linear-gradient(to bottom, hsl(var(--border)), hsl(var(--border)) 1px, transparent 2px, transparent 160px), repeating-linear-gradient(to right, hsl(var(--border)), hsl(var(--border)) 1px, transparent 2px, transparent 160px)',
               }}
             >
               <h2 className="text-2xl font-semibold">
                 Flexibility that cover your needs.
               </h2>
-              <p className="text-muted-foreground text-lg font-medium">
+              <p className="text-lg font-medium text-muted-foreground">
                 Well documented, separated in packages.
               </p>
 
               <div className="mt-8 flex flex-col gap-4">
                 <Link
                   href="/docs/ui"
-                  className="from-primary shadow-primary/20 rounded-xl bg-gradient-to-br p-px shadow-lg"
+                  className="rounded-xl bg-gradient-to-br from-primary p-px shadow-lg shadow-primary/20"
                 >
-                  <div className="from-muted bg-background hover:bg-muted rounded-[inherit] bg-gradient-to-t p-4 transition-colors">
+                  <div className="rounded-[inherit] bg-background bg-gradient-to-t from-muted p-4 transition-colors hover:bg-muted">
                     <LayoutIcon />
                     <h3 className="font-semibold">Next Docs UI</h3>
                     <p className="text-muted-foreground">
@@ -692,9 +692,9 @@ export default function HomePage() {
                 </Link>
                 <Link
                   href="/docs/headless"
-                  className="from-secondary rounded-xl bg-gradient-to-br p-px shadow-lg"
+                  className="rounded-xl bg-gradient-to-br from-secondary p-px shadow-lg"
                 >
-                  <div className="bg-background hover:bg-muted rounded-[inherit] p-4 transition-colors">
+                  <div className="rounded-[inherit] bg-background p-4 transition-colors hover:bg-muted">
                     <LibraryIcon />
                     <h3 className="font-semibold">Next Docs Zeta</h3>
                     <p className="text-muted-foreground">
@@ -705,7 +705,7 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-          <div className="divide-border grid grid-cols-1 border-b md:grid-cols-2 md:divide-x lg:grid-cols-3">
+          <div className="grid grid-cols-1 divide-border border-b md:grid-cols-2 md:divide-x lg:grid-cols-3">
             <div className="relative flex flex-col overflow-hidden px-6 py-14">
               <Rain
                 width={500}
@@ -721,7 +721,7 @@ export default function HomePage() {
                     <BatteryChargingIcon className="inline" /> Battery
                     guaranteed.
                   </span>
-                  <span className="text-muted-foreground ml-2">
+                  <span className="ml-2 text-muted-foreground">
                     Actively maintained, open for contributions.
                   </span>
                 </li>
@@ -729,7 +729,7 @@ export default function HomePage() {
                   <span className="font-medium">
                     <GithubIcon className="inline" /> Fully open-source.
                   </span>
-                  <span className="text-muted-foreground ml-2">
+                  <span className="ml-2 text-muted-foreground">
                     Open source, available on Github.
                   </span>
                 </li>
@@ -737,7 +737,7 @@ export default function HomePage() {
                   <span className="font-medium">
                     <TimerIcon className="inline" /> Within seconds.
                   </span>
-                  <span className="text-muted-foreground ml-2">
+                  <span className="ml-2 text-muted-foreground">
                     Initialize a new project instantly with CLI.
                   </span>
                 </li>
@@ -751,8 +751,8 @@ export default function HomePage() {
                   rel="noreferrer noopener"
                   className={cn(
                     buttonVariants({
-                      variant: 'outline'
-                    })
+                      variant: 'outline',
+                    }),
                   )}
                 >
                   Open in CodeSandbox
@@ -771,24 +771,24 @@ export default function HomePage() {
         </div>
       </main>
     </>
-  )
+  );
 }
 
 const searchItemVariants = cva(
-  'flex flex-row items-center gap-2 text-sm text-popover-foreground p-2 rounded-md hover:bg-accent'
-)
+  'flex flex-row items-center gap-2 rounded-md p-2 text-sm text-popover-foreground hover:bg-accent',
+);
 
-function Search() {
-  const maskImage = 'linear-gradient(to bottom,white 30%,transparent)'
+function Search(): JSX.Element {
+  const maskImage = 'linear-gradient(to bottom,white 30%,transparent)';
   return (
     <div
-      className="bg-popover mt-6 flex select-none flex-col rounded-md border"
+      className="mt-6 flex select-none flex-col rounded-md border bg-popover"
       style={{
         maskImage,
-        WebkitMaskImage: maskImage
+        WebkitMaskImage: maskImage,
       }}
     >
-      <div className="text-muted-foreground inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm">
+      <div className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm text-muted-foreground">
         <SearchIcon className="h-4 w-4" />
         Search...
       </div>
@@ -811,19 +811,19 @@ function Search() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-function LaunchAppWindow(props: HTMLAttributes<HTMLDivElement>) {
+function LaunchAppWindow(props: HTMLAttributes<HTMLDivElement>): JSX.Element {
   return (
     <div
       {...props}
       className={cn(
-        'bg-background overflow-hidden rounded-md border',
-        props.className
+        'overflow-hidden rounded-md border bg-background',
+        props.className,
       )}
     >
-      <div className="bg-muted text-muted-foreground relative flex h-6 flex-row items-center border-b px-4 text-xs">
+      <div className="relative flex h-6 flex-row items-center border-b bg-muted px-4 text-xs text-muted-foreground">
         <CircleIcon
           aria-label="close"
           className="h-2 w-2 fill-red-400 text-transparent"
@@ -832,12 +832,12 @@ function LaunchAppWindow(props: HTMLAttributes<HTMLDivElement>) {
       </div>
       <div className="p-4 text-sm">New App launched with Next Docs!</div>
     </div>
-  )
+  );
 }
 
-function Hero() {
+function Hero(): JSX.Element {
   return (
-    <div className="bg-background container relative z-[2] flex flex-col items-center border-b p-6 text-center">
+    <div className="container relative z-[2] flex flex-col items-center border-b bg-background p-6 text-center">
       <div className="mb-[260px] mt-12 h-fit">
         <h1 className="p-2 text-4xl font-medium sm:text-6xl">
           Build Your Docs.
@@ -869,21 +869,21 @@ function Hero() {
         </StarIcon>
       </div>
       <div
-        className="animate-light absolute inset-0 z-[-1]"
+        className="absolute inset-0 z-[-1] animate-light"
         style={{
           backgroundImage:
-            'conic-gradient(from 310deg at 50% 65%,transparent 0deg,transparent 100deg,rgba(0, 180, 255, 0.8) 140deg,rgba(50, 50, 255, 0.8) 184deg,rgba(255, 20, 255, 0.8) 216deg,rgba(250, 0, 55, 1) 300deg,rgba(200, 50, 255, 0.8) 340deg,transparent 1turn)'
+            'conic-gradient(from 310deg at 50% 65%,transparent 0deg,transparent 100deg,rgba(0, 180, 255, 0.8) 140deg,rgba(50, 50, 255, 0.8) 184deg,rgba(255, 20, 255, 0.8) 216deg,rgba(250, 0, 55, 1) 300deg,rgba(200, 50, 255, 0.8) 340deg,transparent 1turn)',
         }}
       />
       <div
-        className="animate-in fade-in absolute inset-0 z-[-1] duration-1000"
+        className="absolute inset-0 z-[-1] duration-1000 animate-in fade-in"
         style={{
           backgroundImage: [
             'radial-gradient(500px at 50% 65%, transparent, hsl(var(--background)))',
-            'repeating-radial-gradient(500px at 50% 65%,hsl(var(--primary)/.2),transparent 5px,hsl(var(--background)/.7) 50px,hsl(var(--background)) 67px,hsl(var(--primary)/.1) 70px)'
-          ].join(', ')
+            'repeating-radial-gradient(500px at 50% 65%,hsl(var(--primary)/.2),transparent 5px,hsl(var(--background)/.7) 50px,hsl(var(--background)) 67px,hsl(var(--primary)/.1) 70px)',
+          ].join(', '),
         }}
       />
     </div>
-  )
+  );
 }

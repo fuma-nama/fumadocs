@@ -9,7 +9,7 @@ for search dialog. It should be located at the root layout.
 ## Usage
 
 ```jsx
-import { RootProvider } from 'next-docs-ui/provider'
+import { RootProvider } from 'next-docs-ui/provider';
 
 export default function Layout({ children }) {
   return (
@@ -18,7 +18,7 @@ export default function Layout({ children }) {
         <RootProvider>{children}</RootProvider>
       </body>
     </html>
-  )
+  );
 }
 ```
 
@@ -30,17 +30,17 @@ You can customize the search dialog from the root provider.
   type={{
     SearchDialog: {
       description: 'Replace the default dialog',
-      type: 'React.FC<SearchDialogProps>'
+      type: 'React.FC<SearchDialogProps>',
     },
     enableThemeProvider: {
       description: 'Wrap the body in ThemeProvider (next-themes)',
       type: 'boolean',
-      default: 'true'
+      default: 'true',
     },
     links: {
       type: '[string, string][]',
-      description: 'Default items to show (Only supported by default dialog)'
-    }
+      description: 'Default items to show (Only supported by default dialog)',
+    },
   }}
 />
 
@@ -49,8 +49,8 @@ You can customize the search dialog from the root provider.
   search={{
     links: [
       ['Home', '/'],
-      ['Docs', '/docs']
-    ]
+      ['Docs', '/docs'],
+    ],
   }}
 >
   ...

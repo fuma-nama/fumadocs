@@ -1,3 +1,3 @@
-'use client'
+'use client';
 
-export { Pre } from '@/components/mdx/pre'
+export { Pre } from '@/components/mdx/pre';

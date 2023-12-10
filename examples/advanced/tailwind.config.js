@@ -1,4 +1,4 @@
-const { docsUi, docsUiPlugins } = require('next-docs-ui/tailwind-plugin')
+const { docsUi, docsUiPlugins } = require('next-docs-ui/tailwind-plugin');
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -6,7 +6,7 @@ module.exports = {
     './components/**/*.{ts,tsx}',
     './app/**/*.{ts,tsx}',
     './content/**/*.mdx',
-    './node_modules/next-docs-ui/dist/**/*.js'
+    './node_modules/next-docs-ui/dist/**/*.js',
   ],
-  plugins: [...docsUiPlugins, docsUi]
-}
+  plugins: [...docsUiPlugins, docsUi],
+};

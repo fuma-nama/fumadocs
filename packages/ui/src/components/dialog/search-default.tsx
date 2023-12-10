@@ -1,39 +1,39 @@
-'use client'
+'use client';
 
-import { SearchDialog, type SharedProps } from './search'
-import { CommandGroup, CommandItem } from '@/components/ui/command'
-import { I18nContext } from '@/contexts/i18n'
-import { ExternalLinkIcon } from 'lucide-react'
-import { useDocsSearch } from 'next-docs-zeta/search/client'
-import { useRouter } from 'next/navigation'
-import { useContext, type ReactNode } from 'react'
+import { ExternalLinkIcon } from 'lucide-react';
+import { useDocsSearch } from 'next-docs-zeta/search/client';
+import { useRouter } from 'next/navigation';
+import { type ReactNode } from 'react';
+import { useI18n } from '@/contexts/i18n';
+import { CommandGroup, CommandItem } from '@/components/ui/command';
+import { SearchDialog, type SharedProps } from './search';
 
 export type DefaultSearchDialogProps = SharedProps & {
   /**
    * Custom links to be displayed if search is empty
    */
-  links?: [name: string, link: string][]
+  links?: [name: string, link: string][];
 
   /**
    * Search tag
    */
-  tag?: string
-  footer?: ReactNode
-}
+  tag?: string;
+  footer?: ReactNode;
+};
 
 export default function DefaultSearchDialog({
   tag,
   links = [],
   ...props
-}: DefaultSearchDialogProps) {
-  const { locale } = useContext(I18nContext)
-  const { search, setSearch, query } = useDocsSearch(locale, tag)
-  const router = useRouter()
+}: DefaultSearchDialogProps): JSX.Element {
+  const { locale } = useI18n();
+  const { search, setSearch, query } = useDocsSearch(locale, tag);
+  const router = useRouter();
 
-  const onSelect = (v: string) => {
-    router.push(v)
-    props.onOpenChange?.(false)
-  }
+  const onSelect = (v: string): void => {
+    router.push(v);
+    props.onOpenChange(false);
+  };
 
   return (
     <SearchDialog
@@ -44,8 +44,8 @@ export default function DefaultSearchDialog({
     >
       {query.data === 'empty' && links.length > 0 && (
         <CommandGroup>
-          {links.map(([name, link], i) => (
-            <CommandItem key={i} value={link} onSelect={onSelect}>
+          {links.map(([name, link]) => (
+            <CommandItem key={link} value={link} onSelect={onSelect}>
               <ExternalLinkIcon />
               {name}
             </CommandItem>
@@ -53,5 +53,5 @@ export default function DefaultSearchDialog({
         </CommandGroup>
       )}
     </SearchDialog>
-  )
+  );
 }

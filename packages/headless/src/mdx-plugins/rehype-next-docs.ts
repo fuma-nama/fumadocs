@@ -1,56 +1,54 @@
-import { flattenNode, visit } from './hast-utils'
-import Slugger from 'github-slugger'
-import type { Element, Root } from 'hast'
+import Slugger from 'github-slugger';
+import type { Element, Root } from 'hast';
 import rehypePrettycode, {
-  type Options as RehypePrettyCodeOptions
-} from 'rehype-pretty-code'
-import type { Transformer } from 'unified'
+  type Options as RehypePrettyCodeOptions,
+} from 'rehype-pretty-code';
+import type { Transformer } from 'unified';
+import { flattenNode, visit } from './hast-utils';
 
-const slugger = new Slugger()
-const headings = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
-const customMetaRegex = /custom="([^"]+)"/
+const slugger = new Slugger();
+const headings = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
+const customMetaRegex = /custom="(?<value>[^"]+)"/;
 
 const rehypePrettyCodeOptions: RehypePrettyCodeOptions = {
   theme: {
     light: 'github-light',
-    dark: 'github-dark'
+    dark: 'github-dark',
   },
   defaultLang: {
-    block: 'text'
+    block: 'text',
   },
   grid: true,
   keepBackground: false,
   filterMetaString(s) {
-    return s.replace(customMetaRegex, '')
-  }
-}
+    return s.replace(customMetaRegex, '');
+  },
+};
 
-export type RehypeNextDocsOptions = {
-  codeOptions?: RehypePrettyCodeOptions
+export interface RehypeNextDocsOptions {
+  codeOptions?: RehypePrettyCodeOptions;
 }
 
 /**
  * Handle codeblocks and heading slugs
  */
 export function rehypeNextDocs({
-  codeOptions
+  codeOptions,
 }: RehypeNextDocsOptions = {}): Transformer<Root, Root> {
-  return async tree => {
-    slugger.reset()
+  return async (tree, vfile, next) => {
+    slugger.reset();
 
-    visit(tree, ['pre', ...headings], node => {
+    visit(tree, ['pre', ...headings], (node) => {
       if (headings.includes(node.tagName)) {
-        node.properties ||= {}
-
         if (!('id' in node.properties)) {
-          node.properties.id = slugger.slug(flattenNode(node))
+          node.properties.id = slugger.slug(flattenNode(node));
         }
 
-        return
+        return;
       }
 
       if (node.tagName === 'pre') {
-        const codeEl = node.children[0] as Element
+        const codeEl = node.children[0] as Element;
 
         // Allow custom code meta
         if (
@@ -58,41 +56,41 @@ export function rehypeNextDocs({
           'meta' in codeEl.data &&
           typeof codeEl.data.meta === 'string'
         ) {
-          // @ts-ignore
-          node.nd_custom = codeEl.data.meta.match(customMetaRegex)?.[1]
+          // @ts-expect-error -- custom properties
+          node.nd_custom = customMetaRegex.exec(codeEl.data.meta)?.[1];
         }
       }
-    })
+    });
 
-    // @ts-ignore
-    await rehypePrettycode({ ...rehypePrettyCodeOptions, ...codeOptions })(tree)
+    const plugin = rehypePrettycode({
+      ...rehypePrettyCodeOptions,
+      ...codeOptions,
+    }) as Transformer<Root, Root>;
 
-    visit(tree, ['figure', 'pre'], node => {
-      node.properties ||= {}
+    await plugin(tree, vfile, next);
 
+    visit(tree, ['figure', 'pre'], (node) => {
       // Remove default fragment element
       // Add title to pre element
       if ('data-rehype-pretty-code-figure' in node.properties) {
         const titleNode = node.children.find(
-          child => child.type === 'element' && child.tagName === 'figcaption'
-        ) as Element | undefined
+          (child) => child.type === 'element' && child.tagName === 'figcaption',
+        ) as Element | undefined;
         const preNode = node.children.find(
-          child => child.type === 'element' && child.tagName === 'pre'
-        ) as Element | undefined
+          (child) => child.type === 'element' && child.tagName === 'pre',
+        ) as Element | undefined;
 
-        if (!preNode) return
+        if (!preNode) return;
 
         if (titleNode) {
-          preNode.properties ||= {}
-          preNode.properties.title = flattenNode(titleNode)
+          preNode.properties.title = flattenNode(titleNode);
         }
 
-        Object.assign(node, preNode)
+        Object.assign(node, preNode);
       }
 
-      // Add custom meta to properties
-      // @ts-ignore
-      node.properties.custom = node.nd_custom
-    })
-  }
+      // @ts-expect-error -- Add custom meta to properties
+      node.properties.custom = node.nd_custom as unknown;
+    });
+  };
 }

@@ -1,20 +1,19 @@
-/* eslint-disable */
-const fs = require('fs')
-const { globSync } = require('fast-glob')
-const path = require('path')
-const pc = require('picocolors')
+const fs = require('node:fs');
+const path = require('node:path');
+const { globSync } = require('fast-glob');
+const pc = require('picocolors');
 
-const sources = ['simple', 'advanced', 'simple-mdx']
+const sources = ['simple', 'advanced', 'simple-mdx'];
 
-const cwd = process.cwd()
+const cwd = process.cwd();
 
 for (const source of sources) {
-  console.log(pc.bgBlue(`Copying ${source}`))
-  console.log(pc.bgRed('Deleting old files'))
+  console.log(pc.bgBlue(`Copying ${source}`));
+  console.log(pc.bgRed('Deleting old files'));
 
-  fs.rmSync(`./templates/${source}`, { recursive: true, force: true })
+  fs.rmSync(`./templates/${source}`, { recursive: true, force: true });
 
-  const sourceDir = path.resolve(cwd, `../../examples/${source}`)
+  const sourceDir = path.resolve(cwd, `../../examples/${source}`);
   const sourceFiles = globSync(
     [
       '**/*',
@@ -22,28 +21,28 @@ for (const source of sources) {
       '!node_modules',
       '!pnpm-lock.yaml',
       '!next-env.d.ts',
-      '!_map.ts'
+      '!_map.ts',
     ],
-    { dot: false, cwd: sourceDir }
-  )
+    { dot: false, cwd: sourceDir },
+  );
 
   Promise.all(
-    sourceFiles.map(async p => {
-      const dirname = path.dirname(p)
-      const basename = path.basename(p)
+    sourceFiles.map(async (p) => {
+      const dirname = path.dirname(p);
+      const basename = path.basename(p);
 
-      const from = path.resolve(sourceDir, p)
+      const from = path.resolve(sourceDir, p);
       const to = path.join(
         path.resolve(cwd, `./templates/${source}`),
         dirname,
-        basename
-      )
+        basename,
+      );
 
-      console.log(p)
+      console.log(p);
       // Ensure the destination directory exists
-      await fs.promises.mkdir(path.dirname(to), { recursive: true })
+      await fs.promises.mkdir(path.dirname(to), { recursive: true });
 
-      return fs.promises.copyFile(from, to)
-    })
-  )
+      return fs.promises.copyFile(from, to);
+    }),
+  );
 }

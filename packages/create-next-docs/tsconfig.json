@@ -1,15 +1,6 @@
 {
+  "extends": "tsconfig/base.json",
   "compilerOptions": {
-    "target": "ES2016",
-    "module": "esnext",
-    "declaration": false,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "strict": true,
-    "skipLibCheck": true,
-    "allowJs": true,
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
     "paths": {
       "@/*": ["./src/*"]
     }

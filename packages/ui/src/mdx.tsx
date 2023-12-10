@@ -1,22 +1,22 @@
-'use client'
+'use client';
 
-import { Pre } from '@/internal/mdx-client'
+import type { HTMLAttributes } from 'react';
+import { Pre } from '@/internal/mdx-client';
 import serverComponents, {
   Card,
   Cards,
-  default_image_sizes,
+  defaultImageSizes,
   Heading,
   Image,
   Link,
   MDXContent,
-  Table
-} from '@/internal/mdx-server'
-import type { HTMLAttributes } from 'react'
+  Table,
+} from '@/internal/mdx-server';
 
 const defaultMdxComponents = {
   pre: (p: HTMLAttributes<HTMLPreElement>) => <Pre {...p} />,
-  ...serverComponents
-}
+  ...serverComponents,
+};
 
 export {
   defaultMdxComponents as default,
@@ -28,5 +28,5 @@ export {
   Link,
   MDXContent,
   Table,
-  default_image_sizes
-}
+  defaultImageSizes,
+};

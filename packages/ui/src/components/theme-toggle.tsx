@@ -1,34 +1,35 @@
-import { cn } from '@/utils/cn'
-import { cva } from 'class-variance-authority'
-import { MoonIcon, SunIcon } from 'lucide-react'
-import { useTheme } from 'next-themes'
-import { useCallback, type ButtonHTMLAttributes } from 'react'
+import { cva } from 'class-variance-authority';
+import { MoonIcon, SunIcon } from 'lucide-react';
+import { useTheme } from 'next-themes';
+import { useCallback, type ButtonHTMLAttributes } from 'react';
+import { cn } from '@/utils/cn';
 
-const buttonVariants = cva('w-7 h-7 p-1.5 rounded-full text-muted-foreground', {
+const buttonVariants = cva('h-7 w-7 rounded-full p-1.5 text-muted-foreground', {
   variants: {
     dark: {
-      true: 'dark:text-accent-foreground dark:bg-accent',
+      true: 'dark:bg-accent dark:text-accent-foreground',
       false:
-        'text-accent-foreground bg-accent dark:text-muted-foreground dark:bg-transparent'
-    }
-  }
-})
+        'bg-accent text-accent-foreground dark:bg-transparent dark:text-muted-foreground',
+    },
+  },
+});
 
 export function ThemeToggle({
   className,
   ...props
-}: ButtonHTMLAttributes<HTMLButtonElement>) {
-  const { setTheme, resolvedTheme } = useTheme()
+}: ButtonHTMLAttributes<HTMLButtonElement>): JSX.Element {
+  const { setTheme, resolvedTheme } = useTheme();
 
   const onToggle = useCallback(() => {
-    setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')
-  }, [setTheme, resolvedTheme])
+    setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
+  }, [setTheme, resolvedTheme]);
 
   return (
     <button
+      type="button"
       className={cn(
         'inline-flex items-center rounded-full border p-0.5',
-        className
+        className,
       )}
       aria-label="Toggle Theme"
       onClick={onToggle}
@@ -37,5 +38,5 @@ export function ThemeToggle({
       <SunIcon className={cn(buttonVariants({ dark: false }))} />
       <MoonIcon className={cn(buttonVariants({ dark: true }))} />
     </button>
-  )
+  );
 }

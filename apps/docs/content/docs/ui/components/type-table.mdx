@@ -11,7 +11,7 @@ preview: type-table
 It accepts a `type` property.
 
 ```mdx
-import { TypeTable } from 'next-docs-ui/components/type-table'
+import { TypeTable } from 'next-docs-ui/components/type-table';
 
 <TypeTable
   type={{
@@ -19,8 +19,8 @@ import { TypeTable } from 'next-docs-ui/components/type-table'
       description:
         'The percentage of scroll position to display the roll button',
       type: 'number',
-      default: 0.2
-    }
+      default: 0.2,
+    },
   }}
 />
 ```
@@ -32,8 +32,8 @@ import { TypeTable } from 'next-docs-ui/components/type-table'
     type: {
       description: 'The type of object',
       type: 'Record<string, ObjectType>',
-      typeDescriptionLink: '#object-type'
-    }
+      typeDescriptionLink: '#object-type',
+    },
   }}
 />
 
@@ -44,17 +44,17 @@ import { TypeTable } from 'next-docs-ui/components/type-table'
     description: {
       type: 'string',
       description: 'Additional description of the field',
-      default: '"-"'
+      default: '"-"',
     },
     type: {
-      type: 'string'
+      type: 'string',
     },
     typeDescription: {
-      type: 'string'
+      type: 'string',
     },
     typeDescriptionLink: {
       type: 'string',
-      description: 'Optional link to the type'
-    }
+      description: 'Optional link to the type',
+    },
   }}
 />

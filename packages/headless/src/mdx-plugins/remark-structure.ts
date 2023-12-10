@@ -1,76 +1,76 @@
-import { flattenNode } from './remark-utils'
-import { visit } from './unist-visit'
-import Slugger from 'github-slugger'
-import type { RootContent as MdastContent, Root } from 'mdast'
-import { remark } from 'remark'
-import remarkGfm from 'remark-gfm'
-import remarkMdx from 'remark-mdx'
-import type { PluggableList, Transformer } from 'unified'
+import Slugger from 'github-slugger';
+import type { RootContent as MdastContent, Root } from 'mdast';
+import { remark } from 'remark';
+import remarkGfm from 'remark-gfm';
+import remarkMdx from 'remark-mdx';
+import type { PluggableList, Transformer } from 'unified';
+import { visit } from './unist-visit';
+import { flattenNode } from './remark-utils';
 
-type Heading = {
-  id: string
-  content: string
+interface Heading {
+  id: string;
+  content: string;
 }
 
-type Content = {
-  heading: string | undefined
-  content: string
+interface Content {
+  heading: string | undefined;
+  content: string;
 }
 
-export type StructuredData = {
-  headings: Heading[]
+export interface StructuredData {
+  headings: Heading[];
   /**
    * Refer to paragraphs, a heading may contains multiple contents as well
    */
-  contents: Content[]
+  contents: Content[];
 }
 
-type Options = {
+interface Options {
   /**
    * Types to be scanned, default: `["heading", "blockquote", "paragraph"]`
    */
-  types?: string[]
+  types?: string[];
 }
 
-const slugger = new Slugger()
+const slugger = new Slugger();
 
 /**
  * Attach structured data to VFile, you can access via `vfile.data.structuredData`.
  */
 export function remarkStructure({
-  types = ['paragraph', 'blockquote', 'heading']
+  types = ['paragraph', 'blockquote', 'heading'],
 }: Options = {}): Transformer<Root, Root> {
   return (node, file) => {
-    slugger.reset()
-    const data: StructuredData = { contents: [], headings: [] }
-    let lastHeading: string | undefined = ''
+    slugger.reset();
+    const data: StructuredData = { contents: [], headings: [] };
+    let lastHeading: string | undefined = '';
 
     visit(node, types, (element: MdastContent) => {
-      const content = flattenNode(element).trim()
+      const content = flattenNode(element).trim();
       if (element.type === 'heading') {
-        const slug = slugger.slug(content)
+        const slug = slugger.slug(content);
 
         data.headings.push({
           id: slug,
-          content
-        })
+          content,
+        });
 
-        lastHeading = slug
-        return 'skip'
+        lastHeading = slug;
+        return 'skip';
       }
 
       if (content.length > 0) {
         data.contents.push({
           heading: lastHeading,
-          content
-        })
+          content,
+        });
       }
 
-      return 'skip'
-    })
+      return 'skip';
+    });
 
-    file.data.structuredData = data
-  }
+    file.data.structuredData = data;
+  };
 }
 
 /**
@@ -79,14 +79,14 @@ export function remarkStructure({
 export function structure(
   content: string,
   remarkPlugins: PluggableList = [],
-  options: Options = {}
+  options: Options = {},
 ): StructuredData {
   const result = remark()
     .use(remarkGfm)
     .use(remarkMdx)
     .use(remarkPlugins)
     .use(remarkStructure, options)
-    .processSync(content)
+    .processSync(content);
 
-  return result.data.structuredData as StructuredData
+  return result.data.structuredData as StructuredData;
 }

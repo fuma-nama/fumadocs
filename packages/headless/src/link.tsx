@@ -1,5 +1,5 @@
-import Original from 'next/link'
-import type { AnchorHTMLAttributes } from 'react'
+import Original from 'next/link';
+import type { AnchorHTMLAttributes } from 'react';
 
 export type LinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
   /**
@@ -7,8 +7,8 @@ export type LinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
    *
    * automatically determined by default
    */
-  external?: boolean
-}
+  external?: boolean;
+};
 
 /**
  * Wraps `next/link` and safe to use in mdx documents
@@ -21,14 +21,16 @@ function Link({
     href.startsWith('.')
   ),
   ...props
-}: LinkProps) {
+}: LinkProps): JSX.Element {
   if (external) {
     return (
-      <a href={href} rel="noreferrer noopener" target="_blank" {...props} />
-    )
+      <a href={href} rel="noreferrer noopener" target="_blank" {...props}>
+        {props.children}
+      </a>
+    );
   }
 
-  return <Original href={href} {...props} />
+  return <Original href={href} {...props} />;
 }
 
 export {
@@ -37,5 +39,5 @@ export {
    * Legacy exports
    */
   Link as SafeLink,
-  type LinkProps as SafeLinkProps
-}
+  type LinkProps as SafeLinkProps,
+};

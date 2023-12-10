@@ -1,20 +1,20 @@
-import type { PageTree, TreeNode } from '@/server/types'
-import { useMemo } from 'react'
+import { useMemo } from 'react';
+import type { PageTree, TreeNode } from '@/server/types';
 
-export type BreadcrumbItem = {
-  name: string
-  url: string | null
+export interface BreadcrumbItem {
+  name: string;
+  url: string | null;
 }
 
 export function useBreadcrumb(url: string, tree: PageTree): BreadcrumbItem[] {
-  return useMemo(() => getBreadcrumbItems(url, tree), [tree, url])
+  return useMemo(() => getBreadcrumbItems(url, tree), [tree, url]);
 }
 
 export function getBreadcrumbItems(
   url: string,
-  tree: PageTree
+  tree: PageTree,
 ): BreadcrumbItem[] {
-  return searchPath(tree.children, url) ?? []
+  return searchPath(tree.children, url) ?? [];
 }
 
 /**
@@ -26,28 +26,26 @@ export function getBreadcrumbItems(
  * @returns The path to the target node from root
  */
 function searchPath(nodes: TreeNode[], url: string): BreadcrumbItem[] | null {
-  for (let i = 0; i < nodes.length; i++) {
-    const node = nodes[i]
-
+  for (const node of nodes) {
     if (node.type === 'folder') {
       if (node.index && node.index.url === url) {
         return [
           {
             name: node.index.name,
-            url: node.index.url
-          }
-        ]
+            url: node.index.url,
+          },
+        ];
       }
 
-      const items = searchPath(node.children, url)
+      const items = searchPath(node.children, url);
 
-      if (items != null) {
+      if (items !== null) {
         items.unshift({
           name: node.name,
-          url: node.index?.url ?? null
-        })
+          url: node.index?.url ?? null,
+        });
 
-        return items
+        return items;
       }
     }
 
@@ -55,11 +53,11 @@ function searchPath(nodes: TreeNode[], url: string): BreadcrumbItem[] | null {
       return [
         {
           name: node.name,
-          url: node.url
-        }
-      ]
+          url: node.url,
+        },
+      ];
     }
   }
 
-  return null
+  return null;
 }

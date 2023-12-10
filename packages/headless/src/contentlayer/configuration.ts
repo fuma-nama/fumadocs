@@ -5,71 +5,73 @@
  *
  * Warning: Shouldn't be imported in Next.js, this can cause problem. Put it in contentlayer.config.ts only
  */
-import { rehypeImgSize, rehypeNextDocs, remarkGfm } from '@/mdx-plugins'
-import type { RehypeNextDocsOptions } from '@/mdx-plugins/rehype-next-docs'
-import { createGetUrl } from '@/server/utils'
 import type {
   Args,
   ComputedFields,
   FieldDef,
-  LocalDocument
-} from 'contentlayer/source-files'
-import { defineDocumentType } from 'contentlayer/source-files'
-import type { Options as ImgSizeOptions } from 'rehype-img-size'
+  LocalDocument,
+} from 'contentlayer/source-files';
+import { defineDocumentType } from 'contentlayer/source-files';
+import type { Options as ImgSizeOptions } from 'rehype-img-size';
+import { rehypeImgSize, rehypeNextDocs, remarkGfm } from '@/mdx-plugins';
+import type { RehypeNextDocsOptions } from '@/mdx-plugins/rehype-next-docs';
+import { createGetUrl } from '@/server/utils';
 
 function removeSlash(path: string): string {
   let start = 0,
-    end = path.length
-  while (path.charAt(start) == '/') start++
-  while (path.charAt(end - 1) == '/' && end > start) end--
+    end = path.length;
+  while (path.charAt(start) === '/') start++;
+  while (path.charAt(end - 1) === '/' && end > start) end--;
 
-  return path.slice(start, end)
+  return path.slice(start, end);
 }
 
 function removePattern(path: string, pattern: string): string {
+  let flattenedPath = path;
+
   if (path.endsWith('/index') || path === 'index') {
-    path = path.slice(0, path.length - 'index'.length)
+    flattenedPath = path.slice(0, path.length - 'index'.length);
   }
 
-  if (!path.startsWith(pattern)) {
-    return path
+  if (!flattenedPath.startsWith(pattern)) {
+    return flattenedPath;
   }
 
-  return removeSlash(path.slice(pattern.length))
+  return removeSlash(flattenedPath.slice(pattern.length));
 }
 
 export type Options = Partial<{
   /**
    * Where the docs files located
-   * @default "docs"
+   * @defaultValue "docs"
    */
-  docsPattern: string
+  docsPattern: string;
 
   /**
-   * @default "content"
+   * @defaultValue "content"
    */
-  contentDirPath: string
+  contentDirPath: string;
 
   /**
    * The directory path for images
-   * @default "./public"
+   * @defaultValue "./public"
    */
-  imgDirPath: string
+  imgDirPath: string;
 
-  baseUrl: string
+  baseUrl: string;
 
   /**
    * Get url from slugs and locale, override the default getUrl function
    */
-  getUrl: (slugs: string[], locale?: string) => string
+  getUrl: (slugs: string[], locale?: string) => string;
 
-  pluginOptions: RehypeNextDocsOptions
+  pluginOptions: RehypeNextDocsOptions;
 
-  docFields: Record<string, FieldDef>
-  docsComputedFields: ComputedFields<'Docs'>
-  metaFields: Record<string, FieldDef>
-  metaComputedFields: ComputedFields<'Meta'>
-}>
+  docFields: Record<string, FieldDef>;
+  docsComputedFields: ComputedFields<'Docs'>;
+  metaFields: Record<string, FieldDef>;
+  metaComputedFields: ComputedFields<'Meta'>;
+}>;
 
 export function createConfig(options: Options = {}): Args {
   const {
@@ -82,15 +84,15 @@ export function createConfig(options: Options = {}): Args {
     getUrl = createGetUrl(baseUrl),
     docsComputedFields,
     pluginOptions,
-    metaComputedFields
-  } = options
+    metaComputedFields,
+  } = options;
 
   function getSlugs(doc: LocalDocument): string {
-    return removePattern(doc._raw.flattenedPath.split('.')[0], docsPattern)
+    return removePattern(doc._raw.flattenedPath.split('.')[0], docsPattern);
   }
 
   function getLocale(doc: LocalDocument): string {
-    return doc._raw.flattenedPath.split('.')[1]
+    return doc._raw.flattenedPath.split('.')[1];
   }
 
   const Docs = defineDocumentType(() => ({
@@ -101,37 +103,37 @@ export function createConfig(options: Options = {}): Args {
       title: {
         type: 'string',
         description: 'The title of the document',
-        required: true
+        required: true,
       },
       description: {
         type: 'string',
         description: 'The description of the document',
-        required: false
+        required: false,
       },
       icon: {
         type: 'string',
-        required: false
+        required: false,
       },
-      ...docFields
+      ...docFields,
     },
     computedFields: {
       locale: {
         type: 'string',
-        resolve: post => getLocale(post)
+        resolve: (post) => getLocale(post),
       },
       slug: {
         type: 'string',
-        resolve: post => getSlugs(post)
+        resolve: (post) => getSlugs(post),
       },
       url: {
         type: 'string',
-        resolve: post => {
-          return getUrl(getSlugs(post).split('/'), getLocale(post))
-        }
+        resolve: (post) => {
+          return getUrl(getSlugs(post).split('/'), getLocale(post));
+        },
       },
-      ...docsComputedFields
-    }
-  }))
+      ...docsComputedFields,
+    },
+  }));
 
   const Meta = defineDocumentType(() => ({
     name: 'Meta',
@@ -141,30 +143,30 @@ export function createConfig(options: Options = {}): Args {
       title: {
         type: 'string',
         description: 'The title of the folder',
-        required: false
+        required: false,
       },
       pages: {
         type: 'list',
         of: {
-          type: 'string'
+          type: 'string',
         },
         description: 'Pages of the folder',
-        default: []
+        default: [],
       },
       icon: {
         type: 'string',
-        required: false
+        required: false,
       },
-      ...metaFields
+      ...metaFields,
     },
     computedFields: {
       slug: {
         type: 'string',
-        resolve: post => removePattern(post._raw.sourceFileDir, docsPattern)
+        resolve: (post) => removePattern(post._raw.sourceFileDir, docsPattern),
       },
-      ...metaComputedFields
-    }
-  }))
+      ...metaComputedFields,
+    },
+  }));
 
   return {
     contentDirPath,
@@ -173,16 +175,16 @@ export function createConfig(options: Options = {}): Args {
       rehypePlugins: [
         [rehypeNextDocs, pluginOptions],
         [
-          // @ts-ignore
+          // @ts-expect-error -- invalid options type
           rehypeImgSize,
           {
-            dir: imgDirPath
-          } as ImgSizeOptions
-        ]
+            dir: imgDirPath,
+          } as ImgSizeOptions,
+        ],
       ],
-      remarkPlugins: [remarkGfm]
-    }
-  }
+      remarkPlugins: [remarkGfm],
+    },
+  };
 }
 
-export const defaultConfig: Args = createConfig()
+export const defaultConfig: Args = createConfig();

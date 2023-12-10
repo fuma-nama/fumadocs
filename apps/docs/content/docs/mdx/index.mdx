@@ -26,16 +26,16 @@ next-docs-mdx @next/mdx @mdx-js/loader @mdx-js/react @types/mdx
 Add this to your `next.config.mjs` file:
 
 ```js
-import createNextDocsMDX from 'next-docs-mdx/config'
+import createNextDocsMDX from 'next-docs-mdx/config';
 
-const withFumaMDX = createNextDocsMDX()
+const withFumaMDX = createNextDocsMDX();
 
 /** @type {import('next').NextConfig} */
 const config = {
-  reactStrictMode: true
-}
+  reactStrictMode: true,
+};
 
-export default withFumaMDX(config)
+export default withFumaMDX(config);
 ```
 
 <Callout title="Be Careful" type='warn' className="mt-4">
@@ -49,15 +49,15 @@ The Next.js config must be a `.mjs` file since it requires ESM-only modules.
 Create `mdx-components.tsx` in your root directory.
 
 ```tsx
-import type { MDXComponents } from 'mdx/types'
+import type { MDXComponents } from 'mdx/types';
 // Assume you're using Next Docs UI
-import defaultComponents from 'next-docs-ui/mdx-server'
+import defaultComponents from 'next-docs-ui/mdx-server';
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
     ...defaultComponents,
-    ...components
-  }
+    ...components,
+  };
 }
 ```
 
@@ -70,10 +70,10 @@ Read [Pages Conventions](/docs/headless/utils/build-page-tree#pages-structure)
 to learn how to structure your pages.
 
 ```ts title="source.ts"
-import { map } from '@/_map'
-import { fromMap } from 'next-docs-mdx/map'
+import { map } from '@/_map';
+import { fromMap } from 'next-docs-mdx/map';
 
-export const { getPage, getPageUrl, pages, tree } = fromMap(map)
+export const { getPage, getPageUrl, pages, tree } = fromMap(map);
 ```
 
 > The `@/_map` file will be generated automatically
@@ -105,9 +105,9 @@ You can customise the options passed to `@next/mdx`.
 const withNextDocs = createNextDocs({
   mdxOptions: {
     remarkPlugins: [remarkMath],
-    rehypePlugins: [rehypeKatex]
-  }
-})
+    rehypePlugins: [rehypeKatex],
+  },
+});
 ```
 
 ### Export Properties from `vfile.data`
@@ -117,6 +117,6 @@ default, you can pass the property names via `dataExports`.
 
 ```js
 const withNextDocs = createNextDocs({
-  dataExports: ['data']
-})
+  dataExports: ['data'],
+});
 ```

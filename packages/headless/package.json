@@ -1,15 +1,16 @@
 {
   "name": "next-docs-zeta",
-  "description": "The library for building a documentation website in Next.js",
   "version": "5.0.0",
-  "homepage": "https://next-docs-zeta.vercel.app",
-  "author": "Fuma Nama",
-  "repository": "github:fuma-nama/next-docs",
-  "type": "module",
-  "license": "MIT",
-  "files": [
-    "dist/*"
+  "description": "The library for building a documentation website in Next.js",
+  "keywords": [
+    "NextJs",
+    "Docs"
   ],
+  "homepage": "https://next-docs-zeta.vercel.app",
+  "repository": "github:fuma-nama/next-docs",
+  "license": "MIT",
+  "author": "Fuma Nama",
+  "type": "module",
   "exports": {
     "./sidebar": {
       "import": "./dist/sidebar.js",
@@ -110,11 +111,14 @@
       ]
     }
   },
+  "files": [
+    "dist/*"
+  ],
   "scripts": {
     "build": "tsup",
     "clean": "rmdir /q/s dist",
     "dev": "tsup --watch",
-    "prepublishOnly": "pnpm build",
+    "lint": "eslint .",
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
@@ -133,30 +137,28 @@
     "swr": "^2.2.2",
     "unist-util-visit": "^4.1.2"
   },
+  "devDependencies": {
+    "@algolia/client-search": "^4.20.0",
+    "@next/eslint-plugin-next": "^14.0.0",
+    "@types/flexsearch": "0.7.6",
+    "@types/hast": "^3.0.3",
+    "@types/mdast": "^4.0.3",
+    "@types/negotiator": "^0.6.1",
+    "@types/node": "18.17.5",
+    "@types/react": "18.2.0",
+    "@types/react-dom": "18.2.1",
+    "algoliasearch": "^4.20.0",
+    "contentlayer": "^0.3.4",
+    "eslint-config-custom": "workspace:*",
+    "next": "14.0.4",
+    "tsconfig": "workspace:*",
+    "unified": "^11.0.4"
+  },
   "peerDependencies": {
     "next": ">= 13.4",
     "react": ">= 18",
     "react-dom": ">= 18"
   },
-  "devDependencies": {
-    "internal-config": "workspace:*",
-    "@algolia/client-search": "^4.20.0",
-    "@types/flexsearch": "0.7.6",
-    "@types/hast": "^3.0.3",
-    "@types/mdast": "^4.0.3",
-    "@types/negotiator": "^0.6.1",
-    "@types/react": "18.2.0",
-    "@types/react-dom": "18.2.1",
-    "algoliasearch": "^4.20.0",
-    "contentlayer": "^0.3.4",
-    "next": "14.0.4",
-    "unified": "^11.0.4",
-    "@types/node": "18.17.5"
-  },
-  "keywords": [
-    "NextJs",
-    "Docs"
-  ],
   "publishConfig": {
     "access": "public"
   }

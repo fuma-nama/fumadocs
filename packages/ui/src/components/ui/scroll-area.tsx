@@ -1,7 +1,6 @@
-/** Generated with Shadcn UI */
-import { cn } from '@/utils/cn'
-import * as ScrollAreaPrimitive from '@radix-ui/react-scroll-area'
-import * as React from 'react'
+import * as ScrollAreaPrimitive from '@radix-ui/react-scroll-area';
+import * as React from 'react';
+import { cn } from '@/utils/cn';
 
 const ScrollArea = React.forwardRef<
   React.ElementRef<typeof ScrollAreaPrimitive.Root>,
@@ -19,8 +18,8 @@ const ScrollArea = React.forwardRef<
     <ScrollBar orientation="horizontal" />
     <ScrollBar orientation="vertical" />
   </ScrollAreaPrimitive.Root>
-))
-ScrollArea.displayName = ScrollAreaPrimitive.Root.displayName
+));
+ScrollArea.displayName = ScrollAreaPrimitive.Root.displayName;
 
 const ScrollBar = React.forwardRef<
   React.ElementRef<typeof ScrollAreaPrimitive.Scrollbar>,
@@ -30,16 +29,16 @@ const ScrollBar = React.forwardRef<
     ref={ref}
     orientation={orientation}
     className={cn(
-      'data-[state=hidden]:animate-out data-[state=hidden]:fade-out flex select-none',
+      'flex select-none data-[state=hidden]:animate-out data-[state=hidden]:fade-out',
       orientation === 'vertical' && 'h-full w-1.5',
       orientation === 'horizontal' && 'h-1.5 flex-col',
-      className
+      className,
     )}
     {...props}
   >
-    <ScrollAreaPrimitive.ScrollAreaThumb className="bg-border relative flex-1 rounded-full" />
+    <ScrollAreaPrimitive.ScrollAreaThumb className="relative flex-1 rounded-full bg-border" />
   </ScrollAreaPrimitive.Scrollbar>
-))
-ScrollBar.displayName = ScrollAreaPrimitive.Scrollbar.displayName
+));
+ScrollBar.displayName = ScrollAreaPrimitive.Scrollbar.displayName;
 
-export { ScrollArea }
+export { ScrollArea };

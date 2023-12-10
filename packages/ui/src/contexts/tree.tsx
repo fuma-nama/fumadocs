@@ -1,23 +1,23 @@
-import type { PageTree } from 'next-docs-zeta/server'
-import { createContext, type ReactNode } from 'react'
+import type { PageTree } from 'next-docs-zeta/server';
+import { createContext, type ReactNode } from 'react';
 
-type LayoutContextObject = {
-  tree: PageTree
-  sidebarDefaultOpenLevel?: number
+interface LayoutContextObject {
+  tree: PageTree;
+  sidebarDefaultOpenLevel?: number;
 }
 
 export const LayoutContext = createContext<LayoutContextObject>({
-  tree: { name: 'Docs', children: [] }
-})
+  tree: { name: 'Docs', children: [] },
+});
 
 export function LayoutContextProvider({
   value,
-  children
+  children,
 }: {
-  value: LayoutContextObject
-  children: ReactNode
-}) {
+  value: LayoutContextObject;
+  children: ReactNode;
+}): JSX.Element {
   return (
     <LayoutContext.Provider value={value}>{children}</LayoutContext.Provider>
-  )
+  );
 }

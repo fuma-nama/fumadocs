@@ -1,32 +1,52 @@
-'use client'
+'use client';
 
-import * as Primitive from './ui/tabs'
-import type { TabsContentProps } from '@radix-ui/react-tabs'
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import type { TabsContentProps } from '@radix-ui/react-tabs';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import * as Primitive from './ui/tabs';
 
-export * as Primitive from './ui/tabs'
+export * as Primitive from './ui/tabs';
 
-type ListenerObject = () => void
-const valueMap = new Map<string, string>()
-const listeners: Map<string, Set<ListenerObject>> = new Map()
+type ListenerObject = () => void;
+const valueMap = new Map<string, string>();
+const listeners = new Map<string, Set<ListenerObject>>();
 
-function add(id: string, listener: ListenerObject) {
+function add(id: string, listener: ListenerObject): void {
   if (listeners.has(id)) {
-    listeners.get(id)!.add(listener)
+    listeners.get(id)?.add(listener);
   } else {
-    listeners.set(id, new Set([listener]))
+    listeners.set(id, new Set([listener]));
   }
 }
 
-function remove(id: string, listener: ListenerObject) {
-  listeners.get(id)?.delete(listener)
+function remove(id: string, listener: ListenerObject): void {
+  listeners.get(id)?.delete(listener);
 }
 
-function update(id: string, v: string, persist: boolean) {
-  valueMap.set(id, v)
-  listeners.get(id)?.forEach(item => item())
+function update(id: string, v: string, persist: boolean): void {
+  valueMap.set(id, v);
+  listeners.get(id)?.forEach((item) => {
+    item();
+  });
 
-  if (persist) localStorage.setItem(id, v)
+  if (persist) localStorage.setItem(id, v);
+}
+
+export interface TabsProps {
+  /**
+   * Identifier for Sharing value of tabs
+   */
+  id?: string;
+  /**
+   * Enable persistent
+   */
+  persist?: boolean;
+  /**
+   * @defaultValue 0
+   */
+  defaultIndex?: number;
+
+  items?: string[];
+  children: ReactNode;
 }
 
 export function Tabs({
@@ -34,54 +54,40 @@ export function Tabs({
   items = [],
   persist = false,
   defaultIndex = 0,
-  children
-}: {
-  /**
-   * Identifier for Sharing value of tabs
-   */
-  id?: string
-  /**
-   * Enable persistent
-   */
-  persist?: boolean
-  /**
-   * @default 0
-   */
-  defaultIndex?: number
-
-  items?: string[]
-  children: ReactNode
-}) {
-  const values = useMemo(() => items.map(item => toValue(item)), [items])
-  const [value, setValue] = useState(values[defaultIndex])
+  children,
+}: TabsProps): JSX.Element {
+  const values = useMemo(() => items.map((item) => toValue(item)), [items]);
+  const [value, setValue] = useState(values[defaultIndex]);
 
   useEffect(() => {
-    if (!id) return
+    if (!id) return;
 
-    const onUpdate = () => {
-      const current = valueMap.get(id)
+    const onUpdate = (): void => {
+      const current = valueMap.get(id);
       // Only if item exists
-      if (current != null && values.includes(current)) setValue(current)
-    }
+      if (current && values.includes(current)) setValue(current);
+    };
 
     if (persist) {
-      const previous = localStorage.getItem(id)
+      const previous = localStorage.getItem(id);
 
-      if (previous) update(id, previous, persist)
+      if (previous) update(id, previous, persist);
     }
 
-    add(id, onUpdate)
-    onUpdate()
-    return () => remove(id, onUpdate)
-  }, [])
+    add(id, onUpdate);
+    onUpdate();
+    return () => {
+      remove(id, onUpdate);
+    };
+  }, [id, persist, values]);
 
-  const onValueChange = (value: string) => {
+  const onValueChange = (v: string): void => {
     if (id) {
-      update(id, value, persist)
+      update(id, v, persist);
     } else {
-      setValue(value)
+      setValue(v);
     }
-  }
+  };
 
   return (
     <Primitive.Tabs value={value} onValueChange={onValueChange}>
@@ -94,13 +100,13 @@ export function Tabs({
       </Primitive.TabsList>
       {children}
     </Primitive.Tabs>
-  )
+  );
 }
 
-function toValue(v: string) {
-  return v.toLowerCase().replace(/\s/, '-')
+function toValue(v: string): string {
+  return v.toLowerCase().replace(/\s/, '-');
 }
 
-export function Tab(props: TabsContentProps) {
-  return <Primitive.TabsContent {...props} value={toValue(props.value)} />
+export function Tab(props: TabsContentProps): JSX.Element {
+  return <Primitive.TabsContent {...props} value={toValue(props.value)} />;
 }

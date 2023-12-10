@@ -12,10 +12,10 @@ The default Navbar component with a sidebar toggle and search dialog trigger.
 ## Usage
 
 ```tsx
-import { Nav as OriginalNav } from 'next-docs-ui/nav'
+import { Nav as OriginalNav } from 'next-docs-ui/nav';
 
 export function Nav() {
-  return <OriginalNav title="Next Docs" />
+  return <OriginalNav title="Next Docs" />;
 }
 ```
 
@@ -26,12 +26,12 @@ export function Nav() {
     transparent: {
       type: 'boolean',
       description: 'Use transparent background',
-      default: 'false'
+      default: 'false',
     },
     items: { type: 'NavItemProps[]' },
     links: { type: 'NavLinkProps[]' },
     enableSidebar: { type: 'boolean' },
-    collapsibleSidebar: { type: 'boolean' }
+    collapsibleSidebar: { type: 'boolean' },
   }}
 />
 
@@ -56,9 +56,9 @@ const links = [
   {
     children: 'Documentation',
     href: '/docs',
-    external: false
-  }
-]
+    external: false,
+  },
+];
 ```
 
 ### Links
@@ -72,7 +72,7 @@ const links = [
     label: 'Github',
     icon: <GithubIcon className="h-5 w-5" />,
     href: 'https://github.com/fuma-nama/next-docs',
-    external: true
-  }
-]
+    external: true,
+  },
+];
 ```

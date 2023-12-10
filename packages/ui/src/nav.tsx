@@ -1,2 +1,2 @@
-'use client'
-export * from './components/nav'
+'use client';
+export * from './components/nav';

@@ -1,78 +1,78 @@
-import type { LoaderOptions } from './loader'
-import remarkMdxExport from './mdx-plugins/remark-exports'
-import { NextDocsWebpackPlugin } from './webpack-plugins/next-docs'
-import type { ProcessorOptions } from '@mdx-js/mdx'
-import type { NextConfig } from 'next'
+import path from 'node:path';
+import type { ProcessorOptions } from '@mdx-js/mdx';
+import type { NextConfig } from 'next';
 import {
   rehypeNextDocs,
   remarkGfm,
   remarkStructure,
   remarkToc,
-  type RehypeNextDocsOptions
-} from 'next-docs-zeta/mdx-plugins'
-import path from 'path'
-import type { PluggableList } from 'unified'
-import type { Configuration } from 'webpack'
+  type RehypeNextDocsOptions,
+} from 'next-docs-zeta/mdx-plugins';
+import type { PluggableList } from 'unified';
+import type { Configuration } from 'webpack';
+import { NextDocsWebpackPlugin } from './webpack-plugins/next-docs';
+import remarkMdxExport from './mdx-plugins/remark-exports';
+import type { LoaderOptions } from './loader';
 
-type WithMDX = (config: NextConfig) => NextConfig
-type Loader = (options: ProcessorOptions) => WithMDX
+type WithMDX = (config: NextConfig) => NextConfig;
+type Loader = (options: ProcessorOptions) => WithMDX;
 
 type MDXOptions = Omit<
   NonNullable<ProcessorOptions>,
   'rehypePlugins' | 'remarkPlugins'
 > & {
-  rehypePlugins?: ResolvePlugins
-  remarkPlugins?: ResolvePlugins
+  rehypePlugins?: ResolvePlugins;
+  remarkPlugins?: ResolvePlugins;
 
   /**
    * Properties to export from `vfile.data`
    */
-  valueToExport?: string[]
+  valueToExport?: string[];
 
   /**
    * built-in `next-docs-zeta` rehype plugin options
    */
-  rehypeNextDocsOptions?: RehypeNextDocsOptions
-}
+  rehypeNextDocsOptions?: RehypeNextDocsOptions;
+};
 
-type ResolvePlugins = PluggableList | ((v: PluggableList) => PluggableList)
+type ResolvePlugins = PluggableList | ((v: PluggableList) => PluggableList);
 
-type NextDocsMDXOptions = {
-  cwd?: string
+interface NextDocsMDXOptions {
+  cwd?: string;
 
-  mdxOptions?: MDXOptions
+  mdxOptions?: MDXOptions;
 
   /**
    * Custom MDX loader
    */
-  loader?: Loader
+  loader?: Loader;
 
   /**
    * Where the root `_map.ts` should be, relative to cwd
    *
-   * @default './_map.ts'
+   * @defaultValue `'./_map.ts'`
    */
-  rootMapPath?: string
+  rootMapPath?: string;
 
   /**
    * Where the content directory should be, relative to cwd
    *
-   * @default './content'
+   * @defaultValue `'./content'`
    */
-  rootContentPath?: string
+  rootContentPath?: string;
 }
 
 function pluginOption(
   def: (v: PluggableList) => PluggableList,
-  options: ResolvePlugins = []
+  options: ResolvePlugins = [],
 ): PluggableList {
-  const list = def(Array.isArray(options) ? options : [])
+  const list = def(Array.isArray(options) ? options : []);
 
   if (typeof options === 'function') {
-    return options(list)
+    return options(list);
   }
 
-  return list
+  return list;
 }
 
 const createNextDocs =
@@ -80,76 +80,88 @@ const createNextDocs =
     mdxOptions = {},
     cwd = process.cwd(),
     rootMapPath = './_map.ts',
-    rootContentPath = './content'
+    rootContentPath = './content',
   }: NextDocsMDXOptions = {}) =>
   (nextConfig: NextConfig = {}) => {
     const valueToExport = [
       'structuredData',
       'toc',
-      ...(mdxOptions.valueToExport ?? [])
-    ]
-    const _mapPath = path.resolve(cwd, rootMapPath)
+      ...(mdxOptions.valueToExport ?? []),
+    ];
+    const _mapPath = path.resolve(cwd, rootMapPath);
 
     const remarkPlugins = pluginOption(
-      v => [
+      (v) => [
         remarkGfm,
         remarkStructure,
         remarkToc,
         ...v,
-        [remarkMdxExport, { values: valueToExport }]
+        [remarkMdxExport, { values: valueToExport }],
       ],
-      mdxOptions.remarkPlugins
-    )
+      mdxOptions.remarkPlugins,
+    );
 
     const rehypePlugins: PluggableList = pluginOption(
-      v => [[rehypeNextDocs, mdxOptions.rehypeNextDocsOptions], ...v],
-      mdxOptions.rehypePlugins
-    )
+      (v) => [[rehypeNextDocs, mdxOptions.rehypeNextDocsOptions], ...v],
+      mdxOptions.rehypePlugins,
+    );
 
-    return Object.assign({}, nextConfig, {
-      webpack: (config: Configuration, options) => {
-        const alias = config.resolve!.alias as Record<string, unknown>
-        alias['next-mdx-import-source-file'] = [
-          'private-next-root-dir/src/mdx-components',
-          'private-next-root-dir/mdx-components',
-          '@mdx-js/react'
-        ]
+    return {
+      ...nextConfig,
+      ...({
+        webpack: (config: Configuration, options) => {
+          config.resolve ||= {};
 
-        config.module!.rules!.push(
-          {
-            test: /\.mdx?$/,
-            use: [
-              options.defaultLoaders.babel,
-              {
-                loader: 'next-docs-mdx/loader-mdx',
+          const alias = config.resolve.alias as Record<string, unknown>;
+
+          alias['next-mdx-import-source-file'] = [
+            'private-next-root-dir/src/mdx-components',
+            'private-next-root-dir/mdx-components',
+            '@mdx-js/react',
+          ];
+
+          config.module ||= {};
+          config.module.rules ||= [];
+
+          config.module.rules.push(
+            {
+              test: /\.mdx?$/,
+              use: [
+                options.defaultLoaders.babel,
+                {
+                  loader: 'next-docs-mdx/loader-mdx',
+                  options: {
+                    providerImportSource: 'next-mdx-import-source-file',
+                    ...mdxOptions,
+                    remarkPlugins,
+                    rehypePlugins,
+                  },
+                },
+              ],
+            },
+            {
+              test: _mapPath,
+              use: {
+                loader: 'next-docs-mdx/loader',
                 options: {
-                  providerImportSource: 'next-mdx-import-source-file',
-                  ...mdxOptions,
-                  remarkPlugins,
-                  rehypePlugins
-                }
-              }
-            ]
-          },
-          {
-            test: _mapPath,
-            use: {
-              loader: 'next-docs-mdx/loader',
-              options: {
-                cwd,
-                rootContentPath
-              } satisfies LoaderOptions
-            }
-          }
-        )
+                  cwd,
+                  rootContentPath,
+                } satisfies LoaderOptions,
+              },
+            },
+          );
 
-        config.plugins!.push(
-          new NextDocsWebpackPlugin({ rootMapFile: _mapPath })
-        )
+          config.plugins ||= [];
 
-        return nextConfig.webpack?.(config, options) ?? config
-      }
-    } satisfies NextConfig)
-  }
+          config.plugins.push(
+            new NextDocsWebpackPlugin({ rootMapFile: _mapPath }),
+          );
 
-export { createNextDocs as default }
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return -- not provided
+          return nextConfig.webpack?.(config, options) ?? config;
+        },
+      } satisfies NextConfig),
+    };
+  };
+
+export { createNextDocs as default };
