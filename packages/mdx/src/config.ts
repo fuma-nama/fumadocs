@@ -146,6 +146,7 @@ const createNextDocs =
                 options: {
                   cwd,
                   rootContentPath,
+                  mapPath: _mapPath,
                 } satisfies LoaderOptions,
               },
             },
