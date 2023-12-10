@@ -63,7 +63,7 @@ export default async function Page({
           <h1 className="mb-4 text-3xl font-semibold text-foreground sm:text-4xl">
             {page.matter.title}
           </h1>
-          <p className="text-muted-foreground sm:text-lg">
+          <p className="text-lg text-muted-foreground">
             {page.matter.description}
           </p>
         </div>

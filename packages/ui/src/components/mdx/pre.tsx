@@ -90,7 +90,7 @@ function CopyButton({
       type="button"
       className={cn(
         'inline-flex rounded-md bg-muted p-2 text-secondary-foreground transition-opacity group-hover:opacity-100',
-        checked && 'opacity-0',
+        !checked && 'opacity-0',
         className,
       )}
       aria-label="Copy Text"
