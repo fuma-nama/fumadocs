@@ -13,13 +13,17 @@ Pass table of contents to the component.
 ```mdx
 import { DocsPage } from 'next-docs-ui/page';
 
-<DocsPage toc={toc}>
+<DocsPage url={url} toc={toc}>
   <MDXContent>...</MDXContent>
 </DocsPage>
 ```
 
 <TypeTable
   type={{
+    url: {
+      type: 'string',
+      description: 'The URL of current page',
+    },
     tableOfContent: {
       type: 'object',
       typeDescriptionLink: '#table-of-contents',
@@ -42,8 +46,6 @@ import { DocsPage } from 'next-docs-ui/page';
     },
   }}
 />
-
-<Callout title="Note">Footer is not enabled by default.</Callout>
 
 ### Table of Contents
 
@@ -91,11 +93,9 @@ const time = await getGitLastEditTime(
 
 ### Footer
 
-You need to manually enable it by passing the previous and next page to the
-`footer` prop.
+Footer is a navigation element that has two buttons to jump to the next and previous pages. By default, it uses the [`findNeighbour`](/docs/headless/utils/find-neighbour) utility to find neighbour pages.
 
-To obtain these pages, it's recommended to use the
-[Get Neighbours](/docs/headless/utils/find-neighbour) Utility.
+You may override or disable it by passing `false`.
 
 <TypeTable
   type={{
@@ -109,16 +109,6 @@ To obtain these pages, it's recommended to use the
     },
   }}
 />
-
-#### Example
-
-```tsx
-import { findNeighbour } from 'next-docs-zeta/server'
-
-const neighbours = findNeighbour(tree, page.url)
-
-<DocsPage footer={neighbours} />
-```
 
 ### Breadcrumb
 
