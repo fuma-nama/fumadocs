@@ -33,12 +33,13 @@ export default function loader(
   const filePath = this.resourcePath;
   const options = this.getOptions();
   const { content, data: frontmatter } = grayMatter(source);
-  const config = {
+  const format = options.format ?? filePath.endsWith('.mdx') ? 'mdx' : 'md';
+  const config: ProcessorOptions = {
+    format,
     development: this.mode === 'development',
     ...options,
   };
 
-  const format = config.format ?? filePath.endsWith('.mdx') ? 'mdx' : 'md';
   let processor = cache.get(format);
 
   if (!processor) {

@@ -15,10 +15,8 @@ plugins for building a good documentation site.
 
 ### Install Dependencies
 
-Notice that the package doesn't include loader by default.
-
 ```package-install
-next-docs-mdx @next/mdx @mdx-js/loader @mdx-js/react @types/mdx
+next-docs-mdx @types/mdx
 ```
 
 ### Configuration
@@ -91,7 +89,7 @@ correctly.
 
 ## Built-in Features
 
-A Table of Contents (`toc`) and Structurized Data (`structuredData`) is parsed
+Frontmatter (`frontmatter`), Table of Contents (`toc`) and Structurized Data (`structuredData`) are parsed
 and exported from MDX files by default, you can use these for implementing a
 search or TOC section in your docs.
 
@@ -99,13 +97,14 @@ search or TOC section in your docs.
 
 ### MDX Plugins
 
-You can customise the options passed to `@next/mdx`.
+You can customise the options passed to the MDX processor.
 
 ```js
 const withNextDocs = createNextDocs({
   mdxOptions: {
     remarkPlugins: [remarkMath],
-    rehypePlugins: [rehypeKatex],
+    // Place it at first so that it won't be changed by rehype-pretty-code
+    rehypePlugins: (v) => [rehypeKatex, ...v],
   },
 });
 ```
@@ -113,10 +112,12 @@ const withNextDocs = createNextDocs({
 ### Export Properties from `vfile.data`
 
 A remark plugin that turns `vfile.data` properties into exports is applied by
-default, you can pass the property names via `dataExports`.
+default, you can add additional properties to export.
 
 ```js
 const withNextDocs = createNextDocs({
-  dataExports: ['data'],
+  mdxOptions: {
+    valueToExport: ['dataName'],
+  },
 });
 ```
