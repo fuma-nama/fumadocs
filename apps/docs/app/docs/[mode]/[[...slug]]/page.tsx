@@ -1,12 +1,12 @@
 import { resolve } from 'node:url';
 import { ExternalLinkIcon } from 'lucide-react';
 import type { Metadata } from 'next';
-import type { Utils } from 'next-docs-mdx/map';
 import type { Page } from 'next-docs-mdx/types';
 import { Card, Cards, MDXContent } from 'next-docs-ui/mdx';
 import { DocsPage } from 'next-docs-ui/page';
 import { getGithubLastEdit } from 'next-docs-zeta/server';
 import { notFound } from 'next/navigation';
+import type { DocsUtils } from '@/utils/source';
 import { getUtils, tabs } from '@/utils/source';
 import { createMetadata } from '@/utils/metadata';
 import Preview from '@/components/preview';
@@ -60,7 +60,7 @@ export default async function Page({
     >
       <MDXContent>
         <div className="not-prose mb-12">
-          <h1 className="mb-4 text-3xl font-semibold text-foreground sm:text-4xl">
+          <h1 className="mb-4 text-3xl font-bold text-foreground sm:text-4xl">
             {page.matter.title}
           </h1>
           <p className="text-lg text-muted-foreground">
@@ -78,7 +78,7 @@ export default async function Page({
   );
 }
 
-function Category({ page, tab }: { page: Page; tab: Utils }): JSX.Element {
+function Category({ page, tab }: { page: Page; tab: DocsUtils }): JSX.Element {
   const filtered = tab.pages.filter(
     (docs) =>
       docs.file.dirname === page.file.dirname && docs.file.name !== 'index',

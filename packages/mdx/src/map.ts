@@ -3,40 +3,85 @@ import {
   type BuildPageTreeOptions,
   type PageTree,
 } from 'next-docs-zeta/server';
+import type { AnyZodObject, z } from 'zod';
 import { getPageTreeBuilder, type BuilderOptions } from './build-tree';
 import { createPageUtils, type PageUtils } from './page-utils';
 import {
-  defaultValidators,
   resolveFiles,
+  type ResolvedFiles,
+  type SchemaOptions,
   type ResolveOptions,
 } from './resolve-files';
-import type { Meta, Page } from './types';
+import type { DefaultFrontmatter, DefaultMetaData, Meta, Page } from './types';
+import { defaultSchemas } from './validate/schema';
 
-type UtilsOptions<Langs extends string[] | undefined> = {
-  languages: Langs;
+interface UtilsOptions extends BuilderOptions {
+  languages: string[] | undefined;
 
   /**
    * @defaultValue `'/'`
    */
   baseUrl: string;
 
+  schema: Partial<SchemaOptions>;
+
+  getUrl: ResolveOptions['getUrl'];
+  getSlugs: ResolveOptions['getSlugs'];
+  rootDir: ResolveOptions['rootDir'];
   pageTreeOptions: BuildPageTreeOptions;
-} & BuilderOptions &
-  Pick<ResolveOptions, 'getSlugs' | 'getUrl' | 'validate' | 'rootDir'>;
+}
 
-export type Utils = PageUtils & {
-  tree: PageTree;
-  pages: Page[];
-  metas: Meta[];
+interface RootConfig {
+  languages: string[] | undefined;
+  schema: {
+    frontmatter: unknown;
+    meta: unknown;
+  };
+}
+
+export type Utils<TTypes extends RootConfig> = PageUtils<
+  TTypes['schema']['frontmatter']
+> & {
+  tree: TTypes['languages'] extends string[]
+    ? Record<string, PageTree>
+    : PageTree;
+  pages: Page<TTypes['schema']['frontmatter']>[];
+  metas: Meta<TTypes['schema']['meta']>[];
 };
 
-type I18nUtils = Omit<Utils, 'tree'> & {
-  tree: Record<string, PageTree>;
-};
+type GetSchemaType<Schema, DefaultValue> = Schema extends AnyZodObject
+  ? z.infer<Schema>
+  : DefaultValue;
 
-function fromMap<Langs extends string[] | undefined = undefined>(
+/**
+ * Get accurate options type from partial options
+ */
+interface TransformPartialOptions<TOptions extends Partial<UtilsOptions>> {
+  languages: TOptions['languages'] extends string[] ? string[] : undefined;
+  schema: TOptions['schema'] extends Partial<SchemaOptions>
+    ? {
+        frontmatter: GetSchemaType<
+          TOptions['schema']['frontmatter'],
+          DefaultFrontmatter
+        >;
+        meta: GetSchemaType<TOptions['schema']['meta'], DefaultMetaData>;
+      }
+    : {
+        frontmatter: DefaultFrontmatter;
+        meta: DefaultMetaData;
+      };
+}
+
+function fromMap<TOptions extends Partial<UtilsOptions>>(
   map: Record<string, unknown>,
-  {
+  options?: TOptions,
+): Utils<TransformPartialOptions<TOptions>> {
+  type $Options = TransformPartialOptions<TOptions>;
+  type $Frontmatter = $Options['schema']['frontmatter'];
+  type $MetaData = $Options['schema']['meta'];
+  type $Utils = Utils<$Options>;
+
+  const {
     baseUrl = '/',
     rootDir = '',
     getSlugs,
@@ -44,22 +89,25 @@ function fromMap<Langs extends string[] | undefined = undefined>(
     resolveIcon,
     pageTreeOptions = { root: '' },
     languages,
-    validate,
-  }: Partial<UtilsOptions<Langs>> = {},
-): Langs extends string[] ? I18nUtils : Utils {
-  const resolved = resolveFiles({
+    schema,
+  } = options ?? {};
+
+  const resolved = resolveFiles<$Frontmatter, $MetaData>({
     map,
     rootDir,
     getSlugs,
     getUrl,
-    validate,
+    schema,
   });
 
   const pageUtils = createPageUtils(resolved, languages ?? []);
 
-  const builder = getPageTreeBuilder(resolved, {
-    resolveIcon,
-  });
+  const builder = getPageTreeBuilder(
+    resolved as ResolvedFiles<DefaultFrontmatter, DefaultMetaData>,
+    {
+      resolveIcon,
+    },
+  );
 
   const tree =
     languages === undefined
@@ -71,9 +119,9 @@ function fromMap<Langs extends string[] | undefined = undefined>(
 
   return {
     ...resolved,
+    tree: tree as $Utils['tree'],
     ...pageUtils,
-    tree,
-  } as Langs extends string[] ? I18nUtils : Utils;
+  };
 }
 
 export {
@@ -81,5 +129,5 @@ export {
   resolveFiles,
   createPageUtils,
   getPageTreeBuilder,
-  defaultValidators,
+  defaultSchemas,
 };

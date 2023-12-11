@@ -1,55 +1,61 @@
-import { map } from '@/_map';
-import { writeFileSync } from 'fs';
-import { defaultValidators, fromMap, type Utils } from 'next-docs-mdx/map';
+import { writeFileSync } from 'node:fs';
+import path from 'node:path';
+import type { Utils } from 'next-docs-mdx/map';
+import { defaultSchemas, fromMap } from 'next-docs-mdx/map';
 import type { StructuredData } from 'next-docs-zeta/mdx-plugins';
 import { PHASE_PRODUCTION_BUILD } from 'next/constants';
-import path from 'path';
 import { z } from 'zod';
+import type { DefaultMetaData } from 'next-docs-mdx/types';
+import { map } from '@/_map';
 
-const frontmatterSchema = defaultValidators.frontmatter.extend({
+const frontmatterSchema = defaultSchemas.frontmatter.extend({
   preview: z.string().optional(),
   index: z.boolean().default(false),
 });
 
-export const tabs: Record<string, Utils> = {
+export type DocsUtils = Utils<{
+  languages: undefined;
+  schema: {
+    frontmatter: z.infer<typeof frontmatterSchema>;
+    meta: DefaultMetaData;
+  };
+}>;
+
+export const tabs: Record<string, DocsUtils> = {
   ui: fromMap(map, {
     rootDir: 'docs/ui',
     baseUrl: '/docs/ui',
-    validate: {
+    schema: {
       frontmatter: frontmatterSchema,
     },
   }),
   headless: fromMap(map, {
     rootDir: 'docs/headless',
     baseUrl: '/docs/headless',
-    validate: {
+    schema: {
       frontmatter: frontmatterSchema,
     },
   }),
   mdx: fromMap(map, {
     rootDir: 'docs/mdx',
     baseUrl: '/docs/mdx',
-    validate: {
+    schema: {
       frontmatter: frontmatterSchema,
     },
   }),
 };
 
-export function getUtils(mode: 'ui' | 'headless' | 'mdx' | string): Utils {
-  return tabs[mode] ?? tabs['headless'];
+export function getUtils(mode: string): DocsUtils {
+  return mode in tabs ? tabs[mode] : tabs.headless;
 }
 
-declare module 'next-docs-mdx/types' {
-  interface Frontmatter extends z.infer<typeof frontmatterSchema> {}
-}
-
-export type Index = {
+export interface Index {
   id: string;
   title: string;
   description?: string;
   url: string;
   structuredData: StructuredData;
-};
+}
 
 // Access and export MDX pages data to json file
 // So that we can update search indexes after the build

@@ -1,22 +1,26 @@
 import type { ResolvedFiles } from './resolve-files';
 import type { Page } from './types';
 
-export interface PageUtils {
-  getPages: (locale?: string) => Page[];
-  getPage: (slugs: string[] | undefined, locale?: string) => Page | null;
+export interface PageUtils<Frontmatter> {
+  getPages: (locale?: string) => Page<Frontmatter>[];
+  getPage: (
+    slugs: string[] | undefined,
+    locale?: string,
+  ) => Page<Frontmatter> | null;
 }
 
-export function createPageUtils(
-  { pages }: ResolvedFiles,
+export function createPageUtils<Frontmatter>(
+  { pages }: ResolvedFiles<Frontmatter, unknown>,
   languages: string[],
-): PageUtils {
-  const pageMap = new Map<string, Page>();
+): PageUtils<Frontmatter> {
+  type $Page = Page<Frontmatter>;
+  const pageMap = new Map<string, $Page>();
 
   for (const page of pages) {
     pageMap.set(page.file.flattenedPath, page);
   }
 
-  const i18nMap = new Map<string, Page[]>();
+  const i18nMap = new Map<string, $Page[]>();
 
   i18nMap.set('', []);
 
@@ -41,25 +45,17 @@ export function createPageUtils(
       return i18nMap.get(locale) ?? [];
     },
     getPage(slugs, locale) {
-      return getPage(pages, slugs, locale);
+      const path = (slugs ?? []).join('/');
+      let def: $Page | null = null;
+
+      for (const page of pages) {
+        if (page.slugs.join('/') === path) {
+          if (!page.file.locale) def = page;
+          if (page.file.locale === locale) return page;
+        }
+      }
+
+      return def;
     },
   };
-}
-
-function getPage(
-  pages: Page[],
-  slugs: string[] | undefined = [],
-  locale?: string,
-): Page | null {
-  const path = slugs.join('/');
-  let def: Page | null = null;
-
-  for (const page of pages) {
-    if (page.slugs.join('/') === path) {
-      if (!page.file.locale) def = page;
-      if (page.file.locale === locale) return page;
-    }
-  }
-
-  return def;
 }

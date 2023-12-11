@@ -12,5 +12,7 @@ export const frontmatterSchema = z.object({
   icon: z.string().optional(),
 });
 
-export type MetaExport = z.infer<typeof metaSchema>;
-export type Frontmatter = z.infer<typeof frontmatterSchema>;
+export const defaultSchemas = {
+  frontmatter: frontmatterSchema,
+  meta: metaSchema,
+};

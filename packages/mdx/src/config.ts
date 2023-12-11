@@ -86,6 +86,7 @@ const createNextDocs =
     const valueToExport = [
       'structuredData',
       'toc',
+      'frontmatter',
       ...(mdxOptions.valueToExport ?? []),
     ];
     const _mapPath = path.resolve(cwd, rootMapPath);

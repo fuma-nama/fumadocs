@@ -10,11 +10,11 @@ You can now generate slugs automatically depending on the root directory you hav
 
 ```ts
 const utils = fromMap(map, {
-    rootDir: 'ui',
-    validate: {
-      frontmatter: frontmatterSchema
-    }
-  })
+  rootDir: 'ui',
+  schema: {
+    frontmatter: frontmatterSchema
+  }
+})
 ```
 
 The configuration above will generate `/hello` slugs for a file named `/content/ui/hello.mdx`, while the previous one generates `/ui/hello`.

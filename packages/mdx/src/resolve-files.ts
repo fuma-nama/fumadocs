@@ -2,19 +2,14 @@ import path from 'node:path';
 import { joinPaths, splitPath } from 'next-docs-zeta/server';
 import type { AnyZodObject } from 'zod';
 import type { FileInfo, MDXExport, Meta, Page } from './types';
-import {
-  frontmatterSchema,
-  metaSchema,
-  type Frontmatter,
-  type MetaExport,
-} from './validate/schema';
+import { defaultSchemas } from './validate/schema';
 
 const pageTypes = ['.md', '.mdx'];
 const metaTypes = ['.json'];
 
-export interface ResolvedFiles {
-  pages: Page[];
-  metas: Meta[];
+export interface ResolvedFiles<Frontmatter, MetaData> {
+  pages: Page<Frontmatter>[];
+  metas: Meta<MetaData>[];
 }
 
 export interface ResolveOptions {
@@ -33,9 +28,9 @@ export interface ResolveOptions {
   getSlugs?: (file: FileInfo) => string[];
 
   /**
-   * Check frontmatter/meta objects, transform allowed
+   * Zod schema for frontmatter/meta objects, transform allowed
    */
-  validate?: ValidateOptions;
+  schema?: Partial<SchemaOptions>;
 
   /**
    * Get url from slugs and locale, override the default getUrl function
@@ -43,15 +38,10 @@ export interface ResolveOptions {
   getUrl: (slugs: string[], locale?: string) => string;
 }
 
-type ValidateOptions = Partial<{
+export interface SchemaOptions {
   frontmatter: AnyZodObject;
   meta: AnyZodObject;
-}>;
-
-export const defaultValidators = {
-  frontmatter: frontmatterSchema,
-  meta: metaSchema,
-};
+}
 
 function parsePath(p: string, root = ''): FileInfo | false {
   if (!p.startsWith(root)) return false;
@@ -90,28 +80,27 @@ function parse<T>(schema: AnyZodObject, object: unknown, errorName: string): T {
   return result.data as T;
 }
 
-export function resolveFiles({
+export function resolveFiles<Frontmatter, MetaData>({
   map,
   getSlugs = pathToSlugs,
   getUrl,
   rootDir = '',
-  validate = defaultValidators,
-}: ResolveOptions): ResolvedFiles {
-  const metas: Meta[] = [];
-  const pages: Page[] = [];
+  schema = defaultSchemas,
+}: ResolveOptions): ResolvedFiles<Frontmatter, MetaData> {
+  type $Meta = Meta<MetaData>;
+  type $Page = Page<Frontmatter>;
+
+  const metas: $Meta[] = [];
+  const pages: $Page[] = [];
 
   for (const [key, value] of Object.entries(map)) {
     const file = parsePath(key, rootDir);
     if (file === false) continue;
 
     if (metaTypes.includes(file.type)) {
-      const meta: Meta = {
+      const meta: $Meta = {
         file,
-        data: parse<MetaExport>(
-          validate.meta ?? defaultValidators.meta,
-          value,
-          file.path,
-        ),
+        data: parse(schema.meta ?? defaultSchemas.meta, value, file.path),
       };
 
       metas.push(meta);
@@ -120,15 +109,15 @@ export function resolveFiles({
     }
 
     if (pageTypes.includes(file.type)) {
-      const data = value as MDXExport;
+      const data = value as MDXExport<Frontmatter>;
       const slugs = getSlugs(file);
 
-      const page: Page = {
+      const page: $Page = {
         file,
         slugs,
         url: getUrl(slugs, file.locale),
-        matter: parse<Frontmatter>(
-          validate.frontmatter ?? defaultValidators.frontmatter,
+        matter: parse(
+          schema.frontmatter ?? defaultSchemas.frontmatter,
           data.frontmatter,
           file.path,
         ),

@@ -91,14 +91,11 @@ export const docsUi = plugin.withOptions<NextDocsUIOptions>(
           '& [data-line]': {
             'padding-left': `theme('spacing.4')`,
             'padding-right': `theme('spacing.4')`,
-            'border-left-width': `theme('borderWidth.2')`,
-            'border-color': 'transparent',
             '& span': {
               color: 'var(--shiki-light)',
             },
           },
           '& [data-highlighted-line]': {
-            'border-color': `theme('colors.primary.DEFAULT')`,
             'background-color': `theme('colors.primary.DEFAULT / 10%')`,
           },
           '& [data-highlighted-chars]': {

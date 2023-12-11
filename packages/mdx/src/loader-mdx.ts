@@ -18,6 +18,11 @@ export interface NextDocsBuildInfo {
 
 const cache = new Map<string, Processor>();
 
+/**
+ * Load MDX/markdown files
+ *
+ * it supports frontmatter by parsing and injecting the data in `vfile.data.frontmatter`
+ */
 export default function loader(
   this: LoaderContext<Options>,
   source: string,
@@ -27,7 +32,7 @@ export default function loader(
   const context = this.context;
   const filePath = this.resourcePath;
   const options = this.getOptions();
-  const { content, data } = grayMatter(source);
+  const { content, data: frontmatter } = grayMatter(source);
   const config = {
     development: this.mode === 'development',
     ...options,
@@ -41,25 +46,29 @@ export default function loader(
     cache.set(format, processor);
   }
 
-  processor.process({ value: content, path: filePath }).then(
-    (file) => {
-      const result = String(file.value);
-      const info = this._module?.buildInfo as NextDocsBuildInfo;
+  processor
+    .process({
+      value: content,
+      path: filePath,
+      data: {
+        frontmatter,
+      },
+    })
+    .then(
+      (file) => {
+        const info = this._module?.buildInfo as NextDocsBuildInfo;
 
-      info.__next_docs = {
-        path: this.resourcePath,
-        data: file.data,
-      };
+        info.__next_docs = {
+          path: filePath,
+          data: file.data,
+        };
 
-      const final = `export const frontmatter = ${JSON.stringify(
-        data,
-      )};\n${result}`;
-      callback(undefined, final, file.map || undefined);
-    },
-    (error: Error) => {
-      const fpath = path.relative(context, filePath);
-      error.message = `${fpath}:${error.name}: ${error.message}`;
-      callback(error);
-    },
-  );
+        callback(undefined, String(file.value), file.map || undefined);
+      },
+      (error: Error) => {
+        const fpath = path.relative(context, filePath);
+        error.message = `${fpath}:${error.name}: ${error.message}`;
+        callback(error);
+      },
+    );
 }
