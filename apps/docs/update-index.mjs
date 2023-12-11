@@ -1,8 +1,8 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import env from '@next/env';
 import algosearch from 'algoliasearch';
-import { readFileSync } from 'fs';
 import { sync } from 'next-docs-zeta/search-algolia/server';
-import { resolve } from 'path';
 
 env.loadEnvConfig(process.cwd());
 

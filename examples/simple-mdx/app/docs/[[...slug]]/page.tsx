@@ -27,7 +27,7 @@ export default async function Page({
   );
 }
 
-export async function generateStaticParams(): Promise<{ slug: string[] }[]> {
+export async function generateStaticParams() {
   return pages.map((page) => ({
     slug: page.slugs,
   }));

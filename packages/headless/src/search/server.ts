@@ -239,12 +239,12 @@ export function initSearchAPIAdvanced({
         enrich: true,
         tag: paramTag ?? undefined,
         limit: 6,
-      })[0];
+      });
 
       const map = new Map<string, SortedResult[]>();
       const sortedResult: SortedResult[] = [];
 
-      for (const item of results.result) {
+      for (const item of results[0]?.result ?? []) {
         if (item.doc.type === 'page') {
           if (!map.has(item.doc.page_id)) {
             map.set(item.doc.page_id, []);
