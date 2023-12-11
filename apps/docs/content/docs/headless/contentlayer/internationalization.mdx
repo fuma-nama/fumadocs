@@ -25,11 +25,9 @@ import { languages } from './i18n';
 import { allDocs, allMeta } from 'contentlayer/generated';
 import { createContentlayer } from 'next-docs-zeta/contentlayer';
 
-export const { getPage, getPageUrl, tree } = createContentlayer(
-  allMeta,
-  allDocs,
-  { languages },
-);
+export const { getPage, tree } = createContentlayer(allMeta, allDocs, {
+  languages,
+});
 ```
 
 3. Create i18n middleware.
@@ -97,7 +95,7 @@ you can use `createI18nSearchAPI`.
 
 ```ts title="api/search/route.ts"
 import { languages } from '@/i18n';
-import { getPages, getPageUrl } from '@/source';
+import { getPages } from '@/source';
 import { createI18nSearchAPI } from 'next-docs-zeta/server';
 
 export const { GET } = createI18nSearchAPI('simple', {
@@ -105,7 +103,7 @@ export const { GET } = createI18nSearchAPI('simple', {
     const pages = getPages(lang)!.map((page) => ({
       title: page.title,
       content: page.body.raw,
-      url: getPageUrl(page.slug, lang),
+      url: page.url,
     }));
 
     return [lang, pages];

@@ -115,9 +115,7 @@ To obtain these pages, it's recommended to use the
 ```tsx
 import { findNeighbour } from 'next-docs-zeta/server'
 
-// Get the url of page
-const url = getPageUrl(page.slug)
-const neighbours = findNeighbour(tree, url)
+const neighbours = findNeighbour(tree, page.url)
 
 <DocsPage footer={neighbours} />
 ```
