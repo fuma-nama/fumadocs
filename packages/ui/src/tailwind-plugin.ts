@@ -84,30 +84,11 @@ export const docsUi = plugin.withOptions<NextDocsUIOptions>(
           'background-color': `theme('colors.background')`,
           color: `theme('colors.foreground')`,
         },
-      });
-
-      addComponents({
-        '.nd-codeblock': {
-          '& [data-line]': {
-            'padding-left': `theme('spacing.4')`,
-            'padding-right': `theme('spacing.4')`,
-            '& span': {
-              color: 'var(--shiki-light)',
-            },
-          },
-          '& [data-highlighted-line]': {
-            'background-color': `theme('colors.primary.DEFAULT / 10%')`,
-          },
-          '& [data-highlighted-chars]': {
-            'background-color': `theme('colors.primary.DEFAULT / 10%')`,
-            'border-bottom-width': `theme('borderWidth.2')`,
-            'border-color': `theme('colors.primary.DEFAULT')`,
-          },
+        '[data-line] span': {
+          color: 'var(--shiki-light)',
         },
-        '.dark .nd-codeblock': {
-          '& span': {
-            color: 'var(--shiki-dark)',
-          },
+        '.dark [data-line] span': {
+          color: 'var(--shiki-dark)',
         },
         '[data-rmiz]': {
           display: 'block',
@@ -166,6 +147,23 @@ export const docsUi = plugin.withOptions<NextDocsUIOptions>(
         '@media (prefers-reduced-motion: reduce)': {
           '[data-rmiz-modal-overlay], [data-rmiz-modal-img]': {
             'transition-duration': '0.01ms !important',
+          },
+        },
+      });
+
+      addComponents({
+        '.nd-codeblock': {
+          '& [data-line]': {
+            'padding-left': `theme('spacing.4')`,
+            'padding-right': `theme('spacing.4')`,
+          },
+          '& [data-highlighted-line]': {
+            'background-color': `theme('colors.primary.DEFAULT / 10%')`,
+          },
+          '& [data-highlighted-chars]': {
+            'background-color': `theme('colors.primary.DEFAULT / 10%')`,
+            'border-bottom-width': `theme('borderWidth.2')`,
+            'border-color': `theme('colors.primary.DEFAULT')`,
           },
         },
       });

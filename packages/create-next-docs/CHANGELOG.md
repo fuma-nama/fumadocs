@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 1.7.4
+
+### Patch Changes
+
+- 3840ad6: Update to 6.0.0
+
 ## 1.7.3
 
 ### Patch Changes
