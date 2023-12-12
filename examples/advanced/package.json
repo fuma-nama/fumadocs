@@ -23,5 +23,9 @@
     "postcss": "8.4.32",
     "tailwindcss": "3.3.6",
     "typescript": "5.3.3"
+  },
+  "overrides": {
+    "unified": "^11.0.4",
+    "mdx-bundler": "^10.0.1"
   }
 }

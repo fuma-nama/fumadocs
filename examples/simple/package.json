@@ -20,5 +20,9 @@
     "@types/react": "18.2.0",
     "@types/react-dom": "18.2.1",
     "typescript": "5.3.3"
+  },
+  "overrides": {
+    "unified": "^11.0.4",
+    "mdx-bundler": "^10.0.1"
   }
 }
