@@ -3,44 +3,30 @@ title: Quick Start
 description: Getting Started with Next Docs UI
 ---
 
-## Overview
-
 Next Docs UI is the Next.js framework for building documentation website. Built
 on the top of Next.js, Radix UI and Next Docs Zeta.
 
-## Getting Started
+## Automatic Installation
 
-Open in [CodeSandbox](https://githubbox.com/fuma-nama/next-docs-ui-template).
-
-<Tabs items={["With CLI", "Manual"]}>
-
-<Tab value="With CLI">
-
-Create a new app with the CLI.
+Create a new app with `create-next-docs-app`.
 
 ```bash
 npx create-next-docs-app
 # or
-pnpx create-next-docs-app
+pnpm create next-docs-app
 # or
 yarn create next-docs-app
 ```
 
-<Callout title="Note" className="mt-4">
-  The example uses Contentlayer, but you can use any source you want.
-</Callout>
+## Manual Installation
 
-</Tab>
-
-<Tab value="Manual">
-
-Install required dependencies
+Create a new Next.js application with `create-next-app`, and install required packages.
 
 ```package-install
 next-docs-ui next-docs-zeta
 ```
 
-<h3>Configuration</h3>
+### Configuration
 
 Next Docs UI is unopinionated and doesn't provide content management features. You can choose a source
 you prefer, such as [Contentlayer](https://contentlayer.dev) and `next-docs-mdx`.
@@ -52,7 +38,7 @@ This is a list of sources supported by Next Docs:
 
 You have to configure the library correctly following their setup guide before continuing.
 
-<h3>Styles</h3>
+### Styles
 
 You can import the pre-built stylesheet in the root layout.
 
@@ -64,7 +50,7 @@ For Tailwind CSS projects, you may use [the official plugin](/docs/ui/theme) ins
 
 > It doesn't come with a default font, you may choose one from `next/font`.
 
-<h3>Root Layout</h3>
+### Root Layout
 
 Wrap the entire application inside [Root Provider](/docs/ui/blocks/root-provider).
 
@@ -83,7 +69,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 }
 ```
 
-<h3>Layout</h3>
+### Layout
 
 Create a new catch-all route for our docs, and give it a proper layout.
 
@@ -102,7 +88,7 @@ export default function RootDocsLayout({ children }: { children: ReactNode }) {
 
 > `tree` refers to [Page Tree](/docs/headless/page-tree), which should be provided by your data source.
 
-<h3>Page</h3>
+### Page
 
 For the `page.tsx`, it may vary depending on your source. You should manually configure static rendering with `generateStaticParams` and metadata with `generateMetadata`.
 
@@ -118,7 +104,7 @@ Make sure to wrap your content in the [Page](/docs/ui/blocks/page) component. Yo
 </Accordion>
 </Accordions>
 
-<h3>Search</h3>
+### Search
 
 By default, it uses the built-in document search based on Flexsearch. [Learn to configure Document Search](/docs/headless/search/flexsearch) for your data source.
 
@@ -131,9 +117,6 @@ By default, it uses the built-in document search based on Flexsearch. [Learn to 
 
 </Accordion>
 </Accordions>
-
-</Tab>
-</Tabs>
 
 ## Enjoy!
 
@@ -180,6 +163,10 @@ Feel free to open the demo in CodeSandbox and see if it suits you.
 
 </Accordion>
 </Accordions>
+
+### Demo
+
+Open in [CodeSandbox](https://githubbox.com/fuma-nama/next-docs-ui-template).
 
 ## Learn More
 

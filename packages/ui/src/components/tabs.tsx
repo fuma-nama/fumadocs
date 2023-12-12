@@ -2,6 +2,7 @@
 
 import type { TabsContentProps } from '@radix-ui/react-tabs';
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { cn } from '@/utils/cn';
 import * as Primitive from './ui/tabs';
 
 export * as Primitive from './ui/tabs';
@@ -107,6 +108,16 @@ function toValue(v: string): string {
   return v.toLowerCase().replace(/\s/, '-');
 }
 
-export function Tab(props: TabsContentProps): JSX.Element {
-  return <Primitive.TabsContent {...props} value={toValue(props.value)} />;
+export function Tab({
+  value,
+  className,
+  ...props
+}: TabsContentProps): JSX.Element {
+  return (
+    <Primitive.TabsContent
+      value={toValue(value)}
+      className={cn('prose-no-margin', className)}
+      {...props}
+    />
+  );
 }
