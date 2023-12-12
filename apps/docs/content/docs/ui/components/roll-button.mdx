@@ -13,14 +13,14 @@ A button that scrolls to the top.
 Add this component to your page.
 
 ```mdx title="app/docs/[[...slug]]/page.tsx"
-import { RollButton } from 'next-docs-ui/components/roll-button'
+import { RollButton } from 'next-docs-ui/components/roll-button';
 
 <DocsPage toc={toc}>
   <RollButton />
-  <MDXContent>
+  <DocsBody>
     <h1>{page.title}</h1>
     <MDX />
-  </MDXContent>
+  </DocsBody>
 </DocsPage>
 ```
 
@@ -32,8 +32,8 @@ import { RollButton } from 'next-docs-ui/components/roll-button'
       description:
         'The percentage of scroll position to display the roll button',
       type: 'number',
-      default: 0.2
-    }
+      default: 0.2,
+    },
   }}
 />
 

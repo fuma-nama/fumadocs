@@ -3,16 +3,16 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
     "build": "next build",
+    "dev": "next dev",
     "start": "next start"
   },
   "dependencies": {
     "contentlayer": "0.3.4",
-    "next": "14.0.3",
+    "next": "14.0.4",
     "next-contentlayer": "0.3.4",
-    "next-docs-ui": "5.0.0",
-    "next-docs-zeta": "5.0.0",
+    "next-docs-ui": "6.0.0",
+    "next-docs-zeta": "6.0.0",
     "react": "18.2.0",
     "react-dom": "18.2.0"
   },
@@ -22,6 +22,10 @@
     "autoprefixer": "10.4.16",
     "postcss": "8.4.32",
     "tailwindcss": "3.3.6",
-    "typescript": "5.3.2"
+    "typescript": "5.3.3"
+  },
+  "overrides": {
+    "unified": "^11.0.4",
+    "mdx-bundler": "^10.0.1"
   }
 }

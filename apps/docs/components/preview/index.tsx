@@ -1,17 +1,18 @@
-import BannerImage from '@/public/banner.png'
-import { HomeIcon } from 'lucide-react'
-import { Accordion, Accordions } from 'next-docs-ui/components/accordion'
-import { Callout } from 'next-docs-ui/components/callout'
-import { File, Files } from 'next-docs-ui/components/files'
-import { ImageZoom } from 'next-docs-ui/components/image-zoom'
-import { InlineTOC } from 'next-docs-ui/components/inline-toc'
-import { RollButton } from 'next-docs-ui/components/roll-button'
-import { Step, Steps } from 'next-docs-ui/components/steps'
-import { Tab, Tabs } from 'next-docs-ui/components/tabs'
-import { TypeTable } from 'next-docs-ui/components/type-table'
-import { Card, Heading } from 'next-docs-ui/mdx'
-import type { ReactNode } from 'react'
-import { Wrapper } from './wrapper'
+import { HomeIcon } from 'lucide-react';
+import { Accordion, Accordions } from 'next-docs-ui/components/accordion';
+import { Callout } from 'next-docs-ui/components/callout';
+import { File, Files } from 'next-docs-ui/components/files';
+import { ImageZoom } from 'next-docs-ui/components/image-zoom';
+import { InlineTOC } from 'next-docs-ui/components/inline-toc';
+import { RollButton } from 'next-docs-ui/components/roll-button';
+import { Step, Steps } from 'next-docs-ui/components/steps';
+import { Tab, Tabs } from 'next-docs-ui/components/tabs';
+import { TypeTable } from 'next-docs-ui/components/type-table';
+import { Card } from 'next-docs-ui/mdx/card';
+import { Heading } from 'next-docs-ui/mdx/heading';
+import type { ReactNode } from 'react';
+import BannerImage from '@/public/banner.png';
+import { Wrapper } from './wrapper';
 
 export default {
   heading: (
@@ -19,7 +20,7 @@ export default {
       <Heading
         id="preview"
         as="h3"
-        className="bg-background p-4 rounded-xl !my-0"
+        className="!my-0 rounded-xl bg-background p-4"
       >
         Hello World
       </Heading>
@@ -27,7 +28,7 @@ export default {
   ),
   card: (
     <Wrapper>
-      <div className="bg-background rounded-lg">
+      <div className="rounded-lg bg-background">
         <Card
           href="#"
           icon={<HomeIcon />}
@@ -39,7 +40,7 @@ export default {
   ),
   tabs: (
     <Wrapper>
-      <div className="p-4 bg-background rounded-xl text-sm space-y-4">
+      <div className="space-y-4 rounded-xl bg-background p-4 text-sm">
         <Tabs
           id="language"
           persist
@@ -63,15 +64,15 @@ export default {
   ),
   'type-table': (
     <Wrapper>
-      <div className="bg-background px-4 rounded-xl">
+      <div className="rounded-xl bg-background px-4">
         <TypeTable
           type={{
             percentage: {
               description:
                 'The percentage of scroll position to display the roll button',
               type: 'number',
-              default: '0.2'
-            }
+              default: '0.2',
+            },
           }}
         />
       </div>
@@ -82,7 +83,7 @@ export default {
       <ImageZoom
         alt="banner"
         src={BannerImage}
-        className="!my-0 bg-background rounded-xl"
+        className="!my-0 rounded-xl bg-background"
         priority
       />
     </Wrapper>
@@ -123,43 +124,43 @@ export default {
           {
             title: 'Welcome',
             url: '#welcome',
-            depth: 2
+            depth: 2,
           },
           {
             title: 'Getting Started',
             url: '#getting-started',
-            depth: 3
+            depth: 3,
           },
           {
             title: 'Usage',
             url: '#usage',
-            depth: 3
+            depth: 3,
           },
           {
             title: 'Styling',
             url: '#styling',
-            depth: 3
+            depth: 3,
           },
           {
             title: 'Reference',
             url: '#reference',
-            depth: 2
+            depth: 2,
           },
           {
             title: 'Components',
             url: '#components',
-            depth: 3
+            depth: 3,
           },
           {
             title: 'APIs',
             url: '#api',
-            depth: 3
+            depth: 3,
           },
           {
             title: 'Credits',
             url: '#credits',
-            depth: 2
-          }
+            depth: 2,
+          },
         ]}
       />
     </Wrapper>
@@ -184,5 +185,5 @@ export default {
       </div>
     </Wrapper>
   ),
-  'roll-button': <RollButton />
-} as Record<string, ReactNode>
+  'roll-button': <RollButton />,
+} as Record<string, ReactNode>;

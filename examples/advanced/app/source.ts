@@ -1,7 +1,4 @@
-import { allDocs, allMeta } from 'contentlayer/generated'
-import { createContentlayer } from 'next-docs-zeta/contentlayer'
+import { allDocs, allMeta } from 'contentlayer/generated';
+import { createContentlayer } from 'next-docs-zeta/contentlayer';
 
-export const { tree, getPage, getPageUrl } = createContentlayer(
-  allMeta,
-  allDocs
-)
+export const { tree, getPage } = createContentlayer(allMeta, allDocs);

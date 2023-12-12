@@ -4,17 +4,17 @@ description: Adding code blocks to your docs
 ---
 
 <Wrapper>
-<div className="bg-background rounded-lg nd-prose-no-margin">
+<div className="bg-background rounded-lg prose-no-margin">
 
 ```js title="next.config.js" {10} /config/
 const config = {
   pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
-  reactStrictMode: true
-}
+  reactStrictMode: true,
+};
 
-const { withContentlayer } = require('next-contentlayer')
+const { withContentlayer } = require('next-contentlayer');
 
-module.exports = withContentlayer(config)
+module.exports = withContentlayer(config);
 ```
 
 </div>
@@ -31,11 +31,11 @@ Display code blocks, required by default.
 You can add this component to `mdxComponents`.
 
 ```mdx {5}
-import { Pre } from 'next-docs-ui/mdx'
+import { Pre } from 'next-docs-ui/mdx/pre';
 
 <MDX
   components={{
-    pre: props => <Pre {...props} />
+    pre: (props) => <Pre {...props} />,
   }}
 />
 ```
@@ -60,8 +60,8 @@ You can highlight a specific word by wrapping the word in `/`.
 ````mdx
 ```js /config/
 const config = {
-  reactStrictMode: true
-}
+  reactStrictMode: true,
+};
 ```
 ````
 
@@ -73,12 +73,12 @@ Add `title="x"` to the codeblock meta.
 ```js title="next.config.js"
 const config = {
   pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
-  reactStrictMode: true
-}
+  reactStrictMode: true,
+};
 
-const { withContentlayer } = require('next-contentlayer')
+const { withContentlayer } = require('next-contentlayer');
 
-module.exports = withContentlayer(config)
+module.exports = withContentlayer(config);
 ```
 ````
 

@@ -19,11 +19,9 @@ For example:
 It requires a page tree and the url of page.
 
 ```ts
-import { getPageUrl } from 'next-docs-zeta/contentlayer'
-import { findNeighbour } from 'next-docs-zeta/server'
+import { findNeighbour } from 'next-docs-zeta/server';
 
-const url = getPageUrl(params.slug.split('/'), '/docs')
-const neighbours = findNeighbour(tree, url)
+const neighbours = findNeighbour(tree, page.url);
 ```
 
 | Parameter | Type       | Description     |

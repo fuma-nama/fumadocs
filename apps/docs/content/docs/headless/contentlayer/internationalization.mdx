@@ -14,44 +14,42 @@ to learn more about implementing I18n in Next.js.
 1. Put all supported languages in a file.
 
 ```ts title="i18n.ts"
-export const defaultLanguage = 'en'
-export const languages = ['en', 'cn']
+export const defaultLanguage = 'en';
+export const languages = ['en', 'cn'];
 ```
 
 2. Change your current configurations.
 
 ```ts title="source.ts"
-import { allDocs, allMeta } from 'contentlayer/generated'
-import { createContentlayer } from 'next-docs-zeta/contentlayer'
-import { languages } from './i18n'
+import { languages } from './i18n';
+import { allDocs, allMeta } from 'contentlayer/generated';
+import { createContentlayer } from 'next-docs-zeta/contentlayer';
 
-export const { getPage, getPageUrl, tree } = createContentlayer(
-  allMeta,
-  allDocs,
-  { languages }
-)
+export const { getPage, tree } = createContentlayer(allMeta, allDocs, {
+  languages,
+});
 ```
 
 3. Create i18n middleware.
 
 ```ts title="middleware.ts"
-import { defaultLanguage, languages } from '@/i18n'
-import { createI18nMiddleware } from 'next-docs-zeta/middleware'
-import { NextRequest } from 'next/server'
+import { defaultLanguage, languages } from '@/i18n';
+import { createI18nMiddleware } from 'next-docs-zeta/middleware';
+import { NextRequest } from 'next/server';
 
 export default function middleware(request: NextRequest) {
   return createI18nMiddleware(
     request,
     languages,
     defaultLanguage,
-    (locale, slug) => `/${locale}/docs/${slug}` // the format of redirected url
-  )
+    (locale, slug) => `/${locale}/docs/${slug}`, // the format of redirected url
+  );
 }
 
 export const config = {
   // Matcher ignoring `/_next/` and `/api/`
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)']
-}
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+};
 ```
 
 4. Create a dynamic route, ensure all special files are nested under
@@ -63,7 +61,7 @@ export default function Layout({ params }: { params: { lang: string } }) {
     <html lang={params.lang}>
       <body>{children}</body>
     </html>
-  )
+  );
 }
 ```
 
@@ -73,16 +71,16 @@ To get the pages with specific languages, use the utilities exported from
 `source.ts`.
 
 ```ts
-import { getPage, getPages, tree } from '@/source'
+import { getPage, getPages, tree } from '@/source';
 
 // get page tree
-const t = tree[params.lang]
+const t = tree[params.lang];
 
 // get page
-const page = getPage(params.slug, params.lang)
+const page = getPage(params.slug, params.lang);
 
 // get pages
-const pages = getPages(params.lang)
+const pages = getPages(params.lang);
 ```
 
 ### Docs Search
@@ -96,21 +94,21 @@ you can use `createI18nSearchAPI`.
 1. Update the route handler.
 
 ```ts title="api/search/route.ts"
-import { languages } from '@/i18n'
-import { getPages, getPageUrl } from '@/source'
-import { createI18nSearchAPI } from 'next-docs-zeta/server'
+import { languages } from '@/i18n';
+import { getPages } from '@/source';
+import { createI18nSearchAPI } from 'next-docs-zeta/server';
 
 export const { GET } = createI18nSearchAPI('simple', {
-  indexes: languages.map(lang => {
-    const pages = getPages(lang)!.map(page => ({
+  indexes: languages.map((lang) => {
+    const pages = getPages(lang)!.map((page) => ({
       title: page.title,
       content: page.body.raw,
-      url: getPageUrl(page.slug, lang)
-    }))
+      url: page.url,
+    }));
 
-    return [lang, pages]
-  })
-})
+    return [lang, pages];
+  }),
+});
 ```
 
 2. Add `locale` to search dialog, this will only allow pages with specified
@@ -118,7 +116,7 @@ export const { GET } = createI18nSearchAPI('simple', {
 
 ```tsx
 function Dialog() {
-  const { search, setSearch, query } = useDocsSearch(locale)
+  const { search, setSearch, query } = useDocsSearch(locale);
 
   //...
 }

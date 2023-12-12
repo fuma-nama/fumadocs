@@ -8,16 +8,14 @@ preview: zoom-image
 
 ## Usage
 
-Add it to your mdx components.
+Add it to your MDX components.
 
 > A default `sizes` property will be defined if not specified
 
 ```tsx
-import { ImageZoom } from 'next-docs-ui/components/image-zoom'
-import defaultComponents from 'next-docs-ui/mdx'
+import { ImageZoom } from 'next-docs-ui/components/image-zoom';
 
 const components = {
-  ...defaultComponents,
-  img: (props: any) => <ImageZoom {...props} />
-}
+  img: (props) => <ImageZoom {...props} />,
+};
 ```

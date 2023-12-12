@@ -11,10 +11,10 @@ The layout of documentation pages, it must be nested under the
 Wrap the children and pass your page tree to the component.
 
 ```jsx
-import { DocsLayout } from 'next-docs-ui/layout'
+import { DocsLayout } from 'next-docs-ui/layout';
 
 export default function Layout({ children }) {
-  return <DocsLayout tree={tree}>{children}</DocsLayout>
+  return <DocsLayout tree={tree}>{children}</DocsLayout>;
 }
 ```
 
@@ -23,13 +23,13 @@ export default function Layout({ children }) {
     tree: { type: 'PageTree' },
     nav: {
       type: 'object',
-      typeDescriptionLink: '#navbar'
+      typeDescriptionLink: '#navbar',
     },
     sidebar: {
       type: 'object',
-      typeDescriptionLink: '#sidebar'
+      typeDescriptionLink: '#sidebar',
     },
-    children: { type: 'ReactNode' }
+    children: { type: 'ReactNode' },
   }}
 />
 
@@ -44,8 +44,8 @@ export default function Layout({ children }) {
     items: { type: 'NavItemProps[]' },
     githubUrl: {
       description: 'Github url displayed on the navbar',
-      type: 'string'
-    }
+      type: 'string',
+    },
   }}
 />
 
@@ -69,18 +69,18 @@ disable the default navbar and place your own instead.
       type: 'number',
       default: '1',
       description:
-        'Open folders by default if their level is lower or equal to a specific level'
-    }
+        'Open folders by default if their level is lower or equal to a specific level',
+    },
   }}
 />
 
 ### Example
 
 ```tsx title="app/docs/[[...slug]]/layout.tsx"
-import { DocsLayout } from 'next-docs-ui/layout'
-import { ReactNode } from 'react'
+import { DocsLayout } from 'next-docs-ui/layout';
+import { ReactNode } from 'react';
 
 export default function Layout({ children }: { children: ReactNode }) {
-  return <DocsLayout tree={tree}>{children}</DocsLayout>
+  return <DocsLayout tree={tree}>{children}</DocsLayout>;
 }
 ```

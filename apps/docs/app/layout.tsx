@@ -1,37 +1,37 @@
-import { Nav } from '@/components/nav'
-import { Star } from 'lucide-react'
-import { Inter } from 'next/font/google'
-import './style.css'
-import { base_url, createMetadata } from '@/utils/metadata'
-import type { Viewport } from 'next'
-import Link from 'next/link'
-import { Provider } from './provider'
+import './style.css';
+import { Star } from 'lucide-react';
+import type { Viewport } from 'next';
+import { Inter } from 'next/font/google';
+import Link from 'next/link';
+import { baseUrl, createMetadata } from '@/utils/metadata';
+import { Nav } from '@/components/nav';
+import { Provider } from './provider';
 
 export const metadata = createMetadata({
   title: {
     template: '%s | Next Docs',
-    default: 'Next Docs'
+    default: 'Next Docs',
   },
   description: 'The Next.js framework for building documentation sites',
-  metadataBase: base_url
-})
+  metadataBase: baseUrl,
+});
 
 export const viewport: Viewport = {
   themeColor: [
     { media: '(prefers-color-scheme: dark)', color: '#0A0A0A' },
-    { media: '(prefers-color-scheme: light)', color: '#fff' }
-  ]
-}
+    { media: '(prefers-color-scheme: light)', color: '#fff' },
+  ],
+};
 
 const inter = Inter({
-  subsets: ['latin']
-})
+  subsets: ['latin'],
+});
 
 export default function RootLayout({
-  children
+  children,
 }: {
-  children: React.ReactNode
-}) {
+  children: React.ReactNode;
+}): JSX.Element {
   return (
     <html lang="en" className={inter.className} suppressHydrationWarning>
       <body className="flex min-h-screen flex-col">
@@ -42,12 +42,12 @@ export default function RootLayout({
         </Provider>
       </body>
     </html>
-  )
+  );
 }
 
-function Footer() {
+function Footer(): JSX.Element {
   return (
-    <footer className="bg-card text-secondary-foreground mt-auto border-t py-12">
+    <footer className="mt-auto border-t bg-card py-12 text-secondary-foreground">
       <div className="container flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="mb-1 text-sm font-semibold">NEXT DOCS</p>
@@ -64,7 +64,7 @@ function Footer() {
           </p>
         </div>
 
-        <div className="flex flex-row items-center flex-wrap gap-12">
+        <div className="flex flex-row flex-wrap items-center gap-12">
           <a
             href="https://github.com/fuma-nama/next-docs"
             rel="noreferrer noopener"
@@ -82,5 +82,5 @@ function Footer() {
         </div>
       </div>
     </footer>
-  )
+  );
 }

@@ -1,4 +1,4 @@
-import type { Metadata } from 'next/types'
+import type { Metadata } from 'next/types';
 
 export function createMetadata(override: Metadata): Metadata {
   return {
@@ -9,7 +9,7 @@ export function createMetadata(override: Metadata): Metadata {
       url: 'https://next-docs-zeta.vercel.app',
       images: '/banner.png',
       siteName: 'Next Docs',
-      ...override.openGraph
+      ...override.openGraph,
     },
     twitter: {
       card: 'summary_large_image',
@@ -17,12 +17,12 @@ export function createMetadata(override: Metadata): Metadata {
       title: override.title ?? undefined,
       description: override.description ?? undefined,
       images: '/banner.png',
-      ...override.twitter
-    }
-  }
+      ...override.twitter,
+    },
+  };
 }
 
-export const base_url =
+export const baseUrl =
   process.env.NODE_ENV === 'development'
     ? new URL('http://localhost:3000')
-    : new URL(`https://${process.env.VERCEL_URL}`)
+    : new URL(`https://${process.env.VERCEL_URL}`);

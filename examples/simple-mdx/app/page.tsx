@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import Link from 'next/link';
 
 export default function HomePage() {
   return (
@@ -8,14 +8,14 @@ export default function HomePage() {
         display: 'flex',
         flexDirection: 'column',
         textAlign: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
       }}
     >
       <h1
         style={{
           fontSize: '2rem',
           fontWeight: 'bold',
-          marginBottom: '1rem'
+          marginBottom: '1rem',
         }}
       >
         Hello World
@@ -26,7 +26,7 @@ export default function HomePage() {
           href="/docs"
           style={{
             fontWeight: '600',
-            textDecoration: 'underline'
+            textDecoration: 'underline',
           }}
         >
           /docs
@@ -34,5 +34,5 @@ export default function HomePage() {
         and see the documentation.
       </p>
     </main>
-  )
+  );
 }

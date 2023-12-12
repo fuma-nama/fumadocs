@@ -8,42 +8,56 @@ Footer, and Breadcrumb.
 
 ## Usage
 
-Pass table of contents to the component.
+Pass the current page URL and its table of contents to the component.
 
 ```mdx
-import { DocsPage } from 'next-docs-ui/page'
+import { DocsPage, DocsBody } from 'next-docs-ui/page';
 
-<DocsPage toc={toc}>
-  <MDXContent>...</MDXContent>
+<DocsPage url={url} toc={toc}>
+  <DocsBody>...</DocsBody>
 </DocsPage>
 ```
 
 <TypeTable
   type={{
+    url: {
+      type: 'string',
+      description: 'The URL of current page',
+    },
     tableOfContent: {
       type: 'object',
-      typeDescriptionLink: '#table-of-contents'
+      typeDescriptionLink: '#table-of-contents',
     },
     breadcrumb: {
       type: 'object',
-      typeDescriptionLink: '#breadcrumb'
+      typeDescriptionLink: '#breadcrumb',
     },
     toc: {
       type: 'TOCItemType[]',
       description: 'Table of contents in this page',
-      typeDescription: `{ title: string, url: string, depth: number }[]`
+      typeDescription: `{ title: string, url: string, depth: number }[]`,
     },
     footer: {
       type: 'object',
-      typeDescriptionLink: '#footer'
+      typeDescriptionLink: '#footer',
     },
     lastUpdate: {
-      type: 'Date'
-    }
+      type: 'Date',
+    },
   }}
 />
 
-<Callout title="Note">Footer is not enabled by default.</Callout>
+### Body
+
+To apply the [Typography](/docs/ui/theme#typography) styles, wrap your content in the `DocsBody` component.
+
+```mdx
+import { DocsBody } from 'next-docs-ui/page';
+
+<DocsBody>
+  <h1>This heading looks good!</h1>
+</DocsBody>
+```
 
 ### Table of Contents
 
@@ -59,12 +73,12 @@ Also, you can easily customise or disable TOC in your documentation.
     component: { type: 'ReactNode' },
     header: {
       type: 'ReactNode',
-      description: 'Custom content above TOC'
+      description: 'Custom content above TOC',
     },
     footer: {
       type: 'ReactNode',
-      description: 'Custom content below TOC'
-    }
+      description: 'Custom content below TOC',
+    },
   }}
 />
 
@@ -91,36 +105,22 @@ const time = await getGitLastEditTime(
 
 ### Footer
 
-You need to manually enable it by passing the previous and next page to the
-`footer` prop.
+Footer is a navigation element that has two buttons to jump to the next and previous pages. By default, it uses the [`findNeighbour`](/docs/headless/utils/find-neighbour) utility to find neighbour pages.
 
-To obtain these pages, it's recommended to use the
-[Get Neighbours](/docs/headless/utils/find-neighbour) Utility.
+You may override or disable it by passing `false`.
 
 <TypeTable
   type={{
     next: {
       type: 'object',
-      typeDescription: '{ name: string, url: string }'
+      typeDescription: '{ name: string, url: string }',
     },
     previous: {
       type: 'object',
-      typeDescription: '{ name: string, url: string }'
-    }
+      typeDescription: '{ name: string, url: string }',
+    },
   }}
 />
-
-#### Example
-
-```tsx
-import { findNeighbour } from 'next-docs-zeta/server'
-
-// Get the url of page
-const url = getPageUrl(page.slug)
-const neighbours = findNeighbour(tree, url)
-
-<DocsPage footer={neighbours} />
-```
 
 ### Breadcrumb
 
@@ -129,6 +129,6 @@ For now, You can't control the behaviours of breadcrumb.
 <TypeTable
   type={{
     enabled: { type: 'boolean', default: 'true' },
-    component: { type: 'ReactNode' }
+    component: { type: 'ReactNode' },
   }}
 />

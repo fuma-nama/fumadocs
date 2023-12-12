@@ -3,19 +3,44 @@ title: Theming
 description: Add Theme to Next Docs UI
 ---
 
-import { blue_theme, full_layout } from '@/components/themes.js'
-import { ThemeSwitch } from '@/components/ThemeSwitch_server'
+import { ThemeSwitch } from '@/components/theme-switch-server';
+import { blueTheme } from '@/components/themes.js';
 
 The design system was inspired on [Shadcn UI](https://ui.shadcn.com), allowing
 you to overwrite css variables.
 
-## Example
+## Usage
+
+You can import the pre-built stylesheet.
+
+```tsx
+import 'next-docs-ui/style.css';
+```
+
+For Tailwind CSS projects, please use the built-in plugin instead.
+
+```js
+const { docsUi, docsUiPlugins } = require('next-docs-ui/tailwind-plugin');
+
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  darkMode: 'class',
+  content: [
+    './node_modules/next-docs-ui/dist/**/*.js',
+    ...
+  ],
+  plugins: [...docsUiPlugins, docsUi],
+};
+```
+
+> Ensure all files inside `next-docs-ui` are included in the `content` property.
+
+## Customise
 
 You can easily customise all the properties using css variables.
 
 <div className="mb-4 flex flex-row flex-wrap gap-2">
-  <ThemeSwitch style={blue_theme}>Blue Theme</ThemeSwitch>
-  <ThemeSwitch style={full_layout}>Full Layout</ThemeSwitch>
+  <ThemeSwitch style={blueTheme}>Blue Theme</ThemeSwitch>
 </div>
 
 ```css title="global.css"
@@ -83,42 +108,19 @@ You can easily customise all the properties using css variables.
 </Accordion>
 </Accordions>
 
+### Typography
+
+We use the [Tailwind CSS Typography](https://tailwindcss.com/docs/typography-plugin) plugin internally, you may customise it with CSS.
+
+Our Tailwind CSS plugin overrides the default configuration for Typography plugin. You may use the `prose` utility directly.
+
+```tsx
+<div className="prose">...</div>
+```
+
 ## Global Styles
 
-By importing `next-docs-ui/style.css` the default border, text and background
+By importing `next-docs-ui/style.css`, the default border, text and background
 colors will be changed.
 
-CSS selectors such as `[data-line]` has special meanings for codeblock styling.
-
-## Tailwind CSS
-
-You can use Next Docs UI with Tailwind CSS.
-
-Since Next Docs UI uses Tailwind CSS for styling, the `nd-` prefix is added to
-all classes in order to prevent conflicts.
-
-In addition, you may copy the configuration below to share the same design
-system with it.
-
-<Accordions>
-  <Accordion title="Recommended Configuration">
-
-```js title="tailwind.config.js"
-|reference:../../examples/advanced/tailwind.config.js|
-```
-
-  </Accordion>
-</Accordions>
-
-### Fix Preflight
-
-Some global styles might be overwritten by
-[Tailwind CSS Preflight](https://tailwindcss.com/docs/preflight).
-
-Since Next Docs UI already perform the preflight, you can remove
-`@tailwind base` from your stylesheet.
-
-```css
-@tailwind components;
-@tailwind utilities;
-```
+The official Tailwind CSS plugin also includes new colors and extra utilities including `steps` and `step`.

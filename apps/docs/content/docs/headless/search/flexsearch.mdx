@@ -13,31 +13,28 @@ option since it's easier to setup and totally free.
 
 Note: If you're using a CMS, you should use the API provided by the CMS instead.
 
-Assumes you're using Contentlayer.
-
 1. Create the API Route.
 
 ```tsx title="app/api/search/route.ts"
-import { allDocs } from 'contentlayer/generated'
-import { createSearchAPI } from 'next-docs-zeta/search/server'
+import { createSearchAPI } from 'next-docs-zeta/search/server';
 
 export const { GET } = createSearchAPI('simple', {
-  indexes: allDocs.map(docs => ({
+  indexes: allDocs.map((docs) => ({
     title: docs.title,
-    content: docs.body.raw,
-    url: '/docs/' + docs.slug
-  }))
-})
+    content: docs.body.raw, // Raw Content
+    url: docs.url,
+  })),
+});
 ```
 
 2. Create a Search Dialog.
 
 ```tsx
-import { useDocsSearch } from 'next-docs-zeta/search/client'
+import { useDocsSearch } from 'next-docs-zeta/search/client';
 
 export function Dialog() {
-  const { search, setSearch, query } = useDocsSearch()
-  return <div>...</div>
+  const { search, setSearch, query } = useDocsSearch();
+  return <div>...</div>;
 }
 ```
 
@@ -89,58 +86,36 @@ with Next Docs UI.
     id: { type: 'string' },
     url: { type: 'string' },
     type: { type: 'enum', typeDescription: "'page' | 'heading' | 'text'" },
-    content: { type: 'string' }
+    content: { type: 'string' },
   }}
 />
 
 ## Advanced Search
 
-Currently used by the official documentation, returns a more detailed result
-with matching headings and contents.
+Returns a more detailed result with matching headings and contents.
 
-It extracts structured data from a markdown/mdx document, and index it with
-Flexsearch. With the `structure` function exported from
-`next-docs-zeta/mdx-plugins`.
+It accepts structured data procesed from a markdown/MDX document, and index it with
+Flexsearch. You can extract the structured data using the [Structure](/docs/headless/mdx/structure) remark plugin or [`structure()`](/docs/headless/utils/structure) function.
 
-### Known Issues
-
-- Can't extract content from rehype plugin specific content (you can pass remark
-  plugins)
+Notice that it cannot extract content from rehype-specific content (remark plugins are supported)
 
 ### Usage
 
-Assume you are using Contentlayer with the default configuration.
+Same as simple search, but requires the `structuredData` property.
 
 ```ts
-import { allDocs } from 'contentlayer/generated'
-import { createSearchAPI } from 'next-docs-zeta/search/server'
+import { allDocs } from 'contentlayer/generated';
+import { createSearchAPI } from 'next-docs-zeta/search/server';
 
 export const { GET } = await createSearchAPI('advanced', {
-  indexes: allDocs.map(docs => ({
+  indexes: allDocs.map((docs) => ({
     id: docs._id,
     title: docs.title,
-    content: docs.body.raw,
-    url: '/docs/' + docs.slug
-
-    // You can preprocess the content with `structure`
-    //structuredData: docs.structuredData
-  }))
-})
+    url: '/docs/' + docs.slug,
+    structuredData: docs.structuredData,
+  })),
+});
 ```
-
-<Callout title="Tip" className="mt-4">
-If you have custom remark plugins enabled, such as
-`remark-math`, you have to manually structurize the document with these
-plugins passed into the function:
-
-```ts
-import { structure } from 'next-docs-zeta/mdx-plugins'
-import remarkMath from 'remark-math'
-
-structure(page.body.raw, [remarkMath])
-```
-
-</Callout>
 
 ### Tag Filter
 
@@ -150,17 +125,17 @@ documentation.
 > Next Docs UI's Search Dialog doesn't support tag filter.
 
 ```ts
-import { allDocs } from 'contentlayer/generated'
-import { createSearchAPI } from 'next-docs-zeta/search/server'
+import { allDocs } from 'contentlayer/generated';
+import { createSearchAPI } from 'next-docs-zeta/search/server';
 
 export const { GET } = createSearchAPI('advanced', {
-  indexes: allDocs.map(page => ({
+  indexes: allDocs.map((page) => ({
     ...page,
-    tag: 'value'
+    tag: 'value',
   })),
-  tag: true
-})
+  tag: true,
+});
 
 // Pass `tag` in your custom search dialog
-const { search, setSearch, query } = useDocsSearch(locale, tag)
+const { search, setSearch, query } = useDocsSearch(locale, tag);
 ```

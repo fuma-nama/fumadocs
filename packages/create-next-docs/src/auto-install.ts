@@ -1,28 +1,28 @@
-import { spawn } from 'cross-spawn'
+import { spawn } from 'cross-spawn';
 
-type PackageManager = 'npm' | 'pnpm' | 'yarn' | 'bun'
+type PackageManager = 'npm' | 'pnpm' | 'yarn' | 'bun';
 
 export function getPackageManager(): PackageManager {
-  const userAgent = process.env.npm_config_user_agent || ''
+  const userAgent = process.env.npm_config_user_agent || '';
 
   if (userAgent.startsWith('yarn')) {
-    return 'yarn'
+    return 'yarn';
   }
 
   if (userAgent.startsWith('pnpm')) {
-    return 'pnpm'
+    return 'pnpm';
   }
 
   if (userAgent.startsWith('bun')) {
-    return 'bun'
+    return 'bun';
   }
 
-  return 'npm'
+  return 'npm';
 }
 
 export function autoInstall(
   manager: PackageManager,
-  dest: string
+  dest: string,
 ): Promise<void> {
   return new Promise((res, reject) => {
     const installProcess = spawn(manager, ['install'], {
@@ -30,17 +30,17 @@ export function autoInstall(
       env: {
         ...process.env,
         NODE_ENV: 'development',
-        DISABLE_OPENCOLLECTIVE: '1'
+        DISABLE_OPENCOLLECTIVE: '1',
       },
-      cwd: dest
-    })
+      cwd: dest,
+    });
 
-    installProcess.on('close', code => {
+    installProcess.on('close', (code) => {
       if (code !== 0) {
-        reject('Install failed')
+        reject(new Error('Install failed'));
       } else {
-        res()
+        res();
       }
-    })
-  })
+    });
+  });
 }

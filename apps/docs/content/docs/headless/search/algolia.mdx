@@ -41,7 +41,6 @@ paragraphs are all indexed as a record, and the attribute for distinct is
    sync(client, {
      documents: allDocs.map(docs => ({
        ...docs,
-       url: getPageUrl(docs.slug),
        structured: structure(docs.body.raw)
      }))
    })

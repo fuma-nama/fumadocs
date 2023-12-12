@@ -1,94 +1,95 @@
-import { ImageResponse } from 'next/og'
-import type { NextRequest } from 'next/server'
+/* eslint-disable react/no-unknown-property -- Tailwind CSS `tw` property */
+import { ImageResponse } from 'next/og';
+import type { NextRequest } from 'next/server';
 
-type Mode = {
-  param: string
-  name: string
+interface Mode {
+  param: string;
+  name: string;
 }
 
 const modes: Mode[] = [
   {
     param: 'headless',
-    name: 'Next Docs Zeta'
+    name: 'Next Docs Zeta',
   },
   {
     param: 'ui',
-    name: 'Next Docs UI'
+    name: 'Next Docs UI',
   },
   {
     param: 'mdx',
-    name: 'Next Docs MDX'
-  }
-]
+    name: 'Next Docs MDX',
+  },
+];
 
-export const runtime = 'edge'
+export const runtime = 'edge';
 
-const bold = fetch(new URL('./inter-bold.woff', import.meta.url)).then(res =>
-  res.arrayBuffer()
-)
+const bold = fetch(new URL('./inter-bold.woff', import.meta.url)).then((res) =>
+  res.arrayBuffer(),
+);
 
-const foreground = 'hsl(0 0% 98%)'
-const mutedForeground = 'hsl(0 0% 63.9%)'
-const background = 'rgba(10, 10, 10)'
+const foreground = 'hsl(0 0% 98%)';
+const mutedForeground = 'hsl(0 0% 63.9%)';
+const background = 'rgba(10, 10, 10)';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { mode: string } }
-) {
-  const { searchParams } = new URL(request.url!)
+  { params }: { params: { mode: string } },
+): Promise<ImageResponse> {
+  const { searchParams } = request.nextUrl;
   const title = searchParams.get('title'),
-    description = searchParams.get('description')
+    description = searchParams.get('description');
 
   return new ImageResponse(
     OG({
       title: title ?? 'Next Docs',
       description: description ?? 'The Documentation Framework',
-      mode: modes.find(mode => mode.param === params.mode) ?? modes[0]
+      mode: modes.find((mode) => mode.param === params.mode) ?? modes[0],
     }),
     {
       width: 1200,
       height: 630,
-      fonts: [{ name: 'Inter', data: await bold, weight: 700 }]
-    }
-  )
+      fonts: [{ name: 'Inter', data: await bold, weight: 700 }],
+    },
+  );
 }
 
 function OG({
   title,
   description,
-  mode
+  mode,
 }: {
-  mode: Mode
-  title: string
-  description: string
-}) {
+  mode: Mode;
+  title: string;
+  description: string;
+}): JSX.Element {
   return (
     <div
-      tw="flex flex-col w-full h-full p-12"
       style={{
         color: foreground,
-        background
+        background,
       }}
+      tw="flex flex-col w-full h-full p-12"
     >
       <div
-        tw="flex flex-col justify-center rounded-2xl p-4 shadow-2xl shadow-purple-600"
         style={{
           background:
-            'linear-gradient(to right bottom, rgb(150, 200, 255), rgb(200, 100, 255))'
+            'linear-gradient(to right bottom, rgb(150, 200, 255), rgb(200, 100, 255))',
         }}
+        tw="flex flex-col justify-center rounded-2xl p-4 shadow-2xl shadow-purple-600"
       >
         <div
           tw="flex flex-col rounded-2xl p-12"
           style={{
             border: '1px rgba(156,163,175,0.3)',
-            background
+            background,
           }}
         >
           <p tw="font-bold text-6xl">{title}</p>
           <p
             tw="text-4xl"
             style={{
-              color: mutedForeground
+              color: mutedForeground,
             }}
           >
             {description}
@@ -98,14 +99,14 @@ function OG({
 
       <div tw="flex flex-row items-center mt-auto p-4">
         <svg
-          width="60"
-          height="60"
-          viewBox="0 0 24 24"
           fill="currentColor"
+          height="60"
           stroke="currentColor"
-          strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
+          strokeWidth="2"
+          viewBox="0 0 24 24"
+          width="60"
         >
           <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
           <path d="M5 3v4" />
@@ -116,5 +117,5 @@ function OG({
         <p tw="font-bold ml-4 text-4xl">{mode.name}</p>
       </div>
     </div>
-  )
+  );
 }
