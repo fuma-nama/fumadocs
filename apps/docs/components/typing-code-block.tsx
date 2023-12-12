@@ -1,4 +1,4 @@
-import { Pre } from 'next-docs-ui/mdx-server';
+import { Pre } from 'next-docs-ui/mdx/pre';
 import { useMemo, type ComponentPropsWithoutRef } from 'react';
 import { getHighlighter } from 'shikiji';
 

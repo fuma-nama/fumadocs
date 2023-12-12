@@ -1,33 +1,7 @@
 import Link from 'next-docs-zeta/link';
-import NextImage, { type ImageProps } from 'next/image';
-import type {
-  HTMLAttributes,
-  ImgHTMLAttributes,
-  TableHTMLAttributes,
-} from 'react';
-import { Card, Cards } from '@/components/mdx/card';
-import { Heading } from '@/components/mdx/heading';
-import { cn } from '@/utils/cn';
-import { defaultImageSizes } from '@/utils/config';
-
-function Image(props: ImgHTMLAttributes<HTMLImageElement>): JSX.Element {
-  return <NextImage sizes={defaultImageSizes} {...(props as ImageProps)} />;
-}
-
-function Table(props: TableHTMLAttributes<HTMLTableElement>): JSX.Element {
-  return (
-    <div className="relative overflow-auto">
-      <table {...props} />
-    </div>
-  );
-}
-
-function MDXContent({
-  className,
-  ...props
-}: HTMLAttributes<HTMLDivElement>): JSX.Element {
-  return <div className={cn('prose', className)} {...props} />;
-}
+import { Card, Cards } from '@/mdx/card';
+import { Heading } from '@/mdx/heading';
+import { Image, Table } from '@/mdx/base';
 
 const defaultMdxComponents = {
   Card,
@@ -55,14 +29,4 @@ const defaultMdxComponents = {
   table: Table,
 };
 
-export {
-  defaultMdxComponents as default,
-  Link,
-  defaultImageSizes,
-  Heading,
-  Card,
-  Cards,
-  Image,
-  Table,
-  MDXContent,
-};
+export { defaultMdxComponents as default };

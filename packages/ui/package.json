@@ -21,6 +21,10 @@
       "import": "./dist/components/*.js",
       "types": "./dist/components/*.d.mts"
     },
+    "./mdx/*": {
+      "import": "./dist/mdx/*.js",
+      "types": "./dist/mdx/*.d.mts"
+    },
     "./*": {
       "import": "./dist/*.js",
       "types": "./dist/*.d.mts"
@@ -33,6 +37,9 @@
       ],
       "components/*": [
         "./dist/components/*.d.mts"
+      ],
+      "mdx/*": [
+        "./dist/mdx/*.d.mts"
       ],
       "*": [
         "./dist/*.d.mts"

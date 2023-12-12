@@ -2,8 +2,7 @@ import { Content } from './content';
 import { getPage } from '@/app/source';
 import { allDocs } from 'contentlayer/generated';
 import type { Metadata } from 'next';
-import { MDXContent } from 'next-docs-ui/mdx';
-import { DocsPage } from 'next-docs-ui/page';
+import { DocsPage, DocsBody } from 'next-docs-ui/page';
 import { getTableOfContents } from 'next-docs-zeta/server';
 import { notFound } from 'next/navigation';
 
@@ -22,10 +21,10 @@ export default async function Page({
 
   return (
     <DocsPage url={page.url} toc={toc}>
-      <MDXContent>
+      <DocsBody>
         <h1>{page.title}</h1>
         <Content code={page.body.code} />
-      </MDXContent>
+      </DocsBody>
     </DocsPage>
   );
 }

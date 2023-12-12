@@ -1,3 +1,4 @@
+'use client';
 import { CheckIcon, CopyIcon } from 'lucide-react';
 import type { ButtonHTMLAttributes, HTMLAttributes } from 'react';
 import { forwardRef, useCallback, useEffect, useRef, useState } from 'react';

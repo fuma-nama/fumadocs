@@ -2,9 +2,9 @@ import { GithubIcon } from 'lucide-react';
 import type { PageTree } from 'next-docs-zeta/server';
 import { type ReactNode } from 'react';
 import type { SidebarProps } from '@/components/sidebar';
-import type { NavItemProps, NavLinkProps } from '@/components/nav';
+import type { NavItemProps, NavLinkProps } from './nav';
 import { replaceOrDefault } from './utils/replace-or-default';
-import { setPageTree } from './global';
+import { setPageTree } from './utils/global';
 
 const { Nav, LayoutContextProvider, Sidebar } = await import('./layout.client');
 

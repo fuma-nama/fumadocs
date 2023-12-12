@@ -1,7 +1,6 @@
 import { getPage, pages } from '@/app/source';
 import type { Metadata } from 'next';
-import { MDXContent } from 'next-docs-ui/mdx';
-import { DocsPage } from 'next-docs-ui/page';
+import { DocsPage, DocsBody } from 'next-docs-ui/page';
 import { notFound } from 'next/navigation';
 
 export default async function Page({
@@ -19,10 +18,10 @@ export default async function Page({
 
   return (
     <DocsPage url={page.url} toc={page.data.toc}>
-      <MDXContent>
+      <DocsBody>
         <h1>{page.matter.title}</h1>
         <MDX />
-      </MDXContent>
+      </DocsBody>
     </DocsPage>
   );
 }

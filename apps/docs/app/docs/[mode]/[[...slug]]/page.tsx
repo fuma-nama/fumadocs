@@ -2,8 +2,8 @@ import { resolve } from 'node:url';
 import { ExternalLinkIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import type { Page } from 'next-docs-mdx/types';
-import { Card, Cards, MDXContent } from 'next-docs-ui/mdx';
-import { DocsPage } from 'next-docs-ui/page';
+import { Card, Cards } from 'next-docs-ui/mdx/card';
+import { DocsPage, DocsBody } from 'next-docs-ui/page';
 import { getGithubLastEdit } from 'next-docs-zeta/server';
 import { notFound } from 'next/navigation';
 import type { DocsUtils } from '@/utils/source';
@@ -58,7 +58,7 @@ export default async function Page({
         ),
       }}
     >
-      <MDXContent>
+      <DocsBody>
         <div className="not-prose mb-12">
           <h1 className="mb-4 text-3xl font-bold text-foreground sm:text-4xl">
             {page.matter.title}
@@ -73,7 +73,7 @@ export default async function Page({
         ) : (
           <page.data.default />
         )}
-      </MDXContent>
+      </DocsBody>
     </DocsPage>
   );
 }

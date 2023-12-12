@@ -8,13 +8,13 @@ Footer, and Breadcrumb.
 
 ## Usage
 
-Pass table of contents to the component.
+Pass the current page URL and its table of contents to the component.
 
 ```mdx
-import { DocsPage } from 'next-docs-ui/page';
+import { DocsPage, DocsBody } from 'next-docs-ui/page';
 
 <DocsPage url={url} toc={toc}>
-  <MDXContent>...</MDXContent>
+  <DocsBody>...</DocsBody>
 </DocsPage>
 ```
 
@@ -46,6 +46,18 @@ import { DocsPage } from 'next-docs-ui/page';
     },
   }}
 />
+
+### Body
+
+To apply the [Typography](/docs/ui/theme#typography) styles, wrap your content in the `DocsBody` component.
+
+```mdx
+import { DocsBody } from 'next-docs-ui/page';
+
+<DocsBody>
+  <h1>This heading looks good!</h1>
+</DocsBody>
+```
 
 ### Table of Contents
 

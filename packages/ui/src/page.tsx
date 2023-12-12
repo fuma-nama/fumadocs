@@ -6,9 +6,10 @@ import {
   type TOCItemType,
 } from 'next-docs-zeta/server';
 import Link from 'next/link';
-import type { ReactNode } from 'react';
+import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import { replaceOrDefault } from './utils/replace-or-default';
-import { getPageTree } from './global';
+import { getPageTree } from './utils/global';
+import { cn } from './utils/cn';
 
 // We can keep the "use client" directives with dynamic imports
 // Next.js bundler should handle this automatically
@@ -128,3 +129,15 @@ function Footer({ next, previous }: FooterProps): JSX.Element {
     </div>
   );
 }
+
+/**
+ * Add typography styles
+ */
+export const DocsBody = forwardRef<
+  HTMLDivElement,
+  HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div ref={ref} className={cn('prose', className)} {...props} />
+));
+
+DocsBody.displayName = 'DocsBody';

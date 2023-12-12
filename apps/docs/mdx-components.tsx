@@ -1,11 +1,12 @@
-import { Wrapper } from '@/components/preview/wrapper';
 import type { MDXComponents } from 'mdx/types';
 import { Accordion, Accordions } from 'next-docs-ui/components/accordion';
 import { Callout } from 'next-docs-ui/components/callout';
 import { Tab, Tabs } from 'next-docs-ui/components/tabs';
 import { TypeTable } from 'next-docs-ui/components/type-table';
-import defaultComponents, { Pre } from 'next-docs-ui/mdx-server';
+import defaultComponents from 'next-docs-ui/mdx/default';
+import { Pre } from 'next-docs-ui/mdx/pre';
 import type { ReactNode } from 'react';
+import { Wrapper } from '@/components/preview/wrapper';
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {

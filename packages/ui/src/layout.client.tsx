@@ -1,5 +1,5 @@
 'use client';
 
 export { LayoutContextProvider } from './contexts/tree';
-export { Nav } from './components/nav';
+export { Nav } from './nav';
 export { Sidebar } from './components/sidebar';

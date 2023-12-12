@@ -14,7 +14,7 @@ you to overwrite css variables.
 You can import the pre-built stylesheet.
 
 ```tsx
-import 'next-docs-ui/style.css'
+import 'next-docs-ui/style.css';
 ```
 
 For Tailwind CSS projects, please use the built-in plugin instead.
@@ -107,6 +107,16 @@ You can easily customise all the properties using css variables.
 
 </Accordion>
 </Accordions>
+
+### Typography
+
+We use the [Tailwind CSS Typography](https://tailwindcss.com/docs/typography-plugin) plugin internally, you may customise it with CSS.
+
+Our Tailwind CSS plugin overrides the default configuration for Typography plugin. You may use the `prose` utility directly.
+
+```tsx
+<div className="prose">...</div>
+```
 
 ## Global Styles
 
