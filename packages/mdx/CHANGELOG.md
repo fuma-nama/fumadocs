@@ -1,5 +1,11 @@
 # next-docs-mdx
 
+## 6.0.1
+
+### Patch Changes
+
+- next-docs-zeta@6.0.1
+
 ## 6.0.0
 
 ### Major Changes
