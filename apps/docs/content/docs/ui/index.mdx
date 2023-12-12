@@ -42,79 +42,94 @@ next-docs-ui next-docs-zeta
 
 <h3>Configuration</h3>
 
-Next Docs UI doesn't provide static generation directly. You can use a source
-you prefer, such as [Contentlayer](https://www.contentlayer.dev) which is
-supported by default. **This guide is written for Contentlayer.**
+Next Docs UI is unopinionated and doesn't provide content management features. You can choose a source
+you prefer, such as [Contentlayer](https://contentlayer.dev) and `next-docs-mdx`.
 
-```package-install
-contentlayer next-contentlayer
+This is a list of sources supported by Next Docs:
+
+- [Next Docs MDX](/docs/mdx)
+- [Contentlayer](/docs/headless/contentlayer/config)
+
+You have to configure the library correctly following their setup guide before continuing.
+
+<h3>Styles</h3>
+
+You can import the pre-built stylesheet in the root layout.
+
+```ts
+import 'next-docs-ui/style.css';
 ```
 
-1. **Configure Contentlayer**
+For Tailwind CSS projects, you may use [the official plugin](/docs/ui/theme) instead.
 
-Follow their [Getting Started](https://contentlayer.dev/docs/getting-started)
-guide to setup Contentlayer for Next.js Project.
+> It doesn't come with a default font, you may choose one from `next/font`.
 
-After setting up Contentlayer, copy the default Contentlayer configuration.
+<h3>Root Layout</h3>
 
-```ts {4} title="contentlayer.config.ts"
-|reference:../../examples/simple/contentlayer.config.ts|
+Wrap the entire application inside [Root Provider](/docs/ui/blocks/root-provider).
+
+```tsx {8}
+import { RootProvider } from 'next-docs-ui/provider';
+import type { ReactNode } from 'react';
+
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        <RootProvider>{children}</RootProvider>
+      </body>
+    </html>
+  );
+}
 ```
 
-2. **Build Page Tree**
+<h3>Layout</h3>
 
-```ts title="app/source.ts"
-|reference:../../examples/simple/app/source.ts|
+Create a new catch-all route for our docs, and give it a proper layout.
+
+```tsx title="app/docs/[[...slug]]/layout.tsx"
+import { DocsLayout } from 'next-docs-ui/layout';
+import type { ReactNode } from 'react';
+
+export default function RootDocsLayout({ children }: { children: ReactNode }) {
+  return (
+    <DocsLayout tree={tree} nav={{ title: 'My App' }}>
+      {children}
+    </DocsLayout>
+  );
+}
 ```
 
-Make sure you've generated documents correctly before moving to next step.
+> `tree` refers to [Page Tree](/docs/headless/page-tree), which should be provided by your data source.
 
-<h3>Creating Routes</h3>
+<h3>Page</h3>
 
-Copy & Paste required files.
+For the `page.tsx`, it may vary depending on your source. You should manually configure static rendering with `generateStaticParams` and metadata with `generateMetadata`.
+
+Make sure to wrap your content in the [Page](/docs/ui/blocks/page) component. You may prefer [MDX Content](/docs/ui/components/mdx-content) to configure typography styles.
 
 <Accordions>
-
-<Accordion title="Root Layout">
-
-```tsx title="app/layout.tsx"
-|reference:../../examples/simple/app/layout.tsx|
-```
-
-</Accordion>
-
-<Accordion title="Docs Layout">
-
-```tsx title="app/docs/layout.tsx"
-|reference:../../examples/simple/app/docs/layout.tsx|
-```
-
-</Accordion>
-
-<Accordion title="Docs Page">
+<Accordion title="Example with Next Docs MDX">
 
 ```tsx title="app/docs/[[...slug]]/page.tsx"
-|reference:../../examples/simple/app/docs/[[...slug]]/page.tsx|
+|reference:../../examples/simple-mdx/app/docs/[[...slug]]/page.tsx|
 ```
 
 </Accordion>
+</Accordions>
 
-<Accordion title="MDX Content">
+<h3>Search</h3>
 
-```tsx title="app/docs/[[...slug]]/content.tsx"
-|reference:../../examples/simple/app/docs/[[...slug]]/content.tsx|
-```
+By default, it uses the built-in document search based on Flexsearch. [Learn to configure Document Search](/docs/headless/search/flexsearch) for your data source.
 
-</Accordion>
-
-<Accordion title="Search API Route">
+<Accordions>
+<Accordion title="Example with Next Docs MDX">
 
 ```tsx title="app/api/search/route.ts"
-|reference:../../examples/simple/app/api/search/route.ts|
+|reference:../../examples/simple-mdx/app/api/search/route.ts|
 ```
 
 </Accordion>
-
 </Accordions>
 
 </Tab>
