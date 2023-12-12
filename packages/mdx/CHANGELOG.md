@@ -1,5 +1,107 @@
 # next-docs-mdx
 
+## 6.0.0
+
+### Major Changes
+
+- 69f8abf: **Make file paths relative to `rootDir` when resolving files**
+
+  For a more simplified usage, the resolved file paths will be relative to `rootDir`.
+
+  You can now generate slugs automatically depending on the root directory you have configured.
+
+  ```ts
+  const utils = fromMap(map, {
+    rootDir: 'ui',
+    schema: {
+      frontmatter: frontmatterSchema,
+    },
+  });
+  ```
+
+  The configuration above will generate `/hello` slugs for a file named `/content/ui/hello.mdx`, while the previous one generates `/ui/hello`.
+
+- 9ef047d: **Pre-bundle page urls into raw pages.**
+
+  This means you don't need `getPageUrl` anymore for built-in adapters, including `next-docs-mdx` and Contentlayer. It is now replaced by the `url` property from the pages array provided by your adapter.
+
+  Due to this change, your old configuration might not continues to work.
+
+  ```diff
+  import { fromMap } from 'next-docs-mdx/map'
+
+  fromMap({
+  -  slugs: ...
+  +  getSlugs: ...
+  })
+  ```
+
+  For Contentlayer, the `getUrl` option is now moved to `createConfig`.
+
+- 1c187b9: **Support intelligent schema types**
+
+  The `validate` options is now renamed to `schema`.
+
+  ```ts
+  import { defaultSchemas, fromMap } from 'next-docs-mdx/map';
+
+  const utils = fromMap(map, {
+    rootDir: 'docs/ui',
+    baseUrl: '/docs/ui',
+    schema: {
+      frontmatter: defaultSchemas.frontmatter.extend({
+        preview: z.string().optional(),
+      }),
+    },
+  });
+  ```
+
+  The `frontmatter` field on pages should be automatically inferred to your Zod schema type.
+
+- 52b24a6: **Remove `/docs` from default root content path**
+
+  Previously, the default root content path is `./content/docs`. All your documents must be placed under the root directory.
+
+  Since this update, it is now `./content` by default. To keep the old behaviours, you may manually specify `rootContentPath`.
+
+  ```js
+  const withNextDocs = createNextDocs({
+    rootContentPath: './content/docs',
+  });
+  ```
+
+  **Notice that due to this change, your `baseUrl` property will be `/` by default**
+
+  ```diff
+  const withNextDocs = createNextDocs({
+  +  baseUrl: "/docs"
+  })
+  ```
+
+- 2ff7581: **Rename configuration options**
+
+  The options of `createNextDocs` is now renamed to be more flexible and straightforward.
+
+  | Old             | New                                |
+  | --------------- | ---------------------------------- |
+  | `dataExports`   | `mdxOptions.valueToExport`         |
+  | `pluginOptions` | `mdxOptions.rehypeNextDocsOptions` |
+
+  `rehypePlugins` and `remarkPlugins` can also be a function that accepts and returns plugins.
+
+### Minor Changes
+
+- 55a2321: **Use `@mdx-js/mdx` to process MDX/markdown files.**
+
+  You no longer need `@next/loader` and `@mdx-js/loader` to be installed on your project, `next-docs-mdx` will process files with `@mdx-js/mdx` directly.
+
+  _This change will not break most of the projects_
+
+### Patch Changes
+
+- Updated dependencies [9ef047d]
+  - next-docs-zeta@6.0.0
+
 ## 5.0.0
 
 ### Minor Changes
