@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 6.0.1
+
+### Patch Changes
+
+- 515a3e1: Fix inline code blocks are not highlighted
+  - next-docs-zeta@6.0.1
+
 ## 6.0.0
 
 ### Major Changes
