@@ -1,5 +1,102 @@
 # next-docs-ui
 
+## 6.0.0
+
+### Major Changes
+
+- 983ede8: **Remove `not-found` component**
+
+  The `not-found` component was initially intended to be the default 404 page. However, we found that the Next.js default one is good enough. For advanced cases, you can always build your own 404 page.
+
+- ebe8d9f: **Support Tailwind CSS plugin usage**
+
+  If you are using Tailwind CSS for your docs, it's now recommended to use the official plugin instead.
+
+  ```js
+  const { docsUi, docsUiPlugins } = require('next-docs-ui/tailwind-plugin');
+
+  /** @type {import('tailwindcss').Config} */
+  module.exports = {
+    darkMode: 'class',
+    content: [
+      './components/**/*.{ts,tsx}',
+      './app/**/*.{ts,tsx}',
+      './content/**/*.mdx',
+      './node_modules/next-docs-ui/dist/**/*.js',
+    ],
+    plugins: [...docsUiPlugins, docsUi],
+  };
+  ```
+
+  The `docsUi` plugin adds necessary utilities & colors, and `docsUiPlugins` are its dependency plugins which should not be missing.
+
+- 7d89e83: **Add required property `url` to `<DocsPage />` component**
+
+  You must pass the URL of current page to `<DocsPage />` component.
+
+  ```diff
+  export default function Page({ params }) {
+    return (
+      <DocsPage
+  +      url={page.url}
+        toc={page.data.toc}
+      >
+        ...
+      </DocsPage>
+    )
+  }
+  ```
+
+  **`footer` property is now optional**
+
+  Your `footer` property in `<DocsPage />` will be automatically generated if not specified.
+
+  ```ts
+  findNeighbour(tree, url);
+  ```
+
+- 0599d50: **Separate MDX components**
+
+  Previously, you can only import the code block component from `next-docs-ui/mdx` (Client Component) and `next-docs-ui/mdx-server` (Server Component).
+
+  This may lead to confusion, hence, it is now separated into multiple files. You can import these components regardless it is either a client or a server component.
+
+  Notice that `MDXContent` is now renamed to `DocsBody`, you must import it from `next-docs-ui/page` instead.
+
+  ```diff
+  - import { MDXContent } from "next-docs-ui/mdx"
+  - import { MDXContent } from "next-docs-ui/mdx-server"
+
+  + import { DocsBody } from "next-docs-ui/page"
+  ```
+
+  ```diff
+  - import { Card, Cards } from "next-docs-ui/mdx"
+  + import { Card, Cards } from "next-docs-ui/mdx/card"
+
+  - import { Pre } from "next-docs-ui/mdx"
+  + import { Pre } from "next-docs-ui/mdx/pre"
+
+  - import { Heading } from "next-docs-ui/mdx"
+  + import { Heading } from "next-docs-ui/mdx/heading"
+
+  - import defaultComponents from "next-docs-ui/mdx"
+  + import defaultComponents from "next-docs-ui/mdx/default-client"
+
+  - import defaultComponents from "next-docs-ui/mdx-server"
+  + import defaultComponents from "next-docs-ui/mdx/default"
+  ```
+
+### Minor Changes
+
+- 56a35ce: Support custom `searchOptions` in Algolia Search Dialog
+
+### Patch Changes
+
+- 5c98f7f: Support custom attributes to `pre` element inside code blocks
+- Updated dependencies [9ef047d]
+  - next-docs-zeta@6.0.0
+
 ## 5.0.0
 
 ### Minor Changes
