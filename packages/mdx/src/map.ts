@@ -31,6 +31,8 @@ interface UtilsOptions extends BuilderOptions {
   pageTreeOptions: BuildPageTreeOptions;
 }
 
+type PartialUtilsOptions = Partial<UtilsOptions>;
+
 interface RootConfig {
   languages: string[] | undefined;
   schema: {
@@ -56,23 +58,21 @@ type GetSchemaType<Schema, DefaultValue> = Schema extends AnyZodObject
 /**
  * Get accurate options type from partial options
  */
-interface TransformPartialOptions<TOptions extends Partial<UtilsOptions>> {
+interface TransformPartialOptions<TOptions extends PartialUtilsOptions> {
   languages: TOptions['languages'] extends string[] ? string[] : undefined;
-  schema: TOptions['schema'] extends Partial<SchemaOptions>
-    ? {
-        frontmatter: GetSchemaType<
-          TOptions['schema']['frontmatter'],
-          DefaultFrontmatter
-        >;
-        meta: GetSchemaType<TOptions['schema']['meta'], DefaultMetaData>;
-      }
-    : {
-        frontmatter: DefaultFrontmatter;
-        meta: DefaultMetaData;
-      };
+  schema: {
+    frontmatter: GetSchemaType<
+      NonNullable<TOptions['schema']>['frontmatter'],
+      DefaultFrontmatter
+    >;
+    meta: GetSchemaType<
+      NonNullable<TOptions['schema']>['meta'],
+      DefaultMetaData
+    >;
+  };
 }
 
-function fromMap<TOptions extends Partial<UtilsOptions>>(
+function fromMap<TOptions extends PartialUtilsOptions>(
   map: Record<string, unknown>,
   options?: TOptions,
 ): Utils<TransformPartialOptions<TOptions>> {
