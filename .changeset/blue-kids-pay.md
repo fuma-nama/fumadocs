@@ -1,7 +1,6 @@
 ---
 'next-docs-zeta': major
 'next-docs-mdx': major
-'next-docs-ui': major
 ---
 
 **Pre-bundle page urls into raw pages.**

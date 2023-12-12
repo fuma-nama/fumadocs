@@ -1,5 +1,5 @@
 ---
-'next-docs-ui': major
+'next-docs-mdx': major
 ---
 
 **Remove `/docs` from default root content path**
