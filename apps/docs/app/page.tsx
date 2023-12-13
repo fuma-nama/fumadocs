@@ -1,7 +1,6 @@
 import { cva } from 'class-variance-authority';
 import {
   BatteryChargingIcon,
-  CircleIcon,
   FileTextIcon,
   GithubIcon,
   LayoutIcon,
@@ -17,12 +16,12 @@ import {
 import { File, Files } from 'next-docs-ui/components/files';
 import Image from 'next/image';
 import Link from 'next/link';
-import type { HTMLAttributes, SVGProps } from 'react';
+import type { SVGProps } from 'react';
 import { cn } from '@/utils/cn';
 import Example from '@/public/example-2.png';
 import { buttonVariants } from '@/components/ui/button';
 import { CodeBlock } from '@/components/typing-code-block';
-import { Previews, Rain } from './page.client';
+import { CreateAppAnimation, Previews, Rain } from './page.client';
 
 const badgeVariants = cva(
   'mb-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary font-medium text-primary-foreground',
@@ -470,13 +469,10 @@ export default function HomePage(): JSX.Element {
             <div className="relative flex flex-col border-b px-6 py-12 md:border-r md:py-16">
               <div className={cn(badgeVariants())}>1</div>
               <h3 className="text-xl font-bold">Create it.</h3>
-              <p className="text-muted-foreground">
+              <p className="mb-8 text-muted-foreground">
                 Initialize a new docs with a command.
               </p>
-              <div className="mr-4">
-                <CodeBlock lang="bash" code="pnpm create next-docs-app" />
-              </div>
-              <LaunchAppWindow className="z-[2] -mt-14 ml-auto min-h-[120px] w-fit" />
+              <CreateAppAnimation />
             </div>
             <div className="relative flex flex-col border-b px-6 py-12 md:py-16">
               <div className={cn(badgeVariants())}>2</div>
@@ -810,27 +806,6 @@ function Search(): JSX.Element {
           User Guide
         </div>
       </div>
-    </div>
-  );
-}
-
-function LaunchAppWindow(props: HTMLAttributes<HTMLDivElement>): JSX.Element {
-  return (
-    <div
-      {...props}
-      className={cn(
-        'overflow-hidden rounded-md border bg-background',
-        props.className,
-      )}
-    >
-      <div className="relative flex h-6 flex-row items-center border-b bg-muted px-4 text-xs text-muted-foreground">
-        <CircleIcon
-          aria-label="close"
-          className="h-2 w-2 fill-red-400 text-transparent"
-        />
-        <p className="absolute inset-x-0 text-center">localhost:3000</p>
-      </div>
-      <div className="p-4 text-sm">New App launched with Next Docs!</div>
     </div>
   );
 }
