@@ -12,7 +12,7 @@
   "author": "Fuma Nama",
   "exports": {
     "./loader": "./loader.js",
-    "./loader-mdx": "./dist/loader-mdx.mjs",
+    "./loader-mdx": "./loader-mdx.js",
     "./config": {
       "import": "./dist/config.mjs",
       "types": "./dist/config.d.mts"
@@ -37,6 +37,7 @@
   },
   "files": [
     "dist/*",
+    "loader-mdx.js",
     "loader.js"
   ],
   "scripts": {
