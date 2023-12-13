@@ -1,5 +1,12 @@
 # next-docs-mdx
 
+## 6.0.2
+
+### Patch Changes
+
+- 1845bf5: Fixes import path for next-docs-mdx/loader-mdx
+  - next-docs-zeta@6.0.2
+
 ## 6.0.1
 
 ### Patch Changes

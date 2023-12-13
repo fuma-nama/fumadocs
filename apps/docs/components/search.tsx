@@ -49,7 +49,7 @@ export default function CustomSearchDialog(props: SharedProps): JSX.Element {
           filters: `tag:${tag}`,
         }}
         footer={
-          <div className="flex flex-row items-center gap-1 p-4">
+          <div className="flex flex-row items-center gap-1 p-3">
             {modes.map((mode) => (
               <button
                 key={mode.param}
