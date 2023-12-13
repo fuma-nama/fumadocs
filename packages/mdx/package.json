@@ -37,6 +37,7 @@
   },
   "files": [
     "dist/*",
+    "loader-mdx.js",
     "loader.js"
   ],
   "scripts": {
