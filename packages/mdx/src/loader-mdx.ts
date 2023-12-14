@@ -2,7 +2,7 @@ import path from 'node:path';
 import { createProcessor, type ProcessorOptions } from '@mdx-js/mdx';
 import type { Processor } from '@mdx-js/mdx/lib/core';
 import grayMatter from 'gray-matter';
-import type { LoaderContext } from 'webpack';
+import { type LoaderContext } from 'webpack';
 
 type Options = ProcessorOptions;
 

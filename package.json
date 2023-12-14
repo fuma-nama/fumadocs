@@ -14,7 +14,6 @@
     "release": "turbo run build --filter=./packages/* && changeset publish",
     "test": "turbo run test",
     "types:check": "turbo run types:check",
-    "update-example": "node ./scripts/on-push.js",
     "version": "changeset version && pnpm install --lockfile-only"
   },
   "prettier": "@vercel/style-guide/prettier",
