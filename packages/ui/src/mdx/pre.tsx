@@ -1,9 +1,10 @@
 'use client';
 import { CheckIcon, CopyIcon } from 'lucide-react';
 import type { ButtonHTMLAttributes, HTMLAttributes } from 'react';
-import { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
+import { forwardRef, useCallback, useRef } from 'react';
 import { cn } from '@/utils/cn';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useCopyButton } from '@/utils/use-copy-button';
 
 export type CodeBlockProps = HTMLAttributes<HTMLElement> & {
   allowCopy?: boolean;
@@ -67,24 +68,7 @@ function CopyButton({
 }: ButtonHTMLAttributes<HTMLButtonElement> & {
   onCopy: () => void;
 }): JSX.Element {
-  const [checked, setChecked] = useState(false);
-  const timeoutRef = useRef<number | null>();
-
-  const onClick = (): void => {
-    if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
-    timeoutRef.current = window.setTimeout(() => {
-      setChecked(false);
-    }, 1500);
-    onCopy();
-    setChecked(true);
-  };
-
-  // Avoid updates after being unmounted
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
-    };
-  }, []);
+  const [checked, onClick] = useCopyButton(onCopy);
 
   return (
     <button
