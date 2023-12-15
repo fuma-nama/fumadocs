@@ -93,7 +93,7 @@ export default {
       <Accordions
         type="single"
         collapsible
-        className="rounded-xl bg-background pr-4"
+        className="rounded-xl bg-background px-4"
       >
         <Accordion id="what-is-next-docs" title="What is Next Docs?">
           A framework for building documentations

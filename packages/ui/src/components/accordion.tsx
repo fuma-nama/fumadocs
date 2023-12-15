@@ -74,14 +74,14 @@ export const Accordion = forwardRef<
       {...props}
     >
       <AccordionPrimitive.Header className="not-prose flex items-center">
-        <AccordionPrimitive.Trigger className="flex w-full items-center gap-1 px-1 py-4 text-medium font-medium text-foreground [&[data-state=open]>svg]:rotate-90">
+        <AccordionPrimitive.Trigger className="flex w-full items-center gap-1 py-4 text-medium font-medium text-foreground [&[data-state=open]>svg]:rotate-90">
           <ChevronRightIcon className="h-5 w-5 text-muted-foreground transition-transform duration-200" />
           {title}
         </AccordionPrimitive.Trigger>
         {props.id ? <CopyButton id={props.id} /> : null}
       </AccordionPrimitive.Header>
       <AccordionPrimitive.Content className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
-        <div className="pb-4 pl-7 text-sm prose-no-margin">{children}</div>
+        <div className="pb-4 pl-6 text-sm prose-no-margin">{children}</div>
       </AccordionPrimitive.Content>
     </AccordionPrimitive.Item>
   );
@@ -99,13 +99,13 @@ function CopyButton({ id }: { id: string }): JSX.Element {
     <button
       type="button"
       aria-label="Copy Link"
-      className="text-muted-foreground opacity-0 transition-opacity group-hover/accordion:opacity-100"
+      className="text-muted-foreground opacity-0 transition-opacity group-data-[state=open]/accordion:opacity-100"
       onClick={onClick}
     >
       {checked ? (
-        <CheckIcon className="h-4 w-4" />
+        <CheckIcon className="h-3.5 w-3.5" />
       ) : (
-        <LinkIcon className="h-4 w-4" />
+        <LinkIcon className="h-3.5 w-3.5" />
       )}
     </button>
   );
