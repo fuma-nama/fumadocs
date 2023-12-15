@@ -12,17 +12,22 @@ import {
   useState,
   useEffect,
 } from 'react';
-import { cva } from 'class-variance-authority';
 import { cn } from '@/utils/cn';
 import { useCopyButton } from '@/utils/use-copy-button';
-
-const rootVariants = cva('divide-y divide-border');
 
 export const Accordions = forwardRef<
   HTMLDivElement,
   AccordionSingleProps | AccordionMultipleProps
->(({ className, ...props }, ref) => {
-  const [value, setValue] = useState<string[]>([]);
+>(({ className: originalClassName, defaultValue, ...props }, ref) => {
+  const [value, setValue] = useState<string[]>(() => {
+    if (defaultValue) {
+      return Array.isArray(defaultValue) ? defaultValue : [defaultValue];
+    }
+
+    return [];
+  });
+
+  const className = cn('divide-y divide-border', originalClassName);
 
   useEffect(() => {
     if (window.location.hash.length > 0)
@@ -35,7 +40,7 @@ export const Accordions = forwardRef<
         ref={ref}
         value={value}
         onValueChange={setValue}
-        className={cn(rootVariants({ className }))}
+        className={className}
         {...props}
       />
     );
@@ -49,7 +54,7 @@ export const Accordions = forwardRef<
         setValue([v]);
       }}
       collapsible
-      className={cn(rootVariants({ className }))}
+      className={className}
       {...props}
       // If type is undefined
       type="single"
@@ -74,8 +79,8 @@ export const Accordion = forwardRef<
       {...props}
     >
       <AccordionPrimitive.Header className="not-prose flex items-center">
-        <AccordionPrimitive.Trigger className="flex w-full items-center gap-1 py-4 text-medium font-medium text-foreground [&[data-state=open]>svg]:rotate-90">
-          <ChevronRightIcon className="h-5 w-5 text-muted-foreground transition-transform duration-200" />
+        <AccordionPrimitive.Trigger className="flex w-full items-center gap-1 py-4 text-medium font-medium text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          <ChevronRightIcon className="h-5 w-5 text-muted-foreground transition-transform duration-200 group-data-[state=open]/accordion:rotate-90" />
           {title}
         </AccordionPrimitive.Trigger>
         {props.id ? <CopyButton id={props.id} /> : null}
@@ -99,7 +104,7 @@ function CopyButton({ id }: { id: string }): JSX.Element {
     <button
       type="button"
       aria-label="Copy Link"
-      className="text-muted-foreground opacity-0 transition-opacity group-data-[state=open]/accordion:opacity-100"
+      className="p-2 text-muted-foreground opacity-0 transition-opacity group-data-[state=open]/accordion:opacity-100"
       onClick={onClick}
     >
       {checked ? (
