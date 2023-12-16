@@ -2,6 +2,7 @@
 import { cva } from 'class-variance-authority';
 import {
   MenuIcon,
+  MoreVerticalIcon,
   SearchIcon,
   SidebarCloseIcon,
   SidebarOpenIcon,
@@ -9,12 +10,18 @@ import {
 import Link from 'next-docs-zeta/link';
 import { SidebarTrigger } from 'next-docs-zeta/sidebar';
 import { usePathname } from 'next/navigation';
-import { type ReactNode } from 'react';
+import { type AnchorHTMLAttributes, type ReactNode } from 'react';
 import { cn } from '@/utils/cn';
 import { useSidebarCollapse } from '@/contexts/sidebar';
 import { useSearchContext } from '@/contexts/search';
 import { useI18n } from '@/contexts/i18n';
 import { ThemeToggle } from '@/components/theme-toggle';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { type LinkItem } from './contexts/tree';
 
 export interface NavLinkProps {
   icon: ReactNode;
@@ -31,17 +38,17 @@ export interface NavItemProps {
 
 interface NavProps {
   title: ReactNode;
-
   url?: string;
-  items?: NavItemProps[];
+
+  items?: LinkItem[];
   links?: NavLinkProps[];
-  enableSidebar?: boolean;
-  collapsibleSidebar?: boolean;
+  enableSidebar: boolean;
+  collapsibleSidebar: boolean;
   transparent?: boolean;
   children?: ReactNode;
 }
 
-export const itemVariants = cva(
+const itemVariants = cva(
   'rounded-md p-1.5 hover:bg-accent hover:text-accent-foreground [&_svg]:h-5 [&_svg]:w-5',
 );
 
@@ -49,10 +56,10 @@ export function Nav({
   title,
   url = '/',
   links,
-  items,
+  items = [],
   transparent = false,
-  enableSidebar = true,
-  collapsibleSidebar = true,
+  enableSidebar,
+  collapsibleSidebar,
   children,
 }: NavProps): JSX.Element {
   return (
@@ -69,13 +76,36 @@ export function Nav({
           {title}
         </Link>
         {children}
-        {items?.map((item) => <NavItem key={item.href} {...item} />)}
-        <div className="ml-auto flex flex-row items-center md:gap-2">
+        {items.map((item) => (
+          <NavItem key={item.url} item={item} className="max-lg:hidden" />
+        ))}
+        <div className="flex flex-1 flex-row items-center justify-end md:gap-2">
           <SearchToggle />
-          <ThemeToggle className={cn(enableSidebar && 'max-md:hidden')} />
           {enableSidebar ? (
-            <SidebarToggle collapsible={collapsibleSidebar} />
-          ) : null}
+            <>
+              <ThemeToggle className="max-md:hidden" />
+              <SidebarToggle collapsible={collapsibleSidebar} />
+            </>
+          ) : (
+            <Popover>
+              <ThemeToggle className="max-lg:hidden" />
+              <PopoverTrigger
+                className={cn(itemVariants({ className: 'lg:hidden' }))}
+              >
+                <MoreVerticalIcon />
+              </PopoverTrigger>
+              <PopoverContent className="flex min-w-[260px] flex-col px-3 py-1">
+                {items.map((item) => (
+                  <NavItem
+                    key={item.url}
+                    item={item}
+                    className="py-2 text-medium font-medium"
+                  />
+                ))}
+                <ThemeToggle className="w-fit" />
+              </PopoverContent>
+            </Popover>
+          )}
           <div className="flex flex-row items-center border-l pl-2 max-md:hidden">
             {links?.map((item) => <NavLink key={item.href} {...item} />)}
           </div>
@@ -105,7 +135,7 @@ function SearchToggle(): JSX.Element {
       </button>
       <button
         type="button"
-        className="inline-flex w-[240px] items-center gap-2 rounded-full border bg-secondary/50 p-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground max-md:hidden"
+        className="inline-flex w-full max-w-[240px] items-center gap-2 rounded-full border bg-secondary/50 p-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground max-md:hidden"
         onClick={() => {
           setOpenSearch(true);
         }}
@@ -152,23 +182,29 @@ function SidebarToggle({ collapsible }: { collapsible: boolean }): JSX.Element {
   );
 }
 
-function NavItem(props: NavItemProps): JSX.Element {
+function NavItem({
+  item,
+  className,
+  ...props
+}: AnchorHTMLAttributes<HTMLAnchorElement> & { item: LinkItem }): JSX.Element {
+  const { text, url, external } = item;
   const pathname = usePathname();
-  const isActive =
-    props.href === pathname || pathname.startsWith(`${props.href}/`);
+  const isActive = url === pathname || pathname.startsWith(`${url}/`);
 
   return (
     <Link
-      href={props.href}
-      external={props.external}
+      href={url}
+      external={external}
       className={cn(
-        'text-sm text-muted-foreground max-lg:hidden',
+        'text-sm text-muted-foreground',
         isActive
           ? 'font-medium text-accent-foreground'
           : 'transition-colors hover:text-accent-foreground',
+        className,
       )}
+      {...props}
     >
-      {props.children}
+      {text}
     </Link>
   );
 }

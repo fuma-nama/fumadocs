@@ -30,6 +30,7 @@ My Content
 <TypeTable
   type={{
     type: { type: 'single | multiple', default: 'single' },
+    defaultValue: { type: 'string' },
     collapsible: { type: 'boolean', default: 'true' },
   }}
 />
@@ -57,3 +58,5 @@ My Content
 </Accordion>
 </Accordions>
 ```
+
+> The value of accordion is `title` by default. When an `id` is specified, it will be used as the value instead.

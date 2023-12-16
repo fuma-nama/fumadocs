@@ -4,7 +4,6 @@ import type { Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import Link from 'next/link';
 import { baseUrl, createMetadata } from '@/utils/metadata';
-import { Nav } from '@/components/nav';
 import { Provider } from './provider';
 
 export const metadata = createMetadata({
@@ -36,7 +35,6 @@ export default function RootLayout({
     <html lang="en" className={inter.className} suppressHydrationWarning>
       <body className="flex min-h-screen flex-col">
         <Provider>
-          <Nav />
           {children}
           <Footer />
         </Provider>
