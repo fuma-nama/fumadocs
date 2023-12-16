@@ -16,7 +16,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "katex": "^0.16.8",
-    "lucide-react": "^0.295.0",
+    "lucide-react": "^0.297.0",
     "next": "14.0.4",
     "next-docs-mdx": "workspace:*",
     "next-docs-ui": "workspace:*",

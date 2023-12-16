@@ -58,8 +58,8 @@ importers:
         specifier: ^0.16.8
         version: 0.16.8
       lucide-react:
-        specifier: ^0.295.0
-        version: 0.295.0(react@18.2.0)
+        specifier: ^0.297.0
+        version: 0.297.0(react@18.2.0)
       next:
         specifier: 14.0.4
         version: 14.0.4(@babel/core@7.22.17)(react-dom@18.2.0)(react@18.2.0)
@@ -481,8 +481,8 @@ importers:
         specifier: ^0.2.0
         version: 0.2.0(@types/react@18.2.0)(react-dom@18.2.0)(react@18.2.0)
       lucide-react:
-        specifier: ^0.295.0
-        version: 0.295.0(react@18.2.0)
+        specifier: ^0.297.0
+        version: 0.297.0(react@18.2.0)
       next-docs-zeta:
         specifier: workspace:*
         version: link:../headless
@@ -6771,8 +6771,8 @@ packages:
     dependencies:
       yallist: 4.0.0
 
-  /lucide-react@0.295.0(react@18.2.0):
-    resolution: {integrity: sha512-5tQQ8V4Qn9DZscW55OOk9i5z4R0TfJiMjLEwM1P1jqtY5aPD3AnY049Zfb+fyXAa1JcUS5o26Wsl/3dfvTue6w==}
+  /lucide-react@0.297.0(react@18.2.0):
+    resolution: {integrity: sha512-PA3ddfQ1KXZbY8j4eBfd4gp5mDusacqVh/M1xNjHviQR+O0QVCmy2NazperLGm5zlU51p9amUB/apFqfsYa0zA==}
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0
     dependencies:
