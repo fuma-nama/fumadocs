@@ -21,7 +21,7 @@ export function NavChildren(): JSX.Element {
   const { mode } = useParams();
 
   return (
-    <div className="rounded-md border bg-secondary/50 p-1 text-sm text-muted-foreground max-sm:absolute max-sm:left-[50%] max-sm:translate-x-[-50%]">
+    <div className="rounded-md border bg-secondary/50 p-1 text-sm text-muted-foreground max-md:absolute max-md:left-[50%] max-md:translate-x-[-50%]">
       {modes.map((m) => (
         <Link
           key={m.param}

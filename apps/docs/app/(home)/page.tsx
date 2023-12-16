@@ -410,7 +410,7 @@ export default function HomePage(): JSX.Element {
   return (
     <>
       <div
-        className="absolute inset-x-0 top-[200px] h-[250px]"
+        className="absolute inset-x-0 top-[200px] h-[250px] max-md:hidden"
         style={{
           background:
             'repeating-linear-gradient(to right, hsl(var(--border)), transparent 1px, transparent 50px), repeating-linear-gradient(to bottom, hsl(var(--border)), transparent 1px, transparent 50px)',
@@ -813,7 +813,7 @@ function Search(): JSX.Element {
 function Hero(): JSX.Element {
   return (
     <div className="container relative z-[2] flex flex-col items-center border-b bg-background p-6 text-center">
-      <div className="mb-[260px] mt-12 h-fit">
+      <div className="mb-[200px] mt-8 h-fit">
         <h1 className="p-2 text-4xl font-medium sm:text-6xl">
           Build Your Docs.
         </h1>
