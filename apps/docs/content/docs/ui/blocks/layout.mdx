@@ -6,6 +6,8 @@ description: The layout of documentation
 The layout of documentation pages, it must be nested under the
 [Root Provider](/docs/ui/blocks/root-provider).
 
+> It is a server component, you should not reference it in a client component.
+
 ## Usage
 
 Wrap the children and pass your page tree to the component.
@@ -21,6 +23,7 @@ export default function Layout({ children }) {
 <TypeTable
   type={{
     tree: { type: 'PageTree' },
+    links: { type: 'LinkItem[]' },
     nav: {
       type: 'object',
       typeDescriptionLink: '#navbar',
@@ -29,9 +32,24 @@ export default function Layout({ children }) {
       type: 'object',
       typeDescriptionLink: '#sidebar',
     },
-    children: { type: 'ReactNode' },
   }}
 />
+
+### Non-docs Pages
+
+If you want to share navbar and search dialog between other pages, you may use the `Layout` component for non-docs page.
+
+It doesn't contain a sidebar, therefore, a page tree is not required.
+
+```jsx
+import { Layout } from 'next-docs-ui/layout';
+
+export default function HomeLayout({ children }) {
+  return <Layout>{children}</Layout>;
+}
+```
+
+You can create a [Route Group](https://nextjs.org/docs/app/building-your-application/routing/route-groups) to share the same layout across multiple pages.
 
 ### Navbar
 
@@ -41,20 +59,12 @@ export default function Layout({ children }) {
     component: { type: 'ReactNode' },
     title: { type: 'ReactNode' },
     url: { description: 'Redirect url of title', type: 'string', default: '/' },
-    items: { type: 'NavItemProps[]' },
     githubUrl: {
       description: 'Github url displayed on the navbar',
       type: 'string',
     },
   }}
 />
-
-### Shared Navbar
-
-It is common to share a navbar across all the pages. To achieve this, you may
-disable the default navbar and place your own instead.
-
-- [Learn more about Navbar](/docs/ui/blocks/nav)
 
 ### Sidebar
 
@@ -73,14 +83,3 @@ disable the default navbar and place your own instead.
     },
   }}
 />
-
-### Example
-
-```tsx title="app/docs/[[...slug]]/layout.tsx"
-import { DocsLayout } from 'next-docs-ui/layout';
-import { ReactNode } from 'react';
-
-export default function Layout({ children }: { children: ReactNode }) {
-  return <DocsLayout tree={tree}>{children}</DocsLayout>;
-}
-```

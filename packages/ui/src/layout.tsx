@@ -120,10 +120,10 @@ function getNav(
   links: BaseLayoutProps['links'],
   nav: BaseLayoutProps['nav'] = {},
 ): ReactNode {
-  const navlinks: NavLinkProps[] = [];
+  const iconLinks: NavLinkProps[] = [];
 
   if (nav.githubUrl)
-    navlinks.push({
+    iconLinks.push({
       href: nav.githubUrl,
       label: 'Github',
       icon: <GithubIcon />,
@@ -136,7 +136,7 @@ function getNav(
       title={nav.title}
       url={nav.url}
       items={links}
-      links={navlinks}
+      links={iconLinks}
       enableSidebar={enableSidebar}
       collapsibleSidebar={collapsibleSidebar}
     >
