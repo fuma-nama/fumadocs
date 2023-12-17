@@ -12,7 +12,7 @@ const Command = React.forwardRef<
   <CommandPrimitive
     ref={ref}
     className={cn(
-      'flex h-full w-full flex-col bg-popover text-popover-foreground',
+      'flex h-full w-full flex-col divide-y divide-border bg-popover text-popover-foreground',
       className,
     )}
     {...props}
@@ -28,7 +28,7 @@ function CommandDialog({
 }: CommandDialogProps): JSX.Element {
   return (
     <Dialog {...props}>
-      <DialogContent className="overflow-hidden p-0">{children}</DialogContent>
+      <DialogContent className="p-0">{children}</DialogContent>
     </Dialog>
   );
 }
@@ -58,7 +58,7 @@ const CommandList = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <CommandPrimitive.List
     ref={ref}
-    className={cn('max-h-[400px] overflow-y-auto border-t p-2', className)}
+    className={cn('max-h-[400px] overflow-y-auto p-2', className)}
     {...props}
   />
 ));
