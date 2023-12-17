@@ -2,24 +2,22 @@ import { useEffect, useState } from 'react';
 import useSWR, { type SWRResponse } from 'swr';
 import type { SortedResult } from './shared';
 
-interface UseDocsSearch<Result> {
+interface UseDocsSearch {
   search: string;
   setSearch: (v: string) => void;
   query: SWRResponse<
-    Result | 'empty',
+    SortedResult[] | 'empty',
     Error,
-    {
-      keepPreviousData: true;
-    }
+    { keepPreviousData: true }
   >;
 }
 
-async function fetchDocs<Result>(
+async function fetchDocs(
   api: string,
   query: string,
   locale: string | undefined,
   tag: string | undefined,
-): Promise<Result | 'empty'> {
+): Promise<SortedResult[] | 'empty'> {
   if (query.length === 0) return 'empty';
 
   const params = new URLSearchParams();
@@ -30,26 +28,24 @@ async function fetchDocs<Result>(
   const res = await fetch(`${api}?${params.toString()}`);
 
   if (!res.ok) throw new Error(await res.text());
-  return (await res.json()) as Result;
+  return (await res.json()) as SortedResult[];
 }
 
-export function useDocsSearch<Result = SortedResult[]>(
-  locale?: string,
-  tag?: string,
-): UseDocsSearch<Result | 'empty'> {
+export function useDocsSearch(locale?: string, tag?: string): UseDocsSearch {
   const [search, setSearch] = useState('');
   const debouncedValue = useDebounce(search, 100);
 
-  const keys = ['/api/search', debouncedValue, locale, tag] as const;
-  const searchQuery = useSWR<Result | 'empty', Error, typeof keys>(
-    keys,
-    (key) => fetchDocs<Result | 'empty'>(...key),
+  const query = useSWR(
+    ['/api/search', debouncedValue, locale, tag],
+    async ([api, value]) => {
+      return fetchDocs(api, value, locale, tag);
+    },
     {
       keepPreviousData: true,
     },
   );
 
-  return { search, setSearch, query: searchQuery };
+  return { search, setSearch, query };
 }
 
 function useDebounce<T>(value: T, delayMs = 1000): T {

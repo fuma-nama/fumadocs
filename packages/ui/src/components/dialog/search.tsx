@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { type ReactNode } from 'react';
 import { useI18n } from '@/contexts/i18n';
 import {
+  Command,
   CommandDialog,
   CommandEmpty,
   CommandGroup,
@@ -29,16 +30,20 @@ export type SearchDialogProps = SharedProps & {
    * displayed in item list
    */
   children?: ReactNode;
+
+  showOnEmpty?: boolean;
 };
 
 export function SearchDialog({
   search,
   onSearchChange,
   data,
+  showOnEmpty = false,
   ...props
 }: SearchDialogProps): JSX.Element {
   const router = useRouter();
   const { text } = useI18n();
+  const showList = data !== 'empty' || showOnEmpty;
 
   const onOpen = (url: string): void => {
     router.push(url);
@@ -47,21 +52,20 @@ export function SearchDialog({
 
   return (
     <CommandDialog {...props}>
-      <CommandInput
-        placeholder={text.search ?? 'Search'}
-        value={search}
-        onValueChange={onSearchChange}
-      />
-      <CommandList>
-        {data !== 'empty' ? (
-          <>
+      <Command label="Search Dialog" shouldFilter={false} loop>
+        <CommandInput
+          value={search}
+          onValueChange={onSearchChange}
+          placeholder={text.search ?? 'Search'}
+        />
+        {showList ? (
+          <CommandList>
             <CommandEmpty>
               {text.searchNoResult ?? 'No results found'}
             </CommandEmpty>
-
-            {data && data.length !== 0 ? (
-              <CommandGroup>
-                {data.map((item) => (
+            <CommandGroup value="result">
+              {Array.isArray(data) &&
+                data.map((item) => (
                   <CommandItem
                     key={item.id}
                     value={item.id}
@@ -80,13 +84,12 @@ export function SearchDialog({
                     <p className="w-0 flex-1 truncate">{item.content}</p>
                   </CommandItem>
                 ))}
-              </CommandGroup>
-            ) : null}
-          </>
+            </CommandGroup>
+            {props.children}
+          </CommandList>
         ) : null}
-        {props.children}
-      </CommandList>
-      {props.footer}
+        {props.footer}
+      </Command>
     </CommandDialog>
   );
 }

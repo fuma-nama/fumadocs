@@ -1,5 +1,5 @@
 import { Document } from 'flexsearch';
-import { NextResponse, type NextRequest } from 'next/server';
+import nextLib, { type NextRequest, type NextResponse } from 'next/server';
 import type { StructuredData } from '@/mdx-plugins/remark-structure';
 import type { SortedResult } from './shared';
 
@@ -68,7 +68,7 @@ export function createI18nSearchAPI<T extends 'simple' | 'advanced'>(
         if (handler) return handler.GET(request);
       }
 
-      return NextResponse.json([]);
+      return nextLib.NextResponse.json([]);
     },
   };
 }
@@ -126,21 +126,23 @@ export function initSearchAPI({ indexes, language }: SimpleOptions): SearchAPI {
       const { searchParams } = request.nextUrl;
       const query = searchParams.get('query');
 
-      if (!query) return NextResponse.json([]);
+      if (!query) return nextLib.NextResponse.json([]);
 
       const results = index.search(query, 5, {
         enrich: true,
         suggest: true,
       });
 
-      const pages = results[0]?.result?.map<SortedResult>((page) => ({
+      if (results.length === 0) return nextLib.NextResponse.json([]);
+
+      const pages = results[0].result.map<SortedResult>((page) => ({
         type: 'page',
         content: page.doc.title,
         id: page.doc.url,
         url: page.doc.url,
       }));
 
-      return NextResponse.json(pages);
+      return nextLib.NextResponse.json(pages);
     },
   };
 }
@@ -233,7 +235,7 @@ export function initSearchAPIAdvanced({
       const query = request.nextUrl.searchParams.get('query');
       const paramTag = request.nextUrl.searchParams.get('tag');
 
-      if (!query) return NextResponse.json([]);
+      if (!query) return nextLib.NextResponse.json([]);
 
       const results = index.search(query, 5, {
         enrich: true,
@@ -285,7 +287,7 @@ export function initSearchAPIAdvanced({
         sortedResult.push(...items);
       }
 
-      return NextResponse.json(sortedResult);
+      return nextLib.NextResponse.json(sortedResult);
     },
   };
 }

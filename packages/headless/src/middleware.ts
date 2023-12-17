@@ -2,7 +2,7 @@ import { match as matchLocale } from '@formatjs/intl-localematcher';
 import Negotiator from 'negotiator';
 import type { NextMiddlewareResult } from 'next/dist/server/web/types';
 import type { NextRequest } from 'next/server';
-import { NextResponse } from 'next/server';
+import nextLib from 'next/server';
 
 function getLocale(
   request: NextRequest,
@@ -42,6 +42,8 @@ export function createI18nMiddleware(
       path = path.slice(1);
     }
 
-    return NextResponse.redirect(new URL(format(locale, path), request.url));
+    return nextLib.NextResponse.redirect(
+      new URL(format(locale, path), request.url),
+    );
   }
 }
