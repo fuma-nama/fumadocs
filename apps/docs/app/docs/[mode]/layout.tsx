@@ -1,8 +1,30 @@
 import { DocsLayout } from 'next-docs-ui/layout';
 import type { ReactNode } from 'react';
+import { LayoutTemplateIcon, StarsIcon } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { modes } from '@/utils/modes';
 import { getUtils } from '@/utils/source';
+import { NavChildren } from '@/components/nav';
+
+export const layoutOptions = {
+  nav: {
+    title: (
+      <>
+        <StarsIcon className="h-5 w-5" fill="currentColor" />
+        <span className="ml-1.5 font-semibold max-md:hidden">Next Docs</span>
+      </>
+    ),
+    children: <NavChildren />,
+    githubUrl: 'https://github.com/fuma-nama/next-docs',
+  },
+  links: [
+    {
+      text: 'Showcase',
+      url: '/showcase',
+      icon: <LayoutTemplateIcon fill="currentColor" />,
+    },
+  ],
+};
 
 export default function Layout({
   params,
@@ -19,7 +41,7 @@ export default function Layout({
   return (
     <DocsLayout
       tree={tree}
-      nav={{ enabled: false }}
+      {...layoutOptions}
       sidebar={{
         defaultOpenLevel: 0,
         banner: (

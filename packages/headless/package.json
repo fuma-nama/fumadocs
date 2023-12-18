@@ -1,6 +1,6 @@
 {
   "name": "next-docs-zeta",
-  "version": "6.0.2",
+  "version": "6.1.0",
   "description": "The library for building a documentation website in Next.js",
   "keywords": [
     "NextJs",
@@ -29,8 +29,8 @@
       "types": "./dist/search/client.d.ts"
     },
     "./search/server": {
-      "import": "./dist/search/server.cjs",
-      "types": "./dist/search/server.d.cts"
+      "import": "./dist/search/server.js",
+      "types": "./dist/search/server.d.ts"
     },
     "./server": {
       "import": "./dist/server.js",
@@ -49,8 +49,8 @@
       "types": "./dist/contentlayer/configuration.d.ts"
     },
     "./middleware": {
-      "import": "./dist/middleware.cjs",
-      "types": "./dist/middleware.d.cts"
+      "import": "./dist/middleware.js",
+      "types": "./dist/middleware.d.ts"
     },
     "./mdx-plugins": {
       "import": "./dist/mdx-plugins.js",
@@ -61,8 +61,8 @@
       "types": "./dist/search-algolia/client.d.ts"
     },
     "./search-algolia/server": {
-      "import": "./dist/search-algolia/server.cjs",
-      "types": "./dist/search-algolia/server.d.cts"
+      "import": "./dist/search-algolia/server.js",
+      "types": "./dist/search-algolia/server.d.ts"
     }
   },
   "typesVersions": {
@@ -83,7 +83,7 @@
         "./dist/search/shared.d.ts"
       ],
       "search/server": [
-        "./dist/search/server.d.cts"
+        "./dist/search/server.d.ts"
       ],
       "server": [
         "./dist/server.d.ts"
@@ -98,7 +98,7 @@
         "./dist/contentlayer/configuration.d.ts"
       ],
       "middleware": [
-        "./dist/middleware.d.cts"
+        "./dist/middleware.d.ts"
       ],
       "mdx-plugins": [
         "./dist/mdx-plugins.d.ts"
@@ -107,7 +107,7 @@
         "./dist/search-algolia/client.d.ts"
       ],
       "search-algolia/server": [
-        "./dist/search-algolia/server.d.cts"
+        "./dist/search-algolia/server.d.ts"
       ]
     }
   },
@@ -133,7 +133,7 @@
     "remark-gfm": "^4.0.0",
     "remark-mdx": "^3.0.0",
     "scroll-into-view-if-needed": "^3.1.0",
-    "shikiji": "^0.8.0",
+    "shikiji": "^0.9.9",
     "swr": "^2.2.2",
     "unist-util-visit": "^4.1.2"
   },

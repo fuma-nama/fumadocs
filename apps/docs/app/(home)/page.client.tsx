@@ -10,7 +10,7 @@ import {
   type ReactElement,
   type HTMLAttributes,
 } from 'react';
-import { CircleIcon, TerminalIcon } from 'lucide-react';
+import { TerminalIcon } from 'lucide-react';
 import {
   GLSLX_NAME_U_RESOLUTION,
   GLSLX_NAME_U_TIME,
@@ -105,8 +105,6 @@ export function Previews(): JSX.Element {
 }
 
 export function CreateAppAnimation(): JSX.Element {
-  const [tick, setTick] = useState(0);
-
   const installCmd = 'npm create next-docs-app';
   const tickTime = 100;
   const timeCommandEnter = installCmd.length;
@@ -115,9 +113,11 @@ export function CreateAppAnimation(): JSX.Element {
   const timeWindowOpen = timeCommandEnd + 1;
   const timeEnd = timeWindowOpen + 1;
 
+  const [tick, setTick] = useState(timeEnd);
+
   useEffect(() => {
     const timer = setInterval(() => {
-      setTick((prev) => (prev > timeEnd ? prev : prev + 1));
+      setTick((prev) => (prev >= timeEnd ? prev : prev + 1));
     }, tickTime);
 
     return () => {
@@ -170,20 +170,29 @@ export function CreateAppAnimation(): JSX.Element {
     );
 
   return (
-    <pre className="relative overflow-hidden rounded-xl border text-xs">
+    <div
+      className="relative"
+      onMouseEnter={() => {
+        if (tick >= timeEnd) {
+          setTick(0);
+        }
+      }}
+    >
       {tick > timeWindowOpen && (
         <LaunchAppWindow className="absolute bottom-5 right-4 z-10 animate-in fade-in slide-in-from-top-10" />
       )}
-      <div className="flex flex-row items-center gap-2 border-b px-4 py-2">
-        <TerminalIcon className="h-4 w-4" />{' '}
-        <span className="font-bold">Terminal</span>
-        <div className="grow" />
-        <div className="h-2 w-2 rounded-full bg-red-400" />
-      </div>
-      <div className="min-h-[200px] bg-gradient-to-b from-secondary [mask-image:linear-gradient(to_bottom,white,transparent)]">
-        <code className="grid p-4">{lines}</code>
-      </div>
-    </pre>
+      <pre className="overflow-hidden rounded-xl border text-xs">
+        <div className="flex flex-row items-center gap-2 border-b px-4 py-2">
+          <TerminalIcon className="h-4 w-4" />{' '}
+          <span className="font-bold">Terminal</span>
+          <div className="grow" />
+          <div className="h-2 w-2 rounded-full bg-red-400" />
+        </div>
+        <div className="min-h-[200px] bg-gradient-to-b from-secondary [mask-image:linear-gradient(to_bottom,white,transparent)]">
+          <code className="grid p-4">{lines}</code>
+        </div>
+      </pre>
+    </div>
   );
 }
 
@@ -197,10 +206,6 @@ function LaunchAppWindow(props: HTMLAttributes<HTMLDivElement>): JSX.Element {
       )}
     >
       <div className="relative flex h-6 flex-row items-center border-b bg-muted px-4 text-xs text-muted-foreground">
-        <CircleIcon
-          aria-label="close"
-          className="h-2 w-2 fill-red-400 text-transparent"
-        />
         <p className="absolute inset-x-0 text-center">localhost:3000</p>
       </div>
       <div className="p-4 text-sm">New App launched!</div>

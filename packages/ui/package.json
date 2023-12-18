@@ -1,6 +1,6 @@
 {
   "name": "next-docs-ui",
-  "version": "6.0.2",
+  "version": "6.1.0",
   "description": "The framework for building a documentation website in Next.js",
   "keywords": [
     "NextJs",
@@ -70,7 +70,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "cmdk": "^0.2.0",
-    "lucide-react": "^0.294.0",
+    "lucide-react": "^0.297.0",
     "next-docs-zeta": "workspace:*",
     "next-themes": "^0.2.1",
     "react-medium-image-zoom": "^5.1.8",

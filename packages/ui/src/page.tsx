@@ -7,7 +7,7 @@ import {
 } from 'next-docs-zeta/server';
 import Link from 'next/link';
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
-import { replaceOrDefault } from './utils/replace-or-default';
+import { replaceOrDefault } from './utils/shared';
 import { getPageTree } from './utils/global';
 import { cn } from './utils/cn';
 

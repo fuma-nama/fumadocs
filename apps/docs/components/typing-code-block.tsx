@@ -9,7 +9,7 @@ const highlighter = await getHighlighter({
 
 export type CodeBlockProps = ComponentPropsWithoutRef<typeof Pre> & {
   code: string;
-  lang: string;
+  lang: 'bash' | 'ts' | 'tsx';
 };
 
 export function CodeBlock({

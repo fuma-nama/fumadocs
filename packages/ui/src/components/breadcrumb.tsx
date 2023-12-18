@@ -4,17 +4,20 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Fragment, useContext } from 'react';
 import { cn } from '@/utils/cn';
-import { LayoutContext } from '@/contexts/tree';
+import { TreeContext } from '@/contexts/tree';
 
 export function Breadcrumb(): JSX.Element {
-  const { tree } = useContext(LayoutContext);
+  const tree = useContext(TreeContext);
   const pathname = usePathname();
   const items = useBreadcrumb(pathname, tree);
-  // eslint-disable-next-line react/jsx-no-useless-fragment -- render nothing
-  if (items.length === 1) return <></>;
 
   return (
-    <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
+    <div
+      className={cn(
+        'flex flex-row items-center gap-1 text-sm text-muted-foreground',
+        items.length === 1 && 'hidden',
+      )}
+    >
       {items.map((item, i) => {
         const active = items.length === i + 1;
         const style = cn(

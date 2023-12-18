@@ -90,8 +90,17 @@ export default {
   ),
   accordion: (
     <Wrapper>
-      <Accordions type="single" collapsible>
-        <Accordion title="My Title">My Content</Accordion>
+      <Accordions
+        type="single"
+        collapsible
+        className="rounded-xl bg-background px-4"
+      >
+        <Accordion id="what-is-next-docs" title="What is Next Docs?">
+          A framework for building documentations
+        </Accordion>
+        <Accordion id="ux" title="What do we love?">
+          We love websites with a good user experience
+        </Accordion>
       </Accordions>
     </Wrapper>
   ),

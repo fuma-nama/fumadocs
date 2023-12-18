@@ -1,4 +1,5 @@
 import Link from 'next-docs-zeta/link';
+import type { AnchorHTMLAttributes, FC } from 'react';
 import { Card, Cards } from '@/mdx/card';
 import { Heading } from '@/mdx/heading';
 import { Image, Table } from '@/mdx/base';
@@ -6,7 +7,7 @@ import { Image, Table } from '@/mdx/base';
 const defaultMdxComponents = {
   Card,
   Cards,
-  a: Link,
+  a: Link as FC<AnchorHTMLAttributes<HTMLAnchorElement>>,
   img: Image,
   h1: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
     <Heading as="h1" {...props} />

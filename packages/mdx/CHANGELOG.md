@@ -1,5 +1,12 @@
 # next-docs-mdx
 
+## 6.1.0
+
+### Patch Changes
+
+- Updated dependencies [f39ae40]
+  - next-docs-zeta@6.1.0
+
 ## 6.0.2
 
 ### Patch Changes

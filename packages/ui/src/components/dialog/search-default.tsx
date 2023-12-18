@@ -40,18 +40,17 @@ export default function DefaultSearchDialog({
       search={search}
       onSearchChange={setSearch}
       data={query.data}
+      showOnEmpty={links.length > 0}
       {...props}
     >
-      {query.data === 'empty' && links.length > 0 && (
-        <CommandGroup>
-          {links.map(([name, link]) => (
-            <CommandItem key={link} value={link} onSelect={onSelect}>
-              <ExternalLinkIcon />
-              {name}
-            </CommandItem>
-          ))}
-        </CommandGroup>
-      )}
+      <CommandGroup value="items">
+        {links.map(([name, link]) => (
+          <CommandItem key={link} value={link} onSelect={onSelect}>
+            <ExternalLinkIcon />
+            {name}
+          </CommandItem>
+        ))}
+      </CommandGroup>
     </SearchDialog>
   );
 }

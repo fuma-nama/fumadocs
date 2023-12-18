@@ -1,3 +1,9 @@
-import { twMerge } from 'tailwind-merge';
+import { extendTailwindMerge } from 'tailwind-merge';
 
-export const cn = twMerge;
+export const cn = extendTailwindMerge<string, string>({
+  extend: {
+    classGroups: {
+      'font-size': [{ text: ['medium'] }],
+    },
+  },
+});

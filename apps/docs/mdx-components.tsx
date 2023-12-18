@@ -15,12 +15,12 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
       <Pre {...props} ref={undefined} pre={{ className: 'max-h-[400px]' }} />
     ),
     Image: defaultComponents.img,
-    Tabs: ((p) => <Tabs {...p} />) as typeof Tabs,
-    Tab: ((p) => <Tab {...p} />) as typeof Tab,
-    Callout: ((p) => <Callout {...p} />) as typeof Callout,
-    TypeTable: ((p) => <TypeTable {...p} />) as typeof TypeTable,
-    Accordion: ((p) => <Accordion {...p} />) as typeof Accordion,
-    Accordions: ((p) => <Accordions {...p} />) as typeof Accordions,
+    Tabs,
+    Tab,
+    Callout,
+    TypeTable,
+    Accordion,
+    Accordions,
     Wrapper,
     InstallTabs: ({
       items,

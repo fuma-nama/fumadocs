@@ -5,9 +5,7 @@ description: The default Navbar component with a sidebar trigger and searchbar.
 
 The default Navbar component with a sidebar toggle and search dialog trigger.
 
-<Callout title="Note">
-  It has been included in the `<DocsLayout />` by default.
-</Callout>
+<Callout title="Note">It has been included in the layout by default.</Callout>
 
 ## Usage
 
@@ -15,7 +13,7 @@ The default Navbar component with a sidebar toggle and search dialog trigger.
 import { Nav as OriginalNav } from 'next-docs-ui/nav';
 
 export function Nav() {
-  return <OriginalNav title="Next Docs" />;
+  return <OriginalNav title="Next Docs" enableSidebar collapsibleSidebar />;
 }
 ```
 
@@ -28,7 +26,7 @@ export function Nav() {
       description: 'Use transparent background',
       default: 'false',
     },
-    items: { type: 'NavItemProps[]' },
+    items: { type: 'LinkItem[]' },
     links: { type: 'NavLinkProps[]' },
     enableSidebar: { type: 'boolean' },
     collapsibleSidebar: { type: 'boolean' },
@@ -48,14 +46,13 @@ hide the sidebar trigger in specific pages.
 
 ### Items
 
-You can pass an array of items to the component, it needs a children, href and a
-boolean indicating whether it is an external link.
+You can pass an array of items to the component.
 
 ```tsx
-const links = [
+const items = [
   {
-    children: 'Documentation',
-    href: '/docs',
+    text: 'Documentation',
+    url: '/docs',
     external: false,
   },
 ];

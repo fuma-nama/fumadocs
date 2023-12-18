@@ -36,7 +36,7 @@ export function TypeTable({ type }: { type: ObjectType }): JSX.Element {
   const th = cn('p-2 font-medium first:pl-0 last:pr-0');
   const td = cn('p-2 first:pl-0 last:pr-0');
   const field = cn('inline-flex flex-row items-center gap-1');
-  const code = cn('rounded-md bg-secondary p-1');
+  const code = cn('rounded-md bg-secondary p-1 text-secondary-foreground');
 
   return (
     <div className="not-prose overflow-auto whitespace-nowrap">
