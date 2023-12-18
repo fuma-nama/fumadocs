@@ -1,5 +1,12 @@
 # create-next-docs-app
 
+## 6.1.0
+
+### Patch Changes
+
+- 65b7f30: Update examples
+- 3e34d14: Sync version with next-docs
+
 ## 1.7.4
 
 ### Patch Changes

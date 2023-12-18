@@ -1,5 +1,45 @@
 # next-docs-ui
 
+## 6.1.0
+
+### Minor Changes
+
+- 6e0d2e1: **Support `Layout` for non-docs pages (without page tree)**
+
+  Same as Docs Layout but doesn't include a sidebar. It can be used outside of the docs, a page tree is not required.
+
+  ```jsx
+  import { Layout } from 'next-docs-ui/layout';
+
+  export default function HomeLayout({ children }) {
+    return <Layout>{children}</Layout>;
+  }
+  ```
+
+  **`nav.items` prop is deprecated**
+
+  It is now replaced by `links`.
+
+- 2a82e9d: **Support linking to accordions**
+
+  You can now specify an `id` for accordion. The accordion will automatically open when the user is navigating to the page with the specified `id` in hash parameter.
+
+  ```mdx
+  <Accordions>
+  <Accordion title="My Title" id="my-title">
+
+  My Content
+
+  </Accordion>
+  </Accordions>
+  ```
+
+### Patch Changes
+
+- 65b7f30: Improve search dialog design
+- Updated dependencies [f39ae40]
+  - next-docs-zeta@6.1.0
+
 ## 6.0.2
 
 ### Patch Changes

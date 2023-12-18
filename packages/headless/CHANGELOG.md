@@ -1,5 +1,18 @@
 # next-docs-zeta
 
+## 6.1.0
+
+### Minor Changes
+
+- f39ae40: **Forward ref to `Link` and `DynamicLink` component**
+
+  **Legacy import name `SafeLink` is now removed**
+
+  ```diff
+  - import { SafeLink } from "next-docs-zeta/link"
+  + import Link from "next-docs-zeta/link"
+  ```
+
 ## 6.0.2
 
 ## 6.0.1
