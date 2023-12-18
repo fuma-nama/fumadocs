@@ -3,7 +3,7 @@ import type { PageTree } from 'next-docs-zeta/server';
 import type { ReactNode, HTMLAttributes } from 'react';
 import type { SidebarProps } from '@/components/sidebar';
 import type { NavItemProps, NavLinkProps } from './nav';
-import { replaceOrDefault } from './utils/replace-or-default';
+import { replaceOrDefault } from './utils/shared';
 import { setPageTree } from './utils/global';
 import { cn } from './utils/cn';
 import type { LinkItem } from './contexts/tree';

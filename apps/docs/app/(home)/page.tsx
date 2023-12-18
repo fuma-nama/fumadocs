@@ -624,8 +624,8 @@ export default function HomePage(): JSX.Element {
               <Search />
             </div>
           </div>
-          <div className="grid grid-cols-1 divide-border overflow-hidden md:grid-cols-2 md:divide-x">
-            <div className="relative border-b px-6 py-16">
+          <div className="grid grid-cols-1 divide-border md:grid-cols-2 md:divide-x">
+            <div className="relative overflow-hidden border-b px-6 py-16">
               <h2 className="text-2xl font-semibold">Heard of our users.</h2>
               <p className="text-lg font-medium text-muted-foreground">
                 We are making it better.
@@ -813,11 +813,9 @@ function Search(): JSX.Element {
 function Hero(): JSX.Element {
   return (
     <div className="container relative z-[2] flex flex-col items-center border-b bg-background p-6 text-center">
-      <div className="mb-[200px] mt-8 h-fit">
-        <h1 className="p-2 text-4xl font-medium sm:text-6xl">
-          Build Your Docs.
-        </h1>
-      </div>
+      <h1 className="mb-[180px] mt-8 h-fit p-2 text-4xl font-medium sm:mb-[260px] sm:text-6xl">
+        Build Your Docs.
+      </h1>
       <StarsIcon
         className="absolute -left-2 -top-2 h-4 w-4 xl:scale-[200%]"
         stroke="none"

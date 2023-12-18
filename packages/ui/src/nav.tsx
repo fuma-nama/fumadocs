@@ -10,7 +10,8 @@ import {
 import Link from 'next-docs-zeta/link';
 import { SidebarTrigger } from 'next-docs-zeta/sidebar';
 import { usePathname } from 'next/navigation';
-import { type AnchorHTMLAttributes, type ReactNode } from 'react';
+import { forwardRef, type AnchorHTMLAttributes, type ReactNode } from 'react';
+import { PopoverClose } from '@radix-ui/react-popover';
 import { cn } from '@/utils/cn';
 import { useSidebarCollapse } from '@/contexts/sidebar';
 import { useSearchContext } from '@/contexts/search';
@@ -22,6 +23,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { type LinkItem } from './contexts/tree';
+import { isActive } from './utils/shared';
 
 export interface NavLinkProps {
   icon: ReactNode;
@@ -55,7 +57,7 @@ const itemVariants = cva(
 export function Nav({
   title,
   url = '/',
-  links,
+  links = [],
   items = [],
   transparent = false,
   enableSidebar,
@@ -72,7 +74,7 @@ export function Nav({
       )}
     >
       <nav className="container flex h-full flex-row items-center gap-4">
-        <Link href={url} className="inline-flex items-center font-medium">
+        <Link href={url} className="inline-flex items-center font-bold">
           {title}
         </Link>
         {children}
@@ -96,18 +98,34 @@ export function Nav({
               </PopoverTrigger>
               <PopoverContent className="flex min-w-[260px] flex-col px-3 py-1">
                 {items.map((item) => (
-                  <NavItem
-                    key={item.url}
-                    item={item}
-                    className="py-2 text-medium font-medium"
-                  />
+                  <PopoverClose key={item.url} asChild>
+                    <NavItem
+                      item={item}
+                      className="py-2 text-medium font-medium"
+                    />
+                  </PopoverClose>
                 ))}
                 <ThemeToggle className="w-fit" />
               </PopoverContent>
             </Popover>
           )}
-          <div className="flex flex-row items-center border-l pl-2 max-md:hidden">
-            {links?.map((item) => <NavLink key={item.href} {...item} />)}
+          <div
+            className={cn(
+              'flex flex-row items-center border-l pl-2 max-md:hidden',
+              links.length === 0 && 'hidden',
+            )}
+          >
+            {links.map((item) => (
+              <Link
+                aria-label={item.label}
+                key={item.href}
+                href={item.href}
+                external={item.external}
+                className={cn(itemVariants())}
+              >
+                {item.icon}
+              </Link>
+            ))}
           </div>
         </div>
       </nav>
@@ -182,22 +200,21 @@ function SidebarToggle({ collapsible }: { collapsible: boolean }): JSX.Element {
   );
 }
 
-function NavItem({
-  item,
-  className,
-  ...props
-}: AnchorHTMLAttributes<HTMLAnchorElement> & { item: LinkItem }): JSX.Element {
+const NavItem = forwardRef<
+  HTMLAnchorElement,
+  AnchorHTMLAttributes<HTMLAnchorElement> & { item: LinkItem }
+>(({ item, className, ...props }, ref) => {
   const { text, url, external } = item;
   const pathname = usePathname();
-  const isActive = url === pathname || pathname.startsWith(`${url}/`);
 
   return (
     <Link
+      ref={ref}
       href={url}
       external={external}
       className={cn(
         'text-sm text-muted-foreground',
-        isActive
+        isActive(url, pathname)
           ? 'font-medium text-accent-foreground'
           : 'transition-colors hover:text-accent-foreground',
         className,
@@ -207,17 +224,6 @@ function NavItem({
       {text}
     </Link>
   );
-}
+});
 
-function NavLink(props: NavLinkProps): JSX.Element {
-  return (
-    <Link
-      aria-label={props.label}
-      href={props.href}
-      external={props.external}
-      className={cn(itemVariants())}
-    >
-      {props.icon}
-    </Link>
-  );
-}
+NavItem.displayName = 'NavItem';

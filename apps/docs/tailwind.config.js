@@ -16,6 +16,8 @@ module.exports = {
         'gradient-radial': 'radial-gradient(circle, var(--tw-gradient-stops))',
         'repeat-gradient-to-r':
           'repeating-linear-gradient(to right, var(--tw-gradient-stops))',
+        'repeat-gradient-to-br':
+          'repeating-linear-gradient(to bottom right, var(--tw-gradient-stops))',
       },
       keyframes: {
         updown: {

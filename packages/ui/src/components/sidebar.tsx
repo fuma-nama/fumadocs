@@ -11,6 +11,7 @@ import type { LinkItem } from '@/contexts/tree';
 import { TreeContext } from '@/contexts/tree';
 import { useSidebarCollapse } from '@/contexts/sidebar';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { isActive } from '@/utils/shared';
 import {
   Collapsible,
   CollapsibleContent,
@@ -124,9 +125,7 @@ function BaseItem({
   nested?: boolean;
 }): JSX.Element {
   const pathname = usePathname();
-  const active =
-    pathname === item.url ||
-    (nested ? pathname.startsWith(`${item.url}/`) : false);
+  const active = isActive(item.url, pathname, nested);
 
   return (
     <Link
@@ -159,9 +158,8 @@ function Folder({
   level: number;
 }): JSX.Element {
   const { defaultOpenLevel } = useContext(SidebarContext);
-
   const pathname = usePathname();
-  const active = index && pathname === index.url;
+  const active = index && isActive(index.url, pathname, false);
   const childActive = useMemo(
     () => hasActive(children, pathname),
     [children, pathname],
