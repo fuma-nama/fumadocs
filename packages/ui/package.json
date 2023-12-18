@@ -70,7 +70,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "cmdk": "^0.2.0",
-    "lucide-react": "^0.297.0",
+    "lucide-react": "^0.298.0",
     "next-docs-zeta": "workspace:*",
     "next-themes": "^0.2.1",
     "react-medium-image-zoom": "^5.1.8",
@@ -88,7 +88,7 @@
     "postcss": "8.4.32",
     "postcss-cli": "^11.0.0",
     "postcss-lightningcss": "^1.0.0",
-    "tailwindcss": "3.3.6",
+    "tailwindcss": "3.3.7",
     "tsconfig": "workspace:*"
   },
   "peerDependencies": {
