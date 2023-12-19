@@ -43,7 +43,7 @@
     "glslify": "^7.1.1",
     "glslx": "^0.3.0",
     "postcss": "8.4.32",
-    "tailwindcss": "3.3.7",
+    "tailwindcss": "3.4.0",
     "tailwindcss-animate": "^1.0.7",
     "tsconfig": "workspace:*",
     "webpack": "^5.89.0"
