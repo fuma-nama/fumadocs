@@ -1,4 +1,4 @@
 module.exports = {
   extends: ['custom/library'],
-  "ignorePatterns": ["./templates/**/*"],
+  ignorePatterns: ['./templates/**/*'],
 };
