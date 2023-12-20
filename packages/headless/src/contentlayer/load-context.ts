@@ -1,9 +1,7 @@
 import type { RawDocumentData } from 'contentlayer/source-files';
 import type { ReactElement } from 'react';
-import {
-  createPageTreeBuilder,
-  type AbstractFile,
-} from '@/server/page-tree-builder';
+import { createPageTreeBuilder } from '@/source/page-tree-builder';
+import type { FileInfo } from '@/source/types';
 import type { DocsPageBase, MetaPageBase, PagesContext } from './types';
 
 export interface ContextOptions {
@@ -42,7 +40,7 @@ export function loadContext<Docs extends DocsPageBase>(
   };
 }
 
-function getFileData(raw: RawDocumentData, locale?: string): AbstractFile {
+function getFileData(raw: RawDocumentData, locale?: string): FileInfo {
   const dotIndex = raw.sourceFileName.lastIndexOf('.');
   const flattenedPath =
     raw.sourceFileDir === raw.flattenedPath

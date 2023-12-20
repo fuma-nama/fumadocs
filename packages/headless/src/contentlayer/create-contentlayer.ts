@@ -1,4 +1,4 @@
-import type { BuildPageTreeOptions } from '@/server';
+import type { BuildPageTreeOptions } from '@/source/page-tree-builder';
 import type { PageTree } from '@/server/types';
 import { loadContext, type ContextOptions } from './load-context';
 import type { DocsPageBase, MetaPageBase, PagesContext } from './types';

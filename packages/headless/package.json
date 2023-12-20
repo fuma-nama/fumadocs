@@ -119,6 +119,7 @@
     "clean": "rmdir /q/s dist",
     "dev": "tsup --watch",
     "lint": "eslint .",
+    "test": "vitest",
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
@@ -128,7 +129,7 @@
     "negotiator": "^0.6.3",
     "react-remove-scroll": "^2.5.6",
     "rehype-img-size": "^1.0.1",
-    "rehype-pretty-code": "^0.12.1",
+    "rehype-pretty-code": "^0.12.2",
     "remark": "^15.0.0",
     "remark-gfm": "^4.0.0",
     "remark-mdx": "^3.0.0",

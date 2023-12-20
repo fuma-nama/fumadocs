@@ -52,7 +52,7 @@ export function splitPath(path: string): string[] {
 /**
  * Convert paths to an array, slashes within the path will be ignored
  * @param paths - Paths to join
- * @param slash-  whether to add a trailing/leading slash to path
+ * @param slash - whether to add a trailing/leading slash to path
  * @example
  * ```
  * ['a','b','c'] // 'a/b/c'
@@ -79,6 +79,7 @@ export function joinPaths(
       return joined;
   }
 }
+
 export function createGetUrl(
   baseUrl: string,
 ): (slugs: string[], locale?: string) => string {

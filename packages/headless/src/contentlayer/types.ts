@@ -1,5 +1,5 @@
 import type { RawDocumentData } from 'contentlayer/source-files';
-import type { PageTreeBuilder } from '@/server/page-tree-builder';
+import type { PageTreeBuilder } from '@/source/page-tree-builder';
 
 export interface MetaPageBase {
   /** File path relative to `contentDirPath` */

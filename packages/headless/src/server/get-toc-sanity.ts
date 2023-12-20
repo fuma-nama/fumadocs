@@ -14,7 +14,7 @@ interface Block {
 /**
  * Parse TOC from portable text (Sanity)
  *
- * @param value-  Blocks
+ * @param value - Blocks
  * @param slugFn - A function that generates slug from title
  */
 export function getTableOfContentsFromPortableText(

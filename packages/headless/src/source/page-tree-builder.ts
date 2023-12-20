@@ -1,54 +1,20 @@
 import type { ReactElement } from 'react';
-import type { FileNode, FolderNode, PageTree, TreeNode } from './types';
-import { joinPaths, splitPath } from './utils';
-
-export interface AbstractFile {
-  locale?: string;
-
-  /**
-   * Original path of file
-   */
-  path: string;
-
-  /**
-   * File path without extension & prefix
-   */
-  flattenedPath: string;
-
-  /**
-   * File name without extension
-   */
-  name: string;
-
-  dirname: string;
-}
-
-export interface AbstractMeta {
-  file: AbstractFile;
-  icon?: string;
-  title?: string;
-  pages: string[];
-}
-
-export interface AbstractPage {
-  file: AbstractFile;
-  icon?: string;
-  title: string;
-  url: string;
-}
+import type { FileNode, FolderNode, PageTree, TreeNode } from '../server/types';
+import { joinPaths, splitPath } from '../server/utils';
+import type { Meta, Page } from './types';
 
 interface PageTreeBuilderContext {
   lang?: string;
 
-  getMetaByPath: (flattenPath: string) => AbstractMeta | undefined;
-  getPageByPath: (flattenPath: string) => AbstractPage | undefined;
+  getMetaByPath: (flattenPath: string) => Meta | undefined;
+  getPageByPath: (flattenPath: string) => Page | undefined;
 
   resolveIcon: (icon: string | undefined) => ReactElement | undefined;
 
   /**
    * Default pages without specified langauge
    */
-  basePages: AbstractPage[];
+  basePages: Page[];
 }
 
 export interface BuildPageTreeOptions {
@@ -75,8 +41,8 @@ export interface PageTreeBuilder {
 }
 
 export interface CreatePageTreeBuilderOptions {
-  pages: AbstractPage[];
-  metas: AbstractMeta[];
+  pages: Page[];
+  metas: Meta[];
   resolveIcon?: (icon: string) => ReactElement | undefined;
 }
 
@@ -84,10 +50,7 @@ const separator = /---(?<name>.*?)---/;
 const rest = '...';
 const extractor = /\.\.\.(?<name>.+)/;
 
-function buildMeta(
-  meta: AbstractMeta,
-  ctx: PageTreeBuilderContext,
-): FolderNode {
+function buildMeta(meta: Meta, ctx: PageTreeBuilderContext): FolderNode {
   let index: FileNode | undefined;
   const filtered = new Set<string>();
 
@@ -221,10 +184,7 @@ function getFolderNodes(
   return { index, children };
 }
 
-function buildFileNode(
-  page: AbstractPage,
-  ctx: PageTreeBuilderContext,
-): FileNode {
+function buildFileNode(page: Page, ctx: PageTreeBuilderContext): FileNode {
   let localePage = page;
   if (ctx.lang) {
     localePage =
@@ -244,7 +204,7 @@ function buildFolderNode(
   ctx: PageTreeBuilderContext,
   keepIndex = false,
 ): FolderNode {
-  let meta: AbstractMeta | undefined;
+  let meta: Meta | undefined;
 
   if (ctx.lang) meta = ctx.getMetaByPath(joinPaths([path, `meta-${ctx.lang}`]));
   meta ??= ctx.getMetaByPath(joinPaths([path, 'meta']));
@@ -277,9 +237,9 @@ export function createPageTreeBuilder({
   pages,
   resolveIcon = () => undefined,
 }: CreatePageTreeBuilderOptions): PageTreeBuilder {
-  const basePages: AbstractPage[] = [];
-  const pageMap = new Map<string, AbstractPage>();
-  const metaMap = new Map<string, AbstractMeta>();
+  const basePages: Page[] = [];
+  const pageMap = new Map<string, Page>();
+  const metaMap = new Map<string, Meta>();
 
   for (const page of pages) {
     if (!page.file.locale) basePages.push(page);

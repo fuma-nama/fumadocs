@@ -9,7 +9,7 @@ export {
   type PageTreeBuilder,
   type BuildPageTreeOptionsWithI18n,
   type CreatePageTreeBuilderOptions,
-  type AbstractFile as PageTreeBuilderFile,
-  type AbstractMeta as PageTreeBuilderMeta,
-  type AbstractPage as PageTreeBuilderPage,
-} from './server/page-tree-builder';
+  type FileInfo as PageTreeBuilderFile,
+  type Meta as PageTreeBuilderMeta,
+  type Page as PageTreeBuilderPage,
+} from './source';
