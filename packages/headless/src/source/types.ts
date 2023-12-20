@@ -36,3 +36,26 @@ export interface Page {
 }
 
 export type Transformer = (context: Result) => void | Promise<void>;
+
+export interface MetaNode {
+  type: 'meta';
+  meta: Meta;
+}
+
+export interface PageNode {
+  type: 'page';
+  page: Page;
+}
+
+export interface FolderNode {
+  type: 'folder';
+  name: string;
+  children: GraphNode[];
+}
+
+export interface Root {
+  type: 'root';
+  children: GraphNode[];
+}
+
+export type GraphNode = MetaNode | PageNode | FolderNode;

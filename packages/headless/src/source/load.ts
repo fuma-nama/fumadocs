@@ -2,7 +2,14 @@
 // Result should contain page tree and basic utilities
 
 import { splitPath } from '@/server';
-import type { Meta, Page, Transformer } from './types';
+import type {
+  FolderNode,
+  GraphNode,
+  Meta,
+  Page,
+  Root,
+  Transformer,
+} from './types';
 import { parsePath } from './path';
 
 export interface LoadOptions {
@@ -18,16 +25,11 @@ export interface VirtualFile {
 }
 
 export interface Result {
-  graph: GraphNode;
+  graph: Root;
   pages: Page[];
   metas: Meta[];
   data: Record<string, unknown>;
 }
-
-type GraphNode =
-  | { type: 'meta'; meta: Meta }
-  | { type: 'page'; page: Page }
-  | { type: 'folder'; children: GraphNode[] };
 
 export async function load({
   files,
@@ -62,11 +64,7 @@ export async function load({
   return ctx;
 }
 
-export function resolveFiles(
-  path: string,
-  pages: Page[],
-  metas: Meta[],
-): GraphNode {
+function resolveFiles(root: string, pages: Page[], metas: Meta[]): Root {
   const directories = new Map<string, GraphNode[]>();
 
   for (const page of pages) {
@@ -89,8 +87,6 @@ export function resolveFiles(
     directories.set(meta.file.dirname, nodes);
   }
 
-  type FolderNode = Extract<GraphNode, { type: 'folder' }>;
-
   const directoryNodes = new Map<string, FolderNode>();
 
   const sortedKeys = [...directories.keys()].sort(
@@ -112,6 +108,7 @@ export function resolveFiles(
 
     const thisNode: FolderNode = {
       type: 'folder',
+      name: segments.length > 0 ? segments[segments.length - 1] : '',
       children: directories.get(key) ?? [],
     };
 
@@ -119,6 +116,8 @@ export function resolveFiles(
     parentDir?.children.push(thisNode);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- Not null
-  return directoryNodes.get(path)!;
+  return {
+    type: 'root',
+    children: directoryNodes.get(root)?.children ?? [],
+  };
 }
