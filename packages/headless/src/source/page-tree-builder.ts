@@ -198,11 +198,11 @@ function build(ctx: PageTreeBuilderContext): PageTree.PageTree {
 }
 
 export function createPageTreeBuilder({
-  storage: graph,
+  storage,
   resolveIcon = () => undefined,
 }: CreatePageTreeBuilderOptions): PageTreeBuilder {
   const context: PageTreeBuilderContext = {
-    storage: graph,
+    storage,
     resolveIcon(icon) {
       if (!icon) return;
       return resolveIcon(icon);

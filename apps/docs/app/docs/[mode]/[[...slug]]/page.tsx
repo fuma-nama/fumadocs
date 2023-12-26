@@ -78,7 +78,9 @@ export default async function Page({
 function Category({ page }: { page: Page }): JSX.Element {
   const filtered = utils.files.filter(
     (docs) =>
-      docs.info.dirname === page.info.dirname && docs.info.name !== 'index',
+      docs.type === 'page' &&
+      docs.info.dirname === page.info.dirname &&
+      docs.info.name !== 'index',
   ) as Page[];
 
   return (
