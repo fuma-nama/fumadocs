@@ -43,50 +43,16 @@ export function findNeighbour(
 }
 
 /**
- * Split path into segments, trailing/leading slashes are removed
+ * Separate the folder nodes of a root into multiple roots
  */
-export function splitPath(path: string): string[] {
-  return path.split('/').filter((p) => p.length > 0);
-}
+export function separatePageTree(pageTree: PageTree): PageTree[] {
+  return pageTree.children.flatMap<PageTree>((child) => {
+    if (child.type !== 'folder') return [];
 
-/**
- * Convert paths to an array, slashes within the path will be ignored
- * @param paths - Paths to join
- * @param slash - whether to add a trailing/leading slash to path
- * @example
- * ```
- * ['a','b','c'] // 'a/b/c'
- * ['/a'] // 'a'
- * ['a', '/b'] // 'a/b'
- * ['a', 'b/c'] // 'a/b/c'
- * ```
- */
-export function joinPaths(
-  paths: string[],
-  slash: 'leading' | 'trailing' | 'none' = 'none',
-): string {
-  const joined = paths
-    // avoid slashes in path and filter empty
-    .flatMap((path) => splitPath(path))
-    .join('/');
-
-  switch (slash) {
-    case 'leading':
-      return `/${joined}`;
-    case 'trailing':
-      return `${joined}/`;
-    default:
-      return joined;
-  }
-}
-
-export function createGetUrl(
-  baseUrl: string,
-): (slugs: string[], locale?: string) => string {
-  return (slugs, locale) => {
-    const paths = [baseUrl, ...slugs];
-    if (locale) paths.push(locale);
-
-    return joinPaths(paths, 'leading');
-  };
+    return {
+      name: child.name,
+      url: child.index?.url,
+      children: child.children,
+    };
+  });
 }

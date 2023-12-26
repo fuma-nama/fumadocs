@@ -6,7 +6,7 @@ import { PHASE_PRODUCTION_BUILD } from 'next/constants';
 import { z } from 'zod';
 import type { InferMetaType, InferPageType } from 'next-docs-zeta/source';
 import { loader } from 'next-docs-zeta/source';
-import type { PageTree } from 'next-docs-zeta/server';
+import { separatePageTree, type PageTree } from 'next-docs-zeta/server';
 import { map } from '@/_map';
 
 const frontmatterSchema = defaultSchemas.frontmatter.extend({
@@ -24,19 +24,8 @@ export type Page = InferPageType<typeof utils>;
 export type Meta = InferMetaType<typeof utils>;
 
 export function getPageTree(mode: string): PageTree {
-  let result: PageTree | undefined;
-  for (const node of utils.pageTree.children) {
-    if (node.type !== 'folder') continue;
-
-    if (node.name === mode) {
-      result = {
-        name: 'Docs',
-        children: node.children,
-      };
-    }
-  }
-
-  return result ?? utils.pageTree;
+  const roots = separatePageTree(utils.pageTree);
+  return roots.find((root) => root.name === mode) ?? utils.pageTree;
 }
 
 export interface Index {

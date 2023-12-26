@@ -1,6 +1,5 @@
-import { splitPath } from '@/server/utils';
 import type { FileInfo, MetaData, PageData } from './types';
-import { parseFolderPath } from './path';
+import { parseFolderPath, splitPath } from './path';
 
 export interface Meta {
   type: 'meta';
@@ -32,37 +31,46 @@ export type Node = Meta | Page | Folder;
  * A virtual file system can solve this problem
  */
 export interface Storage {
-  read: (path: string) => Node | undefined;
+  read: (path: string) => Page | Meta | undefined;
+  readDir: (path: string) => Folder | undefined;
   root: () => Folder;
   add: (file: Page | Meta) => void;
   makeDir: (path: string) => void;
 }
 
 export function makeGraph(): Storage {
-  const map = new Map<string, Page | Meta | Folder>();
+  const files = new Map<string, Page | Meta>();
+  const folders = new Map<string, Folder>();
+  const root: Folder = {
+    type: 'folder',
+    file: parseFolderPath('.'),
+    children: [],
+  };
+
+  folders.set('.', root);
 
   return {
-    root: () => ({
-      type: 'folder',
-      file: parseFolderPath(''),
-      children: [...map.values()].filter((node) => node.file.dirname === '.'),
-    }),
+    root() {
+      return root;
+    },
     add(file) {
       this.makeDir(file.file.dirname);
-      const dir = map.get(file.file.dirname) as Folder | undefined;
 
-      dir?.children.push(file);
-      map.set(file.file.path, file);
+      folders.get(file.file.dirname)?.children.push(file);
+      files.set(file.file.path, file);
     },
     read(path) {
-      return map.get(path);
+      return files.get(path);
+    },
+    readDir(path) {
+      return folders.get(path);
     },
     makeDir(path) {
       const segments = splitPath(path);
 
       for (let i = 0; i < segments.length; i++) {
         const segment = segments.slice(0, i + 1).join('/');
-        if (map.has(segment)) continue;
+        if (folders.has(segment)) continue;
 
         const folder: Folder = {
           type: 'folder',
@@ -70,10 +78,8 @@ export function makeGraph(): Storage {
           children: [],
         };
 
-        map.set(segment, folder);
-
-        const dir = map.get(folder.file.dirname);
-        if (dir?.type === 'folder') dir.children.push(folder);
+        folders.set(folder.file.path, folder);
+        folders.get(folder.file.dirname)?.children.push(folder);
       }
     },
   };

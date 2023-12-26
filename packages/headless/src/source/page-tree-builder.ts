@@ -112,23 +112,20 @@ function buildFolderNode(
       const extractResult = extractor.exec(item);
 
       const extractName = extractResult?.groups?.name ?? item;
-      const itemNode = folder.children.find(
-        (child) =>
-          (child.type === 'folder' || child.type === 'page') &&
-          child.file.name === extractName,
-      );
+
+      const itemNode =
+        ctx.storage.readDir(`${folder.file.path}/${extractName}`) ??
+        ctx.storage.read(`${folder.file.path}/${extractName}.mdx`) ??
+        ctx.storage.read(`${folder.file.path}/${extractName}.md`);
 
       if (!itemNode) return [];
 
       addedNodePaths.add(itemNode.file.path);
+
       if (itemNode.type === 'folder') {
         const node = buildFolderNode(itemNode, ctx);
 
-        if (extractResult?.groups) {
-          return node.children;
-        }
-
-        return node;
+        return extractResult?.groups ? node.children : node;
       }
 
       if (itemNode.type === 'page') {
@@ -166,17 +163,11 @@ function buildFileNode(
 ): PageTree.FileNode {
   let localePage = page;
   if (ctx.lang) {
-    const parent = ctx.storage.read(page.file.dirname);
+    const result =
+      ctx.storage.read(`${page.file.flattenedPath}.${ctx.lang}.mdx`) ??
+      ctx.storage.read(`${page.file.flattenedPath}.${ctx.lang}.md`);
 
-    if (parent && parent.type === 'folder') {
-      const result = parent.children.find(
-        (child) =>
-          child.type === 'page' &&
-          child.file.name === `${page.file.name}.${ctx.lang}`,
-      ) as FileGraph.Page | undefined;
-
-      localePage = result ?? localePage;
-    }
+    if (result?.type === 'page') localePage = result;
   }
 
   return {

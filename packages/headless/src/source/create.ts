@@ -1,5 +1,4 @@
 import type { PageTree } from '@/server/types';
-import { createGetUrl } from '@/server/utils';
 import {
   load,
   type RawPage,
@@ -10,6 +9,7 @@ import {
 import type { MetaData, PageData, Transformer } from './types';
 import type { CreatePageTreeBuilderOptions } from './page-tree-builder';
 import { createPageTreeBuilder } from './page-tree-builder';
+import { joinPaths } from './path';
 
 interface LoaderConfig {
   source: SourceConfig;
@@ -101,6 +101,17 @@ function groupByLanguages(
   }
 
   return langMap;
+}
+
+function createGetUrl(
+  baseUrl: string,
+): (slugs: string[], locale?: string) => string {
+  return (slugs, locale) => {
+    const paths = [baseUrl, ...slugs];
+    if (locale) paths.push(locale);
+
+    return joinPaths(paths, 'leading');
+  };
 }
 
 type InferSourceConfig<T> = T extends Source<infer Config> ? Config : never;
