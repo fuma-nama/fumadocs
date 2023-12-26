@@ -1,48 +1,31 @@
 import type { ReactElement } from 'react';
-import type { FileNode, FolderNode, PageTree, TreeNode } from '../server/types';
-import { joinPaths, splitPath } from '../server/utils';
-import type { Meta, Page } from './types';
+import type * as PageTree from '../server/types';
+import type * as FileGraph from './file-graph';
 
 interface PageTreeBuilderContext {
+  storage: FileGraph.Storage;
   lang?: string;
 
-  getMetaByPath: (flattenPath: string) => Meta | undefined;
-  getPageByPath: (flattenPath: string) => Page | undefined;
-
   resolveIcon: (icon: string | undefined) => ReactElement | undefined;
-
-  /**
-   * Default pages without specified langauge
-   */
-  basePages: Page[];
 }
 
-export interface BuildPageTreeOptions {
-  /**
-   * The root folder to scan files
-   * @defaultValue `''`
-   */
-  root: string;
-}
-
-export type BuildPageTreeOptionsWithI18n = BuildPageTreeOptions & {
+export interface BuildPageTreeOptionsWithI18n {
   languages: string[];
-};
+}
 
 export interface PageTreeBuilder {
-  build: (options?: Partial<BuildPageTreeOptions>) => PageTree;
+  build: () => PageTree.PageTree;
 
   /**
    * Build page tree and fallback to the default language if the page doesn't exist
    */
   buildI18n: (
     options?: Partial<BuildPageTreeOptionsWithI18n>,
-  ) => Record<string, PageTree>;
+  ) => Record<string, PageTree.PageTree>;
 }
 
 export interface CreatePageTreeBuilderOptions {
-  pages: Page[];
-  metas: Meta[];
+  storage: FileGraph.Storage;
   resolveIcon?: (icon: string) => ReactElement | undefined;
 }
 
@@ -50,180 +33,162 @@ const separator = /---(?<name>.*?)---/;
 const rest = '...';
 const extractor = /\.\.\.(?<name>.+)/;
 
-function buildMeta(meta: Meta, ctx: PageTreeBuilderContext): FolderNode {
-  let index: FileNode | undefined;
-  const filtered = new Set<string>();
+/**
+ * @param skipIndex - Skip index
+ * @returns Nodes with specified locale in context (sorted)
+ */
+function buildAll(
+  nodes: FileGraph.Node[],
+  ctx: PageTreeBuilderContext,
+  skipIndex: boolean,
+): PageTree.TreeNode[] {
+  return nodes
+    .flatMap((child) => {
+      if (child.type === 'page') {
+        if (child.file.locale) return [];
+        if (skipIndex && child.file.name === 'index') return [];
 
-  const resolved = meta.pages.flatMap<TreeNode | '...'>((_item) => {
-    let item = _item;
-    if (item === rest) return '...';
+        return buildFileNode(child, ctx);
+      }
 
-    const result = separator.exec(item);
+      if (child.type === 'folder') {
+        return buildFolderNode(child, ctx, true);
+      }
 
-    if (result?.groups) {
-      return {
-        type: 'separator',
-        name: result.groups.name,
-      };
-    }
-
-    const extractResult = extractor.exec(item);
-    const isExtract = extractResult !== null;
-
-    if (extractResult?.groups) {
-      item = extractResult.groups.name;
-    }
-
-    const path = joinPaths([meta.file.dirname, item]);
-    const page = ctx.getPageByPath(path);
-
-    if (page) {
-      const node = buildFileNode(page, ctx);
-      filtered.add(page.file.path);
-
-      if (item === 'index') index = node;
-      return node;
-    }
-
-    //folder can't be index
-    if (item === 'index') {
       return [];
-    }
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
 
-    const node = buildFolderNode(path, ctx, isExtract);
-    filtered.add(path);
+function getFolderMeta(
+  folder: FileGraph.Folder,
+  ctx: PageTreeBuilderContext,
+): FileGraph.Meta | undefined {
+  const meta = ctx.storage.read(
+    ctx.lang
+      ? `${folder.file.path}/meta.${ctx.lang}.json`
+      : `${folder.file.path}/meta.json`,
+  );
 
-    // if item doesn't exist
-    if (!node.index && node.children.length === 0) return [];
+  if (meta?.type === 'meta') return meta;
+}
 
-    // extract children
-    if (isExtract) return node.children;
+/**
+ *
+ * @param folder - Folder node
+ * @param ctx - Context
+ * @param skipIndex - Exclude index page if meta not specified
+ */
+function buildFolderNode(
+  folder: FileGraph.Folder,
+  ctx: PageTreeBuilderContext,
+  skipIndex = false,
+): PageTree.FolderNode {
+  const indexNode = folder.children.find(
+    (node) => node.type === 'page' && node.file.name === 'index',
+  ) as FileGraph.Page | undefined;
+  const index = indexNode ? buildFileNode(indexNode, ctx) : undefined;
+  const meta = getFolderMeta(folder, ctx)?.data;
 
-    return node;
-  });
+  let children: PageTree.FolderNode['children'];
 
-  const children = resolved.flatMap<TreeNode>((item) => {
-    if (item === '...') {
-      return getFolderNodes(
-        ctx,
-        meta.file.dirname,
-        false,
-        (path) => !filtered.has(path),
-      ).children;
-    }
+  if (!meta) {
+    children = buildAll(folder.children, ctx, skipIndex);
+  } else {
+    const addedNodePaths = new Set<string>();
 
-    return item;
-  });
+    const resolved = meta.pages.flatMap<PageTree.TreeNode | '...'>((item) => {
+      if (item === rest) return '...';
 
-  if (!index) {
-    const page = ctx.getPageByPath(joinPaths([meta.file.dirname, 'index']));
+      const result = separator.exec(item);
 
-    if (page) index = buildFileNode(page, ctx);
+      if (result?.groups) {
+        return {
+          type: 'separator',
+          name: result.groups.name,
+        };
+      }
+
+      const extractResult = extractor.exec(item);
+
+      const extractName = extractResult?.groups?.name ?? item;
+      const itemNode = folder.children.find(
+        (child) =>
+          (child.type === 'folder' || child.type === 'page') &&
+          child.file.name === extractName,
+      );
+
+      if (!itemNode) return [];
+
+      addedNodePaths.add(itemNode.file.path);
+      if (itemNode.type === 'folder') {
+        const node = buildFolderNode(itemNode, ctx);
+
+        if (extractResult?.groups) {
+          return node.children;
+        }
+
+        return node;
+      }
+
+      if (itemNode.type === 'page') {
+        return buildFileNode(itemNode, ctx);
+      }
+
+      return [];
+    });
+
+    children = resolved.flatMap<PageTree.TreeNode>((item) => {
+      if (item === '...') {
+        return buildAll(
+          folder.children.filter((node) => !addedNodePaths.has(node.file.path)),
+          ctx,
+          true,
+        );
+      }
+
+      return item;
+    });
   }
 
   return {
     type: 'folder',
-    name: meta.title ?? index?.name ?? pathToName(splitPath(meta.file.dirname)),
-    icon: ctx.resolveIcon(meta.icon),
+    name: meta?.title ?? index?.name ?? pathToName(folder.file.name),
+    icon: ctx.resolveIcon(meta?.icon),
     index,
     children,
   };
 }
 
-/**
- * Get nodes under specific folder
- * @param ctx - Context
- * @param path - Folder path
- * @param joinIndex - If enabled, join index node into children
- * @param filter - Filter nodes
- */
-function getFolderNodes(
+function buildFileNode(
+  page: FileGraph.Page,
   ctx: PageTreeBuilderContext,
-  path: string,
-  joinIndex: boolean,
-  filter: (path: string) => boolean = () => true,
-): { index?: FileNode; children: TreeNode[] } {
-  let index: FileNode | undefined;
-  const children: TreeNode[] = [];
-
-  for (const page of ctx.basePages) {
-    if (page.file.dirname !== path || !filter(page.file.path)) continue;
-    const node = buildFileNode(page, ctx);
-
-    if (page.file.name === 'index') {
-      index = node;
-      continue;
-    }
-
-    children.push(node);
-  }
-
-  const segments = splitPath(path);
-  const folders = new Set<string>(
-    ctx.basePages.flatMap((page) => {
-      const dirnameSegments = splitPath(page.file.dirname);
-
-      if (path.length === 0 && path !== page.file.dirname)
-        return dirnameSegments[0];
-      if (page.file.dirname.startsWith(`${path}/`))
-        return joinPaths([path, dirnameSegments[segments.length]]);
-
-      return [];
-    }),
-  );
-
-  for (const folder of folders) {
-    if (!filter(folder)) continue;
-
-    children.push(buildFolderNode(folder, ctx));
-  }
-
-  children.sort((next, prev) => next.name.localeCompare(prev.name));
-  if (index && joinIndex) children.unshift(index);
-
-  return { index, children };
-}
-
-function buildFileNode(page: Page, ctx: PageTreeBuilderContext): FileNode {
+): PageTree.FileNode {
   let localePage = page;
   if (ctx.lang) {
-    localePage =
-      ctx.getPageByPath(`${page.file.flattenedPath}.${ctx.lang}`) ?? page;
+    const parent = ctx.storage.read(page.file.dirname);
+
+    if (parent && parent.type === 'folder') {
+      const result = parent.children.find(
+        (child) =>
+          child.type === 'page' &&
+          child.file.name === `${page.file.name}.${ctx.lang}`,
+      ) as FileGraph.Page | undefined;
+
+      localePage = result ?? localePage;
+    }
   }
 
   return {
     type: 'page',
-    name: localePage.title,
-    icon: ctx.resolveIcon(localePage.icon),
+    name: localePage.data.title,
+    icon: ctx.resolveIcon(localePage.data.icon),
     url: localePage.url,
   };
 }
 
-function buildFolderNode(
-  path: string,
-  ctx: PageTreeBuilderContext,
-  keepIndex = false,
-): FolderNode {
-  let meta: Meta | undefined;
-
-  if (ctx.lang) meta = ctx.getMetaByPath(joinPaths([path, `meta-${ctx.lang}`]));
-  meta ??= ctx.getMetaByPath(joinPaths([path, 'meta']));
-
-  if (meta) {
-    return buildMeta(meta, ctx);
-  }
-
-  const { index, children } = getFolderNodes(ctx, path, keepIndex);
-
-  return {
-    type: 'folder',
-    name: index?.name ?? pathToName(splitPath(path)),
-    index,
-    children,
-  };
-}
-
-function build(root: string, ctx: PageTreeBuilderContext): PageTree {
+function build(ctx: PageTreeBuilderContext): PageTree.PageTree {
+  const root = ctx.storage.root();
   const folder = buildFolderNode(root, ctx, true);
 
   return {
@@ -233,27 +198,11 @@ function build(root: string, ctx: PageTreeBuilderContext): PageTree {
 }
 
 export function createPageTreeBuilder({
-  metas,
-  pages,
+  storage: graph,
   resolveIcon = () => undefined,
 }: CreatePageTreeBuilderOptions): PageTreeBuilder {
-  const basePages: Page[] = [];
-  const pageMap = new Map<string, Page>();
-  const metaMap = new Map<string, Meta>();
-
-  for (const page of pages) {
-    if (!page.file.locale) basePages.push(page);
-    pageMap.set(page.file.flattenedPath, page);
-  }
-
-  for (const meta of metas) {
-    metaMap.set(meta.file.flattenedPath, meta);
-  }
-
   const context: PageTreeBuilderContext = {
-    basePages,
-    getMetaByPath: (path) => metaMap.get(path),
-    getPageByPath: (path) => pageMap.get(path),
+    storage: graph,
     resolveIcon(icon) {
       if (!icon) return;
       return resolveIcon(icon);
@@ -261,12 +210,12 @@ export function createPageTreeBuilder({
   };
 
   return {
-    build({ root = '' } = {}) {
-      return build(root, context);
+    build() {
+      return build(context);
     },
-    buildI18n({ root = '', languages = [] } = {}) {
-      const entries = languages.map<[string, PageTree]>((lang) => {
-        const tree = build(root, {
+    buildI18n({ languages = [] } = {}) {
+      const entries = languages.map<[string, PageTree.PageTree]>((lang) => {
+        const tree = build({
           ...context,
           lang,
         });
@@ -279,7 +228,6 @@ export function createPageTreeBuilder({
   };
 }
 
-function pathToName(path: string[]): string {
-  const name = path[path.length - 1] ?? 'docs';
-  return name.slice(0, 1).toUpperCase() + name.slice(1);
+function pathToName(path: string): string {
+  return path.slice(0, 1).toUpperCase() + path.slice(1);
 }

@@ -1,54 +1,23 @@
-import type { BuildPageTreeOptions } from '@/source/page-tree-builder';
-import type { PageTree } from '@/server/types';
-import { loadContext, type ContextOptions } from './load-context';
-import type { DocsPageBase, MetaPageBase, PagesContext } from './types';
-import { createUtils, type ContentlayerUtils } from './utils';
+import { type VirtualFile } from '@/source/load';
+import type { Source } from '@/source/create';
+import type { DocsPageBase, MetaPageBase } from './types';
 
-type Options<L extends string[] | undefined> = Partial<
-  Omit<ContextOptions, 'languages'> & {
-    /**
-     * @defaultValue `{ root: 'docs' }`
-     */
-    pageTreeOptions: BuildPageTreeOptions;
-    languages: L;
-  }
->;
-
-type CreateContentlayer = <
+export function createContentlayerSource<
   Meta extends MetaPageBase,
   Docs extends DocsPageBase,
-  Langs extends string[] | undefined = undefined,
->(
-  metaPages: Meta[],
-  docsPages: Docs[],
-  options?: Options<Langs>,
-) => {
-  __pageContext: PagesContext;
-  tree: Langs extends string[] ? Record<string, PageTree> : PageTree;
-} & ContentlayerUtils<Docs>;
-
-/**
- * Create page tree and utilities for Contentlayer
- */
-export const createContentlayer: CreateContentlayer = (
-  metaPages,
-  docsPages,
-  options = {},
-) => {
-  const ctx = loadContext(metaPages, docsPages, options);
-  const pageTreeOptions = options.pageTreeOptions ?? { root: 'docs' };
-  const tree: ReturnType<CreateContentlayer>['tree'] =
-    options.languages !== undefined
-      ? ctx.builder.buildI18n({
-          ...pageTreeOptions,
-          languages: options.languages,
-        })
-      : ctx.builder.build(pageTreeOptions);
-
+>(metas: Meta[], pages: Docs[]): Source<{ metaData: Meta; pageData: Docs }> {
   return {
-    __pageContext: ctx,
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any -- Avoid complicated types
-    tree: tree as any,
-    ...createUtils(ctx),
+    files: [
+      ...metas.map<VirtualFile>((meta) => ({
+        type: 'meta',
+        path: meta._raw.sourceFilePath,
+        data: meta,
+      })),
+      ...pages.map<VirtualFile>((page) => ({
+        type: 'page',
+        path: page._raw.sourceFilePath,
+        data: page,
+      })),
+    ],
   };
-};
+}

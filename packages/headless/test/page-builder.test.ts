@@ -5,14 +5,13 @@ import { load } from '@/source/load';
 
 const pageTreeTransformer: Transformer = (ctx) => {
   ctx.data.pageTree = createPageTreeBuilder({
-    metas: ctx.metas,
-    pages: ctx.pages,
+    storage: ctx.storage,
   }).build();
 };
 
 describe('Page Tree Builder', () => {
-  test('Simple', async () => {
-    const result = await load({
+  test('Simple', () => {
+    const result = load({
       files: [
         {
           type: 'page',
@@ -40,7 +39,7 @@ describe('Page Tree Builder', () => {
   });
 
   test('Nested Directories', async () => {
-    const result = await load({
+    const result = load({
       files: [
         {
           type: 'page',
@@ -80,6 +79,93 @@ describe('Page Tree Builder', () => {
             {
               type: 'page',
               name: 'Nested Page',
+              url: '/nested/test',
+            },
+          ],
+        },
+      ],
+    } satisfies PageTree);
+  });
+
+  test('Internationalized Routing', () => {
+    const result = load({
+      files: [
+        {
+          type: 'page',
+          path: 'test.mdx',
+          data: {
+            title: 'Hello',
+            url: '/hello',
+          },
+        },
+        {
+          type: 'page',
+          path: 'test.cn.mdx',
+          data: {
+            title: 'Hello Chinese',
+            url: '/hello',
+          },
+        },
+        {
+          type: 'meta',
+          path: 'meta.json',
+          data: {
+            pages: ['test', 'nested'],
+          },
+        },
+        {
+          type: 'meta',
+          path: 'meta.cn.json',
+          data: {
+            title: 'Docs Chinese',
+            pages: ['test', 'nested'],
+          },
+        },
+        {
+          type: 'page',
+          path: '/nested/test.mdx',
+          data: {
+            title: 'Nested Page',
+            url: '/nested/test',
+          },
+        },
+        {
+          type: 'page',
+          path: '/nested/test.cn.mdx',
+          data: {
+            title: 'Nested Page Chinese',
+            url: '/nested/test',
+          },
+        },
+        {
+          type: 'meta',
+          path: '/nested/meta.cn.json',
+          data: {
+            title: 'Nested Chinese',
+            pages: ['...'],
+          },
+        },
+      ],
+      transformers: [
+        (ctx) => {
+          ctx.data.pageTree = createPageTreeBuilder({
+            storage: ctx.storage,
+          }).buildI18n({ languages: ['cn'] })['cn'];
+        },
+      ],
+    });
+
+    expect(result.data.pageTree).toEqual({
+      name: 'Docs Chinese',
+      children: [
+        { type: 'page', name: 'Hello Chinese', url: '/hello' },
+        {
+          type: 'folder',
+          name: 'Nested Chinese',
+          children: [
+            {
+              type: 'page',
+              name: 'Nested Page Chinese',
               url: '/nested/test',
             },
           ],

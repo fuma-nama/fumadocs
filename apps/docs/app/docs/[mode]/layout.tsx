@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { LayoutTemplateIcon, StarsIcon } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { modes } from '@/utils/modes';
-import { getUtils } from '@/utils/source';
+import { getPageTree } from '@/utils/source';
 import { NavChildren } from '@/components/nav';
 
 export const layoutOptions = {
@@ -33,7 +33,7 @@ export default function Layout({
   params: { mode: string };
   children: ReactNode;
 }): JSX.Element {
-  const tree = getUtils(params.mode).tree;
+  const tree = getPageTree(params.mode);
   const currentMode =
     modes.find((mode) => mode.param === params.mode) ?? modes[0];
   const Icon = currentMode.icon;

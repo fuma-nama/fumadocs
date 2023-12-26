@@ -1,9 +1,10 @@
 import { load } from '@/source/load';
+import { parseFilePath, parseFolderPath } from '@/source/path';
 import { describe, expect, test } from 'vitest';
 
 describe('Building File Graph', () => {
   test('Simple', async () => {
-    const result = await load({
+    const result = load({
       files: [
         {
           type: 'page',
@@ -23,23 +24,29 @@ describe('Building File Graph', () => {
       ],
     });
 
-    expect(result.graph).toEqual({
+    expect(result.storage).toEqual({
       type: 'root',
       children: [
-        {
+        expect.objectContaining({
           type: 'page',
-          page: result.pages.find((page) => page.file.path === 'test.mdx'),
-        },
-        {
+          file: parseFilePath('test.mdx'),
+        }),
+        expect.objectContaining({
           type: 'meta',
-          meta: result.metas.find((meta) => meta.file.path === 'meta.json'),
-        },
+          file: parseFilePath('meta.json'),
+        }),
       ],
     });
   });
 
   test('Nested Directories', async () => {
     const result = await load({
+      getUrl(slugs, locale) {
+        return '';
+      },
+      getSlugs(info) {
+        return [];
+      },
       files: [
         {
           type: 'page',
@@ -67,35 +74,33 @@ describe('Building File Graph', () => {
       ],
     });
 
-    expect(result.graph).toEqual({
+    expect(result.storage).toEqual({
       type: 'root',
       children: [
-        {
+        expect.objectContaining({
           type: 'page',
-          page: result.pages.find((page) => page.file.path === 'test.mdx'),
-        },
-        {
+          file: parseFilePath('test.mdx'),
+        }),
+        expect.objectContaining({
           type: 'meta',
-          meta: result.metas.find((meta) => meta.file.path === 'meta.json'),
-        },
-        {
+          file: parseFilePath('meta.json'),
+        }),
+        expect.objectContaining({
           type: 'folder',
-          name: 'nested',
+          file: parseFolderPath('nested'),
           children: [
-            {
+            expect.objectContaining({
               type: 'page',
-              page: result.pages.find(
-                (page) => page.file.path === 'nested/test.mdx',
-              ),
-            },
+              file: parseFilePath('nested/test.mdx'),
+            }),
           ],
-        },
+        }),
       ],
     });
   });
 
   test('Complicated Directories', async () => {
-    const result = await load({
+    const result = load({
       files: [
         {
           type: 'page',
@@ -124,37 +129,33 @@ describe('Building File Graph', () => {
       ],
     });
 
-    expect(result.graph).toEqual({
+    expect(result.storage).toEqual({
       type: 'root',
       children: [
-        {
+        expect.objectContaining({
           type: 'page',
-          page: result.pages.find((page) => page.file.path === 'test.mdx'),
-        },
-        {
+          file: parseFilePath('test.mdx'),
+        }),
+        expect.objectContaining({
           type: 'folder',
-          name: 'nested',
+          file: parseFolderPath('nested'),
           children: [
-            {
+            expect.objectContaining({
               type: 'page',
-              page: result.pages.find(
-                (page) => page.file.path === 'nested/test.mdx',
-              ),
-            },
-            {
+              file: parseFilePath('nested/test.mdx'),
+            }),
+            expect.objectContaining({
               type: 'folder',
-              name: 'nested',
+              file: parseFolderPath('nested/nested'),
               children: [
-                {
+                expect.objectContaining({
                   type: 'page',
-                  page: result.pages.find(
-                    (page) => page.file.path === 'nested/nested/test.mdx',
-                  ),
-                },
+                  file: parseFilePath('nested/nested/test.mdx'),
+                }),
               ],
-            },
+            }),
           ],
-        },
+        }),
       ],
     });
   });

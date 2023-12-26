@@ -6,7 +6,7 @@ import { visit } from './unist-visit';
 
 const regex = /^\|reference:(?<path>.+)\|/;
 
-export interface Options {
+export interface RemarkDynamicContentOptions {
   /** @defaultValue `process.cwd()` */
   cwd?: string;
   /** @defaultValue true */
@@ -26,7 +26,7 @@ export interface Options {
  * |reference:../path/to/file.ts|
  */
 export function remarkDynamicContent(
-  options: Options = {},
+  options: RemarkDynamicContentOptions = {},
 ): Transformer<Root, Root> {
   const {
     cwd = process.cwd(),

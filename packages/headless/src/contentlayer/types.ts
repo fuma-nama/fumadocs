@@ -1,5 +1,4 @@
 import type { RawDocumentData } from 'contentlayer/source-files';
-import type { PageTreeBuilder } from '@/source/page-tree-builder';
 
 export interface MetaPageBase {
   /** File path relative to `contentDirPath` */
@@ -27,13 +26,4 @@ export interface DocsPageBase {
   icon?: string;
   url: string;
   slug: string;
-}
-
-export interface PagesContext<Docs extends DocsPageBase = DocsPageBase> {
-  builder: PageTreeBuilder;
-
-  /**
-   * Language to Page[]
-   */
-  i18nMap: Map<string, Docs[]>;
 }

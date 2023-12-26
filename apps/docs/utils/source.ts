@@ -1,11 +1,12 @@
 import { writeFileSync } from 'node:fs';
 import path from 'node:path';
-import type { Utils } from 'next-docs-mdx/map';
-import { defaultSchemas, fromMap } from 'next-docs-mdx/map';
+import { createMDXSource, defaultSchemas } from 'next-docs-mdx/map';
 import type { StructuredData } from 'next-docs-zeta/mdx-plugins';
 import { PHASE_PRODUCTION_BUILD } from 'next/constants';
 import { z } from 'zod';
-import type { DefaultMetaData } from 'next-docs-mdx/types';
+import type { InferMetaType, InferPageType } from 'next-docs-zeta/source';
+import { loader } from 'next-docs-zeta/source';
+import type { PageTree } from 'next-docs-zeta/server';
 import { map } from '@/_map';
 
 const frontmatterSchema = defaultSchemas.frontmatter.extend({
@@ -13,40 +14,29 @@ const frontmatterSchema = defaultSchemas.frontmatter.extend({
   index: z.boolean().default(false),
 });
 
-export type DocsUtils = Utils<{
-  languages: undefined;
-  schema: {
-    frontmatter: z.infer<typeof frontmatterSchema>;
-    meta: DefaultMetaData;
-  };
-}>;
+export const utils = loader({
+  baseUrl: '/docs',
+  rootDir: 'docs',
+  source: createMDXSource(map, { schema: { frontmatter: frontmatterSchema } }),
+});
 
-export const tabs: Record<string, DocsUtils> = {
-  ui: fromMap(map, {
-    rootDir: 'docs/ui',
-    baseUrl: '/docs/ui',
-    schema: {
-      frontmatter: frontmatterSchema,
-    },
-  }),
-  headless: fromMap(map, {
-    rootDir: 'docs/headless',
-    baseUrl: '/docs/headless',
-    schema: {
-      frontmatter: frontmatterSchema,
-    },
-  }),
-  mdx: fromMap(map, {
-    rootDir: 'docs/mdx',
-    baseUrl: '/docs/mdx',
-    schema: {
-      frontmatter: frontmatterSchema,
-    },
-  }),
-};
+export type Page = InferPageType<typeof utils>;
+export type Meta = InferMetaType<typeof utils>;
 
-export function getUtils(mode: string): DocsUtils {
-  return mode in tabs ? tabs[mode] : tabs.headless;
+export function getPageTree(mode: string): PageTree {
+  let result: PageTree | undefined;
+  for (const node of utils.pageTree.children) {
+    if (node.type !== 'folder') continue;
+
+    if (node.name === mode) {
+      result = {
+        name: 'Docs',
+        children: node.children,
+      };
+    }
+  }
+
+  return result ?? utils.pageTree;
 }
 
 export interface Index {
@@ -68,14 +58,16 @@ if (
   !g.__NEXT_DOCS_INDEX_UPDATED
 ) {
   const mapPath = path.resolve('./.next/_map_indexes.json');
-  const indexes: Index[] = Object.values(tabs).flatMap((tab) => {
-    return tab.pages.map((page) => ({
-      id: page.file.id,
-      title: page.matter.title,
-      description: page.matter.description,
-      url: page.url,
-      structuredData: page.data.structuredData,
-    }));
+  const indexes: Index[] = utils.files.flatMap((file) => {
+    if (file.type !== 'page') return [];
+
+    return {
+      id: file.url,
+      title: file.data.title,
+      description: file.data.description,
+      url: file.url,
+      structuredData: file.data.exports.structuredData,
+    };
   });
 
   writeFileSync(mapPath, JSON.stringify(indexes));

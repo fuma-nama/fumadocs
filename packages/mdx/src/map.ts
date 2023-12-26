@@ -1,55 +1,20 @@
-import {
-  createGetUrl,
-  type BuildPageTreeOptions,
-  type PageTree,
-} from 'next-docs-zeta/server';
+import type { Source, PageData, MetaData } from 'next-docs-zeta/source';
 import type { AnyZodObject, z } from 'zod';
-import { getPageTreeBuilder, type BuilderOptions } from './build-tree';
-import { createPageUtils, type PageUtils } from './page-utils';
-import {
-  resolveFiles,
-  type ResolvedFiles,
-  type SchemaOptions,
-  type ResolveOptions,
-} from './resolve-files';
-import type { DefaultFrontmatter, DefaultMetaData, Meta, Page } from './types';
-import { defaultSchemas } from './validate/schema';
+import { resolveFiles, type SchemaOptions } from './resolve-files';
+import type { DefaultFrontmatter, DefaultMetaData, MDXPageData } from './types';
 
-interface UtilsOptions extends BuilderOptions {
-  languages: string[] | undefined;
-
-  /**
-   * @defaultValue `'/'`
-   */
-  baseUrl: string;
-
+interface UtilsOptions {
   schema: Partial<SchemaOptions>;
-
-  getUrl: ResolveOptions['getUrl'];
-  getSlugs: ResolveOptions['getSlugs'];
-  rootDir: ResolveOptions['rootDir'];
-  pageTreeOptions: BuildPageTreeOptions;
 }
 
 type PartialUtilsOptions = Partial<UtilsOptions>;
 
 interface RootConfig {
-  languages: string[] | undefined;
   schema: {
-    frontmatter: unknown;
-    meta: unknown;
+    frontmatter: PageData;
+    meta: MetaData;
   };
 }
-
-export type Utils<TTypes extends RootConfig> = PageUtils<
-  TTypes['schema']['frontmatter']
-> & {
-  tree: TTypes['languages'] extends string[]
-    ? Record<string, PageTree>
-    : PageTree;
-  pages: Page<TTypes['schema']['frontmatter']>[];
-  metas: Meta<TTypes['schema']['meta']>[];
-};
 
 type GetSchemaType<Schema, DefaultValue> = Schema extends AnyZodObject
   ? z.infer<Schema>
@@ -59,7 +24,6 @@ type GetSchemaType<Schema, DefaultValue> = Schema extends AnyZodObject
  * Get accurate options type from partial options
  */
 interface TransformPartialOptions<TOptions extends PartialUtilsOptions> {
-  languages: TOptions['languages'] extends string[] ? string[] : undefined;
   schema: {
     frontmatter: GetSchemaType<
       NonNullable<TOptions['schema']>['frontmatter'],
@@ -72,62 +36,24 @@ interface TransformPartialOptions<TOptions extends PartialUtilsOptions> {
   };
 }
 
-function fromMap<TOptions extends PartialUtilsOptions>(
+type GetSourceFromOptions<TTypes extends RootConfig> = Source<{
+  metaData: TTypes['schema']['meta'];
+  pageData: MDXPageData<TTypes['schema']['frontmatter']>;
+}>;
+
+export function createMDXSource<Options extends PartialUtilsOptions>(
   map: Record<string, unknown>,
-  options?: TOptions,
-): Utils<TransformPartialOptions<TOptions>> {
-  type $Options = TransformPartialOptions<TOptions>;
-  type $Frontmatter = $Options['schema']['frontmatter'];
-  type $MetaData = $Options['schema']['meta'];
-  type $Utils = Utils<$Options>;
-
-  const {
-    baseUrl = '/',
-    rootDir = '',
-    getSlugs,
-    getUrl = createGetUrl(baseUrl),
-    resolveIcon,
-    pageTreeOptions = { root: '' },
-    languages,
-    schema,
-  } = options ?? {};
-
-  const resolved = resolveFiles<$Frontmatter, $MetaData>({
-    map,
-    rootDir,
-    getSlugs,
-    getUrl,
-    schema,
-  });
-
-  const pageUtils = createPageUtils(resolved, languages ?? []);
-
-  const builder = getPageTreeBuilder(
-    resolved as ResolvedFiles<DefaultFrontmatter, DefaultMetaData>,
-    {
-      resolveIcon,
-    },
-  );
-
-  const tree =
-    languages === undefined
-      ? builder.build(pageTreeOptions)
-      : builder.buildI18n({
-          ...pageTreeOptions,
-          languages,
-        });
+  options?: Options,
+): GetSourceFromOptions<
+  TransformPartialOptions<Options> extends RootConfig
+    ? TransformPartialOptions<Options>
+    : never
+> {
+  const files = resolveFiles({ map, schema: options?.schema });
 
   return {
-    ...resolved,
-    tree: tree as $Utils['tree'],
-    ...pageUtils,
+    files,
   };
 }
 
-export {
-  fromMap,
-  resolveFiles,
-  createPageUtils,
-  getPageTreeBuilder,
-  defaultSchemas,
-};
+export { defaultSchemas } from './validate/schema';

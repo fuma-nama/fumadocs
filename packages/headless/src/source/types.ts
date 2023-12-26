@@ -1,4 +1,5 @@
-import type { Result } from './load';
+import type { LoaderOutput } from './create';
+import type { LoadResult, RawMeta, RawPage } from './load';
 
 export interface FileInfo {
   locale?: string;
@@ -9,7 +10,7 @@ export interface FileInfo {
   path: string;
 
   /**
-   * File path without extension & prefix
+   * File path without extension
    */
   flattenedPath: string;
 
@@ -21,41 +22,27 @@ export interface FileInfo {
   dirname: string;
 }
 
-export interface Meta {
-  file: FileInfo;
+export interface MetaData {
   icon?: string;
   title?: string;
   pages: string[];
 }
 
-export interface Page {
-  file: FileInfo;
+export interface PageData {
   icon?: string;
   title: string;
-  url: string;
 }
 
-export type Transformer = (context: Result) => void | Promise<void>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- infer types
+export type InferPageType<Utils extends LoaderOutput<any>> =
+  Utils extends LoaderOutput<infer Config>
+    ? RawPage<Config['source']['pageData']>
+    : never;
 
-export interface MetaNode {
-  type: 'meta';
-  meta: Meta;
-}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- infer types
+export type InferMetaType<Utils extends LoaderOutput<any>> =
+  Utils extends LoaderOutput<infer Config>
+    ? RawMeta<Config['source']['metaData']>
+    : never;
 
-export interface PageNode {
-  type: 'page';
-  page: Page;
-}
-
-export interface FolderNode {
-  type: 'folder';
-  name: string;
-  children: GraphNode[];
-}
-
-export interface Root {
-  type: 'root';
-  children: GraphNode[];
-}
-
-export type GraphNode = MetaNode | PageNode | FolderNode;
+export type Transformer = (context: LoadResult) => void;

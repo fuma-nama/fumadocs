@@ -33,8 +33,12 @@
       "types": "./dist/search/server.d.ts"
     },
     "./server": {
-      "import": "./dist/server.js",
-      "types": "./dist/server.d.ts"
+      "import": "./dist/server/index.js",
+      "types": "./dist/server/index.d.ts"
+    },
+    "./source": {
+      "import": "./dist/source/index.js",
+      "types": "./dist/source/index.d.ts"
     },
     "./link": {
       "import": "./dist/link.js",
@@ -53,8 +57,8 @@
       "types": "./dist/middleware.d.ts"
     },
     "./mdx-plugins": {
-      "import": "./dist/mdx-plugins.js",
-      "types": "./dist/mdx-plugins.d.ts"
+      "import": "./dist/mdx-plugins/index.js",
+      "types": "./dist/mdx-plugins/index.d.ts"
     },
     "./search-algolia/client": {
       "import": "./dist/search-algolia/client.js",
@@ -86,7 +90,10 @@
         "./dist/search/server.d.ts"
       ],
       "server": [
-        "./dist/server.d.ts"
+        "./dist/server/index.d.ts"
+      ],
+      "source": [
+        "./dist/source/index.d.ts"
       ],
       "link": [
         "./dist/link.d.ts"
@@ -101,7 +108,7 @@
         "./dist/middleware.d.ts"
       ],
       "mdx-plugins": [
-        "./dist/mdx-plugins.d.ts"
+        "./dist/mdx-plugins/index.d.ts"
       ],
       "search-algolia/client": [
         "./dist/search-algolia/client.d.ts"

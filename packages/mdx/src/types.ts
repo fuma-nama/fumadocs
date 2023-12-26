@@ -2,6 +2,7 @@ import type { MDXProps } from 'mdx/types';
 import type { StructuredData } from 'next-docs-zeta/mdx-plugins';
 import type { TableOfContents } from 'next-docs-zeta/server';
 import type { z } from 'zod';
+import type { PageData } from 'next-docs-zeta/source';
 import type * as Default from './validate/schema';
 
 export interface FileInfo {
@@ -46,28 +47,22 @@ export interface FileInfo {
 }
 
 /**
- * Defalt MDX properties, feel free to extend
+ * Defalt MDX properties
  */
-export interface MDXExport<Frontmatter = unknown> {
+export interface MDXExport<Frontmatter = PageData> {
   default: (props: MDXProps) => JSX.Element;
   frontmatter: Frontmatter;
   toc: TableOfContents;
   structuredData: StructuredData;
 }
 
+export type MDXPageData<Frontmatter extends PageData = PageData> = Omit<
+  Frontmatter,
+  'exports'
+> & {
+  exports: Omit<MDXExport<Frontmatter>, 'frontmatter'>;
+};
+
 export type DefaultFrontmatter = z.infer<typeof Default.frontmatterSchema>;
 
 export type DefaultMetaData = z.infer<typeof Default.metaSchema>;
-
-export interface Meta<Data = unknown> {
-  file: FileInfo;
-  data: Data;
-}
-
-export interface Page<Frontmatter = unknown> {
-  file: FileInfo;
-  url: string;
-  slugs: string[];
-  data: MDXExport<Frontmatter>;
-  matter: Frontmatter;
-}

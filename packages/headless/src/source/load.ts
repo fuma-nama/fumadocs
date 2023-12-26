@@ -1,123 +1,110 @@
-// Virtual files -> File Graph -> Plugins -> Result
-// Result should contain page tree and basic utilities
-
-import { splitPath } from '@/server';
-import type {
-  FolderNode,
-  GraphNode,
-  Meta,
-  Page,
-  Root,
-  Transformer,
-} from './types';
-import { parsePath } from './path';
+import type { FileInfo, MetaData, PageData, Transformer } from './types';
+import { isRelative, parseFilePath } from './path';
+import * as FileGraph from './file-graph';
 
 export interface LoadOptions {
   files: VirtualFile[];
   transformers?: Transformer[];
-  rootDir?: string;
+  rootDir: string;
+  getSlugs: (info: FileInfo) => string[];
+  getUrl: (slugs: string[], locale?: string) => string;
 }
 
 export interface VirtualFile {
   path: string;
   type: 'page' | 'meta';
+  data: unknown;
+}
+
+export interface RawPage<Data extends PageData = PageData> {
+  info: FileInfo;
+  type: 'page';
+  slugs: string[];
+  url: string;
+  data: Data;
+}
+
+export interface RawMeta<Data extends MetaData = MetaData> {
+  info: FileInfo;
+  type: 'meta';
+  data: Data;
+}
+
+export type RawFile<
+  PG extends PageData = PageData,
+  MG extends MetaData = MetaData,
+> = RawPage<PG> | RawMeta<MG>;
+
+export interface LoadResult {
+  storage: FileGraph.Storage;
+  files: RawFile[];
   data: Record<string, unknown>;
 }
 
-export interface Result {
-  graph: Root;
-  pages: Page[];
-  metas: Meta[];
-  data: Record<string, unknown>;
-}
-
-export async function load({
+// Virtual files -> File Graph -> Plugins -> Result
+// Result should contain page tree and basic utilities
+export function load({
   files,
   transformers = [],
-  rootDir = '',
-}: LoadOptions): Promise<Result> {
-  const parsedFiles = files.map((file) => ({
-    file: parsePath(file.path, rootDir),
-    type: file.type,
-    data: file.data,
-  }));
+  rootDir,
+  getSlugs,
+  getUrl,
+}: LoadOptions): LoadResult {
+  const parsed = files
+    .filter((file) => isRelative(file.path, rootDir))
+    .map<RawFile>((file) => {
+      const info = parseFilePath(file.path, rootDir);
 
-  const pages: Page[] = parsedFiles
-    .filter((file) => file.type === 'page')
-    .map((file) => ({
-      file: file.file,
-      ...(file.data as Omit<Page, 'file'>),
-    }));
+      if (file.type === 'page') {
+        const slugs = getSlugs(info);
 
-  const metas: Meta[] = parsedFiles
-    .filter((file) => file.type === 'meta')
-    .map((file) => ({ file: file.file, ...(file.data as Omit<Meta, 'file'>) }));
+        return {
+          type: file.type,
+          info,
+          url: getUrl(slugs, info.locale),
+          slugs,
+          data: file.data as PageData,
+        };
+      }
 
-  const graph = resolveFiles('', pages, metas);
-  const ctx: Result = { graph, pages, metas, data: {} };
+      return {
+        type: file.type,
+        info,
+        data: file.data as MetaData,
+      };
+    });
+  const storage = buildStorage(parsed);
+  const ctx: LoadResult = { files: parsed, storage, data: {} };
 
   for (const transformer of transformers) {
-    // eslint-disable-next-line no-await-in-loop -- in sync
-    await transformer(ctx);
+    transformer(ctx);
   }
 
   return ctx;
 }
 
-function resolveFiles(root: string, pages: Page[], metas: Meta[]): Root {
-  const directories = new Map<string, GraphNode[]>();
+function buildStorage(files: RawFile[]): FileGraph.Storage {
+  const storage = FileGraph.makeGraph();
 
-  for (const page of pages) {
-    const nodes = directories.get(page.file.dirname) ?? [];
-
-    nodes.push({
-      type: 'page',
-      page,
-    });
-    directories.set(page.file.dirname, nodes);
-  }
-
-  for (const meta of metas) {
-    const nodes = directories.get(meta.file.dirname) ?? [];
-
-    nodes.push({
-      type: 'meta',
-      meta,
-    });
-    directories.set(meta.file.dirname, nodes);
-  }
-
-  const directoryNodes = new Map<string, FolderNode>();
-
-  const sortedKeys = [...directories.keys()].sort(
-    (a, b) => a.length - b.length,
-  );
-
-  for (const key of sortedKeys) {
-    const segments = splitPath(key);
-    let parentDir: FolderNode | undefined;
-
-    for (let i = segments.length; i >= 0; i--) {
-      const node = directoryNodes.get(segments.slice(0, i).join('/'));
-
-      if (node) {
-        parentDir = node;
-        break;
-      }
+  for (const file of files) {
+    if (file.type === 'page') {
+      storage.add({
+        slugs: file.slugs,
+        url: file.url,
+        type: file.type,
+        file: file.info,
+        data: file.data,
+      });
     }
 
-    const thisNode: FolderNode = {
-      type: 'folder',
-      name: segments.length > 0 ? segments[segments.length - 1] : '',
-      children: directories.get(key) ?? [],
-    };
-
-    directoryNodes.set(key, thisNode);
-    parentDir?.children.push(thisNode);
+    if (file.type === 'meta') {
+      storage.add({
+        type: file.type,
+        file: file.info,
+        data: file.data,
+      });
+    }
   }
 
-  return {
-    type: 'root',
-    children: directoryNodes.get(root)?.children ?? [],
-  };
+  return storage;
 }

@@ -15,7 +15,6 @@ import { defineDocumentType } from 'contentlayer/source-files';
 import type { Options as ImgSizeOptions } from 'rehype-img-size';
 import { rehypeImgSize, rehypeNextDocs, remarkGfm } from '@/mdx-plugins';
 import type { RehypeNextDocsOptions } from '@/mdx-plugins/rehype-next-docs';
-import { createGetUrl } from '@/server/utils';
 
 function removeSlash(path: string): string {
   let start = 0,
@@ -58,13 +57,6 @@ export type Options = Partial<{
    */
   imgDirPath: string;
 
-  baseUrl: string;
-
-  /**
-   * Get url from slugs and locale, override the default getUrl function
-   */
-  getUrl: (slugs: string[], locale?: string) => string;
-
   pluginOptions: RehypeNextDocsOptions;
 
   docFields: Record<string, FieldDef>;
@@ -80,16 +72,10 @@ export function createConfig(options: Options = {}): Args {
     imgDirPath = './public',
     docFields,
     metaFields,
-    baseUrl = '/docs',
-    getUrl = createGetUrl(baseUrl),
     docsComputedFields,
     pluginOptions,
     metaComputedFields,
   } = options;
-
-  function getSlugs(doc: LocalDocument): string {
-    return removePattern(doc._raw.flattenedPath.split('.')[0], docsPattern);
-  }
 
   function getLocale(doc: LocalDocument): string {
     return doc._raw.flattenedPath.split('.')[1];
@@ -120,16 +106,6 @@ export function createConfig(options: Options = {}): Args {
       locale: {
         type: 'string',
         resolve: (post) => getLocale(post),
-      },
-      slug: {
-        type: 'string',
-        resolve: (post) => getSlugs(post),
-      },
-      url: {
-        type: 'string',
-        resolve: (post) => {
-          return getUrl(getSlugs(post).split('/'), getLocale(post));
-        },
       },
       ...docsComputedFields,
     },
