@@ -27,12 +27,12 @@ export interface SidebarProps {
 }
 
 const itemVariants = cva(
-  'flex flex-row items-center gap-2 rounded-md px-2 py-1.5 font-medium text-muted-foreground [&_svg]:h-4 [&_svg]:w-4',
+  'flex flex-row items-center gap-2 rounded-md px-2 py-1.5 text-muted-foreground [&_svg]:h-4 [&_svg]:w-4',
   {
     variants: {
       active: {
-        true: 'bg-primary/10 text-primary',
-        false: 'hover:bg-accent/50',
+        true: 'bg-primary/10 font-medium text-primary',
+        false: 'hover:bg-accent/70 hover:text-accent-foreground/70',
       },
     },
   },

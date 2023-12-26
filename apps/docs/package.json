@@ -15,6 +15,7 @@
     "algoliasearch": "^4.20.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
+    "geist": "^1.2.0",
     "katex": "^0.16.8",
     "lucide-react": "^0.298.0",
     "next": "14.0.4",

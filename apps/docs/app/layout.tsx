@@ -1,7 +1,8 @@
 import './style.css';
 import { Star } from 'lucide-react';
 import type { Viewport } from 'next';
-import { Inter } from 'next/font/google';
+import { GeistSans } from 'geist/font/sans';
+import { GeistMono } from 'geist/font/mono';
 import Link from 'next/link';
 import { baseUrl, createMetadata } from '@/utils/metadata';
 import { Provider } from './provider';
@@ -22,17 +23,17 @@ export const viewport: Viewport = {
   ],
 };
 
-const inter = Inter({
-  subsets: ['latin'],
-});
-
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }): JSX.Element {
   return (
-    <html lang="en" className={inter.className} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${GeistSans.variable} ${GeistMono.variable}`}
+      suppressHydrationWarning
+    >
       <body className="flex min-h-screen flex-col">
         <Provider>
           {children}
