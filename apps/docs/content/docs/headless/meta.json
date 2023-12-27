@@ -1,5 +1,6 @@
 {
   "title": "headless",
+  "root": true,
   "pages": [
     "---Guide---",
     "index",

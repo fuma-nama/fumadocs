@@ -25,7 +25,8 @@ export interface FileInfo {
 export interface MetaData {
   icon?: string;
   title?: string;
-  pages: string[];
+  root?: boolean;
+  pages?: string[];
 }
 
 export interface PageData {

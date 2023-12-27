@@ -3,9 +3,18 @@
 @tailwind utilities;
 
 .dark {
-  --background: 0 0% 1%;
+  --background: 210 100% 1%;
   --card: 0 0% 4%;
   --muted: 0 0% 8%;
   --border: 0 0% 14%;
   --accent: 0 0% 10.9%;
+  --accent-foreground: 0 0% 90%;
+}
+
+.blue {
+  --primary: 210 80% 30%;
+}
+
+.dark .blue {
+  --primary: 210 100% 80%;
 }

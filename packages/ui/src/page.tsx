@@ -2,13 +2,13 @@ import { cva } from 'class-variance-authority';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import {
   findNeighbour,
+  type PageTree,
   type TableOfContents,
   type TOCItemType,
 } from 'next-docs-zeta/server';
 import Link from 'next/link';
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import { replaceOrDefault } from './utils/shared';
-import { getPageTree } from './utils/global';
 import { cn } from './utils/cn';
 
 // We can keep the "use client" directives with dynamic imports
@@ -20,6 +20,8 @@ export interface DocsPageProps {
    * The URL of the current page
    */
   url: string;
+
+  tree: PageTree.Root;
 
   toc?: TableOfContents;
 
@@ -51,10 +53,9 @@ export function DocsPage({
   tableOfContent = {},
   breadcrumb = {},
   url,
+  tree,
   ...props
 }: DocsPageProps): JSX.Element {
-  const tree = getPageTree();
-  if (!tree) throw new Error('You must wrap <DocsPage /> under <DocsLayout />');
   const footer = props.footer ?? findNeighbour(tree, url);
 
   return (

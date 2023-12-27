@@ -1,5 +1,6 @@
 {
   "title": "ui",
+  "root": true,
   "pages": [
     "---Guide---",
     "index",

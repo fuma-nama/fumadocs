@@ -3,6 +3,7 @@ import { z } from 'zod';
 export const metaSchema = z.object({
   title: z.string().optional(),
   pages: z.array(z.string()),
+  root: z.boolean().optional(),
   icon: z.string().optional(),
 });
 

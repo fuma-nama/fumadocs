@@ -1,3 +1,4 @@
+import type { PageTree } from 'next-docs-zeta/server';
 import type { ReactNode } from 'react';
 
 export function isActive(
@@ -21,4 +22,17 @@ export function replaceOrDefault(
   if (obj?.component !== undefined) return obj.component;
 
   return def;
+}
+
+export function hasActive(items: PageTree.Node[], url: string): boolean {
+  return items.some((item) => {
+    if (item.type === 'page') {
+      return item.url === url;
+    }
+
+    if (item.type === 'folder')
+      return item.index?.url === url || hasActive(item.children, url);
+
+    return false;
+  });
 }

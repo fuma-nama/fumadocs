@@ -1,6 +1,6 @@
 import { cva } from 'class-variance-authority';
 import { ChevronDown } from 'lucide-react';
-import type { FolderNode, Separator, TreeNode } from 'next-docs-zeta/server';
+import type { PageTree } from 'next-docs-zeta/server';
 import * as Base from 'next-docs-zeta/sidebar';
 import { usePathname } from 'next/navigation';
 import type { HTMLAttributes, ReactNode } from 'react';
@@ -8,10 +8,10 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import Link from 'next-docs-zeta/link';
 import { cn } from '@/utils/cn';
 import type { LinkItem } from '@/contexts/tree';
-import { TreeContext } from '@/contexts/tree';
+import { useTreeContext } from '@/contexts/tree';
 import { useSidebarCollapse } from '@/contexts/sidebar';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { isActive } from '@/utils/shared';
+import { hasActive, isActive } from '@/utils/shared';
 import {
   Collapsible,
   CollapsibleContent,
@@ -32,7 +32,7 @@ const itemVariants = cva(
     variants: {
       active: {
         true: 'bg-primary/10 font-medium text-primary',
-        false: 'hover:bg-accent/70 hover:text-accent-foreground/70',
+        false: 'hover:bg-accent/50 hover:text-accent-foreground/80',
       },
     },
   },
@@ -49,7 +49,7 @@ export function Sidebar({
   defaultOpenLevel = 1,
 }: SidebarProps): JSX.Element {
   const [open] = useSidebarCollapse();
-  const tree = useContext(TreeContext);
+  const { active } = useTreeContext();
 
   return (
     <Base.SidebarList
@@ -71,7 +71,7 @@ export function Sidebar({
                 <BaseItem key={item.url} item={item} nested />
               ))}
             </div>
-            <NodeList items={tree.children} />
+            <NodeList items={active.children} />
           </div>
         </ScrollArea>
         <div
@@ -89,7 +89,7 @@ export function Sidebar({
 }
 
 interface NodeListProps extends HTMLAttributes<HTMLDivElement> {
-  items: TreeNode[];
+  items: PageTree.Node[];
   level?: number;
 }
 
@@ -139,22 +139,11 @@ function BaseItem({
   );
 }
 
-function hasActive(items: TreeNode[], url: string): boolean {
-  return items.some((item) => {
-    if (item.type === 'page') {
-      return item.url === url;
-    }
-    if (item.type === 'folder') return hasActive(item.children, url);
-
-    return false;
-  });
-}
-
 function Folder({
   item: { name, children, index, icon },
   level,
 }: {
-  item: FolderNode;
+  item: PageTree.Folder;
   level: number;
 }): JSX.Element {
   const { defaultOpenLevel } = useContext(SidebarContext);
@@ -212,6 +201,6 @@ function Folder({
   );
 }
 
-function SeparatorNode({ item }: { item: Separator }): JSX.Element {
+function SeparatorNode({ item }: { item: PageTree.Separator }): JSX.Element {
   return <p className="mb-2 mt-8 px-2 font-medium first:mt-0">{item.name}</p>;
 }

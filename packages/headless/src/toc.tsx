@@ -8,7 +8,7 @@ import {
   useRef,
 } from 'react';
 import scrollIntoView from 'scroll-into-view-if-needed';
-import type { TableOfContents, TOCItemType } from '@/server/types';
+import type { TableOfContents, TOCItemType } from '@/server/get-toc';
 import { mergeRefs } from '@/merge-refs';
 import { useAnchorObserver } from './utils/use-anchor-observer';
 

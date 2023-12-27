@@ -1,7 +1,7 @@
 import Slugger from 'github-slugger';
 import type { Heading, Root } from 'mdast';
 import type { Transformer } from 'unified';
-import type { TOCItemType } from '@/server/types';
+import type { TOCItemType } from '@/server/get-toc';
 import { visit } from './unist-visit';
 import { flattenNode } from './remark-utils';
 

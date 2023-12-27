@@ -1,4 +1,4 @@
-import type { PageTree } from '@/server/types';
+import type * as PageTree from '@/server/page-tree';
 import {
   load,
   type RawPage,
@@ -49,8 +49,8 @@ export interface Source<Config extends SourceConfig> {
 
 export interface LoaderOutput<Config extends LoaderConfig> {
   pageTree: Config['languages'] extends string[]
-    ? Record<string, PageTree>
-    : PageTree;
+    ? Record<string, PageTree.Root>
+    : PageTree.Root;
 
   files: RawFile<Config['source']['pageData'], Config['source']['metaData']>[];
 

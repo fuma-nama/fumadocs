@@ -50,7 +50,7 @@ const darkColors = {
   secondary: '0 0% 14.9%',
   'secondary-foreground': '0 0% 98%',
   accent: '0 0% 14.9%',
-  'accent-foreground': '0 0% 98%',
+  'accent-foreground': '0 0% 90%',
   ring: '0 0% 14.9%',
 };
 
@@ -303,7 +303,7 @@ export const docsUi = plugin.withOptions<NextDocsUIOptions>(
               '--tw-prose-kbd-shadows': `theme('colors.primary.DEFAULT / 50%')`,
               // not used
               '--tw-prose-pre-code': false,
-              fontSize: '15px',
+              fontSize: '16px',
               maxWidth: 'none',
               a: {
                 transition: 'opacity 0.3s',

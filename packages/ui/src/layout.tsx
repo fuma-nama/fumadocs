@@ -4,7 +4,6 @@ import type { ReactNode, HTMLAttributes } from 'react';
 import type { SidebarProps } from '@/components/sidebar';
 import type { NavItemProps, NavLinkProps } from './nav';
 import { replaceOrDefault } from './utils/shared';
-import { setPageTree } from './utils/global';
 import { cn } from './utils/cn';
 import type { LinkItem } from './contexts/tree';
 
@@ -42,7 +41,7 @@ export interface BaseLayoutProps {
 }
 
 export interface DocsLayoutProps extends BaseLayoutProps {
-  tree: PageTree;
+  tree: PageTree.Root;
 
   sidebar?: Partial<
     SidebarProps & {
@@ -84,12 +83,11 @@ export function DocsLayout({
   tree,
   children,
 }: DocsLayoutProps): JSX.Element {
-  setPageTree(tree);
   const sidebarEnabled = sidebar.enabled ?? true;
   const sidebarCollaspible = sidebarEnabled && (sidebar.collapsible ?? true);
 
   return (
-    <TreeContextProvider value={tree}>
+    <TreeContextProvider tree={tree}>
       {getNav(sidebarEnabled, sidebarCollaspible, links, nav)}
       <div
         {...containerProps}

@@ -10,8 +10,7 @@ import { createMetadata } from '@/utils/metadata';
 import Preview from '@/components/preview';
 
 interface Param {
-  mode: string;
-  slug?: string[];
+  slug: string[];
 }
 
 export default async function Page({
@@ -19,7 +18,7 @@ export default async function Page({
 }: {
   params: Param;
 }): Promise<JSX.Element> {
-  const page = utils.getPage([params.mode, ...(params.slug ?? [])]);
+  const page = utils.getPage(params.slug);
 
   if (!page) {
     notFound();
@@ -40,6 +39,7 @@ export default async function Page({
   return (
     <DocsPage
       url={page.url}
+      tree={utils.pageTree}
       toc={page.data.exports.toc}
       lastUpdate={time}
       tableOfContent={{
@@ -98,7 +98,7 @@ function Category({ page }: { page: Page }): JSX.Element {
 }
 
 export function generateMetadata({ params }: { params: Param }): Metadata {
-  const page = utils.getPage([params.mode, ...(params.slug ?? [])]);
+  const page = utils.getPage(params.slug);
 
   if (!page) notFound();
 
@@ -111,7 +111,7 @@ export function generateMetadata({ params }: { params: Param }): Metadata {
 
   const image = {
     alt: 'Banner',
-    url: `/api/og/${params.mode}?${imageParams.toString()}`,
+    url: `/api/og/${params.slug[0]}?${imageParams.toString()}`,
     width: 1200,
     height: 630,
   };
@@ -132,8 +132,7 @@ export function generateMetadata({ params }: { params: Param }): Metadata {
 export function generateStaticParams(): Param[] {
   return (
     utils.getPages()?.map<Param>((page) => ({
-      mode: page.slugs[0],
-      slug: page.slugs.slice(1),
+      slug: page.slugs,
     })) ?? []
   );
 }

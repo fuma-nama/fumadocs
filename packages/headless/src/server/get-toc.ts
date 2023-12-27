@@ -1,6 +1,13 @@
 import { remark } from 'remark';
 import { remarkToc } from '@/mdx-plugins/remark-toc';
-import type { TableOfContents } from './types';
+
+export interface TOCItemType {
+  title: string;
+  url: string;
+  depth: number;
+}
+
+export type TableOfContents = TOCItemType[];
 
 /**
  * Get Table of Contents from markdown/mdx document (using remark)

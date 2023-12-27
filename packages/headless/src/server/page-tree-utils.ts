@@ -1,9 +1,9 @@
-import type { FileNode, PageTree, TreeNode } from './types';
+import type * as PageTree from './page-tree';
 
 /**
  * Flatten tree to an array of page nodes
  */
-export function flattenTree(tree: TreeNode[]): FileNode[] {
+export function flattenTree(tree: PageTree.Node[]): PageTree.Item[] {
   return tree.flatMap((node) => {
     if (node.type === 'separator') return [];
     if (node.type === 'folder') {
@@ -22,11 +22,11 @@ export function flattenTree(tree: TreeNode[]): FileNode[] {
  * Get neighbours of a page, useful for implementing "previous & next" buttons
  */
 export function findNeighbour(
-  tree: PageTree,
+  tree: PageTree.Root,
   url: string,
 ): {
-  previous?: FileNode;
-  next?: FileNode;
+  previous?: PageTree.Item;
+  next?: PageTree.Item;
 } {
   const list = flattenTree(tree.children);
 
@@ -45,8 +45,8 @@ export function findNeighbour(
 /**
  * Separate the folder nodes of a root into multiple roots
  */
-export function separatePageTree(pageTree: PageTree): PageTree[] {
-  return pageTree.children.flatMap<PageTree>((child) => {
+export function separatePageTree(pageTree: PageTree.Root): PageTree.Root[] {
+  return pageTree.children.flatMap((child) => {
     if (child.type !== 'folder') return [];
 
     return {

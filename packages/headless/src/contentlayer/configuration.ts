@@ -116,6 +116,10 @@ export function createConfig(options: Options = {}): Args {
     filePathPattern: `${docsPattern}/**/*.json`,
     contentType: 'data',
     fields: {
+      root: {
+        type: 'boolean',
+        required: false,
+      },
       title: {
         type: 'string',
         description: 'The title of the folder',

@@ -31,6 +31,10 @@ export type Node = Meta | Page | Folder;
  * A virtual file system can solve this problem
  */
 export interface Storage {
+  /**
+   * Read a file, notice that it doesn't need an extension
+   * @param path - flattened path
+   */
   read: (path: string) => Page | Meta | undefined;
   readDir: (path: string) => Folder | undefined;
   root: () => Folder;
@@ -57,7 +61,7 @@ export function makeGraph(): Storage {
       this.makeDir(file.file.dirname);
 
       folders.get(file.file.dirname)?.children.push(file);
-      files.set(file.file.path, file);
+      files.set(file.file.flattenedPath, file);
     },
     read(path) {
       return files.get(path);
