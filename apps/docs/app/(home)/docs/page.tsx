@@ -25,7 +25,7 @@ export default function DocsPage(): JSX.Element {
           }}
         />
       </div>
-      <h1 className="mb-4 text-5xl font-medium">Choose one.</h1>
+      <h1 className="mb-4 text-4xl font-semibold md:text-5xl">Choose one.</h1>
       <p className="text-muted-foreground">
         Different packages for different use cases.
       </p>

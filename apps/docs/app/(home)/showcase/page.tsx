@@ -74,7 +74,7 @@ export default function Showcase(): JSX.Element {
         </div>
       </div>
       <div className="container text-center">
-        <h1 className="mb-4 text-4xl font-semibold leading-snug lg:text-5xl lg:leading-snug">
+        <h1 className="mb-4 text-3xl font-semibold leading-snug md:text-5xl md:leading-snug">
           Cool Websites
           <br />
           Made with Next Docs
