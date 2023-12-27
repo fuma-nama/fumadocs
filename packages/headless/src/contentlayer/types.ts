@@ -1,29 +1,22 @@
 import type { RawDocumentData } from 'contentlayer/source-files';
+import type { MDX } from 'contentlayer/core';
 
 export interface MetaPageBase {
-  /** File path relative to `contentDirPath` */
   _id: string;
   _raw: RawDocumentData;
   type: 'Meta';
-  /** The title of the folder */
   title?: string | undefined;
-  /** Pages of the folder */
-  pages: string[];
+  pages?: string[];
   icon?: string;
-  slug: string;
+  root?: boolean;
 }
 
 export interface DocsPageBase {
-  /** File path relative to `contentDirPath` */
   _id: string;
   _raw: RawDocumentData;
   type: 'Docs';
-  /** The title of the document */
   title: string;
-  /** The description of the document */
   description?: string | undefined;
-  locale?: string;
   icon?: string;
-  url: string;
-  slug: string;
+  body: MDX;
 }

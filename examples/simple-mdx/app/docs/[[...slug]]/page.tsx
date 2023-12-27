@@ -1,4 +1,4 @@
-import { getPage, pages } from '@/app/source';
+import { getPage, getPages, tree } from '@/app/source';
 import type { Metadata } from 'next';
 import { DocsPage, DocsBody } from 'next-docs-ui/page';
 import { notFound } from 'next/navigation';
@@ -14,12 +14,12 @@ export default async function Page({
     notFound();
   }
 
-  const MDX = page.data.default;
+  const MDX = page.data.exports.default;
 
   return (
-    <DocsPage url={page.url} toc={page.data.toc}>
+    <DocsPage url={page.url} tree={tree} toc={page.data.exports.toc}>
       <DocsBody>
-        <h1>{page.matter.title}</h1>
+        <h1>{page.data.title}</h1>
         <MDX />
       </DocsBody>
     </DocsPage>
@@ -27,7 +27,7 @@ export default async function Page({
 }
 
 export async function generateStaticParams() {
-  return pages.map((page) => ({
+  return getPages()!.map((page) => ({
     slug: page.slugs,
   }));
 }
@@ -38,7 +38,7 @@ export function generateMetadata({ params }: { params: { slug?: string[] } }) {
   if (page == null) notFound();
 
   return {
-    title: page.matter.title,
-    description: page.matter.description,
+    title: page.data.title,
+    description: page.data.description,
   } satisfies Metadata;
 }

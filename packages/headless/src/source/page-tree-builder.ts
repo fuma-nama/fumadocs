@@ -85,7 +85,7 @@ function getFolderMeta(
 function buildFolderNode(
   folder: FileGraph.Folder,
   ctx: PageTreeBuilderContext,
-  skipIndex = false,
+  skipIndex: boolean,
 ): PageTree.Folder {
   const indexNode = folder.children.find(
     (node) => node.type === 'page' && node.file.name === 'index',
@@ -125,7 +125,7 @@ function buildFolderNode(
       addedNodePaths.add(itemNode.file.path);
 
       if (itemNode.type === 'folder') {
-        const node = buildFolderNode(itemNode, ctx);
+        const node = buildFolderNode(itemNode, ctx, true);
 
         return extractResult?.groups ? node.children : node;
       }
@@ -181,7 +181,7 @@ function buildFileNode(
 
 function build(ctx: PageTreeBuilderContext): PageTree.Root {
   const root = ctx.storage.root();
-  const folder = buildFolderNode(root, ctx, true);
+  const folder = buildFolderNode(root, ctx, false);
 
   return {
     name: folder.name,

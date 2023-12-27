@@ -13,7 +13,7 @@ import { joinPaths } from './path';
 
 interface LoaderConfig {
   source: SourceConfig;
-  languages: string[] | undefined;
+  i18n: boolean;
 }
 
 interface SourceConfig {
@@ -48,7 +48,7 @@ export interface Source<Config extends SourceConfig> {
 }
 
 export interface LoaderOutput<Config extends LoaderConfig> {
-  pageTree: Config['languages'] extends string[]
+  pageTree: Config['i18n'] extends true
     ? Record<string, PageTree.Root>
     : PageTree.Root;
 
@@ -120,9 +120,7 @@ export function loader<Options extends LoaderOptions>(
   options: Options,
 ): LoaderOutput<{
   source: InferSourceConfig<Options['source']>;
-  languages: Options['languages'] extends LoaderOptions['languages']
-    ? Options['languages']
-    : undefined;
+  i18n: Options['languages'] extends string[] ? true : false;
 }> {
   return createOutput(options) as ReturnType<typeof loader<Options>>;
 }

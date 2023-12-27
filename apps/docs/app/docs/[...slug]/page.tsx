@@ -1,4 +1,3 @@
-import { resolve } from 'node:url';
 import { ExternalLinkIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import { Card, Cards } from 'next-docs-ui/mdx/card';
@@ -24,7 +23,7 @@ export default async function Page({
     notFound();
   }
 
-  const path = resolve(`apps/docs/content`, page.info.path);
+  const path = `apps/docs/content/docs/${page.info.path}`;
   const time = await getGithubLastEdit({
     owner: 'fuma-nama',
     repo: 'next-docs',

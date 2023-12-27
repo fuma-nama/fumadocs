@@ -1,14 +1,4 @@
 import { makeSource } from 'contentlayer/source-files';
-import { createConfig } from 'next-docs-zeta/contentlayer/configuration';
-import { structure } from 'next-docs-zeta/mdx-plugins';
+import { defaultConfig } from 'next-docs-zeta/contentlayer/configuration';
 
-export default makeSource(
-  createConfig({
-    docsComputedFields: {
-      structuredData: {
-        type: 'json',
-        resolve: (page) => structure(page.body.raw),
-      },
-    },
-  }),
-);
+export default makeSource(defaultConfig);

@@ -1,54 +1,28 @@
-import type { Source, PageData, MetaData } from 'next-docs-zeta/source';
-import type { AnyZodObject, z } from 'zod';
-import { resolveFiles, type SchemaOptions } from './resolve-files';
-import type { DefaultFrontmatter, DefaultMetaData, MDXPageData } from './types';
+import { type Source } from 'next-docs-zeta/source';
+import type { z } from 'zod';
+import { resolveFiles } from './resolve-files';
+import type { defaultSchemas } from './validate/schema';
+import type { MDXPageData } from './types';
 
-interface UtilsOptions {
-  schema: Partial<SchemaOptions>;
-}
-
-type PartialUtilsOptions = Partial<UtilsOptions>;
-
-interface RootConfig {
-  schema: {
-    frontmatter: PageData;
-    meta: MetaData;
+interface UtilsOptions<Frontmatter, Meta> {
+  schema?: {
+    frontmatter?: Frontmatter;
+    meta?: Meta;
   };
 }
 
-type GetSchemaType<Schema, DefaultValue> = Schema extends AnyZodObject
-  ? z.infer<Schema>
-  : DefaultValue;
-
-/**
- * Get accurate options type from partial options
- */
-interface TransformPartialOptions<TOptions extends PartialUtilsOptions> {
-  schema: {
-    frontmatter: GetSchemaType<
-      NonNullable<TOptions['schema']>['frontmatter'],
-      DefaultFrontmatter
-    >;
-    meta: GetSchemaType<
-      NonNullable<TOptions['schema']>['meta'],
-      DefaultMetaData
-    >;
-  };
-}
-
-type GetSourceFromOptions<TTypes extends RootConfig> = Source<{
-  metaData: TTypes['schema']['meta'];
-  pageData: MDXPageData<TTypes['schema']['frontmatter']>;
-}>;
-
-export function createMDXSource<Options extends PartialUtilsOptions>(
+export function createMDXSource<
+  Frontmatter extends
+    (typeof defaultSchemas)['frontmatter'] = (typeof defaultSchemas)['frontmatter'],
+  Meta extends
+    (typeof defaultSchemas)['meta'] = (typeof defaultSchemas)['meta'],
+>(
   map: Record<string, unknown>,
-  options?: Options,
-): GetSourceFromOptions<
-  TransformPartialOptions<Options> extends RootConfig
-    ? TransformPartialOptions<Options>
-    : never
-> {
+  options?: UtilsOptions<Frontmatter, Meta>,
+): Source<{
+  metaData: z.infer<Meta>;
+  pageData: MDXPageData<z.infer<Frontmatter>>;
+}> {
   const files = resolveFiles({ map, schema: options?.schema });
 
   return {

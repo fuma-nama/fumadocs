@@ -6,6 +6,8 @@ import { PHASE_PRODUCTION_BUILD } from 'next/constants';
 import { z } from 'zod';
 import type { InferMetaType, InferPageType } from 'next-docs-zeta/source';
 import { loader } from 'next-docs-zeta/source';
+import { icons } from 'lucide-react';
+import { createElement } from 'react';
 import { map } from '@/_map';
 
 const frontmatterSchema = defaultSchemas.frontmatter.extend({
@@ -16,6 +18,9 @@ const frontmatterSchema = defaultSchemas.frontmatter.extend({
 export const utils = loader({
   baseUrl: '/docs',
   rootDir: 'docs',
+  icon(icon) {
+    if (icon in icons) return createElement(icons[icon as keyof typeof icons]);
+  },
   source: createMDXSource(map, { schema: { frontmatter: frontmatterSchema } }),
 });
 
