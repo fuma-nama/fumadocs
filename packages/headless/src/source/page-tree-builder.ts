@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react';
 import type * as PageTree from '../server/page-tree';
 import type * as FileGraph from './file-graph';
+import { joinPaths } from './path';
 
 interface PageTreeBuilderContext {
   storage: FileGraph.Storage;
@@ -64,10 +65,12 @@ function getFolderMeta(
   folder: FileGraph.Folder,
   ctx: PageTreeBuilderContext,
 ): FileGraph.Meta | undefined {
-  let meta = ctx.storage.read(`${folder.file.path}/meta`);
+  let meta = ctx.storage.read(joinPaths([folder.file.path, 'meta']));
 
   if (ctx.lang) {
-    meta = ctx.storage.read(`${folder.file.path}/meta.${ctx.lang}`) ?? meta;
+    meta =
+      ctx.storage.read(joinPaths([folder.file.path, `meta.${ctx.lang}`])) ??
+      meta;
   }
 
   if (meta?.type === 'meta') return meta;
@@ -114,8 +117,8 @@ function buildFolderNode(
       const extractName = extractResult?.groups?.name ?? item;
 
       const itemNode =
-        ctx.storage.readDir(`${folder.file.path}/${extractName}`) ??
-        ctx.storage.read(`${folder.file.path}/${extractName}`);
+        ctx.storage.readDir(joinPaths([folder.file.path, extractName])) ??
+        ctx.storage.read(joinPaths([folder.file.path, extractName]));
 
       if (!itemNode) return [];
 

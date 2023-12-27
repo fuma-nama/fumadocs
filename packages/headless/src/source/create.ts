@@ -107,8 +107,8 @@ function createGetUrl(
   baseUrl: string,
 ): (slugs: string[], locale?: string) => string {
   return (slugs, locale) => {
-    const paths = [baseUrl, ...slugs];
-    if (locale) paths.push(locale);
+    let paths = [baseUrl, ...slugs];
+    if (locale) paths = [baseUrl, locale, ...slugs];
 
     return joinPaths(paths, 'leading');
   };
@@ -134,8 +134,10 @@ function createOutput({
   rootDir = '',
   transformers,
   baseUrl = '/',
-  slugs = (info) =>
-    info.flattenedPath.split('/').filter((s) => !['index'].includes(s)),
+  slugs = (info) => {
+    const result = [...info.dirname.split('/'), info.name].filter(Boolean);
+    return result[result.length - 1] === 'index' ? result.slice(0, -1) : result;
+  },
   url = createGetUrl(baseUrl),
 }: LoaderOptions): LoaderOutput<LoaderConfig> {
   const result = load({

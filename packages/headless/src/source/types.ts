@@ -15,7 +15,7 @@ export interface FileInfo {
   flattenedPath: string;
 
   /**
-   * File name without extension
+   * File name without locale and extension
    */
   name: string;
 

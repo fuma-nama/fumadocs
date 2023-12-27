@@ -47,11 +47,11 @@ export function makeGraph(): Storage {
   const folders = new Map<string, Folder>();
   const root: Folder = {
     type: 'folder',
-    file: parseFolderPath('.'),
+    file: parseFolderPath(''),
     children: [],
   };
 
-  folders.set('.', root);
+  folders.set('', root);
 
   return {
     root() {
