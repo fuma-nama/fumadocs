@@ -1,4 +1,4 @@
-import { basename, dirname, parse } from 'node:path';
+import { parse } from 'node:path';
 import type { FileInfo } from './types';
 
 export function parseFilePath(path: string, root = ''): FileInfo {
@@ -6,11 +6,11 @@ export function parseFilePath(path: string, root = ''): FileInfo {
   const parsed = parse(relativePath);
   const dir = parsed.dir.replace('\\', '/');
   const flattenedPath = joinPaths([dir, parsed.name]);
-  const locale = parsed.name.split('.')[1];
+  const [name, locale] = parsed.name.split('.');
 
   return {
     dirname: dir,
-    name: parsed.name,
+    name,
     flattenedPath,
     locale,
     path: relativePath,
@@ -26,16 +26,17 @@ function getRelativePath(path: string, root: string): string {
   return splitPath(path.substring(root.length)).join('/');
 }
 
-export function parseFolderPath(p: string): FileInfo {
-  const name = basename(p);
-  const dir = dirname(p).replace('\\', '/');
+export function parseFolderPath(path: string): FileInfo {
+  const parsed = parse(path);
+  const dir = parsed.dir.replace('\\', '/');
+  const [name, locale] = parsed.base.split('.');
 
   return {
     dirname: dir,
     name,
-    flattenedPath: p,
-    locale: name.split('.')[1],
-    path: p,
+    flattenedPath: path,
+    locale,
+    path,
   };
 }
 

@@ -12,11 +12,11 @@
 }
 
 .ui {
-  --primary: 210 80% 30%;
+  --primary: 220 80% 30%;
 }
 
 .dark .ui {
-  --primary: 210 100% 80%;
+  --primary: 220 100% 80%;
 }
 
 .headless {
