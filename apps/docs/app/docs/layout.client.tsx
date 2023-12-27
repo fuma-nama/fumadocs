@@ -3,6 +3,7 @@
 import { cva } from 'class-variance-authority';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import type { ReactNode } from 'react';
 import { cn } from '@/utils/cn';
 import { modes } from '@/utils/modes';
 
@@ -16,6 +17,12 @@ const itemVariants = cva(
     },
   },
 );
+
+export function Body({ children }: { children: ReactNode }): JSX.Element {
+  const mode = useMode();
+
+  return <div className={mode}>{children}</div>;
+}
 
 export function NavChildren(): JSX.Element {
   const mode = useMode();

@@ -2,7 +2,7 @@ import { DocsLayout } from 'next-docs-ui/layout';
 import type { ReactNode } from 'react';
 import { LayoutTemplateIcon, StarsIcon } from 'lucide-react';
 import { utils } from '@/utils/source';
-import { NavChildren, SidebarBanner } from '@/app/docs/layout.client';
+import { Body, NavChildren, SidebarBanner } from './layout.client';
 
 export const layoutOptions = {
   nav: {
@@ -34,8 +34,10 @@ export default function Layout({
   children: ReactNode;
 }): JSX.Element {
   return (
-    <DocsLayout tree={utils.pageTree} {...layoutOptions}>
-      {children}
-    </DocsLayout>
+    <Body>
+      <DocsLayout tree={utils.pageTree} {...layoutOptions}>
+        {children}
+      </DocsLayout>
+    </Body>
   );
 }

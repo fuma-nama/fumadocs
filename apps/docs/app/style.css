@@ -11,10 +11,26 @@
   --accent-foreground: 0 0% 90%;
 }
 
-.blue {
+.ui {
   --primary: 210 80% 30%;
 }
 
-.dark .blue {
+.dark .ui {
   --primary: 210 100% 80%;
+}
+
+.headless {
+  --primary: 250 80% 30%;
+}
+
+.dark .headless {
+  --primary: 250 100% 80%;
+}
+
+.mdx {
+  --primary: 0 0% 9%;
+}
+
+.dark .mdx {
+  --primary: 0 0% 100%;
 }
