@@ -17,21 +17,14 @@
       "import": "./dist/config.mjs",
       "types": "./dist/config.d.mts"
     },
-    "./map": {
-      "import": "./dist/map.mjs",
-      "types": "./dist/map.d.mts"
-    }
+    ".": "./dist/index.mjs"
   },
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.mts",
   "typesVersions": {
     "*": {
       "config": [
         "./dist/config.d.mts"
-      ],
-      "map": [
-        "./dist/map.d.mts"
-      ],
-      "types": [
-        "./dist/types.d.mts"
       ]
     }
   },

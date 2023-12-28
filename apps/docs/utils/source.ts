@@ -1,6 +1,6 @@
 import { writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { createMDXSource, defaultSchemas } from 'next-docs-mdx/map';
+import { createMDXSource, defaultSchemas } from 'next-docs-mdx';
 import type { StructuredData } from 'next-docs-zeta/mdx-plugins';
 import { PHASE_PRODUCTION_BUILD } from 'next/constants';
 import { z } from 'zod';

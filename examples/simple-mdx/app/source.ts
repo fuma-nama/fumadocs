@@ -1,5 +1,5 @@
 import { map } from '@/_map';
-import { createMDXSource } from 'next-docs-mdx/map';
+import { createMDXSource } from 'next-docs-mdx';
 import { loader } from 'next-docs-zeta/source';
 
 export const {

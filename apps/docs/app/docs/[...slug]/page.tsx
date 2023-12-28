@@ -23,7 +23,7 @@ export default async function Page({
     notFound();
   }
 
-  const path = `apps/docs/content/docs/${page.info.path}`;
+  const path = `apps/docs/content/docs/${page.file.path}`;
   const time = await getGithubLastEdit({
     owner: 'fuma-nama',
     repo: 'next-docs',
@@ -54,15 +54,13 @@ export default async function Page({
         ),
       }}
     >
+      <h1 className="text-3xl font-bold text-foreground sm:text-4xl">
+        {page.data.title}
+      </h1>
+      <p className="mb-8 text-lg text-muted-foreground">
+        {page.data.description}
+      </p>
       <DocsBody>
-        <div className="not-prose mb-12">
-          <h1 className="mb-4 text-3xl font-bold text-foreground sm:text-4xl">
-            {page.data.title}
-          </h1>
-          <p className="text-lg text-muted-foreground">
-            {page.data.description}
-          </p>
-        </div>
         {preview && preview in Preview ? Preview[preview] : null}
         {page.data.index ? (
           <Category page={page} />
@@ -78,8 +76,8 @@ function Category({ page }: { page: Page }): JSX.Element {
   const filtered = utils.files.filter(
     (docs) =>
       docs.type === 'page' &&
-      docs.info.dirname === page.info.dirname &&
-      docs.info.name !== 'index',
+      docs.file.dirname === page.file.dirname &&
+      docs.file.name !== 'index',
   ) as Page[];
 
   return (

@@ -1,5 +1,6 @@
 import type { LoaderOutput } from './create';
-import type { LoadResult, RawMeta, RawPage } from './load';
+import type { Meta, Page } from './file-graph';
+import type { LoadResult } from './load';
 
 export interface FileInfo {
   locale?: string;
@@ -37,13 +38,13 @@ export interface PageData {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- infer types
 export type InferPageType<Utils extends LoaderOutput<any>> =
   Utils extends LoaderOutput<infer Config>
-    ? RawPage<Config['source']['pageData']>
+    ? Page<Config['source']['pageData']>
     : never;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- infer types
 export type InferMetaType<Utils extends LoaderOutput<any>> =
   Utils extends LoaderOutput<infer Config>
-    ? RawMeta<Config['source']['metaData']>
+    ? Meta<Config['source']['metaData']>
     : never;
 
 export type Transformer = (context: LoadResult) => void;

@@ -1,5 +1,5 @@
 import type { FileInfo, MetaData, PageData, Transformer } from './types';
-import { isRelative, parseFilePath } from './path';
+import { getRelativePath, isRelative, parseFilePath } from './path';
 import * as FileGraph from './file-graph';
 
 export interface LoadOptions {
@@ -16,65 +16,24 @@ export interface VirtualFile {
   data: unknown;
 }
 
-export interface RawPage<Data extends PageData = PageData> {
-  info: FileInfo;
-  type: 'page';
-  slugs: string[];
-  url: string;
-  data: Data;
-}
-
-export interface RawMeta<Data extends MetaData = MetaData> {
-  info: FileInfo;
-  type: 'meta';
-  data: Data;
-}
-
-export type RawFile<
-  PG extends PageData = PageData,
-  MG extends MetaData = MetaData,
-> = RawPage<PG> | RawMeta<MG>;
-
 export interface LoadResult {
   storage: FileGraph.Storage;
-  files: RawFile[];
+  getSlugs: (info: FileInfo) => string[];
+  getUrl: (slugs: string[], locale?: string) => string;
   data: Record<string, unknown>;
 }
 
 // Virtual files -> File Graph -> Plugins -> Result
 // Result should contain page tree and basic utilities
-export function load({
-  files,
-  transformers = [],
-  rootDir,
-  getSlugs,
-  getUrl,
-}: LoadOptions): LoadResult {
-  const parsed = files
-    .filter((file) => isRelative(file.path, rootDir))
-    .map<RawFile>((file) => {
-      const info = parseFilePath(file.path, rootDir);
-
-      if (file.type === 'page') {
-        const slugs = getSlugs(info);
-
-        return {
-          type: file.type,
-          info,
-          url: getUrl(slugs, info.locale),
-          slugs,
-          data: file.data as PageData,
-        };
-      }
-
-      return {
-        type: file.type,
-        info,
-        data: file.data as MetaData,
-      };
-    });
-  const storage = buildStorage(parsed);
-  const ctx: LoadResult = { files: parsed, storage, data: {} };
+export function load(options: LoadOptions): LoadResult {
+  const { transformers = [] } = options;
+  const storage = buildStorage(options);
+  const ctx: LoadResult = {
+    getSlugs: options.getSlugs,
+    getUrl: options.getUrl,
+    storage,
+    data: {},
+  };
 
   for (const transformer of transformers) {
     transformer(ctx);
@@ -83,25 +42,29 @@ export function load({
   return ctx;
 }
 
-function buildStorage(files: RawFile[]): FileGraph.Storage {
+function buildStorage(options: LoadOptions): FileGraph.Storage {
   const storage = FileGraph.makeGraph();
 
-  for (const file of files) {
+  for (const file of options.files) {
+    if (!isRelative(file.path, options.rootDir)) continue;
+    const path = getRelativePath(file.path, options.rootDir);
+
     if (file.type === 'page') {
-      storage.add({
-        slugs: file.slugs,
-        url: file.url,
+      const parsedPath = parseFilePath(path);
+      const slugs = options.getSlugs(parsedPath);
+
+      storage.write(path, {
+        slugs,
+        url: options.getUrl(slugs, parsedPath.locale),
         type: file.type,
-        file: file.info,
-        data: file.data,
+        data: file.data as PageData,
       });
     }
 
     if (file.type === 'meta') {
-      storage.add({
+      storage.write(path, {
         type: file.type,
-        file: file.info,
-        data: file.data,
+        data: file.data as MetaData,
       });
     }
   }

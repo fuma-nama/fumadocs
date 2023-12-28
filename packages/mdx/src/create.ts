@@ -29,5 +29,3 @@ export function createMDXSource<
     files,
   };
 }
-
-export { defaultSchemas } from './validate/schema';

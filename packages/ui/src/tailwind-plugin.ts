@@ -332,7 +332,7 @@ export const docsUi = plugin.withOptions<NextDocsUIOptions>(
                 paddingLeft: '1rem',
               },
               'ul > li': {
-                fontSize: '0.9rem',
+                fontSize: '15px',
               },
               // Disabled styles, handled by Next Docs
               'pre code': false,

@@ -1,15 +1,10 @@
 import type * as PageTree from '@/server/page-tree';
-import {
-  load,
-  type RawPage,
-  type LoadOptions,
-  type RawFile,
-  type VirtualFile,
-} from './load';
+import { load, type LoadOptions, type VirtualFile } from './load';
 import type { MetaData, PageData, Transformer } from './types';
 import type { CreatePageTreeBuilderOptions } from './page-tree-builder';
 import { createPageTreeBuilder } from './page-tree-builder';
 import { joinPaths } from './path';
+import type { Node, Page } from './file-graph';
 
 interface LoaderConfig {
   source: SourceConfig;
@@ -52,7 +47,7 @@ export interface LoaderOutput<Config extends LoaderConfig> {
     ? Record<string, PageTree.Root>
     : PageTree.Root;
 
-  files: RawFile<Config['source']['pageData'], Config['source']['metaData']>[];
+  files: Node<Config['source']['metaData'], Config['source']['pageData']>[];
 
   /**
    * Get list of pages from language
@@ -61,7 +56,7 @@ export interface LoaderOutput<Config extends LoaderConfig> {
    */
   getPages: (
     language?: string,
-  ) => RawPage<Config['source']['pageData']>[] | undefined;
+  ) => Page<Config['source']['pageData']>[] | undefined;
 
   /**
    * @param language - If empty, the default language will be used
@@ -69,32 +64,32 @@ export interface LoaderOutput<Config extends LoaderConfig> {
   getPage: (
     slugs: string[] | undefined,
     language?: string,
-  ) => RawPage<Config['source']['pageData']> | undefined;
+  ) => Page<Config['source']['pageData']> | undefined;
 }
 
 function groupByLanguages(
-  files: RawFile[],
+  nodes: Node[],
   languages: string[],
-): Map<string, RawPage[]> {
-  const pageMap = new Map<string, RawPage>();
+): Map<string, Page[]> {
+  const pageMap = new Map<string, Page>();
 
-  for (const file of files) {
-    if (file.type === 'page') pageMap.set(file.info.flattenedPath, file);
+  for (const node of nodes) {
+    if (node.type === 'page') pageMap.set(node.file.flattenedPath, node);
   }
 
-  const langMap = new Map<string, RawPage[]>();
+  const langMap = new Map<string, Page[]>();
 
   langMap.set('', []);
   for (const lang of languages) {
     langMap.set(lang, []);
   }
 
-  for (const [key, page] of pageMap) {
-    if (page.info.locale) continue;
-    langMap.get('')?.push(page);
+  for (const [key, node] of pageMap) {
+    if (node.file.locale) continue;
+    langMap.get('')?.push(node);
 
     for (const lang of languages) {
-      const v = pageMap.get(`${key}.${lang}`) ?? page;
+      const v = pageMap.get(`${key}.${lang}`) ?? node;
 
       langMap.get(lang)?.push(v);
     }
@@ -145,7 +140,7 @@ function createOutput({
     getSlugs: slugs,
     getUrl: url,
   });
-  const i18nMap = groupByLanguages(result.files, languages ?? []);
+  const i18nMap = groupByLanguages(result.storage.list(), languages ?? []);
   const builder = createPageTreeBuilder({
     storage: result.storage,
     resolveIcon: icon,
@@ -157,7 +152,7 @@ function createOutput({
 
   return {
     pageTree: pageTree as LoaderOutput<LoaderConfig>['pageTree'],
-    files: result.files,
+    files: result.storage.list(),
     getPages(language = '') {
       return i18nMap.get(language);
     },

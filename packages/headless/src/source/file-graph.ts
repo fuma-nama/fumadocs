@@ -1,27 +1,33 @@
 import type { FileInfo, MetaData, PageData } from './types';
-import { parseFolderPath, splitPath } from './path';
+import { parseFilePath, parseFolderPath, splitPath } from './path';
 
-export interface Meta {
+export interface Meta<Data extends MetaData = MetaData> {
   type: 'meta';
   file: FileInfo;
-  data: MetaData;
+  data: Data;
 }
 
-export interface Page {
+export interface Page<Data extends PageData = PageData> {
   type: 'page';
   file: FileInfo;
   slugs: string[];
   url: string;
-  data: PageData;
+  data: Data;
 }
 
-export interface Folder {
+export interface Folder<
+  MD extends MetaData = MetaData,
+  PD extends PageData = PageData,
+> {
   type: 'folder';
   file: FileInfo;
-  children: Node[];
+  children: Node<MD, PD>[];
 }
 
-export type Node = Meta | Page | Folder;
+export type Node<
+  MD extends MetaData = MetaData,
+  PD extends PageData = PageData,
+> = Meta<MD> | Page<PD> | Folder;
 
 /**
  * File Graph is a virtual file system
@@ -38,7 +44,8 @@ export interface Storage {
   read: (path: string) => Page | Meta | undefined;
   readDir: (path: string) => Folder | undefined;
   root: () => Folder;
-  add: (file: Page | Meta) => void;
+  write: (path: string, file: Omit<Page, 'file'> | Omit<Meta, 'file'>) => void;
+  list: () => (Page | Meta)[];
   makeDir: (path: string) => void;
 }
 
@@ -54,14 +61,21 @@ export function makeGraph(): Storage {
   folders.set('', root);
 
   return {
+    list() {
+      return [...files.values()];
+    },
     root() {
       return root;
     },
-    add(file) {
-      this.makeDir(file.file.dirname);
+    write(path, file) {
+      const node: Page | Meta = {
+        file: parseFilePath(path),
+        ...file,
+      };
+      this.makeDir(node.file.dirname);
 
-      folders.get(file.file.dirname)?.children.push(file);
-      files.set(file.file.flattenedPath, file);
+      folders.get(node.file.dirname)?.children.push(node);
+      files.set(node.file.flattenedPath, node);
     },
     read(path) {
       return files.get(path);

@@ -1,9 +1,8 @@
 import { parse } from 'node:path';
 import type { FileInfo } from './types';
 
-export function parseFilePath(path: string, root = ''): FileInfo {
-  const relativePath = getRelativePath(path, root);
-  const parsed = parse(relativePath);
+export function parseFilePath(path: string): FileInfo {
+  const parsed = parse(path);
   const dir = parsed.dir.replace('\\', '/');
   const flattenedPath = joinPaths([dir, parsed.name]);
   const [name, locale] = parsed.name.split('.');
@@ -13,7 +12,7 @@ export function parseFilePath(path: string, root = ''): FileInfo {
     name,
     flattenedPath,
     locale,
-    path: relativePath,
+    path,
   };
 }
 
@@ -21,7 +20,7 @@ export function isRelative(path: string, root: string): boolean {
   return path.startsWith(root);
 }
 
-function getRelativePath(path: string, root: string): string {
+export function getRelativePath(path: string, root: string): string {
   if (!isRelative(path, root)) throw new Error('Invalid path');
   return splitPath(path.substring(root.length)).join('/');
 }
