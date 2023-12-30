@@ -21,7 +21,6 @@ for (const source of sources) {
       '!node_modules',
       '!pnpm-lock.yaml',
       '!next-env.d.ts',
-      '!_map.ts',
     ],
     { dot: false, cwd: sourceDir },
   );

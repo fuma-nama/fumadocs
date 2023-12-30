@@ -48,9 +48,9 @@ interface NextDocsMDXOptions {
   loader?: Loader;
 
   /**
-   * Where the root `_map.ts` should be, relative to cwd
+   * Where the root map.ts should be, relative to cwd
    *
-   * @defaultValue `'./_map.ts'`
+   * @defaultValue `'./.map.ts'`
    */
   rootMapPath?: string;
 
@@ -79,7 +79,7 @@ const createNextDocs =
   ({
     mdxOptions = {},
     cwd = process.cwd(),
-    rootMapPath = './_map.ts',
+    rootMapPath = './.map.ts',
     rootContentPath = './content',
   }: NextDocsMDXOptions = {}) =>
   (nextConfig: NextConfig = {}) => {

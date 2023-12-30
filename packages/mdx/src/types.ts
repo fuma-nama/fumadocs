@@ -1,9 +1,19 @@
 import type { MDXProps } from 'mdx/types';
 import type { StructuredData } from 'next-docs-zeta/mdx-plugins';
 import type { TableOfContents } from 'next-docs-zeta/server';
-import type { z } from 'zod';
-import type { PageData } from 'next-docs-zeta/source';
-import type * as Default from './validate/schema';
+import type { MetaData, PageData } from 'next-docs-zeta/source';
+
+export type SourceFile<Meta extends MetaData, Fronmatter extends PageData> =
+  | {
+      type: 'meta';
+      path: string;
+      data: Meta;
+    }
+  | {
+      type: 'page';
+      path: string;
+      data: MDXPageData<Fronmatter>;
+    };
 
 /**
  * Defalt MDX properties
@@ -21,7 +31,3 @@ export type MDXPageData<Frontmatter extends PageData = PageData> = Omit<
 > & {
   exports: Omit<MDXExport<Frontmatter>, 'frontmatter'>;
 };
-
-export type DefaultFrontmatter = z.infer<typeof Default.frontmatterSchema>;
-
-export type DefaultMetaData = z.infer<typeof Default.metaSchema>;

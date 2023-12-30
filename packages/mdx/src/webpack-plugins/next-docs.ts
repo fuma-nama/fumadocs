@@ -8,6 +8,7 @@ interface Options {
 }
 
 const content = `
+/** Auto-generated with Next Docs **/
 declare const map: Record<string, unknown>
 
 export { map }
@@ -24,7 +25,7 @@ export class NextDocsWebpackPlugin {
     compiler.hooks.beforeCompile.tap(NextDocsWebpackPlugin.name, () => {
       if (firstLoad && !fs.existsSync(this.options.rootMapFile)) {
         fs.writeFileSync(this.options.rootMapFile, content);
-        console.log('Created _map.ts file for you automatically');
+        console.log('Created map.ts file for you automatically');
 
         firstLoad = false;
       }

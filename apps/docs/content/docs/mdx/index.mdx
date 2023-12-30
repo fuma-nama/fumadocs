@@ -68,13 +68,13 @@ Read [Pages Conventions](/docs/headless/utils/build-page-tree#pages-structure)
 to learn how to structure your pages.
 
 ```ts title="source.ts"
-import { map } from '@/_map';
+import { map } from '@/.map';
 import { fromMap } from 'next-docs-mdx/map';
 
 export const { getPage, pages, tree } = fromMap(map);
 ```
 
-> The `@/_map` file will be generated automatically
+> The `@/.map` file will be generated automatically
 
 ### Start Server
 
@@ -84,7 +84,7 @@ Start the dev server
 next dev
 ```
 
-A `_map.ts` file should be created. You can log and see if page tree is built
+A `.map.ts` file should be created. You can log and see if page tree is built
 correctly.
 
 ## Built-in Features

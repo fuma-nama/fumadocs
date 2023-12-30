@@ -9,7 +9,7 @@ export interface LoaderOptions {
 }
 
 /**
- * Load the root `_map.ts` file
+ * Load the root `.map.ts` file
  */
 export default function loader(
   this: LoaderContext<LoaderOptions>,

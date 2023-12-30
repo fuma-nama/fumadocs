@@ -2,7 +2,7 @@ import { type Source } from 'next-docs-zeta/source';
 import type { z } from 'zod';
 import { resolveFiles } from './resolve-files';
 import type { defaultSchemas } from './validate/schema';
-import type { MDXPageData } from './types';
+import type { MDXPageData, SourceFile } from './types';
 
 interface UtilsOptions<Frontmatter, Meta> {
   schema?: {
@@ -11,11 +11,12 @@ interface UtilsOptions<Frontmatter, Meta> {
   };
 }
 
+type DefaultFrontmatter = (typeof defaultSchemas)['frontmatter'];
+type DefaultMeta = (typeof defaultSchemas)['meta'];
+
 export function createMDXSource<
-  Frontmatter extends
-    (typeof defaultSchemas)['frontmatter'] = (typeof defaultSchemas)['frontmatter'],
-  Meta extends
-    (typeof defaultSchemas)['meta'] = (typeof defaultSchemas)['meta'],
+  Frontmatter extends DefaultFrontmatter = DefaultFrontmatter,
+  Meta extends DefaultMeta = DefaultMeta,
 >(
   map: Record<string, unknown>,
   options?: UtilsOptions<Frontmatter, Meta>,
@@ -23,9 +24,19 @@ export function createMDXSource<
   metaData: z.infer<Meta>;
   pageData: MDXPageData<z.infer<Frontmatter>>;
 }> {
-  const files = resolveFiles({ map, schema: options?.schema });
-
   return {
-    files,
+    files: loadMDXSource(map, options),
   };
+}
+
+export function loadMDXSource<
+  Frontmatter extends DefaultFrontmatter = DefaultFrontmatter,
+  Meta extends DefaultMeta = DefaultMeta,
+>(
+  map: Record<string, unknown>,
+  options?: UtilsOptions<Frontmatter, Meta>,
+): SourceFile<z.infer<Meta>, z.infer<Frontmatter>>[] {
+  return resolveFiles({ map, schema: options?.schema }) as ReturnType<
+    typeof loadMDXSource
+  >;
 }

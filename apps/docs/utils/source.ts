@@ -8,7 +8,7 @@ import type { InferMetaType, InferPageType } from 'next-docs-zeta/source';
 import { loader } from 'next-docs-zeta/source';
 import { icons } from 'lucide-react';
 import { createElement } from 'react';
-import { map } from '@/_map';
+import { map } from '@/.map';
 
 const frontmatterSchema = defaultSchemas.frontmatter.extend({
   preview: z.string().optional(),

@@ -26,7 +26,7 @@ export interface DocsPageProps {
   toc?: TableOfContents;
 
   tableOfContent?: Partial<
-    Omit<TOCProps, 'item'> & {
+    Omit<TOCProps, 'items'> & {
       enabled: boolean;
       component: ReactNode;
     }
