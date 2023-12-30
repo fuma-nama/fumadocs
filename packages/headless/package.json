@@ -123,7 +123,7 @@
   ],
   "scripts": {
     "build": "tsup",
-    "clean": "rmdir /q/s dist",
+    "clean": "rimraf dist",
     "dev": "tsup --watch",
     "lint": "eslint .",
     "test": "vitest",

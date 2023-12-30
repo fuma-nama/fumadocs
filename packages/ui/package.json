@@ -51,7 +51,7 @@
   ],
   "scripts": {
     "build": "tsup && postcss css/styles.css -o ./dist/style.css",
-    "clean": "rmdir /q/s dist",
+    "clean": "rimraf dist",
     "dev": "concurrently \"pnpm dev:layout\" \"pnpm dev:tailwind\"",
     "dev:layout": "tsup --watch",
     "dev:tailwind": "postcss css/styles.css -o ./dist/style.css --watch",
