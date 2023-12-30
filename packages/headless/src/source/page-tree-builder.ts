@@ -43,22 +43,30 @@ function buildAll(
   ctx: PageTreeBuilderContext,
   skipIndex: boolean,
 ): PageTree.Node[] {
-  return nodes
-    .flatMap((child) => {
-      if (child.type === 'page') {
-        if (child.file.locale) return [];
-        if (skipIndex && child.file.name === 'index') return [];
+  const output: PageTree.Node[] = [];
+  let index: PageTree.Item | undefined;
 
-        return buildFileNode(child, ctx);
-      }
+  for (const node of [...nodes].sort((a, b) =>
+    a.file.name.localeCompare(b.file.name),
+  )) {
+    if (node.type === 'page') {
+      if (node.file.locale) continue;
+      const treeNode = buildFileNode(node, ctx);
 
-      if (child.type === 'folder') {
-        return buildFolderNode(child, ctx, true);
-      }
+      if (node.file.name === 'index') index = treeNode;
+      else output.push(treeNode);
+    }
 
-      return [];
-    })
-    .sort((a, b) => a.name.localeCompare(b.name));
+    if (node.type === 'folder') {
+      output.push(buildFolderNode(node, ctx, true));
+    }
+  }
+
+  if (!skipIndex && index) {
+    output.unshift(index);
+  }
+
+  return output;
 }
 
 function getFolderMeta(
@@ -113,7 +121,6 @@ function buildFolderNode(
       }
 
       const extractResult = extractor.exec(item);
-
       const extractName = extractResult?.groups?.name ?? item;
 
       const itemNode =
