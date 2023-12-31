@@ -49,7 +49,7 @@ export function Sidebar({
   defaultOpenLevel = 1,
 }: SidebarProps): JSX.Element {
   const [open] = useSidebarCollapse();
-  const { active } = useTreeContext();
+  const { root } = useTreeContext();
 
   return (
     <Base.SidebarList
@@ -71,7 +71,7 @@ export function Sidebar({
                 <BaseItem key={item.url} item={item} nested />
               ))}
             </div>
-            <NodeList items={active.children} />
+            <NodeList items={root.children} />
           </div>
         </ScrollArea>
         <div

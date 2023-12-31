@@ -37,8 +37,6 @@ export default async function Page({
 
   return (
     <DocsPage
-      url={page.url}
-      tree={utils.pageTree}
       toc={page.data.exports.toc}
       lastUpdate={time}
       tableOfContent={{

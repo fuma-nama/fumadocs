@@ -1,7 +1,7 @@
 import type { PageTree } from 'next-docs-zeta/server';
 import { usePathname } from 'next/navigation';
 import { createContext, useContext, type ReactNode, useMemo } from 'react';
-import { hasActive } from '@/utils/shared';
+import { flattenTree, hasActive } from '@/utils/shared';
 
 export interface LinkItem {
   url: string;
@@ -11,11 +11,28 @@ export interface LinkItem {
 }
 
 interface TreeContextType {
-  root: PageTree.Root;
-  active: PageTree.Root | PageTree.Folder;
+  tree: PageTree.Root;
+  list: PageTree.Item[];
+  root: PageTree.Root | PageTree.Folder;
 }
 
 const TreeContext = createContext<TreeContextType | undefined>(undefined);
+
+function findRoot(
+  items: PageTree.Node[],
+  pathname: string,
+): PageTree.Folder | undefined {
+  for (const item of items) {
+    if (item.type === 'folder') {
+      const root = findRoot(item.children, pathname);
+
+      if (root) return root;
+      if (item.root === true && hasActive(item.children, pathname)) {
+        return item;
+      }
+    }
+  }
+}
 
 export function TreeContextProvider({
   children,
@@ -25,17 +42,14 @@ export function TreeContextProvider({
   children: ReactNode;
 }): JSX.Element {
   const pathname = usePathname();
-  const value: TreeContextType = useMemo(() => {
-    const folder = tree.children.find(
-      (child) =>
-        child.type === 'folder' &&
-        child.root === true &&
-        hasActive(child.children, pathname),
-    );
+  const value = useMemo<TreeContextType>(() => {
+    const root = findRoot(tree.children, pathname) ?? tree;
+    const list = flattenTree(root.children);
 
     return {
-      active: folder?.type === 'folder' ? folder : tree,
-      root: tree,
+      root,
+      list,
+      tree,
     };
   }, [pathname, tree]);
 

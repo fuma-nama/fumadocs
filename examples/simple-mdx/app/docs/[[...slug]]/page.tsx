@@ -1,4 +1,4 @@
-import { getPage, getPages, tree } from '@/app/source';
+import { getPage, getPages } from '@/app/source';
 import type { Metadata } from 'next';
 import { DocsPage, DocsBody } from 'next-docs-ui/page';
 import { notFound } from 'next/navigation';
@@ -17,7 +17,7 @@ export default async function Page({
   const MDX = page.data.exports.default;
 
   return (
-    <DocsPage url={page.url} tree={tree} toc={page.data.exports.toc}>
+    <DocsPage toc={page.data.exports.toc}>
       <DocsBody>
         <h1>{page.data.title}</h1>
         <MDX />

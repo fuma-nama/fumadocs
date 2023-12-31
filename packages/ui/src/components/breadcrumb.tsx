@@ -7,9 +7,9 @@ import { cn } from '@/utils/cn';
 import { useTreeContext } from '@/contexts/tree';
 
 export function Breadcrumb(): JSX.Element {
-  const { active } = useTreeContext();
+  const { root } = useTreeContext();
   const pathname = usePathname();
-  const items = useBreadcrumb(pathname, active);
+  const items = useBreadcrumb(pathname, root);
 
   return (
     <div

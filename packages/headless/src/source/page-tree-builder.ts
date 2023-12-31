@@ -44,7 +44,6 @@ function buildAll(
   skipIndex: boolean,
 ): PageTree.Node[] {
   const output: PageTree.Node[] = [];
-  let index: PageTree.Item | undefined;
 
   for (const node of [...nodes].sort((a, b) =>
     a.file.name.localeCompare(b.file.name),
@@ -53,17 +52,17 @@ function buildAll(
       if (node.file.locale) continue;
       const treeNode = buildFileNode(node, ctx);
 
-      if (node.file.name === 'index') index = treeNode;
-      else output.push(treeNode);
+      if (node.file.name === 'index') {
+        if (!skipIndex) output.unshift(treeNode);
+        continue;
+      }
+
+      output.push(treeNode);
     }
 
     if (node.type === 'folder') {
       output.push(buildFolderNode(node, ctx));
     }
-  }
-
-  if (!skipIndex && index) {
-    output.unshift(index);
   }
 
   return output;
