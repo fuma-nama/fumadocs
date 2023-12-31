@@ -1,5 +1,5 @@
 ---
-'create-next-docs-app': minor
+'create-next-docs-app': major
 ---
 
-Support template for Tailwind CSS + Next Docs MDX
+**Support template for Tailwind CSS + Next Docs MDX**
