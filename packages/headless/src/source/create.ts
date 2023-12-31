@@ -4,7 +4,7 @@ import type { MetaData, PageData, Transformer } from './types';
 import type { CreatePageTreeBuilderOptions } from './page-tree-builder';
 import { createPageTreeBuilder } from './page-tree-builder';
 import { joinPaths } from './path';
-import type { Node, Page } from './file-graph';
+import type { Node, Page } from './file-system';
 
 interface LoaderConfig {
   source: SourceConfig;
@@ -39,7 +39,7 @@ export interface Source<Config extends SourceConfig> {
    * @internal
    */
   _config?: Config;
-  files: VirtualFile[];
+  files: VirtualFile[] | ((rootDir: string) => VirtualFile[]);
 }
 
 export interface LoaderOutput<Config extends LoaderConfig> {
@@ -134,7 +134,8 @@ function createOutput({
   url = createGetUrl(baseUrl),
 }: LoaderOptions): LoaderOutput<LoaderConfig> {
   const result = load({
-    files: source.files,
+    files:
+      typeof source.files === 'function' ? source.files(rootDir) : source.files,
     transformers,
     rootDir,
     getSlugs: slugs,

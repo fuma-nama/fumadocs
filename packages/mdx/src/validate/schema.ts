@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const metaSchema = z.object({
   title: z.string().optional(),
-  pages: z.array(z.string()),
+  pages: z.array(z.string()).optional(),
   root: z.boolean().optional(),
   icon: z.string().optional(),
 });

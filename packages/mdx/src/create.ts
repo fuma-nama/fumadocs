@@ -4,11 +4,16 @@ import { resolveFiles } from './resolve-files';
 import type { defaultSchemas } from './validate/schema';
 import type { MDXPageData, SourceFile } from './types';
 
-interface UtilsOptions<Frontmatter, Meta> {
+interface SourceOptions<Frontmatter, Meta> {
   schema?: {
     frontmatter?: Frontmatter;
     meta?: Meta;
   };
+}
+
+interface LoadOptions<Frontmatter, Meta>
+  extends SourceOptions<Frontmatter, Meta> {
+  rootDir?: string;
 }
 
 type DefaultFrontmatter = (typeof defaultSchemas)['frontmatter'];
@@ -19,13 +24,13 @@ export function createMDXSource<
   Meta extends DefaultMeta = DefaultMeta,
 >(
   map: Record<string, unknown>,
-  options?: UtilsOptions<Frontmatter, Meta>,
+  options?: SourceOptions<Frontmatter, Meta>,
 ): Source<{
   metaData: z.infer<Meta>;
   pageData: MDXPageData<z.infer<Frontmatter>>;
 }> {
   return {
-    files: loadMDXSource(map, options),
+    files: (rootDir) => loadMDXSource(map, { ...options, rootDir }),
   };
 }
 
@@ -34,9 +39,10 @@ export function loadMDXSource<
   Meta extends DefaultMeta = DefaultMeta,
 >(
   map: Record<string, unknown>,
-  options?: UtilsOptions<Frontmatter, Meta>,
+  options?: LoadOptions<Frontmatter, Meta>,
 ): SourceFile<z.infer<Meta>, z.infer<Frontmatter>>[] {
-  return resolveFiles({ map, schema: options?.schema }) as ReturnType<
-    typeof loadMDXSource
-  >;
+  return resolveFiles({
+    map,
+    ...options,
+  }) as ReturnType<typeof loadMDXSource>;
 }

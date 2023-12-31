@@ -10,6 +10,8 @@ const metaTypes = ['.json'];
 interface ResolveOptions {
   map: Record<string, unknown>;
 
+  rootDir?: string;
+
   /**
    * Zod schema for frontmatter/meta objects, transform allowed
    */
@@ -40,11 +42,13 @@ function parse<T extends AnyZodObject>(
 
 export function resolveFiles({
   map,
+  rootDir = '',
   schema = {},
 }: ResolveOptions): VirtualFile[] {
   const outputs: VirtualFile[] = [];
 
   for (const [file, value] of Object.entries(map)) {
+    if (!file.startsWith(rootDir)) continue;
     const parsed = path.parse(file);
 
     if (metaTypes.includes(parsed.ext)) {

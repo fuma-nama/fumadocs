@@ -1,5 +1,5 @@
 import type { LoaderOutput } from './create';
-import type { Meta, Page } from './file-graph';
+import type { Meta, Page } from './file-system';
 import type { LoadResult } from './load';
 
 export interface FileInfo {

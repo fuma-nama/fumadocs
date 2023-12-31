@@ -1,6 +1,6 @@
 import type { FileInfo, MetaData, PageData, Transformer } from './types';
 import { getRelativePath, isRelative, parseFilePath } from './path';
-import * as FileGraph from './file-graph';
+import { Storage } from './file-system';
 
 export interface LoadOptions {
   files: VirtualFile[];
@@ -17,13 +17,13 @@ export interface VirtualFile {
 }
 
 export interface LoadResult {
-  storage: FileGraph.Storage;
+  storage: Storage;
   getSlugs: (info: FileInfo) => string[];
   getUrl: (slugs: string[], locale?: string) => string;
   data: Record<string, unknown>;
 }
 
-// Virtual files -> File Graph -> Plugins -> Result
+// Virtual files -> Virtual Storage -> Plugins -> Result
 // Result should contain page tree and basic utilities
 export function load(options: LoadOptions): LoadResult {
   const { transformers = [] } = options;
@@ -42,8 +42,8 @@ export function load(options: LoadOptions): LoadResult {
   return ctx;
 }
 
-function buildStorage(options: LoadOptions): FileGraph.Storage {
-  const storage = FileGraph.makeGraph();
+function buildStorage(options: LoadOptions): Storage {
+  const storage = new Storage();
 
   for (const file of options.files) {
     if (!isRelative(file.path, options.rootDir)) continue;

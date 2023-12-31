@@ -1,10 +1,10 @@
 import type { ReactElement } from 'react';
 import type * as PageTree from '../server/page-tree';
-import type * as FileGraph from './file-graph';
+import type { Folder, Meta, Node, Page, Storage } from './file-system';
 import { joinPaths } from './path';
 
 interface PageTreeBuilderContext {
-  storage: FileGraph.Storage;
+  storage: Storage;
   lang?: string;
 
   resolveIcon: (icon: string | undefined) => ReactElement | undefined;
@@ -26,7 +26,7 @@ export interface PageTreeBuilder {
 }
 
 export interface CreatePageTreeBuilderOptions {
-  storage: FileGraph.Storage;
+  storage: Storage;
   resolveIcon?: (icon: string) => ReactElement | undefined;
 }
 
@@ -39,7 +39,7 @@ const extractor = /\.\.\.(?<name>.+)/;
  * @returns Nodes with specified locale in context (sorted)
  */
 function buildAll(
-  nodes: FileGraph.Node[],
+  nodes: Node[],
   ctx: PageTreeBuilderContext,
   skipIndex: boolean,
 ): PageTree.Node[] {
@@ -58,7 +58,7 @@ function buildAll(
     }
 
     if (node.type === 'folder') {
-      output.push(buildFolderNode(node, ctx, true));
+      output.push(buildFolderNode(node, ctx));
     }
   }
 
@@ -70,9 +70,9 @@ function buildAll(
 }
 
 function getFolderMeta(
-  folder: FileGraph.Folder,
+  folder: Folder,
   ctx: PageTreeBuilderContext,
-): FileGraph.Meta | undefined {
+): Meta | undefined {
   let meta = ctx.storage.read(joinPaths([folder.file.path, 'meta']));
 
   if (ctx.lang) {
@@ -84,31 +84,26 @@ function getFolderMeta(
   if (meta?.type === 'meta') return meta;
 }
 
-/**
- *
- * @param folder - Folder node
- * @param ctx - Context
- * @param skipIndex - Exclude index page if meta not specified
- */
 function buildFolderNode(
-  folder: FileGraph.Folder,
+  folder: Folder,
   ctx: PageTreeBuilderContext,
-  skipIndex: boolean,
+  root = false,
 ): PageTree.Folder {
   const indexNode = folder.children.find(
     (node) => node.type === 'page' && node.file.name === 'index',
-  ) as FileGraph.Page | undefined;
+  ) as Page | undefined;
   const index = indexNode ? buildFileNode(indexNode, ctx) : undefined;
   const meta = getFolderMeta(folder, ctx)?.data;
 
   let children: PageTree.Folder['children'];
 
-  if (!meta?.pages) {
-    children = buildAll(folder.children, ctx, skipIndex);
+  if (!meta) {
+    children = buildAll(folder.children, ctx, !root);
   } else {
+    const isRoot = meta.root ?? root;
     const addedNodePaths = new Set<string>();
 
-    const resolved = meta.pages.flatMap<PageTree.Node | '...'>((item) => {
+    const resolved = meta.pages?.flatMap<PageTree.Node | '...'>((item) => {
       if (item === rest) return '...';
 
       const result = separator.exec(item);
@@ -132,7 +127,7 @@ function buildFolderNode(
       addedNodePaths.add(itemNode.file.path);
 
       if (itemNode.type === 'folder') {
-        const node = buildFolderNode(itemNode, ctx, true);
+        const node = buildFolderNode(itemNode, ctx);
 
         return extractResult?.groups ? node.children : node;
       }
@@ -144,17 +139,21 @@ function buildFolderNode(
       return [];
     });
 
-    children = resolved.flatMap<PageTree.Node>((item) => {
+    const restNodes = buildAll(
+      folder.children.filter((node) => !addedNodePaths.has(node.file.path)),
+      ctx,
+      !isRoot,
+    );
+
+    const nodes = resolved?.flatMap<PageTree.Node>((item) => {
       if (item === '...') {
-        return buildAll(
-          folder.children.filter((node) => !addedNodePaths.has(node.file.path)),
-          ctx,
-          true,
-        );
+        return restNodes;
       }
 
       return item;
     });
+
+    children = nodes ?? restNodes;
   }
 
   return {
@@ -167,10 +166,7 @@ function buildFolderNode(
   };
 }
 
-function buildFileNode(
-  page: FileGraph.Page,
-  ctx: PageTreeBuilderContext,
-): PageTree.Item {
+function buildFileNode(page: Page, ctx: PageTreeBuilderContext): PageTree.Item {
   let localePage = page;
   if (ctx.lang) {
     const result = ctx.storage.read(`${page.file.flattenedPath}.${ctx.lang}`);
@@ -188,7 +184,7 @@ function buildFileNode(
 
 function build(ctx: PageTreeBuilderContext): PageTree.Root {
   const root = ctx.storage.root();
-  const folder = buildFolderNode(root, ctx, false);
+  const folder = buildFolderNode(root, ctx, true);
 
   return {
     name: folder.name,
