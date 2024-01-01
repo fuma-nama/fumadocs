@@ -52,8 +52,8 @@ export function remarkStructure({
       if (element.type === 'heading') {
         element.data ||= {};
         element.data.hProperties ||= {};
-        const propeties = element.data.hProperties as HProperties;
-        const id = propeties.id ?? slugger.slug(content);
+        const properties = element.data.hProperties as HProperties;
+        const id = properties.id ?? slugger.slug(content);
 
         data.headings.push({
           id,

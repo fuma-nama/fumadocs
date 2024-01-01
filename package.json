@@ -32,6 +32,9 @@
   },
   "pnpm": {
     "overrides": {
+      "remark-rehype": "^11.0.0",
+      "@types/mdast": "^4.0.3",
+      "remark-parse": "^11.0.0",
       "unified": "^11.0.4",
       "mdx-bundler": "^10.0.1"
     },
