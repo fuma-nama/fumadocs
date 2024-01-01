@@ -81,9 +81,6 @@ importers:
       next-docs-zeta:
         specifier: workspace:*
         version: link:../../packages/headless
-      next-sitemap:
-        specifier: ^4.2.3
-        version: 4.2.3(next@14.0.4)
       phenomenon:
         specifier: ^1.6.0
         version: 1.6.0
@@ -156,49 +153,6 @@ importers:
         version: 5.89.0
 
   examples/advanced:
-    dependencies:
-      contentlayer:
-        specifier: 0.3.4
-        version: 0.3.4
-      next:
-        specifier: 14.0.4
-        version: 14.0.4(@babel/core@7.22.17)(react-dom@18.2.0)(react@18.2.0)
-      next-contentlayer:
-        specifier: 0.3.4
-        version: 0.3.4(contentlayer@0.3.4)(next@14.0.4)(react-dom@18.2.0)(react@18.2.0)
-      next-docs-ui:
-        specifier: 6.1.0
-        version: link:../../packages/ui
-      next-docs-zeta:
-        specifier: 6.1.0
-        version: link:../../packages/headless
-      react:
-        specifier: 18.2.0
-        version: 18.2.0
-      react-dom:
-        specifier: 18.2.0
-        version: 18.2.0(react@18.2.0)
-    devDependencies:
-      '@types/react':
-        specifier: 18.2.0
-        version: 18.2.0
-      '@types/react-dom':
-        specifier: 18.2.1
-        version: 18.2.1
-      autoprefixer:
-        specifier: 10.4.16
-        version: 10.4.16(postcss@8.4.32)
-      postcss:
-        specifier: 8.4.32
-        version: 8.4.32
-      tailwindcss:
-        specifier: 3.3.7
-        version: 3.3.7
-      typescript:
-        specifier: 5.3.3
-        version: 5.3.3
-
-  examples/my-app:
     dependencies:
       contentlayer:
         specifier: 0.3.4
@@ -1213,10 +1167,6 @@ packages:
       ts-pattern: 4.3.0
       type-fest: 3.13.1
 
-  /@corex/deepmerge@4.0.43:
-    resolution: {integrity: sha512-N8uEMrMPL0cu/bdboEWpQYb/0i2K5Qn8eCsxzOmxSggJbbQte7ljMRoXm917AbntqTGOzdTu+vP3KOOzoC70HQ==}
-    dev: false
-
   /@effect-ts/core@0.60.5:
     resolution: {integrity: sha512-qi1WrtJA90XLMnj2hnUszW9Sx4dXP03ZJtCc5DiUBIOhF4Vw7plfb65/bdBySPoC9s7zy995TdUX1XBSxUkl5w==}
     dependencies:
@@ -1746,10 +1696,6 @@ packages:
       - bufferutil
       - utf-8-validate
     dev: true
-
-  /@next/env@13.5.6:
-    resolution: {integrity: sha512-Yac/bV5sBGkkEXmAX5FWPS9Mmo2rthrOPRQQNfycJPkjUAUclomCPH7QFVCDQ4Mp2k2K1SSM6m0zrxYrOwtFQw==}
-    dev: false
 
   /@next/env@14.0.0:
     resolution: {integrity: sha512-cIKhxkfVELB6hFjYsbtEeTus2mwrTC+JissfZYM0n+8Fv+g8ucUfOlm3VEDtwtwydZ0Nuauv3bl0qF82nnCAqA==}
@@ -7911,6 +7857,7 @@ packages:
 
   /minimist@1.2.8:
     resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
+    dev: true
 
   /minipass@7.0.4:
     resolution: {integrity: sha512-jYofLM5Dam9279rdkWzqHozUo4ybjdZmCsDHePy5V/PbBcVMiSZR97gmAy45aqi8CK1lG2ECd356FU86avfwUQ==}
@@ -7994,23 +7941,6 @@ packages:
       - esbuild
       - markdown-wasm
       - supports-color
-    dev: false
-
-  /next-sitemap@4.2.3(next@14.0.4):
-    resolution: {integrity: sha512-vjdCxeDuWDzldhCnyFCQipw5bfpl4HmZA7uoo3GAaYGjGgfL4Cxb1CiztPuWGmS+auYs7/8OekRS8C2cjdAsjQ==}
-    engines: {node: '>=14.18'}
-    hasBin: true
-    peerDependencies:
-      next: '*'
-    peerDependenciesMeta:
-      next:
-        optional: true
-    dependencies:
-      '@corex/deepmerge': 4.0.43
-      '@next/env': 13.5.6
-      fast-glob: 3.3.2
-      minimist: 1.2.8
-      next: 14.0.4(@babel/core@7.22.17)(react-dom@18.2.0)(react@18.2.0)
     dev: false
 
   /next-themes@0.2.1(next@14.0.4)(react-dom@18.2.0)(react@18.2.0):

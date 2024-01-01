@@ -4,7 +4,6 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "postbuild": "next-sitemap & node ./update-index.mjs",
     "build:shaders": "glslx shaders/rain.glsl --output=shaders/rain.min.js --format=js --renaming=internal-only",
     "dev": "next dev",
     "lint": "next lint",
@@ -22,7 +21,6 @@
     "next-docs-mdx": "workspace:*",
     "next-docs-ui": "workspace:*",
     "next-docs-zeta": "workspace:*",
-    "next-sitemap": "^4.2.3",
     "phenomenon": "^1.6.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
