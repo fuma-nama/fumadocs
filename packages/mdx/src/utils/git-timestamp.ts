@@ -4,6 +4,11 @@ import { spawn } from 'cross-spawn';
 
 const cache = new Map<string, Date>();
 
+/**
+ * Requires `git` to be installed
+ *
+ * if you are using Vercel, please set `VERCEL_DEEP_CLONE` environment variable to `true`
+ */
 export function getGitTimestamp(file: string): Promise<Date | undefined> {
   const cachedTimestamp = cache.get(file);
   if (cachedTimestamp) return Promise.resolve(cachedTimestamp);
