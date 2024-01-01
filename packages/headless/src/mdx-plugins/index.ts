@@ -9,5 +9,5 @@ export {
 export * from './rehype-next-docs';
 export * from './remark-dynamic-content';
 export * from './remark-structure';
-export * from './remark-toc';
+export * from './remark-heading';
 export * from './remark-install';

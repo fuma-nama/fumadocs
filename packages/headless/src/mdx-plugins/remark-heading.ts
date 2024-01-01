@@ -7,20 +7,33 @@ import { flattenNode } from './remark-utils';
 
 const slugger = new Slugger();
 
+export interface HProperties {
+  id?: string;
+}
+
 /**
+ * Add heading ids and extract TOC
+ *
  * Attach an array of `TOCItemType` to `vfile.data.toc`
  */
-export function remarkToc(): Transformer<Root, Root> {
+export function remarkHeading(): Transformer<Root, Root> {
   return (node, file) => {
     const toc: TOCItemType[] = [];
     slugger.reset();
 
     visit(node, ['heading'], (heading: Heading) => {
+      heading.data ||= {};
+      heading.data.hProperties ||= {};
+
       const text = flattenNode(heading);
+      const properties = heading.data.hProperties as HProperties;
+      const id = slugger.slug(properties.id || text);
+
+      properties.id = id;
 
       toc.push({
         title: text,
-        url: `#${slugger.slug(text)}`,
+        url: `#${id}`,
         depth: heading.depth,
       });
 

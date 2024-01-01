@@ -1,13 +1,9 @@
-import Slugger from 'github-slugger';
 import type { Element, Root } from 'hast';
 import rehypePrettycode, {
   type Options as RehypePrettyCodeOptions,
 } from 'rehype-pretty-code';
 import type { Transformer } from 'unified';
-import { flattenNode, visit } from './hast-utils';
-
-const slugger = new Slugger();
-const headings = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
+import { visit } from './hast-utils';
 
 interface MetaValue {
   name: string;
@@ -81,32 +77,21 @@ function parseMeta(meta: string): Record<string, string> {
 }
 
 /**
- * Handle codeblocks and heading slugs
+ * Handle codeblocks
  */
 export function rehypeNextDocs({
   codeOptions,
 }: RehypeNextDocsOptions = {}): Transformer<Root, Root> {
   // TODO: Migrate to rehype-shikiji
   return async (tree, vfile) => {
-    slugger.reset();
+    visit(tree, ['pre'], (node) => {
+      const codeElement = node.children[0] as Element;
 
-    visit(tree, ['pre', ...headings], (node) => {
-      if (headings.includes(node.tagName)) {
-        if ('id' in node.properties) return;
-        node.properties.id = slugger.slug(flattenNode(node));
+      const meta = getMetaFromCode(codeElement);
 
-        return;
-      }
-
-      if (node.tagName === 'pre') {
-        const codeElement = node.children[0] as Element;
-
-        const meta = getMetaFromCode(codeElement);
-
-        Object.assign(node, {
-          [metaKey]: parseMeta(meta),
-        });
-      }
+      Object.assign(node, {
+        [metaKey]: parseMeta(meta),
+      });
     });
 
     const plugin = rehypePrettycode({

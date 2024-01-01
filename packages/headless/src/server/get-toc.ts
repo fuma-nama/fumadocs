@@ -1,5 +1,5 @@
 import { remark } from 'remark';
-import { remarkToc } from '@/mdx-plugins/remark-toc';
+import { remarkHeading } from '@/mdx-plugins/remark-heading';
 
 export interface TOCItemType {
   title: string;
@@ -17,7 +17,7 @@ export type TableOfContents = TOCItemType[];
 export async function getTableOfContents(
   content: string,
 ): Promise<TableOfContents> {
-  const result = await remark().use(remarkToc).process(content);
+  const result = await remark().use(remarkHeading).process(content);
 
   if ('toc' in result.data) return result.data.toc as TableOfContents;
 

@@ -1,14 +1,10 @@
-import type { Literal, RootContent } from 'mdast';
-import { visit } from './unist-visit';
-
-const textTypes = ['text', 'inlineCode', 'code'];
+import type { RootContent } from 'mdast';
 
 export function flattenNode(node: RootContent): string {
-  const p: string[] = [];
+  if ('children' in node)
+    return node.children.map((child) => flattenNode(child)).join('');
 
-  visit(node, textTypes, (child: Literal) => {
-    p.push(child.value);
-  });
+  if ('value' in node) return node.value;
 
-  return p.join('');
+  return '';
 }

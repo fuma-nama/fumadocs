@@ -6,6 +6,7 @@ import remarkMdx from 'remark-mdx';
 import type { PluggableList, Transformer } from 'unified';
 import { visit } from './unist-visit';
 import { flattenNode } from './remark-utils';
+import type { HProperties } from './remark-heading';
 
 interface Heading {
   id: string;
@@ -47,15 +48,19 @@ export function remarkStructure({
 
     visit(node, types, (element: MdastContent) => {
       const content = flattenNode(element).trim();
+
       if (element.type === 'heading') {
-        const slug = slugger.slug(content);
+        element.data ||= {};
+        element.data.hProperties ||= {};
+        const propeties = element.data.hProperties as HProperties;
+        const id = propeties.id ?? slugger.slug(content);
 
         data.headings.push({
-          id: slug,
+          id,
           content,
         });
 
-        lastHeading = slug;
+        lastHeading = id;
         return 'skip';
       }
 

@@ -4,7 +4,7 @@ import {
   rehypeNextDocs,
   remarkGfm,
   remarkStructure,
-  remarkToc,
+  remarkHeading,
   type RehypeNextDocsOptions,
 } from 'next-docs-zeta/mdx-plugins';
 import type { PluggableList } from 'unified';
@@ -87,9 +87,9 @@ const createNextDocs =
     const remarkPlugins = pluginOption(
       (v) => [
         remarkGfm,
-        remarkStructure,
-        remarkToc,
+        remarkHeading,
         ...v,
+        remarkStructure,
         [remarkMdxExport, { values: valueToExport }],
       ],
       mdxOptions.remarkPlugins,
