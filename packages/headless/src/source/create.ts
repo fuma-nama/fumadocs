@@ -50,14 +50,11 @@ export interface LoaderOutput<Config extends LoaderConfig> {
   files: Node<Config['source']['metaData'], Config['source']['pageData']>[];
 
   /**
-   * Get list of pages from language
+   * Get list of pages from language, empty if language hasn't specified
    *
    * @param language - If empty, the default language will be used
    */
-  getPages: (
-    language?: string,
-  ) => Page<Config['source']['pageData']>[] | undefined;
-
+  getPages: (language?: string) => Page<Config['source']['pageData']>[];
   /**
    * @param language - If empty, the default language will be used
    */
@@ -155,7 +152,7 @@ function createOutput({
     pageTree: pageTree as LoaderOutput<LoaderConfig>['pageTree'],
     files: result.storage.list(),
     getPages(language = '') {
-      return i18nMap.get(language);
+      return i18nMap.get(language) ?? [];
     },
     getPage(slugs_ = [], language = '') {
       const path = slugs_.join('/');

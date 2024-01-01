@@ -26,11 +26,9 @@ export default async function Page({
 }
 
 export async function generateStaticParams(): Promise<{ slug: string[] }[]> {
-  return (
-    getPages()?.map((page) => ({
-      slug: page.slugs,
-    })) ?? []
-  );
+  return getPages().map((page) => ({
+    slug: page.slugs,
+  }));
 }
 
 export function generateMetadata({ params }: { params: { slug?: string[] } }) {

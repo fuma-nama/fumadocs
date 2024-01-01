@@ -1,5 +1,4 @@
 import path from 'node:path';
-import type { ProcessorOptions } from '@mdx-js/mdx';
 import type { NextConfig } from 'next';
 import {
   rehypeNextDocs,
@@ -13,12 +12,10 @@ import type { Configuration } from 'webpack';
 import { NextDocsWebpackPlugin } from './webpack-plugins/next-docs';
 import remarkMdxExport from './mdx-plugins/remark-exports';
 import type { LoaderOptions } from './loader';
-
-type WithMDX = (config: NextConfig) => NextConfig;
-type Loader = (options: ProcessorOptions) => WithMDX;
+import type { Options as MDXLoaderOptions } from './loader-mdx';
 
 type MDXOptions = Omit<
-  NonNullable<ProcessorOptions>,
+  NonNullable<MDXLoaderOptions>,
   'rehypePlugins' | 'remarkPlugins'
 > & {
   rehypePlugins?: ResolvePlugins;
@@ -41,11 +38,6 @@ interface NextDocsMDXOptions {
   cwd?: string;
 
   mdxOptions?: MDXOptions;
-
-  /**
-   * Custom MDX loader
-   */
-  loader?: Loader;
 
   /**
    * Where the root map.ts should be, relative to cwd
@@ -87,6 +79,7 @@ const createNextDocs =
       'structuredData',
       'toc',
       'frontmatter',
+      'lastModified',
       ...(mdxOptions.valueToExport ?? []),
     ];
     const _mapPath = path.resolve(cwd, rootMapPath);
@@ -136,7 +129,7 @@ const createNextDocs =
                     ...mdxOptions,
                     remarkPlugins,
                     rehypePlugins,
-                  },
+                  } satisfies MDXLoaderOptions,
                 },
               ],
             },

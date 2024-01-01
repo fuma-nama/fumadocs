@@ -37,7 +37,7 @@ export interface DocsPageProps {
     items: NonNullable<FooterProps['items']>;
   }>;
 
-  lastUpdate?: Date | null;
+  lastUpdate?: Date | string | number;
 
   children: ReactNode;
 }
@@ -53,7 +53,9 @@ export function DocsPage({
       <article className="flex w-0 flex-1 flex-col gap-6 py-10">
         {replaceOrDefault(breadcrumb, <Breadcrumb />)}
         {props.children}
-        {props.lastUpdate ? <LastUpdate date={props.lastUpdate} /> : null}
+        {props.lastUpdate ? (
+          <LastUpdate date={new Date(props.lastUpdate)} />
+        ) : null}
         {replaceOrDefault(footer, <Footer items={footer.items} />)}
       </article>
       {replaceOrDefault(

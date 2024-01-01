@@ -2,7 +2,6 @@ import { ExternalLinkIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import { Card, Cards } from 'next-docs-ui/mdx/card';
 import { DocsPage, DocsBody } from 'next-docs-ui/page';
-import { getGithubLastEdit } from 'next-docs-zeta/server';
 import { notFound } from 'next/navigation';
 import { utils, type Page } from '@/utils/source';
 import { createMetadata } from '@/utils/metadata';
@@ -12,11 +11,7 @@ interface Param {
   slug: string[];
 }
 
-export default async function Page({
-  params,
-}: {
-  params: Param;
-}): Promise<JSX.Element> {
+export default function Page({ params }: { params: Param }): JSX.Element {
   const page = utils.getPage(params.slug);
 
   if (!page) {
@@ -24,21 +19,12 @@ export default async function Page({
   }
 
   const path = `apps/docs/content/docs/${page.file.path}`;
-  const time = await getGithubLastEdit({
-    owner: 'fuma-nama',
-    repo: 'next-docs',
-    path,
-    token: process.env.GIT_TOKEN
-      ? `Bearer ${process.env.GIT_TOKEN}`
-      : undefined,
-  });
-
   const preview = page.data.preview?.trim();
 
   return (
     <DocsPage
       toc={page.data.exports.toc}
-      lastUpdate={time}
+      lastUpdate={page.data.exports.lastModified}
       tableOfContent={{
         footer: (
           <a
@@ -125,9 +111,7 @@ export function generateMetadata({ params }: { params: Param }): Metadata {
 }
 
 export function generateStaticParams(): Param[] {
-  return (
-    utils.getPages()?.map<Param>((page) => ({
-      slug: page.slugs,
-    })) ?? []
-  );
+  return utils.getPages().map<Param>((page) => ({
+    slug: page.slugs,
+  }));
 }

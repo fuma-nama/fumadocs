@@ -127,7 +127,7 @@ export async function generateStaticParams(): Promise<
   { lang: string; slug: string[] }[]
 > {
   return languages.flatMap((lang) =>
-    getPages(lang)!.map((docs) => ({
+    getPages(lang).map((docs) => ({
       slug: docs.slug.split('/'),
       lang: lang,
     })),

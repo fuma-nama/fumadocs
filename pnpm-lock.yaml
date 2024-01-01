@@ -454,6 +454,9 @@ importers:
       '@mdx-js/mdx':
         specifier: ^3.0.0
         version: 3.0.0
+      cross-spawn:
+        specifier: ^7.0.3
+        version: 7.0.3
       estree-util-value-to-estree:
         specifier: ^3.0.1
         version: 3.0.1
@@ -470,6 +473,9 @@ importers:
         specifier: ^3.22.4
         version: 3.22.4
     devDependencies:
+      '@types/cross-spawn':
+        specifier: ^6.0.4
+        version: 6.0.4
       '@types/mdast':
         specifier: ^4.0.3
         version: 4.0.3

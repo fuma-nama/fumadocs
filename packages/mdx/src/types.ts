@@ -21,6 +21,7 @@ export type SourceFile<Meta extends MetaData, Fronmatter extends PageData> =
 export interface MDXExport<Frontmatter = PageData> {
   default: (props: MDXProps) => JSX.Element;
   frontmatter: Frontmatter;
+  lastModified: number | undefined;
   toc: TableOfContents;
   structuredData: StructuredData;
 }
