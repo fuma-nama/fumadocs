@@ -1,7 +1,7 @@
 import { type Source } from 'next-docs-zeta/source';
 import type { z } from 'zod';
 import { resolveFiles } from './resolve-files';
-import type { defaultSchemas } from './validate/schema';
+import type { defaultSchemas } from './utils/schema';
 import type { MDXPageData, SourceFile } from './types';
 
 interface SourceOptions<Frontmatter, Meta> {

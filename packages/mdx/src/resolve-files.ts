@@ -2,7 +2,7 @@ import path from 'node:path';
 import type { AnyZodObject, z } from 'zod';
 import type { VirtualFile } from 'next-docs-zeta/source';
 import type { MDXExport, MDXPageData } from './types';
-import { defaultSchemas } from './validate/schema';
+import { defaultSchemas } from './utils/schema';
 
 const pageTypes = ['.md', '.mdx'];
 const metaTypes = ['.json'];

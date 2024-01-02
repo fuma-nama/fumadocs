@@ -19,7 +19,7 @@ export default function Page({ params }: { params: Param }): JSX.Element {
   }
 
   const path = `apps/docs/content/docs/${page.file.path}`;
-  const preview = page.data.preview?.trim();
+  const preview = page.data.preview;
 
   return (
     <DocsPage
@@ -101,7 +101,7 @@ export function generateMetadata({ params }: { params: Param }): Metadata {
     title: page.data.title,
     description,
     openGraph: {
-      url: `https://next-docs-zeta.vercel.app/docs/${page.slugs.join('/')}`,
+      url: `/docs/${page.slugs.join('/')}`,
       images: image,
     },
     twitter: {

@@ -18,19 +18,20 @@ remark-math rehype-katex katex
 
 Add the remark/rehype plugins you have installed above.
 
-Assume you're using the default contentlayer configuration:
+The code might be vary depending on your content source, here is an example for Next Docs MDX:
 
 ```ts
-import { makeSource } from 'contentlayer/source-files'
-import { createConfig } from 'next-docs-zeta/contentlayer/configuration'
-import rehypeKatex from 'rehype-katex'
-import remarkMath from 'remark-math'
+import createNextDocs from 'next-docs-mdx/config';
+import rehypeKatex from 'rehype-katex';
+import remarkMath from 'remark-math';
 
-const config = createConfig(...)
-
-config.mdx!.remarkPlugins!.push(remarkMath)
-config.mdx!.rehypePlugins!.push(rehypeKatex)
-export default makeSource(config)
+const withNextDocs = createNextDocs({
+  mdxOptions: {
+    remarkPlugins: [remarkMath],
+    // Has to be the first plugin
+    rehypePlugins: (v) => [rehypeKatex, ...v],
+  },
+});
 ```
 
 ### Add Stylesheet
@@ -58,12 +59,5 @@ c = \pm\sqrt{a^2 + b^2}
 **Long equations example**
 
 ```math
-\begin{align}
-a^\dagger_1 &= \frac{X - iY}
-{2} \otimes I \otimes I \otimes ... \otimes I \\ a^\dagger_2 &= Z \otimes \frac
-{X - iY}
-{2} \otimes I \otimes ... \otimes I \\ &\vdots \\ a^\dagger_{2n} &= Z \otimes Z \otimes
-Z \otimes ... \otimes \frac{X - iY}
-{2}
-\end{align}
+\displaystyle {\begin{aligned}T_{f}(z)&=\sum _{k=0}^{\infty }{\frac {(z-c)^{k}}{2\pi i}}\int _{\gamma }{\frac {f(w)}{(w-c)^{k+1}}}\,dw\\&={\frac {1}{2\pi i}}\int _{\gamma }{\frac {f(w)}{w-c}}\sum _{k=0}^{\infty }\left({\frac {z-c}{w-c}}\right)^{k}\,dw\\&={\frac {1}{2\pi i}}\int _{\gamma }{\frac {f(w)}{w-c}}\left({\frac {1}{1-{\frac {z-c}{w-c}}}}\right)\,dw\\&={\frac {1}{2\pi i}}\int _{\gamma }{\frac {f(w)}{w-z}}\,dw=f(z),\end{aligned}}
 ```
