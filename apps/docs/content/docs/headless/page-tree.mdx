@@ -30,8 +30,7 @@ It contains a url, an optional icon and display name.
 
 ### Folder
 
-It contains a display name, an optional icon, a list of items and an optional
-index page
+It contains a display name, an optional icon, a list of items and the index page if exists.
 
 ```json
 {
@@ -46,6 +45,10 @@ index page
     ]
 }
 ```
+
+#### As Root
+
+To implement multiple page trees, you can add a `root` property to the folder node. The nearest root folder of current page will be used as the root of page tree.
 
 ### Separator
 

@@ -4,6 +4,7 @@
   "pages": [
     "---Guide---",
     "index",
+    "page-conventions",
     "page-tree",
     "---API References---",
     "components",
@@ -11,6 +12,7 @@
     "mdx",
     "search",
     "---Sources---",
+    "source-api",
     "next-docs-mdx",
     "contentlayer"
   ]

@@ -28,7 +28,7 @@ next-docs-zeta
 
 ### Choose a Source
 
-Next Docs has native support for [Next MDX](/docs/mdx) and ContentLayer, but any kind of formats and
+Next Docs has native support for [Next Docs MDX](/docs/mdx) and ContentLayer, but any kind of formats and
 sources are allowed.
 
 You can refer to this [guide](/docs/headless/contentlayer) to learn how to
@@ -36,7 +36,7 @@ use Contentlayer with Next Docs.
 
 ### Build Page Tree
 
-A page tree refers to structured data of all pages.
+A page tree refers to the structured data of all pages. It is essential for implementing a sidebar, or other navigation elements.
 
 ```js
 export const tree = [
@@ -57,7 +57,7 @@ export const tree = [
 ];
 ```
 
-You can generate the tree using our Contentlayer adapter, or end up with
+You can generate the tree using our built-in [Source API](/docs/headless/source-api), the adapter for your content source, or end up with
 writing your own.
 
 ### Create MDX file

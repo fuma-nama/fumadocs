@@ -66,9 +66,6 @@ Next Docs MDX automatically generates a `.map.ts` file once you start the dev se
 The raw data of pages is stored in the `map` property from your `.map.ts` file. To Integrate with [Source API](/docs/headless/source-api), create a `source.ts` file, and define the source with `createMDXSource` which returns a
 [Page Tree](/docs/headless/page-tree) and additional utilities.
 
-Read [Pages Conventions](/docs/headless/utils/build-page-tree#pages-structure)
-to learn how to structure your pages.
-
 ```ts title="source.ts"
 import { map } from '@/.map';
 import { createMDXSource } from 'next-docs-mdx';
@@ -80,6 +77,9 @@ export const { getPage, getPages, pageTree } = loader({
   source: createMDXSource(map),
 });
 ```
+
+> Read [Pages Conventions](/docs/headless/page-conventions)
+> to learn how to structure your pages.
 
 ### Start Server
 
@@ -124,7 +124,7 @@ export const blogs = loader({
 You can customise the options passed to the MDX processor.
 
 ```js
-const withNextDocs = createNextDocs({
+const withNextDocs = createMDX({
   mdxOptions: {
     remarkPlugins: [remarkMath],
     // When order matters
@@ -138,7 +138,7 @@ const withNextDocs = createNextDocs({
 The built-in configuration applies a remark plugin that turns `vfile.data` properties into exports, you can define additional properties to be exported.
 
 ```js
-const withNextDocs = createNextDocs({
+const withNextDocs = createMDX({
   mdxOptions: {
     valueToExport: ['dataName'],
   },
