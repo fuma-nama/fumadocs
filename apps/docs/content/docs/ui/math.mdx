@@ -28,7 +28,7 @@ import remarkMath from 'remark-math';
 const withNextDocs = createNextDocs({
   mdxOptions: {
     remarkPlugins: [remarkMath],
-    // Has to be the first plugin
+    // Place it at first so that it won't be changed by rehype-pretty-code
     rehypePlugins: (v) => [rehypeKatex, ...v],
   },
 });
