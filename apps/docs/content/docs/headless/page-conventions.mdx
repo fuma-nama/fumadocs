@@ -97,9 +97,8 @@ You can extract the items from a folder with `...folder_name`.
 
 ## Icons
 
-It is supported to have custom icons for a page or a folder. Add an `icon`
-property to the frontmatter or meta, and configure icon handler with
-the `resolveIcon` option provided by Source API.
+It is supported to have custom icons for a page or a folder with the `icon`
+property in your frontmatter or meta file.
 
 ```mdx
 ---
@@ -108,17 +107,11 @@ icon: MyIcon
 ---
 ```
 
-```ts
-loader({
-  resolveIcon: (icon) => {
-    // load icon from library
-    const res = require('lucide-react');
-    icon = icon.trim();
-
-    if (res[icon]) return createElement(res[icon]);
-    return undefined;
-  },
-});
+```json
+{
+  "title": "My Folder",
+  "icon": "MyIcon"
+}
 ```
 
 ## Internationalization
