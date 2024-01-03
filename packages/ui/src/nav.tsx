@@ -187,7 +187,7 @@ function SidebarToggle({ collapsible }: { collapsible: boolean }): JSX.Element {
           onClick={() => {
             setOpen(!open);
           }}
-          className="rounded-full border bg-secondary/50 p-1.5 hover:bg-accent hover:text-accent-foreground max-md:hidden"
+          className="rounded-full border bg-secondary/50 p-1.5 text-secondary-foreground hover:bg-accent hover:text-accent-foreground max-md:hidden"
         >
           {open ? (
             <SidebarCloseIcon className="h-5 w-5" />
