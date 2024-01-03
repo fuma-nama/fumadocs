@@ -18,21 +18,26 @@ export default makeSource(defaultConfig);
 ```
 
 <Callout title="Note">
-  Configuration file shouldn't be imported in anywhere.
+  Configuration file **can't** be imported from Next.js runtime.
 </Callout>
 
-2. Build the [Page Tree](/docs/headless/page-tree).
+2. Load the files with Source API.
 
 ```ts
 import { allDocs, allMeta } from 'contentlayer/generated';
-import { createContentlayer } from 'next-docs-zeta/contentlayer';
+import { createContentlayerSource } from 'next-docs-zeta/contentlayer';
+import { loader } from 'next-docs-zeta/source';
 
-export const { getPage, tree } = createContentlayer(allMeta, allDocs);
+export const docs = loader({
+  baseUrl: '/docs',
+  rootDir: 'docs',
+  source: createContentlayerSource(allMeta, allDocs),
+});
 ```
 
 ## Pages Structure
 
-All files are located in `/content` and `/content/docs` for documentation pages.
+All documents should be located in `/content` or `/content/docs`.
 
 <Cards>
   <Card
@@ -49,18 +54,5 @@ convenient to use and straightforward.
 
 ### Adding Icons
 
-Configure icon handler via
-[`resolveIcon`](/docs/headless/source-api#icons) option.
-
-```ts
-import { allDocs, allMeta } from 'contentlayer/generated'
-import { createContentlayer } from 'next-docs-zeta/contentlayer'
-
-export const { getPage, tree } = createContentlayer(
-  allMeta,
-  allDocs,
-  {
-    resolveIcon: icon => ...
-  }
-)
-```
+You can configure the icon handler in
+the [`Source API`](/docs/headless/source-api#icons).
