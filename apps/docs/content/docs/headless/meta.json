@@ -6,6 +6,7 @@
     "index",
     "page-conventions",
     "page-tree",
+    "internationalization",
     "---API References---",
     "components",
     "utils",
