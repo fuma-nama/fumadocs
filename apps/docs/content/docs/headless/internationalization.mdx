@@ -3,7 +3,7 @@ title: Internationalization
 description: Support multiple languages in your documentation
 ---
 
-Next Docs has built-in support for internationalized routing in Contentlayer.
+Next Docs has built-in support for internationalized routing.
 You can define a list of supported languages and pass it to i18n utilities. Read
 the
 [Next.js Docs](https://nextjs.org/docs/app/building-your-application/routing/internationalization)
@@ -18,33 +18,30 @@ export const defaultLanguage = 'en';
 export const languages = ['en', 'cn'];
 ```
 
-2. Change your current configurations.
+2. Change your current source configurations.
 
 ```ts title="source.ts"
-import { languages } from './i18n';
-import { allDocs, allMeta } from 'contentlayer/generated';
-import { createContentlayer } from 'next-docs-zeta/contentlayer';
+import { languages } from '@/i18n';
+import { map } from '@/.map';
+import { loader } from 'next-docs-zeta/source';
 
-export const { getPage, tree } = createContentlayer(allMeta, allDocs, {
+export const { getPage, getPages, pageTree } = loader({
   languages,
+  ...
 });
 ```
 
-3. Create i18n middleware.
+3. Create the middleware that redirects users when missing locale.
 
 ```ts title="middleware.ts"
 import { defaultLanguage, languages } from '@/i18n';
 import { createI18nMiddleware } from 'next-docs-zeta/middleware';
 import { NextRequest } from 'next/server';
 
-export default function middleware(request: NextRequest) {
-  return createI18nMiddleware(
-    request,
-    languages,
-    defaultLanguage,
-    (locale, slug) => `/${locale}/docs/${slug}`, // the format of redirected url
-  );
-}
+export default createI18nMiddleware({
+  languages,
+  defaultLanguage,
+});
 
 export const config = {
   // Matcher ignoring `/_next/` and `/api/`
@@ -67,43 +64,38 @@ export default function Layout({ params }: { params: { lang: string } }) {
 
 ### Get Pages
 
-To get the pages with specific languages, use the utilities exported from
+To get the pages of a specific language, use the utilities exported from
 `source.ts`.
 
 ```ts
-import { getPage, getPages, tree } from '@/source';
+import { getPage, getPages, pageTree } from '@/source';
 
 // get page tree
-const t = tree[params.lang];
+pageTree[params.lang];
 
 // get page
-const page = getPage(params.slug, params.lang);
+getPage(params.slug, params.lang);
 
 // get pages
-const pages = getPages(params.lang);
+getPages(params.lang);
 ```
 
-### Docs Search
-
-You will need some extra configurations in order to implement international
-document searching.
+### Flexsearch
 
 The default `createSearchAPI` doesn't provide functionality for i18n. Instead,
-you can use `createI18nSearchAPI`.
+you should use `createI18nSearchAPI`.
 
 1. Update the route handler.
 
 ```ts title="api/search/route.ts"
 import { languages } from '@/i18n';
 import { getPages } from '@/source';
-import { createI18nSearchAPI } from 'next-docs-zeta/server';
+import { createI18nSearchAPI } from 'next-docs-zeta/search/server';
 
-export const { GET } = createI18nSearchAPI('simple', {
+export const { GET } = createI18nSearchAPI('advanced', {
   indexes: languages.map((lang) => {
     const pages = getPages(lang)!.map((page) => ({
-      title: page.title,
-      content: page.body.raw,
-      url: page.url,
+      ...
     }));
 
     return [lang, pages];
@@ -112,7 +104,7 @@ export const { GET } = createI18nSearchAPI('simple', {
 ```
 
 2. Add `locale` to search dialog, this will only allow pages with specified
-   locale to being searched by the user.
+   locale to be searched by the user.
 
 ```tsx
 function Dialog() {
@@ -124,7 +116,7 @@ function Dialog() {
 
 <Cards className="mt-4">
   <Card
-    title="Pages Structure"
+    title="Page Conventions"
     description="Learn to build Internationalized Page Structure"
     href="/docs/headless/page-conventions"
   />
