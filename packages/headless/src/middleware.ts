@@ -1,8 +1,14 @@
 import { match as matchLocale } from '@formatjs/intl-localematcher';
 import Negotiator from 'negotiator';
-import type { NextMiddlewareResult } from 'next/dist/server/web/types';
+import type { NextMiddleware } from 'next/dist/server/web/types';
 import type { NextRequest } from 'next/server';
 import nextLib from 'next/server';
+
+interface MiddlewareOptions {
+  languages: string[];
+  defaultLanguage: string;
+  format?: (locale: string, path: string) => string;
+}
 
 function getLocale(
   request: NextRequest,
@@ -21,29 +27,39 @@ function getLocale(
   return matchLocale(languages, locales, defaultLanguage);
 }
 
-export function createI18nMiddleware(
-  request: NextRequest,
-  languages: string[],
-  defaultLanguage: string,
-  format: (locale: string, slug: string) => string,
-): NextMiddlewareResult | Promise<NextMiddlewareResult> {
-  const { pathname } = request.nextUrl;
+const defaultFormat: NonNullable<MiddlewareOptions['format']> = (
+  locale,
+  path,
+) => {
+  return `/${locale}/${path}`;
+};
 
-  const pathnameIsMissingLocale = languages.every(
-    (locale) =>
-      !pathname.startsWith(`/${locale}/`) && pathname !== `/${locale}`,
-  );
+export function createI18nMiddleware({
+  languages,
+  defaultLanguage,
+  format = defaultFormat,
+}: MiddlewareOptions): NextMiddleware {
+  return (request) => {
+    const { pathname } = request.nextUrl;
 
-  if (pathnameIsMissingLocale) {
-    const locale = getLocale(request, languages, defaultLanguage);
-    let path = pathname;
+    const pathnameIsMissingLocale = languages.every(
+      (locale) =>
+        !pathname.startsWith(`/${locale}/`) && pathname !== `/${locale}`,
+    );
 
-    while (path.startsWith('/')) {
-      path = path.slice(1);
+    if (pathnameIsMissingLocale) {
+      const locale = getLocale(request, languages, defaultLanguage);
+      let path = pathname;
+
+      while (path.startsWith('/')) {
+        path = path.slice(1);
+      }
+
+      return nextLib.NextResponse.redirect(
+        new URL(format(locale, path), request.url),
+      );
     }
 
-    return nextLib.NextResponse.redirect(
-      new URL(format(locale, path), request.url),
-    );
-  }
+    return nextLib.NextResponse.next();
+  };
 }
