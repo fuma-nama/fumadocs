@@ -2,14 +2,14 @@ import { ChevronRightIcon } from 'lucide-react';
 import { useBreadcrumb } from 'next-docs-zeta/breadcrumb';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Fragment, useContext } from 'react';
+import { Fragment } from 'react';
 import { cn } from '@/utils/cn';
-import { TreeContext } from '@/contexts/tree';
+import { useTreeContext } from '@/contexts/tree';
 
 export function Breadcrumb(): JSX.Element {
-  const tree = useContext(TreeContext);
+  const { root } = useTreeContext();
   const pathname = usePathname();
-  const items = useBreadcrumb(pathname, tree);
+  const items = useBreadcrumb(pathname, root);
 
   return (
     <div
@@ -19,10 +19,10 @@ export function Breadcrumb(): JSX.Element {
       )}
     >
       {items.map((item, i) => {
-        const active = items.length === i + 1;
+        const isLast = items.length === i + 1;
         const style = cn(
           'overflow-hidden whitespace-nowrap',
-          active ? 'text-foreground' : 'text-ellipsis',
+          isLast ? 'text-foreground' : 'text-ellipsis',
         );
 
         return (

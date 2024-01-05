@@ -1,18 +1,21 @@
 import { useMemo } from 'react';
-import type { PageTree, TreeNode } from '@/server/types';
+import type * as PageTree from '@/server/page-tree';
 
 export interface BreadcrumbItem {
   name: string;
   url: string | null;
 }
 
-export function useBreadcrumb(url: string, tree: PageTree): BreadcrumbItem[] {
+export function useBreadcrumb(
+  url: string,
+  tree: PageTree.Root,
+): BreadcrumbItem[] {
   return useMemo(() => getBreadcrumbItems(url, tree), [tree, url]);
 }
 
 export function getBreadcrumbItems(
   url: string,
-  tree: PageTree,
+  tree: PageTree.Root,
 ): BreadcrumbItem[] {
   return searchPath(tree.children, url) ?? [];
 }
@@ -25,7 +28,10 @@ export function getBreadcrumbItems(
  *
  * @returns The path to the target node from root
  */
-function searchPath(nodes: TreeNode[], url: string): BreadcrumbItem[] | null {
+function searchPath(
+  nodes: PageTree.Node[],
+  url: string,
+): BreadcrumbItem[] | null {
   for (const node of nodes) {
     if (node.type === 'folder') {
       if (node.index && node.index.url === url) {

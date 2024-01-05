@@ -97,9 +97,7 @@ export function Previews(): JSX.Element {
       >
         @joulev
       </a>
-      <p className="text-xs text-muted-foreground">
-        Moderator at Next.js Discord
-      </p>
+      <p className="text-xs text-muted-foreground">Next.js Expert</p>
     </div>
   );
 }

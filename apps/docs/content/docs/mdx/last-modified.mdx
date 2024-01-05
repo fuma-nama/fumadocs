@@ -1,0 +1,29 @@
+---
+title: Last Modified Time
+description: Output the last modified time of a document
+---
+
+## Usage
+
+This feature is not enabled by default, you can enable this in `next.config.mjs`. Notice that it only supports Git as version control.
+When using `git`, please ensure you have Git installed on your local machine and the repository is not shallow cloned as it relies on your local Git history.
+
+```js {3}
+import createMDX from 'next-docs-mdx/config';
+
+const withMDX = createMDX({
+  mdxOptions: {
+    lastModifiedTime: 'git',
+  },
+});
+```
+
+### Access the Property
+
+After doing this, a `lastModified` number will be exported for each document, you can convert it to a JavaScript Date object with `new Date(lastModified){:js}`.
+
+```js
+const page = getPage(...)
+
+console.log(page.data.exports.lastModified)
+```

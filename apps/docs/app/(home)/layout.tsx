@@ -1,6 +1,6 @@
 import { Layout } from 'next-docs-ui/layout';
 import type { ReactNode } from 'react';
-import { layoutOptions } from '../docs/[mode]/layout';
+import { layoutOptions } from '../docs/layout';
 
 export default function HomeLayout({
   children,

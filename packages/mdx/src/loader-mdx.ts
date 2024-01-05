@@ -3,8 +3,15 @@ import { createProcessor, type ProcessorOptions } from '@mdx-js/mdx';
 import type { Processor } from '@mdx-js/mdx/lib/core';
 import grayMatter from 'gray-matter';
 import { type LoaderContext } from 'webpack';
+import { getGitTimestamp } from './utils/git-timestamp';
 
-type Options = ProcessorOptions;
+export interface Options extends ProcessorOptions {
+  /**
+   * Fetch last modified time with specified version control
+   * @defaultValue 'none'
+   */
+  lastModifiedTime?: 'git' | 'none';
+}
 
 export interface NextDocsBuildInfo {
   __next_docs?: {
@@ -23,27 +30,30 @@ const cache = new Map<string, Processor>();
  *
  * it supports frontmatter by parsing and injecting the data in `vfile.data.frontmatter`
  */
-export default function loader(
+export default async function loader(
   this: LoaderContext<Options>,
   source: string,
   callback: LoaderContext<Options>['callback'],
-): void {
+): Promise<void> {
   this.cacheable(true);
   const context = this.context;
   const filePath = this.resourcePath;
   const options = this.getOptions();
   const { content, data: frontmatter } = grayMatter(source);
   const format = options.format ?? filePath.endsWith('.mdx') ? 'mdx' : 'md';
-  const config: ProcessorOptions = {
-    format,
-    development: this.mode === 'development',
-    ...options,
-  };
-
+  let timestamp: number | undefined;
   let processor = cache.get(format);
 
+  if (options.lastModifiedTime === 'git')
+    timestamp = (await getGitTimestamp(filePath))?.getTime();
+
   if (!processor) {
-    processor = createProcessor(config);
+    processor = createProcessor({
+      format,
+      development: this.mode === 'development',
+      ...options,
+    });
+
     cache.set(format, processor);
   }
 
@@ -52,6 +62,7 @@ export default function loader(
       value: content,
       path: filePath,
       data: {
+        lastModified: timestamp,
         frontmatter,
       },
     })

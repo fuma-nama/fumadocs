@@ -8,36 +8,28 @@
 import type {
   Args,
   ComputedFields,
+  DocumentType,
   FieldDef,
-  LocalDocument,
 } from 'contentlayer/source-files';
 import { defineDocumentType } from 'contentlayer/source-files';
 import type { Options as ImgSizeOptions } from 'rehype-img-size';
-import { rehypeImgSize, rehypeNextDocs, remarkGfm } from '@/mdx-plugins';
+import type { MDXOptions } from 'contentlayer/core';
+import type { PluggableList } from 'unified';
+import {
+  rehypeImgSize,
+  rehypeNextDocs,
+  remarkGfm,
+  structure,
+} from '@/mdx-plugins';
 import type { RehypeNextDocsOptions } from '@/mdx-plugins/rehype-next-docs';
-import { createGetUrl } from '@/server/utils';
+import { getTableOfContents } from '@/server/get-toc';
+import type { DocsPageBase } from './types';
 
-function removeSlash(path: string): string {
-  let start = 0,
-    end = path.length;
-  while (path.charAt(start) === '/') start++;
-  while (path.charAt(end - 1) === '/' && end > start) end--;
-
-  return path.slice(start, end);
-}
-
-function removePattern(path: string, pattern: string): string {
-  let flattenedPath = path;
-
-  if (path.endsWith('/index') || path === 'index') {
-    flattenedPath = path.slice(0, path.length - 'index'.length);
-  }
-
-  if (!flattenedPath.startsWith(pattern)) {
-    return flattenedPath;
-  }
-
-  return removeSlash(flattenedPath.slice(pattern.length));
+export interface Config {
+  contentDirPath: string;
+  Meta: DocumentType;
+  Docs: DocumentType;
+  mdx: MDXOptions;
 }
 
 export type Options = Partial<{
@@ -58,13 +50,7 @@ export type Options = Partial<{
    */
   imgDirPath: string;
 
-  baseUrl: string;
-
-  /**
-   * Get url from slugs and locale, override the default getUrl function
-   */
-  getUrl: (slugs: string[], locale?: string) => string;
-
+  mdx: MDXOptions;
   pluginOptions: RehypeNextDocsOptions;
 
   docFields: Record<string, FieldDef>;
@@ -73,27 +59,34 @@ export type Options = Partial<{
   metaComputedFields: ComputedFields<'Meta'>;
 }>;
 
-export function createConfig(options: Options = {}): Args {
+export function create(options: Options = {}): Config {
   const {
     docsPattern = 'docs',
     contentDirPath = 'content',
     imgDirPath = './public',
     docFields,
     metaFields,
-    baseUrl = '/docs',
-    getUrl = createGetUrl(baseUrl),
     docsComputedFields,
     pluginOptions,
     metaComputedFields,
+    mdx = {},
   } = options;
 
-  function getSlugs(doc: LocalDocument): string {
-    return removePattern(doc._raw.flattenedPath.split('.')[0], docsPattern);
-  }
-
-  function getLocale(doc: LocalDocument): string {
-    return doc._raw.flattenedPath.split('.')[1];
-  }
+  const remarkPlugins: PluggableList = [
+    remarkGfm,
+    ...(mdx.remarkPlugins ?? []),
+  ];
+  const rehypePlugins: PluggableList = [
+    [rehypeNextDocs, pluginOptions],
+    [
+      // @ts-expect-error -- invalid options type
+      rehypeImgSize,
+      {
+        dir: imgDirPath,
+      } satisfies ImgSizeOptions,
+    ],
+    ...(mdx.rehypePlugins ?? []),
+  ];
 
   const Docs = defineDocumentType(() => ({
     name: 'Docs',
@@ -117,18 +110,18 @@ export function createConfig(options: Options = {}): Args {
       ...docFields,
     },
     computedFields: {
-      locale: {
-        type: 'string',
-        resolve: (post) => getLocale(post),
+      structuredData: {
+        type: 'json',
+        resolve(_docs) {
+          const docs = _docs as DocsPageBase;
+          return structure(docs.body.raw, remarkPlugins);
+        },
       },
-      slug: {
-        type: 'string',
-        resolve: (post) => getSlugs(post),
-      },
-      url: {
-        type: 'string',
-        resolve: (post) => {
-          return getUrl(getSlugs(post).split('/'), getLocale(post));
+      toc: {
+        type: 'json',
+        resolve(_docs) {
+          const docs = _docs as DocsPageBase;
+          return getTableOfContents(docs.body.raw);
         },
       },
       ...docsComputedFields,
@@ -140,6 +133,10 @@ export function createConfig(options: Options = {}): Args {
     filePathPattern: `${docsPattern}/**/*.json`,
     contentType: 'data',
     fields: {
+      root: {
+        type: 'boolean',
+        required: false,
+      },
       title: {
         type: 'string',
         description: 'The title of the folder',
@@ -151,7 +148,7 @@ export function createConfig(options: Options = {}): Args {
           type: 'string',
         },
         description: 'Pages of the folder',
-        default: [],
+        required: false,
       },
       icon: {
         type: 'string',
@@ -160,30 +157,29 @@ export function createConfig(options: Options = {}): Args {
       ...metaFields,
     },
     computedFields: {
-      slug: {
-        type: 'string',
-        resolve: (post) => removePattern(post._raw.sourceFileDir, docsPattern),
-      },
       ...metaComputedFields,
     },
   }));
 
   return {
     contentDirPath,
-    documentTypes: [Docs, Meta],
+    Docs,
+    Meta,
     mdx: {
-      rehypePlugins: [
-        [rehypeNextDocs, pluginOptions],
-        [
-          // @ts-expect-error -- invalid options type
-          rehypeImgSize,
-          {
-            dir: imgDirPath,
-          } as ImgSizeOptions,
-        ],
-      ],
-      remarkPlugins: [remarkGfm],
+      ...mdx,
+      rehypePlugins,
+      remarkPlugins,
     },
+  };
+}
+
+export function createConfig(options?: Options): Args {
+  const config = create(options);
+
+  return {
+    contentDirPath: config.contentDirPath,
+    documentTypes: [config.Docs, config.Meta],
+    mdx: config.mdx,
   };
 }
 

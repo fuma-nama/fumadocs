@@ -14,7 +14,7 @@ export function TOCItems({ items }: { items: TOCItemType[] }): JSX.Element {
   return (
     <Primitive.TOCProvider
       toc={items}
-      className="relative overflow-hidden pt-4 text-sm font-medium first:pt-0"
+      className="relative overflow-hidden pt-4 text-sm first:pt-0"
     >
       <h3 className="mb-4 inline-flex items-center gap-2">
         <TextIcon className="h-4 w-4" />
@@ -61,7 +61,7 @@ function TOCItem({
       ref={ref}
       href={item.url}
       className={cn(
-        'overflow-hidden text-ellipsis py-1 transition-colors data-[active=true]:text-primary',
+        'overflow-hidden text-ellipsis py-1 transition-colors data-[active=true]:font-medium data-[active=true]:text-primary',
         item.depth <= 2 && 'pl-4',
         item.depth === 3 && 'pl-7',
         item.depth >= 4 && 'pl-10',

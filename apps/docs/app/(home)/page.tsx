@@ -428,10 +428,17 @@ export default function HomePage(): JSX.Element {
           <div className="border-b px-6">
             <div className="flex flex-col sm:flex-row sm:divide-x sm:divide-border">
               <div className="flex-1 py-8 sm:py-16 sm:pr-8">
-                <p className="font-medium text-muted-foreground sm:text-lg [&_b]:text-foreground">
+                <p className="font-medium text-muted-foreground sm:text-lg">
                   Next Docs is the Next.js framework for building documentation
-                  sites along with <b>Breathtaking UI</b> and{' '}
-                  <b>Excellent User Experience</b>.
+                  sites along with{' '}
+                  <b className="font-semibold text-foreground">
+                    Breathtaking UI
+                  </b>{' '}
+                  and{' '}
+                  <b className="font-semibold text-foreground">
+                    Excellent User Experience
+                  </b>
+                  .
                 </p>
               </div>
               <div className="grid grid-cols-1 gap-4 py-8 sm:py-16 sm:pl-8 lg:grid-cols-2">

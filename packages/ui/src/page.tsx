@@ -1,30 +1,20 @@
-import { cva } from 'class-variance-authority';
-import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
-import {
-  findNeighbour,
-  type TableOfContents,
-  type TOCItemType,
-} from 'next-docs-zeta/server';
-import Link from 'next/link';
+import { type TableOfContents, type TOCItemType } from 'next-docs-zeta/server';
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import { replaceOrDefault } from './utils/shared';
-import { getPageTree } from './utils/global';
 import { cn } from './utils/cn';
+import type { FooterProps } from './page.client';
 
 // We can keep the "use client" directives with dynamic imports
 // Next.js bundler should handle this automatically
-const { TOCItems, Breadcrumb, LastUpdate } = await import('./page.client');
+const { TOCItems, Breadcrumb, LastUpdate, Footer } = await import(
+  './page.client'
+);
 
 export interface DocsPageProps {
-  /**
-   * The URL of the current page
-   */
-  url: string;
-
   toc?: TableOfContents;
 
   tableOfContent?: Partial<
-    Omit<TOCProps, 'item'> & {
+    Omit<TOCProps, 'items'> & {
       enabled: boolean;
       component: ReactNode;
     }
@@ -41,8 +31,13 @@ export interface DocsPageProps {
   /**
    * Footer navigation, you can disable it by passing `false`
    */
-  footer?: FooterProps | false;
-  lastUpdate?: Date | null;
+  footer?: Partial<{
+    enabled: boolean;
+    component: ReactNode;
+    items: NonNullable<FooterProps['items']>;
+  }>;
+
+  lastUpdate?: Date | string | number;
 
   children: ReactNode;
 }
@@ -50,20 +45,18 @@ export interface DocsPageProps {
 export function DocsPage({
   tableOfContent = {},
   breadcrumb = {},
-  url,
+  footer = {},
   ...props
 }: DocsPageProps): JSX.Element {
-  const tree = getPageTree();
-  if (!tree) throw new Error('You must wrap <DocsPage /> under <DocsLayout />');
-  const footer = props.footer ?? findNeighbour(tree, url);
-
   return (
     <>
       <article className="flex w-0 flex-1 flex-col gap-6 py-10">
         {replaceOrDefault(breadcrumb, <Breadcrumb />)}
         {props.children}
-        {props.lastUpdate ? <LastUpdate date={props.lastUpdate} /> : null}
-        {props.footer !== false && <Footer {...footer} />}
+        {props.lastUpdate ? (
+          <LastUpdate date={new Date(props.lastUpdate)} />
+        ) : null}
+        {replaceOrDefault(footer, <Footer items={footer.items} />)}
       </article>
       {replaceOrDefault(
         tableOfContent,
@@ -97,34 +90,6 @@ function Toc(props: TOCProps): JSX.Element {
       {props.items.length > 0 && <TOCItems items={props.items} />}
       {props.footer ? (
         <div className="pt-4 first:pt-0">{props.footer}</div>
-      ) : null}
-    </div>
-  );
-}
-
-interface FooterProps {
-  previous?: { name: string; url: string };
-  next?: { name: string; url: string };
-}
-
-const footerItem = cva(
-  'flex flex-row items-center gap-2 text-muted-foreground transition-colors hover:text-foreground',
-);
-
-function Footer({ next, previous }: FooterProps): JSX.Element {
-  return (
-    <div className="mt-4 flex flex-row flex-wrap gap-4 border-t py-12">
-      {previous ? (
-        <Link href={previous.url} className={footerItem()}>
-          <ChevronLeftIcon className="h-5 w-5 shrink-0" />
-          <p className="font-medium text-foreground">{previous.name}</p>
-        </Link>
-      ) : null}
-      {next ? (
-        <Link href={next.url} className={footerItem({ className: 'ml-auto' })}>
-          <p className="text-end font-medium text-foreground">{next.name}</p>
-          <ChevronRightIcon className="h-5 w-5 shrink-0" />
-        </Link>
       ) : null}
     </div>
   );

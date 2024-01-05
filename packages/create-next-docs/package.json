@@ -1,6 +1,6 @@
 {
   "name": "create-next-docs-app",
-  "version": "6.1.0",
+  "version": "7.0.0",
   "description": "Create a new documentation site with Next Docs UI",
   "keywords": [
     "NextJs",
@@ -14,16 +14,15 @@
   "author": "Fuma Nama",
   "bin": "./dist/index.js",
   "files": [
-    "templates/*",
+    "template/*",
     "static/*",
     "dist/*"
   ],
   "scripts": {
-    "build": "pnpm sync && tsup",
-    "clean": "rmdir /q/s dist && rmdir /q/s templates",
+    "build": "tsup",
+    "clean": "rimraf dist",
     "dev": "tsup --watch",
     "lint": "eslint .",
-    "sync": "node ./scripts/sync.js",
     "types:check": "tsc --noEmit"
   },
   "dependencies": {

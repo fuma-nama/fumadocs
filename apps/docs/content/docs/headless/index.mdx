@@ -24,70 +24,70 @@ It's recommended to use Next Docs with [Tailwind CSS](https://tailwindcss.com) +
 next-docs-zeta
 ```
 
-## Guide
+## Setup
 
-1. ### Choose a Source
+### Choose a Source
 
-   Next Docs has native support for ContentLayer, but any kind of formats and
-   sources are allowed.
+Next Docs has native support for [Next Docs MDX](/docs/mdx) and ContentLayer, but any kind of formats and
+sources are allowed.
 
-   You can refer to this [guide](/docs/headless/contentlayer) to learn how to
-   use Contentlayer with Next Docs.
+You can refer to this [guide](/docs/headless/contentlayer) to learn how to
+use Contentlayer with Next Docs.
 
-2. ### Build Page Tree
+### Build Page Tree
 
-   A page tree refers to structured data of all pages.
+A page tree refers to the structured data of all pages. It is essential for implementing a sidebar, or other navigation elements.
 
-   ```js
-   export const tree = [
-     {
-       type: 'page',
-       name: 'Quick Start',
-       url: '/docs',
-     },
-     {
-       type: 'separator',
-       name: 'Guides',
-     },
-     {
-       type: 'page',
-       name: 'Example',
-       url: '/docs/example',
-     },
-   ];
-   ```
+```js
+export const tree = [
+  {
+    type: 'page',
+    name: 'Quick Start',
+    url: '/docs',
+  },
+  {
+    type: 'separator',
+    name: 'Guides',
+  },
+  {
+    type: 'page',
+    name: 'Example',
+    url: '/docs/example',
+  },
+];
+```
 
-   You can generate the tree using our Contentlayer adapter, or end up with
-   writing your own.
+You can generate the tree using our built-in [Source API](/docs/headless/source-api), the adapter for your content source, or end up with
+writing your own.
 
-3. ### Create MDX file
+### Create MDX file
 
-   Create `/content/docs/index.mdx`:
+Create `/content/docs/index.mdx`:
 
-   ```mdx
-   ---
-   title: Quick Start
-   description: My cool docs
-   ---
+```mdx
+---
+title: Quick Start
+description: My cool docs
+---
 
-   Hello World
-   ```
+Hello World
+```
 
-4. ### Styling & Fun
+### Styling & Fun
 
-   Start styling your docs with headless components provided by Next Docs.
+Start styling your docs with headless components provided by Next Docs.
 
-   ```mdx
-   <article>
-     <nav>
-       <p>My App</p>
-       <SearchToggle />
-     </nav>
-     <Sidebar />
-     <MDXContent />
-     <TOC />
-   </article>
-   ```
+```mdx
+<article>
+  <nav>
+    <p>My App</p>
+    <SearchToggle />
+  </nav>
+  <Sidebar />
+  <MDXContent />
+  <TOC />
+</article>
+```
 
 ### Enjoy!
 

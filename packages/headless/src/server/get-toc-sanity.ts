@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument -- no accurate type */
 import Slugger from 'github-slugger';
-import type { TableOfContents, TOCItemType } from './types';
+import type { TableOfContents, TOCItemType } from './get-toc';
 
 const slugger = new Slugger();
 
@@ -14,7 +14,7 @@ interface Block {
 /**
  * Parse TOC from portable text (Sanity)
  *
- * @param value-  Blocks
+ * @param value - Blocks
  * @param slugFn - A function that generates slug from title
  */
 export function getTableOfContentsFromPortableText(

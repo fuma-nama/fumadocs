@@ -6,10 +6,10 @@ import type { SharedProps } from 'next-docs-ui/components/dialog/search';
 import SearchDialog, {
   AlgoliaContextProvider,
 } from 'next-docs-ui/components/dialog/search-algolia';
-import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { modes } from '@/utils/modes';
 import { cn } from '@/utils/cn';
+import { useMode } from '@/app/docs/layout.client';
 
 const itemVariants = cva(
   'rounded-md border px-2 py-0.5 text-xs font-medium text-muted-foreground transition-colors',
@@ -33,8 +33,7 @@ const client = algo(appId, apiKey);
 const index = client.initIndex(indexName);
 
 export default function CustomSearchDialog(props: SharedProps): JSX.Element {
-  const params = useParams();
-  const defaultTag = 'mode' in params ? (params.mode as string) : 'headless';
+  const defaultTag = useMode() ?? 'headless';
   const [tag, setTag] = useState(defaultTag);
 
   useEffect(() => {

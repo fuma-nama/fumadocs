@@ -22,6 +22,7 @@ const config = {
 
 const withNextDocs = createNextDocs({
   mdxOptions: {
+    lastModifiedTime: 'git',
     remarkPlugins: [
       remarkMath,
       remarkDynamicContent,

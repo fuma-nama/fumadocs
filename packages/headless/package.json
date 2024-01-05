@@ -1,6 +1,6 @@
 {
   "name": "next-docs-zeta",
-  "version": "6.1.0",
+  "version": "7.0.0",
   "description": "The library for building a documentation website in Next.js",
   "keywords": [
     "NextJs",
@@ -33,8 +33,12 @@
       "types": "./dist/search/server.d.ts"
     },
     "./server": {
-      "import": "./dist/server.js",
-      "types": "./dist/server.d.ts"
+      "import": "./dist/server/index.js",
+      "types": "./dist/server/index.d.ts"
+    },
+    "./source": {
+      "import": "./dist/source/index.js",
+      "types": "./dist/source/index.d.ts"
     },
     "./link": {
       "import": "./dist/link.js",
@@ -53,8 +57,8 @@
       "types": "./dist/middleware.d.ts"
     },
     "./mdx-plugins": {
-      "import": "./dist/mdx-plugins.js",
-      "types": "./dist/mdx-plugins.d.ts"
+      "import": "./dist/mdx-plugins/index.js",
+      "types": "./dist/mdx-plugins/index.d.ts"
     },
     "./search-algolia/client": {
       "import": "./dist/search-algolia/client.js",
@@ -86,7 +90,10 @@
         "./dist/search/server.d.ts"
       ],
       "server": [
-        "./dist/server.d.ts"
+        "./dist/server/index.d.ts"
+      ],
+      "source": [
+        "./dist/source/index.d.ts"
       ],
       "link": [
         "./dist/link.d.ts"
@@ -101,7 +108,7 @@
         "./dist/middleware.d.ts"
       ],
       "mdx-plugins": [
-        "./dist/mdx-plugins.d.ts"
+        "./dist/mdx-plugins/index.d.ts"
       ],
       "search-algolia/client": [
         "./dist/search-algolia/client.d.ts"
@@ -116,9 +123,10 @@
   ],
   "scripts": {
     "build": "tsup",
-    "clean": "rmdir /q/s dist",
+    "clean": "rimraf dist",
     "dev": "tsup --watch",
     "lint": "eslint .",
+    "test": "vitest",
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
@@ -128,14 +136,14 @@
     "negotiator": "^0.6.3",
     "react-remove-scroll": "^2.5.6",
     "rehype-img-size": "^1.0.1",
-    "rehype-pretty-code": "^0.12.1",
+    "rehype-pretty-code": "^0.12.2",
     "remark": "^15.0.0",
     "remark-gfm": "^4.0.0",
     "remark-mdx": "^3.0.0",
     "scroll-into-view-if-needed": "^3.1.0",
     "shikiji": "^0.9.9",
     "swr": "^2.2.2",
-    "unist-util-visit": "^4.1.2"
+    "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {
     "@algolia/client-search": "^4.20.0",

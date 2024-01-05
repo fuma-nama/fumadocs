@@ -1,7 +1,7 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  entry: ['./src/{config,map,types,loader,loader-mdx}.ts'],
+  entry: ['./src/{config,index,loader,loader-mdx}.ts'],
   format: 'esm',
   external: ['next-docs-zeta', 'webpack'],
   dts: true,

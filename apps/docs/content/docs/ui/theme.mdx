@@ -6,9 +6,6 @@ description: Add Theme to Next Docs UI
 import { ThemeSwitch } from '@/components/theme-switch';
 import { blueTheme } from '@/components/themes.js';
 
-The design system was inspired on [Shadcn UI](https://ui.shadcn.com), allowing
-you to overwrite css variables.
-
 ## Usage
 
 You can import the pre-built stylesheet.
@@ -17,7 +14,9 @@ You can import the pre-built stylesheet.
 import 'next-docs-ui/style.css';
 ```
 
-For Tailwind CSS projects, please use the built-in plugin instead.
+> Notice that the stylesheet performs preflight (or normalization)
+
+For Tailwind CSS projects, please use the built-in Tailwind CSS plugin instead.
 
 ```js
 const { docsUi, docsUiPlugins } = require('next-docs-ui/tailwind-plugin');
@@ -35,9 +34,14 @@ module.exports = {
 
 > Ensure all files inside `next-docs-ui` are included in the `content` property.
 
-## Customise
+### Global Styles
 
-You can easily customise all the properties using css variables.
+By using the built-in Tailwind CSS plugin, or the pre-built stylesheet, your default border, text and background
+colors will be changed.
+
+## Themes
+
+The design system was inspired by [Shadcn UI](https://ui.shadcn.com), you can easily customize all the properties using CSS variables.
 
 <div className="mb-4 flex flex-row flex-wrap gap-2">
   <ThemeSwitch style={blueTheme}>Blue Theme</ThemeSwitch>
@@ -106,19 +110,34 @@ You can easily customise all the properties using css variables.
 </Accordion>
 </Accordions>
 
+## DocsUI Plugin
+
+Next Docs UI comes with the DocsUI Tailwind CSS plugin by default, it introduces new colors and extra utilities including `steps`.
+
+### Presets
+
+This plugin also provides several theme presets out-of-the-box, you can pick one you prefer rather than the default one.
+
+```js {8}
+const { docsUi, docsUiPlugins } = require('next-docs-ui/tailwind-plugin');
+
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  plugins: [
+    ...docsUiPlugins,
+    docsUi({
+      preset: 'ocean',
+    }),
+  ],
+};
+```
+
 ### Typography
 
-We use the [Tailwind CSS Typography](https://tailwindcss.com/docs/typography-plugin) plugin internally, you may customise it with CSS.
+We use the [Tailwind CSS Typography](https://tailwindcss.com/docs/typography-plugin) plugin internally, you can customize it with CSS.
 
-Our Tailwind CSS plugin overrides the default configuration for Typography plugin. You may use the `prose` utility directly.
+The DocsUI plugin overrides the default configuration for the Typography plugin. You can use the `prose` utility directly.
 
 ```tsx
 <div className="prose">...</div>
 ```
-
-## Global Styles
-
-By importing `next-docs-ui/style.css`, the default border, text and background
-colors will be changed.
-
-The official Tailwind CSS plugin also includes new colors and extra utilities including `steps` and `step`.

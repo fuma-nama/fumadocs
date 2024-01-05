@@ -5,7 +5,7 @@ import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/utils/cn';
 
 const cardVariants = cva(
-  'flex flex-col rounded-xl border border-primary/10 bg-background bg-gradient-to-br from-transparent to-primary/10 p-6 shadow-inner shadow-primary/10 transition-colors hover:bg-muted',
+  'flex flex-col rounded-xl border border-primary/10 bg-background bg-gradient-to-br from-transparent to-primary/10 p-6 shadow-inner shadow-primary/10 transition-colors hover:bg-primary/5',
 );
 
 const cardIconVariants = cva(
@@ -25,7 +25,7 @@ export default function DocsPage(): JSX.Element {
           }}
         />
       </div>
-      <h1 className="mb-4 text-5xl font-medium">Choose one.</h1>
+      <h1 className="mb-4 text-4xl font-semibold md:text-5xl">Choose one.</h1>
       <p className="text-muted-foreground">
         Different packages for different use cases.
       </p>

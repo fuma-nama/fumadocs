@@ -8,22 +8,16 @@ Footer, and Breadcrumb.
 
 ## Usage
 
-Pass the current page URL and its table of contents to the component.
-
 ```mdx
 import { DocsPage, DocsBody } from 'next-docs-ui/page';
 
-<DocsPage url={url} toc={toc}>
+<DocsPage>
   <DocsBody>...</DocsBody>
 </DocsPage>
 ```
 
 <TypeTable
   type={{
-    url: {
-      type: 'string',
-      description: 'The URL of current page',
-    },
     tableOfContent: {
       type: 'object',
       typeDescriptionLink: '#table-of-contents',
@@ -34,7 +28,7 @@ import { DocsPage, DocsBody } from 'next-docs-ui/page';
     },
     toc: {
       type: 'TOCItemType[]',
-      description: 'Table of contents in this page',
+      description: 'Table of contents of the page',
       typeDescription: `{ title: string, url: string, depth: number }[]`,
     },
     footer: {
@@ -42,7 +36,7 @@ import { DocsPage, DocsBody } from 'next-docs-ui/page';
       typeDescriptionLink: '#footer',
     },
     lastUpdate: {
-      type: 'Date',
+      type: 'Date | number',
     },
   }}
 />
@@ -63,9 +57,9 @@ import { DocsBody } from 'next-docs-ui/page';
 
 It is an array with all the headings in your document. For Markdown or MDX
 documents, You can parse TOC by using the
-[TOC Utility](/docs/headless/utils/get-toc).
+[TOC Utility](/docs/headless/utils/get-toc). Some source providers may offer this out-of-the-box.
 
-Also, you can easily customise or disable TOC in your documentation.
+In addition, you can easily customise or disable TOC in your documentation.
 
 <TypeTable
   type={{
@@ -88,43 +82,30 @@ Since you might have different version controls (e.g. Github) or it's from
 remote sources like Sanity, Next Docs UI doesn't display last updated time by
 default.
 
-For Git hosted documents, you can use
-[`getGitLastEditTime`](/docs/headless/utils/git-last-edit) provided by Next Docs
+For Github hosted documents, you can use
+the [Git Last Modified](/docs/headless/utils/git-last-edit) utility provided by Next Docs
 Zeta.
 
 ```tsx
-import { getGitLastEditTime } from 'next-docs-zeta/server'
-
-const time = await getGitLastEditTime(
-  'fuma-nama/next-docs',
-  'apps/docs/content/' + page._raw.sourceFilePath
-)
-
-<DocsPage lastUpdate={time} />
+<DocsPage lastUpdate={new Date(lastModifiedTime)} />
 ```
 
 ### Footer
 
-Footer is a navigation element that has two buttons to jump to the next and previous pages. By default, it uses the [`findNeighbour`](/docs/headless/utils/find-neighbour) utility to find neighbour pages.
-
-You may override or disable it by passing `false`.
+Footer is a navigation element that has two buttons to jump to the next and previous pages. By default, it finds the neighbour pages from page tree.
 
 <TypeTable
   type={{
-    next: {
+    enabled: { type: 'boolean' },
+    component: { type: 'ReactNode' },
+    items: {
       type: 'object',
-      typeDescription: '{ name: string, url: string }',
-    },
-    previous: {
-      type: 'object',
-      typeDescription: '{ name: string, url: string }',
+      description: 'Items including information for the next and previous page',
     },
   }}
 />
 
 ### Breadcrumb
-
-For now, You can't control the behaviours of breadcrumb.
 
 <TypeTable
   type={{

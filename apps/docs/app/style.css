@@ -3,9 +3,41 @@
 @tailwind utilities;
 
 .dark {
-  --background: 0 0% 1%;
+  --background: 210 100% 1%;
   --card: 0 0% 4%;
   --muted: 0 0% 8%;
   --border: 0 0% 14%;
   --accent: 0 0% 10.9%;
+  --accent-foreground: 0 0% 90%;
+}
+
+.ui {
+  --primary: 220 80% 30%;
+}
+
+.dark .ui {
+  --primary: 220 100% 80%;
+}
+
+.headless {
+  --primary: 250 80% 30%;
+}
+
+.dark .headless {
+  --primary: 250 100% 80%;
+}
+
+.mdx {
+  --primary: 0 0% 9%;
+}
+
+.dark .mdx {
+  --primary: 0 0% 100%;
+}
+
+body {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-synthesis-weight: none;
 }

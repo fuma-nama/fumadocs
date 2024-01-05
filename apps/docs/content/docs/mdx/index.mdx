@@ -24,16 +24,16 @@ next-docs-mdx @types/mdx
 Add this to your `next.config.mjs` file:
 
 ```js
-import createNextDocsMDX from 'next-docs-mdx/config';
+import createMDX from 'next-docs-mdx/config';
 
-const withFumaMDX = createNextDocsMDX();
+const withMDX = createMDX();
 
 /** @type {import('next').NextConfig} */
 const config = {
   reactStrictMode: true,
 };
 
-export default withFumaMDX(config);
+export default withMDX(config);
 ```
 
 <Callout title="Be Careful" type='warn' className="mt-4">
@@ -61,20 +61,25 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
 
 ### Resolve Files
 
-Create a `source.ts` file, and use the `fromMap` method which returns a
+Next Docs MDX automatically generates a `.map.ts` file once you start the dev server or start building the app.
+
+The raw data of pages is stored in the `map` property from your `.map.ts` file. To Integrate with [Source API](/docs/headless/source-api), create a `source.ts` file, and define the source with `createMDXSource` which returns a
 [Page Tree](/docs/headless/page-tree) and additional utilities.
 
-Read [Pages Conventions](/docs/headless/utils/build-page-tree#pages-structure)
-to learn how to structure your pages.
-
 ```ts title="source.ts"
-import { map } from '@/_map';
-import { fromMap } from 'next-docs-mdx/map';
+import { map } from '@/.map';
+import { createMDXSource } from 'next-docs-mdx';
+import { loader } from 'next-docs-zeta/source';
 
-export const { getPage, pages, tree } = fromMap(map);
+export const { getPage, getPages, pageTree } = loader({
+  baseUrl: '/docs',
+  rootDir: 'docs',
+  source: createMDXSource(map),
+});
 ```
 
-> The `@/_map` file will be generated automatically
+> Read [Pages Conventions](/docs/headless/page-conventions)
+> to learn how to structure your pages.
 
 ### Start Server
 
@@ -84,8 +89,7 @@ Start the dev server
 next dev
 ```
 
-A `_map.ts` file should be created. You can log and see if page tree is built
-correctly.
+A `.map.ts` file should be created. You can log and see if it is loaded correctly.
 
 ## Built-in Features
 
@@ -95,15 +99,35 @@ search or TOC section in your docs.
 
 ## Advanced Usages
 
+### Multiple Types
+
+You can have multiple document types, such as blog posts, or documents. By
+passing the `rootDir` option, the resolved files will be restricted within a
+specified folder.
+
+```js
+export const docs = loader({
+  baseUrl: '/docs',
+  rootDir: 'docs',
+  source: createMDXSource(map),
+});
+
+export const blogs = loader({
+  baseUrl: '/blog',
+  rootDir: 'blog',
+  source: createMDXSource(map),
+});
+```
+
 ### MDX Plugins
 
 You can customise the options passed to the MDX processor.
 
 ```js
-const withNextDocs = createNextDocs({
+const withNextDocs = createMDX({
   mdxOptions: {
     remarkPlugins: [remarkMath],
-    // Place it at first so that it won't be changed by rehype-pretty-code
+    // When order matters
     rehypePlugins: (v) => [rehypeKatex, ...v],
   },
 });
@@ -111,11 +135,10 @@ const withNextDocs = createNextDocs({
 
 ### Export Properties from `vfile.data`
 
-A remark plugin that turns `vfile.data` properties into exports is applied by
-default, you can add additional properties to export.
+The built-in configuration applies a remark plugin that turns `vfile.data` properties into exports, you can define additional properties to be exported.
 
 ```js
-const withNextDocs = createNextDocs({
+const withNextDocs = createMDX({
   mdxOptions: {
     valueToExport: ['dataName'],
   },

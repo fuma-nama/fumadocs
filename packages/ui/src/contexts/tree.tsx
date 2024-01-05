@@ -1,5 +1,7 @@
 import type { PageTree } from 'next-docs-zeta/server';
-import { createContext, useContext, type ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
+import { createContext, useContext, type ReactNode, useMemo } from 'react';
+import { flattenTree, hasActive } from '@/utils/shared';
 
 export interface LinkItem {
   url: string;
@@ -8,23 +10,56 @@ export interface LinkItem {
   external?: boolean;
 }
 
-export const TreeContext = createContext<PageTree>({
-  name: 'Docs',
-  children: [],
-});
+interface TreeContextType {
+  tree: PageTree.Root;
+  list: PageTree.Item[];
+  root: PageTree.Root | PageTree.Folder;
+}
+
+const TreeContext = createContext<TreeContextType | undefined>(undefined);
+
+function findRoot(
+  items: PageTree.Node[],
+  pathname: string,
+): PageTree.Folder | undefined {
+  for (const item of items) {
+    if (item.type === 'folder') {
+      const root = findRoot(item.children, pathname);
+
+      if (root) return root;
+      if (item.root === true && hasActive(item.children, pathname)) {
+        return item;
+      }
+    }
+  }
+}
 
 export function TreeContextProvider({
   children,
-  value,
+  tree,
 }: {
-  value?: PageTree;
+  tree: PageTree.Root;
   children: ReactNode;
 }): JSX.Element {
-  const current = useContext(TreeContext);
+  const pathname = usePathname();
+  const value = useMemo<TreeContextType>(() => {
+    const root = findRoot(tree.children, pathname) ?? tree;
+    const list = flattenTree(root.children);
 
-  return (
-    <TreeContext.Provider value={value ?? current}>
-      {children}
-    </TreeContext.Provider>
-  );
+    return {
+      root,
+      list,
+      tree,
+    };
+  }, [pathname, tree]);
+
+  return <TreeContext.Provider value={value}>{children}</TreeContext.Provider>;
+}
+
+export function useTreeContext(): TreeContextType {
+  const ctx = useContext(TreeContext);
+
+  if (!ctx)
+    throw new Error('You must wrap this component under <DocsLayout />');
+  return ctx;
 }

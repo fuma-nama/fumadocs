@@ -1,0 +1,86 @@
+---
+title: Source API
+description: Turn a source into an unitied interface
+---
+
+## Usage
+
+Source API is a helper to load file-system based source files, it outputs numerous useful properties to integrate with other components, such as Page Tree.
+
+The output strictly follows [Page Conventions](/docs/headless/page-conventions). During the process, your input source files will be parsed and form a virtual storage to avoid inconsistent behaviour between different OS.
+
+```ts
+import { map } from '@/.map';
+import { createMDXSource } from 'next-docs-mdx';
+import { loader } from 'next-docs-zeta/source';
+
+export const docs = loader({
+  source: createMDXSource(map),
+});
+```
+
+### Custom Source
+
+Furthermore, you can write your source interface. The `Source` object includes a `files` property which has an array of virtual files.
+Each virtual file must contain its file path and corresponding data.
+
+```ts
+export function createMySource(): Source<{
+  metaData: MetaData; // Your custom type
+  pageData: PageData; // Your custom type
+}> {
+  return {
+    files: [...],
+  };
+}
+```
+
+### Transformer
+
+To perform custom file-system operations before processing the storage, you can add a transformer.
+
+```ts
+loader({
+  transformers: [
+    ({ storage }) => {
+      storage.makeDir();
+    },
+  ],
+});
+```
+
+### Root Directory
+
+All files outside of the root directory will be ignored.
+
+```ts
+loader({
+  rootDir: 'docs',
+});
+```
+
+### Base URL
+
+As the `loader` function also generate an URL for each page, you can override the default base URL.
+
+```ts
+loader({
+  baseUrl: '/docs',
+});
+```
+
+### Icons
+
+Load the [icon](/docs/headless/page-conventions#icons) from the data of pages and meta files.
+
+```ts
+import { loader } from 'next-docs-zeta/source';
+import { icons } from 'lucide-react';
+import { createElement } from 'react';
+
+export const utils = loader({
+  icon(icon) {
+    if (icon in icons) return createElement(icons[icon as keyof typeof icons]);
+  },
+});
+```

@@ -25,7 +25,7 @@ export function flattenNode(node: RootContent): string {
     return all(node);
   }
 
-  if (node.type === 'text') {
+  if ('value' in node) {
     return node.value;
   }
 

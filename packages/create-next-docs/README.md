@@ -9,7 +9,3 @@ pnpx create-next-docs-app
 #or
 yarn create next-docs-app
 ```
-
-## Examples
-
-The examples are automatically generated from `./examples`

@@ -1,10 +1,10 @@
-import { allDocs } from 'contentlayer/generated';
+import { getPages } from '@/app/source';
 import { createSearchAPI } from 'next-docs-zeta/search/server';
 
 export const { GET } = createSearchAPI('simple', {
-  indexes: allDocs.map((page) => ({
-    title: page.title,
-    content: page.body.raw,
+  indexes: getPages().map((page) => ({
+    title: page.data.title,
+    content: page.data.body.raw,
     url: page.url,
   })),
 });

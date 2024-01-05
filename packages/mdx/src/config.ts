@@ -1,11 +1,10 @@
 import path from 'node:path';
-import type { ProcessorOptions } from '@mdx-js/mdx';
 import type { NextConfig } from 'next';
 import {
   rehypeNextDocs,
   remarkGfm,
   remarkStructure,
-  remarkToc,
+  remarkHeading,
   type RehypeNextDocsOptions,
 } from 'next-docs-zeta/mdx-plugins';
 import type { PluggableList } from 'unified';
@@ -13,12 +12,10 @@ import type { Configuration } from 'webpack';
 import { NextDocsWebpackPlugin } from './webpack-plugins/next-docs';
 import remarkMdxExport from './mdx-plugins/remark-exports';
 import type { LoaderOptions } from './loader';
-
-type WithMDX = (config: NextConfig) => NextConfig;
-type Loader = (options: ProcessorOptions) => WithMDX;
+import type { Options as MDXLoaderOptions } from './loader-mdx';
 
 type MDXOptions = Omit<
-  NonNullable<ProcessorOptions>,
+  NonNullable<MDXLoaderOptions>,
   'rehypePlugins' | 'remarkPlugins'
 > & {
   rehypePlugins?: ResolvePlugins;
@@ -43,14 +40,9 @@ interface NextDocsMDXOptions {
   mdxOptions?: MDXOptions;
 
   /**
-   * Custom MDX loader
-   */
-  loader?: Loader;
-
-  /**
-   * Where the root `_map.ts` should be, relative to cwd
+   * Where the root map.ts should be, relative to cwd
    *
-   * @defaultValue `'./_map.ts'`
+   * @defaultValue `'./.map.ts'`
    */
   rootMapPath?: string;
 
@@ -79,7 +71,7 @@ const createNextDocs =
   ({
     mdxOptions = {},
     cwd = process.cwd(),
-    rootMapPath = './_map.ts',
+    rootMapPath = './.map.ts',
     rootContentPath = './content',
   }: NextDocsMDXOptions = {}) =>
   (nextConfig: NextConfig = {}) => {
@@ -87,6 +79,7 @@ const createNextDocs =
       'structuredData',
       'toc',
       'frontmatter',
+      'lastModified',
       ...(mdxOptions.valueToExport ?? []),
     ];
     const _mapPath = path.resolve(cwd, rootMapPath);
@@ -94,9 +87,9 @@ const createNextDocs =
     const remarkPlugins = pluginOption(
       (v) => [
         remarkGfm,
-        remarkStructure,
-        remarkToc,
+        remarkHeading,
         ...v,
+        remarkStructure,
         [remarkMdxExport, { values: valueToExport }],
       ],
       mdxOptions.remarkPlugins,
@@ -136,7 +129,7 @@ const createNextDocs =
                     ...mdxOptions,
                     remarkPlugins,
                     rehypePlugins,
-                  },
+                  } satisfies MDXLoaderOptions,
                 },
               ],
             },

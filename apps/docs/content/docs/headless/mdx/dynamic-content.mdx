@@ -3,13 +3,16 @@ title: Dynamic Content
 description: A remark plugin that generates content from files
 ---
 
-This plugin isn't included by default, you have to add it to remark plugins
-manually.
+Add it as a remark plugin.
 
 ```ts
 import { remarkDynamicContent } from 'next-docs-zeta/mdx-plugins';
 
-config.mdx!.remarkPlugins!.push(remarkDynamicContent);
+const config = {
+    remarkPlugins: [
+      [remarkDynamicContent, { ... }]
+    ],
+}
 ```
 
 ## Syntax

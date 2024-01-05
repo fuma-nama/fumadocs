@@ -1,6 +1,6 @@
 {
   "name": "next-docs-mdx",
-  "version": "6.1.0",
+  "version": "7.0.0",
   "description": "The library for using native Next.js MDX features in Next Docs",
   "keywords": [
     "NextJs",
@@ -17,21 +17,17 @@
       "import": "./dist/config.mjs",
       "types": "./dist/config.d.mts"
     },
-    "./map": {
-      "import": "./dist/map.mjs",
-      "types": "./dist/map.d.mts"
+    ".": {
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.mts"
     }
   },
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.mts",
   "typesVersions": {
     "*": {
       "config": [
         "./dist/config.d.mts"
-      ],
-      "map": [
-        "./dist/map.d.mts"
-      ],
-      "types": [
-        "./dist/types.d.mts"
       ]
     }
   },
@@ -42,13 +38,14 @@
   ],
   "scripts": {
     "build": "tsup",
-    "clean": "rmdir /q/s dist",
+    "clean": "rimraf dist",
     "dev": "tsup --watch",
     "lint": "eslint .",
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
     "@mdx-js/mdx": "^3.0.0",
+    "cross-spawn": "^7.0.3",
     "estree-util-value-to-estree": "^3.0.1",
     "fast-glob": "^3.3.1",
     "gray-matter": "^4.0.3",
@@ -56,6 +53,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@types/cross-spawn": "^6.0.4",
     "@types/mdast": "^4.0.3",
     "@types/mdx": "^2.0.8",
     "@types/react": "18.2.0",

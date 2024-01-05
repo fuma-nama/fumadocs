@@ -2,7 +2,7 @@
 /node_modules
 
 # generated content
-_map.ts
+.map.ts
 .contentlayer
 
 # test & build

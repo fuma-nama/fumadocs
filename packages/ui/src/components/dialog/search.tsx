@@ -52,7 +52,7 @@ export function SearchDialog({
 
   return (
     <CommandDialog {...props}>
-      <Command label="Search Dialog" shouldFilter={false} loop>
+      <Command shouldFilter={false} loop>
         <CommandInput
           value={search}
           onValueChange={onSearchChange}
