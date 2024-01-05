@@ -1,5 +1,60 @@
 # next-docs-mdx
 
+## 7.0.0
+
+### Major Changes
+
+- 9929c5b: **Prefer `.map.ts` instead of `_map.ts`**
+
+  Unless you have especially configured, now it uses `.map.ts` by default.
+
+  ```diff
+  - import map from "@/_map"
+  + import map from "@/.map"
+  ```
+
+- 9929c5b: **Migrate to Source API**
+
+  `fromMap` has been removed. Please use `createMDXSource` instead.
+
+  ```ts
+  import { map } from '@/.map';
+  import { createMDXSource } from 'next-docs-mdx';
+  import { loader } from 'next-docs-zeta/source';
+
+  export const { getPage, getPages, pageTree } = loader({
+    baseUrl: '/docs',
+    rootDir: 'docs',
+    source: createMDXSource(map),
+  });
+  ```
+
+### Minor Changes
+
+- 8fd769f: **Support last modified timestamp for Git**
+
+  Enable this in `next.config.mjs`:
+
+  ```js
+  const withNextDocs = createNextDocs({
+    mdxOptions: {
+      lastModifiedTime: 'git',
+    },
+  });
+  ```
+
+  Access it via `page.data.exports.lastModified`.
+
+### Patch Changes
+
+- Updated dependencies [9929c5b]
+- Updated dependencies [9929c5b]
+- Updated dependencies [49201be]
+- Updated dependencies [338ea98]
+- Updated dependencies [4c1334e]
+- Updated dependencies [9929c5b]
+  - next-docs-zeta@7.0.0
+
 ## 6.1.0
 
 ### Patch Changes

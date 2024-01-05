@@ -1,5 +1,75 @@
 # next-docs-ui
 
+## 7.0.0
+
+### Major Changes
+
+- f995ad9: **Page Footer is now a client component**
+
+  This allows the footer component to find items within the current page tree, which fixes the problem where a item from another page tree is appeared.
+
+  Also removed the `url` and `tree` properties from `DocsPage` since we can pass them via React Context API.
+
+  ```diff
+  export default async function Page({ params }) {
+    return (
+      <DocsPage
+  -      url={page.url}
+  -      tree={pageTree}
+      >
+        ...
+      </DocsPage>
+    );
+  }
+  ```
+
+  The `footer` property in `DocsPage` has also updated, now you can specify or replace the default footer component.
+
+  ```tsx
+  <DocsPage footer={{ items: {} }}>...</DocsPage>
+  ```
+
+### Minor Changes
+
+- b30d1cd: **Support theme presets**
+
+  Add theme presets for the Tailwind CSS plugin, the default and ocean presets are available now.
+
+  ```js
+  const { docsUi, docsUiPlugins } = require('next-docs-ui/tailwind-plugin');
+
+  /** @type {import('tailwindcss').Config} */
+  module.exports = {
+    plugins: [
+      ...docsUiPlugins,
+      docsUi({
+        preset: 'ocean',
+      }),
+    ],
+  };
+  ```
+
+- 9929c5b: **Support multiple page tree roots**
+
+  You can specify a `root` property in `meta.json`, the nearest root folder will be used as the root of page tree instead.
+
+  ```json
+  {
+    "title": "Hello World",
+    "root": true
+  }
+  ```
+
+### Patch Changes
+
+- Updated dependencies [9929c5b]
+- Updated dependencies [9929c5b]
+- Updated dependencies [49201be]
+- Updated dependencies [338ea98]
+- Updated dependencies [4c1334e]
+- Updated dependencies [9929c5b]
+  - next-docs-zeta@7.0.0
+
 ## 6.1.0
 
 ### Minor Changes
