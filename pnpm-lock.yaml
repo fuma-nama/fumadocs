@@ -143,11 +143,11 @@ importers:
         specifier: 8.4.33
         version: 8.4.33
       tailwindcss:
-        specifier: 3.4.0
-        version: 3.4.0
+        specifier: 3.4.1
+        version: 3.4.1
       tailwindcss-animate:
         specifier: ^1.0.7
-        version: 1.0.7(tailwindcss@3.4.0)
+        version: 1.0.7(tailwindcss@3.4.1)
       tsconfig:
         specifier: workspace:*
         version: link:../../packages/tsconfig
@@ -167,10 +167,10 @@ importers:
         specifier: 0.3.4
         version: 0.3.4(contentlayer@0.3.4)(next@14.0.4)(react-dom@18.2.0)(react@18.2.0)
       next-docs-ui:
-        specifier: 6.1.0
+        specifier: 7.0.0
         version: link:../../packages/ui
       next-docs-zeta:
-        specifier: 6.1.0
+        specifier: 7.0.0
         version: link:../../packages/headless
       react:
         specifier: 18.2.0
@@ -210,10 +210,10 @@ importers:
         specifier: 0.3.4
         version: 0.3.4(contentlayer@0.3.4)(next@14.0.4)(react-dom@18.2.0)(react@18.2.0)
       next-docs-ui:
-        specifier: 6.1.0
+        specifier: 7.0.0
         version: link:../../packages/ui
       next-docs-zeta:
-        specifier: 6.1.0
+        specifier: 7.0.0
         version: link:../../packages/headless
       react:
         specifier: 18.2.0
@@ -238,13 +238,13 @@ importers:
         specifier: 14.0.4
         version: 14.0.4(@babel/core@7.22.17)(react-dom@18.2.0)(react@18.2.0)
       next-docs-mdx:
-        specifier: 6.1.0
+        specifier: 7.0.0
         version: link:../../packages/mdx
       next-docs-ui:
-        specifier: 6.1.0
+        specifier: 7.0.0
         version: link:../../packages/ui
       next-docs-zeta:
-        specifier: 6.1.0
+        specifier: 7.0.0
         version: link:../../packages/headless
       react:
         specifier: 18.2.0
@@ -304,7 +304,7 @@ importers:
         version: 1.11.1(eslint@8.49.0)
       eslint-plugin-tailwindcss:
         specifier: ^3.13.0
-        version: 3.13.0(tailwindcss@3.4.0)
+        version: 3.13.0(tailwindcss@3.4.1)
       typescript:
         specifier: ^5.2.2
         version: 5.3.3
@@ -485,7 +485,7 @@ importers:
         version: 1.0.4(@types/react-dom@18.2.1)(@types/react@18.2.0)(react-dom@18.2.0)(react@18.2.0)
       '@tailwindcss/typography':
         specifier: ^0.5.10
-        version: 0.5.10(tailwindcss@3.4.0)
+        version: 0.5.10(tailwindcss@3.4.1)
       class-variance-authority:
         specifier: ^0.7.0
         version: 0.7.0
@@ -518,7 +518,7 @@ importers:
         version: 2.0.0
       tailwindcss-animate:
         specifier: ^1.0.7
-        version: 1.0.7(tailwindcss@3.4.0)
+        version: 1.0.7(tailwindcss@3.4.1)
     devDependencies:
       '@algolia/client-search':
         specifier: ^4.20.0
@@ -551,8 +551,8 @@ importers:
         specifier: ^1.0.0
         version: 1.0.0(postcss@8.4.33)
       tailwindcss:
-        specifier: 3.4.0
-        version: 3.4.0
+        specifier: 3.4.1
+        version: 3.4.1
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig
@@ -3168,7 +3168,7 @@ packages:
     dependencies:
       tslib: 2.6.2
 
-  /@tailwindcss/typography@0.5.10(tailwindcss@3.4.0):
+  /@tailwindcss/typography@0.5.10(tailwindcss@3.4.1):
     resolution: {integrity: sha512-Pe8BuPJQJd3FfRnm6H0ulKIGoMEQS+Vq01R6M5aCrFB/ccR/shT+0kXLjouGC1gFLm9hopTFN+DMP0pfwRWzPw==}
     peerDependencies:
       tailwindcss: '>=3.0.0 || insiders'
@@ -3177,7 +3177,7 @@ packages:
       lodash.isplainobject: 4.0.6
       lodash.merge: 4.6.2
       postcss-selector-parser: 6.0.10
-      tailwindcss: 3.4.0
+      tailwindcss: 3.4.1
     dev: false
 
   /@types/acorn@4.0.6:
@@ -5093,7 +5093,7 @@ packages:
       string.prototype.matchall: 4.0.10
     dev: true
 
-  /eslint-plugin-tailwindcss@3.13.0(tailwindcss@3.4.0):
+  /eslint-plugin-tailwindcss@3.13.0(tailwindcss@3.4.1):
     resolution: {integrity: sha512-Fcep4KDRLWaK3KmkQbdyKHG0P4GdXFmXdDaweTIPcgOP60OOuWFbh1++dufRT28Q4zpKTKaHwTsXPJ4O/EjU2Q==}
     engines: {node: '>=12.13.0'}
     peerDependencies:
@@ -5101,7 +5101,7 @@ packages:
     dependencies:
       fast-glob: 3.3.1
       postcss: 8.4.33
-      tailwindcss: 3.4.0
+      tailwindcss: 3.4.1
     dev: true
 
   /eslint-plugin-testing-library@6.2.0(eslint@8.49.0)(typescript@5.3.3):
@@ -9500,12 +9500,12 @@ packages:
       '@babel/runtime': 7.23.2
     dev: false
 
-  /tailwindcss-animate@1.0.7(tailwindcss@3.4.0):
+  /tailwindcss-animate@1.0.7(tailwindcss@3.4.1):
     resolution: {integrity: sha512-bl6mpH3T7I3UFxuvDEXLxy/VuFxBk5bbzplh7tXI68mwMokNYd1t9qPBHlnyTwfa4JGC4zP516I1hYYtQ/vspA==}
     peerDependencies:
       tailwindcss: '>=3.0.0 || insiders'
     dependencies:
-      tailwindcss: 3.4.0
+      tailwindcss: 3.4.1
 
   /tailwindcss@3.3.7:
     resolution: {integrity: sha512-pjgQxDZPvyS/nG3ZYkyCvsbONJl7GdOejfm24iMt2ElYQQw8Jc4p0m8RdMp7mznPD0kUhfzwV3zAwa80qI0zmQ==}
@@ -9538,8 +9538,8 @@ packages:
       - ts-node
     dev: true
 
-  /tailwindcss@3.4.0:
-    resolution: {integrity: sha512-VigzymniH77knD1dryXbyxR+ePHihHociZbXnLZHUyzf2MMs2ZVqlUrZ3FvpXP8pno9JzmILt1sZPD19M3IxtA==}
+  /tailwindcss@3.4.1:
+    resolution: {integrity: sha512-qAYmXRfk3ENzuPBakNK0SRrUDipP8NQnEY6772uDhflcQz5EhRdD7JNZxyrFHVQNCwULPBn6FNPp9brpO7ctcA==}
     engines: {node: '>=14.0.0'}
     hasBin: true
     dependencies:

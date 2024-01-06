@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 7.0.0
+
+### Major Changes
+
+- 579ecaa: **Support template for Tailwind CSS + Next Docs MDX**
+
 ## 6.1.0
 
 ### Patch Changes

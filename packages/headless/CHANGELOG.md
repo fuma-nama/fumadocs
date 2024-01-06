@@ -1,5 +1,117 @@
 # next-docs-zeta
 
+## 7.0.0
+
+### Major Changes
+
+- 9929c5b: **Migrate Contentlayer Integration to Source API**
+
+  `createContentlayer` is now replaced by `createContentlayerSource`.
+
+  You should configure base URL and root directory in the loader instead of Contentlayer configuration.
+
+  It's no longer encouraged to access `allDocs` directly because they will not include `url` property anymore. Please consider `getPages` instead.
+
+  ```ts
+  import { allDocs, allMeta } from 'contentlayer/generated';
+  import { createContentlayerSource } from 'next-docs-zeta/contentlayer';
+  import { loader } from 'next-docs-zeta/source';
+
+  export const { getPage, pageTree, getPages } = loader({
+    baseUrl: '/docs',
+    rootDir: 'docs',
+    source: createContentlayerSource(allMeta, allDocs),
+  });
+  ```
+
+  The interface is very similar, but you can only access Contentlayer properties from `page.data`.
+
+  ```diff
+  - <Content code={page.body.code} />
+  + <Content code={page.data.body.code} />
+  ```
+
+- 9929c5b: **Source API**
+
+  To reduce boilerplate, the Source API is now released to handle File-system based files.
+
+  Thanks to this, you don't have to deal with the inconsistent behaviours between different content sources anymore.
+
+  The interface is now unified, you can easily plug in a content source.
+
+  ```ts
+  import { map } from '@/.map';
+  import { createMDXSource } from 'next-docs-mdx';
+  import { loader } from 'next-docs-zeta/source';
+
+  export const { getPage, getPages, pageTree } = loader({
+    baseUrl: '/docs',
+    rootDir: 'docs',
+    source: createMDXSource(map),
+  });
+  ```
+
+  **Page Tree Builder API is removed in favor of this**
+
+- 49201be: **Change `remarkToc` to `remarkHeading`**
+
+  The previous `remarkToc` plugin only extracts table of contents from documents, now it also adds the `id` property to all heading elements.
+
+  ```diff
+  - import { remarkToc } from "next-docs-zeta/mdx-plugins"
+  + import { remarkHeading } from "next-docs-zeta/mdx-plugins"
+  ```
+
+- 4c1334e: **Improve `createI18nMiddleware` function**
+
+  Now, you can export the middleware directly without a wrapper.
+
+  From:
+
+  ```ts
+  export default function middleware(request: NextRequest) {
+    return createI18nMiddleware(...);
+  }
+  ```
+
+  To:
+
+  ```ts
+  export default createI18nMiddleware({
+    defaultLanguage,
+    languages,
+  });
+  ```
+
+### Minor Changes
+
+- 338ea98: **Export `create` function for Contentlayer configuration**
+
+  If you want to include other document types, or override the output configuration, the `create` function can return the fields and document types you need.
+
+  ```ts
+  import { create } from 'next-docs-zeta/contentlayer/configuration';
+
+  const config = create(options);
+
+  export default {
+    contentDirPath: config.contentDirPath,
+    documentTypes: [config.Docs, config.Meta],
+    mdx: config.mdx,
+  };
+  ```
+
+- 9929c5b: **Support multiple page tree roots**
+
+  You can specify a `root` property in `meta.json`, the nearest root folder will be used as the root of page tree instead.
+
+  ```json
+  {
+    "title": "Hello World",
+    "root": true
+  }
+  ```
+
 ## 6.1.0
 
 ### Minor Changes
