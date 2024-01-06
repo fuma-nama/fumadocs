@@ -12,6 +12,7 @@
   "repository": "github:fuma-nama/next-docs",
   "license": "MIT",
   "author": "Fuma Nama",
+  "type": "module",
   "bin": "./dist/index.js",
   "files": [
     "template/*",
