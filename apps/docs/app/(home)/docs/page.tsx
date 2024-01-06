@@ -5,7 +5,7 @@ import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/utils/cn';
 
 const cardVariants = cva(
-  'flex flex-col rounded-xl border border-primary/10 bg-background bg-gradient-to-br from-transparent to-primary/10 p-6 shadow-inner shadow-primary/10 transition-colors hover:bg-primary/5',
+  'flex flex-col rounded-xl border border-primary/10 bg-gradient-to-br from-transparent to-primary/10 p-6 shadow-inner shadow-primary/10 backdrop-blur-lg transition-colors hover:bg-primary/5',
 );
 
 const cardIconVariants = cva(
