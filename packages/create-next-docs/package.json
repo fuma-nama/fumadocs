@@ -24,6 +24,7 @@
     "clean": "rimraf dist",
     "dev": "tsup --watch",
     "lint": "eslint .",
+    "postpublish": "echo \"Updating template repo\" && bash ./scripts/update-git-repo.sh",
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
