@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-          token: ${{ secrets.UPDATE_TEMPLATE_SSH_KEY }}
+        token: ${{ secrets.UPDATE_TEMPLATE_SSH_KEY }}
 
       - uses: pnpm/action-setup@v2.4.0
         with:
