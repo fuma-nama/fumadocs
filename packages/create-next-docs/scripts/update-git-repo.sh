@@ -9,11 +9,6 @@ get_abs_filename() {
 DIR=$(get_abs_filename $(dirname "$0"))
 TMP=$(get_abs_filename "$DIR/../node_modules/.tmp")
 
-if [ "$CI" ]; then
-	(umask 0077; echo "$UPDATE_TEMPLATE_SSH_KEY" > ~/ssh_key;)
-	export GIT_SSH_COMMAND='ssh -o StrictHostKeyChecking=accept-new -i ~/ssh_key'
-fi
-
 mkdir -p $TMP
 cd $TMP
 
@@ -24,11 +19,6 @@ git clone --depth 1 --single-branch --branch main https://github.com/fuma-nama/n
 # empty out the repo
 cd next-docs-ui-template
 node $DIR/update-git-repo.js $TMP/next-docs-ui-template
-
-if [ "$CI" ]; then
-	git config user.email 'noreply@fuma.dev'
-	git config user.name '[bot]'
-fi
 
 # commit the new files
 git add -A
