@@ -6,6 +6,9 @@ import type { SortedResult } from '@/search/shared';
 import type { BaseIndex } from './server';
 
 export interface Options extends SearchOptions {
+  /**
+   * Use `empty` as result if query is empty
+   */
   allowEmpty?: boolean;
 }
 
@@ -79,7 +82,8 @@ export function useAlgoliaSearch(
   const query = useSWR(
     ['/api/search', search, options],
     async () => {
-      if (!options.allowEmpty && search.length === 0) return 'empty';
+      const { allowEmpty = true } = options;
+      if (!allowEmpty && search.length === 0) return 'empty';
 
       return searchDocs(index, search, options);
     },

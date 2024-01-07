@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation';
 import { type ReactNode } from 'react';
 import { useI18n } from '@/contexts/i18n';
 import {
-  Command,
   CommandDialog,
   CommandEmpty,
   CommandGroup,
@@ -53,32 +52,37 @@ export function SearchDialog({
         onValueChange={onSearchChange}
         placeholder={text.search ?? 'Search'}
       />
-      <CommandList>
-        <CommandEmpty>{text.searchNoResult ?? 'No results found'}</CommandEmpty>
-        <CommandGroup value="result">
-          {Array.isArray(data) &&
-            data.map((item) => (
-              <CommandItem
-                key={item.id}
-                value={item.id}
-                onSelect={() => {
-                  onOpen(item.url);
-                }}
-                nested={item.type !== 'page'}
-              >
-                {
+      {data !== 'empty' ? (
+        <CommandList>
+          <CommandEmpty>
+            {text.searchNoResult ?? 'No results found'}
+          </CommandEmpty>
+
+          <CommandGroup value="result">
+            {Array.isArray(data) &&
+              data.map((item) => (
+                <CommandItem
+                  key={item.id}
+                  value={item.id}
+                  onSelect={() => {
+                    onOpen(item.url);
+                  }}
+                  nested={item.type !== 'page'}
+                >
                   {
-                    text: <TextIcon />,
-                    heading: <HashIcon />,
-                    page: <FileTextIcon />,
-                  }[item.type]
-                }
-                <p className="w-0 flex-1 truncate">{item.content}</p>
-              </CommandItem>
-            ))}
-        </CommandGroup>
-        {props.children}
-      </CommandList>
+                    {
+                      text: <TextIcon />,
+                      heading: <HashIcon />,
+                      page: <FileTextIcon />,
+                    }[item.type]
+                  }
+                  <p className="w-0 flex-1 truncate">{item.content}</p>
+                </CommandItem>
+              ))}
+          </CommandGroup>
+          {props.children}
+        </CommandList>
+      ) : null}
     </CommandDialog>
   );
 }
