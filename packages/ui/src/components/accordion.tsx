@@ -78,7 +78,7 @@ export const Accordion = forwardRef<
       className={cn('group/accordion scroll-m-20', className)}
       {...props}
     >
-      <AccordionPrimitive.Header className="not-prose flex items-center text-muted-foreground">
+      <AccordionPrimitive.Header className="not-prose flex items-center text-medium text-muted-foreground">
         <AccordionPrimitive.Trigger className="flex w-full items-center gap-1 py-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
           <ChevronRightIcon className="h-5 w-5 transition-transform duration-200 group-data-[state=open]/accordion:rotate-90" />
           <span className="text-medium font-medium text-foreground">

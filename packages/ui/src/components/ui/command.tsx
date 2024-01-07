@@ -1,9 +1,9 @@
-import type { DialogProps } from '@radix-ui/react-dialog';
+import { type DialogProps } from '@radix-ui/react-dialog';
 import { Command as CommandPrimitive } from 'cmdk';
 import { Search } from 'lucide-react';
 import * as React from 'react';
 import { cn } from '@/utils/cn';
-import { Dialog, DialogContent } from './dialog';
+import { Drawer, DrawerContent, DrawerFooter } from './drawer';
 
 const Command = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive>,
@@ -20,18 +20,24 @@ const Command = React.forwardRef<
 ));
 Command.displayName = CommandPrimitive.displayName;
 
-type CommandDialogProps = DialogProps;
+interface CommandDialogProps extends DialogProps {
+  footer?: React.ReactNode;
+}
 
 function CommandDialog({
+  footer,
   children,
   ...props
 }: CommandDialogProps): JSX.Element {
   return (
-    <Dialog {...props}>
-      <DialogContent className="bg-popover p-0 text-popover-foreground">
-        {children}
-      </DialogContent>
-    </Dialog>
+    <Drawer {...props}>
+      <DrawerContent className="p-0">
+        <Command shouldFilter={false} loop>
+          {children}
+          {footer ? <DrawerFooter>{footer}</DrawerFooter> : null}
+        </Command>
+      </DrawerContent>
+    </Drawer>
   );
 }
 
@@ -44,7 +50,7 @@ const CommandInput = React.forwardRef<
     <CommandPrimitive.Input
       ref={ref}
       className={cn(
-        'flex w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
+        'flex w-full rounded-md bg-transparent py-3 text-base outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
         className,
       )}
       {...props}

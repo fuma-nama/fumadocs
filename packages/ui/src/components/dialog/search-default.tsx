@@ -40,7 +40,6 @@ export default function DefaultSearchDialog({
       search={search}
       onSearchChange={setSearch}
       data={query.data}
-      showOnEmpty={links.length > 0}
       {...props}
     >
       <CommandGroup value="items">

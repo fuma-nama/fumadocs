@@ -1,5 +1,3 @@
-const { default: createDocsUI } = require('next-docs-ui/tailwind-plugin');
-
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: 'class',
@@ -10,6 +8,7 @@ module.exports = {
     './mdx-components.tsx',
     './node_modules/next-docs-ui/dist/**/*.js',
   ],
+  presets: [require('next-docs-ui/tailwind-plugin').default()],
   theme: {
     extend: {
       fontFamily: {
@@ -57,5 +56,5 @@ module.exports = {
       },
     },
   },
-  plugins: [require('tailwindcss-animate'), ...createDocsUI()],
+  plugins: [require('tailwindcss-animate')],
 };

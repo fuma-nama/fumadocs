@@ -1,13 +1,15 @@
 'use client';
 
-import type { SearchOptions } from '@algolia/client-search';
 import type { SearchIndex } from 'algoliasearch/lite';
-import { useAlgoliaSearch } from 'next-docs-zeta/search-algolia/client';
+import {
+  type Options,
+  useAlgoliaSearch,
+} from 'next-docs-zeta/search-algolia/client';
 import { createContext, useContext, type ReactNode } from 'react';
 import { SearchDialog, type SharedProps } from './search';
 
 export type AlgoliaSearchDialogProps = SharedProps & {
-  searchOptions?: SearchOptions;
+  searchOptions?: Options;
   footer?: ReactNode;
   children?: ReactNode;
 };

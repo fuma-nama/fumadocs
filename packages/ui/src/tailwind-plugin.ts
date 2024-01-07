@@ -1,6 +1,6 @@
 import typography from '@tailwindcss/typography';
 import plugin from 'tailwindcss/plugin';
-import type { PluginsConfig } from 'tailwindcss/types/config';
+import type { PresetsConfig } from 'tailwindcss/types/config';
 import { presets } from './theme/colors';
 import { animations } from './theme/animations';
 import { typography as typographyConfig } from './theme/typography';
@@ -20,8 +20,9 @@ export interface Preset {
   backgroundImage?: string;
 }
 
+// TODO: Remove in next major
 /**
- * Dependency plugins
+ * @deprecated Use preset instead
  */
 export const docsUiPlugins = [typography];
 
@@ -237,8 +238,10 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
   }),
 );
 
-export default function createDocsUI(
-  options: DocsUIOptions = {},
-): PluginsConfig {
-  return [...docsUiPlugins, docsUi(options)];
+export function createPreset(options: DocsUIOptions = {}): PresetsConfig {
+  return {
+    plugins: [...docsUiPlugins, docsUi(options)],
+  };
 }
+
+export default createPreset;

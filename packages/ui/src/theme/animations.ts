@@ -24,6 +24,12 @@ export const animations = {
       from: { transform: 'scale(0.95) translateY(-4rem)' },
       to: { transform: 'scale(1) translateY(0)' },
     },
+    'drawer-in': {
+      from: { transform: 'translateY(100%)' },
+    },
+    'drawer-out': {
+      to: { transform: 'translateY(100%)' },
+    },
     'dialog-out': {
       from: { transform: 'scale(1) translateY(0)' },
       to: { transform: 'scale(0.95) translateY(-4rem)' },
@@ -50,6 +56,8 @@ export const animations = {
     'fade-out': 'fade-out 300ms ease',
     'dialog-in': 'dialog-in 150ms ease',
     'dialog-out': 'dialog-out 200ms ease',
+    'drawer-in': 'drawer-in 0.5s cubic-bezier(0.32, 0.72, 0, 1)',
+    'drawer-out': 'drawer-out 0.5s cubic-bezier(0.32, 0.72, 0, 1)',
     'popover-in': 'popover-in 150ms ease',
     'popover-out': 'popover-out 150ms ease',
     'collapsible-down': 'collapsible-down 150ms ease-out',

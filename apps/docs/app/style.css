@@ -3,7 +3,8 @@
 @tailwind utilities;
 
 .dark {
-  --background: 210 100% 1%;
+  --background: 0 0% 1%;
+  --popover: 0 0% 4%;
   --card: 0 0% 4%;
   --muted: 0 0% 8%;
   --border: 0 0% 14%;
