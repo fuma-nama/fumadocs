@@ -3,6 +3,7 @@
 import { ChevronUpIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { cn } from '@/utils/cn';
+import { buttonVariants } from '@/theme/shared';
 
 interface RollButtonProps {
   /**
@@ -41,8 +42,12 @@ export function RollButton({ percentage = 0.2 }: RollButtonProps): JSX.Element {
       type="button"
       aria-label="Scroll to Top"
       className={cn(
+        buttonVariants({
+          color: 'secondary',
+          className:
+            'fixed bottom-8 p-3 right-8 z-50 shadow-md rounded-full transition-all',
+        }),
         !show && 'translate-y-20 opacity-0',
-        'fixed bottom-12 right-12 z-50 rounded-full border bg-background p-4 text-foreground transition-all',
       )}
       onClick={() => {
         document.scrollingElement?.scrollTo({

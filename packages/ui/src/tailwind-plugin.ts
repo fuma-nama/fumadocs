@@ -240,7 +240,7 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
 
 export function createPreset(options: DocsUIOptions = {}): PresetsConfig {
   return {
-    plugins: [...docsUiPlugins, docsUi(options)],
+    plugins: [typography, docsUi(options)],
   };
 }
 

@@ -1,5 +1,4 @@
 import * as DialogPrimitive from '@radix-ui/react-dialog';
-import { X } from 'lucide-react';
 import * as React from 'react';
 import { cn } from '@/utils/cn';
 
@@ -22,14 +21,11 @@ const DialogContent = React.forwardRef<
         {...props}
       >
         {children}
-        <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm text-muted-foreground ring-offset-background transition-colors hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
-          <X className="h-4 w-4" />
-          <span className="sr-only">Close</span>
-        </DialogPrimitive.Close>
       </DialogPrimitive.Content>
     </DialogPrimitive.DialogOverlay>
   </DialogPrimitive.Portal>
 ));
+
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
 function DialogHeader({
@@ -59,6 +55,16 @@ function DialogFooter({
     />
   );
 }
+
 DialogFooter.displayName = 'DialogFooter';
 
-export { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogFooter };
+const DialogClose = DialogPrimitive.Close;
+
+export {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogClose,
+};

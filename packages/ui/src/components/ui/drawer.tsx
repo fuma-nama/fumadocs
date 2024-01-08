@@ -36,6 +36,8 @@ const DrawerTrigger = DialogPrimitive.Trigger;
 
 const DrawerPortal = DialogPrimitive.Portal;
 
+const DrawerClose = DialogPrimitive.Close;
+
 const DrawerOverlay = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
@@ -54,6 +56,7 @@ const DrawerContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
 >(({ className, children, ...props }, ref) => {
   const { setIsOpen } = React.useContext(Context);
+  const overlayRef = React.useRef<HTMLDivElement>(null);
   const contentRef = React.useRef<HTMLDivElement>(null);
   const isDraggingRef = React.useRef(false);
   const mergedRefs = mergeRefs(ref, contentRef);
@@ -66,12 +69,14 @@ const DrawerContent = React.forwardRef<
   };
 
   const setOffset = (value: number): void => {
-    if (contentRef.current) {
-      contentRef.current.style.setProperty(
-        '--offset-y',
-        `${value.toString()}px`,
-      );
-    }
+    if (!contentRef.current) return;
+
+    contentRef.current.style.setProperty('--offset-y', `${value.toString()}px`);
+
+    overlayRef.current?.style.setProperty(
+      'opacity',
+      `${1 - Math.max(0, value / contentRef.current.clientHeight)}`,
+    );
   };
 
   const onPress: React.PointerEventHandler = (event) => {
@@ -171,6 +176,7 @@ const DrawerContent = React.forwardRef<
   return (
     <DrawerPortal>
       <DrawerOverlay
+        ref={overlayRef}
         onMouseUp={onRelease}
         className="data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in"
       />
@@ -239,10 +245,9 @@ function mergeRefs<T>(
 
 export {
   Drawer,
-  DrawerPortal,
-  DrawerOverlay,
   DrawerTrigger,
   DrawerContent,
   DrawerHeader,
   DrawerFooter,
+  DrawerClose,
 };

@@ -14,6 +14,7 @@ import {
 } from 'react';
 import { cn } from '@/utils/cn';
 import { useCopyButton } from '@/utils/use-copy-button';
+import { buttonVariants } from '@/theme/shared';
 
 export const Accordions = forwardRef<
   HTMLDivElement,
@@ -106,7 +107,13 @@ function CopyButton({ id }: { id: string }): JSX.Element {
     <button
       type="button"
       aria-label="Copy Link"
-      className="p-1 opacity-0 transition-opacity group-data-[state=open]/accordion:opacity-100"
+      className={cn(
+        buttonVariants({
+          color: 'ghost',
+          className:
+            'opacity-0 transition-all group-data-[state=open]/accordion:opacity-100',
+        }),
+      )}
       onClick={onClick}
     >
       {checked ? (

@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/popover';
 import { type LinkItem } from './contexts/tree';
 import { isActive } from './utils/shared';
+import { buttonVariants } from './theme/shared';
 
 export interface NavLinkProps {
   icon: ReactNode;
@@ -49,10 +50,6 @@ interface NavProps {
   transparent?: boolean;
   children?: ReactNode;
 }
-
-const itemVariants = cva(
-  'rounded-md p-1.5 hover:bg-accent hover:text-accent-foreground [&_svg]:h-5 [&_svg]:w-5',
-);
 
 export function Nav({
   title,
@@ -92,7 +89,13 @@ export function Nav({
             <Popover>
               <ThemeToggle className="max-lg:hidden" />
               <PopoverTrigger
-                className={cn(itemVariants({ className: 'lg:hidden' }))}
+                className={cn(
+                  buttonVariants({
+                    size: 'icon',
+                    color: 'ghost',
+                    className: 'lg:hidden',
+                  }),
+                )}
               >
                 <MoreVerticalIcon />
               </PopoverTrigger>
@@ -121,7 +124,7 @@ export function Nav({
                 key={item.href}
                 href={item.href}
                 external={item.external}
-                className={cn(itemVariants())}
+                className={cn(buttonVariants({ size: 'icon', color: 'ghost' }))}
               >
                 {item.icon}
               </Link>
@@ -143,7 +146,13 @@ function SearchToggle(): JSX.Element {
     <>
       <button
         type="button"
-        className={cn(itemVariants({ className: 'md:hidden' }))}
+        className={cn(
+          buttonVariants({
+            size: 'icon',
+            color: 'ghost',
+            className: 'md:hidden',
+          }),
+        )}
         aria-label="Open Search"
         onClick={() => {
           setOpenSearch(true);
@@ -176,7 +185,13 @@ function SidebarToggle({ collapsible }: { collapsible: boolean }): JSX.Element {
     <>
       <SidebarTrigger
         aria-label="Toggle Sidebar"
-        className={cn(itemVariants({ className: 'md:hidden' }))}
+        className={cn(
+          buttonVariants({
+            size: 'icon',
+            color: 'ghost',
+            className: 'md:hidden',
+          }),
+        )}
       >
         <MenuIcon />
       </SidebarTrigger>
@@ -187,13 +202,15 @@ function SidebarToggle({ collapsible }: { collapsible: boolean }): JSX.Element {
           onClick={() => {
             setOpen(!open);
           }}
-          className="rounded-full border bg-secondary/50 p-1.5 text-secondary-foreground hover:bg-accent hover:text-accent-foreground max-md:hidden"
-        >
-          {open ? (
-            <SidebarCloseIcon className="h-5 w-5" />
-          ) : (
-            <SidebarOpenIcon className="h-5 w-5" />
+          className={cn(
+            buttonVariants({
+              color: 'outline',
+              size: 'icon',
+              className: 'rounded-full max-md:hidden',
+            }),
           )}
+        >
+          {open ? <SidebarCloseIcon /> : <SidebarOpenIcon />}
         </button>
       ) : null}
     </>

@@ -3,7 +3,13 @@ import { Command as CommandPrimitive } from 'cmdk';
 import { Search } from 'lucide-react';
 import * as React from 'react';
 import { cn } from '@/utils/cn';
-import { Drawer, DrawerContent, DrawerFooter } from './drawer';
+import { buttonVariants } from '@/theme/shared';
+import {
+  Drawer as Dialog,
+  DrawerClose as DialogClose,
+  DrawerContent as DialogContent,
+  DrawerFooter as DialogFooter,
+} from './drawer';
 
 const Command = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive>,
@@ -30,14 +36,14 @@ function CommandDialog({
   ...props
 }: CommandDialogProps): JSX.Element {
   return (
-    <Drawer {...props}>
-      <DrawerContent className="p-0">
+    <Dialog {...props}>
+      <DialogContent className="p-0">
         <Command shouldFilter={false} loop>
           {children}
-          {footer ? <DrawerFooter>{footer}</DrawerFooter> : null}
+          {footer ? <DialogFooter>{footer}</DialogFooter> : null}
         </Command>
-      </DrawerContent>
-    </Drawer>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -45,16 +51,27 @@ const CommandInput = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Input>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>
 >(({ className, ...props }, ref) => (
-  <div className="flex items-center !border-t-0 px-3">
-    <Search className="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
+  <div className="flex items-center gap-2 !border-t-0 px-3">
+    <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
     <CommandPrimitive.Input
       ref={ref}
       className={cn(
-        'flex w-full rounded-md bg-transparent py-3 text-base outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
+        'w-full bg-transparent py-3 text-base outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
         className,
       )}
       {...props}
     />
+    <DialogClose
+      className={cn(
+        buttonVariants({
+          color: 'outline',
+          size: 'icon',
+          className: 'text-xs',
+        }),
+      )}
+    >
+      Esc
+    </DialogClose>
   </div>
 ));
 
