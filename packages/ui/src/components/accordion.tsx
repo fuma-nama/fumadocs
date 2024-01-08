@@ -14,7 +14,7 @@ import {
 } from 'react';
 import { cn } from '@/utils/cn';
 import { useCopyButton } from '@/utils/use-copy-button';
-import { buttonVariants } from '@/theme/shared';
+import { buttonVariants } from '@/theme/variants';
 
 export const Accordions = forwardRef<
   HTMLDivElement,

@@ -4,6 +4,8 @@ import * as React from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { cn } from '@/utils/cn';
 
+const TIMING_FUNCTION = 'cubic-bezier(0.32, 0.72, 0, 1)';
+
 const Context = React.createContext<{
   isOpen: boolean;
   setIsOpen: (v: boolean) => void;
@@ -84,7 +86,7 @@ const DrawerContent = React.forwardRef<
 
     isDraggingRef.current = true;
 
-    contentRef.current.style.setProperty('transition', 'none');
+    setTransition(false);
 
     window.addEventListener(
       'touchend',
@@ -120,15 +122,22 @@ const DrawerContent = React.forwardRef<
     setOffset(Math.max(-50, getOffset() + e.movementY));
   };
 
-  const onReset = (): void => {
-    if (contentRef.current) {
-      contentRef.current.style.setProperty(
-        'transition',
-        `transform 0.5s cubic-bezier(${[0.32, 0.72, 0, 1].join(',')})`,
-      );
+  const setTransition = (enabled: boolean): void => {
+    contentRef.current?.style.setProperty(
+      'transition',
+      enabled ? `transform 0.5s ${TIMING_FUNCTION}` : 'none',
+    );
 
-      setOffset(0);
-    }
+    overlayRef.current?.style.setProperty(
+      'transition',
+      enabled ? `opacity 0.5s ${TIMING_FUNCTION}` : 'none',
+    );
+  };
+
+  const onReset = (): void => {
+    if (!contentRef.current) return;
+    setTransition(true);
+    setOffset(0);
   };
 
   const shouldDrag = (
@@ -175,15 +184,29 @@ const DrawerContent = React.forwardRef<
 
   return (
     <DrawerPortal>
+      <style>
+        {`
+        [docs-ui-drawer]::after {
+          content: '';
+          position: absolute;
+          top: 100%;
+          background: inherit;
+          background-color: inherit;
+          left: 0;
+          right: 0;
+          height: 200%;
+        }`}
+      </style>
       <DrawerOverlay
         ref={overlayRef}
         onMouseUp={onRelease}
         className="data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in"
       />
       <DialogPrimitive.Content
+        docs-ui-drawer=""
         ref={mergedRefs}
         style={{
-          transform: 'translateY(var(--offset-y))',
+          transform: `translateY(var(--offset-y))`,
         }}
         onPointerDown={onPress}
         onPointerUp={onRelease}

@@ -3,7 +3,7 @@ import { Command as CommandPrimitive } from 'cmdk';
 import { Search } from 'lucide-react';
 import * as React from 'react';
 import { cn } from '@/utils/cn';
-import { buttonVariants } from '@/theme/shared';
+import { buttonVariants } from '@/theme/variants';
 import {
   Drawer as Dialog,
   DrawerClose as DialogClose,

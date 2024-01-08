@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/popover';
 import { type LinkItem } from './contexts/tree';
 import { isActive } from './utils/shared';
-import { buttonVariants } from './theme/shared';
+import { buttonVariants } from './theme/variants';
 
 export interface NavLinkProps {
   icon: ReactNode;

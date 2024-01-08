@@ -6,9 +6,17 @@ import type { SharedProps } from '../components/dialog/search';
 
 const DefaultSearchDialog = dynamic(
   () => import('../components/dialog/search-default'),
+  { ssr: false },
 );
 
 export interface SearchProviderProps {
+  /**
+   * Preload search dialog before opening it
+   *
+   * @defaultValue `true`
+   */
+  preload?: boolean;
+
   links?: DefaultSearchDialogProps['links'];
 
   /**
@@ -33,9 +41,10 @@ export function useSearchContext(): SearchContextType {
 export function SearchProvider({
   SearchDialog,
   children,
+  preload = true,
   ...props
 }: SearchProviderProps): JSX.Element {
-  const [isOpen, setIsOpen] = useState<boolean>();
+  const [isOpen, setIsOpen] = useState(preload ? false : undefined);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent): void => {

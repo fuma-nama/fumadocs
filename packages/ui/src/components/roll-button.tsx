@@ -3,7 +3,7 @@
 import { ChevronUpIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { cn } from '@/utils/cn';
-import { buttonVariants } from '@/theme/shared';
+import { buttonVariants } from '@/theme/variants';
 
 interface RollButtonProps {
   /**
