@@ -45,7 +45,7 @@ export const typography = {
         '0 0 0 1px var(--tw-prose-kbd-shadows),0 3px 0 var(--tw-prose-kbd-shadows)',
     },
     ul: {
-      paddingLeft: '1rem',
+      paddingLeft: '0.7rem',
     },
     // Disabled styles, handled by Next Docs
     'pre code': false,

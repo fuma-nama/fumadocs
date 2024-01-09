@@ -44,6 +44,7 @@ export function RollButton({ percentage = 0.2 }: RollButtonProps): JSX.Element {
       className={cn(
         buttonVariants({
           color: 'secondary',
+          size: 'icon',
           className:
             'fixed bottom-8 p-3 right-8 z-50 shadow-md rounded-full transition-all',
         }),
@@ -56,7 +57,7 @@ export function RollButton({ percentage = 0.2 }: RollButtonProps): JSX.Element {
         });
       }}
     >
-      <ChevronUpIcon className="h-5 w-5" />
+      <ChevronUpIcon />
     </button>
   );
 }

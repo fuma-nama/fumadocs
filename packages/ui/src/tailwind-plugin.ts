@@ -130,6 +130,7 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
       addComponents({
         '.nd-codeblock': {
           '& [data-line]': {
+            'font-size': '13px',
             'padding-left': `theme('spacing.4')`,
             'padding-right': `theme('spacing.4')`,
           },

@@ -64,7 +64,7 @@ export function Sidebar({
     >
       <SidebarContext.Provider value={{ defaultOpenLevel }}>
         <ScrollArea className="flex-1">
-          <div className="flex flex-col gap-8 pb-10 pt-4 max-md:px-4 md:pr-4 md:pt-10">
+          <div className="flex flex-col gap-8 pb-10 pt-4 max-md:px-4 md:pr-3 md:pt-10">
             {banner}
             <div className="lg:hidden">
               {items.map((item) => (

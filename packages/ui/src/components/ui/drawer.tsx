@@ -212,7 +212,7 @@ const DrawerContent = React.forwardRef<
         onPointerUp={onRelease}
         onPointerMove={onDrag}
         className={cn(
-          'fixed inset-x-0 bottom-0 z-50 mx-auto mt-24 flex h-[80%] max-h-[500px] max-w-lg flex-col rounded-t-lg border bg-popover data-[state=closed]:animate-drawer-out data-[state=open]:animate-drawer-in',
+          'fixed inset-x-0 bottom-0 z-50 mx-auto mt-24 flex h-[80%] max-h-[500px] max-w-lg flex-col rounded-t-lg border bg-popover shadow-lg data-[state=closed]:animate-drawer-out data-[state=open]:animate-drawer-in',
           className,
         )}
         {...props}
@@ -243,10 +243,7 @@ function DrawerFooter({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>): JSX.Element {
   return (
-    <div
-      className={cn('mt-auto flex flex-col gap-2 p-4', className)}
-      {...props}
-    />
+    <div className={cn('mt-auto flex flex-col p-3', className)} {...props} />
   );
 }
 

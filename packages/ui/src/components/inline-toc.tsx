@@ -23,13 +23,13 @@ export function InlineTOC({
   return (
     <Collapsible
       defaultOpen={defaultOpen}
-      className="not-prose rounded-lg border bg-card text-sm text-card-foreground"
+      className="not-prose rounded-lg border bg-card text-card-foreground"
     >
       <CollapsibleTrigger asChild>
         {children ?? (
           <button
             type="button"
-            className="inline-flex w-full items-center justify-between p-4 font-medium [&[data-state=open]>svg]:rotate-180"
+            className="inline-flex w-full items-center justify-between p-4 text-medium font-medium [&[data-state=open]>svg]:rotate-180"
           >
             Table of Contents
             <ChevronDown className="h-4 w-4 transition-transform duration-200" />
@@ -37,14 +37,14 @@ export function InlineTOC({
         )}
       </CollapsibleTrigger>
       <CollapsibleContent>
-        <div className="flex flex-col px-4 pb-4 text-muted-foreground">
+        <div className="flex flex-col px-6 pb-4 text-sm text-muted-foreground">
           {items.map((item) => (
             <a
               key={item.url}
               href={item.url}
-              className="border-l py-1.5 hover:border-primary hover:text-primary"
+              className="py-1.5 hover:text-accent-foreground"
               style={{
-                paddingLeft: 16 * Math.max(item.depth - 1, 1),
+                paddingLeft: 16 * Math.max(item.depth - 2, 0),
               }}
             >
               {item.title}

@@ -4,12 +4,7 @@ import { Search } from 'lucide-react';
 import * as React from 'react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/theme/variants';
-import {
-  Drawer as Dialog,
-  DrawerClose as DialogClose,
-  DrawerContent as DialogContent,
-  DrawerFooter as DialogFooter,
-} from './drawer';
+import { Dialog, DialogClose, DialogContent, DialogFooter } from './dialog';
 
 const Command = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive>,
@@ -21,6 +16,8 @@ const Command = React.forwardRef<
       'flex h-full w-full flex-col divide-y divide-border',
       className,
     )}
+    shouldFilter={false}
+    loop
     {...props}
   />
 ));
@@ -38,7 +35,7 @@ function CommandDialog({
   return (
     <Dialog {...props}>
       <DialogContent className="p-0">
-        <Command shouldFilter={false} loop>
+        <Command>
           {children}
           {footer ? <DialogFooter>{footer}</DialogFooter> : null}
         </Command>
