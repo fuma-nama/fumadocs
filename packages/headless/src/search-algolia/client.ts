@@ -75,15 +75,14 @@ interface UseAlgoliaSearch {
 
 export function useAlgoliaSearch(
   index: SearchIndex,
-  options: Options = {},
+  { allowEmpty = true, ...options }: Options = {},
 ): UseAlgoliaSearch {
   const [search, setSearch] = useState('');
 
   const query = useSWR(
-    ['/api/search', search, options],
+    ['/api/search', search, allowEmpty, options],
     async () => {
-      const { allowEmpty = true } = options;
-      if (!allowEmpty && search.length === 0) return 'empty';
+      if (allowEmpty && search.length === 0) return 'empty';
 
       return searchDocs(index, search, options);
     },
