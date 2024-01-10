@@ -12,6 +12,7 @@ import { map } from '@/.map';
 
 const frontmatterSchema = defaultSchemas.frontmatter.extend({
   preview: z.string().optional(),
+  toc: z.boolean().default(true),
   index: z.boolean().default(false),
 });
 

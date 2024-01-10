@@ -1,0 +1,680 @@
+<Root >
+
+<API >
+
+<APIInfo method={"POST"} route={"/pet"}>
+
+## Add a new pet to the store
+
+### Request Body
+
+Pet object that needs to be added to the store
+
+<Property name={"id"} type={"integer"}>
+
+
+
+</Property>
+
+<Property name={"category"} type={"object"}>
+
+A category for a pet
+
+</Property>
+
+<Property name={"name"} type={"string"}>
+
+
+
+Example: `"doggie"`
+
+</Property>
+
+<Property name={"photoUrls"} type={"array of string"}>
+
+
+
+</Property>
+
+<Property name={"tags"} type={"array of object"}>
+
+
+
+</Property>
+
+<Property name={"status"} type={"string"}>
+
+pet status in the store
+
+</Property>
+
+| Status code | Description |
+| ----------- | ----------- |
+| `200` | successful operation |
+| `405` | Invalid input |
+
+</APIInfo>
+
+<APIExample >
+
+
+
+</APIExample>
+
+</API>
+
+<API >
+
+<APIInfo method={"GET"} route={"/pet/findByStatus"}>
+
+## Finds Pets by status
+
+Multiple status values can be provided with comma separated strings
+
+### Required attributes
+
+<Property name={"status"} type={"array of string"}>
+
+
+
+</Property>
+
+| Status code | Description |
+| ----------- | ----------- |
+| `200` | successful operation |
+| `400` | Invalid status value |
+
+</APIInfo>
+
+<APIExample >
+
+
+
+</APIExample>
+
+</API>
+
+<API >
+
+<APIInfo method={"GET"} route={"/pet/findByTags"}>
+
+## Finds Pets by tags
+
+Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
+
+### Required attributes
+
+<Property name={"tags"} type={"array of string"}>
+
+
+
+</Property>
+
+| Status code | Description |
+| ----------- | ----------- |
+| `200` | successful operation |
+| `400` | Invalid tag value |
+
+</APIInfo>
+
+<APIExample >
+
+
+
+</APIExample>
+
+</API>
+
+<API >
+
+<APIInfo method={"GET"} route={"/pet/{petId}"}>
+
+## Find pet by ID
+
+Returns a single pet
+
+### Required attributes
+
+<Property name={"petId"} type={"integer"}>
+
+
+
+</Property>
+
+| Status code | Description |
+| ----------- | ----------- |
+| `200` | successful operation |
+| `400` | Invalid ID supplied |
+| `404` | Pet not found |
+
+</APIInfo>
+
+<APIExample >
+
+
+
+</APIExample>
+
+</API>
+
+<API >
+
+<APIInfo method={"POST"} route={"/pet/{petId}"}>
+
+## Updates a pet in the store with form data
+
+### Request Body (Optional)
+
+
+
+<Property name={"name"} type={"string"}>
+
+Updated name of the pet
+
+</Property>
+
+<Property name={"status"} type={"string"}>
+
+Updated status of the pet
+
+</Property>
+
+### Required attributes
+
+<Property name={"petId"} type={"integer"}>
+
+
+
+</Property>
+
+| Status code | Description |
+| ----------- | ----------- |
+| `405` | Invalid input |
+
+</APIInfo>
+
+<APIExample >
+
+
+
+</APIExample>
+
+</API>
+
+<API >
+
+<APIInfo method={"DELETE"} route={"/pet/{petId}"}>
+
+## Deletes a pet
+
+### Required attributes
+
+<Property name={"petId"} type={"integer"}>
+
+
+
+</Property>
+
+### Optional attributes
+
+<Property name={"api_key"} type={"string"}>
+
+
+
+</Property>
+
+| Status code | Description |
+| ----------- | ----------- |
+| `400` | Invalid pet value |
+
+</APIInfo>
+
+<APIExample >
+
+
+
+</APIExample>
+
+</API>
+
+<API >
+
+<APIInfo method={"POST"} route={"/pet/{petId}/uploadImage"}>
+
+## uploads an image
+
+### Request Body (Optional)
+
+
+
+<Property name={"additionalMetadata"} type={"string"}>
+
+Additional data to pass to server
+
+</Property>
+
+<Property name={"file"} type={"string"}>
+
+file to upload
+
+</Property>
+
+### Required attributes
+
+<Property name={"petId"} type={"integer"}>
+
+
+
+</Property>
+
+| Status code | Description |
+| ----------- | ----------- |
+| `200` | successful operation |
+
+</APIInfo>
+
+<APIExample >
+
+
+
+</APIExample>
+
+</API>
+
+<API >
+
+<APIInfo method={"GET"} route={"/store/inventory"}>
+
+## Returns pet inventories by status
+
+Returns a map of status codes to quantities
+
+| Status code | Description |
+| ----------- | ----------- |
+| `200` | successful operation |
+
+</APIInfo>
+
+<APIExample >
+
+
+
+</APIExample>
+
+</API>
+
+<API >
+
+<APIInfo method={"POST"} route={"/store/order"}>
+
+## Place an order for a pet
+
+### Request Body
+
+order placed for purchasing the pet
+
+<Property name={"id"} type={"integer"}>
+
+
+
+</Property>
+
+<Property name={"petId"} type={"integer"}>
+
+
+
+</Property>
+
+<Property name={"quantity"} type={"integer"}>
+
+
+
+</Property>
+
+<Property name={"shipDate"} type={"string"}>
+
+
+
+</Property>
+
+<Property name={"status"} type={"string"}>
+
+Order Status
+
+</Property>
+
+<Property name={"complete"} type={"boolean"}>
+
+
+
+</Property>
+
+| Status code | Description |
+| ----------- | ----------- |
+| `200` | successful operation |
+| `400` | Invalid Order |
+
+</APIInfo>
+
+<APIExample >
+
+
+
+</APIExample>
+
+</API>
+
+<API >
+
+<APIInfo method={"GET"} route={"/store/order/{orderId}"}>
+
+## Find purchase order by ID
+
+For valid response try integer IDs with value \<= 5 or \> 10. Other values will generate exceptions
+
+### Required attributes
+
+<Property name={"orderId"} type={"integer"}>
+
+
+
+</Property>
+
+| Status code | Description |
+| ----------- | ----------- |
+| `200` | successful operation |
+| `400` | Invalid ID supplied |
+| `404` | Order not found |
+
+</APIInfo>
+
+<APIExample >
+
+
+
+</APIExample>
+
+</API>
+
+<API >
+
+<APIInfo method={"DELETE"} route={"/store/order/{orderId}"}>
+
+## Delete purchase order by ID
+
+For valid response try integer IDs with value \< 1000. Anything above 1000 or nonintegers will generate API errors
+
+### Required attributes
+
+<Property name={"orderId"} type={"string"}>
+
+
+
+</Property>
+
+| Status code | Description |
+| ----------- | ----------- |
+| `400` | Invalid ID supplied |
+| `404` | Order not found |
+
+</APIInfo>
+
+<APIExample >
+
+
+
+</APIExample>
+
+</API>
+
+<API >
+
+<APIInfo method={"POST"} route={"/user"}>
+
+## Create user
+
+This can only be done by the logged in user.
+
+### Request Body
+
+Created user object
+
+<Property name={"id"} type={"integer"}>
+
+
+
+</Property>
+
+<Property name={"username"} type={"string"}>
+
+
+
+</Property>
+
+<Property name={"firstName"} type={"string"}>
+
+
+
+</Property>
+
+<Property name={"lastName"} type={"string"}>
+
+
+
+</Property>
+
+<Property name={"email"} type={"string"}>
+
+
+
+</Property>
+
+<Property name={"password"} type={"string"}>
+
+
+
+</Property>
+
+<Property name={"phone"} type={"string"}>
+
+
+
+</Property>
+
+<Property name={"userStatus"} type={"integer"}>
+
+User Status
+
+</Property>
+
+| Status code | Description |
+| ----------- | ----------- |
+| `default` | successful operation |
+
+</APIInfo>
+
+<APIExample >
+
+
+
+</APIExample>
+
+</API>
+
+<API >
+
+<APIInfo method={"POST"} route={"/user/createWithArray"}>
+
+## Creates list of users with given input array
+
+### Request Body
+
+List of user object
+
+<Property name={"body"} type={"array of object"}>
+
+
+
+</Property>
+
+| Status code | Description |
+| ----------- | ----------- |
+| `default` | successful operation |
+
+</APIInfo>
+
+<APIExample >
+
+
+
+</APIExample>
+
+</API>
+
+<API >
+
+<APIInfo method={"POST"} route={"/user/createWithList"}>
+
+## Creates list of users with given input array
+
+### Request Body
+
+List of user object
+
+<Property name={"body"} type={"array of object"}>
+
+
+
+</Property>
+
+| Status code | Description |
+| ----------- | ----------- |
+| `default` | successful operation |
+
+</APIInfo>
+
+<APIExample >
+
+
+
+</APIExample>
+
+</API>
+
+<API >
+
+<APIInfo method={"GET"} route={"/user/login"}>
+
+## Logs user into the system
+
+### Required attributes
+
+<Property name={"username"} type={"string"}>
+
+
+
+</Property>
+
+<Property name={"password"} type={"string"}>
+
+
+
+</Property>
+
+| Status code | Description |
+| ----------- | ----------- |
+| `200` | successful operation |
+| `400` | Invalid username/password supplied |
+
+</APIInfo>
+
+<APIExample >
+
+
+
+</APIExample>
+
+</API>
+
+<API >
+
+<APIInfo method={"GET"} route={"/user/logout"}>
+
+## Logs out current logged in user session
+
+| Status code | Description |
+| ----------- | ----------- |
+| `default` | successful operation |
+
+</APIInfo>
+
+<APIExample >
+
+
+
+</APIExample>
+
+</API>
+
+<API >
+
+<APIInfo method={"GET"} route={"/user/{username}"}>
+
+## Get user by user name
+
+### Required attributes
+
+<Property name={"username"} type={"string"}>
+
+
+
+</Property>
+
+| Status code | Description |
+| ----------- | ----------- |
+| `200` | successful operation |
+| `400` | Invalid username supplied |
+| `404` | User not found |
+
+</APIInfo>
+
+<APIExample >
+
+
+
+</APIExample>
+
+</API>
+
+<API >
+
+<APIInfo method={"DELETE"} route={"/user/{username}"}>
+
+## Delete user
+
+This can only be done by the logged in user.
+
+### Required attributes
+
+<Property name={"username"} type={"string"}>
+
+
+
+</Property>
+
+| Status code | Description |
+| ----------- | ----------- |
+| `400` | Invalid username supplied |
+| `404` | User not found |
+
+</APIInfo>
+
+<APIExample >
+
+
+
+</APIExample>
+
+</API>
+
+</Root>

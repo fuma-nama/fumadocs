@@ -26,6 +26,7 @@ export default function Page({ params }: { params: Param }): JSX.Element {
       toc={page.data.exports.toc}
       lastUpdate={page.data.exports.lastModified}
       tableOfContent={{
+        enabled: page.data.toc,
         footer: (
           <a
             href={`https://github.com/fuma-nama/next-docs/blob/main/${path}`}

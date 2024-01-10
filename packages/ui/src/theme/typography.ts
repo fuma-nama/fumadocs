@@ -32,6 +32,7 @@ export const typography = {
       opacity: '80%',
     },
     table: {
+      fontSize: '14px',
       whiteSpace: 'nowrap',
     },
     code: {
