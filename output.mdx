@@ -1,362 +1,481 @@
-<Root >
+<Root>
 
-<API >
+<API>
 
-<APIInfo method={"POST"} route={"/pet"}>
+<APIInfo method={"GET"} route={"/museum-hours"}>
 
-## Add a new pet to the store
+## Get museum hours
+
+Get upcoming museum operating hours
+
+### Query Parameters
+
+<Property required={false} deprecated={false} name={"startDate"} type={"string"}>
+
+The starting date to retrieve future operating hours from. Defaults to today's date.
+
+<span>Example:  `"2023-02-23"`</span>
+
+<span>Format:  `"date"`</span>
+
+</Property>
+
+<Property required={false} deprecated={false} name={"page"} type={"integer"}>
+
+The page number to retrieve.
+
+<span>Example:  `2`</span>
+
+<span>Default:  `1`</span>
+
+</Property>
+
+<Property required={false} deprecated={false} name={"limit"} type={"integer"}>
+
+The number of days per page.
+
+<span>Example:  `15`</span>
+
+<span>Default:  `10`</span>
+
+<span>Maximum:  `30`</span>
+
+</Property>
+
+| Status code | Description |
+| ----------- | ----------- |
+| `200` | Success |
+| `400` | Bad request |
+| `404` | Not found |
+
+</APIInfo>
+
+<APIExample>
+
+```bash title="curl"
+curl -X GET "https://api.fake-museum-example.com/museum-hours?startDate=2023-02-23&page=2&limit=15"
+```
+
+<Tabs items={["200"]}>
+
+<Tab value={"200"}>
+
+```json title="Example Response"
+[
+  {
+    "date": "02-02-2022",
+    "timeOpen": "09:00",
+    "timeClose": "18:00"
+  }
+]
+```
+
+</Tab>
+
+</Tabs>
+
+</APIExample>
+
+</API>
+
+<API>
+
+<APIInfo method={"GET"} route={"/special-events"}>
+
+## List special events
+
+Return a list of upcoming special events at the museum.
+
+### Query Parameters
+
+<Property required={false} deprecated={false} name={"startDate"} type={"string"}>
+
+The starting date to retrieve future operating hours from. Defaults to today's date.
+
+<span>Example:  `"2023-02-23"`</span>
+
+<span>Format:  `"date"`</span>
+
+</Property>
+
+<Property required={false} deprecated={false} name={"endDate"} type={"string"}>
+
+The end of a date range to retrieve special events for. Defaults to 7 days after `startDate`.
+
+<span>Example:  `"2023-04-18"`</span>
+
+<span>Format:  `"date"`</span>
+
+</Property>
+
+<Property required={false} deprecated={false} name={"page"} type={"integer"}>
+
+The page number to retrieve.
+
+<span>Example:  `2`</span>
+
+<span>Default:  `1`</span>
+
+</Property>
+
+<Property required={false} deprecated={false} name={"limit"} type={"integer"}>
+
+The number of days per page.
+
+<span>Example:  `15`</span>
+
+<span>Default:  `10`</span>
+
+<span>Maximum:  `30`</span>
+
+</Property>
+
+| Status code | Description |
+| ----------- | ----------- |
+| `200` | Success |
+| `400` | Bad request |
+| `404` | Not found |
+
+</APIInfo>
+
+<APIExample>
+
+```bash title="curl"
+curl -X GET "https://api.fake-museum-example.com/special-events?startDate=2023-02-23&endDate=2023-04-18&page=2&limit=15"
+```
+
+<Tabs items={["200"]}>
+
+<Tab value={"200"}>
+
+```json title="Example Response"
+[
+  {
+    "eventId": "3be6453c-03eb-4357-ae5a-984a0e574a54",
+    "name": "Pirate Coding Workshop",
+    "location": "Computer Room",
+    "eventDescription": "Captain Blackbeard shares his love of the C...language. And possibly Arrrrr (R lang).",
+    "dates": [
+      "2023-10-29"
+    ],
+    "price": 25
+  }
+]
+```
+
+</Tab>
+
+</Tabs>
+
+</APIExample>
+
+</API>
+
+<API>
+
+<APIInfo method={"POST"} route={"/special-events"}>
+
+## Create special events
+
+Creates a new special event for the museum.
 
 ### Request Body
 
-Pet object that needs to be added to the store
-
-<Property name={"id"} type={"integer"}>
 
 
+<Property required={true} deprecated={false} name={"name"} type={"string"}>
 
-</Property>
+Name of the special event
 
-<Property name={"category"} type={"object"}>
-
-A category for a pet
+<span>Example:  `"Pirate Coding Workshop"`</span>
 
 </Property>
 
-<Property name={"name"} type={"string"}>
+<Property required={true} deprecated={false} name={"location"} type={"string"}>
 
+Location where the special event is held
 
-
-Example: `"doggie"`
-
-</Property>
-
-<Property name={"photoUrls"} type={"array of string"}>
-
-
+<span>Example:  `"Computer Room"`</span>
 
 </Property>
 
-<Property name={"tags"} type={"array of object"}>
+<Property required={true} deprecated={false} name={"eventDescription"} type={"string"}>
 
+Description of the special event
 
-
-</Property>
-
-<Property name={"status"} type={"string"}>
-
-pet status in the store
+<span>Example:  `"Captain Blackbeard shares his love of the C...language. And possibly Arrrrr (R lang)."`</span>
 
 </Property>
 
-| Status code | Description |
-| ----------- | ----------- |
-| `200` | successful operation |
-| `405` | Invalid input |
+<Property required={true} deprecated={false} name={"dates"} type={"array of string"}>
 
-</APIInfo>
+List of planned dates for the special event
 
-<APIExample >
+</Property>
 
+<Property required={true} deprecated={false} name={"price"} type={"number"}>
 
+Price of a ticket for the special event
 
-</APIExample>
+<span>Example:  `25`</span>
 
-</API>
-
-<API >
-
-<APIInfo method={"GET"} route={"/pet/findByStatus"}>
-
-## Finds Pets by status
-
-Multiple status values can be provided with comma separated strings
-
-### Required attributes
-
-<Property name={"status"} type={"array of string"}>
-
-
+<span>Format:  `"float"`</span>
 
 </Property>
 
 | Status code | Description |
 | ----------- | ----------- |
-| `200` | successful operation |
-| `400` | Invalid status value |
+| `200` | Success |
+| `400` | Bad request |
+| `404` | Not found |
 
 </APIInfo>
 
-<APIExample >
+<APIExample>
 
+```bash title="curl"
+curl -X POST "https://api.fake-museum-example.com/special-events?" \
+  -d '{
+  "name": "Pirate Coding Workshop",
+  "location": "Computer Room",
+  "eventDescription": "Captain Blackbeard shares his love of the C...language. And possibly Arrrrr (R lang).",
+  "dates": [
+    "2023-10-29"
+  ],
+  "price": 25
+}'
+```
 
+<Tabs items={["200"]}>
+
+<Tab value={"200"}>
+
+```json title="Example Response"
+{
+  "eventId": "3be6453c-03eb-4357-ae5a-984a0e574a54",
+  "name": "Pirate Coding Workshop",
+  "location": "Computer Room",
+  "eventDescription": "Captain Blackbeard shares his love of the C...language. And possibly Arrrrr (R lang).",
+  "dates": [
+    "2023-10-29"
+  ],
+  "price": 25
+}
+```
+
+</Tab>
+
+</Tabs>
 
 </APIExample>
 
 </API>
 
-<API >
+<API>
 
-<APIInfo method={"GET"} route={"/pet/findByTags"}>
+<APIInfo method={"GET"} route={"/special-events/{eventId}"}>
 
-## Finds Pets by tags
+## Get special event
 
-Multiple tags can be provided with comma separated strings. Use tag1, tag2, tag3 for testing.
+Get details about a special event.
 
-### Required attributes
+### Path Parameters
 
-<Property name={"tags"} type={"array of string"}>
+<Property required={true} deprecated={false} name={"eventId"} type={"string"}>
 
+An identifier for a special event.
 
+<span>Example:  `"dad4bce8-f5cb-4078-a211-995864315e39"`</span>
+
+<span>Format:  `"uuid"`</span>
 
 </Property>
 
 | Status code | Description |
 | ----------- | ----------- |
-| `200` | successful operation |
-| `400` | Invalid tag value |
+| `200` | Success |
+| `400` | Bad request |
+| `404` | Not found |
 
 </APIInfo>
 
-<APIExample >
+<APIExample>
 
+```bash title="curl"
+curl -X GET "https://api.fake-museum-example.com/special-events/%7BeventId%7D?"
+```
 
+<Tabs items={["200"]}>
+
+<Tab value={"200"}>
+
+```json title="Example Response"
+{
+  "eventId": "3be6453c-03eb-4357-ae5a-984a0e574a54",
+  "name": "Pirate Coding Workshop",
+  "location": "Computer Room",
+  "eventDescription": "Captain Blackbeard shares his love of the C...language. And possibly Arrrrr (R lang).",
+  "dates": [
+    "2023-10-29"
+  ],
+  "price": 25
+}
+```
+
+</Tab>
+
+</Tabs>
 
 </APIExample>
 
 </API>
 
-<API >
+<API>
 
-<APIInfo method={"GET"} route={"/pet/{petId}"}>
+<APIInfo method={"PATCH"} route={"/special-events/{eventId}"}>
 
-## Find pet by ID
+## Update special event
 
-Returns a single pet
-
-### Required attributes
-
-<Property name={"petId"} type={"integer"}>
-
-
-
-</Property>
-
-| Status code | Description |
-| ----------- | ----------- |
-| `200` | successful operation |
-| `400` | Invalid ID supplied |
-| `404` | Pet not found |
-
-</APIInfo>
-
-<APIExample >
-
-
-
-</APIExample>
-
-</API>
-
-<API >
-
-<APIInfo method={"POST"} route={"/pet/{petId}"}>
-
-## Updates a pet in the store with form data
-
-### Request Body (Optional)
-
-
-
-<Property name={"name"} type={"string"}>
-
-Updated name of the pet
-
-</Property>
-
-<Property name={"status"} type={"string"}>
-
-Updated status of the pet
-
-</Property>
-
-### Required attributes
-
-<Property name={"petId"} type={"integer"}>
-
-
-
-</Property>
-
-| Status code | Description |
-| ----------- | ----------- |
-| `405` | Invalid input |
-
-</APIInfo>
-
-<APIExample >
-
-
-
-</APIExample>
-
-</API>
-
-<API >
-
-<APIInfo method={"DELETE"} route={"/pet/{petId}"}>
-
-## Deletes a pet
-
-### Required attributes
-
-<Property name={"petId"} type={"integer"}>
-
-
-
-</Property>
-
-### Optional attributes
-
-<Property name={"api_key"} type={"string"}>
-
-
-
-</Property>
-
-| Status code | Description |
-| ----------- | ----------- |
-| `400` | Invalid pet value |
-
-</APIInfo>
-
-<APIExample >
-
-
-
-</APIExample>
-
-</API>
-
-<API >
-
-<APIInfo method={"POST"} route={"/pet/{petId}/uploadImage"}>
-
-## uploads an image
-
-### Request Body (Optional)
-
-
-
-<Property name={"additionalMetadata"} type={"string"}>
-
-Additional data to pass to server
-
-</Property>
-
-<Property name={"file"} type={"string"}>
-
-file to upload
-
-</Property>
-
-### Required attributes
-
-<Property name={"petId"} type={"integer"}>
-
-
-
-</Property>
-
-| Status code | Description |
-| ----------- | ----------- |
-| `200` | successful operation |
-
-</APIInfo>
-
-<APIExample >
-
-
-
-</APIExample>
-
-</API>
-
-<API >
-
-<APIInfo method={"GET"} route={"/store/inventory"}>
-
-## Returns pet inventories by status
-
-Returns a map of status codes to quantities
-
-| Status code | Description |
-| ----------- | ----------- |
-| `200` | successful operation |
-
-</APIInfo>
-
-<APIExample >
-
-
-
-</APIExample>
-
-</API>
-
-<API >
-
-<APIInfo method={"POST"} route={"/store/order"}>
-
-## Place an order for a pet
+Update the details of a special event
 
 ### Request Body
 
-order placed for purchasing the pet
-
-<Property name={"id"} type={"integer"}>
 
 
+<Property required={false} deprecated={false} name={"name"} type={"string"}>
 
-</Property>
+Name of the special event
 
-<Property name={"petId"} type={"integer"}>
-
-
+<span>Example:  `"Pirate Coding Workshop"`</span>
 
 </Property>
 
-<Property name={"quantity"} type={"integer"}>
+<Property required={false} deprecated={false} name={"location"} type={"string"}>
 
+Location where the special event is held
 
-
-</Property>
-
-<Property name={"shipDate"} type={"string"}>
-
-
+<span>Example:  `"Computer Room"`</span>
 
 </Property>
 
-<Property name={"status"} type={"string"}>
+<Property required={false} deprecated={false} name={"eventDescription"} type={"string"}>
 
-Order Status
+Description of the special event
+
+<span>Example:  `"Captain Blackbeard shares his love of the C...language. And possibly Arrrrr (R lang)."`</span>
 
 </Property>
 
-<Property name={"complete"} type={"boolean"}>
+<Property required={false} deprecated={false} name={"dates"} type={"array of string"}>
 
+List of planned dates for the special event
 
+</Property>
+
+<Property required={false} deprecated={false} name={"price"} type={"number"}>
+
+Price of a ticket for the special event
+
+<span>Example:  `25`</span>
+
+<span>Format:  `"float"`</span>
+
+</Property>
+
+### Path Parameters
+
+<Property required={true} deprecated={false} name={"eventId"} type={"string"}>
+
+An identifier for a special event.
+
+<span>Example:  `"dad4bce8-f5cb-4078-a211-995864315e39"`</span>
+
+<span>Format:  `"uuid"`</span>
 
 </Property>
 
 | Status code | Description |
 | ----------- | ----------- |
-| `200` | successful operation |
-| `400` | Invalid Order |
+| `200` | Success |
+| `400` | Bad request |
+| `404` | Not found |
 
 </APIInfo>
 
-<APIExample >
+<APIExample>
+
+```bash title="curl"
+curl -X PATCH "https://api.fake-museum-example.com/special-events/%7BeventId%7D?" \
+  -d '{
+  "name": "Pirate Coding Workshop",
+  "location": "Computer Room",
+  "eventDescription": "Captain Blackbeard shares his love of the C...language. And possibly Arrrrr (R lang).",
+  "dates": [
+    "2023-10-29"
+  ],
+  "price": 25
+}'
+```
+
+<Tabs items={["200"]}>
+
+<Tab value={"200"}>
+
+```json title="Example Response"
+{
+  "eventId": "3be6453c-03eb-4357-ae5a-984a0e574a54",
+  "name": "Pirate Coding Workshop",
+  "location": "Computer Room",
+  "eventDescription": "Captain Blackbeard shares his love of the C...language. And possibly Arrrrr (R lang).",
+  "dates": [
+    "2023-10-29"
+  ],
+  "price": 25
+}
+```
+
+</Tab>
+
+</Tabs>
+
+</APIExample>
+
+</API>
+
+<API>
+
+<APIInfo method={"DELETE"} route={"/special-events/{eventId}"}>
+
+## Delete special event
+
+Delete a special event from the collection. Allows museum to cancel planned events.
+
+### Path Parameters
+
+<Property required={true} deprecated={false} name={"eventId"} type={"string"}>
+
+An identifier for a special event.
+
+<span>Example:  `"dad4bce8-f5cb-4078-a211-995864315e39"`</span>
+
+<span>Format:  `"uuid"`</span>
+
+</Property>
+
+| Status code | Description |
+| ----------- | ----------- |
+| `204` | Success - no content |
+| `400` | Bad request |
+| `401` | Unauthorized |
+| `404` | Not found |
+
+</APIInfo>
+
+<APIExample>
+
+```bash title="curl"
+curl -X DELETE "https://api.fake-museum-example.com/special-events/%7BeventId%7D?"
+```
 
 
 
@@ -364,314 +483,155 @@ Order Status
 
 </API>
 
-<API >
+<API>
 
-<APIInfo method={"GET"} route={"/store/order/{orderId}"}>
+<APIInfo method={"POST"} route={"/tickets"}>
 
-## Find purchase order by ID
+## Buy museum tickets
 
-For valid response try integer IDs with value \<= 5 or \> 10. Other values will generate exceptions
-
-### Required attributes
-
-<Property name={"orderId"} type={"integer"}>
-
-
-
-</Property>
-
-| Status code | Description |
-| ----------- | ----------- |
-| `200` | successful operation |
-| `400` | Invalid ID supplied |
-| `404` | Order not found |
-
-</APIInfo>
-
-<APIExample >
-
-
-
-</APIExample>
-
-</API>
-
-<API >
-
-<APIInfo method={"DELETE"} route={"/store/order/{orderId}"}>
-
-## Delete purchase order by ID
-
-For valid response try integer IDs with value \< 1000. Anything above 1000 or nonintegers will generate API errors
-
-### Required attributes
-
-<Property name={"orderId"} type={"string"}>
-
-
-
-</Property>
-
-| Status code | Description |
-| ----------- | ----------- |
-| `400` | Invalid ID supplied |
-| `404` | Order not found |
-
-</APIInfo>
-
-<APIExample >
-
-
-
-</APIExample>
-
-</API>
-
-<API >
-
-<APIInfo method={"POST"} route={"/user"}>
-
-## Create user
-
-This can only be done by the logged in user.
+Purchase museum tickets for general entry or special events.
 
 ### Request Body
 
-Created user object
-
-<Property name={"id"} type={"integer"}>
 
 
+<Property required={true} deprecated={false} name={"ticketType"} type={"string"}>
 
-</Property>
+Type of ticket being purchased. Use `general` for regular museum entry and `event` for tickets to special events.
 
-<Property name={"username"} type={"string"}>
+<span>Example:  `"event"`</span>
 
-
+<span>Value in:  `"event" | "general"`</span>
 
 </Property>
 
-<Property name={"firstName"} type={"string"}>
+<Property required={false} deprecated={false} name={"eventId"} type={"string"}>
 
+Unique identifier for a special event. Required if purchasing tickets for the museum's special events.
 
+<span>Example:  `"3be6453c-03eb-4357-ae5a-984a0e574a54"`</span>
 
-</Property>
-
-<Property name={"lastName"} type={"string"}>
-
-
+<span>Format:  `"uuid"`</span>
 
 </Property>
 
-<Property name={"email"} type={"string"}>
+<Property required={true} deprecated={false} name={"ticketDate"} type={"string"}>
 
+Date that the ticket is valid for.
 
+<span>Example:  `"2023-10-29"`</span>
 
-</Property>
-
-<Property name={"password"} type={"string"}>
-
-
+<span>Format:  `"date"`</span>
 
 </Property>
 
-<Property name={"phone"} type={"string"}>
+<Property required={true} deprecated={false} name={"email"} type={"string"}>
 
+Email address for ticket purchaser.
 
+<span>Example:  `"museum-lover@example.com"`</span>
+
+<span>Format:  `"email"`</span>
 
 </Property>
 
-<Property name={"userStatus"} type={"integer"}>
+<Property required={false} deprecated={false} name={"phone"} type={"string"}>
 
-User Status
+Phone number for the ticket purchaser (optional).
+
+<span>Example:  `"+1(234)-567-8910"`</span>
 
 </Property>
 
 | Status code | Description |
 | ----------- | ----------- |
-| `default` | successful operation |
+| `200` | Success |
+| `400` | Bad request |
+| `404` | Not found |
 
 </APIInfo>
 
-<APIExample >
+<APIExample>
 
+```bash title="curl"
+curl -X POST "https://api.fake-museum-example.com/tickets?" \
+  -d '{
+  "ticketType": "event",
+  "eventId": "3be6453c-03eb-4357-ae5a-984a0e574a54",
+  "ticketDate": "2023-10-29",
+  "email": "museum-lover@example.com",
+  "phone": "+1(234)-567-8910"
+}'
+```
 
+<Tabs items={["200"]}>
+
+<Tab value={"200"}>
+
+```json title="Example Response"
+{
+  "message": "Museum general entry ticket purchased",
+  "eventName": "Pirate Coding Workshop",
+  "ticketId": "a54a57ca-36f8-421b-a6b4-2e8f26858a4c",
+  "ticketType": "event",
+  "ticketDate": "2023-10-29",
+  "confirmationCode": "ticket-event-a98c8f-7eb12"
+}
+```
+
+</Tab>
+
+</Tabs>
 
 </APIExample>
 
 </API>
 
-<API >
+<API>
 
-<APIInfo method={"POST"} route={"/user/createWithArray"}>
+<APIInfo method={"GET"} route={"/tickets/{ticketId}/qr"}>
 
-## Creates list of users with given input array
+## Get ticket QR code
 
-### Request Body
+Return an image of your ticket with scannable QR code. Used for event entry.
 
-List of user object
+### Path Parameters
 
-<Property name={"body"} type={"array of object"}>
+<Property required={true} deprecated={false} name={"ticketId"} type={"string"}>
 
+An identifier for a ticket to a museum event. Used to generate ticket image.
 
+<span>Example:  `"a54a57ca-36f8-421b-a6b4-2e8f26858a4c"`</span>
 
-</Property>
-
-| Status code | Description |
-| ----------- | ----------- |
-| `default` | successful operation |
-
-</APIInfo>
-
-<APIExample >
-
-
-
-</APIExample>
-
-</API>
-
-<API >
-
-<APIInfo method={"POST"} route={"/user/createWithList"}>
-
-## Creates list of users with given input array
-
-### Request Body
-
-List of user object
-
-<Property name={"body"} type={"array of object"}>
-
-
+<span>Format:  `"uuid"`</span>
 
 </Property>
 
 | Status code | Description |
 | ----------- | ----------- |
-| `default` | successful operation |
+| `200` | Scannable event ticket in image format |
+| `400` | Bad request |
+| `404` | Not found |
 
 </APIInfo>
 
-<APIExample >
+<APIExample>
 
+```bash title="curl"
+curl -X GET "https://api.fake-museum-example.com/tickets/%7BticketId%7D/qr?"
+```
 
+<Tabs items={["200"]}>
 
-</APIExample>
+<Tab value={"200"}>
 
-</API>
+```json title="Example Response"
+"string"
+```
 
-<API >
+</Tab>
 
-<APIInfo method={"GET"} route={"/user/login"}>
-
-## Logs user into the system
-
-### Required attributes
-
-<Property name={"username"} type={"string"}>
-
-
-
-</Property>
-
-<Property name={"password"} type={"string"}>
-
-
-
-</Property>
-
-| Status code | Description |
-| ----------- | ----------- |
-| `200` | successful operation |
-| `400` | Invalid username/password supplied |
-
-</APIInfo>
-
-<APIExample >
-
-
-
-</APIExample>
-
-</API>
-
-<API >
-
-<APIInfo method={"GET"} route={"/user/logout"}>
-
-## Logs out current logged in user session
-
-| Status code | Description |
-| ----------- | ----------- |
-| `default` | successful operation |
-
-</APIInfo>
-
-<APIExample >
-
-
-
-</APIExample>
-
-</API>
-
-<API >
-
-<APIInfo method={"GET"} route={"/user/{username}"}>
-
-## Get user by user name
-
-### Required attributes
-
-<Property name={"username"} type={"string"}>
-
-
-
-</Property>
-
-| Status code | Description |
-| ----------- | ----------- |
-| `200` | successful operation |
-| `400` | Invalid username supplied |
-| `404` | User not found |
-
-</APIInfo>
-
-<APIExample >
-
-
-
-</APIExample>
-
-</API>
-
-<API >
-
-<APIInfo method={"DELETE"} route={"/user/{username}"}>
-
-## Delete user
-
-This can only be done by the logged in user.
-
-### Required attributes
-
-<Property name={"username"} type={"string"}>
-
-
-
-</Property>
-
-| Status code | Description |
-| ----------- | ----------- |
-| `400` | Invalid username supplied |
-| `404` | User not found |
-
-</APIInfo>
-
-<APIExample >
-
-
+</Tabs>
 
 </APIExample>
 

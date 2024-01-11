@@ -18,12 +18,14 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@readme/openapi-parser": "^2.5.0"
+    "@readme/openapi-parser": "^2.5.0",
+    "openapi-sampler": "^1.4.0"
   },
   "devDependencies": {
-    "openapi-types": "^12.1.3",
     "@types/node": "18.17.5",
+    "@types/openapi-sampler": "^1.0.3",
     "eslint-config-custom": "workspace:*",
+    "openapi-types": "^12.1.3",
     "tsconfig": "workspace:*"
   },
   "publishConfig": {

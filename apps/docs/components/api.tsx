@@ -70,15 +70,33 @@ export function APIInfo({
 interface PropertyProps {
   name: string;
   type: string;
+  required: boolean;
+  deprecated: boolean;
   children: ReactNode;
 }
 
-export function Property({ name, type, children }: PropertyProps): JSX.Element {
+export function Property({
+  name,
+  type,
+  required,
+  deprecated,
+  children,
+}: PropertyProps): JSX.Element {
   return (
-    <div>
+    <div className="mb-4 flex flex-col rounded-lg border bg-card p-3 prose-no-margin">
       <h4 className="inline-flex items-center gap-4">
         <code>{name}</code>
-        <span className="font-mono text-xs text-muted-foreground">{type}</span>
+        {required ? (
+          <div className={cn(badgeVariants({ color: 'red' }))}>Required</div>
+        ) : null}
+        {deprecated ? (
+          <div className={cn(badgeVariants({ color: 'yellow' }))}>
+            Deprecated
+          </div>
+        ) : null}
+        <span className="ml-auto font-mono text-[13px] text-muted-foreground">
+          {type}
+        </span>
       </h4>
       {children}
     </div>
@@ -91,7 +109,10 @@ export function APIExample({
   ...props
 }: HTMLAttributes<HTMLDivElement>): JSX.Element {
   return (
-    <div className={cn('w-full max-w-[400px]', className)} {...props}>
+    <div
+      className={cn('sticky top-14 h-fit w-full max-w-[400px]', className)}
+      {...props}
+    >
       {children}
     </div>
   );

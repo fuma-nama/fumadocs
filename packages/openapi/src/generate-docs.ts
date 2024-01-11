@@ -1,20 +1,15 @@
 import { writeFileSync } from 'node:fs';
 import Parser from '@readme/openapi-parser';
 import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
-
-interface RouteInformation {
-  path: string;
-  summary?: string;
-  description?: string;
-  methods: MethodInformation[];
-}
-
-interface MethodInformation extends OpenAPI.OperationObject {
-  parameters: OpenAPI.ParameterObject[];
-  method: string;
-}
-
-type NoReference<T> = Exclude<T, OpenAPI.ReferenceObject>;
+import { p } from './render/element';
+import { getPreferredMedia, noRef } from './utils';
+import { schemaElement } from './render/schema';
+import { getSampleRequest } from './samples/curl';
+import type { RouteInformation, MethodInformation } from './types';
+import type { Endpoint } from './samples';
+import { createEndpoint } from './samples';
+import { getExampleResponse } from './samples/response';
+import { api, apiExample, apiInfo, root, tab, tabs } from './render/custom';
 
 export async function generate(path: string): Promise<void> {
   const document = (await Parser.dereference(path)) as OpenAPI.Document;
@@ -22,26 +17,14 @@ export async function generate(path: string): Promise<void> {
   const routes = Object.entries(document.paths).map<RouteInformation>(
     ([key, value]) => {
       if (!value) throw new Error('Invalid schema');
+      const methodKeys = ['get', 'post', 'patch', 'delete', 'head'] as const;
       const methods: MethodInformation[] = [];
 
-      if (value.get) {
-        methods.push(buildOperation('get', value.get));
-      }
-
-      if (value.post) {
-        methods.push(buildOperation('post', value.post));
-      }
-
-      if (value.patch) {
-        methods.push(buildOperation('patch', value.patch));
-      }
-
-      if (value.delete) {
-        methods.push(buildOperation('delete', value.delete));
-      }
-
-      if (value.head) {
-        methods.push(buildOperation('head', value.head));
+      for (const methodKey of methodKeys) {
+        if (methodKey in value) {
+          const operation = value[methodKey];
+          if (operation) methods.push(buildOperation(methodKey, operation));
+        }
       }
 
       return {
@@ -52,28 +35,29 @@ export async function generate(path: string): Promise<void> {
     },
   );
 
+  const serverUrl = document.servers?.[0].url;
   const s: string[] = [];
 
   routes.forEach((entry) => {
     for (const method of entry.methods) {
-      s.push(getOperationContent(entry.path, method));
+      s.push(getOperationContent(entry.path, method, serverUrl));
     }
   });
 
-  writeFileSync('./output.mdx', createElement('Root', {}, ...s));
+  writeFileSync('./output.mdx', root(...s));
 }
 
-function noRef<T>(v: T): NoReference<T> {
-  return v as NoReference<T>;
-}
-
-function getOperationContent(path: string, method: MethodInformation): string {
+function getOperationContent(
+  path: string,
+  method: MethodInformation,
+  baseUrl?: string,
+): string {
   const info: string[] = [];
   const example: string[] = [];
-  info.push(`## ${method.summary}`);
+  info.push(`## ${method.summary ?? method.operationId}`);
   if (method.description) info.push(p(method.description));
 
-  const body = method.requestBody as NoReference<typeof method.requestBody>;
+  const body = noRef(method.requestBody);
 
   if (body) {
     const bodySchema = getPreferredMedia(body.content)?.schema;
@@ -82,44 +66,68 @@ function getOperationContent(path: string, method: MethodInformation): string {
     info.push(
       `### Request Body${!body.required ? ' (Optional)' : ''}`,
       p(body.description),
-      ...schemaElement('body', noRef(bodySchema)),
+      schemaElement('body', noRef(bodySchema), {
+        parseObject: true,
+        readOnly: method.method === 'GET',
+        writeOnly: method.method !== 'GET',
+        required: body.required ?? false,
+      }),
     );
   }
 
-  const required: string[] = [];
-  const optional: string[] = [];
+  const parameterGroups = new Map<string, string[]>();
+  const endpoint = createEndpoint(path, method, baseUrl);
 
   for (const param of method.parameters) {
-    const schema =
-      param.schema ?? getPreferredMedia(param.content ?? {})?.schema;
+    const schema = noRef(
+      param.schema ?? getPreferredMedia(param.content ?? {})?.schema,
+    );
 
     if (!schema) continue;
-    const content = schemaElement(param.name, noRef(schema), false);
 
-    if (param.required) {
-      required.push(...content);
-    } else {
-      optional.push(...content);
-    }
+    const content = schemaElement(
+      param.name,
+      {
+        ...schema,
+        description: param.description ?? schema.description,
+        deprecated: param.deprecated || schema.deprecated,
+      },
+      {
+        parseObject: false,
+        readOnly: method.method === 'GET',
+        writeOnly: method.method !== 'GET',
+        required: param.required ?? false,
+      },
+    );
+
+    const groupName =
+      {
+        path: 'Path Parameters',
+        query: 'Query Parameters',
+        header: 'Header Parameters',
+        cookie: 'Cookie Parameters',
+      }[param.in] ?? 'Other Parameters';
+
+    const group = parameterGroups.get(groupName) ?? [];
+    group.push(content);
+    parameterGroups.set(groupName, group);
   }
 
-  if (required.length > 0) {
-    info.push('### Required attributes', ...required);
-  }
-
-  if (optional.length > 0) {
-    info.push('### Optional attributes', ...optional);
+  for (const [group, parameters] of Array.from(parameterGroups.entries())) {
+    info.push(`### ${group}`, ...parameters);
   }
 
   info.push(getResponseTable(method));
 
-  example.push(getResponseTabs(method));
+  example.push(
+    [`\`\`\`bash title="curl"`, getSampleRequest(endpoint), '```'].join('\n'),
+  );
 
-  return createElement(
-    'API',
-    {},
-    createElement('APIInfo', { method: method.method, route: path }, ...info),
-    createElement('APIExample', {}, ...example),
+  example.push(getResponseTabs(endpoint, method));
+
+  return api(
+    apiInfo({ method: method.method, route: path }, ...info),
+    apiExample(...example),
   );
 }
 
@@ -135,128 +143,36 @@ function getResponseTable(operation: OpenAPI.OperationObject): string {
   return table.join('\n');
 }
 
-function getResponseTabs(operation: OpenAPI.OperationObject): string {
-  const codes: string[] = [];
-  const tabs: string[] = [];
+function getResponseTabs(
+  endpoint: Endpoint,
+  operation: OpenAPI.OperationObject,
+): string {
+  const items: string[] = [];
+  const child: string[] = [];
 
-  Object.entries(operation.responses).forEach(([code, value]) => {
-    const response = noRef(value);
-    const content = noRef(getPreferredMedia(response.content ?? {}));
+  Object.entries(operation.responses).forEach(([code, _]) => {
+    const example = getExampleResponse(endpoint, code);
 
-    if (content?.example) {
-      codes.push(code);
+    if (example) {
+      items.push(code);
 
-      tabs.push(
-        createElement(
-          'Tab',
+      child.push(
+        tab(
           { value: code },
-          [
-            `\`\`\`json title=${JSON.stringify(
-              content.example ? 'Example Response' : 'Response Schema',
-            )}`,
-            JSON.stringify(content.example ?? content.schema),
-            '```',
-          ].join('\n'),
+          [`\`\`\`json title="Example Response"`, example, '```'].join('\n'),
         ),
       );
     }
   });
 
-  if (codes.length === 0) return '';
+  if (items.length === 0) return '';
 
-  return createElement(
-    'Tabs',
+  return tabs(
     {
-      items: codes,
+      items,
     },
-    ...tabs,
-  );
-}
-
-function getPreferredMedia<T>(body: Record<string, T>): T | undefined {
-  if (Object.keys(body).length === 0) return undefined;
-
-  if ('application/json' in body) return body['application/json'];
-
-  return Object.values(body)[0];
-}
-
-function getSchemaType(schema: OpenAPI.SchemaObject): string {
-  if (schema.type === 'array')
-    return `array of ${getSchemaType(noRef(schema.items))}`;
-
-  if (schema.oneOf)
-    return schema.oneOf.map((one) => getSchemaType(noRef(one))).join(' | ');
-
-  if (schema.allOf)
-    return schema.allOf.map((one) => getSchemaType(noRef(one))).join(' & ');
-
-  if (schema.anyOf)
-    return schema.anyOf.map((one) => getSchemaType(noRef(one))).join(' & ');
-
-  if (schema.type) return schema.type;
-
-  return 'object';
-}
-
-function schemaElement(
-  name: string,
-  schema: OpenAPI.SchemaObject,
-  parseObject = true,
-): string[] {
-  if (schema.type === 'object' && parseObject) {
-    const element: string[] = [];
-    const { additionalProperties, properties } = schema;
-
-    if (additionalProperties) {
-      if (additionalProperties === true) {
-        element.push(property('[key: string]', 'any'));
-      } else {
-        element.push(
-          ...schemaElement('[key: string]', noRef(additionalProperties), false),
-        );
-      }
-    }
-
-    Object.entries(properties ?? {}).forEach(([key, value]) => {
-      element.push(...schemaElement(key, noRef(value), false));
-    });
-
-    return element;
-  }
-
-  const child: string[] = [];
-
-  child.push(p(schema.description));
-  if (schema.example)
-    child.push(p(`Example: \`${JSON.stringify(schema.example)}\``));
-  if (schema.default)
-    child.push(p(`Default: \`${JSON.stringify(schema.default)}\``));
-
-  return [property(name, getSchemaType(schema), ...child)];
-}
-
-function p(child?: string): string {
-  if (!child) return '';
-  return child.replace('<', '\\<').replace('>', '\\>');
-}
-
-function property(name: string, type: string, ...child: string[]): string {
-  return createElement('Property', { name, type }, ...child);
-}
-
-function createElement(
-  name: string,
-  props: object,
-  ...child: string[]
-): string {
-  return [
-    `<${name} ${Object.entries(props)
-      .map(([key, value]) => `${key}={${JSON.stringify(value)}}`)
-      .join(' ')}>`,
     ...child,
-    `</${name}>`,
-  ].join('\n\n');
+  );
 }
 
 function buildOperation(
