@@ -1,9 +1,15 @@
-import type { Endpoint } from '.';
+import { generateSample, type Endpoint } from '.';
 
 export function getExampleResponse(
   endpoint: Endpoint,
   code: string,
 ): string | undefined {
-  if (code in endpoint.responses)
-    return JSON.stringify(endpoint.responses[code], null, 2);
+  if (code in endpoint.responses) {
+    const value = generateSample(
+      endpoint.method,
+      endpoint.responses[code].schema,
+    );
+
+    return JSON.stringify(value, null, 2);
+  }
 }

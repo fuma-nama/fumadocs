@@ -13,3 +13,10 @@ export function getPreferredMedia<T>(body: Record<string, T>): T | undefined {
 
   return Object.values(body)[0];
 }
+
+/**
+ * Get Path
+ */
+export function getValue(value: unknown): string {
+  return typeof value === 'string' ? value : JSON.stringify(value, null, 2);
+}

@@ -1,4 +1,8 @@
-function create(name: string, props: object, ...child: string[]): string[] {
+export function createElement(
+  name: string,
+  props: object,
+  ...child: string[]
+): string {
   const s: string[] = [];
   const params = Object.entries(props)
     .map(([key, value]) => `${key}={${JSON.stringify(value)}}`)
@@ -8,15 +12,7 @@ function create(name: string, props: object, ...child: string[]): string[] {
   s.push(...child);
   s.push(`</${name}>`);
 
-  return s;
-}
-
-export function createElement(
-  name: string,
-  props: object,
-  ...child: string[]
-): string {
-  return create(name, props, ...child).join('\n\n');
+  return s.join('\n\n');
 }
 
 export function p(child?: string): string {
@@ -26,4 +22,22 @@ export function p(child?: string): string {
 
 export function span(child?: string): string {
   return `<span>${p(child)}</span>`;
+}
+
+interface CodeBlockProps {
+  language: string;
+  title?: string;
+}
+
+export function codeblock(
+  { language, title }: CodeBlockProps,
+  child: string,
+): string {
+  return [
+    title
+      ? `\`\`\`${language} title=${JSON.stringify(title)}`
+      : `\`\`\`${language}`,
+    child,
+    '```',
+  ].join('\n');
 }

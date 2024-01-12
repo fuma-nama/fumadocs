@@ -1,5 +1,2 @@
-import { generate } from './generate-docs';
-
-void generate('./petstore.yaml').then(() => {
-  console.log('Generated');
-});
+export * from './generate';
+export * from './types';
