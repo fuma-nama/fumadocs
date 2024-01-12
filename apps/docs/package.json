@@ -7,6 +7,7 @@
     "build:index": "node ./update-index.mjs",
     "build:shaders": "glslx shaders/rain.glsl --output=shaders/rain.min.js --format=js --renaming=internal-only",
     "dev": "next dev",
+    "generate:openapi": "node ./generate-docs.mjs",
     "lint": "next lint",
     "start": "next start"
   },
@@ -32,6 +33,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@fuma-docs/openapi": "workspace:^",
     "@next/bundle-analyzer": "^14.0.0",
     "@next/eslint-plugin-next": "^14.0.0",
     "@types/mdx": "^2.0.8",

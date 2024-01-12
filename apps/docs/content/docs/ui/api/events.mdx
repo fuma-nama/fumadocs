@@ -1,82 +1,14 @@
+---
+title: Events
+description: Special events hosted by the Museum
+toc: false
+---
+
+import { Root, API, APIInfo, APIExample, Property } from '@/components/api'
+import { Tabs, Tab } from 'next-docs-ui/components/tabs'
+import { Accordion, Accordions } from 'next-docs-ui/components/accordion';
+
 <Root>
-
-<API>
-
-<APIInfo method={"GET"} route={"/museum-hours"}>
-
-## Get museum hours
-
-Get upcoming museum operating hours
-
-### Query Parameters
-
-<Property required={false} deprecated={false} name={"startDate"} type={"string"}>
-
-The starting date to retrieve future operating hours from. Defaults to today's date.
-
-<span>Example:  `"2023-02-23"`</span>
-
-<span>Format:  `"date"`</span>
-
-</Property>
-
-<Property required={false} deprecated={false} name={"page"} type={"integer"}>
-
-The page number to retrieve.
-
-<span>Example:  `2`</span>
-
-<span>Default:  `1`</span>
-
-</Property>
-
-<Property required={false} deprecated={false} name={"limit"} type={"integer"}>
-
-The number of days per page.
-
-<span>Example:  `15`</span>
-
-<span>Default:  `10`</span>
-
-<span>Maximum:  `30`</span>
-
-</Property>
-
-| Status code | Description |
-| ----------- | ----------- |
-| `200` | Success |
-| `400` | Bad request |
-| `404` | Not found |
-
-</APIInfo>
-
-<APIExample>
-
-```bash title="curl"
-curl -X GET "https://api.fake-museum-example.com/museum-hours?startDate=2023-02-23&page=2&limit=15"
-```
-
-<Tabs items={["200"]}>
-
-<Tab value={"200"}>
-
-```json title="Example Response"
-[
-  {
-    "date": "02-02-2022",
-    "timeOpen": "09:00",
-    "timeClose": "18:00"
-  }
-]
-```
-
-</Tab>
-
-</Tabs>
-
-</APIExample>
-
-</API>
 
 <API>
 
@@ -92,7 +24,7 @@ Return a list of upcoming special events at the museum.
 
 The starting date to retrieve future operating hours from. Defaults to today's date.
 
-<span>Example:  `"2023-02-23"`</span>
+<span>Example:  `"2023-02-23T00:00:00.000Z"`</span>
 
 <span>Format:  `"date"`</span>
 
@@ -102,7 +34,7 @@ The starting date to retrieve future operating hours from. Defaults to today's d
 
 The end of a date range to retrieve special events for. Defaults to 7 days after `startDate`.
 
-<span>Example:  `"2023-04-18"`</span>
+<span>Example:  `"2023-04-18T00:00:00.000Z"`</span>
 
 <span>Format:  `"date"`</span>
 
@@ -141,12 +73,14 @@ The number of days per page.
 <APIExample>
 
 ```bash title="curl"
-curl -X GET "https://api.fake-museum-example.com/special-events?startDate=2023-02-23&endDate=2023-04-18&page=2&limit=15"
+curl -X GET "https://api.fake-museum-example.com/special-events"
 ```
 
 <Tabs items={["200"]}>
 
 <Tab value={"200"}>
+
+A list of upcoming special events
 
 ```json title="Example Response"
 [
@@ -156,12 +90,53 @@ curl -X GET "https://api.fake-museum-example.com/special-events?startDate=2023-0
     "location": "Computer Room",
     "eventDescription": "Captain Blackbeard shares his love of the C...language. And possibly Arrrrr (R lang).",
     "dates": [
-      "2023-10-29"
+      "2023-10-29T00:00:00.000Z"
     ],
     "price": 25
   }
 ]
 ```
+
+<Accordions>
+
+<Accordion title={"Typescript Definition"}>
+
+```ts
+/**
+ * A list of upcoming special events
+ */
+export type Response = {
+  /**
+   * Identifier for a special event.
+   */
+  eventId: string;
+  /**
+   * Name of the special event
+   */
+  name: string;
+  /**
+   * Location where the special event is held
+   */
+  location: string;
+  /**
+   * Description of the special event
+   */
+  eventDescription: string;
+  /**
+   * List of planned dates for the special event
+   */
+  dates: string[];
+  /**
+   * Price of a ticket for the special event
+   */
+  price: number;
+}[];
+
+```
+
+</Accordion>
+
+</Accordions>
 
 </Tab>
 
@@ -234,13 +209,13 @@ Price of a ticket for the special event
 <APIExample>
 
 ```bash title="curl"
-curl -X POST "https://api.fake-museum-example.com/special-events?" \
+curl -X POST "https://api.fake-museum-example.com/special-events" \
   -d '{
   "name": "Pirate Coding Workshop",
   "location": "Computer Room",
   "eventDescription": "Captain Blackbeard shares his love of the C...language. And possibly Arrrrr (R lang).",
   "dates": [
-    "2023-10-29"
+    "2023-10-29T00:00:00.000Z"
   ],
   "price": 25
 }'
@@ -250,6 +225,8 @@ curl -X POST "https://api.fake-museum-example.com/special-events?" \
 
 <Tab value={"200"}>
 
+Information about a special event.
+
 ```json title="Example Response"
 {
   "eventId": "3be6453c-03eb-4357-ae5a-984a0e574a54",
@@ -257,11 +234,52 @@ curl -X POST "https://api.fake-museum-example.com/special-events?" \
   "location": "Computer Room",
   "eventDescription": "Captain Blackbeard shares his love of the C...language. And possibly Arrrrr (R lang).",
   "dates": [
-    "2023-10-29"
+    "2023-10-29T00:00:00.000Z"
   ],
   "price": 25
 }
 ```
+
+<Accordions>
+
+<Accordion title={"Typescript Definition"}>
+
+```ts
+/**
+ * Information about a special event.
+ */
+export interface Response {
+  /**
+   * Identifier for a special event.
+   */
+  eventId: string;
+  /**
+   * Name of the special event
+   */
+  name: string;
+  /**
+   * Location where the special event is held
+   */
+  location: string;
+  /**
+   * Description of the special event
+   */
+  eventDescription: string;
+  /**
+   * List of planned dates for the special event
+   */
+  dates: string[];
+  /**
+   * Price of a ticket for the special event
+   */
+  price: number;
+}
+
+```
+
+</Accordion>
+
+</Accordions>
 
 </Tab>
 
@@ -302,12 +320,14 @@ An identifier for a special event.
 <APIExample>
 
 ```bash title="curl"
-curl -X GET "https://api.fake-museum-example.com/special-events/%7BeventId%7D?"
+curl -X GET "https://api.fake-museum-example.com/special-events/dad4bce8-f5cb-4078-a211-995864315e39"
 ```
 
 <Tabs items={["200"]}>
 
 <Tab value={"200"}>
+
+Information about a special event.
 
 ```json title="Example Response"
 {
@@ -316,11 +336,52 @@ curl -X GET "https://api.fake-museum-example.com/special-events/%7BeventId%7D?"
   "location": "Computer Room",
   "eventDescription": "Captain Blackbeard shares his love of the C...language. And possibly Arrrrr (R lang).",
   "dates": [
-    "2023-10-29"
+    "2023-10-29T00:00:00.000Z"
   ],
   "price": 25
 }
 ```
+
+<Accordions>
+
+<Accordion title={"Typescript Definition"}>
+
+```ts
+/**
+ * Information about a special event.
+ */
+export interface Response {
+  /**
+   * Identifier for a special event.
+   */
+  eventId: string;
+  /**
+   * Name of the special event
+   */
+  name: string;
+  /**
+   * Location where the special event is held
+   */
+  location: string;
+  /**
+   * Description of the special event
+   */
+  eventDescription: string;
+  /**
+   * List of planned dates for the special event
+   */
+  dates: string[];
+  /**
+   * Price of a ticket for the special event
+   */
+  price: number;
+}
+
+```
+
+</Accordion>
+
+</Accordions>
 
 </Tab>
 
@@ -405,13 +466,13 @@ An identifier for a special event.
 <APIExample>
 
 ```bash title="curl"
-curl -X PATCH "https://api.fake-museum-example.com/special-events/%7BeventId%7D?" \
+curl -X PATCH "https://api.fake-museum-example.com/special-events/dad4bce8-f5cb-4078-a211-995864315e39" \
   -d '{
   "name": "Pirate Coding Workshop",
   "location": "Computer Room",
   "eventDescription": "Captain Blackbeard shares his love of the C...language. And possibly Arrrrr (R lang).",
   "dates": [
-    "2023-10-29"
+    "2023-10-29T00:00:00.000Z"
   ],
   "price": 25
 }'
@@ -421,6 +482,8 @@ curl -X PATCH "https://api.fake-museum-example.com/special-events/%7BeventId%7D?
 
 <Tab value={"200"}>
 
+Information about a special event.
+
 ```json title="Example Response"
 {
   "eventId": "3be6453c-03eb-4357-ae5a-984a0e574a54",
@@ -428,11 +491,52 @@ curl -X PATCH "https://api.fake-museum-example.com/special-events/%7BeventId%7D?
   "location": "Computer Room",
   "eventDescription": "Captain Blackbeard shares his love of the C...language. And possibly Arrrrr (R lang).",
   "dates": [
-    "2023-10-29"
+    "2023-10-29T00:00:00.000Z"
   ],
   "price": 25
 }
 ```
+
+<Accordions>
+
+<Accordion title={"Typescript Definition"}>
+
+```ts
+/**
+ * Information about a special event.
+ */
+export interface Response {
+  /**
+   * Identifier for a special event.
+   */
+  eventId: string;
+  /**
+   * Name of the special event
+   */
+  name: string;
+  /**
+   * Location where the special event is held
+   */
+  location: string;
+  /**
+   * Description of the special event
+   */
+  eventDescription: string;
+  /**
+   * List of planned dates for the special event
+   */
+  dates: string[];
+  /**
+   * Price of a ticket for the special event
+   */
+  price: number;
+}
+
+```
+
+</Accordion>
+
+</Accordions>
 
 </Tab>
 
@@ -474,164 +578,10 @@ An identifier for a special event.
 <APIExample>
 
 ```bash title="curl"
-curl -X DELETE "https://api.fake-museum-example.com/special-events/%7BeventId%7D?"
+curl -X DELETE "https://api.fake-museum-example.com/special-events/dad4bce8-f5cb-4078-a211-995864315e39"
 ```
 
 
-
-</APIExample>
-
-</API>
-
-<API>
-
-<APIInfo method={"POST"} route={"/tickets"}>
-
-## Buy museum tickets
-
-Purchase museum tickets for general entry or special events.
-
-### Request Body
-
-
-
-<Property required={true} deprecated={false} name={"ticketType"} type={"string"}>
-
-Type of ticket being purchased. Use `general` for regular museum entry and `event` for tickets to special events.
-
-<span>Example:  `"event"`</span>
-
-<span>Value in:  `"event" | "general"`</span>
-
-</Property>
-
-<Property required={false} deprecated={false} name={"eventId"} type={"string"}>
-
-Unique identifier for a special event. Required if purchasing tickets for the museum's special events.
-
-<span>Example:  `"3be6453c-03eb-4357-ae5a-984a0e574a54"`</span>
-
-<span>Format:  `"uuid"`</span>
-
-</Property>
-
-<Property required={true} deprecated={false} name={"ticketDate"} type={"string"}>
-
-Date that the ticket is valid for.
-
-<span>Example:  `"2023-10-29"`</span>
-
-<span>Format:  `"date"`</span>
-
-</Property>
-
-<Property required={true} deprecated={false} name={"email"} type={"string"}>
-
-Email address for ticket purchaser.
-
-<span>Example:  `"museum-lover@example.com"`</span>
-
-<span>Format:  `"email"`</span>
-
-</Property>
-
-<Property required={false} deprecated={false} name={"phone"} type={"string"}>
-
-Phone number for the ticket purchaser (optional).
-
-<span>Example:  `"+1(234)-567-8910"`</span>
-
-</Property>
-
-| Status code | Description |
-| ----------- | ----------- |
-| `200` | Success |
-| `400` | Bad request |
-| `404` | Not found |
-
-</APIInfo>
-
-<APIExample>
-
-```bash title="curl"
-curl -X POST "https://api.fake-museum-example.com/tickets?" \
-  -d '{
-  "ticketType": "event",
-  "eventId": "3be6453c-03eb-4357-ae5a-984a0e574a54",
-  "ticketDate": "2023-10-29",
-  "email": "museum-lover@example.com",
-  "phone": "+1(234)-567-8910"
-}'
-```
-
-<Tabs items={["200"]}>
-
-<Tab value={"200"}>
-
-```json title="Example Response"
-{
-  "message": "Museum general entry ticket purchased",
-  "eventName": "Pirate Coding Workshop",
-  "ticketId": "a54a57ca-36f8-421b-a6b4-2e8f26858a4c",
-  "ticketType": "event",
-  "ticketDate": "2023-10-29",
-  "confirmationCode": "ticket-event-a98c8f-7eb12"
-}
-```
-
-</Tab>
-
-</Tabs>
-
-</APIExample>
-
-</API>
-
-<API>
-
-<APIInfo method={"GET"} route={"/tickets/{ticketId}/qr"}>
-
-## Get ticket QR code
-
-Return an image of your ticket with scannable QR code. Used for event entry.
-
-### Path Parameters
-
-<Property required={true} deprecated={false} name={"ticketId"} type={"string"}>
-
-An identifier for a ticket to a museum event. Used to generate ticket image.
-
-<span>Example:  `"a54a57ca-36f8-421b-a6b4-2e8f26858a4c"`</span>
-
-<span>Format:  `"uuid"`</span>
-
-</Property>
-
-| Status code | Description |
-| ----------- | ----------- |
-| `200` | Scannable event ticket in image format |
-| `400` | Bad request |
-| `404` | Not found |
-
-</APIInfo>
-
-<APIExample>
-
-```bash title="curl"
-curl -X GET "https://api.fake-museum-example.com/tickets/%7BticketId%7D/qr?"
-```
-
-<Tabs items={["200"]}>
-
-<Tab value={"200"}>
-
-```json title="Example Response"
-"string"
-```
-
-</Tab>
-
-</Tabs>
 
 </APIExample>
 

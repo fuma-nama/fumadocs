@@ -8,7 +8,10 @@ export function Root({
   ...props
 }: HTMLAttributes<HTMLDivElement>): JSX.Element {
   return (
-    <div className={cn('text-sm text-muted-foreground', className)} {...props}>
+    <div
+      className={cn('space-y-24 text-sm text-muted-foreground', className)}
+      {...props}
+    >
       {children}
     </div>
   );
@@ -20,7 +23,10 @@ export function API({
   ...props
 }: HTMLAttributes<HTMLDivElement>): JSX.Element {
   return (
-    <div className={cn('mb-10 flex flex-row gap-6', className)} {...props}>
+    <div
+      className={cn('flex flex-col gap-6 xl:flex-row', className)}
+      {...props}
+    >
       {children}
     </div>
   );
@@ -110,7 +116,10 @@ export function APIExample({
 }: HTMLAttributes<HTMLDivElement>): JSX.Element {
   return (
     <div
-      className={cn('sticky top-14 h-fit w-full max-w-[400px]', className)}
+      className={cn(
+        'sticky top-14 h-fit xl:w-[40%] xl:min-w-[400px]',
+        className,
+      )}
       {...props}
     >
       {children}
