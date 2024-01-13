@@ -10,16 +10,18 @@
   "repository": "github:fuma-nama/next-docs",
   "license": "MIT",
   "author": "Fuma Nama",
-  "main": "./dist/index.mjs",
-  "types": "./dist/index.d.mts",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "bin": {
-    "fuma-docs-openapi": "./dist/bin.mjs"
+    "fuma-docs-openapi": "./dist/bin.js"
   },
   "scripts": {
     "build": "tsup",
     "clean": "rimraf dist",
     "dev": "tsup --watch",
     "lint": "eslint .",
+    "test": "vitest",
     "types:check": "tsc --noEmit"
   },
   "dependencies": {

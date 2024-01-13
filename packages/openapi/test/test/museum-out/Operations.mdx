@@ -1,0 +1,121 @@
+---
+title: Operations
+description: Operational information about the museum.
+---
+
+import { Root, API, APIInfo, APIExample, Property } from '@/components/api'
+import { Tabs, Tab } from 'next-docs-ui/components/tabs'
+import { Accordion, Accordions } from 'next-docs-ui/components/accordion';
+
+<Root>
+
+<API>
+
+<APIInfo method={"GET"} route={"/museum-hours"}>
+
+## Get museum hours
+
+Get upcoming museum operating hours
+
+### Query Parameters
+
+<Property required={false} deprecated={false} name={"startDate"} type={"string"}>
+
+The starting date to retrieve future operating hours from. Defaults to today's date.
+
+<span>Example:  `"2023-02-23T00:00:00.000Z"`</span>
+
+<span>Format:  `"date"`</span>
+
+</Property>
+
+<Property required={false} deprecated={false} name={"page"} type={"integer"}>
+
+The page number to retrieve.
+
+<span>Example:  `2`</span>
+
+<span>Default:  `1`</span>
+
+</Property>
+
+<Property required={false} deprecated={false} name={"limit"} type={"integer"}>
+
+The number of days per page.
+
+<span>Example:  `15`</span>
+
+<span>Default:  `10`</span>
+
+<span>Maximum:  `30`</span>
+
+</Property>
+
+| Status code | Description |
+| ----------- | ----------- |
+| `200` | Success |
+| `400` | Bad request |
+| `404` | Not found |
+
+</APIInfo>
+
+<APIExample>
+
+```bash title="curl"
+curl -X GET "https://api.fake-museum-example.com/museum-hours"
+```
+
+<Tabs items={["200"]}>
+
+<Tab value={"200"}>
+
+List of museum operating hours for consecutive days.
+
+```json title="Example Response"
+[
+  {
+    "date": "02-02-2022",
+    "timeOpen": "09:00",
+    "timeClose": 1080
+  }
+]
+```
+
+<Accordions>
+
+<Accordion title={"Typescript Definition"}>
+
+```ts
+/**
+ * List of museum operating hours for consecutive days.
+ */
+export type Response = {
+  /**
+   * Date the operating hours apply to.
+   */
+  date: string;
+  /**
+   * Time the museum opens on a specific date. Uses 24 hour time format (`HH:mm`).
+   */
+  timeOpen: string;
+  /**
+   * Time the museum closes on a specific date. Uses 24 hour time format (`HH:mm`).
+   */
+  timeClose: string;
+}[];
+
+```
+
+</Accordion>
+
+</Accordions>
+
+</Tab>
+
+</Tabs>
+
+</APIExample>
+
+</API>
+
+</Root>
