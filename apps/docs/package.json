@@ -5,7 +5,7 @@
   "scripts": {
     "build": "pnpm build:openapi && next build && pnpm build:index",
     "build:index": "node ./update-index.mjs",
-    "build:openapi": "fuma-docs-openapi",
+    "build:openapi": "pnpm fuma-docs-openapi",
     "build:shaders": "glslx shaders/rain.glsl --output=shaders/rain.min.js --format=js --renaming=internal-only",
     "dev": "next dev",
     "lint": "next lint",

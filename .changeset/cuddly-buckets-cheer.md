@@ -27,3 +27,5 @@ module.exports = {
   },
 };
 ```
+
+Run `fuma-docs-openapi` to generate.
