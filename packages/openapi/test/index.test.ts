@@ -8,12 +8,13 @@ describe('Generate documents', () => {
       fileURLToPath(new URL('./fixtures/petstore.yaml', import.meta.url)),
     );
 
-    for (const tag of tags) {
-      // eslint-disable-next-line no-await-in-loop -- Ignore
-      await expect(tag.content).toMatchFileSnapshot(
-        `./test/petstore-out/${tag.tag}.mdx`,
-      );
-    }
+    await Promise.all(
+      tags.map(async (tag) =>
+        expect(tag.content).toMatchFileSnapshot(
+          `./out/petstore/${tag.tag}.mdx`,
+        ),
+      ),
+    );
   });
 
   test('Pet Store', async () => {
@@ -21,11 +22,10 @@ describe('Generate documents', () => {
       fileURLToPath(new URL('./fixtures/museum.yaml', import.meta.url)),
     );
 
-    for (const tag of tags) {
-      // eslint-disable-next-line no-await-in-loop -- Ignore
-      await expect(tag.content).toMatchFileSnapshot(
-        `./test/museum-out/${tag.tag}.mdx`,
-      );
-    }
+    await Promise.all(
+      tags.map(async (tag) =>
+        expect(tag.content).toMatchFileSnapshot(`./out/museum/${tag.tag}.mdx`),
+      ),
+    );
   });
 });
