@@ -3,8 +3,9 @@
   "version": "0.1.3",
   "private": true,
   "scripts": {
-    "build": "fuma-docs-openapi ./openapi.config.js && next build && pnpm build:index",
+    "build": "pnpm build:openapi && next build && pnpm build:index",
     "build:index": "node ./update-index.mjs",
+    "build:openapi": "node ./generate-docs.mjs",
     "build:shaders": "glslx shaders/rain.glsl --output=shaders/rain.min.js --format=js --renaming=internal-only",
     "dev": "next dev",
     "lint": "next lint",
