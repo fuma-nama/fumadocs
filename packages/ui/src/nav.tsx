@@ -167,7 +167,7 @@ function SearchToggle(): JSX.Element {
           setOpenSearch(true);
         }}
       >
-        <SearchIcon aria-label="Open Search" className="ml-1 h-4 w-4" />
+        <SearchIcon aria-label="Open Search" className="ml-1 size-4" />
         {search}
         <div className="ml-auto inline-flex gap-0.5 text-xs">
           <kbd className={shortcut()}>⌘</kbd>

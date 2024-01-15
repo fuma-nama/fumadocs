@@ -87,14 +87,11 @@ function CopyButton({
       {...props}
     >
       <CheckIcon
-        className={cn(
-          'h-3.5 w-3.5 transition-transform',
-          !checked && 'scale-0',
-        )}
+        className={cn('size-3.5 transition-transform', !checked && 'scale-0')}
       />
       <CopyIcon
         className={cn(
-          'absolute h-3.5 w-3.5 transition-transform',
+          'absolute size-3.5 transition-transform',
           checked && 'scale-0',
         )}
       />

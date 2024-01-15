@@ -181,10 +181,10 @@ export function CreateAppAnimation(): JSX.Element {
       )}
       <pre className="overflow-hidden rounded-xl border text-xs">
         <div className="flex flex-row items-center gap-2 border-b px-4 py-2">
-          <TerminalIcon className="h-4 w-4" />{' '}
+          <TerminalIcon className="size-4" />{' '}
           <span className="font-bold">Terminal</span>
           <div className="grow" />
-          <div className="h-2 w-2 rounded-full bg-red-400" />
+          <div className="size-2 rounded-full bg-red-400" />
         </div>
         <div className="min-h-[200px] bg-gradient-to-b from-secondary [mask-image:linear-gradient(to_bottom,white,transparent)]">
           <code className="grid p-4">{lines}</code>

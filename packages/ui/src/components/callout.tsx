@@ -24,12 +24,12 @@ export const Callout = forwardRef<HTMLDivElement, CalloutProps>(
       >
         {icon ??
           {
-            info: <InfoIcon className="h-5 w-5 fill-blue-500 text-card" />,
+            info: <InfoIcon className="size-5 fill-blue-500 text-card" />,
             warn: (
-              <AlertTriangleIcon className="h-5 w-5 fill-orange-500 text-card" />
+              <AlertTriangleIcon className="size-5 fill-orange-500 text-card" />
             ),
             error: (
-              <AlertOctagonIcon className="h-5 w-5 fill-red-500 text-card" />
+              <AlertOctagonIcon className="size-5 fill-red-500 text-card" />
             ),
           }[type]}
         <div className="w-0 flex-1">

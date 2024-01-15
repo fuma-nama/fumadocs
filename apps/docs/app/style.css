@@ -3,21 +3,21 @@
 @tailwind utilities;
 
 .dark {
-  --background: 0 0% 1%;
-  --popover: 0 0% 4%;
+  --background: 0 0% 0%;
+  --foreground: 0 0% 100%;
+  --popover: 0 0% 0%;
   --card: 0 0% 4%;
   --muted: 0 0% 8%;
   --border: 0 0% 14%;
-  --accent: 0 0% 10.9%;
-  --accent-foreground: 0 0% 90%;
+  --accent: 0 0% 15%;
+  --accent-foreground: 0 0% 100%;
+  --muted-foreground: 0 0% 60%;
 }
 
 .ui {
-  --primary: 220 80% 30%;
 }
 
 .dark .ui {
-  --primary: 220 100% 80%;
 }
 
 .headless {

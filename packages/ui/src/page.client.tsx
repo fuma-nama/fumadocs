@@ -56,14 +56,14 @@ export function Footer({ items }: FooterProps): JSX.Element {
     <div className="mt-4 flex flex-row flex-wrap gap-4 border-t py-12">
       {previous ? (
         <Link href={previous.url} className={footerItem()}>
-          <ChevronLeftIcon className="h-5 w-5 shrink-0" />
+          <ChevronLeftIcon className="size-5 shrink-0" />
           <p className="font-medium text-foreground">{previous.name}</p>
         </Link>
       ) : null}
       {next ? (
         <Link href={next.url} className={footerItem({ className: 'ml-auto' })}>
           <p className="text-end font-medium text-foreground">{next.name}</p>
-          <ChevronRightIcon className="h-5 w-5 shrink-0" />
+          <ChevronRightIcon className="size-5 shrink-0" />
         </Link>
       ) : null}
     </div>

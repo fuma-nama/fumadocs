@@ -4,7 +4,7 @@ import { useTheme } from 'next-themes';
 import { useCallback, type ButtonHTMLAttributes } from 'react';
 import { cn } from '@/utils/cn';
 
-const buttonVariants = cva('h-7 w-7 rounded-full p-1.5 text-muted-foreground', {
+const buttonVariants = cva('size-7 rounded-full p-1.5 text-muted-foreground', {
   variants: {
     dark: {
       true: 'dark:bg-accent dark:text-accent-foreground',

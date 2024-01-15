@@ -34,7 +34,7 @@ export default function Page({ params }: { params: Param }): JSX.Element {
             rel="noreferrer noopener"
             className="inline-flex items-center text-xs text-muted-foreground hover:text-foreground"
           >
-            Edit on Github <ExternalLinkIcon className="ml-1 h-3 w-3" />
+            Edit on Github <ExternalLinkIcon className="ml-1 size-3" />
           </a>
         ),
       }}

@@ -17,7 +17,7 @@ export function TOCItems({ items }: { items: TOCItemType[] }): JSX.Element {
       className="relative overflow-hidden pt-4 text-sm first:pt-0"
     >
       <h3 className="mb-4 inline-flex items-center gap-2">
-        <TextIcon className="h-4 w-4" />
+        <TextIcon className="size-4" />
         {toc}
       </h3>
       <div className="flex flex-col gap-1 border-l-2 text-muted-foreground">

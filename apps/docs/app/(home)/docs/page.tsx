@@ -9,7 +9,7 @@ const cardVariants = cva(
 );
 
 const cardIconVariants = cva(
-  'mb-2 h-9 w-9 rounded-lg border bg-gradient-to-b from-primary/20 p-1 shadow-sm shadow-primary/50',
+  'mb-2 size-9 rounded-lg border bg-gradient-to-b from-primary/20 p-1 shadow-sm shadow-primary/50',
 );
 
 export default function DocsPage(): JSX.Element {

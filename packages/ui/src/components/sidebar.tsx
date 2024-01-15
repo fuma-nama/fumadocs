@@ -27,7 +27,7 @@ export interface SidebarProps {
 }
 
 const itemVariants = cva(
-  'flex flex-row items-center gap-2 rounded-md px-2 py-1.5 text-muted-foreground [&_svg]:h-4 [&_svg]:w-4',
+  'flex flex-row items-center gap-2 rounded-md px-2 py-1.5 text-muted-foreground [&_svg]:size-4',
   {
     variants: {
       active: {

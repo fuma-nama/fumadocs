@@ -31,7 +31,7 @@ export function ThemeSwitch(props: {
           setActive((prev) => !prev);
         }}
       >
-        <Circle className={cn('h-4 w-4', active && 'fill-primary')} />
+        <Circle className={cn('size-4', active && 'fill-primary')} />
         {props.children}
       </button>
       {active ? <style>{props.style}</style> : null}

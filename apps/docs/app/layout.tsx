@@ -69,7 +69,7 @@ function Footer(): JSX.Element {
             rel="noreferrer noopener"
             className="flex flex-row items-center text-sm text-muted-foreground transition-colors hover:text-accent-foreground"
           >
-            <Star className="mr-2 h-4 w-4" />
+            <Star className="mr-2 size-4" />
             Give us a star
           </a>
           <Link
