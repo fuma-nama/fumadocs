@@ -7,8 +7,8 @@ import { z } from 'zod';
 import type { InferMetaType, InferPageType } from 'next-docs-zeta/source';
 import { loader } from 'next-docs-zeta/source';
 import { icons } from 'lucide-react';
-import { createElement } from 'react';
 import { map } from '@/.map';
+import { create } from '@/components/ui/icon';
 
 const frontmatterSchema = defaultSchemas.frontmatter.extend({
   preview: z.string().optional(),
@@ -20,7 +20,8 @@ export const utils = loader({
   baseUrl: '/docs',
   rootDir: 'docs',
   icon(icon) {
-    if (icon in icons) return createElement(icons[icon as keyof typeof icons]);
+    if (icon in icons)
+      return create({ icon: icons[icon as keyof typeof icons] });
   },
   source: createMDXSource(map, { schema: { frontmatter: frontmatterSchema } }),
 });

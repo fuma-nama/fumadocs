@@ -1,6 +1,7 @@
 ---
 title: Theming
 description: Add Theme to Next Docs UI
+icon: Palette
 ---
 
 import { ThemeSwitch } from '@/components/theme-switch';
@@ -18,17 +19,17 @@ import 'next-docs-ui/style.css';
 
 For Tailwind CSS projects, please use the built-in Tailwind CSS plugin instead.
 
-```js
-const { docsUi, docsUiPlugins } = require('next-docs-ui/tailwind-plugin');
+```js title="tailwind.config.js"
+const { createPreset } = require('next-docs-ui/tailwind-plugin');
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: 'class',
+  presets: [createPreset()],
   content: [
     './node_modules/next-docs-ui/dist/**/*.js',
     ...
   ],
-  plugins: [...docsUiPlugins, docsUi],
 };
 ```
 

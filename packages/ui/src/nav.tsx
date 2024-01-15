@@ -67,7 +67,7 @@ export function Nav({
         'sticky top-0 z-50 h-16 border-b transition-colors',
         transparent
           ? 'border-transparent'
-          : 'border-foreground/10 bg-background/80 backdrop-blur-sm',
+          : 'border-foreground/10 bg-background/50 backdrop-blur-md',
       )}
     >
       <nav className="container flex h-full flex-row items-center gap-4">

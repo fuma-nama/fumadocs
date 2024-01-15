@@ -59,7 +59,7 @@ export function Sidebar({
         !open
           ? 'md:hidden'
           : 'md:sticky md:top-16 md:h-body md:w-[240px] md:text-sm xl:w-[260px]',
-        'max-md:fixed max-md:inset-0 max-md:z-40 max-md:bg-background/80 max-md:pt-16 max-md:backdrop-blur-sm max-md:data-[open=false]:hidden',
+        'max-md:fixed max-md:inset-0 max-md:z-40 max-md:bg-background/80 max-md:pt-16 max-md:backdrop-blur-md max-md:data-[open=false]:hidden',
       )}
     >
       <SidebarContext.Provider value={{ defaultOpenLevel }}>
