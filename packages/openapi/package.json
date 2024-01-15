@@ -16,6 +16,9 @@
   "bin": {
     "fuma-docs-openapi": "./dist/bin.js"
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
     "clean": "rimraf dist",
