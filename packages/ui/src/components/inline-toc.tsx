@@ -32,7 +32,7 @@ export function InlineTOC({
             className="inline-flex w-full items-center justify-between p-4 text-medium font-medium [&[data-state=open]>svg]:rotate-180"
           >
             Table of Contents
-            <ChevronDown className="h-4 w-4 transition-transform duration-200" />
+            <ChevronDown className="size-4 transition-transform duration-200" />
           </button>
         )}
       </CollapsibleTrigger>

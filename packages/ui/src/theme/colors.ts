@@ -75,7 +75,7 @@ const oceanPreset: Preset = {
     popover: '220 50% 10%',
     'popover-foreground': '220 30% 65%',
     accent: '220 40% 20%',
-    secondary: '220 50% 25%',
+    secondary: '220 50% 20%',
     background: '220 60% 6%',
     foreground: '220 60% 94.5%',
     primary: '205 100% 85%',

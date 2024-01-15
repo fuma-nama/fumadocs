@@ -67,7 +67,7 @@ export function Nav({
         'sticky top-0 z-50 h-16 border-b transition-colors',
         transparent
           ? 'border-transparent'
-          : 'border-foreground/10 bg-background/80 backdrop-blur-sm',
+          : 'border-foreground/10 bg-background/50 backdrop-blur-md',
       )}
     >
       <nav className="container flex h-full flex-row items-center gap-4">
@@ -167,7 +167,7 @@ function SearchToggle(): JSX.Element {
           setOpenSearch(true);
         }}
       >
-        <SearchIcon aria-label="Open Search" className="ml-1 h-4 w-4" />
+        <SearchIcon aria-label="Open Search" className="ml-1 size-4" />
         {search}
         <div className="ml-auto inline-flex gap-0.5 text-xs">
           <kbd className={shortcut()}>⌘</kbd>

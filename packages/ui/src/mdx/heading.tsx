@@ -21,7 +21,7 @@ export function Heading<T extends Types = 'h1'>({
           {props.children}
           <LinkIcon
             aria-label="Link to section"
-            className="ml-2 inline h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
+            className="ml-2 inline size-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
           />
         </a>
       ) : (

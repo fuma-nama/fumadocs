@@ -24,7 +24,7 @@ import { CodeBlock } from '@/components/typing-code-block';
 import { CreateAppAnimation, Previews, Rain } from './page.client';
 
 const badgeVariants = cva(
-  'mb-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary font-medium text-primary-foreground',
+  'mb-2 inline-flex size-7 items-center justify-center rounded-full bg-primary font-medium text-primary-foreground',
 );
 
 const code = `const frontmatterSchema = defaultValidators.frontmatter.extend({
@@ -597,7 +597,7 @@ export default function HomePage(): JSX.Element {
           <div className="grid grid-cols-1 divide-border md:grid-cols-2 md:divide-x">
             <div className="border-b px-6 py-16 md:py-20">
               <div className="mb-4 inline-flex items-center gap-2 font-medium text-muted-foreground">
-                <PaperclipIcon className="h-5 w-5" />
+                <PaperclipIcon className="size-5" />
                 <p>Multiple Sources</p>
               </div>
               <h2 className="mb-1 text-xl font-semibold">
@@ -611,7 +611,7 @@ export default function HomePage(): JSX.Element {
             </div>
             <div className="border-b px-6 py-16 md:py-20">
               <div className="mb-4 inline-flex items-center gap-2 font-medium text-muted-foreground">
-                <SearchIcon className="h-5 w-5" />
+                <SearchIcon className="size-5" />
                 <p>Algolia Integration</p>
               </div>
               <h2 className="mb-1 text-xl font-semibold">
@@ -792,24 +792,24 @@ function Search(): JSX.Element {
       }}
     >
       <div className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm text-muted-foreground">
-        <SearchIcon className="h-4 w-4" />
+        <SearchIcon className="size-4" />
         Search...
       </div>
       <div className="border-t p-2">
         <div className={cn(searchItemVariants())}>
-          <FileTextIcon className="h-4 w-4" />
+          <FileTextIcon className="size-4" />
           Getting Started
         </div>
         <div className={cn(searchItemVariants())}>
-          <FileTextIcon className="h-4 w-4" />
+          <FileTextIcon className="size-4" />
           Components
         </div>
         <div className={cn(searchItemVariants())}>
-          <FileTextIcon className="h-4 w-4" />
+          <FileTextIcon className="size-4" />
           MDX Content
         </div>
         <div className={cn(searchItemVariants())}>
-          <FileTextIcon className="h-4 w-4" />
+          <FileTextIcon className="size-4" />
           User Guide
         </div>
       </div>
@@ -824,21 +824,17 @@ function Hero(): JSX.Element {
         Build Your Docs.
       </h1>
       <StarsIcon
-        className="absolute -left-2 -top-2 h-4 w-4 xl:scale-[200%]"
+        className="absolute -left-2 -top-2 size-4 xl:scale-[200%]"
         stroke="none"
         fill="currentColor"
       />
       <StarsIcon
-        className="absolute -bottom-2 -right-2 h-4 w-4 xl:scale-[200%]"
+        className="absolute -bottom-2 -right-2 size-4 xl:scale-[200%]"
         stroke="none"
         fill="currentColor"
       />
       <div className="absolute left-[50%] top-[65%] translate-x-[-50%] translate-y-[-50%] rounded-full bg-gradient-to-t from-black to-gray-800 p-4">
-        <StarIcon
-          className="h-16 w-16"
-          stroke="none"
-          fill="url(#star-gradient)"
-        >
+        <StarIcon className="size-16" stroke="none" fill="url(#star-gradient)">
           <defs>
             <linearGradient id="star-gradient" x1="0" x2="0" y1="0" y2="1">
               <stop offset="20%" stopColor="rgb(255,255,255)" />

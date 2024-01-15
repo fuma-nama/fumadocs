@@ -1,3 +1,5 @@
+const { createPreset } = require('next-docs-ui/tailwind-plugin');
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: 'class',
@@ -8,7 +10,7 @@ module.exports = {
     './mdx-components.tsx',
     './node_modules/next-docs-ui/dist/**/*.js',
   ],
-  presets: [require('next-docs-ui/tailwind-plugin').createPreset()],
+  presets: [createPreset()],
   theme: {
     extend: {
       fontFamily: {

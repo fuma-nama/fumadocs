@@ -11,18 +11,17 @@ const DialogContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
 >(({ className, children, ...props }, ref) => (
   <DialogPrimitive.Portal>
-    <DialogPrimitive.DialogOverlay className="fixed inset-0 z-50 flex flex-col items-center bg-background/50 pt-[10vh] backdrop-blur-sm data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in">
-      <DialogPrimitive.Content
-        ref={ref}
-        className={cn(
-          'relative grid w-[95vw] max-w-2xl gap-4 rounded-lg border bg-popover p-6 text-popover-foreground shadow-lg data-[state=closed]:animate-dialog-out data-[state=open]:animate-dialog-in',
-          className,
-        )}
-        {...props}
-      >
-        {children}
-      </DialogPrimitive.Content>
-    </DialogPrimitive.DialogOverlay>
+    <DialogPrimitive.DialogOverlay className="fixed inset-0 z-50 bg-background/50 backdrop-blur-sm data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in" />
+    <DialogPrimitive.Content
+      ref={ref}
+      className={cn(
+        'fixed inset-x-0 z-50 m-auto mt-[10vh] w-[95vw] max-w-2xl gap-4 rounded-lg border bg-popover p-6 text-popover-foreground shadow-lg data-[state=closed]:animate-dialog-out data-[state=open]:animate-dialog-in',
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </DialogPrimitive.Content>
   </DialogPrimitive.Portal>
 ));
 

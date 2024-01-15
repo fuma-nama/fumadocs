@@ -1,5 +1,5 @@
 import { cva } from 'class-variance-authority';
-import { LayoutIcon, LibraryIcon, PaperclipIcon } from 'lucide-react';
+import { LayoutIcon, LibraryIcon } from 'lucide-react';
 import Link from 'next/link';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/utils/cn';
@@ -9,7 +9,7 @@ const cardVariants = cva(
 );
 
 const cardIconVariants = cva(
-  'mb-2 h-9 w-9 rounded-lg border bg-gradient-to-b from-primary/20 p-1 shadow-sm shadow-primary/50',
+  'mb-2 size-9 rounded-lg border bg-gradient-to-b from-primary/20 p-1 shadow-sm shadow-primary/50',
 );
 
 export default function DocsPage(): JSX.Element {
@@ -44,8 +44,15 @@ export default function DocsPage(): JSX.Element {
           Showcase
         </Link>
       </div>
-      <div className="mt-16 grid grid-cols-1 gap-4 text-left md:grid-cols-3">
-        <Link href="/docs/ui" className={cn(cardVariants())}>
+      <div className="mt-16 grid grid-cols-1 gap-4 text-left md:grid-cols-2">
+        <Link
+          href="/docs/ui"
+          className={cn(
+            cardVariants({
+              className: 'shadow-xl shadow-primary/20 border-primary/70',
+            }),
+          )}
+        >
           <div className={cn(cardIconVariants())}>
             <LayoutIcon className="h-full w-full" />
           </div>
@@ -61,15 +68,6 @@ export default function DocsPage(): JSX.Element {
           <h2 className="mb-2 text-lg font-semibold">Next Docs Zeta</h2>
           <p className="text-sm text-muted-foreground">
             Headless library with an useful set of utilities.
-          </p>
-        </Link>
-        <Link href="/docs/mdx" className={cn(cardVariants())}>
-          <div className={cn(cardIconVariants())}>
-            <PaperclipIcon className="h-full w-full" />
-          </div>
-          <h2 className="mb-2 text-lg font-semibold">Next Docs MDX</h2>
-          <p className="text-sm text-muted-foreground">
-            A Next.js plugin that enhances the official next/mdx loader.
           </p>
         </Link>
       </div>

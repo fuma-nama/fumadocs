@@ -34,7 +34,7 @@ export function Card({
       )}
     >
       {icon ? (
-        <div className="mb-2 w-fit rounded-md border bg-muted p-2 text-muted-foreground [&_svg]:h-4 [&_svg]:w-4">
+        <div className="mb-2 w-fit rounded-md border bg-muted p-2 text-muted-foreground [&_svg]:size-4">
           {icon}
         </div>
       ) : null}

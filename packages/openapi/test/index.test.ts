@@ -11,7 +11,7 @@ describe('Generate documents', () => {
     await expect(result).toMatchFileSnapshot('./out/petstore.mdx');
   });
 
-  test('Pet Store', async () => {
+  test('Museum', async () => {
     const tags = await generateTags(
       fileURLToPath(new URL('./fixtures/museum.yaml', import.meta.url)),
     );

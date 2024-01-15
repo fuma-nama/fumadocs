@@ -14,7 +14,7 @@ export function Info({ children }: { children: ReactNode }): JSX.Element {
   return (
     <Popover>
       <PopoverTrigger>
-        <InfoIcon className="h-4 w-4" />
+        <InfoIcon className="size-4" />
       </PopoverTrigger>
       <PopoverContent className="text-sm">{children}</PopoverContent>
     </Popover>
@@ -71,7 +71,7 @@ export function TypeTable({ type }: { type: ObjectType }): JSX.Element {
                   ) : null}
                   {value.typeDescriptionLink ? (
                     <Link href={value.typeDescriptionLink}>
-                      <InfoIcon className="h-4 w-4" />
+                      <InfoIcon className="size-4" />
                     </Link>
                   ) : null}
                 </div>

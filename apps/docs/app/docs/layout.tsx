@@ -8,7 +8,7 @@ export const layoutOptions = {
   nav: {
     title: (
       <>
-        <StarsIcon className="h-5 w-5" fill="currentColor" />
+        <StarsIcon className="size-5" fill="currentColor" />
         <span className="ml-1.5 font-semibold max-md:hidden">Next Docs</span>
       </>
     ),
