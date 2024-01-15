@@ -8,7 +8,7 @@ module.exports = {
     './mdx-components.tsx',
     './node_modules/next-docs-ui/dist/**/*.js',
   ],
-  presets: [require('next-docs-ui/tailwind-plugin').default()],
+  presets: [require('next-docs-ui/tailwind-plugin').createPreset()],
   theme: {
     extend: {
       fontFamily: {

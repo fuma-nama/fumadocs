@@ -2,8 +2,8 @@
  * @type {import("@fuma-docs/openapi").Config}
  */
 module.exports = {
-  input: ['./petstore.yaml'],
-  output: './content/docs/headless',
+  input: ['./museum.yaml'],
+  output: './content/docs/ui',
   per: 'tag',
   render: (title, description) => {
     return {

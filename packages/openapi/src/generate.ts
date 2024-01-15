@@ -12,6 +12,14 @@ export async function dereference(
 
 export interface GenerateOptions {
   tag?: string;
+
+  /**
+   * The import path of your API components, it must exports all components in `next-docs-ui/components/api`
+   *
+   * @defaultValue `next-docs-ui/components/api`
+   */
+  componentsImportPath?: string;
+
   render?: (
     title: string | undefined,
     description: string | undefined,
@@ -43,7 +51,7 @@ export async function generate(
       for (const methodKey of methodKeys) {
         const operation = value[methodKey];
         if (!operation) continue;
-        if (options.tag && !operation.tags?.includes(options.tag)) continue;
+        if (tag && !operation.tags?.includes(tag.name)) continue;
 
         methods.push(buildOperation(methodKey, operation));
       }
@@ -66,7 +74,12 @@ export async function generate(
     }
   }
 
-  return render(tag?.name, tag?.description, root(...s), options.render);
+  return render(
+    tag?.name ?? document.info.title,
+    tag?.description ?? document.info.description,
+    root(...s),
+    options,
+  );
 }
 
 export async function generateTags(
@@ -91,19 +104,26 @@ function render(
   title: string | undefined,
   description: string | undefined,
   content: string,
-  fn: GenerateOptions['render'],
+  {
+    render: fn,
+    componentsImportPath = 'next-docs-ui/components/api',
+  }: GenerateOptions,
 ): string {
   const result = fn?.(title, description, content) ?? {};
 
   const rendered: RenderResult = {
     frontmatter:
       result.frontmatter ??
-      `---
-title: ${title}
-description: ${description}
----`,
+      [
+        '---',
+        title && `title: ${title}`,
+        description && `description: ${description}`,
+        '---',
+      ]
+        .filter(Boolean)
+        .join('\n'),
     imports: result.imports ?? [
-      `import { Root, API, APIInfo, APIExample, Property } from '@/components/api'`,
+      `import { Root, API, APIInfo, APIExample, Property } from '${componentsImportPath}'`,
       `import { Tabs, Tab } from 'next-docs-ui/components/tabs'`,
       `import { Accordion, Accordions } from 'next-docs-ui/components/accordion';`,
     ],

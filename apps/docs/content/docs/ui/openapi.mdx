@@ -1,0 +1,38 @@
+---
+title: OpenAPI Generator
+description: Generating docs for OpenAPI schema
+---
+
+## Usage
+
+Install the required packages.
+
+```package-install
+@fuma-docs/openapi
+```
+
+Create configuration file:
+
+```js title="openapi.config.js"
+/**
+ * @type {import("@fuma-docs/openapi").Config}
+ */
+module.exports = {
+  input: ['./petstore.yaml'],
+  output: './content/docs',
+};
+```
+
+> Only OpenAPI 3.0 is supported.
+>
+> It doesn't allow JSON schema specific keywords like `const`, as [they are unsupported](https://swagger.io/docs/specification/data-models/keywords)
+
+Generate docs with a command:
+
+```bash
+pnpm fuma-docs-openapi
+```
+
+### Demo
+
+[View demo](/docs/ui/museum)

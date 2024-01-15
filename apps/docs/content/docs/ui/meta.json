@@ -9,6 +9,10 @@
     "...components",
     "---Blocks---",
     "...blocks",
+    "---Integrations---",
+    "math",
+    "openapi",
+    "museum",
     "---Commands---",
     "...commands"
   ]
