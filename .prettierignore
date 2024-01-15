@@ -5,3 +5,7 @@ pnpm-lock.yaml
 apps/docs/shaders/*
 
 **/out/**/*.mdx
+
+apps/docs/content/docs/ui/museum/events.mdx
+apps/docs/content/docs/ui/museum/operations.mdx
+apps/docs/content/docs/ui/museum/tickets.mdx
