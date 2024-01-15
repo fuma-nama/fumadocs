@@ -120,13 +120,12 @@ Next Docs UI comes with the DocsUI Tailwind CSS plugin by default, it introduces
 This plugin also provides several theme presets out-of-the-box, you can pick one you prefer rather than the default one.
 
 ```js {8}
-const { docsUi, docsUiPlugins } = require('next-docs-ui/tailwind-plugin');
+const { createPreset } = require('next-docs-ui/tailwind-plugin');
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  plugins: [
-    ...docsUiPlugins,
-    docsUi({
+  presets: [
+    createPreset({
       preset: 'ocean',
     }),
   ],
