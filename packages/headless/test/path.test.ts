@@ -4,7 +4,7 @@ import {
   parseFilePath,
   parseFolderPath,
   splitPath,
-} from '@/source/path';
+} from '../src/source/path';
 import { describe, expect, test } from 'vitest';
 
 describe('Path utilities', () => {

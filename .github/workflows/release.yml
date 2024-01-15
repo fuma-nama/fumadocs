@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.UPDATE_TEMPLATE_SSH_KEY }}
 
       - uses: pnpm/action-setup@v2.4.0
         with:
@@ -25,7 +27,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install Dependencies
-        run: pnpm i
+        run: pnpm i --frozen-lockfile
 
       - name: Create Release Pull Request or Publish to npm
         id: changesets
@@ -34,5 +36,5 @@ jobs:
           publish: pnpm run release
           version: pnpm run version
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.UPDATE_TEMPLATE_SSH_KEY }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

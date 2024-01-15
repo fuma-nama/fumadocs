@@ -14,6 +14,7 @@ import {
 } from 'react';
 import { cn } from '@/utils/cn';
 import { useCopyButton } from '@/utils/use-copy-button';
+import { buttonVariants } from '@/theme/variants';
 
 export const Accordions = forwardRef<
   HTMLDivElement,
@@ -78,7 +79,7 @@ export const Accordion = forwardRef<
       className={cn('group/accordion scroll-m-20', className)}
       {...props}
     >
-      <AccordionPrimitive.Header className="not-prose flex items-center text-muted-foreground">
+      <AccordionPrimitive.Header className="not-prose flex items-center text-medium text-muted-foreground">
         <AccordionPrimitive.Trigger className="flex w-full items-center gap-1 py-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
           <ChevronRightIcon className="h-5 w-5 transition-transform duration-200 group-data-[state=open]/accordion:rotate-90" />
           <span className="text-medium font-medium text-foreground">
@@ -106,7 +107,13 @@ function CopyButton({ id }: { id: string }): JSX.Element {
     <button
       type="button"
       aria-label="Copy Link"
-      className="p-1 opacity-0 transition-opacity group-data-[state=open]/accordion:opacity-100"
+      className={cn(
+        buttonVariants({
+          color: 'ghost',
+          className:
+            'opacity-0 transition-all group-data-[state=open]/accordion:opacity-100',
+        }),
+      )}
       onClick={onClick}
     >
       {checked ? (

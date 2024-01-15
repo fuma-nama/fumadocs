@@ -1,6 +1,6 @@
 {
   "name": "create-next-docs-app",
-  "version": "7.0.0",
+  "version": "7.1.0",
   "description": "Create a new documentation site with Next Docs UI",
   "keywords": [
     "NextJs",
@@ -12,6 +12,7 @@
   "repository": "github:fuma-nama/next-docs",
   "license": "MIT",
   "author": "Fuma Nama",
+  "type": "module",
   "bin": "./dist/index.js",
   "files": [
     "template/*",
@@ -23,6 +24,7 @@
     "clean": "rimraf dist",
     "dev": "tsup --watch",
     "lint": "eslint .",
+    "postpublish": "echo \"Updating template repo\" && bash ./scripts/update-git-repo.sh",
     "types:check": "tsc --noEmit"
   },
   "dependencies": {

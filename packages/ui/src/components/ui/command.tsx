@@ -1,9 +1,10 @@
-import type { DialogProps } from '@radix-ui/react-dialog';
+import { type DialogProps } from '@radix-ui/react-dialog';
 import { Command as CommandPrimitive } from 'cmdk';
 import { Search } from 'lucide-react';
 import * as React from 'react';
 import { cn } from '@/utils/cn';
-import { Dialog, DialogContent } from './dialog';
+import { buttonVariants } from '@/theme/variants';
+import { Dialog, DialogClose, DialogContent, DialogFooter } from './dialog';
 
 const Command = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive>,
@@ -15,21 +16,29 @@ const Command = React.forwardRef<
       'flex h-full w-full flex-col divide-y divide-border',
       className,
     )}
+    shouldFilter={false}
+    loop
     {...props}
   />
 ));
 Command.displayName = CommandPrimitive.displayName;
 
-type CommandDialogProps = DialogProps;
+interface CommandDialogProps extends DialogProps {
+  footer?: React.ReactNode;
+}
 
 function CommandDialog({
+  footer,
   children,
   ...props
 }: CommandDialogProps): JSX.Element {
   return (
     <Dialog {...props}>
-      <DialogContent className="bg-popover p-0 text-popover-foreground">
-        {children}
+      <DialogContent className="p-0">
+        <Command>
+          {children}
+          {footer ? <DialogFooter>{footer}</DialogFooter> : null}
+        </Command>
       </DialogContent>
     </Dialog>
   );
@@ -39,16 +48,27 @@ const CommandInput = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Input>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>
 >(({ className, ...props }, ref) => (
-  <div className="flex items-center !border-t-0 px-3">
-    <Search className="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
+  <div className="flex items-center gap-2 !border-t-0 px-3">
+    <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
     <CommandPrimitive.Input
       ref={ref}
       className={cn(
-        'flex w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
+        'w-full bg-transparent py-3 text-base outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
         className,
       )}
       {...props}
     />
+    <DialogClose
+      className={cn(
+        buttonVariants({
+          color: 'outline',
+          size: 'icon',
+          className: 'text-xs',
+        }),
+      )}
+    >
+      Esc
+    </DialogClose>
   </div>
 ));
 

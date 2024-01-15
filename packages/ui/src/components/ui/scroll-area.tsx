@@ -29,7 +29,7 @@ const ScrollBar = React.forwardRef<
     ref={ref}
     orientation={orientation}
     className={cn(
-      'flex select-none data-[state=hidden]:animate-out data-[state=hidden]:fade-out',
+      'flex select-none data-[state=hidden]:animate-fade-out',
       orientation === 'vertical' && 'h-full w-1.5',
       orientation === 'horizontal' && 'h-1.5 flex-col',
       className,

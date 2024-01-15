@@ -7,31 +7,22 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [18]
 
     steps:
-      - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.12.0
-        with:
-          access_token: ${{ github.token }}
-
-      - name: Checkout Master
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v2.4.0
         with:
           version: 8
 
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: pnpm
+          node-version: 18
+          cache: 'pnpm'
 
       - name: Install Dependencies
-        run: pnpm i
+        run: pnpm i --frozen-lockfile
 
       - name: Lint Format
         run: pnpm lint:prettier

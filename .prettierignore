@@ -3,3 +3,5 @@ pnpm-lock.yaml
 .github/**/*.md
 
 apps/docs/shaders/*
+
+**/out/**/*.mdx

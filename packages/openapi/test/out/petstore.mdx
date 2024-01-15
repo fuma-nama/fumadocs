@@ -1,0 +1,295 @@
+---
+title: Swagger Petstore
+---
+
+import { Root, API, APIInfo, APIExample, Property } from 'next-docs-ui/components/api'
+import { Tabs, Tab } from 'next-docs-ui/components/tabs'
+import { Accordion, Accordions } from 'next-docs-ui/components/accordion';
+
+<Root>
+
+<API>
+
+<APIInfo method={"GET"} route={"/pets"}>
+
+## List all pets
+
+### Query Parameters
+
+<Property required={false} deprecated={false} name={"limit"} type={"integer"}>
+
+How many items to return at one time (max 100)
+
+<span>Maximum:  `100`</span>
+
+<span>Format:  `"int32"`</span>
+
+</Property>
+
+| Status code | Description |
+| ----------- | ----------- |
+| `200` | A paged array of pets |
+| `default` | unexpected error |
+
+</APIInfo>
+
+<APIExample>
+
+```bash title="curl"
+curl -X GET "http://petstore.swagger.io/pets"
+```
+
+<Tabs items={["200","default"]}>
+
+<Tab value={"200"}>
+
+
+
+```json title="Example Response"
+[
+  {
+    "id": 0,
+    "name": "string",
+    "tag": "string"
+  }
+]
+```
+
+<Accordions>
+
+<Accordion title={"Typescript Definition"}>
+
+```ts
+/**
+ * @maxItems 100
+ */
+export type Response = {
+  id: number;
+  name: string;
+  tag?: string;
+}[];
+
+```
+
+</Accordion>
+
+</Accordions>
+
+</Tab>
+
+<Tab value={"default"}>
+
+
+
+```json title="Example Response"
+{
+  "code": 0,
+  "message": "string"
+}
+```
+
+<Accordions>
+
+<Accordion title={"Typescript Definition"}>
+
+```ts
+export interface Response {
+  code: number;
+  message: string;
+}
+
+```
+
+</Accordion>
+
+</Accordions>
+
+</Tab>
+
+</Tabs>
+
+</APIExample>
+
+</API>
+
+<API>
+
+<APIInfo method={"POST"} route={"/pets"}>
+
+## Create a pet
+
+### Request Body
+
+
+
+<Property required={true} deprecated={false} name={"id"} type={"integer"}>
+
+
+
+<span>Format:  `"int64"`</span>
+
+</Property>
+
+<Property required={true} deprecated={false} name={"name"} type={"string"}>
+
+
+
+</Property>
+
+<Property required={false} deprecated={false} name={"tag"} type={"string"}>
+
+
+
+</Property>
+
+| Status code | Description |
+| ----------- | ----------- |
+| `201` | Null response |
+| `default` | unexpected error |
+
+</APIInfo>
+
+<APIExample>
+
+```bash title="curl"
+curl -X POST "http://petstore.swagger.io/pets" \
+  -d '{
+  "id": 0,
+  "name": "string",
+  "tag": "string"
+}'
+```
+
+<Tabs items={["default"]}>
+
+<Tab value={"default"}>
+
+
+
+```json title="Example Response"
+{
+  "code": 0,
+  "message": "string"
+}
+```
+
+<Accordions>
+
+<Accordion title={"Typescript Definition"}>
+
+```ts
+export interface Response {
+  code: number;
+  message: string;
+}
+
+```
+
+</Accordion>
+
+</Accordions>
+
+</Tab>
+
+</Tabs>
+
+</APIExample>
+
+</API>
+
+<API>
+
+<APIInfo method={"GET"} route={"/pets/{petId}"}>
+
+## Info for a specific pet
+
+### Path Parameters
+
+<Property required={true} deprecated={false} name={"petId"} type={"string"}>
+
+The id of the pet to retrieve
+
+</Property>
+
+| Status code | Description |
+| ----------- | ----------- |
+| `200` | Expected response to a valid request |
+| `default` | unexpected error |
+
+</APIInfo>
+
+<APIExample>
+
+```bash title="curl"
+curl -X GET "http://petstore.swagger.io/pets/string"
+```
+
+<Tabs items={["200","default"]}>
+
+<Tab value={"200"}>
+
+
+
+```json title="Example Response"
+{
+  "id": 0,
+  "name": "string",
+  "tag": "string"
+}
+```
+
+<Accordions>
+
+<Accordion title={"Typescript Definition"}>
+
+```ts
+export interface Response {
+  id: number;
+  name: string;
+  tag?: string;
+}
+
+```
+
+</Accordion>
+
+</Accordions>
+
+</Tab>
+
+<Tab value={"default"}>
+
+
+
+```json title="Example Response"
+{
+  "code": 0,
+  "message": "string"
+}
+```
+
+<Accordions>
+
+<Accordion title={"Typescript Definition"}>
+
+```ts
+export interface Response {
+  code: number;
+  message: string;
+}
+
+```
+
+</Accordion>
+
+</Accordions>
+
+</Tab>
+
+</Tabs>
+
+</APIExample>
+
+</API>
+
+</Root>

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
-import { loader } from '@/source';
-import type * as PageTree from '@/server/page-tree';
+import { loader } from '../src/source';
+import type * as PageTree from '../src/server/page-tree';
 
 describe('Page Tree Builder', () => {
   test('Simple', () => {

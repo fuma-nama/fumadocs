@@ -1,6 +1,6 @@
-import { loader } from '@/source';
-import { Storage } from '@/source/file-system';
-import { parseFilePath, parseFolderPath } from '@/source/path';
+import { loader } from '../src/source';
+import { Storage } from '../src/source/file-system';
+import { parseFilePath, parseFolderPath } from '../src/source/path';
 import { describe, expect, test } from 'vitest';
 
 describe('Virtual Storage', () => {

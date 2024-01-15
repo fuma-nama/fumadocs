@@ -5,6 +5,13 @@ import useSWR, { type SWRResponse } from 'swr';
 import type { SortedResult } from '@/search/shared';
 import type { BaseIndex } from './server';
 
+export interface Options extends SearchOptions {
+  /**
+   * Use `empty` as result if query is empty
+   */
+  allowEmpty?: boolean;
+}
+
 export function groupResults(hits: Hit<BaseIndex>[]): SortedResult[] {
   const grouped: SortedResult[] = [];
   const scannedUrls = new Set<string>();
@@ -37,6 +44,16 @@ export async function searchDocs(
   query: string,
   options?: SearchOptions,
 ): Promise<SortedResult[]> {
+  if (query.length === 0) {
+    const result = await index.search<BaseIndex>(query, {
+      distinct: 1,
+      hitsPerPage: 8,
+      ...options,
+    });
+
+    return groupResults(result.hits).filter((hit) => hit.type === 'page');
+  }
+
   const result = await index.search<BaseIndex>(query, {
     distinct: 5,
     hitsPerPage: 10,
@@ -58,16 +75,16 @@ interface UseAlgoliaSearch {
 
 export function useAlgoliaSearch(
   index: SearchIndex,
-  options?: SearchOptions,
+  { allowEmpty = true, ...options }: Options = {},
 ): UseAlgoliaSearch {
   const [search, setSearch] = useState('');
 
   const query = useSWR(
-    ['/api/search', search, options],
-    async ([, searchV, optionsV]) => {
-      if (searchV.length === 0) return 'empty';
+    ['/api/search', search, allowEmpty, options],
+    async () => {
+      if (allowEmpty && search.length === 0) return 'empty';
 
-      return searchDocs(index, searchV, optionsV);
+      return searchDocs(index, search, options);
     },
     {
       keepPreviousData: true,

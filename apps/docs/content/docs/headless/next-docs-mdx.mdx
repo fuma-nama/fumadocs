@@ -5,12 +5,3 @@ description: The native content source for Next Docs
 
 Please follow the [Getting Started Guide](/docs/mdx) to setup Next Docs MDX for
 your documentation.
-
-## Features
-
-Currently it only supports local content. It is a custom Webpack loader, which allows you to
-import images and CSS files directly in MDX files.
-
-Technically should have a better performance than Contentlayer, since it doesn't
-need to run esbuild separately to build MDX files. We can easily add properties
-to `vfile.data` and export it via custom remark plugins

@@ -5,6 +5,7 @@ import { forwardRef, useCallback, useRef } from 'react';
 import { cn } from '@/utils/cn';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCopyButton } from '@/utils/use-copy-button';
+import { buttonVariants } from '@/theme/variants';
 
 export type CodeBlockProps = HTMLAttributes<HTMLElement> & {
   allowCopy?: boolean;
@@ -74,8 +75,11 @@ function CopyButton({
     <button
       type="button"
       className={cn(
-        'inline-flex rounded-md bg-muted p-2 text-secondary-foreground transition-opacity group-hover:opacity-100',
+        buttonVariants({
+          color: 'muted',
+        }),
         !checked && 'opacity-0',
+        'transition-all group-hover:opacity-100',
         className,
       )}
       aria-label="Copy Text"
