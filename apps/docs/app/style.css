@@ -15,9 +15,11 @@
 }
 
 .ui {
+  --primary: 220 80% 30%;
 }
 
 .dark .ui {
+  --primary: 220 100% 80%;
 }
 
 .headless {
