@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 7.1.1
+
+### Patch Changes
+
+- 65f71d4: Fix picocolors import errors
+
 ## 7.1.0
 
 ## 7.0.0
