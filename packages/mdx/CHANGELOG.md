@@ -1,5 +1,11 @@
 # next-docs-mdx
 
+## 7.1.1
+
+### Patch Changes
+
+- next-docs-zeta@7.1.1
+
 ## 7.1.0
 
 ### Patch Changes

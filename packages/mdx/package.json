@@ -1,6 +1,6 @@
 {
   "name": "next-docs-mdx",
-  "version": "7.1.0",
+  "version": "7.1.1",
   "description": "The library for using native Next.js MDX features in Next Docs",
   "keywords": [
     "NextJs",
