@@ -16,7 +16,6 @@
   "bin": "./dist/index.js",
   "files": [
     "template/*",
-    "static/*",
     "dist/*"
   ],
   "scripts": {
