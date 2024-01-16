@@ -17,6 +17,7 @@ describe('Generate documents', () => {
     );
 
     for (const tag of tags) {
+      console.log(JSON.stringify(tag.content));
       // eslint-disable-next-line no-await-in-loop -- avoid async fs operations
       await expect(tag.content).toMatchFileSnapshot(
         `./out/museum/${tag.tag.toLowerCase()}.mdx`,
