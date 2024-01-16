@@ -1,6 +1,6 @@
 {
   "name": "create-next-docs-app",
-  "version": "7.1.0",
+  "version": "7.1.1",
   "description": "Create a new documentation site with Next Docs UI",
   "keywords": [
     "NextJs",
@@ -16,7 +16,6 @@
   "bin": "./dist/index.js",
   "files": [
     "template/*",
-    "static/*",
     "dist/*"
   ],
   "scripts": {

@@ -19,10 +19,14 @@ export async function create(options: Options): Promise<void> {
   const projectName = path.basename(options.outputDir);
   const dest = path.resolve(cwd, options.outputDir);
   await copy(path.join(sourceDir, `template/${options.template}`), dest);
-  await copy(
-    path.join(sourceDir, 'static/content'),
-    path.join(dest, 'content/docs'),
-  );
+  await copy(path.join(sourceDir, `template/+content`), dest, (name) => {
+    switch (name) {
+      case 'example.gitignore':
+        return '.gitignore';
+      default:
+        return name;
+    }
+  });
 
   if (options.tailwindcss) {
     await copy(path.join(sourceDir, `template/+tailwindcss`), dest);
@@ -31,23 +35,17 @@ export async function create(options: Options): Promise<void> {
   const packageJson = createPackageJson(projectName, options);
   await fs.writeFile(path.join(dest, 'package.json'), packageJson);
 
-  const readMe = await getReadme(projectName);
-
+  const readMe = await getReadme(dest, projectName);
   await fs.writeFile(path.join(dest, 'README.md'), readMe);
-
-  await fs.copyFile(
-    path.join(sourceDir, 'static/example.gitignore'),
-    path.join(dest, '.gitignore'),
-  );
 
   if (options.installDeps) {
     await autoInstall(options.packageManager, dest);
   }
 }
 
-async function getReadme(projectName: string): Promise<string> {
+async function getReadme(dest: string, projectName: string): Promise<string> {
   const template = await fs
-    .readFile(path.join(sourceDir, 'static/README.md'))
+    .readFile(path.join(dest, 'README.md'))
     .then((res) => res.toString());
 
   return `# ${projectName}\n\n${template}`;

@@ -13,7 +13,7 @@ import {
   spinner,
   text,
 } from '@clack/prompts';
-import * as color from 'picocolors';
+import pc from 'picocolors';
 import { getPackageManager } from './auto-install';
 import { type Template, create } from './create-app';
 import { cwd } from './constants';
@@ -21,7 +21,7 @@ import { cwd } from './constants';
 const manager = getPackageManager();
 
 async function main(): Promise<void> {
-  intro(color.bgCyan(color.bold('Create Next Docs')));
+  intro(pc.bgCyan(pc.bold('Create Next Docs')));
 
   const options = await group(
     {
@@ -93,7 +93,7 @@ async function main(): Promise<void> {
 
   info.stop('Project Generated');
 
-  outro(color.bgGreen(color.bold('Done')));
+  outro(pc.bgGreen(pc.bold('Done')));
 
   if (options.tailwindcss) {
     console.log('✔ Tailwind CSS');
@@ -101,14 +101,14 @@ async function main(): Promise<void> {
 
   console.log('✔ Typescript');
 
-  console.log(color.bold('\nOpen the project'));
-  console.log(color.cyan(`cd ${projectName}`));
+  console.log(pc.bold('\nOpen the project'));
+  console.log(pc.cyan(`cd ${projectName}`));
 
-  console.log(color.bold('\nRun Development Server'));
-  console.log(color.cyan('npm run dev | pnpm run dev | yarn dev'));
+  console.log(pc.bold('\nRun Development Server'));
+  console.log(pc.cyan('npm run dev | pnpm run dev | yarn dev'));
 
   console.log(
-    color.bold('\nYou can now open the project and start writing documents'),
+    pc.bold('\nYou can now open the project and start writing documents'),
   );
 
   process.exit(0);

@@ -16,12 +16,11 @@ describe('Generate documents', () => {
       fileURLToPath(new URL('./fixtures/museum.yaml', import.meta.url)),
     );
 
-    await Promise.all(
-      tags.map(async (tag) =>
-        expect(tag.content).toMatchFileSnapshot(
-          `./out/museum/${tag.tag.toLowerCase()}.mdx`,
-        ),
-      ),
-    );
+    for (const tag of tags) {
+      // eslint-disable-next-line no-await-in-loop -- avoid async fs operations
+      await expect(tag.content).toMatchFileSnapshot(
+        `./out/museum/${tag.tag.toLowerCase()}.mdx`,
+      );
+    }
   });
 });
