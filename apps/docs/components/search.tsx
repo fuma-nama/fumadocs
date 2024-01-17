@@ -3,9 +3,7 @@
 import algo from 'algoliasearch/lite';
 import { cva } from 'class-variance-authority';
 import type { SharedProps } from 'next-docs-ui/components/dialog/search';
-import SearchDialog, {
-  AlgoliaContextProvider,
-} from 'next-docs-ui/components/dialog/search-algolia';
+import SearchDialog from 'next-docs-ui/components/dialog/search-algolia';
 import { useEffect, useState } from 'react';
 import { modes } from '@/utils/modes';
 import { cn } from '@/utils/cn';
@@ -41,37 +39,36 @@ export default function CustomSearchDialog(props: SharedProps): JSX.Element {
   }, [defaultTag]);
 
   return (
-    <AlgoliaContextProvider index={index}>
-      <SearchDialog
-        {...props}
-        searchOptions={{
-          filters: `tag:${tag}`,
-        }}
-        footer={
-          <div className="flex flex-row items-center gap-1">
-            {modes.map((mode) => (
-              <button
-                key={mode.param}
-                className={cn(itemVariants({ active: tag === mode.param }))}
-                onClick={() => {
-                  setTag(mode.param);
-                }}
-                type="button"
-                tabIndex={-1}
-              >
-                {mode.name.slice('Next Docs '.length)}
-              </button>
-            ))}
-            <a
-              href="https://algolia.com"
-              rel="noreferrer noopener"
-              className="ml-auto text-xs text-muted-foreground"
+    <SearchDialog
+      index={index}
+      {...props}
+      searchOptions={{
+        filters: `tag:${tag}`,
+      }}
+      footer={
+        <div className="flex flex-row items-center gap-1">
+          {modes.map((mode) => (
+            <button
+              key={mode.param}
+              className={cn(itemVariants({ active: tag === mode.param }))}
+              onClick={() => {
+                setTag(mode.param);
+              }}
+              type="button"
+              tabIndex={-1}
             >
-              Search powered by Algolia
-            </a>
-          </div>
-        }
-      />
-    </AlgoliaContextProvider>
+              {mode.name.slice('Next Docs '.length)}
+            </button>
+          ))}
+          <a
+            href="https://algolia.com"
+            rel="noreferrer noopener"
+            className="ml-auto text-xs text-muted-foreground"
+          >
+            Search powered by Algolia
+          </a>
+        </div>
+      }
+    />
   );
 }

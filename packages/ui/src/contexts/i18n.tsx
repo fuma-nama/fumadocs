@@ -16,12 +16,10 @@ export interface I18nContextType {
   text: Partial<Translations>;
 }
 
-const I18nContext = createContext<I18nContextType | null>(null);
+const I18nContext = createContext<I18nContextType>({ text: {} });
 
 export const I18nProvider = I18nContext.Provider;
 
 export function useI18n(): I18nContextType {
-  const ctx = useContext(I18nContext);
-  if (!ctx) return { text: {} };
-  return ctx;
+  return useContext(I18nContext);
 }

@@ -3,11 +3,12 @@
 import { SidebarProvider } from 'next-docs-zeta/sidebar';
 import { ThemeProvider } from 'next-themes';
 import { type ReactNode } from 'react';
+import dynamic from 'next/dynamic';
 import { SidebarCollapseProvider } from '@/contexts/sidebar';
 import { SearchProvider, type SearchProviderProps } from './contexts/search';
 
 export interface RootProviderProps {
-  search?: Omit<SearchProviderProps, 'children'>;
+  search?: Partial<Omit<SearchProviderProps, 'children'>>;
 
   /**
    * Wrap the body in `ThemeProvider` (next-themes), enabled by default
@@ -15,6 +16,11 @@ export interface RootProviderProps {
   enableThemeProvider?: boolean;
   children: ReactNode;
 }
+
+const DefaultSearchDialog = dynamic(
+  () => import('@/components/dialog/search-default'),
+  { ssr: false },
+);
 
 export function RootProvider({
   children,
@@ -24,7 +30,9 @@ export function RootProvider({
   const body = (
     <SidebarProvider>
       <SidebarCollapseProvider>
-        <SearchProvider {...search}>{children}</SearchProvider>
+        <SearchProvider SearchDialog={DefaultSearchDialog} {...search}>
+          {children}
+        </SearchProvider>
       </SidebarCollapseProvider>
     </SidebarProvider>
   );

@@ -1,13 +1,6 @@
-import dynamic from 'next/dynamic';
 import type { ComponentType, ReactNode } from 'react';
 import { createContext, useContext, useEffect, useState } from 'react';
-import type { DefaultSearchDialogProps } from '../components/dialog/search-default';
 import type { SharedProps } from '../components/dialog/search';
-
-const DefaultSearchDialog = dynamic(
-  () => import('../components/dialog/search-default'),
-  { ssr: false },
-);
 
 export interface SearchProviderProps {
   /**
@@ -17,19 +10,26 @@ export interface SearchProviderProps {
    */
   preload?: boolean;
 
-  links?: DefaultSearchDialogProps['links'];
+  /**
+   * Custom links to be displayed if search is empty
+   */
+  links?: SearchContextType['links'];
 
   /**
    * Replace default search dialog, allowing you to use other solutions such as Algolia Search
    *
    * It receives the `open` and `onOpenChange` prop, shall be lazy loaded with `next/dynamic`
    */
-  SearchDialog?: ComponentType<SharedProps>;
+  SearchDialog: ComponentType<SharedProps>;
 
   children: ReactNode;
 }
 
-type SearchContextType = [setOpenSearch: (value: boolean) => void];
+interface SearchContextType {
+  links: [name: string, link: string][];
+  setOpenSearch: (value: boolean) => void;
+}
+
 const SearchContext = createContext<SearchContextType | undefined>(undefined);
 
 export function useSearchContext(): SearchContextType {
@@ -42,7 +42,7 @@ export function SearchProvider({
   SearchDialog,
   children,
   preload = true,
-  ...props
+  links = [],
 }: SearchProviderProps): JSX.Element {
   const [isOpen, setIsOpen] = useState(preload ? false : undefined);
 
@@ -61,12 +61,10 @@ export function SearchProvider({
     };
   }, []);
 
-  const Dialog = SearchDialog ?? DefaultSearchDialog;
-
   return (
-    <SearchContext.Provider value={[setIsOpen]}>
+    <SearchContext.Provider value={{ links, setOpenSearch: setIsOpen }}>
       {isOpen !== undefined && (
-        <Dialog open={isOpen} onOpenChange={setIsOpen} {...props} />
+        <SearchDialog open={isOpen} onOpenChange={setIsOpen} />
       )}
       {children}
     </SearchContext.Provider>

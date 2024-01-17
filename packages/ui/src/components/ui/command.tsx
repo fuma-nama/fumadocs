@@ -1,10 +1,9 @@
-import { type DialogProps } from '@radix-ui/react-dialog';
 import { Command as CommandPrimitive } from 'cmdk';
 import { Search } from 'lucide-react';
 import * as React from 'react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/theme/variants';
-import { Dialog, DialogClose, DialogContent, DialogFooter } from './dialog';
+import { DialogClose } from './dialog';
 
 const Command = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive>,
@@ -12,10 +11,7 @@ const Command = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <CommandPrimitive
     ref={ref}
-    className={cn(
-      'flex max-h-[80vh] flex-col divide-y divide-border',
-      className,
-    )}
+    className={cn('flex max-h-[80vh] flex-col', className)}
     shouldFilter={false}
     loop
     {...props}
@@ -24,32 +20,11 @@ const Command = React.forwardRef<
 
 Command.displayName = CommandPrimitive.displayName;
 
-interface CommandDialogProps extends DialogProps {
-  footer?: React.ReactNode;
-}
-
-function CommandDialog({
-  footer,
-  children,
-  ...props
-}: CommandDialogProps): JSX.Element {
-  return (
-    <Dialog {...props}>
-      <DialogContent className="p-0">
-        <Command>
-          {children}
-          {footer ? <DialogFooter>{footer}</DialogFooter> : null}
-        </Command>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
 const CommandInput = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Input>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>
 >(({ className, ...props }, ref) => (
-  <div className="flex items-center gap-2 !border-t-0 px-3">
+  <div className="flex items-center gap-2 px-3">
     <Search className="size-4 shrink-0 text-muted-foreground" />
     <CommandPrimitive.Input
       ref={ref}
@@ -81,7 +56,7 @@ const CommandList = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <CommandPrimitive.List
     ref={ref}
-    className={cn('max-h-[460px] overflow-y-auto p-2', className)}
+    className={cn('max-h-[460px] overflow-y-auto border-t p-2', className)}
     {...props}
   />
 ));
@@ -160,7 +135,6 @@ CommandItem.displayName = CommandPrimitive.Item.displayName;
 
 export {
   Command,
-  CommandDialog,
   CommandInput,
   CommandList,
   CommandEmpty,

@@ -139,7 +139,7 @@ export function Nav({
 const shortcut = cva('rounded-md border bg-background px-1.5');
 
 function SearchToggle(): JSX.Element {
-  const [setOpenSearch] = useSearchContext();
+  const { setOpenSearch } = useSearchContext();
   const { search = 'Search' } = useI18n().text;
 
   return (
