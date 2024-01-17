@@ -5,7 +5,7 @@
 .dark {
   --background: 0 0% 0%;
   --foreground: 0 0% 100%;
-  --popover: 0 0% 0%;
+  --popover: 0 0% 4%;
   --card: 0 0% 4%;
   --muted: 0 0% 8%;
   --border: 0 0% 14%;

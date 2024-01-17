@@ -21,8 +21,8 @@ export const animations = {
       to: { height: '0', opacity: '0.5' },
     },
     'dialog-in': {
-      from: { transform: 'scale(0.95) translateY(-4rem)', opacity: '0' },
-      to: { transform: 'scale(1) translateY(0)' },
+      from: { transform: 'scale(0.95) translate(-50%, 0)', opacity: '0' },
+      to: { transform: 'scale(1) translate(-50%, 0)' },
     },
     'drawer-in': {
       from: { transform: 'translateY(100%)' },
@@ -31,8 +31,8 @@ export const animations = {
       to: { transform: 'translateY(100%)' },
     },
     'dialog-out': {
-      from: { transform: 'scale(1) translateY(0)' },
-      to: { transform: 'scale(0.95) translateY(-4rem)', opacity: '0' },
+      from: { transform: 'scale(1) translate(-50%, 0)' },
+      to: { transform: 'scale(0.95) translateY(-50%, 0)', opacity: '0' },
     },
     'popover-in': {
       from: { opacity: '0', transform: 'scale(0.95) translateY(-10px)' },

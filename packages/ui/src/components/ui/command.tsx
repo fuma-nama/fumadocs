@@ -13,7 +13,7 @@ const Command = React.forwardRef<
   <CommandPrimitive
     ref={ref}
     className={cn(
-      'flex h-full w-full flex-col divide-y divide-border',
+      'flex max-h-[80vh] flex-col divide-y divide-border',
       className,
     )}
     shouldFilter={false}
@@ -21,6 +21,7 @@ const Command = React.forwardRef<
     {...props}
   />
 ));
+
 Command.displayName = CommandPrimitive.displayName;
 
 interface CommandDialogProps extends DialogProps {
@@ -53,7 +54,7 @@ const CommandInput = React.forwardRef<
     <CommandPrimitive.Input
       ref={ref}
       className={cn(
-        'w-full bg-transparent py-3 text-base outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50',
+        'w-full bg-transparent py-3 text-base outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed',
         className,
       )}
       {...props}
@@ -80,7 +81,7 @@ const CommandList = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <CommandPrimitive.List
     ref={ref}
-    className={cn('max-h-[400px] overflow-y-auto p-2', className)}
+    className={cn('max-h-[460px] overflow-y-auto p-2', className)}
     {...props}
   />
 ));
@@ -131,21 +132,26 @@ CommandSeparator.displayName = CommandPrimitive.Separator.displayName;
 const CommandItem = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Item> & {
+    icon: React.ReactNode;
     nested?: boolean;
   }
->(({ className, nested = false, ...props }, ref) => (
+>(({ className, icon, nested = false, children, ...props }, ref) => (
   <CommandPrimitive.Item
     ref={ref}
     className={cn(
-      'select-none rounded-lg text-sm aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:size-4',
+      'select-none rounded-lg px-2 text-sm aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
       className,
     )}
     {...props}
   >
     <div
-      className={cn('flex items-center gap-2 p-3', nested && 'ml-5 border-l')}
+      className={cn(
+        'flex min-h-10 items-center gap-3',
+        nested && 'ml-2 gap-2 border-l pl-4',
+      )}
     >
-      {props.children}
+      <div className="text-muted-foreground [&_svg]:size-4">{icon}</div>
+      <p className="w-0 flex-1 truncate">{children}</p>
     </div>
   </CommandPrimitive.Item>
 ));

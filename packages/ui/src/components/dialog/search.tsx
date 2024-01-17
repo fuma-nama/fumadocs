@@ -59,26 +59,25 @@ export function SearchDialog({
           </CommandEmpty>
 
           <CommandGroup value="result">
-            {Array.isArray(data) &&
-              data.map((item) => (
-                <CommandItem
-                  key={item.id}
-                  value={item.id}
-                  onSelect={() => {
-                    onOpen(item.url);
-                  }}
-                  nested={item.type !== 'page'}
-                >
+            {data?.map((item) => (
+              <CommandItem
+                key={item.id}
+                value={item.id}
+                onSelect={() => {
+                  onOpen(item.url);
+                }}
+                icon={
                   {
-                    {
-                      text: <TextIcon />,
-                      heading: <HashIcon />,
-                      page: <FileTextIcon />,
-                    }[item.type]
-                  }
-                  <p className="w-0 flex-1 truncate">{item.content}</p>
-                </CommandItem>
-              ))}
+                    text: <TextIcon />,
+                    heading: <HashIcon />,
+                    page: <FileTextIcon />,
+                  }[item.type]
+                }
+                nested={item.type !== 'page'}
+              >
+                {item.content}
+              </CommandItem>
+            ))}
           </CommandGroup>
           {props.children}
         </CommandList>

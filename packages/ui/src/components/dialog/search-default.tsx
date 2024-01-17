@@ -44,8 +44,12 @@ export default function DefaultSearchDialog({
     >
       <CommandGroup value="items">
         {links.map(([name, link]) => (
-          <CommandItem key={link} value={link} onSelect={onSelect}>
-            <ExternalLinkIcon />
+          <CommandItem
+            key={link}
+            value={link}
+            onSelect={onSelect}
+            icon={<ExternalLinkIcon />}
+          >
             {name}
           </CommandItem>
         ))}
