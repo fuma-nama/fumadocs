@@ -1,4 +1,4 @@
-const { docsUi, docsUiPlugins } = require('next-docs-ui/tailwind-plugin');
+const { createPreset } = require('next-docs-ui/tailwind-plugin');
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -9,5 +9,5 @@ module.exports = {
     './mdx-components.{ts,tsx}',
     './node_modules/next-docs-ui/dist/**/*.js',
   ],
-  plugins: [...docsUiPlugins, docsUi],
+  presets: [createPreset()],
 };
