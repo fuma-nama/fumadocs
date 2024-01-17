@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 7.1.2
+
+### Patch Changes
+
+- b836055: Remove deprecated usage from templates
+
 ## 7.1.1
 
 ### Patch Changes

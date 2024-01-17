@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 7.1.2
+
+### Patch Changes
+
+- 9204975: Fix search dialog overflow issues
+  - next-docs-zeta@7.1.2
+
 ## 7.1.1
 
 ### Patch Changes
