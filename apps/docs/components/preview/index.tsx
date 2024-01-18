@@ -95,7 +95,7 @@ export default {
         collapsible
         className="rounded-xl bg-background px-4"
       >
-        <Accordion id="what-is-next-docs" title="What is Next Docs?">
+        <Accordion id="what-is-next-docs" title="What is Fumadocs?">
           A framework for building documentations
         </Accordion>
         <Accordion id="ux" title="What do we love?">

@@ -21,7 +21,7 @@ import { cwd } from './constants';
 const manager = getPackageManager();
 
 async function main(): Promise<void> {
-  intro(pc.bgCyan(pc.bold('Create Next Docs')));
+  intro(pc.bgCyan(pc.bold('Create Fumadocs App')));
 
   const options = await group(
     {
@@ -36,7 +36,7 @@ async function main(): Promise<void> {
           message: 'Choose a content source',
           initialValue: 'next-docs-mdx' as Template,
           options: [
-            { value: 'next-docs-mdx', label: 'Next Docs MDX' },
+            { value: 'next-docs-mdx', label: 'Fumadocs MDX' },
             { value: 'contentlayer', label: 'Contentlayer' },
           ],
         }),

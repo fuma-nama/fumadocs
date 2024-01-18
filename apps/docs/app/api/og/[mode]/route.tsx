@@ -4,21 +4,20 @@ import type { NextRequest } from 'next/server';
 
 interface Mode {
   param: string;
+  package: string;
   name: string;
 }
 
 const modes: Mode[] = [
   {
     param: 'headless',
-    name: 'Next Docs Zeta',
+    package: 'fuma-docs/core',
+    name: 'Core',
   },
   {
     param: 'ui',
-    name: 'Next Docs UI',
-  },
-  {
-    param: 'mdx',
-    name: 'Next Docs MDX',
+    package: 'fuma-docs/ui',
+    name: 'UI',
   },
 ];
 
@@ -42,7 +41,7 @@ export async function GET(
 
   return new ImageResponse(
     OG({
-      title: title ?? 'Next Docs',
+      title: title ?? 'Fumadocs',
       description: description ?? 'The Documentation Framework',
       mode: modes.find((mode) => mode.param === params.mode) ?? modes[0],
     }),

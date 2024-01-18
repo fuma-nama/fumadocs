@@ -8,7 +8,7 @@ interface Options {
 }
 
 const content = `
-/** Auto-generated with Next Docs **/
+/** Auto-generated **/
 declare const map: Record<string, unknown>
 
 export { map }

@@ -8,31 +8,31 @@ The framework for building documentation websites in Next.js.
 
 This monorepo includes three packages.
 
-### Next Docs Zeta
+### `fuma-docs/ui`
 
-The headless UI library for building documentation websites.
+The documentation framework that powered by Next.js. It offers many out-of-the-box
+features along with a well-designed user interface.
+
+```bash
+npm install fuma-docs/ui
+```
+
+### `fuma-docs/core`
+
+The headless UI library for building documentation sites.
 
 It includes necessary parts such as TOC, Sidebar, and some useful utilities.
 
 ```bash
-npm install next-docs-zeta
+npm install fuma-docs/core
 ```
 
-### Next Docs UI
-
-The framework is built on top of Next Docs Zeta. It offers many out-of-the-box
-features along with a well-designed user interface.
-
-```bash
-npm install next-docs-ui
-```
-
-### Create Next Docs App
+### Create Fumadocs App
 
 A CLI tool that generates documentation sites.
 
 ```bash
-npx create next-docs-app
+pnpm create fuma-docs-app
 ```
 
 ### Compatiability

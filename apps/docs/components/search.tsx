@@ -57,7 +57,7 @@ export default function CustomSearchDialog(props: SharedProps): JSX.Element {
               type="button"
               tabIndex={-1}
             >
-              {mode.name.slice('Next Docs '.length)}
+              {mode.name}
             </button>
           ))}
           <a

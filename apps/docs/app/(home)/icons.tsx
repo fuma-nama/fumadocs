@@ -1,5 +1,34 @@
 import type { SVGProps } from 'react';
 
+export function FumaDocsSVG(props: SVGProps<SVGSVGElement>): JSX.Element {
+  return (
+    <svg
+      width="80"
+      height="80"
+      viewBox="0 0 180 180"
+      filter="url(#shadow)"
+      {...props}
+    >
+      <circle cx="90" cy="90" r="90" fill="url(#iconGradient)" />
+      <defs>
+        <filter id="shadow" colorInterpolationFilters="sRGB">
+          <feDropShadow
+            dx="0"
+            dy="0"
+            stdDeviation="1"
+            floodColor="hsl(var(--primary))"
+            floodOpacity="1"
+          />
+        </filter>
+        <linearGradient id="iconGradient" gradientTransform="rotate(45)">
+          <stop offset="45%" stopColor="hsl(var(--background))" />
+          <stop offset="100%" stopColor="hsl(var(--primary))" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
 export function NextSVG(props: SVGProps<SVGSVGElement>): JSX.Element {
   return (
     <svg

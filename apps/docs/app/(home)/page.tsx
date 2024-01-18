@@ -1,5 +1,6 @@
 import { cva } from 'class-variance-authority';
 import {
+  AlertCircleIcon,
   BatteryChargingIcon,
   FileTextIcon,
   GithubIcon,
@@ -10,7 +11,6 @@ import {
   PersonStandingIcon,
   RocketIcon,
   SearchIcon,
-  StarIcon,
   StarsIcon,
   TimerIcon,
 } from 'lucide-react';
@@ -49,7 +49,11 @@ export default function HomePage(): JSX.Element {
             'repeating-linear-gradient(to right, hsl(var(--border)), transparent 1px, transparent 50px), repeating-linear-gradient(to bottom, hsl(var(--border)), transparent 1px, transparent 50px)',
         }}
       />
-      <main className="container relative max-w-[1100px] px-2 py-4 sm:py-20">
+      <main className="container relative max-w-[1100px] px-2 py-4 sm:py-10">
+        <div className="mx-auto mb-4 flex w-fit flex-row items-center gap-2 rounded-full border bg-muted p-2 text-sm">
+          <AlertCircleIcon className="size-4" />
+          We are renaming to Fumadocs
+        </div>
         <div
           className="border-x border-t"
           style={{
@@ -250,22 +254,6 @@ export default function HomePage(): JSX.Element {
               >
                 Showcase
               </Link>
-
-              <div className="absolute left-[280px] top-[20px] z-[-1] h-[200px] w-[200px]">
-                <StarIcon strokeWidth={0.4} className="h-full w-full" />
-                <StarIcon
-                  strokeWidth={0.4}
-                  className="absolute inset-0 h-full w-full scale-[25%]"
-                />
-                <StarIcon
-                  strokeWidth={0.4}
-                  className="absolute inset-0 h-full w-full scale-50"
-                />
-                <StarIcon
-                  strokeWidth={0.4}
-                  className="absolute inset-0 h-full w-full scale-75"
-                />
-              </div>
               <div className="mt-8">
                 <Previews />
               </div>
@@ -292,7 +280,7 @@ export default function HomePage(): JSX.Element {
                 >
                   <div className="rounded-[inherit] bg-background bg-gradient-to-t from-muted p-4 transition-colors hover:bg-muted">
                     <LayoutIcon />
-                    <h3 className="font-semibold">Next Docs UI</h3>
+                    <h3 className="font-semibold">Fumadocs UI</h3>
                     <p className="text-muted-foreground">
                       Full-powered framework with an excellent UI.
                     </p>
@@ -304,7 +292,7 @@ export default function HomePage(): JSX.Element {
                 >
                   <div className="rounded-[inherit] bg-background p-4 transition-colors hover:bg-muted">
                     <LibraryIcon />
-                    <h3 className="font-semibold">Next Docs Zeta</h3>
+                    <h3 className="font-semibold">Core</h3>
                     <p className="text-muted-foreground">
                       Headless library with an useful set of utilities.
                     </p>
@@ -314,13 +302,13 @@ export default function HomePage(): JSX.Element {
             </div>
           </div>
           <div className="grid grid-cols-1 divide-border border-b md:grid-cols-2 md:divide-x lg:grid-cols-3">
-            <div className="relative flex flex-col overflow-hidden px-6 py-14">
+            <div className="relative flex flex-col overflow-hidden px-8 py-14">
               <Rain
                 width={500}
                 height={1000}
                 className="absolute inset-0 z-[-1] mix-blend-difference"
               />
-              <h2 className="text-2xl font-medium">
+              <h2 className="text-3xl font-bold">
                 Create your first documentation.
               </h2>
               <ul className="my-8 flex flex-col gap-6">
@@ -477,10 +465,16 @@ function Search(): JSX.Element {
 function Hero(): JSX.Element {
   return (
     <div className="container relative z-[2] flex flex-col items-center overflow-hidden border-b bg-background px-6 pt-20 text-center">
-      <h1 className="text-4xl font-medium md:text-5xl">Build Your Docs.</h1>
-      <p className="mb-6 mt-4 h-fit p-2 text-lg text-muted-foreground md:max-w-[80%] md:text-2xl">
-        Next Docs is the Next.js framework for building documentation sites with
-        breathtaking UI and excellent user experience.
+      <h1 className="mb-6 text-4xl font-semibold md:text-5xl">
+        Build Your Docs.
+      </h1>
+      <p className="mb-6 h-fit p-2 text-muted-foreground md:max-w-[80%] md:text-xl">
+        Fumadocs is the framework for building documentation with{' '}
+        <b className="font-medium text-foreground">
+          excellent UI and user experience
+        </b>
+        . Allow you to take advantage of Next.js App Router and React Server
+        Component.
       </p>
       <div className="inline-flex items-center gap-3">
         <Link

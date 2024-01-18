@@ -12,6 +12,7 @@ import zeta from '../../../packages/headless/package.json';
 export interface Mode {
   param: string;
   name: string;
+  package: string;
   description: string;
   version: string;
   icon: LucideIcon;
@@ -20,22 +21,25 @@ export interface Mode {
 export const modes: Mode[] = [
   {
     param: 'headless',
-    name: 'Next Docs Zeta',
-    description: 'The headless library',
+    name: 'Core',
+    package: 'fuma-docs/core',
+    description: 'The core library',
     version: zeta.version,
     icon: LibraryIcon,
   },
   {
     param: 'ui',
-    name: 'Next Docs UI',
-    description: 'The framework',
+    name: 'UI',
+    package: 'fuma-docs/ui',
+    description: 'The user interface',
     version: ui.version,
     icon: LayoutIcon,
   },
   {
     param: 'mdx',
-    name: 'Next Docs MDX',
-    description: 'Better Next.js MDX',
+    name: 'MDX',
+    package: 'fuma-docs/mdx',
+    description: 'Built-in source provider',
     version: mdx.version,
     icon: PaperclipIcon,
   },

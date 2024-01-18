@@ -1,17 +1,19 @@
 ---
 title: Flexsearch
-description: Built-in document search of Next Docs
+description: Built-in document search of Fumadocs
 ---
 
-Next Docs supports searching document based on
+Fumadocs supports searching document based on
 [Flexsearch](https://github.com/nextapps-de/flexsearch).
 
-As the bulit-in search of Next Docs, It is the default but also recommended
+As the bulit-in search of Fumadocs, It is the default but also recommended
 option since it's easier to setup and totally free.
 
-## Usage
+> If you're using a CMS, you should use the API provided by the CMS instead.
 
-Note: If you're using a CMS, you should use the API provided by the CMS instead.
+## Simple Search
+
+Index with the raw content of document.
 
 1. Create the API Route.
 
@@ -41,7 +43,7 @@ export function Dialog() {
 <Accordions className='mt-4'>
 <Accordion title="Example">
 
-You can use the default Search Dialog from [Next Docs UI](/docs/ui/search).
+You can use the default Search Dialog from [Fumadocs UI](/docs/ui/search).
 
 </Accordion>
 </Accordions>
@@ -49,12 +51,6 @@ You can use the default Search Dialog from [Next Docs UI](/docs/ui/search).
 ### createSearchAPI
 
 Create a GET route handler, that supports `simple` and `advanced` search.
-
-### createI18nSearchAPI
-
-Create a GET route handler with i18n functionality.
-
-[Learn how to implement i18n](/docs/headless/internationalization)
 
 ### useDocsSearch
 
@@ -75,20 +71,47 @@ A hook that combined debounce value and `useSWR`.
 | `empty`          | If the searching text is empty or blank         |
 | `SortedResult[]` | Array of matching pages, headings and contents. |
 
-### Custom Algorithm
+## Internationalization
 
-You can port your own search algorithm by returning a list of `SortedResult`
-from your custom `/api/search/route.ts` api endpoint, and you can integrate it
-with Next Docs UI.
+The default `createSearchAPI` doesn't provide functionality for i18n. Instead,
+you should use `createI18nSearchAPI`.
 
-<TypeTable
-  type={{
-    id: { type: 'string' },
-    url: { type: 'string' },
-    type: { type: 'enum', typeDescription: "'page' | 'heading' | 'text'" },
-    content: { type: 'string' },
-  }}
-/>
+1. Update the route handler.
+
+```ts title="api/search/route.ts"
+import { languages } from '@/i18n';
+import { getPages } from '@/source';
+import { createI18nSearchAPI } from 'next-docs-zeta/search/server';
+
+export const { GET } = createI18nSearchAPI('advanced', {
+  indexes: languages.map((lang) => {
+    const pages = getPages(lang)!.map((page) => ({
+      ...
+    }));
+
+    return [lang, pages];
+  }),
+});
+```
+
+2. Add `locale` to search dialog, this will only allow pages with specified
+   locale to be searched by the user.
+
+```tsx
+function Dialog() {
+  const { search, setSearch, query } = useDocsSearch(locale);
+
+  //...
+}
+```
+
+<Cards className="mt-4">
+  <Card
+    title="Page Conventions"
+    description="Learn to build Internationalized Page Structure"
+    href="/docs/headless/page-conventions"
+  />
+</Cards>
 
 ## Advanced Search
 
@@ -122,8 +145,6 @@ export const { GET } = await createSearchAPI('advanced', {
 It's useful for implementing versioned docs, or multi-docs similar to this
 documentation.
 
-> Next Docs UI's Search Dialog doesn't support tag filter.
-
 ```ts
 import { allDocs } from 'contentlayer/generated';
 import { createSearchAPI } from 'next-docs-zeta/search/server';
@@ -139,3 +160,18 @@ export const { GET } = createSearchAPI('advanced', {
 // Pass `tag` in your custom search dialog
 const { search, setSearch, query } = useDocsSearch(locale, tag);
 ```
+
+### Custom Algorithm
+
+You can port your own search algorithm by returning a list of `SortedResult`
+from your custom `/api/search/route.ts` api endpoint, and you can integrate it
+with Fumadocs UI later.
+
+<TypeTable
+  type={{
+    id: { type: 'string' },
+    url: { type: 'string' },
+    type: { type: 'enum', typeDescription: "'page' | 'heading' | 'text'" },
+    content: { type: 'string' },
+  }}
+/>

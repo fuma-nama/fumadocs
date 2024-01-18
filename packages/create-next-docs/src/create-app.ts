@@ -120,13 +120,17 @@ function createPackageJson(
     Object.assign(packageJson.dependencies, {
       'next-docs-mdx': version,
     });
+
+    Object.assign(packageJson.devDependencies, {
+      '@types/mdx': '2.0.10',
+    });
   }
 
   if (tailwindcss) {
     Object.assign(packageJson.devDependencies, {
       autoprefixer: '10.4.16',
       postcss: '8.4.32',
-      tailwindcss: '3.3.7',
+      tailwindcss: '3.4.1',
     });
   }
 

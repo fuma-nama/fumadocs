@@ -1,15 +1,15 @@
 ---
 title: Getting Started
-description: Learn how to use Next Docs MDX in your documentation
+description: Learn how to use Fumadocs MDX in your documentation
 ---
 
 ## Introduction
 
-Next Docs MDX is a Next.js plugin that enhances the experience of the official
+`fuma-docs/mdx` is a Next.js plugin that enhances the experience of the official
 `next/mdx` package. It parses frontmatter and is bundled with several MDX
 plugins for building a good documentation site.
 
-> This package must be used with `next-docs-zeta`
+> This package must be used with Fumadocs
 
 ## Usage
 
@@ -48,7 +48,7 @@ Create `mdx-components.tsx` in your root directory.
 
 ```tsx
 import type { MDXComponents } from 'mdx/types';
-// Assume you're using Next Docs UI
+// Assume you're using Fumadocs UI
 import defaultComponents from 'next-docs-ui/mdx/default';
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
@@ -61,7 +61,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
 
 ### Resolve Files
 
-Next Docs MDX automatically generates a `.map.ts` file once you start the dev server or start building the app.
+It automatically generates a `.map.ts` file once you start the dev server or start building the app.
 
 The raw data of pages is stored in the `map` property from your `.map.ts` file. To Integrate with [Source API](/docs/headless/source-api), create a `source.ts` file, and define the source with `createMDXSource` which returns a
 [Page Tree](/docs/headless/page-tree) and additional utilities.
