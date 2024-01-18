@@ -79,3 +79,18 @@ getPage(params.slug, params.lang);
 // get pages
 getPages(params.lang);
 ```
+
+### Static Generation
+
+Generate parameters for every language and page.
+
+```tsx
+export async function generateStaticParams() {
+  return languages.flatMap((lang) =>
+    getPages(lang)!.map((page) => ({
+      slug: page.slug,
+      lang,
+    })),
+  );
+}
+```

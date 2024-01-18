@@ -82,10 +82,10 @@ function Search({ search, onSearchChange, results }: SearchProps): JSX.Element {
       <CommandInput
         value={search}
         onValueChange={onSearchChange}
-        placeholder={text.search ?? 'Search'}
+        placeholder={text.search}
       />
       <CommandList className={cn(hideList && 'hidden')}>
-        <CommandEmpty>{text.searchNoResult ?? 'No results found'}</CommandEmpty>
+        <CommandEmpty>{text.searchNoResult}</CommandEmpty>
 
         <CommandGroup value="result">
           {items.map((item) => (

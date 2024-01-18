@@ -8,7 +8,7 @@ import { useI18n } from '@/contexts/i18n';
 type PosType = [top: number, height: number];
 
 export function TOCItems({ items }: { items: TOCItemType[] }): JSX.Element {
-  const { toc = 'On this page' } = useI18n().text;
+  const { text } = useI18n();
   const [pos, setPos] = useState<PosType>();
 
   return (
@@ -18,7 +18,7 @@ export function TOCItems({ items }: { items: TOCItemType[] }): JSX.Element {
     >
       <h3 className="mb-4 inline-flex items-center gap-2">
         <TextIcon className="size-4" />
-        {toc}
+        {text.toc}
       </h3>
       <div className="flex flex-col gap-1 border-l-2 text-muted-foreground">
         <div

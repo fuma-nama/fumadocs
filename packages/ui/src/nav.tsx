@@ -140,7 +140,7 @@ const shortcut = cva('rounded-md border bg-background px-1.5');
 
 function SearchToggle(): JSX.Element {
   const { setOpenSearch } = useSearchContext();
-  const { search = 'Search' } = useI18n().text;
+  const { text } = useI18n();
 
   return (
     <>
@@ -168,7 +168,7 @@ function SearchToggle(): JSX.Element {
         }}
       >
         <SearchIcon aria-label="Open Search" className="ml-1 size-4" />
-        {search}
+        {text.search}
         <div className="ml-auto inline-flex gap-0.5 text-xs">
           <kbd className={shortcut()}>⌘</kbd>
           <kbd className={shortcut()}>K</kbd>
