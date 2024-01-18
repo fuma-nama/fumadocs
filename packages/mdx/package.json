@@ -1,12 +1,12 @@
 {
-  "name": "next-docs-mdx",
-  "description": "The built-in source for Fumadocs",
+  "name": "@fuma-docs/mdx",
   "version": "7.1.2",
+  "description": "The built-in source for Fumadocs",
   "keywords": [
     "NextJs",
     "Docs"
   ],
-  "homepage": "https://next-docs-zeta.vercel.app",
+  "homepage": "https://fuma-docs.vercel.app",
   "repository": "github:fuma-nama/next-docs",
   "license": "MIT",
   "author": "Fuma Nama",
@@ -44,12 +44,12 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
+    "@fuma-docs/core": "workspace:*",
     "@mdx-js/mdx": "^3.0.0",
     "cross-spawn": "^7.0.3",
     "estree-util-value-to-estree": "^3.0.1",
     "fast-glob": "^3.3.1",
     "gray-matter": "^4.0.3",
-    "next-docs-zeta": "workspace:*",
     "zod": "^3.22.4"
   },
   "devDependencies": {

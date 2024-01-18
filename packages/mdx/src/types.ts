@@ -1,7 +1,7 @@
 import type { MDXProps } from 'mdx/types';
-import type { StructuredData } from 'next-docs-zeta/mdx-plugins';
-import type { TableOfContents } from 'next-docs-zeta/server';
-import type { MetaData, PageData } from 'next-docs-zeta/source';
+import type { StructuredData } from '@fuma-docs/core/mdx-plugins';
+import type { TableOfContents } from '@fuma-docs/core/server';
+import type { MetaData, PageData } from '@fuma-docs/core/source';
 
 export type SourceFile<Meta extends MetaData, Fronmatter extends PageData> =
   | {

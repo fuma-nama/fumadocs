@@ -12,6 +12,9 @@
     "start": "next start"
   },
   "dependencies": {
+    "@fuma-docs/core": "workspace:*",
+    "@fuma-docs/mdx": "workspace:*",
+    "@fuma-docs/ui": "workspace:*",
     "@next/env": "^14.0.0",
     "algoliasearch": "^4.20.0",
     "class-variance-authority": "^0.7.0",
@@ -20,9 +23,6 @@
     "katex": "^0.16.8",
     "lucide-react": "^0.298.0",
     "next": "14.0.4",
-    "next-docs-mdx": "workspace:*",
-    "next-docs-ui": "workspace:*",
-    "next-docs-zeta": "workspace:*",
     "phenomenon": "^1.6.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",

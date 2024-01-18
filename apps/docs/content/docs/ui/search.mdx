@@ -24,14 +24,14 @@ the setup guide, see [Integrate Algolia Search](/docs/headless/search/algolia). 
 
 While generally we recommend building your own search with their client-side
 SDK, you can use the built-in dialog from
-`next-docs-ui/components/dialog/search-algolia`.
+`@fuma-docs/ui/components/dialog/search-algolia`.
 
 First, create a separate client component for the dialog.
 
 ```tsx title="Client Component"
 import algo from 'algoliasearch/lite';
-import type { SharedProps } from 'next-docs-ui/components/dialog/search';
-import SearchDialog from 'next-docs-ui/components/dialog/search-algolia';
+import type { SharedProps } from '@fuma-docs/ui/components/dialog/search';
+import SearchDialog from '@fuma-docs/ui/components/dialog/search-algolia';
 
 const client = algo(appId, apiKey);
 const index = client.initIndex(indexName);
@@ -44,7 +44,7 @@ export default function CustomSearchDialog(props: SharedProps) {
 Then, lazy load the dialog with `next/dynamic`.
 
 ```tsx title="Provider (Client Component)"
-import { RootProvider } from 'next-docs-ui/provider';
+import { RootProvider } from '@fuma-docs/ui/provider';
 import dynamic from 'next/dynamic';
 import type { ReactNode } from 'react';
 
@@ -99,7 +99,7 @@ you may use the `SearchDialog` component.
 import {
   SearchDialog,
   type SharedProps
-} from 'next-docs-ui/components/dialog/search'
+} from '@fuma-docs/ui/components/dialog/search'
 
 export default function CustomSearchDialog(props: SharedProps) { ... }
 ```

@@ -1,5 +1,5 @@
-import { RootProvider } from 'next-docs-ui/provider';
-import 'next-docs-ui/style.css';
+import { RootProvider } from '@fuma-docs/ui/provider';
+import '@fuma-docs/ui/style.css';
 import { Inter } from 'next/font/google';
 import type { ReactNode } from 'react';
 

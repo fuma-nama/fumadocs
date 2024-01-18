@@ -1,4 +1,4 @@
-import Link from 'next-docs-zeta/link';
+import Link from '@fuma-docs/core/link';
 import type { AnchorHTMLAttributes, FC } from 'react';
 import { Card, Cards } from '@/mdx/card';
 import { Heading } from '@/mdx/heading';

@@ -1,4 +1,4 @@
-const { createPreset } = require('next-docs-ui/tailwind-plugin');
+const { createPreset } = require('@fuma-docs/ui/tailwind-plugin');
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -8,7 +8,7 @@ module.exports = {
     './app/**/*.{ts,tsx}',
     './content/**/*.mdx',
     './mdx-components.tsx',
-    './node_modules/next-docs-ui/dist/**/*.js',
+    './node_modules/@fuma-docs/ui/dist/**/*.js',
   ],
   presets: [createPreset()],
   theme: {

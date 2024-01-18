@@ -4,7 +4,7 @@ import type { SearchIndex } from 'algoliasearch/lite';
 import {
   type Options,
   useAlgoliaSearch,
-} from 'next-docs-zeta/search-algolia/client';
+} from '@fuma-docs/core/search-algolia/client';
 import { type ReactNode } from 'react';
 import { SearchDialog, type SharedProps, SearchDialogContent } from './search';
 

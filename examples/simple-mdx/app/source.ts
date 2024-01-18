@@ -1,6 +1,6 @@
 import { map } from '@/.map';
-import { createMDXSource } from 'next-docs-mdx';
-import { loader } from 'next-docs-zeta/source';
+import { createMDXSource } from '@fuma-docs/mdx';
+import { loader } from '@fuma-docs/core/source';
 
 export const { getPage, getPages, pageTree } = loader({
   baseUrl: '/docs',

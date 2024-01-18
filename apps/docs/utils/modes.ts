@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import mdx from '../../../packages/mdx/package.json';
 import ui from '../../../packages/ui/package.json';
-import zeta from '../../../packages/headless/package.json';
+import zeta from '../../../packages/core/package.json';
 
 export interface Mode {
   param: string;

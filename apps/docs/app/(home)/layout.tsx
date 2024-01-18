@@ -1,4 +1,4 @@
-import { Layout } from 'next-docs-ui/layout';
+import { Layout } from '@fuma-docs/ui/layout';
 import type { ReactNode } from 'react';
 import { layoutOptions } from '../docs/layout';
 

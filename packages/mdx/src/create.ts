@@ -1,4 +1,4 @@
-import { type Source } from 'next-docs-zeta/source';
+import { type Source } from '@fuma-docs/core/source';
 import type { z } from 'zod';
 import { resolveFiles } from './resolve-files';
 import type { defaultSchemas } from './utils/schema';

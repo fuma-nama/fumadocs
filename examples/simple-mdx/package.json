@@ -8,10 +8,10 @@
     "start": "next start"
   },
   "dependencies": {
+    "@fuma-docs/core": "7.1.2",
+    "@fuma-docs/mdx": "7.1.2",
+    "@fuma-docs/ui": "7.1.2",
     "next": "14.0.4",
-    "next-docs-mdx": "7.1.2",
-    "next-docs-ui": "7.1.2",
-    "next-docs-zeta": "7.1.2",
     "react": "18.2.0",
     "react-dom": "18.2.0"
   },

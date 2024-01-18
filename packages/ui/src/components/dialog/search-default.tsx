@@ -1,6 +1,6 @@
 'use client';
 
-import { useDocsSearch } from 'next-docs-zeta/search/client';
+import { useDocsSearch } from '@fuma-docs/core/search/client';
 import { type ReactNode } from 'react';
 import { useI18n } from '@/contexts/i18n';
 import { SearchDialogContent, SearchDialog, type SharedProps } from './search';

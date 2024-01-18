@@ -3,7 +3,12 @@
   "changelog": "@changesets/cli/changelog",
   "commit": false,
   "fixed": [
-    ["next-docs-zeta", "next-docs-ui", "next-docs-mdx", "create-next-docs-app"]
+    [
+      "@fuma-docs/core",
+      "@fuma-docs/ui",
+      "@fuma-docs/mdx",
+      "create-fuma-docs-app"
+    ]
   ],
   "linked": [],
   "access": "restricted",

@@ -8,7 +8,7 @@ A Table of Contents with active anchor observer and auto scroll.
 ## Usage
 
 ```tsx
-import * as Base from 'next-docs-zeta/toc';
+import * as Base from '@fuma-docs/core/toc';
 
 return (
   <Base.TOCProvider>
@@ -47,7 +47,7 @@ boolean value, must be called under the TOC Provider.
 Useful for implementing advanced styling.
 
 ```ts
-import { useActiveAnchor } from 'next-docs-zeta/toc';
+import { useActiveAnchor } from '@fuma-docs/core/toc';
 
 const isActive = useActiveAnchor(item.url);
 ```

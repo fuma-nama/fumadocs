@@ -21,7 +21,7 @@ Put your pages and layouts under `/app/[lang]`, where the 'lang' parameter is at
 'use client';
 
 import { defaultLanguage } from '@/i18n';
-import { I18nProvider } from 'next-docs-ui/i18n';
+import { I18nProvider } from '@fuma-docs/ui/i18n';
 import { useParams, usePathname, useRouter } from 'next/navigation';
 import { ReactNode, useCallback } from 'react';
 
@@ -77,8 +77,8 @@ component to the sidebar same as following:
 
 ```tsx title="[lang]/docs/layout.tsx"
 import { pageTree } from '@/source';
-import { LanguageSelect } from 'next-docs-ui/i18n';
-import { DocsLayout } from 'next-docs-ui/layout';
+import { LanguageSelect } from '@fuma-docs/ui/i18n';
+import { DocsLayout } from '@fuma-docs/ui/layout';
 import { ReactNode } from 'react';
 
 export default function Layout({

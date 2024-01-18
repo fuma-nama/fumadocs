@@ -1,5 +1,5 @@
 import { GithubIcon } from 'lucide-react';
-import type { PageTree } from 'next-docs-zeta/server';
+import type { PageTree } from '@fuma-docs/core/server';
 import type { ReactNode, HTMLAttributes } from 'react';
 import type { SidebarProps } from '@/components/sidebar';
 import type { NavItemProps, NavLinkProps } from './nav';

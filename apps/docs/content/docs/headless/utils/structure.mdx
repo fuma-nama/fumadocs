@@ -9,7 +9,7 @@ Accepts MDX/markdown content and return structurized data. Useful for
 implementing document search.
 
 ```ts
-import { structure } from 'next-docs-zeta/mdx-plugins';
+import { structure } from '@fuma-docs/core/mdx-plugins';
 
 structure(page.body.raw);
 ```
@@ -20,7 +20,7 @@ If you have custom remark plugins enabled, such as
 plugins passed into the function:
 
 ```ts
-import { structure } from 'next-docs-zeta/mdx-plugins';
+import { structure } from '@fuma-docs/core/mdx-plugins';
 import remarkMath from 'remark-math';
 
 structure(page.body.raw, [remarkMath]);

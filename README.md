@@ -2,7 +2,7 @@
 
 The framework for building documentation websites in Next.js.
 
-📘 Learn More: [Documentation](https://next-docs-zeta.vercel.app)
+📘 Learn More: [Documentation](https://fuma-docs.vercel.app)
 
 ## Installation
 

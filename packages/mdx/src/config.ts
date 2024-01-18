@@ -6,7 +6,7 @@ import {
   remarkStructure,
   remarkHeading,
   type RehypeNextDocsOptions,
-} from 'next-docs-zeta/mdx-plugins';
+} from '@fuma-docs/core/mdx-plugins';
 import type { PluggableList } from 'unified';
 import type { Configuration } from 'webpack';
 import { NextDocsWebpackPlugin } from './webpack-plugins/next-docs';
@@ -27,7 +27,7 @@ type MDXOptions = Omit<
   valueToExport?: string[];
 
   /**
-   * built-in `next-docs-zeta` rehype plugin options
+   * built-in `@fuma-docs/core` rehype plugin options
    */
   rehypeNextDocsOptions?: RehypeNextDocsOptions;
 };
@@ -123,7 +123,7 @@ const createNextDocs =
               use: [
                 options.defaultLoaders.babel,
                 {
-                  loader: 'next-docs-mdx/loader-mdx',
+                  loader: '@fuma-docs/mdx/loader-mdx',
                   options: {
                     providerImportSource: 'next-mdx-import-source-file',
                     ...mdxOptions,
@@ -136,7 +136,7 @@ const createNextDocs =
             {
               test: _mapPath,
               use: {
-                loader: 'next-docs-mdx/loader',
+                loader: '@fuma-docs/mdx/loader',
                 options: {
                   cwd,
                   rootContentPath,

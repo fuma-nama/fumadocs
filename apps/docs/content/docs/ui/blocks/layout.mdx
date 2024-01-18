@@ -13,7 +13,7 @@ The layout of documentation pages, it must be nested under the
 Wrap the children and pass your page tree to the component.
 
 ```jsx
-import { DocsLayout } from 'next-docs-ui/layout';
+import { DocsLayout } from '@fuma-docs/ui/layout';
 
 export default function Layout({ children }) {
   return <DocsLayout tree={tree}>{children}</DocsLayout>;
@@ -42,7 +42,7 @@ If you want to share navbar and search dialog between other pages, you may use t
 It doesn't contain a sidebar, therefore, a page tree is not required.
 
 ```jsx
-import { Layout } from 'next-docs-ui/layout';
+import { Layout } from '@fuma-docs/ui/layout';
 
 export default function HomeLayout({ children }) {
   return <Layout>{children}</Layout>;

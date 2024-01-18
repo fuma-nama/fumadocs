@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import env from '@next/env';
 import algosearch from 'algoliasearch';
-import { sync } from 'next-docs-zeta/search-algolia/server';
+import { sync } from '@fuma-docs/core/search-algolia/server';
 
 env.loadEnvConfig(process.cwd());
 

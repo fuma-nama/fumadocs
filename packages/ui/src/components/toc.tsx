@@ -1,6 +1,6 @@
 import { TextIcon } from 'lucide-react';
-import type { TOCItemType } from 'next-docs-zeta/server';
-import * as Primitive from 'next-docs-zeta/toc';
+import type { TOCItemType } from '@fuma-docs/core/server';
+import * as Primitive from '@fuma-docs/core/toc';
 import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/utils/cn';
 import { useI18n } from '@/contexts/i18n';

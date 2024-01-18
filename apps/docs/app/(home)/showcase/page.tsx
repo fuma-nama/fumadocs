@@ -11,7 +11,7 @@ export const metadata = createMetadata({
   title: 'Showcase',
   description: 'Some cool websites using Fumadocs',
   openGraph: {
-    url: 'https://next-docs-zeta.vercel.app/showcase',
+    url: 'https://fuma-docs.vercel.app/showcase',
   },
 });
 

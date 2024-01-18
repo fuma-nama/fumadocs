@@ -16,7 +16,7 @@ plugins for building a good documentation site.
 ### Install Dependencies
 
 ```package-install
-next-docs-mdx @types/mdx
+@fuma-docs/mdx @types/mdx
 ```
 
 ### Configuration
@@ -24,7 +24,7 @@ next-docs-mdx @types/mdx
 Add this to your `next.config.mjs` file:
 
 ```js
-import createMDX from 'next-docs-mdx/config';
+import createMDX from '@fuma-docs/mdx/config';
 
 const withMDX = createMDX();
 
@@ -49,7 +49,7 @@ Create `mdx-components.tsx` in your root directory.
 ```tsx
 import type { MDXComponents } from 'mdx/types';
 // Assume you're using Fumadocs UI
-import defaultComponents from 'next-docs-ui/mdx/default';
+import defaultComponents from '@fuma-docs/ui/mdx/default';
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
@@ -68,8 +68,8 @@ The raw data of pages is stored in the `map` property from your `.map.ts` file. 
 
 ```ts title="source.ts"
 import { map } from '@/.map';
-import { createMDXSource } from 'next-docs-mdx';
-import { loader } from 'next-docs-zeta/source';
+import { createMDXSource } from '@fuma-docs/mdx';
+import { loader } from '@fuma-docs/core/source';
 
 export const { getPage, getPages, pageTree } = loader({
   baseUrl: '/docs',

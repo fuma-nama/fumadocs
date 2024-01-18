@@ -103,7 +103,7 @@ export function Previews(): JSX.Element {
 }
 
 export function CreateAppAnimation(): JSX.Element {
-  const installCmd = 'npm create next-docs-app';
+  const installCmd = 'npm create fuma-docs-app';
   const tickTime = 100;
   const timeCommandEnter = installCmd.length;
   const timeCommandRun = timeCommandEnter + 3;

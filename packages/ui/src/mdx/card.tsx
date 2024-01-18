@@ -1,4 +1,4 @@
-import Link, { type LinkProps } from 'next-docs-zeta/link';
+import Link, { type LinkProps } from '@fuma-docs/core/link';
 import type { HTMLAttributes, ReactNode } from 'react';
 import { cn } from '@/utils/cn';
 

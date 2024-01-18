@@ -8,7 +8,7 @@ description: Get the last edit time of a file in Github repository
 Pass your repository name, and the path to file.
 
 ```ts
-import { getGitLastEditTime } from 'next-docs-zeta/server';
+import { getGitLastEditTime } from '@fuma-docs/core/server';
 import { resolve } from 'url';
 
 const time = await getGithubLastEdit({
@@ -28,7 +28,7 @@ Learn more about
 [Authenticating to the REST API](https://docs.github.com/en/rest/overview/authenticating-to-the-rest-api).
 
 ```ts
-import { getGitLastEditTime } from 'next-docs-zeta/server'
+import { getGitLastEditTime } from '@fuma-docs/core/server'
 
  const time = await getGithubLastEdit({
     ...,

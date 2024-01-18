@@ -1,11 +1,11 @@
 import { cva } from 'class-variance-authority';
 import { ChevronDown } from 'lucide-react';
-import type { PageTree } from 'next-docs-zeta/server';
-import * as Base from 'next-docs-zeta/sidebar';
+import type { PageTree } from '@fuma-docs/core/server';
+import * as Base from '@fuma-docs/core/sidebar';
 import { usePathname } from 'next/navigation';
 import type { HTMLAttributes, ReactNode } from 'react';
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import Link from 'next-docs-zeta/link';
+import Link from '@fuma-docs/core/link';
 import { cn } from '@/utils/cn';
 import type { LinkItem } from '@/contexts/tree';
 import { useTreeContext } from '@/contexts/tree';
