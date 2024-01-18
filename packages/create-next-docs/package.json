@@ -1,7 +1,7 @@
 {
   "name": "create-next-docs-app",
-  "version": "7.1.1",
   "description": "Create a new documentation site with Fumadocs",
+  "version": "7.1.2",
   "keywords": [
     "NextJs",
     "next",

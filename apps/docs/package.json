@@ -40,7 +40,7 @@
     "@types/node": "18.17.5",
     "@types/react": "18.2.0",
     "@types/react-dom": "18.2.1",
-    "autoprefixer": "10.4.16",
+    "autoprefixer": "10.4.17",
     "eslint-config-custom": "workspace:*",
     "glslify": "^7.1.1",
     "glslx": "^0.3.0",
