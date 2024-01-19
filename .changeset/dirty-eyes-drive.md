@@ -1,3 +1,12 @@
+---
+'fumadocs-ui': major
+---
+
+**Remove deprecated `docsUiPlugins`**
+
+migrate: Use `createPreset` instead
+
+```js
 const { createPreset } = require('fumadocs-ui/tailwind-plugin');
 
 /** @type {import('tailwindcss').Config} */
@@ -10,3 +19,4 @@ module.exports = {
   ],
   presets: [createPreset()],
 };
+```

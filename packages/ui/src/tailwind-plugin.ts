@@ -20,12 +20,6 @@ export interface Preset {
   backgroundImage?: string;
 }
 
-// TODO: Remove in next major
-/**
- * @deprecated Use preset instead
- */
-export const docsUiPlugins = [typography];
-
 function mapColors(
   prefix: string,
   map: Record<string, string>,
