@@ -158,7 +158,7 @@
     "algoliasearch": "^4.20.0",
     "contentlayer": "^0.3.4",
     "eslint-config-custom": "workspace:*",
-    "next": "14.0.4",
+    "next": "14.1.0",
     "tsconfig": "workspace:*",
     "unified": "^11.0.4"
   },
