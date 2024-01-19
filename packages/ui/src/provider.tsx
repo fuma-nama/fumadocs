@@ -1,6 +1,6 @@
 'use client';
 
-import { SidebarProvider } from '@fuma-docs/core/sidebar';
+import { SidebarProvider } from 'fumadocs-core/sidebar';
 import { ThemeProvider } from 'next-themes';
 import { type ReactNode } from 'react';
 import dynamic from 'next/dynamic';

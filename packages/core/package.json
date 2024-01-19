@@ -1,12 +1,12 @@
 {
-  "name": "@fuma-docs/core",
+  "name": "fumadocs-core",
   "version": "7.1.2",
   "description": "The library for building a documentation website in Next.js",
   "keywords": [
     "NextJs",
     "Docs"
   ],
-  "homepage": "https://fuma-docs.vercel.app",
+  "homepage": "https://fumadocs.vercel.app",
   "repository": "github:fuma-nama/next-docs",
   "license": "MIT",
   "author": "Fuma Nama",

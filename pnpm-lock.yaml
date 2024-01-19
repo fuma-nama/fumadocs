@@ -51,13 +51,13 @@ importers:
 
   apps/docs:
     dependencies:
-      '@fuma-docs/core':
+      'fumadocs-core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@fuma-docs/mdx':
+      'fumadocs-mdx':
         specifier: workspace:*
         version: link:../../packages/mdx
-      '@fuma-docs/ui':
+      'fumadocs-ui':
         specifier: workspace:*
         version: link:../../packages/ui
       '@next/env':
@@ -109,7 +109,7 @@ importers:
         specifier: ^3.22.4
         version: 3.22.4
     devDependencies:
-      '@fuma-docs/openapi':
+      'fumadocs-openapi':
         specifier: workspace:^
         version: link:../../packages/openapi
       '@next/bundle-analyzer':
@@ -160,10 +160,10 @@ importers:
 
   examples/advanced:
     dependencies:
-      '@fuma-docs/core':
+      'fumadocs-core':
         specifier: 7.1.2
         version: link:../../packages/core
-      '@fuma-docs/ui':
+      'fumadocs-ui':
         specifier: 7.1.2
         version: link:../../packages/ui
       contentlayer:
@@ -203,10 +203,10 @@ importers:
 
   examples/simple:
     dependencies:
-      '@fuma-docs/core':
+      'fumadocs-core':
         specifier: 7.1.2
         version: link:../../packages/core
-      '@fuma-docs/ui':
+      'fumadocs-ui':
         specifier: 7.1.2
         version: link:../../packages/ui
       contentlayer:
@@ -237,13 +237,13 @@ importers:
 
   examples/simple-mdx:
     dependencies:
-      '@fuma-docs/core':
+      'fumadocs-core':
         specifier: 7.1.2
         version: link:../../packages/core
-      '@fuma-docs/mdx':
+      'fumadocs-mdx':
         specifier: 7.1.2
         version: link:../../packages/mdx
-      '@fuma-docs/ui':
+      'fumadocs-ui':
         specifier: 7.1.2
         version: link:../../packages/ui
       next:
@@ -411,7 +411,7 @@ importers:
 
   packages/mdx:
     dependencies:
-      '@fuma-docs/core':
+      'fumadocs-core':
         specifier: workspace:*
         version: link:../core
       '@mdx-js/mdx':
@@ -493,7 +493,7 @@ importers:
 
   packages/ui:
     dependencies:
-      '@fuma-docs/core':
+      'fumadocs-core':
         specifier: workspace:*
         version: link:../core
       '@radix-ui/react-accordion':

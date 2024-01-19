@@ -13,15 +13,15 @@ mkdir -p $TMP
 cd $TMP
 
 # clone the template repo
-rm -rf @fuma-docs/ui-template
-git clone --depth 1 --single-branch --branch main https://github.com/fuma-nama/@fuma-docs/ui-template.git
+rm -rf fumadocs-ui-template
+git clone --depth 1 --single-branch --branch main https://github.com/fuma-nama/fumadocs-ui-template.git
 
 # empty out the repo
-cd @fuma-docs/ui-template
-node $DIR/update-git-repo.js $TMP/@fuma-docs/ui-template
+cd fumadocs-ui-template
+node $DIR/update-git-repo.js $TMP/fumadocs-ui-template
 
 # commit the new files
 git add -A
 git commit -m "version $npm_package_version"
 
-git push https://github.com/fuma-nama/@fuma-docs/ui-template.git main -f
+git push https://github.com/fuma-nama/fumadocs-ui-template.git main -f

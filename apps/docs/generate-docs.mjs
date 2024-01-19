@@ -1,1 +1,1 @@
-import '@fuma-docs/openapi/dist/bin.js';
+import 'fumadocs-openapi/dist/bin.js';

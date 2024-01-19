@@ -1,6 +1,6 @@
 import { allDocs, allMeta } from 'contentlayer/generated';
-import { createContentlayerSource } from '@fuma-docs/core/contentlayer';
-import { loader } from '@fuma-docs/core/source';
+import { createContentlayerSource } from 'fumadocs-core/contentlayer';
+import { loader } from 'fumadocs-core/source';
 
 export const { pageTree, getPages, getPage } = loader({
   baseUrl: '/docs',

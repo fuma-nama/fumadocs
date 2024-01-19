@@ -1,5 +1,5 @@
 import { getPages } from '@/app/source';
-import { createSearchAPI } from '@fuma-docs/core/search/server';
+import { createSearchAPI } from 'fumadocs-core/search/server';
 
 export const { GET } = createSearchAPI('advanced', {
   indexes: getPages().map((page) => ({

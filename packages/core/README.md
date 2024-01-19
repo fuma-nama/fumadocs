@@ -2,4 +2,4 @@
 
 The core library for Fumadocs.
 
-📘 Learn More: [Documentation](https://fuma-docs.vercel.app)
+📘 Learn More: [Documentation](https://fumadocs.vercel.app)

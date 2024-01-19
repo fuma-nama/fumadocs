@@ -1,10 +1,10 @@
 import type { MDXComponents } from 'mdx/types';
-import { Accordion, Accordions } from '@fuma-docs/ui/components/accordion';
-import { Callout } from '@fuma-docs/ui/components/callout';
-import { Tab, Tabs } from '@fuma-docs/ui/components/tabs';
-import { TypeTable } from '@fuma-docs/ui/components/type-table';
-import defaultComponents from '@fuma-docs/ui/mdx/default';
-import { Pre } from '@fuma-docs/ui/mdx/pre';
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import defaultComponents from 'fumadocs-ui/mdx/default';
+import { Pre } from 'fumadocs-ui/mdx/pre';
 import type { ReactNode } from 'react';
 import { Wrapper } from '@/components/preview/wrapper';
 

@@ -19,8 +19,8 @@ Put your pages and layouts under `/app/[lang]`, where the 'lang' parameter is at
 Then, wrap the root provider inside of your i18n provider.
 
 ```tsx
-import { RootProvider } from '@fuma-docs/ui/provider';
-import { I18nProvider } from '@fuma-docs/ui/i18n';
+import { RootProvider } from 'fumadocs-ui/provider';
+import { I18nProvider } from 'fumadocs-ui/i18n';
 import type { ReactNode } from 'react';
 
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -53,7 +53,7 @@ To allow users changing their language, you can add a `<LanguageSelect />`
 component to your UI, for example, as sidebar footer.
 
 ```tsx title="[lang]/docs/layout.tsx"
-import { LanguageSelect } from '@fuma-docs/ui/i18n';
+import { LanguageSelect } from 'fumadocs-ui/i18n';
 
 export function DocsLayout({ children }: { children: ReactNode }) {
   return <LanguageSelect />;

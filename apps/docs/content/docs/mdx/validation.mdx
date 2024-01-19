@@ -22,9 +22,9 @@ option.
 Extend the default frontmatter schema:
 
 ```ts title="source.ts"
-import { createMDXSource, defaultSchemas } from '@fuma-docs/mdx';
+import { createMDXSource, defaultSchemas } from 'fumadocs-mdx';
 import { z } from 'zod';
-import { loader } from '@fuma-docs/core/source';
+import { loader } from 'fumadocs-core/source';
 import { map } from '@/.map';
 
 const frontmatterSchema = defaultSchemas.frontmatter.extend({
@@ -49,7 +49,7 @@ utils.getPages().data; // should be your own frontmatter
 Furthermore, you can infer the type of pages and meta files with build-in type helpers of Source API.
 
 ```ts
-import type { InferMetaType, InferPageType } from '@fuma-docs/core/source';
+import type { InferMetaType, InferPageType } from 'fumadocs-core/source';
 
 export type Page = InferPageType<typeof utils>;
 export type Meta = InferMetaType<typeof utils>;

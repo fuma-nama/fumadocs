@@ -1,4 +1,4 @@
-const { createPreset } = require('@fuma-docs/ui/tailwind-plugin');
+const { createPreset } = require('fumadocs-ui/tailwind-plugin');
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -7,7 +7,7 @@ module.exports = {
     './app/**/*.{ts,tsx}',
     './content/**/*.{md,mdx}',
     './mdx-components.{ts,tsx}',
-    './node_modules/@fuma-docs/ui/dist/**/*.js',
+    './node_modules/fumadocs-ui/dist/**/*.js',
   ],
   presets: [createPreset()],
 };

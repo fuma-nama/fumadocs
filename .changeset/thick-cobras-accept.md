@@ -1,16 +1,19 @@
 ---
-'@fuma-docs/core': major
-'create-fuma-docs-app': major
-'@fuma-docs/mdx': major
-'@fuma-docs/ui': major
+'fumadocs-core': major
+'create-fumadocs-app': major
+'fumadocs-mdx': major
+'fumadocs-ui': major
+'fumadocs-openapi': major
 ---
 
-**Rename to `@fuma-docs/*`**
+**Rename to Fumadocs**
 
-`next-docs-zeta` -> `@fuma-docs/core`
+`next-docs-zeta` -> `fumadocs-core`
 
-`next-docs-ui` -> `@fuma-docs/ui`
+`next-docs-ui` -> `fumadocs-ui`
 
-`next-docs-mdx` -> `@fuma-docs/mdx`
+`next-docs-mdx` -> `fumadocs-mdx`
 
-`create-next-docs-app` -> `create-fuma-docs-app`
+`@fuma-docs/openapi` -> `fumadocs-openapi`
+
+`create-next-docs-app` -> `create-fumadocs-app`

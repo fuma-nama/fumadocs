@@ -1,7 +1,7 @@
 'use client';
 
 import { useMDXComponent } from 'next-contentlayer/hooks';
-import defaultComponents from '@fuma-docs/ui/mdx/default-client';
+import defaultComponents from 'fumadocs-ui/mdx/default-client';
 
 const components = {
   ...defaultComponents,

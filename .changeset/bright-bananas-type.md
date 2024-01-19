@@ -1,5 +1,5 @@
 ---
-'@fuma-docs/ui': major
+'fumadocs-ui': major
 ---
 
 **Improve internationalized routing**

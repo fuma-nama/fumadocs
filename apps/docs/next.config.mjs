@@ -1,9 +1,6 @@
 import createBundleAnalyzer from '@next/bundle-analyzer';
-import createNextDocs from '@fuma-docs/mdx/config';
-import {
-  remarkDynamicContent,
-  remarkInstall,
-} from '@fuma-docs/core/mdx-plugins';
+import createNextDocs from 'fumadocs-mdx/config';
+import { remarkDynamicContent, remarkInstall } from 'fumadocs-core/mdx-plugins';
 import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
 

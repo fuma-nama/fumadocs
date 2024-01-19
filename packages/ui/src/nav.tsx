@@ -7,8 +7,8 @@ import {
   SidebarCloseIcon,
   SidebarOpenIcon,
 } from 'lucide-react';
-import Link from '@fuma-docs/core/link';
-import { SidebarTrigger } from '@fuma-docs/core/sidebar';
+import Link from 'fumadocs-core/link';
+import { SidebarTrigger } from 'fumadocs-core/sidebar';
 import { usePathname } from 'next/navigation';
 import { forwardRef, type AnchorHTMLAttributes, type ReactNode } from 'react';
 import { PopoverClose } from '@radix-ui/react-popover';

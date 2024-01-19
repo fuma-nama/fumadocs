@@ -14,7 +14,7 @@
     "search",
     "---Sources---",
     "source-api",
-    "@fuma-docs/mdx",
+    "fumadocs-mdx",
     "contentlayer"
   ]
 }

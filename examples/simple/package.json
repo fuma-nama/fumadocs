@@ -8,9 +8,9 @@
     "start": "next start"
   },
   "dependencies": {
-    "@fuma-docs/core": "7.1.2",
-    "@fuma-docs/ui": "7.1.2",
     "contentlayer": "0.3.4",
+    "fumadocs-core": "7.1.2",
+    "fumadocs-ui": "7.1.2",
     "next": "14.0.4",
     "next-contentlayer": "0.3.4",
     "react": "18.2.0",

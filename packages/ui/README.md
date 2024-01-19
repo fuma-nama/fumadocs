@@ -2,4 +2,4 @@
 
 The Next.js framework for building documentation website.
 
-[Read Documentation](https://fuma-docs.vercel.app/docs/ui)
+[Read Documentation](https://fumadocs.vercel.app/docs/ui)

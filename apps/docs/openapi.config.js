@@ -1,5 +1,5 @@
 /**
- * @type {import("@fuma-docs/openapi").Config}
+ * @type {import("fumadocs-openapi").Config}
  */
 module.exports = {
   input: ['./museum.yaml'],

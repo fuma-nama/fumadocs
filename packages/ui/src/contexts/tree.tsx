@@ -1,4 +1,4 @@
-import type { PageTree } from '@fuma-docs/core/server';
+import type { PageTree } from 'fumadocs-core/server';
 import { usePathname } from 'next/navigation';
 import { createContext, useContext, type ReactNode, useMemo } from 'react';
 import { flattenTree, hasActive } from '@/utils/shared';

@@ -1,4 +1,4 @@
-import { Pre } from '@fuma-docs/ui/mdx/pre';
+import { Pre } from 'fumadocs-ui/mdx/pre';
 import { useMemo, type ComponentPropsWithoutRef } from 'react';
 import { getHighlighter } from 'shikiji';
 

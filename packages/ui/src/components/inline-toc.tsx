@@ -1,7 +1,7 @@
 'use client';
 
 import { ChevronDown } from 'lucide-react';
-import type { TOCItemType } from '@fuma-docs/core/server';
+import type { TOCItemType } from 'fumadocs-core/server';
 import type { ReactNode } from 'react';
 import {
   Collapsible,

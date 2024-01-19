@@ -1,4 +1,4 @@
-import type { PageTree } from '@fuma-docs/core/server';
+import type { PageTree } from 'fumadocs-core/server';
 import type { ReactNode } from 'react';
 
 export function isActive(

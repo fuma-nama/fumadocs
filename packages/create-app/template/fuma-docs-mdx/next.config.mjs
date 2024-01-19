@@ -1,4 +1,4 @@
-import createNextDocsMDX from '@fuma-docs/mdx/config';
+import createNextDocsMDX from 'fumadocs-mdx/config';
 
 const withMDX = createNextDocsMDX();
 

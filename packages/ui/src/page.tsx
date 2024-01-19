@@ -1,4 +1,4 @@
-import { type TableOfContents, type TOCItemType } from '@fuma-docs/core/server';
+import { type TableOfContents, type TOCItemType } from 'fumadocs-core/server';
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import { replaceOrDefault } from './utils/shared';
 import { cn } from './utils/cn';

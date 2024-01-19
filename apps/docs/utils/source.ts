@@ -1,11 +1,11 @@
 import { writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { createMDXSource, defaultSchemas } from '@fuma-docs/mdx';
-import type { StructuredData } from '@fuma-docs/core/mdx-plugins';
+import { createMDXSource, defaultSchemas } from 'fumadocs-mdx';
+import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import { PHASE_PRODUCTION_BUILD } from 'next/constants';
 import { z } from 'zod';
-import type { InferMetaType, InferPageType } from '@fuma-docs/core/source';
-import { loader } from '@fuma-docs/core/source';
+import type { InferMetaType, InferPageType } from 'fumadocs-core/source';
+import { loader } from 'fumadocs-core/source';
 import { icons } from 'lucide-react';
 import { map } from '@/.map';
 import { create } from '@/components/ui/icon';

@@ -16,7 +16,7 @@ Note: If you're using a CMS, you should use the API provided by the CMS instead.
 Parse markdown content and return an array of TOC items.
 
 ```ts
-import { getTableOfContents } from '@fuma-docs/core/server';
+import { getTableOfContents } from 'fumadocs-core/server';
 
 const toc = await getTableOfContents(page.body.raw);
 ```
@@ -27,7 +27,7 @@ Takes a portable text and slug function, return an array of TOC items with their
 slug generated using the slug function.
 
 ```ts
-import { getTableOfContentsFromPortableText } from '@fuma-docs/core/server';
+import { getTableOfContentsFromPortableText } from 'fumadocs-core/server';
 
 const posts = await client.fetch(query);
 

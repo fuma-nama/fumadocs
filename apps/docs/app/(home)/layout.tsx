@@ -1,4 +1,4 @@
-import { Layout } from '@fuma-docs/ui/layout';
+import { Layout } from 'fumadocs-ui/layout';
 import type { ReactNode } from 'react';
 import { layoutOptions } from '../docs/layout';
 

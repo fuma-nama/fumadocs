@@ -23,7 +23,7 @@ export const languages = ['en', 'cn'];
 ```ts title="source.ts"
 import { languages } from '@/i18n';
 import { map } from '@/.map';
-import { loader } from '@fuma-docs/core/source';
+import { loader } from 'fumadocs-core/source';
 
 export const { getPage, getPages, pageTree } = loader({
   languages,
@@ -35,7 +35,7 @@ export const { getPage, getPages, pageTree } = loader({
 
 ```ts title="middleware.ts"
 import { defaultLanguage, languages } from '@/i18n';
-import { createI18nMiddleware } from '@fuma-docs/core/middleware';
+import { createI18nMiddleware } from 'fumadocs-core/middleware';
 import { NextRequest } from 'next/server';
 
 export default createI18nMiddleware({

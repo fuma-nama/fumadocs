@@ -22,7 +22,7 @@ export const modes: Mode[] = [
   {
     param: 'headless',
     name: 'Core',
-    package: 'fuma-docs/core',
+    package: 'fumadocs-core',
     description: 'The core library',
     version: zeta.version,
     icon: LibraryIcon,
@@ -30,7 +30,7 @@ export const modes: Mode[] = [
   {
     param: 'ui',
     name: 'UI',
-    package: 'fuma-docs/ui',
+    package: 'fumadocs-ui',
     description: 'The user interface',
     version: ui.version,
     icon: LayoutIcon,
@@ -38,7 +38,7 @@ export const modes: Mode[] = [
   {
     param: 'mdx',
     name: 'MDX',
-    package: 'fuma-docs/mdx',
+    package: 'fumadocs-mdx',
     description: 'Built-in source provider',
     version: mdx.version,
     icon: PaperclipIcon,

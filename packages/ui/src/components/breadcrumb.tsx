@@ -1,5 +1,5 @@
 import { ChevronRightIcon } from 'lucide-react';
-import { useBreadcrumb } from '@fuma-docs/core/breadcrumb';
+import { useBreadcrumb } from 'fumadocs-core/breadcrumb';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Fragment } from 'react';

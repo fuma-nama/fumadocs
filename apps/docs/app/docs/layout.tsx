@@ -1,4 +1,4 @@
-import { DocsLayout } from '@fuma-docs/ui/layout';
+import { DocsLayout } from 'fumadocs-ui/layout';
 import type { ReactNode } from 'react';
 import { LayoutTemplateIcon } from 'lucide-react';
 import { utils } from '@/utils/source';

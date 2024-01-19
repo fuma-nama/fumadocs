@@ -3,12 +3,7 @@
   "changelog": "@changesets/cli/changelog",
   "commit": false,
   "fixed": [
-    [
-      "@fuma-docs/core",
-      "@fuma-docs/ui",
-      "@fuma-docs/mdx",
-      "create-fuma-docs-app"
-    ]
+    ["fumadocs-core", "fumadocs-ui", "fumadocs-mdx", "create-fumadocs-app"]
   ],
   "linked": [],
   "access": "restricted",

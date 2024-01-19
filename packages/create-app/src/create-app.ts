@@ -89,8 +89,8 @@ function createPackageJson(
     },
     dependencies: {
       next: '14.0.4',
-      '@fuma-docs/ui': version,
-      '@fuma-docs/core': version,
+      'fumadocs-ui': version,
+      'fumadocs-core': version,
       react: '18.2.0',
       'react-dom': '18.2.0',
     },
@@ -118,7 +118,7 @@ function createPackageJson(
 
   if (template === 'fuma-docs-mdx') {
     Object.assign(packageJson.dependencies, {
-      '@fuma-docs/mdx': version,
+      'fumadocs-mdx': version,
     });
 
     Object.assign(packageJson.devDependencies, {

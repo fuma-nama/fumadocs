@@ -1,11 +1,11 @@
 import { cva } from 'class-variance-authority';
 import { ChevronDown } from 'lucide-react';
-import type { PageTree } from '@fuma-docs/core/server';
-import * as Base from '@fuma-docs/core/sidebar';
+import type { PageTree } from 'fumadocs-core/server';
+import * as Base from 'fumadocs-core/sidebar';
 import { usePathname } from 'next/navigation';
 import type { HTMLAttributes, ReactNode } from 'react';
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import Link from '@fuma-docs/core/link';
+import Link from 'fumadocs-core/link';
 import { cn } from '@/utils/cn';
 import type { LinkItem } from '@/contexts/tree';
 import { useTreeContext } from '@/contexts/tree';

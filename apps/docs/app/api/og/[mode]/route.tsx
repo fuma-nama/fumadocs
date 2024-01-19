@@ -11,12 +11,12 @@ interface Mode {
 const modes: Mode[] = [
   {
     param: 'headless',
-    package: 'fuma-docs/core',
+    package: 'fumadocs-core',
     name: 'Core',
   },
   {
     param: 'ui',
-    package: 'fuma-docs/ui',
+    package: 'fumadocs-ui',
     name: 'UI',
   },
 ];

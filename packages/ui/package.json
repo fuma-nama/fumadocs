@@ -1,12 +1,12 @@
 {
-  "name": "@fuma-docs/ui",
+  "name": "fumadocs-ui",
   "version": "7.1.2",
   "description": "The framework for building a documentation website in Next.js",
   "keywords": [
     "NextJs",
     "Docs"
   ],
-  "homepage": "https://fuma-docs.vercel.app",
+  "homepage": "https://fumadocs.vercel.app",
   "repository": "github:fuma-nama/next-docs",
   "license": "MIT",
   "author": "Fuma Nama",
@@ -59,7 +59,6 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@fuma-docs/core": "workspace:*",
     "@radix-ui/react-accordion": "^1.1.2",
     "@radix-ui/react-collapsible": "^1.0.3",
     "@radix-ui/react-dialog": "^1.0.4",
@@ -71,6 +70,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "cmdk": "^0.2.0",
+    "fumadocs-core": "workspace:*",
     "lucide-react": "^0.298.0",
     "next-themes": "^0.2.1",
     "react-medium-image-zoom": "^5.1.8",

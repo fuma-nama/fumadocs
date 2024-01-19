@@ -12,7 +12,7 @@ import { blueTheme } from '@/components/themes.js';
 You can import the pre-built stylesheet.
 
 ```tsx
-import '@fuma-docs/ui/style.css';
+import 'fumadocs-ui/style.css';
 ```
 
 > Notice that the stylesheet performs preflight (or normalization)
@@ -20,20 +20,20 @@ import '@fuma-docs/ui/style.css';
 For Tailwind CSS projects, please use the built-in Tailwind CSS plugin instead.
 
 ```js title="tailwind.config.js"
-const { createPreset } = require('@fuma-docs/ui/tailwind-plugin');
+const { createPreset } = require('fumadocs-ui/tailwind-plugin');
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: 'class',
   presets: [createPreset()],
   content: [
-    './node_modules/@fuma-docs/ui/dist/**/*.js',
+    './node_modules/fumadocs-ui/dist/**/*.js',
     ...
   ],
 };
 ```
 
-> Ensure all files inside `@fuma-docs/ui` are included in the `content` property.
+> Ensure all files inside `fumadocs-ui` are included in the `content` property.
 
 ### Global Styles
 
@@ -120,7 +120,7 @@ It comes with the DocsUI Tailwind CSS plugin by default, it introduces new color
 This plugin also provides several theme presets out-of-the-box, you can pick one you prefer rather than the default one.
 
 ```js {8}
-const { createPreset } = require('@fuma-docs/ui/tailwind-plugin');
+const { createPreset } = require('fumadocs-ui/tailwind-plugin');
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {

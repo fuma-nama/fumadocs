@@ -1,5 +1,5 @@
 {
-  "name": "create-fuma-docs-app",
+  "name": "create-fumadocs-app",
   "version": "7.1.2",
   "description": "Create a new documentation site with Fumadocs",
   "keywords": [
@@ -8,7 +8,7 @@
     "react",
     "Docs"
   ],
-  "homepage": "https://fuma-docs.vercel.app",
+  "homepage": "https://fumadocs.vercel.app",
   "repository": "github:fuma-nama/next-docs",
   "license": "MIT",
   "author": "Fuma Nama",

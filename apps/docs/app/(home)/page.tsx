@@ -14,7 +14,7 @@ import {
   StarsIcon,
   TimerIcon,
 } from 'lucide-react';
-import { File, Files } from '@fuma-docs/ui/components/files';
+import { File, Files } from 'fumadocs-ui/components/files';
 import Link from 'next/link';
 import type { HTMLAttributes } from 'react';
 import { cn } from '@/utils/cn';
@@ -343,7 +343,7 @@ export default function HomePage(): JSX.Element {
                   Read docs
                 </Link>
                 <a
-                  href="https://githubbox.com/fuma-nama/@fuma-docs/ui-template"
+                  href="https://githubbox.com/fuma-nama/fumadocs-ui-template"
                   rel="noreferrer noopener"
                   className={cn(
                     buttonVariants({
@@ -406,7 +406,7 @@ function Integration({
         <CodeBlock
           className="mt-2"
           lang="bash"
-          code="pnpm create fuma-docs-app"
+          code="pnpm create fumadocs-app"
         />
       </div>
       <div className="col-span-full h-[200px] overflow-hidden bg-secondary">
@@ -486,7 +486,7 @@ function Hero(): JSX.Element {
           Getting Started
         </Link>
         <a
-          href="https://githubbox.com/fuma-nama/@fuma-docs/ui-template"
+          href="https://githubbox.com/fuma-nama/fumadocs-ui-template"
           className={cn(
             buttonVariants({
               size: 'lg',
