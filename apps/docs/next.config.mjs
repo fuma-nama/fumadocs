@@ -7,9 +7,9 @@ import remarkMath from 'remark-math';
 const withAnalyzer = createBundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 });
+
 /** @type {import('next').NextConfig} */
 const config = {
-  pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
   reactStrictMode: true,
   eslint: {
     // Replaced by root workspace command

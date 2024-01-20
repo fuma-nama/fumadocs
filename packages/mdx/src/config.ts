@@ -6,6 +6,8 @@ import {
   remarkStructure,
   remarkHeading,
   type RehypeNextDocsOptions,
+  remarkImage,
+  type RemarkImageOptions,
 } from 'fumadocs-core/mdx-plugins';
 import type { PluggableList } from 'unified';
 import type { Configuration } from 'webpack';
@@ -25,6 +27,8 @@ type MDXOptions = Omit<
    * Properties to export from `vfile.data`
    */
   valueToExport?: string[];
+
+  remarkImageOptions?: RemarkImageOptions;
 
   /**
    * built-in `fumadocs-core` rehype plugin options
@@ -88,6 +92,7 @@ const createNextDocs =
       (v) => [
         remarkGfm,
         remarkHeading,
+        [remarkImage, mdxOptions.remarkImageOptions],
         ...v,
         remarkStructure,
         [remarkMdxExport, { values: valueToExport }],

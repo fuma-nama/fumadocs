@@ -1,9 +1,10 @@
 import { parse } from 'node:path';
+import slash from '@/utils/slash';
 import type { FileInfo } from './types';
 
 export function parseFilePath(path: string): FileInfo {
   const parsed = parse(path);
-  const dir = parsed.dir.replace('\\', '/');
+  const dir = slash(parsed.dir);
   const flattenedPath = joinPaths([dir, parsed.name]);
   const [name, locale] = parsed.name.split('.');
 
@@ -49,7 +50,7 @@ export function splitPath(path: string): string[] {
 /**
  * Convert paths to an array, slashes within the path will be ignored
  * @param paths - Paths to join
- * @param slash - whether to add a trailing/leading slash to path
+ * @param slashMode - whether to add a trailing/leading slash to path
  * @example
  * ```
  * ['a','b','c'] // 'a/b/c'
@@ -60,14 +61,14 @@ export function splitPath(path: string): string[] {
  */
 export function joinPaths(
   paths: string[],
-  slash: 'leading' | 'trailing' | 'none' = 'none',
+  slashMode: 'leading' | 'trailing' | 'none' = 'none',
 ): string {
   const joined = paths
     // avoid slashes in path and filter empty
     .flatMap((path) => splitPath(path))
     .join('/');
 
-  switch (slash) {
+  switch (slashMode) {
     case 'leading':
       return `/${joined}`;
     case 'trailing':

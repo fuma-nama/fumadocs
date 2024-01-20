@@ -12,16 +12,18 @@ import type {
   FieldDef,
 } from 'contentlayer/source-files';
 import { defineDocumentType } from 'contentlayer/source-files';
-import type { Options as ImgSizeOptions } from 'rehype-img-size';
 import type { MDXOptions } from 'contentlayer/core';
-import type { PluggableList } from 'unified';
+import type { PluggableList, Plugin } from 'unified';
+import rehypeImgSize, {
+  type Options as RehypeImgSizeOptions,
+} from 'rehype-img-size';
+import type { Root } from 'hast';
 import {
-  rehypeImgSize,
   rehypeNextDocs,
   remarkGfm,
   structure,
+  type RehypeNextDocsOptions,
 } from '@/mdx-plugins';
-import type { RehypeNextDocsOptions } from '@/mdx-plugins/rehype-next-docs';
 import { getTableOfContents } from '@/server/get-toc';
 import type { DocsPageBase } from './types';
 
@@ -79,11 +81,10 @@ export function create(options: Options = {}): Config {
   const rehypePlugins: PluggableList = [
     [rehypeNextDocs, pluginOptions],
     [
-      // @ts-expect-error -- invalid options type
-      rehypeImgSize,
+      rehypeImgSize as Plugin<[RehypeImgSizeOptions], Root>,
       {
         dir: imgDirPath,
-      } satisfies ImgSizeOptions,
+      },
     ],
     ...(mdx.rehypePlugins ?? []),
   ];

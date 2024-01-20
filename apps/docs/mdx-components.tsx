@@ -14,7 +14,6 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     pre: (props) => (
       <Pre {...props} ref={undefined} pre={{ className: 'max-h-[400px]' }} />
     ),
-    Image: defaultComponents.img,
     Tabs,
     Tab,
     Callout,
