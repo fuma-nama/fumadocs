@@ -10,7 +10,14 @@ import {
 import Link from 'fumadocs-core/link';
 import { SidebarTrigger } from 'fumadocs-core/sidebar';
 import { usePathname } from 'next/navigation';
-import { forwardRef, type AnchorHTMLAttributes, type ReactNode } from 'react';
+import {
+  forwardRef,
+  type AnchorHTMLAttributes,
+  type ReactNode,
+  useEffect,
+  useState,
+  useCallback,
+} from 'react';
 import { PopoverClose } from '@radix-ui/react-popover';
 import { cn } from '@/utils/cn';
 import { useSidebarCollapse } from '@/contexts/sidebar';
@@ -22,9 +29,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { type LinkItem } from './contexts/tree';
-import { isActive } from './utils/shared';
-import { buttonVariants } from './theme/variants';
+import { isActive } from '../utils/shared';
+import { buttonVariants } from '../theme/variants';
+import type { LinkItem } from '../layout';
 
 export interface NavLinkProps {
   icon: ReactNode;
@@ -33,41 +40,60 @@ export interface NavLinkProps {
   external?: boolean;
 }
 
-export interface NavItemProps {
-  href: string;
-  children: ReactNode;
-  external?: boolean;
-}
-
-interface NavProps {
+export interface NavProps {
   title: ReactNode;
+
+  /**
+   * Redirect url of title
+   * @defaultValue '/'
+   */
   url?: string;
 
-  items?: LinkItem[];
-  links?: NavLinkProps[];
+  items: LinkItem[];
+  links: NavLinkProps[];
   enableSidebar: boolean;
   collapsibleSidebar: boolean;
-  transparent?: boolean;
+
+  /**
+   * transparent navbar, default: `none`
+   */
+  transparentMode?: 'always' | 'top' | 'none';
   children?: ReactNode;
 }
 
 export function Nav({
   title,
   url = '/',
-  links = [],
-  items = [],
-  transparent = false,
+  links,
+  items,
+  transparentMode = 'none',
   enableSidebar,
   collapsibleSidebar,
   children,
 }: NavProps): JSX.Element {
+  const [transparent, setTransparent] = useState(transparentMode !== 'none');
+
+  useEffect(() => {
+    if (transparentMode !== 'top') return;
+
+    const listener = (): void => {
+      setTransparent(window.scrollY < 10);
+    };
+
+    listener();
+    window.addEventListener('scroll', listener);
+    return () => {
+      window.removeEventListener('scroll', listener);
+    };
+  }, [transparentMode]);
+
   return (
     <header
       className={cn(
-        'sticky top-0 z-50 h-16 border-b transition-colors',
+        'sticky top-0 z-50 h-16 border-b backdrop-blur-md transition-colors',
         transparent
           ? 'border-transparent'
-          : 'border-foreground/10 bg-background/50 backdrop-blur-md',
+          : 'border-foreground/10 bg-background/50',
       )}
     >
       <nav className="container flex h-full flex-row items-center gap-4">
@@ -142,6 +168,10 @@ function SearchToggle(): JSX.Element {
   const { setOpenSearch } = useSearchContext();
   const { text } = useI18n();
 
+  const onClick = useCallback(() => {
+    setOpenSearch(true);
+  }, [setOpenSearch]);
+
   return (
     <>
       <button
@@ -154,18 +184,14 @@ function SearchToggle(): JSX.Element {
           }),
         )}
         aria-label="Open Search"
-        onClick={() => {
-          setOpenSearch(true);
-        }}
+        onClick={onClick}
       >
         <SearchIcon />
       </button>
       <button
         type="button"
         className="inline-flex w-full max-w-[240px] items-center gap-2 rounded-full border bg-secondary/50 p-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground max-md:hidden"
-        onClick={() => {
-          setOpenSearch(true);
-        }}
+        onClick={onClick}
       >
         <SearchIcon aria-label="Open Search" className="ml-1 size-4" />
         {text.search}

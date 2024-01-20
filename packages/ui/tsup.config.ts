@@ -6,7 +6,7 @@ export default defineConfig([
       './src/components/{type-table,roll-button,image-zoom,files,tabs,accordion,steps,search,inline-toc,callout,api}.{ts,tsx}',
       './src/components/dialog/{search,search-default,search-algolia}.tsx',
       './src/mdx/*.{ts,tsx}',
-      './src/{i18n,layout,nav,page,provider}.{ts,tsx}',
+      './src/{i18n,layout,page,provider}.{ts,tsx}',
     ],
     outExtension: () => ({ js: '.js' }),
     format: 'esm',

@@ -50,3 +50,8 @@ export function RootProvider({
     body
   );
 }
+
+export { useI18n } from './contexts/i18n';
+export { useSearchContext } from './contexts/search';
+export { useSidebarCollapse } from './contexts/sidebar';
+export { useTreeContext } from './contexts/tree';

@@ -1,12 +1,14 @@
-import { DocsLayout } from 'fumadocs-ui/layout';
+import { DocsLayout, type DocsLayoutProps } from 'fumadocs-ui/layout';
 import type { ReactNode } from 'react';
 import { LayoutTemplateIcon } from 'lucide-react';
 import { utils } from '@/utils/source';
 import { FumaDocsSVG } from '../(home)/icons';
 import { Body, NavChildren, SidebarBanner } from './layout.client';
 
-export const layoutOptions = {
+export const layoutOptions: Omit<DocsLayoutProps, 'children'> = {
+  tree: utils.pageTree,
   nav: {
+    transparentMode: 'top',
     title: (
       <>
         <FumaDocsSVG className="size-5" fill="currentColor" />
@@ -36,9 +38,7 @@ export default function Layout({
 }): JSX.Element {
   return (
     <Body>
-      <DocsLayout tree={utils.pageTree} {...layoutOptions}>
-        {children}
-      </DocsLayout>
+      <DocsLayout {...layoutOptions}>{children}</DocsLayout>
     </Body>
   );
 }

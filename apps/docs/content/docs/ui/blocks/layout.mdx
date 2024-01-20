@@ -59,6 +59,12 @@ You can create a [Route Group](https://nextjs.org/docs/app/building-your-applica
     component: { type: 'ReactNode' },
     title: { type: 'ReactNode' },
     url: { description: 'Redirect url of title', type: 'string', default: '/' },
+    transparentMode: {
+      type: 'top | always | none',
+      description: 'Use transparent background',
+      default: 'none',
+    },
+    links: { type: 'NavLinkProps[]' },
     githubUrl: {
       description: 'Github url displayed on the navbar',
       type: 'string',

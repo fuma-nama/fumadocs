@@ -7,11 +7,11 @@ import type { HTMLAttributes, ReactNode } from 'react';
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import Link from 'fumadocs-core/link';
 import { cn } from '@/utils/cn';
-import type { LinkItem } from '@/contexts/tree';
 import { useTreeContext } from '@/contexts/tree';
 import { useSidebarCollapse } from '@/contexts/sidebar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { hasActive, isActive } from '@/utils/shared';
+import type { LinkItem } from '@/layout';
 import {
   Collapsible,
   CollapsibleContent,
@@ -20,7 +20,14 @@ import {
 import { ThemeToggle } from './theme-toggle';
 
 export interface SidebarProps {
-  items?: LinkItem[];
+  items: LinkItem[];
+
+  /**
+   * Open folders by default if their level is lower or equal to a specific level
+   * (Starting from 1)
+   *
+   * @defaultValue 1
+   */
   defaultOpenLevel?: number;
   banner?: ReactNode;
   footer?: ReactNode;
