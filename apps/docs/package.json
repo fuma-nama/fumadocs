@@ -16,6 +16,7 @@
     "algoliasearch": "^4.20.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
+    "fast-glob": "^3.3.1",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
@@ -47,7 +48,9 @@
     "postcss": "8.4.33",
     "tailwindcss": "3.4.1",
     "tailwindcss-animate": "^1.0.7",
+    "ts-morph": "^21.0.1",
     "tsconfig": "workspace:*",
+    "tsx": "^4.7.0",
     "webpack": "^5.89.0"
   }
 }

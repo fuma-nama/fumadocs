@@ -7,6 +7,7 @@ import defaultComponents from 'fumadocs-ui/mdx/default';
 import { Pre } from 'fumadocs-ui/mdx/pre';
 import type { ReactNode } from 'react';
 import { Wrapper } from '@/components/preview/wrapper';
+import { AutoTypeTable } from './components/doc';
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
@@ -14,6 +15,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     pre: (props) => (
       <Pre {...props} ref={undefined} pre={{ className: 'max-h-[400px]' }} />
     ),
+    AutoTypeTable,
     Tabs,
     Tab,
     Callout,
