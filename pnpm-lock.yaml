@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 overrides:
   remark-rehype: ^11.0.0
   '@types/mdast': ^4.0.3
@@ -99,8 +103,8 @@ importers:
         specifier: ^6.0.0
         version: 6.0.0
       shikiji:
-        specifier: ^0.9.9
-        version: 0.9.9
+        specifier: ^0.10.0
+        version: 0.10.0
       tailwind-merge:
         specifier: ^2.0.0
         version: 2.0.0
@@ -302,7 +306,7 @@ importers:
         version: 1.0.1
       rehype-pretty-code:
         specifier: ^0.12.2
-        version: 0.12.2(shikiji@0.9.9)
+        version: 0.12.2(shikiji@0.10.0)
       remark:
         specifier: ^15.0.0
         version: 15.0.1
@@ -316,8 +320,8 @@ importers:
         specifier: ^3.1.0
         version: 3.1.0
       shikiji:
-        specifier: ^0.9.9
-        version: 0.9.9
+        specifier: ^0.10.0
+        version: 0.10.0
       swr:
         specifier: ^2.2.2
         version: 2.2.2(react@18.2.0)
@@ -9431,7 +9435,7 @@ packages:
       unified: 11.0.4
     dev: false
 
-  /rehype-pretty-code@0.12.2(shikiji@0.9.9):
+  /rehype-pretty-code@0.12.2(shikiji@0.10.0):
     resolution: {integrity: sha512-PiGNCFrCkt54G/3ez6RLfU38jWUmgDe60Y81PAxj69A7+EAbhp8UhEigVOwK9ZEJDyedPr0ORWhcqfOn4RNedg==}
     engines: {node: '>=18'}
     peerDependencies:
@@ -9441,7 +9445,7 @@ packages:
       hast-util-to-string: 3.0.0
       parse-numeric-range: 1.3.0
       rehype-parse: 9.0.0
-      shikiji: 0.9.9
+      shikiji: 0.10.0
       unified: 11.0.4
       unist-util-visit: 5.0.0
     dev: false
@@ -9789,14 +9793,14 @@ packages:
     resolution: {integrity: sha512-6j1W9l1iAs/4xYBI1SYOVZyFcCis9b4KCLQ8fgAGG07QvzaRLVVRQvAy85yNmmZSjYjg4MWh4gNvlPujU/5LpA==}
     dev: true
 
-  /shikiji-core@0.9.9:
-    resolution: {integrity: sha512-qu5Qq7Co6JIMY312J9Ek6WYjXieeyJT/fIqmkcjF4MdnMNlUnhSqPo8/42g5UdPgdyTCwijS7Nhg8DfLSLodkg==}
+  /shikiji-core@0.10.0:
+    resolution: {integrity: sha512-imG+bvRkuNlZUi2q9tMVfegRRouTpDxMFejpfF/6J+bFX3NDKtlW9T9iIAkBYnw4pcCtSwirW0AvkwlQR4wyxg==}
     dev: false
 
-  /shikiji@0.9.9:
-    resolution: {integrity: sha512-/S3unr/0mZTstNOuAmNDEufeimtqeQb8lXvPMLsYfDvqyfmG6334bO2xmDzD0kfxH2y8gnFgSWAJpdEzksmYXg==}
+  /shikiji@0.10.0:
+    resolution: {integrity: sha512-1dAzIOWbtM7B4Sem5BvE+CEdsebDsRA34SfCxM4qJ4PLgR73ZD92VEtNfbcoZ3xOLSqvtV0J9i4WpCgVsmQteg==}
     dependencies:
-      shikiji-core: 0.9.9
+      shikiji-core: 0.10.0
     dev: false
 
   /side-channel@1.0.4:
@@ -11320,7 +11324,3 @@ packages:
 
   /zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
-
-settings:
-  autoInstallPeers: true
-  excludeLinksFromLockfile: false
