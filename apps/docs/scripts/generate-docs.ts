@@ -1,7 +1,6 @@
-/**
- * @type {import("fumadocs-openapi").Config}
- */
-module.exports = {
+import { generateFiles } from 'fumadocs-openapi';
+
+void generateFiles({
   input: ['./museum.yaml'],
   output: './content/docs/ui',
   per: 'tag',
@@ -16,4 +15,4 @@ module.exports = {
       ].join('\n'),
     };
   },
-};
+});

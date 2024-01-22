@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "build": "pnpm build:openapi && next build && pnpm build:index",
-    "build:index": "node ./update-index.mjs",
-    "build:openapi": "node ./generate-docs.mjs",
+    "build:index": "tsx ./scripts/update-index.ts",
+    "build:openapi": "tsx ./scripts/generate-docs.ts",
     "build:shaders": "glslx shaders/rain.glsl --output=shaders/rain.min.js --format=js --renaming=internal-only",
     "dev": "next dev",
     "lint": "next lint",
