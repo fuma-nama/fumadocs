@@ -1,11 +1,11 @@
 import path from 'node:path';
 import type { NextConfig } from 'next';
 import {
-  rehypeNextDocs,
+  rehypeCode,
   remarkGfm,
   remarkStructure,
   remarkHeading,
-  type RehypeNextDocsOptions,
+  type RehypeCodeOptions,
   remarkImage,
   type RemarkImageOptions,
 } from 'fumadocs-core/mdx-plugins';
@@ -29,11 +29,7 @@ type MDXOptions = Omit<
   valueToExport?: string[];
 
   remarkImageOptions?: RemarkImageOptions;
-
-  /**
-   * built-in `fumadocs-core` rehype plugin options
-   */
-  rehypeNextDocsOptions?: RehypeNextDocsOptions;
+  rehypeCodeOptions?: RehypeCodeOptions;
 };
 
 type ResolvePlugins = PluggableList | ((v: PluggableList) => PluggableList);
@@ -101,7 +97,7 @@ const createNextDocs =
     );
 
     const rehypePlugins: PluggableList = pluginOption(
-      (v) => [[rehypeNextDocs, mdxOptions.rehypeNextDocsOptions], ...v],
+      (v) => [[rehypeCode, mdxOptions.rehypeCodeOptions], ...v],
       mdxOptions.rehypePlugins,
     );
 

@@ -1,6 +1,6 @@
 import type { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 import type { Callout } from 'fumadocs-ui/components/callout';
-import type { ComponentPropsWithoutRef, ReactNode as A } from 'react';
+import type { ComponentPropsWithoutRef } from 'react';
 
 export type AccordionsProps = Required<
   Omit<
@@ -16,12 +16,9 @@ export type AccordionProps = Required<
   >
 >;
 
-type ReactNode = A;
 export type CalloutProps = Required<
   Omit<
     ComponentPropsWithoutRef<typeof Callout>,
-    keyof ComponentPropsWithoutRef<'div'> | 'icon'
+    keyof ComponentPropsWithoutRef<'div'>
   >
-> & {
-  icon: ReactNode;
-};
+>;

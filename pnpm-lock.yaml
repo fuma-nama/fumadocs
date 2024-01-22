@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 overrides:
   remark-rehype: ^11.0.0
   '@types/mdast': ^4.0.3
@@ -300,9 +304,9 @@ importers:
       rehype-img-size:
         specifier: ^1.0.1
         version: 1.0.1
-      rehype-pretty-code:
-        specifier: ^0.12.2
-        version: 0.12.2(shikiji@0.9.9)
+      rehype-shikiji:
+        specifier: ^0.10.0
+        version: 0.10.0
       remark:
         specifier: ^15.0.0
         version: 15.0.1
@@ -316,8 +320,11 @@ importers:
         specifier: ^3.1.0
         version: 3.1.0
       shikiji:
-        specifier: ^0.9.9
-        version: 0.9.9
+        specifier: ^0.10.0
+        version: 0.10.0
+      shikiji-transformers:
+        specifier: ^0.10.0
+        version: 0.10.0
       swr:
         specifier: ^2.2.2
         version: 2.2.2(react@18.2.0)
@@ -8784,10 +8791,6 @@ packages:
       lines-and-columns: 1.2.4
     dev: true
 
-  /parse-numeric-range@1.3.0:
-    resolution: {integrity: sha512-twN+njEipszzlMJd4ONUYgSfZPDxgHhT9Ahed5uTigpQn90FggW4SA/AIPq/6a149fTbE9qBEcSwE3FAEp6wQQ==}
-    dev: false
-
   /parse5@6.0.1:
     resolution: {integrity: sha512-Ofn/CTFzRGTTxwpNEs9PP93gXShHcTq255nzRYSKe8AkVpZY7e1fpmTfOyoIvjP5HG7Z2ZM7VS9PPhQGW2pOpw==}
 
@@ -9423,25 +9426,13 @@ packages:
       vfile: 6.0.1
     dev: false
 
-  /rehype-parse@9.0.0:
-    resolution: {integrity: sha512-WG7nfvmWWkCR++KEkZevZb/uw41E8TsH4DsY9UxsTbIXCVGbAs4S+r8FrQ+OtH5EEQAs+5UxKC42VinkmpA1Yw==}
-    dependencies:
-      '@types/hast': 3.0.3
-      hast-util-from-html: 2.0.1
-      unified: 11.0.4
-    dev: false
-
-  /rehype-pretty-code@0.12.2(shikiji@0.9.9):
-    resolution: {integrity: sha512-PiGNCFrCkt54G/3ez6RLfU38jWUmgDe60Y81PAxj69A7+EAbhp8UhEigVOwK9ZEJDyedPr0ORWhcqfOn4RNedg==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      shikiji: ^0.7.0 || ^0.8.0 || ^0.9.0
+  /rehype-shikiji@0.10.0:
+    resolution: {integrity: sha512-iLc5d8ZzV7iCCZt6m9+PeNy+dY358SbTpLddf9n78aw08X5kx6+9ympHmN0mjD1HY8aF1UpUFPRMJlB9+fBKKQ==}
     dependencies:
       '@types/hast': 3.0.3
       hast-util-to-string: 3.0.0
-      parse-numeric-range: 1.3.0
-      rehype-parse: 9.0.0
-      shikiji: 0.9.9
+      shikiji: 0.10.0
+      shikiji-transformers: 0.10.0
       unified: 11.0.4
       unist-util-visit: 5.0.0
     dev: false
@@ -9789,8 +9780,24 @@ packages:
     resolution: {integrity: sha512-6j1W9l1iAs/4xYBI1SYOVZyFcCis9b4KCLQ8fgAGG07QvzaRLVVRQvAy85yNmmZSjYjg4MWh4gNvlPujU/5LpA==}
     dev: true
 
+  /shikiji-core@0.10.0:
+    resolution: {integrity: sha512-imG+bvRkuNlZUi2q9tMVfegRRouTpDxMFejpfF/6J+bFX3NDKtlW9T9iIAkBYnw4pcCtSwirW0AvkwlQR4wyxg==}
+    dev: false
+
   /shikiji-core@0.9.9:
     resolution: {integrity: sha512-qu5Qq7Co6JIMY312J9Ek6WYjXieeyJT/fIqmkcjF4MdnMNlUnhSqPo8/42g5UdPgdyTCwijS7Nhg8DfLSLodkg==}
+    dev: false
+
+  /shikiji-transformers@0.10.0:
+    resolution: {integrity: sha512-x9oYybeF/XOrIc6Mm8G1gU5ezunMxdgD4WwBTKrZ5tAmFFaNIWCjwZENgRt1uR4iMi0+pGH0g9bmrbraSC41nA==}
+    dependencies:
+      shikiji: 0.10.0
+    dev: false
+
+  /shikiji@0.10.0:
+    resolution: {integrity: sha512-1dAzIOWbtM7B4Sem5BvE+CEdsebDsRA34SfCxM4qJ4PLgR73ZD92VEtNfbcoZ3xOLSqvtV0J9i4WpCgVsmQteg==}
+    dependencies:
+      shikiji-core: 0.10.0
     dev: false
 
   /shikiji@0.9.9:
@@ -11320,7 +11327,3 @@ packages:
 
   /zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
-
-settings:
-  autoInstallPeers: true
-  excludeLinksFromLockfile: false
