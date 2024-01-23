@@ -1,11 +1,11 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { loadEnvConfig } from '@next/env';
+import env from '@next/env';
 import algosearch from 'algoliasearch';
 import { sync } from 'fumadocs-core/search-algolia/server';
 import type { Index } from '@/utils/source';
 
-loadEnvConfig(process.cwd());
+env.loadEnvConfig(process.cwd());
 
 const indexes = JSON.parse(
   readFileSync(resolve('./.next/_map_indexes.json')).toString(),
