@@ -26,14 +26,4 @@ import { File, Files } from 'fumadocs-ui/components/files';
 </Files>
 ```
 
-<TypeTable
-  type={{
-    title: { type: 'string' },
-    defaultOpen: { type: 'boolean', description: 'Open folder by default' },
-    icon: { type: 'ReactNode' },
-    children: {
-      type: 'ReactNode',
-      description: 'children files of the folder, consider as file if empty',
-    },
-  }}
-/>
+<AutoTypeTable path="ui" name="FileProps" />

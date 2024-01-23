@@ -167,11 +167,4 @@ You can port your own search algorithm by returning a list of `SortedResult`
 from your custom `/api/search/route.ts` api endpoint, and you can integrate it
 with Fumadocs UI later.
 
-<TypeTable
-  type={{
-    id: { type: 'string' },
-    url: { type: 'string' },
-    type: { type: 'enum', typeDescription: "'page' | 'heading' | 'text'" },
-    content: { type: 'string' },
-  }}
-/>
+<AutoTypeTable path="headless" name="SortedResult" />

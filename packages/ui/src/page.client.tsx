@@ -28,6 +28,9 @@ export function LastUpdate(props: { date: Date }): JSX.Element {
 }
 
 export interface FooterProps {
+  /**
+   * Items including information for the next and previous page
+   */
   items?: {
     previous?: { name: string; url: string };
     next?: { name: string; url: string };

@@ -25,34 +25,8 @@ import { TypeTable } from 'fumadocs-ui/components/type-table';
 
 ### Type Table
 
-<TypeTable
-  type={{
-    type: {
-      description: 'The type of object',
-      type: 'Record<string, ObjectType>',
-      typeDescriptionLink: '#object-type',
-    },
-  }}
-/>
+<AutoTypeTable path="ui" name="TypeTableProps" />
 
 ### Object Type
 
-<TypeTable
-  type={{
-    description: {
-      type: 'string',
-      description: 'Additional description of the field',
-      default: '"-"',
-    },
-    type: {
-      type: 'string',
-    },
-    typeDescription: {
-      type: 'string',
-    },
-    typeDescriptionLink: {
-      type: 'string',
-      description: 'Optional link to the type',
-    },
-  }}
-/>
+<AutoTypeTable path="ui" name="ObjectTypeProps" />

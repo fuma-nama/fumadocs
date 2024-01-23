@@ -55,7 +55,8 @@ export interface NavProps {
   collapsibleSidebar: boolean;
 
   /**
-   * transparent navbar, default: `none`
+   * When to use transparent navbar
+   * @defaultValue none
    */
   transparentMode?: 'always' | 'top' | 'none';
   children?: ReactNode;

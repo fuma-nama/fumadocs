@@ -31,7 +31,17 @@ export function Files({
 interface FileProps {
   title: string;
   icon?: ReactNode;
+
+  /**
+   * Open folder by default
+   *
+   * @defaultValue false
+   */
   defaultOpen?: boolean;
+
+  /**
+   * hildren files of the folder, considered as file if empty
+   */
   children?: ReactNode;
 }
 

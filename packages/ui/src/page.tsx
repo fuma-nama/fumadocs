@@ -10,32 +10,39 @@ const { TOCItems, Breadcrumb, LastUpdate, Footer } = await import(
   './page.client'
 );
 
+type TableOfContentOptions = Partial<
+  Omit<TOCProps, 'items'> & {
+    enabled: boolean;
+    component: ReactNode;
+  }
+>;
+
+type BreadcrumbOptions = Partial<{
+  enabled: boolean;
+  component: ReactNode;
+}>;
+
+type FooterOptions = Partial<
+  FooterProps & {
+    enabled: boolean;
+    component: ReactNode;
+  }
+>;
+
 export interface DocsPageProps {
   toc?: TableOfContents;
 
-  tableOfContent?: Partial<
-    Omit<TOCProps, 'items'> & {
-      enabled: boolean;
-      component: ReactNode;
-    }
-  >;
+  tableOfContent?: TableOfContentOptions;
 
   /**
    * Replace or disable breadcrumb
    */
-  breadcrumb?: Partial<{
-    enabled: boolean;
-    component: ReactNode;
-  }>;
+  breadcrumb?: BreadcrumbOptions;
 
   /**
    * Footer navigation, you can disable it by passing `false`
    */
-  footer?: Partial<{
-    enabled: boolean;
-    component: ReactNode;
-    items: NonNullable<FooterProps['items']>;
-  }>;
+  footer?: FooterOptions;
 
   lastUpdate?: Date | string | number;
 

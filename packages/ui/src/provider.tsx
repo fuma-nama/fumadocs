@@ -11,7 +11,9 @@ export interface RootProviderProps {
   search?: Partial<Omit<SearchProviderProps, 'children'>>;
 
   /**
-   * Wrap the body in `ThemeProvider` (next-themes), enabled by default
+   * Wrap the body in `ThemeProvider` (next-themes)
+   *
+   * @defaultValue true
    */
   enableThemeProvider?: boolean;
   children: ReactNode;

@@ -26,23 +26,7 @@ export default function Layout({ children }) {
 
 You can customize the search dialog from the root provider.
 
-<TypeTable
-  type={{
-    SearchDialog: {
-      description: 'Replace the default dialog',
-      type: 'React.FC<SearchDialogProps>',
-    },
-    enableThemeProvider: {
-      description: 'Wrap the body in ThemeProvider (next-themes)',
-      type: 'boolean',
-      default: 'true',
-    },
-    links: {
-      type: '[string, string][]',
-      description: 'Default items to show (Only supported by default dialog)',
-    },
-  }}
-/>
+<AutoTypeTable path="ui" name="ProviderProps" />
 
 ```jsx
 <RootProvider

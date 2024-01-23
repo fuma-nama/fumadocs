@@ -16,30 +16,7 @@ import { DocsPage, DocsBody } from 'fumadocs-ui/page';
 </DocsPage>
 ```
 
-<TypeTable
-  type={{
-    tableOfContent: {
-      type: 'object',
-      typeDescriptionLink: '#table-of-contents',
-    },
-    breadcrumb: {
-      type: 'object',
-      typeDescriptionLink: '#breadcrumb',
-    },
-    toc: {
-      type: 'TOCItemType[]',
-      description: 'Table of contents of the page',
-      typeDescription: `{ title: string, url: string, depth: number }[]`,
-    },
-    footer: {
-      type: 'object',
-      typeDescriptionLink: '#footer',
-    },
-    lastUpdate: {
-      type: 'Date | number',
-    },
-  }}
-/>
+<AutoTypeTable path="ui" name="PageProps" />
 
 ### Body
 
@@ -61,20 +38,7 @@ documents, You can parse TOC by using the
 
 In addition, you can easily customise or disable TOC in your documentation.
 
-<TypeTable
-  type={{
-    enabled: { type: 'boolean', default: 'true' },
-    component: { type: 'ReactNode' },
-    header: {
-      type: 'ReactNode',
-      description: 'Custom content above TOC',
-    },
-    footer: {
-      type: 'ReactNode',
-      description: 'Custom content below TOC',
-    },
-  }}
-/>
+<AutoTypeTable path="ui" name="TOCProps" />
 
 ### Last Update Time
 
@@ -93,22 +57,8 @@ the [Git Last Modified](/docs/headless/utils/git-last-edit) utility.
 
 Footer is a navigation element that has two buttons to jump to the next and previous pages. By default, it finds the neighbour pages from page tree.
 
-<TypeTable
-  type={{
-    enabled: { type: 'boolean' },
-    component: { type: 'ReactNode' },
-    items: {
-      type: 'object',
-      description: 'Items including information for the next and previous page',
-    },
-  }}
-/>
+<AutoTypeTable path="ui" name="FooterProps" />
 
 ### Breadcrumb
 
-<TypeTable
-  type={{
-    enabled: { type: 'boolean', default: 'true' },
-    component: { type: 'ReactNode' },
-  }}
-/>
+<AutoTypeTable path="ui" name="BreadcrumbProps" />
