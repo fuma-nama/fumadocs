@@ -12,6 +12,13 @@ interface DocsUIOptions {
   prefix?: string;
 
   preset?: keyof typeof presets | Preset;
+
+  /**
+   * Keep code block background of theme
+   *
+   * @defaultValue false
+   */
+  keepCodeBlockBackground?: boolean;
 }
 
 export interface Preset {
@@ -38,7 +45,11 @@ function colorToCSS(prefix: string, name: string): string {
 }
 
 export const docsUi = plugin.withOptions<DocsUIOptions>(
-  ({ prefix = '', preset = 'default' } = {}) => {
+  ({
+    prefix = '',
+    preset = 'default',
+    keepCodeBlockBackground = false,
+  } = {}) => {
     return ({ addBase, addComponents, addUtilities }) => {
       const { light, dark, backgroundImage } =
         typeof preset === 'string' ? presets[preset] : preset;
@@ -53,12 +64,6 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
           'background-image': backgroundImage ?? 'initial',
           'background-color': `theme('colors.background')`,
           color: `theme('colors.foreground')`,
-        },
-        '[data-line] span': {
-          color: 'var(--shiki-light)',
-        },
-        '.dark [data-line] span': {
-          color: 'var(--shiki-dark)',
         },
         '[data-rmiz]': {
           display: 'block',
@@ -122,22 +127,43 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
       });
 
       addComponents({
+        '.nd-codeblock span': {
+          color: 'var(--shiki-light)',
+        },
+        '.dark .nd-codeblock span': {
+          color: 'var(--shiki-dark)',
+        },
         '.nd-codeblock': {
-          '& [data-line]': {
+          '& .line': {
             'font-size': '13px',
             'padding-left': `theme('spacing.4')`,
             'padding-right': `theme('spacing.4')`,
           },
-          '& [data-highlighted-line]': {
+          '& .highlighted': {
+            width: '100%',
+            display: 'inline-block',
             'background-color': `theme('colors.primary.DEFAULT / 10%')`,
           },
-          '& [data-highlighted-chars]': {
+          '& .highlighted-word': {
             'background-color': `theme('colors.primary.DEFAULT / 10%')`,
             'border-bottom-width': `theme('borderWidth.2')`,
             'border-color': `theme('colors.primary.DEFAULT')`,
           },
         },
       });
+
+      if (keepCodeBlockBackground) {
+        addComponents({
+          '.nd-codeblock': {
+            color: 'var(--shiki-light)',
+            'background-color': 'var(--shiki-light-bg)',
+          },
+          '.dark .nd-codeblock': {
+            color: 'var(--shiki-dark)',
+            'background-color': 'var(--shiki-dark-bg)',
+          },
+        });
+      }
 
       addUtilities({
         '.steps': {

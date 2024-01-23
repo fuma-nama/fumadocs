@@ -19,10 +19,10 @@ import rehypeImgSize, {
 } from 'rehype-img-size';
 import type { Root } from 'hast';
 import {
-  rehypeNextDocs,
+  rehypeCode,
   remarkGfm,
   structure,
-  type RehypeNextDocsOptions,
+  type RehypeCodeOptions,
 } from '@/mdx-plugins';
 import { getTableOfContents } from '@/server/get-toc';
 import type { DocsPageBase } from './types';
@@ -53,7 +53,8 @@ export type Options = Partial<{
   imgDirPath: string;
 
   mdx: MDXOptions;
-  pluginOptions: RehypeNextDocsOptions;
+
+  codeOptions: RehypeCodeOptions;
 
   docFields: Record<string, FieldDef>;
   docsComputedFields: ComputedFields<'Docs'>;
@@ -69,7 +70,7 @@ export function create(options: Options = {}): Config {
     docFields,
     metaFields,
     docsComputedFields,
-    pluginOptions,
+    codeOptions,
     metaComputedFields,
     mdx = {},
   } = options;
@@ -79,7 +80,7 @@ export function create(options: Options = {}): Config {
     ...(mdx.remarkPlugins ?? []),
   ];
   const rehypePlugins: PluggableList = [
-    [rehypeNextDocs, pluginOptions],
+    [rehypeCode, codeOptions],
     [
       rehypeImgSize as Plugin<[RehypeImgSizeOptions], Root>,
       {

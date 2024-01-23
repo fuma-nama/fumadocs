@@ -12,11 +12,11 @@ export type CodeBlockProps = HTMLAttributes<HTMLElement> & {
   /**
    * Custom attributes to the inner `pre` element
    */
-  pre?: HTMLAttributes<HTMLPreElement>;
+  wrapper?: HTMLAttributes<HTMLElement>;
 };
 
 export const Pre = forwardRef<HTMLElement, CodeBlockProps>(
-  ({ title, allowCopy = true, pre, className, ...props }, ref) => {
+  ({ title, allowCopy = true, wrapper, className, ...props }, ref) => {
     const preRef = useRef<HTMLPreElement>(null);
     const onCopy = useCallback(() => {
       if (!preRef.current?.textContent) return;
@@ -29,9 +29,9 @@ export const Pre = forwardRef<HTMLElement, CodeBlockProps>(
         ref={ref}
         className={cn(
           'not-prose group relative my-6 overflow-hidden rounded-lg border bg-secondary/50 text-sm',
-          className,
+          wrapper?.className,
         )}
-        {...props}
+        {...wrapper}
       >
         {title ? (
           <div className="flex flex-row items-center border-b bg-muted py-1.5 pl-4 pr-2 text-muted-foreground">
@@ -49,8 +49,8 @@ export const Pre = forwardRef<HTMLElement, CodeBlockProps>(
         <ScrollArea>
           <pre
             ref={preRef}
-            {...pre}
-            className={cn('nd-codeblock py-4', pre?.className)}
+            className={cn('nd-codeblock py-4', className)}
+            {...props}
           >
             {props.children}
           </pre>

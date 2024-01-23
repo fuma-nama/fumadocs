@@ -6,15 +6,18 @@ description: Adding code blocks to your docs
 <Wrapper>
 <div className="bg-background rounded-lg prose-no-margin">
 
-```js title="next.config.js" {10} /config/
+```js title="configuration file"
+import createNextDocsMDX from 'fumadocs-mdx/config';
+
+const withMDX = createNextDocsMDX();
+
+// [!code word:config]
+/** @type {import('next').NextConfig} */
 const config = {
-  pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
-  reactStrictMode: true,
+  reactStrictMode: true, // [!code highlight]
 };
 
-const { withContentlayer } = require('next-contentlayer');
-
-module.exports = withContentlayer(config);
+export default withMDX(config);
 ```
 
 </div>
