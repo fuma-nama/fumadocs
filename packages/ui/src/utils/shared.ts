@@ -1,6 +1,9 @@
 import type { PageTree } from 'fumadocs-core/server';
 import type { ReactNode } from 'react';
 
+export const defaultImageSizes =
+  '(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 800px';
+
 export function isActive(
   url: string,
   pathname: string,
@@ -52,4 +55,18 @@ export function flattenTree(tree: PageTree.Node[]): PageTree.Item[] {
 
     return [node];
   });
+}
+
+export function mergeRefs<T>(
+  ...refs: (React.MutableRefObject<T> | React.LegacyRef<T>)[]
+): React.RefCallback<T> {
+  return (value) => {
+    refs.forEach((ref) => {
+      if (typeof ref === 'function') {
+        ref(value);
+      } else if (ref !== null) {
+        (ref as React.MutableRefObject<T | null>).current = value;
+      }
+    });
+  };
 }

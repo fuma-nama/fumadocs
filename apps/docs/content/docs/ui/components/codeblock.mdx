@@ -6,7 +6,7 @@ description: Adding code blocks to your docs
 <Wrapper>
 <div className="bg-background rounded-lg prose-no-margin">
 
-```js title="configuration file"
+```js title="Demo File"
 import createNextDocsMDX from 'fumadocs-mdx/config';
 
 const withMDX = createNextDocsMDX();
@@ -31,25 +31,29 @@ Display code blocks, required by default.
 
 ## Usage
 
-You can add this component to `mdxComponents`.
+Wrap the pre element in `<CodeBlock />`, which acts as the wrapper of code block.
 
-```mdx {5}
-import { Pre } from 'fumadocs-ui/mdx/pre';
+```mdx
+import { Pre, CodeBlock } from 'fumadocs-ui/mdx/pre';
 
 <MDX
   components={{
-    pre: (props) => <Pre {...props} />,
+    pre: ({ ref: _ref, title, ...props }) => (
+      <CodeBlock title={title}>
+        <Pre {...props} />
+      </CodeBlock>
+    ),
   }}
 />
 ```
 
 ### Highlight Lines
 
-You spectify highlighted lines by adding a numbric range.
+You spectify highlighted lines by adding `[!code highlight]`.
 
-````mdx
-```tsx {1-2,4}
-<div>Hello World</div>
+````md
+```tsx
+<div>Hello World</div>  // [\!code highlight]
 <div>Hello World</div>
 <div>Goodbye</div>
 <div>Hello World</div>
@@ -58,10 +62,11 @@ You spectify highlighted lines by adding a numbric range.
 
 ### Highlight Words
 
-You can highlight a specific word by wrapping the word in `/`.
+You can highlight a specific word by adding `[!code word:<match>]`.
 
-````mdx
-```js /config/
+````md
+```js
+// [\!code word:config]
 const config = {
   reactStrictMode: true,
 };
@@ -74,21 +79,6 @@ Add `title="x"` to the codeblock meta.
 
 ````mdx
 ```js title="next.config.js"
-const config = {
-  pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
-  reactStrictMode: true,
-};
-
-const { withContentlayer } = require('next-contentlayer');
-
-module.exports = withContentlayer(config);
+console.log('Hello World');
 ```
 ````
-
-### Inline
-
-Inline code is supported too, `console.log("Hello World"){:js}`.
-
-```mdx
-`console.log("Hello World"){:js}`
-```

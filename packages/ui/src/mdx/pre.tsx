@@ -6,32 +6,43 @@ import { cn } from '@/utils/cn';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCopyButton } from '@/utils/use-copy-button';
 import { buttonVariants } from '@/theme/variants';
+import { mergeRefs } from '@/utils/shared';
 
 export type CodeBlockProps = HTMLAttributes<HTMLElement> & {
   allowCopy?: boolean;
-  /**
-   * Custom attributes to the inner `pre` element
-   */
-  wrapper?: HTMLAttributes<HTMLElement>;
 };
 
-export const Pre = forwardRef<HTMLElement, CodeBlockProps>(
-  ({ title, allowCopy = true, wrapper, className, ...props }, ref) => {
-    const preRef = useRef<HTMLPreElement>(null);
-    const onCopy = useCallback(() => {
-      if (!preRef.current?.textContent) return;
+export const Pre = forwardRef<HTMLPreElement, HTMLAttributes<HTMLPreElement>>(
+  ({ className, ...props }, ref) => {
+    return (
+      <pre ref={ref} className={cn('nd-codeblock py-4', className)} {...props}>
+        {props.children}
+      </pre>
+    );
+  },
+);
 
-      void navigator.clipboard.writeText(preRef.current.textContent);
+Pre.displayName = 'Pre';
+
+export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
+  ({ title, allowCopy = true, className, ...props }, ref) => {
+    const blockRef = useRef<HTMLElement>(null);
+    const mergedRef = mergeRefs(ref, blockRef);
+    const onCopy = useCallback(() => {
+      const pre = blockRef.current?.getElementsByTagName('pre').item(0);
+
+      if (!pre?.textContent) return;
+      void navigator.clipboard.writeText(pre.textContent);
     }, []);
 
     return (
       <figure
-        ref={ref}
+        ref={mergedRef}
         className={cn(
           'not-prose group relative my-6 overflow-hidden rounded-lg border bg-secondary/50 text-sm',
-          wrapper?.className,
+          className,
         )}
-        {...wrapper}
+        {...props}
       >
         {title ? (
           <div className="flex flex-row items-center border-b bg-muted py-1.5 pl-4 pr-2 text-muted-foreground">
@@ -46,21 +57,13 @@ export const Pre = forwardRef<HTMLElement, CodeBlockProps>(
             />
           )
         )}
-        <ScrollArea>
-          <pre
-            ref={preRef}
-            className={cn('nd-codeblock py-4', className)}
-            {...props}
-          >
-            {props.children}
-          </pre>
-        </ScrollArea>
+        <ScrollArea>{props.children}</ScrollArea>
       </figure>
     );
   },
 );
 
-Pre.displayName = 'CodeBlock';
+CodeBlock.displayName = 'CodeBlock';
 
 function CopyButton({
   className,

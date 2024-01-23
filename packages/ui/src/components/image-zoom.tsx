@@ -3,7 +3,7 @@
 import Image, { type ImageProps } from 'next/image';
 import { type ImgHTMLAttributes } from 'react';
 import Zoom from 'react-medium-image-zoom';
-import { defaultImageSizes } from '@/utils/config';
+import { defaultImageSizes } from '@/utils/shared';
 
 export type ImageZoomProps = ImageProps & {
   /**

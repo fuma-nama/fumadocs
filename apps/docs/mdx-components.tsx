@@ -4,7 +4,7 @@ import { Callout } from 'fumadocs-ui/components/callout';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 import { TypeTable } from 'fumadocs-ui/components/type-table';
 import defaultComponents from 'fumadocs-ui/mdx/default';
-import { Pre } from 'fumadocs-ui/mdx/pre';
+import { CodeBlock, Pre } from 'fumadocs-ui/mdx/pre';
 import type { ReactNode } from 'react';
 import { Wrapper } from '@/components/preview/wrapper';
 import { AutoTypeTable } from './components/doc';
@@ -12,8 +12,10 @@ import { AutoTypeTable } from './components/doc';
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
     ...defaultComponents,
-    pre: (props) => (
-      <Pre {...props} ref={undefined} pre={{ className: 'max-h-[400px]' }} />
+    pre: ({ ref: _ref, title, ...props }) => (
+      <CodeBlock title={title}>
+        <Pre className="max-h-[400px]" {...props} />
+      </CodeBlock>
     ),
     AutoTypeTable,
     Tabs,

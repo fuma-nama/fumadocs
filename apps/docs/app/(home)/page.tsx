@@ -19,7 +19,7 @@ import Link from 'next/link';
 import type { HTMLAttributes } from 'react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
-import { CodeBlock } from '@/components/typing-code-block';
+import { CodeBlock } from '@/components/code-block';
 import { CreateAppAnimation, Previews, Rain } from './page.client';
 import {
   VercelLogo,
@@ -100,7 +100,7 @@ export default function HomePage(): JSX.Element {
               <div className="relative flex flex-col">
                 <CodeBlock
                   lang="ts"
-                  className="absolute inset-x-2 top-0"
+                  wrapper={{ className: 'absolute inset-x-2 top-0' }}
                   code={code}
                 />
                 <Files className="z-[2] mt-20 shadow-xl">
@@ -404,7 +404,7 @@ function Integration({
       <div className="col-span-full">
         <p className="text-sm font-medium">Available now</p>
         <CodeBlock
-          className="mt-2"
+          wrapper={{ className: 'mt-2' }}
           lang="bash"
           code="pnpm create fumadocs-app"
         />

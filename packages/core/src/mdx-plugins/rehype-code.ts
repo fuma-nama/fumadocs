@@ -25,7 +25,7 @@ const metaValues: MetaValue[] = [
   },
 ];
 
-const defaultCodeOptions: RehypeCodeOptions = {
+export const rehypeCodeDefaultOptions: RehypeCodeOptions = {
   themes: {
     light: 'github-light',
     dark: 'github-dark',
@@ -70,27 +70,30 @@ export type RehypeCodeOptions = RehypeShikijiOptions & {
  */
 export function rehypeCode(
   this: Processor,
-  codeOptions?: RehypeCodeOptions,
+  options: Partial<RehypeCodeOptions> = {},
 ): Transformer<Root, Root> {
-  const options: RehypeCodeOptions = {
-    ...defaultCodeOptions,
-    ...codeOptions,
+  const codeOptions: RehypeCodeOptions = {
+    ...rehypeCodeDefaultOptions,
+    ...options,
   };
 
-  options.transformers ||= [];
-  options.transformers.unshift({
-    name: 'next-docs:filter-meta',
-    preprocess(code, { meta }) {
-      if (meta && options.filterMetaString) {
-        meta.__raw = options.filterMetaString(meta.__raw ?? '');
-      }
+  codeOptions.transformers ||= [];
+  codeOptions.transformers = [
+    {
+      name: 'rehype-code:filter-meta',
+      preprocess(code, { meta }) {
+        if (meta && codeOptions.filterMetaString) {
+          meta.__raw = codeOptions.filterMetaString(meta.__raw ?? '');
+        }
 
-      // Remove empty line at end
-      return code.replace(/\n$/, '');
+        // Remove empty line at end
+        return code.replace(/\n$/, '');
+      },
     },
-  });
+    ...codeOptions.transformers,
+  ];
 
-  const plugin = rehypeShikiji.call(this, options);
+  const plugin = rehypeShikiji.call(this, codeOptions);
 
   if (!plugin) throw new Error();
 
