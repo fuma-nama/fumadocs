@@ -8,13 +8,14 @@ import { CodeBlock, Pre } from 'fumadocs-ui/mdx/pre';
 import type { ReactNode } from 'react';
 import { Wrapper } from '@/components/preview/wrapper';
 import { AutoTypeTable } from './components/doc';
+import { cn } from './utils/cn';
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
     ...defaultComponents,
-    pre: ({ ref: _ref, title, ...props }) => (
+    pre: ({ ref: _ref, title, className, ...props }) => (
       <CodeBlock title={title}>
-        <Pre className="max-h-[400px]" {...props} />
+        <Pre className={cn('max-h-[400px]', className)} {...props} />
       </CodeBlock>
     ),
     AutoTypeTable,
