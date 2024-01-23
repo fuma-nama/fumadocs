@@ -103,8 +103,8 @@ importers:
         specifier: ^6.0.0
         version: 6.0.0
       shikiji:
-        specifier: ^0.9.9
-        version: 0.9.9
+        specifier: ^0.10.0
+        version: 0.10.0
       tailwind-merge:
         specifier: ^2.0.0
         version: 2.0.0
@@ -9798,12 +9798,6 @@ packages:
     resolution: {integrity: sha512-1dAzIOWbtM7B4Sem5BvE+CEdsebDsRA34SfCxM4qJ4PLgR73ZD92VEtNfbcoZ3xOLSqvtV0J9i4WpCgVsmQteg==}
     dependencies:
       shikiji-core: 0.10.0
-    dev: false
-
-  /shikiji@0.9.9:
-    resolution: {integrity: sha512-/S3unr/0mZTstNOuAmNDEufeimtqeQb8lXvPMLsYfDvqyfmG6334bO2xmDzD0kfxH2y8gnFgSWAJpdEzksmYXg==}
-    dependencies:
-      shikiji-core: 0.9.9
     dev: false
 
   /side-channel@1.0.4:
