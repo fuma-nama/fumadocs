@@ -5,6 +5,7 @@ import {
   transformerNotationWordHighlight,
 } from 'shikiji-transformers';
 import type { Processor, Transformer } from 'unified';
+import { visit } from './hast-utils';
 
 interface MetaValue {
   name: string;
@@ -30,6 +31,7 @@ export const rehypeCodeDefaultOptions: RehypeCodeOptions = {
     light: 'github-light',
     dark: 'github-dark',
   },
+  defaultLang: 'plaintext',
   defaultColor: false,
   transformers: [
     transformerNotationHighlight(),
@@ -63,6 +65,13 @@ export type RehypeCodeOptions = RehypeShikijiOptions & {
    * Filter meta string before processing
    */
   filterMetaString?: (metaString: string) => string;
+
+  /**
+   * Default language
+   *
+   * @defaultValue plaintext
+   */
+  defaultLang?: string;
 };
 
 /**
@@ -93,9 +102,36 @@ export function rehypeCode(
     ...codeOptions.transformers,
   ];
 
-  const plugin = rehypeShikiji.call(this, codeOptions);
+  const prefix = 'language-';
+  const transformer = rehypeShikiji.call(this, codeOptions);
 
-  if (!plugin) throw new Error();
+  return async (root, vfile) => {
+    visit(root, ['pre'], (element) => {
+      const head = element.children[0];
 
-  return plugin;
+      if (
+        element.children.length === 0 ||
+        head.type !== 'element' ||
+        head.tagName !== 'code'
+      )
+        return;
+
+      head.properties.className ||= [];
+      const classes = head.properties.className;
+
+      if (!Array.isArray(classes)) return;
+
+      const hasLanguage = classes.some(
+        (d) => typeof d === 'string' && d.startsWith(prefix),
+      );
+
+      if (!hasLanguage && codeOptions.defaultLang)
+        classes.push(`${prefix}${codeOptions.defaultLang}`);
+    });
+
+    if (transformer)
+      await transformer.call(this, root, vfile, () => {
+        // nothing
+      });
+  };
 }

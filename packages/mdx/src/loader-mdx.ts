@@ -38,24 +38,26 @@ export default async function loader(
   this.cacheable(true);
   const context = this.context;
   const filePath = this.resourcePath;
-  const options = this.getOptions();
+  const { lastModifiedTime, ...options } = this.getOptions();
   const { content, data: frontmatter } = grayMatter(source);
-  const format = options.format ?? filePath.endsWith('.mdx') ? 'mdx' : 'md';
+  const detectedFormat = filePath.endsWith('.mdx') ? 'mdx' : 'md';
+  const format = options.format ?? detectedFormat;
   let timestamp: number | undefined;
   let processor = cache.get(format);
 
-  if (options.lastModifiedTime === 'git')
-    timestamp = (await getGitTimestamp(filePath))?.getTime();
-
-  if (!processor) {
+  if (processor === undefined) {
+    console.log('create');
     processor = createProcessor({
-      format,
-      development: this.mode === 'development',
       ...options,
+      development: this.mode === 'development',
+      format,
     });
 
     cache.set(format, processor);
   }
+
+  if (lastModifiedTime === 'git')
+    timestamp = (await getGitTimestamp(filePath))?.getTime();
 
   processor
     .process({
