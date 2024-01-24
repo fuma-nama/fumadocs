@@ -17,7 +17,7 @@ import { CodeBlock, Pre } from 'fumadocs-ui/mdx/pre';
 After:
 
 ```tsx
-import { CodeBlock, Pre } from 'fumadocs-ui/mdx/pre';
+import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
 
 <CodeBlock title={title} allowCopy>
   <Pre {...props} />

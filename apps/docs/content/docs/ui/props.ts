@@ -4,7 +4,7 @@ import type { File } from 'fumadocs-ui/components/files';
 import type { InlineTOC } from 'fumadocs-ui/components/inline-toc';
 import type { RollButton } from 'fumadocs-ui/components/roll-button';
 import type { TypeTable } from 'fumadocs-ui/components/type-table';
-import type { Card } from 'fumadocs-ui/mdx/card';
+import type { Card } from 'fumadocs-ui/components/card';
 import type { DocsLayoutProps } from 'fumadocs-ui/layout';
 import type { AnchorHTMLAttributes, ComponentPropsWithoutRef } from 'react';
 import type { DocsPageProps } from 'fumadocs-ui/page';

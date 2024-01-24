@@ -1,4 +1,4 @@
-import * as Pre from 'fumadocs-ui/mdx/pre';
+import * as Base from 'fumadocs-ui/components/codeblock';
 import type { HTMLAttributes } from 'react';
 import { useMemo } from 'react';
 import { getHighlighter } from 'shikiji';
@@ -10,7 +10,7 @@ const highlighter = await getHighlighter({
 
 export type CodeBlockProps = HTMLAttributes<HTMLPreElement> & {
   code: string;
-  wrapper?: Pre.CodeBlockProps;
+  wrapper?: Base.CodeBlockProps;
   lang: 'bash' | 'ts' | 'tsx';
 };
 
@@ -33,11 +33,11 @@ export function CodeBlock({
   );
 
   return (
-    <Pre.CodeBlock {...wrapper}>
-      <Pre.Pre {...props}>
+    <Base.CodeBlock {...wrapper}>
+      <Base.Pre {...props}>
         <code>
           {tokens.map((token, i) => (
-            // eslint-disable-next-line react/no-array-index-key, tailwindcss/no-custom-classname -- Should not re-render
+            // eslint-disable-next-line react/no-array-index-key -- Should not re-render
             <span className="line" key={i}>
               {token.map((s, j) => (
                 <span
@@ -56,7 +56,7 @@ export function CodeBlock({
             </span>
           ))}
         </code>
-      </Pre.Pre>
-    </Pre.CodeBlock>
+      </Base.Pre>
+    </Base.CodeBlock>
   );
 }

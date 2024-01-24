@@ -1,7 +1,7 @@
 'use client';
 
 import type { HTMLAttributes } from 'react';
-import * as P from '@/mdx/pre';
+import * as Base from '@/components/codeblock';
 
 export function Pre({
   title,
@@ -9,8 +9,8 @@ export function Pre({
   ...props
 }: HTMLAttributes<HTMLPreElement> & { allowCopy?: boolean }): JSX.Element {
   return (
-    <P.CodeBlock title={title} allowCopy={allowCopy}>
-      <P.Pre {...props} />
-    </P.CodeBlock>
+    <Base.CodeBlock title={title} allowCopy={allowCopy}>
+      <Base.Pre {...props} />
+    </Base.CodeBlock>
   );
 }

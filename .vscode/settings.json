@@ -9,6 +9,6 @@
     ["cn\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
   ],
   "files.associations": {
-    "**/packages/create-next-docs/template/**/*": "plaintext"
+    "**/packages/create-app/template/**/*": "plaintext"
   }
 }

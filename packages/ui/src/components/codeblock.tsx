@@ -6,7 +6,6 @@ import { cn } from '@/utils/cn';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCopyButton } from '@/utils/use-copy-button';
 import { buttonVariants } from '@/theme/variants';
-import { mergeRefs } from '@/utils/shared';
 
 export type CodeBlockProps = HTMLAttributes<HTMLElement> & {
   allowCopy?: boolean;
@@ -26,10 +25,9 @@ Pre.displayName = 'Pre';
 
 export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
   ({ title, allowCopy = true, className, ...props }, ref) => {
-    const blockRef = useRef<HTMLElement>(null);
-    const mergedRef = mergeRefs(ref, blockRef);
+    const areaRef = useRef<HTMLDivElement>(null);
     const onCopy = useCallback(() => {
-      const pre = blockRef.current?.getElementsByTagName('pre').item(0);
+      const pre = areaRef.current?.getElementsByTagName('pre').item(0);
 
       if (!pre?.textContent) return;
       void navigator.clipboard.writeText(pre.textContent);
@@ -37,7 +35,7 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
 
     return (
       <figure
-        ref={mergedRef}
+        ref={ref}
         className={cn(
           'not-prose group relative my-6 overflow-hidden rounded-lg border bg-secondary/50 text-sm',
           className,
@@ -57,7 +55,7 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
             />
           )
         )}
-        <ScrollArea>{props.children}</ScrollArea>
+        <ScrollArea ref={areaRef}>{props.children}</ScrollArea>
       </figure>
     );
   },
