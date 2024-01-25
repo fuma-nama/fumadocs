@@ -7,5 +7,6 @@
   "access": "restricted",
   "baseBranch": "dev",
   "updateInternalDependencies": "patch",
-  "privatePackages": { "version": false, "tag": false }
+  "privatePackages": { "version": false },
+  "ignore": ["docs", "example-*"]
 }
