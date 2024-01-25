@@ -4,11 +4,12 @@ import { replaceOrDefault } from './utils/shared';
 import { cn } from './utils/cn';
 import type { FooterProps } from './page.client';
 
-// We can keep the "use client" directives with dynamic imports
-// Next.js bundler should handle this automatically
-const { TOCItems, Breadcrumb, LastUpdate, Footer } = await import(
-  './page.client'
-);
+declare const {
+  TOCItems,
+  Breadcrumb,
+  Footer,
+  LastUpdate,
+}: typeof import('./page.client');
 
 type TableOfContentOptions = Omit<TOCProps, 'items'> & {
   enabled: boolean;

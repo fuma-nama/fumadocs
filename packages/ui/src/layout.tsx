@@ -6,7 +6,11 @@ import { replaceOrDefault } from './utils/shared';
 import { cn } from './utils/cn';
 import type { SidebarProps } from './components/sidebar';
 
-const { Nav, TreeContextProvider, Sidebar } = await import('./layout.client');
+declare const {
+  Nav,
+  TreeContextProvider,
+  Sidebar,
+}: typeof import('./layout.client');
 
 export interface LinkItem {
   url: string;

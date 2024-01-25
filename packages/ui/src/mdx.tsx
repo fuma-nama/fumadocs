@@ -2,7 +2,6 @@ import Link from 'fumadocs-core/link';
 import type {
   AnchorHTMLAttributes,
   FC,
-  HTMLAttributes,
   ImgHTMLAttributes,
   TableHTMLAttributes,
 } from 'react';
@@ -12,8 +11,7 @@ import { Card, Cards } from '@/components/card';
 import { Heading } from '@/components/heading';
 import { defaultImageSizes } from '@/utils/shared';
 
-// We will inject import via tsup
-declare const Pre: FC<HTMLAttributes<HTMLPreElement>>;
+declare const { Pre }: typeof import('./mdx.client');
 
 function Image(props: ImgHTMLAttributes<HTMLImageElement>): JSX.Element {
   return <NextImage sizes={defaultImageSizes} {...(props as ImageProps)} />;
