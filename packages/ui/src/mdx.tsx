@@ -1,8 +1,8 @@
-import dynamic from 'next/dynamic';
 import Link from 'fumadocs-core/link';
 import type {
   AnchorHTMLAttributes,
   FC,
+  HTMLAttributes,
   ImgHTMLAttributes,
   TableHTMLAttributes,
 } from 'react';
@@ -11,6 +11,9 @@ import type { ImageProps } from 'next/image';
 import { Card, Cards } from '@/components/card';
 import { Heading } from '@/components/heading';
 import { defaultImageSizes } from '@/utils/shared';
+
+// We will inject import via tsup
+declare const Pre: FC<HTMLAttributes<HTMLPreElement>>;
 
 function Image(props: ImgHTMLAttributes<HTMLImageElement>): JSX.Element {
   return <NextImage sizes={defaultImageSizes} {...(props as ImageProps)} />;
@@ -23,8 +26,6 @@ function Table(props: TableHTMLAttributes<HTMLTableElement>): JSX.Element {
     </div>
   );
 }
-
-const Pre = dynamic(() => import('./mdx.client').then((res) => res.Pre));
 
 const defaultMdxComponents = {
   pre: Pre,
