@@ -1,5 +1,4 @@
-import { type VirtualFile } from '@/source/load';
-import type { Source } from '@/source/create';
+import type { VirtualFile, Source } from 'fumadocs-core/source';
 import type { DocsPageBase, MetaPageBase } from './types';
 
 export function createContentlayerSource<

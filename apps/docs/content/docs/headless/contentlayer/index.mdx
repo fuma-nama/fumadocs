@@ -11,11 +11,15 @@ convenient to use and straightforward.
 
 ## Setup
 
+```package-install
+fumadocs-contentlayer
+```
+
 1. Edit your configuration.
 
 ```ts title="contentlayer.config.ts"
 import { makeSource } from 'contentlayer/source-files';
-import { defaultConfig } from 'fumadocs-core/contentlayer/configuration';
+import { defaultConfig } from 'fumadocs-contentlayer/configuration';
 
 export default makeSource(defaultConfig);
 ```
@@ -28,7 +32,7 @@ export default makeSource(defaultConfig);
 
 ```ts
 import { allDocs, allMeta } from 'contentlayer/generated';
-import { createContentlayerSource } from 'fumadocs-core/contentlayer';
+import { createContentlayerSource } from 'fumadocs-contentlayer';
 import { loader } from 'fumadocs-core/source';
 
 export const docs = loader({

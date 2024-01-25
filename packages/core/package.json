@@ -44,14 +44,6 @@
       "import": "./dist/link.js",
       "types": "./dist/link.d.ts"
     },
-    "./contentlayer": {
-      "import": "./dist/contentlayer/index.js",
-      "types": "./dist/contentlayer/index.d.ts"
-    },
-    "./contentlayer/configuration": {
-      "import": "./dist/contentlayer/configuration.js",
-      "types": "./dist/contentlayer/configuration.d.ts"
-    },
     "./middleware": {
       "import": "./dist/middleware.js",
       "types": "./dist/middleware.d.ts"
@@ -98,12 +90,6 @@
       "link": [
         "./dist/link.d.ts"
       ],
-      "contentlayer": [
-        "./dist/contentlayer/index.d.ts"
-      ],
-      "contentlayer/configuration": [
-        "./dist/contentlayer/configuration.d.ts"
-      ],
       "middleware": [
         "./dist/middleware.d.ts"
       ],
@@ -135,7 +121,6 @@
     "github-slugger": "^2.0.0",
     "negotiator": "^0.6.3",
     "react-remove-scroll": "^2.5.6",
-    "rehype-img-size": "^1.0.1",
     "rehype-shikiji": "^0.10.0",
     "remark": "^15.0.0",
     "remark-gfm": "^4.0.0",
@@ -157,7 +142,6 @@
     "@types/react": "18.2.0",
     "@types/react-dom": "18.2.1",
     "algoliasearch": "^4.20.0",
-    "contentlayer": "^0.3.4",
     "eslint-config-custom": "workspace:*",
     "next": "14.1.0",
     "tsconfig": "workspace:*",

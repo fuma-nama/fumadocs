@@ -1,6 +1,10 @@
+/* eslint-disable import/no-relative-packages -- read package versions */
 import path from 'node:path';
 import fs from 'node:fs/promises';
-import pkg from '../package.json';
+import corePkg from '../../core/package.json';
+import uiPkg from '../../ui/package.json';
+import mdxPkg from '../../mdx/package.json';
+import contentlayerPkg from '../../contentlayer/package.json';
 import type { PackageManager } from './auto-install';
 import { autoInstall } from './auto-install';
 import { sourceDir, cwd } from './constants';
@@ -76,8 +80,6 @@ function createPackageJson(
   projectName: string,
   { template, tailwindcss }: Options,
 ): string {
-  const version = pkg.version;
-
   const packageJson = {
     name: projectName,
     version: '0.0.0',
@@ -89,8 +91,8 @@ function createPackageJson(
     },
     dependencies: {
       next: '14.0.4',
-      'fumadocs-ui': version,
-      'fumadocs-core': version,
+      'fumadocs-ui': uiPkg.version,
+      'fumadocs-core': corePkg.version,
       react: '18.2.0',
       'react-dom': '18.2.0',
     },
@@ -103,6 +105,7 @@ function createPackageJson(
 
   if (template === 'contentlayer') {
     Object.assign(packageJson.dependencies, {
+      'fuamdocs-contentlayer': contentlayerPkg.version,
       contentlayer: '0.3.4',
       'next-contentlayer': '0.3.4',
     });
@@ -118,7 +121,7 @@ function createPackageJson(
 
   if (template === 'fuma-docs-mdx') {
     Object.assign(packageJson.dependencies, {
-      'fumadocs-mdx': version,
+      'fumadocs-mdx': mdxPkg.version,
     });
 
     Object.assign(packageJson.devDependencies, {

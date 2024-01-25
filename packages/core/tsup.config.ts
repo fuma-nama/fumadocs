@@ -17,7 +17,6 @@ export default defineConfig({
   entry: [
     'src/{toc,link,breadcrumb,sidebar,dynamic-link}.tsx',
     'src/{server,source,mdx-plugins}/index.ts',
-    'src/contentlayer/{index,configuration}.ts',
     'src/{search,search-algolia}/client.ts',
     'src/search/shared.ts',
     'src/{search,search-algolia}/server.ts',

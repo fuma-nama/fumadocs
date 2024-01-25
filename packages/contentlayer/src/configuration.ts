@@ -17,14 +17,13 @@ import type { PluggableList, Plugin } from 'unified';
 import rehypeImgSize, {
   type Options as RehypeImgSizeOptions,
 } from 'rehype-img-size';
-import type { Root } from 'hast';
 import {
   rehypeCode,
   remarkGfm,
   structure,
   type RehypeCodeOptions,
-} from '@/mdx-plugins';
-import { getTableOfContents } from '@/server/get-toc';
+} from 'fumadocs-core/mdx-plugins';
+import { getTableOfContents } from 'fumadocs-core/server';
 import type { DocsPageBase } from './types';
 
 export interface Config {
@@ -82,7 +81,7 @@ export function create(options: Options = {}): Config {
   const rehypePlugins: PluggableList = [
     [rehypeCode, codeOptions],
     [
-      rehypeImgSize as Plugin<[RehypeImgSizeOptions], Root>,
+      rehypeImgSize as Plugin<[RehypeImgSizeOptions]>,
       {
         dir: imgDirPath,
       },

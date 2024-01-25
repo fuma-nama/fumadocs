@@ -78,9 +78,9 @@ function CopyButton({
       className={cn(
         buttonVariants({
           color: 'muted',
+          className: 'transition-all group-hover:opacity-100',
         }),
         !checked && 'opacity-0',
-        'transition-all group-hover:opacity-100',
         className,
       )}
       aria-label="Copy Text"
