@@ -48,7 +48,6 @@
     "postcss": "8.4.33",
     "tailwindcss": "3.4.1",
     "tailwindcss-animate": "^1.0.7",
-    "ts-morph": "^21.0.1",
     "tsconfig": "workspace:*",
     "tsx": "^4.7.0",
     "webpack": "^5.89.0"

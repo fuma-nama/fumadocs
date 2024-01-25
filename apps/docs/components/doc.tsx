@@ -1,5 +1,5 @@
-import { Project } from 'ts-morph';
-import { displayPartsToString, TypeFormatFlags } from 'typescript';
+/* eslint-disable @typescript-eslint/no-non-null-assertion -- f */
+import * as ts from 'typescript';
 import { TypeTable } from 'fumadocs-ui/components/type-table';
 
 interface DocEntry {
@@ -14,51 +14,79 @@ const shortcuts: Record<string, string> = {
   headless: './content/docs/headless/props.ts',
 };
 
-const project = new Project({
-  tsConfigFilePath: 'tsconfig.json',
-  skipAddingFilesFromTsConfig: true,
+const configFile = ts.readJsonConfigFile('./tsconfig.json', (path) =>
+  ts.sys.readFile(path),
+);
+
+const { fileNames, options } = ts.parseJsonSourceFileConfigFileContent(
+  configFile,
+  ts.sys,
+  './',
+);
+
+const project = ts.createProgram({
+  rootNames: fileNames,
+  options,
 });
 
 /** Generate documentation for properties in a specific interface
  * @param name - interface name
  */
 function generateDocumentation(file: string, name: string): DocEntry[] {
-  project.addSourceFileAtPath(file);
   const sourceFile = project.getSourceFile(file);
+  if (!sourceFile) return [];
 
-  const typeAlias = sourceFile?.getTypeAlias(name);
-  if (!sourceFile || !typeAlias) return [];
+  let aliasNode: ts.TypeAliasDeclaration | undefined;
 
-  return typeAlias
-    .getType()
-    .getProperties()
-    .map<DocEntry>((p) => {
-      const type = p.getTypeAtLocation(typeAlias);
-      const defaultJsDocTag = p
-        .getJsDocTags()
-        .find((info) => ['default', 'defaultValue'].includes(info.getName()));
+  function visit(node: ts.Node): void {
+    if (ts.isTypeAliasDeclaration(node) && node.name.text === name) {
+      aliasNode = node;
+    }
+  }
 
-      let typeName = type
-        .getNonNullableType()
-        .getText(undefined, TypeFormatFlags.UseAliasDefinedOutsideCurrentScope);
+  ts.forEachChild(sourceFile, visit);
 
-      if (type.compilerType.aliasSymbol) {
-        typeName = type.compilerType.aliasSymbol.escapedName.toString();
-      }
+  if (!aliasNode) return [];
 
-      return {
-        name: p.getName(),
-        description: displayPartsToString(
-          p.compilerSymbol.getDocumentationComment(
-            project.getTypeChecker().compilerObject,
-          ),
-        ),
-        default: defaultJsDocTag
-          ? displayPartsToString(defaultJsDocTag.getText())
-          : undefined,
-        type: typeName,
-      };
-    });
+  const aliasSymbol = project
+    .getTypeChecker()
+    .getSymbolAtLocation(aliasNode.name);
+  if (!aliasSymbol) return [];
+
+  const type = project.getTypeChecker().getDeclaredTypeOfSymbol(aliasSymbol);
+
+  return type.getProperties().map<DocEntry>((p) => {
+    const subType = project
+      .getTypeChecker()
+      .getTypeOfSymbolAtLocation(p, aliasNode!);
+
+    const defaultJsDocTag = p
+      .getJsDocTags()
+      .find((info) => ['default', 'defaultValue'].includes(info.name));
+
+    let typeName = project
+      .getTypeChecker()
+      .typeToString(
+        subType.getNonNullableType(),
+        undefined,
+        ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope,
+      );
+
+    if (subType.aliasSymbol && !subType.aliasTypeArguments) {
+      typeName = subType.aliasSymbol.escapedName.toString();
+    }
+
+    return {
+      name: p.getName(),
+      description: ts.displayPartsToString(
+        p.getDocumentationComment(project.getTypeChecker()),
+      ),
+      default: defaultJsDocTag?.text
+        ? ts.displayPartsToString(defaultJsDocTag.text)
+        : undefined,
+      type: typeName,
+    };
+  });
 }
 
 export function AutoTypeTable({
