@@ -1,7 +1,9 @@
-import type { HTMLAttributes, ReactNode } from 'react';
+'use client';
+import { useState, type HTMLAttributes, type ReactNode } from 'react';
 import type { VariantProps } from 'class-variance-authority';
 import { cva } from 'class-variance-authority';
 import { cn } from '@/utils/cn';
+import { buttonVariants } from '@/theme/variants';
 
 export function Root({
   children,
@@ -25,7 +27,7 @@ export function API({
 }: HTMLAttributes<HTMLDivElement>): JSX.Element {
   return (
     <div
-      className={cn('flex flex-col gap-6 xl:flex-row', className)}
+      className={cn('flex flex-col gap-x-6 gap-y-2 xl:flex-row', className)}
       {...props}
     >
       {children}
@@ -114,6 +116,8 @@ export function APIExample({
   className,
   ...props
 }: HTMLAttributes<HTMLDivElement>): JSX.Element {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
     <div
       className={cn(
@@ -122,7 +126,25 @@ export function APIExample({
       )}
       {...props}
     >
-      {children}
+      <div className="flex flex-row items-center gap-4 xl:hidden">
+        <div className="h-px flex-1 bg-border" />
+        <button
+          type="button"
+          className={cn(
+            buttonVariants({
+              color: 'muted',
+              size: 'lg',
+            }),
+          )}
+          onClick={() => {
+            setIsOpen((v) => !v);
+          }}
+        >
+          More Details
+        </button>
+        <div className="h-px flex-1 bg-border" />
+      </div>
+      <div className={cn(!isOpen && 'max-xl:hidden')}>{children}</div>
     </div>
   );
 }
