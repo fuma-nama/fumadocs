@@ -12,6 +12,10 @@ TMP=$(get_abs_filename "$DIR/../node_modules/.tmp")
 mkdir -p $TMP
 cd $TMP
 
+# Set git info
+git config --global user.email "fuma-nama@noreply.com"
+git config --global user.name "Fuma Nama"
+
 # clone the template repo
 rm -rf fumadocs-ui-template
 git clone --depth 1 --single-branch --branch main https://github.com/fuma-nama/fumadocs-ui-template.git
