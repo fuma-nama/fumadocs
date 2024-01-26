@@ -1,5 +1,21 @@
 # @fuma-docs/openapi
 
+## 1.0.0
+
+### Major Changes
+
+- 2b11c20: **Rename to Fumadocs**
+
+  `next-docs-zeta` -> `fumadocs-core`
+
+  `next-docs-ui` -> `fumadocs-ui`
+
+  `next-docs-mdx` -> `fumadocs-mdx`
+
+  `@fuma-docs/openapi` -> `fumadocs-openapi`
+
+  `create-next-docs-app` -> `create-fumadocs-app`
+
 ## 0.1.0
 
 ### Minor Changes
