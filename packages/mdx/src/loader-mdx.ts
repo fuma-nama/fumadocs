@@ -46,7 +46,6 @@ export default async function loader(
   let processor = cache.get(format);
 
   if (processor === undefined) {
-    console.log('create');
     processor = createProcessor({
       ...options,
       development: this.mode === 'development',

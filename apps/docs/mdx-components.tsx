@@ -7,7 +7,7 @@ import defaultComponents from 'fumadocs-ui/mdx';
 import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
 import type { ReactNode } from 'react';
 import { Wrapper } from '@/components/preview/wrapper';
-import { AutoTypeTable } from './components/doc';
+import { AutoTypeTable } from './components/auto-type-table';
 import { cn } from './utils/cn';
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
