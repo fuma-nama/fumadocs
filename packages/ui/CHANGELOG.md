@@ -1,5 +1,121 @@
 # next-docs-ui
 
+## 8.0.0
+
+### Major Changes
+
+- a2f4819: **Improve internationalized routing**
+
+  `I18nProvider` now handles routing for you.
+  Therefore, `locale` and `onChange` is no longer required.
+
+  ```tsx
+  <I18nProvider
+    translations={{
+      cn: {
+        name: 'Chinese', // required
+        search: 'Translated Content',
+      },
+    }}
+  ></I18nProvider>
+  ```
+
+  `LanguageSelect` detects available options from your translations, therefore, the `languages` prop is removed.
+
+- c608ad2: **Remove deprecated `docsUiPlugins`**
+
+  migrate: Use `createPreset` instead
+
+  ```js
+  const { createPreset } = require('fumadocs-ui/tailwind-plugin');
+
+  /** @type {import('tailwindcss').Config} */
+  module.exports = {
+    content: [
+      './components/**/*.{ts,tsx}',
+      './app/**/*.{ts,tsx}',
+      './content/**/*.mdx',
+      './node_modules/fumadocs-ui/dist/**/*.js',
+    ],
+    presets: [createPreset()],
+  };
+  ```
+
+- 2ea9437: **Change usage of Code Block component**
+
+  The inner `pre` element is now separated from code block container, making it easier to customise.`
+
+  Before:
+
+  ```tsx
+  import { CodeBlock, Pre } from 'fumadocs-ui/mdx/pre';
+
+  <Pre title={title} allowCopy {...props} />;
+  ```
+
+  After:
+
+  ```tsx
+  import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
+
+  <CodeBlock title={title} allowCopy>
+    <Pre {...props} />
+  </CodeBlock>;
+  ```
+
+- ac424ec: **Update import paths of MDX components**
+
+  why: To improve consistency, all MDX components are located in `/components/*` instead.
+
+  migrate:
+
+  ```diff
+  - import { Card, Cards } from "fumadocs-ui/mdx/card"
+  + import { Card, Cards } from "fumadocs-ui/components/card"
+
+  - import { Heading } from "fumadocs-ui/mdx/heading"
+  + import { Heading } from "fumadocs-ui/components/heading"
+
+  - import { Codeblock, Pre } from "fumadocs-ui/mdx/pre"
+  + import { Codeblock, Pre } from "fumadocs-ui/components/codeblock"
+  ```
+
+- 2b11c20: **Rename to Fumadocs**
+
+  `next-docs-zeta` -> `fumadocs-core`
+
+  `next-docs-ui` -> `fumadocs-ui`
+
+  `next-docs-mdx` -> `fumadocs-mdx`
+
+  `@fuma-docs/openapi` -> `fumadocs-openapi`
+
+  `create-next-docs-app` -> `create-fumadocs-app`
+
+- 60db195: **Remove Nav component export**
+
+  why: Replaced by the DocsLayout and Layout component, it is now an internal component
+
+  migration: Use the Layout component for sharing the navbar across pages
+
+  ```diff
+  - import { Nav } from "fumadocs-ui/nav"
+  + import { Layout } from "fumadocs-ui/layout"
+  ```
+
+### Minor Changes
+
+- 60db195: **Support transparent navbar**
+
+### Patch Changes
+
+- 974e00f: Collapse API example by default
+- Updated dependencies [2ea9437]
+- Updated dependencies [cdff313]
+- Updated dependencies [1a346a1]
+- Updated dependencies [2b11c20]
+  - fumadocs-core@8.0.0
+
 ## 7.1.2
 
 ### Patch Changes

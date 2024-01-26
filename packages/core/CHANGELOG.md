@@ -1,5 +1,69 @@
 # next-docs-zeta
 
+## 8.0.0
+
+### Major Changes
+
+- 2ea9437: **Migrate to rehype-shikiji**
+
+  - Dropped support for inline code syntax highlighting
+  - Use notation-based word/line highlighting instead of meta string
+
+  Before:
+
+  ````md
+  ```ts /config/ {1}
+  const config = 'Hello';
+
+  something.call(config);
+  ```
+  ````
+
+  After:
+
+  ````md
+  ```ts
+  // [!code word:config]
+  const config = 'Hello'; // [!code highlight]
+
+  something.call(config);
+  ```
+  ````
+
+  Read the docs of Shikiji for more information.
+
+- cdff313: **Separate Contentlayer integration into another package**
+
+  why: As Fumadocs MDX is the preferred default source, Contentlayer should be optional.
+
+  migrate:
+
+  Install `fumadocs-contentlayer`.
+
+  ```diff
+  - import { createContentlayerSource } from "fumadocs-core/contentlayer"
+  + import { createContentlayerSource } from "fumadocs-contentlayer"
+
+  - import { createConfig } from "fumadocs-core/contentlayer/configuration"
+  + import { createConfig } from "fumadocs-contentlayer/configuration"
+  ```
+
+- 2b11c20: **Rename to Fumadocs**
+
+  `next-docs-zeta` -> `fumadocs-core`
+
+  `next-docs-ui` -> `fumadocs-ui`
+
+  `next-docs-mdx` -> `fumadocs-mdx`
+
+  `@fuma-docs/openapi` -> `fumadocs-openapi`
+
+  `create-next-docs-app` -> `create-fumadocs-app`
+
+### Minor Changes
+
+- 1a346a1: Add `remark-image` plugin that converts relative image urls into static image imports (Inspired by Nextra)
+
 ## 7.1.2
 
 ## 7.1.1

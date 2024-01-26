@@ -1,5 +1,45 @@
 # next-docs-mdx
 
+## 8.0.0
+
+### Major Changes
+
+- 1a346a1: **Enable `remark-image` plugin by default**
+
+  You can add image embeds easily. They will be converted to static image imports.
+
+  ```mdx
+  ![banner](/image.png)
+  ```
+
+  Become:
+
+  ```mdx
+  import img_banner from '../../public/image.png';
+
+  <img alt="banner" src={img_banner} />
+  ```
+
+- 2b11c20: **Rename to Fumadocs**
+
+  `next-docs-zeta` -> `fumadocs-core`
+
+  `next-docs-ui` -> `fumadocs-ui`
+
+  `next-docs-mdx` -> `fumadocs-mdx`
+
+  `@fuma-docs/openapi` -> `fumadocs-openapi`
+
+  `create-next-docs-app` -> `create-fumadocs-app`
+
+### Patch Changes
+
+- Updated dependencies [2ea9437]
+- Updated dependencies [cdff313]
+- Updated dependencies [1a346a1]
+- Updated dependencies [2b11c20]
+  - fumadocs-core@8.0.0
+
 ## 7.1.2
 
 ### Patch Changes
