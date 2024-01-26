@@ -1,22 +1,21 @@
 ---
 title: Quick Start
-description: Getting Started with Next Docs UI
+description: Getting Started with Fumadocs
 icon: Album
 ---
 
-Next Docs UI is the Next.js framework for building documentation website. Built
-on the top of Next.js, Radix UI and Next Docs Zeta.
+Fumadocs UI is the built-in user interface integration for Fumadocs, built on the top of Radix UI.
 
 ## Automatic Installation
 
-Create a new app with `create-next-docs-app`.
+Create a new app with `create-fumadocs-app`.
 
 ```bash
-npx create-next-docs-app
+npx create-fumadocs-app
 # or
-pnpm create next-docs-app
+pnpm create fumadocs-app
 # or
-yarn create next-docs-app
+yarn create fumadocs-app
 ```
 
 ## Manual Installation
@@ -24,18 +23,18 @@ yarn create next-docs-app
 Create a new Next.js application with `create-next-app`, and install required packages.
 
 ```package-install
-next-docs-ui next-docs-zeta
+fumadocs-ui fumadocs-core
 ```
 
 ### Configuration
 
-Next Docs UI is unopinionated and doesn't provide content management features. You can choose a source
-you prefer, such as [Contentlayer](https://contentlayer.dev) and `next-docs-mdx`.
+Fumadocs UI is unopinionated and doesn't include content management features by default.
+You can choose a source you prefer, such as Contentlayer and Fumadocs MDX.
 
-This is a list of sources supported by Next Docs:
+There is a list of supported sources:
 
-- [Next Docs MDX](/docs/mdx)
-- [Contentlayer](/docs/headless/contentlayer)
+- [Setup Fumadocs MDX](/docs/mdx)
+- [Setup Contentlayer](/docs/headless/contentlayer)
 
 You have to configure the library correctly following their setup guide before continuing.
 
@@ -44,7 +43,7 @@ You have to configure the library correctly following their setup guide before c
 You can import the pre-built stylesheet in the root layout.
 
 ```ts
-import 'next-docs-ui/style.css';
+import 'fumadocs-ui/style.css';
 ```
 
 For Tailwind CSS projects, you may use [the official plugin](/docs/ui/theme) instead.
@@ -55,8 +54,8 @@ For Tailwind CSS projects, you may use [the official plugin](/docs/ui/theme) ins
 
 Wrap the entire application inside [Root Provider](/docs/ui/blocks/root-provider).
 
-```tsx {8}
-import { RootProvider } from 'next-docs-ui/provider';
+```tsx
+import { RootProvider } from 'fumadocs-ui/provider';
 import type { ReactNode } from 'react';
 
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -75,7 +74,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 Create a new catch-all route for our docs, and give it a proper layout.
 
 ```tsx title="app/docs/[[...slug]]/layout.tsx"
-import { DocsLayout } from 'next-docs-ui/layout';
+import { DocsLayout } from 'fumadocs-ui/layout';
 import type { ReactNode } from 'react';
 
 export default function RootDocsLayout({ children }: { children: ReactNode }) {
@@ -96,10 +95,10 @@ For the `page.tsx`, it may vary depending on your source. You should manually co
 Make sure to wrap your content in the [Page](/docs/ui/blocks/page) component, this will also configure typography styles.
 
 <Accordions>
-<Accordion title="Example with Next Docs MDX">
+<Accordion title="Example with Fumadocs MDX">
 
 ```tsx title="app/docs/[[...slug]]/page.tsx"
-|reference:../../examples/simple-mdx/app/docs/[[...slug]]/page.tsx|
+|reference:../../examples/next-mdx/app/docs/[[...slug]]/page.tsx|
 ```
 
 </Accordion>
@@ -110,10 +109,10 @@ Make sure to wrap your content in the [Page](/docs/ui/blocks/page) component, th
 By default, it uses the built-in document search based on Flexsearch. [Learn to configure Document Search](/docs/headless/search/flexsearch) for your data source.
 
 <Accordions>
-<Accordion title="Example with Next Docs MDX">
+<Accordion title="Example with Fumadocs MDX">
 
 ```tsx title="app/api/search/route.ts"
-|reference:../../examples/simple-mdx/app/api/search/route.ts|
+|reference:../../examples/next-mdx/app/api/search/route.ts|
 ```
 
 </Accordion>
@@ -140,6 +139,18 @@ npm run dev
 ### FAQ
 
 <Accordions>
+<Accordion title="Why Fumadocs UI?">
+
+Fumadocs UI provides many built-in components, and is more flexible compared to
+other existing frameworks.
+
+And most importantly, it is compatible with Next.js App Router which results in
+a faster page load speed with ~120kb initial Javascript load. You can easily use
+Fumadocs in an existing Next.js project, without refactoring anything.
+
+Feel free to open the demo in CodeSandbox and see if it suits you.
+
+</Accordion>
 <Accordion id='collapsible-fix-error' title="How to fix 'supports-color' error?">
 
 If you got this error:
@@ -151,23 +162,11 @@ Module not found: Can't resolve 'supports-color' in '.../node_modules/debug/src'
 Try installing `supports-color@8.1.1`.
 
 </Accordion>
-<Accordion title="Why Next Docs UI?">
-
-Next Docs UI provides many built-in components, and is more flexible compared to
-other existing frameworks.
-
-And most importantly, it is compatible with Next.js App Router which results in
-a faster page load speed with ~120kb initial Javascript load. You can easily use
-Next Docs in an existing Next.js project, without refactoring anything.
-
-Feel free to open the demo in CodeSandbox and see if it suits you.
-
-</Accordion>
 </Accordions>
 
 ### Demo
 
-Open in [CodeSandbox](https://githubbox.com/fuma-nama/next-docs-ui-template).
+Open in [CodeSandbox](https://githubbox.com/fuma-nama/fumadocs-ui-template).
 
 ## Learn More
 
@@ -185,7 +184,7 @@ Open in [CodeSandbox](https://githubbox.com/fuma-nama/next-docs-ui-template).
   <Card
     href="/docs/ui/theme"
     title="Theming"
-    description="Add themes to Next Docs UI"
+    description="Add themes to Fumadocs UI"
   />
   <Card
     href="/docs/ui/components/codeblock"

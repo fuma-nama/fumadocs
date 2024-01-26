@@ -1,12 +1,12 @@
 {
-  "name": "next-docs-mdx",
-  "version": "7.1.1",
-  "description": "The library for using native Next.js MDX features in Next Docs",
+  "name": "fumadocs-mdx",
+  "version": "8.0.0",
+  "description": "The built-in source for Fumadocs",
   "keywords": [
     "NextJs",
     "Docs"
   ],
-  "homepage": "https://next-docs-zeta.vercel.app",
+  "homepage": "https://fumadocs.vercel.app",
   "repository": "github:fuma-nama/next-docs",
   "license": "MIT",
   "author": "Fuma Nama",
@@ -48,8 +48,8 @@
     "cross-spawn": "^7.0.3",
     "estree-util-value-to-estree": "^3.0.1",
     "fast-glob": "^3.3.1",
+    "fumadocs-core": "workspace:*",
     "gray-matter": "^4.0.3",
-    "next-docs-zeta": "workspace:*",
     "zod": "^3.22.4"
   },
   "devDependencies": {
@@ -58,7 +58,7 @@
     "@types/mdx": "^2.0.8",
     "@types/react": "18.2.0",
     "eslint-config-custom": "workspace:*",
-    "next": "14.0.4",
+    "next": "14.1.0",
     "tsconfig": "workspace:*",
     "unified": "^11.0.4",
     "webpack": "^5.89.0"

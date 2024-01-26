@@ -6,14 +6,12 @@ preview: roll-button
 
 A button that scrolls to the top.
 
-> It is an optional component which won't be loaded by default.
-
 ## Usage
 
 Add this component to your page.
 
 ```mdx title="app/docs/[[...slug]]/page.tsx"
-import { RollButton } from 'next-docs-ui/components/roll-button';
+import { RollButton } from 'fumadocs-ui/components/roll-button';
 
 <DocsPage toc={toc}>
   <RollButton />
@@ -26,16 +24,7 @@ import { RollButton } from 'next-docs-ui/components/roll-button';
 
 ### Reference
 
-<TypeTable
-  type={{
-    percentage: {
-      description:
-        'The percentage of scroll position to display the roll button',
-      type: 'number',
-      default: 0.2,
-    },
-  }}
-/>
+<AutoTypeTable path="ui" name="RollButtonProps" />
 
 ## Example
 

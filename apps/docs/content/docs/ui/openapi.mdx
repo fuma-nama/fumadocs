@@ -8,14 +8,14 @@ description: Generating docs for OpenAPI schema
 Install the required packages.
 
 ```package-install
-@fuma-docs/openapi
+fumadocs-openapi
 ```
 
 Create configuration file:
 
 ```js title="openapi.config.js"
 /**
- * @type {import("@fuma-docs/openapi").Config}
+ * @type {import("fumadocs-openapi").Config}
  */
 module.exports = {
   input: ['./petstore.yaml'],
@@ -30,7 +30,7 @@ module.exports = {
 Generate docs with a command:
 
 ```bash
-pnpm fuma-docs-openapi
+pnpm fumadocs-openapi
 ```
 
 ### Demo

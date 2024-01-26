@@ -1,10 +1,10 @@
 ---
 title: Internationalization
-description: Learn more implement internationalization in Next Docs UI
+description: Learn more implement internationalization in Fumadocs UI
 icon: Globe
 ---
 
-Next Docs UI supports I18n routing based on **Zeta**. Please refer to this
+Please refer to this
 [guide](/docs/headless/internationalization) to setup basic
 configurations and learn how to structure the documents.
 
@@ -16,54 +16,31 @@ started.
 A `I18nProvider` is needed for internationalization features.
 
 Put your pages and layouts under `/app/[lang]`, where the 'lang' parameter is at the second segment.
+Then, wrap the root provider inside of your i18n provider.
 
 ```tsx
-'use client';
+import { RootProvider } from 'fumadocs-ui/provider';
+import { I18nProvider } from 'fumadocs-ui/i18n';
+import type { ReactNode } from 'react';
 
-import { defaultLanguage } from '@/i18n';
-import { I18nProvider } from 'next-docs-ui/i18n';
-import { useParams, usePathname, useRouter } from 'next/navigation';
-import { ReactNode, useCallback } from 'react';
-
-export function ClientI18nProvider({ children }: { children: ReactNode }) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const { lang } = useParams() as { lang?: string };
-  const onChange = useCallback(
-    (v: string) => {
-      const segments = pathname.split('/');
-
-      segments[1] = v; // update parameter
-
-      router.push(segments.join('/'));
-    },
-    [router, pathname],
-  );
-
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <I18nProvider value={{ locale: lang ?? defaultLanguage, onChange }}>
-      {children}
+    <I18nProvider>
+      <RootProvider>{children}</RootProvider>
     </I18nProvider>
   );
 }
 ```
 
-Then, wrap the root provider inside of your i18n provider.
-
-```tsx
-<ClientI18nProvider>
-  <RootProvider>...</RootProvider>
-</ClientI18nProvider>
-```
-
 ### Adding Translations
 
-We won't translate any content by default, you have to pass it to the Context.
+We only provide english translation by default, you have to pass your translations to the provider.
 
 ```tsx
 <I18nProvider
-  value={{
-    text: {
+  translations={{
+    cn: {
+      name: 'Chinese', // required
       search: 'Translated Content',
     },
   }}
@@ -73,57 +50,12 @@ We won't translate any content by default, you have to pass it to the Context.
 ## Add Language Switch
 
 To allow users changing their language, you can add a `<LanguageSelect />`
-component to the sidebar same as following:
+component to your UI, for example, as sidebar footer.
 
 ```tsx title="[lang]/docs/layout.tsx"
-import { pageTree } from '@/source';
-import { LanguageSelect } from 'next-docs-ui/i18n';
-import { DocsLayout } from 'next-docs-ui/layout';
-import { ReactNode } from 'react';
+import { LanguageSelect } from 'fumadocs-ui/i18n';
 
-export default function Layout({
-  params,
-  children,
-}: {
-  params: { lang: string };
-  children: ReactNode;
-}) {
-  return (
-    <DocsLayout
-      tree={pageTree[params.lang] ?? []}
-      navTitle="My App"
-      sidebarFooter={
-        <LanguageSelect
-          languages={[
-            {
-              name: 'English',
-              locale: 'en',
-            },
-            {
-              name: 'Chinese',
-              locale: 'cn',
-            },
-          ]}
-        />
-      }
-    >
-      {children}
-    </DocsLayout>
-  );
-}
-```
-
-## Static Generation
-
-Generate parameters for every language and page.
-
-```tsx
-export async function generateStaticParams() {
-  return languages.flatMap((lang) =>
-    getPages(lang)!.map((page) => ({
-      slug: page.slug,
-      lang,
-    })),
-  );
+export function DocsLayout({ children }: { children: ReactNode }) {
+  return <LanguageSelect />;
 }
 ```

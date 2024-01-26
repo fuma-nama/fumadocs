@@ -4,8 +4,6 @@ description: Allow zoom-in images in your documentation
 preview: zoom-image
 ---
 
-> it is an optional component which won't be loaded by default.
-
 ## Usage
 
 Add it to your MDX components.
@@ -13,7 +11,7 @@ Add it to your MDX components.
 > A default `sizes` property will be defined if not specified
 
 ```tsx
-import { ImageZoom } from 'next-docs-ui/components/image-zoom';
+import { ImageZoom } from 'fumadocs-ui/components/image-zoom';
 
 const components = {
   img: (props) => <ImageZoom {...props} />,

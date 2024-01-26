@@ -1,22 +1,22 @@
 ---
 title: Getting Started
-description: Learn how to use Next Docs MDX in your documentation
+description: Learn how to use Fumadocs MDX in your documentation
 ---
 
 ## Introduction
 
-Next Docs MDX is a Next.js plugin that enhances the experience of the official
+`fumadocs-mdx` is a Next.js plugin that enhances the experience of the official
 `next/mdx` package. It parses frontmatter and is bundled with several MDX
 plugins for building a good documentation site.
 
-> This package must be used with `next-docs-zeta`
+> This package must be used with Fumadocs
 
 ## Usage
 
 ### Install Dependencies
 
 ```package-install
-next-docs-mdx @types/mdx
+fumadocs-mdx @types/mdx
 ```
 
 ### Configuration
@@ -24,7 +24,7 @@ next-docs-mdx @types/mdx
 Add this to your `next.config.mjs` file:
 
 ```js
-import createMDX from 'next-docs-mdx/config';
+import createMDX from 'fumadocs-mdx/config';
 
 const withMDX = createMDX();
 
@@ -48,8 +48,8 @@ Create `mdx-components.tsx` in your root directory.
 
 ```tsx
 import type { MDXComponents } from 'mdx/types';
-// Assume you're using Next Docs UI
-import defaultComponents from 'next-docs-ui/mdx/default';
+// Assume you're using Fumadocs UI
+import defaultComponents from 'fumadocs-ui/mdx';
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
@@ -61,15 +61,15 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
 
 ### Resolve Files
 
-Next Docs MDX automatically generates a `.map.ts` file once you start the dev server or start building the app.
+It automatically generates a `.map.ts` file once you start the dev server or start building the app.
 
 The raw data of pages is stored in the `map` property from your `.map.ts` file. To Integrate with [Source API](/docs/headless/source-api), create a `source.ts` file, and define the source with `createMDXSource` which returns a
 [Page Tree](/docs/headless/page-tree) and additional utilities.
 
 ```ts title="source.ts"
 import { map } from '@/.map';
-import { createMDXSource } from 'next-docs-mdx';
-import { loader } from 'next-docs-zeta/source';
+import { createMDXSource } from 'fumadocs-mdx';
+import { loader } from 'fumadocs-core/source';
 
 export const { getPage, getPages, pageTree } = loader({
   baseUrl: '/docs',

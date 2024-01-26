@@ -7,6 +7,9 @@ type CalloutProps = Omit<
   'title' | 'type' | 'icon'
 > & {
   title?: ReactNode;
+  /**
+   * @defaultValue info
+   */
   type?: 'info' | 'warn' | 'error';
   icon?: ReactNode;
 };

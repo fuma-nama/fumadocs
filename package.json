@@ -32,6 +32,7 @@
   },
   "pnpm": {
     "overrides": {
+      "@opentelemetry/api": "^1.4.1",
       "remark-rehype": "^11.0.0",
       "@types/mdast": "^4.0.3",
       "remark-parse": "^11.0.0",
@@ -40,7 +41,6 @@
     },
     "peerDependencyRules": {
       "ignoreMissing": [
-        "@opentelemetry/api",
         "esbuild",
         "next"
       ]

@@ -14,9 +14,9 @@ export interface GenerateOptions {
   tag?: string;
 
   /**
-   * The import path of your API components, it must exports all components in `next-docs-ui/components/api`
+   * The import path of your API components, it must exports all components in `fumadocs-ui/components/api`
    *
-   * @defaultValue `next-docs-ui/components/api`
+   * @defaultValue `fumadocs-ui/components/api`
    */
   componentsImportPath?: string;
 
@@ -106,7 +106,7 @@ function render(
   content: string,
   {
     render: fn,
-    componentsImportPath = 'next-docs-ui/components/api',
+    componentsImportPath = 'fumadocs-ui/components/api',
   }: GenerateOptions,
 ): string {
   const result = fn?.(title, description, content) ?? {};
@@ -124,8 +124,8 @@ function render(
         .join('\n'),
     imports: result.imports ?? [
       `import { Root, API, APIInfo, APIExample, Property } from '${componentsImportPath}'`,
-      `import { Tabs, Tab } from 'next-docs-ui/components/tabs'`,
-      `import { Accordion, Accordions } from 'next-docs-ui/components/accordion';`,
+      `import { Tabs, Tab } from 'fumadocs-ui/components/tabs'`,
+      `import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';`,
     ],
     content: result.content ?? content,
   };

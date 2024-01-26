@@ -15,7 +15,7 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        'fixed inset-x-0 z-50 m-auto mt-[10vh] w-[95vw] max-w-2xl gap-4 rounded-lg border bg-popover p-6 text-popover-foreground shadow-lg data-[state=closed]:animate-dialog-out data-[state=open]:animate-dialog-in',
+        'fixed left-[50%] top-[10vh] z-50 w-[98vw] max-w-[640px] origin-left translate-x-[-50%] rounded-lg border bg-popover p-6 text-popover-foreground shadow-lg data-[state=closed]:animate-dialog-out data-[state=open]:animate-dialog-in',
         className,
       )}
       {...props}

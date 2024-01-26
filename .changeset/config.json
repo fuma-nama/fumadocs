@@ -2,13 +2,11 @@
   "$schema": "https://unpkg.com/@changesets/config@2.3.0/schema.json",
   "changelog": "@changesets/cli/changelog",
   "commit": false,
-  "fixed": [
-    ["next-docs-zeta", "next-docs-ui", "next-docs-mdx", "create-next-docs-app"]
-  ],
+  "fixed": [["fumadocs-core", "fumadocs-ui", "create-fumadocs-app"]],
   "linked": [],
   "access": "restricted",
   "baseBranch": "dev",
   "updateInternalDependencies": "patch",
   "privatePackages": { "version": false },
-  "ignore": ["simple-app", "docs", "advanced-app", "simple-app-mdx"]
+  "ignore": ["docs", "example-*"]
 }

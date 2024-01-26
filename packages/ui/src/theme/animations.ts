@@ -21,18 +21,12 @@ export const animations = {
       to: { height: '0', opacity: '0.5' },
     },
     'dialog-in': {
-      from: { transform: 'scale(0.95) translateY(-4rem)', opacity: '0' },
-      to: { transform: 'scale(1) translateY(0)' },
-    },
-    'drawer-in': {
-      from: { transform: 'translateY(100%)' },
-    },
-    'drawer-out': {
-      to: { transform: 'translateY(100%)' },
+      from: { transform: 'scale(0.95) translate(-50%, 0)', opacity: '0' },
+      to: { transform: 'scale(1) translate(-50%, 0)' },
     },
     'dialog-out': {
-      from: { transform: 'scale(1) translateY(0)' },
-      to: { transform: 'scale(0.95) translateY(-4rem)', opacity: '0' },
+      from: { transform: 'scale(1) translate(-50%, 0)' },
+      to: { transform: 'scale(0.95) translateY(-50%, 0)', opacity: '0' },
     },
     'popover-in': {
       from: { opacity: '0', transform: 'scale(0.95) translateY(-10px)' },
@@ -55,8 +49,6 @@ export const animations = {
     'fade-out': 'fade-out 300ms ease',
     'dialog-in': 'dialog-in 200ms cubic-bezier(0.32, 0.72, 0, 1)',
     'dialog-out': 'dialog-out 300ms cubic-bezier(0.32, 0.72, 0, 1)',
-    'drawer-in': 'drawer-in 0.5s cubic-bezier(0.32, 0.72, 0, 1)',
-    'drawer-out': 'drawer-out 0.5s cubic-bezier(0.32, 0.72, 0, 1)',
     'popover-in': 'popover-in 150ms ease',
     'popover-out': 'popover-out 150ms ease',
     'collapsible-down': 'collapsible-down 150ms ease-out',

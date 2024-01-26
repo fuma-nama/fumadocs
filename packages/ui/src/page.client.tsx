@@ -12,7 +12,7 @@ export * from '@/components/toc';
 export * from '@/components/breadcrumb';
 
 export function LastUpdate(props: { date: Date }): JSX.Element {
-  const lastUpdate = useI18n().text.lastUpdate ?? 'Last updated on';
+  const { text } = useI18n();
   const [date, setDate] = useState('');
 
   useEffect(() => {
@@ -22,12 +22,15 @@ export function LastUpdate(props: { date: Date }): JSX.Element {
 
   return (
     <p className="mt-8 text-xs text-muted-foreground">
-      {lastUpdate} {date}
+      {text.lastUpdate} {date}
     </p>
   );
 }
 
 export interface FooterProps {
+  /**
+   * Items including information for the next and previous page
+   */
   items?: {
     previous?: { name: string; url: string };
     next?: { name: string; url: string };

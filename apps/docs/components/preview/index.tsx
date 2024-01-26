@@ -1,15 +1,15 @@
 import { HomeIcon } from 'lucide-react';
-import { Accordion, Accordions } from 'next-docs-ui/components/accordion';
-import { Callout } from 'next-docs-ui/components/callout';
-import { File, Files } from 'next-docs-ui/components/files';
-import { ImageZoom } from 'next-docs-ui/components/image-zoom';
-import { InlineTOC } from 'next-docs-ui/components/inline-toc';
-import { RollButton } from 'next-docs-ui/components/roll-button';
-import { Step, Steps } from 'next-docs-ui/components/steps';
-import { Tab, Tabs } from 'next-docs-ui/components/tabs';
-import { TypeTable } from 'next-docs-ui/components/type-table';
-import { Card } from 'next-docs-ui/mdx/card';
-import { Heading } from 'next-docs-ui/mdx/heading';
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { File, Files } from 'fumadocs-ui/components/files';
+import { ImageZoom } from 'fumadocs-ui/components/image-zoom';
+import { InlineTOC } from 'fumadocs-ui/components/inline-toc';
+import { RollButton } from 'fumadocs-ui/components/roll-button';
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Card } from 'fumadocs-ui/components/card';
+import { Heading } from 'fumadocs-ui/components/heading';
 import type { ReactNode } from 'react';
 import BannerImage from '@/public/banner.png';
 import { Wrapper } from './wrapper';
@@ -95,7 +95,7 @@ export default {
         collapsible
         className="rounded-xl bg-background px-4"
       >
-        <Accordion id="what-is-next-docs" title="What is Next Docs?">
+        <Accordion id="what-is-next-docs" title="What is Fumadocs?">
           A framework for building documentations
         </Accordion>
         <Accordion id="ux" title="What do we love?">

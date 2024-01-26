@@ -9,8 +9,8 @@ import { Provider } from './provider';
 
 export const metadata = createMetadata({
   title: {
-    template: '%s | Next Docs',
-    default: 'Next Docs',
+    template: '%s | Fumadocs',
+    default: 'Fumadocs',
   },
   description: 'The Next.js framework for building documentation sites',
   metadataBase: baseUrl,
@@ -49,7 +49,7 @@ function Footer(): JSX.Element {
     <footer className="mt-auto border-t bg-card py-12 text-secondary-foreground">
       <div className="container flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="mb-1 text-sm font-semibold">NEXT DOCS</p>
+          <p className="mb-1 text-sm font-semibold">Fumadocs</p>
           <p className="text-xs">
             Built with ❤️ by{' '}
             <a

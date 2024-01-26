@@ -1,41 +1,45 @@
-import { type TableOfContents, type TOCItemType } from 'next-docs-zeta/server';
+import { type TableOfContents, type TOCItemType } from 'fumadocs-core/server';
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import { replaceOrDefault } from './utils/shared';
 import { cn } from './utils/cn';
 import type { FooterProps } from './page.client';
 
-// We can keep the "use client" directives with dynamic imports
-// Next.js bundler should handle this automatically
-const { TOCItems, Breadcrumb, LastUpdate, Footer } = await import(
-  './page.client'
-);
+declare const {
+  TOCItems,
+  Breadcrumb,
+  Footer,
+  LastUpdate,
+}: typeof import('./page.client');
+
+type TableOfContentOptions = Omit<TOCProps, 'items'> & {
+  enabled: boolean;
+  component: ReactNode;
+};
+
+interface BreadcrumbOptions {
+  enabled: boolean;
+  component: ReactNode;
+}
+
+interface FooterOptions extends FooterProps {
+  enabled: boolean;
+  component: ReactNode;
+}
 
 export interface DocsPageProps {
   toc?: TableOfContents;
 
-  tableOfContent?: Partial<
-    Omit<TOCProps, 'items'> & {
-      enabled: boolean;
-      component: ReactNode;
-    }
-  >;
+  tableOfContent?: Partial<TableOfContentOptions>;
 
   /**
    * Replace or disable breadcrumb
    */
-  breadcrumb?: Partial<{
-    enabled: boolean;
-    component: ReactNode;
-  }>;
+  breadcrumb?: Partial<BreadcrumbOptions>;
 
   /**
    * Footer navigation, you can disable it by passing `false`
    */
-  footer?: Partial<{
-    enabled: boolean;
-    component: ReactNode;
-    items: NonNullable<FooterProps['items']>;
-  }>;
+  footer?: Partial<FooterOptions>;
 
   lastUpdate?: Date | string | number;
 

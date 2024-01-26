@@ -48,7 +48,7 @@ export const typography = {
     ul: {
       paddingLeft: '0.7rem',
     },
-    // Disabled styles, handled by Next Docs
+    // Disabled styles, handled by Fumadocs UI
     'pre code': false,
     'pre code::after': false,
     'pre code::before': false,

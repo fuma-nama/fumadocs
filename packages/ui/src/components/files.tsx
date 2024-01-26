@@ -11,7 +11,7 @@ import {
 } from './ui/collapsible';
 
 const item = cva(
-  'flex flex-row items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors hover:bg-accent hover:text-accent-foreground [&_svg]:size-4',
+  'flex flex-row items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground [&_svg]:size-4',
 );
 
 export function Files({
@@ -31,7 +31,17 @@ export function Files({
 interface FileProps {
   title: string;
   icon?: ReactNode;
+
+  /**
+   * Open folder by default
+   *
+   * @defaultValue false
+   */
   defaultOpen?: boolean;
+
+  /**
+   * hildren files of the folder, considered as file if empty
+   */
   children?: ReactNode;
 }
 

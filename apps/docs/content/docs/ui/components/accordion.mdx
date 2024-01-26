@@ -4,8 +4,6 @@ description: Add Accordions to your documentation
 preview: accordion
 ---
 
-> it is an optional component which won't be loaded by default.
-
 ## Usage
 
 Wrap accordions in the container, a `type` property is required by default.
@@ -14,7 +12,7 @@ Based on
 [Radix UI Accordion](https://www.radix-ui.com/primitives/docs/components/accordion).
 
 ```mdx
-import { Accordion, Accordions } from 'next-docs-ui/components/accordion';
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 
 <Accordions>
 <Accordion title="My Title">
@@ -27,23 +25,11 @@ My Content
 
 ### Accordions
 
-<TypeTable
-  type={{
-    type: { type: 'single | multiple', default: 'single' },
-    defaultValue: { type: 'string' },
-    collapsible: { type: 'boolean', default: 'true' },
-  }}
-/>
+<AutoTypeTable path="ui" name="AccordionsProps" />
 
 ### Accordion
 
-<TypeTable
-  type={{
-    title: { type: 'string' },
-    id: { type: 'string' },
-    disabled: { type: 'boolean', default: 'false' },
-  }}
-/>
+<AutoTypeTable path="ui" name="AccordionProps" />
 
 ## Linking to Accordion
 

@@ -9,9 +9,9 @@ import { createMetadata } from '@/utils/metadata';
 
 export const metadata = createMetadata({
   title: 'Showcase',
-  description: 'Some cool websites using Next Docs',
+  description: 'Some cool websites using Fumadocs',
   openGraph: {
-    url: 'https://next-docs-zeta.vercel.app/showcase',
+    url: 'https://fumadocs.vercel.app/showcase',
   },
 });
 
@@ -77,10 +77,10 @@ export default function Showcase(): JSX.Element {
         <h1 className="mb-4 text-3xl font-semibold leading-snug md:text-5xl md:leading-snug">
           Cool Websites
           <br />
-          Made with Next Docs
+          Made with Fumadocs
         </h1>
         <p className="text-muted-foreground">
-          Nice open-source projects powered by Next Docs
+          Nice open-source projects powered by Fumadocs
         </p>
         <div className="mt-4">
           <a

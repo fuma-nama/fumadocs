@@ -1,20 +1,24 @@
 import type { MDXComponents } from 'mdx/types';
-import { Accordion, Accordions } from 'next-docs-ui/components/accordion';
-import { Callout } from 'next-docs-ui/components/callout';
-import { Tab, Tabs } from 'next-docs-ui/components/tabs';
-import { TypeTable } from 'next-docs-ui/components/type-table';
-import defaultComponents from 'next-docs-ui/mdx/default';
-import { Pre } from 'next-docs-ui/mdx/pre';
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import defaultComponents from 'fumadocs-ui/mdx';
+import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
 import type { ReactNode } from 'react';
 import { Wrapper } from '@/components/preview/wrapper';
+import { AutoTypeTable } from './components/auto-type-table';
+import { cn } from './utils/cn';
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
     ...defaultComponents,
-    pre: (props) => (
-      <Pre {...props} ref={undefined} pre={{ className: 'max-h-[400px]' }} />
+    pre: ({ ref: _ref, title, className, ...props }) => (
+      <CodeBlock title={title}>
+        <Pre className={cn('max-h-[400px]', className)} {...props} />
+      </CodeBlock>
     ),
-    Image: defaultComponents.img,
+    AutoTypeTable,
     Tabs,
     Tab,
     Callout,

@@ -25,9 +25,11 @@ export default function DocsPage(): JSX.Element {
           }}
         />
       </div>
-      <h1 className="mb-4 text-4xl font-semibold md:text-5xl">Choose one.</h1>
+      <h1 className="mb-4 text-4xl font-semibold md:text-5xl">
+        Getting Started
+      </h1>
       <p className="text-muted-foreground">
-        Different packages for different use cases.
+        You can start with Fumadocs UI, or just use the core library.
       </p>
       <div className="mt-4 grid grid-cols-2 gap-4">
         <a
@@ -56,7 +58,7 @@ export default function DocsPage(): JSX.Element {
           <div className={cn(cardIconVariants())}>
             <LayoutIcon className="h-full w-full" />
           </div>
-          <h2 className="mb-2 text-lg font-semibold">Next Docs UI</h2>
+          <h2 className="mb-2 text-lg font-semibold">Fumadocs UI</h2>
           <p className="text-sm text-muted-foreground">
             The full-powered documentation framework with an excellent UI.
           </p>
@@ -65,9 +67,9 @@ export default function DocsPage(): JSX.Element {
           <div className={cn(cardIconVariants())}>
             <LibraryIcon className="h-full w-full" />
           </div>
-          <h2 className="mb-2 text-lg font-semibold">Next Docs Zeta</h2>
+          <h2 className="mb-2 text-lg font-semibold">Fumadocs Core</h2>
           <p className="text-sm text-muted-foreground">
-            Headless library with an useful set of utilities.
+            The core library of Fumadocs.
           </p>
         </Link>
       </div>

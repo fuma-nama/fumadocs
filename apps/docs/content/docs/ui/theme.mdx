@@ -1,6 +1,6 @@
 ---
 title: Theming
-description: Add Theme to Next Docs UI
+description: Add Theme to Fumadocs UI
 icon: Palette
 ---
 
@@ -12,7 +12,7 @@ import { blueTheme } from '@/components/themes.js';
 You can import the pre-built stylesheet.
 
 ```tsx
-import 'next-docs-ui/style.css';
+import 'fumadocs-ui/style.css';
 ```
 
 > Notice that the stylesheet performs preflight (or normalization)
@@ -20,20 +20,20 @@ import 'next-docs-ui/style.css';
 For Tailwind CSS projects, please use the built-in Tailwind CSS plugin instead.
 
 ```js title="tailwind.config.js"
-const { createPreset } = require('next-docs-ui/tailwind-plugin');
+const { createPreset } = require('fumadocs-ui/tailwind-plugin');
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: 'class',
   presets: [createPreset()],
   content: [
-    './node_modules/next-docs-ui/dist/**/*.js',
+    './node_modules/fumadocs-ui/dist/**/*.js',
     ...
   ],
 };
 ```
 
-> Ensure all files inside `next-docs-ui` are included in the `content` property.
+> Ensure all files inside `fumadocs-ui` are included in the `content` property.
 
 ### Global Styles
 
@@ -113,14 +113,14 @@ The design system was inspired by [Shadcn UI](https://ui.shadcn.com), you can ea
 
 ## DocsUI Plugin
 
-Next Docs UI comes with the DocsUI Tailwind CSS plugin by default, it introduces new colors and extra utilities including `steps`.
+It comes with the DocsUI Tailwind CSS plugin by default, it introduces new colors and extra utilities including `steps`.
 
 ### Presets
 
 This plugin also provides several theme presets out-of-the-box, you can pick one you prefer rather than the default one.
 
-```js {8}
-const { createPreset } = require('next-docs-ui/tailwind-plugin');
+```js
+const { createPreset } = require('fumadocs-ui/tailwind-plugin');
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {

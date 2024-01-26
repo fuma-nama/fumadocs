@@ -1,6 +1,8 @@
 'use client';
 
 import type { SelectProps } from '@radix-ui/react-select';
+import { useCallback, type ReactNode } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import {
   Select,
   SelectContent,
@@ -8,30 +10,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { I18nProvider, useI18n, type Translations } from './contexts/i18n';
+import {
+  useI18n,
+  type Translations,
+  I18nContext,
+  type NamedTranslation,
+} from './contexts/i18n';
 
-export type LanguageSelectProps = Omit<
-  SelectProps,
-  'value' | 'onValueChange'
-> & {
-  languages: { name: string; locale: string }[];
-};
+export type LanguageSelectProps = Omit<SelectProps, 'value' | 'onValueChange'>;
 
-export function LanguageSelect({
-  languages,
-  ...props
-}: LanguageSelectProps): JSX.Element {
+export function LanguageSelect({ ...props }: LanguageSelectProps): JSX.Element {
   const context = useI18n();
+  if (!context.translations) throw new Error('Missing prop `translations`');
+
+  const languages = Object.entries(context.translations);
 
   return (
     <Select value={context.locale} onValueChange={context.onChange} {...props}>
       <SelectTrigger>
-        <SelectValue placeholder="Choose a language" />
+        <SelectValue placeholder={context.text.chooseLanguage} />
       </SelectTrigger>
       <SelectContent>
-        {languages.map((lang) => (
-          <SelectItem key={lang.locale} value={lang.locale}>
-            {lang.name}
+        {languages.map(([lang, { name }]) => (
+          <SelectItem key={lang} value={lang}>
+            {name}
           </SelectItem>
         ))}
       </SelectContent>
@@ -39,4 +41,56 @@ export function LanguageSelect({
   );
 }
 
-export { I18nProvider, type Translations };
+interface I18nProviderProps {
+  /**
+   * Force a locale
+   */
+  locale?: string;
+
+  /**
+   * Translations for each language
+   */
+  translations?: Record<string, NamedTranslation>;
+
+  children: ReactNode;
+}
+
+export function I18nProvider({
+  translations = {},
+  locale: forceLocale,
+  children,
+}: I18nProviderProps): JSX.Element {
+  const localeIndex = 1;
+  const router = useRouter();
+  const pathname = usePathname();
+  const context = useI18n();
+  const segments = pathname.split('/');
+
+  const locale = forceLocale ?? segments[localeIndex];
+  const onChange = useCallback(
+    (v: string) => {
+      segments[localeIndex] = v; // update parameter
+
+      router.push(segments.join('/'));
+    },
+    [segments, router],
+  );
+
+  return (
+    <I18nContext.Provider
+      value={{
+        locale,
+        translations,
+        text: {
+          ...context.text,
+          ...translations[locale],
+        },
+        onChange,
+      }}
+    >
+      {children}
+    </I18nContext.Provider>
+  );
+}
+
+export { type Translations };

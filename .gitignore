@@ -5,7 +5,6 @@ node_modules
 /.pnp
 .pnp.js
 
-# next-docs-mdx
 .map.ts
 
 # testing

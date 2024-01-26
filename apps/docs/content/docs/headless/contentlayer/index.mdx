@@ -1,18 +1,25 @@
 ---
 title: Contentlayer
-description: Learn how to use Contentlayer with Next Docs
+description: Learn how to use Contentlayer with Fumadocs
 ---
 
-Next Docs has native support for Contentlayer, and provides default
+We have native support for Contentlayer which provides the default
 configuration with required MDX plugins.
 
+It also adds extra functionalities to Contentlayer, making it more
+convenient to use and straightforward.
+
 ## Setup
+
+```package-install
+fumadocs-contentlayer
+```
 
 1. Edit your configuration.
 
 ```ts title="contentlayer.config.ts"
 import { makeSource } from 'contentlayer/source-files';
-import { defaultConfig } from 'next-docs-zeta/contentlayer/configuration';
+import { defaultConfig } from 'fumadocs-contentlayer/configuration';
 
 export default makeSource(defaultConfig);
 ```
@@ -25,8 +32,8 @@ export default makeSource(defaultConfig);
 
 ```ts
 import { allDocs, allMeta } from 'contentlayer/generated';
-import { createContentlayerSource } from 'next-docs-zeta/contentlayer';
-import { loader } from 'next-docs-zeta/source';
+import { createContentlayerSource } from 'fumadocs-contentlayer';
+import { loader } from 'fumadocs-core/source';
 
 export const docs = loader({
   baseUrl: '/docs',
@@ -46,11 +53,6 @@ All documents should be located in `/content` or `/content/docs`.
     href="/docs/headless/page-conventions"
   />
 </Cards>
-
-## Advanced
-
-Next Docs Zeta also adds extra functionalities to Contentlayer, making it more
-convenient to use and straightforward.
 
 ### Adding Icons
 

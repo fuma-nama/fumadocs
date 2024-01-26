@@ -1,14 +1,7 @@
-import type { PageTree } from 'next-docs-zeta/server';
+import type { PageTree } from 'fumadocs-core/server';
 import { usePathname } from 'next/navigation';
 import { createContext, useContext, type ReactNode, useMemo } from 'react';
 import { flattenTree, hasActive } from '@/utils/shared';
-
-export interface LinkItem {
-  url: string;
-  icon?: ReactNode;
-  text: string;
-  external?: boolean;
-}
 
 interface TreeContextType {
   tree: PageTree.Root;

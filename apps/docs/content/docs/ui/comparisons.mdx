@@ -1,40 +1,45 @@
 ---
 title: Comparisons
-description: How does Next Docs UI different from other existing frameworks
+description: How does Fumadocs different from other existing frameworks
 icon: GitCompareArrows
 ---
 
-How does Next Docs UI different from other existing frameworks? It is a
-frequently asked question and here's an answer.
+## Philosophy
 
-## Is it a Nextra Clone?
+The design of Fumadocs is a compound of backend
+library (core) and frontend library (ui), it accepts different sources and gives you a good
+looking, consistent UI.
 
-Someone asked me this question on Discord, it is a fact that it's highly
-inspired by Nextra. For example, the Routing Conventions. That is why
-`meta.json` also exists in Next Docs if you're using Contentlayer.
+Fumadocs, unlike the other frameworks, it expects you to write code and cooperate with other parts of your software.
+While most frameworks are configured with a configuration file, they are usually lack of flexibility when you attempted to complete something more advanced.
+You can't control how they render the page, neither the internal logic.
 
-However, Next Docs is not a clone of Nextra. While we both support a lot of
-advanced usages, Nextra is more opinionated but Next Docs isn't. It is built for
-App Router. As a result, It provides many server-side functions and you have to
-configure things manually compared by simply editing a configuration file.
+Fumadocs has no magic, it just give you the utilities and a good-looking user interface.
+You are still using the features of Next.js App Router.
+You are still configuring Static Site Generation same as a normal Next.js application.
+Therefore, there are nothing new for Next.js developers, you are using it naturally.
+You don't need any _hacky_ ways anymore, as they are now parts of your software.
 
-Next Docs UI works great if you want more control over everything, such as
+For instance, in this docs, all index pages are rendered dynamically.
+Feel free to take a look at the source code of this documentation.
+
+## Nextra
+
+Fumadocs is highly inspired by Nextra. For example, the Routing Conventions. That is why
+`meta.json` also exists in Fumadocs.
+
+**However, it is not a drop-in replacement for Nextra.**
+
+While we both support a lot of
+advanced usages, Nextra is more opinionated than Fumadocs. Fumadocs is accelerated by App Router. As a result, It provides many server-side functions and you have to
+configure things manually compared to simply editing a configuration file.
+
+Fumadocs works great if you want more control over everything, such as
 adding it to an existing codebase or implementing advanced routing.
 
-### The Core Model
+### Feature Table
 
-Next Docs also rely on other libraries, the model of Next Docs is a backend
-library + frontend framework, it accepts different sources and gives you a great
-looking, constant UI.
-
-The only reasion I build Next Docs is that I used to look for an alternative to
-Nextra that allows me to fully customise the UI. I came up with Next Docs Zeta,
-a headless ui library. Next Docs UI laterly released as an example of Next Docs
-Zeta, built on top of Zeta.
-
-### A Table
-
-| Feature             | Next Docs UI | Nextra            |
+| Feature             | Fumadocs     | Nextra            |
 | ------------------- | ------------ | ----------------- |
 | Static Generation   | Yes          | Yes               |
 | Cached              | Yes          | Yes               |
@@ -58,7 +63,7 @@ features via plugins and custom themes.
 
 ### Better DX
 
-Since Next Docs is built on the top of Next.js, you'll have to start Next.js dev
+Since Fumadocs is built on the top of Next.js, you'll have to start Next.js dev
 server in order to review changes. And boilerbate code is relatively more
 compared to Docusaurus. For a simple docs, Docusaurus might be a better choice
 if you don't need any Next.js specific functionality.
@@ -66,14 +71,14 @@ if you don't need any Next.js specific functionality.
 ### Plugins
 
 You can easily achieve many things that will take you a few hours to setup
-manually with plugins. Although the flexiblity of Next Docs is high, their
+manually with plugins. Although the flexiblity of Fumadocs is high, their
 eco-system is larger and maintained by many contributors.
 
-### When to use Next Docs?
+### When to use Fumadocs?
 
 For most of the web applications, vanilla React.js is no longer enough.
 Nowadays, we also wish to have a blog, a showcase page, a FAQ page, etc. With a
-fancy UI that's breathtaking, in these cases, Next Docs can help you build the
+fancy UI that's breathtaking, in these cases, Fumadocs can help you build the
 docs easier, with less boilerbate.
 
 ## We are working forward

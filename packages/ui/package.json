@@ -1,12 +1,12 @@
 {
-  "name": "next-docs-ui",
-  "version": "7.1.1",
+  "name": "fumadocs-ui",
+  "version": "8.0.0",
   "description": "The framework for building a documentation website in Next.js",
   "keywords": [
     "NextJs",
     "Docs"
   ],
-  "homepage": "https://next-docs-zeta.vercel.app",
+  "homepage": "https://fumadocs.vercel.app",
   "repository": "github:fuma-nama/next-docs",
   "license": "MIT",
   "author": "Fuma Nama",
@@ -20,10 +20,6 @@
     "./components/*": {
       "import": "./dist/components/*.js",
       "types": "./dist/components/*.d.mts"
-    },
-    "./mdx/*": {
-      "import": "./dist/mdx/*.js",
-      "types": "./dist/mdx/*.d.mts"
     },
     "./*": {
       "import": "./dist/*.js",
@@ -70,13 +66,12 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "cmdk": "^0.2.0",
+    "fumadocs-core": "workspace:*",
     "lucide-react": "^0.298.0",
-    "next-docs-zeta": "workspace:*",
     "next-themes": "^0.2.1",
     "react-medium-image-zoom": "^5.1.8",
     "tailwind-merge": "^2.0.0",
-    "tailwindcss": "^3.4.1",
-    "vaul": "^0.8.0"
+    "tailwindcss": "^3.4.1"
   },
   "devDependencies": {
     "@algolia/client-search": "^4.20.0",
@@ -85,7 +80,7 @@
     "@types/react-dom": "18.2.1",
     "algoliasearch": "^4.20.0",
     "eslint-config-custom": "workspace:*",
-    "next": "14.0.4",
+    "next": "14.1.0",
     "postcss": "8.4.33",
     "postcss-cli": "^11.0.0",
     "postcss-lightningcss": "^1.0.0",

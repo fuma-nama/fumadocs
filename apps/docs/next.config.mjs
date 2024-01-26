@@ -1,18 +1,19 @@
 import createBundleAnalyzer from '@next/bundle-analyzer';
-import createNextDocs from 'next-docs-mdx/config';
+import createNextDocs from 'fumadocs-mdx/config';
 import {
   remarkDynamicContent,
   remarkInstall,
-} from 'next-docs-zeta/mdx-plugins';
+  rehypeCodeDefaultOptions,
+} from 'fumadocs-core/mdx-plugins';
 import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
 
 const withAnalyzer = createBundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 });
+
 /** @type {import('next').NextConfig} */
 const config = {
-  pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
   reactStrictMode: true,
   eslint: {
     // Replaced by root workspace command
@@ -22,6 +23,29 @@ const config = {
 
 const withNextDocs = createNextDocs({
   mdxOptions: {
+    rehypeCodeOptions: {
+      transformers: [
+        ...rehypeCodeDefaultOptions.transformers,
+        {
+          name: 'shikiji:remove-escape',
+          code(element) {
+            element.children.forEach((line) => {
+              if (line.type !== 'element') return;
+
+              line.children.forEach((child) => {
+                if (child.type !== 'element') return;
+                const textNode = child.children[0];
+                if (!textNode || textNode.type !== 'text') return;
+
+                textNode.value = textNode.value.replace(/\[\\!code/g, '[!code');
+              });
+            });
+
+            return element;
+          },
+        },
+      ],
+    },
     lastModifiedTime: 'git',
     remarkPlugins: [
       remarkMath,

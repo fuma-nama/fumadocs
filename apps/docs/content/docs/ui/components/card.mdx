@@ -10,8 +10,8 @@ import { HomeIcon } from 'lucide-react';
 
 Add it to your MDX components.
 
-```mdx {5-6}
-import { Card, Cards } from 'next-docs-ui/mdx/card';
+```mdx
+import { Card, Cards } from 'fumadocs-ui/components/card';
 
 <MDX
   components={{
@@ -27,24 +27,9 @@ The container of cards.
 
 ### Card
 
-The component to redirect users.
+Based on `<Link />`.
 
-<TypeTable
-  type={{
-    title: {
-      type: 'string',
-    },
-    description: {
-      type: 'string',
-    },
-    icon: {
-      type: 'ReactNode',
-    },
-    href: {
-      type: 'string',
-    },
-  }}
-/>
+<AutoTypeTable path="ui" name="CardProps" />
 
 ## Example
 

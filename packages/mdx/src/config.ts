@@ -1,12 +1,14 @@
 import path from 'node:path';
 import type { NextConfig } from 'next';
 import {
-  rehypeNextDocs,
+  rehypeCode,
   remarkGfm,
   remarkStructure,
   remarkHeading,
-  type RehypeNextDocsOptions,
-} from 'next-docs-zeta/mdx-plugins';
+  type RehypeCodeOptions,
+  remarkImage,
+  type RemarkImageOptions,
+} from 'fumadocs-core/mdx-plugins';
 import type { PluggableList } from 'unified';
 import type { Configuration } from 'webpack';
 import { NextDocsWebpackPlugin } from './webpack-plugins/next-docs';
@@ -26,10 +28,8 @@ type MDXOptions = Omit<
    */
   valueToExport?: string[];
 
-  /**
-   * built-in `next-docs-zeta` rehype plugin options
-   */
-  rehypeNextDocsOptions?: RehypeNextDocsOptions;
+  remarkImageOptions?: RemarkImageOptions;
+  rehypeCodeOptions?: RehypeCodeOptions;
 };
 
 type ResolvePlugins = PluggableList | ((v: PluggableList) => PluggableList);
@@ -88,6 +88,7 @@ const createNextDocs =
       (v) => [
         remarkGfm,
         remarkHeading,
+        [remarkImage, mdxOptions.remarkImageOptions],
         ...v,
         remarkStructure,
         [remarkMdxExport, { values: valueToExport }],
@@ -96,7 +97,7 @@ const createNextDocs =
     );
 
     const rehypePlugins: PluggableList = pluginOption(
-      (v) => [[rehypeNextDocs, mdxOptions.rehypeNextDocsOptions], ...v],
+      (v) => [[rehypeCode, mdxOptions.rehypeCodeOptions], ...v],
       mdxOptions.rehypePlugins,
     );
 
@@ -123,7 +124,7 @@ const createNextDocs =
               use: [
                 options.defaultLoaders.babel,
                 {
-                  loader: 'next-docs-mdx/loader-mdx',
+                  loader: 'fumadocs-mdx/loader-mdx',
                   options: {
                     providerImportSource: 'next-mdx-import-source-file',
                     ...mdxOptions,
@@ -136,7 +137,7 @@ const createNextDocs =
             {
               test: _mapPath,
               use: {
-                loader: 'next-docs-mdx/loader',
+                loader: 'fumadocs-mdx/loader',
                 options: {
                   cwd,
                   rootContentPath,

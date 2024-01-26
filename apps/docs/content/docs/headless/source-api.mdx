@@ -11,8 +11,8 @@ The output strictly follows [Page Conventions](/docs/headless/page-conventions).
 
 ```ts
 import { map } from '@/.map';
-import { createMDXSource } from 'next-docs-mdx';
-import { loader } from 'next-docs-zeta/source';
+import { createMDXSource } from 'fumadocs-mdx';
+import { loader } from 'fumadocs-core/source';
 
 export const docs = loader({
   source: createMDXSource(map),
@@ -74,7 +74,7 @@ loader({
 Load the [icon](/docs/headless/page-conventions#icons) from the data of pages and meta files.
 
 ```ts
-import { loader } from 'next-docs-zeta/source';
+import { loader } from 'fumadocs-core/source';
 import { icons } from 'lucide-react';
 import { createElement } from 'react';
 

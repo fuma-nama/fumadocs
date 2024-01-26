@@ -1,41 +1,47 @@
 import { GithubIcon } from 'lucide-react';
-import type { PageTree } from 'next-docs-zeta/server';
+import type { PageTree } from 'fumadocs-core/server';
 import type { ReactNode, HTMLAttributes } from 'react';
-import type { SidebarProps } from '@/components/sidebar';
-import type { NavItemProps, NavLinkProps } from './nav';
+import type { NavProps } from './components/nav';
 import { replaceOrDefault } from './utils/shared';
 import { cn } from './utils/cn';
-import type { LinkItem } from './contexts/tree';
+import type { SidebarProps } from './components/sidebar';
 
-const { Nav, TreeContextProvider, Sidebar } = await import('./layout.client');
+declare const {
+  Nav,
+  TreeContextProvider,
+  Sidebar,
+}: typeof import('./layout.client');
+
+export interface LinkItem {
+  url: string;
+  icon?: ReactNode;
+  text: string;
+  external?: boolean;
+}
+
+interface NavOptions
+  extends Omit<NavProps, 'enableSidebar' | 'collapsibleSidebar' | 'items'> {
+  enabled: boolean;
+  component: ReactNode;
+
+  /**
+   * Github url displayed on the navbar
+   */
+  githubUrl: string;
+}
+
+interface SidebarOptions extends Omit<SidebarProps, 'items'> {
+  enabled: boolean;
+  component: ReactNode;
+  collapsible: boolean;
+}
 
 export interface BaseLayoutProps {
   links?: LinkItem[];
   /**
    * Replace or disable navbar
    */
-  nav?: Partial<{
-    enabled: boolean;
-    component: ReactNode;
-    title: ReactNode;
-    children: ReactNode;
-
-    /**
-     * Redirect url of title
-     * @defaultValue '/'
-     */
-    url: string;
-
-    /**
-     * @deprecated use `DocsLayoutProps.links` instead
-     */
-    items: NavItemProps[];
-
-    /**
-     * Github url displayed on the navbar
-     */
-    githubUrl: string;
-  }>;
+  nav?: Partial<NavOptions>;
 
   children: ReactNode;
 }
@@ -43,21 +49,7 @@ export interface BaseLayoutProps {
 export interface DocsLayoutProps extends BaseLayoutProps {
   tree: PageTree.Root;
 
-  sidebar?: Partial<
-    SidebarProps & {
-      enabled: boolean;
-      component: ReactNode;
-      collapsible: boolean;
-
-      /**
-       * Open folders by default if their level is lower or equal to a specific level
-       * (Starting from 1)
-       *
-       * @defaultValue 1
-       */
-      defaultOpenLevel: number;
-    }
-  >;
+  sidebar?: Partial<SidebarOptions>;
 
   containerProps?: HTMLAttributes<HTMLDivElement>;
 }
@@ -115,30 +107,33 @@ export function DocsLayout({
 function getNav(
   enableSidebar: boolean,
   collapsibleSidebar: boolean,
-  links: BaseLayoutProps['links'],
-  nav: BaseLayoutProps['nav'] = {},
+  items: LinkItem[],
+  { githubUrl, links, ...props }: Partial<NavOptions>,
 ): ReactNode {
-  const iconLinks: NavLinkProps[] = [];
+  let iconLinks = links ?? [];
 
-  if (nav.githubUrl)
-    iconLinks.push({
-      href: nav.githubUrl,
-      label: 'Github',
-      icon: <GithubIcon />,
-      external: true,
-    });
+  if (githubUrl)
+    iconLinks = [
+      ...iconLinks,
+      {
+        href: githubUrl,
+        label: 'Github',
+        icon: <GithubIcon />,
+        external: true,
+      },
+    ];
 
   return replaceOrDefault(
-    nav,
+    props,
     <Nav
-      title={nav.title}
-      url={nav.url}
-      items={links}
+      title="My App"
+      {...props}
+      items={items}
       links={iconLinks}
       enableSidebar={enableSidebar}
       collapsibleSidebar={collapsibleSidebar}
     >
-      {nav.children}
+      {props.children}
     </Nav>,
   );
 }

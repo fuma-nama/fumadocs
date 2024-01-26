@@ -9,44 +9,21 @@ Footer, and Breadcrumb.
 ## Usage
 
 ```mdx
-import { DocsPage, DocsBody } from 'next-docs-ui/page';
+import { DocsPage, DocsBody } from 'fumadocs-ui/page';
 
 <DocsPage>
   <DocsBody>...</DocsBody>
 </DocsPage>
 ```
 
-<TypeTable
-  type={{
-    tableOfContent: {
-      type: 'object',
-      typeDescriptionLink: '#table-of-contents',
-    },
-    breadcrumb: {
-      type: 'object',
-      typeDescriptionLink: '#breadcrumb',
-    },
-    toc: {
-      type: 'TOCItemType[]',
-      description: 'Table of contents of the page',
-      typeDescription: `{ title: string, url: string, depth: number }[]`,
-    },
-    footer: {
-      type: 'object',
-      typeDescriptionLink: '#footer',
-    },
-    lastUpdate: {
-      type: 'Date | number',
-    },
-  }}
-/>
+<AutoTypeTable path="ui" name="PageProps" />
 
 ### Body
 
 To apply the [Typography](/docs/ui/theme#typography) styles, wrap your content in the `DocsBody` component.
 
 ```mdx
-import { DocsBody } from 'next-docs-ui/page';
+import { DocsBody } from 'fumadocs-ui/page';
 
 <DocsBody>
   <h1>This heading looks good!</h1>
@@ -61,30 +38,16 @@ documents, You can parse TOC by using the
 
 In addition, you can easily customise or disable TOC in your documentation.
 
-<TypeTable
-  type={{
-    enabled: { type: 'boolean', default: 'true' },
-    component: { type: 'ReactNode' },
-    header: {
-      type: 'ReactNode',
-      description: 'Custom content above TOC',
-    },
-    footer: {
-      type: 'ReactNode',
-      description: 'Custom content below TOC',
-    },
-  }}
-/>
+<AutoTypeTable path="ui" name="TOCProps" />
 
 ### Last Update Time
 
 Since you might have different version controls (e.g. Github) or it's from
-remote sources like Sanity, Next Docs UI doesn't display last updated time by
+remote sources like Sanity, Fumadocs UI doesn't display last updated time by
 default.
 
 For Github hosted documents, you can use
-the [Git Last Modified](/docs/headless/utils/git-last-edit) utility provided by Next Docs
-Zeta.
+the [Git Last Modified](/docs/headless/utils/git-last-edit) utility.
 
 ```tsx
 <DocsPage lastUpdate={new Date(lastModifiedTime)} />
@@ -94,22 +57,8 @@ Zeta.
 
 Footer is a navigation element that has two buttons to jump to the next and previous pages. By default, it finds the neighbour pages from page tree.
 
-<TypeTable
-  type={{
-    enabled: { type: 'boolean' },
-    component: { type: 'ReactNode' },
-    items: {
-      type: 'object',
-      description: 'Items including information for the next and previous page',
-    },
-  }}
-/>
+<AutoTypeTable path="ui" name="FooterProps" />
 
 ### Breadcrumb
 
-<TypeTable
-  type={{
-    enabled: { type: 'boolean', default: 'true' },
-    component: { type: 'ReactNode' },
-  }}
-/>
+<AutoTypeTable path="ui" name="BreadcrumbProps" />

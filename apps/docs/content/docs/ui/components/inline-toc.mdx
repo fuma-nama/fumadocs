@@ -9,7 +9,7 @@ preview: inline-toc
 Pass TOC items to the component.
 
 ```mdx
-import { InlineTOC } from 'next-docs-ui/components/inline-toc';
+import { InlineTOC } from 'fumadocs-ui/components/inline-toc';
 
 <InlineTOC items={toc} />
 ```
@@ -28,14 +28,4 @@ You can add inline TOC into every page.
 
 ## Reference
 
-<TypeTable
-  type={{
-    defaultOpen: {
-      type: 'boolean',
-      default: 'false',
-    },
-    items: {
-      type: `TOCItemType[]`,
-    },
-  }}
-/>
+<AutoTypeTable path="ui" name="InlineTOCProps" />

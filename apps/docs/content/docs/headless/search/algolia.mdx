@@ -1,6 +1,6 @@
 ---
 title: Algolia Search
-description: Integrate Algolia Search with Next Docs
+description: Integrate Algolia Search with Fumadocs
 ---
 
 <Callout title="Notice">
@@ -33,8 +33,8 @@ paragraphs are all indexed as a record, and the attribute for distinct is
 
    ```js
    import algosearch from 'algoliasearch'
-   import { sync } from 'next-docs-zeta/search-algolia/server'
-   import { structure } from 'next-docs-zeta/mdx-plugins'
+   import { sync } from 'fumadocs-core/search-algolia/server'
+   import { structure } from 'fumadocs-core/mdx-plugins'
 
    const client = algosearch(...)
 
@@ -50,13 +50,13 @@ paragraphs are all indexed as a record, and the attribute for distinct is
    integrate it with your CI/CD pipeline.
 
 4. To search documents on the client side, you may use the search dialog
-   provided by Next Docs UI, or implement your own for advanced styling.
+   provided by Fumadocs UI, or implement your own for advanced styling.
 
    In addition, you can use the `useAlgoliaSearch` hook which handles loading
    states with SWR.
 
    ```ts
-   import { useAlgoliaSearch } from 'next-docs-zeta/search-algolia/client'
+   import { useAlgoliaSearch } from 'fumadocs-core/search-algolia/client'
 
    const index = algoliasearch(...).initIndex('document')
 

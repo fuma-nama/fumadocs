@@ -2,40 +2,9 @@
 
 The framework for building documentation websites in Next.js.
 
-📘 Learn More: [Documentation](https://next-docs-zeta.vercel.app)
+📘 Learn More: [Documentation](https://fumadocs.vercel.app).
 
-## Installation
-
-This monorepo includes three packages.
-
-### Next Docs Zeta
-
-The headless UI library for building documentation websites.
-
-It includes necessary parts such as TOC, Sidebar, and some useful utilities.
-
-```bash
-npm install next-docs-zeta
-```
-
-### Next Docs UI
-
-The framework is built on top of Next Docs Zeta. It offers many out-of-the-box
-features along with a well-designed user interface.
-
-```bash
-npm install next-docs-ui
-```
-
-### Create Next Docs App
-
-A CLI tool that generates documentation sites.
-
-```bash
-npx create next-docs-app
-```
-
-### Compatiability
+## Compatiability
 
 All packages are **ESM only**.
 

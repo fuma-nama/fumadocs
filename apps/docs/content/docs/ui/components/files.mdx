@@ -4,14 +4,12 @@ description: Display file structure in your documentation
 preview: 'files'
 ---
 
-> it is an optional component which won't be loaded by default.
-
 ## Usage
 
 Wrap file components in `Files`.
 
 ```mdx
-import { File, Files } from 'next-docs-ui/components/files';
+import { File, Files } from 'fumadocs-ui/components/files';
 
 <Files>
   <File title="app" defaultOpen>
@@ -28,14 +26,4 @@ import { File, Files } from 'next-docs-ui/components/files';
 </Files>
 ```
 
-<TypeTable
-  type={{
-    title: { type: 'string' },
-    defaultOpen: { type: 'boolean', description: 'Open folder by default' },
-    icon: { type: 'ReactNode' },
-    children: {
-      type: 'ReactNode',
-      description: 'children files of the folder, consider as file if empty',
-    },
-  }}
-/>
+<AutoTypeTable path="ui" name="FileProps" />

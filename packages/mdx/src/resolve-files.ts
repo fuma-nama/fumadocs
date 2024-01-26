@@ -1,6 +1,6 @@
 import path from 'node:path';
 import type { AnyZodObject, z } from 'zod';
-import type { VirtualFile } from 'next-docs-zeta/source';
+import type { VirtualFile } from 'fumadocs-core/source';
 import type { MDXExport, MDXPageData } from './types';
 import { defaultSchemas } from './utils/schema';
 

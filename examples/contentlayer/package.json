@@ -1,0 +1,32 @@
+{
+  "name": "example-contentlayer",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev",
+    "start": "next start"
+  },
+  "dependencies": {
+    "contentlayer": "0.3.4",
+    "fumadocs-contentlayer": "1.0.1",
+    "fumadocs-core": "8.0.0",
+    "fumadocs-ui": "8.0.0",
+    "next": "14.0.4",
+    "next-contentlayer": "0.3.4",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "18.2.0",
+    "@types/react-dom": "18.2.1",
+    "autoprefixer": "10.4.16",
+    "postcss": "8.4.32",
+    "tailwindcss": "^3.4.1",
+    "typescript": "5.3.3"
+  },
+  "overrides": {
+    "unified": "^11.0.4",
+    "mdx-bundler": "^10.0.1"
+  }
+}

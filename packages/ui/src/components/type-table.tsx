@@ -21,18 +21,25 @@ export function Info({ children }: { children: ReactNode }): JSX.Element {
   );
 }
 
-type ObjectType = Record<
-  string,
-  {
-    description?: string;
-    type: string;
-    typeDescription?: string;
-    typeDescriptionLink?: string;
-    default?: string;
-  }
->;
+interface ObjectType {
+  /**
+   * Additional description of the field
+   */
+  description?: string;
+  type: string;
+  typeDescription?: string;
+  /**
+   * Optional link to the type
+   */
+  typeDescriptionLink?: string;
+  default?: string;
+}
 
-export function TypeTable({ type }: { type: ObjectType }): JSX.Element {
+export function TypeTable({
+  type,
+}: {
+  type: Record<string, ObjectType>;
+}): JSX.Element {
   const th = cn('p-2 font-medium first:pl-0 last:pr-0');
   const td = cn('p-2 first:pl-0 last:pr-0');
   const field = cn('inline-flex flex-row items-center gap-1');

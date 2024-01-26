@@ -1,15 +1,19 @@
-import { DocsLayout } from 'next-docs-ui/layout';
+import { DocsLayout, type DocsLayoutProps } from 'fumadocs-ui/layout';
 import type { ReactNode } from 'react';
-import { LayoutTemplateIcon, StarsIcon } from 'lucide-react';
+import { LayoutTemplateIcon } from 'lucide-react';
 import { utils } from '@/utils/source';
+import { create } from '@/components/ui/icon';
+import { FumaDocsSVG } from '../(home)/icons';
 import { Body, NavChildren, SidebarBanner } from './layout.client';
 
-export const layoutOptions = {
+export const layoutOptions: Omit<DocsLayoutProps, 'children'> = {
+  tree: utils.pageTree,
   nav: {
+    transparentMode: 'top',
     title: (
       <>
-        <StarsIcon className="size-5" fill="currentColor" />
-        <span className="ml-1.5 font-semibold max-md:hidden">Next Docs</span>
+        <FumaDocsSVG className="size-5" fill="currentColor" />
+        <span className="ml-3 font-semibold max-md:hidden">Fumadocs</span>
       </>
     ),
     children: <NavChildren />,
@@ -23,7 +27,7 @@ export const layoutOptions = {
     {
       text: 'Showcase',
       url: '/showcase',
-      icon: <LayoutTemplateIcon fill="currentColor" />,
+      icon: create({ icon: LayoutTemplateIcon }),
     },
   ],
 };
@@ -35,9 +39,7 @@ export default function Layout({
 }): JSX.Element {
   return (
     <Body>
-      <DocsLayout tree={utils.pageTree} {...layoutOptions}>
-        {children}
-      </DocsLayout>
+      <DocsLayout {...layoutOptions}>{children}</DocsLayout>
     </Body>
   );
 }

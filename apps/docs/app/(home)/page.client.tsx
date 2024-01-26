@@ -103,7 +103,7 @@ export function Previews(): JSX.Element {
 }
 
 export function CreateAppAnimation(): JSX.Element {
-  const installCmd = 'npm create next-docs-app';
+  const installCmd = 'npm create fumadocs-app';
   const tickTime = 100;
   const timeCommandEnter = installCmd.length;
   const timeCommandRun = timeCommandEnter + 3;
@@ -141,7 +141,7 @@ export function CreateAppAnimation(): JSX.Element {
   if (tick > timeCommandRun)
     lines.push(
       <Fragment key="command_response">
-        <span className="font-bold">┌ Create Next Docs</span>
+        <span className="font-bold">┌ Create Fumadocs App</span>
         <span>│</span>
         {tick > timeCommandRun + 1 && (
           <>
@@ -152,16 +152,13 @@ export function CreateAppAnimation(): JSX.Element {
         {tick > timeCommandRun + 2 && (
           <>
             <span>│</span>
-            <span className="font-bold">
-              ◆ Which example you want to install?
-            </span>
+            <span className="font-bold">◆ Choose a content source</span>
           </>
         )}
         {tick > timeCommandRun + 3 && (
           <>
-            <span>│ ● Default (Contentlayer)</span>
-            <span>│ ○ Advanced (Contentlayer)</span>
-            <span>│ ○ Default (Next Docs MDX)</span>
+            <span>│ ● Fumadocs MDX</span>
+            <span>│ ○ Contentlayer</span>
           </>
         )}
       </Fragment>,

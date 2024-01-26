@@ -13,27 +13,14 @@ The layout of documentation pages, it must be nested under the
 Wrap the children and pass your page tree to the component.
 
 ```jsx
-import { DocsLayout } from 'next-docs-ui/layout';
+import { DocsLayout } from 'fumadocs-ui/layout';
 
 export default function Layout({ children }) {
   return <DocsLayout tree={tree}>{children}</DocsLayout>;
 }
 ```
 
-<TypeTable
-  type={{
-    tree: { type: 'PageTree' },
-    links: { type: 'LinkItem[]' },
-    nav: {
-      type: 'object',
-      typeDescriptionLink: '#navbar',
-    },
-    sidebar: {
-      type: 'object',
-      typeDescriptionLink: '#sidebar',
-    },
-  }}
-/>
+<AutoTypeTable path="ui" name="LayoutProps" />
 
 ### Non-docs Pages
 
@@ -42,7 +29,7 @@ If you want to share navbar and search dialog between other pages, you may use t
 It doesn't contain a sidebar, therefore, a page tree is not required.
 
 ```jsx
-import { Layout } from 'next-docs-ui/layout';
+import { Layout } from 'fumadocs-ui/layout';
 
 export default function HomeLayout({ children }) {
   return <Layout>{children}</Layout>;
@@ -53,33 +40,8 @@ You can create a [Route Group](https://nextjs.org/docs/app/building-your-applica
 
 ### Navbar
 
-<TypeTable
-  type={{
-    enabled: { type: 'boolean', default: 'true' },
-    component: { type: 'ReactNode' },
-    title: { type: 'ReactNode' },
-    url: { description: 'Redirect url of title', type: 'string', default: '/' },
-    githubUrl: {
-      description: 'Github url displayed on the navbar',
-      type: 'string',
-    },
-  }}
-/>
+<AutoTypeTable path="ui" name="NavbarProps" />
 
 ### Sidebar
 
-<TypeTable
-  type={{
-    enabled: { type: 'boolean', default: 'true' },
-    banner: { type: 'ReactNode' },
-    footer: { type: 'ReactNode' },
-    component: { type: 'ReactNode' },
-    collapsible: { type: 'boolean', default: 'true' },
-    defaultOpenLevel: {
-      type: 'number',
-      default: '1',
-      description:
-        'Open folders by default if their level is lower or equal to a specific level',
-    },
-  }}
-/>
+<AutoTypeTable path="ui" name="SidebarProps" />

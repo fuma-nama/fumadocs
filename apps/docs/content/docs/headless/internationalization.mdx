@@ -3,7 +3,7 @@ title: Internationalization
 description: Support multiple languages in your documentation
 ---
 
-Next Docs has built-in support for internationalized routing.
+Fumadocs has built-in support for internationalized routing.
 You can define a list of supported languages and pass it to i18n utilities. Read
 the
 [Next.js Docs](https://nextjs.org/docs/app/building-your-application/routing/internationalization)
@@ -23,7 +23,7 @@ export const languages = ['en', 'cn'];
 ```ts title="source.ts"
 import { languages } from '@/i18n';
 import { map } from '@/.map';
-import { loader } from 'next-docs-zeta/source';
+import { loader } from 'fumadocs-core/source';
 
 export const { getPage, getPages, pageTree } = loader({
   languages,
@@ -35,7 +35,7 @@ export const { getPage, getPages, pageTree } = loader({
 
 ```ts title="middleware.ts"
 import { defaultLanguage, languages } from '@/i18n';
-import { createI18nMiddleware } from 'next-docs-zeta/middleware';
+import { createI18nMiddleware } from 'fumadocs-core/middleware';
 import { NextRequest } from 'next/server';
 
 export default createI18nMiddleware({
@@ -80,44 +80,17 @@ getPage(params.slug, params.lang);
 getPages(params.lang);
 ```
 
-### Flexsearch
+### Static Generation
 
-The default `createSearchAPI` doesn't provide functionality for i18n. Instead,
-you should use `createI18nSearchAPI`.
-
-1. Update the route handler.
-
-```ts title="api/search/route.ts"
-import { languages } from '@/i18n';
-import { getPages } from '@/source';
-import { createI18nSearchAPI } from 'next-docs-zeta/search/server';
-
-export const { GET } = createI18nSearchAPI('advanced', {
-  indexes: languages.map((lang) => {
-    const pages = getPages(lang)!.map((page) => ({
-      ...
-    }));
-
-    return [lang, pages];
-  }),
-});
-```
-
-2. Add `locale` to search dialog, this will only allow pages with specified
-   locale to be searched by the user.
+Generate parameters for every language and page.
 
 ```tsx
-function Dialog() {
-  const { search, setSearch, query } = useDocsSearch(locale);
-
-  //...
+export async function generateStaticParams() {
+  return languages.flatMap((lang) =>
+    getPages(lang)!.map((page) => ({
+      slug: page.slug,
+      lang,
+    })),
+  );
 }
 ```
-
-<Cards className="mt-4">
-  <Card
-    title="Page Conventions"
-    description="Learn to build Internationalized Page Structure"
-    href="/docs/headless/page-conventions"
-  />
-</Cards>
