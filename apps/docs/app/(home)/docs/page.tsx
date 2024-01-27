@@ -33,7 +33,7 @@ export default function DocsPage(): JSX.Element {
       </p>
       <div className="mt-4 grid grid-cols-2 gap-4">
         <a
-          href="https://github.com/fuma-nama/next-docs"
+          href="https://github.com/fuma-nama/fumadocs"
           rel="noreferrer noopener"
           className={cn(buttonVariants({ size: 'lg' }))}
         >

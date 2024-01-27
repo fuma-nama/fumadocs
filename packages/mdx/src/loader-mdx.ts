@@ -13,7 +13,7 @@ export interface Options extends ProcessorOptions {
   lastModifiedTime?: 'git' | 'none';
 }
 
-export interface NextDocsBuildInfo {
+interface InternalBuildInfo {
   __next_docs?: {
     path: string;
     /**
@@ -69,7 +69,7 @@ export default async function loader(
     })
     .then(
       (file) => {
-        const info = this._module?.buildInfo as NextDocsBuildInfo;
+        const info = this._module?.buildInfo as InternalBuildInfo;
 
         info.__next_docs = {
           path: filePath,

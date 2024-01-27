@@ -1,9 +1,9 @@
 import type { Root } from 'hast';
-import rehypeShikiji, { type RehypeShikijiOptions } from 'rehype-shikiji';
+import rehypeShiki, { type RehypeShikiOptions } from '@shikijs/rehype';
 import {
   transformerNotationHighlight,
   transformerNotationWordHighlight,
-} from 'shikiji-transformers';
+} from '@shikijs/transformers';
 import type { Processor, Transformer } from 'unified';
 import { visit } from './hast-utils';
 
@@ -60,7 +60,7 @@ export const rehypeCodeDefaultOptions: RehypeCodeOptions = {
   },
 };
 
-export type RehypeCodeOptions = RehypeShikijiOptions & {
+export type RehypeCodeOptions = RehypeShikiOptions & {
   /**
    * Filter meta string before processing
    */
@@ -103,7 +103,7 @@ export function rehypeCode(
   ];
 
   const prefix = 'language-';
-  const transformer = rehypeShikiji.call(this, codeOptions);
+  const transformer = rehypeShiki.call(this, codeOptions);
 
   return async (root, vfile) => {
     visit(root, ['pre'], (element) => {

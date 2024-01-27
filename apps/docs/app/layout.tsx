@@ -65,7 +65,7 @@ function Footer(): JSX.Element {
 
         <div className="flex flex-row flex-wrap items-center gap-12">
           <a
-            href="https://github.com/fuma-nama/next-docs"
+            href="https://github.com/fuma-nama/fumadocs"
             rel="noreferrer noopener"
             className="flex flex-row items-center text-sm text-muted-foreground transition-colors hover:text-accent-foreground"
           >

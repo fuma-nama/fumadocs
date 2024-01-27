@@ -9,10 +9,18 @@ import type { ReactNode } from 'react';
 import { Wrapper } from '@/components/preview/wrapper';
 import { AutoTypeTable } from './components/auto-type-table';
 import { cn } from './utils/cn';
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from './components/ui/popover';
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
     ...defaultComponents,
+    Popover: HoverCard,
+    PopoverTrigger: HoverCardTrigger,
+    PopoverContent: HoverCardContent,
     pre: ({ ref: _ref, title, className, ...props }) => (
       <CodeBlock title={title}>
         <Pre className={cn('max-h-[400px]', className)} {...props} />

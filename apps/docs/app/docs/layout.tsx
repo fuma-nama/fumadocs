@@ -17,7 +17,7 @@ export const layoutOptions: Omit<DocsLayoutProps, 'children'> = {
       </>
     ),
     children: <NavChildren />,
-    githubUrl: 'https://github.com/fuma-nama/next-docs',
+    githubUrl: 'https://github.com/fuma-nama/fumadocs',
   },
   sidebar: {
     defaultOpenLevel: 0,

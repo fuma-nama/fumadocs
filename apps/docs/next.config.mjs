@@ -1,10 +1,11 @@
 import createBundleAnalyzer from '@next/bundle-analyzer';
-import createNextDocs from 'fumadocs-mdx/config';
+import createMDX from 'fumadocs-mdx/config';
 import {
   remarkDynamicContent,
   remarkInstall,
   rehypeCodeDefaultOptions,
 } from 'fumadocs-core/mdx-plugins';
+import { transformerTwoslash } from '@shikijs/twoslash';
 import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
 
@@ -21,13 +22,41 @@ const config = {
   },
 };
 
-const withNextDocs = createNextDocs({
+const withMDX = createMDX({
   mdxOptions: {
     rehypeCodeOptions: {
       transformers: [
         ...rehypeCodeDefaultOptions.transformers,
+        transformerTwoslash({
+          explicitTrigger: true,
+          rendererRich: {
+            hast: {
+              hoverCompose: ({ popup, token }) => [
+                {
+                  type: 'element',
+                  tagName: 'Popover',
+                  children: [
+                    popup,
+                    {
+                      type: 'element',
+                      tagName: 'PopoverTrigger',
+                      children: [token],
+                    },
+                  ],
+                },
+              ],
+              popupTypes: {
+                class: 'nd-codeblock twoslash-popup-code',
+              },
+              hoverPopup: {
+                tagName: 'PopoverContent',
+                children: (v) => v,
+              },
+            },
+          },
+        }),
         {
-          name: 'shikiji:remove-escape',
+          name: 'fumadocs:remove-escape',
           code(element) {
             element.children.forEach((line) => {
               if (line.type !== 'element') return;
@@ -56,4 +85,4 @@ const withNextDocs = createNextDocs({
   },
 });
 
-export default withAnalyzer(withNextDocs(config));
+export default withAnalyzer(withMDX(config));

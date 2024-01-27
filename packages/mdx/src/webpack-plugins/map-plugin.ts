@@ -14,7 +14,7 @@ declare const map: Record<string, unknown>
 export { map }
 `.trim();
 
-export class NextDocsWebpackPlugin {
+export class MapWebpackPlugin {
   options: Options;
 
   constructor(options: Options) {
@@ -22,9 +22,9 @@ export class NextDocsWebpackPlugin {
   }
 
   apply(compiler: Compiler): void {
-    const logger = compiler.getInfrastructureLogger(NextDocsWebpackPlugin.name);
+    const logger = compiler.getInfrastructureLogger(MapWebpackPlugin.name);
 
-    compiler.hooks.beforeCompile.tap(NextDocsWebpackPlugin.name, () => {
+    compiler.hooks.beforeCompile.tap(MapWebpackPlugin.name, () => {
       if (firstLoad && !fs.existsSync(this.options.rootMapFile)) {
         fs.writeFileSync(this.options.rootMapFile, content);
         logger.info('Created map.ts file for you automatically');
