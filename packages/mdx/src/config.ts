@@ -67,7 +67,7 @@ function pluginOption(
   return list;
 }
 
-const createNextDocs =
+const createMDX =
   ({
     mdxOptions = {},
     cwd = process.cwd(),
@@ -160,4 +160,4 @@ const createNextDocs =
     };
   };
 
-export { createNextDocs as default };
+export { createMDX as default };

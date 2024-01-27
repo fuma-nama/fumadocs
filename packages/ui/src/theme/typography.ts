@@ -46,7 +46,10 @@ export const typography = {
         '0 0 0 1px var(--tw-prose-kbd-shadows),0 3px 0 var(--tw-prose-kbd-shadows)',
     },
     ul: {
-      paddingLeft: '0.7rem',
+      'list-style-position': 'inside',
+    },
+    li: {
+      'padding-left': '0',
     },
     // Disabled styles, handled by Fumadocs UI
     'pre code': false,

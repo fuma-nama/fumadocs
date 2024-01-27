@@ -7,9 +7,9 @@ description: Adding code blocks to your docs
 <div className="bg-background rounded-lg prose-no-margin">
 
 ```js title="Demo File"
-import createNextDocsMDX from 'fumadocs-mdx/config';
+import createMDX from 'fumadocs-mdx/config';
 
-const withMDX = createNextDocsMDX();
+const withMDX = createMDX();
 
 // [!code word:config]
 /** @type {import('next').NextConfig} */
@@ -25,7 +25,7 @@ export default withMDX(config);
 
 Display code blocks, required by default.
 
-- Syntax highlighting powered by Shikiji
+- Syntax highlighting powered by Shiki
 - Copy button
 - Custom Titles
 
