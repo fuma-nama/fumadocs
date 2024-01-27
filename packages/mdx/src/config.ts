@@ -11,7 +11,7 @@ import {
 } from 'fumadocs-core/mdx-plugins';
 import type { PluggableList } from 'unified';
 import type { Configuration } from 'webpack';
-import { NextDocsWebpackPlugin } from './webpack-plugins/next-docs';
+import { MapWebpackPlugin } from './webpack-plugins/map-plugin';
 import remarkMdxExport from './mdx-plugins/remark-exports';
 import type { LoaderOptions } from './loader';
 import type { Options as MDXLoaderOptions } from './loader-mdx';
@@ -34,7 +34,7 @@ type MDXOptions = Omit<
 
 type ResolvePlugins = PluggableList | ((v: PluggableList) => PluggableList);
 
-interface NextDocsMDXOptions {
+export interface CreateMDXOptions {
   cwd?: string;
 
   mdxOptions?: MDXOptions;
@@ -73,7 +73,7 @@ const createMDX =
     cwd = process.cwd(),
     rootMapPath = './.map.ts',
     rootContentPath = './content',
-  }: NextDocsMDXOptions = {}) =>
+  }: CreateMDXOptions = {}) =>
   (nextConfig: NextConfig = {}) => {
     const valueToExport = [
       'structuredData',
@@ -149,9 +149,7 @@ const createMDX =
 
           config.plugins ||= [];
 
-          config.plugins.push(
-            new NextDocsWebpackPlugin({ rootMapFile: _mapPath }),
-          );
+          config.plugins.push(new MapWebpackPlugin({ rootMapFile: _mapPath }));
 
           // eslint-disable-next-line @typescript-eslint/no-unsafe-return -- not provided
           return nextConfig.webpack?.(config, options) ?? config;

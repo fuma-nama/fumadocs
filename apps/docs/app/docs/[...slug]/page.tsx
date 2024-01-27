@@ -29,7 +29,7 @@ export default function Page({ params }: { params: Param }): JSX.Element {
         enabled: page.data.toc,
         footer: (
           <a
-            href={`https://github.com/fuma-nama/next-docs/blob/main/${path}`}
+            href={`https://github.com/fuma-nama/fumadocs/blob/main/${path}`}
             target="_blank"
             rel="noreferrer noopener"
             className="inline-flex items-center text-xs text-muted-foreground hover:text-foreground"

@@ -7,7 +7,7 @@
     "Docs"
   ],
   "homepage": "https://fumadocs.vercel.app",
-  "repository": "github:fuma-nama/next-docs",
+  "repository": "github:fuma-nama/fumadocs",
   "license": "MIT",
   "author": "Fuma Nama",
   "type": "module",

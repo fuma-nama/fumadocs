@@ -124,7 +124,7 @@ export const blogs = loader({
 You can customise the options passed to the MDX processor.
 
 ```js
-const withNextDocs = createMDX({
+const withMDX = createMDX({
   mdxOptions: {
     remarkPlugins: [remarkMath],
     // When order matters
@@ -138,7 +138,7 @@ const withNextDocs = createMDX({
 The built-in configuration applies a remark plugin that turns `vfile.data` properties into exports, you can define additional properties to be exported.
 
 ```js
-const withNextDocs = createMDX({
+const withMDX = createMDX({
   mdxOptions: {
     valueToExport: ['dataName'],
   },
