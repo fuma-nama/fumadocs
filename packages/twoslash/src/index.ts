@@ -45,6 +45,9 @@ export function transformerTwoslash(
         popupTypes: {
           class: 'nd-codeblock twoslash-popup-code',
         },
+        nodesHighlight: {
+          class: 'highlighted-word twoslash-highlighted',
+        },
         hoverPopup: {
           tagName: 'PopupContent',
           children: (v) => v,

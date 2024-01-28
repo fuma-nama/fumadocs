@@ -145,9 +145,12 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
             'background-color': `theme('colors.primary.DEFAULT / 10%')`,
           },
           '& .highlighted-word': {
+            padding: '1px 2px',
+            margin: '-1px -3px',
+            border: '1px solid',
+            'border-color': `theme('colors.primary.DEFAULT / 50%')`,
             'background-color': `theme('colors.primary.DEFAULT / 10%')`,
-            'border-bottom-width': `theme('borderWidth.2')`,
-            'border-color': `theme('colors.primary.DEFAULT')`,
+            'border-radius': '2px',
           },
         },
       });

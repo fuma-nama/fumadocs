@@ -65,10 +65,10 @@
 }
 
 .twoslash-popup-docs {
-  font-size: 14px;
-  line-height: 20px;
-  margin-top: 8px;
-  color: hsl(var(--muted-foreground));
+  font-size: 14px !important;
+  line-height: 20px !important;
+  margin-top: 8px !important;
+  color: hsl(var(--muted-foreground)) !important;
 }
 
 /* ===== Hover Info ===== */
@@ -130,16 +130,6 @@
 .twoslash-completion-list .deprecated {
   text-decoration: line-through;
   opacity: 0.5;
-}
-
-/* Highlights */
-.twoslash-highlighted {
-  padding: 1px 2px;
-  margin: -1px -3px;
-  border: 1px solid;
-  border-color: hsl(var(--primary) / 0.5);
-  background-color: hsl(var(--primary) / 0.1);
-  border-radius: 2px;
 }
 
 /* Icons */

@@ -58,10 +58,6 @@ async function injectImport(src: string, inject: string): Promise<void> {
   }
 }
 
-async function copyCSSFile(): Promise<void> {
-  await fs.copyFile('./src/twoslash/style.css', './dist/twoslash/style.css');
-}
-
 export default defineConfig([
   {
     entry: [
@@ -78,7 +74,6 @@ export default defineConfig([
       );
 
       await Promise.all(replaceImports);
-      await copyCSSFile();
     },
     format: 'esm',
     dts: true,
