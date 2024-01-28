@@ -1,9 +1,10 @@
 {
-  "name": "fumadocs-openapi",
+  "name": "fumadocs-twoslash",
   "version": "1.0.0",
-  "description": "Generate MDX docs for your OpenAPI spec",
+  "description": "Typescript Twoslash Integration for Fumadocs",
   "keywords": [
     "NextJs",
+    "fumadocs",
     "Docs"
   ],
   "homepage": "https://fumadocs.vercel.app",
@@ -13,11 +14,8 @@
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "bin": {
-    "fumadocs-openapi": "./dist/bin.js"
-  },
   "files": [
-    "dist"
+    "dist/*"
   ],
   "scripts": {
     "build": "tsup",
@@ -27,15 +25,16 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@apidevtools/swagger-parser": "^10.1.0",
-    "json-schema-to-typescript": "^13.1.1",
-    "openapi-sampler": "^1.4.0"
+    "@shikijs/twoslash": "^1.0.0-beta.0",
+    "mdast-util-from-markdown": "^2.0.0",
+    "mdast-util-gfm": "^3.0.0",
+    "mdast-util-to-hast": "^13.1.0",
+    "shiki": "^1.0.0-beta.0"
   },
   "devDependencies": {
-    "@types/node": "18.17.5",
-    "@types/openapi-sampler": "^1.0.3",
+    "@types/hast": "^3.0.3",
+    "@types/mdast": "^4.0.3",
     "eslint-config-custom": "workspace:*",
-    "openapi-types": "^12.1.3",
     "tsconfig": "workspace:*"
   },
   "publishConfig": {

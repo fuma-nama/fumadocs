@@ -58,12 +58,17 @@ async function injectImport(src: string, inject: string): Promise<void> {
   }
 }
 
+async function copyCSSFile(): Promise<void> {
+  await fs.copyFile('./src/twoslash/style.css', './dist/twoslash/style.css');
+}
+
 export default defineConfig([
   {
     entry: [
       `./src/components/{${exportedComponents.join(',')}}.tsx`,
       './src/components/dialog/{search,search-default,search-algolia}.tsx',
       './src/{i18n,layout,page,provider,provider,mdx}.{ts,tsx}',
+      './src/twoslash/popup.tsx',
       ...Object.values(injectImports),
     ],
     outExtension: () => ({ js: '.js' }),
@@ -73,6 +78,7 @@ export default defineConfig([
       );
 
       await Promise.all(replaceImports);
+      await copyCSSFile();
     },
     format: 'esm',
     dts: true,

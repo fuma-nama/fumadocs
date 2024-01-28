@@ -12,6 +12,7 @@
   "author": "Fuma Nama",
   "exports": {
     "./style.css": "./dist/style.css",
+    "./twoslash/style.css": "./dist/style.css",
     "./tailwind-plugin": {
       "import": "./dist/tailwind-plugin.js",
       "require": "./dist/tailwind-plugin.js",
@@ -20,6 +21,10 @@
     "./components/*": {
       "import": "./dist/components/*.js",
       "types": "./dist/components/*.d.mts"
+    },
+    "./twoslash/*": {
+      "import": "./dist/twoslash/*.js",
+      "types": "./dist/twoslash/*.d.mts"
     },
     "./*": {
       "import": "./dist/*.js",
@@ -34,6 +39,9 @@
       "components/*": [
         "./dist/components/*.d.mts"
       ],
+      "twoslash/*": [
+        "./dist/twoslash/*.d.mts"
+      ],
       "mdx/*": [
         "./dist/mdx/*.d.mts"
       ],
@@ -46,7 +54,9 @@
     "dist/*"
   ],
   "scripts": {
-    "build": "tsup && postcss css/styles.css -o ./dist/style.css",
+    "build": "concurrently \"pnpm build:layout\" \"pnpm build:tailwind\"",
+    "build:layout": "tsup",
+    "build:tailwind": "postcss css/styles.css -o ./dist/style.css",
     "clean": "rimraf dist",
     "dev": "concurrently \"pnpm dev:layout\" \"pnpm dev:tailwind\"",
     "dev:layout": "tsup --watch",
@@ -58,6 +68,7 @@
     "@radix-ui/react-accordion": "^1.1.2",
     "@radix-ui/react-collapsible": "^1.0.3",
     "@radix-ui/react-dialog": "^1.0.4",
+    "@radix-ui/react-hover-card": "^1.0.7",
     "@radix-ui/react-popover": "^1.0.6",
     "@radix-ui/react-scroll-area": "^1.0.4",
     "@radix-ui/react-select": "^2.0.0",

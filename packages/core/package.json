@@ -112,7 +112,6 @@
     "clean": "rimraf dist",
     "dev": "tsup --watch",
     "lint": "eslint .",
-    "test": "vitest",
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
