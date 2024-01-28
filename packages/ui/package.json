@@ -54,7 +54,7 @@
     "dist/*"
   ],
   "scripts": {
-    "build": "concurrently \"pnpm build:layout\" \"pnpm build:tailwind\"",
+    "build": "pnpm build:layout && pnpm build:tailwind",
     "build:layout": "tsup",
     "build:tailwind": "postcss css/styles.css -o ./dist/style.css",
     "clean": "rimraf dist",
