@@ -14,7 +14,7 @@
   "dependencies": {
     "@next/env": "^14.0.0",
     "@radix-ui/react-hover-card": "^1.0.7",
-    "@shikijs/twoslash": "1.0.0-beta.0",
+    "@shikijs/twoslash": "1.0.0-beta.1",
     "algoliasearch": "^4.20.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
