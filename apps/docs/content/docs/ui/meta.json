@@ -11,6 +11,7 @@
     "...blocks",
     "---Integrations---",
     "math",
+    "twoslash",
     "openapi",
     "museum",
     "---Commands---",

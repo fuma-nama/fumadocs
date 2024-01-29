@@ -1,0 +1,87 @@
+---
+title: Twoslash
+description: Use Typescript Twoslash in your docs
+---
+
+## Usage
+
+Thanks to the Twoslash integration of [Shiki](https://github.com/shikijs/shiki), the default code syntax highlighter, it is as simple as adding a transformer.
+
+```package-install
+fumadocs-twoslash
+```
+
+Add to your Shiki transformers.
+
+<Callout title='Example for Fumadocs MDX'>
+
+```js title="next.config.mjs"
+import createMDX from 'fumadocs-mdx/config';
+import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins';
+import { transformerTwoslash } from 'fumadocs-twoslash';
+
+/** @type {import('next').NextConfig} */
+const withMDX = createMDX({
+  mdxOptions: {
+    rehypeCodeOptions: {
+      transformers: [
+        ...rehypeCodeDefaultOptions.transformers,
+        transformerTwoslash(), // [!code highlight]
+      ],
+    },
+  },
+});
+
+export default withMDX(config);
+```
+
+</Callout>
+
+Add stylings and components.
+
+```ts title="layout.tsx"
+import 'fumadocs-ui/twoslash.css';
+```
+
+```ts
+import { Popup, PopupContent, PopupTrigger } from 'fumadocs-ui/twoslash/popup';
+
+const mdxComponents = {
+  Popup,
+  PopupContent,
+  PopupTrigger,
+};
+```
+
+### Example
+
+Learn more about [Twoslash notations](https://twoslash.netlify.app/refs/notations).
+
+```ts twoslash
+// @noErrors
+console.;
+```
+
+```ts twoslash
+const a = '123';
+
+console.log(a);
+//      ^^^
+```
+
+```ts twoslash
+// @errors: 2588
+const a = '123';
+// @log: Custom log message
+
+a = 132;
+
+const b = 1;
+// @error: Custom error message
+
+const c = 1;
+// @warn: Custom warning message
+
+const d = 1;
+// @annotate: Custom annotation message
+```
