@@ -65,8 +65,6 @@ function getProgram(options: Options['options'] = {}): ts.Program {
     },
   });
 
-  console.log(program.getConfigFileParsingDiagnostics());
-
   cache.set(key, program);
 
   return program;
@@ -110,30 +108,7 @@ export function generateDocumentation(options: Options): DocEntry[] {
     symbol,
   };
 
-  const allDiagnostics = ts.getPreEmitDiagnostics(program);
-
-  allDiagnostics.forEach((diagnostic) => {
-    if (diagnostic.file && diagnostic.start) {
-      const { line, character } = ts.getLineAndCharacterOfPosition(
-        diagnostic.file,
-        diagnostic.start,
-      );
-      const message = ts.flattenDiagnosticMessageText(
-        diagnostic.messageText,
-        '\n',
-      );
-
-      console.log(
-        `${diagnostic.file.fileName} (${line + 1},${
-          character + 1
-        }): ${message}`,
-      );
-    } else {
-      console.log(
-        ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n'),
-      );
-    }
-  });
+  console.log(type);
 
   return type.getProperties().map(getDocEntry.bind(entryContext));
 }
