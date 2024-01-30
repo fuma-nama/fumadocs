@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 1.0.1
+
+### Patch Changes
+
+- 6c5a39a: Rename Git repository to `fumadocs`
+
 ## 1.0.0
 
 ### Major Changes

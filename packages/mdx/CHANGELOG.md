@@ -1,5 +1,15 @@
 # next-docs-mdx
 
+## 8.0.1
+
+### Patch Changes
+
+- 6c5a39a: Rename Git repository to `fumadocs`
+- Updated dependencies [6c5a39a]
+- Updated dependencies [eb028b4]
+- Updated dependencies [054ec60]
+  - fumadocs-core@8.1.0
+
 ## 8.0.0
 
 ### Major Changes
