@@ -12,15 +12,15 @@ describe('Generate docs from Typescript', () => {
   });
 
   const file = relative('./fixtures/test.ts');
-
-  vi.spyOn(process, 'cwd').mockReturnValue(relative('../'));
-
   test('Run', () => {
+    vi.spyOn(process, 'cwd').mockReturnValue(relative('../'));
+
     const result = ['Test1', 'Test2', 'Test3'].map((name) =>
       generateDocumentation({
         file,
         name,
         options: {
+          tsconfigPath: relative('../tsconfig.json'),
           basePath: relative('../'),
         },
       }),
