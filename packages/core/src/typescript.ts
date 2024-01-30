@@ -48,7 +48,7 @@ function getProgram(options: Options['options'] = {}): ts.Program {
 
   const configFile = ts.readJsonConfigFile(
     options.tsconfigPath ?? './tsconfig.json',
-    ts.sys.readFile.bind(ts.sys),
+    (path) => ts.sys.readFile(path),
   );
 
   const parsed = ts.parseJsonSourceFileConfigFileContent(
