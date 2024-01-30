@@ -11,12 +11,12 @@ interface Param {
   slug: string[];
 }
 
+export const dynamicParams = false;
+
 export default function Page({ params }: { params: Param }): JSX.Element {
   const page = utils.getPage(params.slug);
 
-  if (!page) {
-    notFound();
-  }
+  if (!page) notFound();
 
   const path = `apps/docs/content/docs/${page.file.path}`;
   const preview = page.data.preview;
