@@ -1,10 +1,14 @@
 import { generateDocumentation } from '@/typescript';
 import { fileURLToPath } from 'url';
-import { describe, expect, test, vi } from 'vitest';
+import { afterEach, describe, expect, test, vi } from 'vitest';
+
+const path = (s: string): string => fileURLToPath(new URL(s, import.meta.url));
 
 describe('Generate docs from Typescript', () => {
-  const path = (s: string): string =>
-    fileURLToPath(new URL(s, import.meta.url));
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   const file = path('./fixtures/test.ts');
 
   vi.spyOn(process, 'cwd').mockReturnValue(path('../'));
