@@ -64,6 +64,7 @@ function getProgram(options: Options['options'] = {}): ts.Program {
       incremental: false,
     },
   });
+  console.log(parsed.fileNames);
 
   cache.set(key, program);
 
@@ -98,6 +99,7 @@ export function generateDocumentation(options: Options): DocEntry[] {
   };
 
   const symbol = getExportedSymbol(ctx);
+  console.log(symbol);
   if (!symbol) return [];
 
   const type = checker.getDeclaredTypeOfSymbol(symbol);
