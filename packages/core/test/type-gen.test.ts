@@ -1,4 +1,4 @@
-import { generateDocumentation } from '@/typescript';
+import { generateDocumentation } from '../src/typescript';
 import { fileURLToPath } from 'url';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import path from 'node:path';
@@ -21,7 +21,7 @@ describe('Generate docs from Typescript', () => {
         file,
         name,
         options: {
-          files: [file],
+          basePath: relative('../'),
         },
       }),
     );
