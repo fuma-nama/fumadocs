@@ -1,5 +1,20 @@
 # next-docs-ui
 
+## 8.1.0
+
+### Minor Changes
+
+- 0012eba: Support Typescript Twoslash
+- bc936c5: Add `AutoTypeTable` server component
+
+### Patch Changes
+
+- 6c5a39a: Rename Git repository to `fumadocs`
+- Updated dependencies [6c5a39a]
+- Updated dependencies [eb028b4]
+- Updated dependencies [054ec60]
+  - fumadocs-core@8.1.0
+
 ## 8.0.0
 
 ### Major Changes

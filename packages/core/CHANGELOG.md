@@ -1,5 +1,16 @@
 # next-docs-zeta
 
+## 8.1.0
+
+### Minor Changes
+
+- eb028b4: Migrate to shiki
+- 054ec60: Support generating docs for Typescript file
+
+### Patch Changes
+
+- 6c5a39a: Rename Git repository to `fumadocs`
+
 ## 8.0.0
 
 ### Major Changes
