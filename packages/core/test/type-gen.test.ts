@@ -20,6 +20,9 @@ describe('Generate docs from Typescript', () => {
       generateDocumentation({
         file,
         name,
+        options: {
+          files: [file],
+        },
       }),
     );
 

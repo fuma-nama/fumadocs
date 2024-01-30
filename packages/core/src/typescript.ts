@@ -75,10 +75,6 @@ function getExportedSymbol({
   checker,
   program,
 }: Context): ts.Symbol | undefined {
-  console.log(
-    file,
-    program.getSourceFiles().map((f) => f.fileName),
-  );
   const sourceFile = program.getSourceFile(file);
   if (!sourceFile) return;
 
