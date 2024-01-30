@@ -59,7 +59,8 @@ Learn more about [Twoslash notations](https://twoslash.netlify.app/refs/notation
 
 ```ts twoslash
 // @noErrors
-console.;
+console.g;
+//       ^|
 ```
 
 ```ts twoslash
@@ -67,6 +68,15 @@ const a = '123';
 
 console.log(a);
 //      ^^^
+```
+
+```ts twoslash
+import { generateFiles } from 'fumadocs-openapi';
+
+void generateFiles({
+  input: ['./museum.yaml'],
+  output: './content/docs/ui',
+});
 ```
 
 ```ts twoslash

@@ -10,5 +10,7 @@
   ],
   "files.associations": {
     "**/packages/create-app/template/**/*": "plaintext"
-  }
+  },
+  "prettier.configPath": "prettier.config.cjs",
+  "editor.defaultFormatter": "esbenp.prettier-vscode"
 }
