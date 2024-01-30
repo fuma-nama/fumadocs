@@ -64,7 +64,6 @@ function getProgram(options: Options['options'] = {}): ts.Program {
       incremental: false,
     },
   });
-  console.log(parsed.fileNames);
 
   cache.set(key, program);
 
@@ -76,6 +75,10 @@ function getExportedSymbol({
   checker,
   program,
 }: Context): ts.Symbol | undefined {
+  console.log(
+    file,
+    program.getSourceFiles().map((f) => f.fileName),
+  );
   const sourceFile = program.getSourceFile(file);
   if (!sourceFile) return;
 
@@ -99,7 +102,6 @@ export function generateDocumentation(options: Options): DocEntry[] {
   };
 
   const symbol = getExportedSymbol(ctx);
-  console.log(symbol);
   if (!symbol) return [];
 
   const type = checker.getDeclaredTypeOfSymbol(symbol);
@@ -109,8 +111,6 @@ export function generateDocumentation(options: Options): DocEntry[] {
     type,
     symbol,
   };
-
-  console.log(type);
 
   return type.getProperties().map(getDocEntry.bind(entryContext));
 }
