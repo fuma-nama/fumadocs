@@ -1,0 +1,38 @@
+---
+title: Auto Type Table
+description: Auto-generated type table
+preview: type-table
+---
+
+## Usage
+
+Under the hood, it uses the [Typescript Compiler API](https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API) to extract type information.
+Your `tsconfig.json` file in the current working directory will be loaded. You may specify compiler settings via `options` prop.
+
+It accepts a `path` prop which should be a typescript file, and `name` for the exported type name.
+
+```mdx
+import { AutoTypeTable } from 'fumadocs-ui/components/auto-type-table';
+
+<AutoTypeTable path="./path/to/file.ts" name="MyInterface" />
+```
+
+<Callout title="Server Component only" type="warn">
+
+You cannot use this in a client component.
+
+</Callout>
+
+### Functions
+
+Notice that only object type is allowed. For functions, you should wrap them into an object instead.
+
+```ts
+export interface MyInterface {
+  myFn: (input: string) => void;
+}
+```
+
+### Auto Type Table
+
+<AutoTypeTable path="ui" name="AutoTypeTableProps" />

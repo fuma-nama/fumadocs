@@ -1,4 +1,5 @@
 import './style.css';
+import 'fumadocs-ui/twoslash.css';
 import { Star } from 'lucide-react';
 import type { Viewport } from 'next';
 import { GeistSans } from 'geist/font/sans';

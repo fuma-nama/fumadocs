@@ -6,27 +6,34 @@ import { TypeTable } from 'fumadocs-ui/components/type-table';
 import defaultComponents from 'fumadocs-ui/mdx';
 import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
 import type { ReactNode } from 'react';
+import { Popup, PopupContent, PopupTrigger } from 'fumadocs-ui/twoslash/popup';
+import { AutoTypeTable } from 'fumadocs-ui/components/auto-type-table';
 import { Wrapper } from '@/components/preview/wrapper';
-import { AutoTypeTable } from './components/auto-type-table';
 import { cn } from './utils/cn';
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from './components/ui/popover';
+
+const shortcuts: Record<string, string> = {
+  ui: './content/docs/ui/props.ts',
+  headless: './content/docs/headless/props.ts',
+  test: './components/test.ts',
+};
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
     ...defaultComponents,
-    Popover: HoverCard,
-    PopoverTrigger: HoverCardTrigger,
-    PopoverContent: HoverCardContent,
+    Popup,
+    PopupContent,
+    PopupTrigger,
     pre: ({ ref: _ref, title, className, ...props }) => (
       <CodeBlock title={title}>
         <Pre className={cn('max-h-[400px]', className)} {...props} />
       </CodeBlock>
     ),
-    AutoTypeTable,
+    AutoTypeTable: ({ path, name }: { path: string; name: string }) => (
+      <AutoTypeTable
+        path={path in shortcuts ? shortcuts[path] : path}
+        name={name}
+      />
+    ),
     Tabs,
     Tab,
     Callout,

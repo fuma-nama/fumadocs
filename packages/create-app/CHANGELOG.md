@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 8.1.0
+
+### Patch Changes
+
+- 6c5a39a: Rename Git repository to `fumadocs`
+
 ## 8.0.0
 
 ### Major Changes

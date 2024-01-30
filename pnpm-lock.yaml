@@ -59,8 +59,8 @@ importers:
         specifier: ^1.0.7
         version: 1.0.7(@types/react-dom@18.2.1)(@types/react@18.2.0)(react-dom@18.2.0)(react@18.2.0)
       '@shikijs/twoslash':
-        specifier: 1.0.0-beta.0
-        version: 1.0.0-beta.0(typescript@5.3.3)
+        specifier: 1.0.0-beta.1
+        version: 1.0.0-beta.1(typescript@5.3.3)
       algoliasearch:
         specifier: ^4.20.0
         version: 4.20.0
@@ -79,6 +79,9 @@ importers:
       fumadocs-mdx:
         specifier: workspace:*
         version: link:../../packages/mdx
+      fumadocs-twoslash:
+        specifier: workspace:^
+        version: link:../../packages/twoslash
       fumadocs-ui:
         specifier: workspace:*
         version: link:../../packages/ui
@@ -155,6 +158,9 @@ importers:
       postcss:
         specifier: 8.4.33
         version: 8.4.33
+      postcss-import:
+        specifier: ^16.0.0
+        version: 16.0.0(postcss@8.4.33)
       tailwindcss:
         specifier: 3.4.1
         version: 3.4.1
@@ -177,13 +183,13 @@ importers:
         specifier: 0.3.4
         version: 0.3.4
       fumadocs-contentlayer:
-        specifier: 1.0.1
+        specifier: 1.0.2
         version: link:../../packages/contentlayer
       fumadocs-core:
-        specifier: 8.0.0
+        specifier: 8.1.0
         version: link:../../packages/core
       fumadocs-ui:
-        specifier: 8.0.0
+        specifier: 8.1.0
         version: link:../../packages/ui
       next:
         specifier: 14.0.4
@@ -220,13 +226,13 @@ importers:
   examples/next-mdx:
     dependencies:
       fumadocs-core:
-        specifier: 8.0.0
+        specifier: 8.1.0
         version: link:../../packages/core
       fumadocs-mdx:
-        specifier: 8.0.0
+        specifier: 8.0.1
         version: link:../../packages/mdx
       fumadocs-ui:
-        specifier: 8.0.0
+        specifier: 8.1.0
         version: link:../../packages/ui
       next:
         specifier: 14.0.4
@@ -492,6 +498,37 @@ importers:
 
   packages/tsconfig: {}
 
+  packages/twoslash:
+    dependencies:
+      '@shikijs/twoslash':
+        specifier: ^1.0.0-beta.0
+        version: 1.0.0-beta.0(typescript@5.3.3)
+      mdast-util-from-markdown:
+        specifier: ^2.0.0
+        version: 2.0.0
+      mdast-util-gfm:
+        specifier: ^3.0.0
+        version: 3.0.0
+      mdast-util-to-hast:
+        specifier: ^13.1.0
+        version: 13.1.0
+      shiki:
+        specifier: ^1.0.0-beta.0
+        version: 1.0.0-beta.0
+    devDependencies:
+      '@types/hast':
+        specifier: ^3.0.3
+        version: 3.0.3
+      '@types/mdast':
+        specifier: ^4.0.3
+        version: 4.0.3
+      eslint-config-custom:
+        specifier: workspace:*
+        version: link:../eslint-config-custom
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
+
   packages/ui:
     dependencies:
       '@radix-ui/react-accordion':
@@ -503,6 +540,9 @@ importers:
       '@radix-ui/react-dialog':
         specifier: ^1.0.4
         version: 1.0.4(@types/react-dom@18.2.1)(@types/react@18.2.0)(react-dom@18.2.0)(react@18.2.0)
+      '@radix-ui/react-hover-card':
+        specifier: ^1.0.7
+        version: 1.0.7(@types/react-dom@18.2.1)(@types/react@18.2.0)(react-dom@18.2.0)(react@18.2.0)
       '@radix-ui/react-popover':
         specifier: ^1.0.6
         version: 1.0.6(@types/react-dom@18.2.1)(@types/react@18.2.0)(react-dom@18.2.0)(react@18.2.0)
@@ -3497,6 +3537,10 @@ packages:
     resolution: {integrity: sha512-uicyrkx379Q5sxQuGV3kduHPWIAkjxmeA5A4J6syscx8wiEyIV06i/Q6s9GeKLCb857Hi90H8e/FoFSbcjnZsw==}
     dev: false
 
+  /@shikijs/core@1.0.0-beta.1:
+    resolution: {integrity: sha512-z3gdznaRj/DJSLQdR2Gdx6AB3e5+Il/kSGdLTGHI7HnalgPL15RbGgBSdLHW8rKAz4+dezAcTdnxm8z6YTu7nA==}
+    dev: false
+
   /@shikijs/rehype@1.0.0-beta.0:
     resolution: {integrity: sha512-b2jjH1HJfQ4zxvUJaxMnubxINngvvOXpZZBlW50aYUaMgVFu5vbIJbkXRF4lYCYOtbCxeLf7FCxDLcUqScH8pA==}
     dependencies:
@@ -3518,6 +3562,16 @@ packages:
     resolution: {integrity: sha512-zil9WA4aCs2yJ+1vwt1El8+xp8up9ikh48ksTl7Un8/+dHDAVKjkRD20W+G071cl7NOEEWEynnIMkqqVITNlfA==}
     dependencies:
       '@shikijs/core': 1.0.0-beta.0
+      twoslash: 0.1.0(typescript@5.3.3)
+    transitivePeerDependencies:
+      - supports-color
+      - typescript
+    dev: false
+
+  /@shikijs/twoslash@1.0.0-beta.1(typescript@5.3.3):
+    resolution: {integrity: sha512-kCU1IQhVa/z6ZgCUmIHTzWximpiSeOT3nJSvEaBcudQ32wLmtnVPht4OOTWwwhAHHjAxUUSyxiyikqZXW6JoGg==}
+    dependencies:
+      '@shikijs/core': 1.0.0-beta.1
       twoslash: 0.1.0(typescript@5.3.3)
     transitivePeerDependencies:
       - supports-color
@@ -7767,8 +7821,8 @@ packages:
       '@types/mdast': 4.0.3
       unist-util-is: 6.0.0
 
-  /mdast-util-to-hast@13.0.2:
-    resolution: {integrity: sha512-U5I+500EOOw9e3ZrclN3Is3fRpw8c19SMyNZlZ2IS+7vLsNzb2Om11VpIVOR+/0137GhZsFEF6YiKD5+0Hr2Og==}
+  /mdast-util-to-hast@13.1.0:
+    resolution: {integrity: sha512-/e2l/6+OdGp/FB+ctrJ9Avz71AN/GRH3oi/3KAx/kMnoUsD6q0woXlDT8lLEeViVKE7oZxE7RXzvO3T8kF2/sA==}
     dependencies:
       '@types/hast': 3.0.3
       '@types/mdast': 4.0.3
@@ -7778,6 +7832,7 @@ packages:
       trim-lines: 3.0.1
       unist-util-position: 5.0.0
       unist-util-visit: 5.0.0
+      vfile: 6.0.1
 
   /mdast-util-to-markdown@1.5.0:
     resolution: {integrity: sha512-bbv7TPv/WC49thZPg3jXuqzuvI45IL2EVAr/KxF0BSdHsU0ceFHOmwQn6evxAh1GaoK/6GQ1wp4R4oW2+LFL/A==}
@@ -8910,6 +8965,18 @@ packages:
       read-cache: 1.0.0
       resolve: 1.22.4
 
+  /postcss-import@16.0.0(postcss@8.4.33):
+    resolution: {integrity: sha512-e77lhVvrD1I2y7dYmBv0k9ULTdArgEYZt97T4w6sFIU5uxIHvDFQlKgUUyY7v7Barj0Yf/zm5A4OquZN7jKm5Q==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      postcss: ^8.0.0
+    dependencies:
+      postcss: 8.4.33
+      postcss-value-parser: 4.2.0
+      read-cache: 1.0.0
+      resolve: 1.22.4
+    dev: true
+
   /postcss-js@4.0.1(postcss@8.4.33):
     resolution: {integrity: sha512-dDLF8pEO191hJMtlHFPRa8xsizHaM82MLfNkUHdUtVEV3tgTp5oj+8qbEqYM57SLfc74KSbw//4SeJma2LRVIw==}
     engines: {node: ^12 || ^14 || >= 16}
@@ -9475,7 +9542,7 @@ packages:
     dependencies:
       '@types/hast': 3.0.3
       '@types/mdast': 4.0.3
-      mdast-util-to-hast: 13.0.2
+      mdast-util-to-hast: 13.1.0
       unified: 11.0.4
       vfile: 6.0.1
 

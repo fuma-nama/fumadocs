@@ -5,7 +5,7 @@ import {
   remarkInstall,
   rehypeCodeDefaultOptions,
 } from 'fumadocs-core/mdx-plugins';
-import { transformerTwoslash } from '@shikijs/twoslash';
+import { transformerTwoslash } from 'fumadocs-twoslash';
 import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
 
@@ -27,34 +27,7 @@ const withMDX = createMDX({
     rehypeCodeOptions: {
       transformers: [
         ...rehypeCodeDefaultOptions.transformers,
-        transformerTwoslash({
-          explicitTrigger: true,
-          rendererRich: {
-            hast: {
-              hoverCompose: ({ popup, token }) => [
-                {
-                  type: 'element',
-                  tagName: 'Popover',
-                  children: [
-                    popup,
-                    {
-                      type: 'element',
-                      tagName: 'PopoverTrigger',
-                      children: [token],
-                    },
-                  ],
-                },
-              ],
-              popupTypes: {
-                class: 'nd-codeblock twoslash-popup-code',
-              },
-              hoverPopup: {
-                tagName: 'PopoverContent',
-                children: (v) => v,
-              },
-            },
-          },
-        }),
+        transformerTwoslash(),
         {
           name: 'fumadocs:remove-escape',
           code(element) {

@@ -27,4 +27,8 @@ const HoverCardContent = React.forwardRef<
 
 HoverCardContent.displayName = HoverCardPrimitive.Content.displayName;
 
-export { HoverCard, HoverCardTrigger, HoverCardContent };
+export {
+  HoverCard as Popup,
+  HoverCardTrigger as PopupTrigger,
+  HoverCardContent as PopupContent,
+};

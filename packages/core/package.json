@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-core",
-  "version": "8.0.0",
+  "version": "8.1.0",
   "description": "The library for building a documentation website in Next.js",
   "keywords": [
     "NextJs",
@@ -44,6 +44,10 @@
       "import": "./dist/link.js",
       "types": "./dist/link.d.ts"
     },
+    "./typescript": {
+      "import": "./dist/typescript.js",
+      "types": "./dist/typescript.d.ts"
+    },
     "./middleware": {
       "import": "./dist/middleware.js",
       "types": "./dist/middleware.d.ts"
@@ -71,6 +75,9 @@
       ],
       "toc": [
         "./dist/toc.d.ts"
+      ],
+      "typescript": [
+        "./dist/typescript.d.ts"
       ],
       "search/client": [
         "./dist/search/client.d.ts"
@@ -112,7 +119,6 @@
     "clean": "rimraf dist",
     "dev": "tsup --watch",
     "lint": "eslint .",
-    "test": "vitest",
     "types:check": "tsc --noEmit"
   },
   "dependencies": {

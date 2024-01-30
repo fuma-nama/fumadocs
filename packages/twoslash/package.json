@@ -1,11 +1,10 @@
 {
-  "name": "create-fumadocs-app",
-  "version": "8.1.0",
-  "description": "Create a new documentation site with Fumadocs",
+  "name": "fumadocs-twoslash",
+  "version": "1.0.0",
+  "description": "Typescript Twoslash Integration for Fumadocs",
   "keywords": [
     "NextJs",
-    "next",
-    "react",
+    "fumadocs",
     "Docs"
   ],
   "homepage": "https://fumadocs.vercel.app",
@@ -13,9 +12,9 @@
   "license": "MIT",
   "author": "Fuma Nama",
   "type": "module",
-  "bin": "./dist/index.js",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
-    "template/*",
     "dist/*"
   ],
   "scripts": {
@@ -23,23 +22,20 @@
     "clean": "rimraf dist",
     "dev": "tsup --watch",
     "lint": "eslint .",
-    "postpublish": "echo \"Updating template repo\" && bash ./scripts/update-git-repo.sh",
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@clack/prompts": "^0.7.0",
-    "cross-spawn": "^7.0.3",
-    "picocolors": "^1.0.0"
+    "@shikijs/twoslash": "^1.0.0-beta.0",
+    "mdast-util-from-markdown": "^2.0.0",
+    "mdast-util-gfm": "^3.0.0",
+    "mdast-util-to-hast": "^13.1.0",
+    "shiki": "^1.0.0-beta.0"
   },
   "devDependencies": {
-    "@types/cross-spawn": "^6.0.4",
-    "@types/node": "18.17.5",
+    "@types/hast": "^3.0.3",
+    "@types/mdast": "^4.0.3",
     "eslint-config-custom": "workspace:*",
-    "fast-glob": "^3.3.1",
     "tsconfig": "workspace:*"
-  },
-  "engines": {
-    "node": ">=18.17.0"
   },
   "publishConfig": {
     "access": "public"
