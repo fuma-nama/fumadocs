@@ -21,6 +21,8 @@ describe('Generate docs from Typescript', () => {
       }),
     );
 
+    console.log(process.cwd(), file, result);
+
     expect(JSON.stringify(result, null, 2)).toMatchFileSnapshot(
       './fixtures/test.output.json',
     );
