@@ -6,6 +6,7 @@ const sharedConfig = {
     'algoliasearch',
     'contentlayer',
     'unified',
+    'typescript',
   ],
 };
 
@@ -20,6 +21,6 @@ export default defineConfig({
     'src/{search,search-algolia}/client.ts',
     'src/search/shared.ts',
     'src/{search,search-algolia}/server.ts',
-    'src/middleware.ts',
+    'src/{middleware,typescript}.ts',
   ],
 });
