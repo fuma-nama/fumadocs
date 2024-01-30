@@ -59,8 +59,8 @@ importers:
         specifier: ^1.0.7
         version: 1.0.7(@types/react-dom@18.2.1)(@types/react@18.2.0)(react-dom@18.2.0)(react@18.2.0)
       '@shikijs/twoslash':
-        specifier: 1.0.0-beta.0
-        version: 1.0.0-beta.0(typescript@5.3.3)
+        specifier: 1.0.0-beta.1
+        version: 1.0.0-beta.1(typescript@5.3.3)
       algoliasearch:
         specifier: ^4.20.0
         version: 4.20.0
@@ -3537,6 +3537,10 @@ packages:
     resolution: {integrity: sha512-uicyrkx379Q5sxQuGV3kduHPWIAkjxmeA5A4J6syscx8wiEyIV06i/Q6s9GeKLCb857Hi90H8e/FoFSbcjnZsw==}
     dev: false
 
+  /@shikijs/core@1.0.0-beta.1:
+    resolution: {integrity: sha512-z3gdznaRj/DJSLQdR2Gdx6AB3e5+Il/kSGdLTGHI7HnalgPL15RbGgBSdLHW8rKAz4+dezAcTdnxm8z6YTu7nA==}
+    dev: false
+
   /@shikijs/rehype@1.0.0-beta.0:
     resolution: {integrity: sha512-b2jjH1HJfQ4zxvUJaxMnubxINngvvOXpZZBlW50aYUaMgVFu5vbIJbkXRF4lYCYOtbCxeLf7FCxDLcUqScH8pA==}
     dependencies:
@@ -3558,6 +3562,16 @@ packages:
     resolution: {integrity: sha512-zil9WA4aCs2yJ+1vwt1El8+xp8up9ikh48ksTl7Un8/+dHDAVKjkRD20W+G071cl7NOEEWEynnIMkqqVITNlfA==}
     dependencies:
       '@shikijs/core': 1.0.0-beta.0
+      twoslash: 0.1.0(typescript@5.3.3)
+    transitivePeerDependencies:
+      - supports-color
+      - typescript
+    dev: false
+
+  /@shikijs/twoslash@1.0.0-beta.1(typescript@5.3.3):
+    resolution: {integrity: sha512-kCU1IQhVa/z6ZgCUmIHTzWximpiSeOT3nJSvEaBcudQ32wLmtnVPht4OOTWwwhAHHjAxUUSyxiyikqZXW6JoGg==}
+    dependencies:
+      '@shikijs/core': 1.0.0-beta.1
       twoslash: 0.1.0(typescript@5.3.3)
     transitivePeerDependencies:
       - supports-color
