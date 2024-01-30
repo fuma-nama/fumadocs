@@ -17,9 +17,14 @@ const exportedComponents = [
   'card',
   'heading',
   'codeblock',
+  'auto-type-table',
+  'dialog/search',
+  'dialog/search-default',
+  'dialog/search-algolia',
 ];
 
 const injectImports = {
+  './src/components/auto-type-table.tsx': './src/components/type-table.tsx',
   './src/page.tsx': './src/page.client.tsx',
   './src/mdx.tsx': './src/mdx.client.tsx',
   './src/layout.tsx': './src/layout.client.tsx',
@@ -62,11 +67,11 @@ export default defineConfig([
   {
     entry: [
       `./src/components/{${exportedComponents.join(',')}}.tsx`,
-      './src/components/dialog/{search,search-default,search-algolia}.tsx',
-      './src/{i18n,layout,page,provider,provider,mdx}.{ts,tsx}',
+      './src/{i18n,layout,page,provider,mdx}.{ts,tsx}',
       './src/twoslash/popup.tsx',
-      ...Object.values(injectImports),
+      './src/*.client.tsx',
     ],
+    external: ['server-only'],
     outExtension: () => ({ js: '.js' }),
     async onSuccess() {
       const replaceImports = Object.entries(injectImports).map(

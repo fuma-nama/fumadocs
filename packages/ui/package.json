@@ -26,9 +26,25 @@
       "import": "./dist/twoslash/*.js",
       "types": "./dist/twoslash/*.d.mts"
     },
-    "./*": {
-      "import": "./dist/*.js",
-      "types": "./dist/*.d.mts"
+    "./i18n": {
+      "import": "./dist/i18n.js",
+      "types": "./dist/i18n.d.mts"
+    },
+    "./layout": {
+      "import": "./dist/layout.js",
+      "types": "./dist/layout.d.mts"
+    },
+    "./page": {
+      "import": "./dist/page.js",
+      "types": "./dist/page.d.mts"
+    },
+    "./provider": {
+      "import": "./dist/provider.js",
+      "types": "./dist/provider.d.mts"
+    },
+    "./mdx": {
+      "import": "./dist/mdx.js",
+      "types": "./dist/mdx.d.mts"
     }
   },
   "typesVersions": {
@@ -42,11 +58,20 @@
       "twoslash/*": [
         "./dist/twoslash/*.d.mts"
       ],
-      "mdx/*": [
-        "./dist/mdx/*.d.mts"
+      "i18n": [
+        "./dist/i18n.d.mts"
       ],
-      "*": [
-        "./dist/*.d.mts"
+      "layout": [
+        "./dist/layout.d.mts"
+      ],
+      "page": [
+        "./dist/page.d.mts"
+      ],
+      "provider": [
+        "./dist/provider.d.mts"
+      ],
+      "mdx": [
+        "./dist/mdx.d.mts"
       ]
     }
   },
