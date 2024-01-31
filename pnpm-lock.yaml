@@ -183,13 +183,13 @@ importers:
         specifier: 0.3.4
         version: 0.3.4
       fumadocs-contentlayer:
-        specifier: 1.0.2
+        specifier: 1.0.3
         version: link:../../packages/contentlayer
       fumadocs-core:
-        specifier: 8.1.0
+        specifier: 8.1.1
         version: link:../../packages/core
       fumadocs-ui:
-        specifier: 8.1.0
+        specifier: 8.1.1
         version: link:../../packages/ui
       next:
         specifier: 14.0.4
@@ -226,13 +226,13 @@ importers:
   examples/next-mdx:
     dependencies:
       fumadocs-core:
-        specifier: 8.1.0
+        specifier: 8.1.1
         version: link:../../packages/core
       fumadocs-mdx:
-        specifier: 8.0.1
+        specifier: 8.0.2
         version: link:../../packages/mdx
       fumadocs-ui:
-        specifier: 8.1.0
+        specifier: 8.1.1
         version: link:../../packages/ui
       next:
         specifier: 14.0.4
