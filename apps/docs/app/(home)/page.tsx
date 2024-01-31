@@ -473,7 +473,7 @@ function Hero(): JSX.Element {
         <b className="font-medium text-foreground">
           excellent UI and user experience
         </b>
-        . Allow you to take advantage of Next.js App Router and React Server
+        . Allow yourself to take advantage of Next.js App Router and React Server
         Component.
       </p>
       <div className="inline-flex items-center gap-3">
