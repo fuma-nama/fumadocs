@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-ui",
-  "version": "8.0.0",
+  "version": "8.1.0",
   "description": "The framework for building a documentation website in Next.js",
   "keywords": [
     "NextJs",
