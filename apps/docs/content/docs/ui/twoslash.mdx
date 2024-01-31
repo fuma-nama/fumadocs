@@ -58,9 +58,30 @@ const mdxComponents = {
 Learn more about [Twoslash notations](https://twoslash.netlify.app/refs/notations).
 
 ```ts twoslash
+type Player = {
+  /**
+   * The player name
+   * @default 'user'
+   */
+  name: string;
+};
+
+// ---cut---
 // @noErrors
 console.g;
 //       ^|
+
+// ---cut-start---
+// ---cut-end---
+
+// ---cut-start---
+// ---cut-end---
+
+// ---cut-start---
+// ---cut-end---
+
+const player: Player = { name: 'Hello World' };
+//    ^?
 ```
 
 ```ts twoslash

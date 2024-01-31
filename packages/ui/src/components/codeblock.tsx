@@ -29,8 +29,16 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
     const onCopy = useCallback(() => {
       const pre = areaRef.current?.getElementsByTagName('pre').item(0);
 
-      if (!pre?.textContent) return;
-      void navigator.clipboard.writeText(pre.textContent);
+      if (!pre) return;
+
+      const clone = pre.cloneNode(true) as HTMLElement;
+      clone.querySelectorAll('.nd-copy-ignore').forEach((node) => {
+        node.remove();
+      });
+
+      const text = clone.textContent || '';
+
+      void navigator.clipboard.writeText(text);
     }, []);
 
     return (

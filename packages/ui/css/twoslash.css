@@ -50,7 +50,7 @@
   background-color: hsl(var(--popover));
 }
 
-.twoslash-popup-docs-tags {
+.twoslash-popup-docs-tag {
   display: flex;
   flex-direction: column;
   gap: 0.5em;

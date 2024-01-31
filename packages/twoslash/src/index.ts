@@ -16,10 +16,13 @@ import {
 export function transformerTwoslash(
   options?: TransformerTwoslashIndexOptions,
 ): ShikiTransformer {
+  const ignoreClass = 'nd-copy-ignore';
+
   return originalTransformer({
     explicitTrigger: true,
     ...options,
     rendererRich: {
+      classExtra: ignoreClass,
       renderMarkdown,
       renderMarkdownInline,
       hast: {
