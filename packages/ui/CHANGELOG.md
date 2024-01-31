@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 8.1.1
+
+### Patch Changes
+
+- 153ceaf: Fix typo
+  - fumadocs-core@8.1.1
+
 ## 8.1.0
 
 ### Minor Changes
