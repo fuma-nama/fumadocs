@@ -87,13 +87,13 @@ export function Rain(
 
 export function Previews(): JSX.Element {
   return (
-    <div className="rounded-xl border bg-gradient-to-b from-secondary to-muted p-6 text-sm">
-      <p className="text-base">I&apos;m satisfied with it</p>
+    <div className="rounded-xl border bg-background p-4 shadow-lg">
+      <p className="text-medium font-medium">I&apos;m satisfied with it</p>
 
       <a
         href="https://joulev.dev"
         rel="noreferrer noopener"
-        className="mt-4 inline-flex items-center font-medium"
+        className="mt-4 inline-flex items-center text-sm font-medium"
       >
         @joulev
       </a>
