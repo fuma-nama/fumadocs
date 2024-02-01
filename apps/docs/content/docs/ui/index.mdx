@@ -139,7 +139,7 @@ npm run dev
 ### FAQ
 
 <Accordions>
-<Accordion title="Why Fumadocs UI?">
+<Accordion id='why-fumadocs-ui' title="Why Fumadocs UI?">
 
 Fumadocs UI provides many built-in components, and is more flexible compared to
 other existing frameworks.
@@ -151,7 +151,7 @@ Fumadocs in an existing Next.js project, without refactoring anything.
 Feel free to open the demo in CodeSandbox and see if it suits you.
 
 </Accordion>
-<Accordion id='collapsible-fix-error' title="How to fix 'supports-color' error?">
+<Accordion id='fix-supports-color' title="How to fix 'supports-color' error?">
 
 If you got this error:
 
@@ -160,6 +160,13 @@ Module not found: Can't resolve 'supports-color' in '.../node_modules/debug/src'
 ```
 
 Try installing `supports-color@8.1.1`.
+
+</Accordion>
+<Accordion id='fix-dot-map-error' title="How to fix '@/.map' error?">
+
+If you are using Fumadocs MDX, the `.map.ts` file will be generated automatically once you start the dev server.
+
+For more information, see [Setup Guide](/docs/mdx).
 
 </Accordion>
 </Accordions>
