@@ -1,9 +1,8 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve, dirname, join, parse } from 'node:path';
-import { glob } from 'glob';
-import { globby } from 'globby';
 import type { GenerateOptions } from './generate';
 import { generate, generateTags } from './generate';
+import { resolvePatterns } from './utils';
 
 export interface Config {
   /**
@@ -84,12 +83,4 @@ export async function generateFiles({
 function write(path: string, content: string): void {
   mkdirSync(dirname(path), { recursive: true });
   writeFileSync(path, content);
-}
-
-async function resolvePatterns(patterns: string[] | string): Promise<string[]> {
-  if (glob.hasMagic(patterns)) {
-    return globby(patterns);
-  }
-
-  return typeof patterns === 'string' ? [patterns] : patterns;
 }
