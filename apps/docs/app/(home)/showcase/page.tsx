@@ -6,6 +6,8 @@ import NextFAQImage from '@/public/showcases/next-faq.png';
 import YeecordImage from '@/public/showcases/yeecord.png';
 import { cn } from '@/utils/cn';
 import { createMetadata } from '@/utils/metadata';
+import NuqsImage from '@/public/showcases/nuqs.jpg';
+import TypelyticsImage from '@/public/showcases/typelytics.png';
 
 export const metadata = createMetadata({
   title: 'Showcase',
@@ -63,6 +65,8 @@ export default function Showcase(): JSX.Element {
       'https://nextjs-discord-common-questions.joulev.dev',
     ],
     [YeecordImage, 'Yeecord Docs', 'https://yeecord.com'],
+    [NuqsImage, 'nuqs', 'https://nuqs.47ng.com'],
+    [TypelyticsImage, 'Typelytics', 'https://typelytics.rhyssul.com/'],
   ] as const;
 
   return (
@@ -102,10 +106,15 @@ export default function Showcase(): JSX.Element {
             href={href}
             target="_blank"
             rel="noreferrer noopener"
-            className="group relative overflow-hidden rounded-lg border shadow-lg transition-all hover:border-primary/30 hover:shadow-primary/10"
+            className="relative overflow-hidden rounded-lg border shadow-lg transition-all hover:border-primary/30 hover:shadow-primary/10"
           >
-            <Image alt="Preview" src={image} placeholder="blur" />
-            <p className="absolute inset-x-0 bottom-0 mt-2 bg-gradient-to-t from-black bg-no-repeat p-6 pt-8 text-sm font-medium text-white transition-all group-hover:[background-position-y:50px]">
+            <Image
+              alt="Preview"
+              src={image}
+              placeholder="blur"
+              className="h-full object-cover"
+            />
+            <p className="absolute inset-x-0 bottom-0 mt-2 bg-gradient-to-t from-black bg-no-repeat p-6 pt-8 text-sm font-medium text-white">
               {name}
             </p>
           </a>

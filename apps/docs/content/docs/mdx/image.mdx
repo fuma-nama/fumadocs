@@ -1,0 +1,25 @@
+---
+title: Image Optimization
+description: Adding images to your docs
+---
+
+Fumadocs MDX resolves images into static imports with [Remark Image](/docs/headless/mdx/remark-image).
+Therefore, your images will be optimized automatically by the Next.js Image API.
+
+```mdx
+![Hello](./hello.png)
+
+or in public folder
+
+![Hello](/hello.png)
+```
+
+Yields:
+
+```mdx
+import HelloImage from './hello.png';
+
+<img alt="Hello" src={HelloImage} />
+```
+
+![Banner](/banner.png)

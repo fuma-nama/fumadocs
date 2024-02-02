@@ -1,0 +1,32 @@
+---
+title: Remark Image
+description: Convert images into static imports
+---
+
+## Usage
+
+Convert images into imports (MDX only).
+
+```ts
+import { remarkImage } from 'fumadocs-core/mdx-plugins';
+
+export default {
+  remarkPlugins: [remarkImage],
+};
+```
+
+For example, from this MDX document.
+
+```mdx
+![Hello](./hello.png)
+```
+
+Yields:
+
+```mdx
+import HelloImage from './hello.png';
+
+<img alt="Hello" src={HelloImage} />
+```
+
+> You need an image loader to handle image imports.
