@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { isDynamicPattern } from 'globby';
+import { isDynamicPattern } from 'fast-glob';
 import { generateFiles, type Config } from './generate-file';
 import { resolvePatterns } from './utils';
 
