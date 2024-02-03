@@ -6,7 +6,7 @@ description: Adding code blocks to your docs
 <Wrapper>
 <div className="bg-background rounded-lg prose-no-margin">
 
-```js title="Demo File"
+```js title="config.js"
 import createMDX from 'fumadocs-mdx/config';
 
 const withMDX = createMDX();
@@ -27,7 +27,7 @@ Display code blocks, required by default.
 
 - Syntax highlighting powered by Shiki
 - Copy button
-- Custom Titles
+- Custom titles and icons
 
 ## Usage
 
@@ -82,3 +82,41 @@ Add `title="x"` to the codeblock meta.
 console.log('Hello World');
 ```
 ````
+
+### Icons
+
+You can specify a custom icon by passing an `icon` prop to `CodeBlock` component.
+
+When the `icon` prop is passed as a string, it will be parsed as JSON and converted into `CodeBlockIcon`.
+
+```js title="config.js"
+console.log('js');
+```
+
+```ts title="config.ts"
+console.log('ts');
+```
+
+```md title="document.md"
+# Hello World!
+```
+
+```mdx title="document.mdx"
+# Hello World!
+```
+
+```rust title="main.rs"
+fn main() {
+    println!("Hello World!");
+}
+```
+
+```tsx title="component.tsx"
+<MDXContent>Hello World</MDXContent>
+```
+
+```css title="style.css"
+.nd-codeblock {
+  color: red;
+}
+```

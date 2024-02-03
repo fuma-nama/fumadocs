@@ -4,7 +4,11 @@ import { Callout } from 'fumadocs-ui/components/callout';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 import { TypeTable } from 'fumadocs-ui/components/type-table';
 import defaultComponents from 'fumadocs-ui/mdx';
-import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
+import {
+  CodeBlock,
+  type CodeBlockProps,
+  Pre,
+} from 'fumadocs-ui/components/codeblock';
 import type { ReactNode } from 'react';
 import { Popup, PopupContent, PopupTrigger } from 'fumadocs-ui/twoslash/popup';
 import { AutoTypeTable } from 'fumadocs-ui/components/auto-type-table';
@@ -23,8 +27,8 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     Popup,
     PopupContent,
     PopupTrigger,
-    pre: ({ ref: _ref, title, className, ...props }) => (
-      <CodeBlock title={title}>
+    pre: ({ title, className, icon, allowCopy, ...props }: CodeBlockProps) => (
+      <CodeBlock title={title} icon={icon} allowCopy={allowCopy}>
         <Pre className={cn('max-h-[400px]', className)} {...props} />
       </CodeBlock>
     ),

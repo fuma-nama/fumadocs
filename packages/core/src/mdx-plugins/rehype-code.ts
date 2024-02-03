@@ -6,6 +6,8 @@ import {
 } from '@shikijs/transformers';
 import type { Processor, Transformer } from 'unified';
 import { visit } from './hast-utils';
+import type { IconOptions, CodeBlockIcon } from './transformer-icon';
+import { transformerIcon } from './transformer-icon';
 
 interface MetaValue {
   name: string;
@@ -72,6 +74,11 @@ export type RehypeCodeOptions = RehypeShikiOptions & {
    * @defaultValue plaintext
    */
   defaultLang?: string;
+
+  /**
+   * Add icon to code blocks
+   */
+  icon?: IconOptions | false;
 };
 
 /**
@@ -101,6 +108,13 @@ export function rehypeCode(
     },
     ...codeOptions.transformers,
   ];
+
+  if (codeOptions.icon !== false) {
+    codeOptions.transformers = [
+      ...codeOptions.transformers,
+      transformerIcon(codeOptions.icon),
+    ];
+  }
 
   const prefix = 'language-';
   const transformer = rehypeShiki.call(this, codeOptions);
@@ -135,3 +149,5 @@ export function rehypeCode(
       });
   };
 }
+
+export type { CodeBlockIcon, transformerIcon };

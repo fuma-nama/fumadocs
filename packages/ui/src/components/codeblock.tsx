@@ -1,13 +1,23 @@
 'use client';
 import { CheckIcon, CopyIcon } from 'lucide-react';
-import type { ButtonHTMLAttributes, HTMLAttributes } from 'react';
+import type { ButtonHTMLAttributes, HTMLAttributes, ReactNode } from 'react';
 import { forwardRef, useCallback, useRef } from 'react';
+import type { CodeBlockIcon } from 'fumadocs-core/mdx-plugins';
 import { cn } from '@/utils/cn';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCopyButton } from '@/utils/use-copy-button';
 import { buttonVariants } from '@/theme/variants';
 
 export type CodeBlockProps = HTMLAttributes<HTMLElement> & {
+  /**
+   * Icon of code block
+   *
+   * If specified as string, it will be parsed as JSON, assuming it is `CodeBlockIcon`
+   *
+   * if equal to `default`, use the default icon instead.
+   */
+  icon?: ReactNode;
+
   allowCopy?: boolean;
 };
 
@@ -24,7 +34,19 @@ export const Pre = forwardRef<HTMLPreElement, HTMLAttributes<HTMLPreElement>>(
 Pre.displayName = 'Pre';
 
 export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
-  ({ title, allowCopy = true, className, ...props }, ref) => {
+  ({ title, allowCopy = true, icon, className, ...props }, ref) => {
+    let iconEl = icon;
+
+    if (typeof icon === 'string') {
+      const parsed = JSON.parse(icon) as CodeBlockIcon;
+
+      iconEl = (
+        <svg viewBox={parsed.viewBox} className="size-4">
+          <path fill={parsed.fill} d={parsed.d} />
+        </svg>
+      );
+    }
+
     const areaRef = useRef<HTMLDivElement>(null);
     const onCopy = useCallback(() => {
       const pre = areaRef.current?.getElementsByTagName('pre').item(0);
@@ -51,9 +73,12 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
         {...props}
       >
         {title ? (
-          <div className="flex flex-row items-center border-b bg-muted py-1.5 pl-4 pr-2 text-muted-foreground">
-            <figcaption className="flex-1">{title}</figcaption>
-            {allowCopy ? <CopyButton onCopy={onCopy} /> : null}
+          <div className="flex flex-row items-center gap-2 border-b bg-muted px-4 py-1.5 text-muted-foreground">
+            {iconEl}
+            <figcaption className="flex-1 truncate">{title}</figcaption>
+            {allowCopy ? (
+              <CopyButton className="-mr-2" onCopy={onCopy} />
+            ) : null}
           </div>
         ) : (
           allowCopy && (
