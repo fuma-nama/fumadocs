@@ -1,7 +1,7 @@
 'use client';
 import { CheckIcon, CopyIcon } from 'lucide-react';
 import type { ButtonHTMLAttributes, HTMLAttributes, ReactNode } from 'react';
-import { forwardRef, useCallback, useRef } from 'react';
+import { forwardRef, useCallback, useMemo, useRef } from 'react';
 import type { CodeBlockIcon } from 'fumadocs-core/mdx-plugins';
 import { cn } from '@/utils/cn';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -35,17 +35,19 @@ Pre.displayName = 'Pre';
 
 export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
   ({ title, allowCopy = true, icon, className, ...props }, ref) => {
-    let iconEl = icon;
+    const iconEl = useMemo(() => {
+      if (typeof icon === 'string') {
+        const parsed = JSON.parse(icon) as CodeBlockIcon;
 
-    if (typeof icon === 'string') {
-      const parsed = JSON.parse(icon) as CodeBlockIcon;
+        return (
+          <svg viewBox={parsed.viewBox} className="size-3">
+            <path fill={parsed.fill} d={parsed.d} />
+          </svg>
+        );
+      }
 
-      iconEl = (
-        <svg viewBox={parsed.viewBox} className="size-4">
-          <path fill={parsed.fill} d={parsed.d} />
-        </svg>
-      );
-    }
+      return icon;
+    }, [icon]);
 
     const areaRef = useRef<HTMLDivElement>(null);
     const onCopy = useCallback(() => {
