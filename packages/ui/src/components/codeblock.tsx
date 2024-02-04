@@ -40,7 +40,7 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
         const parsed = JSON.parse(icon) as CodeBlockIcon;
 
         return (
-          <svg viewBox={parsed.viewBox} className="size-3">
+          <svg viewBox={parsed.viewBox} className="size-3.5">
             <path fill={parsed.fill} d={parsed.d} />
           </svg>
         );
