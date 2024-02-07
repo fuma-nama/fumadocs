@@ -1,6 +1,7 @@
 import { fileURLToPath } from 'node:url';
-import { describe, expect, test } from 'vitest';
-import { generate, generateTags } from '../src';
+import { join } from 'node:path';
+import { describe, expect, test, vi } from 'vitest';
+import { generate, generateFiles, generateTags } from '../src';
 
 describe('Generate documents', () => {
   test('Pet Store', async () => {
@@ -22,5 +23,44 @@ describe('Generate documents', () => {
         `./out/museum/${tag.tag.toLowerCase()}.mdx`,
       );
     }
+  });
+
+  test('Generate Files', async () => {
+    const cwd = fileURLToPath(new URL('./', import.meta.url));
+
+    vi.mock('node:fs', async (importOriginal) => {
+      return {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- mock
+        ...(await importOriginal<typeof import('node:fs')>()),
+        mkdirSync: vi.fn().mockImplementation(() => {
+          // do nothing
+        }),
+        writeFileSync: vi.fn().mockImplementation(() => {
+          // do nothing
+        }),
+      };
+    });
+
+    await generateFiles({
+      input: ['./fixtures/*.yaml'],
+      output: './out',
+      cwd,
+    });
+
+    const fs = await import('node:fs');
+
+    expect(fs.writeFileSync).toBeCalledTimes(2);
+    expect(fs.writeFileSync).toBeCalledWith(
+      join(cwd, './out/museum.mdx'),
+      expect.anything(),
+    );
+    expect(fs.writeFileSync).toBeCalledWith(
+      join(cwd, './out/petstore.mdx'),
+      expect.anything(),
+    );
+
+    expect(fs.mkdirSync).toBeCalledWith(join(cwd, './out'), expect.anything());
+
+    vi.resetAllMocks();
   });
 });

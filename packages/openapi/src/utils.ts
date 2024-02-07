@@ -1,4 +1,3 @@
-import { glob, isDynamicPattern } from 'fast-glob';
 import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
 
 type NoReference<T> = Exclude<T, OpenAPI.ReferenceObject>;
@@ -20,17 +19,4 @@ export function getPreferredMedia<T>(body: Record<string, T>): T | undefined {
  */
 export function getValue(value: unknown): string {
   return typeof value === 'string' ? value : JSON.stringify(value, null, 2);
-}
-
-/**
- * Resolve patterns
- */
-export async function resolvePatterns(
-  patterns: string[] | string,
-): Promise<string[]> {
-  if (isDynamicPattern(patterns.toString())) {
-    return glob(patterns);
-  }
-
-  return typeof patterns === 'string' ? [patterns] : patterns;
 }

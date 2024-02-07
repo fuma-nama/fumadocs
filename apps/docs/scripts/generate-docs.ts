@@ -1,7 +1,7 @@
 import { generateFiles } from 'fumadocs-openapi';
 
 void generateFiles({
-  input: ['./museum.yaml'],
+  input: ['./*.yaml'],
   output: './content/docs/ui',
   per: 'tag',
   render: (title, description) => {

@@ -1,9 +1,7 @@
 #!/usr/bin/env node
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { isDynamicPattern } from 'fast-glob';
 import { generateFiles, type Config } from './generate-file';
-import { resolvePatterns } from './utils';
 
 async function main(): Promise<void> {
   const configName = process.argv[2];
@@ -12,13 +10,9 @@ async function main(): Promise<void> {
   await generateFiles(config);
 }
 
-async function readConfig(name = 'openapi.config.{js,ts}'): Promise<Config> {
-  let path = resolve(process.cwd(), name);
-  if (isDynamicPattern(name)) {
-    const [resolved] = await resolvePatterns(name);
-    path = resolved;
-  }
-  const result = (await import(pathToFileURL(path).toString())) as {
+async function readConfig(name = 'openapi.config.js'): Promise<Config> {
+  const path = resolve(process.cwd(), name);
+  const result = (await import(pathToFileURL(path).href)) as {
     default: Config;
   };
 

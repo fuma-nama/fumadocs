@@ -1,8 +1,8 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
-import { resolve, dirname, join, parse } from 'node:path';
+import { dirname, join, parse } from 'node:path';
+import fg from 'fast-glob';
 import type { GenerateOptions } from './generate';
 import { generate, generateTags } from './generate';
-import { resolvePatterns } from './utils';
 
 export interface Config {
   /**
@@ -33,6 +33,8 @@ export interface Config {
    * Modify output file
    */
   render?: NonNullable<GenerateOptions['render']>;
+
+  cwd?: string;
 }
 
 export async function generateFiles({
@@ -41,17 +43,17 @@ export async function generateFiles({
   name: nameFn,
   per = 'file',
   render,
+  cwd = process.cwd(),
 }: Config): Promise<void> {
-  const outputDir = resolve(output);
-
+  const outputDir = join(cwd, output);
   const options = {
     render,
   };
 
-  const resolvedInputs = await resolvePatterns(input);
+  const resolvedInputs = await fg.glob(input, { absolute: true, cwd });
+
   await Promise.all(
-    resolvedInputs.map(async (file) => {
-      const path = resolve(file);
+    resolvedInputs.map(async (path) => {
       let filename = parse(path).name;
       filename = nameFn?.('file', filename) ?? filename;
 
@@ -70,7 +72,7 @@ export async function generateFiles({
             nameFn?.('tag', tagName) ??
             tagName.toLowerCase().replace(/\s+/g, '-');
 
-          const outPath = join(outputDir, `${filename}/${tagName}.mdx`);
+          const outPath = join(outputDir, filename, `${tagName}.mdx`);
 
           write(outPath, result.content);
           console.log(`Generated: ${outPath}`);
