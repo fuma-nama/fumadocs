@@ -2,12 +2,13 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve, dirname, join, parse } from 'node:path';
 import type { GenerateOptions } from './generate';
 import { generate, generateTags } from './generate';
+import { resolvePatterns } from './utils';
 
 export interface Config {
   /**
    * Schema files
    */
-  input: string[];
+  input: string[] | string;
 
   /**
    * Output directory
@@ -47,8 +48,9 @@ export async function generateFiles({
     render,
   };
 
+  const resolvedInputs = await resolvePatterns(input);
   await Promise.all(
-    input.map(async (file) => {
+    resolvedInputs.map(async (file) => {
       const path = resolve(file);
       let filename = parse(path).name;
       filename = nameFn?.('file', filename) ?? filename;
