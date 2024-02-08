@@ -117,7 +117,7 @@
     "algoliasearch": "^4.20.0",
     "eslint-config-custom": "workspace:*",
     "next": "14.1.0",
-    "postcss": "8.4.34",
+    "postcss": "8.4.35",
     "postcss-cli": "^11.0.0",
     "postcss-lightningcss": "^1.0.0",
     "tsconfig": "workspace:*"
