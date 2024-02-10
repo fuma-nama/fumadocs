@@ -5,5 +5,5 @@ export default function slash(path: string): string {
     return path;
   }
 
-  return path.replace('\\', '/');
+  return path.replaceAll('\\', '/');
 }
