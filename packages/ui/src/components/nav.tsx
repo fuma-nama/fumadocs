@@ -91,10 +91,10 @@ export function Nav({
   return (
     <header
       className={cn(
-        'sticky top-0 z-50 h-16 border-b backdrop-blur-md transition-colors',
+        'sticky top-0 z-50 h-16 border-b transition-colors',
         transparent
           ? 'border-transparent'
-          : 'border-foreground/10 bg-background/50',
+          : 'border-foreground/10 bg-background/50 backdrop-blur-md',
       )}
     >
       <nav className="container flex h-full flex-row items-center gap-4">
