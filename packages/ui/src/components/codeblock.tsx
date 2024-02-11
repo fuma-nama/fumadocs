@@ -13,8 +13,6 @@ export type CodeBlockProps = HTMLAttributes<HTMLElement> & {
    * Icon of code block
    *
    * If specified as string, it will be parsed as JSON, assuming it is `CodeBlockIcon`
-   *
-   * if equal to `default`, use the default icon instead.
    */
   icon?: ReactNode;
 
@@ -112,8 +110,9 @@ function CopyButton({
       type="button"
       className={cn(
         buttonVariants({
-          color: 'muted',
-          className: 'transition-all group-hover:opacity-100',
+          color: 'ghost',
+          className:
+            'text-foreground transition-all backdrop-blur-sm group-hover:opacity-100',
         }),
         !checked && 'opacity-0',
         className,

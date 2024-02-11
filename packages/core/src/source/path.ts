@@ -28,7 +28,7 @@ export function getRelativePath(path: string, root: string): string {
 
 export function parseFolderPath(path: string): FileInfo {
   const parsed = parse(path);
-  const dir = parsed.dir.replace('\\', '/');
+  const dir = slash(parsed.dir);
   const [name, locale] = parsed.base.split('.');
 
   return {

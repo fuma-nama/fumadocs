@@ -132,7 +132,7 @@ export function APIExample({
           type="button"
           className={cn(
             buttonVariants({
-              color: 'muted',
+              color: 'secondary',
               size: 'lg',
             }),
           )}
