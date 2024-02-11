@@ -1,5 +1,17 @@
 # next-docs-ui
 
+## 8.2.0
+
+### Minor Changes
+
+- 5c24659: Support code block icons
+
+### Patch Changes
+
+- 09bdf63: Separate stylesheet with Image Zoom component
+- Updated dependencies [5c24659]
+  - fumadocs-core@8.2.0
+
 ## 8.1.1
 
 ### Patch Changes
