@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 1.1.0
+
+### Minor Changes
+
+- 8665888: Added patterns support to config Inputs.
+
 ## 1.0.1
 
 ### Patch Changes
