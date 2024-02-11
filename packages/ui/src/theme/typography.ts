@@ -14,10 +14,10 @@ export const typography = {
     '--tw-prose-code': `theme('colors.foreground')`,
     '--tw-prose-th-borders': `theme('colors.border')`,
     '--tw-prose-td-borders': `theme('colors.border')`,
-    '--tw-prose-pre-bg': `theme('colors.secondary.DEFAULT')`,
     '--tw-prose-kbd': `theme('colors.foreground')`,
     '--tw-prose-kbd-shadows': `theme('colors.primary.DEFAULT / 50%')`,
     // not used
+    '--tw-prose-pre-bg': false,
     '--tw-prose-pre-code': false,
     fontSize: '16px',
     maxWidth: 'none',
@@ -36,7 +36,10 @@ export const typography = {
       whiteSpace: 'nowrap',
     },
     code: {
-      padding: '4px',
+      padding: '3px',
+      border: 'solid 1px',
+      fontSize: '13px',
+      borderColor: `theme('colors.border')`,
       borderRadius: '5px',
       fontWeight: '400',
       background: `theme('colors.muted.DEFAULT')`,

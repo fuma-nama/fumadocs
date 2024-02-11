@@ -12,7 +12,7 @@ async function main(): Promise<void> {
 
 async function readConfig(name = 'openapi.config.js'): Promise<Config> {
   const path = resolve(process.cwd(), name);
-  const result = (await import(pathToFileURL(path).toString())) as {
+  const result = (await import(pathToFileURL(path).href)) as {
     default: Config;
   };
 

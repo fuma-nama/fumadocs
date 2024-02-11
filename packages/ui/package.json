@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-ui",
-  "version": "8.1.1",
+  "version": "8.2.0",
   "description": "The framework for building a documentation website in Next.js",
   "keywords": [
     "NextJs",
@@ -13,6 +13,7 @@
   "exports": {
     "./style.css": "./dist/style.css",
     "./twoslash.css": "./dist/twoslash.css",
+    "./image-zoom.css": "./dist/image-zoom.css",
     "./tailwind-plugin": {
       "import": "./dist/tailwind-plugin.js",
       "require": "./dist/tailwind-plugin.js",
@@ -117,7 +118,7 @@
     "algoliasearch": "^4.20.0",
     "eslint-config-custom": "workspace:*",
     "next": "14.1.0",
-    "postcss": "8.4.33",
+    "postcss": "8.4.35",
     "postcss-cli": "^11.0.0",
     "postcss-lightningcss": "^1.0.0",
     "tsconfig": "workspace:*"

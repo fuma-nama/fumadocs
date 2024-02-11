@@ -4,6 +4,7 @@ import Image, { type ImageProps } from 'next/image';
 import { type ImgHTMLAttributes } from 'react';
 import Zoom from 'react-medium-image-zoom';
 import { defaultImageSizes } from '@/utils/shared';
+import '../../dist/image-zoom.css';
 
 export type ImageZoomProps = ImageProps & {
   /**

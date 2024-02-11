@@ -9,8 +9,6 @@ export const buttonVariants = cva(
         ghost: 'hover:bg-accent hover:text-accent-foreground',
         secondary:
           'border bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground',
-        muted:
-          'bg-muted text-secondary-foreground hover:bg-accent hover:text-accent-foreground',
       },
       size: {
         lg: 'px-4 py-2 text-medium',

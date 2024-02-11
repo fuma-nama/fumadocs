@@ -9,7 +9,7 @@ import {
   remarkImage,
   type RemarkImageOptions,
 } from 'fumadocs-core/mdx-plugins';
-import type { PluggableList } from 'unified';
+import type { Pluggable, PluggableList } from 'unified';
 import type { Configuration } from 'webpack';
 import { MapWebpackPlugin } from './webpack-plugins/map-plugin';
 import remarkMdxExport from './mdx-plugins/remark-exports';
@@ -28,8 +28,8 @@ type MDXOptions = Omit<
    */
   valueToExport?: string[];
 
-  remarkImageOptions?: RemarkImageOptions;
-  rehypeCodeOptions?: RehypeCodeOptions;
+  remarkImageOptions?: RemarkImageOptions | false;
+  rehypeCodeOptions?: RehypeCodeOptions | false;
 };
 
 type ResolvePlugins = PluggableList | ((v: PluggableList) => PluggableList);
@@ -67,6 +67,52 @@ function pluginOption(
   return list;
 }
 
+function getMDXLoaderOptions({
+  valueToExport = [],
+  rehypeCodeOptions,
+  remarkImageOptions,
+  ...mdxOptions
+}: MDXOptions): MDXLoaderOptions {
+  const mdxExports = [
+    'structuredData',
+    'toc',
+    'frontmatter',
+    'lastModified',
+    ...valueToExport,
+  ];
+
+  const remarkPlugins = pluginOption(
+    (v) => [
+      remarkGfm,
+      remarkHeading,
+      ...(remarkImageOptions === false
+        ? []
+        : [[remarkImage, remarkImageOptions] satisfies Pluggable]),
+      ...v,
+      remarkStructure,
+      [remarkMdxExport, { values: mdxExports }],
+    ],
+    mdxOptions.remarkPlugins,
+  );
+
+  const rehypePlugins: PluggableList = pluginOption(
+    (v) => [
+      ...(rehypeCodeOptions === false
+        ? []
+        : [[rehypeCode, rehypeCodeOptions] satisfies Pluggable]),
+      ...v,
+    ],
+    mdxOptions.rehypePlugins,
+  );
+
+  return {
+    providerImportSource: 'next-mdx-import-source-file',
+    ...mdxOptions,
+    remarkPlugins,
+    rehypePlugins,
+  };
+}
+
 const createMDX =
   ({
     mdxOptions = {},
@@ -75,31 +121,8 @@ const createMDX =
     rootContentPath = './content',
   }: CreateMDXOptions = {}) =>
   (nextConfig: NextConfig = {}) => {
-    const valueToExport = [
-      'structuredData',
-      'toc',
-      'frontmatter',
-      'lastModified',
-      ...(mdxOptions.valueToExport ?? []),
-    ];
     const _mapPath = path.resolve(cwd, rootMapPath);
-
-    const remarkPlugins = pluginOption(
-      (v) => [
-        remarkGfm,
-        remarkHeading,
-        [remarkImage, mdxOptions.remarkImageOptions],
-        ...v,
-        remarkStructure,
-        [remarkMdxExport, { values: valueToExport }],
-      ],
-      mdxOptions.remarkPlugins,
-    );
-
-    const rehypePlugins: PluggableList = pluginOption(
-      (v) => [[rehypeCode, mdxOptions.rehypeCodeOptions], ...v],
-      mdxOptions.rehypePlugins,
-    );
+    const mdxLoaderOptions = getMDXLoaderOptions(mdxOptions);
 
     return {
       ...nextConfig,
@@ -125,12 +148,7 @@ const createMDX =
                 options.defaultLoaders.babel,
                 {
                   loader: 'fumadocs-mdx/loader-mdx',
-                  options: {
-                    providerImportSource: 'next-mdx-import-source-file',
-                    ...mdxOptions,
-                    remarkPlugins,
-                    rehypePlugins,
-                  } satisfies MDXLoaderOptions,
+                  options: mdxLoaderOptions,
                 },
               ],
             },

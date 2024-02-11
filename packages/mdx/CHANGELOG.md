@@ -1,5 +1,13 @@
 # next-docs-mdx
 
+## 8.0.3
+
+### Patch Changes
+
+- 9bf5adb: Replace await imports with normal imports
+- Updated dependencies [5c24659]
+  - fumadocs-core@8.2.0
+
 ## 8.0.2
 
 ### Patch Changes

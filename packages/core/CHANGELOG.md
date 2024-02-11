@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 8.2.0
+
+### Minor Changes
+
+- 5c24659: Support code block icons
+
 ## 8.1.1
 
 ## 8.1.0

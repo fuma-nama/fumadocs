@@ -33,19 +33,24 @@ function buildMap({ cwd, rootContentPath, mapPath }: LoaderOptions): string {
     cwd: absoluteContentPath,
   });
 
-  const entries = files.map((file) => {
+  const imports: string[] = [];
+  const entries: string[] = [];
+
+  files.forEach((file, i) => {
     let importPath = path
       .relative(mapDir, path.join(absoluteContentPath, file))
-      .replace(path.sep, '/');
+      .replaceAll(path.sep, '/');
 
     if (!importPath.startsWith('.')) {
       importPath = `./${importPath}`;
     }
 
-    return `${JSON.stringify(file)}: await import(${JSON.stringify(
-      importPath,
-    )})`;
+    const name = `file_${i}`;
+    imports.push(`import * as ${name} from ${JSON.stringify(importPath)};`);
+    entries.push(`${JSON.stringify(file)}: ${name}`);
   });
 
-  return `export const map = {${entries.join(',')}}`;
+  return [imports.join('\n'), `export const map = {${entries.join(',')}}`].join(
+    '\n',
+  );
 }

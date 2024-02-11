@@ -2,6 +2,7 @@ import Link from 'fumadocs-core/link';
 import type {
   AnchorHTMLAttributes,
   FC,
+  HTMLAttributes,
   ImgHTMLAttributes,
   TableHTMLAttributes,
 } from 'react';
@@ -26,7 +27,7 @@ function Table(props: TableHTMLAttributes<HTMLTableElement>): JSX.Element {
 }
 
 const defaultMdxComponents = {
-  pre: Pre,
+  pre: Pre as FC<HTMLAttributes<HTMLPreElement>>,
   Card,
   Cards,
   a: Link as FC<AnchorHTMLAttributes<HTMLAnchorElement>>,

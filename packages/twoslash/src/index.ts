@@ -3,11 +3,7 @@ import type { Code } from 'mdast';
 import { fromMarkdown } from 'mdast-util-from-markdown';
 import { gfmFromMarkdown } from 'mdast-util-gfm';
 import { toHast, defaultHandlers } from 'mdast-util-to-hast';
-import type {
-  ShikiTransformerContextCommon,
-  ShikiTransformerContext,
-  ShikiTransformer,
-} from 'shiki';
+import type { ShikiTransformerContextCommon, ShikiTransformer } from 'shiki';
 import {
   transformerTwoslash as originalTransformer,
   type TransformerTwoslashIndexOptions,
@@ -91,7 +87,7 @@ function renderMarkdown(
 }
 
 function renderMarkdownInline(
-  this: ShikiTransformerContext,
+  this: ShikiTransformerContextCommon,
   md: string,
   context?: string,
 ): ElementContent[] {

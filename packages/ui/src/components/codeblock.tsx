@@ -1,6 +1,6 @@
 'use client';
 import { CheckIcon, CopyIcon } from 'lucide-react';
-import type { ButtonHTMLAttributes, HTMLAttributes } from 'react';
+import type { ButtonHTMLAttributes, HTMLAttributes, ReactNode } from 'react';
 import { forwardRef, useCallback, useRef } from 'react';
 import { cn } from '@/utils/cn';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -8,6 +8,11 @@ import { useCopyButton } from '@/utils/use-copy-button';
 import { buttonVariants } from '@/theme/variants';
 
 export type CodeBlockProps = HTMLAttributes<HTMLElement> & {
+  /**
+   * Icon of code block
+   */
+  icon?: ReactNode;
+
   allowCopy?: boolean;
 };
 
@@ -24,7 +29,7 @@ export const Pre = forwardRef<HTMLPreElement, HTMLAttributes<HTMLPreElement>>(
 Pre.displayName = 'Pre';
 
 export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
-  ({ title, allowCopy = true, className, ...props }, ref) => {
+  ({ title, allowCopy = true, icon, className, ...props }, ref) => {
     const areaRef = useRef<HTMLDivElement>(null);
     const onCopy = useCallback(() => {
       const pre = areaRef.current?.getElementsByTagName('pre').item(0);
@@ -51,14 +56,19 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
         {...props}
       >
         {title ? (
-          <div className="flex flex-row items-center border-b bg-muted py-1.5 pl-4 pr-2 text-muted-foreground">
-            <figcaption className="flex-1">{title}</figcaption>
-            {allowCopy ? <CopyButton onCopy={onCopy} /> : null}
+          <div className="flex flex-row items-center gap-2 border-b bg-muted px-4 py-1.5">
+            <div className="text-muted-foreground [&_svg]:size-3.5">{icon}</div>
+            <figcaption className="flex-1 truncate text-muted-foreground">
+              {title}
+            </figcaption>
+            {allowCopy ? (
+              <CopyButton className="-mr-2" onCopy={onCopy} />
+            ) : null}
           </div>
         ) : (
           allowCopy && (
             <CopyButton
-              className="absolute right-2 top-2 z-[2]"
+              className="absolute right-2 top-2 z-[2] backdrop-blur-sm"
               onCopy={onCopy}
             />
           )
@@ -85,7 +95,7 @@ function CopyButton({
       type="button"
       className={cn(
         buttonVariants({
-          color: 'muted',
+          color: 'ghost',
           className: 'transition-all group-hover:opacity-100',
         }),
         !checked && 'opacity-0',
