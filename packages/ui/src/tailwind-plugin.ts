@@ -65,65 +65,6 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
           'background-color': `theme('colors.background')`,
           color: `theme('colors.foreground')`,
         },
-        '[data-rmiz]': {
-          display: 'block',
-          position: 'relative',
-        },
-        '[data-rmiz-ghost]': {
-          'pointer-events': 'none',
-          position: 'absolute',
-        },
-        '[data-rmiz-btn-zoom], [data-rmiz-btn-unzoom]': {
-          display: 'none',
-        },
-        "[data-rmiz-content='found'] img": {
-          cursor: 'zoom-in',
-        },
-        '[data-rmiz-modal][open]': {
-          width: ['100vw /* fallback */', '100dvw'],
-          height: ['100vh /* fallback */', '100dvh'],
-          'background-color': 'transparent',
-          'max-width': 'none',
-          'max-height': 'none',
-          margin: '0',
-          padding: '0',
-          position: 'fixed',
-          overflow: 'hidden',
-        },
-        '[data-rmiz-modal]:focus-visible': {
-          outline: 'none',
-        },
-        '[data-rmiz-modal-overlay]': {
-          transition: 'background-color 0.3s',
-          position: 'absolute',
-          inset: '0',
-        },
-        "[data-rmiz-modal-overlay='hidden']": {
-          'background-color': 'transparent',
-        },
-        "[data-rmiz-modal-overlay='visible']": {
-          'background-color': `theme('colors.background / 80%')`,
-        },
-        '[data-rmiz-modal-content]': {
-          width: '100%',
-          height: '100%',
-          position: 'relative',
-        },
-        '[data-rmiz-modal]::backdrop': {
-          display: 'none',
-        },
-        '[data-rmiz-modal-img]': {
-          cursor: 'zoom-out',
-          'image-rendering': 'high-quality',
-          'transform-origin': '0 0',
-          transition: 'transform 0.3s',
-          position: 'absolute',
-        },
-        '@media (prefers-reduced-motion: reduce)': {
-          '[data-rmiz-modal-overlay], [data-rmiz-modal-img]': {
-            'transition-duration': '0.01ms !important',
-          },
-        },
       });
 
       addComponents({
@@ -267,5 +208,3 @@ export function createPreset(options: DocsUIOptions = {}): PresetsConfig {
     plugins: [typography, docsUi(options)],
   };
 }
-
-export default createPreset;

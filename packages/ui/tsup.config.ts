@@ -71,7 +71,7 @@ export default defineConfig([
       './src/twoslash/popup.tsx',
       './src/*.client.tsx',
     ],
-    external: ['server-only'],
+    external: ['server-only', '../../dist/image-zoom.css'],
     outExtension: () => ({ js: '.js' }),
     async onSuccess() {
       const replaceImports = Object.entries(injectImports).map(

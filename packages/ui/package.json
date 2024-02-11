@@ -13,6 +13,7 @@
   "exports": {
     "./style.css": "./dist/style.css",
     "./twoslash.css": "./dist/twoslash.css",
+    "./image-zoom.css": "./dist/image-zoom.css",
     "./tailwind-plugin": {
       "import": "./dist/tailwind-plugin.js",
       "require": "./dist/tailwind-plugin.js",
