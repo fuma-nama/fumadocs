@@ -87,7 +87,7 @@ console.log('Hello World');
 
 You can specify a custom icon by passing an `icon` prop to `CodeBlock` component.
 
-When the `icon` prop is passed as a string, it will be parsed as JSON and converted into `CodeBlockIcon`.
+By default, the icon will be injected by the custom Shiki transformer automatically.
 
 ```js title="config.js"
 console.log('js');
@@ -116,15 +116,3 @@ fn main() {
   color: red;
 }
 ```
-
-#### CodeBlockIcon
-
-It is injected by the custom Shiki transformer of Fumadocs Core.
-
-<TypeTable
-  type={{
-    viewBox: { type: 'string' },
-    fill: { type: 'string' },
-    d: { type: 'string' },
-  }}
-/>

@@ -1,3 +1,5 @@
+import { toEstree } from 'hast-util-to-estree';
+import type { JsxElement } from 'hast-util-to-estree/lib/state';
 import { type ShikiTransformer } from 'shiki';
 
 export interface CodeBlockIcon {
@@ -144,14 +146,119 @@ export function transformerIcon(options: IconOptions = {}): ShikiTransformer {
 
   return {
     name: 'rehype-code:icon',
-    pre(pre) {
+    root(root) {
       const lang = this.options.lang;
       if (!lang) return;
 
+      const pre = root.children[0];
+      if (pre.type !== 'element') return;
+
       const iconName = lang in shortcuts ? shortcuts[lang] : lang;
-      pre.properties.icon = JSON.stringify(
-        iconName in icons ? icons[iconName] : icons.default,
-      );
+      const icon = iconName in icons ? icons[iconName] : icons.default;
+
+      const tree = toEstree(pre, {
+        elementAttributeNameCase: 'react',
+      });
+
+      if (tree.body[0].type === 'ExpressionStatement') {
+        const expression = tree.body[0].expression;
+
+        if (expression.type === 'JSXElement') {
+          expression.openingElement.attributes.push({
+            type: 'JSXAttribute',
+            name: {
+              type: 'JSXIdentifier',
+              name: 'icon',
+            },
+            value: createSVGElement(icon),
+          });
+        }
+      }
+      return {
+        type: 'root',
+        children: [
+          {
+            type: 'mdxFlowExpression',
+            value: '',
+            data: {
+              estree: tree,
+            },
+          },
+        ],
+      } as unknown as ReturnType<NonNullable<ShikiTransformer['root']>>;
     },
+  };
+}
+
+function createSVGElement(icon: CodeBlockIcon): JsxElement {
+  return {
+    type: 'JSXElement',
+    openingElement: {
+      type: 'JSXOpeningElement',
+      attributes: [
+        {
+          type: 'JSXAttribute',
+          name: {
+            type: 'JSXIdentifier',
+            name: 'viewBox',
+          },
+          value: {
+            type: 'Literal',
+            value: icon.viewBox,
+          },
+        },
+      ],
+      name: {
+        type: 'JSXIdentifier',
+        name: 'svg',
+      },
+      selfClosing: false,
+    },
+    closingElement: {
+      type: 'JSXClosingElement',
+      name: {
+        type: 'JSXIdentifier',
+        name: 'svg',
+      },
+    },
+    children: [
+      {
+        type: 'JSXElement',
+        openingElement: {
+          type: 'JSXOpeningElement',
+          attributes: [
+            {
+              type: 'JSXAttribute',
+              name: {
+                type: 'JSXIdentifier',
+                name: 'fill',
+              },
+              value: {
+                type: 'Literal',
+                value: icon.fill,
+              },
+            },
+            {
+              type: 'JSXAttribute',
+              name: {
+                type: 'JSXIdentifier',
+                name: 'd',
+              },
+              value: {
+                type: 'Literal',
+                value: icon.d,
+              },
+            },
+          ],
+          name: {
+            type: 'JSXIdentifier',
+            name: 'path',
+          },
+          selfClosing: true,
+        },
+        closingElement: null,
+        children: [],
+      },
+    ],
   };
 }

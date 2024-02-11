@@ -1,8 +1,7 @@
 'use client';
 import { CheckIcon, CopyIcon } from 'lucide-react';
 import type { ButtonHTMLAttributes, HTMLAttributes, ReactNode } from 'react';
-import { forwardRef, useCallback, useMemo, useRef } from 'react';
-import type { CodeBlockIcon } from 'fumadocs-core/mdx-plugins';
+import { forwardRef, useCallback, useRef } from 'react';
 import { cn } from '@/utils/cn';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCopyButton } from '@/utils/use-copy-button';
@@ -11,8 +10,6 @@ import { buttonVariants } from '@/theme/variants';
 export type CodeBlockProps = HTMLAttributes<HTMLElement> & {
   /**
    * Icon of code block
-   *
-   * If specified as string, it will be parsed as JSON, assuming it is `CodeBlockIcon`
    */
   icon?: ReactNode;
 
@@ -33,20 +30,6 @@ Pre.displayName = 'Pre';
 
 export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
   ({ title, allowCopy = true, icon, className, ...props }, ref) => {
-    const iconEl = useMemo(() => {
-      if (typeof icon === 'string') {
-        const parsed = JSON.parse(icon) as CodeBlockIcon;
-
-        return (
-          <svg viewBox={parsed.viewBox} className="size-3.5">
-            <path fill={parsed.fill} d={parsed.d} />
-          </svg>
-        );
-      }
-
-      return icon;
-    }, [icon]);
-
     const areaRef = useRef<HTMLDivElement>(null);
     const onCopy = useCallback(() => {
       const pre = areaRef.current?.getElementsByTagName('pre').item(0);
@@ -73,9 +56,11 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
         {...props}
       >
         {title ? (
-          <div className="flex flex-row items-center gap-2 border-b bg-muted px-4 py-1.5 text-muted-foreground">
-            {iconEl}
-            <figcaption className="flex-1 truncate">{title}</figcaption>
+          <div className="flex flex-row items-center gap-2 border-b bg-muted px-4 py-1.5">
+            <div className="text-muted-foreground [&_svg]:size-3.5">{icon}</div>
+            <figcaption className="flex-1 truncate text-muted-foreground">
+              {title}
+            </figcaption>
             {allowCopy ? (
               <CopyButton className="-mr-2" onCopy={onCopy} />
             ) : null}
@@ -83,7 +68,7 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
         ) : (
           allowCopy && (
             <CopyButton
-              className="absolute right-2 top-2 z-[2]"
+              className="absolute right-2 top-2 z-[2] backdrop-blur-sm"
               onCopy={onCopy}
             />
           )
@@ -111,8 +96,7 @@ function CopyButton({
       className={cn(
         buttonVariants({
           color: 'ghost',
-          className:
-            'text-foreground transition-all backdrop-blur-sm group-hover:opacity-100',
+          className: 'transition-all group-hover:opacity-100',
         }),
         !checked && 'opacity-0',
         className,
