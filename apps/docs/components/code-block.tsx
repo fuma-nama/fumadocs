@@ -20,43 +20,35 @@ export function CodeBlock({
   wrapper,
   ...props
 }: CodeBlockProps): JSX.Element {
-  const tokens = useMemo(
+  const html = useMemo(
     () =>
-      highlighter.codeToTokensWithThemes(code, {
+      highlighter.codeToHtml(code, {
         lang,
+        defaultColor: false,
         themes: {
           light: 'github-light',
           dark: 'github-dark',
         },
+        transformers: [
+          {
+            name: 'remove-pre',
+            root: (root) => {
+              if (root.children[0].type !== 'element') return;
+
+              return {
+                type: 'root',
+                children: root.children[0].children,
+              };
+            },
+          },
+        ],
       }),
     [code, lang],
   );
 
   return (
     <Base.CodeBlock {...wrapper}>
-      <Base.Pre {...props}>
-        <code>
-          {tokens.map((token, i) => (
-            // eslint-disable-next-line react/no-array-index-key -- Should not re-render
-            <span className="line" key={i}>
-              {token.map((s, j) => (
-                <span
-                  // eslint-disable-next-line react/no-array-index-key -- Should not re-render
-                  key={j}
-                  style={Object.fromEntries(
-                    Object.entries(s.variants).map(([k, v]) => [
-                      `--shiki-${k}`,
-                      v.color,
-                    ]),
-                  )}
-                >
-                  {s.content}
-                </span>
-              ))}
-            </span>
-          ))}
-        </code>
-      </Base.Pre>
+      <Base.Pre {...props} dangerouslySetInnerHTML={{ __html: html }} />
     </Base.CodeBlock>
   );
 }

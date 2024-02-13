@@ -1,17 +1,12 @@
 import { defineConfig } from 'tsup';
 
-const sharedConfig = {
+export default defineConfig({
   external: [
     '@algolia/client-search',
     'algoliasearch',
-    'contentlayer',
     'unified',
     'typescript',
   ],
-};
-
-export default defineConfig({
-  ...sharedConfig,
   dts: true,
   target: 'es6',
   format: 'esm',

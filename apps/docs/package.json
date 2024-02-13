@@ -13,11 +13,9 @@
   },
   "dependencies": {
     "@next/env": "^14.0.0",
-    "@radix-ui/react-hover-card": "^1.0.7",
     "algoliasearch": "^4.20.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
-    "fast-glob": "^3.3.1",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-twoslash": "workspace:^",
@@ -31,7 +29,7 @@
     "react-dom": "18.2.0",
     "rehype-katex": "^7.0.0",
     "remark-math": "^6.0.0",
-    "shiki": "^1.0.0-beta.2",
+    "shiki": "^1.1.2",
     "tailwind-merge": "^2.0.0",
     "zod": "^3.22.4"
   },
