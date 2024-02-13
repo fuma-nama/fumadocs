@@ -33,7 +33,7 @@ const defaultPreset: Preset = {
     input: '0 0% 14.9%',
     primary: '0 0% 98%',
     'primary-foreground': '0 0% 9%',
-    secondary: '0 0% 14.9%',
+    secondary: '0 0% 10.9%',
     'secondary-foreground': '0 0% 98%',
     accent: '0 0% 14.9%',
     'accent-foreground': '0 0% 90%',
