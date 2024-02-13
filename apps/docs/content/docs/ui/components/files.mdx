@@ -9,21 +9,27 @@ preview: 'files'
 Wrap file components in `Files`.
 
 ```mdx
-import { File, Files } from 'fumadocs-ui/components/files';
+import { File, Folder, Files } from 'fumadocs-ui/components/files';
 
 <Files>
-  <File title="app" defaultOpen>
-    <File title="layout.tsx" />
-    <File title="page.tsx" />
-    <File title="global.css" />
-  </File>
-  <File title="components">
-    <File title="button.tsx" />
-    <File title="tabs.tsx" />
-    <File title="dialog.tsx" />
-  </File>
-  <File title="package.json" />
+  <Folder name="app" defaultOpen>
+    <File name="layout.tsx" />
+    <File name="page.tsx" />
+    <File name="global.css" />
+  </Folder>
+  <Folder name="components">
+    <File name="button.tsx" />
+    <File name="tabs.tsx" />
+    <File name="dialog.tsx" />
+  </Folder>
+  <File name="package.json" />
 </Files>
 ```
 
+### File
+
 <AutoTypeTable path="ui" name="FileProps" />
+
+### Folder
+
+<AutoTypeTable path="ui" name="FolderProps" />

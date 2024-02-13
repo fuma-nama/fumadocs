@@ -28,13 +28,13 @@ export function Files({
   );
 }
 
-export interface FileProps {
-  title: string;
+export interface FileProps extends HTMLAttributes<HTMLDivElement> {
+  name: string;
   icon?: ReactNode;
 }
 
-export interface FolderProps {
-  title: string;
+export interface FolderProps extends HTMLAttributes<HTMLDivElement> {
+  name: string;
 
   /**
    * Open folder by default
@@ -42,42 +42,40 @@ export interface FolderProps {
    * @defaultValue false
    */
   defaultOpen?: boolean;
-
-  /**
-   * children files of the folder, considered as file if empty
-   */
-  children: ReactNode;
 }
 
-export function File(props: FileProps | FolderProps): JSX.Element {
+export function File(props: FileProps): JSX.Element {
+  // todo: remove in next major
   if ('children' in props) {
-    return <Folder {...props} />;
+    return <Folder {...(props as FolderProps)} />;
   }
 
+  const { name, icon = <FileIcon />, className, ...rest } = props;
   return (
-    <p className={cn(item())}>
-      {props.icon ?? <FileIcon />}
-      {props.title}
-    </p>
+    <div className={cn(item({ className }))} {...rest}>
+      {icon}
+      {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- remove in next major */}
+      {name ?? props.title}
+    </div>
   );
 }
 
 export function Folder({
-  title,
+  name,
   defaultOpen = false,
-  children,
+  ...props
 }: FolderProps): JSX.Element {
   const [open, setOpen] = useState(defaultOpen);
 
   return (
-    <Collapsible open={open} onOpenChange={setOpen}>
-      <CollapsibleTrigger className={cn(item({ className: 'group w-full' }))}>
-        <FolderIcon className="group-data-[state=open]:hidden" />
-        <FolderOpenIcon className="group-data-[state=closed]:hidden" />
-        {title}
+    <Collapsible open={open} onOpenChange={setOpen} {...props}>
+      <CollapsibleTrigger className={cn(item({ className: 'w-full' }))}>
+        {open ? <FolderOpenIcon /> : <FolderIcon />}
+        {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- remove in next major */}
+        {name ?? props.title}
       </CollapsibleTrigger>
       <CollapsibleContent>
-        <div className="ml-4 flex flex-col border-l pl-2 pt-2">{children}</div>
+        <div className="ml-2 flex flex-col border-l pl-2">{props.children}</div>
       </CollapsibleContent>
     </Collapsible>
   );

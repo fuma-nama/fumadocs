@@ -17,7 +17,7 @@ import {
   StarsIcon,
   TimerIcon,
 } from 'lucide-react';
-import { File, Files } from 'fumadocs-ui/components/files';
+import { File, Files, Folder } from 'fumadocs-ui/components/files';
 import Link from 'next/link';
 import type { HTMLAttributes, ReactNode } from 'react';
 import { cn } from '@/utils/cn';
@@ -381,11 +381,11 @@ function Introduction(): JSX.Element {
             code={code}
           />
           <Files className="z-[2] mt-20 shadow-xl">
-            <File title="content" defaultOpen>
-              <File title="index.mdx" />
-              <File title="hello.mdx" />
-              <File title="components.mdx" />
-            </File>
+            <Folder name="content" defaultOpen>
+              <File name="index.mdx" />
+              <File name="hello.mdx" />
+              <File name="components.mdx" />
+            </Folder>
           </Files>
         </div>
       </div>

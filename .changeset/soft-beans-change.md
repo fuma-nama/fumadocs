@@ -2,4 +2,4 @@
 'fumadocs-ui': minor
 ---
 
-Add `Folder` export
+Add `Folder` export to `fumadocs-ui/components/files`
