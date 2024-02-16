@@ -276,11 +276,11 @@ importers:
         specifier: ^0.5.0
         version: 0.5.0
       '@shikijs/rehype':
-        specifier: 1.1.2
-        version: 1.1.2
+        specifier: 1.1.3
+        version: 1.1.3
       '@shikijs/transformers':
-        specifier: 1.1.2
-        version: 1.1.2
+        specifier: 1.1.3
+        version: 1.1.3
       flexsearch:
         specifier: 0.7.21
         version: 0.7.21
@@ -315,8 +315,8 @@ importers:
         specifier: ^3.1.0
         version: 3.1.0
       shiki:
-        specifier: 1.1.2
-        version: 1.1.2
+        specifier: 1.1.3
+        version: 1.1.3
       swr:
         specifier: ^2.2.2
         version: 2.2.2(react@18.2.0)
@@ -498,8 +498,8 @@ importers:
   packages/twoslash:
     dependencies:
       '@shikijs/twoslash':
-        specifier: 1.1.2
-        version: 1.1.2(typescript@5.3.3)
+        specifier: 1.1.3
+        version: 1.1.3(typescript@5.3.3)
       mdast-util-from-markdown:
         specifier: ^2.0.0
         version: 2.0.0
@@ -510,8 +510,8 @@ importers:
         specifier: ^13.1.0
         version: 13.1.0
       shiki:
-        specifier: 1.1.2
-        version: 1.1.2
+        specifier: 1.1.3
+        version: 1.1.3
     devDependencies:
       '@types/hast':
         specifier: ^3.0.4
@@ -3332,28 +3332,32 @@ packages:
     resolution: {integrity: sha512-ERVzNQz88ZkDqUpWeC57Kp+Kmx5RjqeDBR1M8AGWGom4yrkITiTfXCGmjchlDSw12MhDTuPYR4HVFW8uT61RaQ==}
     dev: false
 
-  /@shikijs/rehype@1.1.2:
-    resolution: {integrity: sha512-h90ycM3VFkI6bLD/WgUuxMR9yqc0ejWWiA//T4f4mqoIPW3bVW3uSB/0eJRM6WbP8fEaOAnA7mbKGsoTDGf4Ng==}
+  /@shikijs/core@1.1.3:
+    resolution: {integrity: sha512-1QWSvWcPbvZXsDxB1F7ejW+Kuxp3z/JHs944hp/f8BYOlFd5gplzseFIkE/GTu/qytFef3zNME4qw1oHbQ0j2A==}
+    dev: false
+
+  /@shikijs/rehype@1.1.3:
+    resolution: {integrity: sha512-ZOH8Wpca6uVWIcpEHnkFxDWEFWhlFRbZ8OzmdhSqAM/zDnwe3qbiq1t8YUhfkB4hLphkD1AlsuGycfFImdh/NQ==}
     dependencies:
-      '@shikijs/transformers': 1.1.2
+      '@shikijs/transformers': 1.1.3
       '@types/hast': 3.0.4
       hast-util-to-string: 3.0.0
-      shiki: 1.1.2
+      shiki: 1.1.3
       unified: 11.0.4
       unist-util-visit: 5.0.0
     dev: false
 
-  /@shikijs/transformers@1.1.2:
-    resolution: {integrity: sha512-tldkUMW7RBkU2F6eXbiRMw3ja+hQer1EjwhD2NGOv6K0pgZdVp3JKjU8uisRtg65tyBqrVHq7zlLHVk7EKmUZA==}
+  /@shikijs/transformers@1.1.3:
+    resolution: {integrity: sha512-jv71dQFTucv2RK2pafAxca4hgKP6Uv5ukKrVjH/vGZ8jGH0j2AcLVCcM76ieamwJ1p5WkZcA0X/Bq2qpjhEUSg==}
     dependencies:
-      shiki: 1.1.2
+      shiki: 1.1.3
     dev: false
 
-  /@shikijs/twoslash@1.1.2(typescript@5.3.3):
-    resolution: {integrity: sha512-Jt8QAudENcCS7cgxjbXMpUCA7IAOy1kot+Qo5yyyLl9VwVKvZMW0BDrrigbOia8602X2Z76U6XEs9UXyD6LnsQ==}
+  /@shikijs/twoslash@1.1.3(typescript@5.3.3):
+    resolution: {integrity: sha512-7NUEqRasZ15wWdUIusm2rQMenV2dIpNNOoCiNx7GZ4VzJxy7AwULQxgDVtYfn0u4BCgiUWqtdMYuO9uts8JSmg==}
     dependencies:
-      '@shikijs/core': 1.1.2
-      twoslash: 0.2.1(typescript@5.3.3)
+      '@shikijs/core': 1.1.3
+      twoslash: 0.2.3(typescript@5.3.3)
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -9699,6 +9703,12 @@ packages:
       '@shikijs/core': 1.1.2
     dev: false
 
+  /shiki@1.1.3:
+    resolution: {integrity: sha512-k/B4UvtWmGcHMLp6JnQminlex3Go5MHKXEiormmzTJECAiSQiwSon6USuwTyto8EMUQc9aYRJ7HojkfVLbBk+g==}
+    dependencies:
+      '@shikijs/core': 1.1.3
+    dev: false
+
   /side-channel@1.0.4:
     resolution: {integrity: sha512-q5XPytqFEIKHkGdiMIrY10mvLRvnQh42/+GoBlFW3b2LXLE2xxJpZFdm94we0BaoV3RwJyGqg5wS7epxTv0Zvw==}
     dependencies:
@@ -10438,17 +10448,17 @@ packages:
       turbo-windows-arm64: 1.12.4
     dev: true
 
-  /twoslash-protocol@0.2.1:
-    resolution: {integrity: sha512-ppACotZJJQlhI7UdoAQ1SOhLsnAyVHoY69gmBY6ygw+mULShR13zVToHpM0eUA/GqS2jiNCAeE2HrcXZ+1qLfg==}
+  /twoslash-protocol@0.2.3:
+    resolution: {integrity: sha512-pvNVFaYvZ2S5AvG3dN91NSxTt+JxeoJju/1ezOGhmHB+Wpa5xZuWY5nuvOkeBpqcwvwTvpjtw5d/xSV19ZMzJA==}
     dev: false
 
-  /twoslash@0.2.1(typescript@5.3.3):
-    resolution: {integrity: sha512-V8J0OGo9gj5pZ2UlZvIYlr71PThc/eYEfK/UnnrhysUpEtzhdMC102ucm3C43RHXdUMLYBccwILiOGl87zswDA==}
+  /twoslash@0.2.3(typescript@5.3.3):
+    resolution: {integrity: sha512-96vxkRz/IiOwrRDNniBuLLi29q9F5Vv0BAb0Jx/lhF3EhG71hcm0he4fvQllhf/ZPzUGMt/QfJX6o0cTwnZhJQ==}
     peerDependencies:
       typescript: '*'
     dependencies:
       '@typescript/vfs': 1.5.0
-      twoslash-protocol: 0.2.1
+      twoslash-protocol: 0.2.3
       typescript: 5.3.3
     transitivePeerDependencies:
       - supports-color
