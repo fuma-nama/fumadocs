@@ -2,4 +2,4 @@
 'fumadocs-ui': patch
 ---
 
-Deprecate `input` color from Tailwind CSS preset
+Deprecate `input` color and `medium` font size from Tailwind CSS preset
