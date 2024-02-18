@@ -112,7 +112,7 @@ export const Accordion = forwardRef<
     >
       <AccordionPrimitive.Header
         id={id}
-        className="not-prose font-medium text-foreground hover:bg-accent hover:text-accent-foreground"
+        className="not-prose font-medium text-foreground"
       >
         <AccordionPrimitive.Trigger className="flex w-full items-center gap-2 p-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
           <ChevronRightIcon className="size-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]/accordion:rotate-90" />
@@ -121,7 +121,7 @@ export const Accordion = forwardRef<
       </AccordionPrimitive.Header>
       {id ? <CopyButton id={id} /> : null}
       <AccordionPrimitive.Content className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
-        <div className="ml-2 p-4 prose-no-margin">{children}</div>
+        <div className="ml-2 p-4 pt-0 prose-no-margin">{children}</div>
       </AccordionPrimitive.Content>
     </AccordionPrimitive.Item>
   );
