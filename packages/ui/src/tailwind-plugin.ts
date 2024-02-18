@@ -58,7 +58,7 @@ function variableName(prefix: string, name: string): string {
   return `--${[prefix, name].filter(Boolean).join('-')}`;
 }
 
-function colorToCSS(prefix: string, name: string): string {
+function colorToCSS(prefix: string, name: Keys): string {
   return `hsl(var(${variableName(prefix, name)}) / <alpha-value>)`;
 }
 
@@ -227,6 +227,7 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
 
 export function createPreset(options: DocsUIOptions = {}): PresetsConfig {
   return {
+    darkMode: 'class',
     plugins: [typography, docsUi(options)],
   };
 }
