@@ -1,5 +1,7 @@
 # next-docs-zeta
 
+## 8.3.0
+
 ## 8.2.0
 
 ### Minor Changes
