@@ -18,7 +18,8 @@ import { buttonVariants } from '@/theme/variants';
 
 export const Accordions = forwardRef<
   HTMLDivElement,
-  Omit<AccordionSingleProps | AccordionMultipleProps, 'value' | 'onValueChange'>
+  | Omit<AccordionSingleProps, 'value' | 'onValueChange'>
+  | Omit<AccordionMultipleProps, 'value' | 'onValueChange'>
 >(({ type = 'single', className, defaultValue, ...props }, ref) => {
   const [value, setValue] = useState(
     type === 'single' ? defaultValue ?? '' : defaultValue ?? [],
