@@ -2,7 +2,7 @@
 
 import { cva } from 'class-variance-authority';
 import { FileIcon, FolderIcon, FolderOpenIcon } from 'lucide-react';
-import type { HTMLAttributes, ReactNode } from 'react';
+import { useState, type HTMLAttributes, type ReactNode } from 'react';
 import { cn } from '@/utils/cn';
 import {
   Collapsible,
@@ -28,9 +28,13 @@ export function Files({
   );
 }
 
-interface FileProps {
-  title: string;
+export interface FileProps extends HTMLAttributes<HTMLDivElement> {
+  name: string;
   icon?: ReactNode;
+}
+
+export interface FolderProps extends HTMLAttributes<HTMLDivElement> {
+  name: string;
 
   /**
    * Open folder by default
@@ -38,37 +42,40 @@ interface FileProps {
    * @defaultValue false
    */
   defaultOpen?: boolean;
-
-  /**
-   * hildren files of the folder, considered as file if empty
-   */
-  children?: ReactNode;
 }
 
-export function File({
-  title,
-  icon,
-  defaultOpen,
-  children,
-}: FileProps): JSX.Element {
-  if (!children) {
-    return (
-      <p className={cn(item())}>
-        {icon ?? <FileIcon />}
-        {title}
-      </p>
-    );
+export function File(props: FileProps): JSX.Element {
+  // todo: remove in next major
+  if ('children' in props) {
+    return <Folder {...(props as FolderProps)} />;
   }
 
+  const { name, icon = <FileIcon />, className, ...rest } = props;
   return (
-    <Collapsible defaultOpen={defaultOpen}>
-      <CollapsibleTrigger className={cn(item({ className: 'group w-full' }))}>
-        <FolderIcon className="group-data-[state=open]:hidden" />
-        <FolderOpenIcon className="group-data-[state=closed]:hidden" />
-        {title}
+    <div className={cn(item({ className }))} {...rest}>
+      {icon}
+      {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- remove in next major */}
+      {name ?? props.title}
+    </div>
+  );
+}
+
+export function Folder({
+  name,
+  defaultOpen = false,
+  ...props
+}: FolderProps): JSX.Element {
+  const [open, setOpen] = useState(defaultOpen);
+
+  return (
+    <Collapsible open={open} onOpenChange={setOpen} {...props}>
+      <CollapsibleTrigger className={cn(item({ className: 'w-full' }))}>
+        {open ? <FolderOpenIcon /> : <FolderIcon />}
+        {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- remove in next major */}
+        {name ?? props.title}
       </CollapsibleTrigger>
       <CollapsibleContent>
-        <div className="ml-4 flex flex-col border-l py-2 pl-2">{children}</div>
+        <div className="ml-2 flex flex-col border-l pl-2">{props.children}</div>
       </CollapsibleContent>
     </Collapsible>
   );

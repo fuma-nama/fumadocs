@@ -1,6 +1,6 @@
 import type { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 import type { Callout } from 'fumadocs-ui/components/callout';
-import type { File } from 'fumadocs-ui/components/files';
+import type { File, Folder } from 'fumadocs-ui/components/files';
 import type { InlineTOC } from 'fumadocs-ui/components/inline-toc';
 import type { RollButton } from 'fumadocs-ui/components/roll-button';
 import type { TypeTable } from 'fumadocs-ui/components/type-table';
@@ -26,7 +26,15 @@ export type CalloutProps = Omit<
   keyof ComponentPropsWithoutRef<'div'>
 >;
 
-export type FileProps = ComponentPropsWithoutRef<typeof File>;
+export type FileProps = Omit<
+  ComponentPropsWithoutRef<typeof File>,
+  keyof ComponentPropsWithoutRef<'div'>
+>;
+
+export type FolderProps = Omit<
+  ComponentPropsWithoutRef<typeof Folder>,
+  keyof ComponentPropsWithoutRef<'div'>
+>;
 
 export type InlineTOCProps = Omit<
   ComponentPropsWithoutRef<typeof InlineTOC>,

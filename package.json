@@ -19,14 +19,14 @@
   "prettier": "@vercel/style-guide/prettier",
   "devDependencies": {
     "@changesets/cli": "^2.26.2",
-    "@typescript-eslint/eslint-plugin": "^6.7.0",
-    "@typescript-eslint/parser": "^6.7.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
     "@vercel/style-guide": "^5.1.0",
     "concurrently": "^8.2.1",
     "prettier": "^3.0.3",
     "rimraf": "^5.0.5",
     "tsup": "8.0.2",
-    "turbo": "1.12.3",
+    "turbo": "1.12.4",
     "typescript": "5.3.3",
     "vitest": "^1.0.4"
   },

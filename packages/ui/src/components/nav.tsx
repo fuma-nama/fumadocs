@@ -129,10 +129,7 @@ export function Nav({
               <PopoverContent className="flex min-w-[260px] flex-col px-3 py-1">
                 {items.map((item) => (
                   <PopoverClose key={item.url} asChild>
-                    <NavItem
-                      item={item}
-                      className="py-2 text-medium font-medium"
-                    />
+                    <NavItem item={item} className="py-2 text-lg font-medium" />
                   </PopoverClose>
                 ))}
                 <ThemeToggle className="w-fit" />

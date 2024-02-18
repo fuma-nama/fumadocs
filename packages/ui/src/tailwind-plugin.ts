@@ -21,27 +21,45 @@ interface DocsUIOptions {
   keepCodeBlockBackground?: boolean;
 }
 
+type Keys =
+  | 'background'
+  | 'foreground'
+  | 'muted'
+  | 'muted-foreground'
+  | 'popover'
+  | 'popover-foreground'
+  | 'card'
+  | 'card-foreground'
+  | 'border'
+  | 'primary'
+  | 'primary-foreground'
+  | 'secondary'
+  | 'secondary-foreground'
+  | 'accent'
+  | 'accent-foreground'
+  | 'ring';
+
+type Theme = Record<Keys, string> & {
+  'background-image'?: string;
+};
+
 export interface Preset {
-  light: Record<string, string>;
-  dark: Record<string, string>;
-  backgroundImage?: string;
+  light: Theme;
+  dark: Theme;
 }
 
-function mapColors(
-  prefix: string,
-  map: Record<string, string>,
-): Record<string, string> {
+function getThemeStyles(prefix: string, theme: Theme): Record<string, string> {
   return Object.fromEntries(
-    Object.entries(map).map(([k, v]) => [colorToVariable(prefix, k), v]),
+    Object.entries(theme).map(([k, v]) => [variableName(prefix, k), v]),
   );
 }
 
-function colorToVariable(prefix: string, name: string): string {
+function variableName(prefix: string, name: string): string {
   return `--${[prefix, name].filter(Boolean).join('-')}`;
 }
 
-function colorToCSS(prefix: string, name: string): string {
-  return `hsl(var(${colorToVariable(prefix, name)}) / <alpha-value>)`;
+function colorToCSS(prefix: string, name: Keys): string {
+  return `hsl(var(${variableName(prefix, name)}) / <alpha-value>)`;
 }
 
 export const docsUi = plugin.withOptions<DocsUIOptions>(
@@ -51,18 +69,21 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
     keepCodeBlockBackground = false,
   } = {}) => {
     return ({ addBase, addComponents, addUtilities }) => {
-      const { light, dark, backgroundImage } =
+      const { light, dark } =
         typeof preset === 'string' ? presets[preset] : preset;
 
       addBase({
-        ':root': mapColors(prefix, light),
-        '.dark': mapColors(prefix, dark),
+        ':root': getThemeStyles(prefix, light),
+        '.dark': getThemeStyles(prefix, dark),
         '*': {
           'border-color': `theme('colors.border')`,
         },
         body: {
-          'background-image': backgroundImage ?? 'initial',
           'background-color': `theme('colors.background')`,
+          'background-image': `var(${variableName(
+            prefix,
+            'background-image',
+          )})`,
           color: `theme('colors.foreground')`,
         },
       });
@@ -165,7 +186,8 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
         },
         colors: {
           border: colorToCSS(prefix, 'border'),
-          input: colorToCSS(prefix, 'input'),
+          // todo: remove in next major
+          input: colorToCSS(prefix, 'border'),
           ring: colorToCSS(prefix, 'ring'),
           background: colorToCSS(prefix, 'background'),
           foreground: colorToCSS(prefix, 'foreground'),
@@ -205,6 +227,7 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
 
 export function createPreset(options: DocsUIOptions = {}): PresetsConfig {
   return {
+    darkMode: 'class',
     plugins: [typography, docsUi(options)],
   };
 }

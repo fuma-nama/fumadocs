@@ -1,4 +1,4 @@
-import './style.css';
+import './global.css';
 import 'fumadocs-ui/twoslash.css';
 import { Star } from 'lucide-react';
 import type { Viewport } from 'next';

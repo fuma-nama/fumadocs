@@ -1,5 +1,20 @@
 # next-docs-ui
 
+## 8.3.0
+
+### Minor Changes
+
+- b0003d44: Add `purple` theme
+- 9bdb49dd: Add `Folder` export to `fumadocs-ui/components/files`
+- 99d66d2d: Rename `title` prop to `name` in `File` and `Folder` component
+
+### Patch Changes
+
+- 5e314eee: Deprecate `input` color and `medium` font size from Tailwind CSS preset
+- 52d578d0: Set `darkMode` to `class` by default
+- 84667d2f: Improve Accordions
+  - fumadocs-core@8.3.0
+
 ## 8.2.0
 
 ### Minor Changes

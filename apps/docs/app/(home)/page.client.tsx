@@ -88,7 +88,7 @@ export function Rain(
 export function Previews(): JSX.Element {
   return (
     <div className="rounded-xl border bg-background p-4 shadow-lg">
-      <p className="text-medium font-medium">I&apos;m satisfied with it</p>
+      <p className="text-sm font-medium">I&apos;m satisfied with it</p>
 
       <a
         href="https://joulev.dev"

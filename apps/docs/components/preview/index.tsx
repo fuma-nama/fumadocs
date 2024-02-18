@@ -1,7 +1,7 @@
 import { HomeIcon } from 'lucide-react';
 import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 import { Callout } from 'fumadocs-ui/components/callout';
-import { File, Files } from 'fumadocs-ui/components/files';
+import { File, Folder, Files } from 'fumadocs-ui/components/files';
 import { ImageZoom } from 'fumadocs-ui/components/image-zoom';
 import { InlineTOC } from 'fumadocs-ui/components/inline-toc';
 import { RollButton } from 'fumadocs-ui/components/roll-button';
@@ -90,11 +90,7 @@ export default {
   ),
   accordion: (
     <Wrapper>
-      <Accordions
-        type="single"
-        collapsible
-        className="rounded-xl bg-background px-4"
-      >
+      <Accordions type="single" collapsible>
         <Accordion id="what-is-fumadocs" title="What is Fumadocs?">
           A framework for building documentations
         </Accordion>
@@ -112,17 +108,20 @@ export default {
   files: (
     <Wrapper>
       <Files>
-        <File title="app" defaultOpen>
-          <File title="layout.tsx" />
-          <File title="page.tsx" />
-          <File title="global.css" />
-        </File>
-        <File title="components">
-          <File title="button.tsx" />
-          <File title="tabs.tsx" />
-          <File title="dialog.tsx" />
-        </File>
-        <File title="package.json" />
+        <Folder name="app" defaultOpen>
+          <Folder name="[id]" defaultOpen>
+            <File name="page.tsx" />
+          </Folder>
+          <File name="layout.tsx" />
+          <File name="page.tsx" />
+          <File name="global.css" />
+        </Folder>
+        <Folder name="components">
+          <File name="button.tsx" />
+          <File name="tabs.tsx" />
+          <File name="dialog.tsx" />
+        </Folder>
+        <File name="package.json" />
       </Files>
     </Wrapper>
   ),
@@ -194,5 +193,10 @@ export default {
       </div>
     </Wrapper>
   ),
-  'roll-button': <RollButton />,
+  'roll-button': (
+    <div className="rounded-lg border bg-card p-4 text-muted-foreground">
+      <p className="text-center text-sm">Scroll down to see the button</p>
+      <RollButton />
+    </div>
+  ),
 } as Record<string, ReactNode>;
