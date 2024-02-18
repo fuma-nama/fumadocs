@@ -29,7 +29,7 @@ export function InlineTOC({
         {children ?? (
           <button
             type="button"
-            className="inline-flex w-full items-center justify-between text-medium font-medium [&[data-state=open]>svg]:rotate-180"
+            className="inline-flex w-full items-center justify-between font-medium [&[data-state=open]>svg]:rotate-180"
           >
             Table of Contents
             <ChevronDown className="size-4 transition-transform duration-200" />

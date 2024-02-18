@@ -62,7 +62,7 @@ export function Sidebar({
     <Base.SidebarList
       minWidth={768} // md
       className={cn(
-        'flex w-full flex-col text-medium',
+        'flex w-full flex-col text-[15px]',
         !open
           ? 'md:hidden'
           : 'md:sticky md:top-16 md:h-body md:w-[240px] md:text-sm xl:w-[260px]',

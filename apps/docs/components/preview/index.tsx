@@ -90,11 +90,7 @@ export default {
   ),
   accordion: (
     <Wrapper>
-      <Accordions
-        type="single"
-        collapsible
-        className="rounded-xl bg-background px-4"
-      >
+      <Accordions type="single" collapsible>
         <Accordion id="what-is-fumadocs" title="What is Fumadocs?">
           A framework for building documentations
         </Accordion>
@@ -197,5 +193,10 @@ export default {
       </div>
     </Wrapper>
   ),
-  'roll-button': <RollButton />,
+  'roll-button': (
+    <div className="rounded-lg border bg-card p-4 text-muted-foreground">
+      <p className="text-center text-sm">Scroll down to see the button</p>
+      <RollButton />
+    </div>
+  ),
 } as Record<string, ReactNode>;

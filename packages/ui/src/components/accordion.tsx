@@ -17,7 +17,11 @@ import { cn } from '@/utils/cn';
 import { useCopyButton } from '@/utils/use-copy-button';
 import { buttonVariants } from '@/theme/variants';
 
-const variants = cva('divide-y divide-border');
+const variants = cva(
+  'divide-y divide-border overflow-hidden rounded-lg border bg-card',
+);
+
+// todo: Use `single` unless especially use `MultipleAccordions`
 
 export const Accordions = forwardRef<
   HTMLDivElement,
@@ -97,26 +101,27 @@ export const Accordion = forwardRef<
   Omit<ComponentPropsWithoutRef<typeof AccordionPrimitive.Item>, 'value'> & {
     title: string;
   }
->(({ title, className, children, ...props }, ref) => {
+>(({ title, className, id, children, ...props }, ref) => {
   return (
     <AccordionPrimitive.Item
       ref={ref}
       // Use `id` instead if presents
-      value={props.id ?? title}
-      className={cn('group/accordion scroll-m-20', className)}
+      value={id ?? title}
+      className={cn('group/accordion relative scroll-m-20', className)}
       {...props}
     >
-      <AccordionPrimitive.Header className="not-prose flex items-center text-medium text-muted-foreground">
-        <AccordionPrimitive.Trigger className="flex w-full items-center gap-1 py-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-          <ChevronRightIcon className="size-5 transition-transform duration-200 group-data-[state=open]/accordion:rotate-90" />
-          <span className="text-medium font-medium text-foreground">
-            {title}
-          </span>
+      <AccordionPrimitive.Header
+        id={id}
+        className="not-prose font-medium text-foreground hover:bg-accent hover:text-accent-foreground"
+      >
+        <AccordionPrimitive.Trigger className="flex w-full items-center gap-2 p-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          <ChevronRightIcon className="size-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]/accordion:rotate-90" />
+          {title}
         </AccordionPrimitive.Trigger>
-        {props.id ? <CopyButton id={props.id} /> : null}
       </AccordionPrimitive.Header>
+      {id ? <CopyButton id={id} /> : null}
       <AccordionPrimitive.Content className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
-        <div className="pb-4 pl-6 text-sm prose-no-margin">{children}</div>
+        <div className="ml-2 p-4 prose-no-margin">{children}</div>
       </AccordionPrimitive.Content>
     </AccordionPrimitive.Item>
   );
@@ -137,8 +142,7 @@ function CopyButton({ id }: { id: string }): JSX.Element {
       className={cn(
         buttonVariants({
           color: 'ghost',
-          className:
-            'opacity-0 transition-all group-data-[state=open]/accordion:opacity-100',
+          className: 'absolute top-4 right-4 text-muted-foreground',
         }),
       )}
       onClick={onClick}
