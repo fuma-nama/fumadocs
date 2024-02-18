@@ -44,18 +44,16 @@ export interface FolderProps extends HTMLAttributes<HTMLDivElement> {
   defaultOpen?: boolean;
 }
 
-export function File(props: FileProps): JSX.Element {
-  // todo: remove in next major
-  if ('children' in props) {
-    return <Folder {...(props as FolderProps)} />;
-  }
-
-  const { name, icon = <FileIcon />, className, ...rest } = props;
+export function File({
+  name,
+  icon = <FileIcon />,
+  className,
+  ...rest
+}: FileProps): JSX.Element {
   return (
     <div className={cn(item({ className }))} {...rest}>
       {icon}
-      {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- remove in next major */}
-      {name ?? props.title}
+      {name}
     </div>
   );
 }
@@ -71,8 +69,7 @@ export function Folder({
     <Collapsible open={open} onOpenChange={setOpen} {...props}>
       <CollapsibleTrigger className={cn(item({ className: 'w-full' }))}>
         {open ? <FolderOpenIcon /> : <FolderIcon />}
-        {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- remove in next major */}
-        {name ?? props.title}
+        {name}
       </CollapsibleTrigger>
       <CollapsibleContent>
         <div className="ml-2 flex flex-col border-l pl-2">{props.children}</div>

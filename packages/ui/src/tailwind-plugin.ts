@@ -186,8 +186,6 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
         },
         colors: {
           border: colorToCSS(prefix, 'border'),
-          // todo: remove in next major
-          input: colorToCSS(prefix, 'border'),
           ring: colorToCSS(prefix, 'ring'),
           background: colorToCSS(prefix, 'background'),
           foreground: colorToCSS(prefix, 'foreground'),
