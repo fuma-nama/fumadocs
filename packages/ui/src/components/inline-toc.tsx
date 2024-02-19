@@ -2,7 +2,6 @@
 
 import { ChevronDown } from 'lucide-react';
 import type { TOCItemType } from 'fumadocs-core/server';
-import type { ReactNode } from 'react';
 import {
   Collapsible,
   CollapsibleContent,
@@ -12,32 +11,20 @@ import {
 export interface InlineTocProps {
   items: TOCItemType[];
   defaultOpen?: boolean;
-  children?: ReactNode;
 }
 
-export function InlineTOC({
-  items,
-  defaultOpen,
-  children,
-}: InlineTocProps): JSX.Element {
+export function InlineTOC({ items, defaultOpen }: InlineTocProps): JSX.Element {
   return (
     <Collapsible
       defaultOpen={defaultOpen}
-      className="not-prose rounded-lg border bg-card p-4 text-card-foreground"
+      className="not-prose rounded-lg border bg-card text-card-foreground"
     >
-      <CollapsibleTrigger asChild>
-        {children ?? (
-          <button
-            type="button"
-            className="inline-flex w-full items-center justify-between font-medium [&[data-state=open]>svg]:rotate-180"
-          >
-            Table of Contents
-            <ChevronDown className="size-4 transition-transform duration-200" />
-          </button>
-        )}
+      <CollapsibleTrigger className="inline-flex w-full items-center justify-between p-4 font-medium [&[data-state=open]>svg]:rotate-180">
+        Table of Contents
+        <ChevronDown className="size-4 transition-transform duration-200" />
       </CollapsibleTrigger>
       <CollapsibleContent>
-        <div className="mt-2 flex flex-col text-sm text-muted-foreground">
+        <div className="flex flex-col p-4 pt-0 text-sm text-muted-foreground">
           {items.map((item) => (
             <a
               key={item.url}

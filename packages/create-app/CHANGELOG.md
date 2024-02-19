@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 9.0.0
+
+### Patch Changes
+
+- c1e65b72: Fix typos
+
 ## 8.3.0
 
 ## 8.2.0

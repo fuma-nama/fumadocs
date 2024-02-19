@@ -1,5 +1,11 @@
 # next-docs-mdx
 
+## 8.0.5
+
+### Patch Changes
+
+- fumadocs-core@9.0.0
+
 ## 8.0.4
 
 ### Patch Changes

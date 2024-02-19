@@ -12,89 +12,48 @@ import {
   useState,
   useEffect,
 } from 'react';
-import { cva } from 'class-variance-authority';
 import { cn } from '@/utils/cn';
 import { useCopyButton } from '@/utils/use-copy-button';
 import { buttonVariants } from '@/theme/variants';
 
-const variants = cva(
-  'divide-y divide-border overflow-hidden rounded-lg border bg-card',
-);
-
-// todo: Use `single` unless especially use `MultipleAccordions`
-
 export const Accordions = forwardRef<
   HTMLDivElement,
-  AccordionSingleProps | AccordionMultipleProps
->((props, ref) => {
-  if (props.type === 'multiple') {
-    return <MultipleAccordions ref={ref} {...props} />;
-  }
+  | Omit<AccordionSingleProps, 'value' | 'onValueChange'>
+  | Omit<AccordionMultipleProps, 'value' | 'onValueChange'>
+>(({ type = 'single', className, defaultValue, ...props }, ref) => {
+  const [value, setValue] = useState(
+    type === 'single' ? defaultValue ?? '' : defaultValue ?? [],
+  );
+
+  useEffect(() => {
+    const id = window.location.hash.substring(1);
+
+    if (id.length > 0)
+      setValue((prev) => {
+        return type === 'single'
+          ? id
+          : [id, ...(Array.isArray(prev) ? prev : [])];
+      });
+  }, [type]);
 
   return (
-    <SingleAccordions
+    // @ts-expect-error -- Multiple types
+    <AccordionPrimitive.Root
+      type={type}
       ref={ref}
+      value={value}
+      onValueChange={setValue}
+      collapsible
+      className={cn(
+        'divide-y divide-border overflow-hidden rounded-lg border bg-card',
+        className,
+      )}
       {...props}
-      // If type is undefined
-      type="single"
     />
   );
 });
 
 Accordions.displayName = 'Accordions';
-
-export const MultipleAccordions = forwardRef<
-  HTMLDivElement,
-  AccordionMultipleProps
->(({ className, defaultValue, ...props }, ref) => {
-  const [defValue, setDefValue] = useState(defaultValue);
-  const value = props.value ?? defValue;
-  const setValue = props.onValueChange?.bind(props) ?? setDefValue;
-
-  useEffect(() => {
-    if (window.location.hash.length > 0)
-      setValue([window.location.hash.substring(1)]);
-  }, [setValue]);
-
-  return (
-    <AccordionPrimitive.Root
-      ref={ref}
-      value={value}
-      onValueChange={setValue}
-      className={cn(variants(), className)}
-      {...props}
-    />
-  );
-});
-
-MultipleAccordions.displayName = 'MultipleAccordions';
-
-export const SingleAccordions = forwardRef<
-  HTMLDivElement,
-  AccordionSingleProps
->(({ className, defaultValue, ...props }, ref) => {
-  const [defValue, setDefValue] = useState(defaultValue);
-  const value = props.value ?? defValue;
-  const setValue = props.onValueChange?.bind(props) ?? setDefValue;
-
-  useEffect(() => {
-    if (window.location.hash.length > 0)
-      setValue(window.location.hash.substring(1));
-  }, [setValue]);
-
-  return (
-    <AccordionPrimitive.Root
-      ref={ref}
-      value={value}
-      onValueChange={setValue}
-      collapsible
-      className={cn(variants(), className)}
-      {...props}
-    />
-  );
-});
-
-SingleAccordions.displayName = 'SingleAccordions';
 
 export const Accordion = forwardRef<
   HTMLDivElement,

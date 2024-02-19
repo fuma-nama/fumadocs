@@ -1,0 +1,29 @@
+---
+title: Rehype Code
+description: Code syntax highlighter
+---
+
+A built-in syntax highlighter based on Shiki. 
+
+## Usage
+
+Add the plugin.
+
+```ts
+import { rehypeCode } from 'fumadocs-core/mdx-plugins'
+
+const config = {
+    rehypePlugins: [
+      [rehypeCode, { ... }]
+    ],
+}
+```
+
+For more information, see [Shiki](https://shiki.style).
+
+### Additional Features
+
+- `title` meta string
+- Default language
+- Add `icon` prop to code blocks
+

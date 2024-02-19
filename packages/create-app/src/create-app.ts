@@ -105,7 +105,7 @@ function createPackageJson(
 
   if (template === 'contentlayer') {
     Object.assign(packageJson.dependencies, {
-      'fuamdocs-contentlayer': contentlayerPkg.version,
+      'fumadocs-contentlayer': contentlayerPkg.version,
       contentlayer: '0.3.4',
       'next-contentlayer': '0.3.4',
     });
