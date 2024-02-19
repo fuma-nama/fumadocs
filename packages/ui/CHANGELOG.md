@@ -1,5 +1,39 @@
 # next-docs-ui
 
+## 9.0.0
+
+### Major Changes
+
+- 071898da: **Remove deprecated usage of `Files` component**
+
+  Why: Since `8.3.0`, you should use the `Folder` component instead for folders. For simplicity, the `title` prop has been renamed to `name`.
+
+  Migrate: Replace folders with the `Folder` component. Rename `title` prop to `name`.
+
+  ```diff
+  - <Files>
+  - <File title="folder">
+  - <File title="file.txt" />
+  - </File>
+  - </Files>
+
+  + <Files>
+  + <Folder name="folder">
+  + <File name="file.txt" />
+  + </Folder>
+  + </Files>
+  ```
+
+- 2b355907: **Remove controlled usage for Accordion**
+
+  Why: Components in Fumadocs UI should not be used outside of MDX.
+
+  Migrate: Remove `value` and `onValueChange` props.
+
+### Patch Changes
+
+- fumadocs-core@9.0.0
+
 ## 8.3.0
 
 ### Minor Changes
