@@ -1,3 +1,4 @@
+import { structure } from '@/mdx-plugins';
 import { getTableOfContents, findNeighbour } from '@/server';
 
 import type { Root } from '@/server/page-tree';
@@ -45,8 +46,49 @@ Some text here
 ### Heading 3`;
 
   expect(await getTableOfContents(content)).toStrictEqual([
-    'Heading 1',
-    'Heading 2',
-    'Heading 3',
+    expect.objectContaining({ title: 'Heading 1', url: '#heading-1' }),
+    expect.objectContaining({ title: 'Heading 2', url: '#heading-2' }),
+    expect.objectContaining({ title: 'Heading 3', url: '#heading-3' }),
   ]);
+});
+
+test('Structure', async () => {
+  const content = `# Heading 1
+
+Some text here
+
+## Heading 2
+
+Some text here
+
+### Heading 3`;
+
+  expect(structure(content)).toMatchInlineSnapshot(`
+    {
+      "contents": [
+        {
+          "content": "Some text here",
+          "heading": "heading-1",
+        },
+        {
+          "content": "Some text here",
+          "heading": "heading-2",
+        },
+      ],
+      "headings": [
+        {
+          "content": "Heading 1",
+          "id": "heading-1",
+        },
+        {
+          "content": "Heading 2",
+          "id": "heading-2",
+        },
+        {
+          "content": "Heading 3",
+          "id": "heading-3",
+        },
+      ],
+    }
+  `);
 });
