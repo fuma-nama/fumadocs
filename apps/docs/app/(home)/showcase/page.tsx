@@ -71,7 +71,7 @@ export default function Showcase(): JSX.Element {
 
   return (
     <main className="pb-16">
-      <div className="relative -mb-10 -mt-8 overflow-hidden pt-20 [mask-image:linear-gradient(to_top,transparent,white_100px)]">
+      <div className="relative -mb-10 -mt-16 overflow-hidden pt-24 [mask-image:linear-gradient(to_top,transparent,white_100px,transparent_90%)]">
         <div className="absolute inset-0 z-[-1] bg-repeat-gradient-to-br from-blue-500/30 via-transparent to-pink-500/30 to-30% [mask-image:radial-gradient(circle,white,transparent)]" />
         <div className="relative mx-auto w-fit duration-1000 animate-in fade-in slide-in-from-bottom-10 before:absolute before:-inset-32 before:z-[-1] before:bg-gradient-radial before:from-pink-300/40 before:to-transparent before:to-70% before:content-['']">
           <StarLogo />

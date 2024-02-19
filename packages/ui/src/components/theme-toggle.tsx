@@ -7,9 +7,9 @@ import { cn } from '@/utils/cn';
 const buttonVariants = cva('size-7 rounded-full p-1.5 text-muted-foreground', {
   variants: {
     dark: {
-      true: 'dark:bg-accent dark:text-accent-foreground',
+      true: 'dark:bg-secondary dark:text-secondary-foreground',
       false:
-        'bg-accent text-accent-foreground dark:bg-transparent dark:text-muted-foreground',
+        'bg-secondary text-secondary-foreground dark:bg-transparent dark:text-muted-foreground',
     },
   },
 });
