@@ -18,7 +18,6 @@ import { cn } from './utils/cn';
 const shortcuts: Record<string, string> = {
   ui: './content/docs/ui/props.ts',
   headless: './content/docs/headless/props.ts',
-  test: './components/test.ts',
 };
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {

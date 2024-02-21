@@ -14,7 +14,11 @@ Hence, you shouldn't store any sensitive or large data in page tree.
 
 ## Conventions
 
-Items can be either a separator, page or folder.
+### Root
+
+The initial root of page trees.
+
+<AutoTypeTable path='headless' name='PageTreeRoot' />
 
 ### Page
 
@@ -28,9 +32,13 @@ It contains a url, an optional icon and display name.
 }
 ```
 
+> External urls are also supported
+
+<AutoTypeTable path='headless' name='PageTreeItem' />
+
 ### Folder
 
-It contains a display name, an optional icon, a list of items and the index page if exists.
+A folder containing a list of nodes.
 
 ```json
 {
@@ -46,13 +54,15 @@ It contains a display name, an optional icon, a list of items and the index page
 }
 ```
 
+<AutoTypeTable path='headless' name='PageTreeFolder' />
+
 #### As Root
 
 To implement multiple page trees, you can add a `root` property to the folder node. The nearest root folder of current page will be used as the root of page tree.
 
 ### Separator
 
-It only contains a display name.
+A label between items.
 
 ```json
 {
@@ -61,32 +71,13 @@ It only contains a display name.
 }
 ```
 
-### Icons
+<AutoTypeTable path='headless' name='PageTreeSeparator' />
+
+## Icons
 
 Icon is a `ReactElement`, supported by pages and folders.
 
-### Example
-
-```js
-export const tree = [
-  {
-    type: 'page',
-    name: 'Quick Start',
-    url: '/docs',
-  },
-  {
-    type: 'separator',
-    name: 'Guides',
-  },
-  {
-    type: 'page',
-    name: 'Example',
-    url: '/docs/example',
-  },
-];
-```
-
-### Type Bindings
+## Type Bindings
 
 You can import the type from server package.
 
