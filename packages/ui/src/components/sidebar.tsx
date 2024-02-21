@@ -3,7 +3,7 @@ import { ChevronDown } from 'lucide-react';
 import type { PageTree } from 'fumadocs-core/server';
 import * as Base from 'fumadocs-core/sidebar';
 import { usePathname } from 'next/navigation';
-import type { HTMLAttributes, ReactNode } from 'react';
+import type { FC, HTMLAttributes, ReactNode } from 'react';
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import Link from 'fumadocs-core/link';
 import { cn } from '@/utils/cn';
@@ -29,8 +29,21 @@ export interface SidebarProps {
    * @defaultValue 1
    */
   defaultOpenLevel?: number;
+
+  components?: Partial<Components>;
   banner?: ReactNode;
   footer?: ReactNode;
+}
+
+interface SidebarContext {
+  defaultOpenLevel: number;
+  components: Components;
+}
+
+interface Components {
+  Item: FC<{ item: PageTree.Item }>;
+  Folder: FC<{ item: PageTree.Folder; level: number }>;
+  Separator: FC<{ item: PageTree.Separator }>;
 }
 
 const itemVariants = cva(
@@ -45,18 +58,35 @@ const itemVariants = cva(
   },
 );
 
-const SidebarContext = createContext({
+const defaultComponents: Components = {
+  Folder: FolderNode,
+  Separator: SeparatorNode,
+  Item: ({ item }) => (
+    <BaseItem item={{ text: item.name, url: item.url, icon: item.icon }} />
+  ),
+};
+
+const SidebarContext = createContext<SidebarContext>({
   defaultOpenLevel: 1,
+  components: defaultComponents,
 });
 
 export function Sidebar({
   banner,
   footer,
+  components,
   items = [],
   defaultOpenLevel = 1,
 }: SidebarProps): JSX.Element {
   const [open] = useSidebarCollapse();
   const { root } = useTreeContext();
+  const context = useMemo<SidebarContext>(
+    () => ({
+      defaultOpenLevel,
+      components: { ...defaultComponents, ...components },
+    }),
+    [components, defaultOpenLevel],
+  );
 
   return (
     <Base.SidebarList
@@ -69,15 +99,17 @@ export function Sidebar({
         'max-md:fixed max-md:inset-0 max-md:z-40 max-md:bg-background/80 max-md:pt-16 max-md:backdrop-blur-md max-md:data-[open=false]:hidden',
       )}
     >
-      <SidebarContext.Provider value={{ defaultOpenLevel }}>
+      <SidebarContext.Provider value={context}>
         <ScrollArea className="flex-1">
           <div className="flex flex-col gap-8 pb-10 pt-4 max-md:px-4 md:pr-3 md:pt-10">
             {banner}
-            <div className="lg:hidden">
-              {items.map((item) => (
-                <BaseItem key={item.url} item={item} nested />
-              ))}
-            </div>
+            {items.length > 0 && (
+              <div className="lg:hidden">
+                {items.map((item) => (
+                  <BaseItem key={item.url} item={item} nested />
+                ))}
+              </div>
+            )}
             <NodeList items={root.children} />
           </div>
         </ScrollArea>
@@ -101,6 +133,8 @@ interface NodeListProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 function NodeList({ items, level = 0, ...props }: NodeListProps): JSX.Element {
+  const { components } = useContext(SidebarContext);
+
   return (
     <div {...props}>
       {items.map((item) => {
@@ -108,16 +142,11 @@ function NodeList({ items, level = 0, ...props }: NodeListProps): JSX.Element {
 
         switch (item.type) {
           case 'separator':
-            return <SeparatorNode key={id} item={item} />;
+            return <components.Separator key={id} item={item} />;
           case 'folder':
-            return <Folder key={id} item={item} level={level + 1} />;
+            return <components.Folder key={id} item={item} level={level + 1} />;
           default:
-            return (
-              <BaseItem
-                key={item.url}
-                item={{ text: item.name, url: item.url, icon: item.icon }}
-              />
-            );
+            return <components.Item key={item.url} item={item} />;
         }
       })}
     </div>
@@ -146,8 +175,8 @@ function BaseItem({
   );
 }
 
-function Folder({
-  item: { name, children, index, icon },
+function FolderNode({
+  item: { name, children, index, icon, defaultOpen = false },
   level,
 }: {
   item: PageTree.Folder;
@@ -161,7 +190,7 @@ function Folder({
     [children, pathname],
   );
   const [extend, setExtend] = useState(
-    active || childActive || defaultOpenLevel >= level,
+    active || childActive || defaultOpenLevel >= level || defaultOpen,
   );
 
   useEffect(() => {
