@@ -155,6 +155,10 @@ export function create(options: Options = {}): Config {
         type: 'string',
         required: false,
       },
+      defaultOpen: {
+        type: 'boolean',
+        required: false,
+      },
       ...metaFields,
     },
     computedFields: {

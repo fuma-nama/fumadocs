@@ -28,6 +28,7 @@ export interface MetaData {
   title?: string;
   root?: boolean;
   pages?: string[];
+  defaultOpen?: boolean;
 }
 
 export interface PageData {

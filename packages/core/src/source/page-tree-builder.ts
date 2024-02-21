@@ -86,7 +86,7 @@ function getFolderMeta(
 function buildFolderNode(
   folder: Folder,
   ctx: PageTreeBuilderContext,
-  root = false,
+  defaultIsRoot = false,
 ): PageTree.Folder {
   const indexNode = folder.children.find(
     (node) => node.type === 'page' && node.file.name === 'index',
@@ -97,9 +97,9 @@ function buildFolderNode(
   let children: PageTree.Folder['children'];
 
   if (!meta) {
-    children = buildAll(folder.children, ctx, !root);
+    children = buildAll(folder.children, ctx, !defaultIsRoot);
   } else {
-    const isRoot = meta.root ?? root;
+    const isRoot = meta.root ?? defaultIsRoot;
     const addedNodePaths = new Set<string>();
 
     const resolved = meta.pages?.flatMap<PageTree.Node | '...'>((item) => {
@@ -160,6 +160,7 @@ function buildFolderNode(
     name: meta?.title ?? index?.name ?? pathToName(folder.file.name),
     icon: ctx.resolveIcon(meta?.icon),
     root: meta?.root,
+    defaultOpen: meta?.defaultOpen,
     index,
     children,
   };
