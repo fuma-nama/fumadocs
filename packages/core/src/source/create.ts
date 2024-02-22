@@ -1,9 +1,9 @@
 import type * as PageTree from '@/server/page-tree';
 import { load, type LoadOptions, type VirtualFile } from './load';
-import type { MetaData, PageData, Transformer } from './types';
+import type { FileInfo, MetaData, PageData, Transformer } from './types';
 import type { CreatePageTreeBuilderOptions } from './page-tree-builder';
 import { createPageTreeBuilder } from './page-tree-builder';
-import { joinPaths } from './path';
+import { joinPaths, splitPath } from './path';
 import type { Node, Page } from './file-system';
 
 interface LoaderConfig {
@@ -106,6 +106,12 @@ function createGetUrl(
   };
 }
 
+function getSlugs(info: FileInfo): string[] {
+  const result = [...splitPath(info.dirname), info.name];
+
+  return result[result.length - 1] === 'index' ? result.slice(0, -1) : result;
+}
+
 type InferSourceConfig<T> = T extends Source<infer Config> ? Config : never;
 
 export function loader<Options extends LoaderOptions>(
@@ -124,10 +130,7 @@ function createOutput({
   rootDir = '',
   transformers,
   baseUrl = '/',
-  slugs = (info) => {
-    const result = [...info.dirname.split('/'), info.name].filter(Boolean);
-    return result[result.length - 1] === 'index' ? result.slice(0, -1) : result;
-  },
+  slugs = getSlugs,
   url = createGetUrl(baseUrl),
 }: LoaderOptions): LoaderOutput<LoaderConfig> {
   const result = load({

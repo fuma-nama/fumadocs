@@ -1,6 +1,5 @@
 import { describe, expect, test } from 'vitest';
 import { loader } from '../src/source';
-import type * as PageTree from '../src/server/page-tree';
 
 describe('Page Tree Builder', () => {
   test('Simple', () => {
@@ -25,10 +24,19 @@ describe('Page Tree Builder', () => {
       },
     });
 
-    expect(result.pageTree).toEqual({
-      name: '',
-      children: [{ type: 'page', name: 'Hello', url: '/test' }],
-    } satisfies PageTree.Root);
+    expect(result.pageTree).toMatchInlineSnapshot(`
+      {
+        "children": [
+          {
+            "icon": undefined,
+            "name": "Hello",
+            "type": "page",
+            "url": "/test",
+          },
+        ],
+        "name": "",
+      }
+    `);
   });
 
   test('Nested Directories', async () => {
@@ -60,23 +68,35 @@ describe('Page Tree Builder', () => {
       },
     });
 
-    expect(result.pageTree).toEqual({
-      name: '',
-      children: [
-        { type: 'page', name: 'Hello', url: '/test' },
-        {
-          type: 'folder',
-          name: 'Nested',
-          children: [
-            {
-              type: 'page',
-              name: 'Nested Page',
-              url: '/nested/test',
-            },
-          ],
-        },
-      ],
-    } satisfies PageTree.Root);
+    expect(result.pageTree).toMatchInlineSnapshot(`
+      {
+        "children": [
+          {
+            "icon": undefined,
+            "name": "Hello",
+            "type": "page",
+            "url": "/test",
+          },
+          {
+            "children": [
+              {
+                "icon": undefined,
+                "name": "Nested Page",
+                "type": "page",
+                "url": "/nested/test",
+              },
+            ],
+            "defaultOpen": undefined,
+            "icon": undefined,
+            "index": undefined,
+            "name": "Nested",
+            "root": undefined,
+            "type": "folder",
+          },
+        ],
+        "name": "",
+      }
+    `);
   });
 
   test('Internationalized Routing', () => {
@@ -138,22 +158,34 @@ describe('Page Tree Builder', () => {
       },
     });
 
-    expect(result.pageTree['cn']).toEqual({
-      name: 'Docs Chinese',
-      children: [
-        { type: 'page', name: 'Hello Chinese', url: '/cn/test' },
-        {
-          type: 'folder',
-          name: 'Nested Chinese',
-          children: [
-            {
-              type: 'page',
-              name: 'Nested Page Chinese',
-              url: '/cn/nested/test',
-            },
-          ],
-        },
-      ],
-    } satisfies PageTree.Root);
+    expect(result.pageTree['cn']).toMatchInlineSnapshot(`
+      {
+        "children": [
+          {
+            "icon": undefined,
+            "name": "Hello Chinese",
+            "type": "page",
+            "url": "/cn/test",
+          },
+          {
+            "children": [
+              {
+                "icon": undefined,
+                "name": "Nested Page Chinese",
+                "type": "page",
+                "url": "/cn/nested/test",
+              },
+            ],
+            "defaultOpen": undefined,
+            "icon": undefined,
+            "index": undefined,
+            "name": "Nested Chinese",
+            "root": undefined,
+            "type": "folder",
+          },
+        ],
+        "name": "Docs Chinese",
+      }
+    `);
   });
 });
