@@ -3,40 +3,31 @@ import slash from '@/utils/slash';
 import type { FileInfo } from './types';
 
 export function parseFilePath(path: string): FileInfo {
-  const parsed = parse(path);
-  const dir = slash(parsed.dir);
-  const flattenedPath = joinPaths([dir, parsed.name]);
+  const slashedPath = slash(path);
+  const parsed = parse(slashedPath);
+  const flattenedPath = joinPaths([parsed.dir, parsed.name]);
   const [name, locale] = parsed.name.split('.');
 
   return {
-    dirname: dir,
+    dirname: parsed.dir,
     name,
     flattenedPath,
     locale,
-    path,
+    path: slashedPath,
   };
 }
 
-export function isRelative(path: string, root: string): boolean {
-  return path.startsWith(root);
-}
-
-export function getRelativePath(path: string, root: string): string {
-  if (!isRelative(path, root)) throw new Error('Invalid path');
-  return splitPath(path.substring(root.length)).join('/');
-}
-
 export function parseFolderPath(path: string): FileInfo {
-  const parsed = parse(path);
-  const dir = slash(parsed.dir);
+  const slashedPath = slash(path);
+  const parsed = parse(slashedPath);
   const [name, locale] = parsed.base.split('.');
 
   return {
-    dirname: dir,
+    dirname: parsed.dir,
     name,
-    flattenedPath: path,
+    flattenedPath: slashedPath,
     locale,
-    path,
+    path: slashedPath,
   };
 }
 
