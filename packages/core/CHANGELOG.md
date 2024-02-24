@@ -1,5 +1,16 @@
 # next-docs-zeta
 
+## 9.1.0
+
+### Minor Changes
+
+- 909b0e35: Support duplicated names with meta and page files
+- 1c388ca5: Support `defaultOpen` for folder nodes
+
+### Patch Changes
+
+- 691f12aa: Source API: Support relative paths as root directory
+
 ## 9.0.0
 
 ## 8.3.0

@@ -25,11 +25,11 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@shikijs/twoslash": "1.1.6",
+    "@shikijs/twoslash": "1.1.7",
     "mdast-util-from-markdown": "^2.0.0",
     "mdast-util-gfm": "^3.0.0",
     "mdast-util-to-hast": "^13.1.0",
-    "shiki": "1.1.6"
+    "shiki": "1.1.7"
   },
   "devDependencies": {
     "@types/hast": "^3.0.4",
