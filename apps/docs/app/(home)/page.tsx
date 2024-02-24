@@ -343,8 +343,8 @@ function Hero(): JSX.Element {
           <filter id="noiseFilter">
             <feTurbulence
               type="fractalNoise"
-              baseFrequency="0.67"
-              numOctaves="2"
+              baseFrequency="0.6"
+              numOctaves="1"
               seed="15"
               stitchTiles="stitch"
               result="turbulence"
