@@ -64,8 +64,26 @@ export default function Showcase(): JSX.Element {
             cy="50%"
             r="80"
             fill="url(#Gradient1)"
+            fillOpacity="0"
             filter="url(#circleShadow)"
-          />
+            stroke="rgb(100,100,100)"
+            strokeDasharray="1000"
+            strokeDashoffset="1000"
+          >
+            <animate
+              attributeName="stroke-dashoffset"
+              values="1000;0"
+              dur="1s"
+              fill="freeze"
+            />
+            <animate
+              begin="800ms"
+              attributeName="fill-opacity"
+              values="0;1"
+              dur="500ms"
+              fill="freeze"
+            />
+          </circle>
         </g>
       </svg>
       <div className="container text-center">

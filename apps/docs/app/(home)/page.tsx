@@ -369,24 +369,28 @@ function Hero(): JSX.Element {
           cy="250"
           r="250"
           fill="url(#Gradient1)"
-          fillOpacity="0"
           stroke="rgb(100,100,100)"
           strokeDashoffset="4000"
           strokeDasharray="4000"
           filter="url(#noiseFilter)"
+          transform="translate(0 500)"
         >
-          <animate
-            attributeName="stroke-dashoffset"
-            values="4000;0;-4000"
-            dur="2s"
-            fill="freeze"
-          />
-          <animate
-            attributeName="fill-opacity"
-            begin="500ms"
-            values="0;1"
+          <animateTransform
+            attributeName="transform"
+            type="translate"
+            from="0 500"
+            to="0 0"
             dur="1s"
             fill="freeze"
+            keySplines="
+			0 0.1 0.2 1;
+			0 0.1 0.2 1;
+			0 0.1 0.2 1;
+			0 0.1 0.2 1;
+			0 0.1 0.2 1;
+			0 0.1 0.2 1"
+            keyTimes="0;0.22;0.33;0.55;0.66;0.88;1"
+            calcMode="spline"
           />
         </circle>
       </svg>
