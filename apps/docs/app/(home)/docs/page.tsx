@@ -15,9 +15,9 @@ const cardIconVariants = cva(
 export default function DocsPage(): JSX.Element {
   return (
     <main className="container flex flex-col items-center py-16 text-center">
-      <div className="absolute inset-0 z-[-1] overflow-hidden [perspective:2000px]">
+      <div className="absolute inset-0 z-[-1] overflow-hidden duration-1000 animate-in fade-in [perspective:2000px]">
         <div
-          className="absolute bottom-[20%] left-[50%] h-[1200px] w-[1200px] origin-bottom bg-primary/30 opacity-50 duration-1000 animate-in fade-in"
+          className="absolute bottom-[20%] left-[50%] h-[1200px] w-[1200px] origin-bottom bg-primary/30 opacity-50"
           style={{
             transform: 'rotateX(75deg) translate(-50%, 400px)',
             backgroundImage:

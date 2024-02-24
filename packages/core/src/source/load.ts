@@ -1,5 +1,6 @@
+import * as path from 'node:path';
 import type { FileInfo, MetaData, PageData, Transformer } from './types';
-import { getRelativePath, isRelative, parseFilePath } from './path';
+import { parseFilePath } from './path';
 import { Storage } from './file-system';
 
 export interface LoadOptions {
@@ -46,14 +47,21 @@ function buildStorage(options: LoadOptions): Storage {
   const storage = new Storage();
 
   for (const file of options.files) {
-    if (!isRelative(file.path, options.rootDir)) continue;
-    const path = getRelativePath(file.path, options.rootDir);
+    const relativePath = path.join(
+      path.relative(options.rootDir, path.join('./', path.dirname(file.path))),
+      path.basename(file.path),
+    );
+
+    const isRelative =
+      !relativePath.startsWith('..') && !path.isAbsolute(relativePath);
+
+    if (!isRelative) continue;
 
     if (file.type === 'page') {
-      const parsedPath = parseFilePath(path);
+      const parsedPath = parseFilePath(relativePath);
       const slugs = options.getSlugs(parsedPath);
 
-      storage.write(path, {
+      storage.write(relativePath, {
         slugs,
         url: options.getUrl(slugs, parsedPath.locale),
         type: file.type,
@@ -62,7 +70,7 @@ function buildStorage(options: LoadOptions): Storage {
     }
 
     if (file.type === 'meta') {
-      storage.write(path, {
+      storage.write(relativePath, {
         type: file.type,
         data: file.data as MetaData,
       });

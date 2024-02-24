@@ -1,5 +1,18 @@
 # fumadocs-contentlayer
 
+## 1.1.0
+
+### Minor Changes
+
+- 1c388ca5: Support `defaultOpen` for folder nodes
+
+### Patch Changes
+
+- Updated dependencies [909b0e35]
+- Updated dependencies [691f12aa]
+- Updated dependencies [1c388ca5]
+  - fumadocs-core@9.1.0
+
 ## 1.0.6
 
 ### Patch Changes

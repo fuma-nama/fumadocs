@@ -19,8 +19,8 @@ describe('Virtual Storage', () => {
   });
 
   test('Reading', () => {
-    expect(storage.read('test')).toBeDefined();
-    expect(storage.read('meta')).toBeDefined();
+    expect(storage.readPage('test')).toBeDefined();
+    expect(storage.readMeta('meta')).toBeDefined();
   });
 
   test('Nested Directories', () => {
@@ -31,7 +31,7 @@ describe('Virtual Storage', () => {
 
     expect(storage.readDir('dir1')).toBeDefined();
     expect(storage.readDir('dir1/dir2')).toBeDefined();
-    expect(storage.read('dir1/dir2/meta')).toBeDefined();
+    expect(storage.readMeta('dir1/dir2/meta')).toBeDefined();
   });
 });
 

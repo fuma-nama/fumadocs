@@ -23,3 +23,8 @@ export type TOCItemProps = Omit<
 >;
 
 export type TOCItemType = Server.TOCItemType;
+
+export type PageTreeItem = Server.PageTree.Item;
+export type PageTreeFolder = Server.PageTree.Folder;
+export type PageTreeRoot = Server.PageTree.Root;
+export type PageTreeSeparator = Server.PageTree.Separator;

@@ -1,5 +1,4 @@
 import {
-  isRelative,
   joinPaths,
   parseFilePath,
   parseFolderPath,
@@ -32,6 +31,10 @@ describe('Path utilities', () => {
       locale: 'cn',
       path: 'nested/test.cn.mdx',
     });
+
+    expect(parseFilePath('nested\\test.cn.mdx')).toEqual(
+      parseFilePath('nested/test.cn.mdx'),
+    );
   });
 
   test('parse folder path', () => {
@@ -50,6 +53,10 @@ describe('Path utilities', () => {
       locale: undefined,
       path: 'nested/nested',
     });
+
+    expect(parseFolderPath('nested\\nested')).toEqual(
+      parseFolderPath('nested/nested'),
+    );
   });
 
   test('join paths', () => {
@@ -66,10 +73,5 @@ describe('Path utilities', () => {
     expect(splitPath('a/b/c')).toEqual(['a', 'b', 'c']);
     expect(splitPath('a//c')).toEqual(['a', 'c']);
     expect(splitPath('/a/c')).toEqual(['a', 'c']);
-  });
-
-  test('is relative', () => {
-    expect(isRelative('nested/file.mdx', 'nested')).toBe(true);
-    expect(isRelative('file.mdx', 'nested')).toBe(false);
   });
 });

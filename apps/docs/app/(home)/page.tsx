@@ -335,13 +335,65 @@ function Hero(): JSX.Element {
           Open Demo
         </a>
       </div>
-      <div
-        className="mb-[-150px] mt-16 size-[300px] rounded-full bg-background md:mb-[-250px] md:size-[500px]"
-        style={{
-          backgroundImage:
-            'radial-gradient(circle at 80% 0%, transparent 40%, hsl(var(--primary)))',
-        }}
-      />
+      <svg
+        viewBox="0 0 500 500"
+        className="mb-[-150px] mt-16 size-[300px] dark:invert md:mb-[-250px] md:size-[500px]"
+      >
+        <defs>
+          <filter id="noiseFilter">
+            <feTurbulence
+              type="fractalNoise"
+              baseFrequency="0.67"
+              numOctaves="2"
+              seed="15"
+              stitchTiles="stitch"
+              result="turbulence"
+            />
+            <feComposite in="SourceGraphic" in2="turbulence" operator="in" />
+            <feComposite in2="SourceGraphic" operator="lighter" />
+          </filter>
+          <radialGradient
+            id="Gradient1"
+            cx="50%"
+            cy="50%"
+            r="80%"
+            fx="10%"
+            fy="10%"
+          >
+            <stop stopColor="white" offset="35%" />
+            <stop stopColor="black" offset="100%" />
+          </radialGradient>
+        </defs>
+        <circle
+          cx="250"
+          cy="250"
+          r="250"
+          fill="url(#Gradient1)"
+          stroke="rgb(100,100,100)"
+          strokeDashoffset="4000"
+          strokeDasharray="4000"
+          filter="url(#noiseFilter)"
+          transform="translate(0 500)"
+        >
+          <animateTransform
+            attributeName="transform"
+            type="translate"
+            from="0 500"
+            to="0 0"
+            dur="1s"
+            fill="freeze"
+            keySplines="
+			0 0.1 0.2 1;
+			0 0.1 0.2 1;
+			0 0.1 0.2 1;
+			0 0.1 0.2 1;
+			0 0.1 0.2 1;
+			0 0.1 0.2 1"
+            keyTimes="0;0.22;0.33;0.55;0.66;0.88;1"
+            calcMode="spline"
+          />
+        </circle>
+      </svg>
       <div
         className="absolute inset-0 z-[-1] duration-1000 animate-in fade-in"
         style={{

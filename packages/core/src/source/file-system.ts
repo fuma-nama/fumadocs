@@ -27,7 +27,7 @@ export interface Folder<
 export type Node<
   MD extends MetaData = MetaData,
   PD extends PageData = PageData,
-> = Meta<MD> | Page<PD> | Folder;
+> = Meta<MD> | Page<PD> | Folder<MD, PD>;
 
 /**
  * A virtual file system that solves inconsistent behaviours
@@ -48,11 +48,30 @@ export class Storage {
   }
 
   /**
-   * Read a file, it doesn't need an extension
    * @param path - flattened path
    */
-  read(path: string): Page | Meta | undefined {
-    return this.files.get(path);
+  private read(path: string, type: string): Page | Meta | undefined {
+    return this.files.get(`${path}.${type}`);
+  }
+
+  /**
+   * @param path - flattened path
+   */
+  readPage(path: string): Page | undefined {
+    const result = this.read(path, 'page');
+    if (result?.type !== 'page') return;
+
+    return result;
+  }
+
+  /**
+   * @param path - flattened path
+   */
+  readMeta(path: string): Meta | undefined {
+    const result = this.read(path, 'meta');
+    if (result?.type !== 'meta') return;
+
+    return result;
   }
 
   readDir(path: string): Folder | undefined {
@@ -71,7 +90,7 @@ export class Storage {
 
     this.makeDir(node.file.dirname);
     this.readDir(node.file.dirname)?.children.push(node);
-    this.files.set(node.file.flattenedPath, node);
+    this.files.set(`${node.file.flattenedPath}.${node.type}`, node);
   }
 
   list(): (Page | Meta)[] {

@@ -24,6 +24,7 @@ export interface Folder {
   type: 'folder';
   name: string;
   root?: boolean;
+  defaultOpen?: boolean;
   index?: Item;
   icon?: ReactElement;
   children: Node[];
