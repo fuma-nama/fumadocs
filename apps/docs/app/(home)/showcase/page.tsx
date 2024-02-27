@@ -7,6 +7,7 @@ import { cn } from '@/utils/cn';
 import { createMetadata } from '@/utils/metadata';
 import NuqsImage from '@/public/showcases/nuqs.jpg';
 import TypelyticsImage from '@/public/showcases/typelytics.png';
+import FrameGround from '@/public/showcases/frameground.png';
 
 export const metadata = createMetadata({
   title: 'Showcase',
@@ -26,6 +27,7 @@ export default function Showcase(): JSX.Element {
     [YeecordImage, 'Yeecord Docs', 'https://yeecord.com'],
     [NuqsImage, 'nuqs', 'https://nuqs.47ng.com'],
     [TypelyticsImage, 'Typelytics', 'https://typelytics.rhyssul.com/'],
+    [FrameGround, 'FrameGround', 'https://docs.frameground.tech/'],
   ] as const;
 
   return (
