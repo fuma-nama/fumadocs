@@ -9,7 +9,7 @@ import type { DocsLayoutProps } from 'fumadocs-ui/layout';
 import type { AnchorHTMLAttributes, ComponentPropsWithoutRef } from 'react';
 import type { DocsPageProps } from 'fumadocs-ui/page';
 import type { RootProviderProps } from 'fumadocs-ui/provider';
-import type { AutoTypeTable } from 'fumadocs-ui/components/auto-type-table';
+import type { AutoTypeTable } from 'fumadocs-typescript/ui';
 
 export type AccordionsProps = Omit<
   ComponentPropsWithoutRef<typeof Accordions>,

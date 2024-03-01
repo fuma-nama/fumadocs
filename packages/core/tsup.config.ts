@@ -1,12 +1,7 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  external: [
-    '@algolia/client-search',
-    'algoliasearch',
-    'unified',
-    'typescript',
-  ],
+  external: ['@algolia/client-search', 'algoliasearch', 'unified'],
   dts: true,
   target: 'es6',
   format: 'esm',
@@ -16,6 +11,6 @@ export default defineConfig({
     'src/{search,search-algolia}/client.ts',
     'src/search/shared.ts',
     'src/{search,search-algolia}/server.ts',
-    'src/{middleware,typescript}.ts',
+    'src/middleware.ts',
   ],
 });

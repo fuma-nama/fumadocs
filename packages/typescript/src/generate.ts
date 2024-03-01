@@ -81,8 +81,9 @@ function getExportedSymbol({
   const fileSymbol = checker.getSymbolAtLocation(sourceFile);
   if (!fileSymbol) return;
 
-  const exports = checker.getExportsOfModule(fileSymbol);
-  return exports.find((e) => e.getEscapedName().toString() === name);
+  return checker
+    .getExportsOfModule(fileSymbol)
+    .find((e) => e.getEscapedName().toString() === name);
 }
 
 /**

@@ -17,14 +17,12 @@ const exportedComponents = [
   'card',
   'heading',
   'codeblock',
-  'auto-type-table',
   'dialog/search',
   'dialog/search-default',
   'dialog/search-algolia',
 ];
 
 const injectImports = {
-  './src/components/auto-type-table.tsx': './src/components/type-table.tsx',
   './src/page.tsx': './src/page.client.tsx',
   './src/mdx.tsx': './src/mdx.client.tsx',
   './src/layout.tsx': './src/layout.client.tsx',

@@ -44,10 +44,6 @@
       "import": "./dist/link.js",
       "types": "./dist/link.d.ts"
     },
-    "./typescript": {
-      "import": "./dist/typescript.js",
-      "types": "./dist/typescript.d.ts"
-    },
     "./middleware": {
       "import": "./dist/middleware.js",
       "types": "./dist/middleware.d.ts"
@@ -75,9 +71,6 @@
       ],
       "toc": [
         "./dist/toc.d.ts"
-      ],
-      "typescript": [
-        "./dist/typescript.d.ts"
       ],
       "search/client": [
         "./dist/search/client.d.ts"

@@ -19,6 +19,7 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-twoslash": "workspace:^",
+    "fumadocs-typescript": "workspace:^",
     "fumadocs-ui": "workspace:*",
     "geist": "^1.2.0",
     "katex": "^0.16.8",

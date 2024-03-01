@@ -73,6 +73,9 @@ importers:
       fumadocs-twoslash:
         specifier: workspace:^
         version: link:../../packages/twoslash
+      fumadocs-typescript:
+        specifier: workspace:^
+        version: link:../../packages/typescript
       fumadocs-ui:
         specifier: workspace:*
         version: link:../../packages/ui
@@ -522,6 +525,46 @@ importers:
       eslint-config-custom:
         specifier: workspace:*
         version: link:../eslint-config-custom
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
+
+  packages/typescript:
+    dependencies:
+      hast-util-to-jsx-runtime:
+        specifier: ^2.3.0
+        version: 2.3.0
+      mdast-util-from-markdown:
+        specifier: ^2.0.0
+        version: 2.0.0
+      mdast-util-gfm:
+        specifier: ^3.0.0
+        version: 3.0.0
+      mdast-util-to-hast:
+        specifier: ^13.1.0
+        version: 13.1.0
+      typescript:
+        specifier: '*'
+        version: 5.3.3
+    devDependencies:
+      '@types/hast':
+        specifier: ^3.0.4
+        version: 3.0.4
+      '@types/mdast':
+        specifier: ^4.0.3
+        version: 4.0.3
+      '@types/react':
+        specifier: 18.2.0
+        version: 18.2.0
+      '@types/react-dom':
+        specifier: 18.2.1
+        version: 18.2.1
+      eslint-config-custom:
+        specifier: workspace:*
+        version: link:../eslint-config-custom
+      fumadocs-ui:
+        specifier: workspace:*
+        version: link:../ui
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig
@@ -1251,6 +1294,10 @@ packages:
     peerDependencies:
       '@effect-ts/otel-node': '*'
     peerDependenciesMeta:
+      '@effect-ts/core':
+        optional: true
+      '@effect-ts/otel':
+        optional: true
       '@effect-ts/otel-node':
         optional: true
     dependencies:

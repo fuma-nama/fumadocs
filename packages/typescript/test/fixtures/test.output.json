@@ -32,14 +32,24 @@
   ],
   [
     {
+      "name": "file",
+      "description": "",
+      "type": "string"
+    },
+    {
       "name": "name",
       "description": "",
       "type": "string"
     },
     {
-      "name": "url",
+      "name": "transform",
+      "description": "Modify output property entry",
+      "type": "(this: EntryContext, entry: DocEntry, propertyType: Type, propertySymbol: Symbol) => void"
+    },
+    {
+      "name": "options",
       "description": "",
-      "type": "string"
+      "type": "Partial<{ files: string[]; tsconfigPath: string; basePath: string; }>"
     }
   ]
 ]

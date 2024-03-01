@@ -1,7 +1,8 @@
-import { Options, generateDocumentation } from 'fumadocs-core/typescript';
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { renderMarkdown } from '@/markdown';
+import type { Options } from '../generate';
+import { generateDocumentation } from '../generate';
 import 'server-only';
-
-declare const { TypeTable }: typeof import('./type-table');
 
 /**
  * **Server Component Only**
@@ -26,7 +27,7 @@ export function AutoTypeTable({
           entry.name,
           {
             type: entry.type,
-            description: entry.description,
+            description: renderMarkdown(entry.description),
             default: entry.default,
           },
         ]),

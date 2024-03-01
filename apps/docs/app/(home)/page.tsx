@@ -346,7 +346,6 @@ function Hero(): JSX.Element {
               baseFrequency="0.6"
               numOctaves="1"
               seed="15"
-              stitchTiles="stitch"
               result="turbulence"
             />
             <feComposite in="SourceGraphic" in2="turbulence" operator="in" />

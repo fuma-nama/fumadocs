@@ -1,4 +1,4 @@
-import { generateDocumentation } from '../src/typescript';
+import { generateDocumentation } from '../src/generate';
 import { fileURLToPath } from 'url';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import path from 'node:path';
