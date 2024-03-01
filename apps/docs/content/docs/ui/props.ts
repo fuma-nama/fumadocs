@@ -71,3 +71,14 @@ export type FooterProps = NonNullable<DocsPageProps['footer']>;
 export type ProviderProps = RootProviderProps;
 
 export type AutoTypeTableProps = ComponentPropsWithoutRef<typeof AutoTypeTable>;
+
+export interface AutoTypeTableExample {
+  /**
+   * markdown syntax like links, `code` are supported.
+   *
+   * See https://fumadocs.vercel.app/docs/ui/components/type-table
+   */
+  name: string;
+
+  options: Partial<{ a: unknown }>;
+}
