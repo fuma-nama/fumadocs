@@ -143,7 +143,7 @@
     "@types/react-dom": "18.2.1",
     "algoliasearch": "^4.20.0",
     "eslint-config-custom": "workspace:*",
-    "next": "14.1.0",
+    "next": "14.1.1",
     "tsconfig": "workspace:*",
     "unified": "^11.0.4"
   },
