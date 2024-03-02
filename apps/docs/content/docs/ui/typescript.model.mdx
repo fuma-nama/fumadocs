@@ -1,0 +1,63 @@
+---
+title: Typescript
+description: Generate docs from Typescript definitions
+---
+
+## Usage
+
+```package-install
+fumadocs-typescript
+```
+
+### UI Integration
+
+It comes with the `AutoTypeTable` component. Learn more about [Auto Type Table](/docs/ui/components/auto-type-table).
+
+### Generate MDX Files
+
+You may generate MDX files statically.
+
+```js title="script.mjs"
+import { generateFiles } from 'fumadocs-typescript';
+import * as path from 'node:path';
+
+void generateFiles({
+  input: ['./content/docs/**/*.model.mdx'],
+  // Rename x.model.mdx to x.mdx
+  output: (file) =>
+    path.resolve(
+      path.dirname(file),
+      `${path.basename(file).split('.')[0]}.mdx`,
+    ),
+});
+```
+
+Create a model MDX file.
+
+```mdx title="content/docs/file.model.mdx"
+---
+title: Hello World
+---
+
+## All Exported Properties
+
+---type-table-demo---
+./my/typescript/file.ts
+---end---
+
+## Specified Property
+
+---type-table-demo---
+./my/typescript/file.ts#Property
+---end---
+```
+
+Run this script with `node ./script.mjs`, or `tsx ./script.mts` for Typescript files.
+
+## Demo
+
+Below is an example generated from Typescript definitions.
+
+---type-table---
+./props.ts#NavbarProps
+---end---

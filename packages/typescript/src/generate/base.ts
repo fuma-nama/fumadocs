@@ -1,5 +1,5 @@
-import * as ts from 'typescript';
-import { type TypescriptConfig, getProgram } from './program';
+import ts from 'typescript';
+import { type TypescriptConfig, getProgram, getFileSymbol } from './program';
 
 export interface GeneratedDoc {
   name: string;
@@ -23,8 +23,6 @@ interface EntryContext {
 }
 
 export interface GenerateOptions {
-  file: string;
-  name: string;
   /**
    * Modify output property entry
    */
@@ -34,42 +32,44 @@ export interface GenerateOptions {
     propertyType: ts.Type,
     propertySymbol: ts.Symbol,
   ) => void;
+}
 
+export interface GenerateDocumentationOptions extends GenerateOptions {
   /**
    * Typescript configurations
    */
-  options?: TypescriptConfig;
+  config?: TypescriptConfig;
 }
 
 /**
  * Generate documentation for properties in an exported type/interface
  */
 export function generateDocumentation(
-  options: GenerateOptions,
+  file: string,
+  name: string,
+  options: GenerateDocumentationOptions = {},
 ): GeneratedDoc | undefined {
-  const program = getProgram(options.options);
-  return generateDocumentationFromProgram(program, options);
-}
-
-export function generateDocumentationFromProgram(
-  program: ts.Program,
-  options: GenerateOptions,
-): GeneratedDoc | undefined {
-  const checker = program.getTypeChecker();
-  const sourceFile = program.getSourceFile(options.file);
-  if (!sourceFile) return;
-
-  const fileSymbol = checker.getSymbolAtLocation(sourceFile);
+  const program = getProgram(options.config);
+  const fileSymbol = getFileSymbol(file, program);
   if (!fileSymbol) return;
 
-  const symbol = checker
+  const symbol = program
+    .getTypeChecker()
     .getExportsOfModule(fileSymbol)
-    .find((e) => e.getEscapedName().toString() === options.name);
+    .find((e) => e.getEscapedName().toString() === name);
 
   if (!symbol) return;
 
-  const type = checker.getDeclaredTypeOfSymbol(symbol);
+  return generate(program, symbol, options);
+}
 
+export function generate(
+  program: ts.Program,
+  symbol: ts.Symbol,
+  options: GenerateOptions,
+): GeneratedDoc {
+  const checker = program.getTypeChecker();
+  const type = checker.getDeclaredTypeOfSymbol(symbol);
   const entryContext: EntryContext = {
     checker,
     options,

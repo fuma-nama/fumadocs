@@ -11,6 +11,7 @@
     "...blocks",
     "---Integrations---",
     "math",
+    "typescript",
     "twoslash",
     "openapi",
     "museum",

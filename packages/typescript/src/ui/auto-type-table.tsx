@@ -1,7 +1,6 @@
 import { TypeTable } from 'fumadocs-ui/components/type-table';
 import { renderMarkdown } from '@/markdown';
-import type { TypescriptConfig } from '@/generate/program';
-import { generateDocumentation } from '../generate/base';
+import { type GenerateOptions, generateDocumentation } from '../generate/base';
 import 'server-only';
 
 /**
@@ -16,9 +15,9 @@ export function AutoTypeTable({
 }: {
   path: string;
   name: string;
-  options?: TypescriptConfig;
+  options?: GenerateOptions;
 }): JSX.Element {
-  const output = generateDocumentation({ file: path, name, options });
+  const output = generateDocumentation(path, name, options);
 
   if (!output) throw new Error(`${name} in ${path} doesn't exist`);
 

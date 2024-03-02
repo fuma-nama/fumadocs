@@ -16,10 +16,8 @@ test('Run', () => {
   const file = relative('./fixtures/test.ts');
 
   const result = ['Test1', 'Test2', 'Test3'].map((name) =>
-    generateDocumentation({
-      file,
-      name,
-      options: tsconfig,
+    generateDocumentation(file, name, {
+      config: tsconfig,
     }),
   );
 
@@ -33,6 +31,6 @@ test('Run on MDX files', () => {
   const content = fs.readFileSync(file).toString();
 
   expect(
-    generateMDX(content, { basePath: path.dirname(file), options: tsconfig }),
+    generateMDX(content, { basePath: path.dirname(file), config: tsconfig }),
   ).toMatchFileSnapshot('./fixtures/test.output.mdx');
 });

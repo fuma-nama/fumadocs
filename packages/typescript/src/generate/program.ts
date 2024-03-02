@@ -1,4 +1,4 @@
-import * as ts from 'typescript';
+import ts from 'typescript';
 
 const cache = new Map<string, ts.Program>();
 
@@ -7,6 +7,17 @@ export interface TypescriptConfig {
   tsconfigPath?: string;
   /** A root directory to resolve relative path entries in the config file to. e.g. outDir */
   basePath?: string;
+}
+
+export function getFileSymbol(
+  file: string,
+  program: ts.Program,
+): ts.Symbol | undefined {
+  const checker = program.getTypeChecker();
+  const sourceFile = program.getSourceFile(file);
+  if (!sourceFile) return;
+
+  return checker.getSymbolAtLocation(sourceFile);
 }
 
 export function getProgram(options: TypescriptConfig = {}): ts.Program {
