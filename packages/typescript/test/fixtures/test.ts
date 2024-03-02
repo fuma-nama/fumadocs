@@ -10,7 +10,7 @@ export type Test2 = Test1 & {
   generic: GenericType<string, string, string>;
 };
 
-export type { Options as Test3 } from '../../src/generate';
+export type { Player as Test3 } from './test-2';
 
 interface GenericType<A, B, C> {
   A: A;

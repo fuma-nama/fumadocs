@@ -1,1 +1,2 @@
-export * from './generate';
+export * from './generate/base';
+export * from './generate/mdx';

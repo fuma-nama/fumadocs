@@ -1,55 +1,69 @@
 [
-  [
-    {
-      "name": "name",
-      "description": "",
-      "type": "string"
-    },
-    {
-      "name": "age",
-      "description": "",
-      "default": "4",
-      "type": "number"
-    }
-  ],
-  [
-    {
-      "name": "name",
-      "description": "",
-      "type": "string"
-    },
-    {
-      "name": "age",
-      "description": "",
-      "default": "4",
-      "type": "number"
-    },
-    {
-      "name": "generic",
-      "description": "",
-      "type": "GenericType<string, string, string>"
-    }
-  ],
-  [
-    {
-      "name": "file",
-      "description": "",
-      "type": "string"
-    },
-    {
-      "name": "name",
-      "description": "",
-      "type": "string"
-    },
-    {
-      "name": "transform",
-      "description": "Modify output property entry",
-      "type": "(this: EntryContext, entry: DocEntry, propertyType: Type, propertySymbol: Symbol) => void"
-    },
-    {
-      "name": "options",
-      "description": "",
-      "type": "Partial<{ files: string[]; tsconfigPath: string; basePath: string; }>"
-    }
-  ]
+  {
+    "name": "Test1",
+    "description": "",
+    "entries": [
+      {
+        "name": "name",
+        "description": "",
+        "tags": {},
+        "type": "string"
+      },
+      {
+        "name": "age",
+        "description": "",
+        "tags": {
+          "defaultValue": "4"
+        },
+        "type": "number"
+      }
+    ]
+  },
+  {
+    "name": "Test2",
+    "description": "",
+    "entries": [
+      {
+        "name": "name",
+        "description": "",
+        "tags": {},
+        "type": "string"
+      },
+      {
+        "name": "age",
+        "description": "",
+        "tags": {
+          "defaultValue": "4"
+        },
+        "type": "number"
+      },
+      {
+        "name": "generic",
+        "description": "",
+        "tags": {},
+        "type": "GenericType<string, string, string>"
+      }
+    ]
+  },
+  {
+    "name": "Test3",
+    "description": "",
+    "entries": [
+      {
+        "name": "name",
+        "description": "The name of player",
+        "tags": {
+          "see": "https://fumadocs.vercel.app",
+          "defaultValue": "Henry"
+        },
+        "type": "string"
+      },
+      {
+        "name": "age",
+        "description": "",
+        "tags": {},
+        "type": "number"
+      }
+    ]
+  }
 ]
