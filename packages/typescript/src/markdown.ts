@@ -14,9 +14,6 @@ declare module 'react/jsx-runtime' {
   export const jsxs: Jsx;
 }
 
-/**
- * @returns html
- */
 export function renderMarkdown(md: string): JSX.Element {
   const mdast = fromMarkdown(
     md.replace(/{@link (?<link>[^}]*)}/g, '$1'), // replace jsdoc links
