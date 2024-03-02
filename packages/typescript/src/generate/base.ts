@@ -92,6 +92,11 @@ export function generate(
 function getDocEntry(prop: ts.Symbol, context: EntryContext): DocEntry {
   const { checker, options } = context;
   const subType = checker.getTypeOfSymbol(prop);
+  const tags = Object.fromEntries(
+    prop
+      .getJsDocTags()
+      .map((tag) => [tag.name, ts.displayPartsToString(tag.text)]),
+  );
 
   let typeName = checker.typeToString(
     subType.getNonNullableType(),
@@ -103,14 +108,14 @@ function getDocEntry(prop: ts.Symbol, context: EntryContext): DocEntry {
     typeName = subType.aliasSymbol.escapedName.toString();
   }
 
+  if (tags.remarks) {
+    typeName = /^`(?<name>.+)`/.exec(tags.remarks)?.[1] ?? typeName;
+  }
+
   const entry: DocEntry = {
     name: prop.getName(),
     description: ts.displayPartsToString(prop.getDocumentationComment(checker)),
-    tags: Object.fromEntries(
-      prop
-        .getJsDocTags()
-        .map((tag) => [tag.name, ts.displayPartsToString(tag.text)]),
-    ),
+    tags,
     type: typeName,
   };
 

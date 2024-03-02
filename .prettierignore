@@ -6,7 +6,10 @@ apps/docs/shaders/*
 
 **/out/**/*.mdx
 **/test/fixtures/*.output.json
+**/test/fixtures/*.output.mdx
 
 apps/docs/content/docs/ui/museum/events.mdx
 apps/docs/content/docs/ui/museum/operations.mdx
 apps/docs/content/docs/ui/museum/tickets.mdx
+
+apps/docs/content/docs/ui/typescript.mdx

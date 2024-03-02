@@ -54,6 +54,19 @@ title: Hello World
 
 Run this script with `node ./script.mjs`, or `tsx ./script.mts` for Typescript files.
 
+### Forced Type Name
+
+You can specify the name of type with the `@remarks` tsdoc tag.
+
+```ts
+interface MyInterface {
+  /**
+   * @remarks `timestamp` Returned by API. // [!code highlight]
+   */
+  time: number;
+}
+```
+
 ## Demo
 
 Below is an example generated from Typescript definitions.
@@ -119,7 +132,8 @@ No Description
 
 Redirect url of title
 
-**defaultValue:** '/'
+**defaultValue:**
+'/'
 
 </div>
 <div className='text-sm text-muted-foreground'>
@@ -143,7 +157,8 @@ No Description
 
 When to use transparent navbar
 
-**defaultValue:** none
+**defaultValue:**
+none
 
 </div>
 <div className='text-sm text-muted-foreground'>

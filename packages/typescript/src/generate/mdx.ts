@@ -42,8 +42,8 @@ ${doc.description}
 ${c.description || 'No Description'}
 
 ${Object.entries(c.tags)
-  .map(([tag, value]) => `**${tag}:** ${replaceJsDocLinks(value)}`)
-  .join('<br/>\n')}
+  .map(([tag, value]) => `**${tag}:**\n${replaceJsDocLinks(value)}`)
+  .join('\n<br/>\n')}
 
 </div>`,
 };

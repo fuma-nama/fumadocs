@@ -10,5 +10,13 @@ export interface Player {
    */
   name: string;
 
+  /**
+   * @example
+   * ```js
+   * console.log("Hello World")
+   * ```
+   * @remarks `timestamp`
+   * Returned by API
+   */
   age: number;
 }

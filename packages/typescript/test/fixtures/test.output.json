@@ -61,8 +61,11 @@
       {
         "name": "age",
         "description": "",
-        "tags": {},
-        "type": "number"
+        "tags": {
+          "example": "```js\nconsole.log(\"Hello World\")\n```",
+          "remarks": "`timestamp`\nReturned by API"
+        },
+        "type": "timestamp"
       }
     ]
   }
