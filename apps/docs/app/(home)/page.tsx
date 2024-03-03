@@ -49,7 +49,7 @@ export default function HomePage(): JSX.Element {
         className="absolute inset-x-0 top-[200px] h-[250px] max-md:hidden"
         style={{
           background:
-            'repeating-linear-gradient(to right, hsl(var(--border)), transparent 1px, transparent 50px), repeating-linear-gradient(to bottom, hsl(var(--border)), transparent 1px, transparent 50px)',
+            'repeating-linear-gradient(to right, hsl(var(--border)), hsl(var(--border)) 1px, transparent 1px, transparent 50px), repeating-linear-gradient(to bottom, hsl(var(--border)), transparent 1px, transparent 50px)',
         }}
       />
       <main className="container relative max-w-[1100px] px-2 py-4 lg:py-16">
@@ -376,25 +376,18 @@ function Hero(): JSX.Element {
         >
           <animateTransform
             attributeName="transform"
-            type="translate"
-            from="0 500"
-            to="0 0"
+            begin="0s"
             dur="1s"
+            type="translate"
             fill="freeze"
-            keySplines="
-			0 0.1 0.2 1;
-			0 0.1 0.2 1;
-			0 0.1 0.2 1;
-			0 0.1 0.2 1;
-			0 0.1 0.2 1;
-			0 0.1 0.2 1"
-            keyTimes="0;0.22;0.33;0.55;0.66;0.88;1"
             calcMode="spline"
+            keySplines="0.4 0 0.2 1"
+            values="0 500;0"
           />
         </circle>
       </svg>
       <div
-        className="absolute inset-0 z-[-1] duration-1000 animate-in fade-in"
+        className="absolute inset-0 z-[-1]"
         style={{
           backgroundImage: [
             'radial-gradient(ellipse at top, transparent 60%, hsl(var(--primary) / 0.2))',
