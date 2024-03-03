@@ -1,5 +1,10 @@
-import type { FileInfo, MetaData, PageData } from './types';
-import { parseFilePath, parseFolderPath, splitPath } from './path';
+import type { MetaData, PageData } from './types';
+import {
+  parseFilePath,
+  parseFolderPath,
+  splitPath,
+  type FileInfo,
+} from './path';
 
 export interface Meta<Data extends MetaData = MetaData> {
   type: 'meta';
@@ -21,13 +26,8 @@ export interface Folder<
 > {
   type: 'folder';
   file: FileInfo;
-  children: Node<MD, PD>[];
+  children: (Meta<MD> | Page<PD> | Folder<MD, PD>)[];
 }
-
-export type Node<
-  MD extends MetaData = MetaData,
-  PD extends PageData = PageData,
-> = Meta<MD> | Page<PD> | Folder<MD, PD>;
 
 /**
  * A virtual file system that solves inconsistent behaviours

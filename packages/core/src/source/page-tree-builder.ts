@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import type * as PageTree from '../server/page-tree';
-import type { Folder, Meta, Node, Page, Storage } from './file-system';
+import type { Folder, Meta, Page, Storage } from './file-system';
 import { joinPaths } from './path';
 
 interface PageTreeBuilderContext {
@@ -31,6 +31,7 @@ export interface CreatePageTreeBuilderOptions {
   resolveIcon?: (icon: string) => ReactElement | undefined;
 }
 
+const external = /\[(?<text>.+)\]\((?<url>.+)\)/;
 const separator = /---(?<name>.*?)---/;
 const rest = '...';
 const extractor = /\.\.\.(?<name>.+)/;
@@ -40,7 +41,7 @@ const extractor = /\.\.\.(?<name>.+)/;
  * @returns Nodes with specified locale in context (sorted)
  */
 function buildAll(
-  nodes: Node[],
+  nodes: (Folder | Page | Meta)[],
   ctx: PageTreeBuilderContext,
   skipIndex: boolean,
 ): PageTree.Node[] {
@@ -93,12 +94,23 @@ function resolveFolderItem(
   if (item === rest) return '...';
 
   const separateResult = separator.exec(item);
-
   if (separateResult?.groups) {
     return [
       {
         type: 'separator',
         name: separateResult.groups.name,
+      },
+    ];
+  }
+
+  const externalResult = external.exec(item);
+  if (externalResult?.groups) {
+    return [
+      {
+        type: 'page',
+        name: externalResult.groups.text,
+        url: externalResult.groups.url,
+        external: true,
       },
     ];
   }
@@ -118,7 +130,7 @@ function resolveFolderItem(
   if (itemNode.type === 'folder') {
     const node = buildFolderNode(itemNode, false, ctx);
 
-    return extractResult?.groups ? node.children : [node];
+    return extractResult ? node.children : [node];
   }
 
   return [buildFileNode(itemNode, ctx)];

@@ -1,6 +1,6 @@
 import * as path from 'node:path';
-import type { FileInfo, MetaData, PageData, Transformer } from './types';
-import { parseFilePath } from './path';
+import type { MetaData, PageData } from './types';
+import { parseFilePath, type FileInfo } from './path';
 import { Storage } from './file-system';
 
 export interface LoadOptions {
@@ -19,28 +19,29 @@ export interface VirtualFile {
 
 export interface LoadResult {
   storage: Storage;
+}
+
+export type Transformer = (context: {
+  storage: Storage;
   getSlugs: (info: FileInfo) => string[];
   getUrl: (slugs: string[], locale?: string) => string;
-  data: Record<string, unknown>;
-}
+}) => void;
 
 // Virtual files -> Virtual Storage -> Plugins -> Result
 // Result should contain page tree and basic utilities
 export function load(options: LoadOptions): LoadResult {
   const { transformers = [] } = options;
   const storage = buildStorage(options);
-  const ctx: LoadResult = {
-    getSlugs: options.getSlugs,
-    getUrl: options.getUrl,
-    storage,
-    data: {},
-  };
 
   for (const transformer of transformers) {
-    transformer(ctx);
+    transformer({
+      storage,
+      getUrl: options.getUrl,
+      getSlugs: options.getSlugs,
+    });
   }
 
-  return ctx;
+  return { storage };
 }
 
 function buildStorage(options: LoadOptions): Storage {
@@ -52,10 +53,8 @@ function buildStorage(options: LoadOptions): Storage {
       path.basename(file.path),
     );
 
-    const isRelative =
-      !relativePath.startsWith('..') && !path.isAbsolute(relativePath);
-
-    if (!isRelative) continue;
+    if (relativePath.startsWith('..') || path.isAbsolute(relativePath))
+      continue;
 
     if (file.type === 'page') {
       const parsedPath = parseFilePath(relativePath);
