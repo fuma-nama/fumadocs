@@ -47,13 +47,15 @@ export function Footer({ items }: FooterProps): JSX.Element {
 
   const { previous, next } = useMemo(() => {
     if (items) return items;
-    const currentIndex = tree.list.findIndex((item) => item.url === pathname);
+    const currentIndex = tree.navigation.findIndex(
+      (item) => item.url === pathname,
+    );
 
     return {
-      previous: tree.list[currentIndex - 1],
-      next: tree.list[currentIndex + 1],
+      previous: tree.navigation[currentIndex - 1],
+      next: tree.navigation[currentIndex + 1],
     };
-  }, [items, pathname, tree.list]);
+  }, [items, pathname, tree.navigation]);
 
   return (
     <div className="mt-4 flex flex-row flex-wrap gap-4 border-t py-12">

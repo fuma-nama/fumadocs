@@ -11,7 +11,7 @@ import {
 } from 'fumadocs-ui/components/codeblock';
 import type { ReactNode } from 'react';
 import { Popup, PopupContent, PopupTrigger } from 'fumadocs-ui/twoslash/popup';
-import { AutoTypeTable } from 'fumadocs-ui/components/auto-type-table';
+import { AutoTypeTable } from 'fumadocs-typescript/ui';
 import { Wrapper } from '@/components/preview/wrapper';
 import { cn } from './utils/cn';
 

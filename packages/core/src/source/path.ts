@@ -1,6 +1,26 @@
 import { parse } from 'node:path';
 import slash from '@/utils/slash';
-import type { FileInfo } from './types';
+
+export interface FileInfo {
+  locale?: string;
+
+  /**
+   * Original path of file
+   */
+  path: string;
+
+  /**
+   * File path without extension
+   */
+  flattenedPath: string;
+
+  /**
+   * File name without locale and extension
+   */
+  name: string;
+
+  dirname: string;
+}
 
 export function parseFilePath(path: string): FileInfo {
   const slashedPath = slash(path);

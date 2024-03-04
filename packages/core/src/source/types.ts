@@ -1,27 +1,5 @@
-import type { LoaderOutput } from './create';
+import type { LoaderOutput } from './loader';
 import type { Meta, Page } from './file-system';
-import type { LoadResult } from './load';
-
-export interface FileInfo {
-  locale?: string;
-
-  /**
-   * Original path of file
-   */
-  path: string;
-
-  /**
-   * File path without extension
-   */
-  flattenedPath: string;
-
-  /**
-   * File name without locale and extension
-   */
-  name: string;
-
-  dirname: string;
-}
 
 export interface MetaData {
   icon?: string;
@@ -47,5 +25,3 @@ export type InferMetaType<Utils extends LoaderOutput<any>> =
   Utils extends LoaderOutput<infer Config>
     ? Meta<Config['source']['metaData']>
     : never;
-
-export type Transformer = (context: LoadResult) => void;

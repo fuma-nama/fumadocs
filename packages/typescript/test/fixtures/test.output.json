@@ -1,0 +1,72 @@
+[
+  {
+    "name": "Test1",
+    "description": "",
+    "entries": [
+      {
+        "name": "name",
+        "description": "",
+        "tags": {},
+        "type": "string"
+      },
+      {
+        "name": "age",
+        "description": "",
+        "tags": {
+          "defaultValue": "4"
+        },
+        "type": "number"
+      }
+    ]
+  },
+  {
+    "name": "Test2",
+    "description": "",
+    "entries": [
+      {
+        "name": "name",
+        "description": "",
+        "tags": {},
+        "type": "string"
+      },
+      {
+        "name": "age",
+        "description": "",
+        "tags": {
+          "defaultValue": "4"
+        },
+        "type": "number"
+      },
+      {
+        "name": "generic",
+        "description": "",
+        "tags": {},
+        "type": "GenericType<string, string, string>"
+      }
+    ]
+  },
+  {
+    "name": "Test3",
+    "description": "",
+    "entries": [
+      {
+        "name": "name",
+        "description": "The name of player",
+        "tags": {
+          "see": "https://fumadocs.vercel.app",
+          "defaultValue": "Henry"
+        },
+        "type": "string"
+      },
+      {
+        "name": "age",
+        "description": "",
+        "tags": {
+          "example": "```js\nconsole.log(\"Hello World\")\n```",
+          "remarks": "`timestamp`\nReturned by API"
+        },
+        "type": "timestamp"
+      }
+    ]
+  }
+]

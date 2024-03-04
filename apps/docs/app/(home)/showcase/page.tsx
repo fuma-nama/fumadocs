@@ -7,6 +7,7 @@ import { cn } from '@/utils/cn';
 import { createMetadata } from '@/utils/metadata';
 import NuqsImage from '@/public/showcases/nuqs.jpg';
 import TypelyticsImage from '@/public/showcases/typelytics.png';
+import FrameGround from '@/public/showcases/frameground.png';
 
 export const metadata = createMetadata({
   title: 'Showcase',
@@ -26,20 +27,21 @@ export default function Showcase(): JSX.Element {
     [YeecordImage, 'Yeecord Docs', 'https://yeecord.com'],
     [NuqsImage, 'nuqs', 'https://nuqs.47ng.com'],
     [TypelyticsImage, 'Typelytics', 'https://typelytics.rhyssul.com/'],
+    [FrameGround, 'FrameGround', 'https://docs.frameground.tech/'],
   ] as const;
 
   return (
     <main className="pb-16">
       <svg className="-mb-4 -mt-6 h-[400px] w-full invert dark:invert-0 md:-mt-16">
         <filter id="noiseFilter">
-          <feTurbulence type="turbulence" baseFrequency="0.67" numOctaves="2" />
+          <feTurbulence type="turbulence" baseFrequency="0.67" numOctaves="1" />
           <feColorMatrix type="saturate" values="0" />
           <feComposite in2="SourceGraphic" operator="in" />
           <feComposite in2="SourceGraphic" operator="lighter" />
         </filter>
 
         <filter id="circleShadow" colorInterpolationFilters="sRGB">
-          <feDropShadow dx="0" dy="8" stdDeviation="10" floodColor="black" />
+          <feDropShadow dx="0" dy="8" stdDeviation="4" floodColor="black" />
         </filter>
 
         <defs>
@@ -56,7 +58,7 @@ export default function Showcase(): JSX.Element {
             cx="50%"
             cy="50%"
             r="180"
-            stroke="rgb(10,10,10)"
+            stroke="rgb(50,50,50)"
             fill="none"
           />
           <circle

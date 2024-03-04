@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import type * as PageTree from '../server/page-tree';
-import type { Folder, Meta, Node, Page, Storage } from './file-system';
+import type { Folder, Meta, Page, Storage } from './file-system';
 import { joinPaths } from './path';
 
 interface PageTreeBuilderContext {
@@ -31,6 +31,7 @@ export interface CreatePageTreeBuilderOptions {
   resolveIcon?: (icon: string) => ReactElement | undefined;
 }
 
+const external = /\[(?<text>.+)\]\((?<url>.+)\)/;
 const separator = /---(?<name>.*?)---/;
 const rest = '...';
 const extractor = /\.\.\.(?<name>.+)/;
@@ -40,7 +41,7 @@ const extractor = /\.\.\.(?<name>.+)/;
  * @returns Nodes with specified locale in context (sorted)
  */
 function buildAll(
-  nodes: Node[],
+  nodes: (Folder | Page | Meta)[],
   ctx: PageTreeBuilderContext,
   skipIndex: boolean,
 ): PageTree.Node[] {
@@ -93,12 +94,23 @@ function resolveFolderItem(
   if (item === rest) return '...';
 
   const separateResult = separator.exec(item);
-
   if (separateResult?.groups) {
     return [
       {
         type: 'separator',
         name: separateResult.groups.name,
+      },
+    ];
+  }
+
+  const externalResult = external.exec(item);
+  if (externalResult?.groups) {
+    return [
+      {
+        type: 'page',
+        name: externalResult.groups.text,
+        url: externalResult.groups.url,
+        external: true,
       },
     ];
   }
@@ -118,7 +130,7 @@ function resolveFolderItem(
   if (itemNode.type === 'folder') {
     const node = buildFolderNode(itemNode, false, ctx);
 
-    return extractResult?.groups ? node.children : [node];
+    return extractResult ? node.children : [node];
   }
 
   return [buildFileNode(itemNode, ctx)];
@@ -165,7 +177,7 @@ function buildFolderNode(
     children = nodes ?? restNodes;
   }
 
-  return {
+  return removeUndefined({
     type: 'folder',
     name: meta?.title ?? index?.name ?? pathToName(folder.file.name),
     icon: ctx.resolveIcon(meta?.icon),
@@ -173,7 +185,7 @@ function buildFolderNode(
     defaultOpen: meta?.defaultOpen,
     index,
     children,
-  };
+  });
 }
 
 function buildFileNode(page: Page, ctx: PageTreeBuilderContext): PageTree.Item {
@@ -186,12 +198,12 @@ function buildFileNode(page: Page, ctx: PageTreeBuilderContext): PageTree.Item {
     if (result) localePage = result;
   }
 
-  return {
+  return removeUndefined({
     type: 'page',
     name: localePage.data.title,
     icon: ctx.resolveIcon(localePage.data.icon),
     url: localePage.url,
-  };
+  });
 }
 
 function build(ctx: PageTreeBuilderContext): PageTree.Root {
@@ -241,4 +253,14 @@ export function createPageTreeBuilder({
 
 function pathToName(path: string): string {
   return path.slice(0, 1).toUpperCase() + path.slice(1);
+}
+
+function removeUndefined<T extends object>(value: T): T {
+  const obj = value as Record<string, unknown>;
+  Object.keys(obj).forEach((key) => {
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete -- Remove undefined values
+    if (obj[key] === undefined) delete obj[key];
+  });
+
+  return value;
 }

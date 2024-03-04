@@ -11,28 +11,27 @@ Install the required packages.
 fumadocs-openapi
 ```
 
-Create configuration file:
+Create a script:
 
-```js title="openapi.config.js"
-/**
- * @type {import("fumadocs-openapi").Config}
- */
-module.exports = {
+```js title="scripts/generate-docs.mjs"
+import { generateFiles } from 'fumadocs-openapi';
+
+void generateFiles({
   input: ['./petstore.yaml'],
   output: './content/docs',
-};
+});
 ```
 
 > Only OpenAPI 3.0 is supported.
 >
 > It doesn't allow JSON schema specific keywords like `const`, as [they are unsupported](https://swagger.io/docs/specification/data-models/keywords)
 
-Generate docs with a command:
+Generate docs with the script:
 
 ```bash
-pnpm fumadocs-openapi
+node ./scripts/generate-docs.mjs
 ```
 
 ### Demo
 
-[View demo](/docs/ui/museum)
+[View demo](/docs/ui/museum).

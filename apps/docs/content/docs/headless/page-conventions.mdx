@@ -106,10 +106,21 @@ You can extract the items from a folder with `...folder_name`.
 }
 ```
 
+### External Link
+
+Use the syntax `[Text](url)` to insert external links.
+
+```json
+{
+  "title": "Folder",
+  "pages": ["index", "[Vercel](https://vercel.com)"]
+}
+```
+
 ## Icons
 
 It is supported to have custom icons for a page or a folder with the `icon`
-property in your frontmatter or meta file.
+property.
 
 ```mdx
 ---
@@ -124,6 +135,8 @@ icon: MyIcon
   "icon": "MyIcon"
 }
 ```
+
+> See [Source API](/docs/headless/source-api#icons) to learn how to handle icons.
 
 ## Internationalization
 

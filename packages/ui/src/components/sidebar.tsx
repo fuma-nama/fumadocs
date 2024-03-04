@@ -1,5 +1,5 @@
 import { cva } from 'class-variance-authority';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, ExternalLinkIcon } from 'lucide-react';
 import type { PageTree } from 'fumadocs-core/server';
 import * as Base from 'fumadocs-core/sidebar';
 import { usePathname } from 'next/navigation';
@@ -61,8 +61,8 @@ const itemVariants = cva(
 const defaultComponents: Components = {
   Folder: FolderNode,
   Separator: SeparatorNode,
-  Item: ({ item }) => (
-    <BaseItem item={{ text: item.name, url: item.url, icon: item.icon }} />
+  Item: ({ item: { name, ...rest } }) => (
+    <BaseItem item={{ text: name, ...rest }} />
   ),
 };
 
@@ -162,6 +162,7 @@ function BaseItem({
 }): JSX.Element {
   const pathname = usePathname();
   const active = isActive(item.url, pathname, nested);
+  const defaultIcon = item.external ? <ExternalLinkIcon /> : null;
 
   return (
     <Link
@@ -169,7 +170,7 @@ function BaseItem({
       external={item.external}
       className={cn(itemVariants({ active }))}
     >
-      {item.icon}
+      {item.icon ?? defaultIcon}
       {item.text}
     </Link>
   );

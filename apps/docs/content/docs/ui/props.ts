@@ -9,7 +9,7 @@ import type { DocsLayoutProps } from 'fumadocs-ui/layout';
 import type { AnchorHTMLAttributes, ComponentPropsWithoutRef } from 'react';
 import type { DocsPageProps } from 'fumadocs-ui/page';
 import type { RootProviderProps } from 'fumadocs-ui/provider';
-import type { AutoTypeTable } from 'fumadocs-ui/components/auto-type-table';
+import type { AutoTypeTable } from 'fumadocs-typescript/ui';
 
 export type AccordionsProps = Omit<
   ComponentPropsWithoutRef<typeof Accordions>,
@@ -71,3 +71,14 @@ export type FooterProps = NonNullable<DocsPageProps['footer']>;
 export type ProviderProps = RootProviderProps;
 
 export type AutoTypeTableProps = ComponentPropsWithoutRef<typeof AutoTypeTable>;
+
+export interface AutoTypeTableExample {
+  /**
+   * markdown syntax like links, `code` are supported.
+   *
+   * See https://fumadocs.vercel.app/docs/ui/components/type-table
+   */
+  name: string;
+
+  options: Partial<{ a: unknown }>;
+}

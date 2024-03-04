@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-ui",
-  "version": "9.1.0",
+  "version": "10.0.0",
   "description": "The framework for building a documentation website in Next.js",
   "keywords": [
     "NextJs",
@@ -117,7 +117,7 @@
     "@types/react-dom": "18.2.1",
     "algoliasearch": "^4.20.0",
     "eslint-config-custom": "workspace:*",
-    "next": "14.1.0",
+    "next": "14.1.1",
     "postcss": "8.4.35",
     "postcss-cli": "^11.0.0",
     "postcss-lightningcss": "^1.0.0",

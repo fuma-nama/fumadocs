@@ -11,10 +11,12 @@
     "...blocks",
     "---Integrations---",
     "math",
+    "typescript",
     "twoslash",
     "openapi",
     "museum",
     "---Commands---",
-    "...commands"
+    "...commands",
+    "[Vercel](https://vercel.com)"
   ]
 }
