@@ -24,18 +24,17 @@ test('Simple', () => {
   });
 
   expect(result.pageTree, 'Page Tree').toMatchInlineSnapshot(`
-      {
-        "children": [
-          {
-            "icon": undefined,
-            "name": "Hello",
-            "type": "page",
-            "url": "/test",
-          },
-        ],
-        "name": "",
-      }
-    `);
+    {
+      "children": [
+        {
+          "name": "Hello",
+          "type": "page",
+          "url": "/test",
+        },
+      ],
+      "name": "",
+    }
+  `);
 
   expect(result.getPages().length).toBe(1);
   expect(result.getPage(['test'])).toBeDefined();
@@ -74,7 +73,6 @@ test('Nested Directories', async () => {
     {
       "children": [
         {
-          "icon": undefined,
           "name": "Hello",
           "type": "page",
           "url": "/test",
@@ -82,17 +80,12 @@ test('Nested Directories', async () => {
         {
           "children": [
             {
-              "icon": undefined,
               "name": "Nested Page",
               "type": "page",
               "url": "/nested/test",
             },
           ],
-          "defaultOpen": undefined,
-          "icon": undefined,
-          "index": undefined,
           "name": "Nested",
-          "root": undefined,
           "type": "folder",
         },
         {
@@ -172,7 +165,6 @@ test('Internationalized Routing', () => {
     {
       "children": [
         {
-          "icon": undefined,
           "name": "Hello",
           "type": "page",
           "url": "/test",
@@ -180,17 +172,12 @@ test('Internationalized Routing', () => {
         {
           "children": [
             {
-              "icon": undefined,
               "name": "Nested Page",
               "type": "page",
               "url": "/nested/test",
             },
           ],
-          "defaultOpen": undefined,
-          "icon": undefined,
-          "index": undefined,
           "name": "Nested",
-          "root": undefined,
           "type": "folder",
         },
       ],
@@ -199,34 +186,28 @@ test('Internationalized Routing', () => {
   `);
 
   expect(result.pageTree['cn'], 'Page Tree').toMatchInlineSnapshot(`
-      {
-        "children": [
-          {
-            "icon": undefined,
-            "name": "Hello Chinese",
-            "type": "page",
-            "url": "/cn/test",
-          },
-          {
-            "children": [
-              {
-                "icon": undefined,
-                "name": "Nested Page Chinese",
-                "type": "page",
-                "url": "/cn/nested/test",
-              },
-            ],
-            "defaultOpen": undefined,
-            "icon": undefined,
-            "index": undefined,
-            "name": "Nested Chinese",
-            "root": undefined,
-            "type": "folder",
-          },
-        ],
-        "name": "Docs Chinese",
-      }
-    `);
+    {
+      "children": [
+        {
+          "name": "Hello Chinese",
+          "type": "page",
+          "url": "/cn/test",
+        },
+        {
+          "children": [
+            {
+              "name": "Nested Page Chinese",
+              "type": "page",
+              "url": "/cn/nested/test",
+            },
+          ],
+          "name": "Nested Chinese",
+          "type": "folder",
+        },
+      ],
+      "name": "Docs Chinese",
+    }
+  `);
 
   expect(result.getPages().length).toBe(2);
   expect(result.getPage(['test'])).toBeDefined();

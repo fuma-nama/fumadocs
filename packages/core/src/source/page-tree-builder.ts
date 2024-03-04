@@ -177,7 +177,7 @@ function buildFolderNode(
     children = nodes ?? restNodes;
   }
 
-  return {
+  return removeUndefined({
     type: 'folder',
     name: meta?.title ?? index?.name ?? pathToName(folder.file.name),
     icon: ctx.resolveIcon(meta?.icon),
@@ -185,7 +185,7 @@ function buildFolderNode(
     defaultOpen: meta?.defaultOpen,
     index,
     children,
-  };
+  });
 }
 
 function buildFileNode(page: Page, ctx: PageTreeBuilderContext): PageTree.Item {
@@ -198,12 +198,12 @@ function buildFileNode(page: Page, ctx: PageTreeBuilderContext): PageTree.Item {
     if (result) localePage = result;
   }
 
-  return {
+  return removeUndefined({
     type: 'page',
     name: localePage.data.title,
     icon: ctx.resolveIcon(localePage.data.icon),
     url: localePage.url,
-  };
+  });
 }
 
 function build(ctx: PageTreeBuilderContext): PageTree.Root {
@@ -253,4 +253,14 @@ export function createPageTreeBuilder({
 
 function pathToName(path: string): string {
   return path.slice(0, 1).toUpperCase() + path.slice(1);
+}
+
+function removeUndefined<T extends object>(value: T): T {
+  const obj = value as Record<string, unknown>;
+  Object.keys(obj).forEach((key) => {
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete -- Remove undefined values
+    if (obj[key] === undefined) delete obj[key];
+  });
+
+  return value;
 }
