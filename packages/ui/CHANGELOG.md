@@ -1,5 +1,27 @@
 # next-docs-ui
 
+## 10.0.0
+
+### Major Changes
+
+- 321d1e1f: **Move Typescript integrations to `fumadocs-typescript`**
+
+  why: It is now a stable feature
+
+  migrate: Use `fumadocs-typescript` instead.
+
+  ```diff
+  - import { AutoTypeTable } from "fumadocs-ui/components/auto-type-table"
+  + import { AutoTypeTable } from "fumadocs-typescript/ui"
+  ```
+
+### Patch Changes
+
+- de7ed150: Hide external items from navigation footer
+- Updated dependencies [b5d16938]
+- Updated dependencies [321d1e1f]
+  - fumadocs-core@10.0.0
+
 ## 9.1.0
 
 ### Minor Changes

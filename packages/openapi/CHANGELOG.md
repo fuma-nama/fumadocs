@@ -1,5 +1,26 @@
 # @fuma-docs/openapi
 
+## 2.0.0
+
+### Major Changes
+
+- eacd7b0b: **Remove support for bin usages**
+
+  why: It is more flexible and faster to write a script directly.
+
+  migrate: Create a script named `scripts/generate-docs.mjs`:
+
+  ```js
+  import { generateFiles } from 'fumadocs-openapi';
+
+  void generateFiles({
+    input: ['./petstore.yaml'],
+    output: './content/docs',
+  });
+  ```
+
+  Execute it with `node ./scripts/generate-docs.mjs`.
+
 ## 1.1.0
 
 ### Minor Changes
