@@ -523,6 +523,7 @@ function Features(): JSX.Element {
         >
           Showcase
         </Link>
+
         <div className="mt-8">
           <Previews />
         </div>
