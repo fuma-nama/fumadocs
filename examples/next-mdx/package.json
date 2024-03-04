@@ -8,9 +8,9 @@
     "start": "next start"
   },
   "dependencies": {
-    "fumadocs-core": "9.1.0",
-    "fumadocs-mdx": "8.1.0",
-    "fumadocs-ui": "9.1.0",
+    "fumadocs-core": "10.0.0",
+    "fumadocs-mdx": "8.1.1",
+    "fumadocs-ui": "10.0.0",
     "next": "14.0.4",
     "react": "18.2.0",
     "react-dom": "18.2.0"

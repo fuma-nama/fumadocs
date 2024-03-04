@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-typescript",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Typescript Integration for Fumadocs",
   "keywords": [
     "NextJs",
