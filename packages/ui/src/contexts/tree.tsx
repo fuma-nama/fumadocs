@@ -1,11 +1,11 @@
 import type { PageTree } from 'fumadocs-core/server';
 import { usePathname } from 'next/navigation';
 import { createContext, useContext, type ReactNode, useMemo } from 'react';
-import { flattenTree, hasActive } from '@/utils/shared';
+import { hasActive } from '@/utils/shared';
 
 interface TreeContextType {
   tree: PageTree.Root;
-  list: PageTree.Item[];
+  navigation: PageTree.Item[];
   root: PageTree.Root | PageTree.Folder;
 }
 
@@ -27,6 +27,21 @@ function findRoot(
   }
 }
 
+function getNavigationList(tree: PageTree.Node[]): PageTree.Item[] {
+  return tree.flatMap((node) => {
+    if (node.type === 'separator') return [];
+    if (node.type === 'folder') {
+      const children = getNavigationList(node.children);
+
+      if (!node.root && node.index) children.unshift(node.index);
+      return children;
+    }
+
+    // Only non-external links will be shown in the navigation list
+    return !node.external ? [node] : [];
+  });
+}
+
 export function TreeContextProvider({
   children,
   tree,
@@ -37,11 +52,10 @@ export function TreeContextProvider({
   const pathname = usePathname();
   const value = useMemo<TreeContextType>(() => {
     const root = findRoot(tree.children, pathname) ?? tree;
-    const list = flattenTree(root.children);
 
     return {
       root,
-      list,
+      navigation: getNavigationList(root.children),
       tree,
     };
   }, [pathname, tree]);

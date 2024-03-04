@@ -39,20 +39,3 @@ export function hasActive(items: PageTree.Node[], url: string): boolean {
     return false;
   });
 }
-
-/**
- * Flatten tree to an array of page nodes
- */
-export function flattenTree(tree: PageTree.Node[]): PageTree.Item[] {
-  return tree.flatMap((node) => {
-    if (node.type === 'separator') return [];
-    if (node.type === 'folder') {
-      const children = flattenTree(node.children);
-
-      if (!node.root && node.index) return [node.index, ...children];
-      return children;
-    }
-
-    return [node];
-  });
-}

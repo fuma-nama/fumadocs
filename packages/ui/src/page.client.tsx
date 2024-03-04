@@ -5,7 +5,6 @@ import { cva } from 'class-variance-authority';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import type { PageTree } from 'fumadocs-core/server';
 import { useI18n } from './contexts/i18n';
 import { useTreeContext } from './contexts/tree';
 
@@ -48,15 +47,15 @@ export function Footer({ items }: FooterProps): JSX.Element {
 
   const { previous, next } = useMemo(() => {
     if (items) return items;
-    const currentIndex = tree.list.findIndex((item) => item.url === pathname);
+    const currentIndex = tree.navigation.findIndex(
+      (item) => item.url === pathname,
+    );
 
-    const filter = (item?: PageTree.Item): PageTree.Item | undefined =>
-      item?.external ? undefined : item;
     return {
-      previous: filter(tree.list[currentIndex - 1]),
-      next: filter(tree.list[currentIndex + 1]),
+      previous: tree.navigation[currentIndex - 1],
+      next: tree.navigation[currentIndex + 1],
     };
-  }, [items, pathname, tree.list]);
+  }, [items, pathname, tree.navigation]);
 
   return (
     <div className="mt-4 flex flex-row flex-wrap gap-4 border-t py-12">
