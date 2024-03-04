@@ -30,9 +30,9 @@ const defaultTemplates: Templates = {
 
 ${doc.description}
 
-<div className='flex flex-col gap-4 *:border-b [&>*:last-child]:border-b-0'>${c}</div>`,
+<div className='*:border-b [&>*:last-child]:border-b-0'>${c}</div>`,
 
-  property: (c) => `<div className='text-sm text-muted-foreground'>
+  property: (c) => `<div className='text-sm text-muted-foreground py-4'>
 
 <div className="flex flex-row items-center gap-4">
   <code className="text-sm">${c.name}</code>
@@ -42,8 +42,8 @@ ${doc.description}
 ${c.description || 'No Description'}
 
 ${Object.entries(c.tags)
-  .map(([tag, value]) => `**${tag}:**\n${replaceJsDocLinks(value)}`)
-  .join('\n<br/>\n')}
+  .map(([tag, value]) => `- ${tag}:\n${replaceJsDocLinks(value)}`)
+  .join('\n')}
 
 </div>`,
 };
