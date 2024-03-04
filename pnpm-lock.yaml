@@ -177,13 +177,13 @@ importers:
         specifier: 0.3.4
         version: 0.3.4
       fumadocs-contentlayer:
-        specifier: 1.1.0
+        specifier: 1.1.1
         version: link:../../packages/contentlayer
       fumadocs-core:
-        specifier: 9.1.0
+        specifier: 10.0.0
         version: link:../../packages/core
       fumadocs-ui:
-        specifier: 9.1.0
+        specifier: 10.0.0
         version: link:../../packages/ui
       next:
         specifier: 14.0.4
@@ -220,13 +220,13 @@ importers:
   examples/next-mdx:
     dependencies:
       fumadocs-core:
-        specifier: 9.1.0
+        specifier: 10.0.0
         version: link:../../packages/core
       fumadocs-mdx:
-        specifier: 8.1.0
+        specifier: 8.1.1
         version: link:../../packages/mdx
       fumadocs-ui:
-        specifier: 9.1.0
+        specifier: 10.0.0
         version: link:../../packages/ui
       next:
         specifier: 14.0.4
@@ -1297,10 +1297,6 @@ packages:
     peerDependencies:
       '@effect-ts/otel-node': '*'
     peerDependenciesMeta:
-      '@effect-ts/core':
-        optional: true
-      '@effect-ts/otel':
-        optional: true
       '@effect-ts/otel-node':
         optional: true
     dependencies:
