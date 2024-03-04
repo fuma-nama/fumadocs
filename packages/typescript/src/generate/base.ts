@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { type TypescriptConfig, getProgram, getFileSymbol } from './program';
+import { type TypescriptConfig, getProgram, getFileSymbol } from '../program';
 
 export interface GeneratedDoc {
   name: string;

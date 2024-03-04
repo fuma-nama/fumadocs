@@ -1,11 +1,11 @@
 import * as path from 'node:path';
+import { type TypescriptConfig, getProgram, getFileSymbol } from '../program';
 import {
   type DocEntry,
   type GeneratedDoc,
   generate,
   type GenerateOptions,
 } from './base';
-import { type TypescriptConfig, getProgram, getFileSymbol } from './program';
 
 interface Templates {
   block: (doc: GeneratedDoc, children: string) => string;
