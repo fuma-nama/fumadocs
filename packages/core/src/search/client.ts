@@ -31,19 +31,22 @@ async function fetchDocs(
   return (await res.json()) as SortedResult[];
 }
 
-export function useDocsSearch(locale?: string, tag?: string): UseDocsSearch {
+/**
+ * @param locale - Filter with locale
+ * @param tag - Filter with specific tag
+ * @param api - The Search API URL
+ */
+export function useDocsSearch(
+  locale?: string,
+  tag?: string,
+  api = '/api/search',
+): UseDocsSearch {
   const [search, setSearch] = useState('');
   const debouncedValue = useDebounce(search, 100);
 
-  const query = useSWR(
-    ['/api/search', debouncedValue, locale, tag],
-    async ([api, value]) => {
-      return fetchDocs(api, value, locale, tag);
-    },
-    {
-      keepPreviousData: true,
-    },
-  );
+  const query = useSWR([api, debouncedValue, locale, tag], fetchDocs, {
+    keepPreviousData: true,
+  });
 
   return { search, setSearch, query };
 }

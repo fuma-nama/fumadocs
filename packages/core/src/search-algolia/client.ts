@@ -80,7 +80,7 @@ export function useAlgoliaSearch(
   const [search, setSearch] = useState('');
 
   const query = useSWR(
-    ['/api/search', search, allowEmpty, options],
+    ['algolia-search', search, allowEmpty, options],
     async () => {
       if (allowEmpty && search.length === 0) return 'empty';
 
