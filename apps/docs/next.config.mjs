@@ -23,6 +23,7 @@ const config = {
 };
 
 const withMDX = createMDX({
+  buildSearchIndex: {},
   mdxOptions: {
     rehypeCodeOptions: {
       transformers: [

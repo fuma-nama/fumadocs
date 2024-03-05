@@ -3,9 +3,8 @@ import fg from 'fast-glob';
 import type { LoaderContext } from 'webpack';
 
 export interface LoaderOptions {
-  rootContentPath: string;
-  mapPath: string;
-  cwd: string;
+  rootContentDir: string;
+  rootMapFile: string;
 }
 
 /**
@@ -19,18 +18,17 @@ export default function loader(
   const options = this.getOptions();
 
   this.cacheable(true);
-  this.addContextDependency(path.resolve(options.cwd, options.rootContentPath));
+  this.addContextDependency(options.rootContentDir);
 
   callback(null, buildMap(options));
 }
 
-function buildMap({ cwd, rootContentPath, mapPath }: LoaderOptions): string {
-  const mapDir = path.dirname(mapPath);
-  const absoluteContentPath = path.resolve(cwd, rootContentPath);
+function buildMap({ rootContentDir, rootMapFile }: LoaderOptions): string {
+  const mapDir = path.dirname(rootMapFile);
 
   // eslint-disable-next-line import/no-named-as-default-member -- commom.js
   const files = fg.sync('./**/*.{md,mdx,json}', {
-    cwd: absoluteContentPath,
+    cwd: rootContentDir,
   });
 
   const imports: string[] = [];
@@ -38,7 +36,7 @@ function buildMap({ cwd, rootContentPath, mapPath }: LoaderOptions): string {
 
   files.forEach((file, i) => {
     let importPath = path
-      .relative(mapDir, path.join(absoluteContentPath, file))
+      .relative(mapDir, path.join(rootContentDir, file))
       .replaceAll(path.sep, '/');
 
     if (!importPath.startsWith('.')) {

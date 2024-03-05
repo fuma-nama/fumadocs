@@ -95,7 +95,7 @@ function groupByLanguages(
   return langMap;
 }
 
-function createGetUrl(
+export function createGetUrl(
   baseUrl: string,
 ): (slugs: string[], locale?: string) => string {
   return (slugs, locale) => {
@@ -106,7 +106,7 @@ function createGetUrl(
   };
 }
 
-function getSlugs(info: FileInfo): string[] {
+export function getSlugs(info: FileInfo): string[] {
   const result = [...splitPath(info.dirname), info.name];
 
   return result[result.length - 1] === 'index' ? result.slice(0, -1) : result;

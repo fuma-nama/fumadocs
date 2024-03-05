@@ -3,7 +3,7 @@ import { defineConfig } from 'tsup';
 export default defineConfig({
   entry: ['./src/{config,index,loader,loader-mdx}.ts'],
   format: 'esm',
-  external: ['fumadocs-core', 'webpack'],
+  external: ['fumadocs-core', 'webpack', 'next'],
   dts: true,
-  target: 'es6',
+  target: 'node18',
 });

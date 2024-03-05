@@ -13,8 +13,8 @@ export interface Options extends ProcessorOptions {
   lastModifiedTime?: 'git' | 'none';
 }
 
-interface InternalBuildInfo {
-  __next_docs?: {
+export interface InternalBuildInfo {
+  __fumadocs?: {
     path: string;
     /**
      * `vfile.data` parsed from file
@@ -71,7 +71,7 @@ export default async function loader(
       (file) => {
         const info = this._module?.buildInfo as InternalBuildInfo;
 
-        info.__next_docs = {
+        info.__fumadocs = {
           path: filePath,
           data: file.data,
         };
