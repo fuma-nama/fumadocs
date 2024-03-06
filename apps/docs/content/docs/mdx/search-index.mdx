@@ -22,7 +22,7 @@ const withMDX = createMDX({
 export default withMDX(config);
 ```
 
-Generated search indexes will be written to `.next/server/chunks/fumadocs_search.json`.
+After running `next build`, generated search indexes will be written to `.next/server/chunks/fumadocs_search.json`.
 You can access them with `JSON.parse`.
 
 ```ts title="update-index.mts"
