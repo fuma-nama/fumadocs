@@ -1,5 +1,15 @@
 # next-docs-ui
 
+## 10.0.1
+
+### Patch Changes
+
+- 0e78dc8: Support customising search API URL
+- Updated dependencies [c9b7763]
+- Updated dependencies [0e78dc8]
+- Updated dependencies [d8483a8]
+  - fumadocs-core@10.0.1
+
 ## 10.0.0
 
 ### Major Changes
@@ -132,8 +142,8 @@
   <I18nProvider
     translations={{
       cn: {
-        name: 'Chinese', // required
-        search: 'Translated Content',
+        name: "Chinese", // required
+        search: "Translated Content",
       },
     }}
   ></I18nProvider>
@@ -146,15 +156,15 @@
   migrate: Use `createPreset` instead
 
   ```js
-  const { createPreset } = require('fumadocs-ui/tailwind-plugin');
+  const { createPreset } = require("fumadocs-ui/tailwind-plugin");
 
   /** @type {import('tailwindcss').Config} */
   module.exports = {
     content: [
-      './components/**/*.{ts,tsx}',
-      './app/**/*.{ts,tsx}',
-      './content/**/*.mdx',
-      './node_modules/fumadocs-ui/dist/**/*.js',
+      "./components/**/*.{ts,tsx}",
+      "./app/**/*.{ts,tsx}",
+      "./content/**/*.mdx",
+      "./node_modules/fumadocs-ui/dist/**/*.js",
     ],
     presets: [createPreset()],
   };
@@ -167,7 +177,7 @@
   Before:
 
   ```tsx
-  import { CodeBlock, Pre } from 'fumadocs-ui/mdx/pre';
+  import { CodeBlock, Pre } from "fumadocs-ui/mdx/pre";
 
   <Pre title={title} allowCopy {...props} />;
   ```
@@ -175,7 +185,7 @@
   After:
 
   ```tsx
-  import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
+  import { CodeBlock, Pre } from "fumadocs-ui/components/codeblock";
 
   <CodeBlock title={title} allowCopy>
     <Pre {...props} />
@@ -296,14 +306,14 @@
   Add theme presets for the Tailwind CSS plugin, the default and ocean presets are available now.
 
   ```js
-  const { docsUi, docsUiPlugins } = require('next-docs-ui/tailwind-plugin');
+  const { docsUi, docsUiPlugins } = require("next-docs-ui/tailwind-plugin");
 
   /** @type {import('tailwindcss').Config} */
   module.exports = {
     plugins: [
       ...docsUiPlugins,
       docsUi({
-        preset: 'ocean',
+        preset: "ocean",
       }),
     ],
   };
@@ -339,7 +349,7 @@
   Same as Docs Layout but doesn't include a sidebar. It can be used outside of the docs, a page tree is not required.
 
   ```jsx
-  import { Layout } from 'next-docs-ui/layout';
+  import { Layout } from "next-docs-ui/layout";
 
   export default function HomeLayout({ children }) {
     return <Layout>{children}</Layout>;
@@ -396,16 +406,16 @@
   If you are using Tailwind CSS for your docs, it's now recommended to use the official plugin instead.
 
   ```js
-  const { docsUi, docsUiPlugins } = require('next-docs-ui/tailwind-plugin');
+  const { docsUi, docsUiPlugins } = require("next-docs-ui/tailwind-plugin");
 
   /** @type {import('tailwindcss').Config} */
   module.exports = {
-    darkMode: 'class',
+    darkMode: "class",
     content: [
-      './components/**/*.{ts,tsx}',
-      './app/**/*.{ts,tsx}',
-      './content/**/*.mdx',
-      './node_modules/next-docs-ui/dist/**/*.js',
+      "./components/**/*.{ts,tsx}",
+      "./app/**/*.{ts,tsx}",
+      "./content/**/*.mdx",
+      "./node_modules/next-docs-ui/dist/**/*.js",
     ],
     plugins: [...docsUiPlugins, docsUi],
   };

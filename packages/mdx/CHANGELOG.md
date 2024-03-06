@@ -1,5 +1,18 @@
 # next-docs-mdx
 
+## 8.2.0
+
+### Minor Changes
+
+- 01155f5: Support generate search indexes in build time
+
+### Patch Changes
+
+- Updated dependencies [c9b7763]
+- Updated dependencies [0e78dc8]
+- Updated dependencies [d8483a8]
+  - fumadocs-core@10.0.1
+
 ## 8.1.1
 
 ### Patch Changes
@@ -72,7 +85,7 @@
   Become:
 
   ```mdx
-  import img_banner from '../../public/image.png';
+  import img_banner from "../../public/image.png";
 
   <img alt="banner" src={img_banner} />
   ```
@@ -133,13 +146,13 @@
   `fromMap` has been removed. Please use `createMDXSource` instead.
 
   ```ts
-  import { map } from '@/.map';
-  import { createMDXSource } from 'next-docs-mdx';
-  import { loader } from 'next-docs-zeta/source';
+  import { map } from "@/.map";
+  import { createMDXSource } from "next-docs-mdx";
+  import { loader } from "next-docs-zeta/source";
 
   export const { getPage, getPages, pageTree } = loader({
-    baseUrl: '/docs',
-    rootDir: 'docs',
+    baseUrl: "/docs",
+    rootDir: "docs",
     source: createMDXSource(map),
   });
   ```
@@ -153,7 +166,7 @@
   ```js
   const withNextDocs = createNextDocs({
     mdxOptions: {
-      lastModifiedTime: 'git',
+      lastModifiedTime: "git",
     },
   });
   ```
@@ -202,7 +215,7 @@
 
   ```ts
   const utils = fromMap(map, {
-    rootDir: 'ui',
+    rootDir: "ui",
     schema: {
       frontmatter: frontmatterSchema,
     },
@@ -233,11 +246,11 @@
   The `validate` options is now renamed to `schema`.
 
   ```ts
-  import { defaultSchemas, fromMap } from 'next-docs-mdx/map';
+  import { defaultSchemas, fromMap } from "next-docs-mdx/map";
 
   const utils = fromMap(map, {
-    rootDir: 'docs/ui',
-    baseUrl: '/docs/ui',
+    rootDir: "docs/ui",
+    baseUrl: "/docs/ui",
     schema: {
       frontmatter: defaultSchemas.frontmatter.extend({
         preview: z.string().optional(),
@@ -256,7 +269,7 @@
 
   ```js
   const withNextDocs = createNextDocs({
-    rootContentPath: './content/docs',
+    rootContentPath: "./content/docs",
   });
   ```
 
