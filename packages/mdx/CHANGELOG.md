@@ -1,5 +1,18 @@
 # next-docs-mdx
 
+## 8.2.0
+
+### Minor Changes
+
+- 01155f5: Support generate search indexes in build time
+
+### Patch Changes
+
+- Updated dependencies [c9b7763]
+- Updated dependencies [0e78dc8]
+- Updated dependencies [d8483a8]
+  - fumadocs-core@10.0.1
+
 ## 8.1.1
 
 ### Patch Changes

@@ -18,7 +18,6 @@ describe('Generate documents', () => {
     );
 
     for (const tag of tags) {
-      // eslint-disable-next-line no-await-in-loop -- avoid async fs operations
       await expect(tag.content).toMatchFileSnapshot(
         `./out/museum/${tag.tag.toLowerCase()}.mdx`,
       );

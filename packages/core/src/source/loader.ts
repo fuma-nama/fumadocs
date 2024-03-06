@@ -11,12 +11,12 @@ import { createPageTreeBuilder } from './page-tree-builder';
 import { joinPaths, splitPath, type FileInfo } from './path';
 import type { Meta, Page, Storage } from './file-system';
 
-interface LoaderConfig {
+export interface LoaderConfig {
   source: SourceConfig;
   i18n: boolean;
 }
 
-interface SourceConfig {
+export interface SourceConfig {
   pageData: PageData;
   metaData: MetaData;
 }
@@ -95,7 +95,7 @@ function groupByLanguages(
   return langMap;
 }
 
-function createGetUrl(
+export function createGetUrl(
   baseUrl: string,
 ): (slugs: string[], locale?: string) => string {
   return (slugs, locale) => {
@@ -106,7 +106,7 @@ function createGetUrl(
   };
 }
 
-function getSlugs(info: FileInfo): string[] {
+export function getSlugs(info: FileInfo): string[] {
   const result = [...splitPath(info.dirname), info.name];
 
   return result[result.length - 1] === 'index' ? result.slice(0, -1) : result;

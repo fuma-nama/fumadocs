@@ -1,0 +1,34 @@
+---
+title: Generate Search Indexes
+description: Integrate with search solutions seamlessly
+---
+
+## Usage
+
+Add `buildSearchIndex` to options.
+
+```js
+import createMDX from 'fumadocs-mdx/config';
+
+/** @type {import('next').NextConfig} */
+const config = {
+  reactStrictMode: true,
+};
+
+const withMDX = createMDX({
+  buildSearchIndex: {}, // [!code highlight]
+});
+
+export default withMDX(config);
+```
+
+After running `next build`, generated search indexes will be written to `.next/server/chunks/fumadocs_search.json`.
+You can access them with `JSON.parse`.
+
+```ts title="update-index.mts"
+import type { SearchIndex } from 'fumadocs-mdx';
+
+const indexes = JSON.parse(
+  readFileSync('./.next/server/chunks/fumadocs_search.json').toString(),
+) as SearchIndex[];
+```

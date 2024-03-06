@@ -19,4 +19,9 @@ export interface Player {
    * Returned by API
    */
   age: number;
+
+  /**
+   * @internal
+   */
+  privateValue: string
 }

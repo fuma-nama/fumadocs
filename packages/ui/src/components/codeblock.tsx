@@ -41,7 +41,7 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
         node.remove();
       });
 
-      const text = clone.textContent || '';
+      const text = clone.textContent ?? '';
 
       void navigator.clipboard.writeText(text);
     }, []);

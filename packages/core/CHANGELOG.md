@@ -1,5 +1,13 @@
 # next-docs-zeta
 
+## 10.0.1
+
+### Patch Changes
+
+- c9b7763: Update to Next.js 14.1.0
+- 0e78dc8: Support customising search API URL
+- d8483a8: Remove undefined values from page tree
+
 ## 10.0.0
 
 ### Major Changes

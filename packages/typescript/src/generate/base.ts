@@ -17,21 +17,30 @@ export interface DocEntry {
 interface EntryContext {
   program: ts.Program;
   checker: ts.TypeChecker;
-  options: GenerateOptions;
+  transform?: Transformer;
   type: ts.Type;
   symbol: ts.Symbol;
 }
 
+type Transformer = (
+  this: EntryContext,
+  entry: DocEntry,
+  propertyType: ts.Type,
+  propertySymbol: ts.Symbol,
+) => void;
+
 export interface GenerateOptions {
+  /**
+   * Allow fields with `@internal` tag
+   *
+   * @defaultValue false
+   */
+  allowInternal?: boolean;
+
   /**
    * Modify output property entry
    */
-  transform?: (
-    this: EntryContext,
-    entry: DocEntry,
-    propertyType: ts.Type,
-    propertySymbol: ts.Symbol,
-  ) => void;
+  transform?: Transformer;
 }
 
 export interface GenerateDocumentationOptions extends GenerateOptions {
@@ -66,13 +75,13 @@ export function generateDocumentation(
 export function generate(
   program: ts.Program,
   symbol: ts.Symbol,
-  options: GenerateOptions,
+  { allowInternal = false, transform }: GenerateOptions,
 ): GeneratedDoc {
   const checker = program.getTypeChecker();
   const type = checker.getDeclaredTypeOfSymbol(symbol);
   const entryContext: EntryContext = {
     checker,
-    options,
+    transform,
     program,
     type,
     symbol,
@@ -85,12 +94,13 @@ export function generate(
     ),
     entries: type
       .getProperties()
-      .map((prop) => getDocEntry(prop, entryContext)),
+      .map((prop) => getDocEntry(prop, entryContext))
+      .filter((entry) => allowInternal || !('internal' in entry.tags)),
   };
 }
 
 function getDocEntry(prop: ts.Symbol, context: EntryContext): DocEntry {
-  const { checker, options } = context;
+  const { checker, transform } = context;
   const subType = checker.getTypeOfSymbol(prop);
   const tags = Object.fromEntries(
     prop
@@ -119,7 +129,7 @@ function getDocEntry(prop: ts.Symbol, context: EntryContext): DocEntry {
     type: typeName,
   };
 
-  options.transform?.call(context, entry, subType, prop);
+  transform?.call(context, entry, subType, prop);
 
   return entry;
 }

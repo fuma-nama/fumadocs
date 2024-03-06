@@ -89,7 +89,7 @@ export default function HomePage(): JSX.Element {
             <Rain
               width={1000}
               height={500}
-              className="absolute inset-0 z-[-1] h-full w-full mix-blend-difference"
+              className="absolute inset-0 z-[-1] size-full mix-blend-difference"
             />
           </div>
           <Highlights />
@@ -204,7 +204,7 @@ function Integration({
       </div>
       <div className="col-span-full h-[200px] overflow-hidden bg-gradient-to-b from-primary/10">
         <div
-          className="mx-auto h-[500px] w-[500px] rounded-full"
+          className="mx-auto size-[500px] rounded-full"
           style={{
             backgroundImage:
               'radial-gradient(circle at 0% 100%, transparent 60%, hsl(var(--primary)))',
@@ -523,6 +523,7 @@ function Features(): JSX.Element {
         >
           Showcase
         </Link>
+
         <div className="mt-8">
           <Previews />
         </div>

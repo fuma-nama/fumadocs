@@ -17,7 +17,7 @@ export default function DocsPage(): JSX.Element {
     <main className="container flex flex-col items-center py-16 text-center">
       <div className="absolute inset-0 z-[-1] overflow-hidden duration-1000 animate-in fade-in [perspective:2000px]">
         <div
-          className="absolute bottom-[20%] left-[50%] h-[1200px] w-[1200px] origin-bottom bg-primary/30 opacity-50"
+          className="absolute bottom-[20%] left-[50%] size-[1200px] origin-bottom bg-primary/30 opacity-50"
           style={{
             transform: 'rotateX(75deg) translate(-50%, 400px)',
             backgroundImage:
@@ -56,7 +56,7 @@ export default function DocsPage(): JSX.Element {
           )}
         >
           <div className={cn(cardIconVariants())}>
-            <LayoutIcon className="h-full w-full" />
+            <LayoutIcon className="size-full" />
           </div>
           <h2 className="mb-2 text-lg font-semibold">Fumadocs UI</h2>
           <p className="text-sm text-muted-foreground">
@@ -65,7 +65,7 @@ export default function DocsPage(): JSX.Element {
         </Link>
         <Link href="/docs/headless" className={cn(cardVariants())}>
           <div className={cn(cardIconVariants())}>
-            <LibraryIcon className="h-full w-full" />
+            <LibraryIcon className="size-full" />
           </div>
           <h2 className="mb-2 text-lg font-semibold">Fumadocs Core</h2>
           <p className="text-sm text-muted-foreground">

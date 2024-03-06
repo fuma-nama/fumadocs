@@ -32,3 +32,5 @@ export type MDXPageData<Frontmatter extends PageData = PageData> = Omit<
 > & {
   exports: Omit<MDXExport<Frontmatter>, 'frontmatter'>;
 };
+
+export type { SearchIndex } from './webpack-plugins/search-index-plugin';

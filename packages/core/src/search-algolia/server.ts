@@ -21,7 +21,7 @@ interface DocumentRecord {
   extra_data?: object;
 }
 
-interface SyncOptions {
+export interface SyncOptions {
   document?: string;
   documents: DocumentRecord[];
 }

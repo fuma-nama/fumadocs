@@ -3,13 +3,15 @@ import { resolve } from 'node:path';
 import env from '@next/env';
 import algosearch from 'algoliasearch';
 import { sync } from 'fumadocs-core/search-algolia/server';
-import type { Index } from '@/utils/source';
+import type { SearchIndex } from 'fumadocs-mdx';
 
 env.loadEnvConfig(process.cwd());
 
 const indexes = JSON.parse(
-  readFileSync(resolve('./.next/_map_indexes.json')).toString(),
-) as Index[];
+  readFileSync(
+    resolve('./.next/server/chunks/fumadocs_search.json'),
+  ).toString(),
+) as SearchIndex[];
 
 const client = algosearch(
   process.env.ALGOLIA_APP_ID || '',

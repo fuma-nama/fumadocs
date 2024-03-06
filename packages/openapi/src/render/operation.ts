@@ -60,7 +60,7 @@ export async function renderOperation(
       {
         ...schema,
         description: param.description ?? schema.description,
-        deprecated: param.deprecated || schema.deprecated,
+        deprecated: (param.deprecated ?? false) || (schema.deprecated ?? false),
       },
       {
         parseObject: false,
@@ -122,7 +122,6 @@ async function getResponseTabs(
 
   for (const [code, _] of Object.entries(operation.responses)) {
     const example = getExampleResponse(endpoint, code);
-    // eslint-disable-next-line no-await-in-loop -- Keep order
     const ts = await getTypescript(endpoint, code);
     const description =
       code in endpoint.responses

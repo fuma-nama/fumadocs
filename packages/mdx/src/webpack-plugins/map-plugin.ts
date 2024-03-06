@@ -1,9 +1,12 @@
-import fs from 'node:fs';
-import type { Compiler } from 'webpack';
+import * as fs from 'node:fs';
+import { type Compiler } from 'webpack';
 
 let firstLoad = true;
 
 interface Options {
+  /**
+   * Absolute path of .map file
+   */
   rootMapFile: string;
 }
 

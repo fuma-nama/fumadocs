@@ -15,6 +15,10 @@ import { MapWebpackPlugin } from './webpack-plugins/map-plugin';
 import remarkMdxExport from './mdx-plugins/remark-exports';
 import type { LoaderOptions } from './loader';
 import type { Options as MDXLoaderOptions } from './loader-mdx';
+import {
+  SearchIndexPlugin,
+  type Options as SearchIndexPluginOptions,
+} from './webpack-plugins/search-index-plugin';
 
 type MDXOptions = Omit<
   NonNullable<MDXLoaderOptions>,
@@ -38,6 +42,8 @@ export interface CreateMDXOptions {
   cwd?: string;
 
   mdxOptions?: MDXOptions;
+
+  buildSearchIndex?: Partial<SearchIndexPluginOptions> | false;
 
   /**
    * Where the root map.ts should be, relative to cwd
@@ -119,9 +125,11 @@ const createMDX =
     cwd = process.cwd(),
     rootMapPath = './.map.ts',
     rootContentPath = './content',
+    buildSearchIndex = false,
   }: CreateMDXOptions = {}) =>
   (nextConfig: NextConfig = {}) => {
-    const _mapPath = path.resolve(cwd, rootMapPath);
+    const rootMapFile = path.resolve(cwd, rootMapPath);
+    const rootContentDir = path.resolve(cwd, rootContentPath);
     const mdxLoaderOptions = getMDXLoaderOptions(mdxOptions);
 
     return {
@@ -153,13 +161,12 @@ const createMDX =
               ],
             },
             {
-              test: _mapPath,
+              test: rootMapFile,
               use: {
                 loader: 'fumadocs-mdx/loader',
                 options: {
-                  cwd,
-                  rootContentPath,
-                  mapPath: _mapPath,
+                  rootContentDir,
+                  rootMapFile,
                 } satisfies LoaderOptions,
               },
             },
@@ -167,7 +174,20 @@ const createMDX =
 
           config.plugins ||= [];
 
-          config.plugins.push(new MapWebpackPlugin({ rootMapFile: _mapPath }));
+          config.plugins.push(
+            new MapWebpackPlugin({
+              rootMapFile,
+            }),
+          );
+
+          if (buildSearchIndex !== false)
+            config.plugins.push(
+              new SearchIndexPlugin({
+                rootContentDir,
+                rootMapFile,
+                ...buildSearchIndex,
+              }),
+            );
 
           // eslint-disable-next-line @typescript-eslint/no-unsafe-return -- not provided
           return nextConfig.webpack?.(config, options) ?? config;
