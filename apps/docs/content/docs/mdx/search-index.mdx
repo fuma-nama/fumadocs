@@ -5,6 +5,8 @@ description: Integrate with search solutions seamlessly
 
 ## Usage
 
+Add `buildSearchIndex` to options.
+
 ```js
 import createMDX from 'fumadocs-mdx/config';
 
@@ -14,8 +16,19 @@ const config = {
 };
 
 const withMDX = createMDX({
-  buildSearchIndex: {}, // [code: hightlight]
+  buildSearchIndex: {}, // [!code highlight]
 });
 
 export default withMDX(config);
+```
+
+Generated search indexes will be written to `.next/server/chunks/fumadocs_search.json`.
+You can access them with `JSON.parse`.
+
+```ts title="update-index.mts"
+import type { SearchIndex } from 'fumadocs-mdx';
+
+const indexes = JSON.parse(
+  readFileSync('./.next/server/chunks/fumadocs_search.json').toString()
+) as SearchIndex[];
 ```
