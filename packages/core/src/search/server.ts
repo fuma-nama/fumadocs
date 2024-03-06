@@ -1,6 +1,5 @@
 import { Document } from 'flexsearch';
-import { NextRequest, NextResponse } from 'next/server';
-import { type NextRequest as NextRequestType, type NextResponse as NextResponseType } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import type { StructuredData } from '@/mdx-plugins/remark-structure';
 import type { SortedResult } from './shared';
 

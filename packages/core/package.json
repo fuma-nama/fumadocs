@@ -148,7 +148,7 @@
     "unified": "^11.0.4"
   },
   "peerDependencies": {
-    "next": ">= 13.4",
+    "next": ">= 14.1.0",
     "react": ">= 18",
     "react-dom": ">= 18"
   },
