@@ -182,7 +182,11 @@ const createMDX =
 
           if (buildSearchIndex !== false)
             config.plugins.push(
-              new SearchIndexPlugin({ rootContentDir, ...buildSearchIndex }),
+              new SearchIndexPlugin({
+                rootContentDir,
+                rootMapFile,
+                ...buildSearchIndex,
+              }),
             );
 
           // eslint-disable-next-line @typescript-eslint/no-unsafe-return -- not provided

@@ -12,10 +12,6 @@ const pkg = require('next/dist/compiled/webpack/webpack.js') as {
   webpack: typeof import('webpack');
 };
 
-// todo:
-// It generates the same item twice
-// It executed on three different directories
-
 export interface SearchIndex {
   id: string;
   title: string;
@@ -34,6 +30,8 @@ export interface Options {
    * Absolute path of root content directory
    */
   rootContentDir: string;
+
+  rootMapFile: string;
 
   /**
    * @param path - MDX file path relative to root content dir
@@ -66,13 +64,15 @@ export class SearchIndexPlugin {
     if (productionOnly && !isProduction) return;
 
     compiler.hooks.compilation.tap(SearchIndexPlugin.name, (compilation) => {
+      if (compilation.name !== 'server') return;
+
       compilation.hooks.processAssets.tap(
         {
           name: SearchIndexPlugin.name,
           stage: pkg.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONS,
         },
         () => {
-          const indexFiles: SearchIndex[] = [];
+          const indexFiles = new Map<string, SearchIndex>();
 
           for (const m of compilation.modules.values()) {
             if (!m.buildInfo || !('__fumadocs' in m.buildInfo)) continue;
@@ -91,7 +91,7 @@ export class SearchIndexPlugin {
             const relativePath = path.relative(rootContentDir, searchData.path);
 
             const data = searchData.data;
-            indexFiles.push({
+            indexFiles.set(searchData.path, {
               id: searchData.path,
               structuredData: data.structuredData,
               title: data.frontmatter.title,
@@ -102,7 +102,9 @@ export class SearchIndexPlugin {
 
           compilation.emitAsset(
             'fumadocs_search.json',
-            new pkg.sources.RawSource(JSON.stringify(indexFiles)),
+            new pkg.sources.RawSource(
+              JSON.stringify(Array.from(indexFiles.values())),
+            ),
           );
 
           logger.info('Generated Search Indexes');
