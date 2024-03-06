@@ -44,9 +44,13 @@ export function useDocsSearch(
   const [search, setSearch] = useState('');
   const debouncedValue = useDebounce(search, 100);
 
-  const query = useSWR([api, debouncedValue, locale, tag], fetchDocs, {
-    keepPreviousData: true,
-  });
+  const query = useSWR(
+    [api, debouncedValue, locale, tag],
+    (args) => fetchDocs(...args),
+    {
+      keepPreviousData: true,
+    },
+  );
 
   return { search, setSearch, query };
 }

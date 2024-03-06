@@ -1,0 +1,21 @@
+---
+title: Generate Search Indexes
+description: Integrate with search solutions seamlessly
+---
+
+## Usage
+
+```js
+import createMDX from 'fumadocs-mdx/config';
+
+/** @type {import('next').NextConfig} */
+const config = {
+  reactStrictMode: true,
+};
+
+const withMDX = createMDX({
+  buildSearchIndex: {}, // [code: hightlight]
+});
+
+export default withMDX(config);
+```

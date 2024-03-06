@@ -12,6 +12,10 @@ const pkg = require('next/dist/compiled/webpack/webpack.js') as {
   webpack: typeof import('webpack');
 };
 
+// todo:
+// It generates the same item twice
+// It executed on three different directories
+
 export interface SearchIndex {
   id: string;
   title: string;
