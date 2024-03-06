@@ -1,5 +1,4 @@
 import { createMDXSource, defaultSchemas } from 'fumadocs-mdx';
-import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import { z } from 'zod';
 import type { InferMetaType, InferPageType } from 'fumadocs-core/source';
 import { loader } from 'fumadocs-core/source';
@@ -25,11 +24,3 @@ export const utils = loader({
 
 export type Page = InferPageType<typeof utils>;
 export type Meta = InferMetaType<typeof utils>;
-
-export interface Index {
-  id: string;
-  title: string;
-  description?: string;
-  url: string;
-  structuredData: StructuredData;
-}

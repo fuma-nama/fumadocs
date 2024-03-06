@@ -43,7 +43,6 @@ module.exports = {
     'import/namespace': 'off',
     'import/no-unresolved': 'off',
 
-    'react/jsx-sort-props': 'off',
     '@next/next/no-html-link-for-pages': 'off',
   },
 };

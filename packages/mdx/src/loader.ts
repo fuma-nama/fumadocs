@@ -26,7 +26,6 @@ export default function loader(
 function buildMap({ rootContentDir, rootMapFile }: LoaderOptions): string {
   const mapDir = path.dirname(rootMapFile);
 
-  // eslint-disable-next-line import/no-named-as-default-member -- commom.js
   const files = fg.sync('./**/*.{md,mdx,json}', {
     cwd: rootContentDir,
   });

@@ -27,7 +27,7 @@ export function remarkHeading(): Transformer<Root, Root> {
 
       const text = flattenNode(heading);
       const properties = heading.data.hProperties;
-      const id = slugger.slug(properties.id || text);
+      const id = slugger.slug(properties.id ?? text);
 
       properties.id = id;
 

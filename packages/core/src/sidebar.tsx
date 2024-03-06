@@ -30,7 +30,6 @@ export function SidebarProvider(props: SidebarProviderProps): JSX.Element {
 
   useEffect(() => {
     setOpen(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- exclude setOpen
   }, [pathname]);
 
   return (

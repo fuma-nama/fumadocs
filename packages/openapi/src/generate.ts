@@ -69,7 +69,6 @@ export async function generate(
 
   for (const route of routes) {
     for (const method of route.methods) {
-      // eslint-disable-next-line no-await-in-loop -- Keep order
       s.push(await renderOperation(route.path, method, serverUrl));
     }
   }

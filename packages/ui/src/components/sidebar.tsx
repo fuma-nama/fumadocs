@@ -185,7 +185,7 @@ function FolderNode({
 }): JSX.Element {
   const { defaultOpenLevel } = useContext(SidebarContext);
   const pathname = usePathname();
-  const active = index && isActive(index.url, pathname, false);
+  const active = index !== undefined && isActive(index.url, pathname, false);
   const childActive = useMemo(
     () => hasActive(children, pathname),
     [children, pathname],

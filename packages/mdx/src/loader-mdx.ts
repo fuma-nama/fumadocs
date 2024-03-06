@@ -76,7 +76,7 @@ export default async function loader(
           data: file.data,
         };
 
-        callback(undefined, String(file.value), file.map || undefined);
+        callback(undefined, String(file.value), file.map ?? undefined);
       },
       (error: Error) => {
         const fpath = path.relative(context, filePath);

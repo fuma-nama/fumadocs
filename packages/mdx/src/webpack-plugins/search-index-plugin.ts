@@ -2,7 +2,7 @@
 import * as path from 'node:path';
 import { createRequire } from 'node:module';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins';
-import { createGetUrl } from 'fumadocs-core/source';
+import { createGetUrl, getSlugs, parseFilePath } from 'fumadocs-core/source';
 import type { Compiler } from 'webpack';
 
 const require = createRequire(import.meta.url);
@@ -38,6 +38,11 @@ export interface Options {
    * @returns page URL
    */
   getUrl?: (path: string) => string;
+
+  /**
+   * Filter MDX files with specific path
+   */
+  filter?: (path: string) => boolean;
 }
 
 export class SearchIndexPlugin {
@@ -51,11 +56,9 @@ export class SearchIndexPlugin {
     const {
       rootContentDir,
       productionOnly = true,
+      filter = () => true,
       getUrl = (file) => {
-        const parsedPath = path.parse(file);
-        const flattenedPath = path.join(parsedPath.dir, parsedPath.name);
-
-        return createGetUrl('/')(flattenedPath.split(path.sep));
+        return createGetUrl('/')(getSlugs(parseFilePath(file)));
       },
     } = this.options;
     const logger = compiler.getInfrastructureLogger(SearchIndexPlugin.name);
@@ -77,7 +80,7 @@ export class SearchIndexPlugin {
           for (const m of compilation.modules.values()) {
             if (!m.buildInfo || !('__fumadocs' in m.buildInfo)) continue;
 
-            const searchData = m.buildInfo.__fumadocs as {
+            const info = m.buildInfo.__fumadocs as {
               path: string;
               data: {
                 structuredData: StructuredData;
@@ -88,14 +91,14 @@ export class SearchIndexPlugin {
               };
             };
 
-            const relativePath = path.relative(rootContentDir, searchData.path);
+            const relativePath = path.relative(rootContentDir, info.path);
 
-            const data = searchData.data;
-            indexFiles.set(searchData.path, {
-              id: searchData.path,
-              structuredData: data.structuredData,
-              title: data.frontmatter.title,
-              description: data.frontmatter.description,
+            if (!filter(relativePath)) continue;
+            indexFiles.set(info.path, {
+              id: info.path,
+              structuredData: info.data.structuredData,
+              title: info.data.frontmatter.title,
+              description: info.data.frontmatter.description,
               url: getUrl(relativePath),
             });
           }

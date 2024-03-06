@@ -11,12 +11,12 @@ import { createPageTreeBuilder } from './page-tree-builder';
 import { joinPaths, splitPath, type FileInfo } from './path';
 import type { Meta, Page, Storage } from './file-system';
 
-interface LoaderConfig {
+export interface LoaderConfig {
   source: SourceConfig;
   i18n: boolean;
 }
 
-interface SourceConfig {
+export interface SourceConfig {
   pageData: PageData;
   metaData: MetaData;
 }

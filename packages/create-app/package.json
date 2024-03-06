@@ -32,7 +32,7 @@
     "picocolors": "^1.0.0"
   },
   "devDependencies": {
-    "@types/cross-spawn": "^6.0.4",
+    "@types/cross-spawn": "^6.0.6",
     "@types/node": "18.17.5",
     "eslint-config-custom": "workspace:*",
     "fast-glob": "^3.3.1",

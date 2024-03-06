@@ -71,7 +71,7 @@ function renderMarkdown(
     toHast(mdast, {
       handlers: {
         code: (state, node: Code) => {
-          const lang = node.lang || '';
+          const lang = node.lang ?? '';
           if (lang) {
             return this.codeToHast(node.value, {
               ...this.options,
