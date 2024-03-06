@@ -23,7 +23,13 @@ const config = {
 };
 
 const withMDX = createMDX({
-  buildSearchIndex: {},
+  buildSearchIndex: {
+    filter: (v) => {
+      if (v.match(/.+\.model\.mdx/)) return false
+      
+      return true
+    }
+  },
   mdxOptions: {
     rehypeCodeOptions: {
       transformers: [

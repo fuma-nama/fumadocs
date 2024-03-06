@@ -41,6 +41,9 @@ export interface Options {
 
   /**
    * Filter MDX files with specific path
+   *
+   * @param path - MDX file path relative to root content dir
+   * @returns whether should include this item in search indexes
    */
   filter?: (path: string) => boolean;
 }
