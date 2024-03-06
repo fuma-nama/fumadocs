@@ -29,6 +29,6 @@ You can access them with `JSON.parse`.
 import type { SearchIndex } from 'fumadocs-mdx';
 
 const indexes = JSON.parse(
-  readFileSync('./.next/server/chunks/fumadocs_search.json').toString()
+  readFileSync('./.next/server/chunks/fumadocs_search.json').toString(),
 ) as SearchIndex[];
 ```
