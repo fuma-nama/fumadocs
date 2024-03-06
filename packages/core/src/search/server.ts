@@ -1,5 +1,6 @@
 import { Document } from 'flexsearch';
-import nextLib, { type NextRequest, type NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest as NextRequestType, type NextResponse as NextResponseType } from 'next/server';
 import type { StructuredData } from '@/mdx-plugins/remark-structure';
 import type { SortedResult } from './shared';
 
@@ -68,7 +69,7 @@ export function createI18nSearchAPI<T extends 'simple' | 'advanced'>(
         if (handler) return handler.GET(request);
       }
 
-      return nextLib.NextResponse.json([]);
+      return NextResponse.json([]);
     },
   };
 }
@@ -126,14 +127,14 @@ export function initSearchAPI({ indexes, language }: SimpleOptions): SearchAPI {
       const { searchParams } = request.nextUrl;
       const query = searchParams.get('query');
 
-      if (!query) return nextLib.NextResponse.json([]);
+      if (!query) return NextResponse.json([]);
 
       const results = index.search(query, 5, {
         enrich: true,
         suggest: true,
       });
 
-      if (results.length === 0) return nextLib.NextResponse.json([]);
+      if (results.length === 0) return NextResponse.json([]);
 
       const pages = results[0].result.map<SortedResult>((page) => ({
         type: 'page',
@@ -142,7 +143,7 @@ export function initSearchAPI({ indexes, language }: SimpleOptions): SearchAPI {
         url: page.doc.url,
       }));
 
-      return nextLib.NextResponse.json(pages);
+      return NextResponse.json(pages);
     },
   };
 }
@@ -235,7 +236,7 @@ export function initSearchAPIAdvanced({
       const query = request.nextUrl.searchParams.get('query');
       const paramTag = request.nextUrl.searchParams.get('tag');
 
-      if (!query) return nextLib.NextResponse.json([]);
+      if (!query) return NextResponse.json([]);
 
       const results = index.search(query, 5, {
         enrich: true,
@@ -287,7 +288,7 @@ export function initSearchAPIAdvanced({
         sortedResult.push(...items);
       }
 
-      return nextLib.NextResponse.json(sortedResult);
+      return NextResponse.json(sortedResult);
     },
   };
 }
