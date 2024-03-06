@@ -4,7 +4,7 @@
   "private": true,
   "license": "MIT",
   "devDependencies": {
-    "@vercel/style-guide": "^5.1.0",
+    "@vercel/style-guide": "^6.0.0",
     "eslint-config-turbo": "^1.10.12",
     "eslint-plugin-tailwindcss": "^3.13.0",
     "typescript": "^5.2.2"
