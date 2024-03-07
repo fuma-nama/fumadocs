@@ -23,5 +23,5 @@ export interface Player {
   /**
    * @internal
    */
-  privateValue: string
+  privateValue: string;
 }
