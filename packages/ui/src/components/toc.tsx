@@ -1,42 +1,48 @@
 import { TextIcon } from 'lucide-react';
 import type { TOCItemType } from 'fumadocs-core/server';
 import * as Primitive from 'fumadocs-core/toc';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { cn } from '@/utils/cn';
 import { useI18n } from '@/contexts/i18n';
+import { ScrollArea, ScrollViewport } from './ui/scroll-area';
 
 type PosType = [top: number, height: number];
 
 export function TOCItems({ items }: { items: TOCItemType[] }): JSX.Element {
   const { text } = useI18n();
-  const [pos, setPos] = useState<PosType>();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const markerRef = useRef<HTMLDivElement>(null);
+
+  const setPos = ([top, height]: PosType): void => {
+    const element = markerRef.current;
+    if (!element) return;
+
+    element.style.setProperty('top', `${top}px`);
+    element.style.setProperty('height', `${height}px`);
+    element.style.setProperty('display', `block`);
+  };
 
   return (
-    <Primitive.TOCProvider
-      toc={items}
-      className="relative overflow-hidden pt-4 text-sm first:pt-0"
-    >
-      <h3 className="mb-4 inline-flex items-center gap-2">
-        <TextIcon className="size-4" />
-        {text.toc}
-      </h3>
-      <div className="flex flex-col gap-1 border-l-2 text-muted-foreground">
-        <div
-          role="none"
-          className={cn(
-            'absolute left-0 border-l-2 transition-all',
-            pos && 'border-primary',
-          )}
-          style={{
-            top: pos?.[0],
-            height: pos?.[1],
-          }}
-        />
-        {items.map((item) => (
-          <TOCItem key={item.url} item={item} setMarker={setPos} />
-        ))}
-      </div>
-    </Primitive.TOCProvider>
+    <ScrollArea className="pt-4 text-sm first:pt-0">
+      <ScrollViewport className="relative" ref={containerRef}>
+        <Primitive.TOCScrollProvider containerRef={containerRef} toc={items}>
+          <div
+            role="none"
+            ref={markerRef}
+            className="absolute left-0 hidden border-l-2 border-primary transition-all"
+          />
+          <h3 className="mb-4 inline-flex items-center gap-2">
+            <TextIcon className="size-4" />
+            {text.toc}
+          </h3>
+          <div className="flex flex-col gap-1 border-l-2 text-muted-foreground">
+            {items.map((item) => (
+              <TOCItem key={item.url} item={item} setMarker={setPos} />
+            ))}
+          </div>
+        </Primitive.TOCScrollProvider>
+      </ScrollViewport>
+    </ScrollArea>
   );
 }
 

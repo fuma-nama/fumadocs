@@ -3,7 +3,11 @@ import { CheckIcon, CopyIcon } from 'lucide-react';
 import type { ButtonHTMLAttributes, HTMLAttributes, ReactNode } from 'react';
 import { forwardRef, useCallback, useRef } from 'react';
 import { cn } from '@/utils/cn';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  ScrollArea,
+  ScrollBar,
+  ScrollViewport,
+} from '@/components/ui/scroll-area';
 import { useCopyButton } from '@/utils/use-copy-button';
 import { buttonVariants } from '@/theme/variants';
 
@@ -73,7 +77,10 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
             />
           )
         )}
-        <ScrollArea ref={areaRef}>{props.children}</ScrollArea>
+        <ScrollArea ref={areaRef}>
+          <ScrollViewport>{props.children}</ScrollViewport>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
       </figure>
     );
   },

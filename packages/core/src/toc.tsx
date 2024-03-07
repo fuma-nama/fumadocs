@@ -1,4 +1,9 @@
-import type { AnchorHTMLAttributes, HTMLAttributes, RefObject } from 'react';
+import type {
+  AnchorHTMLAttributes,
+  HTMLAttributes,
+  ReactNode,
+  RefObject,
+} from 'react';
 import {
   createContext,
   forwardRef,
@@ -8,7 +13,7 @@ import {
   useRef,
 } from 'react';
 import scrollIntoView from 'scroll-into-view-if-needed';
-import type { TableOfContents, TOCItemType } from '@/server/get-toc';
+import type { TableOfContents } from '@/server/get-toc';
 import { mergeRefs } from '@/utils/merge-refs';
 import { useAnchorObserver } from './utils/use-anchor-observer';
 
@@ -26,26 +31,26 @@ export const useActiveAnchor = (url: string): boolean => {
   return activeAnchor === url.split('#')[1];
 };
 
-type TOCProviderProps = HTMLAttributes<HTMLDivElement> & {
+export interface TOCProviderProps extends HTMLAttributes<HTMLDivElement> {
   toc: TableOfContents;
-};
+}
+
+export interface TOCScrollProvider {
+  containerRef: RefObject<HTMLElement>;
+  toc: TableOfContents;
+  children: ReactNode;
+}
 
 export const TOCProvider = forwardRef<HTMLDivElement, TOCProviderProps>(
   ({ toc, ...props }, ref) => {
-    const headings = useMemo(() => {
-      return toc.map((item) => item.url.split('#')[1]);
-    }, [toc]);
-
     const containerRef = useRef<HTMLDivElement>(null);
     const mergedRef = mergeRefs(containerRef, ref);
 
-    const activeAnchor = useAnchorObserver(headings);
-
     return (
       <div ref={mergedRef} {...props}>
-        <ActiveAnchorContext.Provider value={{ containerRef, activeAnchor }}>
+        <TOCScrollProvider toc={toc} containerRef={containerRef}>
           {props.children}
-        </ActiveAnchorContext.Provider>
+        </TOCScrollProvider>
       </div>
     );
   },
@@ -53,11 +58,27 @@ export const TOCProvider = forwardRef<HTMLDivElement, TOCProviderProps>(
 
 TOCProvider.displayName = 'TOCProvider';
 
-export type TOCItemProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
+export function TOCScrollProvider({
+  toc,
+  containerRef,
+  children,
+}: TOCScrollProvider): JSX.Element {
+  const headings = useMemo(() => {
+    return toc.map((item) => item.url.split('#')[1]);
+  }, [toc]);
+
+  const activeAnchor = useAnchorObserver(headings);
+
+  return (
+    <ActiveAnchorContext.Provider value={{ containerRef, activeAnchor }}>
+      {children}
+    </ActiveAnchorContext.Provider>
+  );
+}
+
+export interface TOCItemProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
   href: string;
-  /** @deprecated You don't need to pass this anymore */
-  item?: TOCItemType;
-};
+}
 
 export const TOCItem = forwardRef<HTMLAnchorElement, TOCItemProps>(
   (props, ref) => {
