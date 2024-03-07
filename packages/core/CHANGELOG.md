@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 10.0.2
+
+### Patch Changes
+
+- 10e099a: Remove deprecated options from `fumadocs-core/toc`
+
 ## 10.0.1
 
 ### Patch Changes
@@ -74,7 +80,7 @@
 
   ````md
   ```ts /config/ {1}
-  const config = 'Hello';
+  const config = "Hello";
 
   something.call(config);
   ```
@@ -85,7 +91,7 @@
   ````md
   ```ts
   // [!code word:config]
-  const config = 'Hello'; // [!code highlight]
+  const config = "Hello"; // [!code highlight]
 
   something.call(config);
   ```
@@ -144,13 +150,13 @@
   It's no longer encouraged to access `allDocs` directly because they will not include `url` property anymore. Please consider `getPages` instead.
 
   ```ts
-  import { allDocs, allMeta } from 'contentlayer/generated';
-  import { createContentlayerSource } from 'next-docs-zeta/contentlayer';
-  import { loader } from 'next-docs-zeta/source';
+  import { allDocs, allMeta } from "contentlayer/generated";
+  import { createContentlayerSource } from "next-docs-zeta/contentlayer";
+  import { loader } from "next-docs-zeta/source";
 
   export const { getPage, pageTree, getPages } = loader({
-    baseUrl: '/docs',
-    rootDir: 'docs',
+    baseUrl: "/docs",
+    rootDir: "docs",
     source: createContentlayerSource(allMeta, allDocs),
   });
   ```
@@ -171,13 +177,13 @@
   The interface is now unified, you can easily plug in a content source.
 
   ```ts
-  import { map } from '@/.map';
-  import { createMDXSource } from 'next-docs-mdx';
-  import { loader } from 'next-docs-zeta/source';
+  import { map } from "@/.map";
+  import { createMDXSource } from "next-docs-mdx";
+  import { loader } from "next-docs-zeta/source";
 
   export const { getPage, getPages, pageTree } = loader({
-    baseUrl: '/docs',
-    rootDir: 'docs',
+    baseUrl: "/docs",
+    rootDir: "docs",
     source: createMDXSource(map),
   });
   ```
@@ -221,7 +227,7 @@
   If you want to include other document types, or override the output configuration, the `create` function can return the fields and document types you need.
 
   ```ts
-  import { create } from 'next-docs-zeta/contentlayer/configuration';
+  import { create } from "next-docs-zeta/contentlayer/configuration";
 
   const config = create(options);
 

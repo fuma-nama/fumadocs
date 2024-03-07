@@ -1,10 +1,11 @@
+CHANGELOG.md
 pnpm-lock.yaml
 .changeset/*.md
 .github/**/*.md
 
 apps/docs/shaders/*
 
-**/out/**/*.mdx
+**/test/out/**/*
 **/test/fixtures/*.output.json
 **/test/fixtures/*.output.mdx
 

@@ -9,7 +9,7 @@ import Link from 'fumadocs-core/link';
 import { cn } from '@/utils/cn';
 import { useTreeContext } from '@/contexts/tree';
 import { useSidebarCollapse } from '@/contexts/sidebar';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
 import { hasActive, isActive } from '@/utils/shared';
 import type { LinkItem } from '@/layout';
 import {
@@ -101,17 +101,19 @@ export function Sidebar({
     >
       <SidebarContext.Provider value={context}>
         <ScrollArea className="flex-1">
-          <div className="flex flex-col gap-8 pb-10 pt-4 max-md:px-4 md:pr-3 md:pt-10">
-            {banner}
-            {items.length > 0 && (
-              <div className="lg:hidden">
-                {items.map((item) => (
-                  <BaseItem key={item.url} item={item} nested />
-                ))}
-              </div>
-            )}
-            <NodeList items={root.children} />
-          </div>
+          <ScrollViewport>
+            <div className="flex flex-col gap-8 pb-10 pt-4 max-md:px-4 md:pr-3 md:pt-10">
+              {banner}
+              {items.length > 0 && (
+                <div className="lg:hidden">
+                  {items.map((item) => (
+                    <BaseItem key={item.url} item={item} nested />
+                  ))}
+                </div>
+              )}
+              <NodeList items={root.children} />
+            </div>
+          </ScrollViewport>
         </ScrollArea>
         <div
           className={cn(
