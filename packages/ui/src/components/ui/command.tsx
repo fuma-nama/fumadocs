@@ -78,13 +78,15 @@ CommandEmpty.displayName = CommandPrimitive.Empty.displayName;
 const CommandGroup = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Group>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Group>
->(({ className, ...props }, ref) => (
+>(({ className, heading, ...props }, ref) => (
   <CommandPrimitive.Group
     ref={ref}
-    className={cn(
-      'overflow-hidden [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium',
-      className,
-    )}
+    heading={
+      heading ? (
+        <div className="px-3 py-2 text-xs font-medium">{heading}</div>
+      ) : undefined
+    }
+    className={cn('overflow-hidden', className)}
     {...props}
   />
 ));

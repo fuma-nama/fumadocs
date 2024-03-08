@@ -3,22 +3,14 @@
 import { useDocsSearch } from 'fumadocs-core/search/client';
 import { type ReactNode } from 'react';
 import { useI18n } from '@/contexts/i18n';
-import { SearchDialogContent, SearchDialog, type SharedProps } from './search';
+import {
+  SearchDialogContent,
+  SearchDialog,
+  type SharedProps,
+  type SearchLink,
+} from './search';
 
 export type DefaultSearchDialogProps = SharedProps & ContentProps;
-
-export default function DefaultSearchDialog({
-  tag,
-  api,
-  footer,
-  ...props
-}: DefaultSearchDialogProps): JSX.Element {
-  return (
-    <SearchDialog {...props}>
-      <Content tag={tag} footer={footer} api={api} />
-    </SearchDialog>
-  );
-}
 
 interface ContentProps {
   /**
@@ -32,9 +24,22 @@ interface ContentProps {
   api?: string;
 
   footer?: ReactNode;
+  links?: SearchLink[];
 }
 
-function Content({ tag, footer, api }: ContentProps): JSX.Element {
+export default function DefaultSearchDialog({
+  open,
+  onOpenChange,
+  ...props
+}: DefaultSearchDialogProps): JSX.Element {
+  return (
+    <SearchDialog open={open} onOpenChange={onOpenChange}>
+      <Content {...props} />
+    </SearchDialog>
+  );
+}
+
+function Content({ tag, api, ...props }: ContentProps): JSX.Element {
   const { locale } = useI18n();
   const { search, setSearch, query } = useDocsSearch(locale, tag, api);
 
@@ -43,7 +48,7 @@ function Content({ tag, footer, api }: ContentProps): JSX.Element {
       search={search}
       onSearchChange={setSearch}
       results={query.data ?? []}
-      footer={footer}
+      {...props}
     />
   );
 }

@@ -6,30 +6,39 @@ import {
   useAlgoliaSearch,
 } from 'fumadocs-core/search-algolia/client';
 import { type ReactNode } from 'react';
-import { SearchDialog, type SharedProps, SearchDialogContent } from './search';
+import {
+  SearchDialog,
+  SearchDialogContent,
+  type SharedProps,
+  type SearchLink,
+} from './search';
 
 export type AlgoliaSearchDialogProps = ContentProps & SharedProps;
-
-export default function AlgoliaSearchDialog({
-  searchOptions,
-  index,
-  footer,
-  ...props
-}: AlgoliaSearchDialogProps): JSX.Element {
-  return (
-    <SearchDialog {...props}>
-      <Content index={index} searchOptions={searchOptions} footer={footer} />
-    </SearchDialog>
-  );
-}
 
 interface ContentProps {
   index: SearchIndex;
   searchOptions?: Options;
   footer?: ReactNode;
+  links?: SearchLink[];
 }
 
-function Content({ index, searchOptions, footer }: ContentProps): JSX.Element {
+export default function AlgoliaSearchDialog({
+  open,
+  onOpenChange,
+  ...props
+}: AlgoliaSearchDialogProps): JSX.Element {
+  return (
+    <SearchDialog open={open} onOpenChange={onOpenChange}>
+      <Content {...props} />
+    </SearchDialog>
+  );
+}
+
+function Content({
+  index,
+  searchOptions,
+  ...props
+}: ContentProps): JSX.Element {
   const { search, setSearch, query } = useAlgoliaSearch(index, searchOptions);
 
   return (
@@ -37,7 +46,7 @@ function Content({ index, searchOptions, footer }: ContentProps): JSX.Element {
       search={search}
       onSearchChange={setSearch}
       results={query.data ?? []}
-      footer={footer}
+      {...props}
     />
   );
 }
