@@ -1,5 +1,11 @@
 # fumadocs-typescript
 
+## 1.0.1
+
+### Patch Changes
+
+- f4aa6b6: Ignore fields marked with `@internal` tag
+
 ## 1.0.0
 
 ### Major Changes
