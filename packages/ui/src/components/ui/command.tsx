@@ -29,7 +29,7 @@ const CommandInput = React.forwardRef<
     <CommandPrimitive.Input
       ref={ref}
       className={cn(
-        'w-full bg-transparent py-3 text-base outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed',
+        'w-full bg-transparent py-3 text-base placeholder:text-muted-foreground focus-visible:outline-none',
         className,
       )}
       {...props}
@@ -38,8 +38,7 @@ const CommandInput = React.forwardRef<
       className={cn(
         buttonVariants({
           color: 'outline',
-          size: 'icon',
-          className: 'text-xs',
+          className: 'text-xs p-1.5',
         }),
       )}
     >
@@ -114,14 +113,14 @@ const CommandItem = React.forwardRef<
   <CommandPrimitive.Item
     ref={ref}
     className={cn(
-      'select-none rounded-lg px-2 text-sm aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+      'select-none rounded-lg px-2 text-sm aria-disabled:pointer-events-none aria-disabled:opacity-50 aria-selected:bg-accent aria-selected:text-accent-foreground',
       className,
     )}
     {...props}
   >
     <div
       className={cn(
-        'flex min-h-10 items-center gap-3',
+        'flex min-h-10 flex-row items-center gap-3',
         nested && 'ml-2 gap-2 border-l pl-4',
       )}
     >
