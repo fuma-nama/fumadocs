@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 10.0.3
+
+### Patch Changes
+
+- b27091f: Support passing search dialog `options` from root provider
+- Updated dependencies [6f321e5]
+  - fumadocs-core@10.0.3
+
 ## 10.0.2
 
 ### Patch Changes
