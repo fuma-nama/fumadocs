@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 10.0.4
+
+### Patch Changes
+
+- c28c80f: Bump dependencies in templates
+
 ## 10.0.3
 
 ## 10.0.2
