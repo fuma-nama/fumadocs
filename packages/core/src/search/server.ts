@@ -4,9 +4,12 @@ import type { StructuredData } from '@/mdx-plugins/remark-structure';
 import type { SortedResult } from './shared';
 
 interface SearchAPI {
-  GET: (
-    request: NextRequest,
-  ) => NextResponse<SortedResult[]> | Promise<NextResponse<SortedResult[]>>;
+  GET: (request: NextRequest) => NextResponse<SortedResult[]>;
+
+  search: (
+    query: string,
+    options?: { locale?: string; tag?: string },
+  ) => SortedResult[];
 }
 
 interface SimpleOptions {
@@ -29,6 +32,23 @@ type ToI18n<T extends { indexes: unknown }> = Omit<
 > & {
   indexes: [language: string, indexes: T['indexes']][];
 };
+
+function create(search: SearchAPI['search']): SearchAPI {
+  return {
+    search,
+    GET(request) {
+      const query = request.nextUrl.searchParams.get('query');
+      if (!query) return NextResponse.json([]);
+
+      return NextResponse.json(
+        search(query, {
+          tag: request.nextUrl.searchParams.get('tag') ?? undefined,
+          locale: request.nextUrl.searchParams.get('locale') ?? undefined,
+        }),
+      );
+    },
+  };
+}
 
 export function createSearchAPI<T extends 'simple' | 'advanced'>(
   type: T,
@@ -59,18 +79,15 @@ export function createI18nSearchAPI<T extends 'simple' | 'advanced'>(
     );
   }
 
-  return {
-    GET(request) {
-      const locale = request.nextUrl.searchParams.get('locale');
-      if (locale) {
-        const handler = map.get(locale);
+  return create((query, searchOptions) => {
+    if (searchOptions?.locale) {
+      const handler = map.get(searchOptions.locale);
 
-        if (handler) return handler.GET(request);
-      }
+      if (handler) return handler.search(query, searchOptions);
+    }
 
-      return NextResponse.json([]);
-    },
-  };
+    return [];
+  });
 }
 
 interface Index {
@@ -121,30 +138,21 @@ export function initSearchAPI({ indexes, language }: SimpleOptions): SearchAPI {
     });
   }
 
-  return {
-    GET(request) {
-      const { searchParams } = request.nextUrl;
-      const query = searchParams.get('query');
+  return create((query) => {
+    const results = index.search(query, 5, {
+      enrich: true,
+      suggest: true,
+    });
 
-      if (!query) return NextResponse.json([]);
+    if (results.length === 0) return [];
 
-      const results = index.search(query, 5, {
-        enrich: true,
-        suggest: true,
-      });
-
-      if (results.length === 0) return NextResponse.json([]);
-
-      const pages = results[0].result.map<SortedResult>((page) => ({
-        type: 'page',
-        content: page.doc.title,
-        id: page.doc.url,
-        url: page.doc.url,
-      }));
-
-      return NextResponse.json(pages);
-    },
-  };
+    return results[0].result.map<SortedResult>((page) => ({
+      type: 'page',
+      content: page.doc.title,
+      id: page.doc.url,
+      url: page.doc.url,
+    }));
+  });
 }
 
 interface AdvancedIndex {
@@ -230,64 +238,57 @@ export function initSearchAPIAdvanced({
     }
   }
 
-  return {
-    GET(request) {
-      const query = request.nextUrl.searchParams.get('query');
-      const paramTag = request.nextUrl.searchParams.get('tag');
+  return create((query, options) => {
+    const results = index.search(query, 5, {
+      enrich: true,
+      tag: options?.tag,
+      limit: 6,
+    });
 
-      if (!query) return NextResponse.json([]);
+    const map = new Map<string, SortedResult[]>();
+    const sortedResult: SortedResult[] = [];
 
-      const results = index.search(query, 5, {
-        enrich: true,
-        tag: paramTag ?? undefined,
-        limit: 6,
+    for (const item of results[0]?.result ?? []) {
+      if (item.doc.type === 'page') {
+        if (!map.has(item.doc.page_id)) {
+          map.set(item.doc.page_id, []);
+        }
+
+        continue;
+      }
+
+      const i: SortedResult = {
+        id: item.doc.id,
+        content: item.doc.content,
+        type: item.doc.type,
+        url: item.doc.url,
+      };
+
+      if (map.has(item.doc.page_id)) {
+        map.get(item.doc.page_id)?.push(i);
+      } else {
+        map.set(item.doc.page_id, [i]);
+      }
+    }
+
+    for (const [id, items] of map.entries()) {
+      const page = (
+        index as unknown as {
+          get: (id: string) => InternalIndex | null;
+        }
+      ).get(id);
+
+      if (!page) continue;
+
+      sortedResult.push({
+        id: page.id,
+        content: page.content,
+        type: 'page',
+        url: page.url,
       });
+      sortedResult.push(...items);
+    }
 
-      const map = new Map<string, SortedResult[]>();
-      const sortedResult: SortedResult[] = [];
-
-      for (const item of results[0]?.result ?? []) {
-        if (item.doc.type === 'page') {
-          if (!map.has(item.doc.page_id)) {
-            map.set(item.doc.page_id, []);
-          }
-
-          continue;
-        }
-
-        const i: SortedResult = {
-          id: item.doc.id,
-          content: item.doc.content,
-          type: item.doc.type,
-          url: item.doc.url,
-        };
-
-        if (map.has(item.doc.page_id)) {
-          map.get(item.doc.page_id)?.push(i);
-        } else {
-          map.set(item.doc.page_id, [i]);
-        }
-      }
-
-      for (const [id, items] of map.entries()) {
-        const page = (
-          index as unknown as {
-            get: (id: string) => InternalIndex | null;
-          }
-        ).get(id);
-
-        if (!page) continue;
-
-        sortedResult.push({
-          id: page.id,
-          content: page.content,
-          type: 'page',
-          url: page.url,
-        });
-        sortedResult.push(...items);
-      }
-
-      return NextResponse.json(sortedResult);
-    },
-  };
+    return sortedResult;
+  });
 }
