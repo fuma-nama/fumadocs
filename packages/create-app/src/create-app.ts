@@ -1,10 +1,7 @@
 /* eslint-disable import/no-relative-packages -- read package versions */
 import path from 'node:path';
 import fs from 'node:fs/promises';
-import corePkg from '../../core/package.json';
-import uiPkg from '../../ui/package.json';
-import mdxPkg from '../../mdx/package.json';
-import contentlayerPkg from '../../contentlayer/package.json';
+import versionPkg from '../../create-app-versions/package.json';
 import type { PackageManager } from './auto-install';
 import { autoInstall } from './auto-install';
 import { sourceDir, cwd } from './constants';
@@ -90,50 +87,47 @@ function createPackageJson(
       start: 'next start',
     },
     dependencies: {
-      next: '14.0.4',
-      'fumadocs-ui': uiPkg.version,
-      'fumadocs-core': corePkg.version,
-      react: '18.2.0',
-      'react-dom': '18.2.0',
+      next: versionPkg.dependencies.next,
+      'fumadocs-ui': versionPkg.dependencies['fumadocs-ui'],
+      'fumadocs-core': versionPkg.dependencies['fumadocs-core'],
+      react: versionPkg.dependencies.react,
+      'react-dom': versionPkg.dependencies['react-dom'],
     },
     devDependencies: {
-      '@types/react': '18.2.0',
-      '@types/react-dom': '18.2.1',
-      typescript: '5.3.3',
+      '@types/react': versionPkg.dependencies['@types/react'],
+      '@types/react-dom': versionPkg.dependencies['@types/react-dom'],
+      typescript: versionPkg.dependencies.typescript,
     },
   };
 
   if (template === 'contentlayer') {
     Object.assign(packageJson.dependencies, {
-      'fumadocs-contentlayer': contentlayerPkg.version,
-      contentlayer: '0.3.4',
-      'next-contentlayer': '0.3.4',
+      'fumadocs-contentlayer': versionPkg.dependencies['fumadocs-contentlayer'],
+      contentlayer: versionPkg.dependencies.contentlayer,
+      'next-contentlayer': versionPkg.dependencies['next-contentlayer'],
     });
 
     // TODO: Remove this after Contentlayer supports unified 11
     Object.assign(packageJson, {
-      overrides: {
-        unified: '^11.0.4',
-        'mdx-bundler': '^10.0.1',
-      },
+      overrides: versionPkg.overrides,
     });
   }
 
   if (template === 'fuma-docs-mdx') {
     Object.assign(packageJson.dependencies, {
-      'fumadocs-mdx': mdxPkg.version,
+      'fumadocs-mdx': versionPkg.dependencies['fumadocs-mdx'],
     });
 
     Object.assign(packageJson.devDependencies, {
-      '@types/mdx': '2.0.10',
+      '@types/mdx': versionPkg.dependencies['@types/mdx'],
     });
   }
 
   if (tailwindcss) {
     Object.assign(packageJson.devDependencies, {
-      autoprefixer: '10.4.16',
-      postcss: '8.4.32',
-      tailwindcss: '3.4.1',
+      autoprefixer: versionPkg.dependencies.autoprefixer,
+      postcss: versionPkg.dependencies.postcss,
+      tailwindcss: versionPkg.dependencies.tailwindcss,
     });
   }
 
