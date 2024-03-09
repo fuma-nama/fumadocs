@@ -1,5 +1,12 @@
 # fumadocs-contentlayer
 
+## 1.1.4
+
+### Patch Changes
+
+- Updated dependencies [6f321e5]
+  - fumadocs-core@10.0.3
+
 ## 1.1.3
 
 ### Patch Changes
