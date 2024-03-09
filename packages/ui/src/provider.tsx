@@ -5,10 +5,18 @@ import { ThemeProvider } from 'next-themes';
 import { type ReactNode } from 'react';
 import dynamic from 'next/dynamic';
 import { SidebarCollapseProvider } from '@/contexts/sidebar';
+import { DefaultSearchDialogProps } from '@/components/dialog/search-default';
 import { SearchProvider, type SearchProviderProps } from './contexts/search';
 
 export interface RootProviderProps {
-  search?: Partial<Omit<SearchProviderProps, 'children'>>;
+  /**
+   * @remarks `SearchProviderProps`
+   */
+  search?: Partial<
+    Omit<SearchProviderProps, 'options' | 'children'> & {
+      options?: Partial<DefaultSearchDialogProps> | object;
+    }
+  >;
 
   /**
    * Wrap the body in `ThemeProvider` (next-themes)

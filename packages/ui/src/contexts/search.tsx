@@ -1,6 +1,6 @@
 import type { ComponentType, ReactNode } from 'react';
-import { createContext, useContext, useEffect, useState } from 'react';
-import type { SharedProps } from '../components/dialog/search';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import type { SearchLink, SharedProps } from '../components/dialog/search';
 
 export interface SearchProviderProps {
   /**
@@ -13,20 +13,24 @@ export interface SearchProviderProps {
   /**
    * Custom links to be displayed if search is empty
    */
-  links?: SearchContextType['links'];
+  links?: SearchLink[];
 
   /**
    * Replace default search dialog, allowing you to use other solutions such as Algolia Search
    *
-   * It receives the `open` and `onOpenChange` prop, shall be lazy loaded with `next/dynamic`
+   * It receives the `open` and `onOpenChange` prop, can be lazy loaded with `next/dynamic`
    */
   SearchDialog: ComponentType<SharedProps>;
 
-  children: ReactNode;
+  /**
+   * Additional props to the dialog
+   */
+  options?: object;
+
+  children?: ReactNode;
 }
 
 interface SearchContextType {
-  links: [name: string, link: string][];
   setOpenSearch: (value: boolean) => void;
 }
 
@@ -42,7 +46,7 @@ export function SearchProvider({
   SearchDialog,
   children,
   preload = true,
-  links = [],
+  options,
 }: SearchProviderProps): JSX.Element {
   const [isOpen, setIsOpen] = useState(preload ? false : undefined);
 
@@ -55,16 +59,20 @@ export function SearchProvider({
     };
 
     window.addEventListener('keydown', handler);
-
     return () => {
       window.removeEventListener('keydown', handler);
     };
   }, []);
 
+  const ctx = useMemo<SearchContextType>(
+    () => ({ setOpenSearch: setIsOpen }),
+    [],
+  );
+
   return (
-    <SearchContext.Provider value={{ links, setOpenSearch: setIsOpen }}>
+    <SearchContext.Provider value={ctx}>
       {isOpen !== undefined && (
-        <SearchDialog open={isOpen} onOpenChange={setIsOpen} />
+        <SearchDialog open={isOpen} onOpenChange={setIsOpen} {...options} />
       )}
       {children}
     </SearchContext.Provider>

@@ -15,12 +15,21 @@ import { cn } from '@/utils/cn';
 import { useSearchContext } from '@/contexts/search';
 import { Dialog, DialogContent, DialogFooter } from '../ui/dialog';
 
+export type SearchLink = [name: string, href: string];
+
 export interface SharedProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+
+  /**
+   * Custom links to be displayed if search is empty
+   */
+  links?: SearchLink[];
 }
 
-interface SearchDialogProps extends SharedProps {
+interface SearchDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   children?: ReactNode;
 }
 
@@ -28,11 +37,13 @@ export function SearchDialog(props: SearchDialogProps): JSX.Element {
   return <Dialog {...props}>{props.children}</Dialog>;
 }
 
-interface SearchContentProps extends SearchProps {
-  /**
-   * displayed at bottom
-   */
+interface SearchContentProps {
+  search: string;
+  onSearchChange: (v: string) => void;
+  results: SortedResult[] | 'empty';
+
   footer?: ReactNode;
+  links?: SearchLink[];
 }
 
 export function SearchDialogContent({
@@ -49,16 +60,21 @@ export function SearchDialogContent({
   );
 }
 
-interface SearchProps {
-  search: string;
-  onSearchChange: (v: string) => void;
-  results: SortedResult[] | 'empty';
-}
+const icons = {
+  text: <TextIcon />,
+  heading: <HashIcon />,
+  page: <FileTextIcon />,
+};
 
-function Search({ search, onSearchChange, results }: SearchProps): JSX.Element {
+function Search({
+  search,
+  onSearchChange,
+  links = [],
+  results,
+}: SearchContentProps): JSX.Element {
   const { text } = useI18n();
   const router = useRouter();
-  const { links, setOpenSearch } = useSearchContext();
+  const { setOpenSearch } = useSearchContext();
 
   const defaultItems = useMemo<SortedResult[]>(() => {
     return links.map(([name, link]) => ({
@@ -95,13 +111,7 @@ function Search({ search, onSearchChange, results }: SearchProps): JSX.Element {
               onSelect={() => {
                 onOpen(item.url);
               }}
-              icon={
-                {
-                  text: <TextIcon />,
-                  heading: <HashIcon />,
-                  page: <FileTextIcon />,
-                }[item.type]
-              }
+              icon={icons[item.type]}
               nested={item.type !== 'page'}
             >
               {item.content}

@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 10.0.3
+
+### Patch Changes
+
+- 6f321e5: Fix type errors of flexseach
+
 ## 10.0.2
 
 ### Patch Changes

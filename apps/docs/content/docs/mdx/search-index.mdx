@@ -26,9 +26,14 @@ After running `next build`, generated search indexes will be written to `.next/s
 You can access them with `JSON.parse`.
 
 ```ts title="update-index.mts"
+import { readFileSync } from 'node:fs';
 import type { SearchIndex } from 'fumadocs-mdx';
 
 const indexes = JSON.parse(
   readFileSync('./.next/server/chunks/fumadocs_search.json').toString(),
 ) as SearchIndex[];
 ```
+
+### Options
+
+<AutoTypeTable path="mdx" name="SearchIndexOptions" />
