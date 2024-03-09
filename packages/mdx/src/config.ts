@@ -43,7 +43,9 @@ export interface CreateMDXOptions {
 
   mdxOptions?: MDXOptions;
 
-  buildSearchIndex?: Partial<SearchIndexPluginOptions> | false;
+  buildSearchIndex?:
+    | Omit<SearchIndexPluginOptions, 'rootContentDir' | 'rootMapFile'>
+    | boolean;
 
   /**
    * Where the root map.ts should be, relative to cwd
@@ -185,7 +187,9 @@ const createMDX =
               new SearchIndexPlugin({
                 rootContentDir,
                 rootMapFile,
-                ...buildSearchIndex,
+                ...(typeof buildSearchIndex === 'object'
+                  ? buildSearchIndex
+                  : {}),
               }),
             );
 

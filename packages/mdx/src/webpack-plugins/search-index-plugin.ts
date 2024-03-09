@@ -22,7 +22,9 @@ export interface SearchIndex {
 
 export interface Options {
   /**
-   * Only enable at production builds, default: `true`
+   * Only build search indexes in production builds
+   *
+   * @defaultValue true
    */
   productionOnly?: boolean;
 
