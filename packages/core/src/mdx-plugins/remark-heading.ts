@@ -1,14 +1,18 @@
 import Slugger from 'github-slugger';
-import type { Heading, Root } from 'mdast';
+import type { Root } from 'mdast';
 import type { Transformer } from 'unified';
+import { visit } from 'unist-util-visit';
 import type { TOCItemType } from '@/server/get-toc';
-import { visit } from './unist-visit';
 import { flattenNode } from './remark-utils';
 
 const slugger = new Slugger();
 
-export interface HProperties {
-  id?: string;
+declare module 'mdast' {
+  export interface HeadingData extends Data {
+    hProperties?: {
+      id?: string;
+    };
+  }
 }
 
 /**
@@ -21,15 +25,14 @@ export function remarkHeading(): Transformer<Root, Root> {
     const toc: TOCItemType[] = [];
     slugger.reset();
 
-    visit(node, ['heading'], (heading: Heading) => {
+    visit(node, 'heading', (heading) => {
       heading.data ||= {};
       heading.data.hProperties ||= {};
 
       const text = flattenNode(heading);
-      const properties = heading.data.hProperties;
-      const id = slugger.slug(properties.id ?? text);
+      const id = slugger.slug(heading.data.hProperties.id ?? text);
 
-      properties.id = id;
+      heading.data.hProperties.id = id;
 
       toc.push({
         title: text,

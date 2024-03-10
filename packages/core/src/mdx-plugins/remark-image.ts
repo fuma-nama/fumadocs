@@ -1,9 +1,9 @@
 import { existsSync } from 'node:fs';
 import path from 'node:path';
-import type { Image, Root, RootContent } from 'mdast';
+import type { Root, RootContent } from 'mdast';
 import type { Transformer } from 'unified';
+import { visit } from 'unist-util-visit';
 import slash from '@/utils/slash';
-import { visit } from './unist-visit';
 
 const VALID_BLUR_EXT = ['.jpeg', '.png', '.webp', '.avif', '.jpg'];
 const EXTERNAL_URL_REGEX = /^https?:\/\//;
@@ -29,7 +29,7 @@ export function remarkImage({
   return (tree, _file, done) => {
     const importsToInject: { variableName: string; importPath: string }[] = [];
 
-    visit(tree, ['image'], (node: Image) => {
+    visit(tree, 'image', (node) => {
       let url = decodeURI(node.url);
 
       if (!url || EXTERNAL_URL_REGEX.test(url)) {
