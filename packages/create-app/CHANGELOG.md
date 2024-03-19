@@ -1,5 +1,7 @@
 # create-next-docs-app
 
+## 10.0.5
+
 ## 10.0.4
 
 ### Patch Changes

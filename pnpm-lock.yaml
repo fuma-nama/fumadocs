@@ -173,13 +173,13 @@ importers:
         specifier: 0.3.4
         version: 0.3.4
       fumadocs-contentlayer:
-        specifier: 1.1.5
+        specifier: 1.1.6
         version: link:../../packages/contentlayer
       fumadocs-core:
-        specifier: 10.0.4
+        specifier: 10.0.5
         version: link:../../packages/core
       fumadocs-ui:
-        specifier: 10.0.4
+        specifier: 10.0.5
         version: link:../../packages/ui
       next:
         specifier: 14.1.2
@@ -216,13 +216,13 @@ importers:
   examples/next-mdx:
     dependencies:
       fumadocs-core:
-        specifier: 10.0.4
+        specifier: 10.0.5
         version: link:../../packages/core
       fumadocs-mdx:
-        specifier: 8.2.3
+        specifier: 8.2.4
         version: link:../../packages/mdx
       fumadocs-ui:
-        specifier: 10.0.4
+        specifier: 10.0.5
         version: link:../../packages/ui
       next:
         specifier: 14.1.2
@@ -409,16 +409,16 @@ importers:
         specifier: ^0.3.4
         version: 0.3.4
       fumadocs-contentlayer:
-        specifier: ^1.1.5
+        specifier: ^1.1.6
         version: link:../contentlayer
       fumadocs-core:
-        specifier: ^10.0.4
+        specifier: ^10.0.5
         version: link:../core
       fumadocs-mdx:
-        specifier: ^8.2.3
+        specifier: ^8.2.4
         version: link:../mdx
       fumadocs-ui:
-        specifier: ^10.0.4
+        specifier: ^10.0.5
         version: link:../ui
       next:
         specifier: ^14.1.2
@@ -545,8 +545,8 @@ importers:
   packages/twoslash:
     dependencies:
       '@shikijs/twoslash':
-        specifier: 1.1.7
-        version: 1.1.7(typescript@5.4.2)
+        specifier: 1.2.0
+        version: 1.2.0(typescript@5.4.2)
       mdast-util-from-markdown:
         specifier: ^2.0.0
         version: 2.0.0
@@ -557,8 +557,8 @@ importers:
         specifier: ^13.1.0
         version: 13.1.0
       shiki:
-        specifier: 1.1.7
-        version: 1.1.7
+        specifier: 1.2.0
+        version: 1.2.0
     devDependencies:
       '@types/hast':
         specifier: ^3.0.4
@@ -661,8 +661,8 @@ importers:
         specifier: ^0.298.0
         version: 0.298.0(react@18.2.0)
       next-themes:
-        specifier: ^0.2.1
-        version: 0.2.1(next@14.1.2)(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^0.3.0
+        version: 0.3.0(react-dom@18.2.0)(react@18.2.0)
       react:
         specifier: '>= 18'
         version: 18.2.0
@@ -3043,6 +3043,10 @@ packages:
     resolution: {integrity: sha512-gTYLUIuD1UbZp/11qozD3fWpUTuMqPSf3svDMMrL0UmlGU7D9dPw/V1FonwAorCUJBltaaESxq90jrSjQyGixg==}
     dev: false
 
+  /@shikijs/core@1.2.0:
+    resolution: {integrity: sha512-OlFvx+nyr5C8zpcMBnSGir0YPD6K11uYhouqhNmm1qLiis4GA7SsGtu07r9gKS9omks8RtQqHrJL4S+lqWK01A==}
+    dev: false
+
   /@shikijs/rehype@1.1.7:
     resolution: {integrity: sha512-gNNmzQjcosjCAoUBrW6DzCmp6XdUQk4RNmyLsqMaDVpGWQsQCkjMBnBLQ7xWnjq6lwQAlq+m1/19kImsUJnpkg==}
     dependencies:
@@ -3060,10 +3064,10 @@ packages:
       shiki: 1.1.7
     dev: false
 
-  /@shikijs/twoslash@1.1.7(typescript@5.4.2):
-    resolution: {integrity: sha512-WH/Ee67eixqDWjsAUXIJQUgRzPDApsz7Bci65Yobc7SWHNc8T2sY1UBa+MCV2mAj0D6VCYBwWlNxMDTfhN7K0Q==}
+  /@shikijs/twoslash@1.2.0(typescript@5.4.2):
+    resolution: {integrity: sha512-rVIpuL40tXG5hItVf+4aYTEEwQO6R5pvzqMZa5r6bLMpHK720Op25e/BnCohNIdsUOEaFH9xqRSJo8ubjCiM1w==}
     dependencies:
-      '@shikijs/core': 1.1.7
+      '@shikijs/core': 1.2.0
       twoslash: 0.2.4(typescript@5.4.2)
     transitivePeerDependencies:
       - supports-color
@@ -7912,17 +7916,12 @@ packages:
       - supports-color
     dev: false
 
-  /next-themes@0.2.1(next@14.1.2)(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-B+AKNfYNIzh0vqQQKqQItTS8evEouKD7H5Hj3kmuPERwddR2TxvDSFZuTj6T7Jfn1oyeUyJMydPl1Bkxkh0W7A==}
+  /next-themes@0.3.0(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-/QHIrsYpd6Kfk7xakK4svpDI5mmXP0gfvCoJdGpZQ2TOrQZmsW0QxjaiLn8wbIKjtm4BTSqLoix4lxYYOnLJ/w==}
     peerDependencies:
-      next: '*'
-      react: '*'
-      react-dom: '*'
-    peerDependenciesMeta:
-      next:
-        optional: true
+      react: ^16.8 || ^17 || ^18
+      react-dom: ^16.8 || ^17 || ^18
     dependencies:
-      next: 14.1.2(@babel/core@7.24.0)(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false
@@ -9221,6 +9220,12 @@ packages:
     resolution: {integrity: sha512-9kUTMjZtcPH3i7vHunA6EraTPpPOITYTdA5uMrvsJRexktqP0s7P3s9HVK80b4pP42FRVe03D7fT3NmJv2yYhw==}
     dependencies:
       '@shikijs/core': 1.1.7
+    dev: false
+
+  /shiki@1.2.0:
+    resolution: {integrity: sha512-xLhiTMOIUXCv5DqJ4I70GgQCtdlzsTqFLZWcMHHG3TAieBUbvEGthdrlPDlX4mL/Wszx9C6rEcxU6kMlg4YlxA==}
+    dependencies:
+      '@shikijs/core': 1.2.0
     dev: false
 
   /side-channel@1.0.4:
