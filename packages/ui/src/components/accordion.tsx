@@ -71,14 +71,14 @@ export const Accordion = forwardRef<
     >
       <AccordionPrimitive.Header
         id={id}
-        className="not-prose font-medium text-foreground"
+        className="not-prose flex flex-row text-start font-medium text-foreground"
       >
-        <AccordionPrimitive.Trigger className="flex w-full items-center gap-2 p-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+        <AccordionPrimitive.Trigger className="flex flex-1 items-center gap-2 p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
           <ChevronRightIcon className="size-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]/accordion:rotate-90" />
           {title}
         </AccordionPrimitive.Trigger>
+        {id ? <CopyButton id={id} /> : null}
       </AccordionPrimitive.Header>
-      {id ? <CopyButton id={id} /> : null}
       <AccordionPrimitive.Content className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
         <div className="ml-2 p-4 pt-0 prose-no-margin">{children}</div>
       </AccordionPrimitive.Content>
@@ -101,7 +101,7 @@ function CopyButton({ id }: { id: string }): JSX.Element {
       className={cn(
         buttonVariants({
           color: 'ghost',
-          className: 'absolute top-4 right-4 text-muted-foreground',
+          className: 'text-muted-foreground',
         }),
       )}
       onClick={onClick}

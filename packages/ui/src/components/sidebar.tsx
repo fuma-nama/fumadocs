@@ -47,7 +47,7 @@ interface Components {
 }
 
 const itemVariants = cva(
-  'flex flex-row items-center gap-2 rounded-md px-2 py-1.5 text-muted-foreground [&_svg]:size-4',
+  'flex flex-row items-center gap-2 rounded-md px-2 py-1.5 text-muted-foreground rtl:flex-row-reverse [&_svg]:size-4',
   {
     variants: {
       active: {
@@ -92,7 +92,7 @@ export function Sidebar({
     <Base.SidebarList
       minWidth={768} // md
       className={cn(
-        'flex w-full flex-col text-[15px]',
+        'flex w-full flex-col text-[15px] rtl:text-right',
         !open
           ? 'md:hidden'
           : 'md:sticky md:top-16 md:h-body md:w-[240px] md:text-sm xl:w-[260px]',
@@ -164,7 +164,7 @@ function BaseItem({
 }): JSX.Element {
   const pathname = usePathname();
   const active = isActive(item.url, pathname, nested);
-  const defaultIcon = item.external ? <ExternalLinkIcon /> : null;
+  const icon = item.icon ?? (item.external ? <ExternalLinkIcon /> : null);
 
   return (
     <Link
@@ -172,7 +172,7 @@ function BaseItem({
       external={item.external}
       className={cn(itemVariants({ active }))}
     >
-      {item.icon ?? defaultIcon}
+      {icon}
       {item.text}
     </Link>
   );
@@ -192,13 +192,14 @@ function FolderNode({
     () => hasActive(children, pathname),
     [children, pathname],
   );
-  const [extend, setExtend] = useState(
-    active || childActive || defaultOpenLevel >= level || defaultOpen,
-  );
+  const shouldExtend =
+    active || childActive || defaultOpenLevel >= level || defaultOpen;
+
+  const [extend, setExtend] = useState(shouldExtend);
 
   useEffect(() => {
-    if (active || childActive) setExtend(true);
-  }, [active, childActive]);
+    if (shouldExtend) setExtend(true);
+  }, [shouldExtend]);
 
   const content = (
     <>

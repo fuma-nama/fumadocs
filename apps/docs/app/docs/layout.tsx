@@ -13,7 +13,7 @@ export const layoutOptions: Omit<DocsLayoutProps, 'children'> = {
     title: (
       <>
         <FumaDocsSVG className="size-5" fill="currentColor" />
-        <span className="ml-3 font-semibold max-md:hidden">Fumadocs</span>
+        <span className="max-md:hidden">Fumadocs</span>
       </>
     ),
     children: <NavChildren />,

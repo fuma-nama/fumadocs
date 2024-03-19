@@ -35,7 +35,7 @@ export default function RootLayout({
       className={`${GeistSans.variable} ${GeistMono.variable}`}
       suppressHydrationWarning
     >
-      <body className="flex min-h-screen flex-col">
+      <body dir="rtl" className="flex min-h-screen flex-col">
         <Provider>
           {children}
           <Footer />

@@ -23,7 +23,7 @@ export function TOCItems({ items }: { items: TOCItemType[] }): JSX.Element {
   };
 
   return (
-    <ScrollArea className="pt-4 text-sm first:pt-0">
+    <ScrollArea className="pt-4 text-sm first:pt-0 rtl:text-right">
       <ScrollViewport className="relative" ref={containerRef}>
         <Primitive.TOCScrollProvider containerRef={containerRef} toc={items}>
           <div
