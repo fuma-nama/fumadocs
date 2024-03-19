@@ -71,7 +71,7 @@ export const Accordion = forwardRef<
     >
       <AccordionPrimitive.Header
         id={id}
-        className="not-prose flex flex-row text-start font-medium text-foreground"
+        className="not-prose flex flex-row items-center text-start font-medium text-foreground"
       >
         <AccordionPrimitive.Trigger className="flex flex-1 items-center gap-2 p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
           <ChevronRightIcon className="size-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]/accordion:rotate-90" />
@@ -101,7 +101,7 @@ function CopyButton({ id }: { id: string }): JSX.Element {
       className={cn(
         buttonVariants({
           color: 'ghost',
-          className: 'text-muted-foreground',
+          className: 'text-muted-foreground mr-2',
         }),
       )}
       onClick={onClick}
