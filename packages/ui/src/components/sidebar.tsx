@@ -47,7 +47,7 @@ interface Components {
 }
 
 const itemVariants = cva(
-  'flex flex-row items-center gap-2 rounded-md px-2 py-1.5 text-muted-foreground rtl:flex-row-reverse [&_svg]:size-4',
+  'flex flex-row items-center gap-2 rounded-md px-2 py-1.5 text-muted-foreground [&_svg]:size-4',
   {
     variants: {
       active: {
@@ -92,7 +92,7 @@ export function Sidebar({
     <Base.SidebarList
       minWidth={768} // md
       className={cn(
-        'flex w-full flex-col text-[15px] rtl:text-right',
+        'flex w-full flex-col text-[15px]',
         !open
           ? 'md:hidden'
           : 'md:sticky md:top-16 md:h-body md:w-[240px] md:text-sm xl:w-[260px]',
@@ -210,7 +210,7 @@ function FolderNode({
           setExtend((prev) => !prev);
           e.preventDefault();
         }}
-        className={cn('ml-auto transition-transform', !extend && '-rotate-90')}
+        className={cn('ms-auto transition-transform', !extend && '-rotate-90')}
       />
     </>
   );
@@ -232,7 +232,7 @@ function FolderNode({
       </CollapsibleTrigger>
       <CollapsibleContent>
         <NodeList
-          className="ml-4 flex flex-col border-l py-2 pl-2"
+          className="ms-4 flex flex-col border-s py-2 ps-2"
           items={children}
           level={level}
         />

@@ -53,7 +53,7 @@ export function SidebarBanner(): JSX.Element {
   const Icon = currentMode.icon;
 
   return (
-    <div className="-mt-2 flex flex-row items-center gap-2 rounded-lg p-2 text-card-foreground transition-colors hover:bg-muted/80 rtl:flex-row-reverse">
+    <div className="-mt-2 flex flex-row items-center gap-2 rounded-lg p-2 text-card-foreground transition-colors hover:bg-muted/80">
       <Icon className="size-9 shrink-0 rounded-md bg-primary/30 bg-gradient-to-t from-background/80 p-1.5 text-primary shadow-md shadow-primary/50" />
       <div>
         <p className="font-medium">{currentMode.package}</p>

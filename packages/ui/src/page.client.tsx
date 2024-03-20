@@ -66,7 +66,7 @@ export function Footer({ items }: FooterProps): JSX.Element {
         </Link>
       ) : null}
       {next ? (
-        <Link href={next.url} className={footerItem({ className: 'ml-auto' })}>
+        <Link href={next.url} className={footerItem({ className: 'ms-auto' })}>
           <p className="text-end font-medium text-foreground">{next.name}</p>
           <ChevronRightIcon className="size-5 shrink-0" />
         </Link>

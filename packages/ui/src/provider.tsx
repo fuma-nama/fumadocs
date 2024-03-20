@@ -4,11 +4,17 @@ import { SidebarProvider } from 'fumadocs-core/sidebar';
 import { ThemeProvider } from 'next-themes';
 import { type ReactNode } from 'react';
 import dynamic from 'next/dynamic';
+import { DirectionProvider } from '@radix-ui/react-direction';
 import { SidebarCollapseProvider } from '@/contexts/sidebar';
 import { DefaultSearchDialogProps } from '@/components/dialog/search-default';
 import { SearchProvider, type SearchProviderProps } from './contexts/search';
 
 export interface RootProviderProps {
+  /**
+   * `dir` option for Radix UI
+   */
+  dir?: 'rtl' | 'ltr';
+
   /**
    * @remarks `SearchProviderProps`
    */
@@ -34,10 +40,11 @@ const DefaultSearchDialog = dynamic(
 
 export function RootProvider({
   children,
+  dir,
   enableThemeProvider = true,
   search,
 }: RootProviderProps): JSX.Element {
-  const body = (
+  let body = (
     <SidebarProvider>
       <SidebarCollapseProvider>
         <SearchProvider SearchDialog={DefaultSearchDialog} {...search}>
@@ -47,18 +54,21 @@ export function RootProvider({
     </SidebarProvider>
   );
 
-  return enableThemeProvider ? (
-    <ThemeProvider
-      attribute="class"
-      defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange
-    >
-      {body}
-    </ThemeProvider>
-  ) : (
-    body
-  );
+  if (enableThemeProvider)
+    body = (
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
+      >
+        {body}
+      </ThemeProvider>
+    );
+
+  if (dir) body = <DirectionProvider dir={dir}>{body}</DirectionProvider>;
+
+  return body;
 }
 
 export { useI18n } from './contexts/i18n';
