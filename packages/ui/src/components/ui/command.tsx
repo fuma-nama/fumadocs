@@ -1,9 +1,9 @@
 import { Command as CommandPrimitive } from 'cmdk';
 import { Search } from 'lucide-react';
 import * as React from 'react';
+import { DialogClose } from '@radix-ui/react-dialog';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/theme/variants';
-import { DialogClose } from './dialog';
 
 const Command = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive>,
@@ -34,7 +34,7 @@ const CommandInput = React.forwardRef<
       )}
       {...props}
     />
-    <DialogClose
+    <CommandDialogClose
       className={cn(
         buttonVariants({
           color: 'outline',
@@ -43,7 +43,7 @@ const CommandInput = React.forwardRef<
       )}
     >
       Esc
-    </DialogClose>
+    </CommandDialogClose>
   </div>
 ));
 
@@ -123,7 +123,7 @@ const CommandItem = React.forwardRef<
     <div
       className={cn(
         'flex min-h-10 flex-row items-center gap-3',
-        nested && 'ml-2 gap-2 border-l pl-4',
+        nested && 'ms-2 gap-2 border-s ps-4',
       )}
     >
       <div className="text-muted-foreground [&_svg]:size-4">{icon}</div>
@@ -134,6 +134,37 @@ const CommandItem = React.forwardRef<
 
 CommandItem.displayName = CommandPrimitive.Item.displayName;
 
+const CommandDialog = React.forwardRef<
+  React.ElementRef<typeof CommandPrimitive.Dialog>,
+  React.ComponentPropsWithoutRef<typeof CommandPrimitive.Dialog> & {
+    footer?: React.ReactNode;
+  }
+>(({ footer, contentClassName, overlayClassName, children, ...props }, ref) => (
+  <CommandPrimitive.Dialog
+    ref={ref}
+    shouldFilter={false}
+    loop
+    contentClassName={cn(
+      'fixed left-[50%] top-[10vh] z-50 w-[98vw] max-w-[640px] origin-left translate-x-[-50%] rounded-lg border bg-popover text-popover-foreground shadow-lg data-[state=closed]:animate-dialog-out data-[state=open]:animate-dialog-in',
+      contentClassName,
+    )}
+    overlayClassName={cn(
+      'fixed inset-0 z-50 bg-background/50 backdrop-blur-sm data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in',
+      overlayClassName,
+    )}
+    {...props}
+  >
+    {children}
+    {footer ? (
+      <div className="mt-auto flex flex-col border-t p-3">{footer}</div>
+    ) : null}
+  </CommandPrimitive.Dialog>
+));
+
+CommandDialog.displayName = CommandPrimitive.Dialog.displayName;
+
+const CommandDialogClose = DialogClose;
+
 export {
   Command,
   CommandInput,
@@ -142,4 +173,6 @@ export {
   CommandGroup,
   CommandItem,
   CommandSeparator,
+  CommandDialog,
+  CommandDialogClose,
 };

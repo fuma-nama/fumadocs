@@ -1,6 +1,6 @@
-import type { ComponentType, ReactNode } from 'react';
+import type * as React from 'react';
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import type { SearchLink, SharedProps } from '../components/dialog/search';
+import type { SearchLink, SharedProps } from '@/components/dialog/search';
 
 export interface SearchProviderProps {
   /**
@@ -20,14 +20,14 @@ export interface SearchProviderProps {
    *
    * It receives the `open` and `onOpenChange` prop, can be lazy loaded with `next/dynamic`
    */
-  SearchDialog: ComponentType<SharedProps>;
+  SearchDialog: React.ComponentType<SharedProps>;
 
   /**
    * Additional props to the dialog
    */
   options?: object;
 
-  children?: ReactNode;
+  children?: React.ReactNode;
 }
 
 interface SearchContextType {
