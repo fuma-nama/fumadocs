@@ -182,10 +182,10 @@ importers:
         specifier: 10.0.5
         version: link:../../packages/ui
       next:
-        specifier: 14.1.2
+        specifier: ^14.1.2
         version: 14.1.2(@babel/core@7.24.0)(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)
       next-contentlayer:
-        specifier: 0.3.4
+        specifier: ^0.3.4
         version: 0.3.4(contentlayer@0.3.4)(next@14.1.2)(react-dom@18.2.0)(react@18.2.0)
       react:
         specifier: 18.2.0
@@ -225,7 +225,7 @@ importers:
         specifier: 10.0.5
         version: link:../../packages/ui
       next:
-        specifier: 14.1.2
+        specifier: ^14.1.2
         version: 14.1.2(@babel/core@7.24.0)(@opentelemetry/api@1.6.0)(react-dom@18.2.0)(react@18.2.0)
       react:
         specifier: 18.2.0
