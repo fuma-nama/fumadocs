@@ -7,7 +7,7 @@ import SearchDialog from 'fumadocs-ui/components/dialog/search-algolia';
 import { useEffect, useState } from 'react';
 import { modes } from '@/utils/modes';
 import { cn } from '@/utils/cn';
-import { useMode } from '@/app/docs/layout.client';
+import { useMode } from '@/app/layout.client';
 
 const itemVariants = cva(
   'rounded-md border px-2 py-0.5 text-xs font-medium text-muted-foreground transition-colors',

@@ -51,6 +51,7 @@
     "tailwindcss-animate": "^1.0.7",
     "tsconfig": "workspace:*",
     "tsx": "^4.7.1",
-    "webpack": "^5.90.3"
+    "webpack": "^5.90.3",
+    "typescript": "^5.4.3"
   }
 }

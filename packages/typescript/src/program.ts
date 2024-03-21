@@ -1,4 +1,5 @@
 import ts from 'typescript';
+import * as path from 'node:path';
 
 const cache = new Map<string, ts.Program>();
 
@@ -37,8 +38,19 @@ export function getProgram(options: TypescriptConfig = {}): ts.Program {
     options.basePath ?? './',
   );
 
+  const host = ts.createCompilerHost({
+    ...parsed.options,
+    incremental: false,
+  });
+
+  // The default host gives an invalid lib location
+  // todo: remove if Typescript fixed this problem
+  host.getDefaultLibLocation = () =>
+    path.resolve('./node_modules/typescript/lib');
+
   const program = ts.createProgram({
     rootNames: options.files ?? parsed.fileNames,
+    host,
     options: {
       ...parsed.options,
       incremental: false,

@@ -160,6 +160,9 @@ importers:
       tsx:
         specifier: ^4.7.1
         version: 4.7.1
+      typescript:
+        specifier: ^5.4.3
+        version: 5.4.3
       webpack:
         specifier: ^5.90.3
         version: 5.90.3
