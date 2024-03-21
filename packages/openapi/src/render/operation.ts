@@ -24,7 +24,9 @@ export async function renderOperation(
 ): Promise<string> {
   const info: string[] = [];
   const example: string[] = [];
-  info.push(`## ${method.summary ?? method.operationId}`);
+
+  const title = method.summary ?? method.operationId;
+  if (title) info.push(`## ${title}`);
   if (method.description) info.push(p(method.description));
 
   const body = noRef(method.requestBody);

@@ -53,7 +53,7 @@ function buildMap({
       importPath = `./${importPath}`;
     }
 
-    const name = `file_${i}`;
+    const name = `file_${i.toString()}`;
     imports.push(`import * as ${name} from ${JSON.stringify(importPath)};`);
     entries.push(`${JSON.stringify(file)}: ${name}`);
   });

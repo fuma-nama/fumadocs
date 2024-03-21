@@ -84,7 +84,9 @@ export function SidebarList<T extends ElementType = 'aside'>({
 
   useEffect(() => {
     if (minWidth === undefined) return;
-    const mediaQueryList = window.matchMedia(`(min-width: ${minWidth}px)`);
+    const mediaQueryList = window.matchMedia(
+      `(min-width: ${minWidth.toString()}px)`,
+    );
 
     const handleChange = (): void => {
       setIsMobileLayout(!mediaQueryList.matches);

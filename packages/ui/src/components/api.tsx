@@ -120,10 +120,7 @@ export function APIExample({
 
   return (
     <div
-      className={cn(
-        'sticky top-14 h-fit xl:w-[40%] xl:min-w-[400px]',
-        className,
-      )}
+      className={cn('sticky top-14 h-fit xl:w-2/5 xl:min-w-[400px]', className)}
       {...props}
     >
       <div className="flex flex-row items-center gap-4 xl:hidden">

@@ -5,8 +5,8 @@
   "license": "MIT",
   "devDependencies": {
     "@vercel/style-guide": "^6.0.0",
-    "eslint-config-turbo": "^1.12.4",
-    "eslint-plugin-tailwindcss": "^3.14.3",
-    "typescript": "^5.4.2"
+    "eslint-config-turbo": "^1.12.5",
+    "eslint-plugin-tailwindcss": "^3.15.1",
+    "typescript": "^5.4.3"
   }
 }

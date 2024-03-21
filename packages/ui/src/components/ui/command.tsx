@@ -145,7 +145,7 @@ const CommandDialog = React.forwardRef<
     shouldFilter={false}
     loop
     contentClassName={cn(
-      'fixed left-[50%] top-[10vh] z-50 w-[98vw] max-w-[640px] origin-left translate-x-[-50%] rounded-lg border bg-popover text-popover-foreground shadow-lg data-[state=closed]:animate-dialog-out data-[state=open]:animate-dialog-in',
+      'fixed left-1/2 top-[10vh] z-50 w-[98vw] max-w-screen-sm origin-left -translate-x-1/2 rounded-lg border bg-popover text-popover-foreground shadow-lg data-[state=closed]:animate-dialog-out data-[state=open]:animate-dialog-in',
       contentClassName,
     )}
     overlayClassName={cn(

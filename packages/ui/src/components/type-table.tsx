@@ -57,7 +57,7 @@ export function TypeTable({
           <tr>
             <th className={cn(th(), 'w-[45%]')}>Prop</th>
             <th className={cn(th(), 'w-[30%]')}>Type</th>
-            <th className={cn(th(), 'w-[25%]')}>Default</th>
+            <th className={cn(th(), 'w-1/4')}>Default</th>
           </tr>
         </thead>
         <tbody className="border-collapse divide-y divide-border">

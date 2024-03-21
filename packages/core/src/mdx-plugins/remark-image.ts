@@ -47,7 +47,7 @@ export function remarkImage({
       }
 
       // Unique variable name for the given static image URL
-      const variableName = `__img${importsToInject.length}`;
+      const variableName = `__img${importsToInject.length.toString()}`;
       const hasBlur =
         placeholder === 'blur' &&
         VALID_BLUR_EXT.some((ext) => url.endsWith(ext));

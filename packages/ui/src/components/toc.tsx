@@ -17,8 +17,8 @@ export function TOCItems({ items }: { items: TOCItemType[] }): JSX.Element {
     const element = markerRef.current;
     if (!element) return;
 
-    element.style.setProperty('top', `${top}px`);
-    element.style.setProperty('height', `${height}px`);
+    element.style.setProperty('top', `${top.toString()}px`);
+    element.style.setProperty('height', `${height.toString()}px`);
     element.style.setProperty('display', `block`);
   };
 
