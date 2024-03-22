@@ -23,7 +23,7 @@ export default function DefaultSearchDialog({
   tag,
   api,
   ...props
-}: DefaultSearchDialogProps): JSX.Element {
+}: DefaultSearchDialogProps): React.ReactElement {
   const { locale } = useI18n();
   const { search, setSearch, query } = useDocsSearch(locale, tag, api);
 

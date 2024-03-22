@@ -18,7 +18,7 @@ export default function AlgoliaSearchDialog({
   index,
   searchOptions,
   ...props
-}: AlgoliaSearchDialogProps): JSX.Element {
+}: AlgoliaSearchDialogProps): React.ReactElement {
   const { search, setSearch, query } = useAlgoliaSearch(index, searchOptions);
 
   return (

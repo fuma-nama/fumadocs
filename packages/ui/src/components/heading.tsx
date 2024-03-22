@@ -11,7 +11,7 @@ export function Heading<T extends Types = 'h1'>({
   as,
   className,
   ...props
-}: HeadingProps<T>): JSX.Element {
+}: HeadingProps<T>): React.ReactElement {
   const As = as ?? 'h1';
 
   return (

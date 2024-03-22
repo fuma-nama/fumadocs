@@ -30,7 +30,9 @@ const client = algo(appId, apiKey);
 
 const index = client.initIndex(indexName);
 
-export default function CustomSearchDialog(props: SharedProps): JSX.Element {
+export default function CustomSearchDialog(
+  props: SharedProps,
+): React.ReactElement {
   const defaultTag = useMode() ?? 'headless';
   const [tag, setTag] = useState(defaultTag);
 

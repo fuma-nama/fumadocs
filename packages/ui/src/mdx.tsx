@@ -14,11 +14,13 @@ import { defaultImageSizes } from '@/utils/shared';
 
 declare const { Pre }: typeof import('./mdx.client');
 
-function Image(props: ImgHTMLAttributes<HTMLImageElement>): JSX.Element {
+function Image(props: ImgHTMLAttributes<HTMLImageElement>): React.ReactElement {
   return <NextImage sizes={defaultImageSizes} {...(props as ImageProps)} />;
 }
 
-function Table(props: TableHTMLAttributes<HTMLTableElement>): JSX.Element {
+function Table(
+  props: TableHTMLAttributes<HTMLTableElement>,
+): React.ReactElement {
   return (
     <div className="relative overflow-auto">
       <table {...props} />

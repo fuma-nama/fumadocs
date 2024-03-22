@@ -61,7 +61,7 @@ function OG({
   mode: Mode;
   title: string;
   description: string;
-}): JSX.Element {
+}): React.ReactElement {
   return (
     <div
       style={{

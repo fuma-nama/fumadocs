@@ -42,7 +42,7 @@ const code = `const frontmatterSchema = defaultValidators.frontmatter.extend({
   preview: z.string().optional()
 })`;
 
-export default function HomePage(): JSX.Element {
+export default function HomePage(): React.ReactElement {
   return (
     <>
       <div
@@ -161,7 +161,7 @@ const linkItemVariants = cva('transition-colors hover:bg-muted');
 function Integration({
   className,
   ...props
-}: HTMLAttributes<HTMLDivElement>): JSX.Element {
+}: HTMLAttributes<HTMLDivElement>): React.ReactElement {
   return (
     <div
       className={cn(
@@ -219,7 +219,7 @@ const searchItemVariants = cva(
   'flex flex-row items-center gap-2 rounded-md p-2 text-sm text-popover-foreground',
 );
 
-function Search(): JSX.Element {
+function Search(): React.ReactElement {
   return (
     <div className="mt-6 rounded-lg bg-gradient-to-b from-border p-px">
       <div className="flex select-none flex-col rounded-[inherit] bg-gradient-to-b from-popover">
@@ -251,7 +251,7 @@ function Search(): JSX.Element {
   );
 }
 
-function Highlights(): JSX.Element {
+function Highlights(): React.ReactElement {
   return (
     <div className="grid grid-cols-1 border-r md:grid-cols-2 lg:grid-cols-3">
       <Highlight icon={RocketIcon} heading="Light and Fast.">
@@ -287,7 +287,7 @@ function Highlight({
   icon: LucideIcon;
   heading: ReactNode;
   children: ReactNode;
-}): JSX.Element {
+}): React.ReactElement {
   return (
     <div className="border-l border-t px-6 py-12">
       <div className="mb-4 flex flex-row items-center gap-2 text-muted-foreground">
@@ -299,7 +299,7 @@ function Highlight({
   );
 }
 
-function Hero(): JSX.Element {
+function Hero(): React.ReactElement {
   return (
     <div className="container relative z-[2] flex flex-col items-center overflow-hidden border-x border-t bg-background px-6 pt-12 text-center md:pt-20">
       <h1 className="mb-6 text-4xl font-semibold md:text-5xl">
@@ -401,7 +401,7 @@ function Hero(): JSX.Element {
   );
 }
 
-function Introduction(): JSX.Element {
+function Introduction(): React.ReactElement {
   return (
     <div className="grid grid-cols-1 border-r md:grid-cols-2">
       <div className="flex flex-col border-l border-t px-6 py-12 md:py-16">
@@ -465,7 +465,7 @@ function Introduction(): JSX.Element {
   );
 }
 
-function Features(): JSX.Element {
+function Features(): React.ReactElement {
   return (
     <div className="grid grid-cols-1 border-r md:grid-cols-2">
       <Feature
@@ -575,7 +575,7 @@ function Feature({
   subheading: ReactNode;
   heading: ReactNode;
   description: ReactNode;
-}): JSX.Element {
+}): React.ReactElement {
   return (
     <div
       className={cn('border-l border-t px-6 py-12 md:py-16', className)}

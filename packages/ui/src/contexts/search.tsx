@@ -47,7 +47,7 @@ export function SearchProvider({
   children,
   preload = true,
   options,
-}: SearchProviderProps): JSX.Element {
+}: SearchProviderProps): React.ReactElement {
   const [isOpen, setIsOpen] = useState(preload ? false : undefined);
 
   useEffect(() => {

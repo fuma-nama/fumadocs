@@ -17,7 +17,7 @@ export const metadata = createMetadata({
   },
 });
 
-export default function Showcase(): JSX.Element {
+export default function Showcase(): React.ReactElement {
   const showcases = [
     [
       NextFAQImage,

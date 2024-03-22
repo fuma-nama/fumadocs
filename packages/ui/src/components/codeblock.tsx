@@ -94,7 +94,7 @@ function CopyButton({
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & {
   onCopy: () => void;
-}): JSX.Element {
+}): React.ReactElement {
   const [checked, onClick] = useCopyButton(onCopy);
 
   return (

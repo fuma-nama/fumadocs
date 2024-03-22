@@ -2,7 +2,6 @@
 
 import { InfoIcon } from 'lucide-react';
 import Link from 'next/link';
-import type { ReactNode } from 'react';
 import { cva } from 'class-variance-authority';
 import { cn } from '@/utils/cn';
 import {
@@ -11,7 +10,11 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 
-export function Info({ children }: { children: ReactNode }): JSX.Element {
+export function Info({
+  children,
+}: {
+  children: React.ReactNode;
+}): React.ReactElement {
   return (
     <Popover>
       <PopoverTrigger>
@@ -26,7 +29,7 @@ interface ObjectType {
   /**
    * Additional description of the field
    */
-  description?: ReactNode;
+  description?: React.ReactNode;
   type: string;
   typeDescription?: string;
   /**
@@ -49,7 +52,7 @@ export function TypeTable({
   type,
 }: {
   type: Record<string, ObjectType>;
-}): JSX.Element {
+}): React.ReactElement {
   return (
     <div className="not-prose overflow-auto whitespace-nowrap">
       <table className="my-4 w-full text-left text-sm text-muted-foreground">

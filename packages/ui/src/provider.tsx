@@ -43,7 +43,7 @@ export function RootProvider({
   dir,
   enableThemeProvider = true,
   search,
-}: RootProviderProps): JSX.Element {
+}: RootProviderProps): React.ReactElement {
   let body = (
     <SidebarProvider>
       <SidebarCollapseProvider>

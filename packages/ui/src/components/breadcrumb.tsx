@@ -6,7 +6,7 @@ import { Fragment } from 'react';
 import { cn } from '@/utils/cn';
 import { useTreeContext } from '@/contexts/tree';
 
-export function Breadcrumb(): JSX.Element {
+export function Breadcrumb(): React.ReactElement {
   const { root } = useTreeContext();
   const pathname = usePathname();
   const items = useBreadcrumb(pathname, root);

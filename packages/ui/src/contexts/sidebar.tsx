@@ -16,7 +16,7 @@ export function SidebarCollapseProvider({
   children,
 }: {
   children: ReactNode;
-}): JSX.Element {
+}): React.ReactElement {
   const [open, setOpen] = useState(true);
 
   return (

@@ -6,6 +6,6 @@ export default function HomeLayout({
   children,
 }: {
   children: ReactNode;
-}): JSX.Element {
+}): React.ReactElement {
   return <Layout {...layoutOptions}>{children}</Layout>;
 }

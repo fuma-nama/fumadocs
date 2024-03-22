@@ -77,7 +77,7 @@ export function Sidebar({
   components,
   items = [],
   defaultOpenLevel = 1,
-}: SidebarProps): JSX.Element {
+}: SidebarProps): React.ReactElement {
   const [open] = useSidebarCollapse();
   const { root } = useTreeContext();
   const context = useMemo<SidebarContext>(
@@ -134,7 +134,11 @@ interface NodeListProps extends HTMLAttributes<HTMLDivElement> {
   level?: number;
 }
 
-function NodeList({ items, level = 0, ...props }: NodeListProps): JSX.Element {
+function NodeList({
+  items,
+  level = 0,
+  ...props
+}: NodeListProps): React.ReactElement {
   const { components } = useContext(SidebarContext);
 
   return (
@@ -161,7 +165,7 @@ function BaseItem({
 }: {
   item: LinkItem;
   nested?: boolean;
-}): JSX.Element {
+}): React.ReactElement {
   const pathname = usePathname();
   const active = isActive(item.url, pathname, nested);
   const icon = item.icon ?? (item.external ? <ExternalLinkIcon /> : null);
@@ -184,7 +188,7 @@ function FolderNode({
 }: {
   item: PageTree.Folder;
   level: number;
-}): JSX.Element {
+}): React.ReactElement {
   const { defaultOpenLevel } = useContext(SidebarContext);
   const pathname = usePathname();
   const active = index !== undefined && isActive(index.url, pathname, false);
@@ -241,6 +245,10 @@ function FolderNode({
   );
 }
 
-function SeparatorNode({ item }: { item: PageTree.Separator }): JSX.Element {
+function SeparatorNode({
+  item,
+}: {
+  item: PageTree.Separator;
+}): React.ReactElement {
   return <p className="mb-2 mt-8 px-2 font-medium first:mt-0">{item.name}</p>;
 }

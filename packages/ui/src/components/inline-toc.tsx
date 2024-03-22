@@ -13,7 +13,10 @@ export interface InlineTocProps {
   defaultOpen?: boolean;
 }
 
-export function InlineTOC({ items, defaultOpen }: InlineTocProps): JSX.Element {
+export function InlineTOC({
+  items,
+  defaultOpen,
+}: InlineTocProps): React.ReactElement {
   return (
     <Collapsible
       defaultOpen={defaultOpen}

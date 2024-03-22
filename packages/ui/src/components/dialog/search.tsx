@@ -46,7 +46,7 @@ export function SearchDialog({
   footer,
   links = [],
   ...props
-}: SearchDialogProps): JSX.Element {
+}: SearchDialogProps): React.ReactElement {
   const defaultItems = useMemo(
     () =>
       links.map<SortedResult>(([name, link]) => ({
@@ -76,7 +76,7 @@ function Search({
   onSearchChange,
   defaultItems = [],
   results,
-}: SearchContentProps): JSX.Element {
+}: SearchContentProps): React.ReactElement {
   const { text } = useI18n();
   const router = useRouter();
   const { setOpenSearch } = useSearchContext();

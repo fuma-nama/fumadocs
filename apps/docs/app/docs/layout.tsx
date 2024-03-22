@@ -7,7 +7,7 @@ export default function Layout({
   children,
 }: {
   children: ReactNode;
-}): JSX.Element {
+}): React.ReactElement {
   return (
     <Body>
       <DocsLayout {...layoutOptions}>{children}</DocsLayout>

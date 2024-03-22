@@ -71,7 +71,7 @@ export function Nav({
   enableSidebar,
   collapsibleSidebar,
   children,
-}: NavProps): JSX.Element {
+}: NavProps): React.ReactElement {
   const [transparent, setTransparent] = useState(transparentMode !== 'none');
 
   useEffect(() => {
@@ -165,7 +165,7 @@ export function Nav({
 
 const shortcut = cva('rounded-md border bg-background px-1.5');
 
-function SearchToggle(): JSX.Element {
+function SearchToggle(): React.ReactElement {
   const { setOpenSearch } = useSearchContext();
   const { text } = useI18n();
 
@@ -205,7 +205,11 @@ function SearchToggle(): JSX.Element {
   );
 }
 
-function SidebarToggle({ collapsible }: { collapsible: boolean }): JSX.Element {
+function SidebarToggle({
+  collapsible,
+}: {
+  collapsible: boolean;
+}): React.ReactElement {
   const [open, setOpen] = useSidebarCollapse();
 
   return (

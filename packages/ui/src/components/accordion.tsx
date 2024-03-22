@@ -86,7 +86,7 @@ export const Accordion = forwardRef<
   );
 });
 
-function CopyButton({ id }: { id: string }): JSX.Element {
+function CopyButton({ id }: { id: string }): React.ReactElement {
   const [checked, onClick] = useCopyButton(() => {
     const url = new URL(window.location.href);
     url.hash = id;

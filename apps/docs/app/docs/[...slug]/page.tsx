@@ -13,7 +13,11 @@ interface Param {
 
 export const dynamicParams = false;
 
-export default function Page({ params }: { params: Param }): JSX.Element {
+export default function Page({
+  params,
+}: {
+  params: Param;
+}): React.ReactElement {
   const page = utils.getPage(params.slug);
 
   if (!page) notFound();
@@ -57,7 +61,7 @@ export default function Page({ params }: { params: Param }): JSX.Element {
   );
 }
 
-function Category({ page }: { page: Page }): JSX.Element {
+function Category({ page }: { page: Page }): React.ReactElement {
   const filtered = utils.files.filter(
     (docs) =>
       docs.type === 'page' &&

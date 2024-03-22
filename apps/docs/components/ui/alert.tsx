@@ -5,7 +5,7 @@ import { cn } from '@/utils/cn';
 export function Alert({
   className,
   ...props
-}: HTMLAttributes<HTMLDivElement>): JSX.Element {
+}: HTMLAttributes<HTMLDivElement>): React.ReactElement {
   return (
     <div
       className={cn(

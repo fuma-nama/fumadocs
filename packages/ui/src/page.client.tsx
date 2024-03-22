@@ -11,7 +11,7 @@ import { useTreeContext } from './contexts/tree';
 export * from '@/components/toc';
 export * from '@/components/breadcrumb';
 
-export function LastUpdate(props: { date: Date }): JSX.Element {
+export function LastUpdate(props: { date: Date }): React.ReactElement {
   const { text } = useI18n();
   const [date, setDate] = useState('');
 
@@ -41,7 +41,7 @@ const footerItem = cva(
   'flex flex-row items-center gap-2 text-muted-foreground transition-colors hover:text-foreground',
 );
 
-export function Footer({ items }: FooterProps): JSX.Element {
+export function Footer({ items }: FooterProps): React.ReactElement {
   const tree = useTreeContext();
   const pathname = usePathname();
 

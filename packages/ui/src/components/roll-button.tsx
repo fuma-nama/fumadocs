@@ -17,7 +17,9 @@ interface RollButtonProps {
 /**
  * A button that scrolls to the top
  */
-export function RollButton({ percentage = 0.2 }: RollButtonProps): JSX.Element {
+export function RollButton({
+  percentage = 0.2,
+}: RollButtonProps): React.ReactElement {
   const [show, setShow] = useState(false);
 
   useEffect(() => {

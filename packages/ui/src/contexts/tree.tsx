@@ -48,7 +48,7 @@ export function TreeContextProvider({
 }: {
   tree: PageTree.Root;
   children: ReactNode;
-}): JSX.Element {
+}): React.ReactElement {
   const pathname = usePathname();
   const value = useMemo<TreeContextType>(() => {
     const root = findRoot(tree.children, pathname) ?? tree;

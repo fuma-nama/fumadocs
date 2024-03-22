@@ -9,7 +9,7 @@ export function Root({
   children,
   className,
   ...props
-}: HTMLAttributes<HTMLDivElement>): JSX.Element {
+}: HTMLAttributes<HTMLDivElement>): React.ReactElement {
   return (
     <div
       className={cn('space-y-24 text-sm text-muted-foreground', className)}
@@ -24,7 +24,7 @@ export function API({
   className,
   children,
   ...props
-}: HTMLAttributes<HTMLDivElement>): JSX.Element {
+}: HTMLAttributes<HTMLDivElement>): React.ReactElement {
   return (
     <div
       className={cn('flex flex-col gap-x-6 gap-y-2 xl:flex-row', className)}
@@ -58,7 +58,7 @@ export function APIInfo({
   method = 'GET',
   route,
   ...props
-}: APIInfoProps): JSX.Element {
+}: APIInfoProps): React.ReactElement {
   let color: VariantProps<typeof badgeVariants>['color'] = 'green';
   if (['GET', 'HEAD'].includes(method)) color = 'green';
   if (['POST', 'PATCH', 'PUT'].includes(method)) color = 'yellow';
@@ -89,7 +89,7 @@ export function Property({
   required,
   deprecated,
   children,
-}: PropertyProps): JSX.Element {
+}: PropertyProps): React.ReactElement {
   return (
     <div className="mb-4 flex flex-col rounded-lg border bg-card p-3 prose-no-margin">
       <h4 className="inline-flex items-center gap-4">
@@ -115,7 +115,7 @@ export function APIExample({
   children,
   className,
   ...props
-}: HTMLAttributes<HTMLDivElement>): JSX.Element {
+}: HTMLAttributes<HTMLDivElement>): React.ReactElement {
   const [isOpen, setIsOpen] = useState(false);
 
   return (

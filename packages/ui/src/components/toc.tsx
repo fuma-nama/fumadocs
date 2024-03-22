@@ -8,7 +8,11 @@ import { ScrollArea, ScrollViewport } from './ui/scroll-area';
 
 type PosType = [top: number, height: number];
 
-export function TOCItems({ items }: { items: TOCItemType[] }): JSX.Element {
+export function TOCItems({
+  items,
+}: {
+  items: TOCItemType[];
+}): React.ReactElement {
   const { text } = useI18n();
   const containerRef = useRef<HTMLDivElement>(null);
   const markerRef = useRef<HTMLDivElement>(null);
@@ -52,7 +56,7 @@ function TOCItem({
 }: {
   item: TOCItemType;
   setMarker: (v: PosType) => void;
-}): JSX.Element {
+}): React.ReactElement {
   const active = Primitive.useActiveAnchor(item.url);
   const ref = useRef<HTMLAnchorElement>(null);
 

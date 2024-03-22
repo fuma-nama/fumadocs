@@ -19,7 +19,9 @@ import {
 
 export type LanguageSelectProps = Omit<SelectProps, 'value' | 'onValueChange'>;
 
-export function LanguageSelect({ ...props }: LanguageSelectProps): JSX.Element {
+export function LanguageSelect({
+  ...props
+}: LanguageSelectProps): React.ReactElement {
   const context = useI18n();
   if (!context.translations) throw new Error('Missing prop `translations`');
 
@@ -59,7 +61,7 @@ export function I18nProvider({
   translations = {},
   locale: forceLocale,
   children,
-}: I18nProviderProps): JSX.Element {
+}: I18nProviderProps): React.ReactElement {
   const localeIndex = 1;
   const router = useRouter();
   const pathname = usePathname();

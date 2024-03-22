@@ -19,7 +19,7 @@ const itemVariants = cva(
 export function ThemeSwitch(props: {
   children: ReactNode;
   style: string;
-}): JSX.Element {
+}): React.ReactElement {
   const [active, setActive] = useState(false);
 
   return (

@@ -58,7 +58,7 @@ export function Layout({
   nav = {},
   links = [],
   children,
-}: BaseLayoutProps): JSX.Element {
+}: BaseLayoutProps): React.ReactElement {
   return (
     <>
       {getNav(false, false, links, nav)}
@@ -74,7 +74,7 @@ export function DocsLayout({
   containerProps,
   tree,
   children,
-}: DocsLayoutProps): JSX.Element {
+}: DocsLayoutProps): React.ReactElement {
   const sidebarEnabled = sidebar.enabled ?? true;
   const sidebarCollaspible = sidebarEnabled && (sidebar.collapsible ?? true);
 
