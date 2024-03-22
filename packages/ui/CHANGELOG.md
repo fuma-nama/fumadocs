@@ -1,5 +1,15 @@
 # next-docs-ui
 
+## 10.1.0
+
+### Minor Changes
+
+- 566539a: Support RTL layout
+
+### Patch Changes
+
+- fumadocs-core@10.1.0
+
 ## 10.0.5
 
 ### Patch Changes
