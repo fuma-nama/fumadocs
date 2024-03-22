@@ -1,5 +1,5 @@
-import ts from 'typescript';
 import * as path from 'node:path';
+import ts from 'typescript';
 
 const cache = new Map<string, ts.Program>();
 
@@ -8,6 +8,11 @@ export interface TypescriptConfig {
   tsconfigPath?: string;
   /** A root directory to resolve relative path entries in the config file to. e.g. outDir */
   basePath?: string;
+
+  /**
+   * Default lib directory, use `./node_modules/typescript/lib` if not specified
+   */
+  getDefaultLibLocation?: (() => string) | 'default';
 }
 
 export function getFileSymbol(
@@ -29,7 +34,7 @@ export function getProgram(options: TypescriptConfig = {}): ts.Program {
 
   const configFile = ts.readJsonConfigFile(
     options.tsconfigPath ?? './tsconfig.json',
-    (path) => ts.sys.readFile(path),
+    (p) => ts.sys.readFile(p),
   );
 
   const parsed = ts.parseJsonSourceFileConfigFileContent(
@@ -38,23 +43,25 @@ export function getProgram(options: TypescriptConfig = {}): ts.Program {
     options.basePath ?? './',
   );
 
-  const host = ts.createCompilerHost({
-    ...parsed.options,
-    incremental: false,
-  });
+  // disable cache
+  parsed.options.incremental = false;
+
+  const host = ts.createCompilerHost(parsed.options);
 
   // The default host gives an invalid lib location
   // todo: remove if Typescript fixed this problem
-  host.getDefaultLibLocation = () =>
-    path.resolve('./node_modules/typescript/lib');
+  if (options.getDefaultLibLocation !== 'default') {
+    host.getDefaultLibLocation =
+      options.getDefaultLibLocation ??
+      (() => path.resolve('./node_modules/typescript/lib'));
+  }
 
   const program = ts.createProgram({
     rootNames: options.files ?? parsed.fileNames,
     host,
-    options: {
-      ...parsed.options,
-      incremental: false,
-    },
+    options: parsed.options,
+    configFileParsingDiagnostics: parsed.errors,
+    projectReferences: parsed.projectReferences,
   });
 
   cache.set(key, program);
