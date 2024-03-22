@@ -29,9 +29,9 @@ import {
   PopoverTrigger,
   PopoverClose,
 } from '@/components/ui/popover';
-import { isActive } from '../utils/shared';
-import { buttonVariants } from '../theme/variants';
-import type { LinkItem } from '../layout';
+import { isActive } from '@/utils/shared';
+import { buttonVariants } from '@/theme/variants';
+import type { LinkItem } from '@/layout';
 
 export interface NavLinkProps {
   icon: ReactNode;
@@ -237,7 +237,7 @@ function SidebarToggle({
             buttonVariants({
               color: 'outline',
               size: 'icon',
-              className: 'rounded-full max-md:hidden',
+              className: 'rounded-full max-md:hidden rtl:rotate-180',
             }),
           )}
         >

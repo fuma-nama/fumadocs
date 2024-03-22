@@ -45,9 +45,7 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
         node.remove();
       });
 
-      const text = clone.textContent ?? '';
-
-      void navigator.clipboard.writeText(text);
+      void navigator.clipboard.writeText(clone.textContent ?? '');
     }, []);
 
     return (
@@ -77,7 +75,7 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
             />
           )
         )}
-        <ScrollArea ref={areaRef}>
+        <ScrollArea ref={areaRef} dir="ltr">
           <ScrollViewport>{props.children}</ScrollViewport>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>

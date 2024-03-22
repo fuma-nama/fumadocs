@@ -33,13 +33,13 @@ export function TOCItems({
           <div
             role="none"
             ref={markerRef}
-            className="absolute left-0 hidden border-l-2 border-primary transition-all"
+            className="absolute start-0 hidden border-s-2 border-primary transition-all"
           />
           <h3 className="mb-4 inline-flex items-center gap-2">
             <TextIcon className="size-4" />
             {text.toc}
           </h3>
-          <div className="flex flex-col gap-1 border-l-2 text-muted-foreground">
+          <div className="flex flex-col gap-1 border-s-2 text-muted-foreground">
             {items.map((item) => (
               <TOCItem key={item.url} item={item} setMarker={setPos} />
             ))}
@@ -72,9 +72,9 @@ function TOCItem({
       href={item.url}
       className={cn(
         'overflow-hidden text-ellipsis py-1 transition-colors data-[active=true]:font-medium data-[active=true]:text-primary',
-        item.depth <= 2 && 'pl-4',
-        item.depth === 3 && 'pl-7',
-        item.depth >= 4 && 'pl-10',
+        item.depth <= 2 && 'ps-4',
+        item.depth === 3 && 'ps-7',
+        item.depth >= 4 && 'ps-10',
       )}
     >
       {item.title}
