@@ -5,6 +5,13 @@ import type { LoaderContext } from 'webpack';
 export interface LoaderOptions {
   rootContentDir: string;
   rootMapFile: string;
+
+  /**
+   * Included files in the map file
+   *
+   * @defaultValue '.&#47;**&#47;*.&#123;md,mdx,json&#125;'
+   */
+  include?: string | string[];
 }
 
 /**
@@ -23,10 +30,14 @@ export default function loader(
   callback(null, buildMap(options));
 }
 
-function buildMap({ rootContentDir, rootMapFile }: LoaderOptions): string {
+function buildMap({
+  rootContentDir,
+  rootMapFile,
+  include = ['./**/*.{md,mdx,json}'],
+}: LoaderOptions): string {
   const mapDir = path.dirname(rootMapFile);
 
-  const files = fg.sync('./**/*.{md,mdx,json}', {
+  const files = fg.sync(include, {
     cwd: rootContentDir,
   });
 
@@ -42,7 +53,7 @@ function buildMap({ rootContentDir, rootMapFile }: LoaderOptions): string {
       importPath = `./${importPath}`;
     }
 
-    const name = `file_${i}`;
+    const name = `file_${i.toString()}`;
     imports.push(`import * as ${name} from ${JSON.stringify(importPath)};`);
     entries.push(`${JSON.stringify(file)}: ${name}`);
   });

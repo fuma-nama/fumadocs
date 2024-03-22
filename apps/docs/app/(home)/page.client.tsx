@@ -21,7 +21,7 @@ import { cn } from '@/utils/cn';
 
 export function Rain(
   props: CanvasHTMLAttributes<HTMLCanvasElement>,
-): JSX.Element {
+): React.ReactElement {
   const ref = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -85,7 +85,7 @@ export function Rain(
   return <canvas width={1000} height={1000} ref={ref} {...props} />;
 }
 
-export function Previews(): JSX.Element {
+export function Previews(): React.ReactElement {
   return (
     <div className="rounded-xl border bg-background p-4 shadow-lg">
       <p className="text-sm font-medium">I&apos;m satisfied with it</p>
@@ -102,7 +102,7 @@ export function Previews(): JSX.Element {
   );
 }
 
-export function CreateAppAnimation(): JSX.Element {
+export function CreateAppAnimation(): React.ReactElement {
   const installCmd = 'npm create fumadocs-app';
   const tickTime = 100;
   const timeCommandEnter = installCmd.length;
@@ -191,7 +191,9 @@ export function CreateAppAnimation(): JSX.Element {
   );
 }
 
-function LaunchAppWindow(props: HTMLAttributes<HTMLDivElement>): JSX.Element {
+function LaunchAppWindow(
+  props: HTMLAttributes<HTMLDivElement>,
+): React.ReactElement {
   return (
     <div
       {...props}

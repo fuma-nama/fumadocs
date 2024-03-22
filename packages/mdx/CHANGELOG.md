@@ -1,5 +1,19 @@
 # next-docs-mdx
 
+## 8.2.5
+
+### Patch Changes
+
+- fumadocs-core@10.1.0
+
+## 8.2.4
+
+### Patch Changes
+
+- e47c62f: Support customising included files in the map file
+- Updated dependencies [e47c62f]
+  - fumadocs-core@10.0.5
+
 ## 8.2.3
 
 ### Patch Changes

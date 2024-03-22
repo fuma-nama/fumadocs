@@ -1,5 +1,13 @@
 # next-docs-zeta
 
+## 10.1.0
+
+## 10.0.5
+
+### Patch Changes
+
+- e47c62f: Improve remark plugin typings
+
 ## 10.0.4
 
 ## 10.0.3

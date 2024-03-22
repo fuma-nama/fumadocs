@@ -62,7 +62,7 @@ export function TOCScrollProvider({
   toc,
   containerRef,
   children,
-}: TOCScrollProvider): JSX.Element {
+}: TOCScrollProvider): React.ReactElement {
   const headings = useMemo(() => {
     return toc.map((item) => item.url.split('#')[1]);
   }, [toc]);

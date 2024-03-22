@@ -40,6 +40,24 @@ module.exports = {
 By using the built-in Tailwind CSS plugin, or the pre-built stylesheet, your default border, text and background
 colors will be changed.
 
+### RTL Layout
+
+Fumadocs UI has support for RTL (Right-to-left) layout. To enable, you can pass the `dir` prop to body.
+
+```tsx
+<body dir="rtl"></body>
+```
+
+Also pass the same prop to Radix UI `<DirectionProvider />`.
+
+```tsx
+import { RootProvider } from '@fumadocs-ui/provider';
+
+<RootProvider dir="rtl"></RootProvider>;
+```
+
+> Root Provider has integrated with it by default
+
 ## Themes
 
 The design system was inspired by [Shadcn UI](https://ui.shadcn.com), you can easily customize all the properties using CSS variables.

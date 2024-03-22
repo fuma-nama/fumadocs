@@ -1,10 +1,10 @@
 import Slugger from 'github-slugger';
-import type { RootContent as MdastContent, Root } from 'mdast';
+import type { Root } from 'mdast';
 import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
 import remarkMdx from 'remark-mdx';
 import type { PluggableList, Transformer } from 'unified';
-import { visit } from './unist-visit';
+import { visit } from 'unist-util-visit';
 import { flattenNode } from './remark-utils';
 
 interface Heading {
@@ -45,7 +45,8 @@ export function remarkStructure({
     const data: StructuredData = { contents: [], headings: [] };
     let lastHeading: string | undefined = '';
 
-    visit(node, types, (element: MdastContent) => {
+    visit(node, types, (element) => {
+      if (element.type === 'root') return;
       const content = flattenNode(element).trim();
 
       if (element.type === 'heading') {
@@ -68,9 +69,9 @@ export function remarkStructure({
           heading: lastHeading,
           content,
         });
-      }
 
-      return 'skip';
+        return 'skip';
+      }
     });
 
     file.data.structuredData = data;

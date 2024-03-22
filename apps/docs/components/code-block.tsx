@@ -19,7 +19,7 @@ export function CodeBlock({
   lang,
   wrapper,
   ...props
-}: CodeBlockProps): JSX.Element {
+}: CodeBlockProps): React.ReactElement {
   const html = useMemo(
     () =>
       highlighter.codeToHtml(code, {

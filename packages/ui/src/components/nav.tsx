@@ -18,7 +18,6 @@ import {
   useState,
   useCallback,
 } from 'react';
-import { PopoverClose } from '@radix-ui/react-popover';
 import { cn } from '@/utils/cn';
 import { useSidebarCollapse } from '@/contexts/sidebar';
 import { useSearchContext } from '@/contexts/search';
@@ -28,6 +27,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
+  PopoverClose,
 } from '@/components/ui/popover';
 import { isActive } from '../utils/shared';
 import { buttonVariants } from '../theme/variants';
@@ -71,7 +71,7 @@ export function Nav({
   enableSidebar,
   collapsibleSidebar,
   children,
-}: NavProps): JSX.Element {
+}: NavProps): React.ReactElement {
   const [transparent, setTransparent] = useState(transparentMode !== 'none');
 
   useEffect(() => {
@@ -98,7 +98,10 @@ export function Nav({
       )}
     >
       <nav className="container flex h-full flex-row items-center gap-4">
-        <Link href={url} className="inline-flex items-center font-bold">
+        <Link
+          href={url}
+          className="inline-flex items-center gap-3 font-semibold"
+        >
           {title}
         </Link>
         {children}
@@ -138,7 +141,7 @@ export function Nav({
           )}
           <div
             className={cn(
-              'flex flex-row items-center border-l pl-2 max-md:hidden',
+              'flex flex-row items-center border-s ps-2 max-md:hidden',
               links.length === 0 && 'hidden',
             )}
           >
@@ -162,7 +165,7 @@ export function Nav({
 
 const shortcut = cva('rounded-md border bg-background px-1.5');
 
-function SearchToggle(): JSX.Element {
+function SearchToggle(): React.ReactElement {
   const { setOpenSearch } = useSearchContext();
   const { text } = useI18n();
 
@@ -191,9 +194,9 @@ function SearchToggle(): JSX.Element {
         className="inline-flex w-full max-w-[240px] items-center gap-2 rounded-full border bg-secondary/50 p-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground max-md:hidden"
         onClick={onClick}
       >
-        <SearchIcon aria-label="Open Search" className="ml-1 size-4" />
+        <SearchIcon aria-label="Open Search" className="ms-1 size-4" />
         {text.search}
-        <div className="ml-auto inline-flex gap-0.5 text-xs">
+        <div className="ms-auto inline-flex gap-0.5 text-xs">
           <kbd className={shortcut()}>⌘</kbd>
           <kbd className={shortcut()}>K</kbd>
         </div>
@@ -202,7 +205,11 @@ function SearchToggle(): JSX.Element {
   );
 }
 
-function SidebarToggle({ collapsible }: { collapsible: boolean }): JSX.Element {
+function SidebarToggle({
+  collapsible,
+}: {
+  collapsible: boolean;
+}): React.ReactElement {
   const [open, setOpen] = useSidebarCollapse();
 
   return (
@@ -254,10 +261,10 @@ const NavItem = forwardRef<
       href={url}
       external={external}
       className={cn(
-        'text-sm text-muted-foreground',
+        'text-sm text-muted-foreground transition-colors',
         isActive(url, pathname)
           ? 'font-medium text-accent-foreground'
-          : 'transition-colors hover:text-accent-foreground',
+          : 'hover:text-accent-foreground',
         className,
       )}
       {...props}

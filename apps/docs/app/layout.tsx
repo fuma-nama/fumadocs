@@ -28,7 +28,7 @@ export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
-}): JSX.Element {
+}): React.ReactElement {
   return (
     <html
       lang="en"
@@ -45,7 +45,7 @@ export default function RootLayout({
   );
 }
 
-function Footer(): JSX.Element {
+function Footer(): React.ReactElement {
   return (
     <footer className="mt-auto border-t bg-card py-12 text-secondary-foreground">
       <div className="container flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">

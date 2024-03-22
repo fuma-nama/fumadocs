@@ -19,7 +19,9 @@ function useSidebarContext(): SidebarContextType {
   return ctx;
 }
 
-export function SidebarProvider(props: SidebarProviderProps): JSX.Element {
+export function SidebarProvider(
+  props: SidebarProviderProps,
+): React.ReactElement {
   const [openInner, setOpenInner] = useState(false);
   const [open, setOpen] = [
     props.open ?? openInner,
@@ -52,7 +54,7 @@ export type SidebarTriggerProps<T extends ElementType> = WithAs<T>;
 export function SidebarTrigger<T extends ElementType = 'button'>({
   as,
   ...props
-}: SidebarTriggerProps<T>): JSX.Element {
+}: SidebarTriggerProps<T>): React.ReactElement {
   const [open, setOpen] = useSidebarContext();
   const As = as ?? 'button';
 
@@ -78,13 +80,15 @@ export function SidebarList<T extends ElementType = 'aside'>({
   as,
   minWidth,
   ...props
-}: SidebarContentProps<T>): JSX.Element {
+}: SidebarContentProps<T>): React.ReactElement {
   const [open] = useSidebarContext();
   const [isMobileLayout, setIsMobileLayout] = useState(false);
 
   useEffect(() => {
     if (minWidth === undefined) return;
-    const mediaQueryList = window.matchMedia(`(min-width: ${minWidth}px)`);
+    const mediaQueryList = window.matchMedia(
+      `(min-width: ${minWidth.toString()}px)`,
+    );
 
     const handleChange = (): void => {
       setIsMobileLayout(!mediaQueryList.matches);

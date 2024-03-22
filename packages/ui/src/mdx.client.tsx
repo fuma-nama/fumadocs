@@ -7,7 +7,7 @@ export function Pre({
   allowCopy,
   icon,
   ...props
-}: Base.CodeBlockProps): JSX.Element {
+}: Base.CodeBlockProps): React.ReactElement {
   return (
     <Base.CodeBlock title={title} allowCopy={allowCopy} icon={icon}>
       <Base.Pre {...props} />

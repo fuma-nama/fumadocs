@@ -1,5 +1,11 @@
 # fumadocs-typescript
 
+## 1.0.2
+
+### Patch Changes
+
+- 77b5b70: Fix compatibility problems with Typescript 5.4.3
+
 ## 1.0.1
 
 ### Patch Changes

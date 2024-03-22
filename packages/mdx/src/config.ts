@@ -60,6 +60,11 @@ export interface CreateMDXOptions {
    * @defaultValue `'./content'`
    */
   rootContentPath?: string;
+
+  /**
+   * {@link LoaderOptions.include}
+   */
+  include?: string | string[];
 }
 
 function pluginOption(
@@ -89,29 +94,29 @@ function getMDXLoaderOptions({
     ...valueToExport,
   ];
 
-  const remarkPlugins = pluginOption(
-    (v) => [
-      remarkGfm,
-      remarkHeading,
-      ...(remarkImageOptions === false
-        ? []
-        : [[remarkImage, remarkImageOptions] satisfies Pluggable]),
-      ...v,
-      remarkStructure,
-      [remarkMdxExport, { values: mdxExports }],
-    ],
-    mdxOptions.remarkPlugins,
-  );
+  const remarkPlugins = pluginOption((v) => {
+    const plugins: Pluggable[] = [remarkGfm, remarkHeading];
 
-  const rehypePlugins: PluggableList = pluginOption(
-    (v) => [
-      ...(rehypeCodeOptions === false
-        ? []
-        : [[rehypeCode, rehypeCodeOptions] satisfies Pluggable]),
-      ...v,
-    ],
-    mdxOptions.rehypePlugins,
-  );
+    if (remarkImageOptions !== false)
+      plugins.push([remarkImage, remarkImageOptions]);
+
+    plugins.push(...v, remarkStructure, [
+      remarkMdxExport,
+      { values: mdxExports },
+    ]);
+
+    return plugins;
+  }, mdxOptions.remarkPlugins);
+
+  const rehypePlugins: PluggableList = pluginOption((v) => {
+    const plugins: Pluggable[] = [...v];
+
+    if (rehypeCodeOptions !== false) {
+      plugins.unshift([rehypeCode, rehypeCodeOptions]);
+    }
+
+    return plugins;
+  }, mdxOptions.rehypePlugins);
 
   return {
     providerImportSource: 'next-mdx-import-source-file',
@@ -128,6 +133,7 @@ const createMDX =
     rootMapPath = './.map.ts',
     rootContentPath = './content',
     buildSearchIndex = false,
+    ...loadOptions
   }: CreateMDXOptions = {}) =>
   (nextConfig: NextConfig = {}) => {
     const rootMapFile = path.resolve(cwd, rootMapPath);
@@ -169,6 +175,7 @@ const createMDX =
                 options: {
                   rootContentDir,
                   rootMapFile,
+                  ...loadOptions,
                 } satisfies LoaderOptions,
               },
             },

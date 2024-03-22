@@ -1,6 +1,6 @@
 import type { Code, Root } from 'mdast';
 import type { Transformer } from 'unified';
-import { visit } from './unist-visit';
+import { visit } from 'unist-util-visit';
 
 type PackageManager = (name: string) => {
   packageManager: string;
@@ -16,6 +16,7 @@ export type RemarkInstallOptions = Partial<{
 /**
  * It generates the following structure from a code block with `package-install` as language
  *
+ * @example
  * ```tsx
  * <Tabs items={["pnpm", "npm", "yarn"]}>
  *  <Tab value="pnpm">...</Tab>
@@ -33,7 +34,7 @@ export function remarkInstall({
   ],
 }: RemarkInstallOptions = {}): Transformer<Root, Root> {
   return (tree) => {
-    visit(tree, ['code'], (node: Code) => {
+    visit(tree, 'code', (node) => {
       if (node.lang !== 'package-install') return 'skip';
 
       const managers = packageManagers.map((manager) => manager(node.value));

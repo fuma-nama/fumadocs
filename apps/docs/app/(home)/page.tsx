@@ -5,7 +5,6 @@ import {
   CpuIcon,
   FileEditIcon,
   FileTextIcon,
-  GithubIcon,
   KeyboardIcon,
   LayoutIcon,
   LibraryIcon,
@@ -42,7 +41,7 @@ const code = `const frontmatterSchema = defaultValidators.frontmatter.extend({
   preview: z.string().optional()
 })`;
 
-export default function HomePage(): JSX.Element {
+export default function HomePage(): React.ReactElement {
   return (
     <>
       <div
@@ -95,43 +94,46 @@ export default function HomePage(): JSX.Element {
           <Highlights />
           <Features />
           <div className="grid grid-cols-1 border-b border-r md:grid-cols-2 lg:grid-cols-3">
-            <div className="relative flex flex-col overflow-hidden border-l border-t px-8 py-14">
-              <Rain
-                width={500}
-                height={1000}
-                className="absolute inset-0 z-[-1] mix-blend-difference"
-              />
-              <h2 className="text-3xl font-bold">
-                Create your first documentation.
+            <div className="relative flex flex-col gap-8 overflow-hidden border-l border-t px-8 py-14">
+              <h2 className="text-3xl font-semibold md:text-4xl">
+                Build Your Docs.
               </h2>
-              <ul className="my-8 flex flex-col gap-6">
+              <ul className="mt-8 flex flex-col gap-6">
                 <li>
-                  <span className="font-medium">
-                    <BatteryChargingIcon className="inline" /> Battery
-                    guaranteed.
+                  <span className="flex flex-row items-center gap-2 font-medium">
+                    <BatteryChargingIcon className="size-5" />
+                    Battery guaranteed.
                   </span>
-                  <span className="ml-2 text-muted-foreground">
+                  <span className="mt-2 text-sm text-muted-foreground">
                     Actively maintained, open for contributions.
                   </span>
                 </li>
                 <li>
-                  <span className="font-medium">
-                    <GithubIcon className="inline" /> Fully open-source.
+                  <span className="flex flex-row items-center gap-2 font-medium">
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="size-5"
+                      fill="currentColor"
+                    >
+                      <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+                    </svg>
+                    Fully open-source.
                   </span>
-                  <span className="ml-2 text-muted-foreground">
+                  <span className="mt-2 text-sm text-muted-foreground">
                     Open source, available on Github.
                   </span>
                 </li>
                 <li>
-                  <span className="font-medium">
-                    <TimerIcon className="inline" /> Within seconds.
+                  <span className="flex flex-row items-center gap-2 font-medium">
+                    <TimerIcon className="size-5" />
+                    Within seconds.
                   </span>
-                  <span className="ml-2 text-muted-foreground">
+                  <span className="mt-2 text-sm text-muted-foreground">
                     Initialize a new project instantly with CLI.
                   </span>
                 </li>
               </ul>
-              <div className="mt-auto flex flex-row flex-wrap gap-2 border-t pt-8">
+              <div className="flex flex-row flex-wrap gap-2 border-t pt-8">
                 <Link href="/docs" className={cn(buttonVariants())}>
                   Read docs
                 </Link>
@@ -161,7 +163,7 @@ const linkItemVariants = cva('transition-colors hover:bg-muted');
 function Integration({
   className,
   ...props
-}: HTMLAttributes<HTMLDivElement>): JSX.Element {
+}: HTMLAttributes<HTMLDivElement>): React.ReactElement {
   return (
     <div
       className={cn(
@@ -219,7 +221,7 @@ const searchItemVariants = cva(
   'flex flex-row items-center gap-2 rounded-md p-2 text-sm text-popover-foreground',
 );
 
-function Search(): JSX.Element {
+function Search(): React.ReactElement {
   return (
     <div className="mt-6 rounded-lg bg-gradient-to-b from-border p-px">
       <div className="flex select-none flex-col rounded-[inherit] bg-gradient-to-b from-popover">
@@ -251,7 +253,7 @@ function Search(): JSX.Element {
   );
 }
 
-function Highlights(): JSX.Element {
+function Highlights(): React.ReactElement {
   return (
     <div className="grid grid-cols-1 border-r md:grid-cols-2 lg:grid-cols-3">
       <Highlight icon={RocketIcon} heading="Light and Fast.">
@@ -287,7 +289,7 @@ function Highlight({
   icon: LucideIcon;
   heading: ReactNode;
   children: ReactNode;
-}): JSX.Element {
+}): React.ReactElement {
   return (
     <div className="border-l border-t px-6 py-12">
       <div className="mb-4 flex flex-row items-center gap-2 text-muted-foreground">
@@ -299,7 +301,7 @@ function Highlight({
   );
 }
 
-function Hero(): JSX.Element {
+function Hero(): React.ReactElement {
   return (
     <div className="container relative z-[2] flex flex-col items-center overflow-hidden border-x border-t bg-background px-6 pt-12 text-center md:pt-20">
       <h1 className="mb-6 text-4xl font-semibold md:text-5xl">
@@ -310,8 +312,7 @@ function Hero(): JSX.Element {
         <b className="font-medium text-foreground">
           excellent UI and user experience
         </b>
-        . Allow yourself to take advantage of Next.js App Router and React Server
-        Component.
+        . Using the power of Next.js App Router and React Component.
       </p>
       <div className="inline-flex items-center gap-3">
         <Link
@@ -368,9 +369,6 @@ function Hero(): JSX.Element {
           cy="250"
           r="250"
           fill="url(#Gradient1)"
-          stroke="rgb(100,100,100)"
-          strokeDashoffset="4000"
-          strokeDasharray="4000"
           filter="url(#noiseFilter)"
           transform="translate(0 500)"
         >
@@ -401,7 +399,7 @@ function Hero(): JSX.Element {
   );
 }
 
-function Introduction(): JSX.Element {
+function Introduction(): React.ReactElement {
   return (
     <div className="grid grid-cols-1 border-r md:grid-cols-2">
       <div className="flex flex-col border-l border-t px-6 py-12 md:py-16">
@@ -465,7 +463,7 @@ function Introduction(): JSX.Element {
   );
 }
 
-function Features(): JSX.Element {
+function Features(): React.ReactElement {
   return (
     <div className="grid grid-cols-1 border-r md:grid-cols-2">
       <Feature
@@ -473,7 +471,7 @@ function Features(): JSX.Element {
         subheading="Multiple Sources"
         heading="Your source. Your choice"
         description="Native support for different content sources including Contentlayer
-          and the official next/mdx loader."
+          and the official MDX loader."
       >
         <div className="mt-8 flex flex-col">
           <SourceSVG className="h-auto w-full" />
@@ -495,7 +493,7 @@ function Features(): JSX.Element {
       </Feature>
       <Feature
         icon={SearchIcon}
-        subheading="Algolias Integration"
+        subheading="Search Integration"
         heading="Enhance your search experience."
         description="Integrate with Algolia Search in your docs easily."
       >
@@ -575,7 +573,7 @@ function Feature({
   subheading: ReactNode;
   heading: ReactNode;
   description: ReactNode;
-}): JSX.Element {
+}): React.ReactElement {
   return (
     <div
       className={cn('border-l border-t px-6 py-12 md:py-16', className)}

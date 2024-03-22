@@ -11,7 +11,7 @@ import { useTreeContext } from './contexts/tree';
 export * from '@/components/toc';
 export * from '@/components/breadcrumb';
 
-export function LastUpdate(props: { date: Date }): JSX.Element {
+export function LastUpdate(props: { date: Date }): React.ReactElement {
   const { text } = useI18n();
   const [date, setDate] = useState('');
 
@@ -41,7 +41,7 @@ const footerItem = cva(
   'flex flex-row items-center gap-2 text-muted-foreground transition-colors hover:text-foreground',
 );
 
-export function Footer({ items }: FooterProps): JSX.Element {
+export function Footer({ items }: FooterProps): React.ReactElement {
   const tree = useTreeContext();
   const pathname = usePathname();
 
@@ -66,7 +66,7 @@ export function Footer({ items }: FooterProps): JSX.Element {
         </Link>
       ) : null}
       {next ? (
-        <Link href={next.url} className={footerItem({ className: 'ml-auto' })}>
+        <Link href={next.url} className={footerItem({ className: 'ms-auto' })}>
           <p className="text-end font-medium text-foreground">{next.name}</p>
           <ChevronRightIcon className="size-5 shrink-0" />
         </Link>

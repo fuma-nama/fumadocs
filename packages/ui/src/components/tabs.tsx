@@ -56,7 +56,7 @@ export function Tabs({
   persist = false,
   defaultIndex = 0,
   children,
-}: TabsProps): JSX.Element {
+}: TabsProps): React.ReactElement {
   const values = useMemo(() => items.map((item) => toValue(item)), [items]);
   const [value, setValue] = useState(values[defaultIndex]);
 
@@ -112,7 +112,7 @@ export function Tab({
   value,
   className,
   ...props
-}: TabsContentProps): JSX.Element {
+}: TabsContentProps): React.ReactElement {
   return (
     <Primitive.TabsContent
       value={toValue(value)}

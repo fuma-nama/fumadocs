@@ -2,7 +2,9 @@ import Link, { type LinkProps } from 'fumadocs-core/link';
 import type { HTMLAttributes, ReactNode } from 'react';
 import { cn } from '@/utils/cn';
 
-export function Cards(props: HTMLAttributes<HTMLDivElement>): JSX.Element {
+export function Cards(
+  props: HTMLAttributes<HTMLDivElement>,
+): React.ReactElement {
   return (
     <div
       {...props}
@@ -24,7 +26,7 @@ export function Card({
   title,
   description,
   ...props
-}: CardProps): JSX.Element {
+}: CardProps): React.ReactElement {
   return (
     <Link
       {...props}

@@ -51,7 +51,7 @@ export function DocsPage({
   breadcrumb = {},
   footer = {},
   ...props
-}: DocsPageProps): JSX.Element {
+}: DocsPageProps): React.ReactElement {
   return (
     <>
       <article className="flex w-0 flex-1 flex-col gap-6 py-10">
@@ -87,7 +87,7 @@ interface TOCProps {
   footer: ReactNode;
 }
 
-function Toc(props: TOCProps): JSX.Element {
+function Toc(props: TOCProps): React.ReactElement {
   return (
     <div className="sticky top-16 flex h-body w-[220px] flex-col gap-4 divide-y py-10 max-lg:hidden xl:w-[260px]">
       {props.header}

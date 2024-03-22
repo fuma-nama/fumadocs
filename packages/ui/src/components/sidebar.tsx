@@ -77,7 +77,7 @@ export function Sidebar({
   components,
   items = [],
   defaultOpenLevel = 1,
-}: SidebarProps): JSX.Element {
+}: SidebarProps): React.ReactElement {
   const [open] = useSidebarCollapse();
   const { root } = useTreeContext();
   const context = useMemo<SidebarContext>(
@@ -134,7 +134,11 @@ interface NodeListProps extends HTMLAttributes<HTMLDivElement> {
   level?: number;
 }
 
-function NodeList({ items, level = 0, ...props }: NodeListProps): JSX.Element {
+function NodeList({
+  items,
+  level = 0,
+  ...props
+}: NodeListProps): React.ReactElement {
   const { components } = useContext(SidebarContext);
 
   return (
@@ -161,10 +165,10 @@ function BaseItem({
 }: {
   item: LinkItem;
   nested?: boolean;
-}): JSX.Element {
+}): React.ReactElement {
   const pathname = usePathname();
   const active = isActive(item.url, pathname, nested);
-  const defaultIcon = item.external ? <ExternalLinkIcon /> : null;
+  const icon = item.icon ?? (item.external ? <ExternalLinkIcon /> : null);
 
   return (
     <Link
@@ -172,7 +176,7 @@ function BaseItem({
       external={item.external}
       className={cn(itemVariants({ active }))}
     >
-      {item.icon ?? defaultIcon}
+      {icon}
       {item.text}
     </Link>
   );
@@ -184,7 +188,7 @@ function FolderNode({
 }: {
   item: PageTree.Folder;
   level: number;
-}): JSX.Element {
+}): React.ReactElement {
   const { defaultOpenLevel } = useContext(SidebarContext);
   const pathname = usePathname();
   const active = index !== undefined && isActive(index.url, pathname, false);
@@ -192,13 +196,14 @@ function FolderNode({
     () => hasActive(children, pathname),
     [children, pathname],
   );
-  const [extend, setExtend] = useState(
-    active || childActive || defaultOpenLevel >= level || defaultOpen,
-  );
+  const shouldExtend =
+    active || childActive || defaultOpenLevel >= level || defaultOpen;
+
+  const [extend, setExtend] = useState(shouldExtend);
 
   useEffect(() => {
-    if (active || childActive) setExtend(true);
-  }, [active, childActive]);
+    if (shouldExtend) setExtend(true);
+  }, [shouldExtend]);
 
   const content = (
     <>
@@ -209,7 +214,7 @@ function FolderNode({
           setExtend((prev) => !prev);
           e.preventDefault();
         }}
-        className={cn('ml-auto transition-transform', !extend && '-rotate-90')}
+        className={cn('ms-auto transition-transform', !extend && '-rotate-90')}
       />
     </>
   );
@@ -231,7 +236,7 @@ function FolderNode({
       </CollapsibleTrigger>
       <CollapsibleContent>
         <NodeList
-          className="ml-4 flex flex-col border-l py-2 pl-2"
+          className="ms-4 flex flex-col border-s py-2 ps-2"
           items={children}
           level={level}
         />
@@ -240,6 +245,10 @@ function FolderNode({
   );
 }
 
-function SeparatorNode({ item }: { item: PageTree.Separator }): JSX.Element {
+function SeparatorNode({
+  item,
+}: {
+  item: PageTree.Separator;
+}): React.ReactElement {
   return <p className="mb-2 mt-8 px-2 font-medium first:mt-0">{item.name}</p>;
 }

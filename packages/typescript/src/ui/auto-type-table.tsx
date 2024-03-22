@@ -16,7 +16,7 @@ export function AutoTypeTable({
   path: string;
   name: string;
   options?: GenerateOptions;
-}): JSX.Element {
+}): React.ReactElement {
   const output = generateDocumentation(path, name, options);
 
   if (!output) throw new Error(`${name} in ${path} doesn't exist`);

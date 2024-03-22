@@ -1,7 +1,9 @@
 import type { HTMLAttributes } from 'react';
 import { cn } from '@/utils/cn';
 
-export function Wrapper(props: HTMLAttributes<HTMLDivElement>): JSX.Element {
+export function Wrapper(
+  props: HTMLAttributes<HTMLDivElement>,
+): React.ReactElement {
   return (
     <div
       {...props}

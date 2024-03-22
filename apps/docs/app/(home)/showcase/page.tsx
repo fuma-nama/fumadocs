@@ -1,12 +1,11 @@
 import { PlusIcon } from 'lucide-react';
-import Image from 'next/image';
+import Image, { type StaticImageData } from 'next/image';
 import { buttonVariants } from '@/components/ui/button';
 import NextFAQImage from '@/public/showcases/next-faq.png';
 import YeecordImage from '@/public/showcases/yeecord.png';
 import { cn } from '@/utils/cn';
 import { createMetadata } from '@/utils/metadata';
 import NuqsImage from '@/public/showcases/nuqs.jpg';
-import TypelyticsImage from '@/public/showcases/typelytics.png';
 import FrameGround from '@/public/showcases/frameground.png';
 
 export const metadata = createMetadata({
@@ -17,18 +16,39 @@ export const metadata = createMetadata({
   },
 });
 
-export default function Showcase(): JSX.Element {
-  const showcases = [
-    [
-      NextFAQImage,
-      'Next.js Discord Common Questions',
-      'https://nextjs-discord-common-questions.joulev.dev',
-    ],
-    [YeecordImage, 'Yeecord Docs', 'https://yeecord.com'],
-    [NuqsImage, 'nuqs', 'https://nuqs.47ng.com'],
-    [TypelyticsImage, 'Typelytics', 'https://typelytics.rhyssul.com/'],
-    [FrameGround, 'FrameGround', 'https://docs.frameground.tech/'],
-  ] as const;
+interface ShowcaseObject {
+  image?: StaticImageData;
+  name: string;
+  url: string;
+}
+
+export default function Showcase(): React.ReactElement {
+  const showcases: ShowcaseObject[] = [
+    {
+      image: NextFAQImage,
+      name: 'Next.js Discord Common Questions',
+      url: 'https://nextjs-faq.com',
+    },
+    {
+      image: YeecordImage,
+      name: 'Yeecord Docs',
+      url: 'https://yeecord.com',
+    },
+    { image: NuqsImage, name: 'nuqs', url: 'https://nuqs.47ng.com' },
+    {
+      name: 'Typelytics',
+      url: 'https://typelytics.rhyssul.com',
+    },
+    {
+      image: FrameGround,
+      name: 'FrameGround',
+      url: 'https://docs.frameground.tech',
+    },
+    {
+      name: "RUNFUNRUN's Blog",
+      url: 'https://www.runfunrun.tech',
+    },
+  ];
 
   return (
     <main className="pb-16">
@@ -111,26 +131,49 @@ export default function Showcase(): JSX.Element {
       </div>
 
       <div className="container mt-12 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {showcases.map(([image, name, href]) => (
-          <a
-            key={href}
-            href={href}
-            target="_blank"
-            rel="noreferrer noopener"
-            className="relative overflow-hidden rounded-lg border shadow-lg transition-all hover:border-primary/30 hover:shadow-primary/10"
-          >
-            <Image
-              alt="Preview"
-              src={image}
-              placeholder="blur"
-              className="h-full object-cover"
-            />
-            <p className="absolute inset-x-0 bottom-0 mt-2 bg-gradient-to-t from-black bg-no-repeat p-6 pt-8 text-sm font-medium text-white">
-              {name}
-            </p>
-          </a>
+        {showcases.map((showcase) => (
+          <ShowcaseItem key={showcase.url} {...showcase} />
         ))}
       </div>
     </main>
+  );
+}
+
+function ShowcaseItem({
+  name,
+  url,
+  image,
+}: ShowcaseObject): React.ReactElement {
+  if (image) {
+    return (
+      <a
+        href={url}
+        target="_blank"
+        rel="noreferrer noopener"
+        className="relative flex aspect-video flex-col rounded-lg border shadow-md transition-all hover:border-primary/30"
+      >
+        <Image
+          alt="Preview"
+          src={image}
+          placeholder="blur"
+          className="absolute size-full rounded-lg object-cover"
+        />
+        <p className="z-[2] mt-auto rounded-b-lg bg-gradient-to-t from-black p-6 pt-8 text-sm font-medium text-white">
+          {name}
+        </p>
+      </a>
+    );
+  }
+
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noreferrer noopener"
+      className="flex aspect-video flex-col rounded-lg border bg-gradient-to-br from-card to-primary/30 p-8 shadow-md transition-all hover:bg-accent/80"
+    >
+      <p className="mb-4 text-muted-foreground">{new URL(url).hostname}</p>
+      <p className="text-xl font-semibold">{name}</p>
+    </a>
   );
 }

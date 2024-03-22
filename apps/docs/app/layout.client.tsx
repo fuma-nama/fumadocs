@@ -18,17 +18,21 @@ const itemVariants = cva(
   },
 );
 
-export function Body({ children }: { children: ReactNode }): JSX.Element {
+export function Body({
+  children,
+}: {
+  children: ReactNode;
+}): React.ReactElement {
   const mode = useMode();
 
   return <div className={mode}>{children}</div>;
 }
 
-export function NavChildren(): JSX.Element {
+export function NavChildren(): React.ReactElement {
   const mode = useMode();
 
   return (
-    <div className="rounded-md border bg-secondary/50 p-1 text-sm text-muted-foreground max-md:absolute max-md:left-[50%] max-md:translate-x-[-50%]">
+    <div className="rounded-md border bg-secondary/50 p-1 text-sm text-muted-foreground max-md:absolute max-md:left-1/2 max-md:-translate-x-1/2">
       {modes.map((m) => (
         <Link
           key={m.param}
@@ -47,7 +51,7 @@ export function useMode(): string | undefined {
   return Array.isArray(slug) && slug.length > 0 ? slug[0] : undefined;
 }
 
-export function SidebarBanner(): JSX.Element {
+export function SidebarBanner(): React.ReactElement {
   const mode = useMode();
   const currentMode = modes.find((item) => item.param === mode) ?? modes[0];
   const Icon = currentMode.icon;

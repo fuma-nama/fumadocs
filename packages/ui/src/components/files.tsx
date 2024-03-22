@@ -17,7 +17,7 @@ const item = cva(
 export function Files({
   className,
   ...props
-}: HTMLAttributes<HTMLDivElement>): JSX.Element {
+}: HTMLAttributes<HTMLDivElement>): React.ReactElement {
   return (
     <div
       className={cn('not-prose rounded-md border bg-card p-2', className)}
@@ -49,7 +49,7 @@ export function File({
   icon = <FileIcon />,
   className,
   ...rest
-}: FileProps): JSX.Element {
+}: FileProps): React.ReactElement {
   return (
     <div className={cn(item({ className }))} {...rest}>
       {icon}
@@ -62,7 +62,7 @@ export function Folder({
   name,
   defaultOpen = false,
   ...props
-}: FolderProps): JSX.Element {
+}: FolderProps): React.ReactElement {
   const [open, setOpen] = useState(defaultOpen);
 
   return (

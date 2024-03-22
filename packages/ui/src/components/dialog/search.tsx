@@ -4,16 +4,15 @@ import { useRouter } from 'next/navigation';
 import { useMemo, type ReactNode } from 'react';
 import { useI18n } from '@/contexts/i18n';
 import {
-  Command,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
+  CommandDialog,
 } from '@/components/ui/command';
 import { cn } from '@/utils/cn';
 import { useSearchContext } from '@/contexts/search';
-import { Dialog, DialogContent, DialogFooter } from '../ui/dialog';
 
 export type SearchLink = [name: string, href: string];
 
@@ -27,14 +26,10 @@ export interface SharedProps {
   links?: SearchLink[];
 }
 
-interface SearchDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  children?: ReactNode;
-}
-
-export function SearchDialog(props: SearchDialogProps): JSX.Element {
-  return <Dialog {...props}>{props.children}</Dialog>;
+interface SearchDialogProps
+  extends SharedProps,
+    Omit<SearchContentProps, 'defaultItems'> {
+  footer?: ReactNode;
 }
 
 interface SearchContentProps {
@@ -42,21 +37,31 @@ interface SearchContentProps {
   onSearchChange: (v: string) => void;
   results: SortedResult[] | 'empty';
 
-  footer?: ReactNode;
-  links?: SearchLink[];
+  defaultItems?: SortedResult[];
 }
 
-export function SearchDialogContent({
+export function SearchDialog({
+  open,
+  onOpenChange,
   footer,
+  links = [],
   ...props
-}: SearchContentProps): JSX.Element {
+}: SearchDialogProps): React.ReactElement {
+  const defaultItems = useMemo(
+    () =>
+      links.map<SortedResult>(([name, link]) => ({
+        type: 'page',
+        id: name,
+        content: name,
+        url: link,
+      })),
+    [links],
+  );
+
   return (
-    <DialogContent className="p-0">
-      <Search {...props} />
-      {footer ? (
-        <DialogFooter className="border-t">{footer}</DialogFooter>
-      ) : null}
-    </DialogContent>
+    <CommandDialog open={open} onOpenChange={onOpenChange} footer={footer}>
+      <Search defaultItems={defaultItems} {...props} />
+    </CommandDialog>
   );
 }
 
@@ -69,21 +74,12 @@ const icons = {
 function Search({
   search,
   onSearchChange,
-  links = [],
+  defaultItems = [],
   results,
-}: SearchContentProps): JSX.Element {
+}: SearchContentProps): React.ReactElement {
   const { text } = useI18n();
   const router = useRouter();
   const { setOpenSearch } = useSearchContext();
-
-  const defaultItems = useMemo<SortedResult[]>(() => {
-    return links.map(([name, link]) => ({
-      type: 'page',
-      id: name,
-      content: name,
-      url: link,
-    }));
-  }, [links]);
 
   const items = results === 'empty' ? defaultItems : results;
   const hideList = results === 'empty' && defaultItems.length === 0;
@@ -94,7 +90,7 @@ function Search({
   };
 
   return (
-    <Command>
+    <>
       <CommandInput
         value={search}
         onValueChange={onSearchChange}
@@ -119,6 +115,6 @@ function Search({
           ))}
         </CommandGroup>
       </CommandList>
-    </Command>
+    </>
   );
 }

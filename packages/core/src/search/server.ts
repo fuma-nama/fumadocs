@@ -217,7 +217,7 @@ export function initSearchAPIAdvanced({
 
     for (const heading of data.headings) {
       index.add({
-        id: page.id + id++,
+        id: page.id + (id++).toString(),
         page_id: page.id,
         type: 'heading',
         tag: page.tag,
@@ -228,7 +228,7 @@ export function initSearchAPIAdvanced({
 
     for (const content of data.contents) {
       index.add({
-        id: page.id + id++,
+        id: page.id + (id++).toString(),
         page_id: page.id,
         tag: page.tag,
         type: 'text',

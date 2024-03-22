@@ -8,7 +8,11 @@ const SearchDialog = dynamic(() => import('@/components/search'), {
   ssr: false,
 });
 
-export function Provider({ children }: { children: ReactNode }): JSX.Element {
+export function Provider({
+  children,
+}: {
+  children: ReactNode;
+}): React.ReactElement {
   return (
     <RootProvider
       search={{

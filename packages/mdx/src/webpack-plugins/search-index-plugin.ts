@@ -21,19 +21,15 @@ export interface SearchIndex {
 }
 
 export interface Options {
+  rootContentDir: string;
+  rootMapFile: string;
+
   /**
    * Only build search indexes in production builds
    *
    * @defaultValue true
    */
   productionOnly?: boolean;
-
-  /**
-   * Absolute path of root content directory
-   */
-  rootContentDir: string;
-
-  rootMapFile: string;
 
   /**
    * @param path - MDX file path relative to root content dir

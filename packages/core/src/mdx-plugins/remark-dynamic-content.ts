@@ -1,8 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import type { Root, RootContent } from 'mdast';
+import type { Root } from 'mdast';
 import type { Transformer } from 'unified';
-import { visit } from './unist-visit';
+import { visit } from 'unist-util-visit';
 
 const regex = /^\|reference:(?<path>.+)\|/;
 
@@ -35,8 +35,8 @@ export function remarkDynamicContent(
   } = options;
 
   return (tree) => {
-    visit(tree, filter, (node: RootContent) => {
-      if (!('value' in node) || typeof node.value !== 'string') return;
+    visit(tree, filter, (node) => {
+      if (!('value' in node) || typeof node.value === 'string') return;
       const result = regex.exec(node.value);
 
       if (result?.groups?.path) {

@@ -1,6 +1,8 @@
 import type { SVGProps } from 'react';
 
-export function FumaDocsSVG(props: SVGProps<SVGSVGElement>): JSX.Element {
+export function FumaDocsSVG(
+  props: SVGProps<SVGSVGElement>,
+): React.ReactElement {
   return (
     <svg
       width="80"
@@ -29,7 +31,7 @@ export function FumaDocsSVG(props: SVGProps<SVGSVGElement>): JSX.Element {
   );
 }
 
-export function NextSVG(props: SVGProps<SVGSVGElement>): JSX.Element {
+export function NextSVG(props: SVGProps<SVGSVGElement>): React.ReactElement {
   return (
     <svg
       aria-label="Next.js logomark"
@@ -101,7 +103,7 @@ export function NextSVG(props: SVGProps<SVGSVGElement>): JSX.Element {
   );
 }
 
-export function SourceSVG(props: SVGProps<SVGSVGElement>): JSX.Element {
+export function SourceSVG(props: SVGProps<SVGSVGElement>): React.ReactElement {
   return (
     <svg
       width="1320"
@@ -231,7 +233,7 @@ export function SourceSVG(props: SVGProps<SVGSVGElement>): JSX.Element {
   );
 }
 
-export function VercelLogo(props: SVGProps<SVGSVGElement>): JSX.Element {
+export function VercelLogo(props: SVGProps<SVGSVGElement>): React.ReactElement {
   return (
     <svg
       aria-label="Vercel logotype"
@@ -249,7 +251,9 @@ export function VercelLogo(props: SVGProps<SVGSVGElement>): JSX.Element {
   );
 }
 
-export function NetlifyLogo(props: SVGProps<SVGSVGElement>): JSX.Element {
+export function NetlifyLogo(
+  props: SVGProps<SVGSVGElement>,
+): React.ReactElement {
   return (
     <svg
       aria-label="Netlify"
@@ -316,7 +320,9 @@ export function NetlifyLogo(props: SVGProps<SVGSVGElement>): JSX.Element {
   );
 }
 
-export function ContentlayerIcon(props: SVGProps<SVGSVGElement>): JSX.Element {
+export function ContentlayerIcon(
+  props: SVGProps<SVGSVGElement>,
+): React.ReactElement {
   return (
     <svg
       aria-label="Contentlayer Icon"
@@ -336,7 +342,9 @@ export function ContentlayerIcon(props: SVGProps<SVGSVGElement>): JSX.Element {
   );
 }
 
-export function OpenAPIIcon(props: SVGProps<SVGSVGElement>): JSX.Element {
+export function OpenAPIIcon(
+  props: SVGProps<SVGSVGElement>,
+): React.ReactElement {
   return (
     <svg fill="currentColor" viewBox="0 0 512 512" {...props}>
       <path d="m.2041784 294.3757629 135.0729218-.0019836c1.0510101 10.3673706 3.8841248 20.5690308 8.4522095 30.170166l-115.790062 69.7536621c-15.1902405-26.1945495-24.7731477-59.514801-27.7350693-99.9218445zm131.8023066 196.8029786 51.4067841-124.8407288c-5.2182617-2.7826233-10.2264862-6.0957642-14.9382172-9.9553528l-95.4706802 95.4720459c19.4898223 17.5570679 39.5628662 30.7094116 59.0021133 39.3240357zm-65.6047211-45.6471253 95.2843628-95.2860413c-4.9330902-4.9628906-9.4824219-10.8501282-13.6674042-17.6151123l-115.5066642 69.5827027c10.4910965 17.068634 22.1482162 31.8469848 33.8897056 43.3184509zm313.9973145 6.3275757-95.5295105-95.5253601c-1.0485229.8474121-2.1081848 1.671936-3.184845 2.4666138l69.7098999 115.7191772c9.7306824-6.0542297 19.3898926-13.8226013 29.0044556-22.6604309zm-36.7403565 27.5314331-69.5648804-115.4782104c-25.9638519 14.4993591-53.3182526 17.5528564-82.4063263 6.3365173l-51.3009338 124.5834045c70.200531 28.4663086 142.9616852 20.3123169 203.2721405-15.4417114zm-171.9461059-267.7199554-69.7079392-115.7203217c-10.1640396 6.5237503-19.8186493 14.1064529-29.0061646 22.6601715l95.5275803 95.5278625c1.0482636-.8363342 2.1095887-1.6597595 3.1865235-2.4677123zm-171.712616 73.5650482 134.7621918-.0019531c.291153-23.8374939 8.7095032-45.6818237 26.9275513-65.005722l-95.2863083-95.2865982c-43.9871293 46.6117019-65.8919295 100.1147994-66.4034348 160.2942733zm226.6937714-91.9374695.0058594-134.7585754c-44.7272644.2738724-84.0045013 12.32621-116.959053 32.5391159l69.5626297 115.4798889c13.0764617-7.6767197 28.6641692-12.980278 47.3905639-13.2604294zm186.4042816-37.1177979-99.4490967 99.4510498c2.2626953 6.6661987 3.7337646 13.5315552 4.4528503 20.4605103h135.0907898c-.8839111-40.9807434-14.4047241-80.9386597-40.0945434-119.9115601zm40.2803039 129.0516358h-134.747406c-.4680481 25.240448-9.8990479 48.2441101-26.923645 65.0134888l95.2901917 95.2860413c43.8191833-43.1222535 65.1218261-96.9472352 66.3808593-160.2995301zm-217.5386657-226.4921341-.0058594 135.0865784c7.082489.8026276 13.8835602 2.3424988 20.4658203 4.4556732l99.4153442-99.4150772c-35.131958-24.5753861-76.5397338-38.3618508-119.8753051-40.1271744zm195.1100769-56.1426528c-39.1646423 11.456749-55.5329285 55.1829491-38.7815857 88.6712189l-137.3599701 137.3618682c-32.4068756-16.1573944-74.9024811-1.5699463-87.7949829 36.0340729-15.7162628 45.8401489 24.2427673 91.8019104 71.7535858 82.5325317 42.0110779-8.1963196 62.3093567-54.1882019 44.4657593-90.0109253l137.4894714-137.4859314c34.6590576 17.2256775 79.5329285-1.0651627 89.3959961-41.653656 11.4301758-47.0377617-32.6579895-89.0548125-79.1682739-75.449179z" />
@@ -344,7 +352,7 @@ export function OpenAPIIcon(props: SVGProps<SVGSVGElement>): JSX.Element {
   );
 }
 
-export function EarthIcon(props: SVGProps<SVGSVGElement>): JSX.Element {
+export function EarthIcon(props: SVGProps<SVGSVGElement>): React.ReactElement {
   return (
     <svg width="900" height="900" viewBox="0 0 900 900" fill="none" {...props}>
       <circle cx="450" cy="450" r="450" fill="url(#paint0_linear_26_28)" />

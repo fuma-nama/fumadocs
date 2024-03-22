@@ -175,9 +175,6 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
             '2xl': '1400px',
           },
         },
-        fontSize: {
-          medium: '15px',
-        },
         height: {
           body: [
             'calc(100vh - 4rem) /* fallback */',
