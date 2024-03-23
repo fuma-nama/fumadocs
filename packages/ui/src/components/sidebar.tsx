@@ -114,7 +114,7 @@ export function Sidebar({
             color: 'ghost',
             size: 'icon',
           }),
-          'absolute right-2 top-4 transition-opacity group-hover/sidebar:opacity-100 z-[2]',
+          'absolute right-2 top-4 z-[2] transition-opacity group-hover/sidebar:opacity-100 max-md:hidden',
           open ? 'opacity-0' : '-right-6',
           !collapsible && 'hidden',
         )}
