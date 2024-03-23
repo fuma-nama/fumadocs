@@ -1,17 +1,1 @@
-[
-  {
-    "depth": 1,
-    "title": "Heading 1",
-    "url": "#heading-1",
-  },
-  {
-    "depth": 2,
-    "title": "Heading 2",
-    "url": "#heading-2",
-  },
-  {
-    "depth": 3,
-    "title": "Heading 3",
-    "url": "#heading-3",
-  },
-]
+[{"title":"Heading 1","url":"#heading-1","depth":1},{"title":"Heading 2","url":"#heading-2","depth":2},{"title":"Heading 3","url":"#heading-3","depth":3}]
