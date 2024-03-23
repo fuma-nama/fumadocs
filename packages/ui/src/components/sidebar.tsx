@@ -69,7 +69,7 @@ const itemVariants = cva(
 const defaultComponents: Components = {
   Folder: FolderNode,
   Separator: SeparatorNode,
-  Item: ({ item: { name, ...rest } }) => (
+  Item: ({ item: { name, type, ...rest } }) => (
     <BaseItem item={{ text: name, ...rest }} />
   ),
 };
@@ -114,7 +114,7 @@ export function Sidebar({
             color: 'ghost',
             size: 'icon',
           }),
-          'absolute right-2 top-4 z-[2] transition-opacity group-hover/sidebar:opacity-100 max-md:hidden',
+          'absolute right-2 top-4 z-[2] transition-all group-hover/sidebar:opacity-100 max-md:hidden',
           open ? 'opacity-0' : '-right-6',
           !collapsible && 'hidden',
         )}

@@ -1,12 +1,6 @@
 'use client';
 import { cva } from 'class-variance-authority';
-import {
-  MenuIcon,
-  MoreVerticalIcon,
-  SearchIcon,
-  SidebarCloseIcon,
-  SidebarOpenIcon,
-} from 'lucide-react';
+import { MenuIcon, MoreVerticalIcon, SearchIcon } from 'lucide-react';
 import Link from 'fumadocs-core/link';
 import { SidebarTrigger } from 'fumadocs-core/sidebar';
 import { usePathname } from 'next/navigation';
@@ -19,7 +13,6 @@ import {
   useCallback,
 } from 'react';
 import { cn } from '@/utils/cn';
-import { useSidebarCollapse } from '@/contexts/sidebar';
 import { useSearchContext } from '@/contexts/search';
 import { useI18n } from '@/contexts/i18n';
 import { ThemeToggle } from '@/components/theme-toggle';
@@ -50,7 +43,12 @@ export interface NavProps {
   url?: string;
 
   items: LinkItem[];
-  links: NavLinkProps[];
+
+  // todo: Remove in next major
+  /**
+   * @deprecated Use `LayoutOptions.links` option instead
+   */
+  links?: NavLinkProps[];
   enableSidebar: boolean;
 
   /**
@@ -64,7 +62,6 @@ export interface NavProps {
 export function Nav({
   title,
   url = '/',
-  links,
   items,
   transparentMode = 'none',
   enableSidebar,
@@ -103,9 +100,11 @@ export function Nav({
           {title}
         </Link>
         {children}
-        {items.map((item) => (
-          <NavItem key={item.url} item={item} className="max-lg:hidden" />
-        ))}
+        {items
+          .filter((item) => item.type === 'main' || !item.type)
+          .map((item) => (
+            <NavItem key={item.url} item={item} className="max-lg:hidden" />
+          ))}
         <div className="flex flex-1 flex-row items-center justify-end md:gap-2">
           <SearchToggle />
           {enableSidebar ? (
@@ -137,23 +136,25 @@ export function Nav({
               </PopoverContent>
             </Popover>
           )}
-          {links.map((item) => (
-            <Link
-              aria-label={item.label}
-              key={item.href}
-              href={item.href}
-              external={item.external}
-              className={cn(
-                buttonVariants({
-                  size: 'icon',
-                  color: 'ghost',
-                  className: 'max-md:hidden',
-                }),
-              )}
-            >
-              {item.icon}
-            </Link>
-          ))}
+          {items
+            .filter((item) => item.type === 'secondary')
+            .map((item) => (
+              <Link
+                aria-label={item.text}
+                key={item.url}
+                href={item.url}
+                external={item.external}
+                className={cn(
+                  buttonVariants({
+                    size: 'icon',
+                    color: 'ghost',
+                    className: 'max-lg:hidden',
+                  }),
+                )}
+              >
+                {item.icon}
+              </Link>
+            ))}
         </div>
       </nav>
     </header>
