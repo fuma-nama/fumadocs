@@ -60,7 +60,7 @@ export function Layout({
 }: BaseLayoutProps): React.ReactElement {
   return (
     <>
-      {getNav(false, false, links, nav)}
+      {getNav(false, links, nav)}
       {children}
     </>
   );
@@ -75,11 +75,11 @@ export function DocsLayout({
   children,
 }: DocsLayoutProps): React.ReactElement {
   const sidebarEnabled = sidebar.enabled ?? true;
-  const sidebarCollaspible = sidebarEnabled && (sidebar.collapsible ?? true);
+  const sidebarCollapsible = sidebarEnabled && (sidebar.collapsible ?? true);
 
   return (
     <TreeContextProvider tree={tree}>
-      {getNav(sidebarEnabled, sidebarCollaspible, links, nav)}
+      {getNav(sidebarEnabled, links, nav)}
       <div
         {...containerProps}
         className={cn(
@@ -94,6 +94,7 @@ export function DocsLayout({
             defaultOpenLevel={sidebar.defaultOpenLevel}
             banner={sidebar.banner}
             footer={sidebar.footer}
+            collapsible={sidebarCollapsible}
           />,
         )}
 
@@ -105,7 +106,6 @@ export function DocsLayout({
 
 function getNav(
   enableSidebar: boolean,
-  collapsibleSidebar: boolean,
   items: LinkItem[],
   { githubUrl, links, ...props }: Partial<NavOptions>,
 ): ReactNode {
@@ -134,7 +134,6 @@ function getNav(
       items={items}
       links={iconLinks}
       enableSidebar={enableSidebar}
-      collapsibleSidebar={collapsibleSidebar}
     >
       {props.children}
     </Nav>,

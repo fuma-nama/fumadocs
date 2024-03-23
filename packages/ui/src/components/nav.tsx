@@ -52,7 +52,6 @@ export interface NavProps {
   items: LinkItem[];
   links: NavLinkProps[];
   enableSidebar: boolean;
-  collapsibleSidebar: boolean;
 
   /**
    * When to use transparent navbar
@@ -69,7 +68,6 @@ export function Nav({
   items,
   transparentMode = 'none',
   enableSidebar,
-  collapsibleSidebar,
   children,
 }: NavProps): React.ReactElement {
   const [transparent, setTransparent] = useState(transparentMode !== 'none');
@@ -113,7 +111,7 @@ export function Nav({
           {enableSidebar ? (
             <>
               <ThemeToggle className="max-md:hidden" />
-              <SidebarToggle collapsible={collapsibleSidebar} />
+              <SidebarToggle />
             </>
           ) : (
             <Popover>
@@ -139,24 +137,23 @@ export function Nav({
               </PopoverContent>
             </Popover>
           )}
-          <div
-            className={cn(
-              'flex flex-row items-center border-s ps-2 max-md:hidden',
-              links.length === 0 && 'hidden',
-            )}
-          >
-            {links.map((item) => (
-              <Link
-                aria-label={item.label}
-                key={item.href}
-                href={item.href}
-                external={item.external}
-                className={cn(buttonVariants({ size: 'icon', color: 'ghost' }))}
-              >
-                {item.icon}
-              </Link>
-            ))}
-          </div>
+          {links.map((item) => (
+            <Link
+              aria-label={item.label}
+              key={item.href}
+              href={item.href}
+              external={item.external}
+              className={cn(
+                buttonVariants({
+                  size: 'icon',
+                  color: 'ghost',
+                  className: 'max-md:hidden',
+                }),
+              )}
+            >
+              {item.icon}
+            </Link>
+          ))}
         </div>
       </nav>
     </header>
@@ -205,46 +202,20 @@ function SearchToggle(): React.ReactElement {
   );
 }
 
-function SidebarToggle({
-  collapsible,
-}: {
-  collapsible: boolean;
-}): React.ReactElement {
-  const [open, setOpen] = useSidebarCollapse();
-
+function SidebarToggle(): React.ReactElement {
   return (
-    <>
-      <SidebarTrigger
-        aria-label="Toggle Sidebar"
-        className={cn(
-          buttonVariants({
-            size: 'icon',
-            color: 'ghost',
-            className: 'md:hidden',
-          }),
-        )}
-      >
-        <MenuIcon />
-      </SidebarTrigger>
-      {collapsible ? (
-        <button
-          type="button"
-          aria-label="Toggle Sidebar"
-          onClick={() => {
-            setOpen(!open);
-          }}
-          className={cn(
-            buttonVariants({
-              color: 'outline',
-              size: 'icon',
-              className: 'rounded-full max-md:hidden rtl:rotate-180',
-            }),
-          )}
-        >
-          {open ? <SidebarCloseIcon /> : <SidebarOpenIcon />}
-        </button>
-      ) : null}
-    </>
+    <SidebarTrigger
+      aria-label="Toggle Sidebar"
+      className={cn(
+        buttonVariants({
+          size: 'icon',
+          color: 'ghost',
+          className: 'md:hidden',
+        }),
+      )}
+    >
+      <MenuIcon />
+    </SidebarTrigger>
   );
 }
 

@@ -1,9 +1,14 @@
 import { cva } from 'class-variance-authority';
-import { ChevronDown, ExternalLinkIcon } from 'lucide-react';
+import {
+  ChevronDown,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ExternalLinkIcon,
+} from 'lucide-react';
 import type { PageTree } from 'fumadocs-core/server';
 import * as Base from 'fumadocs-core/sidebar';
 import { usePathname } from 'next/navigation';
-import type { FC, HTMLAttributes, ReactNode } from 'react';
+import * as React from 'react';
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import Link from 'fumadocs-core/link';
 import { cn } from '@/utils/cn';
@@ -12,6 +17,7 @@ import { useSidebarCollapse } from '@/contexts/sidebar';
 import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
 import { hasActive, isActive } from '@/utils/shared';
 import type { LinkItem } from '@/layout';
+import { buttonVariants } from '@/theme/variants';
 import {
   Collapsible,
   CollapsibleContent,
@@ -30,9 +36,11 @@ export interface SidebarProps {
    */
   defaultOpenLevel?: number;
 
+  collapsible?: boolean;
+
   components?: Partial<Components>;
-  banner?: ReactNode;
-  footer?: ReactNode;
+  banner?: React.ReactNode;
+  footer?: React.ReactNode;
 }
 
 interface SidebarContext {
@@ -41,13 +49,13 @@ interface SidebarContext {
 }
 
 interface Components {
-  Item: FC<{ item: PageTree.Item }>;
-  Folder: FC<{ item: PageTree.Folder; level: number }>;
-  Separator: FC<{ item: PageTree.Separator }>;
+  Item: React.FC<{ item: PageTree.Item }>;
+  Folder: React.FC<{ item: PageTree.Folder; level: number }>;
+  Separator: React.FC<{ item: PageTree.Separator }>;
 }
 
 const itemVariants = cva(
-  'flex flex-row items-center gap-2 rounded-md px-2 py-1.5 text-muted-foreground [&_svg]:size-4',
+  'flex w-full flex-row items-center gap-2 rounded-md px-2 py-1.5 text-muted-foreground [&_svg]:size-4',
   {
     variants: {
       active: {
@@ -77,8 +85,9 @@ export function Sidebar({
   components,
   items = [],
   defaultOpenLevel = 1,
+  collapsible = true,
 }: SidebarProps): React.ReactElement {
-  const [open] = useSidebarCollapse();
+  const [open, setOpen] = useSidebarCollapse();
   const { root } = useTreeContext();
   const context = useMemo<SidebarContext>(
     () => ({
@@ -92,13 +101,29 @@ export function Sidebar({
     <Base.SidebarList
       minWidth={768} // md
       className={cn(
-        'flex w-full flex-col text-[15px]',
-        !open
-          ? 'md:hidden'
-          : 'md:sticky md:top-16 md:h-body md:w-[240px] md:text-sm xl:w-[260px]',
+        'group/sidebar flex w-full flex-col text-[15px] md:sticky md:top-16 md:h-body md:w-[240px] md:text-sm xl:w-[260px]',
+        !open && 'md:!w-0',
         'max-md:fixed max-md:inset-0 max-md:z-40 max-md:bg-background/80 max-md:pt-16 max-md:backdrop-blur-md max-md:data-[open=false]:hidden',
       )}
     >
+      <button
+        type="button"
+        aria-label="Trigger Sidebar"
+        className={cn(
+          buttonVariants({
+            color: 'ghost',
+            size: 'icon',
+          }),
+          'absolute right-2 top-4 transition-opacity group-hover/sidebar:opacity-100 z-[2]',
+          open ? 'opacity-0' : '-right-6',
+          !collapsible && 'hidden',
+        )}
+        onClick={() => {
+          setOpen(!open);
+        }}
+      >
+        {open ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+      </button>
       <SidebarContext.Provider value={context}>
         <ScrollArea className="flex-1">
           <ScrollViewport>
@@ -129,7 +154,7 @@ export function Sidebar({
   );
 }
 
-interface NodeListProps extends HTMLAttributes<HTMLDivElement> {
+interface NodeListProps extends React.HTMLAttributes<HTMLDivElement> {
   items: PageTree.Node[];
   level?: number;
 }
@@ -198,42 +223,47 @@ function FolderNode({
   );
   const shouldExtend =
     active || childActive || defaultOpenLevel >= level || defaultOpen;
-
   const [extend, setExtend] = useState(shouldExtend);
 
   useEffect(() => {
     if (shouldExtend) setExtend(true);
   }, [shouldExtend]);
 
+  const onClick = React.useCallback(
+    (e: React.MouseEvent) => {
+      if (e.target !== e.currentTarget || active) {
+        setExtend((prev) => !prev);
+        e.preventDefault();
+      }
+    },
+    [active],
+  );
+
   const content = (
     <>
       {icon}
       {name}
       <ChevronDown
-        onClick={(e) => {
-          setExtend((prev) => !prev);
-          e.preventDefault();
-        }}
         className={cn('ms-auto transition-transform', !extend && '-rotate-90')}
       />
     </>
   );
 
   return (
-    <Collapsible
-      open={extend}
-      onOpenChange={!index || active ? setExtend : undefined}
-    >
-      <CollapsibleTrigger
-        className={cn(itemVariants({ active, className: 'w-full' }))}
-        asChild
-      >
-        {index ? (
-          <Link href={index.url}>{content}</Link>
-        ) : (
-          <button type="button">{content}</button>
-        )}
-      </CollapsibleTrigger>
+    <Collapsible open={extend} onOpenChange={setExtend}>
+      {index ? (
+        <Link
+          className={cn(itemVariants({ active }))}
+          href={index.url}
+          onClick={onClick}
+        >
+          {content}
+        </Link>
+      ) : (
+        <CollapsibleTrigger className={cn(itemVariants({ active }))}>
+          {content}
+        </CollapsibleTrigger>
+      )}
       <CollapsibleContent>
         <NodeList
           className="ms-4 flex flex-col border-s py-2 ps-2"
