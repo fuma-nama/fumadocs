@@ -1,5 +1,13 @@
 # next-docs-zeta
 
+## 10.1.1
+
+### Patch Changes
+
+- 779c599: Mark `getTableOfContentsFromPortableText` deprecated
+- 0c01300: Fix remark-dynamic-content ignored code blocks
+- 779c599: Support relative resolve path for remark-dynamic-content
+
 ## 10.1.0
 
 ## 10.0.5

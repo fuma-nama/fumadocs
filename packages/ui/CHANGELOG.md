@@ -1,5 +1,15 @@
 # next-docs-ui
 
+## 10.1.1
+
+### Patch Changes
+
+- 38d6f22: Improve RTL Layout experience
+- Updated dependencies [779c599]
+- Updated dependencies [0c01300]
+- Updated dependencies [779c599]
+  - fumadocs-core@10.1.1
+
 ## 10.1.0
 
 ### Minor Changes
