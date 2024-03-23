@@ -7,14 +7,25 @@ import { visit } from 'unist-util-visit';
 const regex = /^\|reference:(?<path>.+)\|/;
 
 export interface RemarkDynamicContentOptions {
-  /** @defaultValue `process.cwd()` */
+  // todo: Remove in next major
+  /**
+   * @defaultValue `vfile.cwd`
+   * @deprecated use the `cwd` option from remark instead
+   * */
   cwd?: string;
+
   /** @defaultValue true */
   trim?: boolean;
 
   /**
+   * Resolve reference files relative to `vfile.path`
+   * @defaultValue false
+   */
+  relative?: boolean;
+
+  /**
    * Filter specific element types
-   * @defaultValue `['text','code']`
+   * @defaultValue ['text','code']
    * */
   visit?: string[];
 }
@@ -29,18 +40,24 @@ export function remarkDynamicContent(
   options: RemarkDynamicContentOptions = {},
 ): Transformer<Root, Root> {
   const {
-    cwd = process.cwd(),
     trim = true,
+    relative = false,
     visit: filter = ['text', 'code'],
   } = options;
 
-  return (tree) => {
+  return (tree, file) => {
+    const cwd = options.cwd ?? file.cwd;
+
     visit(tree, filter, (node) => {
-      if (!('value' in node) || typeof node.value === 'string') return;
+      const canReplace = 'value' in node && typeof node.value === 'string';
+      if (!canReplace) return;
+
       const result = regex.exec(node.value);
 
-      if (result?.groups?.path) {
-        const dest = path.resolve(cwd, result[1]);
+      if (result) {
+        const dest = relative
+          ? path.resolve(cwd, path.dirname(file.path), result[1])
+          : path.resolve(cwd, result[1]);
         let value = fs.readFileSync(dest).toString();
         if (trim) value = value.trim();
 

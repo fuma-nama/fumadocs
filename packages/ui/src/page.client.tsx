@@ -61,14 +61,14 @@ export function Footer({ items }: FooterProps): React.ReactElement {
     <div className="mt-4 flex flex-row flex-wrap gap-4 border-t py-12">
       {previous ? (
         <Link href={previous.url} className={footerItem()}>
-          <ChevronLeftIcon className="size-5 shrink-0" />
+          <ChevronLeftIcon className="size-5 shrink-0 rtl:rotate-180" />
           <p className="font-medium text-foreground">{previous.name}</p>
         </Link>
       ) : null}
       {next ? (
         <Link href={next.url} className={footerItem({ className: 'ms-auto' })}>
           <p className="text-end font-medium text-foreground">{next.name}</p>
-          <ChevronRightIcon className="size-5 shrink-0" />
+          <ChevronRightIcon className="size-5 shrink-0 rtl:rotate-180" />
         </Link>
       ) : null}
     </div>

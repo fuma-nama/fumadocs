@@ -1,9 +1,12 @@
-import { structure } from '@/mdx-plugins';
-import { createI18nSearchAPI, createSearchAPI } from '@/search/server';
-import { getTableOfContents, findNeighbour } from '@/server';
-
+import {
+  joinPaths,
+  parseFilePath,
+  parseFolderPath,
+  splitPath,
+} from '@/source/path';
+import { describe, expect, test } from 'vitest';
 import type { Root } from '@/server/page-tree';
-import { expect, test } from 'vitest';
+import { findNeighbour } from '@/server/page-tree-utils';
 
 test('Find Neighbours', () => {
   const tree: Root = {
@@ -35,162 +38,72 @@ test('Find Neighbours', () => {
   });
 });
 
-test('Get TOC', async () => {
-  const content = `# Heading 1
+describe('Path utilities', () => {
+  test('parse file path', () => {
+    expect(parseFilePath('test.mdx')).toEqual({
+      dirname: '',
+      name: 'test',
+      flattenedPath: 'test',
+      locale: undefined,
+      path: 'test.mdx',
+    });
 
-Some text here
+    expect(parseFilePath('nested/test.mdx')).toEqual({
+      dirname: 'nested',
+      name: 'test',
+      flattenedPath: 'nested/test',
+      locale: undefined,
+      path: 'nested/test.mdx',
+    });
 
-## Heading 2
+    expect(parseFilePath('nested/test.cn.mdx')).toEqual({
+      dirname: 'nested',
+      name: 'test',
+      flattenedPath: 'nested/test.cn',
+      locale: 'cn',
+      path: 'nested/test.cn.mdx',
+    });
 
-Some text here
-
-### Heading 3`;
-
-  expect(await getTableOfContents(content)).toStrictEqual([
-    expect.objectContaining({ title: 'Heading 1', url: '#heading-1' }),
-    expect.objectContaining({ title: 'Heading 2', url: '#heading-2' }),
-    expect.objectContaining({ title: 'Heading 3', url: '#heading-3' }),
-  ]);
-});
-
-test('Structure', async () => {
-  const content = `# Heading 1
-
-Some text here
-
-## Heading 2
-
-Some text here
-
-### Heading 3`;
-
-  expect(structure(content)).toMatchInlineSnapshot(`
-    {
-      "contents": [
-        {
-          "content": "Some text here",
-          "heading": "heading-1",
-        },
-        {
-          "content": "Some text here",
-          "heading": "heading-2",
-        },
-      ],
-      "headings": [
-        {
-          "content": "Heading 1",
-          "id": "heading-1",
-        },
-        {
-          "content": "Heading 2",
-          "id": "heading-2",
-        },
-        {
-          "content": "Heading 3",
-          "id": "heading-3",
-        },
-      ],
-    }
-  `);
-});
-
-test('Search API', () => {
-  const api = createSearchAPI('simple', {
-    indexes: [
-      {
-        title: 'Hello World',
-        content: 'Hello World',
-        url: '/hello-world',
-      },
-      {
-        title: 'Nothing',
-        content: 'Nothing',
-        url: '/nothing',
-      },
-    ],
+    expect(parseFilePath('nested\\test.cn.mdx')).toEqual(
+      parseFilePath('nested/test.cn.mdx'),
+    );
   });
 
-  expect(api.search('Hello')).toHaveLength(1);
-  expect(api.search('pterodactyl')).toHaveLength(0);
-});
+  test('parse folder path', () => {
+    expect(parseFolderPath('nested')).toEqual({
+      dirname: '',
+      name: 'nested',
+      flattenedPath: 'nested',
+      locale: undefined,
+      path: 'nested',
+    });
 
-test('Search API Advanced', () => {
-  const api = createSearchAPI('advanced', {
-    tag: true,
-    indexes: [
-      {
-        id: '1',
-        title: 'Index',
-        structuredData: structure(
-          `## Hello World
+    expect(parseFolderPath('nested/nested')).toEqual({
+      dirname: 'nested',
+      name: 'nested',
+      flattenedPath: 'nested/nested',
+      locale: undefined,
+      path: 'nested/nested',
+    });
 
-something`,
-        ),
-        url: '/',
-        tag: 'my-tag',
-      },
-      {
-        id: '2',
-        title: 'Page',
-        structuredData: structure(
-          `## My Page
-
-something`,
-        ),
-        url: '/page',
-        tag: '',
-      },
-    ],
+    expect(parseFolderPath('nested\\nested')).toEqual(
+      parseFolderPath('nested/nested'),
+    );
   });
 
-  expect(api.search('Page')).toHaveLength(2);
-  expect(api.search('something')).toHaveLength(4);
-  expect(api.search('', { tag: 'my-tag' })).toHaveLength(3);
+  test('join paths', () => {
+    expect(joinPaths(['a', 'b', 'c'])).toBe('a/b/c');
+    expect(joinPaths(['/a'])).toBe('a');
+    expect(joinPaths(['a/', '/b'])).toBe('a/b');
+    expect(joinPaths(['a/', 'b/c'])).toBe('a/b/c');
 
-  expect(api.search('Hello')).toMatchInlineSnapshot(`
-    [
-      {
-        "content": "Index",
-        "id": "1",
-        "type": "page",
-        "url": "/",
-      },
-      {
-        "content": "Hello World",
-        "id": "10",
-        "type": "heading",
-        "url": "/#hello-world",
-      },
-    ]
-  `);
-});
-
-test('Seach API I18n', () => {
-  const api = createI18nSearchAPI('simple', {
-    indexes: [
-      [
-        'cn',
-        [
-          {
-            title: 'Hello World Chinese',
-            content: 'Hello World',
-            url: '/hello-world',
-          },
-        ],
-      ],
-      [
-        'en',
-        [
-          {
-            title: 'Hello World English',
-            content: 'Hello World',
-            url: '/hello-world',
-          },
-        ],
-      ],
-    ],
+    expect(joinPaths(['a', 'b'], 'leading')).toBe('/a/b');
+    expect(joinPaths(['a', 'b'], 'trailing')).toBe('a/b/');
   });
 
-  expect(api.search('English', { locale: 'en' })).toHaveLength(1);
-  expect(api.search('Hello World Chinese', { locale: 'cn' })).toHaveLength(1);
+  test('split paths', () => {
+    expect(splitPath('a/b/c')).toEqual(['a', 'b', 'c']);
+    expect(splitPath('a//c')).toEqual(['a', 'c']);
+    expect(splitPath('/a/c')).toEqual(['a', 'c']);
+  });
 });

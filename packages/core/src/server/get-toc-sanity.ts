@@ -11,11 +11,13 @@ interface Block {
   text?: string;
 }
 
+// todo: Remove in next major
 /**
  * Parse TOC from portable text (Sanity)
  *
  * @param value - Blocks
  * @param slugFn - A function that generates slug from title
+ * @deprecated Sanity is no longer supported
  */
 export function getTableOfContentsFromPortableText(
   value: any,

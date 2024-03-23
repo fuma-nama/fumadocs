@@ -36,9 +36,9 @@ export default function Page({
             href={`https://github.com/fuma-nama/fumadocs/blob/main/${path}`}
             target="_blank"
             rel="noreferrer noopener"
-            className="inline-flex items-center text-xs text-muted-foreground hover:text-foreground"
+            className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
           >
-            Edit on Github <ExternalLinkIcon className="ml-1 size-3" />
+            Edit on Github <ExternalLinkIcon className="size-3" />
           </a>
         ),
       }}

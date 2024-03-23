@@ -41,8 +41,8 @@ importers:
         specifier: 8.0.2
         version: 8.0.2(typescript@5.4.3)
       turbo:
-        specifier: 1.12.5
-        version: 1.12.5
+        specifier: 1.13.0
+        version: 1.13.0
       typescript:
         specifier: ^5.4.3
         version: 5.4.3
@@ -177,13 +177,13 @@ importers:
         specifier: 0.3.4
         version: 0.3.4
       fumadocs-contentlayer:
-        specifier: 1.1.7
+        specifier: 1.1.8
         version: link:../../packages/contentlayer
       fumadocs-core:
-        specifier: 10.1.0
+        specifier: 10.1.1
         version: link:../../packages/core
       fumadocs-ui:
-        specifier: 10.1.0
+        specifier: 10.1.1
         version: link:../../packages/ui
       next:
         specifier: ^14.1.4
@@ -220,13 +220,13 @@ importers:
   examples/next-mdx:
     dependencies:
       fumadocs-core:
-        specifier: 10.1.0
+        specifier: 10.1.1
         version: link:../../packages/core
       fumadocs-mdx:
-        specifier: 8.2.5
+        specifier: 8.2.6
         version: link:../../packages/mdx
       fumadocs-ui:
-        specifier: 10.1.0
+        specifier: 10.1.1
         version: link:../../packages/ui
       next:
         specifier: ^14.1.4
@@ -330,6 +330,9 @@ importers:
       '@algolia/client-search':
         specifier: ^4.22.1
         version: 4.22.1
+      '@mdx-js/mdx':
+        specifier: ^3.0.1
+        version: 3.0.1
       '@types/flexsearch':
         specifier: 0.7.6
         version: 0.7.6
@@ -413,16 +416,16 @@ importers:
         specifier: ^0.3.4
         version: 0.3.4
       fumadocs-contentlayer:
-        specifier: ^1.1.7
+        specifier: ^1.1.8
         version: link:../contentlayer
       fumadocs-core:
-        specifier: ^10.1.0
+        specifier: ^10.1.1
         version: link:../core
       fumadocs-mdx:
-        specifier: ^8.2.5
+        specifier: ^8.2.6
         version: link:../mdx
       fumadocs-ui:
-        specifier: ^10.1.0
+        specifier: ^10.1.1
         version: link:../ui
       next:
         specifier: ^14.1.4
@@ -10266,64 +10269,64 @@ packages:
       yargs: 17.7.2
     dev: true
 
-  /turbo-darwin-64@1.12.5:
-    resolution: {integrity: sha512-0GZ8reftwNQgIQLHkHjHEXTc/Z1NJm+YjsrBP+qhM/7yIZ3TEy9gJhuogDt2U0xIWwFgisTyzbtU7xNaQydtoA==}
+  /turbo-darwin-64@1.13.0:
+    resolution: {integrity: sha512-ctHeJXtQgBcgxnCXwrJTGiq57HtwF7zWz5NTuSv//5yeU01BtQIt62ArKfjudOhRefWJbX3Z5srn88XTb9hfww==}
     cpu: [x64]
     os: [darwin]
     requiresBuild: true
     dev: true
     optional: true
 
-  /turbo-darwin-arm64@1.12.5:
-    resolution: {integrity: sha512-8WpOLNNzvH6kohQOjihD+gaWL+ZFNfjvBwhOF0rjEzvW+YR3Pa7KjhulrjWyeN2yMFqAPubTbZIGOz1EVXLuQA==}
+  /turbo-darwin-arm64@1.13.0:
+    resolution: {integrity: sha512-/Q9/pNFkF9w83tNxwMpgapwLYdQ12p8mpty2YQRoUiS9ClWkcqe136jR0mtuMqzlNlpREOFZaoyIthjt6Sdo0g==}
     cpu: [arm64]
     os: [darwin]
     requiresBuild: true
     dev: true
     optional: true
 
-  /turbo-linux-64@1.12.5:
-    resolution: {integrity: sha512-INit73+bNUpwqGZCxgXCR3I+cQsdkQ3/LkfkgSOibkpg+oGqxJRzeXw3sp990d7SCoE8QOcs3iw+PtiFX/LDAA==}
+  /turbo-linux-64@1.13.0:
+    resolution: {integrity: sha512-hgbT7o020BGV4L7Sd8hhFTd5zVKPKxbsr0dPfel/9NkdTmptz2aGZ0Vb2MAa18SY3XaCQpDxmdYuOzvvRpo5ZA==}
     cpu: [x64]
     os: [linux]
     requiresBuild: true
     dev: true
     optional: true
 
-  /turbo-linux-arm64@1.12.5:
-    resolution: {integrity: sha512-6lkRBvxtI/GQdGtaAec9LvVQUoRw6nXFp0kM+Eu+5PbZqq7yn6cMkgDJLI08zdeui36yXhone8XGI8pHg8bpUQ==}
+  /turbo-linux-arm64@1.13.0:
+    resolution: {integrity: sha512-WK01i2wDZARrV+HEs495A3hNeGMwQR5suYk7G+ceqqW7b+dOTlQdvUjnI3sg7wAnZPgjafFs/hoBaZdJjVa/nw==}
     cpu: [arm64]
     os: [linux]
     requiresBuild: true
     dev: true
     optional: true
 
-  /turbo-windows-64@1.12.5:
-    resolution: {integrity: sha512-gQYbOhZg5Ww0bQ/bC0w/4W6yQRwBumUUnkB+QPo15VznwxZe2a7bo6JM+9Xy9dKLa/kn+p7zTqme4OEp6M3/Yg==}
+  /turbo-windows-64@1.13.0:
+    resolution: {integrity: sha512-hJgSZJZwlWHNwLEthaqJqJWGm4NqF5X/I7vE0sPE4i/jeDl8f0n1hcOkgJkJiNXVxhj+qy/9+4dzbPLKT9imaQ==}
     cpu: [x64]
     os: [win32]
     requiresBuild: true
     dev: true
     optional: true
 
-  /turbo-windows-arm64@1.12.5:
-    resolution: {integrity: sha512-auvhZ9FrhnvQ4mgBlY9O68MT4dIfprYGvd2uPICba/mHUZZvVy5SGgbHJ0KbMwaJfnnFoPgLJO6M+3N2gDprKw==}
+  /turbo-windows-arm64@1.13.0:
+    resolution: {integrity: sha512-L/ErxYoXeq8tmjU/AIGicC9VyBN1zdYw8JlM4yPmMI0pJdY8E4GaYK1IiIazqq7M72lmQhU/WW7fV9FqEktwrw==}
     cpu: [arm64]
     os: [win32]
     requiresBuild: true
     dev: true
     optional: true
 
-  /turbo@1.12.5:
-    resolution: {integrity: sha512-FATU5EnhrYG8RvQJYFJnDd18DpccDjyvd53hggw9T9JEg9BhWtIEoeaKtBjYbpXwOVrJQMDdXcIB4f2nD3QPPg==}
+  /turbo@1.13.0:
+    resolution: {integrity: sha512-r02GtNmkOPcQvUzVE6lg474QVLyU02r3yh3lUGqrFHf5h5ZEjgDGWILsAUqplVqjri1Y/oOkTssks4CObTAaiw==}
     hasBin: true
     optionalDependencies:
-      turbo-darwin-64: 1.12.5
-      turbo-darwin-arm64: 1.12.5
-      turbo-linux-64: 1.12.5
-      turbo-linux-arm64: 1.12.5
-      turbo-windows-64: 1.12.5
-      turbo-windows-arm64: 1.12.5
+      turbo-darwin-64: 1.13.0
+      turbo-darwin-arm64: 1.13.0
+      turbo-linux-64: 1.13.0
+      turbo-linux-arm64: 1.13.0
+      turbo-windows-64: 1.13.0
+      turbo-windows-arm64: 1.13.0
     dev: true
 
   /twoslash-protocol@0.2.4:

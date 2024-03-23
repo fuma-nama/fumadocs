@@ -1,7 +1,7 @@
 import { DocsLayout } from 'fumadocs-ui/layout';
 import type { ReactNode } from 'react';
-import { Body } from '../layout.client';
 import { layoutOptions } from '@/app/layout.config';
+import { Body } from '../layout.client';
 
 export default function Layout({
   children,

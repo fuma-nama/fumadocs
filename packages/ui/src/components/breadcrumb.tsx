@@ -28,13 +28,15 @@ export function Breadcrumb(): React.ReactElement {
         return (
           // eslint-disable-next-line react/no-array-index-key -- Won't re-render
           <Fragment key={i}>
-            {i !== 0 && <ChevronRightIcon className="size-4 shrink-0" />}
+            {i !== 0 && (
+              <ChevronRightIcon className="size-4 shrink-0 rtl:rotate-180" />
+            )}
             {item.url ? (
               <Link href={item.url} className={style}>
                 {item.name}
               </Link>
             ) : (
-              <p className={style}>{item.name}</p>
+              <span className={style}>{item.name}</span>
             )}
           </Fragment>
         );
