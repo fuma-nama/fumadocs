@@ -36,10 +36,12 @@ export function remarkDynamicContent(
 
   return (tree) => {
     visit(tree, filter, (node) => {
-      if (!('value' in node) || typeof node.value === 'string') return;
+      const canReplace = 'value' in node && typeof node.value === 'string';
+      if (!canReplace) return;
+
       const result = regex.exec(node.value);
 
-      if (result?.groups?.path) {
+      if (result) {
         const dest = path.resolve(cwd, result[1]);
         let value = fs.readFileSync(dest).toString();
         if (trim) value = value.trim();
