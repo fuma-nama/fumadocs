@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { loader } from '../src/source';
+import { loader } from '@/source/loader';
 
 test('Simple', () => {
   const result = loader({
