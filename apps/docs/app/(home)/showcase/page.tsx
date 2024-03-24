@@ -7,6 +7,7 @@ import { cn } from '@/utils/cn';
 import { createMetadata } from '@/utils/metadata';
 import NuqsImage from '@/public/showcases/nuqs.jpg';
 import FrameGround from '@/public/showcases/frameground.png';
+import Spot from '@/public/spot.png';
 
 export const metadata = createMetadata({
   title: 'Showcase',
@@ -52,63 +53,14 @@ export default function Showcase(): React.ReactElement {
 
   return (
     <main className="pb-16">
-      <svg className="-mb-4 -mt-6 h-[400px] w-full invert dark:invert-0 md:-mt-16">
-        <filter id="noiseFilter">
-          <feTurbulence type="turbulence" baseFrequency="0.67" numOctaves="1" />
-          <feColorMatrix type="saturate" values="0" />
-          <feComposite in2="SourceGraphic" operator="in" />
-          <feComposite in2="SourceGraphic" operator="lighter" />
-        </filter>
-
-        <filter id="circleShadow" colorInterpolationFilters="sRGB">
-          <feDropShadow dx="0" dy="8" stdDeviation="4" floodColor="black" />
-        </filter>
-
-        <defs>
-          <linearGradient id="Gradient1" x1="0" x2="0.5" y1="0" y2="1">
-            <stop stopColor="white" offset="20%" />
-            <stop stopColor="black" offset="100%" />
-          </linearGradient>
-        </defs>
-
-        <g width="100%" filter="url(#noiseFilter)">
-          <line x1="50%" y1="0%" x2="50%" y2="100%" stroke="rgb(100,100,100)" />
-          <line x1="0%" y1="50%" x2="100%" y2="50%" stroke="rgb(100,100,100)" />
-          <circle
-            cx="50%"
-            cy="50%"
-            r="180"
-            stroke="rgb(50,50,50)"
-            fill="none"
-          />
-          <circle
-            cx="50%"
-            cy="50%"
-            r="80"
-            fill="url(#Gradient1)"
-            fillOpacity="0"
-            filter="url(#circleShadow)"
-            stroke="rgb(100,100,100)"
-            strokeDasharray="1000"
-            strokeDashoffset="1000"
-          >
-            <animate
-              attributeName="stroke-dashoffset"
-              values="1000;0"
-              dur="1s"
-              fill="freeze"
-            />
-            <animate
-              begin="800ms"
-              attributeName="fill-opacity"
-              values="0;1"
-              dur="500ms"
-              fill="freeze"
-            />
-          </circle>
-        </g>
-      </svg>
-      <div className="container text-center">
+      <Image
+        alt="spot"
+        src={Spot}
+        priority
+        sizes="100vw"
+        className="absolute top-0 z-[-1] min-h-[800px] w-full max-w-[1600px] select-none object-cover opacity-50"
+      />
+      <div className="container my-12 text-center">
         <h1 className="mb-4 text-3xl font-semibold leading-snug md:text-5xl md:leading-snug">
           Cool Websites
           <br />
@@ -117,7 +69,7 @@ export default function Showcase(): React.ReactElement {
         <p className="text-muted-foreground">
           Nice open-source projects powered by Fumadocs
         </p>
-        <div className="mt-4">
+        <div className="mt-6">
           <a
             href="https://github.com/fuma-nama/fumadocs/discussions/30"
             target="_blank"
@@ -150,15 +102,15 @@ function ShowcaseItem({
         href={url}
         target="_blank"
         rel="noreferrer noopener"
-        className="relative flex aspect-video flex-col rounded-lg border shadow-md transition-all hover:border-primary/30"
+        className="relative flex aspect-video flex-col overflow-hidden rounded-2xl border transition-all hover:border-primary/30"
       >
         <Image
           alt="Preview"
           src={image}
           placeholder="blur"
-          className="absolute size-full rounded-lg object-cover"
+          className="absolute size-full object-cover"
         />
-        <p className="z-[2] mt-auto rounded-b-lg bg-gradient-to-t from-black p-6 pt-8 text-sm font-medium text-white">
+        <p className="z-[2] mt-auto bg-gradient-to-t from-black p-6 pt-8 text-sm font-medium text-white">
           {name}
         </p>
       </a>
@@ -170,10 +122,19 @@ function ShowcaseItem({
       href={url}
       target="_blank"
       rel="noreferrer noopener"
-      className="flex aspect-video flex-col rounded-lg border bg-gradient-to-br from-card to-primary/30 p-8 shadow-md transition-all hover:bg-accent/80"
+      className="flex aspect-video flex-col rounded-2xl border border-transparent p-8 text-center shadow-primary/20 transition-all hover:shadow-primary/30"
+      style={{
+        backgroundImage:
+          'radial-gradient(closest-side at center, hsl(var(--background)) 89%, transparent 90%),' +
+          'conic-gradient(from 0deg, hsl(var(--background)) 120deg, hsl(var(--primary)), hsl(var(--background)) 240deg),' +
+          'linear-gradient(to right bottom, black, rgb(200,200,200), black)',
+        backgroundOrigin: 'border-box',
+        boxShadow: 'inset 0px 12px 28px 4px var(--tw-shadow-color)',
+        backgroundClip: 'padding-box, padding-box, border-box',
+      }}
     >
-      <p className="mb-4 text-muted-foreground">{new URL(url).hostname}</p>
-      <p className="text-xl font-semibold">{name}</p>
+      <p className="mb-6 text-muted-foreground">{new URL(url).hostname}</p>
+      <p className="text-3xl font-semibold">{name}</p>
     </a>
   );
 }

@@ -66,7 +66,7 @@ export function Layout({
     <>
       {replaceOrDefault(
         nav,
-        <Nav title="My App" items={finalLinks} enableSidebar={false} {...nav}>
+        <Nav items={finalLinks} enableSidebar={false} {...nav}>
           {nav.children}
         </Nav>,
       )}
@@ -91,12 +91,7 @@ export function DocsLayout({
     <TreeContextProvider tree={tree}>
       {replaceOrDefault(
         nav,
-        <Nav
-          title="My App"
-          items={finalLinks}
-          enableSidebar={sidebarEnabled}
-          {...nav}
-        >
+        <Nav items={finalLinks} enableSidebar={sidebarEnabled} {...nav}>
           {nav.children}
         </Nav>,
       )}

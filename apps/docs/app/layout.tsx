@@ -1,10 +1,8 @@
 import './global.css';
 import 'fumadocs-ui/twoslash.css';
-import { Star } from 'lucide-react';
 import type { Viewport } from 'next';
 import { GeistSans } from 'geist/font/sans';
 import { GeistMono } from 'geist/font/mono';
-import Link from 'next/link';
 import { baseUrl, createMetadata } from '@/utils/metadata';
 import { Provider } from './provider';
 
@@ -62,23 +60,6 @@ function Footer(): React.ReactElement {
               Fuma
             </a>
           </p>
-        </div>
-
-        <div className="flex flex-row flex-wrap items-center gap-12">
-          <a
-            href="https://github.com/fuma-nama/fumadocs"
-            rel="noreferrer noopener"
-            className="flex flex-row items-center text-sm text-muted-foreground transition-colors hover:text-accent-foreground"
-          >
-            <Star className="mr-2 size-4" />
-            Give us a star
-          </a>
-          <Link
-            href="/showcase"
-            className="flex flex-row items-center text-sm text-muted-foreground transition-colors hover:text-accent-foreground"
-          >
-            Showcase
-          </Link>
         </div>
       </div>
     </footer>
