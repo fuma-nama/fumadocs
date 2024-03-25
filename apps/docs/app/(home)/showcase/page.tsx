@@ -53,13 +53,15 @@ export default function Showcase(): React.ReactElement {
 
   return (
     <main className="pb-16">
-      <Image
-        alt="spot"
-        src={Spot}
-        priority
-        sizes="100vw"
-        className="absolute top-0 z-[-1] min-h-[800px] w-full max-w-[1600px] select-none object-cover opacity-50"
-      />
+      <div className="absolute inset-0 z-[-1] select-none overflow-hidden opacity-30">
+        <Image
+          alt="spot"
+          src={Spot}
+          sizes="100vw"
+          className="size-full min-w-[800px] max-w-[1400px]"
+          priority
+        />
+      </div>
       <div className="container my-12 text-center">
         <h1 className="mb-4 text-3xl font-semibold leading-snug md:text-5xl md:leading-snug">
           Cool Websites

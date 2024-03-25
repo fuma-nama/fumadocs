@@ -108,7 +108,18 @@ export function Nav({
           {enableSidebar ? (
             <>
               <ThemeToggle className="max-md:hidden" />
-              <SidebarToggle />
+              <SidebarTrigger
+                aria-label="Toggle Sidebar"
+                className={cn(
+                  buttonVariants({
+                    size: 'icon',
+                    color: 'ghost',
+                    className: 'md:hidden',
+                  }),
+                )}
+              >
+                <MenuIcon />
+              </SidebarTrigger>
             </>
           ) : (
             <LinksMenu items={items} />
@@ -216,23 +227,6 @@ function SearchToggle(): React.ReactElement {
   );
 }
 
-function SidebarToggle(): React.ReactElement {
-  return (
-    <SidebarTrigger
-      aria-label="Toggle Sidebar"
-      className={cn(
-        buttonVariants({
-          size: 'icon',
-          color: 'ghost',
-          className: 'md:hidden',
-        }),
-      )}
-    >
-      <MenuIcon />
-    </SidebarTrigger>
-  );
-}
-
 function NavItem({
   item,
   showIcon = false,
@@ -262,5 +256,3 @@ function NavItem({
     </Link>
   );
 }
-
-NavItem.displayName = 'NavItem';
