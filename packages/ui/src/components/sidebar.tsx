@@ -1,10 +1,5 @@
 import { cva } from 'class-variance-authority';
-import {
-  ChevronDown,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  ExternalLinkIcon,
-} from 'lucide-react';
+import { ChevronDown, ExternalLinkIcon, SidebarIcon } from 'lucide-react';
 import type { PageTree } from 'fumadocs-core/server';
 import * as Base from 'fumadocs-core/sidebar';
 import { usePathname } from 'next/navigation';
@@ -69,8 +64,13 @@ const itemVariants = cva(
 const defaultComponents: Components = {
   Folder: FolderNode,
   Separator: SeparatorNode,
-  Item: ({ item: { name, type, ...rest } }) => (
-    <BaseItem item={{ text: name, ...rest }} />
+  Item: ({ item }) => (
+    <BaseItem
+      url={item.url}
+      external={item.external}
+      icon={item.icon}
+      text={item.name}
+    />
   ),
 };
 
@@ -89,6 +89,7 @@ export function Sidebar({
 }: SidebarProps): React.ReactElement {
   const [open, setOpen] = useSidebarCollapse();
   const { root } = useTreeContext();
+  const alwaysShowFooter = Boolean(footer) || collapsible;
   const context = useMemo<SidebarContext>(
     () => ({
       defaultOpenLevel,
@@ -101,29 +102,11 @@ export function Sidebar({
     <Base.SidebarList
       minWidth={768} // md
       className={cn(
-        'group/sidebar flex w-full flex-col text-[15px] md:sticky md:top-16 md:h-body md:w-[240px] md:text-sm xl:w-[260px]',
+        'flex w-full flex-col text-[15px] md:sticky md:top-16 md:h-body md:w-[240px] md:text-sm xl:w-[260px]',
         !open && 'md:!w-0',
         'max-md:fixed max-md:inset-0 max-md:z-40 max-md:bg-background/80 max-md:pt-16 max-md:backdrop-blur-md max-md:data-[open=false]:hidden',
       )}
     >
-      <button
-        type="button"
-        aria-label="Trigger Sidebar"
-        className={cn(
-          buttonVariants({
-            color: 'ghost',
-            size: 'icon',
-          }),
-          'absolute right-2 top-4 z-[2] transition-all group-hover/sidebar:opacity-100 max-md:hidden',
-          open ? 'opacity-0' : '-right-6',
-          !collapsible && 'hidden',
-        )}
-        onClick={() => {
-          setOpen(!open);
-        }}
-      >
-        {open ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-      </button>
       <SidebarContext.Provider value={context}>
         <ScrollArea className="flex-1">
           <ScrollViewport>
@@ -132,7 +115,7 @@ export function Sidebar({
               {items.length > 0 && (
                 <div className="lg:hidden">
                   {items.map((item) => (
-                    <BaseItem key={item.url} item={item} nested />
+                    <BaseItem key={item.url} {...item} nested />
                   ))}
                 </div>
               )}
@@ -143,11 +126,30 @@ export function Sidebar({
         <div
           className={cn(
             'flex flex-row items-center gap-2 border-t py-2 max-md:px-4',
-            !footer && 'md:hidden',
+            !alwaysShowFooter && 'md:hidden',
           )}
         >
           {footer}
           <ThemeToggle className="md:hidden" />
+          {collapsible ? (
+            <button
+              type="button"
+              aria-label="Trigger Sidebar"
+              className={cn(
+                buttonVariants({
+                  color: 'ghost',
+                  size: 'icon',
+                }),
+                'max-md:hidden',
+                open ? 'ms-auto' : 'absolute -right-6 bottom-2',
+              )}
+              onClick={() => {
+                setOpen(!open);
+              }}
+            >
+              <SidebarIcon />
+            </button>
+          ) : null}
         </div>
       </SidebarContext.Provider>
     </Base.SidebarList>
@@ -185,24 +187,29 @@ function NodeList({
 }
 
 function BaseItem({
-  item,
+  icon,
+  external = false,
+  url,
+  text,
   nested = false,
 }: {
-  item: LinkItem;
+  icon?: React.ReactNode;
+  external?: boolean;
+  text: React.ReactNode;
+  url: string;
   nested?: boolean;
 }): React.ReactElement {
   const pathname = usePathname();
-  const active = isActive(item.url, pathname, nested);
-  const icon = item.icon ?? (item.external ? <ExternalLinkIcon /> : null);
+  const active = isActive(url, pathname, nested);
 
   return (
     <Link
-      href={item.url}
-      external={item.external}
+      href={url}
+      external={external}
       className={cn(itemVariants({ active }))}
     >
-      {icon}
-      {item.text}
+      {icon ?? (external ? <ExternalLinkIcon /> : null)}
+      {text}
     </Link>
   );
 }
