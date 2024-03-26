@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 10.1.2
+
+### Patch Changes
+
+- 0facc07: Replace navbar links with secondary links
+- fd38022: Improve sidebar collapse
+  - fumadocs-core@10.1.2
+
 ## 10.1.1
 
 ### Patch Changes

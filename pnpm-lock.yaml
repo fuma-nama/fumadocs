@@ -177,13 +177,13 @@ importers:
         specifier: 0.3.4
         version: 0.3.4
       fumadocs-contentlayer:
-        specifier: 1.1.8
+        specifier: 1.1.9
         version: link:../../packages/contentlayer
       fumadocs-core:
-        specifier: 10.1.1
+        specifier: 10.1.2
         version: link:../../packages/core
       fumadocs-ui:
-        specifier: 10.1.1
+        specifier: 10.1.2
         version: link:../../packages/ui
       next:
         specifier: ^14.1.4
@@ -220,13 +220,13 @@ importers:
   examples/next-mdx:
     dependencies:
       fumadocs-core:
-        specifier: 10.1.1
+        specifier: 10.1.2
         version: link:../../packages/core
       fumadocs-mdx:
-        specifier: 8.2.6
+        specifier: 8.2.7
         version: link:../../packages/mdx
       fumadocs-ui:
-        specifier: 10.1.1
+        specifier: 10.1.2
         version: link:../../packages/ui
       next:
         specifier: ^14.1.4
@@ -416,16 +416,16 @@ importers:
         specifier: ^0.3.4
         version: 0.3.4
       fumadocs-contentlayer:
-        specifier: ^1.1.8
+        specifier: ^1.1.9
         version: link:../contentlayer
       fumadocs-core:
-        specifier: ^10.1.1
+        specifier: ^10.1.2
         version: link:../core
       fumadocs-mdx:
-        specifier: ^8.2.6
+        specifier: ^8.2.7
         version: link:../mdx
       fumadocs-ui:
-        specifier: ^10.1.1
+        specifier: ^10.1.2
         version: link:../ui
       next:
         specifier: ^14.1.4
