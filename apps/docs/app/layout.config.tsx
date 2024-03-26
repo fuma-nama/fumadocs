@@ -2,7 +2,6 @@ import type { DocsLayoutProps } from 'fumadocs-ui/layout';
 import { utils } from '@/utils/source';
 import { FumaDocsSVG } from '@/app/(home)/icons';
 import { NavChildren, SidebarBanner } from '@/app/layout.client';
-import { create } from '@/components/ui/icon';
 import { LayoutTemplateIcon } from 'lucide-react';
 
 export const layoutOptions: Omit<DocsLayoutProps, 'children'> = {
@@ -26,7 +25,7 @@ export const layoutOptions: Omit<DocsLayoutProps, 'children'> = {
     {
       text: 'Showcase',
       url: '/showcase',
-      icon: create({ icon: LayoutTemplateIcon }),
+      icon: <LayoutTemplateIcon />,
     },
   ],
 };

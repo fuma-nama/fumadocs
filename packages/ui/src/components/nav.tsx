@@ -1,17 +1,9 @@
 'use client';
-import { cva } from 'class-variance-authority';
-import {
-  MenuIcon,
-  MoreVerticalIcon,
-  SearchIcon,
-  SidebarCloseIcon,
-  SidebarOpenIcon,
-} from 'lucide-react';
+import { MenuIcon, MoreVerticalIcon, SearchIcon } from 'lucide-react';
 import Link from 'fumadocs-core/link';
 import { SidebarTrigger } from 'fumadocs-core/sidebar';
 import { usePathname } from 'next/navigation';
 import {
-  forwardRef,
   type AnchorHTMLAttributes,
   type ReactNode,
   useEffect,
@@ -19,7 +11,6 @@ import {
   useCallback,
 } from 'react';
 import { cn } from '@/utils/cn';
-import { useSidebarCollapse } from '@/contexts/sidebar';
 import { useSearchContext } from '@/contexts/search';
 import { useI18n } from '@/contexts/i18n';
 import { ThemeToggle } from '@/components/theme-toggle';
@@ -27,7 +18,6 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-  PopoverClose,
 } from '@/components/ui/popover';
 import { isActive } from '@/utils/shared';
 import { buttonVariants } from '@/theme/variants';
@@ -41,7 +31,7 @@ export interface NavLinkProps {
 }
 
 export interface NavProps {
-  title: ReactNode;
+  title?: ReactNode;
 
   /**
    * Redirect url of title
@@ -50,9 +40,14 @@ export interface NavProps {
   url?: string;
 
   items: LinkItem[];
-  links: NavLinkProps[];
+
+  // todo: Remove in next major
+  /**
+   * @deprecated Use `LayoutOptions.links` option instead
+   */
+  links?: NavLinkProps[];
+
   enableSidebar: boolean;
-  collapsibleSidebar: boolean;
 
   /**
    * When to use transparent navbar
@@ -63,13 +58,11 @@ export interface NavProps {
 }
 
 export function Nav({
-  title,
+  title = 'My App',
   url = '/',
-  links,
   items,
   transparentMode = 'none',
   enableSidebar,
-  collapsibleSidebar,
   children,
 }: NavProps): React.ReactElement {
   const [transparent, setTransparent] = useState(transparentMode !== 'none');
@@ -105,65 +98,91 @@ export function Nav({
           {title}
         </Link>
         {children}
-        {items.map((item) => (
-          <NavItem key={item.url} item={item} className="max-lg:hidden" />
-        ))}
+        {items
+          .filter((item) => item.type === 'main' || !item.type)
+          .map((item) => (
+            <NavItem key={item.url} item={item} className="max-lg:hidden" />
+          ))}
         <div className="flex flex-1 flex-row items-center justify-end md:gap-2">
           <SearchToggle />
           {enableSidebar ? (
             <>
               <ThemeToggle className="max-md:hidden" />
-              <SidebarToggle collapsible={collapsibleSidebar} />
-            </>
-          ) : (
-            <Popover>
-              <ThemeToggle className="max-lg:hidden" />
-              <PopoverTrigger
+              <SidebarTrigger
+                aria-label="Toggle Sidebar"
                 className={cn(
                   buttonVariants({
                     size: 'icon',
                     color: 'ghost',
-                    className: 'lg:hidden',
+                    className: 'md:hidden',
                   }),
                 )}
               >
-                <MoreVerticalIcon />
-              </PopoverTrigger>
-              <PopoverContent className="flex min-w-[260px] flex-col px-3 py-1">
-                {items.map((item) => (
-                  <PopoverClose key={item.url} asChild>
-                    <NavItem item={item} className="py-2 text-lg font-medium" />
-                  </PopoverClose>
-                ))}
-                <ThemeToggle className="w-fit" />
-              </PopoverContent>
-            </Popover>
+                <MenuIcon />
+              </SidebarTrigger>
+            </>
+          ) : (
+            <LinksMenu items={items} />
           )}
-          <div
-            className={cn(
-              'flex flex-row items-center border-s ps-2 max-md:hidden',
-              links.length === 0 && 'hidden',
-            )}
-          >
-            {links.map((item) => (
+          {items
+            .filter((item) => item.type === 'secondary')
+            .map((item) => (
               <Link
-                aria-label={item.label}
-                key={item.href}
-                href={item.href}
+                aria-label={item.text}
+                key={item.url}
+                href={item.url}
                 external={item.external}
-                className={cn(buttonVariants({ size: 'icon', color: 'ghost' }))}
+                className={cn(
+                  buttonVariants({
+                    size: 'icon',
+                    color: 'ghost',
+                    className: 'max-lg:hidden',
+                  }),
+                )}
               >
                 {item.icon}
               </Link>
             ))}
-          </div>
         </div>
       </nav>
     </header>
   );
 }
 
-const shortcut = cva('rounded-md border bg-background px-1.5');
+function LinksMenu({ items }: { items: LinkItem[] }): React.ReactElement {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <ThemeToggle className="max-lg:hidden" />
+      <PopoverTrigger
+        className={cn(
+          buttonVariants({
+            size: 'icon',
+            color: 'ghost',
+            className: 'lg:hidden',
+          }),
+        )}
+      >
+        <MoreVerticalIcon />
+      </PopoverTrigger>
+      <PopoverContent className="flex min-w-[260px] flex-col px-3 py-1">
+        {items.map((item) => (
+          <NavItem
+            key={item.url}
+            item={item}
+            showIcon
+            className="text-base"
+            onClick={() => {
+              setOpen(false);
+            }}
+          />
+        ))}
+        <ThemeToggle className="w-fit" />
+      </PopoverContent>
+    </Popover>
+  );
+}
 
 function SearchToggle(): React.ReactElement {
   const { setOpenSearch } = useSearchContext();
@@ -197,81 +216,43 @@ function SearchToggle(): React.ReactElement {
         <SearchIcon aria-label="Open Search" className="ms-1 size-4" />
         {text.search}
         <div className="ms-auto inline-flex gap-0.5 text-xs">
-          <kbd className={shortcut()}>⌘</kbd>
-          <kbd className={shortcut()}>K</kbd>
+          {['⌘', 'K'].map((k) => (
+            <kbd key={k} className="rounded-md border bg-background px-1.5">
+              {k}
+            </kbd>
+          ))}
         </div>
       </button>
     </>
   );
 }
 
-function SidebarToggle({
-  collapsible,
-}: {
-  collapsible: boolean;
+function NavItem({
+  item,
+  showIcon = false,
+  className,
+  ...props
+}: AnchorHTMLAttributes<HTMLAnchorElement> & {
+  item: LinkItem;
+  showIcon?: boolean;
 }): React.ReactElement {
-  const [open, setOpen] = useSidebarCollapse();
-
-  return (
-    <>
-      <SidebarTrigger
-        aria-label="Toggle Sidebar"
-        className={cn(
-          buttonVariants({
-            size: 'icon',
-            color: 'ghost',
-            className: 'md:hidden',
-          }),
-        )}
-      >
-        <MenuIcon />
-      </SidebarTrigger>
-      {collapsible ? (
-        <button
-          type="button"
-          aria-label="Toggle Sidebar"
-          onClick={() => {
-            setOpen(!open);
-          }}
-          className={cn(
-            buttonVariants({
-              color: 'outline',
-              size: 'icon',
-              className: 'rounded-full max-md:hidden rtl:rotate-180',
-            }),
-          )}
-        >
-          {open ? <SidebarCloseIcon /> : <SidebarOpenIcon />}
-        </button>
-      ) : null}
-    </>
-  );
-}
-
-const NavItem = forwardRef<
-  HTMLAnchorElement,
-  AnchorHTMLAttributes<HTMLAnchorElement> & { item: LinkItem }
->(({ item, className, ...props }, ref) => {
-  const { text, url, external } = item;
   const pathname = usePathname();
 
   return (
     <Link
-      ref={ref}
-      href={url}
-      external={external}
+      href={item.url}
+      external={item.external}
       className={cn(
-        'text-sm text-muted-foreground transition-colors',
-        isActive(url, pathname)
+        'inline-flex items-center gap-2 py-2 text-sm text-muted-foreground transition-colors [&_svg]:size-4',
+        isActive(item.url, pathname)
           ? 'font-medium text-accent-foreground'
           : 'hover:text-accent-foreground',
         className,
       )}
       {...props}
     >
-      {text}
+      {showIcon ? item.icon : null}
+      {item.text}
     </Link>
   );
-});
-
-NavItem.displayName = 'NavItem';
+}
