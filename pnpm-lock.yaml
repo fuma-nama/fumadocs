@@ -552,8 +552,8 @@ importers:
   packages/twoslash:
     dependencies:
       '@shikijs/twoslash':
-        specifier: 1.2.0
-        version: 1.2.0(typescript@5.4.3)
+        specifier: 1.2.1
+        version: 1.2.1(typescript@5.4.3)
       mdast-util-from-markdown:
         specifier: ^2.0.0
         version: 2.0.0
@@ -564,8 +564,8 @@ importers:
         specifier: ^13.1.0
         version: 13.1.0
       shiki:
-        specifier: 1.2.0
-        version: 1.2.0
+        specifier: 1.2.1
+        version: 1.2.1
     devDependencies:
       '@types/hast':
         specifier: ^3.0.4
@@ -3366,6 +3366,10 @@ packages:
     resolution: {integrity: sha512-OlFvx+nyr5C8zpcMBnSGir0YPD6K11uYhouqhNmm1qLiis4GA7SsGtu07r9gKS9omks8RtQqHrJL4S+lqWK01A==}
     dev: false
 
+  /@shikijs/core@1.2.1:
+    resolution: {integrity: sha512-KaIS0H4EQ3KI2d++TjYqRNgwp8E3M/68e9veR4QtInzA7kKFgcjeiJqb80fuXW+blDy5fmd11PN9g9soz/3ANQ==}
+    dev: false
+
   /@shikijs/rehype@1.2.0:
     resolution: {integrity: sha512-k6LARhiQEufC2TR7Jb3mFgGSHil/vYnrqInTq1goEWRCCm+88GlysE4KwC6lyOjigKTlaV1thVfFXP2+LD2bKw==}
     dependencies:
@@ -3383,11 +3387,11 @@ packages:
       shiki: 1.2.0
     dev: false
 
-  /@shikijs/twoslash@1.2.0(typescript@5.4.3):
-    resolution: {integrity: sha512-rVIpuL40tXG5hItVf+4aYTEEwQO6R5pvzqMZa5r6bLMpHK720Op25e/BnCohNIdsUOEaFH9xqRSJo8ubjCiM1w==}
+  /@shikijs/twoslash@1.2.1(typescript@5.4.3):
+    resolution: {integrity: sha512-QyrBtKhIXjByPbC2dS/8LAqCLfoVmZHgNqc4eqLVIkOxZp6AAkAak1A3E+oiMP9vLaMY9qQI1pnV45c8FB5PRw==}
     dependencies:
-      '@shikijs/core': 1.2.0
-      twoslash: 0.2.4(typescript@5.4.3)
+      '@shikijs/core': 1.2.1
+      twoslash: 0.2.5(typescript@5.4.3)
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -9595,6 +9599,12 @@ packages:
       '@shikijs/core': 1.2.0
     dev: false
 
+  /shiki@1.2.1:
+    resolution: {integrity: sha512-u+XW6o0vCkUNlneZb914dLO+AayEIwK5tI62WeS//R5HIXBFiYaj/Hc5xcq27Yh83Grr4JbNtUBV8W6zyK4hWg==}
+    dependencies:
+      '@shikijs/core': 1.2.1
+    dev: false
+
   /side-channel@1.0.4:
     resolution: {integrity: sha512-q5XPytqFEIKHkGdiMIrY10mvLRvnQh42/+GoBlFW3b2LXLE2xxJpZFdm94we0BaoV3RwJyGqg5wS7epxTv0Zvw==}
     dependencies:
@@ -10329,17 +10339,17 @@ packages:
       turbo-windows-arm64: 1.13.0
     dev: true
 
-  /twoslash-protocol@0.2.4:
-    resolution: {integrity: sha512-AEGTJj4mFGfvQc/M6qi0+s82Zq+mxLcjWZU+EUHGG8LQElyHDs+uDR+/3+m1l+WP7WL+QmWrVzFXgFX+hBg+bg==}
+  /twoslash-protocol@0.2.5:
+    resolution: {integrity: sha512-oUr5ZAn37CgNa6p1mrCuuR/pINffsnGCee2aS170Uj1IObxCjsHzu6sgdPUdxGLLn6++gd/qjNH1/iR6RrfLeg==}
     dev: false
 
-  /twoslash@0.2.4(typescript@5.4.3):
-    resolution: {integrity: sha512-hc3y11BjLHP4kV37TR6lUKksxpZp0LQi9kCy95ka6qobye/gV49PqXZIuWlRaRVGNvp4AJBMg8aiwkp0M8x/nQ==}
+  /twoslash@0.2.5(typescript@5.4.3):
+    resolution: {integrity: sha512-U8rqsfVh8jQMO1NJekUtglb52b7xD9+FrzeFrgzpHsRTKl8IQgqnZP6ld4PeKaHXhLfoZPuju9K50NXJ7wom8g==}
     peerDependencies:
       typescript: '*'
     dependencies:
       '@typescript/vfs': 1.5.0
-      twoslash-protocol: 0.2.4
+      twoslash-protocol: 0.2.5
       typescript: 5.4.3
     transitivePeerDependencies:
       - supports-color
