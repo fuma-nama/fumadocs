@@ -19,8 +19,8 @@
   "prettier": "@vercel/style-guide/prettier",
   "devDependencies": {
     "@changesets/cli": "^2.27.1",
-    "@typescript-eslint/eslint-plugin": "^7.3.1",
-    "@typescript-eslint/parser": "^7.3.1",
+    "@typescript-eslint/eslint-plugin": "^7.4.0",
+    "@typescript-eslint/parser": "^7.4.0",
     "@vercel/style-guide": "^6.0.0",
     "concurrently": "^8.2.2",
     "prettier": "^3.2.5",
