@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 10.1.3
+
+### Patch Changes
+
+- bbad52f: Support `bun` in `remark-install` plugin
+
 ## 10.1.2
 
 ## 10.1.1
