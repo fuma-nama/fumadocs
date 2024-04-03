@@ -119,8 +119,48 @@ const purple: Preset = {
   },
 };
 
+const dusk: Preset = {
+  light: {
+    background: '250 20% 92%',
+    primary: '340 40% 48%',
+    border: '240 40% 90%',
+    accent: '250 30% 90%',
+    'accent-foreground': '250 20% 20%',
+    muted: '240 30% 94%',
+    'muted-foreground': '240 10% 50%',
+    foreground: '220 20% 30%',
+    secondary: '250 40% 94%',
+    'secondary-foreground': '240 40% 10%',
+    card: '250 20% 92%',
+    'card-foreground': '250 20% 20%',
+    'popover-foreground': '250 40% 20%',
+    popover: '250 40% 96%',
+    'primary-foreground': '240 80% 20%',
+    ring: '340 40% 48%',
+  },
+  dark: {
+    ring: '340 100% 90%',
+    'primary-foreground': '240 40% 4%',
+    popover: '240 20% 5%',
+    'popover-foreground': '250 20% 90%',
+    primary: '340 100% 90%',
+    border: '220 15% 15%',
+    background: '220 15% 6%',
+    foreground: '220 15% 87%',
+    muted: '220 20% 15%',
+    'muted-foreground': '220 15% 60%',
+    accent: '250 20% 15%',
+    secondary: '240 20% 15%',
+    'card-foreground': '240 15% 87%',
+    card: '240 20% 5%',
+    'secondary-foreground': '250 20% 90%',
+    'accent-foreground': '340 5% 90%',
+  },
+};
+
 export const presets = {
   purple,
   default: defaultPreset,
   ocean: oceanPreset,
+  dusk,
 };
