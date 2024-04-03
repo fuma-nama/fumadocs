@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 10.1.3
+
+### Patch Changes
+
+- 6ace206: Support opening Twoslash popup on mobile
+- d0288d1: New theme dusk
+- Updated dependencies [bbad52f]
+  - fumadocs-core@10.1.3
+
 ## 10.1.2
 
 ### Patch Changes
