@@ -15,7 +15,6 @@
     "@next/env": "^14.1.4",
     "algoliasearch": "^4.23.2",
     "class-variance-authority": "^0.7.0",
-    "clsx": "^2.1.0",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-twoslash": "workspace:^",

@@ -122,6 +122,7 @@
     "github-slugger": "^2.0.0",
     "hast-util-to-estree": "^3.1.0",
     "negotiator": "^0.6.3",
+    "npm-to-yarn": "^2.2.1",
     "react-remove-scroll": "^2.5.9",
     "remark": "^15.0.0",
     "remark-gfm": "^4.0.0",

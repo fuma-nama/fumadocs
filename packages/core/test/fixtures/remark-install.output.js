@@ -8,7 +8,7 @@ function _createMdxContent(props) {
   if (!Tab) _missingMdxReference("Tab", true);
   if (!Tabs) _missingMdxReference("Tabs", true);
   return _jsxs(Tabs, {
-    items: ["npm", "pnpm", "yarn"],
+    items: ["npm", "pnpm", "yarn", "bun"],
     children: [_jsx(Tab, {
       value: "npm",
       children: _jsx(_components.pre, {
@@ -31,6 +31,14 @@ function _createMdxContent(props) {
         children: _jsx(_components.code, {
           className: "language-bash",
           children: "yarn add next\n"
+        })
+      })
+    }), _jsx(Tab, {
+      value: "bun",
+      children: _jsx(_components.pre, {
+        children: _jsx(_components.code, {
+          className: "language-bash",
+          children: "bun add next\n"
         })
       })
     })]

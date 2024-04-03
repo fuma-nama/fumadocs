@@ -1,11 +1,16 @@
 import type { Code, Root } from 'mdast';
 import type { Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
+import convert from 'npm-to-yarn';
 
-type PackageManager = (name: string) => {
-  packageManager: string;
-  command: string;
-};
+interface PackageManager {
+  name: string;
+
+  /**
+   * Convert from npm to another package manager
+   */
+  command: (command: string) => string;
+}
 
 export type RemarkInstallOptions = Partial<{
   Tabs: string;
@@ -13,12 +18,13 @@ export type RemarkInstallOptions = Partial<{
   packageManagers: PackageManager[];
 }>;
 
+// todo: Extract to separate package
 /**
  * It generates the following structure from a code block with `package-install` as language
  *
  * @example
  * ```tsx
- * <Tabs items={["pnpm", "npm", "yarn"]}>
+ * <Tabs items={["npm", "pnpm", "yarn", "bun"]}>
  *  <Tab value="pnpm">...</Tab>
  *  ...
  * </Tabs>
@@ -28,16 +34,19 @@ export function remarkInstall({
   Tab = 'Tab',
   Tabs = 'Tabs',
   packageManagers = [
-    (name) => ({ command: `npm install ${name}`, packageManager: 'npm' }),
-    (name) => ({ command: `pnpm add ${name}`, packageManager: 'pnpm' }),
-    (name) => ({ command: `yarn add ${name}`, packageManager: 'yarn' }),
+    { command: (cmd) => convert(cmd, 'npm'), name: 'npm' },
+    { command: (cmd) => convert(cmd, 'pnpm'), name: 'pnpm' },
+    { command: (cmd) => convert(cmd, 'yarn'), name: 'yarn' },
+    { command: (cmd) => convert(cmd, 'bun'), name: 'bun' },
   ],
 }: RemarkInstallOptions = {}): Transformer<Root, Root> {
   return (tree) => {
     visit(tree, 'code', (node) => {
       if (node.lang !== 'package-install') return 'skip';
 
-      const managers = packageManagers.map((manager) => manager(node.value));
+      const value = node.value.startsWith('npm')
+        ? node.value
+        : `npm install ${node.value}`;
 
       const insert = {
         type: 'mdxJsxFlowElement',
@@ -55,9 +64,9 @@ export function remarkInstall({
                       type: 'ExpressionStatement',
                       expression: {
                         type: 'ArrayExpression',
-                        elements: managers.map(({ packageManager }) => ({
+                        elements: packageManagers.map(({ name }) => ({
                           type: 'Literal',
-                          value: packageManager,
+                          value: name,
                         })),
                       },
                     },
@@ -67,17 +76,15 @@ export function remarkInstall({
             },
           },
         ],
-        children: managers.map(({ command, packageManager }) => ({
+        children: packageManagers.map(({ command, name }) => ({
           type: 'mdxJsxFlowElement',
           name: Tab,
-          attributes: [
-            { type: 'mdxJsxAttribute', name: 'value', value: packageManager },
-          ],
+          attributes: [{ type: 'mdxJsxAttribute', name: 'value', value: name }],
           children: [
             {
               type: 'code',
               lang: 'bash',
-              value: command,
+              value: command(value),
             } satisfies Code,
           ],
         })),

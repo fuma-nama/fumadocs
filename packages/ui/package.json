@@ -102,7 +102,6 @@
     "@radix-ui/react-tabs": "^1.0.4",
     "@tailwindcss/typography": "^0.5.12",
     "class-variance-authority": "^0.7.0",
-    "clsx": "^2.1.0",
     "cmdk": "^1.0.0",
     "fumadocs-core": "workspace:*",
     "lucide-react": "^0.363.0",
