@@ -7,13 +7,6 @@ import { visit } from 'unist-util-visit';
 const regex = /^\|reference:(?<path>.+)\|/;
 
 export interface RemarkDynamicContentOptions {
-  // todo: Remove in next major
-  /**
-   * @defaultValue `vfile.cwd`
-   * @deprecated use the `cwd` option from remark instead
-   * */
-  cwd?: string;
-
   /** @defaultValue true */
   trim?: boolean;
 
@@ -46,7 +39,7 @@ export function remarkDynamicContent(
   } = options;
 
   return (tree, file) => {
-    const cwd = options.cwd ?? file.cwd;
+    const cwd = file.cwd;
 
     visit(tree, filter, (node) => {
       const canReplace = 'value' in node && typeof node.value === 'string';

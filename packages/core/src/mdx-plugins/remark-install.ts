@@ -18,7 +18,6 @@ export type RemarkInstallOptions = Partial<{
   packageManagers: PackageManager[];
 }>;
 
-// todo: Extract to separate package
 /**
  * It generates the following structure from a code block with `package-install` as language
  *
