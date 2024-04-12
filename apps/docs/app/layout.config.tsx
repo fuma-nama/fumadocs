@@ -1,8 +1,8 @@
 import type { DocsLayoutProps } from 'fumadocs-ui/layout';
+import { LayoutTemplateIcon } from 'lucide-react';
 import { utils } from '@/utils/source';
 import { FumaDocsSVG } from '@/app/(home)/icons';
 import { NavChildren, SidebarBanner } from '@/app/layout.client';
-import { LayoutTemplateIcon } from 'lucide-react';
 
 export const layoutOptions: Omit<DocsLayoutProps, 'children'> = {
   tree: utils.pageTree,

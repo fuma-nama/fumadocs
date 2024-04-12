@@ -46,7 +46,7 @@
   "dependencies": {
     "@mdx-js/mdx": "^3.0.1",
     "cross-spawn": "^7.0.3",
-    "estree-util-value-to-estree": "^3.0.1",
+    "estree-util-value-to-estree": "^3.1.1",
     "fast-glob": "^3.3.1",
     "fumadocs-core": "workspace:*",
     "gray-matter": "^4.0.3",
@@ -55,10 +55,10 @@
   "devDependencies": {
     "@types/cross-spawn": "^6.0.6",
     "@types/mdast": "^4.0.3",
-    "@types/mdx": "^2.0.12",
+    "@types/mdx": "^2.0.13",
     "@types/react": "^18.2.67",
     "eslint-config-custom": "workspace:*",
-    "next": "^14.1.4",
+    "next": "^14.2.0",
     "tsconfig": "workspace:*",
     "unified": "^11.0.4",
     "webpack": "^5.90.3"
