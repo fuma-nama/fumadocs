@@ -20,6 +20,11 @@ const config = {
     // Replaced by root workspace command
     ignoreDuringBuilds: true,
   },
+  webpack: (config) => {
+    config.module.noParse = [/typescript\/lib\/typescript.js/];
+
+    return config;
+  },
 };
 
 const withMDX = createMDX({

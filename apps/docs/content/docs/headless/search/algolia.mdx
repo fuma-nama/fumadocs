@@ -31,7 +31,7 @@ paragraphs are all indexed as a record, and the attribute for distinct is
 
 3. Create and sync your index with the `sync` function.
 
-   ```js
+   ```js title="update-index.mjs"
    import algosearch from 'algoliasearch'
    import { sync } from 'fumadocs-core/search-algolia/server'
    import { structure } from 'fumadocs-core/mdx-plugins'
@@ -48,6 +48,12 @@ paragraphs are all indexed as a record, and the attribute for distinct is
 
    You may make it a script and manually sync with `node ./update-index.mjs`, or
    integrate it with your CI/CD pipeline.
+
+   <Callout type="warn" title="Typescript Usage">
+     If you are running the script with
+     [TSX](https://github.com/privatenumber/tsx) or other similar Typescript
+     executors, ensure to name it `.mts` for best ESM compatibility.
+   </Callout>
 
 4. To search documents on the client side, you may use the search dialog
    provided by Fumadocs UI, or implement your own for advanced styling.
