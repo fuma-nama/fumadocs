@@ -23,13 +23,6 @@ import { isActive } from '@/utils/shared';
 import { buttonVariants } from '@/theme/variants';
 import type { LinkItem } from '@/layout';
 
-export interface NavLinkProps {
-  icon: ReactNode;
-  href: string;
-  label: string;
-  external?: boolean;
-}
-
 export interface NavProps {
   title?: ReactNode;
 
@@ -40,12 +33,6 @@ export interface NavProps {
   url?: string;
 
   items: LinkItem[];
-
-  // todo: Remove in next major
-  /**
-   * @deprecated Use `LayoutOptions.links` option instead
-   */
-  links?: NavLinkProps[];
 
   enableSidebar: boolean;
 
@@ -140,7 +127,7 @@ export function Nav({
                   }),
                 )}
               >
-                {item.icon}
+                {item.icon ?? item.text}
               </Link>
             ))}
         </div>

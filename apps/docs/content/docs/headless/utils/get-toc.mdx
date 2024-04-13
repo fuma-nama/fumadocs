@@ -11,29 +11,10 @@ Parse Table of contents from markdown/mdx content.
 
 Note: If you're using a CMS, you should use the API provided by the CMS instead.
 
-### Markdown/MDX
-
-Parse markdown content and return an array of TOC items.
-
 ```ts
 import { getTableOfContents } from 'fumadocs-core/server';
 
 const toc = await getTableOfContents(page.body.raw);
-```
-
-### Portable Text (Sanity)
-
-<Callout type="warn">This is deprecated since v10.1.0.</Callout>
-
-Takes a portable text and slug function, return an array of TOC items with their
-slug generated using the slug function.
-
-```ts
-import { getTableOfContentsFromPortableText } from 'fumadocs-core/server';
-
-const posts = await client.fetch(query);
-
-const toc = await getTableOfContentsFromPortableText(posts[0].body);
 ```
 
 ### Output

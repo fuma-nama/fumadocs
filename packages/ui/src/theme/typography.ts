@@ -35,6 +35,9 @@ export const typography = {
       fontSize: '14px',
       whiteSpace: 'nowrap',
     },
+    'thead th': {
+      textAlign: 'start',
+    },
     code: {
       padding: '3px',
       border: 'solid 1px',

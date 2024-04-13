@@ -1,6 +1,6 @@
 import type { PageTree } from 'fumadocs-core/server';
 import type { ReactNode, HTMLAttributes } from 'react';
-import type { NavProps, NavLinkProps } from './components/nav';
+import type { NavProps } from './components/nav';
 import { replaceOrDefault } from './utils/shared';
 import { cn } from './utils/cn';
 import type { SidebarProps } from './components/sidebar';
@@ -60,7 +60,7 @@ export function Layout({
   links = [],
   children,
 }: BaseLayoutProps): React.ReactElement {
-  const finalLinks = getLinks(links, nav.links, nav.githubUrl);
+  const finalLinks = getLinks(links, nav.githubUrl);
 
   return (
     <>
@@ -85,7 +85,7 @@ export function DocsLayout({
 }: DocsLayoutProps): React.ReactElement {
   const sidebarEnabled = sidebar.enabled ?? true;
   const sidebarCollapsible = sidebarEnabled && (sidebar.collapsible ?? true);
-  const finalLinks = getLinks(links, nav.links, nav.githubUrl);
+  const finalLinks = getLinks(links, nav.githubUrl);
 
   return (
     <TreeContextProvider tree={tree}>
@@ -119,11 +119,7 @@ export function DocsLayout({
   );
 }
 
-function getLinks(
-  links?: LinkItem[],
-  iconLinks?: NavLinkProps[],
-  githubUrl?: string,
-): LinkItem[] {
+function getLinks(links?: LinkItem[], githubUrl?: string): LinkItem[] {
   let result = links ?? [];
 
   if (githubUrl)
@@ -140,18 +136,6 @@ function getLinks(
         ),
         external: true,
       },
-    ];
-
-  if (iconLinks)
-    result = [
-      ...result,
-      ...iconLinks.map<LinkItem>((link) => ({
-        type: 'secondary',
-        text: link.label,
-        url: link.href,
-        icon: link.icon,
-        external: link.external,
-      })),
     ];
 
   return result;

@@ -15,56 +15,82 @@ officially recommended by Algolia.
 
 Each record contains searchable attributes `title`, `section`, and `content`.
 `section` is optional, it only exists in paragraphs under headings. Headings and
-paragraphs are all indexed as a record, and the attribute for distinct is
+paragraphs are all indexed as a record, and the distinct attribute is
 `page_id`.
 
 ## Setup
 
-1. Install `algoliasearch`
+<div className='steps'>
 
-   ```package-install
-   algoliasearch
-   ```
+<div className='step'>
 
-2. Sign up and obtain the required API keys for your search. Store these
-   credentials in environment variables.
+Install `algoliasearch`
 
-3. Create and sync your index with the `sync` function.
+```package-install
+algoliasearch
+```
 
-   ```js
-   import algosearch from 'algoliasearch'
-   import { sync } from 'fumadocs-core/search-algolia/server'
-   import { structure } from 'fumadocs-core/mdx-plugins'
+</div>
 
-   const client = algosearch(...)
+<div className="step">
+  Sign up and obtain the required API keys for your search. Store these
+  credentials in environment variables.
+</div>
 
-   sync(client, {
-     documents: allDocs.map(docs => ({
-       ...docs,
-       structured: structure(docs.body.raw)
-     }))
-   })
-   ```
+<div className='step'>
 
-   You may make it a script and manually sync with `node ./update-index.mjs`, or
-   integrate it with your CI/CD pipeline.
+Create and sync your indexes with the `sync` function.
 
-4. To search documents on the client side, you may use the search dialog
-   provided by Fumadocs UI, or implement your own for advanced styling.
+```js title="update-index.mjs"
+import algosearch from 'algoliasearch'
+import { sync } from 'fumadocs-core/search-algolia/server'
+import { structure } from 'fumadocs-core/mdx-plugins'
 
-   In addition, you can use the `useAlgoliaSearch` hook which handles loading
-   states with SWR.
+const client = algosearch(...)
 
-   ```ts
-   import { useAlgoliaSearch } from 'fumadocs-core/search-algolia/client'
+sync(client, {
+  documents: indexes // [!code highlight]
+})
+```
 
-   const index = algoliasearch(...).initIndex('document')
+The `indexes` variable should be provided by your content source provider. If you are using Fumadocs MDX, see [Search Index Generation](/docs/mdx/search-index).
 
-   const { search, setSearch, query } = useAlgoliaSearch(index, {
-      distinct: 5,
-      hitsPerPage: 10
-   })
-   ```
+Notably it requires a `structured` property, this can be obtained from [structurize](/docs/headless/mdx/structure), or sometimes supplied by the content source you are using.
+
+You may make it a script and manually sync with `node ./update-index.mjs`, or
+integrate it with your CI/CD pipeline.
+
+> Notice that it expects the `url` property of a page to be a unique value and
+> won't duplicated. In other words, you shouldn't have two pages with the same
+> url.
+
+<Callout type="warn" title="Typescript Usage">
+  If you are running the script with
+  [TSX](https://github.com/privatenumber/tsx) or other similar Typescript
+  executors, ensure to name it `.mts` for best ESM compatibility.
+</Callout>
+   
+</div>
+
+<div className='step'>
+
+To search documents on the client side, you can use the [Fumadocs UI Search Dialog](/docs/ui/search#algolia), or bring your own implementation.
+
+In addition, the `useAlgoliaSearch` hook can handle state management with SWR.
+
+```ts
+import { useAlgoliaSearch } from 'fumadocs-core/search-algolia/client'
+
+const index = algoliasearch(...).initIndex('document')
+
+const { search, setSearch, query } = useAlgoliaSearch(index, {
+   distinct: 5,
+   hitsPerPage: 10
+})
+```
+
+</div>
+</div>
 
 ### Customise Attributes & Settings
 
@@ -84,7 +110,3 @@ sync(client, {
 
 To customize the default index settings, set index settings, and update
 documents with `updateDocuments(...)` separately.
-
-> Notice that it expects the `url` property of a page to be a unique value and
-> won't duplicated. In other words, you shouldn't have two pages with the same
-> url.

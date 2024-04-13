@@ -14,19 +14,39 @@ Open with <kbd>K</kbd> <kbd>⌘</kbd> or <kbd>K</kbd> <kbd>Ctrl</kbd>.
 
 You can customize the search dialog from [Root Provider](/docs/ui/blocks/root-provider).
 
+```tsx
+'use client';
+
+import { RootProvider } from 'fumadocs-ui/provider';
+import dynamic from 'next/dynamic';
+
+const SearchDialog = dynamic(() => import('@/components/search'));
+
+export function Provider({ children }: { children: React.ReactNode }) {
+  return (
+    <RootProvider
+      search={{
+        SearchDialog,
+      }}
+    >
+      {children}
+    </RootProvider>
+  );
+}
+```
+
 By default, your dialog will be lazy loaded using
-[`next/dynamic`](https://nextjs.org/docs/app/building-your-application/optimizing/lazy-loading),
-this allows a better initial loading performance.
-It assumes you are using the [Built-in Search](/docs/headless/search/flexsearch) based on Flexsearch.
+[`next/dynamic`](https://nextjs.org/docs/app/building-your-application/optimizing/lazy-loading).
+This allows a better initial loading performance.
+
+When not specified, it uses the [Built-in Search Client](/docs/headless/search/flexsearch) based on Flexsearch.
 
 ### Algolia
 
-Fumadocs offers first-hand support for [Algolia](https://algolia.com). For
-the setup guide, see [Integrate Algolia Search](/docs/headless/search/algolia). Make sure you have `algoliasearch` installed on your project.
+For the setup guide, see [Integrate Algolia Search](/docs/headless/search/algolia). Make sure you have `algoliasearch` installed on your project.
 
 While generally we recommend building your own search with their client-side
-SDK, you can use the built-in dialog from
-`fumadocs-ui/components/dialog/search-algolia`.
+SDK, you can also plug the built-in dialog interface.
 
 First, create a separate client component for the dialog.
 
@@ -42,6 +62,8 @@ export default function CustomSearchDialog(props: SharedProps) {
   return <SearchDialog index={index} {...props} />;
 }
 ```
+
+Replace `appId`, `apiKey` and `indexName` with your desired values.
 
 Then, lazy load the dialog with `next/dynamic`.
 
@@ -65,6 +87,8 @@ export function Provider({ children }: { children: ReactNode }) {
 }
 ```
 
+Finally, wrap your entire application under the new `Provider`.
+
 <Callout title="Note" className='mt-4'>
 
 The built-in implementation doesn't use instant search (their official
@@ -75,22 +99,11 @@ javascript client).
 ### Other Solutions
 
 If you want to use other solutions such as ElasticSearch, you can replace the
-default dialog with your own by passing the `SearchDialog` component to the root
-provider.
+default dialog with your own.
 
 <Callout title="Tip" className="mb-4">
   You can lazy load the dialog with `next/dynamic`.
 </Callout>
-
-```jsx
-<RootProvider
-  search={{
-    SearchDialog: YourOwnDialog,
-  }}
->
-  ...
-</RootProvider>
-```
 
 ### Built-in UI
 
