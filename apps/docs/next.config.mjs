@@ -4,9 +4,11 @@ import {
   remarkDynamicContent,
   remarkInstall,
   rehypeCodeDefaultOptions,
+  remarkDocGen,
 } from 'fumadocs-core/mdx-plugins';
 import { transformerTwoslash } from 'fumadocs-twoslash';
 import rehypeKatex from 'rehype-katex';
+import { typescriptGen } from 'fumadocs-typescript';
 import remarkMath from 'remark-math';
 
 const withAnalyzer = createBundleAnalyzer({
@@ -63,6 +65,7 @@ const withMDX = createMDX({
       remarkMath,
       remarkDynamicContent,
       [remarkInstall, { Tabs: 'InstallTabs' }],
+      [remarkDocGen, { generators: [typescriptGen()] }],
     ],
     rehypePlugins: (v) => [rehypeKatex, ...v],
   },

@@ -575,9 +575,15 @@ importers:
 
   packages/typescript:
     dependencies:
+      estree-util-value-to-estree:
+        specifier: ^3.1.1
+        version: 3.1.1
       fast-glob:
         specifier: ^3.3.1
         version: 3.3.2
+      hast-util-to-estree:
+        specifier: ^3.1.0
+        version: 3.1.0
       hast-util-to-jsx-runtime:
         specifier: ^2.3.0
         version: 2.3.0
@@ -594,6 +600,9 @@ importers:
         specifier: '*'
         version: 5.4.2
     devDependencies:
+      '@types/estree':
+        specifier: ^1.0.5
+        version: 1.0.5
       '@types/hast':
         specifier: ^3.0.4
         version: 3.0.4
@@ -609,6 +618,9 @@ importers:
       eslint-config-custom:
         specifier: workspace:*
         version: link:../eslint-config-custom
+      fumadocs-core:
+        specifier: workspace:*
+        version: link:../core
       fumadocs-ui:
         specifier: workspace:*
         version: link:../ui

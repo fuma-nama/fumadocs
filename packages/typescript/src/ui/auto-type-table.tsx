@@ -1,5 +1,7 @@
 import { TypeTable } from 'fumadocs-ui/components/type-table';
-import { renderMarkdown } from '@/markdown';
+import { type Jsx, toJsxRuntime } from 'hast-util-to-jsx-runtime';
+import * as runtime from 'react/jsx-runtime';
+import { renderMarkdownToHast } from '@/markdown';
 import { type GenerateOptions, generateDocumentation } from '../generate/base';
 import 'server-only';
 
@@ -35,4 +37,12 @@ export function AutoTypeTable({
       )}
     />
   );
+}
+
+function renderMarkdown(md: string): React.ReactElement {
+  return toJsxRuntime(renderMarkdownToHast(md), {
+    Fragment: runtime.Fragment,
+    jsx: runtime.jsx as Jsx,
+    jsxs: runtime.jsxs as Jsx,
+  });
 }

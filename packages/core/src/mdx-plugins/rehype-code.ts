@@ -150,4 +150,4 @@ export function rehypeCode(
   };
 }
 
-export type { CodeBlockIcon, transformerIcon };
+export { type CodeBlockIcon, transformerIcon };
