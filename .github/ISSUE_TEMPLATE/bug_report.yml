@@ -1,0 +1,74 @@
+name: Bug Report
+description: Create a bug report
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before opening a new issue, please do a search of existing issues.
+
+        If you need help with your own project, you can start a discussion in the [Q&A Section](https://github.com/fuma-nama/fumadocs/discussions/categories/q-a).
+  - type: textarea
+    attributes:
+      label: To Reproduce
+      description: A step-by-step description of how to reproduce the issue, or a link to the reproducible repository.
+      placeholder: |
+        1. Start the application in development (next dev)
+        2. Click X
+        3. Y will happen
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Current vs. Expected behavior
+      description: A clear and concise description of what the bug is, and what you expected to happen.
+      placeholder: 'Following the steps from the previous section, I expected A to happen, but I observed B instead'
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Provide environment information
+      description: Please run `next info` in the root directory of your project and paste the results.
+      render: bash
+      placeholder: |
+        Operating System:
+          Platform: darwin
+          Arch: arm64
+          Version: Darwin Kernel Version 22.5.0
+        Binaries:
+          Node: 18.17.1
+          npm: 9.5.1
+          Yarn: 1.22.19
+          pnpm: N/A
+        Relevant Packages:
+          next: 13.4.20
+          eslint-config-next: 13.4.20
+          react: 18.2.0
+          react-dom: 18.2.0
+          typescript: 5.2.2
+        Next.js Config:
+          output: N/A
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Which area(s) are affected? (Select all that apply)
+      multiple: true
+      options:
+        - 'Not sure'
+        - 'Core'
+        - 'CLI (create-fumadocs-app)'
+        - 'UI'
+        - 'MDX'
+        - 'Integrations (e.g Contentlayer, OpenAPI, Typescript DocsGen)'
+        - 'TypeScript (built-in types)'
+        - 'Examples'
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Additional context
+      description: |
+        Any extra information that might help us investigate.
+      placeholder: |
+        I tested my reproduction against different canary releases, and the first one that introduced the bug was "11.0.0", since reverting to "10.0.0" works.
