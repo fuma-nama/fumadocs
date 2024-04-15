@@ -42,9 +42,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "estree-util-value-to-estree": "^3.1.1",
     "fast-glob": "^3.3.1",
-    "hast-util-to-estree": "^3.1.0",
     "hast-util-to-jsx-runtime": "^2.3.0",
     "mdast-util-from-markdown": "^2.0.0",
     "mdast-util-gfm": "^3.0.0",
@@ -57,7 +55,6 @@
     "@types/react": "18.2.67",
     "@types/react-dom": "18.2.22",
     "eslint-config-custom": "workspace:*",
-    "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "tsconfig": "workspace:*"
   },

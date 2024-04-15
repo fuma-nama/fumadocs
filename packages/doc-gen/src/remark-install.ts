@@ -2,6 +2,7 @@ import type { Code, Root } from 'mdast';
 import type { Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
 import convert from 'npm-to-yarn';
+import { createElement } from './utils';
 
 interface PackageManager {
   name: string;
@@ -47,35 +48,18 @@ export function remarkInstall({
         ? node.value
         : `npm install ${node.value}`;
 
-      const insert = {
-        type: 'mdxJsxFlowElement',
-        name: Tabs,
-        attributes: [
-          {
-            type: 'mdxJsxAttribute',
-            name: 'items',
-            value: {
-              type: 'mdxJsxAttributeValueExpression',
-              data: {
-                estree: {
-                  body: [
-                    {
-                      type: 'ExpressionStatement',
-                      expression: {
-                        type: 'ArrayExpression',
-                        elements: packageManagers.map(({ name }) => ({
-                          type: 'Literal',
-                          value: name,
-                        })),
-                      },
-                    },
-                  ],
-                },
-              },
-            },
+      const insert = createElement(
+        Tabs,
+        {
+          items: {
+            type: 'ArrayExpression',
+            elements: packageManagers.map(({ name }) => ({
+              type: 'Literal',
+              value: name,
+            })),
           },
-        ],
-        children: packageManagers.map(({ command, name }) => ({
+        },
+        packageManagers.map(({ command, name }) => ({
           type: 'mdxJsxFlowElement',
           name: Tab,
           attributes: [{ type: 'mdxJsxAttribute', name: 'value', value: name }],
@@ -83,11 +67,12 @@ export function remarkInstall({
             {
               type: 'code',
               lang: 'bash',
+              meta: node.meta,
               value: command(value),
             } satisfies Code,
           ],
         })),
-      };
+      );
 
       Object.assign(node, insert);
     });

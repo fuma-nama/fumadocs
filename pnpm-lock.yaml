@@ -70,6 +70,9 @@ importers:
       fumadocs-core:
         specifier: workspace:*
         version: link:../../packages/core
+      fumadocs-docgen:
+        specifier: workspace:^
+        version: link:../../packages/doc-gen
       fumadocs-mdx:
         specifier: workspace:*
         version: link:../../packages/mdx
@@ -455,6 +458,52 @@ importers:
         specifier: ^5.4.5
         version: 5.4.5
 
+  packages/doc-gen:
+    dependencies:
+      estree-util-value-to-estree:
+        specifier: ^3.1.1
+        version: 3.1.1
+      fumadocs-typescript:
+        specifier: workspace:^
+        version: link:../typescript
+      hast-util-to-estree:
+        specifier: ^3.1.0
+        version: 3.1.0
+      npm-to-yarn:
+        specifier: ^2.2.1
+        version: 2.2.1
+      unist-util-visit:
+        specifier: ^5.0.0
+        version: 5.0.0
+    devDependencies:
+      '@mdx-js/mdx':
+        specifier: ^3.0.1
+        version: 3.0.1
+      '@types/estree':
+        specifier: ^1.0.5
+        version: 1.0.5
+      '@types/hast':
+        specifier: ^3.0.4
+        version: 3.0.4
+      '@types/mdast':
+        specifier: ^4.0.3
+        version: 4.0.3
+      '@types/node':
+        specifier: 18.17.5
+        version: 18.17.5
+      eslint-config-custom:
+        specifier: workspace:*
+        version: link:../eslint-config-custom
+      remark:
+        specifier: ^15.0.0
+        version: 15.0.1
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
+      unified:
+        specifier: ^11.0.4
+        version: 11.0.4
+
   packages/eslint-config-custom: {}
 
   packages/mdx:
@@ -575,15 +624,9 @@ importers:
 
   packages/typescript:
     dependencies:
-      estree-util-value-to-estree:
-        specifier: ^3.1.1
-        version: 3.1.1
       fast-glob:
         specifier: ^3.3.1
         version: 3.3.2
-      hast-util-to-estree:
-        specifier: ^3.1.0
-        version: 3.1.0
       hast-util-to-jsx-runtime:
         specifier: ^2.3.0
         version: 2.3.0
@@ -618,9 +661,6 @@ importers:
       eslint-config-custom:
         specifier: workspace:*
         version: link:../eslint-config-custom
-      fumadocs-core:
-        specifier: workspace:*
-        version: link:../core
       fumadocs-ui:
         specifier: workspace:*
         version: link:../ui
@@ -9564,7 +9604,6 @@ packages:
       '@types/mdast': 4.0.3
       mdast-util-to-markdown: 2.1.0
       unified: 11.0.4
-    dev: false
 
   /remark@15.0.1:
     resolution: {integrity: sha512-Eht5w30ruCXgFmxVUSlNWQ9iiimq07URKeFS3hNc8cUWy1llX4KDWfyEDZRycMc+znsN9Ux5/tJ/BFdgdOwA3A==}
@@ -9575,7 +9614,6 @@ packages:
       unified: 11.0.4
     transitivePeerDependencies:
       - supports-color
-    dev: false
 
   /repeat-string@1.6.1:
     resolution: {integrity: sha512-PV0dzCYDNfRi1jCDbJzpW7jNNDRuCOG/jI5ctQcGKt/clZD+YcPS3yIlWuTJMmESC8aevCFmWJy5wjAFgNqN6w==}
