@@ -23,5 +23,3 @@ export type PageTreeItem = Server.PageTree.Item;
 export type PageTreeFolder = Server.PageTree.Folder;
 export type PageTreeRoot = Server.PageTree.Root;
 export type PageTreeSeparator = Server.PageTree.Separator;
-
-export type { RemarkDynamicContentOptions } from 'fumadocs-core/mdx-plugins';
