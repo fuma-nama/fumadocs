@@ -25,6 +25,22 @@ export interface TypescriptGeneratorInput {
   component?: string;
 }
 
+export interface VirtualTypeTableProps {
+  type: Record<
+    string,
+    {
+      type: string;
+
+      /**
+       * React nodes
+       */
+      description: unknown;
+
+      default?: string;
+    }
+  >;
+}
+
 /**
  * Docs generator for Typescript
  *
