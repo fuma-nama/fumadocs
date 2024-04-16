@@ -338,7 +338,7 @@ function Hero(): React.ReactElement {
       </div>
       <svg
         viewBox="0 0 500 500"
-        className="mb-[-150px] mt-16 size-[300px] dark:invert md:mb-[-250px] md:size-[500px]"
+        className="mb-[-150px] mt-16 size-[300px] duration-1000 animate-in slide-in-from-bottom-[500px] dark:invert md:mb-[-250px] md:size-[500px]"
       >
         <defs>
           <filter id="noiseFilter">
@@ -370,19 +370,7 @@ function Hero(): React.ReactElement {
           r="250"
           fill="url(#Gradient1)"
           filter="url(#noiseFilter)"
-          transform="translate(0 500)"
-        >
-          <animateTransform
-            attributeName="transform"
-            begin="0s"
-            dur="1s"
-            type="translate"
-            fill="freeze"
-            calcMode="spline"
-            keySplines="0.4 0 0.2 1"
-            values="0 500;0"
-          />
-        </circle>
+        />
       </svg>
       <div
         className="absolute inset-0 z-[-1]"
