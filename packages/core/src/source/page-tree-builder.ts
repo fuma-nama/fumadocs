@@ -51,9 +51,7 @@ function buildAll(
   for (const node of [...nodes].sort((a, b) =>
     a.file.name.localeCompare(b.file.name),
   )) {
-    if (node.file.locale) continue;
-
-    if ('data' in node && node.format === 'page') {
+    if ('data' in node && node.format === 'page' && !node.file.locale) {
       const treeNode = buildFileNode(node, ctx);
 
       if (node.file.name === 'index') {
@@ -62,7 +60,9 @@ function buildAll(
       }
 
       output.push(treeNode);
-    } else if ('children' in node) {
+    }
+
+    if ('children' in node) {
       output.push(buildFolderNode(node, false, ctx));
     }
   }
@@ -126,15 +126,13 @@ function buildFolderNode(
   defaultIsRoot: boolean,
   ctx: PageTreeBuilderContext,
 ): PageTree.Folder {
-  let meta = ctx.storage.read(joinPaths([folder.file.path, 'meta']), 'meta');
+  const metaPath = joinPaths([folder.file.path, 'meta']);
+  let meta = ctx.storage.read(metaPath, 'meta');
+  meta = findLocalizedFile(metaPath, 'meta', ctx) ?? meta;
   const indexFile = ctx.storage.read(
     joinPaths([folder.file.flattenedPath, 'index']),
     'page',
   );
-
-  if (meta) {
-    meta = findLocalizedFile(meta, ctx) ?? meta;
-  }
 
   const metadata = meta?.data.data as FileData['meta']['data'] | undefined;
   const index = indexFile ? buildFileNode(indexFile, ctx) : undefined;
@@ -180,7 +178,8 @@ function buildFolderNode(
 }
 
 function buildFileNode(file: File, ctx: PageTreeBuilderContext): PageTree.Item {
-  const localized = findLocalizedFile(file, ctx) ?? file;
+  const localized =
+    findLocalizedFile(file.file.flattenedPath, 'page', ctx) ?? file;
   const data = localized.data as FileData['file'];
 
   return removeUndefined({
@@ -237,15 +236,13 @@ export function createPageTreeBuilder({
 }
 
 function findLocalizedFile(
-  file: File,
+  path: string,
+  format: 'meta' | 'page',
   ctx: PageTreeBuilderContext,
 ): File | undefined {
-  if (!ctx.lang) return file;
+  if (!ctx.lang) return;
 
-  return ctx.storage.read(
-    `${file.file.flattenedPath}.${ctx.lang}`,
-    file.format,
-  );
+  return ctx.storage.read(`${path}.${ctx.lang}`, format);
 }
 
 function pathToName(path: string): string {
