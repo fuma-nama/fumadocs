@@ -62,12 +62,12 @@ export default function Page({
 }
 
 function Category({ page }: { page: Page }): React.ReactElement {
-  const filtered = utils.files.filter(
-    (docs) =>
-      docs.type === 'page' &&
-      docs.file.dirname === page.file.dirname &&
-      docs.file.name !== 'index',
-  ) as Page[];
+  const filtered = utils
+    .getPages()
+    .filter(
+      (item) =>
+        item.file.dirname === page.file.dirname && item.file.name !== 'index',
+    );
 
   return (
     <Cards>
