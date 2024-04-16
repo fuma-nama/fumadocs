@@ -52,6 +52,18 @@ export function parseFolderPath(path: string): FileInfo {
 }
 
 /**
+ * @param path - Relative path
+ * @returns Normalized path, with no trailing/leading slashes
+ * @throws Throws error if path starts with `./` or `../`
+ */
+export function normalizePath(path: string): string {
+  const segments = splitPath(slash(path));
+  if (segments[0] === '.' || segments[0] === '..')
+    throw new Error("It must not start with './' or '../'");
+  return joinPaths(segments);
+}
+
+/**
  * Split path into segments, trailing/leading slashes are removed
  */
 export function splitPath(path: string): string[] {

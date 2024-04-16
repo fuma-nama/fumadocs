@@ -1,6 +1,4 @@
-import * as path from 'node:path';
-import type { MetaData, PageData } from './types';
-import { parseFilePath, type FileInfo } from './path';
+import { parseFilePath, type FileInfo, normalizePath } from './path';
 import { Storage } from './file-system';
 
 export interface LoadOptions {
@@ -12,6 +10,11 @@ export interface LoadOptions {
 }
 
 export interface VirtualFile {
+  /**
+   * Relative path
+   *
+   * @example `docs/page.mdx`
+   */
   path: string;
   type: 'page' | 'meta';
   data: unknown;
@@ -46,32 +49,28 @@ export function load(options: LoadOptions): LoadResult {
 
 function buildStorage(options: LoadOptions): Storage {
   const storage = new Storage();
+  const rootDir = normalizePath(options.rootDir);
 
   for (const file of options.files) {
-    const relativePath = path.join(
-      path.relative(options.rootDir, path.join('./', path.dirname(file.path))),
-      path.basename(file.path),
-    );
+    const normalizedPath = normalizePath(file.path);
+    if (!normalizedPath.startsWith(rootDir)) continue;
 
-    if (relativePath.startsWith('..') || path.isAbsolute(relativePath))
-      continue;
+    const relativePath = normalizePath(normalizedPath.slice(rootDir.length));
 
     if (file.type === 'page') {
       const parsedPath = parseFilePath(relativePath);
       const slugs = options.getSlugs(parsedPath);
 
-      storage.write(relativePath, {
+      storage.write(relativePath, file.type, {
         slugs,
         url: options.getUrl(slugs, parsedPath.locale),
-        type: file.type,
-        data: file.data as PageData,
+        data: file.data,
       });
     }
 
     if (file.type === 'meta') {
-      storage.write(relativePath, {
-        type: file.type,
-        data: file.data as MetaData,
+      storage.write(relativePath, file.type, {
+        data: file.data,
       });
     }
   }

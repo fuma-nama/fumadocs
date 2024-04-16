@@ -1,4 +1,3 @@
-import type { MetaData, PageData } from './types';
 import {
   parseFilePath,
   parseFolderPath,
@@ -6,27 +5,16 @@ import {
   type FileInfo,
 } from './path';
 
-export interface Meta<Data extends MetaData = MetaData> {
-  type: 'meta';
+export interface File {
+  path: string;
   file: FileInfo;
-  data: Data;
+  format: 'meta' | 'page';
+  data: Record<string, unknown>;
 }
 
-export interface Page<Data extends PageData = PageData> {
-  type: 'page';
+export interface Folder {
   file: FileInfo;
-  slugs: string[];
-  url: string;
-  data: Data;
-}
-
-export interface Folder<
-  MD extends MetaData = MetaData,
-  PD extends PageData = PageData,
-> {
-  type: 'folder';
-  file: FileInfo;
-  children: (Meta<MD> | Page<PD> | Folder<MD, PD>)[];
+  children: (File | Folder)[];
 }
 
 /**
@@ -35,10 +23,9 @@ export interface Folder<
  * Some source providers may not provide the full file structure, this will cause inconsistent outputs for page builder and other transformers
  */
 export class Storage {
-  files = new Map<string, Page | Meta>();
+  files = new Map<string, File>();
   folders = new Map<string, Folder>();
   private rootFolder: Folder = {
-    type: 'folder',
     file: parseFolderPath(''),
     children: [],
   };
@@ -50,28 +37,8 @@ export class Storage {
   /**
    * @param path - flattened path
    */
-  private read(path: string, type: string): Page | Meta | undefined {
-    return this.files.get(`${path}.${type}`);
-  }
-
-  /**
-   * @param path - flattened path
-   */
-  readPage(path: string): Page | undefined {
-    const result = this.read(path, 'page');
-    if (result?.type !== 'page') return;
-
-    return result;
-  }
-
-  /**
-   * @param path - flattened path
-   */
-  readMeta(path: string): Meta | undefined {
-    const result = this.read(path, 'meta');
-    if (result?.type !== 'meta') return;
-
-    return result;
+  read(path: string, format: string): File | undefined {
+    return this.files.get(`${path}.${format}`);
   }
 
   readDir(path: string): Folder | undefined {
@@ -82,18 +49,24 @@ export class Storage {
     return this.rootFolder;
   }
 
-  write(path: string, file: Omit<Page, 'file'> | Omit<Meta, 'file'>): void {
-    const node: Page | Meta = {
+  write(
+    path: string,
+    format: 'meta' | 'page',
+    data: Record<string, unknown>,
+  ): void {
+    const node: File = {
+      path,
+      format,
       file: parseFilePath(path),
-      ...file,
+      data,
     };
 
     this.makeDir(node.file.dirname);
     this.readDir(node.file.dirname)?.children.push(node);
-    this.files.set(`${node.file.flattenedPath}.${node.type}`, node);
+    this.files.set(`${node.file.flattenedPath}.${node.format}`, node);
   }
 
-  list(): (Page | Meta)[] {
+  list(): File[] {
     return [...this.files.values()];
   }
 
@@ -105,7 +78,6 @@ export class Storage {
       if (this.folders.has(segment)) continue;
 
       const folder: Folder = {
-        type: 'folder',
         file: parseFolderPath(segment),
         children: [],
       };

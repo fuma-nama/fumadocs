@@ -4,12 +4,12 @@ import {
   type LoadOptions,
   type VirtualFile,
   type Transformer,
-} from './load';
-import type { MetaData, PageData } from './types';
+} from './load-files';
+import type { FileData, MetaData, PageData } from './types';
 import type { CreatePageTreeBuilderOptions } from './page-tree-builder';
 import { createPageTreeBuilder } from './page-tree-builder';
 import { joinPaths, splitPath, type FileInfo } from './path';
-import type { Meta, Page, Storage } from './file-system';
+import type { File, Storage } from './file-system';
 
 export interface LoaderConfig {
   source: SourceConfig;
@@ -47,15 +47,24 @@ export interface Source<Config extends SourceConfig> {
   files: VirtualFile[] | ((rootDir: string) => VirtualFile[]);
 }
 
+export interface Page<Data = PageData> {
+  file: FileInfo;
+  slugs: string[];
+  url: string;
+  data: Data;
+}
+
+export interface Meta<Data = MetaData> {
+  file: FileInfo;
+  data: Data;
+}
+
 export interface LoaderOutput<Config extends LoaderConfig> {
   pageTree: Config['i18n'] extends true
     ? Record<string, PageTree.Root>
     : PageTree.Root;
 
-  files: (
-    | Meta<Config['source']['metaData']>
-    | Page<Config['source']['pageData']>
-  )[];
+  files: File[];
 
   /**
    * Get list of pages from language, empty if language hasn't specified
@@ -80,14 +89,14 @@ function groupByLanguages(
 
   langMap.set('', []);
   for (const node of storage.list()) {
-    if (node.type !== 'page' || node.file.locale) continue;
-    langMap.get('')?.push(node);
+    if (node.format !== 'page' || node.file.locale) continue;
+    langMap.get('')?.push(fileToPage(node));
 
     for (const lang of languages) {
       const list = langMap.get(lang) ?? [];
       const page =
-        storage.readPage(`${node.file.flattenedPath}.${lang}`) ?? node;
-      list.push(page);
+        storage.read(`${node.file.flattenedPath}.${lang}`, 'page') ?? node;
+      list.push(fileToPage(page));
       langMap.set(lang, list);
     }
   }
@@ -164,5 +173,16 @@ function createOutput({
         .get(language)
         ?.find((page) => page.slugs.join('/') === path);
     },
+  };
+}
+
+function fileToPage<Data>(file: File): Page<Data> {
+  const data = file.data as FileData['file'];
+
+  return {
+    file: file.file,
+    url: data.url,
+    slugs: data.slugs,
+    data: data.data as Data,
   };
 }

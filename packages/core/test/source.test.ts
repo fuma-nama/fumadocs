@@ -152,6 +152,13 @@ test('Internationalized Routing', () => {
         },
         {
           type: 'meta',
+          path: '/nested/meta.json',
+          data: {
+            title: 'Nested',
+          },
+        },
+        {
+          type: 'meta',
           path: '/nested/meta.cn.json',
           data: {
             title: 'Nested Chinese',
@@ -171,6 +178,10 @@ test('Internationalized Routing', () => {
         },
         {
           "children": [
+            {
+              "name": "Nested",
+              "type": "page",
+            },
             {
               "name": "Nested Page",
               "type": "page",
@@ -195,6 +206,10 @@ test('Internationalized Routing', () => {
         },
         {
           "children": [
+            {
+              "name": "Nested Chinese",
+              "type": "page",
+            },
             {
               "name": "Nested Page Chinese",
               "type": "page",
