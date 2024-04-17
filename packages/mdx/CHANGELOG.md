@@ -1,5 +1,15 @@
 # next-docs-mdx
 
+## 8.2.9
+
+### Patch Changes
+
+- Updated dependencies [2d8df75]
+- Updated dependencies [92cb12f]
+- Updated dependencies [f75287d]
+- Updated dependencies [2d8df75]
+  - fumadocs-core@11.0.0
+
 ## 8.2.8
 
 ### Patch Changes

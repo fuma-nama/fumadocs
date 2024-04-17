@@ -1,5 +1,49 @@
 # next-docs-ui
 
+## 11.0.0
+
+### Major Changes
+
+- 2d8df75: Replace `nav.links` option with secondary links
+
+  why: A more straightforward API design
+
+  migrate:
+
+  ```diff
+  <DocsLayout
+  +  links={[
+  +    {
+  +      type: 'secondary',
+  +      text: 'Github',
+  +      url: 'https://github.com',
+  +      icon: <GithubIcon />,
+  +      external: true,
+  +    },
+  +  ]}
+  -  nav={{
+  -    links: [
+  -      {
+  -        icon: <GithubIcon />,
+  -        href: 'https://github.com',
+  -        label: 'Github',
+  -        external: true,
+  -      },
+  -    ],
+  -  }}
+  >
+    {children}
+  </DocsLayout>
+  ```
+
+### Patch Changes
+
+- Updated dependencies [2d8df75]
+- Updated dependencies [92cb12f]
+- Updated dependencies [f75287d]
+- Updated dependencies [2d8df75]
+  - fumadocs-core@11.0.0
+
 ## 10.1.3
 
 ### Patch Changes
