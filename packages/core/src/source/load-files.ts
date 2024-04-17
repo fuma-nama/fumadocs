@@ -2,9 +2,8 @@ import { parseFilePath, type FileInfo, normalizePath } from './path';
 import { Storage } from './file-system';
 
 export interface LoadOptions {
-  files: VirtualFile[];
   transformers?: Transformer[];
-  rootDir: string;
+  rootDir?: string;
   getSlugs: (info: FileInfo) => string[];
   getUrl: (slugs: string[], locale?: string) => string;
 }
@@ -20,42 +19,22 @@ export interface VirtualFile {
   data: unknown;
 }
 
-export interface LoadResult {
-  storage: Storage;
-}
-
 export type Transformer = (context: {
   storage: Storage;
-  getSlugs: (info: FileInfo) => string[];
-  getUrl: (slugs: string[], locale?: string) => string;
+  options: LoadOptions;
 }) => void;
 
-// Virtual files -> Virtual Storage -> Plugins -> Result
-// Result should contain page tree and basic utilities
-export function load(options: LoadOptions): LoadResult {
+// Virtual files -> Virtual Storage -> Transformers -> Result
+export function loadFiles(files: VirtualFile[], options: LoadOptions): Storage {
   const { transformers = [] } = options;
-  const storage = buildStorage(options);
-
-  for (const transformer of transformers) {
-    transformer({
-      storage,
-      getUrl: options.getUrl,
-      getSlugs: options.getSlugs,
-    });
-  }
-
-  return { storage };
-}
-
-function buildStorage(options: LoadOptions): Storage {
   const storage = new Storage();
-  const rootDir = normalizePath(options.rootDir);
+  const rootDir = normalizePath(options.rootDir ?? '');
 
-  for (const file of options.files) {
+  for (const file of files) {
     const normalizedPath = normalizePath(file.path);
     if (!normalizedPath.startsWith(rootDir)) continue;
 
-    const relativePath = normalizePath(normalizedPath.slice(rootDir.length));
+    const relativePath = normalizedPath.slice(rootDir.length);
 
     if (file.type === 'page') {
       const parsedPath = parseFilePath(relativePath);
@@ -73,6 +52,13 @@ function buildStorage(options: LoadOptions): Storage {
         data: file.data,
       });
     }
+  }
+
+  for (const transformer of transformers) {
+    transformer({
+      storage,
+      options,
+    });
   }
 
   return storage;

@@ -6,7 +6,6 @@ import {
 } from './path';
 
 export interface File {
-  path: string;
   file: FileInfo;
   format: 'meta' | 'page';
   data: Record<string, unknown>;
@@ -55,7 +54,6 @@ export class Storage {
     data: Record<string, unknown>,
   ): void {
     const node: File = {
-      path,
       format,
       file: parseFilePath(path),
       data,

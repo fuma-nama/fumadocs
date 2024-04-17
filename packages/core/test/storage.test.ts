@@ -1,7 +1,7 @@
 import { Storage } from '@/source/file-system';
 import { parseFilePath, parseFolderPath } from '@/source/path';
 import { describe, expect, test } from 'vitest';
-import { load } from '@/source/load-files';
+import { VirtualFile, loadFiles } from '@/source/load-files';
 
 describe('Virtual Storage', () => {
   const storage = new Storage();
@@ -29,37 +29,38 @@ describe('Virtual Storage', () => {
   });
 });
 
+const demoFiles: VirtualFile[] = [
+  {
+    type: 'page',
+    path: 'test.mdx',
+    data: {
+      title: 'Hello',
+    },
+  },
+  {
+    type: 'page',
+    path: '/nested/test.mdx',
+    data: {
+      title: 'Nested Page',
+    },
+  },
+  {
+    type: 'page',
+    path: '/nested/nested/test.mdx',
+    data: {
+      title: 'Nested Nested Page',
+    },
+  },
+];
+
 test('Building File Graph', () => {
-  const result = load({
+  const storage = loadFiles(demoFiles, {
     rootDir: '',
     getSlugs: () => [''],
-    files: [
-      {
-        type: 'page',
-        path: 'test.mdx',
-        data: {
-          title: 'Hello',
-        },
-      },
-      {
-        type: 'page',
-        path: '/nested/test.mdx',
-        data: {
-          title: 'Nested Page',
-        },
-      },
-      {
-        type: 'page',
-        path: '/nested/nested/test.mdx',
-        data: {
-          title: 'Nested Nested Page',
-        },
-      },
-    ],
     getUrl: () => '',
   });
 
-  expect(result.storage.root().children).toEqual([
+  expect(storage.root().children).toEqual([
     expect.objectContaining({
       format: 'page',
       file: parseFilePath('test.mdx'),
@@ -83,4 +84,66 @@ test('Building File Graph', () => {
       ],
     }),
   ]);
+});
+
+test('Building File Graph - with root directory', () => {
+  const storage = loadFiles(demoFiles, {
+    rootDir: 'nested',
+    getSlugs: () => [''],
+    getUrl: () => '',
+  });
+
+  expect(storage.root().children).toMatchInlineSnapshot(`
+    [
+      {
+        "data": {
+          "data": {
+            "title": "Nested Page",
+          },
+          "slugs": [
+            "",
+          ],
+          "url": "",
+        },
+        "file": {
+          "dirname": "",
+          "flattenedPath": "test",
+          "locale": undefined,
+          "name": "test",
+          "path": "test.mdx",
+        },
+        "format": "page",
+      },
+      {
+        "children": [
+          {
+            "data": {
+              "data": {
+                "title": "Nested Nested Page",
+              },
+              "slugs": [
+                "",
+              ],
+              "url": "",
+            },
+            "file": {
+              "dirname": "nested",
+              "flattenedPath": "nested/test",
+              "locale": undefined,
+              "name": "test",
+              "path": "nested/test.mdx",
+            },
+            "format": "page",
+          },
+        ],
+        "file": {
+          "dirname": "",
+          "flattenedPath": "nested",
+          "locale": undefined,
+          "name": "nested",
+          "path": "nested",
+        },
+      },
+    ]
+  `);
 });

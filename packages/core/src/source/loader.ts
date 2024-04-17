@@ -1,6 +1,6 @@
 import type * as PageTree from '@/server/page-tree';
 import {
-  load,
+  loadFiles,
   type LoadOptions,
   type VirtualFile,
   type Transformer,
@@ -81,27 +81,34 @@ export interface LoaderOutput<Config extends LoaderConfig> {
   ) => Page<Config['source']['pageData']> | undefined;
 }
 
-function groupByLanguages(
+function buildPageMap(
   storage: Storage,
   languages: string[],
-): Map<string, Page[]> {
-  const langMap = new Map<string, Page[]>();
+): Map<string, Map<string, Page>> {
+  const map = new Map<string, Map<string, Page>>();
+  const defaultMap = new Map<string, Page>();
 
-  langMap.set('', []);
-  for (const node of storage.list()) {
-    if (node.format !== 'page' || node.file.locale) continue;
-    langMap.get('')?.push(fileToPage(node));
+  map.set('', defaultMap);
+  for (const file of storage.list()) {
+    if (file.format !== 'page' || file.file.locale) continue;
+    const page = fileToPage(file);
+
+    defaultMap.set(page.slugs.join('/'), page);
 
     for (const lang of languages) {
-      const list = langMap.get(lang) ?? [];
-      const page =
-        storage.read(`${node.file.flattenedPath}.${lang}`, 'page') ?? node;
-      list.push(fileToPage(page));
-      langMap.set(lang, list);
+      const langMap = map.get(lang) ?? new Map<string, Page>();
+
+      const localized = storage.read(
+        `${file.file.flattenedPath}.${lang}`,
+        'page',
+      );
+      const localizedPage = localized ? fileToPage(localized) : page;
+      langMap.set(localizedPage.slugs.join('/'), localizedPage);
+      map.set(lang, langMap);
     }
   }
 
-  return langMap;
+  return map;
 }
 
 export function createGetUrl(
@@ -139,20 +146,21 @@ function createOutput({
   rootDir = '',
   transformers,
   baseUrl = '/',
-  slugs = getSlugs,
-  url = createGetUrl(baseUrl),
+  slugs: slugsFn = getSlugs,
+  url: urlFn = createGetUrl(baseUrl),
 }: LoaderOptions): LoaderOutput<LoaderConfig> {
-  const result = load({
-    files:
-      typeof source.files === 'function' ? source.files(rootDir) : source.files,
-    transformers,
-    rootDir,
-    getSlugs: slugs,
-    getUrl: url,
-  });
-  const i18nMap = groupByLanguages(result.storage, languages ?? []);
+  const storage = loadFiles(
+    typeof source.files === 'function' ? source.files(rootDir) : source.files,
+    {
+      transformers,
+      rootDir,
+      getSlugs: slugsFn,
+      getUrl: urlFn,
+    },
+  );
+  const i18nMap = buildPageMap(storage, languages ?? []);
   const builder = createPageTreeBuilder({
-    storage: result.storage,
+    storage,
     resolveIcon: icon,
   });
   const pageTree =
@@ -162,21 +170,17 @@ function createOutput({
 
   return {
     pageTree: pageTree as LoaderOutput<LoaderConfig>['pageTree'],
-    files: result.storage.list(),
+    files: storage.list(),
     getPages(language = '') {
-      return i18nMap.get(language) ?? [];
+      return Array.from(i18nMap.get(language)?.values() ?? []);
     },
-    getPage(slugs_ = [], language = '') {
-      const path = slugs_.join('/');
-
-      return i18nMap
-        .get(language)
-        ?.find((page) => page.slugs.join('/') === path);
+    getPage(slugs = [], language = '') {
+      return i18nMap.get(language)?.get(slugs.join('/'));
     },
   };
 }
 
-function fileToPage<Data>(file: File): Page<Data> {
+function fileToPage<Data = PageData>(file: File): Page<Data> {
   const data = file.data as FileData['file'];
 
   return {
