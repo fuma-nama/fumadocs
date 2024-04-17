@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-typescript",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "description": "Typescript Integration for Fumadocs",
   "keywords": [
     "NextJs",
@@ -49,6 +49,7 @@
     "mdast-util-to-hast": "^13.1.0"
   },
   "devDependencies": {
+    "@types/estree": "^1.0.5",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.3",
     "@types/react": "18.2.67",

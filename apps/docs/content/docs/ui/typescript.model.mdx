@@ -57,9 +57,24 @@ Run this script with `node ./script.mjs`.
 Generated MDX files assumes you are using the [Tailwind CSS preset](/docs/ui/theme) of Fumadocs UI.
 If you want to customise generated output, use the `templates` option.
 
-### Forced Type Name
+## Annotations
 
-You can specify the name of type with the `@remarks` tsdoc tag.
+### Hide
+
+Hide a field by adding `@internal` tsdoc tag.
+
+```ts
+interface MyInterface {
+  /**
+   * @internal
+   */
+  cache: number;
+}
+```
+
+### Specify Type Name
+
+You can specify the name of a type with the `@remarks` tsdoc tag.
 
 ```ts
 interface MyInterface {
@@ -69,6 +84,8 @@ interface MyInterface {
   time: number;
 }
 ```
+
+This will make the type of `time` property to be shown as `timestamp`.
 
 ## Demo
 

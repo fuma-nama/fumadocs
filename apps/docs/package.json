@@ -16,6 +16,7 @@
     "algoliasearch": "^4.23.3",
     "class-variance-authority": "^0.7.0",
     "fumadocs-core": "workspace:*",
+    "fumadocs-docgen": "workspace:^",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-twoslash": "workspace:^",
     "fumadocs-typescript": "workspace:^",

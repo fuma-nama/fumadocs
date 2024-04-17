@@ -11,15 +11,8 @@ import {
 } from 'fumadocs-ui/components/codeblock';
 import type { ReactNode } from 'react';
 import { Popup, PopupContent, PopupTrigger } from 'fumadocs-ui/twoslash/popup';
-import { AutoTypeTable } from 'fumadocs-typescript/ui';
 import { Wrapper } from '@/components/preview/wrapper';
 import { cn } from './utils/cn';
-
-const shortcuts: Record<string, string> = {
-  ui: './content/docs/ui/props.ts',
-  headless: './content/docs/headless/props.ts',
-  mdx: './content/docs/mdx/props.ts',
-};
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
@@ -31,12 +24,6 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
       <CodeBlock title={title} icon={icon} allowCopy={allowCopy}>
         <Pre className={cn('max-h-[400px]', className)} {...props} />
       </CodeBlock>
-    ),
-    AutoTypeTable: ({ path, name }: { path: string; name: string }) => (
-      <AutoTypeTable
-        path={path in shortcuts ? shortcuts[path] : path}
-        name={name}
-      />
     ),
     Tabs,
     Tab,

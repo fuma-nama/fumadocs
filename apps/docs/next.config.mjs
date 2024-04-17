@@ -1,10 +1,12 @@
 import createBundleAnalyzer from '@next/bundle-analyzer';
 import createMDX from 'fumadocs-mdx/config';
+import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins';
 import {
-  remarkDynamicContent,
+  remarkDocGen,
   remarkInstall,
-  rehypeCodeDefaultOptions,
-} from 'fumadocs-core/mdx-plugins';
+  fileGenerator,
+  typescriptGenerator,
+} from 'fumadocs-docgen';
 import { transformerTwoslash } from 'fumadocs-twoslash';
 import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
@@ -61,8 +63,8 @@ const withMDX = createMDX({
     lastModifiedTime: 'git',
     remarkPlugins: [
       remarkMath,
-      remarkDynamicContent,
       [remarkInstall, { Tabs: 'InstallTabs' }],
+      [remarkDocGen, { generators: [typescriptGenerator(), fileGenerator()] }],
     ],
     rehypePlugins: (v) => [rehypeKatex, ...v],
   },

@@ -1,18 +1,13 @@
 import { fromMarkdown } from 'mdast-util-from-markdown';
 import { gfmFromMarkdown } from 'mdast-util-gfm';
 import { toHast } from 'mdast-util-to-hast';
-import { type Jsx, toJsxRuntime } from 'hast-util-to-jsx-runtime';
-import * as runtime from 'react/jsx-runtime';
+import type { Nodes } from 'hast';
 
-export function renderMarkdown(md: string): React.ReactElement {
+export function renderMarkdownToHast(md: string): Nodes {
   const mdast = fromMarkdown(
     md.replace(/{@link (?<link>[^}]*)}/g, '$1'), // replace jsdoc links
     { mdastExtensions: [gfmFromMarkdown()] },
   );
 
-  return toJsxRuntime(toHast(mdast), {
-    Fragment: runtime.Fragment,
-    jsx: runtime.jsx as Jsx,
-    jsxs: runtime.jsxs as Jsx,
-  });
+  return toHast(mdast);
 }

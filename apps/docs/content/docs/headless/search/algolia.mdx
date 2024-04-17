@@ -55,13 +55,12 @@ sync(client, {
 
 The `indexes` variable should be provided by your content source provider. If you are using Fumadocs MDX, see [Search Index Generation](/docs/mdx/search-index).
 
-Notably it requires a `structured` property, this can be obtained from [structurize](/docs/headless/mdx/structure), or sometimes supplied by the content source you are using.
+Notably, it requires a `structured` property, this can be obtained from [structurize](/docs/headless/mdx/structure), or sometimes supplied by the content source you are using.
 
 You may make it a script and manually sync with `node ./update-index.mjs`, or
 integrate it with your CI/CD pipeline.
 
-> Notice that it expects the `url` property of a page to be a unique value and
-> won't duplicated. In other words, you shouldn't have two pages with the same
+> Notice that it expects the `url` property of a page to be unique. In other words, you shouldn't have two pages with the same
 > url.
 
 <Callout type="warn" title="Typescript Usage">

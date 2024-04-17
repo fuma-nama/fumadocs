@@ -1,5 +1,92 @@
 # next-docs-zeta
 
+## 11.0.0
+
+### Major Changes
+
+- 2d8df75: Remove `cwd` option from `remark-dynamic-content`
+
+  why: Use `cwd` from vfile
+
+  migrate: Pass the `cwd` option from remark instead
+
+- 92cb12f: Simplify Source API virtual storage.
+
+  why: Improve performance
+
+  migrate:
+
+  ```diff
+  - storage.write('path.mdx', { type: 'page', ... })
+  - storage.readPage('page')
+  + storage.write('path.mdx', 'page', { ... })
+  + storage.read('page', 'page')
+  ```
+
+  Transformers can now access file loader options.
+
+  ```ts
+  load({
+    transformers: [
+      ({ storage, options }) => {
+        options.getUrl();
+        options.getSlugs();
+      },
+    ],
+  });
+  ```
+
+- f75287d: **Introduce `fumadocs-docgen` package.**
+
+  Offer a better authoring experience for advanced use cases.
+
+  - Move `remark-dynamic-content` and `remark-install` plugins to the new package `fumadocs-docgen`.
+  - Support Typescript generator by default
+
+  **Usage**
+
+  Add the `remarkDocGen` plugin to your remark plugins.
+
+  ```ts
+  import { remarkDocGen, fileGenerator } from "fumadocs-docgen";
+
+  remark().use(remarkDocGen, { generators: [fileGenerator()] });
+  ```
+
+  Generate docs with code blocks.
+
+  ````mdx
+  ```json doc-gen:<generator>
+  {
+    // options
+  }
+  ```
+  ````
+
+  **Migrate**
+
+  For `remarkDynamicContent`, enable `fileGenerator` and use this syntax:
+
+  ````mdx
+  ```json doc-gen:file
+  {
+    "file": "./path/to/my-file.txt"
+  }
+  ```
+  ````
+
+  For `remarkInstall`, it remains the same:
+
+  ```ts
+  import { remarkInstall } from "fumadocs-docgen";
+  ```
+
+- 2d8df75: Remove support for `getTableOfContentsFromPortableText`
+
+  why: Sanity integration should be provided by 3rd party integrations
+
+  migrate: Use built-in sources, or write a custom implementation
+
 ## 10.1.3
 
 ### Patch Changes

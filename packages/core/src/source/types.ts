@@ -1,5 +1,4 @@
-import type { LoaderOutput } from './loader';
-import type { Meta, Page } from './file-system';
+import type { LoaderOutput, Meta, Page } from './loader';
 
 export interface MetaData {
   icon?: string;
@@ -25,3 +24,17 @@ export type InferMetaType<Utils extends LoaderOutput<any>> =
   Utils extends LoaderOutput<infer Config>
     ? Meta<Config['source']['metaData']>
     : never;
+
+/**
+ * @internal
+ */
+export interface FileData {
+  meta: {
+    data: MetaData;
+  };
+  file: {
+    url: string;
+    slugs: string[];
+    data: PageData;
+  };
+}

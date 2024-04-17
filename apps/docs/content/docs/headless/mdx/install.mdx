@@ -5,10 +5,14 @@ description: Generate code blocks for installing packages
 
 ## Usage
 
-Add the plugin to `remarkPlugins`.
+```package-install
+fumadocs-docgen
+```
+
+Add the remark plugin.
 
 ```ts
-import { remarkInstall } from 'fumadocs-core/mdx-plugins'
+import { remarkInstall } from 'fumadocs-docgen'
 
 const config = {
     remarkPlugins: [

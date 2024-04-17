@@ -1,7 +1,8 @@
 import type { ReactElement } from 'react';
 import type * as PageTree from '../server/page-tree';
-import type { Folder, Meta, Page, Storage } from './file-system';
+import type { File, Folder, Storage } from './file-system';
 import { joinPaths } from './path';
+import { type FileData } from './types';
 
 interface PageTreeBuilderContext {
   storage: Storage;
@@ -41,7 +42,7 @@ const extractor = /\.\.\.(?<name>.+)/;
  * @returns Nodes with specified locale in context (sorted)
  */
 function buildAll(
-  nodes: (Folder | Page | Meta)[],
+  nodes: (Folder | File)[],
   ctx: PageTreeBuilderContext,
   skipIndex: boolean,
 ): PageTree.Node[] {
@@ -50,8 +51,7 @@ function buildAll(
   for (const node of [...nodes].sort((a, b) =>
     a.file.name.localeCompare(b.file.name),
   )) {
-    if (node.type === 'page') {
-      if (node.file.locale) continue;
+    if ('data' in node && node.format === 'page' && !node.file.locale) {
       const treeNode = buildFileNode(node, ctx);
 
       if (node.file.name === 'index') {
@@ -62,27 +62,12 @@ function buildAll(
       output.push(treeNode);
     }
 
-    if (node.type === 'folder') {
+    if ('children' in node) {
       output.push(buildFolderNode(node, false, ctx));
     }
   }
 
   return output;
-}
-
-function getFolderMeta(
-  folder: Folder,
-  ctx: PageTreeBuilderContext,
-): Meta | undefined {
-  let meta = ctx.storage.readMeta(joinPaths([folder.file.path, 'meta']));
-
-  if (ctx.lang) {
-    meta =
-      ctx.storage.readMeta(joinPaths([folder.file.path, `meta.${ctx.lang}`])) ??
-      meta;
-  }
-
-  return meta;
 }
 
 function resolveFolderItem(
@@ -121,13 +106,13 @@ function resolveFolderItem(
     folder.file.path,
     extractResult?.groups?.name ?? item,
   ]);
-  const itemNode = ctx.storage.readDir(path) ?? ctx.storage.readPage(path);
+  const itemNode = ctx.storage.readDir(path) ?? ctx.storage.read(path, 'page');
 
   if (!itemNode) return [];
 
   addedNodePaths.add(itemNode.file.path);
 
-  if (itemNode.type === 'folder') {
+  if ('children' in itemNode) {
     const node = buildFolderNode(itemNode, false, ctx);
 
     return extractResult ? node.children : [node];
@@ -141,22 +126,26 @@ function buildFolderNode(
   defaultIsRoot: boolean,
   ctx: PageTreeBuilderContext,
 ): PageTree.Folder {
-  const indexFile = ctx.storage.readPage(
+  const metaPath = joinPaths([folder.file.path, 'meta']);
+  let meta = ctx.storage.read(metaPath, 'meta');
+  meta = findLocalizedFile(metaPath, 'meta', ctx) ?? meta;
+  const indexFile = ctx.storage.read(
     joinPaths([folder.file.flattenedPath, 'index']),
+    'page',
   );
 
+  const metadata = meta?.data.data as FileData['meta']['data'] | undefined;
   const index = indexFile ? buildFileNode(indexFile, ctx) : undefined;
-  const meta = getFolderMeta(folder, ctx)?.data;
 
   let children: PageTree.Node[];
 
   if (!meta) {
     children = buildAll(folder.children, ctx, !defaultIsRoot);
   } else {
-    const isRoot = meta.root ?? defaultIsRoot;
+    const isRoot = metadata?.root ?? defaultIsRoot;
     const addedNodePaths = new Set<string>();
 
-    const resolved = meta.pages?.flatMap<PageTree.Node | '...'>((item) => {
+    const resolved = metadata?.pages?.flatMap<PageTree.Node | '...'>((item) => {
       return resolveFolderItem(folder, item, ctx, addedNodePaths);
     });
 
@@ -179,30 +168,25 @@ function buildFolderNode(
 
   return removeUndefined({
     type: 'folder',
-    name: meta?.title ?? index?.name ?? pathToName(folder.file.name),
-    icon: ctx.resolveIcon(meta?.icon),
-    root: meta?.root,
-    defaultOpen: meta?.defaultOpen,
+    name: metadata?.title ?? index?.name ?? pathToName(folder.file.name),
+    icon: ctx.resolveIcon(metadata?.icon),
+    root: metadata?.root,
+    defaultOpen: metadata?.defaultOpen,
     index,
     children,
   });
 }
 
-function buildFileNode(page: Page, ctx: PageTreeBuilderContext): PageTree.Item {
-  let localePage = page;
-  if (ctx.lang) {
-    const result = ctx.storage.readPage(
-      `${page.file.flattenedPath}.${ctx.lang}`,
-    );
-
-    if (result) localePage = result;
-  }
+function buildFileNode(file: File, ctx: PageTreeBuilderContext): PageTree.Item {
+  const localized =
+    findLocalizedFile(file.file.flattenedPath, 'page', ctx) ?? file;
+  const data = localized.data as FileData['file'];
 
   return removeUndefined({
     type: 'page',
-    name: localePage.data.title,
-    icon: ctx.resolveIcon(localePage.data.icon),
-    url: localePage.url,
+    name: data.data.title,
+    icon: ctx.resolveIcon(data.data.icon),
+    url: data.url,
   });
 }
 
@@ -249,6 +233,16 @@ export function createPageTreeBuilder({
       return Object.fromEntries(entries);
     },
   };
+}
+
+function findLocalizedFile(
+  path: string,
+  format: 'meta' | 'page',
+  ctx: PageTreeBuilderContext,
+): File | undefined {
+  if (!ctx.lang) return;
+
+  return ctx.storage.read(`${path}.${ctx.lang}`, format);
 }
 
 function pathToName(path: string): string {
