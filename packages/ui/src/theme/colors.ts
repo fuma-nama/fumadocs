@@ -132,7 +132,7 @@ const neutral: Preset = {
       top: '0',
       right: '0',
       zIndex: '-1',
-      width: 'calc(max(0px, 100vw - 1400px) + 100% + 1rem)',
+      width: 'calc(max(0px, 100vw - theme(maxWidth.container)) + 100% + 1rem)',
       height: '100%',
       background: 'hsl(0 0% 93%)',
       borderRight: '1px solid',

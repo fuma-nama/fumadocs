@@ -165,6 +165,7 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
   ({ prefix = '' } = {}) => ({
     theme: {
       extend: {
+        // Allow devs to use `container` for other elements
         container: {
           center: true,
           padding: '1rem',
@@ -177,6 +178,9 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
             'calc(100vh - 4rem) /* fallback */',
             'calc(100dvh - 4rem)',
           ] as unknown as string,
+        },
+        maxWidth: {
+          container: '1400px',
         },
         colors: {
           border: colorToCSS(prefix, 'border'),
