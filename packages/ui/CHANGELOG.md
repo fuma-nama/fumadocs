@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 11.0.1
+
+### Patch Changes
+
+- 1136e02: Support modifying css with color presets
+- 1136e02: New color preset `neutral`
+- f6b4797: Improve Sidebar footer
+  - fumadocs-core@11.0.1
+
 ## 11.0.0
 
 ### Major Changes
