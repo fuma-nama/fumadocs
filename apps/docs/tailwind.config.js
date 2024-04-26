@@ -1,4 +1,4 @@
-const { createPreset } = require('fumadocs-ui/tailwind-plugin');
+const { createPreset, presets } = require('fumadocs-ui/tailwind-plugin');
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -9,7 +9,25 @@ module.exports = {
     './mdx-components.tsx',
     './node_modules/fumadocs-ui/dist/**/*.js',
   ],
-  presets: [createPreset()],
+  presets: [
+    createPreset({
+      preset: {
+        ...presets.default,
+        dark: {
+          ...presets.default.dark,
+          background: '0 0% 0%',
+          foreground: '0 0% 100%',
+          popover: '0 0% 4%',
+          card: '0 0% 4%',
+          muted: '0 0% 8%',
+          border: '0 0% 14%',
+          accent: '0 0% 15%',
+          'accent-foreground': '0 0% 100%',
+          'muted-foreground': '0 0% 60%',
+        },
+      },
+    }),
+  ],
   theme: {
     extend: {
       fontFamily: {

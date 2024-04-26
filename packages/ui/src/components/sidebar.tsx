@@ -50,7 +50,7 @@ interface Components {
 }
 
 const itemVariants = cva(
-  'flex w-full flex-row items-center gap-2 rounded-md px-2 py-1.5 text-muted-foreground [&_svg]:size-4',
+  'flex w-full flex-row items-center gap-2 rounded-md px-2 py-1.5 text-muted-foreground transition-colors duration-100 [&_svg]:size-4',
   {
     variants: {
       active: {
@@ -80,15 +80,13 @@ const SidebarContext = createContext<SidebarContext>({
 });
 
 export function Sidebar({
-  banner,
   footer,
   components,
-  items = [],
   defaultOpenLevel = 1,
   collapsible = true,
+  ...props
 }: SidebarProps): React.ReactElement {
   const [open, setOpen] = useSidebarCollapse();
-  const { root } = useTreeContext();
   const alwaysShowFooter = Boolean(footer) || collapsible;
   const context = useMemo<SidebarContext>(
     () => ({
@@ -98,61 +96,91 @@ export function Sidebar({
     [components, defaultOpenLevel],
   );
 
+  const onCollapse = (): void => {
+    setOpen(!open);
+  };
+
   return (
-    <Base.SidebarList
-      minWidth={768} // md
-      className={cn(
-        'flex w-full flex-col text-[15px] md:sticky md:top-16 md:h-body md:w-[240px] md:text-sm xl:w-[260px]',
-        !open && 'md:!w-0',
-        'max-md:fixed max-md:inset-0 max-md:z-40 max-md:bg-background/80 max-md:pt-16 max-md:backdrop-blur-md max-md:data-[open=false]:hidden',
-      )}
-    >
-      <SidebarContext.Provider value={context}>
-        <ScrollArea className="flex-1">
-          <ScrollViewport>
-            <div className="flex flex-col gap-8 pb-10 pt-4 max-md:px-4 md:pr-3 md:pt-10">
-              {banner}
-              {items.length > 0 && (
-                <div className="lg:hidden">
-                  {items.map((item) => (
-                    <BaseItem key={item.url} {...item} nested />
-                  ))}
-                </div>
-              )}
-              <NodeList items={root.children} />
-            </div>
-          </ScrollViewport>
-        </ScrollArea>
-        <div
+    <>
+      {collapsible && !open ? (
+        <button
+          type="button"
+          aria-label="Trigger Sidebar"
           className={cn(
-            'flex flex-row items-center gap-2 border-t py-2 max-md:px-4',
-            !alwaysShowFooter && 'md:hidden',
+            buttonVariants({
+              color: 'ghost',
+              size: 'icon',
+              className: 'sticky bottom-4 mt-auto mb-4 h-fit',
+            }),
           )}
+          onClick={onCollapse}
         >
-          {footer}
-          <ThemeToggle className="md:hidden" />
-          {collapsible ? (
-            <button
-              type="button"
-              aria-label="Trigger Sidebar"
-              className={cn(
-                buttonVariants({
-                  color: 'ghost',
-                  size: 'icon',
-                }),
-                'max-md:hidden',
-                open ? 'ms-auto' : 'absolute -right-6 bottom-2',
-              )}
-              onClick={() => {
-                setOpen(!open);
-              }}
-            >
-              <SidebarIcon />
-            </button>
-          ) : null}
+          <SidebarIcon />
+        </button>
+      ) : null}
+      <Base.SidebarList
+        minWidth={768} // md
+        className={cn(
+          'flex w-full flex-col text-[15px] md:sticky md:top-16 md:h-body md:w-[240px] md:text-sm xl:w-[260px]',
+          !open && 'md:hidden',
+          'max-md:fixed max-md:inset-0 max-md:z-40 max-md:bg-background/80 max-md:pt-16 max-md:backdrop-blur-md max-md:data-[open=false]:hidden',
+        )}
+      >
+        <SidebarContext.Provider value={context}>
+          <ViewportContent {...props} />
+          <div
+            className={cn(
+              'flex flex-row items-center gap-2 border-t p-3 md:p-2',
+              !alwaysShowFooter && 'md:hidden',
+            )}
+          >
+            {footer}
+            <ThemeToggle className="md:hidden" />
+            {collapsible ? (
+              <button
+                type="button"
+                aria-label="Trigger Sidebar"
+                className={cn(
+                  buttonVariants({
+                    color: 'ghost',
+                    size: 'icon',
+                    className: 'max-md:hidden ms-auto',
+                  }),
+                )}
+                onClick={onCollapse}
+              >
+                <SidebarIcon />
+              </button>
+            ) : null}
+          </div>
+        </SidebarContext.Provider>
+      </Base.SidebarList>
+    </>
+  );
+}
+
+function ViewportContent({
+  items = [],
+  banner,
+}: Pick<SidebarProps, 'items' | 'banner'>): React.ReactElement {
+  const { root } = useTreeContext();
+
+  return (
+    <ScrollArea className="flex-1">
+      <ScrollViewport>
+        <div className="flex flex-col gap-8 pb-10 pt-4 max-md:px-4 md:pr-3 md:pt-10">
+          {banner}
+          {items.length > 0 && (
+            <div className="lg:hidden">
+              {items.map((item) => (
+                <BaseItem key={item.url} {...item} nested />
+              ))}
+            </div>
+          )}
+          <NodeList items={root.children} />
         </div>
-      </SidebarContext.Provider>
-    </Base.SidebarList>
+      </ScrollViewport>
+    </ScrollArea>
   );
 }
 

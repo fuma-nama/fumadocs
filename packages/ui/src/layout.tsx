@@ -98,7 +98,7 @@ export function DocsLayout({
       <div
         {...containerProps}
         className={cn(
-          'container flex flex-row gap-6 xl:gap-12',
+          'mx-auto flex w-full max-w-container flex-row gap-6 px-4 xl:gap-12',
           containerProps?.className,
         )}
       >

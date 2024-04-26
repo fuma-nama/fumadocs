@@ -77,7 +77,7 @@ export function Nav({
           : 'border-foreground/10 bg-background/50 backdrop-blur-md',
       )}
     >
-      <nav className="container flex h-full flex-row items-center gap-4">
+      <nav className="mx-auto flex size-full max-w-container flex-row items-center gap-4 px-4">
         <Link
           href={url}
           className="inline-flex items-center gap-3 font-semibold"

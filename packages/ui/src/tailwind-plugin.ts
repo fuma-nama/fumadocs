@@ -1,6 +1,6 @@
 import typography from '@tailwindcss/typography';
 import plugin from 'tailwindcss/plugin';
-import type { PresetsConfig } from 'tailwindcss/types/config';
+import type { CSSRuleObject, PresetsConfig } from 'tailwindcss/types/config';
 import { presets } from './theme/colors';
 import { animations } from './theme/animations';
 import { typography as typographyConfig } from './theme/typography';
@@ -39,13 +39,12 @@ type Keys =
   | 'accent-foreground'
   | 'ring';
 
-type Theme = Record<Keys, string> & {
-  'background-image'?: string;
-};
+type Theme = Record<Keys, string>;
 
 export interface Preset {
   light: Theme;
   dark: Theme;
+  css?: CSSRuleObject;
 }
 
 function getThemeStyles(prefix: string, theme: Theme): Record<string, string> {
@@ -69,7 +68,7 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
     keepCodeBlockBackground = false,
   } = {}) => {
     return ({ addBase, addComponents, addUtilities }) => {
-      const { light, dark } =
+      const { light, dark, css } =
         typeof preset === 'string' ? presets[preset] : preset;
 
       addBase({
@@ -80,13 +79,11 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
         },
         body: {
           'background-color': `theme('colors.background')`,
-          'background-image': `var(${variableName(
-            prefix,
-            'background-image',
-          )})`,
           color: `theme('colors.foreground')`,
         },
       });
+
+      if (css) addBase(css);
 
       addComponents({
         '.nd-codeblock span': {
@@ -168,6 +165,7 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
   ({ prefix = '' } = {}) => ({
     theme: {
       extend: {
+        // Allow devs to use `container` for other elements
         container: {
           center: true,
           padding: '1rem',
@@ -180,6 +178,9 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
             'calc(100vh - 4rem) /* fallback */',
             'calc(100dvh - 4rem)',
           ] as unknown as string,
+        },
+        maxWidth: {
+          container: '1400px',
         },
         colors: {
           border: colorToCSS(prefix, 'border'),
@@ -226,3 +227,5 @@ export function createPreset(options: DocsUIOptions = {}): PresetsConfig {
     plugins: [typography, docsUi(options)],
   };
 }
+
+export { presets } from './theme/colors';
