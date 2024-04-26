@@ -1,12 +1,13 @@
 import { PlusIcon } from 'lucide-react';
 import Image, { type StaticImageData } from 'next/image';
+import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
+import { createMetadata } from '@/utils/metadata';
 import NextFAQImage from '@/public/showcases/next-faq.png';
 import YeecordImage from '@/public/showcases/yeecord.png';
-import { cn } from '@/utils/cn';
-import { createMetadata } from '@/utils/metadata';
 import NuqsImage from '@/public/showcases/nuqs.jpg';
 import FrameGround from '@/public/showcases/frameground.png';
+import Briefkasten from '@/public/showcases/briefkasten.png';
 import Spot from '@/public/spot.png';
 
 export const metadata = createMetadata({
@@ -48,6 +49,11 @@ export default function Showcase(): React.ReactElement {
     {
       name: "RUNFUNRUN's Blog",
       url: 'https://www.runfunrun.tech',
+    },
+    {
+      image: Briefkasten,
+      name: "Briefkasten Docs",
+      url: 'https://docs.briefkastenhq.com',
     },
   ];
 
