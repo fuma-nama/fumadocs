@@ -110,7 +110,7 @@ export function Sidebar({
             buttonVariants({
               color: 'ghost',
               size: 'icon',
-              className: 'sticky bottom-4 mt-auto mb-4 h-fit',
+              className: 'sticky bottom-4 mt-auto mb-4 h-fit max-md:hidden',
             }),
           )}
           onClick={onCollapse}
