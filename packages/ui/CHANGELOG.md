@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 11.0.2
+
+### Patch Changes
+
+- 6470d6d: Fix collapse button on smaller viewports
+  - fumadocs-core@11.0.2
+
 ## 11.0.1
 
 ### Patch Changes
