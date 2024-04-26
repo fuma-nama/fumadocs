@@ -8,6 +8,12 @@ The framework for building documentation websites in Next.js.
 
 All packages are **ESM only**.
 
+## Sticker
+
+![logo](./documents/logo.png)
+
+Welcome to print it out :D
+
 ## Contributions
 
 We are welcome for contributions! You may start with contributing to the docs,
