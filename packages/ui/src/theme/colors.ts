@@ -123,8 +123,7 @@ const neutral: Preset = {
   },
   css: {
     aside: {
-      '--muted-foreground': '0 0% 29%',
-      'font-weight': '500',
+      '--muted-foreground': '0 0% 30%',
     },
     'aside::before': {
       content: '""',
@@ -134,15 +133,63 @@ const neutral: Preset = {
       zIndex: '-1',
       width: 'calc(max(0px, 100vw - theme(maxWidth.container)) + 100% + 1rem)',
       height: '100%',
-      background: 'hsl(0 0% 93%)',
+      background: 'hsl(var(--secondary))',
       borderRight: '1px solid',
-      borderRightColor: `theme(borderColor.border)`,
+      borderRightColor: "theme(borderColor.border)"
     },
     '.dark aside': {
       '--muted-foreground': '0 0% 72%',
     },
-    '.dark aside::before': {
-      background: 'hsl(0 0% 11.5%)',
+  },
+};
+
+const catppuccin: Preset = {
+  light: {
+    popover: '220deg 22% 92%',
+    'popover-foreground': '234deg 16% 35%',
+    'secondary-foreground': '234deg 16% 35%',
+    border: '223deg 16% 83%',
+    primary: '266deg 85% 58%',
+    'primary-foreground': '234deg 16% 35%',
+    muted: '220deg 22% 92%',
+    card: '220deg 22% 92%',
+    accent: '223deg 16% 83%',
+    'accent-foreground': '234deg 16% 35%',
+    'card-foreground': '234deg 16% 35%',
+    'muted-foreground': '233deg 10% 47%',
+    foreground: '234deg 16% 35%',
+    secondary: '220deg 22% 92%',
+    background: '220deg 23% 95%',
+    ring: '267deg 84% 81%',
+  },
+  dark: {
+    ring: '267deg 84% 81%',
+    primary: '267deg 84% 81%',
+    background: '240deg 21% 15%',
+    foreground: '226deg 64% 88%',
+    popover: '240deg 23% 9%',
+    card: '240deg 21% 12%',
+    muted: '237deg 16% 23%',
+    border: '237deg 16% 23%',
+    accent: '234deg 13% 31%',
+    secondary: '240deg 23% 9%',
+    'primary-foreground': '240deg 23% 9%',
+    'card-foreground': '226deg 64% 88%',
+    'secondary-foreground': '226deg 64% 88%',
+    'popover-foreground': '226deg 64% 88%',
+    'accent-foreground': '226deg 64% 88%',
+    'muted-foreground': '228deg 24% 72%',
+  },
+  css: {
+    'aside::before': {
+      content: '""',
+      position: 'absolute',
+      top: '0',
+      right: '0',
+      zIndex: '-1',
+      width: 'calc(max(0px, 100vw - theme(maxWidth.container)) + 100% + 1rem)',
+      height: '100%',
+      background: 'hsl(var(--secondary))',
     },
   },
 };
@@ -229,6 +276,7 @@ export const presets = {
   purple,
   default: defaultPreset,
   ocean: oceanPreset,
+  catppuccin,
   neutral,
   dusk,
 };

@@ -3,11 +3,11 @@
 @tailwind utilities;
 
 .ui {
-  --primary: 220 80% 30%;
+  --primary: 220deg 91% 54%;
 }
 
 .dark .ui {
-  --primary: 220 100% 80%;
+  --primary: 217deg 92% 76%;
 }
 
 .headless {
@@ -24,11 +24,4 @@
 
 .dark .mdx {
   --primary: 0 0% 100%;
-}
-
-body {
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  font-synthesis-weight: none;
 }

@@ -55,7 +55,8 @@ const itemVariants = cva(
     variants: {
       active: {
         true: 'bg-primary/10 font-medium text-primary',
-        false: 'hover:bg-accent/50 hover:text-accent-foreground/80',
+        false:
+          'hover:bg-accent/50 hover:text-accent-foreground/80 hover:transition-none',
       },
     },
   },
@@ -220,13 +221,7 @@ function BaseItem({
   url,
   text,
   nested = false,
-}: {
-  icon?: React.ReactNode;
-  external?: boolean;
-  text: React.ReactNode;
-  url: string;
-  nested?: boolean;
-}): React.ReactElement {
+}: Omit<LinkItem, 'type'> & { nested?: boolean }): React.ReactElement {
   const pathname = usePathname();
   const active = isActive(url, pathname, nested);
 
