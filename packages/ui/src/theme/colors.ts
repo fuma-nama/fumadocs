@@ -135,7 +135,7 @@ const neutral: Preset = {
       height: '100%',
       background: 'hsl(var(--secondary))',
       borderRight: '1px solid',
-      borderRightColor: "theme(borderColor.border)"
+      borderRightColor: 'theme(borderColor.border)',
     },
     '.dark aside': {
       '--muted-foreground': '0 0% 72%',
