@@ -2,4 +2,4 @@
 "fumadocs-ui": patch
 ---
 
-New color preset: `catppuccin``
+New color preset: `catppuccin`
