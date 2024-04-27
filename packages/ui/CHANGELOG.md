@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 11.0.3
+
+### Patch Changes
+
+- c11e6ce: New color preset: `catppuccin`
+  - fumadocs-core@11.0.3
+
 ## 11.0.2
 
 ### Patch Changes
