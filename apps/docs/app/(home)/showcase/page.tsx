@@ -52,7 +52,7 @@ export default function Showcase(): React.ReactElement {
     },
     {
       image: Briefkasten,
-      name: "Briefkasten Docs",
+      name: 'Briefkasten Docs',
       url: 'https://docs.briefkastenhq.com',
     },
   ];
