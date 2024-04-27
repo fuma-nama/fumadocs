@@ -10,15 +10,37 @@ Fumadocs UI is the built-in user interface integration for Fumadocs, built on th
 
 Create a new app with `create-fumadocs-app`.
 
-```bash title="Terminal"
+<InstallTabs items={['npm', 'pnpm', 'yarn', 'bun']}>
+    <Tab value='npm'>
+
+```bash
 npx create-fumadocs-app
-# or
+```
+
+    </Tab>
+    <Tab value="pnpm">
+
+```bash
 pnpm create fumadocs-app
-# or
+```
+
+    </Tab>
+    <Tab value='yarn'>
+
+```bash
 yarn create fumadocs-app
-# or
+```
+
+    </Tab>
+    <Tab value='bun'>
+
+```bash
 bun create fumadocs-app
 ```
+
+    </Tab>
+
+</InstallTabs>
 
 ## Manual Installation
 
@@ -151,36 +173,46 @@ npm run dev
 ### FAQ
 
 <Accordions>
-<Accordion id='why-fumadocs-ui' title="Why Fumadocs UI?">
+    <Accordion id='why-fumadocs-ui' title="Why Fumadocs UI?">
 
-Fumadocs UI provides many built-in components, and is more flexible compared to
-other existing frameworks.
+        Fumadocs UI provides many built-in components, and is more flexible compared to
+        other existing frameworks.
 
-And most importantly, it is compatible with Next.js App Router which results in
-a faster page load speed with ~120kb initial Javascript load. You can easily use
-Fumadocs in an existing Next.js project, without refactoring anything.
+        And most importantly, it is compatible with Next.js App Router which results in
+        a faster page load speed with ~120kb initial Javascript load. You can easily use
+        Fumadocs in an existing Next.js project, without refactoring anything.
 
-Feel free to open the demo in CodeSandbox and see if it suits you.
+        Feel free to open the demo in CodeSandbox and see if it suits you.
 
-</Accordion>
-<Accordion id='fix-supports-color' title="How to fix 'supports-color' error?">
+    </Accordion>
+    <Accordion id='fix-supports-color' title="How to fix 'supports-color' error?">
 
-If you got this error:
+        If you got this error:
 
-```
-Module not found: Can't resolve 'supports-color' in '.../node_modules/debug/src'
-```
+        ```
+        Module not found: Can't resolve 'supports-color' in '.../node_modules/debug/src'
+        ```
 
-Try installing `supports-color@8.1.1`.
+        Try installing `supports-color@8.1.1`.
 
-</Accordion>
-<Accordion id='fix-dot-map-error' title="How to fix '@/.map' error?">
+    </Accordion>
+    <Accordion id='fix-dot-map-error' title="How to fix '@/.map' error?">
 
-If you are using Fumadocs MDX, the `.map.ts` file will be generated automatically once you start the dev server.
+        If you are using Fumadocs MDX, the `.map.ts` file will be generated automatically once you start the dev server.
 
-For more information, see [Setup Guide](/docs/mdx).
+        For more information, see [Setup Guide](/docs/mdx).
 
-</Accordion>
+    </Accordion>
+    <Accordion id='blog-usage' title="Can I use it for Blog?">
+
+        The answer is yes.
+
+        Fumadocs is built for documentation sites, yet, it is very flexible.
+        You can use the `DocsBody` component to apply typography styles and leverage the built-in remark/rehype plugins.
+        Besides, the `Layout` component allows you to share the navbar between other pages.
+
+    </Accordion>
+
 </Accordions>
 
 ### Demo

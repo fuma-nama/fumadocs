@@ -15,8 +15,8 @@ module.exports = {
         ...presets.default,
         dark: {
           ...presets.default.dark,
-          background: '0 0% 0%',
-          foreground: '0 0% 100%',
+          background: '0 0% 2%',
+          foreground: '0 0% 98%',
           popover: '0 0% 4%',
           card: '0 0% 4%',
           muted: '0 0% 8%',

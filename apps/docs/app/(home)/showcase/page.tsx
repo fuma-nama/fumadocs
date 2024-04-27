@@ -52,7 +52,7 @@ export default function Showcase(): React.ReactElement {
     },
     {
       image: Briefkasten,
-      name: "Briefkasten Docs",
+      name: 'Briefkasten Docs',
       url: 'https://docs.briefkastenhq.com',
     },
   ];
@@ -64,7 +64,7 @@ export default function Showcase(): React.ReactElement {
           alt="spot"
           src={Spot}
           sizes="100vw"
-          className="size-full min-w-[800px] max-w-[1400px]"
+          className="size-full min-w-[800px] max-w-container"
           priority
         />
       </div>
