@@ -20,10 +20,10 @@ import 'fumadocs-ui/style.css';
 For Tailwind CSS projects, please use the built-in Tailwind CSS plugin instead.
 
 ```js title="tailwind.config.js"
-const { createPreset } = require('fumadocs-ui/tailwind-plugin');
+import { createPreset } from 'fumadocs-ui/tailwind-plugin';
 
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
   darkMode: 'class',
   presets: [createPreset()],
   content: [
@@ -94,10 +94,10 @@ It comes with the DocsUI Tailwind CSS plugin by default, it introduces new color
 This plugin also provides several theme presets out-of-the-box, you can pick one you prefer rather than the default one.
 
 ```js
-const { createPreset } = require('fumadocs-ui/tailwind-plugin');
+import { createPreset } from 'fumadocs-ui/tailwind-plugin';
 
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
   presets: [
     createPreset({
       preset: 'ocean',

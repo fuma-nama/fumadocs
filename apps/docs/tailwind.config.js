@@ -1,7 +1,7 @@
-const { createPreset, presets } = require('fumadocs-ui/tailwind-plugin');
+import { createPreset, presets } from 'fumadocs-ui/tailwind-plugin';
 
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
   content: [
     './components/**/*.{ts,tsx}',
     './app/**/*.{ts,tsx}',

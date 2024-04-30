@@ -65,12 +65,12 @@ export default defineConfig([
   {
     entry: [
       `./src/components/{${exportedComponents.join(',')}}.tsx`,
-      './src/{i18n,layout,page,provider,mdx}.{ts,tsx}',
+      './src/{i18n,layout,page,provider,mdx,tailwind-plugin}.{ts,tsx}',
       './src/twoslash/popup.tsx',
       './src/*.client.tsx',
     ],
-    external: ['server-only', '../../dist/image-zoom.css'],
-    outExtension: () => ({ js: '.js' }),
+    external: ['server-only', '../../dist/image-zoom.css', 'tailwindcss'],
+    //outExtension: () => ({ js: '.js' }),
     async onSuccess() {
       const replaceImports = Object.entries(injectImports).map(
         ([src, inject]) => injectImport(src, inject),
@@ -83,10 +83,11 @@ export default defineConfig([
     target: 'es2022',
   },
   {
+    // todo: Remove support for CommonJS in next major
     entry: ['./src/tailwind-plugin.ts'],
     format: 'cjs',
     external: ['tailwindcss'],
-    dts: true,
+    dts: false,
     target: 'node18',
   },
 ]);

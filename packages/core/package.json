@@ -28,6 +28,10 @@
       "import": "./dist/search/client.js",
       "types": "./dist/search/client.d.ts"
     },
+    "./search/shared": {
+      "import": "./dist/search/shared.js",
+      "types": "./dist/search/shared.d.ts"
+    },
     "./search/server": {
       "import": "./dist/search/server.js",
       "types": "./dist/search/server.d.ts"
@@ -135,6 +139,7 @@
   "devDependencies": {
     "@algolia/client-search": "^4.23.3",
     "@mdx-js/mdx": "^3.0.1",
+    "@types/estree-jsx": "^1.0.5",
     "@types/flexsearch": "0.7.6",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.3",
