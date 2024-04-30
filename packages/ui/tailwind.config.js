@@ -1,5 +1,7 @@
+import { createPreset } from './dist/tailwind-plugin';
+
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
   content: ['./src/**/*.{ts,tsx}'],
-  presets: [require('./dist/tailwind-plugin').createPreset()],
+  presets: [createPreset()],
 };
