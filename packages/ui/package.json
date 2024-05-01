@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-ui",
-  "version": "11.0.3",
+  "version": "11.0.4",
   "description": "The framework for building a documentation website in Next.js",
   "keywords": [
     "NextJs",
@@ -10,42 +10,43 @@
   "repository": "github:fuma-nama/fumadocs",
   "license": "MIT",
   "author": "Fuma Nama",
+  "type": "module",
   "exports": {
     "./style.css": "./dist/style.css",
     "./twoslash.css": "./dist/twoslash.css",
     "./image-zoom.css": "./dist/image-zoom.css",
     "./tailwind-plugin": {
       "import": "./dist/tailwind-plugin.js",
-      "require": "./dist/tailwind-plugin.js",
+      "require": "./dist/tailwind-plugin.cjs",
       "types": "./dist/tailwind-plugin.d.ts"
     },
     "./components/*": {
       "import": "./dist/components/*.js",
-      "types": "./dist/components/*.d.mts"
+      "types": "./dist/components/*.d.ts"
     },
     "./twoslash/*": {
       "import": "./dist/twoslash/*.js",
-      "types": "./dist/twoslash/*.d.mts"
+      "types": "./dist/twoslash/*.d.ts"
     },
     "./i18n": {
       "import": "./dist/i18n.js",
-      "types": "./dist/i18n.d.mts"
+      "types": "./dist/i18n.d.ts"
     },
     "./layout": {
       "import": "./dist/layout.js",
-      "types": "./dist/layout.d.mts"
+      "types": "./dist/layout.d.ts"
     },
     "./page": {
       "import": "./dist/page.js",
-      "types": "./dist/page.d.mts"
+      "types": "./dist/page.d.ts"
     },
     "./provider": {
       "import": "./dist/provider.js",
-      "types": "./dist/provider.d.mts"
+      "types": "./dist/provider.d.ts"
     },
     "./mdx": {
       "import": "./dist/mdx.js",
-      "types": "./dist/mdx.d.mts"
+      "types": "./dist/mdx.d.ts"
     }
   },
   "typesVersions": {
@@ -54,25 +55,25 @@
         "./dist/tailwind-plugin.d.ts"
       ],
       "components/*": [
-        "./dist/components/*.d.mts"
+        "./dist/components/*.d.ts"
       ],
       "twoslash/*": [
-        "./dist/twoslash/*.d.mts"
+        "./dist/twoslash/*.d.ts"
       ],
       "i18n": [
-        "./dist/i18n.d.mts"
+        "./dist/i18n.d.ts"
       ],
       "layout": [
-        "./dist/layout.d.mts"
+        "./dist/layout.d.ts"
       ],
       "page": [
-        "./dist/page.d.mts"
+        "./dist/page.d.ts"
       ],
       "provider": [
-        "./dist/provider.d.mts"
+        "./dist/provider.d.ts"
       ],
       "mdx": [
-        "./dist/mdx.d.mts"
+        "./dist/mdx.d.ts"
       ]
     }
   },

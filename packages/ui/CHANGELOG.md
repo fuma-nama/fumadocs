@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 11.0.4
+
+### Patch Changes
+
+- 7b61b2f: Migrate `fumadocs-ui` to fully ESM, adding support for ESM `tailwind.config` file
+- Updated dependencies [7b61b2f]
+  - fumadocs-core@11.0.4
+
 ## 11.0.3
 
 ### Patch Changes

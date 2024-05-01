@@ -2,6 +2,7 @@
   "name": "example-contentlayer",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "next build",
     "dev": "next dev",
@@ -9,9 +10,9 @@
   },
   "dependencies": {
     "contentlayer": "0.3.4",
-    "fumadocs-contentlayer": "1.1.14",
-    "fumadocs-core": "11.0.3",
-    "fumadocs-ui": "11.0.3",
+    "fumadocs-contentlayer": "1.1.15",
+    "fumadocs-core": "11.0.4",
+    "fumadocs-ui": "11.0.4",
     "next": "^14.2.3",
     "next-contentlayer": "^0.3.4",
     "react": "18.3.1",

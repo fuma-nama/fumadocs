@@ -1,7 +1,7 @@
-const shared = require('@vercel/style-guide/prettier');
+import shared from '@vercel/style-guide/prettier';
 
 /** @type {import("prettier").Config} */
-module.exports = {
+export default {
   ...shared,
   endOfLine: 'lf',
 };

@@ -1,5 +1,5 @@
 import { toEstree } from 'hast-util-to-estree';
-import type { JsxElement } from 'hast-util-to-estree/lib/state';
+import { type JSXElement } from 'estree-jsx';
 import { type ShikiTransformer } from 'shiki';
 
 export interface CodeBlockIcon {
@@ -190,7 +190,7 @@ export function transformerIcon(options: IconOptions = {}): ShikiTransformer {
   };
 }
 
-function createSVGElement(icon: CodeBlockIcon): JsxElement {
+function createSVGElement(icon: CodeBlockIcon): JSXElement {
   return {
     type: 'JSXElement',
     openingElement: {
