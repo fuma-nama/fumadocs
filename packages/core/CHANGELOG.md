@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 11.0.4
+
+### Patch Changes
+
+- 7b61b2f: Migrate `fumadocs-ui` to fully ESM, adding support for ESM `tailwind.config` file
+
 ## 11.0.3
 
 ## 11.0.2
