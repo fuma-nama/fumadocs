@@ -22,6 +22,7 @@ import type { HTMLAttributes, ReactNode } from 'react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import { CodeBlock } from '@/components/code-block';
+import { UwuHero } from '@/app/(home)/uwu';
 import { CreateAppAnimation, Previews, Rain } from './page.client';
 import {
   VercelLogo,
@@ -70,6 +71,7 @@ export default function HomePage(): React.ReactElement {
               fill="currentColor"
             />
             <Hero />
+            <UwuHero />
           </div>
           <div className="container border-x border-t py-24">
             <h2 className="text-center text-2xl font-semibold sm:text-3xl">
@@ -303,7 +305,7 @@ function Highlight({
 
 function Hero(): React.ReactElement {
   return (
-    <div className="container relative z-[2] flex flex-col items-center overflow-hidden border-x border-t bg-background px-6 pt-12 text-center md:pt-20">
+    <div className="container relative z-[2] flex flex-col items-center overflow-hidden border-x border-t bg-background px-6 pt-12 text-center md:pt-20 [.uwu_&]:hidden">
       <h1 className="mb-6 text-4xl font-semibold md:text-5xl">
         Build Your Docs.
       </h1>

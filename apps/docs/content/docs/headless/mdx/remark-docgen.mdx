@@ -34,6 +34,8 @@ Use generators in a markdown/MDX file with:
 You can add a generator to the `generators` array.
 
 ```ts
+import { remarkDocGen, fileGenerator } from 'fumadocs-docgen';
+
 const config = {
   remarkPlugins: [[remarkDocGen, { generators: [fileGenerator()] }]],
 };
@@ -93,7 +95,7 @@ You may configure it with generator options.
 To use it, specify the Typescript file and exported type you want to generate from.
 
 ````mdx
-```json
+```json doc-gen:typescript
 {
   "file": "./my-file.ts",
   "name": "MyInterface"

@@ -25,3 +25,25 @@
 .dark .mdx {
   --primary: 0 0% 100%;
 }
+
+.uwu {
+  --background: 240 80% 94% !important;
+  --popover: 240 80% 94% !important;
+  --primary: 230 90% 72% !important;
+  --border: 230 30% 87% !important;
+  --accent: 250 80% 90% !important;
+  --secondary: 230 40% 94% !important;
+  --muted: 230 80% 92% !important;
+  --card: 230 90% 94% !important;
+}
+
+.uwu.dark {
+  --background: 240 40% 20% !important;
+  --primary: 250 70% 94% !important;
+  --border: 230 30% 30% !important;
+  --muted: 230 30% 36.3% !important;
+  --secondary: 250 30% 36.3% !important;
+  --accent: 250 20% 38.3% !important;
+  --muted-foreground: 230 80% 84% !important;
+  --card: 230 40% 26.3% !important;
+}
