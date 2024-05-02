@@ -39,6 +39,7 @@
 
 .uwu.dark {
   --background: 240 40% 20% !important;
+  --popover: 240 20% 20% !important;
   --primary: 250 70% 94% !important;
   --border: 230 30% 30% !important;
   --muted: 230 30% 36.3% !important;
