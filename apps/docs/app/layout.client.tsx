@@ -21,24 +21,18 @@ const itemVariants = cva(
 );
 
 export function Title(): React.ReactElement {
-  const pathname = usePathname();
-
-  if (pathname === '/uwu') {
-    return (
+  return (
+    <>
       <Image
         alt="Fumadocs"
         src={Logo}
         sizes="100px"
-        className="w-20 md:w-24"
+        className="hidden w-20 md:w-24 [.uwu_&]:block"
         aria-label="Fumadocs"
       />
-    );
-  }
 
-  return (
-    <>
-      <FumadocsIcon className="size-5" fill="currentColor" />
-      <span className="max-md:hidden">Fumadocs</span>
+      <FumadocsIcon className="size-5 [.uwu_&]:hidden" fill="currentColor" />
+      <span className="max-md:hidden [.uwu_&]:hidden">Fumadocs</span>
     </>
   );
 }
