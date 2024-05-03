@@ -2,7 +2,7 @@
 
 import { cva } from 'class-variance-authority';
 import Link from 'next/link';
-import { useParams, usePathname } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import type { ReactNode } from 'react';
 import Image from 'next/image';
 import { cn } from '@/utils/cn';
