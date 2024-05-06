@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 11.0.5
+
+### Patch Changes
+
+- c8ea344: Support disabling search bar
+  - fumadocs-core@11.0.5
+
 ## 11.0.4
 
 ### Patch Changes
