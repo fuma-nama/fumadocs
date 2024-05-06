@@ -15,6 +15,7 @@ export interface LinkItem {
   type?: 'main' | 'secondary';
 
   url: string;
+  // todo: make required in next major
   icon?: ReactNode;
   text: string;
   external?: boolean;

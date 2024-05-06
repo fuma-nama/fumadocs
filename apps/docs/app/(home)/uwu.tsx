@@ -7,7 +7,12 @@ import Logo from '@/public/logo.png';
 export function UwuHero(): React.ReactElement {
   return (
     <div className="z-[2] hidden flex-col items-center pb-8 text-center [.uwu_&]:flex">
-      <Image alt="logo" src={Logo} className="mb-6 w-full max-w-[400px] px-4" />
+      <Image
+        alt="logo"
+        src={Logo}
+        className="mb-6 w-full max-w-[400px] px-4"
+        priority
+      />
 
       <p className="mb-6 h-fit p-2 text-lg text-muted-foreground md:max-w-[80%] md:text-xl">
         Fumadocs is the framework for building documentation with{' '}
