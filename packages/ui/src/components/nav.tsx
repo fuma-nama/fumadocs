@@ -35,6 +35,7 @@ export interface NavProps {
   items: LinkItem[];
 
   enableSidebar: boolean;
+  enableSearch?: boolean;
 
   /**
    * When to use transparent navbar
@@ -50,6 +51,7 @@ export function Nav({
   items,
   transparentMode = 'none',
   enableSidebar,
+  enableSearch = true,
   children,
 }: NavProps): React.ReactElement {
   const [transparent, setTransparent] = useState(transparentMode !== 'none');
@@ -91,7 +93,7 @@ export function Nav({
             <NavItem key={item.url} item={item} className="max-lg:hidden" />
           ))}
         <div className="flex flex-1 flex-row items-center justify-end md:gap-2">
-          <SearchToggle />
+          {enableSearch ? <SearchToggle /> : null}
           {enableSidebar ? (
             <>
               <ThemeToggle className="max-md:hidden" />
