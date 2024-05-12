@@ -8,7 +8,6 @@ import {
   type ReactNode,
   useEffect,
   useState,
-  useCallback,
 } from 'react';
 import { cn } from '@/utils/cn';
 import { useSearchContext } from '@/contexts/search';
@@ -35,6 +34,12 @@ export interface NavProps {
   items: LinkItem[];
 
   enableSidebar: boolean;
+
+  /**
+   * Show/hide search toggle
+   *
+   * Note: Enable/disable search from root provider instead
+   */
   enableSearch?: boolean;
 
   /**
@@ -54,6 +59,7 @@ export function Nav({
   enableSearch = true,
   children,
 }: NavProps): React.ReactElement {
+  const search = useSearchContext();
   const [transparent, setTransparent] = useState(transparentMode !== 'none');
 
   useEffect(() => {
@@ -93,7 +99,7 @@ export function Nav({
             <NavItem key={item.url} item={item} className="max-lg:hidden" />
           ))}
         <div className="flex flex-1 flex-row items-center justify-end md:gap-2">
-          {enableSearch ? <SearchToggle /> : null}
+          {enableSearch && search.enabled ? <SearchToggle /> : null}
           {enableSidebar ? (
             <>
               <ThemeToggle className="max-md:hidden" />
@@ -176,10 +182,9 @@ function LinksMenu({ items }: { items: LinkItem[] }): React.ReactElement {
 function SearchToggle(): React.ReactElement {
   const { setOpenSearch } = useSearchContext();
   const { text } = useI18n();
-
-  const onClick = useCallback(() => {
+  const onClick = () => {
     setOpenSearch(true);
-  }, [setOpenSearch]);
+  };
 
   return (
     <>

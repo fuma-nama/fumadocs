@@ -13,7 +13,7 @@ test('Remark Heading', async () => {
 
   const result = await remark().use(remarkHeading).process(content);
 
-  expect(JSON.stringify(result.data.toc)).toMatchFileSnapshot(
+  expect(result.data.toc).toMatchFileSnapshot(
     path.resolve(cwd, './fixtures/remark-heading.output.json'),
   );
 });
@@ -24,7 +24,7 @@ test('Remark Structure', async () => {
   );
   const result = await remark().use(remarkStructure).process(content);
 
-  expect(JSON.stringify(result.data.structuredData)).toMatchFileSnapshot(
+  expect(result.data.structuredData).toMatchFileSnapshot(
     path.resolve(cwd, './fixtures/remark-structure.output.json'),
   );
 });

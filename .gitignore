@@ -21,6 +21,7 @@ dist
 /build
 
 # misc
+.idea
 .DS_Store
 *.pem
 

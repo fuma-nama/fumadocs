@@ -9,6 +9,17 @@ import { SidebarCollapseProvider } from '@/contexts/sidebar';
 import { DefaultSearchDialogProps } from '@/components/dialog/search-default';
 import { SearchProvider, type SearchProviderProps } from './contexts/search';
 
+interface SearchOptions
+  extends Omit<SearchProviderProps, 'options' | 'children'> {
+  options?: Partial<DefaultSearchDialogProps> | SearchProviderProps['options'];
+  /**
+   * Enable search functionality
+   *
+   * @defaultValue `true`
+   */
+  enabled?: boolean;
+}
+
 export interface RootProviderProps {
   /**
    * `dir` option for Radix UI
@@ -18,11 +29,7 @@ export interface RootProviderProps {
   /**
    * @remarks `SearchProviderProps`
    */
-  search?: Partial<
-    Omit<SearchProviderProps, 'options' | 'children'> & {
-      options?: Partial<DefaultSearchDialogProps> | object;
-    }
-  >;
+  search?: Partial<SearchOptions>;
 
   /**
    * Wrap the body in `ThemeProvider` (next-themes)
@@ -46,13 +53,16 @@ export function RootProvider({
 }: RootProviderProps): React.ReactElement {
   let body = (
     <SidebarProvider>
-      <SidebarCollapseProvider>
-        <SearchProvider SearchDialog={DefaultSearchDialog} {...search}>
-          {children}
-        </SearchProvider>
-      </SidebarCollapseProvider>
+      <SidebarCollapseProvider>{children}</SidebarCollapseProvider>
     </SidebarProvider>
   );
+
+  if (search?.enabled !== false)
+    body = (
+      <SearchProvider SearchDialog={DefaultSearchDialog} {...search}>
+        {body}
+      </SearchProvider>
+    );
 
   if (enableThemeProvider)
     body = (
