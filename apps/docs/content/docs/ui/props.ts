@@ -74,7 +74,7 @@ export type AutoTypeTableProps = ComponentPropsWithoutRef<typeof AutoTypeTable>;
 
 export interface AutoTypeTableExample {
   /**
-   * markdown syntax like links, `code` are supported.
+   * Markdown syntax like links, `code` are supported.
    *
    * See https://fumadocs.vercel.app/docs/ui/components/type-table
    */

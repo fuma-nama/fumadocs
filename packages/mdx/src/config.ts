@@ -8,8 +8,9 @@ import {
   type RehypeCodeOptions,
   remarkImage,
   type RemarkImageOptions,
+  type RemarkHeadingOptions,
 } from 'fumadocs-core/mdx-plugins';
-import type { Pluggable, PluggableList } from 'unified';
+import type { Pluggable } from 'unified';
 import type { Configuration } from 'webpack';
 import { MapWebpackPlugin } from './webpack-plugins/map-plugin';
 import remarkMdxExport from './mdx-plugins/remark-exports';
@@ -32,11 +33,12 @@ type MDXOptions = Omit<
    */
   valueToExport?: string[];
 
+  remarkHeadingOptions?: RemarkHeadingOptions;
   remarkImageOptions?: RemarkImageOptions | false;
   rehypeCodeOptions?: RehypeCodeOptions | false;
 };
 
-type ResolvePlugins = PluggableList | ((v: PluggableList) => PluggableList);
+type ResolvePlugins = Pluggable[] | ((v: Pluggable[]) => Pluggable[]);
 
 export interface CreateMDXOptions {
   cwd?: string;
@@ -68,10 +70,12 @@ export interface CreateMDXOptions {
 }
 
 function pluginOption(
-  def: (v: PluggableList) => PluggableList,
+  def: (v: Pluggable[]) => (Pluggable | false)[],
   options: ResolvePlugins = [],
-): PluggableList {
-  const list = def(Array.isArray(options) ? options : []);
+): Pluggable[] {
+  const list = def(Array.isArray(options) ? options : []).filter(
+    Boolean,
+  ) as Pluggable[];
 
   if (typeof options === 'function') {
     return options(list);
@@ -84,6 +88,7 @@ function getMDXLoaderOptions({
   valueToExport = [],
   rehypeCodeOptions,
   remarkImageOptions,
+  remarkHeadingOptions,
   ...mdxOptions
 }: MDXOptions): MDXLoaderOptions {
   const mdxExports = [
@@ -94,29 +99,25 @@ function getMDXLoaderOptions({
     ...valueToExport,
   ];
 
-  const remarkPlugins = pluginOption((v) => {
-    const plugins: Pluggable[] = [remarkGfm, remarkHeading];
+  const remarkPlugins = pluginOption(
+    (v) => [
+      remarkGfm,
+      [remarkHeading, remarkHeadingOptions],
+      remarkImageOptions !== false && [remarkImage, remarkImageOptions],
+      ...v,
+      remarkStructure,
+      [remarkMdxExport, { values: mdxExports }],
+    ],
+    mdxOptions.remarkPlugins,
+  );
 
-    if (remarkImageOptions !== false)
-      plugins.push([remarkImage, remarkImageOptions]);
-
-    plugins.push(...v, remarkStructure, [
-      remarkMdxExport,
-      { values: mdxExports },
-    ]);
-
-    return plugins;
-  }, mdxOptions.remarkPlugins);
-
-  const rehypePlugins: PluggableList = pluginOption((v) => {
-    const plugins: Pluggable[] = [...v];
-
-    if (rehypeCodeOptions !== false) {
-      plugins.unshift([rehypeCode, rehypeCodeOptions]);
-    }
-
-    return plugins;
-  }, mdxOptions.rehypePlugins);
+  const rehypePlugins = pluginOption(
+    (v) => [
+      rehypeCodeOptions !== false && [rehypeCode, rehypeCodeOptions],
+      ...v,
+    ],
+    mdxOptions.rehypePlugins,
+  );
 
   return {
     providerImportSource: 'next-mdx-import-source-file',
