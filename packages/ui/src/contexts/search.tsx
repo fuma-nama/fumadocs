@@ -25,21 +25,23 @@ export interface SearchProviderProps {
   /**
    * Additional props to the dialog
    */
-  options?: object;
+  options?: Partial<SharedProps>;
 
   children?: React.ReactNode;
 }
 
 interface SearchContextType {
+  enabled: boolean;
   setOpenSearch: (value: boolean) => void;
 }
 
-const SearchContext = createContext<SearchContextType | undefined>(undefined);
+const SearchContext = createContext<SearchContextType>({
+  enabled: false,
+  setOpenSearch: () => undefined,
+});
 
 export function useSearchContext(): SearchContextType {
-  const ctx = useContext(SearchContext);
-  if (!ctx) throw new Error('Missing root provider');
-  return ctx;
+  return useContext(SearchContext);
 }
 
 export function SearchProvider({
@@ -47,6 +49,7 @@ export function SearchProvider({
   children,
   preload = true,
   options,
+  links,
 }: SearchProviderProps): React.ReactElement {
   const [isOpen, setIsOpen] = useState(preload ? false : undefined);
 
@@ -65,14 +68,19 @@ export function SearchProvider({
   }, []);
 
   const ctx = useMemo<SearchContextType>(
-    () => ({ setOpenSearch: setIsOpen }),
+    () => ({ enabled: true, setOpenSearch: setIsOpen }),
     [],
   );
 
   return (
     <SearchContext.Provider value={ctx}>
       {isOpen !== undefined && (
-        <SearchDialog open={isOpen} onOpenChange={setIsOpen} {...options} />
+        <SearchDialog
+          open={isOpen}
+          onOpenChange={setIsOpen}
+          links={links}
+          {...options}
+        />
       )}
       {children}
     </SearchContext.Provider>
