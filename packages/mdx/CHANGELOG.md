@@ -1,5 +1,15 @@
 # next-docs-mdx
 
+## 8.2.15
+
+### Patch Changes
+
+- 5653d5d: Support customising heading id in headings
+- 5653d5d: Support custom heading slugger
+- Updated dependencies [5653d5d]
+- Updated dependencies [5653d5d]
+  - fumadocs-core@11.0.6
+
 ## 8.2.14
 
 ### Patch Changes
