@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-contentlayer",
-  "version": "1.1.16",
+  "version": "1.1.17",
   "description": "The Contentlayer adapter for Fumadocs",
   "keywords": [
     "NextJs",

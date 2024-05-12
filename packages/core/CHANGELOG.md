@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 11.0.6
+
+### Patch Changes
+
+- 5653d5d: Support customising heading id in headings
+- 5653d5d: Support custom heading slugger
+
 ## 11.0.5
 
 ## 11.0.4
