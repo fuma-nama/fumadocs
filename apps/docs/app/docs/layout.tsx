@@ -10,9 +10,7 @@ export default function Layout({
 }): React.ReactElement {
   return (
     <Body>
-      <DocsLayout {...layoutOptions}>
-        {children}
-      </DocsLayout>
+      <DocsLayout {...layoutOptions}>{children}</DocsLayout>
     </Body>
   );
 }
