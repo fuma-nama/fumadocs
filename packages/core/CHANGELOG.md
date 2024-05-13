@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 11.0.8
+
+### Patch Changes
+
+- 98258b5: Fix regex problems
+
 ## 11.0.7
 
 ### Patch Changes
