@@ -1,26 +1,27 @@
+import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
+import { useSidebarCollapse } from '@/contexts/sidebar';
+import { useTreeContext } from '@/contexts/tree';
+import type { LinkItem } from '@/layout';
+import { buttonVariants } from '@/theme/variants';
+import { cn } from '@/utils/cn';
+import { hasActive, isActive } from '@/utils/shared';
 import { cva } from 'class-variance-authority';
-import { ChevronDown, ExternalLinkIcon, SidebarIcon } from 'lucide-react';
+import Link from 'fumadocs-core/link';
 import type { PageTree } from 'fumadocs-core/server';
 import * as Base from 'fumadocs-core/sidebar';
+import { ChevronDown, ExternalLinkIcon, SidebarIcon } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import * as React from 'react';
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import Link from 'fumadocs-core/link';
-import { cn } from '@/utils/cn';
-import { useTreeContext } from '@/contexts/tree';
-import { useSidebarCollapse } from '@/contexts/sidebar';
-import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
-import { hasActive, isActive } from '@/utils/shared';
-import type { LinkItem } from '@/layout';
-import { buttonVariants } from '@/theme/variants';
+import { ThemeToggle } from './theme-toggle';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from './ui/collapsible';
-import { ThemeToggle } from './theme-toggle';
 
 export interface SidebarProps {
+  className?:string;
   items: LinkItem[];
 
   /**
@@ -85,6 +86,7 @@ export function Sidebar({
   components,
   defaultOpenLevel = 1,
   collapsible = true,
+  className = "",
   ...props
 }: SidebarProps): React.ReactElement {
   const [open, setOpen] = useSidebarCollapse();
@@ -122,7 +124,8 @@ export function Sidebar({
       <Base.SidebarList
         minWidth={768} // md
         className={cn(
-          'flex w-full flex-col text-[15px] md:sticky md:top-16 md:h-body md:w-[240px] md:text-sm xl:w-[260px]',
+          className,
+          'flex flex-col text-[15px] md:sticky md:top-16 md:h-body md:w-[240px] md:text-sm xl:w-[260px]',
           !open && 'md:hidden',
           'max-md:fixed max-md:inset-0 max-md:z-40 max-md:bg-background/80 max-md:pt-16 max-md:backdrop-blur-md max-md:data-[open=false]:hidden',
         )}
@@ -169,7 +172,7 @@ function ViewportContent({
   return (
     <ScrollArea className="flex-1">
       <ScrollViewport>
-        <div className="flex flex-col gap-8 pb-10 pt-4 max-md:px-4 md:pr-3 md:pt-10">
+        <div className="flex flex-col gap-8 pt-4 pb-10 max-md:px-4 md:pr-3 md:pt-10">
           {banner}
           {items.length > 0 && (
             <div className="lg:hidden">
@@ -296,7 +299,7 @@ function FolderNode({
       )}
       <CollapsibleContent>
         <NodeList
-          className="ms-4 flex flex-col border-s py-2 ps-2"
+          className="flex flex-col py-2 ms-4 border-s ps-2"
           items={children}
           level={level}
         />
@@ -310,5 +313,5 @@ function SeparatorNode({
 }: {
   item: PageTree.Separator;
 }): React.ReactElement {
-  return <p className="mb-2 mt-8 px-2 font-medium first:mt-0">{item.name}</p>;
+  return <p className="px-2 mt-8 mb-2 font-medium first:mt-0">{item.name}</p>;
 }
