@@ -3,7 +3,6 @@ import type { Heading, Root } from 'mdast';
 import type { Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
 import type { TOCItemType } from '@/server/get-toc';
-import { flattenNode } from './remark-utils';
 
 const slugger = new Slugger();
 
@@ -15,8 +14,16 @@ declare module 'mdast' {
   }
 }
 
+const regex = /\s*\[#(?<slug>[^]+?)]\s*$/g;
+
 export interface RemarkHeadingOptions {
   slug?: (root: Root, heading: Heading, text: string) => string;
+  /**
+   * Allow custom headings ids
+   *
+   * @defaultValue `true`
+   */
+  customId?: boolean;
 }
 
 /**
@@ -24,26 +31,42 @@ export interface RemarkHeadingOptions {
  *
  * Attach an array of `TOCItemType` to `file.data.toc`
  */
-export function remarkHeading(
-  options: RemarkHeadingOptions = {},
-): Transformer<Root, Root> {
-  return (node, file) => {
+export function remarkHeading({
+  slug: defaultSlug,
+  customId = true,
+}: RemarkHeadingOptions = {}): Transformer<Root, Root> {
+  return (root, file) => {
     const toc: TOCItemType[] = [];
     slugger.reset();
 
-    visit(node, 'heading', (heading) => {
+    visit(root, 'heading', (heading) => {
+      const node = heading.children.at(-1);
+      if (!node || node.type !== 'text') return;
+
       heading.data ||= {};
       heading.data.hProperties ||= {};
 
-      const text = flattenNode(heading);
-      const id =
-        heading.data.hProperties.id ??
-        (options.slug ? options.slug(node, heading, text) : defaultSlug(text));
+      let id = heading.data.hProperties.id;
+
+      if (!id && customId) {
+        const match = regex.exec(node.value);
+
+        if (match?.[1]) {
+          id = match[1];
+          node.value = node.value.slice(0, match.index);
+        }
+      }
+
+      if (!id) {
+        id = defaultSlug
+          ? defaultSlug(root, heading, node.value)
+          : slugger.slug(node.value);
+      }
 
       heading.data.hProperties.id = id;
 
       toc.push({
-        title: text,
+        title: node.value,
         url: `#${id}`,
         depth: heading.depth,
       });
@@ -53,16 +76,4 @@ export function remarkHeading(
 
     file.data.toc = toc;
   };
-}
-
-function defaultSlug(text: string): string {
-  // match {slug}, while escape `\{slug}`
-  if (text.endsWith('}')) {
-    const start = text.lastIndexOf('{');
-
-    if (start !== -1 && text[start - 1] !== '\\')
-      return text.substring(start + 1, text.length - 1);
-  }
-
-  return slugger.slug(text);
 }

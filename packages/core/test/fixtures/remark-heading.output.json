@@ -16,17 +16,12 @@
   },
   {
     "depth": 3,
-    "title": "Custom heading id {hello-world}",
+    "title": "Custom heading id",
     "url": "#hello-world",
   },
   {
     "depth": 3,
-    "title": "Custom heading id \{hello-world}",
+    "title": "Custom heading id hello-world]",
     "url": "#custom-heading-id-hello-world",
-  },
-  {
-    "depth": 3,
-    "title": "Custom heading id hello-world}",
-    "url": "#custom-heading-id-hello-world-1",
   },
 ]
