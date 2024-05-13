@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 11.0.7
+
+### Patch Changes
+
+- f7c2c5c: Fix custom heading ids conflicts with MDX syntax
+
 ## 11.0.6
 
 ### Patch Changes
