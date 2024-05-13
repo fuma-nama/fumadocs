@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 11.0.6
+
+### Patch Changes
+
+- 8e0ef4b: Support disable search functionality including shortcuts
+- Updated dependencies [5653d5d]
+- Updated dependencies [5653d5d]
+  - fumadocs-core@11.0.6
+
 ## 11.0.5
 
 ### Patch Changes
