@@ -1,5 +1,5 @@
 import type { DocsLayoutProps } from 'fumadocs-ui/layout';
-import { LayoutTemplateIcon } from 'lucide-react';
+import { BookIcon, LayoutTemplateIcon } from 'lucide-react';
 import { utils } from '@/utils/source';
 import { NavChildren, SidebarBanner, Title } from '@/app/layout.client';
 
@@ -20,6 +20,23 @@ export const layoutOptions: Omit<DocsLayoutProps, 'children'> = {
       text: 'Showcase',
       url: '/showcase',
       icon: <LayoutTemplateIcon />,
+    },
+    {
+      type: 'menu',
+      text: 'Test',
+      icon: <BookIcon />,
+      items: [
+        {
+          text: 'Getting Started',
+          url: '/docs/ui',
+          icon: <LayoutTemplateIcon />,
+        },
+        {
+          text: 'Learn More',
+          url: '/docs',
+          icon: <LayoutTemplateIcon />,
+        },
+      ],
     },
   ],
 };

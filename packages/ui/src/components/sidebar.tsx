@@ -65,14 +65,7 @@ const itemVariants = cva(
 const defaultComponents: Components = {
   Folder: FolderNode,
   Separator: SeparatorNode,
-  Item: ({ item }) => (
-    <BaseItem
-      url={item.url}
-      external={item.external}
-      icon={item.icon}
-      text={item.name}
-    />
-  ),
+  Item: ({ item }) => <BaseItem {...item} />,
 };
 
 const SidebarContext = createContext<SidebarContext>({
@@ -102,7 +95,7 @@ export function Sidebar({
   };
 
   return (
-    <>
+    <SidebarContext.Provider value={context}>
       {collapsible && !open ? (
         <button
           type="button"
@@ -127,36 +120,34 @@ export function Sidebar({
           'max-md:fixed max-md:inset-0 max-md:z-40 max-md:bg-background/80 max-md:pt-16 max-md:backdrop-blur-md max-md:data-[open=false]:hidden',
         )}
       >
-        <SidebarContext.Provider value={context}>
-          <ViewportContent {...props} />
-          <div
-            className={cn(
-              'flex flex-row items-center gap-2 border-t p-3 md:p-2',
-              !alwaysShowFooter && 'md:hidden',
-            )}
-          >
-            {footer}
-            <ThemeToggle className="md:hidden" />
-            {collapsible ? (
-              <button
-                type="button"
-                aria-label="Trigger Sidebar"
-                className={cn(
-                  buttonVariants({
-                    color: 'ghost',
-                    size: 'icon',
-                    className: 'max-md:hidden ms-auto',
-                  }),
-                )}
-                onClick={onCollapse}
-              >
-                <SidebarIcon />
-              </button>
-            ) : null}
-          </div>
-        </SidebarContext.Provider>
+        <ViewportContent {...props} />
+        <div
+          className={cn(
+            'flex flex-row items-center gap-2 border-t p-3 md:p-2',
+            !alwaysShowFooter && 'md:hidden',
+          )}
+        >
+          {footer}
+          <ThemeToggle className="md:hidden" />
+          {collapsible ? (
+            <button
+              type="button"
+              aria-label="Trigger Sidebar"
+              className={cn(
+                buttonVariants({
+                  color: 'ghost',
+                  size: 'icon',
+                  className: 'max-md:hidden ms-auto',
+                }),
+              )}
+              onClick={onCollapse}
+            >
+              <SidebarIcon />
+            </button>
+          ) : null}
+        </div>
       </Base.SidebarList>
-    </>
+    </SidebarContext.Provider>
   );
 }
 
@@ -172,9 +163,9 @@ function ViewportContent({
         <div className="flex flex-col gap-8 pb-10 pt-4 max-md:px-4 md:pr-3 md:pt-10">
           {banner}
           {items.length > 0 && (
-            <div className="lg:hidden">
-              {items.map((item) => (
-                <BaseItem key={item.url} {...item} nested />
+            <div className="md:hidden">
+              {items.map((item, i) => (
+                <LinkItemRender key={i} item={item} />
               ))}
             </div>
           )}
@@ -219,9 +210,9 @@ function BaseItem({
   icon,
   external = false,
   url,
-  text,
+  name,
   nested = false,
-}: Omit<LinkItem, 'type'> & { nested?: boolean }): React.ReactElement {
+}: Omit<PageTree.Item, 'type'> & { nested?: boolean }): React.ReactElement {
   const pathname = usePathname();
   const active = isActive(url, pathname, nested);
 
@@ -232,7 +223,7 @@ function BaseItem({
       className={cn(itemVariants({ active }))}
     >
       {icon ?? (external ? <ExternalLinkIcon /> : null)}
-      {text}
+      {name}
     </Link>
   );
 }
@@ -269,16 +260,6 @@ function FolderNode({
     [active],
   );
 
-  const content = (
-    <>
-      {icon}
-      {name}
-      <ChevronDown
-        className={cn('ms-auto transition-transform', !extend && '-rotate-90')}
-      />
-    </>
-  );
-
   return (
     <Collapsible open={extend} onOpenChange={setExtend}>
       {index ? (
@@ -287,11 +268,25 @@ function FolderNode({
           href={index.url}
           onClick={onClick}
         >
-          {content}
+          {icon}
+          {name}
+          <ChevronDown
+            className={cn(
+              'ms-auto transition-transform',
+              !extend && '-rotate-90',
+            )}
+          />
         </Link>
       ) : (
         <CollapsibleTrigger className={cn(itemVariants({ active }))}>
-          {content}
+          {icon}
+          {name}
+          <ChevronDown
+            className={cn(
+              'ms-auto transition-transform',
+              !extend && '-rotate-90',
+            )}
+          />
         </CollapsibleTrigger>
       )}
       <CollapsibleContent>
@@ -302,6 +297,42 @@ function FolderNode({
         />
       </CollapsibleContent>
     </Collapsible>
+  );
+}
+
+function LinkItemRender({ item }: { item: LinkItem }) {
+  if (item.type === 'menu') {
+    return (
+      <Collapsible>
+        <CollapsibleTrigger
+          className={cn(
+            itemVariants({
+              active: false,
+              className: 'group/link',
+            }),
+          )}
+        >
+          {item.icon}
+          {item.text}
+          <ChevronDown className="ms-auto transition-transform group-data-[state=closed]/link:-rotate-90" />
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <div className="ms-4 flex flex-col border-s py-2 ps-2">
+            {item.items.map((child, i) => (
+              <LinkItemRender key={i} item={child} />
+            ))}
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
+    );
+  }
+  return (
+    <BaseItem
+      name={item.text}
+      url={item.url}
+      external={item.external}
+      icon={item.icon as React.ReactElement}
+    />
   );
 }
 

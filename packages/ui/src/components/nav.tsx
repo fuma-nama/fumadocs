@@ -1,5 +1,10 @@
 'use client';
-import { MenuIcon, MoreVerticalIcon, SearchIcon } from 'lucide-react';
+import {
+  ChevronDownIcon,
+  MenuIcon,
+  MoreVerticalIcon,
+  SearchIcon,
+} from 'lucide-react';
 import Link from 'fumadocs-core/link';
 import { SidebarTrigger } from 'fumadocs-core/sidebar';
 import { usePathname } from 'next/navigation';
@@ -21,6 +26,7 @@ import {
 import { isActive } from '@/utils/shared';
 import { buttonVariants } from '@/theme/variants';
 import type { LinkItem } from '@/layout';
+import { cva } from 'class-variance-authority';
 
 export interface NavProps {
   title?: ReactNode;
@@ -85,7 +91,7 @@ export function Nav({
           : 'border-foreground/10 bg-background/50 backdrop-blur-md',
       )}
     >
-      <nav className="mx-auto flex size-full max-w-container flex-row items-center gap-4 px-4">
+      <nav className="mx-auto flex size-full max-w-container flex-row items-center gap-3 px-4">
         <Link
           href={url}
           className="inline-flex items-center gap-3 font-semibold"
@@ -94,80 +100,86 @@ export function Nav({
         </Link>
         {children}
         {items
-          .filter((item) => item.type === 'main' || !item.type)
-          .map((item) => (
-            <NavItem key={item.url} item={item} className="max-lg:hidden" />
+          .filter((item) => item.type !== 'secondary')
+          .map((item, i) => (
+            <NavItem key={i} item={item} className="text-sm max-lg:hidden" />
           ))}
         <div className="flex flex-1 flex-row items-center justify-end md:gap-2">
           {enableSearch && search.enabled ? <SearchToggle /> : null}
-          {enableSidebar ? (
-            <>
-              <ThemeToggle className="max-md:hidden" />
-              <SidebarTrigger
-                aria-label="Toggle Sidebar"
-                className={cn(
-                  buttonVariants({
-                    size: 'icon',
-                    color: 'ghost',
-                    className: 'md:hidden',
-                  }),
-                )}
-              >
-                <MenuIcon />
-              </SidebarTrigger>
-            </>
-          ) : (
-            <LinksMenu items={items} />
+          <ThemeToggle className="max-lg:hidden" />
+          {enableSidebar && (
+            <SidebarTrigger
+              aria-label="Toggle Sidebar"
+              className={cn(
+                buttonVariants({
+                  size: 'icon',
+                  color: 'ghost',
+                  className: 'md:hidden',
+                }),
+              )}
+            >
+              <MenuIcon />
+            </SidebarTrigger>
           )}
-          {items
-            .filter((item) => item.type === 'secondary')
-            .map((item) => (
-              <Link
-                aria-label={item.text}
-                key={item.url}
-                href={item.url}
-                external={item.external}
-                className={cn(
-                  buttonVariants({
-                    size: 'icon',
-                    color: 'ghost',
-                    className: 'max-lg:hidden',
-                  }),
-                )}
-              >
-                {item.icon ?? item.text}
-              </Link>
-            ))}
+          <LinksMenu
+            items={items}
+            className={cn('lg:hidden', enableSidebar && 'max-md:hidden')}
+          />
+          {(
+            items.filter((item) => item.type === 'secondary') as Extract<
+              LinkItem,
+              { type: 'secondary' }
+            >[]
+          ).map((item, i) => (
+            <Link
+              aria-label={item.text}
+              key={i}
+              href={item.url}
+              external={item.external}
+              className={cn(
+                buttonVariants({
+                  size: 'icon',
+                  color: 'ghost',
+                  className: 'max-lg:hidden',
+                }),
+              )}
+            >
+              {item.icon ?? item.text}
+            </Link>
+          ))}
         </div>
       </nav>
     </header>
   );
 }
 
-function LinksMenu({ items }: { items: LinkItem[] }): React.ReactElement {
+interface LinksMenuProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  items: LinkItem[];
+}
+
+function LinksMenu({ items, ...props }: LinksMenuProps): React.ReactElement {
   const [open, setOpen] = useState(false);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <ThemeToggle className="max-lg:hidden" />
       <PopoverTrigger
+        {...props}
         className={cn(
           buttonVariants({
             size: 'icon',
             color: 'ghost',
-            className: 'lg:hidden',
+            className: props.className,
           }),
         )}
       >
         <MoreVerticalIcon />
       </PopoverTrigger>
-      <PopoverContent className="flex min-w-[260px] flex-col px-3 py-1">
-        {items.map((item) => (
+      <PopoverContent className="flex flex-col px-3 py-1">
+        {items.map((item, i) => (
           <NavItem
-            key={item.url}
+            key={i}
             item={item}
             showIcon
-            className="text-base"
             onClick={() => {
               setOpen(false);
             }}
@@ -221,6 +233,18 @@ function SearchToggle(): React.ReactElement {
   );
 }
 
+const linkItemVariants = cva(
+  'inline-flex items-center gap-1.5 p-2 rounded-lg text-muted-foreground text-base transition-colors data-[state=open]:bg-accent [&_svg]:size-4',
+  {
+    variants: {
+      active: {
+        true: 'text-accent-foreground bg-accent',
+        false: 'hover:bg-accent',
+      },
+    },
+  },
+);
+
 function NavItem({
   item,
   showIcon = false,
@@ -232,16 +256,34 @@ function NavItem({
 }): React.ReactElement {
   const pathname = usePathname();
 
+  if (item.type === 'menu') {
+    return (
+      <Popover>
+        <PopoverTrigger
+          className={cn(linkItemVariants({ active: false, className }))}
+        >
+          {showIcon ? item.icon : null}
+          {item.text}
+          <ChevronDownIcon className="ml-auto size-4" />
+        </PopoverTrigger>
+        <PopoverContent className="flex flex-col">
+          {item.items.map((child, i) => (
+            <NavItem key={i} item={child} />
+          ))}
+        </PopoverContent>
+      </Popover>
+    );
+  }
+
   return (
     <Link
       href={item.url}
       external={item.external}
       className={cn(
-        'inline-flex items-center gap-2 py-2 text-sm text-muted-foreground transition-colors [&_svg]:size-4',
-        isActive(item.url, pathname)
-          ? 'font-medium text-accent-foreground'
-          : 'hover:text-accent-foreground',
-        className,
+        linkItemVariants({
+          active: isActive(item.url, pathname, false),
+          className,
+        }),
       )}
       {...props}
     >

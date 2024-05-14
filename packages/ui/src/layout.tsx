@@ -11,15 +11,27 @@ declare const {
   Sidebar,
 }: typeof import('./layout.client');
 
-export interface LinkItem {
-  type?: 'main' | 'secondary';
-
-  url: string;
-  // todo: make required in next major
-  icon?: ReactNode;
-  text: string;
-  external?: boolean;
-}
+export type LinkItem =
+  | {
+      type?: 'main';
+      url: string;
+      icon?: ReactNode;
+      text: string;
+      external?: boolean;
+    }
+  | {
+      type: 'menu';
+      icon?: ReactNode;
+      text: string;
+      items: LinkItem[];
+    }
+  | {
+      type: 'secondary';
+      url: string;
+      icon: ReactNode;
+      text: string;
+      external?: boolean;
+    };
 
 interface NavOptions
   extends Omit<NavProps, 'enableSidebar' | 'collapsibleSidebar' | 'items'> {
