@@ -2,13 +2,8 @@
 import { MenuIcon, MoreVerticalIcon, SearchIcon } from 'lucide-react';
 import Link from 'fumadocs-core/link';
 import { SidebarTrigger } from 'fumadocs-core/sidebar';
+import { type ReactNode, useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import {
-  type AnchorHTMLAttributes,
-  type ReactNode,
-  useEffect,
-  useState,
-} from 'react';
 import { cn } from '@/utils/cn';
 import { useSearchContext } from '@/contexts/search';
 import { useI18n } from '@/contexts/i18n';
@@ -18,9 +13,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { isActive } from '@/utils/shared';
 import { buttonVariants } from '@/theme/variants';
-import type { LinkItem } from '@/layout';
+import type { LinkItemType } from '@/layout';
+import { LinkItem } from './link-item';
 
 export interface NavProps {
   title?: ReactNode;
@@ -31,7 +26,7 @@ export interface NavProps {
    */
   url?: string;
 
-  items: LinkItem[];
+  items: LinkItemType[];
 
   enableSidebar: boolean;
 
@@ -85,7 +80,7 @@ export function Nav({
           : 'border-foreground/10 bg-background/50 backdrop-blur-md',
       )}
     >
-      <nav className="mx-auto flex size-full max-w-container flex-row items-center gap-4 px-4">
+      <nav className="mx-auto flex size-full max-w-container flex-row items-center gap-6 px-4">
         <Link
           href={url}
           className="inline-flex items-center gap-3 font-semibold"
@@ -94,49 +89,39 @@ export function Nav({
         </Link>
         {children}
         {items
-          .filter((item) => item.type === 'main' || !item.type)
-          .map((item) => (
-            <NavItem key={item.url} item={item} className="max-lg:hidden" />
+          .filter((item) => item.type !== 'secondary')
+          .map((item, i) => (
+            <LinkItem
+              key={i}
+              item={item}
+              className="-mx-2 text-sm max-lg:hidden"
+            />
           ))}
         <div className="flex flex-1 flex-row items-center justify-end md:gap-2">
           {enableSearch && search.enabled ? <SearchToggle /> : null}
+          <ThemeToggle className="max-lg:hidden" />
           {enableSidebar ? (
-            <>
-              <ThemeToggle className="max-md:hidden" />
-              <SidebarTrigger
-                aria-label="Toggle Sidebar"
-                className={cn(
-                  buttonVariants({
-                    size: 'icon',
-                    color: 'ghost',
-                    className: 'md:hidden',
-                  }),
-                )}
-              >
-                <MenuIcon />
-              </SidebarTrigger>
-            </>
-          ) : (
-            <LinksMenu items={items} />
-          )}
+            <SidebarTrigger
+              aria-label="Toggle Sidebar"
+              className={cn(
+                buttonVariants({
+                  size: 'icon',
+                  color: 'ghost',
+                  className: 'md:hidden',
+                }),
+              )}
+            >
+              <MenuIcon />
+            </SidebarTrigger>
+          ) : null}
+          <LinksMenu
+            items={items}
+            className={cn('lg:hidden', enableSidebar && 'max-md:hidden')}
+          />
           {items
             .filter((item) => item.type === 'secondary')
-            .map((item) => (
-              <Link
-                aria-label={item.text}
-                key={item.url}
-                href={item.url}
-                external={item.external}
-                className={cn(
-                  buttonVariants({
-                    size: 'icon',
-                    color: 'ghost',
-                    className: 'max-lg:hidden',
-                  }),
-                )}
-              >
-                {item.icon ?? item.text}
-              </Link>
+            .map((item, i) => (
+              <LinkItem key={i} item={item} className="max-lg:hidden" />
             ))}
         </div>
       </nav>
@@ -144,34 +129,35 @@ export function Nav({
   );
 }
 
-function LinksMenu({ items }: { items: LinkItem[] }): React.ReactElement {
+interface LinksMenuProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  items: LinkItemType[];
+}
+
+function LinksMenu({ items, ...props }: LinksMenuProps): React.ReactElement {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <ThemeToggle className="max-lg:hidden" />
       <PopoverTrigger
+        {...props}
         className={cn(
           buttonVariants({
             size: 'icon',
             color: 'ghost',
-            className: 'lg:hidden',
+            className: props.className,
           }),
         )}
       >
         <MoreVerticalIcon />
       </PopoverTrigger>
-      <PopoverContent className="flex min-w-[260px] flex-col px-3 py-1">
-        {items.map((item) => (
-          <NavItem
-            key={item.url}
-            item={item}
-            showIcon
-            className="text-base"
-            onClick={() => {
-              setOpen(false);
-            }}
-          />
+      <PopoverContent className="flex flex-col">
+        {items.map((item, i) => (
+          <LinkItem key={i} item={item} on="menu" />
         ))}
         <ThemeToggle className="w-fit" />
       </PopoverContent>
@@ -182,7 +168,7 @@ function LinksMenu({ items }: { items: LinkItem[] }): React.ReactElement {
 function SearchToggle(): React.ReactElement {
   const { setOpenSearch } = useSearchContext();
   const { text } = useI18n();
-  const onClick = () => {
+  const onClick = (): void => {
     setOpenSearch(true);
   };
 
@@ -207,7 +193,7 @@ function SearchToggle(): React.ReactElement {
         className="inline-flex w-full max-w-[240px] items-center gap-2 rounded-full border bg-secondary/50 p-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground max-md:hidden"
         onClick={onClick}
       >
-        <SearchIcon aria-label="Open Search" className="ms-1 size-4" />
+        <SearchIcon className="ms-1 size-4" />
         {text.search}
         <div className="ms-auto inline-flex gap-0.5 text-xs">
           {['⌘', 'K'].map((k) => (
@@ -218,35 +204,5 @@ function SearchToggle(): React.ReactElement {
         </div>
       </button>
     </>
-  );
-}
-
-function NavItem({
-  item,
-  showIcon = false,
-  className,
-  ...props
-}: AnchorHTMLAttributes<HTMLAnchorElement> & {
-  item: LinkItem;
-  showIcon?: boolean;
-}): React.ReactElement {
-  const pathname = usePathname();
-
-  return (
-    <Link
-      href={item.url}
-      external={item.external}
-      className={cn(
-        'inline-flex items-center gap-2 py-2 text-sm text-muted-foreground transition-colors [&_svg]:size-4',
-        isActive(item.url, pathname)
-          ? 'font-medium text-accent-foreground'
-          : 'hover:text-accent-foreground',
-        className,
-      )}
-      {...props}
-    >
-      {showIcon ? item.icon : null}
-      {item.text}
-    </Link>
   );
 }

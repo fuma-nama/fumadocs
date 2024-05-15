@@ -1,5 +1,22 @@
 # next-docs-ui
 
+## 11.1.0
+
+### Minor Changes
+
+- 02a014f: Support custom menu items in navbar
+
+### Patch Changes
+
+- fumadocs-core@11.1.0
+
+## 11.0.8
+
+### Patch Changes
+
+- Updated dependencies [98258b5]
+  - fumadocs-core@11.0.8
+
 ## 11.0.7
 
 ### Patch Changes

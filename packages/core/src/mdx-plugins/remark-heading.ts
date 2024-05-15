@@ -14,7 +14,7 @@ declare module 'mdast' {
   }
 }
 
-const regex = /\s*\[#(?<slug>[^]+?)]\s*$/g;
+const regex = /\s*\[#(?<slug>[^]+?)]\s*$/;
 
 export interface RemarkHeadingOptions {
   slug?: (root: Root, heading: Heading, text: string) => string;

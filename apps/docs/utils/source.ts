@@ -6,12 +6,6 @@ import { icons } from 'lucide-react';
 import { map } from '@/.map';
 import { create } from '@/components/ui/icon';
 
-const frontmatterSchema = defaultSchemas.frontmatter.extend({
-  preview: z.string().optional(),
-  toc: z.boolean().default(true),
-  index: z.boolean().default(false),
-});
-
 export const utils = loader({
   baseUrl: '/docs',
   rootDir: 'docs',
@@ -19,7 +13,28 @@ export const utils = loader({
     if (icon in icons)
       return create({ icon: icons[icon as keyof typeof icons] });
   },
-  source: createMDXSource(map, { schema: { frontmatter: frontmatterSchema } }),
+  source: createMDXSource(map, {
+    schema: {
+      frontmatter: defaultSchemas.frontmatter.extend({
+        preview: z.string().optional(),
+        toc: z.boolean().default(true),
+        index: z.boolean().default(false),
+      }),
+    },
+  }),
+});
+
+export const blog = loader({
+  baseUrl: '/blog',
+  rootDir: 'blog',
+  source: createMDXSource(map, {
+    schema: {
+      frontmatter: defaultSchemas.frontmatter.extend({
+        author: z.string(),
+        date: z.string().date().optional(),
+      }),
+    },
+  }),
 });
 
 export type Page = InferPageType<typeof utils>;

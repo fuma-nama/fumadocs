@@ -11,15 +11,41 @@ declare const {
   Sidebar,
 }: typeof import('./layout.client');
 
-export interface LinkItem {
-  type?: 'main' | 'secondary';
+type ActiveType = 'none' | 'url' | 'nested-url';
 
-  url: string;
-  // todo: make required in next major
-  icon?: ReactNode;
-  text: string;
-  external?: boolean;
-}
+export type LinkItemType =
+  | {
+      type?: 'main';
+      url: string;
+      /**
+       * When the item is marked as active
+       *
+       * @defaultValue 'url'
+       */
+      active?: ActiveType;
+      icon?: ReactNode;
+      text: string;
+      external?: boolean;
+    }
+  | {
+      type: 'menu';
+      icon?: ReactNode;
+      text: string;
+      items: LinkItemType[];
+    }
+  | {
+      type: 'secondary';
+      url: string;
+      /**
+       * When the item is marked as active
+       *
+       * @defaultValue 'url'
+       */
+      active?: ActiveType;
+      icon: ReactNode;
+      text: string;
+      external?: boolean;
+    };
 
 interface NavOptions
   extends Omit<NavProps, 'enableSidebar' | 'collapsibleSidebar' | 'items'> {
@@ -39,7 +65,7 @@ interface SidebarOptions extends Omit<SidebarProps, 'items'> {
 }
 
 export interface BaseLayoutProps {
-  links?: LinkItem[];
+  links?: LinkItemType[];
   /**
    * Replace or disable navbar
    */
@@ -120,7 +146,7 @@ export function DocsLayout({
   );
 }
 
-function getLinks(links?: LinkItem[], githubUrl?: string): LinkItem[] {
+function getLinks(links?: LinkItemType[], githubUrl?: string): LinkItemType[] {
   let result = links ?? [];
 
   if (githubUrl)
