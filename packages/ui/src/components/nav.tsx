@@ -94,7 +94,7 @@ export function Nav({
             <LinkItem
               key={i}
               item={item}
-              className="text-sm -mx-2 max-lg:hidden"
+              className="-mx-2 text-sm max-lg:hidden"
             />
           ))}
         <div className="flex flex-1 flex-row items-center justify-end md:gap-2">
