@@ -71,15 +71,15 @@ export function LinkItem({
     return (
       <Collapsible className="flex flex-col">
         <CollapsibleTrigger
-          className={cn(linkItemVariants({ className }))}
+          className={cn(linkItemVariants({ className }), 'group/link')}
           {...props}
         >
           {item.icon}
           {item.text}
-          <ChevronDownIcon className="ml-auto size-4" />
+          <ChevronDownIcon className="ml-auto size-4 group-data-[state=closed]/link:-rotate-90" />
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <div className="flex flex-col ps-4 pt-2">
+          <div className="flex flex-col ps-4 py-1">
             {item.items.map((child, i) => (
               <LinkItem key={i} item={child} on="menu" />
             ))}
