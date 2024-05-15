@@ -79,7 +79,8 @@ export function Sidebar({
   components,
   defaultOpenLevel = 1,
   collapsible = true,
-  ...props
+  banner,
+  items,
 }: SidebarProps): React.ReactElement {
   const [open, setOpen] = useSidebarCollapse();
   const alwaysShowFooter = Boolean(footer) || collapsible;
@@ -121,7 +122,16 @@ export function Sidebar({
           'max-md:fixed max-md:inset-0 max-md:z-40 max-md:bg-background/80 max-md:pt-16 max-md:backdrop-blur-md max-md:data-[open=false]:hidden',
         )}
       >
-        <ViewportContent {...props} />
+        <ViewportContent>
+          {banner}
+          {items.length > 0 && (
+            <div className="flex flex-col md:hidden">
+              {items.map((item, i) => (
+                <LinkItem key={i} item={item} on="menu" />
+              ))}
+            </div>
+          )}
+        </ViewportContent>
         <div
           className={cn(
             'flex flex-row items-center gap-2 border-t p-3 md:p-2',
@@ -153,23 +163,17 @@ export function Sidebar({
 }
 
 function ViewportContent({
-  items = [],
-  banner,
-}: Pick<SidebarProps, 'items' | 'banner'>): React.ReactElement {
+  children,
+}: {
+  children: React.ReactNode;
+}): React.ReactElement {
   const { root } = useTreeContext();
 
   return (
     <ScrollArea className="flex-1">
       <ScrollViewport>
         <div className="flex flex-col gap-8 pb-10 pt-4 max-md:px-4 md:pr-3 md:pt-10">
-          {banner}
-          {items.length > 0 && (
-            <div className="flex flex-col md:hidden">
-              {items.map((item, i) => (
-                <LinkItem key={i} item={item} showIcon />
-              ))}
-            </div>
-          )}
+          {children}
           <NodeList items={root.children} />
         </div>
       </ScrollViewport>

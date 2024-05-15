@@ -23,18 +23,16 @@ export const layoutOptions: Omit<DocsLayoutProps, 'children'> = {
     },
     {
       type: 'menu',
-      text: 'Test',
+      text: 'Guide',
       icon: <BookIcon />,
       items: [
         {
           text: 'Getting Started',
           url: '/docs/ui',
-          icon: <LayoutTemplateIcon />,
         },
         {
           text: 'Learn More',
           url: '/docs',
-          icon: <LayoutTemplateIcon />,
         },
       ],
     },

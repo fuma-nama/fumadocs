@@ -114,27 +114,11 @@ export function Nav({
             items={items}
             className={cn('lg:hidden', enableSidebar && 'max-md:hidden')}
           />
-          {items.flatMap((item, i) =>
-            item.type === 'secondary' ? (
-              <Link
-                aria-label={item.text}
-                key={i}
-                href={item.url}
-                external={item.external}
-                className={cn(
-                  buttonVariants({
-                    size: 'icon',
-                    color: 'ghost',
-                    className: 'max-lg:hidden',
-                  }),
-                )}
-              >
-                {item.icon ?? item.text}
-              </Link>
-            ) : (
-              []
-            ),
-          )}
+          {items
+            .filter((item) => item.type === 'secondary')
+            .map((item, i) => (
+              <LinkItem key={i} item={item} className="max-lg:hidden" />
+            ))}
         </div>
       </nav>
     </header>
@@ -169,7 +153,7 @@ function LinksMenu({ items, ...props }: LinksMenuProps): React.ReactElement {
       </PopoverTrigger>
       <PopoverContent className="flex flex-col">
         {items.map((item, i) => (
-          <LinkItem key={i} item={item} showIcon />
+          <LinkItem key={i} item={item} on="menu" />
         ))}
         <ThemeToggle className="w-fit" />
       </PopoverContent>
