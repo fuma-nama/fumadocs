@@ -17,24 +17,15 @@ export const layoutOptions: Omit<DocsLayoutProps, 'children'> = {
   },
   links: [
     {
+      icon: <BookIcon />,
+      text: 'Blog',
+      url: '/blog',
+      active: 'nested-url',
+    },
+    {
       text: 'Showcase',
       url: '/showcase',
       icon: <LayoutTemplateIcon />,
-    },
-    {
-      type: 'menu',
-      text: 'Guide',
-      icon: <BookIcon />,
-      items: [
-        {
-          text: 'Getting Started',
-          url: '/docs/ui',
-        },
-        {
-          text: 'Learn More',
-          url: '/docs',
-        },
-      ],
     },
   ],
 };

@@ -1,0 +1,106 @@
+---
+title: How Fumadocs works
+description: The framework for building documentation
+author: Fuma Nama
+---
+
+## About Fumadocs
+
+1 year ago, I was having fun with Next.js App Rouer.
+While experimenting it on my toy [No Deploy](https://nodeploy-neon.vercel.app), I planned to build a documentation.
+However, Nextra does not support App Router.
+
+To handle this, I implemented a small documentation site with solely Contentlayer and the new features from App Router.
+It was working great, looks blazing-fast and minimal.
+I cloned the logic from No Deploy and built this documentation framework.
+With a few months of development, it soon became powerful and stable.
+
+It was originally named `next-docs`, I renamed it to Fumadocs as it conflicts with Next.js Docs.
+
+Thanks to the support from **Next.js** community, I've received a lot of suggestions along the way.
+[Fumadocs](https://fumadocs.vercel.app) is now a framework used by my libraries and some other amazing projects.
+
+### My Opinion
+
+In Web development, most _"robust"_ frameworks/libraries are incredibly heavy and fabulous, but it indeed made our developer experience fancy.
+
+On the top of Javascript, people bulit bundlers, transpilers, and even Typescript.
+It feels very surprisingly that Javascript, a high-level scripting language, is more similar to assembly code in modern Web development.
+We rarely use them without things like Webpack. This also applies to CSS, at least as my experience, I seldom use CSS without PostCSS.
+
+While they might be necessary for compatibility and DX, the landing of React Server Component and Next.js App Router made the experience even more mindblowing.
+It feels like magic. The cunning magical frameworks, and web development miracles.
+This kind of design is insane, but it also makes us mindlessly forget the boundaries.
+
+Beginners use Metadata API, while they have no idea how meta tag works.
+They put server-side logic in a server component, while they have no idea how expensive the calculation is.
+Even when we looked at the code, we can't predict the result without running it in production mode.
+I saw too many of these misconceptions.
+
+This happens on many frameworks, they are overly magical.
+**I wanted to make it less-magic, and straightforward at least for most Next.js developers.**
+
+### Fumadocs MDX
+
+As the recommended content source, It is actually a webpack hack.
+Since Next.js could only optimize static imports, it first transform your `.map.ts` to a file that roughy yields:
+
+```ts
+export default [import("./my/file.mdx"), ...];
+```
+
+And then transform MDX files with a custom loader. It makes all magic possible, but it doesn't have the ablility of lazy-loading MDX files.
+Comparing to Nextra, it might be a suboptimal approach.
+
+Nextra does it even easier, it directly transforms MDX files into pages. Because the Pages Router adapts Javascript files as a single page, it is possible.
+In App Router, this is not possible anymore. Therefore, I didn't take this approach.
+
+### Fumadocs Core
+
+The core of Fumadocs is a bunch of utilties and MDX plugins.
+
+- **Source API** construct page trees from content source, integrated with other content providers.
+- **Headless components** accelerate Fumadocs UI and other custom UI implementations.
+- **MDX plugins** bring a perfect developer experience to all integrations.
+- **Search utilities** make it way easier to implement document search.
+
+In addition, it also established the definitions of Page Tree and Page Conventions.
+Over all, it is not yet a framework without Fumadocs UI.
+
+In my opinion, the most valuable part in the codebase are MDX plugins.
+I learnt a lot more about ASTs and the eco-system of remark/rehype while working on them.
+Absolutely an amazing experience.
+
+### Fumadocs UI
+
+The UI implementation of Fumadocs using Tailwind CSS and Radix UI.
+Its design system was inspired by Shadcn UI, using CSS variables for color utilities.
+
+Although the structure of Fumadocs UI is even simpler than core, I've used some subtle hacks to solve the problem of `"use client"` directive.
+The bundler I am using, [TSX](https://github.com/privatenumber/tsx), can't handle nested structures like client components imported from a server comopnent.
+Therefore, I made a little hack to build server components and client components as an individual entry, then inject import statements after the process.
+
+Also it took me some time to come up with the [preset approach](https://fumadocs.vercel.app/docs/ui/theme#docsui-plugin) for integrating Fumadocs UI with Tailwind CSS projects.
+
+### Docs Generators
+
+We have a few built-in integrations, like `fumadocs-openapi` which takes an OpenAPI schema and output MDX files.
+
+For the OpenAPI one, it simply parse the schema and convert it to MDX file through string templates.
+
+The Typescript integration does a bit more, it obtain type information with [Typscript Compiler API](https://github.com/Microsoft/TypeScript/wiki/Using-the-Compiler-API). Based on the information, it yields MDX files.
+You can use it inside a server component, which is how `<AutoTypeTable />` works.
+
+### CL/CI
+
+As a project with very few contributors, I built the CL/CI process as convenient as possible for a better efficiency.
+The entire release process is handled by [Changesets](https://github.com/changesets/changesets), and I wrote the scripts to update [the template repository](https://github.com/fuma-nama/fumadocs-ui-template) automatically.
+It worked great so far.
+
+### Thanks
+
+[The Github repository of Fumadocs](https://github.com/fuma-nama/fumadocs) has reached 300 stars in 2024 March, it is a new achievement for me.
+Welcome to give it a star to support my work!
+
+> Original
+> https://fuma-nama.vercel.app/blog/fumadocs
