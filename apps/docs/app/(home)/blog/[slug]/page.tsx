@@ -5,6 +5,7 @@ import { blog } from '@/utils/source';
 import { createMetadata } from '@/utils/metadata';
 import { buttonVariants } from '@/components/ui/button';
 import { Control } from '@/app/(home)/blog/[slug]/page.client';
+import { InlineTOC } from 'fumadocs-ui/components/inline-toc';
 
 interface Param {
   slug: string;
@@ -35,16 +36,17 @@ export default function Page({
       </div>
       <article className="container grid grid-cols-1 px-0 py-8 lg:grid-cols-[2fr_1fr] lg:px-4">
         <div className="prose p-4">
+          <InlineTOC items={page.data.exports.toc} />
           <page.data.exports.default />
         </div>
         <div className="flex flex-col gap-4 border-l p-4">
           <div>
             <p className="mb-1 text-sm text-muted-foreground">Written by</p>
-            <p className="font-semibold">{page.data.author}</p>
+            <p className="font-medium">{page.data.author}</p>
           </div>
           <div>
             <p className="mb-1 text-sm text-muted-foreground">At</p>
-            <p className="font-semibold">
+            <p className="font-medium">
               {new Date(page.data.date ?? page.file.name).toDateString()}
             </p>
           </div>

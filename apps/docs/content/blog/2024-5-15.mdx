@@ -4,8 +4,6 @@ description: The framework for building documentation
 author: Fuma Nama
 ---
 
-## About Fumadocs
-
 1 year ago, I was having fun with Next.js App Rouer.
 While experimenting it on my toy [No Deploy](https://nodeploy-neon.vercel.app), I planned to build a documentation.
 However, Nextra does not support App Router.
@@ -20,7 +18,7 @@ It was originally named `next-docs`, I renamed it to Fumadocs as it conflicts wi
 Thanks to the support from **Next.js** community, I've received a lot of suggestions along the way.
 [Fumadocs](https://fumadocs.vercel.app) is now a framework used by my libraries and some other amazing projects.
 
-### My Opinion
+## My Opinion
 
 In Web development, most _"robust"_ frameworks/libraries are incredibly heavy and fabulous, but it indeed made our developer experience fancy.
 
@@ -40,7 +38,7 @@ I saw too many of these misconceptions.
 This happens on many frameworks, they are overly magical.
 **I wanted to make it less-magic, and straightforward at least for most Next.js developers.**
 
-### Fumadocs MDX
+## Fumadocs MDX
 
 As the recommended content source, It is actually a webpack hack.
 Since Next.js could only optimize static imports, it first transform your `.map.ts` to a file that roughy yields:
@@ -55,7 +53,7 @@ Comparing to Nextra, it might be a suboptimal approach.
 Nextra does it even easier, it directly transforms MDX files into pages. Because the Pages Router adapts Javascript files as a single page, it is possible.
 In App Router, this is not possible anymore. Therefore, I didn't take this approach.
 
-### Fumadocs Core
+## Fumadocs Core
 
 The core of Fumadocs is a bunch of utilties and MDX plugins.
 
@@ -71,7 +69,7 @@ In my opinion, the most valuable part in the codebase are MDX plugins.
 I learnt a lot more about ASTs and the eco-system of remark/rehype while working on them.
 Absolutely an amazing experience.
 
-### Fumadocs UI
+## Fumadocs UI
 
 The UI implementation of Fumadocs using Tailwind CSS and Radix UI.
 Its design system was inspired by Shadcn UI, using CSS variables for color utilities.
@@ -82,7 +80,7 @@ Therefore, I made a little hack to build server components and client components
 
 Also it took me some time to come up with the [preset approach](https://fumadocs.vercel.app/docs/ui/theme#docsui-plugin) for integrating Fumadocs UI with Tailwind CSS projects.
 
-### Docs Generators
+## Docs Generators
 
 We have a few built-in integrations, like `fumadocs-openapi` which takes an OpenAPI schema and output MDX files.
 
@@ -91,13 +89,13 @@ For the OpenAPI one, it simply parse the schema and convert it to MDX file throu
 The Typescript integration does a bit more, it obtain type information with [Typscript Compiler API](https://github.com/Microsoft/TypeScript/wiki/Using-the-Compiler-API). Based on the information, it yields MDX files.
 You can use it inside a server component, which is how `<AutoTypeTable />` works.
 
-### CL/CI
+## CL/CI
 
 As a project with very few contributors, I built the CL/CI process as convenient as possible for a better efficiency.
 The entire release process is handled by [Changesets](https://github.com/changesets/changesets), and I wrote the scripts to update [the template repository](https://github.com/fuma-nama/fumadocs-ui-template) automatically.
 It worked great so far.
 
-### Thanks
+## Thanks
 
 [The Github repository of Fumadocs](https://github.com/fuma-nama/fumadocs) has reached 300 stars in 2024 March, it is a new achievement for me.
 Welcome to give it a star to support my work!

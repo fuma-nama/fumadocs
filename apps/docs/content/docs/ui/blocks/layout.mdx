@@ -43,6 +43,30 @@ export default function HomeLayout({ children }) {
 
 You can create a [Route Group](https://nextjs.org/docs/app/building-your-application/routing/route-groups) to share the same layout across multiple pages.
 
+### Link API
+
+You can display a menu or link on navigation elements like navbar and sidebar.
+
+```tsx
+import { DocsLayout } from 'fumadocs-ui/layout';
+import { BookIcon } from 'lucide-react';
+
+<DocsLayout
+  links={[
+    {
+      icon: <BookIcon />,
+      text: 'Blog',
+      url: '/blog',
+    },
+    {
+      type: 'menu',
+      text: 'Guide',
+      items: [{ ... }],
+    },
+  ]}
+/>;
+```
+
 ### Navbar
 
 ```json doc-gen:typescript
