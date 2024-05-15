@@ -1,19 +1,9 @@
 'use client';
-import {
-  ChevronDownIcon,
-  MenuIcon,
-  MoreVerticalIcon,
-  SearchIcon,
-} from 'lucide-react';
+import { MenuIcon, MoreVerticalIcon, SearchIcon } from 'lucide-react';
 import Link from 'fumadocs-core/link';
 import { SidebarTrigger } from 'fumadocs-core/sidebar';
+import { type ReactNode, useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import {
-  type AnchorHTMLAttributes,
-  type ReactNode,
-  useEffect,
-  useState,
-} from 'react';
 import { cn } from '@/utils/cn';
 import { useSearchContext } from '@/contexts/search';
 import { useI18n } from '@/contexts/i18n';
@@ -23,10 +13,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { isActive } from '@/utils/shared';
 import { buttonVariants } from '@/theme/variants';
-import type { LinkItem } from '@/layout';
-import { cva } from 'class-variance-authority';
+import type { LinkItemType } from '@/layout';
+import { LinkItem } from './link-item';
 
 export interface NavProps {
   title?: ReactNode;
@@ -37,7 +26,7 @@ export interface NavProps {
    */
   url?: string;
 
-  items: LinkItem[];
+  items: LinkItemType[];
 
   enableSidebar: boolean;
 
@@ -102,12 +91,12 @@ export function Nav({
         {items
           .filter((item) => item.type !== 'secondary')
           .map((item, i) => (
-            <NavItem key={i} item={item} className="text-sm max-lg:hidden" />
+            <LinkItem key={i} item={item} className="text-sm max-lg:hidden" />
           ))}
         <div className="flex flex-1 flex-row items-center justify-end md:gap-2">
           {enableSearch && search.enabled ? <SearchToggle /> : null}
           <ThemeToggle className="max-lg:hidden" />
-          {enableSidebar && (
+          {enableSidebar ? (
             <SidebarTrigger
               aria-label="Toggle Sidebar"
               className={cn(
@@ -120,33 +109,32 @@ export function Nav({
             >
               <MenuIcon />
             </SidebarTrigger>
-          )}
+          ) : null}
           <LinksMenu
             items={items}
             className={cn('lg:hidden', enableSidebar && 'max-md:hidden')}
           />
-          {(
-            items.filter((item) => item.type === 'secondary') as Extract<
-              LinkItem,
-              { type: 'secondary' }
-            >[]
-          ).map((item, i) => (
-            <Link
-              aria-label={item.text}
-              key={i}
-              href={item.url}
-              external={item.external}
-              className={cn(
-                buttonVariants({
-                  size: 'icon',
-                  color: 'ghost',
-                  className: 'max-lg:hidden',
-                }),
-              )}
-            >
-              {item.icon ?? item.text}
-            </Link>
-          ))}
+          {items.flatMap((item, i) =>
+            item.type === 'secondary' ? (
+              <Link
+                aria-label={item.text}
+                key={i}
+                href={item.url}
+                external={item.external}
+                className={cn(
+                  buttonVariants({
+                    size: 'icon',
+                    color: 'ghost',
+                    className: 'max-lg:hidden',
+                  }),
+                )}
+              >
+                {item.icon ?? item.text}
+              </Link>
+            ) : (
+              []
+            ),
+          )}
         </div>
       </nav>
     </header>
@@ -154,11 +142,16 @@ export function Nav({
 }
 
 interface LinksMenuProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  items: LinkItem[];
+  items: LinkItemType[];
 }
 
 function LinksMenu({ items, ...props }: LinksMenuProps): React.ReactElement {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -174,16 +167,9 @@ function LinksMenu({ items, ...props }: LinksMenuProps): React.ReactElement {
       >
         <MoreVerticalIcon />
       </PopoverTrigger>
-      <PopoverContent className="flex flex-col px-3 py-1">
+      <PopoverContent className="flex flex-col">
         {items.map((item, i) => (
-          <NavItem
-            key={i}
-            item={item}
-            showIcon
-            onClick={() => {
-              setOpen(false);
-            }}
-          />
+          <LinkItem key={i} item={item} showIcon />
         ))}
         <ThemeToggle className="w-fit" />
       </PopoverContent>
@@ -194,7 +180,7 @@ function LinksMenu({ items, ...props }: LinksMenuProps): React.ReactElement {
 function SearchToggle(): React.ReactElement {
   const { setOpenSearch } = useSearchContext();
   const { text } = useI18n();
-  const onClick = () => {
+  const onClick = (): void => {
     setOpenSearch(true);
   };
 
@@ -230,65 +216,5 @@ function SearchToggle(): React.ReactElement {
         </div>
       </button>
     </>
-  );
-}
-
-const linkItemVariants = cva(
-  'inline-flex items-center gap-1.5 p-2 rounded-lg text-muted-foreground text-base transition-colors data-[state=open]:bg-accent [&_svg]:size-4',
-  {
-    variants: {
-      active: {
-        true: 'text-accent-foreground bg-accent',
-        false: 'hover:bg-accent',
-      },
-    },
-  },
-);
-
-function NavItem({
-  item,
-  showIcon = false,
-  className,
-  ...props
-}: AnchorHTMLAttributes<HTMLAnchorElement> & {
-  item: LinkItem;
-  showIcon?: boolean;
-}): React.ReactElement {
-  const pathname = usePathname();
-
-  if (item.type === 'menu') {
-    return (
-      <Popover>
-        <PopoverTrigger
-          className={cn(linkItemVariants({ active: false, className }))}
-        >
-          {showIcon ? item.icon : null}
-          {item.text}
-          <ChevronDownIcon className="ml-auto size-4" />
-        </PopoverTrigger>
-        <PopoverContent className="flex flex-col">
-          {item.items.map((child, i) => (
-            <NavItem key={i} item={child} />
-          ))}
-        </PopoverContent>
-      </Popover>
-    );
-  }
-
-  return (
-    <Link
-      href={item.url}
-      external={item.external}
-      className={cn(
-        linkItemVariants({
-          active: isActive(item.url, pathname, false),
-          className,
-        }),
-      )}
-      {...props}
-    >
-      {showIcon ? item.icon : null}
-      {item.text}
-    </Link>
   );
 }

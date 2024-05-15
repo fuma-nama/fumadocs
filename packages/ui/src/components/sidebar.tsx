@@ -11,8 +11,9 @@ import { useTreeContext } from '@/contexts/tree';
 import { useSidebarCollapse } from '@/contexts/sidebar';
 import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
 import { hasActive, isActive } from '@/utils/shared';
-import type { LinkItem } from '@/layout';
+import type { LinkItemType } from '@/layout';
 import { buttonVariants } from '@/theme/variants';
+import { LinkItem } from '@/components/link-item';
 import {
   Collapsible,
   CollapsibleContent,
@@ -21,7 +22,7 @@ import {
 import { ThemeToggle } from './theme-toggle';
 
 export interface SidebarProps {
-  items: LinkItem[];
+  items: LinkItemType[];
 
   /**
    * Open folders by default if their level is lower or equal to a specific level
@@ -65,7 +66,7 @@ const itemVariants = cva(
 const defaultComponents: Components = {
   Folder: FolderNode,
   Separator: SeparatorNode,
-  Item: ({ item }) => <BaseItem {...item} />,
+  Item: PageNode,
 };
 
 const SidebarContext = createContext<SidebarContext>({
@@ -163,9 +164,9 @@ function ViewportContent({
         <div className="flex flex-col gap-8 pb-10 pt-4 max-md:px-4 md:pr-3 md:pt-10">
           {banner}
           {items.length > 0 && (
-            <div className="md:hidden">
+            <div className="flex flex-col md:hidden">
               {items.map((item, i) => (
-                <LinkItemRender key={i} item={item} />
+                <LinkItem key={i} item={item} showIcon />
               ))}
             </div>
           )}
@@ -206,13 +207,13 @@ function NodeList({
   );
 }
 
-function BaseItem({
-  icon,
-  external = false,
-  url,
-  name,
+function PageNode({
+  item: { icon, external = false, url, name },
   nested = false,
-}: Omit<PageTree.Item, 'type'> & { nested?: boolean }): React.ReactElement {
+}: {
+  item: PageTree.Item;
+  nested?: boolean;
+}): React.ReactElement {
   const pathname = usePathname();
   const active = isActive(url, pathname, nested);
 
@@ -297,42 +298,6 @@ function FolderNode({
         />
       </CollapsibleContent>
     </Collapsible>
-  );
-}
-
-function LinkItemRender({ item }: { item: LinkItem }) {
-  if (item.type === 'menu') {
-    return (
-      <Collapsible>
-        <CollapsibleTrigger
-          className={cn(
-            itemVariants({
-              active: false,
-              className: 'group/link',
-            }),
-          )}
-        >
-          {item.icon}
-          {item.text}
-          <ChevronDown className="ms-auto transition-transform group-data-[state=closed]/link:-rotate-90" />
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <div className="ms-4 flex flex-col border-s py-2 ps-2">
-            {item.items.map((child, i) => (
-              <LinkItemRender key={i} item={child} />
-            ))}
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
-    );
-  }
-  return (
-    <BaseItem
-      name={item.text}
-      url={item.url}
-      external={item.external}
-      icon={item.icon as React.ReactElement}
-    />
   );
 }
 
