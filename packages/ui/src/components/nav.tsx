@@ -80,7 +80,7 @@ export function Nav({
           : 'border-foreground/10 bg-background/50 backdrop-blur-md',
       )}
     >
-      <nav className="mx-auto flex size-full max-w-container flex-row items-center gap-3 px-4">
+      <nav className="mx-auto flex size-full max-w-container flex-row items-center gap-6 px-4">
         <Link
           href={url}
           className="inline-flex items-center gap-3 font-semibold"
@@ -91,7 +91,11 @@ export function Nav({
         {items
           .filter((item) => item.type !== 'secondary')
           .map((item, i) => (
-            <LinkItem key={i} item={item} className="text-sm max-lg:hidden" />
+            <LinkItem
+              key={i}
+              item={item}
+              className="text-sm -mx-2 max-lg:hidden"
+            />
           ))}
         <div className="flex flex-1 flex-row items-center justify-end md:gap-2">
           {enableSearch && search.enabled ? <SearchToggle /> : null}
@@ -189,7 +193,7 @@ function SearchToggle(): React.ReactElement {
         className="inline-flex w-full max-w-[240px] items-center gap-2 rounded-full border bg-secondary/50 p-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground max-md:hidden"
         onClick={onClick}
       >
-        <SearchIcon aria-label="Open Search" className="ms-1 size-4" />
+        <SearchIcon className="ms-1 size-4" />
         {text.search}
         <div className="ms-auto inline-flex gap-0.5 text-xs">
           {['⌘', 'K'].map((k) => (
