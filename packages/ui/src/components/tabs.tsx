@@ -7,29 +7,30 @@ import * as Primitive from './ui/tabs';
 
 export * as Primitive from './ui/tabs';
 
-type ListenerObject = () => void;
-const valueMap = new Map<string, string>();
-const listeners = new Map<string, Set<ListenerObject>>();
+type ChangeListener = (v: string) => void;
+const listeners = new Map<string, ChangeListener[]>();
 
-function add(id: string, listener: ListenerObject): void {
-  if (listeners.has(id)) {
-    listeners.get(id)?.add(listener);
-  } else {
-    listeners.set(id, new Set([listener]));
-  }
+function addChangeListener(id: string, listener: ChangeListener): void {
+  const list = listeners.get(id) ?? [];
+  list.push(listener);
+  listeners.set(id, list);
 }
 
-function remove(id: string, listener: ListenerObject): void {
-  listeners.get(id)?.delete(listener);
+function removeChangeListener(id: string, listener: ChangeListener): void {
+  const list = listeners.get(id) ?? [];
+  listeners.set(
+    id,
+    list.filter((item) => item !== listener),
+  );
 }
 
 function update(id: string, v: string, persist: boolean): void {
-  valueMap.set(id, v);
   listeners.get(id)?.forEach((item) => {
-    item();
+    item(v);
   });
 
   if (persist) localStorage.setItem(id, v);
+  else sessionStorage.setItem(id, v);
 }
 
 export interface TabsProps {
@@ -63,22 +64,18 @@ export function Tabs({
   useEffect(() => {
     if (!id) return;
 
-    const onUpdate = (): void => {
-      const current = valueMap.get(id);
-      // Only if item exists
-      if (current && values.includes(current)) setValue(current);
+    const onUpdate: ChangeListener = (v) => {
+      if (values.includes(v)) setValue(v);
     };
 
-    if (persist) {
-      const previous = localStorage.getItem(id);
+    const previous = persist
+      ? localStorage.getItem(id)
+      : sessionStorage.getItem(id);
 
-      if (previous) update(id, previous, persist);
-    }
-
-    add(id, onUpdate);
-    onUpdate();
+    if (previous) onUpdate(previous);
+    addChangeListener(id, onUpdate);
     return () => {
-      remove(id, onUpdate);
+      removeChangeListener(id, onUpdate);
     };
   }, [id, persist, values]);
 
