@@ -6,7 +6,7 @@
   "license": "MIT",
   "dependencies": {
     "@types/mdx": "^2.0.13",
-    "@types/react": "^18.3.1",
+    "@types/react": "^18.3.2",
     "@types/react-dom": "^18.3.0",
     "autoprefixer": "^10.4.19",
     "contentlayer": "^0.3.4",

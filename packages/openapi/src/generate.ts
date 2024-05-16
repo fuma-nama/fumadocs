@@ -1,4 +1,4 @@
-import Parser from '@apidevtools/swagger-parser';
+import Parser from '@apidevtools/json-schema-ref-parser';
 import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
 import type { RouteInformation, MethodInformation } from './types';
 import { root } from './render/custom';
@@ -7,7 +7,7 @@ import { renderOperation } from './render/operation';
 export async function dereference(
   pathOrDocument: string | OpenAPI.Document,
 ): Promise<OpenAPI.Document> {
-  return (await Parser.dereference(pathOrDocument)) as OpenAPI.Document;
+  return await Parser.dereference(pathOrDocument);
 }
 
 export interface GenerateOptions {

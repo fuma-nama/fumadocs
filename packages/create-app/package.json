@@ -29,7 +29,7 @@
   "dependencies": {
     "@clack/prompts": "^0.7.0",
     "cross-spawn": "^7.0.3",
-    "picocolors": "^1.0.0"
+    "picocolors": "^1.0.1"
   },
   "devDependencies": {
     "@types/cross-spawn": "^6.0.6",
