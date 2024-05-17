@@ -116,7 +116,8 @@ export function Sidebar({
             buttonVariants({
               color: 'ghost',
               size: 'icon',
-              className: 'sticky bottom-4 mt-auto mb-4 h-fit max-md:hidden',
+              className:
+                'sticky bottom-2 left-2 mt-auto mb-4 h-fit max-md:hidden',
             }),
           )}
           onClick={onCollapse}
@@ -127,7 +128,7 @@ export function Sidebar({
       <Base.SidebarList
         minWidth={768} // md
         className={cn(
-          'flex w-full flex-col text-[15px] md:sticky md:top-0 md:h-screen md:w-[240px] md:text-sm xl:w-[260px]',
+          'flex flex-col text-[15px] md:sticky md:top-0 md:h-[calc(100vh-40px)] md:w-[240px] md:text-sm xl:w-[260px]',
           !open && 'md:hidden',
           'max-md:fixed max-md:inset-0 max-md:z-40 max-md:bg-background/80 max-md:pt-16 max-md:backdrop-blur-md max-md:data-[open=false]:hidden bg-zinc-100 border-r',
         )}

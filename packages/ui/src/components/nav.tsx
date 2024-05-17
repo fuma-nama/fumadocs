@@ -190,7 +190,7 @@ export function SearchToggle(): React.ReactElement {
       </button>
       <button
         type="button"
-        className="inline-flex w-full items-center gap-2 border-b bg-white py-3 px-2 text-sm text-muted-foreground transition-colors hover:text-black max-md:hidden"
+        className="inline-flex w-full items-center gap-2  border-b bg-white py-3 px-2 text-sm text-muted-foreground transition-colors hover:text-black max-md:hidden sticky top-0 z-50"
         onClick={onClick}
       >
         <SearchIcon className="ms-1 size-4" />
