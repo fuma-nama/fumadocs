@@ -53,7 +53,7 @@ interface SidebarContext {
 }
 
 interface Components {
-  Item: React.FC<{ item: PageTree.Item }>;
+  Item: React.FC<{ item: PageTree.Item; isNestedInCollapsible?: boolean }>;
   Folder: React.FC<{ item: PageTree.Folder; level: number }>;
   Separator: React.FC<{ item: PageTree.Separator }>;
 }

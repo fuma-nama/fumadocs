@@ -1,10 +1,5 @@
 'use client';
-import {
-  MenuIcon,
-  MoreVerticalIcon,
-  SearchIcon,
-  SidebarIcon,
-} from 'lucide-react';
+import { MenuIcon, MoreVerticalIcon, SearchIcon } from 'lucide-react';
 import Link from 'fumadocs-core/link';
 import { SidebarTrigger } from 'fumadocs-core/sidebar';
 import { type ReactNode, useEffect, useState } from 'react';
