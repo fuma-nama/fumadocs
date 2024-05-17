@@ -17,11 +17,16 @@ async function fetchDocs(
   query: string,
   locale: string | undefined,
   tag: string | undefined,
+  additionalParams?: Record<string, string>,
 ): Promise<SortedResult[] | 'empty'> {
   if (query.length === 0) return 'empty';
 
   const params = new URLSearchParams();
   params.set('query', query);
+  if (additionalParams)
+    Object.entries(additionalParams).forEach(([key, value]) => {
+      params.set(key, value);
+    });
   if (locale) params.set('locale', locale);
   if (tag) params.set('tag', tag);
 
@@ -35,6 +40,7 @@ async function fetchDocs(
  * @param locale - Filter with locale
  * @param tag - Filter with specific tag
  * @param api - The Search API URL
+ * @param additionalParams - Additional query parameters
  */
 export function useDocsSearch(
   locale?: string,
@@ -43,10 +49,13 @@ export function useDocsSearch(
 ): UseDocsSearch {
   const [search, setSearch] = useState('');
   const debouncedValue = useDebounce(search, 100);
+  const queryParamsFromAPIURL = new URLSearchParams(api.split('?')[1]);
+  const additionalParams = Object.fromEntries(queryParamsFromAPIURL.entries());
+  const apiURL = api.split('?')[0];
 
   const query: UseDocsSearch['query'] = useSWR(
-    [api, debouncedValue, locale, tag],
-    (args) => fetchDocs(...args),
+    [apiURL, debouncedValue, locale, tag],
+    (args) => fetchDocs(...args, additionalParams),
     {
       keepPreviousData: true,
     },
