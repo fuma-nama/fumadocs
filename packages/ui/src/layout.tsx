@@ -116,16 +116,16 @@ export function DocsLayout({
 
   return (
     <TreeContextProvider tree={tree}>
-      {replaceOrDefault(
+      {/* {replaceOrDefault(
         nav,
         <Nav items={finalLinks} enableSidebar={sidebarEnabled} {...nav}>
           {nav.children}
         </Nav>,
-      )}
+      )} */}
       <div
         {...containerProps}
         className={cn(
-          'mx-auto flex w-full max-w-container flex-row gap-6 px-4 xl:gap-12',
+          'mx-auto flex w-full flex-row gap-6 xl:gap-12',
           containerProps?.className,
         )}
       >
@@ -133,6 +133,7 @@ export function DocsLayout({
           sidebar,
           <Sidebar
             items={finalLinks}
+            enableSearch={sidebarEnabled}
             defaultOpenLevel={sidebar.defaultOpenLevel}
             banner={sidebar.banner}
             footer={sidebar.footer}

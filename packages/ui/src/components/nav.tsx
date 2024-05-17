@@ -1,5 +1,10 @@
 'use client';
-import { MenuIcon, MoreVerticalIcon, SearchIcon } from 'lucide-react';
+import {
+  MenuIcon,
+  MoreVerticalIcon,
+  SearchIcon,
+  SidebarIcon,
+} from 'lucide-react';
 import Link from 'fumadocs-core/link';
 import { SidebarTrigger } from 'fumadocs-core/sidebar';
 import { type ReactNode, useEffect, useState } from 'react';
@@ -165,7 +170,7 @@ function LinksMenu({ items, ...props }: LinksMenuProps): React.ReactElement {
   );
 }
 
-function SearchToggle(): React.ReactElement {
+export function SearchToggle(): React.ReactElement {
   const { setOpenSearch } = useSearchContext();
   const { text } = useI18n();
   const onClick = (): void => {
@@ -190,11 +195,11 @@ function SearchToggle(): React.ReactElement {
       </button>
       <button
         type="button"
-        className="inline-flex w-full max-w-[240px] items-center gap-2 rounded-full border bg-secondary/50 p-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground max-md:hidden"
+        className="inline-flex w-full items-center gap-2 border-b bg-white py-3 px-2 text-sm text-muted-foreground transition-colors hover:text-black max-md:hidden"
         onClick={onClick}
       >
         <SearchIcon className="ms-1 size-4" />
-        {text.search}
+        {text.search}...
         <div className="ms-auto inline-flex gap-0.5 text-xs">
           {['⌘', 'K'].map((k) => (
             <kbd key={k} className="rounded-md border bg-background px-1.5">

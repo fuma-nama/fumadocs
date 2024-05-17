@@ -14,12 +14,14 @@ import { hasActive, isActive } from '@/utils/shared';
 import type { LinkItemType } from '@/layout';
 import { buttonVariants } from '@/theme/variants';
 import { LinkItem } from '@/components/link-item';
+import { useSearchContext } from '@/provider';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from './ui/collapsible';
 import { ThemeToggle } from './theme-toggle';
+import { SearchToggle } from './nav';
 
 export interface SidebarProps {
   items: LinkItemType[];
@@ -31,6 +33,12 @@ export interface SidebarProps {
    * @defaultValue 1
    */
   defaultOpenLevel?: number;
+  /**
+   * Show/hide search toggle
+   *
+   * Note: Enable/disable search from root provider instead
+   */
+  enableSearch?: boolean;
 
   collapsible?: boolean;
 
@@ -51,13 +59,13 @@ interface Components {
 }
 
 const itemVariants = cva(
-  'flex w-full flex-row items-center gap-2 rounded-md px-2 py-1.5 text-muted-foreground transition-colors duration-100 [&_svg]:size-4',
+  'flex flex-row items-center gap-2 rounded-md mx-2 px-2 py-1.5 text-muted-foreground transition-colors duration-100 [&_svg]:size-4 my-1',
   {
     variants: {
       active: {
         true: 'bg-primary/10 font-medium text-primary',
         false:
-          'hover:bg-accent/50 hover:text-accent-foreground/80 hover:transition-none',
+          'hover:bg-zinc-200 hover:text-accent-foreground/80 hover:transition-none',
       },
     },
   },
@@ -79,10 +87,12 @@ export function Sidebar({
   components,
   defaultOpenLevel = 1,
   collapsible = true,
+  enableSearch = true,
   banner,
   items,
 }: SidebarProps): React.ReactElement {
   const [open, setOpen] = useSidebarCollapse();
+  const search = useSearchContext();
   const alwaysShowFooter = Boolean(footer) || collapsible;
   const context = useMemo<SidebarContext>(
     () => ({
@@ -117,12 +127,13 @@ export function Sidebar({
       <Base.SidebarList
         minWidth={768} // md
         className={cn(
-          'flex w-full flex-col text-[15px] md:sticky md:top-16 md:h-body md:w-[240px] md:text-sm xl:w-[260px]',
+          'flex w-full flex-col text-[15px] md:sticky md:top-0 md:h-screen md:w-[240px] md:text-sm xl:w-[260px]',
           !open && 'md:hidden',
-          'max-md:fixed max-md:inset-0 max-md:z-40 max-md:bg-background/80 max-md:pt-16 max-md:backdrop-blur-md max-md:data-[open=false]:hidden',
+          'max-md:fixed max-md:inset-0 max-md:z-40 max-md:bg-background/80 max-md:pt-16 max-md:backdrop-blur-md max-md:data-[open=false]:hidden bg-zinc-100 border-r',
         )}
       >
         <ViewportContent>
+          {enableSearch && search.enabled ? <SearchToggle /> : null}
           {banner}
           {items.length > 0 && (
             <div className="flex flex-col md:hidden">
@@ -172,7 +183,7 @@ function ViewportContent({
   return (
     <ScrollArea className="flex-1">
       <ScrollViewport>
-        <div className="flex flex-col gap-8 pb-10 pt-4 max-md:px-4 md:pr-3 md:pt-10">
+        <div className="flex flex-col gap-8 pb-10 max-md:px-4">
           {children}
           <NodeList items={root.children} />
         </div>
@@ -184,11 +195,13 @@ function ViewportContent({
 interface NodeListProps extends React.HTMLAttributes<HTMLDivElement> {
   items: PageTree.Node[];
   level?: number;
+  isNestedInCollapsible?: boolean;
 }
 
 function NodeList({
   items,
   level = 0,
+  isNestedInCollapsible,
   ...props
 }: NodeListProps): React.ReactElement {
   const { components } = useContext(SidebarContext);
@@ -204,7 +217,13 @@ function NodeList({
           case 'folder':
             return <components.Folder key={id} item={item} level={level + 1} />;
           default:
-            return <components.Item key={item.url} item={item} />;
+            return (
+              <components.Item
+                key={item.url}
+                item={item}
+                isNestedInCollapsible={isNestedInCollapsible}
+              />
+            );
         }
       })}
     </div>
@@ -214,9 +233,11 @@ function NodeList({
 function PageNode({
   item: { icon, external = false, url, name },
   nested = false,
+  isNestedInCollapsible = false,
 }: {
   item: PageTree.Item;
   nested?: boolean;
+  isNestedInCollapsible?: boolean;
 }): React.ReactElement {
   const pathname = usePathname();
   const active = isActive(url, pathname, nested);
@@ -225,7 +246,10 @@ function PageNode({
     <Link
       href={url}
       external={external}
-      className={cn(itemVariants({ active }))}
+      className={cn(
+        itemVariants({ active }),
+        isNestedInCollapsible ? 'ml-0' : '',
+      )}
     >
       {icon ?? (external ? <ExternalLinkIcon /> : null)}
       {name}
@@ -299,6 +323,7 @@ function FolderNode({
           className="ms-4 flex flex-col border-s py-2 ps-2"
           items={children}
           level={level}
+          isNestedInCollapsible={true}
         />
       </CollapsibleContent>
     </Collapsible>
