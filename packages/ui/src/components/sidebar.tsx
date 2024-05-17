@@ -1,25 +1,25 @@
+import { LinkItem } from '@/components/link-item';
+import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
+import { useSidebarCollapse } from '@/contexts/sidebar';
+import { useTreeContext } from '@/contexts/tree';
+import type { LinkItemType } from '@/layout';
+import { buttonVariants } from '@/theme/variants';
+import { cn } from '@/utils/cn';
+import { hasActive, isActive } from '@/utils/shared';
 import { cva } from 'class-variance-authority';
-import { ChevronDown, ExternalLinkIcon, SidebarIcon } from 'lucide-react';
+import Link from 'fumadocs-core/link';
 import type { PageTree } from 'fumadocs-core/server';
 import * as Base from 'fumadocs-core/sidebar';
+import { ChevronDown, ExternalLinkIcon, SidebarIcon } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import * as React from 'react';
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import Link from 'fumadocs-core/link';
-import { cn } from '@/utils/cn';
-import { useTreeContext } from '@/contexts/tree';
-import { useSidebarCollapse } from '@/contexts/sidebar';
-import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
-import { hasActive, isActive } from '@/utils/shared';
-import type { LinkItemType } from '@/layout';
-import { buttonVariants } from '@/theme/variants';
-import { LinkItem } from '@/components/link-item';
+import { ThemeToggle } from './theme-toggle';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from './ui/collapsible';
-import { ThemeToggle } from './theme-toggle';
 
 export interface SidebarProps {
   items: LinkItemType[];
@@ -172,7 +172,7 @@ function ViewportContent({
   return (
     <ScrollArea className="flex-1">
       <ScrollViewport>
-        <div className="flex flex-col gap-8 pb-10 pt-4 max-md:px-4 md:pr-3 md:pt-10">
+        <div className="flex flex-col gap-8 pt-4 pb-10 max-md:px-4 md:pr-3 md:pt-10">
           {children}
           <NodeList items={root.children} />
         </div>
@@ -296,7 +296,7 @@ function FolderNode({
       )}
       <CollapsibleContent>
         <NodeList
-          className="ms-4 flex flex-col border-s py-2 ps-2"
+          className="flex flex-col py-2 ms-4 border-s ps-2"
           items={children}
           level={level}
         />
@@ -310,5 +310,5 @@ function SeparatorNode({
 }: {
   item: PageTree.Separator;
 }): React.ReactElement {
-  return <p className="mb-2 mt-8 px-2 font-medium first:mt-0">{item.name}</p>;
+  return <p className="px-2 mt-8 mb-2 font-medium first:mt-0">{item.name}</p>;
 }
