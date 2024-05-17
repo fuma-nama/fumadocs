@@ -1,4 +1,4 @@
-import { type Source } from 'fumadocs-core/source';
+import { type Source } from '@maximai/fumadocs-core/source';
 import type { z } from 'zod';
 import { resolveFiles } from './resolve-files';
 import type { defaultSchemas } from './utils/schema';

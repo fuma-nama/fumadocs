@@ -13,12 +13,12 @@
     "start": "next start"
   },
   "dependencies": {
+    "@maximai/fumadocs-core": "workspace:*",
     "@maximai/fumadocs-ui": "workspace:*",
     "@next/env": "^14.2.3",
     "@radix-ui/react-tooltip": "^1.0.7",
     "algoliasearch": "^4.23.3",
     "class-variance-authority": "^0.7.0",
-    "fumadocs-core": "workspace:*",
     "fumadocs-docgen": "workspace:^",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-twoslash": "workspace:^",

@@ -1,4 +1,4 @@
-import Link from 'fumadocs-core/link';
+import Link from '@maximai/fumadocs-core/link';
 import type {
   AnchorHTMLAttributes,
   FC,

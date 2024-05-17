@@ -1,4 +1,4 @@
-import type { VirtualFile, Source } from 'fumadocs-core/source';
+import type { VirtualFile, Source } from '@maximai/fumadocs-core/source';
 import type { DocsPageBase, MetaPageBase } from './types';
 
 export function createContentlayerSource<

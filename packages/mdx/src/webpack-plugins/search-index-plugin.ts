@@ -1,8 +1,12 @@
 /* eslint-disable @typescript-eslint/consistent-type-imports -- Webpack */
 import * as path from 'node:path';
 import { createRequire } from 'node:module';
-import type { StructuredData } from 'fumadocs-core/mdx-plugins';
-import { createGetUrl, getSlugs, parseFilePath } from 'fumadocs-core/source';
+import type { StructuredData } from '@maximai/fumadocs-core/mdx-plugins';
+import {
+  createGetUrl,
+  getSlugs,
+  parseFilePath,
+} from '@maximai/fumadocs-core/source';
 import type { Compiler } from 'webpack';
 
 const require = createRequire(import.meta.url);

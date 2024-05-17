@@ -1,6 +1,6 @@
 import { TextIcon } from 'lucide-react';
-import type { TOCItemType } from 'fumadocs-core/server';
-import * as Primitive from 'fumadocs-core/toc';
+import type { TOCItemType } from '@maximai/fumadocs-core/server';
+import * as Primitive from '@maximai/fumadocs-core/toc';
 import { useEffect, useRef } from 'react';
 import { cn } from '@/utils/cn';
 import { useI18n } from '@/contexts/i18n';

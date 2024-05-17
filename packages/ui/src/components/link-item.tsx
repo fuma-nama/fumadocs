@@ -1,4 +1,4 @@
-import Link from 'fumadocs-core/link';
+import Link from '@maximai/fumadocs-core/link';
 import { ChevronDownIcon } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cva } from 'class-variance-authority';

@@ -1,6 +1,6 @@
 'use client';
 
-import { useDocsSearch } from 'fumadocs-core/search/client';
+import { useDocsSearch } from '@maximai/fumadocs-core/search/client';
 import { type ReactNode } from 'react';
 import { useI18n } from '@/contexts/i18n';
 import { SearchDialog, type SharedProps } from './search';

@@ -1,4 +1,4 @@
-import type { PageTree } from 'fumadocs-core/server';
+import type { PageTree } from '@maximai/fumadocs-core/server';
 import { usePathname } from 'next/navigation';
 import { createContext, useContext, type ReactNode, useMemo } from 'react';
 import { hasActive } from '@/utils/shared';

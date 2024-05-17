@@ -44,7 +44,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "fumadocs-core": "workspace:*",
+    "@maximai/fumadocs-core": "workspace:*",
     "rehype-img-size": "^1.0.1"
   },
   "devDependencies": {

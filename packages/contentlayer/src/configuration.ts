@@ -22,8 +22,8 @@ import {
   remarkGfm,
   structure,
   type RehypeCodeOptions,
-} from 'fumadocs-core/mdx-plugins';
-import { getTableOfContents } from 'fumadocs-core/server';
+} from '@maximai/fumadocs-core/mdx-plugins';
+import { getTableOfContents } from '@maximai/fumadocs-core/server';
 import type { DocsPageBase } from './types';
 
 export interface Config {

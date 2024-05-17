@@ -1,7 +1,7 @@
 'use client';
 
 import { ChevronDown } from 'lucide-react';
-import type { TOCItemType } from 'fumadocs-core/server';
+import type { TOCItemType } from '@maximai/fumadocs-core/server';
 import {
   Collapsible,
   CollapsibleContent,

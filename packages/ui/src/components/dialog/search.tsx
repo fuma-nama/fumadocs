@@ -1,5 +1,5 @@
 import { FileTextIcon, HashIcon, TextIcon } from 'lucide-react';
-import type { SortedResult } from 'fumadocs-core/search/shared';
+import type { SortedResult } from '@maximai/fumadocs-core/search/shared';
 import { useRouter } from 'next/navigation';
 import { useMemo, type ReactNode } from 'react';
 import { useI18n } from '@/contexts/i18n';

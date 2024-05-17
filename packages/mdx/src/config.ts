@@ -9,7 +9,7 @@ import {
   remarkImage,
   type RemarkImageOptions,
   type RemarkHeadingOptions,
-} from 'fumadocs-core/mdx-plugins';
+} from '@maximai/fumadocs-core/mdx-plugins';
 import type { Pluggable } from 'unified';
 import type { Configuration } from 'webpack';
 import { MapWebpackPlugin } from './webpack-plugins/map-plugin';

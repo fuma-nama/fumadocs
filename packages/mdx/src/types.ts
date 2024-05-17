@@ -1,7 +1,7 @@
 import type { MDXProps } from 'mdx/types';
-import type { StructuredData } from 'fumadocs-core/mdx-plugins';
-import type { TableOfContents } from 'fumadocs-core/server';
-import type { MetaData, PageData } from 'fumadocs-core/source';
+import type { StructuredData } from '@maximai/fumadocs-core/mdx-plugins';
+import type { TableOfContents } from '@maximai/fumadocs-core/server';
+import type { MetaData, PageData } from '@maximai/fumadocs-core/source';
 
 export type SourceFile<Meta extends MetaData, Fronmatter extends PageData> =
   | {

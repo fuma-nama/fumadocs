@@ -1,8 +1,8 @@
-import type * as Breadcrumb from 'fumadocs-core/breadcrumb';
-import type * as TOC from 'fumadocs-core/toc';
-import type * as Server from 'fumadocs-core/server';
-import type * as Sidebar from 'fumadocs-core/sidebar';
-import type { SortedResult as OriginalSortedResult } from 'fumadocs-core/search/shared';
+import type * as Breadcrumb from '@maximai/fumadocs-core/breadcrumb';
+import type * as TOC from '@maximai/fumadocs-core/toc';
+import type * as Server from '@maximai/fumadocs-core/server';
+import type * as Sidebar from '@maximai/fumadocs-core/sidebar';
+import type { SortedResult as OriginalSortedResult } from '@maximai/fumadocs-core/search/shared';
 import type { ComponentPropsWithoutRef, ElementType } from 'react';
 
 export type SortedResult = OriginalSortedResult;

@@ -58,6 +58,9 @@ importers:
 
   apps/docs:
     dependencies:
+      '@maximai/fumadocs-core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@maximai/fumadocs-ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -73,9 +76,6 @@ importers:
       class-variance-authority:
         specifier: ^0.7.0
         version: 0.7.0
-      fumadocs-core:
-        specifier: workspace:*
-        version: link:../../packages/core
       fumadocs-docgen:
         specifier: workspace:^
         version: link:../../packages/doc-gen
@@ -182,6 +182,9 @@ importers:
 
   examples/contentlayer:
     dependencies:
+      '@maximai/fumadocs-core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@maximai/fumadocs-ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -191,9 +194,6 @@ importers:
       fumadocs-contentlayer:
         specifier: 1.1.20
         version: link:../../packages/contentlayer
-      fumadocs-core:
-        specifier: 11.1.0
-        version: link:../../packages/core
       next:
         specifier: ^14.2.3
         version: 14.2.3(@babel/core@7.24.0)(@opentelemetry/api@1.6.0)(react-dom@18.3.1)(react@18.3.1)
@@ -228,12 +228,12 @@ importers:
 
   examples/next-mdx:
     dependencies:
+      '@maximai/fumadocs-core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@maximai/fumadocs-ui':
         specifier: workspace:*
         version: link:../../packages/ui
-      fumadocs-core:
-        specifier: 11.1.0
-        version: link:../../packages/core
       fumadocs-mdx:
         specifier: 8.2.18
         version: link:../../packages/mdx
@@ -262,7 +262,7 @@ importers:
 
   packages/contentlayer:
     dependencies:
-      fumadocs-core:
+      '@maximai/fumadocs-core':
         specifier: workspace:*
         version: link:../core
       rehype-img-size:
@@ -435,7 +435,7 @@ importers:
         version: link:../contentlayer
       fumadocs-core:
         specifier: ^11.1.0
-        version: link:../core
+        version: 11.1.0(@types/react@18.3.1)(next@14.2.3)(react-dom@18.3.1)(react@18.3.1)
       fumadocs-mdx:
         specifier: ^8.2.18
         version: link:../mdx
@@ -514,6 +514,9 @@ importers:
 
   packages/mdx:
     dependencies:
+      '@maximai/fumadocs-core':
+        specifier: workspace:*
+        version: link:../core
       '@mdx-js/mdx':
         specifier: ^3.0.1
         version: 3.0.1
@@ -526,9 +529,6 @@ importers:
       fast-glob:
         specifier: ^3.3.1
         version: 3.3.2
-      fumadocs-core:
-        specifier: workspace:*
-        version: link:../core
       gray-matter:
         specifier: ^4.0.3
         version: 4.0.3
@@ -676,6 +676,9 @@ importers:
 
   packages/ui:
     dependencies:
+      '@maximai/fumadocs-core':
+        specifier: workspace:*
+        version: link:../core
       '@radix-ui/react-accordion':
         specifier: ^1.1.2
         version: 1.1.2(@types/react-dom@18.3.0)(@types/react@18.3.1)(react-dom@18.3.1)(react@18.3.1)
@@ -709,9 +712,6 @@ importers:
       cmdk:
         specifier: ^1.0.0
         version: 1.0.0(@types/react-dom@18.3.0)(@types/react@18.3.1)(react-dom@18.3.1)(react@18.3.1)
-      fumadocs-core:
-        specifier: workspace:*
-        version: link:../core
       lucide-react:
         specifier: ^0.376.0
         version: 0.376.0(react@18.3.1)
@@ -8054,7 +8054,7 @@ packages:
   /mdast-util-mdxjs-esm@2.0.1:
     resolution: {integrity: sha512-EcmOpxsZ96CvlP03NghtH1EsLtr0n9Tm4lPUJUBccV9RwUOneqSycg19n5HGzCf+10LozMRSObtVr3ee1WoHtg==}
     dependencies:
-      '@types/estree-jsx': 1.0.0
+      '@types/estree-jsx': 1.0.5
       '@types/hast': 3.0.4
       '@types/mdast': 4.0.3
       devlop: 1.1.0
@@ -10528,7 +10528,7 @@ packages:
     hasBin: true
     dependencies:
       '@jridgewell/source-map': 0.3.5
-      acorn: 8.10.0
+      acorn: 8.11.3
       commander: 2.20.3
       source-map-support: 0.5.21
     dev: true

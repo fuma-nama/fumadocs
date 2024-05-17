@@ -8,8 +8,8 @@
     "start": "next start"
   },
   "dependencies": {
+    "@maximai/fumadocs-core": "workspace:*",
     "@maximai/fumadocs-ui": "workspace:*",
-    "fumadocs-core": "11.1.0",
     "fumadocs-mdx": "8.2.18",
     "next": "^14.2.3",
     "react": "18.3.1",

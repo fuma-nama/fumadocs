@@ -1,11 +1,11 @@
 import { cva } from 'class-variance-authority';
 import { ChevronDown, ExternalLinkIcon, SidebarIcon } from 'lucide-react';
-import type { PageTree } from 'fumadocs-core/server';
-import * as Base from 'fumadocs-core/sidebar';
+import type { PageTree } from '@maximai/fumadocs-core/server';
+import * as Base from '@maximai/fumadocs-core/sidebar';
 import { usePathname } from 'next/navigation';
 import * as React from 'react';
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import Link from 'fumadocs-core/link';
+import Link from '@maximai/fumadocs-core/link';
 import { cn } from '@/utils/cn';
 import { useTreeContext } from '@/contexts/tree';
 import { useSidebarCollapse } from '@/contexts/sidebar';

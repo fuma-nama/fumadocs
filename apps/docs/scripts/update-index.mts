@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import env from '@next/env';
 import algosearch from 'algoliasearch';
-import { sync } from 'fumadocs-core/search-algolia/server';
+import { sync } from '@maximai/fumadocs-core/search-algolia/server';
 import type { SearchIndex } from 'fumadocs-mdx';
 
 env.loadEnvConfig(process.cwd());

@@ -4,7 +4,7 @@ import type { SearchIndex } from 'algoliasearch/lite';
 import {
   type Options,
   useAlgoliaSearch,
-} from 'fumadocs-core/search-algolia/client';
+} from '@maximai/fumadocs-core/search-algolia/client';
 import { type ReactNode } from 'react';
 import { SearchDialog, type SharedProps } from './search';
 

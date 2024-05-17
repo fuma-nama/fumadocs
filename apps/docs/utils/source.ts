@@ -1,7 +1,10 @@
 import { createMDXSource, defaultSchemas } from 'fumadocs-mdx';
 import { z } from 'zod';
-import type { InferMetaType, InferPageType } from 'fumadocs-core/source';
-import { loader } from 'fumadocs-core/source';
+import type {
+  InferMetaType,
+  InferPageType,
+} from '@maximai/fumadocs-core/source';
+import { loader } from '@maximai/fumadocs-core/source';
 import { icons } from 'lucide-react';
 import { map } from '@/.map';
 import { create } from '@/components/ui/icon';

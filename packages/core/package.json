@@ -1,13 +1,13 @@
 {
-  "name": "fumadocs-core",
-  "version": "11.1.0",
+  "name": "@maximai/fumadocs-core",
+  "version": "11.1.0-beta1",
   "description": "The library for building a documentation website in Next.js",
   "keywords": [
     "NextJs",
     "Docs"
   ],
   "homepage": "https://fumadocs.vercel.app",
-  "repository": "github:fuma-nama/fumadocs",
+  "repository": "github:maximhq/fumadocs",
   "license": "MIT",
   "author": "Fuma Nama, Maxim Engineering",
   "type": "module",
