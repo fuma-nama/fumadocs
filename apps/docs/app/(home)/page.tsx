@@ -16,7 +16,7 @@ import {
   StarsIcon,
   TimerIcon,
 } from 'lucide-react';
-import { File, Files, Folder } from 'fumadocs-ui/components/files';
+import { File, Files, Folder } from '@maximai/fumadocs-ui/components/files';
 import Link from 'next/link';
 import type { HTMLAttributes, ReactNode } from 'react';
 import { cn } from '@/utils/cn';

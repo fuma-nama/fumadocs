@@ -1,4 +1,4 @@
-import { createPreset } from 'fumadocs-ui/tailwind-plugin';
+import { createPreset } from '@maximai/fumadocs-ui/tailwind-plugin';
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -6,7 +6,7 @@ export default {
     './components/**/*.{ts,tsx}',
     './app/**/*.{ts,tsx}',
     './content/**/*.mdx',
-    './node_modules/fumadocs-ui/dist/**/*.js',
+    './node_modules/@maximai/fumadocs-ui/dist/**/*.js',
   ],
   presets: [createPreset()],
 };

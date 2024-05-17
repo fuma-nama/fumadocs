@@ -1,5 +1,5 @@
 import './global.css';
-import { RootProvider } from 'fumadocs-ui/provider';
+import { RootProvider } from '@maximai/fumadocs-ui/provider';
 import { Inter } from 'next/font/google';
 import type { ReactNode } from 'react';
 

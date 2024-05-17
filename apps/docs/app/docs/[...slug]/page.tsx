@@ -1,7 +1,7 @@
 import { ExternalLinkIcon } from 'lucide-react';
 import type { Metadata } from 'next';
-import { Card, Cards } from 'fumadocs-ui/components/card';
-import { DocsPage, DocsBody } from 'fumadocs-ui/page';
+import { Card, Cards } from '@maximai/fumadocs-ui/components/card';
+import { DocsPage, DocsBody } from '@maximai/fumadocs-ui/page';
 import { notFound } from 'next/navigation';
 import { utils, type Page } from '@/utils/source';
 import { createMetadata } from '@/utils/metadata';

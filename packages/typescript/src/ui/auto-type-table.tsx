@@ -1,4 +1,4 @@
-import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { TypeTable } from '@maximai/fumadocs-ui/components/type-table';
 import { type Jsx, toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import * as runtime from 'react/jsx-runtime';
 import { renderMarkdownToHast } from '@/markdown';

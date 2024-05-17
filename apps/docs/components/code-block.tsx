@@ -1,4 +1,4 @@
-import * as Base from 'fumadocs-ui/components/codeblock';
+import * as Base from '@maximai/fumadocs-ui/components/codeblock';
 import type { HTMLAttributes } from 'react';
 import { useMemo } from 'react';
 import { getHighlighter } from 'shiki';

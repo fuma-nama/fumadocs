@@ -9,7 +9,7 @@
   "homepage": "https://fumadocs.vercel.app",
   "repository": "github:fuma-nama/fumadocs",
   "license": "MIT",
-  "author": "Fuma Nama",
+  "author": "Fuma Nama, Maxim Engineering",
   "type": "module",
   "exports": {
     "./sidebar": {

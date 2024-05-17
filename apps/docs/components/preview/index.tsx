@@ -1,15 +1,18 @@
 import { HomeIcon } from 'lucide-react';
-import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
-import { Callout } from 'fumadocs-ui/components/callout';
-import { File, Folder, Files } from 'fumadocs-ui/components/files';
-import { ImageZoom } from 'fumadocs-ui/components/image-zoom';
-import { InlineTOC } from 'fumadocs-ui/components/inline-toc';
-import { RollButton } from 'fumadocs-ui/components/roll-button';
-import { Step, Steps } from 'fumadocs-ui/components/steps';
-import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
-import { TypeTable } from 'fumadocs-ui/components/type-table';
-import { Card } from 'fumadocs-ui/components/card';
-import { Heading } from 'fumadocs-ui/components/heading';
+import {
+  Accordion,
+  Accordions,
+} from '@maximai/fumadocs-ui/components/accordion';
+import { Callout } from '@maximai/fumadocs-ui/components/callout';
+import { File, Folder, Files } from '@maximai/fumadocs-ui/components/files';
+import { ImageZoom } from '@maximai/fumadocs-ui/components/image-zoom';
+import { InlineTOC } from '@maximai/fumadocs-ui/components/inline-toc';
+import { RollButton } from '@maximai/fumadocs-ui/components/roll-button';
+import { Step, Steps } from '@maximai/fumadocs-ui/components/steps';
+import { Tab, Tabs } from '@maximai/fumadocs-ui/components/tabs';
+import { TypeTable } from '@maximai/fumadocs-ui/components/type-table';
+import { Card } from '@maximai/fumadocs-ui/components/card';
+import { Heading } from '@maximai/fumadocs-ui/components/heading';
 import type { ReactNode } from 'react';
 import BannerImage from '@/public/banner.png';
 import { Wrapper } from './wrapper';

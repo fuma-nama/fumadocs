@@ -9,10 +9,10 @@
     "start": "next start"
   },
   "dependencies": {
+    "@maximai/fumadocs-ui": "workspace:*",
     "contentlayer": "0.3.4",
     "fumadocs-contentlayer": "1.1.20",
     "fumadocs-core": "11.1.0",
-    "fumadocs-ui": "11.1.0",
     "next": "^14.2.3",
     "next-contentlayer": "^0.3.4",
     "react": "18.3.1",

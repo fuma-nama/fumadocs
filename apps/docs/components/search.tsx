@@ -2,8 +2,8 @@
 
 import algo from 'algoliasearch/lite';
 import { cva } from 'class-variance-authority';
-import type { SharedProps } from 'fumadocs-ui/components/dialog/search';
-import SearchDialog from 'fumadocs-ui/components/dialog/search-algolia';
+import type { SharedProps } from '@maximai/fumadocs-ui/components/dialog/search';
+import SearchDialog from '@maximai/fumadocs-ui/components/dialog/search-algolia';
 import { useEffect, useState } from 'react';
 import { modes } from '@/utils/modes';
 import { cn } from '@/utils/cn';

@@ -1,6 +1,6 @@
 'use client';
 
-import { RootProvider } from 'fumadocs-ui/provider';
+import { RootProvider } from '@maximai/fumadocs-ui/provider';
 import dynamic from 'next/dynamic';
 import type { ReactNode } from 'react';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
@@ -18,10 +18,10 @@ if (typeof uwuParam === 'string') {
 }
 
 const item = localStorage.getItem('uwu')
-    
+
 if (item === 'true') {
     document.documentElement.classList.add("uwu")
-}    
+}
 `;
 
 export function Provider({

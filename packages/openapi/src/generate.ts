@@ -105,7 +105,7 @@ function render(
   content: string,
   {
     render: fn,
-    componentsImportPath = 'fumadocs-ui/components/api',
+    componentsImportPath = '@maximai/fumadocs-ui/components/api',
   }: GenerateOptions,
 ): string {
   const result = fn?.(title, description, content) ?? {};
@@ -123,8 +123,8 @@ function render(
         .join('\n'),
     imports: result.imports ?? [
       `import { Root, API, APIInfo, APIExample, Property } from '${componentsImportPath}'`,
-      `import { Tabs, Tab } from 'fumadocs-ui/components/tabs'`,
-      `import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';`,
+      `import { Tabs, Tab } from '@maximai/fumadocs-ui/components/tabs'`,
+      `import { Accordion, Accordions } from '@maximai/fumadocs-ui/components/accordion';`,
     ],
     content: result.content ?? content,
   };

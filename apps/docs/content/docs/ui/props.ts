@@ -1,14 +1,17 @@
-import type { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
-import type { Callout } from 'fumadocs-ui/components/callout';
-import type { File, Folder } from 'fumadocs-ui/components/files';
-import type { InlineTOC } from 'fumadocs-ui/components/inline-toc';
-import type { RollButton } from 'fumadocs-ui/components/roll-button';
-import type { TypeTable } from 'fumadocs-ui/components/type-table';
-import type { Card } from 'fumadocs-ui/components/card';
-import type { DocsLayoutProps } from 'fumadocs-ui/layout';
+import type {
+  Accordion,
+  Accordions,
+} from '@maximai/fumadocs-ui/components/accordion';
+import type { Callout } from '@maximai/fumadocs-ui/components/callout';
+import type { File, Folder } from '@maximai/fumadocs-ui/components/files';
+import type { InlineTOC } from '@maximai/fumadocs-ui/components/inline-toc';
+import type { RollButton } from '@maximai/fumadocs-ui/components/roll-button';
+import type { TypeTable } from '@maximai/fumadocs-ui/components/type-table';
+import type { Card } from '@maximai/fumadocs-ui/components/card';
+import type { DocsLayoutProps } from '@maximai/fumadocs-ui/layout';
 import type { AnchorHTMLAttributes, ComponentPropsWithoutRef } from 'react';
-import type { DocsPageProps } from 'fumadocs-ui/page';
-import type { RootProviderProps } from 'fumadocs-ui/provider';
+import type { DocsPageProps } from '@maximai/fumadocs-ui/page';
+import type { RootProviderProps } from '@maximai/fumadocs-ui/provider';
 import type { AutoTypeTable } from 'fumadocs-typescript/ui';
 
 export type AccordionsProps = Omit<

@@ -1,16 +1,23 @@
 import type { MDXComponents } from 'mdx/types';
-import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
-import { Callout } from 'fumadocs-ui/components/callout';
-import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
-import { TypeTable } from 'fumadocs-ui/components/type-table';
-import defaultComponents from 'fumadocs-ui/mdx';
+import {
+  Accordion,
+  Accordions,
+} from '@maximai/fumadocs-ui/components/accordion';
+import { Callout } from '@maximai/fumadocs-ui/components/callout';
+import { Tab, Tabs } from '@maximai/fumadocs-ui/components/tabs';
+import { TypeTable } from '@maximai/fumadocs-ui/components/type-table';
+import defaultComponents from '@maximai/fumadocs-ui/mdx';
 import {
   CodeBlock,
   type CodeBlockProps,
   Pre,
-} from 'fumadocs-ui/components/codeblock';
+} from '@maximai/fumadocs-ui/components/codeblock';
 import type { ReactNode } from 'react';
-import { Popup, PopupContent, PopupTrigger } from 'fumadocs-ui/twoslash/popup';
+import {
+  Popup,
+  PopupContent,
+  PopupTrigger,
+} from '@maximai/fumadocs-ui/twoslash/popup';
 import { Wrapper } from '@/components/preview/wrapper';
 import { cn } from './utils/cn';
 

@@ -1,4 +1,4 @@
-import type { DocsLayoutProps } from 'fumadocs-ui/layout';
+import type { DocsLayoutProps } from '@maximai/fumadocs-ui/layout';
 import { BookIcon, LayoutTemplateIcon, PackageIcon } from 'lucide-react';
 import { utils } from '@/utils/source';
 import { NavChildren, SidebarBanner, Title } from '@/app/layout.client';
