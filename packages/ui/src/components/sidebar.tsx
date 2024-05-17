@@ -184,7 +184,7 @@ function ViewportContent({
   return (
     <ScrollArea className="flex-1">
       <ScrollViewport>
-        <div className="flex flex-col gap-8 pb-10 max-md:px-4">
+        <div className="flex flex-col gap-4 pb-10 max-md:px-4">
           {children}
           <NodeList items={root.children} />
         </div>

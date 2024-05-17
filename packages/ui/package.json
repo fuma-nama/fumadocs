@@ -1,11 +1,8 @@
 {
   "name": "@maximai/fumadocs-ui",
-  "version": "11.1.0-beta3",
+  "version": "11.1.0-beta4",
   "description": "The framework for building a documentation website in Next.js",
-  "keywords": [
-    "NextJs",
-    "Docs"
-  ],
+  "keywords": ["NextJs", "Docs"],
   "homepage": "https://fumadocs.vercel.app",
   "repository": "github:maximhq/fumadocs",
   "license": "MIT",
@@ -51,35 +48,17 @@
   },
   "typesVersions": {
     "*": {
-      "tailwind-plugin": [
-        "./dist/tailwind-plugin.d.ts"
-      ],
-      "components/*": [
-        "./dist/components/*.d.ts"
-      ],
-      "twoslash/*": [
-        "./dist/twoslash/*.d.ts"
-      ],
-      "i18n": [
-        "./dist/i18n.d.ts"
-      ],
-      "layout": [
-        "./dist/layout.d.ts"
-      ],
-      "page": [
-        "./dist/page.d.ts"
-      ],
-      "provider": [
-        "./dist/provider.d.ts"
-      ],
-      "mdx": [
-        "./dist/mdx.d.ts"
-      ]
+      "tailwind-plugin": ["./dist/tailwind-plugin.d.ts"],
+      "components/*": ["./dist/components/*.d.ts"],
+      "twoslash/*": ["./dist/twoslash/*.d.ts"],
+      "i18n": ["./dist/i18n.d.ts"],
+      "layout": ["./dist/layout.d.ts"],
+      "page": ["./dist/page.d.ts"],
+      "provider": ["./dist/provider.d.ts"],
+      "mdx": ["./dist/mdx.d.ts"]
     }
   },
-  "files": [
-    "dist/*"
-  ],
+  "files": ["dist/*"],
   "scripts": {
     "build": "pnpm build:layout && pnpm build:tailwind",
     "build:layout": "tsup",
