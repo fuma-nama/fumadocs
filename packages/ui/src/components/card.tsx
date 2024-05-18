@@ -31,7 +31,7 @@ export function Card({
     <Link
       {...props}
       className={cn(
-        'not-prose block rounded-lg border bg-card p-4 text-sm text-card-foreground shadow-md transition-colors hover:bg-muted/80',
+        'not-prose block rounded-lg border bg-card p-4 text-sm text-card-foreground shadow-md transition-colors hover:bg-accent/80',
         props.className,
       )}
     >
