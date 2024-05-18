@@ -15,6 +15,8 @@
     "twoslash",
     "openapi",
     "museum",
+    "---Reference---",
+    "../headless/page-conventions",
     "---Commands---",
     "...commands",
     "[Vercel](https://vercel.com)"
