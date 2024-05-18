@@ -36,7 +36,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
 We only provide english translation by default, you have to pass your translations to the provider.
 
-```tsx
+```mdx
 <I18nProvider
   translations={{
     cn: {
@@ -47,10 +47,10 @@ We only provide english translation by default, you have to pass your translatio
 ></I18nProvider>
 ```
 
-## Add Language Switch
+### Add Language Switch
 
-To allow users changing their language, you can add a `<LanguageSelect />`
-component to your UI, for example, to sidebar footer.
+To allow users changing their language, add a `<LanguageSelect />`
+component to the UI, for example, to sidebar footer.
 
 ```tsx title="[lang]/docs/layout.tsx"
 import { DocsLayout } from 'fumadocs-ui/layout';
