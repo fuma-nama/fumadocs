@@ -8,13 +8,19 @@ icon: Album
 
 **Fumadocs** can be broken down into two parts: Core and UI.
 
-Core handles most of the logic, from search functionality, MDX enhancement, to content source APIs for you to plug in your own **content source**.
+**Core** handles most of the logic, from search functionality, to MDX plugins.
 
-Fumadocs UI, as named, it is the official user interface for Fumadocs.
+**Fumadocs UI**, as named, it is the official user interface for Fumadocs.
 
 In this documentation, when we are calling Fumadocs UI, it refers to the entire framework.
 
-> Fumadocs Core can be used without Fumadocs UI, in other words, it's headless.
+### Terminology
+
+For a better understanding of the docs, there are some common terminologies you should know:
+
+**Content Source:** The source of your content, for example, Fumadocs MDX, MDXTS and ContentLayer are examples of content source.
+
+**Page Tree:** A tree of all the pages, separators and folders. It is essential for navigation elements. See [Page Tree](/docs/headless/page-tree).
 
 ## Automatic Installation
 
@@ -52,119 +58,11 @@ bun create fumadocs-app
 
 </InstallTabs>
 
-## Manual Installation
+It will initialize a new fumadocs app, now you can start hacking!
 
-Create a new Next.js application with `create-next-app`, and install required packages.
+### Enjoy!
 
-```package-install
-fumadocs-ui fumadocs-core
-```
-
-### Configuration
-
-You can choose a **content source** you prefer, such as ContentLayer and Fumadocs MDX.
-
-There is a list of supported sources:
-
-- [Setup Fumadocs MDX](/docs/mdx)
-- [Setup Contentlayer](/docs/headless/contentlayer)
-
-You have to configure the library correctly following their setup guide before continuing.
-
-### Styles
-
-You can import the pre-built stylesheet in the root layout.
-
-```ts
-import 'fumadocs-ui/style.css';
-```
-
-For Tailwind CSS projects, use [the official plugin](/docs/ui/theme) instead.
-
-> It doesn't come with a default font, you may choose one from `next/font`.
-
-### Root Layout
-
-Wrap the entire application inside [Root Provider](/docs/ui/blocks/root-provider).
-
-```tsx
-import { RootProvider } from 'fumadocs-ui/provider';
-import type { ReactNode } from 'react';
-
-export default function RootLayout({ children }: { children: ReactNode }) {
-  return (
-    <html lang="en">
-      <body>
-        <RootProvider>{children}</RootProvider>
-      </body>
-    </html>
-  );
-}
-```
-
-### Layout
-
-Create a new catch-all route `/app/docs/[[..slugs]]` for our docs, and give it a proper layout.
-
-```tsx title="app/docs/layout.tsx"
-import { DocsLayout } from 'fumadocs-ui/layout';
-import { pageTree } from '@/source';
-import type { ReactNode } from 'react';
-
-export default function RootDocsLayout({ children }: { children: ReactNode }) {
-  return (
-    <DocsLayout tree={pageTree} nav={{ title: 'My App' }}>
-      {children}
-    </DocsLayout>
-  );
-}
-```
-
-> `pageTree` refers to [Page Tree](/docs/headless/page-tree), it is needed for navigation components, which should be provided by your content source.
-
-### Page
-
-For the `page.tsx`, it may vary depending on your source. You should configure static rendering with `generateStaticParams` and metadata with `generateMetadata`.
-
-Make sure to wrap your content in the [Page](/docs/ui/blocks/page) component, this will also configure typography styles.
-
-<Accordions>
-<Accordion title="Example with Fumadocs MDX">
-
-```json doc-gen:file
-{
-  "file": "../../examples/next-mdx/app/docs/[[...slug]]/page.tsx",
-  "codeblock": {
-    "meta": "title=\"app/docs/[[...slug]]/page.tsx\""
-  }
-}
-```
-
-</Accordion>
-</Accordions>
-
-### Search
-
-Use the default document search based on Flexsearch. [Learn to configure Document Search](/docs/headless/search/flexsearch) for your content source.
-
-<Accordions>
-<Accordion title="Example with Fumadocs MDX">
-
-```json doc-gen:file
-{
-  "file": "../../examples/next-mdx/app/api/search/route.ts",
-  "codeblock": {
-    "meta": "title=\"app/api/search/route.ts\""
-  }
-}
-```
-
-</Accordion>
-</Accordions>
-
-## Enjoy!
-
-Now, Create your first mdx file in the docs folder.
+Now, create your first mdx file in the docs folder.
 
 ```mdx title="content/docs/index.mdx"
 ---
@@ -176,7 +74,7 @@ title: Hello World
 
 Run the app in development mode and see http://localhost:3000/docs.
 
-```bash
+```package-install
 npm run dev
 ```
 
@@ -256,14 +154,8 @@ If you find anything confusing, please give your feedback on [Github Discussion]
     description="Add themes to Fumadocs UI"
   />
   <Card
-    href="/docs/ui/components/codeblock"
-    title="Code Block"
-    description="Learn how to use code blocks in MDX"
+    href="/docs/ui/manual-installation"
+    title="Manual Installation"
+    description="Create fumadocs app from scratch"
   />
 </Cards>
-
-## Terminology
-
-For a better understanding of the docs, there are some common terminologies you should know:
-
-**Content Source:** The source of your content, for example, Fumadocs MDX, MDXTS and ContentLayer are examples of content source.
