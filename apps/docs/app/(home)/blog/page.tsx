@@ -2,7 +2,11 @@ import Link from 'next/link';
 import { blog } from '@/utils/source';
 
 export default function Page(): React.ReactElement {
-  const posts = blog.getPages();
+  const posts = [...blog.getPages()].sort(
+    (a, b) =>
+      new Date(b.data.date ?? b.file.name).getTime() -
+      new Date(a.data.date ?? a.file.name).getTime(),
+  );
 
   const svg = `<svg viewBox='0 0 500 500' xmlns='http://www.w3.org/2000/svg'>
   <filter id='noiseFilter'>
@@ -41,14 +45,14 @@ export default function Page(): React.ReactElement {
           <Link
             key={post.url}
             href={post.url}
-            className="block bg-card p-4 hover:bg-accent"
+            className="flex flex-col bg-card p-4 hover:bg-accent"
           >
             <p className="font-medium">{post.data.title}</p>
             <p className="text-sm text-muted-foreground">
               {post.data.description}
             </p>
 
-            <p className="mt-4 text-xs text-muted-foreground">
+            <p className="mt-auto pt-4 text-xs text-muted-foreground">
               {new Date(post.data.date ?? post.file.name).toDateString()}
             </p>
           </Link>
