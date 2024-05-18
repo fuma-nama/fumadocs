@@ -20,10 +20,12 @@ const withMDX = createMDX({
 
 ### Access the Property
 
-After doing this, a `lastModified` number will be exported for each document, you can convert it to a JavaScript Date object with `new Date(lastModified){:js}`.
+After doing this, a `lastModified` number will be exported for each document, you can convert it to a JavaScript Date object.
 
 ```js
-const page = getPage(...)
+import { getPage } from '@/app/source';
 
-console.log(page.data.exports.lastModified)
+const page = getPage('...');
+
+console.log(new Date(page.data.exports.lastModified));
 ```

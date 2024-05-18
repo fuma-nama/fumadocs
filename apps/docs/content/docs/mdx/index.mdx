@@ -20,7 +20,7 @@ fumadocs-mdx @types/mdx
 
 ### Configuration
 
-Add this to your `next.config.mjs` file:
+Add the plugin to your `next.config.mjs` file.
 
 ```js
 import createMDX from 'fumadocs-mdx/config';
@@ -34,6 +34,9 @@ const config = {
 
 export default withMDX(config);
 ```
+
+It generates a `.map.ts` file once you start the dev server or start building the app.
+The map file contains all parsed files, you should add it to `.gitignore`.
 
 <Callout title="ESM Only" type='warn' className="mt-4">
 
@@ -60,12 +63,9 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
 
 ### Resolve Files
 
-It generates a `.map.ts` file once you start the dev server or start building the app.
-The map file contains all parsed files, you should add it to `.gitignore`.
+To integrate with Fumadocs, create:
 
-To integrate with Fumadocs, create a `source.ts`.
-
-```ts title="source.ts"
+```ts title="app/source.ts"
 import { map } from '@/.map';
 import { createMDXSource } from 'fumadocs-mdx';
 import { loader } from 'fumadocs-core/source';
@@ -121,8 +121,7 @@ const withMDX = createMDX({
 Fumadocs MDX is a webpack plugin over Next.js to support reading/importing a MDX file by its name.
 Because Next.js could only optimize static imports, it first generates a map file that imports **all supported files** under the root directory.
 
-The imported files form an array called `map` in your `.map.ts` file.
-This is how the magic works.
+The imported files form an array called `map` in your `.map.ts` file, so that your Next.js app can access them.
 
 ### Export Properties from `vfile.data`
 
