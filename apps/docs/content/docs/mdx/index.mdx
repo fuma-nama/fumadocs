@@ -5,8 +5,7 @@ description: Learn how to use Fumadocs MDX in your documentation
 
 ## Introduction
 
-`fumadocs-mdx` is a Next.js plugin that enhances the experience of the official
-`next/mdx` package. It parses frontmatter and is bundled with several MDX
+`fumadocs-mdx` is the official content source of Fumadocs. It parses frontmatter and is bundled with other MDX
 plugins for building a good documentation site.
 
 > This package must be used with Fumadocs
@@ -36,9 +35,9 @@ const config = {
 export default withMDX(config);
 ```
 
-<Callout title="Be Careful" type='warn' className="mt-4">
+<Callout title="ESM Only" type='warn' className="mt-4">
 
-The Next.js config must be a `.mjs` file since it requires ESM-only modules.
+The Next.js config must be a `.mjs` file since Fumadocs is ESM-only.
 
 </Callout>
 
@@ -61,10 +60,10 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
 
 ### Resolve Files
 
-It automatically generates a `.map.ts` file once you start the dev server or start building the app.
+It generates a `.map.ts` file once you start the dev server or start building the app.
+The map file contains all parsed files, you should add it to `.gitignore`.
 
-The raw data of pages is stored in the `map` property from your `.map.ts` file. To Integrate with [Source API](/docs/headless/source-api), create a `source.ts` file, and define the source with `createMDXSource` which returns a
-[Page Tree](/docs/headless/page-tree) and additional utilities.
+To integrate with Fumadocs, create a `source.ts`.
 
 ```ts title="source.ts"
 import { map } from '@/.map';
@@ -78,12 +77,9 @@ export const { getPage, getPages, pageTree } = loader({
 });
 ```
 
-> Read [Pages Conventions](/docs/headless/page-conventions)
-> to learn how to structure your pages.
+> For more customisation options, check [Source API](/docs/headless/source-api).
 
 ### Start Server
-
-Start the dev server
 
 ```bash
 next dev
@@ -91,39 +87,26 @@ next dev
 
 A `.map.ts` file should be created. You can log and see if it is loaded correctly.
 
-## Built-in Features
+See [Pages Conventions](/docs/headless/page-conventions)
+to learn how to organize your pages.
 
-Frontmatter (`frontmatter`), Table of Contents (`toc`) and Structurized Data (`structuredData`) are parsed
-and exported from MDX files by default, you can use these for implementing a
-search or TOC section in your docs.
+### Built-in Properties
 
-## Advanced Usages
-
-### Multiple Types
-
-You can have multiple document types, such as blog posts, or documents. By
-passing the `rootDir` option, the resolved files will be restricted within a
-specified folder.
-
-```js
-export const docs = loader({
-  baseUrl: '/docs',
-  rootDir: 'docs',
-  source: createMDXSource(map),
-});
-
-export const blogs = loader({
-  baseUrl: '/blog',
-  rootDir: 'blog',
-  source: createMDXSource(map),
-});
-```
+| Property         | Description                                     |
+| ---------------- | ----------------------------------------------- |
+| `frontmatter`    | Frontmatter                                     |
+| `toc`            | Table of Contents                               |
+| `structuredData` | Structured Data, useful for implementing search |
 
 ### MDX Plugins
 
 You can customise the options passed to the MDX processor.
 
 ```js
+import createMDX from 'fumadocs-mdx/config';
+import rehypeKatex from 'rehype-katex';
+import remarkMath from 'remark-math';
+
 const withMDX = createMDX({
   mdxOptions: {
     remarkPlugins: [remarkMath],
@@ -132,6 +115,14 @@ const withMDX = createMDX({
   },
 });
 ```
+
+## Deep Dive
+
+Fumadocs MDX is a webpack plugin over Next.js to support reading/importing a MDX file by its name.
+Because Next.js could only optimize static imports, it first generates a map file that imports **all supported files** under the root directory.
+
+The imported files form an array called `map` in your `.map.ts` file.
+This is how the magic works.
 
 ### Export Properties from `vfile.data`
 

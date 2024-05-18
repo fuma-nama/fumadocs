@@ -5,15 +5,17 @@ description: Different sources for Contentlayer
 
 ## Local Files
 
-You can store documents locally in the `content` folder. Fumadocs provides
-the default configuration, with an opinionated file structure.
+You can store documents locally in the `content` folder.
 
 For advanced usages, you may directly interact with the output configuration.
 
-Read [Files](https://contentlayer.dev/docs/sources/files) on their documentation
-to learn more about the source.
+Read the [Files Section](https://contentlayer.dev/docs/sources/files) on their documentation
+to learn more about local source.
 
 ```ts
+import { createConfig } from "fumadocs-contentlayer/configuration";
+import { makeSource } from 'contentlayer/source-files';
+
 const config = createConfig({ ... })
 
 export default makeSource(config)
@@ -35,13 +37,3 @@ export default makeSource({
     ...config
 })
 ```
-
-## Learn More
-
-<Cards>
-  <Card
-    href="https://contentlayer.dev"
-    title="Contentlayer"
-    description="The official website of Contentlayer"
-  />
-</Cards>
