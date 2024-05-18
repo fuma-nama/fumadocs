@@ -15,25 +15,18 @@ You can import the pre-built stylesheet.
 import 'fumadocs-ui/style.css';
 ```
 
-> Notice that the stylesheet performs preflight (or normalization)
+> Notice that the stylesheet performs preflight (aka normalization)
 
 For Tailwind CSS projects, use the official Tailwind CSS plugin.
 
-```js title="tailwind.config.js"
-import { createPreset } from 'fumadocs-ui/tailwind-plugin';
-
-/** @type {import('tailwindcss').Config} */
-export default {
-  darkMode: 'class',
-  presets: [createPreset()],
-  content: [
-    './node_modules/fumadocs-ui/dist/**/*.js',
-    ...
-  ],
-};
+```json doc-gen:file
+{
+  "file": "./content/docs/example/tailwind.config.js",
+  "codeblock": {
+    "meta": "title=\"tailwind.config.js\""
+  }
+}
 ```
-
-> Ensure all files inside `fumadocs-ui` are included in the `content` property.
 
 ### Global Styles
 

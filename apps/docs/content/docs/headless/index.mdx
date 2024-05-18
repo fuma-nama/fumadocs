@@ -14,7 +14,11 @@ App Router. It offers server-side functions and headless components.
 - Additional utilities
 
 <Callout title="Tip">
-  For beginners and normal usages, use [Fumadocs UI](/docs/ui).
+
+    Fumadocs Core can be used without Fumadocs UI, in other words, it's headless.
+
+    For beginners and normal usages, use [Fumadocs UI](/docs/ui).
+
 </Callout>
 
 ```package-install
@@ -34,25 +38,6 @@ use Contentlayer with `fumadocs-core`.
 ### Build Page Tree
 
 A page tree refers to the structured data of all pages. It is essential for implementing a sidebar, or other navigation elements.
-
-```js
-export const tree = [
-  {
-    type: 'page',
-    name: 'Quick Start',
-    url: '/docs',
-  },
-  {
-    type: 'separator',
-    name: 'Guides',
-  },
-  {
-    type: 'page',
-    name: 'Example',
-    url: '/docs/example',
-  },
-];
-```
 
 You can generate the tree using our built-in [Source API](/docs/headless/source-api), the adapter for your content source, or end up with
 writing your own.
