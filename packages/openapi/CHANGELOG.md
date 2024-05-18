@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 2.0.1
+
+### Patch Changes
+
+- 8ef2b68: Bump deps
+
 ## 2.0.0
 
 ### Major Changes
@@ -11,11 +17,11 @@
   migrate: Create a script named `scripts/generate-docs.mjs`:
 
   ```js
-  import { generateFiles } from 'fumadocs-openapi';
+  import { generateFiles } from "fumadocs-openapi";
 
   void generateFiles({
-    input: ['./petstore.yaml'],
-    output: './content/docs',
+    input: ["./petstore.yaml"],
+    output: "./content/docs",
   });
   ```
 
@@ -62,18 +68,18 @@
    * @type {import("@fuma-docs/openapi").Config}
    */
   module.exports = {
-    input: ['./petstore.yaml'],
-    output: './content/docs',
-    per: 'tag',
+    input: ["./petstore.yaml"],
+    output: "./content/docs",
+    per: "tag",
     render: (title, description) => {
       return {
         frontmatter: [
-          '---',
+          "---",
           `title: ${title}`,
           `description: ${description}`,
-          'toc: false',
-          '---',
-        ].join('\n'),
+          "toc: false",
+          "---",
+        ].join("\n"),
       };
     },
   };

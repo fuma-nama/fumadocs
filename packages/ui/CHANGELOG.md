@@ -1,5 +1,17 @@
 # next-docs-ui
 
+## 11.1.1
+
+### Patch Changes
+
+- 771314c: Use `sessionStorage` for non-persistent tabs
+- 8ef2b68: Bump deps
+- fa78241: Fix accordion text alignment
+- Updated dependencies [8ef2b68]
+- Updated dependencies [26f464d]
+- Updated dependencies [26f464d]
+  - fumadocs-core@11.1.1
+
 ## 11.1.0
 
 ### Minor Changes
