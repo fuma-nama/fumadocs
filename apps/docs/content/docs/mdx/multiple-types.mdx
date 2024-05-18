@@ -7,7 +7,11 @@ You can have multiple document types, such as blog posts, or documents.
 
 Use the `rootDir` option to restrict the folder it scans.
 
-```js
+```ts
+import { map } from '@/.map';
+import { loader } from 'fumadocs-core/source';
+import { createMDXSource } from 'fumadocs-mdx';
+
 export const docs = loader({
   baseUrl: '/docs',
   rootDir: 'docs',

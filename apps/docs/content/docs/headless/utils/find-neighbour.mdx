@@ -6,22 +6,15 @@ description: Find the neighbours of a page from the page tree
 Find the neighbours of a page from the page tree, it returns the next and
 previous page of a given page. It is useful for implementing a footer.
 
-For example:
-
-|              |                                         |
-| ------------ | --------------------------------------- |
-| Quick Start  | `next: Installation`                    |
-| Installation | `previous: Quick Start, next: Concepts` |
-| Concepts     | `previous: Installation`                |
-
 ## Usage
 
 It requires a page tree and the url of page.
 
 ```ts
 import { findNeighbour } from 'fumadocs-core/server';
+import { pageTree } from '@/app/source';
 
-const neighbours = findNeighbour(tree, page.url);
+const neighbours = findNeighbour(pageTree, '/url/to/page');
 ```
 
 | Parameter | Type       | Description     |
