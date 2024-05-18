@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react';
 import type * as PageTree from '../server/page-tree';
 import type { File, Folder, Storage } from './file-system';
-import { joinPaths } from './path';
+import { resolvePath } from './path';
 import { type FileData } from './types';
 
 interface PageTreeBuilderContext {
@@ -20,7 +20,7 @@ export interface PageTreeBuilder {
   build: () => PageTree.Root;
 
   /**
-   * Build page tree and fallback to the default language if the page doesn't exist
+   * Build page tree and fallback to the default language if the localized page doesn't exist
    */
   buildI18n: (
     options?: Partial<BuildPageTreeOptionsWithI18n>,
@@ -32,12 +32,14 @@ export interface CreatePageTreeBuilderOptions {
   resolveIcon?: (icon: string) => ReactElement | undefined;
 }
 
-const external = /\[(?<text>.+)\]\((?<url>.+)\)/;
-const separator = /---(?<name>.*?)---/;
+const link = /^\[(?<text>.+)]\((?<url>.+)\)$/;
+const separator = /^---(?<name>.*?)---$/;
 const rest = '...';
-const extractor = /\.\.\.(?<name>.+)/;
+const extractor = /^\.\.\.(?<name>.+)$/;
 
 /**
+ * @param nodes - All nodes to be built
+ * @param ctx - Context
  * @param skipIndex - Skip index
  * @returns Nodes with specified locale in context (sorted)
  */
@@ -88,24 +90,27 @@ function resolveFolderItem(
     ];
   }
 
-  const externalResult = external.exec(item);
-  if (externalResult?.groups) {
+  const linkResult = link.exec(item);
+  if (linkResult?.groups) {
+    const { url, text } = linkResult.groups;
+    const isRelative =
+      url.startsWith('/') || url.startsWith('#') || url.startsWith('.');
     return [
       {
         type: 'page',
-        name: externalResult.groups.text,
-        url: externalResult.groups.url,
-        external: true,
+        name: text,
+        url,
+        external: !isRelative,
       },
     ];
   }
 
   const extractResult = extractor.exec(item);
 
-  const path = joinPaths([
+  const path = resolvePath(
     folder.file.path,
     extractResult?.groups?.name ?? item,
-  ]);
+  );
   const itemNode = ctx.storage.readDir(path) ?? ctx.storage.read(path, 'page');
 
   if (!itemNode) return [];
@@ -126,11 +131,11 @@ function buildFolderNode(
   defaultIsRoot: boolean,
   ctx: PageTreeBuilderContext,
 ): PageTree.Folder {
-  const metaPath = joinPaths([folder.file.path, 'meta']);
+  const metaPath = resolvePath(folder.file.path, 'meta');
   let meta = ctx.storage.read(metaPath, 'meta');
   meta = findLocalizedFile(metaPath, 'meta', ctx) ?? meta;
   const indexFile = ctx.storage.read(
-    joinPaths([folder.file.flattenedPath, 'index']),
+    resolvePath(folder.file.flattenedPath, 'index'),
     'page',
   );
 
