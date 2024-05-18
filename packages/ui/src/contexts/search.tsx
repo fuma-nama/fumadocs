@@ -16,6 +16,11 @@ export interface SearchProviderProps {
   links?: SearchLink[];
 
   /**
+   * The shortcuts to trigger search dialog
+   */
+  hotKey?: string[];
+
+  /**
    * Replace default search dialog, allowing you to use other solutions such as Algolia Search
    *
    * It receives the `open` and `onOpenChange` prop, can be lazy loaded with `next/dynamic`
