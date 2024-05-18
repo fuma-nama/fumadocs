@@ -1,11 +1,11 @@
 ---
 title: Page Conventions
-description: Build page tree with file-system based routing
+description: Organize documents with file-system based routing
 ---
 
 ## Overview
 
-This is a shared convention for organizing your pages, followed by all built-in file-system based sources including ContentLayer and Fumadocs MDX.
+This is a shared convention for organizing your pages, followed by all file-system based content sources including Fumadocs MDX.
 
 ## File
 
@@ -17,7 +17,6 @@ You may extend your content source to add additional properties.
 
 - `title`
 - `description`
-
 
 ```mdx
 ---
@@ -171,7 +170,7 @@ This works for meta files too, you can add `.{locale}` to the file name like `me
 Assume your default language is `en`.
 
 | Name              |                                           |
-|-------------------|-------------------------------------------|
+| ----------------- | ----------------------------------------- |
 | file.mdx          | Correct                                   |
 | file.cn.mdx       | Correct                                   |
 | file.en.mdx       | Default locale doesn't need a locale code |

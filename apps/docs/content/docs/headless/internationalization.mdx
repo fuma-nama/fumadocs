@@ -3,8 +3,7 @@ title: Internationalization
 description: Support multiple languages in your documentation
 ---
 
-Fumadocs has built-in support for internationalized routing.
-You can define a list of supported languages and pass it to i18n utilities. Read
+Define a list of supported languages and pass it to i18n utilities. Read
 the
 [Next.js Docs](https://nextjs.org/docs/app/building-your-application/routing/internationalization)
 to learn more about implementing I18n in Next.js.
@@ -13,54 +12,64 @@ to learn more about implementing I18n in Next.js.
 
 1. Put all supported languages in a file.
 
-```ts title="i18n.ts"
-export const defaultLanguage = 'en';
-export const languages = ['en', 'cn'];
-```
+   ```ts title="i18n.ts"
+   export const defaultLanguage = 'en';
+   export const languages = ['en', 'cn'];
+   ```
 
 2. Change your current source configurations.
 
-```ts title="source.ts"
-import { languages } from '@/i18n';
-import { map } from '@/.map';
-import { loader } from 'fumadocs-core/source';
+   ```ts title="source.ts"
+   import { languages } from '@/i18n';
+   import { map } from '@/.map';
+   import { loader } from 'fumadocs-core/source';
 
-export const { getPage, getPages, pageTree } = loader({
-  languages,
-  ...
-});
-```
+   export const { getPage, getPages, pageTree } = loader({
+     languages,
+     ...
+   });
+   ```
 
 3. Create the middleware that redirects users when missing locale.
 
-```ts title="middleware.ts"
-import { defaultLanguage, languages } from '@/i18n';
-import { createI18nMiddleware } from 'fumadocs-core/middleware';
-import { NextRequest } from 'next/server';
+   ```ts title="middleware.ts"
+   import { defaultLanguage, languages } from '@/i18n';
+   import { createI18nMiddleware } from 'fumadocs-core/middleware';
+   import { NextRequest } from 'next/server';
 
-export default createI18nMiddleware({
-  languages,
-  defaultLanguage,
-});
+   export default createI18nMiddleware({
+     languages,
+     defaultLanguage,
+   });
 
-export const config = {
-  // Matcher ignoring `/_next/` and `/api/`
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
-};
-```
+   export const config = {
+     // Matcher ignoring `/_next/` and `/api/`
+     matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+   };
+   ```
 
-4. Create a dynamic route, ensure all special files are nested under
-   `/app/[lang]`.
+4. Create a dynamic route `/app/[lang]`, and move all special files to
+   the folder.
 
-```tsx title="app/[lang]/layout.tsx"
-export default function Layout({ params }: { params: { lang: string } }) {
-  return (
-    <html lang={params.lang}>
-      <body>{children}</body>
-    </html>
-  );
-}
-```
+   ```tsx title="app/[lang]/layout.tsx"
+   export default function Layout({
+     params,
+     children,
+   }: {
+     params: { lang: string };
+     children: React.ReactNode;
+   }) {
+     return (
+       <html lang={params.lang}>
+         <body>{children}</body>
+       </html>
+     );
+   }
+   ```
+
+5. Write documents, see [Page Conventions](/docs/headless/page-conventions#internationalization) to learn how to organize your documents.
+
+6. Configure i18n on your search solution. For Flexsearch, see [Setup I18n](/docs/headless/search/flexsearch#internationalization).
 
 ### Get Pages
 

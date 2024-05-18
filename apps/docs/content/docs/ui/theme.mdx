@@ -17,7 +17,7 @@ import 'fumadocs-ui/style.css';
 
 > Notice that the stylesheet performs preflight (or normalization)
 
-For Tailwind CSS projects, please use the built-in Tailwind CSS plugin instead.
+For Tailwind CSS projects, use the official Tailwind CSS plugin.
 
 ```js title="tailwind.config.js"
 import { createPreset } from 'fumadocs-ui/tailwind-plugin';
@@ -37,7 +37,7 @@ export default {
 
 ### Global Styles
 
-By using the built-in Tailwind CSS plugin, or the pre-built stylesheet, your default border, text and background
+By using the Tailwind CSS plugin, or the pre-built stylesheet, your default border, text and background
 colors will be changed.
 
 ### RTL Layout
@@ -48,15 +48,13 @@ Fumadocs UI has support for RTL (Right-to-left) layout. To enable, you can pass 
 <body dir="rtl"></body>
 ```
 
-Also pass the same prop to Radix UI `<DirectionProvider />`.
+Also pass the same prop to root provider to configure Radix UI RTL layout.
 
 ```tsx
 import { RootProvider } from '@fumadocs-ui/provider';
 
 <RootProvider dir="rtl"></RootProvider>;
 ```
-
-> Root Provider has integrated with it by default
 
 ## Themes
 
@@ -83,15 +81,15 @@ The design system was inspired by [Shadcn UI](https://ui.shadcn.com), you can ea
 
 > Only a subset of colors are provided by Fumadocs UI.
 >
-> It may not compatible with Shadcn UI.
+> It may not be compatible with Shadcn UI.
 
-## DocsUI Plugin
+## Tailwind CSS Plugin [#docsui-plugin]
 
-It comes with the DocsUI Tailwind CSS plugin by default, it introduces new colors and extra utilities including `steps`.
+The official Tailwind CSS plugin introduces new colors and extra utilities including `steps`.
 
 ### Presets
 
-This plugin also provides several theme presets out-of-the-box, you can pick one you prefer rather than the default one.
+It comes with several theme presets out-of-the-box, you can pick one you prefer rather than the default one.
 
 ```js
 import { createPreset } from 'fumadocs-ui/tailwind-plugin';
@@ -110,7 +108,7 @@ export default {
 
 We use the [Tailwind CSS Typography](https://tailwindcss.com/docs/typography-plugin) plugin internally, you can customize it with CSS.
 
-The DocsUI plugin overrides the default configuration for the Typography plugin. You can use the `prose` utility directly.
+The Tailwind CSS plugin overrides the default configuration for the Typography plugin. You can use the `prose` utility directly.
 
 ```tsx
 <div className="prose">...</div>

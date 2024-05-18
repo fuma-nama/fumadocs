@@ -6,16 +6,16 @@ icon: Globe
 
 Please refer to this
 [guide](/docs/headless/internationalization) to setup basic
-configurations and learn how to structure the documents.
+configurations and learn how to organize the documents.
 
 Ensure you have your page tree, layout and middleware ready before getting
 started.
 
-## Create Provider
+## Setup
 
-A `I18nProvider` is needed for internationalization features.
+A `I18nProvider` is needed for localization.
 
-Put your pages and layouts under `/app/[lang]`, where the 'lang' parameter is at the second segment.
+Put your pages and layouts under `/app/[lang]`.
 Then, wrap the root provider inside of your i18n provider.
 
 ```tsx
@@ -50,12 +50,13 @@ We only provide english translation by default, you have to pass your translatio
 ## Add Language Switch
 
 To allow users changing their language, you can add a `<LanguageSelect />`
-component to your UI, for example, as sidebar footer.
+component to your UI, for example, to sidebar footer.
 
 ```tsx title="[lang]/docs/layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layout';
 import { LanguageSelect } from 'fumadocs-ui/i18n';
 
-export function DocsLayout({ children }: { children: ReactNode }) {
-  return <LanguageSelect />;
+export default function Layout({ children }: { children: ReactNode }) {
+  return <DocsLayout sidebar={{ footer: <LanguageSelect /> }} />;
 }
 ```

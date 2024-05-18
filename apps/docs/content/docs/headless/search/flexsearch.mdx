@@ -6,7 +6,7 @@ description: Built-in document search of Fumadocs
 Fumadocs supports searching document based on
 [Flexsearch](https://github.com/nextapps-de/flexsearch).
 
-As the bulit-in search of Fumadocs, It is the default but also recommended
+As the built-in search of Fumadocs, It is the default but also recommended
 option since it's easier to setup and totally free.
 
 > If you're using a CMS, you should use the API provided by the CMS instead.
@@ -15,9 +15,14 @@ option since it's easier to setup and totally free.
 
 Index with the raw content of document.
 
-1. Create the API Route.
+<div className='steps'>
+
+<div className='step'>
+
+Create the API Route.
 
 ```tsx title="app/api/search/route.ts"
+import { allDocs } from 'contentlayer/generated';
 import { createSearchAPI } from 'fumadocs-core/search/server';
 
 export const { GET } = createSearchAPI('simple', {
@@ -29,7 +34,14 @@ export const { GET } = createSearchAPI('simple', {
 });
 ```
 
-2. Create a Search Dialog.
+</div>
+<div className='step'>
+
+Create a Search Dialog.
+
+<Callout type="info" title="For Fumadocs UI">
+  You can use the default Search Dialog from [Fumadocs UI](/docs/ui/search).
+</Callout>
 
 ```tsx
 import { useDocsSearch } from 'fumadocs-core/search/client';
@@ -40,102 +52,33 @@ export function Dialog() {
 }
 ```
 
-<Accordions className='mt-4'>
-<Accordion title="Example">
+</div>
 
-You can use the default Search Dialog from [Fumadocs UI](/docs/ui/search).
-
-</Accordion>
-</Accordions>
-
-### createSearchAPI
-
-Create a GET route handler, that supports `simple` and `advanced` search.
-
-### useDocsSearch
-
-A hook that combined debounce value and `useSWR`.
-
-#### Return Type
-
-| Prop        | Type                  | Description                    |
-| ----------- | --------------------- | ------------------------------ |
-| `query`     | `SWRResponse`         | SWR Query                      |
-| `search`    | `string`              | Searching text (not debounced) |
-| `setSearch` | `(v: string) => void` | Set searching text             |
-
-#### Response Data
-
-| Type             |                                                 |
-| ---------------- | ----------------------------------------------- |
-| `empty`          | If the searching text is empty or blank         |
-| `SortedResult[]` | Array of matching pages, headings and contents. |
-
-## Internationalization
-
-The default `createSearchAPI` doesn't provide functionality for i18n. Instead,
-you should use `createI18nSearchAPI`.
-
-1. Update the route handler.
-
-```ts title="api/search/route.ts"
-import { languages } from '@/i18n';
-import { getPages } from '@/source';
-import { createI18nSearchAPI } from 'fumadocs-core/search/server';
-
-export const { GET } = createI18nSearchAPI('advanced', {
-  indexes: languages.map((lang) => {
-    const pages = getPages(lang)!.map((page) => ({
-      ...
-    }));
-
-    return [lang, pages];
-  }),
-});
-```
-
-2. Add `locale` to search dialog, this will only allow pages with specified
-   locale to be searched by the user.
-
-```tsx
-function Dialog() {
-  const { search, setSearch, query } = useDocsSearch(locale);
-
-  //...
-}
-```
-
-<Cards className="mt-4">
-  <Card
-    title="Page Conventions"
-    description="Learn to build Internationalized Page Structure"
-    href="/docs/headless/page-conventions"
-  />
-</Cards>
+</div>
 
 ## Advanced Search
 
 Returns a more detailed result with matching headings and contents.
 
-It accepts structured data procesed from a markdown/MDX document, and index it with
+It accepts structured data processed from a markdown/MDX document, and index it with
 Flexsearch. You can extract the structured data using the [Structure](/docs/headless/mdx/structure) remark plugin.
 
-Notice that it cannot extract content from rehype-specific content (remark plugins are supported)
+It cannot extract content from rehype plugin generated content (remark plugins are supported).
 
 ### Usage
 
 Same as simple search, but requires the `structuredData` property.
 
 ```ts
-import { allDocs } from 'contentlayer/generated';
+import { getPages } from '@/app/source';
 import { createSearchAPI } from 'fumadocs-core/search/server';
 
-export const { GET } = await createSearchAPI('advanced', {
-  indexes: allDocs.map((docs) => ({
-    id: docs._id,
-    title: docs.title,
-    url: '/docs/' + docs.slug,
-    structuredData: docs.structuredData,
+export const { GET } = createSearchAPI('advanced', {
+  indexes: getPages().map((page) => ({
+    title: page.data.title,
+    structuredData: page.data.exports.structuredData,
+    id: page.url,
+    url: page.url,
   })),
 });
 ```
@@ -173,3 +116,81 @@ with Fumadocs UI later.
   "name": "SortedResult"
 }
 ```
+
+## Internationalization
+
+Use `createI18nSearchAPI` for i18n functionality.
+
+<div className='steps'>
+
+<div className='step'>
+
+Update the route handler.
+
+```ts title="api/search/route.ts"
+import { languages } from '@/i18n';
+import { getPages } from '@/source';
+import { createI18nSearchAPI } from 'fumadocs-core/search/server';
+
+export const { GET } = createI18nSearchAPI('advanced', {
+  indexes: languages.map((lang) => {
+    const pages = getPages(lang)!.map((page) => ({
+      ...
+    }));
+
+    return [lang, pages];
+  }),
+});
+```
+
+</div>
+
+<div className='step'>
+
+Add `locale` to search dialog, this will only allow pages with specified
+
+locale to be searched by the user.
+
+<Callout type="info" title="For Fumadocs UI">
+  You can ignore this, Fumadocs UI handles this when you have i18n configured
+  correctly.
+</Callout>
+
+```tsx
+function Dialog() {
+  const { search, setSearch, query } = useDocsSearch(locale);
+
+  //...
+}
+```
+
+</div>
+
+</div>
+
+<Cards>
+  <Card
+    title="Page Conventions"
+    description="Learn to build Internationalized Page Structure"
+    href="/docs/headless/page-conventions"
+  />
+</Cards>
+
+## Search Client
+
+`useDocsSearch` is a hook that combines debounce value and [`useSWR`](https://swr.vercel.app).
+
+### Return Type
+
+| Prop        | Type                  | Description                    |
+| ----------- | --------------------- | ------------------------------ |
+| `query`     | `SWRResponse`         | SWR Query                      |
+| `search`    | `string`              | Searching text (not debounced) |
+| `setSearch` | `(v: string) => void` | Set searching text             |
+
+### Response Data
+
+| Type             |                                                 |
+| ---------------- | ----------------------------------------------- |
+| `empty`          | If the searching text is empty or blank         |
+| `SortedResult[]` | Array of matching pages, headings and contents. |
