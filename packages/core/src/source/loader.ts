@@ -8,7 +8,7 @@ import {
 import type { FileData, MetaData, PageData } from './types';
 import type { CreatePageTreeBuilderOptions } from './page-tree-builder';
 import { createPageTreeBuilder } from './page-tree-builder';
-import { joinPaths, splitPath, type FileInfo } from './path';
+import { splitPath, type FileInfo } from './path';
 import type { File, Storage } from './file-system';
 
 export interface LoaderConfig {
@@ -115,10 +115,11 @@ export function createGetUrl(
   baseUrl: string,
 ): (slugs: string[], locale?: string) => string {
   return (slugs, locale) => {
-    let paths = [baseUrl, ...slugs];
-    if (locale) paths = [baseUrl, locale, ...slugs];
+    const paths = locale
+      ? [...splitPath(baseUrl), locale, ...slugs]
+      : [...splitPath(baseUrl), ...slugs];
 
-    return joinPaths(paths, 'leading');
+    return `/${paths.join('/')}`;
   };
 }
 

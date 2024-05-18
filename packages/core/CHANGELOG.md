@@ -1,5 +1,13 @@
 # next-docs-zeta
 
+## 11.1.1
+
+### Patch Changes
+
+- 8ef2b68: Bump deps
+- 26f464d: Support relative paths in meta.json
+- 26f464d: Support non-external link in meta.json
+
 ## 11.1.0
 
 ## 11.0.8

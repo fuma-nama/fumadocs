@@ -273,8 +273,8 @@ function Highlights(): React.ReactElement {
         performance.
       </Highlight>
       <Highlight icon={KeyboardIcon} heading="Developer Experience.">
-        Bundled with remark and rehype plugins that enhances the developer
-        experience.
+        Useful remark/rehype plugins. Typescript Twoslash, OpenAPI docs
+        generation, and more.
       </Highlight>
       <Highlight icon={PersonStandingIcon} heading="Personalized.">
         Advanced options for customising your theme in a comfortable way.
@@ -318,7 +318,7 @@ function Hero(): React.ReactElement {
       </p>
       <div className="inline-flex items-center gap-3">
         <Link
-          href="/docs"
+          href="/docs/ui"
           className={cn(
             buttonVariants({ size: 'lg', className: 'rounded-full' }),
           )}

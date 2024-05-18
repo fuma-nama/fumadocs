@@ -4,7 +4,17 @@ description: Getting Started with Fumadocs
 icon: Album
 ---
 
-Fumadocs UI is the built-in user interface integration for Fumadocs, built on the top of Radix UI.
+## Introduction
+
+**Fumadocs** can be broken down into two parts: Core and UI.
+
+Core handles most of the logic, from search functionality, MDX enhancement, to content source APIs for you to plug in your own **content source**.
+
+Fumadocs UI, as named, it is the official user interface for Fumadocs.
+
+In this documentation, when we are calling Fumadocs UI, it refers to the entire framework.
+
+> Fumadocs Core can be used without Fumadocs UI, in other words, it's headless.
 
 ## Automatic Installation
 
@@ -52,8 +62,7 @@ fumadocs-ui fumadocs-core
 
 ### Configuration
 
-Fumadocs UI is unopinionated and doesn't include content management features by default.
-You can choose a source you prefer, such as Contentlayer and Fumadocs MDX.
+You can choose a **content source** you prefer, such as ContentLayer and Fumadocs MDX.
 
 There is a list of supported sources:
 
@@ -70,7 +79,7 @@ You can import the pre-built stylesheet in the root layout.
 import 'fumadocs-ui/style.css';
 ```
 
-For Tailwind CSS projects, you may use [the official plugin](/docs/ui/theme) instead.
+For Tailwind CSS projects, use [the official plugin](/docs/ui/theme) instead.
 
 > It doesn't come with a default font, you may choose one from `next/font`.
 
@@ -95,26 +104,27 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
 ### Layout
 
-Create a new catch-all route for our docs, and give it a proper layout.
+Create a new catch-all route `/app/docs/[[..slugs]]` for our docs, and give it a proper layout.
 
 ```tsx title="app/docs/layout.tsx"
 import { DocsLayout } from 'fumadocs-ui/layout';
+import { pageTree } from '@/source';
 import type { ReactNode } from 'react';
 
 export default function RootDocsLayout({ children }: { children: ReactNode }) {
   return (
-    <DocsLayout tree={tree} nav={{ title: 'My App' }}>
+    <DocsLayout tree={pageTree} nav={{ title: 'My App' }}>
       {children}
     </DocsLayout>
   );
 }
 ```
 
-> `tree` refers to [Page Tree](/docs/headless/page-tree), which should be provided by your data source.
+> `pageTree` refers to [Page Tree](/docs/headless/page-tree), it is needed for navigation components, which should be provided by your content source.
 
 ### Page
 
-For the `page.tsx`, it may vary depending on your source. You should manually configure static rendering with `generateStaticParams` and metadata with `generateMetadata`.
+For the `page.tsx`, it may vary depending on your source. You should configure static rendering with `generateStaticParams` and metadata with `generateMetadata`.
 
 Make sure to wrap your content in the [Page](/docs/ui/blocks/page) component, this will also configure typography styles.
 
@@ -135,7 +145,7 @@ Make sure to wrap your content in the [Page](/docs/ui/blocks/page) component, th
 
 ### Search
 
-By default, it uses the built-in document search based on Flexsearch. [Learn to configure Document Search](/docs/headless/search/flexsearch) for your data source.
+Use the default document search based on Flexsearch. [Learn to configure Document Search](/docs/headless/search/flexsearch) for your content source.
 
 <Accordions>
 <Accordion title="Example with Fumadocs MDX">
@@ -175,15 +185,13 @@ npm run dev
 <Accordions>
     <Accordion id='why-fumadocs-ui' title="Why Fumadocs UI?">
 
-        Fumadocs UI provides many built-in components, and is more flexible compared to
-        other existing frameworks.
-
-        And most importantly, it is compatible with Next.js App Router which results in
-        a faster page load speed with ~120kb initial Javascript load. You can easily use
-        Fumadocs in an existing Next.js project, without refactoring anything.
-
         Feel free to open the demo in CodeSandbox and see if it suits you.
 
+        - Many built-in components
+        - Integrations with Typescript Twoslash, OpenAPI, Math
+        - Flexible and Fast by default
+        - Built on App Router
+        - Use Fumadocs in an existing Next.js project, without refactoring anything.
     </Accordion>
     <Accordion id='fix-supports-color' title="How to fix 'supports-color' error?">
 
@@ -193,7 +201,7 @@ npm run dev
         Module not found: Can't resolve 'supports-color' in '.../node_modules/debug/src'
         ```
 
-        Try installing `supports-color@8.1.1`.
+        This error sometimes appear when you are using ContentLayer, usually installing `supports-color@8.1.1` can fix the problem.
 
     </Accordion>
     <Accordion id='fix-dot-map-error' title="How to fix '@/.map' error?">
@@ -203,13 +211,19 @@ npm run dev
         For more information, see [Setup Guide](/docs/mdx).
 
     </Accordion>
+    <Accordion id='dynamic-route' title="It uses Dynamic Route, will it be poor in performance?">
+
+        Next.js turns dynamic route into static routes when `generateStaticParams` is configured.
+        Hence, it is as fast as static pages.
+
+    </Accordion>
     <Accordion id='blog-usage' title="Can I use it for Blog?">
 
         The answer is yes.
 
         Fumadocs is built for documentation sites, yet, it is very flexible.
-        You can use the `DocsBody` component to apply typography styles and leverage the built-in remark/rehype plugins.
-        Besides, the `Layout` component allows you to share the navbar between other pages.
+        You can re-use the typography styles and leverage its built-in remark/rehype plugins.
+        Check our [blog](/blog), it is also built with Fumadocs.
 
     </Accordion>
 
@@ -220,6 +234,10 @@ npm run dev
 Open in [CodeSandbox](https://githubbox.com/fuma-nama/fumadocs-ui-template).
 
 ## Learn More
+
+New to here? Don't worry, we are welcome for your questions.
+
+If you find anything confusing, please give your feedback on [Github Discussion](https://github.com/fuma-nama/fumadocs/discussions)!
 
 <Cards>
   <Card
@@ -243,3 +261,9 @@ Open in [CodeSandbox](https://githubbox.com/fuma-nama/fumadocs-ui-template).
     description="Learn how to use code blocks in MDX"
   />
 </Cards>
+
+## Terminology
+
+For a better understanding of the docs, there are some common terminologies you should know:
+
+**Content Source:** The source of your content, for example, Fumadocs MDX, MDXTS and ContentLayer are examples of content source.

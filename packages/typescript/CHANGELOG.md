@@ -1,5 +1,11 @@
 # fumadocs-typescript
 
+## 2.0.1
+
+### Patch Changes
+
+- 8ef2b68: Bump deps
+
 ## 2.0.0
 
 ### Major Changes

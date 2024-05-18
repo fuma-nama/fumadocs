@@ -1,5 +1,5 @@
 import {
-  joinPaths,
+  resolvePath,
   parseFilePath,
   parseFolderPath,
   splitPath,
@@ -91,14 +91,16 @@ describe('Path utilities', () => {
     );
   });
 
-  test('join paths', () => {
-    expect(joinPaths(['a', 'b', 'c'])).toBe('a/b/c');
-    expect(joinPaths(['/a'])).toBe('a');
-    expect(joinPaths(['a/', '/b'])).toBe('a/b');
-    expect(joinPaths(['a/', 'b/c'])).toBe('a/b/c');
+  test('resolve paths', () => {
+    expect(resolvePath('a', 'b')).toBe('a/b');
+    expect(resolvePath('/a', '')).toBe('a');
+    expect(resolvePath('a/', '/b')).toBe('a/b');
 
-    expect(joinPaths(['a', 'b'], 'leading')).toBe('/a/b');
-    expect(joinPaths(['a', 'b'], 'trailing')).toBe('a/b/');
+    expect(resolvePath('a/', '../b/c')).toBe('b/c');
+    expect(resolvePath('a/', './b/c')).toBe('a/b/c');
+
+    expect(resolvePath('a', 'b', 'leading')).toBe('/a/b');
+    expect(resolvePath('a', 'b', 'trailing')).toBe('a/b/');
   });
 
   test('split paths', () => {

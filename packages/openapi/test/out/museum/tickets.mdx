@@ -33,7 +33,7 @@ Type of ticket being purchased. Use `general` for regular museum entry and `even
 
 <Property required={false} deprecated={false} name={"eventId"} type={"string"}>
 
-Unique identifier for a special event. Required if purchasing tickets for the museum's special events.
+Identifier for a special event.
 
 <span>Example:  `"3be6453c-03eb-4357-ae5a-984a0e574a54"`</span>
 
@@ -45,7 +45,7 @@ Unique identifier for a special event. Required if purchasing tickets for the mu
 
 Date that the ticket is valid for.
 
-<span>Example:  `"2023-10-29T00:00:00.000Z"`</span>
+<span>Example:  `"2023-10-29"`</span>
 
 <span>Format:  `"date"`</span>
 
@@ -84,7 +84,7 @@ curl -X POST "https://api.fake-museum-example.com/tickets" \
   -d '{
   "ticketType": "event",
   "eventId": "3be6453c-03eb-4357-ae5a-984a0e574a54",
-  "ticketDate": "2023-10-29T00:00:00.000Z",
+  "ticketDate": "2023-10-29",
   "email": "museum-lover@example.com",
   "phone": "+1(234)-567-8910"
 }'
@@ -102,7 +102,7 @@ Details for a museum ticket after a successful purchase.
   "eventName": "Pirate Coding Workshop",
   "ticketId": "a54a57ca-36f8-421b-a6b4-2e8f26858a4c",
   "ticketType": "event",
-  "ticketDate": "2023-10-29T00:00:00.000Z",
+  "ticketDate": "2023-10-29",
   "confirmationCode": "ticket-event-a98c8f-7eb12"
 }
 ```

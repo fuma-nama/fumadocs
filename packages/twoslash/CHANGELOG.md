@@ -1,5 +1,11 @@
 # fumadocs-twoslash
 
+## 1.0.3
+
+### Patch Changes
+
+- 8ef2b68: Bump deps
+
 ## 1.0.2
 
 ### Patch Changes

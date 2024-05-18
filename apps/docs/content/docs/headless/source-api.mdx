@@ -1,13 +1,11 @@
 ---
 title: Source API
-description: Turn a source into an unitied interface
+description: Turn a content source into an unified interface
 ---
 
 ## Usage
 
-Source API is a helper to load file-system based source files, it outputs numerous useful properties to integrate with other components, such as Page Tree.
-
-The output strictly follows [Page Conventions](/docs/headless/page-conventions). During the process, your input source files will be parsed and form a virtual storage to avoid inconsistent behaviour between different OS.
+Source API is a helper to load file-system based content source, it outputs numerous useful properties to integrate with Fumadocs, such as Page Tree.
 
 ```ts
 import { map } from '@/.map';
@@ -19,51 +17,29 @@ export const docs = loader({
 });
 ```
 
-### Custom Source
-
-Furthermore, you can write your source interface. The `Source` object includes a `files` property which has an array of virtual files.
-Each virtual file must contain its file path and corresponding data.
-
-```ts
-export function createMySource(): Source<{
-  metaData: MetaData; // Your custom type
-  pageData: PageData; // Your custom type
-}> {
-  return {
-    files: [...],
-  };
-}
-```
-
-### Transformer
-
-To perform custom file-system operations before processing the storage, you can add a transformer.
-
-```ts
-loader({
-  transformers: [
-    ({ storage }) => {
-      storage.makeDir();
-    },
-  ],
-});
-```
-
 ### Root Directory
 
 All files outside of the root directory will be ignored.
 
 ```ts
+import { loader } from 'fumadocs-core/source';
+
 loader({
   rootDir: 'docs',
 });
 ```
+
+<Callout type="warn">
+  Relative paths, like `./` and `../` are not supported.
+</Callout>
 
 ### Base URL
 
 As the `loader` function also generate an URL for each page, you can override the default base URL.
 
 ```ts
+import { loader } from 'fumadocs-core/source';
+
 loader({
   baseUrl: '/docs',
 });
@@ -71,7 +47,7 @@ loader({
 
 ### Icons
 
-Load the [icon](/docs/headless/page-conventions#icons) from the data of pages and meta files.
+Load the [icon](/docs/headless/page-conventions#icons) property specified by pages and meta files.
 
 ```ts
 import { loader } from 'fumadocs-core/source';
@@ -83,4 +59,45 @@ export const utils = loader({
     if (icon in icons) return createElement(icons[icon as keyof typeof icons]);
   },
 });
+```
+
+## Deep Dive
+
+As mentioned, the output strictly follows [Page Conventions](/docs/headless/page-conventions).
+During the process, your input source files will be parsed and form a virtual storage to avoid inconsistent behaviour between different OS.
+
+### Transformer
+
+To perform virtual file-system operations before processing, you can add a transformer.
+
+```ts
+import { loader } from 'fumadocs-core/source';
+
+loader({
+  transformers: [
+    ({ storage }) => {
+      storage.makeDir();
+    },
+  ],
+});
+```
+
+### Custom Source
+
+To plug your own content source, return a `Source` object.
+
+It includes a `files` property which has an array of virtual files.
+Each virtual file must contain its file path and corresponding data.
+
+```ts
+import { Source } from 'fumadocs-core/source';
+
+export function createMySource(): Source<{
+  metaData: { title: string; pages: string[] }; // Your custom type
+  pageData: { title: string; description: string }; // Your custom type
+}> {
+  return {
+    files: [],
+  };
+}
 ```
