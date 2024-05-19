@@ -600,8 +600,8 @@ importers:
   packages/twoslash:
     dependencies:
       '@shikijs/twoslash':
-        specifier: 1.5.2
-        version: 1.5.2(typescript@5.4.5)
+        specifier: 1.6.0
+        version: 1.6.0(typescript@5.4.5)
       mdast-util-from-markdown:
         specifier: ^2.0.0
         version: 2.0.0
@@ -612,8 +612,8 @@ importers:
         specifier: ^13.1.0
         version: 13.1.0
       shiki:
-        specifier: 1.5.2
-        version: 1.5.2
+        specifier: 1.6.0
+        version: 1.6.0
     devDependencies:
       '@types/hast':
         specifier: ^3.0.4
@@ -3425,6 +3425,10 @@ packages:
     resolution: {integrity: sha512-wSAOgaz48GmhILFElMCeQypSZmj6Ru6DttOOtl3KNkdJ17ApQuGNCfzpk4cClasVrnIu45++2DBwG4LNMQAfaA==}
     dev: false
 
+  /@shikijs/core@1.6.0:
+    resolution: {integrity: sha512-NIEAi5U5R7BLkbW1pG/ZKu3eb1lzc3/+jD0lFsuxMT7zjaf9bbNwdNyMr7zh/Zl8EXQtQ+MYBAt5G+JLu+5DlA==}
+    dev: false
+
   /@shikijs/rehype@1.5.2:
     resolution: {integrity: sha512-MlpLBEyLcV399AgV5ai7wD0F7E/5qTlfF3487bx5MkGZb+DMAvpF279OI0UYKXVrqKrTS1zJfZXyIJlFQ3JeTA==}
     dependencies:
@@ -3442,10 +3446,10 @@ packages:
       shiki: 1.5.2
     dev: false
 
-  /@shikijs/twoslash@1.5.2(typescript@5.4.5):
-    resolution: {integrity: sha512-elXSplqPxoifKAzCO9TJ6zkNN9XjM22+zU8OD+0tH6KDgk/8qaLQ48rCTg8/Ir7nvk0VuGnFz4cc5eQ5oX009A==}
+  /@shikijs/twoslash@1.6.0(typescript@5.4.5):
+    resolution: {integrity: sha512-sA9l5hgKNiB+CFUNwxeWyh4nvA6J/fSIzVZId1AhO4rRLINi5dFb13MmDSnxqw+60HKCKjsoWKcbVGvToQXJVA==}
     dependencies:
-      '@shikijs/core': 1.5.2
+      '@shikijs/core': 1.6.0
       twoslash: 0.2.6(typescript@5.4.5)
     transitivePeerDependencies:
       - supports-color
@@ -9721,6 +9725,12 @@ packages:
     resolution: {integrity: sha512-fpPbuSaatinmdGijE7VYUD3hxLozR3ZZ+iAx8Iy2X6REmJGyF5hQl94SgmiUNTospq346nXUVZx0035dyGvIVw==}
     dependencies:
       '@shikijs/core': 1.5.2
+    dev: false
+
+  /shiki@1.6.0:
+    resolution: {integrity: sha512-P31ROeXcVgW/k3Z+vUUErcxoTah7ZRaimctOpzGuqAntqnnSmx1HOsvnbAB8Z2qfXPRhw61yptAzCsuKOhTHwQ==}
+    dependencies:
+      '@shikijs/core': 1.6.0
     dev: false
 
   /side-channel@1.0.4:
