@@ -1,6 +1,6 @@
 {
   "name": "@maximai/fumadocs-ui",
-  "version": "11.1.0-beta4",
+  "version": "11.1.0-beta5",
   "description": "The framework for building a documentation website in Next.js",
   "keywords": ["NextJs", "Docs"],
   "homepage": "https://fumadocs.vercel.app",
