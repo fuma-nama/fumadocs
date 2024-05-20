@@ -2,7 +2,7 @@ import type { Preset } from '@/tailwind-plugin';
 
 const defaultPreset: Preset = {
   light: {
-    background: '0 0% 98%',
+    background: '0 0% 100%',
     foreground: '0 0% 3.9%',
     muted: '0 0% 96.1%',
     'muted-foreground': '0 0% 45.1%',
