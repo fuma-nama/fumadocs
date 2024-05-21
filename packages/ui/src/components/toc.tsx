@@ -1,7 +1,7 @@
 import { TextIcon } from 'lucide-react';
 import type { TOCItemType } from 'fumadocs-core/server';
 import * as Primitive from 'fumadocs-core/toc';
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { cn } from '@/utils/cn';
 import { useI18n } from '@/contexts/i18n';
 import { ScrollArea, ScrollViewport } from './ui/scroll-area';
@@ -17,14 +17,14 @@ export function TOCItems({
   const containerRef = useRef<HTMLDivElement>(null);
   const markerRef = useRef<HTMLDivElement>(null);
 
-  const setPos = ([top, height]: PosType): void => {
+  const setPos = useCallback(([top, height]: PosType) => {
     const element = markerRef.current;
     if (!element) return;
 
     element.style.setProperty('top', `${top.toString()}px`);
     element.style.setProperty('height', `${height.toString()}px`);
-    element.style.setProperty('display', `block`);
-  };
+    element.style.setProperty('display', 'block');
+  }, []);
 
   return (
     <ScrollArea className="pt-4 text-sm first:pt-0">
