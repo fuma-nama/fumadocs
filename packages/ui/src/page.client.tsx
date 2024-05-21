@@ -53,13 +53,13 @@ export function Footer({ items }: FooterProps): React.ReactElement {
   }, [pathname, tree.navigation]);
 
   const footerItem =
-    'flex flex-col gap-2 rounded-lg p-2 transition-colors hover:bg-accent hover:text-accent-foreground';
+    'flex flex-col gap-2 rounded-lg p-3 text-sm transition-colors hover:bg-accent hover:text-accent-foreground';
 
   return (
     <div className="-mx-2 mt-4 grid grid-cols-1 gap-2 border-t py-6 sm:grid-cols-2">
       {previous ? (
         <Link href={previous.url} className={footerItem}>
-          <div className="inline-flex items-center gap-0.5 text-sm text-muted-foreground">
+          <div className="inline-flex items-center gap-0.5 text-muted-foreground">
             <ChevronLeftIcon className="-ms-1 size-4 shrink-0 rtl:rotate-180" />
             <p>Previous</p>
           </div>
@@ -71,7 +71,7 @@ export function Footer({ items }: FooterProps): React.ReactElement {
           href={next.url}
           className={cn(footerItem, 'text-end sm:col-start-2')}
         >
-          <div className="inline-flex flex-row-reverse items-center gap-0.5 text-sm text-muted-foreground">
+          <div className="inline-flex flex-row-reverse items-center gap-0.5 text-muted-foreground">
             <ChevronRightIcon className="-me-1 size-4 shrink-0 rtl:rotate-180" />
             <p>Next</p>
           </div>
