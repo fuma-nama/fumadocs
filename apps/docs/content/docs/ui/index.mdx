@@ -91,6 +91,32 @@ npm run dev
         - Built on App Router
         - Use it in an existing Next.js project, without refactoring anything.
     </Accordion>
+    <Accordion id='fix-turborepo-styling' title="How to fix Turborepo stylings not being applied?">
+
+        Turborepo, keeps all installed packages from the `apps` folder in the root directory of your project.
+        This means that when using Tailwind, it will not be able to find the `DocsLayout` from the package `fumadocs-ui`
+        which contains the styling.
+
+        To fix this, edit the `tailwind.config.js` and replace `./node_modules` with `../../node_modules` in the `content` section.
+
+        Before:
+        ```
+          content: [
+            './node_modules/fumadocs-ui/dist/**/*.js',
+            './components/**/*.{ts,tsx}',
+            ...
+          ],
+        ```
+
+        After:
+        ```
+          content: [
+            '../../node_modules/fumadocs-ui/dist/**/*.js',
+            './components/**/*.{ts,tsx}',
+            ...
+          ],
+        ```
+    </Accordion>
     <Accordion id='fix-supports-color' title="How to fix 'supports-color' error?">
 
         If you got this error:
