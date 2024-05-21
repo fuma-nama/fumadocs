@@ -23,7 +23,7 @@ export type CodeBlockProps = HTMLAttributes<HTMLElement> & {
 export const Pre = forwardRef<HTMLPreElement, HTMLAttributes<HTMLPreElement>>(
   ({ className, ...props }, ref) => {
     return (
-      <pre ref={ref} className={cn('nd-codeblock py-4', className)} {...props}>
+      <pre ref={ref} className={cn('nd-codeblock p-4', className)} {...props}>
         {props.children}
       </pre>
     );
