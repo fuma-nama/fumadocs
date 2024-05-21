@@ -1,5 +1,11 @@
 # fumadocs-contentlayer
 
+## 1.1.22
+
+### Patch Changes
+
+- fumadocs-core@11.1.2
+
 ## 1.1.21
 
 ### Patch Changes
