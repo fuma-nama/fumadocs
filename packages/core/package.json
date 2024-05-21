@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-core",
-  "version": "11.1.1",
+  "version": "11.1.2",
   "description": "The library for building a documentation website in Next.js",
   "keywords": [
     "NextJs",
@@ -120,8 +120,8 @@
   },
   "dependencies": {
     "@formatjs/intl-localematcher": "^0.5.4",
-    "@shikijs/rehype": "^1.5.2",
-    "@shikijs/transformers": "^1.5.2",
+    "@shikijs/rehype": "^1.6.0",
+    "@shikijs/transformers": "^1.6.0",
     "flexsearch": "0.7.21",
     "github-slugger": "^2.0.0",
     "hast-util-to-estree": "^3.1.0",
@@ -132,7 +132,7 @@
     "remark-gfm": "^4.0.0",
     "remark-mdx": "^3.0.1",
     "scroll-into-view-if-needed": "^3.1.0",
-    "shiki": "^1.5.2",
+    "shiki": "^1.6.0",
     "swr": "^2.2.5",
     "unist-util-visit": "^5.0.0"
   },
@@ -142,7 +142,7 @@
     "@types/estree-jsx": "^1.0.5",
     "@types/flexsearch": "0.7.6",
     "@types/hast": "^3.0.4",
-    "@types/mdast": "^4.0.4",
+    "@types/mdast": "^4.0.3",
     "@types/negotiator": "^0.6.3",
     "@types/node": "18.17.5",
     "@types/react": "^18.3.2",

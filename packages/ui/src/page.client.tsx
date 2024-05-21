@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { cva } from 'class-variance-authority';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { cn } from '@/utils/cn';
 import { useI18n } from './contexts/i18n';
 import { useTreeContext } from './contexts/tree';
 
@@ -37,16 +37,11 @@ export interface FooterProps {
   };
 }
 
-const footerItem = cva(
-  'flex flex-row items-center gap-2 text-muted-foreground transition-colors hover:text-foreground',
-);
-
 export function Footer({ items }: FooterProps): React.ReactElement {
   const tree = useTreeContext();
   const pathname = usePathname();
 
-  const { previous, next } = useMemo(() => {
-    if (items) return items;
+  const { previous = items?.previous, next = items?.next } = useMemo(() => {
     const currentIndex = tree.navigation.findIndex(
       (item) => item.url === pathname,
     );
@@ -55,20 +50,32 @@ export function Footer({ items }: FooterProps): React.ReactElement {
       previous: tree.navigation[currentIndex - 1],
       next: tree.navigation[currentIndex + 1],
     };
-  }, [items, pathname, tree.navigation]);
+  }, [pathname, tree.navigation]);
+
+  const footerItem =
+    'flex flex-col gap-2 rounded-lg p-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground';
 
   return (
-    <div className="mt-4 flex flex-row flex-wrap gap-4 border-t py-12">
+    <div className="-mx-2 mt-4 grid grid-cols-1 gap-2 border-t py-6 sm:grid-cols-2">
       {previous ? (
-        <Link href={previous.url} className={footerItem()}>
-          <ChevronLeftIcon className="size-5 shrink-0 rtl:rotate-180" />
+        <Link href={previous.url} className={footerItem}>
+          <div className="inline-flex items-center gap-0.5">
+            <ChevronLeftIcon className="-ms-1 size-4 shrink-0 rtl:rotate-180" />
+            <p>Previous</p>
+          </div>
           <p className="font-medium text-foreground">{previous.name}</p>
         </Link>
       ) : null}
       {next ? (
-        <Link href={next.url} className={footerItem({ className: 'ms-auto' })}>
-          <p className="text-end font-medium text-foreground">{next.name}</p>
-          <ChevronRightIcon className="size-5 shrink-0 rtl:rotate-180" />
+        <Link
+          href={next.url}
+          className={cn(footerItem, 'text-end sm:col-start-2')}
+        >
+          <div className="inline-flex flex-row-reverse items-center gap-0.5">
+            <ChevronRightIcon className="-me-1 size-4 shrink-0 rtl:rotate-180" />
+            <p>Next</p>
+          </div>
+          <p className="font-medium text-foreground">{next.name}</p>
         </Link>
       ) : null}
     </div>

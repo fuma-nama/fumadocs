@@ -3,6 +3,8 @@ title: Layout
 description: The layout of documentation
 ---
 
+import { File, Files, Folder } from 'fumadocs-ui/components/files';
+
 The layout of documentation pages, it must be nested under the
 [Root Provider](/docs/ui/blocks/root-provider).
 
@@ -20,16 +22,9 @@ export default function Layout({ children }) {
 }
 ```
 
-```json doc-gen:typescript
-{
-  "file": "./content/docs/ui/props.ts",
-  "name": "LayoutProps"
-}
-```
-
 ### Non-docs Pages
 
-If you want to share navbar and search dialog between other pages, you may use the `Layout` component for non-docs page.
+If you want to add the navbar and search dialog to other pages, use the `Layout` component.
 
 It doesn't contain a sidebar, therefore, a page tree is not required.
 
@@ -43,14 +38,26 @@ export default function HomeLayout({ children }) {
 
 You can create a [Route Group](https://nextjs.org/docs/app/building-your-application/routing/route-groups) to share the same layout across multiple pages.
 
-### Link API
+<Files>
+  <Folder name="(home)" defaultOpen>
+    <File name="page.tsx" />
+    <File name="layout.tsx" />
+  </Folder>
+  <Folder name="/docs">
+    <Folder name={'[[..slugs]]'}>
+      <File name="page.tsx" />
+    </Folder>
+    <File name="layout.tsx" />
+  </Folder>
+</Files>
 
-You can display a menu or link on navigation elements like navbar and sidebar.
+### Links
 
-```tsx
-import { DocsLayout } from 'fumadocs-ui/layout';
-import { BookIcon } from 'lucide-react';
+You can display dropdown menus and links on navigation elements like navbar and sidebar.
 
+> They are displayed intelligently for best responsibility.
+
+```mdx
 <DocsLayout
   links={[
     {
@@ -64,10 +71,18 @@ import { BookIcon } from 'lucide-react';
       items: [{ ... }],
     },
   ]}
-/>;
+/>
 ```
 
 ### Navbar
+
+Customise the navbar element.
+
+```mdx
+<DocsLayout
+  nav={{ title: <Logo />, githubUrl: 'https://github.com/fuma-nama/fumadocs' }}
+/>
+```
 
 ```json doc-gen:typescript
 {
@@ -77,6 +92,12 @@ import { BookIcon } from 'lucide-react';
 ```
 
 ### Sidebar
+
+Customise the sidebar element.
+
+```mdx
+<DocsLayout sidebar={{ footer: <ShareButton /> }} />
+```
 
 ```json doc-gen:typescript
 {

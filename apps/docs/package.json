@@ -32,7 +32,7 @@
     "react-dom": "^18.3.1",
     "rehype-katex": "^7.0.0",
     "remark-math": "^6.0.0",
-    "shiki": "^1.5.2",
+    "shiki": "^1.6.0",
     "tailwind-merge": "^2.3.0",
     "zod": "^3.23.8"
   },
@@ -52,7 +52,7 @@
     "tailwindcss": "^3.4.3",
     "tailwindcss-animate": "^1.0.7",
     "tsconfig": "workspace:*",
-    "tsx": "^4.10.3",
+    "tsx": "^4.10.5",
     "typescript": "^5.4.5",
     "webpack": "^5.90.3"
   }
