@@ -91,31 +91,26 @@ npm run dev
         - Built on App Router
         - Use it in an existing Next.js project, without refactoring anything.
     </Accordion>
-    <Accordion id='fix-turborepo-styling' title="How to fix Turborepo stylings not being applied?">
+    <Accordion id='fix-monorepo-styling' title="How to fix stylings not being applied in Monorepo?">
 
-        Turborepo, keeps all installed packages from the `apps` folder in the root directory of your project.
-        This means that when using Tailwind, it will not be able to find the `DocsLayout` from the package `fumadocs-ui`
-        which contains the styling.
+        Sometimes, `fumadocs-ui` is not installed in the workspace of your Tailwind CSS configuration file. (e.g. a monorepo setup).
 
-        To fix this, edit the `tailwind.config.js` and replace `./node_modules` with `../../node_modules` in the `content` section.
+        When using the official Tailwind CSS plugin, it will not be able to find the files from `fumadocs-ui`
+        package which contains all styling.
 
-        Before:
-        ```
+        To fix this, edit the Tailwind CSS configuration and replace `./node_modules` with `../../node_modules` in the `content` section.
+
+        ```diff
+        export default {
           content: [
-            './node_modules/fumadocs-ui/dist/**/*.js',
+        -   './node_modules/fumadocs-ui/dist/**/*.js',
+        +   '../../node_modules/fumadocs-ui/dist/**/*.js',
             './components/**/*.{ts,tsx}',
             ...
           ],
+        }
         ```
 
-        After:
-        ```
-          content: [
-            '../../node_modules/fumadocs-ui/dist/**/*.js',
-            './components/**/*.{ts,tsx}',
-            ...
-          ],
-        ```
     </Accordion>
     <Accordion id='fix-supports-color' title="How to fix 'supports-color' error?">
 
