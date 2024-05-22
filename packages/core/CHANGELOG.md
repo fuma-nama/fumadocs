@@ -1,5 +1,13 @@
 # next-docs-zeta
 
+## 11.1.3
+
+### Patch Changes
+
+- 88008b1: Fix ESM compatibility problems in i18n middleware
+- 944541a: Add dynamic page url according to locale
+- 07a9312: Improve Search I18n utilities
+
 ## 11.1.2
 
 ## 11.1.1

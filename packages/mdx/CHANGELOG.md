@@ -1,5 +1,15 @@
 # next-docs-mdx
 
+## 8.2.21
+
+### Patch Changes
+
+- 66a100d: Improve error messages
+- Updated dependencies [88008b1]
+- Updated dependencies [944541a]
+- Updated dependencies [07a9312]
+  - fumadocs-core@11.1.3
+
 ## 8.2.20
 
 ### Patch Changes
