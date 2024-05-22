@@ -26,18 +26,20 @@ export function DynamicSidebar(props: SidebarProps) {
 
     timerRef.current = window.setTimeout(() => {
       setHover(false);
-    }, 1000);
+    }, 300);
   }, []);
 
   return (
     <>
       {!open ? (
         <div
-          className="fixed top-16 left-0 bottom-0 max-lg:hidden"
+          className="fixed top-16 left-0 bottom-0 max-md:hidden"
           onPointerEnter={onHover}
           onPointerLeave={onLeave}
           style={{
+            maxWidth: '240px',
             width: 'calc(max(0px, 100vw - 1400px)/2)',
+            minWidth: '1rem',
           }}
         />
       ) : null}
@@ -67,7 +69,7 @@ export function DynamicSidebar(props: SidebarProps) {
           !open && [
             'md:fixed md:left-2 md:top-16 md:bottom-2 md:border md:overflow-hidden md:shadow-md md:bg-background md:rounded-xl md:[&_#sidebar-background]:w-full md:[&_#sidebar-background]:left-0',
             hover && 'md:translate-x-0',
-            !hover && 'md:translate-x-[-100%]',
+            !hover && 'md:translate-x-[calc(-100%-1rem)]',
           ],
         )}
       >
