@@ -1,5 +1,16 @@
 # next-docs-ui
 
+## 11.1.3
+
+### Patch Changes
+
+- 2b95c89: Fix codeblock select highlight problems
+- cdc52ad: Improve page footer mobile responsibility
+- Updated dependencies [88008b1]
+- Updated dependencies [944541a]
+- Updated dependencies [07a9312]
+  - fumadocs-core@11.1.3
+
 ## 11.1.2
 
 ### Patch Changes
