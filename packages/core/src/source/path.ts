@@ -76,7 +76,6 @@ export function splitPath(path: string): string[] {
  * Resolve paths, slashes within the path will be ignored
  * @param from - Path to resolve from
  * @param join - Paths to resolve
- * @param slashMode - whether to add a trailing/leading slash to path
  * @example
  * ```
  * ['a','b'] // 'a/b'
@@ -85,11 +84,7 @@ export function splitPath(path: string): string[] {
  * ['a', '../b/c'] // 'b/c'
  * ```
  */
-export function resolvePath(
-  from: string,
-  join: string,
-  slashMode: 'leading' | 'trailing' | 'none' = 'none',
-): string {
+export function resolvePath(from: string, join: string): string {
   const v1 = splitPath(from),
     v2 = splitPath(join);
 
@@ -107,14 +102,5 @@ export function resolvePath(
     v2.shift();
   }
 
-  const joined = v1.join('/');
-
-  switch (slashMode) {
-    case 'leading':
-      return `/${joined}`;
-    case 'trailing':
-      return `${joined}/`;
-    default:
-      return joined;
-  }
+  return v1.join('/');
 }
