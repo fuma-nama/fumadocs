@@ -12,7 +12,7 @@ export default {
   ],
   presets: [
     createPreset({
-      preset: 'neutral' || {
+      preset: {
         ...presets.default,
         dark: {
           ...presets.default.dark,
