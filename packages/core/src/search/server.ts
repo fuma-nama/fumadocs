@@ -30,7 +30,13 @@ type ToI18n<T extends { indexes: unknown }> = Omit<
   T,
   'indexes' | 'language'
 > & {
-  indexes: [language: string, indexes: T['indexes']][];
+  indexes: (
+    | [language: string, indexes: T['indexes']]
+    | {
+        language: string;
+        indexes: T['indexes'];
+      }
+  )[];
 };
 
 function create(search: SearchAPI['search']): SearchAPI {
@@ -63,18 +69,22 @@ export function createSearchAPI<T extends 'simple' | 'advanced'>(
 
 export function createI18nSearchAPI<T extends 'simple' | 'advanced'>(
   type: T,
-  options: ToI18n<T extends 'simple' ? SimpleOptions : AdvancedOptions>,
+  options: T extends 'simple' ? ToI18n<SimpleOptions> : ToI18n<AdvancedOptions>,
 ): SearchAPI {
   const map = new Map<string, SearchAPI>();
 
-  for (const [k, v] of options.indexes) {
+  for (const entry of options.indexes) {
+    const v = Array.isArray(entry)
+      ? { language: entry[0], indexes: entry[1] }
+      : entry;
+
     map.set(
-      k,
+      v.language,
       createSearchAPI(type, {
         ...options,
-        language: k,
+        language: v.language,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment -- Avoid complicated types
-        indexes: v as any,
+        indexes: v.indexes as any,
       }),
     );
   }
@@ -90,7 +100,7 @@ export function createI18nSearchAPI<T extends 'simple' | 'advanced'>(
   });
 }
 
-interface Index {
+export interface Index {
   title: string;
   content: string;
   url: string;
@@ -155,7 +165,7 @@ export function initSearchAPI({ indexes, language }: SimpleOptions): SearchAPI {
   });
 }
 
-interface AdvancedIndex {
+export interface AdvancedIndex {
   id: string;
   title: string;
   /**
