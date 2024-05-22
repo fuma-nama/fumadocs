@@ -264,7 +264,7 @@ function FolderNode({
       )}
       <CollapsibleContent>
         <NodeList
-          className="ms-4 flex flex-col border-s py-2 ps-2"
+          className="ms-2 flex flex-col border-s py-2 ps-2"
           items={children}
           level={level}
         />

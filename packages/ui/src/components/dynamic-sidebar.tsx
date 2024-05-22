@@ -1,11 +1,11 @@
+import { type PointerEventHandler, useCallback, useRef, useState } from 'react';
+import { SidebarIcon } from 'lucide-react';
 import { Sidebar, SidebarProps } from '@/components/sidebar';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/theme/variants';
-import { SidebarIcon } from 'lucide-react';
 import { useSidebarCollapse } from '@/contexts/sidebar';
-import { type PointerEventHandler, useCallback, useRef, useState } from 'react';
 
-export function DynamicSidebar(props: SidebarProps) {
+export function DynamicSidebar(props: SidebarProps): React.ReactElement {
   const [open, setOpen] = useSidebarCollapse();
   const [hover, setHover] = useState(false);
   const timerRef = useRef(0);
@@ -33,7 +33,7 @@ export function DynamicSidebar(props: SidebarProps) {
     <>
       {!open ? (
         <div
-          className="fixed top-16 left-0 bottom-0 max-md:hidden"
+          className="fixed bottom-0 left-0 top-16 max-md:hidden"
           onPointerEnter={onHover}
           onPointerLeave={onLeave}
           style={{
@@ -60,17 +60,16 @@ export function DynamicSidebar(props: SidebarProps) {
         </button>
       ) : null}
       <div
-        data-slide={true}
+        id="dynamic-sidebar"
+        data-open={open}
+        data-hover={hover}
         onPointerEnter={onHover}
         onPointerLeave={onLeave}
         aria-hidden={!open && !hover}
         className={cn(
-          'z-40 transition-transform',
-          !open && [
-            'md:fixed md:left-2 md:top-16 md:bottom-2 md:border md:overflow-hidden md:shadow-md md:bg-background md:rounded-xl md:[&_#sidebar-background]:w-full md:[&_#sidebar-background]:left-0',
-            hover && 'md:translate-x-0',
-            !hover && 'md:translate-x-[calc(-100%-1rem)]',
-          ],
+          'z-40 transition-transform max-md:absolute',
+          !open &&
+            'md:fixed md:bottom-2 md:left-2 md:top-16 md:overflow-hidden md:rounded-xl md:border md:bg-background md:shadow-md',
         )}
       >
         <Sidebar
