@@ -32,13 +32,18 @@ export default function Layout({
               search: '搜尋文檔',
               lastUpdate: '最後更新於',
               searchNoResult: '沒有結果',
+              previousPage: '上一頁',
+              nextPage: '下一頁',
             },
           }}
         >
           <RootProvider>
             <DocsLayout
               tree={pageTree[params.lang]}
-              nav={{ title: 'My App' }}
+              nav={{
+                title: params.lang === 'cn' ? '目錄' : 'My App',
+                url: `/${params.lang}`,
+              }}
               sidebar={{ footer: <LanguageSelect /> }}
             >
               {children}

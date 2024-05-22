@@ -125,14 +125,7 @@ const neutral: Preset = {
     aside: {
       '--muted-foreground': '0 0% 30%',
     },
-    'aside::before': {
-      content: '""',
-      position: 'absolute',
-      top: '0',
-      right: '0',
-      zIndex: '-1',
-      width: 'calc(max(0px, 100vw - theme(maxWidth.container)) + 100% + 1rem)',
-      height: '100%',
+    '#sidebar-background': {
       background: 'hsl(var(--secondary))',
       borderRight: '1px solid',
       borderRightColor: 'theme(borderColor.border)',
@@ -181,14 +174,7 @@ const catppuccin: Preset = {
     'muted-foreground': '228deg 24% 72%',
   },
   css: {
-    'aside::before': {
-      content: '""',
-      position: 'absolute',
-      top: '0',
-      right: '0',
-      zIndex: '-1',
-      width: 'calc(max(0px, 100vw - theme(maxWidth.container)) + 100% + 1rem)',
-      height: '100%',
+    '#sidebar-background': {
       background: 'hsl(var(--secondary))',
     },
   },

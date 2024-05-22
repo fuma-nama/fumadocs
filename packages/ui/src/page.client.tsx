@@ -57,7 +57,7 @@ export function Footer({ items }: FooterProps): React.ReactElement {
     'flex flex-col gap-2 rounded-lg p-4 text-sm transition-colors hover:bg-accent hover:text-accent-foreground';
 
   return (
-    <div className="-mx-2 mt-4 flex flex-row flex-wrap gap-1 border-t py-4">
+    <div className="mt-4 flex flex-row flex-wrap gap-1 border-t py-4">
       {previous ? (
         <Link href={previous.url} className={footerItem}>
           <div className="inline-flex items-center gap-0.5 text-muted-foreground">

@@ -1,18 +1,22 @@
 import { cva } from 'class-variance-authority';
-import { ChevronDown, ExternalLinkIcon, SidebarIcon } from 'lucide-react';
+import { ChevronDown, ExternalLinkIcon } from 'lucide-react';
 import type { PageTree } from 'fumadocs-core/server';
 import * as Base from 'fumadocs-core/sidebar';
 import { usePathname } from 'next/navigation';
-import * as React from 'react';
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import Link from 'fumadocs-core/link';
 import { cn } from '@/utils/cn';
 import { useTreeContext } from '@/contexts/tree';
-import { useSidebarCollapse } from '@/contexts/sidebar';
 import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
 import { hasActive, isActive } from '@/utils/shared';
 import type { LinkItemType } from '@/layout';
-import { buttonVariants } from '@/theme/variants';
 import { LinkItem } from '@/components/link-item';
 import {
   Collapsible,
@@ -31,8 +35,6 @@ export interface SidebarProps {
    * @defaultValue 1
    */
   defaultOpenLevel?: number;
-
-  collapsible?: boolean;
 
   components?: Partial<Components>;
   banner?: React.ReactNode;
@@ -78,12 +80,11 @@ export function Sidebar({
   footer,
   components,
   defaultOpenLevel = 1,
-  collapsible = true,
   banner,
   items,
-}: SidebarProps): React.ReactElement {
-  const [open, setOpen] = useSidebarCollapse();
-  const alwaysShowFooter = Boolean(footer) || collapsible;
+  ...props
+}: SidebarProps & { className?: string }): React.ReactElement {
+  const alwaysShowFooter = Boolean(footer);
   const context = useMemo<SidebarContext>(
     () => ({
       defaultOpenLevel,
@@ -91,37 +92,20 @@ export function Sidebar({
     }),
     [components, defaultOpenLevel],
   );
-
-  const onCollapse = (): void => {
-    setOpen(!open);
-  };
-
   return (
     <SidebarContext.Provider value={context}>
-      {collapsible && !open ? (
-        <button
-          type="button"
-          aria-label="Trigger Sidebar"
-          className={cn(
-            buttonVariants({
-              color: 'ghost',
-              size: 'icon',
-              className: 'sticky bottom-4 mt-auto mb-4 h-fit max-md:hidden',
-            }),
-          )}
-          onClick={onCollapse}
-        >
-          <SidebarIcon />
-        </button>
-      ) : null}
       <Base.SidebarList
         minWidth={768} // md
         className={cn(
           'flex w-full flex-col text-[15px] md:sticky md:top-16 md:h-body md:w-[240px] md:text-sm xl:w-[260px]',
-          !open && 'md:hidden',
           'max-md:fixed max-md:inset-0 max-md:z-40 max-md:bg-background/80 max-md:pt-16 max-md:backdrop-blur-md max-md:data-[open=false]:hidden',
+          props.className,
         )}
       >
+        <div
+          id="sidebar-background"
+          className="absolute z-[-1] size-full md:left-[calc((100vw-min(100vw,1400px))/-2)] md:w-[calc((100vw-min(100vw,1400px))/2+100%)]"
+        />
         <ViewportContent>
           {banner}
           {items.length > 0 && (
@@ -140,22 +124,6 @@ export function Sidebar({
         >
           {footer}
           <ThemeToggle className="md:hidden" />
-          {collapsible ? (
-            <button
-              type="button"
-              aria-label="Trigger Sidebar"
-              className={cn(
-                buttonVariants({
-                  color: 'ghost',
-                  size: 'icon',
-                  className: 'max-md:hidden ms-auto',
-                }),
-              )}
-              onClick={onCollapse}
-            >
-              <SidebarIcon />
-            </button>
-          ) : null}
         </div>
       </Base.SidebarList>
     </SidebarContext.Provider>
@@ -172,7 +140,7 @@ function ViewportContent({
   return (
     <ScrollArea className="flex-1">
       <ScrollViewport>
-        <div className="flex flex-col gap-8 pb-10 pt-4 max-md:px-4 md:pr-3 md:pt-10">
+        <div className="flex flex-col gap-8 pb-10 pt-4 px-4 md:px-3 md:pt-10">
           {children}
           <NodeList items={root.children} />
         </div>
@@ -255,7 +223,7 @@ function FolderNode({
     if (shouldExtend) setExtend(true);
   }, [shouldExtend]);
 
-  const onClick = React.useCallback(
+  const onClick = useCallback(
     (e: React.MouseEvent) => {
       if (e.target !== e.currentTarget || active) {
         setExtend((prev) => !prev);
