@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/utils/cn';
@@ -40,6 +40,7 @@ export interface FooterProps {
 export function Footer({ items }: FooterProps): React.ReactElement {
   const tree = useTreeContext();
   const pathname = usePathname();
+  const { nextPage, previousPage } = useI18n().text;
 
   const { previous = items?.previous, next = items?.next } = useMemo(() => {
     const currentIndex = tree.navigation.findIndex(
@@ -53,24 +54,24 @@ export function Footer({ items }: FooterProps): React.ReactElement {
   }, [pathname, tree.navigation]);
 
   const footerItem =
-    'flex flex-col gap-2 rounded-lg p-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground';
+    'flex flex-col gap-2 rounded-lg p-4 text-sm transition-colors hover:bg-accent hover:text-accent-foreground';
 
   return (
-    <div className="-mx-2 mt-4 flex flex-row flex-wrap gap-1 border-t py-6">
+    <div className="-mx-2 mt-4 flex flex-row flex-wrap gap-1 border-t py-4">
       {previous ? (
         <Link href={previous.url} className={footerItem}>
           <div className="inline-flex items-center gap-0.5 text-muted-foreground">
-            <ChevronLeftIcon className="-ms-1 size-4 shrink-0 rtl:rotate-180" />
-            <p>Previous</p>
+            <ChevronLeft className="-ms-1 size-4 shrink-0 rtl:rotate-180" />
+            <p>{previousPage}</p>
           </div>
           <p className="font-medium">{previous.name}</p>
         </Link>
       ) : null}
       {next ? (
-        <Link href={next.url} className={cn(footerItem, 'text-end ms-auto')}>
+        <Link href={next.url} className={cn(footerItem, 'ms-auto text-end')}>
           <div className="inline-flex flex-row-reverse items-center gap-0.5 text-muted-foreground">
-            <ChevronRightIcon className="-me-1 size-4 shrink-0 rtl:rotate-180" />
-            <p>Next</p>
+            <ChevronRight className="-me-1 size-4 shrink-0 rtl:rotate-180" />
+            <p>{nextPage}</p>
           </div>
           <p className="font-medium">{next.name}</p>
         </Link>

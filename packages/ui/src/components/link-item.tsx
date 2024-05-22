@@ -1,5 +1,5 @@
 import Link from 'fumadocs-core/link';
-import { ChevronDownIcon } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cva } from 'class-variance-authority';
 import type { LinkItemType } from '@/layout';
@@ -56,7 +56,7 @@ export function LinkItem({
           {...props}
         >
           {item.text}
-          <ChevronDownIcon className="ml-auto size-4" />
+          <ChevronDown className="ml-auto size-4" />
         </PopoverTrigger>
         <PopoverContent className="flex flex-col">
           {item.items.map((child, i) => (
@@ -76,10 +76,10 @@ export function LinkItem({
         >
           {item.icon}
           {item.text}
-          <ChevronDownIcon className="ml-auto size-4 group-data-[state=closed]/link:-rotate-90" />
+          <ChevronDown className="ml-auto size-4 group-data-[state=closed]/link:-rotate-90" />
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <div className="flex flex-col ps-4 py-1">
+          <div className="flex flex-col py-1 ps-4">
             {item.items.map((child, i) => (
               <LinkItem key={i} item={child} on="menu" />
             ))}

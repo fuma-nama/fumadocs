@@ -56,6 +56,11 @@ import { createElement } from 'react';
 
 export const utils = loader({
   icon(icon) {
+    if (!icon) {
+      // You may set a default icon
+      return;
+    }
+
     if (icon in icons) return createElement(icons[icon as keyof typeof icons]);
   },
 });

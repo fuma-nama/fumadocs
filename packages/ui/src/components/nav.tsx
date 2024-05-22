@@ -1,5 +1,5 @@
 'use client';
-import { MenuIcon, MoreVerticalIcon, SearchIcon } from 'lucide-react';
+import { MenuIcon, MoreVertical, SearchIcon, X } from 'lucide-react';
 import Link from 'fumadocs-core/link';
 import { SidebarTrigger } from 'fumadocs-core/sidebar';
 import { type ReactNode, useEffect, useState } from 'react';
@@ -107,11 +107,12 @@ export function Nav({
                 buttonVariants({
                   size: 'icon',
                   color: 'ghost',
-                  className: 'md:hidden',
+                  className: 'group md:hidden',
                 }),
               )}
             >
-              <MenuIcon />
+              <MenuIcon className="group-data-[open=true]:hidden" />
+              <X className="hidden group-data-[open=true]:block" />
             </SidebarTrigger>
           ) : null}
           <LinksMenu
@@ -153,7 +154,7 @@ function LinksMenu({ items, ...props }: LinksMenuProps): React.ReactElement {
           }),
         )}
       >
-        <MoreVerticalIcon />
+        <MoreVertical />
       </PopoverTrigger>
       <PopoverContent className="flex flex-col">
         {items.map((item, i) => (

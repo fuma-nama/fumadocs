@@ -1,4 +1,4 @@
-import { AlertOctagonIcon, AlertTriangleIcon, InfoIcon } from 'lucide-react';
+import { AlertOctagon, AlertTriangle, Info } from 'lucide-react';
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import { cn } from '@/utils/cn';
 
@@ -27,13 +27,11 @@ export const Callout = forwardRef<HTMLDivElement, CalloutProps>(
       >
         {icon ??
           {
-            info: <InfoIcon className="size-5 fill-blue-500 text-card" />,
+            info: <Info className="size-5 fill-blue-500 text-card" />,
             warn: (
-              <AlertTriangleIcon className="size-5 fill-orange-500 text-card" />
+              <AlertTriangle className="size-5 fill-orange-500 text-card" />
             ),
-            error: (
-              <AlertOctagonIcon className="size-5 fill-red-500 text-card" />
-            ),
+            error: <AlertOctagon className="size-5 fill-red-500 text-card" />,
           }[type]}
         <div className="w-0 flex-1">
           {title ? (

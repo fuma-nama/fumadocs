@@ -1,5 +1,5 @@
 'use client';
-import { CheckIcon, CopyIcon } from 'lucide-react';
+import { Check, Copy } from 'lucide-react';
 import type { ButtonHTMLAttributes, HTMLAttributes, ReactNode } from 'react';
 import { forwardRef, useCallback, useRef } from 'react';
 import { cn } from '@/utils/cn';
@@ -110,10 +110,10 @@ function CopyButton({
       onClick={onClick}
       {...props}
     >
-      <CheckIcon
+      <Check
         className={cn('size-3.5 transition-transform', !checked && 'scale-0')}
       />
-      <CopyIcon
+      <Copy
         className={cn(
           'absolute size-3.5 transition-transform',
           checked && 'scale-0',

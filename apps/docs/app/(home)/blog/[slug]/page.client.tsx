@@ -1,5 +1,5 @@
 'use client';
-import { ShareIcon } from 'lucide-react';
+import { Share } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import {
@@ -24,7 +24,7 @@ export function Control({ url }: { url: string }): React.ReactElement {
         )}
         onClick={onClick}
       >
-        <ShareIcon className="size-4" />
+        <Share className="size-4" />
         Share Post
       </TooltipTrigger>
       <TooltipContent className="bg-popover p-2 text-popover-foreground text-sm border rounded-lg">

@@ -76,6 +76,7 @@ export type SidebarContentProps<T extends ElementType> = WithAs<
   }
 >;
 
+// todo: Change in next major
 export function SidebarList<T extends ElementType = 'aside'>({
   as,
   minWidth,
