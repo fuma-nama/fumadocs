@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronUpIcon } from 'lucide-react';
+import { ChevronUp } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/theme/variants';
@@ -59,7 +59,7 @@ export function RollButton({
         });
       }}
     >
-      <ChevronUpIcon />
+      <ChevronUp />
     </button>
   );
 }

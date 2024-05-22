@@ -54,7 +54,7 @@ export function DocsPage({
 }: DocsPageProps): React.ReactElement {
   return (
     <>
-      <article className="flex w-0 flex-1 flex-col gap-6 py-10">
+      <article className="flex w-0 flex-1 flex-col gap-6 px-4 py-10">
         {replaceOrDefault(breadcrumb, <Breadcrumb />)}
         {props.children}
         {props.lastUpdate ? (

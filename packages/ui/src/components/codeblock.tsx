@@ -1,5 +1,5 @@
 'use client';
-import { CheckIcon, CopyIcon } from 'lucide-react';
+import { Check, Copy } from 'lucide-react';
 import type { ButtonHTMLAttributes, HTMLAttributes, ReactNode } from 'react';
 import { forwardRef, useCallback, useRef } from 'react';
 import { cn } from '@/utils/cn';
@@ -23,7 +23,7 @@ export type CodeBlockProps = HTMLAttributes<HTMLElement> & {
 export const Pre = forwardRef<HTMLPreElement, HTMLAttributes<HTMLPreElement>>(
   ({ className, ...props }, ref) => {
     return (
-      <pre ref={ref} className={cn('nd-codeblock py-4', className)} {...props}>
+      <pre ref={ref} className={cn('nd-codeblock p-4', className)} {...props}>
         {props.children}
       </pre>
     );
@@ -110,10 +110,10 @@ function CopyButton({
       onClick={onClick}
       {...props}
     >
-      <CheckIcon
+      <Check
         className={cn('size-3.5 transition-transform', !checked && 'scale-0')}
       />
-      <CopyIcon
+      <Copy
         className={cn(
           'absolute size-3.5 transition-transform',
           checked && 'scale-0',

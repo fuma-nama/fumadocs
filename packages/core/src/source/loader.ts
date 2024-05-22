@@ -5,7 +5,7 @@ import {
   type VirtualFile,
   type Transformer,
 } from './load-files';
-import type { FileData, MetaData, PageData } from './types';
+import type { FileData, MetaData, PageData, UrlFn } from './types';
 import type { CreatePageTreeBuilderOptions } from './page-tree-builder';
 import { createPageTreeBuilder } from './page-tree-builder';
 import { splitPath, type FileInfo } from './path';
@@ -33,7 +33,7 @@ export interface LoaderOptions {
   languages?: string[];
   icon?: NonNullable<CreatePageTreeBuilderOptions['resolveIcon']>;
   slugs?: LoadOptions['getSlugs'];
-  url?: LoadOptions['getUrl'];
+  url?: UrlFn;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Inevitable
   source: Source<any>;
   transformers?: Transformer[];
@@ -59,6 +59,11 @@ export interface Meta<Data = MetaData> {
   data: Data;
 }
 
+export interface LanguageEntry<Data = PageData> {
+  language: string;
+  pages: Page<Data>[];
+}
+
 export interface LoaderOutput<Config extends LoaderConfig> {
   pageTree: Config['i18n'] extends true
     ? Record<string, PageTree.Root>
@@ -72,6 +77,9 @@ export interface LoaderOutput<Config extends LoaderConfig> {
    * @param language - If empty, the default language will be used
    */
   getPages: (language?: string) => Page<Config['source']['pageData']>[];
+
+  getLanguages: () => LanguageEntry<Config['source']['pageData']>[];
+
   /**
    * @param language - If empty, the default language will be used
    */
@@ -84,6 +92,7 @@ export interface LoaderOutput<Config extends LoaderConfig> {
 function buildPageMap(
   storage: Storage,
   languages: string[],
+  getUrl: UrlFn,
 ): Map<string, Map<string, Page>> {
   const map = new Map<string, Map<string, Page>>();
   const defaultMap = new Map<string, Page>();
@@ -91,7 +100,7 @@ function buildPageMap(
   map.set('', defaultMap);
   for (const file of storage.list()) {
     if (file.format !== 'page' || file.file.locale) continue;
-    const page = fileToPage(file);
+    const page = fileToPage(file, getUrl);
 
     defaultMap.set(page.slugs.join('/'), page);
 
@@ -102,7 +111,7 @@ function buildPageMap(
         `${file.file.flattenedPath}.${lang}`,
         'page',
       );
-      const localizedPage = localized ? fileToPage(localized) : page;
+      const localizedPage = fileToPage(localized ?? file, getUrl, lang);
       langMap.set(localizedPage.slugs.join('/'), localizedPage);
       map.set(lang, langMap);
     }
@@ -111,9 +120,7 @@ function buildPageMap(
   return map;
 }
 
-export function createGetUrl(
-  baseUrl: string,
-): (slugs: string[], locale?: string) => string {
+export function createGetUrl(baseUrl: string): UrlFn {
   return (slugs, locale) => {
     const paths = locale
       ? [...splitPath(baseUrl), locale, ...slugs]
@@ -148,7 +155,7 @@ function createOutput({
   transformers,
   baseUrl = '/',
   slugs: slugsFn = getSlugs,
-  url: urlFn = createGetUrl(baseUrl),
+  url: getUrl = createGetUrl(baseUrl),
 }: LoaderOptions): LoaderOutput<LoaderConfig> {
   const storage = loadFiles(
     typeof source.files === 'function' ? source.files(rootDir) : source.files,
@@ -156,13 +163,13 @@ function createOutput({
       transformers,
       rootDir,
       getSlugs: slugsFn,
-      getUrl: urlFn,
     },
   );
-  const i18nMap = buildPageMap(storage, languages ?? []);
+  const i18nMap = buildPageMap(storage, languages ?? [], getUrl);
   const builder = createPageTreeBuilder({
     storage,
     resolveIcon: icon,
+    getUrl,
   });
   const pageTree =
     languages === undefined
@@ -175,18 +182,34 @@ function createOutput({
     getPages(language = '') {
       return Array.from(i18nMap.get(language)?.values() ?? []);
     },
+    getLanguages() {
+      const list: LanguageEntry[] = [];
+
+      for (const [language, pages] of i18nMap) {
+        list.push({
+          language,
+          pages: Array.from(pages.values()),
+        });
+      }
+
+      return list;
+    },
     getPage(slugs = [], language = '') {
       return i18nMap.get(language)?.get(slugs.join('/'));
     },
   };
 }
 
-function fileToPage<Data = PageData>(file: File): Page<Data> {
+function fileToPage<Data = PageData>(
+  file: File,
+  getUrl: UrlFn,
+  locale?: string,
+): Page<Data> {
   const data = file.data as FileData['file'];
 
   return {
     file: file.file,
-    url: data.url,
+    url: getUrl(data.slugs, locale),
     slugs: data.slugs,
     data: data.data as Data,
   };

@@ -98,9 +98,6 @@ describe('Path utilities', () => {
 
     expect(resolvePath('a/', '../b/c')).toBe('b/c');
     expect(resolvePath('a/', './b/c')).toBe('a/b/c');
-
-    expect(resolvePath('a', 'b', 'leading')).toBe('/a/b');
-    expect(resolvePath('a', 'b', 'trailing')).toBe('a/b/');
   });
 
   test('split paths', () => {

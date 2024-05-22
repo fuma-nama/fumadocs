@@ -5,7 +5,7 @@ import type {
   AccordionMultipleProps,
   AccordionSingleProps,
 } from '@radix-ui/react-accordion';
-import { CheckIcon, ChevronRightIcon, LinkIcon } from 'lucide-react';
+import { Check, ChevronRight, LinkIcon } from 'lucide-react';
 import {
   forwardRef,
   type ComponentPropsWithoutRef,
@@ -74,7 +74,7 @@ export const Accordion = forwardRef<
         className="not-prose flex flex-row items-center font-medium text-foreground"
       >
         <AccordionPrimitive.Trigger className="flex flex-1 items-center gap-2 p-4 text-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-          <ChevronRightIcon className="size-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]/accordion:rotate-90" />
+          <ChevronRight className="size-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]/accordion:rotate-90" />
           {title}
         </AccordionPrimitive.Trigger>
         {id ? <CopyButton id={id} /> : null}
@@ -107,7 +107,7 @@ function CopyButton({ id }: { id: string }): React.ReactElement {
       onClick={onClick}
     >
       {checked ? (
-        <CheckIcon className="size-3.5" />
+        <Check className="size-3.5" />
       ) : (
         <LinkIcon className="size-3.5" />
       )}

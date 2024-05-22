@@ -1,4 +1,4 @@
-import { ChevronRightIcon } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { useBreadcrumb } from 'fumadocs-core/breadcrumb';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -26,10 +26,9 @@ export function Breadcrumb(): React.ReactElement {
         );
 
         return (
-          // eslint-disable-next-line react/no-array-index-key -- Won't re-render
           <Fragment key={i}>
             {i !== 0 && (
-              <ChevronRightIcon className="size-4 shrink-0 rtl:rotate-180" />
+              <ChevronRight className="size-4 shrink-0 rtl:rotate-180" />
             )}
             {item.url ? (
               <Link href={item.url} className={style}>

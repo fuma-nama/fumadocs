@@ -35,7 +35,6 @@ to learn more about implementing I18n in Next.js.
    ```ts title="middleware.ts"
    import { defaultLanguage, languages } from '@/i18n';
    import { createI18nMiddleware } from 'fumadocs-core/middleware';
-   import { NextRequest } from 'next/server';
 
    export default createI18nMiddleware({
      languages,

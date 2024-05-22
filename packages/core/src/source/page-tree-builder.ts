@@ -2,14 +2,12 @@ import type { ReactElement } from 'react';
 import type * as PageTree from '../server/page-tree';
 import type { File, Folder, Storage } from './file-system';
 import { resolvePath } from './path';
-import { type FileData } from './types';
+import { type FileData, type UrlFn } from './types';
 
-interface PageTreeBuilderContext {
-  storage: Storage;
+interface PageTreeBuilderContext extends CreatePageTreeBuilderOptions {
   lang?: string;
 
   builder: PageTreeBuilder;
-  resolveIcon: (icon: string | undefined) => ReactElement | undefined;
 }
 
 export interface BuildPageTreeOptionsWithI18n {
@@ -29,7 +27,9 @@ export interface PageTreeBuilder {
 
 export interface CreatePageTreeBuilderOptions {
   storage: Storage;
-  resolveIcon?: (icon: string) => ReactElement | undefined;
+
+  getUrl: UrlFn;
+  resolveIcon?: (icon: string | undefined) => ReactElement | undefined;
 }
 
 const link = /^\[(?<text>.+)]\((?<url>.+)\)$/;
@@ -174,7 +174,7 @@ function buildFolderNode(
   return removeUndefined({
     type: 'folder',
     name: metadata?.title ?? index?.name ?? pathToName(folder.file.name),
-    icon: ctx.resolveIcon(metadata?.icon),
+    icon: ctx.resolveIcon?.(metadata?.icon),
     root: metadata?.root,
     defaultOpen: metadata?.defaultOpen,
     index,
@@ -190,8 +190,8 @@ function buildFileNode(file: File, ctx: PageTreeBuilderContext): PageTree.Item {
   return removeUndefined({
     type: 'page',
     name: data.data.title,
-    icon: ctx.resolveIcon(data.data.icon),
-    url: data.url,
+    icon: ctx.resolveIcon?.(data.data.icon),
+    url: ctx.getUrl(data.slugs, ctx.lang),
   });
 }
 
@@ -205,21 +205,16 @@ function build(ctx: PageTreeBuilderContext): PageTree.Root {
   };
 }
 
-export function createPageTreeBuilder({
-  storage,
-  resolveIcon = () => undefined,
-}: CreatePageTreeBuilderOptions): PageTreeBuilder {
+export function createPageTreeBuilder(
+  options: CreatePageTreeBuilderOptions,
+): PageTreeBuilder {
   function getContext(
     builder: PageTreeBuilder,
     locale?: string,
   ): PageTreeBuilderContext {
     return {
-      storage,
+      ...options,
       lang: locale,
-      resolveIcon(icon) {
-        if (!icon) return;
-        return resolveIcon(icon);
-      },
       builder,
     };
   }

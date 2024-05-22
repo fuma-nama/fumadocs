@@ -8,6 +8,7 @@ import type { SidebarProps } from './components/sidebar';
 declare const {
   Nav,
   TreeContextProvider,
+  DynamicSidebar,
   Sidebar,
 }: typeof import('./layout.client');
 
@@ -125,19 +126,27 @@ export function DocsLayout({
       <div
         {...containerProps}
         className={cn(
-          'mx-auto flex w-full max-w-container flex-row gap-6 px-4 xl:gap-12',
+          'mx-auto flex w-full max-w-container flex-row gap-2 xl:gap-6',
           containerProps?.className,
         )}
       >
         {replaceOrDefault(
           sidebar,
-          <Sidebar
-            items={finalLinks}
-            defaultOpenLevel={sidebar.defaultOpenLevel}
-            banner={sidebar.banner}
-            footer={sidebar.footer}
-            collapsible={sidebarCollapsible}
-          />,
+          sidebarCollapsible ? (
+            <DynamicSidebar
+              items={finalLinks}
+              defaultOpenLevel={sidebar.defaultOpenLevel}
+              banner={sidebar.banner}
+              footer={sidebar.footer}
+            />
+          ) : (
+            <Sidebar
+              items={finalLinks}
+              defaultOpenLevel={sidebar.defaultOpenLevel}
+              banner={sidebar.banner}
+              footer={sidebar.footer}
+            />
+          ),
         )}
 
         {children}

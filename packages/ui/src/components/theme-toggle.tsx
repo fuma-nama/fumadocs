@@ -1,5 +1,5 @@
 import { cva } from 'class-variance-authority';
-import { MoonIcon, SunIcon } from 'lucide-react';
+import { Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useCallback, type ButtonHTMLAttributes } from 'react';
 import { cn } from '@/utils/cn';
@@ -35,8 +35,8 @@ export function ThemeToggle({
       onClick={onToggle}
       {...props}
     >
-      <SunIcon className={cn(buttonVariants({ dark: false }))} />
-      <MoonIcon className={cn(buttonVariants({ dark: true }))} />
+      <Sun className={cn(buttonVariants({ dark: false }))} />
+      <Moon className={cn(buttonVariants({ dark: true }))} />
     </button>
   );
 }

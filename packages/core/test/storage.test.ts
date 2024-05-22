@@ -57,7 +57,6 @@ test('Building File Graph', () => {
   const storage = loadFiles(demoFiles, {
     rootDir: '',
     getSlugs: () => [''],
-    getUrl: () => '',
   });
 
   expect(storage.root().children).toEqual([
@@ -90,7 +89,6 @@ test('Building File Graph - with root directory', () => {
   const storage = loadFiles(demoFiles, {
     rootDir: 'nested',
     getSlugs: () => [''],
-    getUrl: () => '',
   });
 
   expect(storage.root().children).toMatchInlineSnapshot(`
@@ -103,7 +101,6 @@ test('Building File Graph - with root directory', () => {
           "slugs": [
             "",
           ],
-          "url": "",
         },
         "file": {
           "dirname": "",
@@ -124,7 +121,6 @@ test('Building File Graph - with root directory', () => {
               "slugs": [
                 "",
               ],
-              "url": "",
             },
             "file": {
               "dirname": "nested",

@@ -35,6 +35,7 @@ export class Storage {
 
   /**
    * @param path - flattened path
+   * @param format - file format
    */
   read(path: string, format: string): File | undefined {
     return this.files.get(`${path}.${format}`);

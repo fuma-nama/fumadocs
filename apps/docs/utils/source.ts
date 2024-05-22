@@ -10,7 +10,7 @@ export const utils = loader({
   baseUrl: '/docs',
   rootDir: 'docs',
   icon(icon) {
-    if (icon in icons)
+    if (icon && icon in icons)
       return create({ icon: icons[icon as keyof typeof icons] });
   },
   source: createMDXSource(map, {

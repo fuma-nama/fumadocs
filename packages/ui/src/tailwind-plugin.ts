@@ -95,12 +95,12 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
         '.nd-codeblock': {
           '& .line': {
             'font-size': '13px',
-            'padding-left': `theme('spacing.4')`,
-            'padding-right': `theme('spacing.4')`,
           },
           '& .highlighted': {
-            width: '100%',
+            width: 'calc(100% + 32px)',
             display: 'inline-block',
+            margin: '0 -16px',
+            padding: 'p 16px',
             'background-color': `theme('colors.primary.DEFAULT / 10%')`,
           },
           '& .highlighted-word': {
