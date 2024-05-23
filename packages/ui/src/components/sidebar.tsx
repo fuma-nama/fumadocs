@@ -102,10 +102,7 @@ export function Sidebar({
           props.className,
         )}
       >
-        <div
-          id="sidebar-background"
-          className="absolute z-[-1] size-full md:left-[calc((100vw-min(100vw,1400px))/-2)] md:w-[calc((100vw-min(100vw,1400px))/2+100%)]"
-        />
+        <div id="sidebar-background" className="absolute z-[-1] size-full" />
         <ViewportContent>
           {banner}
           {items.length > 0 && (

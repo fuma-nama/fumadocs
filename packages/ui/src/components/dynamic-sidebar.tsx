@@ -33,7 +33,7 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
     <>
       {!open ? (
         <div
-          className="fixed bottom-0 left-0 top-16 max-md:hidden"
+          className="fixed bottom-0 start-0 top-16 max-md:hidden"
           onPointerEnter={onHover}
           onPointerLeave={onLeave}
           style={{
@@ -51,7 +51,7 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
             buttonVariants({
               color: 'secondary',
               size: 'icon',
-              className: 'fixed left-4 bottom-4 z-10 max-md:hidden',
+              className: 'fixed start-4 bottom-4 z-10 max-md:hidden',
             }),
           )}
           onClick={onCollapse}
@@ -69,7 +69,7 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
         className={cn(
           'z-40 transition-transform max-md:absolute',
           !open &&
-            'md:fixed md:bottom-2 md:left-2 md:top-16 md:overflow-hidden md:rounded-xl md:border md:bg-background md:shadow-md',
+            'md:fixed md:bottom-2 md:start-2 md:top-16 md:overflow-hidden md:rounded-xl md:border md:bg-background md:shadow-md',
         )}
       >
         <Sidebar
