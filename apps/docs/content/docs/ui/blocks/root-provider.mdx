@@ -22,30 +22,11 @@ export default function Layout({ children }) {
 }
 ```
 
-### Search Dialog
-
-You can customize the search dialog from the root provider.
+In addition, You can customize the search dialog from the root provider.
 
 ```json doc-gen:typescript
 {
   "file": "./content/docs/ui/props.ts",
   "name": "ProviderProps"
 }
-```
-
-#### Custom Links
-
-Add custom link items to search dialog.
-
-```jsx
-<RootProvider
-  search={{
-    links: [
-      ['Home', '/'],
-      ['Docs', '/docs'],
-    ],
-  }}
->
-  ...
-</RootProvider>
 ```

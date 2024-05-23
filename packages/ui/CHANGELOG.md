@@ -1,5 +1,15 @@
 # next-docs-ui
 
+## 11.2.0
+
+### Minor Changes
+
+- 3292df1: Support sliding dynamic sidebar
+
+### Patch Changes
+
+- fumadocs-core@11.2.0
+
 ## 11.1.3
 
 ### Patch Changes

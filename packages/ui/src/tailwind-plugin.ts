@@ -81,9 +81,14 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
           'background-color': `theme('colors.background')`,
           color: `theme('colors.foreground')`,
         },
+
         '@screen md': {
+          '#sidebar-background': {
+            'inset-inline-start': 'calc((100vw - min(100vw,1400px))/-2)',
+            width: 'calc((100vw - min(100vw,1400px))/2 + 100%)',
+          },
           '#dynamic-sidebar #sidebar-background': {
-            left: '0',
+            'inset-inline-start': '0',
             width: '100%',
           },
           '#dynamic-sidebar[data-open=false][data-hover=true]': {
@@ -91,6 +96,9 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
           },
           '#dynamic-sidebar[data-open=false][data-hover=false]': {
             transform: 'translateX(calc(-100% - 1rem))',
+          },
+          '[dir=rtl] #dynamic-sidebar[data-open=false][data-hover=false]': {
+            transform: 'translateX(calc(100% + 1rem))',
           },
         },
       });

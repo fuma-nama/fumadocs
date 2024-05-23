@@ -62,7 +62,7 @@ It will initialize a new fumadocs app, now you can start hacking!
 
 ### Enjoy!
 
-Now, create your first mdx file in the docs folder.
+Create your first mdx file in the docs folder.
 
 ```mdx title="content/docs/index.mdx"
 ---
@@ -78,7 +78,9 @@ Run the app in development mode and see http://localhost:3000/docs.
 npm run dev
 ```
 
-### FAQ
+## FAQ
+
+Some common questions you may encounter.
 
 <Accordions>
     <Accordion id='why-fumadocs-ui' title="Why Fumadocs UI?">
@@ -90,6 +92,21 @@ npm run dev
         - Flexible and Fast by default
         - Built on App Router
         - Use it in an existing Next.js project, without refactoring anything.
+    </Accordion>
+    <Accordion id='customise' title='How to Customise UI?'>
+
+        Fumadocs UI offers Themes, Blocks and Components.
+
+        The design system is built with Tailwind CSS, see [Themes](/docs/ui/theme).
+
+        Components are pre-built elements to enhance your documentation.
+        There are many pre-built components, and they are both customisable with exposed props like `style` and `className`.
+
+        Blocks are essential elements of a docs, providing navigation and basic functionality.
+        We provided many options to customise them, see the **Blocks** section of the docs.
+
+        Although the docs didn't explicitly mention, you can always style the elements with CSS selectors.
+
     </Accordion>
     <Accordion id='fix-monorepo-styling' title="How to fix stylings not being applied in Monorepo?">
 
@@ -150,10 +167,6 @@ npm run dev
     </Accordion>
 
 </Accordions>
-
-### Demo
-
-Open in [CodeSandbox](https://githubbox.com/fuma-nama/fumadocs-ui-template).
 
 ## Learn More
 

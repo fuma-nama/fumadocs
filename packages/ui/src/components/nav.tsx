@@ -160,7 +160,7 @@ function LinksMenu({ items, ...props }: LinksMenuProps): React.ReactElement {
         {items.map((item, i) => (
           <LinkItem key={i} item={item} on="menu" />
         ))}
-        <div className="flex flex-row px-2 items-center justify-between">
+        <div className="flex flex-row px-2 py-1 items-center justify-between">
           <p className="font-medium">Theme</p>
           <ThemeToggle />
         </div>

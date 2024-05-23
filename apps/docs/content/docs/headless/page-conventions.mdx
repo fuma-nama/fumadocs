@@ -49,6 +49,7 @@ Force to open the folder by default.
 ### Multiple Page Trees
 
 Adding a `root` property in meta can mark your folder as a root folder.
+The nearest root folder of current page will be used as the root of page tree.
 
 ```json title="meta.json"
 {
@@ -56,8 +57,6 @@ Adding a `root` property in meta can mark your folder as a root folder.
   "root": true
 }
 ```
-
-The nearest root folder of current page will be used as the root of page tree.
 
 ## Meta
 
@@ -69,13 +68,15 @@ When a meta file presents, items are not included unless you have explicitly add
 ```json
 {
   "title": "Name of Folder",
-  "pages": ["guide", "components"] // filename of pages
+  "pages": ["guide", "components"]
 }
 ```
 
+> `pages` are the filenames of file
+
 ### Path
 
-The items of `pages` property can be a relative path to a page or folder.
+The items of `pages` property can be a relative path to a page or folder. File extensions are not required.
 
 ```json
 {
