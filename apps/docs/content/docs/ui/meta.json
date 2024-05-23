@@ -4,6 +4,7 @@
   "pages": [
     "---Guide---",
     "index",
+    "comparisons",
     "...",
     "---Components---",
     "...components",
@@ -15,10 +16,9 @@
     "twoslash",
     "openapi",
     "museum",
-    "---Reference---",
-    "../headless/page-conventions",
-    "---Commands---",
+    "---Others---",
     "...commands",
+    "../headless/page-conventions",
     "[Vercel](https://vercel.com)"
   ]
 }

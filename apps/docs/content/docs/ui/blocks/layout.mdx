@@ -5,14 +5,13 @@ description: The layout of documentation
 
 import { File, Files, Folder } from 'fumadocs-ui/components/files';
 
-The layout of documentation pages, it must be nested under the
-[Root Provider](/docs/ui/blocks/root-provider).
+The layout of documentation pages, it includes sidebar and navbar.
 
 > It is a server component, you should not reference it in a client component.
 
 ## Usage
 
-Wrap the children and pass your page tree to the component.
+Pass your page tree to the component.
 
 ```jsx
 import { DocsLayout } from 'fumadocs-ui/layout';
@@ -51,32 +50,9 @@ You can create a [Route Group](https://nextjs.org/docs/app/building-your-applica
   </Folder>
 </Files>
 
-### Links
+## Navbar
 
-You can display dropdown menus and links on navigation elements like navbar and sidebar.
-
-> They are displayed intelligently for best responsibility.
-
-```mdx
-<DocsLayout
-  links={[
-    {
-      icon: <BookIcon />,
-      text: 'Blog',
-      url: '/blog',
-    },
-    {
-      type: 'menu',
-      text: 'Guide',
-      items: [{ ... }],
-    },
-  ]}
-/>
-```
-
-### Navbar
-
-Customise the navbar element.
+The navigation header provides common interactive elements.
 
 ```mdx
 <DocsLayout
@@ -91,9 +67,9 @@ Customise the navbar element.
 }
 ```
 
-### Sidebar
+## Sidebar
 
-Customise the sidebar element.
+Provide elements to navigate between pages.
 
 ```mdx
 <DocsLayout sidebar={{ footer: <ShareButton /> }} />
@@ -104,4 +80,81 @@ Customise the sidebar element.
   "file": "./content/docs/ui/props.ts",
   "name": "SidebarProps"
 }
+```
+
+## Links
+
+Navigation links displayed on every page.
+
+### Item
+
+A link to navigate to an URL, can be external.
+
+```mdx
+import { DocsLayout } from 'fumadocs-ui/layout';
+
+<DocsLayout
+  links={[
+    {
+      icon: <BookIcon />,
+      text: 'Blog',
+      url: '/blog',
+    },
+  ]}
+/>
+```
+
+To mark the item as active when browsing child pages like `/blog/post`, add set it as `nested-url`.
+
+```mdx
+import { DocsLayout } from 'fumadocs-ui/layout';
+
+<DocsLayout
+  links={[
+    {
+      icon: <BookIcon />,
+      text: 'Blog',
+      url: '/blog',
+      active: 'nested-url',
+    },
+  ]}
+/>
+```
+
+### Secondary Item
+
+Same as normal items, but are shown as icon buttons on the navbar.
+
+```mdx
+import { DocsLayout } from 'fumadocs-ui/layout';
+
+<DocsLayout
+  links={[
+    {
+      type: 'secondary',
+      icon: <BookIcon />,
+      text: 'Blog',
+      url: '/blog',
+    },
+  ]}
+/>
+```
+
+### Dropdown Menu
+
+A dropdown menu containing multiple link items.
+
+```mdx
+import { DocsLayout } from 'fumadocs-ui/layout';
+
+<DocsLayout
+  links={[
+    {
+      icon: <BookIcon />,
+      type: 'menu',
+      text: 'Guide',
+      items: [{ ... }],
+    },
+  ]}
+/>
 ```

@@ -39,9 +39,42 @@ The default dialog will be lazy loaded using
 [`next/dynamic`](https://nextjs.org/docs/app/building-your-application/optimizing/lazy-loading).
 This allows a better initial loading performance.
 
-When not specified, it uses the [Default Search Client](/docs/headless/search/flexsearch) based on Flexsearch.
+When not specified, it uses the [Default Search Client](/docs/headless/search/flexsearch) powered by Flexsearch.
 
-### Algolia
+### Custom Links
+
+Add custom link items to search dialog.
+
+```jsx
+import { RootProvider } from 'fumadocs-ui/root-provider';
+
+<RootProvider
+  search={{
+    links: [
+      ['Home', '/'],
+      ['Docs', '/docs'],
+    ],
+  }}
+>
+  ...
+</RootProvider>;
+```
+
+### Disable Search
+
+To opt-out of document search, disable it from root provider.
+
+```mdx
+<RootProvider
+  search={{
+    enable: false,
+  }}
+>
+  {children}
+</RootProvider>
+```
+
+## Algolia
 
 For the setup guide, see [Integrate Algolia Search](/docs/headless/search/algolia). Make sure you have `algoliasearch` installed on your project.
 
@@ -96,26 +129,12 @@ javascript client).
 
 </Callout>
 
-### Other Solutions
+## Other Solutions
 
 To use other search solutions such as ElasticSearch, you can replace the
 default dialog with your own.
 
-### Disable Search
-
-To opt-out of document search, disable it from root provider.
-
-```mdx
-<RootProvider
-  search={{
-    enable: false,
-  }}
->
-  {children}
-</RootProvider>
-```
-
-### Built-in UI
+## Built-in UI
 
 If you want to use the built-in search dialog UI instead of building your own,
 you may use the `SearchDialog` component.
