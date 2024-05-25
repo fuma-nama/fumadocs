@@ -87,7 +87,7 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
             'inset-inline-start': 'calc((100vw - min(100vw,1400px))/-2)',
             width: 'calc((100vw - min(100vw,1400px))/2 + 100%)',
           },
-          '#dynamic-sidebar #sidebar-background': {
+          '#dynamic-sidebar[data-open=false] #sidebar-background': {
             'inset-inline-start': '0',
             width: '100%',
           },
