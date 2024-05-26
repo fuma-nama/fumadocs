@@ -126,7 +126,7 @@ const neutral: Preset = {
       '--muted-foreground': '0 0% 30%',
     },
     '#sidebar-background': {
-      background: 'hsl(var(--secondary))',
+      background: 'hsl(var(--secondary)/.8)',
       borderRight: '1px solid',
       borderRightColor: 'theme(borderColor.border)',
     },

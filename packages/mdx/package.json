@@ -56,7 +56,7 @@
     "@types/cross-spawn": "^6.0.6",
     "@types/mdast": "^4.0.3",
     "@types/mdx": "^2.0.13",
-    "@types/react": "^18.3.2",
+    "@types/react": "^18.3.3",
     "eslint-config-custom": "workspace:*",
     "next": "^14.2.3",
     "tsconfig": "workspace:*",

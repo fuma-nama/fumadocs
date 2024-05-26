@@ -10,9 +10,9 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
   const [hover, setHover] = useState(false);
   const timerRef = useRef(0);
 
-  const onCollapse = (): void => {
+  const onCollapse = useCallback(() => {
     setOpen(!open);
-  };
+  }, [open, setOpen]);
 
   const onHover: PointerEventHandler = useCallback((e) => {
     if (e.pointerType === 'touch') return;
