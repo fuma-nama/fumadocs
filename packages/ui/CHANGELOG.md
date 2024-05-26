@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 11.2.1
+
+### Patch Changes
+
+- 8074920: Fix sidebar background width on dynamic sidebar
+  - fumadocs-core@11.2.1
+
 ## 11.2.0
 
 ### Minor Changes
