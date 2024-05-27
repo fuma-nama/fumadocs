@@ -40,12 +40,12 @@ export default function Page(): React.ReactElement {
           Light and gorgeous. like the moon
         </p>
       </div>
-      <div className="grid grid-cols-1 gap-2 border md:grid-cols-3 lg:grid-cols-4">
+      <div className="grid grid-cols-1 border md:grid-cols-3 lg:grid-cols-4">
         {posts.map((post) => (
           <Link
             key={post.url}
             href={post.url}
-            className="flex flex-col bg-card p-4 hover:bg-accent"
+            className="flex flex-col bg-card p-4 transition-colors hover:bg-accent hover:text-accent-foreground"
           >
             <p className="font-medium">{post.data.title}</p>
             <p className="text-sm text-muted-foreground">

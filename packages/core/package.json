@@ -145,7 +145,7 @@
     "@types/mdast": "^4.0.3",
     "@types/negotiator": "^0.6.3",
     "@types/node": "18.17.5",
-    "@types/react": "^18.3.2",
+    "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "algoliasearch": "^4.23.3",
     "eslint-config-custom": "workspace:*",

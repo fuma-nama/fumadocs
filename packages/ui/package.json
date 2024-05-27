@@ -104,7 +104,7 @@
     "class-variance-authority": "^0.7.0",
     "cmdk": "^1.0.0",
     "fumadocs-core": "workspace:*",
-    "lucide-react": "^0.378.0",
+    "lucide-react": "^0.379.0",
     "next-themes": "^0.3.0",
     "react-medium-image-zoom": "^5.2.4",
     "tailwind-merge": "^2.3.0"
@@ -112,7 +112,7 @@
   "devDependencies": {
     "@algolia/client-search": "^4.23.3",
     "@next/eslint-plugin-next": "^14.2.3",
-    "@types/react": "^18.3.2",
+    "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "algoliasearch": "^4.23.3",
     "eslint-config-custom": "workspace:*",

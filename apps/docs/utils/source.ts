@@ -31,7 +31,7 @@ export const blog = loader({
     schema: {
       frontmatter: defaultSchemas.frontmatter.extend({
         author: z.string(),
-        date: z.string().date().optional(),
+        date: z.string().date().or(z.date()).optional(),
       }),
     },
   }),

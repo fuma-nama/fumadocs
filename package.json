@@ -24,7 +24,7 @@
     "@vercel/style-guide": "^6.0.0",
     "concurrently": "^8.2.2",
     "eslint": "^8.57.0",
-    "eslint-plugin-tailwindcss": "^3.15.2",
+    "eslint-plugin-tailwindcss": "^3.17.0",
     "prettier": "^3.2.5",
     "rimraf": "^5.0.7",
     "tsup": "8.0.2",

@@ -98,11 +98,14 @@ export function Sidebar({
         minWidth={768} // md
         className={cn(
           'flex w-full flex-col text-[15px] md:sticky md:top-16 md:h-body md:w-[240px] md:text-sm xl:w-[260px]',
-          'max-md:fixed max-md:inset-0 max-md:z-40 max-md:bg-background/80 max-md:pt-16 max-md:backdrop-blur-md max-md:data-[open=false]:hidden',
+          'max-md:fixed max-md:inset-0 max-md:z-40 max-md:pt-16 max-md:data-[open=false]:hidden',
           props.className,
         )}
       >
-        <div id="sidebar-background" className="absolute z-[-1] size-full" />
+        <div
+          id="sidebar-background"
+          className="absolute z-[-1] size-full max-md:bg-background/80 max-md:backdrop-blur-md"
+        />
         <ViewportContent>
           {banner}
           {items.length > 0 && (
@@ -137,7 +140,7 @@ function ViewportContent({
   return (
     <ScrollArea className="flex-1">
       <ScrollViewport>
-        <div className="flex flex-col gap-8 pb-10 pt-4 px-4 md:px-3 md:pt-10">
+        <div className="flex flex-col gap-8 p-4 pb-10 md:px-3 md:pt-10">
           {children}
           <NodeList items={root.children} />
         </div>
