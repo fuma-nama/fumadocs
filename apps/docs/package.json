@@ -32,7 +32,7 @@
     "react-dom": "^18.3.1",
     "rehype-katex": "^7.0.0",
     "remark-math": "^6.0.0",
-    "shiki": "^1.6.0",
+    "shiki": "^1.6.1",
     "tailwind-merge": "^2.3.0",
     "zod": "^3.23.8"
   },

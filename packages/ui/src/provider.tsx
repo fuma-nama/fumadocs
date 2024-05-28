@@ -8,6 +8,7 @@ import { DirectionProvider } from '@radix-ui/react-direction';
 import { SidebarCollapseProvider } from '@/contexts/sidebar';
 import { DefaultSearchDialogProps } from '@/components/dialog/search-default';
 import { SearchProvider, type SearchProviderProps } from './contexts/search';
+import type { ThemeProviderProps } from 'next-themes/dist/types';
 
 interface SearchOptions
   extends Omit<SearchProviderProps, 'options' | 'children'> {
@@ -35,8 +36,22 @@ export interface RootProviderProps {
    * Wrap the body in `ThemeProvider` (next-themes)
    *
    * @defaultValue true
+   * @deprecated Use `theme.enable` instead
    */
   enableThemeProvider?: boolean;
+
+  /**
+   * Customise options of `next-themes`
+   */
+  theme?: Partial<ThemeProviderProps> & {
+    /**
+     * Enable `next-themes`
+     *
+     * @defaultValue true
+     */
+    enabled?: boolean;
+  };
+
   children: ReactNode;
 }
 
@@ -49,6 +64,7 @@ export function RootProvider({
   children,
   dir,
   enableThemeProvider = true,
+  theme: { enabled = true, ...theme } = {},
   search,
 }: RootProviderProps): React.ReactElement {
   let body = (
@@ -64,13 +80,14 @@ export function RootProvider({
       </SearchProvider>
     );
 
-  if (enableThemeProvider)
+  if (enabled && enableThemeProvider)
     body = (
       <ThemeProvider
         attribute="class"
         defaultTheme="system"
         enableSystem
         disableTransitionOnChange
+        {...theme}
       >
         {body}
       </ThemeProvider>
