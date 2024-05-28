@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 11.2.2
+
+### Patch Changes
+
+- dd0feb2: Support customising sidebar background with opacity
+- 72096c3: Support customising theme options from root provider
+  - fumadocs-core@11.2.2
+
 ## 11.2.1
 
 ### Patch Changes
