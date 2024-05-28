@@ -33,9 +33,16 @@ For Tailwind CSS projects, use the official Tailwind CSS plugin.
 By using the Tailwind CSS plugin, or the pre-built stylesheet, your default border, text and background
 colors will be changed.
 
+### Light/Dark Modes
+
+Fumadocs supports light/dark modes with [`next-themes`](https://github.com/pacocoursey/next-themes).
+The Theme Provider is a part of Root Provider.
+
+See [Root Provider](/docs/ui/blocks/root-provider#theme-provider) to learn more.
+
 ### RTL Layout
 
-Fumadocs UI has support for RTL (Right-to-left) layout. To enable, you can pass the `dir` prop to body.
+RTL (Right-to-left) layout is supported. To enable RTL, pass the `dir` prop to body.
 
 ```tsx
 <body dir="rtl"></body>
@@ -82,7 +89,7 @@ The official Tailwind CSS plugin introduces new colors and extra utilities inclu
 
 ### Presets
 
-It comes with several theme presets out-of-the-box, you can pick one you prefer rather than the default one.
+It comes with many theme presets out-of-the-box, you can pick one you prefer rather than the default one.
 
 ```js
 import { createPreset } from 'fumadocs-ui/tailwind-plugin';
