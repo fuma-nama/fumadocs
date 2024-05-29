@@ -1,5 +1,13 @@
 # next-docs-mdx
 
+## 8.2.25
+
+### Patch Changes
+
+- 17e162e: Add `mdx` to page extensions by default
+- Updated dependencies [917d87f]
+  - fumadocs-core@11.3.0
+
 ## 8.2.24
 
 ### Patch Changes

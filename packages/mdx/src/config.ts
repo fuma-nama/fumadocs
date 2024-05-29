@@ -127,85 +127,84 @@ function getMDXLoaderOptions({
   };
 }
 
-const createMDX =
-  ({
-    mdxOptions = {},
-    cwd = process.cwd(),
-    rootMapPath = './.map.ts',
-    rootContentPath = './content',
-    buildSearchIndex = false,
-    ...loadOptions
-  }: CreateMDXOptions = {}) =>
-  (nextConfig: NextConfig = {}) => {
-    const rootMapFile = path.resolve(cwd, rootMapPath);
-    const rootContentDir = path.resolve(cwd, rootContentPath);
-    const mdxLoaderOptions = getMDXLoaderOptions(mdxOptions);
+const defaultPageExtensions = ['mdx', 'md', 'jsx', 'js', 'tsx', 'ts'];
 
+function createMDX({
+  mdxOptions = {},
+  cwd = process.cwd(),
+  rootMapPath = './.map.ts',
+  rootContentPath = './content',
+  buildSearchIndex = false,
+  ...loadOptions
+}: CreateMDXOptions = {}) {
+  const rootMapFile = path.resolve(cwd, rootMapPath);
+  const rootContentDir = path.resolve(cwd, rootContentPath);
+  const mdxLoaderOptions = getMDXLoaderOptions(mdxOptions);
+
+  return (nextConfig: NextConfig = {}): NextConfig => {
     return {
       ...nextConfig,
-      ...({
-        webpack: (config: Configuration, options) => {
-          config.resolve ||= {};
+      pageExtensions: nextConfig.pageExtensions ?? defaultPageExtensions,
+      webpack: (config: Configuration, options) => {
+        config.resolve ||= {};
 
-          const alias = config.resolve.alias as Record<string, unknown>;
+        const alias = config.resolve.alias as Record<string, unknown>;
 
-          alias['next-mdx-import-source-file'] = [
-            'private-next-root-dir/src/mdx-components',
-            'private-next-root-dir/mdx-components',
-            '@mdx-js/react',
-          ];
+        alias['next-mdx-import-source-file'] = [
+          'private-next-root-dir/src/mdx-components',
+          'private-next-root-dir/mdx-components',
+          '@mdx-js/react',
+        ];
 
-          config.module ||= {};
-          config.module.rules ||= [];
+        config.module ||= {};
+        config.module.rules ||= [];
 
-          config.module.rules.push(
-            {
-              test: /\.mdx?$/,
-              use: [
-                options.defaultLoaders.babel,
-                {
-                  loader: 'fumadocs-mdx/loader-mdx',
-                  options: mdxLoaderOptions,
-                },
-              ],
-            },
-            {
-              test: rootMapFile,
-              use: {
-                loader: 'fumadocs-mdx/loader',
-                options: {
-                  rootContentDir,
-                  rootMapFile,
-                  ...loadOptions,
-                } satisfies LoaderOptions,
+        config.module.rules.push(
+          {
+            test: /\.mdx?$/,
+            use: [
+              options.defaultLoaders.babel,
+              {
+                loader: 'fumadocs-mdx/loader-mdx',
+                options: mdxLoaderOptions,
               },
+            ],
+          },
+          {
+            test: rootMapFile,
+            use: {
+              loader: 'fumadocs-mdx/loader',
+              options: {
+                rootContentDir,
+                rootMapFile,
+                ...loadOptions,
+              } satisfies LoaderOptions,
             },
-          );
+          },
+        );
 
-          config.plugins ||= [];
+        config.plugins ||= [];
 
+        config.plugins.push(
+          new MapWebpackPlugin({
+            rootMapFile,
+          }),
+        );
+
+        if (buildSearchIndex !== false)
           config.plugins.push(
-            new MapWebpackPlugin({
+            new SearchIndexPlugin({
+              rootContentDir,
               rootMapFile,
+              ...(typeof buildSearchIndex === 'object' ? buildSearchIndex : {}),
             }),
           );
 
-          if (buildSearchIndex !== false)
-            config.plugins.push(
-              new SearchIndexPlugin({
-                rootContentDir,
-                rootMapFile,
-                ...(typeof buildSearchIndex === 'object'
-                  ? buildSearchIndex
-                  : {}),
-              }),
-            );
-
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-return -- not provided
-          return nextConfig.webpack?.(config, options) ?? config;
-        },
-      } satisfies NextConfig),
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return -- not provided
+        return nextConfig.webpack?.(config, options) ?? config;
+      },
     };
   };
+}
 
 export { createMDX as default };

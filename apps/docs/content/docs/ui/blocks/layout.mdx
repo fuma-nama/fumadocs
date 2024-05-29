@@ -23,7 +23,7 @@ export default function Layout({ children }) {
 
 ### Non-docs Pages
 
-If you want to add the navbar and search dialog to other pages, use the `Layout` component.
+To share the navbar and search dialog across other pages, use the `Layout` component.
 
 It doesn't contain a sidebar, therefore, a page tree is not required.
 
@@ -35,7 +35,7 @@ export default function HomeLayout({ children }) {
 }
 ```
 
-You can create a [Route Group](https://nextjs.org/docs/app/building-your-application/routing/route-groups) to share the same layout across multiple pages.
+Create a [Route Group](https://nextjs.org/docs/app/building-your-application/routing/route-groups) to share the same layout across multiple pages.
 
 <Files>
   <Folder name="(home)" defaultOpen>
@@ -81,6 +81,18 @@ Provide elements to navigate between pages.
   "name": "SidebarProps"
 }
 ```
+
+### Disable Sidebar from Pages
+
+A simple answer is **No**.
+
+Due to the limitations of App Router, layouts are not re-rendered when navigating between pages.
+It is an anti-pattern to change your layout from a page.
+
+You can consider:
+
+1. Disable sidebar from the entire layout.
+2. Create a [MDX Page](/docs/ui/blocks/page#mdx-page) in a layout that doesn't contain a sidebar (e.g. non-docs layout).
 
 ## Links
 

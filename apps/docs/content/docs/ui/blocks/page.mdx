@@ -20,6 +20,8 @@ import { DocsPage, DocsBody } from 'fumadocs-ui/page';
 
 It applies the [Typography](/docs/ui/theme#typography) styles, wrap your content inside.
 
+> You can use this component without `<DocsPage />`.
+
 ```mdx
 import { DocsBody } from 'fumadocs-ui/page';
 
@@ -62,13 +64,17 @@ default.
 For Github hosted documents, you can use
 the [Git Last Modified](/docs/headless/utils/git-last-edit) utility.
 
-```tsx
-<DocsPage lastUpdate={new Date(lastModifiedTime)} />
+```jsx
+import { DocsPage } from 'fumadocs-ui/page';
+
+<DocsPage lastUpdate={new Date(lastModifiedTime)} />;
 ```
 
 ### Footer
 
-Footer is a navigation element that has two buttons to jump to the next and previous pages. By default, it finds the neighbour pages from page tree.
+Footer is a navigation element that has two buttons to jump to the next and previous pages. When not specified, it shows the neighbour pages found from page tree.
+
+You can also customise it with `items` prop.
 
 ```json doc-gen:typescript
 {
@@ -87,3 +93,15 @@ A navigation element, shown only when user is navigating in folders.
   "name": "BreadcrumbProps"
 }
 ```
+
+### MDX Page
+
+In conjunction of Fumadocs MDX, you may create a `page.mdx` file and add the following.
+
+```mdx
+export { withArticle as default } from 'fumadocs-ui/page';
+
+## Hello World
+```
+
+This creates a page with MDX, with proper typography styles applied.

@@ -110,3 +110,18 @@ export const DocsBody = forwardRef<
 ));
 
 DocsBody.displayName = 'DocsBody';
+
+/**
+ * For separate MDX page
+ */
+export function withArticle({
+  children,
+}: {
+  children: React.ReactNode;
+}): React.ReactElement {
+  return (
+    <main className="container py-12">
+      <article className="prose">{children}</article>
+    </main>
+  );
+}

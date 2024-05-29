@@ -94,7 +94,8 @@ export class SearchIndexPlugin {
 
             const relativePath = path.relative(rootContentDir, info.path);
 
-            if (!filter(relativePath)) continue;
+            if (relativePath.startsWith('../') || !filter(relativePath))
+              continue;
             indexFiles.set(info.path, {
               id: info.path,
               structuredData: info.data.structuredData,

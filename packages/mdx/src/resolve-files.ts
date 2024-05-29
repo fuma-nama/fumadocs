@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { AnyZodObject, z, ZodError } from 'zod';
+import type { AnyZodObject, z, ZodError } from 'zod';
 import type { VirtualFile } from 'fumadocs-core/source';
 import type { MDXExport, MDXPageData } from './types';
 import { defaultSchemas } from './utils/schema';

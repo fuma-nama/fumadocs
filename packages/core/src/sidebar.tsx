@@ -1,6 +1,15 @@
 import { usePathname } from 'next/navigation';
-import type { ComponentPropsWithoutRef, ElementType, ReactNode } from 'react';
-import { createContext, useContext, useEffect, useState } from 'react';
+import {
+  useCallback,
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ElementType,
+  type ReactNode,
+  type ReactElement,
+  type ComponentPropsWithoutRef,
+} from 'react';
 import { RemoveScroll } from 'react-remove-scroll';
 
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
@@ -32,7 +41,7 @@ export function SidebarProvider(
 
   useEffect(() => {
     setOpen(false);
-  }, [pathname]);
+  }, [pathname, setOpen]);
 
   return (
     <SidebarContext.Provider value={[open, setOpen]}>
@@ -41,72 +50,77 @@ export function SidebarProvider(
   );
 }
 
-type WithAs<T extends ElementType, Extend = object> = Omit<
+type AsProps<T extends ElementType> = Omit<
   ComponentPropsWithoutRef<T>,
-  'as' | keyof Extend
-> &
-  Extend & {
-    as?: T;
-  };
+  'as'
+> & {
+  as?: T;
+};
 
-export type SidebarTriggerProps<T extends ElementType> = WithAs<T>;
+export type SidebarTriggerProps<T extends ElementType> = AsProps<T>;
 
 export function SidebarTrigger<T extends ElementType = 'button'>({
   as,
   ...props
-}: SidebarTriggerProps<T>): React.ReactElement {
+}: SidebarTriggerProps<T>): ReactElement {
   const [open, setOpen] = useSidebarContext();
   const As = as ?? 'button';
 
   return (
     <As
+      aria-label="Toggle Sidebar"
       data-open={open}
-      onClick={() => {
+      onClick={useCallback(() => {
         setOpen(!open);
-      }}
+      }, [open, setOpen])}
       {...props}
     />
   );
 }
 
-export type SidebarContentProps<T extends ElementType> = WithAs<
-  T,
-  {
-    minWidth?: number;
-  }
->;
+export type SidebarContentProps<T extends ElementType> = AsProps<T> & {
+  /**
+   * @deprecated Use `blockScrollingWidth` instead
+   */
+  minWidth?: number;
+
+  /**
+   * Disable scroll blocking when the viewport width is larger than a certain number (in pixels)
+   */
+  blockScrollingWidth?: number;
+};
 
 // todo: Change in next major
 export function SidebarList<T extends ElementType = 'aside'>({
   as,
   minWidth,
+  blockScrollingWidth = minWidth,
   ...props
-}: SidebarContentProps<T>): React.ReactElement {
+}: SidebarContentProps<T>): ReactElement {
   const [open] = useSidebarContext();
-  const [isMobileLayout, setIsMobileLayout] = useState(false);
+  const [isBlocking, setIsBlocking] = useState(false);
 
   useEffect(() => {
-    if (minWidth === undefined) return;
+    if (!blockScrollingWidth) return;
     const mediaQueryList = window.matchMedia(
-      `(min-width: ${minWidth.toString()}px)`,
+      `(min-width: ${blockScrollingWidth.toString()}px)`,
     );
 
     const handleChange = (): void => {
-      setIsMobileLayout(!mediaQueryList.matches);
+      setIsBlocking(!mediaQueryList.matches);
     };
     handleChange();
-
     mediaQueryList.addEventListener('change', handleChange);
     return () => {
       mediaQueryList.removeEventListener('change', handleChange);
     };
-  }, [minWidth]);
+  }, [blockScrollingWidth]);
 
   return (
     <RemoveScroll
       as={as ?? 'aside'}
-      data-open={isMobileLayout ? open : false}
-      enabled={isMobileLayout ? open : false}
+      data-open={open}
+      enabled={Boolean(isBlocking && open)}
       {...props}
     >
       {props.children}

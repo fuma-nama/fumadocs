@@ -1,18 +1,18 @@
 import { type PointerEventHandler, useCallback, useRef, useState } from 'react';
 import { SidebarIcon } from 'lucide-react';
-import { Sidebar, SidebarProps } from '@/components/sidebar';
+import { Sidebar, type SidebarProps } from '@/components/sidebar';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/theme/variants';
-import { useSidebarCollapse } from '@/contexts/sidebar';
+import { useSidebar } from '@/contexts/sidebar';
 
 export function DynamicSidebar(props: SidebarProps): React.ReactElement {
-  const [open, setOpen] = useSidebarCollapse();
+  const { collapsed, setCollapsed } = useSidebar();
   const [hover, setHover] = useState(false);
   const timerRef = useRef(0);
 
   const onCollapse = useCallback(() => {
-    setOpen(!open);
-  }, [open, setOpen]);
+    setCollapsed(!collapsed);
+  }, [collapsed, setCollapsed]);
 
   const onHover: PointerEventHandler = useCallback((e) => {
     if (e.pointerType === 'touch') return;
@@ -31,7 +31,7 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
 
   return (
     <>
-      {!open ? (
+      {collapsed ? (
         <div
           className="fixed bottom-0 start-0 top-16 max-md:hidden"
           onPointerEnter={onHover}
@@ -43,10 +43,10 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
           }}
         />
       ) : null}
-      {!open ? (
+      {collapsed ? (
         <button
           type="button"
-          aria-label="Trigger Sidebar"
+          aria-label="Collapse Sidebar"
           className={cn(
             buttonVariants({
               color: 'secondary',
@@ -61,26 +61,26 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
       ) : null}
       <div
         id="dynamic-sidebar"
-        data-open={open}
+        data-open={!collapsed}
         data-hover={hover}
         onPointerEnter={onHover}
         onPointerLeave={onLeave}
-        aria-hidden={!open && !hover}
+        aria-hidden={Boolean(collapsed && !hover)}
         className={cn(
           'z-40 transition-transform max-md:absolute',
-          !open &&
+          collapsed &&
             'md:fixed md:bottom-2 md:start-2 md:top-16 md:overflow-hidden md:rounded-xl md:border md:bg-background md:shadow-md',
         )}
       >
         <Sidebar
           {...props}
-          className={cn(!open && 'md:h-full')}
+          className={cn(collapsed && 'md:h-full')}
           footer={
             <>
               {props.footer}
               <button
                 type="button"
-                aria-label="Trigger Sidebar"
+                aria-label="Collapse Sidebar"
                 className={cn(
                   buttonVariants({
                     color: 'ghost',
