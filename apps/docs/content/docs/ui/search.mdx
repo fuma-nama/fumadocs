@@ -75,6 +75,25 @@ To opt-out of document search, disable it from root provider.
 </RootProvider>
 ```
 
+### Hot Keys
+
+You can customise the hot keys to trigger search dialog.
+
+```mdx
+<RootProvider
+  search={{
+    hotkey: [
+      {
+        display: 'K',
+        key: 'k', // key code, or a function determining whether the key is pressed
+      },
+    ],
+  }}
+>
+  {children}
+</RootProvider>
+```
+
 ## Algolia
 
 For the setup guide, see [Integrate Algolia Search](/docs/headless/search/algolia). Make sure you have `algoliasearch` installed on your project.

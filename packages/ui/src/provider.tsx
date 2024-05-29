@@ -1,12 +1,11 @@
 'use client';
 
-import { SidebarProvider } from 'fumadocs-core/sidebar';
 import { ThemeProvider } from 'next-themes';
 import { type ReactNode } from 'react';
 import dynamic from 'next/dynamic';
 import { DirectionProvider } from '@radix-ui/react-direction';
 import type { ThemeProviderProps } from 'next-themes/dist/types';
-import { SidebarCollapseProvider } from '@/contexts/sidebar';
+import { SidebarProvider } from '@/contexts/sidebar';
 import { DefaultSearchDialogProps } from '@/components/dialog/search-default';
 import { SearchProvider, type SearchProviderProps } from './contexts/search';
 
@@ -68,9 +67,9 @@ export function RootProvider({
   search,
 }: RootProviderProps): React.ReactElement {
   let body = (
-    <SidebarProvider>
-      <SidebarCollapseProvider>{children}</SidebarCollapseProvider>
-    </SidebarProvider>
+    <DirectionProvider dir={dir ?? 'ltr'}>
+      <SidebarProvider>{children}</SidebarProvider>
+    </DirectionProvider>
   );
 
   if (search?.enabled !== false)
@@ -93,12 +92,10 @@ export function RootProvider({
       </ThemeProvider>
     );
 
-  if (dir) body = <DirectionProvider dir={dir}>{body}</DirectionProvider>;
-
   return body;
 }
 
 export { useI18n } from './contexts/i18n';
 export { useSearchContext } from './contexts/search';
-export { useSidebarCollapse } from './contexts/sidebar';
+export { useSidebar } from './contexts/sidebar';
 export { useTreeContext } from './contexts/tree';

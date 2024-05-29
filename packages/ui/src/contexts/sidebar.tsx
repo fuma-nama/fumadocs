@@ -1,27 +1,46 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useContext, useState, useMemo } from 'react';
+import { SidebarProvider as BaseProvider } from 'fumadocs-core/sidebar';
 
-type SidebarCollapseContext = [open: boolean, setOpen: (v: boolean) => void];
+type SidebarCollapseContext = {
+  open: boolean;
+  setOpen: (v: boolean) => void;
+  collapsed: boolean;
+  setCollapsed: (v: boolean) => void;
+};
 
-const SidebarCollapseContext = createContext<
-  SidebarCollapseContext | undefined
->(undefined);
+const SidebarContext = createContext<SidebarCollapseContext | undefined>(
+  undefined,
+);
 
-export function useSidebarCollapse(): SidebarCollapseContext {
-  const ctx = useContext(SidebarCollapseContext);
+export function useSidebar(): SidebarCollapseContext {
+  const ctx = useContext(SidebarContext);
   if (!ctx) throw new Error('Missing root provider');
   return ctx;
 }
 
-export function SidebarCollapseProvider({
+export function SidebarProvider({
   children,
 }: {
-  children: ReactNode;
+  children: React.ReactNode;
 }): React.ReactElement {
   const [open, setOpen] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <SidebarCollapseContext.Provider value={[open, setOpen]}>
-      {children}
-    </SidebarCollapseContext.Provider>
+    <SidebarContext.Provider
+      value={useMemo(
+        () => ({
+          open,
+          setOpen,
+          collapsed,
+          setCollapsed,
+        }),
+        [open, collapsed],
+      )}
+    >
+      <BaseProvider open={open} onOpenChange={setOpen}>
+        {children}
+      </BaseProvider>
+    </SidebarContext.Provider>
   );
 }

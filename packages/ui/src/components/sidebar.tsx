@@ -95,7 +95,7 @@ export function Sidebar({
   return (
     <SidebarContext.Provider value={context}>
       <Base.SidebarList
-        minWidth={768} // md
+        blockScrollingWidth={768} // md
         className={cn(
           'flex w-full flex-col text-[15px] md:sticky md:top-16 md:h-body md:w-[240px] md:text-sm xl:w-[260px]',
           'max-md:fixed max-md:inset-0 max-md:z-40 max-md:pt-16 max-md:data-[open=false]:hidden',
@@ -210,7 +210,7 @@ function FolderNode({
 }): React.ReactElement {
   const { defaultOpenLevel } = useContext(SidebarContext);
   const pathname = usePathname();
-  const active = index !== undefined && isActive(index.url, pathname, false);
+  const active = index && isActive(index.url, pathname, false);
   const childActive = useMemo(
     () => hasActive(children, pathname),
     [children, pathname],
