@@ -5,10 +5,10 @@ import { ThemeProvider } from 'next-themes';
 import { type ReactNode } from 'react';
 import dynamic from 'next/dynamic';
 import { DirectionProvider } from '@radix-ui/react-direction';
+import type { ThemeProviderProps } from 'next-themes/dist/types';
 import { SidebarCollapseProvider } from '@/contexts/sidebar';
 import { DefaultSearchDialogProps } from '@/components/dialog/search-default';
 import { SearchProvider, type SearchProviderProps } from './contexts/search';
-import type { ThemeProviderProps } from 'next-themes/dist/types';
 
 interface SearchOptions
   extends Omit<SearchProviderProps, 'options' | 'children'> {

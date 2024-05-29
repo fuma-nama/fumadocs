@@ -2,7 +2,7 @@
 import { MenuIcon, MoreVertical, SearchIcon, X } from 'lucide-react';
 import Link from 'fumadocs-core/link';
 import { SidebarTrigger } from 'fumadocs-core/sidebar';
-import { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, useCallback, useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/utils/cn';
 import { useSearchContext } from '@/contexts/search';
@@ -160,7 +160,7 @@ function LinksMenu({ items, ...props }: LinksMenuProps): React.ReactElement {
         {items.map((item, i) => (
           <LinkItem key={i} item={item} on="menu" />
         ))}
-        <div className="flex flex-row px-2 py-1 items-center justify-between">
+        <div className="flex flex-row items-center justify-between px-2 py-1">
           <p className="font-medium">Theme</p>
           <ThemeToggle />
         </div>
@@ -170,11 +170,11 @@ function LinksMenu({ items, ...props }: LinksMenuProps): React.ReactElement {
 }
 
 function SearchToggle(): React.ReactElement {
-  const { setOpenSearch } = useSearchContext();
+  const { hotKey, setOpenSearch } = useSearchContext();
   const { text } = useI18n();
-  const onClick = (): void => {
+  const onClick = useCallback(() => {
     setOpenSearch(true);
-  };
+  }, [setOpenSearch]);
 
   return (
     <>
@@ -200,9 +200,9 @@ function SearchToggle(): React.ReactElement {
         <SearchIcon className="ms-1 size-4" />
         {text.search}
         <div className="ms-auto inline-flex gap-0.5 text-xs">
-          {['⌘', 'K'].map((k) => (
-            <kbd key={k} className="rounded-md border bg-background px-1.5">
-              {k}
+          {hotKey.map((k, i) => (
+            <kbd key={i} className="rounded-md border bg-background px-1.5">
+              {k.display}
             </kbd>
           ))}
         </div>
