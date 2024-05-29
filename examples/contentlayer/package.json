@@ -10,9 +10,9 @@
   },
   "dependencies": {
     "contentlayer": "0.3.4",
-    "fumadocs-contentlayer": "1.1.27",
-    "fumadocs-core": "11.3.0",
-    "fumadocs-ui": "11.3.0",
+    "fumadocs-contentlayer": "1.1.28",
+    "fumadocs-core": "11.3.1",
+    "fumadocs-ui": "11.3.1",
     "next": "^14.2.3",
     "next-contentlayer": "^0.3.4",
     "react": "18.3.1",
