@@ -23,7 +23,7 @@ export function SidebarProvider({
 }: {
   children: React.ReactNode;
 }): React.ReactElement {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
 
   return (
