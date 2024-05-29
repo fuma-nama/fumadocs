@@ -1,5 +1,18 @@
 # next-docs-ui
 
+## 11.3.0
+
+### Minor Changes
+
+- 917d87f: Rename sidebar primitive `minWidth` prop to `blockScrollingWidth`
+
+### Patch Changes
+
+- 2a1211e: Support customising search dialog hotkeys
+- 9de31e6: Support `withArticle` for MDX Pages
+- Updated dependencies [917d87f]
+  - fumadocs-core@11.3.0
+
 ## 11.2.2
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 11.3.0
+
+### Minor Changes
+
+- 917d87f: Rename sidebar primitive `minWidth` prop to `blockScrollingWidth`
+
 ## 11.2.2
 
 ## 11.2.1
