@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 11.3.1
+
+### Patch Changes
+
+- 10ab3e9: Fix sidebar opened by default
+  - fumadocs-core@11.3.1
+
 ## 11.3.0
 
 ### Minor Changes
