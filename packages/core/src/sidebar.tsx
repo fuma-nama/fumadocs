@@ -41,7 +41,7 @@ export function SidebarProvider(
 
   useEffect(() => {
     setOpen(false);
-  }, [pathname]);
+  }, [pathname, setOpen]);
 
   return (
     <SidebarContext.Provider value={[open, setOpen]}>
@@ -120,7 +120,7 @@ export function SidebarList<T extends ElementType = 'aside'>({
     <RemoveScroll
       as={as ?? 'aside'}
       data-open={open}
-      enabled={isBlocking && open}
+      enabled={Boolean(isBlocking && open)}
       {...props}
     >
       {props.children}

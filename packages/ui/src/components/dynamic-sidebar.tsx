@@ -12,7 +12,7 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
 
   const onCollapse = useCallback(() => {
     setCollapsed(!collapsed);
-  }, [collapsed]);
+  }, [collapsed, setCollapsed]);
 
   const onHover: PointerEventHandler = useCallback((e) => {
     if (e.pointerType === 'touch') return;
@@ -65,7 +65,7 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
         data-hover={hover}
         onPointerEnter={onHover}
         onPointerLeave={onLeave}
-        aria-hidden={collapsed && !hover}
+        aria-hidden={Boolean(collapsed && !hover)}
         className={cn(
           'z-40 transition-transform max-md:absolute',
           collapsed &&

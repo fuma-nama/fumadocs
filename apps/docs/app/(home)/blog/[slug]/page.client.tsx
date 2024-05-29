@@ -1,13 +1,13 @@
 'use client';
 import { Share } from 'lucide-react';
-import { cn } from '@/utils/cn';
-import { buttonVariants } from '@/components/ui/button';
 import {
   TooltipContent,
   Tooltip,
   TooltipTrigger,
 } from '@radix-ui/react-tooltip';
 import { useState } from 'react';
+import { cn } from '@/utils/cn';
+import { buttonVariants } from '@/components/ui/button';
 
 export function Control({ url }: { url: string }): React.ReactElement {
   const [open, setOpen] = useState(false);
@@ -27,7 +27,7 @@ export function Control({ url }: { url: string }): React.ReactElement {
         <Share className="size-4" />
         Share Post
       </TooltipTrigger>
-      <TooltipContent className="bg-popover p-2 text-popover-foreground text-sm border rounded-lg">
+      <TooltipContent className="rounded-lg border bg-popover p-2 text-sm text-popover-foreground">
         Copied
       </TooltipContent>
     </Tooltip>

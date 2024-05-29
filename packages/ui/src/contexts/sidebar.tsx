@@ -1,12 +1,12 @@
 import { createContext, useContext, useState, useMemo } from 'react';
 import { SidebarProvider as BaseProvider } from 'fumadocs-core/sidebar';
 
-type SidebarCollapseContext = {
+interface SidebarCollapseContext {
   open: boolean;
   setOpen: (v: boolean) => void;
   collapsed: boolean;
   setCollapsed: (v: boolean) => void;
-};
+}
 
 const SidebarContext = createContext<SidebarCollapseContext | undefined>(
   undefined,
