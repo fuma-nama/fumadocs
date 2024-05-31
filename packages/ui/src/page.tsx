@@ -106,7 +106,7 @@ export const DocsBody = forwardRef<
   HTMLDivElement,
   HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn('prose', className)} {...props} />
+  <div ref={ref} className={cn('prose dark:prose-invert', className)} {...props} />
 ));
 
 DocsBody.displayName = 'DocsBody';
