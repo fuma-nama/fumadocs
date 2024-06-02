@@ -105,6 +105,15 @@ export function rehypeCode(
         // Remove empty line at end
         return code.replace(/\n$/, '');
       },
+      line(hast) {
+        if (hast.children.length === 0) {
+          // Keep the empty lines when using grid layout
+          hast.children.push({
+            type: 'text',
+            value: ' ',
+          });
+        }
+      },
     },
     ...codeOptions.transformers,
   ];
@@ -119,7 +128,7 @@ export function rehypeCode(
   const prefix = 'language-';
   const transformer = rehypeShiki.call(this, codeOptions);
 
-  return async (root, vfile) => {
+  return async (root, file) => {
     visit(root, ['pre'], (element) => {
       const head = element.children[0];
 
@@ -144,7 +153,7 @@ export function rehypeCode(
     });
 
     if (transformer)
-      await transformer.call(this, root, vfile, () => {
+      await transformer.call(this, root, file, () => {
         // nothing
       });
   };
