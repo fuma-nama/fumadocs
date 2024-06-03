@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 11.3.2
+
+### Patch Changes
+
+- 1b8e12b: Use `display: grid` for codeblocks
+
 ## 11.3.1
 
 ## 11.3.0
