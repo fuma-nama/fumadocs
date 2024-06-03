@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 11.3.2
+
+### Patch Changes
+
+- 1b8e12b: Use `display: grid` for codeblocks
+- Updated dependencies [1b8e12b]
+  - fumadocs-core@11.3.2
+
 ## 11.3.1
 
 ### Patch Changes
