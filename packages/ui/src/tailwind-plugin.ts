@@ -112,25 +112,22 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
         '.dark .nd-codeblock span': {
           color: 'var(--shiki-dark)',
         },
-        '.nd-codeblock': {
-          '& .line': {
-            'font-size': '13px',
-          },
-          '& .highlighted': {
-            width: 'calc(100% + 32px)',
-            display: 'inline-block',
-            margin: '0 -16px',
-            padding: 'p 16px',
-            'background-color': `theme('colors.primary.DEFAULT / 10%')`,
-          },
-          '& .highlighted-word': {
-            padding: '1px 2px',
-            margin: '-1px -3px',
-            border: '1px solid',
-            'border-color': `theme('colors.primary.DEFAULT / 50%')`,
-            'background-color': `theme('colors.primary.DEFAULT / 10%')`,
-            'border-radius': '2px',
-          },
+        '.nd-codeblock code': {
+          display: 'grid',
+          'font-size': '13px',
+        },
+        '.nd-codeblock .highlighted': {
+          margin: '0 -16px',
+          padding: '0 16px',
+          'background-color': `theme('colors.primary.DEFAULT / 10%')`,
+        },
+        '.nd-codeblock .highlighted-word': {
+          padding: '1px 2px',
+          margin: '-1px -3px',
+          border: '1px solid',
+          'border-color': `theme('colors.primary.DEFAULT / 50%')`,
+          'background-color': `theme('colors.primary.DEFAULT / 10%')`,
+          'border-radius': '2px',
         },
       });
 

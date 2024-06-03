@@ -7,6 +7,7 @@ import NextFAQImage from '@/public/showcases/next-faq.png';
 import YeecordImage from '@/public/showcases/yeecord.png';
 import NuqsImage from '@/public/showcases/nuqs.jpg';
 import FrameGround from '@/public/showcases/frameground.png';
+import Xlog from '@/public/showcases/xlog.png';
 import Briefkasten from '@/public/showcases/briefkasten.png';
 import Spot from '@/public/spot.png';
 
@@ -54,6 +55,11 @@ export default function Showcase(): React.ReactElement {
       image: Briefkasten,
       name: 'Briefkasten Docs',
       url: 'https://docs.briefkastenhq.com',
+    },
+    {
+      image: Xlog,
+      name: 'xlog.systems',
+      url: 'https://www.xlog.systems',
     },
   ];
 
@@ -110,15 +116,16 @@ function ShowcaseItem({
         href={url}
         target="_blank"
         rel="noreferrer noopener"
-        className="relative flex aspect-video flex-col overflow-hidden rounded-2xl border transition-all hover:border-primary/30"
+        className="relative flex aspect-[1.91/1] flex-col overflow-hidden rounded-2xl border transition-all hover:border-primary/30"
       >
         <Image
           alt="Preview"
           src={image}
           placeholder="blur"
-          className="absolute size-full object-cover"
+          fill
+          sizes="100vw, (min-width: 750px) 500px"
         />
-        <p className="z-[2] mt-auto bg-gradient-to-t from-black p-6 pt-8 text-sm font-medium text-white">
+        <p className="z-[2] mt-auto bg-black/50 p-4 text-sm font-medium text-white backdrop-blur-sm">
           {name}
         </p>
       </a>
@@ -130,7 +137,7 @@ function ShowcaseItem({
       href={url}
       target="_blank"
       rel="noreferrer noopener"
-      className="flex aspect-video flex-col rounded-2xl border border-transparent p-8 text-center shadow-primary/20 transition-all hover:shadow-primary/30"
+      className="flex aspect-[1.91/1] flex-col rounded-2xl border border-transparent p-8 text-center shadow-primary/20 transition-all hover:shadow-primary/30"
       style={{
         backgroundImage:
           'radial-gradient(closest-side at center, hsl(var(--background)) 89%, transparent 90%),' +

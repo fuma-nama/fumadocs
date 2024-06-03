@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 2.0.2
+
+### Patch Changes
+
+- 9681cc3: Add put method key
+
 ## 2.0.1
 
 ### Patch Changes
@@ -17,11 +23,11 @@
   migrate: Create a script named `scripts/generate-docs.mjs`:
 
   ```js
-  import { generateFiles } from "fumadocs-openapi";
+  import { generateFiles } from 'fumadocs-openapi';
 
   void generateFiles({
-    input: ["./petstore.yaml"],
-    output: "./content/docs",
+    input: ['./petstore.yaml'],
+    output: './content/docs',
   });
   ```
 
@@ -68,18 +74,18 @@
    * @type {import("@fuma-docs/openapi").Config}
    */
   module.exports = {
-    input: ["./petstore.yaml"],
-    output: "./content/docs",
-    per: "tag",
+    input: ['./petstore.yaml'],
+    output: './content/docs',
+    per: 'tag',
     render: (title, description) => {
       return {
         frontmatter: [
-          "---",
+          '---',
           `title: ${title}`,
           `description: ${description}`,
-          "toc: false",
-          "---",
-        ].join("\n"),
+          'toc: false',
+          '---',
+        ].join('\n'),
       };
     },
   };
