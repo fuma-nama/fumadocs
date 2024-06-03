@@ -44,7 +44,9 @@ export function Body({
 }): React.ReactElement {
   const mode = useMode();
 
-  return <div className={mode}>{children}</div>;
+  return (
+    <body className={cn(mode, 'flex min-h-screen flex-col')}>{children}</body>
+  );
 }
 
 export function NavChildren(): React.ReactElement {
@@ -68,24 +70,6 @@ export function NavChildren(): React.ReactElement {
 export function useMode(): string | undefined {
   const { slug } = useParams();
   return Array.isArray(slug) && slug.length > 0 ? slug[0] : undefined;
-}
-
-export function SidebarBanner(): React.ReactElement {
-  const mode = useMode();
-  const currentMode = modes.find((item) => item.param === mode) ?? modes[0];
-  const Icon = currentMode.icon;
-
-  return (
-    <div className="-mt-2 flex flex-row items-center gap-2 rounded-lg p-2 text-card-foreground transition-colors hover:bg-muted/80">
-      <Icon className="size-9 shrink-0 rounded-md bg-primary/30 bg-gradient-to-t from-background/80 p-1.5 text-primary shadow-md shadow-primary/50" />
-      <div>
-        <p className="font-medium">{currentMode.package}</p>
-        <p className="text-xs text-muted-foreground">
-          {currentMode.description} - {currentMode.version}
-        </p>
-      </div>
-    </div>
-  );
 }
 
 export function FumadocsIcon(

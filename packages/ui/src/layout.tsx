@@ -1,14 +1,15 @@
 import type { PageTree } from 'fumadocs-core/server';
 import type { ReactNode, HTMLAttributes } from 'react';
-import type { NavProps } from './components/nav';
+import type { NavProps } from './components/layout/nav';
 import { replaceOrDefault } from './utils/shared';
-import { cn } from './utils/cn';
-import type { SidebarProps } from './components/sidebar';
+import type { SidebarProps } from './components/layout/sidebar';
 
 declare const {
   Nav,
   TreeContextProvider,
   DynamicSidebar,
+  Container,
+  BottomNav,
   Sidebar,
 }: typeof import('./layout.client');
 
@@ -52,11 +53,6 @@ interface NavOptions
   extends Omit<NavProps, 'enableSidebar' | 'collapsibleSidebar' | 'items'> {
   enabled: boolean;
   component: ReactNode;
-
-  /**
-   * GitHub url displayed on the navbar
-   */
-  githubUrl: string;
 }
 
 interface SidebarOptions extends Omit<SidebarProps, 'items'> {
@@ -66,6 +62,11 @@ interface SidebarOptions extends Omit<SidebarProps, 'items'> {
 }
 
 export interface BaseLayoutProps {
+  /**
+   * GitHub url
+   */
+  githubUrl?: string;
+
   links?: LinkItemType[];
   /**
    * Replace or disable navbar
@@ -86,9 +87,10 @@ export interface DocsLayoutProps extends BaseLayoutProps {
 export function Layout({
   nav = {},
   links = [],
+  githubUrl,
   children,
 }: BaseLayoutProps): React.ReactElement {
-  const finalLinks = getLinks(links, nav.githubUrl);
+  const finalLinks = getLinks(links, githubUrl);
 
   return (
     <>
@@ -104,7 +106,7 @@ export function Layout({
 }
 
 export function DocsLayout({
-  nav = {},
+  githubUrl,
   sidebar = {},
   links = [],
   containerProps,
@@ -113,23 +115,11 @@ export function DocsLayout({
 }: DocsLayoutProps): React.ReactElement {
   const sidebarEnabled = sidebar.enabled ?? true;
   const sidebarCollapsible = sidebarEnabled && (sidebar.collapsible ?? true);
-  const finalLinks = getLinks(links, nav.githubUrl);
+  const finalLinks = getLinks(links, githubUrl);
 
   return (
     <TreeContextProvider tree={tree}>
-      {replaceOrDefault(
-        nav,
-        <Nav items={finalLinks} enableSidebar={sidebarEnabled} {...nav}>
-          {nav.children}
-        </Nav>,
-      )}
-      <div
-        {...containerProps}
-        className={cn(
-          'mx-auto flex w-full max-w-container flex-row gap-2 xl:gap-6',
-          containerProps?.className,
-        )}
-      >
+      <Container {...containerProps}>
         {replaceOrDefault(
           sidebar,
           sidebarCollapsible ? (
@@ -150,7 +140,8 @@ export function DocsLayout({
         )}
 
         {children}
-      </div>
+      </Container>
+      <BottomNav />
     </TreeContextProvider>
   );
 }

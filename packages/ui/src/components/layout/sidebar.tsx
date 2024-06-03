@@ -5,6 +5,7 @@ import * as Base from 'fumadocs-core/sidebar';
 import { usePathname } from 'next/navigation';
 import {
   createContext,
+  type HTMLAttributes,
   useCallback,
   useContext,
   useEffect,
@@ -18,11 +19,12 @@ import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
 import { hasActive, isActive } from '@/utils/shared';
 import type { LinkItemType } from '@/layout';
 import { LinkItem } from '@/components/link-item';
+import { LargeSearchToggle } from '@/components/layout/search-toggle';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from './ui/collapsible';
+} from '../ui/collapsible';
 import { ThemeToggle } from './theme-toggle';
 
 export interface SidebarProps {
@@ -82,9 +84,10 @@ export function Sidebar({
   defaultOpenLevel = 1,
   banner,
   items,
-  ...props
-}: SidebarProps & { className?: string }): React.ReactElement {
-  const alwaysShowFooter = Boolean(footer);
+  aside,
+}: SidebarProps & {
+  aside?: HTMLAttributes<HTMLElement> & Record<string, unknown>;
+}): React.ReactElement {
   const context = useMemo<SidebarContext>(
     () => ({
       defaultOpenLevel,
@@ -96,18 +99,18 @@ export function Sidebar({
     <SidebarContext.Provider value={context}>
       <Base.SidebarList
         blockScrollingWidth={768} // md
+        {...aside}
         className={cn(
-          'flex w-full flex-col text-[15px] md:sticky md:top-16 md:h-body md:w-[240px] md:text-sm xl:w-[260px]',
-          'max-md:fixed max-md:inset-0 max-md:z-40 max-md:pt-16 max-md:data-[open=false]:hidden',
-          props.className,
+          'flex w-full flex-col text-[15px] md:fixed md:inset-y-0 md:start-0 md:w-[240px] md:border-e md:bg-card md:text-sm xl:w-[260px]',
+          'max-md:fixed max-md:inset-0 max-md:bg-background/80 max-md:backdrop-blur-md max-md:data-[open=false]:hidden',
+          aside?.className,
         )}
       >
-        <div
-          id="sidebar-background"
-          className="absolute z-[-1] size-full max-md:bg-background/80 max-md:backdrop-blur-md"
-        />
-        <ViewportContent>
+        <div className="flex flex-col gap-4 border-b p-3 md:p-2 md:pt-10">
           {banner}
+          <LargeSearchToggle />
+        </div>
+        <ViewportContent>
           {items.length > 0 && (
             <div className="flex flex-col md:hidden">
               {items.map((item, i) => (
@@ -116,14 +119,9 @@ export function Sidebar({
             </div>
           )}
         </ViewportContent>
-        <div
-          className={cn(
-            'flex flex-row items-center gap-2 border-t p-3 md:p-2',
-            !alwaysShowFooter && 'md:hidden',
-          )}
-        >
+        <div className="flex flex-row items-center gap-2 border-t p-3 md:p-2">
+          <ThemeToggle />
           {footer}
-          <ThemeToggle className="md:hidden" />
         </div>
       </Base.SidebarList>
     </SidebarContext.Provider>

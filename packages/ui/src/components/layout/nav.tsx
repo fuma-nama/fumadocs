@@ -1,13 +1,12 @@
 'use client';
-import { MenuIcon, MoreVertical, SearchIcon, X } from 'lucide-react';
+import { MenuIcon, MoreVertical, X } from 'lucide-react';
 import Link from 'fumadocs-core/link';
 import { SidebarTrigger } from 'fumadocs-core/sidebar';
-import { type ReactNode, useCallback, useEffect, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/utils/cn';
 import { useSearchContext } from '@/contexts/search';
-import { useI18n } from '@/contexts/i18n';
-import { ThemeToggle } from '@/components/theme-toggle';
+import { ThemeToggle } from '@/components/layout/theme-toggle';
 import {
   Popover,
   PopoverContent,
@@ -15,7 +14,11 @@ import {
 } from '@/components/ui/popover';
 import { buttonVariants } from '@/theme/variants';
 import type { LinkItemType } from '@/layout';
-import { LinkItem } from './link-item';
+import {
+  LargeSearchToggle,
+  SearchToggle,
+} from '@/components/layout/search-toggle';
+import { LinkItem } from '../link-item';
 
 export interface NavProps {
   title?: ReactNode;
@@ -98,7 +101,12 @@ export function Nav({
             />
           ))}
         <div className="flex flex-1 flex-row items-center justify-end md:gap-2">
-          {enableSearch && search.enabled ? <SearchToggle /> : null}
+          {enableSearch && search.enabled ? (
+            <>
+              <SearchToggle className="md:hidden" />
+              <LargeSearchToggle className="w-full max-w-[240px] max-md:hidden" />
+            </>
+          ) : null}
           <ThemeToggle className="max-lg:hidden" />
           {enableSidebar ? (
             <SidebarTrigger
@@ -166,47 +174,5 @@ function LinksMenu({ items, ...props }: LinksMenuProps): React.ReactElement {
         </div>
       </PopoverContent>
     </Popover>
-  );
-}
-
-function SearchToggle(): React.ReactElement {
-  const { hotKey, setOpenSearch } = useSearchContext();
-  const { text } = useI18n();
-  const onClick = useCallback(() => {
-    setOpenSearch(true);
-  }, [setOpenSearch]);
-
-  return (
-    <>
-      <button
-        type="button"
-        className={cn(
-          buttonVariants({
-            size: 'icon',
-            color: 'ghost',
-            className: 'md:hidden',
-          }),
-        )}
-        aria-label="Open Search"
-        onClick={onClick}
-      >
-        <SearchIcon />
-      </button>
-      <button
-        type="button"
-        className="inline-flex w-full max-w-[240px] items-center gap-2 rounded-full border bg-secondary/50 p-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground max-md:hidden"
-        onClick={onClick}
-      >
-        <SearchIcon className="ms-1 size-4" />
-        {text.search}
-        <div className="ms-auto inline-flex gap-0.5 text-xs">
-          {hotKey.map((k, i) => (
-            <kbd key={i} className="rounded-md border bg-background px-1.5">
-              {k.display}
-            </kbd>
-          ))}
-        </div>
-      </button>
-    </>
   );
 }

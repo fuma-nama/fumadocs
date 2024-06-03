@@ -1,7 +1,8 @@
 import { DocsLayout } from 'fumadocs-ui/layout';
 import type { ReactNode } from 'react';
-import { layoutOptions } from '@/app/layout.config';
-import { Body } from '../layout.client';
+import { baseOptions } from '@/app/layout.config';
+import { utils } from '@/utils/source';
+import { SidebarBanner } from '@/app/docs/layout.client';
 
 export default function Layout({
   children,
@@ -9,8 +10,14 @@ export default function Layout({
   children: ReactNode;
 }): React.ReactElement {
   return (
-    <Body>
-      <DocsLayout {...layoutOptions}>{children}</DocsLayout>
-    </Body>
+    <DocsLayout
+      {...baseOptions}
+      tree={utils.pageTree}
+      sidebar={{
+        banner: <SidebarBanner />,
+      }}
+    >
+      {children}
+    </DocsLayout>
   );
 }
