@@ -108,7 +108,7 @@ export function Sidebar({
           aside?.className,
         )}
       >
-        <div className="flex flex-col gap-2 border-b p-2 md:p-3 md:pt-10">
+        <div className="flex flex-col gap-2 border-b px-4 py-2 md:p-3 md:pt-10">
           {banner}
           <LargeSearchToggle className="rounded-lg max-md:hidden" />
         </div>
