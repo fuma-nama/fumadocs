@@ -173,6 +173,7 @@ function buildFolderNode(
 
   return removeUndefined({
     type: 'folder',
+    id: folder.file.flattenedPath,
     name: metadata?.title ?? index?.name ?? pathToName(folder.file.name),
     icon: ctx.resolveIcon?.(metadata?.icon),
     root: metadata?.root,

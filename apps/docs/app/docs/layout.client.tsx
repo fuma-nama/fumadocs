@@ -1,24 +1,19 @@
 'use client';
-import Link from 'next/link';
 import { ChevronDown } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { type Mode, modes } from '@/utils/modes';
-import { useMode } from '@/app/layout.client';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { cn } from '@/utils/cn';
+import { useSidebar } from 'fumadocs-ui/provider';
 
 export function SidebarBanner(): React.ReactElement {
-  const mode = useMode();
   const [open, setOpen] = useState(false);
-  const currentMode = modes.find((item) => item.param === mode) ?? modes[0];
-
-  useEffect(() => {
-    setOpen(false);
-  }, [mode]);
+  const { rootId, setRootId } = useSidebar();
+  const currentMode = modes.find((item) => item.param === rootId) ?? modes[0];
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -28,18 +23,21 @@ export function SidebarBanner(): React.ReactElement {
       </PopoverTrigger>
       <PopoverContent className="p-1">
         {modes.map((item) => (
-          <Link
+          <button
             key={item.param}
-            href={`/docs/${item.param}`}
+            onClick={() => {
+              setRootId(item.param);
+              setOpen(false);
+            }}
             className={cn(
-              'flex flex-row gap-2 rounded-lg p-2',
-              mode === item.param
+              'flex flex-row gap-2 rounded-lg p-2 w-full',
+              currentMode.param === item.param
                 ? 'bg-accent text-accent-foreground'
                 : 'hover:bg-accent/50',
             )}
           >
             <Item mode={item} />
-          </Link>
+          </button>
         ))}
       </PopoverContent>
     </Popover>

@@ -22,6 +22,7 @@ export interface Separator {
 
 export interface Folder {
   type: 'folder';
+  id: string;
   name: string;
   root?: boolean;
   defaultOpen?: boolean;

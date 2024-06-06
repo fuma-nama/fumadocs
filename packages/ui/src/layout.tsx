@@ -12,6 +12,7 @@ declare const {
   DynamicSidebar,
   SubNav,
   Sidebar,
+  SidebarProvider,
 }: typeof import('./layout.client');
 
 type ActiveType = 'none' | 'url' | 'nested-url';
@@ -123,7 +124,7 @@ export function DocsLayout({
     <>
       <Link
         href={nav?.url ?? '/'}
-        className="mb-2 inline-flex items-center gap-3 text-base font-semibold max-md:hidden"
+        className="mb-2 inline-flex items-center gap-2.5 font-semibold max-md:hidden"
       >
         {nav?.title}
       </Link>
@@ -133,32 +134,36 @@ export function DocsLayout({
 
   return (
     <TreeContextProvider tree={tree}>
-      {nav?.component ?? <SubNav {...nav} />}
-      <div
-        {...containerProps}
-        className={cn('flex flex-1 flex-row', containerProps?.className)}
-      >
-        {replaceOrDefault(
-          sidebar,
-          sidebarCollapsible ? (
-            <DynamicSidebar
-              items={finalLinks}
-              defaultOpenLevel={sidebar.defaultOpenLevel}
-              banner={banner}
-              footer={sidebar.footer}
-            />
-          ) : (
-            <Sidebar
-              items={finalLinks}
-              defaultOpenLevel={sidebar.defaultOpenLevel}
-              banner={banner}
-              footer={sidebar.footer}
-            />
-          ),
-        )}
+      <SidebarProvider>
+        {nav?.component ?? <SubNav {...nav} />}
+        <div
+          {...containerProps}
+          className={cn('flex flex-1 flex-row', containerProps?.className)}
+        >
+          {replaceOrDefault(
+            sidebar,
+            sidebarCollapsible ? (
+              <DynamicSidebar
+                items={finalLinks}
+                defaultOpenLevel={sidebar.defaultOpenLevel}
+                banner={banner}
+                footer={sidebar.footer}
+                components={sidebar.components}
+              />
+            ) : (
+              <Sidebar
+                items={finalLinks}
+                defaultOpenLevel={sidebar.defaultOpenLevel}
+                banner={banner}
+                footer={sidebar.footer}
+                components={sidebar.components}
+              />
+            ),
+          )}
 
-        {children}
-      </div>
+          {children}
+        </div>
+      </SidebarProvider>
     </TreeContextProvider>
   );
 }

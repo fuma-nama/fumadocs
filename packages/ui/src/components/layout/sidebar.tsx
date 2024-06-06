@@ -26,6 +26,7 @@ import {
   CollapsibleTrigger,
 } from '../ui/collapsible';
 import { ThemeToggle } from './theme-toggle';
+import { useSidebar } from '@/contexts/sidebar';
 
 export interface SidebarProps {
   items: LinkItemType[];
@@ -134,14 +135,17 @@ function ViewportContent({
 }: {
   children: React.ReactNode;
 }): React.ReactElement {
-  const { root } = useTreeContext();
+  const { rootId } = useSidebar();
+  const { root, folders } = useTreeContext();
 
   return (
     <ScrollArea className="flex-1">
       <ScrollViewport>
         <div className="flex flex-col gap-8 p-4 pb-10 md:px-3">
           {children}
-          <NodeList items={root.children} />
+          <NodeList
+            items={((rootId ? folders.get(rootId) : null) ?? root).children}
+          />
         </div>
       </ScrollViewport>
     </ScrollArea>

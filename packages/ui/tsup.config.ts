@@ -20,6 +20,7 @@ const exportedComponents = [
   'dialog/search',
   'dialog/search-default',
   'dialog/search-algolia',
+  'layout/root-toggle',
 ];
 
 const injectImports = {

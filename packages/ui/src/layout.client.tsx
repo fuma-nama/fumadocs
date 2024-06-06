@@ -11,6 +11,7 @@ import type { NavProps } from '@/components/layout/nav';
 import { useSearchContext } from '@/contexts/search';
 
 export { TreeContextProvider } from './contexts/tree';
+export { SidebarProvider } from './contexts/sidebar';
 export { Nav } from './components/layout/nav';
 export { Sidebar } from './components/layout/sidebar';
 export { DynamicSidebar } from './components/layout/dynamic-sidebar';

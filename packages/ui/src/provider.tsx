@@ -67,9 +67,7 @@ export function RootProvider({
   search,
 }: RootProviderProps): React.ReactElement {
   let body = (
-    <DirectionProvider dir={dir ?? 'ltr'}>
-      <SidebarProvider>{children}</SidebarProvider>
-    </DirectionProvider>
+    <DirectionProvider dir={dir ?? 'ltr'}>{children}</DirectionProvider>
   );
 
   if (search?.enabled !== false)
