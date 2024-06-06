@@ -22,7 +22,7 @@ export function SidebarBanner(): React.ReactElement {
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger className="flex flex-row items-center gap-2 rounded-lg p-2 hover:bg-muted">
+      <PopoverTrigger className="-mx-2 flex flex-row items-center gap-2 rounded-lg p-2 hover:bg-muted">
         <Item mode={currentMode} />
         <ChevronDown className="size-4 text-muted-foreground" />
       </PopoverTrigger>

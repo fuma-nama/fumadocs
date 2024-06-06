@@ -95,24 +95,25 @@ export function Sidebar({
     }),
     [components, defaultOpenLevel],
   );
+
   return (
     <SidebarContext.Provider value={context}>
       <Base.SidebarList
         blockScrollingWidth={768} // md
         {...aside}
         className={cn(
-          'flex w-full flex-col text-[15px] md:fixed md:inset-y-0 md:start-0 md:w-[240px] md:border-e md:bg-card md:text-sm xl:w-[260px]',
-          'max-md:fixed max-md:inset-0 max-md:bg-background/80 max-md:backdrop-blur-md max-md:data-[open=false]:hidden',
+          'z-40 flex w-full flex-col text-[15px] md:sticky md:top-0 md:h-dvh md:w-[240px] md:border-e md:bg-card md:text-sm xl:w-[260px]',
+          'max-md:fixed max-md:inset-0 max-md:top-16 max-md:bg-background/80 max-md:backdrop-blur-md max-md:data-[open=false]:hidden',
           aside?.className,
         )}
       >
-        <div className="flex flex-col gap-4 border-b p-3 md:p-2 md:pt-10">
+        <div className="flex flex-col gap-2 border-b p-2 md:p-3 md:pt-10">
           {banner}
-          <LargeSearchToggle />
+          <LargeSearchToggle className="rounded-lg max-md:hidden" />
         </div>
         <ViewportContent>
           {items.length > 0 && (
-            <div className="flex flex-col md:hidden">
+            <div className="flex flex-col">
               {items.map((item, i) => (
                 <LinkItem key={i} item={item} on="menu" />
               ))}
@@ -138,7 +139,7 @@ function ViewportContent({
   return (
     <ScrollArea className="flex-1">
       <ScrollViewport>
-        <div className="flex flex-col gap-8 p-4 pb-10 md:px-3 md:pt-10">
+        <div className="flex flex-col gap-8 p-4 pb-10 md:px-3">
           {children}
           <NodeList items={root.children} />
         </div>

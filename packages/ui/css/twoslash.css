@@ -60,6 +60,11 @@
   font-weight: 600;
 }
 
+.twoslash-popup-code {
+  font-size: 14px;
+  display: block !important;
+}
+
 .twoslash-popup-code .line {
   padding-left: 0 !important;
 }

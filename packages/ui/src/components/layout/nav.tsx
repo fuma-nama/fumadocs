@@ -1,7 +1,6 @@
 'use client';
-import { MenuIcon, MoreVertical, X } from 'lucide-react';
+import { MoreVertical } from 'lucide-react';
 import Link from 'fumadocs-core/link';
-import { SidebarTrigger } from 'fumadocs-core/sidebar';
 import { type ReactNode, useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/utils/cn';
@@ -29,10 +28,6 @@ export interface NavProps {
    */
   url?: string;
 
-  items: LinkItemType[];
-
-  enableSidebar: boolean;
-
   /**
    * Show/hide search toggle
    *
@@ -53,10 +48,9 @@ export function Nav({
   url = '/',
   items,
   transparentMode = 'none',
-  enableSidebar,
   enableSearch = true,
   children,
-}: NavProps): React.ReactElement {
+}: NavProps & { items: LinkItemType[] }): React.ReactElement {
   const search = useSearchContext();
   const [transparent, setTransparent] = useState(transparentMode !== 'none');
 
@@ -108,25 +102,7 @@ export function Nav({
             </>
           ) : null}
           <ThemeToggle className="max-lg:hidden" />
-          {enableSidebar ? (
-            <SidebarTrigger
-              aria-label="Toggle Sidebar"
-              className={cn(
-                buttonVariants({
-                  size: 'icon',
-                  color: 'ghost',
-                  className: 'group md:hidden',
-                }),
-              )}
-            >
-              <MenuIcon className="group-data-[open=true]:hidden" />
-              <X className="hidden group-data-[open=true]:block" />
-            </SidebarTrigger>
-          ) : null}
-          <LinksMenu
-            items={items}
-            className={cn('lg:hidden', enableSidebar && 'max-md:hidden')}
-          />
+          <LinksMenu items={items} className="lg:hidden" />
           {items
             .filter((item) => item.type === 'secondary')
             .map((item, i) => (
@@ -169,7 +145,7 @@ function LinksMenu({ items, ...props }: LinksMenuProps): React.ReactElement {
           <LinkItem key={i} item={item} on="menu" />
         ))}
         <div className="flex flex-row items-center justify-between px-2 py-1">
-          <p className="font-medium">Theme</p>
+          <p className="font-medium text-muted-foreground">Theme</p>
           <ThemeToggle />
         </div>
       </PopoverContent>

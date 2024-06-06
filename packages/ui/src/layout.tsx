@@ -1,5 +1,7 @@
 import type { PageTree } from 'fumadocs-core/server';
 import type { ReactNode, HTMLAttributes } from 'react';
+import Link from 'next/link';
+import { cn } from '@/utils/cn';
 import type { NavProps } from './components/layout/nav';
 import { replaceOrDefault } from './utils/shared';
 import type { SidebarProps } from './components/layout/sidebar';
@@ -8,8 +10,7 @@ declare const {
   Nav,
   TreeContextProvider,
   DynamicSidebar,
-  Container,
-  BottomNav,
+  SubNav,
   Sidebar,
 }: typeof import('./layout.client');
 
@@ -96,7 +97,7 @@ export function Layout({
     <>
       {replaceOrDefault(
         nav,
-        <Nav items={finalLinks} enableSidebar={false} {...nav}>
+        <Nav items={finalLinks} {...nav}>
           {nav.children}
         </Nav>,
       )}
@@ -106,6 +107,7 @@ export function Layout({
 }
 
 export function DocsLayout({
+  nav,
   githubUrl,
   sidebar = {},
   links = [],
@@ -117,31 +119,46 @@ export function DocsLayout({
   const sidebarCollapsible = sidebarEnabled && (sidebar.collapsible ?? true);
   const finalLinks = getLinks(links, githubUrl);
 
+  const banner = (
+    <>
+      <Link
+        href={nav?.url ?? '/'}
+        className="mb-2 inline-flex items-center gap-3 text-base font-semibold max-md:hidden"
+      >
+        {nav?.title}
+      </Link>
+      {sidebar.banner}
+    </>
+  );
+
   return (
     <TreeContextProvider tree={tree}>
-      <Container {...containerProps}>
+      {nav?.component ?? <SubNav {...nav} />}
+      <div
+        {...containerProps}
+        className={cn('flex flex-1 flex-row', containerProps?.className)}
+      >
         {replaceOrDefault(
           sidebar,
           sidebarCollapsible ? (
             <DynamicSidebar
               items={finalLinks}
               defaultOpenLevel={sidebar.defaultOpenLevel}
-              banner={sidebar.banner}
+              banner={banner}
               footer={sidebar.footer}
             />
           ) : (
             <Sidebar
               items={finalLinks}
               defaultOpenLevel={sidebar.defaultOpenLevel}
-              banner={sidebar.banner}
+              banner={banner}
               footer={sidebar.footer}
             />
           ),
         )}
 
         {children}
-      </Container>
-      <BottomNav />
+      </div>
     </TreeContextProvider>
   );
 }

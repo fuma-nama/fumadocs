@@ -1,49 +1,49 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
-import { type HTMLAttributes, useMemo } from 'react';
 import { SidebarTrigger } from 'fumadocs-core/sidebar';
-import { Menu } from 'lucide-react';
-import { useTreeContext } from '@/contexts/tree';
+import { Menu, X } from 'lucide-react';
+import Link from 'next/link';
 import { cn } from '@/utils/cn';
 import { useSidebar } from '@/contexts/sidebar';
+import { SearchToggle } from '@/components/layout/search-toggle';
+import { buttonVariants } from '@/theme/variants';
+import type { NavProps } from '@/components/layout/nav';
+import { useSearchContext } from '@/contexts/search';
 
 export { TreeContextProvider } from './contexts/tree';
 export { Nav } from './components/layout/nav';
 export { Sidebar } from './components/layout/sidebar';
 export { DynamicSidebar } from './components/layout/dynamic-sidebar';
 
-export function BottomNav(): React.ReactElement {
-  const ctx = useTreeContext();
-  const pathname = usePathname();
-  const page = useMemo(() => {
-    return ctx.navigation.find((s) => s.url === pathname);
-  }, [pathname, ctx.navigation]);
+export function SubNav({ title, url = '/' }: NavProps): React.ReactElement {
+  const { open } = useSidebar();
+  const { enabled } = useSearchContext();
 
   return (
-    <SidebarTrigger className="sticky bottom-0 z-50 inline-flex h-14 w-full items-center gap-2 border bg-card px-4 text-sm font-medium data-[open=true]:fixed md:hidden [&_svg]:size-5">
-      {page?.icon}
-      {page?.name}
-      <Menu className="ms-auto size-5 text-muted-foreground" />
-    </SidebarTrigger>
-  );
-}
-
-export function Container(
-  props: HTMLAttributes<HTMLDivElement>,
-): React.ReactElement {
-  const { collapsed } = useSidebar();
-
-  return (
-    <div
-      {...props}
+    <nav
+      id="nd-subnav"
       className={cn(
-        'flex flex-row justify-center lg:pr-[220px] xl:px-[260px]',
-        !collapsed && 'md:pl-[240px]',
-        props.className,
+        'sticky top-0 z-40 flex h-16 w-full flex-row items-center bg-background/80 px-4 backdrop-blur-md md:hidden [&_svg]:size-5',
+        !open && 'border-b',
       )}
     >
-      {props.children}
-    </div>
+      <Link
+        href={url}
+        className="inline-flex flex-1 items-center gap-3 font-semibold"
+      >
+        {title}
+      </Link>
+      {enabled ? <SearchToggle /> : null}
+      <SidebarTrigger
+        className={cn(
+          buttonVariants({
+            color: 'ghost',
+            size: 'icon',
+          }),
+        )}
+      >
+        {open ? <X /> : <Menu />}
+      </SidebarTrigger>
+    </nav>
   );
 }

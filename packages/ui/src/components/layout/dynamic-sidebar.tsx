@@ -33,7 +33,7 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
     <>
       {collapsed ? (
         <div
-          className="fixed inset-y-0 start-0 w-4 max-md:hidden xl:w-[260px]"
+          className="fixed inset-y-0 start-0 w-4 max-md:hidden xl:static xl:w-[260px]"
           onPointerEnter={onHover}
           onPointerLeave={onLeave}
         />
@@ -64,9 +64,9 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
           onPointerLeave: onLeave,
           'aria-hidden': Boolean(collapsed && !hover),
           className: cn(
-            'z-40 overflow-hidden md:fixed md:inset-y-0 md:start-0 md:transition-transform',
+            'overflow-hidden md:transition-transform',
             collapsed &&
-              'md:inset-y-2 md:start-2 md:rounded-xl md:border md:shadow-md',
+              'md:fixed md:inset-y-2 md:start-2 md:rounded-xl md:border md:shadow-md',
           ),
         }}
         footer={
