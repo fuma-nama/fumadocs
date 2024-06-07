@@ -8,6 +8,7 @@ export interface Translations {
   chooseLanguage: string;
   nextPage: string;
   previousPage: string;
+  chooseTheme: string;
 }
 
 export interface NamedTranslation extends Partial<Translations> {
@@ -33,6 +34,7 @@ export const I18nContext = createContext<I18nContextType>({
     chooseLanguage: 'Choose a language',
     nextPage: 'Next',
     previousPage: 'Previous',
+    chooseTheme: 'Theme',
   },
 });
 

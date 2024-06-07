@@ -18,6 +18,7 @@ import {
   SearchToggle,
 } from '@/components/layout/search-toggle';
 import { LinkItem } from '../link-item';
+import { useI18n } from '@/contexts/i18n';
 
 export interface NavProps {
   title?: ReactNode;
@@ -120,6 +121,7 @@ interface LinksMenuProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 function LinksMenu({ items, ...props }: LinksMenuProps): React.ReactElement {
   const [open, setOpen] = useState(false);
+  const { text } = useI18n();
   const pathname = usePathname();
 
   useEffect(() => {
@@ -145,7 +147,9 @@ function LinksMenu({ items, ...props }: LinksMenuProps): React.ReactElement {
           <LinkItem key={i} item={item} on="menu" />
         ))}
         <div className="flex flex-row items-center justify-between px-2 py-1">
-          <p className="font-medium text-muted-foreground">Theme</p>
+          <p className="font-medium text-muted-foreground">
+            {text.chooseTheme}
+          </p>
           <ThemeToggle />
         </div>
       </PopoverContent>
