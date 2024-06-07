@@ -45,8 +45,8 @@ async function injectImport(src: string): Promise<void> {
     /^declare const {(?<names>(?:.|\n)*?)}: typeof import\((?<from>.+)\)/gm;
   let result;
 
-  while ((result = regex.exec(sourceContent))) {
-    const { from, names } = result.groups!;
+  while ((result = regex.exec(sourceContent)) && result.groups) {
+    const { from, names } = result.groups;
     const importName = from.slice(1, from.length - 1);
     const replaceTo = `import {${names}} from ${JSON.stringify(importName)}`;
 

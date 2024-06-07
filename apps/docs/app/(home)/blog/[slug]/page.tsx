@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { InlineTOC } from 'fumadocs-ui/components/inline-toc';
 import { blog } from '@/utils/source';
 import { createMetadata } from '@/utils/metadata';
 import { buttonVariants } from '@/components/ui/button';
 import { Control } from '@/app/(home)/blog/[slug]/page.client';
-import { InlineTOC } from 'fumadocs-ui/components/inline-toc';
 
 interface Param {
   slug: string;

@@ -16,7 +16,7 @@ export interface BuildPageTreeOptions {
   /**
    * Attach the `folder.id` property
    *
-   * @default false
+   * @defaultValue false
    */
   attachFolderIds?: boolean;
 

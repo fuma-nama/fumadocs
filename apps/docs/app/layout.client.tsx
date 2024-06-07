@@ -32,7 +32,7 @@ export function Title(): React.ReactElement {
       />
 
       <FumadocsIcon className="size-5 [.uwu_&]:hidden" fill="currentColor" />
-      <span className="[.uwu_&]:hidden">Fumadocs</span>
+      <span className="[.uwu_&]:hidden max-md:[header_&]:hidden">Fumadocs</span>
     </>
   );
 }
