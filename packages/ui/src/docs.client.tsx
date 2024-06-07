@@ -1,14 +1,14 @@
 'use client';
 
+import Link from 'next/link';
+import { SidebarTrigger } from 'fumadocs-core/sidebar';
+import { Menu, X } from 'lucide-react';
 import type { NavProps } from '@/components/layout/nav';
 import { useSidebar } from '@/contexts/sidebar';
 import { useSearchContext } from '@/contexts/search';
-import Link from 'next/link';
 import { SearchToggle } from '@/components/layout/search-toggle';
-import { SidebarTrigger } from 'fumadocs-core/sidebar';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/theme/variants';
-import { Menu, X } from 'lucide-react';
 
 export function SubNav({
   title,

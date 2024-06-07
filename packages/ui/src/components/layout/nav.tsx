@@ -17,8 +17,8 @@ import {
   LargeSearchToggle,
   SearchToggle,
 } from '@/components/layout/search-toggle';
-import { LinkItem } from '../link-item';
 import { useI18n } from '@/contexts/i18n';
+import { LinkItem } from '../link-item';
 
 export interface NavProps {
   title?: ReactNode;

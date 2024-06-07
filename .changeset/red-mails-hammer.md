@@ -2,4 +2,4 @@
 'fumadocs-core': patch
 ---
 
-Add `id` to page trees
+Support attaching `id` property to page trees
