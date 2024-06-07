@@ -6,7 +6,6 @@ import { hasActive } from '@/utils/shared';
 interface TreeContextType {
   tree: PageTree.Root;
   navigation: PageTree.Item[];
-  folders: Map<string, PageTree.Folder>;
   root: PageTree.Root | PageTree.Folder;
 }
 
@@ -43,18 +42,6 @@ function getNavigationList(tree: PageTree.Node[]): PageTree.Item[] {
   });
 }
 
-function scanFolders(
-  tree: PageTree.Node[],
-  map: Map<string, PageTree.Folder>,
-): void {
-  tree.forEach((node) => {
-    if (node.type === 'folder') {
-      scanFolders(node.children, map);
-      map.set(node.id, node);
-    }
-  });
-}
-
 export function TreeContextProvider({
   children,
   tree,
@@ -64,16 +51,12 @@ export function TreeContextProvider({
 }): React.ReactElement {
   const pathname = usePathname();
   const value = useMemo<TreeContextType>(() => {
-    const folders = new Map();
-    scanFolders(tree.children, folders);
-
     const root = findRoot(tree.children, pathname) ?? tree;
     const navigation = getNavigationList(root.children);
 
     return {
       root,
       navigation,
-      folders,
       tree,
     };
   }, [pathname, tree]);
