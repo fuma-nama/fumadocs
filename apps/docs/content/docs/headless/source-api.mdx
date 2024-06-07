@@ -87,6 +87,21 @@ loader({
 });
 ```
 
+### Attach Custom Properties
+
+Use the `pageTree` option to customise how page tree builder processes different nodes.
+
+```ts
+import { loader } from 'fumadocs-core/source';
+
+loader({
+  pageTree: {
+    attachFolderIds: true, // add `folder.id` property
+    attachFolder: (node) => ({ ... }) // change folder nodes
+  }
+});
+```
+
 ### Custom Source
 
 To plug your own content source, return a `Source` object.
