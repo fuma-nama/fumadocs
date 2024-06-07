@@ -124,7 +124,7 @@ export function DocsLayout({
     <>
       <Link
         href={nav?.url ?? '/'}
-        className="mb-4 inline-flex items-center gap-2.5 border-b pb-4 font-semibold max-md:hidden"
+        className="inline-flex items-center gap-2.5 border-b pb-4 font-semibold max-md:hidden"
       >
         {nav?.title}
       </Link>

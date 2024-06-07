@@ -54,7 +54,12 @@ export function DocsPage({
 }: DocsPageProps): React.ReactElement {
   return (
     <>
-      <article className="mx-auto flex w-0 max-w-[800px] flex-1 flex-col gap-6 px-4 py-10 md:px-6 md:pt-16">
+      <article
+        className={cn(
+          'mx-auto flex w-0 max-w-[800px] flex-1 flex-col gap-6 px-4 py-10 md:px-6 md:pt-16',
+          tableOfContent?.enabled === false && 'max-w-[1200px]',
+        )}
+      >
         {replaceOrDefault(breadcrumb, <Breadcrumb />)}
         {props.children}
         {props.lastUpdate ? (
