@@ -6,7 +6,7 @@ import {
   type Transformer,
 } from './load-files';
 import type { FileData, MetaData, PageData, UrlFn } from './types';
-import type { CreatePageTreeBuilderOptions } from './page-tree-builder';
+import type { BuildPageTreeOptions } from './page-tree-builder';
 import { createPageTreeBuilder } from './page-tree-builder';
 import { splitPath, type FileInfo } from './path';
 import type { File, Storage } from './file-system';
@@ -31,12 +31,17 @@ export interface LoaderOptions {
    */
   baseUrl?: string;
   languages?: string[];
-  icon?: NonNullable<CreatePageTreeBuilderOptions['resolveIcon']>;
+  icon?: NonNullable<BuildPageTreeOptions['resolveIcon']>;
   slugs?: LoadOptions['getSlugs'];
   url?: UrlFn;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Inevitable
   source: Source<any>;
   transformers?: Transformer[];
+
+  /**
+   * Additional options for page tree builder
+   */
+  pageTree?: Partial<Omit<BuildPageTreeOptions, 'storage' | 'getUrl'>>;
 }
 
 export interface Source<Config extends SourceConfig> {
@@ -149,13 +154,14 @@ export function loader<Options extends LoaderOptions>(
 
 function createOutput({
   source,
-  icon,
+  icon: resolveIcon,
   languages,
   rootDir = '',
   transformers,
   baseUrl = '/',
   slugs: slugsFn = getSlugs,
   url: getUrl = createGetUrl(baseUrl),
+  pageTree: pageTreeOptions = {},
 }: LoaderOptions): LoaderOutput<LoaderConfig> {
   const storage = loadFiles(
     typeof source.files === 'function' ? source.files(rootDir) : source.files,
@@ -166,15 +172,22 @@ function createOutput({
     },
   );
   const i18nMap = buildPageMap(storage, languages ?? [], getUrl);
-  const builder = createPageTreeBuilder({
-    storage,
-    resolveIcon: icon,
-    getUrl,
-  });
+  const builder = createPageTreeBuilder();
   const pageTree =
     languages === undefined
-      ? builder.build()
-      : builder.buildI18n({ languages });
+      ? builder.build({
+          storage,
+          resolveIcon,
+          getUrl,
+          ...pageTreeOptions,
+        })
+      : builder.buildI18n({
+          languages,
+          storage,
+          resolveIcon,
+          getUrl,
+          ...pageTreeOptions,
+        });
 
   return {
     pageTree: pageTree as LoaderOutput<LoaderConfig>['pageTree'],
