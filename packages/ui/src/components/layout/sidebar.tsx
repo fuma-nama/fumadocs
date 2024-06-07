@@ -20,13 +20,13 @@ import { hasActive, isActive } from '@/utils/shared';
 import type { LinkItemType } from '@/layout';
 import { LinkItem } from '@/components/link-item';
 import { LargeSearchToggle } from '@/components/layout/search-toggle';
+import { useSidebar } from '@/contexts/sidebar';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from '../ui/collapsible';
 import { ThemeToggle } from './theme-toggle';
-import { useSidebar } from '@/contexts/sidebar';
 
 export interface SidebarProps {
   items: LinkItemType[];
@@ -135,17 +135,14 @@ function ViewportContent({
 }: {
   children: React.ReactNode;
 }): React.ReactElement {
-  const { rootId } = useSidebar();
-  const { root, folders } = useTreeContext();
+  const { root } = useTreeContext();
 
   return (
     <ScrollArea className="flex-1">
       <ScrollViewport>
         <div className="flex flex-col gap-8 p-4 pb-10 md:px-3">
           {children}
-          <NodeList
-            items={((rootId ? folders.get(rootId) : null) ?? root).children}
-          />
+          <NodeList items={root.children} />
         </div>
       </ScrollViewport>
     </ScrollArea>
@@ -190,6 +187,7 @@ function PageNode({
   nested?: boolean;
 }): React.ReactElement {
   const pathname = usePathname();
+  const { setOpen } = useSidebar();
   const active = isActive(url, pathname, nested);
 
   return (
@@ -197,6 +195,9 @@ function PageNode({
       href={url}
       external={external}
       className={cn(itemVariants({ active }))}
+      onClick={useCallback(() => {
+        setOpen(false);
+      }, [setOpen])}
     >
       {icon ?? (external ? <ExternalLinkIcon /> : null)}
       {name}
@@ -211,13 +212,16 @@ function FolderNode({
   item: PageTree.Folder;
   level: number;
 }): React.ReactElement {
+  const { setOpen } = useSidebar();
   const { defaultOpenLevel } = useContext(SidebarContext);
   const pathname = usePathname();
+
   const active = index !== undefined && isActive(index.url, pathname, false);
   const childActive = useMemo(
     () => hasActive(children, pathname),
     [children, pathname],
   );
+
   const shouldExtend =
     active || childActive || defaultOpenLevel >= level || defaultOpen;
   const [extend, setExtend] = useState(shouldExtend);
@@ -226,14 +230,16 @@ function FolderNode({
     if (shouldExtend) setExtend(true);
   }, [shouldExtend]);
 
-  const onClick = useCallback(
-    (e: React.MouseEvent) => {
+  const onClick: React.MouseEventHandler = useCallback(
+    (e) => {
       if (e.target !== e.currentTarget || active) {
         setExtend((prev) => !prev);
         e.preventDefault();
+      } else {
+        setOpen(false);
       }
     },
-    [active],
+    [setOpen, active],
   );
 
   return (

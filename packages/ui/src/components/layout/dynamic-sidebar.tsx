@@ -66,7 +66,7 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
           className: cn(
             'overflow-hidden md:transition-transform',
             collapsed &&
-              'md:fixed md:inset-y-2 md:start-2 md:rounded-xl md:border md:shadow-md',
+              'md:fixed md:inset-y-2 md:start-2 md:h-auto md:rounded-xl md:border md:shadow-md',
           ),
         }}
         footer={

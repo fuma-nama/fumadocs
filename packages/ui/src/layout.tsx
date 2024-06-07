@@ -124,7 +124,7 @@ export function DocsLayout({
     <>
       <Link
         href={nav?.url ?? '/'}
-        className="mb-2 inline-flex items-center gap-2.5 font-semibold max-md:hidden"
+        className="mb-4 inline-flex items-center gap-2.5 border-b pb-4 font-semibold max-md:hidden"
       >
         {nav?.title}
       </Link>
@@ -135,7 +135,7 @@ export function DocsLayout({
   return (
     <TreeContextProvider tree={tree}>
       <SidebarProvider>
-        {nav?.component ?? <SubNav {...nav} />}
+        {replaceOrDefault(nav, <SubNav {...nav} />)}
         <div
           {...containerProps}
           className={cn('flex flex-1 flex-row', containerProps?.className)}

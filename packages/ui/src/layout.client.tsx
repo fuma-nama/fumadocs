@@ -16,17 +16,18 @@ export { Nav } from './components/layout/nav';
 export { Sidebar } from './components/layout/sidebar';
 export { DynamicSidebar } from './components/layout/dynamic-sidebar';
 
-export function SubNav({ title, url = '/' }: NavProps): React.ReactElement {
+export function SubNav({
+  title,
+  url = '/',
+  enableSearch = true,
+}: NavProps): React.ReactElement {
   const { open } = useSidebar();
   const { enabled } = useSearchContext();
 
   return (
     <nav
       id="nd-subnav"
-      className={cn(
-        'sticky top-0 z-40 flex h-16 w-full flex-row items-center bg-background/80 px-4 backdrop-blur-md md:hidden [&_svg]:size-5',
-        !open && 'border-b',
-      )}
+      className="sticky top-0 z-40 flex h-16 w-full flex-row items-center border-b bg-background/80 px-4 backdrop-blur-md md:hidden [&_svg]:size-5"
     >
       <Link
         href={url}
@@ -34,7 +35,7 @@ export function SubNav({ title, url = '/' }: NavProps): React.ReactElement {
       >
         {title}
       </Link>
-      {enabled ? <SearchToggle /> : null}
+      {enabled && enableSearch ? <SearchToggle /> : null}
       <SidebarTrigger
         className={cn(
           buttonVariants({

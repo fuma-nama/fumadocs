@@ -1,16 +1,17 @@
 'use client';
 import { ChevronDown } from 'lucide-react';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { type ReactNode, useState } from 'react';
-import { useSidebar } from '@/contexts/sidebar';
-import { useTreeContext } from '@/contexts/tree';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { cn } from '@/utils/cn';
+import { isActive } from '@/utils/shared';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 
 interface Option {
   /**
-   * ID of the folder, usually equal to the relative pathname
+   * Redirect URL of the folder, usually the index page
    */
-  id: string;
+  url: string;
 
   icon: ReactNode;
   title: ReactNode;
@@ -23,10 +24,9 @@ export function RootToggle({
   options: Option[];
 }): React.ReactElement {
   const [open, setOpen] = useState(false);
-  const { root } = useTreeContext();
-  const { rootId = 'type' in root ? root.id : undefined, setRootId } =
-    useSidebar();
-  const selected = options.find((item) => item.id === rootId) ?? options[0];
+  const pathname = usePathname();
+  const selected =
+    options.find((item) => isActive(item.url, pathname, true)) ?? options[0];
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -34,23 +34,23 @@ export function RootToggle({
         <Item {...selected} />
         <ChevronDown className="size-4 text-muted-foreground" />
       </PopoverTrigger>
-      <PopoverContent className="p-1 w-[var(--radix-popover-trigger-width)]">
+      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-1">
         {options.map((item) => (
-          <button
-            key={item.id}
+          <Link
+            key={item.url}
+            href={item.url}
             onClick={() => {
-              setRootId(item.id);
               setOpen(false);
             }}
             className={cn(
-              'flex flex-row gap-2 rounded-lg p-2 w-full',
-              selected.id === item.id
+              'flex w-full flex-row gap-2 rounded-lg p-2',
+              selected === item
                 ? 'bg-accent text-accent-foreground'
                 : 'hover:bg-accent/50',
             )}
           >
             <Item {...item} />
-          </button>
+          </Link>
         ))}
       </PopoverContent>
     </Popover>
