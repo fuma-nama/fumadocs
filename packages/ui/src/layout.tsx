@@ -6,14 +6,15 @@ import type { NavProps } from './components/layout/nav';
 import { replaceOrDefault } from './utils/shared';
 import type { SidebarProps } from './components/layout/sidebar';
 
+declare const { Nav }: typeof import('./layout.client');
+
 declare const {
-  Nav,
   TreeContextProvider,
   DynamicSidebar,
   SubNav,
   Sidebar,
   SidebarProvider,
-}: typeof import('./layout.client');
+}: typeof import('./docs.client');
 
 type ActiveType = 'none' | 'url' | 'nested-url';
 
