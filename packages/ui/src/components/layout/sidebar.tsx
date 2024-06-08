@@ -41,6 +41,7 @@ export interface SidebarProps {
 
   components?: Partial<Components>;
   banner?: React.ReactNode;
+  bannerProps?: HTMLAttributes<HTMLElement>;
   footer?: React.ReactNode;
 }
 
@@ -86,6 +87,7 @@ export function Sidebar({
   banner,
   items,
   aside,
+  bannerProps,
 }: SidebarProps & {
   aside?: HTMLAttributes<HTMLElement> & Record<string, unknown>;
 }): React.ReactElement {
@@ -103,12 +105,18 @@ export function Sidebar({
         blockScrollingWidth={768} // md
         {...aside}
         className={cn(
-          'z-40 flex w-full flex-col text-[15px] md:sticky md:top-0 md:h-dvh md:w-[240px] md:border-e md:bg-card md:text-sm xl:w-[260px]',
-          'max-md:fixed max-md:inset-0 max-md:top-16 max-md:bg-background/80 max-md:backdrop-blur-md max-md:data-[open=false]:hidden',
+          'z-30 flex w-full flex-col text-[15px] md:sticky md:top-0 md:h-dvh md:w-[240px] md:border-e md:bg-card md:text-sm xl:w-[260px]',
+          'max-md:fixed max-md:inset-0 max-md:pt-16 max-md:bg-background/80 max-md:backdrop-blur-md max-md:data-[open=false]:hidden',
           aside?.className,
         )}
       >
-        <div className="flex flex-col gap-2 border-b px-4 py-2 md:p-3 md:pt-10">
+        <div
+          {...bannerProps}
+          className={cn(
+            'flex flex-col gap-2 border-b px-4 py-2 md:p-3 md:pt-10',
+            bannerProps?.className,
+          )}
+        >
           {banner}
           <LargeSearchToggle className="rounded-lg max-md:hidden" />
         </div>

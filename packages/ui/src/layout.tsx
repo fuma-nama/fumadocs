@@ -121,17 +121,7 @@ export function DocsLayout({
   const sidebarCollapsible = sidebarEnabled && (sidebar.collapsible ?? true);
   const finalLinks = getLinks(links, githubUrl);
 
-  const banner = (
-    <>
-      <Link
-        href={nav?.url ?? '/'}
-        className="inline-flex items-center gap-2.5 border-b pb-4 font-semibold max-md:hidden"
-      >
-        {nav?.title}
-      </Link>
-      {sidebar.banner}
-    </>
-  );
+  const Aside = sidebarCollapsible ? DynamicSidebar : Sidebar;
 
   return (
     <TreeContextProvider tree={tree}>
@@ -143,23 +133,26 @@ export function DocsLayout({
         >
           {replaceOrDefault(
             sidebar,
-            sidebarCollapsible ? (
-              <DynamicSidebar
-                items={finalLinks}
-                defaultOpenLevel={sidebar.defaultOpenLevel}
-                banner={banner}
-                footer={sidebar.footer}
-                components={sidebar.components}
-              />
-            ) : (
-              <Sidebar
-                items={finalLinks}
-                defaultOpenLevel={sidebar.defaultOpenLevel}
-                banner={banner}
-                footer={sidebar.footer}
-                components={sidebar.components}
-              />
-            ),
+            <Aside
+              items={finalLinks}
+              defaultOpenLevel={sidebar.defaultOpenLevel}
+              banner={
+                <>
+                  <Link
+                    href={nav?.url ?? '/'}
+                    className="inline-flex items-center gap-2.5 border-b pb-4 font-semibold max-md:hidden"
+                  >
+                    {nav?.title}
+                  </Link>
+                  {sidebar.banner}
+                </>
+              }
+              bannerProps={{
+                className: cn(!sidebar.banner && 'max-md:hidden'),
+              }}
+              footer={sidebar.footer}
+              components={sidebar.components}
+            />,
           )}
 
           {children}
