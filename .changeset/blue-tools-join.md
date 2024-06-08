@@ -2,6 +2,6 @@
 'fumadocs-core': major
 ---
 
-Remove `minWidth` deprecated option from `Sidebar` component
+**Remove `minWidth` deprecated option from `Sidebar` component.**
 
-migrate: Use `blockScrollingWidth` instead
+**migrate:** Use `blockScrollingWidth` instead

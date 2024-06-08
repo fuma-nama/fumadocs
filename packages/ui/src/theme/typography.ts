@@ -33,7 +33,6 @@ export const typography = {
     },
     table: {
       fontSize: '14px',
-      whiteSpace: 'nowrap',
     },
     'thead th': {
       textAlign: 'start',
