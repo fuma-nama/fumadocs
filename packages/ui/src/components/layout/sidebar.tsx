@@ -190,14 +190,12 @@ function NodeList({
 
 function PageNode({
   item: { icon, external = false, url, name },
-  nested = false,
 }: {
   item: PageTree.Item;
-  nested?: boolean;
 }): React.ReactElement {
   const pathname = usePathname();
   const { closeOnRedirect } = useSidebar();
-  const active = isActive(url, pathname, nested);
+  const active = isActive(url, pathname, false);
 
   return (
     <Link
@@ -205,8 +203,8 @@ function PageNode({
       external={external}
       className={cn(itemVariants({ active }))}
       onClick={useCallback(() => {
-        closeOnRedirect.current = true;
-      }, [closeOnRedirect])}
+        closeOnRedirect.current = !active;
+      }, [closeOnRedirect, active])}
     >
       {icon ?? (external ? <ExternalLinkIcon /> : null)}
       {name}
@@ -245,7 +243,7 @@ function FolderNode({
         setExtend((prev) => !prev);
         e.preventDefault();
       } else {
-        closeOnRedirect.current = true;
+        closeOnRedirect.current = !active;
       }
     },
     [closeOnRedirect, active],

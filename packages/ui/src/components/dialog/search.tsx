@@ -81,7 +81,7 @@ function Search({
   const { text } = useI18n();
   const router = useRouter();
   const { setOpenSearch } = useSearchContext();
-  const { closeOnRedirect } = useSidebar();
+  const sidebar = useSidebar();
 
   const items = results === 'empty' ? defaultItems : results;
   const hideList = results === 'empty' && defaultItems.length === 0;
@@ -89,7 +89,12 @@ function Search({
   const onOpen = (url: string): void => {
     router.push(url);
     setOpenSearch(false);
-    closeOnRedirect.current = true;
+
+    if (location.pathname === url.split('#')[0]) {
+      sidebar.setOpen(false);
+    } else {
+      sidebar.closeOnRedirect.current = true;
+    }
   };
 
   return (

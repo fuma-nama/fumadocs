@@ -51,8 +51,7 @@ export type LinkItemType =
       external?: boolean;
     };
 
-interface NavOptions
-  extends Omit<NavProps, 'enableSidebar' | 'collapsibleSidebar' | 'items'> {
+interface NavOptions extends Omit<NavProps, 'items'> {
   enabled: boolean;
   component: ReactNode;
 }

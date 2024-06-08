@@ -8,4 +8,5 @@
 - On smaller devices, navbar is always shown.
 - Remove exports of internal components, copying components from the repository is now the preferred way.
 
-**migrate:** Modify your stylesheet if necessary. In general, it won't cause problems.
+**migrate:** On layouts, Rename `nav.githubUrl` to `githubUrl`. 
+Modify your stylesheet if necessary.
