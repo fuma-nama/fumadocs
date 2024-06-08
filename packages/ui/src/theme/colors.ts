@@ -122,15 +122,10 @@ const neutral: Preset = {
     ring: '0 0% 14.9%',
   },
   css: {
-    aside: {
+    '#nd-sidebar': {
       '--muted-foreground': '0 0% 30%',
     },
-    '#sidebar-background': {
-      background: 'hsl(var(--secondary)/.8)',
-      borderRight: '1px solid',
-      borderRightColor: 'theme(borderColor.border)',
-    },
-    '.dark aside': {
+    '.dark #nd-sidebar': {
       '--muted-foreground': '0 0% 72%',
     },
   },
@@ -174,8 +169,13 @@ const catppuccin: Preset = {
     'muted-foreground': '228deg 24% 72%',
   },
   css: {
-    '#sidebar-background': {
-      background: 'hsl(var(--secondary))',
+    '#nd-sidebar': {
+      '--secondary': '223deg 16% 83%',
+      '--muted': '223deg 16% 83%',
+    },
+    '.dark #nd-sidebar': {
+      '--secondary': '237deg 16% 23%',
+      '--muted': '237deg 16% 23%',
     },
   },
 };

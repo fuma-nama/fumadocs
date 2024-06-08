@@ -102,6 +102,7 @@ export function Sidebar({
   return (
     <Context.Provider value={context}>
       <Base.SidebarList
+        id="nd-sidebar"
         blockScrollingWidth={768} // md
         {...aside}
         className={cn(

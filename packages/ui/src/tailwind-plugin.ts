@@ -83,13 +83,13 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
         },
 
         '@screen md': {
-          '#dynamic-sidebar[data-collapse=true][data-hover=true]': {
+          '#nd-sidebar[data-collapse=true][data-hover=true]': {
             transform: 'translateX(0)',
           },
-          '#dynamic-sidebar[data-collapse=true][data-hover=false]': {
+          '#nd-sidebar[data-collapse=true][data-hover=false]': {
             transform: 'translateX(calc(-100% - 1rem))',
           },
-          '[dir=rtl] #dynamic-sidebar[data-collapse=true][data-hover=false]': {
+          '[dir=rtl] #nd-sidebar[data-collapse=true][data-hover=false]': {
             transform: 'translateX(calc(100% + 1rem))',
           },
         },

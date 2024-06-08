@@ -57,7 +57,6 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
       <Sidebar
         {...props}
         aside={{
-          id: 'dynamic-sidebar',
           'data-collapse': collapsed,
           'data-hover': hover,
           onPointerEnter: onHover,
