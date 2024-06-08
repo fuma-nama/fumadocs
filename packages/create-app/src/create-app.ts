@@ -20,7 +20,7 @@ export async function create(options: Options): Promise<void> {
   const projectName = path.basename(options.outputDir);
   const dest = path.resolve(cwd, options.outputDir);
   await copy(path.join(sourceDir, `template/${options.template}`), dest);
-  await copy(path.join(sourceDir, `template/+content`), dest, (name) => {
+  await copy(path.join(sourceDir, `template/+shared`), dest, (name) => {
     switch (name) {
       case 'example.gitignore':
         return '.gitignore';

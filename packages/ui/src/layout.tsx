@@ -74,7 +74,7 @@ export interface BaseLayoutProps {
    */
   nav?: Partial<NavOptions>;
 
-  children: ReactNode;
+  children?: ReactNode;
 }
 
 export interface DocsLayoutProps extends BaseLayoutProps {

@@ -2,7 +2,7 @@ import { type BaseLayoutProps } from 'fumadocs-ui/layout';
 import { BookIcon, LayoutTemplateIcon } from 'lucide-react';
 import { NavChildren, Title } from '@/app/layout.client';
 
-export const baseOptions: Omit<BaseLayoutProps, 'children'> = {
+export const baseOptions: BaseLayoutProps = {
   githubUrl: 'https://github.com/fuma-nama/fumadocs',
   nav: {
     transparentMode: 'top',
