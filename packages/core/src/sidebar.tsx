@@ -78,7 +78,6 @@ export type SidebarContentProps<T extends ElementType> = AsProps<T> & {
   blockScrollingWidth?: number;
 };
 
-// todo: Change in next major
 export function SidebarList<T extends ElementType = 'aside'>({
   as,
   blockScrollingWidth,

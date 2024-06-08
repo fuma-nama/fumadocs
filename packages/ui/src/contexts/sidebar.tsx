@@ -1,4 +1,13 @@
-import { createContext, useContext, useState, useMemo } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useMemo,
+  useRef,
+  type MutableRefObject,
+  useEffect,
+} from 'react';
+import { usePathname } from 'next/navigation';
 import { SidebarProvider as BaseProvider } from 'fumadocs-core/sidebar';
 
 interface SidebarContext {
@@ -6,6 +15,11 @@ interface SidebarContext {
   setOpen: (v: boolean) => void;
   collapsed: boolean;
   setCollapsed: (v: boolean) => void;
+
+  /**
+   * When set to true, close the sidebar on redirection
+   */
+  closeOnRedirect: MutableRefObject<boolean>;
 }
 
 const SidebarContext = createContext<SidebarContext | undefined>(undefined);
@@ -21,8 +35,18 @@ export function SidebarProvider({
 }: {
   children: React.ReactNode;
 }): React.ReactElement {
+  const closeOnRedirect = useRef(false);
   const [open, setOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (closeOnRedirect.current) {
+      setOpen(false);
+      closeOnRedirect.current = false;
+    }
+  }, [pathname]);
 
   return (
     <SidebarContext.Provider
@@ -32,6 +56,7 @@ export function SidebarProvider({
           setOpen,
           collapsed,
           setCollapsed,
+          closeOnRedirect,
         }),
         [open, collapsed],
       )}

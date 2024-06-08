@@ -45,7 +45,7 @@ export interface SidebarProps {
   footer?: React.ReactNode;
 }
 
-interface SidebarContext {
+interface InternalContext {
   defaultOpenLevel: number;
   components: Components;
 }
@@ -75,7 +75,7 @@ const defaultComponents: Components = {
   Item: PageNode,
 };
 
-const SidebarContext = createContext<SidebarContext>({
+const Context = createContext<InternalContext>({
   defaultOpenLevel: 1,
   components: defaultComponents,
 });
@@ -91,7 +91,7 @@ export function Sidebar({
 }: SidebarProps & {
   aside?: HTMLAttributes<HTMLElement> & Record<string, unknown>;
 }): React.ReactElement {
-  const context = useMemo<SidebarContext>(
+  const context = useMemo<InternalContext>(
     () => ({
       defaultOpenLevel,
       components: { ...defaultComponents, ...components },
@@ -100,13 +100,13 @@ export function Sidebar({
   );
 
   return (
-    <SidebarContext.Provider value={context}>
+    <Context.Provider value={context}>
       <Base.SidebarList
         blockScrollingWidth={768} // md
         {...aside}
         className={cn(
           'z-30 flex w-full flex-col text-[15px] md:sticky md:top-0 md:h-dvh md:w-[240px] md:border-e md:bg-card md:text-sm xl:w-[260px]',
-          'max-md:fixed max-md:inset-0 max-md:pt-16 max-md:bg-background/80 max-md:backdrop-blur-md max-md:data-[open=false]:hidden',
+          'max-md:fixed max-md:inset-0 max-md:bg-background/80 max-md:pt-16 max-md:backdrop-blur-md max-md:data-[open=false]:hidden',
           aside?.className,
         )}
       >
@@ -134,7 +134,7 @@ export function Sidebar({
           {footer}
         </div>
       </Base.SidebarList>
-    </SidebarContext.Provider>
+    </Context.Provider>
   );
 }
 
@@ -167,7 +167,7 @@ function NodeList({
   level = 0,
   ...props
 }: NodeListProps): React.ReactElement {
-  const { components } = useContext(SidebarContext);
+  const { components } = useContext(Context);
 
   return (
     <div {...props}>
@@ -195,7 +195,7 @@ function PageNode({
   nested?: boolean;
 }): React.ReactElement {
   const pathname = usePathname();
-  const { setOpen } = useSidebar();
+  const { closeOnRedirect } = useSidebar();
   const active = isActive(url, pathname, nested);
 
   return (
@@ -204,8 +204,8 @@ function PageNode({
       external={external}
       className={cn(itemVariants({ active }))}
       onClick={useCallback(() => {
-        setOpen(false);
-      }, [setOpen])}
+        closeOnRedirect.current = true;
+      }, [closeOnRedirect])}
     >
       {icon ?? (external ? <ExternalLinkIcon /> : null)}
       {name}
@@ -220,8 +220,8 @@ function FolderNode({
   item: PageTree.Folder;
   level: number;
 }): React.ReactElement {
-  const { setOpen } = useSidebar();
-  const { defaultOpenLevel } = useContext(SidebarContext);
+  const { defaultOpenLevel } = useContext(Context);
+  const { closeOnRedirect } = useSidebar();
   const pathname = usePathname();
 
   const active = index !== undefined && isActive(index.url, pathname, false);
@@ -244,10 +244,10 @@ function FolderNode({
         setExtend((prev) => !prev);
         e.preventDefault();
       } else {
-        setOpen(false);
+        closeOnRedirect.current = true;
       }
     },
-    [setOpen, active],
+    [closeOnRedirect, active],
   );
 
   return (
