@@ -15,7 +15,7 @@ export default {
 };
 ```
 
-For example, from this MDX document.
+### Example
 
 ```mdx
 ![Hello](./hello.png)
@@ -29,4 +29,5 @@ import HelloImage from './hello.png';
 <img alt="Hello" src={HelloImage} />
 ```
 
-> You need an image loader to handle image imports.
+You need an image loader to handle image imports.
+In Next.js, this is already done by a Webpack/Turbopack plugin

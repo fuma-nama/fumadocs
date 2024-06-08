@@ -13,6 +13,8 @@ import { Heading } from 'fumadocs-ui/components/heading';
 import type { ReactNode } from 'react';
 import BannerImage from '@/public/banner.png';
 import { Wrapper } from './wrapper';
+import { RootToggle } from 'fumadocs-ui/components/layout/root-toggle';
+import { modes } from '@/utils/modes';
 
 export default {
   heading: (
@@ -198,5 +200,19 @@ export default {
       <p className="text-center text-sm">Scroll down to see the button</p>
       <RollButton />
     </div>
+  ),
+  'root-toggle': (
+    <Wrapper>
+      <div className="rounded-xl bg-background p-3 not-prose">
+        <RootToggle
+          options={modes.map((mode) => ({
+            url: `/docs/${mode.param}`,
+            icon: <mode.icon />,
+            title: mode.name,
+            description: mode.description,
+          }))}
+        />
+      </div>
+    </Wrapper>
   ),
 } as Record<string, ReactNode>;

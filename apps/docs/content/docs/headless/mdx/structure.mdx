@@ -60,8 +60,7 @@ structure(page.body.raw);
 
 <Callout title="Tip" className="mt-4">
 If you have custom remark plugins enabled, such as
-`remark-math`, you have to manually structure the document with these
-plugins passed into the function:
+`remark-math`, you have to pass these plugins to the function. This avoids unreadable content on paragraphs.
 
 ```ts
 import { structure } from 'fumadocs-core/mdx-plugins';

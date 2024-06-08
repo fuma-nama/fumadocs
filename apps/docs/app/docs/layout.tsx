@@ -15,6 +15,7 @@ export default function Layout({
       {...baseOptions}
       tree={utils.pageTree}
       sidebar={{
+        defaultOpenLevel: 0,
         banner: (
           <RootToggle
             options={modes.map((mode) => ({
