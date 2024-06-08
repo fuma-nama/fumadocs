@@ -17,7 +17,7 @@ export function Heading<T extends Types = 'h1'>({
   return (
     <As className={cn('scroll-m-20', className)} {...props}>
       {props.id ? (
-        <a href={`#${props.id}`} className="not-prose group">
+        <a href={`#${props.id}`} className="group">
           {props.children}
           <LinkIcon
             aria-label="Link to section"
