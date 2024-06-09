@@ -26,7 +26,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '../ui/collapsible';
-import { ThemeToggle } from './theme-toggle';
 
 export interface SidebarProps {
   items: LinkItemType[];
@@ -41,8 +40,10 @@ export interface SidebarProps {
 
   components?: Partial<Components>;
   banner?: React.ReactNode;
-  bannerProps?: HTMLAttributes<HTMLElement>;
+  bannerProps?: HTMLAttributes<HTMLDivElement>;
+
   footer?: React.ReactNode;
+  footerProps?: HTMLAttributes<HTMLDivElement>;
 }
 
 interface InternalContext {
@@ -88,6 +89,7 @@ export function Sidebar({
   items,
   aside,
   bannerProps,
+  footerProps,
 }: SidebarProps & {
   aside?: HTMLAttributes<HTMLElement> & Record<string, unknown>;
 }): React.ReactElement {
@@ -130,8 +132,13 @@ export function Sidebar({
             </div>
           )}
         </ViewportContent>
-        <div className="flex flex-row items-center gap-2 border-t p-3 md:p-2">
-          <ThemeToggle />
+        <div
+          {...footerProps}
+          className={cn(
+            'flex flex-row items-center border-t px-4 py-2 md:px-3',
+            footerProps?.className,
+          )}
+        >
           {footer}
         </div>
       </Base.SidebarList>

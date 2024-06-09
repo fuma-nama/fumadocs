@@ -34,7 +34,7 @@ export function RootToggle({
         <Item {...selected} />
         <ChevronDown className="size-4 text-muted-foreground" />
       </PopoverTrigger>
-      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-1">
+      <PopoverContent className="w-[var(--radix-popover-trigger-width)] overflow-hidden p-0">
         {options.map((item) => (
           <Link
             key={item.url}
@@ -43,7 +43,7 @@ export function RootToggle({
               setOpen(false);
             }}
             className={cn(
-              'flex w-full flex-row gap-2 rounded-lg p-2',
+              'flex w-full flex-row gap-2 p-2',
               selected === item
                 ? 'bg-accent text-accent-foreground'
                 : 'hover:bg-accent/50',

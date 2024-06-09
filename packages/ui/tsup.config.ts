@@ -21,6 +21,7 @@ const exportedComponents = [
   'dialog/search-default',
   'dialog/search-algolia',
   'layout/root-toggle',
+  'layout/language-toggle',
 ];
 
 const injectImports = ['./src/page.tsx', './src/mdx.tsx', './src/layout.tsx'];

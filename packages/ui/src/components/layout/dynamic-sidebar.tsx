@@ -78,7 +78,7 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
                 buttonVariants({
                   color: 'ghost',
                   size: 'icon',
-                  className: 'max-md:hidden ms-auto',
+                  className: 'max-md:hidden',
                 }),
               )}
               onClick={onCollapse}

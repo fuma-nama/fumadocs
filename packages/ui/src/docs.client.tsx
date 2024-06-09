@@ -47,3 +47,4 @@ export function SubNav({
 export { Sidebar } from './components/layout/sidebar';
 export { DynamicSidebar } from './components/layout/dynamic-sidebar';
 export { TreeContextProvider } from './contexts/tree';
+export { ThemeToggle } from './components/layout/theme-toggle';

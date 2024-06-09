@@ -11,10 +11,10 @@ import { TypeTable } from 'fumadocs-ui/components/type-table';
 import { Card } from 'fumadocs-ui/components/card';
 import { Heading } from 'fumadocs-ui/components/heading';
 import type { ReactNode } from 'react';
-import BannerImage from '@/public/banner.png';
-import { Wrapper } from './wrapper';
 import { RootToggle } from 'fumadocs-ui/components/layout/root-toggle';
+import BannerImage from '@/public/banner.png';
 import { modes } from '@/utils/modes';
+import { Wrapper } from './wrapper';
 
 export default {
   heading: (
@@ -203,7 +203,7 @@ export default {
   ),
   'root-toggle': (
     <Wrapper>
-      <div className="rounded-xl bg-background p-3 not-prose">
+      <div className="not-prose rounded-xl bg-background p-3">
         <RootToggle
           options={modes.map((mode) => ({
             url: `/docs/${mode.param}`,

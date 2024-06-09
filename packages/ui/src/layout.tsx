@@ -13,7 +13,12 @@ declare const {
   DynamicSidebar,
   SubNav,
   Sidebar,
+  ThemeToggle,
 }: typeof import('./docs.client');
+
+declare const {
+  LanguageToggle,
+}: typeof import('./components/layout/language-toggle');
 
 type ActiveType = 'none' | 'url' | 'nested-url';
 
@@ -83,6 +88,13 @@ export interface DocsLayoutProps extends BaseLayoutProps {
   sidebar?: Partial<SidebarOptions>;
 
   containerProps?: HTMLAttributes<HTMLDivElement>;
+
+  /**
+   * Enable Language Switch
+   *
+   * @defaultValue false
+   */
+  i18n?: boolean;
 }
 
 export function Layout({
@@ -113,6 +125,7 @@ export function DocsLayout({
   links = [],
   containerProps,
   tree,
+  i18n = false,
   children,
 }: DocsLayoutProps): React.ReactElement {
   const sidebarEnabled = sidebar.enabled ?? true;
@@ -147,7 +160,13 @@ export function DocsLayout({
             bannerProps={{
               className: cn(!sidebar.banner && 'max-md:hidden'),
             }}
-            footer={sidebar.footer}
+            footer={
+              <>
+                <ThemeToggle className="me-auto" />
+                {sidebar.footer}
+                {i18n ? <LanguageToggle /> : null}
+              </>
+            }
             components={sidebar.components}
           />,
         )}
