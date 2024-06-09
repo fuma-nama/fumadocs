@@ -3,7 +3,7 @@
 import { cva } from 'class-variance-authority';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import type { ReactNode } from 'react';
+import { type ReactNode, useId } from 'react';
 import Image from 'next/image';
 import { cn } from '@/utils/cn';
 import { modes } from '@/utils/modes';
@@ -32,7 +32,7 @@ export function Title(): React.ReactElement {
       />
 
       <FumadocsIcon className="size-5 [.uwu_&]:hidden" fill="currentColor" />
-      <span className="max-md:hidden [.uwu_&]:hidden">Fumadocs</span>
+      <span className="[.uwu_&]:hidden max-md:[nav_&]:hidden">Fumadocs</span>
     </>
   );
 }
@@ -44,7 +44,9 @@ export function Body({
 }): React.ReactElement {
   const mode = useMode();
 
-  return <div className={mode}>{children}</div>;
+  return (
+    <body className={cn(mode, 'flex min-h-screen flex-col')}>{children}</body>
+  );
 }
 
 export function NavChildren(): React.ReactElement {
@@ -70,38 +72,21 @@ export function useMode(): string | undefined {
   return Array.isArray(slug) && slug.length > 0 ? slug[0] : undefined;
 }
 
-export function SidebarBanner(): React.ReactElement {
-  const mode = useMode();
-  const currentMode = modes.find((item) => item.param === mode) ?? modes[0];
-  const Icon = currentMode.icon;
-
-  return (
-    <div className="-mt-2 flex flex-row items-center gap-2 rounded-lg p-2 text-card-foreground transition-colors hover:bg-muted/80">
-      <Icon className="size-9 shrink-0 rounded-md bg-primary/30 bg-gradient-to-t from-background/80 p-1.5 text-primary shadow-md shadow-primary/50" />
-      <div>
-        <p className="font-medium">{currentMode.package}</p>
-        <p className="text-xs text-muted-foreground">
-          {currentMode.description} - {currentMode.version}
-        </p>
-      </div>
-    </div>
-  );
-}
-
 export function FumadocsIcon(
   props: React.SVGProps<SVGSVGElement>,
 ): React.ReactElement {
+  const id = useId();
   return (
     <svg
       width="80"
       height="80"
       viewBox="0 0 180 180"
-      filter="url(#shadow)"
+      filter={`url(#${id}-shadow)`}
       {...props}
     >
-      <circle cx="90" cy="90" r="90" fill="url(#iconGradient)" />
+      <circle cx="90" cy="90" r="90" fill={`url(#${id}-iconGradient)`} />
       <defs>
-        <filter id="shadow" colorInterpolationFilters="sRGB">
+        <filter id={`${id}-shadow`} colorInterpolationFilters="sRGB">
           <feDropShadow
             dx="0"
             dy="0"
@@ -110,7 +95,10 @@ export function FumadocsIcon(
             floodOpacity="1"
           />
         </filter>
-        <linearGradient id="iconGradient" gradientTransform="rotate(45)">
+        <linearGradient
+          id={`${id}-iconGradient`}
+          gradientTransform="rotate(45)"
+        >
           <stop offset="45%" stopColor="hsl(var(--background))" />
           <stop offset="100%" stopColor="hsl(var(--primary))" />
         </linearGradient>

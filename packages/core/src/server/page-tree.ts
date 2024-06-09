@@ -21,6 +21,11 @@ export interface Separator {
 }
 
 export interface Folder {
+  /**
+   * Optional id to be attached to folders
+   */
+  id?: string;
+
   type: 'folder';
   name: string;
   root?: boolean;

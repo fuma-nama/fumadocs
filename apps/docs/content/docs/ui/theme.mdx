@@ -4,9 +4,6 @@ description: Add Theme to Fumadocs UI
 icon: Palette
 ---
 
-import { ThemeSwitch } from '@/components/theme-switch';
-import { blueTheme } from '@/components/themes.js';
-
 ## Usage
 
 You can import the pre-built stylesheet.
@@ -59,10 +56,6 @@ import { RootProvider } from '@fumadocs-ui/provider';
 ## Themes
 
 The design system was inspired by [Shadcn UI](https://ui.shadcn.com), you can easily customize all the properties using CSS variables.
-
-<div className="mb-4 flex flex-row flex-wrap gap-2">
-  <ThemeSwitch style={blueTheme}>Blue Theme</ThemeSwitch>
-</div>
 
 ```css title="global.css"
 :root {

@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/collapsible';
 
 const linkItemVariants = cva(
-  'inline-flex items-center gap-1.5 rounded-lg p-2 text-[15px] text-muted-foreground transition-colors [&_svg]:size-4',
+  'inline-flex items-center gap-1.5 rounded-lg p-2 text-muted-foreground transition-colors [&_svg]:size-4',
   {
     variants: {
       active: {

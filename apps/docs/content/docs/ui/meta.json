@@ -6,6 +6,9 @@
     "index",
     "comparisons",
     "...",
+    "---Writing---",
+    "markdown",
+    "../headless/page-conventions",
     "---Components---",
     "...components",
     "---Blocks---",
@@ -17,8 +20,6 @@
     "openapi",
     "museum",
     "---Others---",
-    "...commands",
-    "../headless/page-conventions",
     "[Vercel](https://vercel.com)"
   ]
 }

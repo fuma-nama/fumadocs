@@ -1,0 +1,217 @@
+---
+title: Markdown
+description: How to write documents
+---
+
+## Introduction
+
+Fumadocs provides many useful extensions to MDX, a markup language. Here is a brief introduction to the default MDX syntax of Fumadocs UI.
+
+> MDX is not the only supported format of Fumadocs. In fact, you can use any renderers such as `next-mdx-remote` or CMS.
+
+## Markdown
+
+We use GFM (GitHub Flavored Markdown), a superset of Markdown (CommonMark).
+See [GFM Specification](https://github.github.com/gfm).
+
+````md
+# Heading
+
+## Heading
+
+### Heading
+
+#### Heading
+
+Hello World, **Bold**, _Italic_, ~~Hidden~~
+
+```js
+console.log('Hello World');
+```
+
+1. First
+2. Second
+3. Third
+
+- Item 1
+- Item 2
+
+> Quote here
+
+![alt](/image.png)
+
+| Table | Description |
+| ----- | ----------- |
+| Hello | World       |
+````
+
+### Auto Links
+
+Internal links use the `next/link` component to allow prefetching and avoid hard-reload.
+
+External links will get the default `rel="noreferrer noopener" target="_blank"` attributes for security.
+
+```mdx
+[My Link](https://github.github.com/gfm)
+
+This also works: https://github.github.com/gfm.
+```
+
+## MDX
+
+MDX is a superset of Markdown, with support of JSX syntax.
+It allows you to import components, and use them right in the document, or even export values.
+
+```mdx
+import { Component } from './component';
+
+<Component name="Hello" />
+```
+
+see [MDX Syntax](https://mdxjs.com/docs/what-is-mdx/#mdx-syntax) to learn more.
+
+### Cards
+
+A [`Card`](/docs/ui/components/mdx/card) component is included by default. Similar to links, but you can display more information (e.g. icons).
+
+```mdx
+<Cards>
+  <Card
+    href="https://nextjs.org/docs/app/building-your-application/data-fetching/fetching-caching-and-revalidating"
+    title="Fetching, Caching, and Revalidating"
+    description="Learn more about caching in Next.js"
+  />
+</Cards>
+```
+
+<Cards>
+  <Card
+    href="https://nextjs.org/docs/app/building-your-application/data-fetching/fetching-caching-and-revalidating"
+    title="Fetching, Caching, and Revalidating"
+    description="Learn more about caching in Next.js"
+  />
+</Cards>
+
+### Callouts
+
+Useful for adding tips/warnings, you have to import them.
+
+```mdx
+import { Callout } from 'fumadocs-ui/components/callout';
+
+<Callout title="Title" type="info">
+  Hello World
+</Callout>
+<Callout title="Title" type="warn">
+  Hello World
+</Callout>
+<Callout title="Title" type="error">
+  Hello World
+</Callout>
+```
+
+<Callout title="Title" type="info">
+  Hello World
+</Callout>
+<Callout title="Title" type="warn">
+  Hello World
+</Callout>
+<Callout title="Title" type="error">
+  Hello World
+</Callout>
+
+## Heading Anchors
+
+An anchor is automatically applied to all headings, it sanitizes invalid characters like spaces. (e.g. `Hello World` to `hello-world`)
+
+### Custom Anchor
+
+You can add `[#slug]` to customise heading anchors.
+
+```mdx
+# heading [#my-heading-id]
+```
+
+To link people to a specific heading, add the heading id to hash fragment: `/page#my-heading-id`.
+
+## Frontmatter
+
+We support YAML frontmatter. It is a way to specify common information of the document (e.g. title).
+Place it at the top of document.
+
+```mdx
+---
+title: Hello World
+---
+
+## Title
+```
+
+See [Page Conventions](/docs/headless/page-conventions#frontmatter) for a list of properties available for frontmatter.
+
+## Codeblock
+
+Syntax Highlighting is done with [Rehype Code](/docs/headless/mdx/rehype-code) automatically.
+
+````mdx
+```js
+console.log('Hello World');
+```
+````
+
+You can add a title to the codeblock.
+
+````mdx
+```js title="My Title"
+console.log('Hello World');
+```
+````
+
+### Highlight Lines
+
+You spectify highlighted lines by adding `[!code highlight]`.
+
+````md
+```tsx
+<div>Hello World</div>  // [\!code highlight]
+<div>Hello World</div>
+<div>Goodbye</div>
+<div>Hello World</div>
+```
+````
+
+### Highlight Words
+
+You can highlight a specific word by adding `[!code word:<match>]`.
+
+````md
+```js
+// [\!code word:config]
+const config = {
+  reactStrictMode: true,
+};
+```
+````
+
+### Using Typescript Twoslash
+
+Write Typescript codeblocks with hover type information and detected types errors.
+
+Not enabled by default. See [Twoslash](/docs/ui/twoslash).
+
+## Images
+
+All built-in content sources handle images properly.
+Images are automatically optimized for `next/image`.
+
+```mdx
+![Image](/image.png)
+```
+
+## Math Equations
+
+Not enabled by default. See [Math Integration](/docs/ui/math).
+
+## Optional Plugins
+
+Fumadocs also has optional plugins, you can see [a list of plugins](/docs/headless/mdx) supported by Fumadocs.

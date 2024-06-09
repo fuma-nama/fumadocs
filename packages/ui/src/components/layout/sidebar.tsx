@@ -5,6 +5,7 @@ import * as Base from 'fumadocs-core/sidebar';
 import { usePathname } from 'next/navigation';
 import {
   createContext,
+  type HTMLAttributes,
   useCallback,
   useContext,
   useEffect,
@@ -18,12 +19,13 @@ import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
 import { hasActive, isActive } from '@/utils/shared';
 import type { LinkItemType } from '@/layout';
 import { LinkItem } from '@/components/link-item';
+import { LargeSearchToggle } from '@/components/layout/search-toggle';
+import { useSidebar } from '@/contexts/sidebar';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from './ui/collapsible';
-import { ThemeToggle } from './theme-toggle';
+} from '../ui/collapsible';
 
 export interface SidebarProps {
   items: LinkItemType[];
@@ -38,10 +40,13 @@ export interface SidebarProps {
 
   components?: Partial<Components>;
   banner?: React.ReactNode;
+  bannerProps?: HTMLAttributes<HTMLDivElement>;
+
   footer?: React.ReactNode;
+  footerProps?: HTMLAttributes<HTMLDivElement>;
 }
 
-interface SidebarContext {
+interface InternalContext {
   defaultOpenLevel: number;
   components: Components;
 }
@@ -71,7 +76,7 @@ const defaultComponents: Components = {
   Item: PageNode,
 };
 
-const SidebarContext = createContext<SidebarContext>({
+const Context = createContext<InternalContext>({
   defaultOpenLevel: 1,
   components: defaultComponents,
 });
@@ -82,34 +87,45 @@ export function Sidebar({
   defaultOpenLevel = 1,
   banner,
   items,
-  ...props
-}: SidebarProps & { className?: string }): React.ReactElement {
-  const alwaysShowFooter = Boolean(footer);
-  const context = useMemo<SidebarContext>(
+  aside,
+  bannerProps,
+  footerProps,
+}: SidebarProps & {
+  aside?: HTMLAttributes<HTMLElement> & Record<string, unknown>;
+}): React.ReactElement {
+  const context = useMemo<InternalContext>(
     () => ({
       defaultOpenLevel,
       components: { ...defaultComponents, ...components },
     }),
     [components, defaultOpenLevel],
   );
+
   return (
-    <SidebarContext.Provider value={context}>
+    <Context.Provider value={context}>
       <Base.SidebarList
+        id="nd-sidebar"
         blockScrollingWidth={768} // md
+        {...aside}
         className={cn(
-          'flex w-full flex-col text-[15px] md:sticky md:top-16 md:h-body md:w-[240px] md:text-sm xl:w-[260px]',
-          'max-md:fixed max-md:inset-0 max-md:z-40 max-md:pt-16 max-md:data-[open=false]:hidden',
-          props.className,
+          'z-30 flex w-full flex-col text-[15px] md:sticky md:top-0 md:h-dvh md:w-[240px] md:border-e md:bg-card md:text-sm xl:w-[260px]',
+          'max-md:fixed max-md:inset-0 max-md:bg-background/80 max-md:pt-16 max-md:backdrop-blur-md max-md:data-[open=false]:hidden',
+          aside?.className,
         )}
       >
         <div
-          id="sidebar-background"
-          className="absolute z-[-1] size-full max-md:bg-background/80 max-md:backdrop-blur-md"
-        />
-        <ViewportContent>
+          {...bannerProps}
+          className={cn(
+            'flex flex-col gap-2 border-b px-4 py-2 md:p-3 md:pt-10',
+            bannerProps?.className,
+          )}
+        >
           {banner}
+          <LargeSearchToggle className="rounded-lg max-md:hidden" />
+        </div>
+        <ViewportContent>
           {items.length > 0 && (
-            <div className="flex flex-col md:hidden">
+            <div className="flex flex-col">
               {items.map((item, i) => (
                 <LinkItem key={i} item={item} on="menu" />
               ))}
@@ -117,16 +133,16 @@ export function Sidebar({
           )}
         </ViewportContent>
         <div
+          {...footerProps}
           className={cn(
-            'flex flex-row items-center gap-2 border-t p-3 md:p-2',
-            !alwaysShowFooter && 'md:hidden',
+            'flex flex-row items-center border-t px-4 py-2 md:px-3',
+            footerProps?.className,
           )}
         >
           {footer}
-          <ThemeToggle className="md:hidden" />
         </div>
       </Base.SidebarList>
-    </SidebarContext.Provider>
+    </Context.Provider>
   );
 }
 
@@ -140,7 +156,7 @@ function ViewportContent({
   return (
     <ScrollArea className="flex-1">
       <ScrollViewport>
-        <div className="flex flex-col gap-8 p-4 pb-10 md:px-3 md:pt-10">
+        <div className="flex flex-col gap-8 p-4 pb-10 md:px-3">
           {children}
           <NodeList items={root.children} />
         </div>
@@ -159,7 +175,7 @@ function NodeList({
   level = 0,
   ...props
 }: NodeListProps): React.ReactElement {
-  const { components } = useContext(SidebarContext);
+  const { components } = useContext(Context);
 
   return (
     <div {...props}>
@@ -181,19 +197,21 @@ function NodeList({
 
 function PageNode({
   item: { icon, external = false, url, name },
-  nested = false,
 }: {
   item: PageTree.Item;
-  nested?: boolean;
 }): React.ReactElement {
   const pathname = usePathname();
-  const active = isActive(url, pathname, nested);
+  const { closeOnRedirect } = useSidebar();
+  const active = isActive(url, pathname, false);
 
   return (
     <Link
       href={url}
       external={external}
       className={cn(itemVariants({ active }))}
+      onClick={useCallback(() => {
+        closeOnRedirect.current = !active;
+      }, [closeOnRedirect, active])}
     >
       {icon ?? (external ? <ExternalLinkIcon /> : null)}
       {name}
@@ -208,13 +226,16 @@ function FolderNode({
   item: PageTree.Folder;
   level: number;
 }): React.ReactElement {
-  const { defaultOpenLevel } = useContext(SidebarContext);
+  const { defaultOpenLevel } = useContext(Context);
+  const { closeOnRedirect } = useSidebar();
   const pathname = usePathname();
+
   const active = index !== undefined && isActive(index.url, pathname, false);
   const childActive = useMemo(
     () => hasActive(children, pathname),
     [children, pathname],
   );
+
   const shouldExtend =
     active || childActive || defaultOpenLevel >= level || defaultOpen;
   const [extend, setExtend] = useState(shouldExtend);
@@ -223,14 +244,16 @@ function FolderNode({
     if (shouldExtend) setExtend(true);
   }, [shouldExtend]);
 
-  const onClick = useCallback(
-    (e: React.MouseEvent) => {
+  const onClick: React.MouseEventHandler = useCallback(
+    (e) => {
       if (e.target !== e.currentTarget || active) {
         setExtend((prev) => !prev);
         e.preventDefault();
+      } else {
+        closeOnRedirect.current = !active;
       }
     },
-    [active],
+    [closeOnRedirect, active],
   );
 
   return (

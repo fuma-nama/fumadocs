@@ -4,6 +4,7 @@ import type { Viewport } from 'next';
 import { GeistSans } from 'geist/font/sans';
 import { GeistMono } from 'geist/font/mono';
 import { baseUrl, createMetadata } from '@/utils/metadata';
+import { Body } from '@/app/layout.client';
 import { Provider } from './provider';
 
 export const metadata = createMetadata({
@@ -33,12 +34,10 @@ export default function RootLayout({
       className={`${GeistSans.variable} ${GeistMono.variable}`}
       suppressHydrationWarning
     >
-      <body className="flex min-h-screen flex-col">
-        <Provider>
-          {children}
-          <Footer />
-        </Provider>
-      </body>
+      <Body>
+        <Provider>{children}</Provider>
+        <Footer />
+      </Body>
     </html>
   );
 }

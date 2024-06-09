@@ -46,7 +46,7 @@
     "hast-util-to-jsx-runtime": "^2.3.0",
     "mdast-util-from-markdown": "^2.0.1",
     "mdast-util-gfm": "^3.0.0",
-    "mdast-util-to-hast": "^13.1.0"
+    "mdast-util-to-hast": "^13.2.0"
   },
   "devDependencies": {
     "@types/estree": "^1.0.5",

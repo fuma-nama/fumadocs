@@ -4,26 +4,23 @@ description: Learn more implement internationalization in Fumadocs UI
 icon: Globe
 ---
 
-Please refer to this
-[guide](/docs/headless/internationalization) to setup basic
-configurations and learn how to organize the documents.
+import * as A from '@/content/docs/headless/internationalization.mdx';
 
-Ensure you have your page tree, layout and middleware ready before getting
-started.
+<A.default />
 
-## Setup
+## Setup UI
 
-A `I18nProvider` is needed for localization.
-
-Put your pages and layouts under `/app/[lang]`.
-Then, wrap the root provider inside of your i18n provider.
+A `I18nProvider` is needed for localization. Wrap the root provider inside your i18n provider.
 
 ```tsx
 import { RootProvider } from 'fumadocs-ui/provider';
 import { I18nProvider } from 'fumadocs-ui/i18n';
-import type { ReactNode } from 'react';
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <I18nProvider>
       <RootProvider>{children}</RootProvider>
@@ -36,27 +33,45 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
 We only provide english translation by default, you have to pass your translations to the provider.
 
-```mdx
-<I18nProvider
-  translations={{
-    cn: {
-      name: 'Chinese', // required
-      search: 'Translated Content',
-    },
-  }}
-></I18nProvider>
+```tsx
+import { RootProvider } from 'fumadocs-ui/provider';
+import { I18nProvider } from 'fumadocs-ui/i18n';
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <I18nProvider
+      translations={{
+        cn: {
+          name: 'Chinese', // required
+          search: 'Translated Content',
+        },
+      }}
+    >
+      <RootProvider>{children}</RootProvider>
+    </I18nProvider>
+  );
+}
 ```
 
 ### Add Language Switch
 
-To allow users changing their language, add a `<LanguageSelect />`
-component to the UI, for example, to sidebar footer.
+To allow users changing their language, enable `i18n` on docs layout.
 
 ```tsx title="[lang]/docs/layout.tsx"
 import { DocsLayout } from 'fumadocs-ui/layout';
-import { LanguageSelect } from 'fumadocs-ui/i18n';
 
-export default function Layout({ children }: { children: ReactNode }) {
-  return <DocsLayout sidebar={{ footer: <LanguageSelect /> }} />;
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return <DocsLayout i18n>{children}</DocsLayout>;
 }
 ```
+
+export function inject() {
+  if (!toc.injected) toc.unshift(...A.toc);
+  toc.injected = true;
+}
+
+{inject()}

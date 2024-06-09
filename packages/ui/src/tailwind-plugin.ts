@@ -83,21 +83,13 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
         },
 
         '@screen md': {
-          '#sidebar-background': {
-            'inset-inline-start': 'calc((100vw - min(100vw,1400px))/-2)',
-            width: 'calc((100vw - min(100vw,1400px))/2 + 100%)',
-          },
-          '#dynamic-sidebar[data-open=false] #sidebar-background': {
-            'inset-inline-start': '0',
-            width: '100%',
-          },
-          '#dynamic-sidebar[data-open=false][data-hover=true]': {
+          '#nd-sidebar[data-collapse=true][data-hover=true]': {
             transform: 'translateX(0)',
           },
-          '#dynamic-sidebar[data-open=false][data-hover=false]': {
+          '#nd-sidebar[data-collapse=true][data-hover=false]': {
             transform: 'translateX(calc(-100% - 1rem))',
           },
-          '[dir=rtl] #dynamic-sidebar[data-open=false][data-hover=false]': {
+          '[dir=rtl] #nd-sidebar[data-collapse=true][data-hover=false]': {
             transform: 'translateX(calc(100% + 1rem))',
           },
         },

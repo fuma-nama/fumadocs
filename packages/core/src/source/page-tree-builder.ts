@@ -4,32 +4,48 @@ import type { File, Folder, Storage } from './file-system';
 import { resolvePath } from './path';
 import { type FileData, type UrlFn } from './types';
 
-interface PageTreeBuilderContext extends CreatePageTreeBuilderOptions {
+interface PageTreeBuilderContext {
   lang?: string;
 
+  storage: Storage;
   builder: PageTreeBuilder;
+  options: BuildPageTreeOptions;
 }
 
-export interface BuildPageTreeOptionsWithI18n {
-  languages: string[];
+export interface BuildPageTreeOptions {
+  /**
+   * Attach the `folder.id` property
+   *
+   * @defaultValue false
+   */
+  attachFolderIds?: boolean;
+
+  attachFile?: (node: PageTree.Item, file?: File) => PageTree.Item;
+  attachFolder?: (
+    node: PageTree.Folder,
+    folder: Folder,
+    meta?: File,
+  ) => PageTree.Folder;
+  attachSeparator?: (node: PageTree.Separator) => PageTree.Separator;
+
+  storage: Storage;
+  getUrl: UrlFn;
+  resolveIcon?: (icon: string | undefined) => ReactElement | undefined;
+}
+
+export interface BuildPageTreeOptionsWithI18n extends BuildPageTreeOptions {
+  languages?: string[];
 }
 
 export interface PageTreeBuilder {
-  build: () => PageTree.Root;
+  build: (options: BuildPageTreeOptions) => PageTree.Root;
 
   /**
    * Build page tree and fallback to the default language if the localized page doesn't exist
    */
   buildI18n: (
-    options?: Partial<BuildPageTreeOptionsWithI18n>,
+    options: BuildPageTreeOptionsWithI18n,
   ) => Record<string, PageTree.Root>;
-}
-
-export interface CreatePageTreeBuilderOptions {
-  storage: Storage;
-
-  getUrl: UrlFn;
-  resolveIcon?: (icon: string | undefined) => ReactElement | undefined;
 }
 
 const link = /^\[(?<text>.+)]\((?<url>.+)\)$/;
@@ -82,12 +98,12 @@ function resolveFolderItem(
 
   const separateResult = separator.exec(item);
   if (separateResult?.groups) {
-    return [
-      {
-        type: 'separator',
-        name: separateResult.groups.name,
-      },
-    ];
+    const node: PageTree.Separator = {
+      type: 'separator',
+      name: separateResult.groups.name,
+    };
+
+    return [ctx.options.attachSeparator?.(node) ?? node];
   }
 
   const linkResult = link.exec(item);
@@ -95,14 +111,15 @@ function resolveFolderItem(
     const { url, text } = linkResult.groups;
     const isRelative =
       url.startsWith('/') || url.startsWith('#') || url.startsWith('.');
-    return [
-      {
-        type: 'page',
-        name: text,
-        url,
-        external: !isRelative,
-      },
-    ];
+
+    const node: PageTree.Item = {
+      type: 'page',
+      name: text,
+      url,
+      external: !isRelative,
+    };
+
+    return [ctx.options.attachFile?.(node) ?? node];
   }
 
   const extractResult = extractor.exec(item);
@@ -171,15 +188,23 @@ function buildFolderNode(
     children = nodes ?? restNodes;
   }
 
-  return removeUndefined({
+  const node: PageTree.Folder = {
     type: 'folder',
     name: metadata?.title ?? index?.name ?? pathToName(folder.file.name),
-    icon: ctx.resolveIcon?.(metadata?.icon),
+    icon: ctx.options.resolveIcon?.(metadata?.icon),
     root: metadata?.root,
     defaultOpen: metadata?.defaultOpen,
     index,
     children,
-  });
+  };
+
+  if (ctx.options.attachFolderIds) {
+    node.id = folder.file.flattenedPath;
+  }
+
+  return removeUndefined(
+    ctx.options.attachFolder?.(node, folder, meta) ?? node,
+  );
 }
 
 function buildFileNode(file: File, ctx: PageTreeBuilderContext): PageTree.Item {
@@ -187,12 +212,14 @@ function buildFileNode(file: File, ctx: PageTreeBuilderContext): PageTree.Item {
     findLocalizedFile(file.file.flattenedPath, 'page', ctx) ?? file;
   const data = localized.data as FileData['file'];
 
-  return removeUndefined({
+  const item: PageTree.Item = {
     type: 'page',
     name: data.data.title,
-    icon: ctx.resolveIcon?.(data.data.icon),
-    url: ctx.getUrl(data.slugs, ctx.lang),
-  });
+    icon: ctx.options.resolveIcon?.(data.data.icon),
+    url: ctx.options.getUrl(data.slugs, ctx.lang),
+  };
+
+  return removeUndefined(ctx.options.attachFile?.(item, file) ?? item);
 }
 
 function build(ctx: PageTreeBuilderContext): PageTree.Root {
@@ -205,27 +232,23 @@ function build(ctx: PageTreeBuilderContext): PageTree.Root {
   };
 }
 
-export function createPageTreeBuilder(
-  options: CreatePageTreeBuilderOptions,
-): PageTreeBuilder {
-  function getContext(
-    builder: PageTreeBuilder,
-    locale?: string,
-  ): PageTreeBuilderContext {
-    return {
-      ...options,
-      lang: locale,
-      builder,
-    };
-  }
-
+export function createPageTreeBuilder(): PageTreeBuilder {
   return {
-    build() {
-      return build(getContext(this));
+    build(options) {
+      return build({
+        options,
+        builder: this,
+        storage: options.storage,
+      });
     },
-    buildI18n({ languages = [] } = {}) {
+    buildI18n({ languages = [], ...options }) {
       const entries = languages.map<[string, PageTree.Root]>((lang) => {
-        const tree = build(getContext(this, lang));
+        const tree = build({
+          lang,
+          options,
+          builder: this,
+          storage: options.storage,
+        });
 
         return [lang, tree];
       });

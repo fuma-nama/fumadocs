@@ -4,7 +4,7 @@ import * as Primitive from 'fumadocs-core/toc';
 import { useCallback, useEffect, useRef } from 'react';
 import { cn } from '@/utils/cn';
 import { useI18n } from '@/contexts/i18n';
-import { ScrollArea, ScrollViewport } from './ui/scroll-area';
+import { ScrollArea, ScrollViewport } from '../ui/scroll-area';
 
 type PosType = [top: number, height: number];
 

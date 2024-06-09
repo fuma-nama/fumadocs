@@ -11,7 +11,9 @@ import { TypeTable } from 'fumadocs-ui/components/type-table';
 import { Card } from 'fumadocs-ui/components/card';
 import { Heading } from 'fumadocs-ui/components/heading';
 import type { ReactNode } from 'react';
+import { RootToggle } from 'fumadocs-ui/components/layout/root-toggle';
 import BannerImage from '@/public/banner.png';
+import { modes } from '@/utils/modes';
 import { Wrapper } from './wrapper';
 
 export default {
@@ -198,5 +200,19 @@ export default {
       <p className="text-center text-sm">Scroll down to see the button</p>
       <RollButton />
     </div>
+  ),
+  'root-toggle': (
+    <Wrapper>
+      <div className="not-prose rounded-xl bg-background p-3">
+        <RootToggle
+          options={modes.map((mode) => ({
+            url: `/docs/${mode.param}`,
+            icon: <mode.icon />,
+            title: mode.name,
+            description: mode.description,
+          }))}
+        />
+      </div>
+    </Wrapper>
   ),
 } as Record<string, ReactNode>;

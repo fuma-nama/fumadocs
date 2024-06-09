@@ -1,5 +1,51 @@
 # next-docs-ui
 
+## 12.0.0
+
+### Major Changes
+
+- 62b5abb: **New Layout**
+
+  - Remove navbar from docs layout, replace it with sidebar.
+  - On smaller devices, navbar is always shown.
+  - Remove exports of internal components, copying components from the repository is now the preferred way.
+
+  **migrate:** On layouts, Rename `nav.githubUrl` to `githubUrl`.
+  Modify your stylesheet if necessary.
+
+- 5741224: **Remove deprecated option `enableThemeProvider` from Root Provider**
+
+  **migrate:** Use `theme.enabled` instead.
+
+- 2f8b168: **Replace `<LanguageSelect />` component with `<LanguageToggle />`**
+
+  **migrate:**
+
+  Remove your `<LanguageSelect />` component from the layout. Enable the new language toggle with:
+
+  ```tsx
+  import { DocsLayout } from 'fumadocs-ui/layout';
+
+  export default function Layout({ children }: { children: React.ReactNode }) {
+    return <DocsLayout i18n>{children}</DocsLayout>;
+  }
+  ```
+
+### Minor Changes
+
+- d88dfa6: Support switching between page trees with `RootToggle` component
+
+### Patch Changes
+
+- c110040: Fix problems with twoslash codeblocks
+- 13a60b9: Heading support typography styles
+- 1fe0812: Support translation for theme label
+- Updated dependencies [98430e9]
+- Updated dependencies [d88dfa6]
+- Updated dependencies [ba20694]
+- Updated dependencies [57eb762]
+  - fumadocs-core@12.0.0
+
 ## 11.3.2
 
 ### Patch Changes

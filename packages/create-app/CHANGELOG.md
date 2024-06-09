@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 12.0.0
+
+### Patch Changes
+
+- c7b0e23: Add `layout.config.tsx` for sharing layout options
+
 ## 11.3.2
 
 ## 11.3.1

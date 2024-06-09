@@ -3,6 +3,8 @@ title: Page Conventions
 description: Organize documents with file-system based routing
 ---
 
+import { File, Files, Folder } from 'fumadocs-ui/components/files';
+
 ## Overview
 
 This is a shared convention for organizing your pages, followed by all file-system based content sources including Fumadocs MDX.
@@ -13,10 +15,13 @@ A [MDX](https://mdxjs.com) or Markdown file.
 
 ### Frontmatter
 
-You may extend your content source to add additional properties.
+By default, it includes:
 
 - `title`
 - `description`
+- `icon`
+
+You may extend your content source to add additional properties.
 
 ```mdx
 ---
@@ -48,8 +53,21 @@ Force to open the folder by default.
 
 ### Multiple Page Trees
 
-Adding a `root` property in meta can mark your folder as a root folder.
-The nearest root folder of current page will be used as the root of page tree.
+Adding a `root` property in meta can mark your folder as a **root**.
+The nearest root of the current page will be shown on all navigation elements.
+
+In other words, when you are in a root folder called "core", the other folders are not shown on the sidebar.
+
+<Files>
+  <Folder name="core" defaultOpen>
+    <File name="Current Page" className="!text-primary !bg-primary/10" />
+  </Folder>
+  <Folder name="ui" defaultOpen>
+    <File name="Not shown on sidebar" />
+  </Folder>
+</Files>
+
+To allow users switching between page trees, you can implement a page tree switch. On Fumadocs UI, it is available via [`<RootToggle />`](/docs/ui/components/root-toggle).
 
 ```json title="meta.json"
 {
@@ -140,6 +158,8 @@ Use the syntax `[Text](url)` to insert links.
 Add custom icons for a page or a folder with the `icon`
 property.
 
+Pass the icon name as a string, and handle it with [Source API](/docs/headless/source-api#icons) or other ways.
+
 ```mdx
 ---
 title: My Page
@@ -153,8 +173,6 @@ icon: MyIcon
   "icon": "MyIcon"
 }
 ```
-
-> See [Source API](/docs/headless/source-api#icons) to learn how to handle icons.
 
 ## Internationalization
 

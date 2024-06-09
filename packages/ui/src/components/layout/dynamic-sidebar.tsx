@@ -1,6 +1,6 @@
 import { type PointerEventHandler, useCallback, useRef, useState } from 'react';
 import { SidebarIcon } from 'lucide-react';
-import { Sidebar, type SidebarProps } from '@/components/sidebar';
+import { Sidebar, type SidebarProps } from '@/components/layout/sidebar';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/theme/variants';
 import { useSidebar } from '@/contexts/sidebar';
@@ -33,14 +33,9 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
     <>
       {collapsed ? (
         <div
-          className="fixed bottom-0 start-0 top-16 max-md:hidden"
+          className="fixed inset-y-0 start-0 w-4 max-md:hidden xl:static xl:w-[260px]"
           onPointerEnter={onHover}
           onPointerLeave={onLeave}
-          style={{
-            maxWidth: '240px',
-            width: 'calc(max(0px, 100vw - 1400px)/2)',
-            minWidth: '1rem',
-          }}
         />
       ) : null}
       {collapsed ? (
@@ -59,43 +54,40 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
           <SidebarIcon />
         </button>
       ) : null}
-      <div
-        id="dynamic-sidebar"
-        data-open={!collapsed}
-        data-hover={hover}
-        onPointerEnter={onHover}
-        onPointerLeave={onLeave}
-        aria-hidden={Boolean(collapsed && !hover)}
-        className={cn(
-          'z-40 transition-transform max-md:absolute',
-          collapsed &&
-            'md:fixed md:bottom-2 md:start-2 md:top-16 md:overflow-hidden md:rounded-xl md:border md:bg-background md:shadow-md',
-        )}
-      >
-        <Sidebar
-          {...props}
-          className={cn(collapsed && 'md:h-full')}
-          footer={
-            <>
-              {props.footer}
-              <button
-                type="button"
-                aria-label="Collapse Sidebar"
-                className={cn(
-                  buttonVariants({
-                    color: 'ghost',
-                    size: 'icon',
-                    className: 'max-md:hidden ms-auto',
-                  }),
-                )}
-                onClick={onCollapse}
-              >
-                <SidebarIcon />
-              </button>
-            </>
-          }
-        />
-      </div>
+      <Sidebar
+        {...props}
+        aside={{
+          'data-collapse': collapsed,
+          'data-hover': hover,
+          onPointerEnter: onHover,
+          onPointerLeave: onLeave,
+          'aria-hidden': Boolean(collapsed && !hover),
+          className: cn(
+            'overflow-hidden md:transition-transform',
+            collapsed &&
+              'md:fixed md:inset-y-2 md:start-2 md:h-auto md:rounded-xl md:border md:shadow-md',
+          ),
+        }}
+        footer={
+          <>
+            {props.footer}
+            <button
+              type="button"
+              aria-label="Collapse Sidebar"
+              className={cn(
+                buttonVariants({
+                  color: 'ghost',
+                  size: 'icon',
+                  className: 'max-md:hidden',
+                }),
+              )}
+              onClick={onCollapse}
+            >
+              <SidebarIcon />
+            </button>
+          </>
+        }
+      />
     </>
   );
 }

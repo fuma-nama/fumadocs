@@ -13,7 +13,8 @@ const withMDX = createMDX();
 
 // [!code word:config]
 /** @type {import('next').NextConfig} */
-const config = { // [!code highlight]
+const config = {
+  // [!code highlight]
   reactStrictMode: true, // [!code highlight]
 }; // [!code highlight]
 
@@ -23,7 +24,7 @@ export default withMDX(config);
 </div>
 </Wrapper>
 
-Display code blocks, required by default.
+Display code blocks, added by default.
 
 - Syntax highlighting powered by Shiki
 - Copy button
@@ -46,42 +47,6 @@ import { Pre, CodeBlock } from 'fumadocs-ui/components/codeblock';
   }}
 />
 ```
-
-### Highlight Lines
-
-You spectify highlighted lines by adding `[!code highlight]`.
-
-````md
-```tsx
-<div>Hello World</div>  // [\!code highlight]
-<div>Hello World</div>
-<div>Goodbye</div>
-<div>Hello World</div>
-```
-````
-
-### Highlight Words
-
-You can highlight a specific word by adding `[!code word:<match>]`.
-
-````md
-```js
-// [\!code word:config]
-const config = {
-  reactStrictMode: true,
-};
-```
-````
-
-### Title
-
-Add `title="x"` to the codeblock meta.
-
-````mdx
-```js title="next.config.js"
-console.log('Hello World');
-```
-````
 
 ### Icons
 

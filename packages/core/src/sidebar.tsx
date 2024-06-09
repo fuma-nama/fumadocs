@@ -1,4 +1,3 @@
-import { usePathname } from 'next/navigation';
 import {
   useCallback,
   createContext,
@@ -37,12 +36,6 @@ export function SidebarProvider(
     props.onOpenChange ?? setOpenInner,
   ];
 
-  const pathname = usePathname();
-
-  useEffect(() => {
-    setOpen(false);
-  }, [pathname, setOpen]);
-
   return (
     <SidebarContext.Provider value={[open, setOpen]}>
       {props.children}
@@ -80,21 +73,14 @@ export function SidebarTrigger<T extends ElementType = 'button'>({
 
 export type SidebarContentProps<T extends ElementType> = AsProps<T> & {
   /**
-   * @deprecated Use `blockScrollingWidth` instead
-   */
-  minWidth?: number;
-
-  /**
    * Disable scroll blocking when the viewport width is larger than a certain number (in pixels)
    */
   blockScrollingWidth?: number;
 };
 
-// todo: Change in next major
 export function SidebarList<T extends ElementType = 'aside'>({
   as,
-  minWidth,
-  blockScrollingWidth = minWidth,
+  blockScrollingWidth,
   ...props
 }: SidebarContentProps<T>): ReactElement {
   const [open] = useSidebarContext();

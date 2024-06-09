@@ -5,8 +5,8 @@ import { type ReactNode } from 'react';
 import dynamic from 'next/dynamic';
 import { DirectionProvider } from '@radix-ui/react-direction';
 import type { ThemeProviderProps } from 'next-themes/dist/types';
-import { SidebarProvider } from '@/contexts/sidebar';
 import type { DefaultSearchDialogProps } from '@/components/dialog/search-default';
+import { SidebarProvider } from '@/contexts/sidebar';
 import { SearchProvider, type SearchProviderProps } from './contexts/search';
 
 interface SearchOptions
@@ -32,14 +32,6 @@ export interface RootProviderProps {
   search?: Partial<SearchOptions>;
 
   /**
-   * Wrap the body in `ThemeProvider` (next-themes)
-   *
-   * @defaultValue true
-   * @deprecated Use `theme.enable` instead
-   */
-  enableThemeProvider?: boolean;
-
-  /**
    * Customise options of `next-themes`
    */
   theme?: Partial<ThemeProviderProps> & {
@@ -62,15 +54,10 @@ const DefaultSearchDialog = dynamic(
 export function RootProvider({
   children,
   dir,
-  enableThemeProvider = true,
   theme: { enabled = true, ...theme } = {},
   search,
 }: RootProviderProps): React.ReactElement {
-  let body = (
-    <DirectionProvider dir={dir ?? 'ltr'}>
-      <SidebarProvider>{children}</SidebarProvider>
-    </DirectionProvider>
-  );
+  let body = children;
 
   if (search?.enabled !== false)
     body = (
@@ -79,7 +66,7 @@ export function RootProvider({
       </SearchProvider>
     );
 
-  if (enabled && enableThemeProvider)
+  if (enabled)
     body = (
       <ThemeProvider
         attribute="class"
@@ -92,7 +79,11 @@ export function RootProvider({
       </ThemeProvider>
     );
 
-  return body;
+  return (
+    <DirectionProvider dir={dir ?? 'ltr'}>
+      <SidebarProvider>{body}</SidebarProvider>
+    </DirectionProvider>
+  );
 }
 
 export { useI18n } from './contexts/i18n';

@@ -54,7 +54,12 @@ export function DocsPage({
 }: DocsPageProps): React.ReactElement {
   return (
     <>
-      <article className="flex w-0 flex-1 flex-col gap-6 px-4 py-10">
+      <article
+        className={cn(
+          'mx-auto flex w-0 max-w-[800px] flex-1 flex-col gap-6 px-4 py-10 md:px-6 md:pt-16',
+          tableOfContent.enabled === false && 'max-w-[1200px]',
+        )}
+      >
         {replaceOrDefault(breadcrumb, <Breadcrumb />)}
         {props.children}
         {props.lastUpdate ? (
@@ -89,7 +94,7 @@ interface TOCProps {
 
 function Toc(props: TOCProps): React.ReactElement {
   return (
-    <div className="sticky top-16 flex h-body w-[220px] flex-col gap-4 divide-y py-10 max-lg:hidden xl:w-[260px]">
+    <div className="sticky top-0 flex h-dvh w-[220px] flex-col gap-4 divide-y py-10 max-lg:hidden xl:w-[260px]">
       {props.header}
       {props.items.length > 0 && <TOCItems items={props.items} />}
       {props.footer ? (
