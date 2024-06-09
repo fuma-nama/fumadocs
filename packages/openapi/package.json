@@ -24,9 +24,9 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@apidevtools/json-schema-ref-parser": "^11.6.2",
+    "@apidevtools/json-schema-ref-parser": "^11.6.4",
     "fast-glob": "^3.3.1",
-    "json-schema-to-typescript": "^14.0.4",
+    "json-schema-to-typescript": "^14.0.5",
     "openapi-sampler": "^1.5.1"
   },
   "devDependencies": {
