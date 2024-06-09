@@ -2,7 +2,7 @@ import { RootProvider } from 'fumadocs-ui/provider';
 import 'fumadocs-ui/style.css';
 import { Inter } from 'next/font/google';
 import type { ReactNode } from 'react';
-import { I18nProvider, LanguageSelect } from 'fumadocs-ui/i18n';
+import { I18nProvider } from 'fumadocs-ui/i18n';
 import { pageTree } from '@/app/source';
 import { DocsLayout } from 'fumadocs-ui/layout';
 
@@ -44,7 +44,7 @@ export default function Layout({
                 title: params.lang === 'cn' ? '目錄' : 'My App',
                 url: `/${params.lang}`,
               }}
-              sidebar={{ footer: <LanguageSelect /> }}
+              i18n
             >
               {children}
             </DocsLayout>

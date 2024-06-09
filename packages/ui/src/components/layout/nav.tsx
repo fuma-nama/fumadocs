@@ -1,24 +1,18 @@
 'use client';
-import { MoreVertical } from 'lucide-react';
 import Link from 'fumadocs-core/link';
 import { type ReactNode, useEffect, useState } from 'react';
-import { usePathname } from 'next/navigation';
+import { MoreVertical } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { useSearchContext } from '@/contexts/search';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { buttonVariants } from '@/theme/variants';
 import type { LinkItemType } from '@/layout';
 import {
   LargeSearchToggle,
   SearchToggle,
 } from '@/components/layout/search-toggle';
 import { useI18n } from '@/contexts/i18n';
-import { LinkItem } from '../link-item';
+import { LinksMenu } from '@/components/layout/links-menu';
+import { LinkItem } from './link-item';
 
 export interface NavProps {
   title?: ReactNode;
@@ -54,6 +48,7 @@ export function Nav({
 }: NavProps & { items: LinkItemType[] }): React.ReactElement {
   const search = useSearchContext();
   const [transparent, setTransparent] = useState(transparentMode !== 'none');
+  const { text } = useI18n();
 
   useEffect(() => {
     if (transparentMode !== 'top') return;
@@ -75,7 +70,7 @@ export function Nav({
         'sticky top-0 z-50 h-16 border-b transition-colors',
         transparent
           ? 'border-transparent'
-          : 'border-foreground/10 bg-background/50 backdrop-blur-md',
+          : 'border-foreground/10 bg-background/80 backdrop-blur-md',
       )}
     >
       <nav className="mx-auto flex size-full max-w-container flex-row items-center gap-6 px-4">
@@ -103,7 +98,20 @@ export function Nav({
             </>
           ) : null}
           <ThemeToggle className="max-lg:hidden" />
-          <LinksMenu items={items} className="lg:hidden" />
+          <LinksMenu
+            items={items}
+            className="lg:hidden"
+            footer={
+              <div className="flex flex-row items-center justify-between px-2 py-1">
+                <p className="font-medium text-muted-foreground">
+                  {text.chooseTheme}
+                </p>
+                <ThemeToggle />
+              </div>
+            }
+          >
+            <MoreVertical />
+          </LinksMenu>
           {items
             .filter((item) => item.type === 'secondary')
             .map((item, i) => (
@@ -112,47 +120,5 @@ export function Nav({
         </div>
       </nav>
     </header>
-  );
-}
-
-interface LinksMenuProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  items: LinkItemType[];
-}
-
-function LinksMenu({ items, ...props }: LinksMenuProps): React.ReactElement {
-  const [open, setOpen] = useState(false);
-  const { text } = useI18n();
-  const pathname = usePathname();
-
-  useEffect(() => {
-    setOpen(false);
-  }, [pathname]);
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger
-        {...props}
-        className={cn(
-          buttonVariants({
-            size: 'icon',
-            color: 'ghost',
-            className: props.className,
-          }),
-        )}
-      >
-        <MoreVertical />
-      </PopoverTrigger>
-      <PopoverContent className="flex flex-col">
-        {items.map((item, i) => (
-          <LinkItem key={i} item={item} on="menu" />
-        ))}
-        <div className="flex flex-row items-center justify-between px-2 py-1">
-          <p className="font-medium text-muted-foreground">
-            {text.chooseTheme}
-          </p>
-          <ThemeToggle />
-        </div>
-      </PopoverContent>
-    </Popover>
   );
 }

@@ -64,7 +64,7 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
               {title}
             </figcaption>
             {allowCopy ? (
-              <CopyButton className="-mr-2" onCopy={onCopy} />
+              <CopyButton className="-me-2" onCopy={onCopy} />
             ) : null}
           </div>
         ) : (

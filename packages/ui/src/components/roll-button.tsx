@@ -1,15 +1,17 @@
 'use client';
 
 import { ChevronUp } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/theme/variants';
+import { useTreeContext } from '@/contexts/tree';
 
 interface RollButtonProps {
   /**
    * Percentage of scroll position to display the roll button
    *
-   * @defaultValue 0.2
+   * @defaultValue 0.1
    */
   percentage?: number;
 }
@@ -18,9 +20,15 @@ interface RollButtonProps {
  * A button that scrolls to the top
  */
 export function RollButton({
-  percentage = 0.2,
+  percentage = 0.1,
 }: RollButtonProps): React.ReactElement {
   const [show, setShow] = useState(false);
+  const { navigation } = useTreeContext();
+  const pathname = usePathname();
+  const current = useMemo(
+    () => navigation.find((item) => item.url === pathname),
+    [pathname, navigation],
+  );
 
   useEffect(() => {
     const listener = (): void => {
@@ -46,20 +54,20 @@ export function RollButton({
       className={cn(
         buttonVariants({
           color: 'secondary',
-          size: 'icon',
           className:
-            'fixed bottom-8 p-3 right-8 z-50 shadow-md rounded-full transition-all',
+            'fixed top-16 [&_svg]:size-4 gap-1 left-1/2 translate-x-[-50%] z-10 shadow-md rounded-full transition-all md:top-4',
         }),
         !show && 'translate-y-20 opacity-0',
       )}
-      onClick={() => {
+      onClick={useCallback(() => {
         document.scrollingElement?.scrollTo({
           top: 0,
           behavior: 'smooth',
         });
-      }}
+      }, [])}
     >
-      <ChevronUp />
+      {current?.icon ?? <ChevronUp />}
+      {current?.name}
     </button>
   );
 }

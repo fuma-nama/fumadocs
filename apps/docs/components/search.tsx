@@ -65,7 +65,7 @@ export default function CustomSearchDialog(
           <a
             href="https://algolia.com"
             rel="noreferrer noopener"
-            className="ml-auto text-xs text-muted-foreground"
+            className="ms-auto text-xs text-muted-foreground"
           >
             Search powered by Algolia
           </a>

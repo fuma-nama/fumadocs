@@ -80,7 +80,7 @@ export const Accordion = forwardRef<
         {id ? <CopyButton id={id} /> : null}
       </AccordionPrimitive.Header>
       <AccordionPrimitive.Content className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
-        <div className="ml-2 p-4 pt-0 prose-no-margin">{children}</div>
+        <div className="ms-2 p-4 pt-0 prose-no-margin">{children}</div>
       </AccordionPrimitive.Content>
     </AccordionPrimitive.Item>
   );
@@ -101,7 +101,7 @@ function CopyButton({ id }: { id: string }): React.ReactElement {
       className={cn(
         buttonVariants({
           color: 'ghost',
-          className: 'text-muted-foreground mr-2',
+          className: 'text-muted-foreground me-2',
         }),
       )}
       onClick={onClick}

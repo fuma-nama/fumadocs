@@ -1,6 +1,7 @@
 import type { PageTree } from 'fumadocs-core/server';
 import type { ReactNode, HTMLAttributes } from 'react';
 import Link from 'next/link';
+import { MoreHorizontal } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import type { NavProps } from './components/layout/nav';
 import { replaceOrDefault } from './utils/shared';
@@ -12,6 +13,7 @@ declare const {
   TreeContextProvider,
   DynamicSidebar,
   SubNav,
+  LinksMenu,
   Sidebar,
   ThemeToggle,
 }: typeof import('./docs.client');
@@ -148,12 +150,18 @@ export function DocsLayout({
             defaultOpenLevel={sidebar.defaultOpenLevel}
             banner={
               <>
-                <Link
-                  href={nav?.url ?? '/'}
-                  className="inline-flex items-center gap-2.5 border-b pb-4 font-semibold max-md:hidden"
-                >
-                  {nav?.title}
-                </Link>
+                <div className="flex flex-row items-center justify-between border-b pb-2 max-md:hidden">
+                  <Link
+                    href={nav?.url ?? '/'}
+                    className="inline-flex items-center gap-2.5 font-medium"
+                  >
+                    {nav?.title}
+                  </Link>
+                  <LinksMenu items={finalLinks}>
+                    <MoreHorizontal />
+                  </LinksMenu>
+                </div>
+
                 {sidebar.banner}
               </>
             }

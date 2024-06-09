@@ -123,9 +123,13 @@ const neutral: Preset = {
   },
   css: {
     '#nd-sidebar': {
+      '--muted': '0deg 0% 89%',
+      '--secondary': '0deg 0% 99%',
       '--muted-foreground': '0 0% 30%',
     },
     '.dark #nd-sidebar': {
+      '--muted': '0deg 0% 16%',
+      '--secondary': '0deg 0% 18%',
       '--muted-foreground': '0 0% 72%',
     },
   },

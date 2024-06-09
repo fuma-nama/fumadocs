@@ -22,19 +22,19 @@ export function SubNav({
   return (
     <nav
       id="nd-subnav"
-      className="sticky top-0 z-40 flex h-16 w-full flex-row items-center border-b bg-background/50 px-4 backdrop-blur-md md:hidden [&_svg]:size-5"
+      className="sticky top-0 z-40 flex h-16 w-full flex-row items-center border-b bg-background/80 px-4 backdrop-blur-md md:hidden [&_svg]:size-5"
     >
       <Link href={url} className="inline-flex items-center gap-3 font-semibold">
         {title}
       </Link>
       {children}
-      {enabled && enableSearch ? <SearchToggle className="ml-auto" /> : null}
+      {enabled && enableSearch ? <SearchToggle className="ms-auto" /> : null}
       <SidebarTrigger
         className={cn(
           buttonVariants({
             color: 'ghost',
             size: 'icon',
-            className: (!enabled || !enableSearch) && 'ml-auto',
+            className: (!enabled || !enableSearch) && 'ms-auto',
           }),
         )}
       >
@@ -44,6 +44,7 @@ export function SubNav({
   );
 }
 
+export { LinksMenu } from '@/components/layout/links-menu';
 export { Sidebar } from './components/layout/sidebar';
 export { DynamicSidebar } from './components/layout/dynamic-sidebar';
 export { TreeContextProvider } from './contexts/tree';

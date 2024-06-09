@@ -18,12 +18,12 @@ import {
 } from '@/components/ui/collapsible';
 
 const linkItemVariants = cva(
-  'inline-flex items-center gap-1.5 rounded-lg p-2 text-muted-foreground transition-colors [&_svg]:size-4',
+  'inline-flex items-center gap-1.5 rounded-lg p-2 text-muted-foreground transition-colors data-[state=open]:bg-accent [&_svg]:size-4',
   {
     variants: {
       active: {
         true: 'bg-accent text-accent-foreground',
-        false: 'hover:bg-accent',
+        false: 'hover:bg-accent hover:transition-none',
       },
     },
     defaultVariants: {
@@ -49,14 +49,11 @@ export function LinkItem({
     return (
       <Popover>
         <PopoverTrigger
-          className={cn(
-            linkItemVariants({ className }),
-            'data-[state=open]:bg-accent',
-          )}
+          className={cn(linkItemVariants({ className }))}
           {...props}
         >
           {item.text}
-          <ChevronDown className="ml-auto size-4" />
+          <ChevronDown className="ms-auto size-4" />
         </PopoverTrigger>
         <PopoverContent className="flex flex-col">
           {item.items.map((child, i) => (
@@ -76,7 +73,7 @@ export function LinkItem({
         >
           {item.icon}
           {item.text}
-          <ChevronDown className="ml-auto size-4 group-data-[state=closed]/link:-rotate-90" />
+          <ChevronDown className="ms-auto size-4 group-data-[state=closed]/link:-rotate-90" />
         </CollapsibleTrigger>
         <CollapsibleContent>
           <div className="flex flex-col py-1 ps-4">

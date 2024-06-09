@@ -31,7 +31,7 @@ export function Title(): React.ReactElement {
         aria-label="Fumadocs"
       />
 
-      <FumadocsIcon className="size-5 [.uwu_&]:hidden" fill="currentColor" />
+      <FumadocsIcon className="size-4 [.uwu_&]:hidden" fill="currentColor" />
       <span className="[.uwu_&]:hidden max-md:[nav_&]:hidden">Fumadocs</span>
     </>
   );
