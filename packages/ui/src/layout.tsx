@@ -1,6 +1,7 @@
 import type { PageTree } from 'fumadocs-core/server';
 import type { ReactNode, HTMLAttributes } from 'react';
 import Link from 'next/link';
+import { MoreHorizontal } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import type { NavProps } from './components/layout/nav';
 import { replaceOrDefault } from './utils/shared';
@@ -156,7 +157,9 @@ export function DocsLayout({
                   >
                     {nav?.title}
                   </Link>
-                  <LinksMenu items={finalLinks} />
+                  <LinksMenu items={finalLinks}>
+                    <MoreHorizontal />
+                  </LinksMenu>
                 </div>
 
                 {sidebar.banner}

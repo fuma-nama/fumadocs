@@ -1,6 +1,7 @@
 'use client';
 import Link from 'fumadocs-core/link';
 import { type ReactNode, useEffect, useState } from 'react';
+import { MoreVertical } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { useSearchContext } from '@/contexts/search';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
@@ -97,13 +98,19 @@ export function Nav({
             </>
           ) : null}
           <ThemeToggle className="max-lg:hidden" />
-          <LinksMenu items={items} className="lg:hidden">
-            <div className="flex flex-row items-center justify-between px-2 py-1">
-              <p className="font-medium text-muted-foreground">
-                {text.chooseTheme}
-              </p>
-              <ThemeToggle />
-            </div>
+          <LinksMenu
+            items={items}
+            className="lg:hidden"
+            footer={
+              <div className="flex flex-row items-center justify-between px-2 py-1">
+                <p className="font-medium text-muted-foreground">
+                  {text.chooseTheme}
+                </p>
+                <ThemeToggle />
+              </div>
+            }
+          >
+            <MoreVertical />
           </LinksMenu>
           {items
             .filter((item) => item.type === 'secondary')

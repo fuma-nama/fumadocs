@@ -54,9 +54,8 @@ export function RollButton({
       className={cn(
         buttonVariants({
           color: 'secondary',
-          size: 'icon',
           className:
-            'fixed top-16 p-2 left-1/2 translate-x-[-50%] z-10 shadow-md rounded-full transition-all md:top-4',
+            'fixed top-16 [&_svg]:size-4 gap-1 left-1/2 translate-x-[-50%] z-10 shadow-md rounded-full transition-all md:top-4',
         }),
         !show && 'translate-y-20 opacity-0',
       )}

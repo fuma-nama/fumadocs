@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { MoreHorizontal } from 'lucide-react';
 import {
   Popover,
   PopoverContent,
@@ -13,11 +12,12 @@ import type { LinkItemType } from '@/layout';
 
 interface LinksMenuProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   items: LinkItemType[];
-  enabledTheme?: boolean;
+  footer?: React.ReactNode;
 }
 
 export function LinksMenu({
   items,
+  footer,
   ...props
 }: LinksMenuProps): React.ReactElement {
   const [open, setOpen] = useState(false);
@@ -38,14 +38,12 @@ export function LinksMenu({
             className: props.className,
           }),
         )}
-      >
-        <MoreHorizontal />
-      </PopoverTrigger>
+      />
       <PopoverContent className="flex flex-col">
         {items.map((item, i) => (
           <LinkItem key={i} item={item} on="menu" />
         ))}
-        {props.children}
+        {footer}
       </PopoverContent>
     </Popover>
   );
