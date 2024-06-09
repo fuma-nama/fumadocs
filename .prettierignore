@@ -3,6 +3,8 @@ pnpm-lock.yaml
 .changeset/*.md
 .github/**/*.md
 
+packages/create-app/versions.json
+
 apps/docs/shaders/*
 
 **/test/out/**/*
