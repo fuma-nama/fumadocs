@@ -6,7 +6,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          'bg-gradient-to-b from-primary to-primary/60 text-primary-foreground shadow-inner shadow-background/40 hover:bg-primary/90',
+          'bg-background bg-gradient-to-b from-primary to-primary/60 text-primary-foreground shadow-inner shadow-background/20 hover:bg-primary/90',
         outline:
           'border bg-gradient-to-t from-primary/10 shadow-inner shadow-primary/10 hover:bg-accent hover:text-accent-foreground',
         secondary:

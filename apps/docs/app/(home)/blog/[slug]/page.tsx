@@ -22,11 +22,37 @@ export default function Page({
 
   if (!page) notFound();
 
+  const svg = `<svg viewBox='0 0 500 500' xmlns='http://www.w3.org/2000/svg'>
+  <filter id='noiseFilter'>
+    <feTurbulence 
+      type='fractalNoise' 
+      baseFrequency='0.5' 
+      numOctaves='2' 
+      stitchTiles='stitch'/>
+  </filter>
+  
+  <rect width='100%' height='100%' filter='url(#noiseFilter)'/>
+</svg>`;
+
   return (
     <>
-      <div className="container rounded-xl border bg-gradient-to-t from-primary/30 to-50% py-12 md:px-8">
-        <h1 className="mb-2 text-3xl font-bold">{page.data.title}</h1>
-        <p className="mb-4 text-muted-foreground">{page.data.description}</p>
+      <div
+        className="container rounded-xl border py-12 md:px-8"
+        style={{
+          backgroundColor: 'black',
+          backgroundImage: [
+            `url("data:image/svg+xml,${encodeURIComponent(svg)}")`,
+            'linear-gradient(140deg, hsla(274,94%,54%,0.3), transparent 50%)',
+            'linear-gradient(to left top, hsla(260,90%,50%,0.8), transparent 50%)',
+            'radial-gradient(circle at 100% 100%, hsla(240,100%,82%,1), hsla(240,40%,40%,1) 17%, hsla(240,40%,40%,0.5) 20%, transparent)',
+          ].join(', '),
+          backgroundBlendMode: 'overlay, difference, difference, normal',
+        }}
+      >
+        <h1 className="mb-2 text-3xl font-bold text-white">
+          {page.data.title}
+        </h1>
+        <p className="mb-4 text-white/80">{page.data.description}</p>
         <Link
           href="/blog"
           className={buttonVariants({ size: 'sm', variant: 'secondary' })}
@@ -39,9 +65,9 @@ export default function Page({
           <InlineTOC items={page.data.exports.toc} />
           <page.data.exports.default />
         </div>
-        <div className="flex flex-col gap-4 border-l p-4">
+        <div className="flex flex-col gap-4 border-l p-4 text-sm">
           <div>
-            <p className="mb-1 text-sm text-muted-foreground">Written by</p>
+            <p className="mb-1 text-muted-foreground">Written by</p>
             <p className="font-medium">{page.data.author}</p>
           </div>
           <div>
