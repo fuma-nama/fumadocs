@@ -14,7 +14,7 @@ const indexes = JSON.parse(
 ) as SearchIndex[];
 
 const client = algosearch(
-  process.env.ALGOLIA_APP_ID || '',
+  process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || '',
   process.env.ALGOLIA_API_KEY || '',
 );
 
@@ -31,4 +31,7 @@ void sync(client, {
   })),
 }).then(() => {
   console.log('search updated');
+}).catch(e => {
+  console.error(e)
+  throw e;
 });
