@@ -32,6 +32,6 @@ void sync(client, {
 }).then(() => {
   console.log('search updated');
 }).catch(e => {
-  console.error(e)
+  console.error(e, process.env.NEXT_PUBLIC_ALGOLIA_APP_ID, process.env.ALGOLIA_API_KEY)
   throw e;
 });
