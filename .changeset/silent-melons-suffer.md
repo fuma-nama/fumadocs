@@ -2,7 +2,7 @@
 'fumadocs-ui': major
 ---
 
-**Replace <LanguageSelect /> component with <LanguageToggle />**
+**Replace `<LanguageSelect />` component with `<LanguageToggle />`**
 
 **migrate:**
 
