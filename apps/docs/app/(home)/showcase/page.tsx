@@ -90,7 +90,7 @@ export default function Showcase(): React.ReactElement {
             rel="noreferrer noopener"
             className={cn(buttonVariants())}
           >
-            <PlusIcon className="mr-2 size-4" />
+            <PlusIcon className="me-2 size-4" />
             Add Your Own
           </a>
         </div>

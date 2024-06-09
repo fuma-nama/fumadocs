@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
+import { MoreHorizontal } from 'lucide-react';
 import {
   Popover,
   PopoverContent,
@@ -7,7 +8,6 @@ import {
 } from '@/components/ui/popover';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/theme/variants';
-import { MoreVertical } from 'lucide-react';
 import { LinkItem } from '@/components/layout/link-item';
 import type { LinkItemType } from '@/layout';
 
@@ -39,7 +39,7 @@ export function LinksMenu({
           }),
         )}
       >
-        <MoreVertical />
+        <MoreHorizontal />
       </PopoverTrigger>
       <PopoverContent className="flex flex-col">
         {items.map((item, i) => (

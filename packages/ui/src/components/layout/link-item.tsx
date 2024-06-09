@@ -53,7 +53,7 @@ export function LinkItem({
           {...props}
         >
           {item.text}
-          <ChevronDown className="ml-auto size-4" />
+          <ChevronDown className="ms-auto size-4" />
         </PopoverTrigger>
         <PopoverContent className="flex flex-col">
           {item.items.map((child, i) => (
@@ -73,7 +73,7 @@ export function LinkItem({
         >
           {item.icon}
           {item.text}
-          <ChevronDown className="ml-auto size-4 group-data-[state=closed]/link:-rotate-90" />
+          <ChevronDown className="ms-auto size-4 group-data-[state=closed]/link:-rotate-90" />
         </CollapsibleTrigger>
         <CollapsibleContent>
           <div className="flex flex-col py-1 ps-4">

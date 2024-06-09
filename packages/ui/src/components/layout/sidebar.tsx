@@ -116,7 +116,7 @@ export function Sidebar({
         <div
           {...bannerProps}
           className={cn(
-            'flex flex-col gap-2 border-b px-4 py-2 md:p-3 md:pt-10',
+            'flex flex-col gap-2 px-4 pt-2 md:px-3 md:pt-6',
             bannerProps?.className,
           )}
         >
@@ -155,8 +155,13 @@ function ViewportContent({
 
   return (
     <ScrollArea className="flex-1">
-      <ScrollViewport>
-        <div className="flex flex-col gap-8 p-4 pb-10 md:px-3">
+      <ScrollViewport
+        style={{
+          maskImage:
+            'linear-gradient(to bottom, transparent 2px, white 16px, white calc(100% - 16px), transparent calc(100% - 2px))',
+        }}
+      >
+        <div className="flex flex-col gap-8 p-4 md:px-3">
           {children}
           <NodeList items={root.children} />
         </div>

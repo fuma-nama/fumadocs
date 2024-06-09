@@ -102,7 +102,7 @@ export function Property({
             Deprecated
           </div>
         ) : null}
-        <span className="ml-auto font-mono text-[13px] text-muted-foreground">
+        <span className="ms-auto font-mono text-[13px] text-muted-foreground">
           {type}
         </span>
       </h4>

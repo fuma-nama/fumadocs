@@ -10,8 +10,8 @@ import {
   SearchToggle,
 } from '@/components/layout/search-toggle';
 import { useI18n } from '@/contexts/i18n';
-import { LinkItem } from './link-item';
 import { LinksMenu } from '@/components/layout/links-menu';
+import { LinkItem } from './link-item';
 
 export interface NavProps {
   title?: ReactNode;
@@ -69,7 +69,7 @@ export function Nav({
         'sticky top-0 z-50 h-16 border-b transition-colors',
         transparent
           ? 'border-transparent'
-          : 'border-foreground/10 bg-background/50 backdrop-blur-md',
+          : 'border-foreground/10 bg-background/80 backdrop-blur-md',
       )}
     >
       <nav className="mx-auto flex size-full max-w-container flex-row items-center gap-6 px-4">

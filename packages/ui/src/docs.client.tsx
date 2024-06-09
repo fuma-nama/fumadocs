@@ -22,7 +22,7 @@ export function SubNav({
   return (
     <nav
       id="nd-subnav"
-      className="sticky top-0 z-40 flex h-16 w-full flex-row items-center border-b bg-background/50 px-4 backdrop-blur-md md:hidden [&_svg]:size-5"
+      className="sticky top-0 z-40 flex h-16 w-full flex-row items-center border-b bg-background/80 px-4 backdrop-blur-md md:hidden [&_svg]:size-5"
     >
       <Link href={url} className="inline-flex items-center gap-3 font-semibold">
         {title}

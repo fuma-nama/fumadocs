@@ -2,10 +2,10 @@
 
 import { ChevronUp } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/theme/variants';
 import { useTreeContext } from '@/contexts/tree';
-import { usePathname } from 'next/navigation';
 
 interface RollButtonProps {
   /**

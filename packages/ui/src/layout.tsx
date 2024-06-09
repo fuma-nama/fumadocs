@@ -149,10 +149,10 @@ export function DocsLayout({
             defaultOpenLevel={sidebar.defaultOpenLevel}
             banner={
               <>
-                <div className="flex flex-row items-center justify-between pb-2 border-b max-md:hidden">
+                <div className="flex flex-row items-center justify-between border-b pb-2 max-md:hidden">
                   <Link
                     href={nav?.url ?? '/'}
-                    className="inline-flex items-center gap-2.5 font-semibold"
+                    className="inline-flex items-center gap-2.5 font-medium"
                   >
                     {nav?.title}
                   </Link>
