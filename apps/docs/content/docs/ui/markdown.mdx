@@ -8,27 +8,14 @@ icon: Pen
 
 Fumadocs provides many useful extensions to MDX, a markup language. Here is a brief introduction to the default MDX syntax of Fumadocs.
 
-> Fumadocs is source agnostic, you can use it with Fumadocs MDX, Contentlayer, or even a CMS.
-> Markdown and MDX are not the only supported format of Fumadocs, in fact, you can use any renderers such as `next-mdx-remote`.
+> Markdown and MDX are not the only supported format of Fumadocs. In fact, you can use any renderers such as `next-mdx-remote`.
 
-### MDX
+## Markdown
 
-MDX is a superset of Markdown, with support of JSX syntax.
-It allows you to import components, and use them right in the document, or even export values.
+We use GFM (GitHub Flavored Markdown), a superset of Markdown (CommonMark syntax).
+See [GFM Specification](https://github.github.com/gfm).
 
-```mdx
-import { Component } from "./component";
-
-<Component name="Hello" />
-```
-
-see [MDX Syntax](https://mdxjs.com/docs/what-is-mdx/#mdx-syntax) to learn more.
-
-### GitHub Flavored Markdown
-
-A superset of Markdown (CommonMark syntax).
-
-#### Tables
+### Tables
 
 ```mdx
 | Table | Description |
@@ -40,7 +27,11 @@ A superset of Markdown (CommonMark syntax).
 | ----- | ----------- |
 | Hello | World       |
 
-#### Auto Links
+### Auto Links
+
+Internal links use the `next/link` component to allow prefetching and avoid hard-reload.
+
+External links will get the default `rel="noreferrer noopener" target="_blank"` attributes for security.
 
 ```mdx
 [My Link](https://github.github.com/gfm)
@@ -48,13 +39,24 @@ A superset of Markdown (CommonMark syntax).
 This also works: https://github.github.com/gfm.
 ```
 
-See [GFM Specification](https://github.github.com/gfm).
+## MDX
 
-### Heading Anchors
+MDX is a superset of Markdown, with support of JSX syntax.
+It allows you to import components, and use them right in the document, or even export values.
+
+```mdx
+import { Component } from './component';
+
+<Component name="Hello" />
+```
+
+see [MDX Syntax](https://mdxjs.com/docs/what-is-mdx/#mdx-syntax) to learn more.
+
+## Heading Anchors
 
 An anchor is automatically applied to all headings, it sanitizes invalid characters like spaces. (e.g. `Hello World` to `hello-world`)
 
-#### Custom Anchor
+### Custom Anchor
 
 You can add `[#slug]` to customise heading anchors.
 
@@ -64,7 +66,7 @@ You can add `[#slug]` to customise heading anchors.
 
 To link people to a specific heading, add the heading id to hash fragment: `/page#my-heading-id`.
 
-### Frontmatter
+## Frontmatter
 
 We support YAML frontmatter. It is a way to specify common information of the document (e.g. title).
 Place it at the top of document.
@@ -77,7 +79,9 @@ title: Hello World
 ## Title
 ```
 
-### Codeblock
+See [Page Conventions](/docs/headless/page-conventions#frontmatter) for a list of properties available for frontmatter.
+
+## Codeblock
 
 Syntax Highlighting is done with [Rehype Code](/docs/headless/mdx/rehype-code) automatically.
 
@@ -95,7 +99,13 @@ console.log('Hello World');
 ```
 ````
 
-### Images
+### Using Typescript Twoslash
+
+Write Typescript codeblocks with hover type information and detected types errors.
+
+Not enabled by default. See [Twoslash](/docs/ui/twoslash).
+
+## Images
 
 All built-in content sources handle images properly.
 Images are automatically optimized for `next/image`.
@@ -104,16 +114,10 @@ Images are automatically optimized for `next/image`.
 ![Image](/image.png)
 ```
 
-### Twoslash CodeBlock
-
-Write Typescript codeblocks with hover type information and detected types errors.
-
-Not enabled by default. See [Twoslash](/docs/ui/twoslash).
-
-### Math Equations
+## Math Equations
 
 Not enabled by default. See [Math Integration](/docs/ui/math).
 
-### More
+## Optional Plugins
 
 Fumadocs also has optional plugins, you can see [a list of plugins](/docs/headless/mdx) supported by Fumadocs.

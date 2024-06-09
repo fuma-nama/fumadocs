@@ -3,14 +3,11 @@ title: Internationalization
 description: Support multiple languages in your documentation
 ---
 
-Define a list of supported languages and pass it to i18n utilities. Read
-the
-[Next.js Docs](https://nextjs.org/docs/app/building-your-application/routing/internationalization)
-to learn more about implementing I18n in Next.js.
+Read the [Next.js Docs](https://nextjs.org/docs/app/building-your-application/routing/internationalization) to learn more about implementing I18n in Next.js.
 
 ## Setup
 
-1. Put all supported languages in a file.
+1. Define all supported languages in a file.
 
    ```ts title="i18n.ts"
    export const defaultLanguage = 'en';
@@ -21,7 +18,6 @@ to learn more about implementing I18n in Next.js.
 
    ```ts title="source.ts"
    import { languages } from '@/i18n';
-   import { map } from '@/.map';
    import { loader } from 'fumadocs-core/source';
 
    export const { getPage, getPages, pageTree } = loader({
@@ -93,6 +89,9 @@ getPages(params.lang);
 Generate parameters for every language and page.
 
 ```tsx
+import { getPages } from '@/source';
+import { languages } from '@/i18n';
+
 export async function generateStaticParams() {
   return languages.flatMap((lang) =>
     getPages(lang)!.map((page) => ({

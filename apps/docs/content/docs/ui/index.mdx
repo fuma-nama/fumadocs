@@ -10,7 +10,7 @@ Fumadocs can be broken down into two parts: Core and UI.
 
 **Core** handles most of the logic, from search functionality, to MDX plugins.
 
-**Fumadocs UI**, the official user interface for Fumadocs.
+**Fumadocs UI** is the official user interface for Fumadocs.
 
 ### Terminology
 
@@ -26,7 +26,7 @@ You might need to be familiar with Next.js App Router to continue.
 
 ## Automatic Installation
 
-Create a new app with `create-fumadocs-app`.
+Create a new app with `create-fumadocs-app`, it requires Node.js 18+.
 
 <InstallTabs items={['npm', 'pnpm', 'yarn', 'bun']}>
     <Tab value='npm'>
@@ -60,7 +60,14 @@ bun create fumadocs-app
 
 </InstallTabs>
 
-It will initialize a new fumadocs app, now you can start hacking!
+It will ask you the following questions:
+
+- Which content source to use? (Recommended: Fumadocs MDX)
+- Configure Tailwind CSS?
+- Install dependencies?
+
+After that, it will initialize a new fumadocs app.
+Now you can start hacking!
 
 ### Enjoy!
 

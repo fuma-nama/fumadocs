@@ -4,26 +4,21 @@ description: Learn more implement internationalization in Fumadocs UI
 icon: Globe
 ---
 
-Please refer to this
-[guide](/docs/headless/internationalization) to setup basic
-configurations and learn how to organize the documents.
+import * as A from '@/content/docs/headless/internationalization.mdx';
 
-Ensure you have your page tree, layout and middleware ready before getting
-started.
+<A.default />
 
-## Setup
+## Setup UI
 
 A `I18nProvider` is needed for localization.
 
-Put your pages and layouts under `/app/[lang]`.
-Then, wrap the root provider inside of your i18n provider.
+Wrap the root provider inside your i18n provider.
 
 ```tsx
 import { RootProvider } from 'fumadocs-ui/provider';
 import { I18nProvider } from 'fumadocs-ui/i18n';
-import type { ReactNode } from 'react';
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <I18nProvider>
       <RootProvider>{children}</RootProvider>
@@ -56,7 +51,14 @@ component to the UI, for example, to sidebar footer.
 import { DocsLayout } from 'fumadocs-ui/layout';
 import { LanguageSelect } from 'fumadocs-ui/i18n';
 
-export default function Layout({ children }: { children: ReactNode }) {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return <DocsLayout sidebar={{ footer: <LanguageSelect /> }} />;
 }
 ```
+
+export function inject() {
+    if (!toc.injected) toc.unshift(...A.toc)
+    toc.injected = true
+}
+
+{inject()}
