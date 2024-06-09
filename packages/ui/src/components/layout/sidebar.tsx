@@ -18,7 +18,7 @@ import { useTreeContext } from '@/contexts/tree';
 import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
 import { hasActive, isActive } from '@/utils/shared';
 import type { LinkItemType } from '@/layout';
-import { LinkItem } from '@/components/link-item';
+import { LinkItem } from '@/components/layout/link-item';
 import { LargeSearchToggle } from '@/components/layout/search-toggle';
 import { useSidebar } from '@/contexts/sidebar';
 import {
@@ -125,7 +125,7 @@ export function Sidebar({
         </div>
         <ViewportContent>
           {items.length > 0 && (
-            <div className="flex flex-col">
+            <div className="flex flex-col md:hidden">
               {items.map((item, i) => (
                 <LinkItem key={i} item={item} on="menu" />
               ))}

@@ -12,6 +12,7 @@ declare const {
   TreeContextProvider,
   DynamicSidebar,
   SubNav,
+  LinksMenu,
   Sidebar,
   ThemeToggle,
 }: typeof import('./docs.client');
@@ -148,12 +149,16 @@ export function DocsLayout({
             defaultOpenLevel={sidebar.defaultOpenLevel}
             banner={
               <>
-                <Link
-                  href={nav?.url ?? '/'}
-                  className="inline-flex items-center gap-2.5 border-b pb-4 font-semibold max-md:hidden"
-                >
-                  {nav?.title}
-                </Link>
+                <div className="flex flex-row items-center justify-between pb-2 border-b max-md:hidden">
+                  <Link
+                    href={nav?.url ?? '/'}
+                    className="inline-flex items-center gap-2.5 font-semibold"
+                  >
+                    {nav?.title}
+                  </Link>
+                  <LinksMenu items={finalLinks} />
+                </div>
+
                 {sidebar.banner}
               </>
             }

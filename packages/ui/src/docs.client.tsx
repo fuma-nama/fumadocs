@@ -28,13 +28,13 @@ export function SubNav({
         {title}
       </Link>
       {children}
-      {enabled && enableSearch ? <SearchToggle className="ml-auto" /> : null}
+      {enabled && enableSearch ? <SearchToggle className="ms-auto" /> : null}
       <SidebarTrigger
         className={cn(
           buttonVariants({
             color: 'ghost',
             size: 'icon',
-            className: (!enabled || !enableSearch) && 'ml-auto',
+            className: (!enabled || !enableSearch) && 'ms-auto',
           }),
         )}
       >
@@ -44,6 +44,7 @@ export function SubNav({
   );
 }
 
+export { LinksMenu } from '@/components/layout/links-menu';
 export { Sidebar } from './components/layout/sidebar';
 export { DynamicSidebar } from './components/layout/dynamic-sidebar';
 export { TreeContextProvider } from './contexts/tree';
