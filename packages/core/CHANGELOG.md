@@ -1,5 +1,22 @@
 # next-docs-zeta
 
+## 12.0.0
+
+### Major Changes
+
+- 98430e9: **Remove `minWidth` deprecated option from `Sidebar` component.**
+
+  **migrate:** Use `blockScrollingWidth` instead
+
+### Minor Changes
+
+- 57eb762: Support attaching custom properties during page tree builder process
+
+### Patch Changes
+
+- d88dfa6: Support attaching `id` property to page trees
+- ba20694: Remark Headings: Support code syntax in headings
+
 ## 11.3.2
 
 ### Patch Changes

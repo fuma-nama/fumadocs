@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 2.0.3
+
+### Patch Changes
+
+- 1d3917f: Fix nullable types cannot be detected
+
 ## 2.0.2
 
 ### Patch Changes
