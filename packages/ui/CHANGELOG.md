@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 12.0.2
+
+### Patch Changes
+
+- Show TOC on mobile devices
+  - fumadocs-core@12.0.2
+
 ## 12.0.1
 
 ### Patch Changes
