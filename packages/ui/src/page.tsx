@@ -1,12 +1,12 @@
-import { type TableOfContents, type TOCItemType } from 'fumadocs-core/server';
+import { type TableOfContents } from 'fumadocs-core/server';
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import { replaceOrDefault } from './utils/shared';
 import { cn } from './utils/cn';
-import type { FooterProps } from './page.client';
+import type { FooterProps, TOCProps } from './page.client';
 
 declare const {
-  TOC,
-  SubTOC,
+  Toc,
+  SubToc,
   Breadcrumb,
   Footer,
   LastUpdate,
@@ -32,6 +32,8 @@ export interface DocsPageProps {
 
   tableOfContent?: Partial<TableOfContentOptions>;
 
+  tableOfContentPopover?: Partial<TableOfContentOptions>;
+
   /**
    * Replace or disable breadcrumb
    */
@@ -48,8 +50,10 @@ export interface DocsPageProps {
 }
 
 export function DocsPage({
+  toc = [],
   tableOfContent = {},
   breadcrumb = {},
+  tableOfContentPopover = {},
   footer = {},
   ...props
 }: DocsPageProps): React.ReactElement {
@@ -67,16 +71,19 @@ export function DocsPage({
           <LastUpdate date={new Date(props.lastUpdate)} />
         ) : null}
         {replaceOrDefault(footer, <Footer items={footer.items} />)}
-        <SubTOC
-          items={props.toc ?? []}
-          header={tableOfContent.header}
-          footer={tableOfContent.footer}
-        />
+        {replaceOrDefault(
+          tableOfContentPopover,
+          <SubToc
+            items={toc}
+            header={tableOfContentPopover.header}
+            footer={tableOfContentPopover.footer}
+          />,
+        )}
       </article>
       {replaceOrDefault(
         tableOfContent,
-        <TOC
-          items={props.toc ?? []}
+        <Toc
+          items={toc}
           header={tableOfContent.header}
           footer={tableOfContent.footer}
         />,
@@ -84,20 +91,6 @@ export function DocsPage({
     </>
   );
 }
-
-interface TOCProps {
-  items: TOCItemType[];
-
-  /**
-   * Custom content in TOC container, before the main TOC
-   */
-  header: ReactNode;
-  /**
-   * Custom content in TOC container, after the main TOC
-   */
-  footer: ReactNode;
-}
-
 /**
  * Add typography styles
  */

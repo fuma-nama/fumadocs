@@ -19,7 +19,7 @@ Welcome to print it out :D
 We are welcome for contributions! You may start with contributing to the docs,
 it is located in `/apps/docs/content/docs`.
 
-To run the docs site in dev mode, 
+To run the docs site in dev mode,
 build the dependencies with `pnpm run build --filter=./packages/*` and run `pnpm run dev --filter=docs` to start the dev server.
 
 Notice that this project is a monorepo using Turborepo, pnpm and

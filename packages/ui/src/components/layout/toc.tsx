@@ -20,7 +20,7 @@ import { ScrollArea, ScrollViewport } from '../ui/scroll-area';
 
 type PosType = [top: number, height: number];
 
-interface TOCProps {
+export interface TOCProps {
   items: TOCItemType[];
 
   /**
@@ -33,23 +33,23 @@ interface TOCProps {
   footer?: ReactNode;
 }
 
-export function TOC({ items, header, footer }: TOCProps): ReactElement {
+export function Toc({ items, header, footer }: TOCProps): ReactElement {
   const { text } = useI18n();
 
   return (
-    <div className="sticky top-0 flex h-dvh w-[220px] flex-col gap-4 pt-12 max-lg:hidden xl:w-[260px]">
+    <div className="sticky top-0 flex h-dvh w-[220px] flex-col gap-4 pe-2 pt-12 max-lg:hidden xl:w-[260px]">
       {header}
       <h3 className="-mb-1 -ms-0.5 inline-flex items-center gap-1.5 text-sm text-muted-foreground">
         <TextIcon className="size-4" />
         {text.toc}
       </h3>
-      {items.length > 0 && <TOCItems items={items} />}
+      <TOCItems items={items} />
       {footer}
     </div>
   );
 }
 
-export function SubTOC({ items, header, footer }: TOCProps): ReactElement {
+export function SubToc({ items, header, footer }: TOCProps): ReactElement {
   const { text } = useI18n();
 
   return (
@@ -58,7 +58,7 @@ export function SubTOC({ items, header, footer }: TOCProps): ReactElement {
         className={cn(
           buttonVariants({
             className:
-              'sticky px-4 justify-start rounded-full bottom-2 gap-2 shadow-lg shadow-background z-10 lg:hidden',
+              'sticky ms-auto bottom-4 gap-2 shadow-lg shadow-background z-10 lg:hidden',
             color: 'secondary',
           }),
         )}
@@ -66,9 +66,9 @@ export function SubTOC({ items, header, footer }: TOCProps): ReactElement {
         <TextIcon className="size-4" />
         {text.toc}
       </PopoverTrigger>
-      <PopoverContent className="flex max-h-[300px] w-[var(--radix-popover-trigger-width)] flex-col gap-4">
+      <PopoverContent className="flex max-h-[300px] w-[260px] flex-col gap-4 p-3">
         {header}
-        {items.length > 0 && <TOCItems className="-me-2" items={items} />}
+        <TOCItems className="-me-1" items={items} />
         {footer}
       </PopoverContent>
     </Popover>
@@ -82,6 +82,7 @@ function TOCItems({
   items: TOCItemType[];
   className?: string;
 }): React.ReactElement {
+  const { text } = useI18n();
   const containerRef = useRef<HTMLDivElement>(null);
   const markerRef = useRef<HTMLDivElement>(null);
 
@@ -94,6 +95,13 @@ function TOCItems({
     element.style.setProperty('display', 'block');
   }, []);
 
+  if (items.length === 0)
+    return (
+      <div className="rounded-lg border bg-card p-3 text-xs text-muted-foreground">
+        {text.tocNoHeadings}
+      </div>
+    );
+
   return (
     <ScrollArea className={cn('flex flex-col', className)}>
       <ScrollViewport
@@ -104,7 +112,7 @@ function TOCItems({
           <div
             role="none"
             ref={markerRef}
-            className="absolute start-0 hidden border-s-2 border-primary transition-all"
+            className="absolute start-0 hidden w-0.5 bg-primary transition-all"
           />
           <div className="flex flex-col gap-1 border-s-2 text-muted-foreground">
             {items.map((item) => (
