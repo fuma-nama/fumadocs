@@ -2,4 +2,4 @@
 'fumadocs-ui': patch
 ---
 
-Use Menu for link items
+Show TOC on mobile devices

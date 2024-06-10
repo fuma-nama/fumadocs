@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 12.0.1
+
+### Patch Changes
+
+- 21fe244: Redesign roll button
+- 547a61a: Use Menu for link items
+  - fumadocs-core@12.0.1
+
 ## 12.0.0
 
 ### Major Changes
