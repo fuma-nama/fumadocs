@@ -24,6 +24,10 @@
       "import": "./dist/toc.js",
       "types": "./dist/toc.d.ts"
     },
+    "./toc-internal": {
+      "import": "./dist/toc-internal.js",
+      "types": "./dist/toc-internal.d.ts"
+    },
     "./search/client": {
       "import": "./dist/search/client.js",
       "types": "./dist/search/client.d.ts"
@@ -75,6 +79,9 @@
       ],
       "toc": [
         "./dist/toc.d.ts"
+      ],
+      "toc-internal": [
+        "./dist/toc-internal.d.ts"
       ],
       "search/client": [
         "./dist/search/client.d.ts"

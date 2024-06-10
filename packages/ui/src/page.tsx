@@ -2,13 +2,14 @@ import { type TableOfContents } from 'fumadocs-core/server';
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import { replaceOrDefault } from './utils/shared';
 import { cn } from './utils/cn';
-import type { FooterProps, TOCProps } from './page.client';
+import { FooterProps, TOCProps } from './page.client';
 
 declare const {
   Toc,
   SubToc,
   Breadcrumb,
   Footer,
+  TocProvider,
   LastUpdate,
 }: typeof import('./page.client');
 
@@ -58,7 +59,7 @@ export function DocsPage({
   ...props
 }: DocsPageProps): React.ReactElement {
   return (
-    <>
+    <TocProvider toc={toc}>
       <article
         className={cn(
           'mx-auto flex w-0 max-w-[800px] flex-1 flex-col gap-6 px-4 py-10 md:px-6 md:pt-12',
@@ -88,7 +89,7 @@ export function DocsPage({
           footer={tableOfContent.footer}
         />,
       )}
-    </>
+    </TocProvider>
   );
 }
 /**

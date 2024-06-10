@@ -1,13 +1,7 @@
 import { TextIcon } from 'lucide-react';
 import type { TOCItemType } from 'fumadocs-core/server';
-import * as Primitive from 'fumadocs-core/toc';
-import {
-  type ReactElement,
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useRef,
-} from 'react';
+import * as Primitive from 'fumadocs-core/toc-internal';
+import { type ReactElement, type ReactNode, useCallback, useRef } from 'react';
 import { cn } from '@/utils/cn';
 import { useI18n } from '@/contexts/i18n';
 import {
@@ -32,6 +26,8 @@ export interface TOCProps {
    */
   footer?: ReactNode;
 }
+
+export const TocProvider = Primitive.AnchorProvider;
 
 export function Toc({ items, header, footer }: TOCProps): ReactElement {
   const { text } = useI18n();
@@ -108,18 +104,18 @@ function TOCItems({
         className="relative h-0 flex-1 text-sm"
         ref={containerRef}
       >
-        <Primitive.TOCScrollProvider containerRef={containerRef} toc={items}>
-          <div
-            role="none"
-            ref={markerRef}
-            className="absolute start-0 hidden w-0.5 bg-primary transition-all"
-          />
+        <div
+          role="none"
+          ref={markerRef}
+          className="absolute start-0 hidden w-0.5 bg-primary transition-all"
+        />
+        <Primitive.ScrollProvider containerRef={containerRef}>
           <div className="flex flex-col gap-1 border-s-2 text-muted-foreground">
             {items.map((item) => (
               <TOCItem key={item.url} item={item} setMarker={setPos} />
             ))}
           </div>
-        </Primitive.TOCScrollProvider>
+        </Primitive.ScrollProvider>
       </ScrollViewport>
     </ScrollArea>
   );
@@ -132,19 +128,17 @@ function TOCItem({
   item: TOCItemType;
   setMarker: (v: PosType) => void;
 }): React.ReactElement {
-  const active = Primitive.useActiveAnchor(item.url);
   const ref = useRef<HTMLAnchorElement>(null);
-
-  useEffect(() => {
-    if (active && ref.current) {
-      setMarker([ref.current.offsetTop, ref.current.clientHeight]);
-    }
-  }, [active, setMarker]);
 
   return (
     <Primitive.TOCItem
       ref={ref}
       href={item.url}
+      onActiveChange={(active) => {
+        const element = ref.current;
+        if (active && element)
+          setMarker([element.offsetTop, element.clientHeight]);
+      }}
       className={cn(
         'py-1 transition-colors data-[active=true]:font-medium data-[active=true]:text-primary',
         item.depth <= 2 && 'ps-4',
