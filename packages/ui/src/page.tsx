@@ -5,7 +5,8 @@ import { cn } from './utils/cn';
 import type { FooterProps } from './page.client';
 
 declare const {
-  TOCItems,
+  TOC,
+  SubTOC,
   Breadcrumb,
   Footer,
   LastUpdate,
@@ -66,10 +67,15 @@ export function DocsPage({
           <LastUpdate date={new Date(props.lastUpdate)} />
         ) : null}
         {replaceOrDefault(footer, <Footer items={footer.items} />)}
+        <SubTOC
+          items={props.toc ?? []}
+          header={tableOfContent.header}
+          footer={tableOfContent.footer}
+        />
       </article>
       {replaceOrDefault(
         tableOfContent,
-        <Toc
+        <TOC
           items={props.toc ?? []}
           header={tableOfContent.header}
           footer={tableOfContent.footer}
@@ -90,18 +96,6 @@ interface TOCProps {
    * Custom content in TOC container, after the main TOC
    */
   footer: ReactNode;
-}
-
-function Toc(props: TOCProps): React.ReactElement {
-  return (
-    <div className="sticky top-0 flex h-dvh w-[220px] flex-col gap-4 divide-y pt-12 max-lg:hidden xl:w-[260px]">
-      {props.header}
-      {props.items.length > 0 && <TOCItems items={props.items} />}
-      {props.footer ? (
-        <div className="pt-4 first:pt-0">{props.footer}</div>
-      ) : null}
-    </div>
-  );
 }
 
 /**

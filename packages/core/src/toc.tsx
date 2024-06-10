@@ -41,6 +41,7 @@ export interface TOCScrollProvider {
   children: ReactNode;
 }
 
+// todo: remove in next major
 export const TOCProvider = forwardRef<HTMLDivElement, TOCProviderProps>(
   ({ toc, ...props }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
