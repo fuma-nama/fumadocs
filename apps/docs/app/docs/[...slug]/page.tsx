@@ -25,23 +25,26 @@ export default function Page({
   const path = `apps/docs/content/docs/${page.file.path}`;
   const preview = page.data.preview;
 
+  const footer = (
+    <a
+      href={`https://github.com/fuma-nama/fumadocs/blob/main/${path}`}
+      target="_blank"
+      rel="noreferrer noopener"
+      className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+    >
+      Edit on Github <ExternalLinkIcon className="size-3" />
+    </a>
+  );
+
   return (
     <DocsPage
       toc={page.data.exports.toc}
       lastUpdate={page.data.exports.lastModified}
       tableOfContent={{
         enabled: page.data.toc,
-        footer: (
-          <a
-            href={`https://github.com/fuma-nama/fumadocs/blob/main/${path}`}
-            target="_blank"
-            rel="noreferrer noopener"
-            className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-          >
-            Edit on Github <ExternalLinkIcon className="size-3" />
-          </a>
-        ),
+        footer,
       }}
+      tableOfContentPopover={{ footer }}
     >
       <h1 className="text-3xl font-bold text-foreground sm:text-4xl">
         {page.data.title}

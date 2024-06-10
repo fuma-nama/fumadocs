@@ -135,7 +135,7 @@ export function Sidebar({
         <div
           {...footerProps}
           className={cn(
-            'flex flex-row items-center border-t px-4 py-2 md:px-3',
+            'flex flex-row items-center border-t px-4 py-1 md:px-3',
             footerProps?.className,
           )}
         >
@@ -158,10 +158,10 @@ function ViewportContent({
       <ScrollViewport
         style={{
           maskImage:
-            'linear-gradient(to bottom, transparent 2px, white 16px, white calc(100% - 16px), transparent calc(100% - 2px))',
+            'linear-gradient(to bottom, transparent 2px, white 24px, white calc(100% - 24px), transparent calc(100% - 2px))',
         }}
       >
-        <div className="flex flex-col gap-8 p-4 md:px-3">
+        <div className="flex flex-col gap-8 px-4 py-6 md:px-3">
           {children}
           <NodeList items={root.children} />
         </div>

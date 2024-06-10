@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-core",
-  "version": "12.0.1",
+  "version": "12.0.2",
   "description": "The library for building a documentation website in Next.js",
   "keywords": [
     "NextJs",
@@ -23,6 +23,10 @@
     "./toc": {
       "import": "./dist/toc.js",
       "types": "./dist/toc.d.ts"
+    },
+    "./toc-internal": {
+      "import": "./dist/toc-internal.js",
+      "types": "./dist/toc-internal.d.ts"
     },
     "./search/client": {
       "import": "./dist/search/client.js",
@@ -75,6 +79,9 @@
       ],
       "toc": [
         "./dist/toc.d.ts"
+      ],
+      "toc-internal": [
+        "./dist/toc-internal.d.ts"
       ],
       "search/client": [
         "./dist/search/client.d.ts"

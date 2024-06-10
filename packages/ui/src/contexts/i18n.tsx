@@ -3,7 +3,10 @@ import { createContext, useContext } from 'react';
 export interface Translations {
   search: string;
   searchNoResult: string;
+
   toc: string;
+  tocNoHeadings: string;
+
   lastUpdate: string;
   chooseLanguage: string;
   nextPage: string;
@@ -30,6 +33,7 @@ export const I18nContext = createContext<I18nContextType>({
     search: 'Search',
     searchNoResult: 'No results found',
     toc: 'On this page',
+    tocNoHeadings: 'No Headings',
     lastUpdate: 'Last updated on',
     chooseLanguage: 'Choose a language',
     nextPage: 'Next',

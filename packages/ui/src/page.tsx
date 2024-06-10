@@ -1,13 +1,15 @@
-import { type TableOfContents, type TOCItemType } from 'fumadocs-core/server';
+import { type TableOfContents } from 'fumadocs-core/server';
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import { replaceOrDefault } from './utils/shared';
 import { cn } from './utils/cn';
-import type { FooterProps } from './page.client';
+import { FooterProps, TOCProps } from './page.client';
 
 declare const {
-  TOCItems,
+  Toc,
+  SubToc,
   Breadcrumb,
   Footer,
+  TocProvider,
   LastUpdate,
 }: typeof import('./page.client');
 
@@ -31,6 +33,8 @@ export interface DocsPageProps {
 
   tableOfContent?: Partial<TableOfContentOptions>;
 
+  tableOfContentPopover?: Partial<TableOfContentOptions>;
+
   /**
    * Replace or disable breadcrumb
    */
@@ -47,13 +51,15 @@ export interface DocsPageProps {
 }
 
 export function DocsPage({
+  toc = [],
   tableOfContent = {},
   breadcrumb = {},
+  tableOfContentPopover = {},
   footer = {},
   ...props
 }: DocsPageProps): React.ReactElement {
   return (
-    <>
+    <TocProvider toc={toc}>
       <article
         className={cn(
           'mx-auto flex w-0 max-w-[800px] flex-1 flex-col gap-6 px-4 py-10 md:px-6 md:pt-12',
@@ -66,44 +72,26 @@ export function DocsPage({
           <LastUpdate date={new Date(props.lastUpdate)} />
         ) : null}
         {replaceOrDefault(footer, <Footer items={footer.items} />)}
+        {replaceOrDefault(
+          tableOfContentPopover,
+          <SubToc
+            items={toc}
+            header={tableOfContentPopover.header}
+            footer={tableOfContentPopover.footer}
+          />,
+        )}
       </article>
       {replaceOrDefault(
         tableOfContent,
         <Toc
-          items={props.toc ?? []}
+          items={toc}
           header={tableOfContent.header}
           footer={tableOfContent.footer}
         />,
       )}
-    </>
+    </TocProvider>
   );
 }
-
-interface TOCProps {
-  items: TOCItemType[];
-
-  /**
-   * Custom content in TOC container, before the main TOC
-   */
-  header: ReactNode;
-  /**
-   * Custom content in TOC container, after the main TOC
-   */
-  footer: ReactNode;
-}
-
-function Toc(props: TOCProps): React.ReactElement {
-  return (
-    <div className="sticky top-0 flex h-dvh w-[220px] flex-col gap-4 divide-y pt-12 max-lg:hidden xl:w-[260px]">
-      {props.header}
-      {props.items.length > 0 && <TOCItems items={props.items} />}
-      {props.footer ? (
-        <div className="pt-4 first:pt-0">{props.footer}</div>
-      ) : null}
-    </div>
-  );
-}
-
 /**
  * Add typography styles
  */
