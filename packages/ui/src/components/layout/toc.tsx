@@ -67,10 +67,10 @@ export function SubToc({ items, header, footer }: TOCProps): ReactElement {
         side="top"
         align="end"
         avoidCollisions={false}
-        className="flex max-h-[300px] w-[260px] flex-col gap-4 p-3"
+        className="flex max-h-[80vh] w-[260px] flex-col gap-4 p-3"
       >
         {header}
-        <TOCItems className="-me-1" items={items} />
+        <TOCItems className="-me-2" items={items} />
         {footer}
       </PopoverContent>
     </Popover>
