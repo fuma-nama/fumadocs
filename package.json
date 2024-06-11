@@ -34,19 +34,19 @@
   },
   "packageManager": "pnpm@9.2.0",
   "pnpm": {
-    "overrides": {
-      "@opentelemetry/api": "^1.4.1",
-      "remark-rehype": "^11.0.0",
-      "@types/mdast": "^4.0.3",
-      "remark-parse": "^11.0.0",
-      "unified": "^11.0.4",
-      "mdx-bundler": "^10.0.1"
-    },
     "peerDependencyRules": {
       "ignoreMissing": [
         "esbuild",
         "next"
       ]
+    },
+    "overrides": {
+      "@opentelemetry/api": "^1.4.1",
+      "@types/mdast": "^4.0.3",
+      "mdx-bundler": "^10.0.1",
+      "remark-parse": "^11.0.0",
+      "remark-rehype": "^11.0.0",
+      "unified": "^11.0.4"
     }
   }
 }
