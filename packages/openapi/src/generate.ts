@@ -123,7 +123,7 @@ function render(
       [
         '---',
         title && `title: ${title}`,
-        description && `description: ${description}`,
+        description && 'description: |\n  ' + description.split('\n').join('\n  ') + '\n',
         '---',
       ]
         .filter(Boolean)
