@@ -44,14 +44,17 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "fumadocs-core": "workspace:*",
     "rehype-img-size": "^1.0.1"
   },
   "devDependencies": {
     "contentlayer": "^0.3.4",
     "eslint-config-custom": "workspace:*",
+    "fumadocs-core": "workspace:*",
     "tsconfig": "workspace:*",
     "unified": "^11.0.4"
+  },
+  "peerDependencies": {
+    "fumadocs-core": ">= 12.0.2"
   },
   "publishConfig": {
     "access": "public"
