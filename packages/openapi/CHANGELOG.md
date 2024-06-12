@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 2.0.4
+
+### Patch Changes
+
+- 310e0ab: Fix multi-line frontmatter
+
 ## 2.0.3
 
 ### Patch Changes

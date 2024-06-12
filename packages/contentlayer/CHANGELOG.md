@@ -1,5 +1,13 @@
 # fumadocs-contentlayer
 
+## 1.1.33
+
+### Patch Changes
+
+- 310e0ab: Move `fumadocs-core` to peer dependency
+- Updated dependencies [053609d]
+  - fumadocs-core@12.0.3
+
 ## 1.1.32
 
 ### Patch Changes
