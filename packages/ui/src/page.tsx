@@ -66,7 +66,7 @@ export function DocsPage({
           tableOfContent.enabled === false && 'max-w-[1200px]',
         )}
       >
-        {replaceOrDefault(breadcrumb, <Breadcrumb full={breadcrumb?.full} />)}
+        {replaceOrDefault(breadcrumb, <Breadcrumb full={breadcrumb.full} />)}
         {props.children}
         {props.lastUpdate ? (
           <LastUpdate date={new Date(props.lastUpdate)} />

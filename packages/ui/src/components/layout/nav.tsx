@@ -76,7 +76,7 @@ export function Nav({
       <nav className="mx-auto flex size-full max-w-container flex-row items-center gap-6 px-4">
         <Link
           href={url}
-          className="inline-flex items-center gap-3 font-semibold"
+          className="inline-flex items-center gap-2.5 font-semibold"
         >
           {title}
         </Link>
