@@ -1,4 +1,4 @@
-import { ExternalLinkIcon } from 'lucide-react';
+import { Edit } from 'lucide-react';
 import type { Metadata } from 'next';
 import { Card, Cards } from 'fumadocs-ui/components/card';
 import { DocsPage, DocsBody } from 'fumadocs-ui/page';
@@ -6,6 +6,8 @@ import { notFound } from 'next/navigation';
 import { utils, type Page } from '@/utils/source';
 import { createMetadata } from '@/utils/metadata';
 import Preview from '@/components/preview';
+import { cn } from '@/utils/cn';
+import { buttonVariants } from '@/components/ui/button';
 
 interface Param {
   slug: string[];
@@ -30,9 +32,16 @@ export default function Page({
       href={`https://github.com/fuma-nama/fumadocs/blob/main/${path}`}
       target="_blank"
       rel="noreferrer noopener"
-      className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+      className={cn(
+        buttonVariants({
+          variant: 'secondary',
+          size: 'sm',
+          className: 'text-xs gap-1.5',
+        }),
+      )}
     >
-      Edit on Github <ExternalLinkIcon className="size-3" />
+      <Edit className="size-3" />
+      Edit on Github
     </a>
   );
 

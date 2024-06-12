@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 12.0.3
+
+### Patch Changes
+
+- 18928af: Improve mobile experience on Safari
+- Updated dependencies [053609d]
+  - fumadocs-core@12.0.3
+
 ## 12.0.2
 
 ### Patch Changes

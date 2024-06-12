@@ -6,7 +6,18 @@ import { Fragment } from 'react';
 import { cn } from '@/utils/cn';
 import { useTreeContext } from '@/contexts/tree';
 
-export function Breadcrumb(): React.ReactElement {
+export interface BreadcrumbProps {
+  /**
+   * Show the full path to the current page
+   *
+   * @defaultValue false
+   */
+  full?: boolean;
+}
+
+export function Breadcrumb({
+  full = false,
+}: BreadcrumbProps): React.ReactElement {
   const { root } = useTreeContext();
   const pathname = usePathname();
   const items = useBreadcrumb(pathname, root);
@@ -20,10 +31,9 @@ export function Breadcrumb(): React.ReactElement {
     >
       {items.map((item, i) => {
         const isLast = items.length === i + 1;
-        const style = cn(
-          'overflow-hidden whitespace-nowrap',
-          isLast ? 'text-foreground' : 'text-ellipsis',
-        );
+        if (isLast && !full) return;
+
+        const style = cn(isLast ? 'text-foreground' : 'truncate');
 
         return (
           <Fragment key={i}>

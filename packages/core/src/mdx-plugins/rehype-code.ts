@@ -5,7 +5,6 @@ import {
   transformerNotationWordHighlight,
 } from '@shikijs/transformers';
 import type { Processor, Transformer } from 'unified';
-import { visit } from './hast-utils';
 import type { IconOptions, CodeBlockIcon } from './transformer-icon';
 import { transformerIcon } from './transformer-icon';
 
@@ -33,7 +32,7 @@ export const rehypeCodeDefaultOptions: RehypeCodeOptions = {
     light: 'github-light',
     dark: 'github-dark',
   },
-  defaultLang: 'plaintext',
+  defaultLanguage: 'plaintext',
   defaultColor: false,
   transformers: [
     transformerNotationHighlight(),
@@ -72,6 +71,7 @@ export type RehypeCodeOptions = RehypeShikiOptions & {
    * Default language
    *
    * @defaultValue plaintext
+   * @deprecated Use `defaultLanguage` instead
    */
   defaultLang?: string;
 
@@ -96,7 +96,7 @@ export function rehypeCode(
   codeOptions.transformers ||= [];
   codeOptions.transformers = [
     {
-      name: 'rehype-code:filter-meta',
+      name: 'rehype-code:pre-process',
       preprocess(code, { meta }) {
         if (meta && codeOptions.filterMetaString) {
           meta.__raw = codeOptions.filterMetaString(meta.__raw ?? '');
@@ -125,38 +125,11 @@ export function rehypeCode(
     ];
   }
 
-  const prefix = 'language-';
-  const transformer = rehypeShiki.call(this, codeOptions);
+  if (codeOptions.defaultLang) {
+    codeOptions.defaultLanguage = codeOptions.defaultLang;
+  }
 
-  return async (root, file) => {
-    visit(root, ['pre'], (element) => {
-      const head = element.children[0];
-
-      if (
-        element.children.length === 0 ||
-        head.type !== 'element' ||
-        head.tagName !== 'code'
-      )
-        return;
-
-      head.properties.className ||= [];
-      const classes = head.properties.className;
-
-      if (!Array.isArray(classes)) return;
-
-      const hasLanguage = classes.some(
-        (d) => typeof d === 'string' && d.startsWith(prefix),
-      );
-
-      if (!hasLanguage && codeOptions.defaultLang)
-        classes.push(`${prefix}${codeOptions.defaultLang}`);
-    });
-
-    if (transformer)
-      await transformer.call(this, root, file, () => {
-        // nothing
-      });
-  };
+  return rehypeShiki.call(this, codeOptions) as Transformer<Root, Root>;
 }
 
 export { type CodeBlockIcon, transformerIcon };

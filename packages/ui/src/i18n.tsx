@@ -11,7 +11,7 @@ import {
 
 interface I18nProviderProps {
   /**
-   * Force a locale
+   * Force a locale, by default, it is parsed from pathname
    */
   locale?: string;
 

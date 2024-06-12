@@ -2,7 +2,7 @@ import { type TableOfContents } from 'fumadocs-core/server';
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import { replaceOrDefault } from './utils/shared';
 import { cn } from './utils/cn';
-import { FooterProps, TOCProps } from './page.client';
+import type { BreadcrumbProps, FooterProps, TOCProps } from './page.client';
 
 declare const {
   Toc,
@@ -18,7 +18,7 @@ type TableOfContentOptions = Omit<TOCProps, 'items'> & {
   component: ReactNode;
 };
 
-interface BreadcrumbOptions {
+interface BreadcrumbOptions extends BreadcrumbProps {
   enabled: boolean;
   component: ReactNode;
 }
@@ -66,7 +66,7 @@ export function DocsPage({
           tableOfContent.enabled === false && 'max-w-[1200px]',
         )}
       >
-        {replaceOrDefault(breadcrumb, <Breadcrumb />)}
+        {replaceOrDefault(breadcrumb, <Breadcrumb full={breadcrumb?.full} />)}
         {props.children}
         {props.lastUpdate ? (
           <LastUpdate date={new Date(props.lastUpdate)} />

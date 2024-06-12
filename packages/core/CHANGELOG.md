@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 12.0.3
+
+### Patch Changes
+
+- 053609d: Rename `defaultLang` to `defaultLanguage`
+
 ## 12.0.2
 
 ## 12.0.1

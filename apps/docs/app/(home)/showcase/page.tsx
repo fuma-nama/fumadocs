@@ -9,6 +9,7 @@ import NuqsImage from '@/public/showcases/nuqs.jpg';
 import FrameGround from '@/public/showcases/frameground.png';
 import Xlog from '@/public/showcases/xlog.png';
 import Briefkasten from '@/public/showcases/briefkasten.png';
+import Turbo from '@/public/showcases/turbo.png';
 import Spot from '@/public/spot.png';
 
 export const metadata = createMetadata({
@@ -27,6 +28,11 @@ interface ShowcaseObject {
 
 export default function Showcase(): React.ReactElement {
   const showcases: ShowcaseObject[] = [
+    {
+      image: Turbo,
+      name: 'Turbo',
+      url: 'https://turbo.build',
+    },
     {
       image: NextFAQImage,
       name: 'Next.js Discord Common Questions',
