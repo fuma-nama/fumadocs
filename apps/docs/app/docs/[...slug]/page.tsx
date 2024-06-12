@@ -32,9 +32,15 @@ export default function Page({
       href={`https://github.com/fuma-nama/fumadocs/blob/main/${path}`}
       target="_blank"
       rel="noreferrer noopener"
-      className={cn(buttonVariants({ variant: 'secondary' }))}
+      className={cn(
+        buttonVariants({
+          variant: 'secondary',
+          size: 'sm',
+          className: 'text-xs gap-1.5',
+        }),
+      )}
     >
-      <Edit className="me-2 size-4" />
+      <Edit className="size-3" />
       Edit on Github
     </a>
   );

@@ -4,10 +4,8 @@ import { cva } from 'class-variance-authority';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { type ReactNode, useId } from 'react';
-import Image from 'next/image';
 import { cn } from '@/utils/cn';
 import { modes } from '@/utils/modes';
-import Logo from '@/public/logo.png';
 
 const itemVariants = cva(
   'rounded-md px-2 py-1 transition-colors hover:text-accent-foreground',
@@ -19,23 +17,6 @@ const itemVariants = cva(
     },
   },
 );
-
-export function Title(): React.ReactElement {
-  return (
-    <>
-      <Image
-        alt="Fumadocs"
-        src={Logo}
-        sizes="100px"
-        className="hidden w-20 md:w-24 [.uwu_&]:block"
-        aria-label="Fumadocs"
-      />
-
-      <FumadocsIcon className="size-4 [.uwu_&]:hidden" fill="currentColor" />
-      <span className="[.uwu_&]:hidden max-md:[nav_&]:hidden">Fumadocs</span>
-    </>
-  );
-}
 
 export function Body({
   children,
