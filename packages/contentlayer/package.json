@@ -54,7 +54,7 @@
     "unified": "^11.0.4"
   },
   "peerDependencies": {
-    "fumadocs-core": ">= 12.0.2"
+    "fumadocs-core": "12.x.x"
   },
   "publishConfig": {
     "access": "public"
