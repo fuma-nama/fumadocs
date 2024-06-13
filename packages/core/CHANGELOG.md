@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 12.0.4
+
+### Patch Changes
+
+- 72dbaf1: Support `ReactNode` in page tree, table of contents and breadcrumb type definitions
+- 51ca944: Support including separators in breadcrumbs
+
 ## 12.0.3
 
 ### Patch Changes

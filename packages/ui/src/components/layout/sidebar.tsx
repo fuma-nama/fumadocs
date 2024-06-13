@@ -184,8 +184,8 @@ function NodeList({
 
   return (
     <div {...props}>
-      {items.map((item) => {
-        const id = `${item.type}_${item.name}`;
+      {items.map((item, i) => {
+        const id = `${item.type}_${i.toString()}`;
 
         switch (item.type) {
           case 'separator':
