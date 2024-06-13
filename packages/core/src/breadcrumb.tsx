@@ -1,8 +1,8 @@
-import { useMemo } from 'react';
+import { type ReactNode, useMemo } from 'react';
 import type * as PageTree from '@/server/page-tree';
 
 export interface BreadcrumbItem {
-  name: string;
+  name: ReactNode;
   url?: string;
 }
 
@@ -59,7 +59,7 @@ function searchPath(
   url: string,
   options: Required<BreadcrumbOptions>,
 ): BreadcrumbItem[] | null {
-  let separator: string | undefined;
+  let separator: ReactNode | undefined;
 
   for (const node of nodes) {
     if (options.includeSeparator && node.type === 'separator')
