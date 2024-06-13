@@ -116,7 +116,7 @@ export function Sidebar({
         <div
           {...bannerProps}
           className={cn(
-            'flex flex-col gap-2 px-4 pt-2 md:px-3 md:pt-6',
+            'flex flex-col gap-2 px-4 pt-2 md:px-3 md:pt-4',
             bannerProps?.className,
           )}
         >

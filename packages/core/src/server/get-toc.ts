@@ -1,8 +1,9 @@
 import { remark } from 'remark';
+import type { ReactNode } from 'react';
 import { remarkHeading } from '@/mdx-plugins/remark-heading';
 
 export interface TOCItemType {
-  title: string;
+  title: ReactNode;
   url: string;
   depth: number;
 }

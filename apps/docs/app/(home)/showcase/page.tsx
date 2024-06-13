@@ -10,6 +10,7 @@ import FrameGround from '@/public/showcases/frameground.png';
 import Xlog from '@/public/showcases/xlog.png';
 import Briefkasten from '@/public/showcases/briefkasten.png';
 import Turbo from '@/public/showcases/turbo.png';
+import Million from '@/public/showcases/million.png';
 import Spot from '@/public/spot.png';
 
 export const metadata = createMetadata({
@@ -42,6 +43,11 @@ export default function Showcase(): React.ReactElement {
       image: YeecordImage,
       name: 'Yeecord Docs',
       url: 'https://yeecord.com',
+    },
+    {
+      image: Million,
+      name: 'Million',
+      url: 'https://million.dev',
     },
     { image: NuqsImage, name: 'nuqs', url: 'https://nuqs.47ng.com' },
     {

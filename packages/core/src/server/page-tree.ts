@@ -1,7 +1,7 @@
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 
 export interface Root {
-  name: string;
+  name: ReactNode;
   children: Node[];
 }
 
@@ -9,7 +9,7 @@ export type Node = Item | Separator | Folder;
 
 export interface Item {
   type: 'page';
-  name: string;
+  name: ReactNode;
   url: string;
   external?: boolean;
   icon?: ReactElement;
@@ -17,7 +17,7 @@ export interface Item {
 
 export interface Separator {
   type: 'separator';
-  name: string;
+  name: ReactNode;
 }
 
 export interface Folder {
@@ -27,7 +27,7 @@ export interface Folder {
   id?: string;
 
   type: 'folder';
-  name: string;
+  name: ReactNode;
   root?: boolean;
   defaultOpen?: boolean;
   index?: Item;
