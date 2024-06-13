@@ -38,6 +38,8 @@ const indexes = JSON.parse(
 
 <Accordion title='Full example of integrating with Algolia Search'>
 
+    You can run this script after `next build` to sync search indexes.
+
 ```ts title='update-index.mts'
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -75,6 +77,18 @@ void sync(client, {
 </Accordions>
 
 ### Options
+
+To customise search index generation:
+
+```ts
+import createMDX from 'fumadocs-mdx/config';
+
+const withMDX = createMDX({
+  buildSearchIndex: {
+    // options
+  },
+});
+```
 
 ```json doc-gen:typescript
 {
