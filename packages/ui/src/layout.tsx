@@ -159,9 +159,11 @@ export function DocsLayout({
                   >
                     {nav?.title}
                   </Link>
-                  <LinksMenu items={finalLinks}>
-                    <MoreHorizontal />
-                  </LinksMenu>
+                  {finalLinks.length > 0 && (
+                    <LinksMenu items={finalLinks}>
+                      <MoreHorizontal />
+                    </LinksMenu>
+                  )}
                 </div>
 
                 {sidebar.banner}
