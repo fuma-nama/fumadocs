@@ -1,5 +1,16 @@
 # next-docs-ui
 
+## 12.0.4
+
+### Patch Changes
+
+- 70666d8: Hide file name on breadcrumbs
+- f96da27: Improve design details
+- 51ca944: Support including separators in breadcrumbs
+- Updated dependencies [72dbaf1]
+- Updated dependencies [51ca944]
+  - fumadocs-core@12.0.4
+
 ## 12.0.3
 
 ### Patch Changes
