@@ -183,52 +183,6 @@ importers:
         specifier: ^5.90.3
         version: 5.90.3(esbuild@0.21.5)
 
-  examples/contentlayer:
-    dependencies:
-      contentlayer:
-        specifier: 0.3.4
-        version: 0.3.4(esbuild@0.21.5)
-      fumadocs-contentlayer:
-        specifier: workspace:*
-        version: link:../../packages/contentlayer
-      fumadocs-core:
-        specifier: workspace:*
-        version: link:../../packages/core
-      fumadocs-ui:
-        specifier: workspace:*
-        version: link:../../packages/ui
-      next:
-        specifier: ^14.2.4
-        version: 14.2.4(@babel/core@7.24.0)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      next-contentlayer:
-        specifier: ^0.3.4
-        version: 0.3.4(contentlayer@0.3.4(esbuild@0.21.5))(esbuild@0.21.5)(next@14.2.4(@babel/core@7.24.0)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      react:
-        specifier: 18.3.1
-        version: 18.3.1
-      react-dom:
-        specifier: 18.3.1
-        version: 18.3.1(react@18.3.1)
-    devDependencies:
-      '@types/react':
-        specifier: ^18.3.3
-        version: 18.3.3
-      '@types/react-dom':
-        specifier: ^18.3.0
-        version: 18.3.0
-      autoprefixer:
-        specifier: 10.4.19
-        version: 10.4.19(postcss@8.4.38)
-      postcss:
-        specifier: 8.4.38
-        version: 8.4.38
-      tailwindcss:
-        specifier: ^3.4.4
-        version: 3.4.4
-      typescript:
-        specifier: ^5.4.5
-        version: 5.4.5
-
   examples/i18n:
     dependencies:
       fumadocs-core:
@@ -271,6 +225,40 @@ importers:
       fumadocs-mdx:
         specifier: workspace:*
         version: link:../../packages/mdx
+      fumadocs-ui:
+        specifier: workspace:*
+        version: link:../../packages/ui
+      next:
+        specifier: ^14.2.4
+        version: 14.2.4(@babel/core@7.24.0)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react:
+        specifier: 18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
+    devDependencies:
+      '@types/mdx':
+        specifier: ^2.0.13
+        version: 2.0.13
+      '@types/react':
+        specifier: ^18.3.3
+        version: 18.3.3
+      '@types/react-dom':
+        specifier: ^18.3.0
+        version: 18.3.0
+      typescript:
+        specifier: ^5.4.5
+        version: 5.4.5
+
+  examples/remote-mdx:
+    dependencies:
+      '@fumadocs/mdx-remote':
+        specifier: workspace:*
+        version: link:../../packages/mdx-remote
+      fumadocs-core:
+        specifier: workspace:*
+        version: link:../../packages/core
       fumadocs-ui:
         specifier: workspace:*
         version: link:../../packages/ui
@@ -588,6 +576,46 @@ importers:
       webpack:
         specifier: ^5.90.3
         version: 5.90.3(esbuild@0.21.5)
+
+  packages/mdx-remote:
+    dependencies:
+      '@mdx-js/mdx':
+        specifier: ^3.0.1
+        version: 3.0.1
+      gray-matter:
+        specifier: ^4.0.3
+        version: 4.0.3
+      rehype-img-size:
+        specifier: ^1.0.1
+        version: 1.0.1
+    devDependencies:
+      '@types/mdx':
+        specifier: ^2.0.13
+        version: 2.0.13
+      '@types/node':
+        specifier: 18.17.5
+        version: 18.17.5
+      '@types/react':
+        specifier: ^18.3.3
+        version: 18.3.3
+      eslint-config-custom:
+        specifier: workspace:*
+        version: link:../eslint-config-custom
+      fumadocs-core:
+        specifier: workspace:*
+        version: link:../core
+      next:
+        specifier: ^14.2.4
+        version: 14.2.4(@babel/core@7.24.0)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
+      unified:
+        specifier: ^11.0.4
+        version: 11.0.4
+      vfile:
+        specifier: ^6.0.1
+        version: 6.0.1
 
   packages/openapi:
     dependencies:
