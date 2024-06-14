@@ -1,3 +1,4 @@
+import { type FileData } from '@/source/types';
 import { parseFilePath, type FileInfo, normalizePath } from './path';
 import { Storage } from './file-system';
 
@@ -5,7 +6,6 @@ export interface LoadOptions {
   transformers?: Transformer[];
   rootDir?: string;
   getSlugs: (info: FileInfo) => string[];
-  getUrl: (slugs: string[], locale?: string) => string;
 }
 
 export interface VirtualFile {
@@ -42,9 +42,8 @@ export function loadFiles(files: VirtualFile[], options: LoadOptions): Storage {
 
       storage.write(relativePath, file.type, {
         slugs,
-        url: options.getUrl(slugs, parsedPath.locale),
         data: file.data,
-      });
+      } as FileData['file']);
     }
 
     if (file.type === 'meta') {

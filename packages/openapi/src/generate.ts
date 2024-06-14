@@ -45,7 +45,14 @@ export async function generate(
   const routes = Object.entries(document.paths).map<RouteInformation>(
     ([key, value]) => {
       if (!value) throw new Error('Invalid schema');
-      const methodKeys = ['get', 'post', 'patch', 'delete', 'head'] as const;
+      const methodKeys = [
+        'get',
+        'post',
+        'patch',
+        'delete',
+        'head',
+        'put',
+      ] as const;
       const methods: MethodInformation[] = [];
 
       for (const methodKey of methodKeys) {
@@ -116,7 +123,8 @@ function render(
       [
         '---',
         title && `title: ${title}`,
-        description && `description: ${description}`,
+        description &&
+          `description: |\n  ${description.split('\n').join('\n  ')}\n`,
         '---',
       ]
         .filter(Boolean)

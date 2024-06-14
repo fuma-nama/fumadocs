@@ -20,12 +20,12 @@ interface Content {
 export interface StructuredData {
   headings: Heading[];
   /**
-   * Refer to paragraphs, a heading may contains multiple contents as well
+   * Refer to paragraphs, a heading may contain multiple contents as well
    */
   contents: Content[];
 }
 
-interface Options {
+export interface StructureOptions {
   /**
    * Types to be scanned, default: `["heading", "blockquote", "paragraph"]`
    */
@@ -39,7 +39,7 @@ const slugger = new Slugger();
  */
 export function remarkStructure({
   types = ['paragraph', 'blockquote', 'heading'],
-}: Options = {}): Transformer<Root, Root> {
+}: StructureOptions = {}): Transformer<Root, Root> {
   return (node, file) => {
     slugger.reset();
     const data: StructuredData = { contents: [], headings: [] };
@@ -84,7 +84,7 @@ export function remarkStructure({
 export function structure(
   content: string,
   remarkPlugins: PluggableList = [],
-  options: Options = {},
+  options: StructureOptions = {},
 ): StructuredData {
   const result = remark()
     .use(remarkGfm)

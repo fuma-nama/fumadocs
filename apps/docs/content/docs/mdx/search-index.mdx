@@ -23,7 +23,7 @@ export default withMDX(config);
 ```
 
 After running `next build`, generated search indexes will be written to `.next/server/chunks/fumadocs_search.json`.
-You can access them with `JSON.parse`.
+You can access them after build.
 
 ```ts title="update-index.mts"
 import { readFileSync } from 'node:fs';
@@ -37,6 +37,8 @@ const indexes = JSON.parse(
 <Accordions>
 
 <Accordion title='Full example of integrating with Algolia Search'>
+
+    You can run this script after `next build` to sync search indexes.
 
 ```ts title='update-index.mts'
 import { readFileSync } from 'node:fs';
@@ -75,6 +77,18 @@ void sync(client, {
 </Accordions>
 
 ### Options
+
+To customise search index generation:
+
+```ts
+import createMDX from 'fumadocs-mdx/config';
+
+const withMDX = createMDX({
+  buildSearchIndex: {
+    // options
+  },
+});
+```
 
 ```json doc-gen:typescript
 {

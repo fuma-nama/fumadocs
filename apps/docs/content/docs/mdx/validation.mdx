@@ -21,7 +21,7 @@ option.
 
 Extend the default frontmatter schema:
 
-```ts title="source.ts"
+```ts title="app/source.ts"
 import { createMDXSource, defaultSchemas } from 'fumadocs-mdx';
 import { z } from 'zod';
 import { loader } from 'fumadocs-core/source';
@@ -46,7 +46,7 @@ Thanks to the Typescript magic, your custom Zod schema type should be automatica
 utils.getPages().data; // should be your own frontmatter
 ```
 
-Furthermore, you can infer the type of pages and meta files with build-in type helpers of Source API.
+Infer the type of pages and meta files with build-in type helpers of Source API.
 
 ```ts
 import type { InferMetaType, InferPageType } from 'fumadocs-core/source';

@@ -21,7 +21,7 @@ export interface GetGithubLastCommitOptions {
   path: string;
 
   /**
-   * Github access token
+   * GitHub access token
    */
   token?: string;
 
@@ -34,7 +34,10 @@ export interface GetGithubLastCommitOptions {
 }
 
 /**
- * Get the last edit time of a file
+ * Get the last edit time of a file using GitHub API
+ *
+ * By default, this will cache the result forever.
+ * Set `options.next.revalidate` to customise this.
  */
 export async function getGithubLastEdit({
   repo,
@@ -44,6 +47,7 @@ export async function getGithubLastEdit({
   options = {},
   params: customParams = {},
 }: GetGithubLastCommitOptions): Promise<Date | null> {
+  const headers = new Headers(options.headers);
   const params = new URLSearchParams();
   params.set('path', path);
   params.set('page', '1');
@@ -54,13 +58,16 @@ export async function getGithubLastEdit({
   }
 
   if (token) {
-    options.headers = new Headers(options.headers);
-    options.headers.append('authorization', token);
+    headers.append('authorization', token);
   }
 
   const res = await fetch(
     `https://api.github.com/repos/${owner}/${repo}/commits?${params.toString()}`,
-    options,
+    {
+      cache: 'force-cache',
+      ...options,
+      headers,
+    },
   );
 
   if (!res.ok)

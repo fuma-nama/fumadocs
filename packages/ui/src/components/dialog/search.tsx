@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/command';
 import { cn } from '@/utils/cn';
 import { useSearchContext } from '@/contexts/search';
+import { useSidebar } from '@/contexts/sidebar';
 
 export type SearchLink = [name: string, href: string];
 
@@ -80,6 +81,7 @@ function Search({
   const { text } = useI18n();
   const router = useRouter();
   const { setOpenSearch } = useSearchContext();
+  const sidebar = useSidebar();
 
   const items = results === 'empty' ? defaultItems : results;
   const hideList = results === 'empty' && defaultItems.length === 0;
@@ -87,6 +89,12 @@ function Search({
   const onOpen = (url: string): void => {
     router.push(url);
     setOpenSearch(false);
+
+    if (location.pathname === url.split('#')[0]) {
+      sidebar.setOpen(false);
+    } else {
+      sidebar.closeOnRedirect.current = true;
+    }
   };
 
   return (

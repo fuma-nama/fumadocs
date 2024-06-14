@@ -81,6 +81,18 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
           'background-color': `theme('colors.background')`,
           color: `theme('colors.foreground')`,
         },
+
+        '@screen md': {
+          '#nd-sidebar[data-collapse=true][data-hover=true]': {
+            transform: 'translateX(0)',
+          },
+          '#nd-sidebar[data-collapse=true][data-hover=false]': {
+            transform: 'translateX(calc(-100% - 1rem))',
+          },
+          '[dir=rtl] #nd-sidebar[data-collapse=true][data-hover=false]': {
+            transform: 'translateX(calc(100% + 1rem))',
+          },
+        },
       });
 
       if (css) addBase(css);
@@ -92,25 +104,22 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
         '.dark .nd-codeblock span': {
           color: 'var(--shiki-dark)',
         },
-        '.nd-codeblock': {
-          '& .line': {
-            'font-size': '13px',
-            'padding-left': `theme('spacing.4')`,
-            'padding-right': `theme('spacing.4')`,
-          },
-          '& .highlighted': {
-            width: '100%',
-            display: 'inline-block',
-            'background-color': `theme('colors.primary.DEFAULT / 10%')`,
-          },
-          '& .highlighted-word': {
-            padding: '1px 2px',
-            margin: '-1px -3px',
-            border: '1px solid',
-            'border-color': `theme('colors.primary.DEFAULT / 50%')`,
-            'background-color': `theme('colors.primary.DEFAULT / 10%')`,
-            'border-radius': '2px',
-          },
+        '.nd-codeblock code': {
+          display: 'grid',
+          'font-size': '13px',
+        },
+        '.nd-codeblock .highlighted': {
+          margin: '0 -16px',
+          padding: '0 16px',
+          'background-color': `theme('colors.primary.DEFAULT / 10%')`,
+        },
+        '.nd-codeblock .highlighted-word': {
+          padding: '1px 2px',
+          margin: '-1px -3px',
+          border: '1px solid',
+          'border-color': `theme('colors.primary.DEFAULT / 50%')`,
+          'background-color': `theme('colors.primary.DEFAULT / 10%')`,
+          'border-radius': '2px',
         },
       });
 

@@ -1,5 +1,185 @@
 # next-docs-ui
 
+## 12.0.6
+
+### Patch Changes
+
+- 056bad5: Improve default values
+- Updated dependencies [7a29b79]
+- Updated dependencies [b0c1242]
+  - fumadocs-core@12.0.6
+
+## 12.0.5
+
+### Patch Changes
+
+- 4455d58: Fix `bannerProps` being ignored
+  - fumadocs-core@12.0.5
+
+## 12.0.4
+
+### Patch Changes
+
+- 70666d8: Hide file name on breadcrumbs
+- f96da27: Improve design details
+- 51ca944: Support including separators in breadcrumbs
+- Updated dependencies [72dbaf1]
+- Updated dependencies [51ca944]
+  - fumadocs-core@12.0.4
+
+## 12.0.3
+
+### Patch Changes
+
+- 18928af: Improve mobile experience on Safari
+- Updated dependencies [053609d]
+  - fumadocs-core@12.0.3
+
+## 12.0.2
+
+### Patch Changes
+
+- Show TOC on mobile devices
+  - fumadocs-core@12.0.2
+
+## 12.0.1
+
+### Patch Changes
+
+- 21fe244: Redesign roll button
+- 547a61a: Use Menu for link items
+  - fumadocs-core@12.0.1
+
+## 12.0.0
+
+### Major Changes
+
+- 62b5abb: **New Layout**
+
+  - Remove navbar from docs layout, replace it with sidebar.
+  - On smaller devices, navbar is always shown.
+  - Remove exports of internal components, copying components from the repository is now the preferred way.
+
+  **migrate:** On layouts, Rename `nav.githubUrl` to `githubUrl`.
+  Modify your stylesheet if necessary.
+
+- 5741224: **Remove deprecated option `enableThemeProvider` from Root Provider**
+
+  **migrate:** Use `theme.enabled` instead.
+
+- 2f8b168: **Replace `<LanguageSelect />` component with `<LanguageToggle />`**
+
+  **migrate:**
+
+  Remove your `<LanguageSelect />` component from the layout. Enable the new language toggle with:
+
+  ```tsx
+  import { DocsLayout } from 'fumadocs-ui/layout';
+
+  export default function Layout({ children }: { children: React.ReactNode }) {
+    return <DocsLayout i18n>{children}</DocsLayout>;
+  }
+  ```
+
+### Minor Changes
+
+- d88dfa6: Support switching between page trees with `RootToggle` component
+
+### Patch Changes
+
+- c110040: Fix problems with twoslash codeblocks
+- 13a60b9: Heading support typography styles
+- 1fe0812: Support translation for theme label
+- Updated dependencies [98430e9]
+- Updated dependencies [d88dfa6]
+- Updated dependencies [ba20694]
+- Updated dependencies [57eb762]
+  - fumadocs-core@12.0.0
+
+## 11.3.2
+
+### Patch Changes
+
+- 1b8e12b: Use `display: grid` for codeblocks
+- Updated dependencies [1b8e12b]
+  - fumadocs-core@11.3.2
+
+## 11.3.1
+
+### Patch Changes
+
+- 10ab3e9: Fix sidebar opened by default
+  - fumadocs-core@11.3.1
+
+## 11.3.0
+
+### Minor Changes
+
+- 917d87f: Rename sidebar primitive `minWidth` prop to `blockScrollingWidth`
+
+### Patch Changes
+
+- 2a1211e: Support customising search dialog hotkeys
+- 9de31e6: Support `withArticle` for MDX Pages
+- Updated dependencies [917d87f]
+  - fumadocs-core@11.3.0
+
+## 11.2.2
+
+### Patch Changes
+
+- dd0feb2: Support customising sidebar background with opacity
+- 72096c3: Support customising theme options from root provider
+  - fumadocs-core@11.2.2
+
+## 11.2.1
+
+### Patch Changes
+
+- 8074920: Fix sidebar background width on dynamic sidebar
+  - fumadocs-core@11.2.1
+
+## 11.2.0
+
+### Minor Changes
+
+- 3292df1: Support sliding dynamic sidebar
+
+### Patch Changes
+
+- fumadocs-core@11.2.0
+
+## 11.1.3
+
+### Patch Changes
+
+- 2b95c89: Fix codeblock select highlight problems
+- cdc52ad: Improve page footer mobile responsibility
+- Updated dependencies [88008b1]
+- Updated dependencies [944541a]
+- Updated dependencies [07a9312]
+  - fumadocs-core@11.1.3
+
+## 11.1.2
+
+### Patch Changes
+
+- 58adab1: Improve theme & styles
+- ae88793: Improve page footer design
+  - fumadocs-core@11.1.2
+
+## 11.1.1
+
+### Patch Changes
+
+- 771314c: Use `sessionStorage` for non-persistent tabs
+- 8ef2b68: Bump deps
+- fa78241: Fix accordion text alignment
+- Updated dependencies [8ef2b68]
+- Updated dependencies [26f464d]
+- Updated dependencies [26f464d]
+  - fumadocs-core@11.1.1
+
 ## 11.1.0
 
 ### Minor Changes
@@ -323,8 +503,8 @@
   <I18nProvider
     translations={{
       cn: {
-        name: "Chinese", // required
-        search: "Translated Content",
+        name: 'Chinese', // required
+        search: 'Translated Content',
       },
     }}
   ></I18nProvider>
@@ -337,15 +517,15 @@
   migrate: Use `createPreset` instead
 
   ```js
-  const { createPreset } = require("fumadocs-ui/tailwind-plugin");
+  const { createPreset } = require('fumadocs-ui/tailwind-plugin');
 
   /** @type {import('tailwindcss').Config} */
   module.exports = {
     content: [
-      "./components/**/*.{ts,tsx}",
-      "./app/**/*.{ts,tsx}",
-      "./content/**/*.mdx",
-      "./node_modules/fumadocs-ui/dist/**/*.js",
+      './components/**/*.{ts,tsx}',
+      './app/**/*.{ts,tsx}',
+      './content/**/*.mdx',
+      './node_modules/fumadocs-ui/dist/**/*.js',
     ],
     presets: [createPreset()],
   };
@@ -358,7 +538,7 @@
   Before:
 
   ```tsx
-  import { CodeBlock, Pre } from "fumadocs-ui/mdx/pre";
+  import { CodeBlock, Pre } from 'fumadocs-ui/mdx/pre';
 
   <Pre title={title} allowCopy {...props} />;
   ```
@@ -366,7 +546,7 @@
   After:
 
   ```tsx
-  import { CodeBlock, Pre } from "fumadocs-ui/components/codeblock";
+  import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
 
   <CodeBlock title={title} allowCopy>
     <Pre {...props} />
@@ -487,14 +667,14 @@
   Add theme presets for the Tailwind CSS plugin, the default and ocean presets are available now.
 
   ```js
-  const { docsUi, docsUiPlugins } = require("next-docs-ui/tailwind-plugin");
+  const { docsUi, docsUiPlugins } = require('next-docs-ui/tailwind-plugin');
 
   /** @type {import('tailwindcss').Config} */
   module.exports = {
     plugins: [
       ...docsUiPlugins,
       docsUi({
-        preset: "ocean",
+        preset: 'ocean',
       }),
     ],
   };
@@ -530,7 +710,7 @@
   Same as Docs Layout but doesn't include a sidebar. It can be used outside of the docs, a page tree is not required.
 
   ```jsx
-  import { Layout } from "next-docs-ui/layout";
+  import { Layout } from 'next-docs-ui/layout';
 
   export default function HomeLayout({ children }) {
     return <Layout>{children}</Layout>;
@@ -587,16 +767,16 @@
   If you are using Tailwind CSS for your docs, it's now recommended to use the official plugin instead.
 
   ```js
-  const { docsUi, docsUiPlugins } = require("next-docs-ui/tailwind-plugin");
+  const { docsUi, docsUiPlugins } = require('next-docs-ui/tailwind-plugin');
 
   /** @type {import('tailwindcss').Config} */
   module.exports = {
-    darkMode: "class",
+    darkMode: 'class',
     content: [
-      "./components/**/*.{ts,tsx}",
-      "./app/**/*.{ts,tsx}",
-      "./content/**/*.mdx",
-      "./node_modules/next-docs-ui/dist/**/*.js",
+      './components/**/*.{ts,tsx}',
+      './app/**/*.{ts,tsx}',
+      './content/**/*.mdx',
+      './node_modules/next-docs-ui/dist/**/*.js',
     ],
     plugins: [...docsUiPlugins, docsUi],
   };

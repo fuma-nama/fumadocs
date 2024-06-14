@@ -1,3 +1,4 @@
+// @ts-check
 import createBundleAnalyzer from '@next/bundle-analyzer';
 import createMDX from 'fumadocs-mdx/config';
 import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins';
@@ -37,6 +38,10 @@ const withMDX = createMDX({
   },
   mdxOptions: {
     rehypeCodeOptions: {
+      themes: {
+        light: 'catppuccin-latte',
+        dark: 'catppuccin-mocha',
+      },
       transformers: [
         ...rehypeCodeDefaultOptions.transformers,
         transformerTwoslash(),

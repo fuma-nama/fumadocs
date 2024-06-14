@@ -1,15 +1,26 @@
 import type { PageTree } from 'fumadocs-core/server';
 import type { ReactNode, HTMLAttributes } from 'react';
-import type { NavProps } from './components/nav';
+import Link from 'next/link';
+import { MoreHorizontal } from 'lucide-react';
+import { cn } from '@/utils/cn';
+import type { NavProps } from './components/layout/nav';
 import { replaceOrDefault } from './utils/shared';
-import { cn } from './utils/cn';
-import type { SidebarProps } from './components/sidebar';
+import type { SidebarProps } from './components/layout/sidebar';
+
+declare const { Nav }: typeof import('./layout.client');
 
 declare const {
-  Nav,
   TreeContextProvider,
+  DynamicSidebar,
+  SubNav,
+  LinksMenu,
   Sidebar,
-}: typeof import('./layout.client');
+  ThemeToggle,
+}: typeof import('./docs.client');
+
+declare const {
+  LanguageToggle,
+}: typeof import('./components/layout/language-toggle');
 
 type ActiveType = 'none' | 'url' | 'nested-url';
 
@@ -47,15 +58,9 @@ export type LinkItemType =
       external?: boolean;
     };
 
-interface NavOptions
-  extends Omit<NavProps, 'enableSidebar' | 'collapsibleSidebar' | 'items'> {
+interface NavOptions extends Omit<NavProps, 'items'> {
   enabled: boolean;
   component: ReactNode;
-
-  /**
-   * GitHub url displayed on the navbar
-   */
-  githubUrl: string;
 }
 
 interface SidebarOptions extends Omit<SidebarProps, 'items'> {
@@ -65,13 +70,18 @@ interface SidebarOptions extends Omit<SidebarProps, 'items'> {
 }
 
 export interface BaseLayoutProps {
+  /**
+   * GitHub url
+   */
+  githubUrl?: string;
+
   links?: LinkItemType[];
   /**
    * Replace or disable navbar
    */
   nav?: Partial<NavOptions>;
 
-  children: ReactNode;
+  children?: ReactNode;
 }
 
 export interface DocsLayoutProps extends BaseLayoutProps {
@@ -80,20 +90,28 @@ export interface DocsLayoutProps extends BaseLayoutProps {
   sidebar?: Partial<SidebarOptions>;
 
   containerProps?: HTMLAttributes<HTMLDivElement>;
+
+  /**
+   * Enable Language Switch
+   *
+   * @defaultValue false
+   */
+  i18n?: boolean;
 }
 
 export function Layout({
   nav = {},
   links = [],
+  githubUrl,
   children,
 }: BaseLayoutProps): React.ReactElement {
-  const finalLinks = getLinks(links, nav.githubUrl);
+  const finalLinks = getLinks(links, githubUrl);
 
   return (
     <>
       {replaceOrDefault(
         nav,
-        <Nav items={finalLinks} enableSidebar={false} {...nav}>
+        <Nav items={finalLinks} {...nav}>
           {nav.children}
         </Nav>,
       )}
@@ -103,40 +121,68 @@ export function Layout({
 }
 
 export function DocsLayout({
-  nav = {},
-  sidebar = {},
+  nav,
+  githubUrl,
+  sidebar: {
+    enabled: sidebarEnabled = true,
+    collapsible = true,
+    component: sidebarReplace,
+    ...sidebar
+  } = {},
   links = [],
   containerProps,
   tree,
+  i18n = false,
   children,
 }: DocsLayoutProps): React.ReactElement {
-  const sidebarEnabled = sidebar.enabled ?? true;
-  const sidebarCollapsible = sidebarEnabled && (sidebar.collapsible ?? true);
-  const finalLinks = getLinks(links, nav.githubUrl);
+  const finalLinks = getLinks(links, githubUrl);
+  const Aside = sidebarEnabled && collapsible ? DynamicSidebar : Sidebar;
 
   return (
     <TreeContextProvider tree={tree}>
-      {replaceOrDefault(
-        nav,
-        <Nav items={finalLinks} enableSidebar={sidebarEnabled} {...nav}>
-          {nav.children}
-        </Nav>,
-      )}
+      {replaceOrDefault(nav, <SubNav {...nav} />)}
       <div
         {...containerProps}
-        className={cn(
-          'mx-auto flex w-full max-w-container flex-row gap-6 px-4 xl:gap-12',
-          containerProps?.className,
-        )}
+        className={cn('flex flex-1 flex-row', containerProps?.className)}
       >
         {replaceOrDefault(
-          sidebar,
-          <Sidebar
+          { enabled: sidebarEnabled, component: sidebarReplace },
+          <Aside
+            {...sidebar}
             items={finalLinks}
-            defaultOpenLevel={sidebar.defaultOpenLevel}
-            banner={sidebar.banner}
-            footer={sidebar.footer}
-            collapsible={sidebarCollapsible}
+            banner={
+              <>
+                <div className="flex flex-row items-center justify-between border-b pb-2 max-md:hidden">
+                  <Link
+                    href={nav?.url ?? '/'}
+                    className="inline-flex items-center gap-2.5 font-medium"
+                  >
+                    {nav?.title}
+                  </Link>
+                  {finalLinks.length > 0 && (
+                    <LinksMenu items={finalLinks}>
+                      <MoreHorizontal />
+                    </LinksMenu>
+                  )}
+                </div>
+
+                {sidebar.banner}
+              </>
+            }
+            bannerProps={{
+              className: cn(
+                !sidebar.banner && 'max-md:hidden',
+                sidebar.bannerProps?.className,
+              ),
+              ...sidebar.bannerProps,
+            }}
+            footer={
+              <>
+                <ThemeToggle className="me-auto" />
+                {sidebar.footer}
+                {i18n ? <LanguageToggle /> : null}
+              </>
+            }
           />,
         )}
 

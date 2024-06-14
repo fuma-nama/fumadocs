@@ -8,5 +8,6 @@
   "baseBranch": "dev",
   "updateInternalDependencies": "patch",
   "privatePackages": { "version": false },
+  "bumpVersionsWithWorkspaceProtocolOnly": true,
   "ignore": ["docs", "example-*"]
 }

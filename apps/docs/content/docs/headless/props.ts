@@ -4,8 +4,11 @@ import type * as Server from 'fumadocs-core/server';
 import type * as Sidebar from 'fumadocs-core/sidebar';
 import type { SortedResult as OriginalSortedResult } from 'fumadocs-core/search/shared';
 import type { ComponentPropsWithoutRef, ElementType } from 'react';
+import type * as MDX from 'fumadocs-core/mdx-plugins';
 
 export type SortedResult = OriginalSortedResult;
+
+export type StructureOptions = MDX.StructureOptions;
 
 export type BreadcrumbItem = Breadcrumb.BreadcrumbItem;
 

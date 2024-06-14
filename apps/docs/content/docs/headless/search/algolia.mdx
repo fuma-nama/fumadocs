@@ -10,13 +10,12 @@ description: Integrate Algolia Search with Fumadocs
 
 ## Indexing
 
-The default behavior creates a record for each paragraph in your document which
+The default behavior creates a record for each paragraph in your document, it is
 officially recommended by Algolia.
 
 Each record contains searchable attributes `title`, `section`, and `content`.
-`section` is optional, it only exists in paragraphs under headings. Headings and
-paragraphs are all indexed as a record, and the distinct attribute is
-`page_id`.
+`section` is optional, it only exists in paragraphs under a heading. Headings and
+paragraphs are all indexed as an individual record, grouped by their `page_id`.
 
 ## Setup
 
@@ -49,7 +48,7 @@ import { structure } from 'fumadocs-core/mdx-plugins'
 const client = algosearch(...)
 
 sync(client, {
-  documents: indexes // [!code highlight]
+    documents: indexes // [!code highlight]
 })
 ```
 

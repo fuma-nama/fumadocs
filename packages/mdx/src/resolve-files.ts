@@ -1,5 +1,5 @@
 import path from 'node:path';
-import type { AnyZodObject, z } from 'zod';
+import type { AnyZodObject, z, ZodError } from 'zod';
 import type { VirtualFile } from 'fumadocs-core/source';
 import type { MDXExport, MDXPageData } from './types';
 import { defaultSchemas } from './utils/schema';
@@ -13,7 +13,7 @@ interface ResolveOptions {
   rootDir?: string;
 
   /**
-   * Zod schema for frontmatter/meta objects, transform allowed
+   * Zod schema for frontmatter/meta, transform allowed
    */
   schema?: SchemaOptions;
 }
@@ -26,6 +26,24 @@ export interface SchemaOptions<
   meta?: Meta;
 }
 
+class DataError extends Error {
+  constructor(name: string, error: ZodError) {
+    const info = error.flatten();
+
+    super(
+      `${name}: ${JSON.stringify(
+        {
+          root: info.formErrors,
+          ...info.fieldErrors,
+        },
+        null,
+        2,
+      )}`,
+    );
+    this.name = 'DataError';
+  }
+}
+
 function parse<T extends AnyZodObject>(
   schema: T,
   object: unknown,
@@ -34,7 +52,7 @@ function parse<T extends AnyZodObject>(
   const result = schema.safeParse(object);
 
   if (!result.success) {
-    throw new Error(`Invalid ${errorName}: ${result.error.toString()}`);
+    throw new DataError(errorName, result.error);
   }
 
   return result.data;
@@ -55,7 +73,11 @@ export function resolveFiles({
       outputs.push({
         type: 'meta',
         path: file,
-        data: parse(schema.meta ?? defaultSchemas.meta, value, file),
+        data: parse(
+          schema.meta ?? defaultSchemas.meta,
+          value,
+          `Invalid meta file in ${file}`,
+        ),
       });
 
       continue;
@@ -66,7 +88,7 @@ export function resolveFiles({
       const parsedFrontmatter = parse(
         schema.frontmatter ?? defaultSchemas.frontmatter,
         frontmatter,
-        file,
+        `Invalid Frontmatter in ${file}`,
       );
 
       outputs.push({

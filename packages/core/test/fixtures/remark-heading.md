@@ -21,3 +21,7 @@ Some text here
 ### Custom heading id hello-world]
 
 Some text here
+
+### `code` here
+
+hi

@@ -3,27 +3,27 @@
 @tailwind utilities;
 
 .ui {
-  --primary: 220deg 91% 54%;
-}
-
-.dark .ui {
-  --primary: 217deg 92% 76%;
+  --primary: var(--ui-color);
 }
 
 .headless {
-  --primary: 250 80% 30%;
-}
-
-.dark .headless {
-  --primary: 250 100% 80%;
+  --primary: var(--headless-color);
 }
 
 .mdx {
-  --primary: 0 0% 9%;
+  --primary: var(--mdx-color);
 }
 
-.dark .mdx {
-  --primary: 0 0% 100%;
+:root {
+  --headless-color: 250 80% 54%;
+  --mdx-color: 0 0% 9%;
+  --ui-color: 220deg 91% 54%;
+}
+
+.dark {
+  --headless-color: 250 100% 80%;
+  --mdx-color: 0 0% 100%;
+  --ui-color: 217deg 92% 76%;
 }
 
 .uwu {

@@ -1,6 +1,6 @@
-/* eslint-disable import/no-relative-packages -- read package versions */
 import path from 'node:path';
 import fs from 'node:fs/promises';
+import localVersions from '../versions.json';
 import versionPkg from '../../create-app-versions/package.json';
 import type { PackageManager } from './auto-install';
 import { autoInstall } from './auto-install';
@@ -20,7 +20,7 @@ export async function create(options: Options): Promise<void> {
   const projectName = path.basename(options.outputDir);
   const dest = path.resolve(cwd, options.outputDir);
   await copy(path.join(sourceDir, `template/${options.template}`), dest);
-  await copy(path.join(sourceDir, `template/+content`), dest, (name) => {
+  await copy(path.join(sourceDir, `template/+shared`), dest, (name) => {
     switch (name) {
       case 'example.gitignore':
         return '.gitignore';
@@ -88,8 +88,8 @@ function createPackageJson(
     },
     dependencies: {
       next: versionPkg.dependencies.next,
-      'fumadocs-ui': versionPkg.dependencies['fumadocs-ui'],
-      'fumadocs-core': versionPkg.dependencies['fumadocs-core'],
+      'fumadocs-ui': localVersions['fumadocs-ui'],
+      'fumadocs-core': localVersions['fumadocs-core'],
       react: versionPkg.dependencies.react,
       'react-dom': versionPkg.dependencies['react-dom'],
     },
@@ -102,7 +102,7 @@ function createPackageJson(
 
   if (template === 'contentlayer') {
     Object.assign(packageJson.dependencies, {
-      'fumadocs-contentlayer': versionPkg.dependencies['fumadocs-contentlayer'],
+      'fumadocs-contentlayer': localVersions['fumadocs-contentlayer'],
       contentlayer: versionPkg.dependencies.contentlayer,
       'next-contentlayer': versionPkg.dependencies['next-contentlayer'],
     });
@@ -115,7 +115,7 @@ function createPackageJson(
 
   if (template === 'fuma-docs-mdx') {
     Object.assign(packageJson.dependencies, {
-      'fumadocs-mdx': versionPkg.dependencies['fumadocs-mdx'],
+      'fumadocs-mdx': localVersions['fumadocs-mdx'],
     });
 
     Object.assign(packageJson.devDependencies, {

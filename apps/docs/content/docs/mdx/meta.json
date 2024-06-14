@@ -1,5 +1,18 @@
 {
   "title": "mdx",
   "root": true,
-  "pages": ["---Guide---", "index", "..."]
+  "pages": [
+    "---Guide---",
+    "index",
+    "...",
+    "---Features---",
+    "last-modified",
+    "image",
+    "search-index",
+    "---Schema---",
+    "validation",
+    "multiple-types",
+    "---Reference---",
+    "../headless/page-conventions"
+  ]
 }

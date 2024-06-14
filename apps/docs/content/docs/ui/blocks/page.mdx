@@ -16,16 +16,11 @@ import { DocsPage, DocsBody } from 'fumadocs-ui/page';
 </DocsPage>
 ```
 
-```json doc-gen:typescript
-{
-  "file": "./content/docs/ui/props.ts",
-  "name": "PageProps"
-}
-```
-
 ### Body
 
-To apply the [Typography](/docs/ui/theme#typography) styles, wrap your content in the `DocsBody` component.
+It applies the [Typography](/docs/ui/theme#typography) styles, wrap your content inside.
+
+> You can use this component without `<DocsPage />`.
 
 ```mdx
 import { DocsBody } from 'fumadocs-ui/page';
@@ -39,9 +34,19 @@ import { DocsBody } from 'fumadocs-ui/page';
 
 It is an array with all the headings in your document. For Markdown or MDX
 documents, You can parse TOC by using the
-[TOC Utility](/docs/headless/utils/get-toc). Some source providers may offer this out-of-the-box.
+[TOC Utility](/docs/headless/utils/get-toc). Some content sources may offer this out-of-the-box.
 
-In addition, you can easily customise or disable TOC in your documentation.
+You can easily customise or disable TOC in your documentation.
+
+```mdx
+import { DocsPage } from 'fumadocs-ui/page';
+
+<DocsPage toc={headings} tableOfContent={options}>
+  ...
+</DocsPage>
+```
+
+#### Options
 
 ```json doc-gen:typescript
 {
@@ -59,13 +64,17 @@ default.
 For Github hosted documents, you can use
 the [Git Last Modified](/docs/headless/utils/git-last-edit) utility.
 
-```tsx
-<DocsPage lastUpdate={new Date(lastModifiedTime)} />
+```jsx
+import { DocsPage } from 'fumadocs-ui/page';
+
+<DocsPage lastUpdate={new Date(lastModifiedTime)} />;
 ```
 
 ### Footer
 
-Footer is a navigation element that has two buttons to jump to the next and previous pages. By default, it finds the neighbour pages from page tree.
+Footer is a navigation element that has two buttons to jump to the next and previous pages. When not specified, it shows the neighbour pages found from page tree.
+
+You can also customise it with `items` prop.
 
 ```json doc-gen:typescript
 {
@@ -76,9 +85,23 @@ Footer is a navigation element that has two buttons to jump to the next and prev
 
 ### Breadcrumb
 
+A navigation element, shown only when user is navigating in folders.
+
 ```json doc-gen:typescript
 {
   "file": "./content/docs/ui/props.ts",
   "name": "BreadcrumbProps"
 }
 ```
+
+### MDX Page
+
+In conjunction of Fumadocs MDX, you may create a `page.mdx` file and add the following.
+
+```mdx
+export { withArticle as default } from 'fumadocs-ui/page';
+
+## Hello World
+```
+
+This creates a page with MDX, with proper typography styles applied.

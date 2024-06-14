@@ -1,8 +1,7 @@
 import { match as matchLocale } from '@formatjs/intl-localematcher';
 import Negotiator from 'negotiator';
 import type { NextMiddleware } from 'next/dist/server/web/types';
-import type { NextRequest } from 'next/server';
-import nextLib from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 
 interface MiddlewareOptions {
   languages: string[];
@@ -34,6 +33,11 @@ const defaultFormat: NonNullable<MiddlewareOptions['format']> = (
   return `/${locale}/${path}`;
 };
 
+/**
+ * @param languages - Supported locale codes
+ * @param defaultLanguage - Default local if not specified
+ * @param format - A function that returns the redirected url with locale code
+ */
 export function createI18nMiddleware({
   languages,
   defaultLanguage,
@@ -55,11 +59,9 @@ export function createI18nMiddleware({
         path = path.slice(1);
       }
 
-      return nextLib.NextResponse.redirect(
-        new URL(format(locale, path), request.url),
-      );
+      return NextResponse.redirect(new URL(format(locale, path), request.url));
     }
 
-    return nextLib.NextResponse.next();
+    return NextResponse.next();
   };
 }

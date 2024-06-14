@@ -25,7 +25,9 @@ export interface FileInfo {
 export function parseFilePath(path: string): FileInfo {
   const normalized = normalizePath(path);
   const parsed = parse(normalized);
-  const flattenedPath = joinPaths([parsed.dir, parsed.name]);
+  const flattenedPath = [parsed.dir, parsed.name]
+    .filter((p) => p.length > 0)
+    .join('/');
   const [name, locale] = parsed.name.split('.');
 
   return {
@@ -60,7 +62,7 @@ export function normalizePath(path: string): string {
   const segments = splitPath(slash(path));
   if (segments[0] === '.' || segments[0] === '..')
     throw new Error("It must not start with './' or '../'");
-  return joinPaths(segments);
+  return segments.join('/');
 }
 
 /**
@@ -71,32 +73,34 @@ export function splitPath(path: string): string[] {
 }
 
 /**
- * Convert paths to an array, slashes within the path will be ignored
- * @param paths - Paths to join
- * @param slashMode - whether to add a trailing/leading slash to path
+ * Resolve paths, slashes within the path will be ignored
+ * @param from - Path to resolve from
+ * @param join - Paths to resolve
  * @example
  * ```
- * ['a','b','c'] // 'a/b/c'
+ * ['a','b'] // 'a/b'
  * ['/a'] // 'a'
  * ['a', '/b'] // 'a/b'
- * ['a', 'b/c'] // 'a/b/c'
+ * ['a', '../b/c'] // 'b/c'
  * ```
  */
-export function joinPaths(
-  paths: string[],
-  slashMode: 'leading' | 'trailing' | 'none' = 'none',
-): string {
-  const joined = paths
-    // avoid slashes in path and filter empty
-    .flatMap((path) => splitPath(path))
-    .join('/');
+export function resolvePath(from: string, join: string): string {
+  const v1 = splitPath(from),
+    v2 = splitPath(join);
 
-  switch (slashMode) {
-    case 'leading':
-      return `/${joined}`;
-    case 'trailing':
-      return `${joined}/`;
-    default:
-      return joined;
+  while (v2.length > 0) {
+    switch (v2[0]) {
+      case '..':
+        v1.pop();
+        break;
+      case '.':
+        break;
+      default:
+        v1.push(v2[0]);
+    }
+
+    v2.shift();
   }
+
+  return v1.join('/');
 }

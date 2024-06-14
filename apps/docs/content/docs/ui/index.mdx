@@ -4,11 +4,29 @@ description: Getting Started with Fumadocs
 icon: Album
 ---
 
-Fumadocs UI is the built-in user interface integration for Fumadocs, built on the top of Radix UI.
+## Introduction
+
+Fumadocs can be broken down into two parts: Core and UI.
+
+**Core** handles most of the logic, from search functionality, to MDX plugins.
+
+**Fumadocs UI** is the official user interface for Fumadocs.
+
+### Terminology
+
+For a better understanding of the docs, there are some common terminologies you should know:
+
+**Content Source:** The source of your content. Fumadocs MDX, CMS and Contentlayer are examples of content source.
+
+**Page Tree:** A tree of all the pages, separators and folders. It is essential for navigation elements. See [Page Tree](/docs/headless/page-tree).
+
+**MDX File & Page:** A MDX file could be located in a folder, or available remotely. Instead, MDX Page is only referring to `page.mdx`, which is already a page on its own.
+
+You might need to be familiar with Next.js App Router to continue.
 
 ## Automatic Installation
 
-Create a new app with `create-fumadocs-app`.
+Create a new app with `create-fumadocs-app`, it requires Node.js 18+.
 
 <InstallTabs items={['npm', 'pnpm', 'yarn', 'bun']}>
     <Tab value='npm'>
@@ -42,119 +60,18 @@ bun create fumadocs-app
 
 </InstallTabs>
 
-## Manual Installation
+It will ask you the following questions:
 
-Create a new Next.js application with `create-next-app`, and install required packages.
+- Which content source to use? (Recommended: Fumadocs MDX)
+- Configure Tailwind CSS?
+- Install dependencies?
 
-```package-install
-fumadocs-ui fumadocs-core
-```
+After that, it will initialize a new fumadocs app.
+Now you can start hacking!
 
-### Configuration
+### Enjoy!
 
-Fumadocs UI is unopinionated and doesn't include content management features by default.
-You can choose a source you prefer, such as Contentlayer and Fumadocs MDX.
-
-There is a list of supported sources:
-
-- [Setup Fumadocs MDX](/docs/mdx)
-- [Setup Contentlayer](/docs/headless/contentlayer)
-
-You have to configure the library correctly following their setup guide before continuing.
-
-### Styles
-
-You can import the pre-built stylesheet in the root layout.
-
-```ts
-import 'fumadocs-ui/style.css';
-```
-
-For Tailwind CSS projects, you may use [the official plugin](/docs/ui/theme) instead.
-
-> It doesn't come with a default font, you may choose one from `next/font`.
-
-### Root Layout
-
-Wrap the entire application inside [Root Provider](/docs/ui/blocks/root-provider).
-
-```tsx
-import { RootProvider } from 'fumadocs-ui/provider';
-import type { ReactNode } from 'react';
-
-export default function RootLayout({ children }: { children: ReactNode }) {
-  return (
-    <html lang="en">
-      <body>
-        <RootProvider>{children}</RootProvider>
-      </body>
-    </html>
-  );
-}
-```
-
-### Layout
-
-Create a new catch-all route for our docs, and give it a proper layout.
-
-```tsx title="app/docs/layout.tsx"
-import { DocsLayout } from 'fumadocs-ui/layout';
-import type { ReactNode } from 'react';
-
-export default function RootDocsLayout({ children }: { children: ReactNode }) {
-  return (
-    <DocsLayout tree={tree} nav={{ title: 'My App' }}>
-      {children}
-    </DocsLayout>
-  );
-}
-```
-
-> `tree` refers to [Page Tree](/docs/headless/page-tree), which should be provided by your data source.
-
-### Page
-
-For the `page.tsx`, it may vary depending on your source. You should manually configure static rendering with `generateStaticParams` and metadata with `generateMetadata`.
-
-Make sure to wrap your content in the [Page](/docs/ui/blocks/page) component, this will also configure typography styles.
-
-<Accordions>
-<Accordion title="Example with Fumadocs MDX">
-
-```json doc-gen:file
-{
-  "file": "../../examples/next-mdx/app/docs/[[...slug]]/page.tsx",
-  "codeblock": {
-    "meta": "title=\"app/docs/[[...slug]]/page.tsx\""
-  }
-}
-```
-
-</Accordion>
-</Accordions>
-
-### Search
-
-By default, it uses the built-in document search based on Flexsearch. [Learn to configure Document Search](/docs/headless/search/flexsearch) for your data source.
-
-<Accordions>
-<Accordion title="Example with Fumadocs MDX">
-
-```json doc-gen:file
-{
-  "file": "../../examples/next-mdx/app/api/search/route.ts",
-  "codeblock": {
-    "meta": "title=\"app/api/search/route.ts\""
-  }
-}
-```
-
-</Accordion>
-</Accordions>
-
-## Enjoy!
-
-Now, Create your first mdx file in the docs folder.
+Create your first mdx file in the docs folder.
 
 ```mdx title="content/docs/index.mdx"
 ---
@@ -166,23 +83,59 @@ title: Hello World
 
 Run the app in development mode and see http://localhost:3000/docs.
 
-```bash
+```package-install
 npm run dev
 ```
 
-### FAQ
+## FAQ
+
+Some common questions you may encounter.
 
 <Accordions>
     <Accordion id='why-fumadocs-ui' title="Why Fumadocs UI?">
 
-        Fumadocs UI provides many built-in components, and is more flexible compared to
-        other existing frameworks.
-
-        And most importantly, it is compatible with Next.js App Router which results in
-        a faster page load speed with ~120kb initial Javascript load. You can easily use
-        Fumadocs in an existing Next.js project, without refactoring anything.
-
         Feel free to open the demo in CodeSandbox and see if it suits you.
+
+        - Many built-in components
+        - Integrations with Typescript Twoslash, OpenAPI, Math
+        - Flexible and Fast by default
+        - Built on App Router
+        - Use it in an existing Next.js project, without refactoring anything.
+    </Accordion>
+    <Accordion id='customise' title='How to Customise UI?'>
+
+        Fumadocs UI offers Themes, Blocks and Components.
+
+        The design system is built with Tailwind CSS, see [Themes](/docs/ui/theme).
+
+        Components are pre-built elements to enhance your documentation,
+        they are customisable with exposed props like `style` and `className`.
+
+        Blocks are essential elements of docs, providing navigation and basic functionality.
+        We provided many options to customise them, see the **Blocks** section of the docs.
+
+        Although the docs didn't explicitly mention, you can always style the elements with CSS selectors.
+
+    </Accordion>
+    <Accordion id='fix-monorepo-styling' title="How to fix stylings not being applied in Monorepo?">
+
+        Sometimes, `fumadocs-ui` is not installed in the workspace of your Tailwind CSS configuration file. (e.g. a monorepo setup).
+
+        When using the official Tailwind CSS plugin, it will not be able to find the files from `fumadocs-ui`
+        package which contains all styling.
+
+        To fix this, edit the Tailwind CSS configuration and replace `./node_modules` with `../../node_modules` in the `content` section.
+
+        ```diff
+        export default {
+          content: [
+        -   './node_modules/fumadocs-ui/dist/**/*.js',
+        +   '../../node_modules/fumadocs-ui/dist/**/*.js',
+            './components/**/*.{ts,tsx}',
+            ...
+          ],
+        }
+        ```
 
     </Accordion>
     <Accordion id='fix-supports-color' title="How to fix 'supports-color' error?">
@@ -193,7 +146,7 @@ npm run dev
         Module not found: Can't resolve 'supports-color' in '.../node_modules/debug/src'
         ```
 
-        Try installing `supports-color@8.1.1`.
+        This error sometimes appear when you are using ContentLayer, usually installing `supports-color@8.1.1` can fix the problem.
 
     </Accordion>
     <Accordion id='fix-dot-map-error' title="How to fix '@/.map' error?">
@@ -203,23 +156,32 @@ npm run dev
         For more information, see [Setup Guide](/docs/mdx).
 
     </Accordion>
+    <Accordion id='dynamic-route' title="It uses Dynamic Route, will it be poor in performance?">
+
+        Next.js turns dynamic route into static routes when `generateStaticParams` is configured.
+        Hence, it is as fast as static pages.
+
+    </Accordion>
     <Accordion id='blog-usage' title="Can I use it for Blog?">
 
         The answer is yes.
 
         Fumadocs is built for documentation sites, yet, it is very flexible.
-        You can use the `DocsBody` component to apply typography styles and leverage the built-in remark/rehype plugins.
-        Besides, the `Layout` component allows you to share the navbar between other pages.
+        You can re-use the typography styles and leverage its built-in remark/rehype plugins.
+        Check our [blog](/blog), it is also built with Fumadocs.
 
+    </Accordion>
+    <Accordion id='pronunciation' title='How to say Fumadocs?'>
+        Fumadocs (Foo-ma docs).
     </Accordion>
 
 </Accordions>
 
-### Demo
-
-Open in [CodeSandbox](https://githubbox.com/fuma-nama/fumadocs-ui-template).
-
 ## Learn More
+
+New to here? Don't worry, we are welcome for your questions.
+
+If you find anything confusing, please give your feedback on [Github Discussion](https://github.com/fuma-nama/fumadocs/discussions)!
 
 <Cards>
   <Card
@@ -238,8 +200,8 @@ Open in [CodeSandbox](https://githubbox.com/fuma-nama/fumadocs-ui-template).
     description="Add themes to Fumadocs UI"
   />
   <Card
-    href="/docs/ui/components/codeblock"
-    title="Code Block"
-    description="Learn how to use code blocks in MDX"
+    href="/docs/ui/manual-installation"
+    title="Manual Installation"
+    description="Create fumadocs app from scratch"
   />
 </Cards>

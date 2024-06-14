@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-core",
-  "version": "11.1.0",
+  "version": "12.0.6",
   "description": "The library for building a documentation website in Next.js",
   "keywords": [
     "NextJs",
@@ -23,6 +23,10 @@
     "./toc": {
       "import": "./dist/toc.js",
       "types": "./dist/toc.d.ts"
+    },
+    "./toc-internal": {
+      "import": "./dist/toc-internal.js",
+      "types": "./dist/toc-internal.d.ts"
     },
     "./search/client": {
       "import": "./dist/search/client.js",
@@ -76,6 +80,9 @@
       "toc": [
         "./dist/toc.d.ts"
       ],
+      "toc-internal": [
+        "./dist/toc-internal.d.ts"
+      ],
       "search/client": [
         "./dist/search/client.d.ts"
       ],
@@ -120,8 +127,8 @@
   },
   "dependencies": {
     "@formatjs/intl-localematcher": "^0.5.4",
-    "@shikijs/rehype": "^1.5.2",
-    "@shikijs/transformers": "^1.5.2",
+    "@shikijs/rehype": "^1.6.4",
+    "@shikijs/transformers": "^1.6.4",
     "flexsearch": "0.7.21",
     "github-slugger": "^2.0.0",
     "hast-util-to-estree": "^3.1.0",
@@ -132,7 +139,7 @@
     "remark-gfm": "^4.0.0",
     "remark-mdx": "^3.0.1",
     "scroll-into-view-if-needed": "^3.1.0",
-    "shiki": "^1.5.2",
+    "shiki": "^1.6.4",
     "swr": "^2.2.5",
     "unist-util-visit": "^5.0.0"
   },
@@ -142,14 +149,14 @@
     "@types/estree-jsx": "^1.0.5",
     "@types/flexsearch": "0.7.6",
     "@types/hast": "^3.0.4",
-    "@types/mdast": "^4.0.4",
+    "@types/mdast": "^4.0.3",
     "@types/negotiator": "^0.6.3",
     "@types/node": "18.17.5",
-    "@types/react": "^18.3.2",
+    "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "algoliasearch": "^4.23.3",
     "eslint-config-custom": "workspace:*",
-    "next": "^14.2.3",
+    "next": "^14.2.4",
     "tsconfig": "workspace:*",
     "unified": "^11.0.4"
   },

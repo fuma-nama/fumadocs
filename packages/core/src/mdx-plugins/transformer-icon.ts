@@ -151,7 +151,7 @@ export function transformerIcon(options: IconOptions = {}): ShikiTransformer {
       if (!lang) return;
 
       const pre = root.children[0];
-      if (pre.type !== 'element') return;
+      if (pre.type !== 'element' || pre.tagName !== 'pre') return;
 
       const iconName = lang in shortcuts ? shortcuts[lang] : lang;
       const icon = iconName in icons ? icons[iconName] : icons.default;

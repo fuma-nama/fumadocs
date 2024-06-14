@@ -35,13 +35,66 @@ export function Provider({ children }: { children: React.ReactNode }) {
 }
 ```
 
-By default, your dialog will be lazy loaded using
+The default dialog will be lazy loaded using
 [`next/dynamic`](https://nextjs.org/docs/app/building-your-application/optimizing/lazy-loading).
 This allows a better initial loading performance.
 
-When not specified, it uses the [Built-in Search Client](/docs/headless/search/flexsearch) based on Flexsearch.
+When not specified, it uses the [Default Search Client](/docs/headless/search/flexsearch) powered by Flexsearch.
 
-### Algolia
+### Custom Links
+
+Add custom link items to search dialog.
+They are shown as fallbacks when the query is empty.
+
+```jsx
+import { RootProvider } from 'fumadocs-ui/root-provider';
+
+<RootProvider
+  search={{
+    links: [
+      ['Home', '/'],
+      ['Docs', '/docs'],
+    ],
+  }}
+>
+  ...
+</RootProvider>;
+```
+
+### Disable Search
+
+To opt-out of document search, disable it from root provider.
+
+```mdx
+<RootProvider
+  search={{
+    enable: false,
+  }}
+>
+  {children}
+</RootProvider>
+```
+
+### Hot Keys
+
+You can customise the hot keys to trigger search dialog.
+
+```mdx
+<RootProvider
+  search={{
+    hotKey: [
+      {
+        display: 'K',
+        key: 'k', // key code, or a function determining whether the key is pressed
+      },
+    ],
+  }}
+>
+  {children}
+</RootProvider>
+```
+
+## Algolia
 
 For the setup guide, see [Integrate Algolia Search](/docs/headless/search/algolia). Make sure you have `algoliasearch` installed on your project.
 
@@ -96,16 +149,12 @@ javascript client).
 
 </Callout>
 
-### Other Solutions
+## Other Solutions
 
-If you want to use other solutions such as ElasticSearch, you can replace the
+To use other search solutions such as ElasticSearch, you can replace the
 default dialog with your own.
 
-<Callout title="Tip" className="mb-4">
-  You can lazy load the dialog with `next/dynamic`.
-</Callout>
-
-### Built-in UI
+## Built-in UI
 
 If you want to use the built-in search dialog UI instead of building your own,
 you may use the `SearchDialog` component.

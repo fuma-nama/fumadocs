@@ -1,5 +1,5 @@
 ---
-title: Structurize
+title: Remark Structure
 description: Extract information from your documents, useful for implementing document search
 ---
 
@@ -20,9 +20,12 @@ write your own plugin to convert it into a MDX export.
 
 ### Options
 
-| Option  |                                   |
-| ------- | --------------------------------- |
-| `types` | mdast element types to be scanned |
+```json doc-gen:typescript
+{
+  "name": "StructureOptions",
+  "file": "./content/docs/headless/props.ts"
+}
+```
 
 ### Output
 
@@ -57,8 +60,7 @@ structure(page.body.raw);
 
 <Callout title="Tip" className="mt-4">
 If you have custom remark plugins enabled, such as
-`remark-math`, you have to manually structurize the document with these
-plugins passed into the function:
+`remark-math`, you have to pass these plugins to the function. This avoids unreadable content on paragraphs.
 
 ```ts
 import { structure } from 'fumadocs-core/mdx-plugins';

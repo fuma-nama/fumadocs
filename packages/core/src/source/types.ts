@@ -28,12 +28,16 @@ export type InferMetaType<Utils extends LoaderOutput<any>> =
 /**
  * @internal
  */
+export type UrlFn = (slugs: string[], locale?: string) => string;
+
+/**
+ * @internal
+ */
 export interface FileData {
   meta: {
     data: MetaData;
   };
   file: {
-    url: string;
     slugs: string[];
     data: PageData;
   };

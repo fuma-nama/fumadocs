@@ -18,12 +18,9 @@ import { mergeRefs } from '@/utils/merge-refs';
 import { useAnchorObserver } from './utils/use-anchor-observer';
 
 const ActiveAnchorContext = createContext<{
-  activeAnchor: string | undefined;
-  containerRef: RefObject<HTMLElement>;
-}>({
-  activeAnchor: undefined,
-  containerRef: { current: null },
-});
+  activeAnchor?: string;
+  containerRef?: RefObject<HTMLElement>;
+}>({});
 
 export const useActiveAnchor = (url: string): boolean => {
   const { activeAnchor } = useContext(ActiveAnchorContext);
@@ -36,11 +33,16 @@ export interface TOCProviderProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 export interface TOCScrollProvider {
-  containerRef: RefObject<HTMLElement>;
+  /**
+   * Scroll into the view of container when active
+   */
+  containerRef?: RefObject<HTMLElement>;
+
   toc: TableOfContents;
   children: ReactNode;
 }
 
+// todo: remove in next major
 export const TOCProvider = forwardRef<HTMLDivElement, TOCProviderProps>(
   ({ toc, ...props }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -78,11 +80,16 @@ export function TOCScrollProvider({
 
 export interface TOCItemProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
   href: string;
+
+  /**
+   * Scroll into the view of container when active
+   */
+  containerRef?: RefObject<HTMLElement>;
 }
 
 export const TOCItem = forwardRef<HTMLAnchorElement, TOCItemProps>(
-  (props, ref) => {
-    const { containerRef } = useContext(ActiveAnchorContext);
+  ({ containerRef: container, ...props }, ref) => {
+    const { containerRef = container } = useContext(ActiveAnchorContext);
     const active = useActiveAnchor(props.href);
     const anchorRef = useRef<HTMLAnchorElement>(null);
     const mergedRef = mergeRefs(anchorRef, ref);
@@ -90,7 +97,7 @@ export const TOCItem = forwardRef<HTMLAnchorElement, TOCItemProps>(
     useEffect(() => {
       const element = anchorRef.current;
 
-      if (active && element) {
+      if (active && element && containerRef) {
         scrollIntoView(element, {
           behavior: 'smooth',
           block: 'center',

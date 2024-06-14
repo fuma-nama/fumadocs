@@ -8,7 +8,6 @@ import type { Card } from 'fumadocs-ui/components/card';
 import type { DocsLayoutProps } from 'fumadocs-ui/layout';
 import type { AnchorHTMLAttributes, ComponentPropsWithoutRef } from 'react';
 import type { DocsPageProps } from 'fumadocs-ui/page';
-import type { RootProviderProps } from 'fumadocs-ui/provider';
 import type { AutoTypeTable } from 'fumadocs-typescript/ui';
 
 export type AccordionsProps = Omit<
@@ -67,8 +66,6 @@ export type BreadcrumbProps = NonNullable<DocsPageProps['breadcrumb']>;
 export type TOCProps = NonNullable<DocsPageProps['tableOfContent']>;
 
 export type FooterProps = NonNullable<DocsPageProps['footer']>;
-
-export type ProviderProps = RootProviderProps;
 
 export type AutoTypeTableProps = ComponentPropsWithoutRef<typeof AutoTypeTable>;
 

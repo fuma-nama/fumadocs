@@ -24,24 +24,31 @@ export default function Layout({ children }) {
 
 ### Search Dialog
 
-You can customize the search dialog from the root provider.
-
-```json doc-gen:typescript
-{
-  "file": "./content/docs/ui/props.ts",
-  "name": "ProviderProps"
-}
-```
+Customize or disable the search dialog with `search` option.
 
 ```jsx
 <RootProvider
   search={{
-    links: [
-      ['Home', '/'],
-      ['Docs', '/docs'],
-    ],
+    enabled: false,
   }}
 >
-  ...
+  {children}
+</RootProvider>
+```
+
+Learn more from [Search](/docs/ui/search).
+
+### Theme Provider
+
+Fumadocs supports light/dark modes with [`next-themes`](https://github.com/pacocoursey/next-themes).
+Customise or disable it with `theme` option.
+
+```jsx
+<RootProvider
+  theme={{
+    enabled: false,
+  }}
+>
+  {children}
 </RootProvider>
 ```

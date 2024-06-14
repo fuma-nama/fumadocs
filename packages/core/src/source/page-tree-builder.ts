@@ -1,43 +1,61 @@
 import type { ReactElement } from 'react';
 import type * as PageTree from '../server/page-tree';
 import type { File, Folder, Storage } from './file-system';
-import { joinPaths } from './path';
-import { type FileData } from './types';
+import { resolvePath } from './path';
+import { type FileData, type UrlFn } from './types';
 
 interface PageTreeBuilderContext {
-  storage: Storage;
   lang?: string;
 
+  storage: Storage;
   builder: PageTreeBuilder;
-  resolveIcon: (icon: string | undefined) => ReactElement | undefined;
+  options: BuildPageTreeOptions;
 }
 
-export interface BuildPageTreeOptionsWithI18n {
-  languages: string[];
+export interface BuildPageTreeOptions {
+  /**
+   * Attach the `folder.id` property
+   *
+   * @defaultValue false
+   */
+  attachFolderIds?: boolean;
+
+  attachFile?: (node: PageTree.Item, file?: File) => PageTree.Item;
+  attachFolder?: (
+    node: PageTree.Folder,
+    folder: Folder,
+    meta?: File,
+  ) => PageTree.Folder;
+  attachSeparator?: (node: PageTree.Separator) => PageTree.Separator;
+
+  storage: Storage;
+  getUrl: UrlFn;
+  resolveIcon?: (icon: string | undefined) => ReactElement | undefined;
+}
+
+export interface BuildPageTreeOptionsWithI18n extends BuildPageTreeOptions {
+  languages?: string[];
 }
 
 export interface PageTreeBuilder {
-  build: () => PageTree.Root;
+  build: (options: BuildPageTreeOptions) => PageTree.Root;
 
   /**
-   * Build page tree and fallback to the default language if the page doesn't exist
+   * Build page tree and fallback to the default language if the localized page doesn't exist
    */
   buildI18n: (
-    options?: Partial<BuildPageTreeOptionsWithI18n>,
+    options: BuildPageTreeOptionsWithI18n,
   ) => Record<string, PageTree.Root>;
 }
 
-export interface CreatePageTreeBuilderOptions {
-  storage: Storage;
-  resolveIcon?: (icon: string) => ReactElement | undefined;
-}
-
-const external = /\[(?<text>.+)\]\((?<url>.+)\)/;
-const separator = /---(?<name>.*?)---/;
+const link = /^\[(?<text>.+)]\((?<url>.+)\)$/;
+const separator = /^---(?<name>.*?)---$/;
 const rest = '...';
-const extractor = /\.\.\.(?<name>.+)/;
+const extractor = /^\.\.\.(?<name>.+)$/;
 
 /**
+ * @param nodes - All nodes to be built
+ * @param ctx - Context
  * @param skipIndex - Skip index
  * @returns Nodes with specified locale in context (sorted)
  */
@@ -80,32 +98,36 @@ function resolveFolderItem(
 
   const separateResult = separator.exec(item);
   if (separateResult?.groups) {
-    return [
-      {
-        type: 'separator',
-        name: separateResult.groups.name,
-      },
-    ];
+    const node: PageTree.Separator = {
+      type: 'separator',
+      name: separateResult.groups.name,
+    };
+
+    return [ctx.options.attachSeparator?.(node) ?? node];
   }
 
-  const externalResult = external.exec(item);
-  if (externalResult?.groups) {
-    return [
-      {
-        type: 'page',
-        name: externalResult.groups.text,
-        url: externalResult.groups.url,
-        external: true,
-      },
-    ];
+  const linkResult = link.exec(item);
+  if (linkResult?.groups) {
+    const { url, text } = linkResult.groups;
+    const isRelative =
+      url.startsWith('/') || url.startsWith('#') || url.startsWith('.');
+
+    const node: PageTree.Item = {
+      type: 'page',
+      name: text,
+      url,
+      external: !isRelative,
+    };
+
+    return [ctx.options.attachFile?.(node) ?? node];
   }
 
   const extractResult = extractor.exec(item);
 
-  const path = joinPaths([
+  const path = resolvePath(
     folder.file.path,
     extractResult?.groups?.name ?? item,
-  ]);
+  );
   const itemNode = ctx.storage.readDir(path) ?? ctx.storage.read(path, 'page');
 
   if (!itemNode) return [];
@@ -126,11 +148,11 @@ function buildFolderNode(
   defaultIsRoot: boolean,
   ctx: PageTreeBuilderContext,
 ): PageTree.Folder {
-  const metaPath = joinPaths([folder.file.path, 'meta']);
+  const metaPath = resolvePath(folder.file.path, 'meta');
   let meta = ctx.storage.read(metaPath, 'meta');
   meta = findLocalizedFile(metaPath, 'meta', ctx) ?? meta;
   const indexFile = ctx.storage.read(
-    joinPaths([folder.file.flattenedPath, 'index']),
+    resolvePath(folder.file.flattenedPath, 'index'),
     'page',
   );
 
@@ -166,15 +188,23 @@ function buildFolderNode(
     children = nodes ?? restNodes;
   }
 
-  return removeUndefined({
+  const node: PageTree.Folder = {
     type: 'folder',
     name: metadata?.title ?? index?.name ?? pathToName(folder.file.name),
-    icon: ctx.resolveIcon(metadata?.icon),
+    icon: ctx.options.resolveIcon?.(metadata?.icon),
     root: metadata?.root,
     defaultOpen: metadata?.defaultOpen,
     index,
     children,
-  });
+  };
+
+  if (ctx.options.attachFolderIds) {
+    node.id = folder.file.flattenedPath;
+  }
+
+  return removeUndefined(
+    ctx.options.attachFolder?.(node, folder, meta) ?? node,
+  );
 }
 
 function buildFileNode(file: File, ctx: PageTreeBuilderContext): PageTree.Item {
@@ -182,12 +212,14 @@ function buildFileNode(file: File, ctx: PageTreeBuilderContext): PageTree.Item {
     findLocalizedFile(file.file.flattenedPath, 'page', ctx) ?? file;
   const data = localized.data as FileData['file'];
 
-  return removeUndefined({
+  const item: PageTree.Item = {
     type: 'page',
     name: data.data.title,
-    icon: ctx.resolveIcon(data.data.icon),
-    url: data.url,
-  });
+    icon: ctx.options.resolveIcon?.(data.data.icon),
+    url: ctx.options.getUrl(data.slugs, ctx.lang),
+  };
+
+  return removeUndefined(ctx.options.attachFile?.(item, file) ?? item);
 }
 
 function build(ctx: PageTreeBuilderContext): PageTree.Root {
@@ -200,32 +232,23 @@ function build(ctx: PageTreeBuilderContext): PageTree.Root {
   };
 }
 
-export function createPageTreeBuilder({
-  storage,
-  resolveIcon = () => undefined,
-}: CreatePageTreeBuilderOptions): PageTreeBuilder {
-  function getContext(
-    builder: PageTreeBuilder,
-    locale?: string,
-  ): PageTreeBuilderContext {
-    return {
-      storage,
-      lang: locale,
-      resolveIcon(icon) {
-        if (!icon) return;
-        return resolveIcon(icon);
-      },
-      builder,
-    };
-  }
-
+export function createPageTreeBuilder(): PageTreeBuilder {
   return {
-    build() {
-      return build(getContext(this));
+    build(options) {
+      return build({
+        options,
+        builder: this,
+        storage: options.storage,
+      });
     },
-    buildI18n({ languages = [] } = {}) {
+    buildI18n({ languages = [], ...options }) {
       const entries = languages.map<[string, PageTree.Root]>((lang) => {
-        const tree = build(getContext(this, lang));
+        const tree = build({
+          lang,
+          options,
+          builder: this,
+          storage: options.storage,
+        });
 
         return [lang, tree];
       });

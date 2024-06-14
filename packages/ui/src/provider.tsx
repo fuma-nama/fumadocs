@@ -1,12 +1,12 @@
 'use client';
 
-import { SidebarProvider } from 'fumadocs-core/sidebar';
 import { ThemeProvider } from 'next-themes';
 import { type ReactNode } from 'react';
 import dynamic from 'next/dynamic';
 import { DirectionProvider } from '@radix-ui/react-direction';
-import { SidebarCollapseProvider } from '@/contexts/sidebar';
-import { DefaultSearchDialogProps } from '@/components/dialog/search-default';
+import type { ThemeProviderProps } from 'next-themes/dist/types';
+import type { DefaultSearchDialogProps } from '@/components/dialog/search-default';
+import { SidebarProvider } from '@/contexts/sidebar';
 import { SearchProvider, type SearchProviderProps } from './contexts/search';
 
 interface SearchOptions
@@ -32,11 +32,17 @@ export interface RootProviderProps {
   search?: Partial<SearchOptions>;
 
   /**
-   * Wrap the body in `ThemeProvider` (next-themes)
-   *
-   * @defaultValue true
+   * Customise options of `next-themes`
    */
-  enableThemeProvider?: boolean;
+  theme?: Partial<ThemeProviderProps> & {
+    /**
+     * Enable `next-themes`
+     *
+     * @defaultValue true
+     */
+    enabled?: boolean;
+  };
+
   children: ReactNode;
 }
 
@@ -48,14 +54,10 @@ const DefaultSearchDialog = dynamic(
 export function RootProvider({
   children,
   dir,
-  enableThemeProvider = true,
+  theme: { enabled = true, ...theme } = {},
   search,
 }: RootProviderProps): React.ReactElement {
-  let body = (
-    <SidebarProvider>
-      <SidebarCollapseProvider>{children}</SidebarCollapseProvider>
-    </SidebarProvider>
-  );
+  let body = children;
 
   if (search?.enabled !== false)
     body = (
@@ -64,24 +66,27 @@ export function RootProvider({
       </SearchProvider>
     );
 
-  if (enableThemeProvider)
+  if (enabled)
     body = (
       <ThemeProvider
         attribute="class"
         defaultTheme="system"
         enableSystem
         disableTransitionOnChange
+        {...theme}
       >
         {body}
       </ThemeProvider>
     );
 
-  if (dir) body = <DirectionProvider dir={dir}>{body}</DirectionProvider>;
-
-  return body;
+  return (
+    <DirectionProvider dir={dir ?? 'ltr'}>
+      <SidebarProvider>{body}</SidebarProvider>
+    </DirectionProvider>
+  );
 }
 
 export { useI18n } from './contexts/i18n';
 export { useSearchContext } from './contexts/search';
-export { useSidebarCollapse } from './contexts/sidebar';
+export { useSidebar } from './contexts/sidebar';
 export { useTreeContext } from './contexts/tree';

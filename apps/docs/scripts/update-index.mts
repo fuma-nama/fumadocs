@@ -13,22 +13,30 @@ const indexes = JSON.parse(
   ).toString(),
 ) as SearchIndex[];
 
-const client = algosearch(
-  process.env.ALGOLIA_APP_ID || '',
-  process.env.ALGOLIA_API_KEY || '',
-);
+if (!process.env.ALGOLIA_API_KEY) {
+  console.warn('Algolia API Key not found, skip updating search index.');
+} else {
+  const client = algosearch(
+    process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || '',
+    process.env.ALGOLIA_API_KEY,
+  );
 
-void sync(client, {
-  document: process.env.NEXT_PUBLIC_ALGOLIA_INDEX,
-  documents: indexes.map((docs) => ({
-    _id: docs.id,
-    title: docs.title,
-    url: docs.url,
-    structured: docs.structuredData,
-    extra_data: {
-      tag: docs.url.split('/')[2],
-    },
-  })),
-}).then(() => {
-  console.log('search updated');
-});
+  void sync(client, {
+    document: process.env.NEXT_PUBLIC_ALGOLIA_INDEX,
+    documents: indexes.map((docs) => ({
+      _id: docs.id,
+      title: docs.title,
+      url: docs.url,
+      structured: docs.structuredData,
+      extra_data: {
+        tag: docs.url.split('/')[2],
+      },
+    })),
+  })
+    .then(() => {
+      console.log('search updated');
+    })
+    .catch((e) => {
+      console.error(e);
+    });
+}

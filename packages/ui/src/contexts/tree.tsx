@@ -52,10 +52,11 @@ export function TreeContextProvider({
   const pathname = usePathname();
   const value = useMemo<TreeContextType>(() => {
     const root = findRoot(tree.children, pathname) ?? tree;
+    const navigation = getNavigationList(root.children);
 
     return {
       root,
-      navigation: getNavigationList(root.children),
+      navigation,
       tree,
     };
   }, [pathname, tree]);

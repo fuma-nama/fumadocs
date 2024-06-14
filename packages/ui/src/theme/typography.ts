@@ -28,12 +28,15 @@ export const typography = {
       textUnderlineOffset: '2px',
       textDecorationColor: `theme('colors.primary.DEFAULT')`,
     },
+    'h1 a,h2 a,h3 a,h4 a,h5 a,h6 a': {
+      fontWeight: 'inherit',
+      textDecoration: 'inherit',
+    },
     'a:hover': {
       opacity: '80%',
     },
     table: {
       fontSize: '14px',
-      whiteSpace: 'nowrap',
     },
     'thead th': {
       textAlign: 'start',

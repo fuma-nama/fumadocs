@@ -1,4 +1,4 @@
 module.exports = {
-  extends: ['custom/library'],
+  extends: ['custom/next'],
   ignorePatterns: ['*.test.ts', '*.output.js'],
 };

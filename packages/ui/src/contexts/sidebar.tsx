@@ -1,27 +1,69 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useMemo,
+  useRef,
+  type MutableRefObject,
+  useEffect,
+} from 'react';
+import { usePathname } from 'next/navigation';
+import { SidebarProvider as BaseProvider } from 'fumadocs-core/sidebar';
 
-type SidebarCollapseContext = [open: boolean, setOpen: (v: boolean) => void];
+interface SidebarContext {
+  open: boolean;
+  setOpen: (v: boolean) => void;
+  collapsed: boolean;
+  setCollapsed: (v: boolean) => void;
 
-const SidebarCollapseContext = createContext<
-  SidebarCollapseContext | undefined
->(undefined);
+  /**
+   * When set to true, close the sidebar on redirection
+   */
+  closeOnRedirect: MutableRefObject<boolean>;
+}
 
-export function useSidebarCollapse(): SidebarCollapseContext {
-  const ctx = useContext(SidebarCollapseContext);
+const SidebarContext = createContext<SidebarContext | undefined>(undefined);
+
+export function useSidebar(): SidebarContext {
+  const ctx = useContext(SidebarContext);
   if (!ctx) throw new Error('Missing root provider');
   return ctx;
 }
 
-export function SidebarCollapseProvider({
+export function SidebarProvider({
   children,
 }: {
-  children: ReactNode;
+  children: React.ReactNode;
 }): React.ReactElement {
-  const [open, setOpen] = useState(true);
+  const closeOnRedirect = useRef(false);
+  const [open, setOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (closeOnRedirect.current) {
+      setOpen(false);
+      closeOnRedirect.current = false;
+    }
+  }, [pathname]);
 
   return (
-    <SidebarCollapseContext.Provider value={[open, setOpen]}>
-      {children}
-    </SidebarCollapseContext.Provider>
+    <SidebarContext.Provider
+      value={useMemo(
+        () => ({
+          open,
+          setOpen,
+          collapsed,
+          setCollapsed,
+          closeOnRedirect,
+        }),
+        [open, collapsed],
+      )}
+    >
+      <BaseProvider open={open} onOpenChange={setOpen}>
+        {children}
+      </BaseProvider>
+    </SidebarContext.Provider>
   );
 }

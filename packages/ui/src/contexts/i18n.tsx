@@ -1,19 +1,17 @@
 import { createContext, useContext } from 'react';
 
-const defaultTranslations: Translations = {
-  search: 'Search',
-  searchNoResult: 'No results found',
-  toc: 'On this page',
-  lastUpdate: 'Last updated on',
-  chooseLanguage: 'Choose a language',
-};
-
 export interface Translations {
   search: string;
   searchNoResult: string;
+
   toc: string;
+  tocNoHeadings: string;
+
   lastUpdate: string;
   chooseLanguage: string;
+  nextPage: string;
+  previousPage: string;
+  chooseTheme: string;
 }
 
 export interface NamedTranslation extends Partial<Translations> {
@@ -31,7 +29,17 @@ interface I18nContextType {
 }
 
 export const I18nContext = createContext<I18nContextType>({
-  text: defaultTranslations,
+  text: {
+    search: 'Search',
+    searchNoResult: 'No results found',
+    toc: 'On this page',
+    tocNoHeadings: 'No Headings',
+    lastUpdate: 'Last updated on',
+    chooseLanguage: 'Choose a language',
+    nextPage: 'Next',
+    previousPage: 'Previous',
+    chooseTheme: 'Theme',
+  },
 });
 
 export function useI18n(): I18nContextType {

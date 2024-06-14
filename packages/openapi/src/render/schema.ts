@@ -135,6 +135,8 @@ function resolveObjectType(
 
 function getSchemaType(schema: OpenAPI.SchemaObject): string {
   if (schema.nullable) {
+    if (!schema.type) return 'null';
+
     return `${getSchemaType({ ...schema, nullable: false })} | null`;
   }
 

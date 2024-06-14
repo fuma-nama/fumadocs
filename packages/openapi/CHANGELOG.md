@@ -1,5 +1,29 @@
 # @fuma-docs/openapi
 
+## 2.0.4
+
+### Patch Changes
+
+- 310e0ab: Fix multi-line frontmatter
+
+## 2.0.3
+
+### Patch Changes
+
+- 1d3917f: Fix nullable types cannot be detected
+
+## 2.0.2
+
+### Patch Changes
+
+- 9681cc3: Add put method key
+
+## 2.0.1
+
+### Patch Changes
+
+- 8ef2b68: Bump deps
+
 ## 2.0.0
 
 ### Major Changes

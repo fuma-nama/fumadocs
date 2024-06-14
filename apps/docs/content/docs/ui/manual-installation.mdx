@@ -1,0 +1,208 @@
+---
+title: Manual Installation
+description: Create a new fumadocs project from sketch.
+icon: Rocket
+---
+
+## Getting Started
+
+Create a new Next.js application with `create-next-app`, and install required packages.
+
+```package-install
+fumadocs-ui fumadocs-core
+```
+
+### Configuration
+
+You can choose a **content source** you prefer.
+
+There is a list of supported sources:
+
+- [Setup Fumadocs MDX](/docs/mdx)
+- [Setup Contentlayer](/docs/headless/contentlayer)
+
+You have to configure the library correctly following their setup guide before continuing.
+
+### Root Layout
+
+Wrap the entire application inside [Root Provider](/docs/ui/blocks/root-provider).
+
+```tsx
+import { RootProvider } from 'fumadocs-ui/provider';
+import type { ReactNode } from 'react';
+
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        <RootProvider>{children}</RootProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+### Styles
+
+<Tabs items={['Vanilla', 'Tailwind CSS']}>
+    <Tab value='Vanilla'>
+
+Import the pre-built stylesheet in the root layout.
+
+```ts title="layout.tsx"
+import 'fumadocs-ui/style.css';
+```
+
+    </Tab>
+    <Tab value='Tailwind CSS'>
+
+Use the official Tailwind CSS plugin.
+
+```json doc-gen:file
+{
+  "file": "./content/docs/example/tailwind.config.js",
+  "codeblock": {
+    "meta": "title=\"tailwind.config.js\""
+  }
+}
+```
+
+    </Tab>
+
+</Tabs>
+
+> It doesn't come with a default font, you may choose one from `next/font`.
+
+### Layout
+
+Create a new catch-all route `/app/docs/[[..slugs]]` for our docs, and give it a proper layout.
+
+```tsx title="app/docs/layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layout';
+import { pageTree } from '@/app/source';
+import type { ReactNode } from 'react';
+
+export default function RootDocsLayout({ children }: { children: ReactNode }) {
+  return (
+    <DocsLayout tree={pageTree} nav={{ title: 'My App' }}>
+      {children}
+    </DocsLayout>
+  );
+}
+```
+
+> `pageTree` refers to Page Tree, it should be provided by your content source.
+
+### Page
+
+For the `page.tsx`, it may vary depending on your source. You should configure static rendering with `generateStaticParams` and metadata with `generateMetadata`.
+
+Wrap your content in the [Page](/docs/ui/blocks/page) component.
+
+<Tabs id='content-source' items={['Fumadocs MDX', 'Contentlayer']}>
+    <Tab value='Fumadocs MDX'>
+
+```json doc-gen:file
+{
+  "file": "../../examples/next-mdx/app/docs/[[...slug]]/page.tsx",
+  "codeblock": {
+    "meta": "title=\"app/docs/[[...slug]]/page.tsx\""
+  }
+}
+```
+
+    </Tab>
+    <Tab value='Contentlayer'>
+
+```tsx title="app/docs/[[...slug]]/page.tsx"
+import { Content } from './content';
+import { getPage, getPages } from '@/app/source';
+import type { Metadata } from 'next';
+import { DocsPage, DocsBody } from 'fumadocs-ui/page';
+import { notFound } from 'next/navigation';
+
+export default async function Page({
+  params,
+}: {
+  params: { slug?: string[] };
+}) {
+  const page = getPage(params.slug);
+
+  if (page == null) {
+    notFound();
+  }
+
+  return (
+    <DocsPage toc={page.data.toc}>
+      <DocsBody>
+        <h1>{page.data.title}</h1>
+        <Content code={page.data.body.code} />
+      </DocsBody>
+    </DocsPage>
+  );
+}
+
+export async function generateStaticParams(): Promise<{ slug: string[] }[]> {
+  return getPages().map((page) => ({
+    slug: page.slugs,
+  }));
+}
+
+export function generateMetadata({ params }: { params: { slug?: string[] } }) {
+  const page = getPage(params.slug);
+
+  if (page == null) notFound();
+
+  return {
+    title: page.data.title,
+    description: page.data.description,
+  } satisfies Metadata;
+}
+```
+
+    </Tab>
+
+</Tabs>
+
+### Search
+
+Use the default document search based on Flexsearch.
+
+<Tabs id='content-source' items={['Fumadocs MDX', 'Contentlayer']}>
+    <Tab value='Fumadocs MDX'>
+
+```json doc-gen:file
+{
+  "file": "../../examples/next-mdx/app/api/search/route.ts",
+  "codeblock": {
+    "meta": "title=\"app/api/search/route.ts\""
+  }
+}
+```
+
+    </Tab>
+    <Tab value='Contentlayer'>
+
+```ts title="app/api/search/route.ts"
+import { getPages } from '@/app/source';
+import { createSearchAPI } from 'fumadocs-core/search/server';
+
+export const { GET } = createSearchAPI('advanced', {
+  indexes: getPages().map((page) => ({
+    title: page.data.title,
+    structuredData: page.data.structuredData,
+    id: page.url,
+    url: page.url,
+  })),
+});
+```
+
+    </Tab>
+
+</Tabs>
+
+Learn more about [Document Search](/docs/headless/search).
+
+### Done
+
+You can start the dev server and start writing content.

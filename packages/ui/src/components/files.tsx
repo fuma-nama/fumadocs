@@ -1,7 +1,7 @@
 'use client';
 
 import { cva } from 'class-variance-authority';
-import { FileIcon, FolderIcon, FolderOpenIcon } from 'lucide-react';
+import { FileIcon, FolderIcon, FolderOpen } from 'lucide-react';
 import { useState, type HTMLAttributes, type ReactNode } from 'react';
 import { cn } from '@/utils/cn';
 import {
@@ -68,11 +68,11 @@ export function Folder({
   return (
     <Collapsible open={open} onOpenChange={setOpen} {...props}>
       <CollapsibleTrigger className={cn(item({ className: 'w-full' }))}>
-        {open ? <FolderOpenIcon /> : <FolderIcon />}
+        {open ? <FolderOpen /> : <FolderIcon />}
         {name}
       </CollapsibleTrigger>
       <CollapsibleContent>
-        <div className="ml-2 flex flex-col border-l pl-2">{props.children}</div>
+        <div className="ms-2 flex flex-col border-l pl-2">{props.children}</div>
       </CollapsibleContent>
     </Collapsible>
   );

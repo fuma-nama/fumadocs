@@ -1,5 +1,86 @@
 # next-docs-zeta
 
+## 12.0.6
+
+### Patch Changes
+
+- 7a29b79: Remove default language from `source.getLanguages`
+- b0c1242: Support Next.js 15 cache behaviour in `getGithubLastEdit`
+
+## 12.0.5
+
+## 12.0.4
+
+### Patch Changes
+
+- 72dbaf1: Support `ReactNode` in page tree, table of contents and breadcrumb type definitions
+- 51ca944: Support including separators in breadcrumbs
+
+## 12.0.3
+
+### Patch Changes
+
+- 053609d: Rename `defaultLang` to `defaultLanguage`
+
+## 12.0.2
+
+## 12.0.1
+
+## 12.0.0
+
+### Major Changes
+
+- 98430e9: **Remove `minWidth` deprecated option from `Sidebar` component.**
+
+  **migrate:** Use `blockScrollingWidth` instead
+
+### Minor Changes
+
+- 57eb762: Support attaching custom properties during page tree builder process
+
+### Patch Changes
+
+- d88dfa6: Support attaching `id` property to page trees
+- ba20694: Remark Headings: Support code syntax in headings
+
+## 11.3.2
+
+### Patch Changes
+
+- 1b8e12b: Use `display: grid` for codeblocks
+
+## 11.3.1
+
+## 11.3.0
+
+### Minor Changes
+
+- 917d87f: Rename sidebar primitive `minWidth` prop to `blockScrollingWidth`
+
+## 11.2.2
+
+## 11.2.1
+
+## 11.2.0
+
+## 11.1.3
+
+### Patch Changes
+
+- 88008b1: Fix ESM compatibility problems in i18n middleware
+- 944541a: Add dynamic page url according to locale
+- 07a9312: Improve Search I18n utilities
+
+## 11.1.2
+
+## 11.1.1
+
+### Patch Changes
+
+- 8ef2b68: Bump deps
+- 26f464d: Support relative paths in meta.json
+- 26f464d: Support non-external link in meta.json
+
 ## 11.1.0
 
 ## 11.0.8
@@ -83,7 +164,7 @@
   Add the `remarkDocGen` plugin to your remark plugins.
 
   ```ts
-  import { remarkDocGen, fileGenerator } from "fumadocs-docgen";
+  import { remarkDocGen, fileGenerator } from 'fumadocs-docgen';
 
   remark().use(remarkDocGen, { generators: [fileGenerator()] });
   ```
@@ -113,7 +194,7 @@
   For `remarkInstall`, it remains the same:
 
   ```ts
-  import { remarkInstall } from "fumadocs-docgen";
+  import { remarkInstall } from 'fumadocs-docgen';
   ```
 
 - 2d8df75: Remove support for `getTableOfContentsFromPortableText`
@@ -234,7 +315,7 @@
 
   ````md
   ```ts /config/ {1}
-  const config = "Hello";
+  const config = 'Hello';
 
   something.call(config);
   ```
@@ -245,7 +326,7 @@
   ````md
   ```ts
   // [!code word:config]
-  const config = "Hello"; // [!code highlight]
+  const config = 'Hello'; // [!code highlight]
 
   something.call(config);
   ```
@@ -304,13 +385,13 @@
   It's no longer encouraged to access `allDocs` directly because they will not include `url` property anymore. Please consider `getPages` instead.
 
   ```ts
-  import { allDocs, allMeta } from "contentlayer/generated";
-  import { createContentlayerSource } from "next-docs-zeta/contentlayer";
-  import { loader } from "next-docs-zeta/source";
+  import { allDocs, allMeta } from 'contentlayer/generated';
+  import { createContentlayerSource } from 'next-docs-zeta/contentlayer';
+  import { loader } from 'next-docs-zeta/source';
 
   export const { getPage, pageTree, getPages } = loader({
-    baseUrl: "/docs",
-    rootDir: "docs",
+    baseUrl: '/docs',
+    rootDir: 'docs',
     source: createContentlayerSource(allMeta, allDocs),
   });
   ```
@@ -331,13 +412,13 @@
   The interface is now unified, you can easily plug in a content source.
 
   ```ts
-  import { map } from "@/.map";
-  import { createMDXSource } from "next-docs-mdx";
-  import { loader } from "next-docs-zeta/source";
+  import { map } from '@/.map';
+  import { createMDXSource } from 'next-docs-mdx';
+  import { loader } from 'next-docs-zeta/source';
 
   export const { getPage, getPages, pageTree } = loader({
-    baseUrl: "/docs",
-    rootDir: "docs",
+    baseUrl: '/docs',
+    rootDir: 'docs',
     source: createMDXSource(map),
   });
   ```
@@ -381,7 +462,7 @@
   If you want to include other document types, or override the output configuration, the `create` function can return the fields and document types you need.
 
   ```ts
-  import { create } from "next-docs-zeta/contentlayer/configuration";
+  import { create } from 'next-docs-zeta/contentlayer/configuration';
 
   const config = create(options);
 

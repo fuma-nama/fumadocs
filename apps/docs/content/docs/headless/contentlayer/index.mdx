@@ -3,8 +3,8 @@ title: Contentlayer
 description: Learn how to use Contentlayer with Fumadocs
 ---
 
-We have native support for Contentlayer which provides the default
-configuration with required MDX plugins.
+Fumadocs provides the default
+configuration with required MDX plugins for Contentlayer.
 
 It also adds extra functionalities to Contentlayer, making it more
 convenient to use and straightforward.
@@ -12,10 +12,12 @@ convenient to use and straightforward.
 ## Setup
 
 ```package-install
-fumadocs-contentlayer
+fumadocs-contentlayer contentlayer next-contentlayer
 ```
 
-1. Edit your configuration.
+[Configure Contentlayer correctly](https://contentlayer.dev/docs/getting-started#nextjs-configuration).
+
+### Edit your configuration
 
 ```ts title="contentlayer.config.ts"
 import { makeSource } from 'contentlayer/source-files';
@@ -28,7 +30,9 @@ export default makeSource(defaultConfig);
   Configuration file **can't** be imported from Next.js runtime.
 </Callout>
 
-2. Load the files with Source API.
+### Load Files
+
+Using [Source API](/docs/headless/source-api).
 
 ```ts
 import { allDocs, allMeta } from 'contentlayer/generated';
@@ -42,9 +46,7 @@ export const docs = loader({
 });
 ```
 
-## Pages Structure
-
-All documents should be located in `/content` or `/content/docs`.
+### Organize Pages
 
 <Cards>
   <Card

@@ -1,7 +1,13 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "pipeline": {
+  "globalEnv": [
+    "NEXT_PUBLIC_ALGOLIA_APP_ID",
+    "NEXT_PUBLIC_ALGOLIA_API_KEY",
+    "NEXT_PUBLIC_ALGOLIA_INDEX"
+  ],
+  "tasks": {
     "build": {
+      "env": ["ALGOLIA_API_KEY"],
       "dependsOn": ["^build"],
       "outputs": [
         ".contentlayer/**",

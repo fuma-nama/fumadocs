@@ -1,15 +1,15 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { cva } from 'class-variance-authority';
-import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { cn } from '@/utils/cn';
 import { useI18n } from './contexts/i18n';
 import { useTreeContext } from './contexts/tree';
 
-export * from '@/components/toc';
-export * from '@/components/breadcrumb';
+export * from '@/components/layout/toc';
+export * from '@/components/layout/breadcrumb';
 
 export function LastUpdate(props: { date: Date }): React.ReactElement {
   const { text } = useI18n();
@@ -37,16 +37,12 @@ export interface FooterProps {
   };
 }
 
-const footerItem = cva(
-  'flex flex-row items-center gap-2 text-muted-foreground transition-colors hover:text-foreground',
-);
-
 export function Footer({ items }: FooterProps): React.ReactElement {
   const tree = useTreeContext();
   const pathname = usePathname();
+  const { nextPage, previousPage } = useI18n().text;
 
-  const { previous, next } = useMemo(() => {
-    if (items) return items;
+  const { previous = items?.previous, next = items?.next } = useMemo(() => {
     const currentIndex = tree.navigation.findIndex(
       (item) => item.url === pathname,
     );
@@ -55,20 +51,29 @@ export function Footer({ items }: FooterProps): React.ReactElement {
       previous: tree.navigation[currentIndex - 1],
       next: tree.navigation[currentIndex + 1],
     };
-  }, [items, pathname, tree.navigation]);
+  }, [pathname, tree.navigation]);
+
+  const footerItem =
+    'flex flex-col gap-2 rounded-lg p-4 text-sm transition-colors hover:bg-accent hover:text-accent-foreground';
 
   return (
-    <div className="mt-4 flex flex-row flex-wrap gap-4 border-t py-12">
+    <div className="mt-auto flex flex-row flex-wrap gap-1 border-t py-4">
       {previous ? (
-        <Link href={previous.url} className={footerItem()}>
-          <ChevronLeftIcon className="size-5 shrink-0 rtl:rotate-180" />
-          <p className="font-medium text-foreground">{previous.name}</p>
+        <Link href={previous.url} className={footerItem}>
+          <div className="inline-flex items-center gap-0.5 text-muted-foreground">
+            <ChevronLeft className="-ms-1 size-4 shrink-0 rtl:rotate-180" />
+            <p>{previousPage}</p>
+          </div>
+          <p className="font-medium">{previous.name}</p>
         </Link>
       ) : null}
       {next ? (
-        <Link href={next.url} className={footerItem({ className: 'ms-auto' })}>
-          <p className="text-end font-medium text-foreground">{next.name}</p>
-          <ChevronRightIcon className="size-5 shrink-0 rtl:rotate-180" />
+        <Link href={next.url} className={cn(footerItem, 'ms-auto text-end')}>
+          <div className="inline-flex flex-row-reverse items-center gap-0.5 text-muted-foreground">
+            <ChevronRight className="-me-1 size-4 shrink-0 rtl:rotate-180" />
+            <p>{nextPage}</p>
+          </div>
+          <p className="font-medium">{next.name}</p>
         </Link>
       ) : null}
     </div>

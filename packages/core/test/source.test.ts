@@ -167,14 +167,14 @@ test('Internationalized Routing', () => {
         {
           "name": "Hello",
           "type": "page",
-          "url": "/test",
+          "url": "/en/test",
         },
         {
           "children": [
             {
               "name": "Nested Page",
               "type": "page",
-              "url": "/nested/test",
+              "url": "/en/nested/test",
             },
           ],
           "name": "Nested",

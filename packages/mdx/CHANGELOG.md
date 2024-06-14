@@ -1,5 +1,100 @@
 # next-docs-mdx
 
+## 8.2.31
+
+### Patch Changes
+
+- 310e0ab: Move `fumadocs-core` to peer dependency
+- Updated dependencies [053609d]
+  - fumadocs-core@12.0.3
+
+## 8.2.30
+
+### Patch Changes
+
+- fumadocs-core@12.0.2
+
+## 8.2.29
+
+### Patch Changes
+
+- fumadocs-core@12.0.1
+
+## 8.2.28
+
+### Patch Changes
+
+- Updated dependencies [98430e9]
+- Updated dependencies [d88dfa6]
+- Updated dependencies [ba20694]
+- Updated dependencies [57eb762]
+  - fumadocs-core@12.0.0
+
+## 8.2.27
+
+### Patch Changes
+
+- Updated dependencies [1b8e12b]
+  - fumadocs-core@11.3.2
+
+## 8.2.26
+
+### Patch Changes
+
+- fumadocs-core@11.3.1
+
+## 8.2.25
+
+### Patch Changes
+
+- 17e162e: Add `mdx` to page extensions by default
+- Updated dependencies [917d87f]
+  - fumadocs-core@11.3.0
+
+## 8.2.24
+
+### Patch Changes
+
+- fumadocs-core@11.2.2
+
+## 8.2.23
+
+### Patch Changes
+
+- fumadocs-core@11.2.1
+
+## 8.2.22
+
+### Patch Changes
+
+- fumadocs-core@11.2.0
+
+## 8.2.21
+
+### Patch Changes
+
+- 66a100d: Improve error messages
+- Updated dependencies [88008b1]
+- Updated dependencies [944541a]
+- Updated dependencies [07a9312]
+  - fumadocs-core@11.1.3
+
+## 8.2.20
+
+### Patch Changes
+
+- fumadocs-core@11.1.2
+
+## 8.2.19
+
+### Patch Changes
+
+- 8ef2b68: Bump deps
+- Updated dependencies [8ef2b68]
+- Updated dependencies [26f464d]
+- Updated dependencies [26f464d]
+  - fumadocs-core@11.1.1
+
 ## 8.2.18
 
 ### Patch Changes
@@ -213,7 +308,7 @@
   Become:
 
   ```mdx
-  import img_banner from "../../public/image.png";
+  import img_banner from '../../public/image.png';
 
   <img alt="banner" src={img_banner} />
   ```
@@ -274,13 +369,13 @@
   `fromMap` has been removed. Please use `createMDXSource` instead.
 
   ```ts
-  import { map } from "@/.map";
-  import { createMDXSource } from "next-docs-mdx";
-  import { loader } from "next-docs-zeta/source";
+  import { map } from '@/.map';
+  import { createMDXSource } from 'next-docs-mdx';
+  import { loader } from 'next-docs-zeta/source';
 
   export const { getPage, getPages, pageTree } = loader({
-    baseUrl: "/docs",
-    rootDir: "docs",
+    baseUrl: '/docs',
+    rootDir: 'docs',
     source: createMDXSource(map),
   });
   ```
@@ -294,7 +389,7 @@
   ```js
   const withNextDocs = createNextDocs({
     mdxOptions: {
-      lastModifiedTime: "git",
+      lastModifiedTime: 'git',
     },
   });
   ```
@@ -343,7 +438,7 @@
 
   ```ts
   const utils = fromMap(map, {
-    rootDir: "ui",
+    rootDir: 'ui',
     schema: {
       frontmatter: frontmatterSchema,
     },
@@ -374,11 +469,11 @@
   The `validate` options is now renamed to `schema`.
 
   ```ts
-  import { defaultSchemas, fromMap } from "next-docs-mdx/map";
+  import { defaultSchemas, fromMap } from 'next-docs-mdx/map';
 
   const utils = fromMap(map, {
-    rootDir: "docs/ui",
-    baseUrl: "/docs/ui",
+    rootDir: 'docs/ui',
+    baseUrl: '/docs/ui',
     schema: {
       frontmatter: defaultSchemas.frontmatter.extend({
         preview: z.string().optional(),
@@ -397,7 +492,7 @@
 
   ```js
   const withNextDocs = createNextDocs({
-    rootContentPath: "./content/docs",
+    rootContentPath: './content/docs',
   });
   ```
 

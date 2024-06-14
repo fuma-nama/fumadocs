@@ -4,9 +4,6 @@ description: Add Theme to Fumadocs UI
 icon: Palette
 ---
 
-import { ThemeSwitch } from '@/components/theme-switch';
-import { blueTheme } from '@/components/themes.js';
-
 ## Usage
 
 You can import the pre-built stylesheet.
@@ -15,40 +12,40 @@ You can import the pre-built stylesheet.
 import 'fumadocs-ui/style.css';
 ```
 
-> Notice that the stylesheet performs preflight (or normalization)
+> Notice that the stylesheet performs preflight (aka normalization)
 
-For Tailwind CSS projects, please use the built-in Tailwind CSS plugin instead.
+For Tailwind CSS projects, use the official Tailwind CSS plugin.
 
-```js title="tailwind.config.js"
-import { createPreset } from 'fumadocs-ui/tailwind-plugin';
-
-/** @type {import('tailwindcss').Config} */
-export default {
-  darkMode: 'class',
-  presets: [createPreset()],
-  content: [
-    './node_modules/fumadocs-ui/dist/**/*.js',
-    ...
-  ],
-};
+```json doc-gen:file
+{
+  "file": "./content/docs/example/tailwind.config.js",
+  "codeblock": {
+    "meta": "title=\"tailwind.config.js\""
+  }
+}
 ```
-
-> Ensure all files inside `fumadocs-ui` are included in the `content` property.
 
 ### Global Styles
 
-By using the built-in Tailwind CSS plugin, or the pre-built stylesheet, your default border, text and background
+By using the Tailwind CSS plugin, or the pre-built stylesheet, your default border, text and background
 colors will be changed.
+
+### Light/Dark Modes
+
+Fumadocs supports light/dark modes with [`next-themes`](https://github.com/pacocoursey/next-themes).
+The Theme Provider is a part of Root Provider.
+
+See [Root Provider](/docs/ui/blocks/root-provider#theme-provider) to learn more.
 
 ### RTL Layout
 
-Fumadocs UI has support for RTL (Right-to-left) layout. To enable, you can pass the `dir` prop to body.
+RTL (Right-to-left) layout is supported. To enable RTL, pass the `dir` prop to body.
 
 ```tsx
 <body dir="rtl"></body>
 ```
 
-Also pass the same prop to Radix UI `<DirectionProvider />`.
+Also pass the same prop to root provider to configure Radix UI RTL layout.
 
 ```tsx
 import { RootProvider } from '@fumadocs-ui/provider';
@@ -56,15 +53,9 @@ import { RootProvider } from '@fumadocs-ui/provider';
 <RootProvider dir="rtl"></RootProvider>;
 ```
 
-> Root Provider has integrated with it by default
-
 ## Themes
 
 The design system was inspired by [Shadcn UI](https://ui.shadcn.com), you can easily customize all the properties using CSS variables.
-
-<div className="mb-4 flex flex-row flex-wrap gap-2">
-  <ThemeSwitch style={blueTheme}>Blue Theme</ThemeSwitch>
-</div>
 
 ```css title="global.css"
 :root {
@@ -83,15 +74,15 @@ The design system was inspired by [Shadcn UI](https://ui.shadcn.com), you can ea
 
 > Only a subset of colors are provided by Fumadocs UI.
 >
-> It may not compatible with Shadcn UI.
+> It may not be compatible with Shadcn UI.
 
-## DocsUI Plugin
+## Tailwind CSS Plugin [#docsui-plugin]
 
-It comes with the DocsUI Tailwind CSS plugin by default, it introduces new colors and extra utilities including `steps`.
+The official Tailwind CSS plugin introduces new colors and extra utilities including `steps`.
 
 ### Presets
 
-This plugin also provides several theme presets out-of-the-box, you can pick one you prefer rather than the default one.
+It comes with many theme presets out-of-the-box, you can pick one you prefer rather than the default one.
 
 ```js
 import { createPreset } from 'fumadocs-ui/tailwind-plugin';
@@ -110,7 +101,7 @@ export default {
 
 We use the [Tailwind CSS Typography](https://tailwindcss.com/docs/typography-plugin) plugin internally, you can customize it with CSS.
 
-The DocsUI plugin overrides the default configuration for the Typography plugin. You can use the `prose` utility directly.
+The Tailwind CSS plugin overrides the default configuration for the Typography plugin. You can use the `prose` utility directly.
 
 ```tsx
 <div className="prose">...</div>
