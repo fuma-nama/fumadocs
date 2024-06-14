@@ -66,6 +66,7 @@ export function Nav({
 
   return (
     <header
+      id="nd-nav"
       className={cn(
         'sticky top-0 z-50 h-16 border-b transition-colors',
         transparent

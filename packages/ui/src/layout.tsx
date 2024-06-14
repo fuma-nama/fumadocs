@@ -123,18 +123,20 @@ export function Layout({
 export function DocsLayout({
   nav,
   githubUrl,
-  sidebar = {},
+  sidebar: {
+    enabled: sidebarEnabled = true,
+    collapsible = true,
+    component: sidebarReplace,
+    ...sidebar
+  } = {},
   links = [],
   containerProps,
   tree,
   i18n = false,
   children,
 }: DocsLayoutProps): React.ReactElement {
-  const sidebarEnabled = sidebar.enabled ?? true;
-  const sidebarCollapsible = sidebarEnabled && (sidebar.collapsible ?? true);
   const finalLinks = getLinks(links, githubUrl);
-
-  const Aside = sidebarCollapsible ? DynamicSidebar : Sidebar;
+  const Aside = sidebarEnabled && collapsible ? DynamicSidebar : Sidebar;
 
   return (
     <TreeContextProvider tree={tree}>
@@ -144,10 +146,10 @@ export function DocsLayout({
         className={cn('flex flex-1 flex-row', containerProps?.className)}
       >
         {replaceOrDefault(
-          sidebar,
+          { enabled: sidebarEnabled, component: sidebarReplace },
           <Aside
+            {...sidebar}
             items={finalLinks}
-            defaultOpenLevel={sidebar.defaultOpenLevel}
             banner={
               <>
                 <div className="flex flex-row items-center justify-between border-b pb-2 max-md:hidden">
@@ -166,7 +168,11 @@ export function DocsLayout({
               </>
             }
             bannerProps={{
-              className: cn(!sidebar.banner && 'max-md:hidden'),
+              className: cn(
+                !sidebar.banner && 'max-md:hidden',
+                sidebar.bannerProps?.className,
+              ),
+              ...sidebar.bannerProps,
             }}
             footer={
               <>
@@ -175,7 +181,6 @@ export function DocsLayout({
                 {i18n ? <LanguageToggle /> : null}
               </>
             }
-            components={sidebar.components}
           />,
         )}
 
