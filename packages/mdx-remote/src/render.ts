@@ -23,6 +23,8 @@ export async function renderMDX(
 
   const hydrateFn = Reflect.construct(Function, keys.concat(compiled));
 
-  const Content: React.ElementType = hydrateFn.apply(hydrateFn, values).default;
-  return React.createElement(Content, { components });
+  const result = hydrateFn.apply(hydrateFn, values) as {
+    default: React.ElementType;
+  };
+  return React.createElement(result.default, { components });
 }
