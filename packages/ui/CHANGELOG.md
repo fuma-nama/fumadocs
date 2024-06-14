@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 12.0.6
+
+### Patch Changes
+
+- 056bad5: Improve default values
+- Updated dependencies [7a29b79]
+- Updated dependencies [b0c1242]
+  - fumadocs-core@12.0.6
+
 ## 12.0.5
 
 ### Patch Changes
