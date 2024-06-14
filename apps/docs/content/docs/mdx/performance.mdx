@@ -1,0 +1,47 @@
+---
+title: Performance
+description: The performance of Fumadocs MDX
+---
+
+## About
+
+Fumadocs MDX is a bundler plugin, in other words, it has a higher performance bottleneck.
+With bundlers like Webpack or Turbopack, it is enough for large docs sites with nearly 500+ MDX files, which is sufficient for almost all docs sites.
+
+### Advantages
+
+Since Fumadocs MDX works with your bundler, you can import any files including client components in your MDX files.
+This allows a high flexibility and ensures everything is optimized by default.
+
+### Caveats
+
+Although Fumadocs MDX can handle nearly 500+ files, you are recommended to use other alternatives when the amount of MDX files exceeds 400.
+A huge amount of MDX files can cause an extremely high memory usage during build and development mode.
+
+This is because of:
+
+- Bundlers do a lot of work under the hood to bundle MDX and JavaScript files and optimize performance.
+- Bundlers are not supposed to compile hundreds of MDX files.
+
+## Alternative
+
+A popular alternative is `next-mdx-remote`, it allows rendering pages on-demand with SSG which can **highly increase your build speed.**
+However, you cannot use import in MDX files anymore.
+
+### Remote Source
+
+`next-mdx-remote` supports remote sources.
+
+For a huge amount of files, we would also recommend using a remote source like GitHub.
+This allows you to fetch file content directly from your remote source and render it on-demand.
+
+This is very important because without a remote source to hold your files, the content of these files will be a part of your build.
+Since host platforms like Vercel are not supposed to hold a huge build output, you might hit the limit of their plans.
+
+### Integration
+
+Fumadocs doesn't provide an integration for `next-mdx-remote`, the main reason is `next-mdx-remote` supports remote sources, which are not necessarily file-system based.
+Fumadocs cannot generate a page tree for non file-system based sources.
+
+To use `next-mdx-remote` with Fumadocs, generate the page tree from the remote source (e.g. GitHub), and pass it to layouts.
+For file-system based sources, you may use [Source API](/docs/headless/source-api) to generate the page tree.
