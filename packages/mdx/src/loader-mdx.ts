@@ -2,10 +2,27 @@ import path from 'node:path';
 import { createProcessor, type ProcessorOptions } from '@mdx-js/mdx';
 import { type Processor } from '@mdx-js/mdx/internal-create-format-aware-processors';
 import grayMatter from 'gray-matter';
-import { type LoaderContext } from 'webpack';
+import { type NormalModule, type LoaderContext } from 'webpack';
 import { getGitTimestamp } from './utils/git-timestamp';
+import { getMDXLoaderOptions, type ResolvePluginsInput } from './config';
 
-export interface Options extends ProcessorOptions {
+type ProcessorOptionsInput = Omit<
+  ProcessorOptions,
+  'rehypePlugins' | 'remarkPlugins'
+> & {
+  rehypePlugins?: ResolvePluginsInput;
+  remarkPlugins?: ResolvePluginsInput;
+};
+
+export interface MDXLoaderOptionsInput extends ProcessorOptionsInput {
+  /**
+   * Fetch last modified time with specified version control
+   * @defaultValue 'none'
+   */
+  lastModifiedTime?: 'git' | 'none';
+}
+
+export interface MDXLoaderOptions extends ProcessorOptions {
   /**
    * Fetch last modified time with specified version control
    * @defaultValue 'none'
@@ -31,14 +48,16 @@ const cache = new Map<string, Processor>();
  * it supports frontmatter by parsing and injecting the data in `vfile.data.frontmatter`
  */
 export default async function loader(
-  this: LoaderContext<Options>,
+  this: LoaderContext<MDXLoaderOptionsInput>,
   source: string,
-  callback: LoaderContext<Options>['callback'],
+  callback: LoaderContext<MDXLoaderOptions>['callback'],
 ): Promise<void> {
   this.cacheable(true);
   const context = this.context;
   const filePath = this.resourcePath;
-  const { lastModifiedTime, ...options } = this.getOptions();
+  const { lastModifiedTime, ...userOptions } = this.getOptions();
+
+  const options = await getMDXLoaderOptions(userOptions);
   const { content, data: frontmatter } = grayMatter(source);
   const detectedFormat = filePath.endsWith('.mdx') ? 'mdx' : 'md';
   const format = options.format ?? detectedFormat;

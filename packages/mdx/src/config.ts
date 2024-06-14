@@ -14,7 +14,7 @@ import type { Pluggable } from 'unified';
 import type { Configuration } from 'webpack';
 import remarkMdxExport from './mdx-plugins/remark-exports';
 import type { LoaderOptions } from './loader';
-import type { Options as MDXLoaderOptions } from './loader-mdx';
+import type { MDXLoaderOptionsInput, MDXLoaderOptions } from './loader-mdx';
 import {
   SearchIndexPlugin,
   type Options as SearchIndexPluginOptions,
@@ -22,11 +22,16 @@ import {
 import { RootMapFile } from './root-map-file';
 
 type MDXOptions = Omit<
-  NonNullable<MDXLoaderOptions>,
+  NonNullable<MDXLoaderOptionsInput>,
   'rehypePlugins' | 'remarkPlugins'
 > & {
-  rehypePlugins?: ResolvePlugins;
-  remarkPlugins?: ResolvePlugins;
+  rehypePlugins?: ResolvePluginsInput;
+  remarkPlugins?: ResolvePluginsInput;
+
+  /**
+   * The folder from which to import the MDX components
+   */
+  providerImportSource?: string | null;
 
   /**
    * Properties to export from `vfile.data`
@@ -38,12 +43,23 @@ type MDXOptions = Omit<
   rehypeCodeOptions?: RehypeCodeOptions | false;
 };
 
+/**
+ * A delayed plugin resolution, which dynamically imports the named plugin,
+ * and then passes the options to it.
+ */
+type LazyPluginResolution = [string, object];
+
+/**
+ * A plugin can either be a valid unified plugin or a pair of plugin name and options
+ */
+export type ResolvePluginsInput = ResolvePlugins | LazyPluginResolution[];
+
 type ResolvePlugins = Pluggable[] | ((v: Pluggable[]) => Pluggable[]);
 
 export interface CreateMDXOptions {
   cwd?: string;
 
-  mdxOptions?: MDXOptions;
+  mdxOptions?: MDXLoaderOptionsInput;
 
   buildSearchIndex?:
     | Omit<SearchIndexPluginOptions, 'rootContentDir' | 'rootMapFile'>
@@ -84,13 +100,13 @@ function pluginOption(
   return list;
 }
 
-function getMDXLoaderOptions({
+async function getMDXLoaderOptions({
   valueToExport = [],
   rehypeCodeOptions,
   remarkImageOptions,
   remarkHeadingOptions,
   ...mdxOptions
-}: MDXOptions): MDXLoaderOptions {
+}: MDXOptions): Promise<MDXLoaderOptions> {
   const mdxExports = [
     'structuredData',
     'toc',
@@ -98,6 +114,13 @@ function getMDXLoaderOptions({
     'lastModified',
     ...valueToExport,
   ];
+
+  const remarkOptions = await resolveImportPlugins(
+    mdxOptions.remarkPlugins ?? [],
+  );
+  const rehypeOptions = await resolveImportPlugins(
+    mdxOptions.rehypePlugins ?? [],
+  );
 
   const remarkPlugins = pluginOption(
     (v) => [
@@ -108,7 +131,7 @@ function getMDXLoaderOptions({
       remarkStructure,
       [remarkMdxExport, { values: mdxExports }],
     ],
-    mdxOptions.remarkPlugins,
+    remarkOptions,
   );
 
   const rehypePlugins = pluginOption(
@@ -116,7 +139,7 @@ function getMDXLoaderOptions({
       rehypeCodeOptions !== false && [rehypeCode, rehypeCodeOptions],
       ...v,
     ],
-    mdxOptions.rehypePlugins,
+    rehypeOptions,
   );
 
   return {
@@ -125,6 +148,38 @@ function getMDXLoaderOptions({
     remarkPlugins,
     rehypePlugins,
   };
+}
+
+/**
+ * When building with turbo we cannot pass closures across the nextjs → turbo boundary,
+ * so instead we support the syntax from {@link LazyPluginResolution} which this function
+ * then evaluates returning a fully resolved plugin
+ */
+async function resolveImportPlugins(
+  input: ResolvePluginsInput,
+): Promise<ResolvePlugins> {
+  return Array.isArray(input)
+    ? await Promise.all(
+        input.map(async (v) => {
+          if (isLazyPluginResolution(v)) {
+            const [pluginName, options] = v;
+            const plugin = (
+              (await import(pluginName)) as {
+                default: (options?: object) => Pluggable;
+              }
+            ).default;
+            return (() => plugin(options)) as Pluggable;
+          }
+          return v;
+        }),
+      )
+    : input;
+}
+
+function isLazyPluginResolution(
+  v: LazyPluginResolution | Pluggable,
+): v is LazyPluginResolution {
+  return Array.isArray(v) && typeof v[0] === 'string';
 }
 
 const defaultPageExtensions = ['mdx', 'md', 'jsx', 'js', 'tsx', 'ts'];
@@ -139,7 +194,6 @@ function createMDX({
 }: CreateMDXOptions = {}) {
   const rootMapFile = path.resolve(cwd, rootMapPath);
   const rootContentDir = path.resolve(cwd, rootContentPath);
-  const mdxLoaderOptions = getMDXLoaderOptions(mdxOptions);
 
   if (
     new RootMapFile({
@@ -153,6 +207,30 @@ function createMDX({
     return {
       ...nextConfig,
       pageExtensions: nextConfig.pageExtensions ?? defaultPageExtensions,
+      experimental: {
+        turbo: {
+          rules: {
+            '*.{md,mdx}': [
+              {
+                loader: 'fumadocs-mdx/loader-mdx',
+                // TODO: how do we communicate to the user about this?
+                // @ts-expect-error(arlyon): user must ensure only JSON is sent
+                options: mdxOptions,
+              },
+            ],
+            '.map.ts': [
+              {
+                loader: 'fumadocs-mdx/loader',
+                options: {
+                  rootContentDir,
+                  rootMapFile,
+                  ...loadOptions,
+                },
+              },
+            ],
+          },
+        },
+      },
       webpack: (config: Configuration, options) => {
         config.resolve ||= {};
 
@@ -174,7 +252,7 @@ function createMDX({
               options.defaultLoaders.babel,
               {
                 loader: 'fumadocs-mdx/loader-mdx',
-                options: mdxLoaderOptions,
+                options: mdxOptions,
               },
             ],
           },
@@ -209,4 +287,7 @@ function createMDX({
   };
 }
 
-export { createMDX as default };
+export {
+  createMDX as default,
+  getMDXLoaderOptions,
+};
