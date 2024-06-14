@@ -19,6 +19,11 @@ const modes: Mode[] = [
     package: 'fumadocs-ui',
     name: 'UI',
   },
+  {
+    param: 'mdx',
+    package: 'fumadocs-mdx',
+    name: 'MDX',
+  },
 ];
 
 export const runtime = 'edge';

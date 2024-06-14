@@ -41,6 +41,7 @@ export function RollButton({
       setShow(!nearTop);
     };
 
+    listener();
     window.addEventListener('scroll', listener);
     return () => {
       window.removeEventListener('scroll', listener);

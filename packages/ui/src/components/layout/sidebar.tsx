@@ -21,6 +21,7 @@ import type { LinkItemType } from '@/layout';
 import { LinkItem } from '@/components/layout/link-item';
 import { LargeSearchToggle } from '@/components/layout/search-toggle';
 import { useSidebar } from '@/contexts/sidebar';
+import { useSearchContext } from '@/contexts/search';
 import {
   Collapsible,
   CollapsibleContent,
@@ -93,6 +94,7 @@ export function Sidebar({
 }: SidebarProps & {
   aside?: HTMLAttributes<HTMLElement> & Record<string, unknown>;
 }): React.ReactElement {
+  const search = useSearchContext();
   const context = useMemo<InternalContext>(
     () => ({
       defaultOpenLevel,
@@ -121,7 +123,9 @@ export function Sidebar({
           )}
         >
           {banner}
-          <LargeSearchToggle className="rounded-lg max-md:hidden" />
+          {search.enabled ? (
+            <LargeSearchToggle className="rounded-lg max-md:hidden" />
+          ) : null}
         </div>
         <ViewportContent>
           {items.length > 0 && (
@@ -261,6 +265,16 @@ function FolderNode({
     [closeOnRedirect, active],
   );
 
+  const content = (
+    <>
+      {icon}
+      {name}
+      <ChevronDown
+        className={cn('ms-auto transition-transform', !extend && '-rotate-90')}
+      />
+    </>
+  );
+
   return (
     <Collapsible open={extend} onOpenChange={setExtend}>
       {index ? (
@@ -269,25 +283,11 @@ function FolderNode({
           href={index.url}
           onClick={onClick}
         >
-          {icon}
-          {name}
-          <ChevronDown
-            className={cn(
-              'ms-auto transition-transform',
-              !extend && '-rotate-90',
-            )}
-          />
+          {content}
         </Link>
       ) : (
         <CollapsibleTrigger className={cn(itemVariants({ active }))}>
-          {icon}
-          {name}
-          <ChevronDown
-            className={cn(
-              'ms-auto transition-transform',
-              !extend && '-rotate-90',
-            )}
-          />
+          {content}
         </CollapsibleTrigger>
       )}
       <CollapsibleContent>

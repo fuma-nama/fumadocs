@@ -1,0 +1,35 @@
+---
+title: Home Layout
+description: Shared layout for other pages
+---
+
+import { File, Files, Folder } from 'fumadocs-ui/components/files';
+
+## Usage
+
+Add a navbar and search dialog across other pages.
+
+It doesn't contain a sidebar, a page tree is not required.
+
+```jsx
+import { Layout } from 'fumadocs-ui/layout';
+
+export default function HomeLayout({ children }) {
+  return <Layout>{children}</Layout>;
+}
+```
+
+Create a [Route Group](https://nextjs.org/docs/app/building-your-application/routing/route-groups) to share the same layout across multiple pages.
+
+<Files>
+  <Folder name="(home)" defaultOpen>
+    <File name="page.tsx" />
+    <File name="layout.tsx" />
+  </Folder>
+  <Folder name="/docs">
+    <Folder name={'[[..slugs]]'}>
+      <File name="page.tsx" />
+    </Folder>
+    <File name="layout.tsx" />
+  </Folder>
+</Files>
