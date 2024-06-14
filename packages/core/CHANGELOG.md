@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 12.0.6
+
+### Patch Changes
+
+- 7a29b79: Remove default language from `source.getLanguages`
+- b0c1242: Support Next.js 15 cache behaviour in `getGithubLastEdit`
+
 ## 12.0.5
 
 ## 12.0.4
