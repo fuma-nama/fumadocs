@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 12.0.5
+
+### Patch Changes
+
+- 4455d58: Fix `bannerProps` being ignored
+  - fumadocs-core@12.0.5
+
 ## 12.0.4
 
 ### Patch Changes
