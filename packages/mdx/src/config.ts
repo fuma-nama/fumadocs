@@ -12,7 +12,6 @@ import {
 } from 'fumadocs-core/mdx-plugins';
 import type { Pluggable } from 'unified';
 import type { Configuration } from 'webpack';
-import { MapWebpackPlugin } from './webpack-plugins/map-plugin';
 import remarkMdxExport from './mdx-plugins/remark-exports';
 import type { LoaderOptions } from './loader';
 import type { Options as MDXLoaderOptions } from './loader-mdx';
@@ -20,6 +19,7 @@ import {
   SearchIndexPlugin,
   type Options as SearchIndexPluginOptions,
 } from './webpack-plugins/search-index-plugin';
+import { RootMapFile } from './root-map-file';
 
 type MDXOptions = Omit<
   NonNullable<MDXLoaderOptions>,
@@ -141,6 +141,14 @@ function createMDX({
   const rootContentDir = path.resolve(cwd, rootContentPath);
   const mdxLoaderOptions = getMDXLoaderOptions(mdxOptions);
 
+  if (
+    new RootMapFile({
+      rootMapFile,
+    }).create()
+  ) {
+    console.log(`Created ${rootMapFile} automatically for you.`);
+  }
+
   return (nextConfig: NextConfig = {}): NextConfig => {
     return {
       ...nextConfig,
@@ -184,12 +192,6 @@ function createMDX({
         );
 
         config.plugins ||= [];
-
-        config.plugins.push(
-          new MapWebpackPlugin({
-            rootMapFile,
-          }),
-        );
 
         if (buildSearchIndex !== false)
           config.plugins.push(
