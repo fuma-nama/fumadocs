@@ -28,11 +28,11 @@
     "prettier": "^3.3.2",
     "rimraf": "^5.0.7",
     "tsup": "8.1.0",
-    "turbo": "2.0.3",
+    "turbo": "2.0.4",
     "typescript": "^5.4.5",
     "vitest": "^1.6.0"
   },
-  "packageManager": "pnpm@9.2.0",
+  "packageManager": "pnpm@9.3.0",
   "pnpm": {
     "peerDependencyRules": {
       "ignoreMissing": [
