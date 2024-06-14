@@ -199,6 +199,8 @@ function createOutput({
       const list: LanguageEntry[] = [];
 
       for (const [language, pages] of i18nMap) {
+        if (language === '') continue;
+
         list.push({
           language,
           pages: Array.from(pages.values()),
