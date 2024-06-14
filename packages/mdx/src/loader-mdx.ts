@@ -69,9 +69,11 @@ export default async function loader(
     })
     .then(
       (file) => {
-        const info = this._module?.buildInfo as InternalBuildInfo;
+        const module =
+          this._module ?? (this._module = { buildInfo: {} } as NormalModule);
+        const buildInfo = module.buildInfo ?? (module.buildInfo = {});
 
-        info.__fumadocs = {
+        buildInfo.__fumadocs = {
           path: filePath,
           data: file.data,
         };
