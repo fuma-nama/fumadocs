@@ -3,32 +3,63 @@ import { createProcessor, type ProcessorOptions } from '@mdx-js/mdx';
 import { type Processor } from '@mdx-js/mdx/internal-create-format-aware-processors';
 import grayMatter from 'gray-matter';
 import { type NormalModule, type LoaderContext } from 'webpack';
+import type { Pluggable } from 'unified';
+import {
+  rehypeCode,
+  type RehypeCodeOptions,
+  remarkGfm,
+  remarkHeading,
+  type RemarkHeadingOptions,
+  remarkImage,
+  type RemarkImageOptions,
+  remarkStructure,
+} from 'fumadocs-core/mdx-plugins';
+import remarkMdxExport from '@/mdx-plugins/remark-exports';
+import { getPlugins } from '@/utils/resolve-plugins';
 import { getGitTimestamp } from './utils/git-timestamp';
-import { getMDXLoaderOptions, type ResolvePluginsInput } from './config';
 
-type ProcessorOptionsInput = Omit<
-  ProcessorOptions,
-  'rehypePlugins' | 'remarkPlugins'
+export type ResolvePlugins = Pluggable[] | ((v: Pluggable[]) => Pluggable[]);
+
+/**
+ * A delayed plugin resolution, which dynamically imports the named plugin,
+ * and then passes the options to it.
+ */
+export type LazyPluginResolution = [string, object];
+
+/**
+ * A plugin can either be a valid Unified plugin or a pair of plugin name and options
+ */
+export type ResolvePluginsInput = ResolvePlugins | LazyPluginResolution[];
+
+export type MDXOptions = ProcessorOptions & {
+  /**
+   * Fetch last modified time with specified version control
+   * @defaultValue 'none'
+   */
+  lastModifiedTime?: 'git' | 'none';
+
+  /**
+   * The folder from which to import the MDX components
+   */
+  providerImportSource?: string | null;
+
+  /**
+   * Properties to export from `vfile.data`
+   */
+  valueToExport?: string[];
+
+  remarkHeadingOptions?: RemarkHeadingOptions;
+  remarkImageOptions?: RemarkImageOptions | false;
+  rehypeCodeOptions?: RehypeCodeOptions | false;
+};
+
+export type InputMDXOptions = Omit<
+  MDXOptions,
+  'remarkPlugins' | 'rehypePlugins'
 > & {
   rehypePlugins?: ResolvePluginsInput;
   remarkPlugins?: ResolvePluginsInput;
 };
-
-export interface MDXLoaderOptionsInput extends ProcessorOptionsInput {
-  /**
-   * Fetch last modified time with specified version control
-   * @defaultValue 'none'
-   */
-  lastModifiedTime?: 'git' | 'none';
-}
-
-export interface MDXLoaderOptions extends ProcessorOptions {
-  /**
-   * Fetch last modified time with specified version control
-   * @defaultValue 'none'
-   */
-  lastModifiedTime?: 'git' | 'none';
-}
 
 export interface InternalBuildInfo {
   __fumadocs?: {
@@ -40,6 +71,49 @@ export interface InternalBuildInfo {
   };
 }
 
+async function getMDXLoaderOptions({
+  valueToExport = [],
+  rehypeCodeOptions,
+  remarkImageOptions,
+  remarkHeadingOptions,
+  ...mdxOptions
+}: InputMDXOptions): Promise<MDXOptions> {
+  const mdxExports = [
+    'structuredData',
+    'toc',
+    'frontmatter',
+    'lastModified',
+    ...valueToExport,
+  ];
+
+  const remarkPlugins = await getPlugins(
+    (v) => [
+      remarkGfm,
+      [remarkHeading, remarkHeadingOptions],
+      remarkImageOptions !== false && [remarkImage, remarkImageOptions],
+      ...v,
+      remarkStructure,
+      [remarkMdxExport, { values: mdxExports }],
+    ],
+    mdxOptions.remarkPlugins ?? [],
+  );
+
+  const rehypePlugins = await getPlugins(
+    (v) => [
+      rehypeCodeOptions !== false && [rehypeCode, rehypeCodeOptions],
+      ...v,
+    ],
+    mdxOptions.rehypePlugins ?? [],
+  );
+
+  return {
+    providerImportSource: 'next-mdx-import-source-file',
+    ...mdxOptions,
+    remarkPlugins,
+    rehypePlugins,
+  };
+}
+
 const cache = new Map<string, Processor>();
 
 /**
@@ -48,16 +122,17 @@ const cache = new Map<string, Processor>();
  * it supports frontmatter by parsing and injecting the data in `vfile.data.frontmatter`
  */
 export default async function loader(
-  this: LoaderContext<MDXLoaderOptionsInput>,
+  this: LoaderContext<InputMDXOptions>,
   source: string,
-  callback: LoaderContext<MDXLoaderOptions>['callback'],
+  callback: LoaderContext<InputMDXOptions>['callback'],
 ): Promise<void> {
   this.cacheable(true);
   const context = this.context;
   const filePath = this.resourcePath;
-  const { lastModifiedTime, ...userOptions } = this.getOptions();
+  const { lastModifiedTime, ...options } = await getMDXLoaderOptions(
+    this.getOptions(),
+  );
 
-  const options = await getMDXLoaderOptions(userOptions);
   const { content, data: frontmatter } = grayMatter(source);
   const detectedFormat = filePath.endsWith('.mdx') ? 'mdx' : 'md';
   const format = options.format ?? detectedFormat;

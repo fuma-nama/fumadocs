@@ -19,7 +19,7 @@
     },
     ".": {
       "import": "./dist/index.mjs",
-      "types": "./dist/index.mts"
+      "types": "./dist/index.d.mts"
     }
   },
   "main": "./dist/index.mjs",
