@@ -1,5 +1,12 @@
 # fumadocs-contentlayer
 
+## 1.1.34
+
+### Patch Changes
+
+- 2eb68c8: Force a release of content sources
+  - fumadocs-core@12.0.7
+
 ## 1.1.33
 
 ### Patch Changes

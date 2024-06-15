@@ -1,5 +1,12 @@
 # next-docs-mdx
 
+## 8.2.32
+
+### Patch Changes
+
+- 2eb68c8: Force a release of content sources
+  - fumadocs-core@12.0.7
+
 ## 8.2.31
 
 ### Patch Changes

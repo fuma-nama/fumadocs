@@ -1,11 +1,9 @@
 ---
-title: Layout
+title: Docs Layout
 description: The layout of documentation
 ---
 
-import { File, Files, Folder } from 'fumadocs-ui/components/files';
-
-The layout of documentation pages, it includes sidebar and navbar.
+The layout of documentation pages, it includes a sidebar and a navigation header.
 
 > It is a server component, you should not reference it in a client component.
 
@@ -21,38 +19,11 @@ export default function Layout({ children }) {
 }
 ```
 
-### Non-docs Layout
-
-To share the navbar and search dialog across other pages, use the `Layout` component.
-
-It doesn't contain a sidebar, therefore, a page tree is not required.
-
-```jsx
-import { Layout } from 'fumadocs-ui/layout';
-
-export default function HomeLayout({ children }) {
-  return <Layout>{children}</Layout>;
-}
-```
-
-Create a [Route Group](https://nextjs.org/docs/app/building-your-application/routing/route-groups) to share the same layout across multiple pages.
-
-<Files>
-  <Folder name="(home)" defaultOpen>
-    <File name="page.tsx" />
-    <File name="layout.tsx" />
-  </Folder>
-  <Folder name="/docs">
-    <Folder name={'[[..slugs]]'}>
-      <File name="page.tsx" />
-    </Folder>
-    <File name="layout.tsx" />
-  </Folder>
-</Files>
-
-## Navbar
+### Navbar
 
 The navigation header provides common interactive elements.
+
+> On larger devices, it becomes a part of sidebar.
 
 ```mdx
 <DocsLayout
@@ -67,7 +38,7 @@ The navigation header provides common interactive elements.
 }
 ```
 
-## Sidebar
+### Sidebar
 
 Provide elements to navigate between pages.
 
@@ -84,89 +55,11 @@ Provide elements to navigate between pages.
 
 ### Disable Sidebar from Pages
 
-A simple answer is **No**.
-
+This is not supported.
 Due to the limitations of App Router, layouts are not re-rendered when navigating between pages.
 It is an anti-pattern to change your layout from a page.
 
 You can consider:
 
 1. Disable sidebar from the entire layout.
-2. Create a [MDX Page](/docs/ui/blocks/page#mdx-page) in a layout that doesn't contain a sidebar (e.g. non-docs layout).
-
-## Links
-
-Navigation links displayed on every page.
-
-### Item
-
-A link to navigate to an URL, can be external.
-
-```mdx
-import { DocsLayout } from 'fumadocs-ui/layout';
-
-<DocsLayout
-  links={[
-    {
-      icon: <BookIcon />,
-      text: 'Blog',
-      url: '/blog',
-    },
-  ]}
-/>
-```
-
-To mark the item as active when browsing child pages like `/blog/post`, add set it as `nested-url`.
-
-```mdx
-import { DocsLayout } from 'fumadocs-ui/layout';
-
-<DocsLayout
-  links={[
-    {
-      icon: <BookIcon />,
-      text: 'Blog',
-      url: '/blog',
-      active: 'nested-url',
-    },
-  ]}
-/>
-```
-
-### Secondary Item
-
-Same as normal items, but are shown as icon buttons on the navbar.
-
-```mdx
-import { DocsLayout } from 'fumadocs-ui/layout';
-
-<DocsLayout
-  links={[
-    {
-      type: 'secondary',
-      icon: <BookIcon />,
-      text: 'Blog',
-      url: '/blog',
-    },
-  ]}
-/>
-```
-
-### Dropdown Menu
-
-A dropdown menu containing multiple link items.
-
-```mdx
-import { DocsLayout } from 'fumadocs-ui/layout';
-
-<DocsLayout
-  links={[
-    {
-      icon: <BookIcon />,
-      type: 'menu',
-      text: 'Guide',
-      items: [{ ... }],
-    },
-  ]}
-/>
-```
+2. Create a [MDX Page](/docs/ui/blocks/page#mdx-page) in a layout that doesn't contain a sidebar.

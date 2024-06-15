@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 12.0.7
+
+### Patch Changes
+
+- 51441d3: Fix `RollButton` component problems on Safari
+  - fumadocs-core@12.0.7
+
 ## 12.0.6
 
 ### Patch Changes

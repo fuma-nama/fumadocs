@@ -64,6 +64,9 @@ export type PageProps = DocsPageProps;
 export type BreadcrumbProps = NonNullable<DocsPageProps['breadcrumb']>;
 
 export type TOCProps = NonNullable<DocsPageProps['tableOfContent']>;
+export type TOCPopoverProps = NonNullable<
+  DocsPageProps['tableOfContentPopover']
+>;
 
 export type FooterProps = NonNullable<DocsPageProps['footer']>;
 

@@ -8,12 +8,12 @@ Footer, and Breadcrumb.
 
 ## Usage
 
-```mdx
+```tsx
 import { DocsPage, DocsBody } from 'fumadocs-ui/page';
 
 <DocsPage>
   <DocsBody>...</DocsBody>
-</DocsPage>
+</DocsPage>;
 ```
 
 ### Body
@@ -22,31 +22,37 @@ It applies the [Typography](/docs/ui/theme#typography) styles, wrap your content
 
 > You can use this component without `<DocsPage />`.
 
-```mdx
+```tsx
 import { DocsBody } from 'fumadocs-ui/page';
 
 <DocsBody>
   <h1>This heading looks good!</h1>
-</DocsBody>
+</DocsBody>;
 ```
 
 ### Table of Contents
 
-It is an array with all the headings in your document. For Markdown or MDX
-documents, You can parse TOC by using the
-[TOC Utility](/docs/headless/utils/get-toc). Some content sources may offer this out-of-the-box.
+An overview of all the headings in your document.
 
-You can easily customise or disable TOC in your documentation.
+It requires an array of headings. For Markdown and MDX
+documents, You can obtain it using the
+[TOC Utility](/docs/headless/utils/get-toc). Content sources like Fumadocs MDX offer this out-of-the-box.
 
-```mdx
+```tsx
 import { DocsPage } from 'fumadocs-ui/page';
 
-<DocsPage toc={headings} tableOfContent={options}>
-  ...
-</DocsPage>
+<DocsPage toc={headings}>...</DocsPage>;
 ```
 
 #### Options
+
+Customise or disable TOC from your documentation with the `tableOfContent` option.
+
+```tsx
+import { DocsPage } from 'fumadocs-ui/page';
+
+<DocsPage tableOfContent={options}>...</DocsPage>;
+```
 
 ```json doc-gen:typescript
 {
@@ -55,10 +61,28 @@ import { DocsPage } from 'fumadocs-ui/page';
 }
 ```
 
-### Last Update Time
+#### Popover Mode
+
+On smaller devices, it is shown on a popover instead.
+Customise it with the `tableOfContentPopover` option.
+
+```tsx
+import { DocsPage } from 'fumadocs-ui/page';
+
+<DocsPage tableOfContentPopover={options}>...</DocsPage>;
+```
+
+```json doc-gen:typescript
+{
+  "file": "./content/docs/ui/props.ts",
+  "name": "TOCPopoverProps"
+}
+```
+
+### Last Updated Time
 
 Since you might have different version controls (e.g. Github) or it's from
-remote sources like Sanity, Fumadocs UI doesn't display last updated time by
+remote sources like Sanity, Fumadocs UI doesn't display the last updated time by
 default.
 
 For Github hosted documents, you can use
@@ -74,7 +98,15 @@ import { DocsPage } from 'fumadocs-ui/page';
 
 Footer is a navigation element that has two buttons to jump to the next and previous pages. When not specified, it shows the neighbour pages found from page tree.
 
-You can also customise it with `items` prop.
+Customise the footer with the `footer` option.
+
+```tsx
+import { DocsPage, DocsBody } from 'fumadocs-ui/page';
+
+<DocsPage footer={options}>
+  <DocsBody>...</DocsBody>
+</DocsPage>;
+```
 
 ```json doc-gen:typescript
 {
