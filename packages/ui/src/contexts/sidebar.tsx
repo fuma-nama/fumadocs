@@ -12,9 +12,9 @@ import { SidebarProvider as BaseProvider } from 'fumadocs-core/sidebar';
 
 interface SidebarContext {
   open: boolean;
-  setOpen: (v: boolean) => void;
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   collapsed: boolean;
-  setCollapsed: (v: boolean) => void;
+  setCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
 
   /**
    * When set to true, close the sidebar on redirection
