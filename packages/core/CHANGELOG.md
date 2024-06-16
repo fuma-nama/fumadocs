@@ -1,5 +1,47 @@
 # next-docs-zeta
 
+## 12.1.0
+
+### Minor Changes
+
+- 0a377a9: **Support writing code blocks as a `<Tab />` element.**
+
+  ````mdx
+  import { Tabs } from 'fumadocs-ui/components/tabs';
+
+  <Tabs items={["Tab 1", "Tab 2"]}>
+
+  ```js tab="Tab 1"
+  console.log('Hello');
+  ```
+
+  ```js tab="Tab 2"
+  console.log('Hello');
+  ```
+
+  </Tabs>
+  ````
+
+  This is same as wrapping the code block in a `<Tab />` component.
+
+- 0a377a9: **Pass the `icon` prop to code blocks as HTML instead of MDX attribute.**
+
+  **why:** Only MDX flow elements support attributes with JSX value, like:
+
+  ```mdx
+  <Pre icon={<svg />}>...</Pre>
+  ```
+
+  As Shiki outputs hast elements, we have to convert the output of Shiki to a MDX flow element so that we can pass the `icon` property.
+
+  Now, `rehype-code` passes a HTML string instead of JSX, and render it with `dangerouslySetInnerHTML`:
+
+  ```mdx
+  <Pre icon="<svg />">...</Pre>
+  ```
+
+  **migrate:** Not needed, it should work seamlessly.
+
 ## 12.0.7
 
 ## 12.0.6
