@@ -1,5 +1,3 @@
-import { toEstree } from 'hast-util-to-estree';
-import { type JSXElement } from 'estree-jsx';
 import { type ShikiTransformer } from 'shiki';
 
 export interface CodeBlockIcon {
@@ -134,6 +132,9 @@ export interface IconOptions {
   extend?: Record<string, CodeBlockIcon>;
 }
 
+/**
+ * Inject icons to `icon` property (as HTML)
+ */
 export function transformerIcon(options: IconOptions = {}): ShikiTransformer {
   const shortcuts = {
     ...defaultShortcuts,
@@ -144,121 +145,21 @@ export function transformerIcon(options: IconOptions = {}): ShikiTransformer {
     ...options.extend,
   };
 
+  const defaultIcon = 'default' in icons ? icons.default : undefined;
   return {
     name: 'rehype-code:icon',
-    root(root) {
+    pre(pre) {
       const lang = this.options.lang;
       if (!lang) return;
 
-      const pre = root.children[0];
-      if (pre.type !== 'element' || pre.tagName !== 'pre') return;
-
       const iconName = lang in shortcuts ? shortcuts[lang] : lang;
-      const icon = iconName in icons ? icons[iconName] : icons.default;
+      const icon = iconName in icons ? icons[iconName] : defaultIcon;
 
-      const tree = toEstree(pre, {
-        elementAttributeNameCase: 'react',
-      });
-
-      if (tree.body[0].type === 'ExpressionStatement') {
-        const expression = tree.body[0].expression;
-
-        if (expression.type === 'JSXElement') {
-          expression.openingElement.attributes.push({
-            type: 'JSXAttribute',
-            name: {
-              type: 'JSXIdentifier',
-              name: 'icon',
-            },
-            value: createSVGElement(icon),
-          });
-        }
+      if (icon) {
+        pre.properties.icon = `<svg viewBox="${icon.viewBox}"><path d="${icon.d}" fill="${icon.fill}" /></svg>`;
       }
-      return {
-        type: 'root',
-        children: [
-          {
-            type: 'mdxFlowExpression',
-            value: '',
-            data: {
-              estree: tree,
-            },
-          },
-        ],
-      } as unknown as ReturnType<NonNullable<ShikiTransformer['root']>>;
-    },
-  };
-}
 
-function createSVGElement(icon: CodeBlockIcon): JSXElement {
-  return {
-    type: 'JSXElement',
-    openingElement: {
-      type: 'JSXOpeningElement',
-      attributes: [
-        {
-          type: 'JSXAttribute',
-          name: {
-            type: 'JSXIdentifier',
-            name: 'viewBox',
-          },
-          value: {
-            type: 'Literal',
-            value: icon.viewBox,
-          },
-        },
-      ],
-      name: {
-        type: 'JSXIdentifier',
-        name: 'svg',
-      },
-      selfClosing: false,
+      return pre;
     },
-    closingElement: {
-      type: 'JSXClosingElement',
-      name: {
-        type: 'JSXIdentifier',
-        name: 'svg',
-      },
-    },
-    children: [
-      {
-        type: 'JSXElement',
-        openingElement: {
-          type: 'JSXOpeningElement',
-          attributes: [
-            {
-              type: 'JSXAttribute',
-              name: {
-                type: 'JSXIdentifier',
-                name: 'fill',
-              },
-              value: {
-                type: 'Literal',
-                value: icon.fill,
-              },
-            },
-            {
-              type: 'JSXAttribute',
-              name: {
-                type: 'JSXIdentifier',
-                name: 'd',
-              },
-              value: {
-                type: 'Literal',
-                value: icon.d,
-              },
-            },
-          ],
-          name: {
-            type: 'JSXIdentifier',
-            name: 'path',
-          },
-          selfClosing: true,
-        },
-        closingElement: null,
-        children: [],
-      },
-    ],
   };
 }

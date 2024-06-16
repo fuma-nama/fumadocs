@@ -127,11 +127,10 @@
   },
   "dependencies": {
     "@formatjs/intl-localematcher": "^0.5.4",
-    "@shikijs/rehype": "^1.6.4",
-    "@shikijs/transformers": "^1.6.4",
+    "@shikijs/rehype": "^1.6.5",
+    "@shikijs/transformers": "^1.6.5",
     "flexsearch": "0.7.21",
     "github-slugger": "^2.0.0",
-    "hast-util-to-estree": "^3.1.0",
     "negotiator": "^0.6.3",
     "npm-to-yarn": "^2.2.1",
     "react-remove-scroll": "^2.5.10",
@@ -139,7 +138,7 @@
     "remark-gfm": "^4.0.0",
     "remark-mdx": "^3.0.1",
     "scroll-into-view-if-needed": "^3.1.0",
-    "shiki": "^1.6.4",
+    "shiki": "^1.6.5",
     "swr": "^2.2.5",
     "unist-util-visit": "^5.0.0"
   },

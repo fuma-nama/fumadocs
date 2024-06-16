@@ -1,7 +1,14 @@
 'use client';
 import { Check, Copy } from 'lucide-react';
-import type { ButtonHTMLAttributes, HTMLAttributes, ReactNode } from 'react';
-import { forwardRef, useCallback, useRef } from 'react';
+import {
+  type ButtonHTMLAttributes,
+  type HTMLAttributes,
+  type ReactElement,
+  type ReactNode,
+  forwardRef,
+  useCallback,
+  useRef,
+} from 'react';
 import { cn } from '@/utils/cn';
 import {
   ScrollArea,
@@ -14,6 +21,8 @@ import { buttonVariants } from '@/theme/variants';
 export type CodeBlockProps = HTMLAttributes<HTMLElement> & {
   /**
    * Icon of code block
+   *
+   * When passed as a string, it assumes the value is the HTML of icon
    */
   icon?: ReactNode;
 
@@ -59,7 +68,18 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
       >
         {title ? (
           <div className="flex flex-row items-center gap-2 border-b bg-muted px-4 py-1.5">
-            <div className="text-muted-foreground [&_svg]:size-3.5">{icon}</div>
+            {icon ? (
+              <div
+                className="text-muted-foreground [&_svg]:size-3.5"
+                {...(typeof icon === 'string'
+                  ? {
+                      dangerouslySetInnerHTML: { __html: icon },
+                    }
+                  : {
+                      children: icon,
+                    })}
+              />
+            ) : null}
             <figcaption className="flex-1 truncate text-muted-foreground">
               {title}
             </figcaption>
@@ -92,7 +112,7 @@ function CopyButton({
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & {
   onCopy: () => void;
-}): React.ReactElement {
+}): ReactElement {
   const [checked, onClick] = useCopyButton(onCopy);
 
   return (
