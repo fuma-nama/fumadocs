@@ -12,6 +12,7 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
 
   const onCollapse = useCallback(() => {
     setCollapsed((v) => !v);
+    setHover(false);
   }, [setCollapsed]);
 
   const onHover: PointerEventHandler = useCallback((e) => {
@@ -59,7 +60,7 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
         aside={{
           'data-collapse': collapsed,
           'data-hover': hover,
-          onPointerEnter: collapsed ? onHover : undefined,
+          onPointerEnter: onHover,
           onPointerLeave: onLeave,
           'aria-hidden': Boolean(collapsed && !hover),
           className: cn(

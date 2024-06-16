@@ -43,13 +43,45 @@ You may filter the meta string before processing it with the `filterMetaString` 
 
 ### Icon
 
-Adds an icon according to the language of codeblock. It outputs JSX syntax, which means MDX must be enabled.
+Add an icon according to the language of codeblock.
+It outputs HTML, you might need to render it with React `dangerouslySetInnerHTML`.
 
 ```jsx
-<pre icon={<svg />}>...</pre>
+<pre icon="<svg />">...</pre>
 ```
 
 Disable or customise icons with the `icon` option.
+
+### Tab
+
+Wrap the pre element in MDX `<Tab />` component.
+This is mainly for Fumadocs UI Integration, but you can use it with your own Tab component.
+
+````mdx
+<Tabs items={["Name"]}>
+
+```js tab="Name"
+console.log('Hello');
+```
+
+</Tabs>
+````
+
+Outputs:
+
+````mdx
+<Tabs items={["Name"]}>
+
+<Tab value="Name">
+
+```js
+console.log('Hello');
+```
+
+</Tab>
+
+</Tabs>
+````
 
 ### More Options
 
