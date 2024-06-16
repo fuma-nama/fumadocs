@@ -1,10 +1,11 @@
-import type { Root } from 'hast';
+import type { Root, RootContent } from 'hast';
 import rehypeShiki, { type RehypeShikiOptions } from '@shikijs/rehype';
 import {
   transformerNotationHighlight,
   transformerNotationWordHighlight,
 } from '@shikijs/transformers';
 import type { Processor, Transformer } from 'unified';
+import type { ShikiTransformer } from 'shiki';
 import type { IconOptions, CodeBlockIcon } from './transformer-icon';
 import { transformerIcon } from './transformer-icon';
 
@@ -25,6 +26,10 @@ const metaValues: MetaValue[] = [
     name: 'custom',
     regex: /custom="(?<value>[^"]+)"/,
   },
+  {
+    name: 'tab',
+    regex: /tab="(?<value>[^"]+)"/,
+  },
 ];
 
 export const rehypeCodeDefaultOptions: RehypeCodeOptions = {
@@ -44,8 +49,8 @@ export const rehypeCodeDefaultOptions: RehypeCodeOptions = {
     for (const value of metaValues) {
       const result = value.regex.exec(meta);
 
-      if (result?.groups) {
-        map[value.name] = result.groups.value;
+      if (result) {
+        map[value.name] = result[1];
       }
     }
 
@@ -79,6 +84,13 @@ export type RehypeCodeOptions = RehypeShikiOptions & {
    * Add icon to code blocks
    */
   icon?: IconOptions | false;
+
+  /**
+   * Wrap code blocks in `<Tab>` component when "tab" meta string presents
+   *
+   * @defaultValue true
+   */
+  tab?: false;
 };
 
 /**
@@ -125,11 +137,42 @@ export function rehypeCode(
     ];
   }
 
+  if (codeOptions.tab !== false) {
+    codeOptions.transformers = [...codeOptions.transformers, transformerTab()];
+  }
+
   if (codeOptions.defaultLang) {
     codeOptions.defaultLanguage = codeOptions.defaultLang;
   }
 
   return rehypeShiki.call(this, codeOptions) as Transformer<Root, Root>;
+}
+
+function transformerTab(): ShikiTransformer {
+  return {
+    name: 'rehype-code:tab',
+    root(root) {
+      const meta = this.options.meta;
+      if (typeof meta?.tab !== 'string') return root;
+
+      return {
+        type: 'root',
+        children: [
+          {
+            type: 'mdxJsxFlowElement',
+            name: 'Tab',
+            data: {
+              _codeblock: true,
+            },
+            attributes: [
+              { type: 'mdxJsxAttribute', name: 'value', value: meta.tab },
+            ],
+            children: root.children,
+          } as RootContent,
+        ],
+      } as ReturnType<NonNullable<ShikiTransformer['root']>>;
+    },
+  };
 }
 
 export { type CodeBlockIcon, transformerIcon };

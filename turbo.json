@@ -5,6 +5,7 @@
     "NEXT_PUBLIC_ALGOLIA_API_KEY",
     "NEXT_PUBLIC_ALGOLIA_INDEX"
   ],
+  "ui": "stream",
   "tasks": {
     "build": {
       "env": ["ALGOLIA_API_KEY"],

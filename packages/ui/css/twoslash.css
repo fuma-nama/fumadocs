@@ -69,7 +69,8 @@
   padding-left: 0 !important;
 }
 
-.twoslash-popup-docs {
+.twoslash-popup-docs,
+.twoslash-popup-docs-tags {
   font-size: 14px !important;
   line-height: 20px !important;
   margin-top: 8px !important;

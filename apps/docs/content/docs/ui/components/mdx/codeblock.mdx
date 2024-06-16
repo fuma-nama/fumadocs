@@ -48,6 +48,8 @@ import { Pre, CodeBlock } from 'fumadocs-ui/components/codeblock';
 />
 ```
 
+See [Markdown](/docs/ui/markdown#codeblock) for supported features.
+
 ### Icons
 
 You can specify a custom icon by passing an `icon` prop to `CodeBlock` component.
@@ -56,28 +58,4 @@ By default, the icon will be injected by the custom Shiki transformer automatica
 
 ```js title="config.js"
 console.log('js');
-```
-
-```ts title="config.ts"
-console.log('ts');
-```
-
-```md title="document.md"
-# Hello World!
-```
-
-```rust title="main.rs"
-fn main() {
-    println!("Hello World!");
-}
-```
-
-```tsx title="component.tsx"
-<MDXContent>Hello World</MDXContent>
-```
-
-```css title="style.css"
-.nd-codeblock {
-  color: red;
-}
 ```

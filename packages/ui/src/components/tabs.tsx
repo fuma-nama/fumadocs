@@ -1,7 +1,13 @@
 'use client';
 
 import type { TabsContentProps } from '@radix-ui/react-tabs';
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+  useCallback,
+} from 'react';
 import { cn } from '@/utils/cn';
 import * as Primitive from './ui/tabs';
 
@@ -79,16 +85,20 @@ export function Tabs({
     };
   }, [id, persist, values]);
 
-  const onValueChange = (v: string): void => {
+  const onValueChange = useCallback((v: string) => {
     if (id) {
       update(id, v, persist);
     } else {
       setValue(v);
     }
-  };
+  }, []);
 
   return (
-    <Primitive.Tabs value={value} onValueChange={onValueChange}>
+    <Primitive.Tabs
+      value={value}
+      onValueChange={onValueChange}
+      className="my-4"
+    >
       <Primitive.TabsList>
         {values.map((v, i) => (
           <Primitive.TabsTrigger key={v} value={v}>
@@ -113,7 +123,10 @@ export function Tab({
   return (
     <Primitive.TabsContent
       value={toValue(value)}
-      className={cn('prose-no-margin', className)}
+      className={cn(
+        'prose-no-margin [&>figure:only-child]:-m-4 [&>figure:only-child]:rounded-none [&>figure:only-child]:border-none',
+        className,
+      )}
       {...props}
     />
   );

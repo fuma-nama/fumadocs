@@ -11,8 +11,9 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
   const timerRef = useRef(0);
 
   const onCollapse = useCallback(() => {
-    setCollapsed(!collapsed);
-  }, [collapsed, setCollapsed]);
+    setCollapsed((v) => !v);
+    setHover(false);
+  }, [setCollapsed]);
 
   const onHover: PointerEventHandler = useCallback((e) => {
     if (e.pointerType === 'touch') return;

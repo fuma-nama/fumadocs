@@ -1,5 +1,11 @@
 # fumadocs-twoslash
 
+## 1.1.0
+
+### Minor Changes
+
+- 5f86faa: Improve multi-line code blocks
+
 ## 1.0.3
 
 ### Patch Changes

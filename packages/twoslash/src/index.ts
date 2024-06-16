@@ -22,17 +22,27 @@ export function transformerTwoslash(
       renderMarkdown,
       renderMarkdownInline,
       hast: {
+        hoverToken: {
+          tagName: 'Popup',
+        },
+        hoverPopup: {
+          tagName: 'PopupContent',
+        },
         hoverCompose: ({ popup, token }) => [
+          popup,
           {
             type: 'element',
-            tagName: 'Popup',
-            properties: {},
+            tagName: 'PopupTrigger',
+            properties: {
+              asChild: true,
+            },
             children: [
-              popup,
               {
                 type: 'element',
-                tagName: 'PopupTrigger',
-                properties: {},
+                tagName: 'span',
+                properties: {
+                  class: 'twoslash-hover',
+                },
                 children: [token],
               },
             ],
@@ -42,14 +52,33 @@ export function transformerTwoslash(
           class: 'prose twoslash-popup-docs',
         },
         popupTypes: {
-          class: 'nd-codeblock twoslash-popup-code',
+          tagName: 'div',
+          class: 'prose-no-margin',
+          children: (v) => {
+            if (
+              v.length === 1 &&
+              v[0].type === 'element' &&
+              v[0].tagName === 'pre'
+            )
+              return v;
+
+            return [
+              {
+                type: 'element',
+                tagName: 'code',
+                properties: {
+                  class: 'nd-codeblock twoslash-popup-code',
+                },
+                children: v,
+              },
+            ];
+          },
+        },
+        popupDocsTags: {
+          class: 'prose twoslash-popup-docs twoslash-popup-docs-tags',
         },
         nodesHighlight: {
           class: 'highlighted-word twoslash-highlighted',
-        },
-        hoverPopup: {
-          tagName: 'PopupContent',
-          children: (v) => v,
         },
         ...options?.rendererRich?.hast,
       },
@@ -71,14 +100,14 @@ function renderMarkdown(
     toHast(mdast, {
       handlers: {
         code: (state, node: Code) => {
-          const lang = node.lang ?? '';
-          if (lang) {
+          if (node.lang) {
             return this.codeToHast(node.value, {
               ...this.options,
               transformers: [],
-              lang,
+              lang: node.lang,
             }).children[0] as Element;
           }
+
           return defaultHandlers.code(state, node);
         },
       },
