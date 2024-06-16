@@ -324,9 +324,6 @@ importers:
       github-slugger:
         specifier: ^2.0.0
         version: 2.0.0
-      hast-util-to-estree:
-        specifier: ^3.1.0
-        version: 3.1.0
       negotiator:
         specifier: ^0.6.3
         version: 0.6.3
