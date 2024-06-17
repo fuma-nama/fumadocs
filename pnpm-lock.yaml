@@ -579,6 +579,9 @@ importers:
       '@mdx-js/mdx':
         specifier: ^3.0.1
         version: 3.0.1
+      fast-glob:
+        specifier: ^3.3.1
+        version: 3.3.2
       gray-matter:
         specifier: ^4.0.3
         version: 4.0.3

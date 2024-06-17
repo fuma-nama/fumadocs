@@ -1,0 +1,43 @@
+{
+  "files": [
+    {
+      "frontmatter": {
+        "description": "Something",
+        "title": "Hello World",
+      },
+      "path": "index.mdx",
+    },
+    {
+      "frontmatter": {},
+      "path": "meta.json",
+    },
+    {
+      "frontmatter": {
+        "description": "You found me!",
+        "title": "Another File",
+      },
+      "path": "another/file.mdx",
+    },
+  ],
+  "pageTree": {
+    "children": [
+      {
+        "name": "Hello World",
+        "type": "page",
+        "url": "/docs",
+      },
+      {
+        "children": [
+          {
+            "name": "Another File",
+            "type": "page",
+            "url": "/docs/another/file",
+          },
+        ],
+        "name": "Another",
+        "type": "folder",
+      },
+    ],
+    "name": "Hello World",
+  },
+}

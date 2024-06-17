@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/mdx-remote",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "The remote MDX files adapter for Fumadocs",
   "keywords": [
     "NextJs",
@@ -13,8 +13,25 @@
   "license": "MIT",
   "author": "Fuma Nama",
   "type": "module",
+  "exports": {
+    "./github": {
+      "import": "./dist/gtihub/index.js",
+      "types": "./dist/github/index.d.ts"
+    },
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "github": [
+        "./dist/github/index.d.ts"
+      ]
+    }
+  },
   "files": [
     "dist/*"
   ],
@@ -27,6 +44,7 @@
   },
   "dependencies": {
     "@mdx-js/mdx": "^3.0.1",
+    "fast-glob": "^3.3.1",
     "gray-matter": "^4.0.3",
     "rehype-img-size": "^1.0.1"
   },
@@ -42,7 +60,7 @@
     "vfile": "^6.0.1"
   },
   "peerDependencies": {
-    "fumadocs-core": "12.x.x",
+    "fumadocs-core": ">= 12.1.1",
     "next": ">= 14.1.0"
   },
   "publishConfig": {

@@ -20,7 +20,7 @@ export interface Config {
    *
    * file: Generate a page for each schema
    *
-   * @defaultValue tag
+   * @defaultValue file
    */
   per?: 'tag' | 'file';
 
