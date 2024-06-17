@@ -8,7 +8,7 @@ packages/create-app/versions.json
 apps/docs/shaders/*
 
 **/test/out/**/*
-**/test/*.output.*
+**/test/fixtures/*.output.*
 
 apps/docs/content/docs/ui/museum/events.mdx
 apps/docs/content/docs/ui/museum/operations.mdx
