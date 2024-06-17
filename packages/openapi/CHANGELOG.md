@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 2.0.5
+
+### Patch Changes
+
+- bcc05d6: Fix docs typo
+
 ## 2.0.4
 
 ### Patch Changes

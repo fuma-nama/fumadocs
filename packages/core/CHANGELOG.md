@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 12.1.1
+
+### Patch Changes
+
+- a39dbcb: Export `loadFiles` from Source API
+
 ## 12.1.0
 
 ### Minor Changes
