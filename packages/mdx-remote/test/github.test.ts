@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { assert, expect, test } from 'vitest';
+import { expect, test } from 'vitest';
 import { generatePageTree } from '@/github';
 import {
   type CompareTreeDiff,
@@ -8,7 +8,6 @@ import {
   filesToGitTree,
   transformTreeToCache,
 } from '@/github/utils';
-import fs from 'node:fs/promises';
 
 const cwd = path.dirname(fileURLToPath(import.meta.url));
 
