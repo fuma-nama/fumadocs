@@ -2,15 +2,22 @@ import path from 'node:path';
 import fg from 'fast-glob';
 import type { GithubCacheFile } from './cache';
 import { getTree } from './get-tree';
-import { getBlob } from './get-blob';
+
+type FilterArray<T, U> = T extends U ? T : never;
+export type GitTreeItem<T extends 'blob' | 'tree' = 'blob' | 'tree'> =
+  FilterArray<Awaited<ReturnType<typeof getTree>>['tree'][number], { type: T }>;
 
 export interface CompareTreeDiff {
-  type: 'tree' | 'blob';
   action: 'add' | 'remove' | 'modify';
+  type: 'tree' | 'blob';
+  sha: string;
   path: string;
 }
 
-const blobToUtf8 = (blob: { content: string; encoding: BufferEncoding }): string => {
+export const blobToUtf8 = (blob: {
+  content: string;
+  encoding: BufferEncoding;
+}): string => {
   return Buffer.from(blob.content, blob.encoding).toString('utf8');
 };
 
@@ -53,12 +60,12 @@ export const findTreeRecursive = async (
 };
 
 export const createTransformTreeToCache = (
-  options?: Omit<Parameters<typeof getBlob>[0], 'fileSha'>,
+  getFileContent?: (path: string) => string | Promise<string>,
 ) =>
-  async function transformTreeToCache(
+  function transformTreeToCache(
     tree: Awaited<ReturnType<typeof getTree>>,
     lastUpdated = Date.now(),
-  ): Promise<GithubCacheFile> {
+  ): GithubCacheFile {
     const files: GithubCacheFile['files'] = [];
     const subDirectories: Record<
       string,
@@ -90,14 +97,7 @@ export const createTransformTreeToCache = (
         files.push({
           sha: item.sha,
           path: item.path,
-          content: options
-            ? blobToUtf8(
-                await getBlob({
-                  ...options,
-                  fileSha: item.sha,
-                }),
-              )
-            : '',
+          content: getFileContent?.(item.path) ?? '',
         });
         continue;
       }
@@ -121,14 +121,7 @@ export const createTransformTreeToCache = (
       realDirectory.files.push({
         sha: item.sha,
         path: item.path,
-        content: options
-          ? blobToUtf8(
-              await getBlob({
-                ...options,
-                fileSha: item.sha,
-              }),
-            )
-          : '',
+        content: getFileContent?.(item.path) ?? '',
       });
     }
 
@@ -139,6 +132,154 @@ export const createTransformTreeToCache = (
       subDirectories: Object.values(subDirectories).filter(
         Boolean,
       ) as GithubCacheFile['subDirectories'],
+    };
+  };
+
+export const createCompareTree = (cache: GithubCacheFile) =>
+  function compareToTree(tree: Awaited<ReturnType<typeof getTree>>) {
+    const diff: CompareTreeDiff[] = [];
+    if (tree.sha === cache.sha) return diff;
+
+    const coveredPaths = new Set<string>();
+    const compareFiles = createCompareFiles((file) => {
+      coveredPaths.add(file.path);
+
+      const matched = tree.tree.find((t) => t.path === file.path);
+      let action: CompareTreeDiff['action'] | undefined;
+
+      if (!matched) action = 'remove';
+      else if (matched.sha !== file.sha) action = 'modify';
+      else return;
+
+      return {
+        type: 'blob',
+        action,
+        path: file.path,
+        sha: matched ? matched.sha : file.sha,
+      };
+    });
+
+    for (const subDir of cache.subDirectories) {
+      coveredPaths.add(subDir.path);
+      diff.push(...compareFiles(subDir.files));
+    }
+
+    diff.push(...compareFiles(cache.files));
+
+    const newItems = tree.tree.filter((t) => !coveredPaths.has(t.path));
+
+    for (const item of newItems) {
+      diff.push({
+        type: item.type,
+        action: 'add',
+        path: item.path,
+        sha: item.sha,
+      });
+    }
+
+    return diff;
+  };
+
+const createCompareFiles = (
+  compareFile: (
+    file: GithubCacheFile['subDirectories'][0]['files'][0],
+  ) => CompareTreeDiff | undefined,
+) =>
+  function compareFiles(files: GithubCacheFile['subDirectories'][0]['files']) {
+    let diff: CompareTreeDiff[] = [];
+    for (const file of files) {
+      diff = diff.concat(compareFile(file) ?? []);
+    }
+
+    return diff;
+  };
+
+export const createApplyDiff = (
+  cache: GithubCacheFile,
+  getFileContent?: (diff: Omit<GitTreeItem, 'url'>) => string | Promise<string>,
+) =>
+  function applyDiff(diff: CompareTreeDiff[]) {
+    for (const change of diff) {
+      switch (change.action) {
+        case 'add':
+          if (change.type === 'blob') {
+            cache.files.push({
+              path: change.path,
+              sha: change.sha,
+              content: getFileContent?.(change) ?? '',
+            });
+          } else {
+            cache.subDirectories.push({
+              path: change.path,
+              sha: change.sha,
+              files: [],
+              subDirectories: [],
+            });
+          }
+          break;
+        case 'modify':
+          if (change.type === 'blob') {
+            const fileIndex = cache.files.findIndex(
+              (f) => f.path === change.path,
+            );
+            if (fileIndex !== -1) {
+              cache.files[fileIndex].sha = change.sha;
+              cache.files[fileIndex].content = getFileContent?.(change) ?? '';
+            }
+          }
+          break;
+        case 'remove':
+          if (change.type === 'blob') {
+            cache.files = cache.files.filter((f) => f.path !== change.path);
+          } else {
+            cache.subDirectories = cache.subDirectories.filter(
+              (sd) => sd.path !== change.path,
+            );
+          }
+          break;
+      }
+    }
+
+    return cache;
+  };
+
+export const createRenderer = (cache: GithubCacheFile) =>
+  async function render(): Promise<GithubCacheFile> {
+    const compressContent =  (content: string): string => {
+      const compressed = Buffer.from(content, 'utf8').toString('hex');
+      return compressed;
+    }
+    
+    const renderSubDirectories = async (
+      subDirectories: GithubCacheFile['subDirectories'],
+    ): Promise<NonNullable<unknown>> => {
+      return await Promise.all(
+        subDirectories.map(async (subDirectory) => ({
+          ...subDirectory,
+          files: await Promise.all(
+            subDirectory.files.map(async (file) => ({
+              ...file,
+              content: compressContent(await file.content),
+            })),
+          ),
+          subDirectories: await renderSubDirectories(
+            subDirectory.subDirectories,
+          ),
+        })),
+      );
+    };
+
+    return {
+      ...cache,
+      files: await Promise.all(
+        cache.files.map(async (file) => ({
+          ...file,
+          content: compressContent(await file.content),
+        })),
+      ),
+      subDirectories: (await renderSubDirectories(
+        cache.subDirectories,
+      )) as GithubCacheFile['subDirectories'],
     };
   };
 
@@ -209,60 +350,3 @@ export const filesToGitTree = async ({
 
   return tree;
 };
-
-export const createCompareTree = (cache: GithubCacheFile) =>
-  function compareToTree(tree: Awaited<ReturnType<typeof getTree>>) {
-    const diff: CompareTreeDiff[] = [];
-    if (tree.sha === cache.sha) return diff;
-
-    const coveredPaths = new Set<string>();
-    const compareFiles = createCompareFiles((file) => {
-      coveredPaths.add(file.path);
-
-      const matched = tree.tree.find((t) => t.path === file.path);
-      let action: CompareTreeDiff['action'] | undefined;
-
-      if (!matched) action = 'remove';
-      else if (matched.sha !== file.sha) action = 'modify';
-      else return;
-
-      return {
-        type: 'blob',
-        action,
-        path: file.path,
-      };
-    });
-
-    for (const subDir of cache.subDirectories) {
-      coveredPaths.add(subDir.path);
-      diff.push(...compareFiles(subDir.files));
-    }
-
-    diff.push(...compareFiles(cache.files));
-
-    const newItems = tree.tree.filter((t) => !coveredPaths.has(t.path));
-
-    for (const item of newItems) {
-      diff.push({
-        type: item.type,
-        action: 'add',
-        path: item.path,
-      });
-    }
-
-    return diff;
-  };
-
-const createCompareFiles = (
-  compareFile: (
-    file: GithubCacheFile['subDirectories'][0]['files'][0],
-  ) => CompareTreeDiff | undefined,
-) =>
-  function compareFiles(files: GithubCacheFile['subDirectories'][0]['files']) {
-    let diff: CompareTreeDiff[] = [];
-    for (const file of files) {
-      diff = diff.concat(compareFile(file) ?? []);
-    }
-
-    return diff;
-  };
