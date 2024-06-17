@@ -6,7 +6,7 @@ import {
   type CompareTreeDiff,
   createCompareTree,
   filesToGitTree,
-  transformTreeToCache,
+  createTransformTreeToCache,
 } from '@/github/utils';
 
 const cwd = path.dirname(fileURLToPath(import.meta.url));
@@ -29,7 +29,7 @@ test('Transform Git tree to cache', async () => {
   const tree = await filesToGitTree({
     directory,
   });
-  const { lastUpdated, ...cache } = await transformTreeToCache(tree);
+  const { lastUpdated, ...cache } = await createTransformTreeToCache()(tree);
 
   await expect(cache).toMatchFileSnapshot(
     path.resolve(cwd, './out/cache.output.json5'),
@@ -43,10 +43,12 @@ test('Differientate between two trees', async () => {
     directory,
   });
 
-  const cache = await transformTreeToCache(tree);
+  const cache = await createTransformTreeToCache()(tree);
   const compareTree = createCompareTree(cache);
 
-  const fakeTree: (typeof tree)['tree'] = [
+  const fakeTree: ((typeof tree)['tree'][number] & {
+    sha: CompareTreeDiff['action'];
+  })[] = [
     {
       // make sure sha property is an action (add, remove, modify)
       sha: 'add',

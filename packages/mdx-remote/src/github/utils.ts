@@ -10,6 +10,10 @@ export interface CompareTreeDiff {
   path: string;
 }
 
+const blobToUtf8 = (blob: { content: string; encoding: BufferEncoding }): string => {
+  return Buffer.from(blob.content, blob.encoding).toString('utf8');
+};
+
 export const findTreeRecursive = async (
   directory: string,
   options: Parameters<typeof getTree>[0],
@@ -49,7 +53,7 @@ export const findTreeRecursive = async (
 };
 
 export const createTransformTreeToCache = (
-  options: Omit<Parameters<typeof getBlob>[0], 'fileSha'>,
+  options?: Omit<Parameters<typeof getBlob>[0], 'fileSha'>,
 ) =>
   async function transformTreeToCache(
     tree: Awaited<ReturnType<typeof getTree>>,
@@ -83,14 +87,17 @@ export const createTransformTreeToCache = (
       const segments = item.path.split('/');
 
       if (segments.length === 1) {
-        const blob = await getBlob({
-          ...options,
-          fileSha: item.sha,
-        });
         files.push({
           sha: item.sha,
           path: item.path,
-          content: Buffer.from(blob.content, blob.encoding).toString(),
+          content: options
+            ? blobToUtf8(
+                await getBlob({
+                  ...options,
+                  fileSha: item.sha,
+                }),
+              )
+            : '',
         });
         continue;
       }
@@ -111,14 +118,17 @@ export const createTransformTreeToCache = (
       const realDirectory =
         segmentDirectory as GithubCacheFile['subDirectories'][0];
 
-      const blob = await getBlob({
-        ...options,
-        fileSha: item.sha,
-      });
       realDirectory.files.push({
         sha: item.sha,
         path: item.path,
-        content: Buffer.from(blob.content, blob.encoding).toString(),
+        content: options
+          ? blobToUtf8(
+              await getBlob({
+                ...options,
+                fileSha: item.sha,
+              }),
+            )
+          : '',
       });
     }
 
