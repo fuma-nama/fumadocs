@@ -10,16 +10,13 @@ import {
 import { githubCacheFileSchema } from './schema';
 import type { getTree } from './get-tree';
 
-const findTreeRecursive =
-  process.env.NODE_ENV === 'test'
-    ? findTreeRecursiveInner
-    : unstableCache(
-        findTreeRecursiveInner,
-        ['@fumadocs/mdx-remote/github/cache'],
-        {
-          tags: ['@fumadocs/mdx-remote/github/cache'],
-        },
-      );
+const findTreeRecursive = unstableCache(
+  findTreeRecursiveInner,
+  ['@fumadocs/mdx-remote/github/cache'],
+  {
+    tags: ['@fumadocs/mdx-remote/github/cache'],
+  },
+);
 
 export type GithubCacheFile = z.infer<typeof githubCacheFileSchema>;
 
@@ -114,10 +111,7 @@ export const createCache = ({
         throw new Error('Cache not initialized - call cache.read() first');
 
       fs.mkdirSync(path.dirname(cachePath), { recursive: true });
-      fs.writeFileSync(
-        cachePath,
-        JSON.stringify(cache, null, 0),
-      )
+      fs.writeFileSync(cachePath, JSON.stringify(cache, null, 0));
     },
   };
 };

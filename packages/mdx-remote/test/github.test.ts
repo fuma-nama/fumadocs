@@ -65,7 +65,7 @@ test('Differientate between two trees', async () => {
       sha: 'remove',
       path: 'meta.json',
       url: 'fixtures/meta.json',
-    }
+    },
   ];
 
   const diff = compareTree({
@@ -77,16 +77,17 @@ test('Differientate between two trees', async () => {
       .filter((item) => !fakeTree.some((f) => f.url === item.url))
       .concat(fakeTree)
       // Act as if the file was removed
-      .filter((item) => item.sha !== "remove")
+      .filter((item) => item.sha !== 'remove'),
   });
   const fakeDiff = fakeTree.map((item) => ({
     type: item.type,
     action: item.sha as CompareTreeDiff['action'],
     path: item.path,
-  }))
+  }));
 
   // DO NOT REMOVE THIS, WILL BREAK TEST (toStrictEqual)
-  const sort = (diff: CompareTreeDiff[]) => diff.sort((a, b) => a.path.localeCompare(b.path));
-  
+  const sort = (diff: CompareTreeDiff[]) =>
+    diff.sort((a, b) => a.path.localeCompare(b.path));
+
   expect(sort(diff)).toStrictEqual(sort(fakeDiff));
 });

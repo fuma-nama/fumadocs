@@ -208,7 +208,7 @@ export const filesToGitTree = async ({
       path: file,
       type: 'blob',
       sha: fnv1a(file),
-      url: path.join(path.basename(directory), file)
+      url: path.join(path.basename(directory), file),
     });
 
     tree.tree = current;
@@ -262,9 +262,7 @@ export const createCompareTree = (cache: GithubCacheFile) =>
 
     diff.push(...compareFiles(cache.files));
 
-    const newItems = tree.tree.filter(
-      (t) => !coveredPaths.has(t.path),
-    );
+    const newItems = tree.tree.filter((t) => !coveredPaths.has(t.path));
 
     for (const item of newItems) {
       diff.push({
