@@ -32,6 +32,41 @@ Generate docs with the script:
 node ./scripts/generate-docs.mjs
 ```
 
-### Demo
+## Options
+
+### Input
+
+An array of input files (path), wildcard allowed.
+
+### Output
+
+Path to the output directory.
+
+### Per
+
+Customise how the page is generated, default to `file`.
+
+| mode | description                     |
+| ---- | ------------------------------- |
+| tag  | Generate a page for each tag    |
+| file | Generate a page for each schema |
+
+### Name
+
+A function that controls the output path of files.
+
+### Render
+
+Customise the docs generation process.
+
+#### `render`
+
+A function to inject custom properties to MDX output.
+
+#### `componentsImportPath`
+
+The import path of your API components, it must exports all components in `fumadocs-ui/components/api`.
+
+## Demo
 
 [View demo](/docs/ui/museum).
