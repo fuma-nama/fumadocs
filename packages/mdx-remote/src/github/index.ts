@@ -1,2 +1,3 @@
 export * from './page-tree';
-export * from './get-file';
+export * from './get-tree';
+export * from './cache';

@@ -1,0 +1,29 @@
+{
+  "files": [
+    {
+      "content": "",
+      "path": "index.mdx",
+      "sha": "44bea95c",
+    },
+    {
+      "content": "",
+      "path": "meta.json",
+      "sha": "7d0aacd6",
+    },
+  ],
+  "sha": "7a31c8fb",
+  "subDirectories": [
+    {
+      "files": [
+        {
+          "content": "",
+          "path": "another/file.mdx",
+          "sha": "73902bb8",
+        },
+      ],
+      "path": "another",
+      "sha": "61f4b532",
+      "subDirectories": [],
+    },
+  ],
+}

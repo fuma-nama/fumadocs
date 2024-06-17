@@ -46,7 +46,8 @@
     "@mdx-js/mdx": "^3.0.1",
     "fast-glob": "^3.3.1",
     "gray-matter": "^4.0.3",
-    "rehype-img-size": "^1.0.1"
+    "rehype-img-size": "^1.0.1",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/mdx": "^2.0.13",
