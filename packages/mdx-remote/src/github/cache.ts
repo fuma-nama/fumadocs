@@ -5,7 +5,7 @@ import { unstable_cache as unstableCache } from 'next/cache';
 import {
   createCompareTree,
   findTreeRecursive as findTreeRecursiveInner,
-  transformTreeToCache,
+  createTransformTreeToCache,
 } from './utils';
 import { githubCacheFileSchema } from './schema';
 import type { getTree } from './get-tree';
@@ -58,7 +58,7 @@ export interface CreateCacheOptions
   /**
    * The SHA1 value or ref (branch or tag) name of the tree.
    */
-  branch?: string;
+  branch: string;
   githubApi?: Omit<
     Parameters<typeof getTree>[0],
     'owner' | 'repo' | 'token' | 'path' | 'treeSha'
@@ -77,6 +77,11 @@ export const createCache = ({
   ...githubInfo
 }: CreateCacheOptions): GithubCache => {
   let cache: GithubCacheFile | undefined;
+
+  const transformTreeToCache = createTransformTreeToCache({
+    ...githubInfo,
+    ...githubApi,
+  });
 
   return {
     get compareToTree() {
@@ -101,7 +106,7 @@ export const createCache = ({
 
         if (!tree) return undefined;
 
-        cache = transformTreeToCache(tree);
+        cache = await transformTreeToCache(tree);
       }
 
       return cache;

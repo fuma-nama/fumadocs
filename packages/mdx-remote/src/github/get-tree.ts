@@ -10,7 +10,7 @@ interface GetTreeOptions {
   /**
    * The SHA1 value or ref (branch or tag) name of the tree.
    */
-  treeSha?: string;
+  treeSha: string;
 
   /**
    *
@@ -56,10 +56,9 @@ export async function getTree({
   if (token) headers.set('Authorization', `Bearer ${token}`);
 
   const url = new URL(
-    `/repos/${owner}/${repo}/git/trees`,
+    `/repos/${owner}/${repo}/git/trees/${treeSha}`,
     'https://api.github.com',
   );
-  if (treeSha) url.pathname += `/${treeSha}`;
   if (recursive) url.searchParams.set('recursive', String(recursive));
 
   const res = await fetch(url, {
