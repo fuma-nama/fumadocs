@@ -1,5 +1,4 @@
-import type { GithubCacheFile } from './cache';
-import type { GithubCacheVirtualFileSystem } from './file-system';
+import type { GithubCache, GithubCacheFile } from './cache';
 import type { getTree } from './get-tree';
 import type { GitTreeItem } from './utils';
 
@@ -10,10 +9,10 @@ export interface CompareTreeDiff {
   path: string;
 }
 
-export const createCompareTree = (cache: GithubCacheFile) =>
-  function compareToTree(tree: Awaited<ReturnType<typeof getTree>>) {
+export const createCompareToGitTree = (cacheFile: GithubCacheFile) =>
+  function compareToGitTree(tree: Awaited<ReturnType<typeof getTree>>) {
     const diff: CompareTreeDiff[] = [];
-    if (tree.sha === cache.sha) return diff;
+    if (tree.sha === cacheFile.sha) return diff;
 
     const coveredPaths = new Set<string>();
     const compareFiles = createCompareFiles((file) => {
@@ -34,12 +33,12 @@ export const createCompareTree = (cache: GithubCacheFile) =>
       };
     });
 
-    for (const subDir of cache.subDirectories) {
+    for (const subDir of cacheFile.subDirectories) {
       coveredPaths.add(subDir.path);
       diff.push(...compareFiles(subDir.files));
     }
 
-    diff.push(...compareFiles(cache.files));
+    diff.push(...compareFiles(cacheFile.files));
 
     const newItems = tree.tree.filter((t) => !coveredPaths.has(t.path));
 
@@ -69,14 +68,14 @@ const createCompareFiles = (
     return diff;
   };
 
-export const createApplyDiff = (
-  cache: GithubCacheFile,
-  fs: GithubCacheVirtualFileSystem,
+export const createApplyDiffToCache = (
+  cacheFile: GithubCacheFile,
+  fs: ReturnType<GithubCache['fs']>,
   _getFileContent?: (
     diff: Omit<GitTreeItem, 'url'>,
   ) => string | Promise<string>,
 ) =>
-  function applyDiff(
+  function applyDiffToCache(
     diff: CompareTreeDiff[],
     getFileContent = _getFileContent,
   ) {
@@ -88,13 +87,13 @@ export const createApplyDiff = (
 
             if (content) fs.writeFile(change.path, content);
 
-            cache.files.push({
+            cacheFile.files.push({
               path: change.path,
               sha: change.sha,
               content,
             });
           } else {
-            cache.subDirectories.push({
+            cacheFile.subDirectories.push({
               path: change.path,
               sha: change.sha,
               files: [],
@@ -104,25 +103,25 @@ export const createApplyDiff = (
           break;
         case 'modify':
           if (change.type === 'blob') {
-            const fileIndex = cache.files.findIndex(
+            const fileIndex = cacheFile.files.findIndex(
               (f) => f.path === change.path,
             );
             if (fileIndex !== -1) {
-              cache.files[fileIndex].sha = change.sha;
+              cacheFile.files[fileIndex].sha = change.sha;
 
               const content = getFileContent?.(change);
               if (!content) continue;
 
               fs.writeFile(change.path, content);
-              cache.files[fileIndex].content = content;
+              cacheFile.files[fileIndex].content = content;
             }
           }
           break;
         case 'remove':
           if (change.type === 'blob') {
-            cache.files = cache.files.filter((f) => f.path !== change.path);
+            cacheFile.files = cacheFile.files.filter((f) => f.path !== change.path);
           } else {
-            cache.subDirectories = cache.subDirectories.filter(
+            cacheFile.subDirectories = cacheFile.subDirectories.filter(
               (sd) => sd.path !== change.path,
             );
           }
@@ -130,5 +129,5 @@ export const createApplyDiff = (
       }
     }
 
-    return cache;
+    return cacheFile;
   };

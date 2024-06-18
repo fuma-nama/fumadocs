@@ -1,13 +1,13 @@
 import type { GithubCacheFile } from './cache';
 
-export const createFillVirtualFileSystem = (
+export const createPopulateFileSystem = (
   cache: GithubCacheFile,
   _getFileContent?: (file: {
     sha: string;
     path: string;
   }) => string | Promise<string>,
 ) =>
-  function fillVirtualFileSystem(getFileContent = _getFileContent) {
+  function populateFileSystem(getFileContent = _getFileContent) {
     const map = new Map<string, string | Promise<string>>();
 
     const addFiles = (files: GithubCacheFile['files']): void => {
@@ -36,7 +36,7 @@ export const createFillVirtualFileSystem = (
     return map;
   };
 
-export interface GithubCacheVirtualFileSystem {
+export interface CacheVirtualFileSystem {
   readFile: (path: string) => Promise<string | undefined>;
   getFiles: () => string[];
   writeFile: (path: string, content: string | Promise<string>) => void;
@@ -44,7 +44,7 @@ export interface GithubCacheVirtualFileSystem {
 
 export const createVirtualFileSystem = (
   extend?: Map<string, string | Promise<string>>,
-): GithubCacheVirtualFileSystem => {
+): CacheVirtualFileSystem => {
   const files = new Map<string, string | Promise<string>>(extend);
 
   return {

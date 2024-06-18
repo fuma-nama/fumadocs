@@ -45,7 +45,7 @@ interface GeneratePageTreeOptions {
 const builder = createPageTreeBuilder();
 
 export const createGeneratePageTree = (
-  fs: GithubCache['fs'],
+  fs: ReturnType<GithubCache['fs']>,
   {
     include = './**/*.{json,md,mdx}',
   }: Pick<GeneratePageTreeOptions, 'include'>,
