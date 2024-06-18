@@ -18,10 +18,7 @@ export class MDXRemoteGithubPlugin {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access -- Webpack
     compiler.hooks.beforeCompile.tapAsync(
       pluginName,
-      (
-        _,
-        callback: (err?: Error | null | undefined) => void,
-      ) => {
+      (_, callback: (err?: Error | null | undefined) => void) => {
         try {
           cache.inner = createCache(this.options);
           callback();

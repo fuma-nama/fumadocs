@@ -57,7 +57,10 @@ export const createTransformTreeToCache = (
     const blobs = tree.tree.filter((t) => t.type === 'blob');
     const trees = tree.tree.filter((t) => t.type === 'tree');
 
-    const initParentDirectories = (item: GitTreeItem, segments: string[]): GithubCacheFile['subDirectories'][0] => {
+    const initParentDirectories = (
+      item: GitTreeItem,
+      segments: string[],
+    ): GithubCacheFile['subDirectories'][0] => {
       let segmentDirectory: Record<string, NonNullable<unknown> | undefined> =
         subDirectories;
 
