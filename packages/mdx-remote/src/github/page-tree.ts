@@ -1,4 +1,4 @@
-import type { PageTree, TableOfContents } from 'fumadocs-core/server';
+import type { PageTree } from 'fumadocs-core/server';
 import {
   createPageTreeBuilder,
   loadFiles,
@@ -7,8 +7,8 @@ import {
   type BuildPageTreeOptions,
 } from 'fumadocs-core/source';
 import picomatch from 'picomatch';
-import { compile } from '..';
 import type { GithubCache } from './cache';
+import matter from 'gray-matter';
 
 interface FileInfo {
   /**
@@ -16,11 +16,9 @@ interface FileInfo {
    */
   path: string;
 
-  data: {
-    frontmatter: Record<string, unknown>;
-    content: React.ReactElement;
-    toc: TableOfContents;
-  };
+  frontmatter: object;
+
+  content: string;
 }
 
 interface GeneratePageTreeResult {
@@ -66,48 +64,26 @@ export const createGeneratePageTree = (
     const entries = (
       await Promise.all(
         files.map(async (file) => {
-          const content = await fs.readFile(file);
+          const contentWithFrontmatter = await fs.readFile(file);
 
-          if (!content) return null;
+          if (!contentWithFrontmatter) return null;
 
-          let data: Record<string, unknown> = {};
-
-          if (['md', 'mdx'].some((ext) => file.endsWith(ext))) {
-            const {
-              scope: _scope,
-              vfile,
-              frontmatter,
-              ...compiled
-            } = await compile({
-              source: content,
-              // TODO: add support for more configuration
-            });
-
-            data = {
-              ...frontmatter,
-              ...compiled,
-              ...vfile.data,
-            };
-          } else if (file.endsWith('.json')) {
-            data = JSON.parse(content) as Record<string, unknown>;
-          }
+          const { data, content } = matter(contentWithFrontmatter)
 
           return {
             path: file,
-            data,
-          };
+            frontmatter: data,
+            content
+          } satisfies FileInfo
         }),
       )
-    ).filter(Boolean) as {
-      path: string;
-      data: NonNullable<unknown>;
-    }[];
+    ).filter(Boolean) as FileInfo[];
 
     const storage = loadFiles(
-      entries.map((e) => ({
-        path: e.path,
-        type: e.path.endsWith('.json') ? 'meta' : 'page',
-        data: e.data,
+      entries.map(({ path, ...data }) => ({
+        path,
+        type: path.endsWith('.json') ? 'meta' : 'page',
+        data
       })),
       {
         getSlugs,

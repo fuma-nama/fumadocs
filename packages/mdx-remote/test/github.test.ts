@@ -12,7 +12,9 @@ const mockCache = vi.fn(async (directory: string) => {
     directory,
   });
 
-  await cache.init();
+  await cache.init({
+    scope: 'tree'
+  });
 
   return {
     cache,

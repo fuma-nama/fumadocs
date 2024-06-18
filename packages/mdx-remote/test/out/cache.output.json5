@@ -3,26 +3,26 @@
     {
       "content": "2d2d2d0a7469746c653a2048656c6c6f20576f726c640a6465736372697074696f6e3a20536f6d657468696e670a2d2d2d0a0a486579210a",
       "path": "index.mdx",
-      "sha": "44bea95c",
+      "sha": "3584b8bb",
     },
     {
       "content": "7b0a2020227061676573223a205b22696e646578222c20222d2d2d4e6f7468696e672d2d2d222c20222e2e2e616e6f74686572225d0a7d0a",
       "path": "meta.json",
-      "sha": "7d0aacd6",
+      "sha": "deee2034",
     },
   ],
-  "sha": "7a31c8fb",
+  "sha": "e783bb54",
   "subDirectories": [
     {
       "files": [
         {
           "content": "2d2d2d0a7469746c653a20416e6f746865722046696c650a6465736372697074696f6e3a20596f7520666f756e64206d65210a2d2d2d0a",
           "path": "another/file.mdx",
-          "sha": "73902bb8",
+          "sha": "822d4c35",
         },
       ],
       "path": "another",
-      "sha": "61f4b532",
+      "sha": "d36172e2",
       "subDirectories": [],
     },
   ],

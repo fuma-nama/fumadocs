@@ -10,3 +10,14 @@ export const blobToUtf8 = (blob: {
 }): string => {
   return Buffer.from(blob.content, blob.encoding).toString('utf8');
 };
+
+export const fnv1a = (str: string): string => {
+  const FNV_PRIME = 16777619;
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash * FNV_PRIME) % 2 ** 32;
+    hash = (hash + str.charCodeAt(i)) % 2 ** 32;
+  }
+
+  return hash.toString(16);
+};

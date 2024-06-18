@@ -16,7 +16,7 @@ import {
 } from './file-system';
 import { createApplyDiff, createCompareTree } from './diff';
 import { createRenderer } from './render';
-import { blobToUtf8 } from './utils';
+import { blobToUtf8, fnv1a } from './utils';
 import { createGeneratePageTree } from './page-tree';
 
 export type GithubCacheFile = z.infer<typeof githubCacheFileSchema>;
@@ -49,7 +49,7 @@ export interface GithubCache {
   /**
    * Reads the cache from the disk or from the remote Git tree.
    */
-  init: (cachePath?: string) => Promise<GithubCacheFile | undefined>;
+  init: ReturnType<typeof createInit>;
 
   // Boilerplate
 
@@ -114,7 +114,7 @@ export const createRemoteCache = (options: CreateCacheOptions): GithubCache => {
       );
     },
     get init() {
-      return createCacheInit(async () => {
+      return createInit(async () => {
         const tree = await findTreeRecursive(directory, {
           ...githubInfo,
           ...githubApi,
@@ -160,10 +160,18 @@ export const createLocalCache = (
       );
     },
     get init() {
-      return createCacheInit(async () => {
+      return createInit(async (scope) => {
+        if (scope === "file") return;
+
         this.tree = await filesToGitTree({
           include,
           directory,
+          hasher: async (file) => {
+            const { mtimeMs: lastModified } = await fs.promises.stat(
+              path.resolve(directory, file)
+            );
+            return fnv1a(`${file}_${String(lastModified)}`);
+          },
         });
 
         this.data = this.transformTreeToCache(this.tree);
@@ -182,10 +190,16 @@ export const createLocalCache = (
   } as GithubCache);
 };
 
-const createCacheInit = (
-  notFound: () => Promise<GithubCacheFile | undefined>,
+const createInit = (
+  notFound: (scope: 'tree' | 'file') => Promise<GithubCacheFile | undefined>,
 ) =>
-  async function cacheInit(cachePath?: string) {
+  async function init({
+    cachePath,
+    scope,
+  }: {
+    cachePath?: string;
+    scope: Parameters<typeof notFound>[0]
+  }) {
     let obj: GithubCacheFile | undefined;
 
     if (cachePath && fs.existsSync(cachePath)) {
@@ -196,7 +210,7 @@ const createCacheInit = (
       );
     }
 
-    return obj ?? (await notFound());
+    return obj ?? (await notFound(scope));
   };
 
 const createCacheBoilerplate = <Env extends 'local' | 'remote'>(

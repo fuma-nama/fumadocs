@@ -2,7 +2,7 @@ import path from 'node:path';
 import fg from 'fast-glob';
 import type { GithubCacheFile } from './cache';
 import { getTree } from './get-tree';
-import type { GitTreeItem } from './utils';
+import { fnv1a, type GitTreeItem } from './utils';
 
 export const findTreeRecursive = async (
   directory: string,
@@ -65,9 +65,15 @@ export const createTransformTreeToCache = (
         subDirectories;
 
       for (const segment of segments.slice(0, -1)) {
+        const index = segments.indexOf(segment);
+        const gitTreeEntry = tree.tree.find((entry) => entry.path === segments.slice(0, index + 1).join('/'))
+
+        // this segment can't be added if the tree doesn't exist
+        if (!gitTreeEntry) break;
+
         segmentDirectory[segment] ||= {
-          sha: item.sha,
-          path: item.path,
+          sha: gitTreeEntry.sha,
+          path: gitTreeEntry.path,
           files: [],
           subDirectories: [],
         };
@@ -110,41 +116,35 @@ export const createTransformTreeToCache = (
       lastUpdated,
       sha: tree.sha,
       files,
-      subDirectories: Object.values(subDirectories).filter(
-        Boolean,
-      ) as GithubCacheFile['subDirectories'],
+      subDirectories: Object.entries(subDirectories)
+        .map(([name, data]) => ({
+          ...data,
+          path: name,
+        }))
+        .filter(Boolean) as GithubCacheFile['subDirectories'],
     };
   };
 
 export const filesToGitTree = async ({
   include = './**/*.{json,md,mdx}',
   directory,
+  hasher = fnv1a,
 }: {
   include?: string | string[];
   directory: string;
+  hasher?: (file: string) => string | Promise<string>;
 }): ReturnType<typeof getTree> => {
-  const fnv1a = (str: string): string => {
-    const FNV_PRIME = 16777619;
-    let hash = 0x811c9dc5;
-    for (let i = 0; i < str.length; i++) {
-      hash = (hash * FNV_PRIME) % 2 ** 32;
-      hash = (hash + str.charCodeAt(i)) % 2 ** 32;
-    }
-
-    return hash.toString(16);
-  };
-
   const files = await fg(include, {
     cwd: path.resolve(directory),
   });
   const tree: Awaited<ReturnType<typeof getTree>> = {
-    sha: fnv1a(directory),
+    sha: await hasher(path.resolve(directory)),
     url: path.basename(directory),
     truncated: false,
     tree: [],
   };
 
-  const addToTree = (file: string): void => {
+  for await (const file of files) {
     const normalizedPath = path.normalize(file);
     const segments = normalizedPath.split(path.sep);
     const current = tree.tree;
@@ -159,7 +159,7 @@ export const filesToGitTree = async ({
         found = {
           path: foundPath,
           type: 'tree',
-          sha: fnv1a(foundPath),
+          sha: await hasher(foundPath),
           url: path.join(path.basename(directory), foundPath),
         };
         current.push(found);
@@ -169,15 +169,11 @@ export const filesToGitTree = async ({
     current.push({
       path: file,
       type: 'blob',
-      sha: fnv1a(file),
+      sha: await hasher(file),
       url: path.join(path.basename(directory), file),
     });
 
     tree.tree = current;
-  };
-
-  for (const file of files) {
-    addToTree(file);
   }
 
   return tree;
