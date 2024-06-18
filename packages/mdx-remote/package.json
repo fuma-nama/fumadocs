@@ -15,7 +15,7 @@
   "type": "module",
   "exports": {
     "./github": {
-      "import": "./dist/gtihub/index.js",
+      "import": "./dist/github/index.js",
       "types": "./dist/github/index.d.ts"
     },
     ".": {

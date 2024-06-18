@@ -5,10 +5,31 @@ import {
   getSlugs,
   createGetUrl,
   type BuildPageTreeOptions,
+  type UrlFn,
+  type FileData,
 } from 'fumadocs-core/source';
 import picomatch from 'picomatch';
 import matter from 'gray-matter';
 import type { GithubCache } from './cache';
+
+interface PageData {
+  icon?: string;
+  title: string;
+  content: string;
+}
+
+interface Page<Data = PageData> {
+  file: FileInfo;
+  slugs: string[];
+  url: string;
+  data: Data;
+}
+
+interface File {
+  file: FileInfo;
+  format: 'meta' | 'page';
+  data: Record<string, unknown>;
+}
 
 interface FileInfo {
   /**
@@ -16,14 +37,16 @@ interface FileInfo {
    */
   path: string;
 
-  frontmatter: object;
-
   content: string;
+
+  frontmatter: Record<string, string | undefined>;
 }
 
 interface GeneratePageTreeResult {
   files: FileInfo[];
   pageTree: PageTree.Root;
+  getPages: () => Page[];
+  getPage: (slugs: string[] | undefined) => Page | undefined;
 }
 
 interface GeneratePageTreeOptions {
@@ -72,18 +95,21 @@ export const createGeneratePageTree = (
 
           return {
             path: file,
-            frontmatter: data,
             content,
-          } satisfies FileInfo;
+            frontmatter: data,
+          };
         }),
       )
     ).filter(Boolean) as FileInfo[];
 
     const storage = loadFiles(
-      entries.map(({ path, ...data }) => ({
-        path,
-        type: path.endsWith('.json') ? 'meta' : 'page',
-        data,
+      entries.map((e) => ({
+        path: e.path,
+        type: e.path.endsWith('.json') ? 'meta' : 'page',
+        data: {
+          ...e.frontmatter,
+          content: e.content,
+        },
       })),
       {
         getSlugs,
@@ -96,8 +122,48 @@ export const createGeneratePageTree = (
       ...options.pageTree,
     });
 
+    const pageMap = buildPageMap(storage, getUrl);
+
     return {
       pageTree,
-      files: entries as unknown as FileInfo[],
+      files: entries,
+      getPages() {
+        return Array.from(pageMap.values());
+      },
+      getPage(slugs = []) {
+        return pageMap.get(slugs.join('/'));
+      },
     };
   };
+
+function buildPageMap<
+  Storage extends {
+    list: () => NonNullable<unknown>[];
+  },
+>(storage: Storage, getUrl: UrlFn): Map<string, Page> {
+  const map = new Map<string, Page>();
+
+  for (const file of storage.list() as File[]) {
+    if (file.format !== 'page') continue;
+    const page = fileToPage(file, getUrl);
+
+    map.set(page.slugs.join('/'), page);
+  }
+
+  return map;
+}
+
+function fileToPage<Data = PageData>(
+  file: File,
+  getUrl: UrlFn,
+  locale?: string,
+): Page<Data> {
+  const data = file.data as FileData['file'];
+
+  return {
+    file: file.file,
+    url: getUrl(data.slugs, locale),
+    slugs: data.slugs,
+    data: data.data as Data,
+  };
+}

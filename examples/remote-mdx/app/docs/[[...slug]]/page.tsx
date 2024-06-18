@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { DocsPage, DocsBody } from 'fumadocs-ui/page';
 import { notFound } from 'next/navigation';
-import { pages } from '@/app/source';
+import { getPage, getPages } from '@/app/source';
 import { compile } from '@fumadocs/mdx-remote';
 import defaultComponents from 'fumadocs-ui/mdx';
 
@@ -10,14 +10,14 @@ export default async function Page({
 }: {
   params: { slug?: string[] };
 }) {
-  const page = pages.find((p) => p.param === (params.slug ?? []).join('/'));
+  const page = getPage(params.slug);
 
   if (!page) {
     notFound();
   }
 
   const compiled = await compile({
-    source: page.content,
+    source: page.data.content,
     components: {
       ...defaultComponents,
     },
@@ -31,8 +31,8 @@ export default async function Page({
 }
 
 export async function generateStaticParams() {
-  return pages.map((page) => ({
-    slug: page.param.split('/'),
+  return getPages().map((page) => ({
+    slug: page.slugs,
   }));
 }
 
@@ -41,11 +41,11 @@ export async function generateMetadata({
 }: {
   params: { slug?: string[] };
 }) {
-  const page = pages.find((p) => p.param === (params.slug ?? []).join('/'));
+  const page = getPage(params.slug);
 
   if (!page) notFound();
 
   return {
-    title: page.info.title,
+    title: page.data.title,
   } satisfies Metadata;
 }

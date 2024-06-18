@@ -232,10 +232,8 @@ const createrLoader = ({
   notFound: (lazy: boolean) => Promise<GithubCacheFile | undefined>;
   set: <T extends keyof GithubCache>(key: T, value: GithubCache[T]) => void;
 }) =>
-  async function load(
-    options: { lazy?: boolean } = { lazy: true },
-  ): Promise<void> {
-    const { lazy = true } = options;
+  async function load(options?: { lazy?: boolean }): Promise<void> {
+    const { lazy = false } = options ?? {};
     let obj: GithubCacheFile | undefined;
 
     if (cachePath && fs.existsSync(cachePath)) {

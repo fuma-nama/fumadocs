@@ -1,39 +1,13 @@
-import type { PageTree } from 'fumadocs-core/server';
+import { createCache } from '@fumadocs/mdx-remote/github';
+import path from 'node:path';
 
-export const pageTree: PageTree.Root = {
-  name: 'Docs',
-  children: [
-    {
-      type: 'page',
-      name: 'Page',
-      url: '/docs',
-    },
-    {
-      type: 'page',
-      name: 'Test',
-      url: '/docs/test',
-    },
-  ],
-};
+const cwd = process.cwd();
+const directory = path.resolve(cwd, 'content', 'docs');
+const cache = createCache({
+  directory,
+  cachePath: path.resolve(directory, '.fumadocs', 'cache.json'),
+});
 
-export const pages = [
-  {
-    param: '',
-    info: {
-      title: 'Hello World',
-    },
-    content: `# Hello World
-\`\`\`js
-console.log("HELLO");
-\`\`\``,
-  },
-  {
-    param: 'test',
-    info: {
-      title: 'Test',
-    },
-    content: `# Test
+await cache.load();
 
-Hey!`,
-  },
-];
+export const { pageTree, getPage, getPages } = await cache.generatePageTree();
