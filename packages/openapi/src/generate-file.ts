@@ -4,7 +4,7 @@ import fg from 'fast-glob';
 import type { GenerateOptions } from './generate';
 import { generate, generateTags } from './generate';
 
-export interface Config {
+export interface Config extends GenerateOptions {
   /**
    * Schema files
    */
@@ -29,11 +29,6 @@ export interface Config {
    */
   name?: (type: 'file' | 'tag', name: string) => string;
 
-  /**
-   * Customise Generator
-   */
-  options?: GenerateOptions;
-
   cwd?: string;
 }
 
@@ -42,8 +37,8 @@ export async function generateFiles({
   output,
   name: nameFn,
   per = 'file',
-  options,
   cwd = process.cwd(),
+  ...options
 }: Config): Promise<void> {
   const outputDir = join(cwd, output);
 

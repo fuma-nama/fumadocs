@@ -1,10 +1,10 @@
 import { codeblock, createElement } from './element';
 
-export interface TabsProps {
+export interface ResponsesProps {
   items: string[];
 }
 
-export interface TabProps {
+export interface ResponseProps {
   value: string;
 }
 
@@ -30,8 +30,8 @@ export interface Renderer {
   APIInfo: (props: APIInfoProps, child: string[]) => string;
   APIExample: (child: string[]) => string;
 
-  Responses: (props: TabsProps, child: string[]) => string;
-  Response: (props: TabProps, child: string[]) => string;
+  Responses: (props: ResponsesProps, child: string[]) => string;
+  Response: (props: ResponseProps, child: string[]) => string;
 
   ResponseTypes: (child: string[]) => string;
   ExampleResponse: (json: string) => string;
