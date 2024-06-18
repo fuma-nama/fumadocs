@@ -35,7 +35,7 @@ export interface BaseCreateCacheOptions
   /**
    * Directory to search for files (local or remote)
    */
-  directory: string;
+  directory?: string;
   /**
    * Included files.
    *
@@ -101,14 +101,28 @@ export type CreateCacheOptions<Env extends 'local' | 'remote'> =
 type CreateCacheRemoteOptions = BaseCreateCacheOptions;
 type CreateCacheLocalOptions = Pick<
   BaseCreateCacheOptions,
-  'directory' | 'include' | 'cachePath'
->;
+  'include' | 'cachePath'
+> & {
+  directory: NonNullable<BaseCreateCacheOptions['directory']>;
+};
 
 export const createCache: (
   options: CreateCacheLocalOptions | CreateCacheRemoteOptions,
-) => GithubCache = (options) =>
-  // TODO: use zod to verify whether is remote or local
-  'owner' in options ? createRemoteCache(options) : createLocalCache(options);
+) => GithubCache = (options) => {
+  const isRemote =
+    'owner' in options &&
+    'repo' in options &&
+    'token' in options &&
+    'branch' in options;
+  const isLocal = 'directory' in options && !isRemote;
+
+  if (!isRemote && !isLocal)
+    throw new Error('Invalid options. View documentation for correct options.');
+
+  return isRemote
+    ? createRemoteCache(options)
+    : createLocalCache(options as CreateCacheLocalOptions);
+};
 
 export const createRemoteCache = (
   options: CreateCacheOptions<'remote'>,
@@ -133,7 +147,7 @@ export const createRemoteCache = (
         cachePath,
         getFileContent,
         notFound: async () => {
-          const tree = await findTreeRecursive(directory, {
+          const tree = await findTreeRecursive(directory ?? '', {
             ...githubInfo,
             ...githubApi,
             treeSha: githubInfo.branch,
