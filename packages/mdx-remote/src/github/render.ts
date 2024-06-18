@@ -1,23 +1,26 @@
-import type { GithubCacheFile } from "./cache";
-import type { GithubCacheVirtualFileSystem } from "./file-system";
+import type { GithubCacheFile } from './cache';
+import type { GithubCacheVirtualFileSystem } from './file-system';
 
-export const createRenderer = (cache: GithubCacheFile, fs: GithubCacheVirtualFileSystem) =>
+export const createRenderer = (
+  cache: GithubCacheFile,
+  fs: GithubCacheVirtualFileSystem,
+) =>
   async function render(): Promise<GithubCacheFile> {
     const compressContent = (content: string | undefined): string => {
       const compressed = Buffer.from(content ?? '', 'utf8').toString('hex');
       return compressed;
     };
 
-    const renderFiles = async (files: GithubCacheFile['files']): Promise<NonNullable<unknown>> => {
+    const renderFiles = async (
+      files: GithubCacheFile['files'],
+    ): Promise<NonNullable<unknown>> => {
       return Promise.all(
         files.map(async (file) => ({
           ...file,
-          content: compressContent(await
-            fs.readFile(file.path)
-          ),
+          content: compressContent(await fs.readFile(file.path)),
         })),
       );
-    }
+    };
 
     const renderSubDirectories = async (
       subDirectories: GithubCacheFile['subDirectories'],
@@ -35,7 +38,7 @@ export const createRenderer = (cache: GithubCacheFile, fs: GithubCacheVirtualFil
 
     return {
       ...cache,
-      files: await renderFiles(cache.files) as GithubCacheFile['files'],
+      files: (await renderFiles(cache.files)) as GithubCacheFile['files'],
       subDirectories: (await renderSubDirectories(
         cache.subDirectories,
       )) as GithubCacheFile['subDirectories'],

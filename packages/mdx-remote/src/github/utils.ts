@@ -1,4 +1,4 @@
-import type { getTree } from "./get-tree";
+import type { getTree } from './get-tree';
 
 type FilterArray<T, U> = T extends U ? T : never;
 export type GitTreeItem<T extends 'blob' | 'tree' = 'blob' | 'tree'> =

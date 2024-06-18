@@ -1,7 +1,7 @@
-import type { GithubCacheFile } from "./cache";
-import type { GithubCacheVirtualFileSystem } from "./file-system";
-import type { getTree } from "./get-tree";
-import type { GitTreeItem } from "./utils";
+import type { GithubCacheFile } from './cache';
+import type { GithubCacheVirtualFileSystem } from './file-system';
+import type { getTree } from './get-tree';
+import type { GitTreeItem } from './utils';
 
 export interface CompareTreeDiff {
   action: 'add' | 'remove' | 'modify';

@@ -1,7 +1,7 @@
-import path from "node:path";
-import fg from "fast-glob";
-import type { GithubCacheFile } from "./cache";
-import { getTree } from "./get-tree";
+import path from 'node:path';
+import fg from 'fast-glob';
+import type { GithubCacheFile } from './cache';
+import { getTree } from './get-tree';
 
 export const findTreeRecursive = async (
   directory: string,

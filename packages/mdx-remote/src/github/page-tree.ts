@@ -59,7 +59,10 @@ export const createGeneratePageTree = (
   async function generatePageTree({
     baseUrl = '/docs',
     ...options
-  }: Pick<GeneratePageTreeOptions, 'baseUrl' | 'pageTree'> = {}): Promise<GeneratePageTreeResult> {
+  }: Pick<
+    GeneratePageTreeOptions,
+    'baseUrl' | 'pageTree'
+  > = {}): Promise<GeneratePageTreeResult> {
     const getUrl = createGetUrl(baseUrl);
     const isMatch = picomatch(include);
     const files = fs.getFiles().filter((f) => isMatch(f));
@@ -81,7 +84,7 @@ export const createGeneratePageTree = (
       )
     ).filter(Boolean) as FileInfo[];
 
-    console.log(entries)
+    console.log(entries);
 
     const storage = loadFiles(
       entries.map((e) => ({

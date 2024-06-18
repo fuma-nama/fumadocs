@@ -155,11 +155,10 @@ export const createRemoteCache = (options: CreateCacheOptions): GithubCache => {
   } as GithubCache);
 };
 
-export const createLocalCache = (options: GithubCacheLocalOptions): GithubCache => {
-  const {
-    directory,
-    include = './**/*.{json,md,mdx}',
-  } = options;
+export const createLocalCache = (
+  options: GithubCacheLocalOptions,
+): GithubCache => {
+  const { directory, include = './**/*.{json,md,mdx}' } = options;
   let filledFileSystem:
     | ReturnType<GithubCache['fillVirtualFileSystem']>
     | undefined;

@@ -1,4 +1,4 @@
-import type { GithubCacheFile } from "./cache";
+import type { GithubCacheFile } from './cache';
 
 export const createFillVirtualFileSystem = (
   cache: GithubCacheFile,
