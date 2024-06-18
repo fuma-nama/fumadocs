@@ -27,7 +27,7 @@ interface Parameter {
 export function createEndpoint(
   path: string,
   method: MethodInformation,
-  baseUrl = 'https://example.com',
+  baseUrl: string,
 ): Endpoint {
   const params: Parameter[] = [];
   const responses: Endpoint['responses'] = {};

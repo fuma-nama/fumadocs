@@ -1,13 +1,9 @@
 ---
 title: Events
-description: |
-  Special events hosted by the Museum
-
+description: Special events hosted by the Museum
 ---
 
-import { Root, API, APIInfo, APIExample, Property } from 'fumadocs-ui/components/api'
-import { Tabs, Tab } from 'fumadocs-ui/components/tabs'
-import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+import { Root, API, APIInfo, APIExample, ResponseTabs, ResponseTab, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible } from "fumadocs-ui/components/api";
 
 <Root>
 
@@ -21,7 +17,7 @@ Return a list of upcoming special events at the museum.
 
 ### Query Parameters
 
-<Property required={false} deprecated={false} name={"startDate"} type={"string"}>
+<Property name={"startDate"} type={"string"} required={false} deprecated={false}>
 
 The starting date to retrieve future operating hours from. Defaults to today's date.
 
@@ -31,7 +27,7 @@ The starting date to retrieve future operating hours from. Defaults to today's d
 
 </Property>
 
-<Property required={false} deprecated={false} name={"endDate"} type={"string"}>
+<Property name={"endDate"} type={"string"} required={false} deprecated={false}>
 
 The end of a date range to retrieve special events for. Defaults to 7 days after `startDate`.
 
@@ -41,7 +37,7 @@ The end of a date range to retrieve special events for. Defaults to 7 days after
 
 </Property>
 
-<Property required={false} deprecated={false} name={"page"} type={"integer"}>
+<Property name={"page"} type={"integer"} required={false} deprecated={false}>
 
 The page number to retrieve.
 
@@ -51,7 +47,7 @@ The page number to retrieve.
 
 </Property>
 
-<Property required={false} deprecated={false} name={"limit"} type={"integer"}>
+<Property name={"limit"} type={"integer"} required={false} deprecated={false}>
 
 The number of days per page.
 
@@ -77,13 +73,15 @@ The number of days per page.
 curl -X GET "https://api.fake-museum-example.com/special-events"
 ```
 
-<Tabs items={["200"]}>
+<ResponseTabs items={["200"]}>
 
-<Tab value={"200"}>
+<ResponseTab value={"200"}>
 
 A list of upcoming special events
 
-```json title="Example Response"
+<ExampleResponse>
+
+```json
 [
   {
     "eventId": "3be6453c-03eb-4357-ae5a-984a0e574a54",
@@ -98,9 +96,9 @@ A list of upcoming special events
 ]
 ```
 
-<Accordions>
+</ExampleResponse>
 
-<Accordion title={"Typescript Definition"}>
+<TypeScriptResponse>
 
 ```ts
 /**
@@ -135,13 +133,11 @@ export type Response = {
 
 ```
 
-</Accordion>
+</TypeScriptResponse>
 
-</Accordions>
+</ResponseTab>
 
-</Tab>
-
-</Tabs>
+</ResponseTabs>
 
 </APIExample>
 
@@ -159,7 +155,7 @@ Creates a new special event for the museum.
 
 
 
-<Property required={true} deprecated={false} name={"name"} type={"string"}>
+<Property name={"name"} type={"string"} required={true} deprecated={undefined}>
 
 Name of the special event
 
@@ -167,7 +163,7 @@ Name of the special event
 
 </Property>
 
-<Property required={true} deprecated={false} name={"location"} type={"string"}>
+<Property name={"location"} type={"string"} required={true} deprecated={undefined}>
 
 Location where the special event is held
 
@@ -175,7 +171,7 @@ Location where the special event is held
 
 </Property>
 
-<Property required={true} deprecated={false} name={"eventDescription"} type={"string"}>
+<Property name={"eventDescription"} type={"string"} required={true} deprecated={undefined}>
 
 Description of the special event
 
@@ -183,13 +179,13 @@ Description of the special event
 
 </Property>
 
-<Property required={true} deprecated={false} name={"dates"} type={"array of string"}>
+<Property name={"dates"} type={"array of string"} required={true} deprecated={undefined}>
 
 List of planned dates for the special event
 
 </Property>
 
-<Property required={true} deprecated={false} name={"price"} type={"number"}>
+<Property name={"price"} type={"number"} required={true} deprecated={undefined}>
 
 Price of a ticket for the special event
 
@@ -222,13 +218,15 @@ curl -X POST "https://api.fake-museum-example.com/special-events" \
 }'
 ```
 
-<Tabs items={["200"]}>
+<ResponseTabs items={["200"]}>
 
-<Tab value={"200"}>
+<ResponseTab value={"200"}>
 
 Information about a special event.
 
-```json title="Example Response"
+<ExampleResponse>
+
+```json
 {
   "eventId": "3be6453c-03eb-4357-ae5a-984a0e574a54",
   "name": "Pirate Coding Workshop",
@@ -241,9 +239,9 @@ Information about a special event.
 }
 ```
 
-<Accordions>
+</ExampleResponse>
 
-<Accordion title={"Typescript Definition"}>
+<TypeScriptResponse>
 
 ```ts
 /**
@@ -278,13 +276,11 @@ export interface Response {
 
 ```
 
-</Accordion>
+</TypeScriptResponse>
 
-</Accordions>
+</ResponseTab>
 
-</Tab>
-
-</Tabs>
+</ResponseTabs>
 
 </APIExample>
 
@@ -300,7 +296,7 @@ Get details about a special event.
 
 ### Path Parameters
 
-<Property required={true} deprecated={false} name={"eventId"} type={"string"}>
+<Property name={"eventId"} type={"string"} required={true} deprecated={false}>
 
 An identifier for a special event.
 
@@ -324,13 +320,15 @@ An identifier for a special event.
 curl -X GET "https://api.fake-museum-example.com/special-events/dad4bce8-f5cb-4078-a211-995864315e39"
 ```
 
-<Tabs items={["200"]}>
+<ResponseTabs items={["200"]}>
 
-<Tab value={"200"}>
+<ResponseTab value={"200"}>
 
 Information about a special event.
 
-```json title="Example Response"
+<ExampleResponse>
+
+```json
 {
   "eventId": "3be6453c-03eb-4357-ae5a-984a0e574a54",
   "name": "Pirate Coding Workshop",
@@ -343,9 +341,9 @@ Information about a special event.
 }
 ```
 
-<Accordions>
+</ExampleResponse>
 
-<Accordion title={"Typescript Definition"}>
+<TypeScriptResponse>
 
 ```ts
 /**
@@ -380,13 +378,11 @@ export interface Response {
 
 ```
 
-</Accordion>
+</TypeScriptResponse>
 
-</Accordions>
+</ResponseTab>
 
-</Tab>
-
-</Tabs>
+</ResponseTabs>
 
 </APIExample>
 
@@ -404,7 +400,7 @@ Update the details of a special event
 
 
 
-<Property required={false} deprecated={false} name={"name"} type={"string"}>
+<Property name={"name"} type={"string"} required={false} deprecated={undefined}>
 
 Name of the special event
 
@@ -412,7 +408,7 @@ Name of the special event
 
 </Property>
 
-<Property required={false} deprecated={false} name={"location"} type={"string"}>
+<Property name={"location"} type={"string"} required={false} deprecated={undefined}>
 
 Location where the special event is held
 
@@ -420,7 +416,7 @@ Location where the special event is held
 
 </Property>
 
-<Property required={false} deprecated={false} name={"eventDescription"} type={"string"}>
+<Property name={"eventDescription"} type={"string"} required={false} deprecated={undefined}>
 
 Description of the special event
 
@@ -428,13 +424,13 @@ Description of the special event
 
 </Property>
 
-<Property required={false} deprecated={false} name={"dates"} type={"array of string"}>
+<Property name={"dates"} type={"array of string"} required={false} deprecated={undefined}>
 
 List of planned dates for the special event
 
 </Property>
 
-<Property required={false} deprecated={false} name={"price"} type={"number"}>
+<Property name={"price"} type={"number"} required={false} deprecated={undefined}>
 
 Price of a ticket for the special event
 
@@ -446,7 +442,7 @@ Price of a ticket for the special event
 
 ### Path Parameters
 
-<Property required={true} deprecated={false} name={"eventId"} type={"string"}>
+<Property name={"eventId"} type={"string"} required={true} deprecated={false}>
 
 An identifier for a special event.
 
@@ -479,13 +475,15 @@ curl -X PATCH "https://api.fake-museum-example.com/special-events/dad4bce8-f5cb-
 }'
 ```
 
-<Tabs items={["200"]}>
+<ResponseTabs items={["200"]}>
 
-<Tab value={"200"}>
+<ResponseTab value={"200"}>
 
 Information about a special event.
 
-```json title="Example Response"
+<ExampleResponse>
+
+```json
 {
   "eventId": "3be6453c-03eb-4357-ae5a-984a0e574a54",
   "name": "Pirate Coding Workshop",
@@ -498,9 +496,9 @@ Information about a special event.
 }
 ```
 
-<Accordions>
+</ExampleResponse>
 
-<Accordion title={"Typescript Definition"}>
+<TypeScriptResponse>
 
 ```ts
 /**
@@ -535,13 +533,11 @@ export interface Response {
 
 ```
 
-</Accordion>
+</TypeScriptResponse>
 
-</Accordions>
+</ResponseTab>
 
-</Tab>
-
-</Tabs>
+</ResponseTabs>
 
 </APIExample>
 
@@ -557,7 +553,7 @@ Delete a special event from the collection. Allows museum to cancel planned even
 
 ### Path Parameters
 
-<Property required={true} deprecated={false} name={"eventId"} type={"string"}>
+<Property name={"eventId"} type={"string"} required={true} deprecated={false}>
 
 An identifier for a special event.
 

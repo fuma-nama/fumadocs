@@ -85,13 +85,16 @@ export function Tabs({
     };
   }, [id, persist, values]);
 
-  const onValueChange = useCallback((v: string) => {
-    if (id) {
-      update(id, v, persist);
-    } else {
-      setValue(v);
-    }
-  }, []);
+  const onValueChange = useCallback(
+    (v: string) => {
+      if (id) {
+        update(id, v, persist);
+      } else {
+        setValue(v);
+      }
+    },
+    [id, persist],
+  );
 
   return (
     <Primitive.Tabs

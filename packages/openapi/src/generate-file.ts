@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join, parse } from 'node:path';
 import fg from 'fast-glob';
 import type { GenerateOptions } from './generate';
@@ -30,9 +30,9 @@ export interface Config {
   name?: (type: 'file' | 'tag', name: string) => string;
 
   /**
-   * Modify output file
+   * Customise Generator
    */
-  render?: NonNullable<GenerateOptions['render']>;
+  options?: GenerateOptions;
 
   cwd?: string;
 }
@@ -42,13 +42,10 @@ export async function generateFiles({
   output,
   name: nameFn,
   per = 'file',
-  render,
+  options,
   cwd = process.cwd(),
 }: Config): Promise<void> {
   const outputDir = join(cwd, output);
-  const options = {
-    render,
-  };
 
   const resolvedInputs = await fg.glob(input, { absolute: true, cwd });
 
@@ -61,28 +58,28 @@ export async function generateFiles({
         const outPath = join(outputDir, `${filename}.mdx`);
 
         const result = await generate(path, options);
-        write(outPath, result);
+        await write(outPath, result);
         console.log(`Generated: ${outPath}`);
-      } else {
-        const results = await generateTags(path, options);
+        return;
+      }
 
-        results.forEach((result) => {
-          let tagName = result.tag;
-          tagName =
-            nameFn?.('tag', tagName) ??
-            tagName.toLowerCase().replace(/\s+/g, '-');
+      const results = await generateTags(path, options);
 
-          const outPath = join(outputDir, filename, `${tagName}.mdx`);
+      for (const result of results) {
+        let tagName = result.tag;
+        tagName =
+          nameFn?.('tag', tagName) ??
+          tagName.toLowerCase().replace(/\s+/g, '-');
 
-          write(outPath, result.content);
-          console.log(`Generated: ${outPath}`);
-        });
+        const outPath = join(outputDir, filename, `${tagName}.mdx`);
+        await write(outPath, result.content);
+        console.log(`Generated: ${outPath}`);
       }
     }),
   );
 }
 
-function write(path: string, content: string): void {
-  mkdirSync(dirname(path), { recursive: true });
-  writeFileSync(path, content);
+async function write(path: string, content: string): Promise<void> {
+  await mkdir(dirname(path), { recursive: true });
+  await writeFile(path, content);
 }
