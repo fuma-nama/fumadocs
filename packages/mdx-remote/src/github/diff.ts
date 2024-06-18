@@ -35,7 +35,7 @@ export const createCompareTree = (cache: GithubCacheFile) =>
     });
 
     for (const subDir of cache.subDirectories) {
-      coveredPaths.add(subDir.path)
+      coveredPaths.add(subDir.path);
       diff.push(...compareFiles(subDir.files));
     }
 

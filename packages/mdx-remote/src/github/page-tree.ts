@@ -7,8 +7,8 @@ import {
   type BuildPageTreeOptions,
 } from 'fumadocs-core/source';
 import picomatch from 'picomatch';
-import type { GithubCache } from './cache';
 import matter from 'gray-matter';
+import type { GithubCache } from './cache';
 
 interface FileInfo {
   /**
@@ -68,13 +68,13 @@ export const createGeneratePageTree = (
 
           if (!contentWithFrontmatter) return null;
 
-          const { data, content } = matter(contentWithFrontmatter)
+          const { data, content } = matter(contentWithFrontmatter);
 
           return {
             path: file,
             frontmatter: data,
-            content
-          } satisfies FileInfo
+            content,
+          } satisfies FileInfo;
         }),
       )
     ).filter(Boolean) as FileInfo[];
@@ -83,7 +83,7 @@ export const createGeneratePageTree = (
       entries.map(({ path, ...data }) => ({
         path,
         type: path.endsWith('.json') ? 'meta' : 'page',
-        data
+        data,
       })),
       {
         getSlugs,

@@ -66,7 +66,9 @@ export const createTransformTreeToCache = (
 
       for (const segment of segments.slice(0, -1)) {
         const index = segments.indexOf(segment);
-        const gitTreeEntry = tree.tree.find((entry) => entry.path === segments.slice(0, index + 1).join('/'))
+        const gitTreeEntry = tree.tree.find(
+          (entry) => entry.path === segments.slice(0, index + 1).join('/'),
+        );
 
         // this segment can't be added if the tree doesn't exist
         if (!gitTreeEntry) break;

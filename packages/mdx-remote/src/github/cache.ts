@@ -161,14 +161,14 @@ export const createLocalCache = (
     },
     get init() {
       return createInit(async (scope) => {
-        if (scope === "file") return;
+        if (scope === 'file') return;
 
         this.tree = await filesToGitTree({
           include,
           directory,
           hasher: async (file) => {
             const { mtimeMs: lastModified } = await fs.promises.stat(
-              path.resolve(directory, file)
+              path.resolve(directory, file),
             );
             return fnv1a(`${file}_${String(lastModified)}`);
           },
@@ -198,7 +198,7 @@ const createInit = (
     scope,
   }: {
     cachePath?: string;
-    scope: Parameters<typeof notFound>[0]
+    scope: Parameters<typeof notFound>[0];
   }) {
     let obj: GithubCacheFile | undefined;
 
