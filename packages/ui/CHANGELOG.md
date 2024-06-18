@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 12.1.2
+
+### Patch Changes
+
+- 284a571: Support Fumadocs OpenAPI v3
+- Updated dependencies [b4856d1]
+  - fumadocs-core@12.1.2
+
 ## 12.1.1
 
 ### Patch Changes

@@ -4,6 +4,8 @@ import type { VariantProps } from 'class-variance-authority';
 import { cva } from 'class-variance-authority';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/theme/variants';
+import { Tab, Tabs } from '@/components/tabs';
+import { Accordion, Accordions } from '@/components/accordion';
 
 export function Root({
   children,
@@ -143,5 +145,44 @@ export function APIExample({
       </div>
       <div className={cn(!isOpen && 'max-xl:hidden')}>{children}</div>
     </div>
+  );
+}
+
+export const Responses = Tabs;
+export const Response = Tab;
+
+export function ResponseTypes(props: {
+  children: ReactNode;
+}): React.ReactElement {
+  return (
+    <Accordions
+      type="single"
+      className="!-m-4 border-none pt-2"
+      defaultValue="Response"
+    >
+      {props.children}
+    </Accordions>
+  );
+}
+
+export function ExampleResponse(props: {
+  children: ReactNode;
+}): React.ReactElement {
+  return <Accordion title="Response">{props.children}</Accordion>;
+}
+
+export function TypeScriptResponse(props: {
+  children: ReactNode;
+}): React.ReactElement {
+  return <Accordion title="Typescript">{props.children}</Accordion>;
+}
+
+export function ObjectCollapsible(props: {
+  children: ReactNode;
+}): React.ReactElement {
+  return (
+    <Accordions type="single">
+      <Accordion title="Object Type">{props.children}</Accordion>
+    </Accordions>
   );
 }

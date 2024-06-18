@@ -625,6 +625,9 @@ importers:
       fast-glob:
         specifier: ^3.3.1
         version: 3.3.2
+      js-yaml:
+        specifier: ^4.1.0
+        version: 4.1.0
       json-schema-to-typescript:
         specifier: ^14.0.5
         version: 14.0.5
@@ -632,6 +635,9 @@ importers:
         specifier: ^1.5.1
         version: 1.5.1
     devDependencies:
+      '@types/js-yaml':
+        specifier: ^4.0.9
+        version: 4.0.9
       '@types/node':
         specifier: 18.17.5
         version: 18.17.5
@@ -653,8 +659,8 @@ importers:
   packages/twoslash:
     dependencies:
       '@shikijs/twoslash':
-        specifier: 1.6.5
-        version: 1.6.5(typescript@5.4.5)
+        specifier: 1.7.0
+        version: 1.7.0(typescript@5.4.5)
       mdast-util-from-markdown:
         specifier: ^2.0.1
         version: 2.0.1
@@ -665,8 +671,8 @@ importers:
         specifier: ^13.2.0
         version: 13.2.0
       shiki:
-        specifier: 1.6.5
-        version: 1.6.5
+        specifier: 1.7.0
+        version: 1.7.0
     devDependencies:
       '@types/hast':
         specifier: ^3.0.4
@@ -2163,14 +2169,17 @@ packages:
   '@shikijs/core@1.6.5':
     resolution: {integrity: sha512-XcQYt6e4L61ruAxHiL3Xg1DL/XkWWjzDdeckB/DtN8jAxoAU+bcxsV6DetC8NafHpL4YpGhxy9iXF0ND/u6HmA==}
 
+  '@shikijs/core@1.7.0':
+    resolution: {integrity: sha512-O6j27b7dGmJbR3mjwh/aHH8Ld+GQvA0OQsNO43wKWnqbAae3AYXrhFyScHGX8hXZD6vX2ngjzDFkZY5srtIJbQ==}
+
   '@shikijs/rehype@1.6.5':
     resolution: {integrity: sha512-tv3WzBXvRI3VD9dBg1wdbRcXXg19mSGsNuJ2ZDlJK7DgRThUs++OgUqYosvBJZlraqFthXSr5tuCok9ffZaqQw==}
 
   '@shikijs/transformers@1.6.5':
     resolution: {integrity: sha512-iuKa1uQtPQEe5vgCsXIb162b/3imRiAIdoF5IqafrTWL1uqZUpipfPjWZPuAAszOzYU//yIYRbhUk8reHVXA/w==}
 
-  '@shikijs/twoslash@1.6.5':
-    resolution: {integrity: sha512-vEdG64AKiTTppyVX60DBkvEntxCwG9vIi4gGJFeIpFu87nt88iCiPmUBO7ZzXBLAW2VjlzE4Bu0av3Tp3MAM6A==}
+  '@shikijs/twoslash@1.7.0':
+    resolution: {integrity: sha512-UztoY1kFhRR8b/eZGfCkM70L8WQB7zZsj5xTRZUaLx6bwMZdDdlJmJu2lPAkPZ5h7wHVDJB6Lq3k8fN9Sxakgw==}
 
   '@sinclair/typebox@0.27.8':
     resolution: {integrity: sha512-+Fj43pSMwJs4KRrH/938Uf+uAELIgVBmQzg/q1YG10djyfA3TnrU8N8XzqCh/okZdszqBQTZf96idMfE5lnwTA==}
@@ -2219,6 +2228,9 @@ packages:
 
   '@types/hast@3.0.4':
     resolution: {integrity: sha512-WPs+bbQw5aCj+x6laNGWLH3wviHtoCv/P3+otBhbOhJgG8qtpdAMlTCxLtsTWA7LH1Oh/bFCHsBn0TPS5m30EQ==}
+
+  '@types/js-yaml@4.0.9':
+    resolution: {integrity: sha512-k4MGaQl5TGo/iipqb2UDG2UwjXziSWkh0uysQelTlJpX1qGlpUZYm8PnO4DxG1qBomtJUdYJ6qR6xdIah10JLg==}
 
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
@@ -5342,6 +5354,9 @@ packages:
   shiki@1.6.5:
     resolution: {integrity: sha512-iFzypldJG0zeyRHKAhaSGCf+YWXpMMyUyOrCVFBFKGGdF5vrB6jbd66/SQljxV20aSrVZEAQwUto/hhuNi/CIg==}
 
+  shiki@1.7.0:
+    resolution: {integrity: sha512-H5pMn4JA7ayx8H0qOz1k2qANq6mZVCMl1gKLK6kWIrv1s2Ial4EmD4s4jE8QB5Dw03d/oCQUxc24sotuyR5byA==}
+
   side-channel@1.0.4:
     resolution: {integrity: sha512-q5XPytqFEIKHkGdiMIrY10mvLRvnQh42/+GoBlFW3b2LXLE2xxJpZFdm94we0BaoV3RwJyGqg5wS7epxTv0Zvw==}
 
@@ -7652,6 +7667,8 @@ snapshots:
 
   '@shikijs/core@1.6.5': {}
 
+  '@shikijs/core@1.7.0': {}
+
   '@shikijs/rehype@1.6.5':
     dependencies:
       '@shikijs/transformers': 1.6.5
@@ -7665,9 +7682,9 @@ snapshots:
     dependencies:
       shiki: 1.6.5
 
-  '@shikijs/twoslash@1.6.5(typescript@5.4.5)':
+  '@shikijs/twoslash@1.7.0(typescript@5.4.5)':
     dependencies:
-      '@shikijs/core': 1.6.5
+      '@shikijs/core': 1.7.0
       twoslash: 0.2.8(typescript@5.4.5)
     transitivePeerDependencies:
       - supports-color
@@ -7729,6 +7746,8 @@ snapshots:
   '@types/hast@3.0.4':
     dependencies:
       '@types/unist': 3.0.2
+
+  '@types/js-yaml@4.0.9': {}
 
   '@types/json-schema@7.0.15': {}
 
@@ -11734,6 +11753,10 @@ snapshots:
   shiki@1.6.5:
     dependencies:
       '@shikijs/core': 1.6.5
+
+  shiki@1.7.0:
+    dependencies:
+      '@shikijs/core': 1.7.0
 
   side-channel@1.0.4:
     dependencies:

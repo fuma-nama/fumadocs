@@ -1,0 +1,452 @@
+---
+title: liveness
+---
+
+import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible } from "fumadocs-ui/components/api";
+
+<Root>
+
+<API>
+
+<APIInfo method={"GET"} route={"/v1/liveness"}>
+
+## v1.liveness
+
+| Status code | Description |
+| ----------- | ----------- |
+| `200` | The configured services and their status |
+| `400` | The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). |
+| `401` | Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. |
+| `403` | The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. |
+| `404` | The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. |
+| `409` | This response is sent when a request conflicts with the current state of the server. |
+| `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
+| `500` | The server has encountered a situation it does not know how to handle. |
+
+</APIInfo>
+
+<APIExample>
+
+```bash title="curl"
+curl -X GET "https://api.unkey.dev/v1/liveness"
+```
+
+<Responses items={["200","400","401","403","404","409","429","500"]}>
+
+<Response value={"200"}>
+
+<ResponseTypes>
+
+<ExampleResponse>
+
+```json
+{
+  "status": "string",
+  "services": {
+    "metrics": "AxiomMetrics",
+    "logger": "AxiomLogger or ConsoleLogger",
+    "ratelimit": "string",
+    "usagelimit": "string",
+    "analytics": "string"
+  }
+}
+```
+
+</ExampleResponse>
+
+<TypeScriptResponse>
+
+```ts
+export interface Response {
+  /**
+   * The status of the server
+   */
+  status: string;
+  services: {
+    /**
+     * The name of the connected metrics service
+     */
+    metrics: string;
+    /**
+     * The name of the connected logger service
+     */
+    logger: string;
+    /**
+     * The name of the connected ratelimit service
+     */
+    ratelimit: string;
+    /**
+     * The name of the connected usagelimit service
+     */
+    usagelimit: string;
+    /**
+     * The name of the connected analytics service
+     */
+    analytics: string;
+  };
+}
+```
+
+</TypeScriptResponse>
+
+</ResponseTypes>
+
+</Response>
+
+<Response value={"400"}>
+
+<ResponseTypes>
+
+<ExampleResponse>
+
+```json
+{
+  "error": {
+    "code": "BAD_REQUEST",
+    "docs": "https://unkey.dev/docs/api-reference/errors/code/BAD_REQUEST",
+    "message": "string",
+    "requestId": "req_1234"
+  }
+}
+```
+
+</ExampleResponse>
+
+<TypeScriptResponse>
+
+```ts
+export interface Response {
+  error: {
+    /**
+     * A machine readable error code.
+     */
+    code: "BAD_REQUEST";
+    /**
+     * A link to our documentation with more details about this error code
+     */
+    docs: string;
+    /**
+     * A human readable explanation of what went wrong
+     */
+    message: string;
+    /**
+     * Please always include the requestId in your error report
+     */
+    requestId: string;
+  };
+}
+```
+
+</TypeScriptResponse>
+
+</ResponseTypes>
+
+</Response>
+
+<Response value={"401"}>
+
+<ResponseTypes>
+
+<ExampleResponse>
+
+```json
+{
+  "error": {
+    "code": "UNAUTHORIZED",
+    "docs": "https://unkey.dev/docs/api-reference/errors/code/UNAUTHORIZED",
+    "message": "string",
+    "requestId": "req_1234"
+  }
+}
+```
+
+</ExampleResponse>
+
+<TypeScriptResponse>
+
+```ts
+export interface Response {
+  error: {
+    /**
+     * A machine readable error code.
+     */
+    code: "UNAUTHORIZED";
+    /**
+     * A link to our documentation with more details about this error code
+     */
+    docs: string;
+    /**
+     * A human readable explanation of what went wrong
+     */
+    message: string;
+    /**
+     * Please always include the requestId in your error report
+     */
+    requestId: string;
+  };
+}
+```
+
+</TypeScriptResponse>
+
+</ResponseTypes>
+
+</Response>
+
+<Response value={"403"}>
+
+<ResponseTypes>
+
+<ExampleResponse>
+
+```json
+{
+  "error": {
+    "code": "FORBIDDEN",
+    "docs": "https://unkey.dev/docs/api-reference/errors/code/FORBIDDEN",
+    "message": "string",
+    "requestId": "req_1234"
+  }
+}
+```
+
+</ExampleResponse>
+
+<TypeScriptResponse>
+
+```ts
+export interface Response {
+  error: {
+    /**
+     * A machine readable error code.
+     */
+    code: "FORBIDDEN";
+    /**
+     * A link to our documentation with more details about this error code
+     */
+    docs: string;
+    /**
+     * A human readable explanation of what went wrong
+     */
+    message: string;
+    /**
+     * Please always include the requestId in your error report
+     */
+    requestId: string;
+  };
+}
+```
+
+</TypeScriptResponse>
+
+</ResponseTypes>
+
+</Response>
+
+<Response value={"404"}>
+
+<ResponseTypes>
+
+<ExampleResponse>
+
+```json
+{
+  "error": {
+    "code": "NOT_FOUND",
+    "docs": "https://unkey.dev/docs/api-reference/errors/code/NOT_FOUND",
+    "message": "string",
+    "requestId": "req_1234"
+  }
+}
+```
+
+</ExampleResponse>
+
+<TypeScriptResponse>
+
+```ts
+export interface Response {
+  error: {
+    /**
+     * A machine readable error code.
+     */
+    code: "NOT_FOUND";
+    /**
+     * A link to our documentation with more details about this error code
+     */
+    docs: string;
+    /**
+     * A human readable explanation of what went wrong
+     */
+    message: string;
+    /**
+     * Please always include the requestId in your error report
+     */
+    requestId: string;
+  };
+}
+```
+
+</TypeScriptResponse>
+
+</ResponseTypes>
+
+</Response>
+
+<Response value={"409"}>
+
+<ResponseTypes>
+
+<ExampleResponse>
+
+```json
+{
+  "error": {
+    "code": "CONFLICT",
+    "docs": "https://unkey.dev/docs/api-reference/errors/code/CONFLICT",
+    "message": "string",
+    "requestId": "req_1234"
+  }
+}
+```
+
+</ExampleResponse>
+
+<TypeScriptResponse>
+
+```ts
+export interface Response {
+  error: {
+    /**
+     * A machine readable error code.
+     */
+    code: "CONFLICT";
+    /**
+     * A link to our documentation with more details about this error code
+     */
+    docs: string;
+    /**
+     * A human readable explanation of what went wrong
+     */
+    message: string;
+    /**
+     * Please always include the requestId in your error report
+     */
+    requestId: string;
+  };
+}
+```
+
+</TypeScriptResponse>
+
+</ResponseTypes>
+
+</Response>
+
+<Response value={"429"}>
+
+<ResponseTypes>
+
+<ExampleResponse>
+
+```json
+{
+  "error": {
+    "code": "TOO_MANY_REQUESTS",
+    "docs": "https://unkey.dev/docs/api-reference/errors/code/TOO_MANY_REQUESTS",
+    "message": "string",
+    "requestId": "req_1234"
+  }
+}
+```
+
+</ExampleResponse>
+
+<TypeScriptResponse>
+
+```ts
+export interface Response {
+  error: {
+    /**
+     * A machine readable error code.
+     */
+    code: "TOO_MANY_REQUESTS";
+    /**
+     * A link to our documentation with more details about this error code
+     */
+    docs: string;
+    /**
+     * A human readable explanation of what went wrong
+     */
+    message: string;
+    /**
+     * Please always include the requestId in your error report
+     */
+    requestId: string;
+  };
+}
+```
+
+</TypeScriptResponse>
+
+</ResponseTypes>
+
+</Response>
+
+<Response value={"500"}>
+
+<ResponseTypes>
+
+<ExampleResponse>
+
+```json
+{
+  "error": {
+    "code": "INTERNAL_SERVER_ERROR",
+    "docs": "https://unkey.dev/docs/api-reference/errors/code/INTERNAL_SERVER_ERROR",
+    "message": "string",
+    "requestId": "req_1234"
+  }
+}
+```
+
+</ExampleResponse>
+
+<TypeScriptResponse>
+
+```ts
+export interface Response {
+  error: {
+    /**
+     * A machine readable error code.
+     */
+    code: "INTERNAL_SERVER_ERROR";
+    /**
+     * A link to our documentation with more details about this error code
+     */
+    docs: string;
+    /**
+     * A human readable explanation of what went wrong
+     */
+    message: string;
+    /**
+     * Please always include the requestId in your error report
+     */
+    requestId: string;
+  };
+}
+```
+
+</TypeScriptResponse>
+
+</ResponseTypes>
+
+</Response>
+
+</Responses>
+
+</APIExample>
+
+</API>
+
+</Root>

@@ -3,24 +3,15 @@ import { createEndpoint, type Endpoint } from '@/samples';
 import { getExampleResponse } from '@/samples/response';
 import { getTypescript } from '@/samples/typescript';
 import { getSampleRequest } from '@/samples/curl';
-import type { MethodInformation } from '@/types';
+import { type MethodInformation, type RenderContext } from '@/types';
 import { noRef, getPreferredMedia } from '@/utils';
 import { codeblock, p } from './element';
-import {
-  accordion,
-  accordions,
-  api,
-  apiExample,
-  apiInfo,
-  tab,
-  tabs,
-} from './custom';
 import { schemaElement } from './schema';
 
 export async function renderOperation(
   path: string,
   method: MethodInformation,
-  baseUrl?: string,
+  ctx: RenderContext,
 ): Promise<string> {
   const info: string[] = [];
   const example: string[] = [];
@@ -43,12 +34,13 @@ export async function renderOperation(
         readOnly: method.method === 'GET',
         writeOnly: method.method !== 'GET',
         required: body.required ?? false,
+        render: ctx,
       }),
     );
   }
 
   const parameterGroups = new Map<string, string[]>();
-  const endpoint = createEndpoint(path, method, baseUrl);
+  const endpoint = createEndpoint(path, method, ctx.baseUrl);
 
   for (const param of method.parameters) {
     const schema = noRef(
@@ -69,6 +61,7 @@ export async function renderOperation(
         readOnly: method.method === 'GET',
         writeOnly: method.method !== 'GET',
         required: param.required ?? false,
+        render: ctx,
       },
     );
 
@@ -95,12 +88,12 @@ export async function renderOperation(
     codeblock({ language: 'bash', title: 'curl' }, getSampleRequest(endpoint)),
   );
 
-  example.push(await getResponseTabs(endpoint, method));
+  example.push(await getResponseTabs(endpoint, method, ctx));
 
-  return api(
-    apiInfo({ method: method.method, route: path }, ...info),
-    apiExample(...example),
-  );
+  return ctx.renderer.API([
+    ctx.renderer.APIInfo({ method: method.method, route: path }, info),
+    ctx.renderer.APIExample(example),
+  ]);
 }
 
 function getResponseTable(operation: OpenAPI.OperationObject): string {
@@ -118,11 +111,12 @@ function getResponseTable(operation: OpenAPI.OperationObject): string {
 async function getResponseTabs(
   endpoint: Endpoint,
   operation: OpenAPI.OperationObject,
+  { renderer }: RenderContext,
 ): Promise<string> {
   const items: string[] = [];
   const child: string[] = [];
 
-  for (const [code, _] of Object.entries(operation.responses)) {
+  for (const code of Object.keys(operation.responses)) {
     const example = getExampleResponse(endpoint, code);
     const ts = await getTypescript(endpoint, code);
     const description =
@@ -134,27 +128,23 @@ async function getResponseTabs(
       items.push(code);
 
       child.push(
-        tab(
-          { value: code },
+        renderer.Response({ value: code }, [
           p(description),
-          codeblock({ language: 'json', title: 'Example Response' }, example),
-          accordions(
-            accordion(
-              { title: 'Typescript Definition' },
-              codeblock({ language: 'ts' }, ts),
-            ),
-          ),
-        ),
+          renderer.ResponseTypes([
+            renderer.ExampleResponse(example),
+            renderer.TypeScriptResponse(ts),
+          ]),
+        ]),
       );
     }
   }
 
   if (items.length === 0) return '';
 
-  return tabs(
+  return renderer.Responses(
     {
       items,
     },
-    ...child,
+    child,
   );
 }

@@ -6,16 +6,18 @@ void OpenAPI.generateFiles({
   input: ['./*.yaml'],
   output: './content/docs/ui',
   per: 'tag',
-  render: (title, description) => {
-    return {
-      frontmatter: [
-        '---',
-        `title: ${title}`,
-        `description: ${description}`,
-        'toc: false',
-        '---',
-      ].join('\n'),
-    };
+  frontmatter: () => ({
+    toc: false,
+  }),
+  renderer: {
+    Root(child) {
+      return OpenAPI.createElement(
+        'Root',
+        {},
+        '<div className="bg-secondary p-4 rounded-lg">Demo Only</div>',
+        ...child,
+      );
+    },
   },
 });
 

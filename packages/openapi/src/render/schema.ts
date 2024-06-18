@@ -1,7 +1,7 @@
 import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
 import { noRef } from '@/utils';
+import type { RenderContext } from '@/types';
 import { p, span } from './element';
-import { property, accordion, accordions } from './custom';
 
 const keys: {
   [T in keyof OpenAPI.SchemaObject]: string;
@@ -17,15 +17,15 @@ const keys: {
 };
 
 interface Context {
-  /** Allow read only */
   readOnly: boolean;
-  /** Allow write only */
   writeOnly: boolean;
 
   required: boolean;
 
   /** Parse object */
   parseObject: boolean;
+
+  render: RenderContext;
 }
 
 function isObject(schema: OpenAPI.SchemaObject): boolean {
@@ -35,10 +35,11 @@ function isObject(schema: OpenAPI.SchemaObject): boolean {
 export function schemaElement(
   name: string,
   schema: OpenAPI.SchemaObject,
-  { parseObject, ...ctx }: Context,
+  ctx: Context,
 ): string {
   if (schema.readOnly && !ctx.readOnly) return '';
   if (schema.writeOnly && !ctx.writeOnly) return '';
+  const { renderer } = ctx.render;
 
   const child: string[] = [];
 
@@ -46,16 +47,19 @@ export function schemaElement(
     child.push(span(`${key}:  \`${value}\``));
   }
 
-  if (isObject(schema) && parseObject) {
+  if (isObject(schema) && ctx.parseObject) {
     const { additionalProperties, properties } = schema;
 
     if (additionalProperties) {
       if (additionalProperties === true) {
         child.push(
-          property({
-            name: '[key: string]',
-            type: 'any',
-          }),
+          renderer.Property(
+            {
+              name: '[key: string]',
+              type: 'any',
+            },
+            [],
+          ),
         );
       } else {
         child.push(
@@ -97,29 +101,26 @@ export function schemaElement(
 
   const resolved = resolveObjectType(schema);
 
-  if (resolved && !parseObject) {
+  if (resolved && !ctx.parseObject) {
     child.push(
-      accordions(
-        accordion(
-          { title: 'Object Type' },
-          schemaElement(name, resolved, {
-            ...ctx,
-            parseObject: true,
-            required: false,
-          }),
-        ),
-      ),
+      renderer.ObjectCollapsible({ name }, [
+        schemaElement(name, resolved, {
+          ...ctx,
+          parseObject: true,
+          required: false,
+        }),
+      ]),
     );
   }
 
-  return property(
+  return renderer.Property(
     {
       name,
       type: getSchemaType(schema),
       required: ctx.required,
       deprecated: schema.deprecated,
     },
-    ...child,
+    child,
   );
 }
 
