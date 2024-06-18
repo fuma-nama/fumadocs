@@ -6,16 +6,10 @@ void OpenAPI.generateFiles({
   input: ['./*.yaml'],
   output: './content/docs/ui',
   per: 'tag',
-  render: (title, description) => {
-    return {
-      frontmatter: [
-        '---',
-        `title: ${title}`,
-        `description: ${description}`,
-        'toc: false',
-        '---',
-      ].join('\n'),
-    };
+  options: {
+    frontmatter: () => ({
+      toc: false
+    })
   },
 });
 

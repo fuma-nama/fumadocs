@@ -21,7 +21,7 @@ Changed the output of MDX files, the new structure requires components:
 - Property
 - ObjectCollapsible
 
-```mdx
+````mdx
 <API>
 
 <APIInfo method={"GET"} route={"/pets"}>
@@ -89,4 +89,4 @@ export type Response = {
 </APIExample>
 
 </API>
-```
+````
