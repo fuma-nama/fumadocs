@@ -6,7 +6,7 @@ import {
   filesToGitTree,
   findTreeRecursive,
 } from './git-tree';
-import { githubCacheFileSchema, parse } from './schema';
+import { githubCacheFileSchema } from './schema';
 import type { getTree } from './get-tree';
 import { getBlob } from './get-blob';
 import {
@@ -16,12 +16,25 @@ import {
 } from './file-system';
 import { createApplyDiffToCache, createCompareToGitTree } from './diff';
 import { createContentResolver } from './resolve-content';
-import { blobToUtf8, fnv1a, type GetFileContent } from './utils';
+import {
+  blobToUtf8,
+  cacheFileToGitTree,
+  fnv1a,
+  parse,
+  type GetFileContent,
+} from './utils';
 import { createGeneratePageTree } from './page-tree';
 
 export type GithubCacheFile = z.infer<typeof githubCacheFileSchema>;
 export interface BaseCreateCacheOptions
   extends Pick<Parameters<typeof getTree>[0], 'owner' | 'repo' | 'token'> {
+  /**
+   * Path on disk to store the cache.
+   */
+  cachePath?: string;
+  /**
+   * Directory to search for files (local or remote)
+   */
   directory: string;
   /**
    * Included files.
@@ -83,13 +96,12 @@ export interface GithubCache {
   };
 }
 
-type CreateCacheOptions<Env extends 'local' | 'remote'> = Env extends 'local'
-  ? CreateCacheLocalOptions
-  : CreateCacheRemoteOptions;
+export type CreateCacheOptions<Env extends 'local' | 'remote'> =
+  Env extends 'local' ? CreateCacheLocalOptions : CreateCacheRemoteOptions;
 type CreateCacheRemoteOptions = BaseCreateCacheOptions;
 type CreateCacheLocalOptions = Pick<
   BaseCreateCacheOptions,
-  'directory' | 'include'
+  'directory' | 'include' | 'cachePath'
 >;
 
 export const createCache: (
@@ -101,8 +113,7 @@ export const createCache: (
 export const createRemoteCache = (
   options: CreateCacheOptions<'remote'>,
 ): GithubCache => {
-  const { directory, githubApi, ...githubInfo } = options;
-
+  const { directory, cachePath, githubApi, ...githubInfo } = options;
   const getFileContent: GetFileContent<{ sha: string }> = async (file) => {
     return blobToUtf8(
       await getBlob({
@@ -119,6 +130,8 @@ export const createRemoteCache = (
     },
     get load() {
       return createrLoader({
+        cachePath,
+        getFileContent,
         notFound: async () => {
           const tree = await findTreeRecursive(directory, {
             ...githubInfo,
@@ -137,8 +150,8 @@ export const createRemoteCache = (
 
           return this.data;
         },
-        setData: (data) => {
-          this.data = data;
+        set: (k, v) => {
+          this[k] = v;
         },
       });
     },
@@ -151,7 +164,7 @@ export const createRemoteCache = (
 export const createLocalCache = (
   options: CreateCacheOptions<'local'>,
 ): GithubCache => {
-  const { directory, include = './**/*.{json,md,mdx}' } = options;
+  const { directory, include = './**/*.{json,md,mdx}', cachePath } = options;
 
   const getFileContent: GetFileContent<{ path: string }> = async (file) => {
     return fs.promises.readFile(path.resolve(directory, file.path), 'utf8');
@@ -163,6 +176,8 @@ export const createLocalCache = (
     },
     get load() {
       return createrLoader({
+        cachePath,
+        getFileContent,
         notFound: async (lazy) => {
           let tree: Awaited<ReturnType<typeof getTree>>;
 
@@ -176,6 +191,7 @@ export const createLocalCache = (
           } else {
             tree = await filesToGitTree({
               include,
+              ignore: cachePath ? [cachePath] : [],
               directory,
               hasher: async (file) => {
                 const { mtimeMs: lastModified } = await fs.promises.stat(
@@ -194,8 +210,8 @@ export const createLocalCache = (
 
           return this.data;
         },
-        setData: (data) => {
-          this.data = data;
+        set: (k, v) => {
+          this[k] = v;
         },
       });
     },
@@ -206,33 +222,37 @@ export const createLocalCache = (
 };
 
 const createrLoader = ({
+  cachePath,
+  set,
   notFound,
-  setData,
+  getFileContent,
 }: {
+  cachePath: string | undefined;
+  getFileContent: GetFileContent;
   notFound: (lazy: boolean) => Promise<GithubCacheFile | undefined>;
-  setData: (data: GithubCacheFile) => void;
+  set: <T extends keyof GithubCache>(key: T, value: GithubCache[T]) => void;
 }) =>
-  async function load({
-    cachePath,
-    lazy = false,
-  }: {
-    cachePath?: string;
-    lazy?: boolean;
-  }): Promise<void> {
+  async function load(
+    options: { lazy?: boolean } = { lazy: true },
+  ): Promise<void> {
+    const { lazy = true } = options;
     let obj: GithubCacheFile | undefined;
 
     if (cachePath && fs.existsSync(cachePath)) {
-      obj = parse(
-        githubCacheFileSchema,
-        JSON.parse(fs.readFileSync(cachePath, 'utf-8')),
-        `Invalid cache file at ${cachePath}`,
+      const raw = await fs.promises.readFile(cachePath, 'utf-8');
+      obj = JSON.parse(raw) as GithubCacheFile;
+      set(
+        'tree',
+        Object.assign(cacheFileToGitTree(obj), {
+          transformToCache: createTransformTreeToCache(getFileContent),
+        }),
       );
     } else obj = await notFound(lazy);
 
-    if (obj) setData(obj);
+    if (obj) set('data', obj);
     else
       console.error(
-        'Attempted to load @fumadocs/mdx-remote/github cache, but could not retrieve cache and/or files',
+        'Attempted to load Github cache, but could not retrieve cache and/or files (local or remote)',
       );
   };
 
@@ -297,7 +317,11 @@ const createCacheBoilerplate = <Env extends 'local' | 'remote'>(
       return cacheFile;
     },
     set data(value) {
-      githubCacheFileSchema.parse(value);
+      parse(
+        githubCacheFileSchema,
+        value,
+        'Invalid cache file. Please check the schema',
+      );
       cacheFile = value;
     },
     get generatePageTree() {

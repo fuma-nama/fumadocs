@@ -134,13 +134,16 @@ export const filesToGitTree = async ({
   include = './**/*.{json,md,mdx}',
   directory,
   hasher = fnv1a,
+  ignore = []
 }: {
+  ignore?: string[];
   include?: string | string[];
   directory: string;
   hasher?: (file: string) => string | Promise<string>;
 }): ReturnType<typeof getTree> => {
   const files = await fg(include, {
     cwd: path.resolve(directory),
+    ignore
   });
   const tree: Awaited<ReturnType<typeof getTree>> = {
     sha: await hasher(path.resolve(directory)),

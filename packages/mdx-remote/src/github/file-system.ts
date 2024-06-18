@@ -10,10 +10,17 @@ export const createPopulateFileSystem = (
 
     const addFiles = (files: GithubCache['data']['files']): void => {
       for (const file of files) {
-        const content = getFileContent?.({
-          path: file.path,
-          sha: file.sha,
-        });
+        let content = file.content;
+        
+        if (!content) {
+          content = getFileContent?.({
+            path: file.path,
+            sha: file.sha,
+          });
+        } else if (typeof content === 'string') {
+          content = Buffer.from(content, 'hex').toString('utf-8');
+        }
+
         if (content) map.set(file.path, content);
       }
     };

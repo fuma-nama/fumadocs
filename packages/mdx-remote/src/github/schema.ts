@@ -1,36 +1,4 @@
-import { z, type ZodError } from 'zod';
-
-class DataError extends Error {
-  constructor(name: string, error: ZodError) {
-    const info = error.flatten();
-
-    super(
-      `${name}: ${JSON.stringify(
-        {
-          root: info.formErrors,
-          ...info.fieldErrors,
-        },
-        null,
-        2,
-      )}`,
-    );
-    this.name = 'DataError';
-  }
-}
-
-export function parse<T extends typeof githubCacheFileSchema>(
-  schema: T,
-  object: unknown,
-  errorName: string,
-): z.infer<T> {
-  const result = schema.safeParse(object);
-
-  if (!result.success) {
-    throw new DataError(errorName, result.error);
-  }
-
-  return result.data;
-}
+import { z } from 'zod';
 
 const baseSubDirectorySchema = z.object({
   path: z.string(),
