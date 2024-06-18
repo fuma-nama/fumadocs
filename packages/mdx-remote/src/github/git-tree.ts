@@ -43,7 +43,10 @@ export const findTreeRecursive = async (
 };
 
 export const createTransformTreeToCache = (
-  getFileContent?: (file: { path: string, sha: string }) => string | Promise<string>,
+  getFileContent?: (file: {
+    path: string;
+    sha: string;
+  }) => string | Promise<string>,
 ) =>
   function transformTreeToCache(
     tree: Awaited<ReturnType<typeof getTree>>,

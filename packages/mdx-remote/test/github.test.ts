@@ -8,14 +8,22 @@ import type { CompareTreeDiff } from '@/github/diff';
 const cwd = path.dirname(fileURLToPath(import.meta.url));
 
 const mockCache = vi.fn(
-  async ({ directory, load = true }: { directory: string; load?: boolean }) => {
+  async ({
+    directory,
+    load = true,
+    lazy = false,
+  }: {
+    directory: string;
+    load?: boolean;
+    lazy?: boolean;
+  }) => {
     const cache = createCache({
       directory,
     });
 
     if (load)
       await cache.load({
-        scope: 'tree',
+        lazy,
       });
 
     return {
@@ -71,7 +79,8 @@ test('Transform Git Tree to GitHub Cache', async () => {
   const directory = path.resolve(cwd, './fixtures');
   const { cache } = await mockCache({ directory });
 
-  const { lastUpdated: _lastUpdated, ...rendered } = await cache.render();
+  const { lastUpdated: _lastUpdated, ...rendered } =
+    await cache.resolveAllContent();
 
   await expect(rendered).toMatchFileSnapshot(
     path.resolve(cwd, './out/cache.output.json5'),
@@ -79,7 +88,6 @@ test('Transform Git Tree to GitHub Cache', async () => {
 });
 
 test('Differientate Between Two Git Trees', async () => {
-  vi.restoreAllMocks();
   const directory = path.resolve(cwd, './fixtures');
   const { cache, fakeTree } = await mockCache({ directory });
 
@@ -172,4 +180,27 @@ test('Error If Cache Has Not Been Loaded', async () => {
 
   expect(() => cache.data).toThrowError();
   expect(() => cache.tree).toThrowError();
+});
+
+test('Lazy Load Cache', async () => {
+  const directory = path.resolve(cwd, './fixtures');
+  const { cache } = await mockCache({
+    directory,
+    lazy: true,
+  });
+
+  expect(cache.data.files).toHaveLength(0);
+  expect(cache.data.subDirectories).toHaveLength(0);
+  expect(cache.tree.tree).toHaveLength(0);
+
+  cache.fs().loadFile(
+    {
+      path: 'index.mdx',
+      sha: 'add',
+    },
+    fs.promises.readFile(path.resolve(directory, 'index.mdx'), 'utf8'),
+  );
+
+  expect(cache.data.files).toHaveLength(1);
+  expect(cache.tree.tree).toHaveLength(1);
 });

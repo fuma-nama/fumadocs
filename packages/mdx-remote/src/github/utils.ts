@@ -1,8 +1,14 @@
 import type { getTree } from './get-tree';
 
 type FilterArray<T, U> = T extends U ? T : never;
+
 export type GitTreeItem<T extends 'blob' | 'tree' = 'blob' | 'tree'> =
   FilterArray<Awaited<ReturnType<typeof getTree>>['tree'][number], { type: T }>;
+export type Awaitable<T> = T | Promise<T>;
+
+export type GetFileContent<T = { path: string; sha: string }> = <U extends T>(
+  file: U,
+) => Awaitable<string>;
 
 export const blobToUtf8 = (blob: {
   content: string;

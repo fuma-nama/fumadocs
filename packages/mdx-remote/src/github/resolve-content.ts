@@ -1,10 +1,10 @@
 import type { GithubCache, GithubCacheFile } from './cache';
 
-export const createRenderer = (
+export const createContentResolver = (
   cacheFile: GithubCacheFile,
   fs: ReturnType<GithubCache['fs']>,
 ) =>
-  async function render(): Promise<GithubCacheFile> {
+  async function resolveAllContent(): Promise<GithubCacheFile> {
     const compressContent = (content: string | undefined): string => {
       const compressed = Buffer.from(content ?? '', 'utf8').toString('hex');
       return compressed;

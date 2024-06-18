@@ -1,6 +1,6 @@
 import type { GithubCache, GithubCacheFile } from './cache';
 import type { getTree } from './get-tree';
-import type { GitTreeItem } from './utils';
+import type { GetFileContent } from './utils';
 
 export interface CompareTreeDiff {
   action: 'add' | 'remove' | 'modify';
@@ -71,9 +71,7 @@ const createCompareFiles = (
 export const createApplyDiffToCache = (
   cacheFile: GithubCacheFile,
   fs: ReturnType<GithubCache['fs']>,
-  _getFileContent?: (
-    diff: Omit<GitTreeItem, 'url'>,
-  ) => string | Promise<string>,
+  _getFileContent: GetFileContent,
 ) =>
   function applyDiffToCache(
     diff: CompareTreeDiff[],
@@ -83,9 +81,9 @@ export const createApplyDiffToCache = (
       switch (change.action) {
         case 'add':
           if (change.type === 'blob') {
-            const content = getFileContent?.(change);
+            const content = getFileContent(change);
 
-            if (content) fs.writeFile(change.path, content);
+            fs.writeFile(change.path, content);
 
             cacheFile.files.push({
               path: change.path,
@@ -109,8 +107,7 @@ export const createApplyDiffToCache = (
             if (fileIndex !== -1) {
               cacheFile.files[fileIndex].sha = change.sha;
 
-              const content = getFileContent?.(change);
-              if (!content) continue;
+              const content = getFileContent(change);
 
               fs.writeFile(change.path, content);
               cacheFile.files[fileIndex].content = content;
@@ -119,7 +116,9 @@ export const createApplyDiffToCache = (
           break;
         case 'remove':
           if (change.type === 'blob') {
-            cacheFile.files = cacheFile.files.filter((f) => f.path !== change.path);
+            cacheFile.files = cacheFile.files.filter(
+              (f) => f.path !== change.path,
+            );
           } else {
             cacheFile.subDirectories = cacheFile.subDirectories.filter(
               (sd) => sd.path !== change.path,
