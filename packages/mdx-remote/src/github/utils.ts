@@ -79,15 +79,17 @@ export const cacheFileToGitTree = (
       type: 'blob',
       sha: file.sha,
       path: file.path,
-      url: ''
+      url: '',
     });
 
-  const addDirectory = (directory: GithubCacheFile['subDirectories'][number]): void => {
+  const addDirectory = (
+    directory: GithubCacheFile['subDirectories'][number],
+  ): void => {
     skeleton.tree.push({
       type: 'tree',
       sha: directory.sha,
       path: directory.path,
-      url: ''
+      url: '',
     });
     for (const file of directory.files) {
       addFile(file);
@@ -95,7 +97,7 @@ export const cacheFileToGitTree = (
     for (const subDirectory of directory.subDirectories) {
       addDirectory(subDirectory);
     }
-  }
+  };
 
   for (const file of files) {
     addFile(file);

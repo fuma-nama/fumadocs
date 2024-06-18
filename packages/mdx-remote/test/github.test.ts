@@ -223,18 +223,18 @@ test('Read Files from Cache', async () => {
   const { cache: newCache } = await mockCache({
     directory,
     cacheOptions: {
-      cachePath
+      cachePath,
     },
     load: false,
   });
-  await newCache.load()
+  await newCache.load();
 
-  const files = await Promise.all(cache.fs().getFiles())
+  const files = await Promise.all(cache.fs().getFiles());
 
   for (const file of files) {
     const vfile = await newCache.fs().readFile(file);
     expect(vfile).toEqual(
       await fs.promises.readFile(path.resolve(directory, file), 'utf8'),
-    )
+    );
   }
 });

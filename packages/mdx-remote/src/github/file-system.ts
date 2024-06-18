@@ -11,7 +11,7 @@ export const createPopulateFileSystem = (
     const addFiles = (files: GithubCache['data']['files']): void => {
       for (const file of files) {
         let content = file.content;
-        
+
         if (!content) {
           content = getFileContent?.({
             path: file.path,
