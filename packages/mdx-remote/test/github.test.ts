@@ -1,140 +1,159 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { expect, test } from 'vitest';
-import { generatePageTree } from '@/github';
-import {
-  type CompareTreeDiff,
-  createCompareTree,
-  filesToGitTree,
-  createTransformTreeToCache,
-  createApplyDiff,
-  createRenderer,
-} from '@/github/utils';
-import fs from 'node:fs/promises';
+import { expect, test, vi } from 'vitest';
+import { createCache } from '@/github';
+import fs from 'node:fs';
+import type { CompareTreeDiff } from '@/github/diff';
 
 const cwd = path.dirname(fileURLToPath(import.meta.url));
 
-test('Generate Page Tree', async () => {
-  const directory = path.resolve(cwd, './fixtures');
-
-  const output = await generatePageTree({
+const mockCache = vi.fn(async (directory: string) => {
+  const cache = createCache({
     directory,
   });
 
-  await expect(output).toMatchFileSnapshot(
+  await cache.init();
+
+  return {
+    cache,
+    fakeTree: [
+      {
+        // make sure sha property is an action (add, remove, modify)
+        sha: 'add',
+        type: 'blob',
+        path: 'new-file.mdx',
+        url: 'fixtures/new-file.mdx',
+      },
+      {
+        type: 'blob',
+        sha: 'modify',
+        path: 'index.mdx',
+        url: 'fixtures/index.mdx',
+      },
+      {
+        type: 'blob',
+        sha: 'remove',
+        path: 'meta.json',
+        url: 'fixtures/meta.json',
+      },
+    ] as ((typeof cache.tree)['tree'][number] & {
+      sha: CompareTreeDiff['action'];
+    })[],
+  };
+});
+
+// DO NOT REMOVE THIS, WILL BREAK SOME CACHE TESTS
+const sort = <
+  T extends {
+    path: string;
+  },
+>(
+  diff: T[],
+) => diff.sort((a, b) => a.path.localeCompare(b.path));
+
+test('Generate Page Tree From Cache', async () => {
+  const directory = path.resolve(cwd, './fixtures');
+  const { cache } = await mockCache(directory);
+
+  const pageTree = await cache.generatePageTree();
+
+  await expect(pageTree).toMatchFileSnapshot(
     path.resolve(cwd, './out/page-tree.output.json5'),
   );
 });
 
-const mockCacheInstace = async (directory: string) => {
-  const tree = await filesToGitTree({
-    directory,
-  });
-
-  const cache = await createTransformTreeToCache(async (file: string) =>
-    fs.readFile(path.resolve(directory, file), 'utf-8'),
-  )(tree);
-
-  return {
-    cache,
-    tree: {
-      real: tree,
-      fake: [
-        {
-          // make sure sha property is an action (add, remove, modify)
-          sha: 'add',
-          type: 'blob',
-          path: 'new-file.mdx',
-          url: 'fixtures/new-file.mdx',
-        },
-        {
-          type: 'blob',
-          sha: 'modify',
-          path: 'index.mdx',
-          url: 'fixtures/index.mdx',
-        },
-        {
-          type: 'blob',
-          sha: 'remove',
-          path: 'meta.json',
-          url: 'fixtures/meta.json',
-        },
-      ] as ((typeof tree)['tree'][number] & {
-        sha: CompareTreeDiff['action'];
-      })[],
-    },
-  };
-};
-
-test('Transform Git tree to cache', async () => {
+test('Transform Git Tree to GitHub Cache', async () => {
   const directory = path.resolve(cwd, './fixtures');
-  const {
-    cache: { lastUpdated, ...cache },
-  } = await mockCacheInstace(directory);
-  const render = createRenderer({
-    lastUpdated,
-    ...cache,
-  });
-  const { lastUpdated: _lastUpdated, ...rendered } = await render();
+  const { cache } = await mockCache(directory);
+
+  const { lastUpdated: _lastUpdated, ...rendered } = await cache.render();
 
   await expect(rendered).toMatchFileSnapshot(
     path.resolve(cwd, './out/cache.output.json5'),
   );
 });
 
-test('Differientate between two trees', async () => {
+test('Differientate Between Two Git Trees', async () => {
+  vi.restoreAllMocks();
   const directory = path.resolve(cwd, './fixtures');
-  const { cache, tree } = await mockCacheInstace(directory);
-  const compareTree = createCompareTree(cache);
+  const { cache, fakeTree } = await mockCache(directory);
 
-  const diff = compareTree({
-    sha: `${tree.real.sha}-fake`,
+  const diff = cache.compareToTree({
+    sha: `${cache.tree.sha}-fake`,
     truncated: false,
-    url: tree.real.url,
-    tree: tree.real.tree
+    url: cache.tree.url,
+    tree: cache.tree.tree
       // Remove the files that are being overwritten
-      .filter((item) => !tree.fake.some((f) => f.url === item.url))
-      .concat(tree.fake)
+      .filter((item) => !fakeTree.some((f) => f.url === item.url))
+      .concat(fakeTree)
       // Act as if the file was removed
       .filter((item) => item.sha !== 'remove'),
   });
-  const fakeDiff = tree.fake.map((item) => ({
+  const fakeDiff = fakeTree.map((item) => ({
     type: item.type,
     action: item.sha as CompareTreeDiff['action'],
     path: item.path,
     // if it's a remove action, the sha isn't updated internally, there fore we need to find the sha
     sha:
       item.sha === 'remove'
-        ? tree.real.tree.find((f) => f.url === item.url)?.sha ?? item.sha
+        ? cache.tree.tree.find((f) => f.url === item.url)?.sha ?? item.sha
         : item.sha,
   }));
 
-  // DO NOT REMOVE THIS, WILL BREAK TEST (toStrictEqual)
-  const sort = <T extends CompareTreeDiff>(diff: T[]) =>
-    diff.sort((a, b) => a.path.localeCompare(b.path));
-
-  expect(sort(diff)).toStrictEqual(sort(fakeDiff));
+  expect(sort(diff)).toEqual(sort(fakeDiff));
 });
 
-test('Apply differences to cache', async () => {
+test('Apply Differences To Current Cache', async () => {
   const directory = path.resolve(cwd, './fixtures');
-  const { cache, tree } = await mockCacheInstace(directory);
-  const compareTree = createCompareTree(cache);
+  const { cache, fakeTree } = await mockCache(directory);
 
-  const diff = compareTree({
-    sha: `${tree.real.sha}-fake`,
+  const diff = cache.compareToTree({
+    sha: `${cache.tree.sha}-fake`,
     truncated: false,
-    url: tree.real.url,
-    tree: tree.real.tree
+    url: cache.tree.url,
+    tree: cache.tree.tree
       // Remove the files that are being overwritten
-      .filter((item) => !tree.fake.some((f) => f.url === item.url))
-      .concat(tree.fake)
+      .filter((item) => !fakeTree.some((f) => f.url === item.url))
+      .concat(fakeTree)
       // Act as if the file was removed
       .filter((item) => item.sha !== 'remove'),
   });
+  const fakeDiff = fakeTree.map((item) => ({
+    type: item.type,
+    action: item.sha as CompareTreeDiff['action'],
+    path: item.path,
+    // if it's a remove action, the sha isn't updated internally, there fore we need to find the sha
+    sha:
+      item.sha === 'remove'
+        ? cache.tree.tree.find((f) => f.url === item.url)?.sha ?? item.sha
+        : item.sha,
+  }));
 
-  const applyDiff = createApplyDiff(cache);
-  applyDiff(diff);
+  cache.applyDiff(diff, async (diff) =>
+    // in real cases, these new files will exist, but for testing purposes, the file doesn't really exist
+    // so we need to check if the file is new, if it is, return some dummy content
+    fakeDiff
+      .filter((item) => item.action === 'add')
+      .some((f) => f.path === diff.path)
+      ? 'new content'
+      : fs.promises.readFile(path.resolve(directory, diff.path), 'utf8'),
+  );
 
-  console.log(cache);
+  for (const fakeFile of sort(
+    fakeTree
+      .filter((item) => item.sha !== 'remove')
+      .map((item) => ({
+        sha: item.sha,
+        path: item.path,
+      })),
+  )) {
+    const file = cache.data.files
+      .map((file) => ({
+        sha: file.sha,
+        path: file.path,
+      }))
+      .find((f) => f.path === fakeFile.path);
+    expect(file).toBeDefined();
+    expect(file).toMatchObject(fakeFile);
+  }
 });

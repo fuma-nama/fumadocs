@@ -39,7 +39,7 @@ const baseSubDirectorySchema = z.object({
     .object({
       path: z.string(),
       sha: z.string(),
-      content: z.promise(z.string()).or(z.string()),
+      content: z.promise(z.string()).or(z.string()).optional(),
     })
     .array(),
 });
