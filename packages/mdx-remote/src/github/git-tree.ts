@@ -2,6 +2,7 @@ import path from 'node:path';
 import fg from 'fast-glob';
 import type { GithubCacheFile } from './cache';
 import { getTree } from './get-tree';
+import type { GitTreeItem } from './utils';
 
 export const findTreeRecursive = async (
   directory: string,
@@ -56,20 +57,29 @@ export const createTransformTreeToCache = (
     const blobs = tree.tree.filter((t) => t.type === 'blob');
     const trees = tree.tree.filter((t) => t.type === 'tree');
 
-    for (const item of trees) {
-      const segments = item.path.split('/');
+    const initParentDirectories = (item: GitTreeItem, segments: string[]): GithubCacheFile['subDirectories'][0] => {
       let segmentDirectory: Record<string, NonNullable<unknown> | undefined> =
         subDirectories;
 
-      for (const segment of segments) {
+      for (const segment of segments.slice(0, -1)) {
         segmentDirectory[segment] ||= {
           sha: item.sha,
           path: item.path,
           files: [],
           subDirectories: [],
         };
-        segmentDirectory = segmentDirectory[segment];
+        segmentDirectory = segmentDirectory[segment] as Record<
+          string,
+          NonNullable<unknown> | undefined
+        >;
       }
+
+      return segmentDirectory as GithubCacheFile['subDirectories'][0];
+    };
+
+    for (const item of trees) {
+      const segments = item.path.split('/');
+      initParentDirectories(item, segments);
     }
 
     for (const item of blobs) {
@@ -84,23 +94,9 @@ export const createTransformTreeToCache = (
         continue;
       }
 
-      let segmentDirectory: Record<string, NonNullable<unknown> | undefined> =
-        subDirectories;
+      const parentDirectory = initParentDirectories(item, segments);
 
-      for (const segment of segments.slice(0, -1)) {
-        segmentDirectory[segment] ||= {
-          sha: item.sha,
-          path: item.path,
-          files: [],
-          subDirectories: [],
-        };
-        segmentDirectory = segmentDirectory[segment];
-      }
-
-      const realDirectory =
-        segmentDirectory as GithubCacheFile['subDirectories'][0];
-
-      realDirectory.files.push({
+      parentDirectory.files.push({
         sha: item.sha,
         path: item.path,
         content: getFileContent?.(item.path) ?? '',

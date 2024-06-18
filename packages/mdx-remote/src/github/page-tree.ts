@@ -1,5 +1,4 @@
 import type { PageTree } from 'fumadocs-core/server';
-import matter from 'gray-matter';
 import {
   createPageTreeBuilder,
   loadFiles,
@@ -8,6 +7,7 @@ import {
   type BuildPageTreeOptions,
 } from 'fumadocs-core/source';
 import picomatch from 'picomatch';
+import matter from 'gray-matter';
 import type { GithubCache } from './cache';
 
 interface FileInfo {
@@ -20,15 +20,7 @@ interface FileInfo {
 }
 
 interface GeneratePageTreeResult {
-  files: {
-    /**
-     * Path relative to directory
-     */
-    path: string;
-
-    frontmatter: object;
-  }[];
-
+  files: FileInfo[];
   pageTree: PageTree.Root;
 }
 
@@ -67,24 +59,23 @@ export const createGeneratePageTree = (
     const isMatch = picomatch(include);
     const files = fs.getFiles().filter((f) => isMatch(f));
 
-    const entries: FileInfo[] = (
+    const entries: FileInfo[]= (
       await Promise.all(
         files.map(async (file) => {
           const content = await fs.readFile(file);
 
           if (!content) return null;
 
-          const { data } = matter(content);
+          const { data} = matter(content);
 
+          // TODO compilem mdx
           return {
             path: file,
-            frontmatter: data,
-          };
+            frontmatter: data
+          }
         }),
       )
     ).filter(Boolean) as FileInfo[];
-
-    console.log(entries);
 
     const storage = loadFiles(
       entries.map((e) => ({
@@ -105,6 +96,6 @@ export const createGeneratePageTree = (
 
     return {
       pageTree,
-      files: entries,
+      files: entries as unknown as FileInfo[],
     };
   };

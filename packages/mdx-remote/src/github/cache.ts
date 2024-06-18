@@ -1,11 +1,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import type { z } from 'zod';
-import { unstable_cache as unstableCache } from 'next/cache';
 import {
   createTransformTreeToCache,
   filesToGitTree,
-  findTreeRecursive as findTreeRecursiveInner,
+  findTreeRecursive,
 } from './git-tree';
 import { githubCacheFileSchema, parse } from './schema';
 import type { getTree } from './get-tree';
@@ -21,15 +20,6 @@ import { blobToUtf8 } from './utils';
 import { createGeneratePageTree } from './page-tree';
 
 export type GithubCacheFile = z.infer<typeof githubCacheFileSchema>;
-
-const findTreeRecursive = unstableCache(
-  findTreeRecursiveInner,
-  ['@fumadocs/mdx-remote/github/cache'],
-  {
-    tags: ['@fumadocs/mdx-remote/github/cache'],
-  },
-);
-
 export interface CreateCacheOptions
   extends Pick<Parameters<typeof getTree>[0], 'owner' | 'repo' | 'token'> {
   directory: string;

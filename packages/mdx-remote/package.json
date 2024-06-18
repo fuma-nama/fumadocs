@@ -60,7 +60,8 @@
     "picomatch": "^4.0.2",
     "tsconfig": "workspace:*",
     "unified": "^11.0.4",
-    "vfile": "^6.0.1"
+    "vfile": "^6.0.1",
+    "webpack": "^5.90.3"
   },
   "peerDependencies": {
     "fumadocs-core": ">= 12.1.1",

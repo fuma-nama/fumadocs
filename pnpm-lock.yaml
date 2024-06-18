@@ -625,6 +625,9 @@ importers:
       vfile:
         specifier: ^6.0.1
         version: 6.0.1
+      webpack:
+        specifier: ^5.90.3
+        version: 5.90.3(esbuild@0.21.5)
 
   packages/openapi:
     dependencies:
