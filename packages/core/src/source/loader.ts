@@ -8,7 +8,7 @@ import {
 import type { FileData, MetaData, PageData, UrlFn } from './types';
 import type { BuildPageTreeOptions } from './page-tree-builder';
 import { createPageTreeBuilder } from './page-tree-builder';
-import { splitPath, type FileInfo } from './path';
+import { type FileInfo } from './path';
 import type { File, Storage } from './file-system';
 
 export interface LoaderConfig {
@@ -128,15 +128,17 @@ function buildPageMap(
 export function createGetUrl(baseUrl: string): UrlFn {
   return (slugs, locale) => {
     const paths = locale
-      ? [...splitPath(baseUrl), locale, ...slugs]
-      : [...splitPath(baseUrl), ...slugs];
+      ? [locale, ...baseUrl.split('/'), ...slugs]
+      : [...baseUrl.split('/'), ...slugs];
 
-    return `/${paths.join('/')}`;
+    return `/${paths.filter((v) => v.length > 0).join('/')}`;
   };
 }
 
 export function getSlugs(info: FileInfo): string[] {
-  const result = [...splitPath(info.dirname), info.name];
+  const result = [...info.dirname.split('/'), info.name].filter(
+    (v) => v.length > 0,
+  );
 
   return result[result.length - 1] === 'index' ? result.slice(0, -1) : result;
 }

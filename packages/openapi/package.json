@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-openapi",
-  "version": "2.0.5",
+  "version": "3.0.0",
   "description": "Generate MDX docs for your OpenAPI spec",
   "keywords": [
     "NextJs",
@@ -26,10 +26,12 @@
   "dependencies": {
     "@apidevtools/json-schema-ref-parser": "^11.6.4",
     "fast-glob": "^3.3.1",
+    "js-yaml": "^4.1.0",
     "json-schema-to-typescript": "^14.0.5",
     "openapi-sampler": "^1.5.1"
   },
   "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
     "@types/node": "18.17.5",
     "@types/openapi-sampler": "^1.0.3",
     "eslint-config-custom": "workspace:*",

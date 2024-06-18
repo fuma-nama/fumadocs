@@ -2,9 +2,7 @@
 title: Swagger Petstore
 ---
 
-import { Root, API, APIInfo, APIExample, Property } from 'fumadocs-ui/components/api'
-import { Tabs, Tab } from 'fumadocs-ui/components/tabs'
-import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible } from "fumadocs-ui/components/api";
 
 <Root>
 
@@ -16,7 +14,7 @@ import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 
 ### Query Parameters
 
-<Property required={false} deprecated={false} name={"limit"} type={"integer"}>
+<Property name={"limit"} type={"integer"} required={false} deprecated={false}>
 
 How many items to return at one time (max 100)
 
@@ -39,13 +37,15 @@ How many items to return at one time (max 100)
 curl -X GET "http://petstore.swagger.io/pets"
 ```
 
-<Tabs items={["200","default"]}>
+<Responses items={["200","default"]}>
 
-<Tab value={"200"}>
+<Response value={"200"}>
 
+<ResponseTypes>
 
+<ExampleResponse>
 
-```json title="Example Response"
+```json
 [
   {
     "id": 0,
@@ -55,9 +55,9 @@ curl -X GET "http://petstore.swagger.io/pets"
 ]
 ```
 
-<Accordions>
+</ExampleResponse>
 
-<Accordion title={"Typescript Definition"}>
+<TypeScriptResponse>
 
 ```ts
 /**
@@ -68,45 +68,45 @@ export type Response = {
   name: string;
   tag?: string;
 }[];
-
 ```
 
-</Accordion>
+</TypeScriptResponse>
 
-</Accordions>
+</ResponseTypes>
 
-</Tab>
+</Response>
 
-<Tab value={"default"}>
+<Response value={"default"}>
 
+<ResponseTypes>
 
+<ExampleResponse>
 
-```json title="Example Response"
+```json
 {
   "code": 0,
   "message": "string"
 }
 ```
 
-<Accordions>
+</ExampleResponse>
 
-<Accordion title={"Typescript Definition"}>
+<TypeScriptResponse>
 
 ```ts
 export interface Response {
   code: number;
   message: string;
 }
-
 ```
 
-</Accordion>
+</TypeScriptResponse>
 
-</Accordions>
+</ResponseTypes>
 
-</Tab>
+</Response>
 
-</Tabs>
+</Responses>
 
 </APIExample>
 
@@ -120,25 +120,17 @@ export interface Response {
 
 ### Request Body
 
-
-
-<Property required={true} deprecated={false} name={"id"} type={"integer"}>
-
-
+<Property name={"id"} type={"integer"} required={true} deprecated={undefined}>
 
 <span>Format:  `"int64"`</span>
 
 </Property>
 
-<Property required={true} deprecated={false} name={"name"} type={"string"}>
-
-
+<Property name={"name"} type={"string"} required={true} deprecated={undefined}>
 
 </Property>
 
-<Property required={false} deprecated={false} name={"tag"} type={"string"}>
-
-
+<Property name={"tag"} type={"string"} required={false} deprecated={undefined}>
 
 </Property>
 
@@ -160,38 +152,39 @@ curl -X POST "http://petstore.swagger.io/pets" \
 }'
 ```
 
-<Tabs items={["default"]}>
+<Responses items={["default"]}>
 
-<Tab value={"default"}>
+<Response value={"default"}>
 
+<ResponseTypes>
 
+<ExampleResponse>
 
-```json title="Example Response"
+```json
 {
   "code": 0,
   "message": "string"
 }
 ```
 
-<Accordions>
+</ExampleResponse>
 
-<Accordion title={"Typescript Definition"}>
+<TypeScriptResponse>
 
 ```ts
 export interface Response {
   code: number;
   message: string;
 }
-
 ```
 
-</Accordion>
+</TypeScriptResponse>
 
-</Accordions>
+</ResponseTypes>
 
-</Tab>
+</Response>
 
-</Tabs>
+</Responses>
 
 </APIExample>
 
@@ -205,7 +198,7 @@ export interface Response {
 
 ### Path Parameters
 
-<Property required={true} deprecated={false} name={"petId"} type={"string"}>
+<Property name={"petId"} type={"string"} required={true} deprecated={false}>
 
 The id of the pet to retrieve
 
@@ -224,13 +217,15 @@ The id of the pet to retrieve
 curl -X GET "http://petstore.swagger.io/pets/string"
 ```
 
-<Tabs items={["200","default"]}>
+<Responses items={["200","default"]}>
 
-<Tab value={"200"}>
+<Response value={"200"}>
 
+<ResponseTypes>
 
+<ExampleResponse>
 
-```json title="Example Response"
+```json
 {
   "id": 0,
   "name": "string",
@@ -238,9 +233,9 @@ curl -X GET "http://petstore.swagger.io/pets/string"
 }
 ```
 
-<Accordions>
+</ExampleResponse>
 
-<Accordion title={"Typescript Definition"}>
+<TypeScriptResponse>
 
 ```ts
 export interface Response {
@@ -248,45 +243,45 @@ export interface Response {
   name: string;
   tag?: string;
 }
-
 ```
 
-</Accordion>
+</TypeScriptResponse>
 
-</Accordions>
+</ResponseTypes>
 
-</Tab>
+</Response>
 
-<Tab value={"default"}>
+<Response value={"default"}>
 
+<ResponseTypes>
 
+<ExampleResponse>
 
-```json title="Example Response"
+```json
 {
   "code": 0,
   "message": "string"
 }
 ```
 
-<Accordions>
+</ExampleResponse>
 
-<Accordion title={"Typescript Definition"}>
+<TypeScriptResponse>
 
 ```ts
 export interface Response {
   code: number;
   message: string;
 }
-
 ```
 
-</Accordion>
+</TypeScriptResponse>
 
-</Accordions>
+</ResponseTypes>
 
-</Tab>
+</Response>
 
-</Tabs>
+</Responses>
 
 </APIExample>
 

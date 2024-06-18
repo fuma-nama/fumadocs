@@ -24,17 +24,29 @@ describe('Generate documents', () => {
     }
   });
 
+  test('Unkey', async () => {
+    const tags = await generateTags(
+      fileURLToPath(new URL('./fixtures/unkey.json', import.meta.url)),
+    );
+
+    for (const tag of tags) {
+      await expect(tag.content).toMatchFileSnapshot(
+        `./out/unkey/${tag.tag.toLowerCase()}.mdx`,
+      );
+    }
+  });
+
   test('Generate Files', async () => {
     const cwd = fileURLToPath(new URL('./', import.meta.url));
 
-    vi.mock('node:fs', async (importOriginal) => {
+    vi.mock('node:fs/promises', async (importOriginal) => {
       return {
         // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- mock
-        ...(await importOriginal<typeof import('node:fs')>()),
-        mkdirSync: vi.fn().mockImplementation(() => {
+        ...(await importOriginal<typeof import('node:fs/promises')>()),
+        mkdir: vi.fn().mockImplementation(() => {
           // do nothing
         }),
-        writeFileSync: vi.fn().mockImplementation(() => {
+        writeFile: vi.fn().mockImplementation(() => {
           // do nothing
         }),
       };
@@ -46,19 +58,19 @@ describe('Generate documents', () => {
       cwd,
     });
 
-    const fs = await import('node:fs');
+    const fs = await import('node:fs/promises');
 
-    expect(fs.writeFileSync).toBeCalledTimes(2);
-    expect(fs.writeFileSync).toBeCalledWith(
+    expect(fs.writeFile).toBeCalledTimes(2);
+    expect(fs.writeFile).toBeCalledWith(
       join(cwd, './out/museum.mdx'),
       expect.anything(),
     );
-    expect(fs.writeFileSync).toBeCalledWith(
+    expect(fs.writeFile).toBeCalledWith(
       join(cwd, './out/petstore.mdx'),
       expect.anything(),
     );
 
-    expect(fs.mkdirSync).toBeCalledWith(join(cwd, './out'), expect.anything());
+    expect(fs.mkdir).toBeCalledWith(join(cwd, './out'), expect.anything());
 
     vi.resetAllMocks();
   });

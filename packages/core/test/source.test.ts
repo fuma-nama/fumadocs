@@ -1,5 +1,29 @@
 import { expect, test } from 'vitest';
-import { loader } from '@/source/loader';
+import { createGetUrl, getSlugs, loader } from '@/source/loader';
+import { parseFilePath } from '@/source';
+
+test('Get Slugs', () => {
+  expect(getSlugs(parseFilePath('path/to/file'))).toStrictEqual([
+    'path',
+    'to',
+    'file',
+  ]);
+
+  expect(getSlugs(parseFilePath(''))).toStrictEqual([]);
+});
+
+test('Get URL: Empty', () => {
+  const getUrl = createGetUrl('');
+  expect(getUrl(['docs', 'hello'])).toBe('/docs/hello');
+  expect(getUrl([''])).toBe('/');
+  expect(getUrl([])).toBe('/');
+});
+
+test('Get URL: Base', () => {
+  const getUrl = createGetUrl('/docs');
+  expect(getUrl(['docs', 'hello'])).toBe('/docs/docs/hello');
+  expect(getUrl([''])).toBe('/docs');
+});
 
 test('Simple', () => {
   const result = loader({
