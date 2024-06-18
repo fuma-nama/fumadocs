@@ -2,7 +2,7 @@
 title: migrations
 ---
 
-import { Root, API, APIInfo, APIExample, ResponseTabs, ResponseTab, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible } from "fumadocs-ui/components/api";
+import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible } from "fumadocs-ui/components/api";
 
 <Root>
 
@@ -14,11 +14,7 @@ import { Root, API, APIInfo, APIExample, ResponseTabs, ResponseTab, ExampleRespo
 
 ### Request Body
 
-
-
 <Property name={"body"} type={"array of object"} required={true} deprecated={undefined}>
-
-
 
 </Property>
 
@@ -81,11 +77,11 @@ curl -X POST "https://api.unkey.dev/v1/migrations.createKeys" \
 ]'
 ```
 
-<ResponseTabs items={["200","400","401","403","404","409","429","500"]}>
+<Responses items={["200","400","401","403","404","409","429","500"]}>
 
-<ResponseTab value={"200"}>
+<Response value={"200"}>
 
-
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -109,16 +105,17 @@ export interface Response {
    */
   keyIds: string[];
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-<ResponseTab value={"400"}>
+</Response>
 
+<Response value={"400"}>
 
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -158,16 +155,17 @@ export interface Response {
     requestId: string;
   };
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-<ResponseTab value={"401"}>
+</Response>
 
+<Response value={"401"}>
 
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -207,16 +205,17 @@ export interface Response {
     requestId: string;
   };
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-<ResponseTab value={"403"}>
+</Response>
 
+<Response value={"403"}>
 
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -256,16 +255,17 @@ export interface Response {
     requestId: string;
   };
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-<ResponseTab value={"404"}>
+</Response>
 
+<Response value={"404"}>
 
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -305,16 +305,17 @@ export interface Response {
     requestId: string;
   };
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-<ResponseTab value={"409"}>
+</Response>
 
+<Response value={"409"}>
 
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -354,16 +355,17 @@ export interface Response {
     requestId: string;
   };
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-<ResponseTab value={"429"}>
+</Response>
 
+<Response value={"429"}>
 
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -403,16 +405,17 @@ export interface Response {
     requestId: string;
   };
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-<ResponseTab value={"500"}>
+</Response>
 
+<Response value={"500"}>
 
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -452,14 +455,15 @@ export interface Response {
     requestId: string;
   };
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-</ResponseTabs>
+</Response>
+
+</Responses>
 
 </APIExample>
 
@@ -472,8 +476,6 @@ export interface Response {
 ## v1.migrations.enqueueKeys
 
 ### Request Body
-
-
 
 <Property name={"migrationId"} type={"string"} required={true} deprecated={undefined}>
 
@@ -488,8 +490,6 @@ The id of the api, you want to migrate keys to
 </Property>
 
 <Property name={"keys"} type={"array of object"} required={true} deprecated={undefined}>
-
-
 
 <ObjectCollapsible name={"keys"}>
 
@@ -570,8 +570,6 @@ This is a place for dynamic meta data, anything that feels useful for you should
 <ObjectCollapsible name={"meta"}>
 
 <Property name={"[key: string]"} type={"null"} required={false} deprecated={undefined}>
-
-
 
 </Property>
 
@@ -796,11 +794,11 @@ curl -X POST "https://api.unkey.dev/v1/migrations.enqueueKeys" \
 }'
 ```
 
-<ResponseTabs items={["202","400","401","403","404","409","429","500"]}>
+<Responses items={["202","400","401","403","404","409","429","500"]}>
 
-<ResponseTab value={"202"}>
+<Response value={"202"}>
 
-
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -814,16 +812,17 @@ curl -X POST "https://api.unkey.dev/v1/migrations.enqueueKeys" \
 
 ```ts
 export interface Response {}
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-<ResponseTab value={"400"}>
+</Response>
 
+<Response value={"400"}>
 
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -863,16 +862,17 @@ export interface Response {
     requestId: string;
   };
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-<ResponseTab value={"401"}>
+</Response>
 
+<Response value={"401"}>
 
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -912,16 +912,17 @@ export interface Response {
     requestId: string;
   };
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-<ResponseTab value={"403"}>
+</Response>
 
+<Response value={"403"}>
 
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -961,16 +962,17 @@ export interface Response {
     requestId: string;
   };
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-<ResponseTab value={"404"}>
+</Response>
 
+<Response value={"404"}>
 
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -1010,16 +1012,17 @@ export interface Response {
     requestId: string;
   };
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-<ResponseTab value={"409"}>
+</Response>
 
+<Response value={"409"}>
 
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -1059,16 +1062,17 @@ export interface Response {
     requestId: string;
   };
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-<ResponseTab value={"429"}>
+</Response>
 
+<Response value={"429"}>
 
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -1108,16 +1112,17 @@ export interface Response {
     requestId: string;
   };
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-<ResponseTab value={"500"}>
+</Response>
 
+<Response value={"500"}>
 
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -1157,14 +1162,15 @@ export interface Response {
     requestId: string;
   };
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-</ResponseTabs>
+</Response>
+
+</Responses>
 
 </APIExample>
 

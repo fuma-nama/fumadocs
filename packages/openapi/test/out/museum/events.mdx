@@ -3,7 +3,7 @@ title: Events
 description: Special events hosted by the Museum
 ---
 
-import { Root, API, APIInfo, APIExample, ResponseTabs, ResponseTab, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible } from "fumadocs-ui/components/api";
+import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible } from "fumadocs-ui/components/api";
 
 <Root>
 
@@ -73,11 +73,13 @@ The number of days per page.
 curl -X GET "https://api.fake-museum-example.com/special-events"
 ```
 
-<ResponseTabs items={["200"]}>
+<Responses items={["200"]}>
 
-<ResponseTab value={"200"}>
+<Response value={"200"}>
 
 A list of upcoming special events
+
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -130,14 +132,15 @@ export type Response = {
    */
   price: number;
 }[];
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-</ResponseTabs>
+</Response>
+
+</Responses>
 
 </APIExample>
 
@@ -152,8 +155,6 @@ export type Response = {
 Creates a new special event for the museum.
 
 ### Request Body
-
-
 
 <Property name={"name"} type={"string"} required={true} deprecated={undefined}>
 
@@ -218,11 +219,13 @@ curl -X POST "https://api.fake-museum-example.com/special-events" \
 }'
 ```
 
-<ResponseTabs items={["200"]}>
+<Responses items={["200"]}>
 
-<ResponseTab value={"200"}>
+<Response value={"200"}>
 
 Information about a special event.
+
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -273,14 +276,15 @@ export interface Response {
    */
   price: number;
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-</ResponseTabs>
+</Response>
+
+</Responses>
 
 </APIExample>
 
@@ -320,11 +324,13 @@ An identifier for a special event.
 curl -X GET "https://api.fake-museum-example.com/special-events/dad4bce8-f5cb-4078-a211-995864315e39"
 ```
 
-<ResponseTabs items={["200"]}>
+<Responses items={["200"]}>
 
-<ResponseTab value={"200"}>
+<Response value={"200"}>
 
 Information about a special event.
+
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -375,14 +381,15 @@ export interface Response {
    */
   price: number;
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-</ResponseTabs>
+</Response>
+
+</Responses>
 
 </APIExample>
 
@@ -397,8 +404,6 @@ export interface Response {
 Update the details of a special event
 
 ### Request Body
-
-
 
 <Property name={"name"} type={"string"} required={false} deprecated={undefined}>
 
@@ -475,11 +480,13 @@ curl -X PATCH "https://api.fake-museum-example.com/special-events/dad4bce8-f5cb-
 }'
 ```
 
-<ResponseTabs items={["200"]}>
+<Responses items={["200"]}>
 
-<ResponseTab value={"200"}>
+<Response value={"200"}>
 
 Information about a special event.
+
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -530,14 +537,15 @@ export interface Response {
    */
   price: number;
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-</ResponseTabs>
+</Response>
+
+</Responses>
 
 </APIExample>
 
@@ -577,8 +585,6 @@ An identifier for a special event.
 ```bash title="curl"
 curl -X DELETE "https://api.fake-museum-example.com/special-events/dad4bce8-f5cb-4078-a211-995864315e39"
 ```
-
-
 
 </APIExample>
 

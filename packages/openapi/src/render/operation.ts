@@ -128,10 +128,12 @@ async function getResponseTabs(
       items.push(code);
 
       child.push(
-        renderer.ResponseTab({ value: code }, [
+        renderer.Response({ value: code }, [
           p(description),
-          renderer.ExampleResponse([codeblock({ language: 'json' }, example)]),
-          renderer.TypeScriptResponse([codeblock({ language: 'ts' }, ts)]),
+          renderer.ResponseTypes([
+            renderer.ExampleResponse(example),
+            renderer.TypeScriptResponse(ts),
+          ]),
         ]),
       );
     }
@@ -139,7 +141,7 @@ async function getResponseTabs(
 
   if (items.length === 0) return '';
 
-  return renderer.ResponseTabs(
+  return renderer.Responses(
     {
       items,
     },

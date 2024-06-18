@@ -148,28 +148,33 @@ export function APIExample({
   );
 }
 
-export const ResponseTabs = Tabs;
-export function ResponseTab(props: {
-  value: string;
+export const Responses = Tabs;
+export const Response = Tab;
+
+export function ResponseTypes(props: {
   children: ReactNode;
 }): React.ReactElement {
   return (
-    <Tab {...props}>
-      <Tabs items={['Response', 'Typescript']}>{props.children}</Tabs>
-    </Tab>
+    <Accordions
+      type="single"
+      className="!-m-4 border-none pt-2"
+      defaultValue="Response"
+    >
+      {props.children}
+    </Accordions>
   );
 }
 
 export function ExampleResponse(props: {
   children: ReactNode;
 }): React.ReactElement {
-  return <Tab value="Response">{props.children}</Tab>;
+  return <Accordion title="Response">{props.children}</Accordion>;
 }
 
 export function TypeScriptResponse(props: {
   children: ReactNode;
 }): React.ReactElement {
-  return <Tab value="Typescript">{props.children}</Tab>;
+  return <Accordion title="Typescript">{props.children}</Accordion>;
 }
 
 export function ObjectCollapsible(props: {

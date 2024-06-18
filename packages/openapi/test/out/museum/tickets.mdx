@@ -3,7 +3,7 @@ title: Tickets
 description: Museum tickets for general entrance or special events.
 ---
 
-import { Root, API, APIInfo, APIExample, ResponseTabs, ResponseTab, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible } from "fumadocs-ui/components/api";
+import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible } from "fumadocs-ui/components/api";
 
 <Root>
 
@@ -16,8 +16,6 @@ import { Root, API, APIInfo, APIExample, ResponseTabs, ResponseTab, ExampleRespo
 Purchase museum tickets for general entry or special events.
 
 ### Request Body
-
-
 
 <Property name={"ticketType"} type={"string"} required={true} deprecated={undefined}>
 
@@ -88,11 +86,13 @@ curl -X POST "https://api.fake-museum-example.com/tickets" \
 }'
 ```
 
-<ResponseTabs items={["200"]}>
+<Responses items={["200"]}>
 
-<ResponseTab value={"200"}>
+<Response value={"200"}>
 
 Details for a museum ticket after a successful purchase.
+
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -141,14 +141,15 @@ export interface Response {
    */
   confirmationCode: string;
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-</ResponseTabs>
+</Response>
+
+</Responses>
 
 </APIExample>
 
@@ -188,11 +189,13 @@ An identifier for a ticket to a museum event. Used to generate ticket image.
 curl -X GET "https://api.fake-museum-example.com/tickets/a54a57ca-36f8-421b-a6b4-2e8f26858a4c/qr"
 ```
 
-<ResponseTabs items={["200"]}>
+<Responses items={["200"]}>
 
-<ResponseTab value={"200"}>
+<Response value={"200"}>
 
 An image of a ticket with a QR code used for museum or event entry.
+
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -209,14 +212,15 @@ An image of a ticket with a QR code used for museum or event entry.
  * An image of a ticket with a QR code used for museum or event entry.
  */
 export type Response = string;
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-</ResponseTabs>
+</Response>
+
+</Responses>
 
 </APIExample>
 

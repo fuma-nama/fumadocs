@@ -2,7 +2,7 @@
 title: Swagger Petstore
 ---
 
-import { Root, API, APIInfo, APIExample, ResponseTabs, ResponseTab, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible } from "fumadocs-ui/components/api";
+import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible } from "fumadocs-ui/components/api";
 
 <Root>
 
@@ -37,11 +37,11 @@ How many items to return at one time (max 100)
 curl -X GET "http://petstore.swagger.io/pets"
 ```
 
-<ResponseTabs items={["200","default"]}>
+<Responses items={["200","default"]}>
 
-<ResponseTab value={"200"}>
+<Response value={"200"}>
 
-
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -68,16 +68,17 @@ export type Response = {
   name: string;
   tag?: string;
 }[];
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-<ResponseTab value={"default"}>
+</Response>
 
+<Response value={"default"}>
 
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -97,14 +98,15 @@ export interface Response {
   code: number;
   message: string;
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-</ResponseTabs>
+</Response>
+
+</Responses>
 
 </APIExample>
 
@@ -118,11 +120,7 @@ export interface Response {
 
 ### Request Body
 
-
-
 <Property name={"id"} type={"integer"} required={true} deprecated={undefined}>
-
-
 
 <span>Format:  `"int64"`</span>
 
@@ -130,13 +128,9 @@ export interface Response {
 
 <Property name={"name"} type={"string"} required={true} deprecated={undefined}>
 
-
-
 </Property>
 
 <Property name={"tag"} type={"string"} required={false} deprecated={undefined}>
-
-
 
 </Property>
 
@@ -158,11 +152,11 @@ curl -X POST "http://petstore.swagger.io/pets" \
 }'
 ```
 
-<ResponseTabs items={["default"]}>
+<Responses items={["default"]}>
 
-<ResponseTab value={"default"}>
+<Response value={"default"}>
 
-
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -182,14 +176,15 @@ export interface Response {
   code: number;
   message: string;
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-</ResponseTabs>
+</Response>
+
+</Responses>
 
 </APIExample>
 
@@ -222,11 +217,11 @@ The id of the pet to retrieve
 curl -X GET "http://petstore.swagger.io/pets/string"
 ```
 
-<ResponseTabs items={["200","default"]}>
+<Responses items={["200","default"]}>
 
-<ResponseTab value={"200"}>
+<Response value={"200"}>
 
-
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -248,16 +243,17 @@ export interface Response {
   name: string;
   tag?: string;
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-<ResponseTab value={"default"}>
+</Response>
 
+<Response value={"default"}>
 
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -277,14 +273,15 @@ export interface Response {
   code: number;
   message: string;
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-</ResponseTabs>
+</Response>
+
+</Responses>
 
 </APIExample>
 

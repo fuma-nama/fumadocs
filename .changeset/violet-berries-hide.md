@@ -14,31 +14,32 @@ Changed the output of MDX files, the new structure requires components:
 - API
 - APIInfo
 - APIExample
-- ResponseTabs
-- ResponseTab
+- Responses
+- Response
 - ExampleResponse
 - TypeScriptResponse
 - Property
 - ObjectCollapsible
+- ResponseTypes
 
 ````mdx
 <API>
 
-<APIInfo method={"GET"} route={"/pets"}>
+<APIInfo method={"GET"} route={"/pets/{petId}"}>
 
-## List all pets
+## Info for a specific pet
 
-### Query Parameters
+### Path Parameters
 
-<Property name={"limit"} type={"integer"} required={false} deprecated={false}>
+<Property name={"petId"} type={"string"} required={true} deprecated={false}>
 
-How many items to return at one time (max 100)
+The id of the pet to retrieve
 
 </Property>
 
 | Status code | Description |
 | ----------- | ----------- |
-| `200` | A paged array of pets |
+| `200` | Expected response to a valid request |
 | `default` | unexpected error |
 
 </APIInfo>
@@ -46,23 +47,23 @@ How many items to return at one time (max 100)
 <APIExample>
 
 ```bash title="curl"
-curl -X GET "http://petstore.swagger.io/pets"
+curl -X GET "http://petstore.swagger.io/pets/string"
 ```
 
-<ResponseTabs items={["200","default"]}>
+<Responses items={["200","default"]}>
 
-<ResponseTab value={"200"}>
+<Response value={"200"}>
+
+<ResponseTypes>
 
 <ExampleResponse>
 
 ```json
-[
-  {
-    "id": 0,
-    "name": "string",
-    "tag": "string"
-  }
-]
+{
+  "id": 0,
+  "name": "string",
+  "tag": "string"
+}
 ```
 
 </ExampleResponse>
@@ -70,21 +71,18 @@ curl -X GET "http://petstore.swagger.io/pets"
 <TypeScriptResponse>
 
 ```ts
-/**
- * @maxItems 100
- */
-export type Response = {
+export interface Response {
   id: number;
   name: string;
   tag?: string;
-}[];
+}
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-</ResponseTabs>
+</Responses>
 
 </APIExample>
 

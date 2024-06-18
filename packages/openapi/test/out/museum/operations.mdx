@@ -3,7 +3,7 @@ title: Operations
 description: Operational information about the museum.
 ---
 
-import { Root, API, APIInfo, APIExample, ResponseTabs, ResponseTab, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible } from "fumadocs-ui/components/api";
+import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible } from "fumadocs-ui/components/api";
 
 <Root>
 
@@ -63,11 +63,13 @@ The number of days per page.
 curl -X GET "https://api.fake-museum-example.com/museum-hours"
 ```
 
-<ResponseTabs items={["200"]}>
+<Responses items={["200"]}>
 
-<ResponseTab value={"200"}>
+<Response value={"200"}>
 
 List of museum operating hours for consecutive days.
+
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -103,14 +105,15 @@ export type Response = {
    */
   timeClose: string;
 }[];
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-</ResponseTabs>
+</Response>
+
+</Responses>
 
 </APIExample>
 

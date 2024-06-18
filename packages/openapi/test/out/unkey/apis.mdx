@@ -2,7 +2,7 @@
 title: apis
 ---
 
-import { Root, API, APIInfo, APIExample, ResponseTabs, ResponseTab, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible } from "fumadocs-ui/components/api";
+import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible } from "fumadocs-ui/components/api";
 
 <Root>
 
@@ -43,11 +43,11 @@ The id of the api to fetch
 curl -X GET "https://api.unkey.dev/v1/apis.getApi"
 ```
 
-<ResponseTabs items={["200","400","401","403","404","409","429","500"]}>
+<Responses items={["200","400","401","403","404","409","429","500"]}>
 
-<ResponseTab value={"200"}>
+<Response value={"200"}>
 
-
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -78,16 +78,17 @@ export interface Response {
    */
   name?: string;
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-<ResponseTab value={"400"}>
+</Response>
 
+<Response value={"400"}>
 
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -127,16 +128,17 @@ export interface Response {
     requestId: string;
   };
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-<ResponseTab value={"401"}>
+</Response>
 
+<Response value={"401"}>
 
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -176,16 +178,17 @@ export interface Response {
     requestId: string;
   };
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-<ResponseTab value={"403"}>
+</Response>
 
+<Response value={"403"}>
 
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -225,16 +228,17 @@ export interface Response {
     requestId: string;
   };
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-<ResponseTab value={"404"}>
+</Response>
 
+<Response value={"404"}>
 
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -274,16 +278,17 @@ export interface Response {
     requestId: string;
   };
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-<ResponseTab value={"409"}>
+</Response>
 
+<Response value={"409"}>
 
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -323,16 +328,17 @@ export interface Response {
     requestId: string;
   };
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-<ResponseTab value={"429"}>
+</Response>
 
+<Response value={"429"}>
 
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -372,16 +378,17 @@ export interface Response {
     requestId: string;
   };
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-<ResponseTab value={"500"}>
+</Response>
 
+<Response value={"500"}>
 
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -421,14 +428,15 @@ export interface Response {
     requestId: string;
   };
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-</ResponseTabs>
+</Response>
+
+</Responses>
 
 </APIExample>
 
@@ -505,11 +513,11 @@ Decrypt and display the raw key. Only possible if the key was encrypted when gen
 curl -X GET "https://api.unkey.dev/v1/apis.listKeys"
 ```
 
-<ResponseTabs items={["200","400","401","403","404","409","429","500"]}>
+<Responses items={["200","400","401","403","404","409","429","500"]}>
 
-<ResponseTab value={"200"}>
+<Response value={"200"}>
 
-
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -689,16 +697,17 @@ export interface Response {
    */
   total: number;
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-<ResponseTab value={"400"}>
+</Response>
 
+<Response value={"400"}>
 
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -738,16 +747,17 @@ export interface Response {
     requestId: string;
   };
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-<ResponseTab value={"401"}>
+</Response>
 
+<Response value={"401"}>
 
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -787,16 +797,17 @@ export interface Response {
     requestId: string;
   };
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-<ResponseTab value={"403"}>
+</Response>
 
+<Response value={"403"}>
 
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -836,16 +847,17 @@ export interface Response {
     requestId: string;
   };
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-<ResponseTab value={"404"}>
+</Response>
 
+<Response value={"404"}>
 
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -885,16 +897,17 @@ export interface Response {
     requestId: string;
   };
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-<ResponseTab value={"409"}>
+</Response>
 
+<Response value={"409"}>
 
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -934,16 +947,17 @@ export interface Response {
     requestId: string;
   };
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-<ResponseTab value={"429"}>
+</Response>
 
+<Response value={"429"}>
 
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -983,16 +997,17 @@ export interface Response {
     requestId: string;
   };
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-<ResponseTab value={"500"}>
+</Response>
 
+<Response value={"500"}>
 
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -1032,14 +1047,15 @@ export interface Response {
     requestId: string;
   };
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-</ResponseTabs>
+</Response>
+
+</Responses>
 
 </APIExample>
 
@@ -1052,8 +1068,6 @@ export interface Response {
 ## deleteKeys
 
 ### Request Body
-
-
 
 <Property name={"apiId"} type={"string"} required={true} deprecated={undefined}>
 
@@ -1096,11 +1110,11 @@ curl -X POST "https://api.unkey.dev/v1/apis.deleteKeys" \
 }'
 ```
 
-<ResponseTabs items={["200","400","401","403","404","409","429","500"]}>
+<Responses items={["200","400","401","403","404","409","429","500"]}>
 
-<ResponseTab value={"200"}>
+<Response value={"200"}>
 
-
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -1121,16 +1135,17 @@ export interface Response {
    */
   deletedKeys: number;
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-<ResponseTab value={"400"}>
+</Response>
 
+<Response value={"400"}>
 
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -1170,16 +1185,17 @@ export interface Response {
     requestId: string;
   };
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-<ResponseTab value={"401"}>
+</Response>
 
+<Response value={"401"}>
 
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -1219,16 +1235,17 @@ export interface Response {
     requestId: string;
   };
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-<ResponseTab value={"403"}>
+</Response>
 
+<Response value={"403"}>
 
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -1268,16 +1285,17 @@ export interface Response {
     requestId: string;
   };
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-<ResponseTab value={"404"}>
+</Response>
 
+<Response value={"404"}>
 
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -1317,16 +1335,17 @@ export interface Response {
     requestId: string;
   };
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-<ResponseTab value={"409"}>
+</Response>
 
+<Response value={"409"}>
 
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -1366,16 +1385,17 @@ export interface Response {
     requestId: string;
   };
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-<ResponseTab value={"429"}>
+</Response>
 
+<Response value={"429"}>
 
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -1415,16 +1435,17 @@ export interface Response {
     requestId: string;
   };
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-<ResponseTab value={"500"}>
+</Response>
 
+<Response value={"500"}>
 
+<ResponseTypes>
 
 <ExampleResponse>
 
@@ -1464,14 +1485,15 @@ export interface Response {
     requestId: string;
   };
 }
-
 ```
 
 </TypeScriptResponse>
 
-</ResponseTab>
+</ResponseTypes>
 
-</ResponseTabs>
+</Response>
+
+</Responses>
 
 </APIExample>
 

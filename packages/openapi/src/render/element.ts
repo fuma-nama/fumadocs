@@ -9,7 +9,7 @@ export function createElement(
     .join(' ');
 
   s.push(params.length > 0 ? `<${name} ${params}>` : `<${name}>`);
-  s.push(...child);
+  s.push(...child.filter((v) => v.length > 0));
   s.push(`</${name}>`);
 
   return s.join('\n\n');
@@ -37,7 +37,7 @@ export function codeblock(
     title
       ? `\`\`\`${language} title=${JSON.stringify(title)}`
       : `\`\`\`${language}`,
-    child,
+    child.trim(),
     '```',
   ].join('\n');
 }
