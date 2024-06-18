@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 12.1.2
+
+### Patch Changes
+
+- b4856d1: Fix `createGetUrl` wrong locale position
+
 ## 12.1.1
 
 ### Patch Changes
