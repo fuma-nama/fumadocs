@@ -27,15 +27,19 @@ Hey!
       "path": "another/file.mdx",
     },
   ],
+  "getPage": [Function],
+  "getPages": [Function],
   "pageTree": {
     "children": [
       {
+        "name": "Hello World",
         "type": "page",
         "url": "/docs",
       },
       {
         "children": [
           {
+            "name": "Another File",
             "type": "page",
             "url": "/docs/another/file",
           },
@@ -44,6 +48,6 @@ Hey!
         "type": "folder",
       },
     ],
-    "name": "",
+    "name": "Hello World",
   },
 }
