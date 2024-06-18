@@ -8,8 +8,8 @@ void OpenAPI.generateFiles({
   per: 'tag',
   options: {
     frontmatter: () => ({
-      toc: false
-    })
+      toc: false,
+    }),
   },
 });
 
