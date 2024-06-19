@@ -274,7 +274,7 @@ export const createLocalCache = (
           this.data = this.tree.transformToCache(this.tree);
 
           return this.data;
-        }
+        },
       });
     },
     get fs() {
@@ -369,7 +369,9 @@ const createLoader = (
     notFound: (lazy: boolean) => Promise<GithubCacheFile | undefined>;
   },
 ) =>
-  async function load(options?: { lazy?: boolean }): Promise<typeof cacheInstance> {
+  async function load(options?: {
+    lazy?: boolean;
+  }): Promise<typeof cacheInstance> {
     const { lazy = false } = options ?? {};
     let obj: GithubCacheFile | undefined;
 

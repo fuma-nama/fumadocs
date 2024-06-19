@@ -23,9 +23,7 @@ export default async function Page({
 
   return (
     <DocsPage toc={compiled.toc}>
-      <DocsBody>
-        {compiled.content}
-      </DocsBody>
+      <DocsBody>{compiled.content}</DocsBody>
     </DocsPage>
   );
 }

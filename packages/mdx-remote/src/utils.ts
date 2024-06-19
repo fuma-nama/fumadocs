@@ -1,4 +1,4 @@
-import type { Pluggable } from "unified";
+import type { Pluggable } from 'unified';
 
 export type ResolvePlugins = Pluggable[] | ((v: Pluggable[]) => Pluggable[]);
 

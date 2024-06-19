@@ -147,13 +147,15 @@ export const createGeneratePageTree = (
 
     const getPageTree = nextUnstableCache(
       (async () => {
-        return await new Promise((resolve) => { resolve(pageTree); });
+        return await new Promise((resolve) => {
+          resolve(pageTree);
+        });
       }) as GeneratePageTreeResult['getPageTree'],
       undefined,
       {
         tags: [revalidationTag],
-      }
-    )
+      },
+    );
 
     return {
       getPageTree,
