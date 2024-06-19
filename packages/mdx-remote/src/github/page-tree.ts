@@ -10,7 +10,9 @@ import {
 } from 'fumadocs-core/source';
 import picomatch from 'picomatch';
 import matter from 'gray-matter';
-import type { GithubCache } from './cache';
+import type { createSearchAPI } from 'fumadocs-core/search/server';
+import { compile as mdxCompile } from '..';
+import type { CreateCacheOptions, GithubCache } from './cache';
 
 interface PageData {
   icon?: string;
@@ -47,6 +49,10 @@ interface GeneratePageTreeResult {
   pageTree: PageTree.Root;
   getPages: () => Page[];
   getPage: (slugs: string[] | undefined) => Page | undefined;
+  compile: (source: string) => ReturnType<typeof mdxCompile>;
+  getSearchIndexes: <T extends 'simple' | 'advanced'>(
+    type: T,
+  ) => Promise<Parameters<typeof createSearchAPI<T>>[1]['indexes']>;
 }
 
 interface GeneratePageTreeOptions {
@@ -69,6 +75,7 @@ const builder = createPageTreeBuilder();
 
 export const createGeneratePageTree = (
   fs: ReturnType<GithubCache['fs']>,
+  compilerOptions: CreateCacheOptions<'local' | 'remote'>['compilerOptions'],
   {
     include = './**/*.{json,md,mdx}',
   }: Pick<GeneratePageTreeOptions, 'include'>,
@@ -87,17 +94,28 @@ export const createGeneratePageTree = (
     const entries = (
       await Promise.all(
         files.map(async (file) => {
-          const contentWithFrontmatter = await fs.readFile(file);
+          const raw = await fs.readFile(file);
 
-          if (!contentWithFrontmatter) return null;
+          if (!raw) return null;
 
-          const { data, content } = matter(contentWithFrontmatter);
+          if (file.endsWith('.json')) {
+            return {
+              path: file,
+              frontmatter: JSON.parse(raw) as Record<
+                string,
+                string | undefined
+              >,
+            };
+          }
+          if (file.endsWith('.md') || file.endsWith('.mdx')) {
+            const { data, content } = matter(raw);
 
-          return {
-            path: file,
-            content,
-            frontmatter: data,
-          };
+            return {
+              path: file,
+              content,
+              frontmatter: data,
+            };
+          }
         }),
       )
     ).filter(Boolean) as FileInfo[];
@@ -106,10 +124,14 @@ export const createGeneratePageTree = (
       entries.map((e) => ({
         path: e.path,
         type: e.path.endsWith('.json') ? 'meta' : 'page',
-        data: {
-          ...e.frontmatter,
-          content: e.content,
-        },
+        data: e.path.endsWith('.json')
+          ? {
+              ...e.frontmatter,
+            }
+          : {
+              ...e.frontmatter,
+              content: e.content,
+            },
       })),
       {
         getSlugs,
@@ -121,8 +143,8 @@ export const createGeneratePageTree = (
       getUrl,
       ...options.pageTree,
     });
-
     const pageMap = buildPageMap(storage, getUrl);
+    const compile = async (source: string): ReturnType<typeof mdxCompile> => mdxCompile({ source, ...compilerOptions });
 
     return {
       pageTree,
@@ -132,6 +154,31 @@ export const createGeneratePageTree = (
       },
       getPage(slugs = []) {
         return pageMap.get(slugs.join('/'));
+      },
+      compile,
+      async getSearchIndexes<T extends 'simple' | 'advanced'>(type: T) {
+        const pages = Array.from(pageMap.values());
+
+        if (type === 'simple') {
+          return pages.map((page) => ({
+            title: page.data.title,
+            content: page.data.content,
+            url: page.url,
+          })) as T extends 'simple' ? Parameters<typeof createSearchAPI<T>>[1]['indexes'] : never;
+        }
+
+        return (await Promise.all(
+          pages.map(async (page) => {
+            const { vfile } = await compile(page.data.content);
+
+            return {
+              title: page.data.title,
+              structuredData: vfile.data.structuredData,
+              id: page.url,
+              url: page.url,
+            };
+          }),
+        )) as T extends 'advanced' ? Parameters<typeof createSearchAPI<T>>[1]['indexes'] : never;
       },
     };
   };

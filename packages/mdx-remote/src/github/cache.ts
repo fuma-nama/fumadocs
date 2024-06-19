@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import type { z } from 'zod';
+import type { Options as CompileOptions } from '..';
 import {
   createTransformTreeToCache,
   filesToGitTree,
@@ -46,6 +47,10 @@ export interface BaseCreateCacheOptions
    * The SHA1 value or ref (branch or tag) name of the tree.
    */
   branch: string;
+  /**
+   * Options provided to the MDX compiler.
+   */
+  compilerOptions?: Pick<CompileOptions, 'mdxOptions' | 'components'>;
   githubApi?: Pick<Parameters<typeof getTree>[0], 'init' | 'recursive'>;
 }
 
@@ -101,7 +106,7 @@ export type CreateCacheOptions<Env extends 'local' | 'remote'> =
 type CreateCacheRemoteOptions = BaseCreateCacheOptions;
 type CreateCacheLocalOptions = Pick<
   BaseCreateCacheOptions,
-  'include' | 'cachePath'
+  'include' | 'cachePath' | 'compilerOptions'
 > & {
   directory: NonNullable<BaseCreateCacheOptions['directory']>;
 };
@@ -305,7 +310,6 @@ const createFileSystem = (
 };
 
 const createCacheBoilerplate = <Env extends 'local' | 'remote'>(
-  inherit: GithubCache,
   options: CreateCacheOptions<Env>,
 ): Omit<GithubCache, 'applyToCache' | 'load' | 'fs' | 'diff'> => {
   let cacheFile: GithubCacheFile | undefined;
@@ -337,9 +341,13 @@ const createCacheBoilerplate = <Env extends 'local' | 'remote'>(
       cacheFile = value;
     },
     get generatePageTree() {
-      return createGeneratePageTree((this as GithubCache).fs(), {
-        include: options.include,
-      });
+      return createGeneratePageTree(
+        (this as GithubCache).fs(),
+        options.compilerOptions ?? {},
+        {
+          include: options.include,
+        },
+      );
     },
     get resolveAllContent() {
       return createContentResolver(this.data, (this as GithubCache).fs());
@@ -351,7 +359,7 @@ const enhancedCacheBoilerplate = <Env extends 'local' | 'remote'>(
   options: CreateCacheOptions<Env>,
   inherit: GithubCache,
 ): GithubCache => {
-  const boilerplate = createCacheBoilerplate(inherit, options);
+  const boilerplate = createCacheBoilerplate(options);
 
   return Object.defineProperties(
     inherit,
