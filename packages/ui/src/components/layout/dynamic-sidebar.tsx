@@ -14,7 +14,7 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
   const onCollapse = useCallback(() => {
     setCollapsed((v) => !v);
     setHover(false);
-    hoverTimeRef.current = Date.now() + 1000;
+    hoverTimeRef.current = Date.now() + 500;
   }, [setCollapsed]);
 
   const onEnter: PointerEventHandler = useCallback((e) => {
@@ -36,7 +36,7 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
     <>
       {collapsed ? (
         <div
-          className="fixed inset-y-0 start-0 w-4 max-md:hidden xl:static xl:w-[260px]"
+          className="fixed inset-y-0 start-0 w-4 max-md:hidden 2xl:w-[180px]"
           onPointerEnter={onEnter}
           onPointerLeave={onLeave}
         />

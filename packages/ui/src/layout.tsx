@@ -136,7 +136,7 @@ export function DocsLayout({
   children,
 }: DocsLayoutProps): React.ReactElement {
   const finalLinks = getLinks(links, githubUrl);
-  const Aside = sidebarEnabled && collapsible ? DynamicSidebar : Sidebar;
+  const Aside = collapsible ? DynamicSidebar : Sidebar;
 
   return (
     <TreeContextProvider tree={tree}>
