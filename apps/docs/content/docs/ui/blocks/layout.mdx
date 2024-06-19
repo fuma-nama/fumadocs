@@ -31,6 +31,23 @@ The navigation header provides common interactive elements.
 />
 ```
 
+#### Transparent Mode
+
+To make the navbar background transparent, you can configure transparent mode.
+It uses the `none` mode by default.
+
+```mdx
+<DocsLayout nav={{ transparentMode: 'top' }} />
+```
+
+| Mode     | Description                         |
+| -------- | ----------------------------------- |
+| `always` | Always use a transparent background |
+| `top`    | When at the top of page             |
+| `none`   | Disable transparent background      |
+
+#### Reference
+
 ```json doc-gen:typescript
 {
   "file": "./content/docs/ui/props.ts",
@@ -46,14 +63,7 @@ Provide elements to navigate between pages.
 <DocsLayout sidebar={{ footer: <ShareButton /> }} />
 ```
 
-```json doc-gen:typescript
-{
-  "file": "./content/docs/ui/props.ts",
-  "name": "SidebarProps"
-}
-```
-
-### Disable Sidebar from Pages
+#### Disable Sidebar from Pages
 
 This is not supported.
 Due to the limitations of App Router, layouts are not re-rendered when navigating between pages.
@@ -63,3 +73,12 @@ You can consider:
 
 1. Disable sidebar from the entire layout.
 2. Create a [MDX Page](/docs/ui/blocks/page#mdx-page) in a layout that doesn't contain a sidebar.
+
+#### Reference
+
+```json doc-gen:typescript
+{
+  "file": "./content/docs/ui/props.ts",
+  "name": "SidebarProps"
+}
+```

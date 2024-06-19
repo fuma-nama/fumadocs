@@ -1,7 +1,7 @@
 import { compile } from 'json-schema-to-typescript';
-import type { Endpoint } from '.';
+import type { Endpoint } from '@/endpoint';
 
-export async function getTypescript(
+export async function getTypescriptSchema(
   endpoint: Endpoint,
   code: string,
 ): Promise<string | undefined> {

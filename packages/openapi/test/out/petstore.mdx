@@ -2,7 +2,7 @@
 title: Swagger Petstore
 ---
 
-import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible } from "fumadocs-ui/components/api";
+import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible, Requests, Request } from "fumadocs-ui/components/api";
 
 <Root>
 
@@ -33,9 +33,27 @@ How many items to return at one time (max 100)
 
 <APIExample>
 
-```bash title="curl"
+<Requests items={["cURL","JavaScript"]}>
+
+<Request value={"cURL"}>
+
+```bash
 curl -X GET "http://petstore.swagger.io/pets"
 ```
+
+</Request>
+
+<Request value={"JavaScript"}>
+
+```js
+fetch("http://petstore.swagger.io/pets", {
+  method: "GET"
+});
+```
+
+</Request>
+
+</Requests>
 
 <Responses items={["200","default"]}>
 
@@ -143,7 +161,11 @@ export interface Response {
 
 <APIExample>
 
-```bash title="curl"
+<Requests items={["cURL","JavaScript"]}>
+
+<Request value={"cURL"}>
+
+```bash
 curl -X POST "http://petstore.swagger.io/pets" \
   -d '{
   "id": 0,
@@ -151,6 +173,20 @@ curl -X POST "http://petstore.swagger.io/pets" \
   "tag": "string"
 }'
 ```
+
+</Request>
+
+<Request value={"JavaScript"}>
+
+```js
+fetch("http://petstore.swagger.io/pets", {
+  method: "POST"
+});
+```
+
+</Request>
+
+</Requests>
 
 <Responses items={["default"]}>
 
@@ -213,9 +249,27 @@ The id of the pet to retrieve
 
 <APIExample>
 
-```bash title="curl"
+<Requests items={["cURL","JavaScript"]}>
+
+<Request value={"cURL"}>
+
+```bash
 curl -X GET "http://petstore.swagger.io/pets/string"
 ```
+
+</Request>
+
+<Request value={"JavaScript"}>
+
+```js
+fetch("http://petstore.swagger.io/pets/string", {
+  method: "GET"
+});
+```
+
+</Request>
+
+</Requests>
 
 <Responses items={["200","default"]}>
 

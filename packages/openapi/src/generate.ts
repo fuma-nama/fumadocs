@@ -90,6 +90,7 @@ function getContext(
   options: GenerateOptions,
 ): RenderContext {
   return {
+    document,
     renderer: {
       ...defaultRenderer,
       ...options.renderer,

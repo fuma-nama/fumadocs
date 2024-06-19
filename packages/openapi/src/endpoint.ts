@@ -1,7 +1,7 @@
-import { sample } from 'openapi-sampler';
 import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
 import type { MethodInformation } from '@/types';
-import { getPreferredMedia, getValue, noRef } from '@/utils';
+import { getPreferredMedia, toSampleInput, noRef } from '@/utils/schema';
+import { generateInput } from '@/utils/generate-input';
 
 export interface Endpoint {
   /**
@@ -64,31 +64,22 @@ export function createEndpoint(
   const queryParams = new URLSearchParams();
 
   for (const param of params) {
-    const value = generateSample(method.method, param.schema);
-    if (param.in === 'query') queryParams.append(param.name, getValue(value));
+    const value = generateInput(method.method, param.schema);
+    if (param.in === 'query')
+      queryParams.append(param.name, toSampleInput(value));
 
     if (param.in === 'path')
       pathWithParameters = pathWithParameters.replace(
         `{${param.name}}`,
-        getValue(value),
+        toSampleInput(value),
       );
   }
 
   return {
     url: new URL(pathWithParameters, baseUrl).toString(),
-    body: bodySchema ? generateSample(method.method, bodySchema) : undefined,
+    body: bodySchema ? generateInput(method.method, bodySchema) : undefined,
     responses,
     method: method.method,
     parameters: params,
   };
-}
-
-export function generateSample(
-  method: string,
-  schema: OpenAPI.SchemaObject,
-): unknown {
-  return sample(schema as object, {
-    skipReadOnly: method !== 'GET',
-    skipWriteOnly: method === 'GET',
-  });
 }

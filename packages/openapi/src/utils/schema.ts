@@ -17,6 +17,6 @@ export function getPreferredMedia<T>(body: Record<string, T>): T | undefined {
 /**
  * Get Path
  */
-export function getValue(value: unknown): string {
+export function toSampleInput(value: unknown): string {
   return typeof value === 'string' ? value : JSON.stringify(value, null, 2);
 }

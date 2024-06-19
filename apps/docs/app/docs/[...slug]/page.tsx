@@ -49,8 +49,8 @@ export default function Page({
     <DocsPage
       toc={page.data.exports.toc}
       lastUpdate={page.data.exports.lastModified}
+      full={!page.data.toc}
       tableOfContent={{
-        enabled: page.data.toc,
         footer,
       }}
       tableOfContentPopover={{ footer }}

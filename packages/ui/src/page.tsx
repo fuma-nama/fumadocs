@@ -31,6 +31,13 @@ interface FooterOptions extends FooterProps {
 export interface DocsPageProps {
   toc?: TableOfContents;
 
+  /**
+   * Extend the page to fill all available space
+   *
+   * @defaultValue false
+   */
+  full?: boolean;
+
   tableOfContent?: Partial<TableOfContentOptions>;
 
   tableOfContentPopover?: Partial<TableOfContentOptions>;
@@ -55,15 +62,22 @@ export function DocsPage({
   tableOfContent = {},
   breadcrumb = {},
   tableOfContentPopover = {},
+  full = false,
   footer = {},
   ...props
 }: DocsPageProps): React.ReactElement {
+  const tocOptions = {
+    // disable TOC on full mode, you can still enable it with `enabled` option.
+    enabled: tableOfContent.enabled ?? !full,
+    ...tableOfContent,
+  };
+
   return (
     <TocProvider toc={toc}>
       <article
         className={cn(
           'mx-auto flex w-0 max-w-[800px] flex-1 flex-col gap-6 px-4 py-10 md:px-6 md:pt-12',
-          tableOfContent.enabled === false && 'max-w-[1200px]',
+          !tocOptions.enabled && 'max-w-[1200px]',
         )}
       >
         {replaceOrDefault(breadcrumb, <Breadcrumb full={breadcrumb.full} />)}
@@ -78,15 +92,16 @@ export function DocsPage({
             items={toc}
             header={tableOfContentPopover.header}
             footer={tableOfContentPopover.footer}
+            className={cn(!full && 'lg:hidden')}
           />,
         )}
       </article>
       {replaceOrDefault(
-        tableOfContent,
+        tocOptions,
         <Toc
           items={toc}
-          header={tableOfContent.header}
-          footer={tableOfContent.footer}
+          header={tocOptions.header}
+          footer={tocOptions.footer}
         />,
       )}
     </TocProvider>

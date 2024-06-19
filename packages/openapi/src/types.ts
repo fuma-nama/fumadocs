@@ -15,5 +15,6 @@ export interface MethodInformation extends OpenAPI.OperationObject {
 
 export interface RenderContext {
   renderer: Renderer;
+  document: OpenAPI.Document;
   baseUrl: string;
 }

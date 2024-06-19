@@ -3,7 +3,7 @@ title: Events
 description: Special events hosted by the Museum
 ---
 
-import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible } from "fumadocs-ui/components/api";
+import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible, Requests, Request } from "fumadocs-ui/components/api";
 
 <Root>
 
@@ -14,6 +14,14 @@ import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, Exa
 ## List special events
 
 Return a list of upcoming special events at the museum.
+
+### Authorization
+
+<Property name={"Authorization"} type={"Basic <token>"} required={true}>
+
+In: `header`
+
+</Property>
 
 ### Query Parameters
 
@@ -69,9 +77,27 @@ The number of days per page.
 
 <APIExample>
 
-```bash title="curl"
+<Requests items={["cURL","JavaScript"]}>
+
+<Request value={"cURL"}>
+
+```bash
 curl -X GET "https://api.fake-museum-example.com/special-events"
 ```
+
+</Request>
+
+<Request value={"JavaScript"}>
+
+```js
+fetch("https://api.fake-museum-example.com/special-events", {
+  method: "GET"
+});
+```
+
+</Request>
+
+</Requests>
 
 <Responses items={["200"]}>
 
@@ -154,6 +180,14 @@ export type Response = {
 
 Creates a new special event for the museum.
 
+### Authorization
+
+<Property name={"Authorization"} type={"Basic <token>"} required={true}>
+
+In: `header`
+
+</Property>
+
 ### Request Body
 
 <Property name={"name"} type={"string"} required={true} deprecated={undefined}>
@@ -206,7 +240,11 @@ Price of a ticket for the special event
 
 <APIExample>
 
-```bash title="curl"
+<Requests items={["cURL","JavaScript"]}>
+
+<Request value={"cURL"}>
+
+```bash
 curl -X POST "https://api.fake-museum-example.com/special-events" \
   -d '{
   "name": "Pirate Coding Workshop",
@@ -218,6 +256,20 @@ curl -X POST "https://api.fake-museum-example.com/special-events" \
   "price": 25
 }'
 ```
+
+</Request>
+
+<Request value={"JavaScript"}>
+
+```js
+fetch("https://api.fake-museum-example.com/special-events", {
+  method: "POST"
+});
+```
+
+</Request>
+
+</Requests>
 
 <Responses items={["200"]}>
 
@@ -298,6 +350,14 @@ export interface Response {
 
 Get details about a special event.
 
+### Authorization
+
+<Property name={"Authorization"} type={"Basic <token>"} required={true}>
+
+In: `header`
+
+</Property>
+
 ### Path Parameters
 
 <Property name={"eventId"} type={"string"} required={true} deprecated={false}>
@@ -320,9 +380,27 @@ An identifier for a special event.
 
 <APIExample>
 
-```bash title="curl"
+<Requests items={["cURL","JavaScript"]}>
+
+<Request value={"cURL"}>
+
+```bash
 curl -X GET "https://api.fake-museum-example.com/special-events/dad4bce8-f5cb-4078-a211-995864315e39"
 ```
+
+</Request>
+
+<Request value={"JavaScript"}>
+
+```js
+fetch("https://api.fake-museum-example.com/special-events/dad4bce8-f5cb-4078-a211-995864315e39", {
+  method: "GET"
+});
+```
+
+</Request>
+
+</Requests>
 
 <Responses items={["200"]}>
 
@@ -403,6 +481,14 @@ export interface Response {
 
 Update the details of a special event
 
+### Authorization
+
+<Property name={"Authorization"} type={"Basic <token>"} required={true}>
+
+In: `header`
+
+</Property>
+
 ### Request Body
 
 <Property name={"name"} type={"string"} required={false} deprecated={undefined}>
@@ -467,7 +553,11 @@ An identifier for a special event.
 
 <APIExample>
 
-```bash title="curl"
+<Requests items={["cURL","JavaScript"]}>
+
+<Request value={"cURL"}>
+
+```bash
 curl -X PATCH "https://api.fake-museum-example.com/special-events/dad4bce8-f5cb-4078-a211-995864315e39" \
   -d '{
   "name": "Pirate Coding Workshop",
@@ -479,6 +569,20 @@ curl -X PATCH "https://api.fake-museum-example.com/special-events/dad4bce8-f5cb-
   "price": 25
 }'
 ```
+
+</Request>
+
+<Request value={"JavaScript"}>
+
+```js
+fetch("https://api.fake-museum-example.com/special-events/dad4bce8-f5cb-4078-a211-995864315e39", {
+  method: "PATCH"
+});
+```
+
+</Request>
+
+</Requests>
 
 <Responses items={["200"]}>
 
@@ -559,6 +663,14 @@ export interface Response {
 
 Delete a special event from the collection. Allows museum to cancel planned events.
 
+### Authorization
+
+<Property name={"Authorization"} type={"Basic <token>"} required={true}>
+
+In: `header`
+
+</Property>
+
 ### Path Parameters
 
 <Property name={"eventId"} type={"string"} required={true} deprecated={false}>
@@ -582,9 +694,27 @@ An identifier for a special event.
 
 <APIExample>
 
-```bash title="curl"
+<Requests items={["cURL","JavaScript"]}>
+
+<Request value={"cURL"}>
+
+```bash
 curl -X DELETE "https://api.fake-museum-example.com/special-events/dad4bce8-f5cb-4078-a211-995864315e39"
 ```
+
+</Request>
+
+<Request value={"JavaScript"}>
+
+```js
+fetch("https://api.fake-museum-example.com/special-events/dad4bce8-f5cb-4078-a211-995864315e39", {
+  method: "DELETE"
+});
+```
+
+</Request>
+
+</Requests>
 
 </APIExample>
 

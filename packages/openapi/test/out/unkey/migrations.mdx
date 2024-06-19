@@ -2,7 +2,7 @@
 title: migrations
 ---
 
-import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible } from "fumadocs-ui/components/api";
+import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible, Requests, Request } from "fumadocs-ui/components/api";
 
 <Root>
 
@@ -11,6 +11,14 @@ import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, Exa
 <APIInfo method={"POST"} route={"/v1/migrations.createKeys"}>
 
 ## v1.migrations.createKeys
+
+### Authorization
+
+<Property name={"Authorization"} type={"Bearer <token>"} required={true}>
+
+In: `header`
+
+</Property>
 
 ### Request Body
 
@@ -33,7 +41,11 @@ import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, Exa
 
 <APIExample>
 
-```bash title="curl"
+<Requests items={["cURL","JavaScript"]}>
+
+<Request value={"cURL"}>
+
+```bash
 curl -X POST "https://api.unkey.dev/v1/migrations.createKeys" \
   -d '[
   {
@@ -76,6 +88,20 @@ curl -X POST "https://api.unkey.dev/v1/migrations.createKeys" \
   }
 ]'
 ```
+
+</Request>
+
+<Request value={"JavaScript"}>
+
+```js
+fetch("https://api.unkey.dev/v1/migrations.createKeys", {
+  method: "POST"
+});
+```
+
+</Request>
+
+</Requests>
 
 <Responses items={["200","400","401","403","404","409","429","500"]}>
 
@@ -475,6 +501,14 @@ export interface Response {
 
 ## v1.migrations.enqueueKeys
 
+### Authorization
+
+<Property name={"Authorization"} type={"Bearer <token>"} required={true}>
+
+In: `header`
+
+</Property>
+
 ### Request Body
 
 <Property name={"migrationId"} type={"string"} required={true} deprecated={undefined}>
@@ -748,7 +782,11 @@ handle it correctly.
 
 <APIExample>
 
-```bash title="curl"
+<Requests items={["cURL","JavaScript"]}>
+
+<Request value={"cURL"}>
+
+```bash
 curl -X POST "https://api.unkey.dev/v1/migrations.enqueueKeys" \
   -d '{
   "migrationId": "string",
@@ -793,6 +831,20 @@ curl -X POST "https://api.unkey.dev/v1/migrations.enqueueKeys" \
   ]
 }'
 ```
+
+</Request>
+
+<Request value={"JavaScript"}>
+
+```js
+fetch("https://api.unkey.dev/v1/migrations.enqueueKeys", {
+  method: "POST"
+});
+```
+
+</Request>
+
+</Requests>
 
 <Responses items={["202","400","401","403","404","409","429","500"]}>
 
