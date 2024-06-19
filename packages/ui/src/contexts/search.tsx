@@ -26,7 +26,7 @@ export interface SearchProviderProps {
   /**
    * Hotkeys for triggering search dialog
    *
-   * @defaultValue K + Meta/Ctrl
+   * @defaultValue Meta/Ctrl + K
    */
   hotKey?: HotKey[];
 
