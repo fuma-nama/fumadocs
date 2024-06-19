@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import type { z } from 'zod';
 import { remarkStructure } from 'fumadocs-core/mdx-plugins';
-import type { Options as CompileOptions } from '..';
+import { compile as compileMDX, type Options as CompileOptions } from '..';
 import {
   createTransformTreeToCache,
   filesToGitTree,
@@ -56,7 +56,17 @@ interface BaseCreateCacheOptions
   githubApi?: Pick<Parameters<typeof getTree>[0], 'init' | 'recursive'>;
 }
 
-export interface GithubCache<Env extends 'local' | 'remote' = 'local' | 'remote'> {
+export interface GithubCache<
+  Env extends 'local' | 'remote' = 'local' | 'remote',
+> {
+  /**
+   * The hash used to revalidate the cache.
+   */
+  revalidationTag: string;
+  /**
+   * The cache data.
+   */
+  data: GithubCacheFile;
   /**
    * File system utilities for the cache.
    * Mostly oriented for page tree generation.
@@ -66,10 +76,6 @@ export interface GithubCache<Env extends 'local' | 'remote' = 'local' | 'remote'
    * Reads the cache from the disk, or interprets new cache from files (local or remoate)
    */
   load: ReturnType<typeof createrLoader>;
-  /**
-   * The cache data.
-   */
-  data: GithubCacheFile;
   /**
    * Resolves all content (content is stored as a promise) in the cache and returns their resolved values.
    * This is useful when preparing the cache to be saved to the disk.
@@ -82,7 +88,13 @@ export interface GithubCache<Env extends 'local' | 'remote' = 'local' | 'remote'
   /**
    * Used in produciton to update the cache with new data when pushing to the repository.
    */
-  createGithubWebhookAPI: Env extends 'remote' ? ReturnType<typeof createCreateGithubWebhookAPI> : never;
+  createGithubWebhookAPI: Env extends 'remote'
+    ? ReturnType<typeof createCreateGithubWebhookAPI>
+    : never;
+  /**
+   * Compiles source (string) to MDX.
+   */
+  compileMDX: ReturnType<typeof createCompileMDX>;
   /**
    * Functions relating to making changes the cache
    */
@@ -118,9 +130,18 @@ type CreateCacheLocalOptions = Pick<
   directory: NonNullable<BaseCreateCacheOptions['directory']>;
 };
 
-export const createCache: (
-  options: CreateCacheLocalOptions | CreateCacheRemoteOptions,
-) => GithubCache = (options) => {
+export const createCache = <Options extends CreateCacheOptions>(
+  options: Options,
+): GithubCache<
+  Options extends {
+    owner: string;
+    repo: string;
+    token?: string;
+    branch: string;
+  }
+    ? 'remote'
+    : 'local'
+> => {
   const isRemote =
     'owner' in options &&
     'repo' in options &&
@@ -131,13 +152,32 @@ export const createCache: (
   if (!isRemote && !isLocal)
     throw new Error('Invalid options. View documentation for correct options.');
 
-  return isRemote
-    ? createRemoteCache(options)
-    : createLocalCache(options as CreateCacheLocalOptions);
+  const revalidationTag = `@fumadocs/mdx-remote/github/cache@${fnv1a(
+    JSON.stringify(options),
+  )}`;
+
+  return (
+    isRemote
+      ? createRemoteCache(options, revalidationTag)
+      : createLocalCache(
+          options as CreateCacheOptions<'local'>,
+          revalidationTag,
+        )
+  ) as GithubCache<
+    Options extends {
+      owner: string;
+      repo: string;
+      token?: string;
+      branch: string;
+    }
+      ? 'remote'
+      : 'local'
+  >;
 };
 
 export const createRemoteCache = (
   options: CreateCacheOptions<'remote'>,
+  revalidationTag: string,
 ): GithubCache<'remote'> => {
   const { directory, cachePath, githubApi, ...githubInfo } = options;
   const getFileContent: GetFileContent<{ sha: string }> = async (file) => {
@@ -150,11 +190,7 @@ export const createRemoteCache = (
     );
   };
 
-  const revalidationTag = `@fumadocs/mdx-remote/github/cache@${fnv1a(
-    JSON.stringify(options),
-  )}`
-
-  return enhancedCacheBoilerplate(options, {
+  return enhancedCacheBoilerplate(options, revalidationTag, {
     get diff() {
       return createDiff(this as unknown as GithubCache, getFileContent);
     },
@@ -190,12 +226,13 @@ export const createRemoteCache = (
     },
     get createGithubWebhookAPI() {
       return createCreateGithubWebhookAPI(options.branch, revalidationTag);
-    }
+    },
   } as GithubCache);
 };
 
 export const createLocalCache = (
   options: CreateCacheOptions<'local'>,
+  revalidationTag: string,
 ): GithubCache<'local'> => {
   const { directory, include = './**/*.{json,md,mdx}', cachePath } = options;
 
@@ -203,7 +240,7 @@ export const createLocalCache = (
     return fs.promises.readFile(path.resolve(directory, file.path), 'utf8');
   };
 
-  return enhancedCacheBoilerplate(options, {
+  return enhancedCacheBoilerplate(options, revalidationTag, {
     get diff() {
       return createDiff(this as unknown as GithubCache, getFileContent);
     },
@@ -252,6 +289,80 @@ export const createLocalCache = (
       return createFileSystem(this.data, this.tree, this.diff, getFileContent);
     },
   } as GithubCache);
+};
+
+const createCacheBoilerplate = <Env extends 'local' | 'remote'>(
+  options: CreateCacheOptions<Env>,
+  revalidationTag: string,
+): Omit<
+  GithubCache,
+  'applyToCache' | 'load' | 'fs' | 'diff' | 'createGithubWebhookAPI'
+> => {
+  let cacheFile: GithubCacheFile | undefined;
+  let gitTree: GithubCache['tree'] | undefined;
+
+  const notInitialized = (subject: string): string =>
+    `${subject} not initialized. Did you call cache.load?`;
+
+  return {
+    revalidationTag,
+    get tree() {
+      if (!gitTree) throw new Error(notInitialized('Tree'));
+
+      return gitTree;
+    },
+    set tree(value) {
+      gitTree = value;
+    },
+    get data() {
+      if (!cacheFile) throw new Error(notInitialized('Cache'));
+
+      return cacheFile;
+    },
+    set data(value) {
+      parse(
+        githubCacheFileSchema,
+        value,
+        'Invalid cache file. Please check the schema',
+      );
+      cacheFile = value;
+    },
+    get generatePageTree() {
+      return createGeneratePageTree(
+        revalidationTag,
+        (this as GithubCache).fs(),
+        this.compileMDX,
+        {
+          include: options.include,
+        },
+      );
+    },
+    get resolveAllContent() {
+      return createContentResolver(this.data, (this as GithubCache).fs());
+    },
+    get compileMDX() {
+      return createCompileMDX(
+        Object.assign(options.compilerOptions ?? {}, {
+          mdxOptions: {
+            remarkPlugins: [remarkStructure],
+          },
+        } satisfies NonNullable<CreateCacheOptions['compilerOptions']>),
+      );
+    },
+  };
+};
+
+const enhancedCacheBoilerplate = <Env extends 'local' | 'remote'>(
+  options: CreateCacheOptions<Env>,
+  revalidationTag: string,
+  inherit: GithubCache,
+): GithubCache => {
+  const boilerplate = createCacheBoilerplate(options, revalidationTag);
+
+  return Object.defineProperties(
+    inherit,
+    Object.getOwnPropertyDescriptors(boilerplate),
+  );
 };
 
 const createrLoader = ({
@@ -323,67 +434,11 @@ const createFileSystem = (
   };
 };
 
-const createCacheBoilerplate = <Env extends 'local' | 'remote'>(
-  options: CreateCacheOptions<Env>,
-): Omit<GithubCache, 'applyToCache' | 'load' | 'fs' | 'diff' | 'createGithubWebhookAPI'> => {
-  let cacheFile: GithubCacheFile | undefined;
-  let gitTree: GithubCache['tree'] | undefined;
-
-  const notInitialized = (subject: string): string =>
-    `${subject} not initialized. Did you call cache.load?`;
-
-  return {
-    get tree() {
-      if (!gitTree) throw new Error(notInitialized('Tree'));
-
-      return gitTree;
-    },
-    set tree(value) {
-      gitTree = value;
-    },
-    get data() {
-      if (!cacheFile) throw new Error(notInitialized('Cache'));
-
-      return cacheFile;
-    },
-    set data(value) {
-      parse(
-        githubCacheFileSchema,
-        value,
-        'Invalid cache file. Please check the schema',
-      );
-      cacheFile = value;
-    },
-    get generatePageTree() {
-      return createGeneratePageTree(
-        (this as GithubCache).fs(),
-        Object.assign(
-          options.compilerOptions ?? {},
-          {
-            mdxOptions: {
-              remarkPlugins: [remarkStructure]
-            }
-          } satisfies NonNullable<CreateCacheOptions['compilerOptions']>,
-        ),
-        {
-          include: options.include,
-        },
-      );
-    },
-    get resolveAllContent() {
-      return createContentResolver(this.data, (this as GithubCache).fs());
-    }
+const createCompileMDX =
+  (compilerOptions: NonNullable<CreateCacheOptions['compilerOptions']>) =>
+  async (source: string, options?: CreateCacheOptions['compilerOptions']) => {
+    return compileMDX({
+      ...Object.assign(compilerOptions, options),
+      source,
+    });
   };
-};
-
-const enhancedCacheBoilerplate = <Env extends 'local' | 'remote'>(
-  options: CreateCacheOptions<Env>,
-  inherit: GithubCache,
-): GithubCache => {
-  const boilerplate = createCacheBoilerplate(options);
-
-  return Object.defineProperties(
-    inherit,
-    Object.getOwnPropertyDescriptors(boilerplate),
-  );
-};

@@ -11,8 +11,8 @@ import {
 import picomatch from 'picomatch';
 import matter from 'gray-matter';
 import type { createSearchAPI } from 'fumadocs-core/search/server';
-import { compile as mdxCompile } from '..';
-import type { CreateCacheOptions, GithubCache } from './cache';
+import { unstable_cache as nextUnstableCache } from 'next/cache';
+import type { GithubCache } from './cache';
 
 interface PageData {
   icon?: string;
@@ -46,13 +46,9 @@ interface FileInfo {
 
 interface GeneratePageTreeResult {
   files: FileInfo[];
-  pageTree: PageTree.Root;
+  getPageTree: () => Promise<PageTree.Root>;
   getPages: () => Page[];
   getPage: (slugs: string[] | undefined) => Page | undefined;
-  compile: (
-    source: string,
-    compileOptions?: CreateCacheOptions['compilerOptions'],
-  ) => ReturnType<typeof mdxCompile>;
   getSearchIndexes: <T extends 'simple' | 'advanced'>(
     type: T,
   ) => Promise<Parameters<typeof createSearchAPI<T>>[1]['indexes']>;
@@ -77,8 +73,9 @@ interface GeneratePageTreeOptions {
 const builder = createPageTreeBuilder();
 
 export const createGeneratePageTree = (
+  revalidationTag: string,
   fs: ReturnType<GithubCache['fs']>,
-  compilerOptions: NonNullable<CreateCacheOptions['compilerOptions']>,
+  compileMDX: GithubCache['compileMDX'],
   {
     include = './**/*.{json,md,mdx}',
   }: Pick<GeneratePageTreeOptions, 'include'>,
@@ -147,17 +144,19 @@ export const createGeneratePageTree = (
       ...options.pageTree,
     });
     const pageMap = buildPageMap(storage, getUrl);
-    const compile: GeneratePageTreeResult['compile'] = async (
-      source,
-      additionalOptions,
-    ) =>
-      mdxCompile({
-        source,
-        ...Object.assign(compilerOptions, additionalOptions),
-      });
+
+    const getPageTree = nextUnstableCache(
+      (async () => {
+        return await new Promise((resolve) => { resolve(pageTree); });
+      }) as GeneratePageTreeResult['getPageTree'],
+      undefined,
+      {
+        tags: [revalidationTag],
+      }
+    )
 
     return {
-      pageTree,
+      getPageTree,
       files: entries,
       getPages() {
         return Array.from(pageMap.values());
@@ -165,7 +164,6 @@ export const createGeneratePageTree = (
       getPage(slugs = []) {
         return pageMap.get(slugs.join('/'));
       },
-      compile,
       async getSearchIndexes<T extends 'simple' | 'advanced'>(type: T) {
         const pages = Array.from(pageMap.values());
 
@@ -181,7 +179,7 @@ export const createGeneratePageTree = (
 
         return (await Promise.all(
           pages.map(async (page) => {
-            const { vfile } = await compile(page.data.content);
+            const { vfile } = await compileMDX(page.data.content);
 
             return {
               title: page.data.title,
