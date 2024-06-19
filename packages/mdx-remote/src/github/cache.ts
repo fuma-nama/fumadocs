@@ -75,7 +75,7 @@ export interface GithubCache<
   /**
    * Reads the cache from the disk, or interprets new cache from files (local or remoate)
    */
-  load: ReturnType<typeof createrLoader>;
+  load: ReturnType<typeof createLoader>;
   /**
    * Resolves all content (content is stored as a promise) in the cache and returns their resolved values.
    * This is useful when preparing the cache to be saved to the disk.
@@ -195,7 +195,7 @@ export const createRemoteCache = (
       return createDiff(this as unknown as GithubCache, getFileContent);
     },
     get load() {
-      return createrLoader({
+      return createLoader(this, {
         cachePath,
         getFileContent,
         notFound: async () => {
@@ -212,12 +212,7 @@ export const createRemoteCache = (
           this.tree.transformToCache =
             createTransformTreeToCache(getFileContent);
 
-          this.data = this.tree.transformToCache(tree);
-
-          return this.data;
-        },
-        set: (k, v) => {
-          this[k] = v;
+          return this.tree.transformToCache(tree);
         },
       });
     },
@@ -245,7 +240,7 @@ export const createLocalCache = (
       return createDiff(this as unknown as GithubCache, getFileContent);
     },
     get load() {
-      return createrLoader({
+      return createLoader(this, {
         cachePath,
         getFileContent,
         notFound: async (lazy) => {
@@ -279,10 +274,7 @@ export const createLocalCache = (
           this.data = this.tree.transformToCache(this.tree);
 
           return this.data;
-        },
-        set: (k, v) => {
-          this[k] = v;
-        },
+        }
       });
     },
     get fs() {
@@ -365,37 +357,37 @@ const enhancedCacheBoilerplate = <Env extends 'local' | 'remote'>(
   );
 };
 
-const createrLoader = ({
-  cachePath,
-  set,
-  notFound,
-  getFileContent,
-}: {
-  cachePath: string | undefined;
-  getFileContent: GetFileContent;
-  notFound: (lazy: boolean) => Promise<GithubCacheFile | undefined>;
-  set: <T extends keyof GithubCache>(key: T, value: GithubCache[T]) => void;
-}) =>
-  async function load(options?: { lazy?: boolean }): Promise<void> {
+const createLoader = (
+  cacheInstance: GithubCache,
+  {
+    cachePath,
+    notFound,
+    getFileContent,
+  }: {
+    cachePath: string | undefined;
+    getFileContent: GetFileContent;
+    notFound: (lazy: boolean) => Promise<GithubCacheFile | undefined>;
+  },
+) =>
+  async function load(options?: { lazy?: boolean }): Promise<typeof cacheInstance> {
     const { lazy = false } = options ?? {};
     let obj: GithubCacheFile | undefined;
 
     if (cachePath && fs.existsSync(cachePath)) {
       const raw = await fs.promises.readFile(cachePath, 'utf-8');
       obj = JSON.parse(raw) as GithubCacheFile;
-      set(
-        'tree',
-        Object.assign(cacheFileToGitTree(obj), {
-          transformToCache: createTransformTreeToCache(getFileContent),
-        }),
-      );
+      cacheInstance.tree = Object.assign(cacheFileToGitTree(obj), {
+        transformToCache: createTransformTreeToCache(getFileContent),
+      });
     } else obj = await notFound(lazy);
 
-    if (obj) set('data', obj);
+    if (obj) cacheInstance.data = obj;
     else
       console.error(
         'Attempted to load Github cache, but could not retrieve cache and/or files (local or remote)',
       );
+
+    return cacheInstance;
   };
 
 const createDiff = (
