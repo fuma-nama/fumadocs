@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
 import { DocsPage, DocsBody } from 'fumadocs-ui/page';
 import { notFound } from 'next/navigation';
-import { getPage, getPages } from '@/app/source';
-import { compile } from '@fumadocs/mdx-remote';
+import { getPage, getPages, compile } from '@/app/source';
 import defaultComponents from 'fumadocs-ui/mdx';
 
 export default async function Page({
@@ -16,8 +15,7 @@ export default async function Page({
     notFound();
   }
 
-  const compiled = await compile({
-    source: page.data.content,
+  const compiled = await compile(page.data.content, {
     components: {
       ...defaultComponents,
     },

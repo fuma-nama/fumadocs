@@ -49,7 +49,10 @@ interface GeneratePageTreeResult {
   pageTree: PageTree.Root;
   getPages: () => Page[];
   getPage: (slugs: string[] | undefined) => Page | undefined;
-  compile: (source: string) => ReturnType<typeof mdxCompile>;
+  compile: (
+    source: string,
+    compileOptions?: CreateCacheOptions['compilerOptions'],
+  ) => ReturnType<typeof mdxCompile>;
   getSearchIndexes: <T extends 'simple' | 'advanced'>(
     type: T,
   ) => Promise<Parameters<typeof createSearchAPI<T>>[1]['indexes']>;
@@ -75,7 +78,7 @@ const builder = createPageTreeBuilder();
 
 export const createGeneratePageTree = (
   fs: ReturnType<GithubCache['fs']>,
-  compilerOptions: CreateCacheOptions<'local' | 'remote'>['compilerOptions'],
+  compilerOptions: NonNullable<CreateCacheOptions['compilerOptions']>,
   {
     include = './**/*.{json,md,mdx}',
   }: Pick<GeneratePageTreeOptions, 'include'>,
@@ -144,7 +147,14 @@ export const createGeneratePageTree = (
       ...options.pageTree,
     });
     const pageMap = buildPageMap(storage, getUrl);
-    const compile = async (source: string): ReturnType<typeof mdxCompile> => mdxCompile({ source, ...compilerOptions });
+    const compile: GeneratePageTreeResult['compile'] = async (
+      source,
+      additionalOptions,
+    ) =>
+      mdxCompile({
+        source,
+        ...Object.assign(compilerOptions, additionalOptions),
+      });
 
     return {
       pageTree,
@@ -164,7 +174,9 @@ export const createGeneratePageTree = (
             title: page.data.title,
             content: page.data.content,
             url: page.url,
-          })) as T extends 'simple' ? Parameters<typeof createSearchAPI<T>>[1]['indexes'] : never;
+          })) as T extends 'simple'
+            ? Parameters<typeof createSearchAPI<T>>[1]['indexes']
+            : never;
         }
 
         return (await Promise.all(
@@ -178,7 +190,9 @@ export const createGeneratePageTree = (
               url: page.url,
             };
           }),
-        )) as T extends 'advanced' ? Parameters<typeof createSearchAPI<T>>[1]['indexes'] : never;
+        )) as T extends 'advanced'
+          ? Parameters<typeof createSearchAPI<T>>[1]['indexes']
+          : never;
       },
     };
   };

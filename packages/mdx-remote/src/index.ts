@@ -9,9 +9,9 @@ import type { CompileOptions } from '@mdx-js/mdx';
 import rehypeImgSize, {
   type Options as RehypeImgSizeOptions,
 } from 'rehype-img-size';
-import type { Pluggable } from 'unified';
 import type { MDXComponents } from 'mdx/types';
 import { compileMDX, type CompileMDXResult } from '@/serialize';
+import { pluginOption, type ResolvePlugins } from './utils';
 
 export type CompileMDXOptions = Omit<
   CompileOptions,
@@ -77,21 +77,4 @@ export async function compile<Frontmatter extends Record<string, unknown>>(
     options.scope,
     options.components,
   );
-}
-
-type ResolvePlugins = Pluggable[] | ((v: Pluggable[]) => Pluggable[]);
-
-function pluginOption(
-  def: (v: Pluggable[]) => (Pluggable | false)[],
-  options: ResolvePlugins = [],
-): Pluggable[] {
-  const list = def(Array.isArray(options) ? options : []).filter(
-    Boolean,
-  ) as Pluggable[];
-
-  if (typeof options === 'function') {
-    return options(list);
-  }
-
-  return list;
 }

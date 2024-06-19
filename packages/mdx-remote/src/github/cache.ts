@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import type { z } from 'zod';
+import { remarkStructure } from 'fumadocs-core/mdx-plugins';
 import type { Options as CompileOptions } from '..';
 import {
   createTransformTreeToCache,
@@ -27,7 +28,7 @@ import {
 import { createGeneratePageTree } from './page-tree';
 
 export type GithubCacheFile = z.infer<typeof githubCacheFileSchema>;
-export interface BaseCreateCacheOptions
+interface BaseCreateCacheOptions
   extends Pick<Parameters<typeof getTree>[0], 'owner' | 'repo' | 'token'> {
   /**
    * Path on disk to store the cache.
@@ -101,8 +102,9 @@ export interface GithubCache {
   };
 }
 
-export type CreateCacheOptions<Env extends 'local' | 'remote'> =
-  Env extends 'local' ? CreateCacheLocalOptions : CreateCacheRemoteOptions;
+export type CreateCacheOptions<
+  Env extends 'local' | 'remote' = 'local' | 'remote',
+> = Env extends 'local' ? CreateCacheLocalOptions : CreateCacheRemoteOptions;
 type CreateCacheRemoteOptions = BaseCreateCacheOptions;
 type CreateCacheLocalOptions = Pick<
   BaseCreateCacheOptions,
@@ -343,7 +345,14 @@ const createCacheBoilerplate = <Env extends 'local' | 'remote'>(
     get generatePageTree() {
       return createGeneratePageTree(
         (this as GithubCache).fs(),
-        options.compilerOptions ?? {},
+        Object.assign(
+          options.compilerOptions ?? {},
+          {
+            mdxOptions: {
+              remarkPlugins: [remarkStructure]
+            }
+          } satisfies NonNullable<CreateCacheOptions['compilerOptions']>,
+        ),
         {
           include: options.include,
         },
