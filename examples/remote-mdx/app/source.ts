@@ -5,7 +5,7 @@ const cwd = process.cwd();
 const directory = path.resolve(cwd, 'content', 'docs');
 const cache = await createCache({
   directory,
-  cachePath: path.resolve(directory, '.fumadocs', 'cache.json'),
+  saveFile: path.resolve(directory, '.fumadocs', 'cache.json'),
 }).load();
 
 export const { getPageTree, getPage, getPages, getSearchIndexes } =
