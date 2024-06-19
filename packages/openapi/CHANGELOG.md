@@ -1,5 +1,12 @@
 # @fuma-docs/openapi
 
+## 3.1.0
+
+### Minor Changes
+
+- 3bdc786: Support JavaScript request example
+- 3bdc786: Support generating Authorization (`security`) section
+
 ## 3.0.0
 
 ### Major Changes

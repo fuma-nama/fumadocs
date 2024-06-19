@@ -2,7 +2,7 @@
 title: liveness
 ---
 
-import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible } from "fumadocs-ui/components/api";
+import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible, Requests, Request } from "fumadocs-ui/components/api";
 
 <Root>
 
@@ -27,9 +27,27 @@ import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, Exa
 
 <APIExample>
 
-```bash title="curl"
+<Requests items={["cURL","JavaScript"]}>
+
+<Request value={"cURL"}>
+
+```bash
 curl -X GET "https://api.unkey.dev/v1/liveness"
 ```
+
+</Request>
+
+<Request value={"JavaScript"}>
+
+```js
+fetch("https://api.unkey.dev/v1/liveness", {
+  method: "GET"
+});
+```
+
+</Request>
+
+</Requests>
 
 <Responses items={["200","400","401","403","404","409","429","500"]}>
 

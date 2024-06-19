@@ -3,7 +3,7 @@ title: Operations
 description: Operational information about the museum.
 ---
 
-import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible } from "fumadocs-ui/components/api";
+import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible, Requests, Request } from "fumadocs-ui/components/api";
 
 <Root>
 
@@ -14,6 +14,14 @@ import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, Exa
 ## Get museum hours
 
 Get upcoming museum operating hours
+
+### Authorization
+
+<Property name={"Authorization"} type={"Basic <token>"} required={true}>
+
+In: `header`
+
+</Property>
 
 ### Query Parameters
 
@@ -59,9 +67,27 @@ The number of days per page.
 
 <APIExample>
 
-```bash title="curl"
+<Requests items={["cURL","JavaScript"]}>
+
+<Request value={"cURL"}>
+
+```bash
 curl -X GET "https://api.fake-museum-example.com/museum-hours"
 ```
+
+</Request>
+
+<Request value={"JavaScript"}>
+
+```js
+fetch("https://api.fake-museum-example.com/museum-hours", {
+  method: "GET"
+});
+```
+
+</Request>
+
+</Requests>
 
 <Responses items={["200"]}>
 

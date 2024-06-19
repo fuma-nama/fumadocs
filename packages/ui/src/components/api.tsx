@@ -1,9 +1,8 @@
 'use client';
-import { useState, type HTMLAttributes, type ReactNode } from 'react';
+import { type HTMLAttributes, type ReactNode } from 'react';
 import type { VariantProps } from 'class-variance-authority';
 import { cva } from 'class-variance-authority';
 import { cn } from '@/utils/cn';
-import { buttonVariants } from '@/theme/variants';
 import { Tab, Tabs } from '@/components/tabs';
 import { Accordion, Accordions } from '@/components/accordion';
 
@@ -118,38 +117,21 @@ export function APIExample({
   className,
   ...props
 }: HTMLAttributes<HTMLDivElement>): React.ReactElement {
-  const [isOpen, setIsOpen] = useState(false);
-
   return (
     <div
       className={cn('sticky top-6 h-fit xl:w-2/5 xl:min-w-[400px]', className)}
       {...props}
     >
-      <div className="flex flex-row items-center gap-4 xl:hidden">
-        <div className="h-px flex-1 bg-border" />
-        <button
-          type="button"
-          className={cn(
-            buttonVariants({
-              color: 'secondary',
-              size: 'lg',
-            }),
-          )}
-          onClick={() => {
-            setIsOpen((v) => !v);
-          }}
-        >
-          More Details
-        </button>
-        <div className="h-px flex-1 bg-border" />
-      </div>
-      <div className={cn(!isOpen && 'max-xl:hidden')}>{children}</div>
+      {children}
     </div>
   );
 }
 
 export const Responses = Tabs;
 export const Response = Tab;
+
+export const Requests = Tabs;
+export const Request = Tab;
 
 export function ResponseTypes(props: {
   children: ReactNode;

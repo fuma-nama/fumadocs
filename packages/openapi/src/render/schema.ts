@@ -1,5 +1,5 @@
 import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
-import { noRef } from '@/utils';
+import { noRef } from '@/utils/schema';
 import type { RenderContext } from '@/types';
 import { p, span } from './element';
 

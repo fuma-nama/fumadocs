@@ -1,32 +1,32 @@
 'use client';
 
-import Link from 'next/link';
 import { SidebarTrigger } from 'fumadocs-core/sidebar';
 import { Menu, X } from 'lucide-react';
-import type { NavProps } from '@/components/layout/nav';
 import { useSidebar } from '@/contexts/sidebar';
 import { useSearchContext } from '@/contexts/search';
 import { SearchToggle } from '@/components/layout/search-toggle';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/theme/variants';
+import type { SharedNavProps } from '@/layout';
+import { NavBox, Title } from '@/components/layout/nav';
 
 export function SubNav({
   title,
-  url = '/',
+  url,
+  transparentMode,
   children,
   enableSearch = true,
-}: NavProps): React.ReactElement {
+}: SharedNavProps): React.ReactElement {
   const { open } = useSidebar();
   const { enabled } = useSearchContext();
 
   return (
-    <nav
+    <NavBox
       id="nd-subnav"
-      className="sticky top-0 z-40 flex h-16 w-full flex-row items-center border-b bg-background/80 px-4 backdrop-blur-md md:hidden [&_svg]:size-5"
+      className="flex flex-row items-center px-4 md:hidden"
+      transparentMode={transparentMode}
     >
-      <Link href={url} className="inline-flex items-center gap-3 font-semibold">
-        {title}
-      </Link>
+      <Title url={url} title={title} />
       {children}
       {enabled && enableSearch ? <SearchToggle className="ms-auto" /> : null}
       <SidebarTrigger
@@ -40,7 +40,7 @@ export function SubNav({
       >
         {open ? <X /> : <Menu />}
       </SidebarTrigger>
-    </nav>
+    </NavBox>
   );
 }
 

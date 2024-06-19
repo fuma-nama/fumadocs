@@ -24,6 +24,12 @@ export interface ObjectCollapsibleProps {
   name: string;
 }
 
+export interface RequestProps {
+  language: string;
+  name: string;
+  code: string;
+}
+
 export interface Renderer {
   Root: (child: string[]) => string;
   API: (child: string[]) => string;
@@ -32,6 +38,9 @@ export interface Renderer {
 
   Responses: (props: ResponsesProps, child: string[]) => string;
   Response: (props: ResponseProps, child: string[]) => string;
+
+  Requests: (items: string[], child: string[]) => string;
+  Request: (props: RequestProps) => string;
 
   ResponseTypes: (child: string[]) => string;
   ExampleResponse: (json: string) => string;
@@ -63,4 +72,8 @@ export const defaultRenderer: Renderer = {
   Property: (props, child) => createElement('Property', props, ...child),
   ObjectCollapsible: (props, child) =>
     createElement('ObjectCollapsible', props, ...child),
+
+  Requests: (items, child) => createElement('Requests', { items }, ...child),
+  Request: ({ language, code, name }) =>
+    createElement('Request', { value: name }, codeblock({ language }, code)),
 };

@@ -1,7 +1,13 @@
 import { TextIcon } from 'lucide-react';
 import type { TOCItemType } from 'fumadocs-core/server';
 import * as Primitive from 'fumadocs-core/toc-internal';
-import { type ReactElement, type ReactNode, useCallback, useRef } from 'react';
+import {
+  type ButtonHTMLAttributes,
+  type ReactElement,
+  type ReactNode,
+  useCallback,
+  useRef,
+} from 'react';
 import { cn } from '@/utils/cn';
 import { useI18n } from '@/contexts/i18n';
 import {
@@ -45,18 +51,25 @@ export function Toc({ items, header, footer }: TOCProps): ReactElement {
   );
 }
 
-export function SubToc({ items, header, footer }: TOCProps): ReactElement {
+export function SubToc({
+  items,
+  header,
+  footer,
+  ...props
+}: TOCProps & ButtonHTMLAttributes<HTMLButtonElement>): ReactElement {
   const { text } = useI18n();
 
   return (
     <Popover>
       <PopoverTrigger
+        {...props}
         className={cn(
           buttonVariants({
             className:
-              'sticky ms-auto bottom-4 gap-2 shadow-lg shadow-background z-10 lg:hidden',
+              'sticky ms-auto bottom-4 gap-2 shadow-lg shadow-background z-10',
             color: 'secondary',
           }),
+          props.className,
         )}
       >
         <TextIcon className="size-4" />

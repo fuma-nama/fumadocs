@@ -1,11 +1,12 @@
-import { generateSample, type Endpoint } from '.';
+import { type Endpoint } from '@/endpoint';
+import { generateInput } from '@/utils/generate-input';
 
 export function getExampleResponse(
   endpoint: Endpoint,
   code: string,
 ): string | undefined {
   if (code in endpoint.responses) {
-    const value = generateSample(
+    const value = generateInput(
       endpoint.method,
       endpoint.responses[code].schema,
     );
