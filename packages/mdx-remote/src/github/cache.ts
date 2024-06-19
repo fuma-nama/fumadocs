@@ -26,6 +26,7 @@ import {
   type GetFileContent,
 } from './utils';
 import { createGeneratePageTree } from './page-tree';
+import { createCreateGithubWebhookAPI } from './github-webhook';
 
 export type GithubCacheFile = z.infer<typeof githubCacheFileSchema>;
 interface BaseCreateCacheOptions
@@ -55,7 +56,7 @@ interface BaseCreateCacheOptions
   githubApi?: Pick<Parameters<typeof getTree>[0], 'init' | 'recursive'>;
 }
 
-export interface GithubCache {
+export interface GithubCache<Env extends 'local' | 'remote' = 'local' | 'remote'> {
   /**
    * File system utilities for the cache.
    * Mostly oriented for page tree generation.
@@ -78,6 +79,10 @@ export interface GithubCache {
    * Generates a page tree from the cache.
    */
   generatePageTree: ReturnType<typeof createGeneratePageTree>;
+  /**
+   * Used in produciton to update the cache with new data when pushing to the repository.
+   */
+  createGithubWebhookAPI: Env extends 'remote' ? ReturnType<typeof createCreateGithubWebhookAPI> : never;
   /**
    * Functions relating to making changes the cache
    */
@@ -133,7 +138,7 @@ export const createCache: (
 
 export const createRemoteCache = (
   options: CreateCacheOptions<'remote'>,
-): GithubCache => {
+): GithubCache<'remote'> => {
   const { directory, cachePath, githubApi, ...githubInfo } = options;
   const getFileContent: GetFileContent<{ sha: string }> = async (file) => {
     return blobToUtf8(
@@ -144,6 +149,10 @@ export const createRemoteCache = (
       }),
     );
   };
+
+  const revalidationTag = `@fumadocs/mdx-remote/github/cache@${fnv1a(
+    JSON.stringify(options),
+  )}`
 
   return enhancedCacheBoilerplate(options, {
     get diff() {
@@ -179,12 +188,15 @@ export const createRemoteCache = (
     get fs() {
       return createFileSystem(this.data, this.tree, this.diff, getFileContent);
     },
+    get createGithubWebhookAPI() {
+      return createCreateGithubWebhookAPI(options.branch, revalidationTag);
+    }
   } as GithubCache);
 };
 
 export const createLocalCache = (
   options: CreateCacheOptions<'local'>,
-): GithubCache => {
+): GithubCache<'local'> => {
   const { directory, include = './**/*.{json,md,mdx}', cachePath } = options;
 
   const getFileContent: GetFileContent<{ path: string }> = async (file) => {
@@ -313,7 +325,7 @@ const createFileSystem = (
 
 const createCacheBoilerplate = <Env extends 'local' | 'remote'>(
   options: CreateCacheOptions<Env>,
-): Omit<GithubCache, 'applyToCache' | 'load' | 'fs' | 'diff'> => {
+): Omit<GithubCache, 'applyToCache' | 'load' | 'fs' | 'diff' | 'createGithubWebhookAPI'> => {
   let cacheFile: GithubCacheFile | undefined;
   let gitTree: GithubCache['tree'] | undefined;
 
@@ -360,7 +372,7 @@ const createCacheBoilerplate = <Env extends 'local' | 'remote'>(
     },
     get resolveAllContent() {
       return createContentResolver(this.data, (this as GithubCache).fs());
-    },
+    }
   };
 };
 
