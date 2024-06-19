@@ -354,7 +354,8 @@ const createCacheBoilerplate = <Env extends 'local' | 'remote'>(
     },
     get minimumRevalidate() {
       const requestsPerHour = 5000;
-      const files = this.tree.tree.length + Math.round(0.25 * this.tree.tree.length)
+      const files =
+        this.tree.tree.length + Math.round(0.25 * this.tree.tree.length);
       const seconds = Math.ceil((files / requestsPerHour) * 3600);
       return seconds;
     },
