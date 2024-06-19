@@ -64,7 +64,6 @@ export async function getTree({
   const res = await fetch(url, {
     ...init,
     headers,
-    cache: 'force-cache',
   });
   if (!res.ok)
     throw new Error(
