@@ -26,7 +26,7 @@ export interface SearchProviderProps {
   /**
    * Hotkeys for triggering search dialog
    *
-   * @defaultValue K + Meta/Ctrl
+   * @defaultValue Meta/Ctrl + K
    */
   hotKey?: HotKey[];
 
@@ -68,12 +68,12 @@ export function SearchProvider({
   options,
   hotKey = [
     {
-      key: 'k',
-      display: 'K',
-    },
-    {
       key: (e) => e.metaKey || e.ctrlKey,
       display: '⌘',
+    },
+    {
+      key: 'k',
+      display: 'K',
     },
   ],
   links,
