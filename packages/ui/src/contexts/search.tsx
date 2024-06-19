@@ -68,12 +68,12 @@ export function SearchProvider({
   options,
   hotKey = [
     {
-      key: 'k',
-      display: 'K',
-    },
-    {
       key: (e) => e.metaKey || e.ctrlKey,
       display: '⌘',
+    },
+    {
+      key: 'k',
+      display: 'K',
     },
   ],
   links,

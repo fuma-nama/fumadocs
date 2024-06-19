@@ -50,7 +50,7 @@ export function LargeSearchToggle(
     >
       <SearchIcon className="ms-1 size-4" />
       {text.search}
-      <div className="ms-auto inline-flex gap-0.5 text-xs">
+      <div className="ms-auto inline-flex gap-0.5">
         {hotKey.map((k, i) => (
           <kbd key={i} className="rounded-md border bg-background px-1.5">
             {k.display}

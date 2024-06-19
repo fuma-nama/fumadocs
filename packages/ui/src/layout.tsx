@@ -3,7 +3,7 @@ import type { ReactNode, HTMLAttributes } from 'react';
 import Link from 'next/link';
 import { MoreHorizontal } from 'lucide-react';
 import { cn } from '@/utils/cn';
-import type { NavProps } from './components/layout/nav';
+import type { NavBoxProps, TitleProps } from './components/layout/nav';
 import { replaceOrDefault } from './utils/shared';
 import type { SidebarProps } from './components/layout/sidebar';
 
@@ -58,9 +58,19 @@ export type LinkItemType =
       external?: boolean;
     };
 
-interface NavOptions extends Omit<NavProps, 'items'> {
+interface NavOptions extends SharedNavProps {
   enabled: boolean;
   component: ReactNode;
+}
+
+export interface SharedNavProps extends TitleProps, NavBoxProps {
+  /**
+   * Show/hide search toggle
+   *
+   * Note: Enable/disable search from root provider instead
+   */
+  enableSearch?: boolean;
+  children?: ReactNode;
 }
 
 interface SidebarOptions extends Omit<SidebarProps, 'items'> {
