@@ -22,6 +22,7 @@ const mockCache = vi.fn(
   }) => {
     const cache = createCache({
       directory,
+      saveFile: false,
       ...cacheOptions,
     });
 
