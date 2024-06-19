@@ -1,34 +1,4 @@
 {
-  "files": [
-    {
-      "content": "
-Hey!
-",
-      "frontmatter": {
-        "description": "Something",
-        "title": "Hello World",
-      },
-      "path": "index.mdx",
-    },
-    {
-      "frontmatter": {
-        "pages": [
-          "index",
-          "---Nothing---",
-          "...another",
-        ],
-      },
-      "path": "meta.json",
-    },
-    {
-      "content": "",
-      "frontmatter": {
-        "description": "You found me!",
-        "title": "Another File",
-      },
-      "path": "another/file.mdx",
-    },
-  ],
   "getPage": [Function],
   "getPageTree": [Function],
   "getPages": [Function],
