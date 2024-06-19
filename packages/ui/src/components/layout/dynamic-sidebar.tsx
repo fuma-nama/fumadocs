@@ -9,14 +9,16 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
   const { collapsed, setCollapsed } = useSidebar();
   const [hover, setHover] = useState(false);
   const timerRef = useRef(0);
+  const hoverTimeRef = useRef(0);
 
   const onCollapse = useCallback(() => {
     setCollapsed((v) => !v);
     setHover(false);
+    hoverTimeRef.current = Date.now() + 1000;
   }, [setCollapsed]);
 
-  const onHover: PointerEventHandler = useCallback((e) => {
-    if (e.pointerType === 'touch') return;
+  const onEnter: PointerEventHandler = useCallback((e) => {
+    if (e.pointerType === 'touch' || hoverTimeRef.current > Date.now()) return;
     window.clearTimeout(timerRef.current);
     setHover(true);
   }, []);
@@ -35,7 +37,7 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
       {collapsed ? (
         <div
           className="fixed inset-y-0 start-0 w-4 max-md:hidden xl:static xl:w-[260px]"
-          onPointerEnter={onHover}
+          onPointerEnter={onEnter}
           onPointerLeave={onLeave}
         />
       ) : null}
@@ -60,7 +62,7 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
         aside={{
           'data-collapse': collapsed,
           'data-hover': hover,
-          onPointerEnter: onHover,
+          onPointerEnter: onEnter,
           onPointerLeave: onLeave,
           'aria-hidden': Boolean(collapsed && !hover),
           className: cn(

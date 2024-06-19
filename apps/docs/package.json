@@ -8,8 +8,8 @@
     "build:docs": "tsx ./scripts/generate-docs.mts",
     "build:index": "tsx ./scripts/update-index.mts",
     "build:shaders": "glslx shaders/rain.glsl --output=shaders/rain.min.js --format=js --renaming=internal-only",
-    "dev": "next dev",
     "clean": "rimraf .next",
+    "dev": "next dev",
     "lint": "next lint",
     "start": "next start"
   },
