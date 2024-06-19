@@ -10,4 +10,4 @@ const cache = await createCache({
 
 export const { getPageTree, getPage, getPages, getSearchIndexes } =
   await cache.generatePageTree();
-export const { compileMDX } = cache;
+export const { compileMDX, minimumRevalidate } = cache;

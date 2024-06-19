@@ -41,7 +41,7 @@ interface BaseCreateCacheOptions
    * Pass `false` to disable storing the cache.
    * @defaultValue .fumadocs/cache.json (relative to cwd)
    */
-  saveFile?: string | false;
+  saveFile: string | false;
   /**
    * Directory to search for files (local or remote)
    */
@@ -102,6 +102,11 @@ export interface GithubCache<
    * Compiles source (string) to MDX.
    */
   compileMDX: ReturnType<typeof createCompileMDX>;
+  /**
+   * The least amount of time (in seconds) to wait before revalidating the cache.
+   * This is based on the current number of files in the cache.
+   */
+  minimumRevalidate: number;
   /**
    * Functions relating to making changes the cache
    */
@@ -346,6 +351,12 @@ const createCacheBoilerplate = <Env extends 'local' | 'remote'>(
         'Invalid cache file. Please check the schema',
       );
       cacheFile = value;
+    },
+    get minimumRevalidate() {
+      const requestsPerHour = 5000;
+      const files = this.tree.tree.length + Math.round(0.25 * this.tree.tree.length)
+      const seconds = Math.ceil((files / requestsPerHour) * 3600);
+      return seconds;
     },
     get generatePageTree() {
       return createGeneratePageTree(
