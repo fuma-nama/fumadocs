@@ -4,7 +4,7 @@ import type { z } from 'zod';
 import { remarkStructure } from 'fumadocs-core/mdx-plugins';
 import { compile as compileMDX, type Options as CompileOptions } from '..';
 import {
-  createTransformTreeToCache,
+  createTransformGitTreeToCache,
   filesToGitTree,
   findTreeRecursive,
 } from './git-tree';
@@ -115,7 +115,7 @@ export interface GithubCache<
     /**
      * This is mostly a utility that allows you to transform a tree to a cache. (useful for testing)
      */
-    transformToCache: ReturnType<typeof createTransformTreeToCache>;
+    transformToCache: ReturnType<typeof createTransformGitTreeToCache>;
   };
 }
 
@@ -210,7 +210,7 @@ export const createRemoteCache = (
           // @ts-expect-error We define tree.transformToCache right after this
           this.tree = tree;
           this.tree.transformToCache =
-            createTransformTreeToCache(getFileContent);
+            createTransformGitTreeToCache(getFileContent);
 
           return this.tree.transformToCache(tree);
         },
@@ -268,7 +268,7 @@ export const createLocalCache = (
           }
 
           this.tree = Object.assign(tree, {
-            transformToCache: createTransformTreeToCache(getFileContent),
+            transformToCache: createTransformGitTreeToCache(getFileContent),
           });
 
           this.data = this.tree.transformToCache(this.tree);
@@ -379,7 +379,7 @@ const createLoader = (
       const raw = await fs.promises.readFile(cachePath, 'utf-8');
       obj = JSON.parse(raw) as GithubCacheFile;
       cacheInstance.tree = Object.assign(cacheFileToGitTree(obj), {
-        transformToCache: createTransformTreeToCache(getFileContent),
+        transformToCache: createTransformGitTreeToCache(getFileContent),
       });
     } else obj = await notFound(lazy);
 

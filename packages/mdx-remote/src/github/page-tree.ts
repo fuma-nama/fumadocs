@@ -10,9 +10,16 @@ import {
 } from 'fumadocs-core/source';
 import picomatch from 'picomatch';
 import matter from 'gray-matter';
-import { unstable_cache as nextUnstableCache } from 'next/cache';
+import { unstable_cache as _unstableCache } from 'next/cache';
 import type { createSearchAPI } from 'fumadocs-core/search/server';
 import type { GithubCache } from './cache';
+
+const unstableCache: typeof _unstableCache =
+  process.env.TSUP_BUILD === 'true'
+    ? _unstableCache
+    : (cb) => {
+        return cb;
+      };
 
 interface PageData {
   icon?: string;
@@ -144,7 +151,7 @@ export const createGeneratePageTree = (
     });
     const pageMap = buildPageMap(storage, getUrl);
 
-    const getGeneratedPageTree = nextUnstableCache(
+    const getGeneratedPageTree = unstableCache(
       async () => {
         return {
           pageTree,

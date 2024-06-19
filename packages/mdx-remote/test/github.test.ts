@@ -4,8 +4,33 @@ import { expect, test, vi } from 'vitest';
 import { createCache, type CreateCacheOptions } from '@/github';
 import fs from 'node:fs';
 import type { CompareTreeDiff } from '@/github/diff';
+import type { GitTreeItem } from '@/github/utils';
 
 const cwd = path.dirname(fileURLToPath(import.meta.url));
+
+const fakeTree = [
+  {
+    // make sure sha property is an action (add, remove, modify)
+    sha: 'add',
+    type: 'blob',
+    path: 'new-file.mdx',
+    url: 'fixtures/new-file.mdx',
+  },
+  {
+    type: 'blob',
+    sha: 'modify',
+    path: 'index.mdx',
+    url: 'fixtures/index.mdx',
+  },
+  {
+    type: 'blob',
+    sha: 'remove',
+    path: 'meta.json',
+    url: 'fixtures/meta.json',
+  },
+] as (GitTreeItem & {
+  sha: CompareTreeDiff['action'];
+})[];
 
 const mockCache = vi.fn(
   async ({
@@ -29,32 +54,7 @@ const mockCache = vi.fn(
         lazy,
       });
 
-    return {
-      cache,
-      fakeTree: [
-        {
-          // make sure sha property is an action (add, remove, modify)
-          sha: 'add',
-          type: 'blob',
-          path: 'new-file.mdx',
-          url: 'fixtures/new-file.mdx',
-        },
-        {
-          type: 'blob',
-          sha: 'modify',
-          path: 'index.mdx',
-          url: 'fixtures/index.mdx',
-        },
-        {
-          type: 'blob',
-          sha: 'remove',
-          path: 'meta.json',
-          url: 'fixtures/meta.json',
-        },
-      ] as ((typeof cache.tree)['tree'][number] & {
-        sha: CompareTreeDiff['action'];
-      })[],
-    };
+    return cache;
   },
 );
 
@@ -69,7 +69,7 @@ const sort = <
 
 test('Error If Cache Has Not Been Loaded', async () => {
   const directory = path.resolve(cwd, './fixtures');
-  const { cache } = await mockCache({
+  const cache = await mockCache({
     directory,
     load: false,
   });
@@ -78,9 +78,10 @@ test('Error If Cache Has Not Been Loaded', async () => {
   expect(() => cache.tree).toThrowError();
 });
 
+// cache.load (cache.tree.transformGitTreeToCache)
 test('Transform Git Tree to GitHub Cache', async () => {
   const directory = path.resolve(cwd, './fixtures');
-  const { cache } = await mockCache({ directory });
+  const cache = await mockCache({ directory });
 
   const { lastUpdated: _lastUpdated, ...rendered } =
     await cache.resolveAllContent();
@@ -90,20 +91,22 @@ test('Transform Git Tree to GitHub Cache', async () => {
   );
 });
 
+// cache.generatePageTree
 test('Generate Page Tree from Cache', async () => {
   const directory = path.resolve(cwd, './fixtures');
-  const { cache } = await mockCache({ directory });
+  const cache = await mockCache({ directory });
 
-  const pageTree = await cache.generatePageTree();
+  const { getPageTree } = await cache.generatePageTree();
 
-  await expect(pageTree).toMatchFileSnapshot(
+  await expect(await getPageTree()).toMatchFileSnapshot(
     path.resolve(cwd, './out/page-tree.output.json5'),
   );
 });
 
+// cache.diff.compareToGitTree
 test('Differientate between Two Git Trees', async () => {
   const directory = path.resolve(cwd, './fixtures');
-  const { cache, fakeTree } = await mockCache({ directory });
+  const cache = await mockCache({ directory });
 
   const diff = cache.diff.compareToGitTree({
     sha: `${cache.tree.sha}-fake`,
@@ -130,9 +133,10 @@ test('Differientate between Two Git Trees', async () => {
   expect(sort(diff)).toEqual(sort(fakeDiff));
 });
 
+// cache.diff.applyToCache
 test('Apply Differences to Current Cache', async () => {
   const directory = path.resolve(cwd, './fixtures');
-  const { cache, fakeTree } = await mockCache({ directory });
+  const cache = await mockCache({ directory });
 
   const diff = cache.diff.compareToGitTree({
     sha: `${cache.tree.sha}-fake`,
@@ -185,9 +189,10 @@ test('Apply Differences to Current Cache', async () => {
   }
 });
 
+// cache.fs.loadFile
 test('Lazy Load Cache', async () => {
   const directory = path.resolve(cwd, './fixtures');
-  const { cache } = await mockCache({
+  const cache = await mockCache({
     directory,
     lazy: true,
   });
@@ -208,10 +213,11 @@ test('Lazy Load Cache', async () => {
   expect(cache.tree.tree).toHaveLength(1);
 });
 
+// cache.fs.readFile
 test('Read Files from Cache', async () => {
   const directory = path.resolve(cwd, './fixtures');
   const cachePath = path.resolve(directory, '.fumadocs', 'cache.json');
-  const { cache } = await mockCache({ directory });
+  const cache = await mockCache({ directory });
 
   await fs.promises.mkdir(path.dirname(cachePath), { recursive: true });
   await fs.promises.writeFile(
@@ -220,7 +226,7 @@ test('Read Files from Cache', async () => {
     'utf8',
   );
 
-  const { cache: newCache } = await mockCache({
+  const newCache = await mockCache({
     directory,
     cacheOptions: {
       cachePath,
@@ -237,4 +243,12 @@ test('Read Files from Cache', async () => {
       await fs.promises.readFile(path.resolve(directory, file), 'utf8'),
     );
   }
+
+  // cleanup
+  await fs.promises.rm(
+    path.dirname(cachePath),
+    {
+      recursive: true,
+    },
+  );
 });

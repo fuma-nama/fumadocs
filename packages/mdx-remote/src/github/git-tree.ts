@@ -42,13 +42,13 @@ export const findTreeRecursive = async (
   return currentTree;
 };
 
-export const createTransformTreeToCache = (
+export const createTransformGitTreeToCache = (
   getFileContent?: (file: {
     path: string;
     sha: string;
   }) => string | Promise<string>,
 ) =>
-  function transformTreeToCache(
+  function transformGitTreeToCache(
     tree: Awaited<ReturnType<typeof getTree>>,
     lastUpdated = Date.now(),
   ): GithubCacheFile {

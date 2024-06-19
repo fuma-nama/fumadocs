@@ -6,4 +6,7 @@ export default defineConfig({
   external: ['fumadocs-core', 'webpack', 'next', 'react'],
   dts: true,
   target: 'esnext',
+  env: {
+    TSUP_BUILD: 'true',
+  }
 });
