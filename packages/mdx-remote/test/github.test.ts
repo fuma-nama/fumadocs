@@ -245,10 +245,7 @@ test('Read Files from Cache', async () => {
   }
 
   // cleanup
-  await fs.promises.rm(
-    path.dirname(cachePath),
-    {
-      recursive: true,
-    },
-  );
+  await fs.promises.rm(path.dirname(cachePath), {
+    recursive: true,
+  });
 });

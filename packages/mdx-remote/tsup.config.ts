@@ -8,5 +8,5 @@ export default defineConfig({
   target: 'esnext',
   env: {
     TSUP_BUILD: 'true',
-  }
+  },
 });

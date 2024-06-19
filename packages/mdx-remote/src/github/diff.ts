@@ -21,7 +21,6 @@ export const createCompareToGitTree = (cacheFile: GithubCacheFile) =>
       const matched = tree.tree.find((t) => t.path === file.path);
       let action: CompareTreeDiff['action'] | undefined;
 
-
       if (!matched) action = 'remove';
       else if (matched.sha !== file.sha) action = 'modify';
       else return;

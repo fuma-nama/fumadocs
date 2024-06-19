@@ -10,7 +10,7 @@ export const createCreateGithubWebhookAPI = ({
   directory,
   githubOptions,
   revalidationTag,
-  set
+  set,
 }: {
   tree: GithubCache['tree'];
   diff: GithubCache['diff'];
@@ -53,8 +53,8 @@ export const createCreateGithubWebhookAPI = ({
               ...githubOptions.init,
               // since this is an exact hash of the tree,
               // the inner content will not change
-              cache: 'force-cache'
-            }
+              cache: 'force-cache',
+            },
           });
 
           if (newTree) {
