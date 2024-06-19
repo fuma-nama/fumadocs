@@ -32,7 +32,13 @@ export type GithubCacheFile = z.infer<typeof githubCacheFileSchema>;
 interface BaseCreateCacheOptions
   extends Pick<Parameters<typeof getTree>[0], 'owner' | 'repo' | 'token'> {
   /**
+   * Current working directory.
+   * @defaultValue process.cwd()
+   */
+  cwd?: string;
+  /**
    * Path on disk to store the cache.
+   * @defaultValue .fumadocs/cache.json (relative to cwd)
    */
   cachePath?: string;
   /**
@@ -176,10 +182,15 @@ export const createCache = <Options extends CreateCacheOptions>(
 };
 
 export const createRemoteCache = (
-  options: CreateCacheOptions<'remote'>,
+  { cwd = process.cwd(), ...options }: CreateCacheOptions<'remote'>,
   revalidationTag: string,
 ): GithubCache<'remote'> => {
-  const { directory, cachePath, githubApi, ...githubInfo } = options;
+  const {
+    directory,
+    cachePath = path.resolve(cwd, '.fumadocs', 'cache.json'),
+    githubApi,
+    ...githubInfo
+  } = options;
   const getFileContent: GetFileContent<{ sha: string }> = async (file) => {
     return blobToUtf8(
       await getBlob({
@@ -207,10 +218,9 @@ export const createRemoteCache = (
 
           if (!tree) return;
 
-          // @ts-expect-error We define tree.transformToCache right after this
-          this.tree = tree;
-          this.tree.transformToCache =
-            createTransformGitTreeToCache(getFileContent);
+          this.tree = Object.assign(tree, {
+            transformToCache: createTransformGitTreeToCache(getFileContent),
+          });
 
           return this.tree.transformToCache(tree);
         },
@@ -220,7 +230,20 @@ export const createRemoteCache = (
       return createFileSystem(this.data, this.tree, this.diff, getFileContent);
     },
     get createGithubWebhookAPI() {
-      return createCreateGithubWebhookAPI(options.branch, revalidationTag);
+      return createCreateGithubWebhookAPI({
+        tree: this.tree,
+        diff: this.diff,
+        ref: options.branch,
+        directory: options.directory ?? '',
+        githubOptions: {
+          ...githubInfo,
+          ...githubApi,
+        },
+        revalidationTag,
+        set: (key, value) => {
+          this[key] = value;
+        },
+      });
     },
   } as GithubCache);
 };
@@ -229,7 +252,11 @@ export const createLocalCache = (
   options: CreateCacheOptions<'local'>,
   revalidationTag: string,
 ): GithubCache<'local'> => {
-  const { directory, include = './**/*.{json,md,mdx}', cachePath } = options;
+  const {
+    directory,
+    include = './**/*.{json,md,mdx}',
+    cachePath = path.resolve(directory, '.fumadocs', 'cache.json'),
+  } = options;
 
   const getFileContent: GetFileContent<{ path: string }> = async (file) => {
     return fs.promises.readFile(path.resolve(directory, file.path), 'utf8');
@@ -364,7 +391,7 @@ const createLoader = (
     notFound,
     getFileContent,
   }: {
-    cachePath: string | undefined;
+    cachePath: string;
     getFileContent: GetFileContent;
     notFound: (lazy: boolean) => Promise<GithubCacheFile | undefined>;
   },
@@ -373,21 +400,32 @@ const createLoader = (
     lazy?: boolean;
   }): Promise<typeof cacheInstance> {
     const { lazy = false } = options ?? {};
-    let obj: GithubCacheFile | undefined;
 
-    if (cachePath && fs.existsSync(cachePath)) {
+    if (fs.existsSync(cachePath)) {
       const raw = await fs.promises.readFile(cachePath, 'utf-8');
-      obj = JSON.parse(raw) as GithubCacheFile;
-      cacheInstance.tree = Object.assign(cacheFileToGitTree(obj), {
+      const data = JSON.parse(raw) as GithubCacheFile;
+      cacheInstance.tree = Object.assign(cacheFileToGitTree(data), {
         transformToCache: createTransformGitTreeToCache(getFileContent),
       });
-    } else obj = await notFound(lazy);
+      cacheInstance.data = data;
+    } else {
+      const data = await notFound(lazy);
 
-    if (obj) cacheInstance.data = obj;
-    else
-      console.error(
-        'Attempted to load Github cache, but could not retrieve cache and/or files (local or remote)',
-      );
+      if (data) cacheInstance.data = data;
+      else
+        throw new Error(
+          'Attempted to load Github cache, but could not retrieve cache and/or files (local or remote)',
+        );
+
+      if (cachePath) {
+        await fs.promises.mkdir(path.dirname(cachePath), { recursive: true });
+        await fs.promises.writeFile(
+          cachePath,
+          JSON.stringify(await cacheInstance.resolveAllContent(), null, 0),
+          'utf-8',
+        );
+      }
+    }
 
     return cacheInstance;
   };

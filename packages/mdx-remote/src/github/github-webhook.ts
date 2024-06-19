@@ -1,22 +1,40 @@
 import { revalidateTag } from 'next/cache';
-import type { CreateCacheOptions } from './cache';
+import type { CreateCacheOptions, GithubCache } from './cache';
+import { findTreeRecursive } from './git-tree';
+import type { getTree } from './get-tree';
 
-export const createCreateGithubWebhookAPI = (
-  ref: NonNullable<CreateCacheOptions<'remote'>['branch']>,
-  revalidationTag: string,
-) =>
-  function createGithubWebhookAPI() {
+export const createCreateGithubWebhookAPI = ({
+  tree,
+  diff,
+  ref,
+  directory,
+  githubOptions,
+  revalidationTag,
+  set
+}: {
+  tree: GithubCache['tree'];
+  diff: GithubCache['diff'];
+  ref: NonNullable<CreateCacheOptions<'remote'>['branch']>;
+  directory: string;
+  githubOptions: Omit<Parameters<typeof getTree>[0], 'treeSha'>;
+  revalidationTag: string;
+  set: <K extends keyof GithubCache>(key: K, value: GithubCache[K]) => void;
+}) =>
+  function createGithubWebhookAPI(webhookSecret?: string) {
     const encoder = new TextEncoder();
 
     const POST = async (request: Request): Promise<Response> => {
       const body = await request.text();
-      const signature = request.headers.get('x-hub-signature-256');
 
-      if (
-        !signature ||
-        !(await verifySignature('EXAMPLE_SECRET', signature, body))
-      ) {
-        return new Response('Unauthorized', { status: 401 });
+      if (webhookSecret) {
+        const signature = request.headers.get('x-hub-signature-256');
+
+        if (
+          !signature ||
+          !(await verifySignature(webhookSecret, signature, body))
+        ) {
+          return new Response('Unauthorized', { status: 401 });
+        }
       }
 
       const githubEvent = request.headers.get('x-github-event');
@@ -24,10 +42,29 @@ export const createCreateGithubWebhookAPI = (
       if (githubEvent === 'push') {
         const data = JSON.parse(body) as {
           ref: string;
+          after: string;
         };
 
         if (data.ref && data.ref === `refs/heads/${ref}`) {
-          revalidateTag(revalidationTag);
+          const newTree = await findTreeRecursive(directory, {
+            ...githubOptions,
+            treeSha: data.after,
+            init: {
+              ...githubOptions.init,
+              // since this is an exact hash of the tree,
+              // the inner content will not change
+              cache: 'force-cache'
+            }
+          });
+
+          if (newTree) {
+            const changes = diff.compareToGitTree(newTree);
+            if (changes.length > 0) {
+              set('tree', Object.assign(tree, newTree));
+              diff.applyToCache(changes);
+              revalidateTag(revalidationTag);
+            }
+          }
         }
       }
 
