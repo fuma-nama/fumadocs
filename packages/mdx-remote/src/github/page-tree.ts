@@ -10,8 +10,8 @@ import {
 } from 'fumadocs-core/source';
 import picomatch from 'picomatch';
 import matter from 'gray-matter';
-import type { createSearchAPI } from 'fumadocs-core/search/server';
 import { unstable_cache as nextUnstableCache } from 'next/cache';
+import type { createSearchAPI } from 'fumadocs-core/search/server';
 import type { GithubCache } from './cache';
 
 interface PageData {
@@ -45,10 +45,9 @@ interface FileInfo {
 }
 
 interface GeneratePageTreeResult {
-  files: FileInfo[];
   getPageTree: () => Promise<PageTree.Root>;
-  getPages: () => Page[];
-  getPage: (slugs: string[] | undefined) => Page | undefined;
+  getPages: () => Promise<Page[]>;
+  getPage: (slugs: string[] | undefined) => Promise<Page | undefined>;
   getSearchIndexes: <T extends 'simple' | 'advanced'>(
     type: T,
   ) => Promise<Parameters<typeof createSearchAPI<T>>[1]['indexes']>;
@@ -145,26 +144,35 @@ export const createGeneratePageTree = (
     });
     const pageMap = buildPageMap(storage, getUrl);
 
-    const getPageTree = nextUnstableCache(
-      (async () => {
-        return await new Promise((resolve) => {
-          resolve(pageTree);
-        });
-      }) as GeneratePageTreeResult['getPageTree'],
+    const getGeneratedPageTree = nextUnstableCache(
+      async () => {
+        return {
+          pageTree,
+          // `await Promise.all` makes ESLINT think that this needs be a async function
+          // because Next.js requires this function to be async
+          files: await Promise.all(entries),
+          pages: Array.from(pageMap.entries()),
+        };
+      },
       undefined,
       {
         tags: [revalidationTag],
       },
     );
+    const getPageMap = async (): Promise<typeof pageMap> => {
+      const { pages } = await getGeneratedPageTree();
+      return new Map(pages);
+    };
 
     return {
-      getPageTree,
-      files: entries,
-      getPages() {
-        return Array.from(pageMap.values());
+      async getPageTree() {
+        return (await getGeneratedPageTree()).pageTree;
       },
-      getPage(slugs = []) {
-        return pageMap.get(slugs.join('/'));
+      async getPages() {
+        return Array.from((await getPageMap()).values());
+      },
+      async getPage(slugs = []) {
+        return (await getPageMap()).get(slugs.join('/'));
       },
       async getSearchIndexes<T extends 'simple' | 'advanced'>(type: T) {
         const pages = Array.from(pageMap.values());

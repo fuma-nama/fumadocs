@@ -3,12 +3,10 @@ import path from 'node:path';
 
 const cwd = process.cwd();
 const directory = path.resolve(cwd, 'content', 'docs');
-const cache = createCache({
+const cache = await createCache({
   directory,
   cachePath: path.resolve(directory, '.fumadocs', 'cache.json'),
-});
-
-await cache.load();
+}).load();
 
 export const { getPageTree, getPage, getPages, getSearchIndexes } =
   await cache.generatePageTree();

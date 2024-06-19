@@ -9,7 +9,7 @@ export default async function Page({
 }: {
   params: { slug?: string[] };
 }) {
-  const page = getPage(params.slug);
+  const page = await getPage(params.slug);
 
   if (!page) {
     notFound();
@@ -29,7 +29,7 @@ export default async function Page({
 }
 
 export async function generateStaticParams() {
-  return getPages().map((page) => ({
+  return (await getPages()).map((page) => ({
     slug: page.slugs,
   }));
 }
@@ -39,7 +39,7 @@ export async function generateMetadata({
 }: {
   params: { slug?: string[] };
 }) {
-  const page = getPage(params.slug);
+  const page = await getPage(params.slug);
 
   if (!page) notFound();
 
