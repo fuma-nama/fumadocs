@@ -1,11 +1,12 @@
 import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
-import { createEndpoint, type Endpoint } from '@/samples';
-import { getExampleResponse } from '@/samples/response';
-import { getTypescript } from '@/samples/typescript';
-import { getSampleRequest } from '@/samples/curl';
+import { createEndpoint, type Endpoint } from '@/endpoint';
+import { getExampleResponse } from '@/utils/generate-response';
+import * as CURL from '@/requests/curl';
+import * as JS from '@/requests/javascript';
 import { type MethodInformation, type RenderContext } from '@/types';
-import { noRef, getPreferredMedia } from '@/utils';
-import { codeblock, p } from './element';
+import { noRef, getPreferredMedia } from '@/utils/schema';
+import { getTypescriptSchema } from '@/utils/get-typescript-schema';
+import { p } from './element';
 import { schemaElement } from './schema';
 
 export async function renderOperation(
@@ -13,6 +14,8 @@ export async function renderOperation(
   method: MethodInformation,
   ctx: RenderContext,
 ): Promise<string> {
+  const body = noRef(method.requestBody);
+  const security = method.security ?? ctx.document.security;
   const info: string[] = [];
   const example: string[] = [];
 
@@ -20,7 +23,10 @@ export async function renderOperation(
   if (title) info.push(`## ${title}`);
   if (method.description) info.push(p(method.description));
 
-  const body = noRef(method.requestBody);
+  if (security) {
+    info.push('### Authorization');
+    info.push(getAuthSection(security, ctx));
+  }
 
   if (body) {
     const bodySchema = getPreferredMedia(body.content)?.schema;
@@ -85,7 +91,21 @@ export async function renderOperation(
   info.push(getResponseTable(method));
 
   example.push(
-    codeblock({ language: 'bash', title: 'curl' }, getSampleRequest(endpoint)),
+    ctx.renderer.Requests(
+      ['cURL', 'JavaScript'],
+      [
+        ctx.renderer.Request({
+          name: 'cURL',
+          code: CURL.getSampleRequest(endpoint),
+          language: 'bash',
+        }),
+        ctx.renderer.Request({
+          name: 'JavaScript',
+          code: JS.getSampleRequest(endpoint),
+          language: 'js',
+        }),
+      ],
+    ),
   );
 
   example.push(await getResponseTabs(endpoint, method, ctx));
@@ -94,6 +114,84 @@ export async function renderOperation(
     ctx.renderer.APIInfo({ method: method.method, route: path }, info),
     ctx.renderer.APIExample(example),
   ]);
+}
+
+function getAuthSection(
+  requirements: OpenAPI.SecurityRequirementObject[],
+  { document, renderer }: RenderContext,
+): string {
+  const info: string[] = [];
+
+  const schemas = document.components?.securitySchemes ?? {};
+  for (const requirement of requirements) {
+    if (info.length > 0) info.push(`---`);
+
+    for (const [name, scopes] of Object.entries(requirement)) {
+      if (!(name in schemas)) continue;
+      const schema = noRef(schemas[name]);
+
+      if (schema.type === 'http') {
+        info.push(
+          renderer.Property(
+            {
+              name: 'Authorization',
+              type:
+                {
+                  basic: 'Basic <token>',
+                  bearer: 'Bearer <token>',
+                }[schema.scheme] ?? '<token>',
+              required: true,
+            },
+            [p(schema.description), `In: \`header\``],
+          ),
+        );
+      }
+
+      if (schema.type === 'oauth2') {
+        info.push(
+          renderer.Property(
+            {
+              name: 'Authorization',
+              type: 'Bearer <token>',
+              required: true,
+            },
+            [
+              p(schema.description),
+              `In: \`header\``,
+              `Scope: \`${scopes.length > 0 ? scopes.join(', ') : 'none'}\``,
+            ],
+          ),
+        );
+      }
+
+      if (schema.type === 'apiKey') {
+        info.push(
+          renderer.Property(
+            {
+              name: schema.name,
+              type: '<token>',
+              required: true,
+            },
+            [p(schema.description), `In: \`${schema.in}\``],
+          ),
+        );
+      }
+      if (schema.type === 'openIdConnect') {
+        info.push(
+          renderer.Property(
+            {
+              name: 'OpenID Connect',
+              type: '<token>',
+              required: true,
+            },
+            [p(schema.description)],
+          ),
+        );
+      }
+    }
+  }
+
+  return info.join('\n\n');
 }
 
 function getResponseTable(operation: OpenAPI.OperationObject): string {
@@ -118,7 +216,8 @@ async function getResponseTabs(
 
   for (const code of Object.keys(operation.responses)) {
     const example = getExampleResponse(endpoint, code);
-    const ts = await getTypescript(endpoint, code);
+    const ts = await getTypescriptSchema(endpoint, code);
+
     const description =
       code in endpoint.responses
         ? endpoint.responses[code].schema.description

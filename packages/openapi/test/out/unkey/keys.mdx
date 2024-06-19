@@ -2,7 +2,7 @@
 title: keys
 ---
 
-import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible } from "fumadocs-ui/components/api";
+import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible, Requests, Request } from "fumadocs-ui/components/api";
 
 <Root>
 
@@ -11,6 +11,14 @@ import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, Exa
 <APIInfo method={"GET"} route={"/v1/keys.getKey"}>
 
 ## getKey
+
+### Authorization
+
+<Property name={"Authorization"} type={"Bearer <token>"} required={true}>
+
+In: `header`
+
+</Property>
 
 ### Query Parameters
 
@@ -45,9 +53,27 @@ Decrypt and display the raw key. Only possible if the key was encrypted when gen
 
 <APIExample>
 
-```bash title="curl"
+<Requests items={["cURL","JavaScript"]}>
+
+<Request value={"cURL"}>
+
+```bash
 curl -X GET "https://api.unkey.dev/v1/keys.getKey"
 ```
+
+</Request>
+
+<Request value={"JavaScript"}>
+
+```js
+fetch("https://api.unkey.dev/v1/keys.getKey", {
+  method: "GET"
+});
+```
+
+</Request>
+
+</Requests>
 
 <Responses items={["200","400","401","403","404","409","429","500"]}>
 
@@ -587,6 +613,14 @@ export interface Response {
 
 ## deleteKey
 
+### Authorization
+
+<Property name={"Authorization"} type={"Bearer <token>"} required={true}>
+
+In: `header`
+
+</Property>
+
 ### Request Body
 
 <Property name={"keyId"} type={"string"} required={true} deprecated={undefined}>
@@ -614,12 +648,30 @@ The id of the key to revoke
 
 <APIExample>
 
-```bash title="curl"
+<Requests items={["cURL","JavaScript"]}>
+
+<Request value={"cURL"}>
+
+```bash
 curl -X POST "https://api.unkey.dev/v1/keys.deleteKey" \
   -d '{
   "keyId": "key_1234"
 }'
 ```
+
+</Request>
+
+<Request value={"JavaScript"}>
+
+```js
+fetch("https://api.unkey.dev/v1/keys.deleteKey", {
+  method: "POST"
+});
+```
+
+</Request>
+
+</Requests>
 
 <Responses items={["200","400","401","403","404","409","429","500"]}>
 
@@ -1009,6 +1061,14 @@ export interface Response {
 
 ## createKey
 
+### Authorization
+
+<Property name={"Authorization"} type={"Bearer <token>"} required={true}>
+
+In: `header`
+
+</Property>
+
 ### Request Body
 
 <Property name={"apiId"} type={"string"} required={true} deprecated={undefined}>
@@ -1242,7 +1302,11 @@ handle it correctly.
 
 <APIExample>
 
-```bash title="curl"
+<Requests items={["cURL","JavaScript"]}>
+
+<Request value={"cURL"}>
+
+```bash
 curl -X POST "https://api.unkey.dev/v1/keys.createKey" \
   -d '{
   "apiId": "api_123",
@@ -1277,6 +1341,20 @@ curl -X POST "https://api.unkey.dev/v1/keys.createKey" \
   "environment": "string"
 }'
 ```
+
+</Request>
+
+<Request value={"JavaScript"}>
+
+```js
+fetch("https://api.unkey.dev/v1/keys.createKey", {
+  method: "POST"
+});
+```
+
+</Request>
+
+</Requests>
 
 <Responses items={["200","400","401","403","404","409","429","500"]}>
 
@@ -1748,7 +1826,11 @@ Override how many tokens are deducted during the ratelimit operation.
 
 <APIExample>
 
-```bash title="curl"
+<Requests items={["cURL","JavaScript"]}>
+
+<Request value={"cURL"}>
+
+```bash
 curl -X POST "https://api.unkey.dev/v1/keys.verifyKey" \
   -d '{
   "apiId": "api_1234",
@@ -1761,6 +1843,20 @@ curl -X POST "https://api.unkey.dev/v1/keys.verifyKey" \
   }
 }'
 ```
+
+</Request>
+
+<Request value={"JavaScript"}>
+
+```js
+fetch("https://api.unkey.dev/v1/keys.verifyKey", {
+  method: "POST"
+});
+```
+
+</Request>
+
+</Requests>
 
 <Responses items={["200","400","401","403","404","409","429","500"]}>
 
@@ -2261,6 +2357,14 @@ export interface Response {
 
 ## updateKey
 
+### Authorization
+
+<Property name={"Authorization"} type={"Bearer <token>"} required={true}>
+
+In: `header`
+
+</Property>
+
 ### Request Body
 
 <Property name={"keyId"} type={"string"} required={true} deprecated={undefined}>
@@ -2430,7 +2534,11 @@ Set if key is enabled or disabled. If disabled, the key cannot be used to verify
 
 <APIExample>
 
-```bash title="curl"
+<Requests items={["cURL","JavaScript"]}>
+
+<Request value={"cURL"}>
+
+```bash
 curl -X POST "https://api.unkey.dev/v1/keys.updateKey" \
   -d '{
   "keyId": "key_123",
@@ -2458,6 +2566,20 @@ curl -X POST "https://api.unkey.dev/v1/keys.updateKey" \
   "enabled": true
 }'
 ```
+
+</Request>
+
+<Request value={"JavaScript"}>
+
+```js
+fetch("https://api.unkey.dev/v1/keys.updateKey", {
+  method: "POST"
+});
+```
+
+</Request>
+
+</Requests>
 
 <Responses items={["200","400","401","403","404","409","429","500"]}>
 
@@ -2847,6 +2969,14 @@ export interface Response {
 
 ## updateRemaining
 
+### Authorization
+
+<Property name={"Authorization"} type={"Bearer <token>"} required={true}>
+
+In: `header`
+
+</Property>
+
 ### Request Body
 
 <Property name={"keyId"} type={"string"} required={true} deprecated={undefined}>
@@ -2888,7 +3018,11 @@ The value you want to set, add or subtract the remaining count by
 
 <APIExample>
 
-```bash title="curl"
+<Requests items={["cURL","JavaScript"]}>
+
+<Request value={"cURL"}>
+
+```bash
 curl -X POST "https://api.unkey.dev/v1/keys.updateRemaining" \
   -d '{
   "keyId": "key_123",
@@ -2896,6 +3030,20 @@ curl -X POST "https://api.unkey.dev/v1/keys.updateRemaining" \
   "value": 1
 }'
 ```
+
+</Request>
+
+<Request value={"JavaScript"}>
+
+```js
+fetch("https://api.unkey.dev/v1/keys.updateRemaining", {
+  method: "POST"
+});
+```
+
+</Request>
+
+</Requests>
 
 <Responses items={["200","400","401","403","404","409","429","500"]}>
 
@@ -3292,6 +3440,14 @@ export interface Response {
 
 ## getVerifications
 
+### Authorization
+
+<Property name={"Authorization"} type={"Bearer <token>"} required={true}>
+
+In: `header`
+
+</Property>
+
 ### Query Parameters
 
 <Property name={"keyId"} type={"string"} required={false} deprecated={false}>
@@ -3353,9 +3509,27 @@ The granularity of the usage data to fetch, currently only `day` is supported
 
 <APIExample>
 
-```bash title="curl"
+<Requests items={["cURL","JavaScript"]}>
+
+<Request value={"cURL"}>
+
+```bash
 curl -X GET "https://api.unkey.dev/v1/keys.getVerifications"
 ```
+
+</Request>
+
+<Request value={"JavaScript"}>
+
+```js
+fetch("https://api.unkey.dev/v1/keys.getVerifications", {
+  method: "GET"
+});
+```
+
+</Request>
+
+</Requests>
 
 <Responses items={["200","400","401","403","404","409","429","500"]}>
 

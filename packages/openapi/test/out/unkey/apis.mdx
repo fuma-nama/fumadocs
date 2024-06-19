@@ -2,7 +2,7 @@
 title: apis
 ---
 
-import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible } from "fumadocs-ui/components/api";
+import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible, Requests, Request } from "fumadocs-ui/components/api";
 
 <Root>
 
@@ -11,6 +11,14 @@ import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, Exa
 <APIInfo method={"GET"} route={"/v1/apis.getApi"}>
 
 ## getApi
+
+### Authorization
+
+<Property name={"Authorization"} type={"Bearer <token>"} required={true}>
+
+In: `header`
+
+</Property>
 
 ### Query Parameters
 
@@ -39,9 +47,27 @@ The id of the api to fetch
 
 <APIExample>
 
-```bash title="curl"
+<Requests items={["cURL","JavaScript"]}>
+
+<Request value={"cURL"}>
+
+```bash
 curl -X GET "https://api.unkey.dev/v1/apis.getApi"
 ```
+
+</Request>
+
+<Request value={"JavaScript"}>
+
+```js
+fetch("https://api.unkey.dev/v1/apis.getApi", {
+  method: "GET"
+});
+```
+
+</Request>
+
+</Requests>
 
 <Responses items={["200","400","401","403","404","409","429","500"]}>
 
@@ -448,6 +474,14 @@ export interface Response {
 
 ## listKeys
 
+### Authorization
+
+<Property name={"Authorization"} type={"Bearer <token>"} required={true}>
+
+In: `header`
+
+</Property>
+
 ### Query Parameters
 
 <Property name={"apiId"} type={"string"} required={true} deprecated={false}>
@@ -509,9 +543,27 @@ Decrypt and display the raw key. Only possible if the key was encrypted when gen
 
 <APIExample>
 
-```bash title="curl"
+<Requests items={["cURL","JavaScript"]}>
+
+<Request value={"cURL"}>
+
+```bash
 curl -X GET "https://api.unkey.dev/v1/apis.listKeys"
 ```
+
+</Request>
+
+<Request value={"JavaScript"}>
+
+```js
+fetch("https://api.unkey.dev/v1/apis.listKeys", {
+  method: "GET"
+});
+```
+
+</Request>
+
+</Requests>
 
 <Responses items={["200","400","401","403","404","409","429","500"]}>
 
@@ -1067,6 +1119,14 @@ export interface Response {
 
 ## deleteKeys
 
+### Authorization
+
+<Property name={"Authorization"} type={"Bearer <token>"} required={true}>
+
+In: `header`
+
+</Property>
+
 ### Request Body
 
 <Property name={"apiId"} type={"string"} required={true} deprecated={undefined}>
@@ -1102,13 +1162,31 @@ If true, the keys will be permanently deleted. If false, the keys will be soft-d
 
 <APIExample>
 
-```bash title="curl"
+<Requests items={["cURL","JavaScript"]}>
+
+<Request value={"cURL"}>
+
+```bash
 curl -X POST "https://api.unkey.dev/v1/apis.deleteKeys" \
   -d '{
   "apiId": "api_1234",
   "permanent": false
 }'
 ```
+
+</Request>
+
+<Request value={"JavaScript"}>
+
+```js
+fetch("https://api.unkey.dev/v1/apis.deleteKeys", {
+  method: "POST"
+});
+```
+
+</Request>
+
+</Requests>
 
 <Responses items={["200","400","401","403","404","409","429","500"]}>
 

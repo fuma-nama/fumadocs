@@ -1,4 +1,6 @@
-import { generateSample, type Endpoint } from '.';
+import { type Endpoint } from '@/endpoint';
+import { generateInput } from '@/utils/generate-input';
+import { toSampleInput } from '@/utils/schema';
 
 export function getSampleRequest(endpoint: Endpoint): string {
   const s: string[] = [];
@@ -7,8 +9,8 @@ export function getSampleRequest(endpoint: Endpoint): string {
 
   for (const param of endpoint.parameters) {
     if (param.in === 'header') {
-      const value = generateSample(endpoint.method, param.schema);
-      const header = `${param.name}: ${getValue(value)}`;
+      const value = generateInput(endpoint.method, param.schema);
+      const header = `${param.name}: ${toSampleInput(value)}`;
 
       s.push(`-H "${header}"`);
     }
@@ -18,11 +20,7 @@ export function getSampleRequest(endpoint: Endpoint): string {
     }
   }
 
-  if (endpoint.body) s.push(`-d '${getValue(endpoint.body)}'`);
+  if (endpoint.body) s.push(`-d '${toSampleInput(endpoint.body)}'`);
 
   return s.join(' \\\n  ');
-}
-
-function getValue(value: unknown): string {
-  return typeof value === 'string' ? value : JSON.stringify(value, null, 2);
 }
