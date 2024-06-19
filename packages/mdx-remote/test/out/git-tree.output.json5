@@ -1,0 +1,31 @@
+{
+  "transformToCache": [Function],
+  "tree": [
+    {
+      "path": "index.mdx",
+      "sha": "da73c60e",
+      "type": "blob",
+      "url": "__FUMADOCS_GITHUB_CACHE_URL__",
+    },
+    {
+      "path": "meta.json",
+      "sha": "deee2034",
+      "type": "blob",
+      "url": "__FUMADOCS_GITHUB_CACHE_URL__",
+    },
+    {
+      "path": "another",
+      "sha": "d36172e2",
+      "type": "tree",
+      "url": "__FUMADOCS_GITHUB_CACHE_URL__",
+    },
+    {
+      "path": "another/file.mdx",
+      "sha": "822d4c35",
+      "type": "blob",
+      "url": "__FUMADOCS_GITHUB_CACHE_URL__",
+    },
+  ],
+  "truncated": false,
+  "url": "__FUMADOCS_GITHUB_CACHE_URL__",
+}

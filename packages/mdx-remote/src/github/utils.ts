@@ -68,7 +68,7 @@ export const cacheFileToGitTree = (
   const skeleton: Awaited<ReturnType<typeof getTree>> = {
     sha: cacheFile.sha,
     tree: [],
-    url: '',
+    url: '__FUMADOCS_GITHUB_CACHE_URL__',
     truncated: false,
   };
 
@@ -79,7 +79,7 @@ export const cacheFileToGitTree = (
       type: 'blob',
       sha: file.sha,
       path: file.path,
-      url: '',
+      url: '__FUMADOCS_GITHUB_CACHE_URL__',
     });
 
   const addDirectory = (
@@ -89,7 +89,7 @@ export const cacheFileToGitTree = (
       type: 'tree',
       sha: directory.sha,
       path: directory.path,
-      url: '',
+      url: '__FUMADOCS_GITHUB_CACHE_URL__',
     });
     for (const file of directory.files) {
       addFile(file);

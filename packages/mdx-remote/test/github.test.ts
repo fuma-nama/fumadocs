@@ -4,7 +4,7 @@ import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
 import { createCache, type CreateCacheOptions } from '@/github';
 import fs from 'node:fs';
 import type { CompareTreeDiff } from '@/github/diff';
-import type { GitTreeItem } from '@/github/utils';
+import { fnv1a, type GitTreeItem } from '@/github/utils';
 
 const cwd = path.dirname(fileURLToPath(import.meta.url));
 
@@ -34,7 +34,8 @@ const mockCache = vi.fn(
   },
 );
 
-describe.sequential('Without Saved Cache', () => {
+describe('Without Saved Cache', () => {
+  const directory = path.resolve(cwd, './fixtures');
   const fakeTree = [
     {
       // make sure sha property is an action (add, remove, modify)
@@ -68,7 +69,6 @@ describe.sequential('Without Saved Cache', () => {
   ) => diff.sort((a, b) => a.path.localeCompare(b.path));
 
   test('cache.data/tree before cache.load()', async () => {
-    const directory = path.resolve(cwd, './fixtures');
     const cache = await mockCache({
       directory,
       load: false,
@@ -78,8 +78,17 @@ describe.sequential('Without Saved Cache', () => {
     expect(() => cache.tree).toThrowError();
   });
 
-  test('cache.tree.transformGitTreeToCache (cache.load)', async () => {
-    const directory = path.resolve(cwd, './fixtures');
+  test('cache.tree', async () => {
+    const cache = await mockCache({ directory });
+
+    const { sha, ...tree } = cache.tree;
+
+    expect(tree).toMatchFileSnapshot(
+      path.resolve(cwd, './out/git-tree.output.json5'),
+    );
+  });
+
+  test('cache.data', async () => {
     const cache = await mockCache({ directory });
 
     // lastUpdated and sha are dynamic, so we need to remove them
@@ -95,7 +104,6 @@ describe.sequential('Without Saved Cache', () => {
   });
 
   test('cache.generatePageTree', async () => {
-    const directory = path.resolve(cwd, './fixtures');
     const cache = await mockCache({ directory });
 
     const { getPageTree } = await cache.generatePageTree();
@@ -106,7 +114,6 @@ describe.sequential('Without Saved Cache', () => {
   });
 
   test('cache.diff.compareToGitTree', async () => {
-    const directory = path.resolve(cwd, './fixtures');
     const cache = await mockCache({ directory });
 
     const diff = cache.diff.compareToGitTree({
@@ -134,7 +141,6 @@ describe.sequential('Without Saved Cache', () => {
   });
 
   test('cache.diff.applyToCache', async () => {
-    const directory = path.resolve(cwd, './fixtures');
     const cache = await mockCache({ directory });
 
     const diff = cache.diff.compareToGitTree({
@@ -189,7 +195,6 @@ describe.sequential('Without Saved Cache', () => {
   });
 
   test('cache.load (lazy)', async () => {
-    const directory = path.resolve(cwd, './fixtures');
     const cache = await mockCache({
       directory,
       lazy: true,
@@ -212,6 +217,15 @@ describe.sequential('Without Saved Cache', () => {
 
     expect(cache.data.files).toHaveLength(1);
     expect(cache.tree.tree).toHaveLength(1);
+  });
+
+  test('cache.revalidationTag', async () => {
+    const opts = { directory };
+    const cache = await mockCache(opts);
+
+    expect(cache.revalidationTag).toBe(
+      `@fumadocs/mdx-remote/github/cache@${fnv1a(JSON.stringify(opts))}`,
+    );
   });
 });
 

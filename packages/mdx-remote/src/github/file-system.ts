@@ -79,7 +79,7 @@ export const createVirtualFileSystem = (
         type: 'blob',
         path: file.path,
         sha: file.sha,
-        url: '',
+        url: '__FUMADOCS_GITHUB_CACHE_URL__',
       });
       const changes = diff.compareToGitTree({
         ...tree,

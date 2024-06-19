@@ -276,8 +276,8 @@ export const createLocalCache = (
 
           if (lazy) {
             tree = {
-              sha: '__FUMADOCS_GITHUB_CACHE_LAZY__',
-              url: '__FUMADOCS_GITHUB_CACHE_LAZY__',
+              sha: '__FUMADOCS_GITHUB_CACHE_SHA__',
+              url: '__FUMADOCS_GITHUB_CACHE_URL__',
               tree: [],
               truncated: false,
             };
