@@ -1,5 +1,16 @@
 # next-docs-ui
 
+## 12.1.3
+
+### Patch Changes
+
+- 2a5db91: Add timeout for hovering after collapsed the sidebar
+- 3e98d7d: Support `full` mode on pages
+- d06c92a: Support `transparentMode` on secondary (docs) navbar
+- 3bdc786: Support Fumadocs OpenAPI 3.1.0
+- d06c92a: Fix hot keys order
+  - fumadocs-core@12.1.3
+
 ## 12.1.2
 
 ### Patch Changes
