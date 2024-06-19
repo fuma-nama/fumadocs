@@ -38,9 +38,10 @@ interface BaseCreateCacheOptions
   cwd?: string;
   /**
    * Path on disk to store the cache.
+   * Pass `false` to disable storing the cache.
    * @defaultValue .fumadocs/cache.json (relative to cwd)
    */
-  cachePath?: string;
+  saveFile?: string | false;
   /**
    * Directory to search for files (local or remote)
    */
@@ -131,7 +132,7 @@ export type CreateCacheOptions<
 type CreateCacheRemoteOptions = BaseCreateCacheOptions;
 type CreateCacheLocalOptions = Pick<
   BaseCreateCacheOptions,
-  'include' | 'cachePath' | 'compilerOptions'
+  'include' | 'saveFile' | 'compilerOptions'
 > & {
   directory: NonNullable<BaseCreateCacheOptions['directory']>;
 };
@@ -187,7 +188,7 @@ export const createRemoteCache = (
 ): GithubCache<'remote'> => {
   const {
     directory,
-    cachePath = path.resolve(cwd, '.fumadocs', 'cache.json'),
+    saveFile = path.resolve(cwd, '.fumadocs', 'cache.json'),
     githubApi,
     ...githubInfo
   } = options;
@@ -207,7 +208,7 @@ export const createRemoteCache = (
     },
     get load() {
       return createLoader(this, {
-        cachePath,
+        saveFile,
         getFileContent,
         notFound: async () => {
           const tree = await findTreeRecursive(directory ?? '', {
@@ -255,7 +256,7 @@ export const createLocalCache = (
   const {
     directory,
     include = './**/*.{json,md,mdx}',
-    cachePath = path.resolve(directory, '.fumadocs', 'cache.json'),
+    saveFile = path.resolve(directory, '.fumadocs', 'cache.json'),
   } = options;
 
   const getFileContent: GetFileContent<{ path: string }> = async (file) => {
@@ -268,7 +269,7 @@ export const createLocalCache = (
     },
     get load() {
       return createLoader(this, {
-        cachePath,
+        saveFile,
         getFileContent,
         notFound: async (lazy) => {
           let tree: Awaited<ReturnType<typeof getTree>>;
@@ -283,7 +284,7 @@ export const createLocalCache = (
           } else {
             tree = await filesToGitTree({
               include,
-              ignore: cachePath ? [cachePath] : [],
+              ignore: saveFile ? [saveFile] : [],
               directory,
               hasher: async (file) => {
                 const { mtimeMs: lastModified } = await fs.promises.stat(
@@ -387,11 +388,11 @@ const enhancedCacheBoilerplate = <Env extends 'local' | 'remote'>(
 const createLoader = (
   cacheInstance: GithubCache,
   {
-    cachePath,
+    saveFile,
     notFound,
     getFileContent,
   }: {
-    cachePath: string;
+    saveFile: string | false;
     getFileContent: GetFileContent;
     notFound: (lazy: boolean) => Promise<GithubCacheFile | undefined>;
   },
@@ -401,8 +402,8 @@ const createLoader = (
   }): Promise<typeof cacheInstance> {
     const { lazy = false } = options ?? {};
 
-    if (fs.existsSync(cachePath)) {
-      const raw = await fs.promises.readFile(cachePath, 'utf-8');
+    if (typeof saveFile === 'string' && fs.existsSync(saveFile)) {
+      const raw = await fs.promises.readFile(saveFile, 'utf-8');
       const data = JSON.parse(raw) as GithubCacheFile;
       cacheInstance.tree = Object.assign(cacheFileToGitTree(data), {
         transformToCache: createTransformGitTreeToCache(getFileContent),
@@ -417,10 +418,10 @@ const createLoader = (
           'Attempted to load Github cache, but could not retrieve cache and/or files (local or remote)',
         );
 
-      if (cachePath) {
-        await fs.promises.mkdir(path.dirname(cachePath), { recursive: true });
+      if (saveFile) {
+        await fs.promises.mkdir(path.dirname(saveFile), { recursive: true });
         await fs.promises.writeFile(
-          cachePath,
+          saveFile,
           JSON.stringify(await cacheInstance.resolveAllContent(), null, 0),
           'utf-8',
         );
