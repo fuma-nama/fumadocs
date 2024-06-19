@@ -1,5 +1,4 @@
 {
-  "compile": [Function],
   "files": [
     {
       "content": "
@@ -31,25 +30,7 @@ Hey!
     },
   ],
   "getPage": [Function],
+  "getPageTree": [Function],
   "getPages": [Function],
   "getSearchIndexes": [Function],
-  "pageTree": {
-    "children": [
-      {
-        "name": "Hello World",
-        "type": "page",
-        "url": "/docs",
-      },
-      {
-        "name": "Nothing",
-        "type": "separator",
-      },
-      {
-        "name": "Another File",
-        "type": "page",
-        "url": "/docs/another/file",
-      },
-    ],
-    "name": "Hello World",
-  },
 }
