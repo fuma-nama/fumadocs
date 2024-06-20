@@ -1,0 +1,22 @@
+---
+title: GitHub
+description: Learn how to use a GitHub repository with Fumadocs
+---
+
+Fumadocs's GitHub integration allows you to use a
+GitHub repository as a source for your documentation.
+
+This means that, in production, your documentation will be automatically updated
+whenever you make changes to the documentation located in your GitHub repository.
+
+<Callout title="Note">
+  Internally, we use a cache that allows us to incrementally update the
+  documentation in real-time, avoiding reloading the entire documentation every
+  time a change is made.
+</Callout>
+
+## Setup
+
+```package-install
+@fumadocs/mdx-remote
+```
