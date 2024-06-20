@@ -1,4 +1,4 @@
-// TODO replace this with more abstracted plugin featuring wesocket and automatic local file cache for dev
+// TODO replace this with more abstracted plugin featuring websocket and automatic local file cache for dev
 
 import { createCache } from '@fumadocs/mdx-remote/github';
 import path from 'node:path';

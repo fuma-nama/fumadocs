@@ -50,7 +50,9 @@ interface GeneratePageTreeResult {
   getPage: (slugs: string[] | undefined) => Page | undefined;
   getSearchIndexes: <T extends 'simple' | 'advanced'>(
     type: T,
-  ) => Promise<Parameters<typeof createSearchAPI<T>>[1]['indexes']>;
+  ) => T extends 'advanced'
+    ? Promise<Parameters<typeof createSearchAPI<'advanced'>>[1]['indexes']>
+    : Parameters<typeof createSearchAPI<'simple'>>[1]['indexes'];
 }
 
 interface GeneratePageTreeOptions {
@@ -147,7 +149,7 @@ export const createGeneratePageTree = (
       getPage(slugs = []) {
         return pageMap.get(slugs.join('/'));
       },
-      async getSearchIndexes<T extends 'simple' | 'advanced'>(type: T) {
+      getSearchIndexes<T extends 'simple' | 'advanced'>(type: T) {
         const pages = Array.from(pageMap.values());
 
         if (type === 'simple') {
@@ -155,12 +157,12 @@ export const createGeneratePageTree = (
             title: page.data.title,
             content: page.data.content,
             url: page.url,
-          })) as T extends 'simple'
-            ? Parameters<typeof createSearchAPI<T>>[1]['indexes']
-            : never;
+          })) as T extends 'advanced'
+            ? never
+            : Parameters<typeof createSearchAPI<'simple'>>[1]['indexes'];
         }
 
-        return (await Promise.all(
+        return Promise.all(
           pages.map(async (page) => {
             const { vfile } = await compileMDX(page.data.content);
 
@@ -171,11 +173,13 @@ export const createGeneratePageTree = (
               url: page.url,
             };
           }),
-        )) as T extends 'advanced'
-          ? Parameters<typeof createSearchAPI<T>>[1]['indexes']
+        ) as T extends 'advanced'
+          ? Promise<
+              Parameters<typeof createSearchAPI<'advanced'>>[1]['indexes']
+            >
           : never;
       },
-    };
+    } satisfies GeneratePageTreeResult;
   };
 
 function buildPageMap<
