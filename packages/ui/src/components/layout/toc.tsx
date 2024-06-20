@@ -66,7 +66,7 @@ export function SubToc({
         className={cn(
           buttonVariants({
             className:
-              'sticky w-fit bottom-2 gap-2 shadow-lg shadow-background px-4 z-10',
+              'sticky bottom-2 gap-2 shadow-lg shadow-background px-4 z-10',
             color: 'secondary',
           }),
           props.className,
@@ -78,8 +78,6 @@ export function SubToc({
       <PopoverContent
         hideWhenDetached
         side="top"
-        align="start"
-        avoidCollisions={false}
         className="flex max-h-[80vh] w-[260px] flex-col gap-4 p-3"
       >
         {header}

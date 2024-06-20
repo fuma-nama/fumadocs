@@ -91,7 +91,7 @@ export function DocsPage({
             items={toc}
             header={tableOfContentPopover.header}
             footer={tableOfContentPopover.footer}
-            className={cn(!full && 'lg:hidden')}
+            className={cn('w-fit md:-mt-12 md:ms-auto', !full && 'lg:hidden')}
           />,
         )}
         {replaceOrDefault(footer, <Footer items={footer.items} />)}
