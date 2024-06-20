@@ -14,9 +14,7 @@ export type GetFileContent<T = { path: string; sha: string }> = <U extends T>(
 ) => Awaitable<string>;
 
 export const unstableCache: typeof _unstableCache =
-  process.env.TSUP_BUILD === 'true'
-    ? _unstableCache
-    : (cb) => cb;
+  process.env.TSUP_BUILD === 'true' ? _unstableCache : (cb) => cb;
 
 export const blobToUtf8 = (blob: {
   content: string;

@@ -72,7 +72,7 @@ export const createGeneratePageTree = (
   {
     include = './**/*.{json,md,mdx}',
   }: Pick<GeneratePageTreeOptions, 'include'>,
-  baseUrl: string
+  baseUrl: string,
 ) =>
   async function generatePageTree({
     ...options

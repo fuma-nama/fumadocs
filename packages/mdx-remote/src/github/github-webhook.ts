@@ -13,15 +13,15 @@ export const createCreateGithubWebhookAPI = ({
   githubOptions,
   baseUrl,
   githubCacheStore,
-  revalidationTag
+  revalidationTag,
 }: {
   cache: GithubCache;
   ref: NonNullable<CreateCacheOptions<'remote'>['branch']>;
   directory: string;
   githubOptions: Omit<Parameters<typeof getTree>[0], 'treeSha'>;
   baseUrl: string;
-  githubCacheStore: GithubCacheStore,
-  revalidationTag: string
+  githubCacheStore: GithubCacheStore;
+  revalidationTag: string;
 }) =>
   function createGithubWebhookAPI({
     secret,
@@ -73,7 +73,9 @@ export const createCreateGithubWebhookAPI = ({
             if (changes.length > 0) {
               latestCache.diff.applyToCache(changes);
               latestCache.tree = Object.assign(latestCache.tree, newTree);
-              latestCache.data = latestCache.tree.transformToCache(latestCache.tree);
+              latestCache.data = latestCache.tree.transformToCache(
+                latestCache.tree,
+              );
               githubCacheStore.set(latestCache, revalidationTag);
 
               // indivdual page changes
@@ -96,7 +98,10 @@ export const createCreateGithubWebhookAPI = ({
                   (c.action === 'modify' || c.action === 'remove'),
               )) {
                 const url = getUrl(
-                  meta.path.replace(path.basename(meta.path), '').split('/').filter(Boolean)
+                  meta.path
+                    .replace(path.basename(meta.path), '')
+                    .split('/')
+                    .filter(Boolean),
                 );
                 revalidatePath(url, 'layout');
               }
