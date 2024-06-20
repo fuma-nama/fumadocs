@@ -42,7 +42,6 @@ export const animations = {
         top: '0',
         bottom: '0',
         'border-radius': 'none',
-        'inset-inline-start': '0',
       },
     },
     'fade-in': {

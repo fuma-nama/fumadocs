@@ -27,17 +27,22 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
     if (e.pointerType === 'touch') return;
     window.clearTimeout(timerRef.current);
 
-    timerRef.current = window.setTimeout(() => {
-      setHover(false);
-      hoverTimeRef.current = Date.now() + 150;
-    }, 300);
+    timerRef.current = window.setTimeout(
+      () => {
+        setHover(false);
+        hoverTimeRef.current = Date.now() + 150;
+      },
+      Math.min(e.clientX, document.body.clientWidth - e.clientX) > 100
+        ? 10
+        : 500,
+    );
   }, []);
 
   return (
     <>
       {collapsed ? (
         <div
-          className="fixed inset-y-0 start-0 w-4 max-md:hidden xl:w-[50px]"
+          className="fixed inset-y-0 start-0 w-6 max-md:hidden xl:w-[50px]"
           onPointerEnter={onEnter}
           onPointerLeave={onLeave}
         />
@@ -69,8 +74,10 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
           className: cn(
             'overflow-hidden md:transition-transform',
             collapsed && [
-              'md:inset-y-1 md:start-0 md:animate-sidebar-collapse md:rounded-xl md:border md:shadow-md',
-              hover ? 'md:translate-x-1' : 'md:-translate-x-full',
+              'md:inset-y-1 md:animate-sidebar-collapse md:rounded-xl md:border md:shadow-md',
+              hover
+                ? 'md:translate-x-1 rtl:md:-translate-x-1'
+                : 'md:-translate-x-full rtl:md:translate-x-full',
             ],
           ),
         }}
