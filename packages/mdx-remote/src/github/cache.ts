@@ -210,7 +210,7 @@ export const createRemoteCache = (
 
   return enhancedCacheBoilerplate(options, {
     get diff() {
-      return createDiff(this as unknown as GithubCache, getFileContent);
+      return createDiff(this, getFileContent);
     },
     get load() {
       return createLoader(this, {

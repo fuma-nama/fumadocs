@@ -47,6 +47,7 @@ export const createCreateGithubWebhookAPI = ({
       if (githubEvent === 'push') {
         const data = JSON.parse(body) as {
           ref: string;
+          before: string;
           after: string;
         };
 
@@ -62,13 +63,18 @@ export const createCreateGithubWebhookAPI = ({
           });
 
           if (newTree) {
-            const changes = cache.diff.compareToGitTree(newTree);
+            // tree won't update if it's the same,
+            // so we make sure to get the latest cache
+            let latestCache = githubCacheStore.get(revalidationTag);
+            if (!latestCache) latestCache = cache;
+
+            const changes = latestCache.diff.compareToGitTree(newTree);
 
             if (changes.length > 0) {
-              cache.diff.applyToCache(changes);
-              cache.tree = Object.assign(cache.tree, newTree);
-
-              githubCacheStore.set(cache, revalidationTag);
+              latestCache.diff.applyToCache(changes);
+              latestCache.tree = Object.assign(latestCache.tree, newTree);
+              latestCache.data = latestCache.tree.transformToCache(latestCache.tree);
+              githubCacheStore.set(latestCache, revalidationTag);
 
               // indivdual page changes
               for (const doc of changes.filter(
@@ -90,7 +96,7 @@ export const createCreateGithubWebhookAPI = ({
                   (c.action === 'modify' || c.action === 'remove'),
               )) {
                 const url = getUrl(
-                  meta.path.replace(path.extname(meta.path), '').split('/'),
+                  meta.path.replace(path.basename(meta.path), '').split('/').filter(Boolean)
                 );
                 revalidatePath(url, 'layout');
               }
