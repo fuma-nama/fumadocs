@@ -6,25 +6,27 @@ import * as JS from '@/requests/javascript';
 import { type MethodInformation, type RenderContext } from '@/types';
 import { noRef, getPreferredMedia } from '@/utils/schema';
 import { getTypescriptSchema } from '@/utils/get-typescript-schema';
-import { p } from './element';
+import { heading, p } from './element';
 import { schemaElement } from './schema';
 
 export async function renderOperation(
   path: string,
   method: MethodInformation,
   ctx: RenderContext,
+  noTitle = false,
 ): Promise<string> {
+  let level = 2;
   const body = noRef(method.requestBody);
   const security = method.security ?? ctx.document.security;
   const info: string[] = [];
   const example: string[] = [];
 
   const title = method.summary ?? method.operationId;
-  if (title) info.push(`## ${title}`);
+  if (title && !noTitle) info.push(heading(level++, title));
   if (method.description) info.push(p(method.description));
 
   if (security) {
-    info.push('### Authorization');
+    info.push(heading(level, 'Authorization'));
     info.push(getAuthSection(security, ctx));
   }
 
@@ -33,7 +35,7 @@ export async function renderOperation(
     if (!bodySchema) throw new Error();
 
     info.push(
-      `### Request Body${!body.required ? ' (Optional)' : ''}`,
+      heading(level, `Request Body ${!body.required ? '(Optional)' : ''}`),
       p(body.description),
       schemaElement('body', noRef(bodySchema), {
         parseObject: true,
@@ -85,7 +87,7 @@ export async function renderOperation(
   }
 
   for (const [group, parameters] of Array.from(parameterGroups.entries())) {
-    info.push(`### ${group}`, ...parameters);
+    info.push(heading(level, group), ...parameters);
   }
 
   info.push(getResponseTable(method));

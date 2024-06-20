@@ -1,9 +1,13 @@
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
-import { describe, expect, test, vi } from 'vitest';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 import { generate, generateFiles, generateTags } from '../src';
 
 describe('Generate documents', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   test('Pet Store', async () => {
     const result = await generate(
       fileURLToPath(new URL('./fixtures/petstore.yaml', import.meta.url)),
@@ -38,7 +42,6 @@ describe('Generate documents', () => {
 
   test('Generate Files', async () => {
     const cwd = fileURLToPath(new URL('./', import.meta.url));
-
     vi.mock('node:fs/promises', async (importOriginal) => {
       return {
         // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- mock
@@ -71,7 +74,5 @@ describe('Generate documents', () => {
     );
 
     expect(fs.mkdir).toBeCalledWith(join(cwd, './out'), expect.anything());
-
-    vi.resetAllMocks();
   });
 });

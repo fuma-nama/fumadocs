@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join, parse } from 'node:path';
 import fg from 'fast-glob';
-import type { GenerateOptions } from './generate';
+import { generateOperations, type GenerateOptions } from './generate';
 import { generate, generateTags } from './generate';
 
 export interface Config extends GenerateOptions {
@@ -22,7 +22,7 @@ export interface Config extends GenerateOptions {
    *
    * @defaultValue file
    */
-  per?: 'tag' | 'file';
+  per?: 'tag' | 'file' | 'operation';
 
   /**
    * Specify name for output file
@@ -41,7 +41,6 @@ export async function generateFiles({
   ...options
 }: Config): Promise<void> {
   const outputDir = join(cwd, output);
-
   const resolvedInputs = await fg.glob(input, { absolute: true, cwd });
 
   await Promise.all(
@@ -58,13 +57,27 @@ export async function generateFiles({
         return;
       }
 
+      if (per === 'operation') {
+        const results = await generateOperations(path, options);
+
+        await Promise.all(
+          results.map(async (result) => {
+            const outPath = join(
+              outputDir,
+              filename,
+              `${getName(result.id)}.mdx`,
+            );
+            await write(outPath, result.content);
+            console.log(`Generated: ${outPath}`);
+          }),
+        );
+      }
+
       const results = await generateTags(path, options);
 
       for (const result of results) {
         let tagName = result.tag;
-        tagName =
-          nameFn?.('tag', tagName) ??
-          tagName.toLowerCase().replace(/\s+/g, '-');
+        tagName = nameFn?.('tag', tagName) ?? getName(tagName);
 
         const outPath = join(outputDir, filename, `${tagName}.mdx`);
         await write(outPath, result.content);
@@ -72,6 +85,13 @@ export async function generateFiles({
       }
     }),
   );
+}
+
+function getName(s: string): string {
+  return s
+    .replace(/([A-Z])/g, (s) => `-${s.toLowerCase()}`)
+    .replace(/\s+/g, '-')
+    .toLowerCase();
 }
 
 async function write(path: string, content: string): Promise<void> {

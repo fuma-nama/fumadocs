@@ -39,6 +39,9 @@ export interface SidebarProps {
    */
   defaultOpenLevel?: number;
 
+  /**
+   * Customise each of the component
+   */
   components?: Partial<Components>;
   banner?: React.ReactNode;
   bannerProps?: HTMLAttributes<HTMLDivElement>;
