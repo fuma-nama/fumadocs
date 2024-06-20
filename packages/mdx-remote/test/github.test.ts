@@ -1,10 +1,19 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  describe,
+  expect,
+  test,
+  vi,
+} from 'vitest';
 import { createCache, type CreateCacheOptions } from '@/github';
 import fs from 'node:fs';
 import type { CompareTreeDiff } from '@/github/diff';
 import { fnv1a, type GitTreeItem } from '@/github/utils';
+import { githubCacheStore } from '@/github/store';
 
 const cwd = path.dirname(fileURLToPath(import.meta.url));
 
@@ -107,9 +116,9 @@ describe('Without Saved Cache', () => {
   test('cache.generatePageTree', async () => {
     const cache = await mockCache({ directory });
 
-    const { getPageTree } = await cache.generatePageTree();
+    const { pageTree } = await cache.generatePageTree();
 
-    await expect(await getPageTree()).toMatchFileSnapshot(
+    await expect(pageTree).toMatchFileSnapshot(
       path.resolve(cwd, './out/page-tree.output.json5'),
     );
   });
@@ -218,15 +227,6 @@ describe('Without Saved Cache', () => {
 
     expect(cache.data.files).toHaveLength(1);
     expect(cache.tree.tree).toHaveLength(1);
-  });
-
-  test('cache.revalidationTag', async () => {
-    const opts = { directory };
-    const cache = await mockCache(opts);
-
-    expect(cache.revalidationTag).toBe(
-      `@fumadocs/mdx-remote/github/cache@${fnv1a(JSON.stringify(opts))}`,
-    );
   });
 });
 

@@ -154,8 +154,11 @@ export const createCache = <Options extends CreateCacheOptions>(
     JSON.stringify(options),
   )}`;
 
-  const storedCache = githubCacheStore.get(revalidationTag);
-  if (storedCache) return storedCache;
+  // only use stored cache in production because state is not shared between requests
+  if (process.env.NODE_ENV === 'production') {
+    const storedCache = githubCacheStore.get(revalidationTag);
+    if (storedCache) return storedCache;
+  }
 
   const isRemote =
     'owner' in options &&
@@ -171,7 +174,9 @@ export const createCache = <Options extends CreateCacheOptions>(
     ? createRemoteCache(options, revalidationTag, githubCacheStore)
     : createLocalCache(options as CreateCacheOptions<'local'>);
 
-  githubCacheStore.set(cache, revalidationTag);
+  // only use stored cache in production because state is not shared between requests
+  if (process.env.NODE_ENV === 'production')
+    githubCacheStore.set(cache, revalidationTag);
 
   return cache as GithubCache<
     Options extends {
