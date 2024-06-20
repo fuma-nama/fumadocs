@@ -89,7 +89,9 @@ export async function generateFiles({
 
 function getName(s: string): string {
   return s
-    .replace(/([A-Z])/g, (s) => `-${s.toLowerCase()}`)
+    .replace(/[A-Z]/g, (match, idx: number) =>
+      idx === 0 ? match : `-${match.toLowerCase()}`,
+    )
     .replace(/\s+/g, '-')
     .toLowerCase();
 }
