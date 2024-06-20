@@ -25,7 +25,9 @@ export const baseOptions: BaseLayoutProps = {
           className="size-5 [.uwu_&]:hidden [aside_&]:size-4"
           fill="currentColor"
         />
-        <span className="[.uwu_&]:hidden max-md:[nav_&]:hidden">Fumadocs</span>
+        <span className="[.uwu_&]:hidden max-md:[header_&]:hidden">
+          Fumadocs
+        </span>
       </>
     ),
     children: <NavChildren />,
