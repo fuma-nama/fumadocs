@@ -83,14 +83,11 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
         },
 
         '@screen md': {
-          '#nd-sidebar[data-collapse=true][data-hover=true]': {
-            transform: 'translateX(0)',
-          },
-          '#nd-sidebar[data-collapse=true][data-hover=false]': {
-            transform: 'translateX(calc(-100% - 1rem))',
+          '[dir=rtl] #nd-sidebar[data-collapse=true][data-hover=true]': {
+            transform: 'translateX(-0.5rem)',
           },
           '[dir=rtl] #nd-sidebar[data-collapse=true][data-hover=false]': {
-            transform: 'translateX(calc(100% + 1rem))',
+            transform: 'translateX(100%)',
           },
         },
       });

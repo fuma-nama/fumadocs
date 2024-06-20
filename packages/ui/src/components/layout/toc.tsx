@@ -66,7 +66,7 @@ export function SubToc({
         className={cn(
           buttonVariants({
             className:
-              'sticky ms-auto bottom-4 gap-2 shadow-lg shadow-background z-10',
+              'fixed end-4 bottom-2 gap-2 shadow-lg shadow-background z-10',
             color: 'secondary',
           }),
           props.className,
