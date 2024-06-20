@@ -13,7 +13,10 @@ export function Root({
 }: HTMLAttributes<HTMLDivElement>): React.ReactElement {
   return (
     <div
-      className={cn('space-y-24 text-sm text-muted-foreground', className)}
+      className={cn(
+        'flex flex-col gap-24 text-sm text-muted-foreground',
+        className,
+      )}
       {...props}
     >
       {children}
@@ -28,7 +31,10 @@ export function API({
 }: HTMLAttributes<HTMLDivElement>): React.ReactElement {
   return (
     <div
-      className={cn('flex flex-col gap-x-6 gap-y-2 xl:flex-row', className)}
+      className={cn(
+        'flex flex-col gap-x-6 gap-y-2 xl:flex-row xl:items-start',
+        className,
+      )}
       {...props}
     >
       {children}
@@ -66,10 +72,10 @@ export function APIInfo({
   if (['DELETE'].includes(method)) color = 'red';
 
   return (
-    <div className={cn('flex-1', className)} {...props}>
-      <h2 className="not-prose mb-2 inline-flex items-center gap-3 font-mono">
-        <div className={cn(badgeVariants({ color }))}>{method}</div>
-        <p className="text-xs">{route}</p>
+    <div className={cn('flex-1 prose-no-margin', className)} {...props}>
+      <h2 className="flex flex-row items-center gap-3 rounded-lg border bg-card p-3 text-base">
+        <span className={cn(badgeVariants({ color }))}>{method}</span>
+        <code>{route}</code>
       </h2>
       {children}
     </div>
@@ -119,7 +125,7 @@ export function APIExample({
 }: HTMLAttributes<HTMLDivElement>): React.ReactElement {
   return (
     <div
-      className={cn('sticky top-6 h-fit xl:w-2/5 xl:min-w-[400px]', className)}
+      className={cn('sticky top-6 prose-no-margin xl:w-[400px]', className)}
       {...props}
     >
       {children}

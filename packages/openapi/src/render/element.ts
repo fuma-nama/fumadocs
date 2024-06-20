@@ -41,3 +41,7 @@ export function codeblock(
     '```',
   ].join('\n');
 }
+
+export function heading(depth: number, child: string): string {
+  return `${'#'.repeat(depth)} ${child.trim()}`;
+}

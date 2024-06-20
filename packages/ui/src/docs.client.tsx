@@ -2,6 +2,7 @@
 
 import { SidebarTrigger } from 'fumadocs-core/sidebar';
 import { Menu, X } from 'lucide-react';
+import type { HTMLAttributes } from 'react';
 import { useSidebar } from '@/contexts/sidebar';
 import { useSearchContext } from '@/contexts/search';
 import { SearchToggle } from '@/components/layout/search-toggle';
@@ -41,6 +42,24 @@ export function SubNav({
         {open ? <X /> : <Menu />}
       </SidebarTrigger>
     </NavBox>
+  );
+}
+
+export function Container(
+  props: HTMLAttributes<HTMLElement>,
+): React.ReactElement {
+  const { collapsed } = useSidebar();
+
+  return (
+    <main
+      id="nd-docs-layout"
+      {...props}
+      className={cn(
+        'flex flex-1 flex-row transition-[padding]',
+        !collapsed && 'md:ps-[240px] xl:ps-[260px]',
+        props.className,
+      )}
+    />
   );
 }
 

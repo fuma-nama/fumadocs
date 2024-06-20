@@ -14,7 +14,7 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
   const onCollapse = useCallback(() => {
     setCollapsed((v) => !v);
     setHover(false);
-    hoverTimeRef.current = Date.now() + 500;
+    hoverTimeRef.current = Date.now() + 150;
   }, [setCollapsed]);
 
   const onEnter: PointerEventHandler = useCallback((e) => {
@@ -27,16 +27,22 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
     if (e.pointerType === 'touch') return;
     window.clearTimeout(timerRef.current);
 
-    timerRef.current = window.setTimeout(() => {
-      setHover(false);
-    }, 300);
+    timerRef.current = window.setTimeout(
+      () => {
+        setHover(false);
+        hoverTimeRef.current = Date.now() + 150;
+      },
+      Math.min(e.clientX, document.body.clientWidth - e.clientX) > 100
+        ? 10
+        : 500,
+    );
   }, []);
 
   return (
     <>
       {collapsed ? (
         <div
-          className="fixed inset-y-0 start-0 w-4 max-md:hidden 2xl:w-[180px]"
+          className="fixed inset-y-0 start-0 w-6 max-md:hidden xl:w-[50px]"
           onPointerEnter={onEnter}
           onPointerLeave={onLeave}
         />
@@ -49,7 +55,7 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
             buttonVariants({
               color: 'secondary',
               size: 'icon',
-              className: 'fixed start-4 bottom-4 z-10 max-md:hidden',
+              className: 'fixed start-4 bottom-2 z-10 max-md:hidden',
             }),
           )}
           onClick={onCollapse}
@@ -67,8 +73,12 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
           'aria-hidden': Boolean(collapsed && !hover),
           className: cn(
             'overflow-hidden md:transition-transform',
-            collapsed &&
-              'md:fixed md:inset-y-2 md:start-2 md:h-auto md:rounded-xl md:border md:shadow-md',
+            collapsed && [
+              'md:inset-y-1 md:animate-sidebar-collapse md:rounded-xl md:border md:shadow-md',
+              hover
+                ? 'md:translate-x-1 rtl:md:-translate-x-1'
+                : 'md:-translate-x-full rtl:md:translate-x-full',
+            ],
           ),
         }}
         footer={

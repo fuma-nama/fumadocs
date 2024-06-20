@@ -62,6 +62,7 @@ export function DocsPage({
   tableOfContent = {},
   breadcrumb = {},
   tableOfContentPopover = {},
+  lastUpdate,
   full = false,
   footer = {},
   ...props
@@ -76,25 +77,24 @@ export function DocsPage({
     <TocProvider toc={toc}>
       <article
         className={cn(
-          'mx-auto flex w-0 max-w-[800px] flex-1 flex-col gap-6 px-4 py-10 md:px-6 md:pt-12',
+          'mx-auto flex w-0 max-w-[840px] flex-1 flex-col gap-6 px-4 pt-10 md:px-6 md:pt-12',
           !tocOptions.enabled && 'max-w-[1200px]',
         )}
       >
         {replaceOrDefault(breadcrumb, <Breadcrumb full={breadcrumb.full} />)}
         {props.children}
-        {props.lastUpdate ? (
-          <LastUpdate date={new Date(props.lastUpdate)} />
-        ) : null}
-        {replaceOrDefault(footer, <Footer items={footer.items} />)}
+        <div className="mt-auto" />
+        {lastUpdate ? <LastUpdate date={new Date(lastUpdate)} /> : null}
         {replaceOrDefault(
           tableOfContentPopover,
           <SubToc
             items={toc}
             header={tableOfContentPopover.header}
             footer={tableOfContentPopover.footer}
-            className={cn(!full && 'lg:hidden')}
+            className={cn('w-fit md:-mt-12 md:ms-auto', !full && 'lg:hidden')}
           />,
         )}
+        {replaceOrDefault(footer, <Footer items={footer.items} />)}
       </article>
       {replaceOrDefault(
         tocOptions,
