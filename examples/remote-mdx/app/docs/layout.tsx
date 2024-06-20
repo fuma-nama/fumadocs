@@ -1,4 +1,4 @@
-import { getPageTree } from '../source';
+import { pageTree } from '../source';
 import { DocsLayout } from 'fumadocs-ui/layout';
 import type { ReactNode } from 'react';
 
@@ -8,7 +8,7 @@ export default async function RootDocsLayout({
   children: ReactNode;
 }) {
   return (
-    <DocsLayout tree={await getPageTree()} nav={{ title: 'My App' }}>
+    <DocsLayout tree={pageTree} nav={{ title: 'My App' }}>
       {children}
     </DocsLayout>
   );

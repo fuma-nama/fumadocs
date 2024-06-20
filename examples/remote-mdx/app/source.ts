@@ -1,3 +1,5 @@
+// TODO replace this with more abstracted plugin featuring wesocket and automatic local file cache for dev
+
 import { createCache } from '@fumadocs/mdx-remote/github';
 import path from 'node:path';
 
@@ -8,6 +10,6 @@ const cache = await createCache({
   saveFile: path.resolve(directory, '.fumadocs', 'cache.json'),
 }).load();
 
-export const { getPageTree, getPage, getPages, getSearchIndexes } =
+export const { pageTree, getPage, getPages, getSearchIndexes } =
   await cache.generatePageTree();
 export const { compileMDX } = cache;
