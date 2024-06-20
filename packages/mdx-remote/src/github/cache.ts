@@ -27,10 +27,15 @@ import {
 } from './utils';
 import { createGeneratePageTree } from './page-tree';
 import { createCreateGithubWebhookAPI } from './github-webhook';
+import { type GithubCacheStore, githubCacheStore } from './store';
 
 export type GithubCacheFile = z.infer<typeof githubCacheFileSchema>;
 interface BaseCreateCacheOptions
   extends Pick<Parameters<typeof getTree>[0], 'owner' | 'repo' | 'token'> {
+  /**
+   * Base url for documentation
+   */
+  baseUrl?: string;
   /**
    * Current working directory.
    * @defaultValue process.cwd()
@@ -43,9 +48,9 @@ interface BaseCreateCacheOptions
    */
   saveFile: string | false;
   /**
-   * Directory to search for files (local or remote)
+   * Options provided to the MDX compiler.
    */
-  directory?: string;
+  compilerOptions?: Pick<CompileOptions, 'mdxOptions' | 'components'>;
   /**
    * Included files.
    *
@@ -53,23 +58,19 @@ interface BaseCreateCacheOptions
    */
   include?: string | string[];
   /**
+   * Directory to search for files (local or remote)
+   */
+  directory?: string;
+  /**
    * The SHA1 value or ref (branch or tag) name of the tree.
    */
   branch: string;
-  /**
-   * Options provided to the MDX compiler.
-   */
-  compilerOptions?: Pick<CompileOptions, 'mdxOptions' | 'components'>;
   githubApi?: Pick<Parameters<typeof getTree>[0], 'init' | 'recursive'>;
 }
 
 export interface GithubCache<
   Env extends 'local' | 'remote' = 'local' | 'remote',
 > {
-  /**
-   * The hash used to revalidate the cache.
-   */
-  revalidationTag: string;
   /**
    * The cache data.
    */
@@ -132,7 +133,7 @@ export type CreateCacheOptions<
 type CreateCacheRemoteOptions = BaseCreateCacheOptions;
 type CreateCacheLocalOptions = Pick<
   BaseCreateCacheOptions,
-  'include' | 'saveFile' | 'compilerOptions'
+  'include' | 'saveFile' | 'compilerOptions' | 'cwd' | 'baseUrl'
 > & {
   directory: NonNullable<BaseCreateCacheOptions['directory']>;
 };
@@ -149,6 +150,13 @@ export const createCache = <Options extends CreateCacheOptions>(
     ? 'remote'
     : 'local'
 > => {
+  const revalidationTag = `@fumadocs/mdx-remote/github/cache@${fnv1a(
+    JSON.stringify(options),
+  )}`;
+
+  const storedCache = githubCacheStore.get(revalidationTag);
+  if (storedCache) return storedCache;
+
   const isRemote =
     'owner' in options &&
     'repo' in options &&
@@ -159,18 +167,13 @@ export const createCache = <Options extends CreateCacheOptions>(
   if (!isRemote && !isLocal)
     throw new Error('Invalid options. View documentation for correct options.');
 
-  const revalidationTag = `@fumadocs/mdx-remote/github/cache@${fnv1a(
-    JSON.stringify(options),
-  )}`;
+  const cache = isRemote
+    ? createRemoteCache(options, revalidationTag, githubCacheStore)
+    : createLocalCache(options as CreateCacheOptions<'local'>);
 
-  return (
-    isRemote
-      ? createRemoteCache(options, revalidationTag)
-      : createLocalCache(
-          options as CreateCacheOptions<'local'>,
-          revalidationTag,
-        )
-  ) as GithubCache<
+  githubCacheStore.set(cache, revalidationTag);
+
+  return cache as GithubCache<
     Options extends {
       owner: string;
       repo: string;
@@ -185,6 +188,7 @@ export const createCache = <Options extends CreateCacheOptions>(
 export const createRemoteCache = (
   { cwd = process.cwd(), ...options }: CreateCacheOptions<'remote'>,
   revalidationTag: string,
+  realGithubCacheStore: GithubCacheStore,
 ): GithubCache<'remote'> => {
   const {
     directory,
@@ -202,7 +206,9 @@ export const createRemoteCache = (
     );
   };
 
-  return enhancedCacheBoilerplate(options, revalidationTag, {
+  let initialLoad = true;
+
+  return enhancedCacheBoilerplate(options, {
     get diff() {
       return createDiff(this as unknown as GithubCache, getFileContent);
     },
@@ -225,6 +231,10 @@ export const createRemoteCache = (
 
           return this.tree.transformToCache(tree);
         },
+        initialLoad,
+        onInitialLoad: () => {
+          initialLoad = false;
+        },
       });
     },
     get fs() {
@@ -232,18 +242,16 @@ export const createRemoteCache = (
     },
     get createGithubWebhookAPI() {
       return createCreateGithubWebhookAPI({
-        tree: this.tree,
-        diff: this.diff,
+        cache: this,
+        baseUrl: options.baseUrl ?? '/docs',
         ref: options.branch,
         directory: options.directory ?? '',
         githubOptions: {
           ...githubInfo,
           ...githubApi,
         },
+        githubCacheStore: realGithubCacheStore,
         revalidationTag,
-        set: (key, value) => {
-          this[key] = value;
-        },
       });
     },
   } as GithubCache);
@@ -251,7 +259,6 @@ export const createRemoteCache = (
 
 export const createLocalCache = (
   options: CreateCacheOptions<'local'>,
-  revalidationTag: string,
 ): GithubCache<'local'> => {
   const {
     directory,
@@ -263,7 +270,7 @@ export const createLocalCache = (
     return fs.promises.readFile(path.resolve(directory, file.path), 'utf8');
   };
 
-  return enhancedCacheBoilerplate(options, revalidationTag, {
+  return enhancedCacheBoilerplate(options, {
     get diff() {
       return createDiff(this as unknown as GithubCache, getFileContent);
     },
@@ -313,7 +320,6 @@ export const createLocalCache = (
 
 const createCacheBoilerplate = <Env extends 'local' | 'remote'>(
   options: CreateCacheOptions<Env>,
-  revalidationTag: string,
 ): Omit<
   GithubCache,
   'applyToCache' | 'load' | 'fs' | 'diff' | 'createGithubWebhookAPI'
@@ -325,7 +331,6 @@ const createCacheBoilerplate = <Env extends 'local' | 'remote'>(
     `${subject} not initialized. Did you call cache.load?`;
 
   return {
-    revalidationTag,
     get tree() {
       if (!gitTree) throw new Error(notInitialized('Tree'));
 
@@ -349,12 +354,12 @@ const createCacheBoilerplate = <Env extends 'local' | 'remote'>(
     },
     get generatePageTree() {
       return createGeneratePageTree(
-        revalidationTag,
         (this as GithubCache).fs(),
         this.compileMDX,
         {
           include: options.include,
         },
+        options.baseUrl ?? '/docs',
       );
     },
     get resolveAllContent() {
@@ -374,10 +379,9 @@ const createCacheBoilerplate = <Env extends 'local' | 'remote'>(
 
 const enhancedCacheBoilerplate = <Env extends 'local' | 'remote'>(
   options: CreateCacheOptions<Env>,
-  revalidationTag: string,
   inherit: GithubCache,
 ): GithubCache => {
-  const boilerplate = createCacheBoilerplate(options, revalidationTag);
+  const boilerplate = createCacheBoilerplate(options);
 
   return Object.defineProperties(
     inherit,
@@ -391,10 +395,14 @@ const createLoader = (
     saveFile,
     notFound,
     getFileContent,
+    initialLoad,
+    onInitialLoad,
   }: {
     saveFile: string | false;
     getFileContent: GetFileContent;
     notFound: (lazy: boolean) => Promise<GithubCacheFile | undefined>;
+    initialLoad?: boolean;
+    onInitialLoad?: () => void;
   },
 ) =>
   async function load(options?: {
@@ -402,7 +410,17 @@ const createLoader = (
   }): Promise<typeof cacheInstance> {
     const { lazy = false } = options ?? {};
 
-    if (typeof saveFile === 'string' && fs.existsSync(saveFile)) {
+    if (process.env.NODE_ENV === 'production' && !initialLoad)
+      return cacheInstance;
+
+    // TODO make this a customizable condition?
+    const isBuildTime = process.env.NEXT_PHASE?.endsWith('build');
+
+    if (
+      typeof saveFile === 'string' &&
+      fs.existsSync(saveFile) &&
+      !isBuildTime
+    ) {
       const raw = await fs.promises.readFile(saveFile, 'utf-8');
       const data = JSON.parse(raw) as GithubCacheFile;
       cacheInstance.tree = Object.assign(cacheFileToGitTree(data), {
@@ -417,16 +435,18 @@ const createLoader = (
         throw new Error(
           'Attempted to load Github cache, but could not retrieve cache and/or files (local or remote)',
         );
-
-      if (saveFile) {
-        await fs.promises.mkdir(path.dirname(saveFile), { recursive: true });
-        await fs.promises.writeFile(
-          saveFile,
-          JSON.stringify(await cacheInstance.resolveAllContent(), null, 0),
-          'utf-8',
-        );
-      }
     }
+
+    if (saveFile && (!fs.existsSync(saveFile) || isBuildTime)) {
+      await fs.promises.mkdir(path.dirname(saveFile), { recursive: true });
+      await fs.promises.writeFile(
+        saveFile,
+        JSON.stringify(await cacheInstance.resolveAllContent(), null, 0),
+        'utf-8',
+      );
+    }
+
+    onInitialLoad?.();
 
     return cacheInstance;
   };

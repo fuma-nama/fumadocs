@@ -12,23 +12,22 @@
   "repository": "github:fuma-nama/fumadocs",
   "license": "MIT",
   "author": "Fuma Nama",
-  "type": "module",
   "exports": {
     "./github": {
-      "import": "./dist/github/index.js",
-      "types": "./dist/github/index.d.ts"
+      "import": "./dist/github/index.mjs",
+      "types": "./dist/github/index.d.mts"
     },
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.mts"
     }
   },
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
   "typesVersions": {
     "*": {
       "github": [
-        "./dist/github/index.d.ts"
+        "./dist/github/index.d.mts"
       ]
     }
   },

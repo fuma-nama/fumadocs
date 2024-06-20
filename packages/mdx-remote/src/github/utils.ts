@@ -1,4 +1,5 @@
 import type { ZodError, z } from 'zod';
+import { unstable_cache as _unstableCache } from 'next/cache.js';
 import type { getTree } from './get-tree';
 import type { GithubCacheFile } from './cache';
 
@@ -11,6 +12,11 @@ export type Awaitable<T> = T | Promise<T>;
 export type GetFileContent<T = { path: string; sha: string }> = <U extends T>(
   file: U,
 ) => Awaitable<string>;
+
+export const unstableCache: typeof _unstableCache =
+  process.env.TSUP_BUILD === 'true'
+    ? _unstableCache
+    : (cb) => cb;
 
 export const blobToUtf8 = (blob: {
   content: string;

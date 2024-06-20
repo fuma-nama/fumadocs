@@ -10,16 +10,8 @@ import {
 } from 'fumadocs-core/source';
 import picomatch from 'picomatch';
 import matter from 'gray-matter';
-import { unstable_cache as _unstableCache } from 'next/cache';
 import type { createSearchAPI } from 'fumadocs-core/search/server';
 import type { GithubCache } from './cache';
-
-const unstableCache: typeof _unstableCache =
-  process.env.TSUP_BUILD === 'true'
-    ? _unstableCache
-    : (cb) => {
-        return cb;
-      };
 
 interface PageData {
   icon?: string;
@@ -52,9 +44,10 @@ interface FileInfo {
 }
 
 interface GeneratePageTreeResult {
-  getPageTree: () => Promise<PageTree.Root>;
-  getPages: () => Promise<Page[]>;
-  getPage: (slugs: string[] | undefined) => Promise<Page | undefined>;
+  files: FileInfo[];
+  pageTree: PageTree.Root;
+  getPages: () => Page[];
+  getPage: (slugs: string[] | undefined) => Page | undefined;
   getSearchIndexes: <T extends 'simple' | 'advanced'>(
     type: T,
   ) => Promise<Parameters<typeof createSearchAPI<T>>[1]['indexes']>;
@@ -68,30 +61,24 @@ interface GeneratePageTreeOptions {
    */
   include?: string | string[];
   directory: string;
-
-  /**
-   * @defaultValue '/docs'
-   */
-  baseUrl?: string;
   pageTree?: Partial<BuildPageTreeOptions>;
 }
 
 const builder = createPageTreeBuilder();
 
 export const createGeneratePageTree = (
-  revalidationTag: string,
   fs: ReturnType<GithubCache['fs']>,
   compileMDX: GithubCache['compileMDX'],
   {
     include = './**/*.{json,md,mdx}',
   }: Pick<GeneratePageTreeOptions, 'include'>,
+  baseUrl: string
 ) =>
   async function generatePageTree({
-    baseUrl = '/docs',
     ...options
   }: Pick<
     GeneratePageTreeOptions,
-    'baseUrl' | 'pageTree'
+    'pageTree'
   > = {}): Promise<GeneratePageTreeResult> {
     const getUrl = createGetUrl(baseUrl);
     const isMatch = picomatch(include);
@@ -151,35 +138,14 @@ export const createGeneratePageTree = (
     });
     const pageMap = buildPageMap(storage, getUrl);
 
-    const getGeneratedPageTree = unstableCache(
-      async () => {
-        return {
-          pageTree,
-          // `await Promise.all` makes ESLINT think that this needs be a async function
-          // because Next.js requires this function to be async
-          files: await Promise.all(entries),
-          pages: Array.from(pageMap.entries()),
-        };
-      },
-      undefined,
-      {
-        tags: [revalidationTag],
-      },
-    );
-    const getPageMap = async (): Promise<typeof pageMap> => {
-      const { pages } = await getGeneratedPageTree();
-      return new Map(pages);
-    };
-
     return {
-      async getPageTree() {
-        return (await getGeneratedPageTree()).pageTree;
+      pageTree,
+      files: entries,
+      getPages() {
+        return Array.from(pageMap.values());
       },
-      async getPages() {
-        return Array.from((await getPageMap()).values());
-      },
-      async getPage(slugs = []) {
-        return (await getPageMap()).get(slugs.join('/'));
+      getPage(slugs = []) {
+        return pageMap.get(slugs.join('/'));
       },
       async getSearchIndexes<T extends 'simple' | 'advanced'>(type: T) {
         const pages = Array.from(pageMap.values());

@@ -1,38 +1,43 @@
-import { revalidateTag } from 'next/cache';
+import path from 'node:path';
+import { createGetUrl } from 'fumadocs-core/source';
+import { revalidatePath } from 'next/cache';
 import type { CreateCacheOptions, GithubCache } from './cache';
 import { findTreeRecursive } from './git-tree';
 import type { getTree } from './get-tree';
+import type { GithubCacheStore } from './store';
 
 export const createCreateGithubWebhookAPI = ({
-  tree,
-  diff,
+  cache,
   ref,
   directory,
   githubOptions,
-  revalidationTag,
-  set,
+  baseUrl,
+  githubCacheStore,
+  revalidationTag
 }: {
-  tree: GithubCache['tree'];
-  diff: GithubCache['diff'];
+  cache: GithubCache;
   ref: NonNullable<CreateCacheOptions<'remote'>['branch']>;
   directory: string;
   githubOptions: Omit<Parameters<typeof getTree>[0], 'treeSha'>;
-  revalidationTag: string;
-  set: <K extends keyof GithubCache>(key: K, value: GithubCache[K]) => void;
+  baseUrl: string;
+  githubCacheStore: GithubCacheStore,
+  revalidationTag: string
 }) =>
-  function createGithubWebhookAPI(webhookSecret?: string) {
+  function createGithubWebhookAPI({
+    secret,
+  }: {
+    secret?: string;
+  } = {}) {
     const encoder = new TextEncoder();
+    const getUrl = createGetUrl(baseUrl);
 
     const POST = async (request: Request): Promise<Response> => {
       const body = await request.text();
 
-      if (webhookSecret) {
+      if (secret) {
         const signature = request.headers.get('x-hub-signature-256');
 
-        if (
-          !signature ||
-          !(await verifySignature(webhookSecret, signature, body))
-        ) {
+        if (!signature || !(await verifySignature(signature, body))) {
           return new Response('Unauthorized', { status: 401 });
         }
       }
@@ -51,18 +56,58 @@ export const createCreateGithubWebhookAPI = ({
             treeSha: data.after,
             init: {
               ...githubOptions.init,
-              // since this is an exact hash of the tree,
-              // the inner content will not change
+              // git hashes are cool so they are the same if the content is the same
               cache: 'force-cache',
             },
           });
 
           if (newTree) {
-            const changes = diff.compareToGitTree(newTree);
+            const changes = cache.diff.compareToGitTree(newTree);
+
             if (changes.length > 0) {
-              set('tree', Object.assign(tree, newTree));
-              diff.applyToCache(changes);
-              revalidateTag(revalidationTag);
+              cache.diff.applyToCache(changes);
+              cache.tree = Object.assign(cache.tree, newTree);
+
+              githubCacheStore.set(cache, revalidationTag);
+
+              // indivdual page changes
+              for (const doc of changes.filter(
+                (c) =>
+                  c.type === 'blob' &&
+                  /\.mdx?$/.test(c.path) &&
+                  (c.action === 'modify' || c.action === 'remove'),
+              )) {
+                const url = getUrl(
+                  doc.path.replace(path.extname(doc.path), '').split('/'),
+                );
+                revalidatePath(url, 'page');
+              }
+              // changes to a group of pages
+              for (const meta of changes.filter(
+                (c) =>
+                  c.type === 'blob' &&
+                  c.path.endsWith('.json') &&
+                  (c.action === 'modify' || c.action === 'remove'),
+              )) {
+                const url = getUrl(
+                  meta.path.replace(path.extname(meta.path), '').split('/'),
+                );
+                revalidatePath(url, 'layout');
+              }
+              // changes to a group of pages
+              for (const tree of changes.filter(
+                (c) =>
+                  c.type === 'tree' &&
+                  (c.action === 'modify' || c.action === 'remove'),
+              )) {
+                const url = getUrl(tree.path.split('/'));
+                revalidatePath(url, 'layout');
+              }
+              // change to whole layout/pageTree
+              if (changes.some((c) => c.action === 'add')) {
+                const url = getUrl([]);
+                revalidatePath(url, 'layout');
+              }
             }
           }
         }
@@ -77,7 +122,6 @@ export const createCreateGithubWebhookAPI = ({
 
     // from github example
     async function verifySignature(
-      secret: string,
       header: string,
       payload: string,
     ): Promise<boolean> {
