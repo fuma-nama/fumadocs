@@ -50,11 +50,10 @@ export interface APIInfoProps extends HTMLAttributes<HTMLDivElement> {
 const badgeVariants = cva('rounded-lg border px-1 py-0.5 text-xs font-medium', {
   variants: {
     color: {
-      green:
-        'border-green-400/50 bg-green-400/20 text-green-600 dark:text-green-400',
-      yellow:
-        'border-yellow-400/50 bg-yellow-400/20 text-yellow-600 dark:text-yellow-400',
+      green: 'border-green-400/50 bg-green-400/20 text-green-600 dark:text-green-400',
+      yellow: 'border-yellow-400/50 bg-yellow-400/20 text-yellow-600 dark:text-yellow-400',
       red: 'border-red-400/50 bg-red-400/20 text-red-600 dark:text-red-400',
+      blue: 'border-blue-400/50 bg-blue-400/20 text-blue-600 dark:text-blue-400',
     },
   },
 });
@@ -68,7 +67,8 @@ export function APIInfo({
 }: APIInfoProps): React.ReactElement {
   let color: VariantProps<typeof badgeVariants>['color'] = 'green';
   if (['GET', 'HEAD'].includes(method)) color = 'green';
-  if (['POST', 'PATCH', 'PUT'].includes(method)) color = 'yellow';
+  if (['PATCH', 'PUT'].includes(method)) color = 'yellow';
+  if (['POST'].includes(method)) color = 'blue';
   if (['DELETE'].includes(method)) color = 'red';
 
   return (
