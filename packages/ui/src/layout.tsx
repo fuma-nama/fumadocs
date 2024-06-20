@@ -13,6 +13,7 @@ declare const {
   TreeContextProvider,
   DynamicSidebar,
   SubNav,
+  Container,
   LinksMenu,
   Sidebar,
   ThemeToggle,
@@ -151,10 +152,7 @@ export function DocsLayout({
   return (
     <TreeContextProvider tree={tree}>
       {replaceOrDefault(nav, <SubNav {...nav} />)}
-      <div
-        {...containerProps}
-        className={cn('flex flex-1 flex-row', containerProps?.className)}
-      >
+      <Container {...containerProps}>
         {replaceOrDefault(
           { enabled: sidebarEnabled, component: sidebarReplace },
           <Aside
@@ -197,7 +195,7 @@ export function DocsLayout({
         )}
 
         {children}
-      </div>
+      </Container>
     </TreeContextProvider>
   );
 }

@@ -81,18 +81,6 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
           'background-color': `theme('colors.background')`,
           color: `theme('colors.foreground')`,
         },
-
-        '@screen md': {
-          '#nd-sidebar[data-collapse=true][data-hover=true]': {
-            transform: 'translateX(0)',
-          },
-          '#nd-sidebar[data-collapse=true][data-hover=false]': {
-            transform: 'translateX(calc(-100% - 1rem))',
-          },
-          '[dir=rtl] #nd-sidebar[data-collapse=true][data-hover=false]': {
-            transform: 'translateX(calc(100% + 1rem))',
-          },
-        },
       });
 
       if (css) addBase(css);

@@ -10,7 +10,8 @@ import { cn } from '@/utils/cn';
 
 export interface NavBoxProps {
   /**
-   * When to use transparent navbar
+   * Use transparent background
+   *
    * @defaultValue none
    */
   transparentMode?: 'always' | 'top' | 'none';
@@ -29,7 +30,7 @@ export interface TitleProps {
 export function NavBox({
   transparentMode = 'none',
   ...props
-}: NavBoxProps & HTMLAttributes<HTMLElement>) {
+}: NavBoxProps & HTMLAttributes<HTMLElement>): React.ReactElement {
   const [transparent, setTransparent] = useState(transparentMode !== 'none');
 
   useEffect(() => {
@@ -60,7 +61,7 @@ export function NavBox({
   );
 }
 
-export function Title({ title, url = '/' }: TitleProps) {
+export function Title({ title, url = '/' }: TitleProps): React.ReactElement {
   return (
     <Link
       href={url}

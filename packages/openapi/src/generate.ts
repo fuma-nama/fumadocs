@@ -33,6 +33,11 @@ export interface GenerateTagOutput {
   content: string;
 }
 
+export interface GenerateOperationOutput {
+  id: string;
+  content: string;
+}
+
 export async function generate(
   pathOrDocument: string | OpenAPI.Document,
   options: GenerateOptions = {},
@@ -53,6 +58,36 @@ export async function generate(
     document.info.description,
     child,
     options,
+  );
+}
+
+export async function generateOperations(
+  pathOrDocument: string | OpenAPI.Document,
+  options: GenerateOptions = {},
+): Promise<GenerateOperationOutput[]> {
+  const document = await Parser.dereference<OpenAPI.Document>(pathOrDocument);
+  const routes = buildRoutes(document).get('all') ?? [];
+  const ctx = getContext(document, options);
+
+  return await Promise.all(
+    routes.flatMap<Promise<GenerateOperationOutput>>((route) => {
+      return route.methods.map(async (method) => {
+        const content = renderPage(
+          method.summary ?? method.method,
+          method.description,
+          [await renderOperation(route.path, method, ctx, true)],
+          options,
+        );
+
+        if (!method.operationId)
+          throw new Error('Operation ID is required for generating docs.');
+
+        return {
+          id: method.operationId,
+          content,
+        } satisfies GenerateOperationOutput;
+      });
+    }),
   );
 }
 

@@ -36,6 +36,14 @@ export const animations = {
       from: { opacity: '1', transform: 'scale(1) translateY(0)' },
       to: { opacity: '0', transform: 'scale(0.95) translateY(-10px)' },
     },
+    'sidebar-collapse': {
+      // retain the current styles until collapsed
+      '0%, 100%': {
+        top: '0',
+        bottom: '0',
+        'border-radius': 'none',
+      },
+    },
     'fade-in': {
       from: { opacity: '0' },
       to: { opacity: '1' },
@@ -55,5 +63,6 @@ export const animations = {
     'collapsible-up': 'collapsible-up 150ms ease-out',
     'accordion-down': 'accordion-down 200ms ease-out',
     'accordion-up': 'accordion-up 200ms ease-out',
+    'sidebar-collapse': 'sidebar-collapse 150ms',
   },
 };
