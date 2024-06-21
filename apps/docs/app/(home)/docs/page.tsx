@@ -1,4 +1,4 @@
-import { LayoutIcon, LibraryIcon } from 'lucide-react';
+import { LayoutIcon, LibraryIcon, PaperclipIcon } from 'lucide-react';
 import Link, { type LinkProps } from 'next/link';
 import Image from 'next/image';
 import { buttonVariants } from '@/components/ui/button';
@@ -31,7 +31,7 @@ export default function DocsPage(): React.ReactElement {
         Getting Started
       </h1>
       <p className="text-muted-foreground">
-        You can start with Fumadocs UI, or just use the core library.
+        Choose from Fumadocs Core, UI, or MDX to best fit your project needs.
       </p>
       <div className="mt-4 grid grid-cols-2 gap-4">
         <a
@@ -49,6 +49,15 @@ export default function DocsPage(): React.ReactElement {
         </Link>
       </div>
       <div className="mt-16 grid grid-cols-1 gap-4 text-left md:grid-cols-2">
+        <Item href="/docs/headless">
+          <Icon>
+            <LibraryIcon className="size-full" />
+          </Icon>
+          <h2 className="mb-2 text-lg font-semibold">Fumadocs Core</h2>
+          <p className="text-sm text-muted-foreground">
+            The core library of Fumadocs.
+          </p>
+        </Item>
         <Item href="/docs/ui">
           <Icon>
             <LayoutIcon className="size-full" />
@@ -58,13 +67,13 @@ export default function DocsPage(): React.ReactElement {
             The full-powered documentation framework with an excellent UI.
           </p>
         </Item>
-        <Item href="/docs/headless">
+        <Item href="/docs/mdx">
           <Icon>
-            <LibraryIcon className="size-full" />
+            <PaperclipIcon className="size-full" />
           </Icon>
-          <h2 className="mb-2 text-lg font-semibold">Fumadocs Core</h2>
+          <h2 className="mb-2 text-lg font-semibold">Fumadocs MDX</h2>
           <p className="text-sm text-muted-foreground">
-            The core library of Fumadocs.
+            Built-in source provider.
           </p>
         </Item>
       </div>
