@@ -12,6 +12,7 @@ const frontmatterSchema = z.object({
   title: z.string(),
   description: z.string().optional(),
   icon: z.string().optional(),
+  full: z.boolean().optional(),
 });
 
 export const defaultSchemas = {
