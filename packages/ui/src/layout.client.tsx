@@ -25,7 +25,7 @@ export function Nav({
   const { text } = useI18n();
 
   return (
-    <NavBox id="nd-nav" transparentMode={transparentMode}>
+    <NavBox id="nd-nav" className="h-16" transparentMode={transparentMode}>
       <nav className="mx-auto flex size-full max-w-container flex-row items-center gap-6 px-4">
         <Title title={title} url={url} />
         {children}
@@ -55,7 +55,7 @@ export function Nav({
 
           <LinksMenu
             items={items}
-            className="lg:hidden"
+            className="-me-2 lg:hidden"
             footer={
               <div className="flex flex-row items-center justify-between px-2 pt-2">
                 <p className="font-medium text-muted-foreground">

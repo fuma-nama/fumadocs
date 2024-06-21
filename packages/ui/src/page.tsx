@@ -6,7 +6,7 @@ import type { BreadcrumbProps, FooterProps, TOCProps } from './page.client';
 
 declare const {
   Toc,
-  SubToc,
+  TocPopover,
   Breadcrumb,
   Footer,
   TocProvider,
@@ -75,27 +75,36 @@ export function DocsPage({
 
   return (
     <TocProvider toc={toc}>
-      <article
-        className={cn(
-          'mx-auto flex w-0 max-w-[840px] flex-1 flex-col gap-6 px-4 pt-10 md:px-6 md:pt-12',
-          !tocOptions.enabled && 'max-w-[1200px]',
-        )}
-      >
-        {replaceOrDefault(breadcrumb, <Breadcrumb full={breadcrumb.full} />)}
-        {props.children}
-        <div className="mt-auto" />
-        {lastUpdate ? <LastUpdate date={new Date(lastUpdate)} /> : null}
-        {replaceOrDefault(
-          tableOfContentPopover,
-          <SubToc
-            items={toc}
-            header={tableOfContentPopover.header}
-            footer={tableOfContentPopover.footer}
-            className={cn(!full && 'lg:hidden')}
-          />,
-        )}
-        {replaceOrDefault(footer, <Footer items={footer.items} />)}
-      </article>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <div
+          className={cn(
+            'sticky top-12 z-10 -mb-4 border-b bg-background/60 text-sm font-medium backdrop-blur-md md:top-0 md:bg-card',
+            !full && 'lg:hidden',
+          )}
+        >
+          {replaceOrDefault(
+            tableOfContentPopover,
+            <TocPopover
+              items={toc}
+              header={tableOfContentPopover.header}
+              footer={tableOfContentPopover.footer}
+              className="inline-flex items-center gap-2 px-4 py-2 text-left max-md:size-full md:ps-6 md:text-muted-foreground"
+            />,
+          )}
+        </div>
+        <article
+          className={cn(
+            'mx-auto flex w-full max-w-[840px] flex-1 flex-col gap-6 px-4 pt-10 md:px-6 md:pt-12',
+            !tocOptions.enabled && 'max-w-[1200px]',
+          )}
+        >
+          {replaceOrDefault(breadcrumb, <Breadcrumb full={breadcrumb.full} />)}
+          {props.children}
+          <div className="mt-auto" />
+          {lastUpdate ? <LastUpdate date={new Date(lastUpdate)} /> : null}
+          {replaceOrDefault(footer, <Footer items={footer.items} />)}
+        </article>
+      </div>
       {replaceOrDefault(
         tocOptions,
         <Toc
@@ -107,6 +116,7 @@ export function DocsPage({
     </TocProvider>
   );
 }
+
 /**
  * Add typography styles
  */

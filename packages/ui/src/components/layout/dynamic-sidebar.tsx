@@ -9,16 +9,16 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
   const { collapsed, setCollapsed } = useSidebar();
   const [hover, setHover] = useState(false);
   const timerRef = useRef(0);
-  const hoverTimeRef = useRef(0);
+  const closeTimeRef = useRef(0);
 
   const onCollapse = useCallback(() => {
     setCollapsed((v) => !v);
     setHover(false);
-    hoverTimeRef.current = Date.now() + 150;
+    closeTimeRef.current = Date.now() + 150;
   }, [setCollapsed]);
 
   const onEnter: PointerEventHandler = useCallback((e) => {
-    if (e.pointerType === 'touch' || hoverTimeRef.current > Date.now()) return;
+    if (e.pointerType === 'touch' || closeTimeRef.current > Date.now()) return;
     window.clearTimeout(timerRef.current);
     setHover(true);
   }, []);
@@ -30,10 +30,10 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
     timerRef.current = window.setTimeout(
       () => {
         setHover(false);
-        hoverTimeRef.current = Date.now() + 150;
+        closeTimeRef.current = Date.now() + 150;
       },
       Math.min(e.clientX, document.body.clientWidth - e.clientX) > 100
-        ? 10
+        ? 0
         : 500,
     );
   }, []);
@@ -72,9 +72,9 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
           onPointerLeave: onLeave,
           'aria-hidden': Boolean(collapsed && !hover),
           className: cn(
-            'overflow-hidden md:transition-transform',
+            'md:transition-[transform,margin]',
             collapsed && [
-              'md:inset-y-1 md:animate-sidebar-collapse md:rounded-xl md:border md:shadow-md',
+              'md:top-1 md:mr-[-240px] md:h-[calc(100dvh-4px)] md:animate-sidebar-collapse md:rounded-xl md:border md:shadow-md xl:mr-[-260px]',
               hover
                 ? 'md:translate-x-1 rtl:md:-translate-x-1'
                 : 'md:-translate-x-full rtl:md:translate-x-full',

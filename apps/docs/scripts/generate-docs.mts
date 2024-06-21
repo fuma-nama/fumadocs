@@ -6,9 +6,6 @@ void OpenAPI.generateFiles({
   input: ['./*.yaml'],
   output: './content/docs/ui',
   per: 'tag',
-  frontmatter: () => ({
-    toc: false,
-  }),
   renderer: {
     Root(child) {
       return OpenAPI.createElement(

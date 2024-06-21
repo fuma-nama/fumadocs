@@ -5,7 +5,17 @@ description: Turn a content source into an unified interface
 
 ## Usage
 
-Source API is a helper to load file-system based content source, it outputs numerous useful properties to integrate with Fumadocs, such as Page Tree.
+Source API is a helper to load file-system based content sources, it offers an unified interface to integrate different content sources with Fumadocs.
+
+It handles some important jobs:
+
+- Build page trees from file-system information
+- Generate Urls and slugs based on file path
+- Output useful utilities to search or walk over files
+
+It doesn't rely on the real file system (zero `node:fs` usage), a virtual storage is also allowed.
+
+You can use it with built-in content sources like Fumadocs MDX.
 
 ```ts
 import { map } from '@/.map';
@@ -16,6 +26,8 @@ export const docs = loader({
   source: createMDXSource(map),
 });
 ```
+
+> The output page tree strictly follows [Page Conventions](/docs/headless/page-conventions).
 
 ### Root Directory
 
@@ -68,7 +80,7 @@ export const utils = loader({
 
 ## Deep Dive
 
-As mentioned, the output strictly follows [Page Conventions](/docs/headless/page-conventions).
+As mentioned, Source API doesn't rely on real file systems.
 During the process, your input source files will be parsed and form a virtual storage to avoid inconsistent behaviour between different OS.
 
 ### Transformer
@@ -89,7 +101,9 @@ loader({
 
 ### Attach Custom Properties
 
-Use the `pageTree` option to customise how page tree builder processes different nodes.
+The `pageTree` option allows you to customise how the page tree builder processes different nodes.
+
+You can attach custom properties to page tree nodes, like customising the display name of pages and folders.
 
 ```ts
 import { loader } from 'fumadocs-core/source';
@@ -97,17 +111,36 @@ import { loader } from 'fumadocs-core/source';
 loader({
   pageTree: {
     attachFolderIds: true, // add `folder.id` property
-    attachFolder: (node) => ({ ... }) // change folder nodes
+    attachFolder: (node) => ({ ... }), // change folder nodes
   }
+});
+```
+
+JSX nodes are also allowed.
+
+```tsx
+import { loader } from 'fumadocs-core/source';
+
+export const docs = loader({
+  pageTree: {
+    attachFile(node) {
+      node.name = <>Some JSX Nodes here</>;
+      return node;
+    },
+  },
 });
 ```
 
 ### Custom Source
 
-To plug your own content source, return a `Source` object.
+To plug your own content source, create a `Source` object.
 
-It includes a `files` property which has an array of virtual files.
+It includes a `files` property which is an array of virtual files.
 Each virtual file must contain its file path and corresponding data.
+Yo can check type definitions for more info.
+
+Since Source API doesn't rely on file system, file paths cannot be absolute or relative (for example, `./file.mdx` and `D://content/file.mdx` are not allowed).
+Instead, pass the file paths like `file.mdx` and`content/file.mdx`.
 
 ```ts
 import { Source } from 'fumadocs-core/source';

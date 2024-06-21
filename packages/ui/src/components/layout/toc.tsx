@@ -1,4 +1,4 @@
-import { TextIcon } from 'lucide-react';
+import { ChevronDown, Text } from 'lucide-react';
 import type { TOCItemType } from 'fumadocs-core/server';
 import * as Primitive from 'fumadocs-core/toc-internal';
 import {
@@ -15,7 +15,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { buttonVariants } from '@/theme/variants';
 import { ScrollArea, ScrollViewport } from '../ui/scroll-area';
 
 type PosType = [top: number, height: number];
@@ -39,10 +38,10 @@ export function Toc({ items, header, footer }: TOCProps): ReactElement {
   const { text } = useI18n();
 
   return (
-    <div className="sticky top-0 flex h-dvh w-[220px] flex-col gap-4 pe-2 pt-12 max-lg:hidden xl:w-[260px]">
+    <div className="sticky top-0 flex h-dvh w-[220px] shrink-0 flex-col gap-4 pe-2 pt-12 max-lg:hidden xl:w-[260px]">
       {header}
       <h3 className="-mb-1 -ms-0.5 inline-flex items-center gap-1.5 text-sm text-muted-foreground">
-        <TextIcon className="size-4" />
+        <Text className="size-4" />
         {text.toc}
       </h3>
       <TOCItems items={items} />
@@ -51,7 +50,7 @@ export function Toc({ items, header, footer }: TOCProps): ReactElement {
   );
 }
 
-export function SubToc({
+export function TocPopover({
   items,
   header,
   footer,
@@ -61,29 +60,20 @@ export function SubToc({
 
   return (
     <Popover>
-      <PopoverTrigger
-        {...props}
-        className={cn(
-          buttonVariants({
-            className:
-              'sticky w-fit bottom-2 gap-2 shadow-lg shadow-background px-4 z-10',
-            color: 'secondary',
-          }),
-          props.className,
-        )}
-      >
-        <TextIcon className="size-4" />
+      <PopoverTrigger {...props}>
+        <Text className="size-4" />
         {text.toc}
+        <ChevronDown className="ms-auto size-4 text-muted-foreground" />
       </PopoverTrigger>
       <PopoverContent
         hideWhenDetached
-        side="top"
+        alignOffset={16}
         align="start"
-        avoidCollisions={false}
+        side="bottom"
         className="flex max-h-[80vh] w-[260px] flex-col gap-4 p-3"
       >
         {header}
-        <TOCItems className="-me-2" items={items} />
+        <TOCItems items={items} isMenu />
         {footer}
       </PopoverContent>
     </Popover>
@@ -92,10 +82,10 @@ export function SubToc({
 
 function TOCItems({
   items,
-  className,
+  isMenu = false,
 }: {
   items: TOCItemType[];
-  className?: string;
+  isMenu?: boolean;
 }): React.ReactElement {
   const { text } = useI18n();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -118,7 +108,7 @@ function TOCItems({
     );
 
   return (
-    <ScrollArea className={cn('flex flex-col', className)}>
+    <ScrollArea className={cn('flex flex-col', isMenu && '-mx-3')}>
       <ScrollViewport
         className="relative h-0 flex-1 text-sm"
         ref={containerRef}
@@ -129,7 +119,12 @@ function TOCItems({
           className="absolute start-0 hidden w-0.5 bg-primary transition-all"
         />
         <Primitive.ScrollProvider containerRef={containerRef}>
-          <div className="flex flex-col gap-1 border-s-2 text-muted-foreground">
+          <div
+            className={cn(
+              'flex flex-col gap-1 text-muted-foreground',
+              !isMenu && 'border-s-2',
+            )}
+          >
             {items.map((item) => (
               <TOCItem key={item.url} item={item} setMarker={setPos} />
             ))}

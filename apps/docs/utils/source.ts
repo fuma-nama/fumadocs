@@ -17,7 +17,6 @@ export const utils = loader({
     schema: {
       frontmatter: defaultSchemas.frontmatter.extend({
         preview: z.string().optional(),
-        toc: z.boolean().default(true),
         index: z.boolean().default(false),
       }),
     },

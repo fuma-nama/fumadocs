@@ -25,7 +25,7 @@ test('Get URL: Base', () => {
   expect(getUrl([''])).toBe('/docs');
 });
 
-test('Simple', () => {
+test('Page Tree: Simple', () => {
   const result = loader({
     source: {
       files: [
@@ -64,7 +64,7 @@ test('Simple', () => {
   expect(result.getPage(['test'])).toBeDefined();
 });
 
-test('Nested Directories', async () => {
+test('Page Tree: Nested Directories', async () => {
   const result = loader({
     source: {
       files: [
@@ -76,10 +76,17 @@ test('Nested Directories', async () => {
           },
         },
         {
+          type: 'page',
+          path: 'hidden.mdx',
+          data: {
+            title: 'Hidden',
+          },
+        },
+        {
           type: 'meta',
           path: 'meta.json',
           data: {
-            pages: ['test', 'nested', '[Text](https://google.com)'],
+            pages: ['...', '!hidden', 'nested', '[Text](https://google.com)'],
           },
         },
         {
@@ -122,11 +129,11 @@ test('Nested Directories', async () => {
       "name": "",
     }
   `);
-  expect(result.getPages().length).toBe(2);
+  expect(result.getPages().length).toBe(3);
   expect(result.getPage(['nested', 'test'])).toBeDefined();
 });
 
-test('Internationalized Routing', () => {
+test('Page Tree: Internationalized Routing', () => {
   const result = loader({
     languages: ['cn', 'en'],
     source: {

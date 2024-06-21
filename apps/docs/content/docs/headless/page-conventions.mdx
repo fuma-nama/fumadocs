@@ -17,9 +17,12 @@ A [MDX](https://mdxjs.com) or Markdown file.
 
 By default, it includes:
 
-- `title`
-- `description`
-- `icon`
+| name          | description                           |
+| ------------- | ------------------------------------- |
+| `title`       | The title of page                     |
+| `description` | The description of page               |
+| `icon`        | The name of icon, see [Icons](#icons) |
+| `full`        | Enable full mode on the page          |
 
 You may extend your content source to add additional properties.
 
@@ -27,6 +30,8 @@ You may extend your content source to add additional properties.
 ---
 title: My Page
 description: Best document ever
+icon: HomeIcon
+full: false
 ---
 
 ## Learn More
@@ -56,7 +61,7 @@ Force to open the folder by default.
 Adding a `root` property in meta can mark your folder as a **root**.
 The nearest root of the current page will be shown on all navigation elements.
 
-In other words, when you are in a root folder called "core", the other folders are not shown on the sidebar.
+In other words, when you are in a root folder called `core`, the other folders (e.g. `ui`) are not shown on the sidebar.
 
 <Files>
   <Folder name="core" defaultOpen>
@@ -81,7 +86,7 @@ To allow users switching between page trees, you can implement a page tree switc
 Customize the display name, order of pages, or its items on the sidebar by
 creating a `meta.json` in the folder.
 
-When a meta file presents, items are not included unless you have explicitly add them to `pages`.
+When a meta file presents, items are not included unless you have explicitly added them to `pages`.
 
 ```json
 {
@@ -90,7 +95,7 @@ When a meta file presents, items are not included unless you have explicitly add
 }
 ```
 
-> `pages` are the filenames of file
+You can add the file names to specify their order.
 
 ### Path
 
@@ -131,6 +136,17 @@ Tired to specify the order of every single page in `meta.json`? You can use
 }
 ```
 
+### Except
+
+In conjunction with the Rest item (`...`), you can use `!name` to exclude an item from the rest.
+
+```json
+{
+  "title": "Folder",
+  "pages": ["...", "!hide-this-page"]
+}
+```
+
 ### Extract
 
 You can extract the items from a folder with `...folder_name`.
@@ -155,10 +171,7 @@ Use the syntax `[Text](url)` to insert links.
 
 ## Icons
 
-Add custom icons for a page or a folder with the `icon`
-property.
-
-Pass the icon name as a string, and handle it with [Source API](/docs/headless/source-api#icons) or other ways.
+Specify an icon name for pages and folders with the `icon` property.
 
 ```mdx
 ---
@@ -173,6 +186,10 @@ icon: MyIcon
   "icon": "MyIcon"
 }
 ```
+
+Since Fumadocs doesn't include a icon library, you have to convert the icon names to JSX elements so that it can be rendered as a component.
+
+For built-in content sources, you can [the `icon` handler](/docs/headless/source-api#icons) from Source API.
 
 ## Internationalization
 

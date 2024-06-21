@@ -51,10 +51,10 @@ export function NavBox({
     <header
       {...props}
       className={cn(
-        'sticky top-0 z-50 h-16 border-b transition-colors',
+        'sticky top-0 z-50 border-b transition-colors',
         transparent
           ? 'border-transparent'
-          : 'border-foreground/10 bg-background/80 backdrop-blur-md',
+          : 'border-foreground/10 bg-background/60 backdrop-blur-md',
         props.className,
       )}
     />

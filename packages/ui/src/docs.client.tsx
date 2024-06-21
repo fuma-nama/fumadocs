@@ -2,7 +2,6 @@
 
 import { SidebarTrigger } from 'fumadocs-core/sidebar';
 import { Menu, X } from 'lucide-react';
-import type { HTMLAttributes } from 'react';
 import { useSidebar } from '@/contexts/sidebar';
 import { useSearchContext } from '@/contexts/search';
 import { SearchToggle } from '@/components/layout/search-toggle';
@@ -24,42 +23,24 @@ export function SubNav({
   return (
     <NavBox
       id="nd-subnav"
-      className="flex flex-row items-center px-4 md:hidden"
+      className="flex h-12 flex-row items-center px-4 md:hidden"
       transparentMode={transparentMode}
     >
       <Title url={url} title={title} />
-      {children}
-      {enabled && enableSearch ? <SearchToggle className="ms-auto" /> : null}
+      <div className="flex flex-1 flex-row items-center">{children}</div>
+      {enabled && enableSearch ? <SearchToggle /> : null}
       <SidebarTrigger
         className={cn(
           buttonVariants({
             color: 'ghost',
             size: 'icon',
-            className: (!enabled || !enableSearch) && 'ms-auto',
+            className: '-me-2',
           }),
         )}
       >
         {open ? <X /> : <Menu />}
       </SidebarTrigger>
     </NavBox>
-  );
-}
-
-export function Container(
-  props: HTMLAttributes<HTMLElement>,
-): React.ReactElement {
-  const { collapsed } = useSidebar();
-
-  return (
-    <main
-      id="nd-docs-layout"
-      {...props}
-      className={cn(
-        'flex flex-1 flex-row transition-[padding]',
-        !collapsed && 'md:ps-[240px] xl:ps-[260px]',
-        props.className,
-      )}
-    />
   );
 }
 

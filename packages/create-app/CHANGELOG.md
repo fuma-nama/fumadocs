@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 12.2.0
+
+### Patch Changes
+
+- 7601b35: Move DocsLayout options to layout.config.tsx
+
 ## 12.1.3
 
 ## 12.1.2
