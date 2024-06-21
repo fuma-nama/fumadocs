@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 12.2.0
+
+### Minor Changes
+
+- b70ff06: Support `!name` to hide pages on `meta.json`
+
 ## 12.1.3
 
 ## 12.1.2

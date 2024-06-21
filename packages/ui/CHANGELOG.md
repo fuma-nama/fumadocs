@@ -1,5 +1,20 @@
 # next-docs-ui
 
+## 12.2.0
+
+### Minor Changes
+
+- 318eaf9: **Redesign TOC popover:** Make the TOC Popover trigger a part of navbar.
+- ea22d04: **Improve dynamic sidebar:** Improve animation & close delay
+
+### Patch Changes
+
+- 2f2d9cf: **Improve footer:** Use card-style buttons to match the other buttons
+- bcc9f91: Added a new colors for API info badge, so POST, PATCH requests are different from PUT.
+- 2f2d9cf: Improve OpenAPI styles
+- Updated dependencies [b70ff06]
+  - fumadocs-core@12.2.0
+
 ## 12.1.3
 
 ### Patch Changes
