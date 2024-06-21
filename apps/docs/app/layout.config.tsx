@@ -50,6 +50,10 @@ export const baseOptions: BaseLayoutProps = {
 export const docsOptions: DocsLayoutProps = {
   ...baseOptions,
   tree: utils.pageTree,
+  nav: {
+    ...baseOptions.nav,
+    children: undefined,
+  },
   sidebar: {
     defaultOpenLevel: 0,
     banner: (
