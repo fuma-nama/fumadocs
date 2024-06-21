@@ -88,7 +88,7 @@ export function DocsPage({
               items={toc}
               header={tableOfContentPopover.header}
               footer={tableOfContentPopover.footer}
-              className="inline-flex items-center gap-2 px-4 py-2 text-left max-md:size-full md:ps-6"
+              className="inline-flex items-center gap-2 px-4 py-2 text-left max-md:size-full md:ps-6 md:text-muted-foreground"
             />,
           )}
         </div>

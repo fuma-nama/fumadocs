@@ -1,4 +1,4 @@
-import { ArrowRight, Text } from 'lucide-react';
+import { ChevronDown, Text } from 'lucide-react';
 import type { TOCItemType } from 'fumadocs-core/server';
 import * as Primitive from 'fumadocs-core/toc-internal';
 import {
@@ -63,7 +63,7 @@ export function TocPopover({
       <PopoverTrigger {...props}>
         <Text className="size-4" />
         {text.toc}
-        <ArrowRight className="ms-auto size-4 text-muted-foreground" />
+        <ChevronDown className="ms-auto size-4 text-muted-foreground" />
       </PopoverTrigger>
       <PopoverContent
         hideWhenDetached
