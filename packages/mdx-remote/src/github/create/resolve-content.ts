@@ -1,4 +1,4 @@
-import type { GithubCache, GithubCacheFile } from './cache';
+import type { GithubCache, GithubCacheFile } from '../types';
 
 export const createContentResolver = (
   cacheFile: GithubCacheFile,

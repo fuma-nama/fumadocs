@@ -1,6 +1,6 @@
-import type { GithubCache, GithubCacheFile } from './cache';
-import type { getTree } from './get-tree';
-import type { GetFileContent } from './utils';
+import type { GithubCache, GithubCacheFile } from '../types';
+import type { getTree } from '../get-tree';
+import type { GetFileContent } from '../utils';
 
 export interface CompareTreeDiff {
   action: 'add' | 'remove' | 'modify';
@@ -130,3 +130,17 @@ export const createApplyDiffToCache = (
 
     return cacheFile;
   };
+
+export const createDiff = (
+  cache: GithubCache,
+  getFileContent: GetFileContent,
+): GithubCache['diff'] => {
+  return {
+    get applyToCache() {
+      return createApplyDiffToCache(cache.data, cache.fs(), getFileContent);
+    },
+    get compareToGitTree() {
+      return createCompareToGitTree(cache.data);
+    },
+  };
+};

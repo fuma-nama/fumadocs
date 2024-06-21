@@ -1,10 +1,10 @@
 import path from 'node:path';
 import { createGetUrl } from 'fumadocs-core/source';
-import { revalidatePath } from 'next/cache';
-import type { CreateCacheOptions, GithubCache } from './cache';
+import { revalidatePath } from 'next/cache.js';
+import type { CreateCacheOptions, GithubCache } from '../types';
+import type { getTree } from '../get-tree';
+import type { GithubCacheStore } from '../store';
 import { findTreeRecursive } from './git-tree';
-import type { getTree } from './get-tree';
-import type { GithubCacheStore } from './store';
 
 export const createCreateGithubWebhookAPI = ({
   cache,

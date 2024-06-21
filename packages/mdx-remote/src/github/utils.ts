@@ -1,20 +1,30 @@
 import type { ZodError, z } from 'zod';
-import { unstable_cache as _unstableCache } from 'next/cache.js';
 import type { getTree } from './get-tree';
-import type { GithubCacheFile } from './cache';
 
 type FilterArray<T, U> = T extends U ? T : never;
 
+export type Prettify<T> = {
+  [K in keyof T]: T[K];
+} & NonNullable<unknown>;
+export type RequiredFields<T> = {
+  [K in keyof T as NonNullable<unknown> extends Pick<T, K> ? never : K]: T[K];
+};
+export type Awaitable<T> = T | Promise<T>;
 export type GitTreeItem<T extends 'blob' | 'tree' = 'blob' | 'tree'> =
   FilterArray<Awaited<ReturnType<typeof getTree>>['tree'][number], { type: T }>;
-export type Awaitable<T> = T | Promise<T>;
 
 export type GetFileContent<T = { path: string; sha: string }> = <U extends T>(
   file: U,
 ) => Awaitable<string>;
 
-export const unstableCache: typeof _unstableCache =
-  process.env.TSUP_BUILD === 'true' ? _unstableCache : (cb) => cb;
+export type JSONValue =
+  | string
+  | number
+  | boolean
+  | JSONValue[]
+  | {
+      [k: string]: JSONValue;
+    };
 
 export const blobToUtf8 = (blob: {
   content: string;
@@ -66,50 +76,14 @@ export function parse<T extends z.ZodType<unknown>>(
   return result.data;
 }
 
-export const cacheFileToGitTree = (
-  cacheFile: GithubCacheFile,
-): Awaited<ReturnType<typeof getTree>> => {
-  const skeleton: Awaited<ReturnType<typeof getTree>> = {
-    sha: cacheFile.sha,
-    tree: [],
-    url: '__FUMADOCS_GITHUB_CACHE_URL__',
-    truncated: false,
-  };
+export const isSerializable = (value: unknown): value is JSONValue => {
+  if (value === null) return true;
 
-  const { files, subDirectories } = cacheFile;
-
-  const addFile = (file: GithubCacheFile['files'][number]): number =>
-    skeleton.tree.push({
-      type: 'blob',
-      sha: file.sha,
-      path: file.path,
-      url: '__FUMADOCS_GITHUB_CACHE_URL__',
-    });
-
-  const addDirectory = (
-    directory: GithubCacheFile['subDirectories'][number],
-  ): void => {
-    skeleton.tree.push({
-      type: 'tree',
-      sha: directory.sha,
-      path: directory.path,
-      url: '__FUMADOCS_GITHUB_CACHE_URL__',
-    });
-    for (const file of directory.files) {
-      addFile(file);
-    }
-    for (const subDirectory of directory.subDirectories) {
-      addDirectory(subDirectory);
-    }
-  };
-
-  for (const file of files) {
-    addFile(file);
+  if (typeof value === 'object') {
+    return Object.values(value).every(isSerializable);
   }
 
-  for (const directory of subDirectories) {
-    addDirectory(directory);
-  }
+  if (Array.isArray(value)) value.every(isSerializable);
 
-  return skeleton;
+  return ['string', 'number', 'bigint', 'boolean'].includes(typeof value);
 };

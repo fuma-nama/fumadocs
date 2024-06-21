@@ -1,12 +1,32 @@
-import { defineConfig } from 'tsup';
+import { defineConfig, type Options } from 'tsup';
 
-export default defineConfig({
-  entry: ['./src/index.ts', './src/github/index.ts'],
-  format: 'esm',
-  external: ['fumadocs-core', 'webpack', 'next', 'react'],
+const baseOptions: Options = {
+  external: [
+    'fumadocs-core',
+    'webpack',
+    'next',
+    'react',
+    '@fumadocs/mdx-remote',
+  ],
   dts: true,
   target: 'esnext',
   env: {
-    TSUP_BUILD: 'true',
+    TSUP: '1',
   },
-});
+};
+
+export default defineConfig([
+  {
+    entry: ['./src/index.ts', './src/github/{index,source}.ts'],
+    format: 'esm',
+    ...baseOptions,
+  },
+  {
+    ...baseOptions,
+    entry: {
+      'github/loader': './src/github/loader.ts',
+    },
+    format: 'cjs',
+    dts: false,
+  },
+]);

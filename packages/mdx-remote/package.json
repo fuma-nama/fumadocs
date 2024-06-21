@@ -15,8 +15,15 @@
   "exports": {
     "./github": {
       "import": "./dist/github/index.mjs",
+      "require": "./dist/github/index.mjs",
       "types": "./dist/github/index.d.mts"
     },
+    "./github/source": {
+      "require": "./dist/github/source.mjs",
+      "import": "./dist/github/source.mjs",
+      "types": "./dist/github/source.d.mts"
+    },
+    "./github/loader": "./dist/github/loader.js",
     ".": {
       "import": "./dist/index.mjs",
       "types": "./dist/index.d.mts"
@@ -59,7 +66,8 @@
     "picomatch": "^4.0.2",
     "tsconfig": "workspace:*",
     "unified": "^11.0.4",
-    "vfile": "^6.0.1"
+    "vfile": "^6.0.1",
+    "webpack": "^5.90.3"
   },
   "peerDependencies": {
     "fumadocs-core": ">= 12.1.1",

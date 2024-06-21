@@ -1,8 +1,8 @@
 import path from 'node:path';
 import fg from 'fast-glob';
-import type { GithubCacheFile } from './cache';
-import { getTree } from './get-tree';
-import { fnv1a, type GitTreeItem } from './utils';
+import type { GithubCacheFile } from '../types';
+import { getTree } from '../get-tree';
+import { fnv1a, type GitTreeItem } from '../utils';
 
 export const findTreeRecursive = async (
   directory: string,
@@ -185,4 +185,52 @@ export const filesToGitTree = async ({
   }
 
   return tree;
+};
+
+export const cacheFileToGitTree = (
+  cacheFile: GithubCacheFile,
+): Awaited<ReturnType<typeof getTree>> => {
+  const skeleton: Awaited<ReturnType<typeof getTree>> = {
+    sha: cacheFile.sha,
+    tree: [],
+    url: '__FUMADOCS_GITHUB_CACHE_URL__',
+    truncated: false,
+  };
+
+  const { files, subDirectories } = cacheFile;
+
+  const addFile = (file: GithubCacheFile['files'][number]): number =>
+    skeleton.tree.push({
+      type: 'blob',
+      sha: file.sha,
+      path: file.path,
+      url: '__FUMADOCS_GITHUB_CACHE_URL__',
+    });
+
+  const addDirectory = (
+    directory: GithubCacheFile['subDirectories'][number],
+  ): void => {
+    skeleton.tree.push({
+      type: 'tree',
+      sha: directory.sha,
+      path: directory.path,
+      url: '__FUMADOCS_GITHUB_CACHE_URL__',
+    });
+    for (const file of directory.files) {
+      addFile(file);
+    }
+    for (const subDirectory of directory.subDirectories) {
+      addDirectory(subDirectory);
+    }
+  };
+
+  for (const file of files) {
+    addFile(file);
+  }
+
+  for (const directory of subDirectories) {
+    addDirectory(directory);
+  }
+
+  return skeleton;
 };

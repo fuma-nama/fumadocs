@@ -1,15 +1,8 @@
-// TODO replace this with more abstracted plugin featuring websocket and automatic local file cache for dev
+import { githubLoader, compileMDX } from '@fumadocs/mdx-remote/github/source';
 
-import { createCache } from '@fumadocs/mdx-remote/github';
-import path from 'node:path';
+export const { pageTree, getPages, getPage, getSearchIndexes } =
+  await githubLoader({
+    /* pass your own options here */
+  });
 
-const cwd = process.cwd();
-const directory = path.resolve(cwd, 'content', 'docs');
-const cache = await createCache({
-  directory,
-  saveFile: path.resolve(directory, '.fumadocs', 'cache.json'),
-}).load();
-
-export const { pageTree, getPage, getPages, getSearchIndexes } =
-  await cache.generatePageTree();
-export const { compileMDX } = cache;
+export { compileMDX };

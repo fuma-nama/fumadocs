@@ -1,4 +1,4 @@
-import type { GithubCache } from './cache';
+import type { GithubCache } from './types';
 import { fnv1a } from './utils';
 
 export class GithubCacheStore {

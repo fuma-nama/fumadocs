@@ -11,7 +11,7 @@ import {
 } from 'vitest';
 import { createCache, type CreateCacheOptions } from '@/github';
 import fs from 'node:fs';
-import type { CompareTreeDiff } from '@/github/diff';
+import type { CompareTreeDiff } from '@/github/create/diff';
 import { fnv1a, type GitTreeItem } from '@/github/utils';
 import { githubCacheStore } from '@/github/store';
 
@@ -116,7 +116,7 @@ describe('Without Saved Cache', () => {
   test('cache.generatePageTree', async () => {
     const cache = await mockCache({ directory });
 
-    const { pageTree } = await cache.generatePageTree();
+    const { pageTree } = await cache.fumadocsLoader();
 
     await expect(pageTree).toMatchFileSnapshot(
       path.resolve(cwd, './out/page-tree.output.json5'),

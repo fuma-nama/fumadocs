@@ -1,5 +1,5 @@
-import type { GithubCache } from './cache';
-import type { GetFileContent } from './utils';
+import type { GithubCache } from '../types';
+import type { GetFileContent } from '../utils';
 
 export const createPopulateFileSystem = (
   cacheFile: GithubCache['data'],
@@ -41,7 +41,7 @@ export const createPopulateFileSystem = (
     return map;
   };
 
-export interface CacheVirtualFileSystem {
+export interface VirtualFileSystem {
   readFile: (path: string) => Promise<string | undefined>;
   getFiles: () => string[];
   writeFile: (path: string, content: string | Promise<string>) => void;
@@ -60,7 +60,7 @@ export const createVirtualFileSystem = (
   diff: GithubCache['diff'],
   getFileContent: GetFileContent,
   extend?: Map<string, string | Promise<string>>,
-): CacheVirtualFileSystem => {
+): VirtualFileSystem => {
   const files = new Map<string, string | Promise<string>>(extend);
 
   return {
@@ -87,5 +87,27 @@ export const createVirtualFileSystem = (
       });
       diff.applyToCache(changes, getFileContent);
     },
+  };
+};
+
+export const createFileSystem = (
+  data: GithubCache['data'],
+  tree: GithubCache['tree'],
+  diff: GithubCache['diff'],
+  getFileContent: GetFileContent,
+) => {
+  const populateFileSystem = createPopulateFileSystem(data);
+  let virtualFileSystem: VirtualFileSystem | undefined;
+
+  return function fileSystem(): VirtualFileSystem {
+    if (!virtualFileSystem) {
+      virtualFileSystem = createVirtualFileSystem(
+        tree,
+        diff,
+        getFileContent,
+        populateFileSystem(getFileContent),
+      );
+    }
+    return virtualFileSystem;
   };
 };
