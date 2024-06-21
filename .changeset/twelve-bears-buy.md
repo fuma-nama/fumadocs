@@ -1,5 +1,5 @@
 ---
-'fumadocs-ui': patch
+'fumadocs-ui': minor
 ---
 
-Improve dynamic sidebar
+**Improve dynamic sidebar:** Improve animation & close delay

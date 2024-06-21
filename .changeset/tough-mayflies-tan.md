@@ -1,5 +1,5 @@
 ---
-'fumadocs-ui': patch
+'fumadocs-ui': minor
 ---
 
-Redesign TOC popover
+**Redesign TOC popover:** Make the TOC Popover trigger a part of navbar.

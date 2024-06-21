@@ -2,4 +2,4 @@
 'fumadocs-ui': patch
 ---
 
-Redesign footer
+**Improve footer:** Use card-style buttons to match the other buttons
