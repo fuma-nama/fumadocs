@@ -95,6 +95,7 @@ void generateFiles({
 ### Frontmatter
 
 Customise the frontmatter of MDX files.
+By default, it includes a `full: true` property for Fumadocs UI.
 
 ```ts
 import { generateFiles } from 'fumadocs-openapi';
@@ -103,7 +104,7 @@ void generateFiles({
   input: ['./petstore.yaml'],
   output: './content/docs',
   frontmatter: (title, description) => ({
-    toc: false,
+    myProperty: 'hello',
   }),
 });
 ```
