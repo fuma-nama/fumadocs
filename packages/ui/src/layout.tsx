@@ -176,7 +176,6 @@ export function DocsLayout({
                     </LinksMenu>
                   )}
                 </div>
-
                 {sidebar.banner}
               </>
             }

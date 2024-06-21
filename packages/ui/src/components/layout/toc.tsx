@@ -1,4 +1,4 @@
-import { Text } from 'lucide-react';
+import { ArrowRight, Text } from 'lucide-react';
 import type { TOCItemType } from 'fumadocs-core/server';
 import * as Primitive from 'fumadocs-core/toc-internal';
 import {
@@ -61,11 +61,13 @@ export function TocPopover({
   return (
     <Popover>
       <PopoverTrigger {...props}>
-        <Text className="size-3" />
+        <Text className="size-4" />
         {text.toc}
+        <ArrowRight className="ms-auto size-4 text-muted-foreground" />
       </PopoverTrigger>
       <PopoverContent
         hideWhenDetached
+        alignOffset={16}
         align="start"
         side="bottom"
         className="flex max-h-[80vh] w-[260px] flex-col gap-4 p-3"

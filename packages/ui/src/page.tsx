@@ -76,19 +76,22 @@ export function DocsPage({
   return (
     <TocProvider toc={toc}>
       <div className="flex min-w-0 flex-1 flex-col">
-        {replaceOrDefault(
-          tableOfContentPopover,
-          <TocPopover
-            items={toc}
-            header={tableOfContentPopover.header}
-            footer={tableOfContentPopover.footer}
-            className={cn(
-              'sticky top-12 z-10 inline-flex items-center gap-2 bg-background/60 p-3 text-left text-xs text-muted-foreground backdrop-blur-md transition-colors max-md:px-4 md:top-2 md:me-2 md:ms-auto md:rounded-md md:border',
-              'hover:text-accent-foreground md:hover:bg-accent',
-              !full && 'lg:hidden',
-            )}
-          />,
-        )}
+        <div
+          className={cn(
+            'sticky top-12 z-10 -mb-4 border-b bg-background/60 text-sm font-medium backdrop-blur-md md:top-0 md:bg-card',
+            !full && 'lg:hidden',
+          )}
+        >
+          {replaceOrDefault(
+            tableOfContentPopover,
+            <TocPopover
+              items={toc}
+              header={tableOfContentPopover.header}
+              footer={tableOfContentPopover.footer}
+              className="inline-flex items-center gap-2 px-4 py-2 text-left max-md:size-full md:ps-6"
+            />,
+          )}
+        </div>
         <article
           className={cn(
             'mx-auto flex w-full max-w-[840px] flex-1 flex-col gap-6 px-4 pt-10 md:px-6 md:pt-12',
