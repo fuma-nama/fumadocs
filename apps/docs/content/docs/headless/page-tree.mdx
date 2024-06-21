@@ -14,6 +14,8 @@ Hence, you shouldn't store any sensitive or large data in page tree.
 
 ## Conventions
 
+This is the definitions of Page Tree, you may refer to Page Conventions to learn how to structure your folders/pages.
+
 ### Root
 
 The initial root of page trees.
@@ -69,7 +71,9 @@ The initial root of page trees.
 
 #### As Root
 
-To implement multiple page trees, you can add a `root` property to the folder node. The nearest root folder of current page will be used as the root of page tree.
+To implement multiple page trees, you can add a `root` property to the folder node.
+This will mark the folder as a root folder, and the nearest root folder of current page will be used as the root of page tree.
+Instead of showing the entire page tree, navigation elements will be restricted within the current root.
 
 ### Separator
 

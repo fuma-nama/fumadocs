@@ -51,7 +51,6 @@ export interface PageTreeBuilder {
 const link = /^\[(?<text>.+)]\((?<url>.+)\)$/;
 const separator = /^---(?<name>.*?)---$/;
 const rest = '...';
-const extractor = /^\.\.\.(?<name>.+)$/;
 
 /**
  * @param nodes - All nodes to be built
@@ -122,22 +121,29 @@ function resolveFolderItem(
     return [ctx.options.attachFile?.(node) ?? node];
   }
 
-  const extractResult = extractor.exec(item);
+  let filename = item;
+  const isExcept = item.startsWith('!');
+  if (isExcept) {
+    filename = item.slice(1);
+  }
 
-  const path = resolvePath(
-    folder.file.path,
-    extractResult?.groups?.name ?? item,
-  );
+  const isExtract = item.startsWith('...');
+  if (isExtract) {
+    filename = item.slice(3);
+  }
+
+  const path = resolvePath(folder.file.path, filename);
+
   const itemNode = ctx.storage.readDir(path) ?? ctx.storage.read(path, 'page');
-
   if (!itemNode) return [];
 
   addedNodePaths.add(itemNode.file.path);
+  if (isExcept) return [];
 
   if ('children' in itemNode) {
     const node = buildFolderNode(itemNode, false, ctx);
 
-    return extractResult ? node.children : [node];
+    return isExtract ? node.children : [node];
   }
 
   return [buildFileNode(itemNode, ctx)];

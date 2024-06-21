@@ -40,7 +40,7 @@ export const animations = {
       // retain the current styles until collapsed
       '0%, 100%': {
         top: '0',
-        bottom: '0',
+        height: '100dvh',
         'border-radius': 'none',
       },
     },
