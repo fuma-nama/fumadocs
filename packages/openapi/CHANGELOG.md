@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 3.1.1
+
+### Patch Changes
+
+- 318eaf9: Support generating files per operation
+
 ## 3.1.0
 
 ### Minor Changes
