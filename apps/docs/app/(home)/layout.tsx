@@ -28,7 +28,7 @@ function Footer(): React.ReactElement {
             aria-label="Go to Fuma Nama's GitHub profile"
           >
             Fuma Nama
-          </Link>{' '}
+          </Link>
           . The source code is available on{' '}
           <Link
             href="https://github.com/fuma-nama/fumadocs"
@@ -37,6 +37,7 @@ function Footer(): React.ReactElement {
           >
             GitHub
           </Link>
+          .
         </p>
       </div>
     </footer>
