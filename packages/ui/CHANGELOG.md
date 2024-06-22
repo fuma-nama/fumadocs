@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 12.2.2
+
+### Patch Changes
+
+- 72c7991: Improve sidebar
+  - fumadocs-core@12.2.2
+
 ## 12.2.1
 
 ### Patch Changes
