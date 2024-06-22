@@ -10,7 +10,6 @@ import { modes } from '@/utils/modes';
 export const baseOptions: BaseLayoutProps = {
   githubUrl: 'https://github.com/fuma-nama/fumadocs',
   nav: {
-    transparentMode: 'top',
     title: (
       <>
         <Image
@@ -21,11 +20,8 @@ export const baseOptions: BaseLayoutProps = {
           aria-label="Fumadocs"
         />
 
-        <FumadocsIcon
-          className="size-5 [.uwu_&]:hidden [aside_&]:size-4"
-          fill="currentColor"
-        />
-        <span className="[.uwu_&]:hidden max-md:[header_&]:hidden">
+        <FumadocsIcon className="size-4 [.uwu_&]:hidden" fill="currentColor" />
+        <span className="font-medium [.uwu_&]:hidden max-md:[header_&]:hidden">
           Fumadocs
         </span>
       </>
@@ -52,6 +48,7 @@ export const docsOptions: DocsLayoutProps = {
   tree: utils.pageTree,
   nav: {
     ...baseOptions.nav,
+    transparentMode: 'top',
     children: undefined,
   },
   sidebar: {
