@@ -4,7 +4,6 @@ import {
   afterAll,
   afterEach,
   beforeAll,
-  beforeEach,
   describe,
   expect,
   test,
@@ -13,7 +12,7 @@ import {
 import { createCache, type CreateCacheOptions } from '@/github';
 import fs from 'node:fs';
 import type { CompareTreeDiff } from '@/github/create/diff';
-import type { GitTreeItem } from '@/github/utils';
+import { fnv1a, type GitTreeItem } from '@/github/utils';
 import { githubCacheStore } from '@/github/store';
 
 const cwd = path.dirname(fileURLToPath(import.meta.url));
@@ -21,21 +20,20 @@ const cwd = path.dirname(fileURLToPath(import.meta.url));
 const mockCache = vi.fn(
   async ({
     directory,
+    cacheOptions,
     load = true,
     lazy = false,
-    ...cacheOptions
   }: {
+    directory: string;
+    cacheOptions?: Omit<CreateCacheOptions<'local'>, 'directory'>;
     load?: boolean;
     lazy?: boolean;
-  } & CreateCacheOptions<'local'>) => {
-    const cache = createCache(
-      {
-        directory,
-        saveCache: false,
-        ...cacheOptions,
-      },
-      'local',
-    );
+  }) => {
+    const cache = createCache({
+      directory,
+      saveFile: false,
+      ...cacheOptions,
+    });
 
     if (load)
       await cache.load({
@@ -79,10 +77,6 @@ describe('Without Saved Cache', () => {
   >(
     diff: T[],
   ) => diff.sort((a, b) => a.path.localeCompare(b.path));
-
-  beforeEach(() => {
-    githubCacheStore.clear();
-  });
 
   test('cache.data/tree before cache.load()', async () => {
     const cache = await mockCache({
@@ -214,6 +208,9 @@ describe('Without Saved Cache', () => {
     const cache = await mockCache({
       directory,
       lazy: true,
+      cacheOptions: {
+        saveFile: false,
+      },
     });
 
     expect(cache.data.files).toHaveLength(0);
@@ -235,13 +232,25 @@ describe('Without Saved Cache', () => {
 
 describe('With Saved Cache', async () => {
   const directory = path.resolve(cwd, './fixtures');
-  const cache = await mockCache({
-    directory,
+  const cachePath = path.resolve(directory, '.fumadocs', 'cache.json');
+  const cache = await mockCache({ directory });
+
+  beforeAll(async () => {
+    await fs.promises.mkdir(path.dirname(cachePath), { recursive: true });
+    await fs.promises.writeFile(
+      cachePath,
+      JSON.stringify(await cache.resolveAllContent()),
+      'utf8',
+    );
   });
+
   // cache.fs.readFile
   test('cache.fs().readFile', async () => {
     const newCache = await mockCache({
       directory,
+      cacheOptions: {
+        saveFile: cachePath,
+      },
       load: false,
     });
     await newCache.load();
@@ -254,5 +263,11 @@ describe('With Saved Cache', async () => {
         await fs.promises.readFile(path.resolve(directory, file), 'utf8'),
       );
     }
+  });
+
+  afterAll(async () => {
+    await fs.promises.rm(path.dirname(cachePath), {
+      recursive: true,
+    });
   });
 });

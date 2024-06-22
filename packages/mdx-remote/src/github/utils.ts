@@ -26,17 +26,6 @@ export type JSONValue =
       [k: string]: JSONValue;
     };
 
-export type ConditionalPromise<T, C extends boolean> = C extends true
-  ? Promise<Awaited<T>>
-  : T;
-export type MergeObjects<A, B> = {
-  [K in keyof A | keyof B]: K extends keyof A
-    ? A[K]
-    : K extends keyof B
-      ? B[K]
-      : never;
-};
-
 export const blobToUtf8 = (blob: {
   content: string;
   encoding: BufferEncoding;
@@ -98,27 +87,3 @@ export const isSerializable = (value: unknown): value is JSONValue => {
 
   return ['string', 'number', 'bigint', 'boolean'].includes(typeof value);
 };
-
-export const generateRevalidationTag = (options: unknown): string => {
-  return `@fumadocs/mdx-remote/github/cache_${fnv1a(JSON.stringify(options))}`;
-};
-
-export class Store<T> {
-  store = new Map<string, T>();
-
-  set(hash: string, data: T): ReturnType<typeof this.store.set> {
-    return this.store.set(hash, data);
-  }
-
-  clear(): ReturnType<typeof this.store.clear> {
-    this.store.clear();
-  }
-
-  get(hash: string): ReturnType<typeof this.store.get> {
-    return this.store.get(hash);
-  }
-
-  has(hash: string): ReturnType<typeof this.store.has> {
-    return this.store.has(hash);
-  }
-}

@@ -7,17 +7,13 @@ import { cacheFileToGitTree, createTransformGitTreeToCache } from './git-tree';
 export const createLoader = (
   cacheInstance: GithubCache,
   {
-    cwd,
     saveFile,
-    saveCache = true,
     notFound,
     getFileContent,
     initialLoad,
     onInitialLoad,
   }: {
-    cwd: string;
     saveFile: string | false;
-    saveCache?: boolean;
     getFileContent: GetFileContent;
     notFound: (lazy: boolean) => Promise<GithubCacheFile | undefined>;
     initialLoad?: boolean;
@@ -29,19 +25,16 @@ export const createLoader = (
   }): Promise<typeof cacheInstance> {
     const { lazy = false } = options ?? {};
 
-    if (process.env.NODE_ENV === 'production' && !initialLoad) {
+    if (process.env.NODE_ENV === 'production' && !initialLoad)
       return cacheInstance;
-    }
 
     // TODO make this a customizable condition?
     const isBuildTime = process.env.NEXT_PHASE?.endsWith('build');
-    const isDev = process.env.NODE_ENV === 'development';
 
     if (
       typeof saveFile === 'string' &&
       fs.existsSync(saveFile) &&
-      !isBuildTime &&
-      !lazy
+      !isBuildTime
     ) {
       const raw = await fs.promises.readFile(saveFile, 'utf-8');
       const data = JSON.parse(raw) as GithubCacheFile;
@@ -59,14 +52,7 @@ export const createLoader = (
         );
     }
 
-    if (
-      (isDev ? saveCache : true) &&
-      saveFile &&
-      (!fs.existsSync(saveFile) || isBuildTime)
-    ) {
-      if (isDev)
-        await addFumadocsCacheToGitIgnore(cwd, path.relative(cwd, saveFile));
-
+    if (saveFile && (!fs.existsSync(saveFile) || isBuildTime)) {
       await fs.promises.mkdir(path.dirname(saveFile), { recursive: true });
       await fs.promises.writeFile(
         saveFile,
@@ -79,29 +65,3 @@ export const createLoader = (
 
     return cacheInstance;
   };
-
-const addFumadocsCacheToGitIgnore = async (
-  cwd: string,
-  file: string,
-): Promise<void> => {
-  const isGitRepo = fs.existsSync(path.join(cwd, '.git'));
-  if (!isGitRepo) return;
-
-  const gitIgnorePath = path.join(cwd, '.gitignore');
-
-  const ignoreValue = `${path.basename(path.dirname(file))}/`;
-
-  if (fs.existsSync(gitIgnorePath)) {
-    const gitIgnore = await fs.promises.readFile(gitIgnorePath, 'utf-8');
-    if (!gitIgnore.includes(ignoreValue)) {
-      await fs.promises.writeFile(
-        gitIgnorePath,
-        `${gitIgnore}\n# fumadocs\n${ignoreValue}`,
-      );
-    } else return;
-  } else {
-    await fs.promises.writeFile(gitIgnorePath, `# fumadocs\n${ignoreValue}`);
-  }
-
-  console.info(`[@fumadocs/mdx-remote/github] Added ${file} to .gitignore`);
-};
