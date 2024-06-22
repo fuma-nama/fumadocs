@@ -25,7 +25,7 @@ export function Banner({
       id={id}
       {...props}
       className={cn(
-        'flex h-12 flex-row items-center justify-center bg-secondary px-4 text-center text-sm font-medium',
+        'relative flex h-12 flex-row items-center justify-center bg-secondary px-4 text-center text-sm font-medium',
         !open && 'hidden',
         props.className,
       )}
@@ -34,8 +34,8 @@ export function Banner({
       {id ? (
         <script
           dangerouslySetInnerHTML={{
-            __html: `const item = localStorage.getItem('nd-banner-${id}');
-   if (item === 'true') {
+            __html: `const ndBannerItem = localStorage.getItem('nd-banner-${id}');
+   if (ndBannerItem === 'true') {
      document.getElementById('${id}').style.display = 'none';
    }`,
           }}
