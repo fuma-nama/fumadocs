@@ -1,6 +1,6 @@
 'use client';
 
-import { HTMLAttributes, useCallback, useEffect, useState } from 'react';
+import { type HTMLAttributes, useCallback, useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/theme/variants';
@@ -44,6 +44,7 @@ export function Banner({
       {props.children}
       {id ? (
         <button
+          type="button"
           aria-label="Close Banner"
           onClick={onClick}
           className={cn(

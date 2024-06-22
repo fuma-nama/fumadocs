@@ -34,9 +34,11 @@ export function RollButton({
     const listener = (): void => {
       const element = document.scrollingElement;
       if (!element) return;
+
       const nearTop =
+        element.scrollHeight === element.clientHeight ||
         element.scrollTop / (element.scrollHeight - element.clientHeight) <
-        percentage;
+          percentage;
 
       setShow(!nearTop);
     };
@@ -56,9 +58,9 @@ export function RollButton({
         buttonVariants({
           color: 'secondary',
           className:
-            'fixed top-20 [&_svg]:size-4 gap-1 left-1/2 translate-x-[-50%] z-10 shadow-md rounded-full transition-all md:top-6',
+            'fixed top-[108px] [&_svg]:size-4 gap-1 left-1/2 translate-x-[-50%] z-10 shadow-md rounded-full transition-all md:top-4',
         }),
-        !show && 'translate-y-20 opacity-0',
+        !show && 'pointer-events-none translate-y-20 opacity-0',
       )}
       onClick={useCallback(() => {
         document.scrollingElement?.scrollTo({

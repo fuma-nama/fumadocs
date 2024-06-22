@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { Card, Cards } from 'fumadocs-ui/components/card';
 import { DocsPage, DocsBody } from 'fumadocs-ui/page';
 import { notFound } from 'next/navigation';
+import { RollButton } from 'fumadocs-ui/components/roll-button';
 import { utils, type Page } from '@/utils/source';
 import { createMetadata } from '@/utils/metadata';
 import Preview from '@/components/preview';
@@ -55,6 +56,7 @@ export default function Page({
       }}
       tableOfContentPopover={{ footer }}
     >
+      <RollButton />
       <h1 className="text-3xl font-bold text-foreground sm:text-4xl">
         {page.data.title}
       </h1>
