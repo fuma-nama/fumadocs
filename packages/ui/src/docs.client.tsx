@@ -23,7 +23,7 @@ export function SubNav({
   return (
     <NavBox
       id="nd-subnav"
-      className="flex h-12 flex-row items-center px-4 md:hidden"
+      className="flex h-16 flex-row items-center px-4 md:hidden"
       transparentMode={transparentMode}
     >
       <Title url={url} title={title} />

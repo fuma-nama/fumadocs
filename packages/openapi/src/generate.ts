@@ -18,7 +18,9 @@ export interface GenerateOptions {
   }[];
 
   /**
-   * Customise frontmatter
+   * Customise frontmatter.
+   *
+   * A `full: true` property will be added by default.
    */
   frontmatter?: (
     title: string,

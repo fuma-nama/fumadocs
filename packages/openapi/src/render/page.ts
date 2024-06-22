@@ -11,6 +11,7 @@ export function renderPage(
   const banner = dump({
     title,
     description,
+    full: true,
     ...options.frontmatter?.(title, description),
   }).trim();
 
