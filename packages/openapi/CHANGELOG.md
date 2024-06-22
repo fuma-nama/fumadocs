@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 3.1.2
+
+### Patch Changes
+
+- 78acd55: Use full mode on docs pages by default on OpenAPI generated pages
+
 ## 3.1.1
 
 ### Patch Changes
