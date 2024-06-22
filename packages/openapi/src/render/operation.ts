@@ -22,7 +22,10 @@ export async function renderOperation(
   const example: string[] = [];
 
   const title = method.summary ?? method.operationId;
-  if (title && !noTitle) info.push(heading(level++, title));
+  if (title && !noTitle) {
+    info.push(heading(level, title));
+    level++;
+  }
   if (method.description) info.push(p(method.description));
 
   if (security) {

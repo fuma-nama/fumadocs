@@ -12,6 +12,7 @@ import { Card } from 'fumadocs-ui/components/card';
 import { Heading } from 'fumadocs-ui/components/heading';
 import type { ReactNode } from 'react';
 import { RootToggle } from 'fumadocs-ui/components/layout/root-toggle';
+import { Banner } from 'fumadocs-ui/components/banner';
 import BannerImage from '@/public/banner.png';
 import { modes } from '@/utils/modes';
 import { Wrapper } from './wrapper';
@@ -212,6 +213,13 @@ export default {
             description: mode.description,
           }))}
         />
+      </div>
+    </Wrapper>
+  ),
+  banner: (
+    <Wrapper>
+      <div>
+        <Banner id="12.21">Be careful, Fumadocs v12.2 has released</Banner>
       </div>
     </Wrapper>
   ),

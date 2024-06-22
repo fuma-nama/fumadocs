@@ -1,0 +1,40 @@
+---
+title: Banner
+description: Add a banner to your site
+preview: banner
+---
+
+## Usage
+
+Put the element at the top of your root layout.
+
+```tsx
+import { Banner } from 'fumadocs-ui/components/banner';
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}): React.ReactElement {
+  return (
+    <html lang="en">
+      <body>
+        <Banner>Hello World</Banner>
+        {children}
+      </body>
+    </html>
+  );
+}
+```
+
+### Close
+
+To allow users to close the banner, give the banner an ID.
+
+```tsx
+import { Banner } from 'fumadocs-ui/components/banner';
+
+<Banner id="hello-world">Hello World</Banner>;
+```
+
+The state will be automatically persisted.
