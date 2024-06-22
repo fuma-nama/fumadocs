@@ -579,6 +579,9 @@ importers:
       '@mdx-js/mdx':
         specifier: ^3.0.1
         version: 3.0.1
+      chokidar:
+        specifier: ^3.6.0
+        version: 3.6.0
       fast-glob:
         specifier: ^3.3.1
         version: 3.3.2
@@ -591,6 +594,9 @@ importers:
       rehype-img-size:
         specifier: ^1.0.1
         version: 1.0.1
+      ws:
+        specifier: ^8.17.1
+        version: 8.17.1
       zod:
         specifier: ^3.23.8
         version: 3.23.8
@@ -607,6 +613,9 @@ importers:
       '@types/react':
         specifier: ^18.3.3
         version: 18.3.3
+      '@types/ws':
+        specifier: ^8.5.10
+        version: 8.5.10
       eslint-config-custom:
         specifier: workspace:*
         version: link:../eslint-config-custom
@@ -2315,6 +2324,9 @@ packages:
 
   '@types/unist@3.0.2':
     resolution: {integrity: sha512-dqId9J8K/vGi5Zr7oo212BGii5m3q5Hxlkwy3WpYuKPklmBEvsbMYYyLxAQpSffdLl/gdW0XUpKWFvYmyoWCoQ==}
+
+  '@types/ws@8.5.10':
+    resolution: {integrity: sha512-vmQSUcfalpIq0R9q7uTo2lXs6eGIpt9wtnLdMv9LVpIjCA/+ufZRozlVoVelIYixx1ugCBKDhn89vnsEGOCx9A==}
 
   '@typescript-eslint/eslint-plugin@7.13.0':
     resolution: {integrity: sha512-FX1X6AF0w8MdVFLSdqwqN/me2hyhuQg4ykN6ZpVhh1ij/80pTvDKclX1sZB9iqex8SjQfVhwMKs3JtnnMLzG9w==}
@@ -6162,6 +6174,18 @@ packages:
       utf-8-validate:
         optional: true
 
+  ws@8.17.1:
+    resolution: {integrity: sha512-6XQFvXTkbfUOZOKKILFG1PDK2NDQs4azKQl26T0YS5CxqWLgXajbPZ+h4gZekJyRqFU8pvnbAbbs/3TgRPy+GQ==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+
   xtend@2.2.0:
     resolution: {integrity: sha512-SLt5uylT+4aoXxXuwtQp5ZnMMzhDb1Xkg4pEqc00WUJCQifPfV9Ub1VrNhp9kXkrjZD2I2Hl8WnjP37jzZLPZw==}
     engines: {node: '>=0.4'}
@@ -7826,6 +7850,10 @@ snapshots:
   '@types/unist@2.0.8': {}
 
   '@types/unist@3.0.2': {}
+
+  '@types/ws@8.5.10':
+    dependencies:
+      '@types/node': 18.17.5
 
   '@typescript-eslint/eslint-plugin@7.13.0(@typescript-eslint/parser@7.13.0(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5)':
     dependencies:
@@ -12669,6 +12697,8 @@ snapshots:
   wrappy@1.0.2: {}
 
   ws@7.5.9: {}
+
+  ws@8.17.1: {}
 
   xtend@2.2.0: {}
 

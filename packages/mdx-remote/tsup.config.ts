@@ -17,7 +17,11 @@ const baseOptions: Options = {
 
 export default defineConfig([
   {
-    entry: ['./src/index.ts', './src/github/{index,source}.ts'],
+    entry: [
+      './src/index.ts',
+      './src/github/{index,source}.ts',
+      './src/github/dev/{index,client}.ts',
+    ],
     format: 'esm',
     ...baseOptions,
   },
