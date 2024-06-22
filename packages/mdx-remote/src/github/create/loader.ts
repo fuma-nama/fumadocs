@@ -1,67 +1,90 @@
 import path from 'node:path';
 import fs from 'node:fs';
-import type { GithubCache, GithubCacheFile } from '../types';
+import type { GithubCacheFile } from '../types';
 import type { GetFileContent } from '../utils';
-import { cacheFileToGitTree, createTransformGitTreeToCache } from './git-tree';
+import { cacheFileToGitTree } from './git-tree';
+import type { GetTreeResponse } from '@/github/get-tree';
+import { resolveAllContent } from '@/github/create/resolve-content';
+import { VirtualFileSystem } from '@/github/create/file-system';
 
-export const createLoader = (
-  cacheInstance: GithubCache,
-  {
-    saveFile,
-    notFound,
-    getFileContent,
-    initialLoad,
-    onInitialLoad,
-  }: {
-    saveFile: string | false;
-    getFileContent: GetFileContent;
-    notFound: (lazy: boolean) => Promise<GithubCacheFile | undefined>;
-    initialLoad?: boolean;
-    onInitialLoad?: () => void;
-  },
-) =>
-  async function load(options?: {
-    lazy?: boolean;
-  }): Promise<typeof cacheInstance> {
-    const { lazy = false } = options ?? {};
+interface Loaded {
+  tree: GetTreeResponse;
+  resolvedFile: GithubCacheFile;
+}
 
-    if (process.env.NODE_ENV === 'production' && !initialLoad)
-      return cacheInstance;
+export interface CacheLoaderOptions {
+  saveFile: string | false;
+  getFileContent: GetFileContent;
+  fs: VirtualFileSystem;
 
-    // TODO make this a customizable condition?
-    const isBuildTime = process.env.NEXT_PHASE?.endsWith('build');
+  /**
+   * Resolve cache file when not found
+   */
+  notFound: (lazy: boolean) => Promise<Loaded | undefined>;
+  onInitialLoad?: () => void;
+}
 
-    if (
-      typeof saveFile === 'string' &&
-      fs.existsSync(saveFile) &&
-      !isBuildTime
-    ) {
-      const raw = await fs.promises.readFile(saveFile, 'utf-8');
-      const data = JSON.parse(raw) as GithubCacheFile;
-      cacheInstance.tree = Object.assign(cacheFileToGitTree(data), {
-        transformToCache: createTransformGitTreeToCache(getFileContent),
-      });
-      cacheInstance.data = data;
-    } else {
-      const data = await notFound(lazy);
+export interface CacheLoader {
+  load: (lazy?: boolean) => Promise<Loaded>;
+}
 
-      if (data) cacheInstance.data = data;
-      else
-        throw new Error(
-          'Attempted to load Github cache, but could not retrieve cache and/or files (local or remote)',
+export function createCacheLoader({
+  saveFile,
+  notFound,
+  onInitialLoad,
+  ...ctx
+}: CacheLoaderOptions): CacheLoader {
+  let tree: GetTreeResponse;
+  let resolvedFile: GithubCacheFile;
+
+  return {
+    async load(lazy = false) {
+      if (process.env.NODE_ENV === 'production' && tree && resolvedFile)
+        return { tree, resolvedFile };
+
+      // TODO make this a customizable condition?
+      const isBuildTime = process.env.NEXT_PHASE?.endsWith('build');
+
+      if (
+        typeof saveFile === 'string' &&
+        fs.existsSync(saveFile) &&
+        !isBuildTime
+      ) {
+        const raw = await fs.promises.readFile(saveFile, 'utf-8');
+        const data = JSON.parse(raw) as GithubCacheFile;
+        tree = cacheFileToGitTree(data);
+        resolvedFile = data;
+      } else {
+        const data = await notFound(lazy);
+
+        if (data) {
+          resolvedFile = data.resolvedFile;
+          tree = data.tree;
+        } else
+          throw new Error(
+            'Attempted to load Github cache, but could not retrieve cache and/or files (local or remote)',
+          );
+      }
+
+      if (saveFile && (!fs.existsSync(saveFile) || isBuildTime)) {
+        await fs.promises.mkdir(path.dirname(saveFile), { recursive: true });
+        await fs.promises.writeFile(
+          saveFile,
+          JSON.stringify(
+            await resolveAllContent(resolvedFile, ctx.fs),
+            null,
+            0,
+          ),
+          'utf-8',
         );
-    }
+      }
 
-    if (saveFile && (!fs.existsSync(saveFile) || isBuildTime)) {
-      await fs.promises.mkdir(path.dirname(saveFile), { recursive: true });
-      await fs.promises.writeFile(
-        saveFile,
-        JSON.stringify(await cacheInstance.resolveAllContent(), null, 0),
-        'utf-8',
-      );
-    }
+      onInitialLoad?.();
 
-    onInitialLoad?.();
-
-    return cacheInstance;
+      return {
+        resolvedFile,
+        tree,
+      };
+    },
   };
+}

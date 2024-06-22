@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { createGetUrl } from 'fumadocs-core/source';
 import { revalidatePath } from 'next/cache.js';
-import type { CreateCacheOptions, GithubCache } from '../types';
+import type { CreateCacheRemoteOptions, GithubCache } from '../types';
 import type { getTree } from '../get-tree';
 import type { GithubCacheStore } from '../store';
 import { findTreeRecursive } from './git-tree';
@@ -16,7 +16,7 @@ export const createCreateGithubWebhookAPI = ({
   revalidationTag,
 }: {
   cache: GithubCache;
-  ref: NonNullable<CreateCacheOptions<'remote'>['branch']>;
+  ref: NonNullable<CreateCacheRemoteOptions['branch']>;
   directory: string;
   githubOptions: Omit<Parameters<typeof getTree>[0], 'treeSha'>;
   baseUrl: string;
@@ -68,14 +68,13 @@ export const createCreateGithubWebhookAPI = ({
             let latestCache = githubCacheStore.get(revalidationTag);
             if (!latestCache) latestCache = cache;
 
-            const changes = latestCache.diff.compareToGitTree(newTree);
+            const file = await latestCache.getData();
+            const changes = latestCache.diff.compareToGitTree(file, newTree);
 
             if (changes.length > 0) {
-              latestCache.diff.applyToCache(changes);
-              latestCache.tree = Object.assign(latestCache.tree, newTree);
-              latestCache.data = latestCache.tree.transformToCache(
-                latestCache.tree,
-              );
+              latestCache.diff.applyToCache(file, changes);
+
+              latestCache.updateTree(newTree);
               githubCacheStore.set(latestCache, revalidationTag);
 
               // indivdual page changes
@@ -153,14 +152,7 @@ export const createCreateGithubWebhookAPI = ({
 
       const sigBytes = hexToBytes(sigHex);
       const dataBytes = encoder.encode(payload);
-      const equal = await crypto.subtle.verify(
-        algorithm.name,
-        key,
-        sigBytes,
-        dataBytes,
-      );
-
-      return equal;
+      return crypto.subtle.verify(algorithm.name, key, sigBytes, dataBytes);
     }
     function hexToBytes(hex: string): Uint8Array {
       const len = hex.length / 2;

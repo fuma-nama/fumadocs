@@ -1,19 +1,11 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import {
-  afterAll,
-  afterEach,
-  beforeAll,
-  describe,
-  expect,
-  test,
-  vi,
-} from 'vitest';
-import { createCache, type CreateCacheOptions } from '@/github';
+import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
+import { type CreateCacheLocalOptions, createLocalCache } from '@/github';
 import fs from 'node:fs';
-import type { CompareTreeDiff } from '@/github/create/diff';
-import { fnv1a, type GitTreeItem } from '@/github/utils';
-import { githubCacheStore } from '@/github/store';
+import { CompareTreeDiff, createDiff } from '@/github/create/diff';
+import { type GitTreeItem } from '@/github/utils';
+import { loader } from '@/github/source';
 
 const cwd = path.dirname(fileURLToPath(import.meta.url));
 
@@ -22,23 +14,18 @@ const mockCache = vi.fn(
     directory,
     cacheOptions,
     load = true,
-    lazy = false,
   }: {
     directory: string;
-    cacheOptions?: Omit<CreateCacheOptions<'local'>, 'directory'>;
+    cacheOptions?: Omit<CreateCacheLocalOptions, 'directory'>;
     load?: boolean;
-    lazy?: boolean;
   }) => {
-    const cache = createCache({
+    const cache = createLocalCache({
       directory,
       saveFile: false,
       ...cacheOptions,
     });
 
-    if (load)
-      await cache.load({
-        lazy,
-      });
+    if (load) await cache.load();
 
     return cache;
   },
@@ -78,20 +65,10 @@ describe('Without Saved Cache', () => {
     diff: T[],
   ) => diff.sort((a, b) => a.path.localeCompare(b.path));
 
-  test('cache.data/tree before cache.load()', async () => {
-    const cache = await mockCache({
-      directory,
-      load: false,
-    });
-
-    expect(() => cache.data).toThrowError();
-    expect(() => cache.tree).toThrowError();
-  });
-
   test('cache.tree', async () => {
     const cache = await mockCache({ directory });
 
-    const { sha, ...tree } = cache.tree;
+    const { sha, ...tree } = await cache.getTree();
 
     expect(tree).toMatchFileSnapshot(
       path.resolve(cwd, './out/git-tree.output.json5'),
@@ -113,24 +90,26 @@ describe('Without Saved Cache', () => {
     );
   });
 
-  test('cache.generatePageTree', async () => {
+  test('Generate Page Tree from cache', async () => {
     const cache = await mockCache({ directory });
+    const { getPageTree } = await loader(cache, {
+      baseUrl: '/docs',
+    });
 
-    const { pageTree } = await cache.fumadocsLoader();
-
-    await expect(pageTree).toMatchFileSnapshot(
+    await expect(await getPageTree()).toMatchFileSnapshot(
       path.resolve(cwd, './out/page-tree.output.json5'),
     );
   });
 
   test('cache.diff.compareToGitTree', async () => {
     const cache = await mockCache({ directory });
+    const tree = await cache.getTree();
 
-    const diff = cache.diff.compareToGitTree({
-      sha: `${cache.tree.sha}-fake`,
+    const diff = cache.diff.compareToGitTree(await cache.getData(), {
+      sha: `${tree.sha}-fake`,
       truncated: false,
-      url: cache.tree.url,
-      tree: cache.tree.tree
+      url: tree.url,
+      tree: tree.tree
         // Remove the files that are being overwritten
         .filter((item) => !fakeTree.some((f) => f.path === item.path))
         .concat(fakeTree)
@@ -143,7 +122,7 @@ describe('Without Saved Cache', () => {
       // if it's a remove action, the sha isn't updated internally, there fore we need to find the sha
       sha:
         item.sha === 'remove'
-          ? cache.tree.tree.find((f) => f.path === item.path)?.sha ?? item.sha
+          ? tree.tree.find((f) => f.path === item.path)?.sha ?? item.sha
           : item.sha,
     }));
 
@@ -152,12 +131,14 @@ describe('Without Saved Cache', () => {
 
   test('cache.diff.applyToCache', async () => {
     const cache = await mockCache({ directory });
+    const tree = await cache.getTree();
+    const cacheFile = await cache.getData();
 
-    const diff = cache.diff.compareToGitTree({
-      sha: `${cache.tree.sha}-fake`,
+    const diff = cache.diff.compareToGitTree(cacheFile, {
+      sha: `${tree.sha}-fake`,
       truncated: false,
-      url: cache.tree.url,
-      tree: cache.tree.tree
+      url: tree.url,
+      tree: tree.tree
         // Remove the files that are being overwritten
         .filter((item) => !fakeTree.some((f) => f.path === item.path))
         .concat(fakeTree)
@@ -171,19 +152,21 @@ describe('Without Saved Cache', () => {
       // if it's a remove action, the sha isn't updated internally, there fore we need to find the sha
       sha:
         item.sha === 'remove'
-          ? cache.tree.tree.find((f) => f.path === item.path)?.sha ?? item.sha
+          ? tree.tree.find((f) => f.path === item.path)?.sha ?? item.sha
           : item.sha,
     }));
 
-    cache.diff.applyToCache(diff, async (diff) =>
-      // in real cases, these new files will exist, but for testing purposes, the file doesn't really exist
-      // so we need to check if the file is new, if it is, return some dummy content
+    // in real cases, these new files will exist, but for testing purposes, the file doesn't really exist
+    // so we need to check if the file is new, if it is, return some dummy content
+    const newDiff = createDiff(cache.getFileSystem(), (diff) =>
       fakeDiff
         .filter((item) => item.action === 'add')
         .some((f) => f.path === diff.path)
         ? 'new content'
         : fs.promises.readFile(path.resolve(directory, diff.path), 'utf8'),
     );
+
+    newDiff.applyToCache(cacheFile, diff);
 
     for (const fakeFile of sort(
       fakeTree
@@ -193,7 +176,7 @@ describe('Without Saved Cache', () => {
           path: item.path,
         })),
     )) {
-      const file = cache.data.files
+      const file = cacheFile.files
         .map((file) => ({
           sha: file.sha,
           path: file.path,
@@ -202,31 +185,6 @@ describe('Without Saved Cache', () => {
       expect(file).toBeDefined();
       expect(file).toMatchObject(fakeFile);
     }
-  });
-
-  test('cache.load (lazy)', async () => {
-    const cache = await mockCache({
-      directory,
-      lazy: true,
-      cacheOptions: {
-        saveFile: false,
-      },
-    });
-
-    expect(cache.data.files).toHaveLength(0);
-    expect(cache.data.subDirectories).toHaveLength(0);
-    expect(cache.tree.tree).toHaveLength(0);
-
-    cache.fs().loadFile(
-      {
-        path: 'index.mdx',
-        sha: 'add',
-      },
-      fs.promises.readFile(path.resolve(directory, 'index.mdx'), 'utf8'),
-    );
-
-    expect(cache.data.files).toHaveLength(1);
-    expect(cache.tree.tree).toHaveLength(1);
   });
 });
 
@@ -255,10 +213,10 @@ describe('With Saved Cache', async () => {
     });
     await newCache.load();
 
-    const files = await Promise.all(cache.fs().getFiles());
+    const files = await Promise.all(cache.getFileSystem().getFiles());
 
     for (const file of files) {
-      const vfile = await newCache.fs().readFile(file);
+      const vfile = await newCache.getFileSystem().readFile(file);
       expect(vfile).toEqual(
         await fs.promises.readFile(path.resolve(directory, file), 'utf8'),
       );

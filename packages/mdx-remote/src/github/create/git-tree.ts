@@ -1,13 +1,13 @@
 import path from 'node:path';
 import fg from 'fast-glob';
 import type { GithubCacheFile } from '../types';
-import { getTree } from '../get-tree';
-import { fnv1a, type GitTreeItem } from '../utils';
+import { getTree, type GetTreeResponse } from '../get-tree';
+import { fnv1a, GetFileContent, type GitTreeItem } from '../utils';
 
 export const findTreeRecursive = async (
   directory: string,
   options: Parameters<typeof getTree>[0],
-): Promise<Awaited<ReturnType<typeof getTree>> | undefined> => {
+): Promise<GetTreeResponse | undefined> => {
   const tree = await getTree(options);
   const segments = directory.split('/');
 
@@ -42,93 +42,89 @@ export const findTreeRecursive = async (
   return currentTree;
 };
 
-export const createTransformGitTreeToCache = (
-  getFileContent?: (file: {
-    path: string;
-    sha: string;
-  }) => string | Promise<string>,
-) =>
-  function transformGitTreeToCache(
-    tree: Awaited<ReturnType<typeof getTree>>,
-    lastUpdated = Date.now(),
-  ): GithubCacheFile {
-    const files: GithubCacheFile['files'] = [];
-    const subDirectories: Record<
-      string,
-      GithubCacheFile['subDirectories'][number] | undefined
-    > = {};
-    const blobs = tree.tree.filter((t) => t.type === 'blob');
-    const trees = tree.tree.filter((t) => t.type === 'tree');
+export function transformGitTreeToCache(
+  tree: GetTreeResponse,
+  // options
+  getFileContent: GetFileContent,
+  lastUpdated = Date.now(),
+): GithubCacheFile {
+  const files: GithubCacheFile['files'] = [];
+  const subDirectories: Record<
+    string,
+    GithubCacheFile['subDirectories'][number] | undefined
+  > = {};
+  const blobs = tree.tree.filter((t) => t.type === 'blob');
+  const trees = tree.tree.filter((t) => t.type === 'tree');
 
-    const initParentDirectories = (
-      item: GitTreeItem,
-      segments: string[],
-    ): GithubCacheFile['subDirectories'][0] => {
-      let segmentDirectory: Record<string, NonNullable<unknown> | undefined> =
-        subDirectories;
+  const initParentDirectories = (
+    item: GitTreeItem,
+    segments: string[],
+  ): GithubCacheFile['subDirectories'][0] => {
+    let segmentDirectory: Record<string, NonNullable<unknown> | undefined> =
+      subDirectories;
 
-      for (const segment of segments.slice(0, -1)) {
-        const index = segments.indexOf(segment);
-        const gitTreeEntry = tree.tree.find(
-          (entry) => entry.path === segments.slice(0, index + 1).join('/'),
-        );
+    for (const segment of segments.slice(0, -1)) {
+      const index = segments.indexOf(segment);
+      const gitTreeEntry = tree.tree.find(
+        (entry) => entry.path === segments.slice(0, index + 1).join('/'),
+      );
 
-        // this segment can't be added if the tree doesn't exist
-        if (!gitTreeEntry) break;
+      // this segment can't be added if the tree doesn't exist
+      if (!gitTreeEntry) break;
 
-        segmentDirectory[segment] ||= {
-          sha: gitTreeEntry.sha,
-          path: gitTreeEntry.path,
-          files: [],
-          subDirectories: [],
-        };
-        segmentDirectory = segmentDirectory[segment] as Record<
-          string,
-          NonNullable<unknown> | undefined
-        >;
-      }
-
-      return segmentDirectory as GithubCacheFile['subDirectories'][0];
-    };
-
-    for (const item of trees) {
-      const segments = item.path.split('/');
-      initParentDirectories(item, segments);
+      segmentDirectory[segment] ||= {
+        sha: gitTreeEntry.sha,
+        path: gitTreeEntry.path,
+        files: [],
+        subDirectories: [],
+      };
+      segmentDirectory = segmentDirectory[segment] as Record<
+        string,
+        NonNullable<unknown> | undefined
+      >;
     }
 
-    for (const item of blobs) {
-      const segments = item.path.split('/');
+    return segmentDirectory as GithubCacheFile['subDirectories'][0];
+  };
 
-      if (segments.length === 1) {
-        files.push({
-          sha: item.sha,
-          path: item.path,
-          content: getFileContent?.(item) ?? '',
-        });
-        continue;
-      }
+  for (const item of trees) {
+    const segments = item.path.split('/');
+    initParentDirectories(item, segments);
+  }
 
-      const parentDirectory = initParentDirectories(item, segments);
+  for (const item of blobs) {
+    const segments = item.path.split('/');
 
-      parentDirectory.files.push({
+    if (segments.length === 1) {
+      files.push({
         sha: item.sha,
         path: item.path,
         content: getFileContent?.(item) ?? '',
       });
+      continue;
     }
 
-    return {
-      lastUpdated,
-      sha: tree.sha,
-      files,
-      subDirectories: Object.entries(subDirectories)
-        .map(([name, data]) => ({
-          ...data,
-          path: name,
-        }))
-        .filter(Boolean) as GithubCacheFile['subDirectories'],
-    };
+    const parentDirectory = initParentDirectories(item, segments);
+
+    parentDirectory.files.push({
+      sha: item.sha,
+      path: item.path,
+      content: getFileContent?.(item) ?? '',
+    });
+  }
+
+  return {
+    lastUpdated,
+    sha: tree.sha,
+    files,
+    subDirectories: Object.entries(subDirectories)
+      .map(([name, data]) => ({
+        ...data,
+        path: name,
+      }))
+      .filter(Boolean) as GithubCacheFile['subDirectories'],
   };
+}
 
 export const filesToGitTree = async ({
   include = './**/*.{json,md,mdx}',

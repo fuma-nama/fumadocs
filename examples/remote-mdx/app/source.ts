@@ -1,8 +1,27 @@
-import { githubLoader, compileMDX } from '@fumadocs/mdx-remote/github/source';
+import {
+  createRemoteCache,
+  createLocalCache,
+  type CreateCacheLocalOptions,
+} from '@fumadocs/mdx-remote/github';
+import { loader } from '@fumadocs/mdx-remote/github/source';
 
-export const { pageTree, getPages, getPage, getSearchIndexes } =
-  await githubLoader({
-    /* pass your own options here */
-  });
+const config: CreateCacheLocalOptions = {
+  directory: 'content/docs',
+  saveFile: '.fumadocs/cache.json',
+  baseUrl: '/docs',
+};
 
-export { compileMDX };
+const cache =
+  process.env.NODE_ENV === 'production'
+    ? createRemoteCache({
+        ...config,
+        // github information
+        owner: '<github-username-here>',
+        repo: '<github-repo-here>',
+        branch: '<github-branch-here>',
+      })
+    : createLocalCache(config);
+
+export const { getPageTree, getPages, getPage } = await loader(cache, {
+  baseUrl: '/docs',
+});

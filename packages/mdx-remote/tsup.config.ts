@@ -1,6 +1,6 @@
-import { defineConfig, type Options } from 'tsup';
+import { defineConfig } from 'tsup';
 
-const baseOptions: Options = {
+export default defineConfig({
   external: [
     'fumadocs-core',
     'webpack',
@@ -13,24 +13,10 @@ const baseOptions: Options = {
   env: {
     TSUP: '1',
   },
-};
-
-export default defineConfig([
-  {
-    entry: [
-      './src/index.ts',
-      './src/github/{index,source}.ts',
-      './src/github/dev/{index,client}.ts',
-    ],
-    format: 'esm',
-    ...baseOptions,
-  },
-  {
-    ...baseOptions,
-    entry: {
-      'github/loader': './src/github/loader.ts',
-    },
-    format: 'cjs',
-    dts: false,
-  },
-]);
+  entry: [
+    './src/index.ts',
+    './src/github/{index,source}.ts',
+    './src/github/dev/{index,client}.ts',
+  ],
+  format: 'esm',
+});

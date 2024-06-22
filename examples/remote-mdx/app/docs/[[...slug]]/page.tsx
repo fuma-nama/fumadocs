@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { DocsPage, DocsBody } from 'fumadocs-ui/page';
 import { notFound } from 'next/navigation';
-import { getPage, getPages, compileMDX } from '@/app/source';
+import { getPage, getPages } from '@/app/source';
 import defaultComponents from 'fumadocs-ui/mdx';
 
 export default async function Page({
@@ -15,7 +15,7 @@ export default async function Page({
     notFound();
   }
 
-  const compiled = await compileMDX(page.data.content, {
+  const compiled = await page.compile({
     components: {
       ...defaultComponents,
     },
@@ -44,6 +44,6 @@ export async function generateMetadata({
   if (!page) notFound();
 
   return {
-    title: page.data.title,
+    title: page.frontmatter.title,
   } satisfies Metadata;
 }

@@ -1,4 +1,4 @@
-interface GetTreeOptions {
+export interface GetTreeOptions {
   owner: string;
   repo: string;
 
@@ -22,7 +22,7 @@ interface GetTreeOptions {
   init?: RequestInit;
 }
 
-interface GetTreeResponse {
+export interface GetTreeResponse {
   sha: string;
   url: string;
   truncated: boolean;

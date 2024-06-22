@@ -22,7 +22,7 @@ function getCompileOptions(mdxOptions: CompileOptions = {}): CompileOptions {
   };
 }
 
-export async function compileMDX<TFrontmatter = Record<string, unknown>>(
+export async function processMDX<TFrontmatter = Record<string, unknown>>(
   source: string,
   options: CompileOptions,
   scope: object = {},

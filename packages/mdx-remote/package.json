@@ -31,7 +31,6 @@
       "import": "./dist/github/dev/index.mjs",
       "types": "./dist/github/dev/index.d.mts"
     },
-    "./github/loader": "./dist/github/loader.js",
     ".": {
       "import": "./dist/index.mjs",
       "types": "./dist/index.d.mts"
@@ -49,6 +48,9 @@
       ],
       "github/dev": [
         "./dist/github/dev/index.d.mts"
+      ],
+      "github/source": [
+        "./dist/github/source.d.mts"
       ],
       "github/dev/client": [
         "./dist/github/dev/client.d.mts"
