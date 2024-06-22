@@ -47,7 +47,7 @@ export interface APIInfoProps extends HTMLAttributes<HTMLDivElement> {
   route: string;
 }
 
-const badgeVariants = cva('rounded-lg border px-1 py-0.5 text-xs font-medium', {
+const badgeVariants = cva('rounded-lg border px-1.5 py-1 text-xs font-medium leading-[12px]', {
   variants: {
     color: {
       green:
