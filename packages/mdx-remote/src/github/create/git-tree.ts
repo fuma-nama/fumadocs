@@ -2,7 +2,7 @@ import path from 'node:path';
 import fg from 'fast-glob';
 import type { GithubCacheFile } from '../types';
 import { getTree, type GetTreeResponse } from '../get-tree';
-import { fnv1a, GetFileContent, type GitTreeItem } from '../utils';
+import { fnv1a, type GetFileContent, type GitTreeItem } from '../utils';
 
 export const findTreeRecursive = async (
   directory: string,
@@ -99,7 +99,7 @@ export function transformGitTreeToCache(
       files.push({
         sha: item.sha,
         path: item.path,
-        content: getFileContent?.(item) ?? '',
+        content: getFileContent(item)
       });
       continue;
     }
@@ -109,7 +109,7 @@ export function transformGitTreeToCache(
     parentDirectory.files.push({
       sha: item.sha,
       path: item.path,
-      content: getFileContent?.(item) ?? '',
+      content: getFileContent(item)
     });
   }
 

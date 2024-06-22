@@ -1,7 +1,7 @@
-import type { GithubCacheFile, GlobalCache } from '../types';
+import type { DiffUtils } from '@/github/create/diff';
+import type { GetTreeResponse } from '@/github/get-tree';
+import type { GithubCacheFile } from '../types';
 import type { GetFileContent } from '../utils';
-import { GetTreeResponse } from '@/github/get-tree';
-import { DiffUtils } from '@/github/create/diff';
 
 export function loadInitialFiles(
   fs: VirtualFileSystem,
@@ -13,7 +13,7 @@ export function loadInitialFiles(
       let content = file.content;
 
       if (!content) {
-        content = getFileContent?.({
+        content = getFileContent({
           path: file.path,
           sha: file.sha,
         });
@@ -56,7 +56,7 @@ export function loadFile(
   diff: DiffUtils,
   file: { path: string; sha: string },
   content: string | Promise<string>,
-) {
+): void {
   fs.writeFile(file.path, content);
 
   tree.tree.push({

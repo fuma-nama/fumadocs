@@ -1,3 +1,5 @@
+"use server";
+
 import {
   createRemoteCache,
   createLocalCache,
@@ -7,7 +9,6 @@ import { loader } from '@fumadocs/mdx-remote/github/source';
 
 const config: CreateCacheLocalOptions = {
   directory: 'content/docs',
-  saveFile: '.fumadocs/cache.json',
   baseUrl: '/docs',
 };
 

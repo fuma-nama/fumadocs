@@ -32,14 +32,10 @@ export const createRemoteCache = ({
   const {
     directory,
     githubApi,
-    saveFile = path.resolve(cwd, '.fumadocs', 'cache.json'),
+    saveFile = true,
     ...githubInfo
   } = options;
 
-  let resolvedSaveFilePath = saveFile;
-  if (typeof saveFile === 'string' && !path.isAbsolute(saveFile)) {
-    resolvedSaveFilePath = path.resolve(cwd, saveFile);
-  }
 
   const getFileContent: GetFileContent<{ sha: string }> = async (file) => {
     return blobToUtf8(
@@ -53,7 +49,7 @@ export const createRemoteCache = ({
 
   const base = createCacheBase({
     getFileContent,
-    saveFile: resolvedSaveFilePath,
+    saveFile: saveFile ? path.resolve(cwd, '.next', 'fumadocs-github-cache.json') : false,
     options,
     cacheLoader: {
       notFound: async () => {
@@ -98,20 +94,17 @@ export const createLocalCache = (
   const {
     directory,
     include = './**/*.{json,md,mdx}',
-    saveFile = path.resolve(directory, '.fumadocs', 'cache.json'),
+    saveFile = true,
   } = options;
-
-  let resolvedSaveFilePath = saveFile;
-  if (typeof saveFile === 'string' && !path.isAbsolute(saveFile)) {
-    resolvedSaveFilePath = path.resolve(directory, saveFile);
-  }
 
   const getFileContent: GetFileContent<{ path: string }> = async (file) => {
     return nodeFs.readFile(path.resolve(directory, file.path), 'utf8');
   };
 
+  const cachePath = path.resolve(directory, '.fumadocs', 'cache.json');
+
   return createCacheBase({
-    saveFile: resolvedSaveFilePath,
+    saveFile: saveFile ? cachePath : false,
     options,
     getFileContent,
     cacheLoader: {
@@ -128,7 +121,7 @@ export const createLocalCache = (
         } else {
           tree = await filesToGitTree({
             include,
-            ignore: saveFile ? [saveFile] : [],
+            ignore: saveFile ? [cachePath] : [],
             directory,
             hasher: async (file) => {
               const { mtimeMs: lastModified } = await nodeFs.stat(

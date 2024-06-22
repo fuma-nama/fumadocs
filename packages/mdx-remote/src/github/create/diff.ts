@@ -1,7 +1,7 @@
+import type { VirtualFileSystem } from '@/github/create/file-system';
 import type { GithubCacheFile } from '../types';
 import type { GetTreeResponse } from '../get-tree';
 import type { GetFileContent } from '../utils';
-import { VirtualFileSystem } from '@/github/create/file-system';
 
 export interface CompareTreeDiff {
   action: 'add' | 'remove' | 'modify';

@@ -1,7 +1,7 @@
 import type { z } from 'zod';
 import type { getTree, GetTreeResponse } from './get-tree';
 import type { githubCacheFileSchema } from './schema';
-import {
+import type {
   createCreateGithubWebhookAPI,
   DiffUtils,
   CacheLoader,
@@ -21,11 +21,10 @@ export interface BaseCreateCacheOptions {
    */
   cwd?: string;
   /**
-   * Path on disk to store the cache.
-   * Pass `false` to disable storing the cache.
-   * @defaultValue .fumadocs/cache.json (relative to cwd)
+   * Enable or disable saving the cache to the disk.
+   * @defaultValue `true`
    */
-  saveFile?: string | false;
+  saveFile?: boolean;
   // compilerOptions?: Pick<CompileOptions, 'mdxOptions' | 'components'>;
   /**
    * Included files.

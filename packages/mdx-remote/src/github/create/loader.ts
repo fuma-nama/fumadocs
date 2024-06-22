@@ -1,11 +1,11 @@
 import path from 'node:path';
 import fs from 'node:fs';
+import type { GetTreeResponse } from '@/github/get-tree';
+import { resolveAllContent } from '@/github/create/resolve-content';
+import type { VirtualFileSystem } from '@/github/create/file-system';
 import type { GithubCacheFile } from '../types';
 import type { GetFileContent } from '../utils';
 import { cacheFileToGitTree } from './git-tree';
-import type { GetTreeResponse } from '@/github/get-tree';
-import { resolveAllContent } from '@/github/create/resolve-content';
-import { VirtualFileSystem } from '@/github/create/file-system';
 
 interface Loaded {
   tree: GetTreeResponse;
@@ -39,7 +39,7 @@ export function createCacheLoader({
 
   return {
     async load(lazy = false) {
-      if (process.env.NODE_ENV === 'production' && tree && resolvedFile)
+      if (process.env.NODE_ENV === 'production')
         return { tree, resolvedFile };
 
       // TODO make this a customizable condition?

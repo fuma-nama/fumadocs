@@ -1,5 +1,5 @@
+import type { VirtualFileSystem } from '@/github/create/file-system';
 import type { GithubCacheFile } from '../types';
-import { VirtualFileSystem } from '@/github/create/file-system';
 
 export async function resolveAllContent(
   from: GithubCacheFile,

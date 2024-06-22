@@ -15,17 +15,18 @@ import {
 } from 'fumadocs-core/source';
 import picomatch from 'picomatch';
 import matter from 'gray-matter';
-import { type CompileMDXResult } from '@/processor';
+import type { PageTree } from 'fumadocs-core/server';
+import type { CompileMDXResult } from '@/processor';
 import type { VirtualFileSystem } from '@/github/create/file-system';
 import { compileMDX, type CompileMDXOptions } from '@/compile';
-import type { PageTree } from 'fumadocs-core/server';
-import { GlobalCache } from '@/github/types';
+import type { GlobalCache } from '@/github/types';
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions -- Needed as 'type' or won't work
 type DefaultFrontmatter = {
   icon?: string;
   title: string;
   content: string;
-};
+}
 
 interface Page<
   Frontmatter extends Record<string, unknown> = DefaultFrontmatter,
@@ -50,7 +51,7 @@ interface LanguageEntry<
 interface LoaderOutput<
   Frontmatter extends Record<string, unknown> = DefaultFrontmatter,
 > {
-  getPageTree(local?: string): Promise<PageTree.Root>;
+  getPageTree: (local?: string) => Promise<PageTree.Root>;
 
   /**
    * Get list of pages from language, empty if language hasn't specified
@@ -110,12 +111,12 @@ export async function loader<
     slugs: slugsFn = getSlugs,
     url: getUrl = createGetUrl(baseUrl),
     pageTree: pageTreeOptions = {},
-  } = options ?? {};
+  } = options;
 
   const isMatch = picomatch(cache._options.include);
 
   await cache.load();
-  async function getStorage() {
+  async function getStorage(): Promise<ReturnType<typeof loadFiles>> {
     const fs = cache.getFileSystem();
     const files = fs.getFiles().filter((f) => isMatch(f));
     const virtualFiles = await resolveFiles(files, fs);
@@ -128,7 +129,7 @@ export async function loader<
   }
   const storage = getStorage();
 
-  async function getI18nMap() {
+  async function getI18nMap(): Promise<Map<string, Map<string, Page<Frontmatter>>>> {
     return buildPageMap(await storage, languages ?? [], {
       getUrl,
       fs: cache.getFileSystem(),
@@ -136,7 +137,7 @@ export async function loader<
   }
   const i18nMap = getI18nMap();
 
-  let pageTree: Record<string, PageTree.Root>;
+  let pageTree: Record<string, PageTree.Root> | undefined;
 
   return {
     async getPageTree(local = 'default') {
@@ -201,7 +202,7 @@ function buildPageMap(
     defaultMap.set(page.slugs.join('/'), page);
 
     for (const lang of languages) {
-      const langMap = map.get(lang) ?? new Map();
+      const langMap = map.get(lang) ?? new Map<string, Page>();
 
       const localized = storage.read(
         `${file.file.flattenedPath}.${lang}`,

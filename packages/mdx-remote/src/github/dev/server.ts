@@ -1,5 +1,5 @@
 import { WebSocketServer } from 'ws';
-import { type FSWatcher } from 'chokidar';
+import type { FSWatcher } from 'chokidar';
 import { watch } from '@/github/dev/watcher';
 
 export function createServer({
