@@ -5,13 +5,19 @@ import {
   getSlugs,
   type LoaderOptions,
   loadFiles,
-  type SourceConfig,
+  type MetaData,
   type UrlFn,
 } from 'fumadocs-core/source';
 import picomatch from 'picomatch';
 import matter from 'gray-matter';
 import type { createSearchAPI } from 'fumadocs-core/search/server';
 import type { GithubCache } from '../types';
+import {
+  type ConditionalPromise,
+  type MergeObjects,
+  type Prettify,
+  Store,
+} from '../utils';
 
 interface PageData {
   icon?: string;
@@ -71,41 +77,87 @@ type SearchIndexes<T, I18n extends boolean = false> = I18n extends true
 interface LoaderConfig {
   source: SourceConfig;
   i18n: boolean;
+  serverActions: boolean;
   languages?: string[];
 }
 
-interface LoaderOutput<Config extends LoaderConfig> {
-  pageTree: Config['i18n'] extends true ? Record<string, Root> : Root;
-  files: File[];
-  /**
-   * Get list of pages from language, empty if language hasn't specified
-   *
-   * @param language - If empty, the default language will be used
-   */
-  getPages: (language?: string) => Page<Config['source']['pageData']>[];
-  getLanguages: () => LanguageEntry<Config['source']['pageData']>[];
-  /**
-   * @param language - If empty, the default language will be used
-   */
-  getPage: (
-    slugs: string[] | undefined,
-    language?: string,
-  ) => Page<Config['source']['pageData']> | undefined;
-  getSearchIndexes: <T extends 'simple' | 'advanced'>(
-    type: T,
-  ) => SearchIndexes<
-    T extends 'advanced'
-      ? Promise<Parameters<typeof createSearchAPI<'advanced'>>[1]['indexes']>
-      : Parameters<typeof createSearchAPI<'simple'>>[1]['indexes'],
-    Config['i18n']
-  >;
+interface SourceConfig {
+  pageData: PageData;
+  metaData: MetaData;
 }
+
+type LoaderOutput<Config extends LoaderConfig> = Prettify<
+  MergeObjects<
+    {
+      pageTree: Config['i18n'] extends true ? Record<string, Root> : Root;
+      files: File[];
+
+      /**
+       * Get list of pages from language, empty if language hasn't specified
+       *
+       * @param language - If empty, the default language will be used
+       */
+      getPages: (
+        language?: string,
+      ) => ConditionalPromise<
+        Page<Config['source']['pageData']>[],
+        Config['serverActions']
+      >;
+      getLanguages: () => ConditionalPromise<
+        LanguageEntry<Config['source']['pageData']>[],
+        Config['serverActions']
+      >;
+      /**
+       * @param language - If empty, the default language will be used
+       */
+      getPage: (
+        slugs: string[] | undefined,
+        language?: string,
+      ) => ConditionalPromise<
+        Page<Config['source']['pageData']> | undefined,
+        Config['serverActions']
+      >;
+      getSearchIndexes: <T extends 'simple' | 'advanced'>(
+        type: T,
+      ) => ConditionalPromise<
+        SearchIndexes<
+          T extends 'advanced'
+            ? Parameters<typeof createSearchAPI<'advanced'>>[1]['indexes']
+            : Parameters<typeof createSearchAPI<'simple'>>[1]['indexes'],
+          Config['i18n']
+        >,
+        Config['serverActions']
+      >;
+    },
+    Config['serverActions'] extends true
+      ? {
+          getPageTree: () => Promise<
+            Config['i18n'] extends true ? Record<string, Root> : Root
+          >;
+        }
+      : NonNullable<unknown>
+  >
+>;
 
 type Root = ReturnType<(typeof builder)['build']>;
 
+export type FumadocsLoader<ServerActions extends boolean = false> = <
+  Options extends Omit<LoaderOptions, 'source' | 'baseUrl'> | undefined,
+>(
+  options?: Options,
+) => Promise<
+  LoaderOutput<{
+    source: SourceConfig;
+    i18n: Options extends { languages: string[] } ? true : false;
+    serverActions: ServerActions;
+  }>
+>;
+
 const builder = createPageTreeBuilder();
+const loaderOutputStore = new Store<LoaderOutput<LoaderConfig>>();
 
 export const createFumadocsLoader = (
+  sha: string,
   fs: ReturnType<GithubCache['fs']>,
   compileMDX: GithubCache['compileMDX'],
   {
@@ -124,8 +176,17 @@ export const createFumadocsLoader = (
     LoaderOutput<{
       source: SourceConfig;
       i18n: Options extends { languages: string[] } ? true : false;
+      serverActions: false;
     }>
   > {
+    const storedLoaderOutput = loaderOutputStore.get(sha);
+    if (storedLoaderOutput)
+      return storedLoaderOutput as LoaderOutput<{
+        source: SourceConfig;
+        i18n: Options extends { languages: string[] } ? true : false;
+        serverActions: false;
+      }>;
+
     const {
       icon: resolveIcon,
       languages,
@@ -157,6 +218,8 @@ export const createFumadocsLoader = (
           }
           if (file.endsWith('.md') || file.endsWith('.mdx')) {
             const { data, content } = matter(raw);
+
+            if (file.endsWith('introduction.mdx')) console.log(content);
 
             return {
               path: file,
@@ -206,7 +269,11 @@ export const createFumadocsLoader = (
           });
     const i18nMap = buildPageMap(storage, languages ?? [], getUrl);
 
-    return {
+    const output: LoaderOutput<{
+      source: SourceConfig;
+      i18n: Options extends { languages: string[] } ? true : false;
+      serverActions: false;
+    }> = {
       pageTree: pageTree as unknown as (
         Options extends { languages: string[] } ? true : false
       ) extends true
@@ -235,25 +302,17 @@ export const createFumadocsLoader = (
       },
       getSearchIndexes<T extends 'simple' | 'advanced'>(type: T) {
         const langs = languages ?? [];
+        let value: NonNullable<unknown>;
 
         if (langs.length === 0) {
-          return generateSearchIndexes() as SearchIndexes<
-            T extends 'advanced'
-              ? Promise<
-                  Parameters<typeof createSearchAPI<'advanced'>>[1]['indexes']
-                >
-              : Parameters<typeof createSearchAPI<'simple'>>[1]['indexes'],
-            Options extends { languages: string[] } ? true : false
-          >;
+          value = generateSearchIndexes();
+        } else {
+          value = Promise.all(langs.map((lang) => generateSearchIndexes(lang)));
         }
 
-        return Promise.all(
-          langs.map((lang) => generateSearchIndexes(lang)),
-        ) as unknown as SearchIndexes<
+        return value as SearchIndexes<
           T extends 'advanced'
-            ? Promise<
-                Parameters<typeof createSearchAPI<'advanced'>>[1]['indexes']
-              >
+            ? Parameters<typeof createSearchAPI<'advanced'>>[1]['indexes']
             : Parameters<typeof createSearchAPI<'simple'>>[1]['indexes'],
           Options extends { languages: string[] } ? true : false
         >;
@@ -296,6 +355,10 @@ export const createFumadocsLoader = (
         }
       },
     };
+
+    loaderOutputStore.set(sha, output as LoaderOutput<LoaderConfig>);
+
+    return output;
   };
 
 function buildPageMap(

@@ -55,7 +55,7 @@ export const createCacheBoilerplate = <Env extends 'local' | 'remote'>(
       });
     },
     get fumadocsLoader() {
-      return createFumadocsLoader(this.fs(), this.compileMDX, {
+      return createFumadocsLoader(this.data.sha, this.fs(), this.compileMDX, {
         include: options.include,
         baseUrl: options.baseUrl,
       });

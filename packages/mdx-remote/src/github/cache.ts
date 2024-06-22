@@ -2,8 +2,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import type { getTree } from './get-tree';
 import { getBlob } from './get-blob';
-import { blobToUtf8, fnv1a, type GetFileContent } from './utils';
-import { type GithubCacheStore, githubCacheStore } from './store';
+import {
+  blobToUtf8,
+  fnv1a,
+  generateRevalidationTag,
+  type Store,
+  type GetFileContent,
+} from './utils';
+import { githubCacheStore } from './store';
 import type { CreateCacheOptions, GithubCache } from './types';
 import {
   createDiff,
@@ -32,20 +38,20 @@ export const createCache = <
     ? 'remote'
     : 'local'
 > => {
-  const revalidationTag = `@fumadocs/mdx-remote/github/cache@${fnv1a(
-    JSON.stringify(options),
-  )}`;
+  const revalidationTag = generateRevalidationTag(options);
 
   const storedCache = githubCacheStore.get(revalidationTag);
   if (storedCache) return storedCache;
 
-  const isRemote =
-    force === 'remote' ||
-    ('owner' in options &&
+  const isRemote = force
+    ? force === 'remote'
+    : 'owner' in options &&
       'repo' in options &&
       'token' in options &&
-      'branch' in options);
-  const isLocal = force === 'local' || ('directory' in options && !isRemote);
+      'branch' in options;
+  const isLocal = force
+    ? force === 'local'
+    : 'directory' in options && !isRemote;
 
   if (!isRemote && !isLocal)
     throw new Error('Invalid options. View documentation for correct options.');
@@ -56,9 +62,9 @@ export const createCache = <
         revalidationTag,
         githubCacheStore,
       )
-    : createLocalCache(options as CreateCacheOptions<'local'>);
+    : createLocalCache(options as CreateCacheOptions<'local'>, revalidationTag);
 
-  if (process.env.TSUP) githubCacheStore.set(cache, revalidationTag);
+  if (process.env.TSUP) githubCacheStore.set(revalidationTag, cache);
 
   return cache as GithubCache<
     Options extends {
@@ -75,14 +81,10 @@ export const createCache = <
 export const createRemoteCache = (
   { cwd = process.cwd(), ...options }: CreateCacheOptions<'remote'>,
   revalidationTag: string,
-  realGithubCacheStore: GithubCacheStore,
+  realGithubCacheStore: Store<GithubCache> = githubCacheStore,
 ): GithubCache<'remote'> => {
   const { directory, githubApi, ...githubInfo } = options;
-  let { saveFile = path.resolve(cwd, '.fumadocs', 'cache.json') } = options;
-
-  if (typeof saveFile === 'string' && !path.isAbsolute(saveFile)) {
-    saveFile = path.resolve(cwd, saveFile);
-  }
+  const saveFile = path.resolve(process.cwd(), '.next', 'fumadocs-cache.json');
 
   const getFileContent: GetFileContent<{ sha: string }> = async (file) => {
     return blobToUtf8(
@@ -96,12 +98,13 @@ export const createRemoteCache = (
 
   let initialLoad = true;
 
-  return enhancedCacheBoilerplate(options, {
+  return enhancedCacheBoilerplate(options, revalidationTag, {
     get diff() {
       return createDiff(this, getFileContent);
     },
     get load() {
       return createLoader(this, {
+        cwd,
         saveFile,
         getFileContent,
         notFound: async () => {
@@ -146,27 +149,31 @@ export const createRemoteCache = (
 };
 
 export const createLocalCache = (
-  options: CreateCacheOptions<'local'>,
+  { cwd = process.cwd(), ...options }: CreateCacheOptions<'local'>,
+  revalidationTag: string,
 ): GithubCache<'local'> => {
-  const { directory, include = './**/*.{json,md,mdx}' } = options;
-  let { saveFile = path.resolve(directory, '.fumadocs', 'cache.json') } =
-    options;
+  const { include = './**/*.{json,md,mdx}' } = options;
+  let { directory } = options;
 
-  if (typeof saveFile === 'string' && !path.isAbsolute(saveFile)) {
-    saveFile = path.resolve(directory, saveFile);
+  if (!path.isAbsolute(directory)) {
+    directory = path.resolve(cwd, directory);
   }
+
+  const saveFile = path.resolve(process.cwd(), '.next', 'fumadocs-cache.json');
 
   const getFileContent: GetFileContent<{ path: string }> = async (file) => {
     return fs.promises.readFile(path.resolve(directory, file.path), 'utf8');
   };
 
-  return enhancedCacheBoilerplate(options, {
+  return enhancedCacheBoilerplate(options, revalidationTag, {
     get diff() {
       return createDiff(this as unknown as GithubCache, getFileContent);
     },
     get load() {
       return createLoader(this, {
+        cwd,
         saveFile,
+        saveCache: options.saveCache,
         getFileContent,
         notFound: async (lazy) => {
           let tree: Awaited<ReturnType<typeof getTree>>;
@@ -210,6 +217,7 @@ export const createLocalCache = (
 
 const enhancedCacheBoilerplate = <Env extends 'local' | 'remote'>(
   options: CreateCacheOptions<Env>,
+  revalidationTag: string,
   inherit: GithubCache,
 ): GithubCache => {
   const boilerplate = createCacheBoilerplate(options);

@@ -18,6 +18,11 @@ export type GithubCacheFile = z.infer<typeof githubCacheFileSchema>;
 interface BaseCreateCacheOptions
   extends Pick<Parameters<typeof getTree>[0], 'owner' | 'repo' | 'token'> {
   /**
+   * Whether or not to save the cache to the disk.
+   * @defaultValue `true`
+   */
+  saveCache?: boolean;
+  /**
    * Base url for documentation
    */
   baseUrl?: string;
@@ -26,12 +31,6 @@ interface BaseCreateCacheOptions
    * @defaultValue process.cwd()
    */
   cwd?: string;
-  /**
-   * Path on disk to store the cache.
-   * Pass `false` to disable storing the cache.
-   * @defaultValue .fumadocs/cache.json (relative to cwd)
-   */
-  saveFile?: string | false;
   // compilerOptions?: Pick<CompileOptions, 'mdxOptions' | 'components'>;
   /**
    * Included files.
@@ -112,7 +111,7 @@ export type CreateCacheOptions<
 type CreateCacheRemoteOptions = BaseCreateCacheOptions;
 type CreateCacheLocalOptions = Pick<
   BaseCreateCacheOptions,
-  'include' | 'saveFile' | 'cwd' | 'baseUrl'
+  'include' | 'cwd' | 'baseUrl' | 'saveCache'
 > & {
   directory: NonNullable<BaseCreateCacheOptions['directory']>;
 };

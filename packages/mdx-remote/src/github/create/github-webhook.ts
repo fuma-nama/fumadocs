@@ -1,9 +1,9 @@
 import path from 'node:path';
 import { createGetUrl } from 'fumadocs-core/source';
-import { revalidatePath } from 'next/cache.js';
+import { revalidatePath, revalidateTag } from 'next/cache.js';
 import type { CreateCacheOptions, GithubCache } from '../types';
 import type { getTree } from '../get-tree';
-import type { GithubCacheStore } from '../store';
+import type { Store } from '../utils';
 import { findTreeRecursive } from './git-tree';
 
 export const createCreateGithubWebhookAPI = ({
@@ -12,16 +12,16 @@ export const createCreateGithubWebhookAPI = ({
   directory,
   githubOptions,
   baseUrl,
-  githubCacheStore,
   revalidationTag,
+  githubCacheStore,
 }: {
   cache: GithubCache;
   ref: NonNullable<CreateCacheOptions<'remote'>['branch']>;
   directory: string;
   githubOptions: Omit<Parameters<typeof getTree>[0], 'treeSha'>;
   baseUrl: string;
-  githubCacheStore: GithubCacheStore;
   revalidationTag: string;
+  githubCacheStore: Store<GithubCache>;
 }) =>
   function createGithubWebhookAPI({
     secret,
@@ -63,33 +63,18 @@ export const createCreateGithubWebhookAPI = ({
           });
 
           if (newTree) {
-            // tree won't update if it's the same,
-            // so we make sure to get the latest cache
-            let latestCache = githubCacheStore.get(revalidationTag);
-            if (!latestCache) latestCache = cache;
-
-            const changes = latestCache.diff.compareToGitTree(newTree);
+            const changes = cache.diff.compareToGitTree(newTree);
 
             if (changes.length > 0) {
-              latestCache.diff.applyToCache(changes);
-              latestCache.tree = Object.assign(latestCache.tree, newTree);
-              latestCache.data = latestCache.tree.transformToCache(
-                latestCache.tree,
-              );
-              githubCacheStore.set(latestCache, revalidationTag);
+              cache.diff.applyToCache(changes);
+              cache.tree = Object.assign(cache.tree, newTree);
+              cache.data = cache.tree.transformToCache(cache.tree);
+              githubCacheStore.set(revalidationTag, cache);
+              console.log('new sha', cache.tree.sha);
 
-              // indivdual page changes
-              for (const doc of changes.filter(
-                (c) =>
-                  c.type === 'blob' &&
-                  /\.mdx?$/.test(c.path) &&
-                  (c.action === 'modify' || c.action === 'remove'),
-              )) {
-                const url = getUrl(
-                  doc.path.replace(path.extname(doc.path), '').split('/'),
-                );
-                revalidatePath(url, 'page');
-              }
+              revalidatePath('/', 'layout');
+              revalidateTag(revalidationTag);
+
               // changes to a group of pages
               for (const meta of changes.filter(
                 (c) =>
@@ -104,6 +89,7 @@ export const createCreateGithubWebhookAPI = ({
                     .filter(Boolean),
                 );
                 revalidatePath(url, 'layout');
+                console.log('revalidatePath (layout)', url);
               }
               // changes to a group of pages
               for (const tree of changes.filter(
@@ -113,12 +99,29 @@ export const createCreateGithubWebhookAPI = ({
               )) {
                 const url = getUrl(tree.path.split('/'));
                 revalidatePath(url, 'layout');
+                console.log('revalidatePath (layout)', url);
               }
               // change to whole layout/pageTree
               if (changes.some((c) => c.action === 'add')) {
                 const url = getUrl([]);
                 revalidatePath(url, 'layout');
+                console.log('revalidatePath (layout)', url);
               }
+              // indivdual page changes
+              for (const doc of changes.filter(
+                (c) =>
+                  c.type === 'blob' &&
+                  /\.mdx?$/.test(c.path) &&
+                  (c.action === 'modify' || c.action === 'remove'),
+              )) {
+                const url = getUrl(
+                  doc.path.replace(path.extname(doc.path), '').split('/'),
+                );
+                revalidatePath(url, 'page');
+                console.log('revalidatePath (page)', url);
+              }
+
+              revalidateTag(revalidationTag);
             }
           }
         }

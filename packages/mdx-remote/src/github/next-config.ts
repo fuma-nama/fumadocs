@@ -11,14 +11,36 @@ import type { CreateCacheOptions } from './types';
 
 type RequiredCacheOptions = RequiredFields<CreateCacheOptions<'local'>> &
   RequiredFields<CreateCacheOptions<'remote'>>;
-export type PluginCacheOptions = Prettify<
-  RequiredCacheOptions & Omit<CreateCacheOptions, keyof RequiredCacheOptions>
->;
+type DirectoryOptions =
+  | {
+      /**
+       * Directory where content is found
+       * Used for local and remote
+       */
+      directory: string;
+    }
+  | {
+      /**
+       * Local directory where content is found
+       */
+      localDirectory: string;
+      /**
+       * Remote directory on the repository where content is found
+       * Leave empty if you want to use the root directory
+       */
+      githubDirectory: string;
+    };
+export type PluginCacheOptions = Omit<
+  RequiredCacheOptions & Omit<CreateCacheOptions, keyof RequiredCacheOptions>,
+  'directory'
+> &
+  DirectoryOptions;
 
-// TODO
-export interface PluginOptions extends PluginCacheOptions {
-  experimentalTurbo?: boolean;
-}
+export type PluginOptions = Prettify<
+  PluginCacheOptions & {
+    experimentalTurbo?: boolean;
+  }
+>;
 
 const require = createRequire(import.meta.url);
 
