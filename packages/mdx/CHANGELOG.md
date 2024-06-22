@@ -1,5 +1,12 @@
 # next-docs-mdx
 
+## 8.2.33
+
+### Patch Changes
+
+- 78acd55: Use full mode on docs pages by default on OpenAPI generated pages
+  - fumadocs-core@12.2.1
+
 ## 8.2.32
 
 ### Patch Changes

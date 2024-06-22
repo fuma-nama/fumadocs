@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 12.2.1
+
+### Patch Changes
+
+- c428a60: Revert the height of docs navbar to 64px
+- 018dbd9: Support `Banner` component
+  - fumadocs-core@12.2.1
+
 ## 12.2.0
 
 ### Minor Changes
