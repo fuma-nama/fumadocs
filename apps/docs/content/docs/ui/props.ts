@@ -1,6 +1,12 @@
 import type { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 import type { Callout } from 'fumadocs-ui/components/callout';
-import type { APIInfo, Property } from 'fumadocs-ui/components/api';
+import type {
+  API,
+  APIExample,
+  APIInfo,
+  Property,
+  Root,
+} from 'fumadocs-ui/components/api';
 import type { File, Folder } from 'fumadocs-ui/components/files';
 import type { InlineTOC } from 'fumadocs-ui/components/inline-toc';
 import type { RollButton } from 'fumadocs-ui/components/roll-button';
@@ -18,6 +24,21 @@ export type AccordionsProps = Omit<
 
 export type AccordionProps = Omit<
   ComponentPropsWithoutRef<typeof Accordion>,
+  keyof ComponentPropsWithoutRef<'div'>
+>;
+
+export type RootProps = Omit<
+  ComponentPropsWithoutRef<typeof Root>,
+  keyof ComponentPropsWithoutRef<'div'>
+>;
+
+export type ApiProps = Omit<
+  ComponentPropsWithoutRef<typeof API>,
+  keyof ComponentPropsWithoutRef<'div'>
+>;
+
+export type ApiExampleProps = Omit<
+  ComponentPropsWithoutRef<typeof APIExample>,
   keyof ComponentPropsWithoutRef<'div'>
 >;
 
