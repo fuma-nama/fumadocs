@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 12.2.3
+
+### Patch Changes
+
+- b4824fa: Updated `<APIInfo />` component, so method name appears vertically centered.
+- e120e0f: Improve `<Banner/>` component
+- 3970b55: Support custom type link items
+  - fumadocs-core@12.2.3
+
 ## 12.2.2
 
 ### Patch Changes

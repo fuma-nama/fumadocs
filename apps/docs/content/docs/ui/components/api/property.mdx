@@ -1,0 +1,59 @@
+---
+title: Property
+description: The component which provides detailed information about an API endpoint's properties.
+---
+
+import { Property } from 'fumadocs-ui/components/api';
+
+<Property name={'Authorization'} type={'Basic <token>'} required={true} />
+
+## Usage
+
+Import it in your MDX documents.
+
+```mdx title="tickets.mdx"
+import { Property } from 'fumadocs-ui/components/api';
+
+<Property name={'Authorization'} type={'Basic <token>'} required={true} />
+```
+
+## Advanced
+
+The `Property` component supports nesting, allowing you to display objects and arrays.
+
+```mdx title="users.mdx"
+import { Property } from 'fumadocs-ui/components/api';
+
+<Property name={'credentials'} type={'object'} required={true}>
+  <Property name={'username'} type={'string'} />
+  <Property name={'password'} type={'string'} />
+</Property>
+```
+
+<Property name={'credentials'} type={'object'} required={true}>
+  <Property name={'username'} type={'string'} />
+  <Property name={'password'} type={'string'} />
+</Property>
+
+The `Property` component allows children to be passed, so that you can display additional information about the property.
+
+<Property name={'Authorization'} type={'Basic <token>'} required={true}>
+  In: `header`
+</Property>
+
+```mdx title="tickets.mdx"
+import { Property } from 'fumadocs-ui/components/api';
+
+<Property name={'Authorization'} type={'Basic <token>'} required={true}>
+  In: `header`
+</Property>
+```
+
+## Reference
+
+```json doc-gen:typescript
+{
+  "file": "./content/docs/ui/props.ts",
+  "name": "PropertyProps"
+}
+```

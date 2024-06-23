@@ -1,5 +1,5 @@
 import type { PageTree } from 'fumadocs-core/server';
-import type { ReactNode, HTMLAttributes } from 'react';
+import type { ReactNode, HTMLAttributes, ReactElement } from 'react';
 import Link from 'next/link';
 import { MoreHorizontal } from 'lucide-react';
 import { cn } from '@/utils/cn';
@@ -56,6 +56,16 @@ export type LinkItemType =
       icon: ReactNode;
       text: string;
       external?: boolean;
+    }
+  | {
+      type: 'custom';
+      /**
+       * Restrict where the item is displayed
+       *
+       * @defaultValue 'all'
+       */
+      on?: 'menu' | 'nav' | 'all';
+      children: ReactElement;
     };
 
 interface NavOptions extends SharedNavProps {

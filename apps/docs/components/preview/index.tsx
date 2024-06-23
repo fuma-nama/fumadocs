@@ -4,7 +4,6 @@ import { Callout } from 'fumadocs-ui/components/callout';
 import { File, Folder, Files } from 'fumadocs-ui/components/files';
 import { ImageZoom } from 'fumadocs-ui/components/image-zoom';
 import { InlineTOC } from 'fumadocs-ui/components/inline-toc';
-import { RollButton } from 'fumadocs-ui/components/roll-button';
 import { Step, Steps } from 'fumadocs-ui/components/steps';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 import { TypeTable } from 'fumadocs-ui/components/type-table';
@@ -199,7 +198,6 @@ export default {
   'roll-button': (
     <div className="rounded-lg border bg-card p-4 text-muted-foreground">
       <p className="text-center text-sm">Scroll down to see the button</p>
-      <RollButton />
     </div>
   ),
   'root-toggle': (
