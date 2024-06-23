@@ -1,0 +1,93 @@
+---
+title: API Info
+description: The component which shows API endpoint method, route and wraps information about the API.
+---
+
+import { APIInfo } from 'fumadocs-ui/components/api';
+
+<APIInfo method={'POST'} route={'/tickets'}></APIInfo>
+
+## Usage
+
+Import it in your MDX documents.
+
+```mdx title="tickets.mdx"
+import { APIInfo } from 'fumadocs-ui/components/api';
+
+<APIInfo method={'POST'} route={'/tickets'}>
+  ...
+</APIInfo>
+```
+
+## Variants
+
+Depending on the method you provide, the APIInfo component will render different variants of the component.
+
+### GET
+
+<APIInfo method={'GET'} route={'/tickets'}></APIInfo>
+
+```mdx title="tickets.mdx"
+import { APIInfo } from 'fumadocs-ui/components/api';
+
+<APIInfo method={'GET'} route={'/tickets'}>
+  ...
+</APIInfo>
+```
+
+### POST
+
+<APIInfo method={'POST'} route={'/tickets'}></APIInfo>
+
+```mdx title="tickets.mdx"
+import { APIInfo } from 'fumadocs-ui/components/api';
+
+<APIInfo method={'POST'} route={'/tickets'}>
+  ...
+</APIInfo>
+```
+
+### PUT
+
+<APIInfo method={'PUT'} route={'/tickets'}></APIInfo>
+
+```mdx title="tickets.mdx"
+import { APIInfo } from 'fumadocs-ui/components/api';
+
+<APIInfo method={'PUT'} route={'/tickets'}>
+  ...
+</APIInfo>
+```
+
+### PATCH
+
+<APIInfo method={'PATCH'} route={'/tickets'}></APIInfo>
+
+```mdx title="tickets.mdx"
+import { APIInfo } from 'fumadocs-ui/components/api';
+
+<APIInfo method={'PATCH'} route={'/tickets'}>
+  ...
+</APIInfo>
+```
+
+### DELETE
+
+<APIInfo method={'DELETE'} route={'/tickets'}></APIInfo>
+
+```mdx title="tickets.mdx"
+import { APIInfo } from 'fumadocs-ui/components/api';
+
+<APIInfo method={'DELETE'} route={'/tickets'}>
+  ...
+</APIInfo>
+```
+
+## Reference
+
+```json doc-gen:typescript
+{
+  "file": "./content/docs/ui/props.ts",
+  "name": "APIInfoProps"
+}
+```
