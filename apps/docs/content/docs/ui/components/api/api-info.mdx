@@ -1,6 +1,6 @@
 ---
 title: API Info
-description: The component which shows API endpoint method, route and wraps information about the API.
+description: Components for basic information of API endpoint.
 ---
 
 import { APIInfo } from 'fumadocs-ui/components/api';
@@ -12,49 +12,51 @@ import { APIInfo } from 'fumadocs-ui/components/api';
 Import it in your MDX documents.
 
 ```mdx title="tickets.mdx"
-import { APIInfo } from 'fumadocs-ui/components/api';
+import { API, APIInfo } from 'fumadocs-ui/components/api';
 
-<APIInfo method={'POST'} route={'/tickets'}>
-  ...
-</APIInfo>
+<API>
+  <APIInfo method="POST" route="/tickets">
+    ...
+  </APIInfo>
+</API>
 ```
 
 ## Variants
 
-Depending on the method you provide, the APIInfo component will render different variants of the component.
+Depending on the `method` prop, the APIInfo component will render different variants of the component.
 
 ### GET
 
-<APIInfo method={'GET'} route={'/tickets'}></APIInfo>
+<APIInfo method="GET" route="/tickets"></APIInfo>
 
 ```mdx title="tickets.mdx"
 import { APIInfo } from 'fumadocs-ui/components/api';
 
-<APIInfo method={'GET'} route={'/tickets'}>
+<APIInfo method="GET" route="/tickets">
   ...
 </APIInfo>
 ```
 
 ### POST
 
-<APIInfo method={'POST'} route={'/tickets'}></APIInfo>
+<APIInfo method="POST" route="/tickets"></APIInfo>
 
 ```mdx title="tickets.mdx"
 import { APIInfo } from 'fumadocs-ui/components/api';
 
-<APIInfo method={'POST'} route={'/tickets'}>
+<APIInfo method="POST" route="/tickets">
   ...
 </APIInfo>
 ```
 
 ### PUT
 
-<APIInfo method={'PUT'} route={'/tickets'}></APIInfo>
+<APIInfo method="PUT" route="/tickets"></APIInfo>
 
 ```mdx title="tickets.mdx"
 import { APIInfo } from 'fumadocs-ui/components/api';
 
-<APIInfo method={'PUT'} route={'/tickets'}>
+<APIInfo method="PUT" route="/tickets">
   ...
 </APIInfo>
 ```
@@ -73,12 +75,12 @@ import { APIInfo } from 'fumadocs-ui/components/api';
 
 ### DELETE
 
-<APIInfo method={'DELETE'} route={'/tickets'}></APIInfo>
+<APIInfo method="DELETE" route="/tickets"></APIInfo>
 
 ```mdx title="tickets.mdx"
 import { APIInfo } from 'fumadocs-ui/components/api';
 
-<APIInfo method={'DELETE'} route={'/tickets'}>
+<APIInfo method="DELETE" route="/tickets">
   ...
 </APIInfo>
 ```

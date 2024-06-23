@@ -1,13 +1,13 @@
 ---
 title: Requests
-description: Components which showcase request examples.
+description: Components for request examples.
 ---
 
 import { Requests, Request } from 'fumadocs-ui/components/api';
 
 <Requests items={["cURL","JavaScript"]}>
 
-<Request value={"cURL"}>
+<Request value="cURL">
 
 ```bash
 curl -X GET "https://api.fake-museum-example.com/special-events"
@@ -15,7 +15,7 @@ curl -X GET "https://api.fake-museum-example.com/special-events"
 
 </Request>
 
-<Request value={"JavaScript"}>
+<Request value="JavaScript">
 
 ```js
 fetch('https://api.fake-museum-example.com/special-events', {
@@ -32,19 +32,17 @@ fetch('https://api.fake-museum-example.com/special-events', {
 Import it in your MDX documents.
 
 ````mdx title="tickets.mdx"
-import { Requests } from 'fumadocs-ui/components/api';
+import { Requests, Request } from 'fumadocs-ui/components/api';
 
 <Requests items={["cURL","JavaScript"]}>
-
-<Request value={"cURL"}>
+<Request value="cURL">
 
 ```bash
 curl -X GET "https://api.fake-museum-example.com/special-events"}
 ```
 
 </Request>
-
-<Request value={"JavaScript"}>
+<Request value="JavaScript">
 
 ```js
 fetch('https://api.fake-museum-example.com/special-events', {
@@ -53,7 +51,6 @@ fetch('https://api.fake-museum-example.com/special-events', {
 ```
 
 </Request>
-
 </Requests>
 ````
 

@@ -1,12 +1,28 @@
 ---
-title: API
-description: Default API Components
+title: OpenAPI
+description: OpenAPI Components
 ---
 
 ## Usage
 
-The default components include Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible, Requests and Request.
+Fumadocs UI provides built-in components for the official [OpenAPI Integration](/docs/ui/openapi), including:
+
+| component          | description                                                |
+| ------------------ | ---------------------------------------------------------- |
+| Root               | The wrapper of entire document                             |
+| API                | Container for each operation                               |
+| APIInfo            | Container for basic operation information                  |
+| APIExample         | Container for API usage examples                           |
+| Responses          | Container (Tabs) for response examples                     |
+| Response           | Container (Tab) for each response example                  |
+| ResponseTypes      | Container for different schema types of a response example |
+| ExampleResponse    | JSON schema of a response example                          |
+| TypeScriptResponse | TypeScript schema of a response example                    |
+| Property           | The card for describing a property                         |
+| ObjectCollapsible  | An accordion to describe additional info of object         |
+| Requests           | Container for request examples                             |
+| Request            | Container for each request example                         |
 
 ```ts
-import defaultComponents from 'fumadocs-ui/components/api';
+import { ... } from 'fumadocs-ui/components/api';
 ```

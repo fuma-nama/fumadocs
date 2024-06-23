@@ -1,6 +1,6 @@
 ---
 title: Responses
-description: Components which showcase response exaples and types.
+description: Components for response examples.
 ---
 
 import {
@@ -13,25 +13,19 @@ import {
 
 <Responses items={["200"]}>
 
-<Response value={"200"}>
+<Response value="200">
 
-A list of upcoming special events
+Description
 
 <ResponseTypes>
 
 <ExampleResponse>
 
 ```json
-[
-  {
-    "eventId": "3be6453c-03eb-4357-ae5a-984a0e574a54",
-    "name": "Pirate Coding Workshop",
-    "location": "Computer Room",
-    "eventDescription": "Captain Blackbeard shares his love of the C...language. And possibly Arrrrr (R lang).",
-    "dates": ["2023-10-29"],
-    "price": 25
-  }
-]
+{
+  "eventId": "3be6453c-03eb-4357-ae5a-984a0e574a54",
+  "name": "Pirate Coding Workshop"
+}
 ```
 
 </ExampleResponse>
@@ -40,34 +34,11 @@ A list of upcoming special events
 
 ```ts
 /**
- * A list of upcoming special events
+ * Description
  */
-export type Response = {
-  /**
-   * Identifier for a special event.
-   */
-  eventId: string;
-  /**
-   * Name of the special event
-   */
-  name: string;
-  /**
-   * Location where the special event is held
-   */
-  location: string;
-  /**
-   * Description of the special event
-   */
-  eventDescription: string;
-  /**
-   * List of planned dates for the special event
-   */
-  dates: string[];
-  /**
-   * Price of a ticket for the special event
-   */
-  price: number;
-}[];
+export interface Response {
+  ...
+};
 ```
 
 </TypeScriptResponse>
@@ -92,13 +63,11 @@ import {
 } from 'fumadocs-ui/components/api';
 
 <Responses items={["200"]}>
+<Response value="200">
 
-<Response value={"200"}>
-
-A list of upcoming special events
+Description
 
 <ResponseTypes>
-
 <ExampleResponse>
 
 ```json
@@ -115,47 +84,20 @@ A list of upcoming special events
 ```
 
 </ExampleResponse>
-
 <TypeScriptResponse>
 
 ```ts
 /**
- * A list of upcoming special events
+ * Description
  */
-export type Response = {
-  /**
-   * Identifier for a special event.
-   */
-  eventId: string;
-  /**
-   * Name of the special event
-   */
-  name: string;
-  /**
-   * Location where the special event is held
-   */
-  location: string;
-  /**
-   * Description of the special event
-   */
-  eventDescription: string;
-  /**
-   * List of planned dates for the special event
-   */
-  dates: string[];
-  /**
-   * Price of a ticket for the special event
-   */
-  price: number;
-}[];
+export interface Response {
+  ...
+};
 ```
 
 </TypeScriptResponse>
-
 </ResponseTypes>
-
 </Response>
-
 </Responses>
 ````
 
