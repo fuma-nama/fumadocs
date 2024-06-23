@@ -26,6 +26,7 @@ export const baseOptions: BaseLayoutProps = {
         </span>
       </>
     ),
+    transparentMode: 'top',
     children: <NavChildren />,
   },
   links: [
@@ -48,7 +49,7 @@ export const docsOptions: DocsLayoutProps = {
   tree: utils.pageTree,
   nav: {
     ...baseOptions.nav,
-    transparentMode: 'top',
+    transparentMode: 'none',
     children: undefined,
   },
   sidebar: {

@@ -12,7 +12,7 @@ This API is available on Home Layout and Docs Layout.
 
 A link to navigate to an URL, can be external.
 
-```mdx
+```tsx
 import { DocsLayout } from 'fumadocs-ui/layout';
 
 <DocsLayout
@@ -23,12 +23,12 @@ import { DocsLayout } from 'fumadocs-ui/layout';
       url: '/blog',
     },
   ]}
-/>
+/>;
 ```
 
 To mark the item as active when browsing child pages like `/blog/post`, add set it as `nested-url`.
 
-```mdx
+```tsx
 import { DocsLayout } from 'fumadocs-ui/layout';
 
 <DocsLayout
@@ -40,14 +40,14 @@ import { DocsLayout } from 'fumadocs-ui/layout';
       active: 'nested-url',
     },
   ]}
-/>
+/>;
 ```
 
 ### Secondary Item
 
 Same as normal items, but are shown as icon buttons on the navbar.
 
-```mdx
+```tsx
 import { DocsLayout } from 'fumadocs-ui/layout';
 
 <DocsLayout
@@ -59,14 +59,14 @@ import { DocsLayout } from 'fumadocs-ui/layout';
       url: '/blog',
     },
   ]}
-/>
+/>;
 ```
 
 ### Dropdown Menu
 
 A dropdown menu containing multiple link items.
 
-```mdx
+```tsx
 import { DocsLayout } from 'fumadocs-ui/layout';
 
 <DocsLayout
@@ -79,4 +79,37 @@ import { DocsLayout } from 'fumadocs-ui/layout';
     },
   ]}
 />
+```
+
+### Custom Item
+
+Display a custom component.
+
+```tsx
+import { DocsLayout } from 'fumadocs-ui/layout';
+
+<DocsLayout
+  links={[
+    {
+      type: 'custom',
+      children: <div>Hey</div>,
+    },
+  ]}
+/>;
+```
+
+You can restrict where the items are displayed, like only on menus or navbar.
+
+```tsx
+import { DocsLayout } from 'fumadocs-ui/layout';
+
+<DocsLayout
+  links={[
+    {
+      type: 'custom',
+      on: 'menu',
+      children: <div>Hey</div>,
+    },
+  ]}
+/>;
 ```

@@ -45,6 +45,13 @@ export function LinkItem({
 }: LinkItemProps): React.ReactElement {
   const pathname = usePathname();
 
+  if (item.type === 'custom') {
+    const itemOn = item.on ?? 'all';
+    if (itemOn === 'all' || itemOn === on) return item.children;
+    // eslint-disable-next-line react/jsx-no-useless-fragment -- Render nothing
+    return <></>;
+  }
+
   if (item.type === 'menu' && on === 'nav') {
     return (
       <Popover>
