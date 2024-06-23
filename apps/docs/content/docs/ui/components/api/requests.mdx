@@ -1,0 +1,58 @@
+---
+title: Requests
+description: Components which showcase request examples.
+---
+
+import { Requests, Request } from 'fumadocs-ui/components/api';
+
+<Requests items={["cURL","JavaScript"]}>
+
+<Request value={"cURL"}>
+
+```bash
+curl -X GET "https://api.fake-museum-example.com/special-events"
+```
+
+</Request>
+
+<Request value={"JavaScript"}>
+
+```js
+fetch('https://api.fake-museum-example.com/special-events', {
+  method: 'GET',
+});
+```
+
+</Request>
+
+</Requests>
+
+## Usage
+
+Import it in your MDX documents.
+
+````mdx title="tickets.mdx"
+import { Requests } from 'fumadocs-ui/components/api';
+
+<Requests items={["cURL","JavaScript"]}>
+
+<Request value={"cURL"}>
+
+```bash
+curl -X GET "https://api.fake-museum-example.com/special-events"}
+```
+
+</Request>
+
+<Request value={"JavaScript"}>
+
+```js
+fetch('https://api.fake-museum-example.com/special-events', {
+  method: 'GET',
+});
+```
+
+</Request>
+
+</Requests>
+````
