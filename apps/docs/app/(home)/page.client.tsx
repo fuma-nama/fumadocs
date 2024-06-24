@@ -346,7 +346,7 @@ export function ContributorCounter({
   }
 
   return (
-    <div ref={counterRef} className=" ">
+    <div ref={counterRef}>
       <h2 className="mb-2 text-center text-lg font-semibold">
         Project Contributors
       </h2>
@@ -376,7 +376,7 @@ export function ContributorCounter({
                     e.currentTarget.style.display = 'none';
                   }}
                 />
-                <div className="absolute top-0 left-0 flex items-center justify-center size-12 rounded-full bg-gray-200 text-gray-600">
+                <div className="absolute left-0 top-0 flex size-12 items-center justify-center rounded-full bg-gray-200 text-gray-600">
                   {contributor.login.charAt(0).toUpperCase()}
                 </div>
               </div>
@@ -511,7 +511,7 @@ export function ContributorCounterSWR({
   }
 
   return (
-    <div ref={counterRef} className=" ">
+    <div ref={counterRef}>
       <h2 className="mb-2 text-center text-lg font-semibold">
         Project Contributors
       </h2>
@@ -541,7 +541,7 @@ export function ContributorCounterSWR({
                     e.currentTarget.style.display = 'none';
                   }}
                 />
-                <div className="absolute top-0 left-0 flex items-center justify-center size-12 rounded-full bg-gray-200 text-gray-600">
+                <div className="absolute left-0 top-0 flex size-12 items-center justify-center rounded-full bg-gray-200 text-gray-600">
                   {contributor.login.charAt(0).toUpperCase()}
                 </div>
               </div>
