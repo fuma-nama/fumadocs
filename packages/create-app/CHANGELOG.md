@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 12.2.4
+
+### Patch Changes
+
+- 7a326d3: Fix missing imports from template
+
 ## 12.2.3
 
 ## 12.2.2
