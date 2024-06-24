@@ -242,6 +242,7 @@ export function ContributorCounter({
   );
   const counterRef = useRef<HTMLDivElement>(null);
 
+  // Function to animate the count
   const animateCount = useCallback(() => {
     let start = 0;
     const end = totalContributors;
@@ -259,6 +260,7 @@ export function ContributorCounter({
     }, 16);
   }, [totalContributors]);
 
+  // Fetch contributors data
   useEffect(() => {
     const fetchContributors = async (): Promise<void> => {
       try {
@@ -269,11 +271,14 @@ export function ContributorCounter({
           throw new Error('Failed to fetch contributors');
         }
         const contributors = (await response.json()) as Contributor[];
+        
+        // Filter out bot contributors
         const filteredContributors = contributors.filter(
           (contributor) => !contributor.login.endsWith('[bot]'),
         );
         setTotalContributors(filteredContributors.length);
 
+        // Randomly select contributors to display
         const shuffled = [...filteredContributors].sort(
           () => 0.5 - Math.random(),
         );
@@ -298,6 +303,7 @@ export function ContributorCounter({
     });
   }, [repoOwner, repoName, displayCount]);
 
+  // Set up Intersection Observer to trigger count animation
   useEffect(() => {
     if (!isLoading && !error) {
       const observer = new IntersectionObserver(
@@ -383,6 +389,7 @@ interface ContributorCounterProps {
   intersectionThreshold?: number;
 }
 
+// Fetcher function to retrieve contributors
 const fetcher = async (url: string): Promise<Contributor[]> => {
   const response = await fetch(url);
   if (!response.ok) {
@@ -400,12 +407,14 @@ export function ContributorCounterSWR({
   const [count, setCount] = useState(0);
   const counterRef = useRef<HTMLDivElement>(null);
 
+    // Fetch contributors data using SWR
   const { data: contributors, error }: SWRResponse<Contributor[], Error> =
     useSWR<Contributor[], Error>(
       `https://api.github.com/repos/${repoOwner}/${repoName}/contributors?per_page=100`,
       fetcher,
     );
 
+  // Determine if data is still loading
   const isLoading = !contributors && !error;
 
   const { randomContributors, totalContributors } = useMemo(() => {
@@ -413,10 +422,12 @@ export function ContributorCounterSWR({
       return { randomContributors: [], totalContributors: 0 };
     }
 
+    // Filter out bot contributors
     const filtered = contributors.filter(
       (contributor) => !contributor.login.endsWith('[bot]'),
     );
 
+    // Randomly select contributors to display
     const shuffled = [...filtered].sort(() => 0.5 - Math.random());
 
     return {
@@ -425,6 +436,7 @@ export function ContributorCounterSWR({
     };
   }, [contributors, displayCount]);
 
+  // Function to animate the count
   const animateCount = useCallback(() => {
     let start = 0;
     const end = totalContributors;
@@ -442,6 +454,7 @@ export function ContributorCounterSWR({
     }, 16);
   }, [totalContributors]);
 
+    // Set up Intersection Observer to trigger count animation
   useEffect(() => {
     if (!isLoading && !error) {
       const observer = new IntersectionObserver(
