@@ -271,7 +271,7 @@ export function ContributorCounter({
           throw new Error('Failed to fetch contributors');
         }
         const contributors = (await response.json()) as Contributor[];
-        
+
         // Filter out bot contributors
         const filteredContributors = contributors.filter(
           (contributor) => !contributor.login.endsWith('[bot]'),
@@ -359,13 +359,27 @@ export function ContributorCounter({
         <div className="flex justify-center space-x-4">
           {randomContributors.map((contributor) => (
             <div key={contributor.login} className="flex flex-col items-center">
-              <Image
-                src={contributor.avatar_url}
-                alt={`${contributor.login}'s avatar`}
-                className="rounded-full"
-                width={48}
-                height={48}
-              />
+              <div className="relative">
+                <Image
+                  src={contributor.avatar_url}
+                  alt={`${contributor.login}'s avatar`}
+                  className="rounded-full"
+                  width={48}
+                  height={48}
+                  onLoad={(e) => {
+                    const placeholder = e.currentTarget.nextSibling;
+                    if (placeholder instanceof HTMLElement) {
+                      placeholder.style.display = 'none';
+                    }
+                  }}
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+                <div className="absolute top-0 left-0 flex items-center justify-center size-12 rounded-full bg-gray-200 text-gray-600">
+                  {contributor.login.charAt(0).toUpperCase()}
+                </div>
+              </div>
               <span className="mt-2 text-sm text-[#e0e0e0]">
                 {contributor.login}
               </span>
@@ -407,7 +421,7 @@ export function ContributorCounterSWR({
   const [count, setCount] = useState(0);
   const counterRef = useRef<HTMLDivElement>(null);
 
-    // Fetch contributors data using SWR
+  // Fetch contributors data using SWR
   const { data: contributors, error }: SWRResponse<Contributor[], Error> =
     useSWR<Contributor[], Error>(
       `https://api.github.com/repos/${repoOwner}/${repoName}/contributors?per_page=100`,
@@ -454,7 +468,7 @@ export function ContributorCounterSWR({
     }, 16);
   }, [totalContributors]);
 
-    // Set up Intersection Observer to trigger count animation
+  // Set up Intersection Observer to trigger count animation
   useEffect(() => {
     if (!isLoading && !error) {
       const observer = new IntersectionObserver(
@@ -510,13 +524,27 @@ export function ContributorCounterSWR({
         <div className="flex justify-center space-x-4">
           {randomContributors.map((contributor) => (
             <div key={contributor.login} className="flex flex-col items-center">
-              <Image
-                src={contributor.avatar_url}
-                alt={`${contributor.login}'s avatar`}
-                className="rounded-full"
-                width={48}
-                height={48}
-              />
+              <div className="relative">
+                <Image
+                  src={contributor.avatar_url}
+                  alt={`${contributor.login}'s avatar`}
+                  className="rounded-full"
+                  width={48}
+                  height={48}
+                  onLoad={(e) => {
+                    const placeholder = e.currentTarget.nextSibling;
+                    if (placeholder instanceof HTMLElement) {
+                      placeholder.style.display = 'none';
+                    }
+                  }}
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+                <div className="absolute top-0 left-0 flex items-center justify-center size-12 rounded-full bg-gray-200 text-gray-600">
+                  {contributor.login.charAt(0).toUpperCase()}
+                </div>
+              </div>
               <span className="mt-2 text-sm text-[#e0e0e0]">
                 {contributor.login}
               </span>
