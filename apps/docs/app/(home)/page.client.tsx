@@ -15,6 +15,7 @@ import {
 import { TerminalIcon } from 'lucide-react';
 import Image from 'next/image';
 import useSWR from 'swr';
+import type { SWRResponse } from 'swr';
 import {
   GLSLX_NAME_U_RESOLUTION,
   GLSLX_NAME_U_TIME,
@@ -399,10 +400,11 @@ export function ContributorCounterSWR({
   const [count, setCount] = useState(0);
   const counterRef = useRef<HTMLDivElement>(null);
 
-  const { data: contributors, error } = useSWR<Contributor[]>(
-    `https://api.github.com/repos/${repoOwner}/${repoName}/contributors?per_page=100`,
-    fetcher,
-  );
+  const { data: contributors, error }: SWRResponse<Contributor[], Error> =
+    useSWR<Contributor[], Error>(
+      `https://api.github.com/repos/${repoOwner}/${repoName}/contributors?per_page=100`,
+      fetcher,
+    );
 
   const isLoading = !contributors && !error;
 
