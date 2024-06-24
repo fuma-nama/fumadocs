@@ -1,11 +1,11 @@
-export interface GetTreeOptions {
+export interface FetchTreeOptions {
   owner: string;
   repo: string;
 
   /**
    * GitHub access token
    */
-  token?: string;
+  accessToken?: string;
 
   /**
    * The SHA1 value or ref (branch or tag) name of the tree.
@@ -22,7 +22,7 @@ export interface GetTreeOptions {
   init?: RequestInit;
 }
 
-export interface GetTreeResponse {
+export interface GitTreeResponse {
   sha: string;
   url: string;
   truncated: boolean;
@@ -42,18 +42,18 @@ export interface GetTreeResponse {
   )[];
 }
 
-export async function getTree({
+export async function fetchTree({
   owner,
   repo,
   treeSha,
-  recursive,
-  token,
+  recursive = false,
+  accessToken,
   init,
-}: GetTreeOptions): Promise<GetTreeResponse> {
+}: FetchTreeOptions): Promise<GitTreeResponse> {
   const headers = new Headers(init?.headers);
 
   headers.set('X-GitHub-Api-Version', '2022-11-28');
-  if (token) headers.set('Authorization', `Bearer ${token}`);
+  if (accessToken) headers.set('Authorization', `Bearer ${accessToken}`);
 
   const url = new URL(
     `/repos/${owner}/${repo}/git/trees/${treeSha}`,
@@ -66,9 +66,7 @@ export async function getTree({
     headers,
   });
   if (!res.ok)
-    throw new Error(
-      `failed to get file content from GitHub: ${await res.text()}`,
-    );
+    throw new Error(`failed to get file tree from GitHub: ${await res.text()}`);
 
-  return (await res.json()) as GetTreeResponse;
+  return (await res.json()) as GitTreeResponse;
 }

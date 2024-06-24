@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "dev": "concurrently \"node ./dev.mjs\" \"next dev\"",
+    "dev": "next dev",
     "start": "next start"
   },
   "dependencies": {

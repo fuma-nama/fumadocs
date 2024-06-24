@@ -24,8 +24,14 @@ export type UpdateMessage =
 export function watch(options: WatchOptions): FSWatcher {
   const { cwd = process.cwd(), files } = options;
   const watcher = watchFn(files, { cwd });
+  let ready = false;
+
+  watcher.once('ready', () => {
+    ready = true;
+  });
 
   watcher.on('all', (eventName, relativePath) => {
+    if (!ready) return;
     const absolutePath = path.resolve(cwd, relativePath);
 
     if (eventName === 'add') {

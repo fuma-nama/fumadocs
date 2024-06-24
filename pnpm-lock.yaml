@@ -130,7 +130,7 @@ importers:
     devDependencies:
       '@next/bundle-analyzer':
         specifier: ^14.2.4
-        version: 14.2.4
+        version: 14.2.4(bufferutil@4.0.8)
       '@next/eslint-plugin-next':
         specifier: ^14.2.4
         version: 14.2.4
@@ -579,6 +579,9 @@ importers:
       '@mdx-js/mdx':
         specifier: ^3.0.1
         version: 3.0.1
+      bufferutil:
+        specifier: ^4.0.8
+        version: 4.0.8
       chokidar:
         specifier: ^3.6.0
         version: 3.6.0
@@ -588,6 +591,9 @@ importers:
       gray-matter:
         specifier: ^4.0.3
         version: 4.0.3
+      micromatch:
+        specifier: ^4.0.7
+        version: 4.0.7
       react:
         specifier: '>= 18'
         version: 18.3.1
@@ -596,7 +602,7 @@ importers:
         version: 1.0.1
       ws:
         specifier: ^8.17.1
-        version: 8.17.1
+        version: 8.17.1(bufferutil@4.0.8)
       zod:
         specifier: ^3.23.8
         version: 3.23.8
@@ -604,12 +610,12 @@ importers:
       '@types/mdx':
         specifier: ^2.0.13
         version: 2.0.13
+      '@types/micromatch':
+        specifier: ^4.0.7
+        version: 4.0.7
       '@types/node':
         specifier: 18.17.5
         version: 18.17.5
-      '@types/picomatch':
-        specifier: ^2.3.3
-        version: 2.3.3
       '@types/react':
         specifier: ^18.3.3
         version: 18.3.3
@@ -625,9 +631,6 @@ importers:
       next:
         specifier: ^14.2.4
         version: 14.2.4(@babel/core@7.24.0)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      picomatch:
-        specifier: ^4.0.2
-        version: 4.0.2
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig
@@ -637,9 +640,6 @@ importers:
       vfile:
         specifier: ^6.0.1
         version: 6.0.1
-      webpack:
-        specifier: ^5.90.3
-        version: 5.90.3(esbuild@0.21.5)
 
   packages/openapi:
     dependencies:
@@ -2226,6 +2226,9 @@ packages:
   '@types/acorn@4.0.6':
     resolution: {integrity: sha512-veQTnWP+1D/xbxVrPC3zHnCZRjSrKfhbMUlEA43iMZLu7EsnTtkJklIuwrCPbOi8YkvDQAiW05VQQFvvz9oieQ==}
 
+  '@types/braces@3.0.4':
+    resolution: {integrity: sha512-0WR3b8eaISjEW7RpZnclONaLFDf7buaowRHdqLp4vLj54AsSAYWfh3DRbfiYJY9XDxMgx1B4sE1Afw2PGpuHOA==}
+
   '@types/cross-spawn@6.0.6':
     resolution: {integrity: sha512-fXRhhUkG4H3TQk5dBhQ7m/JDdSNHKwR2BBia62lhwEIq9xGiQKLxd6LymNhn47SjXhsUEPmxi+PKw2OkW4LLjA==}
 
@@ -2274,6 +2277,9 @@ packages:
   '@types/mdx@2.0.13':
     resolution: {integrity: sha512-+OWZQfAYyio6YkJb3HLxDrvnx6SWWDbC0zVPfBRzUk0/nqoDyf6dNxQi3eArPe8rJ473nobTMQ/8Zk+LxJ+Yuw==}
 
+  '@types/micromatch@4.0.7':
+    resolution: {integrity: sha512-C/FMQ8HJAZhTsDpl4wDKZdMeeW5USjgzOczUwTGbRc1ZopPgOhIEnxY2ZgUrsuyy4DwK1JVOJZKFakv3TbCKiA==}
+
   '@types/minimist@1.2.5':
     resolution: {integrity: sha512-hov8bUuiLiyFPGyFPE1lwWhmzYbirOXQNNo40+y3zow8aFVTeyn3VWL0VFFfdNddA8S4Vf0Tc062rzyNr7Paag==}
 
@@ -2300,9 +2306,6 @@ packages:
 
   '@types/parse5@6.0.3':
     resolution: {integrity: sha512-SuT16Q1K51EAVPz1K29DJ/sXjhSQ0zjvsypYJ6tlwVsRV9jwW5Adq2ch8Dq8kDBCkYnELS7N7VNCSB5nC56t/g==}
-
-  '@types/picomatch@2.3.3':
-    resolution: {integrity: sha512-Yll76ZHikRFCyz/pffKGjrCwe/le2CDwOP5F210KQo27kpRE46U2rDnzikNlVn6/ezH3Mhn46bJMTfeVTtcYMg==}
 
   '@types/prop-types@15.7.12':
     resolution: {integrity: sha512-5zvhXYtRNRluoE/jAp4GVsSduVUzNWKkOZrCDBWYtE7biZywwdC2AcEzg+cSMLFRfVgeAFqpfNabiPjxFddV1Q==}
@@ -2729,6 +2732,10 @@ packages:
 
   buffer-from@1.1.2:
     resolution: {integrity: sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ==}
+
+  bufferutil@4.0.8:
+    resolution: {integrity: sha512-4T53u4PdgsXqKaIctwF8ifXlRTTmEPJ8iEPWFdGZvcf7sbwYo6FKFEX9eNNAnzFZ7EzJAQ3CJeOtCRA4rDp7Pw==}
+    engines: {node: '>=6.14.2'}
 
   builtin-modules@3.3.0:
     resolution: {integrity: sha512-zhaCDicdLuWN5UbN5IMnFqNMhNfo919sH85y2/ea+5Yg9TsTkeZxpL+JLbp6cgYFS4sRLp3YV4S6yDuqVWHYOw==}
@@ -4705,6 +4712,10 @@ packages:
     resolution: {integrity: sha512-dRB78srN/l6gqWulah9SrxeYnxeddIG30+GOqK/9OlLVyLg3HPnr6SqOWTWOXKRwC2eGYCkZ59NNuSgvSrpgOA==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
+  node-gyp-build@4.8.1:
+    resolution: {integrity: sha512-OSs33Z9yWr148JZcbZd5WiAXhh/n9z8TxQcdMhIOlpN9AhWpLfvVFO73+m77bBABQMaY9XSvIa+qk0jlI7Gcaw==}
+    hasBin: true
+
   node-releases@2.0.14:
     resolution: {integrity: sha512-y10wOWt8yZpqXmOgRo77WaHEmhYQYGNA6y421PKsKYWEK8aW+cqAphborZDhqfyKrbZEN92CN1X2KbafY2s7Yw==}
 
@@ -4912,10 +4923,6 @@ packages:
   picomatch@2.3.1:
     resolution: {integrity: sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==}
     engines: {node: '>=8.6'}
-
-  picomatch@4.0.2:
-    resolution: {integrity: sha512-M7BAV6Rlcy5u+m6oPhAPFgJTzAioX/6B0DxyvDlo9l8+T3nLKbrczg2WLUyzd45L8RqfUMyGPzekbMvX2Ldkwg==}
-    engines: {node: '>=12'}
 
   pify@2.3.0:
     resolution: {integrity: sha512-udgsAY+fTnvv7kI7aaxbqwWNb0AHiB0qBO89PZKPkoTmGOgdbrHDKD+0B2X4uTfJ/FT1R09r9gTsjUjNJotuog==}
@@ -7091,9 +7098,9 @@ snapshots:
 
   '@microsoft/tsdoc@0.14.2': {}
 
-  '@next/bundle-analyzer@14.2.4':
+  '@next/bundle-analyzer@14.2.4(bufferutil@4.0.8)':
     dependencies:
-      webpack-bundle-analyzer: 4.10.1
+      webpack-bundle-analyzer: 4.10.1(bufferutil@4.0.8)
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -7759,6 +7766,8 @@ snapshots:
     dependencies:
       '@types/estree': 1.0.5
 
+  '@types/braces@3.0.4': {}
+
   '@types/cross-spawn@6.0.6':
     dependencies:
       '@types/node': 18.17.5
@@ -7809,6 +7818,10 @@ snapshots:
 
   '@types/mdx@2.0.13': {}
 
+  '@types/micromatch@4.0.7':
+    dependencies:
+      '@types/braces': 3.0.4
+
   '@types/minimist@1.2.5': {}
 
   '@types/ms@0.7.34': {}
@@ -7829,8 +7842,6 @@ snapshots:
   '@types/openapi-sampler@1.0.3': {}
 
   '@types/parse5@6.0.3': {}
-
-  '@types/picomatch@2.3.3': {}
 
   '@types/prop-types@15.7.12': {}
 
@@ -8398,6 +8409,10 @@ snapshots:
       update-browserslist-db: 1.0.13(browserslist@4.23.0)
 
   buffer-from@1.1.2: {}
+
+  bufferutil@4.0.8:
+    dependencies:
+      node-gyp-build: 4.8.1
 
   builtin-modules@3.3.0: {}
 
@@ -11023,6 +11038,8 @@ snapshots:
       fetch-blob: 3.2.0
       formdata-polyfill: 4.0.10
 
+  node-gyp-build@4.8.1: {}
+
   node-releases@2.0.14: {}
 
   normalize-package-data@2.5.0:
@@ -11235,8 +11252,6 @@ snapshots:
   picocolors@1.0.1: {}
 
   picomatch@2.3.1: {}
-
-  picomatch@4.0.2: {}
 
   pify@2.3.0: {}
 
@@ -12558,7 +12573,7 @@ snapshots:
 
   webidl-conversions@4.0.2: {}
 
-  webpack-bundle-analyzer@4.10.1:
+  webpack-bundle-analyzer@4.10.1(bufferutil@4.0.8):
     dependencies:
       '@discoveryjs/json-ext': 0.5.7
       acorn: 8.11.3
@@ -12572,7 +12587,7 @@ snapshots:
       opener: 1.5.2
       picocolors: 1.0.1
       sirv: 2.0.4
-      ws: 7.5.9
+      ws: 7.5.9(bufferutil@4.0.8)
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -12696,9 +12711,13 @@ snapshots:
 
   wrappy@1.0.2: {}
 
-  ws@7.5.9: {}
+  ws@7.5.9(bufferutil@4.0.8):
+    optionalDependencies:
+      bufferutil: 4.0.8
 
-  ws@8.17.1: {}
+  ws@8.17.1(bufferutil@4.0.8):
+    optionalDependencies:
+      bufferutil: 4.0.8
 
   xtend@2.2.0: {}
 

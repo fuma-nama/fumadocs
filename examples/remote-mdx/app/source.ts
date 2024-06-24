@@ -1,27 +1,17 @@
-import {
-  createRemoteCache,
-  createLocalCache,
-  type CreateCacheLocalOptions,
-} from '@fumadocs/mdx-remote/github';
-import { loader } from '@fumadocs/mdx-remote/github/source';
+import { createSourceAuto } from '@fumadocs/mdx-remote/github';
+import { loader } from 'fumadocs-core/source';
+import { cache } from 'react';
 
-const config: CreateCacheLocalOptions = {
-  directory: 'content/docs',
-  saveFile: '.fumadocs/cache.json',
-  baseUrl: '/docs',
-};
-
-const cache =
-  process.env.NODE_ENV === 'production'
-    ? createRemoteCache({
-        ...config,
-        // github information
-        owner: '<github-username-here>',
-        repo: '<github-repo-here>',
-        branch: '<github-branch-here>',
-      })
-    : createLocalCache(config);
-
-export const { getPageTree, getPages, getPage } = await loader(cache, {
-  baseUrl: '/docs',
+export const getDocs = cache(async () => {
+  return loader({
+    source: await createSourceAuto({
+      directory: 'content/docs',
+      github: {
+        owner: 'fuma-nama',
+        repo: 'fumadocs',
+        accessToken: '',
+      },
+    }),
+    baseUrl: '/docs',
+  });
 });
