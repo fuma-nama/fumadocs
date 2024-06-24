@@ -9,8 +9,12 @@ import {
   Fragment,
   type ReactElement,
   type HTMLAttributes,
+  useCallback,
+  useMemo,
 } from 'react';
 import { TerminalIcon } from 'lucide-react';
+import Image from 'next/image';
+import useSWR from 'swr';
 import {
   GLSLX_NAME_U_RESOLUTION,
   GLSLX_NAME_U_TIME,
@@ -206,6 +210,305 @@ function LaunchAppWindow(
         <p className="absolute inset-x-0 text-center">localhost:3000</p>
       </div>
       <div className="p-4 text-sm">New App launched!</div>
+    </div>
+  );
+}
+
+interface Contributor {
+  avatar_url: string;
+  login: string;
+}
+
+interface ContributorCounterProps {
+  repoOwner: string;
+  repoName: string;
+  displayCount?: number;
+  intersectionThreshold?: number;
+}
+
+export function ContributorCounter({
+  repoOwner,
+  repoName,
+  displayCount = 4,
+  intersectionThreshold = 0.1,
+}: ContributorCounterProps): JSX.Element {
+  const [count, setCount] = useState(0);
+  const [totalContributors, setTotalContributors] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [randomContributors, setRandomContributors] = useState<Contributor[]>(
+    [],
+  );
+  const counterRef = useRef<HTMLDivElement>(null);
+
+  const animateCount = useCallback(() => {
+    let start = 0;
+    const end = totalContributors;
+    const duration = 1500;
+    const increment = end / (duration / 16);
+
+    const timer = setInterval(() => {
+      start += increment;
+      if (start >= end) {
+        clearInterval(timer);
+        setCount(end);
+      } else {
+        setCount(Math.floor(start));
+      }
+    }, 16);
+  }, [totalContributors]);
+
+  useEffect(() => {
+    const fetchContributors = async (): Promise<void> => {
+      try {
+        const response = await fetch(
+          `https://api.github.com/repos/${repoOwner}/${repoName}/contributors?per_page=100`,
+        );
+        if (!response.ok) {
+          throw new Error('Failed to fetch contributors');
+        }
+        const contributors = (await response.json()) as Contributor[];
+        const filteredContributors = contributors.filter(
+          (contributor) => !contributor.login.endsWith('[bot]'),
+        );
+        setTotalContributors(filteredContributors.length);
+
+        const shuffled = [...filteredContributors].sort(
+          () => 0.5 - Math.random(),
+        );
+        setRandomContributors(shuffled.slice(0, displayCount));
+
+        setIsLoading(false);
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          console.error('Error fetching contributors:', err.message);
+        }
+        setError('Failed to load contributor data');
+        setIsLoading(false);
+      }
+    };
+
+    fetchContributors().catch((err: unknown) => {
+      if (err instanceof Error) {
+        console.error('Error fetching contributors:', err.message);
+      }
+      setError('Failed to load contributor data');
+      setIsLoading(false);
+    });
+  }, [repoOwner, repoName, displayCount]);
+
+  useEffect(() => {
+    if (!isLoading && !error) {
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            animateCount();
+            observer.unobserve(entry.target);
+          }
+        },
+        { threshold: intersectionThreshold },
+      );
+
+      const currentCounterRef = counterRef.current;
+      if (currentCounterRef) {
+        observer.observe(currentCounterRef);
+      }
+
+      return () => {
+        if (currentCounterRef) {
+          observer.unobserve(currentCounterRef);
+        }
+      };
+    }
+  }, [isLoading, error, animateCount, intersectionThreshold]);
+
+  if (isLoading) {
+    return (
+      <div>
+        <div className="text-[#e0e0e0]">Loading...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div>
+        <div className="text-[#f97583]">{error}</div>
+      </div>
+    );
+  }
+
+  return (
+    <div ref={counterRef} className=" ">
+      <h2 className="mb-2 text-center text-lg font-semibold">
+        Project Contributors
+      </h2>
+      <div className="flex items-center justify-center">
+        <div className="p-6">
+          <span className="text-4xl font-bold">{count}</span>
+        </div>
+      </div>
+      <div className="mt-6">
+        <div className="flex justify-center space-x-4">
+          {randomContributors.map((contributor) => (
+            <div key={contributor.login} className="flex flex-col items-center">
+              <Image
+                src={contributor.avatar_url}
+                alt={`${contributor.login}'s avatar`}
+                className="rounded-full"
+                width={48}
+                height={48}
+              />
+              <span className="mt-2 text-sm text-[#e0e0e0]">
+                {contributor.login}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface Contributor {
+  avatar_url: string;
+  login: string;
+}
+
+interface ContributorCounterProps {
+  repoOwner: string;
+  repoName: string;
+  displayCount?: number;
+  intersectionThreshold?: number;
+}
+
+const fetcher = async (url: string): Promise<Contributor[]> => {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error('Failed to fetch contributors');
+  }
+  return response.json() as Promise<Contributor[]>;
+};
+
+export function ContributorCounterSWR({
+  repoOwner,
+  repoName,
+  displayCount = 4,
+  intersectionThreshold = 0.1,
+}: ContributorCounterProps): JSX.Element {
+  const [count, setCount] = useState(0);
+  const counterRef = useRef<HTMLDivElement>(null);
+
+  const { data: contributors, error } = useSWR<Contributor[]>(
+    `https://api.github.com/repos/${repoOwner}/${repoName}/contributors?per_page=100`,
+    fetcher,
+  );
+
+  const isLoading = !contributors && !error;
+
+  const { randomContributors, totalContributors } = useMemo(() => {
+    if (!contributors) {
+      return { randomContributors: [], totalContributors: 0 };
+    }
+
+    const filtered = contributors.filter(
+      (contributor) => !contributor.login.endsWith('[bot]'),
+    );
+
+    const shuffled = [...filtered].sort(() => 0.5 - Math.random());
+
+    return {
+      randomContributors: shuffled.slice(0, displayCount),
+      totalContributors: filtered.length,
+    };
+  }, [contributors, displayCount]);
+
+  const animateCount = useCallback(() => {
+    let start = 0;
+    const end = totalContributors;
+    const duration = 1500;
+    const increment = end / (duration / 16);
+
+    const timer = setInterval(() => {
+      start += increment;
+      if (start >= end) {
+        clearInterval(timer);
+        setCount(end);
+      } else {
+        setCount(Math.floor(start));
+      }
+    }, 16);
+  }, [totalContributors]);
+
+  useEffect(() => {
+    if (!isLoading && !error) {
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            animateCount();
+            observer.unobserve(entry.target);
+          }
+        },
+        { threshold: intersectionThreshold },
+      );
+
+      const currentCounterRef = counterRef.current;
+      if (currentCounterRef) {
+        observer.observe(currentCounterRef);
+      }
+
+      return () => {
+        if (currentCounterRef) {
+          observer.unobserve(currentCounterRef);
+        }
+      };
+    }
+  }, [isLoading, error, animateCount, intersectionThreshold]);
+
+  if (isLoading) {
+    return (
+      <div>
+        <div className="text-[#e0e0e0]">Loading...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div>
+        <div className="text-[#f97583]">Failed to load contributor data</div>
+      </div>
+    );
+  }
+
+  return (
+    <div ref={counterRef} className=" ">
+      <h2 className="mb-2 text-center text-lg font-semibold">
+        Project Contributors
+      </h2>
+      <div className="flex items-center justify-center">
+        <div className="p-6">
+          <span className="text-4xl font-bold">{count}</span>
+        </div>
+      </div>
+      <div className="mt-6">
+        <div className="flex justify-center space-x-4">
+          {randomContributors.map((contributor) => (
+            <div key={contributor.login} className="flex flex-col items-center">
+              <Image
+                src={contributor.avatar_url}
+                alt={`${contributor.login}'s avatar`}
+                className="rounded-full"
+                width={48}
+                height={48}
+              />
+              <span className="mt-2 text-sm text-[#e0e0e0]">
+                {contributor.login}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
