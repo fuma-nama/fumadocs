@@ -346,7 +346,7 @@ export function ContributorCounter({
   }
 
   return (
-    <div ref={counterRef}>
+    <div ref={counterRef} className=" ">
       <h2 className="mb-2 text-center text-lg font-semibold">
         Project Contributors
       </h2>
@@ -511,7 +511,7 @@ export function ContributorCounterSWR({
   }
 
   return (
-    <div ref={counterRef}>
+    <div ref={counterRef} className=" ">
       <h2 className="mb-2 text-center text-lg font-semibold">
         Project Contributors
       </h2>
