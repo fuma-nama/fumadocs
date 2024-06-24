@@ -59,7 +59,7 @@ Decrypt and display the raw key. Only possible if the key was encrypted when gen
 <Request value={"cURL"}>
 
 ```bash
-curl -X GET "https://api.unkey.dev/v1/keys.getKey"
+curl -X GET "https://api.unkey.dev/v1/keys.getKey?keyId=key_1234&decrypt=true"
 ```
 
 </Request>
@@ -67,7 +67,7 @@ curl -X GET "https://api.unkey.dev/v1/keys.getKey"
 <Request value={"JavaScript"}>
 
 ```js
-fetch("https://api.unkey.dev/v1/keys.getKey", {
+fetch("https://api.unkey.dev/v1/keys.getKey?keyId=key_1234&decrypt=true", {
   method: "GET"
 });
 ```
@@ -3515,7 +3515,7 @@ The granularity of the usage data to fetch, currently only `day` is supported
 <Request value={"cURL"}>
 
 ```bash
-curl -X GET "https://api.unkey.dev/v1/keys.getVerifications"
+curl -X GET "https://api.unkey.dev/v1/keys.getVerifications?keyId=key_1234&ownerId=chronark&start=1620000000000&end=1620000000000&granularity=day"
 ```
 
 </Request>
@@ -3523,7 +3523,7 @@ curl -X GET "https://api.unkey.dev/v1/keys.getVerifications"
 <Request value={"JavaScript"}>
 
 ```js
-fetch("https://api.unkey.dev/v1/keys.getVerifications", {
+fetch("https://api.unkey.dev/v1/keys.getVerifications?keyId=key_1234&ownerId=chronark&start=1620000000000&end=1620000000000&granularity=day", {
   method: "GET"
 });
 ```

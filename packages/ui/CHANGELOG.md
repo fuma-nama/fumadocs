@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 12.2.4
+
+### Patch Changes
+
+- ffb9026: Fix `cmdk` upstream dependency problems
+  - fumadocs-core@12.2.4
+
 ## 12.2.3
 
 ### Patch Changes

@@ -83,7 +83,7 @@ The number of days per page.
 <Request value={"cURL"}>
 
 ```bash
-curl -X GET "https://api.fake-museum-example.com/special-events"
+curl -X GET "https://api.fake-museum-example.com/v1/special-events?startDate=2023-02-23&endDate=2023-04-18&page=2&limit=15"
 ```
 
 </Request>
@@ -91,7 +91,7 @@ curl -X GET "https://api.fake-museum-example.com/special-events"
 <Request value={"JavaScript"}>
 
 ```js
-fetch("https://api.fake-museum-example.com/special-events", {
+fetch("https://api.fake-museum-example.com/v1/special-events?startDate=2023-02-23&endDate=2023-04-18&page=2&limit=15", {
   method: "GET"
 });
 ```
@@ -246,7 +246,7 @@ Price of a ticket for the special event
 <Request value={"cURL"}>
 
 ```bash
-curl -X POST "https://api.fake-museum-example.com/special-events" \
+curl -X POST "https://api.fake-museum-example.com/v1/special-events" \
   -d '{
   "name": "Pirate Coding Workshop",
   "location": "Computer Room",
@@ -263,7 +263,7 @@ curl -X POST "https://api.fake-museum-example.com/special-events" \
 <Request value={"JavaScript"}>
 
 ```js
-fetch("https://api.fake-museum-example.com/special-events", {
+fetch("https://api.fake-museum-example.com/v1/special-events", {
   method: "POST"
 });
 ```
@@ -386,7 +386,7 @@ An identifier for a special event.
 <Request value={"cURL"}>
 
 ```bash
-curl -X GET "https://api.fake-museum-example.com/special-events/dad4bce8-f5cb-4078-a211-995864315e39"
+curl -X GET "https://api.fake-museum-example.com/v1/special-events/dad4bce8-f5cb-4078-a211-995864315e39"
 ```
 
 </Request>
@@ -394,7 +394,7 @@ curl -X GET "https://api.fake-museum-example.com/special-events/dad4bce8-f5cb-40
 <Request value={"JavaScript"}>
 
 ```js
-fetch("https://api.fake-museum-example.com/special-events/dad4bce8-f5cb-4078-a211-995864315e39", {
+fetch("https://api.fake-museum-example.com/v1/special-events/dad4bce8-f5cb-4078-a211-995864315e39", {
   method: "GET"
 });
 ```
@@ -559,7 +559,7 @@ An identifier for a special event.
 <Request value={"cURL"}>
 
 ```bash
-curl -X PATCH "https://api.fake-museum-example.com/special-events/dad4bce8-f5cb-4078-a211-995864315e39" \
+curl -X PATCH "https://api.fake-museum-example.com/v1/special-events/dad4bce8-f5cb-4078-a211-995864315e39" \
   -d '{
   "name": "Pirate Coding Workshop",
   "location": "Computer Room",
@@ -576,7 +576,7 @@ curl -X PATCH "https://api.fake-museum-example.com/special-events/dad4bce8-f5cb-
 <Request value={"JavaScript"}>
 
 ```js
-fetch("https://api.fake-museum-example.com/special-events/dad4bce8-f5cb-4078-a211-995864315e39", {
+fetch("https://api.fake-museum-example.com/v1/special-events/dad4bce8-f5cb-4078-a211-995864315e39", {
   method: "PATCH"
 });
 ```
@@ -700,7 +700,7 @@ An identifier for a special event.
 <Request value={"cURL"}>
 
 ```bash
-curl -X DELETE "https://api.fake-museum-example.com/special-events/dad4bce8-f5cb-4078-a211-995864315e39"
+curl -X DELETE "https://api.fake-museum-example.com/v1/special-events/dad4bce8-f5cb-4078-a211-995864315e39"
 ```
 
 </Request>
@@ -708,7 +708,7 @@ curl -X DELETE "https://api.fake-museum-example.com/special-events/dad4bce8-f5cb
 <Request value={"JavaScript"}>
 
 ```js
-fetch("https://api.fake-museum-example.com/special-events/dad4bce8-f5cb-4078-a211-995864315e39", {
+fetch("https://api.fake-museum-example.com/v1/special-events/dad4bce8-f5cb-4078-a211-995864315e39", {
   method: "DELETE"
 });
 ```

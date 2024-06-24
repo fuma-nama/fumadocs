@@ -73,7 +73,7 @@ The number of days per page.
 <Request value={"cURL"}>
 
 ```bash
-curl -X GET "https://api.fake-museum-example.com/museum-hours"
+curl -X GET "https://api.fake-museum-example.com/v1/museum-hours?startDate=2023-02-23&page=2&limit=15"
 ```
 
 </Request>
@@ -81,7 +81,7 @@ curl -X GET "https://api.fake-museum-example.com/museum-hours"
 <Request value={"JavaScript"}>
 
 ```js
-fetch("https://api.fake-museum-example.com/museum-hours", {
+fetch("https://api.fake-museum-example.com/v1/museum-hours?startDate=2023-02-23&page=2&limit=15", {
   method: "GET"
 });
 ```

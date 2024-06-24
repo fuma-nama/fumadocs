@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 3.1.3
+
+### Patch Changes
+
+- 464e44c: Improve example request URL generation
+
 ## 3.1.2
 
 ### Patch Changes

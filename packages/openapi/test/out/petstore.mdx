@@ -39,7 +39,7 @@ How many items to return at one time (max 100)
 <Request value={"cURL"}>
 
 ```bash
-curl -X GET "http://petstore.swagger.io/pets"
+curl -X GET "http://petstore.swagger.io/v1/pets?limit=100"
 ```
 
 </Request>
@@ -47,7 +47,7 @@ curl -X GET "http://petstore.swagger.io/pets"
 <Request value={"JavaScript"}>
 
 ```js
-fetch("http://petstore.swagger.io/pets", {
+fetch("http://petstore.swagger.io/v1/pets?limit=100", {
   method: "GET"
 });
 ```
@@ -167,7 +167,7 @@ export interface Response {
 <Request value={"cURL"}>
 
 ```bash
-curl -X POST "http://petstore.swagger.io/pets" \
+curl -X POST "http://petstore.swagger.io/v1/pets" \
   -d '{
   "id": 0,
   "name": "string",
@@ -180,7 +180,7 @@ curl -X POST "http://petstore.swagger.io/pets" \
 <Request value={"JavaScript"}>
 
 ```js
-fetch("http://petstore.swagger.io/pets", {
+fetch("http://petstore.swagger.io/v1/pets", {
   method: "POST"
 });
 ```
@@ -255,7 +255,7 @@ The id of the pet to retrieve
 <Request value={"cURL"}>
 
 ```bash
-curl -X GET "http://petstore.swagger.io/pets/string"
+curl -X GET "http://petstore.swagger.io/v1/pets/string"
 ```
 
 </Request>
@@ -263,7 +263,7 @@ curl -X GET "http://petstore.swagger.io/pets/string"
 <Request value={"JavaScript"}>
 
 ```js
-fetch("http://petstore.swagger.io/pets/string", {
+fetch("http://petstore.swagger.io/v1/pets/string", {
   method: "GET"
 });
 ```
