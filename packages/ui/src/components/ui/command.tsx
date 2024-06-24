@@ -1,7 +1,6 @@
 import { Command as CommandPrimitive } from 'cmdk';
 import { Search } from 'lucide-react';
 import * as React from 'react';
-import { DialogClose } from '@radix-ui/react-dialog';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/theme/variants';
 
@@ -22,8 +21,10 @@ Command.displayName = CommandPrimitive.displayName;
 
 const CommandInput = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Input>,
-  React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>
->(({ className, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input> & {
+    onClose: () => void;
+  }
+>(({ className, onClose, ...props }, ref) => (
   <div className="flex flex-row items-center gap-2 px-3">
     <Search className="size-4 text-muted-foreground" />
     <CommandPrimitive.Input
@@ -34,7 +35,10 @@ const CommandInput = React.forwardRef<
       )}
       {...props}
     />
-    <CommandDialogClose
+    <button
+      type="button"
+      aria-label="Close Search"
+      onClick={onClose}
       className={cn(
         buttonVariants({
           color: 'outline',
@@ -43,7 +47,7 @@ const CommandInput = React.forwardRef<
       )}
     >
       Esc
-    </CommandDialogClose>
+    </button>
   </div>
 ));
 
@@ -163,8 +167,6 @@ const CommandDialog = React.forwardRef<
 
 CommandDialog.displayName = CommandPrimitive.Dialog.displayName;
 
-const CommandDialogClose = DialogClose;
-
 export {
   Command,
   CommandInput,
@@ -174,5 +176,4 @@ export {
   CommandItem,
   CommandSeparator,
   CommandDialog,
-  CommandDialogClose,
 };

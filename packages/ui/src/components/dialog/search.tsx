@@ -1,7 +1,7 @@
 import { FileTextIcon, HashIcon, TextIcon } from 'lucide-react';
 import type { SortedResult } from 'fumadocs-core/search/shared';
 import { useRouter } from 'next/navigation';
-import { useMemo, type ReactNode } from 'react';
+import { useMemo, type ReactNode, useCallback } from 'react';
 import { useI18n } from '@/contexts/i18n';
 import {
   CommandEmpty,
@@ -102,6 +102,9 @@ function Search({
       <CommandInput
         value={search}
         onValueChange={onSearchChange}
+        onClose={useCallback(() => {
+          setOpenSearch(false);
+        }, [setOpenSearch])}
         placeholder={text.search}
       />
       <CommandList className={cn(hideList && 'hidden')}>
