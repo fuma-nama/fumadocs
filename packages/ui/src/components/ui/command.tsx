@@ -1,23 +1,9 @@
 import { Command as CommandPrimitive } from 'cmdk';
 import { Search } from 'lucide-react';
 import * as React from 'react';
+import type { DialogProps } from '@radix-ui/react-dialog';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/theme/variants';
-
-const Command = React.forwardRef<
-  React.ElementRef<typeof CommandPrimitive>,
-  React.ComponentPropsWithoutRef<typeof CommandPrimitive>
->(({ className, ...props }, ref) => (
-  <CommandPrimitive
-    ref={ref}
-    className={cn('flex max-h-[80vh] flex-col', className)}
-    shouldFilter={false}
-    loop
-    {...props}
-  />
-));
-
-Command.displayName = CommandPrimitive.displayName;
 
 const CommandInput = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Input>,
@@ -139,23 +125,17 @@ const CommandItem = React.forwardRef<
 CommandItem.displayName = CommandPrimitive.Item.displayName;
 
 const CommandDialog = React.forwardRef<
-  React.ElementRef<typeof CommandPrimitive.Dialog>,
-  React.ComponentPropsWithoutRef<typeof CommandPrimitive.Dialog> & {
+  HTMLDivElement,
+  DialogProps & {
     footer?: React.ReactNode;
   }
->(({ footer, contentClassName, overlayClassName, children, ...props }, ref) => (
+>(({ footer, children, ...props }, ref) => (
   <CommandPrimitive.Dialog
     ref={ref}
     shouldFilter={false}
     loop
-    contentClassName={cn(
-      'fixed left-1/2 top-[10vh] z-50 w-[98vw] max-w-screen-sm origin-left -translate-x-1/2 rounded-lg border bg-popover text-popover-foreground shadow-lg data-[state=closed]:animate-dialog-out data-[state=open]:animate-dialog-in',
-      contentClassName,
-    )}
-    overlayClassName={cn(
-      'fixed inset-0 z-50 bg-background/50 backdrop-blur-sm data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in',
-      overlayClassName,
-    )}
+    contentClassName="fixed left-1/2 top-[10vh] z-50 w-[98vw] max-w-screen-sm origin-left -translate-x-1/2 rounded-lg border bg-popover text-popover-foreground shadow-lg data-[state=closed]:animate-dialog-out data-[state=open]:animate-dialog-in"
+    overlayClassName="fixed inset-0 z-50 bg-background/50 backdrop-blur-sm data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in"
     {...props}
   >
     {children}
@@ -168,7 +148,6 @@ const CommandDialog = React.forwardRef<
 CommandDialog.displayName = CommandPrimitive.Dialog.displayName;
 
 export {
-  Command,
   CommandInput,
   CommandList,
   CommandEmpty,
