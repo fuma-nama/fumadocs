@@ -75,8 +75,11 @@ export function createEndpoint(
       );
   }
 
+  if (queryParams.size > 0)
+    pathWithParameters = `${pathWithParameters}?${queryParams.toString()}`;
+
   return {
-    url: new URL(pathWithParameters, baseUrl).toString(),
+    url: new URL(`${baseUrl}${pathWithParameters}`).toString(),
     body: bodySchema ? generateInput(method.method, bodySchema) : undefined,
     responses,
     method: method.method,

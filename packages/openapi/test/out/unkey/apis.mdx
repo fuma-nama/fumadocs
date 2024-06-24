@@ -53,7 +53,7 @@ The id of the api to fetch
 <Request value={"cURL"}>
 
 ```bash
-curl -X GET "https://api.unkey.dev/v1/apis.getApi"
+curl -X GET "https://api.unkey.dev/v1/apis.getApi?apiId=api_1234"
 ```
 
 </Request>
@@ -61,7 +61,7 @@ curl -X GET "https://api.unkey.dev/v1/apis.getApi"
 <Request value={"JavaScript"}>
 
 ```js
-fetch("https://api.unkey.dev/v1/apis.getApi", {
+fetch("https://api.unkey.dev/v1/apis.getApi?apiId=api_1234", {
   method: "GET"
 });
 ```
@@ -549,7 +549,7 @@ Decrypt and display the raw key. Only possible if the key was encrypted when gen
 <Request value={"cURL"}>
 
 ```bash
-curl -X GET "https://api.unkey.dev/v1/apis.listKeys"
+curl -X GET "https://api.unkey.dev/v1/apis.listKeys?apiId=api_1234&limit=100&cursor=string&ownerId=string&decrypt=true"
 ```
 
 </Request>
@@ -557,7 +557,7 @@ curl -X GET "https://api.unkey.dev/v1/apis.listKeys"
 <Request value={"JavaScript"}>
 
 ```js
-fetch("https://api.unkey.dev/v1/apis.listKeys", {
+fetch("https://api.unkey.dev/v1/apis.listKeys?apiId=api_1234&limit=100&cursor=string&ownerId=string&decrypt=true", {
   method: "GET"
 });
 ```
