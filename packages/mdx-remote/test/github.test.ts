@@ -17,9 +17,42 @@ describe('Get Files', () => {
       directory: path.resolve(cwd, './fixtures'),
     });
 
-    expect(files).toMatchFileSnapshot(
-      path.resolve(cwd, './out/local-files.json5'),
-    );
+    expect(files).toContainEqual({
+      data: {
+        data: {
+          resolver: {
+            file: path.resolve(cwd, './fixtures/another/file.mdx'),
+            type: 'local',
+          },
+        },
+        description: 'You found me!',
+        title: 'Another File',
+      },
+      path: 'another/file.mdx',
+      type: 'page',
+    });
+    expect(files).toContainEqual({
+      data: {
+        data: {
+          resolver: {
+            file: path.resolve(cwd, './fixtures/index.mdx'),
+            type: 'local',
+          },
+        },
+        description: 'Something',
+        title: 'Hello World',
+      },
+      path: 'index.mdx',
+      type: 'page',
+    });
+
+    expect(files).toContainEqual({
+      type: 'meta',
+      path: 'meta.json',
+      data: {
+        pages: ['index', '---Nothing---', '...another'],
+      },
+    });
   });
 
   test('Local Files with `keepContent`', async () => {
