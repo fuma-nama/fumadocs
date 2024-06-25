@@ -28,7 +28,7 @@
     "prettier": "^3.3.2",
     "rimraf": "^5.0.7",
     "tsup": "8.1.0",
-    "turbo": "2.0.4",
+    "turbo": "2.0.5",
     "typescript": "^5.4.5",
     "vitest": "^1.6.0"
   },
