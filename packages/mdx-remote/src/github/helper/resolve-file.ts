@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import { type Page } from 'fumadocs-core/source';
 import { type FileData } from '@/github/types';
-import { fetchBlob } from '@/github/fetch-blob';
+import { fetchBlob } from '@/github/api/fetch-blob';
 
 export async function resolveFile<Data extends { data: FileData }>(
   page: Page<Data>,
@@ -15,9 +15,6 @@ export async function resolveFile<Data extends { data: FileData }>(
   const blob = await fetchBlob({
     url: resolver.blobUrl,
     accessToken: resolver.accessToken,
-    init: {
-      cache: 'force-cache',
-    },
   });
 
   return blob.content;

@@ -1,7 +1,7 @@
 'use client';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import type { WebSocketServerMessage } from '@/github/dev';
+import type { WebSocketServerMessage } from '@/github/dev/server';
 
 interface ClientOptions {
   /**

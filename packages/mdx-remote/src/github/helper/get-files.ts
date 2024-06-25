@@ -1,12 +1,12 @@
 import path from 'node:path';
+import fs from 'node:fs/promises';
 import { type VirtualFile } from 'fumadocs-core/source';
 import fg from 'fast-glob';
 import matter from 'gray-matter';
 import micromatch from 'micromatch';
 import { type FileData } from '@/github/types';
-import { fetchTree } from '@/github/fetch-tree';
-import { fetchBlob } from '@/github/fetch-blob';
-import fs from 'node:fs/promises';
+import { fetchTree } from '@/github/api/fetch-tree';
+import { fetchBlob } from '@/github/api/fetch-blob';
 import { createFileMap } from '@/cache/file-map';
 
 export interface GetFilesOptions {
@@ -23,19 +23,38 @@ export interface GetFilesOptions {
    * When not specified, all files will be scanned
    */
   include?: string | string[];
+
+  /**
+   * Keep the cached content on output files
+   *
+   * @defaultValue false
+   */
+  keepContent?: boolean;
 }
 
 const fileMap = createFileMap();
 
+export type ResolvedFile =
+  | (Omit<VirtualFile, 'type'> & {
+      type: 'meta';
+    })
+  | (Omit<VirtualFile, 'type' | 'data'> & {
+      type: 'page';
+      data: Record<string, unknown> & {
+        data: FileData;
+      };
+    });
+
 export async function getLocalFiles({
   directory = './content',
   include = '**/*',
-}: GetFilesOptions): Promise<VirtualFile[]> {
+  keepContent = false,
+}: GetFilesOptions): Promise<ResolvedFile[]> {
   const files = await fg(include, {
     cwd: path.resolve(directory),
     stats: true,
   });
-  const virtualFiles: VirtualFile[] = [];
+  const virtualFiles: ResolvedFile[] = [];
 
   await Promise.all(
     files.map(async (file) => {
@@ -68,6 +87,7 @@ export async function getLocalFiles({
           data: {
             ...data,
             data: {
+              content: keepContent ? content : undefined,
               resolver: {
                 type: 'local',
                 file: normalized,
@@ -113,7 +133,8 @@ export async function getGitHubFiles({
   treeSha = 'main',
   include = '**/*',
   directory = './content',
-}: GetGitHubFilesOptions): Promise<VirtualFile[]> {
+  keepContent = false,
+}: GetGitHubFilesOptions): Promise<ResolvedFile[]> {
   if (directory.startsWith('../'))
     throw new Error(`Directory path: ${directory} cannot start with '../'`);
 
@@ -121,7 +142,7 @@ export async function getGitHubFiles({
     ? directory.slice('./'.length)
     : directory;
 
-  const virtualFiles: VirtualFile[] = [];
+  const virtualFiles: ResolvedFile[] = [];
   const tree = await fetchTree({
     owner,
     repo,
@@ -163,6 +184,7 @@ export async function getGitHubFiles({
           data: {
             ...data,
             data: {
+              content: keepContent ? content : undefined,
               resolver: {
                 type: 'github',
                 blobUrl: file.url,

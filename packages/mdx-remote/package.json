@@ -12,35 +12,40 @@
   "repository": "github:fuma-nama/fumadocs",
   "license": "MIT",
   "author": "Fuma Nama",
+  "type": "module",
   "exports": {
     "./github": {
-      "import": "./dist/github/index.mjs",
-      "types": "./dist/github/index.d.mts"
+      "import": "./dist/github/index.js",
+      "types": "./dist/github/index.d.ts"
+    },
+    "./github/next": {
+      "import": "./dist/github/next/index.js",
+      "types": "./dist/github/next/index.d.ts"
     },
     "./github/dev": {
-      "import": "./dist/github/dev/index.mjs",
-      "types": "./dist/github/dev/index.d.mts"
+      "import": "./dist/github/dev/index.js",
+      "types": "./dist/github/dev/index.d.ts"
     },
     ".": {
-      "import": "./dist/index.mjs",
-      "types": "./dist/index.d.mts"
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
     }
   },
-  "main": "./dist/index.mjs",
-  "types": "./dist/index.d.mts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "typesVersions": {
     "*": {
       ".": [
-        "./dist/index.d.mts"
+        "./dist/index.d.ts"
       ],
       "github": [
-        "./dist/github/index.d.mts"
+        "./dist/github/index.d.ts"
+      ],
+      "github/next": [
+        "./dist/github/next/index.d.ts"
       ],
       "github/dev": [
-        "./dist/github/dev/index.d.mts"
-      ],
-      "github/dev/client": [
-        "./dist/github/dev/client.d.mts"
+        "./dist/github/dev/index.d.ts"
       ]
     }
   },

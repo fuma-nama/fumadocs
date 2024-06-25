@@ -1,4 +1,4 @@
-import { WebSocket } from 'ws';
+import { type WebSocket } from 'ws';
 import dynamic from 'next/dynamic';
 import { createElement } from 'react';
 
@@ -33,7 +33,7 @@ export function initHotReload({
 
   return {
     component: createElement(Client, {
-      url: `ws://localhost:${port}`,
+      url: `ws://localhost:${port.toString()}`,
       revokeUrl,
     }),
   };

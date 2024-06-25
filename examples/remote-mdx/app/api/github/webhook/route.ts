@@ -1,4 +1,6 @@
-/*
-TODO: replace "TBD" with link to docs.
-See [TBD] for more information when using Fumadocs Github Integration in prodution.
-*/
+import { createGithubWebhookAPI } from '@fumadocs/mdx-remote/github/next';
+
+export const { POST } = createGithubWebhookAPI({
+  ref: 'dev',
+  secret: 'example_secret',
+});

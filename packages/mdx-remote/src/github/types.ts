@@ -15,4 +15,9 @@ export type Resolver =
 
 export interface FileData {
   resolver: Resolver;
+
+  /**
+   * Cached file content when `keepContent` is enabled on resolvers
+   */
+  content?: string;
 }

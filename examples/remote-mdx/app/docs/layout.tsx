@@ -1,7 +1,7 @@
 import { getDocs } from '../source';
 import { DocsLayout } from 'fumadocs-ui/layout';
 import type { ReactNode } from 'react';
-import { initHotReload } from '@fumadocs/mdx-remote/github';
+import { initHotReload } from '@fumadocs/mdx-remote/github/next';
 
 const { component } = initHotReload();
 

@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "next build",
-    "dev": "next dev",
+    "build": "concurrently \"next build\" \"node ./scripts/build-indexes.mjs\"",
+    "dev": "concurrently \"next dev\" \"node ./scripts/dev.mjs\"",
     "start": "next start"
   },
   "dependencies": {

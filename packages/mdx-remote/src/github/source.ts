@@ -9,7 +9,8 @@ import {
   getGitHubFiles,
   type GetGitHubFilesOptions,
   getLocalFiles,
-} from '@/github/files';
+} from '@/github/helper/get-files';
+import { USE_LOCAL } from '@/github/constants';
 
 /**
  * Choose between GitHub and Local file system based on node environment.
@@ -33,12 +34,11 @@ export async function createSourceAuto<Frontmatter extends PageData>(
   }>
 > {
   return {
-    files:
-      process.env.NODE_ENV === 'production'
-        ? await getGitHubFiles({
-            ...options,
-            ...options.github,
-          })
-        : await getLocalFiles(options),
+    files: USE_LOCAL
+      ? await getLocalFiles(options)
+      : await getGitHubFiles({
+          ...options,
+          ...options.github,
+        }),
   };
 }
