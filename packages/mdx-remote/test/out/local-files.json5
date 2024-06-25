@@ -1,0 +1,43 @@
+[
+  {
+    "data": {
+      "data": {
+        "content": undefined,
+        "resolver": {
+          "file": "/Users/xred/dev/kijv/fumadocs/packages/mdx-remote/test/fixtures/index.mdx",
+          "type": "local",
+        },
+      },
+      "description": "Something",
+      "title": "Hello World",
+    },
+    "path": "index.mdx",
+    "type": "page",
+  },
+  {
+    "data": {
+      "pages": [
+        "index",
+        "---Nothing---",
+        "...another",
+      ],
+    },
+    "path": "meta.json",
+    "type": "meta",
+  },
+  {
+    "data": {
+      "data": {
+        "content": undefined,
+        "resolver": {
+          "file": "/Users/xred/dev/kijv/fumadocs/packages/mdx-remote/test/fixtures/another/file.mdx",
+          "type": "local",
+        },
+      },
+      "description": "You found me!",
+      "title": "Another File",
+    },
+    "path": "another/file.mdx",
+    "type": "page",
+  },
+]

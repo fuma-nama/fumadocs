@@ -1,0 +1,30 @@
+[
+  {
+    "data": {
+      "data": {
+        "content": undefined,
+        "resolver": {
+          "accessToken": "token",
+          "blobUrl": "1",
+          "type": "github",
+        },
+      },
+    },
+    "path": "content/index.mdx",
+    "type": "page",
+  },
+  {
+    "data": {
+      "data": {
+        "content": undefined,
+        "resolver": {
+          "accessToken": "token",
+          "blobUrl": "3",
+          "type": "github",
+        },
+      },
+    },
+    "path": "content/test.mdx",
+    "type": "page",
+  },
+]

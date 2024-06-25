@@ -41,7 +41,7 @@ async function main() {
 
   // Use Algolia Search and sync search indexes
   // Since this is for experimental purposes, we just use file system
-  await fs.mkdir('./dist')
+  await fs.mkdir('./dist');
   await fs.writeFile('./dist/search-index.json', JSON.stringify(output));
 }
 

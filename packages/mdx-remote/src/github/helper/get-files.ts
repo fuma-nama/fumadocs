@@ -92,7 +92,7 @@ export async function getLocalFiles({
                 type: 'local',
                 file: normalized,
               },
-            } satisfies FileData,
+            },
           },
         });
       }
@@ -190,7 +190,7 @@ export async function getGitHubFiles({
                 blobUrl: file.url,
                 accessToken,
               },
-            } satisfies FileData,
+            },
           },
         });
       }
