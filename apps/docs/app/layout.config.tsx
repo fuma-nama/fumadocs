@@ -20,7 +20,10 @@ export const baseOptions: BaseLayoutProps = {
           aria-label="Fumadocs"
         />
 
-        <FumadocsIcon className="size-4 [.uwu_&]:hidden" fill="currentColor" />
+        <FumadocsIcon
+          className="size-4 [.uwu_&]:hidden [header_&]:size-5"
+          fill="currentColor"
+        />
         <span className="font-medium [.uwu_&]:hidden max-md:[header_&]:hidden">
           Fumadocs
         </span>
