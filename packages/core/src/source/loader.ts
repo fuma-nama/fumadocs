@@ -167,6 +167,7 @@ function createOutput({
   baseUrl = '/',
   slugs: slugsFn = getSlugs,
   url: getUrl = createGetUrl(baseUrl),
+  defaultLanguage,
   pageTree: pageTreeOptions = {},
 }: LoaderOptions): LoaderOutput<LoaderConfig> {
   const storage = loadFiles(
@@ -192,6 +193,7 @@ function createOutput({
           storage,
           resolveIcon,
           getUrl,
+          defaultLanguage,
           ...pageTreeOptions,
         });
 

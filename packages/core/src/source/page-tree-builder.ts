@@ -258,7 +258,7 @@ export function createPageTreeBuilder(): PageTreeBuilder {
     buildI18n({ languages = [], defaultLanguage, ...options }) {
       const entries = languages.map<[string, PageTree.Root]>((lang) => {
         const tree = build({
-          lang: lang === defaultLanguage ? lang : undefined,
+          lang: lang === defaultLanguage ? undefined : lang,
           options,
           builder: this,
           storage: options.storage,
