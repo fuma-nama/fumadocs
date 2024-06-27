@@ -23,6 +23,15 @@ const config = {
     // Replaced by root workspace command
     ignoreDuringBuilds: true,
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'avatars.githubusercontent.com',
+        port: '',
+      },
+    ],
+  },
   webpack: (config) => {
     config.module.noParse = [/typescript\/lib\/typescript.js/];
 

@@ -501,7 +501,7 @@ function Features(): React.ReactElement {
         icon={MessageCircleIcon}
         subheading="Loved by developers"
         heading="Heard of our users."
-        description="We are making it better."
+        description="Fumadocs is used by many awesome developers, and we are making it better."
       >
         <Link
           href="/showcase"

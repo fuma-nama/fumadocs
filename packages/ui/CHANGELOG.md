@@ -1,5 +1,20 @@
 # next-docs-ui
 
+## 12.3.0
+
+### Patch Changes
+
+- Updated dependencies [ce3c8ad]
+- Updated dependencies [ce3c8ad]
+  - fumadocs-core@12.3.0
+
+## 12.2.5
+
+### Patch Changes
+
+- 7c23f7e: No longer set a default size for SVG elements in title
+  - fumadocs-core@12.2.5
+
 ## 12.2.4
 
 ### Patch Changes

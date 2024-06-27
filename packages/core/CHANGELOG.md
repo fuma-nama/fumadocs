@@ -1,5 +1,14 @@
 # next-docs-zeta
 
+## 12.3.0
+
+### Minor Changes
+
+- ce3c8ad: Page Tree Builder: Support `defaultLanguage` option
+- ce3c8ad: Support hiding locale prefixes with I18n middleware
+
+## 12.2.5
+
 ## 12.2.4
 
 ## 12.2.3

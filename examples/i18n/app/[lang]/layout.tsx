@@ -11,17 +11,17 @@ const inter = Inter({
 });
 
 export default function Layout({
-  params,
+  params: { lang },
   children,
 }: {
   params: { lang: string };
   children: ReactNode;
 }) {
   return (
-    <html lang={params.lang} className={inter.className}>
+    <html lang={lang} className={inter.className}>
       <body>
         <I18nProvider
-          locale={params.lang}
+          locale={lang}
           translations={{
             en: {
               name: 'English',
@@ -39,10 +39,10 @@ export default function Layout({
         >
           <RootProvider>
             <DocsLayout
-              tree={pageTree[params.lang]}
+              tree={pageTree[lang]}
               nav={{
-                title: params.lang === 'cn' ? '目錄' : 'My App',
-                url: `/${params.lang}`,
+                title: lang === 'cn' ? '目錄' : 'My App',
+                url: `/${lang}`,
               }}
               i18n
             >

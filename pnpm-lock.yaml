@@ -47,8 +47,8 @@ importers:
         specifier: 8.1.0
         version: 8.1.0(postcss@8.4.38)(typescript@5.4.5)
       turbo:
-        specifier: 2.0.4
-        version: 2.0.4
+        specifier: 2.0.5
+        version: 2.0.5
       typescript:
         specifier: ^5.4.5
         version: 5.4.5
@@ -659,8 +659,8 @@ importers:
   packages/twoslash:
     dependencies:
       '@shikijs/twoslash':
-        specifier: 1.9.0
-        version: 1.9.0(typescript@5.4.5)
+        specifier: 1.9.1
+        version: 1.9.1(typescript@5.4.5)
       mdast-util-from-markdown:
         specifier: ^2.0.1
         version: 2.0.1
@@ -671,8 +671,8 @@ importers:
         specifier: ^13.2.0
         version: 13.2.0
       shiki:
-        specifier: 1.9.0
-        version: 1.9.0
+        specifier: 1.9.1
+        version: 1.9.1
     devDependencies:
       '@types/hast':
         specifier: ^3.0.4
@@ -2169,8 +2169,8 @@ packages:
   '@shikijs/core@1.6.5':
     resolution: {integrity: sha512-XcQYt6e4L61ruAxHiL3Xg1DL/XkWWjzDdeckB/DtN8jAxoAU+bcxsV6DetC8NafHpL4YpGhxy9iXF0ND/u6HmA==}
 
-  '@shikijs/core@1.9.0':
-    resolution: {integrity: sha512-cbSoY8P/jgGByG8UOl3jnP/CWg/Qk+1q+eAKWtcrU3pNoILF8wTsLB0jT44qUBV8Ce1SvA9uqcM9Xf+u3fJFBw==}
+  '@shikijs/core@1.9.1':
+    resolution: {integrity: sha512-EmUful2MQtY8KgCF1OkBtOuMcvaZEvmdubhW0UHCGXi21O9dRLeADVCj+k6ZS+de7Mz9d2qixOXJ+GLhcK3pXg==}
 
   '@shikijs/rehype@1.6.5':
     resolution: {integrity: sha512-tv3WzBXvRI3VD9dBg1wdbRcXXg19mSGsNuJ2ZDlJK7DgRThUs++OgUqYosvBJZlraqFthXSr5tuCok9ffZaqQw==}
@@ -2178,8 +2178,8 @@ packages:
   '@shikijs/transformers@1.6.5':
     resolution: {integrity: sha512-iuKa1uQtPQEe5vgCsXIb162b/3imRiAIdoF5IqafrTWL1uqZUpipfPjWZPuAAszOzYU//yIYRbhUk8reHVXA/w==}
 
-  '@shikijs/twoslash@1.9.0':
-    resolution: {integrity: sha512-XKaiR85K3Bk/MNdZ7tmJDm740iLpt4YDvYrV90pwbvxkSEZ8SPV4gbaX8ONwndNqdf2awF9g7DKYHsyU/XwJdw==}
+  '@shikijs/twoslash@1.9.1':
+    resolution: {integrity: sha512-EPPi3RJeUDeKRR7UpWr9cqHjpj8haLH/leLy4WdK/o5rYnkhYE5HSn5eV3oSn8ZiHpHIZKTiCOct7LNTe+MSYg==}
 
   '@sinclair/typebox@0.27.8':
     resolution: {integrity: sha512-+Fj43pSMwJs4KRrH/938Uf+uAELIgVBmQzg/q1YG10djyfA3TnrU8N8XzqCh/okZdszqBQTZf96idMfE5lnwTA==}
@@ -5354,8 +5354,8 @@ packages:
   shiki@1.6.5:
     resolution: {integrity: sha512-iFzypldJG0zeyRHKAhaSGCf+YWXpMMyUyOrCVFBFKGGdF5vrB6jbd66/SQljxV20aSrVZEAQwUto/hhuNi/CIg==}
 
-  shiki@1.9.0:
-    resolution: {integrity: sha512-i6//Lqgn7+7nZA0qVjoYH0085YdNk4MC+tJV4bo+HgjgRMJ0JmkLZzFAuvVioJqLkcGDK5GAMpghZEZkCnwxpQ==}
+  shiki@1.9.1:
+    resolution: {integrity: sha512-8PDkgb5ja3nfujTjvC4VytL6wGOGCtFAClUb2r3QROevYXxcq+/shVJK5s6gy0HZnjaJgFxd6BpPqpRfqne5rA==}
 
   side-channel@1.0.4:
     resolution: {integrity: sha512-q5XPytqFEIKHkGdiMIrY10mvLRvnQh42/+GoBlFW3b2LXLE2xxJpZFdm94we0BaoV3RwJyGqg5wS7epxTv0Zvw==}
@@ -5748,45 +5748,45 @@ packages:
     engines: {node: '>=8.0.0'}
     hasBin: true
 
-  turbo-darwin-64@2.0.4:
-    resolution: {integrity: sha512-x9mvmh4wudBstML8Z8IOmokLWglIhSfhQwnh2gBCSqabgVBKYvzl8Y+i+UCNPxheCGTgtsPepTcIaKBIyFIcvw==}
+  turbo-darwin-64@2.0.5:
+    resolution: {integrity: sha512-t/9XpWYIjOhIHUdwiR47SYBGYHkR1zWLxTkTNKZwCSn8BN0cfjPZ1BR6kcwYGxLGBhtl5GBf6A29nq2K7iwAjg==}
     cpu: [x64]
     os: [darwin]
 
-  turbo-darwin-arm64@2.0.4:
-    resolution: {integrity: sha512-/B1Ih8zPRGVw5vw4SlclOf3C/woJ/2T6ieH6u54KT4wypoaVyaiyMqBcziIXycdObIYr7jQ+raHO7q3mhay9/A==}
+  turbo-darwin-arm64@2.0.5:
+    resolution: {integrity: sha512-//5y4RJvnal8CttOLBwlaBqblcQb1qTlIxLN+I8O3E3rPuvHOupNKB9ZJxYIQ8oWf8ns8Ec8cxQ0GSBLTJIMtA==}
     cpu: [arm64]
     os: [darwin]
 
-  turbo-linux-64@2.0.4:
-    resolution: {integrity: sha512-6aG670e5zOWu6RczEYcB81nEl8EhiGJEvWhUrnAfNEUIMBEH1pR5SsMmG2ol5/m3PgiRM12r13dSqTxCLcHrVg==}
+  turbo-linux-64@2.0.5:
+    resolution: {integrity: sha512-LDtEDU2Gm8p3lKu//aHXZFRKUCVu68BNF9LQ+HmiCKFpNyK7khpMTxIAAUhDqt+AzlrbxtrxcCpCJaWg1JDjHg==}
     cpu: [x64]
     os: [linux]
 
-  turbo-linux-arm64@2.0.4:
-    resolution: {integrity: sha512-AXfVOjst+mCtPDFT4tCu08Qrfv12Nj7NDd33AjGwV79NYN1Y1rcFY59UQ4nO3ij3rbcvV71Xc+TZJ4csEvRCSg==}
+  turbo-linux-arm64@2.0.5:
+    resolution: {integrity: sha512-84wdrzntErBNxkHcwHxiTZdaginQAxGPnwLTyZj8lpUYI7okPoxy3jKpUeMHN3adm3iDedl/x0mYSIvVVkmOiA==}
     cpu: [arm64]
     os: [linux]
 
-  turbo-windows-64@2.0.4:
-    resolution: {integrity: sha512-QOnUR9hKl0T5gq5h1fAhVEqBSjpcBi/BbaO71YGQNgsr6pAnCQdbG8/r3MYXet53efM0KTdOhieWeO3KLNKybA==}
+  turbo-windows-64@2.0.5:
+    resolution: {integrity: sha512-SgaFZ0VW6kHCJogLNuLEleAauAJx2Y48wazZGVRmBpgSUS2AylXesaBMhJaEScYqLz7mIRn6KOgwM8D4wTxI9g==}
     cpu: [x64]
     os: [win32]
 
-  turbo-windows-arm64@2.0.4:
-    resolution: {integrity: sha512-3v8WpdZy1AxZw0gha0q3caZmm+0gveBQ40OspD6mxDBIS+oBtO5CkxhIXkFJJW+jDKmDlM7wXDIGfMEq+QyNCQ==}
+  turbo-windows-arm64@2.0.5:
+    resolution: {integrity: sha512-foUxLOZoru0IRNIxm53fkfM4ubas9P0nTFjIcHtd+E8YHeogt8GqTweNre2e6ri1EHDo71emmuQgpuoFCOXZMg==}
     cpu: [arm64]
     os: [win32]
 
-  turbo@2.0.4:
-    resolution: {integrity: sha512-Ilme/2Q5kYw0AeRr+aw3s02+WrEYaY7U8vPnqSZU/jaDG/qd6jHVN6nRWyd/9KXvJGYM69vE6JImoGoyNjLwaw==}
+  turbo@2.0.5:
+    resolution: {integrity: sha512-+6+hcWr4nwuESlKqUc626HMOTd3QT8hUOc9QM45PP1d4nErGkNOgExm4Pcov3in7LTuadMnB0gcd/BuzkEDIPw==}
     hasBin: true
 
-  twoslash-protocol@0.2.8:
-    resolution: {integrity: sha512-8l439jrFEJiQmQ6ugFtYXgHpQDp3nBYVF6RR88doLarFGWhjfq0sgntgQYc2aDmJb87Jzhh4EicV8k9DrqpIZg==}
+  twoslash-protocol@0.2.9:
+    resolution: {integrity: sha512-uKQl8UboT6JU4VAtYaSI3DbNtgaNhFaTpCSMy/n3tRl5lMlMhrjiuNKdqx15xjcviconuGJ9oObkz1h9zJFrJg==}
 
-  twoslash@0.2.8:
-    resolution: {integrity: sha512-mQiUB4SvBF58FJkEEtXvVhTO1h0oDpTZuEAyaC8xwf4P6392ydSFhsMiUBbJEOvaelN9DLesViopn3E9O2GKOA==}
+  twoslash@0.2.9:
+    resolution: {integrity: sha512-oj7XY6h8E9nTZBmfRE1gpsSSUqAQo5kcIpFkXyQPp8UCsyCQsUlP2bJ2s32o02c1n5+xl4h9rcCsQ1F97Z6LZg==}
     peerDependencies:
       typescript: '*'
 
@@ -7667,7 +7667,7 @@ snapshots:
 
   '@shikijs/core@1.6.5': {}
 
-  '@shikijs/core@1.9.0': {}
+  '@shikijs/core@1.9.1': {}
 
   '@shikijs/rehype@1.6.5':
     dependencies:
@@ -7682,10 +7682,10 @@ snapshots:
     dependencies:
       shiki: 1.6.5
 
-  '@shikijs/twoslash@1.9.0(typescript@5.4.5)':
+  '@shikijs/twoslash@1.9.1(typescript@5.4.5)':
     dependencies:
-      '@shikijs/core': 1.9.0
-      twoslash: 0.2.8(typescript@5.4.5)
+      '@shikijs/core': 1.9.1
+      twoslash: 0.2.9(typescript@5.4.5)
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -11754,9 +11754,9 @@ snapshots:
     dependencies:
       '@shikijs/core': 1.6.5
 
-  shiki@1.9.0:
+  shiki@1.9.1:
     dependencies:
-      '@shikijs/core': 1.9.0
+      '@shikijs/core': 1.9.1
 
   side-channel@1.0.4:
     dependencies:
@@ -12172,39 +12172,39 @@ snapshots:
       wcwidth: 1.0.1
       yargs: 17.7.2
 
-  turbo-darwin-64@2.0.4:
+  turbo-darwin-64@2.0.5:
     optional: true
 
-  turbo-darwin-arm64@2.0.4:
+  turbo-darwin-arm64@2.0.5:
     optional: true
 
-  turbo-linux-64@2.0.4:
+  turbo-linux-64@2.0.5:
     optional: true
 
-  turbo-linux-arm64@2.0.4:
+  turbo-linux-arm64@2.0.5:
     optional: true
 
-  turbo-windows-64@2.0.4:
+  turbo-windows-64@2.0.5:
     optional: true
 
-  turbo-windows-arm64@2.0.4:
+  turbo-windows-arm64@2.0.5:
     optional: true
 
-  turbo@2.0.4:
+  turbo@2.0.5:
     optionalDependencies:
-      turbo-darwin-64: 2.0.4
-      turbo-darwin-arm64: 2.0.4
-      turbo-linux-64: 2.0.4
-      turbo-linux-arm64: 2.0.4
-      turbo-windows-64: 2.0.4
-      turbo-windows-arm64: 2.0.4
+      turbo-darwin-64: 2.0.5
+      turbo-darwin-arm64: 2.0.5
+      turbo-linux-64: 2.0.5
+      turbo-linux-arm64: 2.0.5
+      turbo-windows-64: 2.0.5
+      turbo-windows-arm64: 2.0.5
 
-  twoslash-protocol@0.2.8: {}
+  twoslash-protocol@0.2.9: {}
 
-  twoslash@0.2.8(typescript@5.4.5):
+  twoslash@0.2.9(typescript@5.4.5):
     dependencies:
       '@typescript/vfs': 1.5.0
-      twoslash-protocol: 0.2.8
+      twoslash-protocol: 0.2.9
       typescript: 5.4.5
     transitivePeerDependencies:
       - supports-color
