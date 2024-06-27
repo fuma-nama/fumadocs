@@ -101,3 +101,30 @@ export async function generateStaticParams() {
   );
 }
 ```
+
+### Middleware Options
+
+You can also customise the I18n middleware.
+
+#### Hide Locale Prefix
+
+To hide the locale prefix, for example, use `/` instead of `/en` where `en` is the default locale, use the `hidePrefix` option.
+
+| Mode             | Description                     |
+| ---------------- | ------------------------------- |
+| `always`         | Always hide the prefix          |
+| `default-locale` | Only hide the default locale    |
+| `never`          | Never hide the prefix (default) |
+
+> It uses `NextResponse.rewrite` under the hood.
+
+```ts
+import { defaultLanguage, languages } from '@/i18n';
+import { createI18nMiddleware } from 'fumadocs-core/middleware';
+
+export default createI18nMiddleware({
+  languages,
+  defaultLanguage,
+  hideLocale: 'default-locale',
+});
+```

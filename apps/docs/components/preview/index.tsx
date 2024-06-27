@@ -12,6 +12,7 @@ import { Heading } from 'fumadocs-ui/components/heading';
 import type { ReactNode } from 'react';
 import { RootToggle } from 'fumadocs-ui/components/layout/root-toggle';
 import { Banner } from 'fumadocs-ui/components/banner';
+import { RollButton } from 'fumadocs-ui/components/roll-button';
 import BannerImage from '@/public/banner.png';
 import { modes } from '@/utils/modes';
 import { Wrapper } from './wrapper';
@@ -197,6 +198,7 @@ export default {
   ),
   'roll-button': (
     <div className="rounded-lg border bg-card p-4 text-muted-foreground">
+      <RollButton />
       <p className="text-center text-sm">Scroll down to see the button</p>
     </div>
   ),

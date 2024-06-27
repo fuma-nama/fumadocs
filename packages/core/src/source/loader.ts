@@ -6,7 +6,10 @@ import {
   type Transformer,
 } from './load-files';
 import type { FileData, MetaData, PageData, UrlFn } from './types';
-import type { BuildPageTreeOptions } from './page-tree-builder';
+import type {
+  BuildPageTreeOptions,
+  BuildPageTreeOptionsWithI18n,
+} from './page-tree-builder';
 import { createPageTreeBuilder } from './page-tree-builder';
 import { type FileInfo } from './path';
 import type { File, Storage } from './file-system';
@@ -21,7 +24,8 @@ export interface SourceConfig {
   metaData: MetaData;
 }
 
-export interface LoaderOptions {
+export interface LoaderOptions
+  extends Pick<BuildPageTreeOptionsWithI18n, 'languages' | 'defaultLanguage'> {
   /**
    * @defaultValue `''`
    */
@@ -30,7 +34,7 @@ export interface LoaderOptions {
    * @defaultValue `'/'`
    */
   baseUrl?: string;
-  languages?: string[];
+
   icon?: NonNullable<BuildPageTreeOptions['resolveIcon']>;
   slugs?: LoadOptions['getSlugs'];
   url?: UrlFn;

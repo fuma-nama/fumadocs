@@ -34,7 +34,15 @@ export interface BuildPageTreeOptions {
 }
 
 export interface BuildPageTreeOptionsWithI18n extends BuildPageTreeOptions {
+  /**
+   * Build a page tree for each language
+   */
   languages?: string[];
+
+  /**
+   * Hide the locale prefix from URLs if it is same as the specified default locale.
+   */
+  defaultLanguage?: string;
 }
 
 export interface PageTreeBuilder {
@@ -247,10 +255,10 @@ export function createPageTreeBuilder(): PageTreeBuilder {
         storage: options.storage,
       });
     },
-    buildI18n({ languages = [], ...options }) {
+    buildI18n({ languages = [], defaultLanguage, ...options }) {
       const entries = languages.map<[string, PageTree.Root]>((lang) => {
         const tree = build({
-          lang,
+          lang: lang === defaultLanguage ? lang : undefined,
           options,
           builder: this,
           storage: options.storage,
