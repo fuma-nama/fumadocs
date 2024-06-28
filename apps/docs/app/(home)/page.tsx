@@ -502,9 +502,10 @@ function Features(): React.ReactElement {
         heading="Your source. Your choice"
         description="Native support for different content sources including Contentlayer
           and the official MDX loader."
+        className="overflow-hidden"
         style={{
           backgroundImage:
-            'linear-gradient(290deg, hsl(var(--secondary)), transparent 50%), radial-gradient(circle at 60% 50%,hsl(var(--secondary)),hsl(var(--background)) 80%)',
+            'radial-gradient(circle at 60% 50%,hsl(var(--secondary)),hsl(var(--background)) 80%)',
         }}
       >
         <div className="mt-8 flex flex-col">
@@ -512,7 +513,7 @@ function Features(): React.ReactElement {
             alt="Source"
             src={SourceImage}
             sizes="600px"
-            className="-my-8 w-full max-w-[400px]"
+            className="-mt-16 w-[400px] min-w-[400px] invert dark:invert-0"
           />
           <div className="z-[2] mt-[-150px] w-[300px] overflow-hidden rounded-lg border border-foreground/10 shadow-xl backdrop-blur-lg">
             <div className="flex flex-row items-center gap-2 bg-muted/50 px-4 py-2 text-xs font-medium text-muted-foreground">
