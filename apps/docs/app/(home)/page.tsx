@@ -19,15 +19,17 @@ import {
 import { File, Files, Folder } from 'fumadocs-ui/components/files';
 import Link from 'next/link';
 import type { HTMLAttributes, ReactNode } from 'react';
+import Image from 'next/image';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import { CodeBlock } from '@/components/code-block';
 import { UwuHero } from '@/app/(home)/uwu';
+import SourceImage from '@/public/source.png';
+import ContributorCounter from '@/components/contributor-count';
 import { CreateAppAnimation, Previews, Rain } from './page.client';
 import {
   VercelLogo,
   NetlifyLogo,
-  SourceSVG,
   NextSVG,
   ContentlayerIcon,
   OpenAPIIcon,
@@ -81,82 +83,106 @@ export default function HomePage(): React.ReactElement {
             </h2>
           </div>
           <Introduction />
-          <div className="container relative overflow-hidden border-x border-t py-16 sm:py-32">
-            <h2 className="text-center text-2xl font-semibold sm:text-3xl">
+          <div
+            className="container relative overflow-hidden border-x border-t py-16 sm:py-24"
+            style={{
+              backgroundImage:
+                'radial-gradient(circle at bottom center, hsl(var(--secondary)), hsl(var(--background)))',
+            }}
+          >
+            <h2 className="bg-gradient-to-b from-primary to-foreground/40 bg-clip-text text-center text-2xl font-semibold text-transparent sm:text-3xl">
               Loved by users.
               <br />
               Built for developers.
             </h2>
-            <Rain
-              width={1000}
-              height={500}
-              className="absolute inset-0 z-[-1] size-full mix-blend-difference"
-            />
+
+            <div
+              className="mx-auto mb-[-160px] mt-8 flex h-[240px] flex-row overflow-hidden rounded-xl border bg-card/50 backdrop-blur-lg md:w-[70%]"
+              style={{
+                maskImage: 'linear-gradient(to bottom, white, transparent)',
+              }}
+            >
+              <div className="flex w-1/4 flex-col gap-4 border-r bg-card p-4">
+                <div className="h-4 w-full rounded-full bg-muted-foreground/20" />
+                <div className="h-4 w-1/2 rounded-full bg-muted-foreground/20" />
+                <div className="h-4 w-1/2 rounded-full bg-muted-foreground/20" />
+              </div>
+              <div className="flex flex-1 flex-col gap-4 px-4 py-8">
+                <div className="mb-3 h-6 w-1/4 rounded-full bg-muted-foreground/20" />
+                <div className="h-4 w-1/3 rounded-full bg-muted-foreground/20" />
+                <div className="h-4 w-full rounded-full bg-muted-foreground/20" />
+                <div className="h-4 w-1/2 rounded-full bg-muted-foreground/20" />
+              </div>
+              <div className="w-1/4 pt-8 max-lg:hidden">
+                <div className="h-4 w-1/2 rounded-full bg-muted-foreground/20" />
+              </div>
+            </div>
           </div>
           <Highlights />
           <Features />
-          <div className="grid grid-cols-1 border-b border-r md:grid-cols-2 lg:grid-cols-3">
-            <div className="relative flex flex-col gap-8 overflow-hidden border-l border-t px-8 py-14">
-              <h2 className="text-3xl font-semibold md:text-4xl">
-                Build Your Docs.
-              </h2>
-              <ul className="mt-8 flex flex-col gap-6">
-                <li>
-                  <span className="flex flex-row items-center gap-2 font-medium">
-                    <BatteryChargingIcon className="size-5" />
-                    Battery guaranteed.
-                  </span>
-                  <span className="mt-2 text-sm text-muted-foreground">
-                    Actively maintained, open for contributions.
-                  </span>
-                </li>
-                <li>
-                  <span className="flex flex-row items-center gap-2 font-medium">
-                    <svg
-                      viewBox="0 0 24 24"
-                      className="size-5"
-                      fill="currentColor"
-                    >
-                      <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
-                    </svg>
-                    Fully open-source.
-                  </span>
-                  <span className="mt-2 text-sm text-muted-foreground">
-                    Open source, available on Github.
-                  </span>
-                </li>
-                <li>
-                  <span className="flex flex-row items-center gap-2 font-medium">
-                    <TimerIcon className="size-5" />
-                    Within seconds.
-                  </span>
-                  <span className="mt-2 text-sm text-muted-foreground">
-                    Initialize a new project instantly with CLI.
-                  </span>
-                </li>
-              </ul>
-              <div className="flex flex-row flex-wrap gap-2 border-t pt-8">
-                <Link href="/docs" className={cn(buttonVariants())}>
-                  Read docs
-                </Link>
-                <a
-                  href="https://githubbox.com/fuma-nama/fumadocs-ui-template"
-                  rel="noreferrer noopener"
-                  className={cn(
-                    buttonVariants({
-                      variant: 'outline',
-                    }),
-                  )}
-                >
-                  Open in CodeSandbox
-                </a>
-              </div>
-            </div>
-            <Integration className="border-t lg:col-span-2" />
-          </div>
+          <Contributing />
+          <End />
         </div>
       </main>
     </>
+  );
+}
+
+function End(): React.ReactElement {
+  return (
+    <div className="grid grid-cols-1 border-b border-r md:grid-cols-2 lg:grid-cols-3">
+      <div className="relative flex flex-col gap-8 overflow-hidden border-l border-t px-8 py-14">
+        <h2 className="text-3xl font-semibold md:text-4xl">Build Your Docs.</h2>
+        <ul className="mt-8 flex flex-col gap-6">
+          <li>
+            <span className="flex flex-row items-center gap-2 font-medium">
+              <BatteryChargingIcon className="size-5" />
+              Battery guaranteed.
+            </span>
+            <span className="mt-2 text-sm text-muted-foreground">
+              Actively maintained, open for contributions.
+            </span>
+          </li>
+          <li>
+            <span className="flex flex-row items-center gap-2 font-medium">
+              <svg viewBox="0 0 24 24" className="size-5" fill="currentColor">
+                <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+              </svg>
+              Fully open-source.
+            </span>
+            <span className="mt-2 text-sm text-muted-foreground">
+              Open source, available on Github.
+            </span>
+          </li>
+          <li>
+            <span className="flex flex-row items-center gap-2 font-medium">
+              <TimerIcon className="size-5" />
+              Within seconds.
+            </span>
+            <span className="mt-2 text-sm text-muted-foreground">
+              Initialize a new project instantly with CLI.
+            </span>
+          </li>
+        </ul>
+        <div className="flex flex-row flex-wrap gap-2 border-t pt-8">
+          <Link href="/docs" className={cn(buttonVariants())}>
+            Read docs
+          </Link>
+          <a
+            href="https://githubbox.com/fuma-nama/fumadocs-ui-template"
+            rel="noreferrer noopener"
+            className={cn(
+              buttonVariants({
+                variant: 'outline',
+              }),
+            )}
+          >
+            Open in CodeSandbox
+          </a>
+        </div>
+      </div>
+      <Integration className="border-t lg:col-span-2" />
+    </div>
   );
 }
 
@@ -453,6 +479,20 @@ function Introduction(): React.ReactElement {
   );
 }
 
+function Contributing(): React.ReactElement {
+  return (
+    <div className="flex flex-col items-center border-x border-t px-4 py-16 text-center">
+      <h2 className="mb-4 text-xl font-semibold sm:text-2xl">
+        Made Possible by You.
+      </h2>
+      <p className="mb-8 text-muted-foreground">
+        Fumadocs is 100% powered by passion and open source community.
+      </p>
+      <ContributorCounter repoOwner="fuma-nama" repoName="fumadocs" />
+    </div>
+  );
+}
+
 function Features(): React.ReactElement {
   return (
     <div className="grid grid-cols-1 border-r md:grid-cols-2">
@@ -462,13 +502,23 @@ function Features(): React.ReactElement {
         heading="Your source. Your choice"
         description="Native support for different content sources including Contentlayer
           and the official MDX loader."
+        className="overflow-hidden"
+        style={{
+          backgroundImage:
+            'radial-gradient(circle at 60% 50%,hsl(var(--secondary)),hsl(var(--background)) 80%)',
+        }}
       >
         <div className="mt-8 flex flex-col">
-          <SourceSVG className="h-auto w-full" />
-          <div className="z-10 mt-[-80px] w-[300px] overflow-hidden rounded-lg border bg-card shadow-xl md:mt-[-150px]">
-            <div className="flex flex-row items-center gap-2 border-b bg-muted px-4 py-2 text-xs font-medium text-muted-foreground">
+          <Image
+            alt="Source"
+            src={SourceImage}
+            sizes="600px"
+            className="-mt-16 w-[400px] min-w-[400px] invert dark:invert-0"
+          />
+          <div className="z-[2] mt-[-150px] w-[300px] overflow-hidden rounded-lg border border-foreground/10 shadow-xl backdrop-blur-lg">
+            <div className="flex flex-row items-center gap-2 bg-muted/50 px-4 py-2 text-xs font-medium text-muted-foreground">
               <FileEditIcon className="size-4" />
-              <p>MDX Editor</p>
+              MDX Editor
             </div>
             <pre className="p-4 text-[13px]">
               <code className="grid">

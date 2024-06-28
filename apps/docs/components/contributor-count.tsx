@@ -1,6 +1,6 @@
-import { Children } from 'react';
-import type { ReactNode } from 'react';
+import type { HTMLAttributes } from 'react';
 import Image from 'next/image';
+import { cn } from '@/utils/cn';
 
 interface Contributor {
   avatar_url: string;
@@ -13,8 +13,8 @@ async function fetchContributors(
   repoName: string,
 ): Promise<Contributor[]> {
   const response = await fetch(
-    `https://api.github.com/repos/${repoOwner}/${repoName}/contributors?per_page=100`,
-    { next: { revalidate: 3600 } },
+    `https://api.github.com/repos/${repoOwner}/${repoName}/contributors?per_page=50`,
+    { next: { revalidate: 3600 }, cache: 'force-cache' },
   );
 
   if (!response.ok) {
@@ -27,54 +27,8 @@ async function fetchContributors(
     .sort((a, b) => b.contributions - a.contributions);
 }
 
-interface AvatarStackProps {
-  children: ReactNode;
-  overlap?: number;
-}
-
-function AvatarStack({
-  children,
-  overlap = 16,
-}: AvatarStackProps): JSX.Element {
-  const childrenArray = Children.toArray(children);
-
-  return (
-    <div className="flex items-center">
-      {childrenArray.map((child, index) => (
-        <div
-          key={`avatar-${(child as React.ReactElement<ContributorAvatarProps>).props.contributor.login}`}
-          className="relative overflow-hidden rounded-full border"
-          style={{
-            marginLeft: index === 0 ? '0' : `-${overlap.toString()}px`,
-            zIndex: (childrenArray.length - index).toString(),
-          }}
-        >
-          {child}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-interface ContributorAvatarProps {
-  contributor: Contributor;
-}
-
-function ContributorAvatar({
-  contributor,
-}: ContributorAvatarProps): JSX.Element {
-  return (
-    <Image
-      src={contributor.avatar_url}
-      alt={`${contributor.login}'s avatar`}
-      width={48}
-      height={48}
-      className="rounded-full border"
-    />
-  );
-}
-
-interface ContributorCounterProps {
+export interface ContributorCounterProps
+  extends HTMLAttributes<HTMLDivElement> {
   repoOwner: string;
   repoName: string;
   displayCount?: number;
@@ -83,26 +37,49 @@ interface ContributorCounterProps {
 export default async function ContributorCounter({
   repoOwner,
   repoName,
-  displayCount = 5,
-}: ContributorCounterProps): Promise<JSX.Element> {
+  displayCount = 40,
+  ...props
+}: ContributorCounterProps): Promise<React.ReactElement> {
   const contributors = await fetchContributors(repoOwner, repoName);
-  const totalContributors = contributors.length;
-  const topContributors = contributors.slice(0, displayCount);
+  const topContributors = contributors
+    .filter((contributor) => contributor.login !== repoOwner)
+    .slice(0, displayCount);
 
   return (
-    <div className="text-center">
-      <div className="flex items-center justify-center">
-        <AvatarStack>
-          {topContributors.map((contributor) => (
-            <ContributorAvatar
-              key={contributor.login}
-              contributor={contributor}
+    <div
+      {...props}
+      className={cn('flex flex-col items-center gap-4', props.className)}
+    >
+      <div className="flex flex-row flex-wrap items-center justify-center md:pe-4">
+        {topContributors.map((contributor, i) => (
+          <a
+            key={contributor.login}
+            href={`https://github.com/${contributor.login}`}
+            rel="noreferrer noopener"
+            target="_blank"
+            className={cn(
+              'size-10 overflow-hidden rounded-full border-4 border-background bg-background md:-mr-4 md:size-12',
+            )}
+            style={{
+              zIndex: topContributors.length - i,
+            }}
+          >
+            <Image
+              src={contributor.avatar_url}
+              alt={`${contributor.login}'s avatar`}
+              width={48}
+              height={48}
             />
-          ))}
-        </AvatarStack>
+          </a>
+        ))}
+        {displayCount < contributors.length ? (
+          <div className="size-12 content-center rounded-full bg-secondary text-center">
+            +{contributors.length - displayCount}
+          </div>
+        ) : null}
       </div>
-      <div className="mt-4 text-sm text-[#a0a0a0]">
-        Some of {totalContributors} best contributors
+      <div className="text-center text-sm text-muted-foreground">
+        Some of our best contributors.
       </div>
     </div>
   );
