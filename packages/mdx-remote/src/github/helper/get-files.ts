@@ -156,8 +156,18 @@ export async function getGitHubFiles({
 
   await Promise.all(
     tree.tree.map(async (file) => {
-      if (file.type === 'tree' || !file.path.startsWith(filter)) return;
-      if (!micromatch.isMatch(file.path, include)) return;
+      if (
+        file.type === 'tree' ||
+        !file.path.startsWith(filter) ||
+        !micromatch.isMatch(file.path, include)
+      )
+        return;
+
+      const normalizedPath = file.path
+        .slice(filter.length)
+        .split('/')
+        .filter((s) => s.length > 0)
+        .join('/');
 
       const blob = await fetchBlob({
         url: file.url,
@@ -171,7 +181,7 @@ export async function getGitHubFiles({
 
       if (path.extname(file.path) === '.json') {
         virtualFiles.push({
-          path: file.path,
+          path: normalizedPath,
           type: 'meta',
           data: JSON.parse(content),
         });
@@ -179,7 +189,7 @@ export async function getGitHubFiles({
         const { data } = matter(content);
 
         virtualFiles.push({
-          path: file.path,
+          path: normalizedPath,
           type: 'page',
           data: {
             ...data,
