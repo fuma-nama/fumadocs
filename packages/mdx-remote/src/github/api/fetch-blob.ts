@@ -14,6 +14,9 @@ interface FetchBlobResponse {
   encoding: BufferEncoding;
 }
 
+/**
+ * Fetch content of blob, result will be converted to utf-8
+ */
 export async function fetchBlob({
   url,
   accessToken,
@@ -33,5 +36,9 @@ export async function fetchBlob({
       `failed to get file content from GitHub: ${await res.text()}`,
     );
 
-  return (await res.json()) as FetchBlobResponse;
+  const blob = (await res.json()) as FetchBlobResponse;
+  return {
+    encoding: 'utf8',
+    content: Buffer.from(blob.content, blob.encoding).toString('utf8'),
+  };
 }

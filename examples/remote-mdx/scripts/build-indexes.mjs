@@ -10,14 +10,15 @@ import * as fs from 'node:fs/promises';
  */
 async function main() {
   const output = await buildSearchIndexes({
-    directory: './content',
+    directory: './content/docs',
+    baseUrl: '/docs',
   });
 
   console.log('Search indexes built');
 
   // Use Algolia Search and sync search indexes
   // Since this is for experimental purposes, we just use file system
-  await fs.mkdir('./dist');
+  await fs.mkdir('./dist', { recursive: true });
   await fs.writeFile('./dist/search-index.json', JSON.stringify(output));
 
   // for Vercel
