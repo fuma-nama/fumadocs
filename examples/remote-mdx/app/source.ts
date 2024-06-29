@@ -9,7 +9,9 @@ export const getDocs = cache(async () => {
       github: {
         owner: 'fuma-nama',
         repo: 'fumadocs',
-        accessToken: '',
+        directory: 'examples/remote-mdx/content',
+        treeSha: 'dev',
+        accessToken: process.env.GITHUB_TOKEN ?? '',
       },
     }),
     baseUrl: '/docs',
