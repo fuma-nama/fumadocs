@@ -1,23 +1,24 @@
 import type { Metadata } from 'next';
 import { DocsPage, DocsBody } from 'fumadocs-ui/page';
 import { notFound } from 'next/navigation';
-import { pages } from '@/app/source';
-import { compile } from '@fumadocs/mdx-remote';
+import { getDocs } from '@/app/source';
 import defaultComponents from 'fumadocs-ui/mdx';
+import { resolveFile } from '@fumadocs/mdx-remote/github';
+import { compileMDX } from '@fumadocs/mdx-remote';
 
 export default async function Page({
   params,
 }: {
   params: { slug?: string[] };
 }) {
-  const page = pages.find((p) => p.param === (params.slug ?? []).join('/'));
+  const page = (await getDocs()).getPage(params.slug);
+  if (!page) notFound();
 
-  if (!page) {
-    notFound();
-  }
+  const content = await resolveFile(page);
+  if (!content) notFound();
 
-  const compiled = await compile({
-    source: page.content,
+  const compiled = await compileMDX({
+    source: content,
     components: {
       ...defaultComponents,
     },
@@ -31,8 +32,8 @@ export default async function Page({
 }
 
 export async function generateStaticParams() {
-  return pages.map((page) => ({
-    slug: page.param.split('/'),
+  return (await getDocs()).getPages().map((page) => ({
+    slug: page.slugs,
   }));
 }
 
@@ -41,11 +42,11 @@ export async function generateMetadata({
 }: {
   params: { slug?: string[] };
 }) {
-  const page = pages.find((p) => p.param === (params.slug ?? []).join('/'));
+  const page = (await getDocs()).getPage(params.slug);
 
   if (!page) notFound();
 
   return {
-    title: page.info.title,
+    title: page.data.title,
   } satisfies Metadata;
 }

@@ -4,21 +4,26 @@ import type { StructuredData } from '@/mdx-plugins/remark-structure';
 import type { SortedResult } from './shared';
 
 interface SearchAPI {
-  GET: (request: NextRequest) => NextResponse<SortedResult[]>;
+  GET: (request: NextRequest) => Promise<NextResponse<SortedResult[]>>;
 
   search: (
     query: string,
     options?: { locale?: string; tag?: string },
-  ) => SortedResult[];
+  ) => Promise<SortedResult[]>;
 }
 
+/**
+ * Resolve indexes dynamically
+ */
+type Dynamic<T> = () => T[] | Promise<T[]>;
+
 interface SimpleOptions {
-  indexes: Index[];
+  indexes: Index[] | Dynamic<Index>;
   language?: string;
 }
 
 interface AdvancedOptions {
-  indexes: AdvancedIndex[];
+  indexes: AdvancedIndex[] | Dynamic<AdvancedIndex>;
   /**
    * Enabled custom tags
    */
@@ -42,12 +47,12 @@ type ToI18n<T extends { indexes: unknown }> = Omit<
 function create(search: SearchAPI['search']): SearchAPI {
   return {
     search,
-    GET(request) {
+    async GET(request) {
       const query = request.nextUrl.searchParams.get('query');
       if (!query) return NextResponse.json([]);
 
       return NextResponse.json(
-        search(query, {
+        await search(query, {
           tag: request.nextUrl.searchParams.get('tag') ?? undefined,
           locale: request.nextUrl.searchParams.get('locale') ?? undefined,
         }),
@@ -80,16 +85,16 @@ export function createI18nSearchAPI<T extends 'simple' | 'advanced'>(
 
     map.set(
       v.language,
+      // @ts-expect-error -- Index depends on generic types
       createSearchAPI(type, {
         ...options,
         language: v.language,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment -- Avoid complicated types
-        indexes: v.indexes as any,
+        indexes: v.indexes,
       }),
     );
   }
 
-  return create((query, searchOptions) => {
+  return create(async (query, searchOptions) => {
     if (searchOptions?.locale) {
       const handler = map.get(searchOptions.locale);
 
@@ -109,47 +114,53 @@ export interface Index {
 
 export function initSearchAPI({ indexes, language }: SimpleOptions): SearchAPI {
   const store = ['title', 'url'];
-  const index = new Document<Index, typeof store>({
-    language,
-    optimize: true,
-    cache: 100,
-    document: {
-      id: 'url',
-      store,
-      index: [
-        {
-          field: 'title',
-          tokenize: 'forward',
-          resolution: 9,
-        },
-        {
-          field: 'content',
-          tokenize: 'strict',
-          context: {
-            depth: 1,
+
+  async function getDocument(): Promise<Document<Index, string[]>> {
+    const items = typeof indexes === 'function' ? await indexes() : indexes;
+    const index = new Document<Index, typeof store>({
+      language,
+      optimize: true,
+      cache: 100,
+      document: {
+        id: 'url',
+        store,
+        index: [
+          {
+            field: 'title',
+            tokenize: 'forward',
             resolution: 9,
           },
-        },
-        {
-          field: 'keywords',
-          tokenize: 'strict',
-          resolution: 9,
-        },
-      ],
-    },
-  });
-
-  for (const page of indexes) {
-    index.add({
-      title: page.title,
-      url: page.url,
-      content: page.content,
-      keywords: page.keywords,
+          {
+            field: 'content',
+            tokenize: 'strict',
+            context: {
+              depth: 1,
+              resolution: 9,
+            },
+          },
+          {
+            field: 'keywords',
+            tokenize: 'strict',
+            resolution: 9,
+          },
+        ],
+      },
     });
+
+    for (const page of items) {
+      index.add({
+        title: page.title,
+        url: page.url,
+        content: page.content,
+        keywords: page.keywords,
+      });
+    }
+    return index;
   }
 
-  return create((query) => {
-    const results = index.search(query, 5, {
+  const doc = getDocument();
+  return create(async (query) => {
+    const results = (await doc).search(query, 5, {
       enrich: true,
       suggest: true,
     });
@@ -194,61 +205,70 @@ export function initSearchAPIAdvanced({
   tag = false,
 }: AdvancedOptions): SearchAPI {
   const store = ['id', 'url', 'content', 'page_id', 'type'];
-  const index = new Document<InternalIndex, typeof store>({
-    language,
-    cache: 100,
-    tokenize: 'forward',
-    optimize: true,
-    context: {
-      depth: 2,
-      bidirectional: true,
-      resolution: 9,
-    },
-    document: {
-      id: 'id',
-      tag: tag ? 'tag' : undefined,
-      store,
-      index: ['content'],
-    },
-  });
 
-  for (const page of indexes) {
-    const data = page.structuredData;
-    let id = 0;
-
-    index.add({
-      id: page.id,
-      page_id: page.id,
-      type: 'page',
-      content: page.title,
-      tag: page.tag,
-      url: page.url,
+  async function getDocument(): Promise<Document<InternalIndex, string[]>> {
+    const items = typeof indexes === 'function' ? await indexes() : indexes;
+    const index = new Document<InternalIndex, typeof store>({
+      language,
+      cache: 100,
+      tokenize: 'forward',
+      optimize: true,
+      context: {
+        depth: 2,
+        bidirectional: true,
+        resolution: 9,
+      },
+      document: {
+        id: 'id',
+        tag: tag ? 'tag' : undefined,
+        store,
+        index: ['content'],
+      },
     });
 
-    for (const heading of data.headings) {
+    for (const page of items) {
+      const data = page.structuredData;
+      let id = 0;
+
       index.add({
-        id: page.id + (id++).toString(),
+        id: page.id,
         page_id: page.id,
-        type: 'heading',
+        type: 'page',
+        content: page.title,
         tag: page.tag,
-        url: `${page.url}#${heading.id}`,
-        content: heading.content,
+        url: page.url,
       });
+
+      for (const heading of data.headings) {
+        index.add({
+          id: page.id + (id++).toString(),
+          page_id: page.id,
+          type: 'heading',
+          tag: page.tag,
+          url: `${page.url}#${heading.id}`,
+          content: heading.content,
+        });
+      }
+
+      for (const content of data.contents) {
+        index.add({
+          id: page.id + (id++).toString(),
+          page_id: page.id,
+          tag: page.tag,
+          type: 'text',
+          url: content.heading ? `${page.url}#${content.heading}` : page.url,
+          content: content.content,
+        });
+      }
     }
 
-    for (const content of data.contents) {
-      index.add({
-        id: page.id + (id++).toString(),
-        page_id: page.id,
-        tag: page.tag,
-        type: 'text',
-        url: content.heading ? `${page.url}#${content.heading}` : page.url,
-        content: content.content,
-      });
-    }
+    return index;
   }
 
-  return create((query, options) => {
+  const doc = getDocument();
+
+  return create(async (query, options) => {
+    const index = await doc;
     const results = index.search(query, 5, {
       enrich: true,
       tag: options?.tag,
@@ -256,7 +276,6 @@ export function initSearchAPIAdvanced({
     });
 
     const map = new Map<string, SortedResult[]>();
-    const sortedResult: SortedResult[] = [];
 
     for (const item of results[0]?.result ?? []) {
       if (item.doc.type === 'page') {
@@ -267,20 +286,19 @@ export function initSearchAPIAdvanced({
         continue;
       }
 
-      const i: SortedResult = {
+      const list = map.get(item.doc.page_id) ?? [];
+
+      list.push({
         id: item.doc.id,
         content: item.doc.content,
         type: item.doc.type,
         url: item.doc.url,
-      };
+      });
 
-      if (map.has(item.doc.page_id)) {
-        map.get(item.doc.page_id)?.push(i);
-      } else {
-        map.set(item.doc.page_id, [i]);
-      }
+      map.set(item.doc.page_id, list);
     }
 
+    const sortedResult: SortedResult[] = [];
     for (const [id, items] of map.entries()) {
       const page = (
         index as unknown as {

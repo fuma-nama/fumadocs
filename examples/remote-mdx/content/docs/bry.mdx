@@ -1,0 +1,86 @@
+---
+title: Comparisons
+description: How does Fumadocs different from other existing frameworks
+---
+
+> This is for testing Fumadocs MDX Remote
+
+## Philosophy
+
+Fumadocs, unlike the other frameworks, it expects you to write code and cooperate with other parts of your software.
+While most frameworks are configured with a configuration file, they are usually lack of flexibility when you attempted to complete something more advanced.
+You can't control how they render the page, neither the internal logic.
+
+**Fumadocs has no magic:** It gives you the utilities and a good-looking user interface.
+You are still using the features of Next.js App Router, configuring Static Site Generation same as a normal Next.js application.
+There is nothing new for Next.js developers, you can use it with confidence.
+
+For instance, in this docs, all index pages are rendered dynamically.
+Feel free to take a look at the source code of this documentation.
+
+**Opinionated on UI:** The only thing Fumadocs UI offers is **User Interface**, it is opinionated on UI for the best mobile responsibility and user experience.
+The design is regularly updated, and we are welcome for feedback about the UI.
+
+## Nextra
+
+Fumadocs is highly inspired by Nextra. For example, the Routing Conventions. That is why
+`meta.json` also exists in Fumadocs.
+
+**However, it is not a drop-in replacement for Nextra.**
+
+While we both support a lot of
+advanced usages, Nextra is more opinionated than Fumadocs. Fumadocs is accelerated by App Router. As a result, It provides many server-side functions and you have to
+configure things manually compared to simply editing a configuration file.
+
+Fumadocs works great if you want more control over everything, such as
+adding it to an existing codebase or implementing advanced routing.
+
+### Feature Table
+
+| Feature             | Fumadocs     | Nextra            |
+| ------------------- | ------------ | ----------------- |
+| Static Generation   | Yes          | Yes               |
+| Cached              | Yes          | Yes               |
+| Light/Dark Mode     | Yes          | Yes               |
+| Syntax Highlighting | Yes          | Yes               |
+| Table of Contents   | Yes          | Yes               |
+| Full-text Search    | Yes          | Yes               |
+| I18n                | Yes          | Yes               |
+| Last Git Edit Time  | Yes          | Yes               |
+| Page Icons          | Yes          | No                |
+| RSC                 | Yes          | Pages Router Only |
+| Remote Source       | Yes          | Not Documented    |
+| SEO                 | Via Metadata | Yes               |
+| Built-in Components | Yes          | Yes               |
+| RTL Layout          | Yes          | Yes               |
+
+## Docusaurus
+
+Docusaurus is a powerful framework based on React.js. It offers many cool
+features with plugins and custom themes.
+
+### Better DX
+
+Since Fumadocs is built on the top of Next.js, you'll have to start the Next.js dev
+server everytime to review changes. And boilerplate code is relatively more
+compared to Docusaurus. For a simple docs, Docusaurus might be a better choice
+if you don't need any Next.js specific functionality.
+
+### Plugins
+
+You can easily achieve many things with plugins. Although the flexibility of Fumadocs is high, their
+eco-system is larger and maintained by many contributors.
+
+### When to use Fumadocs?
+
+For most of the web applications, vanilla React.js is no longer enough.
+Nowadays, we also wish to have a blog, a showcase page, a FAQ page, etc. With a
+fancy UI that's breathtaking, in these cases, Fumadocs can help you build the
+docs easier, with less boilerplate.
+
+## We are working forward
+
+More and more advanced features are rolling out. We currently support
+multiple searching solutions including Algolia Search. A good UI and user
+experience is always our priority, welcome to give us feedback via Github
+discussions!

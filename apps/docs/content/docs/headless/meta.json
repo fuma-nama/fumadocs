@@ -15,6 +15,7 @@
     "---Sources---",
     "source-api",
     "fumadocs-mdx",
-    "contentlayer"
+    "contentlayer",
+    "github"
   ]
 }

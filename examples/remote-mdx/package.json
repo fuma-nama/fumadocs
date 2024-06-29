@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "next build",
-    "dev": "next dev",
+    "build": "next build && node ./scripts/build-indexes.mjs",
+    "dev": "concurrently \"next dev\" \"node ./scripts/dev.mjs\"",
     "start": "next start"
   },
   "dependencies": {
@@ -19,6 +19,6 @@
     "@types/mdx": "^2.0.13",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
-    "typescript": "^5.4.5"
+    "typescript": "^5.5.2"
   }
 }

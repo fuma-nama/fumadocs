@@ -27,7 +27,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "estree-util-value-to-estree": "^3.1.1",
+    "estree-util-value-to-estree": "^3.1.2",
     "fumadocs-typescript": "workspace:^",
     "hast-util-to-estree": "^3.1.0",
     "npm-to-yarn": "^2.2.1",
@@ -42,7 +42,7 @@
     "eslint-config-custom": "workspace:*",
     "remark": "^15.0.0",
     "tsconfig": "workspace:*",
-    "unified": "^11.0.4"
+    "unified": "^11.0.5"
   },
   "publishConfig": {
     "access": "public"
