@@ -18,7 +18,7 @@ paths:
         - lang: bash
           label: List all unwatered plants
           source: |
-              planter list -u
+            planter list -u
       summary: Get museum hours
       description: Get upcoming museum operating hours
       operationId: getMuseumHours
