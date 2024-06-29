@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 12.3.1
+
+### Patch Changes
+
+- cf852f6: Add configurable delayMs Parameter for Debounced Search Performance
+
 ## 12.3.0
 
 ### Minor Changes
