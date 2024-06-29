@@ -11,7 +11,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
   if (!content) {
     content = await fs
-      .readFile('./dist/search-index.json')
+      .readFile( process.env.NODE_ENV === 'production'? './.next/search-index.json' :'./dist/search-index.json')
       .then((res) => res.toString())
       .catch(() => '[]'); // skip if not built
   }
