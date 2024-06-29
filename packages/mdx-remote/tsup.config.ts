@@ -1,9 +1,14 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  entry: ['./src/index.ts', './src/github/index.ts'],
-  format: 'esm',
   external: ['fumadocs-core', 'next', 'react'],
   dts: true,
-  target: 'esnext',
+  target: 'es2021',
+  entry: [
+    './src/index.ts',
+    './src/github/index.ts',
+    './src/github/next/index.ts',
+    './src/github/dev/index.ts',
+  ],
+  format: 'esm',
 });

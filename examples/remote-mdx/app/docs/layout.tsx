@@ -1,10 +1,18 @@
-import { pageTree } from '../source';
+import { getDocs } from '../source';
 import { DocsLayout } from 'fumadocs-ui/layout';
 import type { ReactNode } from 'react';
+import { initHotReload } from '@fumadocs/mdx-remote/github/next';
 
-export default function RootDocsLayout({ children }: { children: ReactNode }) {
+const { component } = initHotReload();
+
+export default async function RootDocsLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
   return (
-    <DocsLayout tree={pageTree} nav={{ title: 'My App' }}>
+    <DocsLayout tree={(await getDocs()).pageTree} nav={{ title: 'My App' }}>
+      {component}
       {children}
     </DocsLayout>
   );
