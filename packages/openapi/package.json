@@ -27,7 +27,7 @@
     "@apidevtools/json-schema-ref-parser": "^11.6.4",
     "fast-glob": "^3.3.1",
     "js-yaml": "^4.1.0",
-    "json-schema-to-typescript": "^14.0.5",
+    "json-schema-to-typescript": "^14.1.0",
     "openapi-sampler": "^1.5.1"
   },
   "devDependencies": {
