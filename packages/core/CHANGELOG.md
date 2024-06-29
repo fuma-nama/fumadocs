@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 12.3.2
+
+### Patch Changes
+
+- ca7d0f4: Support resolving async search indexes
+
 ## 12.3.1
 
 ### Patch Changes
