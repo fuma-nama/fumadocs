@@ -2,9 +2,10 @@ import Parser from '@apidevtools/json-schema-ref-parser';
 import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
 import { buildRoutes } from '@/build-routes';
 import { renderPage } from '@/render/page';
+import type { Endpoint } from '@/endpoint';
 import type { RenderContext } from './types';
 import { defaultRenderer, type Renderer } from './render/renderer';
-import { renderOperation } from './render/operation';
+import { type CodeSample, renderOperation } from './render/operation';
 
 export interface GenerateOptions {
   /**
@@ -26,6 +27,11 @@ export interface GenerateOptions {
     title: string,
     description: string | undefined,
   ) => Record<string, unknown>;
+
+  /**
+   * Generate code samples for endpoint
+   */
+  generateCodeSamples?: (endpoint: Endpoint) => CodeSample[];
 
   renderer?: Partial<Renderer>;
 }

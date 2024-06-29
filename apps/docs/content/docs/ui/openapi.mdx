@@ -109,6 +109,42 @@ void generateFiles({
 });
 ```
 
+### Generate Code Samples
+
+Generate custom code samples for each API endpoint.
+
+```ts
+import { generateFiles } from 'fumadocs-openapi';
+
+void generateFiles({
+  input: ['./petstore.yaml'],
+  output: './content/docs',
+  generateCodeSamples(endpoint) {
+    return [
+      {
+        lang: 'js',
+        label: 'JavaScript SDK',
+        source: "console.log('hello')",
+      },
+    ];
+  },
+});
+```
+
+In addition, you can also specify code samples via OpenAPI schema.
+
+```yaml
+paths:
+  /plants:
+    get:
+      x-codeSamples:
+        - lang: js
+          label: JavaScript SDK
+          source: |
+            const planter = require('planter');
+            planter.list({ unwatered: true });
+```
+
 ### Renderer
 
 Customise how components are generated.

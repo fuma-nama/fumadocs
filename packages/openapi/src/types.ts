@@ -1,5 +1,7 @@
 import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
 import { type Renderer } from '@/render/renderer';
+import type { Endpoint } from '@/endpoint';
+import type { CodeSample } from '@/render/operation';
 
 export interface RouteInformation {
   path: string;
@@ -17,4 +19,5 @@ export interface RenderContext {
   renderer: Renderer;
   document: OpenAPI.Document;
   baseUrl: string;
+  generateCodeSamples?: (endpoint: Endpoint) => CodeSample[];
 }

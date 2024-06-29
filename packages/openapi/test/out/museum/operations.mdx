@@ -68,7 +68,7 @@ The number of days per page.
 
 <APIExample>
 
-<Requests items={["cURL","JavaScript"]}>
+<Requests items={["cURL","JavaScript","List all unwatered plants"]}>
 
 <Request value={"cURL"}>
 
@@ -84,6 +84,14 @@ curl -X GET "https://api.fake-museum-example.com/v1/museum-hours?startDate=2023-
 fetch("https://api.fake-museum-example.com/v1/museum-hours?startDate=2023-02-23&page=2&limit=15", {
   method: "GET"
 });
+```
+
+</Request>
+
+<Request value={"List all unwatered plants"}>
+
+```bash
+planter list -u
 ```
 
 </Request>
