@@ -26,7 +26,7 @@ import { CodeBlock } from '@/components/code-block';
 import { UwuHero } from '@/app/(home)/uwu';
 import SourceImage from '@/public/source.png';
 import ContributorCounter from '@/components/contributor-count';
-import { CreateAppAnimation, Previews, Rain } from './page.client';
+import { CreateAppAnimation, Previews } from './page.client';
 import {
   VercelLogo,
   NetlifyLogo,

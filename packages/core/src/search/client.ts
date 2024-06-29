@@ -41,7 +41,7 @@ export function useDocsSearch(
   locale?: string,
   tag?: string,
   api = '/api/search',
-  delayMs = 100
+  delayMs = 100,
 ): UseDocsSearch {
   const [search, setSearch] = useState('');
   const debouncedValue = useDebounce(search, delayMs);
