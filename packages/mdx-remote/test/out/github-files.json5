@@ -10,7 +10,7 @@
         },
       },
     },
-    "path": "content/index.mdx",
+    "path": "index.mdx",
     "type": "page",
   },
   {
@@ -24,7 +24,7 @@
         },
       },
     },
-    "path": "content/test.mdx",
+    "path": "test.mdx",
     "type": "page",
   },
 ]
