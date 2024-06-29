@@ -130,7 +130,7 @@ importers:
     devDependencies:
       '@next/bundle-analyzer':
         specifier: ^14.2.4
-        version: 14.2.4
+        version: 14.2.4(bufferutil@4.0.8)
       '@next/eslint-plugin-next':
         specifier: ^14.2.4
         version: 14.2.4
@@ -579,25 +579,49 @@ importers:
       '@mdx-js/mdx':
         specifier: ^3.0.1
         version: 3.0.1
+      bufferutil:
+        specifier: ^4.0.8
+        version: 4.0.8
+      chokidar:
+        specifier: ^3.6.0
+        version: 3.6.0
       fast-glob:
         specifier: ^3.3.1
         version: 3.3.2
       gray-matter:
         specifier: ^4.0.3
         version: 4.0.3
+      micromatch:
+        specifier: ^4.0.7
+        version: 4.0.7
+      react:
+        specifier: '>= 18'
+        version: 18.3.1
       rehype-img-size:
         specifier: ^1.0.1
         version: 1.0.1
+      ws:
+        specifier: ^8.17.1
+        version: 8.17.1(bufferutil@4.0.8)
+      zod:
+        specifier: ^3.23.8
+        version: 3.23.8
     devDependencies:
       '@types/mdx':
         specifier: ^2.0.13
         version: 2.0.13
+      '@types/micromatch':
+        specifier: ^4.0.7
+        version: 4.0.8
       '@types/node':
         specifier: 18.17.5
         version: 18.17.5
       '@types/react':
         specifier: ^18.3.3
         version: 18.3.3
+      '@types/ws':
+        specifier: ^8.5.10
+        version: 8.5.10
       eslint-config-custom:
         specifier: workspace:*
         version: link:../eslint-config-custom
@@ -2365,6 +2389,9 @@ packages:
   '@types/acorn@4.0.6':
     resolution: {integrity: sha512-veQTnWP+1D/xbxVrPC3zHnCZRjSrKfhbMUlEA43iMZLu7EsnTtkJklIuwrCPbOi8YkvDQAiW05VQQFvvz9oieQ==}
 
+  '@types/braces@3.0.4':
+    resolution: {integrity: sha512-0WR3b8eaISjEW7RpZnclONaLFDf7buaowRHdqLp4vLj54AsSAYWfh3DRbfiYJY9XDxMgx1B4sE1Afw2PGpuHOA==}
+
   '@types/cross-spawn@6.0.6':
     resolution: {integrity: sha512-fXRhhUkG4H3TQk5dBhQ7m/JDdSNHKwR2BBia62lhwEIq9xGiQKLxd6LymNhn47SjXhsUEPmxi+PKw2OkW4LLjA==}
 
@@ -2413,6 +2440,9 @@ packages:
   '@types/mdx@2.0.13':
     resolution: {integrity: sha512-+OWZQfAYyio6YkJb3HLxDrvnx6SWWDbC0zVPfBRzUk0/nqoDyf6dNxQi3eArPe8rJ473nobTMQ/8Zk+LxJ+Yuw==}
 
+  '@types/micromatch@4.0.8':
+    resolution: {integrity: sha512-hAe0Hc9yJWESaUVl5NM09E9IdAk/0k5njp0gV3yEI5SkmjWuFYh9IexqX3/eTC0y+J+RMx2WIBqkfuzvTRnVmg==}
+
   '@types/ms@0.7.34':
     resolution: {integrity: sha512-nG96G3Wp6acyAgJqGasjODb+acrI7KltPiRxzHPXnP3NgI28bpQDRv53olbqGXbfcgF5aiiHmO3xpwEpS5Ld9g==}
 
@@ -2457,6 +2487,9 @@ packages:
 
   '@types/unist@3.0.2':
     resolution: {integrity: sha512-dqId9J8K/vGi5Zr7oo212BGii5m3q5Hxlkwy3WpYuKPklmBEvsbMYYyLxAQpSffdLl/gdW0XUpKWFvYmyoWCoQ==}
+
+  '@types/ws@8.5.10':
+    resolution: {integrity: sha512-vmQSUcfalpIq0R9q7uTo2lXs6eGIpt9wtnLdMv9LVpIjCA/+ufZRozlVoVelIYixx1ugCBKDhn89vnsEGOCx9A==}
 
   '@typescript-eslint/eslint-plugin@7.14.1':
     resolution: {integrity: sha512-aAJd6bIf2vvQRjUG3ZkNXkmBpN+J7Wd0mfQiiVCJMu9Z5GcZZdcc0j8XwN/BM97Fl7e3SkTXODSk4VehUv7CGw==}
@@ -2852,6 +2885,10 @@ packages:
 
   buffer-from@1.1.2:
     resolution: {integrity: sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ==}
+
+  bufferutil@4.0.8:
+    resolution: {integrity: sha512-4T53u4PdgsXqKaIctwF8ifXlRTTmEPJ8iEPWFdGZvcf7sbwYo6FKFEX9eNNAnzFZ7EzJAQ3CJeOtCRA4rDp7Pw==}
+    engines: {node: '>=6.14.2'}
 
   builtin-modules@3.3.0:
     resolution: {integrity: sha512-zhaCDicdLuWN5UbN5IMnFqNMhNfo919sH85y2/ea+5Yg9TsTkeZxpL+JLbp6cgYFS4sRLp3YV4S6yDuqVWHYOw==}
@@ -4771,6 +4808,10 @@ packages:
     resolution: {integrity: sha512-dRB78srN/l6gqWulah9SrxeYnxeddIG30+GOqK/9OlLVyLg3HPnr6SqOWTWOXKRwC2eGYCkZ59NNuSgvSrpgOA==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
+  node-gyp-build@4.8.1:
+    resolution: {integrity: sha512-OSs33Z9yWr148JZcbZd5WiAXhh/n9z8TxQcdMhIOlpN9AhWpLfvVFO73+m77bBABQMaY9XSvIa+qk0jlI7Gcaw==}
+    hasBin: true
+
   node-releases@2.0.14:
     resolution: {integrity: sha512-y10wOWt8yZpqXmOgRo77WaHEmhYQYGNA6y421PKsKYWEK8aW+cqAphborZDhqfyKrbZEN92CN1X2KbafY2s7Yw==}
 
@@ -6212,6 +6253,18 @@ packages:
       utf-8-validate:
         optional: true
 
+  ws@8.17.1:
+    resolution: {integrity: sha512-6XQFvXTkbfUOZOKKILFG1PDK2NDQs4azKQl26T0YS5CxqWLgXajbPZ+h4gZekJyRqFU8pvnbAbbs/3TgRPy+GQ==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+
   xtend@2.2.0:
     resolution: {integrity: sha512-SLt5uylT+4aoXxXuwtQp5ZnMMzhDb1Xkg4pEqc00WUJCQifPfV9Ub1VrNhp9kXkrjZD2I2Hl8WnjP37jzZLPZw==}
     engines: {node: '>=0.4'}
@@ -7107,9 +7160,9 @@ snapshots:
 
   '@microsoft/tsdoc@0.14.2': {}
 
-  '@next/bundle-analyzer@14.2.4':
+  '@next/bundle-analyzer@14.2.4(bufferutil@4.0.8)':
     dependencies:
-      webpack-bundle-analyzer: 4.10.1
+      webpack-bundle-analyzer: 4.10.1(bufferutil@4.0.8)
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -7890,6 +7943,8 @@ snapshots:
     dependencies:
       '@types/estree': 1.0.5
 
+  '@types/braces@3.0.4': {}
+
   '@types/cross-spawn@6.0.6':
     dependencies:
       '@types/node': 18.17.5
@@ -7940,6 +7995,10 @@ snapshots:
 
   '@types/mdx@2.0.13': {}
 
+  '@types/micromatch@4.0.8':
+    dependencies:
+      '@types/braces': 3.0.4
+
   '@types/ms@0.7.34': {}
 
   '@types/negotiator@0.6.3': {}
@@ -7977,6 +8036,10 @@ snapshots:
   '@types/unist@2.0.8': {}
 
   '@types/unist@3.0.2': {}
+
+  '@types/ws@8.5.10':
+    dependencies:
+      '@types/node': 18.17.5
 
   '@typescript-eslint/eslint-plugin@7.14.1(@typescript-eslint/parser@7.14.1(eslint@8.57.0)(typescript@5.5.2))(eslint@8.57.0)(typescript@5.5.2)':
     dependencies:
@@ -8515,6 +8578,10 @@ snapshots:
       update-browserslist-db: 1.0.13(browserslist@4.23.0)
 
   buffer-from@1.1.2: {}
+
+  bufferutil@4.0.8:
+    dependencies:
+      node-gyp-build: 4.8.1
 
   builtin-modules@3.3.0: {}
 
@@ -11084,6 +11151,8 @@ snapshots:
       fetch-blob: 3.2.0
       formdata-polyfill: 4.0.10
 
+  node-gyp-build@4.8.1: {}
+
   node-releases@2.0.14: {}
 
   normalize-package-data@2.5.0:
@@ -12598,7 +12667,7 @@ snapshots:
 
   webidl-conversions@4.0.2: {}
 
-  webpack-bundle-analyzer@4.10.1:
+  webpack-bundle-analyzer@4.10.1(bufferutil@4.0.8):
     dependencies:
       '@discoveryjs/json-ext': 0.5.7
       acorn: 8.11.3
@@ -12612,7 +12681,7 @@ snapshots:
       opener: 1.5.2
       picocolors: 1.0.1
       sirv: 2.0.4
-      ws: 7.5.9
+      ws: 7.5.9(bufferutil@4.0.8)
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -12728,7 +12797,13 @@ snapshots:
 
   wrappy@1.0.2: {}
 
-  ws@7.5.9: {}
+  ws@7.5.9(bufferutil@4.0.8):
+    optionalDependencies:
+      bufferutil: 4.0.8
+
+  ws@8.17.1(bufferutil@4.0.8):
+    optionalDependencies:
+      bufferutil: 4.0.8
 
   xtend@2.2.0: {}
 
