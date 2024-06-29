@@ -35,14 +35,16 @@ async function fetchDocs(
  * @param locale - Filter with locale
  * @param tag - Filter with specific tag
  * @param api - The Search API URL
+ * @param delayMs - The debounced delay for performing a search.
  */
 export function useDocsSearch(
   locale?: string,
   tag?: string,
   api = '/api/search',
+  delayMs = 100
 ): UseDocsSearch {
   const [search, setSearch] = useState('');
-  const debouncedValue = useDebounce(search, 100);
+  const debouncedValue = useDebounce(search, delayMs);
 
   const query: UseDocsSearch['query'] = useSWR(
     [api, debouncedValue, locale, tag],
