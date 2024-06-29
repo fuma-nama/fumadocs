@@ -1,7 +1,7 @@
 import { AdvancedIndex, createSearchAPI } from 'fumadocs-core/search/server';
 import * as fs from 'node:fs/promises';
 
-export const {GET} = createSearchAPI('advanced', {
+export const { GET } = createSearchAPI('advanced', {
   indexes: async () => {
     const content = await fs
       .readFile(

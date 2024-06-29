@@ -100,6 +100,8 @@ test('Search API I18n', async () => {
   });
 
   expect(await api.search('English', { locale: 'en' })).toHaveLength(1);
-  expect(await api.search('Hello World Chinese', { locale: 'cn' })).toHaveLength(1);
+  expect(
+    await api.search('Hello World Chinese', { locale: 'cn' }),
+  ).toHaveLength(1);
   expect(await api.search('Chinese', { locale: 'en' })).toHaveLength(0);
 });
