@@ -9,6 +9,16 @@ import { getTypescriptSchema } from '@/utils/get-typescript-schema';
 import { heading, p } from './element';
 import { schemaElement } from './schema';
 
+interface CustomProperty {
+  'x-codeSamples'?: CodeSample[];
+}
+
+export interface CodeSample {
+  lang: string;
+  label: string;
+  source: string;
+}
+
 export async function renderOperation(
   path: string,
   method: MethodInformation,
@@ -95,21 +105,31 @@ export async function renderOperation(
 
   info.push(getResponseTable(method));
 
+  const samples: CodeSample[] = dedupe([
+    {
+      label: 'cURL',
+      source: CURL.getSampleRequest(endpoint),
+      lang: 'bash',
+    },
+    {
+      label: 'JavaScript',
+      source: JS.getSampleRequest(endpoint),
+      lang: 'js',
+    },
+    ...(ctx.generateCodeSamples?.(endpoint) ?? []),
+    ...((method as CustomProperty)['x-codeSamples'] ?? []),
+  ]);
+
   example.push(
     ctx.renderer.Requests(
-      ['cURL', 'JavaScript'],
-      [
+      samples.map((s) => s.label),
+      samples.map((s) =>
         ctx.renderer.Request({
-          name: 'cURL',
-          code: CURL.getSampleRequest(endpoint),
-          language: 'bash',
+          name: s.label,
+          code: s.source,
+          language: s.lang,
         }),
-        ctx.renderer.Request({
-          name: 'JavaScript',
-          code: JS.getSampleRequest(endpoint),
-          language: 'js',
-        }),
-      ],
+      ),
     ),
   );
 
@@ -119,6 +139,22 @@ export async function renderOperation(
     ctx.renderer.APIInfo({ method: method.method, route: path }, info),
     ctx.renderer.APIExample(example),
   ]);
+}
+
+/**
+ * Remove duplicated labels
+ */
+function dedupe(samples: CodeSample[]): CodeSample[] {
+  const set = new Set<string>();
+  const out: CodeSample[] = [];
+
+  for (let i = samples.length - 1; i >= 0; i--) {
+    if (set.has(samples[i].label)) continue;
+
+    set.add(samples[i].label);
+    out.unshift(samples[i]);
+  }
+  return out;
 }
 
 function getAuthSection(

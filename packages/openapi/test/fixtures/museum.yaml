@@ -14,6 +14,11 @@ servers:
 paths:
   /museum-hours:
     get:
+      x-codeSamples:
+        - lang: bash
+          label: List all unwatered plants
+          source: |
+              planter list -u
       summary: Get museum hours
       description: Get upcoming museum operating hours
       operationId: getMuseumHours
