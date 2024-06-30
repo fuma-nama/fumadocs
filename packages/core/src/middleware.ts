@@ -95,7 +95,7 @@ export function createI18nMiddleware({
     // Remove explicit default locale
     // (Only possible for default locale)
     if (hideLocale === 'default-locale' && pathLocale === defaultLanguage) {
-      const path = pathLocale.slice(`/${pathLocale}`.length);
+      const path = pathname.slice(`/${pathLocale}`.length);
 
       return NextResponse.redirect(
         new URL(path.startsWith('/') ? path : `/${path}`, request.url),
