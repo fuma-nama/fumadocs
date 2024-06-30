@@ -10,19 +10,21 @@ import * as A from '@/content/docs/headless/internationalization.mdx';
 
 ## Setup UI
 
-A `I18nProvider` is needed for localization. Wrap the root provider inside your i18n provider.
+A `I18nProvider` is needed for localization. Wrap the root provider inside your I18n provider.
 
 ```tsx
 import { RootProvider } from 'fumadocs-ui/provider';
 import { I18nProvider } from 'fumadocs-ui/i18n';
 
 export default function RootLayout({
+  params,
   children,
 }: {
+  params: { lang: string };
   children: React.ReactNode;
 }) {
   return (
-    <I18nProvider>
+    <I18nProvider locale={params.lang}>
       <RootProvider>{children}</RootProvider>
     </I18nProvider>
   );
