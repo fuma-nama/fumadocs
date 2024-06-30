@@ -1,5 +1,16 @@
 # @fumadocs/mdx-remote
 
+## 0.1.0
+
+### Minor Changes
+
+- ca7d0f4: Support built-in search index build utility
+
+### Patch Changes
+
+- Updated dependencies [ca7d0f4]
+  - fumadocs-core@12.3.2
+
 ## 0.0.2
 
 ### Patch Changes
