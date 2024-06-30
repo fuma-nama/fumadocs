@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 12.3.3
+
+### Patch Changes
+
+- 90d51cb: Fix problem with I18n middleware & language toggle
+
 ## 12.3.2
 
 ### Patch Changes

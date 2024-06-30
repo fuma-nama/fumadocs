@@ -10,38 +10,51 @@ import {
 } from './contexts/i18n';
 
 interface I18nProviderProps {
+  // TODO: make required (next major)
   /**
    * Force a locale, by default, it is parsed from pathname
+   *
+   * **Highly recommended to specify one**
    */
   locale?: string;
 
+  // TODO: only pass the current translation, reduce client bundle size
   /**
    * Translations for each language
    */
   translations?: Record<string, NamedTranslation>;
+
+  /**
+   * Handle changes to the locale, redirect user when not specified.
+   */
+  onChange?: (v: string) => void;
 
   children: ReactNode;
 }
 
 export function I18nProvider({
   translations = {},
-  locale: forceLocale,
-  children,
+  ...props
 }: I18nProviderProps): React.ReactElement {
-  const localeIndex = 1;
-  const router = useRouter();
-  const pathname = usePathname();
   const context = useI18n();
-  const segments = pathname.split('/');
+  const router = useRouter();
+  const segments = usePathname()
+    .split('/')
+    .filter((v) => v.length > 0);
 
-  const locale = forceLocale ?? segments[localeIndex];
+  const locale = props.locale ?? segments[0];
   const onChange = useCallback(
     (v: string) => {
-      segments[localeIndex] = v; // update parameter
+      // If locale prefix hidden
+      if (segments[0] !== locale) {
+        segments.unshift(v);
+      } else {
+        segments[0] = v;
+      }
 
-      router.push(segments.join('/'));
+      router.push(`/${segments.join('/')}`);
     },
-    [segments, router],
+    [locale, segments, router],
   );
 
   return (
@@ -53,10 +66,10 @@ export function I18nProvider({
           ...context.text,
           ...translations[locale],
         },
-        onChange,
+        onChange: props.onChange ?? onChange,
       }}
     >
-      {children}
+      {props.children}
     </I18nContext.Provider>
   );
 }
