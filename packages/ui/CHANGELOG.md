@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 12.3.3
+
+### Patch Changes
+
+- 90d51cb: Fix problem with I18n middleware & language toggle
+- Updated dependencies [90d51cb]
+  - fumadocs-core@12.3.3
+
 ## 12.3.2
 
 ### Patch Changes
