@@ -16,6 +16,6 @@
     "source-api",
     "fumadocs-mdx",
     "contentlayer",
-    "github"
+    "remote"
   ]
 }
