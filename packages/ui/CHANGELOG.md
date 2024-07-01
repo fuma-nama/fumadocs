@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 12.3.4
+
+### Patch Changes
+
+- fbfd050: Improve the default theme
+- eefa75d: Reduce the navbar height
+  - fumadocs-core@12.3.4
+
 ## 12.3.3
 
 ### Patch Changes
