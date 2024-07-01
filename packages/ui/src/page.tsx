@@ -78,7 +78,7 @@ export function DocsPage({
       <div className="flex min-w-0 flex-1 flex-col">
         <div
           className={cn(
-            'sticky top-16 z-10 border-b bg-background/60 text-sm font-medium backdrop-blur-md md:top-0 md:bg-card',
+            'sticky top-14 z-10 border-b bg-background/60 text-sm font-medium backdrop-blur-md md:top-0 md:bg-card',
             !full && 'lg:hidden',
           )}
         >

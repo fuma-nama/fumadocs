@@ -25,7 +25,7 @@ export function Nav({
   const { text } = useI18n();
 
   return (
-    <NavBox id="nd-nav" className="h-16" transparentMode={transparentMode}>
+    <NavBox id="nd-nav" className="h-14" transparentMode={transparentMode}>
       <nav className="mx-auto flex size-full max-w-container flex-row items-center gap-6 px-4">
         <Title title={title} url={url} />
         {children}
