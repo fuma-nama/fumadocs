@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-core",
-  "version": "12.3.3",
+  "version": "12.3.4",
   "description": "The library for building a documentation website in Next.js",
   "keywords": [
     "NextJs",
