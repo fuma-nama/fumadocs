@@ -1,0 +1,104 @@
+---
+title: Remote Source
+description: Learn how to use a remote source with Fumadocs
+---
+
+## Introduction
+
+**Fumadocs is very flexible.** You can integrate with any content source, even without an official adapter.
+
+> This guide assumes you are experienced with Next.js App Router.
+
+For a custom content source implementation, you will need:
+
+### Page Tree
+
+You can either hardcode the page tree, or write some code to generate one.
+See [Definitions of Page Tree](/docs/headless/page-tree).
+
+Pass your Page Tree to `DocsLayout` (usually in a `layout.tsx`).
+
+### Docs Page
+
+Same as a normal Next.js app, the code of your docs page is located in `[[...slug]]/page.tsx`.
+
+#### SSG
+
+Define the [`generateStaticParams`](https://nextjs.org/docs/app/api-reference/functions/generate-static-params) function.
+It should return a list of parameters (`params`) to populate the `[[...slug]]` catch-all route.
+
+#### Body
+
+In the main body of page, find the corresponding page according to the slug and render its content inside the `DocsPage` component.
+
+You also need a table of contents, which can be generated with your own implementation, or using the [`getTableOfContents`](/docs/headless/utils/get-toc) utility (Markdown/MDX only).
+
+```tsx
+import { DocsPage, DocsBody } from 'fumadocs-ui/page';
+import { getPage } from './my-content-source';
+import { notFound } from 'next/navigation';
+
+export default function Page({ params }: { params: { slug?: string[] } }) {
+  const page = getPage(params.slug);
+  if (!page) notFound();
+
+  return (
+    <DocsPage toc={page.tableOfContents}>
+      <DocsBody>{page.render()}</DocsBody>
+    </DocsPage>
+  );
+}
+```
+
+#### Metadata
+
+Next.js offers a Metadata API for SEO, you can configure it with `generateMetadata` (same as the code above).
+
+### Document Search
+
+This can be difficult considering your content may not be necessarily Markdown/MDX.
+For Markdown and MDX, the built-in [Search API](/docs/headless/search/flexsearch) is adequate for most use cases.
+Otherwise, you will have to bring your own implementation.
+
+We recommend 3rd party solutions like Algolia Search. They are more flexible than the built-in Search API, and is easier to integrate with remote sources.
+Fumadocs offers a simple [Algolia Search Adapter](/docs/headless/search/algolia), which includes a search client to integrate with Fumadocs UI.
+
+## MDX Remote
+
+Fumadocs offers the **MDX Remote** package, it is a helper to integrate remote content sources with Fumadocs.
+
+<Callout type="warn" title="Take it on your own risk">
+  MDX Remote is still under development, it can be unstable.
+</Callout>
+
+### Setup
+
+```package-install
+@fumadocs/mdx-remote
+```
+
+The main feature it offers is the MDX Compiler, it can compile MDX content to JSX nodes.
+Since it doesn't use a bundler, imports and exports are not supported.
+
+You can pass MDX components via the `components` option, it's compatible with Server Components.
+There's an example:
+
+```tsx
+import { compileMDX } from '@fumadocs/mdx-remote';
+import { getPage } from './my-content-source';
+import { DocsBody, DocsPage } from 'fumadocs-ui/page';
+
+export default function Page({ params }: { params: { slug?: string[] } }) {
+  const page = getPage(params.slug);
+  const compiled = compileMDX({
+    source: page.content,
+    components: {},
+  });
+
+  return (
+    <DocsPage toc={compiled.toc}>
+      <DocsBody>{compiled.content}</DocsBody>
+    </DocsPage>
+  );
+}
+```

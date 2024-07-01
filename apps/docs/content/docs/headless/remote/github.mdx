@@ -1,0 +1,124 @@
+---
+title: With GitHub
+description: Use GitHub as a remote content source
+---
+
+MDX Remote offers a GitHub integration, it allows you to use a
+GitHub repository as the content source of your documentation.
+
+## When to use it?
+
+When your docs site is too large for the built-in content sources (e.g. Fumadocs MDX), building all pages in build time takes too much time.
+For example, you have a docs with more than 1000 MDX files under the project.
+
+For smaller docs, Fumadocs MDX may be a better option.
+
+## Features
+
+With MDX Remote GitHub, in production, your documentation will be automatically updated
+whenever you make changes to the content in your GitHub repository.
+
+You don't need to re-build or re-deploy the entire docs site when the content updates.
+
+## Setup
+
+In `source.ts`, change the usage of `loader` to:
+
+```ts
+import { createSourceAuto } from '@fumadocs/mdx-remote/github';
+import { loader } from 'fumadocs-core/source';
+import { cache } from 'react';
+
+export const getDocs = cache(async () => {
+  return loader({
+    source: await createSourceAuto({
+      github: {
+        owner: 'fuma-nama',
+        repo: 'fumadocs',
+        directory: 'examples/remote-mdx/content',
+        treeSha: 'main',
+        accessToken: 'Bearer <access token>',
+      },
+    }),
+    rootDir: 'docs',
+    baseUrl: '/docs',
+  });
+});
+```
+
+Then, change all usages to the original output to `await getDocs()`.
+
+The `createSourceAuto` function fetches the file tree (file structure), which is required to generate the page tree.
+Depending on the environment:
+
+- **Production:** use the GitHub API and fetch Git Tree.
+- **Development:** Use the file system directly.
+
+To dedupe the requests, we will use React `cache`.
+
+### Page
+
+In your docs page, you have to manually resolve the file content, and compile it using the built-in MDX Compiler.
+
+```json doc-gen:file
+{
+  "file": "../../examples/remote-mdx/app/docs/[[...slug]]/page.tsx",
+  "codeblock": {
+    "lang": "tsx",
+    "meta": "title=\"app/docs/[[...slug]]/page.tsx\""
+  }
+}
+```
+
+### Search
+
+MDX Remote provides a simple way to build search indexes.
+It should be executed every time the content is changed to ensure search indexes are up-to-date.
+
+```ts
+import { buildSearchIndexes } from '@fumadocs/mdx-remote/github';
+
+async function main() {
+  const output = await buildSearchIndexes({
+    directory: './content/docs',
+    baseUrl: '/docs',
+  });
+
+  // handle the output search indexes
+}
+```
+
+## Deploy
+
+MDX Remote GitHub uses Webhook to receive notifications from GitHub and revalidates cache.
+
+In the settings of your GitHub repository, go to the Webhook Tab and create a new Webhook:
+
+![Webhook Settings](/docs/webhook.png)
+
+Remember to give it a secret, it will be used later.
+
+In your app, add the following route handler.
+
+```json doc-gen:file
+{
+  "file": "../../examples/remote-mdx/app/api/github/webhook/route.ts",
+  "codeblock": {
+    "lang": "ts",
+    "meta": "title=\"app/api/github/webhook/route.ts\""
+  }
+}
+```
+
+Now you can deploy your app.
+
+For projects hosted on Vercel, or other platforms which provides a GitHub integration, **skip the deployment step when the commit only affects your content**.
+Otherwise, the optimization of MDX Remote cannot take effect.
+
+On Vercel, this can be done with [Ignore Build Step](https://vercel.com/docs/projects/overview#ignored-build-step).
+
+## Deep Dive
+
+Internally, we use the Next.js cache. It allows us to incrementally update the
+documentation in real-time, avoiding rebuilding the entire documentation every
+time a change is made.
