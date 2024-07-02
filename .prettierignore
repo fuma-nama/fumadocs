@@ -15,3 +15,5 @@ apps/docs/content/docs/ui/museum/operations.mdx
 apps/docs/content/docs/ui/museum/tickets.mdx
 
 apps/docs/content/docs/ui/typescript.mdx
+
+.content-collections/**/*
