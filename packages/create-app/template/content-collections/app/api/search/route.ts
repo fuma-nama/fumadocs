@@ -3,9 +3,9 @@ import { createSearchAPI } from 'fumadocs-core/search/server';
 
 export const { GET } = createSearchAPI('advanced', {
   indexes: getPages().map((page) => ({
-    id: page.data._id,
     title: page.data.title,
-    url: page.url,
     structuredData: page.data.structuredData,
+    id: page.url,
+    url: page.url,
   })),
 });
