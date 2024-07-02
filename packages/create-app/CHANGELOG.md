@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 12.3.5
+
+### Patch Changes
+
+- ff7bcc4: Replace `contentlayer` with `content-collections`
+
 ## 12.3.4
 
 ## 12.3.3
