@@ -14,7 +14,7 @@
     "search",
     "---Sources---",
     "source-api",
-    "fumadocs-mdx",
+    "content-collections/index",
     "contentlayer",
     "remote"
   ]
