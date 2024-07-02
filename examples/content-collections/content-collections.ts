@@ -10,9 +10,7 @@ const docs = defineCollection({
   directory: 'content/docs',
   include: '**/*.mdx',
   schema: createDocSchema,
-  transform: (document, context) => {
-    return transformMDX(document, context);
-  },
+  transform: transformMDX,
 });
 
 const metas = defineCollection({

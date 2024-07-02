@@ -19,7 +19,8 @@ You can choose a **content source** you prefer.
 There is a list of supported sources:
 
 - [Setup Fumadocs MDX](/docs/mdx)
-- [Setup Contentlayer](/docs/headless/contentlayer)
+- [Setup Content Collections](/docs/headless/content-collections)
+- [Setup Contentlayer](/docs/headless/contentlayer) (Deprecated)
 
 You have to configure the library correctly following their setup guide before continuing.
 
@@ -99,68 +100,25 @@ For the `page.tsx`, it may vary depending on your source. You should configure s
 
 Wrap your content in the [Page](/docs/ui/blocks/page) component.
 
-<Tabs id='content-source' items={['Fumadocs MDX', 'Contentlayer']}>
-    <Tab value='Fumadocs MDX'>
+<Tabs id='content-source' items={['Fumadocs MDX', 'Content Collections']}>
 
 ```json doc-gen:file
 {
   "file": "../../examples/next-mdx/app/docs/[[...slug]]/page.tsx",
   "codeblock": {
-    "meta": "title=\"app/docs/[[...slug]]/page.tsx\""
+    "meta": "title=\"app/docs/[[...slug]]/page.tsx\" tab=\"Fumadocs MDX\""
   }
 }
 ```
 
-    </Tab>
-    <Tab value='Contentlayer'>
-
-```tsx title="app/docs/[[...slug]]/page.tsx"
-import { Content } from './content';
-import { getPage, getPages } from '@/app/source';
-import type { Metadata } from 'next';
-import { DocsPage, DocsBody } from 'fumadocs-ui/page';
-import { notFound } from 'next/navigation';
-
-export default async function Page({
-  params,
-}: {
-  params: { slug?: string[] };
-}) {
-  const page = getPage(params.slug);
-
-  if (page == null) {
-    notFound();
+```json doc-gen:file
+{
+  "file": "../../examples/content-collections/app/docs/[[...slug]]/page.tsx",
+  "codeblock": {
+    "meta": "title=\"app/docs/[[...slug]]/page.tsx\" tab=\"Content Collections\""
   }
-
-  return (
-    <DocsPage toc={page.data.toc}>
-      <DocsBody>
-        <h1>{page.data.title}</h1>
-        <Content code={page.data.body.code} />
-      </DocsBody>
-    </DocsPage>
-  );
-}
-
-export async function generateStaticParams(): Promise<{ slug: string[] }[]> {
-  return getPages().map((page) => ({
-    slug: page.slugs,
-  }));
-}
-
-export function generateMetadata({ params }: { params: { slug?: string[] } }) {
-  const page = getPage(params.slug);
-
-  if (page == null) notFound();
-
-  return {
-    title: page.data.title,
-    description: page.data.description,
-  } satisfies Metadata;
 }
 ```
-
-    </Tab>
 
 </Tabs>
 
@@ -168,36 +126,25 @@ export function generateMetadata({ params }: { params: { slug?: string[] } }) {
 
 Use the default document search based on Flexsearch.
 
-<Tabs id='content-source' items={['Fumadocs MDX', 'Contentlayer']}>
-    <Tab value='Fumadocs MDX'>
+<Tabs id='content-source' items={['Fumadocs MDX', 'Content Collections']}>
 
 ```json doc-gen:file
 {
   "file": "../../examples/next-mdx/app/api/search/route.ts",
   "codeblock": {
-    "meta": "title=\"app/api/search/route.ts\""
+    "meta": "title=\"app/api/search/route.ts\" tab=\"Fumadocs MDX\""
   }
 }
 ```
 
-    </Tab>
-    <Tab value='Contentlayer'>
-
-```ts title="app/api/search/route.ts"
-import { getPages } from '@/app/source';
-import { createSearchAPI } from 'fumadocs-core/search/server';
-
-export const { GET } = createSearchAPI('advanced', {
-  indexes: getPages().map((page) => ({
-    title: page.data.title,
-    structuredData: page.data.structuredData,
-    id: page.url,
-    url: page.url,
-  })),
-});
+```json doc-gen:file
+{
+  "file": "../../examples/content-collections/app/api/search/route.ts",
+  "codeblock": {
+    "meta": "title=\"app/api/search/route.ts\" tab=\"Content Collections\""
+  }
+}
 ```
-
-    </Tab>
 
 </Tabs>
 
