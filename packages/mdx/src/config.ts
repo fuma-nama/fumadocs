@@ -1,49 +1,18 @@
 import path from 'node:path';
 import type { NextConfig } from 'next';
-import {
-  rehypeCode,
-  remarkGfm,
-  remarkStructure,
-  remarkHeading,
-  type RehypeCodeOptions,
-  remarkImage,
-  type RemarkImageOptions,
-  type RemarkHeadingOptions,
-} from 'fumadocs-core/mdx-plugins';
-import type { Pluggable } from 'unified';
 import type { Configuration } from 'webpack';
-import { MapWebpackPlugin } from './webpack-plugins/map-plugin';
-import remarkMdxExport from './mdx-plugins/remark-exports';
-import type { LoaderOptions } from './loader';
-import type { Options as MDXLoaderOptions } from './loader-mdx';
+import { type InputMDXOptions } from '@/loader-mdx';
 import {
   SearchIndexPlugin,
   type Options as SearchIndexPluginOptions,
-} from './webpack-plugins/search-index-plugin';
-
-type MDXOptions = Omit<
-  NonNullable<MDXLoaderOptions>,
-  'rehypePlugins' | 'remarkPlugins'
-> & {
-  rehypePlugins?: ResolvePlugins;
-  remarkPlugins?: ResolvePlugins;
-
-  /**
-   * Properties to export from `vfile.data`
-   */
-  valueToExport?: string[];
-
-  remarkHeadingOptions?: RemarkHeadingOptions;
-  remarkImageOptions?: RemarkImageOptions | false;
-  rehypeCodeOptions?: RehypeCodeOptions | false;
-};
-
-type ResolvePlugins = Pluggable[] | ((v: Pluggable[]) => Pluggable[]);
+} from '@/webpack-plugins/search-index-plugin';
+import { RootMapFile } from '@/root-map-file';
+import type { LoaderOptions } from './loader';
 
 export interface CreateMDXOptions {
   cwd?: string;
 
-  mdxOptions?: MDXOptions;
+  mdxOptions?: InputMDXOptions;
 
   buildSearchIndex?:
     | Omit<SearchIndexPluginOptions, 'rootContentDir' | 'rootMapFile'>
@@ -67,64 +36,13 @@ export interface CreateMDXOptions {
    * {@link LoaderOptions.include}
    */
   include?: string | string[];
-}
 
-function pluginOption(
-  def: (v: Pluggable[]) => (Pluggable | false)[],
-  options: ResolvePlugins = [],
-): Pluggable[] {
-  const list = def(Array.isArray(options) ? options : []).filter(
-    Boolean,
-  ) as Pluggable[];
-
-  if (typeof options === 'function') {
-    return options(list);
-  }
-
-  return list;
-}
-
-function getMDXLoaderOptions({
-  valueToExport = [],
-  rehypeCodeOptions,
-  remarkImageOptions,
-  remarkHeadingOptions,
-  ...mdxOptions
-}: MDXOptions): MDXLoaderOptions {
-  const mdxExports = [
-    'structuredData',
-    'toc',
-    'frontmatter',
-    'lastModified',
-    ...valueToExport,
-  ];
-
-  const remarkPlugins = pluginOption(
-    (v) => [
-      remarkGfm,
-      [remarkHeading, remarkHeadingOptions],
-      remarkImageOptions !== false && [remarkImage, remarkImageOptions],
-      ...v,
-      remarkStructure,
-      [remarkMdxExport, { values: mdxExports }],
-    ],
-    mdxOptions.remarkPlugins,
-  );
-
-  const rehypePlugins = pluginOption(
-    (v) => [
-      rehypeCodeOptions !== false && [rehypeCode, rehypeCodeOptions],
-      ...v,
-    ],
-    mdxOptions.rehypePlugins,
-  );
-
-  return {
-    providerImportSource: 'next-mdx-import-source-file',
-    ...mdxOptions,
-    remarkPlugins,
-    rehypePlugins,
-  };
+  /**
+   * Support Turbopack (experimental)
+   *
+   * @defaultValue false
+   */
+  experimentalTurbo?: boolean;
 }
 
 const defaultPageExtensions = ['mdx', 'md', 'jsx', 'js', 'tsx', 'ts'];
@@ -135,13 +53,56 @@ function createMDX({
   rootMapPath = './.map.ts',
   rootContentPath = './content',
   buildSearchIndex = false,
+  experimentalTurbo = false,
   ...loadOptions
 }: CreateMDXOptions = {}) {
   const rootMapFile = path.resolve(cwd, rootMapPath);
   const rootContentDir = path.resolve(cwd, rootContentPath);
-  const mdxLoaderOptions = getMDXLoaderOptions(mdxOptions);
+
+  if (
+    new RootMapFile({
+      rootMapFile,
+    }).create()
+  ) {
+    console.log(`Created ${rootMapFile} automatically.`);
+  }
 
   return (nextConfig: NextConfig = {}): NextConfig => {
+    if (experimentalTurbo) {
+      if (process.env.NODE_ENV === 'development' && !isSerializable(mdxOptions)) {
+        console.warn('`mdxOptions` must be serializable (e.g. JavaScript primitives)');
+      }
+
+      return {
+        ...nextConfig,
+        pageExtensions: nextConfig.pageExtensions ?? defaultPageExtensions,
+        experimental: {
+          turbo: {
+            rules: {
+              '*.{md,mdx}': [
+                {
+                  loader: 'fumadocs-mdx/loader-mdx',
+                  // TODO: how do we communicate to the user about this?
+                  // @ts-expect-error(arlyon): user must ensure only JSON is sent
+                  options: mdxOptions as object,
+                },
+              ],
+              '.map.ts': [
+                {
+                  loader: 'fumadocs-mdx/loader',
+                  options: {
+                    rootContentDir,
+                    rootMapFile,
+                    ...loadOptions,
+                  } satisfies LoaderOptions,
+                },
+              ],
+            },
+          },
+        },
+      };
+    }
+
     return {
       ...nextConfig,
       pageExtensions: nextConfig.pageExtensions ?? defaultPageExtensions,
@@ -166,7 +127,7 @@ function createMDX({
               options.defaultLoaders.babel,
               {
                 loader: 'fumadocs-mdx/loader-mdx',
-                options: mdxLoaderOptions,
+                options: mdxOptions,
               },
             ],
           },
@@ -185,12 +146,6 @@ function createMDX({
 
         config.plugins ||= [];
 
-        config.plugins.push(
-          new MapWebpackPlugin({
-            rootMapFile,
-          }),
-        );
-
         if (buildSearchIndex !== false)
           config.plugins.push(
             new SearchIndexPlugin({
@@ -205,6 +160,23 @@ function createMDX({
       },
     };
   };
+}
+
+type JSONValue = string | boolean | number | JSONValue[] | {
+  [key: string]: JSONValue
+}
+
+// TODO: Improve the check function
+function isSerializable(options: unknown): options is JSONValue {
+  if (options === null) return true;
+
+  if (typeof options === 'object') {
+    return Object.values(options).every(isSerializable)
+  }
+
+  if (Array.isArray(options)) options.every(isSerializable)
+
+  return ['string', 'number', 'bigint', 'boolean'].includes(typeof options)
 }
 
 export { createMDX as default };
