@@ -83,7 +83,7 @@ export function CreateAppAnimation(): React.ReactElement {
         {tick > timeCommandRun + 3 && (
           <>
             <span>│ ● Fumadocs MDX</span>
-            <span>│ ○ Contentlayer</span>
+            <span>│ ○ Content Collections</span>
           </>
         )}
       </Fragment>,

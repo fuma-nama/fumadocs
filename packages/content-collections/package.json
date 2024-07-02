@@ -1,0 +1,66 @@
+{
+  "name": "@fumadocs/content-collections",
+  "version": "1.0.0",
+  "description": "The Content Collections adapter for Fumadocs",
+  "keywords": [
+    "NextJs",
+    "Docs",
+    "Content Collections"
+  ],
+  "homepage": "https://fumadocs.vercel.app",
+  "repository": "github:fuma-nama/fumadocs",
+  "license": "MIT",
+  "author": "Fuma Nama",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./configuration": {
+      "import": "./dist/configuration.js",
+      "types": "./dist/configuration.d.ts"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index.d.ts"
+      ],
+      "configuration": [
+        "./dist/configuration.d.ts"
+      ]
+    }
+  },
+  "files": [
+    "dist/*"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "clean": "rimraf dist",
+    "dev": "tsup --watch",
+    "lint": "eslint .",
+    "types:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "rehype-img-size": "^1.0.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@content-collections/core": "^0.6.0",
+    "@content-collections/mdx": "^0.1.3",
+    "eslint-config-custom": "workspace:*",
+    "fumadocs-core": "workspace:*",
+    "tsconfig": "workspace:*"
+  },
+  "peerDependencies": {
+    "@content-collections/core": "0.x.x",
+    "@content-collections/mdx": "0.x.x",
+    "fumadocs-core": "12.x.x"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

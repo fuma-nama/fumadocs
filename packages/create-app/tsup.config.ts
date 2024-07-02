@@ -3,7 +3,7 @@ import { defineConfig } from 'tsup';
 import corePkg from '../core/package.json';
 import uiPkg from '../ui/package.json';
 import mdxPkg from '../mdx/package.json';
-import contentlayerPkg from '../contentlayer/package.json';
+import contentCollectionsPkg from '../content-collections/package.json';
 
 writeFileSync(
   './versions.json',
@@ -11,7 +11,7 @@ writeFileSync(
     'fumadocs-core': corePkg.version,
     'fumadocs-ui': uiPkg.version,
     'fumadocs-mdx': mdxPkg.version,
-    'fumadocs-contentlayer': contentlayerPkg.version,
+    '@fumadocs/content-collections': contentCollectionsPkg.version,
   }),
 );
 

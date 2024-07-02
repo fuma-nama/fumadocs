@@ -37,7 +37,7 @@ async function main(): Promise<void> {
           initialValue: 'fuma-docs-mdx' as Template,
           options: [
             { value: 'fuma-docs-mdx', label: 'Fumadocs MDX' },
-            { value: 'contentlayer', label: 'Contentlayer' },
+            { value: 'content-collections', label: 'Content Collections' },
           ],
         }),
       tailwindcss: () => confirm({ message: 'Use Tailwind CSS for styling?' }),

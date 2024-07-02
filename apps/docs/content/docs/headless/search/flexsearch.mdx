@@ -19,16 +19,16 @@ Index with the raw content of document.
 
 <div className='step'>
 
-Create the API Route.
+Create the Route Handler.
 
-```tsx title="app/api/search/route.ts"
-import { allDocs } from 'contentlayer/generated';
+```ts title="app/api/search/route.ts"
+import { allDocs } from 'content-collections';
 import { createSearchAPI } from 'fumadocs-core/search/server';
 
 export const { GET } = createSearchAPI('simple', {
   indexes: allDocs.map((docs) => ({
     title: docs.title,
-    content: docs.body.raw, // Raw Content
+    content: docs.content // Raw Content
     url: docs.url,
   })),
 });

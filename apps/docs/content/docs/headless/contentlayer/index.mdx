@@ -9,6 +9,17 @@ configuration with required MDX plugins for Contentlayer.
 It also adds extra functionalities to Contentlayer, making it more
 convenient to use and straightforward.
 
+<Callout type='warn' title='Deprecated'>
+
+    According to the state of Contentlayer, it is no longer actively maintained.
+
+    You may consider Fumadocs MDX, it is a drop-in replacement to Contentlayer.
+    Other content sources like MDXTS and Content Collections can also be supported via a custom adapter.
+
+    **This adapter has been deprecated, please take it on your own risk.**
+
+</Callout>
+
 ## Setup
 
 ```package-install
@@ -60,3 +71,16 @@ export const docs = loader({
 
 You can configure the icon handler in
 the [`loader`](/docs/headless/source-api#icons).
+
+### Image Optimization
+
+Contentlayer integration supports the built-in `next/image` component by looking for the size of images automatically.
+You can enjoy the benefits of Next.js Image Optimization without extra configurations.
+
+The image must be located under the `/public` folder.
+
+```mdx
+![banner](/banner.png)
+```
+
+Under the hood, It gets the image size using `rehype-img-size`, then pass the obtained size to your image element.

@@ -30,6 +30,9 @@ You can see the examples in
 [their docs](https://contentlayer.dev/docs/sources/remote-files).
 
 ```ts
+import { createConfig } from "fumadocs-contentlayer/configuration";
+import { makeSource } from 'contentlayer/source-files';
+
 const config = createConfig({ ... })
 
 export default makeSource({

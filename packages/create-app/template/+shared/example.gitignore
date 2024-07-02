@@ -4,6 +4,7 @@
 # generated content
 .map.ts
 .contentlayer
+.content-collections
 
 # test & build
 /coverage

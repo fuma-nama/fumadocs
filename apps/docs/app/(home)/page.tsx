@@ -31,7 +31,6 @@ import {
   VercelLogo,
   NetlifyLogo,
   NextSVG,
-  ContentlayerIcon,
   OpenAPIIcon,
   EarthIcon,
 } from './icons';
@@ -215,13 +214,19 @@ function Integration({
         </p>
       </Link>
       <Link
-        href="/docs/headless/contentlayer"
+        href="/docs/headless/content-collections"
         className={cn(linkItemVariants())}
       >
-        <ContentlayerIcon className="mb-2 size-12" />
-        <p className="text-lg font-medium">Contentlayer</p>
+        <Image
+          alt="Content Collections logo"
+          src="/content-collections.webp"
+          className="mb-2 grayscale"
+          width={48}
+          height={48}
+        />
+        <p className="text-lg font-medium">Content Collections</p>
         <p className="text-sm text-muted-foreground">
-          Integrate with Contentlayer easily.
+          Integrate with Content Collections, an alternative to Contentlayer.
         </p>
       </Link>
       <div className="col-span-full">
@@ -500,7 +505,7 @@ function Features(): React.ReactElement {
         icon={PaperclipIcon}
         subheading="Multiple Sources"
         heading="Your source. Your choice"
-        description="Native support for different content sources including Contentlayer
+        description="Native support for different content sources including Content Collections
           and the official MDX loader."
         className="overflow-hidden"
         style={{

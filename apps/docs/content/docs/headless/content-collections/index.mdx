@@ -1,0 +1,79 @@
+---
+title: Content Collections
+description: Use Content Collections for Fumadocs
+---
+
+[Content Collections](https://www.content-collections.dev) is a library that transforms your content into type-safe data collections.
+
+## Setup
+
+Install the required packages.
+
+```package-install
+@fumadocs/content-collections @content-collections/core @content-collections/mdx @content-collections/next
+```
+
+After the installation, add a path alias for the generated collections to the `tsconfig.json`.
+
+```json
+{
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./*"],
+      "content-collections": ["./.content-collections/generated"]
+    }
+  }
+}
+```
+
+In the Next.js configuration file, apply the plugin.
+
+```js title="next.config.mjs"
+import { withContentCollections } from '@content-collections/next';
+
+/** @type {import('next').NextConfig} */
+const config = {
+  reactStrictMode: true,
+};
+
+export default withContentCollections(config);
+```
+
+To integrate with Fumadocs, add the following to your `content-collections.ts`.
+
+```json doc-gen:file
+{
+  "file": "../../examples/content-collections/content-collections.ts",
+  "codeblock": {
+    "meta": "title=\"content-collections.ts\""
+  }
+}
+```
+
+And pass it to Source API.
+
+```json doc-gen:file
+{
+  "file": "../../examples/content-collections/app/source.ts",
+  "codeblock": {
+    "meta": "title=\"app/source.ts\""
+  }
+}
+```
+
+Done! You can access the pages and generated page tree from Source API.
+
+```ts
+import { getPage } from '@/app/source';
+
+const page = getPage(slugs);
+
+// MDX output
+page?.data.body;
+
+// Table of contents
+page?.data.toc;
+
+// Structured Data, for Search API
+page?.data.structuredData;
+```

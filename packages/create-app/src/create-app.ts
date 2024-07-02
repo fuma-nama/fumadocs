@@ -6,7 +6,7 @@ import type { PackageManager } from './auto-install';
 import { autoInstall } from './auto-install';
 import { sourceDir, cwd } from './constants';
 
-export type Template = 'contentlayer' | 'fuma-docs-mdx';
+export type Template = 'content-collections' | 'fuma-docs-mdx';
 
 export interface Options {
   outputDir: string;
@@ -101,16 +101,16 @@ function createPackageJson(
     },
   };
 
-  if (template === 'contentlayer') {
+  if (template === 'content-collections') {
     Object.assign(packageJson.dependencies, {
-      'fumadocs-contentlayer': localVersions['fumadocs-contentlayer'],
-      contentlayer: versionPkg.dependencies.contentlayer,
-      'next-contentlayer': versionPkg.dependencies['next-contentlayer'],
-    });
-
-    // TODO: Remove this after Contentlayer supports unified 11
-    Object.assign(packageJson, {
-      overrides: versionPkg.overrides,
+      '@fumadocs/content-collections':
+        localVersions['@fumadocs/content-collections'],
+      '@content-collections/core':
+        versionPkg.dependencies['@content-collections/core'],
+      '@content-collections/mdx':
+        versionPkg.dependencies['@content-collections/mdx'],
+      '@content-collections/next':
+        versionPkg.dependencies['@content-collections/next'],
     });
   }
 
