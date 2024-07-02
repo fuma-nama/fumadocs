@@ -66,6 +66,16 @@ export type LinkItemType =
        */
       on?: 'menu' | 'nav' | 'all';
       children: ReactElement;
+    }
+  | {
+      type: 'secondary_custom';
+      /**
+       * Restrict where the item is displayed for secondary links
+       *
+       * @defaultValue 'all'
+       */
+      on?: 'menu' | 'nav' | 'all';
+      children: ReactElement;
     };
 
 interface NavOptions extends SharedNavProps {
