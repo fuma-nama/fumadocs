@@ -32,21 +32,5 @@
     "typescript": "^5.5.2",
     "vitest": "^1.6.0"
   },
-  "packageManager": "pnpm@9.4.0",
-  "pnpm": {
-    "peerDependencyRules": {
-      "ignoreMissing": [
-        "esbuild",
-        "next"
-      ]
-    },
-    "overrides": {
-      "@opentelemetry/api": "^1.4.1",
-      "@types/mdast": "^4.0.3",
-      "mdx-bundler": "^10.0.1",
-      "remark-parse": "^11.0.0",
-      "remark-rehype": "^11.0.0",
-      "unified": "^11.0.4"
-    }
-  }
+  "packageManager": "pnpm@9.4.0"
 }

@@ -4,14 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-overrides:
-  '@opentelemetry/api': ^1.4.1
-  remark-rehype: ^11.0.0
-  '@types/mdast': ^4.0.3
-  remark-parse: ^11.0.0
-  unified: ^11.0.4
-  mdx-bundler: ^10.0.1
-
 importers:
 
   .:
@@ -333,9 +325,6 @@ importers:
       rehype-img-size:
         specifier: ^1.0.1
         version: 1.0.1
-      zod:
-        specifier: ^3.23.8
-        version: 3.23.8
     devDependencies:
       '@content-collections/core':
         specifier: ^0.6.0
@@ -352,6 +341,9 @@ importers:
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig
+      zod:
+        specifier: ^3.23.8
+        version: 3.23.8
 
   packages/core:
     dependencies:
@@ -450,7 +442,7 @@ importers:
         specifier: workspace:*
         version: link:../tsconfig
       unified:
-        specifier: ^11.0.4
+        specifier: ^11.0.5
         version: 11.0.5
 
   packages/create-app:
@@ -566,7 +558,7 @@ importers:
         specifier: workspace:*
         version: link:../tsconfig
       unified:
-        specifier: ^11.0.4
+        specifier: ^11.0.5
         version: 11.0.5
 
   packages/eslint-config-custom: {}
@@ -617,7 +609,7 @@ importers:
         specifier: workspace:*
         version: link:../tsconfig
       unified:
-        specifier: ^11.0.4
+        specifier: ^11.0.5
         version: 11.0.5
       webpack:
         specifier: ^5.90.3
@@ -684,7 +676,7 @@ importers:
         specifier: workspace:*
         version: link:../tsconfig
       unified:
-        specifier: ^11.0.4
+        specifier: ^11.0.5
         version: 11.0.5
       vfile:
         specifier: ^6.0.1
@@ -4738,7 +4730,7 @@ packages:
     engines: {node: '>=18.17.0'}
     hasBin: true
     peerDependencies:
-      '@opentelemetry/api': ^1.4.1
+      '@opentelemetry/api': ^1.1.0
       '@playwright/test': ^1.41.2
       react: ^18.2.0
       react-dom: ^18.2.0
