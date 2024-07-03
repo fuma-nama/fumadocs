@@ -106,6 +106,7 @@
     "lucide-react": "^0.399.0",
     "next-themes": "^0.3.0",
     "react-medium-image-zoom": "^5.2.5",
+    "shiki": "^1.10.1",
     "tailwind-merge": "^2.3.0"
   },
   "devDependencies": {

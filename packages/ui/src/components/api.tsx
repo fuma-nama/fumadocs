@@ -1,10 +1,21 @@
 'use client';
-import { type HTMLAttributes, type ReactNode } from 'react';
+
+import {
+  ButtonHTMLAttributes,
+  Fragment,
+  ReactElement,
+  type HTMLAttributes,
+  type ReactNode,
+} from 'react';
 import type { VariantProps } from 'class-variance-authority';
 import { cva } from 'class-variance-authority';
+import { CheckIcon, CopyIcon } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { Tab, Tabs } from '@/components/tabs';
 import { Accordion, Accordions } from '@/components/accordion';
+import { buttonVariants } from '@/theme/variants';
+import { useCopyButton } from '@/utils/use-copy-button';
+import { useApiContext } from '@/contexts/api';
 
 export function Root({
   children,
@@ -43,12 +54,13 @@ export function API({
 }
 
 export interface APIInfoProps extends HTMLAttributes<HTMLDivElement> {
-  method?: string;
   route: string;
+  method?: string;
+  badgeClassName?: string;
 }
 
 const badgeVariants = cva(
-  'rounded-lg border px-1.5 py-1 text-xs font-medium leading-[12px]',
+  'rounded border px-1.5 py-1 text-xs font-medium leading-[12px]',
   {
     variants: {
       color: {
@@ -68,10 +80,13 @@ const badgeVariants = cva(
 export function APIInfo({
   children,
   className,
-  method = 'GET',
   route,
+  badgeClassName,
+  method = 'GET',
   ...props
 }: APIInfoProps): React.ReactElement {
+  const { baseUrl } = useApiContext();
+
   let color: VariantProps<typeof badgeVariants>['color'] = 'green';
   if (['GET', 'HEAD'].includes(method)) color = 'green';
   if (['PUT'].includes(method)) color = 'yellow';
@@ -79,12 +94,60 @@ export function APIInfo({
   if (['POST'].includes(method)) color = 'blue';
   if (['DELETE'].includes(method)) color = 'red';
 
+  const renderRoute = (): ReactNode => {
+    const routeFragments = route.split('/').filter((part) => part !== '');
+
+    return routeFragments.map((part, index, array) => (
+      <Fragment key={`${route}-part-${String(index)}`}>
+        {index === 0 && <div className="text-gray-400">/</div>}
+        <div className="text-foreground">{part}</div>
+        {index < array.length - 1 && <div className="text-gray-400">/</div>}
+      </Fragment>
+    ));
+  };
+
+  const onCopy = () => {
+    const textContent = baseUrl + route;
+    void navigator.clipboard.writeText(textContent);
+  };
+
+  const [checked, onClick] = useCopyButton(onCopy);
+
   return (
-    <div className={cn('flex-1 prose-no-margin', className)} {...props}>
-      <h2 className="flex flex-row items-center gap-3 rounded-lg border bg-card p-3 text-base">
-        <span className={cn(badgeVariants({ color }))}>{method}</span>
-        <code>{route}</code>
-      </h2>
+    <div className={cn('min-w-0 flex-1 prose-no-margin', className)} {...props}>
+      <div
+        className={cn(
+          'group flex w-full items-center justify-between rounded-lg border bg-card p-3 text-base',
+          className,
+        )}
+      >
+        <div className="flex items-center gap-2">
+          <span className={cn(badgeVariants({ color }), badgeClassName)}>
+            {method}
+          </span>
+          <div className="h-4 w-px bg-muted" />
+          <div className="flex items-center gap-1 font-mono text-sm">
+            {renderRoute()}
+          </div>
+        </div>
+
+        <InteractiveButton
+          className="size-6 p-1"
+          checked={checked}
+          onClick={onClick}
+        >
+          <CheckIcon
+            className={cn('size-3 transition-transform', !checked && 'scale-0')}
+          />
+          <CopyIcon
+            className={cn(
+              'absolute size-3 transition-transform',
+              checked && 'scale-0',
+            )}
+          />
+        </InteractiveButton>
+      </div>
+
       {children}
     </div>
   );
@@ -180,5 +243,34 @@ export function ObjectCollapsible(props: {
     <Accordions type="single">
       <Accordion title="Object Type">{props.children}</Accordion>
     </Accordions>
+  );
+}
+
+export interface InteractiveButtonProps
+  extends ButtonHTMLAttributes<HTMLButtonElement> {
+  checked?: boolean;
+}
+
+export function InteractiveButton({
+  className,
+  checked = true,
+  children,
+  ...props
+}: InteractiveButtonProps): ReactElement {
+  return (
+    <button
+      type="button"
+      className={cn(
+        buttonVariants({
+          color: 'ghost',
+          className: 'transition-all group-hover:opacity-100',
+        }),
+        !checked && 'opacity-0',
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </button>
   );
 }

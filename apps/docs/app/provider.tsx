@@ -31,6 +31,9 @@ export function Provider({
 }): React.ReactElement {
   return (
     <RootProvider
+      api={{
+        defaultBaseUrl: 'https://api.fake-museum-example.com/v1',
+      }}
       search={{
         SearchDialog,
       }}
