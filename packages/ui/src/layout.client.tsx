@@ -32,7 +32,8 @@ export function Nav({
         {items
           .filter(
             (item) =>
-              item.type !== 'secondary' && !(item.type === 'custom' && item.secondary),
+              item.type !== 'secondary' &&
+              !(item.type === 'custom' && item.secondary),
           )
           .map((item, i) => (
             <LinkItem
@@ -53,7 +54,8 @@ export function Nav({
           {items
             .filter(
               (item) =>
-                item.type === 'secondary' || (item.type === 'custom' && item.secondary),
+                item.type === 'secondary' ||
+                (item.type === 'custom' && item.secondary),
             )
             .map((item, i) => (
               <LinkItem key={i} item={item} className="max-lg:hidden" />
