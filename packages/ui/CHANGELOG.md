@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 12.3.6
+
+### Patch Changes
+
+- 4cc5782: Adding secondary custom links
+  - fumadocs-core@12.3.6
+
 ## 12.3.5
 
 ### Patch Changes
