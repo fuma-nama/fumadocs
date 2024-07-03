@@ -30,7 +30,11 @@ export function Nav({
         <Title title={title} url={url} />
         {children}
         {items
-          .filter((item) => item.type !== 'secondary')
+          .filter(
+            (item) =>
+              item.type !== 'secondary' &&
+              !(item.type === 'custom' && item.secondary),
+          )
           .map((item, i) => (
             <LinkItem
               key={i}
@@ -48,7 +52,11 @@ export function Nav({
 
           <ThemeToggle className="max-lg:hidden" />
           {items
-            .filter((item) => item.type === 'secondary')
+            .filter(
+              (item) =>
+                item.type === 'secondary' ||
+                (item.type === 'custom' && item.secondary),
+            )
             .map((item, i) => (
               <LinkItem key={i} item={item} className="max-lg:hidden" />
             ))}
