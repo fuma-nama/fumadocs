@@ -65,6 +65,7 @@ export type LinkItemType =
        * @defaultValue 'all'
        */
       on?: 'menu' | 'nav' | 'all';
+      secondary?: boolean;
       children: ReactElement;
     };
 
