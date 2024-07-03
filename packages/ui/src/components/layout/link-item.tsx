@@ -52,14 +52,6 @@ export function LinkItem({
     return <></>;
   }
 
-  if (item.type === 'secondary_custom') {
-    const itemSecondaryOn = item.on ?? 'all';
-    if (itemSecondaryOn === 'all' || itemSecondaryOn === on)
-      return item.children;
-    // eslint-disable-next-line react/jsx-no-useless-fragment -- Render nothing
-    return <></>;
-  }
-
   if (item.type === 'menu' && on === 'nav') {
     return (
       <Popover>
