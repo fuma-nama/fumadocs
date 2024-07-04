@@ -34,25 +34,23 @@ export function Breadcrumb({
         items.length === 0 && 'hidden',
       )}
     >
-      {items.map((item, i) => {
-        return (
-          <Fragment key={i}>
-            {i !== 0 && (
-              <ChevronRight className="size-4 shrink-0 rtl:rotate-180" />
-            )}
-            {item.url ? (
-              <Link
-                href={item.url}
-                className="truncate hover:text-accent-foreground"
-              >
-                {item.name}
-              </Link>
-            ) : (
-              <span className="truncate">{item.name}</span>
-            )}
-          </Fragment>
-        );
-      })}
+      {items.map((item, i) => (
+        <Fragment key={i}>
+          {i !== 0 && (
+            <ChevronRight className="size-4 shrink-0 rtl:rotate-180" />
+          )}
+          {item.url ? (
+            <Link
+              href={item.url}
+              className="truncate hover:text-accent-foreground"
+            >
+              {item.name}
+            </Link>
+          ) : (
+            <span className="truncate">{item.name}</span>
+          )}
+        </Fragment>
+      ))}
     </div>
   );
 }

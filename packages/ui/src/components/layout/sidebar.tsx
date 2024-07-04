@@ -1,4 +1,3 @@
-import { cva } from 'class-variance-authority';
 import { ChevronDown, ExternalLinkIcon } from 'lucide-react';
 import type { PageTree } from 'fumadocs-core/server';
 import * as Base from 'fumadocs-core/sidebar';
@@ -17,11 +16,11 @@ import { cn } from '@/utils/cn';
 import { useTreeContext } from '@/contexts/tree';
 import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
 import { hasActive, isActive } from '@/utils/shared';
-import type { LinkItemType } from '@/layout';
-import { LinkItem } from '@/components/layout/link-item';
+import { LinkItem, type LinkItemType } from '@/components/layout/link-item';
 import { LargeSearchToggle } from '@/components/layout/search-toggle';
 import { useSidebar } from '@/contexts/sidebar';
 import { useSearchContext } from '@/contexts/search';
+import { itemVariants } from '@/theme/variants';
 import {
   Collapsible,
   CollapsibleContent,
@@ -60,19 +59,6 @@ interface Components {
   Folder: React.FC<{ item: PageTree.Folder; level: number }>;
   Separator: React.FC<{ item: PageTree.Separator }>;
 }
-
-const itemVariants = cva(
-  'flex w-full flex-row items-center gap-2 rounded-md px-2 py-1.5 text-muted-foreground transition-colors duration-100 [&_svg]:size-4',
-  {
-    variants: {
-      active: {
-        true: 'bg-primary/10 font-medium text-primary',
-        false:
-          'hover:bg-accent/50 hover:text-accent-foreground/80 hover:transition-none',
-      },
-    },
-  },
-);
 
 const defaultComponents: Components = {
   Folder: FolderNode,
