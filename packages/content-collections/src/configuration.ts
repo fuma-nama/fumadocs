@@ -106,7 +106,7 @@ export async function compileMDX(
     rehypePlugins: [
       rehypeCode,
       [rehypeImgSize, { dir: './public' }],
-      ...(rehypePlugins ?? []),
+      ...rehypePlugins,
     ],
   });
 }
