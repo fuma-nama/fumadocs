@@ -44,23 +44,6 @@ export const baseOptions: BaseLayoutProps = {
       url: '/showcase',
       icon: <LayoutTemplateIcon />,
     },
-    {
-      type: 'menu',
-      text: 'Hello',
-      items: [
-        {
-          icon: <BookIcon />,
-          text: 'Blog',
-          url: '/blog',
-          active: 'nested-url',
-        },
-        {
-          text: 'Showcase',
-          url: '/showcase',
-          icon: <LayoutTemplateIcon />,
-        },
-      ],
-    },
   ],
 };
 
