@@ -8,7 +8,12 @@ import React, {
 } from 'react';
 import type { VariantProps } from 'class-variance-authority';
 import { cva } from 'class-variance-authority';
-import { CheckIcon, CopyIcon } from 'lucide-react';
+import {
+  CheckIcon,
+  CircleCheckIcon,
+  CircleXIcon,
+  CopyIcon,
+} from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { Tab, Tabs } from '@/components/tabs';
 import { Accordion, Accordions } from '@/components/accordion';
@@ -326,7 +331,6 @@ const sendButtonVariants = cva(
         red: 'bg-red-500 hover:bg-red-600 disabled:bg-red-600',
         blue: 'bg-blue-500 hover:bg-blue-600 disabled:bg-blue-600',
         orange: 'bg-orange-500 hover:bg-orange-600 disabled:bg-orange-600',
-        purple: 'bg-purple-500 hover:bg-purple-600 disabled:bg-purple-600',
       },
     },
   },
@@ -359,4 +363,45 @@ export function SendButton({
       {children}
     </button>
   );
+}
+
+const statusMap: Record<number, { description: string; color: string; icon: React.ElementType }> = {
+  200: { description: 'OK', color: 'text-green-500', icon: CircleCheckIcon },
+  400: { description: 'Bad Request', color: 'text-red-500', icon: CircleXIcon },
+  401: { description: 'Unauthorized', color: 'text-red-500', icon: CircleXIcon },
+  403: { description: 'Forbidden', color: 'text-red-500', icon: CircleXIcon },
+  404: { description: 'Not Found', color: 'text-gray-500', icon: CircleXIcon },
+  500: { description: 'Internal Server Error', color: 'text-red-500', icon: CircleXIcon },
+};
+
+function getStatusInfo(status: number): {
+  description: string;
+  color: string;
+  icon: React.ElementType;
+} {
+  if (status in statusMap) {
+    return statusMap[status];
+  }
+
+  if (status >= 200 && status < 300) {
+    return {
+      description: 'Success',
+      color: 'text-green-500',
+      icon: CircleCheckIcon,
+    };
+  }
+
+  if (status >= 400 && status < 500) {
+    return { description: 'Error', color: 'text-red-500', icon: CircleXIcon };
+  }
+
+  if (status >= 500) {
+    return { description: 'Error', color: 'text-red-500', icon: CircleXIcon };
+  }
+
+  return {
+    description: 'Unknown Status',
+    color: 'text-gray-500',
+    icon: CircleXIcon,
+  };
 }
