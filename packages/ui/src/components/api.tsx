@@ -1,9 +1,8 @@
 'use client';
 
-import {
+import React, {
   ButtonHTMLAttributes,
   Fragment,
-  ReactElement,
   type HTMLAttributes,
   type ReactNode,
 } from 'react';
@@ -106,49 +105,91 @@ export function APIInfo({
     ));
   };
 
-  const onCopy = () => {
+  const onCopy = (): void => {
     const textContent = baseUrl + route;
     void navigator.clipboard.writeText(textContent);
   };
 
   const [checked, onClick] = useCopyButton(onCopy);
 
-  return (
-    <div className={cn('min-w-0 flex-1 prose-no-margin', className)} {...props}>
+  if (children) {
+    return (
       <div
-        className={cn(
-          'group flex w-full items-center justify-between rounded-lg border bg-card p-3 text-base',
-          className,
-        )}
+        className={cn('min-w-0 flex-1 prose-no-margin', className)}
+        {...props}
       >
-        <div className="flex items-center gap-2">
-          <span className={cn(badgeVariants({ color }), badgeClassName)}>
-            {method}
-          </span>
-          <div className="h-4 w-px bg-muted" />
-          <div className="flex items-center gap-1 font-mono text-sm">
-            {renderRoute()}
+        <div
+          className={cn(
+            'group flex w-full items-center justify-between rounded-lg border bg-card p-3 text-base',
+          )}
+        >
+          <div className="flex items-center gap-2">
+            <span className={cn(badgeVariants({ color }), badgeClassName)}>
+              {method}
+            </span>
+            <div className="h-4 w-px bg-muted" />
+            <div className="flex items-center gap-1 font-mono text-sm">
+              {renderRoute()}
+            </div>
           </div>
+
+          <InteractiveButton
+            className="size-6 p-1"
+            checked={checked}
+            onClick={onClick}
+          >
+            <CheckIcon
+              className={cn(
+                'size-3 transition-transform',
+                !checked && 'scale-0',
+              )}
+            />
+            <CopyIcon
+              className={cn(
+                'absolute size-3 transition-transform',
+                checked && 'scale-0',
+              )}
+            />
+          </InteractiveButton>
         </div>
 
-        <InteractiveButton
-          className="size-6 p-1"
-          checked={checked}
-          onClick={onClick}
-        >
-          <CheckIcon
-            className={cn('size-3 transition-transform', !checked && 'scale-0')}
-          />
-          <CopyIcon
-            className={cn(
-              'absolute size-3 transition-transform',
-              checked && 'scale-0',
-            )}
-          />
-        </InteractiveButton>
+        {children}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={cn(
+        'group flex w-full items-center justify-between rounded-lg border bg-card p-3 text-base',
+        className,
+      )}
+    >
+      <div className="flex items-center gap-2">
+        <span className={cn(badgeVariants({ color }), badgeClassName)}>
+          {method}
+        </span>
+        <div className="h-4 w-px bg-muted" />
+        <div className="flex items-center gap-1 font-mono text-sm">
+          {renderRoute()}
+        </div>
       </div>
 
-      {children}
+      <InteractiveButton
+        className="size-6 p-1"
+        checked={checked}
+        onClick={onClick}
+      >
+        <CheckIcon
+          className={cn('size-3 transition-transform', !checked && 'scale-0')}
+        />
+        <CopyIcon
+          className={cn(
+            'absolute size-3 transition-transform',
+            checked && 'scale-0',
+          )}
+        />
+      </InteractiveButton>
     </div>
   );
 }
@@ -256,7 +297,7 @@ export function InteractiveButton({
   checked = true,
   children,
   ...props
-}: InteractiveButtonProps): ReactElement {
+}: InteractiveButtonProps): React.ReactElement {
   return (
     <button
       type="button"
@@ -268,6 +309,51 @@ export function InteractiveButton({
         !checked && 'opacity-0',
         className,
       )}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+}
+
+const sendButtonVariants = cva(
+  'rounded-lg font-medium text-white transition-colors',
+  {
+    variants: {
+      color: {
+        green: 'bg-green-500 hover:bg-green-600 disabled:bg-green-600',
+        yellow: 'bg-yellow-500 hover:bg-yellow-600 disabled:bg-yellow-600',
+        red: 'bg-red-500 hover:bg-red-600 disabled:bg-red-600',
+        blue: 'bg-blue-500 hover:bg-blue-600 disabled:bg-blue-600',
+        orange: 'bg-orange-500 hover:bg-orange-600 disabled:bg-orange-600',
+        purple: 'bg-purple-500 hover:bg-purple-600 disabled:bg-purple-600',
+      },
+    },
+  },
+);
+
+export function SendButton({
+  children,
+  className,
+  disabled,
+  method,
+  ...props
+}: ButtonHTMLAttributes<HTMLButtonElement> & {
+  method: string;
+}): React.ReactElement {
+  let color: VariantProps<typeof sendButtonVariants>['color'] = 'green';
+
+  if (['GET', 'HEAD'].includes(method)) color = 'green';
+  if (['PUT'].includes(method)) color = 'yellow';
+  if (['PATCH'].includes(method)) color = 'orange';
+  if (['POST'].includes(method)) color = 'blue';
+  if (['DELETE'].includes(method)) color = 'red';
+
+  return (
+    <button
+      disabled={disabled}
+      type="submit"
+      className={cn(sendButtonVariants({ color }), className)}
       {...props}
     >
       {children}
