@@ -58,7 +58,7 @@ export function RollButton({
         buttonVariants({
           color: 'secondary',
           className:
-            'fixed top-[108px] [&_svg]:size-4 gap-1 left-1/2 translate-x-[-50%] z-10 shadow-md rounded-full transition-all md:top-4',
+            'fixed top-[72px] [&_svg]:size-4 gap-1 left-1/2 translate-x-[-50%] z-10 shadow-md rounded-full transition-all md:top-12 lg:top-4',
         }),
         !show && 'pointer-events-none translate-y-20 opacity-0',
       )}

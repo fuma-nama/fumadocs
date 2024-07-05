@@ -3,17 +3,18 @@ title: Links API
 description: Show navigation links on every page
 ---
 
-## Links
+## Introduction
 
-You can configure the navigation links to be displayed on every page.
-This API is available on Home Layout and Docs Layout.
+You can configure the navigation links displayed on every page with Links API.
+It is available on Home Layout and Docs Layout.
 
-### Item
+## Link Item
 
-A link to navigate to an URL, can be external.
+A link to navigate to a URL/href, can be external.
 
 ```tsx
 import { DocsLayout } from 'fumadocs-ui/layout';
+import { BookIcon } from 'lucide-react';
 
 <DocsLayout
   links={[
@@ -26,7 +27,15 @@ import { DocsLayout } from 'fumadocs-ui/layout';
 />;
 ```
 
-To mark the item as active when browsing child pages like `/blog/post`, add set it as `nested-url`.
+### Active Mode
+
+The conditions to be marked as active.
+
+| Mode         | Description                                                 |
+| ------------ | ----------------------------------------------------------- |
+| `url`        | When browsing the specified url                             |
+| `nested-url` | When browsing the url and its child pages like `/blog/post` |
+| `none`       | Never be active                                             |
 
 ```tsx
 import { DocsLayout } from 'fumadocs-ui/layout';
@@ -34,7 +43,6 @@ import { DocsLayout } from 'fumadocs-ui/layout';
 <DocsLayout
   links={[
     {
-      icon: <BookIcon />,
       text: 'Blog',
       url: '/blog',
       active: 'nested-url',
@@ -43,9 +51,9 @@ import { DocsLayout } from 'fumadocs-ui/layout';
 />;
 ```
 
-### Secondary Item
+### Secondary
 
-Same as normal items, but are shown as icon buttons on the navbar.
+Set the item as secondary, secondary items will be displayed differently on navbar.
 
 ```tsx
 import { DocsLayout } from 'fumadocs-ui/layout';
@@ -53,7 +61,46 @@ import { DocsLayout } from 'fumadocs-ui/layout';
 <DocsLayout
   links={[
     {
-      type: 'secondary',
+      text: 'Blog',
+      url: '/blog',
+      secondary: true,
+    },
+  ]}
+/>;
+```
+
+### Filter
+
+You can restrict where the item is displayed.
+
+```tsx
+import { DocsLayout } from 'fumadocs-ui/layout';
+
+<DocsLayout
+  links={[
+    {
+      on: 'menu',
+      url: '/blog',
+      text: 'Blog',
+    },
+  ]}
+/>;
+```
+
+## Icon Item
+
+Same as link item, but is shown as an icon button on navbar.
+Icon items are secondary by default.
+
+```tsx
+import { DocsLayout } from 'fumadocs-ui/layout';
+import { BookIcon } from 'lucide-react';
+
+<DocsLayout
+  links={[
+    {
+      type: 'icon',
+      label: 'Visit Blog', // `aria-label`
       icon: <BookIcon />,
       text: 'Blog',
       url: '/blog',
@@ -62,9 +109,9 @@ import { DocsLayout } from 'fumadocs-ui/layout';
 />;
 ```
 
-### Dropdown Menu
+## Button Item
 
-A dropdown menu containing multiple link items.
+Same as link item, but is shown as a button.
 
 ```tsx
 import { DocsLayout } from 'fumadocs-ui/layout';
@@ -72,7 +119,24 @@ import { DocsLayout } from 'fumadocs-ui/layout';
 <DocsLayout
   links={[
     {
-      icon: <BookIcon />,
+      type: 'button',
+      text: 'Feedback',
+      url: '/feedback',
+    },
+  ]}
+/>;
+```
+
+## Dropdown Menu
+
+A dropdown menu containing multiple items.
+
+```tsx
+import { DocsLayout } from 'fumadocs-ui/layout';
+
+<DocsLayout
+  links={[
+    {
       type: 'menu',
       text: 'Guide',
       items: [{ ... }],
@@ -81,7 +145,7 @@ import { DocsLayout } from 'fumadocs-ui/layout';
 />
 ```
 
-### Custom Item
+## Custom Item
 
 Display a custom component.
 
@@ -92,22 +156,6 @@ import { DocsLayout } from 'fumadocs-ui/layout';
   links={[
     {
       type: 'custom',
-      children: <div>Hey</div>,
-    },
-  ]}
-/>;
-```
-
-You can restrict where the items are displayed, like only on menus or navbar.
-
-```tsx
-import { DocsLayout } from 'fumadocs-ui/layout';
-
-<DocsLayout
-  links={[
-    {
-      type: 'custom',
-      on: 'menu',
       children: <div>Hey</div>,
     },
   ]}

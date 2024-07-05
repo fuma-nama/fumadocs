@@ -8,7 +8,7 @@ import {
   renderMarkdownToHast,
   type DocEntry,
 } from 'fumadocs-typescript';
-import { createElement } from './utils';
+import { createElement, expressionToAttribute } from './utils';
 import type { DocGenerator } from './remark-docgen';
 
 export type TypescriptGeneratorOptions = GenerateDocumentationOptions;
@@ -102,12 +102,12 @@ export function typescriptGenerator(
       const doc = generateDocumentation(dest, name, options);
       if (!doc) throw new Error(`Failed to find type ${name} in ${dest}`);
 
-      return createElement(component, {
-        type: {
+      return createElement(component, [
+        expressionToAttribute('type', {
           type: 'ObjectExpression',
           properties: doc.entries.map(mapProperty),
-        },
-      });
+        }),
+      ]);
     },
   };
 }

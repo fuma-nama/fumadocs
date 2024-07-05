@@ -1,11 +1,13 @@
 import type { PageTree } from 'fumadocs-core/server';
-import type { ReactNode, HTMLAttributes, ReactElement } from 'react';
+import type { ReactNode, HTMLAttributes } from 'react';
 import Link from 'next/link';
 import { MoreHorizontal } from 'lucide-react';
 import { cn } from '@/utils/cn';
+import { buttonVariants } from '@/theme/variants';
 import type { NavBoxProps, TitleProps } from './components/layout/nav';
 import { replaceOrDefault } from './utils/shared';
 import type { SidebarProps } from './components/layout/sidebar';
+import type { LinkItemType } from './components/layout/link-item';
 
 declare const { Nav }: typeof import('./layout.client');
 
@@ -22,51 +24,7 @@ declare const {
   LanguageToggle,
 }: typeof import('./components/layout/language-toggle');
 
-type ActiveType = 'none' | 'url' | 'nested-url';
-
-export type LinkItemType =
-  | {
-      type?: 'main';
-      url: string;
-      /**
-       * When the item is marked as active
-       *
-       * @defaultValue 'url'
-       */
-      active?: ActiveType;
-      icon?: ReactNode;
-      text: string;
-      external?: boolean;
-    }
-  | {
-      type: 'menu';
-      icon?: ReactNode;
-      text: string;
-      items: LinkItemType[];
-    }
-  | {
-      type: 'secondary';
-      url: string;
-      /**
-       * When the item is marked as active
-       *
-       * @defaultValue 'url'
-       */
-      active?: ActiveType;
-      icon: ReactNode;
-      text: string;
-      external?: boolean;
-    }
-  | {
-      type: 'custom';
-      /**
-       * Restrict where the item is displayed
-       *
-       * @defaultValue 'all'
-       */
-      on?: 'menu' | 'nav' | 'all';
-      children: ReactElement;
-    };
+export type { LinkItemType };
 
 interface NavOptions extends SharedNavProps {
   enabled: boolean;
@@ -181,7 +139,15 @@ export function DocsLayout({
                     {nav?.title}
                   </Link>
                   {finalLinks.length > 0 && (
-                    <LinksMenu items={finalLinks}>
+                    <LinksMenu
+                      items={finalLinks}
+                      className={cn(
+                        buttonVariants({
+                          size: 'icon',
+                          color: 'ghost',
+                        }),
+                      )}
+                    >
                       <MoreHorizontal />
                     </LinksMenu>
                   )}

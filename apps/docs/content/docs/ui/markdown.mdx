@@ -240,10 +240,42 @@ Images are automatically optimized for `next/image`.
 ![Image](/image.png)
 ```
 
-## Math Equations
+## Optional
 
-Not enabled by default. See [Math Integration](/docs/ui/math).
+Some optional plugins you can enable.
 
-## Optional Plugins
+### Math Equations
 
-Fumadocs also has optional plugins, you can see [a list of plugins](/docs/headless/mdx) supported by Fumadocs.
+Write math equations with TeX.
+
+````md
+```math
+f(x) = x * e^{2 pi i \xi x}
+```
+````
+
+```math
+f(x) = x * e^{2 pi i \xi x}
+```
+
+To enable, see [Math Integration](/docs/ui/math).
+
+### Package Install
+
+Generate code blocks for installing packages via package managers (JS/Node.js).
+
+````md
+```package-install
+npm i next -D
+```
+````
+
+```package-install
+npm i next -D
+```
+
+To enable, see [Remark Install](/docs/headless/mdx/install).
+
+### More
+
+You can see [a list of plugins](/docs/headless/mdx) supported by Fumadocs.

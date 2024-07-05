@@ -53,6 +53,28 @@ test('Remark Install', async () => {
   );
 });
 
+test('Remark Install', async () => {
+  const file = path.resolve(cwd, './fixtures/remark-install-persist.md');
+  const content = readFileSync(file);
+
+  const result = await createProcessor({
+    remarkPlugins: [
+      [
+        remarkInstall,
+        {
+          persist: {
+            id: 'package_install',
+          },
+        },
+      ],
+    ],
+  }).process(content);
+
+  expect(result.toString()).toMatchFileSnapshot(
+    path.resolve(cwd, './fixtures/remark-install-persist.output.js'),
+  );
+});
+
 test('Typescript Generator', async () => {
   const file = path.resolve(cwd, './fixtures/typescript-gen.md');
   const content = readFileSync(file);

@@ -1,5 +1,26 @@
 # next-docs-ui
 
+## 12.4.0
+
+### Minor Changes
+
+- eb36761: Replace link item `secondary` type with `icon` (backward compatible)
+- eb36761: Support `secondary` property in link items
+- eb36761: Support `button` type link item
+- eb36761: Support `on` filter in link items
+
+### Patch Changes
+
+- 33ffa99: Improve design details
+  - fumadocs-core@12.4.0
+
+## 12.3.6
+
+### Patch Changes
+
+- 4cc5782: Adding secondary custom links
+  - fumadocs-core@12.3.6
+
 ## 12.3.5
 
 ### Patch Changes
