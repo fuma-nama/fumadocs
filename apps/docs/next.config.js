@@ -77,7 +77,7 @@ const withMDX = createMDX({
     lastModifiedTime: 'git',
     remarkPlugins: [
       remarkMath,
-      [remarkInstall, { Tabs: 'InstallTabs' }],
+      [remarkInstall, { persist: { id: 'package-manager' } }],
       [remarkDocGen, { generators: [typescriptGenerator(), fileGenerator()] }],
     ],
     rehypePlugins: (v) => [rehypeKatex, ...v],

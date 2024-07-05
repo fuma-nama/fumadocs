@@ -16,6 +16,18 @@ interface PackageManager {
 export type RemarkInstallOptions = Partial<{
   Tabs: string;
   Tab: string;
+
+  /**
+   * Persist Tab value (Fumadocs UI only)
+   *
+   * @defaultValue false
+   */
+  persist?:
+    | {
+        id: string;
+      }
+    | false;
+
   packageManagers: PackageManager[];
 }>;
 
@@ -33,6 +45,7 @@ export type RemarkInstallOptions = Partial<{
 export function remarkInstall({
   Tab = 'Tab',
   Tabs = 'Tabs',
+  persist = false,
   packageManagers = [
     { command: (cmd) => convert(cmd, 'npm'), name: 'npm' },
     { command: (cmd) => convert(cmd, 'pnpm'), name: 'pnpm' },
@@ -62,7 +75,19 @@ export function remarkInstall({
         packageManagers.map(({ command, name }) => ({
           type: 'mdxJsxFlowElement',
           name: Tab,
-          attributes: [{ type: 'mdxJsxAttribute', name: 'value', value: name }],
+          attributes: [
+            { type: 'mdxJsxAttribute', name: 'value', value: name },
+            typeof persist === 'object' && {
+              type: 'mdxJsxAttribute',
+              name: 'id',
+              value: persist.id,
+            },
+            typeof persist === 'object' && {
+              type: 'mdxJsxAttribute',
+              name: 'persist',
+              value: null,
+            },
+          ].filter(Boolean),
           children: [
             {
               type: 'code',

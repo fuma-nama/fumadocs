@@ -9,7 +9,6 @@ import {
   type CodeBlockProps,
   Pre,
 } from 'fumadocs-ui/components/codeblock';
-import type { ReactNode } from 'react';
 import { Popup, PopupContent, PopupTrigger } from 'fumadocs-ui/twoslash/popup';
 import { Wrapper } from '@/components/preview/wrapper';
 import { cn } from './utils/cn';
@@ -32,17 +31,6 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     Accordion,
     Accordions,
     Wrapper,
-    InstallTabs: ({
-      items,
-      children,
-    }: {
-      items: string[];
-      children: ReactNode;
-    }) => (
-      <Tabs items={items} id="package-manager">
-        {children}
-      </Tabs>
-    ),
     blockquote: (props) => <Callout>{props.children}</Callout>,
     ...components,
   };
