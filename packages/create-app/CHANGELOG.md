@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 12.4.0
+
+### Patch Changes
+
+- 8efc775: Fix Content Collections compatibility
+
 ## 12.3.6
 
 ## 12.3.5
