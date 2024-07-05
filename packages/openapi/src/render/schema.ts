@@ -83,6 +83,21 @@ export function schemaElement(
     });
 
     return child.join('\n\n');
+  } else if (
+    schema.anyOf?.reduce(
+      (acc, s) => acc || Boolean(resolveObjectType(noRef(s))),
+      false,
+    )
+  ) {
+    child.push(
+      ...schema.anyOf.map((s, idx) =>
+        schemaElement(`${name} (option ${(idx + 1).toString()})`, noRef(s), {
+          ...ctx,
+          required: false,
+          parseObject: false,
+        }),
+      ),
+    );
   }
 
   child.push(p(schema.description));
@@ -127,7 +142,7 @@ export function schemaElement(
 function resolveObjectType(
   schema: OpenAPI.SchemaObject,
 ): OpenAPI.SchemaObject | undefined {
-  if (isObject(schema)) return schema;
+  if (isObject(schema) || schema.anyOf) return schema;
 
   if (schema.type === 'array') {
     return resolveObjectType(noRef(schema.items));
