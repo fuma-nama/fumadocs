@@ -2,7 +2,7 @@ import type { Code, Root } from 'mdast';
 import type { Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
 import convert from 'npm-to-yarn';
-import { createElement } from './utils';
+import { createElement, expressionToAttribute } from './utils';
 
 interface PackageManager {
   name: string;
@@ -63,30 +63,34 @@ export function remarkInstall({
 
       const insert = createElement(
         Tabs,
-        {
-          items: {
+        [
+          ...(typeof persist === 'object'
+            ? [
+                {
+                  type: 'mdxJsxAttribute',
+                  name: 'id',
+                  value: persist.id,
+                },
+                {
+                  type: 'mdxJsxAttribute',
+                  name: 'persist',
+                  value: null,
+                },
+              ]
+            : []),
+          expressionToAttribute('items', {
             type: 'ArrayExpression',
             elements: packageManagers.map(({ name }) => ({
               type: 'Literal',
               value: name,
             })),
-          },
-        },
+          }),
+        ],
         packageManagers.map(({ command, name }) => ({
           type: 'mdxJsxFlowElement',
           name: Tab,
           attributes: [
             { type: 'mdxJsxAttribute', name: 'value', value: name },
-            typeof persist === 'object' && {
-              type: 'mdxJsxAttribute',
-              name: 'id',
-              value: persist.id,
-            },
-            typeof persist === 'object' && {
-              type: 'mdxJsxAttribute',
-              name: 'persist',
-              value: null,
-            },
           ].filter(Boolean),
           children: [
             {

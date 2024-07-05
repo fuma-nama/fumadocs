@@ -8,11 +8,11 @@ function _createMdxContent(props) {
   if (!Tab) _missingMdxReference("Tab", true);
   if (!Tabs) _missingMdxReference("Tabs", true);
   return _jsxs(Tabs, {
+    id: "package_install",
+    persist: true,
     items: ["npm", "pnpm", "yarn", "bun"],
     children: [_jsx(Tab, {
       value: "npm",
-      id: "package_install",
-      persist: true,
       children: _jsx(_components.pre, {
         children: _jsx(_components.code, {
           className: "language-bash",
@@ -21,8 +21,6 @@ function _createMdxContent(props) {
       })
     }), _jsx(Tab, {
       value: "pnpm",
-      id: "package_install",
-      persist: true,
       children: _jsx(_components.pre, {
         children: _jsx(_components.code, {
           className: "language-bash",
@@ -31,8 +29,6 @@ function _createMdxContent(props) {
       })
     }), _jsx(Tab, {
       value: "yarn",
-      id: "package_install",
-      persist: true,
       children: _jsx(_components.pre, {
         children: _jsx(_components.code, {
           className: "language-bash",
@@ -41,8 +37,6 @@ function _createMdxContent(props) {
       })
     }), _jsx(Tab, {
       value: "bun",
-      id: "package_install",
-      persist: true,
       children: _jsx(_components.pre, {
         children: _jsx(_components.code, {
           className: "language-bash",
