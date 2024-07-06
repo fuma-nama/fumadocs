@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 12.4.1
+
+### Patch Changes
+
+- dd1e4f3: Change type definitions of built-in schemas
+
 ## 12.4.0
 
 ### Patch Changes

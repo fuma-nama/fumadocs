@@ -1,5 +1,15 @@
 # @fumadocs/mdx-remote
 
+## 0.2.0
+
+### Minor Changes
+
+- e6e1d9f: Improve Hot Reload
+
+### Patch Changes
+
+- fumadocs-core@12.4.1
+
 ## 0.1.0
 
 ### Minor Changes

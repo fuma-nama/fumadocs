@@ -1,5 +1,12 @@
 # @fumadocs/content-collections
 
+## 1.0.2
+
+### Patch Changes
+
+- dd1e4f3: Change type definitions of built-in schemas
+  - fumadocs-core@12.4.1
+
 ## 1.0.1
 
 ### Patch Changes
