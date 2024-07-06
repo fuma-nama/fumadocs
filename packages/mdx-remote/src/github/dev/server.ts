@@ -2,25 +2,30 @@ import { WebSocketServer } from 'ws';
 import { type UpdateMessage, watch } from '@/github/dev/watcher';
 
 export interface ServerOptions {
-  files: string[];
+  /**
+   * Files to watch
+   *
+   * By default, include all files under `./content`
+   */
+  files?: string[];
+
+  /**
+   * Port to listen
+   *
+   * @defaultValue 3001
+   */
   port?: number;
 }
 
 export type WebSocketServerMessage = UpdateMessage;
 
 /**
- * Create development server
+ * Create MDX Remote development server
  */
-export function createServer({ files, port = 3001 }: ServerOptions): void {
-  // running the script via node may not include the `NODE_ENV` by default
-
-  process.env.NODE_ENV ??= 'development';
-  if (process.env.NODE_ENV !== 'development') {
-    console.warn(
-      `'createServer()' is being invoked on ${process.env.NODE_ENV} mode, it should be only used on development mode.`,
-    );
-  }
-
+export function createServer({
+  files = ['./content/**/*'],
+  port = 3001,
+}: ServerOptions): void {
   const wss = new WebSocketServer({
     port,
   });
@@ -32,31 +37,37 @@ export function createServer({ files, port = 3001 }: ServerOptions): void {
   const watcher = watch({
     files,
     onChange(message) {
+      console.log(`Updated Content: ${message.path}`);
       wss.clients.forEach((c) => {
         c.send(JSON.stringify(message));
       });
     },
   });
 
-  process.on('SIGINT', () => {
-    wss.close();
-    void watcher.close();
-  });
-
-  process.on('beforeExit', () => {
+  process.on('exit', () => {
+    console.log('Closing Development Server');
     wss.close();
     void watcher.close();
   });
 }
 
-let created = false;
+export interface InitServerOptions extends ServerOptions {
+  /**
+   * Should enable development server
+   *
+   * Enabled by default in development mode
+   */
+  enabled?: boolean;
+}
 
 /**
- * Initialize development server when necessary
+ * Initialize and start the development server when necessary
  */
-export function initServer(options: ServerOptions): void {
-  if (created) return;
-  createServer(options);
+export function initServer(options: InitServerOptions = {}): void {
+  const { enabled = process.env.NODE_ENV === 'development', ...rest } = options;
 
-  created = true;
+  if (!process.env.ND_DEV_SERVER_STARTED && enabled) {
+    process.env.ND_DEV_SERVER_STARTED = '1';
+    createServer(rest);
+  }
 }

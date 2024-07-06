@@ -15,7 +15,7 @@ writeFileSync(
   }),
 );
 
-console.log('version updated');
+console.log('Create-Fumadocs-App: versions.json updated');
 
 export default defineConfig({
   entry: ['./src/index.ts', './src/create-app.ts'],

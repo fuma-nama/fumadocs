@@ -23,15 +23,13 @@ export type UpdateMessage =
 
 export function watch(options: WatchOptions): FSWatcher {
   const { cwd = process.cwd(), files } = options;
-  const watcher = watchFn(files, { cwd });
-  let ready = false;
+  const watcher = watchFn(files, { cwd, ignoreInitial: true });
 
-  watcher.once('ready', () => {
-    ready = true;
+  watcher.on('error', (e) => {
+    console.error('Development Server failed to start', e);
   });
 
   watcher.on('all', (eventName, relativePath) => {
-    if (!ready) return;
     const absolutePath = path.resolve(cwd, relativePath);
 
     if (eventName === 'add') {
