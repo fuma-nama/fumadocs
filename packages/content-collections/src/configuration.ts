@@ -70,6 +70,7 @@ export async function transformMDX<D extends BaseDoc>(
           cache: async (input, fn) => fn(input),
         },
         {
+          cwd: process.cwd(),
           ...rest,
           remarkPlugins: [
             ...(rest.remarkPlugins ?? []),
