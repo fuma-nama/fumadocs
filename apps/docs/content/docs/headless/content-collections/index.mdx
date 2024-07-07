@@ -3,6 +3,8 @@ title: Content Collections
 description: Use Content Collections for Fumadocs
 ---
 
+import { Callout } from 'fumadocs-ui/components/callout';
+
 [Content Collections](https://www.content-collections.dev) is a library that transforms your content into type-safe data collections.
 
 ## Setup
@@ -77,3 +79,31 @@ page?.data.toc;
 // Structured Data, for Search API
 page?.data.structuredData;
 ```
+
+### Import Components
+
+To use components from other packages like Fumadocs UI, pass them to your `<MDXContent />` component.
+
+```tsx
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { MDXContent } from '@content-collections/mdx/react';
+
+<MDXContent code="..." components={{ ...defaultMdxComponents, Callout }} />;
+```
+
+You can also import them in MDX Files, but it is not recommended.
+
+<Callout title='Deep Dive: Why?'>
+    Content Collections uses `mdx-bundler` to bundle MDX files.
+
+    To support importing a package from node modules, Fumadocs added a default value to the `cwd` option of MDX Bundler.
+    It works good, but we still **do not** recommend to import components in MDX files.
+
+    Reasons:
+
+    - It requires esbuild to bundle these components, while it should be done by the Next.js bundler (for features of Server Components)
+    - You can refactor the import path of components without changing your MDX files.
+    - With Remote Sources, it doesn't make sense to add an import in MDX files.
+
+</Callout>

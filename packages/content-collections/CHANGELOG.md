@@ -1,5 +1,12 @@
 # @fumadocs/content-collections
 
+## 1.0.3
+
+### Patch Changes
+
+- 6e9d4bf: Add `icon` and `root` fields to meta schema
+- 2db6172: Add `cwd` option by default
+
 ## 1.0.2
 
 ### Patch Changes

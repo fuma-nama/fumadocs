@@ -70,6 +70,7 @@ export async function transformMDX<D extends BaseDoc>(
           cache: async (input, fn) => fn(input),
         },
         {
+          cwd: process.cwd(),
           ...rest,
           remarkPlugins: [
             ...(rest.remarkPlugins ?? []),
@@ -126,6 +127,8 @@ export function createMetaSchema(z: typeof Zod) {
   return {
     title: z.string().optional(),
     pages: z.array(z.string()).optional(),
+    icon: z.string().optional(),
+    root: z.boolean().optional(),
     defaultOpen: z.boolean().optional(),
   };
 }
