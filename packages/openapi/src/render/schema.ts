@@ -22,8 +22,10 @@ interface Context {
 
   required: boolean;
 
-  /** Parse object */
+  /** Render the full object */
   parseObject: boolean;
+
+  stack: OpenAPI.SchemaObject[];
 
   render: RenderContext;
 }
@@ -33,6 +35,17 @@ function isObject(schema: OpenAPI.SchemaObject): boolean {
 }
 
 export function schemaElement(
+  name: string,
+  schema: OpenAPI.SchemaObject,
+  ctx: Omit<Context, 'stack'>,
+): string {
+  return render(name, schema, {
+    ...ctx,
+    stack: [],
+  });
+}
+
+function render(
   name: string,
   schema: OpenAPI.SchemaObject,
   ctx: Context,
@@ -63,7 +76,7 @@ export function schemaElement(
       );
     } else if (additionalProperties) {
       child.push(
-        schemaElement('[key: string]', noRef(additionalProperties), {
+        render('[key: string]', noRef(additionalProperties), {
           ...ctx,
           required: false,
           parseObject: false,
@@ -73,7 +86,7 @@ export function schemaElement(
 
     Object.entries(properties ?? {}).forEach(([key, value]) => {
       child.push(
-        schemaElement(key, noRef(value), {
+        render(key, noRef(value), {
           ...ctx,
           required: schema.required?.includes(key) ?? false,
           parseObject: false,
@@ -99,38 +112,41 @@ export function schemaElement(
     );
   }
 
-  const mentionedObjectTypes = [
-    ...(schema.anyOf ?? schema.oneOf ?? schema.allOf ?? []),
-    ...(schema.type === 'array' ? [schema.items] : []),
-  ]
-    .map(noRef)
-    .filter((s) => isObject(s));
-
-  child.push(
-    ...mentionedObjectTypes.map((s, idx) =>
-      renderer.ObjectCollapsible(
-        { name: s.title ?? `Object ${(idx + 1).toString()}` },
-        [
-          schemaElement('element', noRef(s), {
-            ...ctx,
-            parseObject: true,
-            required: false,
-          }),
-        ],
-      ),
-    ),
-  );
-
   if (isObject(schema) && !ctx.parseObject) {
     child.push(
       renderer.ObjectCollapsible({ name }, [
-        schemaElement(name, schema, {
+        render(name, schema, {
           ...ctx,
           parseObject: true,
           required: false,
         }),
       ]),
     );
+  } else {
+    const mentionedObjectTypes = [
+      ...(schema.anyOf ?? schema.oneOf ?? schema.allOf ?? []),
+      ...(schema.not ? [schema.not] : []),
+      ...(schema.type === 'array' ? [schema.items] : []),
+    ]
+      .map(noRef)
+      .filter((s) => isComplexType(s) && !ctx.stack.includes(s));
+
+    ctx.stack.push(schema);
+    child.push(
+      ...mentionedObjectTypes.map((s, idx) =>
+        renderer.ObjectCollapsible(
+          { name: s.title ?? `Object ${(idx + 1).toString()}` },
+          [
+            render('element', noRef(s), {
+              ...ctx,
+              parseObject: true,
+              required: false,
+            }),
+          ],
+        ),
+      ),
+    );
+    ctx.stack.pop();
   }
 
   return renderer.Property(
@@ -144,9 +160,16 @@ export function schemaElement(
   );
 }
 
-function getSchemaType(schema: OpenAPI.SchemaObject): string {
-  if (schema.title) return schema.title;
+/**
+ * Check if the schema needs another collapsible to explain
+ */
+function isComplexType(schema: OpenAPI.SchemaObject): boolean {
+  if (schema.anyOf ?? schema.oneOf ?? schema.allOf) return true;
 
+  return isObject(schema) || schema.type === 'array';
+}
+
+function getSchemaType(schema: OpenAPI.SchemaObject): string {
   if (schema.nullable) {
     const type = getSchemaType({ ...schema, nullable: false });
 
@@ -154,8 +177,10 @@ function getSchemaType(schema: OpenAPI.SchemaObject): string {
     return type === 'unknown' ? 'null' : `${type} | null`;
   }
 
+  if (schema.title) return schema.title;
+
   if (schema.type === 'array')
-    return `array of ${getSchemaType(noRef(schema.items))}`;
+    return `array<${getSchemaType(noRef(schema.items))}>`;
 
   if (schema.oneOf)
     return schema.oneOf.map((one) => getSchemaType(noRef(one))).join(' | ');

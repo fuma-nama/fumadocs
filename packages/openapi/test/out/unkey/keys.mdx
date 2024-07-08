@@ -1138,7 +1138,7 @@ This is a place for dynamic meta data, anything that feels useful for you should
 
 </Property>
 
-<Property name={"roles"} type={"array of string"} required={false} deprecated={undefined}>
+<Property name={"roles"} type={"array<string>"} required={false} deprecated={undefined}>
 
 A list of roles that this key should have. If the role does not exist, an error is thrown
 
@@ -1146,7 +1146,7 @@ A list of roles that this key should have. If the role does not exist, an error 
 
 </Property>
 
-<Property name={"permissions"} type={"array of string"} required={false} deprecated={undefined}>
+<Property name={"permissions"} type={"array<string>"} required={false} deprecated={undefined}>
 
 A list of permissions that this key should have. If the permission does not exist, an error is thrown
 
@@ -1790,7 +1790,7 @@ A query for which permissions you require
 
 <ObjectCollapsible name={"And"}>
 
-<Property name={"and"} type={"array of LiteralClause | And | Or | null"} required={true} deprecated={undefined}>
+<Property name={"and"} type={"array<LiteralClause | And | Or | null>"} required={true} deprecated={undefined}>
 
 </Property>
 
@@ -1798,7 +1798,7 @@ A query for which permissions you require
 
 <ObjectCollapsible name={"Or"}>
 
-<Property name={"or"} type={"array of LiteralClause | And | Or | null"} required={true} deprecated={undefined}>
+<Property name={"or"} type={"array<LiteralClause | And | Or | null>"} required={true} deprecated={undefined}>
 
 </Property>
 
