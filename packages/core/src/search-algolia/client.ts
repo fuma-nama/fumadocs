@@ -8,6 +8,8 @@ import type { BaseIndex } from './server';
 export interface Options extends SearchOptions {
   /**
    * Use `empty` as result if query is empty
+   *
+   * @defaultValue true
    */
   allowEmpty?: boolean;
 }

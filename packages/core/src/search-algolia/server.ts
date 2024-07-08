@@ -1,4 +1,3 @@
-import { randomUUID } from 'node:crypto';
 import type { SearchClient, SearchIndex } from 'algoliasearch';
 import type { StructuredData } from '@/mdx-plugins/remark-structure';
 
@@ -16,20 +15,39 @@ interface DocumentRecord {
   structured: StructuredData;
 
   /**
+   * Tag to filter results
+   */
+  tag?: string;
+
+  /**
    * Data to be added to each section index
    */
   extra_data?: object;
 }
 
 export interface SyncOptions {
+  /**
+   * Index Name for documents
+   */
   document?: string;
+
+  /**
+   * Search indexes
+   */
   documents: DocumentRecord[];
 }
 
+/**
+ * Update index settings and replace all objects
+ *
+ * @param client - Algolia Admin Client
+ * @param options - Index Options
+ */
 export async function sync(
   client: SearchClient,
-  { document = 'document', documents }: SyncOptions,
+  options: SyncOptions,
 ): Promise<void> {
+  const { document = 'document', documents } = options;
   const index = client.initIndex(document);
   await setIndexSettings(index);
   await updateDocuments(index, documents);
@@ -46,7 +64,14 @@ export async function setIndexSettings(index: SearchIndex): Promise<void> {
 }
 
 interface Section {
+  /**
+   * Heading content
+   */
   section?: string;
+
+  /**
+   * The anchor id
+   */
   section_id?: string;
   content: string;
 }
@@ -88,12 +113,13 @@ export async function updateDocuments(
 ): Promise<void> {
   const objects = documents.flatMap((page) => {
     return getSections(page).map(
-      (section) =>
+      (section, idx) =>
         ({
-          objectID: `${page._id}-${randomUUID()}`,
+          objectID: `${page._id}-${idx.toString()}`,
           title: page.title,
           url: page.url,
           page_id: page._id,
+          tag: page.tag,
           ...section,
           ...page.extra_data,
         }) satisfies BaseIndex,
@@ -103,22 +129,14 @@ export async function updateDocuments(
   await index.replaceAllObjects(objects);
 }
 
-export interface BaseIndex {
+export interface BaseIndex extends Section {
   objectID: string;
   title: string;
   url: string;
-
-  section?: string;
-
-  /**
-   * The anchor id
-   */
-  section_id?: string;
+  tag?: string;
 
   /**
    * The id of page, used for distinct
    */
   page_id: string;
-
-  content: string;
 }
