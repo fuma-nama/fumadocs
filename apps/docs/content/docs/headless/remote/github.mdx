@@ -3,6 +3,10 @@ title: With GitHub
 description: Use GitHub as a remote content source
 ---
 
+<Callout type="warn" title="Experimental">
+  It might be unstable.
+</Callout>
+
 MDX Remote offers a GitHub integration, it allows you to use a
 GitHub repository as the content source of your documentation.
 
@@ -49,12 +53,58 @@ export const getDocs = cache(async () => {
 Then, change all usages to the original output to `await getDocs()`.
 
 The `createSourceAuto` function fetches the file tree (file structure), which is required to generate the page tree.
-Depending on the environment:
+Depending on the environment (`process.env.NODE_ENV`):
 
-- **Production:** use the GitHub API and fetch Git Tree.
-- **Development:** Use the file system directly.
+| Environment | Source                                 |
+| ----------- | -------------------------------------- |
+| Production  | use the GitHub API and fetch Git Tree. |
+| Development | use the file system directly.          |
 
 To dedupe the requests, we will use React `cache`.
+
+### Force a Source?
+
+You can use the `from` option to force a source.
+
+```ts
+import { createSourceAuto } from '@fumadocs/mdx-remote/github';
+
+await createSourceAuto({
+  // always use GitHub
+  from: 'github',
+});
+```
+
+Be careful, this may break the MDX Remote development server.
+
+### Hot Reload
+
+MDX Remote provides a development server for implementing hot reload under development environments.
+It uses a file watcher to detect for local content changes, and notify the client via WebSocket.
+
+Initialize the server in your `next.config.mjs`:
+
+```json doc-gen:file
+{
+  "file": "../../examples/remote-mdx/next.config.mjs",
+  "codeblock": {
+    "lang": "js",
+    "meta": "title=\"next.config.mjs\""
+  }
+}
+```
+
+Add the hot reload component to client, it's recommended to add it to a layout.
+
+```json doc-gen:file
+{
+  "file": "../../examples/remote-mdx/app/docs/layout.tsx",
+  "codeblock": {
+    "lang": "tsx",
+    "meta": "title=\"app/docs/layout.tsx\""
+  }
+}
+```
 
 ### Page
 

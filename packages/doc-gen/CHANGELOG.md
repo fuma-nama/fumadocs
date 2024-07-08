@@ -1,5 +1,15 @@
 # fumadocs-docgen
 
+## 1.1.0
+
+### Minor Changes
+
+- 979896f: Support generating Tabs with `persist` enabled (Fumadocs UI only)
+
+### Patch Changes
+
+- fumadocs-typescript@2.0.1
+
 ## 1.0.2
 
 ### Patch Changes

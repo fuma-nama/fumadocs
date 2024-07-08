@@ -18,7 +18,7 @@
   },
   "prettier": "@vercel/style-guide/prettier",
   "devDependencies": {
-    "@changesets/cli": "^2.27.6",
+    "@changesets/cli": "^2.27.7",
     "@typescript-eslint/eslint-plugin": "^7.14.1",
     "@typescript-eslint/parser": "^7.14.1",
     "@vercel/style-guide": "^6.0.0",
@@ -29,8 +29,11 @@
     "rimraf": "^5.0.7",
     "tsup": "8.1.0",
     "turbo": "2.0.6",
-    "typescript": "^5.5.2",
+    "typescript": "^5.5.3",
     "vitest": "^1.6.0"
   },
-  "packageManager": "pnpm@9.4.0"
+  "packageManager": "pnpm@9.5.0",
+  "engines": {
+    "node": ">= 18.17.0"
+  }
 }

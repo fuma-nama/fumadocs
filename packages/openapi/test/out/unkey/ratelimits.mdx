@@ -27,9 +27,9 @@ In: `header`
 
 Namespaces group different limits together for better analytics. You might have a namespace for your public API and one for internal tRPC routes.
 
-<span>Example:  `"email.outbound"`</span>
+<span>Example: `"email.outbound"`</span>
 
-<span>Default:  `"default"`</span>
+<span>Default: `"default"`</span>
 
 </Property>
 
@@ -37,7 +37,7 @@ Namespaces group different limits together for better analytics. You might have 
 
 Identifier of your user, this can be their userId, an email, an ip or anything else.
 
-<span>Example:  `"user_123"`</span>
+<span>Example: `"user_123"`</span>
 
 </Property>
 
@@ -45,9 +45,9 @@ Identifier of your user, this can be their userId, an email, an ip or anything e
 
 How many requests may pass in a given window.
 
-<span>Example:  `10`</span>
+<span>Example: `10`</span>
 
-<span>Minimum:  `0`</span>
+<span>Minimum: `0`</span>
 
 </Property>
 
@@ -55,9 +55,9 @@ How many requests may pass in a given window.
 
 The window duration in milliseconds
 
-<span>Example:  `60000`</span>
+<span>Example: `60000`</span>
 
-<span>Minimum:  `1000`</span>
+<span>Minimum: `1000`</span>
 
 </Property>
 
@@ -68,11 +68,11 @@ If there are not enough tokens left, the request is denied.
                 
 Set it to 0 to receive the current limit without changing anything.
 
-<span>Example:  `2`</span>
+<span>Example: `2`</span>
 
-<span>Default:  `1`</span>
+<span>Default: `1`</span>
 
-<span>Minimum:  `0`</span>
+<span>Minimum: `0`</span>
 
 </Property>
 
@@ -80,7 +80,7 @@ Set it to 0 to receive the current limit without changing anything.
 
 Async will return a response immediately, lowering latency at the cost of accuracy.
 
-<span>Default:  `false`</span>
+<span>Default: `false`</span>
 
 </Property>
 
@@ -98,19 +98,19 @@ Attach any metadata to this request
 
 </Property>
 
-<Property name={"resources"} type={"array of object"} required={false} deprecated={undefined}>
+<Property name={"resources"} type={"array<object>"} required={false} deprecated={undefined}>
 
 Resources that are about to be accessed by the user
 
-<span>Example:  `[{"type":"project","id":"p_123","name":"dub"}]`</span>
+<span>Example: `[{"type":"project","id":"p_123","name":"dub"}]`</span>
 
-<ObjectCollapsible name={"resources"}>
+<ObjectCollapsible name={"Object 1"}>
 
 <Property name={"type"} type={"string"} required={true} deprecated={undefined}>
 
 The type of resource
 
-<span>Example:  `"organization"`</span>
+<span>Example: `"organization"`</span>
 
 </Property>
 
@@ -118,7 +118,7 @@ The type of resource
 
 The unique identifier for the resource
 
-<span>Example:  `"org_123"`</span>
+<span>Example: `"org_123"`</span>
 
 </Property>
 
@@ -126,7 +126,7 @@ The unique identifier for the resource
 
 A human readable name for this resource
 
-<span>Example:  `"unkey"`</span>
+<span>Example: `"unkey"`</span>
 
 </Property>
 

@@ -26,7 +26,7 @@ const defaultPreset: Preset = {
     'muted-foreground': '0 0% 60.9%',
     popover: '0 0% 7%',
     'popover-foreground': '0 0% 88%',
-    card: '0 0% 5.4%',
+    card: '0 0% 6.0%',
     'card-foreground': '0 0% 98%',
     border: '0 0% 18%',
     primary: '0 0% 98%',

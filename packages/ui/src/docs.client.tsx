@@ -44,7 +44,7 @@ export function SubNav({
   );
 }
 
-export { LinksMenu } from '@/components/layout/links-menu';
+export { LinksMenu } from '@/components/layout/link-item';
 export { Sidebar } from './components/layout/sidebar';
 export { DynamicSidebar } from './components/layout/dynamic-sidebar';
 export { TreeContextProvider } from './contexts/tree';

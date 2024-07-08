@@ -22,8 +22,10 @@ interface Context {
 
   required: boolean;
 
-  /** Parse object */
+  /** Render the full object */
   parseObject: boolean;
+
+  stack: OpenAPI.SchemaObject[];
 
   render: RenderContext;
 }
@@ -35,6 +37,17 @@ function isObject(schema: OpenAPI.SchemaObject): boolean {
 export function schemaElement(
   name: string,
   schema: OpenAPI.SchemaObject,
+  ctx: Omit<Context, 'stack'>,
+): string {
+  return render(name, schema, {
+    ...ctx,
+    stack: [],
+  });
+}
+
+function render(
+  name: string,
+  schema: OpenAPI.SchemaObject,
   ctx: Context,
 ): string {
   if (schema.readOnly && !ctx.readOnly) return '';
@@ -44,37 +57,36 @@ export function schemaElement(
   const child: string[] = [];
 
   function field(key: string, value: string): void {
-    child.push(span(`${key}:  \`${value}\``));
+    child.push(span(`${key}: \`${value}\``));
   }
 
+  // object type
   if (isObject(schema) && ctx.parseObject) {
     const { additionalProperties, properties } = schema;
 
-    if (additionalProperties) {
-      if (additionalProperties === true) {
-        child.push(
-          renderer.Property(
-            {
-              name: '[key: string]',
-              type: 'any',
-            },
-            [],
-          ),
-        );
-      } else {
-        child.push(
-          schemaElement('[key: string]', noRef(additionalProperties), {
-            ...ctx,
-            required: false,
-            parseObject: false,
-          }),
-        );
-      }
+    if (additionalProperties === true) {
+      child.push(
+        renderer.Property(
+          {
+            name: '[key: string]',
+            type: 'any',
+          },
+          [],
+        ),
+      );
+    } else if (additionalProperties) {
+      child.push(
+        render('[key: string]', noRef(additionalProperties), {
+          ...ctx,
+          required: false,
+          parseObject: false,
+        }),
+      );
     }
 
     Object.entries(properties ?? {}).forEach(([key, value]) => {
       child.push(
-        schemaElement(key, noRef(value), {
+        render(key, noRef(value), {
           ...ctx,
           required: schema.required?.includes(key) ?? false,
           parseObject: false,
@@ -92,6 +104,7 @@ export function schemaElement(
     }
   }
 
+  // enum types
   if (schema.enum) {
     field(
       'Value in',
@@ -99,18 +112,41 @@ export function schemaElement(
     );
   }
 
-  const resolved = resolveObjectType(schema);
-
-  if (resolved && !ctx.parseObject) {
+  if (isObject(schema) && !ctx.parseObject) {
     child.push(
       renderer.ObjectCollapsible({ name }, [
-        schemaElement(name, resolved, {
+        render(name, schema, {
           ...ctx,
           parseObject: true,
           required: false,
         }),
       ]),
     );
+  } else {
+    const mentionedObjectTypes = [
+      ...(schema.anyOf ?? schema.oneOf ?? schema.allOf ?? []),
+      ...(schema.not ? [schema.not] : []),
+      ...(schema.type === 'array' ? [schema.items] : []),
+    ]
+      .map(noRef)
+      .filter((s) => isComplexType(s) && !ctx.stack.includes(s));
+
+    ctx.stack.push(schema);
+    child.push(
+      ...mentionedObjectTypes.map((s, idx) =>
+        renderer.ObjectCollapsible(
+          { name: s.title ?? `Object ${(idx + 1).toString()}` },
+          [
+            render('element', noRef(s), {
+              ...ctx,
+              parseObject: true,
+              required: false,
+            }),
+          ],
+        ),
+      ),
+    );
+    ctx.stack.pop();
   }
 
   return renderer.Property(
@@ -124,25 +160,27 @@ export function schemaElement(
   );
 }
 
-function resolveObjectType(
-  schema: OpenAPI.SchemaObject,
-): OpenAPI.SchemaObject | undefined {
-  if (isObject(schema)) return schema;
+/**
+ * Check if the schema needs another collapsible to explain
+ */
+function isComplexType(schema: OpenAPI.SchemaObject): boolean {
+  if (schema.anyOf ?? schema.oneOf ?? schema.allOf) return true;
 
-  if (schema.type === 'array') {
-    return resolveObjectType(noRef(schema.items));
-  }
+  return isObject(schema) || schema.type === 'array';
 }
 
 function getSchemaType(schema: OpenAPI.SchemaObject): string {
   if (schema.nullable) {
-    if (!schema.type) return 'null';
+    const type = getSchemaType({ ...schema, nullable: false });
 
-    return `${getSchemaType({ ...schema, nullable: false })} | null`;
+    // null if schema only contains `nullable`
+    return type === 'unknown' ? 'null' : `${type} | null`;
   }
 
+  if (schema.title) return schema.title;
+
   if (schema.type === 'array')
-    return `array of ${getSchemaType(noRef(schema.items))}`;
+    return `array<${getSchemaType(noRef(schema.items))}>`;
 
   if (schema.oneOf)
     return schema.oneOf.map((one) => getSchemaType(noRef(one))).join(' | ');
@@ -150,14 +188,18 @@ function getSchemaType(schema: OpenAPI.SchemaObject): string {
   if (schema.allOf)
     return schema.allOf.map((one) => getSchemaType(noRef(one))).join(' & ');
 
-  if (schema.anyOf)
+  if (schema.not) return `not ${getSchemaType(noRef(schema.not))}`;
+
+  if (schema.anyOf) {
     return `Any properties in ${schema.anyOf
       .map((one) => getSchemaType(noRef(one)))
       .join(', ')}`;
+  }
 
   if (schema.type) return schema.type;
 
+  // object without specified type
   if (isObject(schema)) return 'object';
 
-  throw new Error(`Cannot detect object type: ${JSON.stringify(schema)}`);
+  return 'unknown';
 }

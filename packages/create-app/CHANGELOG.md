@@ -1,5 +1,19 @@
 # create-next-docs-app
 
+## 12.4.2
+
+## 12.4.1
+
+### Patch Changes
+
+- dd1e4f3: Change type definitions of built-in schemas
+
+## 12.4.0
+
+### Patch Changes
+
+- 8efc775: Fix Content Collections compatibility
+
 ## 12.3.6
 
 ## 12.3.5

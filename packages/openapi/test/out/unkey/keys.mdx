@@ -27,9 +27,9 @@ In: `header`
 
 The id of the key to fetch
 
-<span>Example:  `"key_1234"`</span>
+<span>Example: `"key_1234"`</span>
 
-<span>Minimum length:  `1`</span>
+<span>Minimum length: `1`</span>
 
 </Property>
 
@@ -628,9 +628,9 @@ In: `header`
 
 The id of the key to revoke
 
-<span>Example:  `"key_1234"`</span>
+<span>Example: `"key_1234"`</span>
 
-<span>Minimum length:  `1`</span>
+<span>Minimum length: `1`</span>
 
 </Property>
 
@@ -1076,7 +1076,7 @@ In: `header`
 
 Choose an `API` where this key should be created.
 
-<span>Example:  `"api_123"`</span>
+<span>Example: `"api_123"`</span>
 
 </Property>
 
@@ -1089,7 +1089,7 @@ For example Stripe famously prefixes their customer ids with cus_ or their api k
 The underscore is automatically added if you are defining a prefix, for example: "prefix": "abc" will result in a key like abc_xxxxxxxxx
 
 
-<span>Maximum length:  `16`</span>
+<span>Maximum length: `16`</span>
 
 </Property>
 
@@ -1097,7 +1097,7 @@ The underscore is automatically added if you are defining a prefix, for example:
 
 The name for your Key. This is not customer facing.
 
-<span>Example:  `"my key"`</span>
+<span>Example: `"my key"`</span>
 
 </Property>
 
@@ -1105,11 +1105,11 @@ The name for your Key. This is not customer facing.
 
 The byte length used to generate your key determines its entropy as well as its length. Higher is better, but keys become longer and more annoying to handle. The default is 16 bytes, or 2^^128 possible combinations.
 
-<span>Default:  `16`</span>
+<span>Default: `16`</span>
 
-<span>Minimum:  `16`</span>
+<span>Minimum: `16`</span>
 
-<span>Maximum:  `255`</span>
+<span>Maximum: `255`</span>
 
 </Property>
 
@@ -1118,7 +1118,7 @@ The byte length used to generate your key determines its entropy as well as its 
 Your user’s Id. This will provide a link between Unkey and your customer record.
 When validating a key, we will return this back to you, so you can clearly identify your user from their api key.
 
-<span>Example:  `"team_123"`</span>
+<span>Example: `"team_123"`</span>
 
 </Property>
 
@@ -1126,7 +1126,7 @@ When validating a key, we will return this back to you, so you can clearly ident
 
 This is a place for dynamic meta data, anything that feels useful for you should go here
 
-<span>Example:  `{"billingTier":"PRO","trialEnds":"2023-06-16T17:16:37.161Z"}`</span>
+<span>Example: `{"billingTier":"PRO","trialEnds":"2023-06-16T17:16:37.161Z"}`</span>
 
 <ObjectCollapsible name={"meta"}>
 
@@ -1138,19 +1138,19 @@ This is a place for dynamic meta data, anything that feels useful for you should
 
 </Property>
 
-<Property name={"roles"} type={"array of string"} required={false} deprecated={undefined}>
+<Property name={"roles"} type={"array<string>"} required={false} deprecated={undefined}>
 
 A list of roles that this key should have. If the role does not exist, an error is thrown
 
-<span>Example:  `["admin","finance"]`</span>
+<span>Example: `["admin","finance"]`</span>
 
 </Property>
 
-<Property name={"permissions"} type={"array of string"} required={false} deprecated={undefined}>
+<Property name={"permissions"} type={"array<string>"} required={false} deprecated={undefined}>
 
 A list of permissions that this key should have. If the permission does not exist, an error is thrown
 
-<span>Example:  `["domains.create_record","say_hello"]`</span>
+<span>Example: `["domains.create_record","say_hello"]`</span>
 
 </Property>
 
@@ -1158,7 +1158,7 @@ A list of permissions that this key should have. If the permission does not exis
 
 You can auto expire keys by providing a unix timestamp in milliseconds. Once Keys expire they will automatically be disabled and are no longer valid unless you enable them again.
 
-<span>Example:  `1623869797161`</span>
+<span>Example: `1623869797161`</span>
 
 </Property>
 
@@ -1166,7 +1166,7 @@ You can auto expire keys by providing a unix timestamp in milliseconds. Once Key
 
 You can limit the number of requests a key can make. Once a key reaches 0 remaining requests, it will automatically be disabled and is no longer valid unless you update it.
 
-<span>Example:  `1000`</span>
+<span>Example: `1000`</span>
 
 </Property>
 
@@ -1174,7 +1174,7 @@ You can limit the number of requests a key can make. Once a key reaches 0 remain
 
 Unkey enables you to refill verifications for each key at regular intervals.
 
-<span>Example:  `{"interval":"daily","amount":100}`</span>
+<span>Example: `{"interval":"daily","amount":100}`</span>
 
 <ObjectCollapsible name={"refill"}>
 
@@ -1182,7 +1182,7 @@ Unkey enables you to refill verifications for each key at regular intervals.
 
 Unkey will automatically refill verifications at the set interval.
 
-<span>Value in:  `"daily" | "monthly"`</span>
+<span>Value in: `"daily" | "monthly"`</span>
 
 </Property>
 
@@ -1190,7 +1190,7 @@ Unkey will automatically refill verifications at the set interval.
 
 The number of verifications to refill for each occurrence is determined individually for each key.
 
-<span>Minimum:  `0`</span>
+<span>Minimum: `0`</span>
 
 </Property>
 
@@ -1202,7 +1202,7 @@ The number of verifications to refill for each occurrence is determined individu
 
 Unkey comes with per-key fixed-window ratelimiting out of the box.
 
-<span>Example:  `{"type":"fast","limit":10,"duration":60000}`</span>
+<span>Example: `{"type":"fast","limit":10,"duration":60000}`</span>
 
 <ObjectCollapsible name={"ratelimit"}>
 
@@ -1210,7 +1210,7 @@ Unkey comes with per-key fixed-window ratelimiting out of the box.
 
 Async will return a response immediately, lowering latency at the cost of accuracy. Will be required soon.
 
-<span>Default:  `true`</span>
+<span>Default: `true`</span>
 
 </Property>
 
@@ -1218,9 +1218,9 @@ Async will return a response immediately, lowering latency at the cost of accura
 
 Deprecated, used `async`. Fast ratelimiting doesn't add latency, while consistent ratelimiting is more accurate.
 
-<span>Default:  `"fast"`</span>
+<span>Default: `"fast"`</span>
 
-<span>Value in:  `"fast" | "consistent"`</span>
+<span>Value in: `"fast" | "consistent"`</span>
 
 </Property>
 
@@ -1228,7 +1228,7 @@ Deprecated, used `async`. Fast ratelimiting doesn't add latency, while consisten
 
 The total amount of requests in a given interval.
 
-<span>Minimum:  `1`</span>
+<span>Minimum: `1`</span>
 
 </Property>
 
@@ -1236,9 +1236,9 @@ The total amount of requests in a given interval.
 
 The window duration in milliseconds. Will be required soon.
 
-<span>Example:  `60000`</span>
+<span>Example: `60000`</span>
 
-<span>Minimum:  `1000`</span>
+<span>Minimum: `1000`</span>
 
 </Property>
 
@@ -1246,7 +1246,7 @@ The window duration in milliseconds. Will be required soon.
 
 How many tokens to refill during each refillInterval.
 
-<span>Minimum:  `1`</span>
+<span>Minimum: `1`</span>
 
 </Property>
 
@@ -1254,7 +1254,7 @@ How many tokens to refill during each refillInterval.
 
 The refill timeframe, in milliseconds.
 
-<span>Minimum:  `1`</span>
+<span>Minimum: `1`</span>
 
 </Property>
 
@@ -1266,9 +1266,9 @@ The refill timeframe, in milliseconds.
 
 Sets if key is enabled or disabled. Disabled keys are not valid.
 
-<span>Example:  `false`</span>
+<span>Example: `false`</span>
 
-<span>Default:  `true`</span>
+<span>Default: `true`</span>
 
 </Property>
 
@@ -1284,7 +1284,7 @@ When you set an environment, we will return it back to you when validating the k
 handle it correctly.
               
 
-<span>Maximum length:  `256`</span>
+<span>Maximum length: `256`</span>
 
 </Property>
 
@@ -1764,7 +1764,7 @@ export interface Response {
 The id of the api where the key belongs to. This is optional for now but will be required soon.
 The key will be verified against the api's configuration. If the key does not belong to the api, the verification will fail.
 
-<span>Example:  `"api_1234"`</span>
+<span>Example: `"api_1234"`</span>
 
 </Property>
 
@@ -1772,9 +1772,9 @@ The key will be verified against the api's configuration. If the key does not be
 
 The key to verify
 
-<span>Example:  `"sk_1234"`</span>
+<span>Example: `"sk_1234"`</span>
 
-<span>Minimum length:  `1`</span>
+<span>Minimum length: `1`</span>
 
 </Property>
 
@@ -1784,9 +1784,25 @@ Perform RBAC checks
 
 <ObjectCollapsible name={"authorization"}>
 
-<Property name={"permissions"} type={"null"} required={false} deprecated={undefined}>
+<Property name={"permissions"} type={"LiteralClause | And | Or | null"} required={false} deprecated={undefined}>
 
 A query for which permissions you require
+
+<ObjectCollapsible name={"And"}>
+
+<Property name={"and"} type={"array<LiteralClause | And | Or | null>"} required={true} deprecated={undefined}>
+
+</Property>
+
+</ObjectCollapsible>
+
+<ObjectCollapsible name={"Or"}>
+
+<Property name={"or"} type={"array<LiteralClause | And | Or | null>"} required={true} deprecated={undefined}>
+
+</Property>
+
+</ObjectCollapsible>
 
 </Property>
 
@@ -1802,9 +1818,9 @@ A query for which permissions you require
 
 Override how many tokens are deducted during the ratelimit operation.
 
-<span>Default:  `1`</span>
+<span>Default: `1`</span>
 
-<span>Minimum:  `0`</span>
+<span>Minimum: `0`</span>
 
 </Property>
 
@@ -2372,7 +2388,7 @@ In: `header`
 
 The id of the key you want to modify
 
-<span>Example:  `"key_123"`</span>
+<span>Example: `"key_123"`</span>
 
 </Property>
 
@@ -2380,7 +2396,7 @@ The id of the key you want to modify
 
 The name of the key
 
-<span>Example:  `"Customer X"`</span>
+<span>Example: `"Customer X"`</span>
 
 </Property>
 
@@ -2388,7 +2404,7 @@ The name of the key
 
 The id of the tenant associated with this key. Use whatever reference you have in your system to identify the tenant. When verifying the key, we will send this field back to you, so you know who is accessing your API.
 
-<span>Example:  `"user_123"`</span>
+<span>Example: `"user_123"`</span>
 
 </Property>
 
@@ -2396,7 +2412,7 @@ The id of the tenant associated with this key. Use whatever reference you have i
 
 Any additional metadata you want to store with the key
 
-<span>Example:  `{"roles":["admin","user"],"stripeCustomerId":"cus_1234"}`</span>
+<span>Example: `{"roles":["admin","user"],"stripeCustomerId":"cus_1234"}`</span>
 
 <ObjectCollapsible name={"meta"}>
 
@@ -2412,7 +2428,7 @@ Any additional metadata you want to store with the key
 
 The unix timestamp in milliseconds when the key will expire. If this field is null or undefined, the key is not expiring.
 
-<span>Example:  `0`</span>
+<span>Example: `0`</span>
 
 </Property>
 
@@ -2420,7 +2436,7 @@ The unix timestamp in milliseconds when the key will expire. If this field is nu
 
 Unkey comes with per-key ratelimiting out of the box. Set `null` to disable.
 
-<span>Example:  `{"type":"fast","limit":10,"refillRate":1,"refillInterval":60}`</span>
+<span>Example: `{"type":"fast","limit":10,"refillRate":1,"refillInterval":60}`</span>
 
 <ObjectCollapsible name={"ratelimit"}>
 
@@ -2428,7 +2444,7 @@ Unkey comes with per-key ratelimiting out of the box. Set `null` to disable.
 
 Fast ratelimiting doesn't add latency, while consistent ratelimiting is more accurate.
 
-<span>Value in:  `"fast" | "consistent"`</span>
+<span>Value in: `"fast" | "consistent"`</span>
 
 </Property>
 
@@ -2436,7 +2452,7 @@ Fast ratelimiting doesn't add latency, while consistent ratelimiting is more acc
 
 Asnyc ratelimiting doesn't add latency, while sync ratelimiting is more accurate.
 
-<span>Default:  `false`</span>
+<span>Default: `false`</span>
 
 </Property>
 
@@ -2444,7 +2460,7 @@ Asnyc ratelimiting doesn't add latency, while sync ratelimiting is more accurate
 
 The total amount of burstable requests.
 
-<span>Minimum:  `1`</span>
+<span>Minimum: `1`</span>
 
 </Property>
 
@@ -2452,7 +2468,7 @@ The total amount of burstable requests.
 
 How many tokens to refill during each refillInterval.
 
-<span>Minimum:  `1`</span>
+<span>Minimum: `1`</span>
 
 </Property>
 
@@ -2460,7 +2476,7 @@ How many tokens to refill during each refillInterval.
 
 Determines the speed at which tokens are refilled, in milliseconds.
 
-<span>Minimum:  `1`</span>
+<span>Minimum: `1`</span>
 
 </Property>
 
@@ -2468,7 +2484,7 @@ Determines the speed at which tokens are refilled, in milliseconds.
 
 The duration of each ratelimit window, in milliseconds.
 
-<span>Minimum:  `1`</span>
+<span>Minimum: `1`</span>
 
 </Property>
 
@@ -2480,7 +2496,7 @@ The duration of each ratelimit window, in milliseconds.
 
 The number of requests that can be made with this key before it becomes invalid. Set `null` to disable.
 
-<span>Example:  `1000`</span>
+<span>Example: `1000`</span>
 
 </Property>
 
@@ -2488,7 +2504,7 @@ The number of requests that can be made with this key before it becomes invalid.
 
 Unkey enables you to refill verifications for each key at regular intervals.
 
-<span>Example:  `{"interval":"daily","amount":100}`</span>
+<span>Example: `{"interval":"daily","amount":100}`</span>
 
 <ObjectCollapsible name={"refill"}>
 
@@ -2496,7 +2512,7 @@ Unkey enables you to refill verifications for each key at regular intervals.
 
 Unkey will automatically refill verifications at the set interval. If null is used the refill functionality will be removed from the key.
 
-<span>Value in:  `"daily" | "monthly"`</span>
+<span>Value in: `"daily" | "monthly"`</span>
 
 </Property>
 
@@ -2504,7 +2520,7 @@ Unkey will automatically refill verifications at the set interval. If null is us
 
 The amount of verifications to refill for each occurrence is determined individually for each key.
 
-<span>Minimum:  `1`</span>
+<span>Minimum: `1`</span>
 
 </Property>
 
@@ -2516,7 +2532,7 @@ The amount of verifications to refill for each occurrence is determined individu
 
 Set if key is enabled or disabled. If disabled, the key cannot be used to verify.
 
-<span>Example:  `true`</span>
+<span>Example: `true`</span>
 
 </Property>
 
@@ -2984,7 +3000,7 @@ In: `header`
 
 The id of the key you want to modify
 
-<span>Example:  `"key_123"`</span>
+<span>Example: `"key_123"`</span>
 
 </Property>
 
@@ -2992,7 +3008,7 @@ The id of the key you want to modify
 
 The operation you want to perform on the remaining count
 
-<span>Value in:  `"increment" | "decrement" | "set"`</span>
+<span>Value in: `"increment" | "decrement" | "set"`</span>
 
 </Property>
 
@@ -3000,7 +3016,7 @@ The operation you want to perform on the remaining count
 
 The value you want to set, add or subtract the remaining count by
 
-<span>Example:  `1`</span>
+<span>Example: `1`</span>
 
 </Property>
 
@@ -3455,7 +3471,7 @@ In: `header`
 
 The id of the key to fetch, either `keyId` or `ownerId` must be provided
 
-<span>Example:  `"key_1234"`</span>
+<span>Example: `"key_1234"`</span>
 
 </Property>
 
@@ -3463,7 +3479,7 @@ The id of the key to fetch, either `keyId` or `ownerId` must be provided
 
 The owner id to fetch keys for, either `keyId` or `ownerId` must be provided
 
-<span>Example:  `"chronark"`</span>
+<span>Example: `"chronark"`</span>
 
 </Property>
 
@@ -3471,7 +3487,7 @@ The owner id to fetch keys for, either `keyId` or `ownerId` must be provided
 
 The start of the period to fetch usage for as unix milliseconds timestamp
 
-<span>Example:  `1620000000000`</span>
+<span>Example: `1620000000000`</span>
 
 </Property>
 
@@ -3479,7 +3495,7 @@ The start of the period to fetch usage for as unix milliseconds timestamp
 
 The end of the period to fetch usage for as unix milliseconds timestamp
 
-<span>Example:  `1620000000000`</span>
+<span>Example: `1620000000000`</span>
 
 </Property>
 
@@ -3487,11 +3503,11 @@ The end of the period to fetch usage for as unix milliseconds timestamp
 
 The granularity of the usage data to fetch, currently only `day` is supported
 
-<span>Example:  `"day"`</span>
+<span>Example: `"day"`</span>
 
-<span>Default:  `"day"`</span>
+<span>Default: `"day"`</span>
 
-<span>Value in:  `"day"`</span>
+<span>Value in: `"day"`</span>
 
 </Property>
 

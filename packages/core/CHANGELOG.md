@@ -1,5 +1,15 @@
 # next-docs-zeta
 
+## 12.4.2
+
+### Patch Changes
+
+- 503e8e9: Support `keywords` API in advanced search
+
+## 12.4.1
+
+## 12.4.0
+
 ## 12.3.6
 
 ## 12.3.5

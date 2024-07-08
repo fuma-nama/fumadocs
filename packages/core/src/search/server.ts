@@ -25,7 +25,9 @@ interface SimpleOptions {
 interface AdvancedOptions {
   indexes: AdvancedIndex[] | Dynamic<AdvancedIndex>;
   /**
-   * Enabled custom tags
+   * Enable search tags for filtering results
+   *
+   * @defaultValue false
    */
   tag?: boolean;
   language?: string;
@@ -179,6 +181,8 @@ export function initSearchAPI({ indexes, language }: SimpleOptions): SearchAPI {
 export interface AdvancedIndex {
   id: string;
   title: string;
+  keywords?: string;
+
   /**
    * Required if `tag` is enabled
    */
@@ -195,8 +199,10 @@ interface InternalIndex {
   url: string;
   page_id: string;
   type: 'page' | 'heading' | 'text';
-  tag?: string;
   content: string;
+
+  tag?: string;
+  keywords?: string;
 }
 
 export function initSearchAPIAdvanced({
@@ -204,25 +210,30 @@ export function initSearchAPIAdvanced({
   language,
   tag = false,
 }: AdvancedOptions): SearchAPI {
-  const store = ['id', 'url', 'content', 'page_id', 'type'];
+  const store = ['id', 'url', 'content', 'page_id', 'type', 'keywords'];
 
   async function getDocument(): Promise<Document<InternalIndex, string[]>> {
     const items = typeof indexes === 'function' ? await indexes() : indexes;
     const index = new Document<InternalIndex, typeof store>({
       language,
       cache: 100,
-      tokenize: 'forward',
       optimize: true,
-      context: {
-        depth: 2,
-        bidirectional: true,
-        resolution: 9,
-      },
       document: {
         id: 'id',
         tag: tag ? 'tag' : undefined,
         store,
-        index: ['content'],
+        index: [
+          {
+            field: 'content',
+            tokenize: 'forward',
+            context: { depth: 2, bidirectional: true, resolution: 9 },
+          },
+          {
+            field: 'keywords',
+            tokenize: 'strict',
+            resolution: 9,
+          },
+        ],
       },
     });
 
@@ -235,6 +246,7 @@ export function initSearchAPIAdvanced({
         page_id: page.id,
         type: 'page',
         content: page.title,
+        keywords: page.keywords,
         tag: page.tag,
         url: page.url,
       });
@@ -279,8 +291,8 @@ export function initSearchAPIAdvanced({
 
     for (const item of results[0]?.result ?? []) {
       if (item.doc.type === 'page') {
-        if (!map.has(item.doc.page_id)) {
-          map.set(item.doc.page_id, []);
+        if (!map.has(item.doc.id)) {
+          map.set(item.doc.id, []);
         }
 
         continue;

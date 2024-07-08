@@ -59,7 +59,7 @@ export function Footer({ items }: FooterProps): React.ReactElement {
   }, [pathname, tree.navigation]);
 
   return (
-    <div className="grid grid-cols-2 gap-4 border-t py-6">
+    <div className="grid grid-cols-2 gap-4 pb-6">
       {previous ? (
         <Link href={previous.url} className={cn(itemVariants())}>
           <div className={cn(itemLabel())}>
