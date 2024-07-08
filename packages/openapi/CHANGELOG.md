@@ -1,5 +1,12 @@
 # @fuma-docs/openapi
 
+## 3.3.0
+
+### Minor Changes
+
+- b1b154e: Display object types mentioned in schema
+- 81fde3f: Support complex types & self-referencing types
+
 ## 3.2.0
 
 ### Minor Changes
