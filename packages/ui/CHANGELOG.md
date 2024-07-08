@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 12.4.2
+
+### Patch Changes
+
+- 503e8e9: Improve Object Collaspible
+- Updated dependencies [503e8e9]
+  - fumadocs-core@12.4.2
+
 ## 12.4.1
 
 ### Patch Changes
