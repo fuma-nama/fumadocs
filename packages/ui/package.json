@@ -96,8 +96,10 @@
     "@radix-ui/react-collapsible": "^1.1.0",
     "@radix-ui/react-dialog": "^1.1.1",
     "@radix-ui/react-direction": "^1.1.0",
+    "@radix-ui/react-label": "^2.1.0",
     "@radix-ui/react-popover": "^1.1.1",
     "@radix-ui/react-scroll-area": "^1.1.0",
+    "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-tabs": "^1.1.0",
     "@tailwindcss/typography": "^0.5.13",
     "class-variance-authority": "^0.7.0",
@@ -105,8 +107,10 @@
     "fumadocs-core": "workspace:*",
     "lucide-react": "^0.400.0",
     "next-themes": "^0.3.0",
+    "react-hook-form": "^7.52.1",
     "react-medium-image-zoom": "^5.2.5",
     "shiki": "^1.10.1",
+    "swr": "^2.2.5",
     "tailwind-merge": "^2.3.0"
   },
   "devDependencies": {

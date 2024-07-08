@@ -1,8 +1,15 @@
 'use client';
 
+/* eslint-disable @typescript-eslint/no-explicit-any -- Users can pass any value to the playground  */
+/* eslint-disable @typescript-eslint/prefer-nullish-coalescing -- Some parts require logical OR operator */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment -- Response from API is not typed */
+
+import useSWR from 'swr';
+import { useForm, useFieldArray, useFormContext, Form } from 'react-hook-form';
 import React, {
   ButtonHTMLAttributes,
   Fragment,
+  useCallback,
   useEffect,
   useState,
   type HTMLAttributes,
@@ -15,14 +22,25 @@ import {
   CircleCheckIcon,
   CircleXIcon,
   CopyIcon,
+  Loader2Icon,
+  PlusIcon,
+  Trash2Icon,
 } from 'lucide-react';
-import * as Base from "fumadocs-ui/components/codeblock";
+import * as Base from 'fumadocs-ui/components/codeblock';
 import { cn } from '@/utils/cn';
 import { Tab, Tabs } from '@/components/tabs';
 import { Accordion, Accordions } from '@/components/accordion';
 import { buttonVariants } from '@/theme/variants';
 import { useCopyButton } from '@/utils/use-copy-button';
 import { useApiContext } from '@/contexts/api';
+import {
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+} from './ui/form';
+import { Input } from './ui/input';
 
 export function Root({
   children,
@@ -369,13 +387,24 @@ export function SendButton({
   );
 }
 
-const statusMap: Record<number, { description: string; color: string; icon: React.ElementType }> = {
+const statusMap: Record<
+  number,
+  { description: string; color: string; icon: React.ElementType }
+> = {
   200: { description: 'OK', color: 'text-green-500', icon: CircleCheckIcon },
   400: { description: 'Bad Request', color: 'text-red-500', icon: CircleXIcon },
-  401: { description: 'Unauthorized', color: 'text-red-500', icon: CircleXIcon },
+  401: {
+    description: 'Unauthorized',
+    color: 'text-red-500',
+    icon: CircleXIcon,
+  },
   403: { description: 'Forbidden', color: 'text-red-500', icon: CircleXIcon },
   404: { description: 'Not Found', color: 'text-gray-500', icon: CircleXIcon },
-  500: { description: 'Internal Server Error', color: 'text-red-500', icon: CircleXIcon },
+  500: {
+    description: 'Internal Server Error',
+    color: 'text-red-500',
+    icon: CircleXIcon,
+  },
 };
 
 function getStatusInfo(status: number): {
@@ -416,9 +445,14 @@ export type CodeBlockProps = HTMLAttributes<HTMLPreElement> & {
   lang?: string;
 };
 
-export function CodeBlock({ code, wrapper, lang = "json", ...props }: CodeBlockProps): React.ReactElement {
+export function CodeBlock({
+  code,
+  wrapper,
+  lang = 'json',
+  ...props
+}: CodeBlockProps): React.ReactElement {
   const { highlighter } = useApiContext();
-  const [html, setHtml] = useState("");
+  const [html, setHtml] = useState('');
 
   useEffect(() => {
     const highlightCode = (): void => {
@@ -427,7 +461,7 @@ export function CodeBlock({ code, wrapper, lang = "json", ...props }: CodeBlockP
       const themedHtml = highlighter.codeToHtml(code, {
         lang,
         defaultColor: false,
-        themes: { light: "github-light", dark: "github-dark" },
+        themes: { light: 'github-light', dark: 'github-dark' },
       });
 
       setHtml(themedHtml);
@@ -440,5 +474,529 @@ export function CodeBlock({ code, wrapper, lang = "json", ...props }: CodeBlockP
     <Base.CodeBlock {...wrapper}>
       <Base.Pre {...props} dangerouslySetInnerHTML={{ __html: html }} />
     </Base.CodeBlock>
+  );
+}
+
+interface BaseApiRequestValue {
+  name: string;
+  type: string;
+  description: string;
+  isRequired?: boolean;
+}
+
+interface StringApiRequestValue extends BaseApiRequestValue {
+  value: string;
+}
+
+interface BodyApiRequestValue extends BaseApiRequestValue {
+  value: string | BodyApiRequestValue[];
+}
+
+export interface APIPlaygroundProps extends HTMLAttributes<HTMLDivElement> {
+  route: string;
+  method?: string;
+  authorization?: StringApiRequestValue;
+  path?: StringApiRequestValue[];
+  parameters?: StringApiRequestValue[];
+  body?: BodyApiRequestValue[];
+}
+
+export function APIPlayground({
+  route,
+  method = 'GET',
+  authorization,
+  path,
+  parameters,
+  body,
+  children,
+  className,
+  ...props
+}: APIPlaygroundProps): React.ReactElement {
+  const { baseUrl } = useApiContext();
+
+  const parseNestedValues = (arr: BodyApiRequestValue[]): Record<string, any> =>
+    arr.reduce((acc, item) => {
+      if (item.type === 'object' && Array.isArray(item.value)) {
+        return { ...acc, [item.name]: parseNestedValues(item.value) };
+      }
+      if (item.type === 'array') {
+        return { ...acc, [item.name]: [] };
+      }
+      return { ...acc, [item.name]: item.value };
+    }, {});
+
+  const form = useForm({
+    defaultValues: {
+      authorization: authorization?.value ?? '',
+      path: path?.reduce(
+        (acc, param) => ({ ...acc, [param.name]: param.value || '' }),
+        {},
+      ),
+      parameters: parameters?.reduce(
+        (acc, param) => ({ ...acc, [param.name]: param.value || '' }),
+        {},
+      ),
+      body: parseNestedValues(body ?? []),
+    },
+  });
+
+  const fetcher = useCallback(
+    async (formData: any) => {
+      let url = `${baseUrl}${route}`;
+
+      if (path) {
+        path.forEach((param) => {
+          const paramValue = formData?.path?.[param.name] || '';
+          url = url.replace(`{${param.name}}`, paramValue);
+        });
+      }
+      const urlObj = new URL(url);
+
+      if (parameters) {
+        parameters.forEach((param) => {
+          const paramValue = formData?.parameters?.[param.name] || '';
+          urlObj.searchParams.append(param.name, paramValue);
+        });
+      }
+
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      };
+
+      if (formData.authorization) {
+        headers.Authorization = formData.authorization;
+      }
+
+      const convertValue = (value: any, type: string): any => {
+        if (value === '' || value === undefined || value === null) {
+          return type === 'boolean' ? false : '';
+        }
+
+        switch (type) {
+          case 'number':
+            return Number(value);
+          case 'boolean':
+            return Boolean(value);
+          case 'string':
+          default:
+            return String(value);
+        }
+      };
+
+      const parseBody = (
+        fields: Record<string, unknown>,
+        schema: BodyApiRequestValue[],
+      ): Record<string, unknown> => {
+        return Object.keys(fields).reduce(
+          (acc: Record<string, unknown>, key: string) => {
+            const value = fields[key];
+            const schemaItem = schema.find((item) => item.name === key);
+
+            if (!schemaItem) {
+              acc[key] = value;
+              return acc;
+            }
+
+            if (Array.isArray(value)) {
+              // Handle arrays
+              acc[key] =
+                value.length > 0
+                  ? value.map((item) =>
+                      typeof item === 'object' && item !== null
+                        ? parseBody(
+                            item as Record<string, unknown>,
+                            Array.isArray(schemaItem.value)
+                              ? schemaItem.value
+                              : [],
+                          )
+                        : convertValue(item, schemaItem.type),
+                    )
+                  : [];
+            } else if (
+              typeof value === 'object' &&
+              value !== null &&
+              schemaItem.type === 'object'
+            ) {
+              // Handle nested objects
+              acc[key] = parseBody(
+                value as Record<string, unknown>,
+                Array.isArray(schemaItem.value) ? schemaItem.value : [],
+              );
+            } else {
+              // Handle primitive values
+              acc[key] = convertValue(value, schemaItem.type);
+            }
+            return acc;
+          },
+          {},
+        );
+      };
+
+      const bodyObject = parseBody(formData.body, body || []);
+
+      const bodyString = JSON.stringify(bodyObject);
+
+      try {
+        const response = await fetch(urlObj.toString(), {
+          method,
+          headers,
+          body: bodyString !== '{}' ? bodyString : undefined,
+        });
+
+        const data = await response.json();
+
+        return { status: response.status, data };
+      } catch (error) {
+        return { status: 'Error', data: null };
+      }
+    },
+    [baseUrl, route, method, path, parameters, body],
+  );
+
+  const { data, isLoading, isValidating, mutate } = useSWR(
+    `${method}-${baseUrl}-${route}`,
+    null,
+    {
+      revalidateOnMount: false,
+      revalidateOnFocus: false,
+      shouldRetryOnError: false,
+    },
+  );
+
+  const statusInfo = data ? getStatusInfo(data.status) : { description: '', color: '', icon: null };
+  const StatusIcon = statusInfo.icon;
+
+  const onSubmit = (data: any): void => {
+    void mutate(fetcher(data));
+  };
+
+  const renderFields = (fields: BodyApiRequestValue[], namePrefix = ''): JSX.Element[] =>
+    fields.map((item) => {
+      const fieldName = namePrefix ? `${namePrefix}.${item.name}` : item.name;
+
+      if (item.type === 'object' && item.value && Array.isArray(item.value)) {
+        return (
+          <div key={fieldName} className="flex flex-col gap-2">
+            <div className="flex flex-col gap-0.5">
+              <div className="font-mono text-foreground">
+                <span>{item.name}</span>{' '}
+                <span className="text-muted-foreground">{item.type}</span>
+                {item.isRequired ? (
+                  <span className="absolute items-start text-xs text-red-500">
+                    *
+                  </span>
+                ) : null}
+              </div>
+              <div className="text-xs">{item.description}</div>
+            </div>
+            <div className="rounded-lg border p-4">
+              <div className="space-y-4">
+                {renderFields(item.value, fieldName)}
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      if (item.type === 'array' && Array.isArray(item.value)) {
+        return (
+          <div key={fieldName} className="flex flex-col gap-2">
+            <ArrayInput
+              name={fieldName}
+              label={item.name}
+              description={item.description}
+              fieldsSchema={item.value}
+            />
+          </div>
+        );
+      }
+
+      return (
+        <FormField
+          key={fieldName}
+          control={form.control}
+          name={fieldName as "body" | "path" | "authorization" | "parameters" | `body.${string}`}
+          render={({ field: { value, ...restField } }) => (
+            <FormItem className="space-y-1">
+              <FormLabel className="relative font-mono text-sm text-foreground">
+                <span>{item.name}</span>{' '}
+                <span className="text-muted-foreground">{item.type}</span>
+                {item.isRequired ? (
+                  <span className="absolute items-start text-xs text-red-500">
+                    *
+                  </span>
+                ) : null}
+              </FormLabel>
+              <FormControl>
+                <Input
+                  placeholder={`Enter ${item.name}`}
+                  className="text-foreground"
+                  value={value ? String(value) : ''}
+                  {...restField}
+                />
+              </FormControl>
+              <FormDescription className="text-xs">
+                {item.description}
+              </FormDescription>
+            </FormItem>
+          )}
+        />
+      );
+    });
+
+  return (
+    <div className={cn('min-w-0 flex-1 prose-no-margin', className)} {...props}>
+      <Form {...form}>
+        <form
+          className="flex flex-col gap-4"
+          onSubmit={void form.handleSubmit(onSubmit)}
+        >
+          <div className="flex flex-col gap-6 rounded-lg border bg-card p-4">
+            <div className="flex gap-2">
+              <APIInfo
+                route={route}
+                method={method}
+                className="w-full rounded-lg p-1.5"
+              />
+              <SendButton
+                type="submit"
+                disabled={isValidating}
+                method={method}
+                className={cn('grid w-16 shrink-0 place-items-center')}
+              >
+                {isValidating ? (
+                  <Loader2Icon className="animate-spin text-white/80" />
+                ) : (
+                  <span>Send</span>
+                )}
+              </SendButton>
+            </div>
+
+            {authorization || path || parameters || body ? (
+              <Accordions type="multiple">
+                {authorization ? (
+                  <Accordion
+                    title="Authorization"
+                    className={cn(
+                      'overflow-hidden bg-card transition-colors',
+                      '[&>div]:border-t',
+                    )}
+                  >
+                    <div className="pt-4">
+                      <FormField
+                        control={form.control}
+                        name="authorization"
+                        render={({ field: { value, ...restField } }) => (
+                          <FormItem className="space-y-1">
+                            <FormLabel className="relative font-mono text-sm text-foreground">
+                              <span>{authorization.name}</span>{' '}
+                              <span className="text-muted-foreground">
+                                {authorization.type}
+                              </span>
+                              {authorization.isRequired ? (
+                                <span className="absolute items-start text-xs text-red-500">
+                                  *
+                                </span>
+                              ) : null}
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder={`Enter ${authorization.name}`}
+                                className="text-foreground"
+                                value={typeof value === 'string' ? value : ''}
+                                {...restField}
+                              />
+                            </FormControl>
+                            <FormDescription className="text-xs">
+                              {authorization.description}
+                            </FormDescription>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </Accordion>
+                ) : null}
+
+                {path ? (
+                  <Accordion
+                    title="Path"
+                    className={cn(
+                      'overflow-hidden bg-card transition-colors',
+                      '[&>div]:border-t',
+                    )}
+                  >
+                    <div className="space-y-4 pt-4">
+                      {renderFields(path, 'path')}
+                    </div>
+                  </Accordion>
+                ) : null}
+
+                {parameters ? (
+                  <Accordion
+                    title="Parameters"
+                    className={cn(
+                      'overflow-hidden bg-card transition-colors',
+                      '[&>div]:border-t',
+                    )}
+                  >
+                    <div className="space-y-4 pt-4">
+                      {renderFields(parameters, 'parameters')}
+                    </div>
+                  </Accordion>
+                ) : null}
+
+                {body ? (
+                  <Accordion
+                    title="Body"
+                    className={cn(
+                      'overflow-hidden bg-card transition-colors',
+                      '[&>div]:border-t',
+                    )}
+                  >
+                    <div className="space-y-4 pt-4">
+                      {renderFields(body, 'body')}
+                    </div>
+                  </Accordion>
+                ) : null}
+              </Accordions>
+            ) : null}
+          </div>
+
+          {!isLoading && data ? (
+            <div className="flex flex-col gap-3 rounded-lg border bg-card p-4">
+              <div className="flex items-center gap-1.5">
+                {StatusIcon ? (
+                  <StatusIcon className={cn('size-4', statusInfo.color)} />
+                ) : null}
+                <span className="mt-px text-sm font-medium text-foreground">
+                  {data.status} - {statusInfo.description}
+                </span>
+              </div>
+
+              <CodeBlock
+                wrapper={{ title: 'Response', className: 'my-0' }}
+                code={JSON.stringify(data, null, 2)}
+                className="max-h-[288px]"
+              />
+            </div>
+          ) : null}
+        </form>
+      </Form>
+
+      <div>{children}</div>
+    </div>
+  );
+}
+
+interface ArrayInputProps {
+  name: string;
+  label: string;
+  description: string;
+  fieldsSchema: BodyApiRequestValue[];
+}
+
+function ArrayInput({
+  name,
+  label,
+  description,
+  fieldsSchema,
+}: ArrayInputProps): React.ReactElement {
+  const { register, control } = useFormContext();
+  const { fields, append, remove } = useFieldArray({ control, name });
+
+  const isObjectArray =
+    Array.isArray(fieldsSchema) &&
+    fieldsSchema.length > 0 &&
+    typeof fieldsSchema[0] === 'object';
+
+  const defaultValues = isObjectArray
+    ? fieldsSchema.reduce<Record<string, string>>((acc, field) => {
+        acc[field.name] = '';
+        return acc;
+      }, {})
+    : '';
+
+  const handleAppend = (e: React.MouseEvent): void => {
+    e.preventDefault();
+    append(defaultValues);
+  };
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-0.5">
+        <div className="font-mono text-sm text-foreground">
+          <span>{label}</span>{' '}
+          <span className="text-muted-foreground">array</span>
+        </div>
+        <div className="text-xs">{description}</div>
+      </div>
+      <div className="space-y-4 rounded-lg border p-4">
+        {fields.map((field, index) => (
+          <div key={field.id} className="relative space-y-2">
+            {isObjectArray ? (
+              fieldsSchema.map((schemaField: BodyApiRequestValue) => (
+                <FormField
+                  key={`${name}.${String(index)}.${schemaField.name}`}
+                  control={control}
+                  name={`${name}.${String(index)}.${schemaField.name}`}
+                  render={({ field: fieldRef }) => (
+                    <FormItem className="space-y-1">
+                      <FormLabel className="relative font-mono text-sm text-foreground">
+                        <span>{schemaField.name}</span>{' '}
+                        <span className="text-muted-foreground">
+                          {schemaField.type}
+                        </span>
+                        {schemaField.isRequired ? (
+                          <span className="absolute items-start text-xs text-red-500">
+                            *
+                          </span>
+                        ) : null}
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder={`Enter ${schemaField.name}`}
+                          className="text-foreground"
+                          {...fieldRef}
+                        />
+                      </FormControl>
+                      <FormDescription className="text-xs">
+                        {schemaField.description}
+                      </FormDescription>
+                    </FormItem>
+                  )}
+                />
+              ))
+            ) : (
+              <FormControl className="relative">
+                <Input
+                  {...register(`${name}.${String(index)}`)}
+                  placeholder="Enter value"
+                  className="pr-10 text-foreground"
+                />
+              </FormControl>
+            )}
+            <button
+              type="button"
+              className={cn(
+                'group absolute right-2 top-0 flex aspect-square size-6 shrink-0 p-0 hover:bg-transparent',
+                isObjectArray && '-right-2 -top-4',
+              )}
+              onClick={() => {
+                remove(index);
+              }}
+            >
+              <Trash2Icon className="size-4 text-muted-foreground transition-colors group-hover:text-red-500" />
+            </button>
+          </div>
+        ))}
+        <button
+          type="button"
+          className="w-full"
+          onClick={handleAppend}
+        >
+          <PlusIcon className="size-4 text-foreground" />
+        </button>
+      </div>
+    </div>
   );
 }
