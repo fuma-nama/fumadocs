@@ -3,6 +3,8 @@
 import React, {
   ButtonHTMLAttributes,
   Fragment,
+  useEffect,
+  useState,
   type HTMLAttributes,
   type ReactNode,
 } from 'react';
@@ -14,6 +16,7 @@ import {
   CircleXIcon,
   CopyIcon,
 } from 'lucide-react';
+import * as Base from "fumadocs-ui/components/codeblock";
 import { cn } from '@/utils/cn';
 import { Tab, Tabs } from '@/components/tabs';
 import { Accordion, Accordions } from '@/components/accordion';
@@ -405,4 +408,37 @@ function getStatusInfo(status: number): {
     color: 'text-gray-500',
     icon: CircleXIcon,
   };
+}
+
+export type CodeBlockProps = HTMLAttributes<HTMLPreElement> & {
+  code: string;
+  wrapper?: Base.CodeBlockProps;
+  lang?: string;
+};
+
+export function CodeBlock({ code, wrapper, lang = "json", ...props }: CodeBlockProps): React.ReactElement {
+  const { highlighter } = useApiContext();
+  const [html, setHtml] = useState("");
+
+  useEffect(() => {
+    const highlightCode = (): void => {
+      if (!highlighter) return;
+
+      const themedHtml = highlighter.codeToHtml(code, {
+        lang,
+        defaultColor: false,
+        themes: { light: "github-light", dark: "github-dark" },
+      });
+
+      setHtml(themedHtml);
+    };
+
+    highlightCode();
+  }, [code, lang, highlighter]);
+
+  return (
+    <Base.CodeBlock {...wrapper}>
+      <Base.Pre {...props} dangerouslySetInnerHTML={{ __html: html }} />
+    </Base.CodeBlock>
+  );
 }
