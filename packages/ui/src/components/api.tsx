@@ -174,11 +174,12 @@ export function TypeScriptResponse(props: {
 }
 
 export function ObjectCollapsible(props: {
+  name: string;
   children: ReactNode;
 }): React.ReactElement {
   return (
     <Accordions type="single">
-      <Accordion title="Object Type">{props.children}</Accordion>
+      <Accordion title={props.name}>{props.children}</Accordion>
     </Accordions>
   );
 }

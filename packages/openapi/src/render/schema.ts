@@ -44,32 +44,31 @@ export function schemaElement(
   const child: string[] = [];
 
   function field(key: string, value: string): void {
-    child.push(span(`${key}:  \`${value}\``));
+    child.push(span(`${key}: \`${value}\``));
   }
 
+  // object type
   if (isObject(schema) && ctx.parseObject) {
     const { additionalProperties, properties } = schema;
 
-    if (additionalProperties) {
-      if (additionalProperties === true) {
-        child.push(
-          renderer.Property(
-            {
-              name: '[key: string]',
-              type: 'any',
-            },
-            [],
-          ),
-        );
-      } else {
-        child.push(
-          schemaElement('[key: string]', noRef(additionalProperties), {
-            ...ctx,
-            required: false,
-            parseObject: false,
-          }),
-        );
-      }
+    if (additionalProperties === true) {
+      child.push(
+        renderer.Property(
+          {
+            name: '[key: string]',
+            type: 'any',
+          },
+          [],
+        ),
+      );
+    } else if (additionalProperties) {
+      child.push(
+        schemaElement('[key: string]', noRef(additionalProperties), {
+          ...ctx,
+          required: false,
+          parseObject: false,
+        }),
+      );
     }
 
     Object.entries(properties ?? {}).forEach(([key, value]) => {
@@ -92,6 +91,7 @@ export function schemaElement(
     }
   }
 
+  // enum types
   if (schema.enum) {
     field(
       'Value in',
@@ -99,12 +99,32 @@ export function schemaElement(
     );
   }
 
-  const resolved = resolveObjectType(schema);
+  const mentionedObjectTypes = [
+    ...(schema.anyOf ?? schema.oneOf ?? schema.allOf ?? []),
+    ...(schema.type === 'array' ? [schema.items] : []),
+  ]
+    .map(noRef)
+    .filter((s) => isObject(s));
 
-  if (resolved && !ctx.parseObject) {
+  child.push(
+    ...mentionedObjectTypes.map((s, idx) =>
+      renderer.ObjectCollapsible(
+        { name: s.title ?? `Object ${(idx + 1).toString()}` },
+        [
+          schemaElement('element', noRef(s), {
+            ...ctx,
+            parseObject: true,
+            required: false,
+          }),
+        ],
+      ),
+    ),
+  );
+
+  if (isObject(schema) && !ctx.parseObject) {
     child.push(
       renderer.ObjectCollapsible({ name }, [
-        schemaElement(name, resolved, {
+        schemaElement(name, schema, {
           ...ctx,
           parseObject: true,
           required: false,
@@ -124,21 +144,14 @@ export function schemaElement(
   );
 }
 
-function resolveObjectType(
-  schema: OpenAPI.SchemaObject,
-): OpenAPI.SchemaObject | undefined {
-  if (isObject(schema)) return schema;
-
-  if (schema.type === 'array') {
-    return resolveObjectType(noRef(schema.items));
-  }
-}
-
 function getSchemaType(schema: OpenAPI.SchemaObject): string {
-  if (schema.nullable) {
-    if (!schema.type) return 'null';
+  if (schema.title) return schema.title;
 
-    return `${getSchemaType({ ...schema, nullable: false })} | null`;
+  if (schema.nullable) {
+    const type = getSchemaType({ ...schema, nullable: false });
+
+    // null if schema only contains `nullable`
+    return type === 'unknown' ? 'null' : `${type} | null`;
   }
 
   if (schema.type === 'array')
@@ -150,14 +163,18 @@ function getSchemaType(schema: OpenAPI.SchemaObject): string {
   if (schema.allOf)
     return schema.allOf.map((one) => getSchemaType(noRef(one))).join(' & ');
 
-  if (schema.anyOf)
+  if (schema.not) return `not ${getSchemaType(noRef(schema.not))}`;
+
+  if (schema.anyOf) {
     return `Any properties in ${schema.anyOf
       .map((one) => getSchemaType(noRef(one)))
       .join(', ')}`;
+  }
 
   if (schema.type) return schema.type;
 
+  // object without specified type
   if (isObject(schema)) return 'object';
 
-  throw new Error(`Cannot detect object type: ${JSON.stringify(schema)}`);
+  return 'unknown';
 }
