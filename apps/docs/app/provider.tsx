@@ -32,7 +32,7 @@ export function Provider({
   return (
     <RootProvider
       api={{
-        defaultBaseUrl: 'https://api.fake-museum-example.com/v1',
+        defaultBaseUrl: 'https://redocly.com/_mock/docs/openapi/museum-api',
       }}
       search={{
         SearchDialog,

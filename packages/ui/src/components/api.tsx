@@ -1,11 +1,13 @@
+
 'use client';
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- Users can pass any value to the playground  */
 /* eslint-disable @typescript-eslint/prefer-nullish-coalescing -- Some parts require logical OR operator */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment -- Response from API is not typed */
+/* eslint-disable @typescript-eslint/no-unsafe-return -- Users can pass any value to the playground  */
 
 import useSWR from 'swr';
-import { useForm, useFieldArray, useFormContext, Form } from 'react-hook-form';
+import { useForm, useFieldArray, useFormContext } from 'react-hook-form';
 import React, {
   ButtonHTMLAttributes,
   Fragment,
@@ -34,6 +36,7 @@ import { buttonVariants } from '@/theme/variants';
 import { useCopyButton } from '@/utils/use-copy-button';
 import { useApiContext } from '@/contexts/api';
 import {
+  Form,
   FormControl,
   FormDescription,
   FormField,
@@ -492,13 +495,20 @@ interface BodyApiRequestValue extends BaseApiRequestValue {
   value: string | BodyApiRequestValue[];
 }
 
-export interface APIPlaygroundProps extends HTMLAttributes<HTMLDivElement> {
+interface APIPlaygroundProps extends HTMLAttributes<HTMLDivElement> {
   route: string;
   method?: string;
   authorization?: StringApiRequestValue;
   path?: StringApiRequestValue[];
   parameters?: StringApiRequestValue[];
   body?: BodyApiRequestValue[];
+}
+
+interface APIPlaygroundFormData {
+  authorization?: string | undefined;
+  path?: Record<string, string> | undefined;
+  parameters?: Record<string, string> | undefined;
+  body?: Record<string, unknown> | undefined;
 }
 
 export function APIPlayground({
@@ -541,12 +551,12 @@ export function APIPlayground({
   });
 
   const fetcher = useCallback(
-    async (formData: any) => {
+    async (formData: APIPlaygroundFormData) => {
       let url = `${baseUrl}${route}`;
 
       if (path) {
         path.forEach((param) => {
-          const paramValue = formData?.path?.[param.name] || '';
+          const paramValue = formData.path?.[param.name] || '';
           url = url.replace(`{${param.name}}`, paramValue);
         });
       }
@@ -554,7 +564,7 @@ export function APIPlayground({
 
       if (parameters) {
         parameters.forEach((param) => {
-          const paramValue = formData?.parameters?.[param.name] || '';
+          const paramValue = formData.parameters?.[param.name] || '';
           urlObj.searchParams.append(param.name, paramValue);
         });
       }
@@ -632,7 +642,7 @@ export function APIPlayground({
         );
       };
 
-      const bodyObject = parseBody(formData.body, body || []);
+      const bodyObject = parseBody(formData.body ?? {}, body || []);
 
       const bodyString = JSON.stringify(bodyObject);
 
@@ -663,14 +673,20 @@ export function APIPlayground({
     },
   );
 
-  const statusInfo = data ? getStatusInfo(data.status) : { description: '', color: '', icon: null };
+  const statusInfo = data
+    ? getStatusInfo((data as unknown as { status: number }).status)
+    : { description: '', color: '', icon: null };
+
   const StatusIcon = statusInfo.icon;
 
-  const onSubmit = (data: any): void => {
-    void mutate(fetcher(data));
+  const onSubmit = (submitData: APIPlaygroundFormData): void => {
+     void mutate(fetcher(submitData));
   };
 
-  const renderFields = (fields: BodyApiRequestValue[], namePrefix = ''): JSX.Element[] =>
+  const renderFields = (
+    fields: BodyApiRequestValue[],
+    namePrefix = '',
+  ): JSX.Element[] =>
     fields.map((item) => {
       const fieldName = namePrefix ? `${namePrefix}.${item.name}` : item.name;
 
@@ -715,7 +731,14 @@ export function APIPlayground({
         <FormField
           key={fieldName}
           control={form.control}
-          name={fieldName as "body" | "path" | "authorization" | "parameters" | `body.${string}`}
+          name={
+            fieldName as
+              | 'body'
+              | 'path'
+              | 'authorization'
+              | 'parameters'
+              | `body.${string}`
+          }
           render={({ field: { value, ...restField } }) => (
             <FormItem className="space-y-1">
               <FormLabel className="relative font-mono text-sm text-foreground">
@@ -749,7 +772,10 @@ export function APIPlayground({
       <Form {...form}>
         <form
           className="flex flex-col gap-4"
-          onSubmit={void form.handleSubmit(onSubmit)}
+          onSubmit={(e) => {
+            e.preventDefault();
+            void form.handleSubmit(onSubmit)();
+          }}
         >
           <div className="flex flex-col gap-6 rounded-lg border bg-card p-4">
             <div className="flex gap-2">
@@ -869,7 +895,8 @@ export function APIPlayground({
                   <StatusIcon className={cn('size-4', statusInfo.color)} />
                 ) : null}
                 <span className="mt-px text-sm font-medium text-foreground">
-                  {data.status} - {statusInfo.description}
+                  {(data as unknown as { status: number }).status} -{' '}
+                  {statusInfo.description}
                 </span>
               </div>
 
@@ -989,11 +1016,7 @@ function ArrayInput({
             </button>
           </div>
         ))}
-        <button
-          type="button"
-          className="w-full"
-          onClick={handleAppend}
-        >
+        <button type="button" className="w-full" onClick={handleAppend}>
           <PlusIcon className="size-4 text-foreground" />
         </button>
       </div>
