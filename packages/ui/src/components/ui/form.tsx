@@ -39,12 +39,7 @@ const useFormField = () => {
   const fieldContext = useContext(FormFieldContext);
   const itemContext = useContext(FormItemContext);
   const { getFieldState, formState } = useFormContext();
-
   const fieldState = getFieldState(fieldContext.name, formState);
-
-  if (!fieldContext) {
-    throw new Error('useFormField should be used within <FormField>');
-  }
 
   const { id } = itemContext;
 
@@ -62,9 +57,7 @@ interface FormItemContextValue {
   id: string;
 }
 
-const FormItemContext = createContext<FormItemContextValue>(
-  {} as FormItemContextValue,
-);
+const FormItemContext = createContext<FormItemContextValue>({ id: '' });
 
 const FormItem = forwardRef<
   HTMLDivElement,
