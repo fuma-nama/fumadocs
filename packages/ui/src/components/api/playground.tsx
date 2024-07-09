@@ -103,13 +103,11 @@ function getStatusInfo(status: number): StatusInfo {
 
 export type CodeBlockProps = HTMLAttributes<HTMLPreElement> & {
   code: string;
-  wrapper?: Base.CodeBlockProps;
   lang?: string;
 };
 
 function CodeBlock({
   code,
-  wrapper,
   lang = 'json',
   ...props
 }: CodeBlockProps): React.ReactElement {
@@ -135,8 +133,8 @@ function CodeBlock({
   );
 }
 
-function getDefaultValue(arr: BodyApiRequestValue[]): Record<string, any> {
-  return Object.fromEntries(
+function getDefaultValue(arr: BodyApiRequestValue[]): Record<string, unknown> {
+  return Object.fromEntries<unknown>(
     arr.map((item) => {
       if (item.type === 'object' && Array.isArray(item.value)) {
         return [item.name, getDefaultValue(item.value)];
@@ -176,13 +174,14 @@ export function APIPlayground({
       const url = new URL(route, baseUrl ?? window.location.origin);
 
       path?.forEach((param) => {
-        const paramValue = formData.path?.[param.name] || '';
-        url.pathname = url.pathname.replace(`{${param.name}}`, paramValue);
+        const paramValue = formData.path?.[param.name];
+        if (paramValue)
+          url.pathname = url.pathname.replace(`{${param.name}}`, paramValue);
       });
 
       parameters?.forEach((param) => {
-        const paramValue = formData.parameters?.[param.name] || '';
-        url.searchParams.append(param.name, paramValue);
+        const paramValue = formData.parameters?.[param.name];
+        if (paramValue) url.searchParams.append(param.name, paramValue);
       });
 
       const headers: HeadersInit = {
@@ -203,7 +202,7 @@ export function APIPlayground({
         body: bodyValue ? JSON.stringify(bodyValue) : undefined,
       });
       try {
-        const data = await response.json();
+        const data: unknown = await response.json();
 
         return { status: response.status, data };
       } catch (_) {
@@ -221,15 +220,15 @@ export function APIPlayground({
 
   const StatusIcon = statusInfo.icon;
 
-  const onSubmit = form.handleSubmit((value: APIPlaygroundFormData) => {
-    setInput(value);
+  const onSubmit = form.handleSubmit((value) => {
+    setInput(value as APIPlaygroundFormData);
   });
 
   return (
     <Form {...form}>
       <form
         className="not-prose flex flex-col gap-4 rounded-lg border bg-card p-4"
-        onSubmit={onSubmit}
+        onSubmit={onSubmit as React.FormEventHandler}
       >
         <div className="flex flex-row gap-2">
           <code className="flex-1 overflow-auto rounded-lg border bg-secondary px-3 py-1.5 text-sm">
@@ -314,7 +313,7 @@ function InputField({
   namePrefix?: string;
   field: BodyApiRequestValue;
   fieldName?: string;
-}) {
+}): React.ReactElement {
   const { control } = useFormContext();
 
   if (field.type === 'object' && Array.isArray(field.value)) {
@@ -368,7 +367,7 @@ function InputField({
             <Input
               placeholder={`Enter ${field.name}`}
               className="text-foreground"
-              value={value}
+              value={value as string}
               {...restField}
             />
           </FormControl>
@@ -411,7 +410,7 @@ function ArrayInput({
 
       append(defaultValue);
     },
-    [append],
+    [append, isObjectArray, fieldsSchema],
   );
 
   return (

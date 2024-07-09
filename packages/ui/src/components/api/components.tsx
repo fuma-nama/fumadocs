@@ -199,7 +199,6 @@ export function ObjectCollapsible(props: {
 
 function CopyRouteButton({
   className,
-  children,
   route,
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & {
