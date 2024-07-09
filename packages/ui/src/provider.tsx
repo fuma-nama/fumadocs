@@ -6,9 +6,8 @@ import dynamic from 'next/dynamic';
 import { DirectionProvider } from '@radix-ui/react-direction';
 import type { ThemeProviderProps } from 'next-themes/dist/types';
 import type { DefaultSearchDialogProps } from '@/components/dialog/search-default';
-import { SidebarProvider } from '@/contexts/sidebar';
+import { SidebarProvider } from './contexts/sidebar';
 import { SearchProvider, type SearchProviderProps } from './contexts/search';
-import { ApiProvider, ApiProviderProps } from './contexts/api';
 
 interface SearchOptions
   extends Omit<SearchProviderProps, 'options' | 'children'> {
@@ -44,18 +43,6 @@ export interface RootProviderProps {
     enabled?: boolean;
   };
 
-  /**
-   * API Provider
-   */
-  api?: Partial<ApiProviderProps> & {
-    /**
-     * Enable API Provider which provides API playground functionality
-     *
-     * @defaultValue true
-     */
-    enabled?: boolean;
-  };
-
   children: ReactNode;
 }
 
@@ -68,17 +55,9 @@ export function RootProvider({
   children,
   dir,
   theme: { enabled = true, ...theme } = {},
-  api,
   search,
 }: RootProviderProps): React.ReactElement {
   let body = children;
-
-  if (api?.enabled !== false)
-    body = (
-      <ApiProvider {...api}>
-        {body}
-      </ApiProvider>
-    );
 
   if (search?.enabled !== false)
     body = (

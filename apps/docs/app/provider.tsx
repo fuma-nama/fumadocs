@@ -31,9 +31,6 @@ export function Provider({
 }): React.ReactElement {
   return (
     <RootProvider
-      api={{
-        defaultBaseUrl: 'https://redocly.com/_mock/docs/openapi/museum-api',
-      }}
       search={{
         SearchDialog,
       }}

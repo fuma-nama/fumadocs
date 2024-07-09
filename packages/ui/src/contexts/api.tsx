@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { createHighlighter, Highlighter } from 'shiki';
+import type { HighlighterCore } from 'shiki/core';
 
 export interface ApiProviderProps {
   /**
@@ -11,13 +11,13 @@ export interface ApiProviderProps {
 }
 
 interface ApiContextType {
-  baseUrl: string;
+  baseUrl?: string;
   setBaseUrl: (value: string) => void;
-  highlighter: Highlighter | null;
+  highlighter: HighlighterCore | null;
 }
 
 const ApiContext = createContext<ApiContextType>({
-  baseUrl: '',
+  baseUrl: undefined,
   setBaseUrl: () => undefined,
   highlighter: null,
 });
@@ -26,31 +26,41 @@ export function useApiContext(): ApiContextType {
   return useContext(ApiContext);
 }
 
+async function initHighlighter(): Promise<HighlighterCore> {
+  const { createHighlighterCore } = await import('shiki/core');
+  const getWasm = await import('shiki/wasm');
+
+  return createHighlighterCore({
+    themes: [
+      import('shiki/themes/github-light.mjs'),
+      import('shiki/themes/github-dark.mjs'),
+    ],
+    langs: [import('shiki/langs/json.mjs')],
+    loadWasm: getWasm,
+  });
+}
+
+let highlighterInstance: HighlighterCore | undefined;
+
 export function ApiProvider({
   defaultBaseUrl,
   children,
 }: ApiProviderProps): React.ReactElement {
-  const [baseUrl, setBaseUrl] = useState(() => {
-    return localStorage.getItem('apiBaseUrl') ?? defaultBaseUrl ?? "";
-  });
-
-  const [highlighter, setHighlighter] = useState<Highlighter | null>(null);
+  const [highlighter, setHighlighter] = useState<HighlighterCore | null>(null);
+  const [baseUrl, setBaseUrl] = useState(defaultBaseUrl);
 
   useEffect(() => {
-    localStorage.setItem('apiBaseUrl', baseUrl);
-  }, [baseUrl]);
-
-  useEffect(() => {
-    const loadHighlighter = async () => {
-      const hl = await createHighlighter({
-        langs: ['json'],
-        themes: ['github-light', 'github-dark'],
+    setBaseUrl((prev) => localStorage.getItem('apiBaseUrl') ?? prev);
+    if (highlighterInstance) setHighlighter(highlighterInstance);
+    else
+      initHighlighter().then((res) => {
+        setHighlighter(res);
       });
-      setHighlighter(hl);
-    };
-
-    void loadHighlighter();
   }, []);
+
+  useEffect(() => {
+    if (baseUrl) localStorage.setItem('apiBaseUrl', baseUrl);
+  }, [baseUrl]);
 
   return (
     <ApiContext.Provider value={{ baseUrl, setBaseUrl, highlighter }}>
