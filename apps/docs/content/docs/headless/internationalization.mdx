@@ -7,64 +7,66 @@ Read the [Next.js Docs](https://nextjs.org/docs/app/building-your-application/ro
 
 ## Setup
 
-1. Define all supported languages in a file.
+Define all supported languages in a file.
 
-   ```ts title="i18n.ts"
-   export const defaultLanguage = 'en';
-   export const languages = ['en', 'cn'];
-   ```
+```ts title="i18n.ts"
+export const defaultLanguage = 'en';
+export const languages = ['en', 'cn'];
+```
 
-2. Change your current source configurations.
+Change your current source configurations.
 
-   ```ts title="source.ts"
-   import { languages } from '@/i18n';
-   import { loader } from 'fumadocs-core/source';
+```ts title="source.ts"
+import { languages } from '@/i18n';
+import { loader } from 'fumadocs-core/source';
 
-   export const { getPage, getPages, pageTree } = loader({
-     languages,
-     ...
-   });
-   ```
+export const { getPage, getPages, pageTree } = loader({
+  languages,
+  ...
+});
+```
 
-3. Create the middleware that redirects users when missing locale.
+Create the middleware that redirects users when missing locale.
 
-   ```ts title="middleware.ts"
-   import { defaultLanguage, languages } from '@/i18n';
-   import { createI18nMiddleware } from 'fumadocs-core/middleware';
+```ts title="middleware.ts"
+import { defaultLanguage, languages } from '@/i18n';
+import { createI18nMiddleware } from 'fumadocs-core/middleware';
 
-   export default createI18nMiddleware({
-     languages,
-     defaultLanguage,
-   });
+export default createI18nMiddleware({
+  languages,
+  defaultLanguage,
+});
 
-   export const config = {
-     // Matcher ignoring `/_next/` and `/api/`
-     matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
-   };
-   ```
+export const config = {
+  // Matcher ignoring `/_next/` and `/api/`
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+};
+```
 
-4. Create a dynamic route `/app/[lang]`, and move all special files to
-   the folder.
+Create a dynamic route `/app/[lang]`, and move all special files to
+the folder.
 
-   ```tsx title="app/[lang]/layout.tsx"
-   export default function Layout({
-     params,
-     children,
-   }: {
-     params: { lang: string };
-     children: React.ReactNode;
-   }) {
-     return (
-       <html lang={params.lang}>
-         <body>{children}</body>
-       </html>
-     );
-   }
-   ```
+```tsx title="app/[lang]/layout.tsx"
+export default function Layout({
+  params,
+  children,
+}: {
+  params: { lang: string };
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang={params.lang}>
+      <body>{children}</body>
+    </html>
+  );
+}
+```
 
-5. Write documents, see [Page Conventions](/docs/headless/page-conventions#internationalization) to learn how to organize your documents.
+Write documents, see [Page Conventions](/docs/headless/page-conventions#internationalization) to learn how to organize your documents.
 
-6. Configure i18n on your search solution. For Flexsearch, see [Setup I18n](/docs/headless/search/flexsearch#internationalization).
+### Search
+
+Configure i18n on your search solution. For Flexsearch, see [Setup I18n](/docs/headless/search/flexsearch#internationalization).
 
 ### Get Pages
 
@@ -72,7 +74,7 @@ To get the pages of a specific language, use the utilities exported from
 `source.ts`.
 
 ```ts
-import { getPage, getPages, pageTree } from '@/source';
+import { getPage, getPages, pageTree } from '@/app/source';
 
 // get page tree
 pageTree[params.lang];
@@ -89,7 +91,7 @@ getPages(params.lang);
 Generate parameters for every language and page.
 
 ```tsx
-import { getPages } from '@/source';
+import { getPages } from '@/app/source';
 import { languages } from '@/i18n';
 
 export async function generateStaticParams() {
