@@ -26,11 +26,11 @@
     "eslint": "^8.57.0",
     "eslint-plugin-tailwindcss": "^3.17.4",
     "prettier": "^3.3.2",
-    "rimraf": "^5.0.7",
+    "rimraf": "^6.0.0",
     "tsup": "8.1.0",
     "turbo": "2.0.6",
     "typescript": "^5.5.3",
-    "vitest": "^1.6.0"
+    "vitest": "^2.0.0"
   },
   "packageManager": "pnpm@9.5.0",
   "engines": {
