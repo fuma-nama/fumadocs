@@ -156,10 +156,10 @@ void generateFiles({
   input: ['./petstore.yaml'],
   output: './content/docs',
   renderer: {
-    Root(child) {
+    Root(props, child) {
       return createElement(
         'Root',
-        {},
+        props,
         '<div className="bg-secondary p-4 rounded-lg">Demo Only</div>',
         ...child,
       );
