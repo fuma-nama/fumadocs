@@ -30,8 +30,12 @@ export interface RequestProps {
   code: string;
 }
 
+export interface RootProps {
+  baseUrl?: string;
+}
+
 export interface Renderer {
-  Root: (child: string[]) => string;
+  Root: (props: RootProps, child: string[]) => string;
   API: (child: string[]) => string;
   APIInfo: (props: APIInfoProps, child: string[]) => string;
   APIExample: (child: string[]) => string;
@@ -54,7 +58,7 @@ export interface Renderer {
 }
 
 export const defaultRenderer: Renderer = {
-  Root: (child) => createElement('Root', {}, ...child),
+  Root: (props, child) => createElement('Root', props, ...child),
   API: (child) => createElement('API', {}, ...child),
   APIInfo: (props, child) => createElement('APIInfo', props, ...child),
   APIExample: (child) => createElement('APIExample', {}, ...child),

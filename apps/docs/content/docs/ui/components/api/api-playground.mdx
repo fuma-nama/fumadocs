@@ -7,19 +7,21 @@ description: Component for basic operation imformation and dynamic playground
   It might be unstable.
 </Callout>
 
-import { APIPlayground } from 'fumadocs-ui/components/api';
+import { APIPlayground, Root } from 'fumadocs-ui/components/api';
 
-<APIPlayground
-  method={'GET'}
-  route={'/museum-hours'}
-  authorization={{
-    name: 'Authorization',
-    type: 'string',
-    value: 'Basic Og==',
-    description: 'The authorization token.',
-    isRequired: true,
-  }}
-></APIPlayground>
+<Root baseUrl="https://redocly.com/_mock/docs/openapi/museum-api">
+  <APIPlayground
+    method={'GET'}
+    route={'/museum-hours'}
+    authorization={{
+      name: 'Authorization',
+      type: 'string',
+      value: 'Basic Og==',
+      description: 'The authorization token.',
+      isRequired: true,
+    }}
+  />
+</Root>
 
 ## Usage
 

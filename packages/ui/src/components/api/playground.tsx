@@ -232,8 +232,7 @@ export function APIPlayground({
         onSubmit={onSubmit}
       >
         <div className="flex flex-row gap-2">
-          <code className="flex-1 rounded-lg border bg-secondary px-3 py-1.5 text-sm">
-            {baseUrl}
+          <code className="flex-1 overflow-auto rounded-lg border bg-secondary px-3 py-1.5 text-sm">
             {route}
           </code>
           <button

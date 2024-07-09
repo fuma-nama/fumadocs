@@ -1,8 +1,8 @@
 import Parser from '@apidevtools/json-schema-ref-parser';
 import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
 import { buildRoutes } from '@/build-routes';
-import { renderPage } from '@/render/page';
 import type { Endpoint } from '@/endpoint';
+import { generateDocument } from '@/utils/generate-document';
 import type { RenderContext } from './types';
 import { defaultRenderer, type Renderer } from './render/renderer';
 import { type CodeSample, renderOperation } from './render/operation';
@@ -61,10 +61,10 @@ export async function generate(
     }
   }
 
-  return renderPage(
+  return generateDocument(
     document.info.title,
     document.info.description,
-    child,
+    ctx.renderer.Root({ baseUrl: ctx.baseUrl }, child),
     options,
   );
 }
@@ -80,10 +80,12 @@ export async function generateOperations(
   return await Promise.all(
     routes.flatMap<Promise<GenerateOperationOutput>>((route) => {
       return route.methods.map(async (method) => {
-        const content = renderPage(
+        const content = generateDocument(
           method.summary ?? method.method,
           method.description,
-          [await renderOperation(route.path, method, ctx, true)],
+          ctx.renderer.Root({ baseUrl: ctx.baseUrl }, [
+            await renderOperation(route.path, method, ctx, true),
+          ]),
           options,
         );
 
@@ -122,7 +124,12 @@ export async function generateTags(
 
         return {
           tag,
-          content: renderPage(tag, info?.description, child, options),
+          content: generateDocument(
+            tag,
+            info?.description,
+            ctx.renderer.Root({ baseUrl: ctx.baseUrl }, child),
+            options,
+          ),
         } satisfies GenerateTagOutput;
       }),
   );

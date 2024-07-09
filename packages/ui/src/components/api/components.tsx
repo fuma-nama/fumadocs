@@ -9,30 +9,16 @@ import { cn } from '@/utils/cn';
 import { Accordion, Accordions } from '@/components/accordion';
 import { buttonVariants } from '@/theme/variants';
 import { useCopyButton } from '@/utils/use-copy-button';
-import {
-  ApiProvider,
-  type ApiProviderProps,
-  useApiContext,
-} from '@/contexts/api';
+import { ApiProvider, useApiContext } from '@/contexts/api';
 import { badgeVariants, getBadgeColor } from '@/components/api/shared';
 
 export interface RootProps extends HTMLAttributes<HTMLDivElement> {
-  /**
-   * API Provider
-   */
-  api?: Partial<ApiProviderProps> & {
-    /**
-     * Enable API Provider which provides API playground functionality
-     *
-     * @defaultValue true
-     */
-    enabled?: boolean;
-  };
+  baseUrl?: string;
 }
 
 export function Root({
   children,
-  api: { enabled = true, ...api } = {},
+  baseUrl,
   className,
   ...props
 }: RootProps): React.ReactElement {
@@ -44,7 +30,7 @@ export function Root({
       )}
       {...props}
     >
-      {enabled ? <ApiProvider {...api}>{children}</ApiProvider> : children}
+      <ApiProvider defaultBaseUrl={baseUrl}>{children}</ApiProvider>
     </div>
   );
 }

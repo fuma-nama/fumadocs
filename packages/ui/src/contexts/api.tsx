@@ -53,7 +53,7 @@ export function ApiProvider({
     setBaseUrl((prev) => localStorage.getItem('apiBaseUrl') ?? prev);
     if (highlighterInstance) setHighlighter(highlighterInstance);
     else
-      initHighlighter().then((res) => {
+      void initHighlighter().then((res) => {
         setHighlighter(res);
       });
   }, []);
