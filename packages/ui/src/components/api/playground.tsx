@@ -239,7 +239,7 @@ export function APIPlayground({
           </button>
         </div>
 
-        <Accordions type="multiple" className="text-sm">
+        <Accordions type="multiple" className="-m-4 mt-2 border-0 text-sm">
           {authorization ? (
             <Accordion title="Authorization">
               <InputField fieldName="authorization" field={authorization} />
