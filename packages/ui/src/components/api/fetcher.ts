@@ -1,33 +1,22 @@
-import type { BodyApiRequestValue } from '@/components/api/playground';
+import type { RequestField } from 'fumadocs-openapi';
 
 /**
- * Create request body from fields
+ * Create request body from value
  */
-export function createBodyFromFields(
-  fields: Record<string, unknown>,
-  schema: BodyApiRequestValue[],
-): Record<string, unknown> {
-  return Object.fromEntries(
-    Object.keys(fields).map((key) => {
-      const value = fields[key];
-      const schemaItem = schema.find((item) => item.name === key);
-
-      if (!schemaItem) {
-        return [key, value];
-      }
-
-      return [key, convertValue(value, schemaItem)];
-    }),
-  );
+export function createBodyFromValue(
+  value: unknown,
+  schema: RequestField,
+): unknown {
+  return convertValue(value, schema);
 }
 
 /**
- * Convert a value (object and string) to the corresponding type of schema
+ * Convert a value (object or string) to the corresponding type of schema
  *
  * @param value - the original value
  * @param schema - the schema of field
  */
-function convertValue(value: unknown, schema: BodyApiRequestValue): unknown {
+function convertValue(value: unknown, schema: RequestField): unknown {
   if (value === '' || value === undefined || value === null) {
     return schema.type === 'boolean' ? false : '';
   }
@@ -36,10 +25,18 @@ function convertValue(value: unknown, schema: BodyApiRequestValue): unknown {
     return value.map((item: unknown) => convertValue(item, schema));
   }
 
-  if (typeof value === 'object')
-    return createBodyFromFields(
-      value as Record<string, unknown>,
-      Array.isArray(schema.value) ? schema.value : [],
+  if (typeof value === 'object' && schema.type === 'object')
+    return Object.fromEntries(
+      Object.keys(value).map((key) => {
+        const prop = value[key as keyof typeof value];
+        const schemaItem = schema.properties.find((item) => item.name === key);
+
+        if (!schemaItem) {
+          return [key, prop];
+        }
+
+        return [key, convertValue(prop, schemaItem)];
+      }),
     );
 
   switch (schema.type) {

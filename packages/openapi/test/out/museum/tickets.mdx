@@ -4,7 +4,7 @@ description: Museum tickets for general entrance or special events.
 full: true
 ---
 
-import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible, Requests, Request } from "fumadocs-ui/components/api";
+import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible, Requests, Request, APIPlayground } from "fumadocs-ui/components/api";
 
 <Root baseUrl={"https://api.fake-museum-example.com/v1"}>
 
@@ -79,6 +79,10 @@ Phone number for the ticket purchaser (optional).
 | `200` | Success |
 | `400` | Bad request |
 | `404` | Not found |
+
+<APIPlayground authorization={{"type":"string","name":"authorization","defaultValue":"Bearer","isRequired":true,"description":"The authorization token"}} method={"POST"} route={"/tickets"} path={[]} query={[]} header={[]} body={{"type":"null","isRequired":false}}>
+
+</APIPlayground>
 
 </APIInfo>
 
@@ -215,6 +219,10 @@ An identifier for a ticket to a museum event. Used to generate ticket image.
 | `200` | Scannable event ticket in image format |
 | `400` | Bad request |
 | `404` | Not found |
+
+<APIPlayground authorization={{"type":"string","name":"authorization","defaultValue":"Bearer","isRequired":true,"description":"The authorization token"}} method={"GET"} route={"/tickets/{ticketId}/qr"} path={[{"type":"string","defaultValue":"a54a57ca-36f8-421b-a6b4-2e8f26858a4c","isRequired":true,"name":"ticketId"}]} query={[]} header={[]} body={undefined}>
+
+</APIPlayground>
 
 </APIInfo>
 

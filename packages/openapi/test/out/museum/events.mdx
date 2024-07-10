@@ -4,7 +4,7 @@ description: Special events hosted by the Museum
 full: true
 ---
 
-import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible, Requests, Request } from "fumadocs-ui/components/api";
+import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible, Requests, Request, APIPlayground } from "fumadocs-ui/components/api";
 
 <Root baseUrl={"https://api.fake-museum-example.com/v1"}>
 
@@ -73,6 +73,10 @@ The number of days per page.
 | `200` | Success |
 | `400` | Bad request |
 | `404` | Not found |
+
+<APIPlayground authorization={{"type":"string","name":"authorization","defaultValue":"Bearer","isRequired":true,"description":"The authorization token"}} method={"GET"} route={"/special-events"} path={[]} query={[{"type":"string","defaultValue":"2023-02-23","isRequired":false,"name":"startDate"},{"type":"string","defaultValue":"2023-04-18","isRequired":false,"name":"endDate"},{"type":"number","defaultValue":2,"isRequired":false,"name":"page"},{"type":"number","defaultValue":15,"isRequired":false,"name":"limit"}]} header={[]} body={undefined}>
+
+</APIPlayground>
 
 </APIInfo>
 
@@ -237,6 +241,10 @@ Price of a ticket for the special event
 | `400` | Bad request |
 | `404` | Not found |
 
+<APIPlayground authorization={{"type":"string","name":"authorization","defaultValue":"Bearer","isRequired":true,"description":"The authorization token"}} method={"POST"} route={"/special-events"} path={[]} query={[]} header={[]} body={{"type":"null","isRequired":false}}>
+
+</APIPlayground>
+
 </APIInfo>
 
 <APIExample>
@@ -376,6 +384,10 @@ An identifier for a special event.
 | `200` | Success |
 | `400` | Bad request |
 | `404` | Not found |
+
+<APIPlayground authorization={{"type":"string","name":"authorization","defaultValue":"Bearer","isRequired":true,"description":"The authorization token"}} method={"GET"} route={"/special-events/{eventId}"} path={[{"type":"string","defaultValue":"dad4bce8-f5cb-4078-a211-995864315e39","isRequired":true,"name":"eventId"}]} query={[]} header={[]} body={undefined}>
+
+</APIPlayground>
 
 </APIInfo>
 
@@ -550,6 +562,10 @@ An identifier for a special event.
 | `400` | Bad request |
 | `404` | Not found |
 
+<APIPlayground authorization={{"type":"string","name":"authorization","defaultValue":"Bearer","isRequired":true,"description":"The authorization token"}} method={"PATCH"} route={"/special-events/{eventId}"} path={[{"type":"string","defaultValue":"dad4bce8-f5cb-4078-a211-995864315e39","isRequired":true,"name":"eventId"}]} query={[]} header={[]} body={{"type":"null","isRequired":false}}>
+
+</APIPlayground>
+
 </APIInfo>
 
 <APIExample>
@@ -690,6 +706,10 @@ An identifier for a special event.
 | `400` | Bad request |
 | `401` | Unauthorized |
 | `404` | Not found |
+
+<APIPlayground authorization={{"type":"string","name":"authorization","defaultValue":"Bearer","isRequired":true,"description":"The authorization token"}} method={"DELETE"} route={"/special-events/{eventId}"} path={[{"type":"string","defaultValue":"dad4bce8-f5cb-4078-a211-995864315e39","isRequired":true,"name":"eventId"}]} query={[]} header={[]} body={undefined}>
+
+</APIPlayground>
 
 </APIInfo>
 

@@ -72,7 +72,7 @@ const FormItem = forwardRef<
     <FormItemContext.Provider value={{ id }}>
       <div
         ref={ref}
-        className={cn('flex flex-col gap-2', className)}
+        className={cn('flex flex-col gap-1', className)}
         {...props}
       />
     </FormItemContext.Provider>

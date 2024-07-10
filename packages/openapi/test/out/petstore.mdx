@@ -3,7 +3,7 @@ title: Swagger Petstore
 full: true
 ---
 
-import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible, Requests, Request } from "fumadocs-ui/components/api";
+import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible, Requests, Request, APIPlayground } from "fumadocs-ui/components/api";
 
 <Root baseUrl={"http://petstore.swagger.io/v1"}>
 
@@ -29,6 +29,10 @@ How many items to return at one time (max 100)
 | ----------- | ----------- |
 | `200` | A paged array of pets |
 | `default` | unexpected error |
+
+<APIPlayground authorization={undefined} method={"GET"} route={"/pets"} path={[]} query={[{"type":"number","defaultValue":"","isRequired":false,"name":"limit"}]} header={[]} body={undefined}>
+
+</APIPlayground>
 
 </APIInfo>
 
@@ -158,6 +162,10 @@ export interface Response {
 | `201` | Null response |
 | `default` | unexpected error |
 
+<APIPlayground authorization={undefined} method={"POST"} route={"/pets"} path={[]} query={[]} header={[]} body={{"type":"null","isRequired":false}}>
+
+</APIPlayground>
+
 </APIInfo>
 
 <APIExample>
@@ -245,6 +253,10 @@ The id of the pet to retrieve
 | ----------- | ----------- |
 | `200` | Expected response to a valid request |
 | `default` | unexpected error |
+
+<APIPlayground authorization={undefined} method={"GET"} route={"/pets/{petId}"} path={[{"type":"string","defaultValue":"","isRequired":true,"name":"petId"}]} query={[]} header={[]} body={undefined}>
+
+</APIPlayground>
 
 </APIInfo>
 

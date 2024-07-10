@@ -6,6 +6,8 @@ import * as JS from '@/requests/javascript';
 import { type MethodInformation, type RenderContext } from '@/types';
 import { noRef, getPreferredMedia } from '@/utils/schema';
 import { getTypescriptSchema } from '@/utils/get-typescript-schema';
+import { getScheme } from '@/utils/get-security';
+import { renderPlayground } from '@/render/playground';
 import { heading, p } from './element';
 import { schemaElement } from './schema';
 
@@ -104,6 +106,7 @@ export async function renderOperation(
   }
 
   info.push(getResponseTable(method));
+  info.push(renderPlayground(path, method, ctx));
 
   const samples: CodeSample[] = dedupe([
     {
@@ -163,14 +166,10 @@ function getAuthSection(
 ): string {
   const info: string[] = [];
 
-  const schemas = document.components?.securitySchemes ?? {};
   for (const requirement of requirements) {
     if (info.length > 0) info.push(`---`);
 
-    for (const [name, scopes] of Object.entries(requirement)) {
-      if (!(name in schemas)) continue;
-      const schema = noRef(schemas[name]);
-
+    for (const schema of getScheme(requirement, document)) {
       if (schema.type === 'http') {
         info.push(
           renderer.Property(
@@ -199,7 +198,7 @@ function getAuthSection(
             [
               p(schema.description),
               `In: \`header\``,
-              `Scope: \`${scopes.length > 0 ? scopes.join(', ') : 'none'}\``,
+              `Scope: \`${schema.scopes.length > 0 ? schema.scopes.join(', ') : 'none'}\``,
             ],
           ),
         );

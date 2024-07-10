@@ -3,7 +3,7 @@ title: keys
 full: true
 ---
 
-import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible, Requests, Request } from "fumadocs-ui/components/api";
+import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible, Requests, Request, APIPlayground } from "fumadocs-ui/components/api";
 
 <Root baseUrl={"https://api.unkey.dev"}>
 
@@ -49,6 +49,10 @@ Decrypt and display the raw key. Only possible if the key was encrypted when gen
 | `409` | This response is sent when a request conflicts with the current state of the server. |
 | `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
 | `500` | The server has encountered a situation it does not know how to handle. |
+
+<APIPlayground authorization={{"type":"string","name":"authorization","defaultValue":"Bearer","isRequired":true,"description":"The authorization token"}} method={"GET"} route={"/v1/keys.getKey"} path={[]} query={[{"type":"string","defaultValue":"key_1234","isRequired":true,"name":"keyId","description":"The id of the key to fetch"},{"type":"boolean","defaultValue":"","isRequired":false,"name":"decrypt","description":"Decrypt and display the raw key. Only possible if the key was encrypted when generated."}]} header={[]} body={undefined}>
+
+</APIPlayground>
 
 </APIInfo>
 
@@ -644,6 +648,10 @@ The id of the key to revoke
 | `409` | This response is sent when a request conflicts with the current state of the server. |
 | `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
 | `500` | The server has encountered a situation it does not know how to handle. |
+
+<APIPlayground authorization={{"type":"string","name":"authorization","defaultValue":"Bearer","isRequired":true,"description":"The authorization token"}} method={"POST"} route={"/v1/keys.deleteKey"} path={[]} query={[]} header={[]} body={{"type":"null","isRequired":false}}>
+
+</APIPlayground>
 
 </APIInfo>
 
@@ -1299,6 +1307,10 @@ handle it correctly.
 | `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
 | `500` | The server has encountered a situation it does not know how to handle. |
 
+<APIPlayground authorization={{"type":"string","name":"authorization","defaultValue":"Bearer","isRequired":true,"description":"The authorization token"}} method={"POST"} route={"/v1/keys.createKey"} path={[]} query={[]} header={[]} body={{"type":"null","isRequired":false}}>
+
+</APIPlayground>
+
 </APIInfo>
 
 <APIExample>
@@ -1838,6 +1850,10 @@ Override how many tokens are deducted during the ratelimit operation.
 | `409` | This response is sent when a request conflicts with the current state of the server. |
 | `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
 | `500` | The server has encountered a situation it does not know how to handle. |
+
+<APIPlayground authorization={undefined} method={"POST"} route={"/v1/keys.verifyKey"} path={[]} query={[]} header={[]} body={{"type":"null","isRequired":false}}>
+
+</APIPlayground>
 
 </APIInfo>
 
@@ -2547,6 +2563,10 @@ Set if key is enabled or disabled. If disabled, the key cannot be used to verify
 | `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
 | `500` | The server has encountered a situation it does not know how to handle. |
 
+<APIPlayground authorization={{"type":"string","name":"authorization","defaultValue":"Bearer","isRequired":true,"description":"The authorization token"}} method={"POST"} route={"/v1/keys.updateKey"} path={[]} query={[]} header={[]} body={{"type":"null","isRequired":false}}>
+
+</APIPlayground>
+
 </APIInfo>
 
 <APIExample>
@@ -3030,6 +3050,10 @@ The value you want to set, add or subtract the remaining count by
 | `409` | This response is sent when a request conflicts with the current state of the server. |
 | `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
 | `500` | The server has encountered a situation it does not know how to handle. |
+
+<APIPlayground authorization={{"type":"string","name":"authorization","defaultValue":"Bearer","isRequired":true,"description":"The authorization token"}} method={"POST"} route={"/v1/keys.updateRemaining"} path={[]} query={[]} header={[]} body={{"type":"null","isRequired":false}}>
+
+</APIPlayground>
 
 </APIInfo>
 
@@ -3521,6 +3545,10 @@ The granularity of the usage data to fetch, currently only `day` is supported
 | `409` | This response is sent when a request conflicts with the current state of the server. |
 | `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
 | `500` | The server has encountered a situation it does not know how to handle. |
+
+<APIPlayground authorization={{"type":"string","name":"authorization","defaultValue":"Bearer","isRequired":true,"description":"The authorization token"}} method={"GET"} route={"/v1/keys.getVerifications"} path={[]} query={[{"type":"string","defaultValue":"key_1234","isRequired":false,"name":"keyId","description":"The id of the key to fetch, either `keyId` or `ownerId` must be provided"},{"type":"string","defaultValue":"chronark","isRequired":false,"name":"ownerId","description":"The owner id to fetch keys for, either `keyId` or `ownerId` must be provided"},{"type":"number","defaultValue":1620000000000,"isRequired":false,"name":"start","description":"The start of the period to fetch usage for as unix milliseconds timestamp"},{"type":"number","defaultValue":1620000000000,"isRequired":false,"name":"end","description":"The end of the period to fetch usage for as unix milliseconds timestamp"},{"type":"string","defaultValue":"day","isRequired":false,"name":"granularity","description":"The granularity of the usage data to fetch, currently only `day` is supported"}]} header={[]} body={undefined}>
+
+</APIPlayground>
 
 </APIInfo>
 

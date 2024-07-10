@@ -3,7 +3,7 @@ title: apis
 full: true
 ---
 
-import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible, Requests, Request } from "fumadocs-ui/components/api";
+import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible, Requests, Request, APIPlayground } from "fumadocs-ui/components/api";
 
 <Root baseUrl={"https://api.unkey.dev"}>
 
@@ -43,6 +43,10 @@ The id of the api to fetch
 | `409` | This response is sent when a request conflicts with the current state of the server. |
 | `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
 | `500` | The server has encountered a situation it does not know how to handle. |
+
+<APIPlayground authorization={{"type":"string","name":"authorization","defaultValue":"Bearer","isRequired":true,"description":"The authorization token"}} method={"GET"} route={"/v1/apis.getApi"} path={[]} query={[{"type":"string","defaultValue":"api_1234","isRequired":true,"name":"apiId","description":"The id of the api to fetch"}]} header={[]} body={undefined}>
+
+</APIPlayground>
 
 </APIInfo>
 
@@ -539,6 +543,10 @@ Decrypt and display the raw key. Only possible if the key was encrypted when gen
 | `409` | This response is sent when a request conflicts with the current state of the server. |
 | `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
 | `500` | The server has encountered a situation it does not know how to handle. |
+
+<APIPlayground authorization={{"type":"string","name":"authorization","defaultValue":"Bearer","isRequired":true,"description":"The authorization token"}} method={"GET"} route={"/v1/apis.listKeys"} path={[]} query={[{"type":"string","defaultValue":"api_1234","isRequired":true,"name":"apiId","description":"The id of the api to fetch"},{"type":"number","defaultValue":100,"isRequired":false,"name":"limit","description":"The maximum number of keys to return"},{"type":"string","defaultValue":"","isRequired":false,"name":"cursor","description":"Use this to fetch the next page of results. A new cursor will be returned in the response if there are more results."},{"type":"string","defaultValue":"","isRequired":false,"name":"ownerId","description":"If provided, this will only return keys where the `ownerId` matches."},{"type":"boolean","defaultValue":"","isRequired":false,"name":"decrypt","description":"Decrypt and display the raw key. Only possible if the key was encrypted when generated."}]} header={[]} body={undefined}>
+
+</APIPlayground>
 
 </APIInfo>
 
@@ -1158,6 +1166,10 @@ If true, the keys will be permanently deleted. If false, the keys will be soft-d
 | `409` | This response is sent when a request conflicts with the current state of the server. |
 | `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
 | `500` | The server has encountered a situation it does not know how to handle. |
+
+<APIPlayground authorization={{"type":"string","name":"authorization","defaultValue":"Bearer","isRequired":true,"description":"The authorization token"}} method={"POST"} route={"/v1/apis.deleteKeys"} path={[]} query={[]} header={[]} body={{"type":"null","isRequired":false}}>
+
+</APIPlayground>
 
 </APIInfo>
 

@@ -7,6 +7,7 @@ import {
   Trash2Icon,
 } from 'lucide-react';
 import useSWRImmutable from 'swr/immutable';
+import type { APIPlaygroundProps, RequestField } from 'fumadocs-openapi';
 import { useApiContext } from '@/contexts/api';
 import {
   Form,
@@ -20,38 +21,15 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/utils/cn';
 import { Accordion, Accordions } from '@/components/accordion';
 import * as Base from '@/components/codeblock';
-import { createBodyFromFields } from '@/components/api/fetcher';
+import { createBodyFromValue } from '@/components/api/fetcher';
 import { buttonVariants } from '@/theme/variants';
-
-export interface BaseApiRequestValue {
-  name: string;
-  type: string;
-  description: string;
-  isRequired?: boolean;
-}
-
-export interface StringApiRequestValue extends BaseApiRequestValue {
-  value: string;
-}
-
-export interface BodyApiRequestValue extends BaseApiRequestValue {
-  value: string | BodyApiRequestValue[];
-}
-
-export interface APIPlaygroundProps extends HTMLAttributes<HTMLDivElement> {
-  route: string;
-  method?: string;
-  authorization?: StringApiRequestValue;
-  path?: StringApiRequestValue[];
-  parameters?: StringApiRequestValue[];
-  body?: BodyApiRequestValue[];
-}
 
 interface APIPlaygroundFormData {
   authorization?: string | undefined;
-  path?: Record<string, string> | undefined;
-  parameters?: Record<string, string> | undefined;
-  body?: Record<string, unknown> | undefined;
+  path?: Record<string, string>;
+  query?: Record<string, string>;
+  header?: Record<string, string>;
+  body?: Record<string, unknown>;
 }
 
 interface StatusInfo {
@@ -133,68 +111,86 @@ function CodeBlock({
   );
 }
 
-function getDefaultValue(arr: BodyApiRequestValue[]): Record<string, unknown> {
+function getDefaultValues(arr: RequestField[]): Record<string, unknown> {
   return Object.fromEntries<unknown>(
     arr.map((item) => {
-      if (item.type === 'object' && Array.isArray(item.value)) {
-        return [item.name, getDefaultValue(item.value)];
+      const key = item.name ?? '';
+
+      if (item.type === 'object') {
+        return [key, getDefaultValues(item.properties)];
       }
 
-      if (item.type === 'array') {
-        return [item.name, []];
-      }
-
-      return [item.name, item.value];
+      return [key, getDefaultValue(item)];
     }),
   );
+}
+
+function getDefaultValue(item: RequestField): unknown {
+  if (item.type === 'object') return getDefaultValues(item.properties);
+
+  if (item.type === 'array') return [];
+  if (item.type === 'null') return null;
+  if (item.type === 'switcher') return 0;
+
+  return String(item.defaultValue);
 }
 
 export function APIPlayground({
   route,
   method = 'GET',
   authorization,
-  path,
-  parameters,
+  path = [],
+  header = [],
+  query = [],
   body,
-}: APIPlaygroundProps): React.ReactElement {
+}: APIPlaygroundProps & HTMLAttributes<HTMLFormElement>): React.ReactElement {
   const { baseUrl } = useApiContext();
   const [input, setInput] = useState<APIPlaygroundFormData>();
   const form = useForm({
     defaultValues: {
-      authorization: authorization?.value ?? '',
-      path: path ? getDefaultValue(path) : undefined,
-      parameters: parameters ? getDefaultValue(parameters) : undefined,
+      authorization: authorization?.defaultValue,
+      path: getDefaultValues(path),
+      query: getDefaultValues(query),
+      header: getDefaultValues(header),
       body: body ? getDefaultValue(body) : undefined,
     },
   });
 
-  const query = useSWRImmutable(
+  const testQuery = useSWRImmutable(
     input ? [baseUrl, route, method, input] : null,
-    async ([_baseUrl, _route, _method, formData]) => {
+    async () => {
+      if (!input) return;
       const url = new URL(route, baseUrl ?? window.location.origin);
 
-      path?.forEach((param) => {
-        const paramValue = formData.path?.[param.name];
+      Object.keys(input.path ?? {}).forEach((key) => {
+        const paramValue = input.path?.[key];
+
         if (paramValue)
-          url.pathname = url.pathname.replace(`{${param.name}}`, paramValue);
+          url.pathname = url.pathname.replace(`{${key}}`, paramValue);
       });
 
-      parameters?.forEach((param) => {
-        const paramValue = formData.parameters?.[param.name];
-        if (paramValue) url.searchParams.append(param.name, paramValue);
+      Object.keys(input.query ?? {}).forEach((key) => {
+        const paramValue = input.query?.[key];
+        if (paramValue) url.searchParams.append(key, paramValue);
       });
 
-      const headers: HeadersInit = {
+      const headers = new Headers({
         'Content-Type': 'application/json',
-      };
+      });
 
-      if (formData.authorization) {
-        headers.Authorization = formData.authorization;
+      if (input.authorization) {
+        headers.append('Authorization', input.authorization);
       }
 
+      Object.keys(input.header ?? {}).forEach((key) => {
+        const paramValue = input.header?.[key];
+
+        if (paramValue) headers.append(key, paramValue);
+      });
+
       const bodyValue =
-        formData.body && Object.keys(formData.body).length > 0
-          ? createBodyFromFields(formData.body, body ?? [])
+        body && input.body && Object.keys(input.body).length > 0
+          ? createBodyFromValue(input.body, body)
           : undefined;
       const response = await fetch(url, {
         method,
@@ -214,11 +210,11 @@ export function APIPlayground({
     },
   );
 
-  const statusInfo = query.data
-    ? getStatusInfo(query.data.status)
-    : { description: '', color: '', icon: null };
+  const statusInfo = testQuery.data
+    ? getStatusInfo(testQuery.data.status)
+    : undefined;
 
-  const StatusIcon = statusInfo.icon;
+  const StatusIcon = statusInfo?.icon;
 
   const onSubmit = form.handleSubmit((value) => {
     setInput(value as APIPlaygroundFormData);
@@ -237,7 +233,7 @@ export function APIPlayground({
           <button
             type="submit"
             className={cn(buttonVariants({ color: 'secondary' }))}
-            disabled={query.isLoading}
+            disabled={testQuery.isLoading}
           >
             Send
           </button>
@@ -250,7 +246,7 @@ export function APIPlayground({
             </Accordion>
           ) : null}
 
-          {path ? (
+          {path.length > 0 ? (
             <Accordion title="Path">
               {path.map((field) => (
                 <InputField key={field.name} field={field} namePrefix="path" />
@@ -258,43 +254,51 @@ export function APIPlayground({
             </Accordion>
           ) : null}
 
-          {parameters ? (
-            <Accordion title="Parameters">
-              {parameters.map((field) => (
-                <InputField
-                  key={field.name}
-                  field={field}
-                  namePrefix="parameters"
-                />
+          {query.length > 0 ? (
+            <Accordion title="Query">
+              <div className="flex flex-col gap-2">
+                {query.map((field) => (
+                  <InputField
+                    key={field.name}
+                    field={field}
+                    namePrefix="query"
+                  />
+                ))}
+              </div>
+            </Accordion>
+          ) : null}
+
+          {header.length > 0 ? (
+            <Accordion title="Headers">
+              {header.map((field) => (
+                <InputField key={field.name} field={field} namePrefix="query" />
               ))}
             </Accordion>
           ) : null}
 
           {body ? (
             <Accordion title="Body">
-              {body.map((field) => (
-                <InputField key={field.name} field={field} namePrefix="body" />
-              ))}
+              <InputField field={body} namePrefix="body" />
             </Accordion>
           ) : null}
         </Accordions>
 
-        {query.data ? (
+        {testQuery.data ? (
           <div className="flex flex-col gap-3 rounded-lg border bg-card p-4">
             <div className="inline-flex items-center gap-1.5 text-sm">
               {StatusIcon ? (
                 <StatusIcon className={cn('size-4', statusInfo.color)} />
               ) : null}
               <span className="font-medium text-foreground">
-                {query.data.status}
+                {testQuery.data.status}
               </span>
             </div>
             <p className="text-sm text-muted-foreground">
-              {statusInfo.description}
+              {statusInfo?.description}
             </p>
-            {query.data.data ? (
+            {testQuery.data.data ? (
               <CodeBlock
-                code={JSON.stringify(query.data.data, null, 2)}
+                code={JSON.stringify(testQuery.data.data, null, 2)}
                 className="max-h-[288px]"
               />
             ) : null}
@@ -308,15 +312,17 @@ export function APIPlayground({
 function InputField({
   field,
   namePrefix,
-  fieldName = namePrefix ? `${namePrefix}.${field.name}` : field.name,
+  fieldName = namePrefix
+    ? `${namePrefix}.${field.name ?? ''}`
+    : field.name ?? '',
 }: {
   namePrefix?: string;
-  field: BodyApiRequestValue;
+  field: RequestField;
   fieldName?: string;
 }): React.ReactElement {
   const { control } = useFormContext();
 
-  if (field.type === 'object' && Array.isArray(field.value)) {
+  if (field.type === 'object') {
     return (
       <div className="flex flex-col gap-2">
         <div className="inline-flex gap-1 text-sm text-foreground">
@@ -327,8 +333,8 @@ function InputField({
           </code>
         </div>
         <p className="text-xs">{field.description}</p>
-        <div className="flex flex-col gap-2 rounded-lg border p-4">
-          {field.value.map((child) => (
+        <div className="flex flex-col gap-2 rounded-lg border p-2">
+          {field.properties.map((child) => (
             <InputField key={child.name} field={child} namePrefix={fieldName} />
           ))}
         </div>
@@ -336,13 +342,13 @@ function InputField({
     );
   }
 
-  if (field.type === 'array' && Array.isArray(field.value)) {
+  if (field.type === 'array') {
     return (
       <ArrayInput
         name={fieldName}
         label={field.name}
         description={field.description}
-        fieldsSchema={field.value}
+        items={field.items}
       />
     );
   }
@@ -365,7 +371,7 @@ function InputField({
           </FormDescription>
           <FormControl>
             <Input
-              placeholder={`Enter ${field.name}`}
+              placeholder={`Enter ${field.name ?? 'value'}`}
               className="text-foreground"
               value={value as string}
               {...restField}
@@ -379,39 +385,23 @@ function InputField({
 
 interface ArrayInputProps {
   name: string;
-  label: string;
-  description: string;
-  fieldsSchema: BodyApiRequestValue[];
+  label?: string;
+  description?: string;
+  items: RequestField;
 }
 
 function ArrayInput({
   name,
   label,
   description,
-  fieldsSchema,
+  items,
 }: ArrayInputProps): React.ReactElement {
-  const { register, control } = useFormContext();
+  const { control } = useFormContext();
   const { fields, append, remove } = useFieldArray({ control, name });
 
-  const isObjectArray =
-    Array.isArray(fieldsSchema) &&
-    fieldsSchema.length > 0 &&
-    typeof fieldsSchema[0] === 'object';
-
-  const handleAppend = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      let defaultValue: unknown = '';
-
-      if (isObjectArray)
-        defaultValue = Object.fromEntries(
-          fieldsSchema.map((field) => [field.name, '']),
-        );
-
-      append(defaultValue);
-    },
-    [append, isObjectArray, fieldsSchema],
-  );
+  const handleAppend = useCallback(() => {
+    append(getDefaultValue(items));
+  }, [append, items]);
 
   return (
     <div className="flex flex-col gap-2">
@@ -423,23 +413,7 @@ function ArrayInput({
       <div className="flex flex-col gap-4 rounded-lg border p-4">
         {fields.map((field, index) => (
           <div key={field.id}>
-            {isObjectArray ? (
-              fieldsSchema.map((schemaField: BodyApiRequestValue) => (
-                <InputField
-                  key={schemaField.name}
-                  field={schemaField}
-                  namePrefix={`${name}.${String(index)}`}
-                />
-              ))
-            ) : (
-              <FormControl key={field.id}>
-                <Input
-                  {...register(`${name}.${String(index)}`)}
-                  placeholder="Enter value"
-                  className="text-foreground"
-                />
-              </FormControl>
-            )}
+            <InputField field={items} namePrefix={`${name}.${String(index)}`} />
             <button
               type="button"
               className={cn(
@@ -447,7 +421,6 @@ function ArrayInput({
                   color: 'ghost',
                   className: 'absolute end-2 top-0 text-muted-foreground',
                 }),
-                isObjectArray && '-end-2 -top-4',
               )}
               onClick={() => {
                 remove(index);

@@ -1,3 +1,4 @@
+import type { APIPlaygroundProps, RequestField } from '@/render/playground';
 import { codeblock, createElement } from './element';
 
 export interface ResponsesProps {
@@ -55,7 +56,10 @@ export interface Renderer {
    */
   ObjectCollapsible: (props: ObjectCollapsibleProps, child: string[]) => string;
   Property: (props: PropertyProps, child: string[]) => string;
+  APIPlayground: (props: APIPlaygroundProps) => string;
 }
+
+export type { APIPlaygroundProps, RequestField };
 
 export const defaultRenderer: Renderer = {
   Root: (props, child) => createElement('Root', props, ...child),
@@ -80,4 +84,5 @@ export const defaultRenderer: Renderer = {
   Requests: (items, child) => createElement('Requests', { items }, ...child),
   Request: ({ language, code, name }) =>
     createElement('Request', { value: name }, codeblock({ language }, code)),
+  APIPlayground: (props) => createElement('APIPlayground', props),
 };
