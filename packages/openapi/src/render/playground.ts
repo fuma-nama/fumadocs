@@ -32,6 +32,10 @@ interface NullField extends BaseRequestField {
   type: 'null';
 }
 
+interface Context {
+  stack: OpenAPI.SchemaObject[];
+}
+
 export type RequestField =
   | ArrayRequestField
   | PrimitiveRequestField
@@ -98,7 +102,9 @@ export function renderPlayground(
           v.required ?? false,
         ),
       ) as PrimitiveRequestField[],
-    body: body ? schemaToField(body, 'body', false) : undefined,
+    body: body?.schema
+      ? schemaToField(noRef(body.schema), 'body', false)
+      : undefined,
   });
 }
 
@@ -106,18 +112,28 @@ function schemaToField(
   schema: OpenAPI.SchemaObject,
   name: string | undefined,
   required: boolean,
+  ctx: Context = { stack: [] },
 ): RequestField {
+  // TODO: Implement logic to handle self-referencing types
+  if (ctx.stack.includes(schema)) return { type: 'null', isRequired: false };
+
+  ctx.stack = [...ctx.stack, schema];
+
   if (schema.type === 'array') {
     return {
       type: 'array',
       isRequired: required,
       name,
       description: schema.description ?? schema.title,
-      items: schemaToField(noRef(schema.items), undefined, false),
+      items: schemaToField(noRef(schema.items), undefined, false, ctx),
     };
   }
 
-  if (schema.type === 'object' || schema.allOf) {
+  if (
+    schema.type === 'object' ||
+    schema.properties !== undefined ||
+    schema.allOf !== undefined
+  ) {
     const properties: RequestField[] = [];
 
     if (schema.properties) {
@@ -127,13 +143,14 @@ function schemaToField(
             noRef(prop),
             key,
             schema.required?.includes(key) ?? false,
+            ctx,
           ),
         ),
       );
     }
 
     schema.allOf?.forEach((c) => {
-      const field = schemaToField(noRef(c), undefined, true);
+      const field = schemaToField(noRef(c), undefined, true, ctx);
 
       if (field.type === 'object') properties.push(...field.properties);
     });
@@ -155,7 +172,9 @@ function schemaToField(
         type: 'switcher',
         name,
         description: schema.description ?? schema.title,
-        items: combine.map((c) => schemaToField(noRef(c), undefined, true)),
+        items: combine.map((c) =>
+          schemaToField(noRef(c), undefined, true, ctx),
+        ),
         isRequired: required,
       };
     }

@@ -160,15 +160,15 @@ export function APIPlayground({
     input ? [baseUrl, route, method, input] : null,
     async () => {
       if (!input) return;
-      const url = new URL(route, baseUrl ?? window.location.origin);
 
+      let pathname = route;
       Object.keys(input.path ?? {}).forEach((key) => {
         const paramValue = input.path?.[key];
 
-        if (paramValue)
-          url.pathname = url.pathname.replace(`{${key}}`, paramValue);
+        if (paramValue) pathname = pathname.replace(`{${key}}`, paramValue);
       });
 
+      const url = new URL(pathname, baseUrl ?? window.location.origin);
       Object.keys(input.query ?? {}).forEach((key) => {
         const paramValue = input.query?.[key];
         if (paramValue) url.searchParams.append(key, paramValue);
@@ -315,16 +315,18 @@ function InputField({
   fieldName = namePrefix
     ? `${namePrefix}.${field.name ?? ''}`
     : field.name ?? '',
+  ...props
 }: {
   namePrefix?: string;
   field: RequestField;
   fieldName?: string;
+  className?: string;
 }): React.ReactElement {
   const { control } = useFormContext();
 
   if (field.type === 'object') {
     return (
-      <div className="flex flex-col gap-2">
+      <div {...props} className={cn('flex flex-col gap-2', props.className)}>
         <div className="inline-flex gap-1 text-sm text-foreground">
           {field.name}
           {field.isRequired ? <span className="text-red-500">*</span> : null}
@@ -333,7 +335,7 @@ function InputField({
           </code>
         </div>
         <p className="text-xs">{field.description}</p>
-        <div className="flex flex-col gap-2 rounded-lg border p-2">
+        <div className="flex flex-col gap-2 rounded-lg border p-4">
           {field.properties.map((child) => (
             <InputField key={child.name} field={child} namePrefix={fieldName} />
           ))}
@@ -349,6 +351,7 @@ function InputField({
         label={field.name}
         description={field.description}
         items={field.items}
+        {...props}
       />
     );
   }
@@ -358,7 +361,7 @@ function InputField({
       control={control}
       name={fieldName}
       render={({ field: { value, ...restField } }) => (
-        <FormItem>
+        <FormItem {...props}>
           <FormLabel className="inline-flex gap-1 text-sm text-foreground">
             {field.name}
             {field.isRequired ? <span className="text-red-500">*</span> : null}
@@ -388,6 +391,7 @@ interface ArrayInputProps {
   label?: string;
   description?: string;
   items: RequestField;
+  className?: string;
 }
 
 function ArrayInput({
@@ -395,6 +399,7 @@ function ArrayInput({
   label,
   description,
   items,
+  ...props
 }: ArrayInputProps): React.ReactElement {
   const { control } = useFormContext();
   const { fields, append, remove } = useFieldArray({ control, name });
@@ -404,38 +409,46 @@ function ArrayInput({
   }, [append, items]);
 
   return (
-    <div className="flex flex-col gap-2">
+    <div {...props} className={cn('flex flex-col gap-2', props.className)}>
       <div className="inline-flex gap-2 text-sm text-foreground">
         {label}
         <code className="ms-auto text-xs text-muted-foreground">array</code>
       </div>
       <p className="text-xs">{description}</p>
-      <div className="flex flex-col gap-4 rounded-lg border p-4">
+      <div className="flex flex-col gap-2">
         {fields.map((field, index) => (
-          <div key={field.id}>
-            <InputField field={items} namePrefix={`${name}.${String(index)}`} />
+          <div key={field.id} className="flex flex-row items-start">
+            <InputField
+              field={items}
+              fieldName={`${name}.${String(index)}`}
+              className="flex-1"
+            />
             <button
               type="button"
+              aria-label="Remove Item"
               className={cn(
                 buttonVariants({
                   color: 'ghost',
-                  className: 'absolute end-2 top-0 text-muted-foreground',
+                  className: 'text-muted-foreground p-1 -mt-1',
                 }),
               )}
               onClick={() => {
                 remove(index);
               }}
             >
-              <Trash2Icon className="size-4 text-muted-foreground" />
+              <Trash2Icon className="size-4" />
             </button>
           </div>
         ))}
         <button
           type="button"
-          className={cn(buttonVariants({ color: 'secondary' }))}
+          className={cn(
+            buttonVariants({ color: 'secondary', className: 'gap-1.5' }),
+          )}
           onClick={handleAppend}
         >
-          <PlusIcon className="size-4 text-foreground" />
+          <PlusIcon className="size-4" />
+          New Item
         </button>
       </div>
     </div>

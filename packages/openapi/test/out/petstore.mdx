@@ -162,7 +162,7 @@ export interface Response {
 | `201` | Null response |
 | `default` | unexpected error |
 
-<APIPlayground authorization={undefined} method={"POST"} route={"/pets"} path={[]} query={[]} header={[]} body={{"type":"null","isRequired":false}}>
+<APIPlayground authorization={undefined} method={"POST"} route={"/pets"} path={[]} query={[]} header={[]} body={{"type":"object","isRequired":false,"name":"body","properties":[{"type":"number","defaultValue":"","isRequired":true,"name":"id"},{"type":"string","defaultValue":"","isRequired":true,"name":"name"},{"type":"string","defaultValue":"","isRequired":false,"name":"tag"}]}}>
 
 </APIPlayground>
 

@@ -80,7 +80,7 @@ Phone number for the ticket purchaser (optional).
 | `400` | Bad request |
 | `404` | Not found |
 
-<APIPlayground authorization={{"type":"string","name":"authorization","defaultValue":"Bearer","isRequired":true,"description":"The authorization token"}} method={"POST"} route={"/tickets"} path={[]} query={[]} header={[]} body={{"type":"null","isRequired":false}}>
+<APIPlayground authorization={{"type":"string","name":"authorization","defaultValue":"Bearer","isRequired":true,"description":"The authorization token"}} method={"POST"} route={"/tickets"} path={[]} query={[]} header={[]} body={{"type":"object","isRequired":false,"name":"body","description":"Request payload used for purchasing museum tickets.","properties":[{"type":"string","defaultValue":"event","isRequired":true,"name":"ticketType","description":"Type of ticket being purchased. Use `general` for regular museum entry and `event` for tickets to special events."},{"type":"string","defaultValue":"3be6453c-03eb-4357-ae5a-984a0e574a54","isRequired":false,"name":"eventId","description":"Identifier for a special event."},{"type":"string","defaultValue":"2023-10-29","isRequired":true,"name":"ticketDate","description":"Date that the ticket is valid for."},{"type":"string","defaultValue":"museum-lover@example.com","isRequired":true,"name":"email","description":"Email address for ticket purchaser."},{"type":"string","defaultValue":"+1(234)-567-8910","isRequired":false,"name":"phone","description":"Phone number for the ticket purchaser (optional)."}]}}>
 
 </APIPlayground>
 
