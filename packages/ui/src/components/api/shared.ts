@@ -1,4 +1,9 @@
 import { cva, type VariantProps } from 'class-variance-authority';
+import type {
+  PrimitiveRequestField,
+  ReferenceSchema,
+  RequestSchema,
+} from 'fumadocs-openapi';
 
 export const badgeVariants = cva(
   'rounded border px-1.5 py-1 text-xs font-medium leading-[12px]',
@@ -33,4 +38,45 @@ export function getBadgeColor(
     default:
       return 'green';
   }
+}
+
+export type References = Record<string, RequestSchema>;
+
+export function getDefaultValue(
+  item: RequestSchema,
+  context: References,
+): unknown {
+  if (item.type === 'object')
+    return Object.fromEntries(
+      Object.entries(item.properties).map(([key, prop]) => [
+        key,
+        getDefaultValue(context[prop.schema], context),
+      ]),
+    );
+
+  if (item.type === 'array') return [];
+  if (item.type === 'null') return null;
+  if (item.type === 'switcher') return 0;
+
+  return String(item.defaultValue);
+}
+
+export function getDefaultValues(
+  field: PrimitiveRequestField[],
+  context: References,
+): Record<string, unknown> {
+  return Object.fromEntries(
+    field.map((p) => [p.name, getDefaultValue(p, context)]),
+  );
+}
+
+export function resolve(
+  reference: ReferenceSchema,
+  context: References,
+): RequestSchema {
+  return {
+    ...context[reference.schema],
+    description: reference.description,
+    isRequired: reference.isRequired,
+  };
 }

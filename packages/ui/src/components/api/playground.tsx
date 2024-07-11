@@ -1,4 +1,11 @@
-import { type HTMLAttributes, useCallback, useEffect, useState } from 'react';
+import {
+  createContext,
+  type HTMLAttributes,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 import { useFieldArray, useForm, useFormContext } from 'react-hook-form';
 import {
   CircleCheckIcon,
@@ -7,12 +14,7 @@ import {
   Trash2Icon,
 } from 'lucide-react';
 import useSWRImmutable from 'swr/immutable';
-import type {
-  APIPlaygroundProps,
-  PrimitiveRequestField,
-  RequestSchema,
-  ReferenceSchema,
-} from 'fumadocs-openapi';
+import type { APIPlaygroundProps, RequestSchema } from 'fumadocs-openapi';
 import { useApiContext } from '@/contexts/api';
 import {
   Form,
@@ -29,6 +31,11 @@ import { Accordion, Accordions } from '@/components/accordion';
 import * as Base from '@/components/codeblock';
 import { createBodyFromValue } from '@/components/api/fetcher';
 import { buttonVariants } from '@/theme/variants';
+import {
+  getDefaultValue,
+  getDefaultValues,
+  resolve,
+} from '@/components/api/shared';
 
 interface APIPlaygroundFormData {
   authorization?: string | undefined;
@@ -60,6 +67,8 @@ const statusMap: Record<number, StatusInfo> = {
     icon: CircleXIcon,
   },
 };
+
+const SchemaContext = createContext<Record<string, RequestSchema>>({});
 
 function getStatusInfo(status: number): StatusInfo {
   if (status in statusMap) {
@@ -114,33 +123,6 @@ function CodeBlock({
     <Base.CodeBlock className="my-0">
       <Base.Pre {...props} dangerouslySetInnerHTML={{ __html: html }} />
     </Base.CodeBlock>
-  );
-}
-
-type Context = Record<string, RequestSchema>;
-
-function getDefaultValue(item: RequestSchema, context: Context): unknown {
-  if (item.type === 'object')
-    return Object.fromEntries(
-      Object.entries(item.properties).map(([key, prop]) => [
-        key,
-        getDefaultValue(context[prop.schema], context),
-      ]),
-    );
-
-  if (item.type === 'array') return [];
-  if (item.type === 'null') return null;
-  if (item.type === 'switcher') return 0;
-
-  return String(item.defaultValue);
-}
-
-function getDefaultValues(
-  field: PrimitiveRequestField[],
-  context: Context,
-): Record<string, unknown> {
-  return Object.fromEntries(
-    field.map((p) => [p.name, getDefaultValue(p, context)]),
   );
 }
 
@@ -200,7 +182,7 @@ export function APIPlayground({
 
       const bodyValue =
         body && input.body && Object.keys(input.body).length > 0
-          ? createBodyFromValue(input.body, body)
+          ? createBodyFromValue(input.body, body, schemas)
           : undefined;
       const response = await fetch(url, {
         method,
@@ -232,138 +214,122 @@ export function APIPlayground({
 
   return (
     <Form {...form}>
-      <form
-        className="not-prose flex flex-col gap-4 rounded-lg border bg-card p-4"
-        onSubmit={onSubmit as React.FormEventHandler}
-      >
-        <div className="flex flex-row gap-2">
-          <code className="flex-1 overflow-auto rounded-lg border bg-secondary px-3 py-1.5 text-sm">
-            {route}
-          </code>
-          <button
-            type="submit"
-            className={cn(buttonVariants({ color: 'secondary' }))}
-            disabled={testQuery.isLoading}
-          >
-            Send
-          </button>
-        </div>
+      <SchemaContext.Provider value={schemas}>
+        <form
+          className="not-prose flex flex-col gap-4 rounded-lg border bg-card p-4"
+          onSubmit={onSubmit as React.FormEventHandler}
+        >
+          <div className="flex flex-row gap-2">
+            <code className="flex-1 overflow-auto rounded-lg border bg-secondary px-3 py-1.5 text-sm">
+              {route}
+            </code>
+            <button
+              type="submit"
+              className={cn(buttonVariants({ color: 'secondary' }))}
+              disabled={testQuery.isLoading}
+            >
+              Send
+            </button>
+          </div>
 
-        <Accordions type="multiple" className="-m-4 mt-2 border-0 text-sm">
-          {authorization ? (
-            <Accordion title="Authorization">
-              <InputField
-                name="Authorization"
-                fieldName="authorization"
-                field={authorization}
-                context={schemas}
-              />
-            </Accordion>
-          ) : null}
-
-          {path.length > 0 ? (
-            <Accordion title="Path">
-              {path.map((field) => (
+          <Accordions type="multiple" className="-m-4 mt-2 border-0 text-sm">
+            {authorization ? (
+              <Accordion title="Authorization">
                 <InputField
-                  key={field.name}
-                  field={field}
-                  name={field.name}
-                  fieldName={`path.${field.name}`}
-                  context={schemas}
+                  name="Authorization"
+                  fieldName="authorization"
+                  field={authorization}
                 />
-              ))}
-            </Accordion>
-          ) : null}
+              </Accordion>
+            ) : null}
 
-          {query.length > 0 ? (
-            <Accordion title="Query">
-              <div className="flex flex-col gap-2">
-                {query.map((field) => (
+            {path.length > 0 ? (
+              <Accordion title="Path">
+                {path.map((field) => (
                   <InputField
                     key={field.name}
                     field={field}
                     name={field.name}
-                    fieldName={`query.${field.name}`}
-                    context={schemas}
+                    fieldName={`path.${field.name}`}
                   />
                 ))}
-              </div>
-            </Accordion>
-          ) : null}
-
-          {header.length > 0 ? (
-            <Accordion title="Headers">
-              {header.map((field) => (
-                <InputField
-                  key={field.name}
-                  field={field}
-                  name={field.name}
-                  fieldName={`header.${field.name}`}
-                  context={schemas}
-                />
-              ))}
-            </Accordion>
-          ) : null}
-
-          {body ? (
-            <Accordion title="Body">
-              <InputField
-                field={body}
-                name="Body"
-                fieldName="body"
-                context={schemas}
-              />
-            </Accordion>
-          ) : null}
-        </Accordions>
-
-        {testQuery.data ? (
-          <div className="flex flex-col gap-3 rounded-lg border bg-card p-4">
-            <div className="inline-flex items-center gap-1.5 text-sm">
-              {StatusIcon ? (
-                <StatusIcon className={cn('size-4', statusInfo.color)} />
-              ) : null}
-              <span className="font-medium text-foreground">
-                {testQuery.data.status}
-              </span>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              {statusInfo?.description}
-            </p>
-            {testQuery.data.data ? (
-              <CodeBlock
-                code={JSON.stringify(testQuery.data.data, null, 2)}
-                className="max-h-[288px]"
-              />
+              </Accordion>
             ) : null}
-          </div>
-        ) : null}
-      </form>
+
+            {query.length > 0 ? (
+              <Accordion title="Query">
+                <div className="flex flex-col gap-2">
+                  {query.map((field) => (
+                    <InputField
+                      key={field.name}
+                      field={field}
+                      name={field.name}
+                      fieldName={`query.${field.name}`}
+                    />
+                  ))}
+                </div>
+              </Accordion>
+            ) : null}
+
+            {header.length > 0 ? (
+              <Accordion title="Headers">
+                {header.map((field) => (
+                  <InputField
+                    key={field.name}
+                    field={field}
+                    name={field.name}
+                    fieldName={`header.${field.name}`}
+                  />
+                ))}
+              </Accordion>
+            ) : null}
+
+            {body ? (
+              <Accordion title="Body">
+                <InputField field={body} name="Body" fieldName="body" />
+              </Accordion>
+            ) : null}
+          </Accordions>
+
+          {testQuery.data ? (
+            <div className="flex flex-col gap-3 rounded-lg border bg-card p-4">
+              <div className="inline-flex items-center gap-1.5 text-sm">
+                {StatusIcon ? (
+                  <StatusIcon className={cn('size-4', statusInfo.color)} />
+                ) : null}
+                <span className="font-medium text-foreground">
+                  {testQuery.data.status}
+                </span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {statusInfo?.description}
+              </p>
+              {testQuery.data.data ? (
+                <CodeBlock
+                  code={JSON.stringify(testQuery.data.data, null, 2)}
+                  className="max-h-[288px]"
+                />
+              ) : null}
+            </div>
+          ) : null}
+        </form>
+      </SchemaContext.Provider>
     </Form>
   );
-}
-
-function resolve(reference: ReferenceSchema, context: Context): RequestSchema {
-  return {
-    ...context[reference.schema],
-    description: reference.description,
-    isRequired: reference.isRequired,
-  };
 }
 
 function InputField({
   field,
   name,
   fieldName,
-  context,
   ...props
 }: {
   name?: string;
   field: RequestSchema;
-  context: Context;
   fieldName: string;
   className?: string;
 }): React.ReactElement {
+  const context = useContext(SchemaContext);
   const { control } = useFormContext();
 
   if (field.type === 'object') {
@@ -384,7 +350,6 @@ function InputField({
               name={key}
               field={resolve(child, context)}
               fieldName={`${fieldName}.${key}`}
-              context={context}
             />
           ))}
         </div>
@@ -399,7 +364,6 @@ function InputField({
         label={name}
         description={field.description}
         items={context[field.items]}
-        context={context}
         {...props}
       />
     );
@@ -440,7 +404,6 @@ interface ArrayInputProps {
   label?: string;
   description?: string;
   items: RequestSchema;
-  context: Context;
   className?: string;
 }
 
@@ -449,10 +412,10 @@ function ArrayInput({
   label,
   description,
   items,
-  context,
   ...props
 }: ArrayInputProps): React.ReactElement {
   const { control } = useFormContext();
+  const context = useContext(SchemaContext);
   const { fields, append, remove } = useFieldArray({ control, name });
 
   const handleAppend = useCallback(() => {
@@ -473,7 +436,6 @@ function ArrayInput({
               field={items}
               fieldName={`${name}.${String(index)}`}
               className="flex-1"
-              context={context}
             />
             <button
               type="button"

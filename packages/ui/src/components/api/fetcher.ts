@@ -1,13 +1,15 @@
-import type { RequestField } from 'fumadocs-openapi';
+import type { RequestSchema } from 'fumadocs-openapi';
+import { resolve } from '@/components/api/shared';
 
 /**
  * Create request body from value
  */
 export function createBodyFromValue(
   value: unknown,
-  schema: RequestField,
+  schema: RequestSchema,
+  references: Record<string, RequestSchema>,
 ): unknown {
-  return convertValue(value, schema);
+  return convertValue(value, schema, references);
 }
 
 /**
@@ -15,27 +17,38 @@ export function createBodyFromValue(
  *
  * @param value - the original value
  * @param schema - the schema of field
+ * @param references - schema references
  */
-function convertValue(value: unknown, schema: RequestField): unknown {
+function convertValue(
+  value: unknown,
+  schema: RequestSchema,
+  references: Record<string, RequestSchema>,
+): unknown {
   if (value === '' || value === undefined || value === null) {
     return schema.type === 'boolean' ? false : '';
   }
 
   if (Array.isArray(value)) {
-    return value.map((item: unknown) => convertValue(item, schema));
+    return value.map((item: unknown) => convertValue(item, schema, references));
   }
 
   if (typeof value === 'object' && schema.type === 'object')
     return Object.fromEntries(
       Object.keys(value).map((key) => {
         const prop = value[key as keyof typeof value];
-        const schemaItem = schema.properties.find((item) => item.name === key);
 
-        if (!schemaItem) {
-          return [key, prop];
+        if (key in schema.properties) {
+          return [
+            key,
+            convertValue(
+              prop,
+              resolve(schema.properties[key], references),
+              references,
+            ),
+          ];
         }
 
-        return [key, convertValue(prop, schemaItem)];
+        return [key, prop];
       }),
     );
 
