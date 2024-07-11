@@ -14,6 +14,7 @@ export function SearchToggle(
     <button
       type="button"
       className={cn(
+        'search-toggle',
         buttonVariants({
           size: 'icon',
           color: 'ghost',
