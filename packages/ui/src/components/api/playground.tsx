@@ -36,6 +36,7 @@ import {
   getDefaultValues,
   resolve,
 } from '@/components/api/shared';
+import { Tab, Tabs } from '@/components/tabs';
 
 interface APIPlaygroundFormData {
   authorization?: string | undefined;
@@ -286,7 +287,11 @@ export function APIPlayground({
 
             {body ? (
               <Accordion title="Body">
-                <InputField field={body} name="Body" fieldName="body" />
+                {renderExtracted({
+                  field: body,
+                  fieldName: 'body',
+                  label: 'Body',
+                })}
               </Accordion>
             ) : null}
           </Accordions>
@@ -318,6 +323,126 @@ export function APIPlayground({
   );
 }
 
+interface RenderOptions {
+  field: RequestSchema;
+  fieldName: string;
+  className?: string;
+}
+
+function renderInner({ field, ...props }: RenderOptions): React.ReactNode {
+  if (field.type === 'object') return <ObjectInput field={field} {...props} />;
+  if (field.type === 'switcher') return <Switcher field={field} {...props} />;
+  if (field.type === 'array') return <ArrayInput field={field} {...props} />;
+  if (field.type === 'null') return null;
+
+  return <NormalInput field={field} {...props} />;
+}
+
+function renderExtracted({
+  field,
+  fieldName,
+  label,
+}: {
+  field: RequestSchema;
+  fieldName: string;
+  label: string;
+}): React.ReactNode {
+  if (field.type === 'object')
+    return (
+      <ObjectInput
+        field={field}
+        fieldName={fieldName}
+        className="border-0 p-0"
+      />
+    );
+
+  return <InputField name={label} field={field} fieldName={fieldName} />;
+}
+
+interface InputProps<Type> extends HTMLAttributes<HTMLDivElement> {
+  field: Extract<RequestSchema, { type: Type }>;
+  fieldName: string;
+}
+
+function InputContainer(
+  props: {
+    name?: string;
+    required: boolean;
+    type?: string;
+    description?: string;
+  } & HTMLAttributes<HTMLDivElement>,
+): React.ReactElement {
+  return (
+    <div {...props} className={cn('flex flex-col gap-2', props.className)}>
+      <div className={cn(labelVariants(), 'inline-flex gap-1')}>
+        {props.name}
+        {props.required ? <span className="text-red-500">*</span> : null}
+        {props.type ? (
+          <code className="ms-auto text-xs text-muted-foreground">
+            {props.type}
+          </code>
+        ) : null}
+      </div>
+      <p className="text-xs">{props.description}</p>
+      {props.children}
+    </div>
+  );
+}
+
+function ObjectInput({
+  field,
+  fieldName,
+  ...props
+}: InputProps<'object'>): React.ReactElement {
+  const context = useContext(SchemaContext);
+
+  return (
+    <div
+      {...props}
+      className={cn(
+        'flex flex-col gap-4 rounded-lg border p-3',
+        props.className,
+      )}
+    >
+      {Object.entries(field.properties).map(([key, child]) => (
+        <InputField
+          key={key}
+          name={key}
+          field={resolve(child, context)}
+          fieldName={`${fieldName}.${key}`}
+        />
+      ))}
+    </div>
+  );
+}
+
+function Switcher({
+  field,
+  fieldName,
+  className,
+}: InputProps<'switcher'>): React.ReactElement {
+  const items = Object.keys(field.items);
+  const context = useContext(SchemaContext);
+
+  return (
+    <Tabs
+      items={items}
+      defaultValue={undefined}
+      className={cn('my-0', className)}
+    >
+      {items.map((item) => (
+        <Tab key={item} value={item}>
+          {renderExtracted({
+            field: resolve(field.items[item], context),
+            fieldName: `${fieldName}.${item}`,
+            label: 'Value',
+          })}
+        </Tab>
+      ))}
+    </Tabs>
+  );
+}
+
 function InputField({
   field,
   name,
@@ -328,53 +453,58 @@ function InputField({
   field: RequestSchema;
   fieldName: string;
   className?: string;
-}): React.ReactElement {
+}): React.ReactNode {
   const context = useContext(SchemaContext);
-  const { control } = useFormContext();
 
   if (field.type === 'object') {
     return (
-      <div {...props} className={cn('flex flex-col gap-2', props.className)}>
-        <div className={cn(labelVariants(), 'inline-flex gap-1')}>
-          {name}
-          {field.isRequired ? <span className="text-red-500">*</span> : null}
-          <code className="ms-auto text-xs text-muted-foreground">
-            {field.type}
-          </code>
-        </div>
-        <p className="text-xs">{field.description}</p>
-        <div className="flex flex-col gap-4 rounded-lg border p-4">
-          {Object.entries(field.properties).map(([key, child]) => (
-            <InputField
-              key={key}
-              name={key}
-              field={resolve(child, context)}
-              fieldName={`${fieldName}.${key}`}
-            />
-          ))}
-        </div>
-      </div>
+      <InputContainer
+        name={name}
+        required={field.isRequired}
+        type={field.type}
+        description={field.description}
+        {...props}
+      >
+        <ObjectInput field={field} fieldName={fieldName} />
+      </InputContainer>
     );
   }
 
   if (field.type === 'array') {
     return (
-      <ArrayInput
-        name={fieldName}
-        label={name}
-        description={field.description}
-        items={context[field.items]}
+      <InputContainer
+        name={name}
+        required={field.isRequired}
+        description={field.description ?? context[field.items].description}
+        type="array"
         {...props}
-      />
+      >
+        <ArrayInput fieldName={fieldName} field={field} />
+      </InputContainer>
     );
   }
 
+  if (field.type === 'switcher') {
+    return (
+      <InputContainer
+        name={name}
+        description={field.description}
+        required={field.isRequired}
+        {...props}
+      >
+        <Switcher field={field} fieldName={fieldName} />
+      </InputContainer>
+    );
+  }
+
+  if (field.type === 'null') return null;
+
   return (
-    <FormField
-      control={control}
-      name={fieldName}
-      render={({ field: { value, ...restField } }) => (
-        <FormItem {...props}>
+    <NormalInput
+      field={field}
+      fieldName={fieldName}
+      header={
+        <>
           <FormLabel className="inline-flex gap-1">
             {name}
             {field.isRequired ? <span className="text-red-500">*</span> : null}
@@ -385,6 +515,29 @@ function InputField({
           <FormDescription className="text-xs">
             {field.description}
           </FormDescription>
+        </>
+      }
+      {...props}
+    />
+  );
+}
+
+function NormalInput({
+  fieldName,
+  header,
+  ...props
+}: InputProps<'string' | 'boolean' | 'number'> & {
+  header?: React.ReactNode;
+}): React.ReactElement {
+  const { control } = useFormContext();
+
+  return (
+    <FormField
+      control={control}
+      name={fieldName}
+      render={({ field: { value, ...restField } }) => (
+        <FormItem {...props}>
+          {header}
           <FormControl>
             <Input
               placeholder="Enter value"
@@ -399,72 +552,66 @@ function InputField({
   );
 }
 
-interface ArrayInputProps {
-  name: string;
-  label?: string;
-  description?: string;
-  items: RequestSchema;
-  className?: string;
-}
-
 function ArrayInput({
-  name,
-  label,
-  description,
-  items,
+  fieldName,
+  field,
   ...props
-}: ArrayInputProps): React.ReactElement {
+}: InputProps<'array'>): React.ReactElement {
   const { control } = useFormContext();
   const context = useContext(SchemaContext);
-  const { fields, append, remove } = useFieldArray({ control, name });
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: fieldName,
+  });
+  const items = context[field.items];
 
   const handleAppend = useCallback(() => {
     append(getDefaultValue(items, context));
   }, [append, context, items]);
 
   return (
-    <div {...props} className={cn('flex flex-col gap-2', props.className)}>
-      <div className={cn(labelVariants({ className: 'inline-flex gap-1' }))}>
-        {label}
-        <code className="ms-auto text-xs text-muted-foreground">array</code>
-      </div>
-      <p className="text-xs">{description}</p>
-      <div className="flex flex-col gap-2">
-        {fields.map((field, index) => (
-          <div key={field.id} className="flex flex-row items-start">
-            <InputField
-              field={items}
-              fieldName={`${name}.${String(index)}`}
-              className="flex-1"
-            />
-            <button
-              type="button"
-              aria-label="Remove Item"
-              className={cn(
-                buttonVariants({
-                  color: 'ghost',
-                  className: 'text-muted-foreground p-1 -mt-1',
-                }),
-              )}
-              onClick={() => {
-                remove(index);
-              }}
-            >
-              <Trash2Icon className="size-4" />
-            </button>
-          </div>
-        ))}
-        <button
-          type="button"
-          className={cn(
-            buttonVariants({ color: 'secondary', className: 'gap-1.5' }),
-          )}
-          onClick={handleAppend}
-        >
-          <PlusIcon className="size-4" />
-          New Item
-        </button>
-      </div>
+    <div
+      {...props}
+      className={cn(
+        'flex flex-col gap-2 rounded-lg border p-3',
+        props.className,
+      )}
+    >
+      {fields.map((item, index) => (
+        <div key={item.id} className="relative">
+          {renderInner({
+            field: items,
+            fieldName: `${fieldName}.${String(index)}`,
+            className: 'flex-1',
+          })}
+          <button
+            type="button"
+            aria-label="Remove Item"
+            className={cn(
+              buttonVariants({
+                color: 'ghost',
+                className:
+                  'absolute -top-2 -end-2 text-muted-foreground p-1 -mt-1',
+              }),
+            )}
+            onClick={() => {
+              remove(index);
+            }}
+          >
+            <Trash2Icon className="size-4" />
+          </button>
+        </div>
+      ))}
+      <button
+        type="button"
+        className={cn(
+          buttonVariants({ color: 'secondary', className: 'gap-1.5' }),
+        )}
+        onClick={handleAppend}
+      >
+        <PlusIcon className="size-4" />
+        New Item
+      </button>
     </div>
   );
 }

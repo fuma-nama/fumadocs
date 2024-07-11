@@ -1,0 +1,617 @@
+---
+title: ratelimits
+full: true
+---
+
+import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible, Requests, Request, APIPlayground } from "fumadocs-ui/components/api";
+
+<Root baseUrl={"https://api.unkey.dev"}>
+
+<div className="bg-secondary p-4 rounded-lg">Demo Only</div>
+
+<API>
+
+<APIInfo method={"POST"} route={"/v1/ratelimits.limit"}>
+
+## limit
+
+### Authorization
+
+<Property name={"Authorization"} type={"Bearer <token>"} required={true}>
+
+In: `header`
+
+</Property>
+
+### Request Body
+
+<Property name={"namespace"} type={"string"} required={false} deprecated={undefined}>
+
+Namespaces group different limits together for better analytics. You might have a namespace for your public API and one for internal tRPC routes.
+
+<span>Example: `"email.outbound"`</span>
+
+<span>Default: `"default"`</span>
+
+</Property>
+
+<Property name={"identifier"} type={"string"} required={true} deprecated={undefined}>
+
+Identifier of your user, this can be their userId, an email, an ip or anything else.
+
+<span>Example: `"user_123"`</span>
+
+</Property>
+
+<Property name={"limit"} type={"integer"} required={true} deprecated={undefined}>
+
+How many requests may pass in a given window.
+
+<span>Example: `10`</span>
+
+<span>Minimum: `0`</span>
+
+</Property>
+
+<Property name={"duration"} type={"integer"} required={true} deprecated={undefined}>
+
+The window duration in milliseconds
+
+<span>Example: `60000`</span>
+
+<span>Minimum: `1000`</span>
+
+</Property>
+
+<Property name={"cost"} type={"integer"} required={false} deprecated={undefined}>
+
+Expensive requests may use up more tokens. You can specify a cost to the request here and we'll deduct this many tokens in the current window. 
+If there are not enough tokens left, the request is denied.
+                
+Set it to 0 to receive the current limit without changing anything.
+
+<span>Example: `2`</span>
+
+<span>Default: `1`</span>
+
+<span>Minimum: `0`</span>
+
+</Property>
+
+<Property name={"async"} type={"boolean"} required={false} deprecated={undefined}>
+
+Async will return a response immediately, lowering latency at the cost of accuracy.
+
+<span>Default: `false`</span>
+
+</Property>
+
+<Property name={"meta"} type={"object"} required={false} deprecated={undefined}>
+
+Attach any metadata to this request
+
+<ObjectCollapsible name={"meta"}>
+
+<Property name={"[key: string]"} type={"Any properties in string, boolean, number, null, null"} required={false} deprecated={undefined}>
+
+</Property>
+
+</ObjectCollapsible>
+
+</Property>
+
+<Property name={"resources"} type={"array<object>"} required={false} deprecated={undefined}>
+
+Resources that are about to be accessed by the user
+
+<span>Example: `[{"type":"project","id":"p_123","name":"dub"}]`</span>
+
+<ObjectCollapsible name={"Object 1"}>
+
+<Property name={"type"} type={"string"} required={true} deprecated={undefined}>
+
+The type of resource
+
+<span>Example: `"organization"`</span>
+
+</Property>
+
+<Property name={"id"} type={"string"} required={true} deprecated={undefined}>
+
+The unique identifier for the resource
+
+<span>Example: `"org_123"`</span>
+
+</Property>
+
+<Property name={"name"} type={"string"} required={false} deprecated={undefined}>
+
+A human readable name for this resource
+
+<span>Example: `"unkey"`</span>
+
+</Property>
+
+<Property name={"meta"} type={"object"} required={false} deprecated={undefined}>
+
+Attach any metadata to this resources
+
+<ObjectCollapsible name={"meta"}>
+
+<Property name={"[key: string]"} type={"Any properties in string, boolean, number, null, null"} required={false} deprecated={undefined}>
+
+</Property>
+
+</ObjectCollapsible>
+
+</Property>
+
+</ObjectCollapsible>
+
+</Property>
+
+| Status code | Description |
+| ----------- | ----------- |
+| `200` |  |
+| `400` | The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). |
+| `401` | Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. |
+| `403` | The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. |
+| `404` | The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. |
+| `409` | This response is sent when a request conflicts with the current state of the server. |
+| `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
+| `500` | The server has encountered a situation it does not know how to handle. |
+
+<APIPlayground authorization={{"type":"string","name":"authorization","defaultValue":"Bearer","isRequired":true,"description":"The authorization token"}} method={"POST"} route={"/v1/ratelimits.limit"} path={[]} query={[]} header={[]} body={{"type":"object","isRequired":true,"properties":{"namespace":{"type":"ref","isRequired":false,"schema":"0"},"identifier":{"type":"ref","isRequired":true,"schema":"1"},"limit":{"type":"ref","isRequired":true,"schema":"2"},"duration":{"type":"ref","isRequired":true,"schema":"3"},"cost":{"type":"ref","isRequired":false,"schema":"4"},"async":{"type":"ref","isRequired":false,"schema":"5"},"meta":{"type":"ref","isRequired":false,"schema":"6"},"resources":{"type":"ref","isRequired":false,"schema":"7"}}}} schemas={{"0":{"type":"string","defaultValue":"email.outbound","isRequired":false,"description":"Namespaces group different limits together for better analytics. You might have a namespace for your public API and one for internal tRPC routes."},"1":{"type":"string","defaultValue":"user_123","isRequired":false,"description":"Identifier of your user, this can be their userId, an email, an ip or anything else."},"2":{"type":"number","defaultValue":10,"isRequired":false,"description":"How many requests may pass in a given window."},"3":{"type":"number","defaultValue":60000,"isRequired":false,"description":"The window duration in milliseconds"},"4":{"type":"number","defaultValue":2,"isRequired":false,"description":"Expensive requests may use up more tokens. You can specify a cost to the request here and we'll deduct this many tokens in the current window. \nIf there are not enough tokens left, the request is denied.\n                \nSet it to 0 to receive the current limit without changing anything."},"5":{"type":"boolean","defaultValue":"","isRequired":false,"description":"Async will return a response immediately, lowering latency at the cost of accuracy."},"6":{"type":"object","isRequired":false,"description":"Attach any metadata to this request","properties":{}},"7":{"type":"array","description":"Resources that are about to be accessed by the user","isRequired":false,"items":"8"},"8":{"type":"object","isRequired":false,"properties":{"type":{"type":"ref","isRequired":true,"schema":"9"},"id":{"type":"ref","isRequired":true,"schema":"10"},"name":{"type":"ref","isRequired":false,"schema":"11"},"meta":{"type":"ref","isRequired":false,"schema":"12"}}},"9":{"type":"string","defaultValue":"organization","isRequired":false,"description":"The type of resource"},"10":{"type":"string","defaultValue":"org_123","isRequired":false,"description":"The unique identifier for the resource"},"11":{"type":"string","defaultValue":"unkey","isRequired":false,"description":"A human readable name for this resource"},"12":{"type":"object","isRequired":false,"description":"Attach any metadata to this resources","properties":{}}}}>
+
+</APIPlayground>
+
+</APIInfo>
+
+<APIExample>
+
+<Requests items={["cURL","JavaScript"]}>
+
+<Request value={"cURL"}>
+
+```bash
+curl -X POST "https://api.unkey.dev/v1/ratelimits.limit" \
+  -d '{
+  "namespace": "email.outbound",
+  "identifier": "user_123",
+  "limit": 10,
+  "duration": 60000,
+  "cost": 2,
+  "async": false,
+  "meta": {
+    "property1": "string",
+    "property2": "string"
+  },
+  "resources": [
+    {
+      "type": "project",
+      "id": "p_123",
+      "name": "dub"
+    }
+  ]
+}'
+```
+
+</Request>
+
+<Request value={"JavaScript"}>
+
+```js
+fetch("https://api.unkey.dev/v1/ratelimits.limit", {
+  method: "POST"
+});
+```
+
+</Request>
+
+</Requests>
+
+<Responses items={["200","400","401","403","404","409","429","500"]}>
+
+<Response value={"200"}>
+
+<ResponseTypes>
+
+<ExampleResponse>
+
+```json
+{
+  "success": true,
+  "limit": 10,
+  "remaining": 9,
+  "reset": 1709804263654
+}
+```
+
+</ExampleResponse>
+
+<TypeScriptResponse>
+
+```ts
+export interface Response {
+  /**
+   * Returns true if the request should be processed, false if it was rejected.
+   */
+  success: boolean;
+  /**
+   * How many requests are allowed within a window.
+   */
+  limit: number;
+  /**
+   * How many requests can still be made in the current window.
+   */
+  remaining: number;
+  /**
+   * A unix millisecond timestamp when the limits reset.
+   */
+  reset: number;
+}
+```
+
+</TypeScriptResponse>
+
+</ResponseTypes>
+
+</Response>
+
+<Response value={"400"}>
+
+<ResponseTypes>
+
+<ExampleResponse>
+
+```json
+{
+  "error": {
+    "code": "BAD_REQUEST",
+    "docs": "https://unkey.dev/docs/api-reference/errors/code/BAD_REQUEST",
+    "message": "string",
+    "requestId": "req_1234"
+  }
+}
+```
+
+</ExampleResponse>
+
+<TypeScriptResponse>
+
+```ts
+export interface Response {
+  error: {
+    /**
+     * A machine readable error code.
+     */
+    code: "BAD_REQUEST";
+    /**
+     * A link to our documentation with more details about this error code
+     */
+    docs: string;
+    /**
+     * A human readable explanation of what went wrong
+     */
+    message: string;
+    /**
+     * Please always include the requestId in your error report
+     */
+    requestId: string;
+  };
+}
+```
+
+</TypeScriptResponse>
+
+</ResponseTypes>
+
+</Response>
+
+<Response value={"401"}>
+
+<ResponseTypes>
+
+<ExampleResponse>
+
+```json
+{
+  "error": {
+    "code": "UNAUTHORIZED",
+    "docs": "https://unkey.dev/docs/api-reference/errors/code/UNAUTHORIZED",
+    "message": "string",
+    "requestId": "req_1234"
+  }
+}
+```
+
+</ExampleResponse>
+
+<TypeScriptResponse>
+
+```ts
+export interface Response {
+  error: {
+    /**
+     * A machine readable error code.
+     */
+    code: "UNAUTHORIZED";
+    /**
+     * A link to our documentation with more details about this error code
+     */
+    docs: string;
+    /**
+     * A human readable explanation of what went wrong
+     */
+    message: string;
+    /**
+     * Please always include the requestId in your error report
+     */
+    requestId: string;
+  };
+}
+```
+
+</TypeScriptResponse>
+
+</ResponseTypes>
+
+</Response>
+
+<Response value={"403"}>
+
+<ResponseTypes>
+
+<ExampleResponse>
+
+```json
+{
+  "error": {
+    "code": "FORBIDDEN",
+    "docs": "https://unkey.dev/docs/api-reference/errors/code/FORBIDDEN",
+    "message": "string",
+    "requestId": "req_1234"
+  }
+}
+```
+
+</ExampleResponse>
+
+<TypeScriptResponse>
+
+```ts
+export interface Response {
+  error: {
+    /**
+     * A machine readable error code.
+     */
+    code: "FORBIDDEN";
+    /**
+     * A link to our documentation with more details about this error code
+     */
+    docs: string;
+    /**
+     * A human readable explanation of what went wrong
+     */
+    message: string;
+    /**
+     * Please always include the requestId in your error report
+     */
+    requestId: string;
+  };
+}
+```
+
+</TypeScriptResponse>
+
+</ResponseTypes>
+
+</Response>
+
+<Response value={"404"}>
+
+<ResponseTypes>
+
+<ExampleResponse>
+
+```json
+{
+  "error": {
+    "code": "NOT_FOUND",
+    "docs": "https://unkey.dev/docs/api-reference/errors/code/NOT_FOUND",
+    "message": "string",
+    "requestId": "req_1234"
+  }
+}
+```
+
+</ExampleResponse>
+
+<TypeScriptResponse>
+
+```ts
+export interface Response {
+  error: {
+    /**
+     * A machine readable error code.
+     */
+    code: "NOT_FOUND";
+    /**
+     * A link to our documentation with more details about this error code
+     */
+    docs: string;
+    /**
+     * A human readable explanation of what went wrong
+     */
+    message: string;
+    /**
+     * Please always include the requestId in your error report
+     */
+    requestId: string;
+  };
+}
+```
+
+</TypeScriptResponse>
+
+</ResponseTypes>
+
+</Response>
+
+<Response value={"409"}>
+
+<ResponseTypes>
+
+<ExampleResponse>
+
+```json
+{
+  "error": {
+    "code": "CONFLICT",
+    "docs": "https://unkey.dev/docs/api-reference/errors/code/CONFLICT",
+    "message": "string",
+    "requestId": "req_1234"
+  }
+}
+```
+
+</ExampleResponse>
+
+<TypeScriptResponse>
+
+```ts
+export interface Response {
+  error: {
+    /**
+     * A machine readable error code.
+     */
+    code: "CONFLICT";
+    /**
+     * A link to our documentation with more details about this error code
+     */
+    docs: string;
+    /**
+     * A human readable explanation of what went wrong
+     */
+    message: string;
+    /**
+     * Please always include the requestId in your error report
+     */
+    requestId: string;
+  };
+}
+```
+
+</TypeScriptResponse>
+
+</ResponseTypes>
+
+</Response>
+
+<Response value={"429"}>
+
+<ResponseTypes>
+
+<ExampleResponse>
+
+```json
+{
+  "error": {
+    "code": "TOO_MANY_REQUESTS",
+    "docs": "https://unkey.dev/docs/api-reference/errors/code/TOO_MANY_REQUESTS",
+    "message": "string",
+    "requestId": "req_1234"
+  }
+}
+```
+
+</ExampleResponse>
+
+<TypeScriptResponse>
+
+```ts
+export interface Response {
+  error: {
+    /**
+     * A machine readable error code.
+     */
+    code: "TOO_MANY_REQUESTS";
+    /**
+     * A link to our documentation with more details about this error code
+     */
+    docs: string;
+    /**
+     * A human readable explanation of what went wrong
+     */
+    message: string;
+    /**
+     * Please always include the requestId in your error report
+     */
+    requestId: string;
+  };
+}
+```
+
+</TypeScriptResponse>
+
+</ResponseTypes>
+
+</Response>
+
+<Response value={"500"}>
+
+<ResponseTypes>
+
+<ExampleResponse>
+
+```json
+{
+  "error": {
+    "code": "INTERNAL_SERVER_ERROR",
+    "docs": "https://unkey.dev/docs/api-reference/errors/code/INTERNAL_SERVER_ERROR",
+    "message": "string",
+    "requestId": "req_1234"
+  }
+}
+```
+
+</ExampleResponse>
+
+<TypeScriptResponse>
+
+```ts
+export interface Response {
+  error: {
+    /**
+     * A machine readable error code.
+     */
+    code: "INTERNAL_SERVER_ERROR";
+    /**
+     * A link to our documentation with more details about this error code
+     */
+    docs: string;
+    /**
+     * A human readable explanation of what went wrong
+     */
+    message: string;
+    /**
+     * Please always include the requestId in your error report
+     */
+    requestId: string;
+  };
+}
+```
+
+</TypeScriptResponse>
+
+</ResponseTypes>
+
+</Response>
+
+</Responses>
+
+</APIExample>
+
+</API>
+
+</Root>
