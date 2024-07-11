@@ -38,7 +38,7 @@ export function Toc({ items, header, footer }: TOCProps): ReactElement {
   const { text } = useI18n();
 
   return (
-    <div className="sticky top-0 flex h-dvh w-[220px] shrink-0 flex-col gap-4 pe-2 pt-12 max-lg:hidden xl:w-[260px]">
+    <div className="table-of-contents sticky top-0 flex h-dvh w-[220px] shrink-0 flex-col gap-4 pe-2 pt-12 max-lg:hidden xl:w-[260px]">
       {header}
       <h3 className="-mb-1 -ms-0.5 inline-flex items-center gap-1.5 text-sm text-muted-foreground">
         <Text className="size-4" />
