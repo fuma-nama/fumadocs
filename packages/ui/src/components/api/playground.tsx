@@ -7,7 +7,12 @@ import {
   Trash2Icon,
 } from 'lucide-react';
 import useSWRImmutable from 'swr/immutable';
-import type { APIPlaygroundProps, RequestField } from 'fumadocs-openapi';
+import type {
+  APIPlaygroundProps,
+  PrimitiveRequestField,
+  RequestSchema,
+  ReferenceSchema,
+} from 'fumadocs-openapi';
 import { useApiContext } from '@/contexts/api';
 import {
   Form,
@@ -16,6 +21,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  labelVariants,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/utils/cn';
@@ -111,28 +117,31 @@ function CodeBlock({
   );
 }
 
-function getDefaultValues(arr: RequestField[]): Record<string, unknown> {
-  return Object.fromEntries<unknown>(
-    arr.map((item) => {
-      const key = item.name ?? '';
+type Context = Record<string, RequestSchema>;
 
-      if (item.type === 'object') {
-        return [key, getDefaultValues(item.properties)];
-      }
-
-      return [key, getDefaultValue(item)];
-    }),
-  );
-}
-
-function getDefaultValue(item: RequestField): unknown {
-  if (item.type === 'object') return getDefaultValues(item.properties);
+function getDefaultValue(item: RequestSchema, context: Context): unknown {
+  if (item.type === 'object')
+    return Object.fromEntries(
+      Object.entries(item.properties).map(([key, prop]) => [
+        key,
+        getDefaultValue(context[prop.schema], context),
+      ]),
+    );
 
   if (item.type === 'array') return [];
   if (item.type === 'null') return null;
   if (item.type === 'switcher') return 0;
 
   return String(item.defaultValue);
+}
+
+function getDefaultValues(
+  field: PrimitiveRequestField[],
+  context: Context,
+): Record<string, unknown> {
+  return Object.fromEntries(
+    field.map((p) => [p.name, getDefaultValue(p, context)]),
+  );
 }
 
 export function APIPlayground({
@@ -143,16 +152,17 @@ export function APIPlayground({
   header = [],
   query = [],
   body,
+  schemas,
 }: APIPlaygroundProps & HTMLAttributes<HTMLFormElement>): React.ReactElement {
   const { baseUrl } = useApiContext();
   const [input, setInput] = useState<APIPlaygroundFormData>();
   const form = useForm({
     defaultValues: {
       authorization: authorization?.defaultValue,
-      path: getDefaultValues(path),
-      query: getDefaultValues(query),
-      header: getDefaultValues(header),
-      body: body ? getDefaultValue(body) : undefined,
+      path: getDefaultValues(path, schemas),
+      query: getDefaultValues(query, schemas),
+      header: getDefaultValues(header, schemas),
+      body: body ? getDefaultValue(body, schemas) : undefined,
     },
   });
 
@@ -242,14 +252,25 @@ export function APIPlayground({
         <Accordions type="multiple" className="-m-4 mt-2 border-0 text-sm">
           {authorization ? (
             <Accordion title="Authorization">
-              <InputField fieldName="authorization" field={authorization} />
+              <InputField
+                name="Authorization"
+                fieldName="authorization"
+                field={authorization}
+                context={schemas}
+              />
             </Accordion>
           ) : null}
 
           {path.length > 0 ? (
             <Accordion title="Path">
               {path.map((field) => (
-                <InputField key={field.name} field={field} namePrefix="path" />
+                <InputField
+                  key={field.name}
+                  field={field}
+                  name={field.name}
+                  fieldName={`path.${field.name}`}
+                  context={schemas}
+                />
               ))}
             </Accordion>
           ) : null}
@@ -261,7 +282,9 @@ export function APIPlayground({
                   <InputField
                     key={field.name}
                     field={field}
-                    namePrefix="query"
+                    name={field.name}
+                    fieldName={`query.${field.name}`}
+                    context={schemas}
                   />
                 ))}
               </div>
@@ -271,14 +294,25 @@ export function APIPlayground({
           {header.length > 0 ? (
             <Accordion title="Headers">
               {header.map((field) => (
-                <InputField key={field.name} field={field} namePrefix="query" />
+                <InputField
+                  key={field.name}
+                  field={field}
+                  name={field.name}
+                  fieldName={`header.${field.name}`}
+                  context={schemas}
+                />
               ))}
             </Accordion>
           ) : null}
 
           {body ? (
             <Accordion title="Body">
-              <InputField field={body} namePrefix="body" />
+              <InputField
+                field={body}
+                name="Body"
+                fieldName="body"
+                context={schemas}
+              />
             </Accordion>
           ) : null}
         </Accordions>
@@ -309,17 +343,25 @@ export function APIPlayground({
   );
 }
 
+function resolve(reference: ReferenceSchema, context: Context): RequestSchema {
+  return {
+    ...context[reference.schema],
+    description: reference.description,
+    isRequired: reference.isRequired,
+  };
+}
+
 function InputField({
   field,
-  namePrefix,
-  fieldName = namePrefix
-    ? `${namePrefix}.${field.name ?? ''}`
-    : field.name ?? '',
+  name,
+  fieldName,
+  context,
   ...props
 }: {
-  namePrefix?: string;
-  field: RequestField;
-  fieldName?: string;
+  name?: string;
+  field: RequestSchema;
+  context: Context;
+  fieldName: string;
   className?: string;
 }): React.ReactElement {
   const { control } = useFormContext();
@@ -327,17 +369,23 @@ function InputField({
   if (field.type === 'object') {
     return (
       <div {...props} className={cn('flex flex-col gap-2', props.className)}>
-        <div className="inline-flex gap-1 text-sm text-foreground">
-          {field.name}
+        <div className={cn(labelVariants(), 'inline-flex gap-1')}>
+          {name}
           {field.isRequired ? <span className="text-red-500">*</span> : null}
           <code className="ms-auto text-xs text-muted-foreground">
             {field.type}
           </code>
         </div>
         <p className="text-xs">{field.description}</p>
-        <div className="flex flex-col gap-2 rounded-lg border p-4">
-          {field.properties.map((child) => (
-            <InputField key={child.name} field={child} namePrefix={fieldName} />
+        <div className="flex flex-col gap-4 rounded-lg border p-4">
+          {Object.entries(field.properties).map(([key, child]) => (
+            <InputField
+              key={key}
+              name={key}
+              field={resolve(child, context)}
+              fieldName={`${fieldName}.${key}`}
+              context={context}
+            />
           ))}
         </div>
       </div>
@@ -348,9 +396,10 @@ function InputField({
     return (
       <ArrayInput
         name={fieldName}
-        label={field.name}
+        label={name}
         description={field.description}
-        items={field.items}
+        items={context[field.items]}
+        context={context}
         {...props}
       />
     );
@@ -362,8 +411,8 @@ function InputField({
       name={fieldName}
       render={({ field: { value, ...restField } }) => (
         <FormItem {...props}>
-          <FormLabel className="inline-flex gap-1 text-sm text-foreground">
-            {field.name}
+          <FormLabel className="inline-flex gap-1">
+            {name}
             {field.isRequired ? <span className="text-red-500">*</span> : null}
             <code className="ms-auto text-xs text-muted-foreground">
               {field.type}
@@ -374,7 +423,7 @@ function InputField({
           </FormDescription>
           <FormControl>
             <Input
-              placeholder={`Enter ${field.name ?? 'value'}`}
+              placeholder="Enter value"
               className="text-foreground"
               value={value as string}
               {...restField}
@@ -390,7 +439,8 @@ interface ArrayInputProps {
   name: string;
   label?: string;
   description?: string;
-  items: RequestField;
+  items: RequestSchema;
+  context: Context;
   className?: string;
 }
 
@@ -399,18 +449,19 @@ function ArrayInput({
   label,
   description,
   items,
+  context,
   ...props
 }: ArrayInputProps): React.ReactElement {
   const { control } = useFormContext();
   const { fields, append, remove } = useFieldArray({ control, name });
 
   const handleAppend = useCallback(() => {
-    append(getDefaultValue(items));
-  }, [append, items]);
+    append(getDefaultValue(items, context));
+  }, [append, context, items]);
 
   return (
     <div {...props} className={cn('flex flex-col gap-2', props.className)}>
-      <div className="inline-flex gap-2 text-sm text-foreground">
+      <div className={cn(labelVariants({ className: 'inline-flex gap-1' }))}>
         {label}
         <code className="ms-auto text-xs text-muted-foreground">array</code>
       </div>
@@ -422,6 +473,7 @@ function ArrayInput({
               field={items}
               fieldName={`${name}.${String(index)}`}
               className="flex-1"
+              context={context}
             />
             <button
               type="button"

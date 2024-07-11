@@ -80,8 +80,8 @@ const FormItem = forwardRef<
 });
 FormItem.displayName = 'FormItem';
 
-const labelVariants = cva(
-  'text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
+export const labelVariants = cva(
+  'text-xs font-medium text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
 );
 
 const FormLabel = forwardRef<

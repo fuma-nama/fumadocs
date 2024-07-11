@@ -1,4 +1,4 @@
-import type { APIPlaygroundProps, RequestField } from '@/render/playground';
+import type { APIPlaygroundProps } from '@/render/playground';
 import { codeblock, createElement } from './element';
 
 export interface ResponsesProps {
@@ -59,7 +59,12 @@ export interface Renderer {
   APIPlayground: (props: APIPlaygroundProps) => string;
 }
 
-export type { APIPlaygroundProps, RequestField };
+export type {
+  APIPlaygroundProps,
+  RequestSchema,
+  PrimitiveRequestField,
+  ReferenceSchema,
+} from '@/render/playground';
 
 export const defaultRenderer: Renderer = {
   Root: (props, child) => createElement('Root', props, ...child),

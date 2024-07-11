@@ -1,47 +1,64 @@
 import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
 import type { MethodInformation, RenderContext } from '@/types';
 import { getPreferredMedia, noRef } from '@/utils/schema';
+import { getScheme } from '@/utils/get-security';
 
 interface BaseRequestField {
-  name?: string;
+  name: string;
+  description?: string;
+}
+
+interface BaseSchema {
   description?: string;
   isRequired: boolean;
 }
 
-type PrimitiveRequestField = BaseRequestField & {
+export type PrimitiveRequestField = BaseRequestField & PrimitiveSchema;
+
+interface PrimitiveSchema extends BaseSchema {
   type: 'boolean' | 'string' | 'number';
   defaultValue: string;
-};
-
-type ArrayRequestField = BaseRequestField & {
-  type: 'array';
-  items: RequestField;
-};
-
-type ObjectRequestField = BaseRequestField & {
-  type: 'object';
-  properties: RequestField[];
-};
-
-interface Switcher extends BaseRequestField {
-  type: 'switcher';
-  items: RequestField[];
 }
 
-interface NullField extends BaseRequestField {
+export interface ReferenceSchema extends BaseSchema {
+  type: 'ref';
+  schema: string;
+}
+
+interface ArraySchema extends BaseSchema {
+  type: 'array';
+  /**
+   * Reference to item schema
+   */
+  items: string;
+}
+
+interface ObjectSchema extends BaseSchema {
+  type: 'object';
+  properties: Record<string, ReferenceSchema>;
+}
+
+interface SwitcherSchema extends BaseSchema {
+  type: 'switcher';
+  items: Record<string, ReferenceSchema>;
+}
+
+interface NullSchema extends BaseSchema {
   type: 'null';
 }
 
-interface Context {
-  stack: OpenAPI.SchemaObject[];
-}
+export type RequestSchema =
+  | PrimitiveSchema
+  | ArraySchema
+  | ObjectSchema
+  | SwitcherSchema
+  | NullSchema;
 
-export type RequestField =
-  | ArrayRequestField
-  | PrimitiveRequestField
-  | NullField
-  | ObjectRequestField
-  | Switcher;
+interface Context {
+  schema: Record<string, RequestSchema>;
+  registered: WeakMap<OpenAPI.SchemaObject, string>;
+  nextId: () => string;
+}
 
 export interface APIPlaygroundProps {
   route: string;
@@ -50,7 +67,8 @@ export interface APIPlaygroundProps {
   path?: PrimitiveRequestField[];
   query?: PrimitiveRequestField[];
   header?: PrimitiveRequestField[];
-  body?: RequestField;
+  body?: RequestSchema;
+  schemas: Record<string, RequestSchema>;
 }
 
 export function renderPlayground(
@@ -58,74 +76,108 @@ export function renderPlayground(
   method: MethodInformation,
   ctx: RenderContext,
 ): string {
-  const security = method.security ?? ctx.document.security;
+  let currentId = 0;
+  const context: Context = {
+    schema: {},
+    nextId() {
+      return String(currentId++);
+    },
+    registered: new WeakMap(),
+  };
+  const security = method.security ?? ctx.document.security ?? [];
   const body = method.requestBody
     ? getPreferredMedia(noRef(method.requestBody).content)
     : undefined;
 
   return ctx.renderer.APIPlayground({
-    authorization: security
-      ? {
-          type: 'string',
-          name: 'authorization',
-          defaultValue: 'Bearer',
-          isRequired: true,
-          description: 'The authorization token',
-        }
-      : undefined,
+    authorization:
+      security.length > 0
+        ? {
+            type: 'string',
+            name: 'authorization',
+            defaultValue: getScheme(security[0], ctx.document).some(
+              (s) =>
+                s.type === 'oauth2' ||
+                (s.type === 'http' && s.scheme === 'bearer'),
+            )
+              ? 'Bearer'
+              : 'Basic',
+            isRequired: true,
+            description: 'The authorization token',
+          }
+        : undefined,
     method: method.method,
     route: path,
     path: method.parameters
       .filter((v) => v.in === 'path')
-      .map((v) =>
-        schemaToField(
-          noRef(v.schema ?? { type: 'string' }),
-          v.name,
-          v.required ?? false,
-        ),
-      ) as PrimitiveRequestField[],
+      .map((v) => parameterToField(v, context)),
     query: method.parameters
       .filter((v) => v.in === 'query')
-      .map((v) =>
-        schemaToField(
-          noRef(v.schema ?? { type: 'string' }),
-          v.name,
-          v.required ?? false,
-        ),
-      ) as PrimitiveRequestField[],
+      .map((v) => parameterToField(v, context)),
     header: method.parameters
       .filter((v) => v.in === 'header')
-      .map((v) =>
-        schemaToField(
-          noRef(v.schema ?? { type: 'string' }),
-          v.name,
-          v.required ?? false,
-        ),
-      ) as PrimitiveRequestField[],
+      .map((v) => parameterToField(v, context)),
     body: body?.schema
-      ? schemaToField(noRef(body.schema), 'body', false)
+      ? toSchema(noRef(body.schema), true, context)
       : undefined,
+    schemas: context.schema,
   });
 }
 
-function schemaToField(
+function getIdFromSchema(
   schema: OpenAPI.SchemaObject,
-  name: string | undefined,
   required: boolean,
-  ctx: Context = { stack: [] },
-): RequestField {
-  // TODO: Implement logic to handle self-referencing types
-  if (ctx.stack.includes(schema)) return { type: 'null', isRequired: false };
+  ctx: Context,
+): string {
+  const registered = ctx.registered.get(schema);
 
-  ctx.stack = [...ctx.stack, schema];
+  if (registered === undefined) {
+    const id = ctx.nextId();
+    ctx.registered.set(schema, id);
+    ctx.schema[id] = toSchema(schema, required, ctx);
+    return id;
+  }
 
+  return registered;
+}
+
+function parameterToField(
+  v: OpenAPI.ParameterObject,
+  ctx: Context,
+): PrimitiveRequestField {
+  return {
+    name: v.name,
+    ...(toSchema(
+      noRef(v.schema) ?? { type: 'string' },
+      v.required ?? false,
+      ctx,
+    ) as PrimitiveSchema),
+  };
+}
+
+function toReference(
+  schema: OpenAPI.SchemaObject,
+  required: boolean,
+  ctx: Context,
+): ReferenceSchema {
+  return {
+    type: 'ref',
+    isRequired: required,
+    schema: getIdFromSchema(schema, false, ctx),
+  };
+}
+
+function toSchema(
+  schema: OpenAPI.SchemaObject,
+  required: boolean,
+  ctx: Context,
+): RequestSchema {
   if (schema.type === 'array') {
     return {
       type: 'array',
-      isRequired: required,
-      name,
       description: schema.description ?? schema.title,
-      items: schemaToField(noRef(schema.items), undefined, false, ctx),
+      isRequired: required,
+      items: getIdFromSchema(noRef(schema.items), false, ctx),
     };
   }
 
@@ -134,31 +186,25 @@ function schemaToField(
     schema.properties !== undefined ||
     schema.allOf !== undefined
   ) {
-    const properties: RequestField[] = [];
+    const properties: Record<string, ReferenceSchema> = {};
 
-    if (schema.properties) {
-      Object.entries(schema.properties).forEach(([key, prop]) =>
-        properties.push(
-          schemaToField(
-            noRef(prop),
-            key,
-            schema.required?.includes(key) ?? false,
-            ctx,
-          ),
-        ),
+    Object.entries(schema.properties ?? {}).forEach(([key, prop]) => {
+      properties[key] = toReference(
+        noRef(prop),
+        schema.required?.includes(key) ?? false,
+        ctx,
       );
-    }
+    });
 
     schema.allOf?.forEach((c) => {
-      const field = schemaToField(noRef(c), undefined, true, ctx);
+      const field = toSchema(noRef(c), true, ctx);
 
-      if (field.type === 'object') properties.push(...field.properties);
+      if (field.type === 'object') Object.assign(properties, field.properties);
     });
 
     return {
       type: 'object',
       isRequired: required,
-      name,
       description: schema.description ?? schema.title,
       properties,
     };
@@ -170,10 +216,16 @@ function schemaToField(
     if (combine) {
       return {
         type: 'switcher',
-        name,
         description: schema.description ?? schema.title,
-        items: combine.map((c) =>
-          schemaToField(noRef(c), undefined, true, ctx),
+        items: Object.fromEntries(
+          combine.map((c, idx) => {
+            const item = noRef(c);
+
+            return [
+              item.title ?? item.type ?? `Item ${idx.toString()}`,
+              toReference(item, true, ctx),
+            ];
+          }),
         ),
         isRequired: required,
       };
@@ -189,7 +241,6 @@ function schemaToField(
     type: schema.type === 'integer' ? 'number' : schema.type,
     defaultValue: (schema.example ?? '') as string,
     isRequired: required,
-    name,
     description: schema.description ?? schema.title,
   };
 }

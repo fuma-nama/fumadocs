@@ -74,7 +74,7 @@ The number of days per page.
 | `400` | Bad request |
 | `404` | Not found |
 
-<APIPlayground authorization={{"type":"string","name":"authorization","defaultValue":"Bearer","isRequired":true,"description":"The authorization token"}} method={"GET"} route={"/special-events"} path={[]} query={[{"type":"string","defaultValue":"2023-02-23","isRequired":false,"name":"startDate"},{"type":"string","defaultValue":"2023-04-18","isRequired":false,"name":"endDate"},{"type":"number","defaultValue":2,"isRequired":false,"name":"page"},{"type":"number","defaultValue":15,"isRequired":false,"name":"limit"}]} header={[]} body={undefined}>
+<APIPlayground authorization={{"type":"string","name":"authorization","defaultValue":"Basic","isRequired":true,"description":"The authorization token"}} method={"GET"} route={"/special-events"} path={[]} query={[{"name":"startDate","type":"string","defaultValue":"2023-02-23","isRequired":false},{"name":"endDate","type":"string","defaultValue":"2023-04-18","isRequired":false},{"name":"page","type":"number","defaultValue":2,"isRequired":false},{"name":"limit","type":"number","defaultValue":15,"isRequired":false}]} header={[]} body={undefined} schemas={{}}>
 
 </APIPlayground>
 
@@ -241,7 +241,7 @@ Price of a ticket for the special event
 | `400` | Bad request |
 | `404` | Not found |
 
-<APIPlayground authorization={{"type":"string","name":"authorization","defaultValue":"Bearer","isRequired":true,"description":"The authorization token"}} method={"POST"} route={"/special-events"} path={[]} query={[]} header={[]} body={{"type":"object","isRequired":false,"name":"body","description":"Request payload for creating new special events at the museum.","properties":[{"type":"string","defaultValue":"Pirate Coding Workshop","isRequired":true,"name":"name","description":"Name of the special event"},{"type":"string","defaultValue":"Computer Room","isRequired":true,"name":"location","description":"Location where the special event is held"},{"type":"string","defaultValue":"Captain Blackbeard shares his love of the C...language. And possibly Arrrrr (R lang).","isRequired":true,"name":"eventDescription","description":"Description of the special event"},{"type":"array","isRequired":true,"name":"dates","description":"List of planned dates for the special event","items":{"type":"string","defaultValue":"2023-10-29","isRequired":false}},{"type":"number","defaultValue":25,"isRequired":true,"name":"price","description":"Price of a ticket for the special event"}]}}>
+<APIPlayground authorization={{"type":"string","name":"authorization","defaultValue":"Basic","isRequired":true,"description":"The authorization token"}} method={"POST"} route={"/special-events"} path={[]} query={[]} header={[]} body={{"type":"object","isRequired":true,"description":"Request payload for creating new special events at the museum.","properties":{"name":{"type":"ref","isRequired":true,"schema":"0"},"location":{"type":"ref","isRequired":true,"schema":"1"},"eventDescription":{"type":"ref","isRequired":true,"schema":"2"},"dates":{"type":"ref","isRequired":true,"schema":"3"},"price":{"type":"ref","isRequired":true,"schema":"5"}}}} schemas={{"0":{"type":"string","defaultValue":"Pirate Coding Workshop","isRequired":false,"description":"Name of the special event"},"1":{"type":"string","defaultValue":"Computer Room","isRequired":false,"description":"Location where the special event is held"},"2":{"type":"string","defaultValue":"Captain Blackbeard shares his love of the C...language. And possibly Arrrrr (R lang).","isRequired":false,"description":"Description of the special event"},"3":{"type":"array","description":"List of planned dates for the special event","isRequired":false,"items":"4"},"4":{"type":"string","defaultValue":"2023-10-29","isRequired":false},"5":{"type":"number","defaultValue":25,"isRequired":false,"description":"Price of a ticket for the special event"}}}>
 
 </APIPlayground>
 
@@ -385,7 +385,7 @@ An identifier for a special event.
 | `400` | Bad request |
 | `404` | Not found |
 
-<APIPlayground authorization={{"type":"string","name":"authorization","defaultValue":"Bearer","isRequired":true,"description":"The authorization token"}} method={"GET"} route={"/special-events/{eventId}"} path={[{"type":"string","defaultValue":"dad4bce8-f5cb-4078-a211-995864315e39","isRequired":true,"name":"eventId"}]} query={[]} header={[]} body={undefined}>
+<APIPlayground authorization={{"type":"string","name":"authorization","defaultValue":"Basic","isRequired":true,"description":"The authorization token"}} method={"GET"} route={"/special-events/{eventId}"} path={[{"name":"eventId","type":"string","defaultValue":"dad4bce8-f5cb-4078-a211-995864315e39","isRequired":true}]} query={[]} header={[]} body={undefined} schemas={{}}>
 
 </APIPlayground>
 
@@ -562,7 +562,7 @@ An identifier for a special event.
 | `400` | Bad request |
 | `404` | Not found |
 
-<APIPlayground authorization={{"type":"string","name":"authorization","defaultValue":"Bearer","isRequired":true,"description":"The authorization token"}} method={"PATCH"} route={"/special-events/{eventId}"} path={[{"type":"string","defaultValue":"dad4bce8-f5cb-4078-a211-995864315e39","isRequired":true,"name":"eventId"}]} query={[]} header={[]} body={{"type":"object","isRequired":false,"name":"body","description":"Request payload for updating an existing special event. Only included fields are updated in the event.","properties":[{"type":"string","defaultValue":"Pirate Coding Workshop","isRequired":false,"name":"name","description":"Name of the special event"},{"type":"string","defaultValue":"Computer Room","isRequired":false,"name":"location","description":"Location where the special event is held"},{"type":"string","defaultValue":"Captain Blackbeard shares his love of the C...language. And possibly Arrrrr (R lang).","isRequired":false,"name":"eventDescription","description":"Description of the special event"},{"type":"array","isRequired":false,"name":"dates","description":"List of planned dates for the special event","items":{"type":"string","defaultValue":"2023-10-29","isRequired":false}},{"type":"number","defaultValue":25,"isRequired":false,"name":"price","description":"Price of a ticket for the special event"}]}}>
+<APIPlayground authorization={{"type":"string","name":"authorization","defaultValue":"Basic","isRequired":true,"description":"The authorization token"}} method={"PATCH"} route={"/special-events/{eventId}"} path={[{"name":"eventId","type":"string","defaultValue":"dad4bce8-f5cb-4078-a211-995864315e39","isRequired":true}]} query={[]} header={[]} body={{"type":"object","isRequired":true,"description":"Request payload for updating an existing special event. Only included fields are updated in the event.","properties":{"name":{"type":"ref","isRequired":false,"schema":"0"},"location":{"type":"ref","isRequired":false,"schema":"1"},"eventDescription":{"type":"ref","isRequired":false,"schema":"2"},"dates":{"type":"ref","isRequired":false,"schema":"3"},"price":{"type":"ref","isRequired":false,"schema":"5"}}}} schemas={{"0":{"type":"string","defaultValue":"Pirate Coding Workshop","isRequired":false,"description":"Name of the special event"},"1":{"type":"string","defaultValue":"Computer Room","isRequired":false,"description":"Location where the special event is held"},"2":{"type":"string","defaultValue":"Captain Blackbeard shares his love of the C...language. And possibly Arrrrr (R lang).","isRequired":false,"description":"Description of the special event"},"3":{"type":"array","description":"List of planned dates for the special event","isRequired":false,"items":"4"},"4":{"type":"string","defaultValue":"2023-10-29","isRequired":false},"5":{"type":"number","defaultValue":25,"isRequired":false,"description":"Price of a ticket for the special event"}}}>
 
 </APIPlayground>
 
@@ -707,7 +707,7 @@ An identifier for a special event.
 | `401` | Unauthorized |
 | `404` | Not found |
 
-<APIPlayground authorization={{"type":"string","name":"authorization","defaultValue":"Bearer","isRequired":true,"description":"The authorization token"}} method={"DELETE"} route={"/special-events/{eventId}"} path={[{"type":"string","defaultValue":"dad4bce8-f5cb-4078-a211-995864315e39","isRequired":true,"name":"eventId"}]} query={[]} header={[]} body={undefined}>
+<APIPlayground authorization={{"type":"string","name":"authorization","defaultValue":"Basic","isRequired":true,"description":"The authorization token"}} method={"DELETE"} route={"/special-events/{eventId}"} path={[{"name":"eventId","type":"string","defaultValue":"dad4bce8-f5cb-4078-a211-995864315e39","isRequired":true}]} query={[]} header={[]} body={undefined} schemas={{}}>
 
 </APIPlayground>
 

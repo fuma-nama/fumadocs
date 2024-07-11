@@ -44,7 +44,7 @@ The id of the api to fetch
 | `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
 | `500` | The server has encountered a situation it does not know how to handle. |
 
-<APIPlayground authorization={{"type":"string","name":"authorization","defaultValue":"Bearer","isRequired":true,"description":"The authorization token"}} method={"GET"} route={"/v1/apis.getApi"} path={[]} query={[{"type":"string","defaultValue":"api_1234","isRequired":true,"name":"apiId","description":"The id of the api to fetch"}]} header={[]} body={undefined}>
+<APIPlayground authorization={{"type":"string","name":"authorization","defaultValue":"Bearer","isRequired":true,"description":"The authorization token"}} method={"GET"} route={"/v1/apis.getApi"} path={[]} query={[{"name":"apiId","type":"string","defaultValue":"api_1234","isRequired":true,"description":"The id of the api to fetch"}]} header={[]} body={undefined} schemas={{}}>
 
 </APIPlayground>
 
@@ -544,7 +544,7 @@ Decrypt and display the raw key. Only possible if the key was encrypted when gen
 | `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
 | `500` | The server has encountered a situation it does not know how to handle. |
 
-<APIPlayground authorization={{"type":"string","name":"authorization","defaultValue":"Bearer","isRequired":true,"description":"The authorization token"}} method={"GET"} route={"/v1/apis.listKeys"} path={[]} query={[{"type":"string","defaultValue":"api_1234","isRequired":true,"name":"apiId","description":"The id of the api to fetch"},{"type":"number","defaultValue":100,"isRequired":false,"name":"limit","description":"The maximum number of keys to return"},{"type":"string","defaultValue":"","isRequired":false,"name":"cursor","description":"Use this to fetch the next page of results. A new cursor will be returned in the response if there are more results."},{"type":"string","defaultValue":"","isRequired":false,"name":"ownerId","description":"If provided, this will only return keys where the `ownerId` matches."},{"type":"boolean","defaultValue":"","isRequired":false,"name":"decrypt","description":"Decrypt and display the raw key. Only possible if the key was encrypted when generated."}]} header={[]} body={undefined}>
+<APIPlayground authorization={{"type":"string","name":"authorization","defaultValue":"Bearer","isRequired":true,"description":"The authorization token"}} method={"GET"} route={"/v1/apis.listKeys"} path={[]} query={[{"name":"apiId","type":"string","defaultValue":"api_1234","isRequired":true,"description":"The id of the api to fetch"},{"name":"limit","type":"number","defaultValue":100,"isRequired":false,"description":"The maximum number of keys to return"},{"name":"cursor","type":"string","defaultValue":"","isRequired":false,"description":"Use this to fetch the next page of results. A new cursor will be returned in the response if there are more results."},{"name":"ownerId","type":"string","defaultValue":"","isRequired":false,"description":"If provided, this will only return keys where the `ownerId` matches."},{"name":"decrypt","type":"boolean","defaultValue":"","isRequired":false,"description":"Decrypt and display the raw key. Only possible if the key was encrypted when generated."}]} header={[]} body={undefined} schemas={{}}>
 
 </APIPlayground>
 
@@ -1167,7 +1167,7 @@ If true, the keys will be permanently deleted. If false, the keys will be soft-d
 | `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
 | `500` | The server has encountered a situation it does not know how to handle. |
 
-<APIPlayground authorization={{"type":"string","name":"authorization","defaultValue":"Bearer","isRequired":true,"description":"The authorization token"}} method={"POST"} route={"/v1/apis.deleteKeys"} path={[]} query={[]} header={[]} body={{"type":"object","isRequired":false,"name":"body","properties":[{"type":"string","defaultValue":"api_1234","isRequired":true,"name":"apiId","description":"The id of the api, that the keys belong to."},{"type":"boolean","defaultValue":"","isRequired":false,"name":"permanent","description":"If true, the keys will be permanently deleted. If false, the keys will be soft-deleted and can be restored later. "}]}}>
+<APIPlayground authorization={{"type":"string","name":"authorization","defaultValue":"Bearer","isRequired":true,"description":"The authorization token"}} method={"POST"} route={"/v1/apis.deleteKeys"} path={[]} query={[]} header={[]} body={{"type":"object","isRequired":true,"properties":{"apiId":{"type":"ref","isRequired":true,"schema":"0"},"permanent":{"type":"ref","isRequired":false,"schema":"1"}}}} schemas={{"0":{"type":"string","defaultValue":"api_1234","isRequired":false,"description":"The id of the api, that the keys belong to."},"1":{"type":"boolean","defaultValue":"","isRequired":false,"description":"If true, the keys will be permanently deleted. If false, the keys will be soft-deleted and can be restored later. "}}}>
 
 </APIPlayground>
 

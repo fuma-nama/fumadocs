@@ -30,7 +30,7 @@ How many items to return at one time (max 100)
 | `200` | A paged array of pets |
 | `default` | unexpected error |
 
-<APIPlayground authorization={undefined} method={"GET"} route={"/pets"} path={[]} query={[{"type":"number","defaultValue":"","isRequired":false,"name":"limit"}]} header={[]} body={undefined}>
+<APIPlayground authorization={undefined} method={"GET"} route={"/pets"} path={[]} query={[{"name":"limit","type":"number","defaultValue":"","isRequired":false}]} header={[]} body={undefined} schemas={{}}>
 
 </APIPlayground>
 
@@ -162,7 +162,7 @@ export interface Response {
 | `201` | Null response |
 | `default` | unexpected error |
 
-<APIPlayground authorization={undefined} method={"POST"} route={"/pets"} path={[]} query={[]} header={[]} body={{"type":"object","isRequired":false,"name":"body","properties":[{"type":"number","defaultValue":"","isRequired":true,"name":"id"},{"type":"string","defaultValue":"","isRequired":true,"name":"name"},{"type":"string","defaultValue":"","isRequired":false,"name":"tag"}]}}>
+<APIPlayground authorization={undefined} method={"POST"} route={"/pets"} path={[]} query={[]} header={[]} body={{"type":"object","isRequired":true,"properties":{"id":{"type":"ref","isRequired":true,"schema":"0"},"name":{"type":"ref","isRequired":true,"schema":"1"},"tag":{"type":"ref","isRequired":false,"schema":"2"}}}} schemas={{"0":{"type":"number","defaultValue":"","isRequired":false},"1":{"type":"string","defaultValue":"","isRequired":false},"2":{"type":"string","defaultValue":"","isRequired":false}}}>
 
 </APIPlayground>
 
@@ -254,7 +254,7 @@ The id of the pet to retrieve
 | `200` | Expected response to a valid request |
 | `default` | unexpected error |
 
-<APIPlayground authorization={undefined} method={"GET"} route={"/pets/{petId}"} path={[{"type":"string","defaultValue":"","isRequired":true,"name":"petId"}]} query={[]} header={[]} body={undefined}>
+<APIPlayground authorization={undefined} method={"GET"} route={"/pets/{petId}"} path={[{"name":"petId","type":"string","defaultValue":"","isRequired":true}]} query={[]} header={[]} body={undefined} schemas={{}}>
 
 </APIPlayground>
 
