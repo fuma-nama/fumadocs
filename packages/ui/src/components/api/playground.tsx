@@ -352,7 +352,7 @@ function renderExtracted({
       <ObjectInput
         field={field}
         fieldName={fieldName}
-        className="border-0 p-0"
+        className="border-0 bg-transparent p-0"
       />
     );
 
@@ -400,7 +400,7 @@ function ObjectInput({
     <div
       {...props}
       className={cn(
-        'flex flex-col gap-4 rounded-lg border p-3',
+        'flex flex-col gap-4 rounded-lg border bg-accent/30 p-3',
         props.className,
       )}
     >
@@ -573,7 +573,7 @@ function ArrayInput({
     <div
       {...props}
       className={cn(
-        'flex flex-col gap-2 rounded-lg border p-3',
+        'flex flex-col gap-4 rounded-lg border p-3',
         props.className,
       )}
     >
@@ -589,9 +589,9 @@ function ArrayInput({
             aria-label="Remove Item"
             className={cn(
               buttonVariants({
-                color: 'ghost',
-                className:
-                  'absolute -top-2 -end-2 text-muted-foreground p-1 -mt-1',
+                color: 'secondary',
+                size: 'sm',
+                className: 'absolute -top-2 -end-2 p-1',
               }),
             )}
             onClick={() => {

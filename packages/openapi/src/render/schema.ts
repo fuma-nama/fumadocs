@@ -31,7 +31,11 @@ interface Context {
 }
 
 function isObject(schema: OpenAPI.SchemaObject): boolean {
-  return schema.type === 'object' || schema.properties !== undefined;
+  return (
+    schema.type === 'object' ||
+    schema.properties !== undefined ||
+    schema.additionalProperties !== undefined
+  );
 }
 
 export function schemaElement(
@@ -122,9 +126,19 @@ function render(
         }),
       ]),
     );
+  } else if (schema.allOf) {
+    child.push(
+      renderer.ObjectCollapsible({ name }, [
+        render(name, combineSchema(schema.allOf.map(noRef)), {
+          ...ctx,
+          parseObject: true,
+          required: false,
+        }),
+      ]),
+    );
   } else {
     const mentionedObjectTypes = [
-      ...(schema.anyOf ?? schema.oneOf ?? schema.allOf ?? []),
+      ...(schema.anyOf ?? schema.oneOf ?? []),
       ...(schema.not ? [schema.not] : []),
       ...(schema.type === 'array' ? [schema.items] : []),
     ]
@@ -158,6 +172,41 @@ function render(
     },
     child,
   );
+}
+
+/**
+ * Combine multiple object schemas into one
+ */
+function combineSchema(schema: OpenAPI.SchemaObject[]): OpenAPI.SchemaObject {
+  const result: OpenAPI.SchemaObject = {
+    type: 'object',
+  };
+
+  function add(s: OpenAPI.SchemaObject): void {
+    result.properties ??= {};
+
+    if (s.properties) {
+      Object.assign(result.properties, s.properties);
+    }
+
+    result.additionalProperties ??= {};
+    if (s.additionalProperties === true) {
+      result.additionalProperties = true;
+    } else if (
+      s.additionalProperties &&
+      typeof result.additionalProperties !== 'boolean'
+    ) {
+      Object.assign(result.additionalProperties, s.additionalProperties);
+    }
+
+    if (s.allOf) {
+      add(combineSchema(s.allOf.map(noRef)));
+    }
+  }
+
+  schema.forEach(add);
+
+  return result;
 }
 
 /**
@@ -198,7 +247,6 @@ function getSchemaType(schema: OpenAPI.SchemaObject): string {
 
   if (schema.type) return schema.type;
 
-  // object without specified type
   if (isObject(schema)) return 'object';
 
   return 'unknown';
