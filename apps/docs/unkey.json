@@ -27,9 +27,7 @@
             "properties": {
               "code": {
                 "type": "string",
-                "enum": [
-                  "BAD_REQUEST"
-                ],
+                "enum": ["BAD_REQUEST"],
                 "description": "A machine readable error code.",
                 "example": "BAD_REQUEST"
               },
@@ -48,17 +46,10 @@
                 "example": "req_1234"
               }
             },
-            "required": [
-              "code",
-              "docs",
-              "message",
-              "requestId"
-            ]
+            "required": ["code", "docs", "message", "requestId"]
           }
         },
-        "required": [
-          "error"
-        ]
+        "required": ["error"]
       },
       "ErrUnauthorized": {
         "type": "object",
@@ -68,9 +59,7 @@
             "properties": {
               "code": {
                 "type": "string",
-                "enum": [
-                  "UNAUTHORIZED"
-                ],
+                "enum": ["UNAUTHORIZED"],
                 "description": "A machine readable error code.",
                 "example": "UNAUTHORIZED"
               },
@@ -89,17 +78,10 @@
                 "example": "req_1234"
               }
             },
-            "required": [
-              "code",
-              "docs",
-              "message",
-              "requestId"
-            ]
+            "required": ["code", "docs", "message", "requestId"]
           }
         },
-        "required": [
-          "error"
-        ]
+        "required": ["error"]
       },
       "ErrForbidden": {
         "type": "object",
@@ -109,9 +91,7 @@
             "properties": {
               "code": {
                 "type": "string",
-                "enum": [
-                  "FORBIDDEN"
-                ],
+                "enum": ["FORBIDDEN"],
                 "description": "A machine readable error code.",
                 "example": "FORBIDDEN"
               },
@@ -130,17 +110,10 @@
                 "example": "req_1234"
               }
             },
-            "required": [
-              "code",
-              "docs",
-              "message",
-              "requestId"
-            ]
+            "required": ["code", "docs", "message", "requestId"]
           }
         },
-        "required": [
-          "error"
-        ]
+        "required": ["error"]
       },
       "ErrNotFound": {
         "type": "object",
@@ -150,9 +123,7 @@
             "properties": {
               "code": {
                 "type": "string",
-                "enum": [
-                  "NOT_FOUND"
-                ],
+                "enum": ["NOT_FOUND"],
                 "description": "A machine readable error code.",
                 "example": "NOT_FOUND"
               },
@@ -171,17 +142,10 @@
                 "example": "req_1234"
               }
             },
-            "required": [
-              "code",
-              "docs",
-              "message",
-              "requestId"
-            ]
+            "required": ["code", "docs", "message", "requestId"]
           }
         },
-        "required": [
-          "error"
-        ]
+        "required": ["error"]
       },
       "ErrConflict": {
         "type": "object",
@@ -191,9 +155,7 @@
             "properties": {
               "code": {
                 "type": "string",
-                "enum": [
-                  "CONFLICT"
-                ],
+                "enum": ["CONFLICT"],
                 "description": "A machine readable error code.",
                 "example": "CONFLICT"
               },
@@ -212,17 +174,10 @@
                 "example": "req_1234"
               }
             },
-            "required": [
-              "code",
-              "docs",
-              "message",
-              "requestId"
-            ]
+            "required": ["code", "docs", "message", "requestId"]
           }
         },
-        "required": [
-          "error"
-        ]
+        "required": ["error"]
       },
       "ErrTooManyRequests": {
         "type": "object",
@@ -232,9 +187,7 @@
             "properties": {
               "code": {
                 "type": "string",
-                "enum": [
-                  "TOO_MANY_REQUESTS"
-                ],
+                "enum": ["TOO_MANY_REQUESTS"],
                 "description": "A machine readable error code.",
                 "example": "TOO_MANY_REQUESTS"
               },
@@ -253,17 +206,10 @@
                 "example": "req_1234"
               }
             },
-            "required": [
-              "code",
-              "docs",
-              "message",
-              "requestId"
-            ]
+            "required": ["code", "docs", "message", "requestId"]
           }
         },
-        "required": [
-          "error"
-        ]
+        "required": ["error"]
       },
       "ErrInternalServerError": {
         "type": "object",
@@ -273,9 +219,7 @@
             "properties": {
               "code": {
                 "type": "string",
-                "enum": [
-                  "INTERNAL_SERVER_ERROR"
-                ],
+                "enum": ["INTERNAL_SERVER_ERROR"],
                 "description": "A machine readable error code.",
                 "example": "INTERNAL_SERVER_ERROR"
               },
@@ -294,17 +238,10 @@
                 "example": "req_1234"
               }
             },
-            "required": [
-              "code",
-              "docs",
-              "message",
-              "requestId"
-            ]
+            "required": ["code", "docs", "message", "requestId"]
           }
         },
-        "required": [
-          "error"
-        ]
+        "required": ["error"]
       },
       "Key": {
         "type": "object",
@@ -346,10 +283,7 @@
             },
             "description": "Any additional metadata you want to store with the key",
             "example": {
-              "roles": [
-                "admin",
-                "user"
-              ],
+              "roles": ["admin", "user"],
               "stripeCustomerId": "cus_1234"
             }
           },
@@ -378,10 +312,7 @@
             "properties": {
               "interval": {
                 "type": "string",
-                "enum": [
-                  "daily",
-                  "monthly"
-                ],
+                "enum": ["daily", "monthly"],
                 "description": "Determines the rate at which verifications will be refilled.",
                 "example": "daily"
               },
@@ -396,10 +327,7 @@
                 "example": 100
               }
             },
-            "required": [
-              "interval",
-              "amount"
-            ],
+            "required": ["interval", "amount"],
             "description": "Unkey allows you to refill remaining verifications on a key on a regular interval.",
             "example": {
               "interval": "daily",
@@ -411,10 +339,7 @@
             "properties": {
               "type": {
                 "type": "string",
-                "enum": [
-                  "fast",
-                  "consistent"
-                ],
+                "enum": ["fast", "consistent"],
                 "default": "fast",
                 "description": "Fast ratelimiting doesn't add latency, while consistent ratelimiting is more accurate.",
                 "externalDocs": {
@@ -438,12 +363,7 @@
                 "description": "Determines the speed at which tokens are refilled, in milliseconds."
               }
             },
-            "required": [
-              "type",
-              "limit",
-              "refillRate",
-              "refillInterval"
-            ],
+            "required": ["type", "limit", "refillRate", "refillInterval"],
             "description": "Unkey comes with per-key ratelimiting out of the box.",
             "example": {
               "type": "fast",
@@ -458,10 +378,7 @@
               "type": "string"
             },
             "description": "All roles this key belongs to",
-            "example": [
-              "admin",
-              "finance"
-            ]
+            "example": ["admin", "finance"]
           },
           "enabled": {
             "type": "boolean",
@@ -469,11 +386,7 @@
             "example": true
           }
         },
-        "required": [
-          "id",
-          "start",
-          "workspaceId"
-        ]
+        "required": ["id", "start", "workspaceId"]
       },
       "V1KeysVerifyKeyResponse": {
         "type": "object",
@@ -505,10 +418,7 @@
             },
             "description": "Any additional metadata you want to store with the key",
             "example": {
-              "roles": [
-                "admin",
-                "user"
-              ],
+              "roles": ["admin", "user"],
               "stripeCustomerId": "cus_1234"
             }
           },
@@ -536,11 +446,7 @@
                 "example": 3600000
               }
             },
-            "required": [
-              "limit",
-              "remaining",
-              "reset"
-            ],
+            "required": ["limit", "remaining", "reset"],
             "description": "The ratelimit configuration for this key. If this field is null or undefined, the key has no ratelimit.",
             "example": {
               "limit": 10,
@@ -571,9 +477,7 @@
             "description": "Sets the key to be enabled or disabled. Disabled keys will not verify."
           }
         },
-        "required": [
-          "valid"
-        ]
+        "required": ["valid"]
       },
       "V1KeysVerifyKeyRequest": {
         "type": "object",
@@ -590,9 +494,7 @@
             "example": "sk_1234"
           }
         },
-        "required": [
-          "key"
-        ]
+        "required": ["key"]
       }
     },
     "parameters": {}
@@ -649,10 +551,7 @@
                       ]
                     }
                   },
-                  "required": [
-                    "status",
-                    "services"
-                  ]
+                  "required": ["status", "services"]
                 }
               }
             }
@@ -732,7 +631,7 @@
     },
     "/v1/keys.getKey": {
       "get": {
-        "operationId":"getKey",
+        "operationId": "getKey",
         "tags": ["keys"],
         "security": [
           {
@@ -859,9 +758,7 @@
                     "example": "key_1234"
                   }
                 },
-                "required": [
-                  "keyId"
-                ]
+                "required": ["keyId"]
               }
             }
           }
@@ -1013,10 +910,7 @@
                       "maxLength": 512
                     },
                     "description": "A list of roles that this key should have. New roles will be created if they don't exist yet.",
-                    "example": [
-                      "admin",
-                      "finance"
-                    ]
+                    "example": ["admin", "finance"]
                   },
                   "expires": {
                     "type": "integer",
@@ -1037,10 +931,7 @@
                     "properties": {
                       "interval": {
                         "type": "string",
-                        "enum": [
-                          "daily",
-                          "monthly"
-                        ],
+                        "enum": ["daily", "monthly"],
                         "description": "Unkey will automatically refill verifications at the set interval."
                       },
                       "amount": {
@@ -1050,10 +941,7 @@
                         "description": "The number of verifications to refill for each occurrence is determined individually for each key."
                       }
                     },
-                    "required": [
-                      "interval",
-                      "amount"
-                    ],
+                    "required": ["interval", "amount"],
                     "description": "Unkey enables you to refill verifications for each key at regular intervals.",
                     "example": {
                       "interval": "daily",
@@ -1065,10 +953,7 @@
                     "properties": {
                       "type": {
                         "type": "string",
-                        "enum": [
-                          "fast",
-                          "consistent"
-                        ],
+                        "enum": ["fast", "consistent"],
                         "default": "fast",
                         "description": "Fast ratelimiting doesn't add latency, while consistent ratelimiting is more accurate.",
                         "externalDocs": {
@@ -1113,9 +998,7 @@
                     "example": false
                   }
                 },
-                "required": [
-                  "apiId"
-                ]
+                "required": ["apiId"]
               }
             }
           }
@@ -1139,10 +1022,7 @@
                       "example": "prefix_xxxxxxxxx"
                     }
                   },
-                  "required": [
-                    "keyId",
-                    "key"
-                  ]
+                  "required": ["keyId", "key"]
                 }
               }
             }
@@ -1222,7 +1102,7 @@
     },
     "/v1/keys.verifyKey": {
       "post": {
-        "operationId":"verifyKey",
+        "operationId": "verifyKey",
         "tags": ["keys"],
         "requestBody": {
           "required": true,
@@ -1359,10 +1239,7 @@
                     },
                     "description": "Any additional metadata you want to store with the key",
                     "example": {
-                      "roles": [
-                        "admin",
-                        "user"
-                      ],
+                      "roles": ["admin", "user"],
                       "stripeCustomerId": "cus_1234"
                     }
                   },
@@ -1378,10 +1255,7 @@
                     "properties": {
                       "type": {
                         "type": "string",
-                        "enum": [
-                          "fast",
-                          "consistent"
-                        ],
+                        "enum": ["fast", "consistent"],
                         "description": "Fast ratelimiting doesn't add latency, while consistent ratelimiting is more accurate.",
                         "externalDocs": {
                           "description": "Learn more",
@@ -1430,10 +1304,7 @@
                     "properties": {
                       "interval": {
                         "type": "string",
-                        "enum": [
-                          "daily",
-                          "monthly"
-                        ],
+                        "enum": ["daily", "monthly"],
                         "description": "Unkey will automatically refill verifications at the set interval. If null is used the refill functionality will be removed from the key."
                       },
                       "amount": {
@@ -1442,10 +1313,7 @@
                         "description": "The amount of verifications to refill for each occurrence is determined individually for each key."
                       }
                     },
-                    "required": [
-                      "interval",
-                      "amount"
-                    ],
+                    "required": ["interval", "amount"],
                     "description": "Unkey enables you to refill verifications for each key at regular intervals.",
                     "example": {
                       "interval": "daily",
@@ -1458,9 +1326,7 @@
                     "example": true
                   }
                 },
-                "required": [
-                  "keyId"
-                ]
+                "required": ["keyId"]
               }
             }
           }
@@ -1552,8 +1418,8 @@
     },
     "/v1/keys.updateRemaining": {
       "post": {
-        "operationId":"updateRemaining",
-        "tags":["keys"],
+        "operationId": "updateRemaining",
+        "tags": ["keys"],
         "security": [
           {
             "rootKey": []
@@ -1573,11 +1439,7 @@
                   },
                   "op": {
                     "type": "string",
-                    "enum": [
-                      "increment",
-                      "decrement",
-                      "set"
-                    ],
+                    "enum": ["increment", "decrement", "set"],
                     "description": "The operation you want to perform on the remaining count"
                   },
                   "value": {
@@ -1587,11 +1449,7 @@
                     "example": 1
                   }
                 },
-                "required": [
-                  "keyId",
-                  "op",
-                  "value"
-                ]
+                "required": ["keyId", "op", "value"]
               }
             }
           }
@@ -1611,9 +1469,7 @@
                       "example": 100
                     }
                   },
-                  "required": [
-                    "remaining"
-                  ]
+                  "required": ["remaining"]
                 }
               }
             }
@@ -1693,8 +1549,8 @@
     },
     "/v1/keys.getVerifications": {
       "get": {
-        "operationId":"getVerifications",
-        "tags":["keys"],
+        "operationId": "getVerifications",
+        "tags": ["keys"],
         "security": [
           {
             "rootKey": []
@@ -1746,9 +1602,7 @@
           {
             "schema": {
               "type": "string",
-              "enum": [
-                "day"
-              ],
+              "enum": ["day"],
               "default": "day",
               "description": "The granularity of the usage data to fetch, currently only `day` is supported",
               "example": "day"
@@ -1803,9 +1657,7 @@
                       }
                     }
                   },
-                  "required": [
-                    "verifications"
-                  ]
+                  "required": ["verifications"]
                 }
               }
             }
@@ -1929,10 +1781,7 @@
                       "example": "Unkey - Production"
                     }
                   },
-                  "required": [
-                    "id",
-                    "workspaceId"
-                  ]
+                  "required": ["id", "workspaceId"]
                 }
               }
             }
@@ -2012,8 +1861,8 @@
     },
     "/v1/apis.createApi": {
       "post": {
-        "operationId":"createApi",
-        "tags":["apis"],
+        "operationId": "createApi",
+        "tags": ["apis"],
         "security": [
           {
             "rootKey": []
@@ -2033,9 +1882,7 @@
                     "example": "my-api"
                   }
                 },
-                "required": [
-                  "name"
-                ]
+                "required": ["name"]
               }
             }
           }
@@ -2054,9 +1901,7 @@
                       "example": "api_134"
                     }
                   },
-                  "required": [
-                    "apiId"
-                  ]
+                  "required": ["apiId"]
                 }
               }
             }
@@ -2136,8 +1981,8 @@
     },
     "/v1/apis.listKeys": {
       "get": {
-        "operationId":"listKeys",
-        "tags":["apis"],
+        "operationId": "listKeys",
+        "tags": ["apis"],
         "security": [
           {
             "rootKey": []
@@ -2212,10 +2057,7 @@
                       "description": "The total number of keys for this api"
                     }
                   },
-                  "required": [
-                    "keys",
-                    "total"
-                  ]
+                  "required": ["keys", "total"]
                 }
               }
             }
@@ -2295,8 +2137,8 @@
     },
     "/v1/apis.deleteApi": {
       "post": {
-        "operationId":"deleteApi",
-        "tags":["apis"],
+        "operationId": "deleteApi",
+        "tags": ["apis"],
         "security": [
           {
             "rootKey": []
@@ -2316,9 +2158,7 @@
                     "example": "api_1234"
                   }
                 },
-                "required": [
-                  "apiId"
-                ]
+                "required": ["apiId"]
               }
             }
           }

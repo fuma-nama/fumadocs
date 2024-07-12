@@ -86,22 +86,20 @@ export function APIInfo({
     <div className={cn('min-w-0 flex-1 prose-no-margin', className)} {...props}>
       <div
         className={cn(
-          'group flex w-full items-center justify-between rounded-lg border bg-card p-3 text-base',
+          'sticky top-24 z-10 flex flex-row items-center gap-2 rounded-lg border bg-card p-3 md:top-10',
         )}
       >
-        <div className="flex items-center gap-2">
-          <span
-            className={cn(
-              badgeVariants({ color: getBadgeColor(method) }),
-              badgeClassName,
-            )}
-          >
-            {method}
-          </span>
-          <Route route={route} />
-        </div>
+        <span
+          className={cn(
+            badgeVariants({ color: getBadgeColor(method) }),
+            badgeClassName,
+          )}
+        >
+          {method}
+        </span>
+        <Route route={route} />
 
-        <CopyRouteButton className="size-6 p-1" route={route} />
+        <CopyRouteButton className="ms-auto size-6 p-1" route={route} />
       </div>
 
       {children}
@@ -152,7 +150,7 @@ export function APIExample({
 }: HTMLAttributes<HTMLDivElement>): React.ReactElement {
   return (
     <div
-      className={cn('sticky top-6 prose-no-margin xl:w-[400px]', className)}
+      className={cn('sticky top-10 prose-no-margin xl:w-[400px]', className)}
       {...props}
     >
       {children}

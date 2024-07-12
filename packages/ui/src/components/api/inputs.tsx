@@ -224,6 +224,12 @@ function DynamicField({
       isRequired: false,
       defaultValue: '',
     },
+    object: {
+      type: 'object',
+      properties: {},
+      additionalProperties: true,
+      isRequired: false,
+    },
   },
   className,
   onDelete,

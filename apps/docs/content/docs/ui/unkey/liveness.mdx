@@ -3,7 +3,22 @@ title: liveness
 full: true
 ---
 
-import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible, Requests, Request, APIPlayground } from "fumadocs-ui/components/api";
+import {
+  Root,
+  API,
+  APIInfo,
+  APIExample,
+  Responses,
+  Response,
+  ResponseTypes,
+  ExampleResponse,
+  TypeScriptResponse,
+  Property,
+  ObjectCollapsible,
+  Requests,
+  Request,
+  APIPlayground,
+} from 'fumadocs-ui/components/api';
 
 <Root baseUrl={"https://api.unkey.dev"}>
 
@@ -15,16 +30,16 @@ import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, Exa
 
 ## checkLiveness
 
-| Status code | Description |
-| ----------- | ----------- |
-| `200` | The configured services and their status |
-| `400` | The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). |
-| `401` | Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. |
-| `403` | The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. |
-| `404` | The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. |
-| `409` | This response is sent when a request conflicts with the current state of the server. |
-| `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
-| `500` | The server has encountered a situation it does not know how to handle. |
+| Status code | Description                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `200`       | The configured services and their status                                                                                                                                                                                                                                                                                                                                                                                          |
+| `400`       | The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).                                                                                                                                                                                                                        |
+| `401`       | Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response.                                                                                                                                                                                                                                              |
+| `403`       | The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.                                                                                                                                                                                                              |
+| `404`       | The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. |
+| `409`       | This response is sent when a request conflicts with the current state of the server.                                                                                                                                                                                                                                                                                                                                              |
+| `429`       | The user has sent too many requests in a given amount of time ("rate limiting")                                                                                                                                                                                                                                                                                                                                                   |
+| `500`       | The server has encountered a situation it does not know how to handle.                                                                                                                                                                                                                                                                                                                                                            |
 
 <APIPlayground authorization={undefined} method={"GET"} route={"/v1/liveness"} path={[]} query={[]} header={[]} body={undefined} schemas={{}}>
 
@@ -47,8 +62,8 @@ curl -X GET "https://api.unkey.dev/v1/liveness"
 <Request value={"JavaScript"}>
 
 ```js
-fetch("https://api.unkey.dev/v1/liveness", {
-  method: "GET"
+fetch('https://api.unkey.dev/v1/liveness', {
+  method: 'GET',
 });
 ```
 
@@ -145,7 +160,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: "BAD_REQUEST";
+    code: 'BAD_REQUEST';
     /**
      * A link to our documentation with more details about this error code
      */
@@ -195,7 +210,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: "UNAUTHORIZED";
+    code: 'UNAUTHORIZED';
     /**
      * A link to our documentation with more details about this error code
      */
@@ -245,7 +260,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: "FORBIDDEN";
+    code: 'FORBIDDEN';
     /**
      * A link to our documentation with more details about this error code
      */
@@ -295,7 +310,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: "NOT_FOUND";
+    code: 'NOT_FOUND';
     /**
      * A link to our documentation with more details about this error code
      */
@@ -345,7 +360,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: "CONFLICT";
+    code: 'CONFLICT';
     /**
      * A link to our documentation with more details about this error code
      */
@@ -395,7 +410,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: "TOO_MANY_REQUESTS";
+    code: 'TOO_MANY_REQUESTS';
     /**
      * A link to our documentation with more details about this error code
      */
@@ -445,7 +460,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: "INTERNAL_SERVER_ERROR";
+    code: 'INTERNAL_SERVER_ERROR';
     /**
      * A link to our documentation with more details about this error code
      */
