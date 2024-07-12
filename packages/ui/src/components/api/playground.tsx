@@ -7,12 +7,7 @@ import {
   useState,
 } from 'react';
 import { useFieldArray, useForm, useFormContext } from 'react-hook-form';
-import {
-  CircleCheckIcon,
-  CircleXIcon,
-  PlusIcon,
-  Trash2Icon,
-} from 'lucide-react';
+import { CircleCheckIcon, CircleXIcon, PlusIcon, Trash2 } from 'lucide-react';
 import useSWRImmutable from 'swr/immutable';
 import type { APIPlaygroundProps, RequestSchema } from 'fumadocs-openapi';
 import { useApiContext } from '@/contexts/api';
@@ -37,6 +32,13 @@ import {
   resolve,
 } from '@/components/api/shared';
 import { Tab, Tabs } from '@/components/tabs';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface APIPlaygroundFormData {
   authorization?: string | undefined;
@@ -330,9 +332,23 @@ interface RenderOptions {
 }
 
 function renderInner({ field, ...props }: RenderOptions): React.ReactNode {
-  if (field.type === 'object') return <ObjectInput field={field} {...props} />;
+  if (field.type === 'object')
+    return (
+      <ObjectInput
+        field={field}
+        {...props}
+        className={cn('rounded-lg border p-3', props.className)}
+      />
+    );
   if (field.type === 'switcher') return <Switcher field={field} {...props} />;
-  if (field.type === 'array') return <ArrayInput field={field} {...props} />;
+  if (field.type === 'array')
+    return (
+      <ArrayInput
+        field={field}
+        {...props}
+        className={cn('rounded-lg border p-3', props.className)}
+      />
+    );
   if (field.type === 'null') return null;
 
   return <NormalInput field={field} {...props} />;
@@ -348,13 +364,7 @@ function renderExtracted({
   label: string;
 }): React.ReactNode {
   if (field.type === 'object')
-    return (
-      <ObjectInput
-        field={field}
-        fieldName={fieldName}
-        className="border-0 bg-transparent p-0"
-      />
-    );
+    return <ObjectInput field={field} fieldName={fieldName} />;
 
   return <InputField name={label} field={field} fieldName={fieldName} />;
 }
@@ -397,13 +407,7 @@ function ObjectInput({
   const context = useContext(SchemaContext);
 
   return (
-    <div
-      {...props}
-      className={cn(
-        'flex flex-col gap-4 rounded-lg border bg-accent/30 p-3',
-        props.className,
-      )}
-    >
+    <div {...props} className={cn('flex flex-col gap-4', props.className)}>
       {Object.entries(field.properties).map(([key, child]) => (
         <InputField
           key={key}
@@ -465,7 +469,11 @@ function InputField({
         description={field.description}
         {...props}
       >
-        <ObjectInput field={field} fieldName={fieldName} />
+        <ObjectInput
+          field={field}
+          fieldName={fieldName}
+          className="rounded-lg border bg-accent/30 p-3"
+        />
       </InputContainer>
     );
   }
@@ -476,10 +484,14 @@ function InputField({
         name={name}
         required={field.isRequired}
         description={field.description ?? context[field.items].description}
-        type="array"
+        type={`array<${context[field.items].type}>`}
         {...props}
       >
-        <ArrayInput fieldName={fieldName} field={field} />
+        <ArrayInput
+          fieldName={fieldName}
+          field={field}
+          className="rounded-lg border bg-background p-3"
+        />
       </InputContainer>
     );
   }
@@ -525,11 +537,44 @@ function InputField({
 function NormalInput({
   fieldName,
   header,
+  field,
   ...props
 }: InputProps<'string' | 'boolean' | 'number'> & {
   header?: React.ReactNode;
 }): React.ReactElement {
   const { control } = useFormContext();
+
+  if (field.type === 'boolean') {
+    return (
+      <FormField
+        control={control}
+        name={fieldName}
+        render={({ field: { value, onChange, ...restField } }) => (
+          <FormItem {...props}>
+            {header}
+            <Select
+              value={value as string}
+              onValueChange={onChange}
+              disabled={restField.disabled}
+            >
+              <FormControl>
+                <SelectTrigger {...restField}>
+                  <SelectValue />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value="true">True</SelectItem>
+                <SelectItem value="false">False</SelectItem>
+                {field.isRequired ? null : (
+                  <SelectItem value="null">Null</SelectItem>
+                )}
+              </SelectContent>
+            </Select>
+          </FormItem>
+        )}
+      />
+    );
+  }
 
   return (
     <FormField
@@ -541,7 +586,7 @@ function NormalInput({
           <FormControl>
             <Input
               placeholder="Enter value"
-              className="text-foreground"
+              type={field.type === 'string' ? 'text' : 'number'}
               value={value as string}
               {...restField}
             />
@@ -557,10 +602,8 @@ function ArrayInput({
   field,
   ...props
 }: InputProps<'array'>): React.ReactElement {
-  const { control } = useFormContext();
   const context = useContext(SchemaContext);
   const { fields, append, remove } = useFieldArray({
-    control,
     name: fieldName,
   });
   const items = context[field.items];
@@ -570,13 +613,7 @@ function ArrayInput({
   }, [append, context, items]);
 
   return (
-    <div
-      {...props}
-      className={cn(
-        'flex flex-col gap-4 rounded-lg border p-3',
-        props.className,
-      )}
-    >
+    <div {...props} className={cn('flex flex-col gap-4', props.className)}>
       {fields.map((item, index) => (
         <div key={item.id} className="relative">
           {renderInner({
@@ -591,14 +628,14 @@ function ArrayInput({
               buttonVariants({
                 color: 'secondary',
                 size: 'sm',
-                className: 'absolute -top-2 -end-2 p-1',
+                className: 'absolute -top-2 -end-2 p-0.5',
               }),
             )}
             onClick={() => {
               remove(index);
             }}
           >
-            <Trash2Icon className="size-4" />
+            <Trash2 className="size-4" />
           </button>
         </div>
       ))}

@@ -70,6 +70,9 @@ export function getDefaultValues(
   );
 }
 
+/**
+ * Resolve reference
+ */
 export function resolve(
   reference: ReferenceSchema,
   context: References,

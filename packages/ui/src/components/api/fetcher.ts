@@ -24,9 +24,10 @@ function convertValue(
   schema: RequestSchema,
   references: Record<string, RequestSchema>,
 ): unknown {
-  if (value === '' || value === undefined || value === null) {
+  const isEmpty = value === '' || value === undefined || value === null;
+  if (isEmpty && schema.isRequired)
     return schema.type === 'boolean' ? false : '';
-  }
+  else if (isEmpty) return undefined;
 
   if (Array.isArray(value)) {
     return value.map((item: unknown) => convertValue(item, schema, references));
@@ -56,7 +57,7 @@ function convertValue(
     case 'number':
       return Number(value);
     case 'boolean':
-      return Boolean(value);
+      return value === 'null' ? undefined : Boolean(value);
     case 'string':
     default:
       return String(value);

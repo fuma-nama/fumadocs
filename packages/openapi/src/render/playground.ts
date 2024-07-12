@@ -36,6 +36,11 @@ interface ArraySchema extends BaseSchema {
 interface ObjectSchema extends BaseSchema {
   type: 'object';
   properties: Record<string, ReferenceSchema>;
+
+  /**
+   * Reference to schema, or true if it's `any`
+   */
+  additionalProperties?: boolean | string;
 }
 
 interface SwitcherSchema extends BaseSchema {
@@ -84,28 +89,12 @@ export function renderPlayground(
     },
     registered: new WeakMap(),
   };
-  const security = method.security ?? ctx.document.security ?? [];
   const body = method.requestBody
     ? getPreferredMedia(noRef(method.requestBody).content)
     : undefined;
 
   return ctx.renderer.APIPlayground({
-    authorization:
-      security.length > 0
-        ? {
-            type: 'string',
-            name: 'authorization',
-            defaultValue: getScheme(security[0], ctx.document).some(
-              (s) =>
-                s.type === 'oauth2' ||
-                (s.type === 'http' && s.scheme === 'bearer'),
-            )
-              ? 'Bearer'
-              : 'Basic',
-            isRequired: true,
-            description: 'The authorization token',
-          }
-        : undefined,
+    authorization: getAuthorizationField(method, ctx),
     method: method.method,
     route: path,
     path: method.parameters
@@ -122,6 +111,34 @@ export function renderPlayground(
       : undefined,
     schemas: context.schema,
   });
+}
+
+function getAuthorizationField(
+  method: MethodInformation,
+  ctx: RenderContext,
+): PrimitiveRequestField | undefined {
+  const security = method.security ?? ctx.document.security ?? [];
+  if (security.length === 0) return;
+  const singular = security.find(
+    (requirements) => Object.keys(requirements).length === 1,
+  );
+  if (!singular) return;
+
+  const scheme = getScheme(singular, ctx.document)[0];
+
+  return {
+    type: 'string',
+    name: 'Authorization',
+    defaultValue:
+      scheme.type === 'oauth2' ||
+      (scheme.type === 'http' && scheme.scheme === 'bearer')
+        ? 'Bearer'
+        : 'Basic',
+    isRequired: security.every(
+      (requirements) => Object.keys(requirements).length > 0,
+    ),
+    description: 'The Authorization access token',
+  };
 }
 
 function getIdFromSchema(
@@ -207,6 +224,10 @@ function toSchema(
       isRequired: required,
       description: schema.description ?? schema.title,
       properties,
+      additionalProperties:
+        typeof schema.additionalProperties === 'object'
+          ? getIdFromSchema(noRef(schema.additionalProperties), false, ctx)
+          : schema.additionalProperties,
     };
   }
 
