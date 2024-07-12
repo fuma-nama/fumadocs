@@ -21,6 +21,18 @@ export interface CodeSample {
   source: string;
 }
 
+export function idToTitle(id: string): string {
+  const result = [];
+  for (const c of id) {
+    if (result.length === 0) result.push(c.toLocaleUpperCase());
+    else if (/^[A-Z]$/.test(c)) result.push(' ', c);
+    else if (c === '-') result.push(' ');
+    else result.push(c);
+  }
+
+  return result.join('');
+}
+
 export async function renderOperation(
   path: string,
   method: MethodInformation,
@@ -33,9 +45,14 @@ export async function renderOperation(
   const info: string[] = [];
   const example: string[] = [];
 
-  const title = method.summary ?? method.operationId;
-  if (title && !noTitle) {
-    info.push(heading(level, title));
+  if (!noTitle) {
+    info.push(
+      heading(
+        level,
+        method.summary ??
+          (method.operationId ? idToTitle(method.operationId) : path),
+      ),
+    );
     level++;
   }
   if (method.description) info.push(p(method.description));
