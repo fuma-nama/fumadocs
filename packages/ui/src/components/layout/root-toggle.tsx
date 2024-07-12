@@ -1,10 +1,11 @@
 'use client';
 import { ChevronDown } from 'lucide-react';
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useCallback, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/utils/cn';
 import { isActive } from '@/utils/shared';
+import { useSidebar } from '@/contexts/sidebar';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 
 interface Option {
@@ -24,9 +25,15 @@ export function RootToggle({
   options: Option[];
 }): React.ReactElement {
   const [open, setOpen] = useState(false);
+  const { closeOnRedirect } = useSidebar();
   const pathname = usePathname();
   const selected =
     options.find((item) => isActive(item.url, pathname, true)) ?? options[0];
+
+  const onClick = useCallback(() => {
+    closeOnRedirect.current = false;
+    setOpen(false);
+  }, [closeOnRedirect]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -39,9 +46,7 @@ export function RootToggle({
           <Link
             key={item.url}
             href={item.url}
-            onClick={() => {
-              setOpen(false);
-            }}
+            onClick={onClick}
             className={cn(
               'flex w-full flex-row gap-2 p-2',
               selected === item

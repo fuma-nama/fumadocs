@@ -17,7 +17,7 @@ interface SidebarContext {
   setCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
 
   /**
-   * When set to true, close the sidebar on redirection
+   * When set to false, don't close the sidebar when navigate to another page
    */
   closeOnRedirect: MutableRefObject<boolean>;
 }
@@ -35,7 +35,7 @@ export function SidebarProvider({
 }: {
   children: React.ReactNode;
 }): React.ReactElement {
-  const closeOnRedirect = useRef(false);
+  const closeOnRedirect = useRef(true);
   const [open, setOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
 
@@ -44,7 +44,7 @@ export function SidebarProvider({
   useEffect(() => {
     if (closeOnRedirect.current) {
       setOpen(false);
-      closeOnRedirect.current = false;
+      closeOnRedirect.current = true;
     }
   }, [pathname]);
 

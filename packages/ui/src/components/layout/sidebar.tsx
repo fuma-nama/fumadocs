@@ -199,7 +199,6 @@ function PageNode({
   item: PageTree.Item;
 }): React.ReactElement {
   const pathname = usePathname();
-  const { closeOnRedirect } = useSidebar();
   const active = isActive(url, pathname, false);
 
   return (
@@ -207,9 +206,6 @@ function PageNode({
       href={url}
       external={external}
       className={cn(itemVariants({ active }))}
-      onClick={useCallback(() => {
-        closeOnRedirect.current = !active;
-      }, [closeOnRedirect, active])}
     >
       {icon ?? (external ? <ExternalLinkIcon /> : null)}
       {name}
@@ -225,7 +221,6 @@ function FolderNode({
   level: number;
 }): React.ReactElement {
   const { defaultOpenLevel } = useContext(Context);
-  const { closeOnRedirect } = useSidebar();
   const pathname = usePathname();
 
   const active = index !== undefined && isActive(index.url, pathname, false);
@@ -247,11 +242,9 @@ function FolderNode({
       if (e.target !== e.currentTarget || active) {
         setExtend((prev) => !prev);
         e.preventDefault();
-      } else {
-        closeOnRedirect.current = !active;
       }
     },
-    [closeOnRedirect, active],
+    [active],
   );
 
   const content = (

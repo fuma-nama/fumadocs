@@ -97,8 +97,6 @@ function Search({
 
     if (location.pathname === url.split('#')[0]) {
       sidebar.setOpen(false);
-    } else {
-      sidebar.closeOnRedirect.current = true;
     }
   };
 
@@ -112,7 +110,7 @@ function Search({
         }, [setOpenSearch])}
         placeholder={text.search}
       />
-      <CommandList className={cn(items.length === 0 && 'hidden')}>
+      <CommandList>
         <CommandEmpty>{text.searchNoResult}</CommandEmpty>
 
         <CommandGroup value="result">
