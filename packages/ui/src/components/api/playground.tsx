@@ -1,15 +1,23 @@
 import {
   createContext,
   type HTMLAttributes,
+  type MutableRefObject,
+  type ReactNode,
   useCallback,
   useContext,
   useEffect,
+  useMemo,
+  useRef,
   useState,
 } from 'react';
 import { useFieldArray, useForm, useFormContext } from 'react-hook-form';
-import { CircleCheckIcon, CircleXIcon, PlusIcon, Trash2 } from 'lucide-react';
+import { PlusIcon, Trash2 } from 'lucide-react';
 import useSWRImmutable from 'swr/immutable';
-import type { APIPlaygroundProps, RequestSchema } from 'fumadocs-openapi';
+import type {
+  APIPlaygroundProps,
+  ReferenceSchema,
+  RequestSchema,
+} from 'fumadocs-openapi';
 import { useApiContext } from '@/contexts/api';
 import {
   Form,
@@ -24,14 +32,13 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/utils/cn';
 import { Accordion, Accordions } from '@/components/accordion';
 import * as Base from '@/components/codeblock';
-import { createBodyFromValue } from '@/components/api/fetcher';
+import { createBodyFromValue, getStatusInfo } from '@/components/api/fetcher';
 import { buttonVariants } from '@/theme/variants';
 import {
   getDefaultValue,
   getDefaultValues,
   resolve,
 } from '@/components/api/shared';
-import { Tab, Tabs } from '@/components/tabs';
 import {
   Select,
   SelectContent,
@@ -48,53 +55,27 @@ interface APIPlaygroundFormData {
   body?: Record<string, unknown>;
 }
 
-interface StatusInfo {
-  description: string;
-  color: string;
-  icon: React.ElementType;
+export type DynamicField =
+  | {
+      type: 'object';
+      properties: string[];
+    }
+  | {
+      type: 'field';
+      schema: RequestSchema | ReferenceSchema;
+    };
+
+interface SchemaContextType {
+  references: Record<string, RequestSchema>;
+  dynamic: MutableRefObject<Map<string, DynamicField>>;
 }
 
-const statusMap: Record<number, StatusInfo> = {
-  200: { description: 'OK', color: 'text-green-500', icon: CircleCheckIcon },
-  400: { description: 'Bad Request', color: 'text-red-500', icon: CircleXIcon },
-  401: {
-    description: 'Unauthorized',
-    color: 'text-red-500',
-    icon: CircleXIcon,
-  },
-  403: { description: 'Forbidden', color: 'text-red-500', icon: CircleXIcon },
-  404: { description: 'Not Found', color: 'text-gray-500', icon: CircleXIcon },
-  500: {
-    description: 'Internal Server Error',
-    color: 'text-red-500',
-    icon: CircleXIcon,
-  },
-};
+const SchemaContext = createContext<SchemaContextType | undefined>(undefined);
 
-const SchemaContext = createContext<Record<string, RequestSchema>>({});
-
-function getStatusInfo(status: number): StatusInfo {
-  if (status in statusMap) {
-    return statusMap[status];
-  }
-
-  if (status >= 200 && status < 300) {
-    return {
-      description: 'Success',
-      color: 'text-foreground',
-      icon: CircleCheckIcon,
-    };
-  }
-
-  if (status >= 400) {
-    return { description: 'Error', color: 'text-red-500', icon: CircleXIcon };
-  }
-
-  return {
-    description: 'No Description',
-    color: 'text-muted-foreground',
-    icon: CircleXIcon,
-  };
+function useSchemaContext(): SchemaContextType {
+  const ctx = useContext(SchemaContext);
+  if (!ctx) throw new Error('Missing provider');
+  return ctx;
 }
 
 export type CodeBlockProps = HTMLAttributes<HTMLPreElement> & {
@@ -140,6 +121,7 @@ export function APIPlayground({
   schemas,
 }: APIPlaygroundProps & HTMLAttributes<HTMLFormElement>): React.ReactElement {
   const { baseUrl } = useApiContext();
+  const dynamicRef = useRef(new Map<string, DynamicField>());
   const [input, setInput] = useState<APIPlaygroundFormData>();
   const form = useForm({
     defaultValues: {
@@ -185,20 +167,17 @@ export function APIPlayground({
 
       const bodyValue =
         body && input.body && Object.keys(input.body).length > 0
-          ? createBodyFromValue(input.body, body, schemas)
+          ? createBodyFromValue(input.body, body, schemas, dynamicRef.current)
           : undefined;
       const response = await fetch(url, {
         method,
         headers,
         body: bodyValue ? JSON.stringify(bodyValue) : undefined,
       });
-      try {
-        const data: unknown = await response.json();
 
-        return { status: response.status, data };
-      } catch (_) {
-        return { status: response.status };
-      }
+      const data: unknown = await response.json().catch(() => undefined);
+
+      return { status: response.status, data };
     },
     {
       shouldRetryOnError: false,
@@ -209,15 +188,18 @@ export function APIPlayground({
     ? getStatusInfo(testQuery.data.status)
     : undefined;
 
-  const StatusIcon = statusInfo?.icon;
-
   const onSubmit = form.handleSubmit((value) => {
     setInput(value as APIPlaygroundFormData);
   });
 
   return (
     <Form {...form}>
-      <SchemaContext.Provider value={schemas}>
+      <SchemaContext.Provider
+        value={useMemo(
+          () => ({ references: schemas, dynamic: dynamicRef }),
+          [schemas],
+        )}
+      >
         <form
           className="not-prose flex flex-col gap-4 rounded-lg border bg-card p-4"
           onSubmit={onSubmit as React.FormEventHandler}
@@ -298,18 +280,14 @@ export function APIPlayground({
             ) : null}
           </Accordions>
 
-          {testQuery.data ? (
+          {testQuery.data && statusInfo ? (
             <div className="flex flex-col gap-3 rounded-lg border bg-card p-4">
-              <div className="inline-flex items-center gap-1.5 text-sm">
-                {StatusIcon ? (
-                  <StatusIcon className={cn('size-4', statusInfo.color)} />
-                ) : null}
-                <span className="font-medium text-foreground">
-                  {testQuery.data.status}
-                </span>
+              <div className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground">
+                <statusInfo.icon className={cn('size-4', statusInfo.color)} />
+                {statusInfo.description}
               </div>
               <p className="text-sm text-muted-foreground">
-                {statusInfo?.description}
+                {testQuery.data.status}
               </p>
               {testQuery.data.data ? (
                 <CodeBlock
@@ -376,7 +354,7 @@ interface InputProps<Type> extends HTMLAttributes<HTMLDivElement> {
 
 function InputContainer(
   props: {
-    name?: string;
+    name?: ReactNode;
     required: boolean;
     type?: string;
     description?: string;
@@ -384,7 +362,7 @@ function InputContainer(
 ): React.ReactElement {
   return (
     <div {...props} className={cn('flex flex-col gap-2', props.className)}>
-      <div className={cn(labelVariants(), 'inline-flex gap-1')}>
+      <div className={cn(labelVariants(), 'inline-flex items-center gap-1')}>
         {props.name}
         {props.required ? <span className="text-red-500">*</span> : null}
         {props.type ? (
@@ -404,7 +382,7 @@ function ObjectInput({
   fieldName,
   ...props
 }: InputProps<'object'>): React.ReactElement {
-  const context = useContext(SchemaContext);
+  const { references } = useSchemaContext();
 
   return (
     <div {...props} className={cn('flex flex-col gap-4', props.className)}>
@@ -412,11 +390,182 @@ function ObjectInput({
         <InputField
           key={key}
           name={key}
-          field={resolve(child, context)}
+          field={resolve(child, references)}
           fieldName={`${fieldName}.${key}`}
         />
       ))}
+      {field.additionalProperties ? (
+        <AdditionalProperties
+          fieldName={fieldName}
+          type={field.additionalProperties}
+        />
+      ) : null}
     </div>
+  );
+}
+
+function AdditionalProperties({
+  fieldName,
+  type,
+}: {
+  fieldName: string;
+  type: boolean | string;
+}): React.ReactElement {
+  const { references, dynamic } = useSchemaContext();
+  const [nextName, setNextName] = useState('');
+  const [properties, setProperties] = useState<string[]>(() => {
+    const d = dynamic.current.get(fieldName);
+    if (d?.type === 'object') return d.properties;
+
+    return [];
+  });
+
+  useEffect(() => {
+    dynamic.current.set(fieldName, { type: 'object', properties });
+  }, [properties]);
+
+  const onAppend = useCallback(() => {
+    if (nextName.length === 0) return;
+    setProperties((p) => (p.includes(nextName) ? p : [...p, nextName]));
+    setNextName('');
+  }, [nextName]);
+
+  const types =
+    typeof type === 'string'
+      ? resolveDynamicField(references[type], references)
+      : undefined;
+
+  return (
+    <>
+      {properties.map((item) => (
+        <DynamicField
+          key={item}
+          label={item}
+          types={types}
+          fieldName={`${fieldName}.${item}`}
+        />
+      ))}
+      <div className="flex flex-row gap-1">
+        <Input
+          value={nextName}
+          placeholder="Enter Property Name"
+          onChange={useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+            setNextName(e.target.value);
+          }, [])}
+          onKeyDown={useCallback(
+            (e: React.KeyboardEvent<HTMLInputElement>) => {
+              if (e.key === 'Enter') {
+                onAppend();
+                e.preventDefault();
+              }
+            },
+            [onAppend],
+          )}
+        />
+        <button
+          type="button"
+          className={cn(buttonVariants({ color: 'secondary' }))}
+          onClick={onAppend}
+        >
+          New
+        </button>
+      </div>
+    </>
+  );
+}
+
+function resolveDynamicField(
+  schema: RequestSchema,
+  references: Record<string, RequestSchema>,
+): Record<string, RequestSchema> {
+  if (schema.type !== 'switcher') return { [schema.type]: schema };
+
+  return Object.fromEntries(
+    Object.entries(schema.items).map(([key, value]) => [
+      key,
+      resolve(value, references),
+    ]),
+  );
+}
+
+function DynamicField({
+  fieldName,
+  label,
+  types = {
+    string: {
+      type: 'string',
+      isRequired: false,
+      defaultValue: '',
+    },
+    boolean: {
+      type: 'boolean',
+      isRequired: false,
+      defaultValue: '',
+    },
+    number: {
+      type: 'number',
+      isRequired: false,
+      defaultValue: '',
+    },
+  },
+  className,
+}: {
+  fieldName: string;
+  label: string;
+  /**
+   * Available types, fallback to any
+   */
+  types?: Record<string, RequestSchema>;
+  className?: string;
+}): React.ReactElement {
+  const { dynamic } = useSchemaContext();
+  const typeNames = Object.keys(types);
+  const [value, setValue] = useState<string>(() => {
+    const d = dynamic.current.get(fieldName);
+
+    if (d?.type === 'field') {
+      return typeNames.find((name) => types[name] === d.schema) ?? typeNames[0];
+    }
+
+    return typeNames[0];
+  });
+
+  useEffect(() => {
+    if (!value) return;
+
+    dynamic.current.set(fieldName, {
+      type: 'field',
+      schema: types[value],
+    });
+  }, [value, fieldName, types, dynamic]);
+
+  return (
+    <InputContainer
+      name={
+        <>
+          {label}
+          <Select value={value} onValueChange={setValue}>
+            <SelectTrigger className="ms-auto h-auto gap-1 p-1 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {typeNames.map((item) => (
+                <SelectItem key={item} value={item}>
+                  {item}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </>
+      }
+      className={className}
+      required={false}
+    >
+      {renderInner({
+        field: types[value],
+        fieldName,
+      })}
+    </InputContainer>
   );
 }
 
@@ -425,25 +574,50 @@ function Switcher({
   fieldName,
   className,
 }: InputProps<'switcher'>): React.ReactElement {
+  const { references, dynamic } = useSchemaContext();
   const items = Object.keys(field.items);
-  const context = useContext(SchemaContext);
+  const [value, setValue] = useState<string>(() => {
+    const d = dynamic.current.get(fieldName);
+
+    if (d?.type === 'field') {
+      // schemas are passed from server components, they shouldn't be re-constructed
+      const cached = items.find((item) => d.schema === field.items[item]);
+
+      if (cached) return cached;
+    }
+
+    return items[0];
+  });
+
+  useEffect(() => {
+    if (!value) return;
+
+    dynamic.current.set(fieldName, {
+      type: 'field',
+      schema: field.items[value],
+    });
+  }, [value, fieldName, field, dynamic]);
 
   return (
-    <Tabs
-      items={items}
-      defaultValue={undefined}
-      className={cn('my-0', className)}
-    >
-      {items.map((item) => (
-        <Tab key={item} value={item}>
-          {renderExtracted({
-            field: resolve(field.items[item], context),
-            fieldName: `${fieldName}.${item}`,
-            label: 'Value',
-          })}
-        </Tab>
-      ))}
-    </Tabs>
+    <div className={className}>
+      <Select value={value} onValueChange={setValue}>
+        <SelectTrigger>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {items.map((item) => (
+            <SelectItem key={item} value={item}>
+              {item}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      {renderExtracted({
+        field: resolve(field.items[value], references),
+        fieldName,
+        label: 'Value',
+      })}
+    </div>
   );
 }
 
@@ -458,7 +632,7 @@ function InputField({
   fieldName: string;
   className?: string;
 }): React.ReactNode {
-  const context = useContext(SchemaContext);
+  const { references } = useSchemaContext();
 
   if (field.type === 'object') {
     return (
@@ -483,8 +657,8 @@ function InputField({
       <InputContainer
         name={name}
         required={field.isRequired}
-        description={field.description ?? context[field.items].description}
-        type={`array<${context[field.items].type}>`}
+        description={field.description ?? references[field.items].description}
+        type={`array<${references[field.items].type}>`}
         {...props}
       >
         <ArrayInput
@@ -602,15 +776,15 @@ function ArrayInput({
   field,
   ...props
 }: InputProps<'array'>): React.ReactElement {
-  const context = useContext(SchemaContext);
+  const { references } = useSchemaContext();
   const { fields, append, remove } = useFieldArray({
     name: fieldName,
   });
-  const items = context[field.items];
+  const items = references[field.items];
 
   const handleAppend = useCallback(() => {
-    append(getDefaultValue(items, context));
-  }, [append, context, items]);
+    append(getDefaultValue(items, references));
+  }, [append, references, items]);
 
   return (
     <div {...props} className={cn('flex flex-col gap-4', props.className)}>
@@ -626,9 +800,9 @@ function ArrayInput({
             aria-label="Remove Item"
             className={cn(
               buttonVariants({
-                color: 'secondary',
+                color: 'outline',
                 size: 'sm',
-                className: 'absolute -top-2 -end-2 p-0.5',
+                className: 'absolute bg-background -top-2 -end-2',
               }),
             )}
             onClick={() => {

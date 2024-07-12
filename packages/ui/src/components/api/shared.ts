@@ -74,12 +74,14 @@ export function getDefaultValues(
  * Resolve reference
  */
 export function resolve(
-  reference: ReferenceSchema,
+  schema: RequestSchema | ReferenceSchema,
   context: References,
 ): RequestSchema {
+  if (schema.type !== 'ref') return schema;
+
   return {
-    ...context[reference.schema],
-    description: reference.description,
-    isRequired: reference.isRequired,
+    ...context[schema.schema],
+    description: schema.description,
+    isRequired: schema.isRequired,
   };
 }

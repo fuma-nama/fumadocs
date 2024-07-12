@@ -11,7 +11,7 @@ export const buttonVariants = cva(
           'border bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground',
       },
       size: {
-        sm: 'gap-1 p-2 text-xs',
+        sm: 'gap-1 p-0.5 text-xs',
         icon: 'p-1.5 [&_svg]:size-5',
       },
     },

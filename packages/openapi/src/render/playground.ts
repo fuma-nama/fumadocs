@@ -219,15 +219,30 @@ function toSchema(
       if (field.type === 'object') Object.assign(properties, field.properties);
     });
 
+    const additional = noRef(schema.additionalProperties);
+    let additionalProperties: string | boolean | undefined;
+
+    if (additional && typeof additional === 'object') {
+      if (
+        !additional.type &&
+        !additional.anyOf &&
+        !additional.allOf &&
+        !additional.oneOf
+      ) {
+        additionalProperties = true;
+      } else {
+        additionalProperties = getIdFromSchema(additional, false, ctx);
+      }
+    } else {
+      additionalProperties = additional;
+    }
+
     return {
       type: 'object',
       isRequired: required,
       description: schema.description ?? schema.title,
       properties,
-      additionalProperties:
-        typeof schema.additionalProperties === 'object'
-          ? getIdFromSchema(noRef(schema.additionalProperties), false, ctx)
-          : schema.additionalProperties,
+      additionalProperties,
     };
   }
 
