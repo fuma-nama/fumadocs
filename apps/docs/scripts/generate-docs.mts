@@ -3,7 +3,7 @@ import * as Typescript from 'fumadocs-typescript';
 import * as path from 'node:path';
 
 void OpenAPI.generateFiles({
-  input: ['./*.yaml', './unkey.json'],
+  input: ['./*.yaml'],
   output: './content/docs/ui',
   per: 'tag',
   renderer: {
