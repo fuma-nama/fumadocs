@@ -8,6 +8,7 @@ import { noRef, getPreferredMedia } from '@/utils/schema';
 import { getTypescriptSchema } from '@/utils/get-typescript-schema';
 import { getScheme } from '@/utils/get-security';
 import { renderPlayground } from '@/render/playground';
+import { idToTitle } from '@/utils/id-to-title';
 import { heading, p } from './element';
 import { schemaElement } from './schema';
 
@@ -19,18 +20,6 @@ export interface CodeSample {
   lang: string;
   label: string;
   source: string;
-}
-
-export function idToTitle(id: string): string {
-  const result = [];
-  for (const c of id) {
-    if (result.length === 0) result.push(c.toLocaleUpperCase());
-    else if (/^[A-Z]$/.test(c)) result.push(' ', c);
-    else if (c === '-') result.push(' ');
-    else result.push(c);
-  }
-
-  return result.join('');
 }
 
 export async function renderOperation(

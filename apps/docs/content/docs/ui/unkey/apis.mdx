@@ -1,24 +1,9 @@
 ---
-title: apis
+title: Apis
 full: true
 ---
 
-import {
-  Root,
-  API,
-  APIInfo,
-  APIExample,
-  Responses,
-  Response,
-  ResponseTypes,
-  ExampleResponse,
-  TypeScriptResponse,
-  Property,
-  ObjectCollapsible,
-  Requests,
-  Request,
-  APIPlayground,
-} from 'fumadocs-ui/components/api';
+import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible, Requests, Request, APIPlayground } from "fumadocs-ui/components/api";
 
 <Root baseUrl={"https://api.unkey.dev"}>
 
@@ -28,7 +13,7 @@ import {
 
 <APIInfo method={"GET"} route={"/v1/apis.getApi"}>
 
-## getApi
+## Get Api
 
 ### Authorization
 
@@ -50,16 +35,16 @@ The id of the api to fetch
 
 </Property>
 
-| Status code | Description                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `200`       | The configuration for an api                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `400`       | The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).                                                                                                                                                                                                                        |
-| `401`       | Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response.                                                                                                                                                                                                                                              |
-| `403`       | The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.                                                                                                                                                                                                              |
-| `404`       | The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. |
-| `409`       | This response is sent when a request conflicts with the current state of the server.                                                                                                                                                                                                                                                                                                                                              |
-| `429`       | The user has sent too many requests in a given amount of time ("rate limiting")                                                                                                                                                                                                                                                                                                                                                   |
-| `500`       | The server has encountered a situation it does not know how to handle.                                                                                                                                                                                                                                                                                                                                                            |
+| Status code | Description |
+| ----------- | ----------- |
+| `200` | The configuration for an api |
+| `400` | The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). |
+| `401` | Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. |
+| `403` | The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. |
+| `404` | The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. |
+| `409` | This response is sent when a request conflicts with the current state of the server. |
+| `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
+| `500` | The server has encountered a situation it does not know how to handle. |
 
 <APIPlayground authorization={{"type":"string","name":"Authorization","defaultValue":"Bearer","isRequired":true,"description":"The Authorization access token"}} method={"GET"} route={"/v1/apis.getApi"} path={[]} query={[{"name":"apiId","type":"string","defaultValue":"api_1234","isRequired":true,"description":"The id of the api to fetch"}]} header={[]} body={undefined} schemas={{}}>
 
@@ -82,8 +67,8 @@ curl -X GET "https://api.unkey.dev/v1/apis.getApi?apiId=api_1234"
 <Request value={"JavaScript"}>
 
 ```js
-fetch('https://api.unkey.dev/v1/apis.getApi?apiId=api_1234', {
-  method: 'GET',
+fetch("https://api.unkey.dev/v1/apis.getApi?apiId=api_1234", {
+  method: "GET"
 });
 ```
 
@@ -161,7 +146,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'BAD_REQUEST';
+    code: "BAD_REQUEST";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -211,7 +196,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'UNAUTHORIZED';
+    code: "UNAUTHORIZED";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -261,7 +246,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'FORBIDDEN';
+    code: "FORBIDDEN";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -311,7 +296,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'NOT_FOUND';
+    code: "NOT_FOUND";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -361,7 +346,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'CONFLICT';
+    code: "CONFLICT";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -411,7 +396,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'TOO_MANY_REQUESTS';
+    code: "TOO_MANY_REQUESTS";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -461,7 +446,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'INTERNAL_SERVER_ERROR';
+    code: "INTERNAL_SERVER_ERROR";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -494,7 +479,7 @@ export interface Response {
 
 <APIInfo method={"POST"} route={"/v1/apis.createApi"}>
 
-## createApi
+## Create Api
 
 ### Authorization
 
@@ -516,16 +501,16 @@ The name for your API. This is not customer facing.
 
 </Property>
 
-| Status code | Description                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `200`       | The configuration for an api                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `400`       | The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).                                                                                                                                                                                                                        |
-| `401`       | Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response.                                                                                                                                                                                                                                              |
-| `403`       | The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.                                                                                                                                                                                                              |
-| `404`       | The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. |
-| `409`       | This response is sent when a request conflicts with the current state of the server.                                                                                                                                                                                                                                                                                                                                              |
-| `429`       | The user has sent too many requests in a given amount of time ("rate limiting")                                                                                                                                                                                                                                                                                                                                                   |
-| `500`       | The server has encountered a situation it does not know how to handle.                                                                                                                                                                                                                                                                                                                                                            |
+| Status code | Description |
+| ----------- | ----------- |
+| `200` | The configuration for an api |
+| `400` | The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). |
+| `401` | Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. |
+| `403` | The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. |
+| `404` | The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. |
+| `409` | This response is sent when a request conflicts with the current state of the server. |
+| `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
+| `500` | The server has encountered a situation it does not know how to handle. |
 
 <APIPlayground authorization={{"type":"string","name":"Authorization","defaultValue":"Bearer","isRequired":true,"description":"The Authorization access token"}} method={"POST"} route={"/v1/apis.createApi"} path={[]} query={[]} header={[]} body={{"type":"object","isRequired":true,"properties":{"name":{"type":"ref","isRequired":true,"schema":"0"}}}} schemas={{"0":{"type":"string","defaultValue":"my-api","isRequired":false,"description":"The name for your API. This is not customer facing."}}}>
 
@@ -551,8 +536,8 @@ curl -X POST "https://api.unkey.dev/v1/apis.createApi" \
 <Request value={"JavaScript"}>
 
 ```js
-fetch('https://api.unkey.dev/v1/apis.createApi', {
-  method: 'POST',
+fetch("https://api.unkey.dev/v1/apis.createApi", {
+  method: "POST"
 });
 ```
 
@@ -620,7 +605,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'BAD_REQUEST';
+    code: "BAD_REQUEST";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -670,7 +655,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'UNAUTHORIZED';
+    code: "UNAUTHORIZED";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -720,7 +705,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'FORBIDDEN';
+    code: "FORBIDDEN";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -770,7 +755,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'NOT_FOUND';
+    code: "NOT_FOUND";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -820,7 +805,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'CONFLICT';
+    code: "CONFLICT";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -870,7 +855,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'TOO_MANY_REQUESTS';
+    code: "TOO_MANY_REQUESTS";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -920,7 +905,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'INTERNAL_SERVER_ERROR';
+    code: "INTERNAL_SERVER_ERROR";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -953,7 +938,7 @@ export interface Response {
 
 <APIInfo method={"GET"} route={"/v1/apis.listKeys"}>
 
-## listKeys
+## List Keys
 
 ### Authorization
 
@@ -1003,16 +988,16 @@ If provided, this will only return keys where the `ownerId` matches.
 
 </Property>
 
-| Status code | Description                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `200`       | The configuration for an api                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `400`       | The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).                                                                                                                                                                                                                        |
-| `401`       | Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response.                                                                                                                                                                                                                                              |
-| `403`       | The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.                                                                                                                                                                                                              |
-| `404`       | The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. |
-| `409`       | This response is sent when a request conflicts with the current state of the server.                                                                                                                                                                                                                                                                                                                                              |
-| `429`       | The user has sent too many requests in a given amount of time ("rate limiting")                                                                                                                                                                                                                                                                                                                                                   |
-| `500`       | The server has encountered a situation it does not know how to handle.                                                                                                                                                                                                                                                                                                                                                            |
+| Status code | Description |
+| ----------- | ----------- |
+| `200` | The configuration for an api |
+| `400` | The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). |
+| `401` | Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. |
+| `403` | The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. |
+| `404` | The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. |
+| `409` | This response is sent when a request conflicts with the current state of the server. |
+| `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
+| `500` | The server has encountered a situation it does not know how to handle. |
 
 <APIPlayground authorization={{"type":"string","name":"Authorization","defaultValue":"Bearer","isRequired":true,"description":"The Authorization access token"}} method={"GET"} route={"/v1/apis.listKeys"} path={[]} query={[{"name":"apiId","type":"string","defaultValue":"api_1234","isRequired":true,"description":"The id of the api to fetch"},{"name":"limit","type":"number","defaultValue":100,"isRequired":false,"description":"The maximum number of keys to return"},{"name":"cursor","type":"string","defaultValue":"","isRequired":false,"description":"Use this to fetch the next page of results. A new cursor will be returned in the response if there are more results."},{"name":"ownerId","type":"string","defaultValue":"","isRequired":false,"description":"If provided, this will only return keys where the `ownerId` matches."}]} header={[]} body={undefined} schemas={{}}>
 
@@ -1035,12 +1020,9 @@ curl -X GET "https://api.unkey.dev/v1/apis.listKeys?apiId=api_1234&limit=100&cur
 <Request value={"JavaScript"}>
 
 ```js
-fetch(
-  'https://api.unkey.dev/v1/apis.listKeys?apiId=api_1234&limit=100&cursor=string&ownerId=string',
-  {
-    method: 'GET',
-  },
-);
+fetch("https://api.unkey.dev/v1/apis.listKeys?apiId=api_1234&limit=100&cursor=string&ownerId=string", {
+  method: "GET"
+});
 ```
 
 </Request>
@@ -1066,7 +1048,10 @@ fetch(
       "name": "Customer X",
       "ownerId": "user_123",
       "meta": {
-        "roles": ["admin", "user"],
+        "roles": [
+          "admin",
+          "user"
+        ],
         "stripeCustomerId": "cus_1234"
       },
       "createdAt": 0,
@@ -1083,7 +1068,10 @@ fetch(
         "refillRate": 1,
         "refillInterval": 60
       },
-      "roles": ["admin", "finance"],
+      "roles": [
+        "admin",
+        "finance"
+      ],
       "enabled": true
     }
   ],
@@ -1154,7 +1142,7 @@ export interface Response {
       /**
        * Determines the rate at which verifications will be refilled.
        */
-      interval: 'daily' | 'monthly';
+      interval: "daily" | "monthly";
       /**
        * Resets `remaining` to this value every interval.
        */
@@ -1171,7 +1159,7 @@ export interface Response {
       /**
        * Fast ratelimiting doesn't add latency, while consistent ratelimiting is more accurate.
        */
-      type: 'fast' | 'consistent';
+      type: "fast" | "consistent";
       /**
        * The total amount of burstable requests.
        */
@@ -1238,7 +1226,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'BAD_REQUEST';
+    code: "BAD_REQUEST";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -1288,7 +1276,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'UNAUTHORIZED';
+    code: "UNAUTHORIZED";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -1338,7 +1326,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'FORBIDDEN';
+    code: "FORBIDDEN";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -1388,7 +1376,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'NOT_FOUND';
+    code: "NOT_FOUND";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -1438,7 +1426,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'CONFLICT';
+    code: "CONFLICT";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -1488,7 +1476,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'TOO_MANY_REQUESTS';
+    code: "TOO_MANY_REQUESTS";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -1538,7 +1526,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'INTERNAL_SERVER_ERROR';
+    code: "INTERNAL_SERVER_ERROR";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -1571,7 +1559,7 @@ export interface Response {
 
 <APIInfo method={"POST"} route={"/v1/apis.deleteApi"}>
 
-## deleteApi
+## Delete Api
 
 ### Authorization
 
@@ -1593,16 +1581,16 @@ The id of the api to delete
 
 </Property>
 
-| Status code | Description                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `200`       | The api was successfully deleted, it may take up to 30s for this to take effect in all regions                                                                                                                                                                                                                                                                                                                                    |
-| `400`       | The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).                                                                                                                                                                                                                        |
-| `401`       | Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response.                                                                                                                                                                                                                                              |
-| `403`       | The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.                                                                                                                                                                                                              |
-| `404`       | The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. |
-| `409`       | This response is sent when a request conflicts with the current state of the server.                                                                                                                                                                                                                                                                                                                                              |
-| `429`       | The user has sent too many requests in a given amount of time ("rate limiting")                                                                                                                                                                                                                                                                                                                                                   |
-| `500`       | The server has encountered a situation it does not know how to handle.                                                                                                                                                                                                                                                                                                                                                            |
+| Status code | Description |
+| ----------- | ----------- |
+| `200` | The api was successfully deleted, it may take up to 30s for this to take effect in all regions |
+| `400` | The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). |
+| `401` | Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. |
+| `403` | The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. |
+| `404` | The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. |
+| `409` | This response is sent when a request conflicts with the current state of the server. |
+| `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
+| `500` | The server has encountered a situation it does not know how to handle. |
 
 <APIPlayground authorization={{"type":"string","name":"Authorization","defaultValue":"Bearer","isRequired":true,"description":"The Authorization access token"}} method={"POST"} route={"/v1/apis.deleteApi"} path={[]} query={[]} header={[]} body={{"type":"object","isRequired":true,"properties":{"apiId":{"type":"ref","isRequired":true,"schema":"0"}}}} schemas={{"0":{"type":"string","defaultValue":"api_1234","isRequired":false,"description":"The id of the api to delete"}}}>
 
@@ -1628,8 +1616,8 @@ curl -X POST "https://api.unkey.dev/v1/apis.deleteApi" \
 <Request value={"JavaScript"}>
 
 ```js
-fetch('https://api.unkey.dev/v1/apis.deleteApi', {
-  method: 'POST',
+fetch("https://api.unkey.dev/v1/apis.deleteApi", {
+  method: "POST"
 });
 ```
 
@@ -1690,7 +1678,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'BAD_REQUEST';
+    code: "BAD_REQUEST";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -1740,7 +1728,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'UNAUTHORIZED';
+    code: "UNAUTHORIZED";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -1790,7 +1778,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'FORBIDDEN';
+    code: "FORBIDDEN";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -1840,7 +1828,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'NOT_FOUND';
+    code: "NOT_FOUND";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -1890,7 +1878,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'CONFLICT';
+    code: "CONFLICT";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -1940,7 +1928,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'TOO_MANY_REQUESTS';
+    code: "TOO_MANY_REQUESTS";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -1990,7 +1978,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'INTERNAL_SERVER_ERROR';
+    code: "INTERNAL_SERVER_ERROR";
     /**
      * A link to our documentation with more details about this error code
      */

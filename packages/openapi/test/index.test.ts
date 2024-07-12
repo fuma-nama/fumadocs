@@ -1,7 +1,7 @@
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import { afterEach, describe, expect, test, vi } from 'vitest';
-import { idToTitle } from '@/render/operation';
+import { idToTitle } from '@/utils/id-to-title';
 import { generate, generateFiles, generateTags } from '../src';
 
 describe('Utilities', () => {

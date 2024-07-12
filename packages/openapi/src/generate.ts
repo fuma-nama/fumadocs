@@ -3,6 +3,7 @@ import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
 import { buildRoutes } from '@/build-routes';
 import type { Endpoint } from '@/endpoint';
 import { generateDocument } from '@/utils/generate-document';
+import { idToTitle } from '@/utils/id-to-title';
 import type { RenderContext } from './types';
 import { defaultRenderer, type Renderer } from './render/renderer';
 import { type CodeSample, renderOperation } from './render/operation';
@@ -125,7 +126,7 @@ export async function generateTags(
         return {
           tag,
           content: generateDocument(
-            tag,
+            idToTitle(tag),
             info?.description,
             ctx.renderer.Root({ baseUrl: ctx.baseUrl }, child),
             options,

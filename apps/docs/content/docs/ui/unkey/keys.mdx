@@ -1,24 +1,9 @@
 ---
-title: keys
+title: Keys
 full: true
 ---
 
-import {
-  Root,
-  API,
-  APIInfo,
-  APIExample,
-  Responses,
-  Response,
-  ResponseTypes,
-  ExampleResponse,
-  TypeScriptResponse,
-  Property,
-  ObjectCollapsible,
-  Requests,
-  Request,
-  APIPlayground,
-} from 'fumadocs-ui/components/api';
+import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible, Requests, Request, APIPlayground } from "fumadocs-ui/components/api";
 
 <Root baseUrl={"https://api.unkey.dev"}>
 
@@ -28,7 +13,7 @@ import {
 
 <APIInfo method={"GET"} route={"/v1/keys.getKey"}>
 
-## getKey
+## Get Key
 
 ### Authorization
 
@@ -50,16 +35,16 @@ The id of the key to fetch
 
 </Property>
 
-| Status code | Description                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `200`       | The configuration for a single key                                                                                                                                                                                                                                                                                                                                                                                                |
-| `400`       | The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).                                                                                                                                                                                                                        |
-| `401`       | Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response.                                                                                                                                                                                                                                              |
-| `403`       | The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.                                                                                                                                                                                                              |
-| `404`       | The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. |
-| `409`       | This response is sent when a request conflicts with the current state of the server.                                                                                                                                                                                                                                                                                                                                              |
-| `429`       | The user has sent too many requests in a given amount of time ("rate limiting")                                                                                                                                                                                                                                                                                                                                                   |
-| `500`       | The server has encountered a situation it does not know how to handle.                                                                                                                                                                                                                                                                                                                                                            |
+| Status code | Description |
+| ----------- | ----------- |
+| `200` | The configuration for a single key |
+| `400` | The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). |
+| `401` | Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. |
+| `403` | The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. |
+| `404` | The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. |
+| `409` | This response is sent when a request conflicts with the current state of the server. |
+| `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
+| `500` | The server has encountered a situation it does not know how to handle. |
 
 <APIPlayground authorization={{"type":"string","name":"Authorization","defaultValue":"Bearer","isRequired":true,"description":"The Authorization access token"}} method={"GET"} route={"/v1/keys.getKey"} path={[]} query={[{"name":"keyId","type":"string","defaultValue":"key_1234","isRequired":true,"description":"The id of the key to fetch"}]} header={[]} body={undefined} schemas={{}}>
 
@@ -82,8 +67,8 @@ curl -X GET "https://api.unkey.dev/v1/keys.getKey?keyId=key_1234"
 <Request value={"JavaScript"}>
 
 ```js
-fetch('https://api.unkey.dev/v1/keys.getKey?keyId=key_1234', {
-  method: 'GET',
+fetch("https://api.unkey.dev/v1/keys.getKey?keyId=key_1234", {
+  method: "GET"
 });
 ```
 
@@ -108,7 +93,10 @@ fetch('https://api.unkey.dev/v1/keys.getKey?keyId=key_1234', {
   "name": "Customer X",
   "ownerId": "user_123",
   "meta": {
-    "roles": ["admin", "user"],
+    "roles": [
+      "admin",
+      "user"
+    ],
     "stripeCustomerId": "cus_1234"
   },
   "createdAt": 0,
@@ -125,7 +113,10 @@ fetch('https://api.unkey.dev/v1/keys.getKey?keyId=key_1234', {
     "refillRate": 1,
     "refillInterval": 60
   },
-  "roles": ["admin", "finance"],
+  "roles": [
+    "admin",
+    "finance"
+  ],
   "enabled": true
 }
 ```
@@ -191,7 +182,7 @@ export interface Response {
     /**
      * Determines the rate at which verifications will be refilled.
      */
-    interval: 'daily' | 'monthly';
+    interval: "daily" | "monthly";
     /**
      * Resets `remaining` to this value every interval.
      */
@@ -208,7 +199,7 @@ export interface Response {
     /**
      * Fast ratelimiting doesn't add latency, while consistent ratelimiting is more accurate.
      */
-    type: 'fast' | 'consistent';
+    type: "fast" | "consistent";
     /**
      * The total amount of burstable requests.
      */
@@ -266,7 +257,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'BAD_REQUEST';
+    code: "BAD_REQUEST";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -316,7 +307,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'UNAUTHORIZED';
+    code: "UNAUTHORIZED";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -366,7 +357,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'FORBIDDEN';
+    code: "FORBIDDEN";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -416,7 +407,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'NOT_FOUND';
+    code: "NOT_FOUND";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -466,7 +457,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'CONFLICT';
+    code: "CONFLICT";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -516,7 +507,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'TOO_MANY_REQUESTS';
+    code: "TOO_MANY_REQUESTS";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -566,7 +557,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'INTERNAL_SERVER_ERROR';
+    code: "INTERNAL_SERVER_ERROR";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -599,7 +590,7 @@ export interface Response {
 
 <APIInfo method={"POST"} route={"/v1/keys.deleteKey"}>
 
-## deleteKey
+## Delete Key
 
 ### Authorization
 
@@ -621,16 +612,16 @@ The id of the key to revoke
 
 </Property>
 
-| Status code | Description                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `200`       | The key was successfully revoked, it may take up to 30s for this to take effect in all regions                                                                                                                                                                                                                                                                                                                                    |
-| `400`       | The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).                                                                                                                                                                                                                        |
-| `401`       | Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response.                                                                                                                                                                                                                                              |
-| `403`       | The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.                                                                                                                                                                                                              |
-| `404`       | The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. |
-| `409`       | This response is sent when a request conflicts with the current state of the server.                                                                                                                                                                                                                                                                                                                                              |
-| `429`       | The user has sent too many requests in a given amount of time ("rate limiting")                                                                                                                                                                                                                                                                                                                                                   |
-| `500`       | The server has encountered a situation it does not know how to handle.                                                                                                                                                                                                                                                                                                                                                            |
+| Status code | Description |
+| ----------- | ----------- |
+| `200` | The key was successfully revoked, it may take up to 30s for this to take effect in all regions |
+| `400` | The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). |
+| `401` | Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. |
+| `403` | The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. |
+| `404` | The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. |
+| `409` | This response is sent when a request conflicts with the current state of the server. |
+| `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
+| `500` | The server has encountered a situation it does not know how to handle. |
 
 <APIPlayground authorization={{"type":"string","name":"Authorization","defaultValue":"Bearer","isRequired":true,"description":"The Authorization access token"}} method={"POST"} route={"/v1/keys.deleteKey"} path={[]} query={[]} header={[]} body={{"type":"object","isRequired":true,"properties":{"keyId":{"type":"ref","isRequired":true,"schema":"0"}}}} schemas={{"0":{"type":"string","defaultValue":"key_1234","isRequired":false,"description":"The id of the key to revoke"}}}>
 
@@ -656,8 +647,8 @@ curl -X POST "https://api.unkey.dev/v1/keys.deleteKey" \
 <Request value={"JavaScript"}>
 
 ```js
-fetch('https://api.unkey.dev/v1/keys.deleteKey', {
-  method: 'POST',
+fetch("https://api.unkey.dev/v1/keys.deleteKey", {
+  method: "POST"
 });
 ```
 
@@ -718,7 +709,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'BAD_REQUEST';
+    code: "BAD_REQUEST";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -768,7 +759,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'UNAUTHORIZED';
+    code: "UNAUTHORIZED";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -818,7 +809,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'FORBIDDEN';
+    code: "FORBIDDEN";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -868,7 +859,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'NOT_FOUND';
+    code: "NOT_FOUND";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -918,7 +909,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'CONFLICT';
+    code: "CONFLICT";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -968,7 +959,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'TOO_MANY_REQUESTS';
+    code: "TOO_MANY_REQUESTS";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -1018,7 +1009,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'INTERNAL_SERVER_ERROR';
+    code: "INTERNAL_SERVER_ERROR";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -1051,7 +1042,7 @@ export interface Response {
 
 <APIInfo method={"POST"} route={"/v1/keys.createKey"}>
 
-## createKey
+## Create Key
 
 ### Authorization
 
@@ -1075,9 +1066,10 @@ Choose an `API` where this key should be created.
 
 To make it easier for your users to understand which product an api key belongs to, you can add prefix them.
 
-For example Stripe famously prefixes their customer ids with cus* or their api keys with sk_live*.
+For example Stripe famously prefixes their customer ids with cus_ or their api keys with sk_live_.
 
 The underscore is automatically added if you are defining a prefix, for example: "prefix": "abc" will result in a key like abc_xxxxxxxxx
+
 
 <span>Maximum length: `8`</span>
 
@@ -1236,16 +1228,16 @@ Sets if key is enabled or disabled. Disabled keys are not valid.
 
 </Property>
 
-| Status code | Description                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `200`       | The configuration for an api                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `400`       | The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).                                                                                                                                                                                                                        |
-| `401`       | Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response.                                                                                                                                                                                                                                              |
-| `403`       | The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.                                                                                                                                                                                                              |
-| `404`       | The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. |
-| `409`       | This response is sent when a request conflicts with the current state of the server.                                                                                                                                                                                                                                                                                                                                              |
-| `429`       | The user has sent too many requests in a given amount of time ("rate limiting")                                                                                                                                                                                                                                                                                                                                                   |
-| `500`       | The server has encountered a situation it does not know how to handle.                                                                                                                                                                                                                                                                                                                                                            |
+| Status code | Description |
+| ----------- | ----------- |
+| `200` | The configuration for an api |
+| `400` | The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). |
+| `401` | Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. |
+| `403` | The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. |
+| `404` | The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. |
+| `409` | This response is sent when a request conflicts with the current state of the server. |
+| `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
+| `500` | The server has encountered a situation it does not know how to handle. |
 
 <APIPlayground authorization={{"type":"string","name":"Authorization","defaultValue":"Bearer","isRequired":true,"description":"The Authorization access token"}} method={"POST"} route={"/v1/keys.createKey"} path={[]} query={[]} header={[]} body={{"type":"object","isRequired":true,"properties":{"apiId":{"type":"ref","isRequired":true,"schema":"0"},"prefix":{"type":"ref","isRequired":false,"schema":"1"},"name":{"type":"ref","isRequired":false,"schema":"2"},"byteLength":{"type":"ref","isRequired":false,"schema":"3"},"ownerId":{"type":"ref","isRequired":false,"schema":"4"},"meta":{"type":"ref","isRequired":false,"schema":"5"},"roles":{"type":"ref","isRequired":false,"schema":"6"},"expires":{"type":"ref","isRequired":false,"schema":"8"},"remaining":{"type":"ref","isRequired":false,"schema":"9"},"refill":{"type":"ref","isRequired":false,"schema":"10"},"ratelimit":{"type":"ref","isRequired":false,"schema":"13"},"enabled":{"type":"ref","isRequired":false,"schema":"18"}}}} schemas={{"0":{"type":"string","defaultValue":"api_123","isRequired":false,"description":"Choose an `API` where this key should be created."},"1":{"type":"string","defaultValue":"","isRequired":false,"description":"To make it easier for your users to understand which product an api key belongs to, you can add prefix them.\n\nFor example Stripe famously prefixes their customer ids with cus_ or their api keys with sk_live_.\n\nThe underscore is automatically added if you are defining a prefix, for example: \"prefix\": \"abc\" will result in a key like abc_xxxxxxxxx\n"},"2":{"type":"string","defaultValue":"my key","isRequired":false,"description":"The name for your Key. This is not customer facing."},"3":{"type":"number","defaultValue":"","isRequired":false,"description":"The byte length used to generate your key determines its entropy as well as its length. Higher is better, but keys become longer and more annoying to handle. The default is 16 bytes, or 2^^128 possible combinations."},"4":{"type":"string","defaultValue":"team_123","isRequired":false,"description":"Your user’s Id. This will provide a link between Unkey and your customer record.\nWhen validating a key, we will return this back to you, so you can clearly identify your user from their api key."},"5":{"type":"object","isRequired":false,"description":"This is a place for dynamic meta data, anything that feels useful for you should go here","properties":{},"additionalProperties":true},"6":{"type":"array","description":"A list of roles that this key should have. New roles will be created if they don't exist yet.","isRequired":false,"items":"7"},"7":{"type":"string","defaultValue":"","isRequired":false},"8":{"type":"number","defaultValue":1623869797161,"isRequired":false,"description":"You can auto expire keys by providing a unix timestamp in milliseconds. Once Keys expire they will automatically be disabled and are no longer valid unless you enable them again."},"9":{"type":"number","defaultValue":1000,"isRequired":false,"description":"You can limit the number of requests a key can make. Once a key reaches 0 remaining requests, it will automatically be disabled and is no longer valid unless you update it."},"10":{"type":"object","isRequired":false,"description":"Unkey enables you to refill verifications for each key at regular intervals.","properties":{"interval":{"type":"ref","isRequired":true,"schema":"11"},"amount":{"type":"ref","isRequired":true,"schema":"12"}}},"11":{"type":"string","defaultValue":"","isRequired":false,"description":"Unkey will automatically refill verifications at the set interval."},"12":{"type":"number","defaultValue":"","isRequired":false,"description":"The number of verifications to refill for each occurrence is determined individually for each key."},"13":{"type":"object","isRequired":false,"description":"Unkey comes with per-key ratelimiting out of the box.","properties":{"type":{"type":"ref","isRequired":true,"schema":"14"},"limit":{"type":"ref","isRequired":true,"schema":"15"},"refillRate":{"type":"ref","isRequired":true,"schema":"16"},"refillInterval":{"type":"ref","isRequired":true,"schema":"17"}}},"14":{"type":"string","defaultValue":"","isRequired":false,"description":"Fast ratelimiting doesn't add latency, while consistent ratelimiting is more accurate."},"15":{"type":"number","defaultValue":"","isRequired":false,"description":"The total amount of burstable requests."},"16":{"type":"number","defaultValue":"","isRequired":false,"description":"How many tokens to refill during each refillInterval."},"17":{"type":"number","defaultValue":"","isRequired":false,"description":"Determines the speed at which tokens are refilled, in milliseconds."},"18":{"type":"boolean","defaultValue":false,"isRequired":false,"description":"Sets if key is enabled or disabled. Disabled keys are not valid."}}}>
 
@@ -1296,8 +1288,8 @@ curl -X POST "https://api.unkey.dev/v1/keys.createKey" \
 <Request value={"JavaScript"}>
 
 ```js
-fetch('https://api.unkey.dev/v1/keys.createKey', {
-  method: 'POST',
+fetch("https://api.unkey.dev/v1/keys.createKey", {
+  method: "POST"
 });
 ```
 
@@ -1370,7 +1362,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'BAD_REQUEST';
+    code: "BAD_REQUEST";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -1420,7 +1412,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'UNAUTHORIZED';
+    code: "UNAUTHORIZED";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -1470,7 +1462,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'FORBIDDEN';
+    code: "FORBIDDEN";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -1520,7 +1512,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'NOT_FOUND';
+    code: "NOT_FOUND";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -1570,7 +1562,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'CONFLICT';
+    code: "CONFLICT";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -1620,7 +1612,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'TOO_MANY_REQUESTS';
+    code: "TOO_MANY_REQUESTS";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -1670,7 +1662,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'INTERNAL_SERVER_ERROR';
+    code: "INTERNAL_SERVER_ERROR";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -1703,51 +1695,9 @@ export interface Response {
 
 <APIInfo method={"POST"} route={"/v1/keys.verifyKey"}>
 
-## verifyKey
+## Verify Key
 
 ### Request Body
-
-<Property name={"services"} type={"string | object"} required={false} deprecated={undefined}>
-
-<ObjectCollapsible name={"Object 1"}>
-
-<Property name={"metrics"} type={"string"} required={true} deprecated={undefined}>
-
-The name of the connected metrics service
-
-<span>Example: `"AxiomMetrics"`</span>
-
-</Property>
-
-<Property name={"logger"} type={"string"} required={true} deprecated={undefined}>
-
-The name of the connected logger service
-
-<span>Example: `"AxiomLogger or ConsoleLogger"`</span>
-
-</Property>
-
-<Property name={"ratelimit"} type={"string"} required={true} deprecated={undefined}>
-
-The name of the connected ratelimit service
-
-</Property>
-
-<Property name={"usagelimit"} type={"string"} required={true} deprecated={undefined}>
-
-The name of the connected usagelimit service
-
-</Property>
-
-<Property name={"analytics"} type={"string"} required={true} deprecated={undefined}>
-
-The name of the connected analytics service
-
-</Property>
-
-</ObjectCollapsible>
-
-</Property>
 
 <Property name={"apiId"} type={"string"} required={false} deprecated={undefined}>
 
@@ -1768,18 +1718,18 @@ The key to verify
 
 </Property>
 
-| Status code | Description                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `200`       | The verification result                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `400`       | The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).                                                                                                                                                                                                                        |
-| `401`       | Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response.                                                                                                                                                                                                                                              |
-| `403`       | The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.                                                                                                                                                                                                              |
-| `404`       | The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. |
-| `409`       | This response is sent when a request conflicts with the current state of the server.                                                                                                                                                                                                                                                                                                                                              |
-| `429`       | The user has sent too many requests in a given amount of time ("rate limiting")                                                                                                                                                                                                                                                                                                                                                   |
-| `500`       | The server has encountered a situation it does not know how to handle.                                                                                                                                                                                                                                                                                                                                                            |
+| Status code | Description |
+| ----------- | ----------- |
+| `200` | The verification result |
+| `400` | The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). |
+| `401` | Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. |
+| `403` | The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. |
+| `404` | The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. |
+| `409` | This response is sent when a request conflicts with the current state of the server. |
+| `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
+| `500` | The server has encountered a situation it does not know how to handle. |
 
-<APIPlayground authorization={undefined} method={"POST"} route={"/v1/keys.verifyKey"} path={[]} query={[]} header={[]} body={{"type":"object","isRequired":true,"properties":{"services":{"type":"ref","isRequired":false,"schema":"0"},"apiId":{"type":"ref","isRequired":false,"schema":"8"},"key":{"type":"ref","isRequired":true,"schema":"9"}}}} schemas={{"0":{"type":"switcher","items":{"string":{"type":"ref","isRequired":true,"schema":"1"},"object":{"type":"ref","isRequired":true,"schema":"2"}},"isRequired":false},"1":{"type":"string","defaultValue":"","isRequired":false},"2":{"type":"object","isRequired":false,"properties":{"metrics":{"type":"ref","isRequired":true,"schema":"3"},"logger":{"type":"ref","isRequired":true,"schema":"4"},"ratelimit":{"type":"ref","isRequired":true,"schema":"5"},"usagelimit":{"type":"ref","isRequired":true,"schema":"6"},"analytics":{"type":"ref","isRequired":true,"schema":"7"}}},"3":{"type":"string","defaultValue":"AxiomMetrics","isRequired":false,"description":"The name of the connected metrics service"},"4":{"type":"string","defaultValue":"AxiomLogger or ConsoleLogger","isRequired":false,"description":"The name of the connected logger service"},"5":{"type":"string","defaultValue":"","isRequired":false,"description":"The name of the connected ratelimit service"},"6":{"type":"string","defaultValue":"","isRequired":false,"description":"The name of the connected usagelimit service"},"7":{"type":"string","defaultValue":"","isRequired":false,"description":"The name of the connected analytics service"},"8":{"type":"string","defaultValue":"api_1234","isRequired":false,"description":"The id of the api where the key belongs to. This is optional for now but will be required soon.\nThe key will be verified against the api's configuration. If the key does not belong to the api, the verification will fail."},"9":{"type":"string","defaultValue":"sk_1234","isRequired":false,"description":"The key to verify"}}}>
+<APIPlayground authorization={undefined} method={"POST"} route={"/v1/keys.verifyKey"} path={[]} query={[]} header={[]} body={{"type":"object","isRequired":true,"properties":{"apiId":{"type":"ref","isRequired":false,"schema":"0"},"key":{"type":"ref","isRequired":true,"schema":"1"}}}} schemas={{"0":{"type":"string","defaultValue":"api_1234","isRequired":false,"description":"The id of the api where the key belongs to. This is optional for now but will be required soon.\nThe key will be verified against the api's configuration. If the key does not belong to the api, the verification will fail."},"1":{"type":"string","defaultValue":"sk_1234","isRequired":false,"description":"The key to verify"}}}>
 
 </APIPlayground>
 
@@ -1794,7 +1744,6 @@ The key to verify
 ```bash
 curl -X POST "https://api.unkey.dev/v1/keys.verifyKey" \
   -d '{
-  "services": "string",
   "apiId": "api_1234",
   "key": "sk_1234"
 }'
@@ -1805,8 +1754,8 @@ curl -X POST "https://api.unkey.dev/v1/keys.verifyKey" \
 <Request value={"JavaScript"}>
 
 ```js
-fetch('https://api.unkey.dev/v1/keys.verifyKey', {
-  method: 'POST',
+fetch("https://api.unkey.dev/v1/keys.verifyKey", {
+  method: "POST"
 });
 ```
 
@@ -1829,7 +1778,10 @@ fetch('https://api.unkey.dev/v1/keys.verifyKey', {
   "name": "Customer X",
   "ownerId": "user_123",
   "meta": {
-    "roles": ["admin", "user"],
+    "roles": [
+      "admin",
+      "user"
+    ],
     "stripeCustomerId": "cus_1234"
   },
   "expires": 123,
@@ -1913,13 +1865,13 @@ export interface Response {
    *
    */
   code?:
-    | 'NOT_FOUND'
-    | 'FORBIDDEN'
-    | 'USAGE_EXCEEDED'
-    | 'RATE_LIMITED'
-    | 'UNAUTHORIZED'
-    | 'DISABLED'
-    | 'INSUFFICIENT_PERMISSIONS';
+    | "NOT_FOUND"
+    | "FORBIDDEN"
+    | "USAGE_EXCEEDED"
+    | "RATE_LIMITED"
+    | "UNAUTHORIZED"
+    | "DISABLED"
+    | "INSUFFICIENT_PERMISSIONS";
   /**
    * Sets the key to be enabled or disabled. Disabled keys will not verify.
    */
@@ -1960,7 +1912,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'BAD_REQUEST';
+    code: "BAD_REQUEST";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -2010,7 +1962,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'UNAUTHORIZED';
+    code: "UNAUTHORIZED";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -2060,7 +2012,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'FORBIDDEN';
+    code: "FORBIDDEN";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -2110,7 +2062,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'NOT_FOUND';
+    code: "NOT_FOUND";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -2160,7 +2112,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'CONFLICT';
+    code: "CONFLICT";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -2210,7 +2162,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'TOO_MANY_REQUESTS';
+    code: "TOO_MANY_REQUESTS";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -2260,7 +2212,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'INTERNAL_SERVER_ERROR';
+    code: "INTERNAL_SERVER_ERROR";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -2293,7 +2245,7 @@ export interface Response {
 
 <APIInfo method={"POST"} route={"/v1/keys.updateKey"}>
 
-## updateKey
+## Update Key
 
 ### Authorization
 
@@ -2441,16 +2393,16 @@ Set if key is enabled or disabled. If disabled, the key cannot be used to verify
 
 </Property>
 
-| Status code | Description                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `200`       | The key was successfully updated, it may take up to 30s for this to take effect in all regions                                                                                                                                                                                                                                                                                                                                    |
-| `400`       | The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).                                                                                                                                                                                                                        |
-| `401`       | Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response.                                                                                                                                                                                                                                              |
-| `403`       | The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.                                                                                                                                                                                                              |
-| `404`       | The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. |
-| `409`       | This response is sent when a request conflicts with the current state of the server.                                                                                                                                                                                                                                                                                                                                              |
-| `429`       | The user has sent too many requests in a given amount of time ("rate limiting")                                                                                                                                                                                                                                                                                                                                                   |
-| `500`       | The server has encountered a situation it does not know how to handle.                                                                                                                                                                                                                                                                                                                                                            |
+| Status code | Description |
+| ----------- | ----------- |
+| `200` | The key was successfully updated, it may take up to 30s for this to take effect in all regions |
+| `400` | The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). |
+| `401` | Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. |
+| `403` | The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. |
+| `404` | The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. |
+| `409` | This response is sent when a request conflicts with the current state of the server. |
+| `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
+| `500` | The server has encountered a situation it does not know how to handle. |
 
 <APIPlayground authorization={{"type":"string","name":"Authorization","defaultValue":"Bearer","isRequired":true,"description":"The Authorization access token"}} method={"POST"} route={"/v1/keys.updateKey"} path={[]} query={[]} header={[]} body={{"type":"object","isRequired":true,"properties":{"keyId":{"type":"ref","isRequired":true,"schema":"0"},"name":{"type":"ref","isRequired":false,"schema":"1"},"ownerId":{"type":"ref","isRequired":false,"schema":"2"},"meta":{"type":"ref","isRequired":false,"schema":"3"},"expires":{"type":"ref","isRequired":false,"schema":"4"},"ratelimit":{"type":"ref","isRequired":false,"schema":"5"},"remaining":{"type":"ref","isRequired":false,"schema":"10"},"refill":{"type":"ref","isRequired":false,"schema":"11"},"enabled":{"type":"ref","isRequired":false,"schema":"14"}}}} schemas={{"0":{"type":"string","defaultValue":"key_123","isRequired":false,"description":"The id of the key you want to modify"},"1":{"type":"string","defaultValue":"Customer X","isRequired":false,"description":"The name of the key"},"2":{"type":"string","defaultValue":"user_123","isRequired":false,"description":"The id of the tenant associated with this key. Use whatever reference you have in your system to identify the tenant. When verifying the key, we will send this field back to you, so you know who is accessing your API."},"3":{"type":"object","isRequired":false,"description":"Any additional metadata you want to store with the key","properties":{},"additionalProperties":true},"4":{"type":"number","defaultValue":0,"isRequired":false,"description":"The unix timestamp in milliseconds when the key will expire. If this field is null or undefined, the key is not expiring."},"5":{"type":"object","isRequired":false,"description":"Unkey comes with per-key ratelimiting out of the box. Set `null` to disable.","properties":{"type":{"type":"ref","isRequired":true,"schema":"6"},"limit":{"type":"ref","isRequired":true,"schema":"7"},"refillRate":{"type":"ref","isRequired":true,"schema":"8"},"refillInterval":{"type":"ref","isRequired":true,"schema":"9"}}},"6":{"type":"string","defaultValue":"","isRequired":false,"description":"Fast ratelimiting doesn't add latency, while consistent ratelimiting is more accurate."},"7":{"type":"number","defaultValue":"","isRequired":false,"description":"The total amount of burstable requests."},"8":{"type":"number","defaultValue":"","isRequired":false,"description":"How many tokens to refill during each refillInterval."},"9":{"type":"number","defaultValue":"","isRequired":false,"description":"Determines the speed at which tokens are refilled, in milliseconds."},"10":{"type":"number","defaultValue":1000,"isRequired":false,"description":"The number of requests that can be made with this key before it becomes invalid. Set `null` to disable."},"11":{"type":"object","isRequired":false,"description":"Unkey enables you to refill verifications for each key at regular intervals.","properties":{"interval":{"type":"ref","isRequired":true,"schema":"12"},"amount":{"type":"ref","isRequired":true,"schema":"13"}}},"12":{"type":"string","defaultValue":"","isRequired":false,"description":"Unkey will automatically refill verifications at the set interval. If null is used the refill functionality will be removed from the key."},"13":{"type":"number","defaultValue":"","isRequired":false,"description":"The amount of verifications to refill for each occurrence is determined individually for each key."},"14":{"type":"boolean","defaultValue":true,"isRequired":false,"description":"Set if key is enabled or disabled. If disabled, the key cannot be used to verify."}}}>
 
@@ -2498,8 +2450,8 @@ curl -X POST "https://api.unkey.dev/v1/keys.updateKey" \
 <Request value={"JavaScript"}>
 
 ```js
-fetch('https://api.unkey.dev/v1/keys.updateKey', {
-  method: 'POST',
+fetch("https://api.unkey.dev/v1/keys.updateKey", {
+  method: "POST"
 });
 ```
 
@@ -2560,7 +2512,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'BAD_REQUEST';
+    code: "BAD_REQUEST";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -2610,7 +2562,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'UNAUTHORIZED';
+    code: "UNAUTHORIZED";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -2660,7 +2612,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'FORBIDDEN';
+    code: "FORBIDDEN";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -2710,7 +2662,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'NOT_FOUND';
+    code: "NOT_FOUND";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -2760,7 +2712,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'CONFLICT';
+    code: "CONFLICT";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -2810,7 +2762,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'TOO_MANY_REQUESTS';
+    code: "TOO_MANY_REQUESTS";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -2860,7 +2812,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'INTERNAL_SERVER_ERROR';
+    code: "INTERNAL_SERVER_ERROR";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -2893,7 +2845,7 @@ export interface Response {
 
 <APIInfo method={"POST"} route={"/v1/keys.updateRemaining"}>
 
-## updateRemaining
+## Update Remaining
 
 ### Authorization
 
@@ -2929,16 +2881,16 @@ The value you want to set, add or subtract the remaining count by
 
 </Property>
 
-| Status code | Description                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `200`       | The configuration for an api                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `400`       | The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).                                                                                                                                                                                                                        |
-| `401`       | Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response.                                                                                                                                                                                                                                              |
-| `403`       | The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.                                                                                                                                                                                                              |
-| `404`       | The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. |
-| `409`       | This response is sent when a request conflicts with the current state of the server.                                                                                                                                                                                                                                                                                                                                              |
-| `429`       | The user has sent too many requests in a given amount of time ("rate limiting")                                                                                                                                                                                                                                                                                                                                                   |
-| `500`       | The server has encountered a situation it does not know how to handle.                                                                                                                                                                                                                                                                                                                                                            |
+| Status code | Description |
+| ----------- | ----------- |
+| `200` | The configuration for an api |
+| `400` | The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). |
+| `401` | Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. |
+| `403` | The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. |
+| `404` | The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. |
+| `409` | This response is sent when a request conflicts with the current state of the server. |
+| `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
+| `500` | The server has encountered a situation it does not know how to handle. |
 
 <APIPlayground authorization={{"type":"string","name":"Authorization","defaultValue":"Bearer","isRequired":true,"description":"The Authorization access token"}} method={"POST"} route={"/v1/keys.updateRemaining"} path={[]} query={[]} header={[]} body={{"type":"object","isRequired":true,"properties":{"keyId":{"type":"ref","isRequired":true,"schema":"0"},"op":{"type":"ref","isRequired":true,"schema":"1"},"value":{"type":"ref","isRequired":true,"schema":"2"}}}} schemas={{"0":{"type":"string","defaultValue":"key_123","isRequired":false,"description":"The id of the key you want to modify"},"1":{"type":"string","defaultValue":"","isRequired":false,"description":"The operation you want to perform on the remaining count"},"2":{"type":"number","defaultValue":1,"isRequired":false,"description":"The value you want to set, add or subtract the remaining count by"}}}>
 
@@ -2966,8 +2918,8 @@ curl -X POST "https://api.unkey.dev/v1/keys.updateRemaining" \
 <Request value={"JavaScript"}>
 
 ```js
-fetch('https://api.unkey.dev/v1/keys.updateRemaining', {
-  method: 'POST',
+fetch("https://api.unkey.dev/v1/keys.updateRemaining", {
+  method: "POST"
 });
 ```
 
@@ -3035,7 +2987,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'BAD_REQUEST';
+    code: "BAD_REQUEST";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -3085,7 +3037,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'UNAUTHORIZED';
+    code: "UNAUTHORIZED";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -3135,7 +3087,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'FORBIDDEN';
+    code: "FORBIDDEN";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -3185,7 +3137,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'NOT_FOUND';
+    code: "NOT_FOUND";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -3235,7 +3187,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'CONFLICT';
+    code: "CONFLICT";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -3285,7 +3237,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'TOO_MANY_REQUESTS';
+    code: "TOO_MANY_REQUESTS";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -3335,7 +3287,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'INTERNAL_SERVER_ERROR';
+    code: "INTERNAL_SERVER_ERROR";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -3368,7 +3320,7 @@ export interface Response {
 
 <APIInfo method={"GET"} route={"/v1/keys.getVerifications"}>
 
-## getVerifications
+## Get Verifications
 
 ### Authorization
 
@@ -3424,16 +3376,16 @@ The granularity of the usage data to fetch, currently only `day` is supported
 
 </Property>
 
-| Status code | Description                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `200`       | The configuration for a single key                                                                                                                                                                                                                                                                                                                                                                                                |
-| `400`       | The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).                                                                                                                                                                                                                        |
-| `401`       | Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response.                                                                                                                                                                                                                                              |
-| `403`       | The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.                                                                                                                                                                                                              |
-| `404`       | The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. |
-| `409`       | This response is sent when a request conflicts with the current state of the server.                                                                                                                                                                                                                                                                                                                                              |
-| `429`       | The user has sent too many requests in a given amount of time ("rate limiting")                                                                                                                                                                                                                                                                                                                                                   |
-| `500`       | The server has encountered a situation it does not know how to handle.                                                                                                                                                                                                                                                                                                                                                            |
+| Status code | Description |
+| ----------- | ----------- |
+| `200` | The configuration for a single key |
+| `400` | The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). |
+| `401` | Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. |
+| `403` | The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. |
+| `404` | The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. |
+| `409` | This response is sent when a request conflicts with the current state of the server. |
+| `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
+| `500` | The server has encountered a situation it does not know how to handle. |
 
 <APIPlayground authorization={{"type":"string","name":"Authorization","defaultValue":"Bearer","isRequired":true,"description":"The Authorization access token"}} method={"GET"} route={"/v1/keys.getVerifications"} path={[]} query={[{"name":"keyId","type":"string","defaultValue":"key_1234","isRequired":false,"description":"The id of the key to fetch, either `keyId` or `ownerId` must be provided"},{"name":"ownerId","type":"string","defaultValue":"chronark","isRequired":false,"description":"The owner id to fetch keys for, either `keyId` or `ownerId` must be provided"},{"name":"start","type":"number","defaultValue":1620000000000,"isRequired":false,"description":"The start of the period to fetch usage for as unix milliseconds timestamp"},{"name":"end","type":"number","defaultValue":1620000000000,"isRequired":false,"description":"The end of the period to fetch usage for as unix milliseconds timestamp"},{"name":"granularity","type":"string","defaultValue":"day","isRequired":false,"description":"The granularity of the usage data to fetch, currently only `day` is supported"}]} header={[]} body={undefined} schemas={{}}>
 
@@ -3456,12 +3408,9 @@ curl -X GET "https://api.unkey.dev/v1/keys.getVerifications?keyId=key_1234&owner
 <Request value={"JavaScript"}>
 
 ```js
-fetch(
-  'https://api.unkey.dev/v1/keys.getVerifications?keyId=key_1234&ownerId=chronark&start=1620000000000&end=1620000000000&granularity=day',
-  {
-    method: 'GET',
-  },
-);
+fetch("https://api.unkey.dev/v1/keys.getVerifications?keyId=key_1234&ownerId=chronark&start=1620000000000&end=1620000000000&granularity=day", {
+  method: "GET"
+});
 ```
 
 </Request>
@@ -3549,7 +3498,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'BAD_REQUEST';
+    code: "BAD_REQUEST";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -3599,7 +3548,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'UNAUTHORIZED';
+    code: "UNAUTHORIZED";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -3649,7 +3598,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'FORBIDDEN';
+    code: "FORBIDDEN";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -3699,7 +3648,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'NOT_FOUND';
+    code: "NOT_FOUND";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -3749,7 +3698,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'CONFLICT';
+    code: "CONFLICT";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -3799,7 +3748,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'TOO_MANY_REQUESTS';
+    code: "TOO_MANY_REQUESTS";
     /**
      * A link to our documentation with more details about this error code
      */
@@ -3849,7 +3798,7 @@ export interface Response {
     /**
      * A machine readable error code.
      */
-    code: 'INTERNAL_SERVER_ERROR';
+    code: "INTERNAL_SERVER_ERROR";
     /**
      * A link to our documentation with more details about this error code
      */
