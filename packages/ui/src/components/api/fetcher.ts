@@ -1,7 +1,7 @@
 import type { RequestSchema } from 'fumadocs-openapi';
 import { CircleCheckIcon, CircleXIcon } from 'lucide-react';
 import { resolve } from '@/components/api/shared';
-import type { DynamicField } from '@/components/api/playground';
+import type { DynamicField } from '@/components/api/context';
 
 /**
  * Create request body from value
@@ -64,10 +64,7 @@ function convertValue(
           propSchema = resolve(schema.properties[key], references);
         else if (propDynamic?.type === 'field')
           propSchema = resolve(propDynamic.schema, references);
-        else {
-          console.warn('not found', fieldName, dynamic);
-          return [key, prop];
-        }
+        else return [key, prop];
 
         return [
           key,

@@ -1699,6 +1699,48 @@ export interface Response {
 
 ### Request Body
 
+<Property name={"services"} type={"string | object"} required={false} deprecated={undefined}>
+
+<ObjectCollapsible name={"Object 1"}>
+
+<Property name={"metrics"} type={"string"} required={true} deprecated={undefined}>
+
+The name of the connected metrics service
+
+<span>Example: `"AxiomMetrics"`</span>
+
+</Property>
+
+<Property name={"logger"} type={"string"} required={true} deprecated={undefined}>
+
+The name of the connected logger service
+
+<span>Example: `"AxiomLogger or ConsoleLogger"`</span>
+
+</Property>
+
+<Property name={"ratelimit"} type={"string"} required={true} deprecated={undefined}>
+
+The name of the connected ratelimit service
+
+</Property>
+
+<Property name={"usagelimit"} type={"string"} required={true} deprecated={undefined}>
+
+The name of the connected usagelimit service
+
+</Property>
+
+<Property name={"analytics"} type={"string"} required={true} deprecated={undefined}>
+
+The name of the connected analytics service
+
+</Property>
+
+</ObjectCollapsible>
+
+</Property>
+
 <Property name={"apiId"} type={"string"} required={false} deprecated={undefined}>
 
 The id of the api where the key belongs to. This is optional for now but will be required soon.
@@ -1729,7 +1771,7 @@ The key to verify
 | `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
 | `500` | The server has encountered a situation it does not know how to handle. |
 
-<APIPlayground authorization={undefined} method={"POST"} route={"/v1/keys.verifyKey"} path={[]} query={[]} header={[]} body={{"type":"object","isRequired":true,"properties":{"apiId":{"type":"ref","isRequired":false,"schema":"0"},"key":{"type":"ref","isRequired":true,"schema":"1"}}}} schemas={{"0":{"type":"string","defaultValue":"api_1234","isRequired":false,"description":"The id of the api where the key belongs to. This is optional for now but will be required soon.\nThe key will be verified against the api's configuration. If the key does not belong to the api, the verification will fail."},"1":{"type":"string","defaultValue":"sk_1234","isRequired":false,"description":"The key to verify"}}}>
+<APIPlayground authorization={undefined} method={"POST"} route={"/v1/keys.verifyKey"} path={[]} query={[]} header={[]} body={{"type":"object","isRequired":true,"properties":{"services":{"type":"ref","isRequired":false,"schema":"0"},"apiId":{"type":"ref","isRequired":false,"schema":"8"},"key":{"type":"ref","isRequired":true,"schema":"9"}}}} schemas={{"0":{"type":"switcher","items":{"string":{"type":"ref","isRequired":true,"schema":"1"},"object":{"type":"ref","isRequired":true,"schema":"2"}},"isRequired":false},"1":{"type":"string","defaultValue":"","isRequired":false},"2":{"type":"object","isRequired":false,"properties":{"metrics":{"type":"ref","isRequired":true,"schema":"3"},"logger":{"type":"ref","isRequired":true,"schema":"4"},"ratelimit":{"type":"ref","isRequired":true,"schema":"5"},"usagelimit":{"type":"ref","isRequired":true,"schema":"6"},"analytics":{"type":"ref","isRequired":true,"schema":"7"}}},"3":{"type":"string","defaultValue":"AxiomMetrics","isRequired":false,"description":"The name of the connected metrics service"},"4":{"type":"string","defaultValue":"AxiomLogger or ConsoleLogger","isRequired":false,"description":"The name of the connected logger service"},"5":{"type":"string","defaultValue":"","isRequired":false,"description":"The name of the connected ratelimit service"},"6":{"type":"string","defaultValue":"","isRequired":false,"description":"The name of the connected usagelimit service"},"7":{"type":"string","defaultValue":"","isRequired":false,"description":"The name of the connected analytics service"},"8":{"type":"string","defaultValue":"api_1234","isRequired":false,"description":"The id of the api where the key belongs to. This is optional for now but will be required soon.\nThe key will be verified against the api's configuration. If the key does not belong to the api, the verification will fail."},"9":{"type":"string","defaultValue":"sk_1234","isRequired":false,"description":"The key to verify"}}}>
 
 </APIPlayground>
 
@@ -1744,6 +1786,7 @@ The key to verify
 ```bash
 curl -X POST "https://api.unkey.dev/v1/keys.verifyKey" \
   -d '{
+  "services": "string",
   "apiId": "api_1234",
   "key": "sk_1234"
 }'
