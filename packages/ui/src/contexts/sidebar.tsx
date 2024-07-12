@@ -44,8 +44,8 @@ export function SidebarProvider({
   useEffect(() => {
     if (closeOnRedirect.current) {
       setOpen(false);
-      closeOnRedirect.current = true;
     }
+    closeOnRedirect.current = true;
   }, [pathname]);
 
   return (
