@@ -19,13 +19,11 @@ const index = client.initIndex(indexName);
 export default function CustomSearchDialog(
   props: SharedProps,
 ): React.ReactElement {
-  const defaultTag = useMode() ?? 'headless';
-
   return (
     <SearchDialog
       index={index}
       {...props}
-      defaultTag={defaultTag}
+      defaultTag={useMode() ?? 'headless'}
       tags={modes.map((mode) => ({
         name: mode.name,
         value: mode.param,

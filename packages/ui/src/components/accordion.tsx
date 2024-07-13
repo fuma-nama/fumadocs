@@ -21,7 +21,7 @@ export const Accordions = forwardRef<
   | Omit<AccordionSingleProps, 'value' | 'onValueChange'>
   | Omit<AccordionMultipleProps, 'value' | 'onValueChange'>
 >(({ type = 'single', className, defaultValue, ...props }, ref) => {
-  const [value, setValue] = useState(
+  const [value, setValue] = useState<string | string[]>(
     type === 'single' ? defaultValue ?? '' : defaultValue ?? [],
   );
 
@@ -30,11 +30,9 @@ export const Accordions = forwardRef<
 
     if (id.length > 0)
       setValue((prev) => {
-        return type === 'single'
-          ? id
-          : [id, ...(Array.isArray(prev) ? prev : [])];
+        return typeof prev === 'string' ? id : [id, ...prev];
       });
-  }, [type]);
+  }, []);
 
   return (
     // @ts-expect-error -- Multiple types

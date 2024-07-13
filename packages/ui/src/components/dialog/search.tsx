@@ -45,6 +45,8 @@ interface SearchContentProps {
   search: string;
   onSearchChange: (v: string) => void;
   items: SortedResult[];
+
+  hideResults?: boolean;
 }
 
 export function SearchDialog({
@@ -54,9 +56,9 @@ export function SearchDialog({
   links = [],
   ...props
 }: SearchDialogProps): React.ReactElement {
-  const defaultItems = useMemo(
+  const defaultItems: SortedResult[] = useMemo(
     () =>
-      links.map<SortedResult>(([name, link]) => ({
+      links.map(([name, link]) => ({
         type: 'page',
         id: name,
         content: name,
@@ -70,6 +72,7 @@ export function SearchDialog({
       <Search
         {...props}
         items={props.results === 'empty' ? defaultItems : props.results}
+        hideResults={props.results === 'empty' && defaultItems.length === 0}
       />
     </CommandDialog>
   );
@@ -85,6 +88,7 @@ function Search({
   search,
   onSearchChange,
   items,
+  hideResults = false,
 }: SearchContentProps): React.ReactElement {
   const { text } = useI18n();
   const router = useRouter();
@@ -97,8 +101,6 @@ function Search({
 
     if (location.pathname === url.split('#')[0]) {
       sidebar.setOpen(false);
-    } else {
-      sidebar.closeOnRedirect.current = true;
     }
   };
 
@@ -112,7 +114,7 @@ function Search({
         }, [setOpenSearch])}
         placeholder={text.search}
       />
-      <CommandList className={cn(items.length === 0 && 'hidden')}>
+      <CommandList className={cn(hideResults && 'hidden')}>
         <CommandEmpty>{text.searchNoResult}</CommandEmpty>
 
         <CommandGroup value="result">

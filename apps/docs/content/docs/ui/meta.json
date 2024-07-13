@@ -8,7 +8,7 @@
     "...",
     "---Writing---",
     "markdown",
-    "../headless/page-conventions",
+    "page-conventions",
     "---Components---",
     "...components",
     "---Blocks---",

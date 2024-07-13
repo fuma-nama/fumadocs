@@ -6,6 +6,7 @@ import {
   useAlgoliaSearch,
 } from 'fumadocs-core/search-algolia/client';
 import { type ReactNode, useState } from 'react';
+import { useOnChange } from '@/utils/use-on-change';
 import {
   SearchDialog,
   type SharedProps,
@@ -37,7 +38,7 @@ export default function AlgoliaSearchDialog({
   showAlgolia = false,
   ...props
 }: AlgoliaSearchDialogProps): React.ReactElement {
-  const [tag, setTag] = useState<string>();
+  const [tag, setTag] = useState(defaultTag);
   let filters = searchOptions?.filters;
 
   if (tag) {
@@ -49,6 +50,10 @@ export default function AlgoliaSearchDialog({
     filters,
   });
 
+  useOnChange(defaultTag, (v) => {
+    setTag(v);
+  });
+
   return (
     <SearchDialog
       search={search}
@@ -58,7 +63,7 @@ export default function AlgoliaSearchDialog({
       footer={
         <>
           {tags ? (
-            <TagsList tag={tag ?? defaultTag} onTagChange={setTag} items={tags}>
+            <TagsList tag={tag} onTagChange={setTag} items={tags}>
               {showAlgolia ? <AlgoliaTitle /> : null}
             </TagsList>
           ) : null}

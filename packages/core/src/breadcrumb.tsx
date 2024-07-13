@@ -6,7 +6,45 @@ export interface BreadcrumbItem {
   url?: string;
 }
 
-export interface BreadcrumbOptions {
+export interface BreadcrumbOptions extends SearchOptions {
+  /**
+   * Include the root itself in the breadcrumb items array
+   *
+   * @defaultValue false
+   */
+  includeRoot?: boolean;
+}
+
+export function useBreadcrumb(
+  url: string,
+  tree: PageTree.Root,
+  options?: BreadcrumbOptions,
+): BreadcrumbItem[] {
+  return useMemo(
+    () => getBreadcrumbItems(url, tree, options),
+    [tree, url, options],
+  );
+}
+
+export function getBreadcrumbItems(
+  url: string,
+  tree: PageTree.Root,
+  options: BreadcrumbOptions = {},
+): BreadcrumbItem[] {
+  const { includeRoot, ...rest } = options;
+  const path = searchPath(tree.children, url, rest) ?? [];
+
+  if (includeRoot) {
+    path.unshift({
+      name: tree.name,
+      url: tree.children.find((p) => p.type === 'page')?.url,
+    });
+  }
+
+  return path;
+}
+
+interface SearchOptions {
   /**
    * Include the page itself in the breadcrumb items array
    *
@@ -22,30 +60,6 @@ export interface BreadcrumbOptions {
   includeSeparator?: boolean;
 }
 
-export function useBreadcrumb(
-  url: string,
-  tree: PageTree.Root,
-  options: BreadcrumbOptions = {},
-): BreadcrumbItem[] {
-  return useMemo(
-    () => getBreadcrumbItems(url, tree, options),
-    [tree, url, options],
-  );
-}
-
-export function getBreadcrumbItems(
-  url: string,
-  tree: PageTree.Root,
-  options: BreadcrumbOptions = {},
-): BreadcrumbItem[] {
-  return (
-    searchPath(tree.children, url, {
-      includePage: options.includePage ?? true,
-      includeSeparator: options.includeSeparator ?? false,
-    }) ?? []
-  );
-}
-
 /**
  * Search a node in the tree by a specified url
  *
@@ -57,13 +71,13 @@ export function getBreadcrumbItems(
 function searchPath(
   nodes: PageTree.Node[],
   url: string,
-  options: Required<BreadcrumbOptions>,
+  options: SearchOptions,
 ): BreadcrumbItem[] | null {
+  const { includePage = true, includeSeparator = false } = options;
   let separator: ReactNode | undefined;
 
   for (const node of nodes) {
-    if (options.includeSeparator && node.type === 'separator')
-      separator = node.name;
+    if (includeSeparator && node.type === 'separator') separator = node.name;
 
     if (node.type === 'folder') {
       if (node.index?.url === url) {
@@ -96,7 +110,7 @@ function searchPath(
       const items: BreadcrumbItem[] = [];
 
       if (separator) items.push({ name: separator });
-      if (options.includePage)
+      if (includePage)
         items.push({
           name: node.name,
           url: node.url,
