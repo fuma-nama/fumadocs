@@ -14,13 +14,13 @@ export function SearchToggle(
     <button
       type="button"
       className={cn(
-        'search-toggle',
         buttonVariants({
           size: 'icon',
           color: 'ghost',
           className: props.className,
         }),
       )}
+      data-search-toggle
       aria-label="Open Search"
       onClick={useCallback(() => {
         setOpenSearch(true);
