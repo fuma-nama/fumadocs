@@ -15,11 +15,9 @@ option since it's easier to setup and totally free.
 
 Index with the raw content of document.
 
-<div className='steps'>
+<div className='steps [&>h3]:step'>
 
-<div className='step'>
-
-Create the Route Handler.
+### Create the Route Handler
 
 ```ts title="app/api/search/route.ts"
 import { allDocs } from 'content-collections';
@@ -34,13 +32,10 @@ export const { GET } = createSearchAPI('simple', {
 });
 ```
 
-</div>
-<div className='step'>
-
-Create a Search Dialog.
+### Create a Search Dialog
 
 <Callout type="info" title="For Fumadocs UI">
-  You can use the default Search Dialog from [Fumadocs UI](/docs/ui/search).
+  Use the default Search Dialog from [Fumadocs UI](/docs/ui/search).
 </Callout>
 
 ```tsx
@@ -48,11 +43,10 @@ import { useDocsSearch } from 'fumadocs-core/search/client';
 
 export function Dialog() {
   const { search, setSearch, query } = useDocsSearch();
+
   return <div>...</div>;
 }
 ```
-
-</div>
 
 </div>
 
@@ -89,19 +83,25 @@ It's useful for implementing versioned docs, or multi-docs similar to this
 documentation.
 
 ```ts
-import { allDocs } from 'contentlayer/generated';
+import { getPages } from '@/app/source';
 import { createSearchAPI } from 'fumadocs-core/search/server';
 
 export const { GET } = createSearchAPI('advanced', {
-  indexes: allDocs.map((page) => ({
-    ...page,
-    tag: 'value',
+  indexes: getPages().map((page) => ({
+    ...,
+    tag: page.data.tag,
   })),
   tag: true,
 });
+```
+
+On your search client, pass a tag to the hook.
+
+```ts
+import { useDocsSearch } from 'fumadocs-core/search/client';
 
 // Pass `tag` in your custom search dialog
-const { search, setSearch, query } = useDocsSearch(locale, tag);
+const client = useDocsSearch('locale', 'tag');
 ```
 
 ### Custom Algorithm
@@ -167,14 +167,6 @@ function Dialog() {
 </div>
 
 </div>
-
-<Cards>
-  <Card
-    title="Page Conventions"
-    description="Learn to build Internationalized Page Structure"
-    href="/docs/headless/page-conventions"
-  />
-</Cards>
 
 ## Search Client
 

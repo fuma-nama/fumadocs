@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { Card, Cards } from 'fumadocs-ui/components/card';
 import { DocsPage, DocsBody } from 'fumadocs-ui/page';
 import { notFound } from 'next/navigation';
+import { ReactNode } from 'react';
 import { utils, type Page } from '@/utils/source';
 import { createMetadata } from '@/utils/metadata';
 import Preview from '@/components/preview';
@@ -63,11 +64,19 @@ export default function Page({
       </p>
       <DocsBody>
         {preview && preview in Preview ? Preview[preview] : null}
-        {page.data.index ? (
-          <Category page={page} />
-        ) : (
-          <page.data.exports.default />
-        )}
+        {page.data.index ? <Category page={page} /> : null}
+        <page.data.exports.default
+          components={{
+            HeadlessOnly:
+              params.slug[0] === 'headless'
+                ? ({ children }) => children
+                : () => undefined,
+            UIOnly:
+              params.slug[0] === 'ui'
+                ? ({ children }) => children
+                : () => undefined,
+          }}
+        />
       </DocsBody>
     </DocsPage>
   );

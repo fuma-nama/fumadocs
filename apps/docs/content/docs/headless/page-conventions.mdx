@@ -1,5 +1,5 @@
 ---
-title: Page Conventions
+title: Organizing Pages
 description: Organize documents with file-system based routing
 ---
 
@@ -17,12 +17,12 @@ A [MDX](https://mdxjs.com) or Markdown file.
 
 By default, it includes:
 
-| name          | description                           |
-| ------------- | ------------------------------------- |
-| `title`       | The title of page                     |
-| `description` | The description of page               |
-| `icon`        | The name of icon, see [Icons](#icons) |
-| `full`        | Enable full mode on the page          |
+| name          | description                                        |
+| ------------- | -------------------------------------------------- |
+| `title`       | The title of page                                  |
+| `description` | The description of page                            |
+| `icon`        | The name of icon, see [Icons](#icons)              |
+| `full`        | Fill all available space on the page (Fumadocs UI) |
 
 You may extend your content source to add additional properties.
 
@@ -39,52 +39,38 @@ full: false
 
 ## Folder
 
-Organize multiple pages. If not specified, folder name will be used as the display name.
+Organize multiple pages. When not specified, the display name will be generated from its folder name.
 
 Pages are sorted alphabetically, except for `index.mdx` which is always ordered at the top.
 
-Use [meta file](#meta) to customise a folder.
-
-### Open by Default
-
-Force to open the folder by default.
-
-```json title="meta.json"
-{
-  "title": "Name of Folder",
-  "defaultOpen": true
-}
-```
-
-### Multiple Page Trees
-
-Adding a `root` property in meta can mark your folder as a **root**.
-The nearest root of the current page will be shown on all navigation elements.
-
-In other words, when you are in a root folder called `core`, the other folders (e.g. `ui`) are not shown on the sidebar.
-
-<Files>
-  <Folder name="core" defaultOpen>
-    <File name="Current Page" className="!text-primary !bg-primary/10" />
-  </Folder>
-  <Folder name="ui" defaultOpen>
-    <File name="Not shown on sidebar" />
-  </Folder>
-</Files>
-
-To allow users switching between page trees, you can implement a page tree switch. On Fumadocs UI, it is available via [`<RootToggle />`](/docs/ui/components/root-toggle).
-
-```json title="meta.json"
-{
-  "title": "Name of Folder",
-  "root": true
-}
-```
+To customise folders, see [Meta file](#meta).
 
 ## Meta
 
-Customize the display name, order of pages, or its items on the sidebar by
-creating a `meta.json` in the folder.
+Customize a folder by creating a `meta.json` file in the folder.
+
+### Display Name
+
+```json
+{
+  "title": "Name of Folder"
+}
+```
+
+### Icon
+
+Specify an icon name for folder with the `icon` property, see [Icons](#icons).
+
+```json title="meta.json"
+{
+  "title": "My Folder",
+  "icon": "MyIcon"
+}
+```
+
+### Pages
+
+Control the order of items.
 
 When a meta file presents, items are not included unless you have explicitly added them to `pages`.
 
@@ -95,7 +81,11 @@ When a meta file presents, items are not included unless you have explicitly add
 }
 ```
 
-You can add the file names to specify their order.
+<Files>
+  <File name="meta.json" />
+  <File name="guide.mdx" />
+  <File name="components.mdx" />
+</Files>
 
 ### Path
 
@@ -108,10 +98,20 @@ The items of `pages` property can be a relative path to a page or folder. File e
 }
 ```
 
+### Open by Default
+
+Force to open the folder by default.
+
+```json title="meta.json"
+{
+  "title": "Name of Folder",
+  "defaultOpen": true
+}
+```
+
 ### Separator
 
-You can define a separator in meta by adding a item surrounded with
-`---`.
+You can define a separator in meta by adding a item surrounded with `---`.
 
 ```json
 {
@@ -122,10 +122,9 @@ You can define a separator in meta by adding a item surrounded with
 
 ### Rest
 
-Tired to specify the order of every single page in `meta.json`? You can use
-`...` to automatically add and sort remaining items.
+Add a Rest (`...`) item to automatically add and sort remaining page items.
 
-<Callout title="Note" className="mb-4">
+<Callout title="Note">
   Index pages won't be included, you must specify the order of `index`.
 </Callout>
 
@@ -171,25 +170,37 @@ Use the syntax `[Text](url)` to insert links.
 
 ## Icons
 
-Specify an icon name for pages and folders with the `icon` property.
+Since Fumadocs doesn't include a icon library, you have to convert the icon names to JSX elements so that it can be rendered as a component.
 
-```mdx
----
-title: My Page
-icon: MyIcon
----
-```
+For built-in content sources like Fumadocs MDX, you can [the `icon` handler](/docs/headless/source-api#icons) from Source API.
 
-```json
+## Multiple Page Trees
+
+Adding a `root` property in meta file can mark your folder as a **root**.
+
+```json title="meta.json"
 {
-  "title": "My Folder",
-  "icon": "MyIcon"
+  "title": "Name of Folder",
+  "root": true
 }
 ```
 
-Since Fumadocs doesn't include a icon library, you have to convert the icon names to JSX elements so that it can be rendered as a component.
+When users are browsing the pages under a root folder, only the child items of the folder will be visible.
 
-For built-in content sources, you can [the `icon` handler](/docs/headless/source-api#icons) from Source API.
+For example, when you are in a root folder called `core`, the other folders (e.g. `ui`) are not shown on the sidebar and other navigation elements.
+
+<Files>
+  <Folder name="core" defaultOpen>
+    <File name="Current Page" className="!text-primary !bg-primary/10" />
+    <File name="Other Pages" />
+  </Folder>
+  <Folder name="ui" className="opacity-50" disabled defaultOpen>
+    <File name="Invisible Page" />
+  </Folder>
+</Files>
+
+To allow users switching between different roots, implement a component that navigates to a page under the root folders.
+On Fumadocs UI, this is available via the [Root Toggle](/docs/ui/components/root-toggle) component.
 
 ## Internationalization
 
@@ -199,7 +210,7 @@ locale in order to have its localized version.
 This works for meta files too, you can add `.{locale}` to the file name like `meta.cn.json`.
 
 > If it's the default language, just leave it empty like `get-started.mdx`. Do
-> not use add locale code to file name.
+> not add locale code to file name.
 
 ### Example
 

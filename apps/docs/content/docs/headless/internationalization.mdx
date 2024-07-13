@@ -1,9 +1,10 @@
 ---
 title: Internationalization
 description: Support multiple languages in your documentation
+icon: Globe
 ---
 
-Read the [Next.js Docs](https://nextjs.org/docs/app/building-your-application/routing/internationalization) to learn more about implementing I18n in Next.js.
+> Read the [Next.js Docs](https://nextjs.org/docs/app/building-your-application/routing/internationalization) to learn more about implementing I18n in Next.js.
 
 ## Setup
 
@@ -46,6 +47,8 @@ export const config = {
 Create a dynamic route `/app/[lang]`, and move all special files to
 the folder.
 
+<HeadlessOnly>
+
 ```tsx title="app/[lang]/layout.tsx"
 export default function Layout({
   params,
@@ -62,7 +65,50 @@ export default function Layout({
 }
 ```
 
-Write documents, see [Page Conventions](/docs/headless/page-conventions#internationalization) to learn how to organize your documents.
+</HeadlessOnly>
+
+<UIOnly>
+
+A `I18nProvider` is needed for localization. Wrap the root provider inside your I18n provider.
+
+```tsx
+import { RootProvider } from 'fumadocs-ui/provider';
+import { I18nProvider } from 'fumadocs-ui/i18n';
+
+export default function RootLayout({
+  params,
+  children,
+}: {
+  params: { lang: string };
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang={params.lang}>
+      <body>
+        <I18nProvider locale={params.lang}>
+          <RootProvider>{children}</RootProvider>
+        </I18nProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+</UIOnly>
+
+### Writing Documents
+
+<UIOnly>
+
+    see [Page Conventions](/docs/ui/page-conventions#internationalization) to learn how to organize your documents.
+
+</UIOnly>
+
+<HeadlessOnly>
+
+    see [Page Conventions](/docs/headless/page-conventions#internationalization) to learn how to organize your documents.
+
+</HeadlessOnly>
 
 ### Search
 
@@ -130,3 +176,38 @@ export default createI18nMiddleware({
   hideLocale: 'default-locale',
 });
 ```
+
+<UIOnly>
+
+### Adding Translations
+
+We only provide english translation by default, you have to pass your translations to the provider.
+
+```tsx
+import { I18nProvider } from 'fumadocs-ui/i18n';
+
+<I18nProvider
+  translations={{
+    cn: {
+      name: 'Chinese', // required
+      search: 'Translated Content',
+    },
+  }}
+>
+  ...
+</I18nProvider>;
+```
+
+### Add Language Switch
+
+To allow users changing their language, enable `i18n` on docs layout.
+
+```tsx title="[lang]/docs/layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layout';
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return <DocsLayout i18n>{children}</DocsLayout>;
+}
+```
+
+</UIOnly>
