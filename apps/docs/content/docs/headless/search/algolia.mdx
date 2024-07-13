@@ -8,20 +8,27 @@ description: Integrate Algolia Search with Fumadocs
   search dialog](https://algolia.com/policies/free-services-terms).
 </Callout>
 
-## Indexing
+## Introduction
 
-The default behavior creates a record for each paragraph in your document, it is
+The Algolia Integration automatically configures Algolia Search for document search.
+
+By default, it creates a record for **each paragraph** in your document, it is
 officially recommended by Algolia.
 
-Each record contains searchable attributes `title`, `section`, and `content`.
-`section` is optional, it only exists in paragraphs under a heading. Headings and
-paragraphs are all indexed as an individual record, grouped by their `page_id`.
+Each record contains searchable attributes:
+
+| Attribute | Description           |
+| --------- | --------------------- |
+| `title`   | Page Title            |
+| `section` | Heading ID (nullable) |
+| `content` | Paragraph content     |
+
+The `section` field only exists in paragraphs under a heading. Headings and
+paragraphs are indexed as an individual record, grouped by their page ID.
 
 ## Setup
 
-<div className='steps [&>h3]:step'>
-
-### Install Algolia Search
+### Install Dependencies
 
 ```package-install
 algoliasearch
@@ -32,12 +39,13 @@ algoliasearch
 Sign up and obtain the required API keys for your search. Store these
 credentials in environment variables.
 
-### Create and sync your indexes with the `sync` function.
+### Sync Search Indexes
+
+The `sync` function will update the index settings and sync search indexes.
 
 ```js title="update-index.mjs"
 import algosearch from 'algoliasearch';
 import { sync } from 'fumadocs-core/search-algolia/server';
-import { structure } from 'fumadocs-core/mdx-plugins';
 
 const client = algosearch('id', 'key');
 
@@ -69,9 +77,10 @@ To search documents on the client side, use the [Fumadocs UI Search Dialog](/doc
 In addition, the `useAlgoliaSearch` hook can handle state management with SWR.
 
 ```ts
+import algosearch from 'algoliasearch';
 import { useAlgoliaSearch } from 'fumadocs-core/search-algolia/client';
 
-const index = algoliasearch('id', 'key').initIndex('document');
+const index = algosearch('id', 'key').initIndex('document');
 
 const { search, setSearch, query } = useAlgoliaSearch(index, {
   distinct: 5,
@@ -79,7 +88,7 @@ const { search, setSearch, query } = useAlgoliaSearch(index, {
 });
 ```
 
-</div>
+## Options
 
 ### Tag Filter
 

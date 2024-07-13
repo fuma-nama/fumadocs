@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { Card, Cards } from 'fumadocs-ui/components/card';
 import { DocsPage, DocsBody } from 'fumadocs-ui/page';
 import { notFound } from 'next/navigation';
-import { ReactNode } from 'react';
+import { type ReactNode } from 'react';
 import { utils, type Page } from '@/utils/source';
 import { createMetadata } from '@/utils/metadata';
 import Preview from '@/components/preview';
@@ -69,11 +69,11 @@ export default function Page({
           components={{
             HeadlessOnly:
               params.slug[0] === 'headless'
-                ? ({ children }) => children
+                ? ({ children }: { children: ReactNode }) => children
                 : () => undefined,
             UIOnly:
               params.slug[0] === 'ui'
-                ? ({ children }) => children
+                ? ({ children }: { children: ReactNode }) => children
                 : () => undefined,
           }}
         />

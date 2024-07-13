@@ -4,8 +4,8 @@
   "pages": [
     "---Guide---",
     "index",
-    "search",
     "internationalization",
+    "search",
     "---Writing---",
     "page-conventions",
     "---API References---",
