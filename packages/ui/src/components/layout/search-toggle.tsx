@@ -40,6 +40,7 @@ export function LargeSearchToggle(
   return (
     <button
       type="button"
+      data-search-toggle
       {...props}
       className={cn(
         'inline-flex items-center gap-2 rounded-full border bg-secondary/50 p-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground',
