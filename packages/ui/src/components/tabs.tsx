@@ -2,11 +2,11 @@
 
 import type { TabsContentProps } from '@radix-ui/react-tabs';
 import {
-  useEffect,
   useMemo,
   useState,
   type ReactNode,
   useCallback,
+  useLayoutEffect,
 } from 'react';
 import { cn } from '@/utils/cn';
 import * as Primitive from './ui/tabs';
@@ -67,7 +67,7 @@ export function Tabs({
   const values = useMemo(() => items.map((item) => toValue(item)), [items]);
   const [value, setValue] = useState(values[defaultIndex]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!id) return;
 
     const onUpdate: ChangeListener = (v) => {

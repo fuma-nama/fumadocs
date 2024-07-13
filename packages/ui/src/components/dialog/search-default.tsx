@@ -3,6 +3,7 @@
 import { useDocsSearch } from 'fumadocs-core/search/client';
 import { type ReactNode, useState } from 'react';
 import { useI18n } from '@/contexts/i18n';
+import { useOnChange } from '@/utils/use-on-change';
 import {
   SearchDialog,
   type SharedProps,
@@ -42,8 +43,12 @@ export default function DefaultSearchDialog({
   ...props
 }: DefaultSearchDialogProps): React.ReactElement {
   const { locale } = useI18n();
-  const [tag, setTag] = useState<string>();
+  const [tag, setTag] = useState(defaultTag);
   const { search, setSearch, query } = useDocsSearch(locale, tag, api, delayMs);
+
+  useOnChange(defaultTag, (v) => {
+    setTag(v);
+  });
 
   return (
     <SearchDialog
@@ -54,11 +59,7 @@ export default function DefaultSearchDialog({
       footer={
         <>
           {tags ? (
-            <TagsList
-              tag={tag ?? defaultTag}
-              onTagChange={setTag}
-              items={tags}
-            />
+            <TagsList tag={tag} onTagChange={setTag} items={tags} />
           ) : null}
           {props.footer}
         </>

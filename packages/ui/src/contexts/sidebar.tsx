@@ -5,10 +5,10 @@ import {
   useMemo,
   useRef,
   type MutableRefObject,
-  useEffect,
 } from 'react';
 import { usePathname } from 'next/navigation';
 import { SidebarProvider as BaseProvider } from 'fumadocs-core/sidebar';
+import { useOnChange } from '@/utils/use-on-change';
 
 interface SidebarContext {
   open: boolean;
@@ -41,12 +41,12 @@ export function SidebarProvider({
 
   const pathname = usePathname();
 
-  useEffect(() => {
+  useOnChange(pathname, () => {
     if (closeOnRedirect.current) {
       setOpen(false);
     }
     closeOnRedirect.current = true;
-  }, [pathname]);
+  });
 
   return (
     <SidebarContext.Provider
