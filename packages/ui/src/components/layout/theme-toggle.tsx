@@ -28,10 +28,10 @@ export function ThemeToggle({
     <button
       type="button"
       className={cn(
-        'theme-toggle',
         'inline-flex items-center rounded-full border p-0.5',
         className,
       )}
+      data-theme-toggle
       aria-label="Toggle Theme"
       onClick={onToggle}
       {...props}
