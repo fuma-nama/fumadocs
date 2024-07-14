@@ -1,5 +1,15 @@
 # next-docs-zeta
 
+## 12.5.0
+
+### Minor Changes
+
+- b9fa99d: Support `tag` facet field for Algolia Search Integration
+
+### Patch Changes
+
+- 525925b: Support including root folder into breadcrumbs
+
 ## 12.4.2
 
 ### Patch Changes
