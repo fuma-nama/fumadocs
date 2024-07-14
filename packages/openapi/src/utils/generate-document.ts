@@ -19,7 +19,7 @@ export function generateDocument(
     options.imports ?? [
       {
         names: Object.keys(defaultRenderer),
-        from: 'fumadocs-ui/components/api',
+        from: 'fumadocs-openapi/ui',
       },
     ]
   )

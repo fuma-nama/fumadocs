@@ -1,9 +1,9 @@
 import { cva, type VariantProps } from 'class-variance-authority';
-import type {
-  PrimitiveRequestField,
-  ReferenceSchema,
-  RequestSchema,
-} from 'fumadocs-openapi';
+import {
+  type PrimitiveRequestField,
+  type ReferenceSchema,
+  type RequestSchema,
+} from '@/render/playground';
 
 export const badgeVariants = cva(
   'rounded border px-1.5 py-1 text-xs font-medium leading-[12px]',

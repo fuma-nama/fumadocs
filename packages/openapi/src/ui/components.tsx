@@ -5,12 +5,10 @@ import {
   type ReactNode,
 } from 'react';
 import { Check, Copy } from 'lucide-react';
-import { cn } from '@/utils/cn';
-import { Accordion, Accordions } from '@/components/accordion';
-import { buttonVariants } from '@/theme/variants';
-import { useCopyButton } from '@/utils/use-copy-button';
-import { ApiProvider, useApiContext } from '@/contexts/api';
-import { badgeVariants, getBadgeColor } from '@/components/api/shared';
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+import { cn, useCopyButton, buttonVariants } from 'fumadocs-ui/components/api';
+import { badgeVariants, getBadgeColor } from '@/ui/shared';
+import { ApiProvider, useApiContext } from '@/ui/contexts/api';
 
 export interface RootProps extends HTMLAttributes<HTMLDivElement> {
   baseUrl?: string;

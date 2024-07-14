@@ -4,13 +4,7 @@ import type {
   TabsContentProps,
   TabsProps as BaseProps,
 } from '@radix-ui/react-tabs';
-import {
-  useMemo,
-  useState,
-  type ReactNode,
-  useCallback,
-  useLayoutEffect,
-} from 'react';
+import { useMemo, useState, useCallback, useLayoutEffect } from 'react';
 import { cn } from '@/utils/cn';
 import * as Primitive from './ui/tabs';
 

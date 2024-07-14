@@ -9,7 +9,7 @@ import {
 } from 'react-hook-form';
 import { cva } from 'class-variance-authority';
 import { createContext, forwardRef, useContext, useId } from 'react';
-import { cn } from '@/utils/cn';
+import { cn } from 'fumadocs-ui/components/api';
 
 const Form = FormProvider;
 

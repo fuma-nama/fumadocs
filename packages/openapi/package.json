@@ -11,8 +11,28 @@
   "license": "MIT",
   "author": "Fuma Nama",
   "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./ui": {
+      "import": "./dist/ui/index.js",
+      "types": "./dist/ui/index.d.ts"
+    }
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/index.d.ts"
+      ],
+      "ui": [
+        "./dist/ui/index.d.ts"
+      ]
+    }
+  },
   "files": [
     "dist"
   ],
@@ -25,18 +45,33 @@
   },
   "dependencies": {
     "@apidevtools/json-schema-ref-parser": "^11.6.4",
+    "@radix-ui/react-select": "^2.1.1",
+    "@radix-ui/react-slot": "^1.1.0",
+    "class-variance-authority": "^0.7.0",
     "fast-glob": "^3.3.1",
+    "fumadocs-ui": "workspace:*",
     "js-yaml": "^4.1.0",
     "json-schema-to-typescript": "^14.1.0",
-    "openapi-sampler": "^1.5.1"
+    "lucide-react": "^0.400.0",
+    "openapi-sampler": "^1.5.1",
+    "react-hook-form": "^7.52.1",
+    "shiki": "^1.10.3",
+    "swr": "^2.2.5"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
     "@types/node": "20.14.9",
     "@types/openapi-sampler": "^1.0.3",
+    "@types/react": "^18.3.3",
     "eslint-config-custom": "workspace:*",
+    "next": "^14.2.4",
     "openapi-types": "^12.1.3",
     "tsconfig": "workspace:*"
+  },
+  "peerDependencies": {
+    "next": ">= 14.1.0",
+    "react": ">= 18",
+    "react-dom": ">= 18"
   },
   "publishConfig": {
     "access": "public"

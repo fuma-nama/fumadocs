@@ -1,7 +1,7 @@
-import type { RequestSchema } from 'fumadocs-openapi';
 import { CircleCheckIcon, CircleXIcon } from 'lucide-react';
-import { resolve } from '@/components/api/shared';
-import type { DynamicField } from '@/components/api/context';
+import { resolve } from '@/ui/shared';
+import { type RequestSchema } from '@/render/playground';
+import { type DynamicField } from '@/ui/contexts/schema';
 
 /**
  * Create request body from value

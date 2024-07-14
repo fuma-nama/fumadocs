@@ -1,4 +1,3 @@
-import type { RequestSchema } from 'fumadocs-openapi';
 import {
   type HTMLAttributes,
   type ReactNode,
@@ -8,7 +7,15 @@ import {
 } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
-import { cn } from '@/utils/cn';
+import { cn, buttonVariants } from 'fumadocs-ui/components/api';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/ui/components/select';
+import type { RequestSchema } from '@/render/playground';
 import {
   FormControl,
   FormDescription,
@@ -16,18 +23,10 @@ import {
   FormItem,
   FormLabel,
   labelVariants,
-} from '@/components/ui/form';
-import { getDefaultValue, resolve } from '@/components/api/shared';
-import { Input } from '@/components/ui/input';
-import { buttonVariants } from '@/theme/variants';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { useSchemaContext } from './context';
+} from '@/ui/components/form';
+import { getDefaultValue, resolve } from '@/ui/shared';
+import { Input } from '@/ui/components/input';
+import { useSchemaContext } from './contexts/schema';
 
 interface RenderOptions {
   field: RequestSchema;

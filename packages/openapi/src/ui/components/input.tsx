@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { cn } from '@/utils/cn';
+import { cn } from 'fumadocs-ui/components/api';
 
 export type InputProps = React.InputHTMLAttributes<HTMLInputElement>;
 

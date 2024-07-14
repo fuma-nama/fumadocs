@@ -1,5 +1,5 @@
-import type { ReferenceSchema, RequestSchema } from 'fumadocs-openapi';
 import { createContext, type MutableRefObject, useContext } from 'react';
+import { type ReferenceSchema, type RequestSchema } from '@/render/playground';
 
 interface SchemaContextType {
   references: Record<string, RequestSchema>;

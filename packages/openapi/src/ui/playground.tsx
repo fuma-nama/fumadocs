@@ -1,23 +1,16 @@
-import {
-  type HTMLAttributes,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { type HTMLAttributes, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import useSWRImmutable from 'swr/immutable';
-import type { APIPlaygroundProps } from 'fumadocs-openapi';
-import { useApiContext } from '@/contexts/api';
-import { Form } from '@/components/ui/form';
-import { cn } from '@/utils/cn';
-import { Accordion, Accordions } from '@/components/accordion';
-import * as Base from '@/components/codeblock';
-import { createBodyFromValue, getStatusInfo } from '@/components/api/fetcher';
-import { buttonVariants } from '@/theme/variants';
-import { getDefaultValue, getDefaultValues } from '@/components/api/shared';
-import { InputField, ObjectInput } from '@/components/api/inputs';
-import { type DynamicField, SchemaContext } from './context';
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+import { cn, buttonVariants } from 'fumadocs-ui/components/api';
+import { useApiContext } from '@/ui/contexts/api';
+import { Form } from '@/ui/components/form';
+import { createBodyFromValue, getStatusInfo } from '@/ui/fetcher';
+import { getDefaultValue, getDefaultValues } from '@/ui/shared';
+import { InputField, ObjectInput } from '@/ui/inputs';
+import type { APIPlaygroundProps } from '@/render/playground';
+import { CodeBlock } from '@/ui/components/codeblock';
+import { type DynamicField, SchemaContext } from './contexts/schema';
 
 interface APIPlaygroundFormData {
   authorization?: string | undefined;
@@ -25,38 +18,6 @@ interface APIPlaygroundFormData {
   query?: Record<string, string>;
   header?: Record<string, string>;
   body?: Record<string, unknown>;
-}
-
-export type CodeBlockProps = HTMLAttributes<HTMLPreElement> & {
-  code: string;
-  lang?: string;
-};
-
-function CodeBlock({
-  code,
-  lang = 'json',
-  ...props
-}: CodeBlockProps): React.ReactElement {
-  const { highlighter } = useApiContext();
-  const [html, setHtml] = useState('');
-
-  useEffect(() => {
-    if (!highlighter) return;
-
-    const themedHtml = highlighter.codeToHtml(code, {
-      lang,
-      defaultColor: false,
-      themes: { light: 'github-light', dark: 'github-dark' },
-    });
-
-    setHtml(themedHtml);
-  }, [code, lang, highlighter]);
-
-  return (
-    <Base.CodeBlock className="my-0">
-      <Base.Pre {...props} dangerouslySetInnerHTML={{ __html: html }} />
-    </Base.CodeBlock>
-  );
 }
 
 export function APIPlayground({
