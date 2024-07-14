@@ -5,7 +5,7 @@ import {
   useState,
 } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
-import { useFieldArray, useFormContext } from 'react-hook-form';
+import { useFieldArray, useForm, useFormContext } from 'react-hook-form';
 import { cn, buttonVariants, useOnChange } from 'fumadocs-ui/components/api';
 import {
   Select,
@@ -39,7 +39,7 @@ function renderInner({ field, ...props }: RenderOptions): React.ReactNode {
       <ObjectInput
         field={field}
         {...props}
-        className={cn('rounded-lg border p-3', props.className)}
+        className={cn('rounded-lg border bg-accent/20 p-3', props.className)}
       />
     );
   if (field.type === 'switcher')
@@ -49,7 +49,7 @@ function renderInner({ field, ...props }: RenderOptions): React.ReactNode {
       <ArrayInput
         field={field}
         {...props}
-        className={cn('rounded-lg border p-3', props.className)}
+        className={cn('rounded-lg border bg-background p-3', props.className)}
       />
     );
   if (field.type === 'null') return null;
@@ -132,6 +132,7 @@ function AdditionalProperties({
   fieldName: string;
   type: boolean | string;
 }): React.ReactElement {
+  const { control, setValue } = useFormContext();
   const { references, dynamic } = useSchemaContext();
   const [nextName, setNextName] = useState('');
   const [properties, setProperties] = useState<string[]>(() => {
@@ -149,9 +150,16 @@ function AdditionalProperties({
   });
 
   const onAppend = useCallback(() => {
-    if (nextName.length === 0) return;
-    setProperties((p) => (p.includes(nextName) ? p : [...p, nextName]));
-    setNextName('');
+    const name = nextName.trim();
+    if (name.length === 0) return;
+
+    setProperties((p) => {
+      if (p.includes(name)) return p;
+
+      setValue(`${fieldName}.${name}`, '');
+      setNextName('');
+      return [...p, name];
+    });
   }, [nextName]);
 
   const types =
@@ -183,6 +191,7 @@ function AdditionalProperties({
               )}
               onClick={() => {
                 setProperties((p) => p.filter((prop) => prop !== item));
+                control.unregister(`${fieldName}.${item}`);
               }}
             >
               <Trash2 className="size-4" />
@@ -350,7 +359,7 @@ export function InputField({
         <ObjectInput
           field={field}
           fieldName={fieldName}
-          className="rounded-lg border bg-accent/30 p-3"
+          className="rounded-lg border bg-accent/20 p-3"
         />
       </InputContainer>
     );
