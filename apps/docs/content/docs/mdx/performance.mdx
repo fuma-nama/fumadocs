@@ -1,12 +1,13 @@
 ---
 title: Performance
 description: The performance of Fumadocs MDX
+icon: Rocket
 ---
 
 ## About
 
 Fumadocs MDX is a bundler plugin, in other words, it has a higher performance bottleneck.
-With bundlers like Webpack or Turbopack, it is enough for large docs sites with nearly 500+ MDX files, which is sufficient for almost all docs sites.
+With bundlers like Webpack and Turbopack, it is enough for large docs sites with nearly 500+ MDX files, which is sufficient for almost all docs sites.
 
 ### Advantages
 
@@ -43,5 +44,4 @@ Since host platforms like Vercel are not supposed to hold a huge build output, y
 Fumadocs doesn't provide an integration for `next-mdx-remote`, the main reason is `next-mdx-remote` supports remote sources, which are not necessarily file-system based.
 Fumadocs cannot generate a page tree for non file-system based sources.
 
-To use `next-mdx-remote` with Fumadocs, generate the page tree from the remote source (e.g. GitHub), and pass it to layouts.
-For file-system based sources, you may use [Source API](/docs/headless/source-api) to generate the page tree.
+To use `next-mdx-remote` with Fumadocs, see [MDX Remote](/docs/headless/remote) for configuring remote sources.

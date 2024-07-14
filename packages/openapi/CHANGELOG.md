@@ -1,5 +1,54 @@
 # @fuma-docs/openapi
 
+## 4.0.0
+
+### Major Changes
+
+- ad143e1: Move UI implementation from `fumadocs-ui` to `fumadocs-openapi`.
+
+  **why:** Allow a better organization of packages.
+
+  **migrate:**
+
+  This package is now Tailwind CSS only, you need to use it in conjunction with the official Tailwind CSS plugin.
+
+  Add the package to `content` under your Tailwind CSS configuration.
+
+  ```js
+  import { createPreset, presets } from 'fumadocs-ui/tailwind-plugin';
+
+  /** @type {import('tailwindcss').Config} */
+  export default {
+    content: [
+      './node_modules/fumadocs-ui/dist/**/*.js',
+      './node_modules/fumadocs-openapi/dist/**/*.js',
+    ],
+    presets: [createPreset()],
+  };
+  ```
+
+  Re-generate MDX files if needed.
+
+### Minor Changes
+
+- ad143e1: Implement OpenAPI playground
+- ad143e1: Support passing base url to Root component
+
+### Patch Changes
+
+- ad143e1: Combine `allOf` into one object schema
+- Updated dependencies [b9fa99d]
+- Updated dependencies [a4bcaa7]
+- Updated dependencies [d1c7405]
+  - fumadocs-ui@12.5.0
+
+## 3.3.0
+
+### Minor Changes
+
+- b1b154e: Display object types mentioned in schema
+- 81fde3f: Support complex types & self-referencing types
+
 ## 3.2.0
 
 ### Minor Changes

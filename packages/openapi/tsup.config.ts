@@ -1,8 +1,8 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  entry: ['./src/index.ts'],
+  entry: ['./src/index.ts', './src/ui/index.ts'],
   format: 'esm',
   dts: true,
-  target: 'node18',
+  target: 'es2022',
 });

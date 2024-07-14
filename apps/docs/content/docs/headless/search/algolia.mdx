@@ -8,53 +8,55 @@ description: Integrate Algolia Search with Fumadocs
   search dialog](https://algolia.com/policies/free-services-terms).
 </Callout>
 
-## Indexing
+## Introduction
 
-The default behavior creates a record for each paragraph in your document, it is
+The Algolia Integration automatically configures Algolia Search for document search.
+
+By default, it creates a record for **each paragraph** in your document, it is
 officially recommended by Algolia.
 
-Each record contains searchable attributes `title`, `section`, and `content`.
-`section` is optional, it only exists in paragraphs under a heading. Headings and
-paragraphs are all indexed as an individual record, grouped by their `page_id`.
+Each record contains searchable attributes:
+
+| Attribute | Description           |
+| --------- | --------------------- |
+| `title`   | Page Title            |
+| `section` | Heading ID (nullable) |
+| `content` | Paragraph content     |
+
+The `section` field only exists in paragraphs under a heading. Headings and
+paragraphs are indexed as an individual record, grouped by their page ID.
 
 ## Setup
 
-<div className='steps'>
-
-<div className='step'>
-
-Install `algoliasearch`
+### Install Dependencies
 
 ```package-install
 algoliasearch
 ```
 
-</div>
+### Sign up on Algolia
 
-<div className="step">
-  Sign up and obtain the required API keys for your search. Store these
-  credentials in environment variables.
-</div>
+Sign up and obtain the required API keys for your search. Store these
+credentials in environment variables.
 
-<div className='step'>
+### Sync Search Indexes
 
-Create and sync your indexes with the `sync` function.
+The `sync` function will update the index settings and sync search indexes.
 
 ```js title="update-index.mjs"
-import algosearch from 'algoliasearch'
-import { sync } from 'fumadocs-core/search-algolia/server'
-import { structure } from 'fumadocs-core/mdx-plugins'
+import algosearch from 'algoliasearch';
+import { sync } from 'fumadocs-core/search-algolia/server';
 
-const client = algosearch(...)
+const client = algosearch('id', 'key');
 
 sync(client, {
-    documents: indexes // [!code highlight]
-})
+  documents: indexes, // [!code highlight]
+});
 ```
 
 The `indexes` variable should be provided by your content source provider. If you are using Fumadocs MDX, see [Search Index Generation](/docs/mdx/search-index).
 
-Notably, it requires a `structured` property, this can be obtained from [structurize](/docs/headless/mdx/structure), or sometimes supplied by the content source you are using.
+Notably, it requires a `structured` property, this can be obtained from [Remark Structure](/docs/headless/mdx/structure), or sometimes supplied by the content source you are using.
 
 You may make it a script and manually sync with `node ./update-index.mjs`, or
 integrate it with your CI/CD pipeline.
@@ -63,32 +65,62 @@ integrate it with your CI/CD pipeline.
 > url.
 
 <Callout type="warn" title="Typescript Usage">
-  If you are running the script with
-  [TSX](https://github.com/privatenumber/tsx) or other similar Typescript
-  executors, ensure to name it `.mts` for best ESM compatibility.
+  If you are running the script with [TSX](https://github.com/privatenumber/tsx)
+  or other similar Typescript executors, ensure to name it `.mts` for best ESM
+  compatibility.
 </Callout>
-   
-</div>
 
-<div className='step'>
+### Search Client
 
-To search documents on the client side, you can use the [Fumadocs UI Search Dialog](/docs/ui/search#algolia), or bring your own implementation.
+To search documents on the client side, use the [Fumadocs UI Search Dialog](/docs/ui/search#algolia), or your own implementation.
 
 In addition, the `useAlgoliaSearch` hook can handle state management with SWR.
 
 ```ts
-import { useAlgoliaSearch } from 'fumadocs-core/search-algolia/client'
+import algosearch from 'algoliasearch';
+import { useAlgoliaSearch } from 'fumadocs-core/search-algolia/client';
 
-const index = algoliasearch(...).initIndex('document')
+const index = algosearch('id', 'key').initIndex('document');
 
 const { search, setSearch, query } = useAlgoliaSearch(index, {
-   distinct: 5,
-   hitsPerPage: 10
-})
+  distinct: 5,
+  hitsPerPage: 10,
+});
 ```
 
-</div>
-</div>
+## Options
+
+### Tag Filter
+
+To configure tag filtering, add a `tag` value to indexes.
+
+```js
+import algosearch from 'algoliasearch';
+import { sync } from 'fumadocs-core/search-algolia/server';
+
+const client = algosearch('id', 'key');
+
+sync(client, {
+  documents: indexes.map((index) => ({
+    ...index,
+    tag: 'value', // [!code highlight]
+  })),
+});
+```
+
+For Fumadocs UI, enable [Tag Filter](/docs/ui/search#tag-filter-1) on Search Dialog.
+
+The `tag` field is an attribute for faceting, use the filter `tag:value` on search clients to filter indexes by tag.
+
+```ts
+import { useAlgoliaSearch } from 'fumadocs-core/search-algolia/client';
+
+useAlgoliaSearch(index, {
+  distinct: 5,
+  hitsPerPage: 10,
+  filters: 'tag:value',
+});
+```
 
 ### Customise Attributes & Settings
 
@@ -96,8 +128,10 @@ While the default attributes might not suit your case, you can pass `extra_data`
 to index options for adding extra fields to each record.
 
 ```js
+import { sync } from 'fumadocs-core/search-algolia/server'
+
 sync(client, {
-  documents: allDocs.map(docs => ({
+  documents: indexes.map(docs => ({
     ...,
     extra_data: {
       tag: docs.tag

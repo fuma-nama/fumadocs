@@ -8,9 +8,9 @@ info:
     url: 'https://redocly.com/docs/cli/'
   license:
     name: MIT
-    url: 'https://opensource.org/license/mit/ '
+    url: 'https://opensource.org/license/mit/'
 servers:
-  - url: 'https://api.fake-museum-example.com/v1'
+  - url: 'https://redocly.com/_mock/docs/openapi/museum-api'
 paths:
   /museum-hours:
     get:
@@ -366,6 +366,9 @@ components:
           $ref: '#/components/schemas/EventDates'
         price:
           $ref: '#/components/schemas/EventPrice'
+        meta:
+          type: 'object'
+          additionalProperties: true
       required:
         - name
         - location

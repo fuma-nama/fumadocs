@@ -7,10 +7,10 @@ void OpenAPI.generateFiles({
   output: './content/docs/ui',
   per: 'tag',
   renderer: {
-    Root(child) {
+    Root(props, child) {
       return OpenAPI.createElement(
         'Root',
-        {},
+        props,
         '<div className="bg-secondary p-4 rounded-lg">Demo Only</div>',
         ...child,
       );

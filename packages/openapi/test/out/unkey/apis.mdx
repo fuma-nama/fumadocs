@@ -1,17 +1,17 @@
 ---
-title: apis
+title: Apis
 full: true
 ---
 
-import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible, Requests, Request } from "fumadocs-ui/components/api";
+import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible, Requests, Request, APIPlayground } from "fumadocs-openapi/ui";
 
-<Root>
+<Root baseUrl={"https://api.unkey.dev"}>
 
 <API>
 
 <APIInfo method={"GET"} route={"/v1/apis.getApi"}>
 
-## getApi
+## Get Api
 
 ### Authorization
 
@@ -27,9 +27,9 @@ In: `header`
 
 The id of the api to fetch
 
-<span>Example:  `"api_1234"`</span>
+<span>Example: `"api_1234"`</span>
 
-<span>Minimum length:  `1`</span>
+<span>Minimum length: `1`</span>
 
 </Property>
 
@@ -43,6 +43,10 @@ The id of the api to fetch
 | `409` | This response is sent when a request conflicts with the current state of the server. |
 | `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
 | `500` | The server has encountered a situation it does not know how to handle. |
+
+<APIPlayground authorization={{"type":"string","name":"Authorization","defaultValue":"Bearer","isRequired":true,"description":"The Authorization access token"}} method={"GET"} route={"/v1/apis.getApi"} path={[]} query={[{"name":"apiId","type":"string","defaultValue":"api_1234","isRequired":true,"description":"The id of the api to fetch"}]} header={[]} body={undefined} schemas={{}}>
+
+</APIPlayground>
 
 </APIInfo>
 
@@ -471,9 +475,468 @@ export interface Response {
 
 <API>
 
+<APIInfo method={"POST"} route={"/v1/apis.createApi"}>
+
+## Create Api
+
+### Authorization
+
+<Property name={"Authorization"} type={"Bearer <token>"} required={true}>
+
+In: `header`
+
+</Property>
+
+### Request Body
+
+<Property name={"name"} type={"string"} required={true} deprecated={undefined}>
+
+The name for your API. This is not customer facing.
+
+<span>Example: `"my-api"`</span>
+
+<span>Minimum length: `3`</span>
+
+</Property>
+
+| Status code | Description |
+| ----------- | ----------- |
+| `200` | The configuration for an api |
+| `400` | The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). |
+| `401` | Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. |
+| `403` | The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. |
+| `404` | The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. |
+| `409` | This response is sent when a request conflicts with the current state of the server. |
+| `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
+| `500` | The server has encountered a situation it does not know how to handle. |
+
+<APIPlayground authorization={{"type":"string","name":"Authorization","defaultValue":"Bearer","isRequired":true,"description":"The Authorization access token"}} method={"POST"} route={"/v1/apis.createApi"} path={[]} query={[]} header={[]} body={{"type":"object","isRequired":true,"properties":{"name":{"type":"ref","isRequired":true,"schema":"0"}}}} schemas={{"0":{"type":"string","defaultValue":"my-api","isRequired":false,"description":"The name for your API. This is not customer facing."}}}>
+
+</APIPlayground>
+
+</APIInfo>
+
+<APIExample>
+
+<Requests items={["cURL","JavaScript"]}>
+
+<Request value={"cURL"}>
+
+```bash
+curl -X POST "https://api.unkey.dev/v1/apis.createApi" \
+  -d '{
+  "name": "my-api"
+}'
+```
+
+</Request>
+
+<Request value={"JavaScript"}>
+
+```js
+fetch("https://api.unkey.dev/v1/apis.createApi", {
+  method: "POST"
+});
+```
+
+</Request>
+
+</Requests>
+
+<Responses items={["200","400","401","403","404","409","429","500"]}>
+
+<Response value={"200"}>
+
+<ResponseTypes>
+
+<ExampleResponse>
+
+```json
+{
+  "apiId": "api_134"
+}
+```
+
+</ExampleResponse>
+
+<TypeScriptResponse>
+
+```ts
+export interface Response {
+  /**
+   * The id of the api
+   */
+  apiId: string;
+}
+```
+
+</TypeScriptResponse>
+
+</ResponseTypes>
+
+</Response>
+
+<Response value={"400"}>
+
+<ResponseTypes>
+
+<ExampleResponse>
+
+```json
+{
+  "error": {
+    "code": "BAD_REQUEST",
+    "docs": "https://unkey.dev/docs/api-reference/errors/code/BAD_REQUEST",
+    "message": "string",
+    "requestId": "req_1234"
+  }
+}
+```
+
+</ExampleResponse>
+
+<TypeScriptResponse>
+
+```ts
+export interface Response {
+  error: {
+    /**
+     * A machine readable error code.
+     */
+    code: "BAD_REQUEST";
+    /**
+     * A link to our documentation with more details about this error code
+     */
+    docs: string;
+    /**
+     * A human readable explanation of what went wrong
+     */
+    message: string;
+    /**
+     * Please always include the requestId in your error report
+     */
+    requestId: string;
+  };
+}
+```
+
+</TypeScriptResponse>
+
+</ResponseTypes>
+
+</Response>
+
+<Response value={"401"}>
+
+<ResponseTypes>
+
+<ExampleResponse>
+
+```json
+{
+  "error": {
+    "code": "UNAUTHORIZED",
+    "docs": "https://unkey.dev/docs/api-reference/errors/code/UNAUTHORIZED",
+    "message": "string",
+    "requestId": "req_1234"
+  }
+}
+```
+
+</ExampleResponse>
+
+<TypeScriptResponse>
+
+```ts
+export interface Response {
+  error: {
+    /**
+     * A machine readable error code.
+     */
+    code: "UNAUTHORIZED";
+    /**
+     * A link to our documentation with more details about this error code
+     */
+    docs: string;
+    /**
+     * A human readable explanation of what went wrong
+     */
+    message: string;
+    /**
+     * Please always include the requestId in your error report
+     */
+    requestId: string;
+  };
+}
+```
+
+</TypeScriptResponse>
+
+</ResponseTypes>
+
+</Response>
+
+<Response value={"403"}>
+
+<ResponseTypes>
+
+<ExampleResponse>
+
+```json
+{
+  "error": {
+    "code": "FORBIDDEN",
+    "docs": "https://unkey.dev/docs/api-reference/errors/code/FORBIDDEN",
+    "message": "string",
+    "requestId": "req_1234"
+  }
+}
+```
+
+</ExampleResponse>
+
+<TypeScriptResponse>
+
+```ts
+export interface Response {
+  error: {
+    /**
+     * A machine readable error code.
+     */
+    code: "FORBIDDEN";
+    /**
+     * A link to our documentation with more details about this error code
+     */
+    docs: string;
+    /**
+     * A human readable explanation of what went wrong
+     */
+    message: string;
+    /**
+     * Please always include the requestId in your error report
+     */
+    requestId: string;
+  };
+}
+```
+
+</TypeScriptResponse>
+
+</ResponseTypes>
+
+</Response>
+
+<Response value={"404"}>
+
+<ResponseTypes>
+
+<ExampleResponse>
+
+```json
+{
+  "error": {
+    "code": "NOT_FOUND",
+    "docs": "https://unkey.dev/docs/api-reference/errors/code/NOT_FOUND",
+    "message": "string",
+    "requestId": "req_1234"
+  }
+}
+```
+
+</ExampleResponse>
+
+<TypeScriptResponse>
+
+```ts
+export interface Response {
+  error: {
+    /**
+     * A machine readable error code.
+     */
+    code: "NOT_FOUND";
+    /**
+     * A link to our documentation with more details about this error code
+     */
+    docs: string;
+    /**
+     * A human readable explanation of what went wrong
+     */
+    message: string;
+    /**
+     * Please always include the requestId in your error report
+     */
+    requestId: string;
+  };
+}
+```
+
+</TypeScriptResponse>
+
+</ResponseTypes>
+
+</Response>
+
+<Response value={"409"}>
+
+<ResponseTypes>
+
+<ExampleResponse>
+
+```json
+{
+  "error": {
+    "code": "CONFLICT",
+    "docs": "https://unkey.dev/docs/api-reference/errors/code/CONFLICT",
+    "message": "string",
+    "requestId": "req_1234"
+  }
+}
+```
+
+</ExampleResponse>
+
+<TypeScriptResponse>
+
+```ts
+export interface Response {
+  error: {
+    /**
+     * A machine readable error code.
+     */
+    code: "CONFLICT";
+    /**
+     * A link to our documentation with more details about this error code
+     */
+    docs: string;
+    /**
+     * A human readable explanation of what went wrong
+     */
+    message: string;
+    /**
+     * Please always include the requestId in your error report
+     */
+    requestId: string;
+  };
+}
+```
+
+</TypeScriptResponse>
+
+</ResponseTypes>
+
+</Response>
+
+<Response value={"429"}>
+
+<ResponseTypes>
+
+<ExampleResponse>
+
+```json
+{
+  "error": {
+    "code": "TOO_MANY_REQUESTS",
+    "docs": "https://unkey.dev/docs/api-reference/errors/code/TOO_MANY_REQUESTS",
+    "message": "string",
+    "requestId": "req_1234"
+  }
+}
+```
+
+</ExampleResponse>
+
+<TypeScriptResponse>
+
+```ts
+export interface Response {
+  error: {
+    /**
+     * A machine readable error code.
+     */
+    code: "TOO_MANY_REQUESTS";
+    /**
+     * A link to our documentation with more details about this error code
+     */
+    docs: string;
+    /**
+     * A human readable explanation of what went wrong
+     */
+    message: string;
+    /**
+     * Please always include the requestId in your error report
+     */
+    requestId: string;
+  };
+}
+```
+
+</TypeScriptResponse>
+
+</ResponseTypes>
+
+</Response>
+
+<Response value={"500"}>
+
+<ResponseTypes>
+
+<ExampleResponse>
+
+```json
+{
+  "error": {
+    "code": "INTERNAL_SERVER_ERROR",
+    "docs": "https://unkey.dev/docs/api-reference/errors/code/INTERNAL_SERVER_ERROR",
+    "message": "string",
+    "requestId": "req_1234"
+  }
+}
+```
+
+</ExampleResponse>
+
+<TypeScriptResponse>
+
+```ts
+export interface Response {
+  error: {
+    /**
+     * A machine readable error code.
+     */
+    code: "INTERNAL_SERVER_ERROR";
+    /**
+     * A link to our documentation with more details about this error code
+     */
+    docs: string;
+    /**
+     * A human readable explanation of what went wrong
+     */
+    message: string;
+    /**
+     * Please always include the requestId in your error report
+     */
+    requestId: string;
+  };
+}
+```
+
+</TypeScriptResponse>
+
+</ResponseTypes>
+
+</Response>
+
+</Responses>
+
+</APIExample>
+
+</API>
+
+<API>
+
 <APIInfo method={"GET"} route={"/v1/apis.listKeys"}>
 
-## listKeys
+## List Keys
 
 ### Authorization
 
@@ -489,9 +952,9 @@ In: `header`
 
 The id of the api to fetch
 
-<span>Example:  `"api_1234"`</span>
+<span>Example: `"api_1234"`</span>
 
-<span>Minimum length:  `1`</span>
+<span>Minimum length: `1`</span>
 
 </Property>
 
@@ -499,13 +962,13 @@ The id of the api to fetch
 
 The maximum number of keys to return
 
-<span>Example:  `100`</span>
+<span>Example: `100`</span>
 
-<span>Default:  `100`</span>
+<span>Default: `100`</span>
 
-<span>Minimum:  `1`</span>
+<span>Minimum: `1`</span>
 
-<span>Maximum:  `100`</span>
+<span>Maximum: `100`</span>
 
 </Property>
 
@@ -519,13 +982,7 @@ Use this to fetch the next page of results. A new cursor will be returned in the
 
 If provided, this will only return keys where the `ownerId` matches.
 
-<span>Minimum length:  `1`</span>
-
-</Property>
-
-<Property name={"decrypt"} type={"boolean | null"} required={false} deprecated={false}>
-
-Decrypt and display the raw key. Only possible if the key was encrypted when generated.
+<span>Minimum length: `1`</span>
 
 </Property>
 
@@ -540,6 +997,10 @@ Decrypt and display the raw key. Only possible if the key was encrypted when gen
 | `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
 | `500` | The server has encountered a situation it does not know how to handle. |
 
+<APIPlayground authorization={{"type":"string","name":"Authorization","defaultValue":"Bearer","isRequired":true,"description":"The Authorization access token"}} method={"GET"} route={"/v1/apis.listKeys"} path={[]} query={[{"name":"apiId","type":"string","defaultValue":"api_1234","isRequired":true,"description":"The id of the api to fetch"},{"name":"limit","type":"number","defaultValue":100,"isRequired":false,"description":"The maximum number of keys to return"},{"name":"cursor","type":"string","defaultValue":"","isRequired":false,"description":"Use this to fetch the next page of results. A new cursor will be returned in the response if there are more results."},{"name":"ownerId","type":"string","defaultValue":"","isRequired":false,"description":"If provided, this will only return keys where the `ownerId` matches."}]} header={[]} body={undefined} schemas={{}}>
+
+</APIPlayground>
+
 </APIInfo>
 
 <APIExample>
@@ -549,7 +1010,7 @@ Decrypt and display the raw key. Only possible if the key was encrypted when gen
 <Request value={"cURL"}>
 
 ```bash
-curl -X GET "https://api.unkey.dev/v1/apis.listKeys?apiId=api_1234&limit=100&cursor=string&ownerId=string&decrypt=true"
+curl -X GET "https://api.unkey.dev/v1/apis.listKeys?apiId=api_1234&limit=100&cursor=string&ownerId=string"
 ```
 
 </Request>
@@ -557,7 +1018,7 @@ curl -X GET "https://api.unkey.dev/v1/apis.listKeys?apiId=api_1234&limit=100&cur
 <Request value={"JavaScript"}>
 
 ```js
-fetch("https://api.unkey.dev/v1/apis.listKeys?apiId=api_1234&limit=100&cursor=string&ownerId=string&decrypt=true", {
+fetch("https://api.unkey.dev/v1/apis.listKeys?apiId=api_1234&limit=100&cursor=string&ownerId=string", {
   method: "GET"
 });
 ```
@@ -592,7 +1053,6 @@ fetch("https://api.unkey.dev/v1/apis.listKeys?apiId=api_1234&limit=100&cursor=st
         "stripeCustomerId": "cus_1234"
       },
       "createdAt": 0,
-      "updatedAt": 0,
       "deletedAt": 0,
       "expires": 0,
       "remaining": 1000,
@@ -601,20 +1061,16 @@ fetch("https://api.unkey.dev/v1/apis.listKeys?apiId=api_1234&limit=100&cursor=st
         "amount": 10
       },
       "ratelimit": {
-        "async": true,
+        "type": "fast",
         "limit": 10,
-        "duration": 60
+        "refillRate": 1,
+        "refillInterval": 60
       },
       "roles": [
         "admin",
         "finance"
       ],
-      "permissions": [
-        "domain.dns.create_record",
-        "finance.read_receipt"
-      ],
-      "enabled": true,
-      "plaintext": "string"
+      "enabled": true
     }
   ],
   "cursor": "eyJrZXkiOiJrZXlfMTIzNCJ9",
@@ -664,11 +1120,7 @@ export interface Response {
     /**
      * The unix timestamp in milliseconds when the key was created
      */
-    createdAt: number;
-    /**
-     * The unix timestamp in milliseconds when the key was last updated
-     */
-    updatedAt?: number;
+    createdAt?: number;
     /**
      * The unix timestamp in milliseconds when the key was deleted. We don't delete the key outright, you can restore it later.
      */
@@ -702,11 +1154,10 @@ export interface Response {
      * Unkey comes with per-key ratelimiting out of the box.
      */
     ratelimit?: {
-      async: boolean;
       /**
        * Fast ratelimiting doesn't add latency, while consistent ratelimiting is more accurate.
        */
-      type?: "fast" | "consistent";
+      type: "fast" | "consistent";
       /**
        * The total amount of burstable requests.
        */
@@ -714,32 +1165,20 @@ export interface Response {
       /**
        * How many tokens to refill during each refillInterval.
        */
-      refillRate?: number;
+      refillRate: number;
       /**
        * Determines the speed at which tokens are refilled, in milliseconds.
        */
-      refillInterval?: number;
-      /**
-       * The duration of the ratelimit window, in milliseconds.
-       */
-      duration: number;
+      refillInterval: number;
     };
     /**
      * All roles this key belongs to
      */
     roles?: string[];
     /**
-     * All permissions this key has
-     */
-    permissions?: string[];
-    /**
      * Sets if key is enabled or disabled. Disabled keys are not valid.
      */
     enabled?: boolean;
-    /**
-     * The key in plaintext
-     */
-    plaintext?: string;
   }[];
   /**
    * The cursor to use for the next page of results, if no cursor is returned, there are no more results
@@ -1116,9 +1555,9 @@ export interface Response {
 
 <API>
 
-<APIInfo method={"POST"} route={"/v1/apis.deleteKeys"}>
+<APIInfo method={"POST"} route={"/v1/apis.deleteApi"}>
 
-## deleteKeys
+## Delete Api
 
 ### Authorization
 
@@ -1132,25 +1571,17 @@ In: `header`
 
 <Property name={"apiId"} type={"string"} required={true} deprecated={undefined}>
 
-The id of the api, that the keys belong to.
+The id of the api to delete
 
-<span>Example:  `"api_1234"`</span>
+<span>Example: `"api_1234"`</span>
 
-<span>Minimum length:  `1`</span>
-
-</Property>
-
-<Property name={"permanent"} type={"boolean"} required={false} deprecated={undefined}>
-
-If true, the keys will be permanently deleted. If false, the keys will be soft-deleted and can be restored later. 
-
-<span>Default:  `false`</span>
+<span>Minimum length: `1`</span>
 
 </Property>
 
 | Status code | Description |
 | ----------- | ----------- |
-| `200` | The keys have been deleted |
+| `200` | The api was successfully deleted, it may take up to 30s for this to take effect in all regions |
 | `400` | The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). |
 | `401` | Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. |
 | `403` | The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. |
@@ -1158,6 +1589,10 @@ If true, the keys will be permanently deleted. If false, the keys will be soft-d
 | `409` | This response is sent when a request conflicts with the current state of the server. |
 | `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
 | `500` | The server has encountered a situation it does not know how to handle. |
+
+<APIPlayground authorization={{"type":"string","name":"Authorization","defaultValue":"Bearer","isRequired":true,"description":"The Authorization access token"}} method={"POST"} route={"/v1/apis.deleteApi"} path={[]} query={[]} header={[]} body={{"type":"object","isRequired":true,"properties":{"apiId":{"type":"ref","isRequired":true,"schema":"0"}}}} schemas={{"0":{"type":"string","defaultValue":"api_1234","isRequired":false,"description":"The id of the api to delete"}}}>
+
+</APIPlayground>
 
 </APIInfo>
 
@@ -1168,10 +1603,9 @@ If true, the keys will be permanently deleted. If false, the keys will be soft-d
 <Request value={"cURL"}>
 
 ```bash
-curl -X POST "https://api.unkey.dev/v1/apis.deleteKeys" \
+curl -X POST "https://api.unkey.dev/v1/apis.deleteApi" \
   -d '{
-  "apiId": "api_1234",
-  "permanent": false
+  "apiId": "api_1234"
 }'
 ```
 
@@ -1180,7 +1614,7 @@ curl -X POST "https://api.unkey.dev/v1/apis.deleteKeys" \
 <Request value={"JavaScript"}>
 
 ```js
-fetch("https://api.unkey.dev/v1/apis.deleteKeys", {
+fetch("https://api.unkey.dev/v1/apis.deleteApi", {
   method: "POST"
 });
 ```
@@ -1198,9 +1632,7 @@ fetch("https://api.unkey.dev/v1/apis.deleteKeys", {
 <ExampleResponse>
 
 ```json
-{
-  "deletedKeys": 0
-}
+{}
 ```
 
 </ExampleResponse>
@@ -1208,12 +1640,7 @@ fetch("https://api.unkey.dev/v1/apis.deleteKeys", {
 <TypeScriptResponse>
 
 ```ts
-export interface Response {
-  /**
-   * The number of keys that were deleted
-   */
-  deletedKeys: number;
-}
+export interface Response {}
 ```
 
 </TypeScriptResponse>

@@ -36,6 +36,8 @@ export interface FileProps extends HTMLAttributes<HTMLDivElement> {
 export interface FolderProps extends HTMLAttributes<HTMLDivElement> {
   name: string;
 
+  disabled?: boolean;
+
   /**
    * Open folder by default
    *

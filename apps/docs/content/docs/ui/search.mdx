@@ -14,32 +14,9 @@ Open with <kbd>⌘</kbd> <kbd>K</kbd> or <kbd>Ctrl</kbd> <kbd>K</kbd>.
 
 You can customize the search dialog from [Root Provider](/docs/ui/blocks/root-provider).
 
-```tsx
-'use client';
-
-import { RootProvider } from 'fumadocs-ui/provider';
-import dynamic from 'next/dynamic';
-
-const SearchDialog = dynamic(() => import('@/components/search'));
-
-export function Provider({ children }: { children: React.ReactNode }) {
-  return (
-    <RootProvider
-      search={{
-        SearchDialog,
-      }}
-    >
-      {children}
-    </RootProvider>
-  );
-}
-```
-
-The default dialog will be lazy loaded using
-[`next/dynamic`](https://nextjs.org/docs/app/building-your-application/optimizing/lazy-loading).
-This allows a better initial loading performance.
-
 When not specified, it uses the [Default Search Client](/docs/headless/search/flexsearch) powered by Flexsearch.
+It is lazy loaded using [`next/dynamic`](https://nextjs.org/docs/app/building-your-application/optimizing/lazy-loading).
+This allows a better initial loading performance.
 
 ### Custom Links
 
@@ -65,21 +42,25 @@ import { RootProvider } from 'fumadocs-ui/root-provider';
 
 To opt-out of document search, disable it from root provider.
 
-```mdx
+```tsx
+import { RootProvider } from 'fumadocs-ui/root-provider';
+
 <RootProvider
   search={{
     enabled: false,
   }}
 >
-  {children}
-</RootProvider>
+  ...
+</RootProvider>;
 ```
 
 ### Hot Keys
 
-You can customise the hot keys to trigger search dialog.
+Customise the hot keys to trigger search dialog.
 
-```mdx
+```tsx
+import { RootProvider } from 'fumadocs-ui/root-provider';
+
 <RootProvider
   search={{
     hotKey: [
@@ -90,8 +71,32 @@ You can customise the hot keys to trigger search dialog.
     ],
   }}
 >
-  {children}
-</RootProvider>
+  ...
+</RootProvider>;
+```
+
+### Tag Filter
+
+Configure tag filtering on the default search client.
+
+```tsx
+import { RootProvider } from 'fumadocs-ui/root-provider';
+
+<RootProvider
+  search={{
+    options: {
+      defaultTag: 'value',
+      tags: [
+        {
+          name: 'Tag Name',
+          value: 'value',
+        },
+      ],
+    },
+  }}
+>
+  ...
+</RootProvider>;
 ```
 
 ## Algolia
@@ -101,9 +106,10 @@ For the setup guide, see [Integrate Algolia Search](/docs/headless/search/algoli
 While generally we recommend building your own search with their client-side
 SDK, you can also plug the built-in dialog interface.
 
-First, create a separate client component for the dialog.
+Create a separate client component for the dialog.
 
-```tsx title="Client Component"
+```tsx title="components/search.tsx"
+'use client';
 import algo from 'algoliasearch/lite';
 import type { SharedProps } from 'fumadocs-ui/components/dialog/search';
 import SearchDialog from 'fumadocs-ui/components/dialog/search-algolia';
@@ -118,9 +124,12 @@ export default function CustomSearchDialog(props: SharedProps) {
 
 Replace `appId`, `apiKey` and `indexName` with your desired values.
 
-Then, lazy load the dialog with `next/dynamic`.
+Create a new provider component and use it instead of the original Root Provider in the root layout.
 
-```tsx title="Provider (Client Component)"
+Inside the new provider, lazy load the dialog and pass it to Root Provider.
+
+```tsx title="app/provider.tsx"
+'use client';
 import { RootProvider } from 'fumadocs-ui/provider';
 import dynamic from 'next/dynamic';
 import type { ReactNode } from 'react';
@@ -140,8 +149,6 @@ export function Provider({ children }: { children: ReactNode }) {
 }
 ```
 
-Finally, wrap your entire application under the new `Provider`.
-
 <Callout title="Note" className='mt-4'>
 
 The built-in implementation doesn't use instant search (their official
@@ -149,10 +156,51 @@ javascript client).
 
 </Callout>
 
+### Tag Filter
+
+Same as the default search client, you can configure tag filtering with the `tags` prop.
+
+```tsx title="components/search.tsx"
+import SearchDialog from 'fumadocs-ui/components/dialog/search-algolia';
+
+<SearchDialog
+  defaultTag="value"
+  tags={[
+    {
+      name: 'Tag Name',
+      value: 'value',
+    },
+  ]}
+/>;
+```
+
 ## Other Solutions
 
 To use other search solutions such as ElasticSearch, you can replace the
 default dialog with your own.
+
+Since you cannot pass a function to client components, wrap the provider in another client component, and use the new provider in your root layout instead.
+
+```tsx
+'use client';
+
+import { RootProvider } from 'fumadocs-ui/provider';
+import dynamic from 'next/dynamic';
+
+const SearchDialog = dynamic(() => import('@/components/search'));
+
+export function Provider({ children }: { children: React.ReactNode }) {
+  return (
+    <RootProvider
+      search={{
+        SearchDialog,
+      }}
+    >
+      {children}
+    </RootProvider>
+  );
+}
+```
 
 ## Built-in UI
 

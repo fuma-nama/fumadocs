@@ -1,3 +1,4 @@
+'use client';
 import { type PointerEventHandler, useCallback, useRef, useState } from 'react';
 import { SidebarIcon } from 'lucide-react';
 import { Sidebar, type SidebarProps } from '@/components/layout/sidebar';

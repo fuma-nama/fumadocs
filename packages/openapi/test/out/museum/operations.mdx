@@ -4,9 +4,9 @@ description: Operational information about the museum.
 full: true
 ---
 
-import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible, Requests, Request } from "fumadocs-ui/components/api";
+import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible, Requests, Request, APIPlayground } from "fumadocs-openapi/ui";
 
-<Root>
+<Root baseUrl={"https://api.fake-museum-example.com/v1"}>
 
 <API>
 
@@ -30,9 +30,9 @@ In: `header`
 
 The starting date to retrieve future operating hours from. Defaults to today's date.
 
-<span>Example:  `"2023-02-23"`</span>
+<span>Example: `"2023-02-23"`</span>
 
-<span>Format:  `"date"`</span>
+<span>Format: `"date"`</span>
 
 </Property>
 
@@ -40,9 +40,9 @@ The starting date to retrieve future operating hours from. Defaults to today's d
 
 The page number to retrieve.
 
-<span>Example:  `2`</span>
+<span>Example: `2`</span>
 
-<span>Default:  `1`</span>
+<span>Default: `1`</span>
 
 </Property>
 
@@ -50,11 +50,11 @@ The page number to retrieve.
 
 The number of days per page.
 
-<span>Example:  `15`</span>
+<span>Example: `15`</span>
 
-<span>Default:  `10`</span>
+<span>Default: `10`</span>
 
-<span>Maximum:  `30`</span>
+<span>Maximum: `30`</span>
 
 </Property>
 
@@ -63,6 +63,10 @@ The number of days per page.
 | `200` | Success |
 | `400` | Bad request |
 | `404` | Not found |
+
+<APIPlayground authorization={{"type":"string","name":"Authorization","defaultValue":"Basic","isRequired":true,"description":"The Authorization access token"}} method={"GET"} route={"/museum-hours"} path={[]} query={[{"name":"startDate","type":"string","defaultValue":"2023-02-23","isRequired":false},{"name":"page","type":"number","defaultValue":2,"isRequired":false},{"name":"limit","type":"number","defaultValue":15,"isRequired":false}]} header={[]} body={undefined} schemas={{}}>
+
+</APIPlayground>
 
 </APIInfo>
 

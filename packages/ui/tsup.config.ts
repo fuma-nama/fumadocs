@@ -24,7 +24,12 @@ const exportedComponents = [
   'layout/language-toggle',
 ];
 
-const injectImports = ['./src/page.tsx', './src/mdx.tsx', './src/layout.tsx'];
+const injectImports = [
+  './src/page.tsx',
+  './src/mdx.tsx',
+  './src/layout.tsx',
+  './src/home-layout.tsx',
+];
 
 function getOutPath(src: string): string {
   const replacedPath = src
@@ -61,7 +66,7 @@ export default defineConfig([
   {
     entry: [
       `./src/components/{${exportedComponents.join(',')}}.tsx`,
-      './src/{i18n,layout,page,provider,mdx,tailwind-plugin}.{ts,tsx}',
+      './src/{i18n,home-layout,layout,page,provider,mdx,tailwind-plugin}.{ts,tsx}',
       './src/twoslash/popup.tsx',
       './src/*.client.tsx',
     ],
@@ -73,7 +78,7 @@ export default defineConfig([
     },
     format: 'esm',
     dts: true,
-    target: 'es2022',
+    target: 'esnext',
   },
   {
     // todo: Remove support for CommonJS in next major

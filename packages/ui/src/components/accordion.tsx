@@ -21,20 +21,16 @@ export const Accordions = forwardRef<
   | Omit<AccordionSingleProps, 'value' | 'onValueChange'>
   | Omit<AccordionMultipleProps, 'value' | 'onValueChange'>
 >(({ type = 'single', className, defaultValue, ...props }, ref) => {
-  const [value, setValue] = useState(
-    type === 'single' ? defaultValue ?? '' : defaultValue ?? [],
+  const [value, setValue] = useState<string | string[]>(
+    type === 'single' ? (defaultValue ?? '') : (defaultValue ?? []),
   );
 
   useEffect(() => {
     const id = window.location.hash.substring(1);
 
     if (id.length > 0)
-      setValue((prev) => {
-        return type === 'single'
-          ? id
-          : [id, ...(Array.isArray(prev) ? prev : [])];
-      });
-  }, [type]);
+      setValue((prev) => (typeof prev === 'string' ? id : [id, ...prev]));
+  }, []);
 
   return (
     // @ts-expect-error -- Multiple types
@@ -43,7 +39,7 @@ export const Accordions = forwardRef<
       ref={ref}
       value={value}
       onValueChange={setValue}
-      collapsible
+      collapsible={type === 'single' ? true : undefined}
       className={cn(
         'divide-y divide-border overflow-hidden rounded-lg border bg-card',
         className,

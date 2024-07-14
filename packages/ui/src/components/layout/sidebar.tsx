@@ -7,7 +7,6 @@ import {
   type HTMLAttributes,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
 } from 'react';
@@ -18,9 +17,9 @@ import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
 import { hasActive, isActive } from '@/utils/shared';
 import { LinkItem, type LinkItemType } from '@/components/layout/link-item';
 import { LargeSearchToggle } from '@/components/layout/search-toggle';
-import { useSidebar } from '@/contexts/sidebar';
 import { useSearchContext } from '@/contexts/search';
 import { itemVariants } from '@/theme/variants';
+import { useOnChange } from '@/utils/use-on-change';
 import {
   Collapsible,
   CollapsibleContent,
@@ -199,7 +198,6 @@ function PageNode({
   item: PageTree.Item;
 }): React.ReactElement {
   const pathname = usePathname();
-  const { closeOnRedirect } = useSidebar();
   const active = isActive(url, pathname, false);
 
   return (
@@ -207,9 +205,6 @@ function PageNode({
       href={url}
       external={external}
       className={cn(itemVariants({ active }))}
-      onClick={useCallback(() => {
-        closeOnRedirect.current = !active;
-      }, [closeOnRedirect, active])}
     >
       {icon ?? (external ? <ExternalLinkIcon /> : null)}
       {name}
@@ -225,9 +220,7 @@ function FolderNode({
   level: number;
 }): React.ReactElement {
   const { defaultOpenLevel } = useContext(Context);
-  const { closeOnRedirect } = useSidebar();
   const pathname = usePathname();
-
   const active = index !== undefined && isActive(index.url, pathname, false);
   const childActive = useMemo(
     () => hasActive(children, pathname),
@@ -236,22 +229,24 @@ function FolderNode({
 
   const shouldExtend =
     active || childActive || defaultOpenLevel >= level || defaultOpen;
-  const [extend, setExtend] = useState(shouldExtend);
+  const [open, setOpen] = useState(shouldExtend);
 
-  useEffect(() => {
-    if (shouldExtend) setExtend(true);
-  }, [shouldExtend]);
+  useOnChange(shouldExtend, (v) => {
+    if (v) setOpen(v);
+  });
 
   const onClick: React.MouseEventHandler = useCallback(
     (e) => {
-      if (e.target !== e.currentTarget || active) {
-        setExtend((prev) => !prev);
+      if (
+        // clicking on icon
+        (e.target as HTMLElement).hasAttribute('data-icon') ||
+        active
+      ) {
+        setOpen((prev) => !prev);
         e.preventDefault();
-      } else {
-        closeOnRedirect.current = !active;
       }
     },
-    [closeOnRedirect, active],
+    [active],
   );
 
   const content = (
@@ -259,13 +254,14 @@ function FolderNode({
       {icon}
       {name}
       <ChevronDown
-        className={cn('ms-auto transition-transform', !extend && '-rotate-90')}
+        data-icon
+        className={cn('ms-auto transition-transform', !open && '-rotate-90')}
       />
     </>
   );
 
   return (
-    <Collapsible open={extend} onOpenChange={setExtend}>
+    <Collapsible open={open} onOpenChange={setOpen}>
       {index ? (
         <Link
           className={cn(itemVariants({ active }))}

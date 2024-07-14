@@ -1,3 +1,4 @@
+import type { APIPlaygroundProps } from '@/render/playground';
 import { codeblock, createElement } from './element';
 
 export interface ResponsesProps {
@@ -30,8 +31,12 @@ export interface RequestProps {
   code: string;
 }
 
+export interface RootProps {
+  baseUrl?: string;
+}
+
 export interface Renderer {
-  Root: (child: string[]) => string;
+  Root: (props: RootProps, child: string[]) => string;
   API: (child: string[]) => string;
   APIInfo: (props: APIInfoProps, child: string[]) => string;
   APIExample: (child: string[]) => string;
@@ -51,10 +56,18 @@ export interface Renderer {
    */
   ObjectCollapsible: (props: ObjectCollapsibleProps, child: string[]) => string;
   Property: (props: PropertyProps, child: string[]) => string;
+  APIPlayground: (props: APIPlaygroundProps) => string;
 }
 
+export type {
+  APIPlaygroundProps,
+  RequestSchema,
+  PrimitiveRequestField,
+  ReferenceSchema,
+} from '@/render/playground';
+
 export const defaultRenderer: Renderer = {
-  Root: (child) => createElement('Root', {}, ...child),
+  Root: (props, child) => createElement('Root', props, ...child),
   API: (child) => createElement('API', {}, ...child),
   APIInfo: (props, child) => createElement('APIInfo', props, ...child),
   APIExample: (child) => createElement('APIExample', {}, ...child),
@@ -76,4 +89,5 @@ export const defaultRenderer: Renderer = {
   Requests: (items, child) => createElement('Requests', { items }, ...child),
   Request: ({ language, code, name }) =>
     createElement('Request', { value: name }, codeblock({ language }, code)),
+  APIPlayground: (props) => createElement('APIPlayground', props),
 };
