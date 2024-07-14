@@ -1,5 +1,19 @@
 # next-docs-ui
 
+## 12.5.0
+
+### Minor Changes
+
+- b9fa99d: Support tag filters in search dialog
+- a4bcaa7: Rename `Layout` in `fumadocs-ui/layout` to `HomeLayout` in `fumadocs-ui/home-layout`
+
+### Patch Changes
+
+- d1c7405: Optimize performance
+- Updated dependencies [b9fa99d]
+- Updated dependencies [525925b]
+  - fumadocs-core@12.5.0
+
 ## 12.4.2
 
 ### Patch Changes
