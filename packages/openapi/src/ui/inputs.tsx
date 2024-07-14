@@ -5,7 +5,7 @@ import {
   useState,
 } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
-import { useFieldArray, useForm, useFormContext } from 'react-hook-form';
+import { useFieldArray, useFormContext } from 'react-hook-form';
 import { cn, buttonVariants, useOnChange } from 'fumadocs-ui/components/api';
 import {
   Select,
@@ -160,7 +160,7 @@ function AdditionalProperties({
       setNextName('');
       return [...p, name];
     });
-  }, [nextName]);
+  }, [nextName, setValue, fieldName]);
 
   const types =
     typeof type === 'string'

@@ -22,7 +22,7 @@ export const Accordions = forwardRef<
   | Omit<AccordionMultipleProps, 'value' | 'onValueChange'>
 >(({ type = 'single', className, defaultValue, ...props }, ref) => {
   const [value, setValue] = useState<string | string[]>(
-    type === 'single' ? defaultValue ?? '' : defaultValue ?? [],
+    type === 'single' ? (defaultValue ?? '') : (defaultValue ?? []),
   );
 
   useEffect(() => {
