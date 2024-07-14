@@ -20,7 +20,7 @@ export function SearchToggle(
           className: props.className,
         }),
       )}
-      data-search-toggle
+      data-search
       aria-label="Open Search"
       onClick={useCallback(() => {
         setOpenSearch(true);
@@ -40,7 +40,7 @@ export function LargeSearchToggle(
   return (
     <button
       type="button"
-      data-search-toggle
+      data-search-full
       {...props}
       className={cn(
         'inline-flex items-center gap-2 rounded-full border bg-secondary/50 p-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground',
