@@ -28,9 +28,9 @@ export interface ReferenceSchema extends BaseSchema {
 interface ArraySchema extends BaseSchema {
   type: 'array';
   /**
-   * Reference to item schema
+   * Reference to item schema or the schema
    */
-  items: string;
+  items: string | RequestSchema;
 }
 
 interface ObjectSchema extends BaseSchema {
@@ -45,7 +45,7 @@ interface ObjectSchema extends BaseSchema {
 
 interface SwitcherSchema extends BaseSchema {
   type: 'switcher';
-  items: Record<string, ReferenceSchema>;
+  items: Record<string, ReferenceSchema | RequestSchema>;
 }
 
 interface NullSchema extends BaseSchema {

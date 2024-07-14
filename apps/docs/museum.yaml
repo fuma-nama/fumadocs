@@ -366,6 +366,9 @@ components:
           $ref: '#/components/schemas/EventDates'
         price:
           $ref: '#/components/schemas/EventPrice'
+        meta:
+          type: 'object'
+          additionalProperties: true
       required:
         - name
         - location

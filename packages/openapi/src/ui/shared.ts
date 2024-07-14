@@ -44,19 +44,23 @@ export type References = Record<string, RequestSchema>;
 
 export function getDefaultValue(
   item: RequestSchema,
-  context: References,
+  references: References,
 ): unknown {
   if (item.type === 'object')
     return Object.fromEntries(
       Object.entries(item.properties).map(([key, prop]) => [
         key,
-        getDefaultValue(context[prop.schema], context),
+        getDefaultValue(references[prop.schema], references),
       ]),
     );
 
   if (item.type === 'array') return [];
   if (item.type === 'null') return null;
-  if (item.type === 'switcher') return 0;
+  if (item.type === 'switcher')
+    return getDefaultValue(
+      resolve(Object.values(item.items)[0], references),
+      references,
+    );
 
   return String(item.defaultValue);
 }
@@ -74,13 +78,14 @@ export function getDefaultValues(
  * Resolve reference
  */
 export function resolve(
-  schema: RequestSchema | ReferenceSchema,
-  context: References,
+  schema: RequestSchema | ReferenceSchema | string,
+  references: References,
 ): RequestSchema {
+  if (typeof schema === 'string') return references[schema];
   if (schema.type !== 'ref') return schema;
 
   return {
-    ...context[schema.schema],
+    ...references[schema.schema],
     description: schema.description,
     isRequired: schema.isRequired,
   };

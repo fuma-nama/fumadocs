@@ -2,12 +2,11 @@ import {
   type HTMLAttributes,
   type ReactNode,
   useCallback,
-  useEffect,
   useState,
 } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
-import { cn, buttonVariants } from 'fumadocs-ui/components/api';
+import { cn, buttonVariants, useOnChange } from 'fumadocs-ui/components/api';
 import {
   Select,
   SelectContent,
@@ -43,7 +42,8 @@ function renderInner({ field, ...props }: RenderOptions): React.ReactNode {
         className={cn('rounded-lg border p-3', props.className)}
       />
     );
-  if (field.type === 'switcher') return <Switcher field={field} {...props} />;
+  if (field.type === 'switcher')
+    return <Switcher inline field={field} {...props} />;
   if (field.type === 'array')
     return (
       <ArrayInput
@@ -57,34 +57,42 @@ function renderInner({ field, ...props }: RenderOptions): React.ReactNode {
   return <NormalInput field={field} {...props} />;
 }
 
-interface InputProps<Type> extends HTMLAttributes<HTMLDivElement> {
+interface InputProps<Type> {
   field: Extract<RequestSchema, { type: Type }>;
   fieldName: string;
 }
 
-function InputContainer(
-  props: {
-    name?: ReactNode;
-    required: boolean;
-    type?: string;
-    description?: string;
-  } & HTMLAttributes<HTMLDivElement>,
-): React.ReactElement {
+interface InputContainerProps extends HTMLAttributes<HTMLDivElement> {
+  name?: string;
+  required: boolean;
+  type?: string;
+  description?: string;
+
+  inline?: boolean;
+  toolbar?: ReactNode;
+}
+
+function InputContainer({
+  toolbar,
+  name,
+  required,
+  type,
+  description,
+  inline = false,
+  ...props
+}: InputContainerProps): React.ReactElement {
   return (
-    <div
-      {...props}
-      className={cn('relative flex flex-col gap-2', props.className)}
-    >
+    <div {...props} className={cn('flex flex-col gap-2', props.className)}>
       <div className={cn(labelVariants(), 'inline-flex items-center gap-1')}>
-        {props.name}
-        {props.required ? <span className="text-red-500">*</span> : null}
-        {props.type ? (
-          <code className="ms-auto text-xs text-muted-foreground">
-            {props.type}
-          </code>
+        {name}
+        {required ? <span className="text-red-500">*</span> : null}
+        <div className="flex-1" />
+        {type ? (
+          <code className="text-xs text-muted-foreground">{type}</code>
         ) : null}
+        {toolbar}
       </div>
-      <p className="text-xs">{props.description}</p>
+      {!inline ? <p className="text-xs">{description}</p> : null}
       {props.children}
     </div>
   );
@@ -94,7 +102,7 @@ export function ObjectInput({
   field,
   fieldName,
   ...props
-}: InputProps<'object'>): React.ReactElement {
+}: InputProps<'object'> & HTMLAttributes<HTMLDivElement>): React.ReactElement {
   const { references } = useSchemaContext();
 
   return (
@@ -127,15 +135,18 @@ function AdditionalProperties({
   const { references, dynamic } = useSchemaContext();
   const [nextName, setNextName] = useState('');
   const [properties, setProperties] = useState<string[]>(() => {
-    const d = dynamic.current.get(fieldName);
+    const d = dynamic.current.get(`additional_${fieldName}`);
     if (d?.type === 'object') return d.properties;
 
     return [];
   });
 
-  useEffect(() => {
-    dynamic.current.set(fieldName, { type: 'object', properties });
-  }, [dynamic, fieldName, properties]);
+  useOnChange(properties, () => {
+    dynamic.current.set(`additional_${fieldName}`, {
+      type: 'object',
+      properties,
+    });
+  });
 
   const onAppend = useCallback(() => {
     if (nextName.length === 0) return;
@@ -151,14 +162,32 @@ function AdditionalProperties({
   return (
     <>
       {properties.map((item) => (
-        <DynamicField
+        <Switcher
           key={item}
-          label={item}
-          types={types}
-          fieldName={`${fieldName}.${item}`}
-          onDelete={() => {
-            setProperties((p) => p.filter((prop) => prop !== item));
+          name={item}
+          field={{
+            type: 'switcher',
+            items: types ?? anyFields,
+            isRequired: false,
           }}
+          fieldName={`${fieldName}.${item}`}
+          toolbar={
+            <button
+              type="button"
+              aria-label="Remove Item"
+              className={cn(
+                buttonVariants({
+                  color: 'secondary',
+                  size: 'sm',
+                }),
+              )}
+              onClick={() => {
+                setProperties((p) => p.filter((prop) => prop !== item));
+              }}
+            >
+              <Trash2 className="size-4" />
+            </button>
+          }
         />
       ))}
       <div className="flex flex-row gap-1">
@@ -204,113 +233,45 @@ function resolveDynamicTypes(
   );
 }
 
-function DynamicField({
-  fieldName,
-  label,
-  types = {
-    string: {
-      type: 'string',
-      isRequired: false,
-      defaultValue: '',
-    },
-    boolean: {
-      type: 'boolean',
-      isRequired: false,
-      defaultValue: '',
-    },
-    number: {
-      type: 'number',
-      isRequired: false,
-      defaultValue: '',
-    },
-    object: {
-      type: 'object',
-      properties: {},
-      additionalProperties: true,
-      isRequired: false,
-    },
+const anyFields: Record<string, RequestSchema> = {
+  string: {
+    type: 'string',
+    isRequired: false,
+    defaultValue: '',
   },
-  className,
-  onDelete,
-}: {
-  fieldName: string;
-  label: string;
-  /**
-   * Available types, fallback to any
-   */
-  types?: Record<string, RequestSchema>;
-  className?: string;
-  onDelete: () => void;
-}): React.ReactElement {
-  const { dynamic } = useSchemaContext();
-  const typeNames = Object.keys(types);
-  const [value, setValue] = useState<string>(() => {
-    const d = dynamic.current.get(fieldName);
+  boolean: {
+    type: 'boolean',
+    isRequired: false,
+    defaultValue: '',
+  },
+  number: {
+    type: 'number',
+    isRequired: false,
+    defaultValue: '',
+  },
+  object: {
+    type: 'object',
+    properties: {},
+    additionalProperties: true,
+    isRequired: false,
+  },
+};
 
-    if (d?.type === 'field') {
-      return typeNames.find((name) => types[name] === d.schema) ?? typeNames[0];
-    }
-
-    return typeNames[0];
-  });
-
-  useEffect(() => {
-    if (!value) return;
-
-    dynamic.current.set(fieldName, {
-      type: 'field',
-      schema: types[value],
-    });
-  }, [value, fieldName, types, dynamic]);
-
-  return (
-    <InputContainer
-      name={
-        <>
-          {label}
-          <Select value={value} onValueChange={setValue}>
-            <SelectTrigger className="ms-auto h-auto gap-1 p-1 text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {typeNames.map((item) => (
-                <SelectItem key={item} value={item}>
-                  {item}
-                </SelectItem>
-              ))}
-            </SelectContent>
-            <button
-              type="button"
-              aria-label="Remove Item"
-              className={cn(
-                buttonVariants({
-                  color: 'secondary',
-                  size: 'sm',
-                }),
-              )}
-              onClick={onDelete}
-            >
-              <Trash2 className="size-4" />
-            </button>
-          </Select>
-        </>
-      }
-      className={className}
-      required={false}
-    >
-      {renderInner({
-        field: types[value],
-        fieldName,
-      })}
-    </InputContainer>
-  );
-}
+anyFields.array = {
+  type: 'array',
+  isRequired: false,
+  items: {
+    type: 'switcher',
+    isRequired: false,
+    items: anyFields,
+  },
+};
 
 function Switcher({
   field,
   fieldName,
-  className,
-}: InputProps<'switcher'>): React.ReactElement {
+  ...props
+}: InputProps<'switcher'> & Partial<InputContainerProps>): React.ReactElement {
   const { references, dynamic } = useSchemaContext();
   const items = Object.keys(field.items);
   const [value, setValue] = useState<string>(() => {
@@ -326,54 +287,61 @@ function Switcher({
     return items[0];
   });
 
-  useEffect(() => {
+  useOnChange(value, () => {
     if (!value) return;
 
     dynamic.current.set(fieldName, {
       type: 'field',
       schema: field.items[value],
     });
-  }, [value, fieldName, field, dynamic]);
+  });
 
   return (
-    <div className={className}>
-      <Select value={value} onValueChange={setValue}>
-        <SelectTrigger className="ms-auto h-auto p-1 text-xs">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {items.map((item) => (
-            <SelectItem key={item} value={item}>
-              {item}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+    <InputContainer
+      required={field.isRequired}
+      description={field.description}
+      {...props}
+      toolbar={
+        <>
+          <Select value={value} onValueChange={setValue}>
+            <SelectTrigger className="h-auto p-1 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {items.map((item) => (
+                <SelectItem key={item} value={item}>
+                  {item}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {props.toolbar}
+        </>
+      }
+    >
       {renderInner({
         field: resolve(field.items[value], references),
         fieldName,
       })}
-    </div>
+    </InputContainer>
   );
 }
 
 export function InputField({
   field,
-  name,
   fieldName,
   ...props
 }: {
-  name?: string;
   field: RequestSchema;
   fieldName: string;
-  className?: string;
-}): React.ReactNode {
+} & Partial<InputContainerProps>): React.ReactNode {
   const { references } = useSchemaContext();
+
+  if (field.type === 'null') return null;
 
   if (field.type === 'object') {
     return (
       <InputContainer
-        name={name}
         required={field.isRequired}
         type={field.type}
         description={field.description}
@@ -391,10 +359,11 @@ export function InputField({
   if (field.type === 'array') {
     return (
       <InputContainer
-        name={name}
         required={field.isRequired}
-        description={field.description ?? references[field.items].description}
-        type={`array<${references[field.items].type}>`}
+        description={
+          field.description ?? resolve(field.items, references).description
+        }
+        type="array"
         {...props}
       >
         <ArrayInput
@@ -407,19 +376,10 @@ export function InputField({
   }
 
   if (field.type === 'switcher') {
-    return (
-      <InputContainer
-        name={name}
-        description={field.description}
-        required={field.isRequired}
-        {...props}
-      >
-        <Switcher field={field} fieldName={fieldName} />
-      </InputContainer>
-    );
+    return <Switcher field={field} fieldName={fieldName} {...props} />;
   }
 
-  if (field.type === 'null') return null;
+  const { toolbar, inline = false, name, ...rest } = props;
 
   return (
     <NormalInput
@@ -427,19 +387,22 @@ export function InputField({
       fieldName={fieldName}
       header={
         <>
-          <FormLabel className="inline-flex gap-1">
+          <FormLabel className="inline-flex items-center gap-1">
             {name}
             {field.isRequired ? <span className="text-red-500">*</span> : null}
             <code className="ms-auto text-xs text-muted-foreground">
               {field.type}
             </code>
+            {toolbar}
           </FormLabel>
-          <FormDescription className="text-xs">
-            {field.description}
-          </FormDescription>
+          {!inline ? (
+            <FormDescription className="text-xs">
+              {field.description}
+            </FormDescription>
+          ) : null}
         </>
       }
-      {...props}
+      {...rest}
     />
   );
 }
@@ -511,12 +474,18 @@ function ArrayInput({
   fieldName,
   field,
   ...props
-}: InputProps<'array'>): React.ReactElement {
+}: {
+  fieldName: string;
+  field: {
+    description?: string;
+    items: RequestSchema | string;
+  };
+} & HTMLAttributes<HTMLDivElement>): React.ReactElement {
   const { references } = useSchemaContext();
+  const items = resolve(field.items, references);
   const { fields, append, remove } = useFieldArray({
     name: fieldName,
   });
-  const items = references[field.items];
 
   const handleAppend = useCallback(() => {
     append(getDefaultValue(items, references));
@@ -525,29 +494,31 @@ function ArrayInput({
   return (
     <div {...props} className={cn('flex flex-col gap-4', props.className)}>
       {fields.map((item, index) => (
-        <div key={item.id} className="relative">
-          {renderInner({
-            field: items,
-            fieldName: `${fieldName}.${String(index)}`,
-            className: 'flex-1',
-          })}
-          <button
-            type="button"
-            aria-label="Remove Item"
-            className={cn(
-              buttonVariants({
-                color: 'secondary',
-                size: 'sm',
-                className: 'absolute -top-2 -end-2',
-              }),
-            )}
-            onClick={() => {
-              remove(index);
-            }}
-          >
-            <Trash2 className="size-4" />
-          </button>
-        </div>
+        <InputField
+          key={item.id}
+          inline
+          name={`Item ${String(index + 1)}`}
+          field={items}
+          fieldName={`${fieldName}.${String(index)}`}
+          className="flex-1"
+          toolbar={
+            <button
+              type="button"
+              aria-label="Remove Item"
+              className={cn(
+                buttonVariants({
+                  color: 'secondary',
+                  size: 'sm',
+                }),
+              )}
+              onClick={() => {
+                remove(index);
+              }}
+            >
+              <Trash2 className="size-4" />
+            </button>
+          }
+        />
       ))}
       <button
         type="button"
