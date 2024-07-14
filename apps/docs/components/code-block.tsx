@@ -1,9 +1,9 @@
 import * as Base from 'fumadocs-ui/components/codeblock';
 import type { HTMLAttributes } from 'react';
 import { useMemo } from 'react';
-import { getHighlighter } from 'shiki';
+import { createHighlighter } from 'shiki';
 
-const highlighter = await getHighlighter({
+const highlighter = await createHighlighter({
   langs: ['bash', 'ts', 'tsx'],
   themes: ['github-light', 'github-dark'],
 });

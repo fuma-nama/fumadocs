@@ -1,7 +1,6 @@
 'use client';
 
 import { MoreVertical } from 'lucide-react';
-import type { SharedNavProps } from '@/layout';
 import { useSearchContext } from '@/contexts/search';
 import { useI18n } from '@/contexts/i18n';
 import {
@@ -18,6 +17,7 @@ import { NavBox, Title } from '@/components/layout/nav';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/theme/variants';
 import { isSecondary } from '@/utils/shared';
+import type { SharedNavProps } from '@/layout.shared';
 
 export function Nav({
   title,

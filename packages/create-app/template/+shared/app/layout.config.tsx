@@ -1,8 +1,9 @@
-import { type BaseLayoutProps, type DocsLayoutProps } from 'fumadocs-ui/layout';
+import { type DocsLayoutProps } from 'fumadocs-ui/layout';
+import { type HomeLayoutProps } from 'fumadocs-ui/home-layout';
 import { pageTree } from '@/app/source';
 
 // shared configuration
-export const baseOptions: BaseLayoutProps = {
+export const baseOptions: HomeLayoutProps = {
   nav: {
     title: 'My App',
   },

@@ -7,7 +7,7 @@ import { useSearchContext } from '@/contexts/search';
 import { SearchToggle } from '@/components/layout/search-toggle';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/theme/variants';
-import type { SharedNavProps } from '@/layout';
+import type { SharedNavProps } from '@/layout.shared';
 import { NavBox, Title } from '@/components/layout/nav';
 
 export function SubNav({
@@ -46,6 +46,5 @@ export function SubNav({
 
 export { LinksMenu } from '@/components/layout/link-item';
 export { Sidebar } from './components/layout/sidebar';
-export { DynamicSidebar } from './components/layout/dynamic-sidebar';
 export { TreeContextProvider } from './contexts/tree';
 export { ThemeToggle } from './components/layout/theme-toggle';

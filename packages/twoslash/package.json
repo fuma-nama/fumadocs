@@ -28,14 +28,17 @@
     "@shikijs/twoslash": "1.10.3",
     "mdast-util-from-markdown": "^2.0.1",
     "mdast-util-gfm": "^3.0.0",
-    "mdast-util-to-hast": "^13.2.0",
-    "shiki": "1.10.3"
+    "mdast-util-to-hast": "^13.2.0"
   },
   "devDependencies": {
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.3",
     "eslint-config-custom": "workspace:*",
+    "shiki": "^1.10.3",
     "tsconfig": "workspace:*"
+  },
+  "peerDependencies": {
+    "shiki": "1.x.x"
   },
   "publishConfig": {
     "access": "public"

@@ -52,7 +52,7 @@ const withMDX = createMDX({
         dark: 'catppuccin-mocha',
       },
       transformers: [
-        ...rehypeCodeDefaultOptions.transformers,
+        ...(rehypeCodeDefaultOptions.transformers ?? []),
         transformerTwoslash(),
         {
           name: 'fumadocs:remove-escape',
