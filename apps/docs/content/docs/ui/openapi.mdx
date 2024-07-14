@@ -11,13 +11,35 @@ Install the required packages.
 fumadocs-openapi
 ```
 
+### Generate Styles
+
+The interactive UI of OpenAPI integration is styled with Tailwind CSS, it doesn't include a pre-built stylesheet by default.
+You must use it in conjunction with the [official Tailwind CSS plugin](/docs/ui/theme#docsui-plugin).
+
+Add the package to `content` under your Tailwind CSS configuration.
+
+```js title="tailwind.config.js"
+import { createPreset } from 'fumadocs-ui/tailwind-plugin';
+
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    './node_modules/fumadocs-ui/dist/**/*.js',
+    './node_modules/fumadocs-openapi/dist/**/*.js',
+  ],
+  presets: [createPreset()],
+};
+```
+
+### Generate Files
+
 Create a script:
 
 ```js title="scripts/generate-docs.mjs"
 import { generateFiles } from 'fumadocs-openapi';
 
 void generateFiles({
-  input: ['./petstore.yaml'],
+  input: ['./petstore.yaml'], // the OpenAPI schemas
   output: './content/docs',
 });
 ```
@@ -33,6 +55,16 @@ node ./scripts/generate-docs.mjs
 ```
 
 Fumadocs OpenAPI generates MDX content directly, you can use a formatter (e.g. Prettier) to format the output files.
+
+### Features
+
+The official OpenAPI integration supports:
+
+- Basic API endpoint information
+- Interactive API playground
+- Example code to send request (in different programming languages)
+- Response samples and TypeScript definitions
+- Request parameters and body generated from schemas
 
 ### Demo
 
@@ -156,10 +188,10 @@ void generateFiles({
   input: ['./petstore.yaml'],
   output: './content/docs',
   renderer: {
-    Root(child) {
+    Root(props, child) {
       return createElement(
         'Root',
-        {},
+        props,
         '<div className="bg-secondary p-4 rounded-lg">Demo Only</div>',
         ...child,
       );

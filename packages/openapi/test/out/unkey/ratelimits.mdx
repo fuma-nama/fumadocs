@@ -3,9 +3,9 @@ title: ratelimits
 full: true
 ---
 
-import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible, Requests, Request } from "fumadocs-ui/components/api";
+import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible, Requests, Request, APIPlayground } from "fumadocs-ui/components/api";
 
-<Root>
+<Root baseUrl={"https://api.unkey.dev"}>
 
 <API>
 
@@ -158,6 +158,10 @@ Attach any metadata to this resources
 | `409` | This response is sent when a request conflicts with the current state of the server. |
 | `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
 | `500` | The server has encountered a situation it does not know how to handle. |
+
+<APIPlayground authorization={{"type":"string","name":"authorization","defaultValue":"Bearer","isRequired":true,"description":"The authorization token"}} method={"POST"} route={"/v1/ratelimits.limit"} path={[]} query={[]} header={[]} body={{"type":"object","isRequired":true,"properties":{"namespace":{"type":"ref","isRequired":false,"schema":"0"},"identifier":{"type":"ref","isRequired":true,"schema":"1"},"limit":{"type":"ref","isRequired":true,"schema":"2"},"duration":{"type":"ref","isRequired":true,"schema":"3"},"cost":{"type":"ref","isRequired":false,"schema":"4"},"async":{"type":"ref","isRequired":false,"schema":"5"},"meta":{"type":"ref","isRequired":false,"schema":"6"},"resources":{"type":"ref","isRequired":false,"schema":"7"}}}} schemas={{"0":{"type":"string","defaultValue":"email.outbound","isRequired":false,"description":"Namespaces group different limits together for better analytics. You might have a namespace for your public API and one for internal tRPC routes."},"1":{"type":"string","defaultValue":"user_123","isRequired":false,"description":"Identifier of your user, this can be their userId, an email, an ip or anything else."},"2":{"type":"number","defaultValue":10,"isRequired":false,"description":"How many requests may pass in a given window."},"3":{"type":"number","defaultValue":60000,"isRequired":false,"description":"The window duration in milliseconds"},"4":{"type":"number","defaultValue":2,"isRequired":false,"description":"Expensive requests may use up more tokens. You can specify a cost to the request here and we'll deduct this many tokens in the current window. \nIf there are not enough tokens left, the request is denied.\n                \nSet it to 0 to receive the current limit without changing anything."},"5":{"type":"boolean","defaultValue":"","isRequired":false,"description":"Async will return a response immediately, lowering latency at the cost of accuracy."},"6":{"type":"object","isRequired":false,"description":"Attach any metadata to this request","properties":{}},"7":{"type":"array","description":"Resources that are about to be accessed by the user","isRequired":false,"items":"8"},"8":{"type":"object","isRequired":false,"properties":{"type":{"type":"ref","isRequired":true,"schema":"9"},"id":{"type":"ref","isRequired":true,"schema":"10"},"name":{"type":"ref","isRequired":false,"schema":"11"},"meta":{"type":"ref","isRequired":false,"schema":"12"}}},"9":{"type":"string","defaultValue":"organization","isRequired":false,"description":"The type of resource"},"10":{"type":"string","defaultValue":"org_123","isRequired":false,"description":"The unique identifier for the resource"},"11":{"type":"string","defaultValue":"unkey","isRequired":false,"description":"A human readable name for this resource"},"12":{"type":"object","isRequired":false,"description":"Attach any metadata to this resources","properties":{}}}}>
+
+</APIPlayground>
 
 </APIInfo>
 

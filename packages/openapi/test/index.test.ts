@@ -1,7 +1,16 @@
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import { afterEach, describe, expect, test, vi } from 'vitest';
+import { idToTitle } from '@/utils/id-to-title';
 import { generate, generateFiles, generateTags } from '../src';
+
+describe('Utilities', () => {
+  test('Operation ID to Title', () => {
+    expect(idToTitle('getKey')).toBe('Get Key');
+    expect(idToTitle('requestId30')).toBe('Request Id30');
+    expect(idToTitle('requestId-30')).toBe('Request Id 30');
+  });
+});
 
 describe('Generate documents', () => {
   afterEach(() => {

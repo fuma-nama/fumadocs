@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic';
 import { DirectionProvider } from '@radix-ui/react-direction';
 import type { ThemeProviderProps } from 'next-themes/dist/types';
 import type { DefaultSearchDialogProps } from '@/components/dialog/search-default';
-import { SidebarProvider } from '@/contexts/sidebar';
+import { SidebarProvider } from './contexts/sidebar';
 import { SearchProvider, type SearchProviderProps } from './contexts/search';
 
 interface SearchOptions

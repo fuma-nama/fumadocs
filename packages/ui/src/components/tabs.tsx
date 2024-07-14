@@ -1,13 +1,10 @@
 'use client';
 
-import type { TabsContentProps } from '@radix-ui/react-tabs';
-import {
-  useMemo,
-  useState,
-  type ReactNode,
-  useCallback,
-  useLayoutEffect,
-} from 'react';
+import type {
+  TabsContentProps,
+  TabsProps as BaseProps,
+} from '@radix-ui/react-tabs';
+import { useMemo, useState, useCallback, useLayoutEffect } from 'react';
 import { cn } from '@/utils/cn';
 import * as Primitive from './ui/tabs';
 
@@ -39,7 +36,8 @@ function update(id: string, v: string, persist: boolean): void {
   else sessionStorage.setItem(id, v);
 }
 
-export interface TabsProps {
+export interface TabsProps extends BaseProps {
+  // TODO: Rename to group id so that it won't confuse with HTML `id` attribute (next major)
   /**
    * Identifier for Sharing value of tabs
    */
@@ -54,7 +52,6 @@ export interface TabsProps {
   defaultIndex?: number;
 
   items?: string[];
-  children: ReactNode;
 }
 
 export function Tabs({
@@ -62,7 +59,7 @@ export function Tabs({
   items = [],
   persist = false,
   defaultIndex = 0,
-  children,
+  ...props
 }: TabsProps): React.ReactElement {
   const values = useMemo(() => items.map((item) => toValue(item)), [items]);
   const [value, setValue] = useState(values[defaultIndex]);
@@ -100,7 +97,8 @@ export function Tabs({
     <Primitive.Tabs
       value={value}
       onValueChange={onValueChange}
-      className="my-4"
+      {...props}
+      className={cn('my-4', props.className)}
     >
       <Primitive.TabsList>
         {values.map((v, i) => (
@@ -109,7 +107,7 @@ export function Tabs({
           </Primitive.TabsTrigger>
         ))}
       </Primitive.TabsList>
-      {children}
+      {props.children}
     </Primitive.Tabs>
   );
 }

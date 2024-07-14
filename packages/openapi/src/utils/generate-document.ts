@@ -2,10 +2,10 @@ import { dump } from 'js-yaml';
 import { defaultRenderer } from '@/render/renderer';
 import { type GenerateOptions } from '@/generate';
 
-export function renderPage(
+export function generateDocument(
   title: string,
   description: string | undefined,
-  content: string[],
+  content: string,
   options: GenerateOptions,
 ): string {
   const banner = dump({
@@ -19,7 +19,7 @@ export function renderPage(
     options.imports ?? [
       {
         names: Object.keys(defaultRenderer),
-        from: 'fumadocs-ui/components/api',
+        from: 'fumadocs-openapi/ui',
       },
     ]
   )
@@ -29,7 +29,5 @@ export function renderPage(
     )
     .join('\n');
 
-  const Root = options.renderer?.Root ?? defaultRenderer.Root;
-
-  return `---\n${banner}\n---\n\n${finalImports}\n\n${Root(content)}`;
+  return `---\n${banner}\n---\n\n${finalImports}\n\n${content}`;
 }

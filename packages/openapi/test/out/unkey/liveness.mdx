@@ -1,17 +1,17 @@
 ---
-title: liveness
+title: Liveness
 full: true
 ---
 
-import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible, Requests, Request } from "fumadocs-ui/components/api";
+import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, ExampleResponse, TypeScriptResponse, Property, ObjectCollapsible, Requests, Request, APIPlayground } from "fumadocs-openapi/ui";
 
-<Root>
+<Root baseUrl={"https://api.unkey.dev"}>
 
 <API>
 
 <APIInfo method={"GET"} route={"/v1/liveness"}>
 
-## v1.liveness
+## Check Liveness
 
 | Status code | Description |
 | ----------- | ----------- |
@@ -23,6 +23,10 @@ import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, Exa
 | `409` | This response is sent when a request conflicts with the current state of the server. |
 | `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
 | `500` | The server has encountered a situation it does not know how to handle. |
+
+<APIPlayground authorization={undefined} method={"GET"} route={"/v1/liveness"} path={[]} query={[]} header={[]} body={undefined} schemas={{}}>
+
+</APIPlayground>
 
 </APIInfo>
 

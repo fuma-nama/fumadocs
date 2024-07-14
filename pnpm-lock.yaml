@@ -687,18 +687,48 @@ importers:
       '@apidevtools/json-schema-ref-parser':
         specifier: ^11.6.4
         version: 11.6.4
+      '@radix-ui/react-select':
+        specifier: ^2.1.1
+        version: 2.1.1(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@radix-ui/react-slot':
+        specifier: ^1.1.0
+        version: 1.1.0(@types/react@18.3.3)(react@18.3.1)
+      class-variance-authority:
+        specifier: ^0.7.0
+        version: 0.7.0
       fast-glob:
         specifier: ^3.3.1
         version: 3.3.2
+      fumadocs-ui:
+        specifier: workspace:*
+        version: link:../ui
       js-yaml:
         specifier: ^4.1.0
         version: 4.1.0
       json-schema-to-typescript:
         specifier: ^14.1.0
         version: 14.1.0
+      lucide-react:
+        specifier: ^0.400.0
+        version: 0.400.0(react@18.3.1)
       openapi-sampler:
         specifier: ^1.5.1
         version: 1.5.1
+      react:
+        specifier: '>= 18'
+        version: 18.3.1
+      react-dom:
+        specifier: '>= 18'
+        version: 18.3.1(react@18.3.1)
+      react-hook-form:
+        specifier: ^7.52.1
+        version: 7.52.1(react@18.3.1)
+      shiki:
+        specifier: ^1.10.3
+        version: 1.10.3
+      swr:
+        specifier: ^2.2.5
+        version: 2.2.5(react@18.3.1)
     devDependencies:
       '@types/js-yaml':
         specifier: ^4.0.9
@@ -709,9 +739,15 @@ importers:
       '@types/openapi-sampler':
         specifier: ^1.0.3
         version: 1.0.3
+      '@types/react':
+        specifier: ^18.3.3
+        version: 18.3.3
       eslint-config-custom:
         specifier: workspace:*
         version: link:../eslint-config-custom
+      next:
+        specifier: ^14.2.4
+        version: 14.2.4(@babel/core@7.24.0)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       openapi-types:
         specifier: ^12.1.3
         version: 12.1.3
@@ -848,6 +884,9 @@ importers:
       react-medium-image-zoom:
         specifier: ^5.2.5
         version: 5.2.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      swr:
+        specifier: ^2.2.5
+        version: 2.2.5(react@18.3.1)
       tailwind-merge:
         specifier: ^2.3.0
         version: 2.3.0
@@ -2190,6 +2229,19 @@ packages:
       '@types/react-dom':
         optional: true
 
+  '@radix-ui/react-select@2.1.1':
+    resolution: {integrity: sha512-8iRDfyLtzxlprOo9IicnzvpsO1wNCkuwzzCM+Z5Rb5tNOpCdMvcc2AkzX0Fz+Tz9v6NJ5B/7EEgyZveo4FBRfQ==}
+    peerDependencies:
+      '@types/react': '*'
+      '@types/react-dom': '*'
+      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+      react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      '@types/react-dom':
+        optional: true
+
   '@radix-ui/react-slot@1.0.2':
     resolution: {integrity: sha512-YeTpuq4deV+6DusvVUW4ivBgnkHwECUu0BiN43L5UCDFgdhsRUWAghhTF5MbvNTPzmiFOx90asDSUjWuCNapwg==}
     peerDependencies:
@@ -2299,6 +2351,15 @@ packages:
 
   '@radix-ui/react-use-layout-effect@1.1.0':
     resolution: {integrity: sha512-+FPE0rOdziWSrH9athwI1R0HDVbWlEhd+FR+aSDk4uWGmSJ9Z54sdZVDQPZAinJhJXwfT+qnj969mCsT2gfm5w==}
+    peerDependencies:
+      '@types/react': '*'
+      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@radix-ui/react-use-previous@1.1.0':
+    resolution: {integrity: sha512-Z/e78qg2YFnnXcW88A4JmTtm4ADckLno6F7OXotmkQfeuCVaKuYzqAATPhVzl3delXE7CxIV8shofPn3jPc5Og==}
     peerDependencies:
       '@types/react': '*'
       react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
@@ -3784,11 +3845,6 @@ packages:
     engines: {node: '>=16 || 14 >=14.18'}
     hasBin: true
 
-  glob@10.4.2:
-    resolution: {integrity: sha512-GwMlUF6PkPo3Gk21UxkCohOv0PLcIXVtKyLlpEI28R/cO/4eNOdmLk3CMW1wROV/WR/EsZOWAfBbBOqYvs88/w==}
-    engines: {node: '>=16 || 14 >=14.18'}
-    hasBin: true
-
   glob@11.0.0:
     resolution: {integrity: sha512-9UiX/Bl6J2yaBbxKoEBRm4Cipxgok8kQYcOPEhScPwebu2I0HoQOuYdIO6S3hLuWoZgpDpwQZMzTFxgpkyT76g==}
     engines: {node: 20 || >=22}
@@ -5146,6 +5202,12 @@ packages:
     resolution: {integrity: sha512-5m4nQKp+rZRb09LNH59GM4BxTh9251/ylbKIbpe7TpGxfJ+9kv6BLkLBXIjjspbgbnIBNqlI23tRnTWT0snUIw==}
     peerDependencies:
       react: ^18.3.1
+
+  react-hook-form@7.52.1:
+    resolution: {integrity: sha512-uNKIhaoICJ5KQALYZ4TOaOLElyM+xipord+Ha3crEFhTntdLvWZqVY49Wqd/0GiVCA/f9NjemLeiNPjG7Hpurg==}
+    engines: {node: '>=12.22.0'}
+    peerDependencies:
+      react: ^16.8.0 || ^17 || ^18 || ^19
 
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
@@ -7501,6 +7563,35 @@ snapshots:
       '@types/react': 18.3.3
       '@types/react-dom': 18.3.0
 
+  '@radix-ui/react-select@2.1.1(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      '@radix-ui/number': 1.1.0
+      '@radix-ui/primitive': 1.1.0
+      '@radix-ui/react-collection': 1.1.0(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@radix-ui/react-compose-refs': 1.1.0(@types/react@18.3.3)(react@18.3.1)
+      '@radix-ui/react-context': 1.1.0(@types/react@18.3.3)(react@18.3.1)
+      '@radix-ui/react-direction': 1.1.0(@types/react@18.3.3)(react@18.3.1)
+      '@radix-ui/react-dismissable-layer': 1.1.0(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@radix-ui/react-focus-guards': 1.1.0(@types/react@18.3.3)(react@18.3.1)
+      '@radix-ui/react-focus-scope': 1.1.0(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@radix-ui/react-id': 1.1.0(@types/react@18.3.3)(react@18.3.1)
+      '@radix-ui/react-popper': 1.2.0(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@radix-ui/react-portal': 1.1.1(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@radix-ui/react-primitive': 2.0.0(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@radix-ui/react-slot': 1.1.0(@types/react@18.3.3)(react@18.3.1)
+      '@radix-ui/react-use-callback-ref': 1.1.0(@types/react@18.3.3)(react@18.3.1)
+      '@radix-ui/react-use-controllable-state': 1.1.0(@types/react@18.3.3)(react@18.3.1)
+      '@radix-ui/react-use-layout-effect': 1.1.0(@types/react@18.3.3)(react@18.3.1)
+      '@radix-ui/react-use-previous': 1.1.0(@types/react@18.3.3)(react@18.3.1)
+      '@radix-ui/react-visually-hidden': 1.1.0(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      aria-hidden: 1.2.4
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+      react-remove-scroll: 2.5.7(@types/react@18.3.3)(react@18.3.1)
+    optionalDependencies:
+      '@types/react': 18.3.3
+      '@types/react-dom': 18.3.0
+
   '@radix-ui/react-slot@1.0.2(@types/react@18.3.3)(react@18.3.1)':
     dependencies:
       '@babel/runtime': 7.24.7
@@ -7603,6 +7694,12 @@ snapshots:
       '@types/react': 18.3.3
 
   '@radix-ui/react-use-layout-effect@1.1.0(@types/react@18.3.3)(react@18.3.1)':
+    dependencies:
+      react: 18.3.1
+    optionalDependencies:
+      '@types/react': 18.3.3
+
+  '@radix-ui/react-use-previous@1.1.0(@types/react@18.3.3)(react@18.3.1)':
     dependencies:
       react: 18.3.1
     optionalDependencies:
@@ -9423,15 +9520,6 @@ snapshots:
       minipass: 7.1.2
       path-scurry: 1.11.1
 
-  glob@10.4.2:
-    dependencies:
-      foreground-child: 3.2.1
-      jackspeak: 3.4.0
-      minimatch: 9.0.5
-      minipass: 7.1.2
-      package-json-from-dist: 1.0.0
-      path-scurry: 1.11.1
-
   glob@11.0.0:
     dependencies:
       foreground-child: 3.2.1
@@ -9976,7 +10064,7 @@ snapshots:
       '@types/json-schema': 7.0.15
       '@types/lodash': 4.17.6
       cli-color: 2.0.4
-      glob: 10.4.2
+      glob: 10.4.1
       is-glob: 4.0.3
       js-yaml: 4.1.0
       lodash: 4.17.21
@@ -11140,6 +11228,10 @@ snapshots:
       loose-envify: 1.4.0
       react: 18.3.1
       scheduler: 0.23.2
+
+  react-hook-form@7.52.1(react@18.3.1):
+    dependencies:
+      react: 18.3.1
 
   react-is@16.13.1: {}
 

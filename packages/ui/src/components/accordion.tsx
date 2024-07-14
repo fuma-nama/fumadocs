@@ -29,9 +29,7 @@ export const Accordions = forwardRef<
     const id = window.location.hash.substring(1);
 
     if (id.length > 0)
-      setValue((prev) => {
-        return typeof prev === 'string' ? id : [id, ...prev];
-      });
+      setValue((prev) => (typeof prev === 'string' ? id : [id, ...prev]));
   }, []);
 
   return (
@@ -41,7 +39,7 @@ export const Accordions = forwardRef<
       ref={ref}
       value={value}
       onValueChange={setValue}
-      collapsible
+      collapsible={type === 'single' ? true : undefined}
       className={cn(
         'divide-y divide-border overflow-hidden rounded-lg border bg-card',
         className,
