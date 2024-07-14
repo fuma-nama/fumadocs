@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 12.5.1
+
+### Patch Changes
+
+- c5d20d0: Fix wrong padding
+- 3d8f6cf: Add data attributes to certain components to improve CSS targeting
+  - fumadocs-core@12.5.1
+
 ## 12.5.0
 
 ### Minor Changes

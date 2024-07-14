@@ -38,7 +38,10 @@ export function Toc({ items, header, footer }: TOCProps): ReactElement {
   const { text } = useI18n();
 
   return (
-    <div className="sticky top-0 flex h-dvh w-[220px] shrink-0 flex-col gap-4 pe-2 pt-12 max-lg:hidden xl:w-[260px]">
+    <div
+      data-toc=""
+      className="sticky top-0 flex h-dvh w-[220px] shrink-0 flex-col gap-4 pe-3 pt-12 max-lg:hidden xl:w-[260px]"
+    >
       {header}
       <h3 className="-mb-1 -ms-0.5 inline-flex items-center gap-1.5 text-sm text-muted-foreground">
         <Text className="size-4" />
@@ -71,6 +74,7 @@ export function TocPopover({
         align="start"
         side="bottom"
         className="flex max-h-[80vh] w-[260px] flex-col gap-4 p-3"
+        data-toc-popover=""
       >
         {header}
         <TOCItems items={items} isMenu />
