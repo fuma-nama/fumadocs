@@ -41,37 +41,47 @@ function convertValue(
       convertValue(
         `${fieldName}.${String(index)}`,
         item,
-        references[schema.items],
+        resolve(schema.items, references),
         references,
         dynamic,
       ),
     );
   }
 
+  if (schema.type === 'switcher') {
+    return convertDynamicValue(fieldName, value, references, dynamic);
+  }
+
   if (typeof value === 'object' && schema.type === 'object') {
-    const keys = Object.keys(value);
-    const fieldDynamic = dynamic.get(fieldName);
-    if (fieldDynamic?.type === 'object') keys.push(...fieldDynamic.properties);
+    const entries = Object.keys(value).map((key) => {
+      const prop = value[key as keyof object];
+      const propFieldName = `${fieldName}.${key}`;
 
-    return Object.fromEntries(
-      keys.map((key) => {
-        const prop = value[key as keyof typeof value];
-        const propFieldName = `${fieldName}.${key}`;
-        const propDynamic = dynamic.get(propFieldName);
-
-        let propSchema: RequestSchema;
-        if (key in schema.properties)
-          propSchema = resolve(schema.properties[key], references);
-        else if (propDynamic?.type === 'field')
-          propSchema = resolve(propDynamic.schema, references);
-        else return [key, prop];
-
+      if (key in schema.properties) {
         return [
           key,
-          convertValue(propFieldName, prop, propSchema, references, dynamic),
+          convertValue(
+            propFieldName,
+            prop,
+            resolve(schema.properties[key], references),
+            references,
+            dynamic,
+          ),
         ];
-      }),
-    );
+      }
+
+      if (schema.additionalProperties) {
+        return [
+          key,
+          convertDynamicValue(propFieldName, prop, references, dynamic),
+        ];
+      }
+
+      console.warn('Could not resolve field', propFieldName, dynamic);
+      return [key, prop];
+    });
+
+    return Object.fromEntries(entries);
   }
 
   switch (schema.type) {
@@ -79,10 +89,28 @@ function convertValue(
       return Number(value);
     case 'boolean':
       return value === 'null' ? undefined : value === 'true';
-    case 'string':
     default:
       return String(value);
   }
+}
+
+function convertDynamicValue(
+  fieldName: string,
+  value: unknown,
+  references: Record<string, RequestSchema>,
+  dynamic: Map<string, DynamicField>,
+): unknown {
+  const fieldDynamic = dynamic.get(fieldName);
+
+  return convertValue(
+    fieldName,
+    value,
+    fieldDynamic?.type === 'field'
+      ? resolve(fieldDynamic.schema, references)
+      : { type: 'null', isRequired: false },
+    references,
+    dynamic,
+  );
 }
 
 interface StatusInfo {
