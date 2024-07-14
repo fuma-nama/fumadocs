@@ -110,7 +110,17 @@ sync(client, {
 
 For Fumadocs UI, enable [Tag Filter](/docs/ui/search#tag-filter-1) on Search Dialog.
 
-The tag field is an attribute for faceting, use the filter `tag:value` on search clients to filter indexes by tag.
+The `tag` field is an attribute for faceting, use the filter `tag:value` on search clients to filter indexes by tag.
+
+```ts
+import { useAlgoliaSearch } from 'fumadocs-core/search-algolia/client';
+
+useAlgoliaSearch(index, {
+  distinct: 5,
+  hitsPerPage: 10,
+  filters: 'tag:value',
+});
+```
 
 ### Customise Attributes & Settings
 
