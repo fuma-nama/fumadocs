@@ -1,17 +1,19 @@
-import Original from 'next/link';
-import { forwardRef, type AnchorHTMLAttributes } from 'react';
+import Original, { type LinkProps as BaseProps } from 'next/link';
+import { type AnchorHTMLAttributes, forwardRef } from 'react';
 
-export type LinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
+export interface LinkProps
+  extends Pick<BaseProps, 'prefetch' | 'replace'>,
+    AnchorHTMLAttributes<HTMLAnchorElement> {
   /**
    * If the href is an external URL
    *
    * automatically determined by default
    */
   external?: boolean;
-};
+}
 
 /**
- * Wraps `next/link` and safe to use in mdx documents
+ * Wraps `next/link` and safe to use in MDX documents
  */
 const Link = forwardRef<HTMLAnchorElement, LinkProps>(
   (
@@ -22,6 +24,8 @@ const Link = forwardRef<HTMLAnchorElement, LinkProps>(
         href.startsWith('#') ||
         href.startsWith('.')
       ),
+      prefetch,
+      replace,
       ...props
     },
     ref,
@@ -40,7 +44,15 @@ const Link = forwardRef<HTMLAnchorElement, LinkProps>(
       );
     }
 
-    return <Original ref={ref} href={href} {...props} />;
+    return (
+      <Original
+        ref={ref}
+        href={href}
+        prefetch={prefetch}
+        replace={replace}
+        {...props}
+      />
+    );
   },
 );
 

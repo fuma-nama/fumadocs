@@ -38,6 +38,13 @@ export interface SidebarProps {
   defaultOpenLevel?: number;
 
   /**
+   * Prefetch links
+   *
+   * @defaultValue true
+   */
+  prefetch?: boolean;
+
+  /**
    * Customise each of the component
    */
   components?: Partial<Components>;
@@ -51,6 +58,7 @@ export interface SidebarProps {
 interface InternalContext {
   defaultOpenLevel: number;
   components: Components;
+  prefetch: boolean;
 }
 
 interface Components {
@@ -68,17 +76,15 @@ const defaultComponents: Components = {
 const Context = createContext<InternalContext>({
   defaultOpenLevel: 1,
   components: defaultComponents,
+  prefetch: true,
 });
 
 export function Sidebar({
-  footer,
   components,
   defaultOpenLevel = 1,
-  banner,
   items,
-  aside,
-  bannerProps,
-  footerProps,
+  prefetch = true,
+  ...props
 }: SidebarProps & {
   aside?: HTMLAttributes<HTMLElement> & Record<string, unknown>;
 }): React.ReactElement {
@@ -87,8 +93,9 @@ export function Sidebar({
     () => ({
       defaultOpenLevel,
       components: { ...defaultComponents, ...components },
+      prefetch,
     }),
-    [components, defaultOpenLevel],
+    [components, defaultOpenLevel, prefetch],
   );
 
   return (
@@ -96,21 +103,21 @@ export function Sidebar({
       <Base.SidebarList
         id="nd-sidebar"
         blockScrollingWidth={768} // md
-        {...aside}
+        {...props.aside}
         className={cn(
           'fixed z-30 flex shrink-0 flex-col bg-card text-sm md:sticky md:top-0 md:h-dvh md:w-[240px] md:border-e xl:w-[260px]',
           'max-md:inset-0 max-md:bg-background/80 max-md:pt-14 max-md:text-[15px] max-md:backdrop-blur-md max-md:data-[open=false]:hidden',
-          aside?.className,
+          props.aside?.className,
         )}
       >
         <div
-          {...bannerProps}
+          {...props.bannerProps}
           className={cn(
             'flex flex-col gap-2 px-4 pt-2 md:px-3 md:pt-4',
-            bannerProps?.className,
+            props.bannerProps?.className,
           )}
         >
-          {banner}
+          {props.banner}
           {search.enabled ? (
             <LargeSearchToggle className="rounded-lg max-md:hidden" />
           ) : null}
@@ -125,13 +132,13 @@ export function Sidebar({
           )}
         </ViewportContent>
         <div
-          {...footerProps}
+          {...props.footerProps}
           className={cn(
             'flex flex-row items-center border-t px-4 pb-2 pt-1 md:px-3',
-            footerProps?.className,
+            props.footerProps?.className,
           )}
         >
-          {footer}
+          {props.footer}
         </div>
       </Base.SidebarList>
     </Context.Provider>
@@ -199,12 +206,14 @@ function PageNode({
 }): React.ReactElement {
   const pathname = usePathname();
   const active = isActive(url, pathname, false);
+  const { prefetch } = useContext(Context);
 
   return (
     <Link
       href={url}
       external={external}
       className={cn(itemVariants({ active }))}
+      prefetch={prefetch}
     >
       {icon ?? (external ? <ExternalLinkIcon /> : null)}
       {name}
@@ -219,7 +228,7 @@ function FolderNode({
   item: PageTree.Folder;
   level: number;
 }): React.ReactElement {
-  const { defaultOpenLevel } = useContext(Context);
+  const { defaultOpenLevel, prefetch } = useContext(Context);
   const pathname = usePathname();
   const active = index !== undefined && isActive(index.url, pathname, false);
   const childActive = useMemo(
@@ -267,6 +276,7 @@ function FolderNode({
           className={cn(itemVariants({ active }))}
           href={index.url}
           onClick={onClick}
+          prefetch={prefetch}
         >
           {content}
         </Link>

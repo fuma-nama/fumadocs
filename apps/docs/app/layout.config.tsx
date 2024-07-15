@@ -58,6 +58,7 @@ export const docsOptions: DocsLayoutProps = {
   },
   sidebar: {
     defaultOpenLevel: 0,
+    prefetch: false,
     banner: (
       <RootToggle
         options={modes.map((mode) => ({
