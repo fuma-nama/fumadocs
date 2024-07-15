@@ -98,7 +98,7 @@ export function DocsPage({
             !tocOptions.enabled && 'max-w-[1200px]',
           )}
         >
-          {replaceOrDefault(breadcrumb, <Breadcrumb full={breadcrumb.full} />)}
+          {replaceOrDefault(breadcrumb, <Breadcrumb {...breadcrumb} />)}
           {props.children}
           <div className="mt-auto" />
           {lastUpdate ? <LastUpdate date={new Date(lastUpdate)} /> : null}
