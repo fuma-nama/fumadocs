@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 12.5.2
+
+### Patch Changes
+
+- a5c34f0: Support specifying the url of root node when breadcrumbs have `includeRoot` enabled
+- Updated dependencies [a5c34f0]
+  - fumadocs-core@12.5.2
+
 ## 12.5.1
 
 ### Patch Changes

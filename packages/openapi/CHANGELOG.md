@@ -1,5 +1,13 @@
 # @fuma-docs/openapi
 
+## 4.0.2
+
+### Patch Changes
+
+- 0c8eddf: Fix overlap of navbar and api info
+- Updated dependencies [a5c34f0]
+  - fumadocs-ui@12.5.2
+
 ## 4.0.1
 
 ### Patch Changes
