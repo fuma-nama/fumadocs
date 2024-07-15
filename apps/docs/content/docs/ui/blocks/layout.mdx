@@ -3,7 +3,7 @@ title: Docs Layout
 description: The layout of documentation
 ---
 
-The layout of documentation pages, it includes a sidebar and a navigation header.
+The layout of documentation pages, it includes a sidebar and [navbar](/docs/ui/blocks/navbar).
 
 > It is a server component, you should not reference it in a client component.
 
@@ -19,48 +19,14 @@ export default function Layout({ children }) {
 }
 ```
 
-### Navbar
-
-The navigation header provides common interactive elements.
-
-> On larger devices, it becomes a part of sidebar.
-
-```mdx
-<DocsLayout
-  nav={{ title: <Logo />, githubUrl: 'https://github.com/fuma-nama/fumadocs' }}
-/>
-```
-
-#### Transparent Mode
-
-To make the navbar background transparent, you can configure transparent mode.
-It uses the `none` mode by default.
-
-```mdx
-<DocsLayout nav={{ transparentMode: 'top' }} />
-```
-
-| Mode     | Description                         |
-| -------- | ----------------------------------- |
-| `always` | Always use a transparent background |
-| `top`    | When at the top of page             |
-| `none`   | Disable transparent background      |
-
-#### Reference
-
-```json doc-gen:typescript
-{
-  "file": "./content/docs/ui/props.ts",
-  "name": "NavbarProps"
-}
-```
-
 ### Sidebar
 
 Provide elements to navigate between pages.
 
-```mdx
-<DocsLayout sidebar={{ footer: <ShareButton /> }} />
+```tsx
+import { DocsLayout } from 'fumadocs-ui/layout';
+
+<DocsLayout sidebar={{ footer: <ShareButton /> }} />;
 ```
 
 #### Disable Sidebar from Pages
