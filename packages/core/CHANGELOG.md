@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 12.5.2
+
+### Patch Changes
+
+- a5c34f0: Support specifying the url of root node when breadcrumbs have `includeRoot` enabled
+
 ## 12.5.1
 
 ## 12.5.0
