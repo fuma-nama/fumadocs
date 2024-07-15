@@ -84,7 +84,7 @@ export function APIInfo({
     <div className={cn('min-w-0 flex-1 prose-no-margin', className)} {...props}>
       <div
         className={cn(
-          'sticky top-24 z-10 flex flex-row items-center gap-2 rounded-lg border bg-card p-3 md:top-10',
+          'sticky top-24 z-[2] flex flex-row items-center gap-2 rounded-lg border bg-card p-3 md:top-10',
         )}
       >
         <span
