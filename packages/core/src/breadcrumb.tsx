@@ -8,11 +8,16 @@ export interface BreadcrumbItem {
 
 export interface BreadcrumbOptions extends SearchOptions {
   /**
-   * Include the root itself in the breadcrumb items array
+   * Include the root itself in the breadcrumb items array.
+   * Specify the url by passing an object instead
    *
    * @defaultValue false
    */
-  includeRoot?: boolean;
+  includeRoot?:
+    | boolean
+    | {
+        url: string;
+      };
 }
 
 export function useBreadcrumb(
@@ -37,7 +42,7 @@ export function getBreadcrumbItems(
   if (includeRoot) {
     path.unshift({
       name: tree.name,
-      url: tree.children.find((p) => p.type === 'page')?.url,
+      url: typeof includeRoot === 'object' ? includeRoot.url : undefined,
     });
   }
 
