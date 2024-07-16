@@ -1,6 +1,10 @@
 /* eslint-disable react/no-unknown-property -- Tailwind CSS `tw` property */
-import { ImageResponse } from 'next/og';
-import type { NextRequest } from 'next/server';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { join, dirname, resolve } from 'node:path';
+import React from 'react';
+import { Resvg } from '@resvg/resvg-js';
+import type { SearchIndex } from 'fumadocs-mdx';
+import satori from 'satori';
 
 interface Mode {
   param: string;
@@ -26,39 +30,46 @@ const modes: Mode[] = [
   },
 ];
 
-export const runtime = 'edge';
+const path = '.next/server/chunks/fumadocs_search.json';
 
-const bold = fetch(new URL('./inter-bold.woff', import.meta.url)).then((res) =>
-  res.arrayBuffer(),
-);
+export async function writeOgImages(): Promise<void> {
+  const indexes = JSON.parse(
+    (await readFile(path)).toString(),
+  ) as SearchIndex[];
+
+  const font = await readFile(
+    resolve(process.cwd(), './scripts/inter-bold.woff'),
+  );
+
+  await Promise.all(
+    indexes.map(async (index) => {
+      const img = createOgImage({
+        title: index.title,
+        description: index.description ?? 'The Documentation Framework',
+        mode:
+          modes.find((m) => m.param === index.url.split('/')[2]) ?? modes[0],
+      });
+
+      const svg = await satori(img, {
+        width: 1200,
+        height: 630,
+        fonts: [{ name: 'Inter', data: font, weight: 700 }],
+      });
+
+      const image = new Resvg(svg);
+      const out = join('./out/og', `${index.url}.png`);
+
+      await mkdir(dirname(out), { recursive: true });
+      await writeFile(out, image.render().asPng());
+    }),
+  );
+}
 
 const foreground = 'hsl(0 0% 98%)';
 const mutedForeground = 'hsl(0 0% 63.9%)';
 const background = 'rgba(10, 10, 10)';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { mode: string } },
-): Promise<ImageResponse> {
-  const { searchParams } = request.nextUrl;
-  const title = searchParams.get('title'),
-    description = searchParams.get('description');
-
-  return new ImageResponse(
-    OG({
-      title: title ?? 'Fumadocs',
-      description: description ?? 'The Documentation Framework',
-      mode: modes.find((mode) => mode.param === params.mode) ?? modes[0],
-    }),
-    {
-      width: 1200,
-      height: 630,
-      fonts: [{ name: 'Inter', data: await bold, weight: 700 }],
-    },
-  );
-}
-
-function OG({
+function createOgImage({
   title,
   description,
   mode,

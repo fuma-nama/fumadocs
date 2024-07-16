@@ -6,7 +6,7 @@
   "scripts": {
     "build": "pnpm build:docs && next build && pnpm build:index",
     "build:docs": "tsx ./scripts/generate-docs.mts",
-    "build:index": "tsx ./scripts/update-index.mts",
+    "build:index": "tsx ./scripts/post-build.mts",
     "build:shaders": "glslx shaders/rain.glsl --output=shaders/rain.min.js --format=js --renaming=internal-only",
     "clean": "rimraf .next",
     "dev": "next dev",
@@ -17,6 +17,7 @@
     "@next/env": "^14.2.5",
     "@radix-ui/react-popover": "^1.1.1",
     "@radix-ui/react-tooltip": "^1.1.2",
+    "@resvg/resvg-js": "^2.6.2",
     "algoliasearch": "^4.24.0",
     "class-variance-authority": "^0.7.0",
     "fumadocs-core": "workspace:*",
@@ -35,6 +36,7 @@
     "react-dom": "^18.3.1",
     "rehype-katex": "^7.0.0",
     "remark-math": "^6.0.0",
+    "satori": "^0.10.14",
     "shiki": "^1.10.3",
     "tailwind-merge": "^2.4.0",
     "zod": "^3.23.8"
