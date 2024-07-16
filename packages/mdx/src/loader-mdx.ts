@@ -1,8 +1,10 @@
 import path from 'node:path';
+import fs from 'node:fs/promises';
 import { createProcessor, type ProcessorOptions } from '@mdx-js/mdx';
 import { type Processor } from '@mdx-js/mdx/internal-create-format-aware-processors';
 import grayMatter from 'gray-matter';
 import { type LoaderContext } from 'webpack';
+import type { InternalFrontmatter } from '@/types';
 import { getGitTimestamp } from './utils/git-timestamp';
 
 export interface Options extends ProcessorOptions {
@@ -39,10 +41,8 @@ export default async function loader(
   const context = this.context;
   const filePath = this.resourcePath;
   const { lastModifiedTime, ...options } = this.getOptions();
-  const { content, data: frontmatter } = grayMatter(source);
   const detectedFormat = filePath.endsWith('.mdx') ? 'mdx' : 'md';
   const format = options.format ?? detectedFormat;
-  let timestamp: number | undefined;
   let processor = cache.get(format);
 
   if (processor === undefined) {
@@ -55,16 +55,29 @@ export default async function loader(
     cache.set(format, processor);
   }
 
+  const matter = grayMatter(source);
+  const props = (matter.data as InternalFrontmatter)._mdx ?? {};
+
+  if (props.mirror) {
+    const mirrorPath = path.resolve(path.dirname(filePath), props.mirror);
+    this.addDependency(mirrorPath);
+
+    matter.content = await fs
+      .readFile(mirrorPath)
+      .then((res) => grayMatter(res.toString()).content);
+  }
+
+  let timestamp: number | undefined;
   if (lastModifiedTime === 'git')
     timestamp = (await getGitTimestamp(filePath))?.getTime();
 
   processor
     .process({
-      value: content,
+      value: matter.content,
       path: filePath,
       data: {
         lastModified: timestamp,
-        frontmatter,
+        frontmatter: matter.data,
       },
     })
     .then(
