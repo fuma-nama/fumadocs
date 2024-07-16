@@ -1,5 +1,12 @@
 # next-docs-mdx
 
+## 8.2.34
+
+### Patch Changes
+
+- c2d956b: Support mirror pages for symlinks of MDX file
+  - fumadocs-core@12.5.3
+
 ## 8.2.33
 
 ### Patch Changes

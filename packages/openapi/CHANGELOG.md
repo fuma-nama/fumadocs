@@ -1,5 +1,12 @@
 # @fuma-docs/openapi
 
+## 4.0.3
+
+### Patch Changes
+
+- Updated dependencies [5d963f4]
+  - fumadocs-ui@12.5.3
+
 ## 4.0.2
 
 ### Patch Changes
