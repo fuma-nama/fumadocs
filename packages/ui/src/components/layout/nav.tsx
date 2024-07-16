@@ -63,7 +63,7 @@ export function NavBox({
 
 export function Title({ title, url = '/' }: TitleProps): React.ReactElement {
   return (
-    <Link href={url} className="inline-flex items-center gap-2.5 font-semibold">
+    <Link href={url} className="inline-flex items-center gap-1.5 font-semibold">
       {title}
     </Link>
   );
