@@ -112,13 +112,9 @@ export function generateMetadata({ params }: { params: Param }): Metadata {
   const description =
     page.data.description ?? 'The library for building documentation sites';
 
-  const imageParams = new URLSearchParams();
-  imageParams.set('title', page.data.title);
-  imageParams.set('description', description);
-
   const image = {
     alt: 'Banner',
-    url: `/api/og/${params.slug[0]}?${imageParams.toString()}`,
+    url: `/og/docs/${page.slugs.join('/')}.png`,
     width: 1200,
     height: 630,
   };

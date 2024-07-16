@@ -40,7 +40,7 @@ export function Toc({ items, header, footer }: TOCProps): ReactElement {
   return (
     <div
       data-toc=""
-      className="sticky top-0 flex h-dvh w-[220px] shrink-0 flex-col gap-4 pe-3 pt-12 max-lg:hidden xl:w-[260px]"
+      className="sticky top-0 flex h-dvh w-[220px] shrink-0 flex-col gap-4 pr-3 pt-12 max-lg:hidden xl:w-[260px] rtl:pl-3"
     >
       {header}
       <h3 className="-mb-1 -ms-0.5 inline-flex items-center gap-1.5 text-sm text-muted-foreground">

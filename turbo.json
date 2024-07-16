@@ -15,7 +15,8 @@
         "!.contentlayer/.cache/**",
         ".next/**",
         "!.next/cache/**",
-        "dist/**"
+        "dist/**",
+        "out"
       ]
     },
     "lint": {},
