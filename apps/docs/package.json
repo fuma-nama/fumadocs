@@ -6,7 +6,7 @@
   "scripts": {
     "build": "pnpm build:docs && next build && pnpm build:index",
     "build:docs": "tsx ./scripts/generate-docs.mts",
-    "build:index": "tsx ./scripts/update-index.mts && tsx ./scripts/generate-og-images.tsx",
+    "build:index": "tsx ./scripts/post-build.mts",
     "build:shaders": "glslx shaders/rain.glsl --output=shaders/rain.min.js --format=js --renaming=internal-only",
     "clean": "rimraf .next",
     "dev": "next dev",
