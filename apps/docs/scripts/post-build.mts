@@ -1,7 +1,7 @@
-import { loadEnvConfig } from '@next/env';
+import env from '@next/env';
 import { writeOgImages } from './generate-og-images';
 import { updateSearchIndexes } from './update-index.mjs';
 
-loadEnvConfig(process.cwd());
+env.loadEnvConfig(process.cwd());
 
 void Promise.all([writeOgImages(), updateSearchIndexes()]);

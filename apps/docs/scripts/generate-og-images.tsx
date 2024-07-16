@@ -47,7 +47,7 @@ export async function writeOgImages(): Promise<void> {
         title: index.title,
         description: index.description ?? 'The Documentation Framework',
         mode:
-          modes.find((m) => m.param === index.url.split('/')[1]) ?? modes[0],
+          modes.find((m) => m.param === index.url.split('/')[2]) ?? modes[0],
       });
 
       const svg = await satori(img, {
