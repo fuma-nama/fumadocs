@@ -14,7 +14,7 @@ async function fetchContributors(
 ): Promise<Contributor[]> {
   const response = await fetch(
     `https://api.github.com/repos/${repoOwner}/${repoName}/contributors?per_page=50`,
-    { next: { revalidate: 3600 }, cache: 'force-cache' },
+    { next: { revalidate: 1000 * 1000 } },
   );
 
   if (!response.ok) {
@@ -67,6 +67,7 @@ export default async function ContributorCounter({
             <Image
               src={contributor.avatar_url}
               alt={`${contributor.login}'s avatar`}
+              unoptimized
               width={48}
               height={48}
             />
