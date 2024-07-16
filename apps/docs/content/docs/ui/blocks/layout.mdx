@@ -29,6 +29,23 @@ import { DocsLayout } from 'fumadocs-ui/layout';
 <DocsLayout sidebar={{ footer: <ShareButton /> }} />;
 ```
 
+#### Disable Prefetching
+
+By default, it uses the Next.js Link component with prefetch enabled.
+When the link component appears into the browser viewport, the content (RSC payload) will be lazy loaded.
+
+Unless you put most of the page items in folders, all page items on the sidebar will be lazy loaded.
+On Vercel, this may cause a high usage of serverless functions and Data Cache.
+It can also hit the limits of some other hosting platforms.
+
+You can disable prefetching to reduce the amount of RSC requests.
+
+```tsx
+import { DocsLayout } from 'fumadocs-ui/layout';
+
+<DocsLayout sidebar={{ prefetch: false }} />;
+```
+
 #### Disable Sidebar from Pages
 
 This is not supported.
