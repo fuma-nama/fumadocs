@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 12.5.3
+
+### Patch Changes
+
+- 5d963f4: Support to disable prefetching links on sidebar
+  - fumadocs-core@12.5.3
+
 ## 12.5.2
 
 ### Patch Changes
