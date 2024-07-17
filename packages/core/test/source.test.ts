@@ -8,6 +8,10 @@ test('Get Slugs', () => {
     'to',
     'file',
   ]);
+  expect(getSlugs(parseFilePath('path/(group)/file'))).toStrictEqual([
+    'path',
+    'file',
+  ]);
 
   expect(getSlugs(parseFilePath(''))).toStrictEqual([]);
 });
@@ -96,6 +100,13 @@ test('Page Tree: Nested Directories', async () => {
             title: 'Nested Page',
           },
         },
+        {
+          type: 'page',
+          path: '/(nested)/hello.mdx',
+          data: {
+            title: 'Route Group Page',
+          },
+        },
       ],
     },
   });
@@ -103,6 +114,17 @@ test('Page Tree: Nested Directories', async () => {
   expect(result.pageTree, 'Page Tree').toMatchInlineSnapshot(`
     {
       "children": [
+        {
+          "children": [
+            {
+              "name": "Route Group Page",
+              "type": "page",
+              "url": "/hello",
+            },
+          ],
+          "name": "Nested",
+          "type": "folder",
+        },
         {
           "name": "Hello",
           "type": "page",
@@ -129,8 +151,12 @@ test('Page Tree: Nested Directories', async () => {
       "name": "",
     }
   `);
-  expect(result.getPages().length).toBe(3);
+  expect(result.getPages().length).toBe(4);
+  // page in folder
   expect(result.getPage(['nested', 'test'])).toBeDefined();
+
+  // page in folder group
+  expect(result.getPage(['hello'])).toBeDefined();
 });
 
 test('Page Tree: Internationalized Routing', () => {

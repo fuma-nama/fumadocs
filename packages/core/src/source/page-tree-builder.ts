@@ -56,6 +56,7 @@ export interface PageTreeBuilder {
   ) => Record<string, PageTree.Root>;
 }
 
+const group = /^\((?<name>.+)\)$/;
 const link = /^\[(?<text>.+)]\((?<url>.+)\)$/;
 const separator = /^---(?<name>.*?)---$/;
 const rest = '...';
@@ -204,7 +205,7 @@ function buildFolderNode(
 
   const node: PageTree.Folder = {
     type: 'folder',
-    name: metadata?.title ?? index?.name ?? pathToName(folder.file.name),
+    name: metadata?.title ?? index?.name ?? pathToName(folder.file.name, true),
     icon: ctx.options.resolveIcon?.(metadata?.icon),
     root: metadata?.root,
     defaultOpen: metadata?.defaultOpen,
@@ -282,8 +283,23 @@ function findLocalizedFile(
   return ctx.storage.read(`${path}.${ctx.lang}`, format);
 }
 
-function pathToName(path: string): string {
-  return path.slice(0, 1).toUpperCase() + path.slice(1);
+/**
+ * Get item name from file name
+ *
+ * @param name - file name
+ * @param resolveGroup - resolve folder groups like (group_name)
+ */
+function pathToName(name: string, resolveGroup = false): string {
+  const resolved = resolveGroup ? (group.exec(name)?.[1] ?? name) : name;
+
+  const result = [];
+  for (const c of resolved) {
+    if (result.length === 0) result.push(c.toLocaleUpperCase());
+    else if (c === '-') result.push(' ');
+    else result.push(c);
+  }
+
+  return result.join('');
 }
 
 function removeUndefined<T extends object>(value: T): T {

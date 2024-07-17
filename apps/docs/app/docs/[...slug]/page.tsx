@@ -14,8 +14,6 @@ interface Param {
   slug: string[];
 }
 
-export const dynamicParams = false;
-
 export default function Page({
   params,
 }: {
@@ -64,7 +62,6 @@ export default function Page({
       </p>
       <DocsBody>
         {preview && preview in Preview ? Preview[preview] : null}
-        {page.data.index ? <Category page={page} /> : null}
         <page.data.exports.default
           components={{
             HeadlessOnly:
@@ -77,6 +74,7 @@ export default function Page({
                 : () => undefined,
           }}
         />
+        {page.data.index ? <Category page={page} /> : null}
       </DocsBody>
     </DocsPage>
   );

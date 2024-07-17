@@ -10,17 +10,13 @@
     "markdown",
     "page-conventions",
     "navigation",
-    "---Components---",
-    "...components",
-    "---Blocks---",
-    "...blocks",
-    "---Integrations---",
-    "math",
-    "typescript",
-    "twoslash",
-    "openapi",
-    "museum",
+    "---References---",
+    "components",
+    "mdx",
+    "blocks",
+    "(integrations)",
     "---Others---",
+    "museum",
     "[Vercel](https://vercel.com)"
   ]
 }
