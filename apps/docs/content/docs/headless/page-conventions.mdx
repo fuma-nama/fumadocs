@@ -45,6 +45,19 @@ Pages are sorted alphabetically, except for `index.mdx` which is always ordered 
 
 To customise folders, see [Meta file](#meta).
 
+### Folder Group
+
+By default, putting a file into folder will change its slugs and generated page URL.
+You can use folder group to add a folder without impacting the slugs of child files.
+
+To create a folder group, wrap the folder name in parentheses.
+
+<Files>
+  <Folder name="(group-name)" defaultOpen>
+    <File name="file.mdx" />
+  </Folder>
+</Files>
+
 ## Meta
 
 Customize a folder by creating a `meta.json` file in the folder.
