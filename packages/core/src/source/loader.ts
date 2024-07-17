@@ -141,7 +141,8 @@ export function createGetUrl(baseUrl: string): UrlFn {
 
 export function getSlugs(info: FileInfo): string[] {
   const result = [...info.dirname.split('/'), info.name].filter(
-    (v) => v.length > 0,
+    // filter empty folder names and file groups like (group_name)
+    (v) => v.length > 0 && !/^\(.+\)$/.test(v),
   );
 
   return result[result.length - 1] === 'index' ? result.slice(0, -1) : result;

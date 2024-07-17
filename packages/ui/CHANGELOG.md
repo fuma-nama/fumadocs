@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 12.5.4
+
+### Patch Changes
+
+- fccdfdb: Improve TOC Popover design
+- Updated dependencies [fccdfdb]
+- Updated dependencies [2ffd5ea]
+  - fumadocs-core@12.5.4
+
 ## 12.5.3
 
 ### Patch Changes

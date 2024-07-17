@@ -1,12 +1,13 @@
-import { ChevronDown, Text } from 'lucide-react';
+import { ChevronRight, Text } from 'lucide-react';
 import type { TOCItemType } from 'fumadocs-core/server';
 import * as Primitive from 'fumadocs-core/toc-internal';
 import {
-  type ButtonHTMLAttributes,
   type ReactElement,
   type ReactNode,
-  useCallback,
+  useLayoutEffect,
+  useMemo,
   useRef,
+  useState,
 } from 'react';
 import { cn } from '@/utils/cn';
 import { useI18n } from '@/contexts/i18n';
@@ -53,20 +54,25 @@ export function Toc({ items, header, footer }: TOCProps): ReactElement {
   );
 }
 
-export function TocPopover({
-  items,
-  header,
-  footer,
-  ...props
-}: TOCProps & ButtonHTMLAttributes<HTMLButtonElement>): ReactElement {
+export function TocPopover({ items, header, footer }: TOCProps): ReactElement {
   const { text } = useI18n();
+  const active = Primitive.useActiveAnchor();
+  const current = useMemo(() => {
+    if (!active) return;
+    return items.find((item) => item.url === `#${active}`)?.title;
+  }, [items, active]);
 
   return (
     <Popover>
-      <PopoverTrigger {...props}>
-        <Text className="size-4" />
+      <PopoverTrigger className="inline-flex items-center gap-2 text-nowrap px-4 py-2 text-left max-md:size-full md:px-3 md:text-muted-foreground">
+        <Text className="size-4 shrink-0" />
         {text.toc}
-        <ChevronDown className="ms-auto size-4 text-muted-foreground" />
+        {current ? (
+          <>
+            <ChevronRight className="-mx-1.5 size-4 shrink-0 text-muted-foreground" />
+            <span className="truncate text-muted-foreground">{current}</span>
+          </>
+        ) : null}
       </PopoverTrigger>
       <PopoverContent
         hideWhenDetached
@@ -93,16 +99,19 @@ function TOCItems({
 }): React.ReactElement {
   const { text } = useI18n();
   const containerRef = useRef<HTMLDivElement>(null);
-  const markerRef = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState<PosType>();
+  const active = Primitive.useActiveAnchor();
 
-  const setPos = useCallback(([top, height]: PosType) => {
-    const element = markerRef.current;
-    if (!element || containerRef.current?.clientHeight === 0) return;
+  useLayoutEffect(() => {
+    const container = containerRef.current;
+    if (!active || !container) return;
 
-    element.style.setProperty('top', `${top.toString()}px`);
-    element.style.setProperty('height', `${height.toString()}px`);
-    element.style.setProperty('display', 'block');
-  }, []);
+    const element: HTMLElement | null = container.querySelector(
+      `a[href="#${active}"]`,
+    );
+    if (!element) return;
+    setPos([element.offsetTop, element.clientHeight]);
+  }, [active]);
 
   if (items.length === 0)
     return (
@@ -116,8 +125,12 @@ function TOCItems({
       <ScrollViewport className="relative min-h-0 text-sm" ref={containerRef}>
         <div
           role="none"
-          ref={markerRef}
-          className="absolute start-0 hidden w-0.5 bg-primary transition-all"
+          className="absolute start-0 w-0.5 bg-primary transition-all"
+          style={{
+            top: pos ? `${pos[0].toString()}px` : undefined,
+            height: pos ? `${pos[1].toString()}px` : undefined,
+            display: pos ? 'block' : 'hidden',
+          }}
         />
         <Primitive.ScrollProvider containerRef={containerRef}>
           <div
@@ -127,7 +140,7 @@ function TOCItems({
             )}
           >
             {items.map((item) => (
-              <TOCItem key={item.url} item={item} setMarker={setPos} />
+              <TOCItem key={item.url} item={item} />
             ))}
           </div>
         </Primitive.ScrollProvider>
@@ -136,24 +149,10 @@ function TOCItems({
   );
 }
 
-function TOCItem({
-  item,
-  setMarker,
-}: {
-  item: TOCItemType;
-  setMarker: (v: PosType) => void;
-}): React.ReactElement {
-  const ref = useRef<HTMLAnchorElement>(null);
-
+function TOCItem({ item }: { item: TOCItemType }): React.ReactElement {
   return (
     <Primitive.TOCItem
-      ref={ref}
       href={item.url}
-      onActiveChange={(active) => {
-        const element = ref.current;
-        if (active && element)
-          setMarker([element.offsetTop, element.clientHeight]);
-      }}
       className={cn(
         'py-1 transition-colors data-[active=true]:font-medium data-[active=true]:text-primary',
         item.depth <= 2 && 'ps-4',

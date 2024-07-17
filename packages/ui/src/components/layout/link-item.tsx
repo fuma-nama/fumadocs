@@ -3,6 +3,7 @@ import { ChevronDown } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cva } from 'class-variance-authority';
 import { type ReactNode, useState } from 'react';
+import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { cn } from '@/utils/cn';
 import { isActive } from '@/utils/shared';
 import { buttonVariants, itemVariants } from '@/theme/variants';
@@ -16,7 +17,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { useOnChange } from '@/utils/use-on-change';
 
 const linkItemVariants = cva(
   '-m-2 inline-flex items-center gap-1 p-2 text-muted-foreground transition-colors [&_svg]:size-4',

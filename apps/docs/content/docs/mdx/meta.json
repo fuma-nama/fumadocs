@@ -11,8 +11,6 @@
     "search-index",
     "---Schema---",
     "validation",
-    "multiple-types",
-    "---Reference---",
-    "../headless/page-conventions"
+    "multiple-types"
   ]
 }

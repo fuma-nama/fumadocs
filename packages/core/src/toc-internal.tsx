@@ -1,15 +1,9 @@
 import type { AnchorHTMLAttributes, ReactNode, RefObject } from 'react';
-import {
-  createContext,
-  forwardRef,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-} from 'react';
+import { createContext, forwardRef, useContext, useMemo, useRef } from 'react';
 import scrollIntoView from 'scroll-into-view-if-needed';
 import type { TableOfContents } from '@/server/get-toc';
 import { mergeRefs } from '@/utils/merge-refs';
+import { useOnChange } from '@/utils/use-on-change';
 import { useAnchorObserver } from './utils/use-anchor-observer';
 
 const ActiveAnchorContext = createContext<string | undefined>(undefined);
@@ -80,13 +74,12 @@ export const TOCItem = forwardRef<HTMLAnchorElement, TOCItemProps>(
     const mergedRef = mergeRefs(anchorRef, ref);
 
     const isActive = activeAnchor === props.href.split('#')[1];
-    const onActiveRef = useRef<(active: boolean) => void>();
 
-    onActiveRef.current = (active) => {
+    useOnChange(isActive, (v) => {
       const element = anchorRef.current;
       if (!element) return;
 
-      if (active && containerRef.current) {
+      if (v && containerRef.current) {
         scrollIntoView(element, {
           behavior: 'smooth',
           block: 'center',
@@ -96,12 +89,8 @@ export const TOCItem = forwardRef<HTMLAnchorElement, TOCItemProps>(
         });
       }
 
-      onActiveChange?.(active);
-    };
-
-    useEffect(() => {
-      onActiveRef.current?.(isActive);
-    }, [isActive]);
+      onActiveChange?.(v);
+    });
 
     return (
       <a ref={mergedRef} data-active={isActive} {...props}>

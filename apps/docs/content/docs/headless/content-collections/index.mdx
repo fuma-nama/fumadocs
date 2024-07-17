@@ -80,6 +80,22 @@ page?.data.toc;
 page?.data.structuredData;
 ```
 
+### MDX Options
+
+You can customise MDX options in the `transformMDX` function.
+
+```ts
+import { defineCollection } from '@content-collections/core';
+import { transformMDX } from '@fumadocs/content-collections/configuration';
+
+const docs = defineCollection({
+  transform: (document, context) =>
+    transformMDX(document, context, {
+      // options here
+    }),
+});
+```
+
 ### Import Components
 
 To use components from other packages like Fumadocs UI, pass them to your `<MDXContent />` component.

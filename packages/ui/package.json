@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-ui",
-  "version": "12.5.3",
+  "version": "12.5.4",
   "description": "The framework for building a documentation website in Next.js",
   "keywords": [
     "NextJs",
@@ -112,7 +112,7 @@
     "fumadocs-core": "workspace:*",
     "lucide-react": "^0.408.0",
     "next-themes": "^0.3.0",
-    "react-medium-image-zoom": "^5.2.7",
+    "react-medium-image-zoom": "^5.2.8",
     "swr": "^2.2.5",
     "tailwind-merge": "^2.4.0"
   },
@@ -127,7 +127,7 @@
     "postcss": "^8.4.39",
     "postcss-cli": "^11.0.0",
     "postcss-lightningcss": "^1.0.0",
-    "tailwindcss": "^3.4.4",
+    "tailwindcss": "^3.4.6",
     "tsconfig": "workspace:*"
   },
   "peerDependencies": {

@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-core",
-  "version": "12.5.3",
+  "version": "12.5.4",
   "description": "The library for building a documentation website in Next.js",
   "keywords": [
     "NextJs",
@@ -47,6 +47,10 @@
     "./source": {
       "import": "./dist/source/index.js",
       "types": "./dist/source/index.d.ts"
+    },
+    "./utils/use-on-change": {
+      "import": "./dist/utils/use-on-change.js",
+      "types": "./dist/utils/use-on-change.d.ts"
     },
     "./link": {
       "import": "./dist/link.js",
@@ -104,6 +108,9 @@
       "middleware": [
         "./dist/middleware.d.ts"
       ],
+      "utils/use-on-change": [
+        "./dist/utils/use-on-change.d.ts"
+      ],
       "mdx-plugins": [
         "./dist/mdx-plugins/index.d.ts"
       ],
@@ -150,7 +157,7 @@
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.3",
     "@types/negotiator": "^0.6.3",
-    "@types/node": "20.14.10",
+    "@types/node": "20.14.11",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "algoliasearch": "^4.24.0",
