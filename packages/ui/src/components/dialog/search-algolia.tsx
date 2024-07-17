@@ -6,7 +6,7 @@ import {
   useAlgoliaSearch,
 } from 'fumadocs-core/search-algolia/client';
 import { type ReactNode, useState } from 'react';
-import { useOnChange } from '@/utils/use-on-change';
+import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import {
   SearchDialog,
   type SharedProps,

@@ -11,6 +11,7 @@ import {
   useState,
 } from 'react';
 import Link from 'fumadocs-core/link';
+import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { cn } from '@/utils/cn';
 import { useTreeContext } from '@/contexts/tree';
 import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
@@ -19,7 +20,6 @@ import { LinkItem, type LinkItemType } from '@/components/layout/link-item';
 import { LargeSearchToggle } from '@/components/layout/search-toggle';
 import { useSearchContext } from '@/contexts/search';
 import { itemVariants } from '@/theme/variants';
-import { useOnChange } from '@/utils/use-on-change';
 import {
   Collapsible,
   CollapsibleContent,

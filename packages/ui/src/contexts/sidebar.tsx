@@ -8,7 +8,7 @@ import {
 } from 'react';
 import { usePathname } from 'next/navigation';
 import { SidebarProvider as BaseProvider } from 'fumadocs-core/sidebar';
-import { useOnChange } from '@/utils/use-on-change';
+import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 
 interface SidebarContext {
   open: boolean;
