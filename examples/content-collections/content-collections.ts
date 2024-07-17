@@ -10,7 +10,15 @@ const docs = defineCollection({
   directory: 'content/docs',
   include: '**/*.mdx',
   schema: createDocSchema,
-  transform: transformMDX,
+  transform: (document, context) =>
+    transformMDX(document, context, {
+      rehypeCodeOptions: {
+        themes: {
+          light: 'catppuccin-latte',
+          dark: 'catppuccin-mocha',
+        },
+      },
+    }),
 });
 
 const metas = defineCollection({

@@ -44,6 +44,20 @@ export default {
         'repeat-gradient-to-br':
           'repeating-linear-gradient(to bottom right, var(--tw-gradient-stops))',
       },
+      keyframes: {
+        stroke: {
+          from: {
+            'stroke-dasharray': '1000',
+          },
+          to: {
+            'stroke-dasharray': '1000',
+            'stroke-dashoffset': '2000',
+          },
+        },
+      },
+      animation: {
+        stroke: 'stroke 5s linear infinite',
+      },
     },
   },
   plugins: [animate],
