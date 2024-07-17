@@ -1,5 +1,17 @@
 # @fumadocs/content-collections
 
+## 1.1.0
+
+### Minor Changes
+
+- bc80ce3: Support dynamic resolving plugins
+
+### Patch Changes
+
+- Updated dependencies [fccdfdb]
+- Updated dependencies [2ffd5ea]
+  - fumadocs-core@12.5.4
+
 ## 1.0.3
 
 ### Patch Changes

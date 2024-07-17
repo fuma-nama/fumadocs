@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 12.5.4
+
+### Patch Changes
+
+- fccdfdb: Improve TOC Popover design
+- 2ffd5ea: Support folder group on Page Tree Builder
+
 ## 12.5.3
 
 ## 12.5.2
