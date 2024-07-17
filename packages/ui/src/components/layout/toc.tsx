@@ -70,7 +70,7 @@ export function TocPopover({ items, header, footer }: TOCProps): ReactElement {
         {current ? (
           <>
             <ChevronRight className="-mx-1.5 size-4 shrink-0 text-muted-foreground" />
-            <span className="truncate">{current}</span>
+            <span className="truncate text-muted-foreground">{current}</span>
           </>
         ) : null}
       </PopoverTrigger>
