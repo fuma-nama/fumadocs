@@ -30,13 +30,7 @@ const modes: Mode[] = [
   },
 ];
 
-const path = '.next/server/chunks/fumadocs_search.json';
-
-export async function writeOgImages(): Promise<void> {
-  const indexes = JSON.parse(
-    (await readFile(path)).toString(),
-  ) as SearchIndex[];
-
+export async function writeOgImages(indexes: SearchIndex[]): Promise<void> {
   const font = await readFile(
     resolve(process.cwd(), './scripts/inter-bold.woff'),
   );
