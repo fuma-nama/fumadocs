@@ -110,7 +110,7 @@
     "class-variance-authority": "^0.7.0",
     "cmdk": "^1.0.0",
     "fumadocs-core": "workspace:*",
-    "lucide-react": "^0.408.0",
+    "lucide-react": "^0.414.0",
     "next-themes": "^0.3.0",
     "react-medium-image-zoom": "^5.2.8",
     "swr": "^2.2.5",
