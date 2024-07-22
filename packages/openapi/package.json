@@ -52,7 +52,7 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "js-yaml": "^4.1.0",
-    "json-schema-to-typescript": "^14.1.0",
+    "json-schema-to-typescript": "^15.0.0",
     "lucide-react": "^0.414.0",
     "openapi-sampler": "^1.5.1",
     "react-hook-form": "^7.52.1",
