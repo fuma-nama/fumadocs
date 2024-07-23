@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 12.5.5
+
+### Patch Changes
+
+- 3519e6c: Fix TOC overflow problems
+  - fumadocs-core@12.5.5
+
 ## 12.5.4
 
 ### Patch Changes
