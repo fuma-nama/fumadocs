@@ -154,7 +154,7 @@ function TOCItem({ item }: { item: TOCItemType }): React.ReactElement {
     <Primitive.TOCItem
       href={item.url}
       className={cn(
-        'py-1 transition-colors data-[active=true]:font-medium data-[active=true]:text-primary',
+        'py-1 transition-colors [overflow-wrap:anywhere] data-[active=true]:font-medium data-[active=true]:text-primary',
         item.depth <= 2 && 'ps-4',
         item.depth === 3 && 'ps-7',
         item.depth >= 4 && 'ps-10',
