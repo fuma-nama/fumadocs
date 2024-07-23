@@ -15,6 +15,7 @@ async function main() {
   await Promise.all([writeOgImages(indexes), updateSearchIndexes(indexes)]);
 }
 
-void main().catch((e) => {
+await main().catch((e) => {
+  console.error('Failed to run post build script', e);
   throw e;
 });
