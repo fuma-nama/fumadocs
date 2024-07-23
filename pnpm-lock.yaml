@@ -772,8 +772,8 @@ importers:
   packages/twoslash:
     dependencies:
       '@shikijs/twoslash':
-        specifier: 1.11.0
-        version: 1.11.0(typescript@5.5.3)
+        specifier: 1.11.1
+        version: 1.11.1(typescript@5.5.3)
       mdast-util-from-markdown:
         specifier: ^2.0.1
         version: 2.0.1
@@ -2580,14 +2580,17 @@ packages:
   '@shikijs/core@1.11.0':
     resolution: {integrity: sha512-VbEhDAhT/2ozO0TPr5/ZQBO/NWLqtk4ZiBf6NplYpF38mKjNfMMied5fNEfIfYfN+cdKvhDB4VMcKvG/g9c3zg==}
 
+  '@shikijs/core@1.11.1':
+    resolution: {integrity: sha512-Qsn8h15SWgv5TDRoDmiHNzdQO2BxDe86Yq6vIHf5T0cCvmfmccJKIzHtep8bQO9HMBZYCtCBzaXdd1MnxZBPSg==}
+
   '@shikijs/rehype@1.11.0':
     resolution: {integrity: sha512-7cnt5Ih4gcFo7/aOdj73WgP+RsHhxlon/NPoPmm/MRhWQuxS8QoE9yp+fo3gdVSDlY39yRtz35MIhHpOUrHVbg==}
 
   '@shikijs/transformers@1.11.0':
     resolution: {integrity: sha512-RNEUyOxF1cPYVG2EvBv0CZeDU1Tp4fSxmsVD2Ofv+8h9hBqqgpq+l+7uyouyqV1JHNlqwRmUwAqrQU3GQQ3csQ==}
 
-  '@shikijs/twoslash@1.11.0':
-    resolution: {integrity: sha512-fyqUlij+Qm1MigL2JvXmeIJYSzvfrvO+SRULJco1y9XjIOe7SawvgUQf2BXhjZJPmrTKVqi4mbqECpj1KYtmKA==}
+  '@shikijs/twoslash@1.11.1':
+    resolution: {integrity: sha512-eN4U2sEjAJIlgvPpjKNKfnGpY1K6ppwmNQ24wCMOH4WRFpmAHPrrcXxw4Uw1MeDv93hUaVCCJN+ANP6ZBWp/kQ==}
 
   '@shuding/opentype.js@1.4.0-beta.0':
     resolution: {integrity: sha512-3NgmNyH3l/Hv6EvsWJbsvpcpUba6R8IREQ83nH83cyakCw7uM1arZKNfHwv1Wz6jgqrF/j4x5ELvR6PnK9nTcA==}
@@ -8086,6 +8089,10 @@ snapshots:
     dependencies:
       '@types/hast': 3.0.4
 
+  '@shikijs/core@1.11.1':
+    dependencies:
+      '@types/hast': 3.0.4
+
   '@shikijs/rehype@1.11.0':
     dependencies:
       '@shikijs/transformers': 1.11.0
@@ -8099,9 +8106,9 @@ snapshots:
     dependencies:
       shiki: 1.11.0
 
-  '@shikijs/twoslash@1.11.0(typescript@5.5.3)':
+  '@shikijs/twoslash@1.11.1(typescript@5.5.3)':
     dependencies:
-      '@shikijs/core': 1.11.0
+      '@shikijs/core': 1.11.1
       twoslash: 0.2.9(typescript@5.5.3)
     transitivePeerDependencies:
       - supports-color
