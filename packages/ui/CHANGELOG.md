@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 12.5.6
+
+### Patch Changes
+
+- a332bee: Support `undefined` state of `defaultOpen` in folder nodes
+  - fumadocs-core@12.5.6
+
 ## 12.5.5
 
 ### Patch Changes
