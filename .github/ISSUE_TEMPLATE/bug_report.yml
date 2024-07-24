@@ -5,7 +5,10 @@ body:
   - type: markdown
     attributes:
       value: |
-        Before opening a new issue, please do a search of existing issues.
+        Before opening a new issue:
+
+        - do a search of existing issues.
+        - upgrade to the latest versions of Fumadocs.
 
         If you need help with your own project, you can start a discussion in the [Q&A Section](https://github.com/fuma-nama/fumadocs/discussions/categories/q-a).
   - type: textarea
@@ -57,10 +60,10 @@ body:
       options:
         - 'Not sure'
         - 'Core'
-        - 'CLI (create-fumadocs-app)'
         - 'UI'
-        - 'MDX'
-        - 'Integrations (e.g Contentlayer, OpenAPI, Typescript DocsGen)'
+        - 'CLI (create-fumadocs-app)'
+        - 'Content Sources (e.g. Fumadocs MDX, Content Collections)'
+        - 'Integrations (e.g OpenAPI, Typescript DocsGen)'
         - 'TypeScript (built-in types)'
         - 'Examples'
     validations:
