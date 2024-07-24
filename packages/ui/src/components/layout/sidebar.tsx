@@ -222,7 +222,7 @@ function PageNode({
 }
 
 function FolderNode({
-  item: { name, children, index, icon, defaultOpen = false },
+  item,
   level,
 }: {
   item: PageTree.Folder;
@@ -230,14 +230,15 @@ function FolderNode({
 }): React.ReactElement {
   const { defaultOpenLevel, prefetch } = useContext(Context);
   const pathname = usePathname();
-  const active = index !== undefined && isActive(index.url, pathname, false);
+  const active =
+    item.index !== undefined && isActive(item.index.url, pathname, false);
   const childActive = useMemo(
-    () => hasActive(children, pathname),
-    [children, pathname],
+    () => hasActive(item.children, pathname),
+    [item.children, pathname],
   );
 
   const shouldExtend =
-    active || childActive || defaultOpenLevel >= level || defaultOpen;
+    active || childActive || (item.defaultOpen ?? defaultOpenLevel >= level);
   const [open, setOpen] = useState(shouldExtend);
 
   useOnChange(shouldExtend, (v) => {
@@ -260,8 +261,8 @@ function FolderNode({
 
   const content = (
     <>
-      {icon}
-      {name}
+      {item.icon}
+      {item.name}
       <ChevronDown
         data-icon
         className={cn('ms-auto transition-transform', !open && '-rotate-90')}
@@ -271,10 +272,10 @@ function FolderNode({
 
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
-      {index ? (
+      {item.index ? (
         <Link
           className={cn(itemVariants({ active }))}
-          href={index.url}
+          href={item.index.url}
           onClick={onClick}
           prefetch={prefetch}
         >
@@ -288,7 +289,7 @@ function FolderNode({
       <CollapsibleContent>
         <NodeList
           className="ms-2 flex flex-col border-s py-2 ps-2"
-          items={children}
+          items={item.children}
           level={level}
         />
       </CollapsibleContent>

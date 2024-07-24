@@ -44,7 +44,7 @@ const config = {
 const withMDX = createMDX({
   buildSearchIndex: {
     filter: (v) => {
-      return !v.match(/.+\.model\.mdx/);
+      return !v.match(/.+\.model\.mdx/) && !v.startsWith('blog');
     },
   },
   mdxOptions: {
