@@ -18,6 +18,13 @@ export async function updateSearchIndexes(
   const client = algosearch(
     process.env.NEXT_PUBLIC_ALGOLIA_APP_ID,
     process.env.ALGOLIA_API_KEY,
+    {
+      timeouts: {
+        connect: 60,
+        read: 180,
+        write: 180,
+      },
+    },
   );
 
   await sync(client, {

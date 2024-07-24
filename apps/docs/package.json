@@ -37,7 +37,7 @@
     "rehype-katex": "^7.0.0",
     "remark-math": "^6.0.0",
     "satori": "^0.10.14",
-    "shiki": "^1.11.0",
+    "shiki": "^1.11.1",
     "tailwind-merge": "^2.4.0",
     "zod": "^3.23.8"
   },
@@ -45,7 +45,7 @@
     "@next/bundle-analyzer": "^14.2.5",
     "@next/eslint-plugin-next": "^14.2.5",
     "@types/mdx": "^2.0.13",
-    "@types/node": "20.14.11",
+    "@types/node": "20.14.12",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "autoprefixer": "^10.4.19",
@@ -57,7 +57,7 @@
     "tailwindcss-animate": "^1.0.7",
     "tsconfig": "workspace:*",
     "tsx": "^4.16.2",
-    "typescript": "^5.5.3",
+    "typescript": "^5.5.4",
     "webpack": "^5.90.3"
   }
 }
