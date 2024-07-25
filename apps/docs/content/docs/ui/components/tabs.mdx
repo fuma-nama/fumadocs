@@ -25,7 +25,7 @@ By passing an `id` property, you can share a value across all tabs with the same
 id.
 
 ```mdx
-<Tabs id="language" items={['Javascript', 'Rust']}>
+<Tabs groupId="language" items={['Javascript', 'Rust']}>
   <Tab value="Javascript">Javascript is weird</Tab>
   <Tab value="Rust">Rust is fast</Tab>
 </Tabs>
@@ -37,7 +37,7 @@ You can enable persistent by passing a `persist` property. The value will be
 stored in `localStorage`, with its id as the key.
 
 ```mdx
-<Tabs id="language" items={['Javascript', 'Rust']} persist>
+<Tabs groupId="language" items={['Javascript', 'Rust']} persist>
   <Tab value="Javascript">Javascript is weird</Tab>
   <Tab value="Rust">Rust is fast</Tab>
 </Tabs>

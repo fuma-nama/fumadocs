@@ -68,7 +68,7 @@ export function remarkInstall({
             ? [
                 {
                   type: 'mdxJsxAttribute',
-                  name: 'id',
+                  name: 'groupId',
                   value: persist.id,
                 },
                 {

@@ -37,11 +37,11 @@ function update(id: string, v: string, persist: boolean): void {
 }
 
 export interface TabsProps extends BaseProps {
-  // TODO: Rename to group id so that it won't confuse with HTML `id` attribute (next major)
   /**
    * Identifier for Sharing value of tabs
    */
-  id?: string;
+  groupId?: string;
+
   /**
    * Enable persistent
    */
@@ -55,7 +55,7 @@ export interface TabsProps extends BaseProps {
 }
 
 export function Tabs({
-  id,
+  groupId,
   items = [],
   persist = false,
   defaultIndex = 0,
@@ -65,32 +65,32 @@ export function Tabs({
   const [value, setValue] = useState(values[defaultIndex]);
 
   useLayoutEffect(() => {
-    if (!id) return;
+    if (!groupId) return;
 
     const onUpdate: ChangeListener = (v) => {
       if (values.includes(v)) setValue(v);
     };
 
     const previous = persist
-      ? localStorage.getItem(id)
-      : sessionStorage.getItem(id);
+      ? localStorage.getItem(groupId)
+      : sessionStorage.getItem(groupId);
 
     if (previous) onUpdate(previous);
-    addChangeListener(id, onUpdate);
+    addChangeListener(groupId, onUpdate);
     return () => {
-      removeChangeListener(id, onUpdate);
+      removeChangeListener(groupId, onUpdate);
     };
-  }, [id, persist, values]);
+  }, [groupId, persist, values]);
 
   const onValueChange = useCallback(
     (v: string) => {
-      if (id) {
-        update(id, v, persist);
+      if (groupId) {
+        update(groupId, v, persist);
       } else {
         setValue(v);
       }
     },
-    [id, persist],
+    [groupId, persist],
   );
 
   return (
