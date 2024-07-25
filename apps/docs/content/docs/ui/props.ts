@@ -9,7 +9,6 @@ import type {
 } from 'fumadocs-ui/components/api';
 import type { File, Folder } from 'fumadocs-ui/components/files';
 import type { InlineTOC } from 'fumadocs-ui/components/inline-toc';
-import type { RollButton } from 'fumadocs-ui/components/roll-button';
 import type { TypeTable } from 'fumadocs-ui/components/type-table';
 import type { Card } from 'fumadocs-ui/components/card';
 import type { DocsLayoutProps } from 'fumadocs-ui/layout';
@@ -76,8 +75,6 @@ export type CardProps = Omit<
   ComponentPropsWithoutRef<typeof Card>,
   keyof Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href'>
 >;
-
-export type RollButtonProps = ComponentPropsWithoutRef<typeof RollButton>;
 
 export type TypeTableProps = ComponentPropsWithoutRef<typeof TypeTable>;
 

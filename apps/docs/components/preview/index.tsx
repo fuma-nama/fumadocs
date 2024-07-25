@@ -14,10 +14,6 @@ import BannerImage from '@/public/banner.png';
 import { modes } from '@/utils/modes';
 import { Wrapper } from './wrapper';
 
-const RollButton = dynamic(() =>
-  import('fumadocs-ui/components/roll-button').then((m) => m.RollButton),
-);
-
 const Banner = dynamic(() =>
   import('fumadocs-ui/components/banner').then((m) => m.Banner),
 );
@@ -208,12 +204,6 @@ export default {
         </Steps>
       </div>
     </Wrapper>
-  ),
-  'roll-button': (
-    <div className="rounded-lg border bg-fd-card p-4 text-fd-muted-foreground">
-      <RollButton />
-      <p className="text-center text-sm">Scroll down to see the button</p>
-    </div>
   ),
   'root-toggle': (
     <Wrapper>
