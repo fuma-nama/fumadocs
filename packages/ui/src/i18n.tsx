@@ -6,23 +6,24 @@ import {
   useI18n,
   type Translations,
   I18nContext,
-  type NamedTranslation,
+  type LocaleItem,
 } from './contexts/i18n';
 
 interface I18nProviderProps {
-  // TODO: make required (next major)
   /**
-   * Force a locale, by default, it is parsed from pathname
-   *
-   * **Highly recommended to specify one**
+   * Current locale
    */
-  locale?: string;
+  locale: string;
 
-  // TODO: only pass the current translation, reduce client bundle size
   /**
-   * Translations for each language
+   * Translations of current locale
    */
-  translations?: Record<string, NamedTranslation>;
+  translations?: Partial<Translations>;
+
+  /**
+   * Available languages
+   */
+  locales?: LocaleItem[];
 
   /**
    * Handle changes to the locale, redirect user when not specified.
@@ -33,7 +34,8 @@ interface I18nProviderProps {
 }
 
 export function I18nProvider({
-  translations = {},
+  locales = [],
+  locale,
   ...props
 }: I18nProviderProps): React.ReactElement {
   const context = useI18n();
@@ -42,7 +44,6 @@ export function I18nProvider({
     .split('/')
     .filter((v) => v.length > 0);
 
-  const locale = props.locale ?? segments[0];
   const onChange = useCallback(
     (v: string) => {
       // If locale prefix hidden
@@ -61,10 +62,10 @@ export function I18nProvider({
     <I18nContext.Provider
       value={{
         locale,
-        translations,
+        locales,
         text: {
           ...context.text,
-          ...translations[locale],
+          ...props.translations,
         },
         onChange: props.onChange ?? onChange,
       }}

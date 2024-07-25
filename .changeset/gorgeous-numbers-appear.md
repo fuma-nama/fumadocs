@@ -1,14 +1,17 @@
+---
+'fumadocs-ui': major
+---
+
+**Change usage of I18nProvider**
+
+**why:** Make possible to load translations lazily
+
+**migrate:**
+
+```tsx
 import { RootProvider } from 'fumadocs-ui/provider';
-import 'fumadocs-ui/style.css';
-import { Inter } from 'next/font/google';
 import type { ReactNode } from 'react';
 import { I18nProvider } from 'fumadocs-ui/i18n';
-import { pageTree } from '@/app/source';
-import { DocsLayout } from 'fumadocs-ui/layout';
-
-const inter = Inter({
-  subsets: ['latin'],
-});
 
 export default function Layout({
   params: { lang },
@@ -18,10 +21,11 @@ export default function Layout({
   children: ReactNode;
 }) {
   return (
-    <html lang={lang} className={inter.className}>
+    <html lang={lang}>
       <body>
         <I18nProvider
           locale={lang}
+          // options
           locales={[
             {
               name: 'English',
@@ -32,6 +36,7 @@ export default function Layout({
               locale: 'cn',
             },
           ]}
+          // translations
           translations={
             {
               cn: {
@@ -45,20 +50,10 @@ export default function Layout({
             }[lang]
           }
         >
-          <RootProvider>
-            <DocsLayout
-              tree={pageTree[lang]}
-              nav={{
-                title: lang === 'cn' ? '文檔' : 'My App',
-                url: `/${lang}`,
-              }}
-              i18n
-            >
-              {children}
-            </DocsLayout>
-          </RootProvider>
+          <RootProvider>{children}</RootProvider>
         </I18nProvider>
       </body>
     </html>
   );
 }
+```

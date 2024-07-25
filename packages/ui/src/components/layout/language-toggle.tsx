@@ -16,9 +16,7 @@ export type LanguageSelectProps = Omit<PopoverProps, 'open' | 'onOpenChange'>;
 export function LanguageToggle(props: LanguageSelectProps): React.ReactElement {
   const context = useI18n();
   const [open, setOpen] = useState(false);
-  if (!context.translations) throw new Error('Missing `<I18nProvider />`');
-
-  const languages = Object.entries(context.translations);
+  if (!context.locales) throw new Error('Missing `<I18nProvider />`');
 
   return (
     <Popover open={open} onOpenChange={setOpen} {...props}>
@@ -32,21 +30,21 @@ export function LanguageToggle(props: LanguageSelectProps): React.ReactElement {
         <p className="mb-1 p-2 text-xs font-medium text-fd-muted-foreground">
           {context.text.chooseLanguage}
         </p>
-        {languages.map(([lang, { name }]) => (
+        {context.locales.map((item) => (
           <button
-            key={lang}
+            key={item.locale}
             type="button"
             className={cn(
               'rounded-md p-2 text-left text-sm transition-colors duration-100',
-              lang === context.locale
+              item.locale === context.locale
                 ? 'bg-fd-primary/10 font-medium text-fd-primary'
                 : 'hover:bg-fd-accent hover:text-fd-accent-foreground',
             )}
             onClick={() => {
-              context.onChange?.(lang);
+              context.onChange?.(item.locale);
             }}
           >
-            {name}
+            {item.name}
           </button>
         ))}
       </PopoverContent>
