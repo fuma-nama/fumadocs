@@ -10,8 +10,6 @@ import { replaceOrDefault } from './utils/shared';
 import type { LinkItemType } from './components/layout/link-item';
 import { type BaseLayoutProps, getLinks } from './layout.shared';
 
-declare const { Nav }: typeof import('./home-layout.client');
-
 declare const {
   TreeContextProvider,
   SubNav,
@@ -33,14 +31,7 @@ const DynamicSidebar = dynamic(() =>
   ),
 );
 
-export type {
-  LinkItemType,
-  // TODO: Remove this (next major)
-  /**
-   * @deprecated Import `HomeLayoutProps` from `fumadocs-ui/home-layout` instead
-   */
-  BaseLayoutProps,
-};
+export type { LinkItemType };
 
 interface SidebarOptions extends Omit<SidebarProps, 'items'> {
   enabled: boolean;
@@ -61,31 +52,6 @@ export interface DocsLayoutProps extends BaseLayoutProps {
    * @defaultValue false
    */
   i18n?: boolean;
-}
-
-// TODO: Remove this (next major)
-/**
- * @deprecated Use `HomeLayout` from `fumadocs-ui/home-layout` instead
- */
-export function Layout({
-  nav = {},
-  links = [],
-  githubUrl,
-  children,
-}: BaseLayoutProps): React.ReactElement {
-  const finalLinks = getLinks(links, githubUrl);
-
-  return (
-    <>
-      {replaceOrDefault(
-        nav,
-        <Nav items={finalLinks} {...nav}>
-          {nav.children}
-        </Nav>,
-      )}
-      {children}
-    </>
-  );
 }
 
 export function DocsLayout({

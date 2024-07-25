@@ -61,30 +61,20 @@ async function injectImport(src: string): Promise<void> {
   await fs.writeFile(srcOut, outContent);
 }
 
-export default defineConfig([
-  {
-    entry: [
-      `./src/components/{${exportedComponents.join(',')}}.tsx`,
-      './src/{i18n,home-layout,layout,page,provider,mdx,tailwind-plugin}.{ts,tsx}',
-      './src/twoslash/popup.tsx',
-      './src/*.client.tsx',
-    ],
-    external: ['server-only', '../../dist/image-zoom.css', 'tailwindcss'],
-    async onSuccess() {
-      const replaceImports = injectImports.map((src) => injectImport(src));
+export default defineConfig({
+  entry: [
+    `./src/components/{${exportedComponents.join(',')}}.tsx`,
+    './src/{i18n,home-layout,layout,page,provider,mdx,tailwind-plugin}.{ts,tsx}',
+    './src/twoslash/popup.tsx',
+    './src/*.client.tsx',
+  ],
+  external: ['server-only', '../../dist/image-zoom.css', 'tailwindcss'],
+  async onSuccess() {
+    const replaceImports = injectImports.map((src) => injectImport(src));
 
-      await Promise.all(replaceImports);
-    },
-    format: 'esm',
-    dts: true,
-    target: 'esnext',
+    await Promise.all(replaceImports);
   },
-  {
-    // todo: Remove support for CommonJS in next major
-    entry: ['./src/tailwind-plugin.ts'],
-    format: 'cjs',
-    external: ['tailwindcss'],
-    dts: false,
-    target: 'node18',
-  },
-]);
+  format: 'esm',
+  dts: true,
+  target: 'esnext',
+});

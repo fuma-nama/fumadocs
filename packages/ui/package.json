@@ -17,7 +17,6 @@
     "./image-zoom.css": "./dist/image-zoom.css",
     "./tailwind-plugin": {
       "import": "./dist/tailwind-plugin.js",
-      "require": "./dist/tailwind-plugin.cjs",
       "types": "./dist/tailwind-plugin.d.ts"
     },
     "./components/*": {
