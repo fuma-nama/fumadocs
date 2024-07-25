@@ -16,7 +16,6 @@ import { ThemeToggle } from '@/components/layout/theme-toggle';
 import { NavBox, Title } from '@/components/layout/nav';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/theme/variants';
-import { isSecondary } from '@/utils/shared';
 import type { SharedNavProps } from '@/layout.shared';
 
 export function Nav({
@@ -76,5 +75,11 @@ export function Nav({
         </div>
       </nav>
     </NavBox>
+  );
+}
+
+function isSecondary(item: LinkItemType): boolean {
+  return (
+    ('secondary' in item && item.secondary === true) || item.type === 'icon'
   );
 }

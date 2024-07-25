@@ -1,6 +1,5 @@
 import type { PageTree } from 'fumadocs-core/server';
 import type { ReactNode } from 'react';
-import type { LinkItemType } from '@/components/layout/link-item';
 
 export const defaultImageSizes =
   '(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 800px';
@@ -39,12 +38,4 @@ export function hasActive(items: PageTree.Node[], url: string): boolean {
 
     return false;
   });
-}
-
-export function isSecondary(item: LinkItemType): boolean {
-  return (
-    ('secondary' in item && item.secondary === true) ||
-    item.type === 'secondary' ||
-    item.type === 'icon'
-  );
 }

@@ -60,8 +60,7 @@ export type LinkItemType =
       text: ReactNode;
     })
   | (BaseLinkItem & {
-      // TODO: Replace secondary type with icon (next major)
-      type: 'icon' | 'secondary';
+      type: 'icon';
       /**
        * `aria-label` of icon button
        */
@@ -176,7 +175,7 @@ export function LinkItem({
     activeType !== 'none' &&
     isActive(item.url, pathname, activeType === 'nested-url');
 
-  if ((item.type === 'secondary' || item.type === 'icon') && on === 'nav') {
+  if (item.type === 'icon' && on === 'nav') {
     return (
       <Link
         aria-label={item.label}
