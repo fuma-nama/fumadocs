@@ -1,70 +1,51 @@
-import type {
-  AnchorHTMLAttributes,
-  HTMLAttributes,
-  ReactNode,
-  RefObject,
-} from 'react';
-import {
-  createContext,
-  forwardRef,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-} from 'react';
+import type { AnchorHTMLAttributes, ReactNode, RefObject } from 'react';
+import { createContext, forwardRef, useContext, useMemo, useRef } from 'react';
 import scrollIntoView from 'scroll-into-view-if-needed';
 import type { TableOfContents } from '@/server/get-toc';
 import { mergeRefs } from '@/utils/merge-refs';
+import { useOnChange } from '@/utils/use-on-change';
 import { useAnchorObserver } from './utils/use-anchor-observer';
 
-const ActiveAnchorContext = createContext<{
-  activeAnchor?: string;
-  containerRef?: RefObject<HTMLElement>;
-}>({});
+const ActiveAnchorContext = createContext<string | undefined>(undefined);
 
-export const useActiveAnchor = (url: string): boolean => {
-  const { activeAnchor } = useContext(ActiveAnchorContext);
+const ScrollContext = createContext<RefObject<HTMLElement>>({ current: null });
 
-  return activeAnchor === url.split('#')[1];
-};
-
-export interface TOCProviderProps extends HTMLAttributes<HTMLDivElement> {
-  toc: TableOfContents;
+/**
+ * The id of active anchor (doesn't include hash)
+ */
+export function useActiveAnchor(): string | undefined {
+  return useContext(ActiveAnchorContext);
 }
 
-export interface TOCScrollProvider {
+export interface AnchorProviderProps {
+  toc: TableOfContents;
+  children?: ReactNode;
+}
+
+export interface ScrollProviderProps {
   /**
    * Scroll into the view of container when active
    */
-  containerRef?: RefObject<HTMLElement>;
+  containerRef: RefObject<HTMLElement>;
 
-  toc: TableOfContents;
-  children: ReactNode;
+  children?: ReactNode;
 }
 
-// todo: remove in next major
-export const TOCProvider = forwardRef<HTMLDivElement, TOCProviderProps>(
-  ({ toc, ...props }, ref) => {
-    const containerRef = useRef<HTMLDivElement>(null);
-    const mergedRef = mergeRefs(containerRef, ref);
-
-    return (
-      <div ref={mergedRef} {...props}>
-        <TOCScrollProvider toc={toc} containerRef={containerRef}>
-          {props.children}
-        </TOCScrollProvider>
-      </div>
-    );
-  },
-);
-
-TOCProvider.displayName = 'TOCProvider';
-
-export function TOCScrollProvider({
-  toc,
+export function ScrollProvider({
   containerRef,
   children,
-}: TOCScrollProvider): React.ReactElement {
+}: ScrollProviderProps): React.ReactElement {
+  return (
+    <ScrollContext.Provider value={containerRef}>
+      {children}
+    </ScrollContext.Provider>
+  );
+}
+
+export function AnchorProvider({
+  toc,
+  children,
+}: AnchorProviderProps): React.ReactElement {
   const headings = useMemo(() => {
     return toc.map((item) => item.url.split('#')[1]);
   }, [toc]);
@@ -72,32 +53,33 @@ export function TOCScrollProvider({
   const activeAnchor = useAnchorObserver(headings);
 
   return (
-    <ActiveAnchorContext.Provider value={{ containerRef, activeAnchor }}>
+    <ActiveAnchorContext.Provider value={activeAnchor}>
       {children}
     </ActiveAnchorContext.Provider>
   );
 }
 
-export interface TOCItemProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
+export interface TOCItemProps
+  extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> {
   href: string;
 
-  /**
-   * Scroll into the view of container when active
-   */
-  containerRef?: RefObject<HTMLElement>;
+  onActiveChange?: (v: boolean) => void;
 }
 
 export const TOCItem = forwardRef<HTMLAnchorElement, TOCItemProps>(
-  ({ containerRef: container, ...props }, ref) => {
-    const { containerRef = container } = useContext(ActiveAnchorContext);
-    const active = useActiveAnchor(props.href);
+  ({ onActiveChange, ...props }, ref) => {
+    const containerRef = useContext(ScrollContext);
+    const activeAnchor = useActiveAnchor();
     const anchorRef = useRef<HTMLAnchorElement>(null);
     const mergedRef = mergeRefs(anchorRef, ref);
 
-    useEffect(() => {
-      const element = anchorRef.current;
+    const isActive = activeAnchor === props.href.split('#')[1];
 
-      if (active && element && containerRef) {
+    useOnChange(isActive, (v) => {
+      const element = anchorRef.current;
+      if (!element) return;
+
+      if (v && containerRef.current) {
         scrollIntoView(element, {
           behavior: 'smooth',
           block: 'center',
@@ -106,10 +88,12 @@ export const TOCItem = forwardRef<HTMLAnchorElement, TOCItemProps>(
           boundary: containerRef.current,
         });
       }
-    }, [active, containerRef]);
+
+      onActiveChange?.(v);
+    });
 
     return (
-      <a ref={mergedRef} data-active={active} {...props}>
+      <a ref={mergedRef} data-active={isActive} {...props}>
         {props.children}
       </a>
     );

@@ -4,7 +4,6 @@ import { defineConfig } from 'tsup';
 
 const exportedComponents = [
   'type-table',
-  'roll-button',
   'image-zoom',
   'files',
   'tabs',

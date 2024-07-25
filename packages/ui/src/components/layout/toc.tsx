@@ -1,6 +1,6 @@
 import { ChevronRight, Text } from 'lucide-react';
 import type { TOCItemType } from 'fumadocs-core/server';
-import * as Primitive from 'fumadocs-core/toc-internal';
+import * as Primitive from 'fumadocs-core/toc';
 import {
   type ReactElement,
   type ReactNode,
