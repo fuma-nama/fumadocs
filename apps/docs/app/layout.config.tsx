@@ -64,7 +64,7 @@ export const docsOptions: DocsLayoutProps = {
           url: `/docs/${mode.param}`,
           icon: (
             <mode.icon
-              className="size-9 shrink-0 rounded-md bg-gradient-to-t from-background/80 p-1.5"
+              className="size-9 shrink-0 rounded-md bg-gradient-to-t from-fd-background/80 p-1.5"
               style={{
                 backgroundColor: `hsl(var(--${mode.param}-color)/.3)`,
                 color: `hsl(var(--${mode.param}-color))`,

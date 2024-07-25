@@ -29,7 +29,7 @@ export function LanguageToggle(props: LanguageSelectProps): React.ReactElement {
         <LanguagesIcon />
       </PopoverTrigger>
       <PopoverContent className="flex flex-col p-1">
-        <p className="mb-1 p-2 text-xs font-medium text-muted-foreground">
+        <p className="mb-1 p-2 text-xs font-medium text-fd-muted-foreground">
           {context.text.chooseLanguage}
         </p>
         {languages.map(([lang, { name }]) => (
@@ -39,8 +39,8 @@ export function LanguageToggle(props: LanguageSelectProps): React.ReactElement {
             className={cn(
               'rounded-md p-2 text-left text-sm transition-colors duration-100',
               lang === context.locale
-                ? 'bg-primary/10 font-medium text-primary'
-                : 'hover:bg-accent hover:text-accent-foreground',
+                ? 'bg-fd-primary/10 font-medium text-fd-primary'
+                : 'hover:bg-fd-accent hover:text-fd-accent-foreground',
             )}
             onClick={() => {
               context.onChange?.(lang);

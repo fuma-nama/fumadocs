@@ -10,7 +10,7 @@ export default function DocsPage(): React.ReactElement {
     <main className="container flex flex-col items-center py-16 text-center">
       <div className="absolute inset-0 z-[-1] overflow-hidden duration-1000 animate-in fade-in [perspective:2000px]">
         <div
-          className="absolute bottom-[20%] left-1/2 size-[1200px] origin-bottom bg-primary/30 opacity-30"
+          className="absolute bottom-[20%] left-1/2 size-[1200px] origin-bottom bg-fd-primary/30 opacity-30"
           style={{
             transform: 'rotateX(75deg) translate(-50%, 400px)',
             backgroundImage:
@@ -30,7 +30,7 @@ export default function DocsPage(): React.ReactElement {
       <h1 className="mb-4 text-4xl font-semibold md:text-5xl">
         Getting Started
       </h1>
-      <p className="text-muted-foreground">
+      <p className="text-fd-muted-foreground">
         You can start with Fumadocs UI, or just use the core library.
       </p>
       <div className="mt-4 grid grid-cols-2 gap-4">
@@ -54,7 +54,7 @@ export default function DocsPage(): React.ReactElement {
             <LayoutIcon className="size-full" />
           </Icon>
           <h2 className="mb-2 text-lg font-semibold">Fumadocs UI</h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-fd-muted-foreground">
             The full-powered documentation framework with an excellent UI.
           </p>
         </Item>
@@ -63,7 +63,7 @@ export default function DocsPage(): React.ReactElement {
             <LibraryIcon className="size-full" />
           </Icon>
           <h2 className="mb-2 text-lg font-semibold">Fumadocs Core</h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-fd-muted-foreground">
             The core library of Fumadocs.
           </p>
         </Item>
@@ -75,7 +75,7 @@ export default function DocsPage(): React.ReactElement {
 function Icon({ children }: { children: React.ReactNode }): React.ReactElement {
   return (
     <div
-      className="mb-2 size-9 rounded-lg border p-1.5 shadow-primary/30"
+      className="mb-2 size-9 rounded-lg border p-1.5 shadow-fd-primary/30"
       style={{
         boxShadow: 'inset 0px 8px 8px 0px var(--tw-shadow-color)',
       }}
@@ -91,10 +91,10 @@ function Item(
   return (
     <Link
       {...props}
-      className="rounded-2xl border border-transparent p-6 shadow-lg transition-all hover:shadow-primary/20"
+      className="rounded-2xl border border-transparent p-6 shadow-lg transition-all hover:shadow-fd-primary/20"
       style={{
         backgroundImage:
-          'linear-gradient(to right bottom, hsl(var(--background)) 10%, hsl(var(--accent)), hsl(var(--background)) 60%),' +
+          'linear-gradient(to right bottom, hsl(var(--background)) 10%, hsl(var(--fd-accent)), hsl(var(--background)) 60%),' +
           'linear-gradient(to right bottom, rgb(40,40,40) 10%, rgb(180,180,180), rgb(30,30,30) 60%)',
         backgroundOrigin: 'border-box',
         backgroundClip: 'padding-box, border-box',

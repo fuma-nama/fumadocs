@@ -19,12 +19,12 @@ import {
 } from '@/components/ui/popover';
 
 const linkItemVariants = cva(
-  '-m-2 inline-flex items-center gap-1 p-2 text-muted-foreground transition-colors [&_svg]:size-4',
+  '-m-2 inline-flex items-center gap-1 p-2 text-fd-muted-foreground transition-colors [&_svg]:size-4',
   {
     variants: {
       active: {
-        true: 'text-primary',
-        false: 'hover:text-accent-foreground',
+        true: 'text-fd-primary',
+        false: 'hover:text-fd-accent-foreground',
       },
     },
     defaultVariants: {

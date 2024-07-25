@@ -15,7 +15,7 @@ export function Root({
   return (
     <div
       className={cn(
-        'flex flex-col gap-24 text-sm text-muted-foreground',
+        'flex flex-col gap-24 text-sm text-fd-muted-foreground',
         className,
       )}
       {...props}
@@ -82,7 +82,7 @@ export function APIInfo({
 
   return (
     <div className={cn('flex-1 prose-no-margin', className)} {...props}>
-      <h2 className="flex flex-row items-center gap-3 rounded-lg border bg-card p-3 text-base">
+      <h2 className="flex flex-row items-center gap-3 rounded-lg border bg-fd-card p-3 text-base">
         <span className={cn(badgeVariants({ color }))}>{method}</span>
         <code>{route}</code>
       </h2>
@@ -107,7 +107,7 @@ export function Property({
   children,
 }: PropertyProps): React.ReactElement {
   return (
-    <div className="mb-4 flex flex-col rounded-lg border bg-card p-3 prose-no-margin">
+    <div className="mb-4 flex flex-col rounded-lg border bg-fd-card p-3 prose-no-margin">
       <h4 className="inline-flex items-center gap-4">
         <code>{name}</code>
         {required ? (
@@ -118,7 +118,7 @@ export function Property({
             Deprecated
           </div>
         ) : null}
-        <span className="ms-auto font-mono text-[13px] text-muted-foreground">
+        <span className="ms-auto font-mono text-[13px] text-fd-muted-foreground">
           {type}
         </span>
       </h4>

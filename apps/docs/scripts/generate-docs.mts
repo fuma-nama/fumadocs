@@ -11,7 +11,7 @@ void OpenAPI.generateFiles({
       return OpenAPI.createElement(
         'Root',
         props,
-        '<div className="bg-secondary p-4 rounded-lg">Demo Only</div>',
+        '<div className="bg-fd-secondary p-4 rounded-lg">Demo Only</div>',
         ...child,
       );
     },

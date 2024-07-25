@@ -36,7 +36,7 @@ import {
 } from './icons';
 
 const badgeVariants = cva(
-  'mb-2 inline-flex size-7 items-center justify-center rounded-full bg-primary font-medium text-primary-foreground',
+  'mb-2 inline-flex size-7 items-center justify-center rounded-full bg-fd-primary font-medium text-fd-primary-foreground',
 );
 
 const code = `const frontmatterSchema = defaultValidators.frontmatter.extend({
@@ -89,31 +89,31 @@ export default function HomePage(): React.ReactElement {
                 'radial-gradient(circle at bottom center, hsl(var(--secondary)), hsl(var(--background)))',
             }}
           >
-            <h2 className="bg-gradient-to-b from-primary to-foreground/40 bg-clip-text text-center text-2xl font-semibold text-transparent sm:text-3xl">
+            <h2 className="bg-gradient-to-b from-fd-primary to-fd-foreground/40 bg-clip-text text-center text-2xl font-semibold text-transparent sm:text-3xl">
               Loved by users.
               <br />
               Built for developers.
             </h2>
 
             <div
-              className="mx-auto mb-[-160px] mt-8 flex h-[240px] flex-row overflow-hidden rounded-xl border bg-card/50 backdrop-blur-lg md:w-[70%]"
+              className="mx-auto mb-[-160px] mt-8 flex h-[240px] flex-row overflow-hidden rounded-xl border bg-fd-card/50 backdrop-blur-lg md:w-[70%]"
               style={{
                 maskImage: 'linear-gradient(to bottom, white, transparent)',
               }}
             >
-              <div className="flex w-1/4 flex-col gap-4 border-r bg-card p-4">
-                <div className="h-4 w-full rounded-full bg-muted-foreground/20" />
-                <div className="h-4 w-1/2 rounded-full bg-muted-foreground/20" />
-                <div className="h-4 w-1/2 rounded-full bg-muted-foreground/20" />
+              <div className="flex w-1/4 flex-col gap-4 border-r bg-fd-card p-4">
+                <div className="h-4 w-full rounded-full bg-fd-muted-foreground/20" />
+                <div className="h-4 w-1/2 rounded-full bg-fd-muted-foreground/20" />
+                <div className="h-4 w-1/2 rounded-full bg-fd-muted-foreground/20" />
               </div>
               <div className="flex flex-1 flex-col gap-4 px-4 py-8">
-                <div className="mb-3 h-6 w-1/4 rounded-full bg-muted-foreground/20" />
-                <div className="h-4 w-1/3 rounded-full bg-muted-foreground/20" />
-                <div className="h-4 w-full rounded-full bg-muted-foreground/20" />
-                <div className="h-4 w-1/2 rounded-full bg-muted-foreground/20" />
+                <div className="mb-3 h-6 w-1/4 rounded-full bg-fd-muted-foreground/20" />
+                <div className="h-4 w-1/3 rounded-full bg-fd-muted-foreground/20" />
+                <div className="h-4 w-full rounded-full bg-fd-muted-foreground/20" />
+                <div className="h-4 w-1/2 rounded-full bg-fd-muted-foreground/20" />
               </div>
               <div className="w-1/4 pt-8 max-lg:hidden">
-                <div className="h-4 w-1/2 rounded-full bg-muted-foreground/20" />
+                <div className="h-4 w-1/2 rounded-full bg-fd-muted-foreground/20" />
               </div>
             </div>
           </div>
@@ -138,7 +138,7 @@ function End(): React.ReactElement {
               <BatteryChargingIcon className="size-5" />
               Battery guaranteed.
             </span>
-            <span className="mt-2 text-sm text-muted-foreground">
+            <span className="mt-2 text-sm text-fd-muted-foreground">
               Actively maintained, open for contributions.
             </span>
           </li>
@@ -149,7 +149,7 @@ function End(): React.ReactElement {
               </svg>
               Fully open-source.
             </span>
-            <span className="mt-2 text-sm text-muted-foreground">
+            <span className="mt-2 text-sm text-fd-muted-foreground">
               Open source, available on Github.
             </span>
           </li>
@@ -158,7 +158,7 @@ function End(): React.ReactElement {
               <TimerIcon className="size-5" />
               Within seconds.
             </span>
-            <span className="mt-2 text-sm text-muted-foreground">
+            <span className="mt-2 text-sm text-fd-muted-foreground">
               Initialize a new project instantly with CLI.
             </span>
           </li>
@@ -185,7 +185,7 @@ function End(): React.ReactElement {
   );
 }
 
-const linkItemVariants = cva('transition-colors hover:bg-muted');
+const linkItemVariants = cva('transition-colors hover:bg-fd-muted');
 
 function Integration({
   className,
@@ -202,14 +202,14 @@ function Integration({
       <Link href="/docs/ui/openapi" className={cn(linkItemVariants())}>
         <OpenAPIIcon className="mb-2 size-12" />
         <p className="text-lg font-medium">OpenAPI</p>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-fd-muted-foreground">
           Generate docs from your OpenAPI schema.
         </p>
       </Link>
       <Link href="/docs/mdx" className={cn(linkItemVariants())}>
         <NextSVG className="mb-2 size-12" />
         <p className="text-lg font-medium">Next.js</p>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-fd-muted-foreground">
           Enjoy the full power of App Router.
         </p>
       </Link>
@@ -225,7 +225,7 @@ function Integration({
           height={48}
         />
         <p className="text-lg font-medium">Content Collections</p>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-fd-muted-foreground">
           Integrate with Content Collections, an alternative to Contentlayer.
         </p>
       </Link>
@@ -237,7 +237,7 @@ function Integration({
           code="pnpm create fumadocs-app"
         />
       </div>
-      <div className="col-span-full h-[200px] overflow-hidden bg-gradient-to-b from-primary/10">
+      <div className="col-span-full h-[200px] overflow-hidden bg-gradient-to-b from-fd-primary/10">
         <div
           className="mx-auto size-[500px] rounded-full"
           style={{
@@ -251,14 +251,14 @@ function Integration({
 }
 
 const searchItemVariants = cva(
-  'flex flex-row items-center gap-2 rounded-md p-2 text-sm text-popover-foreground',
+  'flex flex-row items-center gap-2 rounded-md p-2 text-sm text-fd-popover-foreground',
 );
 
 function Search(): React.ReactElement {
   return (
-    <div className="mt-6 rounded-lg bg-gradient-to-b from-border p-px">
-      <div className="flex select-none flex-col rounded-[inherit] bg-gradient-to-b from-popover">
-        <div className="inline-flex items-center gap-2 px-4 py-2 text-sm text-muted-foreground">
+    <div className="from-border mt-6 rounded-lg bg-gradient-to-b p-px">
+      <div className="flex select-none flex-col rounded-[inherit] bg-gradient-to-b from-fd-popover">
+        <div className="inline-flex items-center gap-2 px-4 py-2 text-sm text-fd-muted-foreground">
           <SearchIcon className="size-4" />
           Search...
         </div>
@@ -273,10 +273,12 @@ function Search(): React.ReactElement {
             <div
               key={v}
               className={cn(
-                searchItemVariants({ className: i === 0 ? 'bg-accent' : '' }),
+                searchItemVariants({
+                  className: i === 0 ? 'bg-fd-accent' : '',
+                }),
               )}
             >
-              <FileTextIcon className="size-4 text-muted-foreground" />
+              <FileTextIcon className="size-4 text-fd-muted-foreground" />
               {v}
             </div>
           ))}
@@ -325,7 +327,7 @@ function Highlight({
 }): React.ReactElement {
   return (
     <div className="border-l border-t px-6 py-12">
-      <div className="mb-4 flex flex-row items-center gap-2 text-muted-foreground">
+      <div className="mb-4 flex flex-row items-center gap-2 text-fd-muted-foreground">
         <Icon className="size-4" />
         <h2 className="text-sm font-medium">{heading}</h2>
       </div>
@@ -336,13 +338,13 @@ function Highlight({
 
 function Hero(): React.ReactElement {
   return (
-    <div className="container relative z-[2] flex flex-col items-center overflow-hidden border-x border-t bg-background px-6 pt-12 text-center md:pt-20 [.uwu_&]:hidden">
+    <div className="container relative z-[2] flex flex-col items-center overflow-hidden border-x border-t bg-fd-background px-6 pt-12 text-center md:pt-20 [.uwu_&]:hidden">
       <h1 className="mb-6 text-4xl font-semibold md:text-5xl">
         Build Your Docs.
       </h1>
-      <p className="mb-6 h-fit p-2 text-muted-foreground md:max-w-[80%] md:text-xl">
+      <p className="mb-6 h-fit p-2 text-fd-muted-foreground md:max-w-[80%] md:text-xl">
         Fumadocs is the framework for building documentation with{' '}
-        <b className="font-medium text-foreground">
+        <b className="text-foreground font-medium">
           excellent UI and user experience
         </b>
         . Using the power of Next.js App Router and React Component.
@@ -362,7 +364,7 @@ function Hero(): React.ReactElement {
             buttonVariants({
               size: 'lg',
               variant: 'outline',
-              className: 'rounded-full bg-background',
+              className: 'rounded-full bg-fd-background',
             }),
           )}
         >
@@ -426,7 +428,7 @@ function Introduction(): React.ReactElement {
       <div className="flex flex-col border-l border-t px-6 py-12 md:py-16">
         <div className={cn(badgeVariants())}>1</div>
         <h3 className="text-xl font-bold">Create it.</h3>
-        <p className="mb-8 text-muted-foreground">
+        <p className="mb-8 text-fd-muted-foreground">
           Initialize a new docs with a command.
         </p>
         <CreateAppAnimation />
@@ -434,7 +436,7 @@ function Introduction(): React.ReactElement {
       <div className="flex flex-col border-l border-t px-6 py-12 md:py-16">
         <div className={cn(badgeVariants())}>2</div>
         <h3 className="text-xl font-bold">Customise.</h3>
-        <p className="text-muted-foreground">
+        <p className="text-fd-muted-foreground">
           Modify the code, in a comfortable way with Typescript auto-complete.
         </p>
         <div className="relative flex flex-col">
@@ -455,7 +457,7 @@ function Introduction(): React.ReactElement {
       <div className="col-span-full flex flex-col items-center border-l border-t px-6 py-12 text-center">
         <div className={cn(badgeVariants())}>3</div>
         <h3 className="text-2xl font-bold">Ship.</h3>
-        <p className="mb-2 text-muted-foreground">
+        <p className="mb-2 text-fd-muted-foreground">
           Deploy your docs easily with Next.js compatible hosting platforms.
         </p>
 
@@ -490,7 +492,7 @@ function Contributing(): React.ReactElement {
       <h2 className="mb-4 text-xl font-semibold sm:text-2xl">
         Made Possible by You.
       </h2>
-      <p className="mb-8 text-muted-foreground">
+      <p className="mb-8 text-fd-muted-foreground">
         Fumadocs is 100% powered by passion and open source community.
       </p>
       <ContributorCounter repoOwner="fuma-nama" repoName="fumadocs" />
@@ -520,8 +522,8 @@ function Features(): React.ReactElement {
             sizes="600px"
             className="-mt-16 w-[400px] min-w-[400px] invert dark:invert-0"
           />
-          <div className="z-[2] mt-[-150px] w-[300px] overflow-hidden rounded-lg border border-foreground/10 shadow-xl backdrop-blur-lg">
-            <div className="flex flex-row items-center gap-2 bg-muted/50 px-4 py-2 text-xs font-medium text-muted-foreground">
+          <div className="z-[2] mt-[-150px] w-[300px] overflow-hidden rounded-lg border border-fd-foreground/10 shadow-xl backdrop-blur-lg">
+            <div className="flex flex-row items-center gap-2 bg-fd-muted/50 px-4 py-2 text-xs font-medium text-fd-muted-foreground">
               <FileEditIcon className="size-4" />
               MDX Editor
             </div>
@@ -580,23 +582,23 @@ function Features(): React.ReactElement {
         <div className="mt-8 flex flex-col gap-4">
           <Link
             href="/docs/ui"
-            className="rounded-xl bg-gradient-to-br from-transparent via-primary p-px shadow-lg shadow-primary/20"
+            className="rounded-xl bg-gradient-to-br from-transparent via-fd-primary p-px shadow-lg shadow-fd-primary/20"
           >
-            <div className="rounded-[inherit] bg-background bg-gradient-to-br from-transparent via-primary/10 p-4 transition-colors hover:bg-muted">
+            <div className="rounded-[inherit] bg-fd-background bg-gradient-to-br from-transparent via-fd-primary/10 p-4 transition-colors hover:bg-fd-muted">
               <LayoutIcon />
               <h3 className="font-semibold">Fumadocs UI</h3>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-fd-muted-foreground">
                 Full-powered framework with an excellent UI.
               </p>
             </div>
           </Link>
           <Link
             href="/docs/headless"
-            className="rounded-xl border bg-background p-4 shadow-lg transition-colors hover:bg-muted"
+            className="rounded-xl border bg-fd-background p-4 shadow-lg transition-colors hover:bg-fd-muted"
           >
             <LibraryIcon />
             <h3 className="font-semibold">Core</h3>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-fd-muted-foreground">
               Headless library with an useful set of utilities.
             </p>
           </Link>
@@ -624,12 +626,12 @@ function Feature({
       className={cn('border-l border-t px-6 py-12 md:py-16', className)}
       {...props}
     >
-      <div className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground">
+      <div className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-fd-muted-foreground">
         <Icon className="size-4" />
         <p>{subheading}</p>
       </div>
       <h2 className="mb-2 text-lg font-semibold">{heading}</h2>
-      <p className="text-muted-foreground">{description}</p>
+      <p className="text-fd-muted-foreground">{description}</p>
 
       {props.children}
     </div>

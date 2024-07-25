@@ -138,11 +138,11 @@ function Search({
 }
 
 const itemVariants = cva(
-  'rounded-md border px-2 py-0.5 text-xs font-medium text-muted-foreground transition-colors',
+  'rounded-md border px-2 py-0.5 text-xs font-medium text-fd-muted-foreground transition-colors',
   {
     variants: {
       active: {
-        true: 'bg-accent text-accent-foreground',
+        true: 'bg-fd-accent text-fd-accent-foreground',
       },
     },
   },

@@ -54,10 +54,10 @@ export default function Page({
       }}
       tableOfContentPopover={{ footer }}
     >
-      <h1 className="text-3xl font-bold text-foreground sm:text-4xl">
+      <h1 className="text-3xl font-bold text-fd-foreground sm:text-4xl">
         {page.data.title}
       </h1>
-      <p className="mb-8 text-lg text-muted-foreground">
+      <p className="mb-8 text-lg text-fd-muted-foreground">
         {page.data.description}
       </p>
       <DocsBody>

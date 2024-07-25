@@ -37,9 +37,9 @@ export function RootToggle({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger className="-mx-2 flex flex-row items-center gap-2.5 rounded-lg p-2 hover:bg-muted">
+      <PopoverTrigger className="-mx-2 flex flex-row items-center gap-2.5 rounded-lg p-2 hover:bg-fd-muted">
         <Item {...selected} />
-        <ChevronDown className="size-4 text-muted-foreground md:me-1.5" />
+        <ChevronDown className="size-4 text-fd-muted-foreground md:me-1.5" />
       </PopoverTrigger>
       <PopoverContent className="w-[var(--radix-popover-trigger-width)] overflow-hidden p-0">
         {options.map((item) => (
@@ -50,8 +50,8 @@ export function RootToggle({
             className={cn(
               'flex w-full flex-row gap-2 p-2',
               selected === item
-                ? 'bg-accent text-accent-foreground'
-                : 'hover:bg-accent/50',
+                ? 'bg-fd-accent text-fd-accent-foreground'
+                : 'hover:bg-fd-accent/50',
             )}
           >
             <Item {...item} />
@@ -68,7 +68,7 @@ function Item({ title, icon, description }: Option): React.ReactElement {
       {icon}
       <div className="flex-1 text-left">
         <p className="text-sm font-medium">{title}</p>
-        <p className="text-xs text-muted-foreground">{description}</p>
+        <p className="text-xs text-fd-muted-foreground">{description}</p>
       </div>
     </>
   );

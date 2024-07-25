@@ -111,11 +111,11 @@ export function APIPlayground({
         )}
       >
         <form
-          className="not-prose flex flex-col gap-4 rounded-lg border bg-card p-4"
+          className="not-prose flex flex-col gap-4 rounded-lg border bg-fd-card p-4"
           onSubmit={onSubmit as React.FormEventHandler}
         >
           <div className="flex flex-row gap-2">
-            <code className="flex-1 overflow-auto rounded-lg border bg-secondary px-3 py-1.5 text-sm">
+            <code className="flex-1 overflow-auto rounded-lg border bg-fd-secondary px-3 py-1.5 text-sm">
               {route}
             </code>
             <button
@@ -191,12 +191,12 @@ export function APIPlayground({
           </Accordions>
 
           {testQuery.data && statusInfo ? (
-            <div className="flex flex-col gap-3 rounded-lg border bg-card p-4">
-              <div className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground">
+            <div className="flex flex-col gap-3 rounded-lg border bg-fd-card p-4">
+              <div className="inline-flex items-center gap-1.5 text-sm font-medium text-fd-foreground">
                 <statusInfo.icon className={cn('size-4', statusInfo.color)} />
                 {statusInfo.description}
               </div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-fd-muted-foreground">
                 {testQuery.data.status}
               </p>
               {testQuery.data.data ? (

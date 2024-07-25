@@ -42,11 +42,14 @@ interface ObjectType {
 const th = cva('p-2 font-medium first:pl-0 last:pr-0');
 const td = cva('p-2 first:pl-0 last:pr-0');
 const field = cva('inline-flex flex-row items-center gap-1');
-const code = cva('rounded-md bg-secondary p-1 text-secondary-foreground', {
-  variants: {
-    color: { primary: 'bg-primary/10 text-primary' },
+const code = cva(
+  'rounded-md bg-fd-secondary p-1 text-fd-secondary-foreground',
+  {
+    variants: {
+      color: { primary: 'bg-fd-primary/10 text-fd-primary' },
+    },
   },
-});
+);
 
 export function TypeTable({
   type,
@@ -55,7 +58,7 @@ export function TypeTable({
 }): React.ReactElement {
   return (
     <div className="not-prose overflow-auto whitespace-nowrap">
-      <table className="my-4 w-full text-left text-sm text-muted-foreground">
+      <table className="my-4 w-full text-left text-sm text-fd-muted-foreground">
         <thead className="border-b">
           <tr>
             <th className={cn(th(), 'w-[45%]')}>Prop</th>
@@ -63,7 +66,7 @@ export function TypeTable({
             <th className={cn(th(), 'w-1/4')}>Default</th>
           </tr>
         </thead>
-        <tbody className="border-collapse divide-y divide-border">
+        <tbody className="border-collapse divide-y divide-fd-border">
           {Object.entries(type).map(([key, value]) => (
             <tr key={key}>
               <td className={td()}>
@@ -77,7 +80,7 @@ export function TypeTable({
                   <code className={code()}>{value.type}</code>
                   {value.typeDescription ? (
                     <Info>
-                      <pre className="overflow-auto bg-secondary text-secondary-foreground">
+                      <pre className="overflow-auto bg-fd-secondary text-fd-secondary-foreground">
                         {value.typeDescription}
                       </pre>
                     </Info>

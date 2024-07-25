@@ -92,7 +92,7 @@ export default function Showcase(): React.ReactElement {
           <br />
           Made with Fumadocs
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-fd-muted-foreground">
           Nice open-source projects powered by Fumadocs
         </p>
         <div className="mt-6">
@@ -128,7 +128,7 @@ function ShowcaseItem({
         href={url}
         target="_blank"
         rel="noreferrer noopener"
-        className="relative flex aspect-[1.91/1] flex-col overflow-hidden rounded-2xl border transition-all hover:border-primary/30"
+        className="relative flex aspect-[1.91/1] flex-col overflow-hidden rounded-2xl border transition-all hover:border-fd-primary/30"
       >
         <Image
           alt="Preview"
@@ -149,7 +149,7 @@ function ShowcaseItem({
       href={url}
       target="_blank"
       rel="noreferrer noopener"
-      className="flex aspect-[1.91/1] flex-col rounded-2xl border border-transparent p-8 text-center shadow-primary/20 transition-all hover:shadow-primary/30"
+      className="flex aspect-[1.91/1] flex-col rounded-2xl border border-transparent p-8 text-center shadow-fd-primary/20 transition-all hover:shadow-fd-primary/30"
       style={{
         backgroundImage:
           'radial-gradient(closest-side at center, hsl(var(--background)) 89%, transparent 90%),' +
@@ -160,7 +160,7 @@ function ShowcaseItem({
         backgroundClip: 'padding-box, padding-box, border-box',
       }}
     >
-      <p className="mb-6 text-muted-foreground">{new URL(url).hostname}</p>
+      <p className="mb-6 text-fd-muted-foreground">{new URL(url).hostname}</p>
       <p className="text-3xl font-semibold">{name}</p>
     </a>
   );

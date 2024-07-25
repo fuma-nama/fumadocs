@@ -61,16 +61,16 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
       <figure
         ref={ref}
         className={cn(
-          'not-prose group relative my-6 overflow-hidden rounded-lg border bg-secondary/50 text-sm',
+          'not-prose group relative my-6 overflow-hidden rounded-lg border bg-fd-secondary/50 text-sm',
           className,
         )}
         {...props}
       >
         {title ? (
-          <div className="flex flex-row items-center gap-2 border-b bg-muted px-4 py-1.5">
+          <div className="flex flex-row items-center gap-2 border-b bg-fd-muted px-4 py-1.5">
             {icon ? (
               <div
-                className="text-muted-foreground [&_svg]:size-3.5"
+                className="text-fd-muted-foreground [&_svg]:size-3.5"
                 {...(typeof icon === 'string'
                   ? {
                       dangerouslySetInnerHTML: { __html: icon },
@@ -80,7 +80,7 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
                     })}
               />
             ) : null}
-            <figcaption className="flex-1 truncate text-muted-foreground">
+            <figcaption className="flex-1 truncate text-fd-muted-foreground">
               {title}
             </figcaption>
             {allowCopy ? (

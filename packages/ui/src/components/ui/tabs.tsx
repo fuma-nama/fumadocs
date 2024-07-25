@@ -11,7 +11,7 @@ const Tabs = React.forwardRef<
       ref={ref}
       {...props}
       className={cn(
-        'flex flex-col overflow-hidden rounded-xl border bg-card',
+        'flex flex-col overflow-hidden rounded-xl border bg-fd-card',
         props.className,
       )}
     />
@@ -28,7 +28,7 @@ const TabsList = React.forwardRef<
     ref={ref}
     {...props}
     className={cn(
-      'flex flex-row items-end gap-4 overflow-x-auto bg-secondary px-4 text-muted-foreground',
+      'flex flex-row items-end gap-4 overflow-x-auto bg-fd-secondary px-4 text-fd-muted-foreground',
       props.className,
     )}
   />
@@ -43,7 +43,7 @@ const TabsTrigger = React.forwardRef<
     ref={ref}
     {...props}
     className={cn(
-      'whitespace-nowrap border-b border-transparent py-2 text-sm font-medium transition-colors hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-primary data-[state=active]:text-primary',
+      'whitespace-nowrap border-b border-transparent py-2 text-sm font-medium transition-colors hover:text-fd-accent-foreground disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-fd-primary data-[state=active]:text-fd-primary',
       props.className,
     )}
   />

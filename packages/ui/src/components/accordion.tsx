@@ -41,7 +41,7 @@ export const Accordions = forwardRef<
       onValueChange={setValue}
       collapsible={type === 'single' ? true : undefined}
       className={cn(
-        'divide-y divide-border overflow-hidden rounded-lg border bg-card',
+        'divide-y divide-fd-border overflow-hidden rounded-lg border bg-fd-card',
         className,
       )}
       {...props}
@@ -67,15 +67,15 @@ export const Accordion = forwardRef<
     >
       <AccordionPrimitive.Header
         id={id}
-        className="not-prose flex flex-row items-center font-medium text-foreground"
+        className="not-prose flex flex-row items-center font-medium text-fd-foreground"
       >
-        <AccordionPrimitive.Trigger className="flex flex-1 items-center gap-2 p-4 text-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-          <ChevronRight className="-ms-1 size-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]/accordion:rotate-90" />
+        <AccordionPrimitive.Trigger className="flex flex-1 items-center gap-2 p-4 text-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring">
+          <ChevronRight className="-ms-1 size-4 text-fd-muted-foreground transition-transform duration-200 group-data-[state=open]/accordion:rotate-90" />
           {title}
         </AccordionPrimitive.Trigger>
         {id ? <CopyButton id={id} /> : null}
       </AccordionPrimitive.Header>
-      <AccordionPrimitive.Content className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+      <AccordionPrimitive.Content className="overflow-hidden data-[state=closed]:animate-fd-accordion-up data-[state=open]:animate-fd-accordion-down">
         <div className="p-4 pt-0 prose-no-margin">{children}</div>
       </AccordionPrimitive.Content>
     </AccordionPrimitive.Item>
@@ -97,7 +97,7 @@ function CopyButton({ id }: { id: string }): React.ReactElement {
       className={cn(
         buttonVariants({
           color: 'ghost',
-          className: 'text-muted-foreground me-2',
+          className: 'text-fd-muted-foreground me-2',
         }),
       )}
       onClick={onClick}

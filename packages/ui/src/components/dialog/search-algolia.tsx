@@ -79,7 +79,7 @@ function AlgoliaTitle(): React.ReactNode {
     <a
       href="https://algolia.com"
       rel="noreferrer noopener"
-      className="ms-auto text-xs text-muted-foreground"
+      className="ms-auto text-xs text-fd-muted-foreground"
     >
       Search powered by Algolia
     </a>

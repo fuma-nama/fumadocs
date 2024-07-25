@@ -30,7 +30,7 @@ export function Breadcrumb({
   return (
     <div
       className={cn(
-        '-mb-3 flex flex-row items-center gap-1 text-sm font-medium text-muted-foreground',
+        '-mb-3 flex flex-row items-center gap-1 text-sm font-medium text-fd-muted-foreground',
         items.length === 0 && 'hidden',
       )}
     >
@@ -42,7 +42,7 @@ export function Breadcrumb({
           {item.url ? (
             <Link
               href={item.url}
-              className="truncate hover:text-accent-foreground"
+              className="truncate hover:text-fd-accent-foreground"
             >
               {item.name}
             </Link>

@@ -64,7 +64,7 @@ export function Nav({
             )}
             footer={
               <div className="flex flex-row items-center justify-between px-2 pt-2">
-                <p className="font-medium text-muted-foreground">
+                <p className="font-medium text-fd-muted-foreground">
                   {text.chooseTheme}
                 </p>
                 <ThemeToggle />

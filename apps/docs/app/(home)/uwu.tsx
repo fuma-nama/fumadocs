@@ -14,9 +14,11 @@ export function UwuHero(): React.ReactElement {
         priority
       />
 
-      <p className="mb-6 h-fit p-2 text-lg text-muted-foreground md:max-w-[80%] md:text-xl">
+      <p className="mb-6 h-fit p-2 text-lg text-fd-muted-foreground md:max-w-[80%] md:text-xl">
         Fumadocs is the framework for building documentation with{' '}
-        <b className="font-medium text-foreground">anime and fuwa fuwa power</b>
+        <b className="font-medium text-fd-foreground">
+          anime and fuwa fuwa power
+        </b>
         . Using the power of weebs and waifus.
       </p>
       <div className="inline-flex items-center gap-3">
@@ -34,7 +36,7 @@ export function UwuHero(): React.ReactElement {
             buttonVariants({
               size: 'lg',
               variant: 'outline',
-              className: 'rounded-full bg-background',
+              className: 'rounded-full bg-fd-background',
             }),
           )}
         >

@@ -25,7 +25,7 @@ export function Banner({
       id={id}
       {...props}
       className={cn(
-        'relative flex h-12 flex-row items-center justify-center bg-secondary px-4 text-center text-sm font-medium',
+        'relative flex h-12 flex-row items-center justify-center bg-fd-secondary px-4 text-center text-sm font-medium',
         !open && 'hidden',
         props.className,
       )}
@@ -51,7 +51,7 @@ export function Banner({
             buttonVariants({
               color: 'ghost',
               className:
-                'absolute end-2 top-1/2 -translate-y-1/2 text-muted-foreground',
+                'absolute end-2 top-1/2 -translate-y-1/2 text-fd-muted-foreground',
               size: 'icon',
             }),
           )}
