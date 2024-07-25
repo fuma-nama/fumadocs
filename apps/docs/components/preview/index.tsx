@@ -54,7 +54,7 @@ export default {
     <Wrapper>
       <div className="space-y-4 rounded-xl bg-fd-background p-4 text-sm">
         <Tabs
-          id="language"
+          groupId="language"
           persist
           items={['Javascript', 'Rust', 'Typescript']}
         >
@@ -63,7 +63,7 @@ export default {
           <Tab value="Typescript">Also works if items are not the same</Tab>
         </Tabs>
 
-        <Tabs id="language" persist items={['Javascript', 'Rust']}>
+        <Tabs groupId="language" persist items={['Javascript', 'Rust']}>
           <Tab value="Javascript">
             Value is shared! Try refresh and see if the value is persisted
           </Tab>
