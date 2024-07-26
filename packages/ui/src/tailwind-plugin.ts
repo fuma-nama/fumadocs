@@ -21,6 +21,13 @@ interface DocsUIOptions {
   addGlobalColors?: boolean;
 
   /**
+   * Change the default styles of `container`
+   *
+   * @defaultValue true
+   */
+  modifyContainer?: boolean;
+
+  /**
    * Color preset
    */
   preset?: keyof typeof presets | Preset;
@@ -205,23 +212,23 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
       });
     };
   },
-  ({ cssPrefix = '', addGlobalColors = false } = {}) => ({
+  ({
+    cssPrefix = '',
+    modifyContainer = true,
+    addGlobalColors = false,
+  } = {}) => ({
     theme: {
       extend: {
-        // Allow devs to use `container` for other elements
-        container: {
-          center: true,
-          padding: '1rem',
-          screens: {
-            '2xl': '1400px',
-          },
-        },
-        height: {
-          body: [
-            'calc(100vh - 4rem) /* fallback */',
-            'calc(100dvh - 4rem)',
-          ] as unknown as string,
-        },
+        // Allow devs to use `container` to match with home layout
+        container: modifyContainer
+          ? {
+              center: true,
+              padding: '1rem',
+              screens: {
+                '2xl': '1400px',
+              },
+            }
+          : undefined,
         maxWidth: {
           container: '1400px',
         },
