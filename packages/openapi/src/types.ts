@@ -15,9 +15,27 @@ export interface MethodInformation extends OpenAPI.OperationObject {
   method: string;
 }
 
+type Awaitable<T> = T | Promise<T>;
+
 export interface RenderContext {
   renderer: Renderer;
   document: OpenAPI.Document;
   baseUrl: string;
-  generateCodeSamples?: (endpoint: Endpoint) => CodeSample[];
+
+  /**
+   * Generate TypeScript definitions from response schema.
+   *
+   * Pass `false` to disable it.
+   *
+   * @param endpoint - the API endpoint
+   * @param code - status code
+   */
+  generateTypeScriptSchema?:
+    | ((endpoint: Endpoint, code: string) => Awaitable<string>)
+    | false;
+
+  /**
+   * Generate code samples for endpoint.
+   */
+  generateCodeSamples?: (endpoint: Endpoint) => Awaitable<CodeSample[]>;
 }
