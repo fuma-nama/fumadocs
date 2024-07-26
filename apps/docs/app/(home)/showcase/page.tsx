@@ -12,6 +12,7 @@ import Briefkasten from '@/public/showcases/briefkasten.png';
 import Turbo from '@/public/showcases/turbo.png';
 import Million from '@/public/showcases/million.png';
 import Spot from '@/public/spot.png';
+import Hiro from '@/public/showcases/hiro.png';
 
 export const metadata = createMetadata({
   title: 'Showcase',
@@ -50,6 +51,11 @@ export default function Showcase(): React.ReactElement {
       url: 'https://million.dev',
     },
     { image: NuqsImage, name: 'nuqs', url: 'https://nuqs.47ng.com' },
+    {
+      image: Hiro,
+      name: 'Hiro',
+      url: 'https://docs.hiro.so/stacks',
+    },
     {
       name: 'Typelytics',
       url: 'https://typelytics.rhyssul.com',
