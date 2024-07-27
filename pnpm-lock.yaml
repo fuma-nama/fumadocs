@@ -772,7 +772,7 @@ importers:
   packages/twoslash:
     dependencies:
       '@shikijs/twoslash':
-        specifier: 1.11.1
+        specifier: ^1.11.1
         version: 1.11.1(typescript@5.5.4)
       mdast-util-from-markdown:
         specifier: ^2.0.1

@@ -2,8 +2,13 @@ import { expect, test } from 'vitest';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { remark } from 'remark';
-import { remarkHeading, remarkStructure } from '@/mdx-plugins';
+import {
+  remarkAdmonition,
+  remarkHeading,
+  remarkStructure,
+} from '@/mdx-plugins';
 import { fileURLToPath } from 'node:url';
+import remarkMdx from 'remark-mdx';
 
 const cwd = path.dirname(fileURLToPath(import.meta.url));
 
@@ -26,5 +31,19 @@ test('Remark Structure', async () => {
 
   expect(result.data.structuredData).toMatchFileSnapshot(
     path.resolve(cwd, './fixtures/remark-structure.output.json'),
+  );
+});
+
+test('Remark Admonition', async () => {
+  const content = readFileSync(
+    path.resolve(cwd, './fixtures/remark-admonition.md'),
+  );
+  const result = await remark()
+    .use(remarkAdmonition)
+    .use(remarkMdx)
+    .process(content);
+
+  expect(result.value).toMatchFileSnapshot(
+    path.resolve(cwd, './fixtures/remark-admonition.output.mdx'),
   );
 });
