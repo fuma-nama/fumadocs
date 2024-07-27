@@ -168,9 +168,18 @@ export function APIPlayground({
             </button>
           </div>
 
-          <Accordions type="multiple" className="-m-4 mt-2 border-0 text-sm">
-            {authField}
-
+          {authField}
+          <Accordions
+            type="multiple"
+            className={cn(
+              '-m-4 mt-2 border-0 text-sm',
+              path.length === 0 &&
+                query.length === 0 &&
+                header.length === 0 &&
+                !body &&
+                'hidden',
+            )}
+          >
             {path.length > 0 ? (
               <Accordion title="Path">
                 {path.map((field) => (
