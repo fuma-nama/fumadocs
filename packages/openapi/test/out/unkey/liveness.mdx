@@ -13,6 +13,10 @@ import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, Exa
 
 ## Check Liveness
 
+<APIPlayground authorization={undefined} method={"GET"} route={"/v1/liveness"} path={[]} query={[]} header={[]} body={undefined} schemas={{}}>
+
+</APIPlayground>
+
 | Status code | Description |
 | ----------- | ----------- |
 | `200` | The configured services and their status |
@@ -23,10 +27,6 @@ import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, Exa
 | `409` | This response is sent when a request conflicts with the current state of the server. |
 | `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
 | `500` | The server has encountered a situation it does not know how to handle. |
-
-<APIPlayground authorization={undefined} method={"GET"} route={"/v1/liveness"} path={[]} query={[]} header={[]} body={undefined} schemas={{}}>
-
-</APIPlayground>
 
 </APIInfo>
 

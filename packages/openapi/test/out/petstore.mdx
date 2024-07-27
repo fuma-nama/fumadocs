@@ -13,6 +13,10 @@ import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, Exa
 
 ## List all pets
 
+<APIPlayground authorization={undefined} method={"GET"} route={"/pets"} path={[]} query={[{"name":"limit","type":"number","defaultValue":"","isRequired":false}]} header={[]} body={undefined} schemas={{}}>
+
+</APIPlayground>
+
 ### Query Parameters
 
 <Property name={"limit"} type={"integer"} required={false} deprecated={false}>
@@ -29,10 +33,6 @@ How many items to return at one time (max 100)
 | ----------- | ----------- |
 | `200` | A paged array of pets |
 | `default` | unexpected error |
-
-<APIPlayground authorization={undefined} method={"GET"} route={"/pets"} path={[]} query={[{"name":"limit","type":"number","defaultValue":"","isRequired":false}]} header={[]} body={undefined} schemas={{}}>
-
-</APIPlayground>
 
 </APIInfo>
 
@@ -141,6 +141,10 @@ export interface Response {
 
 ## Create a pet
 
+<APIPlayground authorization={undefined} method={"POST"} route={"/pets"} path={[]} query={[]} header={[]} body={{"type":"object","isRequired":true,"properties":{"id":{"type":"ref","isRequired":true,"schema":"0"},"name":{"type":"ref","isRequired":true,"schema":"1"},"tag":{"type":"ref","isRequired":false,"schema":"2"}}}} schemas={{"0":{"type":"number","defaultValue":"","isRequired":false},"1":{"type":"string","defaultValue":"","isRequired":false},"2":{"type":"string","defaultValue":"","isRequired":false}}}>
+
+</APIPlayground>
+
 ### Request Body
 
 <Property name={"id"} type={"integer"} required={true} deprecated={undefined}>
@@ -161,10 +165,6 @@ export interface Response {
 | ----------- | ----------- |
 | `201` | Null response |
 | `default` | unexpected error |
-
-<APIPlayground authorization={undefined} method={"POST"} route={"/pets"} path={[]} query={[]} header={[]} body={{"type":"object","isRequired":true,"properties":{"id":{"type":"ref","isRequired":true,"schema":"0"},"name":{"type":"ref","isRequired":true,"schema":"1"},"tag":{"type":"ref","isRequired":false,"schema":"2"}}}} schemas={{"0":{"type":"number","defaultValue":"","isRequired":false},"1":{"type":"string","defaultValue":"","isRequired":false},"2":{"type":"string","defaultValue":"","isRequired":false}}}>
-
-</APIPlayground>
 
 </APIInfo>
 
@@ -241,6 +241,10 @@ export interface Response {
 
 ## Info for a specific pet
 
+<APIPlayground authorization={undefined} method={"GET"} route={"/pets/{petId}"} path={[{"name":"petId","type":"string","defaultValue":"","isRequired":true}]} query={[]} header={[]} body={undefined} schemas={{}}>
+
+</APIPlayground>
+
 ### Path Parameters
 
 <Property name={"petId"} type={"string"} required={true} deprecated={false}>
@@ -253,10 +257,6 @@ The id of the pet to retrieve
 | ----------- | ----------- |
 | `200` | Expected response to a valid request |
 | `default` | unexpected error |
-
-<APIPlayground authorization={undefined} method={"GET"} route={"/pets/{petId}"} path={[{"name":"petId","type":"string","defaultValue":"","isRequired":true}]} query={[]} header={[]} body={undefined} schemas={{}}>
-
-</APIPlayground>
 
 </APIInfo>
 

@@ -46,6 +46,8 @@ export async function renderOperation(
   }
   if (method.description) info.push(p(method.description));
 
+  info.push(renderPlayground(path, method, ctx));
+
   if (security) {
     info.push(heading(level, 'Authorization'));
     info.push(getAuthSection(security, ctx));
@@ -112,7 +114,6 @@ export async function renderOperation(
   }
 
   info.push(getResponseTable(method));
-  info.push(renderPlayground(path, method, ctx));
 
   const samples: CodeSample[] = dedupe([
     {

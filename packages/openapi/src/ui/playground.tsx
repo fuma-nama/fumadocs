@@ -1,8 +1,20 @@
-import { type HTMLAttributes, useMemo, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import {
+  type ReactElement,
+  type HTMLAttributes,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import useSWRImmutable from 'swr/immutable';
 import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 import { cn, buttonVariants } from 'fumadocs-ui/components/api';
+import type {
+  UseFormStateReturn,
+  ControllerFieldState,
+  ControllerRenderProps,
+} from 'react-hook-form';
 import { useApiContext } from '@/ui/contexts/api';
 import { Form } from '@/ui/components/form';
 import { createBodyFromValue, getStatusInfo } from '@/ui/fetcher';
@@ -12,12 +24,24 @@ import type { APIPlaygroundProps } from '@/render/playground';
 import { CodeBlock } from '@/ui/components/codeblock';
 import { type DynamicField, SchemaContext } from './contexts/schema';
 
-interface APIPlaygroundFormData {
-  authorization?: string | undefined;
-  path?: Record<string, string>;
-  query?: Record<string, string>;
-  header?: Record<string, string>;
-  body?: Record<string, unknown>;
+interface FormValues {
+  authorization: string;
+  path: Record<string, unknown>;
+  query: Record<string, unknown>;
+  header: Record<string, unknown>;
+  body: unknown;
+}
+
+interface CustomField<TName extends keyof FormValues> {
+  render: ({
+    field,
+    fieldState,
+    formState,
+  }: {
+    field: ControllerRenderProps<FormValues, TName>;
+    fieldState: ControllerFieldState;
+    formState: UseFormStateReturn<FormValues>;
+  }) => ReactElement;
 }
 
 export function APIPlayground({
@@ -28,12 +52,17 @@ export function APIPlayground({
   header = [],
   query = [],
   body,
+  fields: { auth } = {},
   schemas,
-}: APIPlaygroundProps & HTMLAttributes<HTMLFormElement>): React.ReactElement {
+}: APIPlaygroundProps & {
+  fields?: {
+    auth?: CustomField<'authorization'>;
+  };
+} & HTMLAttributes<HTMLFormElement>): React.ReactElement {
   const { baseUrl } = useApiContext();
   const dynamicRef = useRef(new Map<string, DynamicField>());
-  const [input, setInput] = useState<APIPlaygroundFormData>();
-  const form = useForm({
+  const [input, setInput] = useState<FormValues>();
+  const form = useForm<FormValues>({
     defaultValues: {
       authorization: authorization?.defaultValue,
       path: getDefaultValues(path, schemas),
@@ -49,16 +78,18 @@ export function APIPlayground({
       if (!input) return;
 
       let pathname = route;
-      Object.keys(input.path ?? {}).forEach((key) => {
-        const paramValue = input.path?.[key];
+      Object.keys(input.path).forEach((key) => {
+        const paramValue = input.path[key];
 
-        if (paramValue) pathname = pathname.replace(`{${key}}`, paramValue);
+        if (typeof paramValue === 'string')
+          pathname = pathname.replace(`{${key}}`, paramValue);
       });
 
       const url = new URL(pathname, baseUrl ?? window.location.origin);
-      Object.keys(input.query ?? {}).forEach((key) => {
-        const paramValue = input.query?.[key];
-        if (paramValue) url.searchParams.append(key, paramValue);
+      Object.keys(input.query).forEach((key) => {
+        const paramValue = input.query[key];
+        if (typeof paramValue === 'string')
+          url.searchParams.append(key, paramValue);
       });
 
       const headers = new Headers({
@@ -69,10 +100,10 @@ export function APIPlayground({
         headers.append('Authorization', input.authorization);
       }
 
-      Object.keys(input.header ?? {}).forEach((key) => {
-        const paramValue = input.header?.[key];
+      Object.keys(input.header).forEach((key) => {
+        const paramValue = input.header[key];
 
-        if (paramValue) headers.append(key, paramValue);
+        if (typeof paramValue === 'string') headers.append(key, paramValue);
       });
 
       const bodyValue =
@@ -94,13 +125,23 @@ export function APIPlayground({
     },
   );
 
-  const statusInfo = testQuery.data
-    ? getStatusInfo(testQuery.data.status)
-    : undefined;
-
   const onSubmit = form.handleSubmit((value) => {
-    setInput(value as APIPlaygroundFormData);
+    setInput(value);
   });
+
+  let authField: ReactNode | undefined;
+
+  if (authorization) {
+    authField = auth ? (
+      <Controller render={auth.render} name="authorization" />
+    ) : (
+      <InputField
+        name="Authorization"
+        fieldName="authorization"
+        field={authorization}
+      />
+    );
+  }
 
   return (
     <Form {...form}>
@@ -128,15 +169,7 @@ export function APIPlayground({
           </div>
 
           <Accordions type="multiple" className="-m-4 mt-2 border-0 text-sm">
-            {authorization ? (
-              <Accordion title="Authorization">
-                <InputField
-                  name="Authorization"
-                  fieldName="authorization"
-                  field={authorization}
-                />
-              </Accordion>
-            ) : null}
+            {authField}
 
             {path.length > 0 ? (
               <Accordion title="Path">
@@ -190,25 +223,33 @@ export function APIPlayground({
             ) : null}
           </Accordions>
 
-          {testQuery.data && statusInfo ? (
-            <div className="flex flex-col gap-3 rounded-lg border bg-fd-card p-4">
-              <div className="inline-flex items-center gap-1.5 text-sm font-medium text-fd-foreground">
-                <statusInfo.icon className={cn('size-4', statusInfo.color)} />
-                {statusInfo.description}
-              </div>
-              <p className="text-sm text-fd-muted-foreground">
-                {testQuery.data.status}
-              </p>
-              {testQuery.data.data ? (
-                <CodeBlock
-                  code={JSON.stringify(testQuery.data.data, null, 2)}
-                  className="max-h-[288px]"
-                />
-              ) : null}
-            </div>
-          ) : null}
+          {testQuery.data ? <ResultDisplay data={testQuery.data} /> : null}
         </form>
       </SchemaContext.Provider>
     </Form>
+  );
+}
+
+function ResultDisplay({
+  data,
+}: {
+  data: { status: number; data: unknown };
+}): ReactElement {
+  const statusInfo = useMemo(() => getStatusInfo(data.status), [data.status]);
+
+  return (
+    <div className="flex flex-col gap-3 rounded-lg border bg-fd-card p-4">
+      <div className="inline-flex items-center gap-1.5 text-sm font-medium text-fd-foreground">
+        <statusInfo.icon className={cn('size-4', statusInfo.color)} />
+        {statusInfo.description}
+      </div>
+      <p className="text-sm text-fd-muted-foreground">{data.status}</p>
+      {data.data ? (
+        <CodeBlock
+          code={JSON.stringify(data.data, null, 2)}
+          className="max-h-[288px]"
+        />
+      ) : null}
+    </div>
   );
 }
