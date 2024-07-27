@@ -128,10 +128,10 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
       if (css) addBase(css);
 
       addComponents({
-        '.fd-codeblock pre span': {
+        '.fd-codeblock code span': {
           color: 'var(--shiki-light)',
         },
-        '.dark .fd-codeblock pre span': {
+        '.dark .fd-codeblock code span': {
           color: 'var(--shiki-dark)',
         },
         '.fd-codeblock code': {
