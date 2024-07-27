@@ -8,35 +8,17 @@ preview: callout
 
 Add it to your MDX components.
 
-```mdx
+```tsx
 import { Callout } from 'fumadocs-ui/components/callout';
 
-<Callout title="Title">Hello World</Callout>
+<MDX
+  components={{
+    Callout,
+  }}
+/>;
 ```
 
-### Types
-
-You can specify the type of callout.
-
-- `info` (default)
-- `warn`
-- `error`
-
-```mdx
-<Callout title="Title" type="warn">
-  Hello World
-</Callout>
-```
-
-<Callout title="Title" type="warn">
-  Hello World
-</Callout>
-
-### Without Title
-
-You can create a Callout without title.
-
-<Callout>Hello World</Callout>
+See [Markdown](/docs/ui/markdown#callouts) for usages.
 
 ### Reference
 

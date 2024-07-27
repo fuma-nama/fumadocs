@@ -70,7 +70,7 @@ export const Accordion = forwardRef<
         className="not-prose flex flex-row items-center font-medium text-fd-foreground"
       >
         <AccordionPrimitive.Trigger className="flex flex-1 items-center gap-2 p-4 text-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring">
-          <ChevronRight className="-ms-1 size-4 text-fd-muted-foreground transition-transform duration-200 group-data-[state=open]/accordion:rotate-90" />
+          <ChevronRight className="-ms-1 size-4 shrink-0 text-fd-muted-foreground transition-transform duration-200 group-data-[state=open]/accordion:rotate-90" />
           {title}
         </AccordionPrimitive.Trigger>
         {id ? <CopyButton id={id} /> : null}

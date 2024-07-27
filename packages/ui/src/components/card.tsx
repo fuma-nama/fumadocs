@@ -18,7 +18,7 @@ export function Cards(
 export type CardProps = {
   icon?: ReactNode;
   title: string;
-  description: string;
+  description?: string;
 } & Omit<LinkProps, 'title'>;
 
 export function Card({
@@ -41,7 +41,9 @@ export function Card({
         </div>
       ) : null}
       <h3 className="mb-1 font-medium">{title}</h3>
-      <p className="text-fd-muted-foreground">{description}</p>
+      {description ? (
+        <p className="text-fd-muted-foreground">{description}</p>
+      ) : null}
     </Link>
   );
 }

@@ -3,6 +3,8 @@ title: Markdown
 description: How to write documents
 ---
 
+import { HomeIcon } from 'lucide-react';
+
 ## Introduction
 
 Fumadocs provides many useful extensions to MDX, a markup language. Here is a brief introduction to the default MDX syntax of Fumadocs UI.
@@ -72,7 +74,9 @@ see [MDX Syntax](https://mdxjs.com/docs/what-is-mdx/#mdx-syntax) to learn more.
 
 ### Cards
 
-A [`Card`](/docs/ui/mdx/card) component is included by default. Similar to links, but you can display more information (e.g. icons).
+Useful for adding links, it is included by default.
+
+Same as normal links, but you can display more information (e.g. icons).
 
 ```mdx
 <Cards>
@@ -89,6 +93,32 @@ A [`Card`](/docs/ui/mdx/card) component is included by default. Similar to links
     href="https://nextjs.org/docs/app/building-your-application/data-fetching/fetching-caching-and-revalidating"
     title="Fetching, Caching, and Revalidating"
     description="Learn more about caching in Next.js"
+  />
+</Cards>
+
+#### Icon
+
+You can specify an icon to cards.
+
+```mdx
+import { HomeIcon } from 'lucide-react';
+
+<Cards>
+  <Card
+    icon={<HomeIcon />}
+    href="/"
+    title="Home"
+    description="Go back to home"
+  />
+</Cards>
+```
+
+<Cards>
+  <Card
+    icon={<HomeIcon />}
+    href="/"
+    title="Home"
+    description="Go back to home"
   />
 </Cards>
 
@@ -97,26 +127,42 @@ A [`Card`](/docs/ui/mdx/card) component is included by default. Similar to links
 Useful for adding tips/warnings, it is included by default.
 
 ```mdx
-<Callout title="Title" type="info">
-  Hello World
-</Callout>
-<Callout title="Title" type="warn">
-  Hello World
-</Callout>
+<Callout>Hello World</Callout>
+```
+
+<Callout>Hello World</Callout>
+
+#### Title
+
+Specify a callout title.
+
+```mdx
+<Callout title="Title">Hello World</Callout>
+```
+
+<Callout title="Title">Hello World</Callout>
+
+#### Types
+
+You can specify the type of callout.
+
+- `info` (default)
+- `warn`
+- `error`
+
+```mdx
 <Callout title="Title" type="error">
   Hello World
 </Callout>
 ```
 
-<Callout title="Title" type="info">
-  Hello World
-</Callout>
-<Callout title="Title" type="warn">
-  Hello World
-</Callout>
 <Callout title="Title" type="error">
   Hello World
 </Callout>
+
+### Customisation
+
+See [all MDX components and available options](/docs/ui/mdx).
 
 ## Heading Anchors
 

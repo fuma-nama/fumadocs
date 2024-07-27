@@ -31,13 +31,6 @@ interface DocsUIOptions {
    * Color preset
    */
   preset?: keyof typeof presets | Preset;
-
-  /**
-   * Keep code block background of theme
-   *
-   * @defaultValue false
-   */
-  keepCodeBlockBackground?: boolean;
 }
 
 type Keys =
@@ -115,11 +108,7 @@ function createTailwindColors(
 }
 
 export const docsUi = plugin.withOptions<DocsUIOptions>(
-  ({
-    cssPrefix = '',
-    preset = 'default',
-    keepCodeBlockBackground = false,
-  } = {}) => {
+  ({ cssPrefix = '', preset = 'default' } = {}) => {
     return ({ addBase, addComponents, addUtilities }) => {
       const { light, dark, css } =
         typeof preset === 'string' ? presets[preset] : preset;
@@ -139,22 +128,22 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
       if (css) addBase(css);
 
       addComponents({
-        '.nd-codeblock span': {
+        '.fd-codeblock pre span': {
           color: 'var(--shiki-light)',
         },
-        '.dark .nd-codeblock span': {
+        '.dark .fd-codeblock pre span': {
           color: 'var(--shiki-dark)',
         },
-        '.nd-codeblock code': {
+        '.fd-codeblock code': {
           display: 'grid',
           'font-size': '13px',
         },
-        '.nd-codeblock .highlighted': {
+        '.fd-codeblock .highlighted': {
           margin: '0 -16px',
           padding: '0 16px',
           'background-color': `theme('colors.fd-primary.DEFAULT / 10%')`,
         },
-        '.nd-codeblock .highlighted-word': {
+        '.fd-codeblock .highlighted-word': {
           padding: '1px 2px',
           margin: '-1px -3px',
           border: '1px solid',
@@ -162,20 +151,13 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
           'background-color': `theme('colors.fd-primary.DEFAULT / 10%')`,
           'border-radius': '2px',
         },
+        '.fd-codeblock-keep-bg': {
+          'background-color': 'var(--shiki-light-bg)',
+        },
+        '.dark .fd-codeblock-keep-bg': {
+          'background-color': 'var(--shiki-dark-bg)',
+        },
       });
-
-      if (keepCodeBlockBackground) {
-        addComponents({
-          '.nd-codeblock': {
-            color: 'var(--shiki-light)',
-            'background-color': 'var(--shiki-light-bg)',
-          },
-          '.dark .nd-codeblock': {
-            color: 'var(--shiki-dark)',
-            'background-color': 'var(--shiki-dark-bg)',
-          },
-        });
-      }
 
       addUtilities({
         '.steps': {
@@ -234,9 +216,6 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
         },
         colors: createTailwindColors(cssPrefix, addGlobalColors),
         ...animations,
-        typography: {
-          DEFAULT: typographyConfig,
-        },
       },
     },
   }),
@@ -246,6 +225,13 @@ export function createPreset(options: DocsUIOptions = {}): PresetsConfig {
   return {
     darkMode: 'class',
     plugins: [typography, docsUi(options)],
+    theme: {
+      extend: {
+        typography: {
+          DEFAULT: typographyConfig,
+        },
+      },
+    },
   };
 }
 
