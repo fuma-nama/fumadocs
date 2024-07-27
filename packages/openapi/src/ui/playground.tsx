@@ -32,7 +32,7 @@ interface FormValues {
   body: unknown;
 }
 
-interface CustomField<TName extends keyof FormValues> {
+export interface CustomField<TName extends keyof FormValues> {
   render: ({
     field,
     fieldState,
