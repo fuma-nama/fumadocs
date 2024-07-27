@@ -65,7 +65,11 @@ function Route({ route }: { route: string }): ReactNode {
       {segments.map((part, index) => (
         <Fragment key={index}>
           <span className="text-fd-muted-foreground">/</span>
-          <span className="text-fd-foreground">{part}</span>
+          {part.startsWith('{') && part.endsWith('}') ? (
+            <code className="text-fd-primary">{part}</code>
+          ) : (
+            <span className="text-fd-foreground">{part}</span>
+          )}
         </Fragment>
       ))}
     </div>

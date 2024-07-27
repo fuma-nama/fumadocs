@@ -172,7 +172,7 @@ export function APIPlayground({
           <Accordions
             type="multiple"
             className={cn(
-              '-m-4 mt-2 border-0 text-sm',
+              '-m-4 border-0 text-sm',
               path.length === 0 &&
                 query.length === 0 &&
                 header.length === 0 &&
