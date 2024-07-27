@@ -11,6 +11,10 @@ type CalloutProps = Omit<
    * @defaultValue info
    */
   type?: 'info' | 'warn' | 'error';
+
+  /**
+   * Force an icon
+   */
   icon?: ReactNode;
 };
 
@@ -20,7 +24,7 @@ export const Callout = forwardRef<HTMLDivElement, CalloutProps>(
       <div
         ref={ref}
         className={cn(
-          'my-6 flex flex-row gap-2 rounded-lg border bg-fd-card p-3 text-sm text-fd-muted-foreground shadow-md',
+          'my-6 flex flex-row gap-2 rounded-lg border bg-fd-card p-3 text-sm text-fd-card-foreground shadow-md',
           className,
         )}
         {...props}
@@ -35,13 +39,11 @@ export const Callout = forwardRef<HTMLDivElement, CalloutProps>(
               <AlertOctagon className="size-5 fill-red-500 text-fd-card" />
             ),
           }[type]}
-        <div className="w-0 flex-1">
-          {title ? (
-            <div className="mb-2 font-medium text-fd-card-foreground">
-              {title}
-            </div>
-          ) : null}
-          <div className="prose-no-margin">{children}</div>
+        <div className="min-w-0 flex-1">
+          {title ? <p className="mb-2 font-medium">{title}</p> : null}
+          <div className="text-fd-muted-foreground prose-no-margin">
+            {children}
+          </div>
         </div>
       </div>
     );
