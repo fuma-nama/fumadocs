@@ -1,4 +1,4 @@
-import { AlertOctagon, AlertTriangle, Info } from 'lucide-react';
+import { AlertTriangle, Info, OctagonAlert } from 'lucide-react';
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import { cn } from '@/utils/cn';
 
@@ -36,11 +36,11 @@ export const Callout = forwardRef<HTMLDivElement, CalloutProps>(
               <AlertTriangle className="size-5 fill-orange-500 text-fd-card" />
             ),
             error: (
-              <AlertOctagon className="size-5 fill-red-500 text-fd-card" />
+              <OctagonAlert className="size-5 fill-red-500 text-fd-card" />
             ),
           }[type]}
         <div className="min-w-0 flex-1">
-          {title ? <p className="mb-2 font-medium">{title}</p> : null}
+          {title ? <p className="not-prose mb-2 font-medium">{title}</p> : null}
           <div className="text-fd-muted-foreground prose-no-margin">
             {children}
           </div>
