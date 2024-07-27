@@ -793,6 +793,9 @@ importers:
       eslint-config-custom:
         specifier: workspace:*
         version: link:../eslint-config-custom
+      fumadocs-ui:
+        specifier: workspace:*
+        version: link:../ui
       shiki:
         specifier: ^1.11.1
         version: 1.11.1
