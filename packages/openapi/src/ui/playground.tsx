@@ -4,13 +4,13 @@ import {
   useMemo,
   useRef,
   useState,
-  type ReactNode,
 } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import useSWRImmutable from 'swr/immutable';
 import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 import { cn, buttonVariants } from 'fumadocs-ui/components/api';
 import type {
+  FieldPath,
   UseFormStateReturn,
   ControllerFieldState,
   ControllerRenderProps,
@@ -20,7 +20,11 @@ import { Form } from '@/ui/components/form';
 import { createBodyFromValue, getStatusInfo } from '@/ui/fetcher';
 import { getDefaultValue, getDefaultValues } from '@/ui/shared';
 import { InputField, ObjectInput } from '@/ui/inputs';
-import type { APIPlaygroundProps } from '@/render/playground';
+import type {
+  APIPlaygroundProps,
+  PrimitiveRequestField,
+  RequestSchema,
+} from '@/render/playground';
 import { CodeBlock } from '@/ui/components/codeblock';
 import { type DynamicField, SchemaContext } from './contexts/schema';
 
@@ -32,12 +36,12 @@ interface FormValues {
   body: unknown;
 }
 
-export interface CustomField<TName extends keyof FormValues> {
-  render: ({
-    field,
-    fieldState,
-    formState,
-  }: {
+export interface CustomField<TName extends FieldPath<FormValues>, Info> {
+  render: (props: {
+    /**
+     * Field Info
+     */
+    info: Info;
     field: ControllerRenderProps<FormValues, TName>;
     fieldState: ControllerFieldState;
     formState: UseFormStateReturn<FormValues>;
@@ -52,11 +56,15 @@ export function APIPlayground({
   header = [],
   query = [],
   body,
-  fields: { auth } = {},
+  fields = {},
   schemas,
 }: APIPlaygroundProps & {
   fields?: {
-    auth?: CustomField<'authorization'>;
+    auth?: CustomField<'authorization', PrimitiveRequestField>;
+    path?: CustomField<`path.${string}`, PrimitiveRequestField>;
+    query?: CustomField<`query.${string}`, PrimitiveRequestField>;
+    header?: CustomField<`header.${string}`, PrimitiveRequestField>;
+    body?: CustomField<'body', RequestSchema>;
   };
 } & HTMLAttributes<HTMLFormElement>): React.ReactElement {
   const { baseUrl } = useApiContext();
@@ -129,16 +137,32 @@ export function APIPlayground({
     setInput(value);
   });
 
-  let authField: ReactNode | undefined;
+  function renderCustomField<
+    T extends FieldPath<FormValues>,
+    F extends RequestSchema & { name?: string },
+  >(
+    fieldName: T,
+    info: F,
+    field: CustomField<T, F> | undefined,
+    key?: string,
+  ): ReactElement {
+    if (field) {
+      return (
+        <Controller
+          key={key}
+          control={form.control}
+          render={(props) => field.render({ ...props, info })}
+          name={fieldName}
+        />
+      );
+    }
 
-  if (authorization) {
-    authField = auth ? (
-      <Controller render={auth.render} name="authorization" />
-    ) : (
+    return (
       <InputField
-        name="Authorization"
-        fieldName="authorization"
-        field={authorization}
+        key={key}
+        name={info.name}
+        fieldName={fieldName}
+        field={info}
       />
     );
   }
@@ -168,7 +192,9 @@ export function APIPlayground({
             </button>
           </div>
 
-          {authField}
+          {authorization
+            ? renderCustomField('authorization', authorization, fields.auth)
+            : null}
           <Accordions
             type="multiple"
             className={cn(
@@ -182,51 +208,49 @@ export function APIPlayground({
           >
             {path.length > 0 ? (
               <Accordion title="Path">
-                {path.map((field) => (
-                  <InputField
-                    key={field.name}
-                    field={field}
-                    name={field.name}
-                    fieldName={`path.${field.name}`}
-                  />
-                ))}
+                {path.map((field) =>
+                  renderCustomField(
+                    `path.${field.name}`,
+                    field,
+                    fields.path,
+                    field.name,
+                  ),
+                )}
               </Accordion>
             ) : null}
 
             {query.length > 0 ? (
               <Accordion title="Query">
-                <div className="flex flex-col gap-2">
-                  {query.map((field) => (
-                    <InputField
-                      key={field.name}
-                      field={field}
-                      name={field.name}
-                      fieldName={`query.${field.name}`}
-                    />
-                  ))}
-                </div>
+                {query.map((field) =>
+                  renderCustomField(
+                    `query.${field.name}`,
+                    field,
+                    fields.query,
+                    field.name,
+                  ),
+                )}
               </Accordion>
             ) : null}
 
             {header.length > 0 ? (
               <Accordion title="Headers">
-                {header.map((field) => (
-                  <InputField
-                    key={field.name}
-                    field={field}
-                    name={field.name}
-                    fieldName={`header.${field.name}`}
-                  />
-                ))}
+                {header.map((field) =>
+                  renderCustomField(
+                    `header.${field.name}`,
+                    field,
+                    fields.header,
+                    field.name,
+                  ),
+                )}
               </Accordion>
             ) : null}
 
             {body ? (
               <Accordion title="Body">
-                {body.type === 'object' ? (
+                {body.type === 'object' && !fields.body ? (
                   <ObjectInput field={body} fieldName="body" />
                 ) : (
-                  <InputField name="Body" field={body} fieldName="body" />
+                  renderCustomField('body', body, fields.body)
                 )}
               </Accordion>
             ) : null}

@@ -2,4 +2,4 @@
 'fumadocs-openapi': minor
 ---
 
-Support custom authorization field
+Support custom fields (auth, query, header, path and body)

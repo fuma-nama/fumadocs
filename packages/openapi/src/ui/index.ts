@@ -14,3 +14,5 @@ export const Response = Tab;
 
 export const Requests = Tabs;
 export const Request = Tab;
+
+export { useSchemaContext } from './contexts/schema';
