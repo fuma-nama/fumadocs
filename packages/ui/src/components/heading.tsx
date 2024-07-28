@@ -1,4 +1,4 @@
-import { LinkIcon } from 'lucide-react';
+import { Link } from 'lucide-react';
 import type { ComponentPropsWithoutRef } from 'react';
 import { cn } from '@/utils/cn';
 
@@ -14,19 +14,17 @@ export function Heading<T extends Types = 'h1'>({
 }: HeadingProps<T>): React.ReactElement {
   const As = as ?? 'h1';
 
+  if (!props.id) return <As className={className} {...props} />;
+
   return (
     <As className={cn('scroll-m-20', className)} {...props}>
-      {props.id ? (
-        <a href={`#${props.id}`} className="group">
-          {props.children}
-          <LinkIcon
-            aria-label="Link to section"
-            className="ms-2 inline size-4 text-fd-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
-          />
-        </a>
-      ) : (
-        props.children
-      )}
+      <a href={`#${props.id}`} className="group inline-flex items-center">
+        {props.children}
+        <Link
+          aria-label="Link to section"
+          className="ms-2 size-4 text-fd-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
+        />
+      </a>
     </As>
   );
 }

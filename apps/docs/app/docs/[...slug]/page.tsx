@@ -131,7 +131,7 @@ export function generateMetadata({ params }: { params: Param }): Metadata {
 }
 
 export function generateStaticParams(): Param[] {
-  return utils.getPages().map<Param>((page) => ({
+  return utils.getPages().map((page) => ({
     slug: page.slugs,
   }));
 }

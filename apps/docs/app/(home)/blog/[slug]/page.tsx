@@ -11,8 +11,6 @@ interface Param {
   slug: string;
 }
 
-export const dynamicParams = false;
-
 export default function Page({
   params,
 }: {
@@ -83,7 +81,7 @@ export function generateMetadata({ params }: { params: Param }): Metadata {
 }
 
 export function generateStaticParams(): Param[] {
-  return blog.getPages().map<Param>((page) => ({
+  return blog.getPages().map((page) => ({
     slug: page.slugs[0],
   }));
 }
