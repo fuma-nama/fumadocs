@@ -1,5 +1,26 @@
 # fumadocs-twoslash
 
+## 1.1.1
+
+### Patch Changes
+
+- 6ed95ea: Fix compatibility issues with Fumadocs UI v13
+- Updated dependencies [89190ae]
+- Updated dependencies [b02eebf]
+- Updated dependencies [f868018]
+- Updated dependencies [8aebeab]
+- Updated dependencies [c684c00]
+- Updated dependencies [8aebeab]
+- Updated dependencies [0377bb4]
+- Updated dependencies [e8e6a17]
+- Updated dependencies [c8964d3]
+- Updated dependencies [c901e6b]
+- Updated dependencies [daa7d3c]
+- Updated dependencies [89190ae]
+- Updated dependencies [b02eebf]
+- Updated dependencies [4373231]
+  - fumadocs-ui@13.0.0
+
 ## 1.1.0
 
 ### Minor Changes
