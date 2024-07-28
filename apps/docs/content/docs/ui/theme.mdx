@@ -25,6 +25,10 @@ For Tailwind CSS projects, use the official Tailwind CSS plugin.
 }
 ```
 
+<Callout type="warn" title="ESM-Only">
+  Use ESM syntax on your configuration file.
+</Callout>
+
 ### Global Styles
 
 By using the Tailwind CSS plugin, or the pre-built stylesheet, your default border, text and background
@@ -105,4 +109,24 @@ The Tailwind CSS plugin overrides the default configuration for the Typography p
 
 ```tsx
 <div className="prose">...</div>
+```
+
+### Colors
+
+Fumadocs UI has its own colors, animations, and utilities.
+It adds the colors with a `fd-` prefix, you can reference them with the prefix like `bg-fd-background`.
+
+To remove the prefix, enable `addGlobalColors`.
+
+```js
+import { createPreset } from 'fumadocs-ui/tailwind-plugin';
+
+/** @type {import('tailwindcss').Config} */
+export default {
+  presets: [
+    createPreset({
+      addGlobalColors: true,
+    }),
+  ],
+};
 ```
