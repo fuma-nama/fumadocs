@@ -1,5 +1,15 @@
 # next-docs-mdx
 
+## 9.0.0
+
+### Major Changes
+
+- 1f1989e: Support Fumadocs v13
+
+### Patch Changes
+
+- fumadocs-core@13.0.1
+
 ## 8.2.34
 
 ### Patch Changes
