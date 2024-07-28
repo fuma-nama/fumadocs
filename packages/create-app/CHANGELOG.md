@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 13.0.1
+
+### Patch Changes
+
+- 1f1989e: Update versions
+
 ## 13.0.0
 
 ## 12.5.6
