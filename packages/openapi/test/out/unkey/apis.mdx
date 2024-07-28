@@ -13,6 +13,10 @@ import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, Exa
 
 ## Get Api
 
+<APIPlayground authorization={{"type":"string","name":"Authorization","defaultValue":"Bearer","isRequired":true,"description":"The Authorization access token"}} method={"GET"} route={"/v1/apis.getApi"} path={[]} query={[{"name":"apiId","type":"string","defaultValue":"api_1234","isRequired":true,"description":"The id of the api to fetch"}]} header={[]} body={undefined} schemas={{}}>
+
+</APIPlayground>
+
 ### Authorization
 
 <Property name={"Authorization"} type={"Bearer <token>"} required={true}>
@@ -43,10 +47,6 @@ The id of the api to fetch
 | `409` | This response is sent when a request conflicts with the current state of the server. |
 | `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
 | `500` | The server has encountered a situation it does not know how to handle. |
-
-<APIPlayground authorization={{"type":"string","name":"Authorization","defaultValue":"Bearer","isRequired":true,"description":"The Authorization access token"}} method={"GET"} route={"/v1/apis.getApi"} path={[]} query={[{"name":"apiId","type":"string","defaultValue":"api_1234","isRequired":true,"description":"The id of the api to fetch"}]} header={[]} body={undefined} schemas={{}}>
-
-</APIPlayground>
 
 </APIInfo>
 
@@ -479,6 +479,10 @@ export interface Response {
 
 ## Create Api
 
+<APIPlayground authorization={{"type":"string","name":"Authorization","defaultValue":"Bearer","isRequired":true,"description":"The Authorization access token"}} method={"POST"} route={"/v1/apis.createApi"} path={[]} query={[]} header={[]} body={{"type":"object","isRequired":true,"properties":{"name":{"type":"ref","isRequired":true,"schema":"0"}}}} schemas={{"0":{"type":"string","defaultValue":"my-api","isRequired":false,"description":"The name for your API. This is not customer facing."}}}>
+
+</APIPlayground>
+
 ### Authorization
 
 <Property name={"Authorization"} type={"Bearer <token>"} required={true}>
@@ -509,10 +513,6 @@ The name for your API. This is not customer facing.
 | `409` | This response is sent when a request conflicts with the current state of the server. |
 | `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
 | `500` | The server has encountered a situation it does not know how to handle. |
-
-<APIPlayground authorization={{"type":"string","name":"Authorization","defaultValue":"Bearer","isRequired":true,"description":"The Authorization access token"}} method={"POST"} route={"/v1/apis.createApi"} path={[]} query={[]} header={[]} body={{"type":"object","isRequired":true,"properties":{"name":{"type":"ref","isRequired":true,"schema":"0"}}}} schemas={{"0":{"type":"string","defaultValue":"my-api","isRequired":false,"description":"The name for your API. This is not customer facing."}}}>
-
-</APIPlayground>
 
 </APIInfo>
 
@@ -938,6 +938,10 @@ export interface Response {
 
 ## List Keys
 
+<APIPlayground authorization={{"type":"string","name":"Authorization","defaultValue":"Bearer","isRequired":true,"description":"The Authorization access token"}} method={"GET"} route={"/v1/apis.listKeys"} path={[]} query={[{"name":"apiId","type":"string","defaultValue":"api_1234","isRequired":true,"description":"The id of the api to fetch"},{"name":"limit","type":"number","defaultValue":100,"isRequired":false,"description":"The maximum number of keys to return"},{"name":"cursor","type":"string","defaultValue":"","isRequired":false,"description":"Use this to fetch the next page of results. A new cursor will be returned in the response if there are more results."},{"name":"ownerId","type":"string","defaultValue":"","isRequired":false,"description":"If provided, this will only return keys where the `ownerId` matches."}]} header={[]} body={undefined} schemas={{}}>
+
+</APIPlayground>
+
 ### Authorization
 
 <Property name={"Authorization"} type={"Bearer <token>"} required={true}>
@@ -996,10 +1000,6 @@ If provided, this will only return keys where the `ownerId` matches.
 | `409` | This response is sent when a request conflicts with the current state of the server. |
 | `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
 | `500` | The server has encountered a situation it does not know how to handle. |
-
-<APIPlayground authorization={{"type":"string","name":"Authorization","defaultValue":"Bearer","isRequired":true,"description":"The Authorization access token"}} method={"GET"} route={"/v1/apis.listKeys"} path={[]} query={[{"name":"apiId","type":"string","defaultValue":"api_1234","isRequired":true,"description":"The id of the api to fetch"},{"name":"limit","type":"number","defaultValue":100,"isRequired":false,"description":"The maximum number of keys to return"},{"name":"cursor","type":"string","defaultValue":"","isRequired":false,"description":"Use this to fetch the next page of results. A new cursor will be returned in the response if there are more results."},{"name":"ownerId","type":"string","defaultValue":"","isRequired":false,"description":"If provided, this will only return keys where the `ownerId` matches."}]} header={[]} body={undefined} schemas={{}}>
-
-</APIPlayground>
 
 </APIInfo>
 
@@ -1559,6 +1559,10 @@ export interface Response {
 
 ## Delete Api
 
+<APIPlayground authorization={{"type":"string","name":"Authorization","defaultValue":"Bearer","isRequired":true,"description":"The Authorization access token"}} method={"POST"} route={"/v1/apis.deleteApi"} path={[]} query={[]} header={[]} body={{"type":"object","isRequired":true,"properties":{"apiId":{"type":"ref","isRequired":true,"schema":"0"}}}} schemas={{"0":{"type":"string","defaultValue":"api_1234","isRequired":false,"description":"The id of the api to delete"}}}>
+
+</APIPlayground>
+
 ### Authorization
 
 <Property name={"Authorization"} type={"Bearer <token>"} required={true}>
@@ -1589,10 +1593,6 @@ The id of the api to delete
 | `409` | This response is sent when a request conflicts with the current state of the server. |
 | `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
 | `500` | The server has encountered a situation it does not know how to handle. |
-
-<APIPlayground authorization={{"type":"string","name":"Authorization","defaultValue":"Bearer","isRequired":true,"description":"The Authorization access token"}} method={"POST"} route={"/v1/apis.deleteApi"} path={[]} query={[]} header={[]} body={{"type":"object","isRequired":true,"properties":{"apiId":{"type":"ref","isRequired":true,"schema":"0"}}}} schemas={{"0":{"type":"string","defaultValue":"api_1234","isRequired":false,"description":"The id of the api to delete"}}}>
-
-</APIPlayground>
 
 </APIInfo>
 

@@ -15,10 +15,8 @@ export type BreadcrumbItem = Breadcrumb.BreadcrumbItem;
 export type SidebarProviderProps = Sidebar.SidebarProviderProps;
 export type SidebarTriggerProps = Sidebar.SidebarTriggerProps<ElementType>;
 
-export type TOCProviderProps = Omit<
-  ComponentPropsWithoutRef<typeof TOC.TOCProvider>,
-  keyof ComponentPropsWithoutRef<'div'>
->;
+export type ScrollProviderProps = TOC.ScrollProviderProps;
+export type AnchorProviderProps = TOC.AnchorProviderProps;
 
 export type TOCItemType = Server.TOCItemType;
 

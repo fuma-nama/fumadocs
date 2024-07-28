@@ -22,26 +22,34 @@ export default function Layout({
       <body>
         <I18nProvider
           locale={lang}
-          translations={{
-            en: {
+          locales={[
+            {
               name: 'English',
+              locale: 'en',
             },
-            cn: {
+            {
               name: 'Chinese',
-              toc: '目錄',
-              search: '搜尋文檔',
-              lastUpdate: '最後更新於',
-              searchNoResult: '沒有結果',
-              previousPage: '上一頁',
-              nextPage: '下一頁',
+              locale: 'cn',
             },
-          }}
+          ]}
+          translations={
+            {
+              cn: {
+                toc: '目錄',
+                search: '搜尋文檔',
+                lastUpdate: '最後更新於',
+                searchNoResult: '沒有結果',
+                previousPage: '上一頁',
+                nextPage: '下一頁',
+              },
+            }[lang]
+          }
         >
           <RootProvider>
             <DocsLayout
               tree={pageTree[lang]}
               nav={{
-                title: lang === 'cn' ? '目錄' : 'My App',
+                title: lang === 'cn' ? '文檔' : 'My App',
                 url: `/${lang}`,
               }}
               i18n

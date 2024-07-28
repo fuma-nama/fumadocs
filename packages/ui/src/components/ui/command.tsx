@@ -12,11 +12,11 @@ const CommandInput = React.forwardRef<
   }
 >(({ className, onClose, ...props }, ref) => (
   <div className="flex flex-row items-center gap-2 px-3">
-    <Search className="size-4 text-muted-foreground" />
+    <Search className="size-4 text-fd-muted-foreground" />
     <CommandPrimitive.Input
       ref={ref}
       className={cn(
-        'w-0 flex-1 bg-transparent py-3 text-base placeholder:text-muted-foreground focus-visible:outline-none',
+        'w-0 flex-1 bg-transparent py-3 text-base placeholder:text-fd-muted-foreground focus-visible:outline-none',
         className,
       )}
       {...props}
@@ -89,7 +89,7 @@ const CommandSeparator = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <CommandPrimitive.Separator
     ref={ref}
-    className={cn('h-px bg-border', className)}
+    className={cn('h-px bg-fd-border', className)}
     {...props}
   />
 ));
@@ -105,7 +105,7 @@ const CommandItem = React.forwardRef<
   <CommandPrimitive.Item
     ref={ref}
     className={cn(
-      'select-none rounded-lg px-2 text-sm aria-disabled:pointer-events-none aria-disabled:opacity-50 aria-selected:bg-accent aria-selected:text-accent-foreground',
+      'select-none rounded-lg px-2 text-sm aria-disabled:pointer-events-none aria-disabled:opacity-50 aria-selected:bg-fd-accent aria-selected:text-fd-accent-foreground',
       className,
     )}
     {...props}
@@ -116,7 +116,7 @@ const CommandItem = React.forwardRef<
         nested && 'ms-2 gap-2 border-s ps-4',
       )}
     >
-      <div className="text-muted-foreground [&_svg]:size-4">{icon}</div>
+      <div className="text-fd-muted-foreground [&_svg]:size-4">{icon}</div>
       <p className="w-0 flex-1 truncate">{children}</p>
     </div>
   </CommandPrimitive.Item>
@@ -134,8 +134,8 @@ const CommandDialog = React.forwardRef<
     ref={ref}
     shouldFilter={false}
     loop
-    contentClassName="fixed left-1/2 top-[10vh] z-50 w-[98vw] max-w-screen-sm origin-left -translate-x-1/2 rounded-lg border bg-popover text-popover-foreground shadow-lg data-[state=closed]:animate-dialog-out data-[state=open]:animate-dialog-in"
-    overlayClassName="fixed inset-0 z-50 bg-background/50 backdrop-blur-sm data-[state=closed]:animate-fade-out data-[state=open]:animate-fade-in"
+    contentClassName="fixed left-1/2 top-[10vh] z-50 w-[98vw] max-w-screen-sm origin-left -translate-x-1/2 rounded-lg border bg-fd-popover text-fd-popover-foreground shadow-lg data-[state=closed]:animate-fd-dialog-out data-[state=open]:animate-fd-dialog-in"
+    overlayClassName="fixed inset-0 z-50 bg-fd-background/50 backdrop-blur-sm data-[state=closed]:animate-fd-fade-out data-[state=open]:animate-fd-fade-in"
     {...props}
   >
     {children}

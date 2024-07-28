@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-ui",
-  "version": "12.5.6",
+  "version": "13.0.0",
   "description": "The framework for building a documentation website in Next.js",
   "keywords": [
     "NextJs",
@@ -17,7 +17,7 @@
     "./image-zoom.css": "./dist/image-zoom.css",
     "./tailwind-plugin": {
       "import": "./dist/tailwind-plugin.js",
-      "require": "./dist/tailwind-plugin.cjs",
+      "default": "./dist/tailwind-plugin.js",
       "types": "./dist/tailwind-plugin.d.ts"
     },
     "./components/*": {

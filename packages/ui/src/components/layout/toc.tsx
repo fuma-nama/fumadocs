@@ -1,6 +1,6 @@
 import { ChevronRight, Text } from 'lucide-react';
 import type { TOCItemType } from 'fumadocs-core/server';
-import * as Primitive from 'fumadocs-core/toc-internal';
+import * as Primitive from 'fumadocs-core/toc';
 import {
   type ReactElement,
   type ReactNode,
@@ -44,7 +44,7 @@ export function Toc({ items, header, footer }: TOCProps): ReactElement {
       className="sticky top-0 flex h-dvh w-[220px] shrink-0 flex-col gap-4 pr-3 pt-12 max-lg:hidden xl:w-[260px] rtl:pl-3"
     >
       {header}
-      <h3 className="-mb-1 -ms-0.5 inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+      <h3 className="-mb-1 -ms-0.5 inline-flex items-center gap-1.5 text-sm text-fd-muted-foreground">
         <Text className="size-4" />
         {text.toc}
       </h3>
@@ -64,13 +64,13 @@ export function TocPopover({ items, header, footer }: TOCProps): ReactElement {
 
   return (
     <Popover>
-      <PopoverTrigger className="inline-flex items-center gap-2 text-nowrap px-4 py-2 text-left max-md:size-full md:px-3 md:text-muted-foreground">
+      <PopoverTrigger className="inline-flex items-center gap-2 text-nowrap px-4 py-2 text-left max-md:size-full md:px-3 md:text-fd-muted-foreground">
         <Text className="size-4 shrink-0" />
         {text.toc}
         {current ? (
           <>
-            <ChevronRight className="-mx-1.5 size-4 shrink-0 text-muted-foreground" />
-            <span className="truncate text-muted-foreground">{current}</span>
+            <ChevronRight className="-mx-1.5 size-4 shrink-0 text-fd-muted-foreground" />
+            <span className="truncate text-fd-muted-foreground">{current}</span>
           </>
         ) : null}
       </PopoverTrigger>
@@ -115,7 +115,7 @@ function TOCItems({
 
   if (items.length === 0)
     return (
-      <div className="rounded-lg border bg-card p-3 text-xs text-muted-foreground">
+      <div className="rounded-lg border bg-fd-card p-3 text-xs text-fd-muted-foreground">
         {text.tocNoHeadings}
       </div>
     );
@@ -125,7 +125,7 @@ function TOCItems({
       <ScrollViewport className="relative min-h-0 text-sm" ref={containerRef}>
         <div
           role="none"
-          className="absolute start-0 w-0.5 bg-primary transition-all"
+          className="absolute start-0 w-0.5 bg-fd-primary transition-all"
           style={{
             top: pos ? `${pos[0].toString()}px` : undefined,
             height: pos ? `${pos[1].toString()}px` : undefined,
@@ -135,7 +135,7 @@ function TOCItems({
         <Primitive.ScrollProvider containerRef={containerRef}>
           <div
             className={cn(
-              'flex flex-col gap-1 text-muted-foreground',
+              'flex flex-col gap-1 text-fd-muted-foreground',
               !isMenu && 'border-s-2',
             )}
           >
@@ -154,7 +154,7 @@ function TOCItem({ item }: { item: TOCItemType }): React.ReactElement {
     <Primitive.TOCItem
       href={item.url}
       className={cn(
-        'py-1 transition-colors [overflow-wrap:anywhere] data-[active=true]:font-medium data-[active=true]:text-primary',
+        'py-1 transition-colors [overflow-wrap:anywhere] data-[active=true]:font-medium data-[active=true]:text-fd-primary',
         item.depth <= 2 && 'ps-4',
         item.depth === 3 && 'ps-7',
         item.depth >= 4 && 'ps-10',

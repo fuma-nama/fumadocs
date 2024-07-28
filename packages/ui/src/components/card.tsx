@@ -18,7 +18,7 @@ export function Cards(
 export type CardProps = {
   icon?: ReactNode;
   title: string;
-  description: string;
+  description?: string;
 } & Omit<LinkProps, 'title'>;
 
 export function Card({
@@ -31,17 +31,19 @@ export function Card({
     <Link
       {...props}
       className={cn(
-        'not-prose block rounded-lg border bg-card p-4 text-sm text-card-foreground shadow-md transition-colors hover:bg-accent/80',
+        'not-prose block rounded-lg border bg-fd-card p-4 text-sm text-fd-card-foreground shadow-md transition-colors hover:bg-fd-accent/80',
         props.className,
       )}
     >
       {icon ? (
-        <div className="mb-2 w-fit rounded-md border bg-muted p-2 text-muted-foreground [&_svg]:size-4">
+        <div className="mb-2 w-fit rounded-md border bg-fd-muted p-2 text-fd-muted-foreground [&_svg]:size-4">
           {icon}
         </div>
       ) : null}
       <h3 className="mb-1 font-medium">{title}</h3>
-      <p className="text-muted-foreground">{description}</p>
+      {description ? (
+        <p className="text-fd-muted-foreground">{description}</p>
+      ) : null}
     </Link>
   );
 }

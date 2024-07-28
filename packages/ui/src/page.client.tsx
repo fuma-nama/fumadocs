@@ -22,7 +22,7 @@ export function LastUpdate(props: { date: Date }): React.ReactElement {
   }, [props.date]);
 
   return (
-    <p className="text-xs text-muted-foreground">
+    <p className="text-xs text-fd-muted-foreground">
       {text.lastUpdate} {date}
     </p>
   );
@@ -39,10 +39,12 @@ export interface FooterProps {
 }
 
 const itemVariants = cva(
-  'flex w-full flex-col gap-2 rounded-lg border bg-card p-4 text-sm transition-colors hover:bg-accent/80 hover:text-accent-foreground',
+  'flex w-full flex-col gap-2 rounded-lg border bg-fd-card p-4 text-sm transition-colors hover:bg-fd-accent/80 hover:text-fd-accent-foreground',
 );
 
-const itemLabel = cva('inline-flex items-center gap-0.5 text-muted-foreground');
+const itemLabel = cva(
+  'inline-flex items-center gap-0.5 text-fd-muted-foreground',
+);
 
 export function Footer({ items }: FooterProps): React.ReactElement {
   const tree = useTreeContext();

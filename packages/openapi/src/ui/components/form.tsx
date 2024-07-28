@@ -81,7 +81,7 @@ const FormItem = forwardRef<
 FormItem.displayName = 'FormItem';
 
 export const labelVariants = cva(
-  'text-xs font-medium text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
+  'text-xs font-medium text-fd-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
 );
 
 const FormLabel = forwardRef<
@@ -128,7 +128,7 @@ const FormDescription = forwardRef<
     <p
       ref={ref}
       id={formDescriptionId}
-      className={cn('text-xs text-muted-foreground', className)}
+      className={cn('text-xs text-fd-muted-foreground', className)}
       {...props}
     />
   );

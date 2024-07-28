@@ -11,7 +11,6 @@ import {
 } from 'fumadocs-ui/components/codeblock';
 import { Popup, PopupContent, PopupTrigger } from 'fumadocs-ui/twoslash/popup';
 import { Wrapper } from '@/components/preview/wrapper';
-import { cn } from './utils/cn';
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
@@ -19,9 +18,9 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     Popup,
     PopupContent,
     PopupTrigger,
-    pre: ({ title, className, icon, allowCopy, ...props }: CodeBlockProps) => (
-      <CodeBlock title={title} icon={icon} allowCopy={allowCopy}>
-        <Pre className={cn('max-h-[400px]', className)} {...props} />
+    pre: (props: CodeBlockProps) => (
+      <CodeBlock {...props}>
+        <Pre className="max-h-[400px]">{props.children}</Pre>
       </CodeBlock>
     ),
     Tabs,

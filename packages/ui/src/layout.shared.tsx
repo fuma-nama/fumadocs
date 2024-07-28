@@ -42,7 +42,7 @@ export function getLinks(
     result = [
       ...result,
       {
-        type: 'secondary',
+        type: 'icon',
         url: githubUrl,
         text: 'Github',
         icon: (

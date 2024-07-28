@@ -59,7 +59,7 @@
   "peerDependencies": {
     "@content-collections/core": "0.x.x",
     "@content-collections/mdx": "0.x.x",
-    "fumadocs-core": "12.x.x"
+    "fumadocs-core": "13.x.x"
   },
   "publishConfig": {
     "access": "public"

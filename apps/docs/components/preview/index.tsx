@@ -14,10 +14,6 @@ import BannerImage from '@/public/banner.png';
 import { modes } from '@/utils/modes';
 import { Wrapper } from './wrapper';
 
-const RollButton = dynamic(() =>
-  import('fumadocs-ui/components/roll-button').then((m) => m.RollButton),
-);
-
 const Banner = dynamic(() =>
   import('fumadocs-ui/components/banner').then((m) => m.Banner),
 );
@@ -36,7 +32,7 @@ export default {
       <Heading
         id="preview"
         as="h3"
-        className="!my-0 rounded-xl bg-background p-4"
+        className="!my-0 rounded-xl bg-fd-background p-4"
       >
         Hello World
       </Heading>
@@ -44,7 +40,7 @@ export default {
   ),
   card: (
     <Wrapper>
-      <div className="rounded-lg bg-background">
+      <div className="rounded-lg bg-fd-background">
         <Card
           href="#"
           icon={<HomeIcon />}
@@ -56,9 +52,9 @@ export default {
   ),
   tabs: (
     <Wrapper>
-      <div className="space-y-4 rounded-xl bg-background p-4 text-sm">
+      <div className="space-y-4 rounded-xl bg-fd-background p-4 text-sm">
         <Tabs
-          id="language"
+          groupId="language"
           persist
           items={['Javascript', 'Rust', 'Typescript']}
         >
@@ -67,7 +63,7 @@ export default {
           <Tab value="Typescript">Also works if items are not the same</Tab>
         </Tabs>
 
-        <Tabs id="language" persist items={['Javascript', 'Rust']}>
+        <Tabs groupId="language" persist items={['Javascript', 'Rust']}>
           <Tab value="Javascript">
             Value is shared! Try refresh and see if the value is persisted
           </Tab>
@@ -80,7 +76,7 @@ export default {
   ),
   'type-table': (
     <Wrapper>
-      <div className="rounded-xl bg-background px-4">
+      <div className="rounded-xl bg-fd-background px-4">
         <TypeTable
           type={{
             percentage: {
@@ -99,7 +95,7 @@ export default {
       <ImageZoom
         alt="banner"
         src={BannerImage}
-        className="!my-0 rounded-xl bg-background"
+        className="!my-0 rounded-xl bg-fd-background"
         priority
       />
     </Wrapper>
@@ -136,6 +132,7 @@ export default {
           <File name="button.tsx" />
           <File name="tabs.tsx" />
           <File name="dialog.tsx" />
+          <Folder name="empty" />
         </Folder>
         <File name="package.json" />
       </Files>
@@ -191,7 +188,7 @@ export default {
   ),
   steps: (
     <Wrapper>
-      <div className="rounded-xl bg-background p-3">
+      <div className="rounded-xl bg-fd-background p-3">
         <Steps>
           <Step>
             <h4>Buy Coffee</h4>
@@ -209,15 +206,9 @@ export default {
       </div>
     </Wrapper>
   ),
-  'roll-button': (
-    <div className="rounded-lg border bg-card p-4 text-muted-foreground">
-      <RollButton />
-      <p className="text-center text-sm">Scroll down to see the button</p>
-    </div>
-  ),
   'root-toggle': (
     <Wrapper>
-      <div className="not-prose rounded-xl bg-background p-3">
+      <div className="not-prose rounded-xl bg-fd-background p-3">
         <RootToggle
           options={modes.map((mode) => ({
             url: `/docs/${mode.param}`,

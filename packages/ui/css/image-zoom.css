@@ -34,7 +34,7 @@
 }
 
 [data-rmiz-modal]:focus-visible {
-  outline: 'none';
+  outline: none;
 }
 
 [data-rmiz-modal-overlay] {
@@ -48,7 +48,7 @@
 }
 
 [data-rmiz-modal-overlay='visible'] {
-  background-color: theme('colors.background / 80%');
+  @apply bg-fd-background;
 }
 
 [data-rmiz-modal-content] {

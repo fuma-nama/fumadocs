@@ -1,14 +1,17 @@
 import Parser from '@apidevtools/json-schema-ref-parser';
 import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
 import { buildRoutes } from '@/build-routes';
-import type { Endpoint } from '@/endpoint';
 import { generateDocument } from '@/utils/generate-document';
 import { idToTitle } from '@/utils/id-to-title';
 import type { RenderContext } from './types';
 import { defaultRenderer, type Renderer } from './render/renderer';
-import { type CodeSample, renderOperation } from './render/operation';
+import { renderOperation } from './render/operation';
 
-export interface GenerateOptions {
+export interface GenerateOptions
+  extends Pick<
+    RenderContext,
+    'generateCodeSamples' | 'generateTypeScriptSchema'
+  > {
   /**
    * The imports of your MDX components.
    *
@@ -28,11 +31,6 @@ export interface GenerateOptions {
     title: string,
     description: string | undefined,
   ) => Record<string, unknown>;
-
-  /**
-   * Generate code samples for endpoint
-   */
-  generateCodeSamples?: (endpoint: Endpoint) => CodeSample[];
 
   renderer?: Partial<Renderer>;
 }
@@ -146,6 +144,8 @@ function getContext(
       ...defaultRenderer,
       ...options.renderer,
     },
+    generateTypeScriptSchema: options.generateTypeScriptSchema,
+    generateCodeSamples: options.generateCodeSamples,
     baseUrl: document.servers?.[0].url ?? 'https://example.com',
   };
 }

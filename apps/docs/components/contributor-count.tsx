@@ -58,7 +58,7 @@ export default async function ContributorCounter({
             rel="noreferrer noopener"
             target="_blank"
             className={cn(
-              'size-10 overflow-hidden rounded-full border-4 border-background bg-background md:-mr-4 md:size-12',
+              'border-background size-10 overflow-hidden rounded-full border-4 bg-fd-background md:-mr-4 md:size-12',
             )}
             style={{
               zIndex: topContributors.length - i,
@@ -74,12 +74,12 @@ export default async function ContributorCounter({
           </a>
         ))}
         {displayCount < contributors.length ? (
-          <div className="size-12 content-center rounded-full bg-secondary text-center">
+          <div className="size-12 content-center rounded-full bg-fd-secondary text-center">
             +{contributors.length - displayCount}
           </div>
         ) : null}
       </div>
-      <div className="text-center text-sm text-muted-foreground">
+      <div className="text-center text-sm text-fd-muted-foreground">
         Some of our best contributors.
       </div>
     </div>

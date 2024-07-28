@@ -73,14 +73,6 @@ export type RehypeCodeOptions = RehypeShikiOptions & {
   filterMetaString?: (metaString: string) => string;
 
   /**
-   * Default language
-   *
-   * @defaultValue plaintext
-   * @deprecated Use `defaultLanguage` instead
-   */
-  defaultLang?: string;
-
-  /**
    * Add icon to code blocks
    */
   icon?: IconOptions | false;
@@ -139,10 +131,6 @@ export function rehypeCode(
 
   if (codeOptions.tab !== false) {
     codeOptions.transformers = [...codeOptions.transformers, transformerTab()];
-  }
-
-  if (codeOptions.defaultLang) {
-    codeOptions.defaultLanguage = codeOptions.defaultLang;
   }
 
   return rehypeShiki.call(this, codeOptions) as Transformer<Root, Root>;

@@ -23,7 +23,7 @@ export function Root({
   return (
     <div
       className={cn(
-        'flex flex-col gap-24 text-sm text-muted-foreground',
+        'flex flex-col gap-24 text-sm text-fd-muted-foreground',
         className,
       )}
       {...props}
@@ -61,11 +61,15 @@ function Route({ route }: { route: string }): ReactNode {
   const segments = route.split('/').filter((part) => part.length > 0);
 
   return (
-    <div className="flex flex-row items-center gap-1 text-sm">
+    <div className="flex flex-row flex-wrap items-center gap-1 text-sm">
       {segments.map((part, index) => (
         <Fragment key={index}>
-          <span className="text-muted-foreground">/</span>
-          <span className="text-foreground">{part}</span>
+          <span className="text-fd-muted-foreground">/</span>
+          {part.startsWith('{') && part.endsWith('}') ? (
+            <code className="text-fd-primary">{part}</code>
+          ) : (
+            <span className="text-fd-foreground">{part}</span>
+          )}
         </Fragment>
       ))}
     </div>
@@ -84,7 +88,7 @@ export function APIInfo({
     <div className={cn('min-w-0 flex-1 prose-no-margin', className)} {...props}>
       <div
         className={cn(
-          'sticky top-24 z-[2] flex flex-row items-center gap-2 rounded-lg border bg-card p-3 md:top-10',
+          'sticky top-24 z-[2] flex flex-row items-center gap-2 rounded-lg border bg-fd-card p-3 md:top-10',
         )}
       >
         <span
@@ -121,7 +125,7 @@ export function Property({
   children,
 }: PropertyProps): React.ReactElement {
   return (
-    <div className="mb-4 flex flex-col rounded-lg border bg-card p-3 prose-no-margin">
+    <div className="mb-4 flex flex-col rounded-lg border bg-fd-card p-3 prose-no-margin">
       <h4 className="inline-flex items-center gap-4">
         <code>{name}</code>
         {required ? (
@@ -132,7 +136,7 @@ export function Property({
             Deprecated
           </div>
         ) : null}
-        <span className="ms-auto font-mono text-[13px] text-muted-foreground">
+        <span className="ms-auto font-mono text-[13px] text-fd-muted-foreground">
           {type}
         </span>
       </h4>

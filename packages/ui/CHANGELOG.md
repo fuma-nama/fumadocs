@@ -1,5 +1,200 @@
 # next-docs-ui
 
+## 13.0.0
+
+### Major Changes
+
+- 89190ae: **Rename `prefix` option on Tailwind CSS Plugin to `cssPrefix`**
+
+  **why:** The previous name was misleading
+
+  **migrate:** Rename the option.
+
+  ```js
+  import { createPreset } from 'fumadocs-ui/tailwind-plugin';
+
+  /** @type {import('tailwindcss').Config} */
+  export default {
+    presets: [
+      createPreset({
+        cssPrefix: 'fd',
+      }),
+    ],
+  };
+  ```
+
+- b02eebf: **Move `keepCodeBlockBackground` option to code block component**
+
+  **why:** Easier to customise code block styles.
+
+  **migrate:**
+
+  Enable `keepBackground` on `<CodeBlock />`, and remove deprecated usage.
+
+  ```tsx
+  import { Pre, CodeBlock } from 'fumadocs-ui/components/codeblock';
+
+  <MDX
+    components={{
+      pre: ({ ref: _ref, ...props }) => (
+        <CodeBlock keepBackground {...props}>
+          <Pre>{props.children}</Pre>
+        </CodeBlock>
+      ),
+    }}
+  />;
+  ```
+
+- f868018: **Replace `secondary` link items with `icon` link items**
+
+  **why:** Link items with type `secondary` has been deprecated long time ago.
+
+  **migrate:** Replace type `secondary` with `icon`.
+
+- 8aebeab: **Change usage of I18nProvider**
+
+  **why:** Make possible to load translations lazily
+
+  **migrate:**
+
+  ```tsx
+  import { RootProvider } from 'fumadocs-ui/provider';
+  import type { ReactNode } from 'react';
+  import { I18nProvider } from 'fumadocs-ui/i18n';
+
+  export default function Layout({
+    params: { lang },
+    children,
+  }: {
+    params: { lang: string };
+    children: ReactNode;
+  }) {
+    return (
+      <html lang={lang}>
+        <body>
+          <I18nProvider
+            locale={lang}
+            // options
+            locales={[
+              {
+                name: 'English',
+                locale: 'en',
+              },
+              {
+                name: 'Chinese',
+                locale: 'cn',
+              },
+            ]}
+            // translations
+            translations={
+              {
+                cn: {
+                  toc: '目錄',
+                  search: '搜尋文檔',
+                  lastUpdate: '最後更新於',
+                  searchNoResult: '沒有結果',
+                  previousPage: '上一頁',
+                  nextPage: '下一頁',
+                },
+              }[lang]
+            }
+          >
+            <RootProvider>{children}</RootProvider>
+          </I18nProvider>
+        </body>
+      </html>
+    );
+  }
+  ```
+
+- 8aebeab: **Require `locale` prop on I18nProvider**
+
+  **why:** Fix problems related to pathname parsing
+
+  **migrate:** Pass `locale` parameter to the provider
+
+- 0377bb4: **Rename `id` prop on Tabs component to `groupId`**
+
+  **why:** Conflicted with HTML `id` attribute.
+
+  **migrate:** Rename to `groupId`.
+
+- e8e6a17: **Make Tailwind CSS Plugin ESM-only**
+
+  **why:** Tailwind CSS supported ESM and TypeScript configs.
+
+  **migrate:** Use ESM syntax in your Tailwind CSS config.
+
+- c901e6b: **Remove deprecated `fumadocs-ui/components/api` components**
+
+  **why:** The new OpenAPI integration has its own UI implementation.
+
+  **migrate:** Update to latest OpenAPI integration.
+
+- 89190ae: **Add `fd-` prefix to all Fumadocs UI colors, animations and utilities**
+
+  **why:** The added Tailwind CSS colors may conflict with the existing colors of codebases.
+
+  **migrate:** Enable `addGlobalColors` on Tailwind CSS Plugin or add the `fd-` prefix to class names.
+
+  ```js
+  import { createPreset } from 'fumadocs-ui/tailwind-plugin';
+
+  /** @type {import('tailwindcss').Config} */
+  export default {
+    presets: [
+      createPreset({
+        addGlobalColors: true,
+      }),
+    ],
+  };
+  ```
+
+- b02eebf: **Change code block component usage**
+
+  **why:** The previous usage was confusing, some props are passed directly to `pre` while some are not.
+
+  **migrate:**
+
+  Pass all props to `CodeBlock` component.
+  This also includes class names, change your custom styles if necessary.
+
+  ```tsx
+  import { Pre, CodeBlock } from 'fumadocs-ui/components/codeblock';
+
+  <MDX
+    components={{
+      // HTML `ref` attribute conflicts with `forwardRef`
+      pre: ({ ref: _ref, ...props }) => (
+        <CodeBlock {...props}>
+          <Pre>{props.children}</Pre>
+        </CodeBlock>
+      ),
+    }}
+  />;
+  ```
+
+  You can ignore this if you didn't customise the default `pre` element.
+
+- 4373231: **Remove `RollButton` component**
+
+  **why:** `RollButton` was created because there were no "Table Of Contents" on mobile viewports. Now users can use the TOC Popover to switch between headings, `RollButton` is no longer a suitable design for Fumadocs UI.
+
+  **migrate:** Remove usages, you may copy the [last implementation of `RollButton`](https://github.com/fuma-nama/fumadocs/blob/fumadocs-ui%4012.5.6/packages/ui/src/components/roll-button.tsx).
+
+### Minor Changes
+
+- c684c00: Support to disable container style overriding
+- c8964d3: Include `Callout` as default MDX component
+
+### Patch Changes
+
+- daa7d3c: Fix empty folder animation problems
+- Updated dependencies [09c3103]
+- Updated dependencies [c714eaa]
+- Updated dependencies [b02eebf]
+  - fumadocs-core@13.0.0
+
 ## 12.5.6
 
 ### Patch Changes

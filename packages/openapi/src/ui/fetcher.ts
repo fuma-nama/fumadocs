@@ -129,7 +129,7 @@ const statusMap: Record<number, StatusInfo> = {
   403: { description: 'Forbidden', color: 'text-red-500', icon: CircleXIcon },
   404: {
     description: 'Not Found',
-    color: 'text-muted-foreground',
+    color: 'text-fd-muted-foreground',
     icon: CircleXIcon,
   },
   500: {
@@ -158,7 +158,7 @@ export function getStatusInfo(status: number): StatusInfo {
 
   return {
     description: 'No Description',
-    color: 'text-muted-foreground',
+    color: 'text-fd-muted-foreground',
     icon: CircleXIcon,
   };
 }

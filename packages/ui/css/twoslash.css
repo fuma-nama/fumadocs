@@ -27,9 +27,9 @@
   border-width: 1px;
   border-radius: 6px;
   padding: 8px;
-  background-color: hsl(var(--popover));
-  color: hsl(var(--popover-foreground));
   z-index: 8;
+
+  @apply text-fd-popover-foreground bg-fd-popover;
 }
 
 .twoslash-query-presisted .twoslash-popup-container:hover,
@@ -47,7 +47,8 @@
   height: 6px;
   border-top-width: 1px;
   border-right-width: 1px;
-  background-color: hsl(var(--popover));
+
+  @apply bg-fd-popover;
 }
 
 .twoslash-popup-docs-tag {
@@ -74,7 +75,8 @@
   font-size: 14px !important;
   line-height: 20px !important;
   margin-top: 8px !important;
-  color: hsl(var(--muted-foreground)) !important;
+
+  @apply text-fd-muted-foreground;
 }
 
 /* ===== Hover Info ===== */
@@ -116,7 +118,7 @@
   height: 1em;
   left: -1px;
   content: ' ';
-  background-color: hsl(var(--foreground));
+  @apply bg-fd-foreground;
 }
 
 .twoslash-completion-list li {
@@ -130,7 +132,7 @@
 }
 
 .twoslash-completion-list li span.twoslash-completions-unmatched {
-  color: hsl(var(--muted-foreground));
+  @apply text-fd-muted-foreground;
 }
 
 .twoslash-completion-list .deprecated {
@@ -142,7 +144,7 @@
 .twoslash-completion-list .twoslash-completions-icon {
   width: 1em;
   flex: none;
-  color: hsl(var(--muted-foreground));
+  @apply text-fd-muted-foreground;
 }
 
 /* Custom Tags */

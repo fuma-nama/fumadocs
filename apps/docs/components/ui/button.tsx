@@ -1,18 +1,18 @@
 import { cva } from 'class-variance-authority';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',
+  'ring-offset-background inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
         default:
-          'bg-background bg-gradient-to-b from-primary to-primary/60 text-primary-foreground shadow-inner shadow-background/20 hover:bg-primary/90',
+          'bg-fd-background bg-gradient-to-b from-fd-primary to-fd-primary/60 text-fd-primary-foreground shadow-inner shadow-fd-background/20 hover:bg-fd-primary/90',
         outline:
-          'border bg-gradient-to-t from-primary/10 shadow-inner shadow-primary/10 hover:bg-accent hover:text-accent-foreground',
+          'border bg-gradient-to-t from-fd-primary/10 shadow-inner shadow-fd-primary/10 hover:bg-fd-accent hover:text-fd-accent-foreground',
         secondary:
-          'border bg-secondary text-secondary-foreground hover:bg-secondary/80',
-        ghost: 'hover:bg-accent hover:text-accent-foreground',
-        link: 'text-primary underline-offset-4 hover:underline',
+          'border bg-fd-secondary text-fd-secondary-foreground hover:bg-fd-secondary/80',
+        ghost: 'hover:bg-fd-accent hover:text-fd-accent-foreground',
+        link: 'text-fd-primary underline-offset-4 hover:underline',
       },
       size: {
         default: 'h-10 px-4 py-2',

@@ -8,7 +8,7 @@ function _createMdxContent(props) {
   if (!Tab) _missingMdxReference("Tab", true);
   if (!Tabs) _missingMdxReference("Tabs", true);
   return _jsxs(Tabs, {
-    id: "package_install",
+    groupId: "package_install",
     persist: true,
     items: ["npm", "pnpm", "yarn", "bun"],
     children: [_jsx(Tab, {

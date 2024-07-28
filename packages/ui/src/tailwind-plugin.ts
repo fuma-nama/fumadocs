@@ -7,18 +7,30 @@ import { typography as typographyConfig } from './theme/typography';
 
 interface DocsUIOptions {
   /**
-   * Prefix of colors
+   * Prefix to the variable name of colors
+   *
+   * @defaultValue ''
    */
-  prefix?: string;
-
-  preset?: keyof typeof presets | Preset;
+  cssPrefix?: string;
 
   /**
-   * Keep code block background of theme
+   * Add Fumadocs UI `fd-*` colors to global colors
    *
    * @defaultValue false
    */
-  keepCodeBlockBackground?: boolean;
+  addGlobalColors?: boolean;
+
+  /**
+   * Change the default styles of `container`
+   *
+   * @defaultValue true
+   */
+  modifyContainer?: boolean;
+
+  /**
+   * Color preset
+   */
+  preset?: keyof typeof presets | Preset;
 }
 
 type Keys =
@@ -57,72 +69,95 @@ function variableName(prefix: string, name: string): string {
   return `--${[prefix, name].filter(Boolean).join('-')}`;
 }
 
-function colorToCSS(prefix: string, name: Keys): string {
-  return `hsl(var(${variableName(prefix, name)}) / <alpha-value>)`;
+type TailwindColors = Record<string, string | Record<string, string>>;
+
+function createTailwindColors(
+  prefix: string,
+  cloneToGlobal: boolean,
+): TailwindColors {
+  function colorToCSS(name: Keys): string {
+    return `hsl(var(${variableName(prefix, name)}) / <alpha-value>)`;
+  }
+
+  const v = new Map<string, TailwindColors[string]>();
+
+  for (const key of ['background', 'foreground', 'ring', 'border'] as const) {
+    const value = colorToCSS(key);
+    v.set(`fd-${key}`, value);
+    if (cloneToGlobal) v.set(key, value);
+  }
+
+  for (const key of [
+    'popover',
+    'primary',
+    'secondary',
+    'accent',
+    'muted',
+    'card',
+  ] as const) {
+    const value = {
+      DEFAULT: colorToCSS(key),
+      foreground: colorToCSS(`${key}-foreground`),
+    };
+
+    v.set(`fd-${key}`, value);
+    if (cloneToGlobal) v.set(key, value);
+  }
+
+  return Object.fromEntries(v.entries());
 }
 
 export const docsUi = plugin.withOptions<DocsUIOptions>(
-  ({
-    prefix = '',
-    preset = 'default',
-    keepCodeBlockBackground = false,
-  } = {}) => {
+  ({ cssPrefix = '', preset = 'default' } = {}) => {
     return ({ addBase, addComponents, addUtilities }) => {
       const { light, dark, css } =
         typeof preset === 'string' ? presets[preset] : preset;
 
       addBase({
-        ':root': getThemeStyles(prefix, light),
-        '.dark': getThemeStyles(prefix, dark),
+        ':root': getThemeStyles(cssPrefix, light),
+        '.dark': getThemeStyles(cssPrefix, dark),
         '*': {
-          'border-color': `theme('colors.border')`,
+          'border-color': `theme('colors.fd-border')`,
         },
         body: {
-          'background-color': `theme('colors.background')`,
-          color: `theme('colors.foreground')`,
+          'background-color': `theme('colors.fd-background')`,
+          color: `theme('colors.fd-foreground')`,
         },
       });
 
       if (css) addBase(css);
 
       addComponents({
-        '.nd-codeblock span': {
+        '.fd-codeblock code span': {
           color: 'var(--shiki-light)',
         },
-        '.dark .nd-codeblock span': {
+        '.dark .fd-codeblock code span': {
           color: 'var(--shiki-dark)',
         },
-        '.nd-codeblock code': {
+        '.fd-codeblock code': {
           display: 'grid',
           'font-size': '13px',
         },
-        '.nd-codeblock .highlighted': {
+        '.fd-codeblock .highlighted': {
           margin: '0 -16px',
           padding: '0 16px',
-          'background-color': `theme('colors.primary.DEFAULT / 10%')`,
+          'background-color': `theme('colors.fd-primary.DEFAULT / 10%')`,
         },
-        '.nd-codeblock .highlighted-word': {
+        '.fd-codeblock .highlighted-word': {
           padding: '1px 2px',
           margin: '-1px -3px',
           border: '1px solid',
-          'border-color': `theme('colors.primary.DEFAULT / 50%')`,
-          'background-color': `theme('colors.primary.DEFAULT / 10%')`,
+          'border-color': `theme('colors.fd-primary.DEFAULT / 50%')`,
+          'background-color': `theme('colors.fd-primary.DEFAULT / 10%')`,
           'border-radius': '2px',
         },
+        '.fd-codeblock-keep-bg': {
+          'background-color': 'var(--shiki-light-bg)',
+        },
+        '.dark .fd-codeblock-keep-bg': {
+          'background-color': 'var(--shiki-dark-bg)',
+        },
       });
-
-      if (keepCodeBlockBackground) {
-        addComponents({
-          '.nd-codeblock': {
-            color: 'var(--shiki-light)',
-            'background-color': 'var(--shiki-light-bg)',
-          },
-          '.dark .nd-codeblock': {
-            color: 'var(--shiki-dark)',
-            'background-color': 'var(--shiki-dark-bg)',
-          },
-        });
-      }
 
       addUtilities({
         '.steps': {
@@ -133,8 +168,8 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
           position: 'relative',
         },
         '.step:before': {
-          'background-color': `theme('colors.secondary.DEFAULT')`,
-          color: `theme('colors.secondary.foreground')`,
+          'background-color': `theme('colors.fd-secondary.DEFAULT')`,
+          color: `theme('colors.fd-secondary.foreground')`,
           content: 'counter(step)',
           'counter-increment': 'step',
           'border-radius': `theme('borderRadius.full')`,
@@ -159,60 +194,28 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
       });
     };
   },
-  ({ prefix = '' } = {}) => ({
+  ({
+    cssPrefix = '',
+    modifyContainer = true,
+    addGlobalColors = false,
+  } = {}) => ({
     theme: {
       extend: {
-        // Allow devs to use `container` for other elements
-        container: {
-          center: true,
-          padding: '1rem',
-          screens: {
-            '2xl': '1400px',
-          },
-        },
-        height: {
-          body: [
-            'calc(100vh - 4rem) /* fallback */',
-            'calc(100dvh - 4rem)',
-          ] as unknown as string,
-        },
+        // Allow devs to use `container` to match with home layout
+        container: modifyContainer
+          ? {
+              center: true,
+              padding: '1rem',
+              screens: {
+                '2xl': '1400px',
+              },
+            }
+          : undefined,
         maxWidth: {
           container: '1400px',
         },
-        colors: {
-          border: colorToCSS(prefix, 'border'),
-          ring: colorToCSS(prefix, 'ring'),
-          background: colorToCSS(prefix, 'background'),
-          foreground: colorToCSS(prefix, 'foreground'),
-          primary: {
-            DEFAULT: colorToCSS(prefix, 'primary'),
-            foreground: colorToCSS(prefix, 'primary-foreground'),
-          },
-          secondary: {
-            DEFAULT: colorToCSS(prefix, 'secondary'),
-            foreground: colorToCSS(prefix, 'secondary-foreground'),
-          },
-          muted: {
-            DEFAULT: colorToCSS(prefix, 'muted'),
-            foreground: colorToCSS(prefix, 'muted-foreground'),
-          },
-          accent: {
-            DEFAULT: colorToCSS(prefix, 'accent'),
-            foreground: colorToCSS(prefix, 'accent-foreground'),
-          },
-          popover: {
-            DEFAULT: colorToCSS(prefix, 'popover'),
-            foreground: colorToCSS(prefix, 'popover-foreground'),
-          },
-          card: {
-            DEFAULT: colorToCSS(prefix, 'card'),
-            foreground: colorToCSS(prefix, 'card-foreground'),
-          },
-        },
+        colors: createTailwindColors(cssPrefix, addGlobalColors),
         ...animations,
-        typography: {
-          DEFAULT: typographyConfig,
-        },
       },
     },
   }),
@@ -222,6 +225,13 @@ export function createPreset(options: DocsUIOptions = {}): PresetsConfig {
   return {
     darkMode: 'class',
     plugins: [typography, docsUi(options)],
+    theme: {
+      extend: {
+        typography: {
+          DEFAULT: typographyConfig,
+        },
+      },
+    },
   };
 }
 

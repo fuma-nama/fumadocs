@@ -75,7 +75,7 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
           className: cn(
             'md:transition-[transform,margin]',
             collapsed && [
-              'md:top-1 md:mr-[-240px] md:h-[calc(100dvh-4px)] md:animate-sidebar-collapse md:rounded-xl md:border md:shadow-md xl:mr-[-260px]',
+              'md:top-1 md:mr-[-240px] md:h-[calc(100dvh-4px)] md:animate-fd-sidebar-collapse md:rounded-xl md:border md:shadow-md xl:mr-[-260px]',
               hover
                 ? 'md:translate-x-1 rtl:md:-translate-x-1'
                 : 'md:-translate-x-full rtl:md:translate-x-full',

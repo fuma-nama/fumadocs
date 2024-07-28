@@ -53,7 +53,7 @@ export function transformerTwoslash(
         },
         popupTypes: {
           tagName: 'div',
-          class: 'prose-no-margin',
+          class: 'fd-codeblock prose-no-margin',
           children: (v) => {
             if (
               v.length === 1 &&
@@ -67,7 +67,7 @@ export function transformerTwoslash(
                 type: 'element',
                 tagName: 'code',
                 properties: {
-                  class: 'nd-codeblock twoslash-popup-code',
+                  class: 'twoslash-popup-code',
                 },
                 children: v,
               },

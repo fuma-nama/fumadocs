@@ -10,16 +10,18 @@ import { HomeIcon } from 'lucide-react';
 
 Add it to your MDX components.
 
-```mdx
+```tsx
 import { Card, Cards } from 'fumadocs-ui/components/card';
 
 <MDX
   components={{
-    Card: (props) => <Card {...props} />,
-    Cards: (props) => <Cards {...props} />,
+    Card,
+    Cards,
   }}
-/>
+/>;
 ```
+
+See [Markdown](/docs/ui/markdown#cards) for usages.
 
 ### Cards
 
@@ -27,7 +29,7 @@ The container of cards.
 
 ### Card
 
-Based on `<Link />`.
+Based on Next.js `<Link />`.
 
 ```json doc-gen:typescript
 {
@@ -35,28 +37,6 @@ Based on `<Link />`.
   "name": "CardProps"
 }
 ```
-
-## Example
-
-Pass the href, title and description.
-
-```mdx
-<Cards>
-  <Card
-    href="https://nextjs.org/docs/app/building-your-application/data-fetching/fetching-caching-and-revalidating"
-    title="Fetching, Caching, and Revalidating"
-    description="Learn more about caching in Next.js"
-  />
-</Cards>
-```
-
-<Cards>
-  <Card
-    href="https://nextjs.org/docs/app/building-your-application/data-fetching/fetching-caching-and-revalidating"
-    title="Fetching, Caching, and Revalidating"
-    description="Learn more about caching in Next.js"
-  />
-</Cards>
 
 ### With Icons
 

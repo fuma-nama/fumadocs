@@ -46,6 +46,8 @@ export async function renderOperation(
   }
   if (method.description) info.push(p(method.description));
 
+  info.push(renderPlayground(path, method, ctx));
+
   if (security) {
     info.push(heading(level, 'Authorization'));
     info.push(getAuthSection(security, ctx));
@@ -112,7 +114,6 @@ export async function renderOperation(
   }
 
   info.push(getResponseTable(method));
-  info.push(renderPlayground(path, method, ctx));
 
   const samples: CodeSample[] = dedupe([
     {
@@ -125,7 +126,7 @@ export async function renderOperation(
       source: JS.getSampleRequest(endpoint),
       lang: 'js',
     },
-    ...(ctx.generateCodeSamples?.(endpoint) ?? []),
+    ...(ctx.generateCodeSamples ? await ctx.generateCodeSamples(endpoint) : []),
     ...((method as CustomProperty)['x-codeSamples'] ?? []),
   ]);
 
@@ -255,21 +256,27 @@ function getResponseTable(operation: OpenAPI.OperationObject): string {
 async function getResponseTabs(
   endpoint: Endpoint,
   operation: OpenAPI.OperationObject,
-  { renderer }: RenderContext,
+  { renderer, generateTypeScriptSchema }: RenderContext,
 ): Promise<string> {
   const items: string[] = [];
   const child: string[] = [];
 
   for (const code of Object.keys(operation.responses)) {
     const example = getExampleResponse(endpoint, code);
-    const ts = await getTypescriptSchema(endpoint, code);
+    let ts: string | undefined;
+
+    if (generateTypeScriptSchema) {
+      ts = await generateTypeScriptSchema(endpoint, code);
+    } else if (generateTypeScriptSchema === undefined) {
+      ts = await getTypescriptSchema(endpoint, code);
+    }
 
     const description =
       code in endpoint.responses
         ? endpoint.responses[code].schema.description
         : undefined;
 
-    if (example && ts) {
+    if (example) {
       items.push(code);
 
       child.push(
@@ -277,7 +284,7 @@ async function getResponseTabs(
           p(description),
           renderer.ResponseTypes([
             renderer.ExampleResponse(example),
-            renderer.TypeScriptResponse(ts),
+            ...(ts ? [renderer.TypeScriptResponse(ts)] : []),
           ]),
         ]),
       );

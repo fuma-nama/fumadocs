@@ -187,15 +187,25 @@ We only provide english translation by default, you have to pass your translatio
 import { I18nProvider } from 'fumadocs-ui/i18n';
 
 <I18nProvider
-  translations={{
-    cn: {
-      name: 'Chinese', // required
-      search: 'Translated Content',
+  locales={[
+    {
+      name: 'English',
+      locale: 'en',
     },
-  }}
->
-  ...
-</I18nProvider>;
+    {
+      name: 'Chinese',
+      locale: 'cn',
+    },
+  ]}
+  translations={
+    {
+      cn: {
+        search: 'Translated Content',
+      },
+    }[locale]
+  }
+  // other props
+/>;
 ```
 
 ### Add Language Switch

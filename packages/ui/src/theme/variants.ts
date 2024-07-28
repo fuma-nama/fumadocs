@@ -5,10 +5,10 @@ export const buttonVariants = cva(
   {
     variants: {
       color: {
-        outline: 'border hover:bg-accent hover:text-accent-foreground',
-        ghost: 'hover:bg-accent hover:text-accent-foreground',
+        outline: 'border hover:bg-fd-accent hover:text-fd-accent-foreground',
+        ghost: 'hover:bg-fd-accent hover:text-fd-accent-foreground',
         secondary:
-          'border bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground',
+          'border bg-fd-secondary text-fd-secondary-foreground hover:bg-fd-accent hover:text-fd-accent-foreground',
       },
       size: {
         sm: 'gap-1 p-0.5 text-xs',
@@ -19,13 +19,13 @@ export const buttonVariants = cva(
 );
 
 export const itemVariants = cva(
-  'flex w-full flex-row items-center gap-2 rounded-md px-2 py-1.5 text-muted-foreground transition-colors duration-100 [&_svg]:size-4',
+  'flex w-full flex-row items-center gap-2 rounded-md px-2 py-1.5 text-fd-muted-foreground transition-colors duration-100 [&_svg]:size-4',
   {
     variants: {
       active: {
-        true: 'bg-primary/10 font-medium text-primary',
+        true: 'bg-fd-primary/10 font-medium text-fd-primary',
         false:
-          'hover:bg-accent/50 hover:text-accent-foreground/80 hover:transition-none',
+          'hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 hover:transition-none',
       },
     },
     defaultVariants: {

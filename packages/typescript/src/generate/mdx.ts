@@ -32,11 +32,11 @@ ${doc.description}
 
 <div className='*:border-b [&>*:last-child]:border-b-0'>${c}</div>`,
 
-  property: (c) => `<div className='text-sm text-muted-foreground py-4'>
+  property: (c) => `<div className='text-sm text-fd-muted-foreground py-4'>
 
 <div className="flex flex-row items-center gap-4">
   <code className="text-sm">${c.name}</code>
-  <code className="text-muted-foreground">{${JSON.stringify(c.type)}}</code>
+  <code className="text-fd-muted-foreground">{${JSON.stringify(c.type)}}</code>
 </div>
 
 ${c.description || 'No Description'}

@@ -27,7 +27,7 @@ export function Control({ url }: { url: string }): React.ReactElement {
         <Share className="size-4" />
         Share Post
       </TooltipTrigger>
-      <TooltipContent className="rounded-lg border bg-popover p-2 text-sm text-popover-foreground">
+      <TooltipContent className="rounded-lg border bg-fd-popover p-2 text-sm text-fd-popover-foreground">
         Copied
       </TooltipContent>
     </Tooltip>
