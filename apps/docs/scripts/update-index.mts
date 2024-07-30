@@ -34,9 +34,7 @@ export async function updateSearchIndexes(
       title: docs.title,
       url: docs.url,
       structured: docs.structuredData,
-      extra_data: {
-        tag: docs.url.split('/')[2],
-      },
+      tag: docs.url.split('/')[2],
     })),
   });
 
