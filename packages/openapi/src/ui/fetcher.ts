@@ -7,12 +7,43 @@ import { type DynamicField } from '@/ui/contexts/schema';
  * Create request body from value
  */
 export function createBodyFromValue(
+  type: 'json' | 'form-data',
   value: unknown,
   schema: RequestSchema,
   references: Record<string, RequestSchema>,
   dynamic: Map<string, DynamicField>,
-): unknown {
-  return convertValue('body', value, schema, references, dynamic);
+): string | FormData {
+  const result = convertValue('body', value, schema, references, dynamic);
+
+  if (type === 'json') {
+    return JSON.stringify(result);
+  }
+
+  const formData = new FormData();
+
+  if (typeof result !== 'object' || !result) {
+    throw new Error(
+      `Unsupported body type: ${typeof result}, expected: object`,
+    );
+  }
+
+  for (const key of Object.keys(result)) {
+    const prop: unknown = result[key as keyof object];
+
+    if (typeof prop === 'object' && prop instanceof File) {
+      formData.set(key, prop);
+    }
+
+    if (Array.isArray(prop) && prop.every((item) => item instanceof File)) {
+      for (const item of prop) {
+        formData.append(key, item);
+      }
+    }
+
+    formData.set(key, JSON.stringify(prop));
+  }
+
+  return formData;
 }
 
 /**
@@ -89,6 +120,8 @@ function convertValue(
       return Number(value);
     case 'boolean':
       return value === 'null' ? undefined : value === 'true';
+    case 'file':
+      return value; // file
     default:
       return String(value);
   }

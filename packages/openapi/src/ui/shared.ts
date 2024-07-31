@@ -61,6 +61,7 @@ export function getDefaultValue(
       resolve(Object.values(item.items)[0], references),
       references,
     );
+  if (item.type === 'file') return undefined;
 
   return String(item.defaultValue);
 }

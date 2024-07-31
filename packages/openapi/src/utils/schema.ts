@@ -7,11 +7,16 @@ export function noRef<T>(v: T): NoReference<T> {
 }
 
 export function getPreferredMedia<T>(body: Record<string, T>): T | undefined {
-  if (Object.keys(body).length === 0) return undefined;
+  const type = getPreferredType(body);
+  if (type) return body[type];
+}
 
-  if ('application/json' in body) return body['application/json'];
+export function getPreferredType<B extends Record<string, unknown>>(
+  body: B,
+): keyof B | undefined {
+  if ('application/json' in body) return 'application/json';
 
-  return Object.values(body)[0];
+  return Object.keys(body)[0];
 }
 
 /**

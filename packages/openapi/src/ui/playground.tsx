@@ -51,6 +51,7 @@ export interface CustomField<TName extends FieldPath<FormValues>, Info> {
 export function APIPlayground({
   route,
   method = 'GET',
+  bodyType,
   authorization,
   path = [],
   header = [],
@@ -81,7 +82,7 @@ export function APIPlayground({
   });
 
   const testQuery = useSWRImmutable(
-    input ? [baseUrl, route, method, input] : null,
+    input ? [baseUrl, route, method, input, bodyType] : null,
     async () => {
       if (!input) return;
 
@@ -93,7 +94,7 @@ export function APIPlayground({
           pathname = pathname.replace(`{${key}}`, paramValue);
       });
 
-      const url = new URL(pathname, baseUrl ?? window.location.origin);
+      const url = new URL(`${baseUrl ?? window.location.origin}${pathname}`);
       Object.keys(input.query).forEach((key) => {
         const paramValue = input.query[key];
         if (typeof paramValue === 'string')
@@ -116,12 +117,18 @@ export function APIPlayground({
 
       const bodyValue =
         body && input.body && Object.keys(input.body).length > 0
-          ? createBodyFromValue(input.body, body, schemas, dynamicRef.current)
+          ? createBodyFromValue(
+              bodyType,
+              input.body,
+              body,
+              schemas,
+              dynamicRef.current,
+            )
           : undefined;
       const response = await fetch(url, {
         method,
         headers,
-        body: bodyValue ? JSON.stringify(bodyValue) : undefined,
+        body: bodyValue,
       });
 
       const data: unknown = await response.json().catch(() => undefined);

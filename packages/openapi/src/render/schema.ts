@@ -25,6 +25,11 @@ interface Context {
   /** Render the full object */
   parseObject: boolean;
 
+  /**
+   * Parse binary format string to be files
+   */
+  allowFile: boolean;
+
   stack: OpenAPI.SchemaObject[];
 
   render: RenderContext;
@@ -166,7 +171,7 @@ function render(
   return renderer.Property(
     {
       name,
-      type: getSchemaType(schema),
+      type: getSchemaType(schema, ctx),
       required: ctx.required,
       deprecated: schema.deprecated,
     },
@@ -218,9 +223,9 @@ function isComplexType(schema: OpenAPI.SchemaObject): boolean {
   return isObject(schema) || schema.type === 'array';
 }
 
-function getSchemaType(schema: OpenAPI.SchemaObject): string {
+function getSchemaType(schema: OpenAPI.SchemaObject, ctx: Context): string {
   if (schema.nullable) {
-    const type = getSchemaType({ ...schema, nullable: false });
+    const type = getSchemaType({ ...schema, nullable: false }, ctx);
 
     // null if schema only contains `nullable`
     return type === 'unknown' ? 'null' : `${type} | null`;
@@ -229,22 +234,28 @@ function getSchemaType(schema: OpenAPI.SchemaObject): string {
   if (schema.title) return schema.title;
 
   if (schema.type === 'array')
-    return `array<${getSchemaType(noRef(schema.items))}>`;
+    return `array<${getSchemaType(noRef(schema.items), ctx)}>`;
 
   if (schema.oneOf)
-    return schema.oneOf.map((one) => getSchemaType(noRef(one))).join(' | ');
+    return schema.oneOf
+      .map((one) => getSchemaType(noRef(one), ctx))
+      .join(' | ');
 
   if (schema.allOf)
-    return schema.allOf.map((one) => getSchemaType(noRef(one))).join(' & ');
+    return schema.allOf
+      .map((one) => getSchemaType(noRef(one), ctx))
+      .join(' & ');
 
-  if (schema.not) return `not ${getSchemaType(noRef(schema.not))}`;
+  if (schema.not) return `not ${getSchemaType(noRef(schema.not), ctx)}`;
 
   if (schema.anyOf) {
     return `Any properties in ${schema.anyOf
-      .map((one) => getSchemaType(noRef(one)))
+      .map((one) => getSchemaType(noRef(one), ctx))
       .join(', ')}`;
   }
 
+  if (schema.type === 'string' && schema.format === 'binary' && ctx.allowFile)
+    return 'File';
   if (schema.type) return schema.type;
 
   if (isObject(schema)) return 'object';

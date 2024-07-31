@@ -173,7 +173,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: '#/components/schemas/BuyMuseumTicketsRequest'
             examples:
@@ -255,6 +255,9 @@ components:
           $ref: '#/components/schemas/Email'
         phone:
           $ref: '#/components/schemas/Phone'
+        image:
+          type: string
+          format: binary
       required:
         - ticketType
         - ticketDate
