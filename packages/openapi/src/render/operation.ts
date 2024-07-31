@@ -4,7 +4,7 @@ import { getExampleResponse } from '@/utils/generate-response';
 import * as CURL from '@/requests/curl';
 import * as JS from '@/requests/javascript';
 import { type MethodInformation, type RenderContext } from '@/types';
-import { noRef, getPreferredMedia } from '@/utils/schema';
+import { noRef, getPreferredMedia, getPreferredType } from '@/utils/schema';
 import { getTypescriptSchema } from '@/utils/get-typescript-schema';
 import { getScheme } from '@/utils/get-security';
 import { renderPlayground } from '@/render/playground';
@@ -54,18 +54,20 @@ export async function renderOperation(
   }
 
   if (body) {
-    const bodySchema = getPreferredMedia(body.content)?.schema;
-    if (!bodySchema) throw new Error();
+    const type = getPreferredType(body.content);
+    if (!type)
+      throw new Error(`No supported media type for body content: ${path}`);
 
     info.push(
       heading(level, `Request Body ${!body.required ? '(Optional)' : ''}`),
       p(body.description),
-      schemaElement('body', noRef(bodySchema), {
+      schemaElement('body', noRef(body.content[type].schema ?? {}), {
         parseObject: true,
         readOnly: method.method === 'GET',
         writeOnly: method.method !== 'GET',
         required: body.required ?? false,
         render: ctx,
+        allowFile: type === 'multipart/form-data',
       }),
     );
   }
@@ -93,6 +95,7 @@ export async function renderOperation(
         writeOnly: method.method !== 'GET',
         required: param.required ?? false,
         render: ctx,
+        allowFile: false,
       },
     );
 

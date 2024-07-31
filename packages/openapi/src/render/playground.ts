@@ -1,6 +1,6 @@
 import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
 import type { MethodInformation, RenderContext } from '@/types';
-import { getPreferredMedia, noRef } from '@/utils/schema';
+import { getPreferredType, noRef } from '@/utils/schema';
 import { getScheme } from '@/utils/get-security';
 
 interface BaseRequestField {
@@ -33,6 +33,10 @@ interface ArraySchema extends BaseSchema {
   items: string | RequestSchema;
 }
 
+interface FileSchema extends BaseSchema {
+  type: 'file';
+}
+
 interface ObjectSchema extends BaseSchema {
   type: 'object';
   properties: Record<string, ReferenceSchema>;
@@ -57,9 +61,11 @@ export type RequestSchema =
   | ArraySchema
   | ObjectSchema
   | SwitcherSchema
-  | NullSchema;
+  | NullSchema
+  | FileSchema;
 
 interface Context {
+  allowFile: boolean;
   schema: Record<string, RequestSchema>;
   registered: WeakMap<OpenAPI.SchemaObject, string>;
   nextId: () => string;
@@ -68,6 +74,7 @@ interface Context {
 export interface APIPlaygroundProps {
   route: string;
   method: string;
+  bodyType: 'json' | 'form-data';
   authorization?: PrimitiveRequestField;
   path?: PrimitiveRequestField[];
   query?: PrimitiveRequestField[];
@@ -82,21 +89,23 @@ export function renderPlayground(
   ctx: RenderContext,
 ): string {
   let currentId = 0;
+  const bodyContent = noRef(method.requestBody)?.content;
+  const mediaType = bodyContent ? getPreferredType(bodyContent) : undefined;
+
   const context: Context = {
+    allowFile: mediaType === 'multipart/form-data',
     schema: {},
     nextId() {
       return String(currentId++);
     },
     registered: new WeakMap(),
   };
-  const body = method.requestBody
-    ? getPreferredMedia(noRef(method.requestBody).content)
-    : undefined;
 
   return ctx.renderer.APIPlayground({
     authorization: getAuthorizationField(method, ctx),
     method: method.method,
     route: path,
+    bodyType: mediaType === 'multipart/form-data' ? 'form-data' : 'json',
     path: method.parameters
       .filter((v) => v.in === 'path')
       .map((v) => parameterToField(v, context)),
@@ -106,9 +115,10 @@ export function renderPlayground(
     header: method.parameters
       .filter((v) => v.in === 'header')
       .map((v) => parameterToField(v, context)),
-    body: body?.schema
-      ? toSchema(noRef(body.schema), true, context)
-      : undefined,
+    body:
+      bodyContent && mediaType && bodyContent[mediaType].schema
+        ? toSchema(noRef(bodyContent[mediaType].schema), true, context)
+        : undefined,
     schemas: context.schema,
   });
 }
@@ -270,6 +280,14 @@ function toSchema(
     return {
       type: 'null',
       isRequired: false,
+    };
+  }
+
+  if (ctx.allowFile && schema.type === 'string' && schema.format === 'binary') {
+    return {
+      type: 'file',
+      isRequired: required,
+      description: schema.description ?? schema.title,
     };
   }
 

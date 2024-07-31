@@ -425,10 +425,35 @@ function NormalInput({
   header,
   field,
   ...props
-}: InputProps<'string' | 'boolean' | 'number'> & {
+}: InputProps<'string' | 'boolean' | 'number' | 'file'> & {
   header?: React.ReactNode;
 }): React.ReactElement {
   const { control } = useFormContext();
+
+  if (field.type === 'file') {
+    return (
+      <FormField
+        control={control}
+        name={fieldName}
+        render={({ field: { value, onChange, ...restField } }) => (
+          <FormItem {...props}>
+            {header}
+            <p>{(value as File | undefined)?.name}</p>
+            <FormControl>
+              <input
+                type="file"
+                onChange={(e) => {
+                  if (!e.target.files) return [];
+                  onChange(e.target.files.item(0));
+                }}
+                {...restField}
+              />
+            </FormControl>
+          </FormItem>
+        )}
+      />
+    );
+  }
 
   if (field.type === 'boolean') {
     return (
