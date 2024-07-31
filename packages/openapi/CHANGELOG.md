@@ -1,5 +1,15 @@
 # @fuma-docs/openapi
 
+## 4.2.0
+
+### Minor Changes
+
+- dfcc61f: Implement multipart form data
+
+### Patch Changes
+
+- f2b540a: Fix `fetch` problems on API Playground
+
 ## 4.1.1
 
 ### Patch Changes
