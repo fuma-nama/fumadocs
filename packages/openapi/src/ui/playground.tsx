@@ -94,7 +94,7 @@ export function APIPlayground({
           pathname = pathname.replace(`{${key}}`, paramValue);
       });
 
-      const url = new URL(pathname, baseUrl ?? window.location.origin);
+      const url = new URL(`${baseUrl ?? window.location.origin}${pathname}`);
       Object.keys(input.query).forEach((key) => {
         const paramValue = input.query[key];
         if (typeof paramValue === 'string')
@@ -128,7 +128,7 @@ export function APIPlayground({
       const response = await fetch(url, {
         method,
         headers,
-        body: bodyValue ? JSON.stringify(bodyValue) : undefined,
+        body: bodyValue,
       });
 
       const data: unknown = await response.json().catch(() => undefined);

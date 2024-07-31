@@ -12,51 +12,38 @@ export function createBodyFromValue(
   schema: RequestSchema,
   references: Record<string, RequestSchema>,
   dynamic: Map<string, DynamicField>,
-): unknown {
+): string | FormData {
+  const result = convertValue('body', value, schema, references, dynamic);
+
   if (type === 'json') {
-    return convertValue('body', value, schema, references, dynamic);
+    return JSON.stringify(result);
   }
 
   const formData = new FormData();
 
-  if (schema.type !== 'object' || typeof value !== 'object' || !value) {
+  if (typeof result !== 'object' || !result) {
     throw new Error(
-      `Unsupported body schema type: ${schema.type}, expected: object`,
+      `Unsupported body type: ${typeof result}, expected: object`,
     );
   }
 
-  for (const key of Object.keys(value)) {
-    if (!(key in schema)) return;
+  for (const key of Object.keys(result)) {
+    const prop: unknown = result[key as keyof object];
 
-    const prop = resolve(schema.properties[key], references);
-
-    if (prop.type === 'file') {
-      formData.set(key, value[key as keyof object]);
+    if (typeof prop === 'object' && prop instanceof File) {
+      formData.set(key, prop);
     }
 
-    if (
-      prop.type === 'array' &&
-      Array.isArray(value) &&
-      resolve(prop.items, references).type === 'file'
-    ) {
-      for (const item of value) {
-        formData.append(key, item as Blob);
+    if (Array.isArray(prop) && prop.every((item) => item instanceof File)) {
+      for (const item of prop) {
+        formData.append(key, item);
       }
     }
 
-    formData.set(
-      key,
-      JSON.stringify(
-        convertValue(
-          `body.${key}`,
-          value[key as keyof object],
-          resolve(schema.properties[key], references),
-          references,
-          dynamic,
-        ),
-      ),
-    );
+    formData.set(key, JSON.stringify(prop));
   }
+
+  return formData;
 }
 
 /**
@@ -133,6 +120,8 @@ function convertValue(
       return Number(value);
     case 'boolean':
       return value === 'null' ? undefined : value === 'true';
+    case 'file':
+      return value; // file
     default:
       return String(value);
   }

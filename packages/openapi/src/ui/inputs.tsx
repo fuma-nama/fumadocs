@@ -435,15 +435,15 @@ function NormalInput({
       <FormField
         control={control}
         name={fieldName}
-        render={({ field: { value, onChange, ...restField } }) => (
+        render={({ field: { value: _value, onChange, ...restField } }) => (
           <FormItem {...props}>
             {header}
-            <p>{(value as File | undefined)?.name}</p>
             <FormControl>
               <input
                 type="file"
+                multiple={false}
                 onChange={(e) => {
-                  if (!e.target.files) return [];
+                  if (!e.target.files) return;
                   onChange(e.target.files.item(0));
                 }}
                 {...restField}
