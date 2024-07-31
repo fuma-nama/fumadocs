@@ -13,7 +13,7 @@ import { Root, API, APIInfo, APIExample, Responses, Response, ResponseTypes, Exa
 
 ## List all pets
 
-<APIPlayground authorization={undefined} method={"GET"} route={"/pets"} path={[]} query={[{"name":"limit","type":"number","defaultValue":"","isRequired":false}]} header={[]} body={undefined} schemas={{}}>
+<APIPlayground authorization={undefined} method={"GET"} route={"/pets"} bodyType={"json"} path={[]} query={[{"name":"limit","type":"number","defaultValue":"","isRequired":false}]} header={[]} body={undefined} schemas={{}}>
 
 </APIPlayground>
 
@@ -141,7 +141,7 @@ export interface Response {
 
 ## Create a pet
 
-<APIPlayground authorization={undefined} method={"POST"} route={"/pets"} path={[]} query={[]} header={[]} body={{"type":"object","isRequired":true,"properties":{"id":{"type":"ref","isRequired":true,"schema":"0"},"name":{"type":"ref","isRequired":true,"schema":"1"},"tag":{"type":"ref","isRequired":false,"schema":"2"}}}} schemas={{"0":{"type":"number","defaultValue":"","isRequired":false},"1":{"type":"string","defaultValue":"","isRequired":false},"2":{"type":"string","defaultValue":"","isRequired":false}}}>
+<APIPlayground authorization={undefined} method={"POST"} route={"/pets"} bodyType={"json"} path={[]} query={[]} header={[]} body={{"type":"object","isRequired":true,"properties":{"id":{"type":"ref","isRequired":true,"schema":"0"},"name":{"type":"ref","isRequired":true,"schema":"1"},"tag":{"type":"ref","isRequired":false,"schema":"2"}}}} schemas={{"0":{"type":"number","defaultValue":"","isRequired":false},"1":{"type":"string","defaultValue":"","isRequired":false},"2":{"type":"string","defaultValue":"","isRequired":false}}}>
 
 </APIPlayground>
 
@@ -241,7 +241,7 @@ export interface Response {
 
 ## Info for a specific pet
 
-<APIPlayground authorization={undefined} method={"GET"} route={"/pets/{petId}"} path={[{"name":"petId","type":"string","defaultValue":"","isRequired":true}]} query={[]} header={[]} body={undefined} schemas={{}}>
+<APIPlayground authorization={undefined} method={"GET"} route={"/pets/{petId}"} bodyType={"json"} path={[{"name":"petId","type":"string","defaultValue":"","isRequired":true}]} query={[]} header={[]} body={undefined} schemas={{}}>
 
 </APIPlayground>
 
