@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 13.0.2
+
+### Patch Changes
+
+- Updated dependencies [4819820]
+  - fumadocs-core@13.0.2
+
 ## 13.0.1
 
 ### Patch Changes
