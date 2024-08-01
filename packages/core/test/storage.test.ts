@@ -7,8 +7,15 @@ describe('Virtual Storage', () => {
   const storage = new Storage();
 
   test('Writing', () => {
-    storage.write('test.mdx', 'page', {});
-    storage.write('meta.json', 'meta', {});
+    storage.write('test.mdx', 'page', {
+      slugs: [],
+      data: {
+        title: 'Hello',
+      },
+    });
+    storage.write('meta.json', 'meta', {
+      data: {},
+    });
 
     expect(storage.list().length).toBe(2);
   });
@@ -20,7 +27,7 @@ describe('Virtual Storage', () => {
 
   test('Nested Directories', () => {
     storage.write('dir1/dir2/meta.json', 'meta', {
-      data: 'Hello',
+      data: {},
     });
 
     expect(storage.readDir('dir1')).toBeDefined();

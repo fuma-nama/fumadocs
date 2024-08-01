@@ -1,4 +1,4 @@
-import { type FileData } from '@/source/types';
+import { type MetaData, type PageData } from '@/source/types';
 import { parseFilePath, type FileInfo, normalizePath } from './path';
 import { Storage } from './file-system';
 
@@ -42,13 +42,13 @@ export function loadFiles(files: VirtualFile[], options: LoadOptions): Storage {
 
       storage.write(relativePath, file.type, {
         slugs,
-        data: file.data,
-      } as FileData['file']);
+        data: file.data as PageData,
+      });
     }
 
     if (file.type === 'meta') {
       storage.write(relativePath, file.type, {
-        data: file.data,
+        data: file.data as MetaData,
       });
     }
   }

@@ -5,6 +5,12 @@ import { loader } from 'fumadocs-core/source';
 import { icons } from 'lucide-react';
 import { map } from '@/.map';
 import { create } from '@/components/ui/icon';
+import { ApiIndicator } from '@/components/ui/api-indicator';
+
+const frontmatter = defaultSchemas.frontmatter.extend({
+  preview: z.string().optional(),
+  index: z.boolean().default(false),
+});
 
 export const utils = loader({
   baseUrl: '/docs',
@@ -15,12 +21,19 @@ export const utils = loader({
   },
   source: createMDXSource(map, {
     schema: {
-      frontmatter: defaultSchemas.frontmatter.extend({
-        preview: z.string().optional(),
-        index: z.boolean().default(false),
-      }),
+      frontmatter,
     },
   }),
+  pageTree: {
+    attachFile(node, file) {
+      if (!file) return node;
+      const data = file.data.data as z.output<typeof frontmatter>;
+      if (!data.full) return node;
+
+      node.name = [node.name, ApiIndicator()];
+      return node;
+    },
+  },
 });
 
 export const blog = loader({
