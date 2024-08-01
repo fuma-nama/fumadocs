@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 13.0.2
+
+### Patch Changes
+
+- 4819820: Page Tree Builder: Fallback to page icon when metadata doesn't exist
+
 ## 13.0.1
 
 ## 13.0.0
