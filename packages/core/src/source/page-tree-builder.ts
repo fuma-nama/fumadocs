@@ -130,14 +130,13 @@ function resolveFolderItem(
     return [ctx.options.attachFile?.(node) ?? node];
   }
 
+  const isExcept = item.startsWith('!'),
+    isExtract = item.startsWith('...');
+
   let filename = item;
-  const isExcept = item.startsWith('!');
   if (isExcept) {
     filename = item.slice(1);
-  }
-
-  const isExtract = item.startsWith('...');
-  if (isExtract) {
+  } else if (isExtract) {
     filename = item.slice(3);
   }
 
@@ -160,7 +159,7 @@ function resolveFolderItem(
 
 function buildFolderNode(
   folder: Folder,
-  defaultIsRoot: boolean,
+  isGlobalRoot: boolean,
   ctx: PageTreeBuilderContext,
 ): PageTree.Folder {
   const metaPath = resolvePath(folder.file.path, 'meta');
@@ -177,9 +176,9 @@ function buildFolderNode(
   let children: PageTree.Node[];
 
   if (!meta) {
-    children = buildAll(folder.children, ctx, !defaultIsRoot);
+    children = buildAll(folder.children, ctx, !isGlobalRoot);
   } else {
-    const isRoot = metadata?.root ?? defaultIsRoot;
+    const isRoot = metadata?.root ?? isGlobalRoot;
     const addedNodePaths = new Set<string>();
 
     const resolved = metadata?.pages?.flatMap<PageTree.Node | '...'>((item) => {
@@ -206,7 +205,7 @@ function buildFolderNode(
   const node: PageTree.Folder = {
     type: 'folder',
     name: metadata?.title ?? index?.name ?? pathToName(folder.file.name, true),
-    icon: ctx.options.resolveIcon?.(metadata?.icon),
+    icon: ctx.options.resolveIcon?.(metadata?.icon) ?? index?.icon,
     root: metadata?.root,
     defaultOpen: metadata?.defaultOpen,
     index,
