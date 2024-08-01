@@ -3,9 +3,9 @@ import Image, { type StaticImageData } from 'next/image';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import { createMetadata } from '@/utils/metadata';
-import NextFAQImage from '@/public/showcases/next-faq.png';
-import YeecordImage from '@/public/showcases/yeecord.png';
-import NuqsImage from '@/public/showcases/nuqs.jpg';
+import NextFAQ from '@/public/showcases/next-faq.png';
+import Yeecord from '@/public/showcases/yeecord.png';
+import Nuqs from '@/public/showcases/nuqs.jpg';
 import FrameGround from '@/public/showcases/frameground.png';
 import Xlog from '@/public/showcases/xlog.png';
 import Briefkasten from '@/public/showcases/briefkasten.png';
@@ -13,6 +13,7 @@ import Turbo from '@/public/showcases/turbo.png';
 import Million from '@/public/showcases/million.png';
 import Spot from '@/public/spot.png';
 import Hiro from '@/public/showcases/hiro.png';
+import DokPloy from '@/public/showcases/dokploy.png';
 
 export const metadata = createMetadata({
   title: 'Showcase',
@@ -36,12 +37,12 @@ export default function Showcase(): React.ReactElement {
       url: 'https://turbo.build',
     },
     {
-      image: NextFAQImage,
+      image: NextFAQ,
       name: 'Next.js Discord Common Questions',
       url: 'https://nextjs-faq.com',
     },
     {
-      image: YeecordImage,
+      image: Yeecord,
       name: 'Yeecord Docs',
       url: 'https://yeecord.com',
     },
@@ -50,7 +51,12 @@ export default function Showcase(): React.ReactElement {
       name: 'Million',
       url: 'https://million.dev',
     },
-    { image: NuqsImage, name: 'nuqs', url: 'https://nuqs.47ng.com' },
+    { image: Nuqs, name: 'nuqs', url: 'https://nuqs.47ng.com' },
+    {
+      image: DokPloy,
+      name: 'Dokploy',
+      url: 'https://dokploy.com',
+    },
     {
       image: Hiro,
       name: 'Hiro',
