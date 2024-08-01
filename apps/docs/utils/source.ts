@@ -30,7 +30,7 @@ export const utils = loader({
       const data = file.data.data as z.output<typeof frontmatter>;
       if (!data.full) return node;
 
-      node.name = [node.name, ApiIndicator()];
+      node.name = [node.name, ' ', ApiIndicator()];
       return node;
     },
   },
