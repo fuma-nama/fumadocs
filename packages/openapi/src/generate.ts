@@ -3,9 +3,37 @@ import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
 import { buildRoutes } from '@/build-routes';
 import { generateDocument } from '@/utils/generate-document';
 import { idToTitle } from '@/utils/id-to-title';
-import type { RenderContext } from './types';
+import type {
+  MethodInformation,
+  RenderContext,
+  RouteInformation,
+} from './types';
 import { defaultRenderer, type Renderer } from './render/renderer';
 import { renderOperation } from './render/operation';
+
+export type DocumentContext =
+  | {
+      type: 'tag';
+      tag: OpenAPI.TagObject | undefined;
+      routes: RouteInformation[];
+    }
+  | {
+      type: 'operation';
+
+      /**
+       * information of the route
+       */
+      route: RouteInformation;
+
+      /**
+       * information of the method (API Endpoint)
+       */
+      endpoint: MethodInformation;
+    }
+  | {
+      type: 'file';
+      routes: RouteInformation[];
+    };
 
 export interface GenerateOptions
   extends Pick<
@@ -30,6 +58,7 @@ export interface GenerateOptions
   frontmatter?: (
     title: string,
     description: string | undefined,
+    context: DocumentContext,
   ) => Record<string, unknown>;
 
   renderer?: Partial<Renderer>;
@@ -43,6 +72,8 @@ export interface GenerateTagOutput {
 export interface GenerateOperationOutput {
   id: string;
   content: string;
+
+  route: RouteInformation;
 }
 
 export async function generate(
@@ -61,10 +92,15 @@ export async function generate(
   }
 
   return generateDocument(
-    document.info.title,
-    document.info.description,
     ctx.renderer.Root({ baseUrl: ctx.baseUrl }, child),
     options,
+    {
+      ...document.info,
+      context: {
+        type: 'file',
+        routes,
+      },
+    },
   );
 }
 
@@ -79,21 +115,29 @@ export async function generateOperations(
   return await Promise.all(
     routes.flatMap<Promise<GenerateOperationOutput>>((route) => {
       return route.methods.map(async (method) => {
-        const content = generateDocument(
-          method.summary ?? method.method,
-          method.description,
-          ctx.renderer.Root({ baseUrl: ctx.baseUrl }, [
-            await renderOperation(route.path, method, ctx, true),
-          ]),
-          options,
-        );
-
         if (!method.operationId)
           throw new Error('Operation ID is required for generating docs.');
+
+        const content = generateDocument(
+          ctx.renderer.Root({ baseUrl: ctx.baseUrl }, [
+            await renderOperation(route.path, method, ctx, false),
+          ]),
+          options,
+          {
+            title: method.summary ?? method.method,
+            description: method.description,
+            context: {
+              type: 'operation',
+              endpoint: method,
+              route,
+            },
+          },
+        );
 
         return {
           id: method.operationId,
           content,
+          route,
         } satisfies GenerateOperationOutput;
       });
     }),
@@ -124,10 +168,17 @@ export async function generateTags(
         return {
           tag,
           content: generateDocument(
-            idToTitle(tag),
-            info?.description,
             ctx.renderer.Root({ baseUrl: ctx.baseUrl }, child),
             options,
+            {
+              title: idToTitle(tag),
+              description: info?.description,
+              context: {
+                type: 'tag',
+                tag: info,
+                routes,
+              },
+            },
           ),
         } satisfies GenerateTagOutput;
       }),

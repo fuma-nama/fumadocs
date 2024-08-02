@@ -8,6 +8,8 @@ interface DocumentRecord {
   _id: string;
 
   title: string;
+  description?: string;
+
   /**
    * URL to the page
    */
@@ -63,73 +65,61 @@ export async function setIndexSettings(index: SearchIndex): Promise<void> {
   });
 }
 
-interface Section {
-  /**
-   * Heading content
-   */
-  section?: string;
-
-  /**
-   * The anchor id
-   */
-  section_id?: string;
-  content: string;
-}
-
-function getSections(page: DocumentRecord): Section[] {
+function toIndex(page: DocumentRecord): BaseIndex[] {
+  let id = 0;
+  const indexes: BaseIndex[] = [];
   const scannedHeadings = new Set<string>();
 
-  return page.structured.contents.flatMap((p) => {
+  function createIndex(
+    section: string | undefined,
+    sectionId: string | undefined,
+    content: string,
+  ): BaseIndex {
+    return {
+      objectID: `${page._id}-${(id++).toString()}`,
+      title: page.title,
+      url: page.url,
+      page_id: page._id,
+      tag: page.tag,
+      section,
+      section_id: sectionId,
+      content,
+      ...page.extra_data,
+    };
+  }
+
+  if (page.description)
+    indexes.push(createIndex(undefined, undefined, page.description));
+
+  page.structured.contents.forEach((p) => {
     const heading = p.heading
       ? page.structured.headings.find((h) => p.heading === h.id)
       : null;
 
-    const section = {
-      section: heading?.content,
-      section_id: heading?.id,
-      content: p.content,
-    };
+    const index = createIndex(heading?.content, heading?.id, p.content);
 
     if (heading && !scannedHeadings.has(heading.id)) {
       scannedHeadings.add(heading.id);
 
-      return [
-        {
-          section: heading.content,
-          section_id: heading.id,
-          content: heading.content,
-        },
-        section,
-      ];
+      indexes.push(createIndex(heading.content, heading.id, heading.content));
     }
 
-    return section;
+    indexes.push(index);
   });
+
+  return indexes;
 }
 
 export async function updateDocuments(
   index: SearchIndex,
   documents: DocumentRecord[],
 ): Promise<void> {
-  const objects = documents.flatMap((page) => {
-    return getSections(page).map(
-      (section, idx) =>
-        ({
-          objectID: `${page._id}-${idx.toString()}`,
-          title: page.title,
-          url: page.url,
-          page_id: page._id,
-          tag: page.tag,
-          ...section,
-          ...page.extra_data,
-        }) satisfies BaseIndex,
-    );
-  });
+  const objects = documents.flatMap(toIndex);
 
   await index.replaceAllObjects(objects);
 }
 
-export interface BaseIndex extends Section {
+export interface BaseIndex {
   objectID: string;
   title: string;
   url: string;
@@ -139,4 +129,16 @@ export interface BaseIndex extends Section {
    * The id of page, used for distinct
    */
   page_id: string;
+
+  /**
+   * Heading content
+   */
+  section?: string;
+
+  /**
+   * Heading (anchor) id
+   */
+  section_id?: string;
+
+  content: string;
 }

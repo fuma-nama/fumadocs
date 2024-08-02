@@ -3,8 +3,18 @@ import { z } from 'zod';
 import type { InferMetaType, InferPageType } from 'fumadocs-core/source';
 import { loader } from 'fumadocs-core/source';
 import { icons } from 'lucide-react';
+import { attachFile } from 'fumadocs-openapi/source';
 import { map } from '@/.map';
 import { create } from '@/components/ui/icon';
+
+const frontmatter = defaultSchemas.frontmatter.extend({
+  preview: z.string().optional(),
+  index: z.boolean().default(false),
+  /**
+   * API routes only
+   */
+  method: z.string().optional(),
+});
 
 export const utils = loader({
   baseUrl: '/docs',
@@ -15,12 +25,12 @@ export const utils = loader({
   },
   source: createMDXSource(map, {
     schema: {
-      frontmatter: defaultSchemas.frontmatter.extend({
-        preview: z.string().optional(),
-        index: z.boolean().default(false),
-      }),
+      frontmatter,
     },
   }),
+  pageTree: {
+    attachFile,
+  },
 });
 
 export const blog = loader({

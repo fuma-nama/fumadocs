@@ -32,6 +32,7 @@ export async function updateSearchIndexes(
     documents: indexes.map((docs) => ({
       _id: docs.id,
       title: docs.title,
+      description: docs.description,
       url: docs.url,
       structured: docs.structuredData,
       tag: docs.url.split('/')[2],

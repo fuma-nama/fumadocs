@@ -29,6 +29,13 @@ export interface Config extends GenerateOptions {
    */
   name?: (type: 'file' | 'tag', name: string) => string;
 
+  /**
+   * Group output using folders (Only works on `operation` mode)
+   *
+   * @defaultValue false
+   */
+  groupByFolder?: boolean;
+
   cwd?: string;
 }
 
@@ -38,6 +45,7 @@ export async function generateFiles({
   name: nameFn,
   per = 'file',
   cwd = process.cwd(),
+  groupByFolder = false,
   ...options
 }: Config): Promise<void> {
   const outputDir = join(cwd, output);
@@ -58,26 +66,50 @@ export async function generateFiles({
       }
 
       if (per === 'operation') {
+        const routeFolders = new Set<string>();
         const results = await generateOperations(path, options);
 
         await Promise.all(
           results.map(async (result) => {
-            const outPath = join(
-              outputDir,
-              filename,
-              `${getName(result.id)}.mdx`,
-            );
+            const outPath = groupByFolder
+              ? join(
+                  outputDir,
+                  filename,
+                  result.route.summary
+                    ? getFilename(result.route.summary)
+                    : getFilenameFromRoute(result.route.path),
+                  `${getFilename(result.id)}.mdx`,
+                )
+              : join(outputDir, filename, `${getFilename(result.id)}.mdx`);
+
+            if (groupByFolder && !routeFolders.has(dirname(outPath))) {
+              routeFolders.add(dirname(outPath));
+
+              if (result.route.summary) {
+                const metaFile = join(dirname(outPath), 'meta.json');
+
+                await write(
+                  metaFile,
+                  JSON.stringify({
+                    title: result.route.summary,
+                  }),
+                );
+                console.log(`Generated Meta: ${metaFile}`);
+              }
+            }
+
             await write(outPath, result.content);
             console.log(`Generated: ${outPath}`);
           }),
         );
+        return;
       }
 
       const results = await generateTags(path, options);
 
       for (const result of results) {
         let tagName = result.tag;
-        tagName = nameFn?.('tag', tagName) ?? getName(tagName);
+        tagName = nameFn?.('tag', tagName) ?? getFilename(tagName);
 
         const outPath = join(outputDir, filename, `${tagName}.mdx`);
         await write(outPath, result.content);
@@ -87,7 +119,16 @@ export async function generateFiles({
   );
 }
 
-function getName(s: string): string {
+function getFilenameFromRoute(path: string): string {
+  return (
+    path
+      .split('/')
+      .filter((v) => !v.startsWith('{') && !v.endsWith('}'))
+      .at(-1) ?? ''
+  );
+}
+
+function getFilename(s: string): string {
   return s
     .replace(/[A-Z]/g, (match, idx: number) =>
       idx === 0 ? match : `-${match.toLowerCase()}`,

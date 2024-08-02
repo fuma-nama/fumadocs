@@ -1,5 +1,17 @@
 # next-docs-zeta
 
+## 13.0.4
+
+### Patch Changes
+
+- 5355391: Support indexing description field on documents
+
+## 13.0.3
+
+### Patch Changes
+
+- 978342f: Type file system utilities (Note: This is an internal module, you're not supposed to reference it)
+
 ## 13.0.2
 
 ### Patch Changes

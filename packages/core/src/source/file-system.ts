@@ -1,3 +1,4 @@
+import type { MetaData, PageData } from '@/source/types';
 import {
   parseFilePath,
   parseFolderPath,
@@ -5,11 +6,25 @@ import {
   type FileInfo,
 } from './path';
 
-export interface File {
+export interface MetaFile {
   file: FileInfo;
-  format: 'meta' | 'page';
-  data: Record<string, unknown>;
+  format: 'meta';
+  data: {
+    // TODO: Merge it into data (major)
+    data: MetaData;
+  };
 }
+
+export interface PageFile {
+  file: FileInfo;
+  format: 'page';
+  data: {
+    slugs: string[];
+    data: PageData;
+  };
+}
+
+export type File = MetaFile | PageFile;
 
 export interface Folder {
   file: FileInfo;
@@ -37,8 +52,11 @@ export class Storage {
    * @param path - flattened path
    * @param format - file format
    */
-  read(path: string, format: string): File | undefined {
-    return this.files.get(`${path}.${format}`);
+  read<F extends File['format']>(
+    path: string,
+    format: F,
+  ): Extract<File, { format: F }> | undefined {
+    return this.files.get(`${path}.${format}`) as Extract<File, { format: F }>;
   }
 
   readDir(path: string): Folder | undefined {
@@ -49,16 +67,16 @@ export class Storage {
     return this.rootFolder;
   }
 
-  write(
+  write<F extends File['format']>(
     path: string,
-    format: 'meta' | 'page',
-    data: Record<string, unknown>,
+    format: F,
+    data: Extract<File, { format: F }>['data'],
   ): void {
-    const node: File = {
+    const node = {
       format,
       file: parseFilePath(path),
       data,
-    };
+    } as File;
 
     this.makeDir(node.file.dirname);
     this.readDir(node.file.dirname)?.children.push(node);

@@ -99,10 +99,12 @@ loader({
 });
 ```
 
-### Attach Custom Properties
+### Page Tree
 
-The `pageTree` option allows you to customise how the page tree builder processes different nodes.
+The page tree is generated from your file system, using the **Page Tree Builder**.
+It also filters out some unnecessary information (e.g. file path), which means after the generation process, you cannot access the file path of a page node.
 
+To customise the process, use the `pageTree` option.
 You can attach custom properties to page tree nodes, like customising the display name of pages and folders.
 
 ```ts
@@ -110,9 +112,13 @@ import { loader } from 'fumadocs-core/source';
 
 loader({
   pageTree: {
-    attachFolderIds: true, // add `folder.id` property
-    attachFolder: (node) => ({ ... }), // change folder nodes
-  }
+    attachFile(node, file) {
+      // you can access its file information
+      console.log(file.data);
+
+      return node;
+    },
+  },
 });
 ```
 

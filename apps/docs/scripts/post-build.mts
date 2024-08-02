@@ -6,10 +6,9 @@ import type { SearchIndex } from 'fumadocs-mdx';
 
 env.loadEnvConfig(process.cwd());
 
-const path = '.next/server/chunks/fumadocs_search.json';
 async function main() {
   const indexes = JSON.parse(
-    (await readFile(path)).toString(),
+    (await readFile('.next/server/chunks/fumadocs_search.json')).toString(),
   ) as SearchIndex[];
 
   await Promise.all([writeOgImages(indexes), updateSearchIndexes(indexes)]);

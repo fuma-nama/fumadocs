@@ -1,8 +1,8 @@
 import type { ReactElement } from 'react';
 import type * as PageTree from '../server/page-tree';
-import type { File, Folder, Storage } from './file-system';
+import type { File, Folder, MetaFile, PageFile, Storage } from './file-system';
 import { resolvePath } from './path';
-import { type FileData, type UrlFn } from './types';
+import { type UrlFn } from './types';
 
 interface PageTreeBuilderContext {
   lang?: string;
@@ -20,11 +20,12 @@ export interface BuildPageTreeOptions {
    */
   attachFolderIds?: boolean;
 
-  attachFile?: (node: PageTree.Item, file?: File) => PageTree.Item;
+  // TODO: Rename to `attachPage` (major)
+  attachFile?: (node: PageTree.Item, file?: PageFile) => PageTree.Item;
   attachFolder?: (
     node: PageTree.Folder,
     folder: Folder,
-    meta?: File,
+    meta?: MetaFile,
   ) => PageTree.Folder;
   attachSeparator?: (node: PageTree.Separator) => PageTree.Separator;
 
@@ -170,7 +171,7 @@ function buildFolderNode(
     'page',
   );
 
-  const metadata = meta?.data.data as FileData['meta']['data'] | undefined;
+  const metadata = meta?.data.data;
   const index = indexFile ? buildFileNode(indexFile, ctx) : undefined;
 
   let children: PageTree.Node[];
@@ -221,16 +222,18 @@ function buildFolderNode(
   );
 }
 
-function buildFileNode(file: File, ctx: PageTreeBuilderContext): PageTree.Item {
+function buildFileNode(
+  file: PageFile,
+  ctx: PageTreeBuilderContext,
+): PageTree.Item {
   const localized =
     findLocalizedFile(file.file.flattenedPath, 'page', ctx) ?? file;
-  const data = localized.data as FileData['file'];
 
   const item: PageTree.Item = {
     type: 'page',
-    name: data.data.title,
-    icon: ctx.options.resolveIcon?.(data.data.icon),
-    url: ctx.options.getUrl(data.slugs, ctx.lang),
+    name: localized.data.data.title,
+    icon: ctx.options.resolveIcon?.(localized.data.data.icon),
+    url: ctx.options.getUrl(localized.data.slugs, ctx.lang),
   };
 
   return removeUndefined(ctx.options.attachFile?.(item, file) ?? item);
@@ -272,11 +275,11 @@ export function createPageTreeBuilder(): PageTreeBuilder {
   };
 }
 
-function findLocalizedFile(
+function findLocalizedFile<F extends File['format']>(
   path: string,
-  format: 'meta' | 'page',
+  format: F,
   ctx: PageTreeBuilderContext,
-): File | undefined {
+): Extract<File, { format: F }> | undefined {
   if (!ctx.lang) return;
 
   return ctx.storage.read(`${path}.${ctx.lang}`, format);

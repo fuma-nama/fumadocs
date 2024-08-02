@@ -5,14 +5,14 @@ import {
   type VirtualFile,
   type Transformer,
 } from './load-files';
-import type { FileData, MetaData, PageData, UrlFn } from './types';
+import type { MetaData, PageData, UrlFn } from './types';
 import type {
   BuildPageTreeOptions,
   BuildPageTreeOptionsWithI18n,
 } from './page-tree-builder';
 import { createPageTreeBuilder } from './page-tree-builder';
 import { type FileInfo } from './path';
-import type { File, Storage } from './file-system';
+import type { File, PageFile, Storage } from './file-system';
 
 export interface LoaderConfig {
   source: SourceConfig;
@@ -225,16 +225,14 @@ function createOutput({
 }
 
 function fileToPage<Data = PageData>(
-  file: File,
+  file: PageFile,
   getUrl: UrlFn,
   locale?: string,
 ): Page<Data> {
-  const data = file.data as FileData['file'];
-
   return {
     file: file.file,
-    url: getUrl(data.slugs, locale),
-    slugs: data.slugs,
-    data: data.data as Data,
+    url: getUrl(file.data.slugs, locale),
+    slugs: file.data.slugs,
+    data: file.data.data as Data,
   };
 }

@@ -1,18 +1,31 @@
 import { dump } from 'js-yaml';
 import { defaultRenderer } from '@/render/renderer';
-import { type GenerateOptions } from '@/generate';
+import type { DocumentContext, GenerateOptions } from '@/generate';
 
 export function generateDocument(
-  title: string,
-  description: string | undefined,
   content: string,
   options: GenerateOptions,
+  frontmatter: {
+    title: string;
+    description?: string;
+    context: DocumentContext;
+  },
 ): string {
   const banner = dump({
-    title,
-    description,
+    title: frontmatter.title,
+    description: frontmatter.description,
     full: true,
-    ...options.frontmatter?.(title, description),
+    ...(frontmatter.context.type === 'operation'
+      ? {
+          method: frontmatter.context.endpoint.method,
+          route: frontmatter.context.route.path,
+        }
+      : undefined),
+    ...options.frontmatter?.(
+      frontmatter.title,
+      frontmatter.description,
+      frontmatter.context,
+    ),
   }).trim();
 
   const finalImports = (
