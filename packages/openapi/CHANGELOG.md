@@ -1,5 +1,20 @@
 # @fuma-docs/openapi
 
+## 4.3.0
+
+### Minor Changes
+
+- 5acebdd: Support grouping output by folders (per operation)
+- 744bd24: Support accessing context information on custom frontmatter
+- 6bb9d2d: Support integration with Fumadocs Source API
+
+### Patch Changes
+
+- 744bd24: Fix generate files on `operation` mode
+- Updated dependencies [5355391]
+  - fumadocs-core@13.0.4
+  - fumadocs-ui@13.0.4
+
 ## 4.2.2
 
 ### Patch Changes
