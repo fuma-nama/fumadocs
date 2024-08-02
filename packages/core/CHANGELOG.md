@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 13.0.4
+
+### Patch Changes
+
+- 5355391: Support indexing description field on documents
+
 ## 13.0.3
 
 ### Patch Changes
