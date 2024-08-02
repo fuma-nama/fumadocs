@@ -109,6 +109,7 @@ export function createI18nSearchAPI<T extends 'simple' | 'advanced'>(
 
 export interface Index {
   title: string;
+  description?: string;
   content: string;
   url: string;
   keywords?: string;
@@ -133,6 +134,14 @@ export function initSearchAPI({ indexes, language }: SimpleOptions): SearchAPI {
             resolution: 9,
           },
           {
+            field: 'description',
+            tokenize: 'strict',
+            context: {
+              depth: 1,
+              resolution: 9,
+            },
+          },
+          {
             field: 'content',
             tokenize: 'strict',
             context: {
@@ -152,6 +161,7 @@ export function initSearchAPI({ indexes, language }: SimpleOptions): SearchAPI {
     for (const page of items) {
       index.add({
         title: page.title,
+        description: page.description,
         url: page.url,
         content: page.content,
         keywords: page.keywords,
@@ -181,10 +191,12 @@ export function initSearchAPI({ indexes, language }: SimpleOptions): SearchAPI {
 export interface AdvancedIndex {
   id: string;
   title: string;
+  description?: string;
+
   keywords?: string;
 
   /**
-   * Required if `tag` is enabled
+   * Required if tag filter is enabled
    */
   tag?: string;
   /**
@@ -250,6 +262,17 @@ export function initSearchAPIAdvanced({
         tag: page.tag,
         url: page.url,
       });
+
+      if (page.description) {
+        index.add({
+          id: page.id + (id++).toString(),
+          page_id: page.id,
+          tag: page.tag,
+          type: 'text',
+          url: page.url,
+          content: page.description,
+        });
+      }
 
       for (const heading of data.headings) {
         index.add({
