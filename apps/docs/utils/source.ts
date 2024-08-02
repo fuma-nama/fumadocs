@@ -10,6 +10,10 @@ import { ApiIndicator } from '@/components/ui/api-indicator';
 const frontmatter = defaultSchemas.frontmatter.extend({
   preview: z.string().optional(),
   index: z.boolean().default(false),
+  /**
+   * API routes only
+   */
+  method: z.string().optional(),
 });
 
 export const utils = loader({
@@ -30,7 +34,11 @@ export const utils = loader({
       const data = file.data.data as z.output<typeof frontmatter>;
       if (!data.full) return node;
 
-      node.name = [node.name, ' ', ApiIndicator()];
+      node.name = [
+        node.name,
+        ' ',
+        ApiIndicator({ method: data.method ?? 'API' }),
+      ];
       return node;
     },
   },

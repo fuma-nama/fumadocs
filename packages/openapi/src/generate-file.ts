@@ -71,6 +71,7 @@ export async function generateFiles({
             console.log(`Generated: ${outPath}`);
           }),
         );
+        return;
       }
 
       const results = await generateTags(path, options);

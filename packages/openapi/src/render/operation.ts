@@ -26,7 +26,7 @@ export async function renderOperation(
   path: string,
   method: MethodInformation,
   ctx: RenderContext,
-  noTitle = false,
+  hasHead = true,
 ): Promise<string> {
   let level = 2;
   const body = noRef(method.requestBody);
@@ -34,7 +34,7 @@ export async function renderOperation(
   const info: string[] = [];
   const example: string[] = [];
 
-  if (!noTitle) {
+  if (hasHead) {
     info.push(
       heading(
         level,
@@ -43,8 +43,9 @@ export async function renderOperation(
       ),
     );
     level++;
+
+    if (method.description) info.push(p(method.description));
   }
-  if (method.description) info.push(p(method.description));
 
   info.push(renderPlayground(path, method, ctx));
 

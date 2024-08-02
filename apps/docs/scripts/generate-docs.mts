@@ -5,7 +5,7 @@ import * as path from 'node:path';
 void OpenAPI.generateFiles({
   input: ['./*.yaml'],
   output: './content/docs/ui',
-  per: 'tag',
+  per: 'operation',
   renderer: {
     Root(props, child) {
       return OpenAPI.createElement(
