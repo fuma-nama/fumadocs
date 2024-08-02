@@ -72,6 +72,8 @@ export interface GenerateTagOutput {
 export interface GenerateOperationOutput {
   id: string;
   content: string;
+
+  route: RouteInformation;
 }
 
 export async function generate(
@@ -113,6 +115,9 @@ export async function generateOperations(
   return await Promise.all(
     routes.flatMap<Promise<GenerateOperationOutput>>((route) => {
       return route.methods.map(async (method) => {
+        if (!method.operationId)
+          throw new Error('Operation ID is required for generating docs.');
+
         const content = generateDocument(
           ctx.renderer.Root({ baseUrl: ctx.baseUrl }, [
             await renderOperation(route.path, method, ctx, false),
@@ -129,12 +134,10 @@ export async function generateOperations(
           },
         );
 
-        if (!method.operationId)
-          throw new Error('Operation ID is required for generating docs.');
-
         return {
           id: method.operationId,
           content,
+          route,
         } satisfies GenerateOperationOutput;
       });
     }),

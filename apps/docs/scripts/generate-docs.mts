@@ -1,6 +1,13 @@
 import * as OpenAPI from 'fumadocs-openapi';
 import * as Typescript from 'fumadocs-typescript';
 import * as path from 'node:path';
+import { rimrafSync } from 'rimraf';
+
+rimrafSync('./content/docs/ui/museum', {
+  filter(v) {
+    return !v.endsWith('index.mdx');
+  },
+});
 
 void OpenAPI.generateFiles({
   input: ['./*.yaml'],
