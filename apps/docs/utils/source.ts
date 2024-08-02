@@ -3,9 +3,9 @@ import { z } from 'zod';
 import type { InferMetaType, InferPageType } from 'fumadocs-core/source';
 import { loader } from 'fumadocs-core/source';
 import { icons } from 'lucide-react';
+import { attachFile } from 'fumadocs-openapi/source';
 import { map } from '@/.map';
 import { create } from '@/components/ui/icon';
-import { ApiIndicator } from '@/components/ui/api-indicator';
 
 const frontmatter = defaultSchemas.frontmatter.extend({
   preview: z.string().optional(),
@@ -29,18 +29,7 @@ export const utils = loader({
     },
   }),
   pageTree: {
-    attachFile(node, file) {
-      if (!file) return node;
-      const data = file.data.data as z.output<typeof frontmatter>;
-      if (!data.full) return node;
-
-      node.name = [
-        node.name,
-        ' ',
-        ApiIndicator({ method: data.method ?? 'API' }),
-      ];
-      return node;
-    },
+    attachFile,
   },
 });
 

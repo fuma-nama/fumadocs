@@ -56,7 +56,36 @@ node ./scripts/generate-docs.mjs
 
 Fumadocs OpenAPI generates MDX content directly, you can use a formatter (e.g. Prettier) to format the output files.
 
-### Features
+### Generate Page Tree
+
+You can add the `attachFile` to decorate the page tree with Source API.
+
+It adds a badge to each page item.
+
+```ts title="source.ts"
+import { createMDXSource, defaultSchemas } from 'fumadocs-mdx';
+import { z } from 'zod';
+import { loader } from 'fumadocs-core/source';
+import { attachFile } from 'fumadocs-openapi/source';
+
+const frontmatter = defaultSchemas.frontmatter.extend({
+  method: z.string().optional(),
+});
+
+export const utils = loader({
+  source: createMDXSource(map, {
+    schema: {
+      frontmatter,
+    },
+  }),
+  pageTree: {
+    attachFile,
+  },
+  // other props
+});
+```
+
+## Features
 
 The official OpenAPI integration supports:
 
@@ -86,10 +115,32 @@ Path to the output directory.
 
 Customise how the page is generated, default to `file`.
 
-| mode | description                     |
-| ---- | ------------------------------- |
-| tag  | Generate a page for each tag    |
-| file | Generate a page for each schema |
+| mode      | Generate a page for                 |
+| --------- | ----------------------------------- |
+| tag       | each tag                            |
+| file      | each schema                         |
+| operation | each operation (method of endpoint) |
+
+```ts
+import { generateFiles } from 'fumadocs-openapi';
+
+void generateFiles({
+  per: 'tag',
+});
+```
+
+### Group By Folder
+
+In `operation` mode, you can group operations with folders.
+
+```ts
+import { generateFiles } from 'fumadocs-openapi';
+
+void generateFiles({
+  per: 'operation',
+  groupByFolder: true,
+});
+```
 
 ### Name
 
@@ -99,8 +150,9 @@ A function that controls the output path of files.
 import { generateFiles } from 'fumadocs-openapi';
 
 void generateFiles({
-  input: ['./petstore.yaml'],
-  output: './content/docs',
+  name: (type, file) => {
+    return; // filename
+  },
 });
 ```
 
@@ -127,7 +179,16 @@ void generateFiles({
 ### Frontmatter
 
 Customise the frontmatter of MDX files.
-By default, it includes a `full: true` property for Fumadocs UI.
+
+By default, it includes:
+
+| property      | description                                      |
+| ------------- | ------------------------------------------------ |
+| `title`       | Page title                                       |
+| `description` | Page description                                 |
+| `full`        | Always true, added for Fumadocs UI               |
+| `method`      | Available method of operation (`operation` mode) |
+| `route`       | Route of operation (`operation` mode)            |
 
 ```ts
 import { generateFiles } from 'fumadocs-openapi';

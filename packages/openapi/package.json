@@ -19,6 +19,10 @@
     "./ui": {
       "import": "./dist/ui/index.js",
       "types": "./dist/ui/index.d.ts"
+    },
+    "./source": {
+      "import": "./dist/source/index.js",
+      "types": "./dist/source/index.d.ts"
     }
   },
   "main": "./dist/index.js",
@@ -30,6 +34,9 @@
       ],
       "ui": [
         "./dist/ui/index.d.ts"
+      ],
+      "source": [
+        "./dist/source/index.d.ts"
       ]
     }
   },
