@@ -1,5 +1,12 @@
 # @fuma-docs/openapi
 
+## 4.3.1
+
+### Patch Changes
+
+- d987912: Show current request pathname in Playground
+- 0146572: Fix empty params
+
 ## 4.3.0
 
 ### Minor Changes
