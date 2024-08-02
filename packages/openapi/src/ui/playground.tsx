@@ -97,7 +97,7 @@ export function APIPlayground({
       const url = new URL(`${baseUrl ?? window.location.origin}${pathname}`);
       Object.keys(input.query).forEach((key) => {
         const paramValue = input.query[key];
-        if (typeof paramValue === 'string')
+        if (typeof paramValue === 'string' && paramValue.length > 0)
           url.searchParams.append(key, paramValue);
       });
 
@@ -112,7 +112,8 @@ export function APIPlayground({
       Object.keys(input.header).forEach((key) => {
         const paramValue = input.header[key];
 
-        if (typeof paramValue === 'string') headers.append(key, paramValue);
+        if (typeof paramValue === 'string' && paramValue.length > 0)
+          headers.append(key, paramValue);
       });
 
       const bodyValue =
