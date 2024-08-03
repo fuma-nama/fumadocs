@@ -5,7 +5,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import useSWRImmutable from 'swr/immutable';
 import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 import { cn, buttonVariants } from 'fumadocs-ui/components/api';
@@ -86,18 +86,12 @@ export function APIPlayground({
     async () => {
       if (!input) return;
 
-      let pathname = route;
-      Object.keys(input.path).forEach((key) => {
-        const paramValue = input.path[key];
-
-        if (typeof paramValue === 'string')
-          pathname = pathname.replace(`{${key}}`, paramValue);
-      });
-
-      const url = new URL(`${baseUrl ?? window.location.origin}${pathname}`);
+      const url = new URL(
+        `${baseUrl ?? window.location.origin}${createPathnameFromInput(route, input.path)}`,
+      );
       Object.keys(input.query).forEach((key) => {
         const paramValue = input.query[key];
-        if (typeof paramValue === 'string')
+        if (typeof paramValue === 'string' && paramValue.length > 0)
           url.searchParams.append(key, paramValue);
       });
 
@@ -112,7 +106,8 @@ export function APIPlayground({
       Object.keys(input.header).forEach((key) => {
         const paramValue = input.header[key];
 
-        if (typeof paramValue === 'string') headers.append(key, paramValue);
+        if (typeof paramValue === 'string' && paramValue.length > 0)
+          headers.append(key, paramValue);
       });
 
       const bodyValue =
@@ -187,9 +182,7 @@ export function APIPlayground({
           onSubmit={onSubmit as React.FormEventHandler}
         >
           <div className="flex flex-row gap-2">
-            <code className="flex-1 overflow-auto rounded-lg border bg-fd-secondary px-3 py-1.5 text-sm">
-              {route}
-            </code>
+            <RouteDisplay route={route} />
             <button
               type="submit"
               className={cn(buttonVariants({ color: 'secondary' }))}
@@ -267,6 +260,36 @@ export function APIPlayground({
         </form>
       </SchemaContext.Provider>
     </Form>
+  );
+}
+
+function createPathnameFromInput(
+  route: string,
+  input: Record<string, unknown>,
+): string {
+  let pathname = route;
+  Object.keys(input).forEach((key) => {
+    const paramValue = input[key];
+
+    if (typeof paramValue === 'string' && paramValue.length > 0)
+      pathname = pathname.replace(`{${key}}`, paramValue);
+  });
+  return pathname;
+}
+
+function RouteDisplay({ route }: { route: string }): ReactElement {
+  const pathInput = useWatch<FormValues, 'path'>({
+    name: 'path',
+  });
+  const pathname = useMemo(
+    () => createPathnameFromInput(route, pathInput),
+    [route, pathInput],
+  );
+
+  return (
+    <code className="flex-1 overflow-auto text-nowrap rounded-lg border bg-fd-secondary px-3 py-1.5 text-sm">
+      {pathname}
+    </code>
   );
 }
 
