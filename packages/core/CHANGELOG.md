@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 13.0.5
+
+### Patch Changes
+
+- 2cf65f6: Support debounce value on algolia search client
+
 ## 13.0.4
 
 ### Patch Changes

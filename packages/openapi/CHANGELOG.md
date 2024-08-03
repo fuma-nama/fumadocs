@@ -1,5 +1,17 @@
 # @fuma-docs/openapi
 
+## 4.4.0
+
+### Minor Changes
+
+- b109e44: Improve generated sample requests
+
+### Patch Changes
+
+- Updated dependencies [2cf65f6]
+  - fumadocs-core@13.0.5
+  - fumadocs-ui@13.0.5
+
 ## 4.3.1
 
 ### Patch Changes
