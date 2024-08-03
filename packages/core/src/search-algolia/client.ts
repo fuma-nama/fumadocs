@@ -3,6 +3,7 @@ import type { SearchIndex } from 'algoliasearch/lite';
 import { useState } from 'react';
 import useSWR, { type SWRResponse } from 'swr';
 import type { SortedResult } from '@/search/shared';
+import { useDebounce } from '@/utils/use-debounce';
 import type { BaseIndex } from './server';
 
 export interface Options extends SearchOptions {
@@ -12,6 +13,13 @@ export interface Options extends SearchOptions {
    * @defaultValue true
    */
   allowEmpty?: boolean;
+
+  /**
+   * Delay to debounce (in ms)
+   *
+   * @defaultValue 300
+   */
+  delay?: number;
 }
 
 export function groupResults(hits: Hit<BaseIndex>[]): SortedResult[] {
@@ -77,16 +85,17 @@ interface UseAlgoliaSearch {
 
 export function useAlgoliaSearch(
   index: SearchIndex,
-  { allowEmpty = true, ...options }: Options = {},
+  { allowEmpty = true, delay = 150, ...options }: Options = {},
 ): UseAlgoliaSearch {
   const [search, setSearch] = useState('');
+  const debouncedValue = useDebounce(search, delay);
 
   const query: UseAlgoliaSearch['query'] = useSWR(
-    ['algolia-search', search, allowEmpty, options],
+    ['algolia-search', debouncedValue, allowEmpty, options],
     async () => {
-      if (allowEmpty && search.length === 0) return 'empty';
+      if (allowEmpty && debouncedValue.length === 0) return 'empty';
 
-      return searchDocs(index, search, options);
+      return searchDocs(index, debouncedValue, options);
     },
     {
       keepPreviousData: true,
