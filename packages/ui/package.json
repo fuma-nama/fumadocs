@@ -17,8 +17,8 @@
     "./image-zoom.css": "./dist/image-zoom.css",
     "./tailwind-plugin": {
       "import": "./dist/tailwind-plugin.js",
-      "default": "./dist/tailwind-plugin.js",
-      "types": "./dist/tailwind-plugin.d.ts"
+      "types": "./dist/tailwind-plugin.d.ts",
+      "default": "./dist/tailwind-plugin.js"
     },
     "./components/*": {
       "import": "./dist/components/*.js",
