@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 13.0.6
+
+### Patch Changes
+
+- 1622e36: Fix bug breaking Tailwind CSS IntelliSense VSCode Extension
+  - fumadocs-core@13.0.6
+
 ## 13.0.5
 
 ### Patch Changes
