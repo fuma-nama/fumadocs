@@ -19,7 +19,7 @@ export const buttonVariants = cva(
 );
 
 export const itemVariants = cva(
-  'flex w-full flex-row items-center gap-2 rounded-md px-2 py-1.5 text-fd-muted-foreground transition-colors duration-100 [&_svg]:size-4',
+  'flex w-full flex-row items-center gap-2 rounded-md px-2 py-1.5 text-fd-muted-foreground transition-colors duration-100 [overflow-wrap:anywhere] [&_svg]:size-4',
   {
     variants: {
       active: {

@@ -70,9 +70,9 @@ export interface GenerateTagOutput {
 }
 
 export interface GenerateOperationOutput {
-  id: string;
   content: string;
 
+  method: MethodInformation;
   route: RouteInformation;
 }
 
@@ -124,7 +124,7 @@ export async function generateOperations(
           ]),
           options,
           {
-            title: method.summary ?? method.method,
+            title: method.summary ?? idToTitle(method.operationId),
             description: method.description,
             context: {
               type: 'operation',
@@ -135,9 +135,9 @@ export async function generateOperations(
         );
 
         return {
-          id: method.operationId,
           content,
           route,
+          method,
         } satisfies GenerateOperationOutput;
       });
     }),

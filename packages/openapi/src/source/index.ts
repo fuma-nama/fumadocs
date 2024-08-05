@@ -38,7 +38,7 @@ function ApiIndicator({ method }: { method: string }): ReactNode {
   return React.createElement(
     'span',
     {
-      className: badgeVariants({ className: 'ms-auto', color }),
+      className: badgeVariants({ className: 'ms-auto text-nowrap', color }),
     },
     method,
   );

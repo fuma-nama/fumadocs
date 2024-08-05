@@ -32,9 +32,17 @@ export interface Config extends GenerateOptions {
   /**
    * Group output using folders (Only works on `operation` mode)
    *
+   * @deprecated Use `groupBy` instead
    * @defaultValue false
    */
   groupByFolder?: boolean;
+
+  /**
+   * Group output using folders (Only works on `operation` mode)
+   *
+   * @defaultValue 'none'
+   */
+  groupBy?: 'tag' | 'route' | 'none';
 
   cwd?: string;
 }
@@ -45,7 +53,7 @@ export async function generateFiles({
   name: nameFn,
   per = 'file',
   cwd = process.cwd(),
-  groupByFolder = false,
+  groupBy = 'none',
   ...options
 }: Config): Promise<void> {
   const outputDir = join(cwd, output);
@@ -66,27 +74,46 @@ export async function generateFiles({
       }
 
       if (per === 'operation') {
-        const routeFolders = new Set<string>();
+        const metaFiles = new Set<string>();
         const results = await generateOperations(path, options);
 
         await Promise.all(
           results.map(async (result) => {
-            const outPath = groupByFolder
-              ? join(
-                  outputDir,
-                  filename,
-                  result.route.summary
-                    ? getFilename(result.route.summary)
-                    : getFilenameFromRoute(result.route.path),
-                  `${getFilename(result.id)}.mdx`,
-                )
-              : join(outputDir, filename, `${getFilename(result.id)}.mdx`);
+            let outPath;
+            if (!result.method.operationId) return;
+            const id =
+              result.method.operationId.split('.').at(-1) ??
+              result.method.operationId;
 
-            if (groupByFolder && !routeFolders.has(dirname(outPath))) {
-              routeFolders.add(dirname(outPath));
+            if (
+              groupBy === 'tag' &&
+              result.method.tags &&
+              result.method.tags.length > 0
+            ) {
+              if (result.method.tags.length > 1)
+                console.warn(
+                  `${result.route.path} has more than 1 tag, which isn't allowed under 'groupBy: tag'. Only the first tag will be considered.`,
+                );
 
-              if (result.route.summary) {
-                const metaFile = join(dirname(outPath), 'meta.json');
+              outPath = join(
+                outputDir,
+                filename,
+                result.method.tags[0],
+                `${getFilename(id)}.mdx`,
+              );
+            } else if (groupBy === 'route') {
+              outPath = join(
+                outputDir,
+                filename,
+                result.route.summary
+                  ? getFilename(result.route.summary)
+                  : getFilenameFromRoute(result.route.path),
+                `${getFilename(id)}.mdx`,
+              );
+
+              const metaFile = join(dirname(outPath), 'meta.json');
+              if (result.route.summary && !metaFiles.has(metaFile)) {
+                metaFiles.add(metaFile);
 
                 await write(
                   metaFile,
@@ -96,6 +123,8 @@ export async function generateFiles({
                 );
                 console.log(`Generated Meta: ${metaFile}`);
               }
+            } else {
+              outPath = join(outputDir, filename, `${getFilename(id)}.mdx`);
             }
 
             await write(outPath, result.content);
@@ -122,6 +151,7 @@ export async function generateFiles({
 function getFilenameFromRoute(path: string): string {
   return (
     path
+      .replaceAll('.', '/')
       .split('/')
       .filter((v) => !v.startsWith('{') && !v.endsWith('}'))
       .at(-1) ?? ''
