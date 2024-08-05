@@ -29,13 +29,14 @@ const ImageZoom = dynamic(() =>
 export default {
   heading: (
     <Wrapper>
-      <Heading
-        id="preview"
-        as="h3"
-        className="!my-0 rounded-xl bg-fd-background p-4"
-      >
-        Hello World
-      </Heading>
+      <div className="rounded-lg bg-fd-background p-4 prose-no-margin">
+        <Heading id="preview" as="h3">
+          Hello World
+        </Heading>
+        <Heading id="preview" as="h3">
+          Hello <code>World</code> Everyone!
+        </Heading>
+      </div>
     </Wrapper>
   ),
   card: (
