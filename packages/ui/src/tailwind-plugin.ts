@@ -125,7 +125,7 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
         },
       });
 
-      if (css) addBase(css);
+      if (css) addComponents(css);
 
       addComponents({
         '.fd-codeblock code span': {

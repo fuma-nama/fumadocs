@@ -262,7 +262,62 @@ const dusk: Preset = {
   },
 };
 
+const vitepress: Preset = {
+  light: {
+    ...defaultPreset.light,
+    background: '0 0% 100%',
+    card: '0 0% 100%',
+    foreground: '240 6% 25%',
+    'muted-foreground': '240 6% 50%',
+    secondary: '240 6% 97%',
+    'accent-foreground': '240 6% 25%',
+    primary: '226 55% 45%',
+  },
+  dark: {
+    ring: '234 100% 83%',
+    primary: '234 100% 83%',
+    'secondary-foreground': '60 100% 98%',
+    'card-foreground': '60 100% 98%',
+    background: '240 7% 11%',
+    foreground: '60 100% 98%',
+    popover: '240 7% 11%',
+    'popover-foreground': '60 100% 98%',
+    'primary-foreground': '240 7% 11%',
+    card: '240 7% 11%',
+    muted: '0 0% 13%',
+    border: '240 4% 19%',
+    accent: '0 0% 15%',
+    secondary: '240 4% 9%',
+    'accent-foreground': '0 0% 100%',
+    'muted-foreground': '0 0% 56%',
+  },
+  css: {
+    '.prose': {
+      '--tw-prose-body': 'theme(colors.fd-foreground / 85%)',
+      '--tw-prose-headings': 'theme(colors.fd-foreground / 85%)',
+      '--tw-prose-links': 'theme(colors.fd-primary.DEFAULT)',
+      '--tw-prose-code': 'theme(colors.fd-primary.DEFAULT)',
+    },
+    '.prose :where(code):not(:where([class~="not-prose"],[class~="not-prose"] *))':
+      {
+        border: 'none',
+        backgroundColor: 'theme(colors.fd-primary.DEFAULT / 10%)',
+      },
+    '#nd-sidebar': {
+      border: 'none',
+      backgroundColor: 'hsl(240 6% 97%)',
+    },
+    '.dark #nd-sidebar': {
+      backgroundColor: 'hsl(240 4% 9%)',
+    },
+    'button[data-search-full]': {
+      backgroundColor: 'theme(colors.fd-background)',
+    },
+  },
+};
+
 export const presets = {
+  vitepress,
   purple,
   default: defaultPreset,
   ocean: oceanPreset,
