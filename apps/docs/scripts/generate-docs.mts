@@ -13,16 +13,6 @@ void OpenAPI.generateFiles({
   input: ['./*.yaml'],
   output: './content/docs/ui',
   per: 'operation',
-  renderer: {
-    Root(props, child) {
-      return OpenAPI.createElement(
-        'Root',
-        props,
-        '<div className="bg-fd-secondary p-4 rounded-lg">Demo Only</div>',
-        ...child,
-      );
-    },
-  },
 });
 
 const demoRegex = /^---type-table-demo---\r?\n(?<content>.+)\r?\n---end---$/gm;

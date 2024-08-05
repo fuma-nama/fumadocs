@@ -109,7 +109,14 @@ curl -X POST "https://api.fake-museum-example.com/v1/tickets" \
 
 ```js
 fetch("https://api.fake-museum-example.com/v1/tickets", {
-  method: "POST"
+  method: "POST",
+  body: JSON.stringify({
+    "ticketType": "event",
+    "eventId": "3be6453c-03eb-4357-ae5a-984a0e574a54",
+    "ticketDate": "2023-10-29",
+    "email": "museum-lover@example.com",
+    "phone": "+1(234)-567-8910"
+  })
 });
 ```
 

@@ -646,7 +646,10 @@ curl -X POST "https://api.unkey.dev/v1/keys.deleteKey" \
 
 ```js
 fetch("https://api.unkey.dev/v1/keys.deleteKey", {
-  method: "POST"
+  method: "POST",
+  body: JSON.stringify({
+    "keyId": "key_1234"
+  })
 });
 ```
 
@@ -1287,7 +1290,35 @@ curl -X POST "https://api.unkey.dev/v1/keys.createKey" \
 
 ```js
 fetch("https://api.unkey.dev/v1/keys.createKey", {
-  method: "POST"
+  method: "POST",
+  body: JSON.stringify({
+    "apiId": "api_123",
+    "prefix": "string",
+    "name": "my key",
+    "byteLength": 16,
+    "ownerId": "team_123",
+    "meta": {
+      "billingTier": "PRO",
+      "trialEnds": "2023-06-16T17:16:37.161Z"
+    },
+    "roles": [
+      "admin",
+      "finance"
+    ],
+    "expires": 1623869797161,
+    "remaining": 1000,
+    "refill": {
+      "interval": "daily",
+      "amount": 100
+    },
+    "ratelimit": {
+      "type": "fast",
+      "limit": 10,
+      "refillRate": 1,
+      "refillInterval": 60
+    },
+    "enabled": false
+  })
 });
 ```
 
@@ -1753,7 +1784,11 @@ curl -X POST "https://api.unkey.dev/v1/keys.verifyKey" \
 
 ```js
 fetch("https://api.unkey.dev/v1/keys.verifyKey", {
-  method: "POST"
+  method: "POST",
+  body: JSON.stringify({
+    "apiId": "api_1234",
+    "key": "sk_1234"
+  })
 });
 ```
 
@@ -2449,7 +2484,32 @@ curl -X POST "https://api.unkey.dev/v1/keys.updateKey" \
 
 ```js
 fetch("https://api.unkey.dev/v1/keys.updateKey", {
-  method: "POST"
+  method: "POST",
+  body: JSON.stringify({
+    "keyId": "key_123",
+    "name": "Customer X",
+    "ownerId": "user_123",
+    "meta": {
+      "roles": [
+        "admin",
+        "user"
+      ],
+      "stripeCustomerId": "cus_1234"
+    },
+    "expires": 0,
+    "ratelimit": {
+      "type": "fast",
+      "limit": 10,
+      "refillRate": 1,
+      "refillInterval": 60
+    },
+    "remaining": 1000,
+    "refill": {
+      "interval": "daily",
+      "amount": 100
+    },
+    "enabled": true
+  })
 });
 ```
 
@@ -2917,7 +2977,12 @@ curl -X POST "https://api.unkey.dev/v1/keys.updateRemaining" \
 
 ```js
 fetch("https://api.unkey.dev/v1/keys.updateRemaining", {
-  method: "POST"
+  method: "POST",
+  body: JSON.stringify({
+    "keyId": "key_123",
+    "op": "increment",
+    "value": 1
+  })
 });
 ```
 

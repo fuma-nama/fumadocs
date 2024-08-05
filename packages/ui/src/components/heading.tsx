@@ -17,14 +17,17 @@ export function Heading<T extends Types = 'h1'>({
   if (!props.id) return <As className={className} {...props} />;
 
   return (
-    <As className={cn('scroll-m-20', className)} {...props}>
-      <a href={`#${props.id}`} className="group inline-flex items-center">
+    <As
+      className={cn('flex scroll-m-20 flex-row items-center gap-2', className)}
+      {...props}
+    >
+      <a href={`#${props.id}`} className="peer">
         {props.children}
-        <Link
-          aria-label="Link to section"
-          className="ms-2 size-4 text-fd-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
-        />
       </a>
+      <Link
+        aria-label="Link to section"
+        className="size-3.5 shrink-0 text-fd-muted-foreground opacity-0 transition-opacity peer-hover:opacity-100"
+      />
     </As>
   );
 }

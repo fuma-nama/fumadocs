@@ -535,7 +535,10 @@ curl -X POST "https://api.unkey.dev/v1/apis.createApi" \
 
 ```js
 fetch("https://api.unkey.dev/v1/apis.createApi", {
-  method: "POST"
+  method: "POST",
+  body: JSON.stringify({
+    "name": "my-api"
+  })
 });
 ```
 
@@ -1615,7 +1618,10 @@ curl -X POST "https://api.unkey.dev/v1/apis.deleteApi" \
 
 ```js
 fetch("https://api.unkey.dev/v1/apis.deleteApi", {
-  method: "POST"
+  method: "POST",
+  body: JSON.stringify({
+    "apiId": "api_1234"
+  })
 });
 ```
 

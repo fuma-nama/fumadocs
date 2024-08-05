@@ -1,5 +1,4 @@
 import { type Endpoint } from '@/endpoint';
-import { generateInput } from '@/utils/generate-input';
 import { toSampleInput } from '@/utils/schema';
 
 export function getSampleRequest(endpoint: Endpoint): string {
@@ -9,18 +8,15 @@ export function getSampleRequest(endpoint: Endpoint): string {
 
   for (const param of endpoint.parameters) {
     if (param.in === 'header') {
-      const value = generateInput(endpoint.method, param.schema);
-      const header = `${param.name}: ${toSampleInput(value)}`;
+      const header = `${param.name}: ${toSampleInput(param.sample)}`;
 
       s.push(`-H "${header}"`);
     }
-
-    if (param.in === 'formData') {
-      console.log('Request example for form data is not supported');
-    }
   }
 
-  if (endpoint.body) s.push(`-d '${toSampleInput(endpoint.body)}'`);
+  if (endpoint.body?.mediaType === 'multipart/form-data')
+    console.warn("Curl sample with form data body isn't supported.");
+  if (endpoint.body) s.push(`-d '${toSampleInput(endpoint.body.sample)}'`);
 
   return s.join(' \\\n  ');
 }

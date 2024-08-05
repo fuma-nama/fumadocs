@@ -1,5 +1,27 @@
 # next-docs-ui
 
+## 13.0.7
+
+### Patch Changes
+
+- e7c52f2: Fix code styles in headings
+- Updated dependencies [37bbfff]
+  - fumadocs-core@13.0.7
+
+## 13.0.6
+
+### Patch Changes
+
+- 1622e36: Fix bug breaking Tailwind CSS IntelliSense VSCode Extension
+  - fumadocs-core@13.0.6
+
+## 13.0.5
+
+### Patch Changes
+
+- Updated dependencies [2cf65f6]
+  - fumadocs-core@13.0.5
+
 ## 13.0.4
 
 ### Patch Changes

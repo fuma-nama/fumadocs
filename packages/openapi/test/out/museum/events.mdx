@@ -272,7 +272,16 @@ curl -X POST "https://api.fake-museum-example.com/v1/special-events" \
 
 ```js
 fetch("https://api.fake-museum-example.com/v1/special-events", {
-  method: "POST"
+  method: "POST",
+  body: JSON.stringify({
+    "name": "Pirate Coding Workshop",
+    "location": "Computer Room",
+    "eventDescription": "Captain Blackbeard shares his love of the C...language. And possibly Arrrrr (R lang).",
+    "dates": [
+      "2023-10-29"
+    ],
+    "price": 25
+  })
 });
 ```
 
@@ -593,7 +602,16 @@ curl -X PATCH "https://api.fake-museum-example.com/v1/special-events/dad4bce8-f5
 
 ```js
 fetch("https://api.fake-museum-example.com/v1/special-events/dad4bce8-f5cb-4078-a211-995864315e39", {
-  method: "PATCH"
+  method: "PATCH",
+  body: JSON.stringify({
+    "name": "Pirate Coding Workshop",
+    "location": "Computer Room",
+    "eventDescription": "Captain Blackbeard shares his love of the C...language. And possibly Arrrrr (R lang).",
+    "dates": [
+      "2023-10-29"
+    ],
+    "price": 25
+  })
 });
 ```
 

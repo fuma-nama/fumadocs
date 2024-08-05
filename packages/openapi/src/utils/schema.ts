@@ -20,7 +20,7 @@ export function getPreferredType<B extends Record<string, unknown>>(
 }
 
 /**
- * Get Path
+ * Convert to JSON string if necessary
  */
 export function toSampleInput(value: unknown): string {
   return typeof value === 'string' ? value : JSON.stringify(value, null, 2);

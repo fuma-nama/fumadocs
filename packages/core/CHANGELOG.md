@@ -1,5 +1,19 @@
 # next-docs-zeta
 
+## 13.0.7
+
+### Patch Changes
+
+- 37bbfff: Improve active anchor observer
+
+## 13.0.6
+
+## 13.0.5
+
+### Patch Changes
+
+- 2cf65f6: Support debounce value on algolia search client
+
 ## 13.0.4
 
 ### Patch Changes

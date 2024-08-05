@@ -189,7 +189,12 @@ curl -X POST "http://petstore.swagger.io/v1/pets" \
 
 ```js
 fetch("http://petstore.swagger.io/v1/pets", {
-  method: "POST"
+  method: "POST",
+  body: JSON.stringify({
+    "id": 0,
+    "name": "string",
+    "tag": "string"
+  })
 });
 ```
 
