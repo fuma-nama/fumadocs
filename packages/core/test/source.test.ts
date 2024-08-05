@@ -115,6 +115,11 @@ test('Page Tree: Nested Directories', async () => {
     {
       "children": [
         {
+          "name": "Hello",
+          "type": "page",
+          "url": "/test",
+        },
+        {
           "children": [
             {
               "name": "Route Group Page",
@@ -124,11 +129,6 @@ test('Page Tree: Nested Directories', async () => {
           ],
           "name": "Nested",
           "type": "folder",
-        },
-        {
-          "name": "Hello",
-          "type": "page",
-          "url": "/test",
         },
         {
           "children": [

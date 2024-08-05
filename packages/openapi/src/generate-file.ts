@@ -98,7 +98,7 @@ export async function generateFiles({
               outPath = join(
                 outputDir,
                 filename,
-                result.method.tags[0],
+                getFilename(result.method.tags[0]),
                 `${getFilename(id)}.mdx`,
               );
             } else if (groupBy === 'route') {

@@ -255,15 +255,16 @@ Price of a ticket for the special event
 
 ```bash
 curl -X POST "https://api.fake-museum-example.com/v1/special-events" \
+  -H "Content-Type: application/json" \
   -d '{
-  "name": "Pirate Coding Workshop",
-  "location": "Computer Room",
-  "eventDescription": "Captain Blackbeard shares his love of the C...language. And possibly Arrrrr (R lang).",
-  "dates": [
-    "2023-10-29"
-  ],
-  "price": 25
-}'
+    "name": "Pirate Coding Workshop",
+    "location": "Computer Room",
+    "eventDescription": "Captain Blackbeard shares his love of the C...language. And possibly Arrrrr (R lang).",
+    "dates": [
+      "2023-10-29"
+    ],
+    "price": 25
+  }'
 ```
 
 </Request>
@@ -585,15 +586,16 @@ An identifier for a special event.
 
 ```bash
 curl -X PATCH "https://api.fake-museum-example.com/v1/special-events/dad4bce8-f5cb-4078-a211-995864315e39" \
+  -H "Content-Type: application/json" \
   -d '{
-  "name": "Pirate Coding Workshop",
-  "location": "Computer Room",
-  "eventDescription": "Captain Blackbeard shares his love of the C...language. And possibly Arrrrr (R lang).",
-  "dates": [
-    "2023-10-29"
-  ],
-  "price": 25
-}'
+    "name": "Pirate Coding Workshop",
+    "location": "Computer Room",
+    "eventDescription": "Captain Blackbeard shares his love of the C...language. And possibly Arrrrr (R lang).",
+    "dates": [
+      "2023-10-29"
+    ],
+    "price": 25
+  }'
 ```
 
 </Request>

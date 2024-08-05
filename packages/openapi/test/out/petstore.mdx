@@ -176,11 +176,12 @@ export interface Response {
 
 ```bash
 curl -X POST "http://petstore.swagger.io/v1/pets" \
+  -H "Content-Type: application/json" \
   -d '{
-  "id": 0,
-  "name": "string",
-  "tag": "string"
-}'
+    "id": 0,
+    "name": "string",
+    "tag": "string"
+  }'
 ```
 
 </Request>

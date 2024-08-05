@@ -524,9 +524,10 @@ The name for your API. This is not customer facing.
 
 ```bash
 curl -X POST "https://api.unkey.dev/v1/apis.createApi" \
+  -H "Content-Type: application/json" \
   -d '{
-  "name": "my-api"
-}'
+    "name": "my-api"
+  }'
 ```
 
 </Request>
@@ -1607,9 +1608,10 @@ The id of the api to delete
 
 ```bash
 curl -X POST "https://api.unkey.dev/v1/apis.deleteApi" \
+  -H "Content-Type: application/json" \
   -d '{
-  "apiId": "api_1234"
-}'
+    "apiId": "api_1234"
+  }'
 ```
 
 </Request>

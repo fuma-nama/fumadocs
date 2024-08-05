@@ -635,9 +635,10 @@ The id of the key to revoke
 
 ```bash
 curl -X POST "https://api.unkey.dev/v1/keys.deleteKey" \
+  -H "Content-Type: application/json" \
   -d '{
-  "keyId": "key_1234"
-}'
+    "keyId": "key_1234"
+  }'
 ```
 
 </Request>
@@ -1115,7 +1116,7 @@ This is a place for dynamic meta data, anything that feels useful for you should
 
 <span>Example: `{"billingTier":"PRO","trialEnds":"2023-06-16T17:16:37.161Z"}`</span>
 
-<ObjectCollapsible name={"meta"}>
+<ObjectCollapsible name={"Attributes"}>
 
 <Property name={"[key: string]"} type={"null"} required={false} deprecated={undefined}>
 
@@ -1155,7 +1156,7 @@ Unkey enables you to refill verifications for each key at regular intervals.
 
 <span>Example: `{"interval":"daily","amount":100}`</span>
 
-<ObjectCollapsible name={"refill"}>
+<ObjectCollapsible name={"Attributes"}>
 
 <Property name={"interval"} type={"string"} required={true} deprecated={undefined}>
 
@@ -1183,7 +1184,7 @@ Unkey comes with per-key ratelimiting out of the box.
 
 <span>Example: `{"type":"fast","limit":10,"refillRate":1,"refillInterval":60}`</span>
 
-<ObjectCollapsible name={"ratelimit"}>
+<ObjectCollapsible name={"Attributes"}>
 
 <Property name={"type"} type={"string"} required={true} deprecated={undefined}>
 
@@ -1254,34 +1255,35 @@ Sets if key is enabled or disabled. Disabled keys are not valid.
 
 ```bash
 curl -X POST "https://api.unkey.dev/v1/keys.createKey" \
+  -H "Content-Type: application/json" \
   -d '{
-  "apiId": "api_123",
-  "prefix": "string",
-  "name": "my key",
-  "byteLength": 16,
-  "ownerId": "team_123",
-  "meta": {
-    "billingTier": "PRO",
-    "trialEnds": "2023-06-16T17:16:37.161Z"
-  },
-  "roles": [
-    "admin",
-    "finance"
-  ],
-  "expires": 1623869797161,
-  "remaining": 1000,
-  "refill": {
-    "interval": "daily",
-    "amount": 100
-  },
-  "ratelimit": {
-    "type": "fast",
-    "limit": 10,
-    "refillRate": 1,
-    "refillInterval": 60
-  },
-  "enabled": false
-}'
+    "apiId": "api_123",
+    "prefix": "string",
+    "name": "my key",
+    "byteLength": 16,
+    "ownerId": "team_123",
+    "meta": {
+      "billingTier": "PRO",
+      "trialEnds": "2023-06-16T17:16:37.161Z"
+    },
+    "roles": [
+      "admin",
+      "finance"
+    ],
+    "expires": 1623869797161,
+    "remaining": 1000,
+    "refill": {
+      "interval": "daily",
+      "amount": 100
+    },
+    "ratelimit": {
+      "type": "fast",
+      "limit": 10,
+      "refillRate": 1,
+      "refillInterval": 60
+    },
+    "enabled": false
+  }'
 ```
 
 </Request>
@@ -1772,10 +1774,11 @@ The key to verify
 
 ```bash
 curl -X POST "https://api.unkey.dev/v1/keys.verifyKey" \
+  -H "Content-Type: application/json" \
   -d '{
-  "apiId": "api_1234",
-  "key": "sk_1234"
-}'
+    "apiId": "api_1234",
+    "key": "sk_1234"
+  }'
 ```
 
 </Request>
@@ -2324,7 +2327,7 @@ Any additional metadata you want to store with the key
 
 <span>Example: `{"roles":["admin","user"],"stripeCustomerId":"cus_1234"}`</span>
 
-<ObjectCollapsible name={"meta"}>
+<ObjectCollapsible name={"Attributes"}>
 
 <Property name={"[key: string]"} type={"null"} required={false} deprecated={undefined}>
 
@@ -2348,7 +2351,7 @@ Unkey comes with per-key ratelimiting out of the box. Set `null` to disable.
 
 <span>Example: `{"type":"fast","limit":10,"refillRate":1,"refillInterval":60}`</span>
 
-<ObjectCollapsible name={"ratelimit"}>
+<ObjectCollapsible name={"Attributes"}>
 
 <Property name={"type"} type={"string"} required={true} deprecated={undefined}>
 
@@ -2400,7 +2403,7 @@ Unkey enables you to refill verifications for each key at regular intervals.
 
 <span>Example: `{"interval":"daily","amount":100}`</span>
 
-<ObjectCollapsible name={"refill"}>
+<ObjectCollapsible name={"Attributes"}>
 
 <Property name={"interval"} type={"string"} required={true} deprecated={undefined}>
 
@@ -2451,31 +2454,32 @@ Set if key is enabled or disabled. If disabled, the key cannot be used to verify
 
 ```bash
 curl -X POST "https://api.unkey.dev/v1/keys.updateKey" \
+  -H "Content-Type: application/json" \
   -d '{
-  "keyId": "key_123",
-  "name": "Customer X",
-  "ownerId": "user_123",
-  "meta": {
-    "roles": [
-      "admin",
-      "user"
-    ],
-    "stripeCustomerId": "cus_1234"
-  },
-  "expires": 0,
-  "ratelimit": {
-    "type": "fast",
-    "limit": 10,
-    "refillRate": 1,
-    "refillInterval": 60
-  },
-  "remaining": 1000,
-  "refill": {
-    "interval": "daily",
-    "amount": 100
-  },
-  "enabled": true
-}'
+    "keyId": "key_123",
+    "name": "Customer X",
+    "ownerId": "user_123",
+    "meta": {
+      "roles": [
+        "admin",
+        "user"
+      ],
+      "stripeCustomerId": "cus_1234"
+    },
+    "expires": 0,
+    "ratelimit": {
+      "type": "fast",
+      "limit": 10,
+      "refillRate": 1,
+      "refillInterval": 60
+    },
+    "remaining": 1000,
+    "refill": {
+      "interval": "daily",
+      "amount": 100
+    },
+    "enabled": true
+  }'
 ```
 
 </Request>
@@ -2964,11 +2968,12 @@ The value you want to set, add or subtract the remaining count by
 
 ```bash
 curl -X POST "https://api.unkey.dev/v1/keys.updateRemaining" \
+  -H "Content-Type: application/json" \
   -d '{
-  "keyId": "key_123",
-  "op": "increment",
-  "value": 1
-}'
+    "keyId": "key_123",
+    "op": "increment",
+    "value": 1
+  }'
 ```
 
 </Request>

@@ -123,7 +123,7 @@ function render(
 
   if (isObject(schema) && !ctx.parseObject) {
     child.push(
-      renderer.ObjectCollapsible({ name }, [
+      renderer.ObjectCollapsible({ name: 'Attributes' }, [
         render(name, schema, {
           ...ctx,
           parseObject: true,

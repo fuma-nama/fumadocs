@@ -208,40 +208,46 @@ export function APIPlayground({
           >
             {path.length > 0 ? (
               <Accordion title="Path">
-                {path.map((field) =>
-                  renderCustomField(
-                    `path.${field.name}`,
-                    field,
-                    fields.path,
-                    field.name,
-                  ),
-                )}
+                <div className="flex flex-col gap-4">
+                  {path.map((field) =>
+                    renderCustomField(
+                      `path.${field.name}`,
+                      field,
+                      fields.path,
+                      field.name,
+                    ),
+                  )}
+                </div>
               </Accordion>
             ) : null}
 
             {query.length > 0 ? (
               <Accordion title="Query">
-                {query.map((field) =>
-                  renderCustomField(
-                    `query.${field.name}`,
-                    field,
-                    fields.query,
-                    field.name,
-                  ),
-                )}
+                <div className="flex flex-col gap-4">
+                  {query.map((field) =>
+                    renderCustomField(
+                      `query.${field.name}`,
+                      field,
+                      fields.query,
+                      field.name,
+                    ),
+                  )}
+                </div>
               </Accordion>
             ) : null}
 
             {header.length > 0 ? (
               <Accordion title="Headers">
-                {header.map((field) =>
-                  renderCustomField(
-                    `header.${field.name}`,
-                    field,
-                    fields.header,
-                    field.name,
-                  ),
-                )}
+                <div className="flex flex-col gap-4">
+                  {header.map((field) =>
+                    renderCustomField(
+                      `header.${field.name}`,
+                      field,
+                      fields.header,
+                      field.name,
+                    ),
+                  )}
+                </div>
               </Accordion>
             ) : null}
 

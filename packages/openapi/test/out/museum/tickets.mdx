@@ -94,13 +94,14 @@ Phone number for the ticket purchaser (optional).
 
 ```bash
 curl -X POST "https://api.fake-museum-example.com/v1/tickets" \
+  -H "Content-Type: application/json" \
   -d '{
-  "ticketType": "event",
-  "eventId": "3be6453c-03eb-4357-ae5a-984a0e574a54",
-  "ticketDate": "2023-10-29",
-  "email": "museum-lover@example.com",
-  "phone": "+1(234)-567-8910"
-}'
+    "ticketType": "event",
+    "eventId": "3be6453c-03eb-4357-ae5a-984a0e574a54",
+    "ticketDate": "2023-10-29",
+    "email": "museum-lover@example.com",
+    "phone": "+1(234)-567-8910"
+  }'
 ```
 
 </Request>

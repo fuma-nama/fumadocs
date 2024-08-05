@@ -11,7 +11,10 @@ apps/docs/shaders/*
 **/test/fixtures/*.output.*
 
 apps/docs/content/docs/ui/museum/*.mdx
-apps/docs/content/docs/ui/museum/!index.mdx
+!apps/docs/content/docs/ui/museum/index.mdx
+
+apps/docs/content/docs/unkey/**/*.mdx
+!apps/docs/content/docs/unkey/index.mdx
 
 apps/docs/content/docs/ui/typescript.mdx
 
