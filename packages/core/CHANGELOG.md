@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 13.0.7
+
+### Patch Changes
+
+- 37bbfff: Improve active anchor observer
+
 ## 13.0.6
 
 ## 13.0.5

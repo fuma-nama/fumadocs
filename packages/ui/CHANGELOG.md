@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 13.0.7
+
+### Patch Changes
+
+- e7c52f2: Fix code styles in headings
+- Updated dependencies [37bbfff]
+  - fumadocs-core@13.0.7
+
 ## 13.0.6
 
 ### Patch Changes
