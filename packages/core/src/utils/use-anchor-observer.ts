@@ -35,8 +35,8 @@ export function useAnchorObserver(watch: string[]): string | undefined {
       // select the last item when reached the bottom
       if (
         element.scrollTop >=
-        // assume you have a 100px margin (including footer & padding)
-        element.scrollHeight - element.clientHeight - 100
+        // assume you have a 10px margin
+        element.scrollHeight - element.clientHeight - 10
       ) {
         setActiveAnchor(watch.at(-1));
       }
