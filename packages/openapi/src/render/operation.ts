@@ -1,8 +1,8 @@
 import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
-import { createEndpoint, type Endpoint } from '@/endpoint';
-import { getExampleResponse } from '@/utils/generate-response';
+import { createSample, type EndpointSample } from '@/create-sample';
 import * as CURL from '@/requests/curl';
 import * as JS from '@/requests/javascript';
+import * as Go from '@/requests/go';
 import { type MethodInformation, type RenderContext } from '@/types';
 import { noRef, getPreferredMedia, getPreferredType } from '@/utils/schema';
 import { getTypescriptSchema } from '@/utils/get-typescript-schema';
@@ -74,7 +74,7 @@ export async function renderOperation(
   }
 
   const parameterGroups = new Map<string, string[]>();
-  const endpoint = createEndpoint(path, method, ctx.baseUrl);
+  const endpoint = createSample(path, method, ctx.baseUrl);
 
   for (const param of method.parameters) {
     const schema = noRef(
@@ -117,8 +117,6 @@ export async function renderOperation(
     info.push(heading(level, group), ...parameters);
   }
 
-  info.push(getResponseTable(method));
-
   const samples: CodeSample[] = dedupe([
     {
       label: 'cURL',
@@ -129,6 +127,11 @@ export async function renderOperation(
       label: 'JavaScript',
       source: JS.getSampleRequest(endpoint),
       lang: 'js',
+    },
+    {
+      label: 'Go',
+      source: Go.getSampleRequest(endpoint),
+      lang: 'go',
     },
     ...(ctx.generateCodeSamples ? await ctx.generateCodeSamples(endpoint) : []),
     ...((method as CustomProperty)['x-codeSamples'] ?? []),
@@ -245,20 +248,8 @@ function getAuthSection(
   return info.join('\n\n');
 }
 
-function getResponseTable(operation: OpenAPI.OperationObject): string {
-  const table: string[] = [];
-  table.push(`| Status code | Description |`);
-  table.push(`| ----------- | ----------- |`);
-
-  Object.entries(operation.responses).forEach(([code, value]) => {
-    table.push(`| \`${code}\` | ${noRef(value).description} |`);
-  });
-
-  return table.join('\n');
-}
-
 async function getResponseTabs(
-  endpoint: Endpoint,
+  endpoint: EndpointSample,
   operation: OpenAPI.OperationObject,
   { renderer, generateTypeScriptSchema }: RenderContext,
 ): Promise<string> {
@@ -266,33 +257,37 @@ async function getResponseTabs(
   const child: string[] = [];
 
   for (const code of Object.keys(operation.responses)) {
-    const example = getExampleResponse(endpoint, code);
-    let ts: string | undefined;
+    const tabs: string[] = [];
 
+    if (code in endpoint.responses) {
+      tabs.push(
+        renderer.ExampleResponse(
+          JSON.stringify(endpoint.responses[code].sample, null, 2),
+        ),
+      );
+    }
+
+    let ts: string | undefined;
     if (generateTypeScriptSchema) {
       ts = await generateTypeScriptSchema(endpoint, code);
     } else if (generateTypeScriptSchema === undefined) {
       ts = await getTypescriptSchema(endpoint, code);
     }
 
-    const description =
-      code in endpoint.responses
-        ? endpoint.responses[code].schema.description
-        : undefined;
+    if (ts) tabs.push(renderer.TypeScriptResponse(ts));
 
-    if (example) {
-      items.push(code);
+    let description = noRef(operation.responses[code]).description;
 
-      child.push(
-        renderer.Response({ value: code }, [
-          p(description),
-          renderer.ResponseTypes([
-            renderer.ExampleResponse(example),
-            ...(ts ? [renderer.TypeScriptResponse(ts)] : []),
-          ]),
-        ]),
-      );
-    }
+    if (!description && code in endpoint.responses)
+      description = endpoint.responses[code].schema.description ?? '';
+
+    items.push(code);
+    child.push(
+      renderer.Response({ value: code }, [
+        p(description),
+        ...(tabs.length > 0 ? [renderer.ResponseTypes(tabs)] : []),
+      ]),
+    );
   }
 
   if (items.length === 0) return '';

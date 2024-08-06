@@ -1,8 +1,8 @@
 import { compile } from 'json-schema-to-typescript';
-import type { Endpoint } from '@/endpoint';
+import type { EndpointSample } from '@/create-sample';
 
 export async function getTypescriptSchema(
-  endpoint: Endpoint,
+  endpoint: EndpointSample,
   code: string,
 ): Promise<string | undefined> {
   if (code in endpoint.responses) {

@@ -72,17 +72,11 @@ The number of days per page.
 
 </Property>
 
-| Status code | Description |
-| ----------- | ----------- |
-| `200` | Success |
-| `400` | Bad request |
-| `404` | Not found |
-
 </APIInfo>
 
 <APIExample>
 
-<Requests items={["cURL","JavaScript"]}>
+<Requests items={["cURL","JavaScript","Go"]}>
 
 <Request value={"cURL"}>
 
@@ -96,19 +90,46 @@ curl -X GET "https://api.fake-museum-example.com/v1/special-events?startDate=202
 
 ```js
 fetch("https://api.fake-museum-example.com/v1/special-events?startDate=2023-02-23&endDate=2023-04-18&page=2&limit=15", {
-  method: "GET"
+
 });
+```
+
+</Request>
+
+<Request value={"Go"}>
+
+```go
+package main
+
+import (
+  "fmt"
+  "net/http"
+  "io/ioutil"
+)
+
+func main() {
+  url := "https://api.fake-museum-example.com/v1/special-events?startDate=2023-02-23&endDate=2023-04-18&page=2&limit=15"
+  
+  req, _ := http.NewRequest("GET", url, nil)
+  
+  res, _ := http.DefaultClient.Do(req)
+  defer res.Body.Close()
+  body, _ := ioutil.ReadAll(res.Body)
+
+  fmt.Println(res)
+  fmt.Println(string(body))
+}
 ```
 
 </Request>
 
 </Requests>
 
-<Responses items={["200"]}>
+<Responses items={["200","400","404"]}>
 
 <Response value={"200"}>
 
-A list of upcoming special events
+Success
 
 <ResponseTypes>
 
@@ -168,6 +189,18 @@ export type Response = {
 </TypeScriptResponse>
 
 </ResponseTypes>
+
+</Response>
+
+<Response value={"400"}>
+
+Bad request
+
+</Response>
+
+<Response value={"404"}>
+
+Not found
 
 </Response>
 
@@ -239,17 +272,11 @@ Price of a ticket for the special event
 
 </Property>
 
-| Status code | Description |
-| ----------- | ----------- |
-| `200` | Success |
-| `400` | Bad request |
-| `404` | Not found |
-
 </APIInfo>
 
 <APIExample>
 
-<Requests items={["cURL","JavaScript"]}>
+<Requests items={["cURL","JavaScript","Go"]}>
 
 <Request value={"cURL"}>
 
@@ -273,7 +300,6 @@ curl -X POST "https://api.fake-museum-example.com/v1/special-events" \
 
 ```js
 fetch("https://api.fake-museum-example.com/v1/special-events", {
-  method: "POST",
   body: JSON.stringify({
     "name": "Pirate Coding Workshop",
     "location": "Computer Room",
@@ -288,13 +314,50 @@ fetch("https://api.fake-museum-example.com/v1/special-events", {
 
 </Request>
 
+<Request value={"Go"}>
+
+```go
+package main
+
+import (
+  "fmt"
+  "net/http"
+  "io/ioutil"
+  "strings"
+)
+
+func main() {
+  url := "https://api.fake-museum-example.com/v1/special-events"
+  payload := strings.NewReader(`{
+    "name": "Pirate Coding Workshop",
+    "location": "Computer Room",
+    "eventDescription": "Captain Blackbeard shares his love of the C...language. And possibly Arrrrr (R lang).",
+    "dates": [
+      "2023-10-29"
+    ],
+    "price": 25
+  }`)
+  
+  req, _ := http.NewRequest("POST", url, payload)
+  req.Header.Add("Content-Type", "application/json")
+  res, _ := http.DefaultClient.Do(req)
+  defer res.Body.Close()
+  body, _ := ioutil.ReadAll(res.Body)
+
+  fmt.Println(res)
+  fmt.Println(string(body))
+}
+```
+
+</Request>
+
 </Requests>
 
-<Responses items={["200"]}>
+<Responses items={["200","400","404"]}>
 
 <Response value={"200"}>
 
-Information about a special event.
+Success
 
 <ResponseTypes>
 
@@ -355,6 +418,18 @@ export interface Response {
 
 </Response>
 
+<Response value={"400"}>
+
+Bad request
+
+</Response>
+
+<Response value={"404"}>
+
+Not found
+
+</Response>
+
 </Responses>
 
 </APIExample>
@@ -393,17 +468,11 @@ An identifier for a special event.
 
 </Property>
 
-| Status code | Description |
-| ----------- | ----------- |
-| `200` | Success |
-| `400` | Bad request |
-| `404` | Not found |
-
 </APIInfo>
 
 <APIExample>
 
-<Requests items={["cURL","JavaScript"]}>
+<Requests items={["cURL","JavaScript","Go"]}>
 
 <Request value={"cURL"}>
 
@@ -417,19 +486,46 @@ curl -X GET "https://api.fake-museum-example.com/v1/special-events/dad4bce8-f5cb
 
 ```js
 fetch("https://api.fake-museum-example.com/v1/special-events/dad4bce8-f5cb-4078-a211-995864315e39", {
-  method: "GET"
+
 });
+```
+
+</Request>
+
+<Request value={"Go"}>
+
+```go
+package main
+
+import (
+  "fmt"
+  "net/http"
+  "io/ioutil"
+)
+
+func main() {
+  url := "https://api.fake-museum-example.com/v1/special-events/dad4bce8-f5cb-4078-a211-995864315e39"
+  
+  req, _ := http.NewRequest("GET", url, nil)
+  
+  res, _ := http.DefaultClient.Do(req)
+  defer res.Body.Close()
+  body, _ := ioutil.ReadAll(res.Body)
+
+  fmt.Println(res)
+  fmt.Println(string(body))
+}
 ```
 
 </Request>
 
 </Requests>
 
-<Responses items={["200"]}>
+<Responses items={["200","400","404"]}>
 
 <Response value={"200"}>
 
-Information about a special event.
+Success
 
 <ResponseTypes>
 
@@ -487,6 +583,18 @@ export interface Response {
 </TypeScriptResponse>
 
 </ResponseTypes>
+
+</Response>
+
+<Response value={"400"}>
+
+Bad request
+
+</Response>
+
+<Response value={"404"}>
+
+Not found
 
 </Response>
 
@@ -570,17 +678,11 @@ An identifier for a special event.
 
 </Property>
 
-| Status code | Description |
-| ----------- | ----------- |
-| `200` | Success |
-| `400` | Bad request |
-| `404` | Not found |
-
 </APIInfo>
 
 <APIExample>
 
-<Requests items={["cURL","JavaScript"]}>
+<Requests items={["cURL","JavaScript","Go"]}>
 
 <Request value={"cURL"}>
 
@@ -604,7 +706,6 @@ curl -X PATCH "https://api.fake-museum-example.com/v1/special-events/dad4bce8-f5
 
 ```js
 fetch("https://api.fake-museum-example.com/v1/special-events/dad4bce8-f5cb-4078-a211-995864315e39", {
-  method: "PATCH",
   body: JSON.stringify({
     "name": "Pirate Coding Workshop",
     "location": "Computer Room",
@@ -619,13 +720,50 @@ fetch("https://api.fake-museum-example.com/v1/special-events/dad4bce8-f5cb-4078-
 
 </Request>
 
+<Request value={"Go"}>
+
+```go
+package main
+
+import (
+  "fmt"
+  "net/http"
+  "io/ioutil"
+  "strings"
+)
+
+func main() {
+  url := "https://api.fake-museum-example.com/v1/special-events/dad4bce8-f5cb-4078-a211-995864315e39"
+  payload := strings.NewReader(`{
+    "name": "Pirate Coding Workshop",
+    "location": "Computer Room",
+    "eventDescription": "Captain Blackbeard shares his love of the C...language. And possibly Arrrrr (R lang).",
+    "dates": [
+      "2023-10-29"
+    ],
+    "price": 25
+  }`)
+  
+  req, _ := http.NewRequest("PATCH", url, payload)
+  req.Header.Add("Content-Type", "application/json")
+  res, _ := http.DefaultClient.Do(req)
+  defer res.Body.Close()
+  body, _ := ioutil.ReadAll(res.Body)
+
+  fmt.Println(res)
+  fmt.Println(string(body))
+}
+```
+
+</Request>
+
 </Requests>
 
-<Responses items={["200"]}>
+<Responses items={["200","400","404"]}>
 
 <Response value={"200"}>
 
-Information about a special event.
+Success
 
 <ResponseTypes>
 
@@ -686,6 +824,18 @@ export interface Response {
 
 </Response>
 
+<Response value={"400"}>
+
+Bad request
+
+</Response>
+
+<Response value={"404"}>
+
+Not found
+
+</Response>
+
 </Responses>
 
 </APIExample>
@@ -724,18 +874,11 @@ An identifier for a special event.
 
 </Property>
 
-| Status code | Description |
-| ----------- | ----------- |
-| `204` | Success - no content |
-| `400` | Bad request |
-| `401` | Unauthorized |
-| `404` | Not found |
-
 </APIInfo>
 
 <APIExample>
 
-<Requests items={["cURL","JavaScript"]}>
+<Requests items={["cURL","JavaScript","Go"]}>
 
 <Request value={"cURL"}>
 
@@ -749,13 +892,68 @@ curl -X DELETE "https://api.fake-museum-example.com/v1/special-events/dad4bce8-f
 
 ```js
 fetch("https://api.fake-museum-example.com/v1/special-events/dad4bce8-f5cb-4078-a211-995864315e39", {
-  method: "DELETE"
+
 });
 ```
 
 </Request>
 
+<Request value={"Go"}>
+
+```go
+package main
+
+import (
+  "fmt"
+  "net/http"
+  "io/ioutil"
+)
+
+func main() {
+  url := "https://api.fake-museum-example.com/v1/special-events/dad4bce8-f5cb-4078-a211-995864315e39"
+  
+  req, _ := http.NewRequest("DELETE", url, nil)
+  
+  res, _ := http.DefaultClient.Do(req)
+  defer res.Body.Close()
+  body, _ := ioutil.ReadAll(res.Body)
+
+  fmt.Println(res)
+  fmt.Println(string(body))
+}
+```
+
+</Request>
+
 </Requests>
+
+<Responses items={["204","400","401","404"]}>
+
+<Response value={"204"}>
+
+Success - no content
+
+</Response>
+
+<Response value={"400"}>
+
+Bad request
+
+</Response>
+
+<Response value={"401"}>
+
+Unauthorized
+
+</Response>
+
+<Response value={"404"}>
+
+Not found
+
+</Response>
+
+</Responses>
 
 </APIExample>
 

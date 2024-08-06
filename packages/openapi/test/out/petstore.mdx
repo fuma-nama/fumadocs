@@ -29,16 +29,11 @@ How many items to return at one time (max 100)
 
 </Property>
 
-| Status code | Description |
-| ----------- | ----------- |
-| `200` | A paged array of pets |
-| `default` | unexpected error |
-
 </APIInfo>
 
 <APIExample>
 
-<Requests items={["cURL","JavaScript"]}>
+<Requests items={["cURL","JavaScript","Go"]}>
 
 <Request value={"cURL"}>
 
@@ -52,8 +47,35 @@ curl -X GET "http://petstore.swagger.io/v1/pets?limit=100"
 
 ```js
 fetch("http://petstore.swagger.io/v1/pets?limit=100", {
-  method: "GET"
+
 });
+```
+
+</Request>
+
+<Request value={"Go"}>
+
+```go
+package main
+
+import (
+  "fmt"
+  "net/http"
+  "io/ioutil"
+)
+
+func main() {
+  url := "http://petstore.swagger.io/v1/pets?limit=100"
+  
+  req, _ := http.NewRequest("GET", url, nil)
+  
+  res, _ := http.DefaultClient.Do(req)
+  defer res.Body.Close()
+  body, _ := ioutil.ReadAll(res.Body)
+
+  fmt.Println(res)
+  fmt.Println(string(body))
+}
 ```
 
 </Request>
@@ -63,6 +85,8 @@ fetch("http://petstore.swagger.io/v1/pets?limit=100", {
 <Responses items={["200","default"]}>
 
 <Response value={"200"}>
+
+A paged array of pets
 
 <ResponseTypes>
 
@@ -100,6 +124,8 @@ export type Response = {
 </Response>
 
 <Response value={"default"}>
+
+unexpected error
 
 <ResponseTypes>
 
@@ -161,16 +187,11 @@ export interface Response {
 
 </Property>
 
-| Status code | Description |
-| ----------- | ----------- |
-| `201` | Null response |
-| `default` | unexpected error |
-
 </APIInfo>
 
 <APIExample>
 
-<Requests items={["cURL","JavaScript"]}>
+<Requests items={["cURL","JavaScript","Go"]}>
 
 <Request value={"cURL"}>
 
@@ -190,7 +211,6 @@ curl -X POST "http://petstore.swagger.io/v1/pets" \
 
 ```js
 fetch("http://petstore.swagger.io/v1/pets", {
-  method: "POST",
   body: JSON.stringify({
     "id": 0,
     "name": "string",
@@ -201,11 +221,52 @@ fetch("http://petstore.swagger.io/v1/pets", {
 
 </Request>
 
+<Request value={"Go"}>
+
+```go
+package main
+
+import (
+  "fmt"
+  "net/http"
+  "io/ioutil"
+  "strings"
+)
+
+func main() {
+  url := "http://petstore.swagger.io/v1/pets"
+  payload := strings.NewReader(`{
+    "id": 0,
+    "name": "string",
+    "tag": "string"
+  }`)
+  
+  req, _ := http.NewRequest("POST", url, payload)
+  req.Header.Add("Content-Type", "application/json")
+  res, _ := http.DefaultClient.Do(req)
+  defer res.Body.Close()
+  body, _ := ioutil.ReadAll(res.Body)
+
+  fmt.Println(res)
+  fmt.Println(string(body))
+}
+```
+
+</Request>
+
 </Requests>
 
-<Responses items={["default"]}>
+<Responses items={["201","default"]}>
+
+<Response value={"201"}>
+
+Null response
+
+</Response>
 
 <Response value={"default"}>
+
+unexpected error
 
 <ResponseTypes>
 
@@ -259,16 +320,11 @@ The id of the pet to retrieve
 
 </Property>
 
-| Status code | Description |
-| ----------- | ----------- |
-| `200` | Expected response to a valid request |
-| `default` | unexpected error |
-
 </APIInfo>
 
 <APIExample>
 
-<Requests items={["cURL","JavaScript"]}>
+<Requests items={["cURL","JavaScript","Go"]}>
 
 <Request value={"cURL"}>
 
@@ -282,8 +338,35 @@ curl -X GET "http://petstore.swagger.io/v1/pets/string"
 
 ```js
 fetch("http://petstore.swagger.io/v1/pets/string", {
-  method: "GET"
+
 });
+```
+
+</Request>
+
+<Request value={"Go"}>
+
+```go
+package main
+
+import (
+  "fmt"
+  "net/http"
+  "io/ioutil"
+)
+
+func main() {
+  url := "http://petstore.swagger.io/v1/pets/string"
+  
+  req, _ := http.NewRequest("GET", url, nil)
+  
+  res, _ := http.DefaultClient.Do(req)
+  defer res.Body.Close()
+  body, _ := ioutil.ReadAll(res.Body)
+
+  fmt.Println(res)
+  fmt.Println(string(body))
+}
 ```
 
 </Request>
@@ -293,6 +376,8 @@ fetch("http://petstore.swagger.io/v1/pets/string", {
 <Responses items={["200","default"]}>
 
 <Response value={"200"}>
+
+Expected response to a valid request
 
 <ResponseTypes>
 
@@ -325,6 +410,8 @@ export interface Response {
 </Response>
 
 <Response value={"default"}>
+
+unexpected error
 
 <ResponseTypes>
 

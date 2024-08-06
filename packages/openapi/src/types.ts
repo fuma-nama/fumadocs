@@ -1,6 +1,6 @@
 import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
 import { type Renderer } from '@/render/renderer';
-import type { Endpoint } from '@/endpoint';
+import type { EndpointSample } from '@/create-sample';
 import type { CodeSample } from '@/render/operation';
 
 export interface RouteInformation {
@@ -31,11 +31,11 @@ export interface RenderContext {
    * @param code - status code
    */
   generateTypeScriptSchema?:
-    | ((endpoint: Endpoint, code: string) => Awaitable<string>)
+    | ((endpoint: EndpointSample, code: string) => Awaitable<string>)
     | false;
 
   /**
    * Generate code samples for endpoint.
    */
-  generateCodeSamples?: (endpoint: Endpoint) => Awaitable<CodeSample[]>;
+  generateCodeSamples?: (endpoint: EndpointSample) => Awaitable<CodeSample[]>;
 }

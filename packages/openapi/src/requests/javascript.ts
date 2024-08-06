@@ -1,21 +1,40 @@
-import { type Endpoint } from '@/endpoint';
-import { generateInput } from '@/utils/generate-input';
+import { type EndpointSample } from '@/create-sample';
+import { toSampleInput } from '@/utils/schema';
 
-export function getSampleRequest(endpoint: Endpoint): string {
+export function getSampleRequest(endpoint: EndpointSample): string {
   const s: string[] = [];
   const options = new Map<string, string>();
-  const headers: Record<string, unknown> = {};
+  const headers = new Map<string, unknown>();
+  const cookies = new Map<string, unknown>();
 
   for (const param of endpoint.parameters) {
     if (param.in === 'header') {
-      headers[param.name] = generateInput(endpoint.method, param.schema);
+      headers.set(param.name, param.sample);
+    }
+
+    if (param.in === 'cookie') {
+      cookies.set(param.name, param.sample);
     }
   }
 
-  options.set('method', JSON.stringify(endpoint.method));
+  if (cookies.size > 0) {
+    headers.set(
+      'cookie',
+      Array.from(cookies.entries())
+        .map(([key, value]) => `${key}=${toSampleInput(value)}`)
+        .join('; '),
+    );
+  }
 
-  if (Object.keys(headers).length > 0) {
-    options.set('headers', JSON.stringify(headers, undefined, 2));
+  if (headers.size > 0) {
+    options.set(
+      'headers',
+      JSON.stringify(
+        Object.fromEntries(headers.entries()),
+        undefined,
+        2,
+      ).replaceAll('\n', '\n  '),
+    );
   }
 
   if (
@@ -32,10 +51,11 @@ export function getSampleRequest(endpoint: Endpoint): string {
   } else if (endpoint.body) {
     options.set(
       'body',
-      `JSON.stringify(${JSON.stringify(endpoint.body.sample, null, 2)
-        .split('\n')
-        .map((v, i) => (i > 0 ? `  ${v}` : v))
-        .join('\n')})`,
+      `JSON.stringify(${JSON.stringify(
+        endpoint.body.sample,
+        null,
+        2,
+      ).replaceAll('\n', '\n  ')})`,
     );
   }
 

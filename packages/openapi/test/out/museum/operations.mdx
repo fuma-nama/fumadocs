@@ -62,17 +62,11 @@ The number of days per page.
 
 </Property>
 
-| Status code | Description |
-| ----------- | ----------- |
-| `200` | Success |
-| `400` | Bad request |
-| `404` | Not found |
-
 </APIInfo>
 
 <APIExample>
 
-<Requests items={["cURL","JavaScript","List all unwatered plants"]}>
+<Requests items={["cURL","JavaScript","Go","List all unwatered plants"]}>
 
 <Request value={"cURL"}>
 
@@ -86,8 +80,35 @@ curl -X GET "https://api.fake-museum-example.com/v1/museum-hours?startDate=2023-
 
 ```js
 fetch("https://api.fake-museum-example.com/v1/museum-hours?startDate=2023-02-23&page=2&limit=15", {
-  method: "GET"
+
 });
+```
+
+</Request>
+
+<Request value={"Go"}>
+
+```go
+package main
+
+import (
+  "fmt"
+  "net/http"
+  "io/ioutil"
+)
+
+func main() {
+  url := "https://api.fake-museum-example.com/v1/museum-hours?startDate=2023-02-23&page=2&limit=15"
+  
+  req, _ := http.NewRequest("GET", url, nil)
+  
+  res, _ := http.DefaultClient.Do(req)
+  defer res.Body.Close()
+  body, _ := ioutil.ReadAll(res.Body)
+
+  fmt.Println(res)
+  fmt.Println(string(body))
+}
 ```
 
 </Request>
@@ -102,11 +123,11 @@ planter list -u
 
 </Requests>
 
-<Responses items={["200"]}>
+<Responses items={["200","400","404"]}>
 
 <Response value={"200"}>
 
-List of museum operating hours for consecutive days.
+Success
 
 <ResponseTypes>
 
@@ -149,6 +170,18 @@ export type Response = {
 </TypeScriptResponse>
 
 </ResponseTypes>
+
+</Response>
+
+<Response value={"400"}>
+
+Bad request
+
+</Response>
+
+<Response value={"404"}>
+
+Not found
 
 </Response>
 

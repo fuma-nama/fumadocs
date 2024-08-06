@@ -37,22 +37,11 @@ The id of the api to fetch
 
 </Property>
 
-| Status code | Description |
-| ----------- | ----------- |
-| `200` | The configuration for an api |
-| `400` | The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). |
-| `401` | Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. |
-| `403` | The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. |
-| `404` | The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. |
-| `409` | This response is sent when a request conflicts with the current state of the server. |
-| `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
-| `500` | The server has encountered a situation it does not know how to handle. |
-
 </APIInfo>
 
 <APIExample>
 
-<Requests items={["cURL","JavaScript"]}>
+<Requests items={["cURL","JavaScript","Go"]}>
 
 <Request value={"cURL"}>
 
@@ -66,8 +55,35 @@ curl -X GET "https://api.unkey.dev/v1/apis.getApi?apiId=api_1234"
 
 ```js
 fetch("https://api.unkey.dev/v1/apis.getApi?apiId=api_1234", {
-  method: "GET"
+
 });
+```
+
+</Request>
+
+<Request value={"Go"}>
+
+```go
+package main
+
+import (
+  "fmt"
+  "net/http"
+  "io/ioutil"
+)
+
+func main() {
+  url := "https://api.unkey.dev/v1/apis.getApi?apiId=api_1234"
+  
+  req, _ := http.NewRequest("GET", url, nil)
+  
+  res, _ := http.DefaultClient.Do(req)
+  defer res.Body.Close()
+  body, _ := ioutil.ReadAll(res.Body)
+
+  fmt.Println(res)
+  fmt.Println(string(body))
+}
 ```
 
 </Request>
@@ -77,6 +93,8 @@ fetch("https://api.unkey.dev/v1/apis.getApi?apiId=api_1234", {
 <Responses items={["200","400","401","403","404","409","429","500"]}>
 
 <Response value={"200"}>
+
+The configuration for an api
 
 <ResponseTypes>
 
@@ -118,6 +136,8 @@ export interface Response {
 </Response>
 
 <Response value={"400"}>
+
+The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).
 
 <ResponseTypes>
 
@@ -169,6 +189,8 @@ export interface Response {
 
 <Response value={"401"}>
 
+Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response.
+
 <ResponseTypes>
 
 <ExampleResponse>
@@ -218,6 +240,8 @@ export interface Response {
 </Response>
 
 <Response value={"403"}>
+
+The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.
 
 <ResponseTypes>
 
@@ -269,6 +293,8 @@ export interface Response {
 
 <Response value={"404"}>
 
+The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.
+
 <ResponseTypes>
 
 <ExampleResponse>
@@ -318,6 +344,8 @@ export interface Response {
 </Response>
 
 <Response value={"409"}>
+
+This response is sent when a request conflicts with the current state of the server.
 
 <ResponseTypes>
 
@@ -369,6 +397,8 @@ export interface Response {
 
 <Response value={"429"}>
 
+The user has sent too many requests in a given amount of time ("rate limiting")
+
 <ResponseTypes>
 
 <ExampleResponse>
@@ -418,6 +448,8 @@ export interface Response {
 </Response>
 
 <Response value={"500"}>
+
+The server has encountered a situation it does not know how to handle.
 
 <ResponseTypes>
 
@@ -503,22 +535,11 @@ The name for your API. This is not customer facing.
 
 </Property>
 
-| Status code | Description |
-| ----------- | ----------- |
-| `200` | The configuration for an api |
-| `400` | The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). |
-| `401` | Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. |
-| `403` | The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. |
-| `404` | The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. |
-| `409` | This response is sent when a request conflicts with the current state of the server. |
-| `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
-| `500` | The server has encountered a situation it does not know how to handle. |
-
 </APIInfo>
 
 <APIExample>
 
-<Requests items={["cURL","JavaScript"]}>
+<Requests items={["cURL","JavaScript","Go"]}>
 
 <Request value={"cURL"}>
 
@@ -536,11 +557,41 @@ curl -X POST "https://api.unkey.dev/v1/apis.createApi" \
 
 ```js
 fetch("https://api.unkey.dev/v1/apis.createApi", {
-  method: "POST",
   body: JSON.stringify({
     "name": "my-api"
   })
 });
+```
+
+</Request>
+
+<Request value={"Go"}>
+
+```go
+package main
+
+import (
+  "fmt"
+  "net/http"
+  "io/ioutil"
+  "strings"
+)
+
+func main() {
+  url := "https://api.unkey.dev/v1/apis.createApi"
+  payload := strings.NewReader(`{
+    "name": "my-api"
+  }`)
+  
+  req, _ := http.NewRequest("POST", url, payload)
+  req.Header.Add("Content-Type", "application/json")
+  res, _ := http.DefaultClient.Do(req)
+  defer res.Body.Close()
+  body, _ := ioutil.ReadAll(res.Body)
+
+  fmt.Println(res)
+  fmt.Println(string(body))
+}
 ```
 
 </Request>
@@ -550,6 +601,8 @@ fetch("https://api.unkey.dev/v1/apis.createApi", {
 <Responses items={["200","400","401","403","404","409","429","500"]}>
 
 <Response value={"200"}>
+
+The configuration for an api
 
 <ResponseTypes>
 
@@ -581,6 +634,8 @@ export interface Response {
 </Response>
 
 <Response value={"400"}>
+
+The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).
 
 <ResponseTypes>
 
@@ -632,6 +687,8 @@ export interface Response {
 
 <Response value={"401"}>
 
+Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response.
+
 <ResponseTypes>
 
 <ExampleResponse>
@@ -681,6 +738,8 @@ export interface Response {
 </Response>
 
 <Response value={"403"}>
+
+The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.
 
 <ResponseTypes>
 
@@ -732,6 +791,8 @@ export interface Response {
 
 <Response value={"404"}>
 
+The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.
+
 <ResponseTypes>
 
 <ExampleResponse>
@@ -781,6 +842,8 @@ export interface Response {
 </Response>
 
 <Response value={"409"}>
+
+This response is sent when a request conflicts with the current state of the server.
 
 <ResponseTypes>
 
@@ -832,6 +895,8 @@ export interface Response {
 
 <Response value={"429"}>
 
+The user has sent too many requests in a given amount of time ("rate limiting")
+
 <ResponseTypes>
 
 <ExampleResponse>
@@ -881,6 +946,8 @@ export interface Response {
 </Response>
 
 <Response value={"500"}>
+
+The server has encountered a situation it does not know how to handle.
 
 <ResponseTypes>
 
@@ -994,22 +1061,11 @@ If provided, this will only return keys where the `ownerId` matches.
 
 </Property>
 
-| Status code | Description |
-| ----------- | ----------- |
-| `200` | The configuration for an api |
-| `400` | The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). |
-| `401` | Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. |
-| `403` | The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. |
-| `404` | The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. |
-| `409` | This response is sent when a request conflicts with the current state of the server. |
-| `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
-| `500` | The server has encountered a situation it does not know how to handle. |
-
 </APIInfo>
 
 <APIExample>
 
-<Requests items={["cURL","JavaScript"]}>
+<Requests items={["cURL","JavaScript","Go"]}>
 
 <Request value={"cURL"}>
 
@@ -1023,8 +1079,35 @@ curl -X GET "https://api.unkey.dev/v1/apis.listKeys?apiId=api_1234&limit=100&cur
 
 ```js
 fetch("https://api.unkey.dev/v1/apis.listKeys?apiId=api_1234&limit=100&cursor=string&ownerId=string", {
-  method: "GET"
+
 });
+```
+
+</Request>
+
+<Request value={"Go"}>
+
+```go
+package main
+
+import (
+  "fmt"
+  "net/http"
+  "io/ioutil"
+)
+
+func main() {
+  url := "https://api.unkey.dev/v1/apis.listKeys?apiId=api_1234&limit=100&cursor=string&ownerId=string"
+  
+  req, _ := http.NewRequest("GET", url, nil)
+  
+  res, _ := http.DefaultClient.Do(req)
+  defer res.Body.Close()
+  body, _ := ioutil.ReadAll(res.Body)
+
+  fmt.Println(res)
+  fmt.Println(string(body))
+}
 ```
 
 </Request>
@@ -1034,6 +1117,8 @@ fetch("https://api.unkey.dev/v1/apis.listKeys?apiId=api_1234&limit=100&cursor=st
 <Responses items={["200","400","401","403","404","409","429","500"]}>
 
 <Response value={"200"}>
+
+The configuration for an api
 
 <ResponseTypes>
 
@@ -1203,6 +1288,8 @@ export interface Response {
 
 <Response value={"400"}>
 
+The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).
+
 <ResponseTypes>
 
 <ExampleResponse>
@@ -1252,6 +1339,8 @@ export interface Response {
 </Response>
 
 <Response value={"401"}>
+
+Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response.
 
 <ResponseTypes>
 
@@ -1303,6 +1392,8 @@ export interface Response {
 
 <Response value={"403"}>
 
+The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.
+
 <ResponseTypes>
 
 <ExampleResponse>
@@ -1352,6 +1443,8 @@ export interface Response {
 </Response>
 
 <Response value={"404"}>
+
+The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.
 
 <ResponseTypes>
 
@@ -1403,6 +1496,8 @@ export interface Response {
 
 <Response value={"409"}>
 
+This response is sent when a request conflicts with the current state of the server.
+
 <ResponseTypes>
 
 <ExampleResponse>
@@ -1453,6 +1548,8 @@ export interface Response {
 
 <Response value={"429"}>
 
+The user has sent too many requests in a given amount of time ("rate limiting")
+
 <ResponseTypes>
 
 <ExampleResponse>
@@ -1502,6 +1599,8 @@ export interface Response {
 </Response>
 
 <Response value={"500"}>
+
+The server has encountered a situation it does not know how to handle.
 
 <ResponseTypes>
 
@@ -1587,22 +1686,11 @@ The id of the api to delete
 
 </Property>
 
-| Status code | Description |
-| ----------- | ----------- |
-| `200` | The api was successfully deleted, it may take up to 30s for this to take effect in all regions |
-| `400` | The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). |
-| `401` | Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response. |
-| `403` | The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server. |
-| `404` | The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web. |
-| `409` | This response is sent when a request conflicts with the current state of the server. |
-| `429` | The user has sent too many requests in a given amount of time ("rate limiting") |
-| `500` | The server has encountered a situation it does not know how to handle. |
-
 </APIInfo>
 
 <APIExample>
 
-<Requests items={["cURL","JavaScript"]}>
+<Requests items={["cURL","JavaScript","Go"]}>
 
 <Request value={"cURL"}>
 
@@ -1620,11 +1708,41 @@ curl -X POST "https://api.unkey.dev/v1/apis.deleteApi" \
 
 ```js
 fetch("https://api.unkey.dev/v1/apis.deleteApi", {
-  method: "POST",
   body: JSON.stringify({
     "apiId": "api_1234"
   })
 });
+```
+
+</Request>
+
+<Request value={"Go"}>
+
+```go
+package main
+
+import (
+  "fmt"
+  "net/http"
+  "io/ioutil"
+  "strings"
+)
+
+func main() {
+  url := "https://api.unkey.dev/v1/apis.deleteApi"
+  payload := strings.NewReader(`{
+    "apiId": "api_1234"
+  }`)
+  
+  req, _ := http.NewRequest("POST", url, payload)
+  req.Header.Add("Content-Type", "application/json")
+  res, _ := http.DefaultClient.Do(req)
+  defer res.Body.Close()
+  body, _ := ioutil.ReadAll(res.Body)
+
+  fmt.Println(res)
+  fmt.Println(string(body))
+}
 ```
 
 </Request>
@@ -1634,6 +1752,8 @@ fetch("https://api.unkey.dev/v1/apis.deleteApi", {
 <Responses items={["200","400","401","403","404","409","429","500"]}>
 
 <Response value={"200"}>
+
+The api was successfully deleted, it may take up to 30s for this to take effect in all regions
 
 <ResponseTypes>
 
@@ -1658,6 +1778,8 @@ export interface Response {}
 </Response>
 
 <Response value={"400"}>
+
+The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).
 
 <ResponseTypes>
 
@@ -1709,6 +1831,8 @@ export interface Response {
 
 <Response value={"401"}>
 
+Although the HTTP standard specifies "unauthorized", semantically this response means "unauthenticated". That is, the client must authenticate itself to get the requested response.
+
 <ResponseTypes>
 
 <ExampleResponse>
@@ -1758,6 +1882,8 @@ export interface Response {
 </Response>
 
 <Response value={"403"}>
+
+The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.
 
 <ResponseTypes>
 
@@ -1809,6 +1935,8 @@ export interface Response {
 
 <Response value={"404"}>
 
+The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.
+
 <ResponseTypes>
 
 <ExampleResponse>
@@ -1858,6 +1986,8 @@ export interface Response {
 </Response>
 
 <Response value={"409"}>
+
+This response is sent when a request conflicts with the current state of the server.
 
 <ResponseTypes>
 
@@ -1909,6 +2039,8 @@ export interface Response {
 
 <Response value={"429"}>
 
+The user has sent too many requests in a given amount of time ("rate limiting")
+
 <ResponseTypes>
 
 <ExampleResponse>
@@ -1958,6 +2090,8 @@ export interface Response {
 </Response>
 
 <Response value={"500"}>
+
+The server has encountered a situation it does not know how to handle.
 
 <ResponseTypes>
 

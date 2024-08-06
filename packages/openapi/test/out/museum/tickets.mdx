@@ -78,17 +78,11 @@ Phone number for the ticket purchaser (optional).
 
 </Property>
 
-| Status code | Description |
-| ----------- | ----------- |
-| `200` | Success |
-| `400` | Bad request |
-| `404` | Not found |
-
 </APIInfo>
 
 <APIExample>
 
-<Requests items={["cURL","JavaScript"]}>
+<Requests items={["cURL","JavaScript","Go"]}>
 
 <Request value={"cURL"}>
 
@@ -110,7 +104,6 @@ curl -X POST "https://api.fake-museum-example.com/v1/tickets" \
 
 ```js
 fetch("https://api.fake-museum-example.com/v1/tickets", {
-  method: "POST",
   body: JSON.stringify({
     "ticketType": "event",
     "eventId": "3be6453c-03eb-4357-ae5a-984a0e574a54",
@@ -123,13 +116,48 @@ fetch("https://api.fake-museum-example.com/v1/tickets", {
 
 </Request>
 
+<Request value={"Go"}>
+
+```go
+package main
+
+import (
+  "fmt"
+  "net/http"
+  "io/ioutil"
+  "strings"
+)
+
+func main() {
+  url := "https://api.fake-museum-example.com/v1/tickets"
+  payload := strings.NewReader(`{
+    "ticketType": "event",
+    "eventId": "3be6453c-03eb-4357-ae5a-984a0e574a54",
+    "ticketDate": "2023-10-29",
+    "email": "museum-lover@example.com",
+    "phone": "+1(234)-567-8910"
+  }`)
+  
+  req, _ := http.NewRequest("POST", url, payload)
+  req.Header.Add("Content-Type", "application/json")
+  res, _ := http.DefaultClient.Do(req)
+  defer res.Body.Close()
+  body, _ := ioutil.ReadAll(res.Body)
+
+  fmt.Println(res)
+  fmt.Println(string(body))
+}
+```
+
+</Request>
+
 </Requests>
 
-<Responses items={["200"]}>
+<Responses items={["200","400","404"]}>
 
 <Response value={"200"}>
 
-Details for a museum ticket after a successful purchase.
+Success
 
 <ResponseTypes>
 
@@ -188,6 +216,18 @@ export interface Response {
 
 </Response>
 
+<Response value={"400"}>
+
+Bad request
+
+</Response>
+
+<Response value={"404"}>
+
+Not found
+
+</Response>
+
 </Responses>
 
 </APIExample>
@@ -226,17 +266,11 @@ An identifier for a ticket to a museum event. Used to generate ticket image.
 
 </Property>
 
-| Status code | Description |
-| ----------- | ----------- |
-| `200` | Scannable event ticket in image format |
-| `400` | Bad request |
-| `404` | Not found |
-
 </APIInfo>
 
 <APIExample>
 
-<Requests items={["cURL","JavaScript"]}>
+<Requests items={["cURL","JavaScript","Go"]}>
 
 <Request value={"cURL"}>
 
@@ -250,19 +284,46 @@ curl -X GET "https://api.fake-museum-example.com/v1/tickets/a54a57ca-36f8-421b-a
 
 ```js
 fetch("https://api.fake-museum-example.com/v1/tickets/a54a57ca-36f8-421b-a6b4-2e8f26858a4c/qr", {
-  method: "GET"
+
 });
+```
+
+</Request>
+
+<Request value={"Go"}>
+
+```go
+package main
+
+import (
+  "fmt"
+  "net/http"
+  "io/ioutil"
+)
+
+func main() {
+  url := "https://api.fake-museum-example.com/v1/tickets/a54a57ca-36f8-421b-a6b4-2e8f26858a4c/qr"
+  
+  req, _ := http.NewRequest("GET", url, nil)
+  
+  res, _ := http.DefaultClient.Do(req)
+  defer res.Body.Close()
+  body, _ := ioutil.ReadAll(res.Body)
+
+  fmt.Println(res)
+  fmt.Println(string(body))
+}
 ```
 
 </Request>
 
 </Requests>
 
-<Responses items={["200"]}>
+<Responses items={["200","400","404"]}>
 
 <Response value={"200"}>
 
-An image of a ticket with a QR code used for museum or event entry.
+Scannable event ticket in image format
 
 <ResponseTypes>
 
@@ -286,6 +347,18 @@ export type Response = string;
 </TypeScriptResponse>
 
 </ResponseTypes>
+
+</Response>
+
+<Response value={"400"}>
+
+Bad request
+
+</Response>
+
+<Response value={"404"}>
+
+Not found
 
 </Response>
 

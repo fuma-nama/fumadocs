@@ -1,18 +1,13 @@
 import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
 import { sample } from 'openapi-sampler';
 import type { MethodInformation } from '@/types';
-import {
-  getPreferredMedia,
-  toSampleInput,
-  noRef,
-  getPreferredType,
-} from '@/utils/schema';
+import { toSampleInput, noRef, getPreferredType } from '@/utils/schema';
 import { generateInput } from '@/utils/generate-input';
 
 /**
  * Sample info of endpoint
  */
-export interface Endpoint {
+export interface EndpointSample {
   /**
    * Request URL, including path and query parameters
    */
@@ -23,28 +18,30 @@ export interface Endpoint {
     mediaType: string;
     sample: unknown;
   };
-  responses: Record<string, Response>;
-  parameters: Parameter[];
+  responses: Record<string, ResponseSample>;
+  parameters: ParameterSample[];
 }
 
-interface Response {
+interface ResponseSample {
+  mediaType: string;
+  sample: unknown;
   schema: OpenAPI.SchemaObject;
 }
 
-interface Parameter {
+interface ParameterSample {
   name: string;
   in: string;
   schema: OpenAPI.SchemaObject;
   sample: unknown;
 }
 
-export function createEndpoint(
+export function createSample(
   path: string,
   method: MethodInformation,
   baseUrl: string,
-): Endpoint {
-  const params: Parameter[] = [];
-  const responses: Endpoint['responses'] = {};
+): EndpointSample {
+  const params: ParameterSample[] = [];
+  const responses: EndpointSample['responses'] = {};
 
   for (const param of method.parameters) {
     if (param.schema) {
@@ -73,7 +70,7 @@ export function createEndpoint(
     }
   }
 
-  let bodyOutput: Endpoint['body'];
+  let bodyOutput: EndpointSample['body'];
 
   if (method.requestBody) {
     const body = noRef(method.requestBody).content;
@@ -90,12 +87,20 @@ export function createEndpoint(
   }
 
   for (const [code, value] of Object.entries(method.responses)) {
-    const mediaTypes = noRef(value).content ?? {};
-    const responseSchema = noRef(getPreferredMedia(mediaTypes)?.schema);
+    const content = noRef(value).content;
+    if (!content) continue;
 
+    const mediaType = getPreferredType(content) as string;
+    if (!mediaType) continue;
+
+    const responseSchema = noRef(content[mediaType].schema);
     if (!responseSchema) continue;
 
     responses[code] = {
+      mediaType,
+      sample:
+        content[mediaType].example ??
+        generateInput(method.method, responseSchema),
       schema: responseSchema,
     };
   }

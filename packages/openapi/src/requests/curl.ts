@@ -1,7 +1,7 @@
-import { type Endpoint } from '@/endpoint';
+import { type EndpointSample } from '@/create-sample';
 import { toSampleInput } from '@/utils/schema';
 
-export function getSampleRequest(endpoint: Endpoint): string {
+export function getSampleRequest(endpoint: EndpointSample): string {
   const s: string[] = [];
 
   s.push(`curl -X ${endpoint.method} "${endpoint.url}"`);
