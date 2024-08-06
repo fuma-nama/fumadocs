@@ -94,7 +94,7 @@ function Item(
       className="rounded-2xl border border-transparent p-6 shadow-lg transition-all hover:shadow-fd-primary/20"
       style={{
         backgroundImage:
-          'linear-gradient(to right bottom, hsl(var(--background)) 10%, hsl(var(--fd-accent)), hsl(var(--background)) 60%),' +
+          'linear-gradient(to right bottom, hsl(var(--background)) 10%, hsl(var(--accent)), hsl(var(--background)) 60%),' +
           'linear-gradient(to right bottom, rgb(40,40,40) 10%, rgb(180,180,180), rgb(30,30,30) 60%)',
         backgroundOrigin: 'border-box',
         backgroundClip: 'padding-box, border-box',

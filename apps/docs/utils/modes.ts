@@ -4,7 +4,6 @@ import {
   LibraryIcon,
   PaperclipIcon,
   type LucideIcon,
-  KeyIcon,
 } from 'lucide-react';
 import mdx from '../../../packages/mdx/package.json';
 import ui from '../../../packages/ui/package.json';
@@ -43,13 +42,5 @@ export const modes: Mode[] = [
     description: 'Built-in source provider',
     version: mdx.version,
     icon: PaperclipIcon,
-  },
-  {
-    param: 'unkey',
-    name: 'Unkey',
-    package: 'test',
-    description: 'Experimental OpenAPI',
-    version: '0',
-    icon: KeyIcon,
   },
 ];

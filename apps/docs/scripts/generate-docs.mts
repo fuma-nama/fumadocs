@@ -3,12 +3,6 @@ import * as Typescript from 'fumadocs-typescript';
 import * as path from 'node:path';
 import { rimrafSync } from 'rimraf';
 
-rimrafSync('./content/docs/ui/unkey', {
-  filter(v) {
-    return !v.endsWith('index.mdx') && !v.endsWith('meta.json');
-  },
-});
-
 rimrafSync('./content/docs/ui/museum', {
   filter(v) {
     return !v.endsWith('index.mdx') && !v.endsWith('meta.json');
@@ -17,15 +11,8 @@ rimrafSync('./content/docs/ui/museum', {
 
 void OpenAPI.generateFiles({
   input: ['./museum.yaml'],
-  output: './content/docs/ui',
+  output: './content/docs/ui/museum',
   per: 'operation',
-});
-
-void OpenAPI.generateFiles({
-  input: ['./unkey.json'],
-  output: './content/docs',
-  per: 'operation',
-  groupBy: 'tag',
 });
 
 const demoRegex = /^---type-table-demo---\r?\n(?<content>.+)\r?\n---end---$/gm;

@@ -61,10 +61,10 @@ export async function generateFiles({
 
   await Promise.all(
     resolvedInputs.map(async (path) => {
-      let filename = parse(path).name;
-      filename = nameFn?.('file', filename) ?? filename;
-
       if (per === 'file') {
+        let filename = parse(path).name;
+        if (nameFn) filename = nameFn('file', filename);
+
         const outPath = join(outputDir, `${filename}.mdx`);
 
         const result = await generate(path, options);
@@ -97,14 +97,12 @@ export async function generateFiles({
 
               outPath = join(
                 outputDir,
-                filename,
                 getFilename(result.method.tags[0]),
                 `${getFilename(id)}.mdx`,
               );
             } else if (groupBy === 'route') {
               outPath = join(
                 outputDir,
-                filename,
                 result.route.summary
                   ? getFilename(result.route.summary)
                   : getFilenameFromRoute(result.route.path),
@@ -124,7 +122,7 @@ export async function generateFiles({
                 console.log(`Generated Meta: ${metaFile}`);
               }
             } else {
-              outPath = join(outputDir, filename, `${getFilename(id)}.mdx`);
+              outPath = join(outputDir, `${getFilename(id)}.mdx`);
             }
 
             await write(outPath, result.content);
@@ -140,7 +138,7 @@ export async function generateFiles({
         let tagName = result.tag;
         tagName = nameFn?.('tag', tagName) ?? getFilename(tagName);
 
-        const outPath = join(outputDir, filename, `${tagName}.mdx`);
+        const outPath = join(outputDir, `${tagName}.mdx`);
         await write(outPath, result.content);
         console.log(`Generated: ${outPath}`);
       }
