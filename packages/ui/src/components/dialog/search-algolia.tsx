@@ -61,14 +61,16 @@ export default function AlgoliaSearchDialog({
       results={query.data ?? []}
       {...props}
       footer={
-        <>
-          {tags ? (
+        tags ? (
+          <>
             <TagsList tag={tag} onTagChange={setTag} items={tags}>
               {showAlgolia ? <AlgoliaTitle /> : null}
             </TagsList>
-          ) : null}
-          {props.footer}
-        </>
+            {props.footer}
+          </>
+        ) : (
+          props.footer
+        )
       }
     />
   );

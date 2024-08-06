@@ -136,7 +136,7 @@ function TOCItems({
           <div
             className={cn(
               'flex flex-col gap-1 text-fd-muted-foreground',
-              !isMenu && 'border-s-2',
+              !isMenu && 'border-s-2 border-fd-foreground/10',
             )}
           >
             {items.map((item) => (

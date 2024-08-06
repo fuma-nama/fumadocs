@@ -57,12 +57,14 @@ export default function DefaultSearchDialog({
       results={query.data ?? []}
       {...props}
       footer={
-        <>
-          {tags ? (
+        tags ? (
+          <>
             <TagsList tag={tag} onTagChange={setTag} items={tags} />
-          ) : null}
-          {props.footer}
-        </>
+            {props.footer}
+          </>
+        ) : (
+          props.footer
+        )
       }
     />
   );
