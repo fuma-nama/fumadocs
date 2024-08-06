@@ -28,7 +28,7 @@ const defaultPreset: Preset = {
     'popover-foreground': '0 0% 88%',
     card: '0 0% 6.0%',
     'card-foreground': '0 0% 98%',
-    border: '0 0% 18%',
+    border: '0 0% 15%',
     primary: '0 0% 98%',
     'primary-foreground': '0 0% 9%',
     secondary: '0 0% 12.9%',
@@ -259,6 +259,14 @@ const dusk: Preset = {
     card: '240 20% 5%',
     'secondary-foreground': '250 20% 90%',
     'accent-foreground': '340 5% 90%',
+  },
+  css: {
+    '#nd-sidebar': {
+      backgroundColor: 'hsl(250 20% 90%)',
+    },
+    '.dark #nd-sidebar': {
+      backgroundColor: 'hsl(240 20% 5%)',
+    },
   },
 };
 
