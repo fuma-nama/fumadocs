@@ -6,11 +6,6 @@ export function noRef<T>(v: T): NoReference<T> {
   return v as NoReference<T>;
 }
 
-export function getPreferredMedia<T>(body: Record<string, T>): T | undefined {
-  const type = getPreferredType(body);
-  if (type) return body[type];
-}
-
 export function getPreferredType<B extends Record<string, unknown>>(
   body: B,
 ): keyof B | undefined {

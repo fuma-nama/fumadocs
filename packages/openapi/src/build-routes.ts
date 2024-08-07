@@ -1,5 +1,6 @@
 import { type OpenAPIV3 as OpenAPI } from 'openapi-types';
 import { type MethodInformation, type RouteInformation } from '@/types';
+import { createMethod } from '@/schema/method';
 
 export const methodKeys = [
   'get',
@@ -26,7 +27,7 @@ export function buildRoutes(
       const operation = value[methodKey];
       if (!operation) continue;
 
-      const info = buildOperation(methodKey, operation);
+      const info = createMethod(methodKey, operation);
       const tags = operation.tags ?? [];
 
       for (const tag of [...tags, 'all']) {
@@ -49,15 +50,4 @@ export function buildRoutes(
   }
 
   return map;
-}
-
-function buildOperation(
-  method: string,
-  operation: OpenAPI.OperationObject,
-): MethodInformation {
-  return {
-    ...operation,
-    parameters: (operation.parameters ?? []) as OpenAPI.ParameterObject[],
-    method: method.toUpperCase(),
-  };
 }

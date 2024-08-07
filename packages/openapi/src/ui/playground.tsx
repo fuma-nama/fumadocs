@@ -1,3 +1,4 @@
+'use client';
 import {
   type ReactElement,
   type HTMLAttributes,
@@ -17,8 +18,8 @@ import type {
 } from 'react-hook-form';
 import { useApiContext } from '@/ui/contexts/api';
 import { Form } from '@/ui/components/form';
-import { createBodyFromValue, getStatusInfo } from '@/ui/fetcher';
-import { getDefaultValue, getDefaultValues } from '@/ui/shared';
+import { createBodyFromValue, getStatusInfo } from '@/ui/api/fetcher';
+import { getDefaultValue, getDefaultValues } from '@/ui/api/get-default-values';
 import { InputField, ObjectInput } from '@/ui/inputs';
 import type {
   APIPlaygroundProps,
@@ -178,7 +179,7 @@ export function APIPlayground({
         )}
       >
         <form
-          className="not-prose flex flex-col gap-4 rounded-lg border bg-fd-card p-4"
+          className="not-prose flex flex-col gap-5 rounded-lg border bg-fd-card p-4"
           onSubmit={onSubmit as React.FormEventHandler}
         >
           <div className="flex flex-row gap-2">
@@ -293,7 +294,7 @@ function RouteDisplay({ route }: { route: string }): ReactElement {
   );
 
   return (
-    <code className="flex-1 overflow-auto text-nowrap rounded-lg border bg-fd-secondary px-3 py-1.5 text-sm">
+    <code className="flex-1 overflow-auto text-nowrap rounded-lg border bg-fd-muted px-3 py-1.5 text-sm text-fd-muted-foreground">
       {pathname}
     </code>
   );

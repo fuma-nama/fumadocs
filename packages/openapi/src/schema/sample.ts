@@ -2,7 +2,6 @@ import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
 import { sample } from 'openapi-sampler';
 import type { MethodInformation } from '@/types';
 import { toSampleInput, noRef, getPreferredType } from '@/utils/schema';
-import { generateInput } from '@/utils/generate-input';
 
 /**
  * Sample info of endpoint
@@ -35,7 +34,7 @@ interface ParameterSample {
   sample: unknown;
 }
 
-export function createSample(
+export function generateSample(
   path: string,
   method: MethodInformation,
   baseUrl: string,
@@ -82,7 +81,7 @@ export function createSample(
     bodyOutput = {
       schema,
       mediaType: type as string,
-      sample: body[type].example ?? generateInput(method.method, schema),
+      sample: body[type].example ?? generateBody(method.method, schema),
     };
   }
 
@@ -100,7 +99,7 @@ export function createSample(
       mediaType,
       sample:
         content[mediaType].example ??
-        generateInput(method.method, responseSchema),
+        generateBody(method.method, responseSchema),
       schema: responseSchema,
     };
   }
@@ -109,7 +108,7 @@ export function createSample(
   const queryParams = new URLSearchParams();
 
   for (const param of params) {
-    const value = generateInput(method.method, param.schema);
+    const value = generateBody(method.method, param.schema);
     if (param.in === 'query')
       queryParams.append(param.name, toSampleInput(value));
 
@@ -130,4 +129,11 @@ export function createSample(
     method: method.method,
     parameters: params,
   };
+}
+
+function generateBody(method: string, schema: OpenAPI.SchemaObject): unknown {
+  return sample(schema as object, {
+    skipReadOnly: method !== 'GET',
+    skipWriteOnly: method === 'GET',
+  });
 }

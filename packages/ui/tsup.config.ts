@@ -1,6 +1,5 @@
-import fs from 'node:fs/promises';
-import path from 'node:path';
 import { defineConfig } from 'tsup';
+import { injectImport } from './build-config';
 
 const exportedComponents = [
   'type-table',
@@ -28,45 +27,15 @@ const injectImports = [
   './src/mdx.tsx',
   './src/layout.tsx',
   './src/home-layout.tsx',
+  './src/components/api.tsx',
 ];
-
-function getOutPath(src: string): string {
-  const replacedPath = src
-    .split('/')
-    .map((v) => (v === 'src' ? 'dist' : v))
-    .join('/');
-
-  const info = path.parse(replacedPath);
-
-  return path.join('./', info.dir, `${info.name}.js`).replace(path.sep, '/');
-}
-
-async function injectImport(src: string): Promise<void> {
-  const srcOut = getOutPath(src);
-  const sourceContent = (await fs.readFile(src)).toString();
-  let outContent = (await fs.readFile(srcOut)).toString();
-
-  const regex =
-    /^declare const {(?<names>(?:.|\n)*?)}: typeof import\((?<from>.+)\)/gm;
-  let result;
-
-  while ((result = regex.exec(sourceContent)) && result.groups) {
-    const { from, names } = result.groups;
-    const importName = from.slice(1, from.length - 1);
-    const replaceTo = `import {${names}} from ${JSON.stringify(importName)}`;
-
-    outContent = `${replaceTo}\n${outContent}`;
-  }
-
-  await fs.writeFile(srcOut, outContent);
-}
 
 export default defineConfig({
   entry: [
     `./src/components/{${exportedComponents.join(',')}}.tsx`,
     './src/{i18n,home-layout,layout,page,provider,mdx,tailwind-plugin}.{ts,tsx}',
     './src/twoslash/popup.tsx',
-    './src/*.client.tsx',
+    './src/**/*.client.tsx',
   ],
   external: ['server-only', '../../dist/image-zoom.css', 'tailwindcss'],
   async onSuccess() {

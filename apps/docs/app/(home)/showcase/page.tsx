@@ -73,7 +73,7 @@ export default function Showcase(): React.ReactElement {
     },
     {
       name: "RUNFUNRUN's Blog",
-      url: 'https://www.runfunrun.tech',
+      url: 'https://runfunrun.dev',
     },
     {
       image: Briefkasten,

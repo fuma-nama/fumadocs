@@ -3,13 +3,7 @@ import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
 import { buildRoutes } from '@/build-routes';
 import { generateDocument } from '@/utils/generate-document';
 import { idToTitle } from '@/utils/id-to-title';
-import type {
-  MethodInformation,
-  RenderContext,
-  RouteInformation,
-} from './types';
-import { defaultRenderer, type Renderer } from './render/renderer';
-import { renderOperation } from './render/operation';
+import type { MethodInformation, RouteInformation } from './types';
 
 export type DocumentContext =
   | {
@@ -35,15 +29,9 @@ export type DocumentContext =
       routes: RouteInformation[];
     };
 
-export interface GenerateOptions
-  extends Pick<
-    RenderContext,
-    'generateCodeSamples' | 'generateTypeScriptSchema'
-  > {
+export interface GenerateOptions {
   /**
-   * The imports of your MDX components.
-   *
-   * If not specified, import required components from `fumadocs-ui/components/api`.
+   * Additional imports of your MDX components.
    */
   imports?: {
     names: string[];
@@ -60,8 +48,6 @@ export interface GenerateOptions
     description: string | undefined,
     context: DocumentContext,
   ) => Record<string, unknown>;
-
-  renderer?: Partial<Renderer>;
 }
 
 export interface GenerateTagOutput {
@@ -82,17 +68,19 @@ export async function generate(
 ): Promise<string> {
   const document = await Parser.dereference<OpenAPI.Document>(pathOrDocument);
   const routes = buildRoutes(document).get('all') ?? [];
-  const ctx = getContext(document, options);
-  const child: string[] = [];
+  const operations: { path: string; method: string }[] = [];
 
   for (const route of routes) {
     for (const method of route.methods) {
-      child.push(await renderOperation(route.path, method, ctx));
+      operations.push({
+        method: method.method.toLowerCase(),
+        path: route.path,
+      });
     }
   }
 
   return generateDocument(
-    ctx.renderer.Root({ baseUrl: ctx.baseUrl }, child),
+    `<APIPage operations={${JSON.stringify(operations)}} />`,
     options,
     {
       ...document.info,
@@ -110,38 +98,38 @@ export async function generateOperations(
 ): Promise<GenerateOperationOutput[]> {
   const document = await Parser.dereference<OpenAPI.Document>(pathOrDocument);
   const routes = buildRoutes(document).get('all') ?? [];
-  const ctx = getContext(document, options);
 
-  return await Promise.all(
-    routes.flatMap<Promise<GenerateOperationOutput>>((route) => {
-      return route.methods.map(async (method) => {
-        if (!method.operationId)
-          throw new Error('Operation ID is required for generating docs.');
+  return routes.flatMap<GenerateOperationOutput>((route) => {
+    return route.methods.map((method) => {
+      if (!method.operationId)
+        throw new Error('Operation ID is required for generating docs.');
 
-        const content = generateDocument(
-          ctx.renderer.Root({ baseUrl: ctx.baseUrl }, [
-            await renderOperation(route.path, method, ctx, false),
-          ]),
-          options,
+      const content = generateDocument(
+        `<APIPage operations={${JSON.stringify([
           {
-            title: method.summary ?? idToTitle(method.operationId),
-            description: method.description,
-            context: {
-              type: 'operation',
-              endpoint: method,
-              route,
-            },
+            path: route.path,
+            method: method.method.toLowerCase(),
           },
-        );
+        ])}} hasHead={false} />`,
+        options,
+        {
+          title: method.summary ?? idToTitle(method.operationId),
+          description: method.description,
+          context: {
+            type: 'operation',
+            endpoint: method,
+            route,
+          },
+        },
+      );
 
-        return {
-          content,
-          route,
-          method,
-        } satisfies GenerateOperationOutput;
-      });
-    }),
-  );
+      return {
+        content,
+        route,
+        method,
+      } satisfies GenerateOperationOutput;
+    });
+  });
 }
 
 export async function generateTags(
@@ -150,53 +138,37 @@ export async function generateTags(
 ): Promise<GenerateTagOutput[]> {
   const document = await Parser.dereference<OpenAPI.Document>(pathOrDocument);
   const tags = Array.from(buildRoutes(document).entries());
-  const ctx = getContext(document, options);
 
-  return await Promise.all(
-    tags
-      .filter(([tag]) => tag !== 'all')
-      .map(async ([tag, routes]) => {
-        const info = document.tags?.find((t) => t.name === tag);
-        const child: string[] = [];
+  return tags
+    .filter(([tag]) => tag !== 'all')
+    .map(([tag, routes]) => {
+      const info = document.tags?.find((t) => t.name === tag);
+      const operations: { path: string; method: string }[] = [];
 
-        for (const route of routes) {
-          for (const method of route.methods) {
-            child.push(await renderOperation(route.path, method, ctx));
-          }
+      for (const route of routes) {
+        for (const method of route.methods) {
+          operations.push({
+            method: method.method.toLowerCase(),
+            path: route.path,
+          });
         }
+      }
 
-        return {
-          tag,
-          content: generateDocument(
-            ctx.renderer.Root({ baseUrl: ctx.baseUrl }, child),
-            options,
-            {
-              title: idToTitle(tag),
-              description: info?.description,
-              context: {
-                type: 'tag',
-                tag: info,
-                routes,
-              },
+      return {
+        tag,
+        content: generateDocument(
+          `<APIPage operations={${JSON.stringify(operations)}} />`,
+          options,
+          {
+            title: idToTitle(tag),
+            description: info?.description,
+            context: {
+              type: 'tag',
+              tag: info,
+              routes,
             },
-          ),
-        } satisfies GenerateTagOutput;
-      }),
-  );
-}
-
-function getContext(
-  document: OpenAPI.Document,
-  options: GenerateOptions,
-): RenderContext {
-  return {
-    document,
-    renderer: {
-      ...defaultRenderer,
-      ...options.renderer,
-    },
-    generateTypeScriptSchema: options.generateTypeScriptSchema,
-    generateCodeSamples: options.generateCodeSamples,
-    baseUrl: document.servers?.[0].url ?? 'https://example.com',
-  };
+          },
+        ),
+      } satisfies GenerateTagOutput;
+    });
 }

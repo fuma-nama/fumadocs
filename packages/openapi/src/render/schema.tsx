@@ -1,7 +1,8 @@
 import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
+import type { ReactNode } from 'react';
 import { noRef } from '@/utils/schema';
 import type { RenderContext } from '@/types';
-import { p, span } from './element';
+import { Markdown } from './element';
 
 const keys: {
   [T in keyof OpenAPI.SchemaObject]: string;
@@ -43,30 +44,29 @@ function isObject(schema: OpenAPI.SchemaObject): boolean {
   );
 }
 
-export function schemaElement(
-  name: string,
-  schema: OpenAPI.SchemaObject,
-  ctx: Omit<Context, 'stack'>,
-): string {
-  return render(name, schema, {
-    ...ctx,
-    stack: [],
-  });
-}
-
-function render(
-  name: string,
-  schema: OpenAPI.SchemaObject,
-  ctx: Context,
-): string {
-  if (schema.readOnly && !ctx.readOnly) return '';
-  if (schema.writeOnly && !ctx.writeOnly) return '';
+export function Schema({
+  name,
+  schema,
+  ctx,
+}: {
+  name: string;
+  schema: OpenAPI.SchemaObject;
+  ctx: Context;
+}): ReactNode {
+  if (
+    (schema.readOnly === true && !ctx.readOnly) ||
+    (schema.writeOnly === true && !ctx.writeOnly)
+  )
+    return null;
   const { renderer } = ctx.render;
-
-  const child: string[] = [];
+  const child: ReactNode[] = [];
 
   function field(key: string, value: string): void {
-    child.push(span(`${key}: \`${value}\``));
+    child.push(
+      <span key={key}>
+        {key}: <code>{value}</code>
+      </span>,
+    );
   }
 
   // object type
@@ -75,38 +75,51 @@ function render(
 
     if (additionalProperties === true) {
       child.push(
-        renderer.Property(
-          {
-            name: '[key: string]',
-            type: 'any',
-          },
-          [],
-        ),
+        <renderer.Property
+          key="additionalProperties"
+          name="[key: string]"
+          type="any"
+        />,
       );
     } else if (additionalProperties) {
       child.push(
-        render('[key: string]', noRef(additionalProperties), {
-          ...ctx,
-          required: false,
-          parseObject: false,
-        }),
+        <Schema
+          key="additionalProperties"
+          name="[key: string]"
+          schema={noRef(additionalProperties)}
+          ctx={{
+            ...ctx,
+            required: false,
+            parseObject: false,
+          }}
+        />,
       );
     }
 
-    Object.entries(properties ?? {}).forEach(([key, value]) => {
-      child.push(
-        render(key, noRef(value), {
-          ...ctx,
-          required: schema.required?.includes(key) ?? false,
-          parseObject: false,
-        }),
-      );
-    });
+    if (properties) {
+      const rendered = Object.entries(properties).map(([key, value]) => {
+        return (
+          <Schema
+            key={key}
+            name={key}
+            schema={noRef(value)}
+            ctx={{
+              ...ctx,
+              required: schema.required?.includes(key) ?? false,
+              parseObject: false,
+            }}
+          />
+        );
+      });
 
-    return child.join('\n\n');
+      child.push(...rendered);
+    }
+
+    return <>{child}</>;
   }
 
-  child.push(p(schema.description));
+  if (schema.description)
+    child.push(<Markdown key="description" text={schema.description} />);
   for (const [key, value] of Object.entries(keys)) {
     if (key in schema) {
       field(value, JSON.stringify(schema[key as keyof OpenAPI.SchemaObject]));
@@ -123,23 +136,31 @@ function render(
 
   if (isObject(schema) && !ctx.parseObject) {
     child.push(
-      renderer.ObjectCollapsible({ name: 'Attributes' }, [
-        render(name, schema, {
-          ...ctx,
-          parseObject: true,
-          required: false,
-        }),
-      ]),
+      <renderer.ObjectCollapsible key="attributes" name="Attributes">
+        <Schema
+          name={name}
+          schema={schema}
+          ctx={{
+            ...ctx,
+            parseObject: true,
+            required: false,
+          }}
+        />
+      </renderer.ObjectCollapsible>,
     );
   } else if (schema.allOf) {
     child.push(
-      renderer.ObjectCollapsible({ name }, [
-        render(name, combineSchema(schema.allOf.map(noRef)), {
-          ...ctx,
-          parseObject: true,
-          required: false,
-        }),
-      ]),
+      <renderer.ObjectCollapsible key="attributes" name={name}>
+        <Schema
+          name={name}
+          schema={combineSchema(schema.allOf.map(noRef))}
+          ctx={{
+            ...ctx,
+            parseObject: true,
+            required: false,
+          }}
+        />
+      </renderer.ObjectCollapsible>,
     );
   } else {
     const mentionedObjectTypes = [
@@ -151,31 +172,38 @@ function render(
       .filter((s) => isComplexType(s) && !ctx.stack.includes(s));
 
     ctx.stack.push(schema);
-    child.push(
-      ...mentionedObjectTypes.map((s, idx) =>
-        renderer.ObjectCollapsible(
-          { name: s.title ?? `Object ${(idx + 1).toString()}` },
-          [
-            render('element', noRef(s), {
+
+    const renderedMentionedTypes = mentionedObjectTypes.map((s, idx) => {
+      return (
+        <renderer.ObjectCollapsible
+          key={`mentioned:${idx.toString()}`}
+          name={s.title ?? `Object ${(idx + 1).toString()}`}
+        >
+          <Schema
+            name="element"
+            schema={noRef(s)}
+            ctx={{
               ...ctx,
               parseObject: true,
               required: false,
-            }),
-          ],
-        ),
-      ),
-    );
+            }}
+          />
+        </renderer.ObjectCollapsible>
+      );
+    });
+
+    child.push(...renderedMentionedTypes);
     ctx.stack.pop();
   }
 
-  return renderer.Property(
-    {
-      name,
-      type: getSchemaType(schema, ctx),
-      required: ctx.required,
-      deprecated: schema.deprecated,
-    },
-    child,
+  return (
+    <renderer.Property
+      name={name}
+      type={getSchemaType(schema, ctx)}
+      deprecated={schema.deprecated}
+    >
+      {child}
+    </renderer.Property>
   );
 }
 

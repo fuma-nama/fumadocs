@@ -1,5 +1,5 @@
 import { compile } from 'json-schema-to-typescript';
-import type { EndpointSample } from '@/create-sample';
+import type { EndpointSample } from '@/schema/sample';
 
 export async function getTypescriptSchema(
   endpoint: EndpointSample,

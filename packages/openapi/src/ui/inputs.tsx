@@ -24,8 +24,9 @@ import {
   FormLabel,
   labelVariants,
 } from '@/ui/components/form';
-import { getDefaultValue, resolve } from '@/ui/shared';
+import { resolve } from '@/ui/api/resolve';
 import { Input } from '@/ui/components/input';
+import { getDefaultValue } from '@/ui/api/get-default-values';
 import { useSchemaContext } from './contexts/schema';
 
 interface RenderOptions {

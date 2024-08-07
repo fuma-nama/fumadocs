@@ -1,6 +1,7 @@
 import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
+import type { default as Slugger } from 'github-slugger';
 import { type Renderer } from '@/render/renderer';
-import type { EndpointSample } from '@/create-sample';
+import type { EndpointSample } from '@/schema/sample';
 import type { CodeSample } from '@/render/operation';
 
 export interface RouteInformation {
@@ -21,6 +22,7 @@ export interface RenderContext {
   renderer: Renderer;
   document: OpenAPI.Document;
   baseUrl: string;
+  slugger: Slugger;
 
   /**
    * Generate TypeScript definitions from response schema.

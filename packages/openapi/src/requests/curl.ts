@@ -1,4 +1,4 @@
-import { type EndpointSample } from '@/create-sample';
+import { type EndpointSample } from '@/schema/sample';
 import { toSampleInput } from '@/utils/schema';
 
 export function getSampleRequest(endpoint: EndpointSample): string {

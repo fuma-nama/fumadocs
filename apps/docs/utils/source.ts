@@ -3,7 +3,7 @@ import { z } from 'zod';
 import type { InferMetaType, InferPageType } from 'fumadocs-core/source';
 import { loader } from 'fumadocs-core/source';
 import { icons } from 'lucide-react';
-import { attachFile } from 'fumadocs-openapi/source';
+import { attachFile, createOpenAPI } from 'fumadocs-openapi/server';
 import { map } from '@/.map';
 import { create } from '@/components/ui/icon';
 
@@ -44,6 +44,10 @@ export const blog = loader({
       }),
     },
   }),
+});
+
+export const openapi = createOpenAPI({
+  documentOrPath: './museum.yaml',
 });
 
 export type Page = InferPageType<typeof utils>;

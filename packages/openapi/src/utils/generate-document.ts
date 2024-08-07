@@ -1,5 +1,4 @@
 import { dump } from 'js-yaml';
-import { defaultRenderer } from '@/render/renderer';
 import type { DocumentContext, GenerateOptions } from '@/generate';
 
 export function generateDocument(
@@ -11,6 +10,7 @@ export function generateDocument(
     context: DocumentContext;
   },
 ): string {
+  const out: string[] = [];
   const banner = dump({
     title: frontmatter.title,
     description: frontmatter.description,
@@ -27,20 +27,20 @@ export function generateDocument(
       frontmatter.context,
     ),
   }).trim();
+  if (banner.length > 0) out.push(`---\n${banner}\n---`);
 
-  const finalImports = (
-    options.imports ?? [
-      {
-        names: Object.keys(defaultRenderer),
-        from: 'fumadocs-openapi/ui',
-      },
-    ]
-  )
-    .map(
+  const imports = options.imports
+    ?.map(
       (item) =>
         `import { ${item.names.join(', ')} } from ${JSON.stringify(item.from)};`,
     )
     .join('\n');
 
-  return `---\n${banner}\n---\n\n${finalImports}\n\n${content}`;
+  if (imports) {
+    out.push(imports);
+  }
+
+  out.push(content);
+
+  return out.join('\n\n');
 }

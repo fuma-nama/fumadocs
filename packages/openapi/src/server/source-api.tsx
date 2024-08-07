@@ -1,8 +1,6 @@
-import React from 'react';
 import type { BuildPageTreeOptions } from 'fumadocs-core/source';
-import { type ReactNode } from 'react';
 import { cva } from 'class-variance-authority';
-import { getBadgeColor } from '@/ui/shared';
+import { getBadgeColor } from '@/ui/components/variants';
 
 /**
  * Source API Integration
@@ -14,7 +12,18 @@ export const attachFile: BuildPageTreeOptions['attachFile'] = (node, file) => {
   const data = file.data.data as object;
 
   if ('method' in data && typeof data.method === 'string') {
-    node.name = [node.name, ' ', ApiIndicator({ method: data.method })];
+    const color = getBadgeColor(data.method);
+
+    node.name = [
+      node.name,
+      ' ',
+      // eslint-disable-next-line react/jsx-key -- static
+      <span
+        className={badgeVariants({ className: 'ms-auto text-nowrap', color })}
+      >
+        {data.method}
+      </span>,
+    ];
   }
 
   return node;
@@ -31,15 +40,3 @@ const badgeVariants = cva('rounded-full border px-1.5 text-xs font-medium', {
     },
   },
 });
-
-function ApiIndicator({ method }: { method: string }): ReactNode {
-  const color = getBadgeColor(method);
-
-  return React.createElement(
-    'span',
-    {
-      className: badgeVariants({ className: 'ms-auto text-nowrap', color }),
-    },
-    method,
-  );
-}
