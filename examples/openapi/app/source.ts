@@ -24,4 +24,5 @@ export const { getPage, getPages, pageTree } = loader({
 
 export const openapi = createOpenAPI({
   documentOrPath: path.resolve('./unkey.json'),
+  generateTypeScriptSchema: false,
 });

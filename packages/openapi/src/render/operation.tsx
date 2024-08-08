@@ -83,13 +83,11 @@ export function Operation({
           name="body"
           schema={noRef(body.content[type].schema ?? {})}
           ctx={{
-            parseObject: true,
             readOnly: method.method === 'GET',
             writeOnly: method.method !== 'GET',
             required: body.required ?? false,
             render: ctx,
             allowFile: type === 'multipart/form-data',
-            stack: [],
           }}
         />
       </Fragment>,
@@ -130,8 +128,6 @@ export function Operation({
           writeOnly: method.method !== 'GET',
           required: param.required ?? false,
           render: ctx,
-          allowFile: false,
-          stack: [],
         }}
       />,
     );

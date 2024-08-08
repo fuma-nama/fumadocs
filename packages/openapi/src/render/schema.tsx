@@ -23,15 +23,21 @@ interface Context {
 
   required: boolean;
 
-  /** Render the full object */
-  parseObject: boolean;
+  /**
+   * Render the full object
+   *
+   * @defaultValue true
+   * */
+  parseObject?: boolean;
 
   /**
    * Parse binary format string to be files
+   *
+   * @defaultValue false
    */
-  allowFile: boolean;
+  allowFile?: boolean;
 
-  stack: OpenAPI.SchemaObject[];
+  stack?: OpenAPI.SchemaObject[];
 
   render: RenderContext;
 }
@@ -58,6 +64,10 @@ export function Schema({
     (schema.writeOnly === true && !ctx.writeOnly)
   )
     return null;
+  const parseObject = ctx.parseObject ?? true;
+
+  const stack = ctx.stack ?? [];
+
   const { renderer } = ctx.render;
   const child: ReactNode[] = [];
 
@@ -70,7 +80,7 @@ export function Schema({
   }
 
   // object type
-  if (isObject(schema) && ctx.parseObject) {
+  if (isObject(schema) && parseObject) {
     const { additionalProperties, properties } = schema;
 
     if (additionalProperties === true) {
@@ -134,7 +144,7 @@ export function Schema({
     );
   }
 
-  if (isObject(schema) && !ctx.parseObject) {
+  if (isObject(schema) && !parseObject) {
     child.push(
       <renderer.ObjectCollapsible key="attributes" name="Attributes">
         <Schema
@@ -169,9 +179,7 @@ export function Schema({
       ...(schema.type === 'array' ? [schema.items] : []),
     ]
       .map(noRef)
-      .filter((s) => isComplexType(s) && !ctx.stack.includes(s));
-
-    ctx.stack.push(schema);
+      .filter((s) => isComplexType(s) && !stack.includes(s));
 
     const renderedMentionedTypes = mentionedObjectTypes.map((s, idx) => {
       return (
@@ -184,6 +192,7 @@ export function Schema({
             schema={noRef(s)}
             ctx={{
               ...ctx,
+              stack: [schema, ...stack],
               parseObject: true,
               required: false,
             }}
@@ -193,7 +202,6 @@ export function Schema({
     });
 
     child.push(...renderedMentionedTypes);
-    ctx.stack.pop();
   }
 
   return (
@@ -283,7 +291,7 @@ function getSchemaType(schema: OpenAPI.SchemaObject, ctx: Context): string {
   }
 
   if (schema.type === 'string' && schema.format === 'binary' && ctx.allowFile)
-    return 'File';
+    return 'file';
   if (schema.type) return schema.type;
 
   if (isObject(schema)) return 'object';

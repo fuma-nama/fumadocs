@@ -5,12 +5,12 @@ import type { APIPlaygroundProps } from '@/render/playground';
 import { CodeBlock } from '@/render/codeblock';
 import {
   API,
-  APIInfo,
-  APIPlayground,
-  APIExample,
   Root,
+  APIInfo,
+  APIExample,
   Property,
   ObjectCollapsible,
+  APIPlayground,
 } from '@/ui';
 
 export interface ResponsesProps {
