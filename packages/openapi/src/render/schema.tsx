@@ -28,10 +28,12 @@ interface Context {
 
   /**
    * Parse binary format string to be files
+   *
+   * @defaultValue false
    */
-  allowFile: boolean;
+  allowFile?: boolean;
 
-  stack: OpenAPI.SchemaObject[];
+  stack?: OpenAPI.SchemaObject[];
 
   render: RenderContext;
 }
@@ -58,6 +60,9 @@ export function Schema({
     (schema.writeOnly === true && !ctx.writeOnly)
   )
     return null;
+  ctx.allowFile ??= true;
+  const stack = ctx.stack ?? [];
+
   const { renderer } = ctx.render;
   const child: ReactNode[] = [];
 
@@ -169,9 +174,7 @@ export function Schema({
       ...(schema.type === 'array' ? [schema.items] : []),
     ]
       .map(noRef)
-      .filter((s) => isComplexType(s) && !ctx.stack.includes(s));
-
-    ctx.stack.push(schema);
+      .filter((s) => isComplexType(s) && !stack.includes(s));
 
     const renderedMentionedTypes = mentionedObjectTypes.map((s, idx) => {
       return (
@@ -184,6 +187,7 @@ export function Schema({
             schema={noRef(s)}
             ctx={{
               ...ctx,
+              stack: [schema, ...stack],
               parseObject: true,
               required: false,
             }}
@@ -193,7 +197,6 @@ export function Schema({
     });
 
     child.push(...renderedMentionedTypes);
-    ctx.stack.pop();
   }
 
   return (

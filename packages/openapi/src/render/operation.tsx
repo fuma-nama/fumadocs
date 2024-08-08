@@ -89,7 +89,6 @@ export function Operation({
             required: body.required ?? false,
             render: ctx,
             allowFile: type === 'multipart/form-data',
-            stack: [],
           }}
         />
       </Fragment>,
@@ -130,8 +129,6 @@ export function Operation({
           writeOnly: method.method !== 'GET',
           required: param.required ?? false,
           render: ctx,
-          allowFile: false,
-          stack: [],
         }}
       />,
     );
