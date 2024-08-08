@@ -1,5 +1,53 @@
 # @fuma-docs/openapi
 
+## 5.0.0
+
+### Major Changes
+
+- 971817c: **Migrate to React Server Component**
+
+  The API reference page is now a server component.
+  The MDX generator will only generate a small MDX file, and the rest will be handled by our `APIPage` component.
+
+  ```mdx
+  ---
+  title: Delete Api
+  full: true
+  method: POST
+  route: /v1/apis.deleteApi
+  ---
+
+  <APIPage
+    operations={[{ path: '/v1/apis.deleteApi', method: 'post' }]}
+    hasHead={false}
+  />
+  ```
+
+  - Markdown/MDX content is still supported, but will be processed in the server component (during runtime) instead.
+  - Your Remark/Rehype plugins (e.g. Rehype Code) configured in Fumadocs MDX or other source providers, will **not** be shared. Fumadocs OpenAPI uses a separate MDX processor instance.
+  - `APIPage` component will fetch the OpenAPI Schema when being rendered. **On Vercel**, if it relies on the file system, ensure the page **will not** be re-rendered after build.
+
+  Please refer to documentation for the new usage.
+
+### Minor Changes
+
+- 480d211: Change output path logic
+- 4bf9851: Support to group pages by tags
+- 3874ab5: Support Go Sample Request
+- 3874ab5: Replace Response Table of Tabs
+
+### Patch Changes
+
+- 4bf9851: Improve Curl example generator
+- Updated dependencies [f280191]
+- Updated dependencies [61ef42c]
+- Updated dependencies [deae4dd]
+- Updated dependencies [c8910c4]
+- Updated dependencies [c8910c4]
+- Updated dependencies [6c42960]
+  - fumadocs-core@13.1.0
+  - fumadocs-ui@13.1.0
+
 ## 4.4.2
 
 ### Patch Changes
