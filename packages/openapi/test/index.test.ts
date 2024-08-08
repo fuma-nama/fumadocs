@@ -2,7 +2,7 @@ import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { idToTitle } from '@/utils/id-to-title';
-import { generate, generateFiles, generateTags } from '../src';
+import { generateAll, generateFiles, generateTags } from '../src';
 
 describe('Utilities', () => {
   test('Operation ID to Title', () => {
@@ -18,7 +18,7 @@ describe('Generate documents', () => {
   });
 
   test('Pet Store', async () => {
-    const result = await generate(
+    const result = await generateAll(
       fileURLToPath(new URL('./fixtures/petstore.yaml', import.meta.url)),
     );
 

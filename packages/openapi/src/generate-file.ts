@@ -2,7 +2,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join, parse } from 'node:path';
 import fg from 'fast-glob';
 import { generateOperations, type GenerateOptions } from './generate';
-import { generate, generateTags } from './generate';
+import { generateAll, generateTags } from './generate';
 
 export interface Config extends GenerateOptions {
   /**
@@ -67,7 +67,7 @@ export async function generateFiles({
 
         const outPath = join(outputDir, `${filename}.mdx`);
 
-        const result = await generate(path, options);
+        const result = await generateAll(path, options);
         await write(outPath, result);
         console.log(`Generated: ${outPath}`);
         return;

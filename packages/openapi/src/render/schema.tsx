@@ -2,7 +2,7 @@ import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
 import type { ReactNode } from 'react';
 import { noRef } from '@/utils/schema';
 import type { RenderContext } from '@/types';
-import { Markdown } from './element';
+import { Markdown } from './markdown';
 
 const keys: {
   [T in keyof OpenAPI.SchemaObject]: string;
@@ -115,7 +115,7 @@ export function Schema({
       child.push(...rendered);
     }
 
-    return <>{child}</>;
+    return child;
   }
 
   if (schema.description)

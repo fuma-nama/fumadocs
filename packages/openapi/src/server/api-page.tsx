@@ -9,7 +9,7 @@ export interface ApiPageProps {
    * An array of operation
    */
   operations: { path: string; method: OpenAPI.HttpMethods }[];
-  hasHead?: boolean;
+  hasHead: boolean;
   ctx: RenderContext;
 }
 

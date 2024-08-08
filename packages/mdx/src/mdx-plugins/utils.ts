@@ -20,7 +20,7 @@ export function getMdastExport(name: string, value: unknown): object {
             source: null,
             declaration: {
               type: 'VariableDeclaration',
-              kind: 'const',
+              kind: 'let',
               declarations: [
                 {
                   type: 'VariableDeclarator',

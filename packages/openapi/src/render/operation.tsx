@@ -10,7 +10,8 @@ import { getTypescriptSchema } from '@/utils/get-typescript-schema';
 import { getScheme } from '@/utils/get-security';
 import { Playground } from '@/render/playground';
 import { idToTitle } from '@/utils/id-to-title';
-import { Markdown } from './element';
+import { type ResponseTypeProps } from '@/render/renderer';
+import { Markdown } from './markdown';
 import { heading } from './heading';
 import { Schema } from './schema';
 
@@ -24,7 +25,7 @@ export interface CodeSample {
   source: string;
 }
 
-export async function Operation({
+export function Operation({
   path,
   method,
   ctx,
@@ -34,12 +35,18 @@ export async function Operation({
   method: MethodInformation;
   ctx: RenderContext;
   hasHead?: boolean;
-}): Promise<ReactElement> {
+}): ReactElement {
   let level = 2;
   const body = noRef(method.requestBody);
   const security = method.security ?? ctx.document.security;
   const info: ReactNode[] = [];
-  const example: ReactNode[] = [];
+
+  function addToSearchIndex(content: string): void {
+    ctx.structuredData.contents.push({
+      heading: ctx.structuredData.headings.at(-1)?.id,
+      content,
+    });
+  }
 
   if (hasHead) {
     info.push(
@@ -52,8 +59,10 @@ export async function Operation({
     );
     level++;
 
-    if (method.description)
+    if (method.description) {
+      addToSearchIndex(method.description);
       info.push(<Markdown key="description" text={method.description} />);
+    }
   }
 
   info.push(
@@ -70,13 +79,15 @@ export async function Operation({
     if (!type)
       throw new Error(`No supported media type for body content: ${path}`);
 
+    if (body.description) addToSearchIndex(body.description);
+
     info.push(
       <Fragment key="body">
-        {heading(
-          level,
-          `Request Body ${!body.required ? '(Optional)' : ''}`,
-          ctx,
-        )}
+        {heading(level, 'Request Body', ctx)}
+        <div className="mb-8 flex flex-row items-center justify-between gap-2">
+          <code>{type}</code>
+          <span>{body.required ? 'Required' : 'Optional'}</span>
+        </div>
         {body.description ? <Markdown text={body.description} /> : null}
         <Schema
           name="body"
@@ -141,6 +152,28 @@ export async function Operation({
     info.push(heading(level, group, ctx), ...parameters);
   }
 
+  return (
+    <ctx.renderer.API>
+      <ctx.renderer.APIInfo method={method.method} route={path}>
+        {info}
+      </ctx.renderer.APIInfo>
+      <APIExample method={method} endpoint={endpoint} ctx={ctx} />
+    </ctx.renderer.API>
+  );
+}
+
+async function APIExample({
+  method,
+  endpoint,
+  ctx,
+}: {
+  method: MethodInformation;
+  endpoint: EndpointSample;
+  ctx: RenderContext;
+}): Promise<ReactElement> {
+  const renderer = ctx.renderer;
+  const children: ReactNode[] = [];
+
   const samples: CodeSample[] = dedupe([
     {
       label: 'cURL',
@@ -161,20 +194,20 @@ export async function Operation({
     ...((method as CustomProperty)['x-codeSamples'] ?? []),
   ]);
 
-  example.push(
-    <ctx.renderer.Requests key="requests" items={samples.map((s) => s.label)}>
+  children.push(
+    <renderer.Requests key="requests" items={samples.map((s) => s.label)}>
       {samples.map((s) => (
-        <ctx.renderer.Request
+        <renderer.Request
           key={s.label}
           name={s.label}
           code={s.source}
           language={s.lang}
         />
       ))}
-    </ctx.renderer.Requests>,
+    </renderer.Requests>,
   );
 
-  example.push(
+  children.push(
     <ResponseTabs
       key="responses"
       operation={method}
@@ -183,14 +216,7 @@ export async function Operation({
     />,
   );
 
-  return (
-    <ctx.renderer.API>
-      <ctx.renderer.APIInfo method={method.method} route={path}>
-        {info}
-      </ctx.renderer.APIInfo>
-      <ctx.renderer.APIExample>{example}</ctx.renderer.APIExample>
-    </ctx.renderer.API>
-  );
+  return <renderer.APIExample>{children}</renderer.APIExample>;
 }
 
 /**
@@ -234,6 +260,7 @@ function AuthSection({
                 bearer: 'Bearer <token>',
               }[schema.scheme] ?? '<token>'
             }
+            required
           >
             {schema.description ? <Markdown text={schema.description} /> : null}
             <p>
@@ -306,17 +333,18 @@ async function ResponseTabs({
   const children: ReactNode[] = [];
 
   for (const code of Object.keys(operation.responses)) {
-    const tabs: ReactNode[] = [];
+    const types: ResponseTypeProps[] = [];
+    let description = noRef(operation.responses[code]).description;
+
+    if (!description && code in endpoint.responses)
+      description = endpoint.responses[code].schema.description ?? '';
 
     if (code in endpoint.responses) {
-      tabs.push(
-        <renderer.ResponseType
-          key="json"
-          lang="json"
-          label="Response"
-          code={JSON.stringify(endpoint.responses[code].sample, null, 2)}
-        />,
-      );
+      types.push({
+        lang: 'json',
+        label: 'Response',
+        code: JSON.stringify(endpoint.responses[code].sample, null, 2),
+      });
     }
 
     let ts: string | undefined;
@@ -326,27 +354,24 @@ async function ResponseTabs({
       ts = await getTypescriptSchema(endpoint, code);
     }
 
-    if (ts)
-      tabs.push(
-        <renderer.ResponseType
-          key="ts"
-          lang="ts"
-          label="TypeScript"
-          code={ts}
-        />,
-      );
-
-    let description = noRef(operation.responses[code]).description;
-
-    if (!description && code in endpoint.responses)
-      description = endpoint.responses[code].schema.description ?? '';
+    if (ts) {
+      types.push({
+        code: ts,
+        lang: 'ts',
+        label: 'TypeScript',
+      });
+    }
 
     items.push(code);
     children.push(
       <renderer.Response key={code} value={code}>
         <Markdown text={description} />
-        {tabs.length > 0 ? (
-          <renderer.ResponseTypes>{tabs}</renderer.ResponseTypes>
+        {types.length > 0 ? (
+          <renderer.ResponseTypes>
+            {types.map((type) => (
+              <renderer.ResponseType key={type.lang} {...type} />
+            ))}
+          </renderer.ResponseTypes>
         ) : null}
       </renderer.Response>,
     );

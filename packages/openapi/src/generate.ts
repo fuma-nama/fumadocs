@@ -1,8 +1,9 @@
 import Parser from '@apidevtools/json-schema-ref-parser';
-import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
+import { type OpenAPIV3 as OpenAPI } from 'openapi-types';
 import { buildRoutes } from '@/build-routes';
 import { generateDocument } from '@/utils/generate-document';
 import { idToTitle } from '@/utils/id-to-title';
+import { type ApiPageProps } from '@/server/api-page';
 import type { MethodInformation, RouteInformation } from './types';
 
 export type DocumentContext =
@@ -62,34 +63,30 @@ export interface GenerateOperationOutput {
   route: RouteInformation;
 }
 
-export async function generate(
+export async function generateAll(
   pathOrDocument: string | OpenAPI.Document,
   options: GenerateOptions = {},
 ): Promise<string> {
   const document = await Parser.dereference<OpenAPI.Document>(pathOrDocument);
   const routes = buildRoutes(document).get('all') ?? [];
-  const operations: { path: string; method: string }[] = [];
+  const operations: { path: string; method: OpenAPI.HttpMethods }[] = [];
 
   for (const route of routes) {
     for (const method of route.methods) {
       operations.push({
-        method: method.method.toLowerCase(),
+        method: method.method.toLowerCase() as OpenAPI.HttpMethods,
         path: route.path,
       });
     }
   }
 
-  return generateDocument(
-    `<APIPage operations={${JSON.stringify(operations)}} />`,
-    options,
-    {
-      ...document.info,
-      context: {
-        type: 'file',
-        routes,
-      },
+  return generateDocument(pageContent({ operations, hasHead: true }), options, {
+    ...document.info,
+    context: {
+      type: 'file',
+      routes,
     },
-  );
+  });
 }
 
 export async function generateOperations(
@@ -105,12 +102,15 @@ export async function generateOperations(
         throw new Error('Operation ID is required for generating docs.');
 
       const content = generateDocument(
-        `<APIPage operations={${JSON.stringify([
-          {
-            path: route.path,
-            method: method.method.toLowerCase(),
-          },
-        ])}} hasHead={false} />`,
+        pageContent({
+          operations: [
+            {
+              path: route.path,
+              method: method.method.toLowerCase() as OpenAPI.HttpMethods,
+            },
+          ],
+          hasHead: false,
+        }),
         options,
         {
           title: method.summary ?? idToTitle(method.operationId),
@@ -143,12 +143,12 @@ export async function generateTags(
     .filter(([tag]) => tag !== 'all')
     .map(([tag, routes]) => {
       const info = document.tags?.find((t) => t.name === tag);
-      const operations: { path: string; method: string }[] = [];
+      const operations: { path: string; method: OpenAPI.HttpMethods }[] = [];
 
       for (const route of routes) {
         for (const method of route.methods) {
           operations.push({
-            method: method.method.toLowerCase(),
+            method: method.method.toLowerCase() as OpenAPI.HttpMethods,
             path: route.path,
           });
         }
@@ -157,7 +157,7 @@ export async function generateTags(
       return {
         tag,
         content: generateDocument(
-          `<APIPage operations={${JSON.stringify(operations)}} />`,
+          pageContent({ operations, hasHead: true }),
           options,
           {
             title: idToTitle(tag),
@@ -171,4 +171,8 @@ export async function generateTags(
         ),
       } satisfies GenerateTagOutput;
     });
+}
+
+function pageContent(props: Omit<ApiPageProps, 'ctx'>): string {
+  return `<APIPage operations={${JSON.stringify(props.operations)}} hasHead={${JSON.stringify(props.hasHead)}} toc={toc} structuredData={structuredData} />`;
 }
