@@ -1,5 +1,12 @@
 # @fuma-docs/openapi
 
+## 5.0.1
+
+### Patch Changes
+
+- 444af27: Fix self-referencing schema types
+- 90af678: Reduce initial loaded bundle size
+
 ## 5.0.0
 
 ### Major Changes
