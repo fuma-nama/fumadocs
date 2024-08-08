@@ -121,7 +121,7 @@ function TOCItems({
     );
 
   return (
-    <ScrollArea className={cn('flex flex-col', isMenu && '-mx-3')}>
+    <ScrollArea className={cn('flex flex-col', isMenu && '-ms-3')}>
       <ScrollViewport className="relative min-h-0 text-sm" ref={containerRef}>
         <div
           role="none"
