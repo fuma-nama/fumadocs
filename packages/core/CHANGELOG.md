@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 13.1.0
+
+### Patch Changes
+
+- f280191: Page Tree Builder: Sort folders to bottom
+
 ## 13.0.7
 
 ### Patch Changes

@@ -1,5 +1,20 @@
 # next-docs-ui
 
+## 13.1.0
+
+### Minor Changes
+
+- c8910c4: Add default 'max-height' to codeblocks
+
+### Patch Changes
+
+- 61ef42c: Add `vitepress` theme preset
+- deae4dd: Improve theme presets
+- c8910c4: Fix empty space on search dialog
+- 6c42960: Improve TOC design
+- Updated dependencies [f280191]
+  - fumadocs-core@13.1.0
+
 ## 13.0.7
 
 ### Patch Changes
