@@ -1,29 +1,34 @@
 import type { ReactElement } from 'react';
 import { type OpenAPIV3 as OpenAPI } from 'openapi-types';
+import Slugger from 'github-slugger';
 import { Operation } from '@/render/operation';
 import type { RenderContext } from '@/types';
 import { createMethod } from '@/schema/method';
+import { defaultRenderer, type Renderer } from '@/render/renderer';
 
-export interface ApiPageProps {
+export interface ApiPageProps
+  extends Pick<
+    RenderContext,
+    'generateCodeSamples' | 'generateTypeScriptSchema'
+  > {
+  document: OpenAPI.Document;
+
   /**
    * An array of operation
    */
   operations: { path: string; method: OpenAPI.HttpMethods }[];
   hasHead: boolean;
-  ctx: RenderContext;
+  renderer?: Partial<Renderer>;
 }
 
-export function APIPage({
-  operations,
-  ctx,
-  hasHead = true,
-}: ApiPageProps): ReactElement {
-  const schema = ctx.document;
+export function APIPage(props: ApiPageProps): ReactElement {
+  const { operations, document, hasHead = true } = props;
 
+  const ctx = getContext(document, props);
   return (
     <ctx.renderer.Root baseUrl={ctx.baseUrl}>
       {operations.map((item) => {
-        const operation = schema.paths[item.path]?.[item.method];
+        const operation = document.paths[item.path]?.[item.method];
         if (!operation) return null;
         const method = createMethod(item.method, operation);
 
@@ -39,4 +44,21 @@ export function APIPage({
       })}
     </ctx.renderer.Root>
   );
+}
+
+function getContext(
+  document: OpenAPI.Document,
+  options: ApiPageProps,
+): RenderContext {
+  return {
+    document,
+    renderer: {
+      ...defaultRenderer,
+      ...options.renderer,
+    },
+    generateTypeScriptSchema: options.generateTypeScriptSchema,
+    generateCodeSamples: options.generateCodeSamples,
+    baseUrl: document.servers?.[0].url ?? 'https://example.com',
+    slugger: new Slugger(),
+  };
 }

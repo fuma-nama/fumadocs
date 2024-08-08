@@ -183,7 +183,7 @@ export async function generateTags(
 
 function pageContent(
   doc: OpenAPI.Document,
-  props: Omit<ApiPageProps, 'ctx'>,
+  props: Omit<ApiPageProps, 'document'>,
 ): string {
   const slugger = new Slugger();
   const toc: TableOfContents = [];

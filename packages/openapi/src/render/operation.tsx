@@ -83,7 +83,6 @@ export function Operation({
           name="body"
           schema={noRef(body.content[type].schema ?? {})}
           ctx={{
-            parseObject: true,
             readOnly: method.method === 'GET',
             writeOnly: method.method !== 'GET',
             required: body.required ?? false,

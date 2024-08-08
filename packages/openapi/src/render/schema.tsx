@@ -23,8 +23,12 @@ interface Context {
 
   required: boolean;
 
-  /** Render the full object */
-  parseObject: boolean;
+  /**
+   * Render the full object
+   *
+   * @defaultValue true
+   * */
+  parseObject?: boolean;
 
   /**
    * Parse binary format string to be files
@@ -60,7 +64,8 @@ export function Schema({
     (schema.writeOnly === true && !ctx.writeOnly)
   )
     return null;
-  ctx.allowFile ??= true;
+  const parseObject = ctx.parseObject ?? true;
+
   const stack = ctx.stack ?? [];
 
   const { renderer } = ctx.render;
@@ -75,7 +80,7 @@ export function Schema({
   }
 
   // object type
-  if (isObject(schema) && ctx.parseObject) {
+  if (isObject(schema) && parseObject) {
     const { additionalProperties, properties } = schema;
 
     if (additionalProperties === true) {
@@ -139,7 +144,7 @@ export function Schema({
     );
   }
 
-  if (isObject(schema) && !ctx.parseObject) {
+  if (isObject(schema) && !parseObject) {
     child.push(
       <renderer.ObjectCollapsible key="attributes" name="Attributes">
         <Schema
@@ -286,7 +291,7 @@ function getSchemaType(schema: OpenAPI.SchemaObject, ctx: Context): string {
   }
 
   if (schema.type === 'string' && schema.format === 'binary' && ctx.allowFile)
-    return 'File';
+    return 'file';
   if (schema.type) return schema.type;
 
   if (isObject(schema)) return 'object';

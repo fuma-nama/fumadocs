@@ -2,8 +2,13 @@
 import { type ButtonHTMLAttributes, type HTMLAttributes } from 'react';
 import { Check, Copy } from 'lucide-react';
 import { cn, useCopyButton, buttonVariants } from 'fumadocs-ui/components/api';
+import dynamic from 'next/dynamic';
 import { ApiProvider, useApiContext } from '@/ui/contexts/api';
 import { type RootProps } from '@/render/renderer';
+
+export const APIPlayground = dynamic(() =>
+  import('./playground').then((mod) => mod.APIPlayground),
+);
 
 export function Root({
   children,

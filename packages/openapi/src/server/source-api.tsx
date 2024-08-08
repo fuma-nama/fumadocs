@@ -14,16 +14,16 @@ export const attachFile: BuildPageTreeOptions['attachFile'] = (node, file) => {
   if ('method' in data && typeof data.method === 'string') {
     const color = getBadgeColor(data.method);
 
-    node.name = [
-      node.name,
-      ' ',
-      // eslint-disable-next-line react/jsx-key -- static
-      <span
-        className={badgeVariants({ className: 'ms-auto text-nowrap', color })}
-      >
-        {data.method}
-      </span>,
-    ];
+    node.name = (
+      <>
+        {node.name}{' '}
+        <span
+          className={badgeVariants({ className: 'ms-auto text-nowrap', color })}
+        >
+          {data.method}
+        </span>
+      </>
+    );
   }
 
   return node;

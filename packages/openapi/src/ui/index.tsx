@@ -1,4 +1,3 @@
-import dynamic from 'next/dynamic';
 import { cn } from 'fumadocs-ui/components/api';
 import { Fragment, type HTMLAttributes, type ReactNode } from 'react';
 import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
@@ -6,11 +5,7 @@ import { badgeVariants, getBadgeColor } from '@/ui/components/variants';
 import type { APIInfoProps, PropertyProps } from '@/render/renderer';
 import { CopyRouteButton } from '@/ui/client';
 
-export { Root, useSchemaContext } from './client';
-
-export const APIPlayground = dynamic(() =>
-  import('./playground').then((mod) => mod.APIPlayground),
-);
+export { Root, useSchemaContext, APIPlayground } from './client';
 
 function Route({ route }: { route: string }): ReactNode {
   const segments = route.split('/').filter((part) => part.length > 0);
