@@ -1,0 +1,132 @@
+---
+title: OpenAPI
+description: Generating docs for OpenAPI schema
+---
+
+## Usage
+
+Install the required packages.
+
+```package-install
+fumadocs-openapi
+```
+
+### Generate Styles
+
+The interactive UI of OpenAPI integration is styled with Tailwind CSS, it doesn't include a pre-built stylesheet by default.
+You must use it in conjunction with the [official Tailwind CSS plugin](/docs/ui/theme#docsui-plugin).
+
+Add the package to `content` under your Tailwind CSS configuration.
+
+```js title="tailwind.config.js"
+import { createPreset } from 'fumadocs-ui/tailwind-plugin';
+
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    './node_modules/fumadocs-ui/dist/**/*.js',
+    './node_modules/fumadocs-openapi/dist/**/*.js',
+  ],
+  presets: [createPreset()],
+};
+```
+
+### Configure Pages
+
+Create an OpenAPI instance on the server. Fumadocs OpenAPI renders the pages on server-side.
+
+```ts title="source.ts"
+import { createOpenAPI } from 'fumadocs-openapi/server';
+
+export const openapi = createOpenAPI({
+  // Your OpenAPI Schema (content, url, or path)
+  // relative to `cwd`
+  documentOrPath: './unkey.json',
+});
+```
+
+Add `APIPage` to your MDX Components, so that you can use it in MDX files.
+
+```tsx title="mdx-components.tsx"
+import type { MDXComponents } from 'mdx/types';
+import defaultComponents from 'fumadocs-ui/mdx';
+import { openapi } from '@/app/source';
+
+export function useMDXComponents(components: MDXComponents): MDXComponents {
+  return {
+    ...defaultComponents,
+    ...components,
+    APIPage: openapi.APIPage,
+  };
+}
+```
+
+> It is a React Server Component.
+
+### Generate Files
+
+You can generate MDX files directly from your OpenAPI schema.
+
+Create a script:
+
+```js title="scripts/generate-docs.mjs"
+import { generateFiles } from 'fumadocs-openapi';
+
+void generateFiles({
+  input: ['./unkey.json'], // the OpenAPI schemas
+  output: './content/docs',
+});
+```
+
+> Only OpenAPI 3.0 is supported.
+>
+> It doesn't allow JSON schema specific keywords like `const`, as [they are unsupported](https://swagger.io/docs/specification/data-models/keywords)
+
+Generate docs with the script:
+
+```bash
+node ./scripts/generate-docs.mjs
+```
+
+### Generate Page Tree
+
+You can add the `attachFile` to decorate the page tree with Source API.
+
+It adds a badge to each page item.
+
+```ts title="source.ts"
+import { createMDXSource, defaultSchemas } from 'fumadocs-mdx';
+import { z } from 'zod';
+import { loader } from 'fumadocs-core/source';
+import { attachFile } from 'fumadocs-openapi/server';
+
+const frontmatter = defaultSchemas.frontmatter.extend({
+  method: z.string().optional(),
+});
+
+export const utils = loader({
+  source: createMDXSource(map, {
+    schema: {
+      frontmatter,
+    },
+  }),
+  pageTree: {
+    attachFile,
+  },
+  // other props
+});
+```
+
+## Features
+
+The official OpenAPI integration supports:
+
+- Basic API endpoint information
+- Interactive API playground
+- Example code to send request (in different programming languages)
+- Response samples and TypeScript definitions
+- Request parameters and body generated from schemas
+
+### Demo
+
+[View demo](/docs/ui/museum).

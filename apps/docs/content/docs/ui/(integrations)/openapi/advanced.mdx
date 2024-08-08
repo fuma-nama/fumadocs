@@ -1,0 +1,48 @@
+---
+title: Advanced
+description: Advanced topics of Fumadocs OpenAPI
+---
+
+## How It Works?
+
+Fumadocs OpenAPI has two parts:
+
+### File Generator
+
+It generates the MDX page with correct frontmatter, so you don't have to manually create a MDX file for each endpoint/operation.
+
+### OpenAPI Server
+
+It renders the API page, a server component.
+
+The schema passed to server will also be fetched dynamically on server.
+
+### Markdown
+
+Markdown/MDX content is rendered in the server component (during runtime) using `@mdx-js/mdx`.
+
+Your Remark/Rehype plugins (e.g. Rehype Code) configured in Fumadocs MDX or other source providers, will **not** be shared.
+Fumadocs OpenAPI uses a separate MDX processor instance.
+
+## Use API Page
+
+To use the `APIPage` component in your MDX files directly:
+
+```mdx
+---
+title: Delete Api
+full: true
+method: POST
+route: /v1/apis.deleteApi
+---
+
+<APIPage
+  operations={[{ path: '/v1/apis.deleteApi', method: 'post' }]}
+  hasHead={false}
+/>
+```
+
+| Prop         | Description                               |
+| ------------ | ----------------------------------------- |
+| `operations` | Operations (API endpoints) to be rendered |
+| `hasHead`    | Enable to render the heading of operation |
