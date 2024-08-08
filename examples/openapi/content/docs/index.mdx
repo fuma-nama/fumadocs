@@ -1,0 +1,36 @@
+---
+title: Overview
+description: General information about the API.
+---
+
+The Unkey API uses HTTP RPC-style methods and generally follow the schema:
+
+```
+https://api.unkey.dev/{version}/{service}.{method}
+```
+
+For example `GET https://api.unkey.dev/v1/apis.listKeys` to list all keys for an API.
+
+## HTTP Methods
+
+We strictly use only `GET` and `POST` methods. `PUT` and `DELETE` are not used.
+
+### `GET`
+
+`GET` methods are used for reading data. Filtering, sorting, or pagination is done via query parameters.
+
+```http
+curl "https://api.unkey.dev/v1/keys.getKey?keyId=key_123" \
+  -H "Authorization: Bearer <ROOT_KEY>"
+```
+
+### `POST`
+
+`POST` methods are used for creating, updating, and deleting data. Data is passed as `application/json` in the request body.
+
+```http
+curl -XPOST "https://api.unkey.dev/v1/keys.createKey" \
+  -H "Authorization: Bearer <ROOT_KEY>" \
+  -H "Content-Type: application/json" \
+  -d '{"apiId": "api_123", "name": "My Key"}'
+```

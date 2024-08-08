@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-openapi",
-  "version": "4.4.2",
+  "version": "5.0.0",
   "description": "Generate MDX docs for your OpenAPI spec",
   "keywords": [
     "NextJs",
@@ -20,9 +20,9 @@
       "import": "./dist/ui/index.js",
       "types": "./dist/ui/index.d.ts"
     },
-    "./source": {
-      "import": "./dist/source/index.js",
-      "types": "./dist/source/index.d.ts"
+    "./server": {
+      "import": "./dist/server/index.js",
+      "types": "./dist/server/index.d.ts"
     }
   },
   "main": "./dist/index.js",
@@ -35,8 +35,8 @@
       "ui": [
         "./dist/ui/index.d.ts"
       ],
-      "source": [
-        "./dist/source/index.d.ts"
+      "server": [
+        "./dist/server/index.d.ts"
       ]
     }
   },
@@ -44,25 +44,29 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup",
+    "build": "bunchee",
     "clean": "rimraf dist",
-    "dev": "tsup --watch",
+    "dev": "bunchee --watch",
     "lint": "eslint .",
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
     "@apidevtools/json-schema-ref-parser": "^11.6.4",
+    "@mdx-js/mdx": "^3.0.1",
     "@radix-ui/react-select": "^2.1.1",
     "@radix-ui/react-slot": "^1.1.0",
+    "@types/mdx": "^2.0.13",
     "class-variance-authority": "^0.7.0",
     "fast-glob": "^3.3.1",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
+    "github-slugger": "^2.0.0",
     "js-yaml": "^4.1.0",
     "json-schema-to-typescript": "^15.0.0",
     "lucide-react": "^0.414.0",
     "openapi-sampler": "^1.5.1",
     "react-hook-form": "^7.52.1",
+    "remark": "^15.0.0",
     "shiki": "^1.11.1",
     "swr": "^2.2.5"
   },
@@ -71,6 +75,7 @@
     "@types/node": "20.14.12",
     "@types/openapi-sampler": "^1.0.3",
     "@types/react": "^18.3.3",
+    "bunchee": "^5.3.1",
     "eslint-config-custom": "workspace:*",
     "next": "^14.2.5",
     "openapi-types": "^12.1.3",

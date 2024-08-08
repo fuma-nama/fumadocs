@@ -1,0 +1,30 @@
+{
+  "name": "example-openapi",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "build:docs": "node ./scripts/generate-docs.mjs",
+    "dev": "next dev",
+    "start": "next start"
+  },
+  "dependencies": {
+    "fumadocs-core": "workspace:*",
+    "fumadocs-mdx": "workspace:*",
+    "fumadocs-openapi": "workspace:*",
+    "fumadocs-ui": "workspace:*",
+    "next": "^14.2.5",
+    "postcss": "^8.4.39",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "tailwindcss": "^3.4.6",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/mdx": "^2.0.13",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.5.4"
+  }
+}

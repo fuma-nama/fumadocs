@@ -29,8 +29,10 @@ export const typography = {
       textDecorationColor: `theme('colors.fd-primary.DEFAULT')`,
     },
     'h1 a,h2 a,h3 a,h4 a,h5 a,h6 a': {
-      fontWeight: 'inherit',
+      // disable anchor styles on headings
       textDecoration: 'inherit',
+      font: 'inherit',
+      color: 'inherit',
     },
     'a:hover': {
       opacity: '80%',

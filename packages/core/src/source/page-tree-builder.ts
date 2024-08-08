@@ -74,6 +74,7 @@ function buildAll(
   skipIndex: boolean,
 ): PageTree.Node[] {
   const output: PageTree.Node[] = [];
+  const folders: PageTree.Folder[] = [];
 
   for (const node of [...nodes].sort((a, b) =>
     a.file.name.localeCompare(b.file.name),
@@ -90,10 +91,11 @@ function buildAll(
     }
 
     if ('children' in node) {
-      output.push(buildFolderNode(node, false, ctx));
+      folders.push(buildFolderNode(node, false, ctx));
     }
   }
 
+  output.push(...folders);
   return output;
 }
 

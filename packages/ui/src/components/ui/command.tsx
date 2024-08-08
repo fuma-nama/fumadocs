@@ -124,26 +124,20 @@ const CommandItem = React.forwardRef<
 
 CommandItem.displayName = CommandPrimitive.Item.displayName;
 
-const CommandDialog = React.forwardRef<
-  HTMLDivElement,
-  DialogProps & {
-    footer?: React.ReactNode;
-  }
->(({ footer, children, ...props }, ref) => (
-  <CommandPrimitive.Dialog
-    ref={ref}
-    shouldFilter={false}
-    loop
-    contentClassName="fixed left-1/2 top-[10vh] z-50 w-[98vw] max-w-screen-sm origin-left -translate-x-1/2 rounded-lg border bg-fd-popover text-fd-popover-foreground shadow-lg data-[state=closed]:animate-fd-dialog-out data-[state=open]:animate-fd-dialog-in"
-    overlayClassName="fixed inset-0 z-50 bg-fd-background/50 backdrop-blur-sm data-[state=closed]:animate-fd-fade-out data-[state=open]:animate-fd-fade-in"
-    {...props}
-  >
-    {children}
-    {footer ? (
-      <div className="mt-auto flex flex-col border-t p-3">{footer}</div>
-    ) : null}
-  </CommandPrimitive.Dialog>
-));
+const CommandDialog = React.forwardRef<HTMLDivElement, DialogProps>(
+  ({ children, ...props }, ref) => (
+    <CommandPrimitive.Dialog
+      ref={ref}
+      shouldFilter={false}
+      loop
+      contentClassName="fixed left-1/2 top-[10vh] z-50 w-[98vw] max-w-screen-sm origin-left -translate-x-1/2 rounded-lg border bg-fd-popover text-fd-popover-foreground shadow-lg data-[state=closed]:animate-fd-dialog-out data-[state=open]:animate-fd-dialog-in"
+      overlayClassName="fixed inset-0 z-50 bg-fd-background/50 backdrop-blur-sm data-[state=closed]:animate-fd-fade-out data-[state=open]:animate-fd-fade-in"
+      {...props}
+    >
+      {children}
+    </CommandPrimitive.Dialog>
+  ),
+);
 
 CommandDialog.displayName = CommandPrimitive.Dialog.displayName;
 

@@ -1,5 +1,5 @@
 import { CircleCheckIcon, CircleXIcon } from 'lucide-react';
-import { resolve } from '@/ui/shared';
+import { resolve } from '@/ui/api/resolve';
 import { type RequestSchema } from '@/render/playground';
 import { type DynamicField } from '@/ui/contexts/schema';
 

@@ -1,4 +1,5 @@
 import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
+import type { ReactNode } from 'react';
 import type { MethodInformation, RenderContext } from '@/types';
 import { getPreferredType, noRef } from '@/utils/schema';
 import { getScheme } from '@/utils/get-security';
@@ -83,11 +84,15 @@ export interface APIPlaygroundProps {
   schemas: Record<string, RequestSchema>;
 }
 
-export function renderPlayground(
-  path: string,
-  method: MethodInformation,
-  ctx: RenderContext,
-): string {
+export function Playground({
+  path,
+  method,
+  ctx,
+}: {
+  path: string;
+  method: MethodInformation;
+  ctx: RenderContext;
+}): ReactNode {
   let currentId = 0;
   const bodyContent = noRef(method.requestBody)?.content;
   const mediaType = bodyContent ? getPreferredType(bodyContent) : undefined;
@@ -101,7 +106,7 @@ export function renderPlayground(
     registered: new WeakMap(),
   };
 
-  return ctx.renderer.APIPlayground({
+  const props: APIPlaygroundProps = {
     authorization: getAuthorizationField(method, ctx),
     method: method.method,
     route: path,
@@ -120,7 +125,9 @@ export function renderPlayground(
         ? toSchema(noRef(bodyContent[mediaType].schema), true, context)
         : undefined,
     schemas: context.schema,
-  });
+  };
+
+  return <ctx.renderer.APIPlayground {...props} />;
 }
 
 function getAuthorizationField(

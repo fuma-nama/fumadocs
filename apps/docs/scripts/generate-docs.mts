@@ -5,13 +5,13 @@ import { rimrafSync } from 'rimraf';
 
 rimrafSync('./content/docs/ui/museum', {
   filter(v) {
-    return !v.endsWith('index.mdx');
+    return !v.endsWith('index.mdx') && !v.endsWith('meta.json');
   },
 });
 
 void OpenAPI.generateFiles({
-  input: ['./*.yaml'],
-  output: './content/docs/ui',
+  input: ['./museum.yaml'],
+  output: './content/docs/ui/museum',
   per: 'operation',
 });
 

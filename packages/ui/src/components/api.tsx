@@ -1,5 +1,6 @@
-'use client';
+declare const { _useCopyButton }: typeof import('./api.client');
 
-export * from '@/utils/use-copy-button';
+export const useCopyButton = _useCopyButton;
+
 export * from '@/utils/cn';
 export * from '@/theme/variants';

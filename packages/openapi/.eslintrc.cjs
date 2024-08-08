@@ -4,7 +4,7 @@ module.exports = {
     // commonjs compatibility
     'import/no-named-as-default-member': 'off',
     'no-console': 'off',
-    // some arrays will not be changes
+    // some arrays will not be changed
     'react/no-array-index-key': 'off',
   },
 };

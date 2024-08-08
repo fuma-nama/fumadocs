@@ -57,9 +57,11 @@ export default function Page({
       <h1 className="text-3xl font-bold text-fd-foreground sm:text-4xl">
         {page.data.title}
       </h1>
-      <p className="mb-8 text-lg text-fd-muted-foreground">
-        {page.data.description}
-      </p>
+      {page.data.description ? (
+        <p className="mb-8 text-lg text-fd-muted-foreground">
+          {page.data.description}
+        </p>
+      ) : null}
       <DocsBody>
         {preview && preview in Preview ? Preview[preview] : null}
         <page.data.exports.default

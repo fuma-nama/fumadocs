@@ -68,12 +68,15 @@ export function SearchDialog({
   );
 
   return (
-    <CommandDialog open={open} onOpenChange={onOpenChange} footer={footer}>
+    <CommandDialog open={open} onOpenChange={onOpenChange}>
       <Search
         {...props}
         items={props.results === 'empty' ? defaultItems : props.results}
         hideResults={props.results === 'empty' && defaultItems.length === 0}
       />
+      {footer ? (
+        <div className="mt-auto flex flex-col border-t p-3">{footer}</div>
+      ) : null}
     </CommandDialog>
   );
 }

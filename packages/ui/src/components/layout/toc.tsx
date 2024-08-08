@@ -121,7 +121,7 @@ function TOCItems({
     );
 
   return (
-    <ScrollArea className={cn('flex flex-col', isMenu && '-mx-3')}>
+    <ScrollArea className={cn('flex flex-col', isMenu && '-ms-3')}>
       <ScrollViewport className="relative min-h-0 text-sm" ref={containerRef}>
         <div
           role="none"
@@ -136,7 +136,7 @@ function TOCItems({
           <div
             className={cn(
               'flex flex-col gap-1 text-fd-muted-foreground',
-              !isMenu && 'border-s-2',
+              !isMenu && 'border-s-2 border-fd-foreground/10',
             )}
           >
             {items.map((item) => (

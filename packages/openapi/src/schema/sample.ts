@@ -1,18 +1,12 @@
 import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
 import { sample } from 'openapi-sampler';
 import type { MethodInformation } from '@/types';
-import {
-  getPreferredMedia,
-  toSampleInput,
-  noRef,
-  getPreferredType,
-} from '@/utils/schema';
-import { generateInput } from '@/utils/generate-input';
+import { toSampleInput, noRef, getPreferredType } from '@/utils/schema';
 
 /**
  * Sample info of endpoint
  */
-export interface Endpoint {
+export interface EndpointSample {
   /**
    * Request URL, including path and query parameters
    */
@@ -23,28 +17,30 @@ export interface Endpoint {
     mediaType: string;
     sample: unknown;
   };
-  responses: Record<string, Response>;
-  parameters: Parameter[];
+  responses: Record<string, ResponseSample>;
+  parameters: ParameterSample[];
 }
 
-interface Response {
+interface ResponseSample {
+  mediaType: string;
+  sample: unknown;
   schema: OpenAPI.SchemaObject;
 }
 
-interface Parameter {
+interface ParameterSample {
   name: string;
   in: string;
   schema: OpenAPI.SchemaObject;
   sample: unknown;
 }
 
-export function createEndpoint(
+export function generateSample(
   path: string,
   method: MethodInformation,
   baseUrl: string,
-): Endpoint {
-  const params: Parameter[] = [];
-  const responses: Endpoint['responses'] = {};
+): EndpointSample {
+  const params: ParameterSample[] = [];
+  const responses: EndpointSample['responses'] = {};
 
   for (const param of method.parameters) {
     if (param.schema) {
@@ -73,7 +69,7 @@ export function createEndpoint(
     }
   }
 
-  let bodyOutput: Endpoint['body'];
+  let bodyOutput: EndpointSample['body'];
 
   if (method.requestBody) {
     const body = noRef(method.requestBody).content;
@@ -85,17 +81,25 @@ export function createEndpoint(
     bodyOutput = {
       schema,
       mediaType: type as string,
-      sample: body[type].example ?? generateInput(method.method, schema),
+      sample: body[type].example ?? generateBody(method.method, schema),
     };
   }
 
   for (const [code, value] of Object.entries(method.responses)) {
-    const mediaTypes = noRef(value).content ?? {};
-    const responseSchema = noRef(getPreferredMedia(mediaTypes)?.schema);
+    const content = noRef(value).content;
+    if (!content) continue;
 
+    const mediaType = getPreferredType(content) as string;
+    if (!mediaType) continue;
+
+    const responseSchema = noRef(content[mediaType].schema);
     if (!responseSchema) continue;
 
     responses[code] = {
+      mediaType,
+      sample:
+        content[mediaType].example ??
+        generateBody(method.method, responseSchema),
       schema: responseSchema,
     };
   }
@@ -104,7 +108,7 @@ export function createEndpoint(
   const queryParams = new URLSearchParams();
 
   for (const param of params) {
-    const value = generateInput(method.method, param.schema);
+    const value = generateBody(method.method, param.schema);
     if (param.in === 'query')
       queryParams.append(param.name, toSampleInput(value));
 
@@ -125,4 +129,11 @@ export function createEndpoint(
     method: method.method,
     parameters: params,
   };
+}
+
+function generateBody(method: string, schema: OpenAPI.SchemaObject): unknown {
+  return sample(schema as object, {
+    skipReadOnly: method !== 'GET',
+    skipWriteOnly: method === 'GET',
+  });
 }
