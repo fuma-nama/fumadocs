@@ -1,7 +1,5 @@
 import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
 import type { default as Slugger } from 'github-slugger';
-import type { TableOfContents } from 'fumadocs-core/server';
-import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import { type Renderer } from '@/render/renderer';
 import type { EndpointSample } from '@/schema/sample';
 import type { CodeSample } from '@/render/operation';
@@ -25,9 +23,6 @@ export interface RenderContext {
   document: OpenAPI.Document;
   baseUrl: string;
   slugger: Slugger;
-
-  toc: TableOfContents;
-  structuredData: StructuredData;
 
   /**
    * Generate TypeScript definitions from response schema.

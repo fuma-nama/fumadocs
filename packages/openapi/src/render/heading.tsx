@@ -8,15 +8,6 @@ export function heading(
   ctx: RenderContext,
 ): ReactNode {
   const id = ctx.slugger.slug(child);
-  ctx.toc.push({
-    depth,
-    url: `#${id}`,
-    title: child,
-  });
-  ctx.structuredData.headings.push({
-    id,
-    content: child,
-  });
 
   return (
     <Heading id={id} key={id} as={`h${depth.toString()}` as `h1`}>

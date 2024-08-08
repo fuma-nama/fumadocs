@@ -41,13 +41,6 @@ export function Operation({
   const security = method.security ?? ctx.document.security;
   const info: ReactNode[] = [];
 
-  function addToSearchIndex(content: string): void {
-    ctx.structuredData.contents.push({
-      heading: ctx.structuredData.headings.at(-1)?.id,
-      content,
-    });
-  }
-
   if (hasHead) {
     info.push(
       heading(
@@ -60,7 +53,6 @@ export function Operation({
     level++;
 
     if (method.description) {
-      addToSearchIndex(method.description);
       info.push(<Markdown key="description" text={method.description} />);
     }
   }
@@ -78,8 +70,6 @@ export function Operation({
     const type = getPreferredType(body.content);
     if (!type)
       throw new Error(`No supported media type for body content: ${path}`);
-
-    if (body.description) addToSearchIndex(body.description);
 
     info.push(
       <Fragment key="body">

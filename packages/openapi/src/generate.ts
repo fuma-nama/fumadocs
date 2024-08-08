@@ -1,5 +1,8 @@
 import Parser from '@apidevtools/json-schema-ref-parser';
 import { type OpenAPIV3 as OpenAPI } from 'openapi-types';
+import { type TableOfContents } from 'fumadocs-core/server';
+import { type StructuredData } from 'fumadocs-core/mdx-plugins';
+import Slugger from 'github-slugger';
 import { buildRoutes } from '@/build-routes';
 import { generateDocument } from '@/utils/generate-document';
 import { idToTitle } from '@/utils/id-to-title';
@@ -80,13 +83,18 @@ export async function generateAll(
     }
   }
 
-  return generateDocument(pageContent({ operations, hasHead: true }), options, {
-    ...document.info,
-    context: {
-      type: 'file',
-      routes,
+  return generateDocument(
+    pageContent(document, { operations, hasHead: true }),
+    options,
+    {
+      title: document.info.title,
+      description: document.info.description,
+      context: {
+        type: 'file',
+        routes,
+      },
     },
-  });
+  );
 }
 
 export async function generateOperations(
@@ -102,7 +110,7 @@ export async function generateOperations(
         throw new Error('Operation ID is required for generating docs.');
 
       const content = generateDocument(
-        pageContent({
+        pageContent(document, {
           operations: [
             {
               path: route.path,
@@ -157,7 +165,7 @@ export async function generateTags(
       return {
         tag,
         content: generateDocument(
-          pageContent({ operations, hasHead: true }),
+          pageContent(document, { operations, hasHead: true }),
           options,
           {
             title: idToTitle(tag),
@@ -173,6 +181,56 @@ export async function generateTags(
     });
 }
 
-function pageContent(props: Omit<ApiPageProps, 'ctx'>): string {
-  return `<APIPage operations={${JSON.stringify(props.operations)}} hasHead={${JSON.stringify(props.hasHead)}} toc={toc} structuredData={structuredData} />`;
+function pageContent(
+  doc: OpenAPI.Document,
+  props: Omit<ApiPageProps, 'ctx'>,
+): string {
+  const slugger = new Slugger();
+  const toc: TableOfContents = [];
+  const structuredData: StructuredData = { headings: [], contents: [] };
+
+  for (const item of props.operations) {
+    const operation = doc.paths[item.path]?.[item.method];
+    if (!operation) continue;
+
+    if (props.hasHead && operation.operationId) {
+      const title =
+        operation.summary ??
+        (operation.operationId ? idToTitle(operation.operationId) : item.path);
+      const id = slugger.slug(title);
+
+      toc.push({
+        depth: 2,
+        title,
+        url: `#${id}`,
+      });
+      structuredData.headings.push({
+        content: title,
+        id,
+      });
+    }
+
+    if (operation.description)
+      structuredData.contents.push({
+        content: operation.description,
+        heading: structuredData.headings.at(-1)?.id,
+      });
+  }
+
+  return `<APIPage operations={${JSON.stringify(props.operations)}} hasHead={${JSON.stringify(props.hasHead)}} />
+
+export function startup() {
+    if (toc) {
+        // toc might be immutable
+        while (toc.length > 0) toc.pop()
+        toc.push(...${JSON.stringify(toc)})
+    }
+    
+    if (structuredData) {
+        structuredData.headings = ${JSON.stringify(structuredData.headings)}
+        structuredData.contents = ${JSON.stringify(structuredData.contents)}
+    }
+}
+
+{startup()}`;
 }
