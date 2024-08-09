@@ -7,7 +7,7 @@ import * as Go from '@/requests/go';
 import { type MethodInformation, type RenderContext } from '@/types';
 import { noRef, getPreferredType } from '@/utils/schema';
 import { getTypescriptSchema } from '@/utils/get-typescript-schema';
-import { getScheme } from '@/utils/get-security';
+import { getSecurities, getSecurityPrefix } from '@/utils/get-security';
 import { Playground } from '@/render/playground';
 import { idToTitle } from '@/utils/id-to-title';
 import { type ResponseTypeProps } from '@/render/renderer';
@@ -95,7 +95,7 @@ export function Operation({
   }
 
   const parameterGroups = new Map<string, ReactNode[]>();
-  const endpoint = generateSample(path, method, ctx.baseUrl);
+  const endpoint = generateSample(path, method, ctx);
 
   for (const param of method.parameters) {
     const pInfo = endpoint.parameters.find(
@@ -232,20 +232,15 @@ function AuthSection({
   const info: ReactNode[] = [];
 
   for (const requirement of requirements) {
-    if (info.length > 0) info.push(`---`);
+    for (const schema of getSecurities(requirement, document)) {
+      const prefix = getSecurityPrefix(schema);
 
-    for (const schema of getScheme(requirement, document)) {
       if (schema.type === 'http') {
         info.push(
           <renderer.Property
             key={id++}
             name="Authorization"
-            type={
-              {
-                basic: 'Basic <token>',
-                bearer: 'Bearer <token>',
-              }[schema.scheme] ?? '<token>'
-            }
+            type={prefix ? `${prefix} <token>` : '<token>'}
             required
           >
             {schema.description ? <Markdown text={schema.description} /> : null}
@@ -261,19 +256,18 @@ function AuthSection({
           <renderer.Property
             key={id++}
             name="Authorization"
-            type="Bearer <token>"
+            type={prefix ? `${prefix} <token>` : '<token>'}
             required
           >
             {schema.description ? <Markdown text={schema.description} /> : null}
             <p>
               In: <code>header</code>
             </p>
-            <p>
-              Scope:{' '}
-              <code>
-                {schema.scopes.length > 0 ? schema.scopes.join(', ') : 'none'}
-              </code>
-            </p>
+            {schema.scopes.length > 0 ? (
+              <p>
+                Scope: <code>{schema.scopes.join(', ')}</code>
+              </p>
+            ) : null}
           </renderer.Property>,
         );
       }

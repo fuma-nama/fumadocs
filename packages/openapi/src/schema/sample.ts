@@ -1,7 +1,8 @@
 import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
 import { sample } from 'openapi-sampler';
-import type { MethodInformation } from '@/types';
+import type { MethodInformation, RenderContext } from '@/types';
 import { toSampleInput, noRef, getPreferredType } from '@/utils/schema';
+import { getSecurities, getSecurityPrefix } from '@/utils/get-security';
 
 /**
  * Sample info of endpoint
@@ -37,7 +38,7 @@ interface ParameterSample {
 export function generateSample(
   path: string,
   method: MethodInformation,
-  baseUrl: string,
+  { baseUrl, document }: RenderContext,
 ): EndpointSample {
   const params: ParameterSample[] = [];
   const responses: EndpointSample['responses'] = {};
@@ -69,8 +70,23 @@ export function generateSample(
     }
   }
 
-  let bodyOutput: EndpointSample['body'];
+  const requirements = method.security ?? document.security;
+  if (requirements && requirements.length > 0) {
+    for (const security of getSecurities(requirements[0], document)) {
+      const prefix = getSecurityPrefix(security);
 
+      params.push({
+        name: 'Authorization',
+        schema: {
+          type: 'string',
+        },
+        sample: prefix ? `${prefix} <token>` : '<token>',
+        in: 'header',
+      });
+    }
+  }
+
+  let bodyOutput: EndpointSample['body'];
   if (method.requestBody) {
     const body = noRef(method.requestBody).content;
     const type = getPreferredType(body);

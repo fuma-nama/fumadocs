@@ -2,7 +2,7 @@ import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
 import type { ReactNode } from 'react';
 import type { MethodInformation, RenderContext } from '@/types';
 import { getPreferredType, noRef } from '@/utils/schema';
-import { getScheme } from '@/utils/get-security';
+import { getSecurities } from '@/utils/get-security';
 
 interface BaseRequestField {
   name: string;
@@ -141,7 +141,7 @@ function getAuthorizationField(
   );
   if (!singular) return;
 
-  const scheme = getScheme(singular, ctx.document)[0];
+  const scheme = getSecurities(singular, ctx.document)[0];
 
   return {
     type: 'string',

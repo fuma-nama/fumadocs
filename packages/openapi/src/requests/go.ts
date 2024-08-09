@@ -72,7 +72,7 @@ ${Array.from(variables.entries())
   req, _ := http.NewRequest("${endpoint.method}", url, ${variables.has('payload') ? 'payload' : 'nil'})
   ${Array.from(headers.entries())
     .map(([key, value]) => `req.Header.Add("${key}", ${value})`)
-    .join('\n')}
+    .join('\n  ')}
   res, _ := http.DefaultClient.Do(req)
   defer res.Body.Close()
   body, _ := ioutil.ReadAll(res.Body)
