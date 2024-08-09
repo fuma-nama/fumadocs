@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 5.0.2
+
+### Patch Changes
+
+- 22549cd: Add authorization properties to examples
+
 ## 5.0.1
 
 ### Patch Changes
