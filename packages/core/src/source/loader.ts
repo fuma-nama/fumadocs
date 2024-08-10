@@ -140,12 +140,14 @@ export function createGetUrl(baseUrl: string): UrlFn {
 }
 
 export function getSlugs(info: FileInfo): string[] {
-  const result = [...info.dirname.split('/'), info.name].filter(
+  return [...info.dirname.split('/'), info.name].filter(
     // filter empty folder names and file groups like (group_name)
-    (v) => v.length > 0 && !/^\(.+\)$/.test(v),
-  );
+    (v, i, arr) => {
+      if (v.length === 0) return false;
 
-  return result[result.length - 1] === 'index' ? result.slice(0, -1) : result;
+      return i === arr.length - 1 ? v !== 'index' : !/^\(.+\)$/.test(v);
+    },
+  );
 }
 
 type InferSourceConfig<T> = T extends Source<infer Config> ? Config : never;
