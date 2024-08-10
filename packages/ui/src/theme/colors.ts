@@ -297,7 +297,7 @@ const vitepress: Preset = {
     accent: '0 0% 15%',
     secondary: '240 4% 9%',
     'accent-foreground': '0 0% 100%',
-    'muted-foreground': '0 0% 56%',
+    'muted-foreground': '240 4% 65%',
   },
   css: {
     '.prose': {

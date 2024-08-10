@@ -144,7 +144,7 @@ export function Sidebar({
         <div
           {...props.footerProps}
           className={cn(
-            'flex flex-row items-center border-t px-4 pb-2 pt-1 md:px-3',
+            'flex flex-row items-center border-t pb-2 pt-1 max-md:px-4 md:mx-3',
             props.footerProps?.className,
           )}
         >

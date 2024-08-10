@@ -134,8 +134,8 @@ export function DocsLayout({
             footer={
               <>
                 <ThemeToggle className="me-auto" />
-                {sidebar.footer}
                 {i18n ? <LanguageToggle /> : null}
+                {sidebar.footer}
               </>
             }
           />,

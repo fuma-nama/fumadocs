@@ -30,7 +30,7 @@ interface DocsUIOptions {
   /**
    * Max width of docs layout
    *
-   * @defaultValue '1600px'
+   * @defaultValue '100vw'
    */
   layoutWidth?: string;
 
@@ -115,7 +115,7 @@ function createTailwindColors(
 }
 
 export const docsUi = plugin.withOptions<DocsUIOptions>(
-  ({ cssPrefix = '', preset = 'default', layoutWidth = '1600px' } = {}) => {
+  ({ cssPrefix = '', preset = 'default', layoutWidth = '100vw' } = {}) => {
     return ({ addBase, addComponents, addUtilities }) => {
       const { light, dark, css } =
         typeof preset === 'string' ? presets[preset] : preset;
@@ -129,7 +129,7 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
           // computed
           '--fd-doc':
             'calc(min(100vw, var(--fd-layout-width)) - var(--fd-toc-width) - var(--fd-sidebar-width))',
-          '--fd-c-sidebar': 'calc(50vw - var(--fd-doc))',
+          '--fd-c-sidebar': 'var(--fd-sidebar-width)',
         },
         '.dark': getThemeStyles(cssPrefix, dark),
         '*': {
@@ -140,7 +140,9 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
           color: `theme('colors.fd-foreground')`,
         },
         '@screen md': {
-          ':root': { '--fd-sidebar-width': '240px' },
+          ':root': {
+            '--fd-sidebar-width': '240px',
+          },
         },
         '@screen lg': {
           ':root': {
