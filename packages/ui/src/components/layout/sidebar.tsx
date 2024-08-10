@@ -33,7 +33,7 @@ export interface SidebarProps {
    * Open folders by default if their level is lower or equal to a specific level
    * (Starting from 1)
    *
-   * @defaultValue 1
+   * @defaultValue 0
    */
   defaultOpenLevel?: number;
 
@@ -81,14 +81,14 @@ const defaultComponents: Components = {
 };
 
 const Context = createContext<InternalContext>({
-  defaultOpenLevel: 1,
+  defaultOpenLevel: 0,
   components: defaultComponents,
   prefetch: true,
 });
 
 export function Sidebar({
   components,
-  defaultOpenLevel = 1,
+  defaultOpenLevel = 0,
   items,
   prefetch = true,
   ...props
