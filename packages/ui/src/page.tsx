@@ -93,7 +93,7 @@ export function DocsPage({
         </div>
         <article
           className={cn(
-            'mx-auto flex w-full max-w-[840px] flex-1 flex-col gap-6 px-4 pt-10 md:px-6 md:pt-12',
+            'mx-auto flex w-full max-w-[860px] flex-1 flex-col gap-6 px-4 pt-10 md:px-6 md:pt-12',
             !tocOptions.enabled && 'max-w-[1200px]',
           )}
         >

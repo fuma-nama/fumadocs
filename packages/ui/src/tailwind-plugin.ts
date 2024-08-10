@@ -28,6 +28,13 @@ interface DocsUIOptions {
   modifyContainer?: boolean;
 
   /**
+   * Max width of docs layout
+   *
+   * @defaultValue '1600px'
+   */
+  layoutWidth?: string;
+
+  /**
    * Color preset
    */
   preset?: keyof typeof presets | Preset;
@@ -108,13 +115,22 @@ function createTailwindColors(
 }
 
 export const docsUi = plugin.withOptions<DocsUIOptions>(
-  ({ cssPrefix = '', preset = 'default' } = {}) => {
+  ({ cssPrefix = '', preset = 'default', layoutWidth = '1600px' } = {}) => {
     return ({ addBase, addComponents, addUtilities }) => {
       const { light, dark, css } =
         typeof preset === 'string' ? presets[preset] : preset;
 
       addBase({
-        ':root': getThemeStyles(cssPrefix, light),
+        ':root': {
+          ...getThemeStyles(cssPrefix, light),
+          '--fd-sidebar-width': '0px',
+          '--fd-toc-width': '0px',
+          '--fd-layout-width': layoutWidth,
+          // computed
+          '--fd-doc':
+            'calc(min(100vw, var(--fd-layout-width)) - var(--fd-toc-width) - var(--fd-sidebar-width))',
+          '--fd-c-sidebar': 'calc(50vw - var(--fd-doc))',
+        },
         '.dark': getThemeStyles(cssPrefix, dark),
         '*': {
           'border-color': `theme('colors.fd-border')`,
@@ -122,6 +138,19 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
         body: {
           'background-color': `theme('colors.fd-background')`,
           color: `theme('colors.fd-foreground')`,
+        },
+        '@screen md': {
+          ':root': { '--fd-sidebar-width': '240px' },
+        },
+        '@screen lg': {
+          ':root': {
+            '--fd-toc-width': '240px',
+            '--fd-c-toc': 'calc(50vw - var(--fd-doc) / 2)',
+            '--fd-c-sidebar': 'calc(50vw - var(--fd-doc) / 2)',
+          },
+        },
+        '@screen xl': {
+          ':root': { '--fd-sidebar-width': '260px', '--fd-toc-width': '260px' },
         },
       });
 
@@ -213,6 +242,11 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
           : undefined,
         maxWidth: {
           container: '1400px',
+        },
+        margin: {
+          // the offset given to docs content when the sidebar is collapsed
+          'fd-sidebar-offset':
+            'max(calc(var(--fd-c-sidebar) - 2 * var(--fd-sidebar-width)), var(--fd-sidebar-width) * -1)',
         },
         colors: createTailwindColors(cssPrefix, addGlobalColors),
         ...animations,
