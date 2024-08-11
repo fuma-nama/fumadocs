@@ -8,6 +8,7 @@ import {
   group,
   intro,
   isCancel,
+  log,
   outro,
   select,
   spinner,
@@ -89,17 +90,15 @@ async function main(): Promise<void> {
     template: options.template,
     outputDir: dest,
     installDeps: options.installDeps,
+
+    log: (message) => {
+      log.info(message);
+    },
   });
 
   info.stop('Project Generated');
 
   outro(pc.bgGreen(pc.bold('Done')));
-
-  if (options.tailwindcss) {
-    console.log('✔ Tailwind CSS');
-  }
-
-  console.log('✔ Typescript');
 
   console.log(pc.bold('\nOpen the project'));
   console.log(pc.cyan(`cd ${projectName}`));
