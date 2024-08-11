@@ -76,7 +76,7 @@ Use the official Tailwind CSS plugin.
 
 ### Layout
 
-Create a new catch-all route `/app/docs/[[..slugs]]` for our docs, and give it a proper layout.
+Create a folder `/app/docs` for our docs, and give it a proper layout.
 
 ```tsx title="app/docs/layout.tsx"
 import { DocsLayout } from 'fumadocs-ui/layout';
@@ -96,9 +96,10 @@ export default function RootDocsLayout({ children }: { children: ReactNode }) {
 
 ### Page
 
-For the `page.tsx`, it may vary depending on your source. You should configure static rendering with `generateStaticParams` and metadata with `generateMetadata`.
+Create a catch-all route `/app/docs/[[...slug]]` for docs pages.
 
-Wrap your content in the [Page](/docs/ui/blocks/page) component.
+In the page, wrap your content in the [Page](/docs/ui/blocks/page) component.
+It may vary depending on your content source. You should configure static rendering with `generateStaticParams` and metadata with `generateMetadata`.
 
 <Tabs groupId='content-source' items={['Fumadocs MDX', 'Content Collections']}>
 

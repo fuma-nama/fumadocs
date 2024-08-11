@@ -51,11 +51,14 @@ export function ApiProvider({
 
   useEffect(() => {
     setBaseUrl((prev) => localStorage.getItem('apiBaseUrl') ?? prev);
-    if (highlighterInstance) setHighlighter(highlighterInstance);
-    else
+    if (highlighterInstance) {
+      setHighlighter(highlighterInstance);
+    } else {
       void initHighlighter().then((res) => {
+        highlighterInstance = res;
         setHighlighter(res);
       });
+    }
   }, []);
 
   useEffect(() => {

@@ -73,7 +73,7 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
           onPointerLeave: onLeave,
           'aria-hidden': Boolean(collapsed && !hover),
           className: cn(
-            'md:transition-all',
+            'md:transition-[transform,padding,width,margin]',
             collapsed && [
               'md:top-1 md:me-fd-sidebar-offset md:h-[calc(100dvh-4px)] md:w-[var(--fd-sidebar-width)] md:animate-fd-sidebar-collapse md:rounded-xl md:border md:ps-0 md:shadow-md',
               hover

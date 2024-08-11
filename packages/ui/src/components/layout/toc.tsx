@@ -64,7 +64,7 @@ export function TocPopover({ items, header, footer }: TOCProps): ReactElement {
 
   return (
     <Popover>
-      <PopoverTrigger className="inline-flex items-center gap-2 text-nowrap px-4 py-2 text-left max-md:size-full md:px-3 md:text-fd-muted-foreground">
+      <PopoverTrigger className="inline-flex size-full items-center gap-2 text-nowrap px-4 py-2 text-left md:px-3">
         <Text className="size-4 shrink-0" />
         {text.toc}
         {current ? (

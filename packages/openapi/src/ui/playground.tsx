@@ -179,7 +179,7 @@ export function APIPlayground({
         )}
       >
         <form
-          className="not-prose flex flex-col gap-5 rounded-lg border bg-fd-card p-4"
+          className="not-prose flex flex-col gap-5 rounded-lg border bg-fd-card p-3"
           onSubmit={onSubmit as React.FormEventHandler}
         >
           <div className="flex flex-row gap-2">
@@ -199,7 +199,7 @@ export function APIPlayground({
           <Accordions
             type="multiple"
             className={cn(
-              '-m-4 border-0 text-sm',
+              '-m-3 border-0 text-sm',
               path.length === 0 &&
                 query.length === 0 &&
                 header.length === 0 &&
@@ -294,7 +294,7 @@ function RouteDisplay({ route }: { route: string }): ReactElement {
   );
 
   return (
-    <code className="flex-1 overflow-auto text-nowrap rounded-lg border bg-fd-muted px-3 py-1.5 text-sm text-fd-muted-foreground">
+    <code className="flex-1 overflow-auto text-nowrap rounded-lg border bg-fd-muted px-2 py-1.5 text-sm text-fd-muted-foreground">
       {pathname}
     </code>
   );
