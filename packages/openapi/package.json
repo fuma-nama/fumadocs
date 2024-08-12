@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-openapi",
-  "version": "5.0.2",
+  "version": "5.0.3",
   "description": "Generate MDX docs for your OpenAPI spec",
   "keywords": [
     "NextJs",

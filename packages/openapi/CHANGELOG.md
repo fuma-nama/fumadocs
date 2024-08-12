@@ -1,5 +1,18 @@
 # @fuma-docs/openapi
 
+## 5.0.3
+
+### Patch Changes
+
+- 96c9dda: Change Heading scroll margins
+- c094fef: Fix compatibility issues on other content sources
+- Updated dependencies [96c9dda]
+- Updated dependencies [ba588a2]
+- Updated dependencies [96c9dda]
+- Updated dependencies [ec983a3]
+  - fumadocs-core@13.2.0
+  - fumadocs-ui@13.2.0
+
 ## 5.0.2
 
 ### Patch Changes
