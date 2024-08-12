@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 13.2.0
+
+### Patch Changes
+
+- 70f15af: Support to initialize git repo
+
 ## 13.1.0
 
 ## 13.0.7
