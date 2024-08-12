@@ -6,13 +6,13 @@ full: true
 <APIPage operations={[{"method":"get","path":"/v1/apis.getApi"},{"method":"post","path":"/v1/apis.createApi"},{"method":"get","path":"/v1/apis.listKeys"},{"method":"post","path":"/v1/apis.deleteApi"}]} hasHead={true} />
 
 export function startup() {
-    if (toc) {
+    if (typeof toc !== 'undefined') {
         // toc might be immutable
         while (toc.length > 0) toc.pop()
         toc.push(...[{"depth":2,"title":"Get Api","url":"#get-api"},{"depth":2,"title":"Create Api","url":"#create-api"},{"depth":2,"title":"List Keys","url":"#list-keys"},{"depth":2,"title":"Delete Api","url":"#delete-api"}])
     }
     
-    if (structuredData) {
+    if (typeof structuredData !== 'undefined') {
         structuredData.headings = [{"content":"Get Api","id":"get-api"},{"content":"Create Api","id":"create-api"},{"content":"List Keys","id":"list-keys"},{"content":"Delete Api","id":"delete-api"}]
         structuredData.contents = []
     }

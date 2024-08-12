@@ -6,13 +6,13 @@ full: true
 <APIPage operations={[{"method":"get","path":"/v1/liveness"}]} hasHead={true} />
 
 export function startup() {
-    if (toc) {
+    if (typeof toc !== 'undefined') {
         // toc might be immutable
         while (toc.length > 0) toc.pop()
         toc.push(...[{"depth":2,"title":"Check Liveness","url":"#check-liveness"}])
     }
     
-    if (structuredData) {
+    if (typeof structuredData !== 'undefined') {
         structuredData.headings = [{"content":"Check Liveness","id":"check-liveness"}]
         structuredData.contents = []
     }

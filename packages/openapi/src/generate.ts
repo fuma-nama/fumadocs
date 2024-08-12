@@ -217,16 +217,19 @@ function pageContent(
       });
   }
 
+  // modify toc and structured data if possible
+  // it may not be compatible with other content sources except Fumadocs MDX
+  // TODO: Maybe add to frontmatter and let developers to handle them?
   return `<APIPage operations={${JSON.stringify(props.operations)}} hasHead={${JSON.stringify(props.hasHead)}} />
 
 export function startup() {
-    if (toc) {
+    if (typeof toc !== 'undefined') {
         // toc might be immutable
         while (toc.length > 0) toc.pop()
         toc.push(...${JSON.stringify(toc)})
     }
     
-    if (structuredData) {
+    if (typeof structuredData !== 'undefined') {
         structuredData.headings = ${JSON.stringify(structuredData.headings)}
         structuredData.contents = ${JSON.stringify(structuredData.contents)}
     }
