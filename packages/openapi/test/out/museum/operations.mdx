@@ -2,9 +2,21 @@
 title: Operations
 description: Operational information about the museum.
 full: true
+_openapi:
+  toc:
+    - depth: 2
+      title: Get museum hours
+      url: '#get-museum-hours'
+  structuredData:
+    headings:
+      - content: Get museum hours
+        id: get-museum-hours
+    contents:
+      - content: Get upcoming museum operating hours
+        heading: get-museum-hours
 ---
 
-<APIPage operations={[{"method":"get","path":"/museum-hours"}]} hasHead={true} />
+<APIPage document={"./fixtures/museum.yaml"} operations={[{"method":"get","path":"/museum-hours"}]} hasHead={true} />
 
 export function startup() {
     if (typeof toc !== 'undefined') {

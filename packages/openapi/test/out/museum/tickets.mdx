@@ -2,9 +2,30 @@
 title: Tickets
 description: Museum tickets for general entrance or special events.
 full: true
+_openapi:
+  toc:
+    - depth: 2
+      title: Buy museum tickets
+      url: '#buy-museum-tickets'
+    - depth: 2
+      title: Get ticket QR code
+      url: '#get-ticket-qr-code'
+  structuredData:
+    headings:
+      - content: Buy museum tickets
+        id: buy-museum-tickets
+      - content: Get ticket QR code
+        id: get-ticket-qr-code
+    contents:
+      - content: Purchase museum tickets for general entry or special events.
+        heading: buy-museum-tickets
+      - content: >-
+          Return an image of your ticket with scannable QR code. Used for event
+          entry.
+        heading: get-ticket-qr-code
 ---
 
-<APIPage operations={[{"method":"post","path":"/tickets"},{"method":"get","path":"/tickets/{ticketId}/qr"}]} hasHead={true} />
+<APIPage document={"./fixtures/museum.yaml"} operations={[{"method":"post","path":"/tickets"},{"method":"get","path":"/tickets/{ticketId}/qr"}]} hasHead={true} />
 
 export function startup() {
     if (typeof toc !== 'undefined') {

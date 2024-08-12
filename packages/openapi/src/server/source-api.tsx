@@ -10,9 +10,20 @@ import { getBadgeColor } from '@/ui/components/variants';
 export const attachFile: BuildPageTreeOptions['attachFile'] = (node, file) => {
   if (!file) return node;
   const data = file.data.data as object;
+  let method: string | undefined;
 
-  if ('method' in data && typeof data.method === 'string') {
-    const color = getBadgeColor(data.method);
+  if ('_openapi' in data && typeof data._openapi === 'object') {
+    const meta = data._openapi as {
+      method?: string;
+    };
+
+    method = meta.method;
+  } else if ('method' in data && typeof data.method === 'string') {
+    method = data.method;
+  }
+
+  if (method) {
+    const color = getBadgeColor(method);
 
     node.name = (
       <>
@@ -20,7 +31,7 @@ export const attachFile: BuildPageTreeOptions['attachFile'] = (node, file) => {
         <span
           className={badgeVariants({ className: 'ms-auto text-nowrap', color })}
         >
-          {data.method}
+          {method}
         </span>
       </>
     );

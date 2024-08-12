@@ -1,9 +1,19 @@
 ---
 title: Liveness
 full: true
+_openapi:
+  toc:
+    - depth: 2
+      title: Check Liveness
+      url: '#check-liveness'
+  structuredData:
+    headings:
+      - content: Check Liveness
+        id: check-liveness
+    contents: []
 ---
 
-<APIPage operations={[{"method":"get","path":"/v1/liveness"}]} hasHead={true} />
+<APIPage document={"./fixtures/unkey.json"} operations={[{"method":"get","path":"/v1/liveness"}]} hasHead={true} />
 
 export function startup() {
     if (typeof toc !== 'undefined') {

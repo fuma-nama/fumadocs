@@ -43,31 +43,43 @@ export interface Config extends GenerateOptions {
    * @defaultValue 'none'
    */
   groupBy?: 'tag' | 'route' | 'none';
-
-  cwd?: string;
 }
 
-export async function generateFiles({
-  input,
-  output,
-  name: nameFn,
-  per = 'file',
-  cwd = process.cwd(),
-  groupBy = 'none',
-  ...options
-}: Config): Promise<void> {
+export async function generateFiles(options: Config): Promise<void> {
+  const {
+    input,
+    output,
+    name: nameFn,
+    per = 'file',
+    groupBy = 'none',
+    cwd = process.cwd(),
+  } = options;
   const outputDir = join(cwd, output);
-  const resolvedInputs = await fg.glob(input, { absolute: true, cwd });
+  const urlInputs: string[] = [];
+  const fileInputs: string[] = [];
+
+  for (const v of typeof input === 'string' ? [input] : input) {
+    if (isUrl(v)) {
+      urlInputs.push(v);
+    } else {
+      fileInputs.push(v);
+    }
+  }
+
+  const resolvedInputs = [
+    ...(await fg.glob(fileInputs, { cwd, absolute: false })),
+    ...urlInputs,
+  ];
 
   await Promise.all(
-    resolvedInputs.map(async (path) => {
+    resolvedInputs.map(async (pathOrUrl) => {
       if (per === 'file') {
-        let filename = parse(path).name;
+        let filename = isUrl(pathOrUrl) ? 'index' : parse(pathOrUrl).name;
         if (nameFn) filename = nameFn('file', filename);
 
         const outPath = join(outputDir, `${filename}.mdx`);
 
-        const result = await generateAll(path, options);
+        const result = await generateAll(pathOrUrl, options);
         await write(outPath, result);
         console.log(`Generated: ${outPath}`);
         return;
@@ -75,7 +87,7 @@ export async function generateFiles({
 
       if (per === 'operation') {
         const metaFiles = new Set<string>();
-        const results = await generateOperations(path, options);
+        const results = await generateOperations(pathOrUrl, options);
 
         await Promise.all(
           results.map(async (result) => {
@@ -132,7 +144,7 @@ export async function generateFiles({
         return;
       }
 
-      const results = await generateTags(path, options);
+      const results = await generateTags(pathOrUrl, options);
 
       for (const result of results) {
         let tagName = result.tag;
@@ -144,6 +156,10 @@ export async function generateFiles({
       }
     }),
   );
+}
+
+function isUrl(input: string): boolean {
+  return input.startsWith('https://') || input.startsWith('http://');
 }
 
 function getFilenameFromRoute(path: string): string {

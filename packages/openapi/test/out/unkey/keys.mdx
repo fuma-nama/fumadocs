@@ -1,9 +1,49 @@
 ---
 title: Keys
 full: true
+_openapi:
+  toc:
+    - depth: 2
+      title: Get Key
+      url: '#get-key'
+    - depth: 2
+      title: Delete Key
+      url: '#delete-key'
+    - depth: 2
+      title: Create Key
+      url: '#create-key'
+    - depth: 2
+      title: Verify Key
+      url: '#verify-key'
+    - depth: 2
+      title: Update Key
+      url: '#update-key'
+    - depth: 2
+      title: Update Remaining
+      url: '#update-remaining'
+    - depth: 2
+      title: Get Verifications
+      url: '#get-verifications'
+  structuredData:
+    headings:
+      - content: Get Key
+        id: get-key
+      - content: Delete Key
+        id: delete-key
+      - content: Create Key
+        id: create-key
+      - content: Verify Key
+        id: verify-key
+      - content: Update Key
+        id: update-key
+      - content: Update Remaining
+        id: update-remaining
+      - content: Get Verifications
+        id: get-verifications
+    contents: []
 ---
 
-<APIPage operations={[{"method":"get","path":"/v1/keys.getKey"},{"method":"post","path":"/v1/keys.deleteKey"},{"method":"post","path":"/v1/keys.createKey"},{"method":"post","path":"/v1/keys.verifyKey"},{"method":"post","path":"/v1/keys.updateKey"},{"method":"post","path":"/v1/keys.updateRemaining"},{"method":"get","path":"/v1/keys.getVerifications"}]} hasHead={true} />
+<APIPage document={"./fixtures/unkey.json"} operations={[{"method":"get","path":"/v1/keys.getKey"},{"method":"post","path":"/v1/keys.deleteKey"},{"method":"post","path":"/v1/keys.createKey"},{"method":"post","path":"/v1/keys.verifyKey"},{"method":"post","path":"/v1/keys.updateKey"},{"method":"post","path":"/v1/keys.updateRemaining"},{"method":"get","path":"/v1/keys.getVerifications"}]} hasHead={true} />
 
 export function startup() {
     if (typeof toc !== 'undefined') {

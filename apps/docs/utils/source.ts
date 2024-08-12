@@ -46,9 +46,7 @@ export const blog = loader({
   }),
 });
 
-export const openapi = createOpenAPI({
-  documentOrPath: './museum.yaml',
-});
+export const openapi = createOpenAPI({});
 
 export type Page = InferPageType<typeof utils>;
 export type Meta = InferMetaType<typeof utils>;

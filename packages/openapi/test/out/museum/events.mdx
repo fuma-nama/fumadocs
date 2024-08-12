@@ -2,9 +2,51 @@
 title: Events
 description: Special events hosted by the Museum
 full: true
+_openapi:
+  toc:
+    - depth: 2
+      title: List special events
+      url: '#list-special-events'
+    - depth: 2
+      title: Create special events
+      url: '#create-special-events'
+    - depth: 2
+      title: Get special event
+      url: '#get-special-event'
+    - depth: 2
+      title: Update special event
+      url: '#update-special-event'
+    - depth: 2
+      title: Delete special event
+      url: '#delete-special-event'
+  structuredData:
+    headings:
+      - content: List special events
+        id: list-special-events
+      - content: Create special events
+        id: create-special-events
+      - content: Get special event
+        id: get-special-event
+      - content: Update special event
+        id: update-special-event
+      - content: Delete special event
+        id: delete-special-event
+    contents:
+      - content: Return a list of upcoming special events at the museum.
+        heading: list-special-events
+      - content: Creates a new special event for the museum.
+        heading: create-special-events
+      - content: Get details about a special event.
+        heading: get-special-event
+      - content: Update the details of a special event
+        heading: update-special-event
+      - content: >-
+          Delete a special event from the collection. Allows museum to cancel
+          planned events.
+        heading: delete-special-event
 ---
 
-<APIPage operations={[{"method":"get","path":"/special-events"},{"method":"post","path":"/special-events"},{"method":"get","path":"/special-events/{eventId}"},{"method":"patch","path":"/special-events/{eventId}"},{"method":"delete","path":"/special-events/{eventId}"}]} hasHead={true} />
+<APIPage document={"./fixtures/museum.yaml"} operations={[{"method":"get","path":"/special-events"},{"method":"post","path":"/special-events"},{"method":"get","path":"/special-events/{eventId}"},{"method":"patch","path":"/special-events/{eventId}"},{"method":"delete","path":"/special-events/{eventId}"}]} hasHead={true} />
 
 export function startup() {
     if (typeof toc !== 'undefined') {
