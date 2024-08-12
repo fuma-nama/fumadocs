@@ -19,7 +19,7 @@ export function Root({
   return (
     <div
       className={cn(
-        'flex flex-col gap-24 text-sm text-fd-muted-foreground',
+        'text-fd-muted-foreground flex flex-col gap-24 text-sm',
         className,
       )}
       {...props}
@@ -52,6 +52,7 @@ export function CopyRouteButton({
         }),
       )}
       onClick={onCopy}
+      aria-label="Copy route path"
       {...props}
     >
       {checked ? <Check className="size-3" /> : <Copy className="size-3" />}
