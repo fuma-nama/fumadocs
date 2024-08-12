@@ -61,7 +61,7 @@ export function DocsPage({
   toc = [],
   tableOfContent = {},
   breadcrumb = {},
-  tableOfContentPopover = {},
+  tableOfContentPopover: tocPopoverOptions = {},
   lastUpdate,
   full = false,
   footer = {},
@@ -75,28 +75,30 @@ export function DocsPage({
 
   return (
     <TocProvider toc={toc}>
-      <div className="flex min-w-0 flex-1 flex-col">
-        <div
-          className={cn(
-            'sticky top-14 z-10 border-b bg-fd-background/60 text-sm font-medium backdrop-blur-md md:top-0 md:bg-fd-card',
-            !full && 'lg:hidden',
-          )}
-        >
-          {replaceOrDefault(
-            tableOfContentPopover,
+      <div
+        className={cn(
+          'mx-auto flex min-w-0 max-w-[860px] flex-1 flex-col',
+          !tocOptions.enabled &&
+            // ensure it's still centered when toc is hidden
+            'max-w-[1200px] md:ms-[max(0px,calc(50vw-min(50%,600px)-var(--fd-c-sidebar)))]',
+        )}
+      >
+        {replaceOrDefault(
+          tocPopoverOptions,
+          <div
+            className={cn(
+              'sticky top-14 z-10 border-b bg-fd-background/60 text-sm backdrop-blur-md md:top-1 md:mx-3 md:rounded-full md:border md:shadow-md',
+              tocPopoverOptions.enabled !== true && 'lg:hidden',
+            )}
+          >
             <TocPopover
               items={toc}
-              header={tableOfContentPopover.header}
-              footer={tableOfContentPopover.footer}
-            />,
-          )}
-        </div>
-        <article
-          className={cn(
-            'mx-auto flex w-full max-w-[840px] flex-1 flex-col gap-6 px-4 pt-10 md:px-6 md:pt-12',
-            !tocOptions.enabled && 'max-w-[1200px]',
-          )}
-        >
+              header={tocPopoverOptions.header}
+              footer={tocPopoverOptions.footer}
+            />
+          </div>,
+        )}
+        <article className="flex flex-1 flex-col gap-6 px-4 pt-10 md:px-6 md:pt-12">
           {replaceOrDefault(breadcrumb, <Breadcrumb {...breadcrumb} />)}
           {props.children}
           <div className="mt-auto" />

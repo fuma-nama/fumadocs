@@ -41,7 +41,7 @@ export function APIInfo({
     <div className={cn('min-w-0 flex-1', className)} {...props}>
       <div
         className={cn(
-          'sticky top-24 z-[2] mb-4 flex flex-row items-center gap-2 rounded-lg border bg-fd-card p-3 md:top-10',
+          'sticky top-24 z-20 mb-4 flex flex-row items-center gap-2 rounded-lg border bg-fd-card px-3 py-2 md:top-12 lg:top-1',
         )}
       >
         <span
@@ -70,7 +70,7 @@ export function API({
   return (
     <div
       className={cn(
-        'flex flex-col gap-x-6 gap-y-2 xl:flex-row xl:items-start',
+        'flex flex-col gap-x-6 gap-y-4 xl:flex-row xl:items-start',
         className,
       )}
       {...props}
@@ -115,7 +115,10 @@ export function APIExample({
 }: HTMLAttributes<HTMLDivElement>): React.ReactElement {
   return (
     <div
-      className={cn('sticky top-10 prose-no-margin xl:w-[400px]', className)}
+      className={cn(
+        'prose-no-margin md:sticky md:top-12 lg:top-1 xl:w-[400px]',
+        className,
+      )}
       {...props}
     >
       {children}

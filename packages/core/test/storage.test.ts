@@ -1,7 +1,7 @@
 import { Storage } from '@/source/file-system';
-import { parseFilePath, parseFolderPath } from '@/source/path';
 import { describe, expect, test } from 'vitest';
 import { VirtualFile, loadFiles } from '@/source/load-files';
+import { getSlugs } from '@/source/loader';
 
 describe('Virtual Storage', () => {
   const storage = new Storage();
@@ -63,39 +63,98 @@ const demoFiles: VirtualFile[] = [
 test('Building File Graph', () => {
   const storage = loadFiles(demoFiles, {
     rootDir: '',
-    getSlugs: () => [''],
+    getSlugs,
   });
 
-  expect(storage.root().children).toEqual([
-    expect.objectContaining({
-      format: 'page',
-      file: parseFilePath('test.mdx'),
-    }),
-    expect.objectContaining({
-      file: parseFolderPath('nested'),
-      children: [
-        expect.objectContaining({
-          format: 'page',
-          file: parseFilePath('nested/test.mdx'),
-        }),
-        expect.objectContaining({
-          file: parseFolderPath('nested/nested'),
-          children: [
-            expect.objectContaining({
-              format: 'page',
-              file: parseFilePath('nested/nested/test.mdx'),
-            }),
+  expect(storage.root().children).toMatchInlineSnapshot(`
+    [
+      {
+        "data": {
+          "data": {
+            "title": "Hello",
+          },
+          "slugs": [
+            "test",
           ],
-        }),
-      ],
-    }),
-  ]);
+        },
+        "file": {
+          "dirname": "",
+          "flattenedPath": "test",
+          "locale": undefined,
+          "name": "test",
+          "path": "test.mdx",
+        },
+        "format": "page",
+      },
+      {
+        "children": [
+          {
+            "data": {
+              "data": {
+                "title": "Nested Page",
+              },
+              "slugs": [
+                "nested",
+                "test",
+              ],
+            },
+            "file": {
+              "dirname": "nested",
+              "flattenedPath": "nested/test",
+              "locale": undefined,
+              "name": "test",
+              "path": "nested/test.mdx",
+            },
+            "format": "page",
+          },
+          {
+            "children": [
+              {
+                "data": {
+                  "data": {
+                    "title": "Nested Nested Page",
+                  },
+                  "slugs": [
+                    "nested",
+                    "nested",
+                    "test",
+                  ],
+                },
+                "file": {
+                  "dirname": "nested/nested",
+                  "flattenedPath": "nested/nested/test",
+                  "locale": undefined,
+                  "name": "test",
+                  "path": "nested/nested/test.mdx",
+                },
+                "format": "page",
+              },
+            ],
+            "file": {
+              "dirname": "nested",
+              "flattenedPath": "nested/nested",
+              "locale": undefined,
+              "name": "nested",
+              "path": "nested/nested",
+            },
+          },
+        ],
+        "file": {
+          "dirname": "",
+          "flattenedPath": "nested",
+          "locale": undefined,
+          "name": "nested",
+          "path": "nested",
+        },
+      },
+    ]
+  `);
 });
 
 test('Building File Graph - with root directory', () => {
   const storage = loadFiles(demoFiles, {
     rootDir: 'nested',
-    getSlugs: () => [''],
+    getSlugs,
   });
 
   expect(storage.root().children).toMatchInlineSnapshot(`
@@ -106,7 +165,7 @@ test('Building File Graph - with root directory', () => {
             "title": "Nested Page",
           },
           "slugs": [
-            "",
+            "test",
           ],
         },
         "file": {
@@ -126,7 +185,8 @@ test('Building File Graph - with root directory', () => {
                 "title": "Nested Nested Page",
               },
               "slugs": [
-                "",
+                "nested",
+                "test",
               ],
             },
             "file": {

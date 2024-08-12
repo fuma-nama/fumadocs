@@ -344,7 +344,7 @@ function Hero(): React.ReactElement {
       </h1>
       <p className="mb-6 h-fit p-2 text-fd-muted-foreground md:max-w-[80%] md:text-xl">
         Fumadocs is the framework for building documentation with{' '}
-        <b className="text-foreground font-medium">
+        <b className="font-medium text-fd-foreground">
           excellent UI and user experience
         </b>
         . Using the power of Next.js App Router and React Component.

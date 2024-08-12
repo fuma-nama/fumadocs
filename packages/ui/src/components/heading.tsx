@@ -18,7 +18,7 @@ export function Heading<T extends Types = 'h1'>({
 
   return (
     <As
-      className={cn('flex scroll-m-20 flex-row items-center gap-2', className)}
+      className={cn('flex scroll-m-28 flex-row items-center gap-2', className)}
       {...props}
     >
       <a href={`#${props.id}`} className="peer">

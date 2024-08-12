@@ -57,7 +57,6 @@ export const docsOptions: DocsLayoutProps = {
     children: undefined,
   },
   sidebar: {
-    defaultOpenLevel: 0,
     banner: (
       <RootToggle
         options={modes.map((mode) => ({

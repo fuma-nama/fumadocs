@@ -41,7 +41,7 @@ export function Toc({ items, header, footer }: TOCProps): ReactElement {
   return (
     <div
       data-toc=""
-      className="sticky top-0 flex h-dvh w-[220px] shrink-0 flex-col gap-4 pr-3 pt-12 max-lg:hidden xl:w-[260px] rtl:pl-3"
+      className="sticky top-0 flex h-dvh w-[var(--fd-c-toc)] min-w-[var(--fd-toc-width)] flex-col gap-4 pe-[max(calc(var(--fd-c-toc)-var(--fd-toc-width)),0.75rem)] pt-12 max-lg:hidden"
     >
       {header}
       <h3 className="-mb-1 -ms-0.5 inline-flex items-center gap-1.5 text-sm text-fd-muted-foreground">
@@ -64,7 +64,7 @@ export function TocPopover({ items, header, footer }: TOCProps): ReactElement {
 
   return (
     <Popover>
-      <PopoverTrigger className="inline-flex items-center gap-2 text-nowrap px-4 py-2 text-left max-md:size-full md:px-3 md:text-fd-muted-foreground">
+      <PopoverTrigger className="inline-flex size-full items-center gap-2 text-nowrap px-4 py-2 text-left md:px-3">
         <Text className="size-4 shrink-0" />
         {text.toc}
         {current ? (

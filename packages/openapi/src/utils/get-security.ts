@@ -1,11 +1,11 @@
 import { type OpenAPIV3 as OpenAPI } from 'openapi-types';
 import { noRef } from '@/utils/schema';
 
-type Security = OpenAPI.SecuritySchemeObject & {
+export type Security = OpenAPI.SecuritySchemeObject & {
   scopes: string[];
 };
 
-export function getScheme(
+export function getSecurities(
   requirement: OpenAPI.SecurityRequirementObject,
   document: OpenAPI.Document,
 ): Security[] {
@@ -23,4 +23,14 @@ export function getScheme(
   }
 
   return results;
+}
+
+export function getSecurityPrefix(security: Security): string | undefined {
+  if (security.type === 'http')
+    return {
+      basic: 'Basic',
+      bearer: 'Bearer',
+    }[security.scheme];
+
+  if (security.type === 'oauth2') return 'Bearer';
 }

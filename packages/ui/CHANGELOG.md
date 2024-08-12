@@ -1,5 +1,19 @@
 # next-docs-ui
 
+## 13.2.0
+
+### Minor Changes
+
+- ba588a2: Support custom max width
+- ec983a3: Change default value of `defaultOpenLevel` to 0
+
+### Patch Changes
+
+- 96c9dda: Change Heading scroll margins
+- 96c9dda: Hide TOC Popover on full mode
+- Updated dependencies [96c9dda]
+  - fumadocs-core@13.2.0
+
 ## 13.1.0
 
 ### Minor Changes

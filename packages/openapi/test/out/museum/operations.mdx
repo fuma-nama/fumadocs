@@ -7,13 +7,13 @@ full: true
 <APIPage operations={[{"method":"get","path":"/museum-hours"}]} hasHead={true} />
 
 export function startup() {
-    if (toc) {
+    if (typeof toc !== 'undefined') {
         // toc might be immutable
         while (toc.length > 0) toc.pop()
         toc.push(...[{"depth":2,"title":"Get museum hours","url":"#get-museum-hours"}])
     }
     
-    if (structuredData) {
+    if (typeof structuredData !== 'undefined') {
         structuredData.headings = [{"content":"Get museum hours","id":"get-museum-hours"}]
         structuredData.contents = [{"content":"Get upcoming museum operating hours","heading":"get-museum-hours"}]
     }

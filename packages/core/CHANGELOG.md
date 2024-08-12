@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 13.2.0
+
+### Patch Changes
+
+- 96c9dda: Change Heading scroll margins
+
 ## 13.1.0
 
 ### Patch Changes

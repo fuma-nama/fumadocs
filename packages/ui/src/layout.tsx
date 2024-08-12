@@ -63,17 +63,44 @@ export function DocsLayout({
     component: sidebarReplace,
     ...sidebar
   } = {},
-  links = [],
   containerProps = {},
-  tree,
   i18n = false,
-  children,
+  ...props
 }: DocsLayoutProps): React.ReactElement {
-  const finalLinks = getLinks(links, githubUrl);
+  const links = getLinks(props.links ?? [], githubUrl);
   const Aside = collapsible ? DynamicSidebar : Sidebar;
 
+  const banner: ReactNode[] = [];
+  if (nav?.title)
+    banner.push(
+      <Link
+        key="title"
+        href={nav.url ?? '/'}
+        className="inline-flex items-center gap-2.5 font-medium"
+      >
+        {nav.title}
+      </Link>,
+    );
+
+  if (links.length > 0)
+    banner.push(
+      <LinksMenu
+        key="links"
+        items={links}
+        className={cn(
+          buttonVariants({
+            size: 'icon',
+            color: 'ghost',
+            className: 'ms-auto',
+          }),
+        )}
+      >
+        <MoreHorizontal />
+      </LinksMenu>,
+    );
+
   return (
-    <TreeContextProvider tree={tree}>
+    <TreeContextProvider tree={props.tree}>
       {replaceOrDefault(nav, <SubNav {...nav} />)}
       <main
         id="nd-docs-layout"
@@ -84,50 +111,36 @@ export function DocsLayout({
           { enabled: sidebarEnabled, component: sidebarReplace },
           <Aside
             {...sidebar}
-            items={finalLinks}
+            items={links}
             banner={
-              <>
-                <div className="flex flex-row items-center justify-between border-b pb-2 max-md:hidden">
-                  <Link
-                    href={nav?.url ?? '/'}
-                    className="inline-flex items-center gap-2.5 font-medium"
-                  >
-                    {nav?.title}
-                  </Link>
-                  {finalLinks.length > 0 && (
-                    <LinksMenu
-                      items={finalLinks}
-                      className={cn(
-                        buttonVariants({
-                          size: 'icon',
-                          color: 'ghost',
-                        }),
-                      )}
-                    >
-                      <MoreHorizontal />
-                    </LinksMenu>
-                  )}
-                </div>
-                {sidebar.banner}
-              </>
+              banner.length > 0 || sidebar.banner ? (
+                <>
+                  {banner.length > 0 ? (
+                    <div className="flex flex-row items-center border-b pb-2 max-md:hidden">
+                      {banner}
+                    </div>
+                  ) : null}
+                  {sidebar.banner}
+                </>
+              ) : null
             }
             bannerProps={{
+              ...sidebar.bannerProps,
               className: cn(
                 !sidebar.banner && 'max-md:hidden',
                 sidebar.bannerProps?.className,
               ),
-              ...sidebar.bannerProps,
             }}
             footer={
               <>
                 <ThemeToggle className="me-auto" />
-                {sidebar.footer}
                 {i18n ? <LanguageToggle /> : null}
+                {sidebar.footer}
               </>
             }
           />,
         )}
-        {children}
+        {props.children}
       </main>
     </TreeContextProvider>
   );

@@ -33,7 +33,7 @@ export interface SidebarProps {
    * Open folders by default if their level is lower or equal to a specific level
    * (Starting from 1)
    *
-   * @defaultValue 1
+   * @defaultValue 0
    */
   defaultOpenLevel?: number;
 
@@ -53,6 +53,13 @@ export interface SidebarProps {
 
   footer?: React.ReactNode;
   footerProps?: HTMLAttributes<HTMLDivElement>;
+
+  /**
+   * Hide search trigger
+   *
+   * @defaultValue false
+   */
+  hideSearch?: boolean;
 }
 
 interface InternalContext {
@@ -74,14 +81,14 @@ const defaultComponents: Components = {
 };
 
 const Context = createContext<InternalContext>({
-  defaultOpenLevel: 1,
+  defaultOpenLevel: 0,
   components: defaultComponents,
   prefetch: true,
 });
 
 export function Sidebar({
   components,
-  defaultOpenLevel = 1,
+  defaultOpenLevel = 0,
   items,
   prefetch = true,
   ...props
@@ -89,6 +96,7 @@ export function Sidebar({
   aside?: HTMLAttributes<HTMLElement> & Record<string, unknown>;
 }): React.ReactElement {
   const search = useSearchContext();
+  const hasSearch = search.enabled && !props.hideSearch;
   const context = useMemo<InternalContext>(
     () => ({
       defaultOpenLevel,
@@ -105,23 +113,25 @@ export function Sidebar({
         blockScrollingWidth={768} // md
         {...props.aside}
         className={cn(
-          'fixed z-30 flex shrink-0 flex-col bg-fd-card text-sm md:sticky md:top-0 md:h-dvh md:w-[240px] md:border-e xl:w-[260px]',
+          'fixed z-30 flex flex-col bg-fd-card text-sm md:sticky md:top-0 md:h-dvh md:w-[var(--fd-c-sidebar)] md:min-w-[var(--fd-sidebar-width)] md:border-e md:ps-[calc(var(--fd-c-sidebar)-var(--fd-sidebar-width))]',
           'max-md:inset-0 max-md:bg-fd-background/80 max-md:pt-14 max-md:text-[15px] max-md:backdrop-blur-md max-md:data-[open=false]:hidden',
           props.aside?.className,
         )}
       >
-        <div
-          {...props.bannerProps}
-          className={cn(
-            'flex flex-col gap-2 px-4 pt-2 md:px-3 md:pt-4',
-            props.bannerProps?.className,
-          )}
-        >
-          {props.banner}
-          {search.enabled ? (
-            <LargeSearchToggle className="rounded-lg max-md:hidden" />
-          ) : null}
-        </div>
+        {hasSearch || props.banner ? (
+          <div
+            {...props.bannerProps}
+            className={cn(
+              'flex flex-col gap-2 px-4 pt-2 md:px-3 md:pt-4',
+              props.bannerProps?.className,
+            )}
+          >
+            {props.banner}
+            {hasSearch ? (
+              <LargeSearchToggle className="rounded-lg max-md:hidden" />
+            ) : null}
+          </div>
+        ) : null}
         <ViewportContent>
           {items.length > 0 && (
             <div className="flex flex-col md:hidden">
@@ -134,7 +144,7 @@ export function Sidebar({
         <div
           {...props.footerProps}
           className={cn(
-            'flex flex-row items-center border-t px-4 pb-2 pt-1 md:px-3',
+            'flex flex-row items-center border-t pb-2 pt-1 max-md:px-4 md:mx-3',
             props.footerProps?.className,
           )}
         >

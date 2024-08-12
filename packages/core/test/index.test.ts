@@ -7,6 +7,7 @@ import {
 import { describe, expect, test } from 'vitest';
 import type { Root } from '@/server/page-tree';
 import { findNeighbour } from '@/server/page-tree-utils';
+import { getSlugs } from '@/source/loader';
 
 test('Find Neighbours', () => {
   const tree: Root = {
@@ -105,4 +106,28 @@ describe('Path utilities', () => {
     expect(splitPath('a//c')).toEqual(['a', 'c']);
     expect(splitPath('/a/c')).toEqual(['a', 'c']);
   });
+});
+
+test('get slugs', () => {
+  expect(getSlugs(parseFilePath('index.mdx'))).toStrictEqual([]);
+  expect(getSlugs(parseFilePath('page.mdx'))).toStrictEqual(['page']);
+
+  expect(getSlugs(parseFilePath('nested/index.mdx'))).toStrictEqual(['nested']);
+  expect(getSlugs(parseFilePath('nested/page.mdx'))).toStrictEqual([
+    'nested',
+    'page',
+  ]);
+});
+
+test('get slugs: folder groups', () => {
+  expect(getSlugs(parseFilePath('(nested)/index.mdx'))).toStrictEqual([]);
+  expect(getSlugs(parseFilePath('folder/(nested)/page.mdx'))).toStrictEqual([
+    'folder',
+    'page',
+  ]);
+
+  expect(getSlugs(parseFilePath('nested/(page).mdx'))).toStrictEqual([
+    'nested',
+    '(page)',
+  ]);
 });
