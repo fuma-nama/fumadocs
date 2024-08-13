@@ -52,29 +52,27 @@ test('Remark Admonition', async () => {
 
 test('Remark Image', async () => {
   const content = readFileSync(path.resolve(cwd, './fixtures/remark-image.md'));
-  const result = await compile(content, {
-    remarkPlugins: [
-      [remarkImage, { publicDir: path.resolve(cwd, './fixtures') }],
-    ],
-  });
+  const result = await remark()
+    .use(remarkImage, { publicDir: path.resolve(cwd, './fixtures') })
+    .use(remarkMdx)
+    .process(content);
 
   expect(result.value).toMatchFileSnapshot(
-    path.resolve(cwd, './fixtures/remark-image.output.js'),
+    path.resolve(cwd, './fixtures/remark-image.output.mdx'),
   );
 });
 
 test('Remark Image: Without Import', async () => {
   const content = readFileSync(path.resolve(cwd, './fixtures/remark-image.md'));
-  const result = await compile(content, {
-    remarkPlugins: [
-      [
-        remarkImage,
-        { publicDir: path.resolve(cwd, './fixtures'), useImport: false },
-      ],
-    ],
-  });
+  const result = await remark()
+    .use(remarkImage, {
+      publicDir: path.resolve(cwd, './fixtures'),
+      useImport: false,
+    })
+    .use(remarkMdx)
+    .process(content);
 
   expect(result.value).toMatchFileSnapshot(
-    path.resolve(cwd, './fixtures/remark-image-without-import.output.js'),
+    path.resolve(cwd, './fixtures/remark-image-without-import.output.mdx'),
   );
 });

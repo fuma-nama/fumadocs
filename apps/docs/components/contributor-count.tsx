@@ -37,7 +37,7 @@ export interface ContributorCounterProps
 export default async function ContributorCounter({
   repoOwner,
   repoName,
-  displayCount = 40,
+  displayCount = 20,
   ...props
 }: ContributorCounterProps): Promise<React.ReactElement> {
   const contributors = await fetchContributors(repoOwner, repoName);
@@ -57,9 +57,7 @@ export default async function ContributorCounter({
             href={`https://github.com/${contributor.login}`}
             rel="noreferrer noopener"
             target="_blank"
-            className={cn(
-              'border-background size-10 overflow-hidden rounded-full border-4 bg-fd-background md:-mr-4 md:size-12',
-            )}
+            className="size-10 overflow-hidden rounded-full border-4 border-fd-background bg-fd-background md:-mr-4 md:size-12"
             style={{
               zIndex: topContributors.length - i,
             }}

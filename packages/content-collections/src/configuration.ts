@@ -12,12 +12,12 @@ import {
   rehypeCode,
   remarkGfm,
   remarkHeading,
+  remarkImage,
   remarkStructure,
   type RemarkHeadingOptions,
   type RehypeCodeOptions,
 } from 'fumadocs-core/mdx-plugins';
 import type { z as Zod } from 'zod';
-import rehypeImgSize from 'rehype-img-size';
 import {
   resolvePlugin,
   resolvePlugins,
@@ -94,7 +94,7 @@ export async function transformMDX<D extends BaseDoc>(
           rehypePlugins: resolvePlugins(
             (plugins) => [
               resolvePlugin(rehypeCode, rehypeCodeOptions ?? true),
-              [rehypeImgSize, { dir: './public' }],
+              [remarkImage, { useImport: false }],
               ...plugins,
             ],
             rest.rehypePlugins,
