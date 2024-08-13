@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react';
 import { type OpenAPIV3 as OpenAPI } from 'openapi-types';
 import Slugger from 'github-slugger';
+import Parser from '@apidevtools/json-schema-ref-parser';
 import { Operation } from '@/render/operation';
 import type { RenderContext } from '@/types';
 import { createMethod } from '@/schema/method';
@@ -11,18 +12,35 @@ export interface ApiPageProps
     RenderContext,
     'generateCodeSamples' | 'generateTypeScriptSchema'
   > {
-  document: OpenAPI.Document;
+  document: string | OpenAPI.Document;
 
   /**
-   * An array of operation
+   * An array of operations
    */
-  operations: { path: string; method: OpenAPI.HttpMethods }[];
+  operations: Operation[];
   hasHead: boolean;
   renderer?: Partial<Renderer>;
 }
 
-export function APIPage(props: ApiPageProps): ReactElement {
-  const { operations, document, hasHead = true } = props;
+const cache = new Map<string, OpenAPI.Document>();
+
+export interface Operation {
+  path: string;
+  method: OpenAPI.HttpMethods;
+}
+
+export async function APIPage(props: ApiPageProps): Promise<ReactElement> {
+  const { operations, hasHead = true } = props;
+  let document: OpenAPI.Document;
+
+  if (typeof props.document === 'string') {
+    const cached = cache.get(props.document);
+    document =
+      cached ?? (await Parser.dereference<OpenAPI.Document>(props.document));
+    cache.set(props.document, document);
+  } else {
+    document = await Parser.dereference<OpenAPI.Document>(props.document);
+  }
 
   const ctx = getContext(document, props);
   return (

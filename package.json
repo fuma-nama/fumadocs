@@ -19,8 +19,8 @@
   "prettier": "@vercel/style-guide/prettier",
   "devDependencies": {
     "@changesets/cli": "^2.27.7",
-    "@typescript-eslint/eslint-plugin": "^8.0.0",
-    "@typescript-eslint/parser": "^8.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.1.0",
+    "@typescript-eslint/parser": "^8.1.0",
     "@vercel/style-guide": "^6.0.0",
     "concurrently": "^8.2.2",
     "eslint": "^8.57.0",
@@ -30,7 +30,7 @@
     "tsup": "8.2.4",
     "turbo": "2.0.12",
     "typescript": "^5.5.4",
-    "vitest": "^2.0.4"
+    "vitest": "^2.0.5"
   },
   "packageManager": "pnpm@9.7.0",
   "engines": {

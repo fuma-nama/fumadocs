@@ -1,95 +1,158 @@
-import { existsSync } from 'node:fs';
 import path from 'node:path';
 import type { Root, RootContent } from 'mdast';
 import type { Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
+import sizeOf from 'image-size';
+import { type ISizeCalculationResult } from 'image-size/dist/types/interface';
 import slash from '@/utils/slash';
 
 const VALID_BLUR_EXT = ['.jpeg', '.png', '.webp', '.avif', '.jpg'];
 const EXTERNAL_URL_REGEX = /^https?:\/\//;
-const PUBLIC_DIR = path.join(process.cwd(), 'public');
 
 export interface RemarkImageOptions {
+  /**
+   * Directory to resolve absolute image paths
+   */
+  publicDir?: string;
+
   /**
    * Preferred placeholder type
    *
    * @defaultValue 'blur'
    */
   placeholder?: 'blur' | 'none';
+
+  /**
+   * Import images in the file, and let bundlers handle it.
+   *
+   * ```tsx
+   * import MyImage from "./public/img.png";
+   *
+   * <img src={MyImage} />
+   * ```
+   *
+   * When disabled, `placeholder` will be ignored.
+   *
+   * @defaultValue true
+   */
+  useImport?: boolean;
+
+  /**
+   * Fetch image size of external URLs
+   *
+   * @defaultValue true
+   */
+  external?: boolean;
 }
 
 // Based on the Nextra: https://github.com/shuding/nextra
 
 /**
- * Turn images into static imports
+ * Turn images into Next.js Image compatible usage.
  */
 export function remarkImage({
   placeholder = 'blur',
+  external = true,
+  useImport = true,
+  publicDir = path.join(process.cwd(), 'public'),
 }: RemarkImageOptions = {}): Transformer<Root, Root> {
-  return (tree, _file, done) => {
+  return async (tree) => {
     const importsToInject: { variableName: string; importPath: string }[] = [];
+    const promises: Promise<void>[] = [];
 
     visit(tree, 'image', (node) => {
-      let url = decodeURI(node.url);
+      const src = decodeURI(node.url);
+      if (!src) return;
+      const isExternal = EXTERNAL_URL_REGEX.test(src);
 
-      if (!url || EXTERNAL_URL_REGEX.test(url)) {
-        return;
-      }
+      if ((isExternal && external) || !useImport) {
+        promises.push(
+          getImageSize(src, publicDir).then((size) => {
+            if (!size.width || !size.height) return;
 
-      if (url.startsWith('/')) {
-        const urlPath = path.join(PUBLIC_DIR, url);
+            Object.assign(node, {
+              type: 'mdxJsxFlowElement',
+              name: 'img',
+              attributes: [
+                {
+                  type: 'mdxJsxAttribute',
+                  name: 'alt',
+                  value: node.alt ?? 'image',
+                },
+                {
+                  type: 'mdxJsxAttribute',
+                  name: 'src',
+                  value: src,
+                },
+                {
+                  type: 'mdxJsxAttribute',
+                  name: 'width',
+                  value: size.width.toString(),
+                },
+                {
+                  type: 'mdxJsxAttribute',
+                  name: 'height',
+                  value: size.height.toString(),
+                },
+              ],
+            });
+          }),
+        );
+      } else if (!isExternal) {
+        // Unique variable name for the given static image URL
+        const variableName = `__img${importsToInject.length.toString()}`;
+        const hasBlur =
+          placeholder === 'blur' &&
+          VALID_BLUR_EXT.some((ext) => src.endsWith(ext));
 
-        if (!existsSync(urlPath)) {
-          return;
-        }
+        importsToInject.push({
+          variableName,
+          importPath: slash(
+            // with imports, relative paths don't have to be absolute
+            src.startsWith('/') ? path.join(publicDir, src) : src,
+          ),
+        });
 
-        url = slash(urlPath);
-      }
-
-      // Unique variable name for the given static image URL
-      const variableName = `__img${importsToInject.length.toString()}`;
-      const hasBlur =
-        placeholder === 'blur' &&
-        VALID_BLUR_EXT.some((ext) => url.endsWith(ext));
-      importsToInject.push({ variableName, importPath: url });
-      // Replace the image node with an MDX component node (Next.js Image)
-      Object.assign(node, {
-        type: 'mdxJsxFlowElement',
-        name: 'img',
-        attributes: [
-          {
-            type: 'mdxJsxAttribute',
-            name: 'alt',
-            value: node.alt ?? 'image',
-          },
-          hasBlur && {
-            type: 'mdxJsxAttribute',
-            name: 'placeholder',
-            value: 'blur',
-          },
-          {
-            type: 'mdxJsxAttribute',
-            name: 'src',
-            value: {
-              type: 'mdxJsxAttributeValueExpression',
-              value: variableName,
-              data: {
-                estree: {
-                  body: [
-                    {
-                      type: 'ExpressionStatement',
-                      expression: { type: 'Identifier', name: variableName },
-                    },
-                  ],
+        Object.assign(node, {
+          type: 'mdxJsxFlowElement',
+          name: 'img',
+          attributes: [
+            {
+              type: 'mdxJsxAttribute',
+              name: 'alt',
+              value: node.alt ?? 'image',
+            },
+            hasBlur && {
+              type: 'mdxJsxAttribute',
+              name: 'placeholder',
+              value: 'blur',
+            },
+            {
+              type: 'mdxJsxAttribute',
+              name: 'src',
+              value: {
+                type: 'mdxJsxAttributeValueExpression',
+                value: variableName,
+                data: {
+                  estree: {
+                    body: [
+                      {
+                        type: 'ExpressionStatement',
+                        expression: { type: 'Identifier', name: variableName },
+                      },
+                    ],
+                  },
                 },
               },
             },
-          },
-        ].filter(Boolean),
-      });
+          ].filter(Boolean),
+        });
+      }
     });
 
-    if (importsToInject.length) {
+    await Promise.all(promises);
+
+    if (importsToInject.length > 0) {
       const imports = importsToInject.map(
         ({ variableName, importPath }) =>
           ({
@@ -115,7 +178,29 @@ export function remarkImage({
 
       tree.children.unshift(...imports);
     }
-
-    done();
   };
+}
+
+/**
+ * Resolve `src` to an absolute path
+ */
+function resolveSrc(src: string, dir: string): string {
+  return src.startsWith('/') || !path.isAbsolute(src)
+    ? path.join(dir, src)
+    : src;
+}
+
+async function getImageSize(
+  src: string,
+  dir: string,
+): Promise<ISizeCalculationResult> {
+  if (EXTERNAL_URL_REGEX.test(src)) {
+    const res = await fetch(src);
+
+    return sizeOf(
+      await res.arrayBuffer().then((buffer) => new Uint8Array(buffer)),
+    );
+  }
+
+  return sizeOf(resolveSrc(src, dir));
 }

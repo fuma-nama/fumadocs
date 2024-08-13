@@ -256,7 +256,7 @@ const searchItemVariants = cva(
 
 function Search(): React.ReactElement {
   return (
-    <div className="from-border mt-6 rounded-lg bg-gradient-to-b p-px">
+    <div className="mt-6 rounded-lg bg-gradient-to-b from-fd-border p-px">
       <div className="flex select-none flex-col rounded-[inherit] bg-gradient-to-b from-fd-popover">
         <div className="inline-flex items-center gap-2 px-4 py-2 text-sm text-fd-muted-foreground">
           <SearchIcon className="size-4" />

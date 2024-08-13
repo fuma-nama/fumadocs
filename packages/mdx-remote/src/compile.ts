@@ -4,11 +4,10 @@ import {
   remarkGfm,
   remarkHeading,
   type RemarkHeadingOptions,
+  remarkImage,
+  type RemarkImageOptions,
 } from 'fumadocs-core/mdx-plugins';
 import type { CompileOptions } from '@mdx-js/mdx';
-import rehypeImgSize, {
-  type Options as RehypeImgSizeOptions,
-} from 'rehype-img-size';
 import type { MDXComponents } from 'mdx/types';
 import { processMDX, type CompileMDXResult } from '@/processor';
 import { pluginOption, type ResolvePlugins } from './utils';
@@ -62,12 +61,13 @@ export async function compileMDX<Frontmatter extends Record<string, unknown>>(
             mdxOptions.rehypeCodeOptions,
           ],
           [
-            rehypeImgSize,
+            remarkImage,
             {
-              dir: mdxOptions.imageDir ?? './public',
-            } satisfies RehypeImgSizeOptions,
-            ...v,
+              useImport: false,
+              publicDir: mdxOptions.imageDir ?? './public',
+            } satisfies RemarkImageOptions,
           ],
+          ...v,
         ],
         mdxOptions.rehypePlugins,
       ),

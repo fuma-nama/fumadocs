@@ -1,11 +1,11 @@
 ---
 title: Remark Image
-description: Convert images into static imports
+description: Make images compatible with Next.js Image Optimization
 ---
 
 ## Usage
 
-Convert images into imports (MDX only).
+Add it to your Remark plugins.
 
 ```ts
 import { remarkImage } from 'fumadocs-core/mdx-plugins';
@@ -15,19 +15,87 @@ export default {
 };
 ```
 
-### Example
+Supported:
+
+- Local Images
+- External URLs
+- Next.js static imports
+
+### How It Works
+
+It transforms your `![image](./test.png)` into Next.js Image usage, and add required props like `width` and `height`.
+
+By default, it uses Next.js static imports to import local images, which supports the `placeholder` option of Next.js Image.
+
+Next.js can handle image imports with its built-in image loader.
 
 ```mdx
-![Hello](./hello.png)
+import MyImage from './public/image.png';
+
+<img alt="image" src={MyImage} />
+```
+
+Otherwise, it obtains the image size from file-system or HTTP request.
+
+```mdx
+<img alt="image" src="/image.png" widht="1980" height="1080" />
+```
+
+### Options
+
+```json doc-gen:typescript
+{
+  "file": "./content/docs/headless/props.ts",
+  "name": "RemarkImageOptions"
+}
+```
+
+### Example: With Imports
+
+```mdx
+![Hello](/hello.png)
+![Test](https://example.com/image.png)
 ```
 
 Yields:
 
 ```mdx
-import HelloImage from './hello.png';
+import HelloImage from './public/hello.png';
 
 <img alt="Hello" src={HelloImage} />
+<img
+  alt="Test"
+  src="https://example.com/image.png"
+  width="1980"
+  height="1080"
+/>
 ```
 
-You need an image loader to handle image imports.
-In Next.js, this is already done by a Webpack/Turbopack plugin
+### Example: Without Imports
+
+You can disable Next.js static imports on local images.
+
+```ts
+import { remarkImage } from 'fumadocs-core/mdx-plugins';
+
+export default {
+  remarkPlugins: [[remarkImage, { useImport: false }]],
+};
+```
+
+```mdx
+![Hello](/hello.png)
+![Test](https://example.com/image.png)
+```
+
+Yields:
+
+```mdx
+<img alt="Hello" src="/hello.png" width="1980" height="1080" />
+<img
+  alt="Test"
+  src="https://example.com/image.png"
+  width="1980"
+  height="1080"
+/>
+```

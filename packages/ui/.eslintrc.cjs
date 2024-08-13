@@ -5,5 +5,6 @@ module.exports = {
     '@typescript-eslint/consistent-type-imports': 'off',
     // some arrays like link items won't be changed
     'react/no-array-index-key': 'off',
+    '@typescript-eslint/unbound-method': 'off',
   },
 };

@@ -15,8 +15,6 @@ It generates the MDX page with correct frontmatter, so you don't have to manuall
 
 It renders the API page, a server component.
 
-The schema passed to server will also be fetched dynamically on server.
-
 ### Markdown
 
 Markdown/MDX content is rendered in the server component (during runtime) using `@mdx-js/mdx`.
@@ -32,11 +30,10 @@ To use the `APIPage` component in your MDX files directly:
 ---
 title: Delete Api
 full: true
-method: POST
-route: /v1/apis.deleteApi
 ---
 
 <APIPage
+  document="./unkey.json"
   operations={[{ path: '/v1/apis.deleteApi', method: 'post' }]}
   hasHead={false}
 />
@@ -44,5 +41,6 @@ route: /v1/apis.deleteApi
 
 | Prop         | Description                               |
 | ------------ | ----------------------------------------- |
+| `document`   | OpenAPI Schema                            |
 | `operations` | Operations (API endpoints) to be rendered |
 | `hasHead`    | Enable to render the heading of operation |

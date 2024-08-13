@@ -1,12 +1,10 @@
+import { resolve } from 'node:path';
 import Parser from '@apidevtools/json-schema-ref-parser';
 import { type OpenAPIV3 as OpenAPI } from 'openapi-types';
-import { type TableOfContents } from 'fumadocs-core/server';
-import { type StructuredData } from 'fumadocs-core/mdx-plugins';
-import Slugger from 'github-slugger';
 import { buildRoutes } from '@/build-routes';
 import { generateDocument } from '@/utils/generate-document';
 import { idToTitle } from '@/utils/id-to-title';
-import { type ApiPageProps } from '@/server/api-page';
+import { type Operation } from '@/server/api-page';
 import type { MethodInformation, RouteInformation } from './types';
 
 export type DocumentContext =
@@ -52,6 +50,8 @@ export interface GenerateOptions {
     description: string | undefined,
     context: DocumentContext,
   ) => Record<string, unknown>;
+
+  cwd?: string;
 }
 
 export interface GenerateTagOutput {
@@ -66,13 +66,27 @@ export interface GenerateOperationOutput {
   route: RouteInformation;
 }
 
+async function dereference(
+  pathOrDocument: string | OpenAPI.Document,
+  options: GenerateOptions,
+): Promise<OpenAPI.Document> {
+  return await Parser.dereference<OpenAPI.Document>(
+    // resolve paths
+    typeof pathOrDocument === 'string' &&
+      !pathOrDocument.startsWith('http://') &&
+      !pathOrDocument.startsWith('https://')
+      ? resolve(options.cwd ?? process.cwd(), pathOrDocument)
+      : pathOrDocument,
+  );
+}
+
 export async function generateAll(
   pathOrDocument: string | OpenAPI.Document,
   options: GenerateOptions = {},
 ): Promise<string> {
-  const document = await Parser.dereference<OpenAPI.Document>(pathOrDocument);
+  const document = await dereference(pathOrDocument, options);
   const routes = buildRoutes(document).get('all') ?? [];
-  const operations: { path: string; method: OpenAPI.HttpMethods }[] = [];
+  const operations: Operation[] = [];
 
   for (const route of routes) {
     for (const method of route.methods) {
@@ -83,25 +97,29 @@ export async function generateAll(
     }
   }
 
-  return generateDocument(
-    pageContent(document, { operations, hasHead: true }),
-    options,
-    {
-      title: document.info.title,
-      description: document.info.description,
-      context: {
-        type: 'file',
-        routes,
-      },
+  return generateDocument({
+    ...options,
+    dereferenced: document,
+    title: document.info.title,
+    description: document.info.description,
+    page: {
+      operations,
+      hasHead: true,
+      document: pathOrDocument,
     },
-  );
+
+    context: {
+      type: 'file',
+      routes,
+    },
+  });
 }
 
 export async function generateOperations(
   pathOrDocument: string | OpenAPI.Document,
   options: GenerateOptions = {},
 ): Promise<GenerateOperationOutput[]> {
-  const document = await Parser.dereference<OpenAPI.Document>(pathOrDocument);
+  const document = await dereference(pathOrDocument, options);
   const routes = buildRoutes(document).get('all') ?? [];
 
   return routes.flatMap<GenerateOperationOutput>((route) => {
@@ -109,8 +127,9 @@ export async function generateOperations(
       if (!method.operationId)
         throw new Error('Operation ID is required for generating docs.');
 
-      const content = generateDocument(
-        pageContent(document, {
+      const content = generateDocument({
+        ...options,
+        page: {
           operations: [
             {
               path: route.path,
@@ -118,18 +137,17 @@ export async function generateOperations(
             },
           ],
           hasHead: false,
-        }),
-        options,
-        {
-          title: method.summary ?? idToTitle(method.operationId),
-          description: method.description,
-          context: {
-            type: 'operation',
-            endpoint: method,
-            route,
-          },
+          document: pathOrDocument,
         },
-      );
+        dereferenced: document,
+        title: method.summary ?? idToTitle(method.operationId),
+        description: method.description,
+        context: {
+          type: 'operation',
+          endpoint: method,
+          route,
+        },
+      });
 
       return {
         content,
@@ -144,14 +162,14 @@ export async function generateTags(
   pathOrDocument: string | OpenAPI.Document,
   options: GenerateOptions = {},
 ): Promise<GenerateTagOutput[]> {
-  const document = await Parser.dereference<OpenAPI.Document>(pathOrDocument);
+  const document = await dereference(pathOrDocument, options);
   const tags = Array.from(buildRoutes(document).entries());
 
   return tags
     .filter(([tag]) => tag !== 'all')
     .map(([tag, routes]) => {
       const info = document.tags?.find((t) => t.name === tag);
-      const operations: { path: string; method: OpenAPI.HttpMethods }[] = [];
+      const operations: Operation[] = [];
 
       for (const route of routes) {
         for (const method of route.methods) {
@@ -164,76 +182,22 @@ export async function generateTags(
 
       return {
         tag,
-        content: generateDocument(
-          pageContent(document, { operations, hasHead: true }),
-          options,
-          {
-            title: idToTitle(tag),
-            description: info?.description,
-            context: {
-              type: 'tag',
-              tag: info,
-              routes,
-            },
+        content: generateDocument({
+          ...options,
+          page: {
+            document: pathOrDocument,
+            operations,
+            hasHead: true,
           },
-        ),
+          dereferenced: document,
+          title: idToTitle(tag),
+          description: info?.description,
+          context: {
+            type: 'tag',
+            tag: info,
+            routes,
+          },
+        }),
       } satisfies GenerateTagOutput;
     });
-}
-
-function pageContent(
-  doc: OpenAPI.Document,
-  props: Omit<ApiPageProps, 'document'>,
-): string {
-  const slugger = new Slugger();
-  const toc: TableOfContents = [];
-  const structuredData: StructuredData = { headings: [], contents: [] };
-
-  for (const item of props.operations) {
-    const operation = doc.paths[item.path]?.[item.method];
-    if (!operation) continue;
-
-    if (props.hasHead && operation.operationId) {
-      const title =
-        operation.summary ??
-        (operation.operationId ? idToTitle(operation.operationId) : item.path);
-      const id = slugger.slug(title);
-
-      toc.push({
-        depth: 2,
-        title,
-        url: `#${id}`,
-      });
-      structuredData.headings.push({
-        content: title,
-        id,
-      });
-    }
-
-    if (operation.description)
-      structuredData.contents.push({
-        content: operation.description,
-        heading: structuredData.headings.at(-1)?.id,
-      });
-  }
-
-  // modify toc and structured data if possible
-  // it may not be compatible with other content sources except Fumadocs MDX
-  // TODO: Maybe add to frontmatter and let developers to handle them?
-  return `<APIPage operations={${JSON.stringify(props.operations)}} hasHead={${JSON.stringify(props.hasHead)}} />
-
-export function startup() {
-    if (typeof toc !== 'undefined') {
-        // toc might be immutable
-        while (toc.length > 0) toc.pop()
-        toc.push(...${JSON.stringify(toc)})
-    }
-    
-    if (typeof structuredData !== 'undefined') {
-        structuredData.headings = ${JSON.stringify(structuredData.headings)}
-        structuredData.contents = ${JSON.stringify(structuredData.contents)}
-    }
-}
-
-{startup()}`;
 }

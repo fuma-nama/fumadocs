@@ -13,6 +13,9 @@ const frontmatterSchema = z.object({
   description: z.string().optional(),
   icon: z.string().optional(),
   full: z.boolean().optional(),
+
+  // Fumadocs OpenAPI generated
+  _openapi: z.object({}).passthrough().optional(),
 });
 
 export const defaultSchemas = {

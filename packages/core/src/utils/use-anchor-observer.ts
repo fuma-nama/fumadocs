@@ -25,19 +25,21 @@ export function useAnchorObserver(watch: string[]): string | undefined {
           return f ?? watch[0];
         });
       },
-      { rootMargin: `-100px 0% -75% 0%`, threshold: 1 },
+      { rootMargin: `-80px 0% -78% 0%`, threshold: 1 },
     );
 
     const scroll = (): void => {
       const element = document.scrollingElement;
       if (!element) return;
 
-      // select the last item when reached the bottom
-      if (
+      if (element.scrollTop === 0) {
+        setActiveAnchor(watch.at(0));
+      } else if (
         element.scrollTop >=
         // assume you have a 10px margin
         element.scrollHeight - element.clientHeight - 10
       ) {
+        // select the last item when reached the bottom
         setActiveAnchor(watch.at(-1));
       }
     };

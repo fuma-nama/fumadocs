@@ -52,6 +52,7 @@ export function CopyRouteButton({
         }),
       )}
       onClick={onCopy}
+      aria-label="Copy route path"
       {...props}
     >
       {checked ? <Check className="size-3" /> : <Copy className="size-3" />}

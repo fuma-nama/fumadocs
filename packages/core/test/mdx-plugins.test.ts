@@ -5,10 +5,12 @@ import { remark } from 'remark';
 import {
   remarkAdmonition,
   remarkHeading,
+  remarkImage,
   remarkStructure,
 } from '@/mdx-plugins';
 import { fileURLToPath } from 'node:url';
 import remarkMdx from 'remark-mdx';
+import { compile } from '@mdx-js/mdx';
 
 const cwd = path.dirname(fileURLToPath(import.meta.url));
 
@@ -45,5 +47,32 @@ test('Remark Admonition', async () => {
 
   expect(result.value).toMatchFileSnapshot(
     path.resolve(cwd, './fixtures/remark-admonition.output.mdx'),
+  );
+});
+
+test('Remark Image', async () => {
+  const content = readFileSync(path.resolve(cwd, './fixtures/remark-image.md'));
+  const result = await remark()
+    .use(remarkImage, { publicDir: path.resolve(cwd, './fixtures') })
+    .use(remarkMdx)
+    .process(content);
+
+  expect(result.value).toMatchFileSnapshot(
+    path.resolve(cwd, './fixtures/remark-image.output.mdx'),
+  );
+});
+
+test('Remark Image: Without Import', async () => {
+  const content = readFileSync(path.resolve(cwd, './fixtures/remark-image.md'));
+  const result = await remark()
+    .use(remarkImage, {
+      publicDir: path.resolve(cwd, './fixtures'),
+      useImport: false,
+    })
+    .use(remarkMdx)
+    .process(content);
+
+  expect(result.value).toMatchFileSnapshot(
+    path.resolve(cwd, './fixtures/remark-image-without-import.output.mdx'),
   );
 });

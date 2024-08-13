@@ -1,5 +1,9 @@
 # create-next-docs-app
 
+## 13.2.2
+
+## 13.2.1
+
 ## 13.2.0
 
 ### Patch Changes

@@ -1,21 +1,26 @@
 ---
 title: Swagger Petstore
 full: true
+_openapi:
+  toc:
+    - depth: 2
+      title: List all pets
+      url: '#list-all-pets'
+    - depth: 2
+      title: Create a pet
+      url: '#create-a-pet'
+    - depth: 2
+      title: Info for a specific pet
+      url: '#info-for-a-specific-pet'
+  structuredData:
+    headings:
+      - content: List all pets
+        id: list-all-pets
+      - content: Create a pet
+        id: create-a-pet
+      - content: Info for a specific pet
+        id: info-for-a-specific-pet
+    contents: []
 ---
 
-<APIPage operations={[{"method":"get","path":"/pets"},{"method":"post","path":"/pets"},{"method":"get","path":"/pets/{petId}"}]} hasHead={true} />
-
-export function startup() {
-    if (typeof toc !== 'undefined') {
-        // toc might be immutable
-        while (toc.length > 0) toc.pop()
-        toc.push(...[{"depth":2,"title":"List all pets","url":"#list-all-pets"},{"depth":2,"title":"Create a pet","url":"#create-a-pet"},{"depth":2,"title":"Info for a specific pet","url":"#info-for-a-specific-pet"}])
-    }
-    
-    if (typeof structuredData !== 'undefined') {
-        structuredData.headings = [{"content":"List all pets","id":"list-all-pets"},{"content":"Create a pet","id":"create-a-pet"},{"content":"Info for a specific pet","id":"info-for-a-specific-pet"}]
-        structuredData.contents = []
-    }
-}
-
-{startup()}
+<APIPage document={"./fixtures/petstore.yaml"} operations={[{"method":"get","path":"/pets"},{"method":"post","path":"/pets"},{"method":"get","path":"/pets/{petId}"}]} hasHead={true} />

@@ -4,6 +4,8 @@ description: Add Theme to Fumadocs UI
 icon: Palette
 ---
 
+import { WidthTrigger } from './theme';
+
 ## Usage
 
 You can import the pre-built stylesheet.
@@ -56,6 +58,18 @@ import { RootProvider } from '@fumadocs-ui/provider';
 
 <RootProvider dir="rtl"></RootProvider>;
 ```
+
+### Layout Width
+
+Customise the max width of docs layout with CSS Variables.
+
+```css
+:root {
+  --fd-layout-width: 1400px;
+}
+```
+
+<WidthTrigger />
 
 ## Themes
 
@@ -126,6 +140,23 @@ export default {
   presets: [
     createPreset({
       addGlobalColors: true,
+    }),
+  ],
+};
+```
+
+### Layout Width
+
+Customise the max width of docs layout with Tailwind CSS plugin.
+
+```js
+import { createPreset } from 'fumadocs-ui/tailwind-plugin';
+
+/** @type {import('tailwindcss').Config} */
+export default {
+  presets: [
+    createPreset({
+      layoutWidth: '1400px',
     }),
   ],
 };

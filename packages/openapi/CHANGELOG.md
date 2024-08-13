@@ -1,5 +1,31 @@
 # @fuma-docs/openapi
 
+## 5.2.0
+
+### Minor Changes
+
+- 70172f1: Change default value of `per` to `operation`
+
+### Patch Changes
+
+- 61b91fa: Improve Fumadocs OpenAPI support
+- Updated dependencies [36b771b]
+- Updated dependencies [61b91fa]
+  - fumadocs-core@13.2.2
+  - fumadocs-ui@13.2.2
+
+## 5.1.0
+
+### Minor Changes
+
+- c7aa090: Generate `document` field on output MDX files
+
+### Patch Changes
+
+- Updated dependencies [17fa173]
+  - fumadocs-core@13.2.1
+  - fumadocs-ui@13.2.1
+
 ## 5.0.3
 
 ### Patch Changes

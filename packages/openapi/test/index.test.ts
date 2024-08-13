@@ -13,22 +13,24 @@ describe('Utilities', () => {
 });
 
 describe('Generate documents', () => {
+  const cwd = fileURLToPath(new URL('./', import.meta.url));
+
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
   test('Pet Store', async () => {
-    const result = await generateAll(
-      fileURLToPath(new URL('./fixtures/petstore.yaml', import.meta.url)),
-    );
+    const result = await generateAll('./fixtures/petstore.yaml', {
+      cwd,
+    });
 
     await expect(result).toMatchFileSnapshot('./out/petstore.mdx');
   });
 
   test('Museum', async () => {
-    const tags = await generateTags(
-      fileURLToPath(new URL('./fixtures/museum.yaml', import.meta.url)),
-    );
+    const tags = await generateTags('./fixtures/museum.yaml', {
+      cwd,
+    });
 
     for (const tag of tags) {
       await expect(tag.content).toMatchFileSnapshot(
@@ -38,9 +40,7 @@ describe('Generate documents', () => {
   });
 
   test('Unkey', async () => {
-    const tags = await generateTags(
-      fileURLToPath(new URL('./fixtures/unkey.json', import.meta.url)),
-    );
+    const tags = await generateTags('./fixtures/unkey.json', { cwd });
 
     for (const tag of tags) {
       await expect(tag.content).toMatchFileSnapshot(
@@ -50,7 +50,6 @@ describe('Generate documents', () => {
   });
 
   test('Generate Files', async () => {
-    const cwd = fileURLToPath(new URL('./', import.meta.url));
     vi.mock('node:fs/promises', async (importOriginal) => {
       return {
         // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- mock
@@ -67,6 +66,7 @@ describe('Generate documents', () => {
     await generateFiles({
       input: ['./fixtures/*.yaml'],
       output: './out',
+      per: 'file',
       cwd,
     });
 

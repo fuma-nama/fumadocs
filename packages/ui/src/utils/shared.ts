@@ -2,7 +2,7 @@ import type { PageTree } from 'fumadocs-core/server';
 import type { ReactNode } from 'react';
 
 export const defaultImageSizes =
-  '(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 800px';
+  '(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 900px';
 
 export function isActive(
   url: string,
