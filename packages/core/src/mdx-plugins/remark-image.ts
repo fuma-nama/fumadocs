@@ -107,7 +107,10 @@ export function remarkImage({
 
         importsToInject.push({
           variableName,
-          importPath: slash(resolveSrc(src, publicDir)),
+          importPath: slash(
+            // with imports, relative paths don't have to be absolute
+            src.startsWith('/') ? path.join(publicDir, src) : src,
+          ),
         });
 
         Object.assign(node, {
