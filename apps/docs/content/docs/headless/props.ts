@@ -3,7 +3,7 @@ import type * as TOC from 'fumadocs-core/toc';
 import type * as Server from 'fumadocs-core/server';
 import type * as Sidebar from 'fumadocs-core/sidebar';
 import type { SortedResult as OriginalSortedResult } from 'fumadocs-core/search/shared';
-import type { ComponentPropsWithoutRef, ElementType } from 'react';
+import type { ElementType } from 'react';
 import type * as MDX from 'fumadocs-core/mdx-plugins';
 
 export type SortedResult = OriginalSortedResult;
@@ -24,3 +24,5 @@ export type PageTreeItem = Server.PageTree.Item;
 export type PageTreeFolder = Server.PageTree.Folder;
 export type PageTreeRoot = Server.PageTree.Root;
 export type PageTreeSeparator = Server.PageTree.Separator;
+
+export type RemarkImageOptions = MDX.RemarkImageOptions;

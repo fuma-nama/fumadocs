@@ -106,15 +106,15 @@
     "@radix-ui/react-popover": "^1.1.1",
     "@radix-ui/react-scroll-area": "^1.1.0",
     "@radix-ui/react-tabs": "^1.1.0",
-    "@tailwindcss/typography": "^0.5.13",
+    "@tailwindcss/typography": "^0.5.14",
     "class-variance-authority": "^0.7.0",
     "cmdk": "^1.0.0",
     "fumadocs-core": "workspace:*",
-    "lucide-react": "^0.414.0",
+    "lucide-react": "^0.427.0",
     "next-themes": "^0.3.0",
     "react-medium-image-zoom": "^5.2.8",
     "swr": "^2.2.5",
-    "tailwind-merge": "^2.4.0"
+    "tailwind-merge": "^2.5.2"
   },
   "devDependencies": {
     "@algolia/client-search": "^4.24.0",
@@ -124,10 +124,10 @@
     "algoliasearch": "^4.24.0",
     "eslint-config-custom": "workspace:*",
     "next": "^14.2.5",
-    "postcss": "^8.4.39",
+    "postcss": "^8.4.41",
     "postcss-cli": "^11.0.0",
-    "postcss-lightningcss": "^1.0.0",
-    "tailwindcss": "^3.4.6",
+    "postcss-lightningcss": "^1.0.1",
+    "tailwindcss": "^3.4.9",
     "tsconfig": "workspace:*"
   },
   "peerDependencies": {
