@@ -66,6 +66,7 @@ describe('Generate documents', () => {
     await generateFiles({
       input: ['./fixtures/*.yaml'],
       output: './out',
+      per: 'file',
       cwd,
     });
 

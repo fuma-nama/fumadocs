@@ -17,10 +17,10 @@ export interface Config extends GenerateOptions {
 
   /**
    * tag: Generate a page for each tag
-   *
    * file: Generate a page for each schema
+   * operation: Generate a page for each API endpoint/operation
    *
-   * @defaultValue file
+   * @defaultValue 'operation'
    */
   per?: 'tag' | 'file' | 'operation';
 
@@ -50,7 +50,7 @@ export async function generateFiles(options: Config): Promise<void> {
     input,
     output,
     name: nameFn,
-    per = 'file',
+    per = 'operation',
     groupBy = 'none',
     cwd = process.cwd(),
   } = options;
