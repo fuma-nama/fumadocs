@@ -40,6 +40,19 @@ export function remarkHeading({
     const toc: TOCItemType[] = [];
     slugger.reset();
 
+    // Fumadocs OpenAPI Generated TOC
+    if (file.data.frontmatter) {
+      const frontmatter = file.data.frontmatter as {
+        _openapi?: {
+          toc?: TOCItemType[];
+        };
+      };
+
+      if (frontmatter._openapi?.toc) {
+        toc.push(...frontmatter._openapi.toc);
+      }
+    }
+
     visit(root, 'heading', (heading) => {
       heading.data ||= {};
       heading.data.hProperties ||= {};

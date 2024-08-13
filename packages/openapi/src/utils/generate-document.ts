@@ -64,7 +64,7 @@ export function generateDocument(
     out.push(imports);
   }
 
-  out.push(pageContent(data, options.page));
+  out.push(pageContent(options.page));
 
   return out.join('\n\n');
 }
@@ -108,24 +108,6 @@ function generateStaticData(
   return { toc, structuredData };
 }
 
-function pageContent(data: StaticData, props: ApiPageProps): string {
-  // modify toc and structured data if possible
-  // it may not be compatible with other content sources except Fumadocs MDX
-  // TODO: Maybe add to frontmatter and let developers to handle them?
-  return `<APIPage document={${JSON.stringify(props.document)}} operations={${JSON.stringify(props.operations)}} hasHead={${JSON.stringify(props.hasHead)}} />
-
-export function startup() {
-    if (typeof toc !== 'undefined') {
-        // toc might be immutable
-        while (toc.length > 0) toc.pop()
-        toc.push(...${JSON.stringify(data.toc)})
-    }
-    
-    if (typeof structuredData !== 'undefined') {
-        structuredData.headings = ${JSON.stringify(data.structuredData.headings)}
-        structuredData.contents = ${JSON.stringify(data.structuredData.contents)}
-    }
-}
-
-{startup()}`;
+function pageContent(props: ApiPageProps): string {
+  return `<APIPage document={${JSON.stringify(props.document)}} operations={${JSON.stringify(props.operations)}} hasHead={${JSON.stringify(props.hasHead)}} />`;
 }

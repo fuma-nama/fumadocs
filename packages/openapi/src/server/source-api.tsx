@@ -18,8 +18,6 @@ export const attachFile: BuildPageTreeOptions['attachFile'] = (node, file) => {
     };
 
     method = meta.method;
-  } else if ('method' in data && typeof data.method === 'string') {
-    method = data.method;
   }
 
   if (method) {

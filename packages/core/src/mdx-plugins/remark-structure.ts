@@ -45,6 +45,20 @@ export function remarkStructure({
     const data: StructuredData = { contents: [], headings: [] };
     let lastHeading: string | undefined = '';
 
+    // Fumadocs OpenAPI Generated Structured Data
+    if (file.data.frontmatter) {
+      const frontmatter = file.data.frontmatter as {
+        _openapi?: {
+          structuredData?: StructuredData;
+        };
+      };
+
+      if (frontmatter._openapi?.structuredData) {
+        data.headings.push(...frontmatter._openapi.structuredData.headings);
+        data.contents.push(...frontmatter._openapi.structuredData.contents);
+      }
+    }
+
     visit(node, types, (element) => {
       if (element.type === 'root') return;
       const content = flattenNode(element).trim();
