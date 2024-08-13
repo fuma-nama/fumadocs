@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 13.2.1
+
+### Patch Changes
+
+- 17fa173: Remark Image: Support fetching image size of external urls
+
 ## 13.2.0
 
 ### Patch Changes

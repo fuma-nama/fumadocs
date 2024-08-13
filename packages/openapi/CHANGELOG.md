@@ -1,5 +1,17 @@
 # @fuma-docs/openapi
 
+## 5.1.0
+
+### Minor Changes
+
+- c7aa090: Generate `document` field on output MDX files
+
+### Patch Changes
+
+- Updated dependencies [17fa173]
+  - fumadocs-core@13.2.1
+  - fumadocs-ui@13.2.1
+
 ## 5.0.3
 
 ### Patch Changes
