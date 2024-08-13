@@ -1,5 +1,13 @@
 # next-docs-mdx
 
+## 9.0.1
+
+### Patch Changes
+
+- c7aa090: Improve Fumadocs OpenAPI support
+- Updated dependencies [17fa173]
+  - fumadocs-core@13.2.1
+
 ## 9.0.0
 
 ### Major Changes

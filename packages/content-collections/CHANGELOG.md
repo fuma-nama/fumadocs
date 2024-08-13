@@ -1,5 +1,13 @@
 # @fumadocs/content-collections
 
+## 1.1.1
+
+### Patch Changes
+
+- c7aa090: Improve Fumadocs OpenAPI support
+- Updated dependencies [17fa173]
+  - fumadocs-core@13.2.1
+
 ## 1.1.0
 
 ### Minor Changes
