@@ -19,7 +19,7 @@ export function Root({
   return (
     <div
       className={cn(
-        'text-fd-muted-foreground flex flex-col gap-24 text-sm',
+        'flex flex-col gap-24 text-sm text-fd-muted-foreground',
         className,
       )}
       {...props}
