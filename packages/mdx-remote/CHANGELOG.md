@@ -1,5 +1,14 @@
 # @fumadocs/mdx-remote
 
+## 0.2.1
+
+### Patch Changes
+
+- 758013f: Use Fumadocs Remark Image instead of `rehype-img-size`
+- Updated dependencies [36b771b]
+- Updated dependencies [61b91fa]
+  - fumadocs-core@13.2.2
+
 ## 0.2.0
 
 ### Minor Changes

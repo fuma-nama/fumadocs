@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 13.2.2
+
+### Patch Changes
+
+- 36b771b: Remark Image: Support relative import path
+- 61b91fa: Improve Fumadocs OpenAPI support
+
 ## 13.2.1
 
 ### Patch Changes
