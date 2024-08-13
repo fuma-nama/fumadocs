@@ -39,9 +39,7 @@ Create an OpenAPI instance on the server. Fumadocs OpenAPI renders the pages on 
 import { createOpenAPI } from 'fumadocs-openapi/server';
 
 export const openapi = createOpenAPI({
-  // Your OpenAPI Schema (content, url, or path)
-  // relative to `cwd`
-  documentOrPath: './unkey.json',
+  // options
 });
 ```
 
@@ -95,21 +93,12 @@ You can add the `attachFile` to decorate the page tree with Source API.
 It adds a badge to each page item.
 
 ```ts title="source.ts"
-import { createMDXSource, defaultSchemas } from 'fumadocs-mdx';
-import { z } from 'zod';
+import { createMDXSource } from 'fumadocs-mdx';
 import { loader } from 'fumadocs-core/source';
 import { attachFile } from 'fumadocs-openapi/server';
 
-const frontmatter = defaultSchemas.frontmatter.extend({
-  method: z.string().optional(),
-});
-
 export const utils = loader({
-  source: createMDXSource(map, {
-    schema: {
-      frontmatter,
-    },
-  }),
+  source: createMDXSource(map),
   pageTree: {
     attachFile,
   },

@@ -14,10 +14,10 @@ export interface OpenAPIServer {
   APIPage: FC<ApiPageProps>;
 }
 
-export function createOpenAPI(options: OpenAPIOptions): OpenAPIServer {
+export function createOpenAPI(options: OpenAPIOptions = {}): OpenAPIServer {
   return {
     APIPage(props) {
-      return <APIPage {...props} />;
+      return <APIPage {...options} {...props} />;
     },
   };
 }

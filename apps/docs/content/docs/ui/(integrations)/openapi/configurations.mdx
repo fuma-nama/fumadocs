@@ -9,7 +9,12 @@ Pass options to the `generateFiles` function.
 
 ### Input
 
-An array of input files (path), wildcard allowed.
+An array of input files.
+Allowed:
+
+- File Paths
+- External URLs
+- Wildcard
 
 ```ts
 import { generateFiles } from 'fumadocs-openapi';
@@ -18,6 +23,14 @@ void generateFiles({
   input: ['./unkey.json'],
 });
 ```
+
+On Next.js server, the schema is dynamically fetched when the `APIPage` component renders.
+
+<Callout type='warn' title='For Vercel'>
+
+    If the schema is passed as a file path, ensure the page **will not** be re-rendered after build.
+
+</Callout>
 
 ### Output
 
@@ -128,27 +141,6 @@ void generateFiles({
 ## OpenAPI Server
 
 The server to render pages.
-
-### Input
-
-The Input OpenAPI schema.
-
-It can be the schema content (as JavaScript Object), a file path, or URL.
-The schema is dynamically fetched when the `APIPage` component renders.
-
-```ts
-import { createOpenAPI } from 'fumadocs-openapi/server';
-
-export const openapi = createOpenAPI({
-  documentOrPath: './unkey.json',
-});
-```
-
-<Callout type='warn' title='For Vercel'>
-
-    If it relies on the file system, ensure the page **will not** be re-rendered after build.
-
-</Callout>
 
 ### Generate Code Samples
 
