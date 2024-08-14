@@ -117,11 +117,11 @@
     "tailwind-merge": "^2.5.2"
   },
   "devDependencies": {
-    "@algolia/client-search": "^4.24.0",
+    "@algolia/client-search": "^5.0.0",
     "@next/eslint-plugin-next": "^14.2.5",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
-    "algoliasearch": "^4.24.0",
+    "algoliasearch": "^5.0.0",
     "eslint-config-custom": "workspace:*",
     "next": "^14.2.5",
     "postcss": "^8.4.41",
