@@ -1,4 +1,4 @@
-import algosearch from 'algoliasearch';
+import { algoliasearch } from 'algoliasearch';
 import { sync } from 'fumadocs-core/search-algolia/server';
 import type { SearchIndex } from 'fumadocs-mdx';
 
@@ -15,7 +15,7 @@ export async function updateSearchIndexes(
     return;
   }
 
-  const client = algosearch(
+  const client = algoliasearch(
     process.env.NEXT_PUBLIC_ALGOLIA_APP_ID,
     process.env.ALGOLIA_API_KEY,
     {

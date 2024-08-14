@@ -1,10 +1,16 @@
-import type { Hit, SearchOptions } from '@algolia/client-search';
-import type { SearchIndex } from 'algoliasearch/lite';
+import type {
+  LiteClient,
+  SearchResult,
+  SearchQuery,
+  SearchForHits,
+} from 'algoliasearch/lite';
 import { useState } from 'react';
 import useSWR, { type SWRResponse } from 'swr';
 import type { SortedResult } from '@/search/shared';
 import { useDebounce } from '@/utils/use-debounce';
 import type { BaseIndex } from './server';
+
+type SearchOptions = SearchForHits;
 
 export interface Options extends SearchOptions {
   /**
@@ -22,11 +28,14 @@ export interface Options extends SearchOptions {
   delay?: number;
 }
 
-export function groupResults(hits: Hit<BaseIndex>[]): SortedResult[] {
+export function groupResults(result: SearchResult<BaseIndex>): SortedResult[] {
   const grouped: SortedResult[] = [];
   const scannedUrls = new Set<string>();
+  if (!('hits' in result)) {
+    return [];
+  }
 
-  for (const hit of hits) {
+  for (const hit of result.hits) {
     if (!scannedUrls.has(hit.url)) {
       scannedUrls.add(hit.url);
 
@@ -50,27 +59,37 @@ export function groupResults(hits: Hit<BaseIndex>[]): SortedResult[] {
 }
 
 export async function searchDocs(
-  index: SearchIndex,
+  client: LiteClient,
   query: string,
-  options?: SearchOptions,
+  options: SearchOptions,
 ): Promise<SortedResult[]> {
   if (query.length === 0) {
-    const result = await index.search<BaseIndex>(query, {
-      distinct: 1,
-      hitsPerPage: 8,
-      ...options,
+    const result = await client.search<BaseIndex>({
+      requests: [
+        {
+          query,
+          distinct: 1,
+          hitsPerPage: 8,
+          ...(options as SearchQuery),
+        },
+      ],
     });
 
-    return groupResults(result.hits).filter((hit) => hit.type === 'page');
+    return groupResults(result.results[0]).filter((hit) => hit.type === 'page');
   }
 
-  const result = await index.search<BaseIndex>(query, {
-    distinct: 5,
-    hitsPerPage: 10,
-    ...options,
+  const result = await client.search<BaseIndex>({
+    requests: [
+      {
+        query,
+        distinct: 5,
+        hitsPerPage: 10,
+        ...(options as SearchQuery),
+      },
+    ],
   });
 
-  return groupResults(result.hits);
+  return groupResults(result.results[0]);
 }
 
 interface UseAlgoliaSearch {
@@ -84,8 +103,8 @@ interface UseAlgoliaSearch {
 }
 
 export function useAlgoliaSearch(
-  index: SearchIndex,
-  { allowEmpty = true, delay = 150, ...options }: Options = {},
+  client: LiteClient,
+  { allowEmpty = true, delay = 150, ...options }: Options,
 ): UseAlgoliaSearch {
   const [search, setSearch] = useState('');
   const debouncedValue = useDebounce(search, delay);
@@ -95,7 +114,7 @@ export function useAlgoliaSearch(
     async () => {
       if (allowEmpty && debouncedValue.length === 0) return 'empty';
 
-      return searchDocs(index, debouncedValue, options);
+      return searchDocs(client, debouncedValue, options);
     },
     {
       keepPreviousData: true,

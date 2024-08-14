@@ -1,6 +1,6 @@
 'use client';
 
-import type { SearchIndex } from 'algoliasearch/lite';
+import type { LiteClient } from 'algoliasearch/lite';
 import {
   type Options,
   useAlgoliaSearch,
@@ -15,8 +15,9 @@ import {
 } from './search';
 
 export interface AlgoliaSearchDialogProps extends SharedProps {
-  index: SearchIndex;
-  searchOptions?: Options;
+  client: LiteClient;
+  searchOptions: Options;
+
   footer?: ReactNode;
 
   defaultTag?: string;
@@ -31,7 +32,7 @@ export interface AlgoliaSearchDialogProps extends SharedProps {
 }
 
 export default function AlgoliaSearchDialog({
-  index,
+  client,
   searchOptions,
   tags,
   defaultTag,
@@ -39,13 +40,13 @@ export default function AlgoliaSearchDialog({
   ...props
 }: AlgoliaSearchDialogProps): React.ReactElement {
   const [tag, setTag] = useState(defaultTag);
-  let filters = searchOptions?.filters;
+  let filters = searchOptions.filters;
 
   if (tag) {
     filters = filters ? `tag:${tag} AND (${filters})` : `tag:${tag}`;
   }
 
-  const { search, setSearch, query } = useAlgoliaSearch(index, {
+  const { search, setSearch, query } = useAlgoliaSearch(client, {
     ...searchOptions,
     filters,
   });
