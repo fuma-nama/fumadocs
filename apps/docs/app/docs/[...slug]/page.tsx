@@ -1,7 +1,12 @@
 import { Edit } from 'lucide-react';
 import type { Metadata } from 'next';
-import { Card, Cards } from 'fumadocs-ui/components/card';
-import { DocsPage, DocsBody } from 'fumadocs-ui/page';
+import {
+  DocsPage,
+  DocsBody,
+  DocsCategory,
+  DocsTitle,
+  DocsDescription,
+} from 'fumadocs-ui/page';
 import { notFound } from 'next/navigation';
 import { type ReactNode } from 'react';
 import { utils, type Page } from '@/utils/source';
@@ -54,13 +59,9 @@ export default function Page({
       }}
       tableOfContentPopover={{ footer }}
     >
-      <h1 className="text-3xl font-bold text-fd-foreground sm:text-4xl">
-        {page.data.title}
-      </h1>
+      <DocsTitle>{page.data.title}</DocsTitle>
       {page.data.description ? (
-        <p className="mb-8 text-lg text-fd-muted-foreground">
-          {page.data.description}
-        </p>
+        <DocsDescription>{page.data.description}</DocsDescription>
       ) : null}
       <DocsBody>
         {preview && preview in Preview ? Preview[preview] : null}
@@ -76,31 +77,11 @@ export default function Page({
                 : () => undefined,
           }}
         />
-        {page.data.index ? <Category page={page} /> : null}
+        {page.data.index ? (
+          <DocsCategory page={page} pages={utils.getPages()} />
+        ) : null}
       </DocsBody>
     </DocsPage>
-  );
-}
-
-function Category({ page }: { page: Page }): React.ReactElement {
-  const filtered = utils
-    .getPages()
-    .filter(
-      (item) =>
-        item.file.dirname === page.file.dirname && item.file.name !== 'index',
-    );
-
-  return (
-    <Cards>
-      {filtered.map((item) => (
-        <Card
-          key={item.url}
-          title={item.data.title}
-          description={item.data.description ?? 'No Description'}
-          href={item.url}
-        />
-      ))}
-    </Cards>
   );
 }
 

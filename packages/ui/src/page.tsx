@@ -1,5 +1,7 @@
 import { type TableOfContents } from 'fumadocs-core/server';
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
+import type { Page } from 'fumadocs-core/source';
+import { Card, Cards } from './components/card';
 import { replaceOrDefault } from './utils/shared';
 import { cn } from './utils/cn';
 import type { BreadcrumbProps, FooterProps, TOCProps } from './page.client';
@@ -118,6 +120,43 @@ export function DocsPage({
   );
 }
 
+export const DocsDescription = forwardRef<
+  HTMLParagraphElement,
+  HTMLAttributes<HTMLParagraphElement>
+>((props, ref) => {
+  return (
+    <p
+      ref={ref}
+      {...props}
+      className={cn('mb-8 text-lg text-fd-muted-foreground', props.className)}
+    >
+      {props.children}
+    </p>
+  );
+});
+
+DocsDescription.displayName = 'DocsDescription';
+
+export const DocsTitle = forwardRef<
+  HTMLHeadingElement,
+  HTMLAttributes<HTMLHeadingElement>
+>((props, ref) => {
+  return (
+    <h1
+      ref={ref}
+      {...props}
+      className={cn(
+        'text-3xl font-bold text-fd-foreground sm:text-4xl',
+        props.className,
+      )}
+    >
+      {props.children}
+    </h1>
+  );
+});
+
+DocsTitle.displayName = 'DocsTitle';
+
 /**
  * Add typography styles
  */
@@ -127,6 +166,37 @@ export const DocsBody = forwardRef<
 >(({ className, ...props }, ref) => (
   <div ref={ref} className={cn('prose', className)} {...props} />
 ));
+
+export function DocsCategory({
+  page,
+  pages,
+  ...props
+}: HTMLAttributes<HTMLDivElement> & {
+  page: Page;
+  pages: Page[];
+}): React.ReactElement {
+  const filtered = pages.filter(
+    (item) =>
+      item.file.dirname === page.file.dirname &&
+      item.file.name !== page.file.name,
+  );
+
+  return (
+    <Cards {...props}>
+      {filtered.map((item) => (
+        <Card
+          key={item.url}
+          title={item.data.title}
+          description={
+            (item.data as { description?: string }).description ??
+            'No Description'
+          }
+          href={item.url}
+        />
+      ))}
+    </Cards>
+  );
+}
 
 DocsBody.displayName = 'DocsBody';
 
@@ -139,8 +209,8 @@ export function withArticle({
   children: React.ReactNode;
 }): React.ReactElement {
   return (
-    <main className="container py-12">
-      <article className="prose">{children}</article>
-    </main>
+    <article className="prose mx-auto w-full max-w-container py-12">
+      {children}
+    </article>
   );
 }
