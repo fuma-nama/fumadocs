@@ -6,14 +6,14 @@ import { mergeRefs } from '@/utils/merge-refs';
 import { useOnChange } from '@/utils/use-on-change';
 import { useAnchorObserver } from './utils/use-anchor-observer';
 
-const ActiveAnchorContext = createContext<string | undefined>(undefined);
+const ActiveAnchorContext = createContext<string[]>([]);
 
 const ScrollContext = createContext<RefObject<HTMLElement>>({ current: null });
 
 /**
- * The id of active anchor (doesn't include hash)
+ * The id of active anchors (doesn't include hash)
  */
-export function useActiveAnchor(): string | undefined {
+export function useActiveAnchor(): string[] {
   return useContext(ActiveAnchorContext);
 }
 
@@ -50,10 +50,8 @@ export function AnchorProvider({
     return toc.map((item) => item.url.split('#')[1]);
   }, [toc]);
 
-  const activeAnchor = useAnchorObserver(headings);
-
   return (
-    <ActiveAnchorContext.Provider value={activeAnchor}>
+    <ActiveAnchorContext.Provider value={useAnchorObserver(headings)}>
       {children}
     </ActiveAnchorContext.Provider>
   );
@@ -73,7 +71,7 @@ export const TOCItem = forwardRef<HTMLAnchorElement, TOCItemProps>(
     const anchorRef = useRef<HTMLAnchorElement>(null);
     const mergedRef = mergeRefs(anchorRef, ref);
 
-    const isActive = activeAnchor === props.href.split('#')[1];
+    const isActive = activeAnchor.includes(props.href.split('#')[1]);
 
     useOnChange(isActive, (v) => {
       const element = anchorRef.current;

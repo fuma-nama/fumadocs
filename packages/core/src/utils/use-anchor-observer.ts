@@ -8,43 +8,28 @@ import { useEffect, useState } from 'react';
  * @param watch - An array of element ids to watch
  * @returns Active anchor
  */
-export function useAnchorObserver(watch: string[]): string | undefined {
-  const [activeAnchor, setActiveAnchor] = useState<string>();
+export function useAnchorObserver(watch: string[]): string[] {
+  const [activeAnchor, setActiveAnchor] = useState<string[]>([]);
 
   useEffect(() => {
+    let visible: string[] = [];
     const observer = new IntersectionObserver(
       (entries) => {
-        setActiveAnchor((f) => {
-          for (const entry of entries) {
-            if (entry.isIntersecting) {
-              return entry.target.id;
-            }
+        for (const entry of entries) {
+          if (entry.isIntersecting && !visible.includes(entry.target.id)) {
+            visible = [...visible, entry.target.id];
+          } else if (
+            !entry.isIntersecting &&
+            visible.includes(entry.target.id)
+          ) {
+            visible = visible.filter((v) => v !== entry.target.id);
           }
+        }
 
-          // use the first item if not found
-          return f ?? watch[0];
-        });
+        if (visible.length > 0) setActiveAnchor(visible);
       },
-      { rootMargin: `-80px 0% -78% 0%`, threshold: 1 },
+      { rootMargin: `-20px 0% -40% 0%`, threshold: 1 },
     );
-
-    const scroll = (): void => {
-      const element = document.scrollingElement;
-      if (!element) return;
-
-      if (element.scrollTop === 0) {
-        setActiveAnchor(watch.at(0));
-      } else if (
-        element.scrollTop >=
-        // assume you have a 10px margin
-        element.scrollHeight - element.clientHeight - 10
-      ) {
-        // select the last item when reached the bottom
-        setActiveAnchor(watch.at(-1));
-      }
-    };
-
-    window.addEventListener('scroll', scroll);
 
     for (const heading of watch) {
       const element = document.getElementById(heading);
@@ -55,7 +40,6 @@ export function useAnchorObserver(watch: string[]): string | undefined {
     }
 
     return () => {
-      window.removeEventListener('scroll', scroll);
       observer.disconnect();
     };
   }, [watch]);

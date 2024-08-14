@@ -58,8 +58,7 @@ export function TocPopover({ items, header, footer }: TOCProps): ReactElement {
   const { text } = useI18n();
   const active = Primitive.useActiveAnchor();
   const current = useMemo(() => {
-    if (!active) return;
-    return items.find((item) => item.url === `#${active}`)?.title;
+    return items.find((item) => active.includes(item.url.slice(1)))?.title;
   }, [items, active]);
 
   return (
@@ -99,18 +98,30 @@ function TOCItems({
 }): React.ReactElement {
   const { text } = useI18n();
   const containerRef = useRef<HTMLDivElement>(null);
-  const [pos, setPos] = useState<PosType>();
+  const [pos, setPos] = useState<PosType>([0, 0]);
   const active = Primitive.useActiveAnchor();
 
   useLayoutEffect(() => {
     const container = containerRef.current;
-    if (!active || !container) return;
+    if (active.length === 0 || !container || container.clientHeight === 0) {
+      setPos([0, 0]);
+      return;
+    }
 
-    const element: HTMLElement | null = container.querySelector(
-      `a[href="#${active}"]`,
-    );
-    if (!element) return;
-    setPos([element.offsetTop, element.clientHeight]);
+    let upper = Number.MAX_VALUE,
+      lower = 0;
+
+    for (const item of active) {
+      const element: HTMLElement | null = container.querySelector(
+        `a[href="#${item}"]`,
+      );
+      if (!element) continue;
+
+      upper = Math.min(upper, element.offsetTop);
+      lower = Math.max(lower, element.offsetTop + element.clientHeight);
+    }
+
+    setPos([upper, lower - upper]);
   }, [active]);
 
   if (items.length === 0)
@@ -125,18 +136,17 @@ function TOCItems({
       <ScrollViewport className="relative min-h-0 text-sm" ref={containerRef}>
         <div
           role="none"
-          className="absolute start-0 w-0.5 bg-fd-primary transition-all"
+          className="absolute start-0 w-px bg-fd-primary transition-all"
           style={{
-            top: pos ? `${pos[0].toString()}px` : undefined,
-            height: pos ? `${pos[1].toString()}px` : undefined,
-            display: pos ? 'block' : 'hidden',
+            top: `${pos[0].toString()}px`,
+            height: `${pos[1].toString()}px`,
           }}
         />
         <Primitive.ScrollProvider containerRef={containerRef}>
           <div
             className={cn(
               'flex flex-col gap-1 text-fd-muted-foreground',
-              !isMenu && 'border-s-2 border-fd-foreground/10',
+              !isMenu && 'border-s border-fd-foreground/10',
             )}
           >
             {items.map((item) => (
@@ -154,10 +164,10 @@ function TOCItem({ item }: { item: TOCItemType }): React.ReactElement {
     <Primitive.TOCItem
       href={item.url}
       className={cn(
-        'py-1 transition-colors [overflow-wrap:anywhere] data-[active=true]:font-medium data-[active=true]:text-fd-primary',
-        item.depth <= 2 && 'ps-4',
-        item.depth === 3 && 'ps-7',
-        item.depth >= 4 && 'ps-10',
+        'py-0.5 transition-colors [overflow-wrap:anywhere] data-[active=true]:text-fd-primary',
+        item.depth <= 2 && 'ps-3.5',
+        item.depth === 3 && 'ps-6',
+        item.depth >= 4 && 'ps-8',
       )}
     >
       {item.title}
