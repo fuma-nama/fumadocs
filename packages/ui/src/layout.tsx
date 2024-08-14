@@ -102,7 +102,7 @@ export function DocsLayout({
       </LinksMenu>,
     );
 
-  footer.push(<ThemeToggle />);
+  footer.push(<ThemeToggle key="theme" />);
 
   if (i18n) {
     footer.push(<LanguageToggle key="i18n" />);
