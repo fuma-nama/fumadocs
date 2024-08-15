@@ -16,9 +16,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { ClerkTOCItems } from '@/components/layout/toc-clerk';
 import { ScrollArea, ScrollViewport } from '../ui/scroll-area';
 
-type PosType = [top: number, height: number];
+export type PosType = [top: number, height: number];
 
 export interface TOCProps {
   items: TOCItemType[];
@@ -48,7 +49,7 @@ export function Toc({ items, header, footer }: TOCProps): ReactElement {
         <Text className="size-4" />
         {text.toc}
       </h3>
-      <TOCItems items={items} />
+      <ClerkTOCItems items={items} />
       {footer}
     </div>
   );
@@ -82,13 +83,14 @@ export function TocPopover({ items, header, footer }: TOCProps): ReactElement {
         data-toc-popover=""
       >
         {header}
-        <TOCItems items={items} isMenu />
+        <ClerkTOCItems items={items} isMenu />
         {footer}
       </PopoverContent>
     </Popover>
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- test
 function TOCItems({
   items,
   isMenu = false,
@@ -138,14 +140,14 @@ function TOCItems({
           role="none"
           className="absolute start-0 w-px bg-fd-primary transition-all"
           style={{
-            top: `${pos[0].toString()}px`,
-            height: `${pos[1].toString()}px`,
+            top: pos[0],
+            height: pos[1],
           }}
         />
         <Primitive.ScrollProvider containerRef={containerRef}>
           <div
             className={cn(
-              'flex flex-col gap-1 text-fd-muted-foreground',
+              'flex flex-col text-fd-muted-foreground',
               !isMenu && 'border-s border-fd-foreground/10',
             )}
           >
@@ -164,7 +166,7 @@ function TOCItem({ item }: { item: TOCItemType }): React.ReactElement {
     <Primitive.TOCItem
       href={item.url}
       className={cn(
-        'py-0.5 transition-colors [overflow-wrap:anywhere] data-[active=true]:text-fd-primary',
+        'py-1.5 transition-colors [overflow-wrap:anywhere] data-[active=true]:text-fd-primary',
         item.depth <= 2 && 'ps-3.5',
         item.depth === 3 && 'ps-6',
         item.depth >= 4 && 'ps-8',
