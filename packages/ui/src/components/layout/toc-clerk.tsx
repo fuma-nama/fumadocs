@@ -1,12 +1,13 @@
+'use client';
 import type { TOCItemType } from 'fumadocs-core/server';
 import * as Primitive from 'fumadocs-core/toc';
 import { useLayoutEffect, useRef, useState } from 'react';
 import { cn } from '@/utils/cn';
 import { useI18n } from '@/contexts/i18n';
-import type { PosType } from '@/components/layout/toc';
+import { useTocThumb } from '@/utils/use-toc-thumb';
 import { ScrollArea, ScrollViewport } from '../ui/scroll-area';
 
-export function ClerkTOCItems({
+export default function ClerkTOCItems({
   items,
   isMenu = false,
 }: {
@@ -15,36 +16,12 @@ export function ClerkTOCItems({
 }): React.ReactElement {
   const { text } = useI18n();
   const containerRef = useRef<HTMLDivElement>(null);
-  const [pos, setPos] = useState<PosType>([0, 0]);
-  const active = Primitive.useActiveAnchors();
+  const pos = useTocThumb(containerRef);
   const [svg, setSvg] = useState<{
     path: string;
     width: number;
     height: number;
   }>();
-
-  useLayoutEffect(() => {
-    const container = containerRef.current;
-    if (active.length === 0 || !container || container.clientHeight === 0) {
-      setPos([0, 0]);
-      return;
-    }
-
-    let upper = Number.MAX_VALUE,
-      lower = 0;
-
-    for (const item of active) {
-      const element: HTMLElement | null = container.querySelector(
-        `a[href="#${item}"]`,
-      );
-      if (!element) continue;
-
-      upper = Math.min(upper, element.offsetTop);
-      lower = Math.max(lower, element.offsetTop + element.clientHeight);
-    }
-
-    setPos([upper, lower - upper]);
-  }, [active]);
 
   useLayoutEffect(() => {
     if (!containerRef.current) return;
@@ -56,18 +33,18 @@ export function ClerkTOCItems({
         h = 0;
       const d: string[] = [];
       for (let i = 0; i < items.length; i++) {
-        const item = items[i];
         const element: HTMLElement | null = container.querySelector(
-          `a[href="#${item.url.slice(1)}"]`,
+          `a[href="#${items[i].url.slice(1)}"]`,
         );
         if (!element) continue;
 
-        const offset = getLineOffset(item.depth) + 1,
-          top = i === 0 ? element.offsetTop : element.offsetTop + 8,
+        const styles = getComputedStyle(element);
+        const offset = getLineOffset(items[i].depth) + 1,
+          top = element.offsetTop + parseFloat(styles.paddingTop),
           bottom =
-            i === items.length - 1
-              ? element.offsetTop + element.clientHeight
-              : element.offsetTop + element.clientHeight - 8;
+            element.offsetTop +
+            element.clientHeight -
+            parseFloat(styles.paddingBottom);
 
         w = Math.max(offset, w);
         h = Math.max(h, bottom);
@@ -172,7 +149,7 @@ function TOCItem({
       style={{
         paddingInlineStart: `${getItemOffset(item.depth)}px`,
       }}
-      className="relative py-2 transition-colors [overflow-wrap:anywhere] data-[active=true]:text-fd-primary"
+      className="relative py-2 transition-colors [overflow-wrap:anywhere] first:pt-0 last:pb-0 data-[active=true]:text-fd-primary"
     >
       {offset !== getLineOffset(upper) ? (
         <svg

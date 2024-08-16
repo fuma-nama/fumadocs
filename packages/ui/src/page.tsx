@@ -1,5 +1,6 @@
 import { type TableOfContents } from 'fumadocs-core/server';
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
+import dynamic from 'next/dynamic';
 import { replaceOrDefault } from './utils/shared';
 import { cn } from './utils/cn';
 import type { BreadcrumbProps, FooterProps, TOCProps } from './page.client';
@@ -9,13 +10,21 @@ declare const {
   TocPopover,
   Breadcrumb,
   Footer,
+  TOCItems,
   TocProvider,
   LastUpdate,
 }: typeof import('./page.client');
 
-type TableOfContentOptions = Omit<TOCProps, 'items'> & {
+const ClerkTOCItems = dynamic(() => import('@/components/layout/toc-clerk'));
+
+type TableOfContentOptions = Omit<TOCProps, 'items' | 'children'> & {
   enabled: boolean;
   component: ReactNode;
+
+  /**
+   * @defaultValue 'normal'
+   */
+  style?: 'normal' | 'clerk';
 };
 
 interface BreadcrumbOptions extends BreadcrumbProps {
@@ -95,7 +104,13 @@ export function DocsPage({
               items={toc}
               header={tocPopoverOptions.header}
               footer={tocPopoverOptions.footer}
-            />
+            >
+              {tocPopoverOptions.style === 'clerk' ? (
+                <ClerkTOCItems items={toc} isMenu />
+              ) : (
+                <TOCItems items={toc} isMenu />
+              )}
+            </TocPopover>
           </div>,
         )}
         <article className="flex flex-1 flex-col gap-6 px-4 pt-10 md:px-6 md:pt-12">
@@ -108,11 +123,13 @@ export function DocsPage({
       </div>
       {replaceOrDefault(
         tocOptions,
-        <Toc
-          items={toc}
-          header={tocOptions.header}
-          footer={tocOptions.footer}
-        />,
+        <Toc header={tocOptions.header} footer={tocOptions.footer}>
+          {tocOptions.style === 'clerk' ? (
+            <ClerkTOCItems items={toc} />
+          ) : (
+            <TOCItems items={toc} />
+          )}
+        </Toc>,
       )}
     </TocProvider>
   );

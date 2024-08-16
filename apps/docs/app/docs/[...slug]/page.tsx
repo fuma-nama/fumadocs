@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { Card, Cards } from 'fumadocs-ui/components/card';
 import { DocsPage, DocsBody } from 'fumadocs-ui/page';
 import { notFound } from 'next/navigation';
-import { type ReactNode } from 'react';
+import { Fragment } from 'react';
 import { utils, type Page } from '@/utils/source';
 import { createMetadata } from '@/utils/metadata';
 import Preview from '@/components/preview';
@@ -51,6 +51,7 @@ export default function Page({
       full={page.data.full}
       tableOfContent={{
         footer,
+        style: 'clerk',
       }}
       tableOfContentPopover={{ footer }}
     >
@@ -67,13 +68,8 @@ export default function Page({
         <page.data.exports.default
           components={{
             HeadlessOnly:
-              params.slug[0] === 'headless'
-                ? ({ children }: { children: ReactNode }) => children
-                : () => undefined,
-            UIOnly:
-              params.slug[0] === 'ui'
-                ? ({ children }: { children: ReactNode }) => children
-                : () => undefined,
+              params.slug[0] === 'headless' ? Fragment : () => undefined,
+            UIOnly: params.slug[0] === 'ui' ? Fragment : () => undefined,
           }}
         />
         {page.data.index ? <Category page={page} /> : null}
