@@ -59,7 +59,7 @@ export function TocPopover({ items, header, footer }: TOCProps): ReactElement {
   const { text } = useI18n();
   const active = Primitive.useActiveAnchor();
   const current = useMemo(() => {
-    return items.find((item) => active.includes(item.url.slice(1)))?.title;
+    return items.find((item) => active === item.url.slice(1))?.title;
   }, [items, active]);
 
   return (
@@ -101,7 +101,7 @@ function TOCItems({
   const { text } = useI18n();
   const containerRef = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<PosType>([0, 0]);
-  const active = Primitive.useActiveAnchor();
+  const active = Primitive.useActiveAnchors();
 
   useLayoutEffect(() => {
     const container = containerRef.current;

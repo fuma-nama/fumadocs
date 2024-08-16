@@ -16,7 +16,7 @@ export function ClerkTOCItems({
   const { text } = useI18n();
   const containerRef = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<PosType>([0, 0]);
-  const active = Primitive.useActiveAnchor();
+  const active = Primitive.useActiveAnchors();
   const [svg, setSvg] = useState<{
     path: string;
     width: number;
@@ -47,38 +47,49 @@ export function ClerkTOCItems({
   }, [active]);
 
   useLayoutEffect(() => {
+    if (!containerRef.current) return;
     const container = containerRef.current;
-    if (!container || container.clientHeight === 0) return;
 
-    let w = 0,
-      h = 0;
-    const d: string[] = [];
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
-      const element: HTMLElement | null = container.querySelector(
-        `a[href="#${item.url.slice(1)}"]`,
-      );
-      if (!element) continue;
+    function onResize(): void {
+      if (container.clientHeight === 0) return;
+      let w = 0,
+        h = 0;
+      const d: string[] = [];
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        const element: HTMLElement | null = container.querySelector(
+          `a[href="#${item.url.slice(1)}"]`,
+        );
+        if (!element) continue;
 
-      const offset = getLineOffset(item.depth) + 1,
-        top = i === 0 ? element.offsetTop : element.offsetTop + 8,
-        bottom =
-          i === items.length - 1
-            ? element.offsetTop + element.clientHeight
-            : element.offsetTop + element.clientHeight - 8;
+        const offset = getLineOffset(item.depth) + 1,
+          top = i === 0 ? element.offsetTop : element.offsetTop + 8,
+          bottom =
+            i === items.length - 1
+              ? element.offsetTop + element.clientHeight
+              : element.offsetTop + element.clientHeight - 8;
 
-      w = Math.max(offset, w);
-      h = Math.max(h, bottom);
+        w = Math.max(offset, w);
+        h = Math.max(h, bottom);
 
-      d.push(`${i === 0 ? 'M' : 'L'}${offset} ${top}`);
-      d.push(`L${offset} ${bottom}`);
+        d.push(`${i === 0 ? 'M' : 'L'}${offset} ${top}`);
+        d.push(`L${offset} ${bottom}`);
+      }
+
+      setSvg({
+        path: d.join(' '),
+        width: w + 1,
+        height: h,
+      });
     }
 
-    setSvg({
-      path: d.join(' '),
-      width: w + 1,
-      height: h,
-    });
+    const observer = new ResizeObserver(onResize);
+    onResize();
+
+    observer.observe(container);
+    return () => {
+      observer.disconnect();
+    };
   }, [items]);
 
   if (items.length === 0)
@@ -102,8 +113,8 @@ export function ClerkTOCItems({
               height: svg.height,
               maskImage: `url("data:image/svg+xml,${
                 // Inline SVG
-                encodeURI(
-                  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${svg.width} ${svg.height}"><path d="${svg.path}" stroke="black" stroke-width="1.5" fill="none" /></svg>`,
+                encodeURIComponent(
+                  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${svg.width} ${svg.height}"><path d="${svg.path}" stroke="black" stroke-width="1" fill="none" /></svg>`,
                 )
               }")`,
             }}
@@ -111,8 +122,8 @@ export function ClerkTOCItems({
             <div
               className="bg-fd-primary transition-all"
               style={{
+                marginTop: pos[0],
                 height: pos[1],
-                transform: `translateY(${pos[0]}px)`,
               }}
             />
           </div>

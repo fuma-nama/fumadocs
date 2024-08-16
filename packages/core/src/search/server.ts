@@ -1,7 +1,7 @@
 import { Document } from 'flexsearch';
 import { type NextRequest, NextResponse } from 'next/server';
 import type { StructuredData } from '@/mdx-plugins/remark-structure';
-import type { SortedResult } from './shared';
+import type { SortedResult } from '@/server/types';
 
 interface SearchAPI {
   GET: (request: NextRequest) => Promise<NextResponse<SortedResult[]>>;

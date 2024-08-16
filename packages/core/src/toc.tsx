@@ -11,9 +11,16 @@ const ActiveAnchorContext = createContext<string[]>([]);
 const ScrollContext = createContext<RefObject<HTMLElement>>({ current: null });
 
 /**
- * The id of active anchors (doesn't include hash)
+ * The estimated active heading ID
  */
-export function useActiveAnchor(): string[] {
+export function useActiveAnchor(): string | undefined {
+  return useContext(ActiveAnchorContext).at(-1);
+}
+
+/**
+ * The id of visible anchors
+ */
+export function useActiveAnchors(): string[] {
   return useContext(ActiveAnchorContext);
 }
 
@@ -67,11 +74,11 @@ export interface TOCItemProps
 export const TOCItem = forwardRef<HTMLAnchorElement, TOCItemProps>(
   ({ onActiveChange, ...props }, ref) => {
     const containerRef = useContext(ScrollContext);
-    const activeAnchor = useActiveAnchor();
+    const anchors = useActiveAnchors();
     const anchorRef = useRef<HTMLAnchorElement>(null);
     const mergedRef = mergeRefs(anchorRef, ref);
 
-    const isActive = activeAnchor.includes(props.href.split('#')[1]);
+    const isActive = anchors.includes(props.href.slice(1));
 
     useOnChange(isActive, (v) => {
       const element = anchorRef.current;
