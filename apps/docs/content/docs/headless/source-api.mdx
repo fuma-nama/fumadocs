@@ -1,6 +1,6 @@
 ---
 title: Source API
-description: Turn a content source into an unified interface
+description: Turn a content source into a unified interface
 ---
 
 ## Usage
@@ -143,10 +143,10 @@ To plug your own content source, create a `Source` object.
 
 It includes a `files` property which is an array of virtual files.
 Each virtual file must contain its file path and corresponding data.
-Yo can check type definitions for more info.
+You can check type definitions for more info.
 
 Since Source API doesn't rely on file system, file paths cannot be absolute or relative (for example, `./file.mdx` and `D://content/file.mdx` are not allowed).
-Instead, pass the file paths like `file.mdx` and`content/file.mdx`.
+Instead, pass the file paths like `file.mdx` and `content/file.mdx`.
 
 ```ts
 import { Source } from 'fumadocs-core/source';
