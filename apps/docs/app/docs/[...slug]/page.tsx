@@ -9,7 +9,7 @@ import {
 } from 'fumadocs-ui/page';
 import { notFound } from 'next/navigation';
 import { type ReactNode } from 'react';
-import { utils, type Page } from '@/utils/source';
+import { utils } from '@/utils/source';
 import { createMetadata } from '@/utils/metadata';
 import Preview from '@/components/preview';
 import { cn } from '@/utils/cn';
@@ -60,9 +60,7 @@ export default function Page({
       tableOfContentPopover={{ footer }}
     >
       <DocsTitle>{page.data.title}</DocsTitle>
-      {page.data.description ? (
-        <DocsDescription>{page.data.description}</DocsDescription>
-      ) : null}
+      <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>
         {preview && preview in Preview ? Preview[preview] : null}
         <page.data.exports.default

@@ -136,6 +136,9 @@ export const DocsDescription = forwardRef<
   HTMLParagraphElement,
   HTMLAttributes<HTMLParagraphElement>
 >((props, ref) => {
+  // don't render if no description provided
+  if (props.children === undefined) return null;
+
   return (
     <p
       ref={ref}
@@ -157,7 +160,7 @@ export const DocsTitle = forwardRef<
     <h1
       ref={ref}
       {...props}
-      className={cn('text-3xl font-bold sm:text-4xl', props.className)}
+      className={cn('text-2xl font-bold sm:text-3xl', props.className)}
     >
       {props.children}
     </h1>
