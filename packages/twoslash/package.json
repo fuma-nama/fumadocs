@@ -25,7 +25,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@shikijs/twoslash": "^1.12.1",
+    "@shikijs/twoslash": "^1.13.0",
     "mdast-util-from-markdown": "^2.0.1",
     "mdast-util-gfm": "^3.0.0",
     "mdast-util-to-hast": "^13.2.0"
@@ -35,7 +35,7 @@
     "@types/mdast": "^4.0.3",
     "eslint-config-custom": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "shiki": "^1.12.1",
+    "shiki": "^1.13.0",
     "tsconfig": "workspace:*"
   },
   "peerDependencies": {

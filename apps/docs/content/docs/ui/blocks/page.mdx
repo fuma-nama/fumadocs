@@ -9,12 +9,31 @@ Footer, and Breadcrumb.
 ## Usage
 
 ```tsx
-import { DocsPage, DocsBody } from 'fumadocs-ui/page';
+import {
+  DocsPage,
+  DocsDescription,
+  DocsTitle,
+  DocsBody,
+} from 'fumadocs-ui/page';
 
 <DocsPage>
+  <DocsTitle>title</DocsTitle>
+  <DocsDescription>description</DocsDescription>
   <DocsBody>...</DocsBody>
 </DocsPage>;
 ```
+
+### Page
+
+The main layout of docs pages.
+
+### Title
+
+Page title.
+
+### Description
+
+Page description.
 
 ### Body
 
@@ -28,6 +47,21 @@ import { DocsBody } from 'fumadocs-ui/page';
 <DocsBody>
   <h1>This heading looks good!</h1>
 </DocsBody>;
+```
+
+### Category
+
+Optional, display the other pages in its folder.
+
+> You can use this component without `<DocsPage />`.
+
+```tsx
+import { DocsPage, DocsCategory } from 'fumadocs-ui/page';
+import { getPages } from '@/app/source';
+
+<DocsPage>
+  <DocsCategory page={page} pages={getPages()} />
+</DocsPage>;
 ```
 
 ## Configurations

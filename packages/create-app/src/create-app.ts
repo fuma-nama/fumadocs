@@ -111,6 +111,7 @@ function createPackageJson(
       'react-dom': versionPkg.dependencies['react-dom'],
     },
     devDependencies: {
+      '@types/node': versionPkg.dependencies['@types/node'],
       '@types/react': versionPkg.dependencies['@types/react'],
       '@types/react-dom': versionPkg.dependencies['@types/react-dom'],
       typescript: versionPkg.dependencies.typescript,

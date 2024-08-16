@@ -1,6 +1,8 @@
 import { type TableOfContents } from 'fumadocs-core/server';
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import dynamic from 'next/dynamic';
+import type { Page } from 'fumadocs-core/source';
+import { Card, Cards } from '@/components/card';
 import { replaceOrDefault } from './utils/shared';
 import { cn } from './utils/cn';
 import type { BreadcrumbProps, FooterProps, TOCProps } from './page.client';
@@ -144,6 +146,76 @@ export const DocsBody = forwardRef<
 >(({ className, ...props }, ref) => (
   <div ref={ref} className={cn('prose', className)} {...props} />
 ));
+
+DocsBody.displayName = 'DocsBody';
+
+export const DocsDescription = forwardRef<
+  HTMLParagraphElement,
+  HTMLAttributes<HTMLParagraphElement>
+>((props, ref) => {
+  // don't render if no description provided
+  if (props.children === undefined) return null;
+
+  return (
+    <p
+      ref={ref}
+      {...props}
+      className={cn('mb-8 text-lg text-fd-muted-foreground', props.className)}
+    >
+      {props.children}
+    </p>
+  );
+});
+
+DocsDescription.displayName = 'DocsDescription';
+
+export const DocsTitle = forwardRef<
+  HTMLHeadingElement,
+  HTMLAttributes<HTMLHeadingElement>
+>((props, ref) => {
+  return (
+    <h1
+      ref={ref}
+      {...props}
+      className={cn('text-2xl font-bold sm:text-3xl', props.className)}
+    >
+      {props.children}
+    </h1>
+  );
+});
+
+DocsTitle.displayName = 'DocsTitle';
+
+export function DocsCategory({
+  page,
+  pages,
+  ...props
+}: HTMLAttributes<HTMLDivElement> & {
+  page: Page;
+  pages: Page[];
+}): React.ReactElement {
+  const filtered = pages.filter(
+    (item) =>
+      item.file.dirname === page.file.dirname &&
+      item.file.name !== page.file.name,
+  );
+
+  return (
+    <Cards {...props}>
+      {filtered.map((item) => (
+        <Card
+          key={item.url}
+          title={item.data.title}
+          description={
+            (item.data as { description?: string }).description ??
+            'No Description'
+          }
+          href={item.url}
+        />
+      ))}
+    </Cards>
+  );
+}
 
 DocsBody.displayName = 'DocsBody';
 
