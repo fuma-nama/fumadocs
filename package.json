@@ -28,11 +28,11 @@
     "prettier": "^3.3.3",
     "rimraf": "^6.0.1",
     "tsup": "8.2.4",
-    "turbo": "2.0.12",
+    "turbo": "2.0.14",
     "typescript": "^5.5.4",
     "vitest": "^2.0.5"
   },
-  "packageManager": "pnpm@9.7.0",
+  "packageManager": "pnpm@9.7.1",
   "engines": {
     "node": ">= 18.17.0"
   }

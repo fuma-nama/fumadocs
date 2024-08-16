@@ -1,6 +1,11 @@
 import { getPage, getPages } from '@/app/source';
 import type { Metadata } from 'next';
-import { DocsPage, DocsBody } from 'fumadocs-ui/page';
+import {
+  DocsPage,
+  DocsBody,
+  DocsTitle,
+  DocsDescription,
+} from 'fumadocs-ui/page';
 import { notFound } from 'next/navigation';
 import { MDXContent } from '@content-collections/mdx/react';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
@@ -12,8 +17,9 @@ export default function Page({ params }: { params: { slug?: string[] } }) {
 
   return (
     <DocsPage toc={page.data.toc} full={page.data.full}>
+      <DocsTitle>{page.data.title}</DocsTitle>
+      <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>
-        <h1>{page.data.title}</h1>
         <MDXContent
           code={page.data.body}
           components={{ ...defaultMdxComponents }}

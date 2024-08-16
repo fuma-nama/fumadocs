@@ -1,6 +1,11 @@
 import { getPage, getLanguages } from '@/app/source';
 import type { Metadata } from 'next';
-import { DocsPage, DocsBody } from 'fumadocs-ui/page';
+import {
+  DocsPage,
+  DocsBody,
+  DocsTitle,
+  DocsDescription,
+} from 'fumadocs-ui/page';
 import { notFound } from 'next/navigation';
 
 export default async function Page({
@@ -18,8 +23,9 @@ export default async function Page({
 
   return (
     <DocsPage toc={page.data.exports.toc}>
+      <DocsTitle>{page.data.title}</DocsTitle>
+      <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>
-        <h1>{page.data.title}</h1>
         <MDX />
       </DocsBody>
     </DocsPage>
