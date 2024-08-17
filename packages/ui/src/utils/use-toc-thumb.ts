@@ -1,4 +1,4 @@
-import { RefObject, useLayoutEffect, useState } from 'react';
+import { type RefObject, useLayoutEffect, useState } from 'react';
 import * as Primitive from 'fumadocs-core/toc';
 
 export type TOCThumb = [top: number, height: number];

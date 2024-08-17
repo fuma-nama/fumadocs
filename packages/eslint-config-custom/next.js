@@ -44,11 +44,5 @@ module.exports = {
     'import/no-unresolved': 'off',
 
     '@next/next/no-html-link-for-pages': 'off',
-    '@typescript-eslint/restrict-template-expressions': [
-      'error',
-      {
-        allowNumber: true,
-      },
-    ],
   },
 };

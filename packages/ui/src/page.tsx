@@ -2,6 +2,7 @@ import { type TableOfContents } from 'fumadocs-core/server';
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import dynamic from 'next/dynamic';
 import type { Page } from 'fumadocs-core/source';
+import { type AnchorProviderProps, AnchorProvider } from 'fumadocs-core/toc';
 import { Card, Cards } from '@/components/card';
 import { replaceOrDefault } from './utils/shared';
 import { cn } from './utils/cn';
@@ -13,21 +14,23 @@ declare const {
   Breadcrumb,
   Footer,
   TOCItems,
-  TocProvider,
   LastUpdate,
 }: typeof import('./page.client');
 
 const ClerkTOCItems = dynamic(() => import('@/components/layout/toc-clerk'));
 
-type TableOfContentOptions = Omit<TOCProps, 'items' | 'children'> & {
-  enabled: boolean;
-  component: ReactNode;
+type TableOfContentOptions = Omit<TOCProps, 'items' | 'children'> &
+  Pick<AnchorProviderProps, 'single'> & {
+    enabled: boolean;
+    component: ReactNode;
 
-  /**
-   * @defaultValue 'normal'
-   */
-  style?: 'normal' | 'clerk';
-};
+    /**
+     * @defaultValue 'normal'
+     */
+    style?: 'normal' | 'clerk';
+  };
+
+type TableOfContentPopoverOptions = Omit<TableOfContentOptions, 'single'>;
 
 interface BreadcrumbOptions extends BreadcrumbProps {
   enabled: boolean;
@@ -50,8 +53,7 @@ export interface DocsPageProps {
   full?: boolean;
 
   tableOfContent?: Partial<TableOfContentOptions>;
-
-  tableOfContentPopover?: Partial<TableOfContentOptions>;
+  tableOfContentPopover?: Partial<TableOfContentPopoverOptions>;
 
   /**
    * Replace or disable breadcrumb
@@ -85,7 +87,7 @@ export function DocsPage({
   };
 
   return (
-    <TocProvider toc={toc}>
+    <AnchorProvider toc={toc} single={tableOfContent.single}>
       <div
         className={cn(
           'mx-auto flex min-w-0 max-w-[860px] flex-1 flex-col',
@@ -133,7 +135,7 @@ export function DocsPage({
           )}
         </Toc>,
       )}
-    </TocProvider>
+    </AnchorProvider>
   );
 }
 

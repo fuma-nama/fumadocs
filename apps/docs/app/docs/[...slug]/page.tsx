@@ -9,7 +9,7 @@ import {
 } from 'fumadocs-ui/page';
 import { notFound } from 'next/navigation';
 import { Fragment } from 'react';
-import { utils, type Page } from '@/utils/source';
+import { utils } from '@/utils/source';
 import { createMetadata } from '@/utils/metadata';
 import Preview from '@/components/preview';
 import { cn } from '@/utils/cn';
@@ -57,6 +57,7 @@ export default function Page({
       tableOfContent={{
         footer,
         style: 'clerk',
+        single: true,
       }}
       tableOfContentPopover={{ footer }}
     >

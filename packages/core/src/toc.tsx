@@ -1,3 +1,4 @@
+'use client';
 import type { AnchorHTMLAttributes, ReactNode, RefObject } from 'react';
 import { createContext, forwardRef, useContext, useMemo, useRef } from 'react';
 import scrollIntoView from 'scroll-into-view-if-needed';
@@ -26,6 +27,12 @@ export function useActiveAnchors(): string[] {
 
 export interface AnchorProviderProps {
   toc: TableOfContents;
+  /**
+   * Only accept one active item at most
+   *
+   * @defaultValue false
+   */
+  single?: boolean;
   children?: ReactNode;
 }
 
@@ -51,6 +58,7 @@ export function ScrollProvider({
 
 export function AnchorProvider({
   toc,
+  single = false,
   children,
 }: AnchorProviderProps): React.ReactElement {
   const headings = useMemo(() => {
@@ -58,7 +66,7 @@ export function AnchorProvider({
   }, [toc]);
 
   return (
-    <ActiveAnchorContext.Provider value={useAnchorObserver(headings)}>
+    <ActiveAnchorContext.Provider value={useAnchorObserver(headings, single)}>
       {children}
     </ActiveAnchorContext.Provider>
   );

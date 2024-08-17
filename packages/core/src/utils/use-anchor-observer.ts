@@ -6,9 +6,10 @@ import { useEffect, useState } from 'react';
  * It selects the top heading by default, and the last item when reached the bottom of page.
  *
  * @param watch - An array of element ids to watch
+ * @param single - only one active item at most
  * @returns Active anchor
  */
-export function useAnchorObserver(watch: string[]): string[] {
+export function useAnchorObserver(watch: string[], single: boolean): string[] {
   const [activeAnchor, setActiveAnchor] = useState<string[]>([]);
 
   useEffect(() => {
@@ -26,9 +27,13 @@ export function useAnchorObserver(watch: string[]): string[] {
           }
         }
 
-        if (visible.length > 0) setActiveAnchor(visible);
+        if (visible.length > 0)
+          setActiveAnchor(single ? visible.slice(0, 1) : visible);
       },
-      { rootMargin: `-20px 0% -40% 0%`, threshold: 1 },
+      {
+        rootMargin: single ? '-80px 0% -70% 0%' : `-20px 0% -40% 0%`,
+        threshold: 1,
+      },
     );
 
     for (const heading of watch) {
@@ -42,7 +47,7 @@ export function useAnchorObserver(watch: string[]): string[] {
     return () => {
       observer.disconnect();
     };
-  }, [watch]);
+  }, [single, watch]);
 
   return activeAnchor;
 }

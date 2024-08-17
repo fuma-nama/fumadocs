@@ -26,8 +26,6 @@ export interface TOCProps {
   children: ReactNode;
 }
 
-export const TocProvider = Primitive.AnchorProvider;
-
 export function Toc({ header, footer, children }: TOCProps): ReactElement {
   const { text } = useI18n();
 
