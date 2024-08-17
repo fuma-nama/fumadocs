@@ -123,31 +123,21 @@ with Fumadocs UI later.
 
 Use `createI18nSearchAPI` for i18n functionality.
 
-<div className='steps'>
+<div className='steps [&_h4]:step'>
 
-<div className='step'>
+<h4>Update the route handler</h4>
 
-Update the route handler.
-
-```ts title="api/search/route.ts"
-import { languages } from '@/i18n';
-import { getPages } from '@/source';
-import { createI18nSearchAPI } from 'fumadocs-core/search/server';
-
-export const { GET } = createI18nSearchAPI('advanced', {
-  indexes: languages.map((lang) => {
-    const pages = getPages(lang)!.map((page) => ({
-      ...
-    }));
-
-    return [lang, pages];
-  }),
-});
+```json doc-gen:file
+{
+  "file": "../../examples/i18n/app/api/search/route.ts",
+  "codeblock": {
+    "lang": "ts",
+    "meta": "title=\"app/api/search/route.ts\""
+  }
+}
 ```
 
-</div>
-
-<div className='step'>
+<h4>Update search client</h4>
 
 Add `locale` to search dialog, this will only allow pages with specified
 
@@ -165,8 +155,6 @@ function Dialog() {
   //...
 }
 ```
-
-</div>
 
 </div>
 
