@@ -67,6 +67,10 @@
     "./search-algolia/server": {
       "import": "./dist/search-algolia/server.js",
       "types": "./dist/search-algolia/server.d.ts"
+    },
+    "./i18n": {
+      "import": "./dist/i18n/index.js",
+      "types": "./dist/i18n/index.d.ts"
     }
   },
   "typesVersions": {
@@ -112,6 +116,9 @@
       ],
       "search-algolia/server": [
         "./dist/search-algolia/server.d.ts"
+      ],
+      "i18n": [
+        "./dist/i18n/index.d.ts"
       ]
     }
   },

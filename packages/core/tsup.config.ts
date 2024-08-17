@@ -13,5 +13,6 @@ export default defineConfig({
     'src/utils/use-on-change.ts',
     'src/{search,search-algolia}/server.ts',
     'src/middleware.ts',
+    'src/i18n/index.ts',
   ],
 });

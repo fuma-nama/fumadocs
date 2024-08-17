@@ -3,6 +3,7 @@ import type { ReactNode, HTMLAttributes } from 'react';
 import Link from 'next/link';
 import { MoreHorizontal } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import { notFound } from 'next/navigation';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/theme/variants';
 import type { SidebarProps } from '@/components/layout/sidebar';
@@ -67,9 +68,12 @@ export function DocsLayout({
   containerProps = {},
   i18n = false,
   ...props
-}: DocsLayoutProps): React.ReactElement {
+}: DocsLayoutProps): React.ReactNode {
   const links = getLinks(props.links ?? [], githubUrl);
   const Aside = collapsible ? DynamicSidebar : Sidebar;
+
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Prevent people passing undefined page tree
+  if (props.tree === undefined) notFound();
 
   const banner: ReactNode[] = [];
   const footer: ReactNode[] = [];

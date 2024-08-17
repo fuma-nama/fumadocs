@@ -14,10 +14,7 @@ export default async function Page({
   params: { lang: string; slug?: string[] };
 }) {
   const page = getPage(params.slug, params.lang);
-
-  if (page == null) {
-    notFound();
-  }
+  if (!page) notFound();
 
   const MDX = page.data.exports.default;
 
@@ -47,8 +44,7 @@ export function generateMetadata({
   params: { lang: string; slug?: string[] };
 }) {
   const page = getPage(params.slug, params.lang);
-
-  if (page == null) notFound();
+  if (!page) notFound();
 
   return {
     title: page.data.title,
