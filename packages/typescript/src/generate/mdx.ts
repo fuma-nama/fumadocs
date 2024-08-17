@@ -1,5 +1,5 @@
 import * as path from 'node:path';
-import { type TypescriptConfig, getProgram, getFileSymbol } from '../program';
+import { type TypescriptConfig, getProgram, getFileSymbol } from '@/program';
 import {
   type DocEntry,
   type GeneratedDoc,

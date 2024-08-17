@@ -1,4 +1,5 @@
 import type * as PageTree from '@/server/page-tree';
+import type { I18nConfig } from '@/i18n';
 import {
   loadFiles,
   type LoadOptions,
@@ -6,10 +7,7 @@ import {
   type Transformer,
 } from './load-files';
 import type { MetaData, PageData, UrlFn } from './types';
-import type {
-  BuildPageTreeOptions,
-  BuildPageTreeOptionsWithI18n,
-} from './page-tree-builder';
+import type { BuildPageTreeOptions } from './page-tree-builder';
 import { createPageTreeBuilder } from './page-tree-builder';
 import { type FileInfo } from './path';
 import type { File, PageFile, Storage } from './file-system';
@@ -24,8 +22,7 @@ export interface SourceConfig {
   metaData: MetaData;
 }
 
-export interface LoaderOptions
-  extends Pick<BuildPageTreeOptionsWithI18n, 'languages' | 'defaultLanguage'> {
+export interface LoaderOptions {
   /**
    * @defaultValue `''`
    */
@@ -38,6 +35,7 @@ export interface LoaderOptions
   icon?: NonNullable<BuildPageTreeOptions['resolveIcon']>;
   slugs?: LoadOptions['getSlugs'];
   url?: UrlFn;
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Inevitable
   source: Source<any>;
   transformers?: Transformer[];
@@ -46,6 +44,27 @@ export interface LoaderOptions
    * Additional options for page tree builder
    */
   pageTree?: Partial<Omit<BuildPageTreeOptions, 'storage' | 'getUrl'>>;
+
+  /**
+   * Configure i18n
+   */
+  i18n?: I18nConfig;
+
+  /**
+   * Accepted languages.
+   *
+   * A page tree will be built for each language.
+   *
+   * @deprecated Use `i18n` instead
+   */
+  languages?: string[];
+
+  /**
+   * Default locale when locale is not provided.
+   *
+   * @deprecated Use `i18n` instead
+   */
+  defaultLanguage?: string;
 }
 
 export interface Source<Config extends SourceConfig> {
@@ -100,8 +119,8 @@ export interface LoaderOutput<Config extends LoaderConfig> {
 
 function buildPageMap(
   storage: Storage,
-  languages: string[],
   getUrl: UrlFn,
+  languages: string[] = [],
 ): Map<string, Map<string, Page>> {
   const map = new Map<string, Map<string, Page>>();
   const defaultMap = new Map<string, Page>();
@@ -156,22 +175,40 @@ export function loader<Options extends LoaderOptions>(
   options: Options,
 ): LoaderOutput<{
   source: InferSourceConfig<Options['source']>;
-  i18n: Options['languages'] extends string[] ? true : false;
+  i18n: Options['i18n'] extends I18nConfig
+    ? true
+    : Options['languages'] extends string[]
+      ? true
+      : false;
 }> {
+  // TODO: Remove deprecated `languages` option (major)
+  if (options.languages) {
+    console.warn(
+      "Fumadocs: It's highly recommended to use `i18n` config instead of passing `languages` to loader.",
+    );
+
+    return createOutput({
+      ...options,
+      i18n: {
+        languages: options.languages,
+        defaultLanguage: options.defaultLanguage,
+      },
+    }) as ReturnType<typeof loader<Options>>;
+  }
+
   return createOutput(options) as ReturnType<typeof loader<Options>>;
 }
 
 function createOutput({
   source,
   icon: resolveIcon,
-  languages,
   rootDir = '',
   transformers,
   baseUrl = '/',
   slugs: slugsFn = getSlugs,
   url: getUrl = createGetUrl(baseUrl),
-  defaultLanguage,
   pageTree: pageTreeOptions = {},
+  i18n,
 }: LoaderOptions): LoaderOutput<LoaderConfig> {
   const storage = loadFiles(
     typeof source.files === 'function' ? source.files(rootDir) : source.files,
@@ -181,10 +218,10 @@ function createOutput({
       getSlugs: slugsFn,
     },
   );
-  const i18nMap = buildPageMap(storage, languages ?? [], getUrl);
+  const i18nMap = buildPageMap(storage, getUrl, i18n?.languages);
   const builder = createPageTreeBuilder();
   const pageTree =
-    languages === undefined
+    i18n === undefined
       ? builder.build({
           storage,
           resolveIcon,
@@ -192,18 +229,17 @@ function createOutput({
           ...pageTreeOptions,
         })
       : builder.buildI18n({
-          languages,
           storage,
           resolveIcon,
           getUrl,
-          defaultLanguage,
+          i18n,
           ...pageTreeOptions,
         });
 
   return {
     pageTree: pageTree as LoaderOutput<LoaderConfig>['pageTree'],
     files: storage.list(),
-    getPages(language = '') {
+    getPages(language = i18n?.defaultLanguage ?? '') {
       return Array.from(i18nMap.get(language)?.values() ?? []);
     },
     getLanguages() {
@@ -220,7 +256,7 @@ function createOutput({
 
       return list;
     },
-    getPage(slugs = [], language = '') {
+    getPage(slugs = [], language = i18n?.defaultLanguage ?? '') {
       return i18nMap.get(language)?.get(slugs.join('/'));
     },
   };

@@ -1,19 +1,35 @@
 import { expect, test } from 'vitest';
-import { createGetUrl, getSlugs, loader } from '@/source/loader';
+import {
+  createGetUrl,
+  getSlugs,
+  loader,
+  type Source,
+  type SourceConfig,
+} from '@/source/loader';
 import { parseFilePath } from '@/source';
 
-test('Get Slugs', () => {
-  expect(getSlugs(parseFilePath('path/to/file'))).toStrictEqual([
-    'path',
-    'to',
-    'file',
+test('get slugs', () => {
+  expect(getSlugs(parseFilePath('index.mdx'))).toStrictEqual([]);
+  expect(getSlugs(parseFilePath('page.mdx'))).toStrictEqual(['page']);
+
+  expect(getSlugs(parseFilePath('nested/index.mdx'))).toStrictEqual(['nested']);
+  expect(getSlugs(parseFilePath('nested/page.mdx'))).toStrictEqual([
+    'nested',
+    'page',
   ]);
-  expect(getSlugs(parseFilePath('path/(group)/file'))).toStrictEqual([
-    'path',
-    'file',
+});
+
+test('get slugs: folder groups', () => {
+  expect(getSlugs(parseFilePath('(nested)/index.mdx'))).toStrictEqual([]);
+  expect(getSlugs(parseFilePath('folder/(nested)/page.mdx'))).toStrictEqual([
+    'folder',
+    'page',
   ]);
 
-  expect(getSlugs(parseFilePath(''))).toStrictEqual([]);
+  expect(getSlugs(parseFilePath('nested/(page).mdx'))).toStrictEqual([
+    'nested',
+    '(page)',
+  ]);
 });
 
 test('Get URL: Empty', () => {
@@ -29,7 +45,7 @@ test('Get URL: Base', () => {
   expect(getUrl([''])).toBe('/docs');
 });
 
-test('Page Tree: Simple', () => {
+test('Loader: Simple', () => {
   const result = loader({
     source: {
       files: [
@@ -68,7 +84,7 @@ test('Page Tree: Simple', () => {
   expect(result.getPage(['test'])).toBeDefined();
 });
 
-test('Page Tree: Nested Directories', async () => {
+test('Nested Directories', async () => {
   const result = loader({
     source: {
       files: [
@@ -159,63 +175,68 @@ test('Page Tree: Nested Directories', async () => {
   expect(result.getPage(['hello'])).toBeDefined();
 });
 
-test('Page Tree: Internationalized Routing', () => {
-  const result = loader({
-    languages: ['cn', 'en'],
-    source: {
-      files: [
-        {
-          type: 'page',
-          path: 'test.mdx',
-          data: {
-            title: 'Hello',
-          },
-        },
-        {
-          type: 'page',
-          path: 'test.cn.mdx',
-          data: {
-            title: 'Hello Chinese',
-          },
-        },
-        {
-          type: 'meta',
-          path: 'meta.json',
-          data: {
-            pages: ['test', 'nested'],
-          },
-        },
-        {
-          type: 'meta',
-          path: 'meta.cn.json',
-          data: {
-            title: 'Docs Chinese',
-            pages: ['test', 'nested'],
-          },
-        },
-        {
-          type: 'page',
-          path: '/nested/test.mdx',
-          data: {
-            title: 'Nested Page',
-          },
-        },
-        {
-          type: 'page',
-          path: '/nested/test.cn.mdx',
-          data: {
-            title: 'Nested Page Chinese',
-          },
-        },
-        {
-          type: 'meta',
-          path: '/nested/meta.cn.json',
-          data: {
-            title: 'Nested Chinese',
-          },
-        },
-      ],
+const i18nSource: Source<SourceConfig> = {
+  files: [
+    {
+      type: 'page',
+      path: 'test.mdx',
+      data: {
+        title: 'Hello',
+      },
     },
+    {
+      type: 'page',
+      path: 'test.cn.mdx',
+      data: {
+        title: 'Hello Chinese',
+      },
+    },
+    {
+      type: 'meta',
+      path: 'meta.json',
+      data: {
+        pages: ['test', 'nested'],
+      },
+    },
+    {
+      type: 'meta',
+      path: 'meta.cn.json',
+      data: {
+        title: 'Docs Chinese',
+        pages: ['test', 'nested'],
+      },
+    },
+    {
+      type: 'page',
+      path: '/nested/test.mdx',
+      data: {
+        title: 'Nested Page',
+      },
+    },
+    {
+      type: 'page',
+      path: '/nested/test.cn.mdx',
+      data: {
+        title: 'Nested Page Chinese',
+      },
+    },
+    {
+      type: 'meta',
+      path: '/nested/meta.cn.json',
+      data: {
+        title: 'Nested Chinese',
+      },
+    },
+  ],
+};
+
+test('Internationalized Routing', () => {
+  const result = loader({
+    i18n: {
+      languages: ['cn', 'en'],
+      defaultLanguage: 'en',
+    },
+    source: i18nSource,
   });
 
   expect(result.pageTree['en'], 'Page Tree').toMatchInlineSnapshot(`
@@ -267,6 +288,69 @@ test('Page Tree: Internationalized Routing', () => {
   `);
 
   expect(result.getPages().length).toBe(2);
-  expect(result.getPage(['test'])).toBeDefined();
-  expect(result.getPage(['test'], 'cn')).toBeDefined();
+  expect(result.getPage(['test'])?.url).toBe('/en/test');
+  expect(result.getPage(['test'], 'cn')?.url).toBe('/cn/test');
+});
+
+test('Internationalized Routing: Hide Prefix', () => {
+  const result = loader({
+    i18n: {
+      languages: ['cn', 'en'],
+      defaultLanguage: 'en',
+      hideLocale: 'default-locale',
+    },
+    source: i18nSource,
+  });
+
+  expect(result.pageTree['en'], 'Page Tree').toMatchInlineSnapshot(`
+    {
+      "children": [
+        {
+          "name": "Hello",
+          "type": "page",
+          "url": "/test",
+        },
+        {
+          "children": [
+            {
+              "name": "Nested Page",
+              "type": "page",
+              "url": "/nested/test",
+            },
+          ],
+          "name": "Nested",
+          "type": "folder",
+        },
+      ],
+      "name": "",
+    }
+  `);
+
+  expect(result.pageTree['cn'], 'Page Tree').toMatchInlineSnapshot(`
+    {
+      "children": [
+        {
+          "name": "Hello Chinese",
+          "type": "page",
+          "url": "/cn/test",
+        },
+        {
+          "children": [
+            {
+              "name": "Nested Page Chinese",
+              "type": "page",
+              "url": "/cn/nested/test",
+            },
+          ],
+          "name": "Nested Chinese",
+          "type": "folder",
+        },
+      ],
+      "name": "Docs Chinese",
+    }
+  `);
+
+  expect(result.getPages().length).toBe(2);
+  expect(result.getPage(['test'])?.url).toBe('/en/test');
+  expect(result.getPage(['test'], 'cn')?.url).toBe('/cn/test');
 });

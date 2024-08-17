@@ -1,9 +1,10 @@
 import { Document } from 'flexsearch';
-import { type NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, type NextResponse } from 'next/server';
 import type { StructuredData } from '@/mdx-plugins/remark-structure';
+import { createEndpoint } from '@/search/create-endpoint';
 import type { SortedResult } from './shared';
 
-interface SearchAPI {
+export interface SearchAPI {
   GET: (request: NextRequest) => Promise<NextResponse<SortedResult[]>>;
 
   search: (
@@ -15,15 +16,16 @@ interface SearchAPI {
 /**
  * Resolve indexes dynamically
  */
-type Dynamic<T> = () => T[] | Promise<T[]>;
+export type Dynamic<T> = () => T[] | Promise<T[]>;
 
-interface SimpleOptions {
+export interface SimpleOptions {
   indexes: Index[] | Dynamic<Index>;
   language?: string;
 }
 
-interface AdvancedOptions {
+export interface AdvancedOptions {
   indexes: AdvancedIndex[] | Dynamic<AdvancedIndex>;
+
   /**
    * Enable search tags for filtering results
    *
@@ -31,36 +33,6 @@ interface AdvancedOptions {
    */
   tag?: boolean;
   language?: string;
-}
-
-type ToI18n<T extends { indexes: unknown }> = Omit<
-  T,
-  'indexes' | 'language'
-> & {
-  indexes: (
-    | [language: string, indexes: T['indexes']]
-    | {
-        language: string;
-        indexes: T['indexes'];
-      }
-  )[];
-};
-
-function create(search: SearchAPI['search']): SearchAPI {
-  return {
-    search,
-    async GET(request) {
-      const query = request.nextUrl.searchParams.get('query');
-      if (!query) return NextResponse.json([]);
-
-      return NextResponse.json(
-        await search(query, {
-          tag: request.nextUrl.searchParams.get('tag') ?? undefined,
-          locale: request.nextUrl.searchParams.get('locale') ?? undefined,
-        }),
-      );
-    },
-  };
 }
 
 export function createSearchAPI<T extends 'simple' | 'advanced'>(
@@ -72,39 +44,6 @@ export function createSearchAPI<T extends 'simple' | 'advanced'>(
   }
 
   return initSearchAPIAdvanced(options as AdvancedOptions);
-}
-
-export function createI18nSearchAPI<T extends 'simple' | 'advanced'>(
-  type: T,
-  options: T extends 'simple' ? ToI18n<SimpleOptions> : ToI18n<AdvancedOptions>,
-): SearchAPI {
-  const map = new Map<string, SearchAPI>();
-
-  for (const entry of options.indexes) {
-    const v = Array.isArray(entry)
-      ? { language: entry[0], indexes: entry[1] }
-      : entry;
-
-    map.set(
-      v.language,
-      // @ts-expect-error -- Index depends on generic types
-      createSearchAPI(type, {
-        ...options,
-        language: v.language,
-        indexes: v.indexes,
-      }),
-    );
-  }
-
-  return create(async (query, searchOptions) => {
-    if (searchOptions?.locale) {
-      const handler = map.get(searchOptions.locale);
-
-      if (handler) return handler.search(query, searchOptions);
-    }
-
-    return [];
-  });
 }
 
 export interface Index {
@@ -171,7 +110,7 @@ export function initSearchAPI({ indexes, language }: SimpleOptions): SearchAPI {
   }
 
   const doc = getDocument();
-  return create(async (query) => {
+  return createEndpoint(async (query) => {
     const results = (await doc).search(query, 5, {
       enrich: true,
       suggest: true,
@@ -302,7 +241,7 @@ export function initSearchAPIAdvanced({
 
   const doc = getDocument();
 
-  return create(async (query, options) => {
+  return createEndpoint(async (query, options) => {
     const index = await doc;
     const results = index.search(query, 5, {
       enrich: true,
@@ -355,3 +294,9 @@ export function initSearchAPIAdvanced({
     return sortedResult;
   });
 }
+
+// TODO: Use new i18n API (major)
+// eslint-disable-next-line import/no-cycle -- bundler
+export { createI18nSearchAPI as createI18nSearchAPIExperimental } from './i18n-api';
+// eslint-disable-next-line import/no-cycle -- bundler
+export { createI18nSearchAPI } from './legacy-i18n-api';
