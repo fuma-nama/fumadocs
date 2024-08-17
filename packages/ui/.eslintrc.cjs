@@ -6,5 +6,6 @@ module.exports = {
     // some arrays like link items won't be changed
     'react/no-array-index-key': 'off',
     '@typescript-eslint/unbound-method': 'off',
+    '@typescript-eslint/restrict-template-expressions': 'off',
   },
 };
