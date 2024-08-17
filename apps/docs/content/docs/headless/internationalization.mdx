@@ -158,13 +158,13 @@ You can also customise the i18n middleware from `i18n.ts`.
 
 ### Hide Locale Prefix
 
-To hide the locale prefix, for example, use `/` instead of `/en` where `en` is the default locale, use the `hideLocale` option.
+To hide the locale prefix, for example, use `/` instead of `/en`, use the `hideLocale` option.
 
-| Mode             | Description                     |
-| ---------------- | ------------------------------- |
-| `always`         | Always hide the prefix          |
-| `default-locale` | Only hide the default locale    |
-| `never`          | Never hide the prefix (default) |
+| Mode             | Description                                        |
+| ---------------- | -------------------------------------------------- |
+| `always`         | Always hide the prefix, detect locale from cookies |
+| `default-locale` | Only hide the default locale                       |
+| `never`          | Never hide the prefix (default)                    |
 
 > It uses `NextResponse.rewrite` under the hood.
 
@@ -177,6 +177,13 @@ export const i18n: I18nConfig = {
   hideLocale: 'default-locale',
 };
 ```
+
+#### `always`
+
+It's highly **unrecommended** to use `always`.
+On this mode, locale is stored as a cookie, read and set on the middleware.
+
+This may cause undesired cache problems on your hosting platform, and need to pay extra attention on SEO to ensure search engines can index your pages correctly.
 
 <UIOnly>
 

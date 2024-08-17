@@ -11,6 +11,8 @@ interface MiddlewareOptions extends I18nConfig {
   format?: (locale: string, path: string) => string;
 }
 
+const COOKIE = 'FD_LOCALE';
+
 function getLocale(
   request: NextRequest,
   locales: string[],
@@ -41,10 +43,21 @@ export function createI18nMiddleware({
   format = defaultFormat,
   hideLocale = 'never',
 }: MiddlewareOptions): NextMiddleware {
-  function shouldHideLocale(locale: string): boolean {
-    return (
-      hideLocale === 'always' ||
-      (hideLocale === 'default-locale' && locale === defaultLanguage)
+  function getUrl(
+    request: NextRequest,
+    pathname: string,
+    locale?: string,
+  ): URL {
+    if (!locale) {
+      return new URL(
+        pathname.startsWith('/') ? pathname : `/${pathname}`,
+        request.url,
+      );
+    }
+
+    return new URL(
+      format(locale, pathname.startsWith('/') ? pathname.slice(1) : pathname),
+      request.url,
     );
   }
 
@@ -57,17 +70,25 @@ export function createI18nMiddleware({
     );
 
     if (!pathLocale) {
-      const locale = getLocale(request, languages, defaultLanguage);
-      let path = pathname;
-
-      while (path.startsWith('/')) {
-        path = path.slice(1);
+      if (hideLocale === 'default-locale') {
+        return NextResponse.rewrite(getUrl(request, pathname, defaultLanguage));
       }
 
-      const url = new URL(format(locale, path), request.url);
-      return shouldHideLocale(locale)
-        ? NextResponse.rewrite(url)
-        : NextResponse.redirect(url);
+      if (hideLocale === 'always') {
+        const locale = request.cookies.get(COOKIE)?.value ?? defaultLanguage;
+        return NextResponse.rewrite(getUrl(request, pathname, locale));
+      }
+
+      const locale = getLocale(request, languages, defaultLanguage);
+      return NextResponse.redirect(getUrl(request, pathname, locale));
+    }
+
+    if (hideLocale === 'always') {
+      const path = pathname.slice(`/${pathLocale}`.length);
+
+      const res = NextResponse.redirect(getUrl(request, path));
+      res.cookies.set(COOKIE, pathLocale);
+      return res;
     }
 
     // Remove explicit default locale
@@ -75,9 +96,7 @@ export function createI18nMiddleware({
     if (hideLocale === 'default-locale' && pathLocale === defaultLanguage) {
       const path = pathname.slice(`/${pathLocale}`.length);
 
-      return NextResponse.redirect(
-        new URL(path.startsWith('/') ? path : `/${path}`, request.url),
-      );
+      return NextResponse.redirect(getUrl(request, path));
     }
 
     return NextResponse.next();
