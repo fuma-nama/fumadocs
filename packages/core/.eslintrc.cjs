@@ -4,6 +4,6 @@ module.exports = {
   rules: {
     'no-console': 'off',
     // handled by bundler
-    'import/no-cycle': 'off'
+    'import/no-cycle': 'off',
   },
 };

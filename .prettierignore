@@ -10,6 +10,9 @@ apps/docs/shaders/*
 **/test/out/**/*
 **/test/fixtures/*.output.*
 
+out
+.content-collections
+
 apps/docs/content/docs/ui/museum/*.mdx
 !apps/docs/content/docs/ui/museum/index.mdx
 
