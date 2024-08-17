@@ -1,4 +1,3 @@
-import { parse } from 'node:path';
 import slash from '@/utils/slash';
 
 export interface FileInfo {
@@ -23,33 +22,40 @@ export interface FileInfo {
 }
 
 export function parseFilePath(path: string): FileInfo {
-  const normalized = normalizePath(path);
-  const parsed = parse(normalized);
-  const flattenedPath = [parsed.dir, parsed.name]
+  const segments = splitPath(slash(path));
+
+  const dirname = segments.slice(0, -1).join('/');
+  const base = segments.at(-1) ?? '';
+
+  const dotIdx = base.lastIndexOf('.');
+  const nameWithLocale = dotIdx !== -1 ? base.slice(0, dotIdx) : base;
+
+  const flattenedPath = [dirname, nameWithLocale]
     .filter((p) => p.length > 0)
     .join('/');
-  const [name, locale] = parsed.name.split('.');
 
+  const [name, locale] = nameWithLocale.split('.');
   return {
-    dirname: parsed.dir,
+    dirname,
     name,
     flattenedPath,
     locale,
-    path: normalized,
+    path: segments.join('/'),
   };
 }
 
 export function parseFolderPath(path: string): FileInfo {
-  const normalized = normalizePath(path);
-  const parsed = parse(normalized);
-  const [name, locale] = parsed.base.split('.');
+  const segments = splitPath(slash(path));
+  const base = segments.at(-1) ?? '';
+  const [name, locale] = base.split('.');
+  const flattenedPath = segments.join('/');
 
   return {
-    dirname: parsed.dir,
+    dirname: segments.slice(0, -1).join('/'),
     name,
-    flattenedPath: normalized,
+    flattenedPath,
     locale,
-    path: normalized,
+    path: flattenedPath,
   };
 }
 
