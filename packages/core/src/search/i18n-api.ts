@@ -22,7 +22,7 @@ interface I18nAdvancedOptions
   indexes: WithLocale<AdvancedIndex>[] | Dynamic<WithLocale<AdvancedIndex>>;
 }
 
-type WithLocale<T extends object> = T & {
+type WithLocale<T> = T & {
   locale: string;
 };
 

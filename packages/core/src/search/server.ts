@@ -296,7 +296,5 @@ export function initSearchAPIAdvanced({
 }
 
 // TODO: Use new i18n API (major)
-// eslint-disable-next-line import/no-cycle -- bundler
 export { createI18nSearchAPI as createI18nSearchAPIExperimental } from './i18n-api';
-// eslint-disable-next-line import/no-cycle -- bundler
 export { createI18nSearchAPI } from './legacy-i18n-api';
