@@ -1,7 +1,6 @@
 'use client';
 import { type PointerEventHandler, useCallback, useRef, useState } from 'react';
 import { SidebarIcon } from 'lucide-react';
-import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { Sidebar, type SidebarProps } from '@/components/layout/sidebar';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/theme/variants';
@@ -15,12 +14,9 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
 
   const onCollapse = useCallback(() => {
     setCollapsed((v) => !v);
-  }, [setCollapsed]);
-
-  useOnChange(collapsed, () => {
     setHover(false);
     closeTimeRef.current = Date.now() + 150;
-  });
+  }, [setCollapsed]);
 
   const onEnter: PointerEventHandler = useCallback((e) => {
     if (e.pointerType === 'touch' || closeTimeRef.current > Date.now()) return;
@@ -86,6 +82,25 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
             ],
           ),
         }}
+        footer={
+          <>
+            {props.footer}
+            <button
+              type="button"
+              aria-label="Collapse Sidebar"
+              className={cn(
+                buttonVariants({
+                  color: 'ghost',
+                  size: 'icon',
+                  className: 'max-md:hidden',
+                }),
+              )}
+              onClick={onCollapse}
+            >
+              <SidebarIcon />
+            </button>
+          </>
+        }
       />
     </>
   );

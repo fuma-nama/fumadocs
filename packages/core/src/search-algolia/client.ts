@@ -2,7 +2,7 @@ import type { Hit, SearchOptions } from '@algolia/client-search';
 import type { SearchIndex } from 'algoliasearch/lite';
 import { useState } from 'react';
 import useSWR, { type SWRResponse } from 'swr';
-import type { SortedResult } from '@/server/types';
+import type { SortedResult } from '@/search/shared';
 import { useDebounce } from '@/utils/use-debounce';
 import type { BaseIndex } from './server';
 

@@ -122,7 +122,7 @@ export function Sidebar({
           <div
             {...props.bannerProps}
             className={cn(
-              'flex flex-col gap-1 px-4 pt-2 md:px-3 md:pt-4',
+              'flex flex-col gap-2 px-4 pt-2 md:px-3 md:pt-4',
               props.bannerProps?.className,
             )}
           >
@@ -132,27 +132,33 @@ export function Sidebar({
             ) : null}
           </div>
         ) : null}
-        <ViewportContent items={items} />
-        {props.footer ? (
-          <div
-            {...props.footerProps}
-            className={cn(
-              'flex flex-row items-center border-t py-1 max-md:px-4 md:mx-3',
-              props.footerProps?.className,
-            )}
-          >
-            {props.footer}
-          </div>
-        ) : null}
+        <ViewportContent>
+          {items.length > 0 && (
+            <div className="flex flex-col md:hidden">
+              {items.map((item, i) => (
+                <LinkItem key={i} item={item} on="menu" />
+              ))}
+            </div>
+          )}
+        </ViewportContent>
+        <div
+          {...props.footerProps}
+          className={cn(
+            'flex flex-row items-center border-t pb-2 pt-1 max-md:px-4 md:mx-3',
+            props.footerProps?.className,
+          )}
+        >
+          {props.footer}
+        </div>
       </Base.SidebarList>
     </Context.Provider>
   );
 }
 
 function ViewportContent({
-  items,
+  children,
 }: {
-  items: LinkItemType[];
+  children: React.ReactNode;
 }): React.ReactElement {
   const { root } = useTreeContext();
 
@@ -160,17 +166,14 @@ function ViewportContent({
     <ScrollArea className="flex-1">
       <ScrollViewport
         style={{
-          maskImage: 'linear-gradient(to bottom, transparent 2px, white 24px)',
+          maskImage:
+            'linear-gradient(to bottom, transparent 2px, white 24px, white calc(100% - 24px), transparent calc(100% - 2px))',
         }}
       >
-        {items.length > 0 ? (
-          <div className="flex flex-col px-4 pt-6 md:hidden">
-            {items.map((item, i) => (
-              <LinkItem key={i} item={item} on="menu" />
-            ))}
-          </div>
-        ) : null}
-        <NodeList items={root.children} className="px-4 py-6 md:px-3" />
+        <div className="flex flex-col gap-8 px-4 py-6 md:px-3">
+          {children}
+          <NodeList items={root.children} />
+        </div>
       </ScrollViewport>
     </ScrollArea>
   );

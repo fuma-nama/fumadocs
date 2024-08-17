@@ -1,7 +1,14 @@
 import { ChevronRight, Text } from 'lucide-react';
 import type { TOCItemType } from 'fumadocs-core/server';
 import * as Primitive from 'fumadocs-core/toc';
-import { type ReactElement, type ReactNode, useMemo, useRef } from 'react';
+import {
+  type ReactElement,
+  type ReactNode,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { cn } from '@/utils/cn';
 import { useI18n } from '@/contexts/i18n';
 import {
@@ -9,24 +16,26 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { useTocThumb } from '@/utils/use-toc-thumb';
 import { ScrollArea, ScrollViewport } from '../ui/scroll-area';
 
+type PosType = [top: number, height: number];
+
 export interface TOCProps {
+  items: TOCItemType[];
+
   /**
    * Custom content in TOC container, before the main TOC
    */
   header?: ReactNode;
-
   /**
    * Custom content in TOC container, after the main TOC
    */
   footer?: ReactNode;
-
-  children: ReactNode;
 }
 
-export function Toc({ header, footer, children }: TOCProps): ReactElement {
+export const TocProvider = Primitive.AnchorProvider;
+
+export function Toc({ items, header, footer }: TOCProps): ReactElement {
   const { text } = useI18n();
 
   return (
@@ -39,22 +48,18 @@ export function Toc({ header, footer, children }: TOCProps): ReactElement {
         <Text className="size-4" />
         {text.toc}
       </h3>
-      {children}
+      <TOCItems items={items} />
       {footer}
     </div>
   );
 }
 
-export function TocPopover({
-  header,
-  footer,
-  items,
-  children,
-}: TOCProps & { items: TOCItemType[] }): ReactElement {
+export function TocPopover({ items, header, footer }: TOCProps): ReactElement {
   const { text } = useI18n();
   const active = Primitive.useActiveAnchor();
   const current = useMemo(() => {
-    return items.find((item) => active === item.url.slice(1))?.title;
+    if (!active) return;
+    return items.find((item) => item.url === `#${active}`)?.title;
   }, [items, active]);
 
   return (
@@ -78,14 +83,14 @@ export function TocPopover({
         data-toc-popover=""
       >
         {header}
-        {children}
+        <TOCItems items={items} isMenu />
         {footer}
       </PopoverContent>
     </Popover>
   );
 }
 
-export function TOCItems({
+function TOCItems({
   items,
   isMenu = false,
 }: {
@@ -94,7 +99,19 @@ export function TOCItems({
 }): React.ReactElement {
   const { text } = useI18n();
   const containerRef = useRef<HTMLDivElement>(null);
-  const pos = useTocThumb(containerRef);
+  const [pos, setPos] = useState<PosType>();
+  const active = Primitive.useActiveAnchor();
+
+  useLayoutEffect(() => {
+    const container = containerRef.current;
+    if (!active || !container) return;
+
+    const element: HTMLElement | null = container.querySelector(
+      `a[href="#${active}"]`,
+    );
+    if (!element) return;
+    setPos([element.offsetTop, element.clientHeight]);
+  }, [active]);
 
   if (items.length === 0)
     return (
@@ -108,17 +125,18 @@ export function TOCItems({
       <ScrollViewport className="relative min-h-0 text-sm" ref={containerRef}>
         <div
           role="none"
-          className="absolute start-0 w-px bg-fd-primary transition-all"
+          className="absolute start-0 w-0.5 bg-fd-primary transition-all"
           style={{
-            top: pos[0],
-            height: pos[1],
+            top: pos ? `${pos[0].toString()}px` : undefined,
+            height: pos ? `${pos[1].toString()}px` : undefined,
+            display: pos ? 'block' : 'hidden',
           }}
         />
         <Primitive.ScrollProvider containerRef={containerRef}>
           <div
             className={cn(
-              'flex flex-col text-fd-muted-foreground',
-              !isMenu && 'border-s border-fd-foreground/10',
+              'flex flex-col gap-1 text-fd-muted-foreground',
+              !isMenu && 'border-s-2 border-fd-foreground/10',
             )}
           >
             {items.map((item) => (
@@ -136,10 +154,10 @@ function TOCItem({ item }: { item: TOCItemType }): React.ReactElement {
     <Primitive.TOCItem
       href={item.url}
       className={cn(
-        'py-1.5 transition-colors [overflow-wrap:anywhere] first:pt-0 last:pb-0 data-[active=true]:text-fd-primary',
-        item.depth <= 2 && 'ps-3.5',
-        item.depth === 3 && 'ps-6',
-        item.depth >= 4 && 'ps-8',
+        'py-1 transition-colors [overflow-wrap:anywhere] data-[active=true]:font-medium data-[active=true]:text-fd-primary',
+        item.depth <= 2 && 'ps-4',
+        item.depth === 3 && 'ps-7',
+        item.depth >= 4 && 'ps-10',
       )}
     >
       {item.title}

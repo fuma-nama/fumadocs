@@ -1,8 +1,6 @@
 import { type TableOfContents } from 'fumadocs-core/server';
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
-import dynamic from 'next/dynamic';
 import type { Page } from 'fumadocs-core/source';
-import { type AnchorProviderProps, AnchorProvider } from 'fumadocs-core/toc';
 import { Card, Cards } from '@/components/card';
 import { replaceOrDefault } from './utils/shared';
 import { cn } from './utils/cn';
@@ -13,24 +11,14 @@ declare const {
   TocPopover,
   Breadcrumb,
   Footer,
-  TOCItems,
+  TocProvider,
   LastUpdate,
 }: typeof import('./page.client');
 
-const ClerkTOCItems = dynamic(() => import('@/components/layout/toc-clerk'));
-
-type TableOfContentOptions = Omit<TOCProps, 'items' | 'children'> &
-  Pick<AnchorProviderProps, 'single'> & {
-    enabled: boolean;
-    component: ReactNode;
-
-    /**
-     * @defaultValue 'normal'
-     */
-    style?: 'normal' | 'clerk';
-  };
-
-type TableOfContentPopoverOptions = Omit<TableOfContentOptions, 'single'>;
+type TableOfContentOptions = Omit<TOCProps, 'items'> & {
+  enabled: boolean;
+  component: ReactNode;
+};
 
 interface BreadcrumbOptions extends BreadcrumbProps {
   enabled: boolean;
@@ -53,7 +41,8 @@ export interface DocsPageProps {
   full?: boolean;
 
   tableOfContent?: Partial<TableOfContentOptions>;
-  tableOfContentPopover?: Partial<TableOfContentPopoverOptions>;
+
+  tableOfContentPopover?: Partial<TableOfContentOptions>;
 
   /**
    * Replace or disable breadcrumb
@@ -87,7 +76,7 @@ export function DocsPage({
   };
 
   return (
-    <AnchorProvider toc={toc} single={tableOfContent.single}>
+    <TocProvider toc={toc}>
       <div
         className={cn(
           'mx-auto flex min-w-0 max-w-[860px] flex-1 flex-col',
@@ -108,13 +97,7 @@ export function DocsPage({
               items={toc}
               header={tocPopoverOptions.header}
               footer={tocPopoverOptions.footer}
-            >
-              {tocPopoverOptions.style === 'clerk' ? (
-                <ClerkTOCItems items={toc} isMenu />
-              ) : (
-                <TOCItems items={toc} isMenu />
-              )}
-            </TocPopover>
+            />
           </div>,
         )}
         <article className="flex flex-1 flex-col gap-6 px-4 pt-10 md:px-6 md:pt-12">
@@ -127,15 +110,13 @@ export function DocsPage({
       </div>
       {replaceOrDefault(
         tocOptions,
-        <Toc header={tocOptions.header} footer={tocOptions.footer}>
-          {tocOptions.style === 'clerk' ? (
-            <ClerkTOCItems items={toc} />
-          ) : (
-            <TOCItems items={toc} />
-          )}
-        </Toc>,
+        <Toc
+          items={toc}
+          header={tocOptions.header}
+          footer={tocOptions.footer}
+        />,
       )}
-    </AnchorProvider>
+    </TocProvider>
   );
 }
 

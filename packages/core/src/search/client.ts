@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import useSWR, { type SWRResponse } from 'swr';
 import { useDebounce } from '@/utils/use-debounce';
-import type { SortedResult } from '@/server/types';
+import type { SortedResult } from './shared';
 
 interface UseDocsSearch {
   search: string;

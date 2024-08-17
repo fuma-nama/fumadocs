@@ -1,8 +1,7 @@
 'use client';
 
 import { SidebarTrigger } from 'fumadocs-core/sidebar';
-import { Menu, SidebarIcon, X } from 'lucide-react';
-import { useCallback } from 'react';
+import { Menu, X } from 'lucide-react';
 import { useSidebar } from '@/contexts/sidebar';
 import { useSearchContext } from '@/contexts/search';
 import { SearchToggle } from '@/components/layout/search-toggle';
@@ -42,29 +41,6 @@ export function SubNav({
         {open ? <X /> : <Menu />}
       </SidebarTrigger>
     </NavBox>
-  );
-}
-
-export function SidebarCollapseTrigger(): React.ReactElement {
-  const { setCollapsed } = useSidebar();
-
-  return (
-    <button
-      type="button"
-      aria-label="Collapse Sidebar"
-      className={cn(
-        buttonVariants({
-          color: 'ghost',
-          size: 'icon',
-          className: 'ms-auto max-md:hidden',
-        }),
-      )}
-      onClick={useCallback(() => {
-        setCollapsed((prev) => !prev);
-      }, [setCollapsed])}
-    >
-      <SidebarIcon />
-    </button>
   );
 }
 

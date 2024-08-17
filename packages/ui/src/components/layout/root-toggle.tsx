@@ -37,7 +37,7 @@ export function RootToggle({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger className="-mx-2 flex flex-row items-center gap-2.5 rounded-lg p-2 hover:bg-fd-accent/50 hover:text-fd-accent-foreground">
+      <PopoverTrigger className="-mx-2 flex flex-row items-center gap-2.5 rounded-lg p-2 hover:bg-fd-muted">
         <Item {...selected} />
         <ChevronDown className="size-4 text-fd-muted-foreground md:me-1.5" />
       </PopoverTrigger>
