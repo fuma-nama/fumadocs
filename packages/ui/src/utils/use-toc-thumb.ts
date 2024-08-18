@@ -1,6 +1,5 @@
-import { type RefObject, useState } from 'react';
+import { type RefObject, useLayoutEffect, useState } from 'react';
 import * as Primitive from 'fumadocs-core/toc';
-import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 
 export type TOCThumb = [top: number, height: number];
 
@@ -8,7 +7,8 @@ export function useTocThumb(containerRef: RefObject<HTMLElement>): TOCThumb {
   const active = Primitive.useActiveAnchors();
   const [pos, setPos] = useState<TOCThumb>([0, 0]);
 
-  useOnChange(active, () => {
+  // effect is required to render TOC thumb at the correct position
+  useLayoutEffect(() => {
     const container = containerRef.current;
     if (active.length === 0 || !container || container.clientHeight === 0) {
       setPos([0, 0]);
@@ -38,7 +38,7 @@ export function useTocThumb(containerRef: RefObject<HTMLElement>): TOCThumb {
     }
 
     setPos([upper, lower - upper]);
-  });
+  }, [active, containerRef]);
 
   return pos;
 }
