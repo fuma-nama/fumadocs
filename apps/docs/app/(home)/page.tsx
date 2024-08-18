@@ -292,7 +292,7 @@ function Highlights(): React.ReactElement {
   return (
     <div className="grid grid-cols-1 border-r md:grid-cols-2 lg:grid-cols-3">
       <Highlight icon={RocketIcon} heading="Light and Fast.">
-        Full powered documentation site with Next.js App Router.
+        Fully powered documentation site with Next.js App Router.
       </Highlight>
       <Highlight icon={TimerIcon} heading="Performance.">
         Less client components, less Javascript, optimized images.
@@ -557,7 +557,7 @@ function Features(): React.ReactElement {
       <Feature
         icon={MessageCircleIcon}
         subheading="Loved by developers"
-        heading="Heard of our users."
+        heading="Heard of our users?"
         description="Fumadocs is used by many awesome developers, and we are making it better."
       >
         <Link
