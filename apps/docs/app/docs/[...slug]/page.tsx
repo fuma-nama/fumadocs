@@ -1,4 +1,3 @@
-import { Edit } from 'lucide-react';
 import type { Metadata } from 'next';
 import {
   DocsPage,
