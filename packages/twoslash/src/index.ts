@@ -104,6 +104,9 @@ function renderMarkdown(
             return this.codeToHast(node.value, {
               ...this.options,
               transformers: [],
+              meta: {
+                __raw: node.meta ?? undefined,
+              },
               lang: node.lang,
             }).children[0] as Element;
           }

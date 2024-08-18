@@ -1,5 +1,9 @@
 import { type TableOfContents } from 'fumadocs-core/server';
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
+import dynamic from 'next/dynamic';
+import type { Page } from 'fumadocs-core/source';
+import { type AnchorProviderProps, AnchorProvider } from 'fumadocs-core/toc';
+import { Card, Cards } from '@/components/card';
 import { replaceOrDefault } from './utils/shared';
 import { cn } from './utils/cn';
 import type { BreadcrumbProps, FooterProps, TOCProps } from './page.client';
@@ -9,14 +13,24 @@ declare const {
   TocPopover,
   Breadcrumb,
   Footer,
-  TocProvider,
+  TOCItems,
   LastUpdate,
 }: typeof import('./page.client');
 
-type TableOfContentOptions = Omit<TOCProps, 'items'> & {
-  enabled: boolean;
-  component: ReactNode;
-};
+const ClerkTOCItems = dynamic(() => import('@/components/layout/toc-clerk'));
+
+type TableOfContentOptions = Omit<TOCProps, 'items' | 'children'> &
+  Pick<AnchorProviderProps, 'single'> & {
+    enabled: boolean;
+    component: ReactNode;
+
+    /**
+     * @defaultValue 'normal'
+     */
+    style?: 'normal' | 'clerk';
+  };
+
+type TableOfContentPopoverOptions = Omit<TableOfContentOptions, 'single'>;
 
 interface BreadcrumbOptions extends BreadcrumbProps {
   enabled: boolean;
@@ -39,8 +53,7 @@ export interface DocsPageProps {
   full?: boolean;
 
   tableOfContent?: Partial<TableOfContentOptions>;
-
-  tableOfContentPopover?: Partial<TableOfContentOptions>;
+  tableOfContentPopover?: Partial<TableOfContentPopoverOptions>;
 
   /**
    * Replace or disable breadcrumb
@@ -74,7 +87,7 @@ export function DocsPage({
   };
 
   return (
-    <TocProvider toc={toc}>
+    <AnchorProvider toc={toc} single={tableOfContent.single}>
       <div
         className={cn(
           'mx-auto flex min-w-0 max-w-[860px] flex-1 flex-col',
@@ -95,7 +108,13 @@ export function DocsPage({
               items={toc}
               header={tocPopoverOptions.header}
               footer={tocPopoverOptions.footer}
-            />
+            >
+              {tocPopoverOptions.style === 'clerk' ? (
+                <ClerkTOCItems items={toc} isMenu />
+              ) : (
+                <TOCItems items={toc} isMenu />
+              )}
+            </TocPopover>
           </div>,
         )}
         <article className="flex flex-1 flex-col gap-6 px-4 pt-10 md:px-6 md:pt-12">
@@ -108,13 +127,15 @@ export function DocsPage({
       </div>
       {replaceOrDefault(
         tocOptions,
-        <Toc
-          items={toc}
-          header={tocOptions.header}
-          footer={tocOptions.footer}
-        />,
+        <Toc header={tocOptions.header} footer={tocOptions.footer}>
+          {tocOptions.style === 'clerk' ? (
+            <ClerkTOCItems items={toc} />
+          ) : (
+            <TOCItems items={toc} />
+          )}
+        </Toc>,
       )}
-    </TocProvider>
+    </AnchorProvider>
   );
 }
 
@@ -127,6 +148,76 @@ export const DocsBody = forwardRef<
 >(({ className, ...props }, ref) => (
   <div ref={ref} className={cn('prose', className)} {...props} />
 ));
+
+DocsBody.displayName = 'DocsBody';
+
+export const DocsDescription = forwardRef<
+  HTMLParagraphElement,
+  HTMLAttributes<HTMLParagraphElement>
+>((props, ref) => {
+  // don't render if no description provided
+  if (props.children === undefined) return null;
+
+  return (
+    <p
+      ref={ref}
+      {...props}
+      className={cn('mb-8 text-lg text-fd-muted-foreground', props.className)}
+    >
+      {props.children}
+    </p>
+  );
+});
+
+DocsDescription.displayName = 'DocsDescription';
+
+export const DocsTitle = forwardRef<
+  HTMLHeadingElement,
+  HTMLAttributes<HTMLHeadingElement>
+>((props, ref) => {
+  return (
+    <h1
+      ref={ref}
+      {...props}
+      className={cn('text-3xl font-bold', props.className)}
+    >
+      {props.children}
+    </h1>
+  );
+});
+
+DocsTitle.displayName = 'DocsTitle';
+
+export function DocsCategory({
+  page,
+  pages,
+  ...props
+}: HTMLAttributes<HTMLDivElement> & {
+  page: Page;
+  pages: Page[];
+}): React.ReactElement {
+  const filtered = pages.filter(
+    (item) =>
+      item.file.dirname === page.file.dirname &&
+      item.file.name !== page.file.name,
+  );
+
+  return (
+    <Cards {...props}>
+      {filtered.map((item) => (
+        <Card
+          key={item.url}
+          title={item.data.title}
+          description={
+            (item.data as { description?: string }).description ??
+            'No Description'
+          }
+          href={item.url}
+        />
+      ))}
+    </Cards>
+  );
+}
 
 DocsBody.displayName = 'DocsBody';
 

@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-core",
-  "version": "13.2.2",
+  "version": "13.3.0",
   "description": "The library for building a documentation website in Next.js",
   "keywords": [
     "NextJs",
@@ -67,6 +67,10 @@
     "./search-algolia/server": {
       "import": "./dist/search-algolia/server.js",
       "types": "./dist/search-algolia/server.d.ts"
+    },
+    "./i18n": {
+      "import": "./dist/i18n/index.js",
+      "types": "./dist/i18n/index.d.ts"
     }
   },
   "typesVersions": {
@@ -112,6 +116,9 @@
       ],
       "search-algolia/server": [
         "./dist/search-algolia/server.d.ts"
+      ],
+      "i18n": [
+        "./dist/i18n/index.d.ts"
       ]
     }
   },
@@ -127,8 +134,8 @@
   },
   "dependencies": {
     "@formatjs/intl-localematcher": "^0.5.4",
-    "@shikijs/rehype": "^1.12.1",
-    "@shikijs/transformers": "^1.12.1",
+    "@shikijs/rehype": "^1.13.0",
+    "@shikijs/transformers": "^1.13.0",
     "flexsearch": "0.7.21",
     "github-slugger": "^2.0.0",
     "image-size": "^1.1.1",
@@ -139,7 +146,7 @@
     "remark-gfm": "^4.0.0",
     "remark-mdx": "^3.0.1",
     "scroll-into-view-if-needed": "^3.1.0",
-    "shiki": "^1.12.1",
+    "shiki": "^1.13.0",
     "swr": "^2.2.5",
     "unist-util-visit": "^5.0.0"
   },
@@ -151,7 +158,7 @@
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.3",
     "@types/negotiator": "^0.6.3",
-    "@types/node": "20.14.12",
+    "@types/node": "22.3.0",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "algoliasearch": "^4.24.0",

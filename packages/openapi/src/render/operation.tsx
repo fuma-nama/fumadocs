@@ -22,7 +22,7 @@ interface CustomProperty {
 export interface CodeSample {
   lang: string;
   label: string;
-  source: string;
+  source?: string;
 }
 
 export function Operation({
@@ -160,7 +160,7 @@ async function APIExample({
   const renderer = ctx.renderer;
   const children: ReactNode[] = [];
 
-  const samples: CodeSample[] = dedupe([
+  const samples = dedupe([
     {
       label: 'cURL',
       source: CURL.getSampleRequest(endpoint),
@@ -178,7 +178,7 @@ async function APIExample({
     },
     ...(ctx.generateCodeSamples ? await ctx.generateCodeSamples(endpoint) : []),
     ...((method as CustomProperty)['x-codeSamples'] ?? []),
-  ]);
+  ]).filter((item) => item.source !== undefined) as Required<CodeSample>[];
 
   children.push(
     <renderer.Requests key="requests" items={samples.map((s) => s.label)}>

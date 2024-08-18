@@ -1,5 +1,25 @@
 # next-docs-ui
 
+## 13.3.0
+
+### Minor Changes
+
+- 8f5b19e: Introduce `DocsTitle`, `DocsDescription` and `DocsCategory` components
+- 32ca37a: Support Clerk-style TOC
+- 9aae448: Support multiple toc active items
+- c542561: Use cookie to store active locale on `always` mode
+
+### Patch Changes
+
+- Updated dependencies [4916f84]
+- Updated dependencies [fd46eb6]
+- Updated dependencies [fd46eb6]
+- Updated dependencies [fd46eb6]
+- Updated dependencies [fd46eb6]
+- Updated dependencies [9aae448]
+- Updated dependencies [c542561]
+  - fumadocs-core@13.3.0
+
 ## 13.2.2
 
 ### Patch Changes

@@ -41,6 +41,7 @@ export default function Layout({
                 searchNoResult: '沒有結果',
                 previousPage: '上一頁',
                 nextPage: '下一頁',
+                chooseLanguage: '選擇語言',
               },
             }[lang]
           }

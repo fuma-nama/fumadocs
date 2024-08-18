@@ -6,59 +6,65 @@ import { useEffect, useState } from 'react';
  * It selects the top heading by default, and the last item when reached the bottom of page.
  *
  * @param watch - An array of element ids to watch
+ * @param single - only one active item at most
  * @returns Active anchor
  */
-export function useAnchorObserver(watch: string[]): string | undefined {
-  const [activeAnchor, setActiveAnchor] = useState<string>();
+export function useAnchorObserver(watch: string[], single: boolean): string[] {
+  const [activeAnchor, setActiveAnchor] = useState<string[]>([]);
 
   useEffect(() => {
+    let visible: string[] = [];
     const observer = new IntersectionObserver(
       (entries) => {
-        setActiveAnchor((f) => {
-          for (const entry of entries) {
-            if (entry.isIntersecting) {
-              return entry.target.id;
-            }
+        for (const entry of entries) {
+          if (entry.isIntersecting && !visible.includes(entry.target.id)) {
+            visible = [...visible, entry.target.id];
+          } else if (
+            !entry.isIntersecting &&
+            visible.includes(entry.target.id)
+          ) {
+            visible = visible.filter((v) => v !== entry.target.id);
           }
+        }
 
-          // use the first item if not found
-          return f ?? watch[0];
-        });
+        if (visible.length > 0) setActiveAnchor(visible);
       },
-      { rootMargin: `-80px 0% -78% 0%`, threshold: 1 },
+      {
+        rootMargin: single ? '-80px 0% -70% 0%' : `-20px 0% -40% 0%`,
+        threshold: 1,
+      },
     );
 
-    const scroll = (): void => {
+    function onScroll(): void {
       const element = document.scrollingElement;
       if (!element) return;
 
-      if (element.scrollTop === 0) {
-        setActiveAnchor(watch.at(0));
-      } else if (
-        element.scrollTop >=
-        // assume you have a 10px margin
-        element.scrollHeight - element.clientHeight - 10
+      if (element.scrollTop === 0 && single) setActiveAnchor(watch.slice(0, 1));
+      else if (
+        element.scrollTop + element.clientHeight >=
+        element.scrollHeight - 6
       ) {
-        // select the last item when reached the bottom
-        setActiveAnchor(watch.at(-1));
-      }
-    };
+        setActiveAnchor((active) => {
+          const last = active.at(-1);
 
-    window.addEventListener('scroll', scroll);
+          return last ? watch.slice(watch.indexOf(last)) : active;
+        });
+      }
+    }
 
     for (const heading of watch) {
       const element = document.getElementById(heading);
 
-      if (element !== null) {
-        observer.observe(element);
-      }
+      if (element) observer.observe(element);
     }
 
+    onScroll();
+    window.addEventListener('scroll', onScroll);
     return () => {
-      window.removeEventListener('scroll', scroll);
+      window.removeEventListener('scroll', onScroll);
       observer.disconnect();
     };
-  }, [watch]);
+  }, [single, watch]);
 
-  return activeAnchor;
+  return single ? activeAnchor.slice(0, 1) : activeAnchor;
 }

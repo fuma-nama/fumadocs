@@ -1,3 +1,4 @@
+'use client';
 import type { AnchorHTMLAttributes, ReactNode, RefObject } from 'react';
 import { createContext, forwardRef, useContext, useMemo, useRef } from 'react';
 import scrollIntoView from 'scroll-into-view-if-needed';
@@ -6,19 +7,32 @@ import { mergeRefs } from '@/utils/merge-refs';
 import { useOnChange } from '@/utils/use-on-change';
 import { useAnchorObserver } from './utils/use-anchor-observer';
 
-const ActiveAnchorContext = createContext<string | undefined>(undefined);
+const ActiveAnchorContext = createContext<string[]>([]);
 
 const ScrollContext = createContext<RefObject<HTMLElement>>({ current: null });
 
 /**
- * The id of active anchor (doesn't include hash)
+ * The estimated active heading ID
  */
 export function useActiveAnchor(): string | undefined {
+  return useContext(ActiveAnchorContext).at(-1);
+}
+
+/**
+ * The id of visible anchors
+ */
+export function useActiveAnchors(): string[] {
   return useContext(ActiveAnchorContext);
 }
 
 export interface AnchorProviderProps {
   toc: TableOfContents;
+  /**
+   * Only accept one active item at most
+   *
+   * @defaultValue true
+   */
+  single?: boolean;
   children?: ReactNode;
 }
 
@@ -44,16 +58,15 @@ export function ScrollProvider({
 
 export function AnchorProvider({
   toc,
+  single = true,
   children,
 }: AnchorProviderProps): React.ReactElement {
   const headings = useMemo(() => {
     return toc.map((item) => item.url.split('#')[1]);
   }, [toc]);
 
-  const activeAnchor = useAnchorObserver(headings);
-
   return (
-    <ActiveAnchorContext.Provider value={activeAnchor}>
+    <ActiveAnchorContext.Provider value={useAnchorObserver(headings, single)}>
       {children}
     </ActiveAnchorContext.Provider>
   );
@@ -69,11 +82,11 @@ export interface TOCItemProps
 export const TOCItem = forwardRef<HTMLAnchorElement, TOCItemProps>(
   ({ onActiveChange, ...props }, ref) => {
     const containerRef = useContext(ScrollContext);
-    const activeAnchor = useActiveAnchor();
+    const anchors = useActiveAnchors();
     const anchorRef = useRef<HTMLAnchorElement>(null);
     const mergedRef = mergeRefs(anchorRef, ref);
 
-    const isActive = activeAnchor === props.href.split('#')[1];
+    const isActive = anchors.includes(props.href.slice(1));
 
     useOnChange(isActive, (v) => {
       const element = anchorRef.current;

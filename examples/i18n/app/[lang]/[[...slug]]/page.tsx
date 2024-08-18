@@ -1,6 +1,11 @@
 import { getPage, getLanguages } from '@/app/source';
 import type { Metadata } from 'next';
-import { DocsPage, DocsBody } from 'fumadocs-ui/page';
+import {
+  DocsPage,
+  DocsBody,
+  DocsTitle,
+  DocsDescription,
+} from 'fumadocs-ui/page';
 import { notFound } from 'next/navigation';
 
 export default async function Page({
@@ -9,17 +14,15 @@ export default async function Page({
   params: { lang: string; slug?: string[] };
 }) {
   const page = getPage(params.slug, params.lang);
-
-  if (page == null) {
-    notFound();
-  }
+  if (!page) notFound();
 
   const MDX = page.data.exports.default;
 
   return (
     <DocsPage toc={page.data.exports.toc}>
+      <DocsTitle>{page.data.title}</DocsTitle>
+      <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>
-        <h1>{page.data.title}</h1>
         <MDX />
       </DocsBody>
     </DocsPage>
@@ -41,8 +44,7 @@ export function generateMetadata({
   params: { lang: string; slug?: string[] };
 }) {
   const page = getPage(params.slug, params.lang);
-
-  if (page == null) notFound();
+  if (!page) notFound();
 
   return {
     title: page.data.title,

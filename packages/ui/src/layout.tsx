@@ -3,6 +3,7 @@ import type { ReactNode, HTMLAttributes } from 'react';
 import Link from 'next/link';
 import { MoreHorizontal } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import { notFound } from 'next/navigation';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/theme/variants';
 import type { SidebarProps } from '@/components/layout/sidebar';
@@ -12,10 +13,11 @@ import { type BaseLayoutProps, getLinks } from './layout.shared';
 
 declare const {
   TreeContextProvider,
+  SidebarCollapseTrigger,
+  ThemeToggle,
   SubNav,
   LinksMenu,
   Sidebar,
-  ThemeToggle,
 }: typeof import('./docs-layout.client');
 
 // We can use dynamic imports to avoid loading a client component when they are not used
@@ -66,17 +68,22 @@ export function DocsLayout({
   containerProps = {},
   i18n = false,
   ...props
-}: DocsLayoutProps): React.ReactElement {
+}: DocsLayoutProps): React.ReactNode {
   const links = getLinks(props.links ?? [], githubUrl);
   const Aside = collapsible ? DynamicSidebar : Sidebar;
 
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Prevent people passing undefined page tree
+  if (props.tree === undefined) notFound();
+
   const banner: ReactNode[] = [];
+  const footer: ReactNode[] = [];
+
   if (nav?.title)
     banner.push(
       <Link
         key="title"
         href={nav.url ?? '/'}
-        className="inline-flex items-center gap-2.5 font-medium"
+        className="inline-flex items-center gap-2.5 py-1 font-medium"
       >
         {nav.title}
       </Link>,
@@ -98,6 +105,16 @@ export function DocsLayout({
         <MoreHorizontal />
       </LinksMenu>,
     );
+
+  footer.push(<ThemeToggle key="theme" />);
+
+  if (i18n) {
+    footer.push(<LanguageToggle key="i18n" />);
+  }
+
+  if (collapsible) {
+    footer.push(<SidebarCollapseTrigger key="sidebar" />);
+  }
 
   return (
     <TreeContextProvider tree={props.tree}>
@@ -132,11 +149,12 @@ export function DocsLayout({
               ),
             }}
             footer={
-              <>
-                <ThemeToggle className="me-auto" />
-                {i18n ? <LanguageToggle /> : null}
-                {sidebar.footer}
-              </>
+              footer.length > 0 || sidebar.footer ? (
+                <>
+                  {sidebar.footer}
+                  {footer}
+                </>
+              ) : null
             }
           />,
         )}
