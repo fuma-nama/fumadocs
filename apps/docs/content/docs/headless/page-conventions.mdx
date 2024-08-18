@@ -198,9 +198,9 @@ Adding a `root` property in meta file can mark your folder as a **root**.
 }
 ```
 
-When users are browsing the pages under a root folder, only the child items of the folder will be visible.
+When the user is browsing a page under a root folder, only the child items of the folder will be visible.
 
-For example, when you are in a root folder called `core`, the other folders (e.g. `ui`) are not shown on the sidebar and other navigation elements.
+For example, when you are in a root folder called `core`, the other folders (e.g. `ui`) are not shown on the sidebar (and other navigation elements).
 
 <Files>
   <Folder name="core" defaultOpen>
@@ -214,6 +214,8 @@ For example, when you are in a root folder called `core`, the other folders (e.g
 
 To allow users switching between different roots, implement a component that navigates to a page under the root folders.
 On Fumadocs UI, this is available via the [Root Toggle](/docs/ui/components/root-toggle) component.
+
+> By default, index pages are not considered as the pages "under" a folder, you must specify them in the `pages` property.
 
 ## Internationalization
 
