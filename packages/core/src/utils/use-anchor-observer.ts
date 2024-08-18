@@ -47,7 +47,7 @@ export function useAnchorObserver(watch: string[], single: boolean): string[] {
         setActiveAnchor((active) => {
           const last = active.at(-1);
 
-          return last ? watch.slice(watch.indexOf(last)) : active;
+          return last ? watch.slice(watch.indexOf(last)) : watch.slice(-1);
         });
       }
     }

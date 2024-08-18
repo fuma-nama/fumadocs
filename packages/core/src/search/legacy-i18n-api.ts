@@ -41,13 +41,15 @@ export function createI18nSearchAPI<T extends 'simple' | 'advanced'>(
     );
   }
 
-  return createEndpoint(async (query, searchOptions) => {
-    if (searchOptions?.locale) {
-      const handler = map.get(searchOptions.locale);
+  return createEndpoint({
+    search: async (query, searchOptions) => {
+      if (searchOptions?.locale) {
+        const handler = map.get(searchOptions.locale);
 
-      if (handler) return handler.search(query, searchOptions);
-    }
+        if (handler) return handler.search(query, searchOptions);
+      }
 
-    return [];
+      return [];
+    },
   });
 }
