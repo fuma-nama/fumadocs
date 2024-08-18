@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 13.3.0
+
+### Patch Changes
+
+- 5ed3e08: Install the @types/node package
+
 ## 13.2.2
 
 ## 13.2.1
