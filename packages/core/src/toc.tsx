@@ -30,7 +30,7 @@ export interface AnchorProviderProps {
   /**
    * Only accept one active item at most
    *
-   * @defaultValue false
+   * @defaultValue true
    */
   single?: boolean;
   children?: ReactNode;
@@ -58,7 +58,7 @@ export function ScrollProvider({
 
 export function AnchorProvider({
   toc,
-  single = false,
+  single = true,
   children,
 }: AnchorProviderProps): React.ReactElement {
   const headings = useMemo(() => {

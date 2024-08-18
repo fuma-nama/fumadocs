@@ -74,13 +74,15 @@ export function createI18nMiddleware({
         return NextResponse.rewrite(getUrl(request, pathname, defaultLanguage));
       }
 
+      const preferred = getLocale(request, languages, defaultLanguage);
+
       if (hideLocale === 'always') {
-        const locale = request.cookies.get(COOKIE)?.value ?? defaultLanguage;
+        const locale = request.cookies.get(COOKIE)?.value ?? preferred;
+
         return NextResponse.rewrite(getUrl(request, pathname, locale));
       }
 
-      const locale = getLocale(request, languages, defaultLanguage);
-      return NextResponse.redirect(getUrl(request, pathname, locale));
+      return NextResponse.redirect(getUrl(request, pathname, preferred));
     }
 
     if (hideLocale === 'always') {

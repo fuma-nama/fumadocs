@@ -27,8 +27,7 @@ export function useAnchorObserver(watch: string[], single: boolean): string[] {
           }
         }
 
-        if (visible.length > 0)
-          setActiveAnchor(single ? visible.slice(0, 1) : visible);
+        if (visible.length > 0) setActiveAnchor(visible);
       },
       {
         rootMargin: single ? '-80px 0% -70% 0%' : `-20px 0% -40% 0%`,
@@ -36,18 +35,36 @@ export function useAnchorObserver(watch: string[], single: boolean): string[] {
       },
     );
 
-    for (const heading of watch) {
-      const element = document.getElementById(heading);
+    function onScroll(): void {
+      const element = document.scrollingElement;
+      if (!element) return;
 
-      if (element !== null) {
-        observer.observe(element);
+      if (element.scrollTop === 0 && single) setActiveAnchor(watch.slice(0, 1));
+      else if (
+        element.scrollTop + element.clientHeight >=
+        element.scrollHeight - 6
+      ) {
+        setActiveAnchor((active) => {
+          const last = active.at(-1);
+
+          return last ? watch.slice(watch.indexOf(last)) : active;
+        });
       }
     }
 
+    for (const heading of watch) {
+      const element = document.getElementById(heading);
+
+      if (element) observer.observe(element);
+    }
+
+    onScroll();
+    window.addEventListener('scroll', onScroll);
     return () => {
+      window.removeEventListener('scroll', onScroll);
       observer.disconnect();
     };
   }, [single, watch]);
 
-  return activeAnchor;
+  return single ? activeAnchor.slice(0, 1) : activeAnchor;
 }
