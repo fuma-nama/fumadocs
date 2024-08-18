@@ -26,6 +26,11 @@ export interface GetGithubLastCommitOptions {
   token?: string;
 
   /**
+   * SHA or ref (branch or tag) name.
+   */
+  sha?: string;
+
+  /**
    * Custom query parameters
    */
   params?: Record<string, string>;
@@ -44,6 +49,7 @@ export async function getGithubLastEdit({
   token,
   owner,
   path,
+  sha,
   options = {},
   params: customParams = {},
 }: GetGithubLastCommitOptions): Promise<Date | null> {
@@ -52,6 +58,8 @@ export async function getGithubLastEdit({
   params.set('path', path);
   params.set('page', '1');
   params.set('per_page', '1');
+
+  if (sha) params.set('sha', sha);
 
   for (const [key, value] of Object.entries(customParams)) {
     params.set(key, value);

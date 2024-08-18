@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import type { Page } from 'fumadocs-core/source';
 import { type AnchorProviderProps, AnchorProvider } from 'fumadocs-core/toc';
 import { Card, Cards } from '@/components/card';
+import type { EditOnGitHubOptions } from '@/components/layout/edit-on-github';
 import { replaceOrDefault } from './utils/shared';
 import { cn } from './utils/cn';
 import type { BreadcrumbProps, FooterProps, TOCProps } from './page.client';
@@ -18,6 +19,9 @@ declare const {
 }: typeof import('./page.client');
 
 const ClerkTOCItems = dynamic(() => import('@/components/layout/toc-clerk'));
+const EditOnGitHub = dynamic(() =>
+  import('@/components/layout/edit-on-github').then((mod) => mod.EditOnGitHub),
+);
 
 type TableOfContentOptions = Omit<TOCProps, 'items' | 'children'> &
   Pick<AnchorProviderProps, 'single'> & {
@@ -65,6 +69,7 @@ export interface DocsPageProps {
    */
   footer?: Partial<FooterOptions>;
 
+  editOnGithub?: EditOnGitHubOptions;
   lastUpdate?: Date | string | number;
 
   children: ReactNode;
@@ -72,22 +77,38 @@ export interface DocsPageProps {
 
 export function DocsPage({
   toc = [],
-  tableOfContent = {},
   breadcrumb = {},
-  tableOfContentPopover: tocPopoverOptions = {},
-  lastUpdate,
   full = false,
   footer = {},
   ...props
 }: DocsPageProps): React.ReactElement {
+  const tocPopoverOptions = {
+    ...props.tableOfContentPopover,
+  };
   const tocOptions = {
     // disable TOC on full mode, you can still enable it with `enabled` option.
-    enabled: tableOfContent.enabled ?? !full,
-    ...tableOfContent,
+    enabled: props.tableOfContent?.enabled ?? !full,
+    ...props.tableOfContent,
   };
 
+  if (props.editOnGithub) {
+    tocOptions.footer = (
+      <>
+        {tocOptions.footer}
+        <EditOnGitHub {...props.editOnGithub} />
+      </>
+    );
+
+    tocPopoverOptions.footer = (
+      <>
+        {tocPopoverOptions.footer}
+        <EditOnGitHub {...props.editOnGithub} />
+      </>
+    );
+  }
+
   return (
-    <AnchorProvider toc={toc} single={tableOfContent.single}>
+    <AnchorProvider toc={toc} single={tocOptions.single}>
       <div
         className={cn(
           'mx-auto flex min-w-0 max-w-[860px] flex-1 flex-col',
@@ -121,7 +142,9 @@ export function DocsPage({
           {replaceOrDefault(breadcrumb, <Breadcrumb {...breadcrumb} />)}
           {props.children}
           <div className="mt-auto" />
-          {lastUpdate ? <LastUpdate date={new Date(lastUpdate)} /> : null}
+          {props.lastUpdate ? (
+            <LastUpdate date={new Date(props.lastUpdate)} />
+          ) : null}
           {replaceOrDefault(footer, <Footer items={footer.items} />)}
         </article>
       </div>

@@ -12,8 +12,6 @@ import { Fragment } from 'react';
 import { utils } from '@/utils/source';
 import { createMetadata } from '@/utils/metadata';
 import Preview from '@/components/preview';
-import { cn } from '@/utils/cn';
-import { buttonVariants } from '@/components/ui/button';
 
 interface Param {
   slug: string[];
@@ -31,35 +29,21 @@ export default function Page({
   const path = `apps/docs/content/docs/${page.file.path}`;
   const preview = page.data.preview;
 
-  const footer = (
-    <a
-      href={`https://github.com/fuma-nama/fumadocs/blob/main/${path}`}
-      target="_blank"
-      rel="noreferrer noopener"
-      className={cn(
-        buttonVariants({
-          variant: 'secondary',
-          size: 'sm',
-          className: 'text-xs gap-1.5',
-        }),
-      )}
-    >
-      <Edit className="size-3" />
-      Edit on Github
-    </a>
-  );
-
   return (
     <DocsPage
       toc={page.data.exports.toc}
       lastUpdate={page.data.exports.lastModified}
       full={page.data.full}
       tableOfContent={{
-        footer,
         style: 'clerk',
-        single: true,
+        single: false,
       }}
-      tableOfContentPopover={{ footer }}
+      editOnGithub={{
+        repo: 'fumadocs',
+        owner: 'fuma-nama',
+        sha: 'main',
+        path,
+      }}
     >
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
