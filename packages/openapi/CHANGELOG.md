@@ -1,5 +1,22 @@
 # @fuma-docs/openapi
 
+## 5.2.1
+
+### Patch Changes
+
+- 81d0887: Support disabling code sample with undefined source
+- Updated dependencies [8f5b19e]
+- Updated dependencies [4916f84]
+- Updated dependencies [fd46eb6]
+- Updated dependencies [fd46eb6]
+- Updated dependencies [fd46eb6]
+- Updated dependencies [fd46eb6]
+- Updated dependencies [32ca37a]
+- Updated dependencies [9aae448]
+- Updated dependencies [c542561]
+  - fumadocs-ui@13.3.0
+  - fumadocs-core@13.3.0
+
 ## 5.2.0
 
 ### Minor Changes

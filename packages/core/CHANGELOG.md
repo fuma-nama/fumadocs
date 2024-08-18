@@ -1,5 +1,20 @@
 # next-docs-zeta
 
+## 13.3.0
+
+### Minor Changes
+
+- fd46eb6: Export new `createI18nSearchAPIExperimental` API for i18n config
+- fd46eb6: Introduce `i18n` config for Core APIs
+- fd46eb6: Deprecated `languages` and `defaultLanguage` option on Source API, replaced with `i18n` config
+- fd46eb6: Move I18n middleware to `fumadocs-core/i18n`
+- 9aae448: Support multiple toc active items
+- c542561: Use cookie to store active locale on `always` mode
+
+### Patch Changes
+
+- 4916f84: Improve Source API performance
+
 ## 13.2.2
 
 ### Patch Changes

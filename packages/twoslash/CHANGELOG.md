@@ -1,5 +1,16 @@
 # fumadocs-twoslash
 
+## 1.1.2
+
+### Patch Changes
+
+- 2cc477f: Fix meta field inherited to child code blocks
+- Updated dependencies [8f5b19e]
+- Updated dependencies [32ca37a]
+- Updated dependencies [9aae448]
+- Updated dependencies [c542561]
+  - fumadocs-ui@13.3.0
+
 ## 1.1.1
 
 ### Patch Changes
