@@ -74,7 +74,7 @@ export function TocPopover({
         alignOffset={16}
         align="start"
         side="bottom"
-        className="flex max-h-[80vh] w-[260px] flex-col gap-4 p-3"
+        className="flex max-h-[var(--radix-popover-content-available-height)] w-[260px] flex-col gap-4 p-3"
         data-toc-popover=""
       >
         {header}

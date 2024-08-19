@@ -2,8 +2,8 @@
 import { type AnchorHTMLAttributes, forwardRef } from 'react';
 import { Edit } from 'lucide-react';
 import { cn } from '@/utils/cn';
-import { buttonVariants } from '@/theme/variants';
 import { useI18n } from '@/contexts/i18n';
+import { buttonVariants } from '@/theme/variants';
 
 export interface EditOnGitHubOptions
   extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href' | 'children'> {
@@ -36,13 +36,13 @@ export const EditOnGitHub = forwardRef<HTMLAnchorElement, EditOnGitHubOptions>(
         {...props}
         className={cn(
           buttonVariants({
-            color: 'secondary',
-            className: 'text-xs gap-1.5',
+            color: 'outline',
+            className: 'text-fd-muted-foreground text-xs p-1.5 gap-2',
           }),
           props.className,
         )}
       >
-        <Edit className="size-3" />
+        <Edit className="size-3.5" />
         {text.editOnGithub}
       </a>
     );
