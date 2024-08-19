@@ -4,6 +4,7 @@ import { generateSample, type EndpointSample } from '@/schema/sample';
 import * as CURL from '@/requests/curl';
 import * as JS from '@/requests/javascript';
 import * as Go from '@/requests/go';
+import * as Python from '@/requests/python';
 import { type MethodInformation, type RenderContext } from '@/types';
 import { noRef, getPreferredType } from '@/utils/schema';
 import { getTypescriptSchema } from '@/utils/get-typescript-schema';
@@ -175,6 +176,11 @@ async function APIExample({
       label: 'Go',
       source: Go.getSampleRequest(endpoint),
       lang: 'go',
+    },
+    {
+      label: 'Python',
+      source: Python.getSampleRequest(endpoint),
+      lang: 'python',
     },
     ...(ctx.generateCodeSamples ? await ctx.generateCodeSamples(endpoint) : []),
     ...((method as CustomProperty)['x-codeSamples'] ?? []),

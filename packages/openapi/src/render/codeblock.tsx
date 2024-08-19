@@ -1,6 +1,7 @@
 import { type HTMLAttributes, useMemo } from 'react';
 import * as Base from 'fumadocs-ui/components/codeblock';
 import { createHighlighter, bundledLanguages, bundledThemes } from 'shiki';
+import { sharedTransformers } from '@/utils/shiki';
 
 export type CodeBlockProps = HTMLAttributes<HTMLPreElement> & {
   code: string;
@@ -22,6 +23,7 @@ export function CodeBlock({
       lang,
       defaultColor: false,
       themes: { light: 'github-light', dark: 'github-dark' },
+      transformers: sharedTransformers,
     });
   }, [code, lang]);
 
