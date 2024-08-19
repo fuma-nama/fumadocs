@@ -135,10 +135,28 @@ default.
 For Github hosted documents, you can use
 the [Git Last Modified](/docs/headless/utils/git-last-edit) utility.
 
-```jsx
+```tsx
 import { DocsPage } from 'fumadocs-ui/page';
 
 <DocsPage lastUpdate={new Date(lastModifiedTime)} />;
+```
+
+### Edit on GitHub
+
+A shortcut to add "Edit on GitHub" button to TOC footer.
+
+```tsx
+import { DocsPage } from 'fumadocs-ui/page';
+
+<DocsPage
+  editOnGithub={{
+    owner: 'fuma-nama',
+    repo: 'fumadocs',
+    sha: 'main',
+    // file path, make sure it's valid
+    path: `content/docs/${page.file.path}`,
+  }}
+/>;
 ```
 
 ### Footer

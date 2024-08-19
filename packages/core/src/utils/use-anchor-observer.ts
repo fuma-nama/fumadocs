@@ -45,9 +45,9 @@ export function useAnchorObserver(watch: string[], single: boolean): string[] {
         element.scrollHeight - 6
       ) {
         setActiveAnchor((active) => {
-          const last = active.at(-1);
-
-          return last ? watch.slice(watch.indexOf(last)) : active;
+          return active.length > 0
+            ? watch.slice(watch.indexOf(active[0]))
+            : watch.slice(-1);
         });
       }
     }

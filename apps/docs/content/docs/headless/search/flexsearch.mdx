@@ -176,3 +176,19 @@ function Dialog() {
 | ---------------- | ----------------------------------------------- |
 | `empty`          | If the searching text is empty or blank         |
 | `SortedResult[]` | Array of matching pages, headings and contents. |
+
+## Headless
+
+You can also host the search server on Express or Elysia, without Next.js.
+
+```ts
+import { initAdvancedSearch } from 'fumadocs-core/search/server';
+
+const server = initAdvancedSearch({
+  // options
+});
+
+server.search('query', {
+  // you can specify `locale` and `tag` here
+});
+```

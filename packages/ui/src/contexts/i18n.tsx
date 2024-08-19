@@ -12,6 +12,7 @@ export interface Translations {
   nextPage: string;
   previousPage: string;
   chooseTheme: string;
+  editOnGithub: string;
 }
 
 export interface LocaleItem {
@@ -37,6 +38,7 @@ export const I18nContext = createContext<I18nContextType>({
     nextPage: 'Next',
     previousPage: 'Previous',
     chooseTheme: 'Theme',
+    editOnGithub: 'Edit on GitHub',
   },
 });
 

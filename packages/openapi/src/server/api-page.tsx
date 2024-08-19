@@ -46,9 +46,13 @@ export async function APIPage(props: ApiPageProps): Promise<ReactElement> {
   return (
     <ctx.renderer.Root baseUrl={ctx.baseUrl}>
       {operations.map((item) => {
-        const operation = document.paths[item.path]?.[item.method];
+        const pathItem = document.paths[item.path];
+        if (!pathItem) return null;
+
+        const operation = pathItem[item.method];
         if (!operation) return null;
-        const method = createMethod(item.method, operation);
+
+        const method = createMethod(item.method, pathItem, operation);
 
         return (
           <Operation

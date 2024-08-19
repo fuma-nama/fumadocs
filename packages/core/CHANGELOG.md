@@ -1,5 +1,13 @@
 # next-docs-zeta
 
+## 13.3.2
+
+### Patch Changes
+
+- 0e0ef8c: Support headless search servers
+
+## 13.3.1
+
 ## 13.3.0
 
 ### Minor Changes

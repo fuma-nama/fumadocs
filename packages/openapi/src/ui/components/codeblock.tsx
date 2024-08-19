@@ -1,6 +1,7 @@
 import { type HTMLAttributes, useLayoutEffect, useState } from 'react';
 import * as Base from 'fumadocs-ui/components/codeblock';
 import { useApiContext } from '@/ui/contexts/api';
+import { sharedTransformers } from '@/utils/shiki';
 
 export type CodeBlockProps = HTMLAttributes<HTMLPreElement> & {
   code: string;
@@ -22,6 +23,7 @@ export function CodeBlock({
       lang,
       defaultColor: false,
       themes: { light: 'github-light', dark: 'github-dark' },
+      transformers: sharedTransformers,
     });
 
     setHtml(themedHtml);

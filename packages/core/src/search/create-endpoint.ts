@@ -1,14 +1,15 @@
-import { NextResponse } from 'next/server';
-import { type SearchAPI } from '@/search/server';
+import { type SearchAPI, type SearchServer } from '@/search/server';
 
-export function createEndpoint(search: SearchAPI['search']): SearchAPI {
+export function createEndpoint(server: SearchServer): SearchAPI {
+  const { search } = server;
+
   return {
     search,
     async GET(request) {
       const query = request.nextUrl.searchParams.get('query');
-      if (!query) return NextResponse.json([]);
+      if (!query) return Response.json([]);
 
-      return NextResponse.json(
+      return Response.json(
         await search(query, {
           tag: request.nextUrl.searchParams.get('tag') ?? undefined,
           locale: request.nextUrl.searchParams.get('locale') ?? undefined,

@@ -1,10 +1,12 @@
 import {
   type AdvancedIndex,
   type AdvancedOptions,
-  createSearchAPI,
   type Dynamic,
   type Index,
+  initAdvancedSearch,
+  initSimpleSearch,
   type SearchAPI,
+  type SearchServer,
   type SimpleOptions,
 } from '@/search/server';
 import { createEndpoint } from '@/search/create-endpoint';
@@ -30,30 +32,54 @@ export function createI18nSearchAPI<T extends 'simple' | 'advanced'>(
   type: T,
   options: T extends 'simple' ? I18nSimpleOptions : I18nAdvancedOptions,
 ): SearchAPI {
-  const map = new Map<string, SearchAPI>();
+  const map = new Map<string, SearchServer>();
 
-  return createEndpoint(async (query, searchOptions) => {
-    if (map.size === 0) {
-      const indexes =
-        typeof options.indexes === 'function'
-          ? await options.indexes()
-          : options.indexes;
-
-      for (const locale of options.i18n.languages) {
-        const api = createSearchAPI(type, {
-          ...options,
-          language: locale,
-          indexes: indexes.filter((index) => index.locale === locale),
-        });
-        map.set(locale, api);
-      }
+  async function init(): Promise<void> {
+    if (options.i18n.languages.length === 0) {
+      return;
     }
 
-    const handler = map.get(
-      searchOptions?.locale ?? options.i18n.defaultLanguage,
-    );
+    const indexes =
+      typeof options.indexes === 'function'
+        ? await options.indexes()
+        : options.indexes;
 
-    if (handler) return handler.search(query, searchOptions);
-    return [];
+    for (const locale of options.i18n.languages) {
+      const localeIndexes = indexes.filter((index) => index.locale === locale);
+
+      if (type === 'simple') {
+        map.set(
+          locale,
+          initSimpleSearch({
+            ...options,
+            language: locale,
+            indexes: localeIndexes as SimpleOptions['indexes'],
+          }),
+        );
+        continue;
+      }
+
+      map.set(
+        locale,
+        initAdvancedSearch({
+          ...options,
+          language: locale,
+          indexes: localeIndexes as AdvancedOptions['indexes'],
+        }),
+      );
+    }
+  }
+
+  return createEndpoint({
+    search: async (query, searchOptions) => {
+      if (map.size === 0) await init();
+
+      const handler = map.get(
+        searchOptions?.locale ?? options.i18n.defaultLanguage,
+      );
+
+      if (handler) return handler.search(query, searchOptions);
+      return [];
+    },
   });
 }

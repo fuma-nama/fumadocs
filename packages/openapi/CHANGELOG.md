@@ -1,5 +1,28 @@
 # @fuma-docs/openapi
 
+## 5.3.0
+
+### Minor Changes
+
+- 3fa2436: Support Python code sample
+
+### Patch Changes
+
+- 3e4627a: Show required label on body parameters
+- 10f6f39: Fix common parameters
+- Updated dependencies [17746a6]
+- Updated dependencies [0e0ef8c]
+  - fumadocs-ui@13.3.2
+  - fumadocs-core@13.3.2
+
+## 5.2.2
+
+### Patch Changes
+
+- Updated dependencies [7258c4b]
+  - fumadocs-ui@13.3.1
+  - fumadocs-core@13.3.1
+
 ## 5.2.1
 
 ### Patch Changes

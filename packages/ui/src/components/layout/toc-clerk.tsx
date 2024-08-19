@@ -129,7 +129,7 @@ function getItemOffset(depth: number): number {
 }
 
 function getLineOffset(depth: number): number {
-  return depth >= 3 ? 16 : 0;
+  return depth >= 3 ? 12 : 0;
 }
 
 function TOCItem({
@@ -141,7 +141,9 @@ function TOCItem({
   upper?: number;
   lower?: number;
 }): React.ReactElement {
-  const offset = getLineOffset(item.depth);
+  const offset = getLineOffset(item.depth),
+    upperOffset = getLineOffset(upper),
+    lowerOffset = getLineOffset(lower);
 
   return (
     <Primitive.TOCItem
@@ -151,21 +153,16 @@ function TOCItem({
       }}
       className="relative py-2 transition-colors [overflow-wrap:anywhere] first:pt-0 last:pb-0 data-[active=true]:text-fd-primary"
     >
-      {offset !== getLineOffset(upper) ? (
+      {offset !== upperOffset ? (
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 16 16"
-          className={cn(
-            'absolute -top-2 start-0 size-4',
-            offset < getLineOffset(upper)
-              ? 'rotate-90 rtl:rotate-0'
-              : 'rtl:rotate-90',
-          )}
+          className="absolute -top-2 start-0 size-4 rtl:-scale-x-100"
         >
           <line
-            x1="0"
+            x1={upperOffset}
             y1="0"
-            x2="16"
+            x2={offset}
             y2="16"
             className="stroke-fd-foreground/10"
             strokeWidth="1"
@@ -175,8 +172,8 @@ function TOCItem({
       <div
         className={cn(
           'absolute inset-y-0 w-px bg-fd-foreground/10',
-          offset !== getLineOffset(upper) && 'top-2',
-          offset !== getLineOffset(lower) && 'bottom-2',
+          offset !== upperOffset && 'top-2',
+          offset !== lowerOffset && 'bottom-2',
         )}
         style={{
           insetInlineStart: offset,
