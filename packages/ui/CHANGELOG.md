@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 13.3.2
+
+### Patch Changes
+
+- 17746a6: Support built-in edit on github button
+- Updated dependencies [0e0ef8c]
+  - fumadocs-core@13.3.2
+
 ## 13.3.1
 
 ### Patch Changes
