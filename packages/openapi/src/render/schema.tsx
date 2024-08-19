@@ -172,7 +172,7 @@ export function Schema({
       <renderer.ObjectCollapsible key="attributes" name={name}>
         <Schema
           name={name}
-          schema={combineSchema(schema.allOf.map(noRef))}
+          schema={combineSchema(noRef(schema.allOf))}
           ctx={{
             ...ctx,
             parseObject: true,
@@ -251,7 +251,7 @@ function combineSchema(schema: OpenAPI.SchemaObject[]): OpenAPI.SchemaObject {
     }
 
     if (s.allOf) {
-      add(combineSchema(s.allOf.map(noRef)));
+      add(combineSchema(noRef(s.allOf)));
     }
   }
 

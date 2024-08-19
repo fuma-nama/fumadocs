@@ -1,6 +1,8 @@
 import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
 
-type NoReference<T> = Exclude<T, OpenAPI.ReferenceObject>;
+type NoReference<T> = T extends (infer I)[]
+  ? NoReference<I>[]
+  : Exclude<T, OpenAPI.ReferenceObject>;
 
 export function noRef<T>(v: T): NoReference<T> {
   return v as NoReference<T>;

@@ -19,15 +19,15 @@ export function buildRoutes(
 ): Map<string, RouteInformation[]> {
   const map = new Map<string, RouteInformation[]>();
 
-  for (const [path, value] of Object.entries(document.paths)) {
-    if (!value) continue;
+  for (const [path, pathItem] of Object.entries(document.paths)) {
+    if (!pathItem) continue;
     const methodMap = new Map<string, MethodInformation[]>();
 
     for (const methodKey of methodKeys) {
-      const operation = value[methodKey];
+      const operation = pathItem[methodKey];
       if (!operation) continue;
 
-      const info = createMethod(methodKey, operation);
+      const info = createMethod(methodKey, pathItem, operation);
       const tags = operation.tags ?? [];
 
       for (const tag of [...tags, 'all']) {
@@ -40,7 +40,7 @@ export function buildRoutes(
     for (const [tag, methods] of methodMap.entries()) {
       const list = map.get(tag) ?? [];
       list.push({
-        ...value,
+        ...pathItem,
         path,
         methods,
       });
