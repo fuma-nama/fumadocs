@@ -7,7 +7,6 @@ import { Markdown } from './markdown';
 const keys: {
   [T in keyof OpenAPI.SchemaObject]: string;
 } = {
-  example: 'Example',
   default: 'Default',
   minimum: 'Minimum',
   maximum: 'Maximum',
@@ -64,20 +63,11 @@ export function Schema({
     (schema.writeOnly === true && !ctx.writeOnly)
   )
     return null;
+
   const parseObject = ctx.parseObject ?? true;
-
   const stack = ctx.stack ?? [];
-
   const { renderer } = ctx.render;
   const child: ReactNode[] = [];
-
-  function field(key: string, value: string): void {
-    child.push(
-      <span key={key}>
-        {key}: <code>{value}</code>
-      </span>,
-    );
-  }
 
   // object type
   if (isObject(schema) && parseObject) {
@@ -130,19 +120,38 @@ export function Schema({
 
   if (schema.description)
     child.push(<Markdown key="description" text={schema.description} />);
+
+  const fields: {
+    key: string;
+    value: string;
+  }[] = [];
+
   for (const [key, value] of Object.entries(keys)) {
     if (key in schema) {
-      field(value, JSON.stringify(schema[key as keyof OpenAPI.SchemaObject]));
+      fields.push({
+        key: value,
+        value: JSON.stringify(schema[key as keyof OpenAPI.SchemaObject]),
+      });
     }
   }
 
-  // enum types
   if (schema.enum) {
-    field(
-      'Value in',
-      schema.enum.map((value) => JSON.stringify(value)).join(' | '),
-    );
+    fields.push({
+      key: 'Value in',
+      value: schema.enum.map((value) => JSON.stringify(value)).join(' | '),
+    });
   }
+
+  if (fields.length > 0)
+    child.push(
+      <p key="fields">
+        {fields.map((field) => (
+          <span key={field.key}>
+            {field.key}: <code>{field.value}</code>
+          </span>
+        ))}
+      </p>,
+    );
 
   if (isObject(schema) && !parseObject) {
     child.push(
@@ -208,6 +217,7 @@ export function Schema({
     <renderer.Property
       name={name}
       type={getSchemaType(schema, ctx)}
+      required={ctx.required}
       deprecated={schema.deprecated}
     >
       {child}
