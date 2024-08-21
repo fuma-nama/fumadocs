@@ -26,7 +26,9 @@ export function Body({
   const mode = useMode();
 
   return (
-    <body className={cn(mode, 'flex min-h-screen flex-col')}>{children}</body>
+    <body className={cn(mode, 'relative flex min-h-screen flex-col')}>
+      {children}
+    </body>
   );
 }
 
