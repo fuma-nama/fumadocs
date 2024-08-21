@@ -1,12 +1,6 @@
 import * as Base from 'fumadocs-ui/components/codeblock';
 import type { HTMLAttributes } from 'react';
-import { useMemo } from 'react';
-import { createHighlighter } from 'shiki';
-
-const highlighter = await createHighlighter({
-  langs: ['bash', 'ts', 'tsx'],
-  themes: ['github-light', 'github-dark'],
-});
+import { codeToHtml } from 'shiki';
 
 export type CodeBlockProps = HTMLAttributes<HTMLPreElement> & {
   code: string;
@@ -14,37 +8,33 @@ export type CodeBlockProps = HTMLAttributes<HTMLPreElement> & {
   lang: 'bash' | 'ts' | 'tsx';
 };
 
-export function CodeBlock({
+export async function CodeBlock({
   code,
   lang,
   wrapper,
   ...props
-}: CodeBlockProps): React.ReactElement {
-  const html = useMemo(
-    () =>
-      highlighter.codeToHtml(code, {
-        lang,
-        defaultColor: false,
-        themes: {
-          light: 'github-light',
-          dark: 'github-dark',
-        },
-        transformers: [
-          {
-            name: 'remove-pre',
-            root: (root) => {
-              if (root.children[0].type !== 'element') return;
+}: CodeBlockProps): Promise<React.ReactElement> {
+  const html = await codeToHtml(code, {
+    lang,
+    defaultColor: false,
+    themes: {
+      light: 'github-light',
+      dark: 'github-dark',
+    },
+    transformers: [
+      {
+        name: 'remove-pre',
+        root: (root) => {
+          if (root.children[0].type !== 'element') return;
 
-              return {
-                type: 'root',
-                children: root.children[0].children,
-              };
-            },
-          },
-        ],
-      }),
-    [code, lang],
-  );
+          return {
+            type: 'root',
+            children: root.children[0].children,
+          };
+        },
+      },
+    ],
+  });
 
   return (
     <Base.CodeBlock {...wrapper}>

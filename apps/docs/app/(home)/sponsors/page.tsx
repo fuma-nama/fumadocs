@@ -212,6 +212,7 @@ export default function Page(): ReactNode {
               unoptimized
               width="30"
               height="30"
+              className="rounded-lg"
             />
             {sponsor.name}
           </a>
