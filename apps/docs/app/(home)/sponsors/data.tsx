@@ -89,10 +89,16 @@ export const sponsors = [
   },
 ];
 
+// TODO: Fetch user sponsors dynamically?
 export const sponsorUsers = [
   {
     avatar: 'https://avatars.githubusercontent.com/u/70720713',
     name: 'Kyrylo Lvov',
     url: 'https://github.com/kyrylolvov',
+  },
+  {
+    avatar: 'https://avatars.githubusercontent.com/u/90281553',
+    name: 'RUNFUNRUN',
+    url: 'https://runfunrun.dev',
   },
 ];
