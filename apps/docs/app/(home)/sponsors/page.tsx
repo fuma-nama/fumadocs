@@ -11,12 +11,24 @@ export default function Page(): ReactNode {
         className="absolute inset-0 z-[-1]"
         style={{
           backgroundImage:
-            'conic-gradient(at 50% 96px, transparent 20%, rgba(200,100,255,0.2) 40%, transparent, rgba(100,140,255,0.3) 60%, transparent 80%)',
+            'conic-gradient(at 50% 196px, transparent 20%, rgba(200,100,255,0.2) 40%, transparent, rgba(100,140,255,0.3) 60%, transparent 80%)',
+          maskImage:
+            'radial-gradient(circle at center, white 20%, transparent 60%)',
         }}
+      />
+      <Image
+        src="/circuit_2.svg"
+        alt="circuit"
+        width="1231"
+        height="536"
+        className="absolute top-16 z-[-1] w-full max-w-[1200px] opacity-30 invert dark:invert-0"
       />
       <svg
         viewBox="0 0 100 100"
-        className="absolute top-24 z-[-1] max-w-[200px] opacity-20 dark:opacity-50"
+        className="absolute top-24 z-[-1] max-w-[200px]"
+        style={{
+          maskImage: 'linear-gradient(to bottom,transparent 20%,white 80%)',
+        }}
       >
         <circle
           r="49"
