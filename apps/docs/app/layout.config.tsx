@@ -1,5 +1,5 @@
 import { type DocsLayoutProps } from 'fumadocs-ui/layout';
-import { BookIcon, LayoutTemplateIcon } from 'lucide-react';
+import { BookIcon, Heart, LayoutTemplateIcon } from 'lucide-react';
 import Image from 'next/image';
 import { RootToggle } from 'fumadocs-ui/components/layout/root-toggle';
 import type { HomeLayoutProps } from 'fumadocs-ui/home-layout';
@@ -44,6 +44,11 @@ export const baseOptions: HomeLayoutProps = {
       text: 'Showcase',
       url: '/showcase',
       icon: <LayoutTemplateIcon />,
+    },
+    {
+      text: 'Sponsors',
+      url: '/sponsors',
+      icon: <Heart />,
     },
   ],
 };
