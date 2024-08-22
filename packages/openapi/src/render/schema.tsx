@@ -118,6 +118,16 @@ export function Schema({
     return child;
   }
 
+  if (schema.allOf && parseObject) {
+    return (
+      <Schema
+        name={name}
+        schema={combineSchema(noRef(schema.allOf))}
+        ctx={ctx}
+      />
+    );
+  }
+
   if (schema.description)
     child.push(<Markdown key="description" text={schema.description} />);
 
@@ -156,26 +166,12 @@ export function Schema({
       </p>,
     );
 
-  if (isObject(schema) && !parseObject) {
+  if ((isObject(schema) || schema.allOf) && !parseObject) {
     child.push(
       <renderer.ObjectCollapsible key="attributes" name="Attributes">
         <Schema
           name={name}
           schema={schema}
-          ctx={{
-            ...ctx,
-            parseObject: true,
-            required: false,
-          }}
-        />
-      </renderer.ObjectCollapsible>,
-    );
-  } else if (schema.allOf) {
-    child.push(
-      <renderer.ObjectCollapsible key="attributes" name={name}>
-        <Schema
-          name={name}
-          schema={combineSchema(noRef(schema.allOf))}
           ctx={{
             ...ctx,
             parseObject: true,
@@ -237,24 +233,23 @@ function combineSchema(schema: OpenAPI.SchemaObject[]): OpenAPI.SchemaObject {
   };
 
   function add(s: OpenAPI.SchemaObject): void {
-    result.properties ??= {};
-
     if (s.properties) {
+      result.properties ??= {};
       Object.assign(result.properties, s.properties);
     }
 
-    result.additionalProperties ??= {};
     if (s.additionalProperties === true) {
       result.additionalProperties = true;
     } else if (
       s.additionalProperties &&
       typeof result.additionalProperties !== 'boolean'
     ) {
+      result.additionalProperties ??= {};
       Object.assign(result.additionalProperties, s.additionalProperties);
     }
 
     if (s.allOf) {
-      add(combineSchema(noRef(s.allOf)));
+      noRef(s.allOf).forEach(add);
     }
   }
 
