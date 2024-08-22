@@ -1,5 +1,12 @@
 # @fuma-docs/openapi
 
+## 5.3.1
+
+### Patch Changes
+
+- 5660e1e: Fix `allOf` schema display problem
+- 28bb673: Fix fields styles
+
 ## 5.3.0
 
 ### Minor Changes
