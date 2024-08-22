@@ -1,5 +1,5 @@
 import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
-import type { ReactNode } from 'react';
+import { Fragment, type ReactNode } from 'react';
 import { noRef } from '@/utils/schema';
 import type { RenderContext } from '@/types';
 import { Markdown } from './markdown';
@@ -145,10 +145,13 @@ export function Schema({
   if (fields.length > 0)
     child.push(
       <p key="fields">
-        {fields.map((field) => (
-          <span key={field.key}>
-            {field.key}: <code>{field.value}</code>
-          </span>
+        {fields.map((field, i) => (
+          <Fragment key={field.key}>
+            <span>
+              {field.key}: <code>{field.value}</code>
+            </span>
+            {i !== fields.length - 1 ? <br /> : null}
+          </Fragment>
         ))}
       </p>,
     );
