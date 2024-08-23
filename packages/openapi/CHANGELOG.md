@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 5.3.2
+
+### Patch Changes
+
+- 0b93a31: Support `required` in `allOf` schemas
+
 ## 5.3.1
 
 ### Patch Changes
