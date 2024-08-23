@@ -1,31 +1,7 @@
 import type { HTMLAttributes } from 'react';
 import Image from 'next/image';
 import { cn } from '@/utils/cn';
-
-interface Contributor {
-  avatar_url: string;
-  login: string;
-  contributions: number;
-}
-
-async function fetchContributors(
-  repoOwner: string,
-  repoName: string,
-): Promise<Contributor[]> {
-  const response = await fetch(
-    `https://api.github.com/repos/${repoOwner}/${repoName}/contributors?per_page=50`,
-    { next: { revalidate: 1000 * 1000 } },
-  );
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch contributors: ${response.statusText}`);
-  }
-
-  const contributors = (await response.json()) as Contributor[];
-  return contributors
-    .filter((contributor) => !contributor.login.endsWith('[bot]'))
-    .sort((a, b) => b.contributions - a.contributions);
-}
+import { fetchContributors } from '@/utils/get-contributors';
 
 export interface ContributorCounterProps
   extends HTMLAttributes<HTMLDivElement> {

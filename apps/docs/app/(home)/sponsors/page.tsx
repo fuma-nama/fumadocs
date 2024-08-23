@@ -1,10 +1,11 @@
 import { Fragment, type ReactNode } from 'react';
 import Image from 'next/image';
-import { sponsors, sponsorUsers } from '@/app/(home)/sponsors/data';
+import { sponsors } from '@/app/(home)/sponsors/data';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/utils/cn';
+import { getUserSponsors } from '@/utils/get-sponsors';
 
-export default function Page(): ReactNode {
+export default async function Page(): Promise<ReactNode> {
   return (
     <main className="container flex flex-col items-center py-16 text-center">
       <div
@@ -198,17 +199,17 @@ export default function Page(): ReactNode {
 
       <h2 className="mt-12 font-mono text-xs">Individual Sponsors</h2>
       <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-        {sponsorUsers.map((sponsor) => (
+        {(await getUserSponsors('fuma-nama')).map((sponsor) => (
           <a
             key={sponsor.name}
-            href={sponsor.url}
+            href={sponsor.websiteUrl ?? `https://github.com/${sponsor.login}`}
             rel="noreferrer noopener"
             target="_blank"
             className="inline-flex items-center gap-2 rounded-xl p-3 text-xs transition-colors hover:bg-fd-primary/10"
           >
             <Image
               alt="avatar"
-              src={sponsor.avatar}
+              src={sponsor.avatarUrl}
               unoptimized
               width="30"
               height="30"
