@@ -5,6 +5,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useEffect,
 } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import useSWRImmutable from 'swr/immutable';
@@ -135,6 +136,23 @@ export function APIPlayground({
       shouldRetryOnError: false,
     },
   );
+
+  useEffect(() => {
+    if (!authorization) return;
+    const key = `__fumadocs_authorization_${authorization.authType}`;
+    const cached = localStorage.getItem(key);
+    if (cached) form.setValue('authorization', cached);
+
+    const subscription = form.watch((value, { name }) => {
+      if (name !== 'authorization' || !value.authorization) return;
+      localStorage.setItem(key, value.authorization);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mounted only once
+  }, []);
 
   const onSubmit = form.handleSubmit((value) => {
     setInput(value);

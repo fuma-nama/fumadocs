@@ -76,7 +76,7 @@ export interface APIPlaygroundProps {
   route: string;
   method: string;
   bodyType: 'json' | 'form-data';
-  authorization?: PrimitiveRequestField;
+  authorization?: PrimitiveRequestField & { authType: string };
   path?: PrimitiveRequestField[];
   query?: PrimitiveRequestField[];
   header?: PrimitiveRequestField[];
@@ -133,7 +133,7 @@ export function Playground({
 function getAuthorizationField(
   method: MethodInformation,
   ctx: RenderContext,
-): PrimitiveRequestField | undefined {
+): (PrimitiveRequestField & { authType: string }) | undefined {
   const security = method.security ?? ctx.document.security ?? [];
   if (security.length === 0) return;
   const singular = security.find(
@@ -146,6 +146,7 @@ function getAuthorizationField(
   return {
     type: 'string',
     name: 'Authorization',
+    authType: scheme.type,
     defaultValue:
       scheme.type === 'oauth2' ||
       (scheme.type === 'http' && scheme.scheme === 'bearer')
