@@ -2,6 +2,7 @@ import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
 import { Fragment, type ReactNode } from 'react';
 import { noRef } from '@/utils/schema';
 import type { RenderContext } from '@/types';
+import { combineSchema } from '@/utils/combine-schema';
 import { Markdown } from './markdown';
 
 const keys: {
@@ -222,40 +223,6 @@ export function Schema({
       {child}
     </renderer.Property>
   );
-}
-
-/**
- * Combine multiple object schemas into one
- */
-function combineSchema(schema: OpenAPI.SchemaObject[]): OpenAPI.SchemaObject {
-  const result: OpenAPI.SchemaObject = {
-    type: 'object',
-  };
-
-  function add(s: OpenAPI.SchemaObject): void {
-    if (s.properties) {
-      result.properties ??= {};
-      Object.assign(result.properties, s.properties);
-    }
-
-    if (s.additionalProperties === true) {
-      result.additionalProperties = true;
-    } else if (
-      s.additionalProperties &&
-      typeof result.additionalProperties !== 'boolean'
-    ) {
-      result.additionalProperties ??= {};
-      Object.assign(result.additionalProperties, s.additionalProperties);
-    }
-
-    if (s.allOf) {
-      noRef(s.allOf).forEach(add);
-    }
-  }
-
-  schema.forEach(add);
-
-  return result;
 }
 
 /**
