@@ -175,7 +175,17 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/BuyMuseumTicketsRequest'
+              allOf:
+                - $ref: '#/components/schemas/BuyMuseumTicketsRequest'
+                - type: object
+                  properties:
+                    test:
+                      type: string
+                      enum:
+                        - general
+                        - gold
+                        - platinum
+                        - vip
             examples:
               general_entry:
                 $ref: '#/components/examples/BuyGeneralTicketsRequestExample'

@@ -1,7 +1,8 @@
 import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
-import type { ReactNode } from 'react';
+import { Fragment, type ReactNode } from 'react';
 import { noRef } from '@/utils/schema';
 import type { RenderContext } from '@/types';
+import { combineSchema } from '@/utils/combine-schema';
 import { Markdown } from './markdown';
 
 const keys: {
@@ -118,6 +119,16 @@ export function Schema({
     return child;
   }
 
+  if (schema.allOf && parseObject) {
+    return (
+      <Schema
+        name={name}
+        schema={combineSchema(noRef(schema.allOf))}
+        ctx={ctx}
+      />
+    );
+  }
+
   if (schema.description)
     child.push(<Markdown key="description" text={schema.description} />);
 
@@ -145,34 +156,23 @@ export function Schema({
   if (fields.length > 0)
     child.push(
       <p key="fields">
-        {fields.map((field) => (
-          <span key={field.key}>
-            {field.key}: <code>{field.value}</code>
-          </span>
+        {fields.map((field, i) => (
+          <Fragment key={field.key}>
+            <span>
+              {field.key}: <code>{field.value}</code>
+            </span>
+            {i !== fields.length - 1 ? <br /> : null}
+          </Fragment>
         ))}
       </p>,
     );
 
-  if (isObject(schema) && !parseObject) {
+  if ((isObject(schema) || schema.allOf) && !parseObject) {
     child.push(
       <renderer.ObjectCollapsible key="attributes" name="Attributes">
         <Schema
           name={name}
           schema={schema}
-          ctx={{
-            ...ctx,
-            parseObject: true,
-            required: false,
-          }}
-        />
-      </renderer.ObjectCollapsible>,
-    );
-  } else if (schema.allOf) {
-    child.push(
-      <renderer.ObjectCollapsible key="attributes" name={name}>
-        <Schema
-          name={name}
-          schema={combineSchema(noRef(schema.allOf))}
           ctx={{
             ...ctx,
             parseObject: true,
@@ -223,41 +223,6 @@ export function Schema({
       {child}
     </renderer.Property>
   );
-}
-
-/**
- * Combine multiple object schemas into one
- */
-function combineSchema(schema: OpenAPI.SchemaObject[]): OpenAPI.SchemaObject {
-  const result: OpenAPI.SchemaObject = {
-    type: 'object',
-  };
-
-  function add(s: OpenAPI.SchemaObject): void {
-    result.properties ??= {};
-
-    if (s.properties) {
-      Object.assign(result.properties, s.properties);
-    }
-
-    result.additionalProperties ??= {};
-    if (s.additionalProperties === true) {
-      result.additionalProperties = true;
-    } else if (
-      s.additionalProperties &&
-      typeof result.additionalProperties !== 'boolean'
-    ) {
-      Object.assign(result.additionalProperties, s.additionalProperties);
-    }
-
-    if (s.allOf) {
-      add(combineSchema(noRef(s.allOf)));
-    }
-  }
-
-  schema.forEach(add);
-
-  return result;
 }
 
 /**

@@ -1,5 +1,24 @@
 # @fuma-docs/openapi
 
+## 5.4.0
+
+### Minor Changes
+
+- 6cf5535: Persist `authorization` field
+
+## 5.3.2
+
+### Patch Changes
+
+- 0b93a31: Support `required` in `allOf` schemas
+
+## 5.3.1
+
+### Patch Changes
+
+- 5660e1e: Fix `allOf` schema display problem
+- 28bb673: Fix fields styles
+
 ## 5.3.0
 
 ### Minor Changes
