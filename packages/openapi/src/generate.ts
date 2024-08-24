@@ -51,6 +51,13 @@ export interface GenerateOptions {
     context: DocumentContext,
   ) => Record<string, unknown>;
 
+  /**
+   * Add description to document body
+   *
+   * @defaultValue false
+   */
+  includeDescription?: boolean;
+
   cwd?: string;
 }
 
