@@ -1,5 +1,12 @@
 # @fuma-docs/openapi
 
+## 5.4.1
+
+### Patch Changes
+
+- 029a156: Fix `display` on property components
+- eb922e1: Support adding `description` to generated document body
+
 ## 5.4.0
 
 ### Minor Changes
