@@ -22,7 +22,7 @@ export function generateDocument(
     context: DocumentContext;
   },
 ): string {
-  const { frontmatter } = options;
+  const { frontmatter, includeDescription = false } = options;
   const out: string[] = [];
   const extend = frontmatter?.(
     options.title,
@@ -63,6 +63,8 @@ export function generateDocument(
   if (imports) {
     out.push(imports);
   }
+
+  if (options.description && includeDescription) out.push(options.description);
 
   out.push(pageContent(options.page));
 

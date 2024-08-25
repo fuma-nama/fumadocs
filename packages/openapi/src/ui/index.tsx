@@ -88,8 +88,8 @@ export function Property({
   children,
 }: PropertyProps): React.ReactElement {
   return (
-    <div className="mb-4 flex flex-col rounded-lg border bg-fd-card p-3 prose-no-margin">
-      <h4 className="inline-flex items-center gap-4">
+    <div className="mb-4 rounded-lg border bg-fd-card p-3 prose-no-margin">
+      <h4 className="flex flex-row items-center gap-4">
         <code>{name}</code>
         {required ? (
           <div className={cn(badgeVariants({ color: 'red' }))}>Required</div>
