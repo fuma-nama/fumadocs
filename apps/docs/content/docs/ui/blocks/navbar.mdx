@@ -7,15 +7,18 @@ description: Top navigation bar
 
 The navigation header provides common interactive elements.
 
-> On larger devices, it becomes a part of sidebar.
-
 ```tsx
 import { DocsLayout } from 'fumadocs-ui/layout';
 
 <DocsLayout
-  nav={{ title: <Logo />, githubUrl: 'https://github.com/fuma-nama/fumadocs' }}
+  githubUrl="https://github.com/fuma-nama/fumadocs"
+  nav={{ title: 'My App' }}
 />;
 ```
+
+### Sidebar
+
+On docs layout, it becomes a part of sidebar when the sidebar is shown.
 
 ### Transparent Mode
 
