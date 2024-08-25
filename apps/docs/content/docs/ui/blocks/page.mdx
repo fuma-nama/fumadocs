@@ -156,6 +156,13 @@ const time = await getGithubLastEdit({
 <DocsPage lastUpdate={new Date(time)} />;
 ```
 
+<Callout type='info' title='Note'>
+
+    You can also manually specify the last updated time of documents (e.g. using frontmatter).
+    Don't forget to [update the schema type](/docs/mdx/validation) on Fumadocs MDX.
+
+</Callout>
+
 ### Edit on GitHub
 
 A shortcut to add "Edit on GitHub" button to TOC footer.
