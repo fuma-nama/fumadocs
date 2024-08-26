@@ -13,7 +13,8 @@
     "fumadocs-ui": "workspace:*",
     "next": "^14.2.5",
     "react": "18.3.1",
-    "react-dom": "18.3.1"
+    "react-dom": "18.3.1",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/mdx": "^2.0.13",

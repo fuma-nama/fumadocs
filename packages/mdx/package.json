@@ -45,6 +45,7 @@
   },
   "dependencies": {
     "@mdx-js/mdx": "^3.0.1",
+    "@swc/core": "^1.7.18",
     "cross-spawn": "^7.0.3",
     "estree-util-value-to-estree": "^3.1.2",
     "fast-glob": "^3.3.1",

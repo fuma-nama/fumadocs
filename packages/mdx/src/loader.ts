@@ -1,8 +1,11 @@
 import path from 'node:path';
 import fg from 'fast-glob';
 import type { LoaderContext } from 'webpack';
+import { findConfigFile, loadConfig } from '@/utils/config';
 
 export interface LoaderOptions {
+  configPath?: string;
+
   rootContentDir: string;
   rootMapFile: string;
 
@@ -17,32 +20,31 @@ export interface LoaderOptions {
 /**
  * Load the root `.map.ts` file
  */
-export default function loader(
+export default async function loader(
   this: LoaderContext<LoaderOptions>,
   _source: string,
   callback: LoaderContext<LoaderOptions>['callback'],
-): void {
-  const options = this.getOptions();
+): Promise<void> {
+  const {
+    rootMapFile,
+    configPath = findConfigFile(),
+    include = ['./**/*.{md,mdx,json}'],
+  } = this.getOptions();
 
   this.cacheable(true);
-  this.addContextDependency(options.rootContentDir);
+  for (const v of )
+  this.addContextDependency(rootContentDir);
+  this.addDependency(configPath);
 
-  callback(null, buildMap(options));
-}
-
-function buildMap({
-  rootContentDir,
-  rootMapFile,
-  include = ['./**/*.{md,mdx,json}'],
-}: LoaderOptions): string {
   const mapDir = path.dirname(rootMapFile);
-
   const files = fg.sync(include, {
     cwd: rootContentDir,
   });
 
   const imports: string[] = [];
   const entries: string[] = [];
+  const config = await loadConfig(configPath);
+  config['sdf']
 
   files.forEach((file, i) => {
     let importPath = path
@@ -58,7 +60,10 @@ function buildMap({
     entries.push(`${JSON.stringify(file)}: ${name}`);
   });
 
-  return [imports.join('\n'), `export const map = {${entries.join(',')}}`].join(
-    '\n',
+  callback(
+    null,
+    [imports.join('\n'), `export const map = {${entries.join(',')}}`].join(
+      '\n',
+    ),
   );
 }
