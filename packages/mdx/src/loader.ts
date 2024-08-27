@@ -1,7 +1,7 @@
 import path from 'node:path';
 import fg from 'fast-glob';
 import type { LoaderContext } from 'webpack';
-import { findConfigFile, loadConfig } from '@/utils/config';
+import { findConfigFile, loadConfig, type LoadedConfig } from '@/config/load';
 
 export interface LoaderOptions {
   configPath?: string;
@@ -17,6 +17,12 @@ export interface LoaderOptions {
   include?: string | string[];
 }
 
+let cachedConfig: LoadedConfig | undefined;
+
+export function getCachedConfig(): LoadedConfig | undefined {
+  return cachedConfig;
+}
+
 /**
  * Load the root `.map.ts` file
  */
@@ -25,45 +31,62 @@ export default async function loader(
   _source: string,
   callback: LoaderContext<LoaderOptions>['callback'],
 ): Promise<void> {
-  const {
-    rootMapFile,
-    configPath = findConfigFile(),
-    include = ['./**/*.{md,mdx,json}'],
-  } = this.getOptions();
+  const { rootMapFile, configPath = findConfigFile() } = this.getOptions();
+  const config = await loadConfig(configPath);
+  cachedConfig = config;
 
   this.cacheable(true);
-  for (const v of )
-  this.addContextDependency(rootContentDir);
+
+  for (const collection of Object.values(config)) {
+    for (const dir of Array.isArray(collection.dir)
+      ? collection.dir
+      : [collection.dir]) {
+      this.addContextDependency(path.resolve(dir));
+    }
+  }
+
   this.addDependency(configPath);
 
   const mapDir = path.dirname(rootMapFile);
-  const files = fg.sync(include, {
-    cwd: rootContentDir,
-  });
 
   const imports: string[] = [];
-  const entries: string[] = [];
-  const config = await loadConfig(configPath);
-  config['sdf']
+  const sources: string[] = [];
 
-  files.forEach((file, i) => {
-    let importPath = path
-      .relative(mapDir, path.join(rootContentDir, file))
-      .replaceAll(path.sep, '/');
+  await Promise.all(
+    Object.entries(config).map(async ([name, collection]) => {
+      const files = new Set<string>();
+      const entries: string[] = [];
 
-    if (!importPath.startsWith('.')) {
-      importPath = `./${importPath}`;
-    }
+      const dirs = Array.isArray(collection.dir)
+        ? collection.dir
+        : [collection.dir];
+      await Promise.all(
+        dirs.map(async (dir) => {
+          const included = await fg(collection.files ?? ['**/*'], {
+            cwd: dir,
+          });
 
-    const name = `file_${i.toString()}`;
-    imports.push(`import * as ${name} from ${JSON.stringify(importPath)};`);
-    entries.push(`${JSON.stringify(file)}: ${name}`);
-  });
+          included.forEach((item) => files.add(item));
+        }),
+      );
 
-  callback(
-    null,
-    [imports.join('\n'), `export const map = {${entries.join(',')}}`].join(
-      '\n',
-    ),
+      Array.from(files.values()).forEach((file, i) => {
+        let importPath = path.relative(mapDir, file).replaceAll(path.sep, '/');
+
+        if (!importPath.startsWith('.')) {
+          importPath = `./${importPath}`;
+        }
+
+        const importName = `file_${i.toString()}`;
+        imports.push(
+          `import * as ${importName} from ${JSON.stringify(importPath)};`,
+        );
+        entries.push(`${JSON.stringify(file)}: ${importName}`);
+      });
+
+      sources.push(`export const ${name} = {${entries.join(',')}}`);
+    }),
   );
+
+  callback(null, [...imports, ...sources].join('\n'));
 }

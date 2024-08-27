@@ -649,6 +649,9 @@ importers:
       gray-matter:
         specifier: ^4.0.3
         version: 4.0.3
+      micromatch:
+        specifier: ^4.0.7
+        version: 4.0.7
       zod:
         specifier: ^3.23.8
         version: 3.23.8
@@ -662,6 +665,9 @@ importers:
       '@types/mdx':
         specifier: ^2.0.13
         version: 2.0.13
+      '@types/micromatch':
+        specifier: ^4.0.9
+        version: 4.0.9
       '@types/react':
         specifier: ^18.3.3
         version: 18.3.3

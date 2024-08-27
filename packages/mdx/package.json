@@ -50,12 +50,14 @@
     "estree-util-value-to-estree": "^3.1.2",
     "fast-glob": "^3.3.1",
     "gray-matter": "^4.0.3",
+    "micromatch": "^4.0.7",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/cross-spawn": "^6.0.6",
     "@types/mdast": "^4.0.3",
     "@types/mdx": "^2.0.13",
+    "@types/micromatch": "^4.0.9",
     "@types/react": "^18.3.3",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",

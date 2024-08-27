@@ -5,6 +5,7 @@ import { type Processor } from '@mdx-js/mdx/internal-create-format-aware-process
 import grayMatter from 'gray-matter';
 import { type LoaderContext } from 'webpack';
 import type { InternalFrontmatter } from '@/types';
+import { getCachedConfig } from '@/loader';
 import { getGitTimestamp } from './utils/git-timestamp';
 
 export interface Options extends ProcessorOptions {
@@ -43,6 +44,9 @@ export default async function loader(
   const { lastModifiedTime, ...options } = this.getOptions();
   const detectedFormat = filePath.endsWith('.mdx') ? 'mdx' : 'md';
   const format = options.format ?? detectedFormat;
+  const config = getCachedConfig();
+  if (!config) return;
+
   let processor = cache.get(format);
 
   if (processor === undefined) {

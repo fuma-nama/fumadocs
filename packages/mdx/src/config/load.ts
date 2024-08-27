@@ -4,12 +4,15 @@ import { join } from 'node:path';
 import { type CompilerOptions } from 'typescript';
 import { type Options as SWCOptions, transform } from '@swc/core';
 import { type Config } from '@/config/types';
+import { validateConfig } from '@/config/validate';
 
 export function findConfigFile(): string {
   return path.resolve('source.config.ts');
 }
 
-export async function loadConfig(configPath: string): Promise<Config> {
+export type LoadedConfig = Config;
+
+export async function loadConfig(configPath: string): Promise<LoadedConfig> {
   const outputPath = path.resolve('.source/config.js');
   const configCode = await readFile(configPath).catch(() => null);
 
@@ -26,7 +29,13 @@ export async function loadConfig(configPath: string): Promise<Config> {
   await mkdir(path.dirname(outputPath), { recursive: true });
   await writeFile(outputPath, transformed.code);
 
-  return ((await import(outputPath)) as { default: Config }).default;
+  const [err, config] = validateConfig(
+    ((await import(outputPath)) as { default: Record<string, unknown> })
+      .default,
+  );
+
+  if (err !== null) throw new Error(err);
+  return config;
 }
 
 interface TSConfig {
