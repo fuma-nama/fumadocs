@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 5.4.2
+
+### Patch Changes
+
+- 3d1ec96: Improve schema fields margins
+
 ## 5.4.1
 
 ### Patch Changes
