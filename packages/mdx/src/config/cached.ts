@@ -12,3 +12,7 @@ export async function loadConfigCached(
   cache.set(configPath, config);
   return config;
 }
+
+export function invalidateCache(configPath: string): void {
+  cache.delete(configPath);
+}

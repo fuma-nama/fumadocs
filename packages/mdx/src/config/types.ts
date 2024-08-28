@@ -1,29 +1,53 @@
 import { type AnyZodObject, type z } from 'zod';
-import { type Collections, type SupportedTypes } from '@/config/collections';
+import type { MDXProps } from 'mdx/types';
+import type { StructuredData } from 'fumadocs-core/mdx-plugins';
+import type { TableOfContents } from 'fumadocs-core/server';
+import { type Collections } from '@/config/collections';
 
 export type Config = Record<string, Collections>;
 
-export type InferSchema<C extends Collections> =
-  C extends Collections<infer Schema> ? Schema : never;
+export type InferSchema<C> =
+  C extends Collections<infer Schema, any, any> ? Schema : never;
 
-export type InferSchemaType<C extends Collections> = z.output<InferSchema<C>>;
+export type InferSchemaType<C> = z.output<InferSchema<C>>;
 
-export type InferCollectionsProps<C extends Collections> =
-  SupportedTypes[C extends Collections<AnyZodObject, infer Type>
-    ? Type
-    : never];
+export type InferCollectionsProps<C> = SupportedTypes[C extends Collections<
+  AnyZodObject,
+  infer Type,
+  any
+>
+  ? Type
+  : never];
 
 export interface FileInfo {
   path: string;
   absolutePath: string;
 }
 
+interface MarkdownProps {
+  body: (props: MDXProps) => React.ReactElement;
+  structuredData: StructuredData;
+  toc: TableOfContents;
+}
+
+export interface SupportedTypes {
+  // eslint-disable-next-line @typescript-eslint/ban-types -- empty object
+  meta: {};
+  doc: MarkdownProps;
+}
+
+export type SupportedType = keyof SupportedTypes;
+
+export type GetCollectionEntry<Type extends SupportedType, Output> = Omit<
+  SupportedTypes[Type],
+  keyof Output
+> &
+  Output & {
+    _file: FileInfo;
+  };
+
 export type CollectionEntry<C> =
-  C extends Collections<any, any, infer Output>
-    ? Omit<Output, '_file'> & {
-        _file: FileInfo;
-      }
-    : never;
+  C extends Collections<any, any, infer Output> ? Output : never;
 
 /**
  * Get output type of collections

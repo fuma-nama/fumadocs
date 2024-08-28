@@ -2,7 +2,7 @@ import path from 'node:path';
 import fg from 'fast-glob';
 import type { LoaderContext } from 'webpack';
 import { type FileInfo } from '@/config';
-import { loadConfigCached } from '@/config/cached';
+import { invalidateCache, loadConfigCached } from '@/config/cached';
 
 export interface LoaderOptions {
   configPath: string;
@@ -27,6 +27,7 @@ export default async function loader(
   callback: LoaderContext<LoaderOptions>['callback'],
 ): Promise<void> {
   const { rootMapFile, configPath } = this.getOptions();
+  invalidateCache(configPath);
   const config = await loadConfigCached(configPath);
 
   this.cacheable(true);
@@ -44,9 +45,20 @@ export default async function loader(
   const mapDir = path.dirname(rootMapFile);
 
   const imports: string[] = ['import { toRuntime } from "fumadocs-mdx"'];
+  const importedCollections = new Set<string>();
   const sources: string[] = [];
   const files = new Set<string>();
   let importId = 0;
+
+  function toImportPath(file: string): string {
+    let importPath = path.relative(mapDir, file).replaceAll(path.sep, '/');
+
+    if (!importPath.startsWith('.')) {
+      importPath = `./${importPath}`;
+    }
+
+    return importPath;
+  }
 
   await Promise.all(
     Object.entries(config).map(async ([name, collection]) => {
@@ -66,30 +78,38 @@ export default async function loader(
             if (files.has(file)) continue;
             files.add(file);
 
-            let importPath = path
-              .relative(mapDir, file)
-              .replaceAll(path.sep, '/');
-
-            if (!importPath.startsWith('.')) {
-              importPath = `./${importPath}`;
-            }
-
+            const importPath = toImportPath(file);
             const importName = `file_${(importId++).toString()}`;
             imports.push(
               `import * as ${importName} from ${JSON.stringify(importPath)}`,
             );
+
             const info: FileInfo = {
               path: path.relative(dir, file),
               absolutePath: file,
             };
+
             entries.push(`toRuntime(${importName}, ${JSON.stringify(info)})`);
           }
         }),
       );
 
-      sources.push(`export const ${name} = [${entries.join(',')}]`);
+      if (collection.transform) {
+        importedCollections.add(name);
+        sources.push(
+          `export const ${name} = await Promise.all([${entries.join(',')}].map(c_${name}.transform))`,
+        );
+      } else {
+        sources.push(`export const ${name} = [${entries.join(',')}]`);
+      }
     }),
   );
 
+  if (importedCollections.size > 0)
+    imports.push(
+      `import { ${Array.from(importedCollections.values())
+        .map((v) => `${v} as c_${v}`)
+        .join(', ')} } from ${JSON.stringify(toImportPath(configPath))}`,
+    );
   callback(null, [...imports, ...sources].join('\n'));
 }

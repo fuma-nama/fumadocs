@@ -1,31 +1,22 @@
 import { type AnyZodObject, type z } from 'zod';
-import type { TableOfContents } from 'fumadocs-core/server';
-import type { StructuredData } from 'fumadocs-core/mdx-plugins';
-import type { MDXProps } from 'mdx/types';
+import { type ProcessorOptions } from '@mdx-js/mdx';
+import { type MDXOptions } from '@/utils/build-mdx';
+import { type GetCollectionEntry, type SupportedType } from '@/config/types';
 
-export interface MarkdownProps {
-  body: (props: MDXProps) => React.ReactElement;
-  structuredData: StructuredData;
-  toc: TableOfContents;
+export interface TransformContext {
+  path: string;
+  source: string;
+
+  /**
+   * Compile MDX to JavaScript
+   */
+  buildMDX: (source: string, options?: ProcessorOptions) => Promise<string>;
 }
-
-export interface SupportedTypes {
-  // eslint-disable-next-line @typescript-eslint/ban-types -- empty object
-  meta: {};
-  doc: MarkdownProps;
-}
-
-export type SupportedType = keyof SupportedTypes;
-
-export type CollectionData<
-  Schema extends AnyZodObject,
-  Type extends SupportedType,
-> = Omit<SupportedTypes[Type], keyof z.output<Schema>> & z.output<Schema>;
 
 export interface Collections<
   Schema extends AnyZodObject = AnyZodObject,
   Type extends SupportedType = SupportedType,
-  Output = CollectionData<Schema, Type>,
+  Output = GetCollectionEntry<Type, z.output<Schema>>,
 > {
   /**
    * Directories to scan
@@ -39,20 +30,29 @@ export interface Collections<
    */
   files?: string[];
 
-  schema: Schema;
+  schema: Schema | ((ctx: TransformContext) => Schema);
 
   /**
    * content type
    */
   type: Type;
 
-  transform?: (entry: CollectionData<Schema, Type>) => Output;
+  /**
+   * Do transformation in runtime.
+   *
+   * This cannot be optimized by bundlers/loaders, avoid expensive calculations here.
+   */
+  transform?: (
+    entry: GetCollectionEntry<Type, z.output<Schema>>,
+  ) => Output | Promise<Output>;
+
+  mdxOptions?: Type extends 'doc' ? MDXOptions : never;
 }
 
 export function defineCollections<
   Schema extends AnyZodObject,
   Type extends SupportedType,
-  Output = CollectionData<Schema, Type>,
+  Output = GetCollectionEntry<Type, z.output<Schema>>,
 >(
   options: Collections<Schema, Type, Output>,
 ): {

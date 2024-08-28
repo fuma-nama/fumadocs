@@ -1,50 +1,23 @@
 import path from 'node:path';
 import type { NextConfig } from 'next';
-import {
-  rehypeCode,
-  remarkGfm,
-  remarkStructure,
-  remarkHeading,
-  type RehypeCodeOptions,
-  remarkImage,
-  type RemarkImageOptions,
-  type RemarkHeadingOptions,
-} from 'fumadocs-core/mdx-plugins';
-import type { Pluggable } from 'unified';
 import type { Configuration } from 'webpack';
 import { MapWebpackPlugin } from '@/webpack-plugins/map-plugin';
 import type { LoaderOptions } from '@/loader';
 import { findConfigFile } from '@/config/load';
-import remarkMdxExport from '../mdx-plugins/remark-exports';
+import {
+  type DefaultMDXOptions,
+  getDefaultMDXOptions,
+} from '@/utils/mdx-options';
 import type { Options as MDXLoaderOptions } from '../loader-mdx';
 import {
   SearchIndexPlugin,
   type Options as SearchIndexPluginOptions,
 } from '../webpack-plugins/search-index-plugin';
 
-type MDXOptions = Omit<
-  NonNullable<MDXLoaderOptions>,
-  'rehypePlugins' | 'remarkPlugins' | '_ctx'
-> & {
-  rehypePlugins?: ResolvePlugins;
-  remarkPlugins?: ResolvePlugins;
-
-  /**
-   * Properties to export from `vfile.data`
-   */
-  valueToExport?: string[];
-
-  remarkHeadingOptions?: RemarkHeadingOptions;
-  remarkImageOptions?: RemarkImageOptions | false;
-  rehypeCodeOptions?: RehypeCodeOptions | false;
-};
-
-type ResolvePlugins = Pluggable[] | ((v: Pluggable[]) => Pluggable[]);
-
 export interface CreateMDXOptions {
   cwd?: string;
 
-  mdxOptions?: MDXOptions;
+  mdxOptions?: DefaultMDXOptions;
 
   buildSearchIndex?:
     | Omit<SearchIndexPluginOptions, 'rootContentDir' | 'rootMapFile'>
@@ -53,7 +26,7 @@ export interface CreateMDXOptions {
   /**
    * Where the root map.ts should be, relative to cwd
    *
-   * @defaultValue `'./.map.ts'`
+   * @defaultValue `'./.source/index.ts'`
    */
   rootMapPath?: string;
 
@@ -75,70 +48,12 @@ export interface CreateMDXOptions {
   configPath?: string;
 }
 
-function pluginOption(
-  def: (v: Pluggable[]) => (Pluggable | false)[],
-  options: ResolvePlugins = [],
-): Pluggable[] {
-  const list = def(Array.isArray(options) ? options : []).filter(
-    Boolean,
-  ) as Pluggable[];
-
-  if (typeof options === 'function') {
-    return options(list);
-  }
-
-  return list;
-}
-
-function getMDXLoaderOptions({
-  valueToExport = [],
-  rehypeCodeOptions,
-  remarkImageOptions,
-  remarkHeadingOptions,
-  ...mdxOptions
-}: MDXOptions): Omit<MDXLoaderOptions, '_ctx'> {
-  const mdxExports = [
-    'structuredData',
-    'toc',
-    'frontmatter',
-    'lastModified',
-    ...valueToExport,
-  ];
-
-  const remarkPlugins = pluginOption(
-    (v) => [
-      remarkGfm,
-      [remarkHeading, remarkHeadingOptions],
-      remarkImageOptions !== false && [remarkImage, remarkImageOptions],
-      ...v,
-      remarkStructure,
-      [remarkMdxExport, { values: mdxExports }],
-    ],
-    mdxOptions.remarkPlugins,
-  );
-
-  const rehypePlugins = pluginOption(
-    (v) => [
-      rehypeCodeOptions !== false && [rehypeCode, rehypeCodeOptions],
-      ...v,
-    ],
-    mdxOptions.rehypePlugins,
-  );
-
-  return {
-    providerImportSource: 'next-mdx-import-source-file',
-    ...mdxOptions,
-    remarkPlugins,
-    rehypePlugins,
-  };
-}
-
 const defaultPageExtensions = ['mdx', 'md', 'jsx', 'js', 'tsx', 'ts'];
 
 export function createMDX({
   mdxOptions = {},
   cwd = process.cwd(),
-  rootMapPath = './.map.ts',
+  rootMapPath = '.source/index.ts',
   rootContentPath = './content',
   buildSearchIndex = false,
   configPath = findConfigFile(),
@@ -146,7 +61,7 @@ export function createMDX({
 }: CreateMDXOptions = {}) {
   const rootMapFile = path.resolve(cwd, rootMapPath);
   const rootContentDir = path.resolve(cwd, rootContentPath);
-  const mdxLoaderOptions = getMDXLoaderOptions(mdxOptions);
+  const mdxLoaderOptions = getDefaultMDXOptions(mdxOptions);
 
   return (nextConfig: NextConfig = {}): NextConfig => {
     return {

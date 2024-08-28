@@ -1,11 +1,6 @@
 import { getPage, getPages } from '@/app/source';
 import type { Metadata } from 'next';
-import {
-  DocsPage,
-  DocsBody,
-  DocsTitle,
-  DocsDescription,
-} from 'fumadocs-ui/page';
+import { DocsPage, DocsBody, DocsTitle } from 'fumadocs-ui/page';
 import { notFound } from 'next/navigation';
 
 export default async function Page({
@@ -24,8 +19,11 @@ export default async function Page({
   return (
     <DocsPage toc={page.data.toc} full={page.data.full}>
       <DocsTitle>{page.data.title}</DocsTitle>
-      <DocsDescription>{page.data.description}</DocsDescription>
+
       <DocsBody>
+        <div className="mb-8 text-lg text-fd-muted-foreground">
+          {page.data.description_md}
+        </div>
         <MDX />
       </DocsBody>
     </DocsPage>
@@ -45,6 +43,5 @@ export function generateMetadata({ params }: { params: { slug?: string[] } }) {
 
   return {
     title: page.data.title,
-    description: page.data.description,
   } satisfies Metadata;
 }

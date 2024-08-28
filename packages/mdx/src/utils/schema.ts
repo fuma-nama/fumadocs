@@ -17,8 +17,3 @@ export const frontmatterSchema = z.object({
   // Fumadocs OpenAPI generated
   _openapi: z.object({}).passthrough().optional(),
 });
-
-export const defaultSchemas = {
-  frontmatter: frontmatterSchema,
-  meta: metaSchema,
-};

@@ -1,16 +1,13 @@
-import { type AnyZodObject } from 'zod';
-import {
-  type CollectionData,
-  type Collections,
-  defineCollections,
-} from '@/config/collections';
+import { type AnyZodObject, type z } from 'zod';
+import { type Collections, defineCollections } from '@/config/collections';
 import { frontmatterSchema, metaSchema } from '@/utils/schema';
+import type { GetCollectionEntry } from '@/config/types';
 
 export function defineDocs<
   F extends AnyZodObject = typeof frontmatterSchema,
   M extends AnyZodObject = typeof metaSchema,
-  DocsOut = CollectionData<F, 'doc'>,
-  MetaOut = CollectionData<M, 'meta'>,
+  DocsOut = GetCollectionEntry<'doc', z.output<F>>,
+  MetaOut = GetCollectionEntry<'meta', z.output<M>>,
 >(options?: {
   docs?: Partial<Collections<F, 'doc', DocsOut>>;
   meta?: Partial<Collections<M, 'meta', MetaOut>>;

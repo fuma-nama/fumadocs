@@ -1,12 +1,13 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
-import { createProcessor, type ProcessorOptions } from '@mdx-js/mdx';
-import { type Processor } from '@mdx-js/mdx/internal-create-format-aware-processors';
+import { type ProcessorOptions } from '@mdx-js/mdx';
 import grayMatter from 'gray-matter';
 import { type LoaderContext } from 'webpack';
 import type { InternalFrontmatter } from '@/types';
 import { findCollection } from '@/utils/find-collection';
 import { loadConfigCached } from '@/config/cached';
+import { buildMDX } from '@/utils/build-mdx';
+import { type TransformContext } from '@/config';
 import { getGitTimestamp } from './utils/git-timestamp';
 
 export interface Options extends ProcessorOptions {
@@ -34,8 +35,6 @@ export interface InternalBuildInfo {
   };
 }
 
-const cache = new Map<string, Processor>();
-
 /**
  * Load MDX/markdown files
  *
@@ -49,33 +48,44 @@ export default async function loader(
   this.cacheable(true);
   const context = this.context;
   const filePath = this.resourcePath;
-  const { lastModifiedTime, _ctx, ...options } = this.getOptions();
-  const detectedFormat = filePath.endsWith('.mdx') ? 'mdx' : 'md';
-  const format = options.format ?? detectedFormat;
+  const { lastModifiedTime, _ctx, ...mdxOptions } = this.getOptions();
   const config = await loadConfigCached(_ctx.configPath);
   const collection = findCollection(config, filePath, 'doc');
+  const matter = grayMatter(source);
 
-  let processor = cache.get(format);
-
-  if (processor === undefined) {
-    processor = createProcessor({
-      ...options,
-      development: this.mode === 'development',
-      format,
-    });
-
-    cache.set(format, processor);
+  function getTransformContext(): TransformContext {
+    return {
+      buildMDX: async (v, options = collection?.mdxOptions ?? mdxOptions) => {
+        const res = await buildMDX(v, options);
+        return String(res.value);
+      },
+      source,
+      path: filePath,
+    };
   }
 
-  const matter = grayMatter(source);
-  const parsedMatter = collection?.schema.parse(matter.data) ?? matter.data;
-  const props = (parsedMatter as InternalFrontmatter)._mdx ?? {};
+  let frontmatter = matter.data;
+  if (collection?.schema) {
+    const schema =
+      typeof collection.schema === 'function'
+        ? collection.schema(getTransformContext())
+        : collection.schema;
 
+    const result = await schema.safeParseAsync(frontmatter);
+    if (result.error) {
+      callback(result.error);
+      return;
+    }
+
+    frontmatter = result.data;
+  }
+
+  const props = (frontmatter as InternalFrontmatter)._mdx ?? {};
   if (props.mirror) {
     const mirrorPath = path.resolve(path.dirname(filePath), props.mirror);
     this.addDependency(mirrorPath);
 
-    matter.content = await fs
+    frontmatter.content = await fs
       .readFile(mirrorPath)
       .then((res) => grayMatter(res.toString()).content);
   }
@@ -84,30 +94,30 @@ export default async function loader(
   if (lastModifiedTime === 'git')
     timestamp = (await getGitTimestamp(filePath))?.getTime();
 
-  processor
-    .process({
-      value: matter.content,
-      path: filePath,
+  try {
+    const file = await buildMDX(matter.content, {
+      development: this.mode === 'development',
+      ...(collection?.mdxOptions ?? mdxOptions),
+      filePath,
+      frontmatter,
+      outputFormat: 'program',
       data: {
         lastModified: timestamp,
-        frontmatter: parsedMatter,
       },
-    })
-    .then(
-      (file) => {
-        const info = this._module?.buildInfo as InternalBuildInfo;
+    });
+    const info = this._module?.buildInfo as InternalBuildInfo;
 
-        info.__fumadocs = {
-          path: filePath,
-          data: file.data,
-        };
+    info.__fumadocs = {
+      path: filePath,
+      data: file.data,
+    };
 
-        callback(undefined, String(file.value), file.map ?? undefined);
-      },
-      (error: Error) => {
-        const fpath = path.relative(context, filePath);
-        error.message = `${fpath}:${error.name}: ${error.message}`;
-        callback(error);
-      },
-    );
+    callback(undefined, String(file.value), file.map ?? undefined);
+  } catch (error) {
+    if (!(error instanceof Error)) throw error;
+
+    const fpath = path.relative(context, filePath);
+    error.message = `${fpath}:${error.name}: ${error.message}`;
+    callback(error);
+  }
 }
