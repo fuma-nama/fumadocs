@@ -5,7 +5,8 @@ import { type Processor } from '@mdx-js/mdx/internal-create-format-aware-process
 import grayMatter from 'gray-matter';
 import { type LoaderContext } from 'webpack';
 import type { InternalFrontmatter } from '@/types';
-import { getCachedConfig } from '@/loader';
+import { findCollection } from '@/utils/find-collection';
+import { loadConfigCached } from '@/config/cached';
 import { getGitTimestamp } from './utils/git-timestamp';
 
 export interface Options extends ProcessorOptions {
@@ -14,6 +15,13 @@ export interface Options extends ProcessorOptions {
    * @defaultValue 'none'
    */
   lastModifiedTime?: 'git' | 'none';
+
+  /**
+   * @internal
+   */
+  _ctx: {
+    configPath: string;
+  };
 }
 
 export interface InternalBuildInfo {
@@ -41,11 +49,11 @@ export default async function loader(
   this.cacheable(true);
   const context = this.context;
   const filePath = this.resourcePath;
-  const { lastModifiedTime, ...options } = this.getOptions();
+  const { lastModifiedTime, _ctx, ...options } = this.getOptions();
   const detectedFormat = filePath.endsWith('.mdx') ? 'mdx' : 'md';
   const format = options.format ?? detectedFormat;
-  const config = getCachedConfig();
-  if (!config) return;
+  const config = await loadConfigCached(_ctx.configPath);
+  const collection = findCollection(config, filePath, 'doc');
 
   let processor = cache.get(format);
 
@@ -60,7 +68,8 @@ export default async function loader(
   }
 
   const matter = grayMatter(source);
-  const props = (matter.data as InternalFrontmatter)._mdx ?? {};
+  const parsedMatter = collection?.schema.parse(matter.data) ?? matter.data;
+  const props = (parsedMatter as InternalFrontmatter)._mdx ?? {};
 
   if (props.mirror) {
     const mirrorPath = path.resolve(path.dirname(filePath), props.mirror);
@@ -81,7 +90,7 @@ export default async function loader(
       path: filePath,
       data: {
         lastModified: timestamp,
-        frontmatter: matter.data,
+        frontmatter: parsedMatter,
       },
     })
     .then(

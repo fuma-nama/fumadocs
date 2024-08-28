@@ -14,8 +14,12 @@
     "./loader": "./loader.js",
     "./loader-mdx": "./loader-mdx.js",
     "./config": {
-      "import": "./dist/config.mjs",
-      "types": "./dist/config.d.mts"
+      "import": "./dist/config/index.mjs",
+      "types": "./dist/config/index.d.mts"
+    },
+    "./next": {
+      "import": "./dist/next/index.mjs",
+      "types": "./dist/next/index.d.mts"
     },
     ".": {
       "import": "./dist/index.mjs",

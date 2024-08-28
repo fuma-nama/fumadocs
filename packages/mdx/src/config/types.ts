@@ -1,9 +1,5 @@
 import { type AnyZodObject, type z } from 'zod';
-import {
-  type Collections,
-  type SupportedType,
-  type SupportedTypes,
-} from '@/config/collections';
+import { type Collections, type SupportedTypes } from '@/config/collections';
 
 export type Config = Record<string, Collections>;
 
@@ -17,16 +13,19 @@ export type InferCollectionsProps<C extends Collections> =
     ? Type
     : never];
 
-export type CollectionEntry<C extends Collections> =
-  C extends Collections<AnyZodObject, SupportedType, infer Output>
+export interface FileInfo {
+  path: string;
+  absolutePath: string;
+}
+
+export type CollectionEntry<C> =
+  C extends Collections<any, any, infer Output>
     ? Omit<Output, '_file'> & {
-        _file: {
-          path: string;
-        };
+        _file: FileInfo;
       }
     : never;
 
 /**
  * Get output type of collections
  */
-export type GetOutput<C extends Collections> = CollectionEntry<C>[];
+export type GetOutput<C> = CollectionEntry<C>[];

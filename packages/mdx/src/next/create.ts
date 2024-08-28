@@ -14,6 +14,7 @@ import type { Pluggable } from 'unified';
 import type { Configuration } from 'webpack';
 import { MapWebpackPlugin } from '@/webpack-plugins/map-plugin';
 import type { LoaderOptions } from '@/loader';
+import { findConfigFile } from '@/config/load';
 import remarkMdxExport from '../mdx-plugins/remark-exports';
 import type { Options as MDXLoaderOptions } from '../loader-mdx';
 import {
@@ -23,7 +24,7 @@ import {
 
 type MDXOptions = Omit<
   NonNullable<MDXLoaderOptions>,
-  'rehypePlugins' | 'remarkPlugins'
+  'rehypePlugins' | 'remarkPlugins' | '_ctx'
 > & {
   rehypePlugins?: ResolvePlugins;
   remarkPlugins?: ResolvePlugins;
@@ -67,6 +68,11 @@ export interface CreateMDXOptions {
    * {@link LoaderOptions.include}
    */
   include?: string | string[];
+
+  /**
+   * Path to source configuration file
+   */
+  configPath?: string;
 }
 
 function pluginOption(
@@ -90,7 +96,7 @@ function getMDXLoaderOptions({
   remarkImageOptions,
   remarkHeadingOptions,
   ...mdxOptions
-}: MDXOptions): MDXLoaderOptions {
+}: MDXOptions): Omit<MDXLoaderOptions, '_ctx'> {
   const mdxExports = [
     'structuredData',
     'toc',
@@ -129,12 +135,13 @@ function getMDXLoaderOptions({
 
 const defaultPageExtensions = ['mdx', 'md', 'jsx', 'js', 'tsx', 'ts'];
 
-function createMDX({
+export function createMDX({
   mdxOptions = {},
   cwd = process.cwd(),
   rootMapPath = './.map.ts',
   rootContentPath = './content',
   buildSearchIndex = false,
+  configPath = findConfigFile(),
   ...loadOptions
 }: CreateMDXOptions = {}) {
   const rootMapFile = path.resolve(cwd, rootMapPath);
@@ -166,7 +173,12 @@ function createMDX({
               options.defaultLoaders.babel,
               {
                 loader: 'fumadocs-mdx/loader-mdx',
-                options: mdxLoaderOptions,
+                options: {
+                  ...mdxLoaderOptions,
+                  _ctx: {
+                    configPath,
+                  },
+                } satisfies MDXLoaderOptions,
               },
             ],
           },
@@ -177,6 +189,7 @@ function createMDX({
               options: {
                 rootContentDir,
                 rootMapFile,
+                configPath,
                 ...loadOptions,
               } satisfies LoaderOptions,
             },
@@ -188,6 +201,7 @@ function createMDX({
         config.plugins.push(
           new MapWebpackPlugin({
             rootMapFile,
+            configPath,
           }),
         );
 
@@ -206,5 +220,3 @@ function createMDX({
     };
   };
 }
-
-export { createMDX as default };

@@ -1,10 +1,11 @@
 import path from 'node:path';
 import fg from 'fast-glob';
 import type { LoaderContext } from 'webpack';
-import { findConfigFile, loadConfig, type LoadedConfig } from '@/config/load';
+import { type FileInfo } from '@/config';
+import { loadConfigCached } from '@/config/cached';
 
 export interface LoaderOptions {
-  configPath?: string;
+  configPath: string;
 
   rootContentDir: string;
   rootMapFile: string;
@@ -17,12 +18,6 @@ export interface LoaderOptions {
   include?: string | string[];
 }
 
-let cachedConfig: LoadedConfig | undefined;
-
-export function getCachedConfig(): LoadedConfig | undefined {
-  return cachedConfig;
-}
-
 /**
  * Load the root `.map.ts` file
  */
@@ -31,9 +26,8 @@ export default async function loader(
   _source: string,
   callback: LoaderContext<LoaderOptions>['callback'],
 ): Promise<void> {
-  const { rootMapFile, configPath = findConfigFile() } = this.getOptions();
-  const config = await loadConfig(configPath);
-  cachedConfig = config;
+  const { rootMapFile, configPath } = this.getOptions();
+  const config = await loadConfigCached(configPath);
 
   this.cacheable(true);
 
@@ -49,12 +43,13 @@ export default async function loader(
 
   const mapDir = path.dirname(rootMapFile);
 
-  const imports: string[] = [];
+  const imports: string[] = ['import { toRuntime } from "fumadocs-mdx"'];
   const sources: string[] = [];
+  const files = new Set<string>();
+  let importId = 0;
 
   await Promise.all(
     Object.entries(config).map(async ([name, collection]) => {
-      const files = new Set<string>();
       const entries: string[] = [];
 
       const dirs = Array.isArray(collection.dir)
@@ -64,27 +59,35 @@ export default async function loader(
         dirs.map(async (dir) => {
           const included = await fg(collection.files ?? ['**/*'], {
             cwd: dir,
+            absolute: true,
           });
 
-          included.forEach((item) => files.add(item));
+          for (const file of included) {
+            if (files.has(file)) continue;
+            files.add(file);
+
+            let importPath = path
+              .relative(mapDir, file)
+              .replaceAll(path.sep, '/');
+
+            if (!importPath.startsWith('.')) {
+              importPath = `./${importPath}`;
+            }
+
+            const importName = `file_${(importId++).toString()}`;
+            imports.push(
+              `import * as ${importName} from ${JSON.stringify(importPath)}`,
+            );
+            const info: FileInfo = {
+              path: path.relative(dir, file),
+              absolutePath: file,
+            };
+            entries.push(`toRuntime(${importName}, ${JSON.stringify(info)})`);
+          }
         }),
       );
 
-      Array.from(files.values()).forEach((file, i) => {
-        let importPath = path.relative(mapDir, file).replaceAll(path.sep, '/');
-
-        if (!importPath.startsWith('.')) {
-          importPath = `./${importPath}`;
-        }
-
-        const importName = `file_${i.toString()}`;
-        imports.push(
-          `import * as ${importName} from ${JSON.stringify(importPath)};`,
-        );
-        entries.push(`${JSON.stringify(file)}: ${importName}`);
-      });
-
-      sources.push(`export const ${name} = {${entries.join(',')}}`);
+      sources.push(`export const ${name} = [${entries.join(',')}]`);
     }),
   );
 

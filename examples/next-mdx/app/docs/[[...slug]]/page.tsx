@@ -15,14 +15,14 @@ export default async function Page({
 }) {
   const page = getPage(params.slug);
 
-  if (page == null) {
+  if (!page) {
     notFound();
   }
 
-  const MDX = page.data.exports.default;
+  const MDX = page.data.body;
 
   return (
-    <DocsPage toc={page.data.exports.toc} full={page.data.full}>
+    <DocsPage toc={page.data.toc} full={page.data.full}>
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>

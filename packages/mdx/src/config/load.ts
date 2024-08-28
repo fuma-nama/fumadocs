@@ -13,7 +13,7 @@ export function findConfigFile(): string {
 export type LoadedConfig = Config;
 
 export async function loadConfig(configPath: string): Promise<LoadedConfig> {
-  const outputPath = path.resolve('.source/config.js');
+  const outputPath = path.resolve('.source/config.mjs');
   const configCode = await readFile(configPath).catch(() => null);
 
   if (!configCode) throw new Error('No configuration file found');
@@ -30,8 +30,7 @@ export async function loadConfig(configPath: string): Promise<LoadedConfig> {
   await writeFile(outputPath, transformed.code);
 
   const [err, config] = validateConfig(
-    ((await import(outputPath)) as { default: Record<string, unknown> })
-      .default,
+    (await import(outputPath)) as Record<string, unknown>,
   );
 
   if (err !== null) throw new Error(err);
@@ -79,7 +78,7 @@ function resolveSWCOptions(
       baseUrl: resolvedBaseUrl,
     },
     module: {
-      type: 'commonjs',
+      type: 'es6',
     },
     sourceMaps: false,
     isModule: 'unknown',

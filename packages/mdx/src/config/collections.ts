@@ -10,7 +10,8 @@ export interface MarkdownProps {
 }
 
 export interface SupportedTypes {
-  meta: Record<string, never>;
+  // eslint-disable-next-line @typescript-eslint/ban-types -- empty object
+  meta: {};
   doc: MarkdownProps;
 }
 

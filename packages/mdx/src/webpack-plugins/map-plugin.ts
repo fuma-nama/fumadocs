@@ -1,5 +1,6 @@
 import * as fs from 'node:fs';
 import { type Compiler } from 'webpack';
+import { loadConfigCached } from '@/config/cached';
 
 let firstLoad = true;
 
@@ -8,14 +9,9 @@ interface Options {
    * Absolute path of .map file
    */
   rootMapFile: string;
+
+  configPath: string;
 }
-
-const content = `
-/** Auto-generated **/
-declare const map: Record<string, unknown>
-
-export { map }
-`.trim();
 
 export class MapWebpackPlugin {
   options: Options;
@@ -26,11 +22,24 @@ export class MapWebpackPlugin {
 
   apply(compiler: Compiler): void {
     const logger = compiler.getInfrastructureLogger(MapWebpackPlugin.name);
+    const loadConfig = loadConfigCached(this.options.configPath);
 
     compiler.hooks.beforeCompile.tap(MapWebpackPlugin.name, () => {
-      if (firstLoad && !fs.existsSync(this.options.rootMapFile)) {
-        fs.writeFileSync(this.options.rootMapFile, content);
-        logger.info('Created map.ts file for you automatically');
+      if (firstLoad) {
+        const lines: string[] = [
+          'import type { GetOutput } from "fumadocs-mdx/config"',
+        ];
+
+        void loadConfig.then((config) => {
+          for (const name of Object.keys(config)) {
+            lines.push(
+              `export declare const ${name}: GetOutput<typeof import(${JSON.stringify(this.options.configPath)}).${name}>`,
+            );
+          }
+
+          fs.writeFileSync(this.options.rootMapFile, lines.join('\n'));
+          logger.info('Created map.ts file for you automatically');
+        });
 
         firstLoad = false;
       }
