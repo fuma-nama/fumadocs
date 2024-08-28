@@ -64,6 +64,13 @@ describe('Path utilities', () => {
       path: 'nested/test.cn.mdx',
     });
 
+    expect(parseFilePath('nested/test.01.mdx')).toEqual({
+      dirname: 'nested',
+      name: 'test.01',
+      flattenedPath: 'nested/test.01',
+      path: 'nested/test.01.mdx',
+    });
+
     expect(parseFilePath('nested\\test.cn.mdx')).toEqual(
       parseFilePath('nested/test.cn.mdx'),
     );
