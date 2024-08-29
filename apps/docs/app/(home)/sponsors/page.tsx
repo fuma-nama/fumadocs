@@ -1,6 +1,6 @@
 import { Fragment, type ReactNode } from 'react';
 import Image from 'next/image';
-import { sponsors } from '@/app/(home)/sponsors/data';
+import { organizationUsers, sponsors } from '@/app/(home)/sponsors/data';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/utils/cn';
 import { getUserSponsors } from '@/utils/get-sponsors';
@@ -185,9 +185,9 @@ export default async function Page(): Promise<ReactNode> {
             href={sponsor.url}
             rel="noreferrer noopener"
             target="_blank"
-            className="rounded-xl p-3 transition-colors hover:bg-fd-primary/10"
+            className="group flex flex-col items-center justify-center rounded-xl p-3 transition-colors hover:bg-fd-primary/10"
           >
-            <div className="inline-flex h-12 items-center gap-2 text-lg">
+            <div className="inline-flex h-12 items-center gap-2 text-lg grayscale transition-all group-hover:grayscale-0">
               {sponsor.logo}
             </div>
             {sponsor.tier === 'golden' ? (
@@ -199,25 +199,27 @@ export default async function Page(): Promise<ReactNode> {
 
       <h2 className="mt-12 font-mono text-xs">Individual Sponsors</h2>
       <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-        {(await getUserSponsors('fuma-nama')).map((sponsor) => (
-          <a
-            key={sponsor.name}
-            href={sponsor.websiteUrl ?? `https://github.com/${sponsor.login}`}
-            rel="noreferrer noopener"
-            target="_blank"
-            className="inline-flex items-center gap-2 rounded-xl p-3 text-xs transition-colors hover:bg-fd-primary/10"
-          >
-            <Image
-              alt="avatar"
-              src={sponsor.avatarUrl}
-              unoptimized
-              width="30"
-              height="30"
-              className="rounded-lg"
-            />
-            {sponsor.name}
-          </a>
-        ))}
+        {(await getUserSponsors('fuma-nama', organizationUsers)).map(
+          (sponsor) => (
+            <a
+              key={sponsor.name}
+              href={sponsor.websiteUrl ?? `https://github.com/${sponsor.login}`}
+              rel="noreferrer noopener"
+              target="_blank"
+              className="inline-flex items-center gap-2 rounded-xl p-3 text-xs transition-colors hover:bg-fd-primary/10"
+            >
+              <Image
+                alt="avatar"
+                src={sponsor.avatarUrl}
+                unoptimized
+                width="30"
+                height="30"
+                className="rounded-lg"
+              />
+              {sponsor.name}
+            </a>
+          ),
+        )}
       </div>
     </main>
   );
