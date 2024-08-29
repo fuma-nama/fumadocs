@@ -1,8 +1,12 @@
+import { readFileSync } from 'node:fs';
 import { generateOGImage } from 'fumadocs-ui/og';
 import { type ImageResponse } from 'next/og';
 import { type NextRequest } from 'next/server';
 import { notFound } from 'next/navigation';
 import { utils } from '@/utils/source';
+
+const font = readFileSync('./app/og/[...slug]/Geist-Regular.ttf');
+const fontBold = readFileSync('./app/og/[...slug]/Geist-Bold.ttf');
 
 export function GET(
   _: NextRequest,
@@ -19,7 +23,7 @@ export function GET(
 
   return generateOGImage({
     primaryTextColor: 'rgb(240,240,240)',
-    primaryColor: 'rgba(255,255,255,0.5)',
+    primaryColor: 'rgba(255,255,255,0.3)',
     title: page.data.title,
     icon: (
       <svg
@@ -38,7 +42,7 @@ export function GET(
       >
         <linearGradient id="test" x1="0" y1="0" x2="0" y2="1">
           <stop stopColor="white" />
-          <stop stopColor="rgb(60,60,60)" offset="100%" />
+          <stop stopColor="rgb(80,80,80)" offset="100%" />
         </linearGradient>
         <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
         <polyline points="11 3 11 11 14 8 17 11 17 3" />
@@ -46,6 +50,18 @@ export function GET(
     ),
     description: page.data.description,
     site: 'Fumadocs',
+    fonts: [
+      {
+        name: 'Geist Regular',
+        data: font,
+        weight: 400,
+      },
+      {
+        name: 'Geist Bold',
+        data: fontBold,
+        weight: 800,
+      },
+    ],
   });
 }
 

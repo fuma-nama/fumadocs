@@ -108,8 +108,7 @@ export function generate({
       </p>
       <p
         style={{
-          marginTop: '-10px',
-          fontSize: '56px',
+          fontSize: '52px',
           color: 'rgba(240,240,240,0.8)',
         }}
       >
