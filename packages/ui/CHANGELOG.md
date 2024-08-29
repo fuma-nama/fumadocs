@@ -1,5 +1,22 @@
 # next-docs-ui
 
+## 13.4.0
+
+### Minor Changes
+
+- 26f5360: Support built-in OG Image generation
+
+### Patch Changes
+
+- fumadocs-core@13.4.0
+
+## 13.3.3
+
+### Patch Changes
+
+- Updated dependencies [f8cc167]
+  - fumadocs-core@13.3.3
+
 ## 13.3.2
 
 ### Patch Changes
