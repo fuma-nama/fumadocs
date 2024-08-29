@@ -51,6 +51,10 @@
     "./mdx": {
       "import": "./dist/mdx.js",
       "types": "./dist/mdx.d.ts"
+    },
+    "./og": {
+      "import": "./dist/og.js",
+      "types": "./dist/og.d.ts"
     }
   },
   "typesVersions": {
@@ -81,6 +85,9 @@
       ],
       "mdx": [
         "./dist/mdx.d.ts"
+      ],
+      "og": [
+        "./dist/og.d.ts"
       ]
     }
   },

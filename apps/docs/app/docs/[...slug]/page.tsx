@@ -8,6 +8,7 @@ import {
 } from 'fumadocs-ui/page';
 import { notFound } from 'next/navigation';
 import { Fragment } from 'react';
+import { getImageMeta } from 'fumadocs-ui/og';
 import { utils } from '@/utils/source';
 import { createMetadata } from '@/utils/metadata';
 import Preview from '@/components/preview';
@@ -71,13 +72,7 @@ export function generateMetadata({ params }: { params: Param }): Metadata {
   const description =
     page.data.description ?? 'The library for building documentation sites';
 
-  const image = {
-    alt: 'Banner',
-    url: `/og/docs/${page.slugs.join('/')}.png`,
-    width: 1200,
-    height: 630,
-  };
-
+  const image = getImageMeta('og', page.slugs);
   return createMetadata({
     title: page.data.title,
     description,
