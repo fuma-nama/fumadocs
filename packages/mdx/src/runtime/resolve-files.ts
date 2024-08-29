@@ -19,36 +19,42 @@ export function resolveFiles({
 }: ResolveOptions): VirtualFile[] {
   const outputs: VirtualFile[] = [];
 
-  for (const doc of docs) {
-    if (!doc._file.path.startsWith(rootDir)) continue;
-    const parsed = path.parse(doc._file.path);
-
-    if (pageTypes.includes(parsed.ext)) {
-      outputs.push({
-        type: 'page',
-        path: doc._file.path,
-        data: doc,
-      });
-
-      continue;
-    }
-
-    console.warn('Unknown Type:', parsed.ext);
-  }
-
-  for (const entry of meta) {
+  for (const entry of docs) {
     if (!entry._file.path.startsWith(rootDir)) continue;
-    const parsed = path.parse(entry._file.path);
+    const ext = path.extname(entry._file.path);
 
-    if (metaTypes.includes(parsed.ext)) {
+    if (pageTypes.includes(ext)) {
       outputs.push({
         type: 'page',
         path: entry._file.path,
         data: entry,
       });
+
+      continue;
     }
 
-    console.warn('Unknown Type:', parsed.ext);
+    console.warn(
+      `Unknown Type: ${ext} on ${entry._file.path}, expected: ${pageTypes.toString()}`,
+    );
+  }
+
+  for (const entry of meta) {
+    if (!entry._file.path.startsWith(rootDir)) continue;
+    const ext = path.extname(entry._file.path);
+
+    if (metaTypes.includes(ext)) {
+      outputs.push({
+        type: 'meta',
+        path: entry._file.path,
+        data: entry,
+      });
+
+      continue;
+    }
+
+    console.warn(
+      `Unknown Type: ${ext} on ${entry._file.path}, expected: ${metaTypes.toString()}`,
+    );
   }
 
   return outputs;

@@ -8,7 +8,7 @@ import {
 } from 'fumadocs-ui/page';
 import { notFound } from 'next/navigation';
 import { Fragment } from 'react';
-import { utils } from '@/utils/source';
+import { utils } from '@/app/source';
 import { createMetadata } from '@/utils/metadata';
 import Preview from '@/components/preview';
 
@@ -30,8 +30,8 @@ export default function Page({
 
   return (
     <DocsPage
-      toc={page.data.exports.toc}
-      lastUpdate={page.data.exports.lastModified}
+      toc={page.data.toc}
+      lastUpdate={page.data.lastModified}
       full={page.data.full}
       tableOfContent={{
         style: 'clerk',
@@ -48,7 +48,7 @@ export default function Page({
       <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>
         {preview && preview in Preview ? Preview[preview] : null}
-        <page.data.exports.default
+        <page.data.body
           components={{
             HeadlessOnly:
               params.slug[0] === 'headless' ? Fragment : () => undefined,

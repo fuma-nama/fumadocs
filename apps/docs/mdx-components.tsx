@@ -6,7 +6,7 @@ import { TypeTable } from 'fumadocs-ui/components/type-table';
 import defaultComponents from 'fumadocs-ui/mdx';
 import { Popup, PopupContent, PopupTrigger } from 'fumadocs-ui/twoslash/popup';
 import { Wrapper } from '@/components/preview/wrapper';
-import { openapi } from '@/utils/source';
+import { openapi } from '@/app/source';
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {

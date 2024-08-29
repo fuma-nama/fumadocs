@@ -93,7 +93,6 @@ export function defineDocs<
     meta: defineCollections({
       type: 'meta',
       dir: 'content/docs',
-      files: ['**/*/meta.json'],
       schema: metaSchema as M,
       ...options?.meta,
     }),

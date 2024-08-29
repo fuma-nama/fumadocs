@@ -8,19 +8,29 @@ import {
   type Collections,
   type FileInfo,
   type CollectionEntry,
+  type SupportedType,
 } from '@/config';
 import { resolveFiles } from '@/runtime/resolve-files';
 
 export function toRuntime(
+  type: SupportedType,
   file: Record<string, unknown>,
   info: FileInfo,
 ): EntryFromCollection<Collections> {
-  const { default: body, frontmatter, ...exports } = file;
+  if (type === 'doc') {
+    const { default: body, frontmatter, ...exports } = file;
+
+    return {
+      body,
+      ...exports,
+      ...(frontmatter as object),
+      _exports: file,
+      _file: info,
+    };
+  }
 
   return {
-    body,
-    ...exports,
-    ...(frontmatter as object),
+    ...file,
     _file: info,
   };
 }
@@ -32,8 +42,8 @@ export function createMDXSource<
   docs: Doc[],
   meta: Meta[],
 ): Source<{
-  metaData: Meta;
   pageData: Doc;
+  metaData: Meta;
 }> {
   return {
     files: (rootDir) =>

@@ -31,7 +31,7 @@ export class MapWebpackPlugin {
         ];
 
         void loadConfig.then((config) => {
-          for (const name of Object.keys(config)) {
+          for (const name of config.collections.keys()) {
             lines.push(
               `export declare const ${name}: GetOutput<typeof import(${JSON.stringify(this.options.configPath)}).${name}>`,
             );

@@ -32,6 +32,11 @@ interface MarkdownProps {
   structuredData: StructuredData;
   toc: TableOfContents;
   _exports: Record<string, unknown>;
+
+  /**
+   * Only available when `lastModifiedTime` is enabled on MDX loader
+   */
+  lastModified?: Date;
 }
 
 export interface SupportedTypes {

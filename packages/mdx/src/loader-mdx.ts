@@ -83,12 +83,12 @@ export default async function loader(
     frontmatter = result.data;
   }
 
-  const props = (frontmatter as InternalFrontmatter)._mdx ?? {};
+  const props = (matter.data as InternalFrontmatter)._mdx ?? {};
   if (props.mirror) {
     const mirrorPath = path.resolve(path.dirname(filePath), props.mirror);
     this.addDependency(mirrorPath);
 
-    frontmatter.content = await fs
+    matter.content = await fs
       .readFile(mirrorPath)
       .then((res) => grayMatter(res.toString()).content);
   }

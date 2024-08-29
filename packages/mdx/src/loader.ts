@@ -3,6 +3,7 @@ import fg from 'fast-glob';
 import type { LoaderContext } from 'webpack';
 import { type FileInfo } from '@/config';
 import { invalidateCache, loadConfigCached } from '@/config/cached';
+import { getTypeFromPath } from '@/utils/get-type-from-path';
 
 export interface LoaderOptions {
   configPath: string;
@@ -75,7 +76,9 @@ export default async function loader(
           });
 
           for (const file of included) {
-            if (files.has(file)) continue;
+            if (getTypeFromPath(file) !== collection.type || files.has(file))
+              continue;
+
             config._runtime.files.set(file, name);
             files.add(file);
 
@@ -90,7 +93,9 @@ export default async function loader(
               absolutePath: file,
             };
 
-            entries.push(`toRuntime(${importName}, ${JSON.stringify(info)})`);
+            entries.push(
+              `toRuntime("${collection.type}", ${importName}, ${JSON.stringify(info)})`,
+            );
           }
         }),
       );
