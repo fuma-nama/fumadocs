@@ -1,8 +1,3 @@
-/**
- * Users who sponsored with their personal account as an organization
- */
-const organizationUsers = ['marclave', 'rishi-raj-jain'];
-
 interface UserSponsor {
   login: string;
   name: string;
@@ -10,7 +5,10 @@ interface UserSponsor {
   websiteUrl?: string;
 }
 
-export async function getUserSponsors(login: string): Promise<UserSponsor[]> {
+export async function getUserSponsors(
+  login: string,
+  excluded: string[],
+): Promise<UserSponsor[]> {
   const query = `query {
   user(login:${JSON.stringify(login)}) {
     ... on Sponsorable {
@@ -49,7 +47,6 @@ export async function getUserSponsors(login: string): Promise<UserSponsor[]> {
   };
 
   return data.user.sponsors.nodes.filter(
-    (sponsor) =>
-      'name' in sponsor && !organizationUsers.includes(sponsor.login),
+    (sponsor) => 'name' in sponsor && !excluded.includes(sponsor.login),
   ) as UserSponsor[];
 }
