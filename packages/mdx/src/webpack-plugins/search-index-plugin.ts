@@ -18,6 +18,14 @@ export interface SearchIndex {
   description?: string;
   url: string;
   structuredData: StructuredData;
+
+  /**
+   * VFile Data
+   */
+  _data: {
+    frontmatter: Record<string, unknown>;
+    [key: string]: unknown;
+  };
 }
 
 export interface Options {
@@ -88,6 +96,7 @@ export class SearchIndexPlugin {
                 frontmatter: {
                   title: string;
                   description?: string;
+                  [key: string]: unknown;
                 };
               };
             };
@@ -102,6 +111,7 @@ export class SearchIndexPlugin {
               title: info.data.frontmatter.title,
               description: info.data.frontmatter.description,
               url: getUrl(relativePath),
+              _data: info.data,
             });
           }
 
