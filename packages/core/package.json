@@ -140,7 +140,7 @@
     "github-slugger": "^2.0.0",
     "image-size": "^1.1.1",
     "negotiator": "^0.6.3",
-    "npm-to-yarn": "^2.2.1",
+    "npm-to-yarn": "^3.0.0",
     "react-remove-scroll": "^2.5.10",
     "remark": "^15.0.0",
     "remark-gfm": "^4.0.0",
