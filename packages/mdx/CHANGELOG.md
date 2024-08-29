@@ -1,5 +1,12 @@
 # next-docs-mdx
 
+## 9.0.3
+
+### Patch Changes
+
+- c0d1faf: Store additional `_data` to search indexes
+  - fumadocs-core@13.4.0
+
 ## 9.0.2
 
 ### Patch Changes
