@@ -4,16 +4,17 @@ import {
   type Source,
 } from 'fumadocs-core/source';
 import {
-  type CollectionEntry,
+  type EntryFromCollection,
   type Collections,
   type FileInfo,
+  type CollectionEntry,
 } from '@/config';
 import { resolveFiles } from '@/runtime/resolve-files';
 
 export function toRuntime(
   file: Record<string, unknown>,
   info: FileInfo,
-): CollectionEntry<Collections> {
+): EntryFromCollection<Collections> {
   const { default: body, frontmatter, ...exports } = file;
 
   return {
@@ -25,8 +26,8 @@ export function toRuntime(
 }
 
 export function createMDXSource<
-  Doc extends CollectionEntry<any> & PageData,
-  Meta extends CollectionEntry<any> & MetaData,
+  Doc extends CollectionEntry<'doc', PageData>,
+  Meta extends CollectionEntry<'meta', MetaData>,
 >(
   docs: Doc[],
   meta: Meta[],

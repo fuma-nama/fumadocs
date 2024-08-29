@@ -1,4 +1,8 @@
-import { defineDocs, defineCollections } from 'fumadocs-mdx/config';
+import {
+  defineDocs,
+  defineCollections,
+  defineConfig,
+} from 'fumadocs-mdx/config';
 import { z } from 'zod';
 import React from 'react';
 import Markdown from 'react-markdown';
@@ -25,4 +29,8 @@ export const blog = defineCollections({
   schema: z.object({
     title: z.string(),
   }),
+});
+
+export default defineConfig({
+  mdxOptions: {},
 });

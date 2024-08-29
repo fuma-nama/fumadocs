@@ -11,12 +11,11 @@ import {
 import type { ProcessorOptions } from '@mdx-js/mdx';
 import type { Pluggable } from 'unified';
 import remarkMdxExport from '@/mdx-plugins/remark-exports';
-import type { Options as MDXLoaderOptions } from '@/loader-mdx';
 
 type ResolvePlugins = Pluggable[] | ((v: Pluggable[]) => Pluggable[]);
 
 export type DefaultMDXOptions = Omit<
-  NonNullable<MDXLoaderOptions>,
+  NonNullable<ProcessorOptions>,
   'rehypePlugins' | 'remarkPlugins' | '_ctx'
 > & {
   rehypePlugins?: ResolvePlugins;

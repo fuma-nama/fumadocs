@@ -4,11 +4,7 @@ import type { Configuration } from 'webpack';
 import { MapWebpackPlugin } from '@/webpack-plugins/map-plugin';
 import type { LoaderOptions } from '@/loader';
 import { findConfigFile } from '@/config/load';
-import {
-  type DefaultMDXOptions,
-  getDefaultMDXOptions,
-} from '@/utils/mdx-options';
-import type { Options as MDXLoaderOptions } from '../loader-mdx';
+import { type Options as MDXLoaderOptions } from '../loader-mdx';
 import {
   SearchIndexPlugin,
   type Options as SearchIndexPluginOptions,
@@ -17,11 +13,11 @@ import {
 export interface CreateMDXOptions {
   cwd?: string;
 
-  mdxOptions?: DefaultMDXOptions;
-
   buildSearchIndex?:
     | Omit<SearchIndexPluginOptions, 'rootContentDir' | 'rootMapFile'>
     | boolean;
+
+  mdxOptions?: Omit<MDXLoaderOptions, '_ctx'>;
 
   /**
    * Where the root map.ts should be, relative to cwd
@@ -51,7 +47,7 @@ export interface CreateMDXOptions {
 const defaultPageExtensions = ['mdx', 'md', 'jsx', 'js', 'tsx', 'ts'];
 
 export function createMDX({
-  mdxOptions = {},
+  mdxOptions,
   cwd = process.cwd(),
   rootMapPath = '.source/index.ts',
   rootContentPath = './content',
@@ -61,7 +57,6 @@ export function createMDX({
 }: CreateMDXOptions = {}) {
   const rootMapFile = path.resolve(cwd, rootMapPath);
   const rootContentDir = path.resolve(cwd, rootContentPath);
-  const mdxLoaderOptions = getDefaultMDXOptions(mdxOptions);
 
   return (nextConfig: NextConfig = {}): NextConfig => {
     return {
@@ -89,7 +84,7 @@ export function createMDX({
               {
                 loader: 'fumadocs-mdx/loader-mdx',
                 options: {
-                  ...mdxLoaderOptions,
+                  ...mdxOptions,
                   _ctx: {
                     configPath,
                   },

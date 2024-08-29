@@ -1,16 +1,15 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
-import { type ProcessorOptions } from '@mdx-js/mdx';
 import grayMatter from 'gray-matter';
 import { type LoaderContext } from 'webpack';
 import type { InternalFrontmatter } from '@/types';
 import { findCollection } from '@/utils/find-collection';
 import { loadConfigCached } from '@/config/cached';
 import { buildMDX } from '@/utils/build-mdx';
-import { type TransformContext } from '@/config';
+import { getDefaultMDXOptions, type TransformContext } from '@/config';
 import { getGitTimestamp } from './utils/git-timestamp';
 
-export interface Options extends ProcessorOptions {
+export interface Options {
   /**
    * Fetch last modified time with specified version control
    * @defaultValue 'none'
@@ -48,14 +47,18 @@ export default async function loader(
   this.cacheable(true);
   const context = this.context;
   const filePath = this.resourcePath;
-  const { lastModifiedTime, _ctx, ...mdxOptions } = this.getOptions();
+  const { lastModifiedTime, _ctx } = this.getOptions();
   const config = await loadConfigCached(_ctx.configPath);
   const collection = findCollection(config, filePath, 'doc');
   const matter = grayMatter(source);
 
+  const mdxOptions =
+    collection?.mdxOptions ??
+    getDefaultMDXOptions(config.global?.mdxOptions ?? {});
+
   function getTransformContext(): TransformContext {
     return {
-      buildMDX: async (v, options = collection?.mdxOptions ?? mdxOptions) => {
+      buildMDX: async (v, options = mdxOptions) => {
         const res = await buildMDX(v, options);
         return String(res.value);
       },
@@ -97,7 +100,7 @@ export default async function loader(
   try {
     const file = await buildMDX(matter.content, {
       development: this.mode === 'development',
-      ...(collection?.mdxOptions ?? mdxOptions),
+      ...mdxOptions,
       filePath,
       frontmatter,
       outputFormat: 'program',

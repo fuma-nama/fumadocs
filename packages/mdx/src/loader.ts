@@ -32,7 +32,7 @@ export default async function loader(
 
   this.cacheable(true);
 
-  for (const collection of Object.values(config)) {
+  for (const collection of config.collections.values()) {
     for (const dir of Array.isArray(collection.dir)
       ? collection.dir
       : [collection.dir]) {
@@ -61,7 +61,7 @@ export default async function loader(
   }
 
   await Promise.all(
-    Object.entries(config).map(async ([name, collection]) => {
+    Array.from(config.collections.entries()).map(async ([name, collection]) => {
       const entries: string[] = [];
 
       const dirs = Array.isArray(collection.dir)
@@ -76,6 +76,7 @@ export default async function loader(
 
           for (const file of included) {
             if (files.has(file)) continue;
+            config._runtime.files.set(file, name);
             files.add(file);
 
             const importPath = toImportPath(file);
@@ -95,9 +96,10 @@ export default async function loader(
       );
 
       if (collection.transform) {
+        if (config.global) importedCollections.add('default'); // global config
         importedCollections.add(name);
         sources.push(
-          `export const ${name} = await Promise.all([${entries.join(',')}].map(c_${name}.transform))`,
+          `export const ${name} = await Promise.all([${entries.join(',')}].map(v => c_${name}.transform(v, c_default)))`,
         );
       } else {
         sources.push(`export const ${name} = [${entries.join(',')}]`);
@@ -105,11 +107,13 @@ export default async function loader(
     }),
   );
 
-  if (importedCollections.size > 0)
+  if (importedCollections.size > 0) {
     imports.push(
       `import { ${Array.from(importedCollections.values())
         .map((v) => `${v} as c_${v}`)
         .join(', ')} } from ${JSON.stringify(toImportPath(configPath))}`,
     );
+  }
+
   callback(null, [...imports, ...sources].join('\n'));
 }

@@ -2,9 +2,12 @@ import { type AnyZodObject, type z } from 'zod';
 import type { MDXProps } from 'mdx/types';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { TableOfContents } from 'fumadocs-core/server';
-import { type Collections } from '@/config/collections';
+import { type Collections } from '@/config/define';
+import { type DefaultMDXOptions } from '@/utils/mdx-options';
 
-export type Config = Record<string, Collections>;
+export interface GlobalConfig {
+  mdxOptions?: DefaultMDXOptions;
+}
 
 export type InferSchema<C> =
   C extends Collections<infer Schema, any, any> ? Schema : never;
@@ -28,6 +31,7 @@ interface MarkdownProps {
   body: (props: MDXProps) => React.ReactElement;
   structuredData: StructuredData;
   toc: TableOfContents;
+  _exports: Record<string, unknown>;
 }
 
 export interface SupportedTypes {
@@ -38,18 +42,21 @@ export interface SupportedTypes {
 
 export type SupportedType = keyof SupportedTypes;
 
-export type GetCollectionEntry<Type extends SupportedType, Output> = Omit<
+export type CollectionEntry<Type extends SupportedType, Output> = Omit<
   SupportedTypes[Type],
   keyof Output
 > &
-  Output & {
-    _file: FileInfo;
-  };
+  Output &
+  BaseCollectionEntry;
 
-export type CollectionEntry<C> =
+export interface BaseCollectionEntry {
+  _file: FileInfo;
+}
+
+export type EntryFromCollection<C> =
   C extends Collections<any, any, infer Output> ? Output : never;
 
 /**
  * Get output type of collections
  */
-export type GetOutput<C> = CollectionEntry<C>[];
+export type GetOutput<C> = EntryFromCollection<C>[];

@@ -1,8 +1,6 @@
 import Link from 'next/link';
-import { docs } from '@/.map';
 
 export default function HomePage() {
-  console.log(docs);
   return (
     <main
       style={{

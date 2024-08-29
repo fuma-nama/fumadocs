@@ -6,8 +6,8 @@ const pageTypes = ['.md', '.mdx'];
 const metaTypes = ['.json', '.yaml'];
 
 interface ResolveOptions {
-  docs: CollectionEntry<any>[];
-  meta: CollectionEntry<any>[];
+  docs: CollectionEntry<'doc', unknown>[];
+  meta: CollectionEntry<'meta', unknown>[];
 
   rootDir?: string;
 }
