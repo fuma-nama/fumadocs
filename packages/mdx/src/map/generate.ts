@@ -1,48 +1,16 @@
 import path from 'node:path';
 import fg from 'fast-glob';
-import type { LoaderContext } from 'webpack';
-import { type FileInfo } from '@/config';
-import { invalidateCache, loadConfigCached } from '@/config/cached';
 import { getTypeFromPath } from '@/utils/get-type-from-path';
+import type { FileInfo } from '@/config';
+import { type LoadedConfig } from '@/config/load';
 
-export interface LoaderOptions {
-  configPath: string;
-
-  rootContentDir: string;
-  rootMapFile: string;
-
-  /**
-   * Included files in the map file
-   *
-   * @defaultValue '.&#47;**&#47;*.&#123;md,mdx,json&#125;'
-   */
-  include?: string | string[];
-}
-
-/**
- * Load the root `.map.ts` file
- */
-export default async function loader(
-  this: LoaderContext<LoaderOptions>,
-  _source: string,
-  callback: LoaderContext<LoaderOptions>['callback'],
-): Promise<void> {
-  const { rootMapFile, configPath } = this.getOptions();
-  invalidateCache(configPath);
-  const config = await loadConfigCached(configPath);
-
-  for (const collection of config.collections.values()) {
-    for (const dir of Array.isArray(collection.dir)
-      ? collection.dir
-      : [collection.dir]) {
-      this.addContextDependency(path.resolve(dir));
-    }
-  }
-
-  this.cacheable(true);
-  this.addDependency(configPath);
-
-  const mapDir = path.dirname(rootMapFile);
+export async function generateJS(
+  configPath: string,
+  config: LoadedConfig,
+  outputPath: string,
+  hash: string,
+): Promise<string> {
+  const outDir = path.dirname(outputPath);
 
   const imports: string[] = ['import { toRuntime } from "fumadocs-mdx"'];
   const importedCollections = new Set<string>();
@@ -50,15 +18,7 @@ export default async function loader(
   const files = new Set<string>();
   let importId = 0;
 
-  function toImportPath(file: string): string {
-    let importPath = path.relative(mapDir, file).replaceAll(path.sep, '/');
-
-    if (!importPath.startsWith('.')) {
-      importPath = `./${importPath}`;
-    }
-
-    return importPath;
-  }
+  config._runtime.files.clear();
 
   await Promise.all(
     Array.from(config.collections.entries()).map(async ([name, collection]) => {
@@ -81,10 +41,9 @@ export default async function loader(
             config._runtime.files.set(file, name);
             files.add(file);
 
-            const importPath = toImportPath(file);
             const importName = `file_${(importId++).toString()}`;
             imports.push(
-              `import * as ${importName} from ${JSON.stringify(importPath)}`,
+              `import * as ${importName} from ${JSON.stringify(`${toImportPath(file, outDir)}?collection=${name}&hash=${hash}`)}`,
             );
 
             const info: FileInfo = {
@@ -115,9 +74,42 @@ export default async function loader(
     imports.push(
       `import { ${Array.from(importedCollections.values())
         .map((v) => `${v} as c_${v}`)
-        .join(', ')} } from ${JSON.stringify(toImportPath(configPath))}`,
+        .join(
+          ', ',
+        )} } from ${JSON.stringify(toImportPath(configPath, outDir))}`,
     );
   }
 
-  callback(null, [...imports, ...sources].join('\n'));
+  return [...imports, ...sources].join('\n');
+}
+
+function toImportPath(file: string, dir: string): string {
+  let importPath = path.relative(dir, file).replaceAll(path.sep, '/');
+
+  if (!importPath.startsWith('.')) {
+    importPath = `./${importPath}`;
+  }
+
+  return importPath;
+}
+
+export function generateTypes(
+  configPath: string,
+  config: LoadedConfig,
+  outputPath: string,
+): string {
+  const importPath = JSON.stringify(
+    toImportPath(configPath, path.dirname(outputPath)),
+  );
+  const lines: string[] = [
+    'import type { GetOutput } from "fumadocs-mdx/config"',
+  ];
+
+  for (const name of config.collections.keys()) {
+    lines.push(
+      `export declare const ${name}: GetOutput<typeof import(${importPath}).${name}>`,
+    );
+  }
+
+  return lines.join('\n');
 }

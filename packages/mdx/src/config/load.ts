@@ -20,7 +20,11 @@ export interface LoadedConfig {
   };
 }
 
-export async function loadConfig(configPath: string): Promise<LoadedConfig> {
+let globalHash = 0;
+export async function loadConfig(
+  configPath: string,
+  hash?: string,
+): Promise<LoadedConfig> {
   const outputPath = path.resolve('.source/source.config.mjs');
 
   const transformed = await build({
@@ -35,6 +39,7 @@ export async function loadConfig(configPath: string): Promise<LoadedConfig> {
     outExtension: {
       '.js': '.mjs',
     },
+    allowOverwrite: true,
     splitting: true,
   });
 
@@ -43,7 +48,9 @@ export async function loadConfig(configPath: string): Promise<LoadedConfig> {
   }
 
   const [err, config] = validateConfig(
-    (await import(outputPath)) as Record<string, unknown>,
+    (await import(
+      `${outputPath}?hash=${hash ?? (globalHash++).toString()}`
+    )) as Record<string, unknown>,
   );
 
   if (err !== null) throw new Error(err);

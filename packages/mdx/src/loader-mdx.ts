@@ -1,10 +1,11 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
+import { parse } from 'node:querystring';
 import grayMatter from 'gray-matter';
 import { type LoaderContext } from 'webpack';
 import type { InternalFrontmatter } from '@/types';
 import { findCollection } from '@/utils/find-collection';
-import { loadConfigCached } from '@/config/cached';
+import { invalidateCache, loadConfigCached } from '@/config/cached';
 import { buildMDX } from '@/utils/build-mdx';
 import { getDefaultMDXOptions, type TransformContext } from '@/config';
 import { getGitTimestamp } from './utils/git-timestamp';
@@ -34,6 +35,25 @@ export interface InternalBuildInfo {
   };
 }
 
+function getQuery(query: string): {
+  collection?: string;
+  hash?: string;
+} {
+  let collection: string | undefined;
+  let hash: string | undefined;
+  const parsed = parse(query.slice(1));
+
+  if (parsed.collection && typeof parsed.collection === 'string')
+    collection = parsed.collection;
+
+  if (parsed.hash && typeof parsed.hash === 'string') hash = parsed.hash;
+
+  return { collection, hash };
+}
+
+// hash start from zero
+const hashes = new Set<string>(['0']);
+
 /**
  * Load MDX/markdown files
  *
@@ -46,13 +66,22 @@ export default async function loader(
 ): Promise<void> {
   const context = this.context;
   const filePath = this.resourcePath;
+  // notice that `resourceQuery` can be missing (e.g. on Turbopack)
+  const { hash, collection: collectionId } = getQuery(this.resourceQuery);
   const { lastModifiedTime, _ctx } = this.getOptions();
+  const matter = grayMatter(source);
   this.cacheable(true);
-  this.addDependency(_ctx.configPath);
+
+  if (hash === undefined || !hashes.has(hash)) {
+    invalidateCache(_ctx.configPath);
+    if (hash) hashes.add(hash);
+  }
 
   const config = await loadConfigCached(_ctx.configPath);
-  const collection = findCollection(config, filePath, 'doc');
-  const matter = grayMatter(source);
+  const collection =
+    collectionId !== undefined
+      ? config.collections.get(collectionId)
+      : findCollection(config, filePath, 'doc');
 
   const mdxOptions =
     collection?.mdxOptions ??
@@ -82,7 +111,7 @@ export default async function loader(
       return;
     }
 
-    frontmatter = result.data;
+    frontmatter = result.data as Record<string, unknown>;
   }
 
   const props = (matter.data as InternalFrontmatter)._mdx ?? {};

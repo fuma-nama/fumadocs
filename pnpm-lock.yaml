@@ -646,6 +646,9 @@ importers:
       '@mdx-js/mdx':
         specifier: ^3.0.1
         version: 3.0.1
+      chokidar:
+        specifier: ^3.6.0
+        version: 3.6.0
       cross-spawn:
         specifier: ^7.0.3
         version: 7.0.3

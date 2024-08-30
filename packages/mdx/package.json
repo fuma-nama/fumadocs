@@ -11,7 +11,6 @@
   "license": "MIT",
   "author": "Fuma Nama",
   "exports": {
-    "./loader": "./loader.js",
     "./loader-mdx": "./loader-mdx.js",
     "./config": {
       "import": "./dist/config/index.mjs",
@@ -52,6 +51,7 @@
   },
   "dependencies": {
     "@mdx-js/mdx": "^3.0.1",
+    "chokidar": "^3.6.0",
     "cross-spawn": "^7.0.3",
     "esbuild": "^0.23.1",
     "estree-util-value-to-estree": "^3.1.2",
