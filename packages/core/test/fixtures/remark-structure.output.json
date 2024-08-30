@@ -8,6 +8,22 @@
       "content": "Some text here",
       "heading": "heading-2",
     },
+    {
+      "content": "Name",
+      "heading": "heading-3",
+    },
+    {
+      "content": "Description",
+      "heading": "heading-3",
+    },
+    {
+      "content": "Hello World",
+      "heading": "heading-3",
+    },
+    {
+      "content": "Goodbye",
+      "heading": "heading-3",
+    },
   ],
   "headings": [
     {

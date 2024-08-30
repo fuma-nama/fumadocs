@@ -7,3 +7,11 @@ Some text here
 Some text here
 
 ### Heading 3
+
+| Name        | Description |
+| ----------- | ----------- |
+| Hello World | Goodbye     |
+
+```ts
+console.log('Not indexed');
+```

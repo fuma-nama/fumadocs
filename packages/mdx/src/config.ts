@@ -9,6 +9,7 @@ import {
   remarkImage,
   type RemarkImageOptions,
   type RemarkHeadingOptions,
+  type StructureOptions,
 } from 'fumadocs-core/mdx-plugins';
 import type { Pluggable } from 'unified';
 import type { Configuration } from 'webpack';
@@ -33,6 +34,7 @@ type MDXOptions = Omit<
    */
   valueToExport?: string[];
 
+  remarkStructureOptions?: StructureOptions | false;
   remarkHeadingOptions?: RemarkHeadingOptions;
   remarkImageOptions?: RemarkImageOptions | false;
   rehypeCodeOptions?: RehypeCodeOptions | false;
@@ -89,6 +91,7 @@ function getMDXLoaderOptions({
   rehypeCodeOptions,
   remarkImageOptions,
   remarkHeadingOptions,
+  remarkStructureOptions,
   ...mdxOptions
 }: MDXOptions): MDXLoaderOptions {
   const mdxExports = [
@@ -105,7 +108,10 @@ function getMDXLoaderOptions({
       [remarkHeading, remarkHeadingOptions],
       remarkImageOptions !== false && [remarkImage, remarkImageOptions],
       ...v,
-      remarkStructure,
+      remarkStructureOptions !== false && [
+        remarkStructure,
+        remarkStructureOptions,
+      ],
       [remarkMdxExport, { values: mdxExports }],
     ],
     mdxOptions.remarkPlugins,
