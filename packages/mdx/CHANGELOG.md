@@ -1,5 +1,13 @@
 # next-docs-mdx
 
+## 9.0.4
+
+### Patch Changes
+
+- 95dbba1: Support passing remark structure options
+- Updated dependencies [95dbba1]
+  - fumadocs-core@13.4.1
+
 ## 9.0.3
 
 ### Patch Changes

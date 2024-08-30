@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 13.4.1
+
+### Patch Changes
+
+- 95dbba1: Scan table into search indexes by default
+
 ## 13.4.0
 
 ## 13.3.3
