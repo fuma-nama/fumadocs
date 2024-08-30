@@ -77,16 +77,9 @@ export function createMDX({
       ...nextConfig,
       experimental: {
         turbo: {
-          resolveAlias: {
-            'next-mdx-import-source-file': [
-              `./mdx-components`,
-              `./src/mdx-components`,
-              '@mdx-js/react',
-            ],
-          },
           // @ts-expect-error -- JSON compatible
           rules: {
-            '**/*/.source/index.ts': {
+            [`./${rootMapPath}`]: {
               loaders: [
                 { loader: 'fumadocs-mdx/loader', options: loaderOptions },
               ],
@@ -110,14 +103,6 @@ export function createMDX({
       pageExtensions: nextConfig.pageExtensions ?? defaultPageExtensions,
       webpack: (config: Configuration, options) => {
         config.resolve ||= {};
-
-        const alias = config.resolve.alias as Record<string, unknown>;
-
-        alias['next-mdx-import-source-file'] = [
-          'private-next-root-dir/src/mdx-components',
-          'private-next-root-dir/mdx-components',
-          '@mdx-js/react',
-        ];
 
         config.module ||= {};
         config.module.rules ||= [];

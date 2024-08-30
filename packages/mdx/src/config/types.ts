@@ -1,4 +1,4 @@
-import { type AnyZodObject, type z } from 'zod';
+import { type z } from 'zod';
 import type { MDXProps } from 'mdx/types';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { TableOfContents } from 'fumadocs-core/server';
@@ -15,7 +15,7 @@ export type InferSchema<C> =
 export type InferSchemaType<C> = z.output<InferSchema<C>>;
 
 export type InferCollectionsProps<C> = SupportedTypes[C extends Collections<
-  AnyZodObject,
+  any,
   infer Type,
   any
 >

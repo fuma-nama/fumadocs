@@ -31,8 +31,6 @@ export default async function loader(
   invalidateCache(configPath);
   const config = await loadConfigCached(configPath);
 
-  this.cacheable(true);
-
   for (const collection of config.collections.values()) {
     for (const dir of Array.isArray(collection.dir)
       ? collection.dir
@@ -41,6 +39,7 @@ export default async function loader(
     }
   }
 
+  this.cacheable(true);
   this.addDependency(configPath);
 
   const mapDir = path.dirname(rootMapFile);

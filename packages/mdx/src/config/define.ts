@@ -1,4 +1,4 @@
-import { type AnyZodObject, type z } from 'zod';
+import { type ZodTypeAny, type z } from 'zod';
 import { type ProcessorOptions } from '@mdx-js/mdx';
 import { type MDXOptions } from '@/utils/build-mdx';
 import {
@@ -20,7 +20,7 @@ export interface TransformContext {
 }
 
 export interface Collections<
-  Schema extends AnyZodObject = AnyZodObject,
+  Schema extends ZodTypeAny = ZodTypeAny,
   Type extends SupportedType = SupportedType,
   Output extends BaseCollectionEntry = CollectionEntry<Type, z.output<Schema>>,
 > {
@@ -57,7 +57,7 @@ export interface Collections<
 }
 
 export function defineCollections<
-  Schema extends AnyZodObject,
+  Schema extends ZodTypeAny,
   Type extends SupportedType,
   Output extends BaseCollectionEntry = CollectionEntry<Type, z.output<Schema>>,
 >(
@@ -72,8 +72,8 @@ export function defineCollections<
 }
 
 export function defineDocs<
-  F extends AnyZodObject = typeof frontmatterSchema,
-  M extends AnyZodObject = typeof metaSchema,
+  F extends ZodTypeAny = typeof frontmatterSchema,
+  M extends ZodTypeAny = typeof metaSchema,
   DocsOut extends BaseCollectionEntry = CollectionEntry<'doc', z.output<F>>,
   MetaOut extends BaseCollectionEntry = CollectionEntry<'meta', z.output<M>>,
 >(options?: {
@@ -93,7 +93,7 @@ export function defineDocs<
     meta: defineCollections({
       type: 'meta',
       dir: 'content/docs',
-      schema: metaSchema as M,
+      schema: metaSchema as unknown as M,
       ...options?.meta,
     }),
   };

@@ -2,6 +2,10 @@ import { getPage, getPages } from '@/app/source';
 import type { Metadata } from 'next';
 import { DocsPage, DocsBody, DocsTitle } from 'fumadocs-ui/page';
 import { notFound } from 'next/navigation';
+import defaultComponents from 'fumadocs-ui/mdx';
+import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
+import { Fragment } from 'react';
+import { jsx, jsxs } from 'react/jsx-runtime';
 
 export default async function Page({
   params,
@@ -14,7 +18,16 @@ export default async function Page({
     notFound();
   }
 
-  const MDX = page.data.body;
+  const descriptionMd = toJsxRuntime(page.data.descriptionHast, {
+    development: false,
+    Fragment,
+    // @ts-expect-error -- jsx
+    jsx,
+    // @ts-expect-error -- jsx
+    jsxs,
+    // @ts-expect-error -- jsx
+    components: defaultComponents,
+  });
 
   return (
     <DocsPage toc={page.data.toc} full={page.data.full}>
@@ -22,9 +35,9 @@ export default async function Page({
 
       <DocsBody>
         <div className="mb-8 text-lg text-fd-muted-foreground">
-          {page.data.description_md}
+          {descriptionMd}
         </div>
-        <MDX />
+        <page.data.body components={defaultComponents} />
       </DocsBody>
     </DocsPage>
   );

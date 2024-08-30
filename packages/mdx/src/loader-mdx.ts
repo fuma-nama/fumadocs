@@ -44,10 +44,12 @@ export default async function loader(
   source: string,
   callback: LoaderContext<Options>['callback'],
 ): Promise<void> {
-  this.cacheable(true);
   const context = this.context;
   const filePath = this.resourcePath;
   const { lastModifiedTime, _ctx } = this.getOptions();
+  this.cacheable(true);
+  this.addDependency(_ctx.configPath);
+
   const config = await loadConfigCached(_ctx.configPath);
   const collection = findCollection(config, filePath, 'doc');
   const matter = grayMatter(source);

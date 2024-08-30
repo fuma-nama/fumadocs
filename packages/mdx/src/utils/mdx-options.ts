@@ -7,6 +7,7 @@ import {
   remarkImage,
   type RemarkImageOptions,
   remarkStructure,
+  type StructureOptions,
 } from 'fumadocs-core/mdx-plugins';
 import type { ProcessorOptions } from '@mdx-js/mdx';
 import type { Pluggable } from 'unified';
@@ -26,6 +27,7 @@ export type DefaultMDXOptions = Omit<
    */
   valueToExport?: string[];
 
+  remarkStructureOptions?: StructureOptions | false;
   remarkHeadingOptions?: RemarkHeadingOptions;
   remarkImageOptions?: RemarkImageOptions | false;
   rehypeCodeOptions?: RehypeCodeOptions | false;
@@ -51,6 +53,7 @@ export function getDefaultMDXOptions({
   rehypeCodeOptions,
   remarkImageOptions,
   remarkHeadingOptions,
+  remarkStructureOptions,
   ...mdxOptions
 }: DefaultMDXOptions): ProcessorOptions {
   const mdxExports = [
@@ -67,7 +70,10 @@ export function getDefaultMDXOptions({
       [remarkHeading, remarkHeadingOptions],
       remarkImageOptions !== false && [remarkImage, remarkImageOptions],
       ...v,
-      remarkStructure,
+      remarkStructureOptions !== false && [
+        remarkStructure,
+        remarkStructureOptions,
+      ],
       [remarkMdxExport, { values: mdxExports }],
     ],
     mdxOptions.remarkPlugins,
@@ -82,7 +88,6 @@ export function getDefaultMDXOptions({
   );
 
   return {
-    providerImportSource: 'next-mdx-import-source-file',
     ...mdxOptions,
     remarkPlugins,
     rehypePlugins,
