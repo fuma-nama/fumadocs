@@ -108,12 +108,14 @@ export default async function loader(
         lastModified: timestamp,
       },
     });
-    const info = this._module?.buildInfo as InternalBuildInfo;
 
-    info.__fumadocs = {
-      path: filePath,
-      data: file.data,
-    };
+    const info = this._module?.buildInfo as InternalBuildInfo | undefined;
+
+    if (info)
+      info.__fumadocs = {
+        path: filePath,
+        data: file.data,
+      };
 
     callback(undefined, String(file.value), file.map ?? undefined);
   } catch (error) {

@@ -59,8 +59,54 @@ export function createMDX({
   const rootContentDir = path.resolve(cwd, rootContentPath);
 
   return (nextConfig: NextConfig = {}): NextConfig => {
+    const loaderOptions: LoaderOptions = {
+      rootContentDir,
+      rootMapFile,
+      configPath,
+      ...loadOptions,
+    };
+
+    const mdxLoaderOptions: MDXLoaderOptions = {
+      ...mdxOptions,
+      _ctx: {
+        configPath,
+      },
+    };
+
     return {
       ...nextConfig,
+      experimental: {
+        turbo: {
+          resolveAlias: {
+            'next-mdx-import-source-file': [
+              `./mdx-components`,
+              `./src/mdx-components`,
+              '@mdx-js/react',
+            ],
+          },
+          // @ts-expect-error -- JSON compatible
+          rules: {
+            '**/*/.source/index.ts': {
+              loaders: [
+                { loader: 'fumadocs-mdx/loader', options: loaderOptions },
+              ],
+              as: '*.js',
+            },
+            '*.{md,mdx}': {
+              loaders: [
+                {
+                  loader: 'fumadocs-mdx/loader-mdx',
+                  options: mdxLoaderOptions,
+                },
+              ],
+              as: '*.js',
+            },
+            ...nextConfig.experimental?.turbo?.rules,
+          },
+          ...nextConfig.experimental?.turbo,
+        },
+        ...nextConfig.experimental,
+      },
       pageExtensions: nextConfig.pageExtensions ?? defaultPageExtensions,
       webpack: (config: Configuration, options) => {
         config.resolve ||= {};
@@ -83,12 +129,7 @@ export function createMDX({
               options.defaultLoaders.babel,
               {
                 loader: 'fumadocs-mdx/loader-mdx',
-                options: {
-                  ...mdxOptions,
-                  _ctx: {
-                    configPath,
-                  },
-                } satisfies MDXLoaderOptions,
+                options: mdxLoaderOptions,
               },
             ],
           },
@@ -96,12 +137,7 @@ export function createMDX({
             test: rootMapFile,
             use: {
               loader: 'fumadocs-mdx/loader',
-              options: {
-                rootContentDir,
-                rootMapFile,
-                configPath,
-                ...loadOptions,
-              } satisfies LoaderOptions,
+              options: loaderOptions,
             },
           },
         );
