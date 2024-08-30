@@ -1,7 +1,7 @@
 import path from 'node:path';
 import fs from 'node:fs';
 import { watcher } from '@/map/watcher';
-import { invalidateCache, loadConfigCached } from '@/config/cached';
+import { loadConfigCached } from '@/config/cached';
 import { generateJS, generateTypes } from '@/map/generate';
 
 export async function start(
@@ -9,8 +9,8 @@ export async function start(
   configPath: string,
   outName: string,
 ): Promise<void> {
-  let config = await loadConfigCached(configPath),
-    configHash = 0;
+  let configHash = 0;
+  let config = await loadConfigCached(configPath, configHash.toString());
   const jsOut = path.resolve('.source', `${outName}.js`);
   const typeOut = path.resolve('.source', `${outName}.d.ts`);
 
@@ -26,9 +26,8 @@ export async function start(
         const isConfigFile = path.resolve(file) === configPath;
 
         if (isConfigFile) {
-          invalidateCache(configPath);
           configHash++;
-          config = await loadConfigCached(configPath);
+          config = await loadConfigCached(configPath, configHash.toString());
           fs.writeFileSync(typeOut, generateTypes(configPath, config, typeOut));
           console.log('[MDX] Updated map types');
         }
@@ -51,6 +50,7 @@ export async function start(
     });
   }
 
+  fs.mkdirSync('.source', { recursive: true });
   fs.writeFileSync(
     jsOut,
     await generateJS(configPath, config, jsOut, configHash.toString()),

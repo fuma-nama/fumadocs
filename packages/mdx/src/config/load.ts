@@ -20,11 +20,7 @@ export interface LoadedConfig {
   };
 }
 
-let globalHash = 0;
-export async function loadConfig(
-  configPath: string,
-  hash?: string,
-): Promise<LoadedConfig> {
+export async function loadConfig(configPath: string): Promise<LoadedConfig> {
   const outputPath = path.resolve('.source/source.config.mjs');
 
   const transformed = await build({
@@ -48,9 +44,11 @@ export async function loadConfig(
   }
 
   const [err, config] = validateConfig(
-    (await import(
-      `${outputPath}?hash=${hash ?? (globalHash++).toString()}`
-    )) as Record<string, unknown>,
+    // every call to `loadConfig` will cause the previous cache to be ignored
+    (await import(`${outputPath}?hash=${Date.now().toString()}`)) as Record<
+      string,
+      unknown
+    >,
   );
 
   if (err !== null) throw new Error(err);

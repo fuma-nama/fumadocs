@@ -51,9 +51,6 @@ function getQuery(query: string): {
   return { collection, hash };
 }
 
-// hash start from zero
-const hashes = new Set<string>(['0']);
-
 /**
  * Load MDX/markdown files
  *
@@ -72,12 +69,9 @@ export default async function loader(
   const matter = grayMatter(source);
   this.cacheable(true);
 
-  if (hash === undefined || !hashes.has(hash)) {
-    invalidateCache(_ctx.configPath);
-    if (hash) hashes.add(hash);
-  }
-
-  const config = await loadConfigCached(_ctx.configPath);
+  // if no hash provided, always load a new config
+  if (hash === undefined) invalidateCache(_ctx.configPath);
+  const config = await loadConfigCached(_ctx.configPath, hash ?? 'initial');
   const collection =
     collectionId !== undefined
       ? config.collections.get(collectionId)
