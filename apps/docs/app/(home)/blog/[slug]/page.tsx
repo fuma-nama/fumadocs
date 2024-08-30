@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { InlineTOC } from 'fumadocs-ui/components/inline-toc';
+import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { blog } from '@/app/source';
 import { createMetadata } from '@/utils/metadata';
 import { buttonVariants } from '@/components/ui/button';
@@ -48,7 +49,7 @@ export default function Page({
       <article className="container grid grid-cols-1 px-0 py-8 lg:grid-cols-[2fr_1fr] lg:px-4">
         <div className="prose p-4">
           <InlineTOC items={page.data.toc} />
-          <page.data.body />
+          <page.data.body components={defaultMdxComponents} />
         </div>
         <div className="flex flex-col gap-4 border-l p-4 text-sm">
           <div>

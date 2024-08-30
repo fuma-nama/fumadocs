@@ -7,10 +7,17 @@ import {
   DocsCategory,
 } from 'fumadocs-ui/page';
 import { notFound } from 'next/navigation';
-import { Fragment } from 'react';
-import { utils } from '@/app/source';
-import { createMetadata } from '@/utils/metadata';
+import { type ComponentProps, type FC, Fragment } from 'react';
+import defaultComponents from 'fumadocs-ui/mdx';
+import { Popup, PopupContent, PopupTrigger } from 'fumadocs-ui/twoslash/popup';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 import Preview from '@/components/preview';
+import { createMetadata } from '@/utils/metadata';
+import { openapi, utils } from '@/app/source';
+import { Wrapper } from '@/components/preview/wrapper';
 
 interface Param {
   slug: string[];
@@ -50,6 +57,18 @@ export default function Page({
         {preview && preview in Preview ? Preview[preview] : null}
         <page.data.body
           components={{
+            ...defaultComponents,
+            Popup,
+            PopupContent,
+            PopupTrigger,
+            Tabs,
+            Tab,
+            TypeTable,
+            Accordion,
+            Accordions,
+            Wrapper,
+            blockquote: Callout as unknown as FC<ComponentProps<'blockquote'>>,
+            APIPage: openapi.APIPage,
             HeadlessOnly:
               params.slug[0] === 'headless' ? Fragment : () => undefined,
             UIOnly: params.slug[0] === 'ui' ? Fragment : () => undefined,
