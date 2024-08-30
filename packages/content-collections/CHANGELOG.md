@@ -1,5 +1,11 @@
 # @fumadocs/content-collections
 
+## 1.1.3
+
+### Patch Changes
+
+- dfd8ac4: Fix type errors
+
 ## 1.1.2
 
 ### Patch Changes
