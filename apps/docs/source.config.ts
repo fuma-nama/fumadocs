@@ -44,6 +44,7 @@ export default defineConfig({
   lastModifiedTime: 'git',
   mdxOptions: {
     rehypeCodeOptions: {
+      inline: 'tailing-curly-colon',
       themes: {
         light: 'catppuccin-latte',
         dark: 'catppuccin-mocha',
