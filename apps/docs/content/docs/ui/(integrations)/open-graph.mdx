@@ -1,0 +1,91 @@
+---
+title: Open Graph
+description: Open Graph with Next.js Metadata API
+---
+
+## Introduction
+
+Next.js provides an useful set of utilities, allowing a flexible experience with Fumadocs.
+Fumadocs uses the Next.js Metadata API for SEO.
+
+Make sure to read their [Metadata section](https://nextjs.org/docs/app/building-your-application/optimizing/metadata) for the fundamentals of Metadata API.
+
+### Open Graph Image
+
+For docs pages, Fumadocs UI has a built-in dynamic image generator.
+
+You will need a route handler to get started.
+
+```tsx title="app/og/[...slug]/route.tsx"
+import { generateOGImage } from 'fumadocs-ui/og';
+import { type NextRequest } from 'next/server';
+import { notFound } from 'next/navigation';
+import { getPage, getPages } from '@/app/source';
+
+export function GET(
+  _: NextRequest,
+  { params }: { params: { slug: string[] } },
+) {
+  const page = getPage(params.slug.slice(0, -1));
+  if (!page) notFound();
+
+  return generateOGImage({
+    title: page.data.title,
+    description: page.data.description,
+    site: 'My App',
+  });
+}
+
+export function generateStaticParams() {
+  return getPages().map((page) => ({
+    slug: [...page.slugs, 'og.png'],
+  }));
+}
+```
+
+> We need to append `og.png` to the end of slugs so that we can access it via `/og/my-page/og.png`.
+
+In your docs page, add the image to metadata.
+
+```tsx title="app/docs/[[...slug]]/page.tsx"
+import { getPage } from '@/app/source';
+import { notFound } from 'next/navigation';
+import { getImageMeta } from 'fumadocs-ui/og';
+
+export function generateMetadata({ params }: { params: { slug?: string[] } }) {
+  const page = getPage(params.slug);
+  if (!page) notFound();
+
+  const image = getImageMeta('og', page.slugs);
+  return {
+    title: page.data.title,
+    description: page.data.description,
+    openGraph: {
+      url: `/docs/${page.slugs.join('/')}`,
+      images: image,
+    },
+    twitter: {
+      images: image,
+      card: 'summary_large_image',
+    },
+  };
+}
+```
+
+You can also customise the font, options for Satori are also available on the built-in generator.
+
+```ts
+import { generateOGImage } from 'fumadocs-ui/og';
+
+generateOGImage({
+  fonts: [
+    {
+      name: 'Roboto',
+      // Use `fs` (Node.js only) or `fetch` to read the font as Buffer/ArrayBuffer and provide `data` here.
+      data: robotoArrayBuffer,
+      weight: 400,
+      style: 'normal',
+    },
+  ],
+});
+```

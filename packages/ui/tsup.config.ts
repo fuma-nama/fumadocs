@@ -33,7 +33,7 @@ const injectImports = [
 export default defineConfig({
   entry: [
     `./src/components/{${exportedComponents.join(',')}}.tsx`,
-    './src/{i18n,home-layout,layout,page,provider,mdx,tailwind-plugin}.{ts,tsx}',
+    './src/{i18n,home-layout,layout,page,provider,mdx,tailwind-plugin,og}.{ts,tsx}',
     './src/twoslash/popup.tsx',
     './src/**/*.client.tsx',
   ],

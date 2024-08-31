@@ -89,13 +89,8 @@ export function APIPlayground({
       if (!input) return;
 
       const url = new URL(
-        `${baseUrl ?? window.location.origin}${createPathnameFromInput(route, input.path)}`,
+        `${baseUrl ?? window.location.origin}${createUrlFromInput(route, input.path, input.query)}`,
       );
-      Object.keys(input.query).forEach((key) => {
-        const paramValue = input.query[key];
-        if (typeof paramValue === 'string' && paramValue.length > 0)
-          url.searchParams.append(key, paramValue);
-      });
 
       const headers = new Headers({
         'Content-Type': 'application/json',
@@ -288,27 +283,39 @@ export function APIPlayground({
   );
 }
 
-function createPathnameFromInput(
+function createUrlFromInput(
   route: string,
-  input: Record<string, unknown>,
+  path: Record<string, unknown>,
+  query: Record<string, unknown>,
 ): string {
   let pathname = route;
-  Object.keys(input).forEach((key) => {
-    const paramValue = input[key];
+  Object.keys(path).forEach((key) => {
+    const paramValue = path[key];
 
     if (typeof paramValue === 'string' && paramValue.length > 0)
       pathname = pathname.replace(`{${key}}`, paramValue);
   });
-  return pathname;
+
+  const searchParams = new URLSearchParams();
+  Object.keys(query).forEach((key) => {
+    const paramValue = query[key];
+    if (typeof paramValue === 'string' && paramValue.length > 0)
+      searchParams.append(key, paramValue);
+  });
+
+  return searchParams.size > 0
+    ? `${pathname}?${searchParams.toString()}`
+    : pathname;
 }
 
 function RouteDisplay({ route }: { route: string }): ReactElement {
-  const pathInput = useWatch<FormValues, 'path'>({
-    name: 'path',
+  const [path, query] = useWatch<FormValues, ['path', 'query']>({
+    name: ['path', 'query'],
   });
+
   const pathname = useMemo(
-    () => createPathnameFromInput(route, pathInput),
-    [route, pathInput],
+    () => createUrlFromInput(route, path, query),
+    [route, path, query],
   );
 
   return (

@@ -34,7 +34,7 @@ export function parseFilePath(path: string): FileInfo {
     .filter((p) => p.length > 0)
     .join('/');
 
-  const [name, locale] = nameWithLocale.split('.');
+  const [name, locale] = getLocale(nameWithLocale);
   return {
     dirname,
     name,
@@ -47,7 +47,7 @@ export function parseFilePath(path: string): FileInfo {
 export function parseFolderPath(path: string): FileInfo {
   const segments = splitPath(slash(path));
   const base = segments.at(-1) ?? '';
-  const [name, locale] = base.split('.');
+  const [name, locale] = getLocale(base);
   const flattenedPath = segments.join('/');
 
   return {
@@ -57,6 +57,15 @@ export function parseFolderPath(path: string): FileInfo {
     locale,
     path: flattenedPath,
   };
+}
+
+function getLocale(name: string): [string, string?] {
+  const sep = name.lastIndexOf('.');
+  if (sep === -1) return [name];
+  const locale = name.slice(sep + 1);
+
+  if (/\d+/.exec(locale)) return [name];
+  return [name.slice(0, sep), locale];
 }
 
 /**

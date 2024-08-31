@@ -16,8 +16,10 @@ import {
   remarkStructure,
   type RemarkHeadingOptions,
   type RehypeCodeOptions,
+  type StructuredData,
 } from 'fumadocs-core/mdx-plugins';
 import type { z as Zod } from 'zod';
+import { type TableOfContents } from 'fumadocs-core/server';
 import {
   resolvePlugin,
   resolvePlugins,
@@ -51,6 +53,18 @@ interface BaseDoc {
   content: string;
 }
 
+/**
+ * We need to convert interface types to object types.
+ *
+ * Otherwise, `T extends Serializable? true : false` gives us `false`.
+ * Because interface types cannot extend a union type, but `Serializable` is.
+ */
+type InterfaceToObject<T> = T extends object
+  ? {
+      [K in keyof T]: InterfaceToObject<T[K]>;
+    }
+  : T;
+
 export async function transformMDX<D extends BaseDoc>(
   document: D,
   context: Context,
@@ -58,12 +72,11 @@ export async function transformMDX<D extends BaseDoc>(
 ): Promise<
   D & {
     body: string;
-    toc: SerializableTOC;
+    toc: InterfaceToObject<TableOfContents>;
     /**
      * `StructuredData` for search indexes
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Avoid wrong type errors
-    structuredData: any;
+    structuredData: InterfaceToObject<StructuredData>;
   }
 > {
   const {
@@ -119,7 +132,7 @@ export async function transformMDX<D extends BaseDoc>(
       return {
         ...document,
         toc: data.toc as SerializableTOC,
-        structuredData: data.structuredData,
+        structuredData: data.structuredData as StructuredData,
         body,
       };
     },
@@ -134,7 +147,7 @@ export function createDocSchema(z: typeof Zod) {
     icon: z.string().optional(),
     full: z.boolean().optional(),
     // Fumadocs OpenAPI generated
-    _openapi: z.object({}).passthrough().optional(),
+    _openapi: z.record(z.any()).optional(),
   };
 }
 

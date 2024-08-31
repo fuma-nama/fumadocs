@@ -1,5 +1,13 @@
 # next-docs-zeta
 
+## 13.4.0
+
+## 13.3.3
+
+### Patch Changes
+
+- f8cc167: Ignore numeric locale file name
+
 ## 13.3.2
 
 ### Patch Changes

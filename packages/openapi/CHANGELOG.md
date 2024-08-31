@@ -1,5 +1,27 @@
 # @fuma-docs/openapi
 
+## 5.4.4
+
+### Patch Changes
+
+- Updated dependencies [26f5360]
+  - fumadocs-ui@13.4.0
+  - fumadocs-core@13.4.0
+
+## 5.4.3
+
+### Patch Changes
+
+- Updated dependencies [f8cc167]
+  - fumadocs-core@13.3.3
+  - fumadocs-ui@13.3.3
+
+## 5.4.2
+
+### Patch Changes
+
+- 3d1ec96: Improve schema fields margins
+
 ## 5.4.1
 
 ### Patch Changes
