@@ -36,7 +36,7 @@ export interface Collections<
    */
   files?: string[];
 
-  schema: Schema | ((ctx: TransformContext) => Schema);
+  schema?: Schema | ((ctx: TransformContext) => Schema);
 
   /**
    * content type
