@@ -10,13 +10,15 @@
     "build:shaders": "glslx shaders/rain.glsl --output=shaders/rain.min.js --format=js --renaming=internal-only",
     "clean": "rimraf .next",
     "dev": "next dev",
-    "lint": "next lint",
+    "lint": "fumadocs-mdx && next lint",
     "start": "next start"
   },
   "dependencies": {
     "@next/env": "^14.2.5",
     "@radix-ui/react-popover": "^1.1.1",
     "@radix-ui/react-tooltip": "^1.1.2",
+    "@resvg/resvg-js": "^2.6.2",
+    "@shikijs/transformers": "^1.13.0",
     "algoliasearch": "^4.24.0",
     "class-variance-authority": "^0.7.0",
     "fumadocs-core": "workspace:*",

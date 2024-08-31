@@ -1,31 +1,59 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
-import { createProcessor, type ProcessorOptions } from '@mdx-js/mdx';
-import { type Processor } from '@mdx-js/mdx/internal-create-format-aware-processors';
+import { parse } from 'node:querystring';
 import grayMatter from 'gray-matter';
 import { type LoaderContext } from 'webpack';
-import type { InternalFrontmatter } from '@/types';
+import { type StructuredData } from 'fumadocs-core/mdx-plugins';
+import { findCollection } from '@/utils/find-collection';
+import { getConfigHash, loadConfigCached } from '@/config/cached';
+import { buildMDX } from '@/utils/build-mdx';
+import { getDefaultMDXOptions, type TransformContext } from '@/config';
+import { getKey } from '@/map/manifest';
+import { formatError } from '@/utils/format-error';
 import { getGitTimestamp } from './utils/git-timestamp';
 
-export interface Options extends ProcessorOptions {
+export interface Options {
   /**
-   * Fetch last modified time with specified version control
-   * @defaultValue 'none'
+   * @internal
    */
-  lastModifiedTime?: 'git' | 'none';
-}
-
-export interface InternalBuildInfo {
-  __fumadocs?: {
-    path: string;
-    /**
-     * `vfile.data` parsed from file
-     */
-    data: unknown;
+  _ctx: {
+    configPath: string;
   };
 }
 
-const cache = new Map<string, Processor>();
+interface InternalFrontmatter {
+  _mdx?: {
+    /**
+     * Mirror another MDX file
+     */
+    mirror?: string;
+  };
+}
+
+export interface MetaFile {
+  path: string;
+  data: {
+    frontmatter: Record<string, unknown>;
+    structuredData?: StructuredData;
+    [key: string]: unknown;
+  };
+}
+
+function getQuery(query: string): {
+  collection?: string;
+  hash?: string;
+} {
+  let collection: string | undefined;
+  let hash: string | undefined;
+  const parsed = parse(query.slice(1));
+
+  if (parsed.collection && typeof parsed.collection === 'string')
+    collection = parsed.collection;
+
+  if (parsed.hash && typeof parsed.hash === 'string') hash = parsed.hash;
+
+  return { collection, hash };
+}
 
 /**
  * Load MDX/markdown files
@@ -37,27 +65,56 @@ export default async function loader(
   source: string,
   callback: LoaderContext<Options>['callback'],
 ): Promise<void> {
-  this.cacheable(true);
   const context = this.context;
   const filePath = this.resourcePath;
-  const { lastModifiedTime, ...options } = this.getOptions();
-  const detectedFormat = filePath.endsWith('.mdx') ? 'mdx' : 'md';
-  const format = options.format ?? detectedFormat;
-  let processor = cache.get(format);
+  // notice that `resourceQuery` can be missing (e.g. on Turbopack)
+  const { hash, collection: collectionId } = getQuery(this.resourceQuery);
+  const { _ctx } = this.getOptions();
+  const matter = grayMatter(source);
+  this.cacheable(true);
 
-  if (processor === undefined) {
-    processor = createProcessor({
-      ...options,
-      development: this.mode === 'development',
-      format,
-    });
+  const config = await loadConfigCached(
+    _ctx.configPath,
+    // if no hash provided, always load a new config
+    hash ?? (await getConfigHash(_ctx.configPath)),
+  );
+  const collection =
+    collectionId !== undefined
+      ? config.collections.get(collectionId)
+      : findCollection(config, filePath, 'doc');
 
-    cache.set(format, processor);
+  const mdxOptions =
+    collection?.mdxOptions ??
+    getDefaultMDXOptions(config.global?.mdxOptions ?? {});
+
+  function getTransformContext(): TransformContext {
+    return {
+      buildMDX: async (v, options = mdxOptions) => {
+        const res = await buildMDX(v, options);
+        return String(res.value);
+      },
+      source,
+      path: filePath,
+    };
   }
 
-  const matter = grayMatter(source);
-  const props = (matter.data as InternalFrontmatter)._mdx ?? {};
+  let frontmatter = matter.data;
+  if (collection?.schema) {
+    const schema =
+      typeof collection.schema === 'function'
+        ? collection.schema(getTransformContext())
+        : collection.schema;
 
+    const result = await schema.safeParseAsync(frontmatter);
+    if (result.error) {
+      callback(new Error(formatError(filePath, result.error)));
+      return;
+    }
+
+    frontmatter = result.data as Record<string, unknown>;
+  }
+
+  const props = (matter.data as InternalFrontmatter)._mdx ?? {};
   if (props.mirror) {
     const mirrorPath = path.resolve(path.dirname(filePath), props.mirror);
     this.addDependency(mirrorPath);
@@ -68,33 +125,38 @@ export default async function loader(
   }
 
   let timestamp: number | undefined;
-  if (lastModifiedTime === 'git')
+  if (config.global?.lastModifiedTime === 'git')
     timestamp = (await getGitTimestamp(filePath))?.getTime();
 
-  processor
-    .process({
-      value: matter.content,
-      path: filePath,
+  try {
+    const file = await buildMDX(matter.content, {
+      development: this.mode === 'development',
+      ...mdxOptions,
+      filePath,
+      frontmatter,
+      outputFormat: 'program',
       data: {
         lastModified: timestamp,
-        frontmatter: matter.data,
       },
-    })
-    .then(
-      (file) => {
-        const info = this._module?.buildInfo as InternalBuildInfo;
+    });
 
-        info.__fumadocs = {
+    if (config.global?.generateManifest) {
+      await fs.mkdir('.next/cache/fumadocs', { recursive: true });
+      await fs.writeFile(
+        path.resolve('.next/cache/fumadocs', `${getKey(filePath)}.json`),
+        JSON.stringify({
           path: filePath,
-          data: file.data,
-        };
+          data: file.data as MetaFile['data'],
+        } satisfies MetaFile),
+      );
+    }
 
-        callback(undefined, String(file.value), file.map ?? undefined);
-      },
-      (error: Error) => {
-        const fpath = path.relative(context, filePath);
-        error.message = `${fpath}:${error.name}: ${error.message}`;
-        callback(error);
-      },
-    );
+    callback(undefined, String(file.value), file.map ?? undefined);
+  } catch (error) {
+    if (!(error instanceof Error)) throw error;
+
+    const fpath = path.relative(context, filePath);
+    error.message = `${fpath}:${error.name}: ${error.message}`;
+    callback(error);
+  }
 }

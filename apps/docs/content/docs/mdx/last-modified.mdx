@@ -5,16 +5,14 @@ description: Output the last modified time of a document
 
 ## Usage
 
-This feature is not enabled by default, you can enable this in `next.config.mjs`. Notice that it only supports Git as version control.
-When using `git`, please ensure you have Git installed on your local machine and the repository is not shallow cloned as it relies on your local Git history.
+This feature is not enabled by default, you can enable this from config file. Notice that it only supports Git as version control.
+When using `git`, please ensure you have Git installed on your local machine and the repository is not shallow cloned, as it relies on your local Git history.
 
 ```js
-import createMDX from 'fumadocs-mdx/config';
+import { defineConfig } from 'fumadocs-mdx/config';
 
-const withMDX = createMDX({
-  mdxOptions: {
-    lastModifiedTime: 'git', // [!code highlight]
-  },
+export default defineConfig({
+  lastModifiedTime: 'git', // [!code highlight]
 });
 ```
 
@@ -27,5 +25,5 @@ import { getPage } from '@/app/source';
 
 const page = getPage('...');
 
-console.log(new Date(page.data.exports.lastModified));
+console.log(new Date(page.data.lastModified));
 ```

@@ -8,9 +8,7 @@
     "---Features---",
     "last-modified",
     "image",
-    "search-index",
-    "---Schema---",
-    "validation",
-    "multiple-types"
+    "manifest",
+    "transform"
   ]
 }

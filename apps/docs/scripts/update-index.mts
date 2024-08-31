@@ -1,10 +1,10 @@
 import algosearch from 'algoliasearch';
 import { sync } from 'fumadocs-core/search-algolia/server';
-import type { SearchIndex } from 'fumadocs-mdx';
+import type { Manifest } from 'fumadocs-mdx';
+import { createGetUrl, getSlugs, parseFilePath } from 'fumadocs-core/source';
+import path from 'node:path';
 
-export async function updateSearchIndexes(
-  indexes: SearchIndex[],
-): Promise<void> {
+export async function updateSearchIndexes(manifest: Manifest): Promise<void> {
   if (!process.env.ALGOLIA_API_KEY) {
     console.warn('Algolia API Key not found, skip updating search index.');
     return;
@@ -27,16 +27,29 @@ export async function updateSearchIndexes(
     },
   );
 
+  const getUrl = createGetUrl('/docs');
+
   await sync(client, {
     document: process.env.NEXT_PUBLIC_ALGOLIA_INDEX ?? 'document',
-    documents: indexes.map((docs) => ({
-      _id: docs.id,
-      title: docs.title,
-      description: docs.description,
-      url: docs.url,
-      structured: docs.structuredData,
-      tag: docs.url.split('/')[2],
-    })),
+    documents: manifest.files
+      .filter((file) => file.collection === 'docs')
+      .map((docs) => {
+        const url = getUrl(
+          getSlugs(parseFilePath(path.relative('content/docs', docs.path))),
+        );
+
+        if (!docs.data.structuredData)
+          throw new Error('`structuredData` is required');
+
+        return {
+          _id: docs.path,
+          title: docs.data.frontmatter.title as string,
+          description: docs.data.frontmatter.description as string,
+          url,
+          structured: docs.data.structuredData,
+          tag: url.split('/')[2],
+        };
+      }),
   });
 
   console.log('search updated');

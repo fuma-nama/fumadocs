@@ -5,7 +5,7 @@ import { RootToggle } from 'fumadocs-ui/components/layout/root-toggle';
 import type { HomeLayoutProps } from 'fumadocs-ui/home-layout';
 import { FumadocsIcon, NavChildren } from '@/app/layout.client';
 import Logo from '@/public/logo.png';
-import { utils } from '@/utils/source';
+import { utils } from '@/app/source';
 import { modes } from '@/utils/modes';
 
 export const baseOptions: HomeLayoutProps = {

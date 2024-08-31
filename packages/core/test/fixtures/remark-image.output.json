@@ -1,0 +1,169 @@
+{
+  "children": [
+    {
+      "data": {
+        "estree": {
+          "body": [
+            {
+              "source": {
+                "type": "Literal",
+                "value": "./test.png",
+              },
+              "specifiers": [
+                {
+                  "local": {
+                    "name": "__img0",
+                    "type": "Identifier",
+                  },
+                  "type": "ImportDefaultSpecifier",
+                },
+              ],
+              "type": "ImportDeclaration",
+            },
+          ],
+        },
+      },
+      "type": "mdxjsEsm",
+    },
+    {
+      "children": [
+        {
+          "alt": "Test",
+          "attributes": [
+            {
+              "name": "alt",
+              "type": "mdxJsxAttribute",
+              "value": "Test",
+            },
+            {
+              "name": "placeholder",
+              "type": "mdxJsxAttribute",
+              "value": "blur",
+            },
+            {
+              "name": "src",
+              "type": "mdxJsxAttribute",
+              "value": {
+                "data": {
+                  "estree": {
+                    "body": [
+                      {
+                        "expression": {
+                          "name": "__img0",
+                          "type": "Identifier",
+                        },
+                        "type": "ExpressionStatement",
+                      },
+                    ],
+                  },
+                },
+                "type": "mdxJsxAttributeValueExpression",
+                "value": "__img0",
+              },
+            },
+          ],
+          "name": "img",
+          "position": {
+            "end": {
+              "column": 20,
+              "line": 1,
+              "offset": 19,
+            },
+            "start": {
+              "column": 1,
+              "line": 1,
+              "offset": 0,
+            },
+          },
+          "title": null,
+          "type": "mdxJsxFlowElement",
+          "url": "./test.png",
+        },
+      ],
+      "position": {
+        "end": {
+          "column": 20,
+          "line": 1,
+          "offset": 19,
+        },
+        "start": {
+          "column": 1,
+          "line": 1,
+          "offset": 0,
+        },
+      },
+      "type": "paragraph",
+    },
+    {
+      "children": [
+        {
+          "alt": "External",
+          "attributes": [
+            {
+              "name": "alt",
+              "type": "mdxJsxAttribute",
+              "value": "External",
+            },
+            {
+              "name": "src",
+              "type": "mdxJsxAttribute",
+              "value": "https://picsum.photos/id/237/200/300",
+            },
+            {
+              "name": "width",
+              "type": "mdxJsxAttribute",
+              "value": "200",
+            },
+            {
+              "name": "height",
+              "type": "mdxJsxAttribute",
+              "value": "300",
+            },
+          ],
+          "name": "img",
+          "position": {
+            "end": {
+              "column": 50,
+              "line": 3,
+              "offset": 70,
+            },
+            "start": {
+              "column": 1,
+              "line": 3,
+              "offset": 21,
+            },
+          },
+          "title": null,
+          "type": "mdxJsxFlowElement",
+          "url": "https://picsum.photos/id/237/200/300",
+        },
+      ],
+      "position": {
+        "end": {
+          "column": 50,
+          "line": 3,
+          "offset": 70,
+        },
+        "start": {
+          "column": 1,
+          "line": 3,
+          "offset": 21,
+        },
+      },
+      "type": "paragraph",
+    },
+  ],
+  "position": {
+    "end": {
+      "column": 1,
+      "line": 4,
+      "offset": 71,
+    },
+    "start": {
+      "column": 1,
+      "line": 1,
+      "offset": 0,
+    },
+  },
+  "type": "root",
+}

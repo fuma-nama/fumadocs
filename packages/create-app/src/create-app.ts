@@ -132,6 +132,10 @@ function createPackageJson(
   }
 
   if (template === 'fuma-docs-mdx') {
+    Object.assign(packageJson.scripts, {
+      postinstall: 'fumadocs-mdx',
+    });
+
     Object.assign(packageJson.dependencies, {
       'fumadocs-mdx': localVersions['fumadocs-mdx'],
     });

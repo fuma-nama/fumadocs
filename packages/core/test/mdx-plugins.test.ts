@@ -55,13 +55,14 @@ test('Remark Admonition', async () => {
 
 test('Remark Image', async () => {
   const content = readFileSync(path.resolve(cwd, './fixtures/remark-image.md'));
-  const result = await remark()
+  const processor = remark()
     .use(remarkImage, { publicDir: path.resolve(cwd, './fixtures') })
-    .use(remarkMdx)
-    .process(content);
+    .use(remarkMdx);
 
-  expect(result.value).toMatchFileSnapshot(
-    path.resolve(cwd, './fixtures/remark-image.output.mdx'),
+  const result = await processor.run(processor.parse(content));
+
+  expect(result).toMatchFileSnapshot(
+    path.resolve(cwd, './fixtures/remark-image.output.json'),
   );
 });
 
