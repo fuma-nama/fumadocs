@@ -37,10 +37,11 @@
       ]
     }
   },
+  "bin": "./bin.mjs",
   "files": [
     "dist/*",
     "loader-mdx.js",
-    "loader.js"
+    "bin.mjs"
   ],
   "scripts": {
     "build": "tsup",

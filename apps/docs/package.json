@@ -10,7 +10,7 @@
     "build:shaders": "glslx shaders/rain.glsl --output=shaders/rain.min.js --format=js --renaming=internal-only",
     "clean": "rimraf .next",
     "dev": "next dev",
-    "lint": "next lint",
+    "lint": "fumadocs-mdx && next lint",
     "start": "next start"
   },
   "dependencies": {
