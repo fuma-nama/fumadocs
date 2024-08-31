@@ -28,7 +28,6 @@ export default async function Page({
     // @ts-expect-error -- jsx
     components: defaultComponents,
   });
-  console.log(page.data.test);
 
   return (
     <DocsPage toc={page.data.toc} full={page.data.full}>

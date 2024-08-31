@@ -40,6 +40,7 @@ export const blog = defineCollections({
 });
 
 export default defineConfig({
+  generateManifest: true,
   mdxOptions: {
     rehypeCodeOptions: {
       themes: {

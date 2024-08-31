@@ -1,3 +1,5 @@
+import { createHash } from 'node:crypto';
+import fs from 'node:fs';
 import { loadConfig, type LoadedConfig } from '@/config/load';
 
 const cache = new Map<
@@ -22,6 +24,16 @@ export async function loadConfigCached(
   return await config;
 }
 
-export function invalidateCache(configPath: string): void {
-  cache.delete(configPath);
+/**
+ * Generate hash based on the content of config
+ */
+export async function getConfigHash(configPath: string): Promise<string> {
+  const hash = createHash('sha256');
+  const rs = fs.createReadStream(configPath);
+
+  for await (const chunk of rs) {
+    hash.update(chunk as string);
+  }
+
+  return hash.digest('hex');
 }

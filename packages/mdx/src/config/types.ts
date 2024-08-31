@@ -6,7 +6,23 @@ import { type Collections } from '@/config/define';
 import { type DefaultMDXOptions } from '@/utils/mdx-options';
 
 export interface GlobalConfig {
+  /**
+   * Configure global MDX options
+   */
   mdxOptions?: DefaultMDXOptions;
+
+  /**
+   * Fetch last modified time with specified version control
+   * @defaultValue 'none'
+   */
+  lastModifiedTime?: 'git' | 'none';
+
+  /**
+   * Generate manifest file on build mode
+   *
+   * @defaultValue false
+   */
+  generateManifest?: boolean;
 }
 
 export type InferSchema<C> =

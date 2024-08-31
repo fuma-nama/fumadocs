@@ -1,18 +1,20 @@
 import path from 'node:path';
 import fs from 'node:fs';
 import { watcher } from '@/map/watcher';
-import { loadConfigCached } from '@/config/cached';
+import { getConfigHash, loadConfigCached } from '@/config/cached';
 import { generateJS, generateTypes } from '@/map/generate';
+import { writeManifest } from '@/map/manifest';
 
 export async function start(
   dev: boolean,
   configPath: string,
-  outName: string,
+  outDir: string,
 ): Promise<void> {
-  let configHash = 0;
-  let config = await loadConfigCached(configPath, configHash.toString());
-  const jsOut = path.resolve('.source', `${outName}.js`);
-  const typeOut = path.resolve('.source', `${outName}.d.ts`);
+  let configHash = await getConfigHash(configPath);
+  let config = await loadConfigCached(configPath, configHash);
+  const manifestPath = path.resolve(outDir, 'manifest.json');
+  const jsOut = path.resolve(outDir, `index.js`);
+  const typeOut = path.resolve(outDir, `index.d.ts`);
 
   if (dev) {
     const instance = watcher(configPath, config);
@@ -26,8 +28,8 @@ export async function start(
         const isConfigFile = path.resolve(file) === configPath;
 
         if (isConfigFile) {
-          configHash++;
-          config = await loadConfigCached(configPath, configHash.toString());
+          configHash = await getConfigHash(configPath);
+          config = await loadConfigCached(configPath, configHash);
           fs.writeFileSync(typeOut, generateTypes(configPath, config, typeOut));
           console.log('[MDX] Updated map types');
         }
@@ -35,7 +37,7 @@ export async function start(
         if (isConfigFile || event !== 'change') {
           fs.writeFileSync(
             jsOut,
-            await generateJS(configPath, config, jsOut, configHash.toString()),
+            await generateJS(configPath, config, jsOut, configHash),
           );
           console.log('[MDX] Updated map file');
         }
@@ -50,11 +52,18 @@ export async function start(
     });
   }
 
-  fs.mkdirSync('.source', { recursive: true });
+  fs.mkdirSync(outDir, { recursive: true });
   fs.writeFileSync(
     jsOut,
-    await generateJS(configPath, config, jsOut, configHash.toString()),
+    await generateJS(configPath, config, jsOut, configHash),
   );
   fs.writeFileSync(typeOut, generateTypes(configPath, config, typeOut));
-  console.log('[MDX] Initialized map file');
+  console.log('[MDX] initialized map file');
+
+  if (config.global?.generateManifest) {
+    process.on('exit', () => {
+      console.log('[MDX] writing manifest');
+      writeManifest(manifestPath, config);
+    });
+  }
 }

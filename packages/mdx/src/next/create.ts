@@ -1,29 +1,21 @@
+import path from 'node:path';
 import type { NextConfig } from 'next';
 import type { Configuration } from 'webpack';
 import { findConfigFile } from '@/config/load';
 import { start } from '@/map';
 import { type Options as MDXLoaderOptions } from '../loader-mdx';
-import { type Options as SearchIndexPluginOptions } from '../webpack-plugins/search-index-plugin';
 
 export interface CreateMDXOptions {
-  cwd?: string;
-
-  buildSearchIndex?:
-    | Omit<SearchIndexPluginOptions, 'rootContentDir' | 'rootMapFile'>
-    | boolean;
-
-  mdxOptions?: Omit<MDXLoaderOptions, '_ctx'>;
-
   /**
    * Path to source configuration file
    */
   configPath?: string;
 }
 
+const outDir = path.resolve('.source');
 const defaultPageExtensions = ['mdx', 'md', 'jsx', 'js', 'tsx', 'ts'];
 
 export function createMDX({
-  mdxOptions,
   configPath = findConfigFile(),
 }: CreateMDXOptions = {}) {
   // Next.js performs multiple iteration on the `next.config.js` file
@@ -33,12 +25,11 @@ export function createMDX({
   const isBuild = process.argv.includes('build');
 
   if (isDev || isBuild) {
-    void start(isDev, configPath, 'index');
+    void start(isDev, configPath, outDir);
   }
 
   return (nextConfig: NextConfig = {}): NextConfig => {
     const mdxLoaderOptions: MDXLoaderOptions = {
-      ...mdxOptions,
       _ctx: {
         configPath,
       },

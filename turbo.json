@@ -13,6 +13,7 @@
       "dependsOn": ["^build"],
       "outputs": [
         ".contentlayer/**",
+        ".source/**",
         "!.contentlayer/.cache/**",
         ".next/**",
         "!.next/cache/**",

@@ -1,18 +1,16 @@
-import { z } from 'zod';
 import { type LoadedConfig } from '@/config/load';
 import { type Collections } from '@/config/define';
-import { type DefaultMDXOptions } from '@/utils/mdx-options';
 import { type GlobalConfig } from '@/config/types';
-
-const defaultSchema = z.object({
-  mdxOptions: z.custom<DefaultMDXOptions>().optional(),
-});
 
 export function validateConfig(
   config: Record<string, unknown>,
 ): [err: string, value: null] | [err: null, value: LoadedConfig] {
-  let globalConfig: GlobalConfig | undefined;
-  const collections = new Map<string, Collections>();
+  const out: LoadedConfig = {
+    collections: new Map(),
+    _runtime: {
+      files: new Map(),
+    },
+  };
 
   for (const [k, v] of Object.entries(config)) {
     if (!v) {
@@ -20,12 +18,12 @@ export function validateConfig(
     }
 
     if (typeof v === 'object' && '_doc' in v && v._doc === 'collections') {
-      collections.set(k, v as unknown as Collections);
+      out.collections.set(k, v as unknown as Collections);
       continue;
     }
 
     if (k === 'default') {
-      globalConfig = defaultSchema.parse(v);
+      out.global = v as GlobalConfig;
       continue;
     }
 
@@ -35,14 +33,5 @@ export function validateConfig(
     ];
   }
 
-  return [
-    null,
-    {
-      collections,
-      global: globalConfig,
-      _runtime: {
-        files: new Map(),
-      },
-    },
-  ];
+  return [null, out];
 }

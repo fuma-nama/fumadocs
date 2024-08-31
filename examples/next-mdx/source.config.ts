@@ -30,7 +30,7 @@ export const { docs, meta } = defineDocs({
       return {
         ...v,
         descriptionHast: hast,
-        test: 'goodbye',
+        test: 'goodbye hi',
       };
     }),
   },

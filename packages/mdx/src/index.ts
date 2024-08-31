@@ -1,2 +1,2 @@
 export * from './runtime/create';
-export * from './types';
+export type { Manifest } from './map/manifest';
