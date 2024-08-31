@@ -60,7 +60,7 @@ export async function start(
   fs.writeFileSync(typeOut, generateTypes(configPath, config, typeOut));
   console.log('[MDX] initialized map file');
 
-  if (config.global?.generateManifest) {
+  if (config.global?.generateManifest && !dev) {
     process.on('exit', () => {
       console.log('[MDX] writing manifest');
       writeManifest(manifestPath, config);

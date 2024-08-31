@@ -30,7 +30,7 @@ export function toRuntime(
   }
 
   return {
-    ...file,
+    ...(file.default as object),
     _file: info,
   };
 }

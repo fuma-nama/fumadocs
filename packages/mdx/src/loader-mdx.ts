@@ -5,7 +5,7 @@ import grayMatter from 'gray-matter';
 import { type LoaderContext } from 'webpack';
 import { type StructuredData } from 'fumadocs-core/mdx-plugins';
 import { findCollection } from '@/utils/find-collection';
-import { loadConfigCached } from '@/config/cached';
+import { getConfigHash, loadConfigCached } from '@/config/cached';
 import { buildMDX } from '@/utils/build-mdx';
 import { getDefaultMDXOptions, type TransformContext } from '@/config';
 import { getKey } from '@/map/manifest';
@@ -75,7 +75,7 @@ export default async function loader(
   const config = await loadConfigCached(
     _ctx.configPath,
     // if no hash provided, always load a new config
-    hash ?? Date.now().toString(),
+    hash ?? (await getConfigHash(_ctx.configPath)),
   );
   const collection =
     collectionId !== undefined
