@@ -24,7 +24,7 @@ export async function loadConfig(configPath: string): Promise<LoadedConfig> {
   const outputPath = path.resolve('.source/source.config.mjs');
 
   const transformed = await build({
-    entryPoints: [configPath],
+    entryPoints: [{ in: configPath, out: 'source.config' }],
     bundle: true,
     outdir: '.source',
     target: 'node18',

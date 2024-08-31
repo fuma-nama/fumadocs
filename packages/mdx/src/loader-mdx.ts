@@ -9,6 +9,7 @@ import { getConfigHash, loadConfigCached } from '@/config/cached';
 import { buildMDX } from '@/utils/build-mdx';
 import { getDefaultMDXOptions, type TransformContext } from '@/config';
 import { getKey } from '@/map/manifest';
+import { formatError } from '@/utils/format-error';
 import { getGitTimestamp } from './utils/git-timestamp';
 
 export interface Options {
@@ -106,7 +107,7 @@ export default async function loader(
 
     const result = await schema.safeParseAsync(frontmatter);
     if (result.error) {
-      callback(result.error);
+      callback(new Error(formatError(filePath, result.error)));
       return;
     }
 

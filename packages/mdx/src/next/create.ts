@@ -38,9 +38,12 @@ export function createMDX({
     return {
       ...nextConfig,
       experimental: {
+        ...nextConfig.experimental,
         turbo: {
-          // @ts-expect-error -- safe types
+          ...nextConfig.experimental?.turbo,
           rules: {
+            ...nextConfig.experimental?.turbo?.rules,
+            // @ts-expect-error -- safe types
             '*.{md,mdx}': {
               loaders: [
                 {
@@ -50,11 +53,8 @@ export function createMDX({
               ],
               as: '*.js',
             },
-            ...nextConfig.experimental?.turbo?.rules,
           },
-          ...nextConfig.experimental?.turbo,
         },
-        ...nextConfig.experimental,
       },
       pageExtensions: nextConfig.pageExtensions ?? defaultPageExtensions,
       webpack: (config: Configuration, options) => {
