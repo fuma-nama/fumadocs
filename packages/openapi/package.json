@@ -61,6 +61,7 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "github-slugger": "^2.0.0",
+    "hast-util-to-jsx-runtime": "^2.3.0",
     "js-yaml": "^4.1.0",
     "json-schema-to-typescript": "15.0.0",
     "lucide-react": "^0.437.0",

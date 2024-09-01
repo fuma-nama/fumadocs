@@ -92,7 +92,9 @@ export const defaultRenderer: Renderer = {
   API,
   APIInfo,
   APIExample,
-  Responses: Tabs,
+  Responses: (props) => (
+    <Tabs groupId="fumadocs_openapi_responses" {...props} />
+  ),
   Response: Tab,
   ResponseTypes: (props) => (
     <Accordions
@@ -110,7 +112,7 @@ export const defaultRenderer: Renderer = {
   ),
   Property,
   ObjectCollapsible,
-  Requests: Tabs,
+  Requests: (props) => <Tabs groupId="fumadocs_openapi_requests" {...props} />,
   Request: (props) => (
     <Tab value={props.name}>
       <CodeBlock lang={props.language} code={props.code} />
