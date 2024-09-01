@@ -131,7 +131,7 @@
     "algoliasearch": "^4.24.0",
     "eslint-config-custom": "workspace:*",
     "next": "^14.2.7",
-    "postcss": "^8.4.41",
+    "postcss": "^8.4.42",
     "postcss-cli": "^11.0.0",
     "postcss-lightningcss": "^1.0.1",
     "tailwindcss": "^3.4.10",

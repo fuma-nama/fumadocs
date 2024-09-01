@@ -52,7 +52,7 @@
   },
   "dependencies": {
     "@apidevtools/json-schema-ref-parser": "^11.7.0",
-    "@fumari/json-schema-to-typescript": "^1.0.1",
+    "@fumari/json-schema-to-typescript": "^1.1.0",
     "@mdx-js/mdx": "^3.0.1",
     "@radix-ui/react-select": "^2.1.1",
     "@radix-ui/react-slot": "^1.1.0",
@@ -68,15 +68,15 @@
     "openapi-sampler": "^1.5.1",
     "react-hook-form": "^7.53.0",
     "remark": "^15.0.0",
-    "shiki": "^1.15.1",
+    "shiki": "^1.15.2",
     "swr": "^2.2.5"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "22.5.1",
+    "@types/node": "22.5.2",
     "@types/openapi-sampler": "^1.0.3",
     "@types/react": "^18.3.5",
-    "bunchee": "^5.3.2",
+    "bunchee": "^5.4.0",
     "eslint-config-custom": "workspace:*",
     "next": "^14.2.7",
     "openapi-types": "^12.1.3",
