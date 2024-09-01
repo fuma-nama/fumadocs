@@ -52,6 +52,7 @@
   },
   "dependencies": {
     "@apidevtools/json-schema-ref-parser": "^11.7.0",
+    "@fumari/json-schema-to-typescript": "^1.0.1",
     "@mdx-js/mdx": "^3.0.1",
     "@radix-ui/react-select": "^2.1.1",
     "@radix-ui/react-slot": "^1.1.0",
@@ -63,7 +64,6 @@
     "github-slugger": "^2.0.0",
     "hast-util-to-jsx-runtime": "^2.3.0",
     "js-yaml": "^4.1.0",
-    "json-schema-to-typescript": "15.0.0",
     "lucide-react": "^0.437.0",
     "openapi-sampler": "^1.5.1",
     "react-hook-form": "^7.53.0",

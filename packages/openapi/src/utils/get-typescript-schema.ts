@@ -1,4 +1,4 @@
-import { compile } from 'json-schema-to-typescript';
+import { compile } from '@fumari/json-schema-to-typescript';
 import type { EndpointSample } from '@/schema/sample';
 
 export async function getTypescriptSchema(

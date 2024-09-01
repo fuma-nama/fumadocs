@@ -92,9 +92,7 @@ export const defaultRenderer: Renderer = {
   API,
   APIInfo,
   APIExample,
-  Responses: (props) => (
-    <Tabs groupId="fumadocs_openapi_responses" {...props} />
-  ),
+  Responses: Tabs,
   Response: Tab,
   ResponseTypes: (props) => (
     <Accordions

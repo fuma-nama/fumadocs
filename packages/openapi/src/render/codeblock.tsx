@@ -1,4 +1,4 @@
-import { type HTMLAttributes } from 'react';
+import { Fragment, type HTMLAttributes } from 'react';
 import * as Base from 'fumadocs-ui/components/codeblock';
 import { codeToHast } from 'shiki';
 import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
@@ -13,7 +13,7 @@ export type CodeBlockProps = HTMLAttributes<HTMLPreElement> & {
 export async function CodeBlock({
   code,
   lang,
-  ...props
+  ...options
 }: CodeBlockProps): Promise<React.ReactElement> {
   const html = await codeToHast(code, {
     lang,
@@ -29,9 +29,10 @@ export async function CodeBlock({
     // @ts-expect-error -- untyped
     jsxs,
     components: {
-      // @ts-expect-error -- untyped
-      pre: Base.Pre,
+      // eslint-disable-next-line react/no-unstable-nested-components -- server component
+      pre: (props) => <Base.Pre {...props} {...options} />,
     },
+    Fragment,
   });
 
   return <Base.CodeBlock className="my-0">{codeblock}</Base.CodeBlock>;
