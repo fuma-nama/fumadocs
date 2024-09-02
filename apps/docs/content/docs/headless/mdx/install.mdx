@@ -21,18 +21,15 @@ const config = {
 
 Define the required components.
 
-```tsx title="mdx-components.tsx"
-// With Fumadocs UI
+```tsx title="page.tsx (Fumadocs UI)"
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
-import type { MDXComponents } from 'mdx/types';
 
-export function useMDXComponents(components: MDXComponents) {
-  return {
-    ...components,
+<MDX
+  components={{
     Tab,
     Tabs,
-  };
-}
+  }}
+/>;
 ```
 
 | Component |                                   |
