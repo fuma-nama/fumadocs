@@ -9,6 +9,7 @@ import type { Processor, Transformer } from 'unified';
 import {
   getSingletonHighlighter,
   createJavaScriptRegexEngine,
+  createWasmOnigEngine,
   type ShikiTransformer,
   bundledLanguages,
   type BuiltinTheme,
@@ -159,7 +160,7 @@ export function rehypeCode(
   const highlighter = getSingletonHighlighter({
     engine: codeOptions.experimentalJSEngine
       ? createJavaScriptRegexEngine()
-      : undefined,
+      : createWasmOnigEngine(),
     themes: themeItems.filter(Boolean) as BuiltinTheme[],
     langs: codeOptions.langs ?? Object.keys(bundledLanguages),
   });
