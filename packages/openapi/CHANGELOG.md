@@ -1,5 +1,19 @@
 # @fuma-docs/openapi
 
+## 5.4.6
+
+### Patch Changes
+
+- 0cff470: Enable group id on tabs by default
+- 0c251e5: Bump deps
+- Updated dependencies [7dabbc1]
+- Updated dependencies [0c251e5]
+- Updated dependencies [3b56170]
+- Updated dependencies [0c251e5]
+- Updated dependencies [0c251e5]
+  - fumadocs-core@13.4.2
+  - fumadocs-ui@13.4.2
+
 ## 5.4.5
 
 ### Patch Changes
