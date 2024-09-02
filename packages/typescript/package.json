@@ -56,7 +56,8 @@
     "@types/react-dom": "18.3.0",
     "eslint-config-custom": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "tsconfig": "workspace:*"
+    "tsconfig": "workspace:*",
+    "typescript": "^5.5.4"
   },
   "peerDependencies": {
     "typescript": "*"

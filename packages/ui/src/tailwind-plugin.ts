@@ -141,7 +141,7 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
         },
         '@screen md': {
           ':root': {
-            '--fd-sidebar-width': '240px',
+            '--fd-sidebar-width': '260px',
           },
         },
         '@screen lg': {
@@ -152,7 +152,7 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
           },
         },
         '@screen xl': {
-          ':root': { '--fd-sidebar-width': '260px', '--fd-toc-width': '260px' },
+          ':root': { '--fd-toc-width': '260px' },
         },
       });
 

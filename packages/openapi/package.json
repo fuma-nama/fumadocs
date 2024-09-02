@@ -53,10 +53,8 @@
   "dependencies": {
     "@apidevtools/json-schema-ref-parser": "^11.7.0",
     "@fumari/json-schema-to-typescript": "^1.1.0",
-    "@mdx-js/mdx": "^3.0.1",
     "@radix-ui/react-select": "^2.1.1",
     "@radix-ui/react-slot": "^1.1.0",
-    "@types/mdx": "^2.0.13",
     "class-variance-authority": "^0.7.0",
     "fast-glob": "^3.3.1",
     "fumadocs-core": "workspace:*",
@@ -67,7 +65,8 @@
     "lucide-react": "^0.437.0",
     "openapi-sampler": "^1.5.1",
     "react-hook-form": "^7.53.0",
-    "remark": "^15.0.0",
+    "remark": "^15.0.1",
+    "remark-rehype": "^11.1.0",
     "shiki": "^1.15.2",
     "swr": "^2.2.5"
   },

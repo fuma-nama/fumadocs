@@ -37,7 +37,7 @@ export async function generateJS(
             if (getTypeFromPath(file) !== collection.type) continue;
             if (config._runtime.files.has(file)) {
               console.warn(
-                `[MDX] Files cannot exist in multiple collections: ${file}`,
+                `[MDX] Files cannot exist in multiple collections: ${file} (${config._runtime.files.get(file) ?? ''})`,
               );
               continue;
             }

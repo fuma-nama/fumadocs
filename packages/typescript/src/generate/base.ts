@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { type TypescriptConfig, getProgram, getFileSymbol } from '../program';
+import { type TypescriptConfig, getProgram, getFileSymbol } from '@/program';
 
 export interface GeneratedDoc {
   name: string;
@@ -47,7 +47,11 @@ export interface GenerateDocumentationOptions extends GenerateOptions {
   /**
    * Typescript configurations
    */
-  config?: TypescriptConfig;
+  config?:
+    | TypescriptConfig
+    | {
+        program: ts.Program;
+      };
 }
 
 /**
@@ -58,7 +62,10 @@ export function generateDocumentation(
   name: string,
   options: GenerateDocumentationOptions = {},
 ): GeneratedDoc | undefined {
-  const program = getProgram(options.config);
+  const program =
+    options.config && 'program' in options.config
+      ? options.config.program
+      : getProgram(options.config);
   const fileSymbol = getFileSymbol(file, program);
   if (!fileSymbol) return;
 
