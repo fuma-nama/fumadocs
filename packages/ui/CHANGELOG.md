@@ -1,5 +1,11 @@
 # next-docs-ui
 
+## 13.4.3
+
+### Patch Changes
+
+- fumadocs-core@13.4.3
+
 ## 13.4.2
 
 ### Patch Changes
