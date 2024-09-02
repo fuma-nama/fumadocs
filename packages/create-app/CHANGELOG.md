@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 13.4.3
+
+### Patch Changes
+
+- e409799: Fix typos
+
 ## 13.4.2
 
 ### Patch Changes
