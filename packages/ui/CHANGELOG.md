@@ -1,5 +1,24 @@
 # next-docs-ui
 
+## 13.4.2
+
+### Patch Changes
+
+- 0c251e5: Bump deps
+- 0c251e5: Support Shiki inline code
+- 0c251e5: Improve nested list styles
+- Updated dependencies [7dabbc1]
+- Updated dependencies [0c251e5]
+- Updated dependencies [3b56170]
+  - fumadocs-core@13.4.2
+
+## 13.4.1
+
+### Patch Changes
+
+- Updated dependencies [95dbba1]
+  - fumadocs-core@13.4.1
+
 ## 13.4.0
 
 ### Minor Changes

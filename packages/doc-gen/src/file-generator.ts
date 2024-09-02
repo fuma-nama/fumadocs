@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import type { Code, Paragraph } from 'mdast';
+import { z } from 'zod';
 import type { DocGenerator } from './remark-docgen';
 
 export interface FileGeneratorOptions {
@@ -15,21 +16,26 @@ export interface FileGeneratorOptions {
   relative?: boolean;
 }
 
-export interface FileGeneratorInput {
-  file: string;
+export type FileGeneratorInput = z.output<typeof fileGeneratorSchema>;
+
+export const fileGeneratorSchema = z.object({
+  file: z.string(),
 
   /**
    * Turn file content into a code block
    *
    * @defaultValue false
    */
-  codeblock?: CodeBlock | boolean;
-}
-
-interface CodeBlock {
-  lang?: string;
-  meta?: string;
-}
+  codeblock: z
+    .union([
+      z.object({
+        lang: z.string().optional(),
+        meta: z.string().optional(),
+      }),
+      z.boolean(),
+    ])
+    .default(false),
+});
 
 export function fileGenerator({
   relative = false,
@@ -38,7 +44,7 @@ export function fileGenerator({
   return {
     name: 'file',
     run(input, ctx) {
-      const { file, codeblock = false } = input as FileGeneratorInput;
+      const { file, codeblock = false } = fileGeneratorSchema.parse(input);
 
       const dest = relative
         ? path.resolve(ctx.cwd, path.dirname(ctx.path), file)

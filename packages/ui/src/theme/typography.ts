@@ -58,10 +58,10 @@ export const typography = {
     },
     ul: {
       listStylePosition: 'inside',
-      paddingLeft: '0',
+      paddingInlineStart: '1rem',
     },
     'ul > li': {
-      paddingLeft: '0',
+      paddingInlineStart: '0',
     },
     // Disabled styles, handled by Fumadocs UI
     'pre code': false,

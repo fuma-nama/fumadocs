@@ -1,8 +1,6 @@
 import * as path from 'node:path';
 import ts from 'typescript';
 
-const cache = new Map<string, ts.Program>();
-
 export interface TypescriptConfig {
   files?: string[];
   tsconfigPath?: string;
@@ -27,11 +25,6 @@ export function getFileSymbol(
 }
 
 export function getProgram(options: TypescriptConfig = {}): ts.Program {
-  const key = JSON.stringify(options);
-  const cached = cache.get(key);
-
-  if (cached) return cached;
-
   const configFile = ts.readJsonConfigFile(
     options.tsconfigPath ?? './tsconfig.json',
     (p) => ts.sys.readFile(p),
@@ -56,15 +49,11 @@ export function getProgram(options: TypescriptConfig = {}): ts.Program {
       (() => path.resolve('./node_modules/typescript/lib'));
   }
 
-  const program = ts.createProgram({
+  return ts.createProgram({
     rootNames: options.files ?? parsed.fileNames,
     host,
     options: parsed.options,
     configFileParsingDiagnostics: parsed.errors,
     projectReferences: parsed.projectReferences,
   });
-
-  cache.set(key, program);
-
-  return program;
 }

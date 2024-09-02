@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-mdx",
-  "version": "9.0.3",
+  "version": "10.0.0",
   "description": "The built-in source for Fumadocs",
   "keywords": [
     "NextJs",
@@ -11,11 +11,14 @@
   "license": "MIT",
   "author": "Fuma Nama",
   "exports": {
-    "./loader": "./loader.js",
     "./loader-mdx": "./loader-mdx.js",
     "./config": {
-      "import": "./dist/config.mjs",
-      "types": "./dist/config.d.mts"
+      "import": "./dist/config/index.mjs",
+      "types": "./dist/config/index.d.mts"
+    },
+    "./next": {
+      "import": "./dist/next/index.mjs",
+      "types": "./dist/next/index.d.mts"
     },
     ".": {
       "import": "./dist/index.mjs",
@@ -27,14 +30,18 @@
   "typesVersions": {
     "*": {
       "config": [
-        "./dist/config.d.mts"
+        "./dist/config/index.d.mts"
+      ],
+      "next": [
+        "./dist/next/index.d.mts"
       ]
     }
   },
+  "bin": "./bin.mjs",
   "files": [
     "dist/*",
     "loader-mdx.js",
-    "loader.js"
+    "bin.mjs"
   ],
   "scripts": {
     "build": "tsup",
@@ -45,20 +52,24 @@
   },
   "dependencies": {
     "@mdx-js/mdx": "^3.0.1",
+    "chokidar": "^3.6.0",
     "cross-spawn": "^7.0.3",
+    "esbuild": "^0.23.1",
     "estree-util-value-to-estree": "^3.1.2",
     "fast-glob": "^3.3.1",
     "gray-matter": "^4.0.3",
+    "micromatch": "^4.0.8",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/cross-spawn": "^6.0.6",
     "@types/mdast": "^4.0.3",
     "@types/mdx": "^2.0.13",
-    "@types/react": "^18.3.3",
+    "@types/micromatch": "^4.0.9",
+    "@types/react": "^18.3.5",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
-    "next": "^14.2.5",
+    "next": "^14.2.7",
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
     "webpack": "^5.90.3"

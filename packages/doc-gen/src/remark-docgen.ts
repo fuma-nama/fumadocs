@@ -1,6 +1,7 @@
 import { type BlockContent, type Code, type Root } from 'mdast';
 import { type Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
+import type { VFile } from 'vfile';
 
 export interface DocGenerator {
   name: string;
@@ -9,6 +10,8 @@ export interface DocGenerator {
    * Transform codeblocks to another mdast element
    */
   run: (input: unknown, context: Context) => object | undefined;
+
+  onFile?: (tree: Root, file: VFile) => void;
 }
 
 interface Context {
@@ -27,6 +30,8 @@ export function remarkDocGen({
   generators = [],
 }: RemarkDocGenOptions): Transformer<Root, Root> {
   return (tree, file) => {
+    generators.forEach((gen) => gen.onFile?.(tree, file));
+
     visit(tree, 'code', (code, index, parent) => {
       if (code.lang !== 'json' || !code.meta) return;
 

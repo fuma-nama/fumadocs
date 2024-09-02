@@ -9,7 +9,7 @@ export const { GET } = createI18nSearchAPIExperimental('advanced', {
       id: page.url,
       url: page.url,
       title: page.data.title,
-      structuredData: page.data.exports.structuredData,
+      structuredData: page.data.structuredData,
       locale: entry.language,
     }));
   }),

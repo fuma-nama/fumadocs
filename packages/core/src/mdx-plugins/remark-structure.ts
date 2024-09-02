@@ -4,7 +4,7 @@ import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
 import remarkMdx from 'remark-mdx';
 import type { PluggableList, Transformer } from 'unified';
-import { visit } from 'unist-util-visit';
+import { visit, type Test } from 'unist-util-visit';
 import { flattenNode } from './remark-utils';
 
 interface Heading {
@@ -27,9 +27,11 @@ export interface StructuredData {
 
 export interface StructureOptions {
   /**
-   * Types to be scanned, default: `["heading", "blockquote", "paragraph"]`
+   * Types to be scanned.
+   *
+   * @defaultValue ['paragraph', 'blockquote', 'heading', 'tableCell']
    */
-  types?: string[];
+  types?: Test;
 }
 
 const slugger = new Slugger();
@@ -38,7 +40,7 @@ const slugger = new Slugger();
  * Attach structured data to VFile, you can access via `vfile.data.structuredData`.
  */
 export function remarkStructure({
-  types = ['paragraph', 'blockquote', 'heading'],
+  types = ['paragraph', 'blockquote', 'heading', 'tableCell'],
 }: StructureOptions = {}): Transformer<Root, Root> {
   return (node, file) => {
     slugger.reset();

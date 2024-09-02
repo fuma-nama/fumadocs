@@ -1,5 +1,15 @@
 # fumadocs-twoslash
 
+## 1.1.3
+
+### Patch Changes
+
+- 0c251e5: Bump deps
+- Updated dependencies [0c251e5]
+- Updated dependencies [0c251e5]
+- Updated dependencies [0c251e5]
+  - fumadocs-ui@13.4.2
+
 ## 1.1.2
 
 ### Patch Changes

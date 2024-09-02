@@ -1,11 +1,18 @@
 import type { Root, RootContent } from 'hast';
-import rehypeShiki, { type RehypeShikiOptions } from '@shikijs/rehype';
+import { type RehypeShikiOptions } from '@shikijs/rehype';
+import rehypeShikiFromHighlighter from '@shikijs/rehype/core';
 import {
   transformerNotationHighlight,
   transformerNotationWordHighlight,
 } from '@shikijs/transformers';
 import type { Processor, Transformer } from 'unified';
-import type { ShikiTransformer } from 'shiki';
+import {
+  getSingletonHighlighter,
+  createJavaScriptRegexEngine,
+  type ShikiTransformer,
+  bundledLanguages,
+  type BuiltinTheme,
+} from 'shiki';
 import type { IconOptions, CodeBlockIcon } from './transformer-icon';
 import { transformerIcon } from './transformer-icon';
 
@@ -38,6 +45,7 @@ export const rehypeCodeDefaultOptions: RehypeCodeOptions = {
     dark: 'github-dark',
   },
   defaultLanguage: 'plaintext',
+  experimentalJSEngine: false,
   defaultColor: false,
   transformers: [
     transformerNotationHighlight(),
@@ -83,6 +91,13 @@ export type RehypeCodeOptions = RehypeShikiOptions & {
    * @defaultValue true
    */
   tab?: false;
+
+  /**
+   * Enable Shiki's experimental JS engine
+   *
+   * @defaultValue false
+   */
+  experimentalJSEngine?: boolean;
 };
 
 /**
@@ -133,7 +148,32 @@ export function rehypeCode(
     codeOptions.transformers = [...codeOptions.transformers, transformerTab()];
   }
 
-  return rehypeShiki.call(this, codeOptions) as Transformer<Root, Root>;
+  let themeItems: unknown[] = [];
+
+  if ('themes' in codeOptions) {
+    themeItems = Object.values(codeOptions.themes);
+  } else if ('theme' in codeOptions) {
+    themeItems = [codeOptions.theme];
+  }
+
+  const highlighter = getSingletonHighlighter({
+    engine: codeOptions.experimentalJSEngine
+      ? createJavaScriptRegexEngine()
+      : undefined,
+    themes: themeItems.filter(Boolean) as BuiltinTheme[],
+    langs: codeOptions.langs ?? Object.keys(bundledLanguages),
+  });
+
+  return async (tree, file) => {
+    const transformer = rehypeShikiFromHighlighter(
+      await highlighter,
+      codeOptions,
+    );
+
+    await transformer(tree, file, () => {
+      // nothing
+    });
+  };
 }
 
 function transformerTab(): ShikiTransformer {

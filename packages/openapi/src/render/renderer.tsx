@@ -110,7 +110,7 @@ export const defaultRenderer: Renderer = {
   ),
   Property,
   ObjectCollapsible,
-  Requests: Tabs,
+  Requests: (props) => <Tabs groupId="fumadocs_openapi_requests" {...props} />,
   Request: (props) => (
     <Tab value={props.name}>
       <CodeBlock lang={props.language} code={props.code} />

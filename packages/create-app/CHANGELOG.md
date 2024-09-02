@@ -1,5 +1,13 @@
 # create-next-docs-app
 
+## 13.4.2
+
+### Patch Changes
+
+- 0c251e5: Bump deps
+
+## 13.4.1
+
 ## 13.4.0
 
 ## 13.3.3

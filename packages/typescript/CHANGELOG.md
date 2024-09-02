@@ -1,5 +1,15 @@
 # fumadocs-typescript
 
+## 2.1.0
+
+### Minor Changes
+
+- 3a2c837: Disable cache on program-level
+
+### Patch Changes
+
+- 0c251e5: Bump deps
+
 ## 2.0.1
 
 ### Patch Changes
@@ -22,7 +32,7 @@
   Add the `remarkDocGen` plugin to your remark plugins.
 
   ```ts
-  import { remarkDocGen, fileGenerator } from "fumadocs-docgen";
+  import { remarkDocGen, fileGenerator } from 'fumadocs-docgen';
 
   remark().use(remarkDocGen, { generators: [fileGenerator()] });
   ```
@@ -52,7 +62,7 @@
   For `remarkInstall`, it remains the same:
 
   ```ts
-  import { remarkInstall } from "fumadocs-docgen";
+  import { remarkInstall } from 'fumadocs-docgen';
   ```
 
 ## 1.0.2

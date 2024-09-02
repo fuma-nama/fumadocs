@@ -7,6 +7,7 @@ import {
   DocsDescription,
 } from 'fumadocs-ui/page';
 import { notFound } from 'next/navigation';
+import defaultMdxComponents from 'fumadocs-ui/mdx';
 
 export default async function Page({
   params,
@@ -16,14 +17,14 @@ export default async function Page({
   const page = getPage(params.slug, params.lang);
   if (!page) notFound();
 
-  const MDX = page.data.exports.default;
+  const MDX = page.data.body;
 
   return (
-    <DocsPage toc={page.data.exports.toc}>
+    <DocsPage toc={page.data.toc}>
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>
-        <MDX />
+        <MDX components={defaultMdxComponents} />
       </DocsBody>
     </DocsPage>
   );

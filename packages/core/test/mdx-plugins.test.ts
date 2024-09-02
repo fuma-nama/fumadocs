@@ -10,7 +10,7 @@ import {
 } from '@/mdx-plugins';
 import { fileURLToPath } from 'node:url';
 import remarkMdx from 'remark-mdx';
-import { compile } from '@mdx-js/mdx';
+import remarkGfm from 'remark-gfm';
 
 const cwd = path.dirname(fileURLToPath(import.meta.url));
 
@@ -29,7 +29,10 @@ test('Remark Structure', async () => {
   const content = readFileSync(
     path.resolve(cwd, './fixtures/remark-structure.md'),
   );
-  const result = await remark().use(remarkStructure).process(content);
+  const result = await remark()
+    .use(remarkGfm)
+    .use(remarkStructure)
+    .process(content);
 
   expect(result.data.structuredData).toMatchFileSnapshot(
     path.resolve(cwd, './fixtures/remark-structure.output.json'),
@@ -52,13 +55,14 @@ test('Remark Admonition', async () => {
 
 test('Remark Image', async () => {
   const content = readFileSync(path.resolve(cwd, './fixtures/remark-image.md'));
-  const result = await remark()
+  const processor = remark()
     .use(remarkImage, { publicDir: path.resolve(cwd, './fixtures') })
-    .use(remarkMdx)
-    .process(content);
+    .use(remarkMdx);
 
-  expect(result.value).toMatchFileSnapshot(
-    path.resolve(cwd, './fixtures/remark-image.output.mdx'),
+  const result = await processor.run(processor.parse(content));
+
+  expect(result).toMatchFileSnapshot(
+    path.resolve(cwd, './fixtures/remark-image.output.json'),
   );
 });
 

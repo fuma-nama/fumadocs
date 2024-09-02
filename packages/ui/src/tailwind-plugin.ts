@@ -141,7 +141,7 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
         },
         '@screen md': {
           ':root': {
-            '--fd-sidebar-width': '240px',
+            '--fd-sidebar-width': '260px',
           },
         },
         '@screen lg': {
@@ -152,29 +152,29 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
           },
         },
         '@screen xl': {
-          ':root': { '--fd-sidebar-width': '260px', '--fd-toc-width': '260px' },
+          ':root': { '--fd-toc-width': '260px' },
         },
       });
 
       if (css) addComponents(css);
 
       addComponents({
-        '.fd-codeblock code span': {
+        '.shiki code span': {
           color: 'var(--shiki-light)',
         },
-        '.dark .fd-codeblock code span': {
+        '.dark .shiki code span': {
           color: 'var(--shiki-dark)',
         },
         '.fd-codeblock code': {
           display: 'grid',
           'font-size': '13px',
         },
-        '.fd-codeblock .highlighted': {
+        '.shiki .highlighted': {
           margin: '0 -16px',
           padding: '0 16px',
           'background-color': `theme('colors.fd-primary.DEFAULT / 10%')`,
         },
-        '.fd-codeblock .highlighted-word': {
+        '.shiki .highlighted-word': {
           padding: '1px 2px',
           margin: '-1px -3px',
           border: '1px solid',

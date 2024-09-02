@@ -7,6 +7,7 @@ import {
   DocsDescription,
 } from 'fumadocs-ui/page';
 import { notFound } from 'next/navigation';
+import defaultComponents from 'fumadocs-ui/mdx';
 
 export default async function Page({
   params,
@@ -15,18 +16,14 @@ export default async function Page({
 }) {
   const page = getPage(params.slug);
 
-  if (page == null) {
-    notFound();
-  }
-
-  const MDX = page.data.exports.default;
+  if (!page) notFound();
 
   return (
-    <DocsPage toc={page.data.exports.toc} full={page.data.full}>
+    <DocsPage toc={page.data.toc} full={page.data.full}>
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>
-        <MDX />
+        <page.data.body components={defaultComponents} />
       </DocsBody>
     </DocsPage>
   );
@@ -41,10 +38,9 @@ export async function generateStaticParams() {
 export function generateMetadata({ params }: { params: { slug?: string[] } }) {
   const page = getPage(params.slug);
 
-  if (page == null) notFound();
+  if (!page) notFound();
 
   return {
     title: page.data.title,
-    description: page.data.description,
   } satisfies Metadata;
 }

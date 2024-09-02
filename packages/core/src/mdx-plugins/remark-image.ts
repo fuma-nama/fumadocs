@@ -56,9 +56,24 @@ export function remarkImage({
   useImport = true,
   publicDir = path.join(process.cwd(), 'public'),
 }: RemarkImageOptions = {}): Transformer<Root, Root> {
-  return async (tree) => {
+  return async (tree, file) => {
     const importsToInject: { variableName: string; importPath: string }[] = [];
     const promises: Promise<void>[] = [];
+
+    function getImportPath(src: string): string {
+      if (!src.startsWith('/')) return src;
+
+      if (file.path) {
+        const relative = path.relative(
+          path.dirname(file.path),
+          path.join(publicDir, src),
+        );
+
+        return relative.startsWith('./') ? relative : `./${relative}`;
+      }
+
+      return path.join(publicDir, src);
+    }
 
     visit(tree, 'image', (node) => {
       const src = decodeURI(node.url);
@@ -107,10 +122,7 @@ export function remarkImage({
 
         importsToInject.push({
           variableName,
-          importPath: slash(
-            // with imports, relative paths don't have to be absolute
-            src.startsWith('/') ? path.join(publicDir, src) : src,
-          ),
+          importPath: slash(getImportPath(src)),
         });
 
         Object.assign(node, {

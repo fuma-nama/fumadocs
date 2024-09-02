@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/mdx-remote",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "The remote MDX files adapter for Fumadocs",
   "keywords": [
     "NextJs",
@@ -65,22 +65,22 @@
     "chokidar": "^3.6.0",
     "fast-glob": "^3.3.1",
     "gray-matter": "^4.0.3",
-    "micromatch": "^4.0.7",
+    "micromatch": "^4.0.8",
     "ws": "^8.18.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/mdx": "^2.0.13",
     "@types/micromatch": "^4.0.9",
-    "@types/node": "22.3.0",
-    "@types/react": "^18.3.3",
+    "@types/node": "22.5.2",
+    "@types/react": "^18.3.5",
     "@types/ws": "^8.5.12",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
-    "next": "^14.2.5",
+    "next": "^14.2.7",
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
-    "vfile": "^6.0.2"
+    "vfile": "^6.0.3"
   },
   "peerDependencies": {
     "fumadocs-core": "^13.2.1",
