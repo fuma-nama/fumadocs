@@ -1,18 +1,18 @@
 import path from 'node:path';
 import micromatch from 'micromatch';
 import { type LoadedConfig } from '@/config/load';
-import { type Collections } from '@/config/define';
 import { type SupportedType } from '@/config/types';
 
-export function findCollection(
+export function findCollectionId(
   config: LoadedConfig,
   file: string,
   type: SupportedType,
-): Collections | undefined {
+): string | undefined {
   const cached = config._runtime.files.get(file);
 
-  if (cached) return config.collections.get(cached);
-  for (const collection of config.collections.values()) {
+  if (cached) return cached;
+
+  for (const [name, collection] of config.collections.entries()) {
     if (collection.type !== type) continue;
     const dirs = Array.isArray(collection.dir)
       ? collection.dir
@@ -30,6 +30,7 @@ export function findCollection(
       : true;
     if (!isIncluded) continue;
 
-    return collection;
+    config._runtime.files.set(file, name);
+    return name;
   }
 }

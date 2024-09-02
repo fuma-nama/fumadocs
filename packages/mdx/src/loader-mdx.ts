@@ -4,7 +4,7 @@ import { parse } from 'node:querystring';
 import grayMatter from 'gray-matter';
 import { type LoaderContext } from 'webpack';
 import { type StructuredData } from 'fumadocs-core/mdx-plugins';
-import { findCollection } from '@/utils/find-collection';
+import { findCollectionId } from '@/utils/find-collection';
 import { getConfigHash, loadConfigCached } from '@/config/cached';
 import { buildMDX } from '@/utils/build-mdx';
 import { getDefaultMDXOptions, type TransformContext } from '@/config';
@@ -65,23 +65,23 @@ export default async function loader(
   source: string,
   callback: LoaderContext<Options>['callback'],
 ): Promise<void> {
+  this.cacheable(true);
   const context = this.context;
   const filePath = this.resourcePath;
-  // notice that `resourceQuery` can be missing (e.g. on Turbopack)
-  const { hash, collection: collectionId } = getQuery(this.resourceQuery);
   const { _ctx } = this.getOptions();
   const matter = grayMatter(source);
-  this.cacheable(true);
 
-  const config = await loadConfigCached(
-    _ctx.configPath,
-    // if no hash provided, always load a new config
-    hash ?? (await getConfigHash(_ctx.configPath)),
-  );
+  // notice that `resourceQuery` can be missing (e.g. on Turbopack)
+  const query = getQuery(this.resourceQuery);
+  const configHash = query.hash ?? (await getConfigHash(_ctx.configPath));
+  const config = await loadConfigCached(_ctx.configPath, configHash);
+  const collectionId =
+    query.collection ?? findCollectionId(config, filePath, 'doc');
+
   const collection =
     collectionId !== undefined
       ? config.collections.get(collectionId)
-      : findCollection(config, filePath, 'doc');
+      : undefined;
 
   const mdxOptions =
     collection?.mdxOptions ??
@@ -90,7 +90,12 @@ export default async function loader(
   function getTransformContext(): TransformContext {
     return {
       buildMDX: async (v, options = mdxOptions) => {
-        const res = await buildMDX(v, options);
+        const res = await buildMDX(
+          collectionId ?? 'global',
+          configHash,
+          v,
+          options,
+        );
         return String(res.value);
       },
       source,
@@ -129,16 +134,22 @@ export default async function loader(
     timestamp = (await getGitTimestamp(filePath))?.getTime();
 
   try {
-    const file = await buildMDX(matter.content, {
-      development: this.mode === 'development',
-      ...mdxOptions,
-      filePath,
-      frontmatter,
-      outputFormat: 'program',
-      data: {
-        lastModified: timestamp,
+    const file = await buildMDX(
+      collectionId ?? 'global',
+      configHash,
+      matter.content,
+      {
+        development: this.mode === 'development',
+        ...mdxOptions,
+        filePath,
+        frontmatter,
+        data: {
+          lastModified: timestamp,
+        },
       },
-    });
+    );
+
+    callback(undefined, String(file.value), file.map ?? undefined);
 
     if (config.global?.generateManifest) {
       await fs.mkdir('.next/cache/fumadocs', { recursive: true });
@@ -146,12 +157,10 @@ export default async function loader(
         path.resolve('.next/cache/fumadocs', `${getKey(filePath)}.json`),
         JSON.stringify({
           path: filePath,
-          data: file.data as MetaFile['data'],
-        } satisfies MetaFile),
+          data: file.data,
+        } as MetaFile),
       );
     }
-
-    callback(undefined, String(file.value), file.map ?? undefined);
   } catch (error) {
     if (!(error instanceof Error)) throw error;
 

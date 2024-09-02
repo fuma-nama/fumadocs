@@ -15,7 +15,6 @@ export async function generateJS(
   const imports: string[] = ['import { toRuntime } from "fumadocs-mdx"'];
   const importedCollections = new Set<string>();
   const sources: string[] = [];
-  const files = new Set<string>();
   let importId = 0;
 
   config._runtime.files.clear();
@@ -35,11 +34,15 @@ export async function generateJS(
           });
 
           for (const file of included) {
-            if (getTypeFromPath(file) !== collection.type || files.has(file))
+            if (getTypeFromPath(file) !== collection.type) continue;
+            if (config._runtime.files.has(file)) {
+              console.warn(
+                `[MDX] Files cannot exist in multiple collections: ${file}`,
+              );
               continue;
+            }
 
             config._runtime.files.set(file, name);
-            files.add(file);
 
             const importName = `file_${(importId++).toString()}`;
             imports.push(

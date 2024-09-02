@@ -45,6 +45,7 @@ export const rehypeCodeDefaultOptions: RehypeCodeOptions = {
     dark: 'github-dark',
   },
   defaultLanguage: 'plaintext',
+  experimentalJSEngine: false,
   defaultColor: false,
   transformers: [
     transformerNotationHighlight(),
@@ -71,7 +72,6 @@ export const rehypeCodeDefaultOptions: RehypeCodeOptions = {
 
     return replaced;
   },
-  experimentalJSEngine: true,
 };
 
 export type RehypeCodeOptions = RehypeShikiOptions & {
@@ -93,7 +93,9 @@ export type RehypeCodeOptions = RehypeShikiOptions & {
   tab?: false;
 
   /**
-   * @defaultValue true
+   * Enable Shiki's experimental JS engine
+   *
+   * @defaultValue false
    */
   experimentalJSEngine?: boolean;
 };

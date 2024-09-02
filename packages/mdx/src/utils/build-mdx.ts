@@ -4,9 +4,14 @@ import type {
 } from '@mdx-js/mdx/internal-create-format-aware-processors';
 import { createProcessor, type ProcessorOptions } from '@mdx-js/mdx';
 
-const cache = new Map<string, Processor>();
+const cache = new Map<string, { processor: Processor; configHash: string }>();
 
 export interface MDXOptions extends ProcessorOptions {
+  /**
+   * Name of collection
+   */
+  collection?: string;
+
   /**
    * Specify a file path for source
    */
@@ -20,7 +25,19 @@ export interface MDXOptions extends ProcessorOptions {
   data?: Record<string, unknown>;
 }
 
+function cacheKey(group: string, format: string): string {
+  return `${group}:${format}`;
+}
+
+/**
+ * @param group - The cache group of MDX content, usually the collection name or hash of MDX options
+ * @param configHash - config hash
+ * @param source - mdx content
+ * @param options - MDX options
+ */
 export function buildMDX(
+  group: string,
+  configHash: string,
   source: string,
   options: MDXOptions = {},
 ): Promise<VFile> {
@@ -32,19 +49,25 @@ export function buildMDX(
   }
   format ??= 'mdx';
 
-  let processor = cache.get(format);
+  const key = cacheKey(group, format);
+  let cached = cache.get(key);
 
-  if (processor === undefined) {
-    processor = createProcessor({
-      development: process.env.NODE_ENV === 'development',
-      ...rest,
-      format,
-    });
+  if (cached === undefined || cached.configHash !== configHash) {
+    cached = {
+      processor: createProcessor({
+        outputFormat: 'program',
+        development: process.env.NODE_ENV === 'development',
+        ...rest,
+        format,
+      }),
 
-    cache.set(format, processor);
+      configHash,
+    };
+
+    cache.set(key, cached);
   }
 
-  return processor.process({
+  return cached.processor.process({
     value: source,
     path: filePath,
     data: {

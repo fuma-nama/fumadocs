@@ -18,7 +18,6 @@ export async function loadConfigCached(
   if (cached && cached.hash === hash) {
     return await cached.config;
   }
-
   const config = loadConfig(configPath);
   cache.set(configPath, { config, hash });
   return await config;
