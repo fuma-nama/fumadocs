@@ -1,5 +1,13 @@
 # next-docs-zeta
 
+## 13.4.2
+
+### Patch Changes
+
+- 7dabbc1: Remark Image: Support relative imports
+- 0c251e5: Bump deps
+- 3b56170: Support to enable experiment Shiki JS engine
+
 ## 13.4.1
 
 ### Patch Changes
