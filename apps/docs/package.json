@@ -18,7 +18,7 @@
     "@radix-ui/react-popover": "^1.1.1",
     "@radix-ui/react-tooltip": "^1.1.2",
     "@resvg/resvg-js": "^2.6.2",
-    "@shikijs/transformers": "^1.15.2",
+    "@shikijs/transformers": "^1.16.1",
     "algoliasearch": "^4.24.0",
     "class-variance-authority": "^0.7.0",
     "fumadocs-core": "workspace:*",
@@ -38,7 +38,7 @@
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0",
     "satori": "^0.10.14",
-    "shiki": "^1.15.2",
+    "shiki": "^1.16.1",
     "tailwind-merge": "^2.5.2",
     "zod": "^3.23.8"
   },

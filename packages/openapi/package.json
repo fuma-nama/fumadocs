@@ -67,7 +67,7 @@
     "react-hook-form": "^7.53.0",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.0",
-    "shiki": "^1.15.2",
+    "shiki": "^1.16.1",
     "swr": "^2.2.5"
   },
   "devDependencies": {

@@ -1,5 +1,4 @@
 import { Command as CommandPrimitive } from 'cmdk';
-import { Search } from 'lucide-react';
 import * as React from 'react';
 import type { DialogProps } from '@radix-ui/react-dialog';
 import { cn } from '@/utils/cn';
@@ -10,9 +9,9 @@ const CommandInput = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input> & {
     onClose: () => void;
   }
->(({ className, onClose, ...props }, ref) => (
+>(({ className, onClose, children, ...props }, ref) => (
   <div className="flex flex-row items-center gap-2 px-3">
-    <Search className="size-4 text-fd-muted-foreground" />
+    {children}
     <CommandPrimitive.Input
       ref={ref}
       className={cn(

@@ -54,6 +54,7 @@ export default function DefaultSearchDialog({
     <SearchDialog
       search={search}
       onSearchChange={setSearch}
+      isLoading={query.isLoading}
       results={query.data ?? []}
       {...props}
       footer={

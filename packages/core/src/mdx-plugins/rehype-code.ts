@@ -160,7 +160,7 @@ export function rehypeCode(
   const highlighter = getSingletonHighlighter({
     engine: codeOptions.experimentalJSEngine
       ? createJavaScriptRegexEngine()
-      : createWasmOnigEngine(import("shiki/wasm")),
+      : createWasmOnigEngine(import('shiki/wasm')),
     themes: themeItems.filter(Boolean) as BuiltinTheme[],
     langs: codeOptions.langs ?? Object.keys(bundledLanguages),
   });

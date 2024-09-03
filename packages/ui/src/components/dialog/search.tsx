@@ -1,4 +1,4 @@
-import { FileText, Hash, Text } from 'lucide-react';
+import { FileText, Hash, Loader2, SearchIcon, Text } from 'lucide-react';
 import type { SortedResult } from 'fumadocs-core/search/shared';
 import { useRouter } from 'next/navigation';
 import {
@@ -8,6 +8,7 @@ import {
   type HTMLAttributes,
 } from 'react';
 import { cva } from 'class-variance-authority';
+import * as React from 'react';
 import { useI18n } from '@/contexts/i18n';
 import {
   CommandEmpty,
@@ -44,6 +45,7 @@ interface SearchDialogProps
 interface SearchContentProps {
   search: string;
   onSearchChange: (v: string) => void;
+  isLoading?: boolean;
   items: SortedResult[];
 
   hideResults?: boolean;
@@ -91,6 +93,7 @@ function Search({
   search,
   onSearchChange,
   items,
+  isLoading,
   hideResults = false,
 }: SearchContentProps): React.ReactElement {
   const { text } = useI18n();
@@ -116,7 +119,22 @@ function Search({
           setOpenSearch(false);
         }, [setOpenSearch])}
         placeholder={text.search}
-      />
+      >
+        <div className="relative size-4">
+          <Loader2
+            className={cn(
+              'absolute size-full animate-spin text-fd-primary transition-opacity',
+              !isLoading && 'opacity-0',
+            )}
+          />
+          <SearchIcon
+            className={cn(
+              'absolute size-full text-fd-muted-foreground transition-opacity',
+              isLoading && 'opacity-0',
+            )}
+          />
+        </div>
+      </CommandInput>
       <CommandList className={cn(hideResults && 'hidden')}>
         <CommandEmpty>{text.searchNoResult}</CommandEmpty>
 
