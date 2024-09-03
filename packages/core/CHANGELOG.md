@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 13.4.4
+
+### Patch Changes
+
+- 729928e: Fix build error without JS engine
+
 ## 13.4.3
 
 ## 13.4.2
