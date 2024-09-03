@@ -87,13 +87,13 @@ export async function generateJS(
 }
 
 function toImportPath(file: string, dir: string): string {
-  let importPath = path.relative(dir, file).replaceAll(path.sep, '/');
+  let importPath = path.relative(dir, file);
 
-  if (!importPath.startsWith('.')) {
+  if (!path.isAbsolute(importPath) && !importPath.startsWith('.')) {
     importPath = `./${importPath}`;
   }
 
-  return importPath;
+  return importPath.replaceAll(path.sep, '/');
 }
 
 export function generateTypes(

@@ -1,5 +1,5 @@
 import { cva } from 'class-variance-authority';
-import type { LucideIcon } from 'lucide-react';
+import { Heart, type LucideIcon, MousePointer } from 'lucide-react';
 import {
   BatteryChargingIcon,
   CpuIcon,
@@ -40,7 +40,7 @@ const badgeVariants = cva(
   'mb-2 inline-flex size-7 items-center justify-center rounded-full bg-fd-primary font-medium text-fd-primary-foreground',
 );
 
-const code = `const frontmatterSchema = defaultValidators.frontmatter.extend({
+const code = `const frontmatterSchema = frontmatterSchema.extend({
   preview: z.string().optional()
 })`;
 
@@ -84,6 +84,7 @@ export default function Page(): React.ReactElement {
           </div>
           <Introduction />
           <Why />
+          <Highlights />
           <div
             className="container relative overflow-hidden border-x border-t py-16 sm:py-24"
             style={{
@@ -120,7 +121,6 @@ export default function Page(): React.ReactElement {
             </div>
           </div>
           <Features />
-          <Highlights />
           <Contributing />
           <End />
         </div>
@@ -175,9 +175,9 @@ function Why(): React.ReactElement {
         }`}
       </style>
       <h2 className="bg-gradient-to-b from-foreground to-foreground/40 bg-clip-text text-2xl font-semibold text-transparent">
-        It can be Simple
+        Docs can be Simple
         <br />
-        Without crazy Abstraction
+        with Fumadocs
       </h2>
       <p className="mt-4 text-foreground/50">
         Fumadocs offers a complete toolchain to maintain your docs.
@@ -472,6 +472,12 @@ function Search(): React.ReactElement {
 function Highlights(): React.ReactElement {
   return (
     <div className="grid grid-cols-1 border-r md:grid-cols-2 lg:grid-cols-3">
+      <div className="col-span-full flex flex-row items-start justify-center border-l border-t p-8 pb-2 text-center">
+        <h2 className="bg-pink-300/50 pl-1 text-2xl font-semibold">
+          Highlights
+        </h2>
+        <MousePointer className="-ml-1 mt-8" />
+      </div>
       <Highlight icon={RocketIcon} heading="Light and Fast.">
         Powerful documentation site with Next.js App Router.
       </Highlight>
@@ -672,6 +678,7 @@ function Introduction(): React.ReactElement {
 function Contributing(): React.ReactElement {
   return (
     <div className="flex flex-col items-center border-x border-t px-4 py-16 text-center">
+      <Heart className="mb-4" />
       <h2 className="mb-4 text-xl font-semibold sm:text-2xl">
         Made Possible by You.
       </h2>

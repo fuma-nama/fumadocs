@@ -4,21 +4,63 @@ description: Getting Started with Fumadocs
 icon: Album
 ---
 
+import { CpuIcon, PanelsTopLeft, Database } from 'lucide-react';
+
 ## Introduction
 
-Fumadocs can be broken down into two parts: Core and UI.
+Fumadocs is a **documentation framework** based on Next.js, designed to be fast and flexible.
+It composes seamlessly into Next.js App Router, and benefits from the React Server Component (RSC) model.
 
-**Core** handles most of the logic, from search functionality, to MDX plugins.
+We separated Fumadocs into multiple parts:
 
-**Fumadocs UI** is the official user interface for Fumadocs.
+<h4 className="inline-flex items-center gap-2">
+  <CpuIcon className="text-purple-300" />
+  <span>Core</span>
+</h4>
+
+The core of Fumadocs.
+Just like the CPU, it handles most of the logic, including document search, content source adapters, and Markdown/MDX plugins.
+
+<h4 className="inline-flex items-center gap-2">
+  <PanelsTopLeft className="text-blue-300" />
+  <span>UI</span>
+</h4>
+
+The default theme of Fumadocs, it offers a beautiful look for documentation sites and many interactive components.
+
+<h4 className="inline-flex items-center gap-2">
+  <Database className="text-muted-foreground" />
+  <span>Content Source</span>
+</h4>
+
+The input/source of your content, it can be a CMS, or local data layers like [Content Collections](https://www.content-collections.dev) and [Fumadocs MDX](/docs/mdx).
+
+Fumadocs Core will process your content source, hence theoretically any kind of format and source can be supported by Fumadocs.
+
+> Fumadocs MDX is the official content source of Fumadocs.
+
+### Use Cases
+
+### Documentation
+
+Fumadocs focuses on docs authoring experience, it provides a beautiful theme and many docs automation tools.
+
+It helps you to iterate your codebase faster while never leaving your docs behind.
+You can take this site as an example of docs site built with Fumadocs.
+
+### Blog sites
+
+You can build blog sites using Fumadocs.
+Since Next.js is already a powerful framework, most features can be implemented with Next.js itself.
+
+Fumadocs Core can process the content (e.g. syntax highlighting), and you can render it with the default theme (Fumadocs UI) or your custom theme.
+It is particularly helpful if you want to build complicated things like search.
 
 ### Terminology
 
 For a better understanding of the docs, there are some common terminologies you should know:
 
-**Content Source:** The source of your content. Fumadocs MDX, CMS and Contentlayer are examples of content source.
-
-**Page Tree:** A tree of all the pages, separators and folders. It is essential for navigation elements. See [Page Tree](/docs/headless/page-tree).
+**Page Tree:** A tree of all the pages, separators and folders. It is essential for navigation elements. Types definitions can be found at [Page Tree](/docs/headless/page-tree).
 
 **MDX File & Page:** A MDX file could be located in a folder, or available remotely. Instead, MDX Page is only referring to `page.mdx`, which is already a page on its own.
 
@@ -80,14 +122,14 @@ npm run dev
 Some common questions you may encounter.
 
 <Accordions>
-    <Accordion id='why-fumadocs-ui' title="Why Fumadocs UI?">
+    <Accordion id='why-fumadocs-ui' title="Why Fumadocs?">
 
         Feel free to open the demo in CodeSandbox and see if it suits you.
 
-        - Many built-in components
-        - Integrations with Typescript Twoslash, OpenAPI, Math
-        - Flexible and Fast by default
-        - Built on App Router
+        - Many built-in components.
+        - Integrations with Typescript Twoslash, OpenAPI, Math (KaTeX).
+        - Flexible and Fast by default.
+        - Built on App Router, no need for hydration over static content.
         - Use it in an existing Next.js project, without refactoring anything.
     </Accordion>
     <Accordion id='customise' title='How to Customise UI?'>
@@ -126,26 +168,12 @@ Some common questions you may encounter.
         ```
 
     </Accordion>
-    <Accordion id='fix-dot-map-error' title="How to fix '@/.map' error?">
-
-        If you are using Fumadocs MDX, the `.map.ts` file will be generated automatically once you start the dev server.
-
-        For more information, see [Setup Guide](/docs/mdx).
-
-    </Accordion>
     <Accordion id='dynamic-route' title="It uses Dynamic Route, will it be poor in performance?">
 
         Next.js turns dynamic route into static routes when `generateStaticParams` is configured.
         Hence, it is as fast as static pages.
 
-    </Accordion>
-    <Accordion id='blog-usage' title="Can I use it for Blog?">
-
-        The answer is yes.
-
-        Fumadocs is built for documentation sites, yet, it is very flexible.
-        You can re-use the typography styles and leverage its built-in remark/rehype plugins.
-        Check our [blog](/blog), it is also built with Fumadocs.
+        You can enable Static Exports on Next.js to get a static build output. (Notice that Route Handler doesn't work with static export, you may use 3rd party search solutions like Algolia)
 
     </Accordion>
     <Accordion id='pronunciation' title='How to say Fumadocs?'>
