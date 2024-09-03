@@ -23,7 +23,13 @@ interface CustomProperty {
 export interface CodeSample {
   lang: string;
   label: string;
-  source?: string;
+  source: string | ((endpoint: EndpointSample) => string | undefined) | false;
+}
+
+interface CodeSampleCompiled {
+  lang: string;
+  label: string;
+  source: string;
 }
 
 export function Operation({
@@ -149,6 +155,29 @@ export function Operation({
   );
 }
 
+const defaultSamples: CodeSample[] = [
+  {
+    label: 'cURL',
+    source: CURL.getSampleRequest,
+    lang: 'bash',
+  },
+  {
+    label: 'JavaScript',
+    source: JS.getSampleRequest,
+    lang: 'js',
+  },
+  {
+    label: 'Go',
+    source: Go.getSampleRequest,
+    lang: 'go',
+  },
+  {
+    label: 'Python',
+    source: Python.getSampleRequest,
+    lang: 'python',
+  },
+];
+
 async function APIExample({
   method,
   endpoint,
@@ -162,42 +191,38 @@ async function APIExample({
   const children: ReactNode[] = [];
 
   const samples = dedupe([
-    {
-      label: 'cURL',
-      source: CURL.getSampleRequest(endpoint),
-      lang: 'bash',
-    },
-    {
-      label: 'JavaScript',
-      source: JS.getSampleRequest(endpoint),
-      lang: 'js',
-    },
-    {
-      label: 'Go',
-      source: Go.getSampleRequest(endpoint),
-      lang: 'go',
-    },
-    {
-      label: 'Python',
-      source: Python.getSampleRequest(endpoint),
-      lang: 'python',
-    },
+    ...defaultSamples,
     ...(ctx.generateCodeSamples ? await ctx.generateCodeSamples(endpoint) : []),
     ...((method as CustomProperty)['x-codeSamples'] ?? []),
-  ]).filter((item) => item.source !== undefined) as Required<CodeSample>[];
+  ]).flatMap<CodeSampleCompiled>((sample) => {
+    if (sample.source === false) return [];
 
-  children.push(
-    <renderer.Requests key="requests" items={samples.map((s) => s.label)}>
-      {samples.map((s) => (
-        <renderer.Request
-          key={s.label}
-          name={s.label}
-          code={s.source}
-          language={s.lang}
-        />
-      ))}
-    </renderer.Requests>,
-  );
+    const result =
+      typeof sample.source === 'function'
+        ? sample.source(endpoint)
+        : sample.source;
+    if (result === undefined) return [];
+
+    return {
+      ...sample,
+      source: result,
+    };
+  });
+
+  if (samples.length > 0) {
+    children.push(
+      <renderer.Requests key="requests" items={samples.map((s) => s.label)}>
+        {samples.map((s) => (
+          <renderer.Request
+            key={s.label}
+            name={s.label}
+            code={s.source}
+            language={s.lang}
+          />
+        ))}
+      </renderer.Requests>,
+    );
+  }
 
   children.push(
     <ResponseTabs
