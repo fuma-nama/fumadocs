@@ -24,7 +24,7 @@ export default async function Page({
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>
-        <MDX componens={defaultComponents} />
+        <MDX components={defaultComponents} />
       </DocsBody>
     </DocsPage>
   );

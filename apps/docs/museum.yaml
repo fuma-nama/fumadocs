@@ -68,6 +68,15 @@ paths:
         '404':
           description: Not found
     get:
+      x-codeSamples:
+        - lang: js
+          label: JavaScript
+        - lang: go
+          label: Go
+        - lang: bash
+          label: cURL
+        - lang: python
+          label: Python
       summary: List special events
       description: Return a list of upcoming special events at the museum.
       operationId: listSpecialEvents

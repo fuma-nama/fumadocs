@@ -15,15 +15,16 @@ export default async function Page({
   params: { slug?: string[] };
 }) {
   const page = getPage(params.slug);
-
   if (!page) notFound();
+
+  const MDX = page.data.body;
 
   return (
     <DocsPage toc={page.data.toc} full={page.data.full}>
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>
-        <page.data.body components={defaultComponents} />
+        <MDX components={defaultComponents} />
       </DocsBody>
     </DocsPage>
   );

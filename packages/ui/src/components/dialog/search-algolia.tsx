@@ -59,6 +59,7 @@ export default function AlgoliaSearchDialog({
       search={search}
       onSearchChange={setSearch}
       results={query.data ?? []}
+      isLoading={query.isLoading}
       {...props}
       footer={
         tags ? (
