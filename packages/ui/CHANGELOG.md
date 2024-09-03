@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 13.4.5
+
+### Patch Changes
+
+- d46a3f1: Improve search dialog
+  - fumadocs-core@13.4.5
+
 ## 13.4.4
 
 ### Patch Changes
