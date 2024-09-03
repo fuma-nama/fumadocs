@@ -13,16 +13,18 @@ import { cn } from '@/utils/cn';
 export function Previews(): React.ReactElement {
   return (
     <div className="rounded-xl border bg-fd-background p-4 shadow-lg">
-      <p className="text-sm font-medium">I&apos;m satisfied with it</p>
-
+      <p className="text-sm font-medium">
+        A gorgeous documentation framework that composes beautifully into the
+        App Router.
+      </p>
       <a
-        href="https://joulev.dev"
+        href="https://shew.dev"
         rel="noreferrer noopener"
         className="mt-4 inline-flex items-center text-sm font-medium"
       >
-        @joulev
+        Anthony Shew
       </a>
-      <p className="text-xs text-fd-muted-foreground">Next.js Expert</p>
+      <p className="text-xs text-fd-muted-foreground">Turbo DX at Vercel</p>
     </div>
   );
 }

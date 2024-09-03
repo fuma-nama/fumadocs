@@ -20,6 +20,7 @@ import { File, Files, Folder } from 'fumadocs-ui/components/files';
 import Link from 'next/link';
 import type { HTMLAttributes, ReactNode } from 'react';
 import Image from 'next/image';
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import { CodeBlock } from '@/components/code-block';
@@ -43,7 +44,7 @@ const code = `const frontmatterSchema = defaultValidators.frontmatter.extend({
   preview: z.string().optional()
 })`;
 
-export default function HomePage(): React.ReactElement {
+export default function Page(): React.ReactElement {
   return (
     <>
       <div
@@ -82,6 +83,7 @@ export default function HomePage(): React.ReactElement {
             </h2>
           </div>
           <Introduction />
+          <Why />
           <div
             className="container relative overflow-hidden border-x border-t py-16 sm:py-24"
             style={{
@@ -117,13 +119,192 @@ export default function HomePage(): React.ReactElement {
               </div>
             </div>
           </div>
-          <Highlights />
           <Features />
+          <Highlights />
           <Contributing />
           <End />
         </div>
       </main>
     </>
+  );
+}
+
+function WhyCard(props: HTMLAttributes<HTMLDivElement>): React.ReactElement {
+  return (
+    <div
+      className="rounded-xl border border-foreground/10 bg-fd-card/20 p-4 text-foreground/50 shadow-xl backdrop-blur-xl transition-colors hover:text-foreground"
+      style={{
+        transform: 'translate3d(12px,-24px,0)',
+      }}
+      {...props}
+    >
+      {props.children}
+    </div>
+  );
+}
+
+function Why(): React.ReactElement {
+  return (
+    <div
+      className="container relative overflow-hidden border-x border-t p-8"
+      style={{
+        perspective: '900px',
+      }}
+    >
+      {new Array(10).fill(0).map((_, i) => (
+        <div
+          // eslint-disable-next-line react/no-array-index-key -- static
+          key={i}
+          className="absolute -left-10 top-0 z-[-1] h-[1000px] max-h-[100vw] origin-top-right rotate-45 bg-gradient-to-b from-primary blur-xl"
+          style={{
+            width: Math.random() * 32,
+            animation: `lightray ${((i + 2) * 2).toString()}s linear infinite`,
+          }}
+        />
+      ))}
+      <style>
+        {`@keyframes lightray {
+        from {
+        transform: rotate(40deg);
+        opacity: 100%;
+        }
+        to {
+        transform: rotate(-90deg);
+        opacity: 0%;
+        }
+        }`}
+      </style>
+      <h2 className="bg-gradient-to-b from-foreground to-foreground/40 bg-clip-text text-2xl font-semibold text-transparent">
+        It can be Simple
+        <br />
+        Without crazy Abstraction
+      </h2>
+      <p className="mt-4 text-foreground/50">
+        Fumadocs offers a complete toolchain to maintain your docs.
+      </p>
+      <Accordions
+        type="single"
+        className="mt-8 max-w-[400px] border-foreground/10 bg-card/50 backdrop-blur-lg"
+      >
+        <Accordion className="text-sm" title="Design System & Tailwind CSS">
+          <p>
+            Using our Tailwind CSS plugin, you can share the same design system
+            cross the docs and your app.
+          </p>
+          <Link
+            href="/docs/ui/theme"
+            className={cn(
+              buttonVariants({ className: 'mt-4', variant: 'outline' }),
+            )}
+          >
+            See Themes
+          </Link>
+        </Accordion>
+        <Accordion className="text-sm" title="Full-text Search">
+          <p>
+            Implementing search is difficult. Fumadocs offers native support for
+            Flexsearch and Algolia Search, it is as simple as plugging a route
+            handler.
+          </p>
+          <Link
+            href="/docs/headless/search"
+            className={cn(
+              buttonVariants({ className: 'mt-4', variant: 'outline' }),
+            )}
+          >
+            See Search
+          </Link>
+        </Accordion>
+        <Accordion className="text-sm" title="Other Search Solutions">
+          <p>
+            Fumadocs offers utilities to parse document into search indexes. You
+            can integrate with different search solutions seamlessly.
+          </p>
+          <p className="mt-4 text-muted-foreground">
+            In addition, you can plug your own search modal to allow full
+            control over the search UI.
+          </p>
+          <Link
+            href="/docs/headless/mdx/structure"
+            className={cn(
+              buttonVariants({ className: 'mt-4', variant: 'outline' }),
+            )}
+          >
+            See Plugin
+          </Link>
+        </Accordion>
+        <Accordion className="text-sm" title="Generate docs from TypeScript">
+          <p>
+            Fumadocs has a smart Type Table component that renders the
+            properties of interface/type automatically, powered by the
+            TypeScript Compiler API.
+          </p>
+          <Link
+            href="/docs/ui/typescript"
+            className={cn(
+              buttonVariants({ className: 'mt-4', variant: 'outline' }),
+            )}
+          >
+            TypeScript Integration
+          </Link>
+        </Accordion>
+        <Accordion className="text-sm" title="Generate docs from OpenAPI">
+          <p>
+            Fumadocs offers built-in OpenAPI playground and docs generator. You
+            can also try{' '}
+            <a
+              href="https://docs.scalar.com/swagger-editor"
+              rel="noreferrer noopener"
+            >
+              Scalar
+            </a>
+            , a beautiful alternative to Fumadocs OpenAPI.
+          </p>
+          <Link
+            href="/docs/ui/openapi"
+            className={cn(
+              buttonVariants({ className: 'mt-4', variant: 'outline' }),
+            )}
+          >
+            OpenAPI Integration
+          </Link>
+        </Accordion>
+        <Accordion className="text-sm" title="Interactive Examples">
+          <p>
+            Fumadocs offers different useful components, like Files and Zoomable
+            Image.
+          </p>
+
+          <p className="mt-4">
+            With the magic of React Server Component and App Router, you can
+            have server component inside MDX documents, and import client
+            components from MDX files.
+          </p>
+        </Accordion>
+      </Accordions>
+      <div
+        className="absolute bottom-8 right-12 z-[-1] grid origin-center grid-cols-2 gap-4 rounded-lg border border-foreground/20 lg:max-w-[50%]"
+        style={{
+          backgroundImage:
+            'linear-gradient(hsl(var(--foreground)/.1) 1px, transparent 1px), linear-gradient(to right, hsl(var(--foreground)/.1) 1px, transparent 1px)',
+          backgroundSize: '14px 14px',
+          transform: 'rotate3d(1,0,0,40deg)',
+        }}
+      >
+        <WhyCard>
+          <h3 className="text-lg">Full-text Search</h3>
+        </WhyCard>
+        <WhyCard>
+          <h3 className="text-lg">Docs Automation</h3>
+        </WhyCard>
+        <WhyCard>
+          <h3 className="text-lg">Interactive Examples</h3>
+        </WhyCard>
+        <WhyCard>
+          <h3 className="text-lg">Custom Content Source</h3>
+        </WhyCard>
+      </div>
+    </div>
   );
 }
 
@@ -292,20 +473,22 @@ function Highlights(): React.ReactElement {
   return (
     <div className="grid grid-cols-1 border-r md:grid-cols-2 lg:grid-cols-3">
       <Highlight icon={RocketIcon} heading="Light and Fast.">
-        Fully powered documentation site with Next.js App Router.
+        Powerful documentation site with Next.js App Router.
       </Highlight>
       <Highlight icon={TimerIcon} heading="Performance.">
         Less client components, less Javascript, optimized images.
       </Highlight>
       <Highlight icon={LayoutIcon} heading="Accessibility & UX first.">
-        Focus on user experience and accessibility, providing an excellent
-        experience for your users.
+        Focus on user experience and accessibility.
       </Highlight>
-      <Highlight icon={SearchIcon} heading="Powerful document search.">
-        Built-in search implemented with Flexsearch, with high flexibility and
-        performance.
+      <Highlight icon={SearchIcon} heading="Syntax Highlighting.">
+        Beautiful syntax highlighter, powered by{' '}
+        <a href="https://shiki.style" rel="noreferrer noopener">
+          Shiki
+        </a>
+        .
       </Highlight>
-      <Highlight icon={KeyboardIcon} heading="Developer Experience.">
+      <Highlight icon={KeyboardIcon} heading="Automation.">
         Useful remark/rehype plugins. Typescript Twoslash, OpenAPI docs
         generation, and more.
       </Highlight>
@@ -343,11 +526,11 @@ function Hero(): React.ReactElement {
         Build Your Docs.
       </h1>
       <p className="mb-6 h-fit p-2 text-fd-muted-foreground md:max-w-[80%] md:text-xl">
-        Fumadocs is the framework for building documentation with{' '}
+        Fumadocs is the documentation framework with{' '}
         <b className="font-medium text-fd-foreground">
           excellent UI and user experience
         </b>
-        . Using the power of Next.js App Router and React Component.
+        , powered by Next.js App Router. Designed to be flexible and fast.
       </p>
       <div className="inline-flex items-center gap-3">
         <Link
@@ -505,10 +688,19 @@ function Features(): React.ReactElement {
     <div className="grid grid-cols-1 border-r md:grid-cols-2">
       <Feature
         icon={PaperclipIcon}
-        subheading="Multiple Sources"
+        subheading="Source Agnostic"
         heading="Your source. Your choice"
-        description="Native support for different content sources including Content Collections
-          and the official MDX loader."
+        description={
+          <>
+            <span className="font-medium text-foreground">
+              Designed to integrate with any content source:{' '}
+            </span>
+            <span>
+              Fumadocs has native support for Content Collections and Fumadocs
+              MDX, and compatible with your own CMS.
+            </span>
+          </>
+        }
         className="overflow-hidden"
         style={{
           backgroundImage:
@@ -556,9 +748,9 @@ function Features(): React.ReactElement {
       </Feature>
       <Feature
         icon={MessageCircleIcon}
-        subheading="Loved by developers"
-        heading="Heard of our users?"
-        description="Fumadocs is used by many awesome developers, and we are making it better."
+        subheading="Feedback"
+        heading="Loved by developers"
+        description="Fumadocs is trusted by many awesome developers, and we are making it better."
       >
         <Link
           href="/showcase"
@@ -588,7 +780,7 @@ function Features(): React.ReactElement {
               <LayoutIcon />
               <h3 className="font-semibold">Fumadocs UI</h3>
               <p className="text-sm text-fd-muted-foreground">
-                Full-powered framework with an excellent UI.
+                Default theme of Fumadocs with many useful components.
               </p>
             </div>
           </Link>
