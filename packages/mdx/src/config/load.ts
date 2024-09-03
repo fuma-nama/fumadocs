@@ -1,4 +1,5 @@
 import * as path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { build } from 'esbuild';
 import { validateConfig } from '@/config/validate';
 import { type Collections } from '@/config/define';
@@ -43,9 +44,10 @@ export async function loadConfig(configPath: string): Promise<LoadedConfig> {
     throw new Error('failed to compile configuration file');
   }
 
+  const url = pathToFileURL(outputPath);
   const [err, config] = validateConfig(
     // every call to `loadConfig` will cause the previous cache to be ignored
-    (await import(`${outputPath}?hash=${Date.now().toString()}`)) as Record<
+    (await import(`${url.toString()}?hash=${Date.now().toString()}`)) as Record<
       string,
       unknown
     >,
