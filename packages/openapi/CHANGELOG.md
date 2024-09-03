@@ -1,5 +1,14 @@
 # @fuma-docs/openapi
 
+## 5.4.9
+
+### Patch Changes
+
+- 5bca46f: Support removing all code samples
+- Updated dependencies [d46a3f1]
+  - fumadocs-ui@13.4.5
+  - fumadocs-core@13.4.5
+
 ## 5.4.8
 
 ### Patch Changes
