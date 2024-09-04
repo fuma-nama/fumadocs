@@ -25,7 +25,7 @@ export function Banner({
       id={id}
       {...props}
       className={cn(
-        'relative flex h-12 flex-row items-center justify-center bg-fd-secondary px-4 text-center text-sm font-medium',
+        'relative z-40 flex h-12 flex-row items-center justify-center bg-fd-secondary px-4 text-center text-sm font-medium',
         !open && 'hidden',
         props.className,
       )}

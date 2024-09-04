@@ -224,8 +224,10 @@ export default {
   banner: (
     <Wrapper>
       <div className="flex flex-col gap-4">
-        <Banner>Be careful, Fumadocs v99 has released</Banner>
-        <Banner id="99">Be careful, this banner can be closed</Banner>
+        <Banner className="z-0">Be careful, Fumadocs v99 has released</Banner>
+        <Banner className="z-0" id="99">
+          Be careful, this banner can be closed
+        </Banner>
       </div>
     </Wrapper>
   ),
