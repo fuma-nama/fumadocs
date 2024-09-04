@@ -5,11 +5,11 @@ description: Turn a content source into a unified interface
 
 ## Usage
 
-Source API is a helper to load file-system based content sources, it offers an unified interface to integrate different content sources with Fumadocs.
+Source API is a helper to load file-system based content sources, it offers a unified interface to integrate content sources with Fumadocs.
 
 It handles some important jobs:
 
-- Build page trees from file-system information
+- Build page trees based on file system
 - Generate Urls and slugs based on file path
 - Output useful utilities to search or walk over files
 
@@ -18,32 +18,15 @@ It doesn't rely on the real file system (zero `node:fs` usage), a virtual storag
 You can use it with built-in content sources like Fumadocs MDX.
 
 ```ts
-import { map } from '@/.map';
 import { createMDXSource } from 'fumadocs-mdx';
 import { loader } from 'fumadocs-core/source';
 
 export const docs = loader({
-  source: createMDXSource(map),
+  source: createMDXSource(docs, meta),
 });
 ```
 
 > The output page tree strictly follows [Page Conventions](/docs/headless/page-conventions).
-
-### Root Directory
-
-All files outside of the root directory will be ignored.
-
-```ts
-import { loader } from 'fumadocs-core/source';
-
-loader({
-  rootDir: 'docs',
-});
-```
-
-<Callout type="warn">
-  Relative paths, like `./` and `../` are not supported.
-</Callout>
 
 ### Base URL
 
@@ -77,6 +60,28 @@ export const utils = loader({
   },
 });
 ```
+
+### Root Directory
+
+Filter the input files by its located directory.
+
+```ts
+import { loader } from 'fumadocs-core/source';
+
+loader({
+  rootDir: 'test',
+});
+```
+
+Content sources only provide **a virtual file path** to the loader (like `test/index.mdx`).
+Relative paths such as `./` and `../` are not supported.
+
+<Callout type='warn' title='Be Careful'>
+
+This is not equivalent to your content directory configured on content source (e.g. [Fumadocs MDX `dir` option](/docs/mdx/configuration#collections)).
+Please use relevant options on your source instead.
+
+</Callout>
 
 ## Deep Dive
 

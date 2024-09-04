@@ -1,5 +1,12 @@
 # next-docs-mdx
 
+## 10.0.1
+
+### Patch Changes
+
+- 7e23388: Fix windows compatibility
+  - fumadocs-core@13.4.5
+
 ## 10.0.0
 
 ### Major Changes
