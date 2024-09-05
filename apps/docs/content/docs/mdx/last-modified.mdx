@@ -21,9 +21,9 @@ export default defineConfig({
 After doing this, a `lastModified` number will be exported for each document, you can convert it to a JavaScript Date object.
 
 ```js
-import { getPage } from '@/app/source';
+import { source } from '@/app/source';
 
-const page = getPage('...');
+const page = source.getPage('...');
 
 console.log(new Date(page.data.lastModified));
 ```

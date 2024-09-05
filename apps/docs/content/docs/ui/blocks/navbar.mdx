@@ -8,12 +8,14 @@ description: Top navigation bar
 The navigation header provides common interactive elements.
 
 ```tsx
-import { DocsLayout } from 'fumadocs-ui/layout';
+import type { HomeLayoutProps } from 'fumadocs-ui/home-layout';
 
-<DocsLayout
-  githubUrl="https://github.com/fuma-nama/fumadocs"
-  nav={{ title: 'My App' }}
-/>;
+export const baseOptions: HomeLayoutProps = {
+  githubUrl: 'https://github.com/fuma-nama/fumadocs',
+  nav: {
+    title: 'My App',
+  },
+};
 ```
 
 ### Sidebar
@@ -26,9 +28,13 @@ To make the navbar background transparent, you can configure transparent mode.
 It uses the `none` mode by default.
 
 ```tsx
-import { DocsLayout } from 'fumadocs-ui/layout';
+import type { HomeLayoutProps } from 'fumadocs-ui/home-layout';
 
-<DocsLayout nav={{ transparentMode: 'top' }} />;
+export const baseOptions: HomeLayoutProps = {
+  nav: {
+    transparentMode: 'top',
+  },
+};
 ```
 
 | Mode     | Description                         |

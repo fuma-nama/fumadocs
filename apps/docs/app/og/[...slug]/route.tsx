@@ -68,7 +68,8 @@ export function GET(
 export function generateStaticParams(): {
   slug: string[];
 }[] {
-  return utils.getPages().map((page) => ({
-    slug: [...page.slugs, 'og.png'],
+  return utils.generateParams().map((param) => ({
+    ...param,
+    slug: [...param.slug, 'og.png'],
   }));
 }

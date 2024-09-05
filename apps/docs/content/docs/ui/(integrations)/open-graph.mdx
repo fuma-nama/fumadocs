@@ -16,30 +16,12 @@ For docs pages, Fumadocs UI has a built-in dynamic image generator.
 
 You will need a route handler to get started.
 
-```tsx title="app/og/[...slug]/route.tsx"
-import { generateOGImage } from 'fumadocs-ui/og';
-import { type NextRequest } from 'next/server';
-import { notFound } from 'next/navigation';
-import { getPage, getPages } from '@/app/source';
-
-export function GET(
-  _: NextRequest,
-  { params }: { params: { slug: string[] } },
-) {
-  const page = getPage(params.slug.slice(0, -1));
-  if (!page) notFound();
-
-  return generateOGImage({
-    title: page.data.title,
-    description: page.data.description,
-    site: 'My App',
-  });
-}
-
-export function generateStaticParams() {
-  return getPages().map((page) => ({
-    slug: [...page.slugs, 'og.png'],
-  }));
+```json doc-gen:file
+{
+  "file": "../../examples/next-mdx-og/app/og/[...slug]/route.tsx",
+  "codeblock": {
+    "meta": "title=\"app/og/[...slug]/route.tsx\""
+  }
 }
 ```
 
@@ -47,28 +29,12 @@ export function generateStaticParams() {
 
 In your docs page, add the image to metadata.
 
-```tsx title="app/docs/[[...slug]]/page.tsx"
-import { getPage } from '@/app/source';
-import { notFound } from 'next/navigation';
-import { getImageMeta } from 'fumadocs-ui/og';
-
-export function generateMetadata({ params }: { params: { slug?: string[] } }) {
-  const page = getPage(params.slug);
-  if (!page) notFound();
-
-  const image = getImageMeta('og', page.slugs);
-  return {
-    title: page.data.title,
-    description: page.data.description,
-    openGraph: {
-      url: `/docs/${page.slugs.join('/')}`,
-      images: image,
-    },
-    twitter: {
-      images: image,
-      card: 'summary_large_image',
-    },
-  };
+```json doc-gen:file
+{
+  "file": "../../examples/next-mdx-og/app/docs/[[...slug]]/page.tsx",
+  "codeblock": {
+    "meta": "title=\"app/docs/[[...slug]]/page.tsx\""
+  }
 }
 ```
 

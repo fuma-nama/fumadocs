@@ -38,44 +38,49 @@ You can use the [Links API](/docs/ui/blocks/links) to add global links.
 They are displayed on all Fumadocs UI layouts (e.g. Home Layout and Docs Layout).
 Links items are passed to the layout.
 
-```tsx
-import { DocsLayout } from 'fumadocs-ui/layout';
+```tsx twoslash title="app/layout.config.tsx"
+import { type HomeLayoutProps } from 'fumadocs-ui/home-layout';
 
-// any Fumadocs UI layout
-<DocsLayout
-  links={
-    // Links
-  }
-/>;
+export const baseOptions: HomeLayoutProps = {
+  links: [
+    {
+      text: 'Documentation',
+      url: '/docs',
+      active: 'nested-url',
+    },
+  ],
+};
 ```
 
 #### GitHub Url
 
 A shortcut for adding GitHub repository link item.
 
-```tsx
-import { DocsLayout } from 'fumadocs-ui/layout';
+```tsx twoslash title="app/layout.config.tsx"
+import { type HomeLayoutProps } from 'fumadocs-ui/home-layout';
 
-// any Fumadocs UI layout
-<DocsLayout githubUrl="https://github.com" />;
+export const baseOptions: HomeLayoutProps = {
+  githubUrl: 'https://github.com',
+};
 ```
 
 ### Navbar
 
 A part of all Fumadocs UI layouts, it displays the link items and your logo.
 
-```tsx
-import { DocsLayout } from 'fumadocs-ui/layout';
+```tsx twoslash title="app/layout.config.tsx"
+import React from 'react';
+// ---cut---
+import { type HomeLayoutProps } from 'fumadocs-ui/home-layout';
 
-// any Fumadocs UI layout
-<DocsLayout
-  nav={{
+export const baseOptions: HomeLayoutProps = {
+  nav: {
     // Give it a logo
-    title: <Logo />,
+    title: <div>Logo</div>,
     // You can also customise the href of Logo
     url: '/docs',
-  }}
-/>;
+  },
+};
 ```
 
 For the full options, see [Navbar](/docs/ui/blocks/navbar).

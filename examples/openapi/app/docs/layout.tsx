@@ -1,15 +1,11 @@
-import { pageTree } from '../source';
+import { source } from '../source';
 import { DocsLayout } from 'fumadocs-ui/layout';
 import type { ReactNode } from 'react';
+import { baseOptions } from '@/app/layout.config';
 
 export default function RootDocsLayout({ children }: { children: ReactNode }) {
   return (
-    <DocsLayout
-      tree={pageTree}
-      nav={{
-        title: <span className="text-lg font-bold py-2">Unkey Docs</span>,
-      }}
-    >
+    <DocsLayout tree={source.pageTree} {...baseOptions}>
       {children}
     </DocsLayout>
   );

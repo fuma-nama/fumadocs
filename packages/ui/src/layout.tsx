@@ -47,13 +47,6 @@ export interface DocsLayoutProps extends BaseLayoutProps {
   sidebar?: Partial<SidebarOptions>;
 
   containerProps?: HTMLAttributes<HTMLDivElement>;
-
-  /**
-   * Enable Language Switch
-   *
-   * @defaultValue false
-   */
-  i18n?: boolean;
 }
 
 export function DocsLayout({

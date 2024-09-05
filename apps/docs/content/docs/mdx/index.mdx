@@ -74,7 +74,7 @@ import { docs, meta } from '@/.source';
 import { createMDXSource } from 'fumadocs-mdx';
 import { loader } from 'fumadocs-core/source';
 
-export const { getPage, getPages, pageTree } = loader({
+export const source = loader({
   baseUrl: '/docs',
   source: createMDXSource(docs, meta),
 });
@@ -100,35 +100,12 @@ You can see the type definitions to find the available properties.
 
 To render the page, pass components to the body.
 
-```tsx title="page.tsx (Fumadocs UI)"
-import { getPage } from '@/app/source';
-import {
-  DocsPage,
-  DocsBody,
-  DocsTitle,
-  DocsDescription,
-} from 'fumadocs-ui/page';
-import { notFound } from 'next/navigation';
-import defaultComponents from 'fumadocs-ui/mdx';
-
-export default async function Page({
-  params,
-}: {
-  params: { slug?: string[] };
-}) {
-  const page = getPage(params.slug);
-
-  if (!page) notFound();
-
-  return (
-    <DocsPage toc={page.data.toc} full={page.data.full}>
-      <DocsTitle>{page.data.title}</DocsTitle>
-      <DocsDescription>{page.data.description}</DocsDescription>
-      <DocsBody>
-        <page.data.body components={defaultComponents} />
-      </DocsBody>
-    </DocsPage>
-  );
+```json doc-gen:file
+{
+  "file": "../../examples/next-mdx/app/docs/[[...slug]]/page.tsx",
+  "codeblock": {
+    "meta": "title=\"page.tsx (Fumadocs UI)\""
+  }
 }
 ```
 

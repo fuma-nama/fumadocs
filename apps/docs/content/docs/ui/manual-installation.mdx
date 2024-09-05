@@ -32,7 +32,7 @@ Wrap the entire application inside [Root Provider](/docs/ui/blocks/root-provider
 import { RootProvider } from 'fumadocs-ui/provider';
 import type { ReactNode } from 'react';
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default function Layout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body>
@@ -76,19 +76,21 @@ Use the official Tailwind CSS plugin.
 
 ### Layout
 
+Create a `app/layout.config.tsx` file to put the shared options for our layouts.
+
+```json doc-gen:file
+{
+  "file": "../../examples/next-mdx/app/layout.config.tsx",
+  "codeblock": true
+}
+```
+
 Create a folder `/app/docs` for our docs, and give it a proper layout.
 
-```tsx title="app/docs/layout.tsx"
-import { DocsLayout } from 'fumadocs-ui/layout';
-import { pageTree } from '@/app/source';
-import type { ReactNode } from 'react';
-
-export default function RootDocsLayout({ children }: { children: ReactNode }) {
-  return (
-    <DocsLayout tree={pageTree} nav={{ title: 'My App' }}>
-      {children}
-    </DocsLayout>
-  );
+```json doc-gen:file
+{
+  "file": "../../examples/next-mdx/app/docs/layout.tsx",
+  "codeblock": true
 }
 ```
 
