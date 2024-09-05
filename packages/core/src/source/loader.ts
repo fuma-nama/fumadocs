@@ -115,6 +115,17 @@ export interface LoaderOutput<Config extends LoaderConfig> {
     slugs: string[] | undefined,
     language?: string,
   ) => Page<Config['source']['pageData']> | undefined;
+
+  /**
+   * generate static params for Next.js SSG
+   */
+  generateParams: <
+    TSlug extends string = 'slug',
+    TLang extends string = 'lang',
+  >(
+    slug?: TSlug,
+    lang?: TLang,
+  ) => (Record<TSlug, string[]> & Record<TLang, string>)[];
 }
 
 function buildPageMap(
@@ -258,6 +269,21 @@ function createOutput({
     },
     getPage(slugs = [], language = i18n?.defaultLanguage ?? '') {
       return i18nMap.get(language)?.get(slugs.join('/'));
+    },
+    // @ts-expect-error -- ignore this
+    generateParams(slug, lang) {
+      if (i18n) {
+        return this.getLanguages().flatMap((entry) =>
+          entry.pages.map((page) => ({
+            [slug ?? 'slug']: page.slugs,
+            [lang ?? 'lang']: entry.language,
+          })),
+        );
+      }
+
+      return Array.from(i18nMap.get('')?.values() ?? []).map((page) => ({
+        [slug ?? 'slug']: page.slugs,
+      }));
     },
   };
 }
