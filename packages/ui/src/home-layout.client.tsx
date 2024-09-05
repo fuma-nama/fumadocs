@@ -17,6 +17,7 @@ import { NavBox, Title } from '@/components/layout/nav';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/theme/variants';
 import type { SharedNavProps } from '@/layout.shared';
+import { LanguageToggle } from '@/components/layout/language-toggle';
 
 export function Nav({
   title,
@@ -24,8 +25,12 @@ export function Nav({
   items,
   transparentMode,
   enableSearch = true,
+  i18n,
   children,
-}: SharedNavProps & { items: LinkItemType[] }): React.ReactElement {
+}: SharedNavProps & {
+  i18n?: boolean;
+  items: LinkItemType[];
+}): React.ReactElement {
   const search = useSearchContext();
   const { text } = useI18n();
 
@@ -62,12 +67,22 @@ export function Nav({
               }),
             )}
             footer={
-              <div className="flex flex-row items-center justify-between px-2 pt-2">
-                <p className="font-medium text-fd-muted-foreground">
-                  {text.chooseTheme}
-                </p>
-                <ThemeToggle />
-              </div>
+              <>
+                <div className="flex flex-row items-center justify-between px-2 pt-2">
+                  <p className="font-medium text-fd-muted-foreground">
+                    {text.chooseTheme}
+                  </p>
+                  <ThemeToggle />
+                </div>
+                {i18n ? (
+                  <div className="flex flex-row items-center justify-between px-2 pt-2">
+                    <p className="font-medium text-fd-muted-foreground">
+                      {text.chooseLanguage}
+                    </p>
+                    <LanguageToggle />
+                  </div>
+                ) : null}
+              </>
             }
           >
             <MoreVertical />

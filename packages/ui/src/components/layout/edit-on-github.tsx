@@ -23,7 +23,7 @@ export interface EditOnGitHubOptions
   path: string;
 }
 
-export const EditOnGitHub = forwardRef<HTMLAnchorElement, EditOnGitHubOptions>(
+const EditOnGitHub = forwardRef<HTMLAnchorElement, EditOnGitHubOptions>(
   ({ owner, repo, sha = 'main', path, ...props }, ref) => {
     const { text } = useI18n();
 
@@ -50,3 +50,5 @@ export const EditOnGitHub = forwardRef<HTMLAnchorElement, EditOnGitHubOptions>(
 );
 
 EditOnGitHub.displayName = 'EditOnGitHub';
+
+export default EditOnGitHub;

@@ -14,7 +14,7 @@ It composes seamlessly into Next.js App Router, and benefits from the React Serv
 We separated Fumadocs into multiple parts:
 
 <h4 className="inline-flex items-center gap-2">
-  <CpuIcon className="text-purple-300" />
+  <CpuIcon className="text-purple-300 p-0.5 border rounded-lg" />
   <span>Core</span>
 </h4>
 
@@ -22,14 +22,14 @@ The core of Fumadocs.
 Just like the CPU, it handles most of the logic, including document search, content source adapters, and Markdown/MDX plugins.
 
 <h4 className="inline-flex items-center gap-2">
-  <PanelsTopLeft className="text-blue-300" />
+  <PanelsTopLeft className="text-blue-300 p-0.5 border rounded-lg" />
   <span>UI</span>
 </h4>
 
 The default theme of Fumadocs, it offers a beautiful look for documentation sites and many interactive components.
 
 <h4 className="inline-flex items-center gap-2">
-  <Database className="text-muted-foreground" />
+  <Database className="text-muted-foreground p-0.5 border rounded-lg" />
   <span>Content Source</span>
 </h4>
 
@@ -43,15 +43,14 @@ Fumadocs Core will process your content source, hence theoretically any kind of 
 
 ### Documentation
 
-Fumadocs focuses on docs authoring experience, it provides a beautiful theme and many docs automation tools.
+Fumadocs focuses on **authoring experience**, it provides a beautiful theme and many docs automation tools.
 
 It helps you to iterate your codebase faster while never leaving your docs behind.
 You can take this site as an example of docs site built with Fumadocs.
 
 ### Blog sites
 
-You can build blog sites using Fumadocs.
-Since Next.js is already a powerful framework, most features can be implemented with Next.js itself.
+Since Next.js is already a powerful framework, most features can be implemented with **only Next.js**.
 
 Fumadocs Core can process the content (e.g. syntax highlighting), and you can render it with the default theme (Fumadocs UI) or your custom theme.
 It is particularly helpful if you want to build complicated things like search.
@@ -116,6 +115,16 @@ Run the app in development mode and see http://localhost:3000/docs.
 ```package-install
 npm run dev
 ```
+
+### Explore
+
+In the project, you can see:
+
+- `app/source.ts`: Where you organize code for the source adapter, it is used here to read from your content source.
+- `app/layout.config.tsx`: Shared options for layouts, this is optional but preferred to keep.
+- `app/(home)`: The route group for your landing page and other pages.
+- `app/docs`: The entire docs.
+- `app/api/search/route.ts`: The Route Handler for Search.
 
 ## FAQ
 

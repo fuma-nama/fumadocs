@@ -72,3 +72,5 @@ export { LinksMenu } from '@/components/layout/link-item';
 export { Sidebar } from './components/layout/sidebar';
 export { TreeContextProvider } from './contexts/tree';
 export { ThemeToggle } from './components/layout/theme-toggle';
+export { LanguageToggle } from './components/layout/language-toggle';
+export { DynamicSidebar } from './components/layout/dynamic-sidebar';

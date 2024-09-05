@@ -7,37 +7,52 @@ import { buttonVariants } from '@/theme/variants';
 
 export function Banner({
   id,
+  changeLayout = true,
   ...props
-}: HTMLAttributes<HTMLDivElement>): React.ReactElement {
+}: HTMLAttributes<HTMLDivElement> & {
+  /**
+   * Change Fumadocs layout styles
+   *
+   * @defaultValue true
+   */
+  changeLayout?: boolean;
+}): React.ReactElement {
   const [open, setOpen] = useState(true);
+  const globalKey = id ? `nd-banner-${id}` : undefined;
 
   useEffect(() => {
-    if (id) setOpen(localStorage.getItem(`nd-banner-${id}`) !== 'true');
-  }, [id]);
+    if (globalKey) setOpen(localStorage.getItem(globalKey) !== 'true');
+  }, [globalKey]);
 
   const onClick = useCallback(() => {
     setOpen(false);
-    if (id) localStorage.setItem(`nd-banner-${id}`, 'true');
-  }, [id]);
+    if (globalKey) localStorage.setItem(globalKey, 'true');
+  }, [globalKey]);
 
   return (
     <div
       id={id}
       {...props}
       className={cn(
-        'relative flex h-12 flex-row items-center justify-center bg-fd-secondary px-4 text-center text-sm font-medium',
-        !open && 'hidden',
+        'sticky top-0 z-40 flex h-12 flex-row items-center justify-center bg-fd-secondary px-4 text-center text-sm font-medium',
         props.className,
       )}
       suppressHydrationWarning
     >
+      {changeLayout && open ? (
+        <style>{`
+        .not_${globalKey} #nd-sidebar, .not_${globalKey} #nd-nav, .not_${globalKey} #nd-subnav, .not_${globalKey} [data-toc] { top: 3rem; }
+        .not_${globalKey} #nd-tocnav { top: 6.5rem; }
+        .not_${globalKey} #nd-sidebar, .not_${globalKey} [data-toc] { height: calc(100dvh - 3rem); }
+        `}</style>
+      ) : null}
+      <style>{`.${globalKey} #${id} { display: none; }`}</style>
       {id ? (
         <script
           dangerouslySetInnerHTML={{
-            __html: `const ndBannerItem = localStorage.getItem('nd-banner-${id}');
-   if (ndBannerItem === 'true') {
-     document.getElementById('${id}').style.display = 'none';
-   }`,
+            __html: `document.documentElement.classList.add(
+            localStorage.getItem('${globalKey}') === 'true'? '${globalKey}' : 'not_${globalKey}'
+           )`,
           }}
         />
       ) : null}

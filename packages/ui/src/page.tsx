@@ -19,8 +19,8 @@ declare const {
 }: typeof import('./page.client');
 
 const ClerkTOCItems = dynamic(() => import('@/components/layout/toc-clerk'));
-const EditOnGitHub = dynamic(() =>
-  import('@/components/layout/edit-on-github').then((mod) => mod.EditOnGitHub),
+const EditOnGitHub = dynamic(
+  () => import('@/components/layout/edit-on-github'),
 );
 
 type TableOfContentOptions = Omit<TOCProps, 'items' | 'children'> &
@@ -120,6 +120,7 @@ export function DocsPage({
         {replaceOrDefault(
           tocPopoverOptions,
           <div
+            id="nd-tocnav"
             className={cn(
               'sticky top-14 z-10 border-b bg-fd-background/60 text-sm backdrop-blur-md md:top-1 md:mx-3 md:rounded-full md:border md:shadow-md',
               tocPopoverOptions.enabled !== true && 'lg:hidden',

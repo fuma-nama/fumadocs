@@ -1,4 +1,7 @@
-import { AdvancedIndex, createSearchAPI } from 'fumadocs-core/search/server';
+import {
+  type AdvancedIndex,
+  createSearchAPI,
+} from 'fumadocs-core/search/server';
 import * as fs from 'node:fs/promises';
 
 export const { GET } = createSearchAPI('advanced', {

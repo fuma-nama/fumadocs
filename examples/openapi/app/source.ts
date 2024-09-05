@@ -3,7 +3,7 @@ import { loader } from 'fumadocs-core/source';
 import { attachFile, createOpenAPI } from 'fumadocs-openapi/server';
 import { docs, meta } from '@/.source';
 
-export const { getPage, getPages, pageTree } = loader({
+export const source = loader({
   baseUrl: '/docs',
   source: createMDXSource(docs, meta),
   pageTree: {

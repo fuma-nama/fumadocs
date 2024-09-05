@@ -3,7 +3,7 @@ import 'fumadocs-ui/style.css';
 import { Inter } from 'next/font/google';
 import type { ReactNode } from 'react';
 import { I18nProvider } from 'fumadocs-ui/i18n';
-import { pageTree } from '@/app/source';
+import { source } from '@/app/source';
 import { DocsLayout } from 'fumadocs-ui/layout';
 
 const inter = Inter({
@@ -48,7 +48,7 @@ export default function Layout({
         >
           <RootProvider>
             <DocsLayout
-              tree={pageTree[lang]}
+              tree={source.pageTree[lang]}
               nav={{
                 title: lang === 'cn' ? '文檔' : 'My App',
                 url: `/${lang}`,

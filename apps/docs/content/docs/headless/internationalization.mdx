@@ -20,16 +20,14 @@ Define the i18n configurations in a file, we will import it with `@/i18n` in thi
 }
 ```
 
-### Source API
-
 Change your current source configurations.
 
 ```ts title="source.ts"
 import { i18n } from '@/i18n';
 import { loader } from 'fumadocs-core/source';
 
-export const { getPage, getPages, pageTree, getLanguages } = loader({
-  i18n,
+export const source = loader({
+  i18n, // [!code highlight]
   // other options
 });
 ```
@@ -37,16 +35,16 @@ export const { getPage, getPages, pageTree, getLanguages } = loader({
 Update the usages to your source:
 
 ```ts
-import { getPage, getPages, pageTree } from '@/app/source';
+import { source } from '@/app/source';
 
 // get page tree
-pageTree[params.lang];
+source.pageTree[params.lang];
 
 // get page
-getPage(params.slug, params.lang);
+source.getPage(params.slug, params.lang);
 
 // get pages
-getPages(params.lang);
+source.getPages(params.lang);
 ```
 
 ### Middleware
@@ -65,7 +63,7 @@ Create a middleware that redirects users to appropriate locale.
 
 ### Root Layout
 
-Create a dynamic route `/app/[lang]`, and move all special files to
+Create a dynamic route `/app/[lang]`, and move all special files from `/app` to
 the folder.
 
 <HeadlessOnly>
@@ -119,10 +117,7 @@ export default function RootLayout({
 
 ### Docs Page
 
-Make sure to configure **Static Generation** correctly for your pages.
-
-The `generateStaticParams` function should return an item for every page in different languages.
-On Fumadocs UI, it looks like:
+Make sure to update references to `source` and configure Static Site Generation correctly.
 
 ```json doc-gen:file
 {
@@ -151,39 +146,6 @@ On Fumadocs UI, it looks like:
 ### Search
 
 Configure i18n on your search solution. For Flexsearch, see [Setup I18n](/docs/headless/search/flexsearch#internationalization).
-
-## Configurations
-
-You can also customise the i18n middleware from `i18n.ts`.
-
-### Hide Locale Prefix
-
-To hide the locale prefix, for example, use `/` instead of `/en`, use the `hideLocale` option.
-
-| Mode             | Description                                        |
-| ---------------- | -------------------------------------------------- |
-| `always`         | Always hide the prefix, detect locale from cookies |
-| `default-locale` | Only hide the default locale                       |
-| `never`          | Never hide the prefix (default)                    |
-
-> It uses `NextResponse.rewrite` under the hood.
-
-```ts
-import type { I18nConfig } from 'fumadocs-core/i18n';
-
-export const i18n: I18nConfig = {
-  defaultLanguage: 'en',
-  languages: ['en', 'cn'],
-  hideLocale: 'default-locale',
-};
-```
-
-#### `always`
-
-It's highly **unrecommended** to use `always`.
-On this mode, locale is stored as a cookie, read and set on the middleware.
-
-This may cause undesired cache problems on your hosting platform, and need to pay extra attention on SEO to ensure search engines can index your pages correctly.
 
 <UIOnly>
 
@@ -218,14 +180,45 @@ import { I18nProvider } from 'fumadocs-ui/i18n';
 
 ### Add Language Switch
 
-To allow users changing their language, enable `i18n` on docs layout.
+To allow users changing their language, enable `i18n` on your layouts.
 
-```tsx title="[lang]/docs/layout.tsx"
-import { DocsLayout } from 'fumadocs-ui/layout';
+```tsx title="app/layout.config.tsx" twoslash
+import type { HomeLayoutProps } from 'fumadocs-ui/home-layout';
 
-export default function Layout({ children }: { children: React.ReactNode }) {
-  return <DocsLayout i18n>{children}</DocsLayout>;
-}
+export const baseOptions: HomeLayoutProps = {
+  i18n: true,
+};
 ```
 
 </UIOnly>
+
+## Configurations
+
+You can also customise the i18n middleware from `i18n.ts`.
+
+### Hide Locale Prefix
+
+To hide the locale prefix, for example, use `/` instead of `/en`, use the `hideLocale` option.
+
+| Mode             | Description                                        |
+| ---------------- | -------------------------------------------------- |
+| `always`         | Always hide the prefix, detect locale from cookies |
+| `default-locale` | Only hide the default locale                       |
+| `never`          | Never hide the prefix (default)                    |
+
+> It uses `NextResponse.rewrite` under the hood.
+
+```ts
+import type { I18nConfig } from 'fumadocs-core/i18n';
+
+export const i18n: I18nConfig = {
+  defaultLanguage: 'en',
+  languages: ['en', 'cn'],
+  hideLocale: 'default-locale',
+};
+```
+
+It's **not recommended** to use `always`.
+On this mode, locale is stored as a cookie, read and set on the middleware.
+
+This may cause undesired cache problems on your hosting platform, and need to pay extra attention on SEO to ensure search engines can index your pages correctly.

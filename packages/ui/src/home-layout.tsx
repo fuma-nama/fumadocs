@@ -9,6 +9,7 @@ export function HomeLayout({
   nav = {},
   links = [],
   githubUrl,
+  i18n,
   children,
 }: BaseLayoutProps): React.ReactElement {
   const finalLinks = getLinks(links, githubUrl);
@@ -17,7 +18,7 @@ export function HomeLayout({
     <>
       {replaceOrDefault(
         nav,
-        <Nav items={finalLinks} {...nav}>
+        <Nav items={finalLinks} i18n={i18n} {...nav}>
           {nav.children}
         </Nav>,
       )}

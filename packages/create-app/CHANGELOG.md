@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 13.4.6
+
+### Patch Changes
+
+- 9c2095e: Add home layout by default
+
 ## 13.4.5
 
 ## 13.4.4

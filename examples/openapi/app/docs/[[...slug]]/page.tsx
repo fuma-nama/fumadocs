@@ -1,4 +1,4 @@
-import { getPage, getPages, openapi } from '@/app/source';
+import { source, openapi } from '@/app/source';
 import type { Metadata } from 'next';
 import {
   DocsPage,
@@ -14,7 +14,7 @@ export default async function Page({
 }: {
   params: { slug?: string[] };
 }) {
-  const page = getPage(params.slug);
+  const page = source.getPage(params.slug);
 
   if (!page) {
     notFound();
@@ -39,13 +39,11 @@ export default async function Page({
 }
 
 export async function generateStaticParams() {
-  return getPages().map((page) => ({
-    slug: page.slugs,
-  }));
+  return source.generateParams();
 }
 
 export function generateMetadata({ params }: { params: { slug?: string[] } }) {
-  const page = getPage(params.slug);
+  const page = source.getPage(params.slug);
 
   if (!page) notFound();
 

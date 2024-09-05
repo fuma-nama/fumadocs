@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 13.4.6
+
+### Patch Changes
+
+- afb697e: Fix Next.js 14.2.8 dynamic import problems
+- daa66d2: Support generating static params automatically with Source API
+
 ## 13.4.5
 
 ## 13.4.4

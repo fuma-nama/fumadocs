@@ -1,4 +1,4 @@
-import { getPage, getLanguages } from '@/app/source';
+import { source } from '@/app/source';
 import type { Metadata } from 'next';
 import {
   DocsPage,
@@ -14,7 +14,7 @@ export default async function Page({
 }: {
   params: { lang: string; slug?: string[] };
 }) {
-  const page = getPage(params.slug, params.lang);
+  const page = source.getPage(params.slug, params.lang);
   if (!page) notFound();
 
   const MDX = page.data.body;
@@ -24,19 +24,14 @@ export default async function Page({
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>
-        <MDX components={defaultMdxComponents} />
+        <MDX components={{ ...defaultMdxComponents }} />
       </DocsBody>
     </DocsPage>
   );
 }
 
 export async function generateStaticParams() {
-  return getLanguages().flatMap(({ language, pages }) =>
-    pages.map((page) => ({
-      lang: language,
-      slug: page.slugs,
-    })),
-  );
+  return source.generateParams();
 }
 
 export function generateMetadata({
@@ -44,7 +39,7 @@ export function generateMetadata({
 }: {
   params: { lang: string; slug?: string[] };
 }) {
-  const page = getPage(params.slug, params.lang);
+  const page = source.getPage(params.slug, params.lang);
   if (!page) notFound();
 
   return {
