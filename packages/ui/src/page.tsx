@@ -19,8 +19,8 @@ declare const {
 }: typeof import('./page.client');
 
 const ClerkTOCItems = dynamic(() => import('@/components/layout/toc-clerk'));
-const EditOnGitHub = dynamic(() =>
-  import('@/components/layout/edit-on-github').then((mod) => mod.EditOnGitHub),
+const EditOnGitHub = dynamic(
+  () => import('@/components/layout/edit-on-github'),
 );
 
 type TableOfContentOptions = Omit<TOCProps, 'items' | 'children'> &

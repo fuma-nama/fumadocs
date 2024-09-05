@@ -2,7 +2,6 @@ import type { PageTree } from 'fumadocs-core/server';
 import type { ReactNode, HTMLAttributes } from 'react';
 import Link from 'next/link';
 import { MoreHorizontal } from 'lucide-react';
-import dynamic from 'next/dynamic';
 import { notFound } from 'next/navigation';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/theme/variants';
@@ -16,22 +15,11 @@ declare const {
   SidebarCollapseTrigger,
   ThemeToggle,
   SubNav,
+  LanguageToggle,
   LinksMenu,
+  DynamicSidebar,
   Sidebar,
 }: typeof import('./docs-layout.client');
-
-// We can use dynamic imports to avoid loading a client component when they are not used
-const LanguageToggle = dynamic(() =>
-  import('./components/layout/language-toggle').then(
-    (mod) => mod.LanguageToggle,
-  ),
-);
-
-const DynamicSidebar = dynamic(() =>
-  import('./components/layout/dynamic-sidebar').then(
-    (mod) => mod.DynamicSidebar,
-  ),
-);
 
 export type { LinkItemType };
 

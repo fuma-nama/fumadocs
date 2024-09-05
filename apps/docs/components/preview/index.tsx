@@ -9,22 +9,12 @@ import { Card } from 'fumadocs-ui/components/card';
 import { Heading } from 'fumadocs-ui/components/heading';
 import type { ReactNode } from 'react';
 import { RootToggle } from 'fumadocs-ui/components/layout/root-toggle';
-import dynamic from 'next/dynamic';
+import { Banner } from 'fumadocs-ui/components/banner';
+import { InlineTOC } from 'fumadocs-ui/components/inline-toc';
+import { ImageZoom } from 'fumadocs-ui/components/image-zoom';
 import BannerImage from '@/public/banner.png';
 import { modes } from '@/utils/modes';
 import { Wrapper } from './wrapper';
-
-const Banner = dynamic(() =>
-  import('fumadocs-ui/components/banner').then((m) => m.Banner),
-);
-
-const InlineTOC = dynamic(() =>
-  import('fumadocs-ui/components/inline-toc').then((res) => res.InlineTOC),
-);
-
-const ImageZoom = dynamic(() =>
-  import('fumadocs-ui/components/image-zoom').then((m) => m.ImageZoom),
-);
 
 export default {
   heading: (

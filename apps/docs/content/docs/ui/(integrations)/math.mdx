@@ -21,14 +21,14 @@ Add the remark/rehype plugins you have installed above.
 The code might be vary depending on your content source, here is an example for Fumadocs MDX:
 
 ```ts
-import createMDX from 'fumadocs-mdx/config';
 import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
+import { defineConfig } from 'fumadocs-mdx/config';
 
-const withMDX = createMDX({
+export default defineConfig({
   mdxOptions: {
     remarkPlugins: [remarkMath],
-    // Place it at first so that it won't be changed by rehype-pretty-code
+    // Place it at first so that it won't be changed by syntax highlighter
     rehypePlugins: (v) => [rehypeKatex, ...v],
   },
 });
