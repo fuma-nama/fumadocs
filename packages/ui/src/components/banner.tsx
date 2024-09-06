@@ -47,7 +47,7 @@ export function Banner({
         props.className,
       )}
     >
-      {changeLayout ? (
+      {changeLayout && open ? (
         <style>{`
         #nd-sidebar${cssFilter}, #nd-nav${cssFilter}, #nd-subnav${cssFilter}, [data-toc]${cssFilter} { top: 3rem; }
         #nd-tocnav${cssFilter} { top: 6.5rem; }
