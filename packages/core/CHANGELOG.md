@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 13.4.6
+
+### Patch Changes
+
+- 2da6024: Improve anchors observer
+
 ## 13.4.5
 
 ## 13.4.4

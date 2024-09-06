@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 13.4.6
+
+### Patch Changes
+
+- 35d1e56: Fix ocean present background repeat
+- 2da6024: Introduce `rainbow` variant on Banner component
+- Updated dependencies [2da6024]
+  - fumadocs-core@13.4.6
+
 ## 13.4.5
 
 ### Patch Changes
