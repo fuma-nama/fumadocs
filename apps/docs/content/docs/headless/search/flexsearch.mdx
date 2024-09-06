@@ -61,20 +61,16 @@ It cannot extract content from rehype plugin generated content (remark plugins a
 
 ### Usage
 
-Same as simple search, but requires the `structuredData` property.
+Same as simple search, but requires the `structuredData` property instead of raw content.
 
-```ts
-import { getPages } from '@/app/source';
-import { createSearchAPI } from 'fumadocs-core/search/server';
-
-export const { GET } = createSearchAPI('advanced', {
-  indexes: getPages().map((page) => ({
-    title: page.data.title,
-    structuredData: page.data.exports.structuredData,
-    id: page.url,
-    url: page.url,
-  })),
-});
+```json doc-gen:file
+{
+  "file": "../../examples/next-mdx/app/api/search/route.ts",
+  "codeblock": {
+    "lang": "ts",
+    "meta": "title=\"app/api/search/route.ts\""
+  }
+}
 ```
 
 ### Tag Filter
@@ -83,19 +79,23 @@ It's useful for implementing versioned docs, or multi-docs similar to this
 documentation.
 
 ```ts
-import { getPages } from '@/app/source';
+import { source } from '@/app/source';
 import { createSearchAPI } from 'fumadocs-core/search/server';
 
 export const { GET } = createSearchAPI('advanced', {
-  indexes: getPages().map((page) => ({
-    ...,
-    tag: page.data.tag,
+  indexes: source.getPages().map((page) => ({
+    tag: 'your value here',
+    // other props
   })),
   tag: true,
 });
 ```
 
-For Fumadocs UI, configure [Tag Filter](/docs/ui/search#tag-filter).
+<Callout title="For Fumadocs UI">
+
+Configure [Tag Filter](/docs/ui/search#tag-filter) on search client.
+
+</Callout>
 
 On your search client, pass a tag to the hook.
 
