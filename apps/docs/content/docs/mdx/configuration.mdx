@@ -63,6 +63,10 @@ export const blog = defineCollections({
 }
 ```
 
+#### `dir`
+
+Directories to scan input files.
+
 #### Schema
 
 The Zod schema to validate file data (frontmatter on `doc` type, content on `meta` type).
@@ -149,6 +153,31 @@ import { defineDocs } from 'fumadocs-mdx/config';
 export const { docs, meta } = defineDocs({
   docs: {
     // optional, you can pass options to each collection
+  },
+  meta: {
+    // optional, you can pass options to each collection
+  },
+});
+```
+
+#### Extend `schema`
+
+You can extend the default Zod schema of `docs` and `meta`.
+
+```ts
+import { frontmatterSchema, metaSchema, defineDocs } from 'fumadocs-mdx/config';
+import { z } from 'zod';
+
+export const { docs, meta } = defineDocs({
+  docs: {
+    schema: frontmatterSchema.extend({
+      index: z.boolean().default(false),
+    }),
+  },
+  meta: {
+    schema: metaSchema.extend({
+      // other props
+    }),
   },
 });
 ```
