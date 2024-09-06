@@ -14,7 +14,7 @@ interface Option {
    */
   url: string;
 
-  icon: ReactNode;
+  icon?: ReactNode;
   title: ReactNode;
   description: ReactNode;
 }
