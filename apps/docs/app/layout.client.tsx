@@ -2,8 +2,9 @@
 
 import { cva } from 'class-variance-authority';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, usePathname } from 'next/navigation';
 import { type ReactNode, useId } from 'react';
+import { Banner } from 'fumadocs-ui/components/banner';
 import { cn } from '@/utils/cn';
 import { modes } from '@/utils/modes';
 
@@ -24,9 +25,20 @@ export function Body({
   children: ReactNode;
 }): React.ReactElement {
   const mode = useMode();
+  const pathname = usePathname();
 
   return (
     <body className={cn(mode, 'relative flex min-h-screen flex-col')}>
+      {pathname === '/' ? (
+        <Banner variant="rainbow" id="mdx-v10">
+          <Link
+            href="/blog/mdx-v10"
+            className="opacity-80 mix-blend-luminosity"
+          >
+            Fumadocs MDX v10 is now available. {'->'}
+          </Link>
+        </Banner>
+      ) : null}
       {children}
     </body>
   );
