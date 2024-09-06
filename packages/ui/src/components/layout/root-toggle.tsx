@@ -1,6 +1,6 @@
 'use client';
 import { ChevronDown } from 'lucide-react';
-import { type ReactNode, useCallback, useState } from 'react';
+import { HTMLAttributes, type ReactNode, useCallback, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/utils/cn';
@@ -17,13 +17,16 @@ interface Option {
   icon?: ReactNode;
   title: ReactNode;
   description: ReactNode;
+
+  props?: HTMLAttributes<HTMLElement>;
 }
 
 export function RootToggle({
   options,
+  ...props
 }: {
   options: Option[];
-}): React.ReactElement {
+} & HTMLAttributes<HTMLButtonElement>): React.ReactElement {
   const [open, setOpen] = useState(false);
   const { closeOnRedirect } = useSidebar();
   const pathname = usePathname();
@@ -37,7 +40,13 @@ export function RootToggle({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger className="-mx-2 flex flex-row items-center gap-2.5 rounded-lg p-2 hover:bg-fd-accent/50 hover:text-fd-accent-foreground">
+      <PopoverTrigger
+        {...props}
+        className={cn(
+          '-mx-2 flex flex-row items-center gap-2.5 rounded-lg p-2 hover:bg-fd-accent/50 hover:text-fd-accent-foreground',
+          props.className,
+        )}
+      >
         <Item {...selected} />
         <ChevronDown className="size-4 text-fd-muted-foreground md:me-1.5" />
       </PopoverTrigger>
@@ -47,11 +56,13 @@ export function RootToggle({
             key={item.url}
             href={item.url}
             onClick={onClick}
+            {...item.props}
             className={cn(
-              'flex w-full flex-row gap-2 p-2',
+              'flex w-full flex-row items-center gap-2.5 p-2',
               selected === item
                 ? 'bg-fd-accent text-fd-accent-foreground'
                 : 'hover:bg-fd-accent/50',
+              item.props?.className,
             )}
           >
             <Item {...item} />
