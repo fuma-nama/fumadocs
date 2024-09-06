@@ -45,7 +45,7 @@ export function useAnchorObserver(watch: string[], single: boolean): string[] {
         element.scrollHeight - 6
       ) {
         setActiveAnchor((active) => {
-          return active.length > 0
+          return active.length > 0 && !single
             ? watch.slice(watch.indexOf(active[0]))
             : watch.slice(-1);
         });

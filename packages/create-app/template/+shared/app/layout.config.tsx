@@ -1,10 +1,11 @@
 import { type HomeLayoutProps } from 'fumadocs-ui/home-layout';
 
 /**
- * Shared layout configuration
+ * Shared layout configurations
  *
- * you cna configure layouts individually from:
- * Home Layout:
+ * you can configure layouts individually from:
+ * Home Layout: app/(home)/layout.tsx
+ * Docs Layout: app/docs/layout.tsx
  */
 export const baseOptions: HomeLayoutProps = {
   nav: {

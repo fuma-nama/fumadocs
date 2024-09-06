@@ -27,6 +27,27 @@ export default function RootLayout({
 }
 ```
 
+### Variant
+
+Change the default variant.
+
+```tsx
+import { Banner } from 'fumadocs-ui/components/banner';
+
+<Banner variant="rainbow">Hello World</Banner>;
+```
+
+### Change Layout
+
+By default, the banner uses a `style` tag to modify Fumadocs layouts (e.g. reduce the sidebar height).
+You can disable it with:
+
+```tsx
+import { Banner } from 'fumadocs-ui/components/banner';
+
+<Banner changeLayout={false}>Hello World</Banner>;
+```
+
 ### Close
 
 To allow users to close the banner, give the banner an ID.

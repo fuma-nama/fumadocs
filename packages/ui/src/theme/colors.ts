@@ -80,6 +80,7 @@ const oceanPreset: Preset = {
     '.dark body': {
       'background-image':
         'linear-gradient(rgba(5, 105, 255, 0.15), transparent 20rem, transparent)',
+      'background-repeat': 'no-repeat',
     },
   },
 };

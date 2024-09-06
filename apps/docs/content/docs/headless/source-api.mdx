@@ -21,7 +21,7 @@ You can use it with built-in content sources like Fumadocs MDX.
 import { createMDXSource } from 'fumadocs-mdx';
 import { loader } from 'fumadocs-core/source';
 
-export const docs = loader({
+export const source = loader({
   source: createMDXSource(docs, meta),
 });
 ```
@@ -49,7 +49,7 @@ import { loader } from 'fumadocs-core/source';
 import { icons } from 'lucide-react';
 import { createElement } from 'react';
 
-export const utils = loader({
+loader({
   icon(icon) {
     if (!icon) {
       // You may set a default icon
@@ -132,7 +132,7 @@ JSX nodes are also allowed.
 ```tsx
 import { loader } from 'fumadocs-core/source';
 
-export const docs = loader({
+loader({
   pageTree: {
     attachFile(node) {
       node.name = <>Some JSX Nodes here</>;
