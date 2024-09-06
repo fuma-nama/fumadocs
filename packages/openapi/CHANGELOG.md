@@ -4,11 +4,12 @@
 
 ### Patch Changes
 
-- Updated dependencies [2da6024]
-- Updated dependencies [35d1e56]
-- Updated dependencies [2da6024]
-  - fumadocs-core@13.4.6
+- Updated dependencies [b33aff0]
+- Updated dependencies [afb697e]
+- Updated dependencies [6bcd263]
+- Updated dependencies [daa66d2]
   - fumadocs-ui@13.4.6
+  - fumadocs-core@13.4.6
 
 ## 5.4.9
 

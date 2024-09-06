@@ -4,7 +4,7 @@
 
 ### Patch Changes
 
-- 7b76a72: Fix typos
+- 9c2095e: Add home layout by default
 
 ## 13.4.5
 

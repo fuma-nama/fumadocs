@@ -4,9 +4,11 @@
 
 ### Patch Changes
 
-- 35d1e56: Fix ocean present background repeat
-- 2da6024: Introduce `rainbow` variant on Banner component
-- Updated dependencies [2da6024]
+- b33aff0: Fix typography styles
+- afb697e: Fix Next.js 14.2.8 dynamic import problems
+- 6bcd263: Fix Banner component z-index
+- Updated dependencies [afb697e]
+- Updated dependencies [daa66d2]
   - fumadocs-core@13.4.6
 
 ## 13.4.5

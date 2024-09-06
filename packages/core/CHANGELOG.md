@@ -4,7 +4,8 @@
 
 ### Patch Changes
 
-- 2da6024: Improve anchors observer
+- afb697e: Fix Next.js 14.2.8 dynamic import problems
+- daa66d2: Support generating static params automatically with Source API
 
 ## 13.4.5
 

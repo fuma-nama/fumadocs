@@ -798,7 +798,7 @@ function Features(): React.ReactElement {
             <LibraryIcon />
             <h3 className="font-semibold">Core</h3>
             <p className="text-sm text-fd-muted-foreground">
-              Headless library with an useful set of utilities.
+              Headless library with a useful set of utilities.
             </p>
           </Link>
         </div>
