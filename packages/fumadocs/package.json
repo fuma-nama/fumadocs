@@ -1,0 +1,36 @@
+{
+  "name": "fumadocs",
+  "version": "13.4.7",
+  "description": "The framework for building a documentation website in Next.js",
+  "keywords": [
+    "NextJs",
+    "Docs",
+    "Fumadocs"
+  ],
+  "homepage": "https://fumadocs.vercel.app",
+  "repository": "github:fuma-nama/fumadocs",
+  "license": "MIT",
+  "author": "Fuma Nama",
+  "type": "module",
+  "files": [
+    "dist/*"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "clean": "rimraf dist",
+    "dev": "tsup --watch",
+    "lint": "eslint .",
+    "types:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "fumadocs-core": "workspace:*",
+    "fumadocs-ui": "workspace:*"
+  },
+  "devDependencies": {
+    "eslint-config-custom": "workspace:*",
+    "tsconfig": "workspace:*"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

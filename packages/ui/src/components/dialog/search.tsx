@@ -1,5 +1,5 @@
 import { FileText, Hash, Loader2, SearchIcon, Text } from 'lucide-react';
-import type { SortedResult } from 'fumadocs-core/search/shared';
+import type { SortedResult } from 'fumadocs-core/server';
 import { useRouter } from 'next/navigation';
 import {
   useMemo,

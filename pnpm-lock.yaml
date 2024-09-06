@@ -675,6 +675,22 @@ importers:
 
   packages/eslint-config-custom: {}
 
+  packages/fumadocs:
+    dependencies:
+      fumadocs-core:
+        specifier: workspace:*
+        version: link:../core
+      fumadocs-ui:
+        specifier: workspace:*
+        version: link:../ui
+    devDependencies:
+      eslint-config-custom:
+        specifier: workspace:*
+        version: link:../eslint-config-custom
+      tsconfig:
+        specifier: workspace:*
+        version: link:../tsconfig
+
   packages/mdx:
     dependencies:
       '@mdx-js/mdx':

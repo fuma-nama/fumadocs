@@ -28,10 +28,6 @@
       "import": "./dist/search/client.js",
       "types": "./dist/search/client.d.ts"
     },
-    "./search/shared": {
-      "import": "./dist/search/shared.js",
-      "types": "./dist/search/shared.d.ts"
-    },
     "./search/server": {
       "import": "./dist/search/server.js",
       "types": "./dist/search/server.d.ts"
@@ -86,9 +82,6 @@
       ],
       "search/client": [
         "./dist/search/client.d.ts"
-      ],
-      "search/shared": [
-        "./dist/search/shared.d.ts"
       ],
       "search/server": [
         "./dist/search/server.d.ts"
