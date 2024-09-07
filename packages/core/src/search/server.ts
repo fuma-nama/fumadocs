@@ -309,4 +309,5 @@ export function initAdvancedSearch({
   };
 }
 
+export { createFromSource } from './create-from-source';
 export { createI18nSearchAPI } from './i18n-api';

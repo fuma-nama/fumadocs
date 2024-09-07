@@ -23,7 +23,6 @@ export interface BuildPageTreeOptions {
    */
   attachFolderIds?: boolean;
 
-  // TODO: Rename to `attachPage` (major)
   attachFile?: (node: PageTree.Item, file?: PageFile) => PageTree.Item;
   attachFolder?: (
     node: PageTree.Folder,
