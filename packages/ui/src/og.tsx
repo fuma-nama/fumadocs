@@ -11,23 +11,6 @@ interface GenerateProps {
   site?: ReactNode;
 }
 
-export function getImageMeta(
-  baseUrl: string,
-  slugs: string[] = [],
-): {
-  alt: string;
-  url: string;
-  width: number;
-  height: number;
-} {
-  return {
-    alt: 'Banner',
-    url: `/${[...baseUrl.split('/'), ...slugs, 'og.png'].filter((v) => v.length > 0).join('/')}`,
-    width: 1200,
-    height: 630,
-  };
-}
-
 export function generateOGImage(
   options: GenerateProps & ImageResponseOptions,
 ): ImageResponse {
