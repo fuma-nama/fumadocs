@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 13.4.8
+
+### Patch Changes
+
+- 78e59e7: Support to add icons to link items in meta.json
+
 ## 13.4.7
 
 ### Patch Changes

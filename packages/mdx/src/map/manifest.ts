@@ -1,5 +1,4 @@
 import fs from 'node:fs';
-import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { type LoadedConfig } from '@/config/load';
 import type { MetaFile } from '@/loader-mdx';
@@ -11,8 +10,13 @@ export interface Manifest {
   })[];
 }
 
-export function getKey(key: string): string {
-  return createHash('sha256').update(key).digest('hex');
+export function getManifestEntryPath(originalPath: string): string {
+  const toName = path
+    .relative(process.cwd(), originalPath)
+    .replaceAll(`..${path.sep}`, '-')
+    .replaceAll(path.sep, '_');
+
+  return path.resolve('.next/cache/fumadocs', `${toName}.json`);
 }
 
 export function writeManifest(to: string, config: LoadedConfig): void {
@@ -24,9 +28,7 @@ export function writeManifest(to: string, config: LoadedConfig): void {
     if (type === 'meta') continue;
 
     try {
-      const content = fs.readFileSync(
-        path.resolve('.next/cache/fumadocs', `${getKey(file)}.json`),
-      );
+      const content = fs.readFileSync(getManifestEntryPath(file));
       const meta = JSON.parse(content.toString()) as MetaFile;
 
       output.files.push({
