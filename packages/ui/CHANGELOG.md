@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 13.4.8
+
+### Patch Changes
+
+- 5581733: Add center to root toggle
+- 1a327cc: Fix props types of Root Toggle
+- Updated dependencies [78e59e7]
+  - fumadocs-core@13.4.8
+
 ## 13.4.7
 
 ### Patch Changes
