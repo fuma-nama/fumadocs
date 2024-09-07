@@ -86,6 +86,7 @@ test('Loader: Simple', () => {
 
 test('Nested Directories', async () => {
   const result = loader({
+    icon: (v) => v as any,
     source: {
       files: [
         {
@@ -106,7 +107,13 @@ test('Nested Directories', async () => {
           type: 'meta',
           path: 'meta.json',
           data: {
-            pages: ['...', '!hidden', 'nested', '[Text](https://google.com)'],
+            pages: [
+              '...',
+              '!hidden',
+              'nested',
+              '[Text](https://google.com)',
+              '[Icon][Text](https://google.com)',
+            ],
           },
         },
         {
@@ -159,7 +166,12 @@ test('Nested Directories', async () => {
         },
         {
           "external": true,
-          "name": "Text",
+          "type": "page",
+          "url": "https://google.com",
+        },
+        {
+          "external": true,
+          "icon": "Icon",
           "type": "page",
           "url": "https://google.com",
         },

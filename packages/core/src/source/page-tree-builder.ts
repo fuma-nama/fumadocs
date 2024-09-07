@@ -53,7 +53,7 @@ export interface PageTreeBuilder {
 }
 
 const group = /^\((?<name>.+)\)$/;
-const link = /^\[(?<text>.+)]\((?<url>.+)\)$/;
+const link = /^(?:\[(?<icon>[^\]]+)])?\[(?<name>[^\]]+)]\((?<url>[^)]+)\)$/;
 const separator = /^---(?<name>.*?)---$/;
 const rest = '...';
 const extractPrefix = '...';
@@ -116,18 +116,19 @@ function resolveFolderItem(
 
   const linkResult = link.exec(item);
   if (linkResult?.groups) {
-    const { url, text } = linkResult.groups;
+    const { icon, url, text } = linkResult.groups;
     const isRelative =
       url.startsWith('/') || url.startsWith('#') || url.startsWith('.');
 
     const node: PageTree.Item = {
       type: 'page',
+      icon: ctx.options.resolveIcon?.(icon),
       name: text,
       url,
       external: !isRelative,
     };
 
-    return [ctx.options.attachFile?.(node) ?? node];
+    return [removeUndefined(ctx.options.attachFile?.(node) ?? node)];
   }
 
   const isExcept = item.startsWith(excludePrefix),

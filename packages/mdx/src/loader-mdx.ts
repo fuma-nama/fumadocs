@@ -8,7 +8,7 @@ import { findCollectionId } from '@/utils/find-collection';
 import { getConfigHash, loadConfigCached } from '@/config/cached';
 import { buildMDX } from '@/utils/build-mdx';
 import { getDefaultMDXOptions, type TransformContext } from '@/config';
-import { getKey } from '@/map/manifest';
+import { getManifestEntryPath } from '@/map/manifest';
 import { formatError } from '@/utils/format-error';
 import { getGitTimestamp } from './utils/git-timestamp';
 
@@ -154,7 +154,7 @@ export default async function loader(
     if (config.global?.generateManifest) {
       await fs.mkdir('.next/cache/fumadocs', { recursive: true });
       await fs.writeFile(
-        path.resolve('.next/cache/fumadocs', `${getKey(filePath)}.json`),
+        getManifestEntryPath(filePath),
         JSON.stringify({
           path: filePath,
           data: file.data,
