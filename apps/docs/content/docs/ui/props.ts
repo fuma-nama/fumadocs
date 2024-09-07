@@ -4,7 +4,7 @@ import type { File, Folder } from 'fumadocs-ui/components/files';
 import type { InlineTOC } from 'fumadocs-ui/components/inline-toc';
 import type { TypeTable } from 'fumadocs-ui/components/type-table';
 import type { Card } from 'fumadocs-ui/components/card';
-import type { DocsLayoutProps } from 'fumadocs-ui/layout';
+import type { DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
 import type { AnchorHTMLAttributes, ComponentPropsWithoutRef } from 'react';
 import type { DocsPageProps } from 'fumadocs-ui/page';
 import type { AutoTypeTable } from 'fumadocs-typescript/ui';

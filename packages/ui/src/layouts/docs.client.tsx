@@ -8,8 +8,8 @@ import { useSearchContext } from '@/contexts/search';
 import { SearchToggle } from '@/components/layout/search-toggle';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/theme/variants';
-import type { SharedNavProps } from '@/layout.shared';
 import { NavBox, Title } from '@/components/layout/nav';
+import type { SharedNavProps } from './shared';
 
 export function SubNav({
   title,
@@ -69,8 +69,8 @@ export function SidebarCollapseTrigger(): React.ReactElement {
 }
 
 export { LinksMenu } from '@/components/layout/link-item';
-export { Sidebar } from './components/layout/sidebar';
-export { TreeContextProvider } from './contexts/tree';
-export { ThemeToggle } from './components/layout/theme-toggle';
-export { LanguageToggle } from './components/layout/language-toggle';
-export { DynamicSidebar } from './components/layout/dynamic-sidebar';
+export { Sidebar } from '@/components/layout/sidebar';
+export { TreeContextProvider } from '@/contexts/tree';
+export { ThemeToggle } from '@/components/layout/theme-toggle';
+export { LanguageToggle } from '@/components/layout/language-toggle';
+export { DynamicSidebar } from '@/components/layout/dynamic-sidebar';

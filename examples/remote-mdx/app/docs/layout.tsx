@@ -1,5 +1,5 @@
 import { getDocs } from '../source';
-import { DocsLayout } from 'fumadocs-ui/layout';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import type { ReactNode } from 'react';
 import { initHotReload } from '@fumadocs/mdx-remote/github/next';
 

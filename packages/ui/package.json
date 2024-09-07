@@ -32,13 +32,9 @@
       "import": "./dist/i18n.js",
       "types": "./dist/i18n.d.ts"
     },
-    "./layout": {
-      "import": "./dist/layout.js",
-      "types": "./dist/layout.d.ts"
-    },
-    "./home-layout": {
-      "import": "./dist/home-layout.js",
-      "types": "./dist/home-layout.d.ts"
+    "./layouts/*": {
+      "import": "./dist/layouts/*.js",
+      "types": "./dist/layouts/*.d.ts"
     },
     "./page": {
       "import": "./dist/page.js",
@@ -71,11 +67,8 @@
       "i18n": [
         "./dist/i18n.d.ts"
       ],
-      "layout": [
-        "./dist/layout.d.ts"
-      ],
-      "home-layout": [
-        "./dist/home-layout.d.ts"
+      "layouts/*": [
+        "./dist/layouts/*.d.ts"
       ],
       "page": [
         "./dist/page.d.ts"

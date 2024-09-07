@@ -183,9 +183,9 @@ import { I18nProvider } from 'fumadocs-ui/i18n';
 To allow users changing their language, enable `i18n` on your layouts.
 
 ```tsx title="app/layout.config.tsx" twoslash
-import type { HomeLayoutProps } from 'fumadocs-ui/home-layout';
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 
-export const baseOptions: HomeLayoutProps = {
+export const baseOptions: BaseLayoutProps = {
   i18n: true,
 };
 ```

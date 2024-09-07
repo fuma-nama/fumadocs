@@ -22,7 +22,7 @@ You can see [Organizing Pages](/docs/ui/page-conventions) to learn how to custom
 It is passed to the [Docs Layout](/docs/ui/blocks/layout) component and shared to navigation elements:
 
 ```tsx
-import { DocsLayout } from 'fumadocs-ui/layout';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 
 <DocsLayout
   tree={
@@ -39,9 +39,9 @@ They are displayed on all Fumadocs UI layouts (e.g. Home Layout and Docs Layout)
 Links items are passed to the layout.
 
 ```tsx twoslash title="app/layout.config.tsx"
-import { type HomeLayoutProps } from 'fumadocs-ui/home-layout';
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 
-export const baseOptions: HomeLayoutProps = {
+export const baseOptions: BaseLayoutProps = {
   links: [
     {
       text: 'Documentation',
@@ -57,9 +57,9 @@ export const baseOptions: HomeLayoutProps = {
 A shortcut for adding GitHub repository link item.
 
 ```tsx twoslash title="app/layout.config.tsx"
-import { type HomeLayoutProps } from 'fumadocs-ui/home-layout';
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 
-export const baseOptions: HomeLayoutProps = {
+export const baseOptions: BaseLayoutProps = {
   githubUrl: 'https://github.com',
 };
 ```
@@ -71,9 +71,9 @@ A part of all Fumadocs UI layouts, it displays the link items and your logo.
 ```tsx twoslash title="app/layout.config.tsx"
 import React from 'react';
 // ---cut---
-import { type HomeLayoutProps } from 'fumadocs-ui/home-layout';
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 
-export const baseOptions: HomeLayoutProps = {
+export const baseOptions: BaseLayoutProps = {
   nav: {
     // Give it a logo
     title: <div>Logo</div>,
@@ -95,7 +95,7 @@ You can use them to add additional components.
 For example, adding an announcement to the top of sidebar.
 
 ```tsx
-import { DocsLayout } from 'fumadocs-ui/layout';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 
 <DocsLayout
   sidebar={{

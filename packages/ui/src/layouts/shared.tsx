@@ -39,6 +39,9 @@ export interface BaseLayoutProps {
   children?: ReactNode;
 }
 
+/**
+ * Get Links Items with shortcuts
+ */
 export function getLinks(
   links?: LinkItemType[],
   githubUrl?: string,

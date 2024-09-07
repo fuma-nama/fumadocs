@@ -1,5 +1,5 @@
-import { HomeLayoutProps } from 'fumadocs-ui/home-layout';
+import { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 
-export const baseOptions: HomeLayoutProps = {
+export const baseOptions: BaseLayoutProps = {
   i18n: true,
 };

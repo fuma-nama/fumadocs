@@ -6,9 +6,9 @@ import { notFound } from 'next/navigation';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/theme/variants';
 import type { SidebarProps } from '@/components/layout/sidebar';
-import { replaceOrDefault } from './utils/shared';
-import type { LinkItemType } from './components/layout/link-item';
-import { type BaseLayoutProps, getLinks } from './layout.shared';
+import { replaceOrDefault } from '@/utils/shared';
+import type { LinkItemType } from '@/components/layout/link-item';
+import { type BaseLayoutProps, getLinks } from './shared';
 
 declare const {
   TreeContextProvider,
@@ -19,7 +19,7 @@ declare const {
   LinksMenu,
   DynamicSidebar,
   Sidebar,
-}: typeof import('./docs-layout.client');
+}: typeof import('./docs.client');
 
 export type { LinkItemType };
 

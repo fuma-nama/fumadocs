@@ -23,10 +23,12 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
+    "commander": "^12.1.0",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*"
   },
   "devDependencies": {
+    "@types/node": "22.5.4",
     "eslint-config-custom": "workspace:*",
     "tsconfig": "workspace:*"
   },

@@ -1,7 +1,7 @@
 import { replaceOrDefault } from '@/utils/shared';
-import { getLinks, type BaseLayoutProps } from '@/layout.shared';
+import { getLinks, type BaseLayoutProps } from './shared';
 
-declare const { Nav }: typeof import('./home-layout.client');
+declare const { Nav }: typeof import('./home.client');
 
 export type HomeLayoutProps = BaseLayoutProps;
 
