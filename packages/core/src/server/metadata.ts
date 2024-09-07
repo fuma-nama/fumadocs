@@ -1,8 +1,11 @@
 import type { Metadata } from 'next';
 import { type NextRequest } from 'next/server';
 import { notFound } from 'next/navigation';
-import type { LoaderOutput } from 'fumadocs-core/source';
-import { type InferPageType, type LoaderConfig } from '@/source';
+import {
+  type InferPageType,
+  type LoaderConfig,
+  type LoaderOutput,
+} from '@/source';
 
 interface ImageMeta {
   alt: string;
