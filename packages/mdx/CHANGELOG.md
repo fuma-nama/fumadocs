@@ -1,5 +1,13 @@
 # next-docs-mdx
 
+## 10.0.2
+
+### Patch Changes
+
+- f21c871: Change cache path of manifest files
+- Updated dependencies [78e59e7]
+  - fumadocs-core@13.4.8
+
 ## 10.0.1
 
 ### Patch Changes
