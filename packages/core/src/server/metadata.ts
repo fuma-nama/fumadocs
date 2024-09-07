@@ -21,7 +21,7 @@ interface RouteOptions {
   };
 }
 
-export function createMetadataFromSource<
+export function createMetadataImage<
   S extends LoaderOutput<LoaderConfig>,
 >(options: {
   source: S;

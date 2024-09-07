@@ -7,7 +7,7 @@ import {
 } from 'fumadocs-ui/page';
 import { notFound } from 'next/navigation';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
-import { withImage } from '@/lib/metadata';
+import { metadataImage } from '@/lib/metadata';
 
 export default async function Page({
   params,
@@ -47,7 +47,7 @@ export function generateMetadata({ params }: { params: { slug?: string[] } }) {
 
   if (!page) notFound();
 
-  return withImage({
+  return metadataImage.withImage({
     title: page.data.title,
     description: page.data.description,
   });

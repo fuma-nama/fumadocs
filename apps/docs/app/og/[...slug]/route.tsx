@@ -1,29 +1,15 @@
 import { readFileSync } from 'node:fs';
 import { generateOGImage } from 'fumadocs-ui/og';
 import { type ImageResponse } from 'next/og';
-import { type NextRequest } from 'next/server';
-import { notFound } from 'next/navigation';
-import { utils } from '@/app/source';
+import { metadataImage } from '@/utils/metadata';
 
 const font = readFileSync('./app/og/[...slug]/Geist-Regular.ttf');
 const fontBold = readFileSync('./app/og/[...slug]/Geist-Bold.ttf');
 
-export function GET(
-  _: NextRequest,
-  {
-    params,
-  }: {
-    params: {
-      slug: string[];
-    };
-  },
-): ImageResponse {
-  const page = utils.getPage(params.slug.slice(0, -1));
-  if (!page) notFound();
-
+export const GET = metadataImage.createAPI((page): ImageResponse => {
   return generateOGImage({
     primaryTextColor: 'rgb(240,240,240)',
-    primaryColor: 'rgba(255,255,255,0.3)',
+    primaryColor: 'rgba(255,255,255,0.2)',
     title: page.data.title,
     icon: (
       <svg
@@ -63,13 +49,10 @@ export function GET(
       },
     ],
   });
-}
+});
 
 export function generateStaticParams(): {
   slug: string[];
 }[] {
-  return utils.generateParams().map((param) => ({
-    ...param,
-    slug: [...param.slug, 'og.png'],
-  }));
+  return metadataImage.generateParams();
 }
