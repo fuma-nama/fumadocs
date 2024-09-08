@@ -1,7 +1,7 @@
 {
   "name": "fumadocs",
-  "version": "13.4.7",
-  "description": "The framework for building a documentation website in Next.js",
+  "version": "0.0.0",
+  "description": "The CLI tool for Fumadocs",
   "keywords": [
     "NextJs",
     "Docs",
@@ -12,6 +12,7 @@
   "license": "MIT",
   "author": "Fuma Nama",
   "type": "module",
+  "bin": "./dist/index.js",
   "files": [
     "dist/*"
   ],
@@ -20,17 +21,21 @@
     "clean": "rimraf dist",
     "dev": "tsup --watch",
     "lint": "eslint .",
+    "sync": "tsx ./scripts/sync.ts",
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
+    "@clack/prompts": "^0.7.0",
     "commander": "^12.1.0",
-    "fumadocs-core": "workspace:*",
-    "fumadocs-ui": "workspace:*"
+    "execa": "^9.3.1",
+    "picocolors": "^1.1.0",
+    "ts-morph": "^23.0.0"
   },
   "devDependencies": {
     "@types/node": "22.5.4",
     "eslint-config-custom": "workspace:*",
-    "tsconfig": "workspace:*"
+    "tsconfig": "workspace:*",
+    "tsx": "^4.19.0"
   },
   "publishConfig": {
     "access": "public"

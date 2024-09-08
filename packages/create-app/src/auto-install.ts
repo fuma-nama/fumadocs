@@ -26,7 +26,7 @@ export function autoInstall(
 ): Promise<void> {
   return new Promise((res, reject) => {
     const installProcess = spawn(manager, ['install'], {
-      stdio: 'inherit',
+      stdio: 'ignore',
       env: {
         ...process.env,
         NODE_ENV: 'development',
