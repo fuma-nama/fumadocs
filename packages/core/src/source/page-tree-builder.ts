@@ -116,14 +116,14 @@ function resolveFolderItem(
 
   const linkResult = link.exec(item);
   if (linkResult?.groups) {
-    const { icon, url, text } = linkResult.groups;
+    const { icon, url, name } = linkResult.groups;
     const isRelative =
       url.startsWith('/') || url.startsWith('#') || url.startsWith('.');
 
     const node: PageTree.Item = {
       type: 'page',
       icon: ctx.options.resolveIcon?.(icon),
-      name: text,
+      name,
       url,
       external: !isRelative,
     };

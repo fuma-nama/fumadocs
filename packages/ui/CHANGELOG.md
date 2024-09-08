@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 13.4.9
+
+### Patch Changes
+
+- bcf51a6: Improve banner rainbow variant
+- Updated dependencies [083f04a]
+  - fumadocs-core@13.4.9
+
 ## 13.4.8
 
 ### Patch Changes

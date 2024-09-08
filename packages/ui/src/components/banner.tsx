@@ -106,7 +106,7 @@ const rainbowLayer = (
           '--via': 'rgba(164,255,68,0.4)',
           animationDirection: 'reverse',
           backgroundImage:
-            'repeating-linear-gradient(to right, var(--end), var(--start) 2%, var(--start) 5%, transparent 8%, transparent 14%, var(--via) 18%, var(--via) 22%, var(--mid) 28%, var(--mid) 30%, var(--via) 34%, var(--via) 36%, transparent, var(--end) 50%)',
+            'repeating-linear-gradient(60deg, var(--end), var(--start) 2%, var(--start) 5%, transparent 8%, transparent 14%, var(--via) 18%, var(--via) 22%, var(--mid) 28%, var(--mid) 30%, var(--via) 34%, var(--via) 36%, transparent, var(--end) calc(50% - 12px))',
           backgroundSize: '200% 100%',
           mixBlendMode: 'difference',
         } as object
@@ -124,8 +124,9 @@ const rainbowLayer = (
           '--end': 'rgba(64,0,255,0.51)',
           '--via': 'rgba(255,89,0,0.56)',
           backgroundImage:
-            'repeating-linear-gradient(to right, var(--end), var(--start) 4%, var(--start) 8%, transparent 9%, transparent 14%, var(--mid) 16%, var(--mid) 20%, transparent, var(--via) 36%, var(--via) 40%, transparent 42%, var(--end) 46%, var(--end) 50%)',
+            'repeating-linear-gradient(45deg, var(--end), var(--start) 4%, var(--start) 8%, transparent 9%, transparent 14%, var(--mid) 16%, var(--mid) 20%, transparent, var(--via) 36%, var(--via) 40%, transparent 42%, var(--end) 46%, var(--end) calc(50% - 16.8px))',
           backgroundSize: '200% 100%',
+          mixBlendMode: 'color-dodge',
         } as object
       }
     />
