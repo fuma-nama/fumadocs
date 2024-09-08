@@ -4,22 +4,14 @@ import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { baseOptions } from '@/app/layout.config';
 
 export default function Layout({
-  params: { lang },
+  params,
   children,
 }: {
   params: { lang: string };
   children: ReactNode;
 }) {
   return (
-    <DocsLayout
-      {...baseOptions}
-      tree={source.pageTree[lang]}
-      nav={{
-        ...baseOptions.nav,
-        title: lang === 'cn' ? '文檔' : 'My App',
-        url: `/${lang}`,
-      }}
-    >
+    <DocsLayout {...baseOptions} tree={source.pageTree[params.lang]}>
       {children}
     </DocsLayout>
   );

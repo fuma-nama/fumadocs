@@ -75,27 +75,23 @@ something`,
 
 test('Search API I18n', async () => {
   const api = createI18nSearchAPI('simple', {
+    i18n: {
+      languages: ['cn', 'en'],
+      defaultLanguage: 'en',
+    },
     indexes: [
-      [
-        'cn',
-        [
-          {
-            title: 'Hello World Chinese',
-            content: 'Hello World',
-            url: '/hello-world',
-          },
-        ],
-      ],
-      [
-        'en',
-        [
-          {
-            title: 'Hello World English',
-            content: 'Hello World',
-            url: '/hello-world',
-          },
-        ],
-      ],
+      {
+        title: 'Hello World Chinese',
+        content: 'Hello World',
+        url: '/hello-world',
+        locale: 'cn',
+      },
+      {
+        title: 'Hello World English',
+        content: 'Hello World',
+        url: '/hello-world',
+        locale: 'en',
+      },
     ],
   });
 

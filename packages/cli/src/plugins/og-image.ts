@@ -2,7 +2,7 @@ import picocolors from 'picocolors';
 import { generated } from '@/generated';
 import { type Plugin } from '@/commands/add';
 
-const { cyanBright, bold } = picocolors;
+const { cyanBright, bold, underline } = picocolors;
 
 export const ogImagePlugin: Plugin = {
   files: {
@@ -33,7 +33,7 @@ export function generateMetadata({ params }: { params: { slug?: string[] } }) {
 
   if (!page) notFound();
 
-  ${bold('return metadataImage.withImage({')}
+  ${bold(underline('return metadataImage.withImage({'))}
     title: page.data.title,
     description: page.data.description,
   });
