@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 13.4.9
+
+### Patch Changes
+
+- 083f04a: Fix link items text
+
 ## 13.4.8
 
 ### Patch Changes
