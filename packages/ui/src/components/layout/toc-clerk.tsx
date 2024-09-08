@@ -1,7 +1,7 @@
 'use client';
 import type { TOCItemType } from 'fumadocs-core/server';
 import * as Primitive from 'fumadocs-core/toc';
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/utils/cn';
 import { useI18n } from '@/contexts/i18n';
 import { useTocThumb } from '@/utils/use-toc-thumb';
@@ -23,7 +23,7 @@ export default function ClerkTOCItems({
     height: number;
   }>();
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (!containerRef.current) return;
     const container = containerRef.current;
 

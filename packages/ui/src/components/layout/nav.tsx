@@ -7,6 +7,7 @@ import {
   useState,
 } from 'react';
 import { cn } from '@/utils/cn';
+import { useI18n } from '@/contexts/i18n';
 
 export interface NavBoxProps {
   /**
@@ -61,9 +62,14 @@ export function NavBox({
   );
 }
 
-export function Title({ title, url = '/' }: TitleProps): React.ReactElement {
+export function Title({ title, url }: TitleProps): React.ReactElement {
+  const { locale } = useI18n();
+
   return (
-    <Link href={url} className="inline-flex items-center gap-2 font-semibold">
+    <Link
+      href={url ?? (locale ? `/${locale}` : '/')}
+      className="inline-flex items-center gap-2 font-semibold"
+    >
       {title}
     </Link>
   );
