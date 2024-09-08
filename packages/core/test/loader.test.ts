@@ -166,12 +166,14 @@ test('Nested Directories', async () => {
         },
         {
           "external": true,
+          "name": "Text",
           "type": "page",
           "url": "https://google.com",
         },
         {
           "external": true,
           "icon": "Icon",
+          "name": "Text",
           "type": "page",
           "url": "https://google.com",
         },
