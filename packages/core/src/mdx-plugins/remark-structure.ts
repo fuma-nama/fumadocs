@@ -2,7 +2,6 @@ import Slugger from 'github-slugger';
 import type { Root } from 'mdast';
 import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
-import remarkMdx from 'remark-mdx';
 import type { PluggableList, Transformer } from 'unified';
 import { visit, type Test } from 'unist-util-visit';
 import { flattenNode } from './remark-utils';
@@ -104,7 +103,6 @@ export function structure(
 ): StructuredData {
   const result = remark()
     .use(remarkGfm)
-    .use(remarkMdx)
     .use(remarkPlugins)
     .use(remarkStructure, options)
     .processSync(content);

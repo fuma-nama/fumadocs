@@ -1,16 +1,28 @@
 import picocolors from 'picocolors';
 import { generated } from '@/generated';
 import { type Plugin } from '@/commands/add';
+import { exists } from '@/utils/fs';
+import { resolveAppPath } from '@/utils/is-src';
 
 const { cyanBright, bold, underline } = picocolors;
 
+function isI18nEnabled(src: boolean): Promise<boolean> {
+  return exists(resolveAppPath('./lib/i18n.ts', src));
+}
+
 export const ogImagePlugin: Plugin = {
-  files: {
-    'lib/metadata.ts': generated['lib/metadata'],
-    'app/docs-og/[...slug]/route.tsx': generated['app/docs-og/[...slug]/route'],
+  files: async (src) => {
+    const route = (await isI18nEnabled(src))
+      ? 'app/[lang]/docs-og/[...slug]/route.tsx'
+      : 'app/docs-og/[...slug]/route.tsx';
+
+    return {
+      'lib/metadata.ts': generated['lib/metadata'],
+      [route]: generated['app/docs-og/[...slug]/route'],
+    };
   },
   dependencies: [],
-  instructions: [
+  instructions: (src) => [
     {
       type: 'text',
       text: cyanBright(bold('Import the utils like:')),
@@ -26,7 +38,7 @@ export const ogImagePlugin: Plugin = {
     },
     {
       type: 'code',
-      title: 'app/docs/[[...slug]]/page.tsx',
+      title: resolveAppPath('app/docs/[[...slug]]/page.tsx', src),
       code: `
 export function generateMetadata({ params }: { params: { slug?: string[] } }) {
   const page = source.getPage(params.slug);

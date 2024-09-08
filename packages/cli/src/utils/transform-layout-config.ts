@@ -1,6 +1,5 @@
-import { Project, ts } from 'ts-morph';
-import SyntaxKind = ts.SyntaxKind;
 import fs from 'node:fs/promises';
+import { Project, SyntaxKind } from 'ts-morph';
 
 export async function transformLayoutConfig(filePath: string): Promise<void> {
   let content: string;

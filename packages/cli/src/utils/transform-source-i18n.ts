@@ -1,6 +1,5 @@
 import * as fs from 'node:fs/promises';
-import { Project, StructureKind, ts } from 'ts-morph';
-import SyntaxKind = ts.SyntaxKind;
+import { Project, StructureKind, SyntaxKind } from 'ts-morph';
 
 export async function transformSourceI18n(filePath: string): Promise<void> {
   let content: string;

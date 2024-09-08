@@ -15,14 +15,18 @@ program
   .command('add')
   .description('Add a new plugin to your docs')
   .argument('<string>', 'plugin name')
-  .action(async (str) => {
+  .action(async (str: string) => {
     if (str === 'og-image') {
       await add(ogImagePlugin);
+      return;
     }
 
     if (str === 'i18n') {
       await add(i18nPlugin);
+      return;
     }
+
+    throw new Error(`Plugin not found: ${str}`);
   });
 
 program

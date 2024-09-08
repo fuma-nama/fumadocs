@@ -1,5 +1,4 @@
-import { source } from '@/app/source';
-import type { Metadata } from 'next';
+import { source } from '@/lib/source';
 import {
   DocsPage,
   DocsBody,
@@ -41,5 +40,5 @@ export function generateMetadata({ params }: { params: { slug?: string[] } }) {
   return {
     title: page.data.title,
     description: page.data.description,
-  } satisfies Metadata;
+  };
 }

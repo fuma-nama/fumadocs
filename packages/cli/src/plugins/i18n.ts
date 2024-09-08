@@ -4,18 +4,18 @@ import picocolors from 'picocolors';
 import { type Plugin } from '@/commands/add';
 import { generated } from '@/generated';
 import { transformLayoutConfig } from '@/utils/transform-layout-config';
-import { isSrc } from '@/utils/is-src';
+import { isSrc, resolveAppPath } from '@/utils/is-src';
 import { moveFiles } from '@/utils/move-files';
 import { isRelative } from '@/utils/fs';
 import { transformSourceI18n } from '@/utils/transform-source-i18n';
 
 export const i18nPlugin: Plugin = {
-  files: {
+  files: () => ({
     'lib/i18n.ts': generated['lib/i18n'],
     'middleware.ts': generated.middleware,
-  },
+  }),
   dependencies: [],
-  instructions: [
+  instructions: () => [
     {
       type: 'text',
       text: `Moved the ./app files to a [lang] route group.
@@ -39,7 +39,8 @@ export default function Page({
     {
       type: 'code',
       title: 'page.tsx',
-      code: `const page = source.getPage(params.slug, params.lang);`,
+      code: `const page = source.getPage(params.slug, params.lang);
+const pages = source.getPage(params.lang);`,
     },
     {
       type: 'code',
@@ -72,7 +73,3 @@ export default function Page({
     );
   },
 };
-
-function resolveAppPath(filePath: string, src: boolean): string {
-  return src ? path.join('./src', filePath) : filePath;
-}

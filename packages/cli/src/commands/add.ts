@@ -14,24 +14,28 @@ import {
 import picocolors from 'picocolors';
 import { getPackageManager } from '@/utils/get-package-manager';
 import { exists } from '@/utils/fs';
-import { isSrc } from '@/utils/is-src';
+import { isSrc, resolveAppPath } from '@/utils/is-src';
+
+type Awaitable<T> = T | Promise<T>;
 
 export interface Plugin {
   dependencies: string[];
-  files: Record<string, string>;
-  instructions: (
-    | {
-        type: 'code';
-        title?: string;
-        code: string;
-      }
-    | {
-        type: 'text';
-        text: string;
-      }
-  )[];
+  files: (src: boolean) => Awaitable<Record<string, string>>;
+  instructions: (src: boolean) => Awaitable<
+    (
+      | {
+          type: 'code';
+          title?: string;
+          code: string;
+        }
+      | {
+          type: 'text';
+          text: string;
+        }
+    )[]
+  >;
 
-  transform?: () => void | Promise<void>;
+  transform?: () => Awaitable<void>;
 }
 
 export async function add(plugin: Plugin): Promise<void> {
@@ -39,9 +43,10 @@ export async function add(plugin: Plugin): Promise<void> {
     picocolors.bgCyan(picocolors.black(picocolors.bold('Installing Plugins'))),
   );
   const useSrc = await isSrc();
+  const files = await plugin.files(useSrc);
 
-  for (const [name, content] of Object.entries(plugin.files)) {
-    const file = useSrc ? path.resolve('./src', name) : name;
+  for (const [name, content] of Object.entries(files)) {
+    const file = resolveAppPath(name, useSrc);
     log.step(picocolors.green(`Writing ${file} ★`));
 
     if (await exists(file)) {
@@ -79,7 +84,9 @@ Detected as ${manager}`,
     if (value) {
       const spin = spinner();
       spin.start('Installing dependencies');
-      await execa(`${manager} install ${plugin.dependencies.join(' ')}`);
+      await execa(`${manager} install ${plugin.dependencies.join(' ')}`, {
+        stdout: 'ignore',
+      });
       spin.stop('Successfully installed.');
     }
   }
@@ -105,7 +112,8 @@ prettier . --write`,
     }
   }
 
-  for (const text of plugin.instructions) {
+  const instructions = await plugin.instructions(useSrc);
+  for (const text of instructions) {
     if (text.type === 'text') {
       log.message(text.text, {
         symbol: '○',
