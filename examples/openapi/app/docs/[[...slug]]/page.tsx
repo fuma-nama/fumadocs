@@ -47,7 +47,7 @@ export function generateMetadata({ params }: { params: { slug?: string[] } }) {
 
   if (!page) notFound();
 
-  return metadataImage.withImage({
+  return metadataImage.withImage(page.slugs, {
     title: page.data.title,
     description: page.data.description,
   });

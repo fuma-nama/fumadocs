@@ -1,6 +1,6 @@
 import picocolors from 'picocolors';
 import { generated } from '@/generated';
-import { type Plugin } from '@/commands/add';
+import { type Plugin } from '@/commands/init';
 import { exists } from '@/utils/fs';
 import { resolveAppPath } from '@/utils/is-src';
 
@@ -45,7 +45,7 @@ export function generateMetadata({ params }: { params: { slug?: string[] } }) {
 
   if (!page) notFound();
 
-  ${bold(underline('return metadataImage.withImage({'))}
+  ${bold(underline('return metadataImage.withImage(page.slugs, {'))}
     title: page.data.title,
     description: page.data.description,
   });

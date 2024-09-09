@@ -8,10 +8,8 @@ export const templates = {
 
   'lib/i18n': './examples/i18n/lib/i18n.ts',
   middleware: './examples/i18n/middleware.ts',
-};
 
-export const examples = {
-  'fumadocs-mdx': './examples/next-mdx',
+  'scripts/generate-docs': './examples/openapi/scripts/generate-docs.mjs',
 };
 
 export async function sync(): Promise<void> {

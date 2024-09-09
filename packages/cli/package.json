@@ -1,5 +1,5 @@
 {
-  "name": "fumadocs",
+  "name": "fumadocs-cli",
   "version": "0.0.0",
   "description": "The CLI tool for Fumadocs",
   "keywords": [
@@ -12,7 +12,9 @@
   "license": "MIT",
   "author": "Fuma Nama",
   "type": "module",
-  "bin": "./dist/index.js",
+  "bin": {
+    "fumadocs": "./dist/index.js"
+  },
   "files": [
     "dist/*"
   ],
@@ -27,11 +29,13 @@
   "dependencies": {
     "@clack/prompts": "^0.7.0",
     "commander": "^12.1.0",
-    "execa": "^9.3.1",
+    "cross-spawn": "^7.0.3",
+    "package-manager-detector": "^0.2.0",
     "picocolors": "^1.1.0",
     "ts-morph": "^23.0.0"
   },
   "devDependencies": {
+    "@types/cross-spawn": "^6.0.6",
     "@types/node": "22.5.4",
     "eslint-config-custom": "workspace:*",
     "tsconfig": "workspace:*",

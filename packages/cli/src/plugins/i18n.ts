@@ -1,10 +1,10 @@
 import path from 'node:path';
 import { Project } from 'ts-morph';
 import picocolors from 'picocolors';
-import { type Plugin } from '@/commands/add';
+import { type Plugin } from '@/commands/init';
 import { generated } from '@/generated';
 import { transformLayoutConfig } from '@/utils/transform-layout-config';
-import { isSrc, resolveAppPath } from '@/utils/is-src';
+import { resolveAppPath } from '@/utils/is-src';
 import { moveFiles } from '@/utils/move-files';
 import { isRelative } from '@/utils/fs';
 import { transformSourceI18n } from '@/utils/transform-source-i18n';
@@ -48,9 +48,7 @@ const pages = source.getPage(params.lang);`,
       code: `const tree = source.pageTree[params.lang];`,
     },
   ],
-  async transform() {
-    const src = await isSrc();
-
+  async transform(src) {
     await Promise.all([
       transformLayoutConfig(resolveAppPath('./app/layout.config.tsx', src)),
       transformSourceI18n('./lib/source.ts'),

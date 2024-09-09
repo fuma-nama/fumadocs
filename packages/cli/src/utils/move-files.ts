@@ -1,9 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { type Project, ts } from 'ts-morph';
-import { isRelative } from '@/utils/fs';
-import SyntaxKind = ts.SyntaxKind;
 import { type Stats } from 'node:fs';
+import { type Project, SyntaxKind } from 'ts-morph';
+import { isRelative } from '@/utils/fs';
 
 const transformExts = ['.js', '.ts', '.tsx', '.jsx'];
 
