@@ -24,7 +24,7 @@ export const openapiPlugin: Plugin = {
   instructions: async () => [
     {
       type: 'text',
-      text: `Made a script to generate docs from OpenAPI Schema.
+      text: `I've made some changes to your Tailwind CSS config.
 You can add the APIPage component to your page.tsx:`,
     },
     {
@@ -42,7 +42,7 @@ import { openapi } from '@/lib/source';
     },
     {
       type: 'text',
-      text: 'Run the script with:',
+      text: `Paste your OpenAPI schema to ./openapi.json, and use this script to generate docs:`,
     },
     {
       type: 'code',
