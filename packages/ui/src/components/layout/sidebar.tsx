@@ -19,7 +19,7 @@ import { hasActive, isActive } from '@/utils/shared';
 import { LinkItem, type LinkItemType } from '@/components/layout/link-item';
 import { LargeSearchToggle } from '@/components/layout/search-toggle';
 import { useSearchContext } from '@/contexts/search';
-import { itemVariants } from '@/theme/variants';
+import { itemVariants } from '@/components/layout/variants';
 import {
   Collapsible,
   CollapsibleContent,

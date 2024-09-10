@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { MoreHorizontal } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { cn } from '@/utils/cn';
-import { buttonVariants } from '@/theme/variants';
+import { buttonVariants } from '@/components/ui/button';
 import type { SidebarProps } from '@/components/layout/sidebar';
 import { replaceOrDefault } from '@/utils/shared';
 import type { LinkItemType } from '@/components/layout/link-item';

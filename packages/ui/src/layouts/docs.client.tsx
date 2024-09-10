@@ -7,7 +7,7 @@ import { useSidebar } from '@/contexts/sidebar';
 import { useSearchContext } from '@/contexts/search';
 import { SearchToggle } from '@/components/layout/search-toggle';
 import { cn } from '@/utils/cn';
-import { buttonVariants } from '@/theme/variants';
+import { buttonVariants } from '@/components/ui/button';
 import { NavBox, Title } from '@/components/layout/nav';
 import type { SharedNavProps } from './shared';
 

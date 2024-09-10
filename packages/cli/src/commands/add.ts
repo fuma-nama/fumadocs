@@ -3,7 +3,6 @@ import { spawnSync } from 'node:child_process';
 import { log, confirm, isCancel, outro, spinner, intro } from '@clack/prompts';
 import { type Project } from 'ts-morph';
 import picocolors from 'picocolors';
-import { defineWorkspace } from 'vitest/config';
 import { createEmptyProject } from '@/utils/typescript';
 import { getPackageManager } from '@/utils/get-package-manager';
 import { isSrc } from '@/utils/is-src';
@@ -20,7 +19,7 @@ export async function add(
   branch = 'main',
   outDir = 'components',
 ): Promise<void> {
-  intro(picocolors.bold(picocolors.cyan(picocolors.black('Add Component'))));
+  intro(picocolors.bold(picocolors.bgCyan(picocolors.black('Add Component'))));
   const project = createEmptyProject();
 
   const result = await downloadFile(

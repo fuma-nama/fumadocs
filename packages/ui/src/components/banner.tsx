@@ -3,7 +3,7 @@
 import { type HTMLAttributes, useCallback, useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@/utils/cn';
-import { buttonVariants } from '@/theme/variants';
+import { buttonVariants } from '@/components/ui/button';
 
 export function Banner({
   id,

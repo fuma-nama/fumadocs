@@ -15,7 +15,7 @@ import {
 import { ThemeToggle } from '@/components/layout/theme-toggle';
 import { NavBox, Title } from '@/components/layout/nav';
 import { cn } from '@/utils/cn';
-import { buttonVariants } from '@/theme/variants';
+import { buttonVariants } from '@/components/ui/button';
 import { LanguageToggle } from '@/components/layout/language-toggle';
 import type { SharedNavProps } from './shared';
 

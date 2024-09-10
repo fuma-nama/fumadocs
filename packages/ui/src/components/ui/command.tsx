@@ -2,7 +2,7 @@ import { Command as CommandPrimitive } from 'cmdk';
 import * as React from 'react';
 import type { DialogProps } from '@radix-ui/react-dialog';
 import { cn } from '@/utils/cn';
-import { buttonVariants } from '@/theme/variants';
+import { buttonVariants } from '@/components/ui/button';
 
 const CommandInput = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Input>,

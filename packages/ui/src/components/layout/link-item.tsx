@@ -6,7 +6,7 @@ import { type ReactNode, useState } from 'react';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { cn } from '@/utils/cn';
 import { isActive } from '@/utils/shared';
-import { buttonVariants, itemVariants } from '@/theme/variants';
+import { buttonVariants } from '@/components/ui/button';
 import {
   Collapsible,
   CollapsibleContent,
@@ -17,6 +17,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { itemVariants } from '@/components/layout/variants';
 
 const linkItemVariants = cva(
   '-m-2 inline-flex items-center gap-1 p-2 text-fd-muted-foreground transition-colors [&_svg]:size-4',
