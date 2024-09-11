@@ -1,9 +1,9 @@
 import { Command } from 'commander';
-import { ogImagePlugin } from '@/plugins/og-image';
+import picocolors from 'picocolors';
 import { init } from '@/commands/init';
-import { i18nPlugin } from '@/plugins/i18n';
-import { openapiPlugin } from '@/plugins/openapi';
 import { add } from '@/commands/add';
+import { initConfig, loadConfig } from '@/config';
+import { plugins } from '@/plugins';
 import packageJson from '../package.json';
 
 const program = new Command();
@@ -14,34 +14,36 @@ program
   .version(packageJson.version);
 
 program
+  .command('i')
+  .description('init a config for Fumadocs CLI')
+  .action(async () => {
+    await initConfig();
+    console.log(picocolors.green('Successful: ./cli.json'));
+  });
+
+program
   .command('init')
   .description('init a new plugin to your docs')
   .argument('<string>', 'plugin name')
-  .action(async (str: string) => {
-    if (str === 'og-image') {
-      await init(ogImagePlugin);
-      return;
-    }
+  .option('--config <string>')
+  .action(async (str: string, { config }) => {
+    const loadedConfig = await loadConfig(config as string | undefined);
+    const plugin = str in plugins ? plugins[str] : undefined;
 
-    if (str === 'i18n') {
-      await init(i18nPlugin);
-      return;
-    }
+    if (!plugin) throw new Error(`Plugin not found: ${str}`);
 
-    if (str === 'openapi') {
-      await init(openapiPlugin);
-      return;
-    }
-
-    throw new Error(`Plugin not found: ${str}`);
+    await init(plugin, loadedConfig);
   });
 
 program
   .command('add')
   .description('add a new component to your docs')
   .argument('<string>', 'component name/path')
-  .action(async (str: string) => {
-    await add(str);
+  .option('--config <string>')
+  .action(async (str: string, { config }) => {
+    const loadedConfig = await loadConfig(config as string | undefined);
+
+    await add(str, 'main', loadedConfig);
   });
 
 program.parse();

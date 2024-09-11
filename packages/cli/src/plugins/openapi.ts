@@ -1,20 +1,21 @@
 import fs from 'node:fs/promises';
+import path from 'node:path';
 import { StructureKind } from 'ts-morph';
 import { type Plugin } from '@/commands/init';
-import { resolveAppPath } from '@/utils/is-src';
 import { createEmptyProject } from '@/utils/typescript';
 import { generated } from '@/generated';
 import { getPackageManager } from '@/utils/get-package-manager';
 import { transformTailwind } from '@/utils/transform-tailwind';
+import { type Config, defaultConfig } from '@/config';
 
 export const openapiPlugin: Plugin = {
   files: () => ({
     'scripts/generate-docs.mjs': generated['scripts/generate-docs'],
   }),
   dependencies: ['fumadocs-openapi', 'rimraf'],
-  async transform(src) {
+  async transform(ctx) {
     await Promise.all([
-      transformSource(src),
+      transformSource(ctx),
       transformTailwind({
         addContents: [`./node_modules/fumadocs-openapi/dist/**/*.js`],
       }),
@@ -66,17 +67,16 @@ async function addScript(): Promise<void> {
   await fs.writeFile('package.json', JSON.stringify(parsed, null, 2));
 }
 
-async function transformSource(src: boolean): Promise<void> {
-  const source = resolveAppPath('./lib/source.ts', src);
+async function transformSource(config: Config): Promise<void> {
+  const source = path.join(
+    config.aliases?.libDir ?? defaultConfig.aliases.libDir,
+    'source.ts',
+  );
   const project = createEmptyProject();
 
-  const file = project.createSourceFile(
-    source,
-    await fs.readFile(source).then((res) => res.toString()),
-    {
-      overwrite: true,
-    },
-  );
+  const file = project.createSourceFile(source, undefined, {
+    overwrite: true,
+  });
 
   file.addImportDeclaration({
     kind: StructureKind.ImportDeclaration,

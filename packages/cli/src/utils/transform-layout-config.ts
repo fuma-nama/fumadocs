@@ -1,8 +1,10 @@
 import fs from 'node:fs/promises';
-import { SyntaxKind } from 'ts-morph';
-import { createEmptyProject } from '@/utils/typescript';
+import { type Project, SyntaxKind } from 'ts-morph';
 
-export async function transformLayoutConfig(filePath: string): Promise<void> {
+export async function transformLayoutConfig(
+  project: Project,
+  filePath: string,
+): Promise<void> {
   let content: string;
 
   try {
@@ -10,8 +12,6 @@ export async function transformLayoutConfig(filePath: string): Promise<void> {
   } catch (_) {
     return;
   }
-
-  const project = createEmptyProject();
 
   const sourceFile = project.createSourceFile(filePath, content, {
     overwrite: true,

@@ -1,7 +1,14 @@
 import * as fs from 'node:fs/promises';
-import { Project, StructureKind, SyntaxKind } from 'ts-morph';
+import path from 'node:path';
+import { type Project, StructureKind, SyntaxKind } from 'ts-morph';
+import { toReferencePath } from '@/utils/transform-references';
+import { type Config, defaultConfig } from '@/config';
 
-export async function transformSourceI18n(filePath: string): Promise<void> {
+export async function transformSourceI18n(
+  project: Project,
+  filePath: string,
+  config: Config,
+): Promise<void> {
   let content: string;
 
   try {
@@ -9,17 +16,16 @@ export async function transformSourceI18n(filePath: string): Promise<void> {
   } catch (e) {
     return;
   }
-
-  const project = new Project({
-    compilerOptions: {},
-  });
   const sourceFile = project.createSourceFile(filePath, content, {
     overwrite: true,
   });
 
   sourceFile.addImportDeclaration({
     kind: StructureKind.ImportDeclaration,
-    moduleSpecifier: '@/lib/i18n',
+    moduleSpecifier: toReferencePath(
+      filePath,
+      path.join(config.aliases?.libDir ?? defaultConfig.aliases.libDir, 'i18n'),
+    ),
     namedImports: ['i18n'],
   });
 
@@ -33,8 +39,7 @@ export async function transformSourceI18n(filePath: string): Promise<void> {
     SyntaxKind.ObjectLiteralExpression,
   );
 
-  if (!loaderCall) return;
-  if (loaderCall.getProperty('i18n')) return;
+  if (!loaderCall || loaderCall.getProperty('i18n')) return;
 
   loaderCall.addPropertyAssignment({
     name: 'i18n',

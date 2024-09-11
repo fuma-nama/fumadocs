@@ -1,12 +1,25 @@
 import path from 'node:path';
-import { spawnSync } from 'node:child_process';
+import { sync as spawnSync } from 'cross-spawn';
 import { log, confirm, isCancel, outro, spinner, intro } from '@clack/prompts';
 import { type Project } from 'ts-morph';
 import picocolors from 'picocolors';
 import { createEmptyProject } from '@/utils/typescript';
 import { getPackageManager } from '@/utils/get-package-manager';
-import { isSrc } from '@/utils/is-src';
 import { exists } from '@/utils/fs';
+import { type Config } from '@/config';
+import {
+  getOutputPath,
+  toReferencePath,
+  transformReferences,
+} from '@/utils/transform-references';
+import { isSrc } from '@/utils/is-src';
+
+interface Context {
+  config: Config;
+  project: Project;
+  branch: string;
+  src: boolean;
+}
 
 /**
  * A set of downloaded paths (without ext)
@@ -17,16 +30,20 @@ const excludedDeps = ['react', 'next', 'fumadocs-ui', 'fumadocs-core'];
 export async function add(
   name: string,
   branch = 'main',
-  outDir = 'components',
+  config: Config = {},
 ): Promise<void> {
   intro(picocolors.bold(picocolors.bgCyan(picocolors.black('Add Component'))));
   const project = createEmptyProject();
 
   const result = await downloadFile(
     `src/components/${name}`,
-    path.resolve(outDir, name),
-    project,
-    branch,
+    getOutputPath(`components/${name}`, config),
+    {
+      project,
+      branch,
+      config,
+      src: await isSrc(),
+    },
   );
 
   if (!result) {
@@ -56,56 +73,54 @@ export async function add(
   outro(picocolors.bold(picocolors.greenBright('Component installed')));
 }
 
+interface DownloadFileResult {
+  deps: string[];
+  found: FindResult;
+}
+
 async function downloadFile(
   pathWithoutExt: string,
   outPathWithoutExt: string,
-  project: Project,
-  branch = 'main',
-): Promise<
-  | {
-      deps: string[];
-      found: FindResult;
-    }
-  | undefined
-> {
+  ctx: Context,
+): Promise<DownloadFileResult | undefined> {
   const deps: string[] = [];
-  const rootUrl = `https://raw.githubusercontent.com/fuma-nama/fumadocs/${branch}/packages/ui`;
+  const rootUrl = `https://raw.githubusercontent.com/fuma-nama/fumadocs/${ctx.branch}/packages/ui`;
 
   const found = await find(rootUrl, pathWithoutExt);
   if (!found) return;
 
   const outPath = `${outPathWithoutExt}.${found.ext}`;
-  const file = project.createSourceFile(outPath, found.code, {
+  const file = ctx.project.createSourceFile(outPath, found.code, {
     overwrite: true,
   });
 
-  for (const item of file.getImportDeclarations()) {
-    const src = item.getModuleSpecifier().getLiteralValue();
+  await transformReferences(
+    file,
+    // resolved from Fumadocs repo, we use `./src/*` for import aliases
+    true,
+    async (resolved) => {
+      if (resolved.type === 'dep') {
+        deps.push(resolved.name);
+        return;
+      }
 
-    const reference = await downloadReference(src, outPath, project, branch);
-    item.getModuleSpecifier().setLiteralValue(reference.replaceSrc);
-    deps.push(...reference.deps);
-  }
+      const downloadPath = getOutputPath(
+        path.relative('src', resolved.path),
+        ctx.config,
+      );
+      const downloaded = await downloadFile(resolved.path, downloadPath, ctx);
+      if (!downloaded) throw new Error(`Cannot find file: ${resolved.path}`);
 
-  for (const item of file.getExportDeclarations()) {
-    const specifier = item.getModuleSpecifier();
-    if (!specifier) continue;
+      deps.push(...downloaded.deps);
+      return toReferencePath(outPath, downloadPath);
+    },
+  );
 
-    const reference = await downloadReference(
-      specifier.getLiteralValue(),
-      outPath,
-      project,
-      branch,
-    );
-    specifier.setLiteralValue(reference.replaceSrc);
-    deps.push(...reference.deps);
-  }
-
-  const isOverride = await exists(file.getFilePath());
+  const isOverride = await exists(outPath);
 
   if (isOverride) {
     const value = await confirm({
-      message: `Do you want to override ${file.getFilePath()}?`,
+      message: `Do you want to override ${outPath}?`,
     });
 
     if (isCancel(value)) {
@@ -123,53 +138,6 @@ async function downloadFile(
   return {
     found,
     deps,
-  };
-}
-
-/**
- * Download referenced files, given an import/export module specifier. (e.g. `@/files`)
- */
-async function downloadReference(
-  src: string,
-  sourceFile: string,
-  project: Project,
-  branch: string,
-): Promise<{
-  replaceSrc: string;
-  deps: string[];
-}> {
-  const resolved = resolveImport(src);
-
-  if (resolved.type === 'dep') {
-    return {
-      replaceSrc: src,
-      deps: [resolved.name],
-    };
-  }
-
-  const resolvedOut = (await isSrc())
-    ? resolved.pathWithoutExt
-    : path.relative('src', resolved.pathWithoutExt);
-
-  const res = await downloadFile(
-    resolved.pathWithoutExt,
-    resolvedOut,
-    project,
-    branch,
-  );
-
-  if (!res) {
-    throw new Error(`${resolved.pathWithoutExt} not found`);
-  }
-
-  const importPath = path.relative(
-    path.dirname(sourceFile),
-    `${resolvedOut}.${res.found.ext}`,
-  );
-
-  return {
-    replaceSrc: importPath.startsWith('../') ? importPath : `./${importPath}`,
-    deps: res.deps,
   };
 }
 
@@ -204,34 +172,3 @@ async function find(
  * Only look for TypeScript extensions
  */
 const resolveExtensions = ['tsx', 'ts'];
-
-function resolveImport(src: string):
-  | {
-      type: 'dep';
-      name: string;
-    }
-  | {
-      type: 'file';
-      pathWithoutExt: string;
-    } {
-  if (src.startsWith('@/') || src.startsWith('./') || src.startsWith('../')) {
-    return {
-      type: 'file',
-      pathWithoutExt: path.join('./src', src.slice('@/'.length)),
-    };
-  }
-
-  if (src.startsWith('@')) {
-    const segments = src.split('/');
-
-    return {
-      type: 'dep',
-      name: segments.slice(0, 2).join('/'),
-    };
-  }
-
-  return {
-    type: 'dep',
-    name: src.split('/')[0],
-  };
-}

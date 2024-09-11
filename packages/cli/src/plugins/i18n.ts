@@ -1,5 +1,4 @@
 import path from 'node:path';
-import { Project } from 'ts-morph';
 import picocolors from 'picocolors';
 import { type Plugin } from '@/commands/init';
 import { generated } from '@/generated';
@@ -8,6 +7,8 @@ import { resolveAppPath } from '@/utils/is-src';
 import { moveFiles } from '@/utils/move-files';
 import { isRelative } from '@/utils/fs';
 import { transformSourceI18n } from '@/utils/transform-source-i18n';
+import { defaultConfig } from '@/config';
+import { createEmptyProject } from '@/utils/typescript';
 
 export const i18nPlugin: Plugin = {
   files: () => ({
@@ -48,19 +49,27 @@ const pages = source.getPage(params.lang);`,
       code: `const tree = source.pageTree[params.lang];`,
     },
   ],
-  async transform(src) {
+  async transform(ctx) {
+    const project = createEmptyProject();
+
     await Promise.all([
-      transformLayoutConfig(resolveAppPath('./app/layout.config.tsx', src)),
-      transformSourceI18n('./lib/source.ts'),
+      transformLayoutConfig(
+        project,
+        resolveAppPath('./app/layout.config.tsx', ctx.src),
+      ),
+      transformSourceI18n(
+        project,
+        path.join(
+          ctx.aliases?.libDir ?? defaultConfig.aliases.libDir,
+          'source.ts',
+        ),
+        ctx,
+      ),
     ]);
 
-    const project = new Project({
-      compilerOptions: {},
-    });
-
     await moveFiles(
-      resolveAppPath('./app', src),
-      resolveAppPath('./app/[lang]', src),
+      resolveAppPath('./app', ctx.src),
+      resolveAppPath('./app/[lang]', ctx.src),
       (v) => {
         return (
           path.basename(v, path.extname(v)) !== 'layout.config' &&
@@ -68,6 +77,7 @@ const pages = source.getPage(params.lang);`,
         );
       },
       project,
+      ctx.src,
     );
   },
 };

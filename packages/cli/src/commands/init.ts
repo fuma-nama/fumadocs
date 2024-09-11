@@ -1,5 +1,3 @@
-import * as fs from 'node:fs/promises';
-import path from 'node:path';
 import * as process from 'node:process';
 import {
   intro,
@@ -14,14 +12,30 @@ import picocolors from 'picocolors';
 import { sync } from 'cross-spawn';
 import { getPackageManager } from '@/utils/get-package-manager';
 import { exists } from '@/utils/fs';
-import { isSrc, resolveAppPath } from '@/utils/is-src';
+import { isSrc } from '@/utils/is-src';
+import { type Config } from '@/config';
+import {
+  getOutputPath,
+  toReferencePath,
+  transformReferences,
+} from '@/utils/transform-references';
+import { createEmptyProject } from '@/utils/typescript';
 
-type Awaitable<T> = T | Promise<T>;
+export type Awaitable<T> = T | Promise<T>;
+
+export interface PluginContext extends Config {
+  src: boolean;
+
+  /**
+   * Original path in `files` - Transformed output path
+   */
+  outFileMap: Map<string, string>;
+}
 
 export interface Plugin {
   dependencies: string[];
-  files: (src: boolean) => Awaitable<Record<string, string>>;
-  instructions: (src: boolean) => Awaitable<
+  files: (ctx: PluginContext) => Awaitable<Record<string, string>>;
+  instructions: (ctx: PluginContext) => Awaitable<
     (
       | {
           type: 'code';
@@ -35,18 +49,26 @@ export interface Plugin {
     )[]
   >;
 
-  transform?: (src: boolean) => Awaitable<void>;
+  transform?: (ctx: PluginContext) => Awaitable<void>;
 }
 
-export async function init(plugin: Plugin): Promise<void> {
+export async function init(plugin: Plugin, config: Config = {}): Promise<void> {
   intro(
     picocolors.bgCyan(picocolors.black(picocolors.bold('Installing Plugins'))),
   );
-  const useSrc = await isSrc();
-  const files = await plugin.files(useSrc);
+  const ctx: PluginContext = {
+    src: await isSrc(),
+    outFileMap: new Map(),
+    ...config,
+  };
+
+  const files = await plugin.files(ctx);
+  const project = createEmptyProject();
 
   for (const [name, content] of Object.entries(files)) {
-    const file = resolveAppPath(name, useSrc);
+    const file = getOutputPath(name, ctx);
+    ctx.outFileMap.set(name, file);
+
     log.step(picocolors.green(`Writing ${file} ★`));
 
     if (await exists(file)) {
@@ -64,8 +86,17 @@ export async function init(plugin: Plugin): Promise<void> {
       if (!value) continue;
     }
 
-    await fs.mkdir(path.dirname(file), { recursive: true });
-    await fs.writeFile(file, content);
+    const sourceFile = project.createSourceFile(file, content, {
+      overwrite: true,
+    });
+
+    await transformReferences(sourceFile, ctx.src, (resolved) => {
+      if (resolved.type !== 'file') return;
+
+      return toReferencePath(file, getOutputPath(resolved.path, ctx));
+    });
+
+    await sourceFile.save();
   }
 
   if (plugin.dependencies.length > 0) {
@@ -102,7 +133,7 @@ export async function init(plugin: Plugin): Promise<void> {
     }
 
     if (value) {
-      await plugin.transform(useSrc);
+      await plugin.transform(ctx);
       note(
         `You can format the output with Prettier or other code formating tools
 prettier . --write`,
@@ -111,7 +142,7 @@ prettier . --write`,
     }
   }
 
-  const instructions = await plugin.instructions(useSrc);
+  const instructions = await plugin.instructions(ctx);
   for (const text of instructions) {
     if (text.type === 'text') {
       log.message(text.text, {

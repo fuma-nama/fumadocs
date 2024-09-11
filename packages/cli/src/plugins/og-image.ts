@@ -11,8 +11,8 @@ function isI18nEnabled(src: boolean): Promise<boolean> {
 }
 
 export const ogImagePlugin: Plugin = {
-  files: async (src) => {
-    const route = (await isI18nEnabled(src))
+  files: async (ctx) => {
+    const route = (await isI18nEnabled(ctx.src))
       ? 'app/[lang]/docs-og/[...slug]/route.tsx'
       : 'app/docs-og/[...slug]/route.tsx';
 
@@ -22,7 +22,7 @@ export const ogImagePlugin: Plugin = {
     };
   },
   dependencies: [],
-  instructions: (src) => [
+  instructions: (ctx) => [
     {
       type: 'text',
       text: cyanBright(bold('Import the utils like:')),
@@ -38,7 +38,7 @@ export const ogImagePlugin: Plugin = {
     },
     {
       type: 'code',
-      title: resolveAppPath('app/docs/[[...slug]]/page.tsx', src),
+      title: resolveAppPath('app/docs/[[...slug]]/page.tsx', ctx.src),
       code: `
 export function generateMetadata({ params }: { params: { slug?: string[] } }) {
   const page = source.getPage(params.slug);

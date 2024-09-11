@@ -1,8 +1,12 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { type Stats } from 'node:fs';
-import { type Project, SyntaxKind } from 'ts-morph';
+import { type Project } from 'ts-morph';
 import { isRelative } from '@/utils/fs';
+import {
+  toReferencePath,
+  transformReferences,
+} from '@/utils/transform-references';
 
 const transformExts = ['.js', '.ts', '.tsx', '.jsx'];
 
@@ -16,6 +20,7 @@ export async function moveFiles(
   to: string,
   filter: (file: string) => boolean | Promise<boolean>,
   project: Project,
+  src: boolean,
   /**
    * the original directory to move files from
    */
@@ -39,6 +44,7 @@ export async function moveFiles(
           path.resolve(to, item),
           filter,
           project,
+          src,
           originalDir,
         );
       }),
@@ -62,26 +68,12 @@ export async function moveFiles(
       overwrite: true,
     });
 
-    const imports = sourceFile.getDescendantsOfKind(
-      SyntaxKind.ImportDeclaration,
-    );
+    await transformReferences(sourceFile, src, (resolved) => {
+      if (resolved.type !== 'file') return;
+      if (isRelative(originalDir, from) && filter(resolved.path)) return;
 
-    for (const item of imports) {
-      const module = item.getModuleSpecifier();
-      const file = module.getLiteralValue();
-
-      // ignore absolute/import alias
-      // this may create issues, we;ll suggest devs to fix them manually
-      if (!file.startsWith('./') && !file.startsWith('../')) continue;
-      const importPath = path.resolve(path.dirname(from), file);
-
-      if (isRelative(originalDir, from) && filter(importPath)) continue;
-      const newImportPath = path.relative(path.dirname(to), importPath);
-
-      module.setLiteralValue(
-        newImportPath.startsWith('../') ? newImportPath : `./${newImportPath}`,
-      );
-    }
+      return toReferencePath(to, resolved.path);
+    });
 
     await sourceFile.save();
   }

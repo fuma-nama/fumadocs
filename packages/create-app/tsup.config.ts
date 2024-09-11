@@ -5,14 +5,16 @@ import uiPkg from '../ui/package.json';
 import mdxPkg from '../mdx/package.json';
 import contentCollectionsPkg from '../content-collections/package.json';
 
+const versions = {
+  'fumadocs-core': corePkg.version,
+  'fumadocs-ui': uiPkg.version,
+  'fumadocs-mdx': mdxPkg.version,
+  '@fumadocs/content-collections': contentCollectionsPkg.version,
+};
+
 writeFileSync(
-  './versions.json',
-  JSON.stringify({
-    'fumadocs-core': corePkg.version,
-    'fumadocs-ui': uiPkg.version,
-    'fumadocs-mdx': mdxPkg.version,
-    '@fumadocs/content-collections': contentCollectionsPkg.version,
-  }),
+  './src/versions.js',
+  `export const versions = ${JSON.stringify(versions)}`,
 );
 
 console.log('Create-Fumadocs-App: versions.json updated');
