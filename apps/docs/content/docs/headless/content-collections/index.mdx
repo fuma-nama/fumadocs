@@ -56,9 +56,9 @@ And pass it to Source API.
 
 ```json doc-gen:file
 {
-  "file": "../../examples/content-collections/app/source.ts",
+  "file": "../../examples/content-collections/lib/source.ts",
   "codeblock": {
-    "meta": "title=\"app/source.ts\""
+    "meta": "title=\"lib/source.ts\""
   }
 }
 ```
@@ -66,7 +66,7 @@ And pass it to Source API.
 Done! You can access the pages and generated page tree from Source API.
 
 ```ts
-import { getPage } from '@/app/source';
+import { getPage } from '@/lib/source';
 
 const page = getPage(slugs);
 

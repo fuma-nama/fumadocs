@@ -1,4 +1,4 @@
-import type { Root, RootContent } from 'hast';
+import type { Root } from 'hast';
 import { type RehypeShikiOptions } from '@shikijs/rehype';
 import rehypeShikiFromHighlighter from '@shikijs/rehype/core';
 import {
@@ -14,6 +14,7 @@ import {
   bundledLanguages,
   type BuiltinTheme,
 } from 'shiki';
+import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
 import type { IconOptions, CodeBlockIcon } from './transformer-icon';
 import { transformerIcon } from './transformer-icon';
 
@@ -180,6 +181,7 @@ export function rehypeCode(
 function transformerTab(): ShikiTransformer {
   return {
     name: 'rehype-code:tab',
+    // @ts-expect-error -- types not compatible with MDX
     root(root) {
       const meta = this.options.meta;
       if (typeof meta?.tab !== 'string') return root;
@@ -197,9 +199,9 @@ function transformerTab(): ShikiTransformer {
               { type: 'mdxJsxAttribute', name: 'value', value: meta.tab },
             ],
             children: root.children,
-          } as RootContent,
+          } as MdxJsxFlowElement,
         ],
-      } as ReturnType<NonNullable<ShikiTransformer['root']>>;
+      };
     },
   };
 }

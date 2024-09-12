@@ -3,7 +3,7 @@ import { SearchIcon } from 'lucide-react';
 import { useSearchContext } from '@/contexts/search';
 import { useI18n } from '@/contexts/i18n';
 import { cn } from '@/utils/cn';
-import { buttonVariants } from '@/theme/variants';
+import { buttonVariants } from '@/components/ui/button';
 
 export function SearchToggle(
   props: ButtonHTMLAttributes<HTMLButtonElement>,

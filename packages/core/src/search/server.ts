@@ -309,6 +309,5 @@ export function initAdvancedSearch({
   };
 }
 
-// TODO: Use new i18n API (major)
-export { createI18nSearchAPI as createI18nSearchAPIExperimental } from './i18n-api';
-export { createI18nSearchAPI } from './legacy-i18n-api';
+export { createFromSource } from './create-from-source';
+export { createI18nSearchAPI } from './i18n-api';

@@ -12,7 +12,7 @@ Define the i18n configurations in a file, we will import it with `@/i18n` in thi
 
 ```json doc-gen:file
 {
-  "file": "../../examples/i18n/i18n.ts",
+  "file": "../../examples/i18n/lib/i18n.ts",
   "codeblock": {
     "lang": "ts",
     "meta": "title=\"i18n.ts\""
@@ -35,7 +35,7 @@ export const source = loader({
 Update the usages to your source:
 
 ```ts
-import { source } from '@/app/source';
+import { source } from '@/lib/source';
 
 // get page tree
 source.pageTree[params.lang];
@@ -121,7 +121,7 @@ Make sure to update references to `source` and configure Static Site Generation 
 
 ```json doc-gen:file
 {
-  "file": "../../examples/i18n/app/[lang]/[[...slug]]/page.tsx",
+  "file": "../../examples/i18n/app/[lang]/docs/[[...slug]]/page.tsx",
   "codeblock": {
     "lang": "tsx",
     "meta": "title=\"page.tsx\""
@@ -183,9 +183,9 @@ import { I18nProvider } from 'fumadocs-ui/i18n';
 To allow users changing their language, enable `i18n` on your layouts.
 
 ```tsx title="app/layout.config.tsx" twoslash
-import type { HomeLayoutProps } from 'fumadocs-ui/home-layout';
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 
-export const baseOptions: HomeLayoutProps = {
+export const baseOptions: BaseLayoutProps = {
   i18n: true,
 };
 ```

@@ -4,7 +4,7 @@ import { SidebarIcon } from 'lucide-react';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { Sidebar, type SidebarProps } from '@/components/layout/sidebar';
 import { cn } from '@/utils/cn';
-import { buttonVariants } from '@/theme/variants';
+import { buttonVariants } from '@/components/ui/button';
 import { useSidebar } from '@/contexts/sidebar';
 
 export function DynamicSidebar(props: SidebarProps): React.ReactElement {

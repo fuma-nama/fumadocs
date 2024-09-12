@@ -3,7 +3,7 @@ import { type AnchorHTMLAttributes, forwardRef } from 'react';
 import { Edit } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { useI18n } from '@/contexts/i18n';
-import { buttonVariants } from '@/theme/variants';
+import { buttonVariants } from '@/components/ui/button';
 
 export interface EditOnGitHubOptions
   extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href' | 'children'> {

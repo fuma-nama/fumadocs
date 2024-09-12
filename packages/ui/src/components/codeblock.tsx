@@ -16,7 +16,7 @@ import {
   ScrollViewport,
 } from '@/components/ui/scroll-area';
 import { useCopyButton } from '@/utils/use-copy-button';
-import { buttonVariants } from '@/theme/variants';
+import { buttonVariants } from '@/components/ui/button';
 
 export type CodeBlockProps = HTMLAttributes<HTMLElement> & {
   /**

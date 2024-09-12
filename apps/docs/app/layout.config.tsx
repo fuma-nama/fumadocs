@@ -1,14 +1,14 @@
-import { type DocsLayoutProps } from 'fumadocs-ui/layout';
+import { type DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
 import { BookIcon, Heart, LayoutTemplateIcon } from 'lucide-react';
 import Image from 'next/image';
 import { RootToggle } from 'fumadocs-ui/components/layout/root-toggle';
-import type { HomeLayoutProps } from 'fumadocs-ui/home-layout';
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import { FumadocsIcon, NavChildren } from '@/app/layout.client';
 import Logo from '@/public/logo.png';
 import { utils } from '@/app/source';
 import { modes } from '@/utils/modes';
 
-export const baseOptions: HomeLayoutProps = {
+export const baseOptions: BaseLayoutProps = {
   githubUrl: 'https://github.com/fuma-nama/fumadocs',
   nav: {
     title: (

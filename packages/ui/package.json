@@ -32,13 +32,9 @@
       "import": "./dist/i18n.js",
       "types": "./dist/i18n.d.ts"
     },
-    "./layout": {
-      "import": "./dist/layout.js",
-      "types": "./dist/layout.d.ts"
-    },
-    "./home-layout": {
-      "import": "./dist/home-layout.js",
-      "types": "./dist/home-layout.d.ts"
+    "./layouts/*": {
+      "import": "./dist/layouts/*.js",
+      "types": "./dist/layouts/*.d.ts"
     },
     "./page": {
       "import": "./dist/page.js",
@@ -71,11 +67,8 @@
       "i18n": [
         "./dist/i18n.d.ts"
       ],
-      "layout": [
-        "./dist/layout.d.ts"
-      ],
-      "home-layout": [
-        "./dist/home-layout.d.ts"
+      "layouts/*": [
+        "./dist/layouts/*.d.ts"
       ],
       "page": [
         "./dist/page.d.ts"
@@ -117,7 +110,6 @@
     "class-variance-authority": "^0.7.0",
     "cmdk": "^1.0.0",
     "fumadocs-core": "workspace:*",
-    "lucide-react": "^0.438.0",
     "next-themes": "^0.3.0",
     "react-medium-image-zoom": "^5.2.9",
     "swr": "^2.2.5",
@@ -130,6 +122,7 @@
     "@types/react-dom": "^18.3.0",
     "algoliasearch": "^4.24.0",
     "eslint-config-custom": "workspace:*",
+    "lucide-react": "^0.438.0",
     "next": "^14.2.8",
     "postcss": "^8.4.45",
     "postcss-cli": "^11.0.0",

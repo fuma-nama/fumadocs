@@ -49,22 +49,6 @@ export interface LoaderOptions {
    * Configure i18n
    */
   i18n?: I18nConfig;
-
-  /**
-   * Accepted languages.
-   *
-   * A page tree will be built for each language.
-   *
-   * @deprecated Use `i18n` instead
-   */
-  languages?: string[];
-
-  /**
-   * Default locale when locale is not provided.
-   *
-   * @deprecated Use `i18n` instead
-   */
-  defaultLanguage?: string;
 }
 
 export interface Source<Config extends SourceConfig> {
@@ -96,6 +80,7 @@ export interface LoaderOutput<Config extends LoaderConfig> {
   pageTree: Config['i18n'] extends true
     ? Record<string, PageTree.Root>
     : PageTree.Root;
+  _i18n?: I18nConfig;
 
   files: File[];
 
@@ -186,27 +171,8 @@ export function loader<Options extends LoaderOptions>(
   options: Options,
 ): LoaderOutput<{
   source: InferSourceConfig<Options['source']>;
-  i18n: Options['i18n'] extends I18nConfig
-    ? true
-    : Options['languages'] extends string[]
-      ? true
-      : false;
+  i18n: Options['i18n'] extends I18nConfig ? true : false;
 }> {
-  // TODO: Remove deprecated `languages` option (major)
-  if (options.languages) {
-    console.warn(
-      "Fumadocs: It's highly recommended to use `i18n` config instead of passing `languages` to loader.",
-    );
-
-    return createOutput({
-      ...options,
-      i18n: {
-        languages: options.languages,
-        defaultLanguage: options.defaultLanguage,
-      },
-    }) as ReturnType<typeof loader<Options>>;
-  }
-
   return createOutput(options) as ReturnType<typeof loader<Options>>;
 }
 
@@ -248,6 +214,7 @@ function createOutput({
         });
 
   return {
+    _i18n: i18n,
     pageTree: pageTree as LoaderOutput<LoaderConfig>['pageTree'],
     files: storage.list(),
     getPages(language = i18n?.defaultLanguage ?? '') {

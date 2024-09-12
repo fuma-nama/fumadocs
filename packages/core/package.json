@@ -28,10 +28,6 @@
       "import": "./dist/search/client.js",
       "types": "./dist/search/client.d.ts"
     },
-    "./search/shared": {
-      "import": "./dist/search/shared.js",
-      "types": "./dist/search/shared.d.ts"
-    },
     "./search/server": {
       "import": "./dist/search/server.js",
       "types": "./dist/search/server.d.ts"
@@ -87,9 +83,6 @@
       "search/client": [
         "./dist/search/client.d.ts"
       ],
-      "search/shared": [
-        "./dist/search/shared.d.ts"
-      ],
       "search/server": [
         "./dist/search/server.d.ts"
       ],
@@ -144,7 +137,6 @@
     "react-remove-scroll": "^2.5.10",
     "remark": "^15.0.0",
     "remark-gfm": "^4.0.0",
-    "remark-mdx": "^3.0.1",
     "scroll-into-view-if-needed": "^3.1.0",
     "shiki": "^1.16.2",
     "swr": "^2.2.5",
@@ -163,7 +155,10 @@
     "@types/react-dom": "^18.3.0",
     "algoliasearch": "^4.24.0",
     "eslint-config-custom": "workspace:*",
+    "mdast-util-mdx-jsx": "^3.1.3",
+    "mdast-util-mdxjs-esm": "^2.0.1",
     "next": "^14.2.8",
+    "remark-mdx": "^3.0.1",
     "tsconfig": "workspace:*",
     "unified": "^11.0.5"
   },

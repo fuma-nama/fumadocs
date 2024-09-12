@@ -1,0 +1,48 @@
+{
+  "name": "fumadocs-cli",
+  "version": "0.0.0",
+  "description": "The CLI tool for Fumadocs",
+  "keywords": [
+    "NextJs",
+    "Docs",
+    "Fumadocs"
+  ],
+  "homepage": "https://fumadocs.vercel.app",
+  "repository": "github:fuma-nama/fumadocs",
+  "license": "MIT",
+  "author": "Fuma Nama",
+  "type": "module",
+  "bin": {
+    "fumadocs": "./dist/index.js"
+  },
+  "files": [
+    "dist/*"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "clean": "rimraf dist",
+    "dev": "tsup --watch",
+    "lint": "eslint .",
+    "sync": "tsx ./scripts/sync.ts",
+    "types:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.7.0",
+    "commander": "^12.1.0",
+    "cross-spawn": "^7.0.3",
+    "package-manager-detector": "^0.2.0",
+    "picocolors": "^1.1.0",
+    "ts-morph": "^23.0.0"
+  },
+  "devDependencies": {
+    "@types/cross-spawn": "^6.0.6",
+    "@types/node": "22.5.4",
+    "eslint-config-custom": "workspace:*",
+    "fast-glob": "^3.3.1",
+    "tsconfig": "workspace:*",
+    "tsx": "^4.19.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -12,26 +12,35 @@ Make sure to read their [Metadata section](https://nextjs.org/docs/app/building-
 
 ### Open Graph Image
 
-For docs pages, Fumadocs UI has a built-in dynamic image generator.
+For docs pages, Fumadocs has a built-in dynamic image generator.
+
+```json doc-gen:file
+{
+  "file": "../../examples/next-mdx/lib/metadata.ts",
+  "codeblock": {
+    "meta": "title=\"lib/metadata.ts\""
+  }
+}
+```
 
 You will need a route handler to get started.
 
 ```json doc-gen:file
 {
-  "file": "../../examples/next-mdx-og/app/og/[...slug]/route.tsx",
+  "file": "../../examples/next-mdx/app/docs-og/[...slug]/route.tsx",
   "codeblock": {
-    "meta": "title=\"app/og/[...slug]/route.tsx\""
+    "meta": "title=\"app/docs-og/[...slug]/route.tsx\""
   }
 }
 ```
 
-> We need to append `og.png` to the end of slugs so that we can access it via `/og/my-page/og.png`.
+> We need to append `og.png` to the end of slugs so that we can access it via `/docs-og/my-page/og.png`.
 
 In your docs page, add the image to metadata.
 
 ```json doc-gen:file
 {
-  "file": "../../examples/next-mdx-og/app/docs/[[...slug]]/page.tsx",
+  "file": "../../examples/next-mdx/app/docs/[[...slug]]/page.tsx",
   "codeblock": {
     "meta": "title=\"app/docs/[[...slug]]/page.tsx\""
   }
