@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 13.4.10
+
+### Patch Changes
+
+- 6231ad3: fix(types): PageData & MetaData exactOptionalPropertyTypes compat
+
 ## 13.4.9
 
 ### Patch Changes
