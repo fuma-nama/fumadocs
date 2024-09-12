@@ -12,6 +12,17 @@
   "license": "MIT",
   "author": "Fuma Nama",
   "type": "module",
+  "exports": {
+    "./twoslash.css": "./dist/twoslash.css",
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./ui": {
+      "import": "./dist/ui/index.js",
+      "types": "./dist/ui/index.d.ts"
+    }
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
@@ -25,21 +36,29 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
+    "@radix-ui/react-popover": "^1.1.1",
     "@shikijs/twoslash": "^1.16.2",
     "mdast-util-from-markdown": "^2.0.1",
     "mdast-util-gfm": "^3.0.0",
-    "mdast-util-to-hast": "^13.2.0"
+    "mdast-util-to-hast": "^13.2.0",
+    "tailwind-merge": "^2.5.2"
   },
   "devDependencies": {
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.3",
+    "@types/node": "22.5.4",
+    "@types/react": "^18.3.5",
     "eslint-config-custom": "workspace:*",
     "fumadocs-ui": "workspace:*",
+    "postcss": "^8.4.45",
+    "postcss-lightningcss": "^1.0.1",
     "shiki": "^1.16.2",
+    "tailwindcss": "^3.4.10",
     "tsconfig": "workspace:*"
   },
   "peerDependencies": {
     "fumadocs-ui": "13.x.x",
+    "react": ">= 18",
     "shiki": "1.x.x"
   },
   "publishConfig": {

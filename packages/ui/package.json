@@ -13,7 +13,6 @@
   "type": "module",
   "exports": {
     "./style.css": "./dist/style.css",
-    "./twoslash.css": "./dist/twoslash.css",
     "./image-zoom.css": "./dist/image-zoom.css",
     "./tailwind-plugin": {
       "import": "./dist/tailwind-plugin.js",
@@ -23,10 +22,6 @@
     "./components/*": {
       "import": "./dist/components/*.js",
       "types": "./dist/components/*.d.ts"
-    },
-    "./twoslash/*": {
-      "import": "./dist/twoslash/*.js",
-      "types": "./dist/twoslash/*.d.ts"
     },
     "./i18n": {
       "import": "./dist/i18n.js",
@@ -51,37 +46,6 @@
     "./og": {
       "import": "./dist/og.js",
       "types": "./dist/og.d.ts"
-    }
-  },
-  "typesVersions": {
-    "*": {
-      "tailwind-plugin": [
-        "./dist/tailwind-plugin.d.ts"
-      ],
-      "components/*": [
-        "./dist/components/*.d.ts"
-      ],
-      "twoslash/*": [
-        "./dist/twoslash/*.d.ts"
-      ],
-      "i18n": [
-        "./dist/i18n.d.ts"
-      ],
-      "layouts/*": [
-        "./dist/layouts/*.d.ts"
-      ],
-      "page": [
-        "./dist/page.d.ts"
-      ],
-      "provider": [
-        "./dist/provider.d.ts"
-      ],
-      "mdx": [
-        "./dist/mdx.d.ts"
-      ],
-      "og": [
-        "./dist/og.d.ts"
-      ]
     }
   },
   "files": [

@@ -9,7 +9,7 @@ import {
 import { notFound } from 'next/navigation';
 import { type ComponentProps, type FC, Fragment } from 'react';
 import defaultComponents from 'fumadocs-ui/mdx';
-import { Popup, PopupContent, PopupTrigger } from 'fumadocs-ui/twoslash/popup';
+import { Popup, PopupContent, PopupTrigger } from 'fumadocs-twoslash/ui';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 import { Callout } from 'fumadocs-ui/components/callout';
 import { TypeTable } from 'fumadocs-ui/components/type-table';

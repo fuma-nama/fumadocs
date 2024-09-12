@@ -35,7 +35,6 @@ export default defineConfig({
     `./src/components/{${exportedComponents.join(',')}}.tsx`,
     './src/layouts/{docs,shared,home}.tsx',
     './src/{i18n,home-layout,layout,page,provider,mdx,tailwind-plugin,og}.{ts,tsx}',
-    './src/twoslash/popup.tsx',
     './src/**/*.client.tsx',
   ],
   external: ['server-only', '../../dist/image-zoom.css', 'tailwindcss'],

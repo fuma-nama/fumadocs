@@ -1,12 +1,6 @@
-'use client';
-
 import * as React from 'react';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { cn } from '@/utils/cn';
+import { Popover, PopoverContent, PopoverTrigger } from './popover';
+import { cn } from './cn';
 
 interface PopupContextObject {
   open: boolean;
