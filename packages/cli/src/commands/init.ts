@@ -1,4 +1,5 @@
 import * as process from 'node:process';
+import path from 'node:path';
 import {
   intro,
   confirm,
@@ -90,11 +91,18 @@ export async function init(plugin: Plugin, config: Config = {}): Promise<void> {
       overwrite: true,
     });
 
-    await transformReferences(sourceFile, ctx.src, (resolved) => {
-      if (resolved.type !== 'file') return;
+    await transformReferences(
+      sourceFile,
+      {
+        alias: ctx.src ? 'src' : 'root',
+        relativeTo: path.dirname(file),
+      },
+      (resolved) => {
+        if (resolved.type !== 'file') return;
 
-      return toReferencePath(file, getOutputPath(resolved.path, ctx));
-    });
+        return toReferencePath(file, getOutputPath(resolved.path, ctx));
+      },
+    );
 
     await sourceFile.save();
   }

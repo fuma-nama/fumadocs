@@ -43,21 +43,17 @@ export function getOutputPath(ref: string, config: Config): string {
  * Transform references to other files (e.g. import/export from)
  *
  * @param file - source file
- * @param useSrc - add ./src when resolving `@/*` alias import
+ * @param resolver - options to resolve references
  * @param transform - a function that transforms module specifier
  */
 export async function transformReferences(
   file: SourceFile,
-  useSrc: boolean,
+  resolver: ReferenceResolver,
   transform: (src: ResolvedImport) => Awaitable<string | undefined>,
 ): Promise<void> {
   for (const item of file.getImportDeclarations()) {
     const result = await transform(
-      resolveReference(
-        item.getModuleSpecifier().getLiteralValue(),
-        file.getFilePath(),
-        useSrc,
-      ),
+      resolveReference(item.getModuleSpecifier().getLiteralValue(), resolver),
     );
     if (!result) continue;
 
@@ -68,7 +64,7 @@ export async function transformReferences(
     const specifier = item.getModuleSpecifier();
     if (!specifier) continue;
     const result = await transform(
-      resolveReference(specifier.getLiteralValue(), file.getFilePath(), useSrc),
+      resolveReference(specifier.getLiteralValue(), resolver),
     );
     if (!result) continue;
 
@@ -104,18 +100,29 @@ export type ResolvedImport =
       path: string;
     };
 
+export interface ReferenceResolver {
+  /**
+   * Resolve import aliases (e.g. `@/components`)
+   */
+  alias: 'src' | 'root';
+
+  /**
+   * which directory to resolve relative paths from (e.g. `./components`)
+   */
+  relativeTo: string;
+}
+
 /**
  * Get information from references (e.g. import/export from)
  */
 export function resolveReference(
   ref: string,
-  from: string,
-  src: boolean,
+  resolver: ReferenceResolver,
 ): ResolvedImport {
   if (ref.startsWith('./') || ref.startsWith('../')) {
     return {
       type: 'file',
-      path: path.join(path.dirname(from), ref),
+      path: path.join(resolver.relativeTo, ref),
     };
   }
 
@@ -124,7 +131,7 @@ export function resolveReference(
 
     return {
       type: 'file',
-      path: src ? path.join('./src', rest) : rest,
+      path: resolver.alias === 'src' ? path.join('./src', rest) : rest,
     };
   }
 

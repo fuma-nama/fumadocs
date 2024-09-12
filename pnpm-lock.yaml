@@ -411,6 +411,9 @@ importers:
       eslint-config-custom:
         specifier: workspace:*
         version: link:../eslint-config-custom
+      fast-glob:
+        specifier: ^3.3.1
+        version: 3.3.2
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig

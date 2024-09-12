@@ -68,12 +68,19 @@ export async function moveFiles(
       overwrite: true,
     });
 
-    await transformReferences(sourceFile, src, (resolved) => {
-      if (resolved.type !== 'file') return;
-      if (isRelative(originalDir, from) && filter(resolved.path)) return;
+    await transformReferences(
+      sourceFile,
+      {
+        alias: src ? 'src' : 'root',
+        relativeTo: path.dirname(from),
+      },
+      (resolved) => {
+        if (resolved.type !== 'file') return;
+        if (isRelative(originalDir, from) && filter(resolved.path)) return;
 
-      return toReferencePath(to, resolved.path);
-    });
+        return toReferencePath(to, resolved.path);
+      },
+    );
 
     await sourceFile.save();
   }

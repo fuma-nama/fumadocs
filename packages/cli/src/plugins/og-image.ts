@@ -1,18 +1,17 @@
 import picocolors from 'picocolors';
 import { generated } from '@/generated';
-import { type Plugin } from '@/commands/init';
+import { type Plugin, type PluginContext } from '@/commands/init';
 import { exists } from '@/utils/fs';
 import { resolveAppPath } from '@/utils/is-src';
+import { getOutputPath } from '@/utils/transform-references';
 
-const { cyanBright, bold, underline } = picocolors;
-
-function isI18nEnabled(src: boolean): Promise<boolean> {
-  return exists(resolveAppPath('./lib/i18n.ts', src));
+function isI18nEnabled(ctx: PluginContext): Promise<boolean> {
+  return exists(getOutputPath('lib/i18n.ts', ctx));
 }
 
 export const ogImagePlugin: Plugin = {
   files: async (ctx) => {
-    const route = (await isI18nEnabled(ctx.src))
+    const route = (await isI18nEnabled(ctx))
       ? 'app/[lang]/docs-og/[...slug]/route.tsx'
       : 'app/docs-og/[...slug]/route.tsx';
 
@@ -25,7 +24,7 @@ export const ogImagePlugin: Plugin = {
   instructions: (ctx) => [
     {
       type: 'text',
-      text: cyanBright(bold('Import the utils like:')),
+      text: picocolors.cyanBright(picocolors.bold('Import the utils like:')),
     },
     {
       type: 'code',
@@ -34,7 +33,9 @@ export const ogImagePlugin: Plugin = {
     },
     {
       type: 'text',
-      text: cyanBright(bold('Add the images to your metadata:')),
+      text: picocolors.cyanBright(
+        picocolors.bold('Add the images to your metadata:'),
+      ),
     },
     {
       type: 'code',
@@ -45,7 +46,7 @@ export function generateMetadata({ params }: { params: { slug?: string[] } }) {
 
   if (!page) notFound();
 
-  ${bold(underline('return metadataImage.withImage(page.slugs, {'))}
+  ${picocolors.bold(picocolors.underline('return metadataImage.withImage(page.slugs, {'))}
     title: page.data.title,
     description: page.data.description,
   });

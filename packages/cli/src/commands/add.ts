@@ -96,8 +96,10 @@ async function downloadFile(
 
   await transformReferences(
     file,
-    // resolved from Fumadocs repo, we use `./src/*` for import aliases
-    true,
+    {
+      alias: 'src',
+      relativeTo: path.dirname(pathWithoutExt),
+    },
     async (resolved) => {
       if (resolved.type === 'dep') {
         deps.push(resolved.name);
@@ -108,8 +110,10 @@ async function downloadFile(
         path.relative('src', resolved.path),
         ctx.config,
       );
+
       const downloaded = await downloadFile(resolved.path, downloadPath, ctx);
-      if (!downloaded) throw new Error(`Cannot find file: ${resolved.path}`);
+      if (!downloaded)
+        throw new Error(`Cannot download file: ${resolved.path}`);
 
       deps.push(...downloaded.deps);
       return toReferencePath(outPath, downloadPath);
