@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 13.4.10
+
+### Patch Changes
+
+- 4cb74d5: Expose more props to Image Zoom
+- Updated dependencies [6231ad3]
+  - fumadocs-core@13.4.10
+
 ## 13.4.9
 
 ### Patch Changes
