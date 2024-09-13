@@ -1,5 +1,6 @@
 import path from 'node:path';
 import fs from 'node:fs';
+import { type EmitArgs } from 'chokidar';
 import { watcher } from '@/map/watcher';
 import { getConfigHash, loadConfigCached } from '@/config/cached';
 import { generateJS, generateTypes } from '@/map/generate';
@@ -23,7 +24,9 @@ export async function start(
       console.log('[MDX] started dev server');
     });
 
-    instance.on('all', (event, file) => {
+    instance.on('all', (...args: EmitArgs) => {
+      const [event, file] = args;
+
       const onUpdate = async (): Promise<void> => {
         const isConfigFile = path.resolve(file) === configPath;
 
