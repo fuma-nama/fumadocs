@@ -1,7 +1,7 @@
 import type { SearchClient, SearchIndex } from 'algoliasearch';
 import type { StructuredData } from '@/mdx-plugins/remark-structure';
 
-interface DocumentRecord {
+export interface DocumentRecord {
   /**
    * The ID of document, must be unique
    */

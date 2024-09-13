@@ -40,7 +40,6 @@ export const blog = defineCollections({
 });
 
 export default defineConfig({
-  generateManifest: true,
   lastModifiedTime: 'git',
   mdxOptions: {
     rehypeCodeOptions: {
