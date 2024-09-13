@@ -8,38 +8,7 @@ import {
   type HTMLAttributes,
 } from 'react';
 import { TerminalIcon } from 'lucide-react';
-import Image from 'next/image';
 import { cn } from '@/utils/cn';
-
-export function Previews(): React.ReactElement {
-  return (
-    <div className="rounded-xl border bg-fd-background p-4 shadow-lg">
-      <p className="text-sm font-medium">
-        A gorgeous documentation framework that composes beautifully into the
-        App Router.
-      </p>
-      <div className="mt-4 flex flex-row items-center gap-2 ">
-        <Image
-          src="https://avatars.githubusercontent.com/u/35677084"
-          alt="avatar"
-          width="32"
-          height="32"
-          className="size-8 rounded-full"
-        />
-        <div>
-          <a
-            href="https://shew.dev"
-            rel="noreferrer noopener"
-            className="text-sm font-medium"
-          >
-            Anthony Shew
-          </a>
-          <p className="text-xs text-fd-muted-foreground">Turbo DX at Vercel</p>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export function CreateAppAnimation(): React.ReactElement {
   const installCmd = 'npm create fumadocs-app';

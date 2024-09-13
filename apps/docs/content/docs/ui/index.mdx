@@ -4,38 +4,46 @@ description: Getting Started with Fumadocs
 icon: Album
 ---
 
-import { CpuIcon, PanelsTopLeft, Database } from 'lucide-react';
+import { CpuIcon, PanelsTopLeft, Database, Terminal } from 'lucide-react';
 
 ## Introduction
 
 Fumadocs is a **documentation framework** based on Next.js, designed to be fast and flexible.
-It composes seamlessly into Next.js App Router, and benefits from the React Server Component (RSC) model.
+It composes seamlessly into Next.js App Router, and benefits from the React Server Component model.
 
-We separated Fumadocs into multiple parts:
+Fumadocs has different parts:
 
-<h4 className="inline-flex items-center gap-2">
-  <CpuIcon className="text-purple-300 p-0.5 border rounded-lg" />
-  <span>Core</span>
-</h4>
+<Cards>
+
+<Card icon={<CpuIcon className="text-purple-300" />} title='Fumadocs Core'>
 
 The core of Fumadocs.
 Just like the CPU, it handles most of the logic, including document search, content source adapters, and Markdown/MDX plugins.
 
-<h4 className="inline-flex items-center gap-2">
-  <PanelsTopLeft className="text-blue-300 p-0.5 border rounded-lg" />
-  <span>UI</span>
-</h4>
+</Card>
+
+<Card icon={<PanelsTopLeft className="text-blue-300" />} title='Fumadocs UI'>
 
 The default theme of Fumadocs, it offers a beautiful look for documentation sites and many interactive components.
 
-<h4 className="inline-flex items-center gap-2">
-  <Database className="text-muted-foreground p-0.5 border rounded-lg" />
-  <span>Content Source</span>
-</h4>
+</Card>
+
+<Card icon={<Database />} title='Content Source'>
 
 The input/source of your content, it can be a CMS, or local data layers like [Content Collections](https://www.content-collections.dev) and [Fumadocs MDX](/docs/mdx).
 
-Fumadocs Core will process your content source, hence theoretically any kind of format and source can be supported by Fumadocs.
+</Card>
+
+<Card icon={<Terminal />} title='Fumadocs CLI'>
+
+A command line tool to configure features automatically, and copy components from Fumadocs UI (similar to Shadcn UI).
+
+</Card>
+
+</Cards>
+
+This gives Fumadocs great flexibility.
+Fumadocs Core can process your content source, theoretically any kind of format and source can be supported by Fumadocs.
 
 > Fumadocs MDX is the official content source of Fumadocs.
 

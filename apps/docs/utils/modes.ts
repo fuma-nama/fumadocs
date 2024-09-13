@@ -1,7 +1,7 @@
 /* eslint-disable import/no-relative-packages -- required */
 import {
-  LayoutIcon,
   LibraryIcon,
+  Building2,
   PaperclipIcon,
   type LucideIcon,
 } from 'lucide-react';
@@ -12,7 +12,6 @@ import zeta from '../../../packages/core/package.json';
 export interface Mode {
   param: string;
   name: string;
-  package: string;
   description: string;
   version: string;
   icon: LucideIcon;
@@ -20,25 +19,22 @@ export interface Mode {
 
 export const modes: Mode[] = [
   {
+    param: 'ui',
+    name: 'Framework',
+    description: 'The docs framework',
+    version: ui.version,
+    icon: Building2,
+  },
+  {
     param: 'headless',
     name: 'Core',
-    package: 'fumadocs-core',
     description: 'The core library',
     version: zeta.version,
     icon: LibraryIcon,
   },
   {
-    param: 'ui',
-    name: 'UI',
-    package: 'fumadocs-ui',
-    description: 'The user interface',
-    version: ui.version,
-    icon: LayoutIcon,
-  },
-  {
     param: 'mdx',
     name: 'MDX',
-    package: 'fumadocs-mdx',
     description: 'Built-in source provider',
     version: mdx.version,
     icon: PaperclipIcon,
