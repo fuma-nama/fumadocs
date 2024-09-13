@@ -1,5 +1,11 @@
 import { cva } from 'class-variance-authority';
-import { Heart, type LucideIcon, MousePointer, Terminal } from 'lucide-react';
+import {
+  Heart,
+  type LucideIcon,
+  MousePointer,
+  Sparkle,
+  Terminal,
+} from 'lucide-react';
 import {
   BatteryChargingIcon,
   CpuIcon,
@@ -62,13 +68,8 @@ export default function Page(): React.ReactElement {
           }}
         >
           <div className="relative">
-            <StarsIcon
+            <Sparkle
               className="absolute -left-2 -top-2 z-10 size-4 xl:scale-[200%]"
-              stroke="none"
-              fill="currentColor"
-            />
-            <StarsIcon
-              className="absolute -bottom-2 -right-2 z-10 size-4 xl:scale-[200%]"
               stroke="none"
               fill="currentColor"
             />
@@ -156,8 +157,7 @@ function Why(): React.ReactElement {
       </style>
       <h2 className="bg-gradient-to-b from-foreground to-foreground/40 bg-clip-text text-2xl font-semibold text-transparent md:text-3xl">
         Build docs 100x faster and easier
-        <br />
-        with Fumadocs
+        <p className="max-md:hidden">with Fumadocs</p>
       </h2>
       <p className="mt-4 text-foreground/50">
         Fumadocs offers a complete toolchain to maintain your docs.
@@ -507,22 +507,19 @@ function Highlight({
 
 function Hero(): React.ReactElement {
   return (
-    <div className="container relative z-[2] flex flex-col overflow-hidden border-x border-t bg-fd-background px-6 pt-12 md:px-12 md:pt-16 [.uwu_&]:hidden">
-      <h1 className="mb-8 max-w-[600px] text-3xl font-medium md:text-4xl">
+    <div className="container relative z-[2] flex flex-col overflow-hidden border-x border-t bg-fd-background px-6 pt-12 max-md:text-center md:px-12 md:pt-16 [.uwu_&]:hidden">
+      <h1 className="mb-8 text-4xl font-medium md:hidden">Build Your Docs</h1>
+      <h1 className="mb-8 max-w-[600px] text-4xl font-medium max-md:hidden">
         Build excellent documentation site with less effort
       </h1>
       <p className="mb-8 text-fd-muted-foreground md:max-w-[80%] md:text-xl">
-        Fumadocs is a{' '}
-        <span className="font-medium text-fd-foreground">beautiful</span>{' '}
+        Fumadocs is a <span className="text-fd-foreground">beautiful</span>{' '}
         documentation framework with{' '}
-        <span className="font-medium text-fd-foreground">
-          a complete toolchain
-        </span>
-        , powered by{' '}
-        <span className="font-medium text-foreground">Next.js App Router</span>.
+        <span className="text-fd-foreground">a complete toolchain</span>,
+        powered by <span className="text-foreground">Next.js App Router</span>.
         Designed to be flexible and fast.
       </p>
-      <div className="inline-flex items-center gap-3">
+      <div className="inline-flex items-center gap-3 max-md:mx-auto">
         <Link
           href="/docs/ui"
           className={cn(
@@ -547,7 +544,7 @@ function Hero(): React.ReactElement {
       <Image
         src={Img}
         alt="preview"
-        className="mb-[-250px] mt-8 min-w-[800px] select-none duration-1000 animate-in fade-in slide-in-from-bottom-12 md:mb-[-370px] md:min-w-[1200px]"
+        className="mb-[-250px] mt-8 min-w-[800px] select-none duration-1000 animate-in fade-in slide-in-from-bottom-12 md:mb-[-370px] md:min-w-[1100px]"
         priority
       />
       <div
@@ -567,7 +564,7 @@ function Hero(): React.ReactElement {
 
 function Feedback(): React.ReactElement {
   return (
-    <div className="relative flex flex-col items-center overflow-hidden border-x border-t px-12 py-8 md:py-16">
+    <div className="relative flex flex-col items-center overflow-hidden border-x border-t px-6 py-8 md:py-16">
       <div
         className="absolute inset-x-0 bottom-0 z-[-1] h-24 opacity-30 duration-1000 animate-in fade-in"
         style={{

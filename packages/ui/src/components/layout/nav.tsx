@@ -68,7 +68,7 @@ export function Title({ title, url }: TitleProps): React.ReactElement {
   return (
     <Link
       href={url ?? (locale ? `/${locale}` : '/')}
-      className="inline-flex items-center gap-2 font-semibold"
+      className="inline-flex items-center gap-2.5 font-semibold"
     >
       {title}
     </Link>

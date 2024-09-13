@@ -10,9 +10,17 @@ Fumadocs uses the Next.js Metadata API for SEO.
 
 Make sure to read their [Metadata section](https://nextjs.org/docs/app/building-your-application/optimizing/metadata) for the fundamentals of Metadata API.
 
-### Open Graph Image
+## Open Graph Image
 
-For docs pages, Fumadocs has a built-in dynamic image generator.
+For docs pages, Fumadocs has a built-in metadata image generator.
+
+### Auto Setup
+
+```package-install
+npx fumadocs init og-image
+```
+
+### Manual Setup
 
 ```json doc-gen:file
 {
@@ -46,6 +54,8 @@ In your docs page, add the image to metadata.
   }
 }
 ```
+
+### Font
 
 You can also customise the font, options for Satori are also available on the built-in generator.
 

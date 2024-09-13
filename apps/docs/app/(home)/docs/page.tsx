@@ -1,4 +1,4 @@
-import { LayoutIcon, LibraryIcon } from 'lucide-react';
+import { Building2, LibraryIcon } from 'lucide-react';
 import Link, { type LinkProps } from 'next/link';
 import Image from 'next/image';
 import { buttonVariants } from '@/components/ui/button';
@@ -31,7 +31,7 @@ export default function DocsPage(): React.ReactElement {
         Getting Started
       </h1>
       <p className="text-fd-muted-foreground">
-        You can start with Fumadocs UI, or just use the core library.
+        You can start with Fumadocs, or just use the core library.
       </p>
       <div className="mt-4 grid grid-cols-2 gap-4">
         <a
@@ -51,9 +51,9 @@ export default function DocsPage(): React.ReactElement {
       <div className="mt-16 grid grid-cols-1 gap-4 text-left md:grid-cols-2">
         <Item href="/docs/ui">
           <Icon>
-            <LayoutIcon className="size-full" />
+            <Building2 className="size-full" />
           </Icon>
-          <h2 className="mb-2 text-lg font-semibold">Fumadocs UI</h2>
+          <h2 className="mb-2 text-lg font-semibold">Fumadocs</h2>
           <p className="text-sm text-fd-muted-foreground">
             The full-powered documentation framework with an excellent UI.
           </p>

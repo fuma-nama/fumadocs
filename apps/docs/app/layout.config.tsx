@@ -1,9 +1,9 @@
 import { type DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
-import { BookIcon, Heart, LayoutTemplateIcon } from 'lucide-react';
+import { AlbumIcon, BookIcon, Heart, LayoutTemplateIcon } from 'lucide-react';
 import Image from 'next/image';
 import { RootToggle } from 'fumadocs-ui/components/layout/root-toggle';
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
-import { FumadocsIcon, NavChildren } from '@/app/layout.client';
+import { FumadocsIcon } from '@/app/layout.client';
 import Logo from '@/public/logo.png';
 import { utils } from '@/app/source';
 import { modes } from '@/utils/modes';
@@ -25,17 +25,22 @@ export const baseOptions: BaseLayoutProps = {
           className="size-4 [.uwu_&]:hidden [header_&]:size-5"
           fill="currentColor"
         />
-        <span className="font-medium [.uwu_&]:hidden max-md:[header_&]:hidden">
+        <span className="font-medium [#nd-nav_&]:text-[15px] [.uwu_&]:hidden">
           Fumadocs
         </span>
       </>
     ),
     transparentMode: 'top',
-    children: <NavChildren />,
   },
   links: [
     {
       icon: <BookIcon />,
+      text: 'Documentation',
+      url: '/docs/ui',
+      active: 'none',
+    },
+    {
+      icon: <AlbumIcon />,
       text: 'Blog',
       url: '/blog',
       active: 'nested-url',

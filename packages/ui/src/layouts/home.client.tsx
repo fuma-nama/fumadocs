@@ -47,8 +47,8 @@ export function Nav({
         <div className="flex flex-1 flex-row items-center justify-end md:gap-2">
           {enableSearch && search.enabled ? (
             <>
-              <SearchToggle className="md:hidden" />
-              <LargeSearchToggle className="w-full max-w-[240px] max-md:hidden" />
+              <SearchToggle className="sm:hidden" />
+              <LargeSearchToggle className="w-full max-w-[240px] max-sm:hidden" />
             </>
           ) : null}
 
