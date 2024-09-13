@@ -3,13 +3,17 @@ title: Page Tree
 description: The structure of page tree.
 ---
 
-Page tree is a tree that includes all the pages, separator and folders.
+Page tree a tree structure that includes all the navigation links related to the docs, with separator and folders.
 
 It will be sent to the client and being referenced in navigation elements including the sidebar and breadcrumb.
 Hence, you shouldn't store any sensitive or large data in page tree.
 
 <Callout title="Note">
-  Unserializable data such as functions can't be passed to page tree.
+
+By design, page tree only contains necessary information of all pages and folders.
+
+Unserializable data such as functions can't be passed to page tree.
+
 </Callout>
 
 ## Conventions

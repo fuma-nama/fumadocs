@@ -1,0 +1,30 @@
+---
+title: layout.config.tsx
+description: Shared Layout Options
+---
+
+## What is This?
+
+As Fumadocs uses Next.js Routing, different layouts may need to share the same information (e.g. site title).
+
+This file stores the shared options for different layouts.
+
+```json doc-gen:file
+{
+  "file": "../../examples/next-mdx/app/layout.config.tsx",
+  "codeblock": {
+    "meta": "title=\"app/layout.config.tsx\""
+  }
+}
+```
+
+You can import it from other layouts, like docs layout for example:
+
+```json doc-gen:file
+{
+  "file": "../../examples/next-mdx/app/docs/layout.tsx",
+  "codeblock": {
+    "meta": "title=\"app/docs/layout.tsx\""
+  }
+}
+```

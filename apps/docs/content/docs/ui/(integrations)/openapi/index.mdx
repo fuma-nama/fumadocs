@@ -35,7 +35,7 @@ export default {
 
 Create an OpenAPI instance on the server. Fumadocs OpenAPI renders the pages on server-side.
 
-```ts title="source.ts"
+```ts title="lib/source.ts"
 import { createOpenAPI } from 'fumadocs-openapi/server';
 
 export const openapi = createOpenAPI({
@@ -90,7 +90,7 @@ You can add the `attachFile` to decorate the page tree with Source API.
 
 It adds a badge to each page item.
 
-```ts title="source.ts"
+```ts title="lib/source.ts"
 import { createMDXSource } from 'fumadocs-mdx';
 import { loader } from 'fumadocs-core/source';
 import { attachFile } from 'fumadocs-openapi/server';

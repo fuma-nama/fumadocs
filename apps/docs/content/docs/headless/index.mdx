@@ -1,13 +1,12 @@
 ---
-title: Quick Start
+title: Introduction
 description: Getting started with core library
 icon: Album
 ---
 
-## Introduction
+## What is This?
 
-The core of Fumadocs, built for
-App Router. It offers server-side functions and headless components.
+Fumadocs Core offers server-side functions and headless components, built for App Router.
 
 - Search (built-in: Flexsearch, Algolia Search)
 - Breadcrumb, Sidebar, TOC Components
@@ -16,60 +15,19 @@ App Router. It offers server-side functions and headless components.
 
 <Callout title="Tip">
 
-    Fumadocs Core can be used without Fumadocs UI, in other words, it's headless.
+    It can be used without Fumadocs UI, in other words, it's headless.
 
     For beginners and normal usages, use [Fumadocs UI](/docs/ui).
 
 </Callout>
 
+## Installation
+
+No other dependencies required.
+
 ```package-install
 fumadocs-core
 ```
-
-## Setup
-
-### Choose a Source
-
-We have native support for [Fumadocs MDX](/docs/mdx) and [Content Collections](/docs/headless/content-collections), but all formats and
-content sources have be supported via a custom adapter.
-
-### Build Page Tree
-
-A page tree refers to the structured data of all pages. It is essential for implementing a sidebar, or other navigation elements.
-
-You can generate the tree using our built-in [Source API](/docs/headless/source-api), the adapter for your content source, or end up with
-writing your own.
-
-### Create MDX file
-
-Create `/content/docs/index.mdx`:
-
-```mdx
----
-title: Quick Start
-description: My cool docs
----
-
-Hello World
-```
-
-### Styling & Fun
-
-Start styling your docs with headless components.
-
-```mdx
-<article>
-  <nav>
-    <p>My App</p>
-    <SearchToggle />
-  </nav>
-  <Sidebar />
-  <MDXContent />
-  <TOC />
-</article>
-```
-
-### Enjoy!
 
 It offers simple document searching as well as components for building a
 good docs. It is made for flexibility and speed.

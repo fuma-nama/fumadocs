@@ -783,7 +783,7 @@ function Features(): React.ReactElement {
         description="Fumadocs CLI creates interactive components for your docs, offering a rich experience to your users."
       >
         <CodeBlock
-          code="pnpm fumadocs add files"
+          code="npx fumadocs add files"
           lang="bash"
           wrapper={{
             title: 'Terminal',

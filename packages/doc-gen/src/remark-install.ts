@@ -57,9 +57,10 @@ export function remarkInstall({
     visit(tree, 'code', (node) => {
       if (node.lang !== 'package-install') return 'skip';
 
-      const value = node.value.startsWith('npm')
-        ? node.value
-        : `npm install ${node.value}`;
+      const value =
+        node.value.startsWith('npm') || node.value.startsWith('npx')
+          ? node.value
+          : `npm install ${node.value}`;
 
       const insert = createElement(
         Tabs,
