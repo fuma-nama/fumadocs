@@ -1,0 +1,152 @@
+---
+title: Collections
+description: Collection of content data for your app
+---
+
+## Define Collections
+
+Define a collection to parse a certain set of files.
+
+```ts
+import { defineCollections } from 'fumadocs-mdx/config';
+import { z } from 'zod';
+
+export const blog = defineCollections({
+  type: 'doc',
+  dir: './content/blog',
+  schema: z.object({
+    // allowed...
+  }),
+});
+```
+
+```json doc-gen:typescript
+{
+  "file": "./content/docs/mdx/props.ts",
+  "name": "Collections"
+}
+```
+
+### Options
+
+#### `dir`
+
+Directories to scan input files.
+
+#### Schema
+
+The Zod schema to validate file data (frontmatter on `doc` type, content on `meta` type).
+
+```ts
+import { defineCollections } from 'fumadocs-mdx/config';
+import { z } from 'zod';
+
+export const blog = defineCollections({
+  type: 'doc',
+  dir: './content/blog',
+  schema: z.object({
+    name: z.string(),
+  }),
+});
+```
+
+You can add additional properties to the output.
+Note that the validation is done by build time, hence the output must be serializable.
+
+You can also pass a function and receives the transform context.
+
+```ts
+import { defineCollections } from 'fumadocs-mdx/config';
+import { z } from 'zod';
+
+export const blog = defineCollections({
+  type: 'doc',
+  dir: './content/blog',
+  schema: (ctx) => {
+    return z.object({
+      name: z.string(),
+      testPath: z.string().default(ctx.path),
+    });
+  },
+});
+```
+
+#### Type
+
+The accepted type of collection.
+
+| Type   | Description            |
+| ------ | ---------------------- |
+| `meta` | JSON/YAML File         |
+| `doc`  | Markdown/MDX Documents |
+
+#### MDX Options
+
+You can also customise MDX options from collections.
+Notice that passing `mdxOptions` to collection overrides all defaults from global config.
+
+```ts
+import { defineCollections, getDefaultMDXOptions } from 'fumadocs-mdx/config';
+
+export const blog = defineCollections({
+  type: 'doc',
+  mdxOptions: getDefaultMDXOptions({
+    // mdx options
+  }),
+});
+```
+
+We use `getDefaultMDXOptions` to apply default MDX options, it accepts the [Default MDX Options](/docs/mdx/mdx).
+
+For full control over MDX options, you can pass MDX options without `getDefaultMDXOptions`, which means no defaults will be applied (except the ones from MDX.js).
+
+> This API only available on `doc` type.
+
+#### Transform
+
+A function to perform runtime transformation on collection entries.
+
+See [Transform](/docs/mdx/transform).
+
+## Define Docs
+
+You can use `defineDocs` to define the required collections to work with Fumadocs.
+It offers the same API as `defineCollections`.
+
+```ts
+import { defineDocs } from 'fumadocs-mdx/config';
+
+export const { docs, meta } = defineDocs({
+  docs: {
+    // optional, you can pass options to each collection
+  },
+  meta: {
+    // optional, you can pass options to each collection
+  },
+});
+```
+
+The `docs` and `meta` are collections on their own.
+You can pass collection options to them as shown above.
+
+### Extend `schema`
+
+You can extend the default Zod schema of `docs` and `meta`.
+
+```ts
+import { frontmatterSchema, metaSchema, defineDocs } from 'fumadocs-mdx/config';
+import { z } from 'zod';
+
+export const { docs, meta } = defineDocs({
+  docs: {
+    schema: frontmatterSchema.extend({
+      index: z.boolean().default(false),
+    }),
+  },
+  meta: {
+    schema: metaSchema.extend({
+      // other props
+    }),
+  },
+});
+```

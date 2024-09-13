@@ -1,0 +1,35 @@
+---
+title: Global Options
+description: Customise Fumadocs MDX
+---
+
+## Global Options
+
+Shared options of Fumadocs MDX.
+
+```ts title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  // global options
+});
+```
+
+```json doc-gen:typescript
+{
+  "file": "./content/docs/mdx/props.ts",
+  "name": "GlobalConfig"
+}
+```
+
+#### MDX Options
+
+Customise the default MDX options of all MDX files.
+
+See [Default MDX Options](#default-mdx-options) for more details.
+
+#### Manifest
+
+Enable the `generateManifest` option to generate a manifest file for production builds.
+
+See [Manifest](/docs/mdx/manifest) to learn more.

@@ -23,7 +23,7 @@ export type WebSocketServerMessage = UpdateMessage;
  * Create MDX Remote development server
  */
 export function createServer({
-  files = ['./content/**/*'],
+  files = ['./content'],
   port = 3001,
 }: ServerOptions): void {
   const wss = new WebSocketServer({

@@ -1,0 +1,21 @@
+---
+title: Next.js
+description: Customise the Next.js loader
+---
+
+## Plugin Options
+
+Fumadocs MDX offers loaders and a Fumadocs [Source API](/docs/headless/source-api) adapter to integrate with Fumadocs.
+You can configure the plugin by passing options to `createMDX` in `next.config.mjs`.
+
+### Config Path
+
+Customise the path of config file.
+
+```ts
+import { createMDX } from 'fumadocs-mdx/next';
+
+const withMDX = createMDX({
+  configPath: './my-config.ts',
+});
+```

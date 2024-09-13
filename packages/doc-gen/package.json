@@ -43,7 +43,7 @@
     "eslint-config-custom": "workspace:*",
     "remark": "^15.0.0",
     "tsconfig": "workspace:*",
-    "typescript": "^5.5.4",
+    "typescript": "^5.6.2",
     "unified": "^11.0.5",
     "vfile": "^6.0.3"
   },

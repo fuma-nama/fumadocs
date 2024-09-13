@@ -8,7 +8,7 @@ import { cn } from '@/utils/cn';
 import { modes } from '@/utils/modes';
 
 const itemVariants = cva(
-  'rounded-md px-2 py-1 transition-colors hover:text-fd-accent-foreground',
+  'rounded-full px-2 py-1 transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground',
   {
     variants: {
       active: {
@@ -36,7 +36,7 @@ export function NavChildren(): React.ReactElement {
   const mode = useMode();
 
   return (
-    <div className="rounded-md border bg-fd-muted/80 p-1 text-sm text-fd-muted-foreground max-md:absolute max-md:left-1/2 max-md:-translate-x-1/2">
+    <div className="rounded-full border bg-fd-muted p-0.5 text-sm text-fd-muted-foreground max-md:absolute max-md:left-1/2 max-md:-translate-x-1/2">
       {modes.map((m) => (
         <Link
           key={m.param}
