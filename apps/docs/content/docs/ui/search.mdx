@@ -16,7 +16,7 @@ Open with <kbd>⌘</kbd> <kbd>K</kbd> or <kbd>Ctrl</kbd> <kbd>K</kbd>.
 
 You can customize the search dialog from [Root Provider](/docs/ui/blocks/root-provider).
 
-When not specified, it uses the [Default Search Client](/docs/headless/search/flexsearch) powered by Flexsearch.
+When not specified, it uses the [Default Search Client](/docs/headless/search/orama) powered by Orama.
 It is lazy loaded using [`next/dynamic`](https://nextjs.org/docs/app/building-your-application/optimizing/lazy-loading).
 This allows a better initial loading performance.
 
@@ -79,7 +79,7 @@ import { RootProvider } from 'fumadocs-ui/root-provider';
 
 ### Tag Filter
 
-Configure [Tag Filter](/docs/headless/search/flexsearch#tag-filter) on the default search client.
+Configure [Tag Filter](/docs/headless/search/orama#tag-filter) on the default search client.
 
 ```tsx
 import { RootProvider } from 'fumadocs-ui/root-provider';

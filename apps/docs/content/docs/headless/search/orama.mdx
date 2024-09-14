@@ -1,0 +1,259 @@
+---
+title: Built-in Search
+description: Built-in document search of Fumadocs
+---
+
+Fumadocs supports searching document based on Orama.
+
+As the built-in search of Fumadocs, It is the default but also recommended
+option since it's easier to setup and totally free.
+
+> If you're using a CMS, you should use the API provided by the CMS instead.
+
+## Advanced Search
+
+Returns a detailed result with matching headings and contents.
+
+It accepts structured data processed from a markdown/MDX document, and index it with
+Orama. You can extract the structured data using the [Structure](/docs/headless/mdx/structure) remark plugin.
+
+It cannot extract content from rehype plugin generated content (remark plugins are supported).
+
+### Usage
+
+#### From Source
+
+Create a route handler from Source API.
+
+```json doc-gen:file
+{
+  "file": "../../examples/next-mdx/app/api/search/route.ts",
+  "codeblock": {
+    "lang": "ts",
+    "meta": "title=\"app/api/search/route.ts\""
+  }
+}
+```
+
+#### From Search Indexes
+
+Pass search indexes to the function, see type information for required properties.
+
+```ts
+import { source } from '@/lib/source';
+import { createSearchAPI } from 'fumadocs-core/search/server';
+
+export const { GET } = createSearchAPI('advanced', {
+  indexes: source.getPages().map((page) => ({
+    title: page.data.title,
+    description: page.data.description,
+    structuredData: page.data.structuredData,
+    id: page.url,
+    url: page.url,
+  })),
+});
+```
+
+#### Client
+
+You can query it using headless search client.
+
+```ts twoslash
+import { useDocsSearch } from 'fumadocs-core/search/client';
+
+const client = useDocsSearch({
+  type: 'fetch',
+});
+```
+
+Or use Fumadocs UI, which includes a built-in search UI.
+
+### Tag Filter
+
+It's useful for implementing versioned docs, or multi-docs similar to this
+documentation.
+
+```ts
+import { source } from '@/lib/source';
+import { createSearchAPI } from 'fumadocs-core/search/server';
+
+export const { GET } = createSearchAPI('advanced', {
+  indexes: source.getPages().map((page) => ({
+    tag: 'your value here',
+    // other props
+  })),
+});
+```
+
+<Callout title="For Fumadocs UI">
+
+Remember to configure [Tag Filter](/docs/ui/search#tag-filter) on Search UI.
+
+You don't need to follow the steps below if you're using the built-in Search UI.
+
+</Callout>
+
+On your search client, pass a tag to the hook.
+
+```ts
+import { useDocsSearch } from 'fumadocs-core/search/client';
+
+// Pass `tag` in your custom search dialog
+const client = useDocsSearch(
+  {
+    type: 'fetch',
+  },
+  undefined, // locale code, can be `undefined`
+  'tag',
+);
+```
+
+## Internationalization
+
+<div className='steps [&_h4]:step'>
+
+<h4>Update the route handler</h4>
+
+Use `createI18nSearchAPI` for i18n functionality.
+
+```json doc-gen:file
+{
+  "file": "../../examples/i18n/app/api/search/route.ts",
+  "codeblock": {
+    "lang": "ts",
+    "meta": "title=\"app/api/search/route.ts\""
+  }
+}
+```
+
+> You don't need to allow this for `createFromSource`, it handles i18n automatically.
+
+<h4>Update search client</h4>
+
+<Callout type="info" title="For Fumadocs UI">
+  You can ignore this, Fumadocs UI handles this when you have i18n configured
+  correctly.
+</Callout>
+
+Add `locale` to the search client, this will only allow pages with specified locale to be searchable by the user.
+
+```ts
+const { search, setSearch, query } = useDocsSearch(
+  {
+    type: 'fetch',
+  },
+  locale,
+);
+```
+
+</div>
+
+## Static Search
+
+To work with Next.js static export, use `staticGET` from search server.
+
+```ts title="app/api/search/route.ts"
+import { source } from '@/lib/source';
+import { createFromSource } from 'fumadocs-core/search/server';
+
+// it should be cached forever
+export const revalidate = false;
+
+export const { staticGET: GET } = createFromSource(source);
+```
+
+> `staticGET` is also available on `createSearchAPI`.
+
+On your search client, use `static` instead of `fetch`.
+
+```ts
+import { useDocsSearch } from 'fumadocs-core/search/client';
+
+const client = useDocsSearch({
+  type: 'static',
+});
+```
+
+## Simple Search
+
+Index with the raw content of document.
+
+```ts title="app/api/search/route.ts"
+import { allDocs } from 'content-collections';
+import { createSearchAPI } from 'fumadocs-core/search/server';
+
+export const { GET } = createSearchAPI('simple', {
+  indexes: allDocs.map((docs) => ({
+    title: docs.title,
+    content: docs.content, // Raw Content
+    url: docs.url,
+  })),
+});
+```
+
+## Search Client
+
+`useDocsSearch` is a hook to search documents using the built-in search clients.
+
+### Client
+
+Choose the client to use.
+
+```ts
+import { useDocsSearch } from 'fumadocs-core/search/client';
+
+const client = useDocsSearch({
+  type: 'static',
+  // you can pass options for the client you specified
+});
+```
+
+| Type              | Description                                                      |
+| ----------------- | ---------------------------------------------------------------- |
+| `fetch` (default) | send HTTP request to a search server with `fetch`                |
+| `static`          | Load search map on client-side and query them                    |
+| `algolia`         | Use Algolia Search (See [Algolia](/docs/headless/search/algolia) |
+
+### Return Type
+
+| Prop        | Type                  | Description                    |
+| ----------- | --------------------- | ------------------------------ |
+| `query`     | `Query`               | Query status and results       |
+| `search`    | `string`              | Searching text (not debounced) |
+| `setSearch` | `(v: string) => void` | Set searching text             |
+
+### Response Data
+
+| Type             |                                                 |
+| ---------------- | ----------------------------------------------- |
+| `empty`          | If the searching text is empty or blank         |
+| `SortedResult[]` | Array of matching pages, headings and contents. |
+
+### Custom Algorithm
+
+You can port your own search algorithm by returning a list of `SortedResult`
+from your custom `/api/search/route.ts` route handler (API Endpoint). You can also integrate it
+with Fumadocs UI.
+
+```json doc-gen:typescript
+{
+  "file": "./content/docs/headless/props.ts",
+  "name": "SortedResult"
+}
+```
+
+## Headless
+
+You can host the search server on Express or Elysia, without Next.js.
+
+```ts
+import { initAdvancedSearch } from 'fumadocs-core/search/server';
+
+const server = initAdvancedSearch({
+  // options
+});
+
+server.search('query', {
+  // you can specify `locale` and `tag` here
+});
+```

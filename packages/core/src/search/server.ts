@@ -41,10 +41,10 @@ export interface SearchServer {
 export interface SearchAPI extends SearchServer {
   GET: (request: NextRequest) => Promise<Response>;
 
-  search: (
-    query: string,
-    options?: { locale?: string; tag?: string },
-  ) => Promise<SortedResult[]>;
+  /**
+   * `GET` route handler that exports search indexes for static search.
+   */
+  staticGET: () => Promise<Response>;
 }
 
 /**

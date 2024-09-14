@@ -183,7 +183,7 @@ function Why(): React.ReactElement {
         <Accordion className="text-sm" title="Full-text Search">
           <p>
             Implementing search is difficult. Fumadocs offers native support for
-            Flexsearch and Algolia Search, it is as simple as plugging a route
+            Orama and Algolia Search, it is as simple as plugging a route
             handler.
           </p>
           <Link

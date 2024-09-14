@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { type DocumentRecord } from 'fumadocs-core/search-algolia/server';
+import { type DocumentRecord } from 'fumadocs-core/search/algolia';
 import { utils } from '@/app/source';
 
 export const revalidate = false;
