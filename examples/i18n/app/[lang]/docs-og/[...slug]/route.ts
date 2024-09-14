@@ -1,5 +1,5 @@
 import { createAPI } from '@/lib/metadata';
-import { generateOGImage } from 'fumadocs-ui/src/og';
+import { generateOGImage } from 'fumadocs-ui/og';
 
 export const GET = createAPI((page) => {
   return generateOGImage({

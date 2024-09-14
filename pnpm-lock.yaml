@@ -232,6 +232,12 @@ importers:
 
   examples/i18n:
     dependencies:
+      '@orama/stopwords':
+        specifier: ^2.1.0
+        version: 2.1.0
+      '@orama/tokenizers':
+        specifier: ^2.1.0
+        version: 2.1.0
       fumadocs-core:
         specifier: workspace:*
         version: link:../../packages/core
@@ -1991,6 +1997,14 @@ packages:
   '@orama/orama@2.1.0':
     resolution: {integrity: sha512-6Z6acBHmXGhp2Dom0ZvGJsJ1tkCwvs+uqNZUnhBbUTDvX4U1EMSGiTZt3fJFXy1enLKse6lOpG+E76/MnQIdBw==}
     engines: {node: '>= 16.0.0'}
+
+  '@orama/stopwords@2.1.0':
+    resolution: {integrity: sha512-mCqr0VUifAtAUyYcUK1JhAaJz7huKqn5cJDoxPenHixs78ltm+fwoLsxfVoXetJGIc9c7TX6mYrO/vDb4bXYtw==}
+    engines: {node: '>= 16.0.0'}
+
+  '@orama/tokenizers@2.1.0':
+    resolution: {integrity: sha512-wzkf9zkJTwrg7o49FfyNrVeJhxoy6N3hRfsVJbkrjyRz8ITKPooglM84GRYnEtFQ/xz2GZy1psBJEHSDosupvQ==}
+    engines: {node: '>= 18.0.0'}
 
   '@parcel/watcher-android-arm64@2.4.1':
     resolution: {integrity: sha512-LOi/WTbbh3aTn2RYddrO8pnapixAziFl6SMxHM69r3tvdSm94JtCenaKgk1GRg5FJ5wpMCpHeW+7yqPlvZv7kg==}
@@ -8125,6 +8139,12 @@ snapshots:
       fastq: 1.17.1
 
   '@orama/orama@2.1.0': {}
+
+  '@orama/stopwords@2.1.0': {}
+
+  '@orama/tokenizers@2.1.0':
+    dependencies:
+      '@orama/orama': 2.1.0
 
   '@parcel/watcher-android-arm64@2.4.1':
     optional: true

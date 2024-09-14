@@ -12,6 +12,7 @@ import {
   type Page,
 } from '@/source';
 import { type StructuredData } from '@/mdx-plugins';
+import { type LocaleMap } from '@/search/i18n-api';
 
 function defaultToIndex(page: Page): AdvancedIndex {
   if (!('structuredData' in page.data)) {
@@ -32,10 +33,14 @@ function defaultToIndex(page: Page): AdvancedIndex {
   };
 }
 
+type Options = Omit<AdvancedOptions, 'language' | 'indexes'> & {
+  localeMap?: LocaleMap<Partial<AdvancedOptions>>;
+};
+
 export function createFromSource<S extends LoaderOutput<LoaderConfig>>(
   source: S,
   pageToIndex: (page: InferPageType<S>) => AdvancedIndex = defaultToIndex,
-  options: Omit<AdvancedOptions, 'language' | 'indexes'> = {},
+  options: Options = {},
 ): SearchAPI {
   if (source._i18n) {
     return createI18nSearchAPI('advanced', {

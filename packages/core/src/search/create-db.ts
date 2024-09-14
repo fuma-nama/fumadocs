@@ -29,9 +29,7 @@ export async function createDB({
     ...rest,
     schema: advancedSchema,
     components: {
-      tokenizer: tokenizer ?? {
-        stemmerSkipProperties: ['tag', 'url', 'page_id', 'type'],
-      },
+      tokenizer,
     },
   });
 

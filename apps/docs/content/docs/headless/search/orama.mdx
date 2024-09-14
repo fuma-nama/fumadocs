@@ -148,6 +148,22 @@ const { search, setSearch, query } = useDocsSearch(
 
 </div>
 
+### Chinese
+
+Orama requires extra configurations for Chinese, Japanese, and some other languages.
+
+```json doc-gen:file
+{
+  "file": "../../examples/i18n/app/api/search/route-cn.ts",
+  "codeblock": {
+    "lang": "ts",
+    "meta": "title=\"app/api/search/route.ts\""
+  }
+}
+```
+
+See [Orama Docs](https://docs.orama.com/open-source/supported-languages/using-chinese-with-orama) for more details.
+
 ## Static Search
 
 To work with Next.js static export, use `staticGET` from search server.
@@ -164,6 +180,8 @@ export const { staticGET: GET } = createFromSource(source);
 
 > `staticGET` is also available on `createSearchAPI`.
 
+### Search Client
+
 On your search client, use `static` instead of `fetch`.
 
 ```ts
@@ -173,6 +191,22 @@ const client = useDocsSearch({
   type: 'static',
 });
 ```
+
+### Search UI
+
+You can pass search options from the Root Provider.
+
+See [Search UI `options`](/docs/ui/search#search-options).
+
+<Callout type='warn' title="Be Careful">
+
+    Static Search requires clients to download the exported search indexes.
+    For large docs sites, its size can be really big.
+
+    Especially with i18n (e.g. Chinese tokenizers), the bundle size of tokenizers can exceed ~500MB.
+    You should use 3rd party solutions like Algolia for these cases.
+
+</Callout>
 
 ## Simple Search
 

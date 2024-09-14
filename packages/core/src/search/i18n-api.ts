@@ -14,7 +14,7 @@ import { createEndpoint } from '@/search/create-endpoint';
 import { type I18nConfig } from '@/i18n';
 import { STEMMERS } from '@/search/_stemmers';
 
-type LocaleMap<O> = Record<string, Language | O>;
+export type LocaleMap<O> = Record<string, Language | O>;
 
 type Options<O extends SimpleOptions | AdvancedOptions, Idx> = Omit<
   O,

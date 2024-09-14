@@ -18,7 +18,6 @@ import {
   PersonStandingIcon,
   RocketIcon,
   SearchIcon,
-  StarsIcon,
   TimerIcon,
 } from 'lucide-react';
 import { File, Files, Folder } from 'fumadocs-ui/components/files';
