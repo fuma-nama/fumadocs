@@ -36,6 +36,7 @@ let staticClient: StaticClient | undefined;
  * @param locale - Filter with locale
  * @param tag - Filter with specific tag
  * @param delayMs - The debounced delay for performing a search.
+ * @param allowEmtpy - still perform search even if query is empty
  * @param key - cache key
  */
 export function useDocsSearch(
@@ -43,6 +44,7 @@ export function useDocsSearch(
   locale?: string,
   tag?: string,
   delayMs = 100,
+  allowEmtpy = false,
   key?: string,
 ): UseDocsSearch {
   const [search, setSearch] = useState('');
@@ -73,6 +75,8 @@ export function useDocsSearch(
     };
 
     async function run(): Promise<SortedResult[] | 'empty'> {
+      if (debouncedValue.length === 0 && !allowEmtpy) return 'empty';
+
       if (client.type === 'fetch') {
         const { fetchDocs } = await import('./client/fetch');
         return fetchDocs(debouncedValue, locale, tag, client);

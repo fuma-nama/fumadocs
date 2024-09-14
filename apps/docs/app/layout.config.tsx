@@ -25,7 +25,7 @@ export const baseOptions: BaseLayoutProps = {
           className="size-4 [.uwu_&]:hidden [header_&]:size-5"
           fill="currentColor"
         />
-        <span className="font-medium [#nd-nav_&]:text-[15px] [.uwu_&]:hidden">
+        <span className="font-medium [.uwu_&]:hidden [header_&]:text-[15px]">
           Fumadocs
         </span>
       </>

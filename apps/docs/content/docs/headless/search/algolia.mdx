@@ -66,13 +66,11 @@ export const revalidate = false;
 
 export function GET() {
   const results: DocumentRecord[] = [];
-  const pages = source.getPages();
 
-  for (const page of pages) {
+  for (const page of source.getPages()) {
     results.push({
       _id: page.url,
       structured: page.data.structuredData,
-      tag: page.slugs[0],
       url: page.url,
       title: page.data.title,
       description: page.data.description,

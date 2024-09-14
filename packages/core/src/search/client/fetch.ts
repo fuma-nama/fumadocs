@@ -12,9 +12,7 @@ export async function fetchDocs(
   locale: string | undefined,
   tag: string | undefined,
   options: FetchOptions,
-): Promise<SortedResult[] | 'empty'> {
-  if (query.length === 0) return 'empty';
-
+): Promise<SortedResult[]> {
   const params = new URLSearchParams();
   params.set('query', query);
   if (locale) params.set('locale', locale);
