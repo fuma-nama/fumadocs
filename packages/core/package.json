@@ -32,6 +32,10 @@
       "import": "./dist/search/server.js",
       "types": "./dist/search/server.d.ts"
     },
+    "./search/algolia": {
+      "import": "./dist/search/algolia.js",
+      "types": "./dist/search/algolia.d.ts"
+    },
     "./server": {
       "import": "./dist/server/index.js",
       "types": "./dist/server/index.d.ts"
@@ -56,63 +60,9 @@
       "import": "./dist/mdx-plugins/index.js",
       "types": "./dist/mdx-plugins/index.d.ts"
     },
-    "./search-algolia/client": {
-      "import": "./dist/search-algolia/client.js",
-      "types": "./dist/search-algolia/client.d.ts"
-    },
-    "./search-algolia/server": {
-      "import": "./dist/search-algolia/server.js",
-      "types": "./dist/search-algolia/server.d.ts"
-    },
     "./i18n": {
       "import": "./dist/i18n/index.js",
       "types": "./dist/i18n/index.d.ts"
-    }
-  },
-  "typesVersions": {
-    "*": {
-      "sidebar": [
-        "./dist/sidebar.d.ts"
-      ],
-      "breadcrumb": [
-        "./dist/breadcrumb.d.ts"
-      ],
-      "toc": [
-        "./dist/toc.d.ts"
-      ],
-      "search/client": [
-        "./dist/search/client.d.ts"
-      ],
-      "search/server": [
-        "./dist/search/server.d.ts"
-      ],
-      "server": [
-        "./dist/server/index.d.ts"
-      ],
-      "source": [
-        "./dist/source/index.d.ts"
-      ],
-      "link": [
-        "./dist/link.d.ts"
-      ],
-      "middleware": [
-        "./dist/middleware.d.ts"
-      ],
-      "utils/use-on-change": [
-        "./dist/utils/use-on-change.d.ts"
-      ],
-      "mdx-plugins": [
-        "./dist/mdx-plugins/index.d.ts"
-      ],
-      "search-algolia/client": [
-        "./dist/search-algolia/client.d.ts"
-      ],
-      "search-algolia/server": [
-        "./dist/search-algolia/server.d.ts"
-      ],
-      "i18n": [
-        "./dist/i18n/index.d.ts"
-      ]
     }
   },
   "files": [
@@ -163,6 +113,9 @@
     "next": ">= 14.1.0",
     "react": ">= 18",
     "react-dom": ">= 18"
+  },
+  "optionalDependencies": {
+    "algoliasearch": "4.x.x"
   },
   "publishConfig": {
     "access": "public"

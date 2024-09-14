@@ -13,11 +13,9 @@ import {
 
 export interface DefaultSearchDialogProps extends SharedProps {
   /**
-   * Search tag
-   *
-   * @deprecated Use Tags API instead
+   * @defaultValue 'fetch'
    */
-  tag?: string;
+  type?: 'fetch' | 'static';
 
   defaultTag?: string;
   tags?: TagItem[];
@@ -40,11 +38,25 @@ export default function DefaultSearchDialog({
   tags,
   api,
   delayMs,
+  type = 'fetch',
   ...props
 }: DefaultSearchDialogProps): React.ReactElement {
   const { locale } = useI18n();
   const [tag, setTag] = useState(defaultTag);
-  const { search, setSearch, query } = useDocsSearch(locale, tag, api, delayMs);
+  const { search, setSearch, query } = useDocsSearch(
+    type === 'fetch'
+      ? {
+          type: 'fetch',
+          api,
+        }
+      : {
+          type: 'static',
+          from: api,
+        },
+    locale,
+    tag,
+    delayMs,
+  );
 
   useOnChange(defaultTag, (v) => {
     setTag(v);

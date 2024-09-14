@@ -8,9 +8,10 @@ export default defineConfig({
   entry: [
     'src/{toc,link,breadcrumb,sidebar,dynamic-link}.tsx',
     'src/{server,source,mdx-plugins}/index.ts',
-    'src/{search,search-algolia}/client.ts',
+    'src/search/client.ts',
+    'src/search/server.ts',
+    'src/search/algolia.ts',
     'src/utils/use-on-change.ts',
-    'src/{search,search-algolia}/server.ts',
     'src/middleware.ts',
     'src/i18n/index.ts',
   ],

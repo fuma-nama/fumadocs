@@ -1,4 +1,8 @@
 import { source } from '@/lib/source';
 import { createFromSource } from 'fumadocs-core/search/server';
 
-export const { GET } = createFromSource(source);
+const server = createFromSource(source);
+
+export async function GET() {
+  return Response.json(await server.export());
+}

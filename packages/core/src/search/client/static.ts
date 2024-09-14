@@ -11,7 +11,14 @@ import { searchAdvanced } from '@/search/search/advanced';
 import { type advancedSchema } from '@/search/create-db';
 import { type schema } from '@/search/create-db-simple';
 
-interface Client {
+export interface StaticOptions {
+  /**
+   * Where to download exported search indexes (URL)
+   */
+  from?: string;
+}
+
+export interface StaticClient {
   search: (
     query: string,
     locale: string | undefined,
@@ -28,20 +35,19 @@ type ExportedData =
       data: Record<string, RawData & { type: Type }>;
     };
 
-// locale -> db
-const dbs = new Map<
-  string,
-  {
-    type: 'simple' | 'advanced';
-    db: AnyOrama;
-  }
->();
-let started = false;
+export function createStaticClient({
+  from = '/api/search',
+}: StaticOptions): StaticClient {
+  // locale -> db
+  const dbs = new Map<
+    string,
+    {
+      type: 'simple' | 'advanced';
+      db: AnyOrama;
+    }
+  >();
 
-export function createStaticClient(from = '/api/search'): Client {
   async function init(): Promise<void> {
-    if (started) return;
-    started = true;
     const res = await fetch(from);
 
     if (!res.ok)
@@ -78,14 +84,14 @@ export function createStaticClient(from = '/api/search'): Client {
   return {
     async search(query, locale, tag) {
       await get;
-      const db = dbs.get(locale ?? '');
+      const cached = dbs.get(locale ?? '');
 
-      if (!db) return [];
-      if (db.type === 'simple')
-        return searchSimple(db as unknown as Orama<typeof schema>, query);
+      if (!cached) return [];
+      if (cached.type === 'simple')
+        return searchSimple(cached as unknown as Orama<typeof schema>, query);
 
       return searchAdvanced(
-        db as unknown as Orama<typeof advancedSchema>,
+        cached.db as Orama<typeof advancedSchema>,
         query,
         tag,
       );

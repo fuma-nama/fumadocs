@@ -1,12 +1,10 @@
 'use client';
 
 import type { SearchIndex } from 'algoliasearch/lite';
-import {
-  type Options,
-  useAlgoliaSearch,
-} from 'fumadocs-core/search-algolia/client';
+import { useDocsSearch } from 'fumadocs-core/search/client';
 import { type ReactNode, useState } from 'react';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
+import { SearchOptions } from '@algolia/client-search';
 import {
   SearchDialog,
   type SharedProps,
@@ -16,7 +14,7 @@ import {
 
 export interface AlgoliaSearchDialogProps extends SharedProps {
   index: SearchIndex;
-  searchOptions?: Options;
+  searchOptions?: SearchOptions;
   footer?: ReactNode;
 
   defaultTag?: string;
@@ -39,16 +37,15 @@ export default function AlgoliaSearchDialog({
   ...props
 }: AlgoliaSearchDialogProps): React.ReactElement {
   const [tag, setTag] = useState(defaultTag);
-  let filters = searchOptions?.filters;
-
-  if (tag) {
-    filters = filters ? `tag:${tag} AND (${filters})` : `tag:${tag}`;
-  }
-
-  const { search, setSearch, query } = useAlgoliaSearch(index, {
-    ...searchOptions,
-    filters,
-  });
+  const { search, setSearch, query } = useDocsSearch(
+    {
+      type: 'algolia',
+      index,
+      ...searchOptions,
+    },
+    undefined,
+    tag,
+  );
 
   useOnChange(defaultTag, (v) => {
     setTag(v);

@@ -1,25 +1,10 @@
 import type { Hit, SearchOptions } from '@algolia/client-search';
 import type { SearchIndex } from 'algoliasearch/lite';
-import { useState } from 'react';
-import useSWR, { type SWRResponse } from 'swr';
 import type { SortedResult } from '@/server/types';
-import { useDebounce } from '@/utils/use-debounce';
-import type { BaseIndex } from './server';
+import type { BaseIndex } from '@/search/algolia';
 
-export interface Options extends SearchOptions {
-  /**
-   * Use `empty` as result if query is empty
-   *
-   * @defaultValue true
-   */
-  allowEmpty?: boolean;
-
-  /**
-   * Delay to debounce (in ms)
-   *
-   * @defaultValue 300
-   */
-  delay?: number;
+export interface AlgoliaOptions extends SearchOptions {
+  index: SearchIndex;
 }
 
 export function groupResults(hits: Hit<BaseIndex>[]): SortedResult[] {
@@ -52,13 +37,18 @@ export function groupResults(hits: Hit<BaseIndex>[]): SortedResult[] {
 export async function searchDocs(
   index: SearchIndex,
   query: string,
+  tag?: string,
   options?: SearchOptions,
 ): Promise<SortedResult[]> {
   if (query.length === 0) {
+    let filters = options?.filters;
+    if (tag) filters = filters ? `tag:${tag} AND (${filters})` : `tag:${tag}`;
+
     const result = await index.search<BaseIndex>(query, {
       distinct: 1,
       hitsPerPage: 8,
       ...options,
+      filters,
     });
 
     return groupResults(result.hits).filter((hit) => hit.type === 'page');
@@ -71,36 +61,4 @@ export async function searchDocs(
   });
 
   return groupResults(result.hits);
-}
-
-interface UseAlgoliaSearch {
-  search: string;
-  setSearch: (v: string) => void;
-  query: SWRResponse<
-    SortedResult[] | 'empty',
-    Error,
-    { keepPreviousData: true }
-  >;
-}
-
-export function useAlgoliaSearch(
-  index: SearchIndex,
-  { allowEmpty = true, delay = 150, ...options }: Options = {},
-): UseAlgoliaSearch {
-  const [search, setSearch] = useState('');
-  const debouncedValue = useDebounce(search, delay);
-
-  const query: UseAlgoliaSearch['query'] = useSWR(
-    ['algolia-search', debouncedValue, allowEmpty, options],
-    async () => {
-      if (allowEmpty && debouncedValue.length === 0) return 'empty';
-
-      return searchDocs(index, debouncedValue, options);
-    },
-    {
-      keepPreviousData: true,
-    },
-  );
-
-  return { search, setSearch, query };
 }

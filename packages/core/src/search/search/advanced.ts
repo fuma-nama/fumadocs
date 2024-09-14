@@ -61,6 +61,5 @@ export async function searchAdvanced(
       });
     }
   }
-
   return list;
 }

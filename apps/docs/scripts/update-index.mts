@@ -1,5 +1,5 @@
 import algosearch from 'algoliasearch';
-import { DocumentRecord, sync } from 'fumadocs-core/search-algolia/server';
+import { DocumentRecord, sync } from 'fumadocs-core/search/algolia';
 import * as fs from 'node:fs/promises';
 
 export async function updateSearchIndexes(): Promise<void> {
