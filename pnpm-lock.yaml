@@ -453,15 +453,15 @@ importers:
       '@formatjs/intl-localematcher':
         specifier: ^0.5.4
         version: 0.5.4
+      '@orama/orama':
+        specifier: ^2.1.0
+        version: 2.1.0
       '@shikijs/rehype':
         specifier: ^1.17.5
         version: 1.17.5
       '@shikijs/transformers':
         specifier: ^1.17.5
         version: 1.17.5
-      flexsearch:
-        specifier: 0.7.21
-        version: 0.7.21
       github-slugger:
         specifier: ^2.0.0
         version: 2.0.0
@@ -471,9 +471,6 @@ importers:
       negotiator:
         specifier: ^0.6.3
         version: 0.6.3
-      npm-to-yarn:
-        specifier: ^3.0.0
-        version: 3.0.0
       react:
         specifier: '>= 18'
         version: 18.3.1
@@ -495,9 +492,6 @@ importers:
       shiki:
         specifier: ^1.17.5
         version: 1.17.5
-      swr:
-        specifier: ^2.2.5
-        version: 2.2.5(react@18.3.1)
       unist-util-visit:
         specifier: ^5.0.0
         version: 5.0.0
@@ -511,9 +505,6 @@ importers:
       '@types/estree-jsx':
         specifier: ^1.0.5
         version: 1.0.5
-      '@types/flexsearch':
-        specifier: 0.7.6
-        version: 0.7.6
       '@types/hast':
         specifier: ^3.0.4
         version: 3.0.4
@@ -1996,6 +1987,10 @@ packages:
     resolution: {integrity: sha512-oGB+UxlgWcgQkgwo8GcEGwemoTFt3FIO9ababBmaGwXIoBKZ+GTy0pP185beGg7Llih/NSHSV2XAs1lnznocSg==}
     engines: {node: '>= 8'}
 
+  '@orama/orama@2.1.0':
+    resolution: {integrity: sha512-6Z6acBHmXGhp2Dom0ZvGJsJ1tkCwvs+uqNZUnhBbUTDvX4U1EMSGiTZt3fJFXy1enLKse6lOpG+E76/MnQIdBw==}
+    engines: {node: '>= 16.0.0'}
+
   '@parcel/watcher-android-arm64@2.4.1':
     resolution: {integrity: sha512-LOi/WTbbh3aTn2RYddrO8pnapixAziFl6SMxHM69r3tvdSm94JtCenaKgk1GRg5FJ5wpMCpHeW+7yqPlvZv7kg==}
     engines: {node: '>= 10.0.0'}
@@ -3192,9 +3187,6 @@ packages:
 
   '@types/estree@1.0.5':
     resolution: {integrity: sha512-/kYRxGDLWzHOB7q+wtSUQlFrtcdUccpfy+X+9iMBpHK8QLLhx2wIPYuS5DYtR9Wa/YlZAbIovy7qVdB1Aq6Lyw==}
-
-  '@types/flexsearch@0.7.6':
-    resolution: {integrity: sha512-H5IXcRn96/gaDmo+rDl2aJuIJsob8dgOXDqf8K0t8rWZd1AFNaaspmRsElESiU+EWE33qfbFPgI0OC/B1g9FCA==}
 
   '@types/hast@3.0.4':
     resolution: {integrity: sha512-WPs+bbQw5aCj+x6laNGWLH3wviHtoCv/P3+otBhbOhJgG8qtpdAMlTCxLtsTWA7LH1Oh/bFCHsBn0TPS5m30EQ==}
@@ -4509,9 +4501,6 @@ packages:
 
   flatted@3.3.1:
     resolution: {integrity: sha512-X8cqMLLie7KsNUDSdzeN8FYK9rEt4Dt67OsG/DNGnYTSDBG4uFAJFBnUeiV+zCVAvwFy56IjM9sH51jVaEhNxw==}
-
-  flexsearch@0.7.21:
-    resolution: {integrity: sha512-W7cHV7Hrwjid6lWmy0IhsWDFQboWSng25U3VVywpHOTJnnAZNPScog67G+cVpeX9f7yDD21ih0WDrMMT+JoaYg==}
 
   for-each@0.3.3:
     resolution: {integrity: sha512-jqYfLp7mo9vIyQf8ykW2v7A+2N4QjeCeI5+Dz9XraiO1ign81wjiH7Fb9vSOWvQfNtmSa4H2RoQTrrXivdUZmw==}
@@ -8134,6 +8123,8 @@ snapshots:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.17.1
 
+  '@orama/orama@2.1.0': {}
+
   '@parcel/watcher-android-arm64@2.4.1':
     optional: true
 
@@ -9171,8 +9162,6 @@ snapshots:
       '@types/estree': 1.0.5
 
   '@types/estree@1.0.5': {}
-
-  '@types/flexsearch@0.7.6': {}
 
   '@types/hast@3.0.4':
     dependencies:
@@ -10836,8 +10825,6 @@ snapshots:
       rimraf: 3.0.2
 
   flatted@3.3.1: {}
-
-  flexsearch@0.7.21: {}
 
   for-each@0.3.3:
     dependencies:

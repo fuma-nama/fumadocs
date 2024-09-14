@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react';
 import type { I18nConfig } from '@/i18n';
+import { removeUndefined } from '@/utils/remove-undefined';
 import type * as PageTree from '../server/page-tree';
 import type { File, Folder, MetaFile, PageFile, Storage } from './file-system';
 import { resolvePath } from './path';
@@ -313,14 +314,4 @@ function pathToName(name: string, resolveGroup = false): string {
   }
 
   return result.join('');
-}
-
-function removeUndefined<T extends object>(value: T): T {
-  const obj = value as Record<string, unknown>;
-  Object.keys(obj).forEach((key) => {
-    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete -- Remove undefined values
-    if (obj[key] === undefined) delete obj[key];
-  });
-
-  return value;
 }

@@ -24,7 +24,6 @@ test('Search API', async () => {
 
 test('Search API Advanced', async () => {
   const api = createSearchAPI('advanced', {
-    tag: true,
     indexes: [
       {
         id: '1',
@@ -46,7 +45,7 @@ something`,
 something`,
         ),
         url: '/page',
-        tag: '',
+        tag: 'test',
       },
     ],
   });
@@ -65,7 +64,7 @@ something`,
       },
       {
         "content": "Hello World",
-        "id": "10",
+        "id": "1-0",
         "type": "heading",
         "url": "/#hello-world",
       },
@@ -76,15 +75,15 @@ something`,
 test('Search API I18n', async () => {
   const api = createI18nSearchAPI('simple', {
     i18n: {
-      languages: ['cn', 'en'],
+      languages: ['italian', 'en'],
       defaultLanguage: 'en',
     },
     indexes: [
       {
-        title: 'Hello World Chinese',
-        content: 'Hello World',
+        title: 'ciao mondo amico italian',
+        content: 'ciao mondo amico',
         url: '/hello-world',
-        locale: 'cn',
+        locale: 'italian',
       },
       {
         title: 'Hello World English',
@@ -96,8 +95,6 @@ test('Search API I18n', async () => {
   });
 
   expect(await api.search('English', { locale: 'en' })).toHaveLength(1);
-  expect(
-    await api.search('Hello World Chinese', { locale: 'cn' }),
-  ).toHaveLength(1);
-  expect(await api.search('Chinese', { locale: 'en' })).toHaveLength(0);
+  expect(await api.search('amico', { locale: 'italian' })).toHaveLength(1);
+  expect(await api.search('italian', { locale: 'en' })).toHaveLength(0);
 });

@@ -4,7 +4,7 @@ export function createEndpoint(server: SearchServer): SearchAPI {
   const { search } = server;
 
   return {
-    search,
+    ...server,
     async GET(request) {
       const query = request.nextUrl.searchParams.get('query');
       if (!query) return Response.json([]);

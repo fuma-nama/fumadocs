@@ -77,7 +77,6 @@ export default function Page(): React.ReactElement {
             <UwuHero />
           </div>
           <Feedback />
-          <Why />
           <div className="container border-x border-t py-16 md:py-24">
             <Terminal className="mx-auto mb-2 size-8 text-muted-foreground" />
             <h2 className="text-center text-2xl font-semibold sm:text-3xl">
@@ -87,7 +86,7 @@ export default function Page(): React.ReactElement {
             </h2>
           </div>
           <Introduction />
-          <Highlights />
+          <Why />
           <div
             className="container relative overflow-hidden border-x border-t py-16 sm:py-24"
             style={{
@@ -102,6 +101,7 @@ export default function Page(): React.ReactElement {
             </h2>
           </div>
           <Features />
+          <Highlights />
           <Contributing />
           <End />
         </div>
@@ -160,7 +160,7 @@ function Why(): React.ReactElement {
         <p className="max-md:hidden">with Fumadocs</p>
       </h2>
       <p className="mt-4 text-foreground/50">
-        Fumadocs offers a complete toolchain to maintain your docs.
+        Fumadocs offers a complete toolchain to build and maintain your docs.
       </p>
       <Accordions
         type="single"

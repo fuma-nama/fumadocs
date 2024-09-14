@@ -1,36 +1,20 @@
-import { useState } from 'react';
-import useSWR, { type SWRResponse } from 'swr';
+import { useRef, useState } from 'react';
 import { useDebounce } from '@/utils/use-debounce';
 import type { SortedResult } from '@/server/types';
+import { fetchDocs } from '@/search/client/fetch';
+import { useOnChange } from '@/utils/use-on-change';
 
 interface UseDocsSearch {
   search: string;
   setSearch: (v: string) => void;
-  query: SWRResponse<
-    SortedResult[] | 'empty',
-    Error,
-    { keepPreviousData: true }
-  >;
+  query: {
+    isLoading: boolean;
+    data?: SortedResult[] | 'empty';
+    error?: Error;
+  };
 }
 
-async function fetchDocs(
-  api: string,
-  query: string,
-  locale: string | undefined,
-  tag: string | undefined,
-): Promise<SortedResult[] | 'empty'> {
-  if (query.length === 0) return 'empty';
-
-  const params = new URLSearchParams();
-  params.set('query', query);
-  if (locale) params.set('locale', locale);
-  if (tag) params.set('tag', tag);
-
-  const res = await fetch(`${api}?${params.toString()}`);
-
-  if (!res.ok) throw new Error(await res.text());
-  return (await res.json()) as SortedResult[];
-}
+const cache = new Map<string, SortedResult[] | 'empty'>();
 
 /**
  * @param locale - Filter with locale
@@ -45,15 +29,43 @@ export function useDocsSearch(
   delayMs = 100,
 ): UseDocsSearch {
   const [search, setSearch] = useState('');
+  const [results, setResults] = useState<SortedResult[] | 'empty'>('empty');
+  const [error, setError] = useState<Error>();
+  const [isLoading, setIsLoading] = useState(false);
   const debouncedValue = useDebounce(search, delayMs);
+  const onStart = useRef<() => void>();
 
-  const query: UseDocsSearch['query'] = useSWR(
-    [api, debouncedValue, locale, tag],
-    (args) => fetchDocs(...args),
-    {
-      keepPreviousData: true,
-    },
-  );
+  useOnChange(debouncedValue, () => {
+    if (onStart.current) onStart.current();
 
-  return { search, setSearch, query };
+    const cached = cache.get(debouncedValue);
+    if (cached) {
+      setError(undefined);
+      setResults(cached);
+      return;
+    }
+
+    setIsLoading(true);
+    let interrupt = false;
+    onStart.current = () => {
+      interrupt = true;
+    };
+
+    void fetchDocs(api, debouncedValue, locale, tag)
+      .then((res) => {
+        cache.set(debouncedValue, res);
+        if (interrupt) return;
+
+        setError(undefined);
+        setResults(res);
+      })
+      .catch((err: unknown) => {
+        setError(err as Error);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  });
+
+  return { search, setSearch, query: { isLoading, data: results, error } };
 }
