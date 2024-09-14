@@ -181,7 +181,7 @@ For the setup guide, see [Integrate Algolia Search](/docs/headless/search/algoli
 While generally we recommend building your own search with their client-side
 SDK, you can also plug the built-in dialog interface.
 
-Create a separate client component for the dialog.
+Create a new search dialog:
 
 ```tsx title="components/search.tsx"
 'use client';
@@ -199,30 +199,7 @@ export default function CustomSearchDialog(props: SharedProps) {
 
 Replace `appId`, `apiKey` and `indexName` with your desired values.
 
-Create a new provider component and use it instead of the original Root Provider in the root layout.
-
-Inside the new provider, lazy load the dialog and pass it to Root Provider.
-
-```tsx title="app/provider.tsx"
-'use client';
-import { RootProvider } from 'fumadocs-ui/provider';
-import dynamic from 'next/dynamic';
-import type { ReactNode } from 'react';
-
-const SearchDialog = dynamic(() => import('@/components/search'));
-
-export function Provider({ children }: { children: ReactNode }) {
-  return (
-    <RootProvider
-      search={{
-        SearchDialog,
-      }}
-    >
-      {children}
-    </RootProvider>
-  );
-}
-```
+Replace the default search dialog with a separate client component, see [Replace Search Dialog](#replace-search-dialog) for details.
 
 <Callout title="Note" className='mt-4'>
 

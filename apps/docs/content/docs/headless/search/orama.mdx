@@ -70,19 +70,16 @@ Or use Fumadocs UI, which includes a built-in search UI.
 
 ### Tag Filter
 
-It's useful for implementing versioned docs, or multi-docs similar to this
-documentation.
+It's useful for implementing multi-docs similar to this documentation.
 
-```ts
-import { source } from '@/lib/source';
-import { createSearchAPI } from 'fumadocs-core/search/server';
-
-export const { GET } = createSearchAPI('advanced', {
-  indexes: source.getPages().map((page) => ({
-    tag: 'your value here',
-    // other props
-  })),
-});
+```json doc-gen:file
+{
+  "file": "../../examples/next-mdx/app/api/search/route-tag.ts",
+  "codeblock": {
+    "lang": "ts",
+    "meta": "title=\"app/api/search/route.ts\""
+  }
+}
 ```
 
 <Callout title="For Fumadocs UI">
