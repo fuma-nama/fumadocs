@@ -20,7 +20,9 @@ export function Info({
       <PopoverTrigger>
         <InfoIcon className="size-4" />
       </PopoverTrigger>
-      <PopoverContent className="prose text-sm">{children}</PopoverContent>
+      <PopoverContent className="prose max-w-[500px] text-sm">
+        {children}
+      </PopoverContent>
     </Popover>
   );
 }

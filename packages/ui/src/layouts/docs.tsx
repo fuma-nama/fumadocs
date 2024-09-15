@@ -105,7 +105,12 @@ export function DocsLayout({
         {links
           .filter((v) => v.type === 'icon')
           .map((v, i) => (
-            <LinkItem key={i} item={v} on="nav" className="md:hidden" />
+            <LinkItem
+              key={i}
+              item={v}
+              on="nav"
+              className="text-fd-muted-foreground md:hidden"
+            />
           ))}
       </Fragment>,
     );
