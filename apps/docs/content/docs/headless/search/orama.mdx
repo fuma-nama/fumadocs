@@ -8,7 +8,7 @@ Fumadocs supports searching document based on Orama.
 As the built-in search of Fumadocs, It is the default but also recommended
 option since it's easier to setup and totally free.
 
-> If you're using a CMS, you should use the API provided by the CMS instead.
+> If you're using a CMS, you may use the API provided by the CMS instead.
 
 ## Advanced Search
 
@@ -39,19 +39,14 @@ Create a route handler from Source API.
 
 Pass search indexes to the function, see type information for required properties.
 
-```ts
-import { source } from '@/lib/source';
-import { createSearchAPI } from 'fumadocs-core/search/server';
-
-export const { GET } = createSearchAPI('advanced', {
-  indexes: source.getPages().map((page) => ({
-    title: page.data.title,
-    description: page.data.description,
-    structuredData: page.data.structuredData,
-    id: page.url,
-    url: page.url,
-  })),
-});
+```json doc-gen:file
+{
+  "file": "../../examples/next-mdx/app/api/search/route-full.ts",
+  "codeblock": {
+    "lang": "ts",
+    "meta": "title=\"app/api/search/route.ts\""
+  }
+}
 ```
 
 #### Client
@@ -109,21 +104,23 @@ const client = useDocsSearch(
 
 <div className='steps [&_h4]:step'>
 
-<h4>Update the route handler</h4>
+<h4>Update the route handler (From Source)</h4>
+
+You don't need to change anything, it handles i18n automatically.
+
+<h4>Update the route handler (From Search Indexes)</h4>
 
 Use `createI18nSearchAPI` for i18n functionality.
 
 ```json doc-gen:file
 {
-  "file": "../../examples/i18n/app/api/search/route.ts",
+  "file": "../../examples/i18n/app/api/search/route-full.ts",
   "codeblock": {
     "lang": "ts",
     "meta": "title=\"app/api/search/route.ts\""
   }
 }
 ```
-
-> You don't need to allow this for `createFromSource`, it handles i18n automatically.
 
 <h4>Update search client</h4>
 

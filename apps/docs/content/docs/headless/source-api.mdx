@@ -7,9 +7,9 @@ description: Turn a content source into a unified interface
 
 Source API is a helper to load file-system based content sources, it offers a unified interface to integrate content sources with Fumadocs.
 
-It handles some important jobs:
+### What it does?
 
-- Build page trees based on file system
+- Generate page trees based on file system
 - Generate Urls and slugs based on file path
 - Output useful utilities to search or walk over files
 
@@ -30,7 +30,7 @@ export const source = loader({
 
 ### Base URL
 
-As the `loader` function also generate an URL for each page, you can override the default base URL.
+The loader generates a URL for each page, you can override the default base URL.
 
 ```ts
 import { loader } from 'fumadocs-core/source';
@@ -61,9 +61,98 @@ loader({
 });
 ```
 
+### I18n
+
+Pass the `i18n` config to loader.
+
+```ts title="lib/source.ts"
+import { i18n } from '@/lib/i18n';
+import { loader } from 'fumadocs-core/source';
+
+export const source = loader({
+  i18n, // [!code highlight]
+});
+```
+
+With i18n enabled, loader will generate a page tree for every locale.
+
+When looking for a page, it fallbacks to default locale if the page doesn't exist for the specified locale.
+
+## Output
+
+The loader outputs a source object.
+
+### Get Page
+
+Get page with slugs.
+
+```ts
+import { source } from '@/lib/source';
+
+source.getPage(['slug', 'of', 'page']);
+
+// with i18n
+source.getPage(['slug', 'of', 'page'], 'locale');
+```
+
+### Get Pages
+
+Get a list of page available for locale.
+
+```ts
+import { source } from '@/lib/source';
+
+// from default locale
+source.getPages();
+
+// for a specific locale
+source.getPages('locale');
+```
+
+### Page Tree
+
+```ts
+import { source } from '@/lib/source';
+
+// without i18n
+source.pageTree;
+
+// with i18n
+source.pageTree['locale'];
+```
+
+### Params
+
+A function to generate output for Next.js `generateStaticParams`.
+The generated parameter names will be `slug: string[]` and `lang: string` (i18n only).
+
+```ts title="app/[[...slug]]/page.tsx"
+import { source } from '@/lib/source';
+
+export function generateStaticParams() {
+  return source.generateParams();
+}
+```
+
+### Language Entries
+
+Get available languages and its pages.
+
+```ts
+import { source } from '@/lib/source';
+
+// language -> pages
+const entries = source.getLanguages();
+```
+
+## Deep Dive
+
+As mentioned, Source API doesn't rely on real file systems.
+During the process, your input source files will be parsed and form a virtual storage to avoid inconsistent behaviour between different OS.
+
 ### Root Directory
 
-Filter the input files by its located directory.
+Filter the input files by its parent directory.
 
 ```ts
 import { loader } from 'fumadocs-core/source';
@@ -78,15 +167,10 @@ Relative paths such as `./` and `../` are not supported.
 
 <Callout type='warn' title='Be Careful'>
 
-This is not equivalent to your content directory configured on content source (e.g. [Fumadocs MDX `dir` option](/docs/mdx/configuration#collections)).
+This is not equivalent to your content directory configured on content source (e.g. Fumadocs MDX `dir` option).
 Please use relevant options on your source instead.
 
 </Callout>
-
-## Deep Dive
-
-As mentioned, Source API doesn't rely on real file systems.
-During the process, your input source files will be parsed and form a virtual storage to avoid inconsistent behaviour between different OS.
 
 ### Transformer
 

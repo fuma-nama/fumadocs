@@ -36,20 +36,7 @@ export const source = loader({
 });
 ```
 
-You can access it with:
-
-```ts
-import { source } from '@/lib/source';
-
-// get page tree
-source.pageTree[params.lang];
-
-// get page
-source.getPage(params.slug, params.lang);
-
-// get pages
-source.getPages(params.lang);
-```
+See [Source API](/docs/headless/source-api).
 
 ### Middleware
 
@@ -93,10 +80,6 @@ It's **not recommended** to use `always`.
 On this mode, locale is stored as a cookie, read and set on the middleware.
 
 This may cause undesired cache problems on your hosting platform, and need to pay extra attention on SEO to ensure search engines can index your pages correctly.
-
-### Writing Documents
-
-see [Page Conventions](/docs/headless/page-conventions#internationalization) to learn how to organize your documents.
 
 ### Search
 
