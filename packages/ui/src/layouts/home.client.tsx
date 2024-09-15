@@ -20,14 +20,11 @@ import { LanguageToggle } from '@/components/layout/language-toggle';
 import type { SharedNavProps } from './shared';
 
 export function Nav({
-  title,
-  url,
   items,
-  transparentMode,
   enableSearch = true,
-  i18n,
-  children,
+  ...props
 }: SharedNavProps & {
+  disableThemeSwitch?: boolean;
   i18n?: boolean;
   items: LinkItemType[];
 }): React.ReactElement {
@@ -35,10 +32,14 @@ export function Nav({
   const { text } = useI18n();
 
   return (
-    <NavBox id="nd-nav" className="h-14" transparentMode={transparentMode}>
+    <NavBox
+      id="nd-nav"
+      className="h-14"
+      transparentMode={props.transparentMode}
+    >
       <nav className="mx-auto flex size-full max-w-container flex-row items-center gap-6 px-4">
-        <Title title={title} url={url} />
-        {children}
+        <Title title={props.title} url={props.url} />
+        {props.children}
         {items
           .filter((item) => !isSecondary(item))
           .map((item, i) => (
@@ -68,13 +69,15 @@ export function Nav({
             )}
             footer={
               <>
-                <div className="flex flex-row items-center justify-between px-2 pt-2">
-                  <p className="font-medium text-fd-muted-foreground">
-                    {text.chooseTheme}
-                  </p>
-                  <ThemeToggle />
-                </div>
-                {i18n ? (
+                {!props.disableThemeSwitch ? (
+                  <div className="flex flex-row items-center justify-between px-2 pt-2">
+                    <p className="font-medium text-fd-muted-foreground">
+                      {text.chooseTheme}
+                    </p>
+                    <ThemeToggle />
+                  </div>
+                ) : null}
+                {props.i18n ? (
                   <div className="flex flex-row items-center justify-between px-2 pt-2">
                     <p className="font-medium text-fd-muted-foreground">
                       {text.chooseLanguage}

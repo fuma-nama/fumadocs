@@ -1,5 +1,5 @@
 import type { PageTree } from 'fumadocs-core/server';
-import type { ReactNode, HTMLAttributes } from 'react';
+import { ReactNode, HTMLAttributes, Fragment } from 'react';
 import Link from 'next/link';
 import { MoreHorizontal } from 'lucide-react';
 import { notFound } from 'next/navigation';
@@ -17,6 +17,7 @@ declare const {
   SubNav,
   LanguageToggle,
   LinksMenu,
+  LinkItem,
   DynamicSidebar,
   Sidebar,
 }: typeof import('./docs.client');
@@ -46,7 +47,6 @@ export function DocsLayout({
     component: sidebarReplace,
     ...sidebar
   } = {},
-  containerProps = {},
   i18n = false,
   ...props
 }: DocsLayoutProps): React.ReactNode {
@@ -87,14 +87,34 @@ export function DocsLayout({
       </LinksMenu>,
     );
 
-  footer.push(<ThemeToggle key="theme" />);
+  if (sidebar.footer) {
+    footer.push(<Fragment key="footer">{sidebar.footer}</Fragment>);
+  }
+
+  if (!props.disableThemeSwitch) {
+    footer.push(<ThemeToggle key="theme" className="me-auto" />);
+  }
 
   if (i18n) {
     footer.push(<LanguageToggle key="i18n" />);
   }
 
+  if (links.some((v) => v.type === 'icon')) {
+    footer.push(
+      <Fragment key="links">
+        {links
+          .filter((v) => v.type === 'icon')
+          .map((v, i) => (
+            <LinkItem key={i} item={v} on="nav" className="md:hidden" />
+          ))}
+      </Fragment>,
+    );
+  }
+
   if (collapsible) {
-    footer.push(<SidebarCollapseTrigger key="sidebar" />);
+    footer.push(
+      <SidebarCollapseTrigger key="sidebar" className="max-md:hidden" />,
+    );
   }
 
   return (
@@ -102,14 +122,14 @@ export function DocsLayout({
       {replaceOrDefault(nav, <SubNav {...nav} />)}
       <main
         id="nd-docs-layout"
-        {...containerProps}
-        className={cn('flex flex-1 flex-row', containerProps.className)}
+        {...props.containerProps}
+        className={cn('flex flex-1 flex-row', props.containerProps?.className)}
       >
         {replaceOrDefault(
           { enabled: sidebarEnabled, component: sidebarReplace },
           <Aside
             {...sidebar}
-            items={links}
+            items={links.filter((v) => v.type !== 'icon')}
             banner={
               banner.length > 0 || sidebar.banner ? (
                 <>
@@ -129,14 +149,7 @@ export function DocsLayout({
                 sidebar.bannerProps?.className,
               ),
             }}
-            footer={
-              footer.length > 0 || sidebar.footer ? (
-                <>
-                  {sidebar.footer}
-                  {footer}
-                </>
-              ) : null
-            }
+            footer={footer.length > 0 ? footer : null}
           />,
         )}
         {props.children}

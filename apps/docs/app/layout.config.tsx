@@ -66,6 +66,7 @@ export const docsOptions: DocsLayoutProps = {
     transparentMode: 'none',
     children: undefined,
   },
+  links: baseOptions.links?.slice(1),
   sidebar: {
     banner: (
       <RootToggle

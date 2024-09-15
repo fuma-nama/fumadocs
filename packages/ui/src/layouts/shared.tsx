@@ -19,6 +19,11 @@ export interface SharedNavProps extends TitleProps, NavBoxProps {
 
 export interface BaseLayoutProps {
   /**
+   * Remove theme switcher component
+   */
+  disableThemeSwitch?: boolean;
+
+  /**
    * Enable Language Switch
    *
    * @defaultValue false

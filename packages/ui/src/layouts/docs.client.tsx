@@ -2,7 +2,7 @@
 
 import { SidebarTrigger } from 'fumadocs-core/sidebar';
 import { Menu, SidebarIcon, X } from 'lucide-react';
-import { useCallback } from 'react';
+import { ButtonHTMLAttributes, useCallback } from 'react';
 import { useSidebar } from '@/contexts/sidebar';
 import { useSearchContext } from '@/contexts/search';
 import { SearchToggle } from '@/components/layout/search-toggle';
@@ -45,18 +45,21 @@ export function SubNav({
   );
 }
 
-export function SidebarCollapseTrigger(): React.ReactElement {
+export function SidebarCollapseTrigger(
+  props: ButtonHTMLAttributes<HTMLButtonElement>,
+): React.ReactElement {
   const { setCollapsed } = useSidebar();
 
   return (
     <button
       type="button"
       aria-label="Collapse Sidebar"
+      {...props}
       className={cn(
         buttonVariants({
           color: 'ghost',
           size: 'icon',
-          className: 'ms-auto max-md:hidden',
+          className: props.className,
         }),
       )}
       onClick={useCallback(() => {
@@ -68,7 +71,7 @@ export function SidebarCollapseTrigger(): React.ReactElement {
   );
 }
 
-export { LinksMenu } from '@/components/layout/link-item';
+export { LinksMenu, LinkItem } from '@/components/layout/link-item';
 export { Sidebar } from '@/components/layout/sidebar';
 export { TreeContextProvider } from '@/contexts/tree';
 export { ThemeToggle } from '@/components/layout/theme-toggle';

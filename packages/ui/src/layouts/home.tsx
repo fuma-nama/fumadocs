@@ -8,21 +8,24 @@ export type HomeLayoutProps = BaseLayoutProps;
 export function HomeLayout({
   nav = {},
   links = [],
-  githubUrl,
-  i18n,
-  children,
+  ...props
 }: BaseLayoutProps): React.ReactElement {
-  const finalLinks = getLinks(links, githubUrl);
+  const finalLinks = getLinks(links, props.githubUrl);
 
   return (
     <>
       {replaceOrDefault(
         nav,
-        <Nav items={finalLinks} i18n={i18n} {...nav}>
+        <Nav
+          items={finalLinks}
+          i18n={props.i18n}
+          disableThemeSwitch={props.disableThemeSwitch}
+          {...nav}
+        >
           {nav.children}
         </Nav>,
       )}
-      {children}
+      {props.children}
     </>
   );
 }
