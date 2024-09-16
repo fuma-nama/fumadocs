@@ -36,7 +36,7 @@ let staticClient: StaticClient | undefined;
  * @param locale - Filter with locale
  * @param tag - Filter with specific tag
  * @param delayMs - The debounced delay for performing a search.
- * @param allowEmtpy - still perform search even if query is empty
+ * @param allowEmpty - still perform search even if query is empty
  * @param key - cache key
  */
 export function useDocsSearch(
@@ -44,7 +44,7 @@ export function useDocsSearch(
   locale?: string,
   tag?: string,
   delayMs = 100,
-  allowEmtpy = false,
+  allowEmpty = false,
   key?: string,
 ): UseDocsSearch {
   const [search, setSearch] = useState('');
@@ -59,10 +59,15 @@ export function useDocsSearch(
   }, [client, debouncedValue, locale, tag, key]);
 
   useOnChange(cacheKey, () => {
-    if (onStart.current) onStart.current();
-
     const cached = cache.get(cacheKey);
+
+    if (onStart.current) {
+      onStart.current();
+      onStart.current = undefined;
+    }
+
     if (cached) {
+      setIsLoading(false);
       setError(undefined);
       setResults(cached);
       return;
@@ -75,7 +80,7 @@ export function useDocsSearch(
     };
 
     async function run(): Promise<SortedResult[] | 'empty'> {
-      if (debouncedValue.length === 0 && !allowEmtpy) return 'empty';
+      if (debouncedValue.length === 0 && !allowEmpty) return 'empty';
 
       if (client.type === 'fetch') {
         const { fetchDocs } = await import('./client/fetch');
@@ -97,7 +102,7 @@ export function useDocsSearch(
 
     void run()
       .then((res) => {
-        cache.set(debouncedValue, res);
+        cache.set(cacheKey, res);
         if (interrupt) return;
 
         setError(undefined);

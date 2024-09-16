@@ -159,6 +159,9 @@ importers:
       eslint-config-custom:
         specifier: workspace:*
         version: link:../../packages/eslint-config-custom
+      fumadocs:
+        specifier: workspace:*
+        version: link:../../packages/cli
       glslify:
         specifier: ^7.1.1
         version: 7.1.1

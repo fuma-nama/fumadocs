@@ -40,10 +40,10 @@ export async function searchDocs(
   tag?: string,
   options?: SearchOptions,
 ): Promise<SortedResult[]> {
-  if (query.length === 0) {
-    let filters = options?.filters;
-    if (tag) filters = filters ? `tag:${tag} AND (${filters})` : `tag:${tag}`;
+  let filters = options?.filters;
+  if (tag) filters = filters ? `tag:${tag} AND (${filters})` : `tag:${tag}`;
 
+  if (query.length === 0) {
     const result = await index.search<BaseIndex>(query, {
       distinct: 1,
       hitsPerPage: 8,
@@ -58,6 +58,7 @@ export async function searchDocs(
     distinct: 5,
     hitsPerPage: 10,
     ...options,
+    filters,
   });
 
   return groupResults(result.hits);

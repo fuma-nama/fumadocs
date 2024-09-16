@@ -10,7 +10,7 @@ import {
   CollapsibleTrigger,
 } from './ui/collapsible';
 
-const item = cva(
+const itemVariants = cva(
   'flex flex-row items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-fd-accent hover:text-fd-accent-foreground [&_svg]:size-4',
 );
 
@@ -53,7 +53,7 @@ export function File({
   ...rest
 }: FileProps): React.ReactElement {
   return (
-    <div className={cn(item({ className }))} {...rest}>
+    <div className={cn(itemVariants({ className }))} {...rest}>
       {icon}
       {name}
     </div>
@@ -69,12 +69,12 @@ export function Folder({
 
   return (
     <Collapsible open={open} onOpenChange={setOpen} {...props}>
-      <CollapsibleTrigger className={cn(item({ className: 'w-full' }))}>
+      <CollapsibleTrigger className={cn(itemVariants({ className: 'w-full' }))}>
         {open ? <FolderOpen /> : <FolderIcon />}
         {name}
       </CollapsibleTrigger>
       <CollapsibleContent>
-        <div className="ms-2 flex flex-col border-l pl-2">{props.children}</div>
+        <div className="ms-2 flex flex-col border-l ps-2">{props.children}</div>
       </CollapsibleContent>
     </Collapsible>
   );

@@ -31,12 +31,6 @@ export const typography = {
       textUnderlineOffset: '2px',
       textDecorationColor: `theme('colors.fd-primary.DEFAULT')`,
     },
-    'h1 a,h2 a,h3 a,h4 a,h5 a,h6 a': {
-      // disable anchor styles on headings
-      textDecoration: 'inherit',
-      font: 'inherit',
-      color: 'inherit',
-    },
     'a:not([data-card]):hover': {
       opacity: '80%',
     },
@@ -45,6 +39,9 @@ export const typography = {
     },
     'thead th': {
       textAlign: 'start',
+    },
+    h2: {
+      fontWeight: '600',
     },
     code: {
       padding: '3px',

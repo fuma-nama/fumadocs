@@ -97,7 +97,7 @@ export default function ClerkTOCItems({
             }}
           >
             <div
-              className="bg-fd-primary transition-all"
+              className="bg-fd-primary transition-all ease-linear"
               style={{
                 marginTop: pos[0],
                 height: pos[1],

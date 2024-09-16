@@ -191,3 +191,30 @@ export const openapi = createOpenAPI({
   },
 });
 ```
+
+## Advanced
+
+### Using API Page
+
+> This is not a public API, use it carefully.
+
+To use the `APIPage` component in your MDX files:
+
+```mdx
+---
+title: Delete Api
+full: true
+---
+
+<APIPage
+  document="./unkey.json"
+  operations={[{ path: '/v1/apis.deleteApi', method: 'post' }]}
+  hasHead={false}
+/>
+```
+
+| Prop         | Description                               |
+| ------------ | ----------------------------------------- |
+| `document`   | OpenAPI Schema                            |
+| `operations` | Operations (API endpoints) to be rendered |
+| `hasHead`    | Enable to render the heading of operation |

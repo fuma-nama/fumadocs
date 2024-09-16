@@ -52,6 +52,7 @@
     "@types/react-dom": "^18.3.0",
     "autoprefixer": "^10.4.20",
     "eslint-config-custom": "workspace:*",
+    "fumadocs": "workspace:*",
     "glslify": "^7.1.1",
     "glslx": "^0.3.0",
     "postcss": "^8.4.45",
