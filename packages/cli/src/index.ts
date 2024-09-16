@@ -1,3 +1,5 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
 import { Command } from 'commander';
 import picocolors from 'picocolors';
 import { isCancel, multiselect, outro } from '@clack/prompts';
@@ -6,6 +8,12 @@ import { add } from '@/commands/add';
 import { initConfig, loadConfig } from '@/config';
 import { plugins } from '@/plugins';
 import { components } from '@/generated';
+import {
+  type JsonTreeNode,
+  treeToJavaScript,
+  treeToMdx,
+} from '@/commands/file-tree';
+import { runTree } from '@/utils/run-tree';
 import packageJson from '../package.json';
 
 const program = new Command();
@@ -16,7 +24,7 @@ program
   .version(packageJson.version);
 
 program
-  .command('i')
+  .command('config')
   .description('init a config for Fumadocs CLI')
   .action(async () => {
     await initConfig();
@@ -73,6 +81,50 @@ program
       const loadedConfig = await loadConfig(config);
       for (const name of target) {
         await add(name, branch ?? 'main', loadedConfig);
+      }
+    },
+  );
+
+program
+  .command('tree')
+  .argument(
+    '[json_or_args]',
+    'JSON output of `tree` command or arguments for the `tree` command',
+  )
+  .argument('[output]', 'output path of file')
+  .option('--js', 'output as JavaScript file')
+  .option('--no-root', 'remove the root node')
+  .option('--import-name <name>', 'where to import components (JS only)')
+  .action(
+    async (
+      str: string | undefined,
+      output: string | undefined,
+      {
+        js,
+        root,
+        importName,
+      }: { js: boolean; root: boolean; importName?: string },
+    ) => {
+      const jsExtensions = ['.js', '.tsx', '.jsx'];
+      const noRoot = !root;
+      let nodes: JsonTreeNode[];
+
+      try {
+        nodes = JSON.parse(str ?? '') as JsonTreeNode[];
+      } catch (e) {
+        nodes = await runTree(str ?? './');
+      }
+
+      const out =
+        js || (output && jsExtensions.includes(path.extname(output)))
+          ? treeToJavaScript(nodes, noRoot, importName)
+          : treeToMdx(nodes, noRoot);
+
+      if (output) {
+        await fs.mkdir(path.dirname(output), { recursive: true });
+        await fs.writeFile(output, out);
+      } else {
+        console.log(out);
       }
     },
   );
