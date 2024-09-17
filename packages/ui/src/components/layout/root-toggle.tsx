@@ -8,7 +8,7 @@ import { isActive } from '@/utils/shared';
 import { useSidebar } from '@/contexts/sidebar';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 
-interface Option {
+export interface Option {
   /**
    * Redirect URL of the folder, usually the index page
    */
@@ -30,8 +30,7 @@ export function RootToggle({
   const [open, setOpen] = useState(false);
   const { closeOnRedirect } = useSidebar();
   const pathname = usePathname();
-  const selected =
-    options.find((item) => isActive(item.url, pathname, true)) ?? options[0];
+  const selected = options.find((item) => isActive(item.url, pathname, true));
 
   const onClick = useCallback(() => {
     closeOnRedirect.current = false;
@@ -42,12 +41,15 @@ export function RootToggle({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
         {...props}
+        {...selected?.props}
         className={cn(
-          '-mx-2 flex flex-row items-center gap-2.5 rounded-lg p-2 hover:bg-fd-accent/50 hover:text-fd-accent-foreground',
+          '-mx-1 flex flex-row items-center gap-2.5 rounded-lg p-1 hover:bg-fd-accent/50 hover:text-fd-accent-foreground',
           props.className,
+          selected?.props?.className,
         )}
       >
-        <Item {...selected} />
+        {selected ? <Item {...selected} /> : null}
+
         <ChevronDown className="size-4 text-fd-muted-foreground md:me-1.5" />
       </PopoverTrigger>
       <PopoverContent className="w-[var(--radix-popover-trigger-width)] overflow-hidden p-0">

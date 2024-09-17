@@ -10,7 +10,7 @@ import type { MetaData, PageData, UrlFn } from './types';
 import type { BuildPageTreeOptions } from './page-tree-builder';
 import { createPageTreeBuilder } from './page-tree-builder';
 import { type FileInfo } from './path';
-import type { File, PageFile, Storage } from './file-system';
+import type { MetaFile, PageFile, Storage } from './file-system';
 
 export interface LoaderConfig {
   source: SourceConfig;
@@ -80,9 +80,8 @@ export interface LoaderOutput<Config extends LoaderConfig> {
   pageTree: Config['i18n'] extends true
     ? Record<string, PageTree.Root>
     : PageTree.Root;
-  _i18n?: I18nConfig;
 
-  files: File[];
+  _i18n?: I18nConfig;
 
   /**
    * Get list of pages from language, empty if language hasn't specified
@@ -101,6 +100,14 @@ export interface LoaderOutput<Config extends LoaderConfig> {
     language?: string,
   ) => Page<Config['source']['pageData']> | undefined;
 
+  getNodePage: (
+    node: PageTree.Item,
+  ) => Page<Config['source']['pageData']> | undefined;
+
+  getNodeMeta: (
+    node: PageTree.Folder,
+  ) => Meta<Config['source']['metaData']> | undefined;
+
   /**
    * generate static params for Next.js SSG
    */
@@ -113,35 +120,53 @@ export interface LoaderOutput<Config extends LoaderConfig> {
   ) => (Record<TSlug, string[]> & Record<TLang, string>)[];
 }
 
-function buildPageMap(
+function indexPages(
   storage: Storage,
   getUrl: UrlFn,
   languages: string[] = [],
-): Map<string, Map<string, Page>> {
-  const map = new Map<string, Map<string, Page>>();
+): {
+  // locale -> (slugs -> page[])
+  i18n: Map<string, Map<string, Page>>;
+
+  pathToPage: Map<string, Page>;
+  pathToMeta: Map<string, Meta>;
+} {
+  const i18n = new Map<string, Map<string, Page>>();
+  const pages = new Map<string, Page>();
+  const metas = new Map<string, Meta>();
+
   const defaultMap = new Map<string, Page>();
 
-  map.set('', defaultMap);
+  i18n.set('', defaultMap);
   for (const file of storage.list()) {
-    if (file.format !== 'page' || file.file.locale) continue;
-    const page = fileToPage(file, getUrl);
+    if (file.format === 'meta') metas.set(file.file.path, fileToMeta(file));
 
-    defaultMap.set(page.slugs.join('/'), page);
+    if (file.format === 'page') {
+      const page = fileToPage(file, getUrl, file.file.locale);
+      pages.set(file.file.path, page);
 
-    for (const lang of languages) {
-      const langMap = map.get(lang) ?? new Map<string, Page>();
+      if (file.file.locale) continue;
+      defaultMap.set(page.slugs.join('/'), page);
 
-      const localized = storage.read(
-        `${file.file.flattenedPath}.${lang}`,
-        'page',
-      );
-      const localizedPage = fileToPage(localized ?? file, getUrl, lang);
-      langMap.set(localizedPage.slugs.join('/'), localizedPage);
-      map.set(lang, langMap);
+      for (const lang of languages) {
+        const langMap = i18n.get(lang) ?? new Map<string, Page>();
+
+        const localized = storage.read(
+          `${file.file.flattenedPath}.${lang}`,
+          'page',
+        );
+        const localizedPage = fileToPage(localized ?? file, getUrl, lang);
+        langMap.set(localizedPage.slugs.join('/'), localizedPage);
+        i18n.set(lang, langMap);
+      }
     }
   }
 
-  return map;
+  return {
+    i18n,
+    pathToPage: pages,
+    pathToMeta: metas,
+  };
 }
 
 export function createGetUrl(baseUrl: string): UrlFn {
@@ -195,7 +220,7 @@ function createOutput({
       getSlugs: slugsFn,
     },
   );
-  const i18nMap = buildPageMap(storage, getUrl, i18n?.languages);
+  const walker = indexPages(storage, getUrl, i18n?.languages);
   const builder = createPageTreeBuilder();
   const pageTree =
     i18n === undefined
@@ -216,14 +241,13 @@ function createOutput({
   return {
     _i18n: i18n,
     pageTree: pageTree as LoaderOutput<LoaderConfig>['pageTree'],
-    files: storage.list(),
     getPages(language = i18n?.defaultLanguage ?? '') {
-      return Array.from(i18nMap.get(language)?.values() ?? []);
+      return Array.from(walker.i18n.get(language)?.values() ?? []);
     },
     getLanguages() {
       const list: LanguageEntry[] = [];
 
-      for (const [language, pages] of i18nMap) {
+      for (const [language, pages] of walker.i18n) {
         if (language === '') continue;
 
         list.push({
@@ -235,7 +259,17 @@ function createOutput({
       return list;
     },
     getPage(slugs = [], language = i18n?.defaultLanguage ?? '') {
-      return i18nMap.get(language)?.get(slugs.join('/'));
+      return walker.i18n.get(language)?.get(slugs.join('/'));
+    },
+    getNodeMeta(node) {
+      if (!node.$ref?.metaFile) return;
+
+      return walker.pathToMeta.get(node.$ref.metaFile);
+    },
+    getNodePage(node) {
+      if (!node.$ref?.file) return;
+
+      return walker.pathToPage.get(node.$ref.file);
     },
     // @ts-expect-error -- ignore this
     generateParams(slug, lang) {
@@ -248,10 +282,17 @@ function createOutput({
         );
       }
 
-      return Array.from(i18nMap.get('')?.values() ?? []).map((page) => ({
+      return Array.from(walker.i18n.get('')?.values() ?? []).map((page) => ({
         [slug ?? 'slug']: page.slugs,
       }));
     },
+  };
+}
+
+function fileToMeta<Data = MetaData>(file: MetaFile): Meta<Data> {
+  return {
+    file: file.file,
+    data: file.data.data as Data,
   };
 }
 

@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { Command } from 'commander';
 import picocolors from 'picocolors';
-import { isCancel, multiselect, outro } from '@clack/prompts';
+import { isCancel, multiselect, outro, select } from '@clack/prompts';
 import { init } from '@/commands/init';
 import { add } from '@/commands/add';
 import { initConfig, loadConfig } from '@/config';
@@ -34,15 +34,33 @@ program
 program
   .command('init')
   .description('init a new plugin to your docs')
-  .argument('<string>', 'plugin name')
+  .argument('[string]', 'plugin name')
   .option('--config <string>')
-  .action(async (str: string, { config }) => {
+  .action(async (str: string | undefined, { config }) => {
     const loadedConfig = await loadConfig(config as string | undefined);
-    const plugin = str in plugins ? plugins[str] : undefined;
 
-    if (!plugin) throw new Error(`Plugin not found: ${str}`);
+    if (str) {
+      const plugin = str in plugins ? plugins[str] : undefined;
+      if (!plugin) throw new Error(`Plugin not found: ${str}`);
 
-    await init(plugin, loadedConfig);
+      await init(plugin, loadedConfig);
+      return;
+    }
+
+    const value = await select({
+      message: 'Select components to install',
+      options: Object.keys(plugins).map((c) => ({
+        label: c,
+        value: c,
+      })),
+    });
+
+    if (isCancel(value)) {
+      outro('Ended');
+      return;
+    }
+
+    await init(plugins[value as keyof typeof plugins], loadedConfig);
   });
 
 program

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next/types';
 import { createMetadataImage } from 'fumadocs-core/server';
-import { utils } from '@/app/source';
+import { source } from '@/app/source';
 
 export function createMetadata(override: Metadata): Metadata {
   return {
@@ -25,11 +25,11 @@ export function createMetadata(override: Metadata): Metadata {
 }
 
 export const baseUrl =
-  process.env.NODE_ENV === 'development'
+  process.env.NODE_ENV === 'development' || !process.env.VERCEL_URL
     ? new URL('http://localhost:3000')
-    : new URL(`https://${process.env.VERCEL_URL!}`);
+    : new URL(`https://${process.env.VERCEL_URL}`);
 
 export const metadataImage = createMetadataImage({
-  source: utils,
+  source,
   imageRoute: 'og',
 });

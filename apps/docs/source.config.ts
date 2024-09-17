@@ -3,6 +3,7 @@ import {
   defineDocs,
   defineCollections,
   frontmatterSchema,
+  metaSchema,
 } from 'fumadocs-mdx/config';
 import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins';
 import { transformerTwoslash } from 'fumadocs-twoslash';
@@ -26,6 +27,11 @@ export const { docs, meta } = defineDocs({
        * API routes only
        */
       method: z.string().optional(),
+    }),
+  },
+  meta: {
+    schema: metaSchema.extend({
+      description: z.string().optional(),
     }),
   },
 });

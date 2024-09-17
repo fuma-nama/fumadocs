@@ -16,7 +16,7 @@ import { TypeTable } from 'fumadocs-ui/components/type-table';
 import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 import Preview from '@/components/preview';
 import { createMetadata, metadataImage } from '@/utils/metadata';
-import { openapi, utils } from '@/app/source';
+import { openapi, source } from '@/app/source';
 import { Wrapper } from '@/components/preview/wrapper';
 
 interface Param {
@@ -28,7 +28,7 @@ export default function Page({
 }: {
   params: Param;
 }): React.ReactElement {
-  const page = utils.getPage(params.slug);
+  const page = source.getPage(params.slug);
 
   if (!page) notFound();
 
@@ -75,7 +75,7 @@ export default function Page({
           }}
         />
         {page.data.index ? (
-          <DocsCategory page={page} pages={utils.getPages()} />
+          <DocsCategory page={page} pages={source.getPages()} />
         ) : null}
       </DocsBody>
     </DocsPage>
@@ -83,7 +83,7 @@ export default function Page({
 }
 
 export function generateMetadata({ params }: { params: Param }): Metadata {
-  const page = utils.getPage(params.slug);
+  const page = source.getPage(params.slug);
 
   if (!page) notFound();
 
@@ -102,5 +102,5 @@ export function generateMetadata({ params }: { params: Param }): Metadata {
 }
 
 export function generateStaticParams(): Param[] {
-  return utils.generateParams();
+  return source.generateParams();
 }

@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 import { type DocumentRecord } from 'fumadocs-core/search/algolia';
-import { utils } from '@/app/source';
+import { source } from '@/app/source';
 
 export const revalidate = false;
 
 export function GET(): Response {
   const results: DocumentRecord[] = [];
-  const pages = utils.getPages();
+  const pages = source.getPages();
 
   for (const page of pages) {
     results.push({

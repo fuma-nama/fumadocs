@@ -18,11 +18,11 @@ interface PageTreeBuilderContext {
 
 export interface BuildPageTreeOptions {
   /**
-   * Attach the `folder.id` property
+   * Remove references to the file path of original nodes (`$ref`)
    *
    * @defaultValue false
    */
-  attachFolderIds?: boolean;
+  noRef?: boolean;
 
   attachFile?: (node: PageTree.Item, file?: PageFile) => PageTree.Item;
   attachFolder?: (
@@ -211,11 +211,12 @@ function buildFolderNode(
     defaultOpen: metadata?.defaultOpen,
     index,
     children,
+    $ref: !ctx.options.noRef
+      ? {
+          metaFile: meta?.file.path,
+        }
+      : undefined,
   };
-
-  if (ctx.options.attachFolderIds) {
-    node.id = folder.file.flattenedPath;
-  }
 
   return removeUndefined(
     ctx.options.attachFolder?.(node, folder, meta) ?? node,
@@ -245,6 +246,11 @@ function buildFileNode(
     name: localized.data.data.title,
     icon: ctx.options.resolveIcon?.(localized.data.data.icon),
     url: ctx.options.getUrl(localized.data.slugs, urlLocale),
+    $ref: !ctx.options.noRef
+      ? {
+          file: localized.file.path,
+        }
+      : undefined,
   };
 
   return removeUndefined(ctx.options.attachFile?.(item, file) ?? item);

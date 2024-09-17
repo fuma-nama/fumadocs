@@ -16,6 +16,7 @@
   "dependencies": {
     "@next/env": "^14.2.11",
     "@radix-ui/react-popover": "^1.1.1",
+    "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-tooltip": "^1.1.2",
     "@resvg/resvg-js": "^2.6.2",
     "@shikijs/transformers": "^1.17.5",
