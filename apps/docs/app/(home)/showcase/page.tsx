@@ -14,6 +14,10 @@ import Million from '@/public/showcases/million.png';
 import Spot from '@/public/spot.png';
 import Hiro from '@/public/showcases/hiro.png';
 import DokPloy from '@/public/showcases/dokploy.png';
+import CodeHike from '@/public/showcases/codehike.png';
+import Expostarter from '@/public/showcases/expostarter.png';
+import Sunar from '@/public/showcases/sunar.png';
+import Supastarter from '@/public/showcases/supastarter.png';
 
 export const metadata = createMetadata({
   title: 'Showcase',
@@ -63,13 +67,29 @@ export default function Showcase(): React.ReactElement {
       url: 'https://docs.hiro.so/stacks',
     },
     {
-      name: 'Typelytics',
-      url: 'https://typelytics.rhyssul.com',
-    },
-    {
       image: FrameGround,
       name: 'FrameGround',
       url: 'https://docs.frameground.tech',
+    },
+    {
+      image: Sunar,
+      name: 'Sunar',
+      url: 'https://sunar.js.org',
+    },
+    {
+      image: Supastarter,
+      name: 'SupaStarter',
+      url: 'https://supastarter.dev',
+    },
+    {
+      image: CodeHike,
+      name: 'CodeHike',
+      url: 'https://codehike.org',
+    },
+    {
+      image: Expostarter,
+      name: 'ExpoStarter',
+      url: 'https://expostarter.com/docs',
     },
     {
       name: "RUNFUNRUN's Blog",
@@ -84,6 +104,14 @@ export default function Showcase(): React.ReactElement {
       image: Xlog,
       name: 'xlog.systems',
       url: 'https://www.xlog.systems',
+    },
+    {
+      name: 'Vision UI',
+      url: 'https://vision.uing.dev',
+    },
+    {
+      name: 'Typelytics',
+      url: 'https://typelytics.rhyssul.com',
     },
   ];
 
