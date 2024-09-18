@@ -8,6 +8,8 @@ import { buttonVariants } from '@/components/ui/button';
 import type { SidebarProps } from '@/components/layout/sidebar';
 import { replaceOrDefault } from '@/utils/shared';
 import type { LinkItemType } from '@/components/layout/link-item';
+import { getSidebarTabs, type TabOptions } from '@/utils/get-sidebar-tabs';
+import { Option } from '@/components/layout/root-toggle';
 import { type BaseLayoutProps, getLinks } from './shared';
 
 declare const {
@@ -17,6 +19,7 @@ declare const {
   SubNav,
   LanguageToggle,
   LinksMenu,
+  RootToggle,
   LinkItem,
   DynamicSidebar,
   Sidebar,
@@ -28,6 +31,11 @@ interface SidebarOptions extends Omit<SidebarProps, 'items'> {
   enabled: boolean;
   component: ReactNode;
   collapsible: boolean;
+
+  /**
+   * Root Toggle options
+   */
+  tabs?: Option[] | TabOptions | false;
 }
 
 export interface DocsLayoutProps extends BaseLayoutProps {
@@ -39,28 +47,28 @@ export interface DocsLayoutProps extends BaseLayoutProps {
 }
 
 export function DocsLayout({
-  nav,
-  githubUrl,
+  nav = {},
   sidebar: {
     enabled: sidebarEnabled = true,
     collapsible = true,
     component: sidebarReplace,
+    tabs: tabOptions,
     ...sidebar
   } = {},
   i18n = false,
   ...props
 }: DocsLayoutProps): React.ReactNode {
-  const links = getLinks(props.links ?? [], githubUrl);
+  const links = getLinks(props.links ?? [], props.githubUrl);
   const Aside = collapsible ? DynamicSidebar : Sidebar;
 
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Prevent people passing undefined page tree
   if (props.tree === undefined) notFound();
 
-  const banner: ReactNode[] = [];
+  const header: ReactNode[] = [];
   const footer: ReactNode[] = [];
 
-  if (nav?.title)
-    banner.push(
+  if (nav.title)
+    header.push(
       <Link
         key="title"
         href={nav.url ?? '/'}
@@ -71,7 +79,7 @@ export function DocsLayout({
     );
 
   if (links.length > 0)
-    banner.push(
+    header.push(
       <LinksMenu
         key="links"
         items={links}
@@ -122,6 +130,12 @@ export function DocsLayout({
     );
   }
 
+  let tabs: Option[] = [];
+  if (Array.isArray(tabOptions)) tabs = tabOptions;
+  else if (typeof tabOptions === 'object')
+    tabs = getSidebarTabs(props.tree, tabOptions);
+  else if (tabOptions !== false) tabs = getSidebarTabs(props.tree);
+
   return (
     <TreeContextProvider tree={props.tree}>
       {replaceOrDefault(nav, <SubNav {...nav} />)}
@@ -136,13 +150,16 @@ export function DocsLayout({
             {...sidebar}
             items={links.filter((v) => v.type !== 'icon')}
             banner={
-              banner.length > 0 || sidebar.banner ? (
+              header.length > 0 ||
+              Boolean(sidebar.banner) ||
+              tabs.length > 0 ? (
                 <>
-                  {banner.length > 0 ? (
+                  {header.length > 0 ? (
                     <div className="flex flex-row items-center border-b pb-2 max-md:hidden">
-                      {banner}
+                      {header}
                     </div>
                   ) : null}
+                  {tabs.length > 0 ? <RootToggle options={tabs} /> : null}
                   {sidebar.banner}
                 </>
               ) : null
@@ -150,7 +167,7 @@ export function DocsLayout({
             bannerProps={{
               ...sidebar.bannerProps,
               className: cn(
-                !sidebar.banner && 'max-md:hidden',
+                !sidebar.banner && tabs.length === 0 && 'max-md:hidden',
                 sidebar.bannerProps?.className,
               ),
             }}
@@ -162,3 +179,5 @@ export function DocsLayout({
     </TreeContextProvider>
   );
 }
+
+export { getSidebarTabs, type TabOptions };

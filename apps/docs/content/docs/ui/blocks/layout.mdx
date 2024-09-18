@@ -19,17 +19,86 @@ export default function Layout({ children }) {
 }
 ```
 
-### Sidebar
+## Sidebar
 
 Provide elements to navigate between pages.
+
+```tsx title="layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+
+<DocsLayout
+  sidebar={
+    {
+      // options
+    }
+  }
+/>;
+```
+
+### Sidebar Tabs
+
+Add a navigation component to switch between root folders (Enabled by default).
+
+<Callout title='Good to know'>
+
+You can use [Root Toggle](/docs/ui/components/root-toggle) directly.
+
+</Callout>
+
+#### Disable Tabs
 
 ```tsx
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 
-<DocsLayout sidebar={{ footer: <ShareButton /> }} />;
+<DocsLayout sidebar={{ tabs: false }} />;
 ```
 
-#### Disable Prefetching
+#### Add Description
+
+Add `description` to the meta file of root folder.
+
+```json title="meta.json"
+{
+  "root": true,
+  "description": "The description of root folder"
+}
+```
+
+And pass your source object to sidebar.
+
+```tsx
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { source } from '@/lib/source';
+
+<DocsLayout
+  sidebar={{
+    tabs: { source },
+  }}
+/>;
+```
+
+#### Decoration
+
+Change the icon/styles of tabs.
+
+```tsx
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { source } from '@/lib/source';
+
+<DocsLayout
+  sidebar={{
+    tabs: {
+      source,
+      transform: (option, node) => ({
+        ...option,
+        icon: 'my icon',
+      }),
+    },
+  }}
+/>;
+```
+
+### Disable Prefetching
 
 By default, it uses the Next.js Link component with prefetch enabled.
 When the link component appears into the browser viewport, the content (RSC payload) will be lazy loaded.
@@ -46,7 +115,7 @@ import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 <DocsLayout sidebar={{ prefetch: false }} />;
 ```
 
-#### Disable Sidebar from Pages
+### Disable Sidebar from Pages
 
 This is not supported.
 Due to the limitations of App Router, layouts are not re-rendered when navigating between pages.
@@ -57,7 +126,7 @@ You can consider:
 1. Disable sidebar from the entire layout.
 2. Create a [MDX Page](/docs/ui/blocks/page#mdx-page) in a layout that doesn't contain a sidebar.
 
-#### Reference
+### Reference
 
 ```json doc-gen:typescript
 {

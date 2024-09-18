@@ -41,9 +41,9 @@ full: false
 
 Organize multiple pages. When not specified, the display name will be generated from its folder name.
 
-Pages are sorted alphabetically, except for `index.mdx` which is always ordered at the top.
+Pages are sorted alphabetically, except `index.mdx` which is always ordered at the top.
 
-To customise folders, see [Meta file](#meta).
+To customise folders, use [Meta file](#meta).
 
 ### Folder Group
 
@@ -209,7 +209,7 @@ Adding a `root` property in meta file can mark your folder as a **root**.
 
 When the user is browsing a page under a root folder, only the child items of the folder will be visible.
 
-For example, when you are in a root folder called `core`, the other folders (e.g. `ui`) are not shown on the sidebar (and other navigation elements).
+For example, when you are in a root folder called `core`, the other folders (e.g. `ui`) are not shown on the sidebar and other navigation elements.
 
 <Files>
   <Folder name="core" defaultOpen>
@@ -221,10 +221,23 @@ For example, when you are in a root folder called `core`, the other folders (e.g
   </Folder>
 </Files>
 
-To allow users switching between different roots, implement a component that navigates to a page under the root folders.
-On Fumadocs UI, this is available via the [Root Toggle](/docs/ui/components/root-toggle) component.
+<Callout title='Fumadocs UI'>
 
-> By default, index pages are not considered as the pages "under" a folder, you must specify them in the `pages` property.
+    When a root folder exists, Fumadocs UI will add a Tabs component to the sidebar.
+    It allows user to switch between different roots.
+
+    You can customise it via [`sidebar.tabs`](/docs/ui/blocks/layout#sidebar-tabs) in Docs Layout.
+
+</Callout>
+
+<HeadlessOnly>
+  To allow users switching root folders, implement a navigation component that
+  navigates to a page under the root folder.
+</HeadlessOnly>
+
+### Index Pages
+
+By default, index pages are not considered as a page "under" the folder, you must specify them in the `pages` property.
 
 ## Internationalization
 

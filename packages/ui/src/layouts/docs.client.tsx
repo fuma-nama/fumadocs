@@ -72,6 +72,7 @@ export function SidebarCollapseTrigger(
 }
 
 export { LinksMenu, LinkItem } from '@/components/layout/link-item';
+export { RootToggle } from '@/components/layout/root-toggle';
 export { Sidebar } from '@/components/layout/sidebar';
 export { TreeContextProvider } from '@/contexts/tree';
 export { ThemeToggle } from '@/components/layout/theme-toggle';
