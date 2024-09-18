@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "@radix-ui/react-popover": "^1.1.1",
-    "@shikijs/twoslash": "^1.17.5",
+    "@shikijs/twoslash": "^1.17.7",
     "mdast-util-from-markdown": "^2.0.1",
     "mdast-util-gfm": "^3.0.0",
     "mdast-util-to-hast": "^13.2.0",
@@ -46,14 +46,14 @@
   "devDependencies": {
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.3",
-    "@types/node": "22.5.4",
-    "@types/react": "^18.3.5",
+    "@types/node": "22.5.5",
+    "@types/react": "^18.3.7",
     "eslint-config-custom": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "postcss": "^8.4.45",
+    "postcss": "^8.4.47",
     "postcss-lightningcss": "^1.0.1",
-    "shiki": "^1.17.5",
-    "tailwindcss": "^3.4.11",
+    "shiki": "^1.17.7",
+    "tailwindcss": "^3.4.12",
     "tsconfig": "workspace:*"
   },
   "peerDependencies": {

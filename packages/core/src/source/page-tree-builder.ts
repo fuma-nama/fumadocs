@@ -211,12 +211,15 @@ function buildFolderNode(
     defaultOpen: metadata?.defaultOpen,
     index,
     children,
-    $ref: !ctx.options.noRef
-      ? {
-          metaFile: meta?.file.path,
-        }
-      : undefined,
   };
+
+  if (!ctx.options.noRef)
+    Object.defineProperty(node, '$ref', {
+      value: {
+        metaFile: meta?.file.path,
+      } as PageTree.Folder['$ref'],
+      enumerable: false,
+    });
 
   return removeUndefined(
     ctx.options.attachFolder?.(node, folder, meta) ?? node,
@@ -246,12 +249,15 @@ function buildFileNode(
     name: localized.data.data.title,
     icon: ctx.options.resolveIcon?.(localized.data.data.icon),
     url: ctx.options.getUrl(localized.data.slugs, urlLocale),
-    $ref: !ctx.options.noRef
-      ? {
-          file: localized.file.path,
-        }
-      : undefined,
   };
+
+  if (!ctx.options.noRef)
+    Object.defineProperty(item, '$ref', {
+      value: {
+        file: localized.file.path,
+      } as PageTree.Item['$ref'],
+      enumerable: false,
+    });
 
   return removeUndefined(ctx.options.attachFile?.(item, file) ?? item);
 }
