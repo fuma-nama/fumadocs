@@ -3,7 +3,6 @@
 import Image, { type ImageProps } from 'next/image';
 import { type ImgHTMLAttributes } from 'react';
 import Zoom, { type UncontrolledProps } from 'react-medium-image-zoom';
-import { defaultImageSizes } from '@/utils/shared';
 import '../../dist/image-zoom.css';
 
 export type ImageZoomProps = ImageProps & {
@@ -41,7 +40,12 @@ export function ImageZoom({
         ...zoomInProps,
       }}
     >
-      {children ?? <Image sizes={defaultImageSizes} {...props} />}
+      {children ?? (
+        <Image
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 900px"
+          {...props}
+        />
+      )}
     </Zoom>
   );
 }

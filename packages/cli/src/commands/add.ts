@@ -1,4 +1,5 @@
 import path from 'node:path';
+import fs from 'node:fs/promises';
 import { sync as spawnSync } from 'cross-spawn';
 import { log, confirm, isCancel, outro, spinner, intro } from '@clack/prompts';
 import { type Project } from 'ts-morph';
@@ -13,6 +14,7 @@ import {
   transformReferences,
 } from '@/utils/transform-references';
 import { isSrc } from '@/utils/is-src';
+import { typescriptExtensions } from '@/constants';
 
 interface Context {
   config: Config;
@@ -79,18 +81,61 @@ interface DownloadFileResult {
 }
 
 async function downloadFile(
-  pathWithoutExt: string,
-  outPathWithoutExt: string,
+  downloadPath: string,
+  outputPath: string,
   ctx: Context,
 ): Promise<DownloadFileResult | undefined> {
-  const deps: string[] = [];
   const rootUrl = `https://raw.githubusercontent.com/fuma-nama/fumadocs/${ctx.branch}/packages/ui`;
-
-  const found = await find(rootUrl, pathWithoutExt);
+  const found = await find(rootUrl, downloadPath);
   if (!found) return;
 
-  const outPath = `${outPathWithoutExt}.${found.ext}`;
-  const file = ctx.project.createSourceFile(outPath, found.code, {
+  const outPath =
+    path.extname(outputPath).length > 0
+      ? outputPath
+      : `${outputPath}${path.extname(found.filePath)}`;
+  log.step(`downloaded ${outPath}`);
+  const [output, deps] = typescriptExtensions.includes(path.extname(outPath))
+    ? await transformTypeScript(outPath, found.code, ctx)
+    : [found.code, []];
+
+  let canWrite = true;
+
+  if (await exists(outPath)) {
+    const value = await confirm({
+      message: `Do you want to override ${outPath}?`,
+    });
+
+    if (isCancel(value)) {
+      outro('Ended');
+      process.exit(0);
+    }
+
+    canWrite = value;
+  }
+
+  if (canWrite) {
+    await fs.mkdir(path.dirname(outPath), { recursive: true });
+    await fs.writeFile(outPath, output);
+  }
+
+  return {
+    found,
+    deps,
+  };
+}
+
+const transformMap: Record<string, string> = {
+  '@/contexts/sidebar': 'fumadocs-ui/provider',
+  '@/contexts/i18n': 'fumadocs-ui/provider',
+};
+
+async function transformTypeScript(
+  filePath: string,
+  code: string,
+  ctx: Context,
+): Promise<[code: string, deps: string[]]> {
+  const deps: string[] = [];
+  const file = ctx.project.createSourceFile(filePath, code, {
     overwrite: true,
   });
 
@@ -98,13 +143,22 @@ async function downloadFile(
     file,
     {
       alias: 'src',
-      relativeTo: path.dirname(pathWithoutExt),
+      relativeTo: path.dirname(filePath),
     },
-    async (resolved) => {
+    async (resolved, original) => {
       if (resolved.type === 'dep') {
         deps.push(resolved.name);
         return;
       }
+
+      if (original === '../../dist/image-zoom.css') {
+        const cssOut = path.join(path.dirname(filePath), 'image-zoom.css');
+        await downloadFile('css/image-zoom.css', cssOut, ctx);
+
+        return './image-zoom.css';
+      }
+
+      if (original in transformMap) return transformMap[original];
 
       const downloadPath = getOutputPath(
         path.relative('src', resolved.path),
@@ -116,38 +170,29 @@ async function downloadFile(
         throw new Error(`Cannot download file: ${resolved.path}`);
 
       deps.push(...downloaded.deps);
-      return toReferencePath(outPath, downloadPath);
+      return toReferencePath(filePath, downloadPath);
     },
   );
 
-  const isOverride = await exists(outPath);
-
-  if (isOverride) {
-    const value = await confirm({
-      message: `Do you want to override ${outPath}?`,
-    });
-
-    if (isCancel(value)) {
-      outro('Ended');
-      process.exit(0);
-    }
-
-    if (value) {
-      await file.save();
-    }
-  } else {
-    await file.save();
-  }
-
-  return {
-    found,
-    deps,
-  };
+  return [file.getFullText(), deps];
 }
 
 interface FindResult {
-  ext: string;
+  filePath: string;
   code: string;
+}
+
+async function fetchFile(
+  rootUrl: string,
+  filePath: string,
+): Promise<FindResult | undefined> {
+  const res = await fetch(`${rootUrl}/${filePath}`);
+
+  if (res.ok)
+    return {
+      filePath,
+      code: await res.text(),
+    };
 }
 
 async function find(
@@ -157,22 +202,16 @@ async function find(
   const cached = downloadedFiles.get(pathWithoutExt);
   if (cached) return cached;
 
-  for (const ext of resolveExtensions) {
-    const res = await fetch(`${rootUrl}/${pathWithoutExt}.${ext}`);
-    if (!res.ok) continue;
-    log.step(`downloaded ${pathWithoutExt}.${ext}`);
+  if (path.extname(pathWithoutExt).length > 0) {
+    return fetchFile(rootUrl, pathWithoutExt);
+  }
 
-    const result: FindResult = {
-      ext,
-      code: await res.text(),
-    };
+  // Only look for TypeScript extensions
+  for (const ext of ['tsx', 'ts']) {
+    const res = await fetchFile(rootUrl, `${pathWithoutExt}.${ext}`);
+    if (!res) continue;
 
-    downloadedFiles.set(pathWithoutExt, result);
-    return result;
+    downloadedFiles.set(pathWithoutExt, res);
+    return res;
   }
 }
-
-/**
- * Only look for TypeScript extensions
- */
-const resolveExtensions = ['tsx', 'ts'];

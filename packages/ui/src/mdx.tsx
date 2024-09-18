@@ -11,7 +11,6 @@ import type { ImageProps } from 'next/image';
 import { Card, Cards } from '@/components/card';
 import { Callout } from '@/components/callout';
 import { Heading } from '@/components/heading';
-import { defaultImageSizes } from '@/utils/shared';
 import { cn } from '@/utils/cn';
 
 declare const { Pre }: typeof import('./mdx.client');
@@ -19,7 +18,7 @@ declare const { Pre }: typeof import('./mdx.client');
 function Image(props: ImgHTMLAttributes<HTMLImageElement>): React.ReactElement {
   return (
     <NextImage
-      sizes={defaultImageSizes}
+      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 900px"
       {...(props as ImageProps)}
       className={cn('rounded-lg', props.className)}
     />

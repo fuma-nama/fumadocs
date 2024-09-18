@@ -27,11 +27,20 @@ export async function sync(): Promise<void> {
 
   await Promise.all(resolve);
 
-  const files = await fg(['*.tsx', '!api.tsx', '!*.client.tsx'], {
-    cwd: path.resolve('../../packages/ui/src/components'),
-  });
+  const files = await fg(
+    [
+      '*.tsx',
+      './layout/root-toggle.tsx',
+      './layout/language-toggle.tsx',
+      '!api.tsx',
+      '!*.client.tsx',
+    ],
+    {
+      cwd: path.resolve('../../packages/ui/src/components'),
+    },
+  );
   const components = files.map((file) =>
-    path.basename(file, path.extname(file)),
+    path.join(path.dirname(file), path.basename(file, path.extname(file))),
   );
 
   const out = `

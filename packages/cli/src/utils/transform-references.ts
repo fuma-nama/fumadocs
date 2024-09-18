@@ -2,6 +2,7 @@ import path from 'node:path';
 import { type SourceFile } from 'ts-morph';
 import { type Config, defaultConfig } from '@/config';
 import { type Awaitable } from '@/commands/init';
+import { typescriptExtensions } from '@/constants';
 
 /**
  * Find the transformed output path of input ref.
@@ -49,12 +50,14 @@ export function getOutputPath(ref: string, config: Config): string {
 export async function transformReferences(
   file: SourceFile,
   resolver: ReferenceResolver,
-  transform: (src: ResolvedImport) => Awaitable<string | undefined>,
+  transform: (
+    src: ResolvedImport,
+    ref: string,
+  ) => Awaitable<string | undefined>,
 ): Promise<void> {
   for (const item of file.getImportDeclarations()) {
-    const result = await transform(
-      resolveReference(item.getModuleSpecifier().getLiteralValue(), resolver),
-    );
+    const ref = item.getModuleSpecifier().getLiteralValue();
+    const result = await transform(resolveReference(ref, resolver), ref);
     if (!result) continue;
 
     item.getModuleSpecifier().setLiteralValue(result);
@@ -63,9 +66,8 @@ export async function transformReferences(
   for (const item of file.getExportDeclarations()) {
     const specifier = item.getModuleSpecifier();
     if (!specifier) continue;
-    const result = await transform(
-      resolveReference(specifier.getLiteralValue(), resolver),
-    );
+    const ref = specifier.getLiteralValue();
+    const result = await transform(resolveReference(ref, resolver), ref);
     if (!result) continue;
 
     specifier.setLiteralValue(result);
@@ -76,11 +78,15 @@ export function toReferencePath(
   sourceFile: string,
   referenceFile: string,
 ): string {
+  const extname = path.extname(referenceFile);
   const importPath = path.relative(
     path.dirname(sourceFile),
     path.join(
       path.dirname(referenceFile),
-      path.basename(referenceFile, path.extname(referenceFile)),
+      path.basename(
+        referenceFile,
+        typescriptExtensions.includes(extname) ? extname : undefined,
+      ),
     ),
   );
 
