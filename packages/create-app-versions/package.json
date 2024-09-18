@@ -9,15 +9,15 @@
     "@content-collections/mdx": "^0.1.5",
     "@content-collections/next": "^0.2.1",
     "@types/mdx": "^2.0.13",
-    "@types/node": "22.5.4",
-    "@types/react": "^18.3.5",
+    "@types/node": "22.5.5",
+    "@types/react": "^18.3.7",
     "@types/react-dom": "^18.3.0",
     "autoprefixer": "^10.4.20",
-    "next": "^14.2.11",
-    "postcss": "^8.4.45",
+    "next": "^14.2.12",
+    "postcss": "^8.4.47",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "tailwindcss": "^3.4.11",
+    "tailwindcss": "^3.4.12",
     "typescript": "^5.6.2"
   }
 }

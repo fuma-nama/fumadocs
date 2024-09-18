@@ -7,6 +7,7 @@ export async function getTypescriptSchema(
 ): Promise<string | undefined> {
   if (code in endpoint.responses) {
     return compile(endpoint.responses[code].schema, 'Response', {
+      $refOptions: false,
       bannerComment: '',
       additionalProperties: false,
       format: true,

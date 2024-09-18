@@ -66,10 +66,10 @@
     "@types/mdast": "^4.0.3",
     "@types/mdx": "^2.0.13",
     "@types/micromatch": "^4.0.9",
-    "@types/react": "^18.3.5",
+    "@types/react": "^18.3.7",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
-    "next": "^14.2.11",
+    "next": "^14.2.12",
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
     "webpack": "^5.90.3"

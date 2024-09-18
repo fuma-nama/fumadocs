@@ -7,6 +7,7 @@ import {
   type SourceConfig,
 } from '@/source/loader';
 import { parseFilePath } from '@/source';
+import { PageTree } from '../dist/server';
 
 test('get slugs', () => {
   expect(getSlugs(parseFilePath('index.mdx'))).toStrictEqual([]);
@@ -253,6 +254,16 @@ test('Internationalized Routing', () => {
     source: i18nSource,
   });
 
+  expect(
+    result.getNodePage(result.pageTree['en'].children[0] as PageTree.Item),
+  ).toEqual(
+    expect.objectContaining({
+      data: {
+        title: 'Hello',
+      },
+    }),
+  );
+
   expect(result.pageTree['en'], 'Page Tree').toMatchInlineSnapshot(`
     {
       "children": [
@@ -312,6 +323,9 @@ test('Internationalized Routing: Hide Prefix', () => {
       languages: ['cn', 'en'],
       defaultLanguage: 'en',
       hideLocale: 'default-locale',
+    },
+    pageTree: {
+      noRef: true,
     },
     source: i18nSource,
   });
