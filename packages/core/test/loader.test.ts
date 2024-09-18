@@ -48,6 +48,9 @@ test('Get URL: Base', () => {
 
 test('Loader: Simple', () => {
   const result = loader({
+    pageTree: {
+      noRef: true,
+    },
     source: {
       files: [
         {
@@ -88,6 +91,9 @@ test('Loader: Simple', () => {
 test('Nested Directories', async () => {
   const result = loader({
     icon: (v) => v as any,
+    pageTree: {
+      noRef: true,
+    },
     source: {
       files: [
         {
@@ -268,13 +274,22 @@ test('Internationalized Routing', () => {
     {
       "children": [
         {
+          "$ref": {
+            "file": "test.mdx",
+          },
           "name": "Hello",
           "type": "page",
           "url": "/en/test",
         },
         {
+          "$ref": {
+            "metaFile": undefined,
+          },
           "children": [
             {
+              "$ref": {
+                "file": "nested/test.mdx",
+              },
               "name": "Nested Page",
               "type": "page",
               "url": "/en/nested/test",
@@ -292,13 +307,22 @@ test('Internationalized Routing', () => {
     {
       "children": [
         {
+          "$ref": {
+            "file": "test.cn.mdx",
+          },
           "name": "Hello Chinese",
           "type": "page",
           "url": "/cn/test",
         },
         {
+          "$ref": {
+            "metaFile": "nested/meta.cn.json",
+          },
           "children": [
             {
+              "$ref": {
+                "file": "nested/test.cn.mdx",
+              },
               "name": "Nested Page Chinese",
               "type": "page",
               "url": "/cn/nested/test",
