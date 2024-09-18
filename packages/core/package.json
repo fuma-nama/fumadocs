@@ -115,7 +115,7 @@
     "react-dom": ">= 18"
   },
   "optionalDependencies": {
-    "algoliasearch": "4.x.x"
+    "algoliasearch": "5.x"
   },
   "publishConfig": {
     "access": "public"
