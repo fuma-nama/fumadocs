@@ -63,7 +63,6 @@ export const docsOptions: DocsLayoutProps = {
   nav: {
     ...baseOptions.nav,
     transparentMode: 'none',
-    children: undefined,
   },
   links: baseOptions.links?.slice(1),
   sidebar: {
