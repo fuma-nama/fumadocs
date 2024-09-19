@@ -67,7 +67,6 @@ export const docsOptions: DocsLayoutProps = {
   links: baseOptions.links?.slice(1),
   sidebar: {
     tabs: {
-      source,
       transform(option, node) {
         const meta = source.getNodeMeta(node);
         if (!meta) return option;

@@ -76,7 +76,7 @@ export const source = loader({
 
 With i18n enabled, loader will generate a page tree for every locale.
 
-When looking for a page, it fallbacks to default locale if the page doesn't exist for the specified locale.
+When looking for a page, it fallbacks to default locale if the page doesn't exist for specified locale.
 
 ## Output
 
@@ -119,6 +119,18 @@ source.pageTree;
 
 // with i18n
 source.pageTree['locale'];
+```
+
+### Get from Node
+
+The page tree nodes contain references to their original file path.
+You can find their original page or meta file from the tree nodes.
+
+```ts
+import { source } from '@/lib/source';
+
+source.getNodePage(pageNode);
+source.getNodeMeta(folderNode);
 ```
 
 ### Params
@@ -191,35 +203,23 @@ loader({
 ### Page Tree
 
 The page tree is generated from your file system, using the **Page Tree Builder**.
-It also filters out some unnecessary information (e.g. file path), which means after the generation process, you cannot access the file path of a page node.
+It also filters out some unnecessary information (e.g. unused frontmatter properties).
 
 To customise the process, use the `pageTree` option.
 You can attach custom properties to page tree nodes, like customising the display name of pages and folders.
 
-```ts
+```tsx
+import React from 'react';
 import { loader } from 'fumadocs-core/source';
 
 loader({
   pageTree: {
     attachFile(node, file) {
       // you can access its file information
-      console.log(file.data);
-
-      return node;
-    },
-  },
-});
-```
-
-JSX nodes are also allowed.
-
-```tsx
-import { loader } from 'fumadocs-core/source';
-
-loader({
-  pageTree: {
-    attachFile(node) {
+      console.log(file?.data);
+      // JSX nodes are allowed
       node.name = <>Some JSX Nodes here</>;
+
       return node;
     },
   },

@@ -64,31 +64,16 @@ Add `description` to the meta file of root folder.
 }
 ```
 
-And pass your source object to sidebar.
-
-```tsx
-import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import { source } from '@/lib/source';
-
-<DocsLayout
-  sidebar={{
-    tabs: { source },
-  }}
-/>;
-```
-
 #### Decoration
 
 Change the icon/styles of tabs.
 
 ```tsx
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import { source } from '@/lib/source';
 
 <DocsLayout
   sidebar={{
     tabs: {
-      source,
       transform: (option, node) => ({
         ...option,
         icon: 'my icon',
