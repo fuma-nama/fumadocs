@@ -46,12 +46,12 @@ export default function Page({
           Back
         </Link>
       </div>
-      <article className="container grid grid-cols-1 px-0 py-8 lg:grid-cols-[2fr_1fr] lg:px-4">
-        <div className="prose p-4">
+      <article className="container flex flex-col px-0 py-8 lg:flex-row lg:px-4">
+        <div className="prose min-w-0 flex-1 p-4">
           <InlineTOC items={page.data.toc} />
           <page.data.body components={defaultMdxComponents} />
         </div>
-        <div className="flex flex-col gap-4 border-l p-4 text-sm">
+        <div className="flex flex-col gap-4 border-l p-4 text-sm lg:w-[250px]">
           <div>
             <p className="mb-1 text-fd-muted-foreground">Written by</p>
             <p className="font-medium">{page.data.author}</p>

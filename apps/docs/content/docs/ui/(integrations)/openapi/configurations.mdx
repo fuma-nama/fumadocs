@@ -138,6 +138,17 @@ void generateFiles({
 });
 ```
 
+### Tag Display Name
+
+Adding `x-displayName` to OpenAPI Schema can control the display name of your tags.
+
+```yaml title="openapi.yaml"
+tags:
+  - name: test
+    description: this is a tag.
+    x-displayName: My Test Name
+```
+
 ## OpenAPI Server
 
 The server to render pages.

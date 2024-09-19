@@ -1,0 +1,232 @@
+---
+title: Fumadocs v14
+description: Introducing Fumadocs v14
+author: Fuma Nama
+date: 2024-09-19
+---
+
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+
+## Why?
+
+Taking some inspirations from [Shadcn UI](https://ui.shadcn.com), I decided to make Fumadocs easier to use, with more APIs that simplify the design.
+
+This is a large update.
+
+## New Features
+
+### Fumadocs CLI
+
+Clone Fumadocs UI components to your workspace and modify them.
+
+```package-install
+npx fumadocs add
+```
+
+See [docs](/docs/cli) for details.
+
+### Sidebar Tabs
+
+Previously, multiple page tree is implemented with Fumadocs UI `RootToggle` component.
+You have to add it to the sidebar banner which isn't as intuitive as other APIs.
+
+With Sidebar Tabs, by creating a root folder, Fumadocs will immediately add a tabs component to the sidebar.
+
+```json title="meta.json"
+{
+  "root": true,
+  "title": "Tab Name",
+  "description": "Some text about the tab",
+  "icon": "IconName"
+}
+```
+
+### Orama
+
+We migrated the built-in search from Flexsearch to Orama, the same search engine that powers the Node.js docs site.
+It is open source, and also have their Cloud integration.
+
+No changes required.
+You can use our new `createFromSource` API to create the route handler, which offers i18n support without any configurations.
+
+```ts
+import { source } from '@/lib/source';
+import { createFromSource } from 'fumadocs-core/search/server';
+
+export const { GET } = createFromSource(source);
+```
+
+In favour of this, the new search client of Fumadocs is introduced with support for different API clients.
+This includes Algolia, Orama (static and dynamic with route handlers).
+
+```ts
+import { useDocsSearch } from 'fumadocs-core/search/client';
+
+const client = useDocsSearch({
+  type: 'static',
+});
+```
+
+See [Search API](/docs/headless/search).
+
+### Static Search
+
+For sites with static export, you cannot use route handlers.
+We now support client-side search using search indexes generated during build time.
+
+See [Static Search](/docs/headless/search/orama#static-search).
+
+### Less Dependencies
+
+I'm always working to reduce the dependencies required for Fumadocs, that is one reason why we separated Fumadocs into different packages.
+
+Fumadocs UI now bundles icons from `lucide-react`, for Next.js apps that is not using Lucide, they can avoid downloading the entire icon library.
+
+And `swr` is no longer used for search client, we implemented a light `useQuery` hook with extra care on React performance optimization.
+
+### New Metadata Image API
+
+To improve code organization, we made a Metadata Image API on Fumadocs Core.
+It is a tiny wrapper over Next.js Metadata API, composes seamlessly with Source API.
+
+```ts title="lib/metadata.ts"
+import { createMetadataImage } from 'fumadocs-core/server';
+import { source } from '@/lib/source';
+
+export const metadataImage = createMetadataImage({
+  imageRoute: '/docs-og',
+  source,
+});
+```
+
+```ts title="route.ts"
+import { generateOGImage } from 'fumadocs-ui/og';
+import { metadataImage } from '@/lib/metadata';
+
+export const GET = metadataImage.createAPI((page) => {
+  return generateOGImage({
+    title: page.data.title,
+    description: page.data.description,
+    site: 'My App',
+  });
+});
+
+export function generateStaticParams() {
+  return metadataImage.generateParams();
+}
+```
+
+```tsx title="page.tsx"
+import { source } from '@/lib/source';
+import { metadataImage } from '@/lib/metadata';
+import { notFound } from 'next/navigation';
+
+export function generateMetadata({ params }: { params: { slug?: string[] } }) {
+  const page = source.getPage(params.slug);
+  if (!page) notFound();
+
+  return metadataImage.withImage(page.slugs, {
+    title: page.data.title,
+    description: page.data.description,
+  });
+}
+```
+
+In favour of this, the `getImageMeta` function from `fumadocs-ui/og` has been removed.
+
+### Shorthands
+
+As you may notice, we introduced more abstractions to reduce the setup steps required for enabling some features.
+It is also required for the code generator from Fumadocs CLI to work.
+
+Like the `generateParams` function, it enables zero-configuration i18n support for Next.js `generateStaticParams`.
+
+```ts
+import { source } from '@/lib/source';
+
+export function generateStaticParams() {
+  return source.generateParams();
+}
+```
+
+### Better Card Component
+
+Fumadocs UI Card can now support usage without `href`.
+You can pass children as React node, Typography styles will be applied correctly.
+
+```mdx
+<Card icon={<Database />} title='Content Source'>
+
+The input/source of your content, it can be a CMS, or local data layers like [Content Collections](https://www.content-collections.dev) and [Fumadocs MDX](/docs/mdx).
+
+</Card>
+```
+
+### OpenAPI Tag Display Name
+
+Change the display name with `x-displayName`.
+
+```yaml title="openapi.yaml"
+tags:
+  - name: test
+    description: this is a tag.
+    x-displayName: My Test Name
+```
+
+## UI Improvements
+
+### Link Styles
+
+You can escape Tailwind CSS Typography styles for the `a` tag with `data-card` attribute.
+
+```jsx
+<a data-card="">
+  No styles applied <code>But it does</code>
+</a>
+```
+
+### Disable Theme Switch
+
+You can disable the default theme switcher with `disableThemeSwitch` on layouts.
+
+## Breaking Changes
+
+### Refactor Imports
+
+**Previous**
+
+```ts
+import { DocsLayout } from 'fumadocs-ui/layout';
+import { HomeLayout } from 'fumadocs-ui/home-layout';
+import { HomeLayoutProps } from 'fumadocs-ui/home-layout';
+```
+
+**New Import Path**
+
+```ts
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { HomeLayout } from 'fumadocs-ui/layouts/home';
+import { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+```
+
+### Twoslash UI
+
+We moved Twoslash UI components to `fumadocs-twoslash`.
+This isolates some logic from Fumadocs UI, allowing a better code organization.
+
+Import the CSS styles and `Popup` component differently.
+
+```ts
+import 'fumadocs-twoslash/twoslash.css';
+
+import { Popup } from 'fumadocs-twoslash/ui';
+```
+
+<Callout>It requires Tailwind CSS.</Callout>
+
+### Remove Deprecated APIs
+
+The previous `createI18nSearchAPIExperimental` is now renamed to `createI18nSearchAPI`.
+It takes the i18n config instead of scattering the options everywhere.
+
+The types from `fumadocs-core/search/shared` is moved to `fumadocs-core/server`.
