@@ -6,6 +6,8 @@ export interface MetaData {
   root?: boolean | undefined;
   pages?: string[] | undefined;
   defaultOpen?: boolean | undefined;
+
+  description?: string | undefined;
 }
 
 export interface PageData {

@@ -169,10 +169,22 @@ function indexPages(
   };
 }
 
-export function createGetUrl(baseUrl: string): UrlFn {
+export function createGetUrl(baseUrl: string, i18n?: I18nConfig): UrlFn {
   return (slugs, locale) => {
-    const paths = locale
-      ? [locale, ...baseUrl.split('/'), ...slugs]
+    const hideLocale = i18n?.hideLocale ?? 'never';
+    let urlLocale: string | undefined;
+
+    if (hideLocale === 'never') {
+      urlLocale = locale;
+    } else if (
+      hideLocale === 'default-locale' &&
+      locale !== i18n?.defaultLanguage
+    ) {
+      urlLocale = locale;
+    }
+
+    const paths = urlLocale
+      ? [urlLocale, ...baseUrl.split('/'), ...slugs]
       : [...baseUrl.split('/'), ...slugs];
 
     return `/${paths.filter((v) => v.length > 0).join('/')}`;
@@ -201,47 +213,44 @@ export function loader<Options extends LoaderOptions>(
   return createOutput(options) as ReturnType<typeof loader<Options>>;
 }
 
-function createOutput({
-  source,
-  icon: resolveIcon,
-  rootDir = '',
-  transformers,
-  baseUrl = '/',
-  slugs: slugsFn = getSlugs,
-  url: getUrl = createGetUrl(baseUrl),
-  pageTree: pageTreeOptions = {},
-  i18n,
-}: LoaderOptions): LoaderOutput<LoaderConfig> {
+function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
+  const {
+    source,
+    rootDir = '',
+    baseUrl = '/',
+    slugs: slugsFn = getSlugs,
+    url: getUrl = createGetUrl(baseUrl, options.i18n),
+  } = options;
   const storage = loadFiles(
     typeof source.files === 'function' ? source.files(rootDir) : source.files,
     {
-      transformers,
+      transformers: options.transformers,
       rootDir,
       getSlugs: slugsFn,
     },
   );
-  const walker = indexPages(storage, getUrl, i18n?.languages);
+  const walker = indexPages(storage, getUrl, options.i18n?.languages);
   const builder = createPageTreeBuilder();
   const pageTree =
-    i18n === undefined
+    options.i18n === undefined
       ? builder.build({
           storage,
-          resolveIcon,
+          resolveIcon: options.icon,
           getUrl,
-          ...pageTreeOptions,
+          ...options.pageTree,
         })
       : builder.buildI18n({
           storage,
-          resolveIcon,
+          resolveIcon: options.icon,
           getUrl,
-          i18n,
-          ...pageTreeOptions,
+          i18n: options.i18n,
+          ...options.pageTree,
         });
 
   return {
-    _i18n: i18n,
+    _i18n: options.i18n,
     pageTree: pageTree as LoaderOutput<LoaderConfig>['pageTree'],
-    getPages(language = i18n?.defaultLanguage ?? '') {
+    getPages(language = options.i18n?.defaultLanguage ?? '') {
       return Array.from(walker.i18n.get(language)?.values() ?? []);
     },
     getLanguages() {
@@ -258,7 +267,7 @@ function createOutput({
 
       return list;
     },
-    getPage(slugs = [], language = i18n?.defaultLanguage ?? '') {
+    getPage(slugs = [], language = options.i18n?.defaultLanguage ?? '') {
       return walker.i18n.get(language)?.get(slugs.join('/'));
     },
     getNodeMeta(node) {
@@ -273,7 +282,7 @@ function createOutput({
     },
     // @ts-expect-error -- ignore this
     generateParams(slug, lang) {
-      if (i18n) {
+      if (options.i18n) {
         return this.getLanguages().flatMap((entry) =>
           entry.pages.map((page) => ({
             [slug ?? 'slug']: page.slugs,

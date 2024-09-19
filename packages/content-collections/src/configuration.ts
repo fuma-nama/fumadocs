@@ -19,7 +19,6 @@ import {
   type StructuredData,
 } from 'fumadocs-core/mdx-plugins';
 import type { z as Zod } from 'zod';
-import { type TableOfContents } from 'fumadocs-core/server';
 import {
   resolvePlugin,
   resolvePlugins,
@@ -42,6 +41,9 @@ export interface TransformOptions
   rehypeCodeOptions?: RehypeCodeOptions | boolean;
 }
 
+/**
+ * The default TOC types support `ReactNode`, which isn't serializable
+ */
 export type SerializableTOC = {
   title: string;
   url: string;
@@ -72,7 +74,7 @@ export async function transformMDX<D extends BaseDoc>(
 ): Promise<
   D & {
     body: string;
-    toc: InterfaceToObject<TableOfContents>;
+    toc: SerializableTOC;
     /**
      * `StructuredData` for search indexes
      */

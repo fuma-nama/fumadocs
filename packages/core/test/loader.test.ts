@@ -403,6 +403,6 @@ test('Internationalized Routing: Hide Prefix', () => {
   `);
 
   expect(result.getPages().length).toBe(2);
-  expect(result.getPage(['test'])?.url).toBe('/en/test');
+  expect(result.getPage(['test'])?.url).toBe('/test');
   expect(result.getPage(['test'], 'cn')?.url).toBe('/cn/test');
 });

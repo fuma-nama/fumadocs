@@ -209,6 +209,7 @@ function buildFolderNode(
     icon: ctx.options.resolveIcon?.(metadata?.icon) ?? index?.icon,
     root: metadata?.root,
     defaultOpen: metadata?.defaultOpen,
+    description: metadata?.description,
     index,
     children,
     $ref: !ctx.options.noRef
@@ -227,25 +228,14 @@ function buildFileNode(
   file: PageFile,
   ctx: PageTreeBuilderContext,
 ): PageTree.Item {
-  let urlLocale: string | undefined;
   const localized =
     findLocalizedFile(file.file.flattenedPath, 'page', ctx) ?? file;
-
-  const hideLocale = ctx.i18n?.hideLocale ?? 'never';
-  if (hideLocale === 'never') {
-    urlLocale = ctx.lang;
-  } else if (
-    hideLocale === 'default-locale' &&
-    ctx.lang !== ctx.i18n?.defaultLanguage
-  ) {
-    urlLocale = ctx.lang;
-  }
 
   const item: PageTree.Item = {
     type: 'page',
     name: localized.data.data.title,
     icon: ctx.options.resolveIcon?.(localized.data.data.icon),
-    url: ctx.options.getUrl(localized.data.slugs, urlLocale),
+    url: ctx.options.getUrl(localized.data.slugs, ctx.lang),
     $ref: !ctx.options.noRef
       ? {
           file: localized.file.path,
