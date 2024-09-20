@@ -37,7 +37,7 @@ export function Nav({
       className="h-14"
       transparentMode={props.transparentMode}
     >
-      <nav className="mx-auto flex size-full max-w-container flex-row items-center gap-6 px-4">
+      <nav className="mx-auto flex size-full max-w-fd-container flex-row items-center gap-6 px-4">
         <Title title={props.title} url={props.url} />
         {props.children}
         {items

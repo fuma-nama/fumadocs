@@ -2,7 +2,7 @@
 
 import { SidebarTrigger } from 'fumadocs-core/sidebar';
 import { Menu, SidebarIcon, X } from 'lucide-react';
-import { ButtonHTMLAttributes, useCallback } from 'react';
+import { ButtonHTMLAttributes, HTMLAttributes, useCallback } from 'react';
 import { useSidebar } from '@/contexts/sidebar';
 import { useSearchContext } from '@/contexts/search';
 import { SearchToggle } from '@/components/layout/search-toggle';
@@ -14,28 +14,33 @@ import type { SharedNavProps } from './shared';
 export function SubNav({
   title,
   url,
-  transparentMode,
-  children,
   enableSearch = true,
-}: SharedNavProps): React.ReactElement {
+  ...props
+}: SharedNavProps &
+  Omit<HTMLAttributes<HTMLElement>, 'title'>): React.ReactElement {
   const { open } = useSidebar();
-  const { enabled } = useSearchContext();
+  const search = useSearchContext();
 
   return (
     <NavBox
       id="nd-subnav"
-      className="flex h-14 flex-row items-center px-4 md:hidden"
-      transparentMode={transparentMode}
+      {...props}
+      className={cn(
+        'flex h-[var(--fd-nav-height)] flex-row items-center px-4',
+        props.className,
+      )}
     >
       <Title url={url} title={title} />
-      <div className="flex flex-1 flex-row items-center">{children}</div>
-      {enabled && enableSearch ? <SearchToggle /> : null}
+      <div className="flex flex-1 flex-row items-center gap-1">
+        {props.children}
+      </div>
+      {search.enabled && enableSearch ? <SearchToggle /> : null}
       <SidebarTrigger
         className={cn(
           buttonVariants({
             color: 'ghost',
             size: 'icon',
-            className: '-me-2',
+            className: '-me-2 md:hidden',
           }),
         )}
       >

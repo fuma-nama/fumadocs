@@ -122,7 +122,7 @@ export default function Showcase(): React.ReactElement {
           alt="spot"
           src={Spot}
           sizes="100vw"
-          className="size-full min-w-[800px] max-w-container"
+          className="size-full min-w-[800px] max-w-fd-container"
           priority
         />
       </div>

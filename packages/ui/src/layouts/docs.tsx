@@ -138,7 +138,7 @@ export function DocsLayout({
 
   return (
     <TreeContextProvider tree={props.tree}>
-      {replaceOrDefault(nav, <SubNav {...nav} />)}
+      {replaceOrDefault(nav, <SubNav className="md:hidden" {...nav} />)}
       <main
         id="nd-docs-layout"
         {...props.containerProps}
@@ -164,13 +164,6 @@ export function DocsLayout({
                 </>
               ) : null
             }
-            bannerProps={{
-              ...sidebar.bannerProps,
-              className: cn(
-                !sidebar.banner && tabs.length === 0 && 'max-md:hidden',
-                sidebar.bannerProps?.className,
-              ),
-            }}
             footer={footer.length > 0 ? footer : null}
           />,
         )}

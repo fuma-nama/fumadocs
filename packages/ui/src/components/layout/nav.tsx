@@ -1,5 +1,5 @@
 'use client';
-import Link from 'fumadocs-core/link';
+import Link, { type LinkProps } from 'fumadocs-core/link';
 import {
   type HTMLAttributes,
   type ReactNode,
@@ -52,7 +52,7 @@ export function NavBox({
     <header
       {...props}
       className={cn(
-        'sticky top-0 z-40 border-b transition-colors',
+        'sticky top-fd-sidebar-top z-40 border-b transition-colors',
         transparent
           ? 'border-transparent'
           : 'border-fd-foreground/10 bg-fd-background/60 backdrop-blur-md',
@@ -62,13 +62,21 @@ export function NavBox({
   );
 }
 
-export function Title({ title, url }: TitleProps): React.ReactElement {
+export function Title({
+  title,
+  url,
+  ...props
+}: TitleProps & Omit<LinkProps, 'title'>): React.ReactElement {
   const { locale } = useI18n();
 
   return (
     <Link
       href={url ?? (locale ? `/${locale}` : '/')}
-      className="inline-flex items-center gap-2.5 font-semibold"
+      {...props}
+      className={cn(
+        'inline-flex items-center gap-2.5 font-semibold',
+        props.className,
+      )}
     >
       {title}
     </Link>

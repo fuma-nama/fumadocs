@@ -79,7 +79,7 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
           className: cn(
             'md:transition-[transform,padding,width,margin]',
             collapsed && [
-              'md:top-1 md:me-fd-sidebar-offset md:h-[calc(100dvh-4px)] md:w-[var(--fd-sidebar-width)] md:animate-fd-sidebar-collapse md:rounded-xl md:border md:ps-0 md:shadow-md',
+              'md:me-fd-sidebar-offset md:w-[var(--fd-sidebar-width)] md:rounded-xl md:border md:ps-0 md:shadow-md',
               hover
                 ? 'md:translate-x-1 rtl:md:-translate-x-1'
                 : 'md:translate-x-[calc(var(--fd-sidebar-width)*-1)] rtl:md:translate-x-[var(--fd-sidebar-width)]',
