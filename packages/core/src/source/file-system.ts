@@ -9,10 +9,7 @@ import {
 export interface MetaFile {
   file: FileInfo;
   format: 'meta';
-  data: {
-    // TODO: Merge it into data (major)
-    data: MetaData;
-  };
+  data: MetaData;
 }
 
 export interface PageFile {

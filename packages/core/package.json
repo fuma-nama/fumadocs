@@ -52,10 +52,6 @@
       "import": "./dist/link.js",
       "types": "./dist/link.d.ts"
     },
-    "./middleware": {
-      "import": "./dist/middleware.js",
-      "types": "./dist/middleware.d.ts"
-    },
     "./mdx-plugins": {
       "import": "./dist/mdx-plugins/index.js",
       "types": "./dist/mdx-plugins/index.d.ts"

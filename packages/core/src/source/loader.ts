@@ -301,7 +301,7 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
 function fileToMeta<Data = MetaData>(file: MetaFile): Meta<Data> {
   return {
     file: file.file,
-    data: file.data.data as Data,
+    data: file.data as Data,
   };
 }
 

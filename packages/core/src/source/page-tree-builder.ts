@@ -171,7 +171,7 @@ function buildFolderNode(
     'page',
   );
 
-  const metadata = meta?.data.data;
+  const metadata = meta?.data;
   const index = indexFile ? buildFileNode(indexFile, ctx) : undefined;
 
   let children: PageTree.Node[];
