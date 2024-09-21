@@ -51,9 +51,7 @@ export function loadFiles(files: VirtualFile[], options: LoadOptions): Storage {
     }
 
     if (file.type === 'meta') {
-      storage.write(relativePath, file.type, {
-        data: file.data as MetaData,
-      });
+      storage.write(relativePath, file.type, file.data as MetaData);
     }
   }
 

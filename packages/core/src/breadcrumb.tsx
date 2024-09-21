@@ -89,7 +89,7 @@ function searchPath(
         const items: BreadcrumbItem[] = [];
 
         if (separator) items.push({ name: separator });
-        if (options.includePage)
+        if (includePage)
           items.push({
             name: node.index.name,
             url: node.index.url,
