@@ -5,6 +5,7 @@ import {
   type Message,
 } from '@oramacloud/client';
 import {
+  type HTMLAttributes,
   memo,
   type ReactNode,
   type TextareaHTMLAttributes,
@@ -71,27 +72,10 @@ export function AIDialog(): React.ReactElement {
   // eslint-disable-next-line react/hook-use-state -- rerender
   const [_, update] = useState<unknown>();
   const shouldFocus = useRef(false); // should focus on input on next render
-  const containerRef = useRef<HTMLDivElement>(null);
   const [relatedQueries, setRelatedQueries] = useState<string[]>([]);
 
   useEffect(() => {
     session ??= createClient();
-
-    if (!containerRef.current) return;
-    const observer = new ResizeObserver(() => {
-      const container = containerRef.current;
-      if (!container) return;
-
-      if (
-        container.scrollTop >=
-        container.scrollHeight - container.clientHeight - 50
-      ) {
-        container.scrollTo({
-          top: container.scrollHeight,
-          behavior: 'instant',
-        });
-      }
-    });
 
     const onRelatedQuery: RelatedQueryListener = (params) => {
       setRelatedQueries(params);
@@ -104,20 +88,11 @@ export function AIDialog(): React.ReactElement {
     messageListeners.push(onMessageChange);
     relatedQueryListeners.push(onRelatedQuery);
 
-    containerRef.current.scrollTop =
-      containerRef.current.scrollHeight - containerRef.current.clientHeight;
-
-    // after animation
-    setTimeout(() => {
-      if (containerRef.current) observer.observe(containerRef.current);
-    }, 2000);
-
     return () => {
       messageListeners = messageListeners.filter((l) => l !== onMessageChange);
       relatedQueryListeners = relatedQueryListeners.filter(
         (l) => l !== onRelatedQuery,
       );
-      observer.disconnect();
     };
   }, []);
 
@@ -164,13 +139,7 @@ export function AIDialog(): React.ReactElement {
 
   return (
     <>
-      <div
-        ref={containerRef}
-        className={cn(
-          'mb-2 flex min-h-0 flex-1 flex-col gap-1 overflow-auto px-2',
-          messages.length === 0 && 'hidden',
-        )}
-      >
+      <List className={cn(messages.length === 0 && 'hidden')}>
         {messages.map((item, i) => (
           // eslint-disable-next-line react/no-array-index-key -- safe
           <Message key={i} {...item}>
@@ -191,9 +160,9 @@ export function AIDialog(): React.ReactElement {
             ) : null}
           </Message>
         ))}
-      </div>
+      </List>
       {relatedQueries.length > 0 ? (
-        <div className="flex flex-row items-center gap-2">
+        <div className="flex flex-row flex-wrap items-center gap-1">
           {relatedQueries.map((item) => (
             <button
               key={item}
@@ -248,6 +217,50 @@ export function AIDialog(): React.ReactElement {
         )}
       </form>
     </>
+  );
+}
+
+function List(props: HTMLAttributes<HTMLDivElement>): React.ReactElement {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const observer = new ResizeObserver(() => {
+      const container = containerRef.current;
+      if (!container) return;
+
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: 'instant',
+      });
+    });
+
+    containerRef.current.scrollTop =
+      containerRef.current.scrollHeight - containerRef.current.clientHeight;
+
+    // after animation
+    setTimeout(() => {
+      const element = containerRef.current?.firstElementChild;
+
+      if (element) {
+        observer.observe(element);
+      }
+    }, 2000);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  return (
+    <div
+      {...props}
+      ref={containerRef}
+      className={cn('min-h-0 flex-1 overflow-auto px-2 pb-2', props.className)}
+    >
+      <div className="flex flex-col gap-1">{props.children}</div>
+    </div>
   );
 }
 
