@@ -23,7 +23,7 @@ export default function CustomSearchDialog(
     <SearchDialog
       index={index}
       {...props}
-      defaultTag={useMode() ?? 'headless'}
+      defaultTag={useMode() ?? 'ui'}
       tags={modes.map((mode) => ({
         name: mode.name,
         value: mode.param,

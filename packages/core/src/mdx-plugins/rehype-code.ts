@@ -166,13 +166,14 @@ export function rehypeCode(
     langs: codeOptions.langs ?? Object.keys(bundledLanguages),
   });
 
-  return async (tree, file) => {
-    const transformer = rehypeShikiFromHighlighter(
-      await highlighter,
-      codeOptions,
-    );
+  const transformer = highlighter.then((instance) =>
+    rehypeShikiFromHighlighter(instance, codeOptions),
+  );
 
-    await transformer(tree, file, () => {
+  return async (tree, file) => {
+    await (
+      await transformer
+    )(tree, file, () => {
       // nothing
     });
   };
