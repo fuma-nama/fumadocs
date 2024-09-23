@@ -24,11 +24,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@radix-ui/react-dialog';
-import { Info, Loader2, Send, Sparkles, X } from 'lucide-react';
+import { Info, Loader2, RefreshCw, Send, Sparkles, X } from 'lucide-react';
 import { type Jsx, toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import { Fragment, jsx, jsxs } from 'react/jsx-runtime';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
-import { buttonVariants } from '@/components/ui/button';
+import { cva } from 'class-variance-authority';
 import { cn } from '@/utils/cn';
 import type { createProcessor } from '@/components/markdown-processor';
 
@@ -37,10 +37,32 @@ type MessageChangeListener = (messages: Message[]) => void;
 let relatedQueryListeners: RelatedQueryListener[] = [];
 let messageListeners: MessageChangeListener[] = [];
 
+const buttonVariants = cva(
+  'inline-flex items-center justify-center rounded-md p-2 text-sm font-medium transition-colors duration-100 disabled:pointer-events-none disabled:opacity-50',
+  {
+    variants: {
+      color: {
+        outline: 'border hover:bg-fd-accent hover:text-fd-accent-foreground',
+        ghost: 'hover:bg-fd-accent hover:text-fd-accent-foreground',
+        secondary:
+          'border bg-fd-secondary text-fd-secondary-foreground hover:bg-fd-accent hover:text-fd-accent-foreground',
+      },
+      size: {
+        sm: 'gap-1 p-0.5 text-xs',
+        icon: 'p-1.5 [&_svg]:size-5',
+      },
+    },
+  },
+);
+
 export function createClient(): AnswerSession {
+  const endpoint = process.env.NEXT_PUBLIC_ORAMA_ENDPOINT,
+    apiKey = process.env.NEXT_PUBLIC_ORAMA_API_KEY;
+
+  if (!endpoint || !apiKey) throw new Error('Failed to find api keys');
   const client = new OramaClient({
-    endpoint: 'https://cloud.orama.run/v1/indexes/fumadocs-vercel-app-kayb5v',
-    api_key: 'lUf9gBNDq8BiyTG0fn4ukbc0ebHxnyLs',
+    endpoint,
+    api_key: apiKey,
   });
 
   const instance = client.createAnswerSession({
@@ -119,13 +141,19 @@ export function AIDialog(): React.ReactElement {
     [message],
   );
 
-  const onRegenerate = useCallback(() => {
+  const onTry = useCallback(() => {
     if (!session) return;
 
     setLoading(true);
     void session.regenerateLast({ stream: false }).finally(() => {
       setLoading(false);
     });
+  }, []);
+
+  const onClear = useCallback(() => {
+    session?.clearSession();
+    update({});
+    shouldFocus.current = true;
   }, []);
 
   useEffect(() => {
@@ -144,31 +172,50 @@ export function AIDialog(): React.ReactElement {
           // eslint-disable-next-line react/no-array-index-key -- safe
           <Message key={i} {...item}>
             {!loading && i === messages.length - 1 ? (
-              <button
-                type="button"
-                className={cn(
-                  buttonVariants({
-                    size: 'sm',
-                    variant: 'secondary',
-                    className: 'mt-2',
-                  }),
-                )}
-                onClick={onRegenerate}
-              >
-                Re-generate answer
-              </button>
+              <div className="mt-2 flex flex-row items-center gap-2">
+                <button
+                  type="button"
+                  className={cn(
+                    buttonVariants({
+                      color: 'secondary',
+                      className: 'gap-1.5',
+                    }),
+                  )}
+                  onClick={onTry}
+                >
+                  <RefreshCw className="size-4" />
+                  Retry
+                </button>
+                <button
+                  type="button"
+                  className={cn(
+                    buttonVariants({
+                      color: 'ghost',
+                    }),
+                  )}
+                  onClick={onClear}
+                >
+                  Clear Messages
+                </button>
+              </div>
             ) : null}
           </Message>
         ))}
       </List>
       {relatedQueries.length > 0 ? (
-        <div className="flex flex-row flex-wrap items-center gap-1">
+        <div className="flex flex-row items-center gap-1 overflow-x-auto p-1">
           {relatedQueries.map((item) => (
             <button
               key={item}
               type="button"
-              className={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}
+              className={cn(
+                buttonVariants({
+                  color: 'outline',
+                  className: 'py-1 text-nowrap',
+                }),
+              )}
               onClick={() => {
+                shouldFocus.current = true;
                 setMessage(item);
               }}
             >
@@ -179,14 +226,14 @@ export function AIDialog(): React.ReactElement {
       ) : null}
       <form
         className={cn(
-          'flex flex-row gap-1 rounded-b-lg bg-fd-secondary pe-2 text-fd-secondary-foreground transition-colors',
+          'flex flex-row rounded-b-lg border-t pe-2 transition-colors',
           loading && 'bg-fd-muted',
         )}
         onSubmit={onStart}
       >
         <Input
           value={message}
-          placeholder={loading ? 'AI is answering' : 'Ask AI something'}
+          placeholder={loading ? 'AI is answering...' : 'Ask AI something'}
           disabled={loading}
           onChange={(e) => {
             setMessage(e.target.value);
@@ -206,7 +253,7 @@ export function AIDialog(): React.ReactElement {
             className={cn(
               buttonVariants({
                 size: 'sm',
-                variant: 'ghost',
+                color: 'ghost',
                 className: 'rounded-full p-1',
               }),
             )}
@@ -268,7 +315,7 @@ function Input(
   props: TextareaHTMLAttributes<HTMLTextAreaElement>,
 ): React.ReactElement {
   const ref = useRef<HTMLDivElement>(null);
-  const shared = cn('col-start-1 row-start-1 max-h-60 min-h-12 px-2 py-1.5');
+  const shared = cn('col-start-1 row-start-1 max-h-60 min-h-12 px-3 py-1.5');
 
   return (
     <div className="grid flex-1">
@@ -308,7 +355,10 @@ const Message = memo(
           jsxs: jsxs as Jsx,
           Fragment,
           // @ts-expect-error -- safe to use
-          components: defaultMdxComponents,
+          components: {
+            ...defaultMdxComponents,
+            img: undefined, // use JSX
+          },
         });
 
         map.set(message.content, result);
@@ -349,8 +399,7 @@ export function Trigger(): React.ReactElement {
       <DialogTrigger
         className={cn(
           buttonVariants({
-            variant: 'outline',
-            size: 'sm',
+            color: 'outline',
             className: 'rounded-full gap-1.5',
           }),
         )}
@@ -365,7 +414,7 @@ export function Trigger(): React.ReactElement {
             document.getElementById('nd-ai-input')?.focus();
             e.preventDefault();
           }}
-          className="fixed left-1/2 z-50 my-[5vh] flex max-h-[90dvh] w-[98vw] max-w-screen-sm origin-left -translate-x-1/2 flex-col rounded-lg border bg-fd-popover text-fd-popover-foreground shadow-lg focus-visible:outline-none data-[state=closed]:animate-fd-dialog-out data-[state=open]:animate-fd-dialog-in"
+          className="fixed left-1/2 z-50 my-[5vh] flex max-h-[90dvh] w-[98vw] max-w-[860px] origin-left -translate-x-1/2 flex-col rounded-lg border bg-fd-popover text-fd-popover-foreground shadow-lg focus-visible:outline-none data-[state=closed]:animate-fd-dialog-out data-[state=open]:animate-fd-dialog-in"
         >
           <DialogTitle className="sr-only">Search AI</DialogTitle>
           <DialogDescription className="sr-only">
