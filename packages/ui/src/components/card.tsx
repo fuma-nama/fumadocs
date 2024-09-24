@@ -47,7 +47,7 @@ export function Card({
           {icon}
         </div>
       ) : null}
-      <h3 className="mb-1 mt-0 text-sm font-medium">{title}</h3>
+      <h3 className="not-prose mb-1 text-sm font-medium">{title}</h3>
       {description ? (
         <p className="my-0 text-sm text-fd-muted-foreground">{description}</p>
       ) : null}

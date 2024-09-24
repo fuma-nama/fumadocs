@@ -4,8 +4,6 @@ description: Support multiple languages in your documentation
 icon: Globe
 ---
 
-> Read the [Next.js Docs](https://nextjs.org/docs/app/building-your-application/routing/internationalization) to learn more about implementing I18n in Next.js.
-
 ## Introduction
 
 Fumadocs core provides necessary middleware and options for i18n support.
@@ -64,8 +62,6 @@ To hide the locale prefix, for example, use `/` instead of `/en`, use the `hideL
 | `default-locale` | Only hide the default locale                       |
 | `never`          | Never hide the prefix (default)                    |
 
-> It uses `NextResponse.rewrite` under the hood.
-
 ```ts
 import type { I18nConfig } from 'fumadocs-core/i18n';
 
@@ -75,6 +71,8 @@ export const i18n: I18nConfig = {
   hideLocale: 'default-locale',
 };
 ```
+
+> It uses `NextResponse.rewrite` to hide locale prefixes.
 
 It's **not recommended** to use `always`.
 On this mode, locale is stored as a cookie, read and set on the middleware.

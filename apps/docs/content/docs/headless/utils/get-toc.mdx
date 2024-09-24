@@ -14,9 +14,9 @@ Note: If you're using a CMS, you should use the API provided by the CMS instead.
 ```ts
 import { getTableOfContents } from 'fumadocs-core/server';
 
-const toc = await getTableOfContents(page.body.raw);
+const toc = await getTableOfContents('## markdown content');
 ```
 
 ### Output
 
-An array of [TOCItemType](/docs/headless/mdx/toc#output) is returned.
+An array of [`TOCItemType`](/docs/headless/mdx/toc#output) is returned.

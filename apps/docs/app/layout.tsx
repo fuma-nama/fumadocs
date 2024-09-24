@@ -1,3 +1,4 @@
+import 'katex/dist/katex.min.css';
 import './global.css';
 import type { Viewport } from 'next';
 import { GeistSans } from 'geist/font/sans';

@@ -3,6 +3,8 @@ import remarkGfm from 'remark-gfm';
 import remarkRehype from 'remark-rehype';
 import { bundledLanguages, createHighlighter } from 'shiki/bundle/web';
 import rehypeShikiFromHighlighter from '@shikijs/rehype/core';
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
 
 interface MetaValue {
   name: string;
@@ -45,7 +47,9 @@ export async function createProcessor() {
 
   return remark()
     .use(remarkGfm)
+    .use(remarkMath)
     .use(remarkRehype)
+    .use(rehypeKatex)
     .use(() =>
       rehypeShikiFromHighlighter(highlighter, {
         defaultLanguage: 'text',

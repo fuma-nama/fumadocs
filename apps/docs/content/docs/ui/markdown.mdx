@@ -76,15 +76,14 @@ see [MDX Syntax](https://mdxjs.com/docs/what-is-mdx/#mdx-syntax) to learn more.
 
 Useful for adding links, it is included by default.
 
-Same as normal links, but you can display more information (e.g. icons).
-
 ```mdx
 <Cards>
   <Card
     href="https://nextjs.org/docs/app/building-your-application/data-fetching/fetching-caching-and-revalidating"
     title="Fetching, Caching, and Revalidating"
-    description="Learn more about caching in Next.js"
-  />
+  >
+    Learn more about caching in Next.js
+  </Card>
 </Cards>
 ```
 
@@ -92,8 +91,9 @@ Same as normal links, but you can display more information (e.g. icons).
   <Card
     href="https://nextjs.org/docs/app/building-your-application/data-fetching/fetching-caching-and-revalidating"
     title="Fetching, Caching, and Revalidating"
-    description="Learn more about caching in Next.js"
-  />
+  >
+    Learn more about caching in Next.js
+  </Card>
 </Cards>
 
 #### Icon
@@ -104,22 +104,32 @@ You can specify an icon to cards.
 import { HomeIcon } from 'lucide-react';
 
 <Cards>
-  <Card
-    icon={<HomeIcon />}
-    href="/"
-    title="Home"
-    description="Go back to home"
-  />
+  <Card icon={<HomeIcon />} href="/" title="Home">
+    Go back to home
+  </Card>
 </Cards>
 ```
 
 <Cards>
-  <Card
-    icon={<HomeIcon />}
-    href="/"
-    title="Home"
-    description="Go back to home"
-  />
+  <Card icon={<HomeIcon />} href="/" title="Go back to home">
+    The home page of Fumadocs.
+  </Card>
+</Cards>
+
+#### Without href
+
+```mdx
+<Cards>
+  <Card title="Fetching, Caching, and Revalidating">
+    Learn more about `fetch` in Next.js.
+  </Card>
+</Cards>
+```
+
+<Cards>
+  <Card title="Fetching, Caching, and Revalidating">
+    Learn more about `fetch` in Next.js.
+  </Card>
 </Cards>
 
 ### Callouts
