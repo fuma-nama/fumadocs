@@ -7,7 +7,7 @@ import { Files, Folder, File } from 'fumadocs-ui/components/files';
 
 ## Layouts
 
-Add links to docs layouts.
+Add links to Fumadocs UI layouts.
 
 ### Page Tree
 
@@ -86,9 +86,9 @@ A part of [Docs Layout](/docs/ui/blocks/layout#sidebar), it displays the complet
 Besides the page tree, the sidebar exposes a `banner` and `footer` option.
 You can use them to add additional components.
 
-For example, adding an announcement to the top of sidebar.
+For example, adding an announcement as the banner of sidebar:
 
-```tsx
+```tsx title="layout.tsx"
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 
 <DocsLayout
@@ -136,7 +136,7 @@ import { DocsPage } from 'fumadocs-ui/page';
 
 <DocsPage
   tableOfContent={{
-    banner: <Banner />, // your banner
+    banner: <div>Hello World</div>, // your banner
   }}
 >
   {children}
@@ -154,10 +154,10 @@ import { DocsPage } from 'fumadocs-ui/page';
 
 <DocsPage
   tableOfContent={{
-    banner: <Banner />,
+    banner: <div>Hello World</div>,
   }}
   tableOfContentPopover={{
-    banner: <Banner />,
+    banner: <div>Hello World</div>,
   }}
 >
   {children}
@@ -228,7 +228,7 @@ Links API -> Root Toggle & Document Search -> Page Tree -> Page
 
 1. **Links API** adds links to the layout, they should redirect the user to another layout, like the blog page or landing page.
 
-2. A page tree can have multiple roots, each root contains a tree of navigation links. Users can switch between roots with [Root Toggle](/docs/ui/components/root-toggle).
+2. A page tree can have multiple roots, each root contains a tree of navigation links. Users can switch between roots from sidebar.
 
 3. The active **page tree** will be shown on navigation elements like sidebar, allowing users to switch between pages.
 
@@ -236,6 +236,31 @@ Links API -> Root Toggle & Document Search -> Page Tree -> Page
 
 Nodes should not impact their upper nodes (ancestors).
 For example, clicking a page tree item on sidebar should not change the root of page tree.
+
+## Changing Routes
+
+The default routing structure of your docs can also be changed as it is essentially a Next.js app.
+
+### Remove the docs layout of a certain page
+
+The `/docs/[[...slug]]` route is a catch-all route.
+
+To use another layout for a certain page, move the page outside the `app/docs` folder, to a place that's accessible with the same base route `/docs`.
+
+This is possible using Next.js Route Group. For example, adding a `/docs` page without docs layout.
+
+<Files>
+  <Folder name="app" defaultOpen>
+    <File name="(home)/docs/page.tsx" />
+    <Folder name="docs" defaultOpen>
+      <File name="layout.tsx" />
+      <File name="[[...slug]]/page.tsx" />
+    </Folder>
+  </Folder>
+</Files>
+
+Ensure **there's no duplicated page** with the same URL in the catch-all route `[[...slug]]/page.tsx`.
+In the above example, a MDX file with the path `content/docs/index.mdx` will produce errors.
 
 ## FAQ
 
