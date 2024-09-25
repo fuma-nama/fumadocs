@@ -27,16 +27,11 @@ export function useApiContext(): ApiContextType {
 }
 
 async function initHighlighter(): Promise<HighlighterCore> {
-  const { createHighlighterCore } = await import('shiki/core');
-  const getWasm = await import('shiki/wasm');
+  const { getSingletonHighlighter } = await import('shiki/bundle/web');
 
-  return createHighlighterCore({
-    themes: [
-      import('shiki/themes/github-light.mjs'),
-      import('shiki/themes/github-dark.mjs'),
-    ],
-    langs: [import('shiki/langs/json.mjs')],
-    loadWasm: getWasm,
+  return getSingletonHighlighter({
+    themes: ['github-light', 'github-dark'],
+    langs: ['json'],
   });
 }
 

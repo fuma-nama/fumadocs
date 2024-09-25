@@ -12,7 +12,7 @@ export const openapiPlugin: Plugin = {
   files: () => ({
     'scripts/generate-docs.mjs': generated['scripts/generate-docs'],
   }),
-  dependencies: ['fumadocs-openapi', 'rimraf'],
+  dependencies: ['fumadocs-openapi', 'rimraf', 'shiki'],
   async transform(ctx) {
     await Promise.all([
       transformSource(ctx),
