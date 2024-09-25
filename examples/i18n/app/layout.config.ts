@@ -5,4 +5,11 @@ export const baseOptions: BaseLayoutProps = {
   nav: {
     title: 'I18n Docs',
   },
+  links: [
+    {
+      type: 'main',
+      text: 'Documentation',
+      url: '/docs',
+    },
+  ],
 };

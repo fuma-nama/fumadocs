@@ -1,8 +1,7 @@
 'use client';
 
-import { MoreVertical } from 'lucide-react';
+import { ChevronDown, Languages, MoreVertical } from 'lucide-react';
 import { useSearchContext } from '@/contexts/search';
-import { useI18n } from '@/contexts/i18n';
 import {
   LinkItem,
   type LinkItemType,
@@ -16,7 +15,10 @@ import { ThemeToggle } from '@/components/layout/theme-toggle';
 import { NavBox, Title } from '@/components/layout/nav';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
-import { LanguageToggle } from '@/components/layout/language-toggle';
+import {
+  LanguageToggle,
+  LanguageToggleText,
+} from '@/components/layout/language-toggle';
 import type { SharedNavProps } from './shared';
 
 export function Nav({
@@ -29,7 +31,6 @@ export function Nav({
   items: LinkItemType[];
 }): React.ReactElement {
   const search = useSearchContext();
-  const { text } = useI18n();
 
   return (
     <NavBox
@@ -54,6 +55,11 @@ export function Nav({
           ) : null}
 
           <ThemeToggle className="max-lg:hidden" />
+          {props.i18n ? (
+            <LanguageToggle className="max-lg:hidden">
+              <Languages className="size-5" />
+            </LanguageToggle>
+          ) : null}
           {items.filter(isSecondary).map((item, i) => (
             <LinkItem key={i} item={item} className="max-lg:hidden" />
           ))}
@@ -68,24 +74,20 @@ export function Nav({
               }),
             )}
             footer={
-              <>
-                {!props.disableThemeSwitch ? (
-                  <div className="flex flex-row items-center justify-between px-2 pt-2">
-                    <p className="font-medium text-fd-muted-foreground">
-                      {text.chooseTheme}
-                    </p>
-                    <ThemeToggle />
-                  </div>
-                ) : null}
-                {props.i18n ? (
-                  <div className="flex flex-row items-center justify-between px-2 pt-2">
-                    <p className="font-medium text-fd-muted-foreground">
-                      {text.chooseLanguage}
-                    </p>
-                    <LanguageToggle />
-                  </div>
-                ) : null}
-              </>
+              Boolean(props.i18n) || !props.disableThemeSwitch ? (
+                <div className="flex flex-row items-center gap-1.5 px-2 pt-1.5">
+                  {props.i18n ? (
+                    <LanguageToggle className="-ms-1.5">
+                      <Languages className="size-5" />
+                      <LanguageToggleText />
+                      <ChevronDown className="size-3 text-fd-muted-foreground" />
+                    </LanguageToggle>
+                  ) : null}
+                  {!props.disableThemeSwitch ? (
+                    <ThemeToggle className="ms-auto" />
+                  ) : null}
+                </div>
+              ) : null
             }
           >
             <MoreVertical />

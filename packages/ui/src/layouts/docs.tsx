@@ -1,7 +1,7 @@
 import type { PageTree } from 'fumadocs-core/server';
 import { ReactNode, HTMLAttributes, Fragment } from 'react';
 import Link from 'next/link';
-import { MoreHorizontal } from 'lucide-react';
+import { Languages, MoreHorizontal } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
@@ -18,6 +18,7 @@ declare const {
   ThemeToggle,
   SubNav,
   LanguageToggle,
+  LanguageToggleText,
   LinksMenu,
   RootToggle,
   LinkItem,
@@ -104,7 +105,12 @@ export function DocsLayout({
   }
 
   if (i18n) {
-    footer.push(<LanguageToggle key="i18n" />);
+    footer.push(
+      <LanguageToggle key="i18n">
+        <Languages className="size-5" />
+        <LanguageToggleText className="md:hidden" />
+      </LanguageToggle>,
+    );
   }
 
   if (links.some((v) => v.type === 'icon')) {

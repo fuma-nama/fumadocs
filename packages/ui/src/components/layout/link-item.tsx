@@ -236,7 +236,7 @@ export function LinksMenu({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger {...props} />
-      <PopoverContent className="flex flex-col">
+      <PopoverContent className="flex flex-col p-1">
         {items.map((item, i) => (
           <LinkItem key={i} item={item} on="menu" />
         ))}
