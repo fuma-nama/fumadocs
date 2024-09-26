@@ -10,7 +10,7 @@ import {
   note,
 } from '@clack/prompts';
 import picocolors from 'picocolors';
-import { sync } from 'cross-spawn';
+import { execa } from 'execa';
 import { getPackageManager } from '@/utils/get-package-manager';
 import { exists } from '@/utils/fs';
 import { isSrc } from '@/utils/is-src';
@@ -51,6 +51,7 @@ export interface Plugin {
   >;
 
   transform?: (ctx: PluginContext) => Awaitable<void>;
+  transformRejected?: (ctx: PluginContext) => Awaitable<void>;
 }
 
 export async function init(plugin: Plugin, config: Config = {}): Promise<void> {
@@ -122,9 +123,7 @@ export async function init(plugin: Plugin, config: Config = {}): Promise<void> {
     if (value) {
       const spin = spinner();
       spin.start('Installing dependencies');
-      sync(`${manager} install ${plugin.dependencies.join(' ')}`, {
-        stdio: 'ignore',
-      });
+      await execa(manager, ['install', ...plugin.dependencies]);
       spin.stop('Successfully installed.');
     }
   }
@@ -147,6 +146,8 @@ export async function init(plugin: Plugin, config: Config = {}): Promise<void> {
 prettier . --write`,
         picocolors.bold(picocolors.green('Changes Applied')),
       );
+    } else {
+      await plugin.transformRejected?.(ctx);
     }
   }
 

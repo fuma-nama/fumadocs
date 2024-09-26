@@ -7,7 +7,10 @@ import { File, Files, Folder } from 'fumadocs-ui/components/files';
 
 ## Overview
 
-This is a shared convention for organizing your pages, followed by all file-system based content sources including Fumadocs MDX.
+This is a shared convention for organizing your documents.
+
+Fumadocs MDX, and other file-system based content sources generate slugs and page trees depending on your file structure.
+It's very similar to Next.js App Router, but is specialized for documents.
 
 ## File
 
@@ -36,6 +39,15 @@ full: false
 
 ## Learn More
 ```
+
+#### Slugs
+
+The generated slugs will be same as your file path.
+
+| path (relative to root folder) | slugs             |
+| ------------------------------ | ----------------- |
+| `./dir/page.mdx`               | `['dir', 'page']` |
+| `./dir/index.mdx`              | `['dir']`         |
 
 ## Folder
 
@@ -192,9 +204,9 @@ You can add an icon too.
 
 ## Icons
 
-Since Fumadocs doesn't include an icon library, you have to convert the icon names to JSX elements so that it can be rendered as a component.
+Since Fumadocs doesn't include an icon library, you have to convert the icon names to JSX elements in runtime, and render it as a component.
 
-For built-in content sources like Fumadocs MDX, you can use [the `icon` handler](/docs/headless/source-api#icons) from Source API.
+You can use [the `icon` handler](/docs/headless/source-api#icons) from Source API.
 
 ## Multiple Page Trees
 

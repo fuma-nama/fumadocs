@@ -1,14 +1,16 @@
 import path from 'node:path';
 import picocolors from 'picocolors';
+import { log } from '@clack/prompts';
 import { type Plugin } from '@/commands/init';
 import { generated } from '@/generated';
-import { transformLayoutConfig } from '@/utils/transform-layout-config';
+import { transformLayoutConfig } from '@/utils/i18n/transform-layout-config';
 import { resolveAppPath } from '@/utils/is-src';
 import { moveFiles } from '@/utils/move-files';
 import { isRelative } from '@/utils/fs';
-import { transformSourceI18n } from '@/utils/transform-source-i18n';
+import { transformSourceI18n } from '@/utils/i18n/transform-source-i18n';
 import { defaultConfig } from '@/config';
 import { createEmptyProject } from '@/utils/typescript';
+import { transformRootLayout } from '@/utils/i18n/transform-root-layout';
 
 export const i18nPlugin: Plugin = {
   files: () => ({
@@ -19,8 +21,7 @@ export const i18nPlugin: Plugin = {
   instructions: () => [
     {
       type: 'text',
-      text: `Moved the ./app files to a [lang] route group.
-Make sure to update the params of page.tsx and route.ts (if necessary):`,
+      text: 'Make sure to update the params of page.tsx and route.ts (if necessary):',
     },
     {
       type: 'code',
@@ -57,6 +58,7 @@ const pages = source.getPage(params.lang);`,
         project,
         resolveAppPath('./app/layout.config.tsx', ctx.src),
       ),
+      transformRootLayout(project, resolveAppPath('./app/layout.tsx', ctx.src)),
       transformSourceI18n(
         project,
         path.join(
@@ -78,6 +80,16 @@ const pages = source.getPage(params.lang);`,
       },
       project,
       ctx.src,
+    );
+
+    log.success(
+      'Moved the ./app files to a [lang] route group, and modified your root layout to add `<I18nProvider />`.',
+    );
+  },
+  transformRejected() {
+    log.info(
+      `Please create a [lang] route group and move all special files into the folder.
+See https://nextjs.org/docs/app/building-your-application/routing/internationalization for more info.`,
     );
   },
 };

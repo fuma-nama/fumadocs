@@ -13,7 +13,7 @@ import {
   treeToJavaScript,
   treeToMdx,
 } from '@/commands/file-tree';
-import { runTree } from '@/utils/run-tree';
+import { runTree } from '@/utils/file-tree/run-tree';
 import packageJson from '../package.json';
 
 const program = new Command();

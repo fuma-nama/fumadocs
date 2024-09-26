@@ -29,7 +29,7 @@
   "dependencies": {
     "@clack/prompts": "^0.7.0",
     "commander": "^12.1.0",
-    "cross-spawn": "^7.0.3",
+    "execa": "^9.4.0",
     "package-manager-detector": "^0.2.0",
     "picocolors": "^1.1.0",
     "ts-morph": "^23.0.0"

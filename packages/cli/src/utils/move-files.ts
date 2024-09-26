@@ -8,7 +8,7 @@ import {
   transformReferences,
 } from '@/utils/transform-references';
 
-const transformExts = ['.js', '.ts', '.tsx', '.jsx'];
+const transformExtensions = ['.js', '.ts', '.tsx', '.jsx'];
 
 /**
  * Move files from directory to another directory
@@ -62,7 +62,7 @@ export async function moveFiles(
   const allowed = await filter(path.resolve(from));
   if (!allowed) return;
 
-  if (transformExts.includes(path.extname(from))) {
+  if (transformExtensions.includes(path.extname(from))) {
     const content = await fs.readFile(from);
     const sourceFile = project.createSourceFile(from, content.toString(), {
       overwrite: true,
