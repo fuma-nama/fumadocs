@@ -7,7 +7,7 @@
     "build:docs": "node ./scripts/generate-docs.mjs",
     "dev": "next dev",
     "start": "next start",
-    "types:check": "tsc --noEmit"
+    "types:check": "fumadocs-mdx && tsc --noEmit"
   },
   "dependencies": {
     "fumadocs-core": "workspace:*",
