@@ -9,11 +9,10 @@ import { notFound } from 'next/navigation';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { metadataImage } from '@/lib/metadata';
 
-export default async function Page({
-  params,
-}: {
-  params: { slug?: string[] };
+export default async function Page(props: {
+  params: Promise<{ slug?: string[] }>;
 }) {
+  const params = await props.params;
   const page = source.getPage(params.slug);
 
   if (!page) {
@@ -42,7 +41,10 @@ export async function generateStaticParams() {
   return source.generateParams();
 }
 
-export function generateMetadata({ params }: { params: { slug?: string[] } }) {
+export async function generateMetadata(props: {
+  params: Promise<{ slug?: string[] }>;
+}) {
+  const params = await props.params;
   const page = source.getPage(params.slug);
 
   if (!page) notFound();

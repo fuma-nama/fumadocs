@@ -8,15 +8,10 @@ import { createMetadata } from '@/utils/metadata';
 import { buttonVariants } from '@/components/ui/button';
 import { Control } from '@/app/(home)/blog/[slug]/page.client';
 
-interface Param {
-  slug: string;
-}
-
-export default function Page({
-  params,
-}: {
-  params: Param;
-}): React.ReactElement {
+export default async function Page(props: {
+  params: Promise<{ slug: string }>;
+}): Promise<React.ReactElement> {
+  const params = await props.params;
   const page = blog.getPage([params.slug]);
 
   if (!page) notFound();
@@ -69,7 +64,10 @@ export default function Page({
   );
 }
 
-export function generateMetadata({ params }: { params: Param }): Metadata {
+export async function generateMetadata(props: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const params = await props.params;
   const page = blog.getPage([params.slug]);
 
   if (!page) notFound();
@@ -81,7 +79,7 @@ export function generateMetadata({ params }: { params: Param }): Metadata {
   });
 }
 
-export function generateStaticParams(): Param[] {
+export function generateStaticParams(): { slug: string }[] {
   return blog.getPages().map((page) => ({
     slug: page.slugs[0],
   }));

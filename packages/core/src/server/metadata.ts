@@ -15,10 +15,10 @@ interface ImageMeta {
 }
 
 interface RouteOptions {
-  params: {
+  params: Promise<{
     slug: string[];
     lang?: string;
-  };
+  }>;
 }
 
 export function createMetadataImage<
@@ -106,8 +106,8 @@ export function createMetadataImage<
       }));
     },
     createAPI(handler) {
-      return (req, args) => {
-        const params = args.params;
+      return async (req, args) => {
+        const params = await args.params;
         const page = options.source.getPage(
           params.slug.slice(0, -1), //remove filename
           params.lang,

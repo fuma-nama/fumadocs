@@ -2,6 +2,8 @@ import type { MetadataRoute } from 'next';
 import { baseUrl } from '@/utils/metadata';
 import { source } from '@/app/source';
 
+export const revalidate = false;
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const url = (path: string): string => new URL(path, baseUrl).toString();
 

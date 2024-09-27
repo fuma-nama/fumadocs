@@ -19,15 +19,10 @@ import { createMetadata, metadataImage } from '@/utils/metadata';
 import { openapi, source } from '@/app/source';
 import { Wrapper } from '@/components/preview/wrapper';
 
-interface Param {
-  slug: string[];
-}
-
-export default function Page({
-  params,
-}: {
-  params: Param;
-}): React.ReactElement {
+export default async function Page(props: {
+  params: Promise<{ slug: string[] }>;
+}): Promise<React.ReactElement> {
+  const params = await props.params;
   const page = source.getPage(params.slug);
 
   if (!page) notFound();
@@ -82,7 +77,10 @@ export default function Page({
   );
 }
 
-export function generateMetadata({ params }: { params: Param }): Metadata {
+export async function generateMetadata(props: {
+  params: Promise<{ slug: string[] }>;
+}): Promise<Metadata> {
+  const params = await props.params;
   const page = source.getPage(params.slug);
 
   if (!page) notFound();
@@ -101,6 +99,6 @@ export function generateMetadata({ params }: { params: Param }): Metadata {
   );
 }
 
-export function generateStaticParams(): Param[] {
+export function generateStaticParams(): { slug: string[] }[] {
   return source.generateParams();
 }
