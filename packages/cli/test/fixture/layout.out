@@ -1,0 +1,23 @@
+import './global.css';
+import { RootProvider } from 'fumadocs-ui/provider';
+import { Inter } from 'next/font/google';
+import type { ReactNode } from 'react';
+import { I18nProvider } from "fumadocs-ui/i18n";
+
+const inter = Inter({
+  subsets: ['latin'],
+});
+
+export default function Layout({ params, children }: { params: { lang: string }, children: ReactNode }) {
+  return (
+    <html lang="en" className={inter.className} suppressHydrationWarning>
+      <body>
+              <I18nProvider locale={params.lang} locales={[
+                  { locale: 'en', name: 'English' }
+              ]}>
+                <RootProvider>{children}</RootProvider>
+              </I18nProvider>
+          </body>
+    </html>
+  );
+}

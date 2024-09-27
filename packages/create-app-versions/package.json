@@ -9,7 +9,7 @@
     "@content-collections/mdx": "^0.1.5",
     "@content-collections/next": "^0.2.2",
     "@types/mdx": "^2.0.13",
-    "@types/node": "22.7.0",
+    "@types/node": "22.7.3",
     "@types/react": "^18.3.9",
     "@types/react-dom": "^18.3.0",
     "autoprefixer": "^10.4.20",

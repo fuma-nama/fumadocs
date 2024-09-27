@@ -23,7 +23,7 @@
     "@typescript-eslint/parser": "^8.7.0",
     "@vercel/style-guide": "^6.0.0",
     "concurrently": "^9.0.1",
-    "eslint": "^8.57.0",
+    "eslint": "^8.57.1",
     "eslint-plugin-tailwindcss": "^3.17.4",
     "prettier": "^3.3.3",
     "rimraf": "^6.0.1",

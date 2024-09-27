@@ -346,7 +346,7 @@ const Message = memo(
     useEffect(() => {
       const run = async (): Promise<void> => {
         const { createProcessor } = await import('./markdown-processor');
-        processor ??= await createProcessor();
+        processor ??= createProcessor();
         const nodes = processor.parse({ value: message.content });
         const hast = await processor.run(nodes);
         const result = toJsxRuntime(hast, {

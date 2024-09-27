@@ -67,15 +67,15 @@
     "react-hook-form": "^7.53.0",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.1",
-    "shiki": "^1.18.0",
+    "shiki": "^1.20.0",
     "swr": "^2.2.5"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "22.7.0",
+    "@types/node": "22.7.3",
     "@types/openapi-sampler": "^1.0.3",
     "@types/react": "^18.3.9",
-    "bunchee": "^5.4.0",
+    "bunchee": "^5.5.0",
     "eslint-config-custom": "workspace:*",
     "next": "^14.2.13",
     "openapi-types": "^12.1.3",

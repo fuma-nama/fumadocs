@@ -1,10 +1,9 @@
 import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
 import remarkRehype from 'remark-rehype';
-import { bundledLanguages, createHighlighter } from 'shiki/bundle/web';
-import rehypeShikiFromHighlighter from '@shikijs/rehype/core';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
+import rehypeShiki, { type RehypeShikiOptions } from '@shikijs/rehype';
 
 interface MetaValue {
   name: string;
@@ -30,12 +29,7 @@ const metaValues: MetaValue[] = [
 ];
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type -- auto
-export async function createProcessor() {
-  const highlighter = await createHighlighter({
-    themes: ['vitesse-light', 'vitesse-dark'],
-    langs: Object.keys(bundledLanguages),
-  });
-
+export function createProcessor() {
   function filterMetaString(meta: string): string {
     let replaced = meta;
     for (const value of metaValues) {
@@ -50,49 +44,48 @@ export async function createProcessor() {
     .use(remarkMath)
     .use(remarkRehype)
     .use(rehypeKatex)
-    .use(() =>
-      rehypeShikiFromHighlighter(highlighter, {
-        defaultLanguage: 'text',
-        defaultColor: false,
-        themes: {
-          light: 'vitesse-light',
-          dark: 'vitesse-dark',
-        },
-        parseMetaString(meta) {
-          const map: Record<string, string> = {};
+    .use(rehypeShiki, {
+      defaultLanguage: 'text',
+      defaultColor: false,
+      themes: {
+        light: 'vitesse-light',
+        dark: 'vitesse-dark',
+      },
+      lazy: true,
+      parseMetaString(meta) {
+        const map: Record<string, string> = {};
 
-          for (const value of metaValues) {
-            const result = value.regex.exec(meta);
+        for (const value of metaValues) {
+          const result = value.regex.exec(meta);
 
-            if (result) {
-              map[value.name] = result[1];
-            }
+          if (result) {
+            map[value.name] = result[1];
           }
+        }
 
-          return map;
-        },
-        transformers: [
-          {
-            name: 'rehype-code:pre-process',
-            preprocess(code, { meta }) {
-              if (meta) {
-                meta.__raw = filterMetaString(meta.__raw ?? '');
-              }
+        return map;
+      },
+      transformers: [
+        {
+          name: 'rehype-code:pre-process',
+          preprocess(code, { meta }) {
+            if (meta) {
+              meta.__raw = filterMetaString(meta.__raw ?? '');
+            }
 
-              // Remove empty line at end
-              return code.replace(/\n$/, '');
-            },
-            line(hast) {
-              if (hast.children.length === 0) {
-                // Keep the empty lines when using grid layout
-                hast.children.push({
-                  type: 'text',
-                  value: ' ',
-                });
-              }
-            },
+            // Remove empty line at end
+            return code.replace(/\n$/, '');
           },
-        ],
-      }),
-    );
+          line(hast) {
+            if (hast.children.length === 0) {
+              // Keep the empty lines when using grid layout
+              hast.children.push({
+                type: 'text',
+                value: ' ',
+              });
+            }
+          },
+        },
+      ],
+    } satisfies RehypeShikiOptions);
 }
