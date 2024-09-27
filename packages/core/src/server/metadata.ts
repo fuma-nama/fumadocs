@@ -14,13 +14,6 @@ interface ImageMeta {
   height: number;
 }
 
-interface RouteOptions {
-  params: Promise<{
-    slug: string[];
-    lang?: string;
-  }>;
-}
-
 export function createMetadataImage<
   S extends LoaderOutput<LoaderConfig>,
 >(options: {
@@ -63,11 +56,22 @@ export function createMetadataImage<
     handler: (
       page: InferPageType<S>,
       request: NextRequest,
-      options: RouteOptions,
+      options: {
+        params:
+          | {
+              slug: string[];
+              lang?: string;
+            }
+          | Promise<{
+              slug: string[];
+              lang?: string;
+            }>;
+      },
     ) => Response | Promise<Response>,
   ) => (
     request: NextRequest,
-    options: RouteOptions,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- ignore Next.js type check
+    options: any,
   ) => Response | Promise<Response>;
 } {
   const { filename = 'image.png', imageRoute = '/docs-og' } = options;
@@ -107,14 +111,32 @@ export function createMetadataImage<
     },
     createAPI(handler) {
       return async (req, args) => {
-        const params = await args.params;
+        const params = await (
+          args as {
+            params?: Promise<Record<string, string | string[] | undefined>>;
+          }
+        ).params;
+
+        if (!params || !('slug' in params) || params.slug === undefined)
+          throw new Error(`Invalid params: ${JSON.stringify(params)}`);
+
+        const lang =
+          'lang' in params && typeof params.lang === 'string'
+            ? params.lang
+            : undefined;
+        const input: { slug: string[]; lang?: string } = {
+          slug: Array.isArray(params.slug) ? params.slug : [params.slug],
+          lang,
+        };
+
         const page = options.source.getPage(
-          params.slug.slice(0, -1), //remove filename
-          params.lang,
+          input.slug.slice(0, -1), //remove filename
+          lang,
         );
+
         if (!page) notFound();
 
-        return handler(page as InferPageType<S>, req, args);
+        return handler(page as InferPageType<S>, req, { params: input });
       };
     },
   };

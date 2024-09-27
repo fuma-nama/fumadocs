@@ -1,9 +1,5 @@
 'use client';
-import {
-  type AnswerSession,
-  OramaClient,
-  type Message,
-} from '@oramacloud/client';
+import type { AnswerSession, Message } from '@oramacloud/client';
 import {
   type HTMLAttributes,
   memo,
@@ -55,11 +51,13 @@ const buttonVariants = cva(
   },
 );
 
-export function createClient(): AnswerSession {
+export async function createClient(): Promise<AnswerSession> {
   const endpoint = process.env.NEXT_PUBLIC_ORAMA_ENDPOINT,
     apiKey = process.env.NEXT_PUBLIC_ORAMA_API_KEY;
 
   if (!endpoint || !apiKey) throw new Error('Failed to find api keys');
+
+  const { OramaClient } = await import('@oramacloud/client');
   const client = new OramaClient({
     endpoint,
     api_key: apiKey,
@@ -97,7 +95,11 @@ export function AIDialog(): React.ReactElement {
   const [relatedQueries, setRelatedQueries] = useState<string[]>([]);
 
   useEffect(() => {
-    session ??= createClient();
+    // preload processor
+    void import('./markdown-processor');
+    void createClient().then((res) => {
+      session = res;
+    });
 
     const onRelatedQuery: RelatedQueryListener = (params) => {
       setRelatedQueries(params);
@@ -344,9 +346,12 @@ const Message = memo(
     );
 
     useEffect(() => {
+      const loadProcessor = import('./markdown-processor').then(
+        (res) => res.createProcessor,
+      );
+
       const run = async (): Promise<void> => {
-        const { createProcessor } = await import('./markdown-processor');
-        processor ??= createProcessor();
+        processor ??= (await loadProcessor)();
         const nodes = processor.parse({ value: message.content });
         const hast = await processor.run(nodes);
         const result = toJsxRuntime(hast, {
