@@ -97,9 +97,12 @@ export function AIDialog(): React.ReactElement {
   useEffect(() => {
     // preload processor
     void import('./markdown-processor');
-    void createClient().then((res) => {
-      session = res;
-    });
+
+    if (!session) {
+      void createClient().then((res) => {
+        session = res;
+      });
+    }
 
     const onRelatedQuery: RelatedQueryListener = (params) => {
       setRelatedQueries(params);
@@ -173,7 +176,9 @@ export function AIDialog(): React.ReactElement {
         {messages.map((item, i) => (
           // eslint-disable-next-line react/no-array-index-key -- safe
           <Message key={i} {...item}>
-            {!loading && i === messages.length - 1 ? (
+            {!loading &&
+            item.role === 'assistant' &&
+            i === messages.length - 1 ? (
               <div className="mt-2 flex flex-row items-center gap-2">
                 <button
                   type="button"
@@ -225,6 +230,22 @@ export function AIDialog(): React.ReactElement {
             </button>
           ))}
         </div>
+      ) : null}
+      {loading ? (
+        <button
+          type="button"
+          className={cn(
+            buttonVariants({
+              color: 'secondary',
+              className: 'rounded-full mx-auto my-1',
+            }),
+          )}
+          onClick={() => {
+            session?.abortAnswer();
+          }}
+        >
+          Abort Answer
+        </button>
       ) : null}
       <form
         className={cn(
