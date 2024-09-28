@@ -117,7 +117,7 @@ export function TOCItems({
         <Primitive.ScrollProvider containerRef={containerRef}>
           <div
             className={cn(
-              'flex flex-col text-fd-muted-foreground',
+              'flex flex-col',
               !isMenu && 'border-s border-fd-foreground/10',
             )}
           >
@@ -136,7 +136,7 @@ function TOCItem({ item }: { item: TOCItemType }): React.ReactElement {
     <Primitive.TOCItem
       href={item.url}
       className={cn(
-        'py-1.5 transition-colors [overflow-wrap:anywhere] first:pt-0 last:pb-0 data-[active=true]:text-fd-primary',
+        'prose py-1.5 text-sm text-fd-muted-foreground transition-colors [overflow-wrap:anywhere] first:pt-0 last:pb-0 data-[active=true]:text-fd-primary',
         item.depth <= 2 && 'ps-3.5',
         item.depth === 3 && 'ps-6',
         item.depth >= 4 && 'ps-8',

@@ -1,6 +1,7 @@
 import {
   rehypeCode,
   type RehypeCodeOptions,
+  rehypeToc,
   remarkGfm,
   remarkHeading,
   type RemarkHeadingOptions,
@@ -58,7 +59,6 @@ export function getDefaultMDXOptions({
 }: DefaultMDXOptions): ProcessorOptions {
   const mdxExports = [
     'structuredData',
-    'toc',
     'frontmatter',
     'lastModified',
     ...valueToExport,
@@ -67,7 +67,13 @@ export function getDefaultMDXOptions({
   const remarkPlugins = pluginOption(
     (v) => [
       remarkGfm,
-      [remarkHeading, remarkHeadingOptions],
+      [
+        remarkHeading,
+        {
+          generateToc: false,
+          ...remarkHeadingOptions,
+        },
+      ],
       remarkImageOptions !== false && [remarkImage, remarkImageOptions],
       ...v,
       remarkStructureOptions !== false && [
@@ -83,6 +89,7 @@ export function getDefaultMDXOptions({
     (v) => [
       rehypeCodeOptions !== false && [rehypeCode, rehypeCodeOptions],
       ...v,
+      [rehypeToc],
     ],
     mdxOptions.rehypePlugins,
   );

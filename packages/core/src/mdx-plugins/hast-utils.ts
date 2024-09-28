@@ -6,13 +6,12 @@ import type { Element, Root, RootContent } from 'hast';
 export function visit(
   node: RootContent | Root,
   tagNames: string[],
-  handler: (node: Element) => void,
+  handler: (node: Element) => 'skip' | undefined,
 ): void {
-  if (node.type === 'element')
-    if (tagNames.includes(node.tagName)) {
-      handler(node);
-      return;
-    }
+  if (node.type === 'element' && tagNames.includes(node.tagName)) {
+    const result = handler(node);
+    if (result === 'skip') return;
+  }
 
   if ('children' in node)
     node.children.forEach((n) => {

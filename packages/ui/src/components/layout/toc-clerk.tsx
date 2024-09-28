@@ -78,10 +78,7 @@ export default function ClerkTOCItems({
 
   return (
     <ScrollArea className={cn('flex flex-col', isMenu && '-ms-3')}>
-      <ScrollViewport
-        className="relative min-h-0 text-sm text-fd-muted-foreground"
-        ref={containerRef}
-      >
+      <ScrollViewport className="relative min-h-0" ref={containerRef}>
         {svg ? (
           <div
             className="absolute start-0 top-0 rtl:-scale-x-100"
@@ -151,7 +148,7 @@ function TOCItem({
       style={{
         paddingInlineStart: `${getItemOffset(item.depth)}px`,
       }}
-      className="relative py-2 transition-colors [overflow-wrap:anywhere] first:pt-0 last:pb-0 data-[active=true]:text-fd-primary"
+      className="prose relative py-2 text-sm text-fd-muted-foreground transition-colors [overflow-wrap:anywhere] first:pt-0 last:pb-0 data-[active=true]:text-fd-primary"
     >
       {offset !== upperOffset ? (
         <svg

@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { remark } from 'remark';
 import {
+  rehypeToc,
   remarkAdmonition,
   remarkHeading,
   remarkImage,
@@ -11,6 +12,8 @@ import {
 import { fileURLToPath } from 'node:url';
 import remarkMdx from 'remark-mdx';
 import remarkGfm from 'remark-gfm';
+import remarkRehype from 'remark-rehype';
+import { createProcessor } from '@mdx-js/mdx';
 
 const cwd = path.dirname(fileURLToPath(import.meta.url));
 
@@ -78,5 +81,19 @@ test('Remark Image: Without Import', async () => {
 
   expect(result.value).toMatchFileSnapshot(
     path.resolve(cwd, './fixtures/remark-image-without-import.output.mdx'),
+  );
+});
+
+test('Rehype Toc', async () => {
+  const content = readFileSync(path.resolve(cwd, './fixtures/rehype-toc.md'));
+
+  const processor = createProcessor({
+    remarkPlugins: [remarkHeading],
+    rehypePlugins: [rehypeToc],
+  });
+  const result = await processor.process({ value: content });
+
+  expect(result.value).toMatchFileSnapshot(
+    path.resolve(cwd, './fixtures/rehype-toc.output.js'),
   );
 });
