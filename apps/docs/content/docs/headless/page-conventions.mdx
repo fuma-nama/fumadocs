@@ -251,51 +251,6 @@ For example, when you are in a root folder called `core`, the other folders (e.g
 
 By default, index pages are not considered as a page "under" the folder, you must specify them in the `pages` property.
 
- 
-## Adding a page at docs path (/docs)
-
-By default the main mdx page (index.mdx) is located at /docs path but you can change that
-
-<Steps>
-<Step>
-To do this go to `app/content/docs` and remove any index.mdx file.
-
-> Note that you should use the [Multiple Page Tree](#multiple-page-trees) instead of original layout to avoid any errors.
-</Step>
-<Step>
-Next you should add the page you want to add at `app/(home)/docs/page.tsx`
-
-```ts title="app/(home)/docs/page.tsx"
-
-import DocsPage from "@/components/ui/DocsPage"  
-// Page you want to show at this path
-
-export default function Page() {
-return (
-    <>
-    <DocsPage />
-    </>
-)
-}
-```
-
-After doing this try running the development server. 
-
-> The development server will start regardless of whether there are errors in the application. But if there are any erros in the app the build will fail
-</Step>
-
-<Step>
-**Additional Step if terminal shows an error**
-
-In the `app/docs/[[...slug]]` rename the slug from `[[...slug]]` to `[...slug]` and check if the issue gets solved or doing the vice versa will solve the issue.
-</Step>
-
-<Steps>
-
-Doing this will add a static page at `/docs` and the dynamic route will be added after the `/docs/` path.
-
-
-
 ## Internationalization
 
 You can create a localized page for specific language by adding `.{locale}` to your file name. Pages can't be language-specific, you must create a page for default
