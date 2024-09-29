@@ -27,13 +27,11 @@ export const blog = defineCollections({
 }
 ```
 
-### Options
-
-#### `dir`
+### `dir`
 
 Directories to scan input files.
 
-#### Schema
+### `schema`
 
 The Zod schema to validate file data (frontmatter on `doc` type, content on `meta` type).
 
@@ -71,7 +69,7 @@ export const blog = defineCollections({
 });
 ```
 
-#### Type
+### `type`
 
 The accepted type of collection.
 
@@ -80,7 +78,16 @@ The accepted type of collection.
 | `meta` | JSON/YAML File         |
 | `doc`  | Markdown/MDX Documents |
 
-#### MDX Options
+```ts
+import { defineCollections } from 'fumadocs-mdx/config';
+
+// only scan for json/yaml files
+export const metaFiles = defineCollections({
+  type: 'meta',
+});
+```
+
+### `mdxOptions`
 
 You can also customise MDX options from collections.
 Notice that passing `mdxOptions` to collection overrides all defaults from global config.
@@ -102,7 +109,7 @@ For full control over MDX options, you can pass MDX options without `getDefaultM
 
 > This API only available on `doc` type.
 
-#### Transform
+### `transform`
 
 A function to perform runtime transformation on collection entries.
 
@@ -129,7 +136,7 @@ export const { docs, meta } = defineDocs({
 The `docs` and `meta` are collections on their own.
 You can pass collection options to them as shown above.
 
-### Extend `schema`
+### `schema`
 
 You can extend the default Zod schema of `docs` and `meta`.
 
