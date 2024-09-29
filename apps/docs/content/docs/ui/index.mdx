@@ -141,17 +141,17 @@ Some common questions you may encounter.
 <Accordions>
     <Accordion id='customise' title='How to Customise UI?'>
 
-        Fumadocs UI offers Themes, Blocks and Components.
+Fumadocs UI offers Themes, Layouts and Components.
 
-        The design system is built with Tailwind CSS, see [Themes](/docs/ui/theme).
+The design system is built with Tailwind CSS, see [Themes](/docs/ui/theme).
 
-        Components are pre-built elements to enhance your documentation,
-        they are customisable with exposed props like `style` and `className`.
+Components are pre-built elements to enhance your documentation,
+they are customisable with exposed props like `style` and `className`.
 
-        Blocks are essential elements of docs, providing navigation and basic functionality.
-        We provided many options to customise them, see [Blocks](/docs/ui/blocks).
+Layouts are essential elements of docs, providing navigation and basic functionality.
+We provided many options to customise them, see [Layouts](/docs/ui/blocks).
 
-        Although the docs didn't explicitly mention, you can always style the elements with CSS selectors.
+Although the docs didn't explicitly mention, you can always style the elements with CSS selectors.
 
     </Accordion>
     <Accordion id='fix-monorepo-styling' title="How to fix stylings not being applied in Monorepo?">
@@ -212,6 +212,26 @@ You can enable Static Exports on Next.js to get a static build output. (Notice t
     </Accordion>
     <Accordion id='pronunciation' title='How to say Fumadocs?'>
         Fumadocs (Foo-ma docs).
+    </Accordion>
+    <Accordion id='custom-layout-docs-page' title='How to create a page in /docs without docs layout?'>
+
+Same as managing layouts in Next.js App Router, remove the original MDX file from content directory (`/content/docs`).
+This ensures duplicated pages will not cause errors.
+
+Now, You can add the page to another route group, which isn't a descendant of docs layout.
+
+For example, under your `app` folder:
+
+<Files>
+  <File name="(home)/docs/page.tsx" />
+  <Folder name="docs">
+    <File name="layout.tsx" />
+    <File name="[[...slug]]/page.tsx" />
+  </Folder>
+</Files>
+
+Replace the `/docs` page with your `page.tsx`.
+
     </Accordion>
 
 </Accordions>
