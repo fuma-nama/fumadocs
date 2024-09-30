@@ -116,12 +116,15 @@ export function LinkItem({
 
   if (item.on && item.on !== 'all' && item.on !== on) return null;
 
-  if (item.type === 'custom') return item.children;
+  if (item.type === 'custom')
+    return <div className={cn('grid', className)}>{item.children}</div>;
 
   if (item.type === 'menu' && on === 'nav') {
     return (
       <LinksMenu
-        items={item.items}
+        items={item.items.map((child, i) => (
+          <LinkItem key={i} item={child} on="menu" />
+        ))}
         className={cn(linkItemVariants({ className }))}
         {...props}
       >
@@ -217,13 +220,11 @@ export function LinkItem({
 }
 
 interface LinksMenuProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  items: LinkItemType[];
-  footer?: React.ReactNode;
+  items?: ReactNode;
 }
 
 export function LinksMenu({
   items,
-  footer,
   ...props
 }: LinksMenuProps): React.ReactElement {
   const [open, setOpen] = useState(false);
@@ -236,12 +237,7 @@ export function LinksMenu({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger {...props} />
-      <PopoverContent className="flex flex-col p-1">
-        {items.map((item, i) => (
-          <LinkItem key={i} item={item} on="menu" />
-        ))}
-        {footer}
-      </PopoverContent>
+      <PopoverContent className="flex flex-col p-1">{items}</PopoverContent>
     </Popover>
   );
 }

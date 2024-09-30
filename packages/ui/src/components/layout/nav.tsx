@@ -55,7 +55,7 @@ export function NavBox({
         'sticky top-fd-sidebar-top z-40 border-b transition-colors',
         transparent
           ? 'border-transparent'
-          : 'border-fd-foreground/10 bg-fd-background/60 backdrop-blur-md',
+          : 'border-fd-foreground/10 bg-fd-background/80 backdrop-blur-md',
         props.className,
       )}
     />

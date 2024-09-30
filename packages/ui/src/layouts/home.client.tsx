@@ -44,38 +44,40 @@ export function Nav({
         {items
           .filter((item) => !isSecondary(item))
           .map((item, i) => (
-            <LinkItem key={i} item={item} className="text-sm max-lg:hidden" />
+            <LinkItem key={i} item={item} className="text-sm max-sm:hidden" />
           ))}
-        <div className="flex flex-1 flex-row items-center justify-end md:gap-2">
+        <div className="flex flex-1 flex-row items-center justify-end">
           {enableSearch && search.enabled ? (
             <>
-              <SearchToggle className="sm:hidden" />
-              <LargeSearchToggle className="w-full max-w-[240px] max-sm:hidden" />
+              <SearchToggle className="lg:hidden" />
+              <LargeSearchToggle className="me-1.5 w-full max-w-[240px] last:me-0 max-lg:hidden" />
             </>
           ) : null}
-
-          <ThemeToggle className="max-lg:hidden" />
+          {!props.disableThemeSwitch ? (
+            <ThemeToggle className="me-1.5 last:me-0 max-lg:hidden" />
+          ) : null}
           {props.i18n ? (
-            <LanguageToggle className="max-lg:hidden">
+            <LanguageToggle className="me-1.5 last:me-0 max-lg:hidden">
               <Languages className="size-5" />
             </LanguageToggle>
           ) : null}
+
           {items.filter(isSecondary).map((item, i) => (
             <LinkItem key={i} item={item} className="max-lg:hidden" />
           ))}
 
           <LinksMenu
-            items={items}
-            className={cn(
-              buttonVariants({
-                size: 'icon',
-                color: 'ghost',
-                className: '-me-2 lg:hidden',
-              }),
-            )}
-            footer={
-              Boolean(props.i18n) || !props.disableThemeSwitch ? (
-                <div className="flex flex-row items-center gap-1.5 px-2 pt-1.5">
+            items={
+              <>
+                {items.map((item, i) => (
+                  <LinkItem
+                    key={i}
+                    item={item}
+                    on="menu"
+                    className={cn(!isSecondary(item) && 'sm:hidden')}
+                  />
+                ))}
+                <div className="flex flex-row items-center gap-1.5 px-2 pt-1.5 empty:hidden">
                   {props.i18n ? (
                     <LanguageToggle className="-ms-1.5">
                       <Languages className="size-5" />
@@ -87,8 +89,15 @@ export function Nav({
                     <ThemeToggle className="ms-auto" />
                   ) : null}
                 </div>
-              ) : null
+              </>
             }
+            className={cn(
+              buttonVariants({
+                size: 'icon',
+                color: 'ghost',
+                className: '-me-2 lg:hidden',
+              }),
+            )}
           >
             <MoreVertical />
           </LinksMenu>

@@ -1,6 +1,7 @@
 'use client';
 import type { AnswerSession, Message } from '@oramacloud/client';
 import {
+  type ButtonHTMLAttributes,
   type HTMLAttributes,
   memo,
   type ReactNode,
@@ -20,7 +21,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@radix-ui/react-dialog';
-import { Info, Loader2, RefreshCw, Send, Sparkles, X } from 'lucide-react';
+import { Info, Loader2, RefreshCw, Send, X } from 'lucide-react';
 import { type Jsx, toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import { Fragment, jsx, jsxs } from 'react/jsx-runtime';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
@@ -419,20 +420,12 @@ const Message = memo(
 
 Message.displayName = 'Message';
 
-export function Trigger(): React.ReactElement {
+export function Trigger(
+  props: ButtonHTMLAttributes<HTMLButtonElement>,
+): React.ReactElement {
   return (
     <Dialog>
-      <DialogTrigger
-        className={cn(
-          buttonVariants({
-            color: 'outline',
-            className: 'rounded-full gap-1.5',
-          }),
-        )}
-      >
-        <Sparkles className="size-4" />
-        Ask AI
-      </DialogTrigger>
+      <DialogTrigger {...props} />
       <DialogPortal>
         <DialogOverlay className="fixed inset-0 z-50 bg-fd-background/50 backdrop-blur-sm data-[state=closed]:animate-fd-fade-out data-[state=open]:animate-fd-fade-in" />
         <DialogContent

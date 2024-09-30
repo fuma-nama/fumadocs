@@ -77,13 +77,16 @@ export function DocsLayout({
       >
         {nav.title}
       </Link>,
+      nav.children,
     );
 
   if (links.length > 0)
     header.push(
       <LinksMenu
         key="links"
-        items={links}
+        items={links.map((item, i) => (
+          <LinkItem key={i} item={item} on="menu" />
+        ))}
         className={cn(
           buttonVariants({
             size: 'icon',
