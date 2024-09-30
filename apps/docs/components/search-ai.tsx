@@ -210,28 +210,6 @@ export function AIDialog(): React.ReactElement {
           </Message>
         ))}
       </List>
-      {relatedQueries.length > 0 ? (
-        <div className="flex flex-row items-center gap-1 overflow-x-auto p-1">
-          {relatedQueries.map((item) => (
-            <button
-              key={item}
-              type="button"
-              className={cn(
-                buttonVariants({
-                  color: 'outline',
-                  className: 'py-1 text-nowrap',
-                }),
-              )}
-              onClick={() => {
-                shouldFocus.current = true;
-                setMessage(item);
-              }}
-            >
-              {item}
-            </button>
-          ))}
-        </div>
-      ) : null}
       {loading ? (
         <button
           type="button"
@@ -247,6 +225,28 @@ export function AIDialog(): React.ReactElement {
         >
           Abort Answer
         </button>
+      ) : null}
+      {relatedQueries.length > 0 ? (
+        <div className="flex shrink-0 flex-row items-center gap-1 overflow-x-auto p-2">
+          {relatedQueries.map((item) => (
+            <button
+              key={item}
+              type="button"
+              className={cn(
+                buttonVariants({
+                  color: 'secondary',
+                  className: 'py-1 text-nowrap',
+                }),
+              )}
+              onClick={() => {
+                shouldFocus.current = true;
+                setMessage(item);
+              }}
+            >
+              {item}
+            </button>
+          ))}
+        </div>
       ) : null}
       <form
         className={cn(
