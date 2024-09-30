@@ -55,9 +55,8 @@ export function generate({
         height: '100%',
         color: 'white',
         padding: '4rem',
-        backgroundColor: '#000000',
-        backgroundImage: `linear-gradient(to top right, ${primaryColor}, transparent), linear-gradient(to top, #303030 2px, transparent 2px), linear-gradient(to right, #303030 2px, transparent 2px)`,
-        backgroundSize: '100% 100%, 40px 40px, 40px 40px',
+        backgroundColor: '#0c0c0c',
+        backgroundImage: `linear-gradient(to top right, ${primaryColor}, transparent)`,
       }}
     >
       <div
@@ -73,8 +72,8 @@ export function generate({
         {props.icon}
         <p
           style={{
-            fontSize: '64px',
-            fontWeight: 800,
+            fontSize: '56px',
+            fontWeight: 600,
           }}
         >
           {props.site}

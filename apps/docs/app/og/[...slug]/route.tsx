@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
-import { generateOGImage } from 'fumadocs-ui/og';
 import { type ImageResponse } from 'next/og';
 import { metadataImage } from '@/utils/metadata';
+import { generateOGImage } from '@/app/og/[...slug]/og';
 
 const font = readFileSync('./app/og/[...slug]/Geist-Regular.ttf');
 const fontBold = readFileSync('./app/og/[...slug]/Geist-Bold.ttf');
@@ -9,7 +9,7 @@ const fontBold = readFileSync('./app/og/[...slug]/Geist-Bold.ttf');
 export const GET = metadataImage.createAPI((page): ImageResponse => {
   return generateOGImage({
     primaryTextColor: 'rgb(240,240,240)',
-    primaryColor: 'rgba(255,255,255,0.2)',
+    primaryColor: 'rgba(65,65,84,0.9)',
     title: page.data.title,
     icon: (
       <svg
@@ -38,14 +38,14 @@ export const GET = metadataImage.createAPI((page): ImageResponse => {
     site: 'Fumadocs',
     fonts: [
       {
-        name: 'Geist Regular',
+        name: 'Geist',
         data: font,
         weight: 400,
       },
       {
-        name: 'Geist Bold',
+        name: 'Geist',
         data: fontBold,
-        weight: 800,
+        weight: 600,
       },
     ],
   });
