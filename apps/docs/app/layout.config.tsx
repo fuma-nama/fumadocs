@@ -15,7 +15,7 @@ import { Slot } from '@radix-ui/react-slot';
 import { FumadocsIcon } from '@/app/layout.client';
 import Logo from '@/public/logo.png';
 import { source } from '@/app/source';
-import { Trigger } from '@/components/search-ai';
+import { Trigger } from '@/components/public/search-ai';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 

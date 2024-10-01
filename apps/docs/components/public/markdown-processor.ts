@@ -4,6 +4,13 @@ import remarkRehype from 'remark-rehype';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import rehypeShiki, { type RehypeShikiOptions } from '@shikijs/rehype';
+import {
+  type Components,
+  type Jsx,
+  toJsxRuntime,
+} from 'hast-util-to-jsx-runtime';
+import { type ReactNode } from 'react';
+import { Fragment, jsx, jsxs } from 'react/jsx-runtime';
 
 interface MetaValue {
   name: string;
@@ -18,18 +25,16 @@ const metaValues: MetaValue[] = [
     name: 'title',
     regex: /title="(?<value>[^"]*)"/,
   },
-  {
-    name: 'custom',
-    regex: /custom="(?<value>[^"]+)"/,
-  },
-  {
-    name: 'tab',
-    regex: /tab="(?<value>[^"]+)"/,
-  },
 ];
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type -- auto
-export function createProcessor() {
+export interface Processor {
+  process: (
+    content: string,
+    components: Partial<Components>,
+  ) => Promise<ReactNode>;
+}
+
+export function createProcessor(): Processor {
   function filterMetaString(meta: string): string {
     let replaced = meta;
     for (const value of metaValues) {
@@ -39,7 +44,7 @@ export function createProcessor() {
     return replaced;
   }
 
-  return remark()
+  const processor = remark()
     .use(remarkGfm)
     .use(remarkMath)
     .use(remarkRehype)
@@ -88,4 +93,18 @@ export function createProcessor() {
         },
       ],
     } satisfies RehypeShikiOptions);
+
+  return {
+    async process(content, components) {
+      const nodes = processor.parse({ value: content });
+      const hast = await processor.run(nodes);
+      return toJsxRuntime(hast, {
+        development: false,
+        jsx: jsx as Jsx,
+        jsxs: jsxs as Jsx,
+        Fragment,
+        components,
+      });
+    },
+  };
 }

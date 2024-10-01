@@ -22,51 +22,34 @@ import {
   DialogTrigger,
 } from '@radix-ui/react-dialog';
 import { Info, Loader2, RefreshCw, Send, X } from 'lucide-react';
-import { type Jsx, toJsxRuntime } from 'hast-util-to-jsx-runtime';
-import { Fragment, jsx, jsxs } from 'react/jsx-runtime';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
-import { cva } from 'class-variance-authority';
 import { cn } from '@/utils/cn';
-import type { createProcessor } from '@/components/markdown-processor';
+import { buttonVariants } from './ui/button';
+import type { Processor } from './markdown-processor';
 
 type RelatedQueryListener = (queries: string[]) => void;
 type MessageChangeListener = (messages: Message[]) => void;
+type MessageLoadingListener = (isLoading: boolean) => void;
 let relatedQueryListeners: RelatedQueryListener[] = [];
 let messageListeners: MessageChangeListener[] = [];
+let messageLoadingListeners: MessageLoadingListener[] = [];
 
-const buttonVariants = cva(
-  'inline-flex items-center justify-center rounded-md p-2 text-sm font-medium transition-colors duration-100 disabled:pointer-events-none disabled:opacity-50',
-  {
-    variants: {
-      color: {
-        outline: 'border hover:bg-fd-accent hover:text-fd-accent-foreground',
-        ghost: 'hover:bg-fd-accent hover:text-fd-accent-foreground',
-        secondary:
-          'border bg-fd-secondary text-fd-secondary-foreground hover:bg-fd-accent hover:text-fd-accent-foreground',
-      },
-      size: {
-        sm: 'gap-1 p-0.5 text-xs',
-        icon: 'p-1.5 [&_svg]:size-5',
-      },
-    },
-  },
-);
+const context =
+  'The user is a web developer who knows some Next.js and React.js, but is new to Fumadocs.';
+const endpoint = process.env.NEXT_PUBLIC_ORAMA_ENDPOINT;
+const apiKey = process.env.NEXT_PUBLIC_ORAMA_API_KEY;
 
 export async function createClient(): Promise<AnswerSession> {
-  const endpoint = process.env.NEXT_PUBLIC_ORAMA_ENDPOINT,
-    apiKey = process.env.NEXT_PUBLIC_ORAMA_API_KEY;
-
+  const { OramaClient } = await import('@oramacloud/client');
   if (!endpoint || !apiKey) throw new Error('Failed to find api keys');
 
-  const { OramaClient } = await import('@oramacloud/client');
   const client = new OramaClient({
     endpoint,
     api_key: apiKey,
   });
 
   const instance = client.createAnswerSession({
-    userContext:
-      'The user is a web developer who knows some Next.js and React.js, but is new to Fumadocs.',
+    userContext: context,
     events: {
       onRelatedQueries(params) {
         relatedQueryListeners.forEach((l) => {
@@ -76,6 +59,11 @@ export async function createClient(): Promise<AnswerSession> {
       onStateChange() {
         messageListeners.forEach((l) => {
           l(instance.getMessages());
+        });
+      },
+      onMessageLoading(isLoading) {
+        messageLoadingListeners.forEach((l) => {
+          l(isLoading);
         });
       },
     },
@@ -113,13 +101,24 @@ export function AIDialog(): React.ReactElement {
       update({});
     };
 
+    const onMessageLoading: MessageLoadingListener = (value) => {
+      setLoading(value);
+      if (!value) {
+        shouldFocus.current = true;
+      }
+    };
+
     messageListeners.push(onMessageChange);
     relatedQueryListeners.push(onRelatedQuery);
+    messageLoadingListeners.push(onMessageLoading);
 
     return () => {
       messageListeners = messageListeners.filter((l) => l !== onMessageChange);
       relatedQueryListeners = relatedQueryListeners.filter(
         (l) => l !== onRelatedQuery,
+      );
+      messageLoadingListeners = messageLoadingListeners.filter(
+        (l) => l !== onMessageLoading,
       );
     };
   }, []);
@@ -129,7 +128,7 @@ export function AIDialog(): React.ReactElement {
       e?.preventDefault();
       if (!session || message.length === 0) return;
 
-      const gen = session.ask({
+      void session.ask({
         term: message,
         related: {
           howMany: 3,
@@ -138,11 +137,6 @@ export function AIDialog(): React.ReactElement {
       });
 
       setMessage('');
-      setLoading(true);
-      void gen.finally(() => {
-        setLoading(false);
-        shouldFocus.current = true;
-      });
     },
     [message],
   );
@@ -150,10 +144,7 @@ export function AIDialog(): React.ReactElement {
   const onTry = useCallback(() => {
     if (!session) return;
 
-    setLoading(true);
-    void session.regenerateLast({ stream: false }).finally(() => {
-      setLoading(false);
-    });
+    void session.regenerateLast({ stream: false });
   }, []);
 
   const onClear = useCallback(() => {
@@ -358,7 +349,7 @@ function Input(
   );
 }
 
-let processor: Awaited<ReturnType<typeof createProcessor>> | undefined;
+let processor: Processor | undefined;
 const map = new Map<string, ReactNode>();
 
 const Message = memo(
@@ -368,25 +359,18 @@ const Message = memo(
     );
 
     useEffect(() => {
-      const loadProcessor = import('./markdown-processor').then(
-        (res) => res.createProcessor,
-      );
-
       const run = async (): Promise<void> => {
-        processor ??= (await loadProcessor)();
-        const nodes = processor.parse({ value: message.content });
-        const hast = await processor.run(nodes);
-        const result = toJsxRuntime(hast, {
-          development: false,
-          jsx: jsx as Jsx,
-          jsxs: jsxs as Jsx,
-          Fragment,
-          // @ts-expect-error -- safe to use
-          components: {
+        const { createProcessor } = await import('./markdown-processor');
+
+        processor ??= createProcessor();
+        const result = await processor.process(
+          message.content,
+          // @ts-expect-error -- avoid conflicts between JSX types and React types
+          {
             ...defaultMdxComponents,
             img: undefined, // use JSX
           },
-        });
+        );
 
         map.set(message.content, result);
         setRendered(result);
