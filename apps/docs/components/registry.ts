@@ -1,4 +1,4 @@
-import { type Registry } from '../../../packages/cli/src/build/build-registry';
+import { type Registry } from 'fumadocs/build';
 import * as ui from '../../../packages/ui/src/components/registry';
 
 export const registry: Registry = {

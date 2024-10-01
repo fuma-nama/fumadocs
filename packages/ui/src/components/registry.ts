@@ -1,4 +1,4 @@
-import { Registry } from '../../../cli/src/build/build-registry';
+import type { Registry } from 'fumadocs/build';
 
 export const registry: Registry = {
   path: __filename,

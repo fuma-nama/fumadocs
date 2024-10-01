@@ -1121,6 +1121,9 @@ importers:
       eslint-config-custom:
         specifier: workspace:*
         version: link:../eslint-config-custom
+      fumadocs:
+        specifier: workspace:^
+        version: link:../cli
       lucide-react:
         specifier: ^0.446.0
         version: 0.446.0(react@18.3.1)
