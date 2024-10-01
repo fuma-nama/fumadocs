@@ -12,6 +12,13 @@
   "license": "MIT",
   "author": "Fuma Nama",
   "type": "module",
+  "exports": {
+    "./build": {
+      "import": "./dist/build/index.js",
+      "types": "./dist/build/index.d.ts"
+    }
+  },
+  "main": "./dist/index.js",
   "bin": {
     "fumadocs": "./dist/index.js"
   },

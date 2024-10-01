@@ -3,6 +3,9 @@ import fs from 'node:fs/promises';
 import { expect, test } from 'vitest';
 import { runTransform } from '@/utils/i18n/transform-root-layout';
 import { createEmptyProject } from '@/utils/typescript';
+import { build } from '@/build/build-registry';
+import * as ui from '../../ui/src/components/registry';
+import * as docs from '../../../apps/docs/components/registry';
 
 const project = createEmptyProject();
 
@@ -18,4 +21,14 @@ test('transform layout: i18n', async () => {
   await expect(sourceFile.getFullText()).toMatchFileSnapshot(
     './fixture/layout.out',
   );
+});
+
+test('build registry: docs', async () => {
+  const out = await build(docs.registry);
+
+  for (const comp of out.components) {
+    await expect(JSON.stringify(comp, null, 2)).toMatchFileSnapshot(
+      `./fixture/out/${comp.name}.json`,
+    );
+  }
 });

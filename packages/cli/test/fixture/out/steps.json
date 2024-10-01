@@ -1,0 +1,15 @@
+{
+  "name": "steps",
+  "files": [
+    {
+      "imports": {},
+      "content": "import type { ReactNode } from 'react';\n\nexport function Steps({\n  children,\n}: {\n  children: ReactNode;\n}): React.ReactElement {\n  return <div className=\"steps\">{children}</div>;\n}\n\nexport function Step({\n  children,\n}: {\n  children: ReactNode;\n}): React.ReactElement {\n  return <div className=\"step\">{children}</div>;\n}\n",
+      "path": "components:steps.tsx"
+    }
+  ],
+  "devDependencies": {},
+  "dependencies": {
+    "react": ""
+  },
+  "subComponents": []
+}

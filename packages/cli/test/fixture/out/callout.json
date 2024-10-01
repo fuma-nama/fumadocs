@@ -1,0 +1,25 @@
+{
+  "name": "callout",
+  "files": [
+    {
+      "imports": {
+        "@/utils/cn": "lib:cn.ts"
+      },
+      "content": "import { AlertTriangle, CircleX, Info } from 'lucide-react';\nimport { forwardRef, type HTMLAttributes, type ReactNode } from 'react';\nimport { cn } from '@/utils/cn';\n\ntype CalloutProps = Omit<\n  HTMLAttributes<HTMLDivElement>,\n  'title' | 'type' | 'icon'\n> & {\n  title?: ReactNode;\n  /**\n   * @defaultValue info\n   */\n  type?: 'info' | 'warn' | 'error';\n\n  /**\n   * Force an icon\n   */\n  icon?: ReactNode;\n};\n\nexport const Callout = forwardRef<HTMLDivElement, CalloutProps>(\n  ({ className, children, title, type = 'info', icon, ...props }, ref) => {\n    return (\n      <div\n        ref={ref}\n        className={cn(\n          'my-6 flex flex-row gap-2 rounded-lg border bg-fd-card p-3 text-sm text-fd-card-foreground shadow-md',\n          className,\n        )}\n        {...props}\n      >\n        {icon ??\n          {\n            info: <Info className=\"size-5 fill-blue-500 text-fd-card\" />,\n            warn: (\n              <AlertTriangle className=\"size-5 fill-orange-500 text-fd-card\" />\n            ),\n            error: <CircleX className=\"size-5 fill-red-500 text-fd-card\" />,\n          }[type]}\n        <div className=\"min-w-0 flex-1\">\n          {title ? <p className=\"not-prose mb-2 font-medium\">{title}</p> : null}\n          <div className=\"text-fd-muted-foreground prose-no-margin\">\n            {children}\n          </div>\n        </div>\n      </div>\n    );\n  },\n);\n\nCallout.displayName = 'Callout';\n",
+      "path": "components:callout.tsx"
+    },
+    {
+      "imports": {},
+      "content": "export { twMerge as cn } from 'tailwind-merge';\n",
+      "path": "lib:cn.ts"
+    }
+  ],
+  "devDependencies": {
+    "lucide-react": "^0.446.0"
+  },
+  "dependencies": {
+    "react": "",
+    "tailwind-merge": "^2.5.2"
+  },
+  "subComponents": []
+}

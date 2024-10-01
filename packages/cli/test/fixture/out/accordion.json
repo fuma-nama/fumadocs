@@ -1,0 +1,35 @@
+{
+  "name": "accordion",
+  "files": [
+    {
+      "imports": {
+        "@/utils/cn": "lib:cn.ts",
+        "@/utils/use-copy-button": "lib:use-copy-button.ts",
+        "@/components/ui/button": "components:ui/button.tsx"
+      },
+      "content": "'use client';\n\nimport * as AccordionPrimitive from '@radix-ui/react-accordion';\nimport type {\n  AccordionMultipleProps,\n  AccordionSingleProps,\n} from '@radix-ui/react-accordion';\nimport { Check, ChevronRight, LinkIcon } from 'lucide-react';\nimport {\n  forwardRef,\n  type ComponentPropsWithoutRef,\n  useState,\n  useEffect,\n} from 'react';\nimport { cn } from '@/utils/cn';\nimport { useCopyButton } from '@/utils/use-copy-button';\nimport { buttonVariants } from '@/components/ui/button';\n\nexport const Accordions = forwardRef<\n  HTMLDivElement,\n  | Omit<AccordionSingleProps, 'value' | 'onValueChange'>\n  | Omit<AccordionMultipleProps, 'value' | 'onValueChange'>\n>(({ type = 'single', className, defaultValue, ...props }, ref) => {\n  const [value, setValue] = useState<string | string[]>(\n    type === 'single' ? (defaultValue ?? '') : (defaultValue ?? []),\n  );\n\n  useEffect(() => {\n    const id = window.location.hash.substring(1);\n\n    if (id.length > 0)\n      setValue((prev) => (typeof prev === 'string' ? id : [id, ...prev]));\n  }, []);\n\n  return (\n    // @ts-expect-error -- Multiple types\n    <AccordionPrimitive.Root\n      type={type}\n      ref={ref}\n      value={value}\n      onValueChange={setValue}\n      collapsible={type === 'single' ? true : undefined}\n      className={cn(\n        'divide-y divide-fd-border overflow-hidden rounded-lg border bg-fd-card',\n        className,\n      )}\n      {...props}\n    />\n  );\n});\n\nAccordions.displayName = 'Accordions';\n\nexport const Accordion = forwardRef<\n  HTMLDivElement,\n  Omit<ComponentPropsWithoutRef<typeof AccordionPrimitive.Item>, 'value'> & {\n    title: string;\n  }\n>(({ title, className, id, children, ...props }, ref) => {\n  return (\n    <AccordionPrimitive.Item\n      ref={ref}\n      // Use `id` instead if presents\n      value={id ?? title}\n      className={cn('group/accordion relative scroll-m-20', className)}\n      {...props}\n    >\n      <AccordionPrimitive.Header\n        id={id}\n        className=\"not-prose flex flex-row items-center font-medium text-fd-foreground\"\n      >\n        <AccordionPrimitive.Trigger className=\"flex flex-1 items-center gap-2 p-4 text-start focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring\">\n          <ChevronRight className=\"-ms-1 size-4 shrink-0 text-fd-muted-foreground transition-transform duration-200 group-data-[state=open]/accordion:rotate-90\" />\n          {title}\n        </AccordionPrimitive.Trigger>\n        {id ? <CopyButton id={id} /> : null}\n      </AccordionPrimitive.Header>\n      <AccordionPrimitive.Content className=\"overflow-hidden data-[state=closed]:animate-fd-accordion-up data-[state=open]:animate-fd-accordion-down\">\n        <div className=\"p-4 pt-0 prose-no-margin\">{children}</div>\n      </AccordionPrimitive.Content>\n    </AccordionPrimitive.Item>\n  );\n});\n\nfunction CopyButton({ id }: { id: string }): React.ReactElement {\n  const [checked, onClick] = useCopyButton(() => {\n    const url = new URL(window.location.href);\n    url.hash = id;\n\n    void navigator.clipboard.writeText(url.toString());\n  });\n\n  return (\n    <button\n      type=\"button\"\n      aria-label=\"Copy Link\"\n      className={cn(\n        buttonVariants({\n          color: 'ghost',\n          className: 'text-fd-muted-foreground me-2',\n        }),\n      )}\n      onClick={onClick}\n    >\n      {checked ? (\n        <Check className=\"size-3.5\" />\n      ) : (\n        <LinkIcon className=\"size-3.5\" />\n      )}\n    </button>\n  );\n}\n\nAccordion.displayName = 'Accordion';\n",
+      "path": "components:accordion.tsx"
+    },
+    {
+      "imports": {},
+      "content": "export { twMerge as cn } from 'tailwind-merge';\n",
+      "path": "lib:cn.ts"
+    },
+    {
+      "imports": {},
+      "content": "import {\n  useState,\n  useRef,\n  useEffect,\n  useCallback,\n  type MouseEventHandler,\n} from 'react';\n\nexport function useCopyButton(\n  onCopy: () => void,\n): [checked: boolean, onClick: MouseEventHandler] {\n  const [checked, setChecked] = useState(false);\n  const timeoutRef = useRef<number | null>(null);\n\n  const onClick: MouseEventHandler = useCallback(() => {\n    if (timeoutRef.current) window.clearTimeout(timeoutRef.current);\n    timeoutRef.current = window.setTimeout(() => {\n      setChecked(false);\n    }, 1500);\n    onCopy();\n    setChecked(true);\n  }, [onCopy]);\n\n  // Avoid updates after being unmounted\n  useEffect(() => {\n    return () => {\n      if (timeoutRef.current) window.clearTimeout(timeoutRef.current);\n    };\n  }, []);\n\n  return [checked, onClick];\n}\n",
+      "path": "lib:use-copy-button.ts"
+    }
+  ],
+  "devDependencies": {
+    "lucide-react": "^0.446.0"
+  },
+  "dependencies": {
+    "@radix-ui/react-accordion": "^1.2.0",
+    "react": "",
+    "tailwind-merge": "^2.5.2"
+  },
+  "subComponents": [
+    "button"
+  ]
+}

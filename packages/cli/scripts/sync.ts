@@ -1,6 +1,5 @@
 import * as fs from 'node:fs/promises';
 import path from 'node:path';
-import fg from 'fast-glob';
 
 export const templates = {
   'lib/metadata': './examples/next-mdx/lib/metadata.ts',
@@ -26,26 +25,8 @@ export async function sync(): Promise<void> {
   });
 
   await Promise.all(resolve);
-
-  const files = await fg(
-    [
-      '*.tsx',
-      './layout/root-toggle.tsx',
-      './layout/language-toggle.tsx',
-      '!api.tsx',
-      '!*.client.tsx',
-    ],
-    {
-      cwd: path.resolve('../../packages/ui/src/components'),
-    },
-  );
-  const components = files.map((file) =>
-    path.join(path.dirname(file), path.basename(file, path.extname(file))),
-  );
-
   const out = `
   export const generated = ${JSON.stringify(generated)}
-  export const components = ${JSON.stringify(components)}
   `;
 
   await fs.writeFile('./src/generated.js', out);

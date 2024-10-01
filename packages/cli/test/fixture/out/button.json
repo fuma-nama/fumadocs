@@ -1,0 +1,15 @@
+{
+  "name": "button",
+  "files": [
+    {
+      "imports": {},
+      "content": "import { cva } from 'class-variance-authority';\n\nexport const buttonVariants = cva(\n  'inline-flex items-center justify-center rounded-md p-2 text-sm font-medium transition-colors duration-100 disabled:pointer-events-none disabled:opacity-50',\n  {\n    variants: {\n      color: {\n        outline: 'border hover:bg-fd-accent hover:text-fd-accent-foreground',\n        ghost: 'hover:bg-fd-accent hover:text-fd-accent-foreground',\n        secondary:\n          'border bg-fd-secondary text-fd-secondary-foreground hover:bg-fd-accent hover:text-fd-accent-foreground',\n      },\n      size: {\n        sm: 'gap-1 p-0.5 text-xs',\n        icon: 'p-1.5 [&_svg]:size-5',\n      },\n    },\n  },\n);\n",
+      "path": "components:ui/button.tsx"
+    }
+  ],
+  "devDependencies": {},
+  "dependencies": {
+    "class-variance-authority": "^0.7.0"
+  },
+  "subComponents": []
+}

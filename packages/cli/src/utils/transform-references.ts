@@ -12,11 +12,8 @@ import { typescriptExtensions } from '@/constants';
 export function getOutputPath(ref: string, config: Config): string {
   if (path.isAbsolute(ref)) throw new Error(`path cannot be absolute: ${ref}`);
 
-  if (ref.startsWith('components/ui')) {
-    return path.join(
-      config.aliases?.uiDir ?? defaultConfig.aliases.uiDir,
-      path.relative('components/ui', ref),
-    );
+  if (ref === 'utils/cn' || ref === 'utils/cn.ts') {
+    return config.aliases?.cn ?? defaultConfig.aliases.cn;
   }
 
   if (ref.startsWith('components')) {
@@ -26,15 +23,11 @@ export function getOutputPath(ref: string, config: Config): string {
     );
   }
 
-  if (ref.startsWith('lib')) {
+  if (ref.startsWith('lib') || ref.startsWith('utils')) {
     return path.join(
       config.aliases?.libDir ?? defaultConfig.aliases.libDir,
       path.relative('lib', ref),
     );
-  }
-
-  if (ref === 'utils/cn' || ref === 'utils/cn.ts') {
-    return config.aliases?.cn ?? defaultConfig.aliases.cn;
   }
 
   return ref;
@@ -108,9 +101,12 @@ export type ResolvedImport =
 
 export interface ReferenceResolver {
   /**
-   * Resolve import aliases (e.g. `@/components`)
+   * Transform import aliases (e.g. `@/components`)
    */
-  alias: 'src' | 'root';
+  alias?: {
+    type: 'append';
+    dir: string;
+  };
 
   /**
    * which directory to resolve relative paths from (e.g. `./components`)
@@ -134,10 +130,11 @@ export function resolveReference(
 
   if (ref.startsWith('@/')) {
     const rest = ref.slice('@/'.length);
+    if (!resolver.alias) throw new Error('alias resolver is not configured');
 
     return {
       type: 'file',
-      path: resolver.alias === 'src' ? path.join('./src', rest) : rest,
+      path: path.join(resolver.alias.dir, rest),
     };
   }
 

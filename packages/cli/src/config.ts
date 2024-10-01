@@ -7,8 +7,6 @@ export interface Config {
      * Path for importing `cn` utility.
      *
      * Can be from Shadcn UI or your own `cn` function (Tailwind CSS supported)
-     *
-     * Be careful to **not** include file extensions.
      */
     cn?: string;
     uiDir?: string;
@@ -28,7 +26,7 @@ const src = await isSrc();
 
 export const defaultConfig = {
   aliases: {
-    cn: src ? './src/utils/cn' : './utils/cn',
+    cn: src ? './src/lib/utils.ts' : './lib/utils.ts',
     componentsDir: src ? './src/components' : './components',
     uiDir: src ? './src/components/ui' : './components/ui',
     libDir: src ? './src/lib' : './lib',

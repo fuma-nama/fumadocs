@@ -1,0 +1,28 @@
+{
+  "name": "banner",
+  "files": [
+    {
+      "imports": {
+        "@/utils/cn": "lib:cn.ts",
+        "@/components/ui/button": "components:ui/button.tsx"
+      },
+      "content": "'use client';\n\nimport { type HTMLAttributes, useCallback, useEffect, useState } from 'react';\nimport { X } from 'lucide-react';\nimport { cn } from '@/utils/cn';\nimport { buttonVariants } from '@/components/ui/button';\n\nexport function Banner({\n  id,\n  variant = 'normal',\n  changeLayout = true,\n  ...props\n}: HTMLAttributes<HTMLDivElement> & {\n  /**\n   * @defaultValue 'normal'\n   */\n  variant?: 'rainbow' | 'normal';\n\n  /**\n   * Change Fumadocs layout styles\n   *\n   * @defaultValue true\n   */\n  changeLayout?: boolean;\n}): React.ReactElement {\n  const [open, setOpen] = useState(true);\n  const globalKey = id ? `nd-banner-${id}` : undefined;\n\n  useEffect(() => {\n    if (globalKey) setOpen(localStorage.getItem(globalKey) !== 'true');\n  }, [globalKey]);\n\n  const onClick = useCallback(() => {\n    setOpen(false);\n    if (globalKey) localStorage.setItem(globalKey, 'true');\n  }, [globalKey]);\n\n  return (\n    <div\n      id={id}\n      {...props}\n      className={cn(\n        'sticky top-0 z-40 flex h-12 flex-row items-center justify-center bg-fd-secondary px-4 text-center text-sm font-medium',\n        variant === 'rainbow' && 'bg-fd-background',\n        !open && 'hidden',\n        props.className,\n      )}\n    >\n      {changeLayout && open ? (\n        <style>{`\n        :root:not(.${globalKey ?? 'nd-banner-never'}) { --fd-banner-height: 3rem; }\n        `}</style>\n      ) : null}\n      {globalKey ? (\n        <style>{`.${globalKey} #${id} { display: none; }`}</style>\n      ) : null}\n      {id ? (\n        <script\n          dangerouslySetInnerHTML={{\n            __html: `if (localStorage.getItem('${globalKey}') === 'true') document.documentElement.classList.add('${globalKey}');`,\n          }}\n        />\n      ) : null}\n\n      {variant === 'rainbow' ? rainbowLayer : null}\n      {props.children}\n      {id ? (\n        <button\n          type=\"button\"\n          aria-label=\"Close Banner\"\n          onClick={onClick}\n          className={cn(\n            buttonVariants({\n              color: 'ghost',\n              className:\n                'absolute end-2 top-1/2 -translate-y-1/2 text-fd-muted-foreground',\n              size: 'icon',\n            }),\n          )}\n        >\n          <X />\n        </button>\n      ) : null}\n    </div>\n  );\n}\n\nconst maskImage =\n  'linear-gradient(to bottom,white,transparent), radial-gradient(circle at top center, white, transparent)';\n\nconst rainbowLayer = (\n  <>\n    <div\n      className=\"absolute inset-0 z-[-1]\"\n      style={\n        {\n          maskImage,\n          maskComposite: 'intersect',\n          animation: 'fd-moving-banner 16s linear infinite',\n          '--start': 'rgba(0,87,255,0.5)',\n          '--mid': 'rgba(255,0,166,0.77)',\n          '--end': 'rgba(255,77,0,0.4)',\n          '--via': 'rgba(164,255,68,0.4)',\n          animationDirection: 'reverse',\n          backgroundImage:\n            'repeating-linear-gradient(60deg, var(--end), var(--start) 2%, var(--start) 5%, transparent 8%, transparent 14%, var(--via) 18%, var(--via) 22%, var(--mid) 28%, var(--mid) 30%, var(--via) 34%, var(--via) 36%, transparent, var(--end) calc(50% - 12px))',\n          backgroundSize: '200% 100%',\n          mixBlendMode: 'difference',\n        } as object\n      }\n    />\n    <div\n      className=\"absolute inset-0 z-[-1]\"\n      style={\n        {\n          maskImage,\n          maskComposite: 'intersect',\n          animation: 'fd-moving-banner 20s linear infinite',\n          '--start': 'rgba(255,120,120,0.5)',\n          '--mid': 'rgba(36,188,255,0.4)',\n          '--end': 'rgba(64,0,255,0.51)',\n          '--via': 'rgba(255,89,0,0.56)',\n          backgroundImage:\n            'repeating-linear-gradient(45deg, var(--end), var(--start) 4%, var(--start) 8%, transparent 9%, transparent 14%, var(--mid) 16%, var(--mid) 20%, transparent, var(--via) 36%, var(--via) 40%, transparent 42%, var(--end) 46%, var(--end) calc(50% - 16.8px))',\n          backgroundSize: '200% 100%',\n          mixBlendMode: 'color-dodge',\n        } as object\n      }\n    />\n    <style>\n      {`@keyframes fd-moving-banner {\n            from { background-position: 0% 0;  }\n            to { background-position: 100% 0;  }\n         }`}\n    </style>\n  </>\n);\n",
+      "path": "components:banner.tsx"
+    },
+    {
+      "imports": {},
+      "content": "export { twMerge as cn } from 'tailwind-merge';\n",
+      "path": "lib:cn.ts"
+    }
+  ],
+  "devDependencies": {
+    "lucide-react": "^0.446.0"
+  },
+  "dependencies": {
+    "react": "",
+    "tailwind-merge": "^2.5.2"
+  },
+  "subComponents": [
+    "button"
+  ]
+}

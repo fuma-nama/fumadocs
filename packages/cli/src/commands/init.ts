@@ -95,7 +95,10 @@ export async function init(plugin: Plugin, config: Config = {}): Promise<void> {
     await transformReferences(
       sourceFile,
       {
-        alias: ctx.src ? 'src' : 'root',
+        alias: {
+          type: 'append',
+          dir: ctx.src ? 'src' : '',
+        },
         relativeTo: path.dirname(file),
       },
       (resolved) => {

@@ -1,0 +1,19 @@
+{
+  "components": {
+    "layout/root-toggle": "ui",
+    "layout/language-toggle": "ui",
+    "accordion": "ui",
+    "banner": "ui",
+    "callout": "ui",
+    "card": "ui",
+    "codeblock": "ui",
+    "files": "ui",
+    "heading": "ui",
+    "image-zoom": "ui",
+    "inline-toc": "ui",
+    "steps": "ui",
+    "tabs": "ui",
+    "type-table": "ui",
+    "search-ai": "docs"
+  }
+}

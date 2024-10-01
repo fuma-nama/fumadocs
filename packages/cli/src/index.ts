@@ -4,16 +4,16 @@ import { Command } from 'commander';
 import picocolors from 'picocolors';
 import { isCancel, multiselect, outro, select } from '@clack/prompts';
 import { init } from '@/commands/init';
-import { add } from '@/commands/add';
+import { add, localResolver, remoteResolver } from '@/commands/add';
 import { initConfig, loadConfig } from '@/config';
 import { plugins } from '@/plugins';
-import { components } from '@/generated';
 import {
   type JsonTreeNode,
   treeToJavaScript,
   treeToMdx,
 } from '@/commands/file-tree';
 import { runTree } from '@/utils/file-tree/run-tree';
+import registry from '@/registry.json';
 import packageJson from '../package.json';
 
 const program = new Command();
@@ -67,24 +67,24 @@ program
   .command('add')
   .description('add a new component to your docs')
   .argument('[components...]', 'components to download')
-  .option(
-    '--branch <string>',
-    'the Git branch name of Fumadocs repo to download from (e.g. main)',
-  )
+  .option('--url <string>', 'the root url or path to resolve registry')
   .option('--config <string>')
   .action(
     async (
       str: string[],
-      { config, branch }: { config?: string; branch?: string },
+      {
+        config,
+        url = 'https://fumadocs.vercel.app/registry',
+      }: { config?: string; url?: string },
     ) => {
       let target = str;
 
       if (str.length === 0) {
         const value = await multiselect({
           message: 'Select components to install',
-          options: components.map((c) => ({
-            label: c,
-            value: c,
+          options: Object.keys(registry.components).map((k) => ({
+            label: k,
+            value: k,
           })),
         });
 
@@ -98,7 +98,11 @@ program
 
       const loadedConfig = await loadConfig(config);
       for (const name of target) {
-        await add(name, branch ?? 'main', loadedConfig);
+        await add(
+          name,
+          url.startsWith('http') ? remoteResolver(url) : localResolver(url),
+          loadedConfig,
+        );
       }
     },
   );

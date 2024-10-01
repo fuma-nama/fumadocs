@@ -71,7 +71,10 @@ export async function moveFiles(
     await transformReferences(
       sourceFile,
       {
-        alias: src ? 'src' : 'root',
+        alias: {
+          type: 'append',
+          dir: src ? 'src' : '',
+        },
         relativeTo: path.dirname(from),
       },
       (resolved) => {

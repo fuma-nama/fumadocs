@@ -24,7 +24,7 @@ import {
 import { Info, Loader2, RefreshCw, Send, X } from 'lucide-react';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { cn } from '@/utils/cn';
-import { buttonVariants } from './ui/button';
+import { buttonVariants } from '../../../../packages/ui/src/components/ui/button';
 import type { Processor } from './markdown-processor';
 
 type RelatedQueryListener = (queries: string[]) => void;

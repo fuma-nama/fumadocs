@@ -37,7 +37,7 @@ export default defineConfig({
     './src/{i18n,home-layout,layout,page,provider,mdx,tailwind-plugin,og}.{ts,tsx}',
     './src/**/*.client.tsx',
   ],
-  external: ['server-only', '../../dist/image-zoom.css', 'tailwindcss'],
+  external: ['server-only', './image-zoom.css', 'tailwindcss'],
   async onSuccess() {
     const replaceImports = injectImports.map((src) => injectImport(src));
 
