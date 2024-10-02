@@ -29,7 +29,7 @@
     "next": "",
     "class-variance-authority": "^0.7.0",
     "tailwind-merge": "^2.5.2",
-    "@radix-ui/react-popover": "^1.1.1",
+    "@radix-ui/react-popover": "^1.1.2",
     "react": ""
   },
   "subComponents": []

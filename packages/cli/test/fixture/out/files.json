@@ -29,7 +29,7 @@
     "class-variance-authority": "^0.7.0",
     "react": "",
     "tailwind-merge": "^2.5.2",
-    "@radix-ui/react-collapsible": "^1.1.0"
+    "@radix-ui/react-collapsible": "^1.1.1"
   },
   "subComponents": []
 }

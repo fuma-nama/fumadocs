@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "fumadocs-core": "",
-    "@radix-ui/react-collapsible": "^1.1.0",
+    "@radix-ui/react-collapsible": "^1.1.1",
     "react": "",
     "tailwind-merge": "^2.5.2"
   },

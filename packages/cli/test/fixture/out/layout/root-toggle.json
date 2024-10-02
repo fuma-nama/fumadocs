@@ -37,7 +37,7 @@
     "tailwind-merge": "^2.5.2",
     "fumadocs-core": "",
     "fumadocs-ui": "",
-    "@radix-ui/react-popover": "^1.1.1"
+    "@radix-ui/react-popover": "^1.1.2"
   },
   "subComponents": []
 }

@@ -25,7 +25,7 @@
     "lucide-react": "^0.446.0"
   },
   "dependencies": {
-    "@radix-ui/react-accordion": "^1.2.0",
+    "@radix-ui/react-accordion": "^1.2.1",
     "react": "",
     "tailwind-merge": "^2.5.2"
   },

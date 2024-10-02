@@ -3,13 +3,13 @@
     "name": "layout/root-toggle"
   },
   {
-    "name": "accordion"
-  },
-  {
     "name": "layout/language-toggle"
   },
   {
     "name": "banner"
+  },
+  {
+    "name": "accordion"
   },
   {
     "name": "card"
@@ -18,13 +18,13 @@
     "name": "callout"
   },
   {
+    "name": "codeblock"
+  },
+  {
     "name": "files"
   },
   {
     "name": "heading"
-  },
-  {
-    "name": "codeblock"
   },
   {
     "name": "inline-toc"
@@ -34,16 +34,13 @@
     "description": "Zoomable Image"
   },
   {
-    "name": "steps"
-  },
-  {
     "name": "tabs"
   },
   {
-    "name": "type-table"
+    "name": "steps"
   },
   {
-    "name": "button"
+    "name": "type-table"
   },
   {
     "name": "search-ai"

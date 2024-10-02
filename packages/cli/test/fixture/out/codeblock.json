@@ -35,7 +35,7 @@
   "dependencies": {
     "react": "",
     "tailwind-merge": "^2.5.2",
-    "@radix-ui/react-scroll-area": "^1.1.0"
+    "@radix-ui/react-scroll-area": "^1.2.0"
   },
   "subComponents": [
     "button"
