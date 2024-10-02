@@ -2,6 +2,7 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import picocolors from 'picocolors';
 import { type Output } from '@/build/build-registry';
+import { exists } from '@/utils/fs';
 
 export * from './build-registry';
 export * from './component-builder';
@@ -22,7 +23,7 @@ export async function writeOutput(
 ): Promise<void> {
   const { log = true } = options;
 
-  if (options.cleanDir) {
+  if (options.cleanDir && (await exists(dir))) {
     await fs.rm(dir, {
       recursive: true,
     });

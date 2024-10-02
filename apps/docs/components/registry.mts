@@ -1,8 +1,9 @@
 import { type Registry } from 'fumadocs/build';
 import * as ui from '../../../packages/ui/src/components/registry';
+import { fileURLToPath } from 'node:url';
 
 export const registry: Registry = {
-  path: __filename,
+  path: fileURLToPath(import.meta.url),
   on: {
     ui: {
       type: 'local',

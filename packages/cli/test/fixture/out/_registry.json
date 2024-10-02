@@ -6,16 +6,16 @@
     "name": "layout/language-toggle"
   },
   {
-    "name": "banner"
-  },
-  {
     "name": "accordion"
   },
   {
-    "name": "card"
+    "name": "banner"
   },
   {
     "name": "callout"
+  },
+  {
+    "name": "card"
   },
   {
     "name": "codeblock"
@@ -27,17 +27,17 @@
     "name": "heading"
   },
   {
-    "name": "inline-toc"
-  },
-  {
     "name": "image-zoom",
     "description": "Zoomable Image"
   },
   {
-    "name": "tabs"
+    "name": "inline-toc"
   },
   {
     "name": "steps"
+  },
+  {
+    "name": "tabs"
   },
   {
     "name": "type-table"

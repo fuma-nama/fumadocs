@@ -1,7 +1,8 @@
+import { fileURLToPath } from 'node:url';
 import type { Registry } from 'fumadocs/build';
 
 export const registry: Registry = {
-  path: __filename,
+  path: fileURLToPath(import.meta.url),
   rootDir: '../../',
   namespaces: {
     '': 'components',

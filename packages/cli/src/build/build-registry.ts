@@ -168,18 +168,20 @@ export async function build(registry: Registry): Promise<Output> {
       });
 
     await Promise.all(read);
+    return [component, comp] as const;
+  });
 
-    if (!component.unlisted) {
+  for (const [input, comp] of await Promise.all(buildComps)) {
+    if (!input.unlisted) {
       output.index.push({
-        name: component.name,
-        description: component.description,
+        name: input.name,
+        description: input.description,
       });
     }
 
     output.components.push(comp);
-  });
+  }
 
-  await Promise.all(buildComps);
   return output;
 }
 

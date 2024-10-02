@@ -8,42 +8,30 @@ import * as docs from '../../../apps/docs/components/registry.mjs';
 
 const project = createEmptyProject();
 
-test(
-  'transform layout: i18n',
-  async () => {
-    const sourceFile = project.createSourceFile(
-      'layout.tsx',
-      await fs
-        .readFile(path.join(__dirname, './fixture/layout'))
-        .then((r) => r.toString()),
+test('transform layout: i18n', { timeout: 1000 * 15 }, async () => {
+  const sourceFile = project.createSourceFile(
+    'layout.tsx',
+    await fs
+      .readFile(path.join(__dirname, './fixture/layout'))
+      .then((r) => r.toString()),
+  );
+
+  runTransform(sourceFile);
+  await expect(sourceFile.getFullText()).toMatchFileSnapshot(
+    './fixture/layout.out',
+  );
+});
+
+test('build registry: docs', { timeout: 1000 * 15 }, async () => {
+  const out = await build(docs.registry as Registry);
+
+  await expect(JSON.stringify(out.index, null, 2)).toMatchFileSnapshot(
+    `./fixture/out/_registry.json`,
+  );
+
+  for (const comp of out.components) {
+    await expect(JSON.stringify(comp, null, 2)).toMatchFileSnapshot(
+      `./fixture/out/${comp.name}.json`,
     );
-
-    runTransform(sourceFile);
-    await expect(sourceFile.getFullText()).toMatchFileSnapshot(
-      './fixture/layout.out',
-    );
-  },
-  {
-    timeout: 1000 * 15,
-  },
-);
-
-test(
-  'build registry: docs',
-  async () => {
-    const out = await build(docs.registry as Registry);
-
-    await expect(JSON.stringify(out.index, null, 2)).toMatchFileSnapshot(
-      `./fixture/out/_registry.json`,
-    );
-
-    for (const comp of out.components) {
-      await expect(JSON.stringify(comp, null, 2)).toMatchFileSnapshot(
-        `./fixture/out/${comp.name}.json`,
-      );
-    }
-  },
-  {
-    timeout: 1000 * 15,
-  },
-);
+  }
+});
