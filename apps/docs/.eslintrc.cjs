@@ -3,6 +3,6 @@ module.exports = {
   rules: {
     'no-console': 'off',
     // for Fumadocs CLI
-    'import/no-relative-packages': 'off'
+    'import/no-relative-packages': 'off',
   },
 };

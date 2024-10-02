@@ -7,6 +7,6 @@ module.exports = {
     'react/no-array-index-key': 'off',
     '@typescript-eslint/unbound-method': 'off',
     '@typescript-eslint/restrict-template-expressions': 'off',
-    'import/no-relative-packages': 'off'
+    'import/no-relative-packages': 'off',
   },
 };

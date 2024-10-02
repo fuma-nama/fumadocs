@@ -4,7 +4,7 @@ import { expect, test } from 'vitest';
 import { runTransform } from '@/utils/i18n/transform-root-layout';
 import { createEmptyProject } from '@/utils/typescript';
 import { build, type Registry } from '@/build/build-registry';
-import * as docs from '../../../apps/docs/components/registry';
+import * as docs from '../../../apps/docs/components/registry.mjs';
 
 const project = createEmptyProject();
 

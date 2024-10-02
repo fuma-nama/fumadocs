@@ -70,6 +70,10 @@ program
     await init(plugins[value as keyof typeof plugins], loadedConfig);
   });
 
+const dirShortcuts: Record<string, string> = {
+  ':dev': 'https://fumadocs-dev.vercel.app/registry',
+};
+
 program
   .command('add')
   .description('add a new component to your docs')
@@ -77,13 +81,10 @@ program
   .option('--dir <string>', 'the root url or directory to resolve registry')
   .option('--config <string>')
   .action(
-    async (
-      input: string[],
-      {
-        config,
-        dir = 'https://fumadocs.vercel.app/registry',
-      }: { config?: string; dir?: string },
-    ) => {
+    async (input: string[], options: { config?: string; dir?: string }) => {
+      let dir = options.dir ?? 'https://fumadocs.vercel.app/registry';
+      if (dir in dirShortcuts) dir = dirShortcuts[dir];
+
       const resolver =
         dir.startsWith('http://') || dir.startsWith('https://')
           ? remoteResolver(dir)
@@ -120,7 +121,7 @@ program
         target = value as string[];
       }
 
-      const loadedConfig = await loadConfig(config);
+      const loadedConfig = await loadConfig(options.config);
       for (const name of target) {
         await add(name, resolver, loadedConfig);
       }
