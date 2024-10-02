@@ -5,4 +5,5 @@ module.exports = {
     // for Fumadocs CLI
     'import/no-relative-packages': 'off',
   },
+  ignorePatterns: ['.next/', 'out/'],
 };

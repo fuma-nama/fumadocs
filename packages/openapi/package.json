@@ -62,7 +62,7 @@
     "github-slugger": "^2.0.0",
     "hast-util-to-jsx-runtime": "^2.3.0",
     "js-yaml": "^4.1.0",
-    "lucide-react": "^0.446.0",
+    "lucide-react": "^0.447.0",
     "openapi-sampler": "^1.5.1",
     "react-hook-form": "^7.53.0",
     "remark": "^15.0.1",

@@ -1,4 +1,3 @@
-/* eslint-disable import/no-relative-packages -- required */
 import {
   LibraryIcon,
   Building2,
