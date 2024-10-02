@@ -31,6 +31,7 @@ export const registry: Registry = {
     { name: 'heading', files: ['heading.tsx'] },
     {
       name: 'image-zoom',
+      description: 'Zoomable Image',
       files: ['image-zoom.tsx', 'image-zoom.css'],
     },
     { name: 'inline-toc', files: ['inline-toc.tsx'] },
@@ -39,6 +40,7 @@ export const registry: Registry = {
     { name: 'type-table', files: ['type-table.tsx'] },
     {
       name: 'button',
+      unlisted: true,
       files: ['ui/button.tsx'],
     },
   ],

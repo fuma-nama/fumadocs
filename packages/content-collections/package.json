@@ -45,9 +45,9 @@
     "types:check": "tsc --noEmit"
   },
   "devDependencies": {
-    "@content-collections/core": "^0.7.1",
-    "@content-collections/mdx": "^0.1.5",
-    "@types/node": "22.7.3",
+    "@content-collections/core": "^0.7.2",
+    "@content-collections/mdx": "^0.1.6",
+    "@types/node": "22.7.4",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "tsconfig": "workspace:*",

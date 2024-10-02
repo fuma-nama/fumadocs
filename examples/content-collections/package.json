@@ -16,11 +16,11 @@
     "react-dom": "18.3.1"
   },
   "devDependencies": {
-    "@content-collections/core": "^0.7.1",
-    "@content-collections/mdx": "^0.1.5",
-    "@content-collections/next": "^0.2.2",
+    "@content-collections/core": "^0.7.2",
+    "@content-collections/mdx": "^0.1.6",
+    "@content-collections/next": "^0.2.3",
     "@types/mdx": "^2.0.13",
-    "@types/react": "^18.3.9",
+    "@types/react": "^18.3.10",
     "@types/react-dom": "^18.3.0",
     "typescript": "^5.6.2"
   }

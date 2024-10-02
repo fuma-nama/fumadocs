@@ -6,7 +6,6 @@ import picocolors from 'picocolors';
 import { execa } from 'execa';
 import { createEmptyProject } from '@/utils/typescript';
 import { getPackageManager } from '@/utils/get-package-manager';
-import { exists } from '@/utils/fs';
 import { type Config, defaultConfig } from '@/config';
 import { typescriptExtensions } from '@/constants';
 import { getDependencies } from '@/utils/add/get-dependencies';
@@ -25,20 +24,23 @@ interface Context {
   resolver: Resolver;
 }
 
-type Resolver = (file: string) => Awaitable<OutputComponent | undefined>;
+type Resolver = (file: string) => Awaitable<object | undefined>;
 
 /**
  * A set of downloaded files
  */
 const downloadedFiles = new Set<string>();
-const excludedDeps = ['react', 'next', 'fumadocs-ui', 'fumadocs-core'];
 
 export async function add(
   name: string,
   resolver: Resolver,
   config: Config = {},
 ): Promise<void> {
-  intro(picocolors.bold(picocolors.bgCyan(picocolors.black('Add Component'))));
+  intro(
+    picocolors.bold(
+      picocolors.inverse(picocolors.cyanBright(`Add Component: ${name}`)),
+    ),
+  );
   const project = createEmptyProject();
 
   const result = await downloadComponent(name, {
@@ -54,16 +56,17 @@ export async function add(
 
   const installed = await getDependencies();
   const deps = Object.entries(result.dependencies)
-    .filter(([k]) => !installed.has(k) && !excludedDeps.includes(k))
+    .filter(([k]) => !installed.has(k))
     .map(([k, v]) => (v.length === 0 ? k : `${k}@${v}`));
 
   const devDeps = Object.entries(result.devDependencies)
-    .filter(([k]) => !installed.has(k) && !excludedDeps.includes(k))
+    .filter(([k]) => !installed.has(k))
     .map(([k, v]) => (v.length === 0 ? k : `${k}@${v}`));
 
-  if (deps.length > 0) {
+  if (deps.length > 0 || devDeps.length > 0) {
+    const manager = await getPackageManager();
     const value = await confirm({
-      message: `This component requires extra dependencies (${[...deps, ...devDeps].join(' ')}), do you want to install?`,
+      message: `This component requires dependencies (${[...deps, ...devDeps].join(' ')}), install them with ${manager}?`,
     });
 
     if (isCancel(value)) {
@@ -74,8 +77,9 @@ export async function add(
     if (value) {
       const spin = spinner();
       spin.start('Installing dependencies...');
-      await execa(await getPackageManager(), ['install', ...deps]);
-      await execa(await getPackageManager(), ['install', ...devDeps, '-D']);
+      if (deps.length > 0) await execa(manager, ['install', ...deps]);
+      if (devDeps.length > 0)
+        await execa(manager, ['install', ...devDeps, '-D']);
 
       spin.stop('Dependencies installed.');
     }
@@ -92,7 +96,9 @@ async function downloadComponent(
   const cached = downloadedComps.get(name);
   if (cached) return cached;
 
-  const comp = await ctx.resolver(`${name}.json`);
+  const comp = (await ctx.resolver(`${name}.json`)) as
+    | OutputComponent
+    | undefined;
   if (!comp) return;
 
   downloadedComps.set(name, comp);
@@ -106,7 +112,12 @@ async function downloadComponent(
       : file.content;
 
     let canWrite = true;
-    if (await exists(outPath)) {
+    const requireOverride = await fs
+      .readFile(outPath)
+      .then((res) => res.toString() !== output)
+      .catch(() => false);
+
+    if (requireOverride) {
       const value = await confirm({
         message: `Do you want to override ${outPath}?`,
       });

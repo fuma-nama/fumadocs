@@ -1,0 +1,51 @@
+[
+  {
+    "name": "layout/root-toggle"
+  },
+  {
+    "name": "accordion"
+  },
+  {
+    "name": "layout/language-toggle"
+  },
+  {
+    "name": "banner"
+  },
+  {
+    "name": "card"
+  },
+  {
+    "name": "callout"
+  },
+  {
+    "name": "files"
+  },
+  {
+    "name": "heading"
+  },
+  {
+    "name": "codeblock"
+  },
+  {
+    "name": "inline-toc"
+  },
+  {
+    "name": "image-zoom",
+    "description": "Zoomable Image"
+  },
+  {
+    "name": "steps"
+  },
+  {
+    "name": "tabs"
+  },
+  {
+    "name": "type-table"
+  },
+  {
+    "name": "button"
+  },
+  {
+    "name": "search-ai"
+  }
+]

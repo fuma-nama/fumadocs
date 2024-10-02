@@ -8,7 +8,13 @@ import {
 
 export interface Component {
   name: string;
+  description?: string;
   files: string[];
+
+  /**
+   * Don't list the component in registry index file
+   */
+  unlisted?: boolean;
 
   /**
    * Map imported file paths
@@ -66,7 +72,13 @@ export interface Registry {
 }
 
 export interface Output {
+  index: OutputIndex[];
   components: OutputComponent[];
+}
+
+export interface OutputIndex {
+  name: string;
+  description?: string;
 }
 
 export interface OutputFile {
@@ -92,6 +104,7 @@ export async function build(registry: Registry): Promise<Output> {
   const registryDir = path.dirname(registry.path);
   const rootDir = path.join(registryDir, registry.rootDir);
   const output: Output = {
+    index: [],
     components: [],
   };
 
@@ -122,16 +135,17 @@ export async function build(registry: Registry): Promise<Output> {
   const buildExtendRegistries = Object.values(registry.on ?? {}).map(
     async (schema) => {
       if (schema.type === 'remote') {
-        return schema.registry.components;
+        return schema.registry;
       }
 
-      return (await build(schema.registry)).components;
+      return await build(schema.registry);
     },
   );
 
-  output.components.push(
-    ...(await Promise.all(buildExtendRegistries).then((res) => res.flat())),
-  );
+  for (const built of await Promise.all(buildExtendRegistries)) {
+    output.components.push(...built.components);
+    output.index.push(...built.index);
+  }
 
   const buildComps = registry.components.map(async (component) => {
     const comp: OutputComponent = {
@@ -154,6 +168,14 @@ export async function build(registry: Registry): Promise<Output> {
       });
 
     await Promise.all(read);
+
+    if (!component.unlisted) {
+      output.index.push({
+        name: component.name,
+        description: component.description,
+      });
+    }
+
     output.components.push(comp);
   });
 
@@ -179,33 +201,34 @@ async function addFile(
   ctx.files.push(out);
 
   /**
-   * Handle import path mappings
+   * Process import paths
    */
-  function preprocess(
-    specifiedFile: SourceFile,
+  async function process(
     specifier: StringLiteral,
-  ): void {
+    getSpecifiedFile: () => SourceFile | undefined,
+  ): Promise<void> {
+    let specifiedFile = getSpecifiedFile();
+    if (!specifiedFile) return;
+
     const name = specifiedFile.isInNodeModules()
       ? builder.resolveDep(specifier.getLiteralValue()).name
       : path.relative(builder.registryDir, specifiedFile.getFilePath());
 
-    if (!comp.mapImportPath || !(name in comp.mapImportPath)) return;
-    const resolver = comp.mapImportPath[name];
+    if (comp.mapImportPath && name in comp.mapImportPath) {
+      const resolver = comp.mapImportPath[name];
 
-    if (typeof resolver === 'string') {
-      specifier.setLiteralValue(resolver);
-      return;
+      if (typeof resolver === 'string') {
+        specifier.setLiteralValue(resolver);
+        specifiedFile = getSpecifiedFile();
+
+        if (!specifiedFile) return;
+      } else {
+        ctx.subComponents.push(resolver.name);
+        out.imports[specifier.getLiteralValue()] = resolver.file;
+        return;
+      }
     }
 
-    ctx.subComponents.push(resolver.name);
-    out.imports[specifier.getLiteralValue()] = resolver.file;
-  }
-
-  async function process(
-    specifiedFile: SourceFile,
-    specifier: StringLiteral,
-  ): Promise<void> {
-    if (specifier.getLiteralValue() in out.imports) return;
     if (specifiedFile.isInNodeModules() || specifiedFile.isDeclarationFile()) {
       const info = builder.resolveDep(specifier.getLiteralValue());
 
@@ -237,27 +260,16 @@ async function addFile(
   }
 
   for (const item of sourceFile.getImportDeclarations()) {
-    const specifier = item.getModuleSpecifier();
-    let refFile = item.getModuleSpecifierSourceFile();
-    if (!refFile) continue;
-
-    preprocess(refFile, specifier);
-    refFile = item.getModuleSpecifierSourceFile();
-    if (!refFile) continue;
-
-    await process(refFile, specifier);
+    await process(item.getModuleSpecifier(), () =>
+      item.getModuleSpecifierSourceFile(),
+    );
   }
 
   for (const item of sourceFile.getExportDeclarations()) {
     const specifier = item.getModuleSpecifier();
-    let refFile = item.getModuleSpecifierSourceFile();
-    if (!specifier || !refFile) continue;
+    if (!specifier) continue;
 
-    preprocess(refFile, specifier);
-    refFile = item.getModuleSpecifierSourceFile();
-    if (!refFile) continue;
-
-    await process(refFile, specifier);
+    await process(specifier, () => item.getModuleSpecifierSourceFile());
   }
 
   out.content = sourceFile.getFullText();

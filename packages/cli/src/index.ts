@@ -2,7 +2,14 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { Command } from 'commander';
 import picocolors from 'picocolors';
-import { isCancel, multiselect, outro, select } from '@clack/prompts';
+import {
+  isCancel,
+  log,
+  multiselect,
+  outro,
+  select,
+  spinner,
+} from '@clack/prompts';
 import { init } from '@/commands/init';
 import { add, localResolver, remoteResolver } from '@/commands/add';
 import { initConfig, loadConfig } from '@/config';
@@ -13,7 +20,7 @@ import {
   treeToMdx,
 } from '@/commands/file-tree';
 import { runTree } from '@/utils/file-tree/run-tree';
-import registry from '@/registry.json';
+import { type OutputIndex } from '@/build';
 import packageJson from '../package.json';
 
 const program = new Command();
@@ -67,24 +74,41 @@ program
   .command('add')
   .description('add a new component to your docs')
   .argument('[components...]', 'components to download')
-  .option('--url <string>', 'the root url or path to resolve registry')
+  .option('--dir <string>', 'the root url or directory to resolve registry')
   .option('--config <string>')
   .action(
     async (
-      str: string[],
+      input: string[],
       {
         config,
-        url = 'https://fumadocs.vercel.app/registry',
-      }: { config?: string; url?: string },
+        dir = 'https://fumadocs.vercel.app/registry',
+      }: { config?: string; dir?: string },
     ) => {
-      let target = str;
+      const resolver =
+        dir.startsWith('http://') || dir.startsWith('https://')
+          ? remoteResolver(dir)
+          : localResolver(dir);
+      let target = input;
 
-      if (str.length === 0) {
+      if (input.length === 0) {
+        const spin = spinner();
+        spin.start('fetching registry');
+        const registry = (await resolver('_registry.json')) as
+          | OutputIndex[]
+          | undefined;
+        spin.stop(picocolors.bold(picocolors.greenBright('registry fetched')));
+
+        if (!registry) {
+          log.error(`Failed to fetch '_registry.json' file from ${dir}`);
+          throw new Error(`Failed to fetch registry`);
+        }
+
         const value = await multiselect({
           message: 'Select components to install',
-          options: Object.keys(registry.components).map((k) => ({
-            label: k,
-            value: k,
+          options: registry.map((item) => ({
+            label: item.name,
+            value: item.name,
+            hint: item.description,
           })),
         });
 
@@ -98,11 +122,7 @@ program
 
       const loadedConfig = await loadConfig(config);
       for (const name of target) {
-        await add(
-          name,
-          url.startsWith('http') ? remoteResolver(url) : localResolver(url),
-          loadedConfig,
-        );
+        await add(name, resolver, loadedConfig);
       }
     },
   );

@@ -53,7 +53,7 @@
   "dependencies": {
     "@apidevtools/json-schema-ref-parser": "^11.7.0",
     "@fumari/json-schema-to-typescript": "^1.1.1",
-    "@radix-ui/react-select": "^2.1.1",
+    "@radix-ui/react-select": "^2.1.2",
     "@radix-ui/react-slot": "^1.1.0",
     "class-variance-authority": "^0.7.0",
     "fast-glob": "^3.3.1",
@@ -67,14 +67,14 @@
     "react-hook-form": "^7.53.0",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.1",
-    "shiki": "^1.20.0",
+    "shiki": "^1.21.0",
     "swr": "^2.2.5"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "22.7.3",
+    "@types/node": "22.7.4",
     "@types/openapi-sampler": "^1.0.3",
-    "@types/react": "^18.3.9",
+    "@types/react": "^18.3.10",
     "bunchee": "^5.5.0",
     "eslint-config-custom": "workspace:*",
     "next": "15.0.0-canary.171",
