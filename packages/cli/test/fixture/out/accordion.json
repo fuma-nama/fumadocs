@@ -21,15 +21,15 @@
       "path": "lib:use-copy-button.ts"
     }
   ],
-  "devDependencies": {
-    "lucide-react": "^0.447.0"
-  },
+  "subComponents": [
+    "button"
+  ],
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.1",
     "react": "",
     "tailwind-merge": "^2.5.2"
   },
-  "subComponents": [
-    "button"
-  ]
+  "devDependencies": {
+    "lucide-react": "^0.447.0"
+  }
 }

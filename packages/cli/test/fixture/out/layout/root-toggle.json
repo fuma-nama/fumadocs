@@ -28,9 +28,7 @@
       "path": "components:ui/popover.tsx"
     }
   ],
-  "devDependencies": {
-    "lucide-react": "^0.447.0"
-  },
+  "subComponents": [],
   "dependencies": {
     "react": "",
     "next": "",
@@ -39,5 +37,7 @@
     "fumadocs-ui": "",
     "@radix-ui/react-popover": "^1.1.2"
   },
-  "subComponents": []
+  "devDependencies": {
+    "lucide-react": "^0.447.0"
+  }
 }

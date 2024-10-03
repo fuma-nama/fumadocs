@@ -22,9 +22,7 @@
       "path": "components:ui/popover.tsx"
     }
   ],
-  "devDependencies": {
-    "lucide-react": "^0.447.0"
-  },
+  "subComponents": [],
   "dependencies": {
     "next": "",
     "class-variance-authority": "^0.7.0",
@@ -32,5 +30,7 @@
     "@radix-ui/react-popover": "^1.1.2",
     "react": ""
   },
-  "subComponents": []
+  "devDependencies": {
+    "lucide-react": "^0.447.0"
+  }
 }

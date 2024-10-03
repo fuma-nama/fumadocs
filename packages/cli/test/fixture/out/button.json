@@ -7,9 +7,9 @@
       "path": "components:ui/button.tsx"
     }
   ],
-  "devDependencies": {},
+  "subComponents": [],
   "dependencies": {
     "class-variance-authority": "^0.7.0"
   },
-  "subComponents": []
+  "devDependencies": {}
 }

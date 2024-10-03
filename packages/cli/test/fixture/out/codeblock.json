@@ -29,15 +29,15 @@
       "path": "lib:use-copy-button.ts"
     }
   ],
-  "devDependencies": {
-    "lucide-react": "^0.447.0"
-  },
+  "subComponents": [
+    "button"
+  ],
   "dependencies": {
     "react": "",
     "tailwind-merge": "^2.5.2",
     "@radix-ui/react-scroll-area": "^1.2.0"
   },
-  "subComponents": [
-    "button"
-  ]
+  "devDependencies": {
+    "lucide-react": "^0.447.0"
+  }
 }

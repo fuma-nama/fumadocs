@@ -22,14 +22,14 @@
       "path": "components:ui/collapsible.tsx"
     }
   ],
-  "devDependencies": {
-    "lucide-react": "^0.447.0"
-  },
+  "subComponents": [],
   "dependencies": {
     "class-variance-authority": "^0.7.0",
     "react": "",
     "tailwind-merge": "^2.5.2",
     "@radix-ui/react-collapsible": "^1.1.1"
   },
-  "subComponents": []
+  "devDependencies": {
+    "lucide-react": "^0.447.0"
+  }
 }

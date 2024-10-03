@@ -7,9 +7,9 @@
       "path": "components:steps.tsx"
     }
   ],
-  "devDependencies": {},
+  "subComponents": [],
   "dependencies": {
     "react": ""
   },
-  "subComponents": []
+  "devDependencies": {}
 }

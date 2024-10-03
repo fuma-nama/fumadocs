@@ -199,7 +199,7 @@ export default {
   ),
   'root-toggle': (
     <Wrapper>
-      <div className="not-prose rounded-xl bg-fd-background p-3">
+      <div className="not-prose mx-auto grid max-w-[240px] rounded-xl bg-fd-background p-3">
         <RootToggle
           options={modes.map((mode) => ({
             url: `/docs/${mode.param}`,

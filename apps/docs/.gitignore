@@ -4,3 +4,4 @@ content/docs/ui/museum/**/*.mdx
 
 content/docs/ui/(integrations)/typescript.mdx
 public/registry
+!next-env.d.ts

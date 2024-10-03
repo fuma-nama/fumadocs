@@ -1,10 +1,8 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import { Project, type SourceFile, type StringLiteral } from 'ts-morph';
-import {
-  type ComponentBuilder,
-  createComponentBuilder,
-} from './component-builder';
+import { Project } from 'ts-morph';
+import { buildFile, merge, type ProcessedFiles } from '@/build/build-file';
+import { createComponentBuilder } from './component-builder';
 
 export interface Component {
   name: string;
@@ -148,12 +146,12 @@ export async function build(registry: Registry): Promise<Output> {
   }
 
   const buildComps = registry.components.map(async (component) => {
-    const comp: OutputComponent = {
-      name: component.name,
+    const processedFiles = new Set<string>();
+    const collect: ProcessedFiles = {
       files: [],
-      devDependencies: {},
-      dependencies: {},
-      subComponents: [],
+      subComponents: new Set(),
+      devDependencies: new Map(),
+      dependencies: new Map(),
     };
 
     const read = component.files
@@ -164,11 +162,35 @@ export async function build(registry: Registry): Promise<Output> {
           overwrite: true,
         });
 
-        await addFile(sourceFile, builder, comp, component);
+        const outputPath = builder.resolveOutputPath(sourceFile.getFilePath());
+
+        if (processedFiles.has(outputPath)) return;
+        return buildFile(
+          outputPath,
+          sourceFile,
+          builder,
+          component,
+          processedFiles,
+        );
       });
 
-    await Promise.all(read);
-    return [component, comp] as const;
+    const outFiles = await Promise.all(read);
+    for (const file of outFiles) {
+      if (!file) continue;
+
+      merge(collect, file);
+    }
+
+    return [
+      component,
+      {
+        name: component.name,
+        files: collect.files,
+        subComponents: Array.from(collect.subComponents),
+        dependencies: Object.fromEntries(collect.dependencies),
+        devDependencies: Object.fromEntries(collect.devDependencies),
+      },
+    ] as [Component, OutputComponent];
   });
 
   for (const [input, comp] of await Promise.all(buildComps)) {
@@ -183,97 +205,4 @@ export async function build(registry: Registry): Promise<Output> {
   }
 
   return output;
-}
-
-async function addFile(
-  sourceFile: SourceFile,
-  builder: ComponentBuilder,
-  ctx: OutputComponent,
-  comp: Component,
-): Promise<string> {
-  const outputPath = builder.resolveOutputPath(sourceFile.getFilePath());
-  if (ctx.files.some((item) => item.path === outputPath)) return outputPath;
-
-  const out: OutputFile = {
-    imports: {},
-    content: '',
-    path: outputPath,
-  };
-
-  ctx.files.push(out);
-
-  /**
-   * Process import paths
-   */
-  async function process(
-    specifier: StringLiteral,
-    getSpecifiedFile: () => SourceFile | undefined,
-  ): Promise<void> {
-    let specifiedFile = getSpecifiedFile();
-    if (!specifiedFile) return;
-
-    const name = specifiedFile.isInNodeModules()
-      ? builder.resolveDep(specifier.getLiteralValue()).name
-      : path.relative(builder.registryDir, specifiedFile.getFilePath());
-
-    if (comp.mapImportPath && name in comp.mapImportPath) {
-      const resolver = comp.mapImportPath[name];
-
-      if (typeof resolver === 'string') {
-        specifier.setLiteralValue(resolver);
-        specifiedFile = getSpecifiedFile();
-
-        if (!specifiedFile) return;
-      } else {
-        ctx.subComponents.push(resolver.name);
-        out.imports[specifier.getLiteralValue()] = resolver.file;
-        return;
-      }
-    }
-
-    if (specifiedFile.isInNodeModules() || specifiedFile.isDeclarationFile()) {
-      const info = builder.resolveDep(specifier.getLiteralValue());
-
-      if (info.type === 'dev') {
-        ctx.devDependencies[info.name] = info.version ?? '';
-      } else {
-        ctx.dependencies[info.name] = info.version ?? '';
-      }
-      return;
-    }
-
-    const sub = builder.getSubComponent(specifiedFile.getFilePath());
-    if (sub) {
-      if (!ctx.subComponents.includes(sub.component.name))
-        ctx.subComponents.push(sub.component.name);
-
-      out.imports[specifier.getLiteralValue()] = builder.resolveOutputPath(
-        specifiedFile.getFilePath(),
-      );
-      return;
-    }
-
-    out.imports[specifier.getLiteralValue()] = await addFile(
-      specifiedFile,
-      builder,
-      ctx,
-      comp,
-    );
-  }
-
-  for (const item of sourceFile.getImportDeclarations()) {
-    await process(item.getModuleSpecifier(), () =>
-      item.getModuleSpecifierSourceFile(),
-    );
-  }
-
-  for (const item of sourceFile.getExportDeclarations()) {
-    const specifier = item.getModuleSpecifier();
-    if (!specifier) continue;
-
-    await process(specifier, () => item.getModuleSpecifierSourceFile());
-  }
-
-  out.content = sourceFile.getFullText();
-  return outputPath;
 }

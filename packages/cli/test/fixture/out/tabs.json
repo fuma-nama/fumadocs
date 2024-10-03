@@ -22,11 +22,11 @@
       "path": "components:ui/tabs.tsx"
     }
   ],
-  "devDependencies": {},
+  "subComponents": [],
   "dependencies": {
     "@radix-ui/react-tabs": "^1.1.1",
     "react": "",
     "tailwind-merge": "^2.5.2"
   },
-  "subComponents": []
+  "devDependencies": {}
 }

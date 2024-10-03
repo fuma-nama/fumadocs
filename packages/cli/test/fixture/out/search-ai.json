@@ -21,7 +21,9 @@
       "path": "components:ai/markdown-processor.ts"
     }
   ],
-  "devDependencies": {},
+  "subComponents": [
+    "button"
+  ],
   "dependencies": {
     "@oramacloud/client": "^1.3.16",
     "react": "",
@@ -37,7 +39,5 @@
     "@shikijs/rehype": "^1.21.0",
     "hast-util-to-jsx-runtime": "^2.3.0"
   },
-  "subComponents": [
-    "button"
-  ]
+  "devDependencies": {}
 }

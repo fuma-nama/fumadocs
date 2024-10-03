@@ -15,14 +15,14 @@
       "path": "lib:cn.ts"
     }
   ],
-  "devDependencies": {
-    "lucide-react": "^0.447.0"
-  },
+  "subComponents": [
+    "button"
+  ],
   "dependencies": {
     "react": "",
     "tailwind-merge": "^2.5.2"
   },
-  "subComponents": [
-    "button"
-  ]
+  "devDependencies": {
+    "lucide-react": "^0.447.0"
+  }
 }

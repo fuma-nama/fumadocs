@@ -23,14 +23,14 @@
       "path": "lib:cn.ts"
     }
   ],
-  "devDependencies": {},
+  "subComponents": [
+    "button"
+  ],
   "dependencies": {
     "react": "",
     "fumadocs-ui": "",
     "@radix-ui/react-popover": "^1.1.2",
     "tailwind-merge": "^2.5.2"
   },
-  "subComponents": [
-    "button"
-  ]
+  "devDependencies": {}
 }

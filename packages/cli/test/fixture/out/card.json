@@ -14,11 +14,11 @@
       "path": "lib:cn.ts"
     }
   ],
-  "devDependencies": {},
+  "subComponents": [],
   "dependencies": {
     "fumadocs-core": "",
     "react": "",
     "tailwind-merge": "^2.5.2"
   },
-  "subComponents": []
+  "devDependencies": {}
 }
