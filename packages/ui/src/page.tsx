@@ -224,8 +224,8 @@ export function DocsCategory({
     (item) =>
       (item.file.dirname === page.file.dirname &&
         item.file.name !== page.file.name) ||
-      (item.file.name === "index" &&
-        item.file.dirname.split("/").slice(0, -1).join("/") ===
+      (item.file.name === 'index' &&
+        item.file.dirname.split('/').slice(0, -1).join('/') ===
           page.file.dirname),
   );
 
