@@ -162,6 +162,33 @@ The input/source of your content, it can be a CMS, or local data layers like [Co
 </Card>
 ```
 
+### Better Category Component
+
+The original `DocsCategory` component was copied from our official docs, which is a very simple implementation that doesn't take page tree into account.
+
+Now it accepts the source object via `from` prop.
+
+```tsx title="page.tsx"
+import { source } from '@/lib/source';
+import { DocsCategory } from 'fumadocs-ui/page';
+
+const page = source.getPage(params.slug);
+
+<DocsCategory page={page} from={source} />;
+```
+
+By default, it takes the `locale` property from `page` to find the corresponding page tree to traverse.
+You can also force a page tree.
+
+```tsx title="page.tsx (i18n enabled)"
+import { source } from '@/lib/source';
+import { DocsCategory } from 'fumadocs-ui/page';
+
+const page = source.getPage(params.slug, params.lang);
+
+<DocsCategory page={page} from={source} tree={source.pageTree['en']} />;
+```
+
 ### OpenAPI Tag Display Name
 
 Change the display name with `x-displayName`.

@@ -15,7 +15,7 @@
     }
   ],
   "devDependencies": {
-    "lucide-react": "^0.446.0"
+    "lucide-react": "^0.447.0"
   },
   "dependencies": {
     "react": "",

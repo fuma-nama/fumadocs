@@ -22,7 +22,7 @@
     }
   ],
   "devDependencies": {
-    "lucide-react": "^0.446.0"
+    "lucide-react": "^0.447.0"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.1",

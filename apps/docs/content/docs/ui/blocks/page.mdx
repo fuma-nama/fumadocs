@@ -23,17 +23,24 @@ import {
 </DocsPage>;
 ```
 
+<Callout type='info' title='Good to know'>
+
+Instead of rendering the title with `DocsTitle` or your custom component in `page.tsx`, you can put the title into MDX file.
+This will render the title in the MDX body.
+
+</Callout>
+
 ### Page
 
 The main layout of docs pages.
 
 ### Title
 
-Page title.
+Optional, display the page title.
 
 ### Description
 
-Page description.
+Optional, display the page description.
 
 ### Body
 
@@ -51,17 +58,30 @@ import { DocsBody } from 'fumadocs-ui/page';
 
 ### Category
 
-Optional, display the other pages in its folder.
+Optional, display the other pages in its folder in page tree.
 
 > You can use this component without `<DocsPage />`.
 
-```tsx
-import { DocsPage, DocsCategory } from 'fumadocs-ui/page';
-import { getPages } from '@/lib/source';
+```tsx title="page.tsx"
+import { source } from '@/lib/source';
+import { DocsCategory } from 'fumadocs-ui/page';
 
-<DocsPage>
-  <DocsCategory page={page} pages={getPages()} />
-</DocsPage>;
+const page = source.getPage(['...']);
+
+<DocsCategory page={page} from={source} />;
+```
+
+By default, it takes the `locale` property from `page` to find the corresponding page tree to traverse.
+You can also specify it.
+
+```tsx title="page.tsx (i18n enabled)"
+import { source } from '@/lib/source';
+import { DocsCategory } from 'fumadocs-ui/page';
+
+const page = source.getPage(['...'], 'cn');
+
+// force to use English page tree
+<DocsCategory page={page} from={source} tree={source.pageTree['en']} />;
 ```
 
 ## Configurations

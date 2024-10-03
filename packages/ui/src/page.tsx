@@ -1,7 +1,7 @@
-import { type TableOfContents } from 'fumadocs-core/server';
+import { type PageTree, type TableOfContents } from 'fumadocs-core/server';
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import dynamic from 'next/dynamic';
-import type { Page } from 'fumadocs-core/source';
+import type { LoaderConfig, LoaderOutput, Page } from 'fumadocs-core/source';
 import { type AnchorProviderProps, AnchorProvider } from 'fumadocs-core/toc';
 import { Card, Cards } from '@/components/card';
 import type { EditOnGitHubOptions } from '@/components/layout/edit-on-github';
@@ -214,24 +214,53 @@ DocsTitle.displayName = 'DocsTitle';
 
 export function DocsCategory({
   page,
-  pages,
+  from,
+  tree: forcedTree,
   ...props
 }: HTMLAttributes<HTMLDivElement> & {
   page: Page;
-  pages: Page[];
-}): React.ReactElement {
-  const filtered = pages.filter(
-    (item) =>
-      (item.file.dirname === page.file.dirname &&
-        item.file.name !== page.file.name) ||
-      (item.file.name === 'index' &&
-        item.file.dirname.split('/').slice(0, -1).join('/') ===
-          page.file.dirname),
-  );
+  from: LoaderOutput<LoaderConfig>;
+  tree?: PageTree.Root;
+}): React.ReactNode {
+  const tree =
+    forcedTree ??
+    (from._i18n
+      ? (from as LoaderOutput<LoaderConfig & { i18n: true }>).pageTree[
+          page.locale ?? from._i18n.defaultLanguage
+        ]
+      : from.pageTree);
+
+  function findParent(
+    node: PageTree.Root | PageTree.Folder,
+  ): PageTree.Root | PageTree.Folder | undefined {
+    if ('index' in node && node.index?.$ref?.file === page.file.path) {
+      return node;
+    }
+
+    for (const child of node.children) {
+      if (child.type === 'folder') {
+        const parent = findParent(child);
+        if (parent) return parent;
+      }
+
+      if (child.type === 'page' && child.$ref?.file === page.file.path) {
+        return node;
+      }
+    }
+  }
+
+  const parent = findParent(tree);
+  if (!parent) return null;
+
+  const items = parent.children.flatMap<Page>((item) => {
+    if (item.type !== 'page' || item.url === page.url) return [];
+
+    return from.getNodePage(item) ?? [];
+  });
 
   return (
     <Cards {...props}>
-      {filtered.map((item) => (
+      {items.map((item) => (
         <Card
           key={item.url}
           title={item.data.title}

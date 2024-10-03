@@ -64,6 +64,8 @@ export interface Page<Data = PageData> {
   slugs: string[];
   url: string;
   data: Data;
+
+  locale?: string | undefined;
 }
 
 export interface Meta<Data = MetaData> {
@@ -315,5 +317,6 @@ function fileToPage<Data = PageData>(
     url: getUrl(file.data.slugs, locale),
     slugs: file.data.slugs,
     data: file.data.data as Data,
+    locale,
   };
 }

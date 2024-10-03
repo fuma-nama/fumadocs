@@ -69,9 +69,7 @@ export default async function Page(props: {
             UIOnly: params.slug[0] === 'ui' ? Fragment : () => undefined,
           }}
         />
-        {page.data.index ? (
-          <DocsCategory page={page} pages={source.getPages()} />
-        ) : null}
+        {page.data.index ? <DocsCategory page={page} from={source} /> : null}
       </DocsBody>
     </DocsPage>
   );
