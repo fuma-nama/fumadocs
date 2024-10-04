@@ -15,6 +15,8 @@ export interface CreateMDXOptions {
 const outDir = path.resolve('.source');
 const defaultPageExtensions = ['mdx', 'md', 'jsx', 'js', 'tsx', 'ts'];
 
+export { start };
+
 export function createMDX({
   configPath = findConfigFile(),
 }: CreateMDXOptions = {}) {

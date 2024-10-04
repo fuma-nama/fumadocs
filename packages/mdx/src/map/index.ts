@@ -1,11 +1,15 @@
 import path from 'node:path';
 import fs from 'node:fs';
 import { type EventName } from 'chokidar/handler.js';
-import { watcher } from '@/map/watcher';
 import { getConfigHash, loadConfigCached } from '@/config/cached';
 import { generateJS, generateTypes } from '@/map/generate';
 import { writeManifest } from '@/map/manifest';
 
+/**
+ * Start a MDX server that builds index and manifest files.
+ *
+ * In development mode, it starts a file watcher to auto-update output as your input changes.
+ */
 export async function start(
   dev: boolean,
   configPath: string,
@@ -18,6 +22,7 @@ export async function start(
   const typeOut = path.resolve(outDir, `index.d.ts`);
 
   if (dev) {
+    const { watcher } = await import('@/map/watcher');
     const instance = watcher(configPath, config);
 
     instance.on('ready', () => {
