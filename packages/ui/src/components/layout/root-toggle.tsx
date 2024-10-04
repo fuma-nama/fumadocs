@@ -1,12 +1,6 @@
 'use client';
 import { ChevronDown } from 'lucide-react';
-import {
-  type HTMLAttributes,
-  type ReactNode,
-  useCallback,
-  useMemo,
-  useState,
-} from 'react';
+import { type HTMLAttributes, type ReactNode, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/utils/cn';
