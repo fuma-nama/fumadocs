@@ -57,7 +57,7 @@
     "tsconfig": "workspace:*"
   },
   "peerDependencies": {
-    "fumadocs-ui": "13.x.x",
+    "fumadocs-ui": "14.x.x",
     "react": ">= 18",
     "shiki": "1.x.x"
   },

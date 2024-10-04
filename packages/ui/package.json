@@ -76,7 +76,6 @@
     "fumadocs-core": "workspace:*",
     "next-themes": "^0.3.0",
     "react-medium-image-zoom": "^5.2.10",
-    "swr": "^2.2.5",
     "tailwind-merge": "^2.5.2"
   },
   "devDependencies": {
@@ -99,6 +98,11 @@
     "next": "14.x.x || 15.x.x",
     "react": ">= 18",
     "react-dom": ">= 18"
+  },
+  "optionalDependencies": {
+    "@algolia/client-search": "4.x.x",
+    "algoliasearch": "4.x.x",
+    "tailwindcss": "3.x.x"
   },
   "publishConfig": {
     "access": "public"

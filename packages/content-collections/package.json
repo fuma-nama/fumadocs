@@ -24,16 +24,6 @@
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "typesVersions": {
-    "*": {
-      ".": [
-        "./dist/index.d.ts"
-      ],
-      "configuration": [
-        "./dist/configuration.d.ts"
-      ]
-    }
-  },
   "files": [
     "dist/*"
   ],
@@ -57,7 +47,7 @@
   "peerDependencies": {
     "@content-collections/core": "0.x.x",
     "@content-collections/mdx": "0.x.x",
-    "fumadocs-core": "^13.2.1"
+    "fumadocs-core": "^13.2.1 || ^14.0.0"
   },
   "publishConfig": {
     "access": "public"
