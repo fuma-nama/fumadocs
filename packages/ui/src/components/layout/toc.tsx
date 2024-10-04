@@ -94,6 +94,7 @@ export function TOCItems({
 }): React.ReactElement {
   const { text } = useI18n();
   const containerRef = useRef<HTMLDivElement>(null);
+  const viewRef = useRef<HTMLDivElement>(null);
   const pos = useTocThumb(containerRef);
 
   if (items.length === 0)
@@ -105,7 +106,7 @@ export function TOCItems({
 
   return (
     <ScrollArea className={cn('flex flex-col', isMenu && '-ms-3')}>
-      <ScrollViewport className="relative min-h-0 text-sm" ref={containerRef}>
+      <ScrollViewport className="relative min-h-0 text-sm" ref={viewRef}>
         <div
           role="none"
           className="absolute start-0 w-px bg-fd-primary transition-all"
@@ -114,8 +115,9 @@ export function TOCItems({
             height: pos[1],
           }}
         />
-        <Primitive.ScrollProvider containerRef={containerRef}>
+        <Primitive.ScrollProvider containerRef={viewRef}>
           <div
+            ref={containerRef}
             className={cn(
               'flex flex-col',
               !isMenu && 'border-s border-fd-foreground/10',

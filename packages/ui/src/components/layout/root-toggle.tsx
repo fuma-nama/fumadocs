@@ -40,10 +40,10 @@ export function RootToggle({
     return options.find((item) => isActive(item.url, pathname, true));
   }, [options, pathname]);
 
-  const onClick = useCallback(() => {
+  const onClick = (): void => {
     closeOnRedirect.current = false;
     setOpen(false);
-  }, [closeOnRedirect]);
+  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

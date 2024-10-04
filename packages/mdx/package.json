@@ -27,16 +27,6 @@
   },
   "main": "./dist/index.mjs",
   "types": "./dist/index.mts",
-  "typesVersions": {
-    "*": {
-      "config": [
-        "./dist/config/index.d.mts"
-      ],
-      "next": [
-        "./dist/next/index.d.mts"
-      ]
-    }
-  },
   "bin": "./bin.mjs",
   "files": [
     "dist/*",
@@ -75,7 +65,7 @@
     "webpack": "^5.90.3"
   },
   "peerDependencies": {
-    "fumadocs-core": "^13.2.1",
+    "fumadocs-core": "^13.2.1 || ^14.0.0",
     "next": "14.x.x || 15.x.x"
   },
   "publishConfig": {

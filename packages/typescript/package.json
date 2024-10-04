@@ -24,13 +24,6 @@
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "typesVersions": {
-    "*": {
-      "ui": [
-        "./dist/ui/index.d.ts"
-      ]
-    }
-  },
   "files": [
     "dist/*"
   ],

@@ -887,9 +887,6 @@ importers:
       js-yaml:
         specifier: ^4.1.0
         version: 4.1.0
-      lucide-react:
-        specifier: ^0.447.0
-        version: 0.447.0(react@18.3.1)
       openapi-sampler:
         specifier: ^1.5.1
         version: 1.5.1
@@ -933,6 +930,9 @@ importers:
       eslint-config-custom:
         specifier: workspace:*
         version: link:../eslint-config-custom
+      lucide-react:
+        specifier: ^0.447.0
+        version: 0.447.0(react@18.3.1)
       next:
         specifier: 15.0.0-canary.171
         version: 15.0.0-canary.171(@babel/core@7.24.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1096,16 +1096,20 @@ importers:
       react-medium-image-zoom:
         specifier: ^5.2.10
         version: 5.2.10(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      swr:
-        specifier: ^2.2.5
-        version: 2.2.5(react@18.3.1)
       tailwind-merge:
         specifier: ^2.5.2
         version: 2.5.2
-    devDependencies:
+    optionalDependencies:
       '@algolia/client-search':
-        specifier: 4.24.0
+        specifier: 4.x.x
         version: 4.24.0
+      algoliasearch:
+        specifier: 4.x.x
+        version: 4.24.0
+      tailwindcss:
+        specifier: 3.x.x
+        version: 3.4.13
+    devDependencies:
       '@next/eslint-plugin-next':
         specifier: 15.0.0-canary.171
         version: 15.0.0-canary.171
@@ -1115,9 +1119,6 @@ importers:
       '@types/react-dom':
         specifier: ^18.3.0
         version: 18.3.0
-      algoliasearch:
-        specifier: 4.24.0
-        version: 4.24.0
       eslint-config-custom:
         specifier: workspace:*
         version: link:../eslint-config-custom
@@ -1139,9 +1140,6 @@ importers:
       postcss-lightningcss:
         specifier: ^1.0.1
         version: 1.0.1(postcss@8.4.47)
-      tailwindcss:
-        specifier: ^3.4.13
-        version: 3.4.13
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig

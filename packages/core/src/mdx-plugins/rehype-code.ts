@@ -1,5 +1,5 @@
 import type { Root } from 'hast';
-import { type RehypeShikiOptions } from '@shikijs/rehype';
+import type { RehypeShikiOptions } from '@shikijs/rehype';
 import rehypeShikiFromHighlighter from '@shikijs/rehype/core';
 import {
   transformerNotationHighlight,
@@ -8,13 +8,12 @@ import {
 import type { Processor, Transformer } from 'unified';
 import {
   getSingletonHighlighter,
-  createJavaScriptRegexEngine,
-  createWasmOnigEngine,
   type ShikiTransformer,
-  bundledLanguages,
   type BuiltinTheme,
 } from 'shiki';
 import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
+import { createOnigurumaEngine } from 'shiki/engine/oniguruma';
+import { createJavaScriptRegexEngine } from 'shiki/engine/javascript';
 import type { IconOptions, CodeBlockIcon } from './transformer-icon';
 import { transformerIcon } from './transformer-icon';
 
@@ -47,6 +46,7 @@ export const rehypeCodeDefaultOptions: RehypeCodeOptions = {
     dark: 'github-dark',
   },
   defaultLanguage: 'plaintext',
+  lazy: true,
   experimentalJSEngine: false,
   defaultColor: false,
   transformers: [
@@ -161,9 +161,9 @@ export function rehypeCode(
   const highlighter = getSingletonHighlighter({
     engine: codeOptions.experimentalJSEngine
       ? createJavaScriptRegexEngine()
-      : createWasmOnigEngine(import('shiki/wasm')),
+      : createOnigurumaEngine(() => import('shiki/wasm')),
     themes: themeItems.filter(Boolean) as BuiltinTheme[],
-    langs: codeOptions.langs ?? Object.keys(bundledLanguages),
+    langs: codeOptions.langs,
   });
 
   const transformer = highlighter.then((instance) =>

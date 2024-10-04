@@ -15,7 +15,9 @@ export default function ClerkTOCItems({
   isMenu?: boolean;
 }): React.ReactElement {
   const { text } = useI18n();
+  const viewRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
   const pos = useTocThumb(containerRef);
   const [svg, setSvg] = useState<{
     path: string;
@@ -78,7 +80,7 @@ export default function ClerkTOCItems({
 
   return (
     <ScrollArea className={cn('flex flex-col', isMenu && '-ms-3')}>
-      <ScrollViewport className="relative min-h-0" ref={containerRef}>
+      <ScrollViewport className="relative min-h-0" ref={viewRef}>
         {svg ? (
           <div
             className="absolute start-0 top-0 rtl:-scale-x-100"
@@ -102,8 +104,8 @@ export default function ClerkTOCItems({
             />
           </div>
         ) : null}
-        <Primitive.ScrollProvider containerRef={containerRef}>
-          <div className="flex flex-col">
+        <Primitive.ScrollProvider containerRef={viewRef}>
+          <div className="flex flex-col" ref={containerRef}>
             {items.map((item, i) => (
               <TOCItem
                 key={item.url}
@@ -146,7 +148,7 @@ function TOCItem({
     <Primitive.TOCItem
       href={item.url}
       style={{
-        paddingInlineStart: `${getItemOffset(item.depth)}px`,
+        paddingInlineStart: getItemOffset(item.depth),
       }}
       className="prose relative py-2 text-sm text-fd-muted-foreground transition-colors [overflow-wrap:anywhere] first:pt-0 last:pb-0 data-[active=true]:text-fd-primary"
     >
