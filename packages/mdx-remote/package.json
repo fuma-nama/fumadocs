@@ -73,7 +73,7 @@
     "@types/mdx": "^2.0.13",
     "@types/micromatch": "^4.0.9",
     "@types/node": "22.7.4",
-    "@types/react": "^18.3.10",
+    "@types/react": "^18.3.11",
     "@types/ws": "^8.5.12",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
@@ -83,7 +83,7 @@
     "vfile": "^6.0.3"
   },
   "peerDependencies": {
-    "fumadocs-core": "^13.2.1",
+    "fumadocs-core": "^13.2.1 || ^14.0.0",
     "next": "14.x.x || 15.x.x",
     "react": ">= 18"
   },

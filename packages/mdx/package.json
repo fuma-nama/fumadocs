@@ -56,13 +56,13 @@
     "@types/mdast": "^4.0.3",
     "@types/mdx": "^2.0.13",
     "@types/micromatch": "^4.0.9",
-    "@types/react": "^18.3.10",
+    "@types/react": "^18.3.11",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "next": "15.0.0-canary.177",
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
-    "webpack": "^5.90.3"
+    "webpack": "^5.95.0"
   },
   "peerDependencies": {
     "fumadocs-core": "^13.2.1 || ^14.0.0",

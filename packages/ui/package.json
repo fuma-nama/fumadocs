@@ -76,12 +76,12 @@
     "fumadocs-core": "workspace:*",
     "next-themes": "^0.3.0",
     "react-medium-image-zoom": "^5.2.10",
-    "tailwind-merge": "^2.5.2"
+    "tailwind-merge": "^2.5.3"
   },
   "devDependencies": {
     "@algolia/client-search": "4.24.0",
     "@next/eslint-plugin-next": "15.0.0-canary.177",
-    "@types/react": "^18.3.10",
+    "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.0",
     "algoliasearch": "4.24.0",
     "eslint-config-custom": "workspace:*",
@@ -100,8 +100,8 @@
     "react-dom": ">= 18"
   },
   "optionalDependencies": {
-    "@algolia/client-search": "4.x.x",
-    "algoliasearch": "4.x.x",
+    "@algolia/client-search": "^4.0.0",
+    "algoliasearch": "^4.0.0",
     "tailwindcss": "3.x.x"
   },
   "publishConfig": {

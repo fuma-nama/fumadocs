@@ -18,6 +18,7 @@ import CodeHike from '@/public/showcases/codehike.png';
 import Expostarter from '@/public/showcases/expostarter.png';
 import Sunar from '@/public/showcases/sunar.png';
 import Supastarter from '@/public/showcases/supastarter.png';
+import BetterAuth from '@/public/showcases/better-auth.png';
 
 export const metadata = createMetadata({
   title: 'Showcase',
@@ -46,14 +47,14 @@ export default function Showcase(): React.ReactElement {
       url: 'https://nextjs-faq.com',
     },
     {
-      image: Yeecord,
-      name: 'Yeecord Docs',
-      url: 'https://yeecord.com',
-    },
-    {
       image: Million,
       name: 'Million',
       url: 'https://million.dev',
+    },
+    {
+      image: Yeecord,
+      name: 'Yeecord Docs',
+      url: 'https://yeecord.com',
     },
     { image: Nuqs, name: 'nuqs', url: 'https://nuqs.47ng.com' },
     {
@@ -65,6 +66,11 @@ export default function Showcase(): React.ReactElement {
       image: Hiro,
       name: 'Hiro',
       url: 'https://docs.hiro.so/stacks',
+    },
+    {
+      image: BetterAuth,
+      name: 'Better Auth',
+      url: 'https://better-auth.com',
     },
     {
       image: FrameGround,

@@ -59,7 +59,7 @@
     "@types/js-yaml": "^4.0.9",
     "@types/node": "22.7.4",
     "@types/openapi-sampler": "^1.0.3",
-    "@types/react": "^18.3.10",
+    "@types/react": "^18.3.11",
     "bunchee": "^5.5.0",
     "eslint-config-custom": "workspace:*",
     "lucide-react": "^0.447.0",

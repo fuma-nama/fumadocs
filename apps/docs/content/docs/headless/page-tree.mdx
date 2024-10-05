@@ -20,6 +20,8 @@ Unserializable data such as functions can't be passed to page tree.
 
 This is the definitions of Page Tree, you may refer to Page Conventions to learn how to structure your folders/pages.
 
+Certain nodes contain a `$ref` property to link to its original page/meta file, they are optional when hardcoding it.
+
 ### Root
 
 The initial root of page trees.
@@ -106,7 +108,9 @@ Icon is a `ReactElement`, supported by pages and folders.
 You can import the type from server package.
 
 ```ts
-import type { PageTree } from 'fumadocs-core/server'
+import type { PageTree } from 'fumadocs-core/server';
 
-const tree: PageTree = ...
+const tree: PageTree.Root = {
+  // props
+};
 ```
