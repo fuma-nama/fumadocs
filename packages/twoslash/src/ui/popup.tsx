@@ -1,6 +1,12 @@
-import * as React from 'react';
+import {
+  forwardRef,
+  useState,
+  useRef,
+  useContext,
+  createContext,
+  useMemo,
+} from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from './popover';
-import { cn } from './cn';
 
 interface PopupContextObject {
   open: boolean;
@@ -10,9 +16,7 @@ interface PopupContextObject {
   handleClose: (e: React.PointerEvent) => void;
 }
 
-const PopupContext = React.createContext<PopupContextObject | undefined>(
-  undefined,
-);
+const PopupContext = createContext<PopupContextObject | undefined>(undefined);
 
 function Popup({
   delay = 300,
@@ -21,38 +25,32 @@ function Popup({
   delay?: number;
   children: React.ReactNode;
 }): JSX.Element {
-  const [open, setOpen] = React.useState(false);
-  const openTimeoutRef = React.useRef<number>();
-  const closeTimeoutRef = React.useRef<number>();
+  const [open, setOpen] = useState(false);
+  const openTimeoutRef = useRef<number>();
+  const closeTimeoutRef = useRef<number>();
 
-  const handleOpen = React.useCallback(
-    (e: React.PointerEvent) => {
-      if (e.pointerType === 'touch') return;
-      if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+  const handleOpen = (e: React.PointerEvent): void => {
+    if (e.pointerType === 'touch') return;
+    if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
 
-      openTimeoutRef.current = window.setTimeout(() => {
-        setOpen(true);
-      }, delay);
-    },
-    [delay],
-  );
+    openTimeoutRef.current = window.setTimeout(() => {
+      setOpen(true);
+    }, delay);
+  };
 
-  const handleClose = React.useCallback(
-    (e: React.PointerEvent) => {
-      if (e.pointerType === 'touch') return;
-      if (openTimeoutRef.current) clearTimeout(openTimeoutRef.current);
+  const handleClose = (e: React.PointerEvent): void => {
+    if (e.pointerType === 'touch') return;
+    if (openTimeoutRef.current) clearTimeout(openTimeoutRef.current);
 
-      closeTimeoutRef.current = window.setTimeout(() => {
-        setOpen(false);
-      }, delay);
-    },
-    [delay],
-  );
+    closeTimeoutRef.current = window.setTimeout(() => {
+      setOpen(false);
+    }, delay);
+  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopupContext.Provider
-        value={React.useMemo(
+        value={useMemo(
           () => ({
             open,
             setOpen,
@@ -68,11 +66,11 @@ function Popup({
   );
 }
 
-const PopupTrigger = React.forwardRef<
+const PopupTrigger = forwardRef<
   React.ElementRef<typeof PopoverTrigger>,
   React.ComponentPropsWithoutRef<typeof PopoverTrigger>
 >((props, ref) => {
-  const ctx = React.useContext(PopupContext);
+  const ctx = useContext(PopupContext);
   if (!ctx) throw new Error('Missing Popup Context');
 
   return (
@@ -87,11 +85,11 @@ const PopupTrigger = React.forwardRef<
 
 PopupTrigger.displayName = 'PopupTrigger';
 
-const PopupContent = React.forwardRef<
+const PopupContent = forwardRef<
   React.ElementRef<typeof PopoverContent>,
   React.ComponentPropsWithoutRef<typeof PopoverContent>
->(({ className, ...props }, ref) => {
-  const ctx = React.useContext(PopupContext);
+>((props, ref) => {
+  const ctx = useContext(PopupContext);
   if (!ctx) throw new Error('Missing Popup Context');
 
   return (
@@ -102,7 +100,6 @@ const PopupContent = React.forwardRef<
       onCloseAutoFocus={(e) => {
         e.preventDefault();
       }}
-      className={cn('max-w-80', className)}
       {...props}
     />
   );

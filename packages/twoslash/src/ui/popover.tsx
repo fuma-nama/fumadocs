@@ -16,10 +16,7 @@ const PopoverContent = React.forwardRef<
       align={align}
       sideOffset={sideOffset}
       side="bottom"
-      className={cn(
-        'z-50 min-w-[220px] max-w-[98vw] rounded-lg border bg-fd-popover p-2 text-sm text-fd-popover-foreground shadow-md data-[state=closed]:animate-fd-popover-out data-[state=open]:animate-fd-popover-in',
-        className,
-      )}
+      className={cn('fd-twoslash-popover', className)}
       {...props}
     />
   </PopoverPrimitive.Portal>

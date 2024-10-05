@@ -189,3 +189,7 @@
     transition: none !important;
   }
 }
+
+.fd-twoslash-popover {
+  @apply z-50 min-w-[220px] max-w-[380px] max-h-[400px] overflow-auto rounded-lg border bg-fd-popover p-2 text-sm text-fd-popover-foreground shadow-md data-[state=closed]:animate-fd-popover-out data-[state=open]:animate-fd-popover-in focus-visible:outline-none;
+}
