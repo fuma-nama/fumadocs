@@ -32,10 +32,16 @@ export function Toc({ header, footer, children }: TOCProps): ReactElement {
   return (
     <div
       data-toc=""
-      className="sticky top-fd-toc-top flex w-[var(--fd-c-toc)] min-w-[var(--fd-toc-width)] flex-col gap-4 pe-[max(calc(var(--fd-c-toc)-var(--fd-toc-width)),0.75rem)] pt-12 max-lg:hidden md:h-fd-toc-height"
+      className="sticky top-fd-toc-top flex w-[var(--fd-c-toc)] min-w-[var(--fd-toc-width)] flex-col gap-3 pb-2 pe-[var(--fd-toc-offset)] pt-12 max-lg:hidden md:h-fd-toc-height"
+      style={
+        {
+          '--fd-toc-offset':
+            'max(calc(var(--fd-c-toc) - var(--fd-toc-width)), 0.75rem)',
+        } as object
+      }
     >
       {header}
-      <h3 className="-mb-1 -ms-0.5 inline-flex items-center gap-1.5 text-sm text-fd-muted-foreground">
+      <h3 className="-ms-0.5 inline-flex items-center gap-1.5 text-sm text-fd-muted-foreground">
         <Text className="size-4" />
         {text.toc}
       </h3>

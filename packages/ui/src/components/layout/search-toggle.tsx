@@ -1,4 +1,4 @@
-import { type ButtonHTMLAttributes, useCallback } from 'react';
+import { type ButtonHTMLAttributes } from 'react';
 import { SearchIcon } from 'lucide-react';
 import { useSearchContext } from '@/contexts/search';
 import { useI18n } from '@/contexts/i18n';
@@ -22,9 +22,9 @@ export function SearchToggle(
       )}
       data-search=""
       aria-label="Open Search"
-      onClick={useCallback(() => {
+      onClick={() => {
         setOpenSearch(true);
-      }, [setOpenSearch])}
+      }}
     >
       <SearchIcon />
     </button>
@@ -46,9 +46,9 @@ export function LargeSearchToggle(
         'inline-flex items-center gap-2 rounded-full border bg-fd-secondary/50 p-1.5 text-sm text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground',
         props.className,
       )}
-      onClick={useCallback(() => {
+      onClick={() => {
         setOpenSearch(true);
-      }, [setOpenSearch])}
+      }}
     >
       <SearchIcon className="ms-1 size-4" />
       {text.search}

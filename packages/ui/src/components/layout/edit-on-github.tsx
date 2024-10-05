@@ -37,12 +37,13 @@ const EditOnGitHub = forwardRef<HTMLAnchorElement, EditOnGitHubOptions>(
         className={cn(
           buttonVariants({
             color: 'outline',
-            className: 'text-fd-muted-foreground text-xs p-1.5 gap-2',
+            className:
+              'text-fd-muted-foreground bg-fd-secondary/50 px-2 py-1.5 gap-2 rounded-lg',
           }),
           props.className,
         )}
       >
-        <Edit className="size-3.5" />
+        <Edit className="size-4" />
         {text.editOnGithub}
       </a>
     );

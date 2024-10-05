@@ -113,10 +113,17 @@ export function Sidebar({
         blockScrollingWidth={768} // md
         {...props.aside}
         className={cn(
-          'fixed z-30 flex flex-col bg-fd-card text-sm md:sticky md:top-fd-sidebar-top md:h-fd-sidebar-height md:w-[var(--fd-c-sidebar)] md:min-w-[var(--fd-sidebar-width)] md:border-e md:ps-[calc(var(--fd-c-sidebar)-var(--fd-sidebar-width))]',
+          'fixed z-30 flex flex-col bg-fd-card text-sm md:sticky md:top-fd-sidebar-top md:h-fd-sidebar-height md:w-[var(--fd-c-sidebar)] md:min-w-[var(--fd-sidebar-width)] md:border-e md:ps-[var(--fd-sidebar-offset)]',
           'max-md:inset-0 max-md:top-fd-sidebar-top max-md:bg-fd-background/80 max-md:pt-[var(--fd-nav-height)] max-md:text-[15px] max-md:backdrop-blur-md max-md:data-[open=false]:invisible',
           props.aside?.className,
         )}
+        style={
+          {
+            ...props.aside?.style,
+            '--fd-sidebar-offset':
+              'calc(var(--fd-c-sidebar) - var(--fd-sidebar-width))',
+          } as object
+        }
       >
         {hasSearch || props.banner ? (
           <div

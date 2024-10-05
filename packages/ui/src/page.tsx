@@ -91,22 +91,6 @@ export function DocsPage({
     ...props.tableOfContent,
   };
 
-  if (props.editOnGithub) {
-    tocOptions.footer = (
-      <>
-        {tocOptions.footer}
-        <EditOnGitHub {...props.editOnGithub} />
-      </>
-    );
-
-    tocPopoverOptions.footer = (
-      <>
-        {tocPopoverOptions.footer}
-        <EditOnGitHub {...props.editOnGithub} />
-      </>
-    );
-  }
-
   return (
     <AnchorProvider toc={toc} single={tocOptions.single}>
       <div
@@ -142,10 +126,14 @@ export function DocsPage({
         <article className="flex flex-1 flex-col gap-6 px-4 pt-10 md:px-6 md:pt-12">
           {replaceOrDefault(breadcrumb, <Breadcrumb {...breadcrumb} />)}
           {props.children}
-          <div className="mt-auto" />
-          {props.lastUpdate ? (
-            <LastUpdate date={new Date(props.lastUpdate)} />
-          ) : null}
+          <div className="mt-auto flex flex-row flex-wrap items-center justify-between gap-1.5 empty:hidden">
+            {props.editOnGithub ? (
+              <EditOnGitHub {...props.editOnGithub} />
+            ) : null}
+            {props.lastUpdate ? (
+              <LastUpdate date={new Date(props.lastUpdate)} />
+            ) : null}
+          </div>
           {replaceOrDefault(footer, <Footer items={footer.items} />)}
         </article>
       </div>

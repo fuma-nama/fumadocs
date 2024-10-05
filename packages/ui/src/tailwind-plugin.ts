@@ -135,7 +135,7 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
           '--fd-c-sidebar': 'var(--fd-sidebar-width)',
 
           '--fd-diff-remove-color': 'rgba(200,10,100,0.12)',
-          '--fd-diff-remove-symbol-color': 'rgb(200,10,100)',
+          '--fd-diff-remove-symbol-color': 'rgb(230,10,100)',
           '--fd-diff-add-color': 'rgba(14,180,100,0.12)',
           '--fd-diff-add-symbol-color': 'rgb(10,200,100)',
         },
