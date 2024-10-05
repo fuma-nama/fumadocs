@@ -71,7 +71,6 @@ export function APIPlayground({
 } & HTMLAttributes<HTMLFormElement>): React.ReactElement {
   const { baseUrl } = useApiContext();
   const dynamicRef = useRef(new Map<string, DynamicField>());
-  const [input, setInput] = useState<FormValues>();
   const form = useForm<FormValues>({
     defaultValues: {
       authorization: authorization?.defaultValue,
@@ -82,9 +81,7 @@ export function APIPlayground({
     },
   });
 
-  const testQuery = useQuery(async () => {
-    if (!input) return;
-
+  const testQuery = useQuery(async (input: FormValues) => {
     const url = new URL(
       `${baseUrl ?? window.location.origin}${createUrlFromInput(route, input.path, input.query)}`,
     );
@@ -143,7 +140,7 @@ export function APIPlayground({
   }, []);
 
   const onSubmit = form.handleSubmit((value) => {
-    setInput(value);
+    testQuery.start(value);
   });
 
   function renderCustomField<
@@ -342,8 +339,10 @@ function ResultDisplay({
   );
 }
 
-function useQuery<T>(fn: () => Promise<T>): {
-  start: () => void;
+function useQuery<I, T>(
+  fn: (input: I) => Promise<T>,
+): {
+  start: (input: I) => void;
   data?: T;
   isLoading: boolean;
 } {
@@ -354,10 +353,10 @@ function useQuery<T>(fn: () => Promise<T>): {
     () => ({
       isLoading: loading,
       data,
-      start() {
+      start(input) {
         setLoading(true);
 
-        void fn()
+        void fn(input)
           .then((res) => {
             setData(res);
           })

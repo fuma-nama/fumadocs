@@ -59,7 +59,7 @@
     "@types/react": "^18.3.10",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
-    "next": "15.0.0-canary.171",
+    "next": "15.0.0-canary.177",
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
     "webpack": "^5.90.3"
