@@ -44,6 +44,7 @@
   "devDependencies": {
     "@types/cross-spawn": "^6.0.6",
     "@types/node": "22.7.4",
+    "@types/react": "^18.3.11",
     "eslint-config-custom": "workspace:*",
     "fast-glob": "^3.3.1",
     "tsconfig": "workspace:*",

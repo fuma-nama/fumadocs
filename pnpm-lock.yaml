@@ -447,6 +447,9 @@ importers:
       '@types/node':
         specifier: 22.7.4
         version: 22.7.4
+      '@types/react':
+        specifier: ^18.3.11
+        version: 18.3.11
       eslint-config-custom:
         specifier: workspace:*
         version: link:../eslint-config-custom

@@ -3,4 +3,5 @@ module.exports = {
   rules: {
     'import/no-relative-packages': 'off',
   },
+  ignorePatterns: ['test/repo', 'test/repo-2'],
 };

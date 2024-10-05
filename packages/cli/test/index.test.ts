@@ -3,8 +3,9 @@ import fs from 'node:fs/promises';
 import { expect, test } from 'vitest';
 import { runTransform } from '@/utils/i18n/transform-root-layout';
 import { createEmptyProject } from '@/utils/typescript';
-import { build, type Registry } from '@/build/build-registry';
-import * as docs from '../../../apps/docs/components/registry.mjs';
+import { build } from '@/build/build-registry';
+import * as repo from './repo/registry';
+import * as repo2 from './repo-2/registry';
 
 const project = createEmptyProject();
 
@@ -22,16 +23,30 @@ test('transform layout: i18n', { timeout: 1000 * 15 }, async () => {
   );
 });
 
-test('build registry: docs', { timeout: 1000 * 15 }, async () => {
-  const out = await build(docs.registry as Registry);
+test('build registry', { timeout: 1000 * 15 }, async () => {
+  const out = await build(repo.registry);
 
   await expect(JSON.stringify(out.index, null, 2)).toMatchFileSnapshot(
-    `./fixture/out/_registry.json`,
+    `./out/repo/_registry.json`,
   );
 
   for (const comp of out.components) {
     await expect(JSON.stringify(comp, null, 2)).toMatchFileSnapshot(
-      `./fixture/out/${comp.name}.json`,
+      `./out/repo/${comp.name}.json`,
+    );
+  }
+});
+
+test('build registry: extended', { timeout: 1000 * 15 }, async () => {
+  const out = await build(repo2.registry);
+
+  await expect(JSON.stringify(out.index, null, 2)).toMatchFileSnapshot(
+    `./out/extended/_registry.json`,
+  );
+
+  for (const comp of out.components) {
+    await expect(JSON.stringify(comp, null, 2)).toMatchFileSnapshot(
+      `./out/extended/${comp.name}.json`,
     );
   }
 });
