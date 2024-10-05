@@ -2,6 +2,7 @@ import type { Root } from 'hast';
 import type { RehypeShikiOptions } from '@shikijs/rehype';
 import rehypeShikiFromHighlighter from '@shikijs/rehype/core';
 import {
+  transformerNotationDiff,
   transformerNotationHighlight,
   transformerNotationWordHighlight,
 } from '@shikijs/transformers';
@@ -52,6 +53,7 @@ export const rehypeCodeDefaultOptions: RehypeCodeOptions = {
   transformers: [
     transformerNotationHighlight(),
     transformerNotationWordHighlight(),
+    transformerNotationDiff(),
   ],
   parseMetaString(meta) {
     const map: Record<string, string> = {};

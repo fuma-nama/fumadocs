@@ -205,7 +205,7 @@ See [Page Conventions](/docs/ui/page-conventions#frontmatter) for a list of prop
 
 ## Codeblock
 
-Syntax Highlighting is done with [Rehype Code](/docs/headless/mdx/rehype-code) automatically.
+Syntax Highlighting is supported by default using [Rehype Code](/docs/headless/mdx/rehype-code).
 
 ````mdx
 ```js
@@ -223,7 +223,7 @@ console.log('Hello World');
 
 ### Highlight Lines
 
-You spectify highlighted lines by adding `[!code highlight]`.
+You can highlight specific lines by adding `[!code highlight]`.
 
 ````md
 ```tsx
@@ -246,6 +246,20 @@ const config = {
 };
 ```
 ````
+
+### Diffs
+
+````mdx
+```ts
+console.log('hewwo'); // [\!code --]
+console.log('hello'); // [\!code ++]
+```
+````
+
+```ts
+console.log('hewwo'); // [!code --]
+console.log('hello'); // [!code ++]
+```
 
 ### As Tab
 

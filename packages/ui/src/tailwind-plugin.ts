@@ -133,6 +133,11 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
           '--fd-doc':
             'calc(min(100vw, var(--fd-layout-width)) - var(--fd-toc-width) - var(--fd-sidebar-width))',
           '--fd-c-sidebar': 'var(--fd-sidebar-width)',
+
+          '--fd-diff-remove-color': 'rgba(200,10,100,0.12)',
+          '--fd-diff-remove-symbol-color': 'rgb(200,10,100)',
+          '--fd-diff-add-color': 'rgba(14,180,100,0.12)',
+          '--fd-diff-add-symbol-color': 'rgb(10,200,100)',
         },
         '.dark': getThemeStyles(cssPrefix, dark),
         '*': {
@@ -162,7 +167,8 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
 
       if (css) addComponents(css);
 
-      addComponents({
+      // Shiki styles
+      addBase({
         '.shiki code span': {
           color: 'var(--shiki-light)',
         },
@@ -173,24 +179,43 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
           display: 'grid',
           'font-size': '13px',
         },
+
+        '.shiki code .diff.remove': {
+          backgroundColor: 'var(--fd-diff-remove-color)',
+          opacity: '0.7',
+        },
+        '.shiki code .diff::before': {
+          position: 'absolute',
+          left: '6px',
+        },
+        '.shiki code .diff.remove::before': {
+          content: "'-'",
+          color: 'var(--fd-diff-remove-symbol-color)',
+        },
+        '.shiki code .diff.add': {
+          backgroundColor: 'var(--fd-diff-add-color)',
+        },
+        '.shiki code .diff.add::before': {
+          content: "'+'",
+          color: 'var(--fd-diff-add-symbol-color)',
+        },
+        '.shiki code .diff': {
+          margin: '0 -16px',
+          padding: '0 16px',
+          display: 'inline-block',
+        },
         '.shiki .highlighted': {
           margin: '0 -16px',
           padding: '0 16px',
-          'background-color': `theme('colors.fd-primary.DEFAULT / 10%')`,
+          backgroundColor: `theme('colors.fd-primary.DEFAULT / 10%')`,
         },
         '.shiki .highlighted-word': {
           padding: '1px 2px',
           margin: '-1px -3px',
           border: '1px solid',
-          'border-color': `theme('colors.fd-primary.DEFAULT / 50%')`,
-          'background-color': `theme('colors.fd-primary.DEFAULT / 10%')`,
-          'border-radius': '2px',
-        },
-        '.fd-codeblock-keep-bg': {
-          'background-color': 'var(--shiki-light-bg)',
-        },
-        '.dark .fd-codeblock-keep-bg': {
-          'background-color': 'var(--shiki-dark-bg)',
+          borderColor: `theme('colors.fd-primary.DEFAULT / 50%')`,
+          backgroundColor: `theme('colors.fd-primary.DEFAULT / 10%')`,
+          borderRadius: '2px',
         },
       });
 
