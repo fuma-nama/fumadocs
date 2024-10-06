@@ -21,7 +21,8 @@ export async function start(
   const jsOut = path.resolve(outDir, `index.js`);
   const typeOut = path.resolve(outDir, `index.d.ts`);
 
-  if (dev) {
+  if (dev && !process.env._FUMADOCS_MDX) {
+    process.env._FUMADOCS_MDX = '1';
     const { watcher } = await import('@/map/watcher');
     const instance = watcher(configPath, config);
 

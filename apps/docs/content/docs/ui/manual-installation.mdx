@@ -3,6 +3,8 @@ title: Manual Installation
 description: Create a new fumadocs project from sketch.
 ---
 
+> Make sure to read the [Quick Start](/docs/ui) guide first.
+
 ## Getting Started
 
 Create a new Next.js application with `create-next-app`, and install required packages.
@@ -22,7 +24,7 @@ There is a list of supported sources:
 
 You have to configure the library correctly following their setup guide before continuing.
 
-Make sure to create a `source.ts` file for content adapters.
+Make sure to create a `source.ts` file for content adapters, this allows Fumadocs to interact with your content source through a unified interface.
 
 ```json doc-gen:file
 {
@@ -78,7 +80,7 @@ Create a `app/layout.config.tsx` file to put the shared options for our layouts.
 }
 ```
 
-Create a folder `/app/docs` for our docs, and give it a proper layout.
+Create a folder `/app/docs` for our docs, and give it a proper layout with `/app/docs/layout.tsx`.
 
 ```json doc-gen:file
 {
@@ -148,4 +150,22 @@ Learn more about [Document Search](/docs/headless/search).
 
 ### Done
 
-You can start the dev server and start writing content.
+You can start the dev server and create MDX files.
+
+```mdx title="content/docs/index.mdx"
+---
+title: Hello World
+---
+
+## Introduction
+
+I love Anime.
+```
+
+#### Content
+
+See the docs of your content source (e.g. Fumadocs MDX) to customise how content are processed.
+
+#### Routing
+
+See [Organizing Pages](/docs/ui/page-conventions) for customising routing.

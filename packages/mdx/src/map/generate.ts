@@ -26,6 +26,7 @@ export async function generateJS(
       const dirs = Array.isArray(collection.dir)
         ? collection.dir
         : [collection.dir];
+
       await Promise.all(
         dirs.map(async (dir) => {
           const included = await fg(collection.files ?? ['**/*'], {
@@ -36,9 +37,14 @@ export async function generateJS(
           for (const file of included) {
             if (getTypeFromPath(file) !== collection.type) continue;
             if (config._runtime.files.has(file)) {
-              console.warn(
-                `[MDX] Files cannot exist in multiple collections: ${file} (${config._runtime.files.get(file) ?? ''})`,
-              );
+              const belongs = config._runtime.files.get(file);
+
+              if (belongs !== name) {
+                console.warn(
+                  `[MDX] Files cannot exist in multiple collections: ${file} (${belongs ?? ''} and ${name})`,
+                );
+              }
+
               continue;
             }
 

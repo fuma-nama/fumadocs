@@ -239,6 +239,16 @@ You can disable the default theme switcher with `disableThemeSwitch` on layouts.
 
 ## Breaking Changes
 
+### Move `dir` option from `defineDocs`
+
+```ts
+import { defineDocs } from 'fumadocs-mdx/config';
+
+export const { docs, meta } = defineDocs({
+  dir: 'my/content/dir', // define once
+});
+```
+
 ### Refactor Imports
 
 **Previous**

@@ -77,22 +77,31 @@ export function defineDocs<
   DocsOut extends BaseCollectionEntry = CollectionEntry<'doc', z.output<F>>,
   MetaOut extends BaseCollectionEntry = CollectionEntry<'meta', z.output<M>>,
 >(options?: {
-  docs?: Partial<Collections<F, 'doc', DocsOut>>;
-  meta?: Partial<Collections<M, 'meta', MetaOut>>;
+  /**
+   * The directory to scan files
+   *
+   *  @defaultValue '/content/docs'
+   */
+  dir?: string | string[];
+
+  docs?: Omit<Partial<Collections<F, 'doc', DocsOut>>, 'dir'>;
+  meta?: Omit<Partial<Collections<M, 'meta', MetaOut>>, 'dir'>;
 }): {
   docs: Collections<F, 'doc', DocsOut>;
   meta: Collections<M, 'meta', MetaOut>;
 } {
+  const dir = options?.dir ?? 'content/docs';
+
   return {
     docs: defineCollections({
       type: 'doc',
-      dir: 'content/docs',
+      dir,
       schema: frontmatterSchema as unknown as F,
       ...options?.docs,
     }),
     meta: defineCollections({
       type: 'meta',
-      dir: 'content/docs',
+      dir,
       schema: metaSchema as unknown as M,
       ...options?.meta,
     }),

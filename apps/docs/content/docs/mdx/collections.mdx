@@ -131,6 +131,18 @@ export const { docs, meta } = defineDocs({
 The `docs` and `meta` are collections on their own.
 You can pass collection options to them as shown above.
 
+### `dir`
+
+Instead of per collection, you should customise `dir` from `defineDocs`:
+
+```ts
+import { defineDocs } from 'fumadocs-mdx/config';
+
+export const { docs, meta } = defineDocs({
+  dir: 'my/content/dir',
+});
+```
+
 ### `schema`
 
 You can extend the default Zod schema of `docs` and `meta`.
