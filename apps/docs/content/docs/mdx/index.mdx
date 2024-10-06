@@ -95,10 +95,26 @@ to learn how to organize your pages.
 
 ### Usages
 
-Usually, you'll interact with Fumadocs MDX through Source API (the `loader`).
-You can see the type definitions to find the available properties.
+Generally, you'll interact with Fumadocs MDX through the Source `loader` API.
+You can see the type definitions to find available properties.
 
-To render the page, pass components to the body.
+To render the page, obtain the page from `source` and render the MDX component (`page.data.body`).
+
+```tsx
+import { notFound } from 'next/navigation';
+import { source } from '@/lib/source';
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+
+const page = source.getPage(['slugs']);
+if (!page) notFound();
+
+const MDX = page.data.body;
+
+// set your MDX components with `components` prop
+<MDX components={{ ...defaultMdxComponents }} />;
+```
+
+Eventually, it will look like:
 
 ```json doc-gen:file
 {
@@ -123,7 +139,7 @@ These properties are exported from MDX files by default.
 
 ### MDX Plugins
 
-You can customise the options passed to the MDX processor.
+You can customise the MDX options with [Global Config](/docs/mdx/global) or [Collection Config](/docs/mdx/collections).
 
 ```ts title="source.config.ts"
 import { defineConfig } from 'fumadocs-mdx/config';

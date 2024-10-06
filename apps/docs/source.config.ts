@@ -8,12 +8,7 @@ import {
 import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins';
 import { transformerTwoslash } from 'fumadocs-twoslash';
 import remarkMath from 'remark-math';
-import {
-  fileGenerator,
-  remarkDocGen,
-  remarkInstall,
-  typescriptGenerator,
-} from 'fumadocs-docgen';
+import { fileGenerator, remarkDocGen, remarkInstall } from 'fumadocs-docgen';
 import rehypeKatex from 'rehype-katex';
 import { z } from 'zod';
 

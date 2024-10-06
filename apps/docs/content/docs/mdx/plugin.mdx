@@ -1,5 +1,5 @@
 ---
-title: Next.js
+title: Next.js Loader
 description: Customise the Next.js loader
 ---
 
@@ -19,3 +19,8 @@ const withMDX = createMDX({
   configPath: './my-config.ts',
 });
 ```
+
+### Development Server
+
+When running in development mode (`next dev`), a file watcher will be started to watch for changes.
+It automatically re-generates the index file in `.source` folder, ensuring Next.js hot reload is working properly.
