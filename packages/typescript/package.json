@@ -42,7 +42,7 @@
     "mdast-util-gfm": "^3.0.0",
     "mdast-util-to-hast": "^13.2.0",
     "shiki": "^1.21.0",
-    "ts-morph": "^23.0.0"
+    "ts-morph": "^24.0.0"
   },
   "devDependencies": {
     "@types/estree": "^1.0.6",

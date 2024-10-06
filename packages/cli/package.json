@@ -39,7 +39,7 @@
     "execa": "^9.4.0",
     "package-manager-detector": "^0.2.0",
     "picocolors": "^1.1.0",
-    "ts-morph": "^23.0.0"
+    "ts-morph": "^24.0.0"
   },
   "devDependencies": {
     "@types/cross-spawn": "^6.0.6",
