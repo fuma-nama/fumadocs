@@ -20,7 +20,7 @@ export function Info({
       <PopoverTrigger>
         <InfoIcon className="size-4" />
       </PopoverTrigger>
-      <PopoverContent className="prose max-w-[500px] text-sm">
+      <PopoverContent className="prose max-h-[400px] min-w-[220px] max-w-[400px] overflow-auto text-sm prose-no-margin">
         {children}
       </PopoverContent>
     </Popover>

@@ -3,20 +3,22 @@ import { fileURLToPath } from 'url';
 import { expect, test } from 'vitest';
 import * as path from 'node:path';
 import * as fs from 'node:fs';
+import type { TypescriptConfig } from '@/get-project';
 
 const relative = (s: string): string =>
   path.resolve(fileURLToPath(new URL(s, import.meta.url)));
 
-const tsconfig = {
+const tsconfig: TypescriptConfig = {
   tsconfigPath: relative('../tsconfig.json'),
   basePath: relative('../'),
 };
 
 test('Run', () => {
   const file = relative('./fixtures/test.ts');
+  const content = fs.readFileSync(file).toString();
 
-  const result = ['Test1', 'Test2', 'Test3'].map((name) =>
-    generateDocumentation(file, name, {
+  const result = ['Test1', 'Test2', 'Test3'].flatMap((name) =>
+    generateDocumentation(file, name, content, {
       config: tsconfig,
     }),
   );

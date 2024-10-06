@@ -35,11 +35,14 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
+    "@types/node": "22.7.4",
     "fast-glob": "^3.3.1",
     "hast-util-to-jsx-runtime": "^2.3.0",
     "mdast-util-from-markdown": "^2.0.1",
     "mdast-util-gfm": "^3.0.0",
-    "mdast-util-to-hast": "^13.2.0"
+    "mdast-util-to-hast": "^13.2.0",
+    "shiki": "^1.21.0",
+    "ts-morph": "^23.0.0"
   },
   "devDependencies": {
     "@types/estree": "^1.0.6",

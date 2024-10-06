@@ -7,12 +7,24 @@ description: Auto-generated type table
 
 <div className="bg-fd-background px-4 rounded-xl">
 
-```json doc-gen:typescript
-{
-  "file": "./content/docs/ui/props.ts",
-  "name": "AutoTypeTableExample"
-}
-```
+<AutoTypeTable name="AutoTypeTableExample" type={`export interface AutoTypeTableExample {
+    /**
+     * Markdown syntax like links, \`code\` are supported.
+     *
+     * See https://fumadocs.vercel.app/docs/ui/components/type-table
+     */
+    name: string;
+
+    /**
+    * We love Shiki.
+    *
+    * \`\`\`ts
+    * console.log("Hello World, powered by Shiki");
+    * \`\`\`
+    */
+    options: Partial<{ a: unknown }>;
+
+}`} />
 
 </div>
 
@@ -24,11 +36,25 @@ description: Auto-generated type table
 fumadocs-typescript
 ```
 
+Initialize the TypeScript compiler and add it as a MDX component.
+
+```tsx title="page.tsx"
+import { createTypeTable } from 'fumadocs-typescript/ui';
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+
+const { AutoTypeTable } = createTypeTable();
+
+<MDX
+  components={{
+    ...defaultMdxComponents,
+    AutoTypeTable,
+  }}
+/>;
+```
+
 It accepts a `path` prop which should be a typescript file, and `name` for the exported type name.
 
 ```mdx
-import { AutoTypeTable } from 'fumadocs-typescript/ui';
-
 <AutoTypeTable path="./path/to/file.ts" name="MyInterface" />
 ```
 
@@ -37,6 +63,39 @@ import { AutoTypeTable } from 'fumadocs-typescript/ui';
 You cannot use this in a client component.
 
 </Callout>
+
+### `type`
+
+You can specify the type to generate, without an actual TypeScript file.
+
+```mdx
+import { AutoTypeTable } from 'fumadocs-typescript/ui';
+
+<AutoTypeTable type="{ hello: string }" />
+```
+
+When a `path` is given, it shares the same context as the TypeScript file.
+
+```ts title="file.ts"
+export type A = { hello: string };
+```
+
+```mdx
+<AutoTypeTable path="file.ts" type="A & { world: string }" />
+```
+
+When `type` has multiple lines, the export statement and `name` prop are required.
+
+```mdx
+<AutoTypeTable
+  path="file.ts"
+  name="B"
+  type={`
+import { ReactNode } from "react"
+export type B = ReactNode | { world: string }
+`}
+/>
+```
 
 ### Functions
 
@@ -50,12 +109,7 @@ export interface MyInterface {
 
 ### Auto Type Table
 
-```json doc-gen:typescript
-{
-  "file": "./content/docs/ui/props.ts",
-  "name": "AutoTypeTableProps"
-}
-```
+<AutoTypeTable path="./content/docs/ui/props.ts" name="AutoTypeTableProps" />
 
 ### File System
 

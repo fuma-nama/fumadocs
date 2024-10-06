@@ -14,10 +14,13 @@ import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 import { Callout } from 'fumadocs-ui/components/callout';
 import { TypeTable } from 'fumadocs-ui/components/type-table';
 import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+import { createTypeTable } from 'fumadocs-typescript/ui';
 import Preview from '@/components/preview';
 import { createMetadata, metadataImage } from '@/utils/metadata';
 import { openapi, source } from '@/app/source';
 import { Wrapper } from '@/components/preview/wrapper';
+
+const { AutoTypeTable } = createTypeTable();
 
 export default async function Page(props: {
   params: Promise<{ slug: string[] }>;
@@ -59,6 +62,7 @@ export default async function Page(props: {
             Tabs,
             Tab,
             TypeTable,
+            AutoTypeTable,
             Accordion,
             Accordions,
             Wrapper,

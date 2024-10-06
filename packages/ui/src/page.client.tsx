@@ -22,7 +22,7 @@ export function LastUpdate(props: { date: Date }): React.ReactElement {
   }, [props.date]);
 
   return (
-    <p className="text-xs text-fd-muted-foreground">
+    <p className="text-sm text-fd-muted-foreground">
       {text.lastUpdate} {date}
     </p>
   );

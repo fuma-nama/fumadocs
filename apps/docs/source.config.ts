@@ -78,7 +78,7 @@ export default defineConfig({
     remarkPlugins: [
       remarkMath,
       [remarkInstall, { persist: { id: 'package-manager' } }],
-      [remarkDocGen, { generators: [typescriptGenerator(), fileGenerator()] }],
+      [remarkDocGen, { generators: [fileGenerator()] }],
     ],
     rehypePlugins: (v) => [rehypeKatex, ...v],
   },

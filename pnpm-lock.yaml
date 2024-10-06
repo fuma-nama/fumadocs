@@ -684,6 +684,9 @@ importers:
       npm-to-yarn:
         specifier: ^3.0.0
         version: 3.0.0
+      ts-morph:
+        specifier: ^23.0.0
+        version: 23.0.0
       unist-util-visit:
         specifier: ^5.0.0
         version: 5.0.0
@@ -1005,6 +1008,9 @@ importers:
 
   packages/typescript:
     dependencies:
+      '@types/node':
+        specifier: 22.7.4
+        version: 22.7.4
       fast-glob:
         specifier: ^3.3.1
         version: 3.3.2
@@ -1020,6 +1026,12 @@ importers:
       mdast-util-to-hast:
         specifier: ^13.2.0
         version: 13.2.0
+      shiki:
+        specifier: ^1.21.0
+        version: 1.21.0
+      ts-morph:
+        specifier: ^23.0.0
+        version: 23.0.0
     devDependencies:
       '@types/estree':
         specifier: ^1.0.6

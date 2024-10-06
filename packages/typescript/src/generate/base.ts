@@ -1,5 +1,11 @@
-import ts from 'typescript';
-import { type TypescriptConfig, getProgram, getFileSymbol } from '@/program';
+import {
+  type ExportedDeclarations,
+  type Project,
+  type Symbol as TsSymbol,
+  ts,
+  type Type,
+} from 'ts-morph';
+import { getProject, type TypescriptConfig } from '@/get-project';
 
 export interface GeneratedDoc {
   name: string;
@@ -15,18 +21,17 @@ export interface DocEntry {
 }
 
 interface EntryContext {
-  program: ts.Program;
-  checker: ts.TypeChecker;
+  program: Project;
   transform?: Transformer;
-  type: ts.Type;
-  symbol: ts.Symbol;
+  type: Type;
+  declaration: ExportedDeclarations;
 }
 
 type Transformer = (
   this: EntryContext,
   entry: DocEntry,
-  propertyType: ts.Type,
-  propertySymbol: ts.Symbol,
+  propertyType: Type,
+  propertySymbol: TsSymbol,
 ) => void;
 
 export interface GenerateOptions {
@@ -47,11 +52,8 @@ export interface GenerateDocumentationOptions extends GenerateOptions {
   /**
    * Typescript configurations
    */
-  config?:
-    | TypescriptConfig
-    | {
-        program: ts.Program;
-      };
+  config?: TypescriptConfig;
+  project?: Project;
 }
 
 /**
@@ -59,79 +61,93 @@ export interface GenerateDocumentationOptions extends GenerateOptions {
  */
 export function generateDocumentation(
   file: string,
-  name: string,
+  name: string | undefined,
+  content: string,
   options: GenerateDocumentationOptions = {},
-): GeneratedDoc | undefined {
-  const program =
-    options.config && 'program' in options.config
-      ? options.config.program
-      : getProgram(options.config);
-  const fileSymbol = getFileSymbol(file, program);
-  if (!fileSymbol) return;
+): GeneratedDoc[] {
+  const project = options.project ?? getProject(options.config);
+  const sourceFile = project.createSourceFile(file, content, {
+    overwrite: true,
+  });
+  const out: GeneratedDoc[] = [];
 
-  const symbol = program
-    .getTypeChecker()
-    .getExportsOfModule(fileSymbol)
-    .find((e) => e.getEscapedName().toString() === name);
+  for (const [k, d] of sourceFile.getExportedDeclarations()) {
+    if (name && name !== k) continue;
 
-  if (!symbol) return;
+    if (d.length > 1)
+      console.warn(
+        `export ${k} should not have more than one type declaration.`,
+      );
 
-  return generate(program, symbol, options);
+    out.push(generate(project, k, d[0], options));
+  }
+
+  return out;
 }
 
 export function generate(
-  program: ts.Program,
-  symbol: ts.Symbol,
+  program: Project,
+  name: string,
+  declaration: ExportedDeclarations,
   { allowInternal = false, transform }: GenerateOptions,
 ): GeneratedDoc {
-  const checker = program.getTypeChecker();
-  const type = checker.getDeclaredTypeOfSymbol(symbol);
   const entryContext: EntryContext = {
-    checker,
     transform,
     program,
-    type,
-    symbol,
+    type: declaration.getType(),
+    declaration,
   };
 
+  const comment = declaration
+    .getSymbol()
+    ?.compilerSymbol.getDocumentationComment(
+      program.getTypeChecker().compilerObject,
+    );
+
   return {
-    name: symbol.getEscapedName().toString(),
-    description: ts.displayPartsToString(
-      symbol.getDocumentationComment(checker),
-    ),
-    entries: type
+    name,
+    description: comment ? ts.displayPartsToString(comment) : '',
+    entries: declaration
+      .getType()
       .getProperties()
       .map((prop) => getDocEntry(prop, entryContext))
       .filter((entry) => allowInternal || !('internal' in entry.tags)),
   };
 }
 
-function getDocEntry(prop: ts.Symbol, context: EntryContext): DocEntry {
-  const { checker, transform } = context;
-  const subType = checker.getTypeOfSymbol(prop);
+function getDocEntry(prop: TsSymbol, context: EntryContext): DocEntry {
+  const { transform, program } = context;
+  const subType = program
+    .getTypeChecker()
+    .getTypeOfSymbolAtLocation(prop, context.declaration);
   const tags = Object.fromEntries(
     prop
       .getJsDocTags()
-      .map((tag) => [tag.name, ts.displayPartsToString(tag.text)]),
+      .map((tag) => [tag.getName(), ts.displayPartsToString(tag.getText())]),
   );
 
-  let typeName = checker.typeToString(
-    subType.getNonNullableType(),
-    undefined,
-    ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope,
-  );
+  let typeName = subType
+    .getNonNullableType()
+    .getText(undefined, ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope);
 
-  if (subType.aliasSymbol && !subType.aliasTypeArguments) {
-    typeName = subType.aliasSymbol.escapedName.toString();
+  if (
+    subType.getAliasSymbol() &&
+    subType.getAliasTypeArguments().length === 0
+  ) {
+    typeName = subType.getAliasSymbol()?.getEscapedName() ?? typeName;
   }
 
-  if (tags.remarks) {
+  if ('remarks' in tags) {
     typeName = /^`(?<name>.+)`/.exec(tags.remarks)?.[1] ?? typeName;
   }
 
   const entry: DocEntry = {
     name: prop.getName(),
-    description: ts.displayPartsToString(prop.getDocumentationComment(checker)),
+    description: ts.displayPartsToString(
+      prop.compilerSymbol.getDocumentationComment(
+        program.getTypeChecker().compilerObject,
+      ),
+    ),
     tags,
     type: typeName,
   };

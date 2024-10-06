@@ -1,4 +1,5 @@
 import * as path from 'node:path';
+import * as fs from 'node:fs/promises';
 import { valueToEstree } from 'estree-util-value-to-estree';
 import type { ExpressionStatement, ObjectExpression, Property } from 'estree';
 import { toEstree as hastToEstree } from 'hast-util-to-estree';
@@ -7,9 +8,8 @@ import {
   generateDocumentation,
   renderMarkdownToHast,
   type DocEntry,
+  getProject,
 } from 'fumadocs-typescript';
-import { getProgram } from 'fumadocs-typescript';
-import type { Program } from 'typescript';
 import { z } from 'zod';
 import { createElement, expressionToAttribute } from './utils';
 import type { DocGenerator } from './remark-docgen';
@@ -58,15 +58,9 @@ export interface VirtualTypeTableProps {
 export function typescriptGenerator(
   options: TypescriptGeneratorOptions = {},
 ): DocGenerator {
-  let program: Program | undefined;
+  const project = options.project ?? getProject(options.config);
 
-  function loadProgram(): Program {
-    return options.config && 'program' in options.config
-      ? options.config.program
-      : getProgram(options.config);
-  }
-
-  function mapProperty(entry: DocEntry): Property {
+  async function mapProperty(entry: DocEntry): Promise<Property> {
     const value = valueToEstree({
       type: entry.type,
       description: '',
@@ -74,7 +68,7 @@ export function typescriptGenerator(
     }) as ObjectExpression;
 
     if (entry.description) {
-      const hast = hastToEstree(renderMarkdownToHast(entry.description), {
+      const hast = hastToEstree(await renderMarkdownToHast(entry.description), {
         elementAttributeNameCase: 'react',
       }).body[0] as ExpressionStatement;
 
@@ -108,31 +102,35 @@ export function typescriptGenerator(
 
   return {
     name: 'typescript',
-    onFile() {
-      if (process.env.NODE_ENV === 'development' || !program) {
-        program = loadProgram();
-      }
-    },
-    run(input, ctx) {
+    async run(input, ctx) {
       const {
         file,
         name,
         component = 'TypeTable',
       } = typescriptGeneratorSchema.parse(input);
       const dest = path.resolve(ctx.cwd, file);
+      const content = await fs.readFile(dest);
 
-      const doc = generateDocumentation(dest, name, {
+      const result = generateDocumentation(dest, name, content.toString(), {
         ...options,
-        config: { program: program ?? loadProgram() },
+        project,
       });
-      if (!doc) throw new Error(`Failed to find type ${name} in ${dest}`);
 
-      return createElement(component, [
-        expressionToAttribute('type', {
-          type: 'ObjectExpression',
-          properties: doc.entries.map(mapProperty),
-        }),
-      ]);
+      if (result.length === 0)
+        throw new Error(`Failed to find type ${name} in ${dest}`);
+
+      const rendered = result.map(async (doc) => {
+        const properties = await Promise.all(doc.entries.map(mapProperty));
+
+        return createElement(component, [
+          expressionToAttribute('type', {
+            type: 'ObjectExpression',
+            properties,
+          }),
+        ]);
+      });
+
+      return Promise.all(rendered);
     },
   };
 }

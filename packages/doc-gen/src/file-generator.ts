@@ -1,5 +1,5 @@
-import fs from 'node:fs';
-import path from 'node:path';
+import * as fs from 'node:fs/promises';
+import * as path from 'node:path';
 import type { Code, Paragraph } from 'mdast';
 import { z } from 'zod';
 import type { DocGenerator } from './remark-docgen';
@@ -43,13 +43,13 @@ export function fileGenerator({
 }: FileGeneratorOptions = {}): DocGenerator {
   return {
     name: 'file',
-    run(input, ctx) {
+    async run(input, ctx) {
       const { file, codeblock = false } = fileGeneratorSchema.parse(input);
 
       const dest = relative
         ? path.resolve(ctx.cwd, path.dirname(ctx.path), file)
         : path.resolve(ctx.cwd, file);
-      let value = fs.readFileSync(dest).toString();
+      let value = await fs.readFile(dest).then((res) => res.toString());
       if (trim) value = value.trim();
 
       if (codeblock === false) {
