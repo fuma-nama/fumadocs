@@ -86,9 +86,8 @@ export function APIPlayground({
       `${baseUrl ?? window.location.origin}${createUrlFromInput(route, input.path, input.query)}`,
     );
 
-    const headers = new Headers({
-      'Content-Type': 'application/json',
-    });
+    const headers = new Headers();
+    if (bodyType !== 'form-data') headers.append('Content-Type', 'application/json');
 
     if (input.authorization) {
       headers.append('Authorization', input.authorization);
