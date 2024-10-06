@@ -40,7 +40,9 @@ export function createBodyFromValue(
       }
     }
 
-    formData.set(key, JSON.stringify(prop));
+    if (prop && !(prop instanceof File)) {
+      formData.set(key, JSON.stringify(prop));
+    }
   }
 
   return formData;
