@@ -4,7 +4,7 @@ import * as Primitive from 'fumadocs-core/toc';
 import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/utils/cn';
 import { useI18n } from '@/contexts/i18n';
-import { useTocThumb } from '@/utils/use-toc-thumb';
+import { TocThumb } from '@/components/layout/toc-thumb';
 import { ScrollArea, ScrollViewport } from '../ui/scroll-area';
 
 export default function ClerkTOCItems({
@@ -18,7 +18,6 @@ export default function ClerkTOCItems({
   const viewRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const pos = useTocThumb(containerRef);
   const [svg, setSvg] = useState<{
     path: string;
     width: number;
@@ -95,12 +94,9 @@ export default function ClerkTOCItems({
               }")`,
             }}
           >
-            <div
-              className="bg-fd-primary transition-all ease-linear"
-              style={{
-                marginTop: pos[0],
-                height: pos[1],
-              }}
+            <TocThumb
+              containerRef={containerRef}
+              className="mt-[var(--fd-top)] h-[var(--fd-height)] bg-fd-primary transition-all ease-linear"
             />
           </div>
         ) : null}

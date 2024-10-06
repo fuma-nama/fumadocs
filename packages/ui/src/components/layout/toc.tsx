@@ -9,7 +9,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { useTocThumb } from '@/utils/use-toc-thumb';
+import { TocThumb } from '@/components/layout/toc-thumb';
 import { ScrollArea, ScrollViewport } from '../ui/scroll-area';
 
 export interface TOCProps {
@@ -101,7 +101,6 @@ export function TOCItems({
   const { text } = useI18n();
   const containerRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<HTMLDivElement>(null);
-  const pos = useTocThumb(containerRef);
 
   if (items.length === 0)
     return (
@@ -113,14 +112,12 @@ export function TOCItems({
   return (
     <ScrollArea className={cn('flex flex-col', isMenu && '-ms-3')}>
       <ScrollViewport className="relative min-h-0 text-sm" ref={viewRef}>
-        <div
-          role="none"
-          className="absolute start-0 w-px bg-fd-primary transition-all"
-          style={{
-            top: pos[0],
-            height: pos[1],
-          }}
-        />
+        {!isMenu ? (
+          <TocThumb
+            containerRef={containerRef}
+            className="absolute start-0 mt-[var(--fd-top)] h-[var(--fd-height)] w-px bg-fd-primary transition-all ease-linear"
+          />
+        ) : null}
         <Primitive.ScrollProvider containerRef={viewRef}>
           <div
             ref={containerRef}

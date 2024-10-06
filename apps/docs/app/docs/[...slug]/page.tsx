@@ -45,7 +45,7 @@ export default async function Page(props: {
       editOnGithub={{
         repo: 'fumadocs',
         owner: 'fuma-nama',
-        sha: 'main',
+        sha: 'dev',
         path,
       }}
     >
