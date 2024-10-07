@@ -126,7 +126,8 @@ export function DocsPage({
         <article className="flex flex-1 flex-col gap-6 px-4 pt-10 md:px-6 md:pt-12">
           {replaceOrDefault(breadcrumb, <Breadcrumb {...breadcrumb} />)}
           {props.children}
-          <div className="mt-auto flex flex-row flex-wrap items-center justify-between gap-4 pt-4 empty:hidden">
+          <div role="none" className="flex-1" />
+          <div className="flex flex-row flex-wrap items-center justify-between gap-4 empty:hidden">
             {props.editOnGithub ? (
               <EditOnGitHub {...props.editOnGithub} />
             ) : null}

@@ -21,13 +21,12 @@ export async function start(
   const jsOut = path.resolve(outDir, `index.js`);
   const typeOut = path.resolve(outDir, `index.d.ts`);
 
-  if (dev && !process.env._FUMADOCS_MDX) {
-    process.env._FUMADOCS_MDX = '1';
+  if (dev) {
     const { watcher } = await import('@/map/watcher');
     const instance = watcher(configPath, config);
 
     instance.on('ready', () => {
-      console.log('[MDX] started dev server');
+      if (!instance._readyEmitted) console.log('[MDX] started dev server');
     });
 
     instance.on('all', (event: EventName, file: string) => {

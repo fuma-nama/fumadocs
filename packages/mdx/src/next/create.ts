@@ -26,7 +26,9 @@ export function createMDX({
   const isDev = process.argv.includes('dev');
   const isBuild = process.argv.includes('build');
 
-  if (isDev || isBuild) {
+  if ((isDev || isBuild) && process.env._FUMADOCS_MDX !== '1') {
+    process.env._FUMADOCS_MDX = '1';
+
     void start(isDev, configPath, outDir);
   }
 
