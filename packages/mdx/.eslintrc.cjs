@@ -5,5 +5,5 @@ module.exports = {
     'import/no-named-as-default-member': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
   },
-  ignorePatterns: ['test/**/*.out.js'],
+  ignorePatterns: ['test/**/*.output.js'],
 };

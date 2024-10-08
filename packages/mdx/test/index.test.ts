@@ -49,9 +49,11 @@ test('generate JS index file', async () => {
         ],
       ]),
     },
-    path.join(file, './fixtures/index.out.js'),
+    path.join(file, './fixtures/index.output.js'),
     'hash',
   );
 
-  await expect(out).toMatchFileSnapshot('./fixtures/index.out.js');
+  await expect(out.replaceAll(process.cwd(), '$cwd')).toMatchFileSnapshot(
+    './fixtures/index.output.js',
+  );
 });
