@@ -110,7 +110,6 @@ export const docsOptions: DocsLayoutProps = {
         Ask AI
       </Trigger>
     ),
-    transparentMode: 'none',
   },
   links: linkItems,
   sidebar: {
