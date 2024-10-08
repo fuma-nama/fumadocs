@@ -30,7 +30,7 @@ function cacheKey(group: string, format: string): string {
 }
 
 /**
- * @param group - The cache group of MDX content, usually the collection name or hash of MDX options
+ * @param group - The cache group of MDX content, usually the collection name
  * @param configHash - config hash
  * @param source - mdx content
  * @param options - MDX options

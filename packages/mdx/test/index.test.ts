@@ -1,6 +1,10 @@
+import { fileURLToPath } from 'node:url';
+import * as path from 'node:path';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
 import { formatError } from '@/utils/format-error';
+import { generateJS } from '@/map/generate';
+import { defineCollections } from '@/config';
 
 test('format errors', () => {
   const schema = z.object({
@@ -25,4 +29,29 @@ test('format errors', () => {
           obj.key: Required
         value: String must contain at most 4 character(s)"
     `);
+});
+
+const file = path.dirname(fileURLToPath(import.meta.url));
+test('generate JS index file', async () => {
+  const out = await generateJS(
+    path.join(file, './fixtures/config.ts'),
+    {
+      _runtime: {
+        files: new Map(),
+      },
+      collections: new Map([
+        [
+          'docs',
+          defineCollections({
+            type: 'doc',
+            dir: path.join(file, './fixtures'),
+          }),
+        ],
+      ]),
+    },
+    path.join(file, './fixtures/index.out.js'),
+    'hash',
+  );
+
+  await expect(out).toMatchFileSnapshot('./fixtures/index.out.js');
 });
