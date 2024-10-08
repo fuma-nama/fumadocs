@@ -36,19 +36,46 @@ See [Root Provider](/docs/ui/blocks/root-provider#theme-provider) to learn more.
 
 ### RTL Layout
 
-RTL (Right-to-left) layout is supported. To enable RTL, pass the `dir` prop to body.
+RTL (Right-to-left) layout is supported.
+
+To enable RTL, set the `dir` prop to `rtl` in body and root provider (required for Radix UI).
 
 ```tsx
-<body dir="rtl"></body>
+import { RootProvider } from 'fumadocs-ui/provider';
+import type { ReactNode } from 'react';
+
+export default function RootLayout({
+  children,
+}: {
+  children: ReactNode;
+}): ReactNode {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body dir="rtl">
+        <RootProvider dir="rtl">{children}</RootProvider>
+      </body>
+    </html>
+  );
+}
 ```
 
-Also pass the same prop to root provider to configure Radix UI RTL layout.
+## CSS Variables
 
-```tsx
-import { RootProvider } from '@fumadocs-ui/provider';
+Fumadocs UI provides some CSS variables for customising the layout.
 
-<RootProvider dir="rtl"></RootProvider>;
+### Navbar Height
+
+When the default navbar is replaced, the layout may overlap with your new navbar.
+
+You should set the `--fd-nav-height` variable to the height of your navbar.
+
+```css
+:root {
+  --fd-nav-height: 40px !important;
+}
 ```
+
+> You can use it with CSS media queries.
 
 ### Layout Width
 
@@ -113,7 +140,9 @@ We use the [Tailwind CSS Typography](https://tailwindcss.com/docs/typography-plu
 The Tailwind CSS plugin overrides the default configuration for the Typography plugin. You can use the `prose` utility directly.
 
 ```tsx
-<div className="prose">...</div>
+<div className="prose">
+  <h1>Good Heading</h1>
+</div>
 ```
 
 ### Colors
@@ -131,23 +160,6 @@ export default {
   presets: [
     createPreset({
       addGlobalColors: true,
-    }),
-  ],
-};
-```
-
-### Layout Width
-
-Customise the max width of docs layout with Tailwind CSS plugin.
-
-```js
-import { createPreset } from 'fumadocs-ui/tailwind-plugin';
-
-/** @type {import('tailwindcss').Config} */
-export default {
-  presets: [
-    createPreset({
-      layoutWidth: '1400px',
     }),
   ],
 };

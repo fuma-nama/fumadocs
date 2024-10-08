@@ -106,7 +106,7 @@ export function DocsPage({
           <div
             id="nd-tocnav"
             className={cn(
-              'sticky top-fd-toc-top z-10 border-b bg-fd-background/60 text-sm backdrop-blur-md md:top-[calc(4px+var(--fd-banner-height)+var(--fd-nav-height))] md:mx-3 md:rounded-full md:border md:shadow-md',
+              'sticky top-fd-layout-top z-10 border-b bg-fd-background/60 text-sm backdrop-blur-md md:top-[calc(4px+var(--fd-banner-height)+var(--fd-nav-height))] md:mx-3 md:rounded-full md:border md:shadow-md',
               tocPopoverOptions.enabled !== true && 'lg:hidden',
             )}
           >

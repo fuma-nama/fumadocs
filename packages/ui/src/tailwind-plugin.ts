@@ -126,9 +126,9 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
           '--fd-sidebar-width': '0px',
           '--fd-toc-width': '0px',
           '--fd-layout-width': layoutWidth,
-
-          '--fd-nav-height': '56px',
           '--fd-banner-height': '0px',
+          '--fd-nav-height': '0px',
+
           // computed
           '--fd-doc':
             'calc(min(100vw, var(--fd-layout-width)) - var(--fd-toc-width) - var(--fd-sidebar-width))',
@@ -150,7 +150,6 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
         '@screen md': {
           ':root': {
             '--fd-sidebar-width': '260px',
-            '--fd-nav-height': '0px',
           },
         },
         '@screen lg': {
@@ -202,7 +201,7 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
         '.shiki code .diff': {
           margin: '0 -16px',
           padding: '0 16px',
-          display: 'inline-block',
+          position: 'relative',
         },
         '.shiki .highlighted': {
           margin: '0 -16px',
@@ -278,11 +277,10 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
         height: {
           'fd-toc-height':
             'calc(100dvh - var(--fd-banner-height) - var(--fd-nav-height))',
-          'fd-sidebar-height': 'calc(100dvh - var(--fd-banner-height))',
         },
         spacing: {
-          'fd-toc-top': 'calc(var(--fd-banner-height) + var(--fd-nav-height))',
-          'fd-sidebar-top': 'var(--fd-banner-height)',
+          'fd-layout-top':
+            'calc(var(--fd-banner-height) + var(--fd-nav-height))',
         },
         margin: {
           // the offset given to docs content when the sidebar is collapsed

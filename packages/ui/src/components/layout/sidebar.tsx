@@ -16,7 +16,7 @@ import { cn } from '@/utils/cn';
 import { useTreeContext } from '@/contexts/tree';
 import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
 import { hasActive, isActive } from '@/utils/shared';
-import { LinkItem, type LinkItemType } from '@/components/layout/link-item';
+import { type LinkItemType, MenuItem } from '@/components/layout/link-item';
 import { LargeSearchToggle } from '@/components/layout/search-toggle';
 import { useSearchContext } from '@/contexts/search';
 import { itemVariants } from '@/components/layout/variants';
@@ -113,13 +113,15 @@ export function Sidebar({
         blockScrollingWidth={768} // md
         {...props.aside}
         className={cn(
-          'fixed z-30 flex flex-col bg-fd-card text-sm md:sticky md:top-fd-sidebar-top md:h-fd-sidebar-height md:w-[var(--fd-c-sidebar)] md:min-w-[var(--fd-sidebar-width)] md:border-e md:ps-[var(--fd-sidebar-offset)]',
-          'max-md:inset-0 max-md:top-fd-sidebar-top max-md:bg-fd-background/80 max-md:pt-[var(--fd-nav-height)] max-md:text-[15px] max-md:backdrop-blur-md max-md:data-[open=false]:invisible',
+          'fixed top-fd-layout-top z-30 flex flex-col bg-fd-card text-sm md:sticky md:h-[var(--fd-sidebar-height)] md:w-[var(--fd-c-sidebar)] md:min-w-[var(--fd-sidebar-width)] md:border-e md:ps-[var(--fd-sidebar-offset)]',
+          'max-md:inset-x-0 max-md:bottom-0 max-md:bg-fd-background/80 max-md:pt-[var(--fd-nav-height)] max-md:text-[15px] max-md:backdrop-blur-md max-md:data-[open=false]:invisible',
           props.aside?.className,
         )}
         style={
           {
             ...props.aside?.style,
+            '--fd-sidebar-height':
+              'calc(100dvh - var(--fd-banner-height) - var(--fd-nav-height))',
             '--fd-sidebar-offset':
               'calc(var(--fd-c-sidebar) - var(--fd-sidebar-width))',
           } as object
@@ -140,7 +142,15 @@ export function Sidebar({
             ) : null}
           </div>
         ) : null}
-        <ViewportContent items={items} />
+        <ViewportContent>
+          {items.length > 0 ? (
+            <div className="flex flex-col px-4 pt-6 md:hidden">
+              {items.map((item, i) => (
+                <MenuItem key={i} item={item} />
+              ))}
+            </div>
+          ) : null}
+        </ViewportContent>
         {props.footer ? (
           <div
             {...props.footerProps}
@@ -158,9 +168,9 @@ export function Sidebar({
 }
 
 function ViewportContent({
-  items,
+  children,
 }: {
-  items: LinkItemType[];
+  children: React.ReactNode;
 }): React.ReactElement {
   const { root } = useTreeContext();
 
@@ -171,13 +181,7 @@ function ViewportContent({
           maskImage: 'linear-gradient(to bottom, transparent 2px, white 24px)',
         }}
       >
-        {items.length > 0 ? (
-          <div className="flex flex-col px-4 pt-6 md:hidden">
-            {items.map((item, i) => (
-              <LinkItem key={i} item={item} on="menu" />
-            ))}
-          </div>
-        ) : null}
+        {children}
         <NodeList items={root.children} className="px-4 py-6 md:px-3" />
       </ScrollViewport>
     </ScrollArea>
@@ -227,7 +231,8 @@ function PageNode({
     <Link
       href={url}
       external={external}
-      className={cn(itemVariants({ active }))}
+      data-active={active}
+      className={cn(itemVariants())}
       prefetch={prefetch}
     >
       {icon ?? (external ? <ExternalLinkIcon /> : null)}
@@ -289,7 +294,8 @@ function FolderNode({
     <Collapsible open={open} onOpenChange={setOpen}>
       {item.index ? (
         <Link
-          className={cn(itemVariants({ active }))}
+          data-active={active}
+          className={cn(itemVariants())}
           href={item.index.url}
           onClick={onClick}
           prefetch={prefetch}
@@ -297,7 +303,7 @@ function FolderNode({
           {content}
         </Link>
       ) : (
-        <CollapsibleTrigger className={cn(itemVariants({ active }))}>
+        <CollapsibleTrigger data-active={active} className={cn(itemVariants())}>
           {content}
         </CollapsibleTrigger>
       )}

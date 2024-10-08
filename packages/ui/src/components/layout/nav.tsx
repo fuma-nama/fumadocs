@@ -52,7 +52,7 @@ export function NavBox({
     <header
       {...props}
       className={cn(
-        'sticky top-fd-sidebar-top z-40 border-b transition-colors',
+        'sticky top-[var(--fd-banner-height)] z-40 border-b transition-colors',
         transparent
           ? 'border-transparent'
           : 'border-fd-foreground/10 bg-fd-background/80 backdrop-blur-md',

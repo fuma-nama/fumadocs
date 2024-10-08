@@ -22,6 +22,7 @@ export function HomeLayout({
           disableThemeSwitch={props.disableThemeSwitch}
           {...nav}
         >
+          <style>{`:root { --fd-nav-height 3.5rem; }`}</style>
           {nav.children}
         </Nav>,
       )}

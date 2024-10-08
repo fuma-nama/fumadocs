@@ -21,9 +21,10 @@ declare const {
   LanguageToggleText,
   LinksMenu,
   RootToggle,
-  LinkItem,
   DynamicSidebar,
   Sidebar,
+  IconItem,
+  MenuItem,
 }: typeof import('./docs.client');
 
 export type { LinkItemType };
@@ -85,7 +86,7 @@ export function DocsLayout({
       <LinksMenu
         key="links"
         items={links.map((item, i) => (
-          <LinkItem key={i} item={item} on="menu" />
+          <MenuItem key={i} item={item} />
         ))}
         className={cn(
           buttonVariants({
@@ -121,11 +122,10 @@ export function DocsLayout({
       <Fragment key="links">
         {links
           .filter((v) => v.type === 'icon')
-          .map((v, i) => (
-            <LinkItem
+          .map((item, i) => (
+            <IconItem
               key={i}
-              item={v}
-              on="nav"
+              item={item}
               className="text-fd-muted-foreground md:hidden"
             />
           ))}
@@ -147,11 +147,17 @@ export function DocsLayout({
 
   return (
     <TreeContextProvider tree={props.tree}>
-      {replaceOrDefault(nav, <SubNav className="md:hidden" {...nav} />)}
+      {replaceOrDefault(nav, <SubNav className="h-14 md:hidden" {...nav} />)}
       <main
         id="nd-docs-layout"
         {...props.containerProps}
-        className={cn('flex flex-1 flex-row', props.containerProps?.className)}
+        className={cn(
+          'flex flex-1 flex-row',
+          !nav.component &&
+            nav.enabled !== false &&
+            '[--fd-nav-height:3.5rem] md:[--fd-nav-height:0px]',
+          props.containerProps?.className,
+        )}
       >
         {replaceOrDefault(
           { enabled: sidebarEnabled, component: sidebarReplace },

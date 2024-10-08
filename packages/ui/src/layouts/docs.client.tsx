@@ -25,10 +25,7 @@ export function SubNav({
     <NavBox
       id="nd-subnav"
       {...props}
-      className={cn(
-        'flex h-[var(--fd-nav-height)] flex-row items-center px-4',
-        props.className,
-      )}
+      className={cn('flex flex-row items-center px-4', props.className)}
     >
       <Title url={url} title={title} />
       <div className="flex flex-1 flex-row items-center gap-1">
@@ -76,7 +73,12 @@ export function SidebarCollapseTrigger(
   );
 }
 
-export { LinksMenu, LinkItem } from '@/components/layout/link-item';
+export {
+  LinksMenu,
+  LinkItem,
+  IconItem,
+  MenuItem,
+} from '@/components/layout/link-item';
 export { RootToggle } from '@/components/layout/root-toggle';
 export { Sidebar } from '@/components/layout/sidebar';
 export { TreeContextProvider } from '@/contexts/tree';

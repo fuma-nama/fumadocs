@@ -1,11 +1,13 @@
 'use client';
 
 import { ChevronDown, Languages, MoreVertical } from 'lucide-react';
+import { useMemo } from 'react';
 import { useSearchContext } from '@/contexts/search';
 import {
   LinkItem,
   type LinkItemType,
   LinksMenu,
+  MenuItem,
 } from '@/components/layout/link-item';
 import {
   LargeSearchToggle,
@@ -31,6 +33,13 @@ export function Nav({
   items: LinkItemType[];
 }): React.ReactElement {
   const search = useSearchContext();
+  const [navItems, menuItems] = useMemo(
+    () => [
+      items.filter((item) => ['nav', 'all'].includes(item.on ?? 'all')),
+      items.filter((item) => ['menu', 'all'].includes(item.on ?? 'all')),
+    ],
+    [items],
+  );
 
   return (
     <NavBox
@@ -41,7 +50,7 @@ export function Nav({
       <nav className="mx-auto flex size-full max-w-fd-container flex-row items-center gap-6 px-4">
         <Title title={props.title} url={props.url} />
         {props.children}
-        {items
+        {navItems
           .filter((item) => !isSecondary(item))
           .map((item, i) => (
             <LinkItem key={i} item={item} className="text-sm max-sm:hidden" />
@@ -62,18 +71,17 @@ export function Nav({
             </LanguageToggle>
           ) : null}
 
-          {items.filter(isSecondary).map((item, i) => (
+          {navItems.filter(isSecondary).map((item, i) => (
             <LinkItem key={i} item={item} className="max-lg:hidden" />
           ))}
 
           <LinksMenu
             items={
               <>
-                {items.map((item, i) => (
-                  <LinkItem
+                {menuItems.map((item, i) => (
+                  <MenuItem
                     key={i}
                     item={item}
-                    on="menu"
                     className={cn(!isSecondary(item) && 'sm:hidden')}
                   />
                 ))}

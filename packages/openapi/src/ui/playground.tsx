@@ -87,7 +87,8 @@ export function APIPlayground({
     );
 
     const headers = new Headers();
-    if (bodyType !== 'form-data') headers.append('Content-Type', 'application/json');
+    if (bodyType !== 'form-data')
+      headers.append('Content-Type', 'application/json');
 
     if (input.authorization) {
       headers.append('Authorization', input.authorization);

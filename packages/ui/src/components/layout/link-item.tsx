@@ -2,7 +2,7 @@ import Link from 'fumadocs-core/link';
 import { ChevronDown } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cva } from 'class-variance-authority';
-import { type ReactNode, useState } from 'react';
+import { HTMLAttributes, type ReactNode, useState } from 'react';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { cn } from '@/utils/cn';
 import { isActive } from '@/utils/shared';
@@ -19,19 +19,8 @@ import {
 } from '@/components/ui/popover';
 import { itemVariants } from '@/components/layout/variants';
 
-const linkItemVariants = cva(
-  '-m-2 inline-flex items-center gap-1 p-2 text-fd-muted-foreground transition-colors [&_svg]:size-4',
-  {
-    variants: {
-      active: {
-        true: 'text-fd-primary',
-        false: 'hover:text-fd-accent-foreground',
-      },
-    },
-    defaultVariants: {
-      active: false,
-    },
-  },
+const navItemVariants = cva(
+  '-m-2 inline-flex items-center gap-1 p-2 text-fd-muted-foreground transition-colors hover:text-fd-accent-foreground data-[active=true]:!text-fd-primary [&_svg]:size-4',
 );
 
 interface BaseItem {
@@ -54,86 +43,78 @@ interface BaseLinkItem extends BaseItem {
   external?: boolean;
 }
 
+interface MainItem extends BaseLinkItem {
+  type?: 'main';
+  icon?: ReactNode;
+  text: ReactNode;
+}
+
+interface IconItem extends BaseLinkItem {
+  type: 'icon';
+  /**
+   * `aria-label` of icon button
+   */
+  label?: string;
+  icon: ReactNode;
+  text: ReactNode;
+  /**
+   * @defaultValue true
+   */
+  secondary?: boolean;
+}
+
+interface ButtonItem extends BaseLinkItem {
+  type: 'button';
+  icon?: ReactNode;
+  text: ReactNode;
+  /**
+   * @defaultValue false
+   */
+  secondary?: boolean;
+}
+
+interface MenuItem extends BaseItem {
+  type: 'menu';
+  icon?: ReactNode;
+  text: ReactNode;
+  items: LinkItemType[];
+  /**
+   * @defaultValue false
+   */
+  secondary?: boolean;
+}
+
+interface CustomItem extends BaseItem {
+  type: 'custom';
+  /**
+   * @defaultValue false
+   */
+  secondary?: boolean;
+  children: ReactNode;
+}
+
 export type LinkItemType =
-  | (BaseLinkItem & {
-      type?: 'main';
-      icon?: ReactNode;
-      text: ReactNode;
-    })
-  | (BaseLinkItem & {
-      type: 'icon';
-      /**
-       * `aria-label` of icon button
-       */
-      label?: string;
-      icon: ReactNode;
-      text: ReactNode;
-      /**
-       * @defaultValue true
-       */
-      secondary?: boolean;
-    })
-  | (BaseLinkItem & {
-      type: 'button';
-      icon?: ReactNode;
-      text: ReactNode;
-      /**
-       * @defaultValue false
-       */
-      secondary?: boolean;
-    })
-  | (BaseItem & {
-      type: 'menu';
-      icon?: ReactNode;
-      text: ReactNode;
-      items: LinkItemType[];
-      /**
-       * @defaultValue false
-       */
-      secondary?: boolean;
-    })
-  | (BaseItem & {
-      type: 'custom';
-      /**
-       * @defaultValue false
-       */
-      secondary?: boolean;
-      children: ReactNode;
-    });
+  | MainItem
+  | IconItem
+  | ButtonItem
+  | MenuItem
+  | CustomItem;
 
 interface LinkItemProps extends React.HTMLAttributes<HTMLElement> {
   item: LinkItemType;
-  on?: 'menu' | 'nav';
 }
 
-export function LinkItem({
+export function MenuItem({
   item,
-  on = 'nav',
   className,
   ...props
 }: LinkItemProps): React.ReactNode {
-  const pathname = usePathname();
-
-  if (item.on && item.on !== 'all' && item.on !== on) return null;
-
   if (item.type === 'custom')
-    return <div className={cn('grid', className)}>{item.children}</div>;
-
-  if (item.type === 'menu' && on === 'nav') {
     return (
-      <LinksMenu
-        items={item.items.map((child, i) => (
-          <LinkItem key={i} item={child} on="menu" />
-        ))}
-        className={cn(linkItemVariants({ className }))}
-        {...props}
-      >
-        {item.icon}
-        {item.text}
-        <ChevronDown className="ms-auto !size-3.5" />
-      </LinksMenu>
+      <div className={cn('grid', className)} {...props}>
+        {item.children}
+      </div>
     );
-  }
 
   if (item.type === 'menu') {
     return (
@@ -149,7 +130,7 @@ export function LinkItem({
         <CollapsibleContent>
           <div className="ms-2 flex flex-col border-s py-2 ps-2">
             {item.items.map((child, i) => (
-              <LinkItem key={i} item={child} on="menu" />
+              <MenuItem key={i} item={child} />
             ))}
           </div>
         </CollapsibleContent>
@@ -158,62 +139,129 @@ export function LinkItem({
   }
 
   if (item.type === 'button') {
+    return <ButtonItem item={item} />;
+  }
+
+  return (
+    <BaseLinkItem
+      item={item}
+      className={cn(itemVariants(), className)}
+      {...props}
+    >
+      {item.icon}
+      {item.text}
+    </BaseLinkItem>
+  );
+}
+
+export function LinkItem({
+  item,
+  className,
+  ...props
+}: LinkItemProps): React.ReactNode {
+  if (item.type === 'custom')
     return (
-      <Link
-        href={item.url}
-        external={item.external}
-        className={cn(
-          buttonVariants({ color: 'secondary' }),
-          'gap-1.5 [&_svg]:size-4',
-          className,
-        )}
+      <div className={cn('grid', className)} {...props}>
+        {item.children}
+      </div>
+    );
+
+  if (item.type === 'menu') {
+    return (
+      <LinksMenu
+        items={item.items.map((child, i) => (
+          <MenuItem key={i} item={child} />
+        ))}
+        className={cn(navItemVariants({ className }))}
+        {...props}
       >
         {item.icon}
         {item.text}
-      </Link>
+        <ChevronDown className="ms-auto !size-3.5" />
+      </LinksMenu>
     );
   }
 
+  if (item.type === 'button') {
+    return <ButtonItem item={item} {...props} />;
+  }
+
+  if (item.type === 'icon') {
+    return <IconItem item={item} {...props} />;
+  }
+
+  return (
+    <BaseLinkItem
+      item={item}
+      className={cn(navItemVariants(), className)}
+      {...props}
+    >
+      {item.text}
+    </BaseLinkItem>
+  );
+}
+
+function BaseLinkItem({
+  item,
+  ...props
+}: { item: BaseLinkItem } & HTMLAttributes<HTMLAnchorElement>): ReactNode {
+  const pathname = usePathname();
   const activeType = item.active ?? 'url';
   const active =
     activeType !== 'none' &&
     isActive(item.url, pathname, activeType === 'nested-url');
 
-  if (item.type === 'icon' && on === 'nav') {
-    return (
-      <Link
-        aria-label={item.label}
-        href={item.url}
-        external={item.external}
-        className={cn(
-          buttonVariants({
-            size: 'icon',
-            color: 'ghost',
-            className,
-          }),
-        )}
-        {...props}
-      >
-        {item.icon}
-      </Link>
-    );
-  }
-
   return (
     <Link
       href={item.url}
       external={item.external}
-      className={cn(
-        on === 'nav'
-          ? linkItemVariants({
-              active,
-            })
-          : itemVariants({ active }),
-        className,
-      )}
+      data-active={active}
       {...props}
     >
-      {on === 'menu' ? item.icon : null}
+      {props.children}
+    </Link>
+  );
+}
+
+export function IconItem({
+  item,
+  ...props
+}: { item: IconItem } & HTMLAttributes<HTMLAnchorElement>): ReactNode {
+  return (
+    <Link
+      aria-label={item.label}
+      href={item.url}
+      external={item.external}
+      {...props}
+      className={cn(
+        buttonVariants({
+          size: 'icon',
+          color: 'ghost',
+        }),
+        props.className,
+      )}
+    >
+      {item.icon}
+    </Link>
+  );
+}
+
+function ButtonItem({
+  item,
+  ...props
+}: { item: ButtonItem } & HTMLAttributes<HTMLAnchorElement>): ReactNode {
+  return (
+    <Link
+      href={item.url}
+      external={item.external}
+      {...props}
+      className={cn(
+        buttonVariants({ color: 'secondary' }),
+        'gap-1.5 [&_svg]:size-4',
+        props.className,
+      )}
+    >
+      {item.icon}
       {item.text}
     </Link>
   );
