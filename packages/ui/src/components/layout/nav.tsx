@@ -1,15 +1,10 @@
 'use client';
 import Link, { type LinkProps } from 'fumadocs-core/link';
-import {
-  type HTMLAttributes,
-  type ReactNode,
-  useEffect,
-  useState,
-} from 'react';
+import { createContext, type ReactNode, useEffect, useState } from 'react';
 import { cn } from '@/utils/cn';
 import { useI18n } from '@/contexts/i18n';
 
-export interface NavBoxProps {
+export interface NavProviderProps {
   /**
    * Use transparent background
    *
@@ -28,10 +23,18 @@ export interface TitleProps {
   url?: string;
 }
 
-export function NavBox({
+interface NavContextType {
+  isTransparent: boolean;
+}
+
+export const NavContext = createContext<NavContextType>({
+  isTransparent: false,
+});
+
+export function NavProvider({
   transparentMode = 'none',
-  ...props
-}: NavBoxProps & HTMLAttributes<HTMLElement>): React.ReactElement {
+  children,
+}: NavProviderProps & { children: ReactNode }): ReactNode {
   const [transparent, setTransparent] = useState(transparentMode !== 'none');
 
   useEffect(() => {
@@ -49,16 +52,9 @@ export function NavBox({
   }, [transparentMode]);
 
   return (
-    <header
-      {...props}
-      className={cn(
-        'sticky top-[var(--fd-banner-height)] z-40 border-b transition-colors',
-        transparent
-          ? 'border-transparent'
-          : 'border-fd-foreground/10 bg-fd-background/80 backdrop-blur-md',
-        props.className,
-      )}
-    />
+    <NavContext.Provider value={{ isTransparent: transparent }}>
+      {children}
+    </NavContext.Provider>
   );
 }
 

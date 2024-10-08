@@ -5,7 +5,7 @@ import type { LoaderConfig, LoaderOutput, Page } from 'fumadocs-core/source';
 import { type AnchorProviderProps, AnchorProvider } from 'fumadocs-core/toc';
 import { Card, Cards } from '@/components/card';
 import type { EditOnGitHubOptions } from '@/components/layout/edit-on-github';
-import { replaceOrDefault } from './utils/shared';
+import { replaceOrDefault } from '@/layouts/shared';
 import { cn } from './utils/cn';
 import type { BreadcrumbProps, FooterProps, TOCProps } from './page.client';
 
@@ -103,25 +103,18 @@ export function DocsPage({
       >
         {replaceOrDefault(
           tocPopoverOptions,
-          <div
-            id="nd-tocnav"
-            className={cn(
-              'sticky top-fd-layout-top z-10 border-b bg-fd-background/60 text-sm backdrop-blur-md md:top-[calc(4px+var(--fd-banner-height)+var(--fd-nav-height))] md:mx-3 md:rounded-full md:border md:shadow-md',
-              tocPopoverOptions.enabled !== true && 'lg:hidden',
-            )}
+          <TocPopover
+            items={toc}
+            header={tocPopoverOptions.header}
+            footer={tocPopoverOptions.footer}
+            className={cn(tocPopoverOptions.enabled !== true && 'lg:hidden')}
           >
-            <TocPopover
-              items={toc}
-              header={tocPopoverOptions.header}
-              footer={tocPopoverOptions.footer}
-            >
-              {tocPopoverOptions.style === 'clerk' ? (
-                <ClerkTOCItems items={toc} isMenu />
-              ) : (
-                <TOCItems items={toc} isMenu />
-              )}
-            </TocPopover>
-          </div>,
+            {tocPopoverOptions.style === 'clerk' ? (
+              <ClerkTOCItems items={toc} isMenu />
+            ) : (
+              <TOCItems items={toc} isMenu />
+            )}
+          </TocPopover>,
         )}
         <article className="flex flex-1 flex-col gap-6 px-4 pt-10 md:px-6 md:pt-12">
           {replaceOrDefault(breadcrumb, <Breadcrumb {...breadcrumb} />)}
@@ -201,6 +194,26 @@ export const DocsTitle = forwardRef<
 
 DocsTitle.displayName = 'DocsTitle';
 
+function findParent(
+  node: PageTree.Root | PageTree.Folder,
+  page: Page,
+): PageTree.Root | PageTree.Folder | undefined {
+  if ('index' in node && node.index?.$ref?.file === page.file.path) {
+    return node;
+  }
+
+  for (const child of node.children) {
+    if (child.type === 'folder') {
+      const parent = findParent(child, page);
+      if (parent) return parent;
+    }
+
+    if (child.type === 'page' && child.$ref?.file === page.file.path) {
+      return node;
+    }
+  }
+}
+
 export function DocsCategory({
   page,
   from,
@@ -219,26 +232,7 @@ export function DocsCategory({
         ]
       : from.pageTree);
 
-  function findParent(
-    node: PageTree.Root | PageTree.Folder,
-  ): PageTree.Root | PageTree.Folder | undefined {
-    if ('index' in node && node.index?.$ref?.file === page.file.path) {
-      return node;
-    }
-
-    for (const child of node.children) {
-      if (child.type === 'folder') {
-        const parent = findParent(child);
-        if (parent) return parent;
-      }
-
-      if (child.type === 'page' && child.$ref?.file === page.file.path) {
-        return node;
-      }
-    }
-  }
-
-  const parent = findParent(tree);
+  const parent = findParent(tree, page);
   if (!parent) return null;
 
   const items = parent.children.flatMap<Page>((item) => {

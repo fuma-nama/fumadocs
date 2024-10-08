@@ -1,19 +1,19 @@
-import { replaceOrDefault } from '@/utils/shared';
+import { replaceOrDefault } from '@/layouts/shared';
 import { getLinks, type BaseLayoutProps } from './shared';
 
-declare const { Nav }: typeof import('./home.client');
+declare const { Nav, NavProvider }: typeof import('./home.client');
 
 export type HomeLayoutProps = BaseLayoutProps;
 
 export function HomeLayout({
-  nav = {},
+  nav: { transparentMode, ...nav } = {},
   links = [],
   ...props
 }: BaseLayoutProps): React.ReactElement {
   const finalLinks = getLinks(links, props.githubUrl);
 
   return (
-    <>
+    <NavProvider transparentMode={transparentMode}>
       {replaceOrDefault(
         nav,
         <Nav
@@ -27,6 +27,6 @@ export function HomeLayout({
         </Nav>,
       )}
       {props.children}
-    </>
+    </NavProvider>
   );
 }

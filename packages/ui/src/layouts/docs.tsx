@@ -6,7 +6,7 @@ import { notFound } from 'next/navigation';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import type { SidebarProps } from '@/components/layout/sidebar';
-import { replaceOrDefault } from '@/utils/shared';
+import { replaceOrDefault } from '@/layouts/shared';
 import type { LinkItemType } from '@/components/layout/link-item';
 import { getSidebarTabs, type TabOptions } from '@/utils/get-sidebar-tabs';
 import { Option } from '@/components/layout/root-toggle';
@@ -25,6 +25,7 @@ declare const {
   Sidebar,
   IconItem,
   MenuItem,
+  NavProvider,
 }: typeof import('./docs.client');
 
 export type { LinkItemType };
@@ -49,7 +50,7 @@ export interface DocsLayoutProps extends BaseLayoutProps {
 }
 
 export function DocsLayout({
-  nav = {},
+  nav: { transparentMode, ...nav } = {},
   sidebar: {
     enabled: sidebarEnabled = true,
     collapsible = true,
@@ -147,43 +148,45 @@ export function DocsLayout({
 
   return (
     <TreeContextProvider tree={props.tree}>
-      {replaceOrDefault(nav, <SubNav className="h-14 md:hidden" {...nav} />)}
-      <main
-        id="nd-docs-layout"
-        {...props.containerProps}
-        className={cn(
-          'flex flex-1 flex-row',
-          !nav.component &&
-            nav.enabled !== false &&
-            '[--fd-nav-height:3.5rem] md:[--fd-nav-height:0px]',
-          props.containerProps?.className,
-        )}
-      >
-        {replaceOrDefault(
-          { enabled: sidebarEnabled, component: sidebarReplace },
-          <Aside
-            {...sidebar}
-            items={links.filter((v) => v.type !== 'icon')}
-            banner={
-              header.length > 0 ||
-              Boolean(sidebar.banner) ||
-              tabs.length > 0 ? (
-                <>
-                  {header.length > 0 ? (
-                    <div className="flex flex-row items-center border-b pb-2 max-md:hidden">
-                      {header}
-                    </div>
-                  ) : null}
-                  {tabs.length > 0 ? <RootToggle options={tabs} /> : null}
-                  {sidebar.banner}
-                </>
-              ) : null
-            }
-            footer={footer.length > 0 ? footer : null}
-          />,
-        )}
-        {props.children}
-      </main>
+      <NavProvider transparentMode={transparentMode}>
+        {replaceOrDefault(nav, <SubNav className="h-14 md:hidden" {...nav} />)}
+        <main
+          id="nd-docs-layout"
+          {...props.containerProps}
+          className={cn(
+            'flex flex-1 flex-row',
+            !nav.component &&
+              nav.enabled !== false &&
+              '[--fd-nav-height:3.5rem] md:[--fd-nav-height:0px]',
+            props.containerProps?.className,
+          )}
+        >
+          {replaceOrDefault(
+            { enabled: sidebarEnabled, component: sidebarReplace },
+            <Aside
+              {...sidebar}
+              items={links.filter((v) => v.type !== 'icon')}
+              banner={
+                header.length > 0 ||
+                Boolean(sidebar.banner) ||
+                tabs.length > 0 ? (
+                  <>
+                    {header.length > 0 ? (
+                      <div className="flex flex-row items-center border-b pb-2 max-md:hidden">
+                        {header}
+                      </div>
+                    ) : null}
+                    {tabs.length > 0 ? <RootToggle options={tabs} /> : null}
+                    {sidebar.banner}
+                  </>
+                ) : null
+              }
+              footer={footer.length > 0 ? footer : null}
+            />,
+          )}
+          {props.children}
+        </main>
+      </NavProvider>
     </TreeContextProvider>
   );
 }

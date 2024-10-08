@@ -1,10 +1,10 @@
 'use client';
 
 import { ChevronDown, Languages, MoreVertical } from 'lucide-react';
-import { useMemo } from 'react';
+import { useContext, useMemo } from 'react';
 import { useSearchContext } from '@/contexts/search';
 import {
-  LinkItem,
+  NavItem,
   type LinkItemType,
   LinksMenu,
   MenuItem,
@@ -14,7 +14,7 @@ import {
   SearchToggle,
 } from '@/components/layout/search-toggle';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
-import { NavBox, Title } from '@/components/layout/nav';
+import { NavContext, Title } from '@/components/layout/nav';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import {
@@ -27,11 +27,12 @@ export function Nav({
   items,
   enableSearch = true,
   ...props
-}: SharedNavProps & {
+}: Omit<SharedNavProps, 'transparentMode'> & {
   disableThemeSwitch?: boolean;
   i18n?: boolean;
   items: LinkItemType[];
 }): React.ReactElement {
+  const { isTransparent } = useContext(NavContext);
   const search = useSearchContext();
   const [navItems, menuItems] = useMemo(
     () => [
@@ -42,10 +43,14 @@ export function Nav({
   );
 
   return (
-    <NavBox
+    <header
       id="nd-nav"
-      className="h-14"
-      transparentMode={props.transparentMode}
+      className={cn(
+        'sticky top-[var(--fd-banner-height)] z-40 h-14 border-b transition-colors',
+        isTransparent
+          ? 'border-transparent'
+          : 'border-fd-foreground/10 bg-fd-background/80 backdrop-blur-md',
+      )}
     >
       <nav className="mx-auto flex size-full max-w-fd-container flex-row items-center gap-6 px-4">
         <Title title={props.title} url={props.url} />
@@ -53,7 +58,7 @@ export function Nav({
         {navItems
           .filter((item) => !isSecondary(item))
           .map((item, i) => (
-            <LinkItem key={i} item={item} className="text-sm max-sm:hidden" />
+            <NavItem key={i} item={item} className="text-sm max-sm:hidden" />
           ))}
         <div className="flex flex-1 flex-row items-center justify-end">
           {enableSearch && search.enabled ? (
@@ -72,7 +77,7 @@ export function Nav({
           ) : null}
 
           {navItems.filter(isSecondary).map((item, i) => (
-            <LinkItem key={i} item={item} className="max-lg:hidden" />
+            <NavItem key={i} item={item} className="max-lg:hidden" />
           ))}
 
           <LinksMenu
@@ -111,7 +116,7 @@ export function Nav({
           </LinksMenu>
         </div>
       </nav>
-    </NavBox>
+    </header>
   );
 }
 
@@ -120,3 +125,5 @@ function isSecondary(item: LinkItemType): boolean {
     ('secondary' in item && item.secondary === true) || item.type === 'icon'
   );
 }
+
+export { NavProvider } from '@/components/layout/nav';

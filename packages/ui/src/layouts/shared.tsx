@@ -1,13 +1,13 @@
 import type { ReactNode } from 'react';
 import type { LinkItemType } from '@/components/layout/link-item';
-import type { NavBoxProps, TitleProps } from '@/components/layout/nav';
+import type { NavProviderProps, TitleProps } from '@/components/layout/nav';
 
 interface NavOptions extends SharedNavProps {
   enabled: boolean;
   component: ReactNode;
 }
 
-export interface SharedNavProps extends TitleProps, NavBoxProps {
+export interface SharedNavProps extends TitleProps, NavProviderProps {
   /**
    * Show/hide search toggle
    *
@@ -70,4 +70,19 @@ export function getLinks(
     ];
 
   return result;
+}
+
+export function replaceOrDefault(
+  obj:
+    | {
+        enabled?: boolean;
+        component?: ReactNode;
+      }
+    | undefined,
+  def: ReactNode,
+): ReactNode {
+  if (obj?.enabled === false) return;
+  if (obj?.component !== undefined) return obj.component;
+
+  return def;
 }

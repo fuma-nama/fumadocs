@@ -1,5 +1,4 @@
 import type { PageTree } from 'fumadocs-core/server';
-import type { ReactNode } from 'react';
 
 export function isActive(
   url: string,
@@ -7,21 +6,6 @@ export function isActive(
   nested = true,
 ): boolean {
   return url === pathname || (nested && pathname.startsWith(`${url}/`));
-}
-
-export function replaceOrDefault(
-  obj:
-    | {
-        enabled?: boolean;
-        component?: ReactNode;
-      }
-    | undefined,
-  def: ReactNode,
-): ReactNode {
-  if (obj?.enabled === false) return;
-  if (obj?.component !== undefined) return obj.component;
-
-  return def;
 }
 
 export function hasActive(items: PageTree.Node[], url: string): boolean {

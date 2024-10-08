@@ -114,7 +114,7 @@ export function Sidebar({
         {...props.aside}
         className={cn(
           'fixed top-fd-layout-top z-30 flex flex-col bg-fd-card text-sm md:sticky md:h-[var(--fd-sidebar-height)] md:w-[var(--fd-c-sidebar)] md:min-w-[var(--fd-sidebar-width)] md:border-e md:ps-[var(--fd-sidebar-offset)]',
-          'max-md:inset-x-0 max-md:bottom-0 max-md:bg-fd-background/80 max-md:pt-[var(--fd-nav-height)] max-md:text-[15px] max-md:backdrop-blur-md max-md:data-[open=false]:invisible',
+          'max-md:inset-x-0 max-md:bottom-0 max-md:bg-fd-background/80 max-md:text-[15px] max-md:backdrop-blur-md max-md:data-[open=false]:invisible',
           props.aside?.className,
         )}
         style={

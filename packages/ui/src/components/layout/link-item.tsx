@@ -104,14 +104,10 @@ interface LinkItemProps extends React.HTMLAttributes<HTMLElement> {
   item: LinkItemType;
 }
 
-export function MenuItem({
-  item,
-  className,
-  ...props
-}: LinkItemProps): React.ReactNode {
+export function MenuItem({ item, ...props }: LinkItemProps): React.ReactNode {
   if (item.type === 'custom')
     return (
-      <div className={cn('grid', className)} {...props}>
+      <div {...props} className={cn('grid', props.className)}>
         {item.children}
       </div>
     );
@@ -120,8 +116,8 @@ export function MenuItem({
     return (
       <Collapsible className="flex flex-col">
         <CollapsibleTrigger
-          className={cn(itemVariants({ className }), 'group/link')}
           {...props}
+          className={cn(itemVariants(), props.className, 'group/link')}
         >
           {item.icon}
           {item.text}
@@ -139,14 +135,14 @@ export function MenuItem({
   }
 
   if (item.type === 'button') {
-    return <ButtonItem item={item} />;
+    return <ButtonItem item={item} {...props} />;
   }
 
   return (
     <BaseLinkItem
       item={item}
-      className={cn(itemVariants(), className)}
       {...props}
+      className={cn(itemVariants(), props.className)}
     >
       {item.icon}
       {item.text}
@@ -154,14 +150,10 @@ export function MenuItem({
   );
 }
 
-export function LinkItem({
-  item,
-  className,
-  ...props
-}: LinkItemProps): React.ReactNode {
+export function NavItem({ item, ...props }: LinkItemProps): React.ReactNode {
   if (item.type === 'custom')
     return (
-      <div className={cn('grid', className)} {...props}>
+      <div {...props} className={cn('grid', props.className)}>
         {item.children}
       </div>
     );
@@ -172,8 +164,8 @@ export function LinkItem({
         items={item.items.map((child, i) => (
           <MenuItem key={i} item={child} />
         ))}
-        className={cn(navItemVariants({ className }))}
         {...props}
+        className={cn(navItemVariants(), props.className)}
       >
         {item.icon}
         {item.text}
@@ -193,8 +185,8 @@ export function LinkItem({
   return (
     <BaseLinkItem
       item={item}
-      className={cn(navItemVariants(), className)}
       {...props}
+      className={cn(navItemVariants(), props.className)}
     >
       {item.text}
     </BaseLinkItem>
