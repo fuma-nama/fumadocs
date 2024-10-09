@@ -20,8 +20,22 @@ export async function CodeBlock({
     defaultColor: false,
     themes: {
       light: 'github-light',
-      dark: 'github-dark',
+      dark: 'vesper',
     },
+    transformers: [
+      {
+        name: 'rehype-code:pre-process',
+        line(node) {
+          if (node.children.length === 0) {
+            // Keep the empty lines when using grid layout
+            node.children.push({
+              type: 'text',
+              value: ' ',
+            });
+          }
+        },
+      },
+    ],
   });
 
   const rendered = toJsxRuntime(hast, {

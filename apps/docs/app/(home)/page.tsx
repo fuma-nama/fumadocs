@@ -24,14 +24,14 @@ import { File, Files, Folder } from 'fumadocs-ui/components/files';
 import Link from 'next/link';
 import type { HTMLAttributes, ReactNode } from 'react';
 import Image from 'next/image';
-import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import { CodeBlock } from '@/components/code-block';
 import { UwuHero } from '@/app/(home)/uwu';
 import SourceImage from '@/public/source.png';
 import ContributorCounter from '@/components/contributor-count';
-import { CreateAppAnimation } from './page.client';
+import { AutoTypeTable } from '@/components/type-table';
+import { CreateAppAnimation, WhyInteractive } from './page.client';
 import {
   VercelLogo,
   NetlifyLogo,
@@ -109,24 +109,10 @@ export default function Page(): React.ReactElement {
   );
 }
 
-function WhyCard(props: HTMLAttributes<HTMLDivElement>): React.ReactElement {
-  return (
-    <div
-      className="rounded-xl border border-foreground/10 bg-fd-card/20 p-4 text-foreground/50 shadow-xl backdrop-blur-xl transition-colors hover:text-foreground"
-      style={{
-        transform: 'translate3d(12px,-24px,0)',
-      }}
-      {...props}
-    >
-      {props.children}
-    </div>
-  );
-}
-
 function Why(): React.ReactElement {
   return (
     <div
-      className="container relative overflow-hidden border-x border-t px-8 py-12 md:py-24"
+      className="container relative overflow-hidden border-x border-t px-8 pb-4 pt-12 md:pt-24"
       style={{
         perspective: '900px',
       }}
@@ -161,128 +147,91 @@ function Why(): React.ReactElement {
       <p className="mt-4 text-foreground/50">
         Fumadocs offers a complete toolchain to build and maintain your docs.
       </p>
-      <Accordions
-        type="single"
-        className="mt-8 max-w-[400px] border-foreground/10 bg-card/50 backdrop-blur-lg"
-      >
-        <Accordion className="text-sm" title="Design System & Tailwind CSS">
-          <p>
-            Using our Tailwind CSS plugin, you can share the same design system
-            cross the docs and your app.
-          </p>
-          <Link
-            href="/docs/ui/theme"
-            className={cn(
-              buttonVariants({ className: 'mt-4', variant: 'outline' }),
-            )}
-          >
-            See Themes
-          </Link>
-        </Accordion>
-        <Accordion className="text-sm" title="Full-text Search">
-          <p>
-            Implementing search is difficult. Fumadocs offers native support for
-            Orama and Algolia Search, it is as simple as plugging a route
-            handler.
-          </p>
-          <Link
-            href="/docs/headless/search"
-            className={cn(
-              buttonVariants({ className: 'mt-4', variant: 'outline' }),
-            )}
-          >
-            See Search
-          </Link>
-        </Accordion>
-        <Accordion className="text-sm" title="Other Search Solutions">
-          <p>
-            Fumadocs offers utilities to parse document into search indexes. You
-            can integrate with different search solutions seamlessly.
-          </p>
-          <p className="mt-4 text-muted-foreground">
-            In addition, you can plug your own search modal to allow full
-            control over the search UI.
-          </p>
-          <Link
-            href="/docs/headless/mdx/structure"
-            className={cn(
-              buttonVariants({ className: 'mt-4', variant: 'outline' }),
-            )}
-          >
-            See Plugin
-          </Link>
-        </Accordion>
-        <Accordion className="text-sm" title="Generate docs from TypeScript">
-          <p>
-            Fumadocs has a smart Type Table component that renders the
-            properties of interface/type automatically, powered by the
-            TypeScript Compiler API.
-          </p>
-          <Link
-            href="/docs/ui/typescript"
-            className={cn(
-              buttonVariants({ className: 'mt-4', variant: 'outline' }),
-            )}
-          >
-            TypeScript Integration
-          </Link>
-        </Accordion>
-        <Accordion className="text-sm" title="Generate docs from OpenAPI">
-          <p>
-            Fumadocs offers built-in OpenAPI playground and docs generator. You
-            can also try{' '}
-            <a
-              href="https://docs.scalar.com/swagger-editor"
-              rel="noreferrer noopener"
-            >
-              Scalar
-            </a>
-            , a beautiful alternative to Fumadocs OpenAPI.
-          </p>
-          <Link
-            href="/docs/ui/openapi"
-            className={cn(
-              buttonVariants({ className: 'mt-4', variant: 'outline' }),
-            )}
-          >
-            OpenAPI Integration
-          </Link>
-        </Accordion>
-        <Accordion className="text-sm" title="Interactive Examples">
-          <p>
-            Fumadocs offers different useful components, like Files and Zoomable
-            Image.
-          </p>
+      <WhyInteractive
+        typeTable={
+          <AutoTypeTable
+            name="MyType"
+            type={`
+export interface MyType {
+  /**
+  * The name of player
+  * @defaultValue 'hello'
+  */
+  name: string
 
-          <p className="mt-4">
-            With the magic of React Server Component and App Router, you can
-            have server component inside MDX documents, and import client
-            components easily.
-          </p>
-        </Accordion>
-      </Accordions>
-      <div
-        className="absolute bottom-8 right-12 z-[-1] grid origin-center grid-cols-2 gap-4 rounded-lg border border-foreground/20 lg:max-w-[50%]"
-        style={{
-          backgroundImage:
-            'linear-gradient(hsl(var(--foreground)/.1) 1px, transparent 1px), linear-gradient(to right, hsl(var(--foreground)/.1) 1px, transparent 1px)',
-          backgroundSize: '14px 14px',
-          transform: 'rotate3d(1,0,0,40deg)',
-        }}
-      >
-        <WhyCard>
-          <h3 className="text-lg">Full-text Search</h3>
-        </WhyCard>
-        <WhyCard>
-          <h3 className="text-lg">Docs Automation</h3>
-        </WhyCard>
-        <WhyCard>
-          <h3 className="text-lg">Interactive Examples</h3>
-        </WhyCard>
-        <WhyCard>
-          <h3 className="text-lg">Custom Content Source</h3>
-        </WhyCard>
-      </div>
+  /**
+  * There's a codeblock:
+  * \`\`\`ts
+  * console.log('hello world')
+  * \`\`\`
+  */
+  code: string
+}`}
+          />
+        }
+        codeblockSearchRouter={
+          <CodeBlock
+            lang="ts"
+            code={`import { source } from '@/lib/source';
+import { createFromSource } from 'fumadocs-core/search/server';
+ 
+export const { GET } = createFromSource(source);`}
+          />
+        }
+        codeblockTheme={
+          <CodeBlock
+            lang="ts"
+            code={`import { createPreset } from 'fumadocs-ui/tailwind-plugin';
+ 
+/** @type {import('tailwindcss').Config} */
+export default {
+  darkMode: 'class',
+  presets: [createPreset()],
+  content: [
+    './node_modules/fumadocs-ui/dist/**/*.js',
+    './components/**/*.{ts,tsx}',
+    './app/**/*.{ts,tsx}',
+    './content/**/*.mdx',
+  ],
+};`}
+          />
+        }
+        codeblockInteractive={
+          <CodeBlock
+            lang="tsx"
+            code={`import { File, Folder, Files } from 'fumadocs-ui/components/files';
+ 
+<Files>
+  <Folder name="app" defaultOpen>
+    <File name="layout.tsx" />
+    <File name="page.tsx" />
+    <File name="global.css" />
+  </Folder>
+  <File name="package.json" />
+</Files>`}
+          />
+        }
+        codeblockMdx={
+          <CodeBlock
+            lang="tsx"
+            code={`import { db } from '@/server/db';
+
+export function ProductTable() {
+  const products = db.getProducts()
+    
+  return (
+    <ul>
+      {products.map(product => <li key={product.key}>{product.name}</li>)}
+    </ul>
+  );
+}
+
+## Products
+
+<ProductTable />`}
+          />
+        }
+      />
     </div>
   );
 }
