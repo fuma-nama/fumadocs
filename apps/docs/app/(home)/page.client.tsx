@@ -11,6 +11,7 @@ import {
 } from 'react';
 import { TerminalIcon } from 'lucide-react';
 import Link from 'next/link';
+import scrollIntoView from 'scroll-into-view-if-needed';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 
@@ -152,12 +153,29 @@ export function WhyInteractive(props: {
     };
   }, [active, autoActive, duration, items.length]);
 
+  if (typeof window !== 'undefined') {
+    const element = document.getElementById(
+      `why-interactive-${active.toString()}`,
+    );
+
+    if (element) {
+      scrollIntoView(element, {
+        behavior: 'smooth',
+        boundary: document.getElementById('why-interactive'),
+      });
+    }
+  }
+
   return (
-    <div className="-mx-6 mt-8 flex flex-col gap-2 rounded-lg border border-foreground/10 bg-fd-muted/50 p-6 lg:flex-row">
-      <div className="flex flex-row gap-2 overflow-x-auto max-lg:-mx-6 max-lg:-mt-4 max-lg:items-center max-lg:px-4 lg:-ml-4 lg:w-[320px] lg:flex-col">
+    <div
+      id="why-interactive"
+      className="-mx-6 mt-8 flex flex-col gap-6 rounded-lg border border-foreground/10 bg-fd-muted/50 p-4 lg:flex-row lg:p-6"
+    >
+      <div className="flex flex-row gap-2 overflow-x-auto max-lg:-mx-4 max-lg:-mt-2 max-lg:items-center max-lg:px-2 lg:-ml-4 lg:flex-col">
         {items.map((item, i) => (
           <button
             key={item}
+            id={`why-interactive-${i.toString()}`}
             type="button"
             className={cn(
               'inline-flex flex-col-reverse text-nowrap rounded-lg text-left font-medium text-muted-foreground transition-colors max-lg:px-2 max-lg:py-1.5 max-lg:text-sm lg:flex-row',
