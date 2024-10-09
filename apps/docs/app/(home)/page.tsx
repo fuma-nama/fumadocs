@@ -140,11 +140,11 @@ function Why(): React.ReactElement {
         }
         }`}
       </style>
-      <h2 className="bg-gradient-to-b from-foreground to-foreground/40 bg-clip-text text-2xl font-semibold text-transparent md:text-3xl">
+      <h2 className="bg-gradient-to-b from-foreground to-foreground/40 bg-clip-text text-center text-2xl font-semibold text-transparent md:text-4xl">
         Build docs 100x faster and easier
         <p className="max-md:hidden">with Fumadocs</p>
       </h2>
-      <p className="mt-4 text-foreground/50">
+      <p className="mt-4 text-center text-foreground/50">
         Fumadocs offers a complete toolchain to build and maintain your docs.
       </p>
       <WhyInteractive
