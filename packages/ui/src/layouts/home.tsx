@@ -19,7 +19,7 @@ export function HomeLayout({
         className="flex flex-1 flex-col pt-[var(--fd-nav-height)]"
         style={
           {
-            '--fd-nav-height': '58px',
+            '--fd-nav-height': '54px',
           } as object
         }
       >

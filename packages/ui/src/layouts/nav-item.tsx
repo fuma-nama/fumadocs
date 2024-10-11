@@ -39,7 +39,7 @@ export function renderNavItem({
 }: LinkItemProps): ReactNode {
   if (item.type === 'custom')
     return (
-      <div key={key} {...props} className={cn('grid', props.className)}>
+      <div key={key} {...props}>
         {item.children}
       </div>
     );
@@ -132,12 +132,25 @@ function MenuItemContent({ item }: { item: MenuItem }): ReactNode {
   );
 }
 
-export function renderMenuItem(props: LinkItemProps): ReactNode {
-  const { key, item, ...rest } = props;
-
-  if (item.type === 'button' || item.type === 'custom') {
-    return renderNavItem(props);
+export function renderMenuItem({
+  key,
+  item,
+  ...rest
+}: LinkItemProps): ReactNode {
+  if (item.type === 'button') {
+    return (
+      <NavigationMenuLink key={key} asChild>
+        <ButtonItem item={item} {...rest} />
+      </NavigationMenuLink>
+    );
   }
+
+  if (item.type === 'custom')
+    return (
+      <div key={key} {...rest} className={cn('grid', rest.className)}>
+        {item.children}
+      </div>
+    );
 
   if (item.type === 'menu') {
     return (
@@ -147,8 +160,19 @@ export function renderMenuItem(props: LinkItemProps): ReactNode {
         className={cn('flex flex-col', rest.className)}
       >
         <CollapsibleTrigger className={cn(itemVariants(), 'group/link')}>
-          {item.icon}
-          {item.text}
+          {item.url ? (
+            <NavigationMenuLink asChild>
+              <Link href={item.url}>
+                {item.icon}
+                {item.text}
+              </Link>
+            </NavigationMenuLink>
+          ) : (
+            <>
+              {item.icon}
+              {item.text}
+            </>
+          )}
           <ChevronDown className="ms-auto transition-transform group-data-[state=closed]/link:-rotate-90" />
         </CollapsibleTrigger>
         <CollapsibleContent>
@@ -163,17 +187,15 @@ export function renderMenuItem(props: LinkItemProps): ReactNode {
   }
 
   return (
-    <NavigationMenuItem
-      key={key}
-      {...rest}
-      className={cn('list-none', rest.className)}
-    >
-      <NavigationMenuLink asChild>
-        <BaseLinkItem item={item} className={cn(itemVariants())}>
-          {item.icon}
-          {item.text}
-        </BaseLinkItem>
-      </NavigationMenuLink>
-    </NavigationMenuItem>
+    <NavigationMenuLink key={key} asChild>
+      <BaseLinkItem
+        item={item}
+        {...rest}
+        className={cn(itemVariants(), rest.className)}
+      >
+        {item.icon}
+        {item.text}
+      </BaseLinkItem>
+    </NavigationMenuLink>
   );
 }

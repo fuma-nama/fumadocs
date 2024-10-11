@@ -52,7 +52,7 @@ export function Nav({
       <header
         id="nd-nav"
         className={cn(
-          'fixed left-1/2 top-[var(--fd-banner-height)] z-40 mt-2 w-[calc(100%-1rem)] max-w-fd-container -translate-x-1/2 rounded-2xl border border-fd-foreground/10 px-4 transition-colors',
+          'fixed left-1/2 top-[var(--fd-banner-height)] z-40 mt-1 w-[calc(100%-1rem)] max-w-fd-container -translate-x-1/2 rounded-2xl border border-fd-foreground/10 px-4 transition-colors',
           value.length > 0 ? 'shadow-lg' : 'shadow-sm',
           (!isTransparent || value.length > 0) &&
             'bg-fd-background/80 backdrop-blur-md',
