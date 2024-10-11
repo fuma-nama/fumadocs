@@ -14,6 +14,7 @@ const config = {
     // Replaced by root workspace command
     ignoreDuringBuilds: true,
   },
+  serverExternalPackages: ['ts-morph', 'typescript'],
   images: {
     unoptimized: true,
     remotePatterns: [
@@ -23,11 +24,6 @@ const config = {
         port: '',
       },
     ],
-  },
-  webpack: (config) => {
-    config.module.noParse = [/typescript\/lib\/typescript.js/];
-
-    return config;
   },
 };
 

@@ -16,7 +16,10 @@ import { cn } from '@/utils/cn';
 import { useTreeContext } from '@/contexts/tree';
 import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
 import { hasActive, isActive } from '@/utils/shared';
-import { type LinkItemType, MenuItem } from '@/components/layout/link-item';
+import {
+  type LinkItemType,
+  renderMenuItem,
+} from '@/components/layout/link-item';
 import { LargeSearchToggle } from '@/components/layout/search-toggle';
 import { useSearchContext } from '@/contexts/search';
 import { itemVariants } from '@/components/layout/variants';
@@ -145,9 +148,7 @@ export function Sidebar({
         <ViewportContent>
           {items.length > 0 ? (
             <div className="flex flex-col px-4 pt-6 md:hidden">
-              {items.map((item, i) => (
-                <MenuItem key={i} item={item} />
-              ))}
+              {items.map((item, i) => renderMenuItem({ key: i, item }))}
             </div>
           ) : null}
         </ViewportContent>

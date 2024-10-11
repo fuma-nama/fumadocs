@@ -40,9 +40,11 @@ export function Toc({ header, footer, children }: TOCProps): ReactElement {
   return (
     <div
       data-toc=""
-      className="sticky top-fd-layout-top flex h-fd-toc-height w-[var(--fd-c-toc)] min-w-[var(--fd-toc-width)] flex-col gap-3 pb-2 pe-[var(--fd-toc-offset)] pt-12 max-lg:hidden"
+      className="sticky top-fd-layout-top flex h-[var(--fd-toc-height)] w-[var(--fd-c-toc)] min-w-[var(--fd-toc-width)] flex-col gap-3 pb-2 pe-[var(--fd-toc-offset)] pt-12 max-lg:hidden"
       style={
         {
+          '--fd-toc-height':
+            'calc(100dvh - var(--fd-banner-height) - var(--fd-nav-height))',
           '--fd-toc-offset':
             'max(calc(var(--fd-c-toc) - var(--fd-toc-width)), 0.75rem)',
         } as object

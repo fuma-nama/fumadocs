@@ -82,9 +82,9 @@ export function SidebarCollapseTrigger(
 
 export {
   LinksMenu,
-  NavItem,
+  renderNavItem,
   IconItem,
-  MenuItem,
+  renderMenuItem,
 } from '@/components/layout/link-item';
 export { NavProvider } from '@/components/layout/nav';
 export { RootToggle } from '@/components/layout/root-toggle';

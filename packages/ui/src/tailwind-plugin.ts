@@ -271,21 +271,11 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
             }
           : undefined,
         maxWidth: {
-          container: '1400px',
           'fd-container': '1400px',
-        },
-        height: {
-          'fd-toc-height':
-            'calc(100dvh - var(--fd-banner-height) - var(--fd-nav-height))',
         },
         spacing: {
           'fd-layout-top':
             'calc(var(--fd-banner-height) + var(--fd-nav-height))',
-        },
-        margin: {
-          // the offset given to docs content when the sidebar is collapsed
-          'fd-sidebar-offset':
-            'max(calc(var(--fd-c-sidebar) - 2 * var(--fd-sidebar-width)), var(--fd-sidebar-width) * -1)',
         },
         colors: createTailwindColors(cssPrefix, addGlobalColors),
         ...animations,

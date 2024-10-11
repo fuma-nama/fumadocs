@@ -2,7 +2,7 @@ import Link from 'fumadocs-core/link';
 import { ChevronDown } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cva } from 'class-variance-authority';
-import { HTMLAttributes, type ReactNode, useState } from 'react';
+import { type HTMLAttributes, type ReactNode, useState } from 'react';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { cn } from '@/utils/cn';
 import { isActive } from '@/utils/shared';
@@ -101,20 +101,25 @@ export type LinkItemType =
   | CustomItem;
 
 interface LinkItemProps extends React.HTMLAttributes<HTMLElement> {
+  key?: string | number;
   item: LinkItemType;
 }
 
-export function MenuItem({ item, ...props }: LinkItemProps): React.ReactNode {
+export function renderMenuItem({
+  key,
+  item,
+  ...props
+}: LinkItemProps): ReactNode {
   if (item.type === 'custom')
     return (
-      <div {...props} className={cn('grid', props.className)}>
+      <div key={key} {...props} className={cn('grid', props.className)}>
         {item.children}
       </div>
     );
 
   if (item.type === 'menu') {
     return (
-      <Collapsible className="flex flex-col">
+      <Collapsible key={key} className="flex flex-col">
         <CollapsibleTrigger
           {...props}
           className={cn(itemVariants(), props.className, 'group/link')}
@@ -125,9 +130,9 @@ export function MenuItem({ item, ...props }: LinkItemProps): React.ReactNode {
         </CollapsibleTrigger>
         <CollapsibleContent>
           <div className="ms-2 flex flex-col border-s py-2 ps-2">
-            {item.items.map((child, i) => (
-              <MenuItem key={i} item={child} />
-            ))}
+            {item.items.map((child, i) =>
+              renderMenuItem({ key: i, item: child }),
+            )}
           </div>
         </CollapsibleContent>
       </Collapsible>
@@ -135,11 +140,12 @@ export function MenuItem({ item, ...props }: LinkItemProps): React.ReactNode {
   }
 
   if (item.type === 'button') {
-    return <ButtonItem item={item} {...props} />;
+    return <ButtonItem key={key} item={item} {...props} />;
   }
 
   return (
     <BaseLinkItem
+      key={key}
       item={item}
       {...props}
       className={cn(itemVariants(), props.className)}
@@ -150,10 +156,14 @@ export function MenuItem({ item, ...props }: LinkItemProps): React.ReactNode {
   );
 }
 
-export function NavItem({ item, ...props }: LinkItemProps): React.ReactNode {
+export function renderNavItem({
+  key,
+  item,
+  ...props
+}: LinkItemProps): ReactNode {
   if (item.type === 'custom')
     return (
-      <div {...props} className={cn('grid', props.className)}>
+      <div key={key} {...props} className={cn('grid', props.className)}>
         {item.children}
       </div>
     );
@@ -161,13 +171,13 @@ export function NavItem({ item, ...props }: LinkItemProps): React.ReactNode {
   if (item.type === 'menu') {
     return (
       <LinksMenu
-        items={item.items.map((child, i) => (
-          <MenuItem key={i} item={child} />
-        ))}
+        key={key}
+        items={item.items.map((child, i) =>
+          renderMenuItem({ key: i, item: child }),
+        )}
         {...props}
         className={cn(navItemVariants(), props.className)}
       >
-        {item.icon}
         {item.text}
         <ChevronDown className="ms-auto !size-3.5" />
       </LinksMenu>
@@ -175,15 +185,16 @@ export function NavItem({ item, ...props }: LinkItemProps): React.ReactNode {
   }
 
   if (item.type === 'button') {
-    return <ButtonItem item={item} {...props} />;
+    return <ButtonItem key={key} item={item} {...props} />;
   }
 
   if (item.type === 'icon') {
-    return <IconItem item={item} {...props} />;
+    return <IconItem key={key} item={item} {...props} />;
   }
 
   return (
     <BaseLinkItem
+      key={key}
       item={item}
       {...props}
       className={cn(navItemVariants(), props.className)}
@@ -263,10 +274,7 @@ interface LinksMenuProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   items?: ReactNode;
 }
 
-export function LinksMenu({
-  items,
-  ...props
-}: LinksMenuProps): React.ReactElement {
+export function LinksMenu({ items, ...props }: LinksMenuProps): ReactNode {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 

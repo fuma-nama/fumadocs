@@ -4,10 +4,10 @@ import { ChevronDown, Languages, MoreVertical } from 'lucide-react';
 import { useContext, useMemo } from 'react';
 import { useSearchContext } from '@/contexts/search';
 import {
-  NavItem,
+  renderNavItem,
   type LinkItemType,
   LinksMenu,
-  MenuItem,
+  renderMenuItem,
 } from '@/components/layout/link-item';
 import {
   LargeSearchToggle,
@@ -57,9 +57,13 @@ export function Nav({
         {props.children}
         {navItems
           .filter((item) => !isSecondary(item))
-          .map((item, i) => (
-            <NavItem key={i} item={item} className="text-sm max-sm:hidden" />
-          ))}
+          .map((item, i) =>
+            renderNavItem({
+              key: i,
+              item,
+              className: 'text-sm max-sm:hidden',
+            }),
+          )}
         <div className="flex flex-1 flex-row items-center justify-end">
           {enableSearch && search.enabled ? (
             <>
@@ -76,20 +80,24 @@ export function Nav({
             </LanguageToggle>
           ) : null}
 
-          {navItems.filter(isSecondary).map((item, i) => (
-            <NavItem key={i} item={item} className="max-lg:hidden" />
-          ))}
+          {navItems.filter(isSecondary).map((item, i) =>
+            renderNavItem({
+              key: i,
+              item,
+              className: 'max-lg:hidden',
+            }),
+          )}
 
           <LinksMenu
             items={
               <>
-                {menuItems.map((item, i) => (
-                  <MenuItem
-                    key={i}
-                    item={item}
-                    className={cn(!isSecondary(item) && 'sm:hidden')}
-                  />
-                ))}
+                {menuItems.map((item, i) =>
+                  renderMenuItem({
+                    key: i,
+                    item,
+                    className: cn(!isSecondary(item) && 'sm:hidden'),
+                  }),
+                )}
                 <div className="flex flex-row items-center gap-1.5 px-2 pt-1.5 empty:hidden">
                   {props.i18n ? (
                     <LanguageToggle className="-ms-1.5">

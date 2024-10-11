@@ -56,6 +56,28 @@ Set a default value by passing `defaultIndex`.
 </Tabs>
 ```
 
+### Link to Tab
+
+You can use HTML `id` attribute to link to a specific tab.
+
+```mdx
+<Tabs items={['Javascript', 'Rust', 'C++']}>
+  <Tab value="Javascript">Javascript is weird</Tab>
+  <Tab value="Rust">Rust is fast</Tab>
+  <Tab id="tab-cpp" value="C++">
+    `Hello World`
+  </Tab>
+</Tabs>
+```
+
+<Tabs items={['Javascript', 'Rust', 'C++']}>
+  <Tab value="Javascript">Javascript is weird</Tab>
+  <Tab value="Rust">Rust is fast</Tab>
+  <Tab id="tab-cpp" value="C++">
+    `Hello World`
+  </Tab>
+</Tabs>
+
 ### Advanced
 
 You can use the styled Radix UI primitive directly from exported `Primitive`.

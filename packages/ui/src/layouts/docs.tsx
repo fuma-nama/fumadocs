@@ -24,7 +24,7 @@ declare const {
   DynamicSidebar,
   Sidebar,
   IconItem,
-  MenuItem,
+  renderMenuItem,
   NavProvider,
 }: typeof import('./docs.client');
 
@@ -61,6 +61,7 @@ export function DocsLayout({
   i18n = false,
   ...props
 }: DocsLayoutProps): React.ReactNode {
+  const MenuItem = renderMenuItem;
   const links = getLinks(props.links ?? [], props.githubUrl);
   const Aside = collapsible ? DynamicSidebar : Sidebar;
 
@@ -79,7 +80,7 @@ export function DocsLayout({
       >
         {nav.title}
       </Link>,
-      nav.children,
+      <Fragment key="children">{nav.children}</Fragment>,
     );
 
   if (links.length > 0)

@@ -4,7 +4,15 @@ import type {
   TabsContentProps,
   TabsProps as BaseProps,
 } from '@radix-ui/react-tabs';
-import { useMemo, useState, useCallback, useLayoutEffect } from 'react';
+import {
+  useMemo,
+  useState,
+  useCallback,
+  createContext,
+  useContext,
+  useRef,
+  useLayoutEffect,
+} from 'react';
 import { cn } from '@/utils/cn';
 import * as Primitive from './ui/tabs';
 
@@ -27,15 +35,6 @@ function removeChangeListener(id: string, listener: ChangeListener): void {
   );
 }
 
-function update(id: string, v: string, persist: boolean): void {
-  listeners.get(id)?.forEach((item) => {
-    item(v);
-  });
-
-  if (persist) localStorage.setItem(id, v);
-  else sessionStorage.setItem(id, v);
-}
-
 export interface TabsProps extends BaseProps {
   /**
    * Identifier for Sharing value of tabs
@@ -54,6 +53,8 @@ export interface TabsProps extends BaseProps {
   items?: string[];
 }
 
+const ValueChangeContext = createContext<(v: string) => void>(() => undefined);
+
 export function Tabs({
   groupId,
   items = [],
@@ -63,12 +64,14 @@ export function Tabs({
 }: TabsProps): React.ReactElement {
   const values = useMemo(() => items.map((item) => toValue(item)), [items]);
   const [value, setValue] = useState(values[defaultIndex]);
+  const valuesRef = useRef(values);
+  valuesRef.current = values;
 
   useLayoutEffect(() => {
     if (!groupId) return;
 
     const onUpdate: ChangeListener = (v) => {
-      if (values.includes(v)) setValue(v);
+      if (valuesRef.current.includes(v)) setValue(v);
     };
 
     const previous = persist
@@ -80,12 +83,17 @@ export function Tabs({
     return () => {
       removeChangeListener(groupId, onUpdate);
     };
-  }, [groupId, persist, values]);
+  }, [groupId, persist]);
 
   const onValueChange = useCallback(
     (v: string) => {
       if (groupId) {
-        update(groupId, v, persist);
+        listeners.get(groupId)?.forEach((item) => {
+          item(v);
+        });
+
+        if (persist) localStorage.setItem(groupId, v);
+        else sessionStorage.setItem(groupId, v);
       } else {
         setValue(v);
       }
@@ -107,7 +115,9 @@ export function Tabs({
           </Primitive.TabsTrigger>
         ))}
       </Primitive.TabsList>
-      {props.children}
+      <ValueChangeContext.Provider value={onValueChange}>
+        {props.children}
+      </ValueChangeContext.Provider>
     </Primitive.Tabs>
   );
 }
@@ -121,9 +131,20 @@ export function Tab({
   className,
   ...props
 }: TabsContentProps): React.ReactElement {
+  const v = toValue(value);
+  const onValueChange = useContext(ValueChangeContext);
+
+  useLayoutEffect(() => {
+    const hash = window.location.hash.slice(1);
+
+    if (hash === props.id) {
+      onValueChange(v);
+    }
+  }, [onValueChange, props.id, v]);
+
   return (
     <Primitive.TabsContent
-      value={toValue(value)}
+      value={v}
       className={cn(
         'prose-no-margin [&>figure:only-child]:-m-4 [&>figure:only-child]:rounded-none [&>figure:only-child]:border-none',
         className,

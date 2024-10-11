@@ -80,10 +80,15 @@ export const baseOptions: BaseLayoutProps = {
   },
   links: [
     {
+      type: 'menu',
       icon: <BookIcon />,
       text: 'Documentation',
-      url: '/docs/ui',
-      active: 'none',
+      items: [
+        {
+          text: 'Getting Started',
+          url: '/docs/ui',
+        },
+      ],
     },
     ...linkItems,
   ],

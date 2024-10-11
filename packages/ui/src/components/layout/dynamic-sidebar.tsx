@@ -76,10 +76,15 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
           onPointerEnter: onEnter,
           onPointerLeave: onLeave,
           'aria-hidden': Boolean(collapsed && !hover),
+          style: {
+            // the offset given to docs content when the sidebar is collapsed
+            '--fd-content-offset':
+              'max(calc(var(--fd-c-sidebar) - 2 * var(--fd-sidebar-width)), var(--fd-sidebar-width) * -1)',
+          } as object,
           className: cn(
             'md:transition-[transform,padding,width,margin]',
             collapsed && [
-              'md:me-fd-sidebar-offset md:w-[var(--fd-sidebar-width)] md:rounded-xl md:border md:ps-0 md:shadow-md',
+              'md:me-[var(--fd-content-offset)] md:w-[var(--fd-sidebar-width)] md:rounded-xl md:border md:ps-0 md:shadow-md',
               hover
                 ? 'md:translate-x-1 rtl:md:-translate-x-1'
                 : 'md:translate-x-[calc(var(--fd-sidebar-width)*-1)] rtl:md:translate-x-[var(--fd-sidebar-width)]',
