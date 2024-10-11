@@ -85,7 +85,9 @@ export const baseOptions: BaseLayoutProps = {
       type: 'menu',
       text: 'Documentation',
       url: '/docs/ui',
-      banner: <Image src={Preview} alt="Perview" />,
+      banner: (
+        <Image src={Preview} alt="Perview" className="size-full object-cover" />
+      ),
       items: [
         {
           icon: <BookIcon />,

@@ -127,9 +127,9 @@ export const baseOptions: BaseLayoutProps = {
 };
 ```
 
-## Dropdown Menu
+## Navigation Menu
 
-A dropdown menu containing multiple items.
+A navigation menu containing link items.
 
 ```tsx title="app/layout.config.tsx"
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
@@ -140,7 +140,39 @@ export const baseOptions: BaseLayoutProps = {
       type: 'menu',
       text: 'Guide',
       items: [
-        // child items
+        {
+          text: 'Getting Started',
+          description: 'Learn to use Fumadocs',
+          url: '/docs',
+        },
+      ],
+    },
+  ],
+};
+```
+
+Note that the `description` field will only be displayed on the navbar in Home Layout.
+
+### Menu Props
+
+Specify the props for Radix UI Navigation Menu item in Home Layout.
+
+```tsx title="app/layout.config.tsx"
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+export const baseOptions: BaseLayoutProps = {
+  links: [
+    {
+      type: 'menu',
+      text: 'Guide',
+      items: [
+        {
+          text: 'Getting Started',
+          url: '/docs',
+          menu: {
+            className: 'row-span-2',
+          },
+        },
       ],
     },
   ],

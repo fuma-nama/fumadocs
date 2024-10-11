@@ -63,7 +63,7 @@ interface ButtonItem extends BaseLinkItem {
   secondary?: boolean;
 }
 
-interface MenuItem extends BaseItem {
+export interface MenuItem extends BaseItem {
   type: 'menu';
   icon?: ReactNode;
   text: ReactNode;

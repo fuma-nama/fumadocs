@@ -15,10 +15,7 @@ const NavigationMenuTrigger = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <NavigationMenuPrimitive.Trigger
     ref={ref}
-    className={cn(
-      'group data-[active]:bg-fd-accent/50 data-[state=open]:bg-fd-accent/50',
-      className,
-    )}
+    className={cn('group data-[state=open]:bg-fd-accent/50', className)}
     {...props}
   >
     {children}
@@ -36,7 +33,10 @@ const NavigationMenuContent = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <NavigationMenuPrimitive.Content
     ref={ref}
-    className={cn('md:absolute md:inset-x-0 md:top-0', className)}
+    className={cn(
+      'sm:absolute sm:inset-x-0 sm:top-0 sm:data-[motion=from-end]:animate-fd-enterFromRight sm:data-[motion=from-start]:animate-fd-enterFromLeft sm:data-[motion=to-end]:animate-fd-exitToRight sm:data-[motion=to-start]:animate-fd-exitToLeft',
+      className,
+    )}
     {...props}
   />
 ));
@@ -52,7 +52,7 @@ const NavigationMenuViewport = React.forwardRef<
     <NavigationMenuPrimitive.Viewport
       {...props}
       className={cn(
-        'relative h-fit w-full origin-[top_center] overflow-hidden text-fd-popover-foreground duration-300 data-[state=closed]:animate-fd-nav-menu-out data-[state=open]:animate-fd-nav-menu-in md:h-[var(--radix-navigation-menu-viewport-height)] md:transition-[width,height]',
+        'relative h-fit w-full origin-[top_center] overflow-hidden text-fd-popover-foreground duration-300 data-[state=closed]:animate-fd-nav-menu-out data-[state=open]:animate-fd-nav-menu-in sm:h-[var(--radix-navigation-menu-viewport-height)] sm:transition-[width,height]',
         className,
       )}
     />

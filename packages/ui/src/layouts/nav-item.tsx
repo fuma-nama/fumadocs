@@ -7,6 +7,7 @@ import {
   ButtonItem,
   IconItem,
   type LinkItemType,
+  type MenuItem,
 } from '@/components/layout/link-item';
 import {
   NavigationMenuContent,
@@ -46,44 +47,7 @@ export function renderNavItem({
           {item.url ? <Link href={item.url}>{item.text}</Link> : item.text}
         </NavigationMenuTrigger>
         <NavigationMenuContent className="grid grid-cols-1 gap-3 pb-4 md:grid-cols-2 lg:grid-cols-3">
-          {item.banner ? (
-            <div className="row-span-3 overflow-hidden rounded-xl border-fd-foreground/10 bg-fd-muted">
-              {item.banner}
-            </div>
-          ) : null}
-          {item.items.map((child, i) => {
-            if (child.type === 'custom')
-              return <Fragment key={i}>{child.children}</Fragment>;
-            const { banner, footer, ...menuProps } = child.menu ?? {};
-
-            return (
-              <NavigationMenuLink key={i} asChild>
-                <Link
-                  external={child.external}
-                  href={child.url}
-                  {...menuProps}
-                  className={cn(
-                    'block rounded-lg border bg-fd-muted/50 p-3 text-sm transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground',
-                    menuProps.className,
-                  )}
-                >
-                  {banner}
-                  {child.icon ? (
-                    <div className="mb-1 w-fit rounded-md border bg-fd-muted p-1 [&_svg]:size-4">
-                      {child.icon}
-                    </div>
-                  ) : null}
-                  <p className="font-medium">{child.text}</p>
-                  {child.description ? (
-                    <p className="text-fd-muted-foreground">
-                      {child.description}
-                    </p>
-                  ) : null}
-                  {footer}
-                </Link>
-              </NavigationMenuLink>
-            );
-          })}
+          <MenuItemContent item={item} />
         </NavigationMenuContent>
       </NavigationMenuItem>
     );
@@ -109,5 +73,48 @@ export function renderNavItem({
         </BaseLinkItem>
       </NavigationMenuLink>
     </NavigationMenuItem>
+  );
+}
+
+function MenuItemContent({ item }: { item: MenuItem }): ReactNode {
+  return (
+    <>
+      {item.banner ? (
+        <div className="row-span-3 overflow-hidden rounded-xl border-fd-foreground/10 bg-fd-muted">
+          {item.banner}
+        </div>
+      ) : null}
+      {item.items.map((child, i) => {
+        if (child.type === 'custom')
+          return <Fragment key={i}>{child.children}</Fragment>;
+        const { banner, footer, ...menuProps } = child.menu ?? {};
+
+        return (
+          <NavigationMenuLink key={i} asChild>
+            <Link
+              external={child.external}
+              href={child.url}
+              {...menuProps}
+              className={cn(
+                'block rounded-lg border bg-fd-muted/50 p-3 text-sm transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground',
+                menuProps.className,
+              )}
+            >
+              {banner}
+              {child.icon ? (
+                <div className="mb-1 w-fit rounded-md border bg-fd-muted p-1 [&_svg]:size-4">
+                  {child.icon}
+                </div>
+              ) : null}
+              <p className="font-medium">{child.text}</p>
+              {child.description ? (
+                <p className="text-fd-muted-foreground">{child.description}</p>
+              ) : null}
+              {footer}
+            </Link>
+          </NavigationMenuLink>
+        );
+      })}
+    </>
   );
 }

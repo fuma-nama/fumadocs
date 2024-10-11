@@ -109,7 +109,7 @@ export function Nav({
                   }),
                 )}
               />
-              <NavigationMenuContent className="flex flex-col pb-4 md:flex-row">
+              <NavigationMenuContent className="flex flex-col pb-4 sm:flex-row sm:items-center sm:justify-end">
                 {menuItems.map((item, i) =>
                   renderMenuItem({
                     key: i,
@@ -119,7 +119,7 @@ export function Nav({
                     ),
                   }),
                 )}
-                <div className="flex flex-row items-center gap-1.5 empty:hidden max-sm:mt-1.5 sm:ms-auto">
+                <div className="flex flex-row items-center gap-1.5 empty:hidden max-sm:mt-1.5 sm:ms-1.5">
                   {props.i18n ? (
                     <LanguageToggle className="-ms-1.5">
                       <Languages className="size-5" />
