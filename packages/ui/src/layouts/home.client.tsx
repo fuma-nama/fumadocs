@@ -84,7 +84,7 @@ export function Nav({
               <ThemeToggle className="max-lg:hidden" />
             ) : null}
             {props.i18n ? (
-              <LanguageToggle className="max-lg:hidden">
+              <LanguageToggle className="-me-1.5 max-lg:hidden">
                 <Languages className="size-5" />
               </LanguageToggle>
             ) : null}
@@ -119,7 +119,7 @@ export function Nav({
                 )}
                 <div className="flex flex-row items-center gap-1.5 empty:hidden max-sm:mt-1.5 sm:ms-1.5">
                   {props.i18n ? (
-                    <LanguageToggle className="-ms-1.5">
+                    <LanguageToggle>
                       <Languages className="size-5" />
                       <LanguageToggleText />
                       <ChevronDown className="size-3 text-fd-muted-foreground" />

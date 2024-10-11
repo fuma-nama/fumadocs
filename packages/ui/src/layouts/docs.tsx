@@ -24,7 +24,7 @@ declare const {
   DynamicSidebar,
   Sidebar,
   IconItem,
-  renderMenuItem,
+  MenuItem,
   NavProvider,
 }: typeof import('./docs.client');
 
@@ -61,7 +61,6 @@ export function DocsLayout({
   i18n = false,
   ...props
 }: DocsLayoutProps): React.ReactNode {
-  const MenuItem = renderMenuItem;
   const links = getLinks(props.links ?? [], props.githubUrl);
   const Aside = collapsible ? DynamicSidebar : Sidebar;
 
@@ -102,36 +101,37 @@ export function DocsLayout({
       </LinksMenu>,
     );
 
+  const iconLinks = links.filter((v) => v.type === 'icon');
+  if (iconLinks.length > 0) {
+    footer.push(
+      <Fragment key="links">
+        {iconLinks.map((item, i) => (
+          <IconItem
+            key={i}
+            item={item}
+            className="text-fd-muted-foreground md:hidden"
+          />
+        ))}
+      </Fragment>,
+    );
+  }
+
   if (sidebar.footer) {
     footer.push(<Fragment key="footer">{sidebar.footer}</Fragment>);
   }
 
   if (!props.disableThemeSwitch) {
-    footer.push(<ThemeToggle key="theme" className="me-auto" />);
+    footer.push(
+      <ThemeToggle key="theme" className="max-md:ms-auto md:me-auto" />,
+    );
   }
 
   if (i18n) {
     footer.push(
-      <LanguageToggle key="i18n">
+      <LanguageToggle key="i18n" className="max-md:order-first">
         <Languages className="size-5" />
         <LanguageToggleText className="md:hidden" />
       </LanguageToggle>,
-    );
-  }
-
-  if (links.some((v) => v.type === 'icon')) {
-    footer.push(
-      <Fragment key="links">
-        {links
-          .filter((v) => v.type === 'icon')
-          .map((item, i) => (
-            <IconItem
-              key={i}
-              item={item}
-              className="text-fd-muted-foreground md:hidden"
-            />
-          ))}
-      </Fragment>,
     );
   }
 

@@ -5,7 +5,6 @@ import { usePathname } from 'next/navigation';
 import {
   createContext,
   type HTMLAttributes,
-  useCallback,
   useContext,
   useMemo,
   useState,
@@ -20,7 +19,7 @@ import { type LinkItemType } from '@/layouts/links';
 import { LargeSearchToggle } from '@/components/layout/search-toggle';
 import { useSearchContext } from '@/contexts/search';
 import { itemVariants } from '@/components/layout/variants';
-import { renderMenuItem } from '@/layouts/menu-item';
+import { MenuItem } from '@/layouts/menu-item';
 import {
   Collapsible,
   CollapsibleContent,
@@ -146,7 +145,9 @@ export function Sidebar({
         <ViewportContent>
           {items.length > 0 ? (
             <div className="flex flex-col px-4 pt-6 md:hidden">
-              {items.map((item, i) => renderMenuItem({ key: i, item }))}
+              {items.map((item, i) => (
+                <MenuItem key={i} item={item} />
+              ))}
             </div>
           ) : null}
         </ViewportContent>
@@ -264,20 +265,6 @@ function FolderNode({
     if (v) setOpen(v);
   });
 
-  const onClick: React.MouseEventHandler = useCallback(
-    (e) => {
-      if (
-        // clicking on icon
-        (e.target as HTMLElement).hasAttribute('data-icon') ||
-        active
-      ) {
-        setOpen((prev) => !prev);
-        e.preventDefault();
-      }
-    },
-    [active],
-  );
-
   const content = (
     <>
       {item.icon}
@@ -296,7 +283,16 @@ function FolderNode({
           data-active={active}
           className={cn(itemVariants())}
           href={item.index.url}
-          onClick={onClick}
+          onClick={(e) => {
+            if (
+              // clicking on icon
+              (e.target as HTMLElement).hasAttribute('data-icon') ||
+              active
+            ) {
+              setOpen((prev) => !prev);
+              e.preventDefault();
+            }
+          }}
           prefetch={prefetch}
         >
           {content}

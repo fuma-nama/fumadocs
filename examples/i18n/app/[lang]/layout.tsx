@@ -17,7 +17,13 @@ export default function Layout({
 }) {
   return (
     <html lang={lang} className={inter.className}>
-      <body>
+      <body
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: '100vh',
+        }}
+      >
         <I18nProvider
           locale={lang}
           locales={[
