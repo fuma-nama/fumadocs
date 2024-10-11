@@ -113,7 +113,8 @@ export function LinksMenu({ items, ...props }: LinksMenuProps): ReactNode {
   );
 }
 
-export { IconItem, renderMenuItem } from '@/components/layout/link-item';
+export { IconItem } from '@/layouts/links';
+export { renderMenuItem } from '@/layouts/menu-item';
 export { NavProvider } from '@/components/layout/nav';
 export { RootToggle } from '@/components/layout/root-toggle';
 export { Sidebar } from '@/components/layout/sidebar';

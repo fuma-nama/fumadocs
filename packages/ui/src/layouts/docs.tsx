@@ -7,7 +7,7 @@ import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import type { SidebarProps } from '@/components/layout/sidebar';
 import { replaceOrDefault } from '@/layouts/shared';
-import type { LinkItemType } from '@/components/layout/link-item';
+import type { LinkItemType } from '@/layouts/links';
 import { getSidebarTabs, type TabOptions } from '@/utils/get-sidebar-tabs';
 import { Option } from '@/components/layout/root-toggle';
 import { type BaseLayoutProps, getLinks } from './shared';

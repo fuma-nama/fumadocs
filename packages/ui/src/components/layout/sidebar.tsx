@@ -16,13 +16,11 @@ import { cn } from '@/utils/cn';
 import { useTreeContext } from '@/contexts/tree';
 import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
 import { hasActive, isActive } from '@/utils/shared';
-import {
-  type LinkItemType,
-  renderMenuItem,
-} from '@/components/layout/link-item';
+import { type LinkItemType } from '@/layouts/links';
 import { LargeSearchToggle } from '@/components/layout/search-toggle';
 import { useSearchContext } from '@/contexts/search';
 import { itemVariants } from '@/components/layout/variants';
+import { renderMenuItem } from '@/layouts/menu-item';
 import {
   Collapsible,
   CollapsibleContent,

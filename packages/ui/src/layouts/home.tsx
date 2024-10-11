@@ -15,10 +15,11 @@ export function HomeLayout({
   return (
     <NavProvider transparentMode={transparentMode}>
       <main
-        className="pt-[var(--fd-nav-height)]"
+        id="nd-home-layout"
+        className="flex flex-1 flex-col pt-[var(--fd-nav-height)]"
         style={
           {
-            '--fd-nav-height': '3.5rem',
+            '--fd-nav-height': '58px',
           } as object
         }
       >

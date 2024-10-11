@@ -3,10 +3,7 @@
 import { ChevronDown, Languages } from 'lucide-react';
 import { useContext, useMemo, useState } from 'react';
 import { useSearchContext } from '@/contexts/search';
-import {
-  type LinkItemType,
-  renderMenuItem,
-} from '@/components/layout/link-item';
+import { type LinkItemType } from '@/layouts/links';
 import {
   LargeSearchToggle,
   SearchToggle,
@@ -19,7 +16,7 @@ import {
   LanguageToggle,
   LanguageToggleText,
 } from '@/components/layout/language-toggle';
-import { renderNavItem } from '@/layouts/nav-item';
+import { renderNavItem, renderMenuItem } from '@/layouts/nav-item';
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -39,7 +36,7 @@ export function Nav({
   i18n?: boolean;
   items: LinkItemType[];
 }): React.ReactElement {
-  const [value, setValue] = useState<string>();
+  const [value, setValue] = useState('');
   const { isTransparent } = useContext(NavContext);
   const search = useSearchContext();
   const [navItems, menuItems] = useMemo(
@@ -55,22 +52,23 @@ export function Nav({
       <header
         id="nd-nav"
         className={cn(
-          'fixed left-1/2 top-[calc(var(--fd-banner-height)+4px)] z-40 w-[calc(100%-1rem)] max-w-fd-container -translate-x-1/2 rounded-2xl border border-fd-foreground/10 px-4 shadow-sm transition-colors',
-          (!isTransparent || Boolean(value)) &&
+          'fixed left-1/2 top-[var(--fd-banner-height)] z-40 mt-2 w-[calc(100%-1rem)] max-w-fd-container -translate-x-1/2 rounded-2xl border border-fd-foreground/10 px-4 transition-colors',
+          value.length > 0 ? 'shadow-lg' : 'shadow-sm',
+          (!isTransparent || value.length > 0) &&
             'bg-fd-background/80 backdrop-blur-md',
         )}
       >
-        <nav className="flex h-14 w-full flex-row items-center gap-4">
+        <nav className="flex h-12 w-full flex-row items-center gap-4">
           <Title title={props.title} url={props.url} />
           {props.children}
-          <NavigationMenuList className="flex flex-row items-center gap-2">
+          <NavigationMenuList className="flex flex-row items-center gap-2 max-sm:hidden">
             {navItems
               .filter((item) => !isSecondary(item))
               .map((item, i) =>
                 renderNavItem({
                   key: i,
                   item,
-                  className: 'text-sm max-sm:hidden',
+                  className: 'text-sm',
                 }),
               )}
           </NavigationMenuList>
@@ -95,7 +93,7 @@ export function Nav({
               renderNavItem({
                 key: i,
                 item,
-                className: '-me-2 max-lg:hidden',
+                className: '-me-1.5 list-none max-lg:hidden',
               }),
             )}
 

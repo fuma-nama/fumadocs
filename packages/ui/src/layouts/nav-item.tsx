@@ -1,6 +1,7 @@
-import { Fragment, ReactNode } from 'react';
+import { Fragment, type ReactNode } from 'react';
 import { cva } from 'class-variance-authority';
 import Link from 'fumadocs-core/link';
+import { ChevronDown } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import {
   BaseLinkItem,
@@ -8,13 +9,19 @@ import {
   IconItem,
   type LinkItemType,
   type MenuItem,
-} from '@/components/layout/link-item';
+} from '@/layouts/links';
 import {
   NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuTrigger,
 } from '@/components/ui/navigation-menu';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import { itemVariants } from '@/components/layout/variants';
 
 interface LinkItemProps extends React.HTMLAttributes<HTMLElement> {
   key?: string | number;
@@ -39,11 +46,8 @@ export function renderNavItem({
 
   if (item.type === 'menu') {
     return (
-      <NavigationMenuItem key={key}>
-        <NavigationMenuTrigger
-          {...props}
-          className={cn(navItemVariants(), props.className)}
-        >
+      <NavigationMenuItem key={key} {...props}>
+        <NavigationMenuTrigger className={cn(navItemVariants())}>
           {item.url ? <Link href={item.url}>{item.text}</Link> : item.text}
         </NavigationMenuTrigger>
         <NavigationMenuContent className="grid grid-cols-1 gap-3 pb-4 md:grid-cols-2 lg:grid-cols-3">
@@ -54,21 +58,29 @@ export function renderNavItem({
   }
 
   if (item.type === 'button') {
-    return <ButtonItem key={key} item={item} {...props} />;
+    return (
+      <NavigationMenuItem key={key} {...props}>
+        <NavigationMenuLink asChild>
+          <ButtonItem item={item} />
+        </NavigationMenuLink>
+      </NavigationMenuItem>
+    );
   }
 
   if (item.type === 'icon') {
-    return <IconItem key={key} item={item} {...props} />;
+    return (
+      <NavigationMenuItem key={key} {...props}>
+        <NavigationMenuLink asChild>
+          <IconItem item={item} />
+        </NavigationMenuLink>
+      </NavigationMenuItem>
+    );
   }
 
   return (
-    <NavigationMenuItem key={key}>
+    <NavigationMenuItem key={key} {...props}>
       <NavigationMenuLink asChild>
-        <BaseLinkItem
-          item={item}
-          {...props}
-          className={cn(navItemVariants(), props.className)}
-        >
+        <BaseLinkItem item={item} className={cn(navItemVariants())}>
           {item.text}
         </BaseLinkItem>
       </NavigationMenuLink>
@@ -87,6 +99,7 @@ function MenuItemContent({ item }: { item: MenuItem }): ReactNode {
       {item.items.map((child, i) => {
         if (child.type === 'custom')
           return <Fragment key={i}>{child.children}</Fragment>;
+
         const { banner, footer, ...menuProps } = child.menu ?? {};
 
         return (
@@ -116,5 +129,51 @@ function MenuItemContent({ item }: { item: MenuItem }): ReactNode {
         );
       })}
     </>
+  );
+}
+
+export function renderMenuItem(props: LinkItemProps): ReactNode {
+  const { key, item, ...rest } = props;
+
+  if (item.type === 'button' || item.type === 'custom') {
+    return renderNavItem(props);
+  }
+
+  if (item.type === 'menu') {
+    return (
+      <Collapsible
+        key={key}
+        {...rest}
+        className={cn('flex flex-col', rest.className)}
+      >
+        <CollapsibleTrigger className={cn(itemVariants(), 'group/link')}>
+          {item.icon}
+          {item.text}
+          <ChevronDown className="ms-auto transition-transform group-data-[state=closed]/link:-rotate-90" />
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <div className="ms-2 flex flex-col border-s py-2 ps-2">
+            {item.items.map((child, i) =>
+              renderMenuItem({ key: i, item: child }),
+            )}
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
+    );
+  }
+
+  return (
+    <NavigationMenuItem
+      key={key}
+      {...rest}
+      className={cn('list-none', rest.className)}
+    >
+      <NavigationMenuLink asChild>
+        <BaseLinkItem item={item} className={cn(itemVariants())}>
+          {item.icon}
+          {item.text}
+        </BaseLinkItem>
+      </NavigationMenuLink>
+    </NavigationMenuItem>
   );
 }

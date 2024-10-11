@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import type { LinkItemType } from '@/components/layout/link-item';
+import type { LinkItemType } from '@/layouts/links';
 import type { NavProviderProps, TitleProps } from '@/components/layout/nav';
 
 interface NavOptions extends SharedNavProps {
