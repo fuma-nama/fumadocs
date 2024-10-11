@@ -5,6 +5,7 @@ import {
 import {
   AlbumIcon,
   BookIcon,
+  ComponentIcon,
   Heart,
   LayoutTemplateIcon,
   MessageCircle,
@@ -18,6 +19,7 @@ import { source } from '@/app/source';
 import { Trigger } from '@/components/ai/search-ai';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
+import Preview from '@/public/banner.png';
 
 const linkItems: LinkItemType[] = [
   {
@@ -81,12 +83,24 @@ export const baseOptions: BaseLayoutProps = {
   links: [
     {
       type: 'menu',
-      icon: <BookIcon />,
       text: 'Documentation',
+      url: '/docs/ui',
+      banner: <Image src={Preview} alt="Perview" />,
       items: [
         {
+          icon: <BookIcon />,
           text: 'Getting Started',
+          description: 'Learn to use Fumadocs on your docs site.',
           url: '/docs/ui',
+        },
+        {
+          icon: <ComponentIcon />,
+          text: 'Components',
+          description: 'Add interactive experience to your docs.',
+          url: '/docs/ui/components',
+          menu: {
+            className: 'lg:col-start-2',
+          },
         },
       ],
     },

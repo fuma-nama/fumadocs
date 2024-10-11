@@ -2,13 +2,26 @@
 
 import { SidebarTrigger } from 'fumadocs-core/sidebar';
 import { Menu, SidebarIcon, X } from 'lucide-react';
-import { type ButtonHTMLAttributes, useCallback, useContext } from 'react';
+import {
+  type ButtonHTMLAttributes,
+  type ReactNode,
+  useCallback,
+  useContext,
+  useState,
+} from 'react';
+import { usePathname } from 'next/navigation';
+import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { useSidebar } from '@/contexts/sidebar';
 import { useSearchContext } from '@/contexts/search';
 import { SearchToggle } from '@/components/layout/search-toggle';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import { NavContext, Title } from '@/components/layout/nav';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import type { SharedNavProps } from './shared';
 
 export function SubNav({
@@ -80,12 +93,27 @@ export function SidebarCollapseTrigger(
   );
 }
 
-export {
-  LinksMenu,
-  renderNavItem,
-  IconItem,
-  renderMenuItem,
-} from '@/components/layout/link-item';
+interface LinksMenuProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  items?: ReactNode;
+}
+
+export function LinksMenu({ items, ...props }: LinksMenuProps): ReactNode {
+  const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+
+  useOnChange(pathname, () => {
+    setOpen(false);
+  });
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger {...props} />
+      <PopoverContent className="flex flex-col p-1">{items}</PopoverContent>
+    </Popover>
+  );
+}
+
+export { IconItem, renderMenuItem } from '@/components/layout/link-item';
 export { NavProvider } from '@/components/layout/nav';
 export { RootToggle } from '@/components/layout/root-toggle';
 export { Sidebar } from '@/components/layout/sidebar';

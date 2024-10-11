@@ -143,7 +143,7 @@ export function TOCItems({
         {!isMenu ? (
           <TocThumb
             containerRef={containerRef}
-            className="absolute start-0 mt-[var(--fd-top)] h-[var(--fd-height)] w-px bg-fd-primary transition-all ease-linear"
+            className="absolute start-0 mt-[var(--fd-top)] h-[var(--fd-height)] w-px bg-fd-primary transition-all"
           />
         ) : null}
         <Primitive.ScrollProvider containerRef={viewRef}>

@@ -14,19 +14,25 @@ export function HomeLayout({
 
   return (
     <NavProvider transparentMode={transparentMode}>
-      {replaceOrDefault(
-        nav,
-        <Nav
-          items={finalLinks}
-          i18n={props.i18n}
-          disableThemeSwitch={props.disableThemeSwitch}
-          {...nav}
-        >
-          <style>{`:root { --fd-nav-height 3.5rem; }`}</style>
-          {nav.children}
-        </Nav>,
-      )}
-      {props.children}
+      <main
+        className="pt-[var(--fd-nav-height)]"
+        style={
+          {
+            '--fd-nav-height': '3.5rem',
+          } as object
+        }
+      >
+        {replaceOrDefault(
+          nav,
+          <Nav
+            items={finalLinks}
+            i18n={props.i18n}
+            disableThemeSwitch={props.disableThemeSwitch}
+            {...nav}
+          />,
+        )}
+        {props.children}
+      </main>
     </NavProvider>
   );
 }

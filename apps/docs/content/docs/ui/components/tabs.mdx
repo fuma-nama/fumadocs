@@ -58,7 +58,7 @@ Set a default value by passing `defaultIndex`.
 
 ### Link to Tab
 
-You can use HTML `id` attribute to link to a specific tab.
+Use HTML `id` attribute to link to a specific tab.
 
 ```mdx
 <Tabs items={['Javascript', 'Rust', 'C++']}>
@@ -69,6 +69,8 @@ You can use HTML `id` attribute to link to a specific tab.
   </Tab>
 </Tabs>
 ```
+
+You can add the hash `#tab-cpp` to your URL and reload, the C++ tab will be activated.
 
 <Tabs items={['Javascript', 'Rust', 'C++']}>
   <Tab value="Javascript">Javascript is weird</Tab>
