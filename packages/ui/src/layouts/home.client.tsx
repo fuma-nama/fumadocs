@@ -1,7 +1,7 @@
 'use client';
 
 import { ChevronDown, Languages } from 'lucide-react';
-import { useContext, useMemo, useState } from 'react';
+import { type ReactNode, useContext, useMemo, useState } from 'react';
 import { useSearchContext } from '@/contexts/search';
 import { type LinkItemType } from '@/layouts/links';
 import {
@@ -16,7 +16,7 @@ import {
   LanguageToggle,
   LanguageToggleText,
 } from '@/components/layout/language-toggle';
-import { renderNavItem, renderMenuItem } from '@/layouts/nav-item';
+import { NavItem, MenuItem } from '@/layouts/nav-item';
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -35,7 +35,7 @@ export function Nav({
   disableThemeSwitch?: boolean;
   i18n?: boolean;
   items: LinkItemType[];
-}): React.ReactElement {
+}): ReactNode {
   const [value, setValue] = useState('');
   const { isTransparent } = useContext(NavContext);
   const search = useSearchContext();
@@ -52,25 +52,21 @@ export function Nav({
       <header
         id="nd-nav"
         className={cn(
-          'fixed left-1/2 top-[var(--fd-banner-height)] z-40 mt-1 w-[calc(100%-1rem)] max-w-fd-container -translate-x-1/2 rounded-2xl border border-fd-foreground/10 px-4 transition-colors',
+          'fixed left-1/2 top-[var(--fd-banner-height)] z-40 mt-1 w-[calc(100%-1rem)] max-w-fd-container -translate-x-1/2 rounded-2xl border border-fd-foreground/10 transition-colors',
           value.length > 0 ? 'shadow-lg' : 'shadow-sm',
           (!isTransparent || value.length > 0) &&
             'bg-fd-background/80 backdrop-blur-md',
         )}
       >
-        <nav className="flex h-12 w-full flex-row items-center gap-4">
+        <nav className="flex h-12 w-full flex-row items-center gap-6 px-4">
           <Title title={props.title} url={props.url} />
           {props.children}
           <NavigationMenuList className="flex flex-row items-center gap-2 max-sm:hidden">
             {navItems
               .filter((item) => !isSecondary(item))
-              .map((item, i) =>
-                renderNavItem({
-                  key: i,
-                  item,
-                  className: 'text-sm',
-                }),
-              )}
+              .map((item, i) => (
+                <NavItem key={i} item={item} className="text-sm" />
+              ))}
           </NavigationMenuList>
 
           <div className="flex flex-1 flex-row items-center justify-end lg:gap-1.5">
@@ -89,13 +85,13 @@ export function Nav({
               </LanguageToggle>
             ) : null}
 
-            {navItems.filter(isSecondary).map((item, i) =>
-              renderNavItem({
-                key: i,
-                item,
-                className: '-me-1.5 list-none max-lg:hidden',
-              }),
-            )}
+            {navItems.filter(isSecondary).map((item, i) => (
+              <NavItem
+                item={item}
+                key={i}
+                className="-me-1.5 list-none max-lg:hidden"
+              />
+            ))}
 
             <NavigationMenuItem className="list-none lg:hidden">
               <NavigationMenuTrigger
@@ -103,30 +99,33 @@ export function Nav({
                   buttonVariants({
                     size: 'icon',
                     color: 'ghost',
-                    className: '-me-2',
                   }),
+                  'group -me-2',
                 )}
-              />
-              <NavigationMenuContent className="flex flex-col pb-4 sm:flex-row sm:items-center sm:justify-end">
-                {menuItems.map((item, i) =>
-                  renderMenuItem({
-                    key: i,
-                    item,
-                    className: cn(
-                      !isSecondary(item) ? 'sm:hidden' : 'sm:w-fit',
-                    ),
-                  }),
-                )}
-                <div className="flex flex-row items-center gap-1.5 empty:hidden max-sm:mt-1.5 sm:ms-1.5">
+              >
+                <ChevronDown className="size-3 transition-transform duration-300 group-data-[state=open]:rotate-180" />
+              </NavigationMenuTrigger>
+              <NavigationMenuContent className="flex flex-col p-4 sm:flex-row sm:items-center sm:justify-end">
+                {menuItems
+                  .filter((item) => !isSecondary(item))
+                  .map((item, i) => (
+                    <MenuItem key={i} item={item} className="sm:hidden" />
+                  ))}
+                <div className="-ms-1.5 flex flex-row items-center gap-1.5 max-sm:mt-2">
                   {props.i18n ? (
-                    <LanguageToggle>
+                    <LanguageToggle className="me-auto">
                       <Languages className="size-5" />
                       <LanguageToggleText />
                       <ChevronDown className="size-3 text-fd-muted-foreground" />
                     </LanguageToggle>
                   ) : null}
+                  <div className="flex flex-row items-center empty:hidden">
+                    {menuItems.filter(isSecondary).map((item, i) => (
+                      <NavItem key={i} item={item} className="list-none" />
+                    ))}
+                  </div>
                   {!props.disableThemeSwitch ? (
-                    <ThemeToggle className="ms-auto" />
+                    <ThemeToggle className={cn(!props.i18n && 'ms-auto')} />
                   ) : null}
                 </div>
               </NavigationMenuContent>

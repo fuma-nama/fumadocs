@@ -49,10 +49,8 @@ export interface SidebarProps {
    */
   components?: Partial<Components>;
   banner?: React.ReactNode;
-  bannerProps?: HTMLAttributes<HTMLDivElement>;
 
   footer?: React.ReactNode;
-  footerProps?: HTMLAttributes<HTMLDivElement>;
 
   /**
    * Hide search trigger
@@ -113,7 +111,7 @@ export function Sidebar({
         blockScrollingWidth={768} // md
         {...props.aside}
         className={cn(
-          'fixed top-fd-layout-top z-30 flex flex-col bg-fd-card text-sm md:sticky md:h-[var(--fd-sidebar-height)] md:w-[var(--fd-c-sidebar)] md:min-w-[var(--fd-sidebar-width)] md:border-e md:ps-[var(--fd-sidebar-offset)]',
+          'fixed top-fd-layout-top z-30 flex flex-col bg-fd-card pt-2 text-sm md:sticky md:h-[var(--fd-sidebar-height)] md:w-[var(--fd-c-sidebar)] md:min-w-[var(--fd-sidebar-width)] md:border-e md:ps-[var(--fd-sidebar-offset)] md:pt-4',
           'max-md:inset-x-0 max-md:bottom-0 max-md:bg-fd-background/80 max-md:text-[15px] max-md:backdrop-blur-md max-md:data-[open=false]:invisible',
           props.aside?.className,
         )}
@@ -127,41 +125,18 @@ export function Sidebar({
           } as object
         }
       >
-        {hasSearch || props.banner ? (
-          <div
-            {...props.bannerProps}
-            className={cn(
-              'flex flex-col gap-1 px-4 pt-2 md:px-3 md:pt-4',
-              !props.banner && 'max-md:hidden',
-              props.bannerProps?.className,
-            )}
-          >
-            {props.banner}
-            {hasSearch ? (
-              <LargeSearchToggle className="rounded-lg max-md:hidden" />
-            ) : null}
-          </div>
+        {props.banner}
+        {hasSearch ? (
+          <LargeSearchToggle className="mx-4 rounded-lg max-md:hidden md:mx-3" />
         ) : null}
         <ViewportContent>
-          {items.length > 0 ? (
-            <div className="flex flex-col px-4 pt-6 md:hidden">
-              {items.map((item, i) => (
-                <MenuItem key={i} item={item} />
-              ))}
-            </div>
-          ) : null}
-        </ViewportContent>
-        {props.footer ? (
-          <div
-            {...props.footerProps}
-            className={cn(
-              'flex flex-row items-center border-t py-1 max-md:px-4 md:mx-3',
-              props.footerProps?.className,
-            )}
-          >
-            {props.footer}
+          <div className="flex flex-col px-4 pt-4 empty:hidden md:hidden">
+            {items.map((item, i) => (
+              <MenuItem key={i} item={item} />
+            ))}
           </div>
-        ) : null}
+        </ViewportContent>
+        {props.footer}
       </Base.SidebarList>
     </Context.Provider>
   );
@@ -178,11 +153,11 @@ function ViewportContent({
     <ScrollArea className="flex-1">
       <ScrollViewport
         style={{
-          maskImage: 'linear-gradient(to bottom, transparent 2px, white 24px)',
+          maskImage: 'linear-gradient(to bottom, transparent 2px, white 16px)',
         }}
       >
         {children}
-        <NodeList items={root.children} className="px-4 py-6 md:px-3" />
+        <NodeList items={root.children} className="p-4 md:px-3" />
       </ScrollViewport>
     </ScrollArea>
   );

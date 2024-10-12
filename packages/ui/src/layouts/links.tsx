@@ -114,8 +114,8 @@ export const BaseLinkItem = forwardRef<
       ref={ref}
       href={item.url}
       external={item.external}
-      data-active={active}
       {...props}
+      data-active={active}
     >
       {props.children}
     </Link>

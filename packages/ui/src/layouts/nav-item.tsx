@@ -1,7 +1,6 @@
 import { Fragment, type ReactNode } from 'react';
 import { cva } from 'class-variance-authority';
 import Link from 'fumadocs-core/link';
-import { ChevronDown } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import {
   BaseLinkItem,
@@ -16,41 +15,25 @@ import {
   NavigationMenuLink,
   NavigationMenuTrigger,
 } from '@/components/ui/navigation-menu';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
-import { itemVariants } from '@/components/layout/variants';
 
 interface LinkItemProps extends React.HTMLAttributes<HTMLElement> {
-  key?: string | number;
   item: LinkItemType;
 }
 
 const navItemVariants = cva(
-  'inline-flex items-center gap-1 p-2 text-fd-muted-foreground transition-colors hover:text-fd-accent-foreground data-[active=true]:!text-fd-primary [&_svg]:size-4',
+  'inline-flex items-center gap-1 p-2 text-fd-muted-foreground transition-colors hover:text-fd-accent-foreground data-[active=true]:text-fd-primary [&_svg]:size-4',
 );
 
-export function renderNavItem({
-  key,
-  item,
-  ...props
-}: LinkItemProps): ReactNode {
-  if (item.type === 'custom')
-    return (
-      <div key={key} {...props}>
-        {item.children}
-      </div>
-    );
+export function NavItem({ item, ...props }: LinkItemProps): ReactNode {
+  if (item.type === 'custom') return <div {...props}>{item.children}</div>;
 
   if (item.type === 'menu') {
     return (
-      <NavigationMenuItem key={key} {...props}>
-        <NavigationMenuTrigger className={cn(navItemVariants())}>
+      <NavigationMenuItem {...props}>
+        <NavigationMenuTrigger className={cn(navItemVariants(), 'rounded-md')}>
           {item.url ? <Link href={item.url}>{item.text}</Link> : item.text}
         </NavigationMenuTrigger>
-        <NavigationMenuContent className="grid grid-cols-1 gap-3 pb-4 md:grid-cols-2 lg:grid-cols-3">
+        <NavigationMenuContent className="grid grid-cols-1 gap-3 px-4 pb-4 md:grid-cols-2 lg:grid-cols-3">
           <MenuItemContent item={item} />
         </NavigationMenuContent>
       </NavigationMenuItem>
@@ -59,7 +42,7 @@ export function renderNavItem({
 
   if (item.type === 'button') {
     return (
-      <NavigationMenuItem key={key} {...props}>
+      <NavigationMenuItem {...props}>
         <NavigationMenuLink asChild>
           <ButtonItem item={item} />
         </NavigationMenuLink>
@@ -69,7 +52,7 @@ export function renderNavItem({
 
   if (item.type === 'icon') {
     return (
-      <NavigationMenuItem key={key} {...props}>
+      <NavigationMenuItem {...props}>
         <NavigationMenuLink asChild>
           <IconItem item={item} />
         </NavigationMenuLink>
@@ -78,7 +61,7 @@ export function renderNavItem({
   }
 
   return (
-    <NavigationMenuItem key={key} {...props}>
+    <NavigationMenuItem {...props}>
       <NavigationMenuLink asChild>
         <BaseLinkItem item={item} className={cn(navItemVariants())}>
           {item.text}
@@ -132,14 +115,10 @@ function MenuItemContent({ item }: { item: MenuItem }): ReactNode {
   );
 }
 
-export function renderMenuItem({
-  key,
-  item,
-  ...rest
-}: LinkItemProps): ReactNode {
+export function MenuItem({ item, ...rest }: LinkItemProps): ReactNode {
   if (item.type === 'button') {
     return (
-      <NavigationMenuLink key={key} asChild>
+      <NavigationMenuLink asChild>
         <ButtonItem item={item} {...rest} />
       </NavigationMenuLink>
     );
@@ -147,19 +126,15 @@ export function renderMenuItem({
 
   if (item.type === 'custom')
     return (
-      <div key={key} {...rest} className={cn('grid', rest.className)}>
+      <div {...rest} className={cn('grid', rest.className)}>
         {item.children}
       </div>
     );
 
   if (item.type === 'menu') {
     return (
-      <Collapsible
-        key={key}
-        {...rest}
-        className={cn('flex flex-col', rest.className)}
-      >
-        <CollapsibleTrigger className={cn(itemVariants(), 'group/link')}>
+      <div {...rest} className={cn('mb-4 flex flex-col', rest.className)}>
+        <p className="mb-1 text-sm text-fd-muted-foreground">
           {item.url ? (
             <NavigationMenuLink asChild>
               <Link href={item.url}>
@@ -173,25 +148,23 @@ export function renderMenuItem({
               {item.text}
             </>
           )}
-          <ChevronDown className="ms-auto transition-transform group-data-[state=closed]/link:-rotate-90" />
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <div className="ms-2 flex flex-col border-s py-2 ps-2">
-            {item.items.map((child, i) =>
-              renderMenuItem({ key: i, item: child }),
-            )}
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
+        </p>
+        {item.items.map((child, i) => (
+          <MenuItem key={i} item={child} />
+        ))}
+      </div>
     );
   }
 
   return (
-    <NavigationMenuLink key={key} asChild>
+    <NavigationMenuLink asChild>
       <BaseLinkItem
         item={item}
         {...rest}
-        className={cn(itemVariants(), rest.className)}
+        className={cn(
+          'inline-flex items-center gap-2 py-1.5 transition-colors hover:text-fd-popover-foreground/50 data-[active=true]:font-medium data-[active=true]:text-fd-primary [&_svg]:size-4',
+          rest.className,
+        )}
       >
         {item.icon}
         {item.text}

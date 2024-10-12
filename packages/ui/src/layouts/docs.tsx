@@ -1,5 +1,5 @@
 import type { PageTree } from 'fumadocs-core/server';
-import { ReactNode, HTMLAttributes, Fragment } from 'react';
+import { type ReactNode, type HTMLAttributes, Fragment } from 'react';
 import Link from 'next/link';
 import { Languages, MoreHorizontal } from 'lucide-react';
 import { notFound } from 'next/navigation';
@@ -9,7 +9,7 @@ import type { SidebarProps } from '@/components/layout/sidebar';
 import { replaceOrDefault } from '@/layouts/shared';
 import type { LinkItemType } from '@/layouts/links';
 import { getSidebarTabs, type TabOptions } from '@/utils/get-sidebar-tabs';
-import { Option } from '@/components/layout/root-toggle';
+import type { Option } from '@/components/layout/root-toggle';
 import { type BaseLayoutProps, getLinks } from './shared';
 
 declare const {
@@ -60,7 +60,7 @@ export function DocsLayout({
   } = {},
   i18n = false,
   ...props
-}: DocsLayoutProps): React.ReactNode {
+}: DocsLayoutProps): ReactNode {
   const links = getLinks(props.links ?? [], props.githubUrl);
   const Aside = collapsible ? DynamicSidebar : Sidebar;
 
@@ -79,8 +79,10 @@ export function DocsLayout({
       >
         {nav.title}
       </Link>,
-      <Fragment key="children">{nav.children}</Fragment>,
     );
+
+  if (nav.children)
+    header.push(<Fragment key="children">{nav.children}</Fragment>);
 
   if (links.length > 0)
     header.push(
@@ -104,31 +106,26 @@ export function DocsLayout({
   const iconLinks = links.filter((v) => v.type === 'icon');
   if (iconLinks.length > 0) {
     footer.push(
-      <Fragment key="links">
+      <div key="links" className="flex flex-row items-center md:hidden">
         {iconLinks.map((item, i) => (
-          <IconItem
-            key={i}
-            item={item}
-            className="text-fd-muted-foreground md:hidden"
-          />
+          <IconItem key={i} item={item} className="text-fd-muted-foreground" />
         ))}
-      </Fragment>,
+      </div>,
     );
-  }
-
-  if (sidebar.footer) {
-    footer.push(<Fragment key="footer">{sidebar.footer}</Fragment>);
   }
 
   if (!props.disableThemeSwitch) {
     footer.push(
-      <ThemeToggle key="theme" className="max-md:ms-auto md:me-auto" />,
+      <ThemeToggle
+        key="theme"
+        className={cn('md:me-auto', !i18n && 'max-md:ms-auto')}
+      />,
     );
   }
 
   if (i18n) {
     footer.push(
-      <LanguageToggle key="i18n" className="max-md:order-first">
+      <LanguageToggle key="i18n" className="max-md:order-first max-md:me-auto">
         <Languages className="size-5" />
         <LanguageToggleText className="md:hidden" />
       </LanguageToggle>,
@@ -168,21 +165,24 @@ export function DocsLayout({
               {...sidebar}
               items={links.filter((v) => v.type !== 'icon')}
               banner={
-                header.length > 0 ||
-                Boolean(sidebar.banner) ||
-                tabs.length > 0 ? (
-                  <>
-                    {header.length > 0 ? (
-                      <div className="flex flex-row items-center border-b pb-2 max-md:hidden">
-                        {header}
-                      </div>
-                    ) : null}
-                    {tabs.length > 0 ? <RootToggle options={tabs} /> : null}
-                    {sidebar.banner}
-                  </>
-                ) : null
+                <div className="flex flex-col gap-1 px-4 empty:hidden md:px-3 md:pb-2">
+                  {header.length > 0 ? (
+                    <div className="flex flex-row items-center border-b pb-2 max-md:hidden">
+                      {header}
+                    </div>
+                  ) : null}
+                  {tabs.length > 0 ? <RootToggle options={tabs} /> : null}
+                  {sidebar.banner}
+                </div>
               }
-              footer={footer.length > 0 ? footer : null}
+              footer={
+                <>
+                  <div className="flex flex-row items-center border-t py-1 empty:hidden max-md:gap-1.5 max-md:px-4 md:mx-3">
+                    {footer}
+                  </div>
+                  {sidebar.footer}
+                </>
+              }
             />,
           )}
           {props.children}
