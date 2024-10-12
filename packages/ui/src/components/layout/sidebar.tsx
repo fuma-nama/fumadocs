@@ -5,6 +5,8 @@ import { usePathname } from 'next/navigation';
 import {
   createContext,
   type HTMLAttributes,
+  memo,
+  type ReactNode,
   useContext,
   useMemo,
   useState,
@@ -15,11 +17,9 @@ import { cn } from '@/utils/cn';
 import { useTreeContext } from '@/contexts/tree';
 import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
 import { hasActive, isActive } from '@/utils/shared';
-import { type LinkItemType } from '@/layouts/links';
 import { LargeSearchToggle } from '@/components/layout/search-toggle';
 import { useSearchContext } from '@/contexts/search';
 import { itemVariants } from '@/components/layout/variants';
-import { MenuItem } from '@/layouts/menu-item';
 import {
   Collapsible,
   CollapsibleContent,
@@ -27,8 +27,6 @@ import {
 } from '../ui/collapsible';
 
 export interface SidebarProps {
-  items: LinkItemType[];
-
   /**
    * Open folders by default if their level is lower or equal to a specific level
    * (Starting from 1)
@@ -48,9 +46,10 @@ export interface SidebarProps {
    * Customise each of the component
    */
   components?: Partial<Components>;
-  banner?: React.ReactNode;
 
-  footer?: React.ReactNode;
+  banner?: ReactNode;
+  children?: ReactNode;
+  footer?: ReactNode;
 
   /**
    * Hide search trigger
@@ -84,69 +83,62 @@ const Context = createContext<InternalContext>({
   prefetch: true,
 });
 
-export function Sidebar({
-  components,
-  defaultOpenLevel = 0,
-  items,
-  prefetch = true,
-  ...props
-}: SidebarProps & {
-  aside?: HTMLAttributes<HTMLElement> & Record<string, unknown>;
-}): React.ReactElement {
-  const search = useSearchContext();
-  const hasSearch = search.enabled && !props.hideSearch;
-  const context = useMemo<InternalContext>(
-    () => ({
-      defaultOpenLevel,
-      components: { ...defaultComponents, ...components },
-      prefetch,
-    }),
-    [components, defaultOpenLevel, prefetch],
-  );
+export const Sidebar = memo(
+  ({
+    components,
+    defaultOpenLevel = 0,
+    prefetch = true,
+    ...props
+  }: SidebarProps & {
+    aside?: HTMLAttributes<HTMLElement> & Record<string, unknown>;
+  }): React.ReactElement => {
+    const search = useSearchContext();
+    const hasSearch = search.enabled && !props.hideSearch;
+    const context = useMemo<InternalContext>(
+      () => ({
+        defaultOpenLevel,
+        components: { ...defaultComponents, ...components },
+        prefetch,
+      }),
+      [components, defaultOpenLevel, prefetch],
+    );
 
-  return (
-    <Context.Provider value={context}>
-      <Base.SidebarList
-        id="nd-sidebar"
-        blockScrollingWidth={768} // md
-        {...props.aside}
-        className={cn(
-          'fixed top-fd-layout-top z-30 flex flex-col bg-fd-card pt-2 text-sm md:sticky md:h-[var(--fd-sidebar-height)] md:w-[var(--fd-c-sidebar)] md:min-w-[var(--fd-sidebar-width)] md:border-e md:ps-[var(--fd-sidebar-offset)] md:pt-4',
-          'max-md:inset-x-0 max-md:bottom-0 max-md:bg-fd-background/80 max-md:text-[15px] max-md:backdrop-blur-md max-md:data-[open=false]:invisible',
-          props.aside?.className,
-        )}
-        style={
-          {
-            ...props.aside?.style,
-            '--fd-sidebar-height':
-              'calc(100dvh - var(--fd-banner-height) - var(--fd-nav-height))',
-            '--fd-sidebar-offset':
-              'calc(var(--fd-c-sidebar) - var(--fd-sidebar-width))',
-          } as object
-        }
-      >
-        {props.banner}
-        {hasSearch ? (
-          <LargeSearchToggle className="mx-4 rounded-lg max-md:hidden md:mx-3" />
-        ) : null}
-        <ViewportContent>
-          <div className="flex flex-col px-4 pt-4 empty:hidden md:hidden">
-            {items.map((item, i) => (
-              <MenuItem key={i} item={item} />
-            ))}
-          </div>
-        </ViewportContent>
-        {props.footer}
-      </Base.SidebarList>
-    </Context.Provider>
-  );
-}
+    return (
+      <Context.Provider value={context}>
+        <Base.SidebarList
+          id="nd-sidebar"
+          blockScrollingWidth={768} // md
+          {...props.aside}
+          className={cn(
+            'fixed top-fd-layout-top z-30 flex flex-col bg-fd-card pt-2 text-sm md:sticky md:h-[var(--fd-sidebar-height)] md:w-[var(--fd-c-sidebar)] md:min-w-[var(--fd-sidebar-width)] md:border-e md:ps-[var(--fd-sidebar-offset)] md:pt-4',
+            'max-md:inset-x-0 max-md:bottom-0 max-md:bg-fd-background/80 max-md:text-[15px] max-md:backdrop-blur-md max-md:data-[open=false]:invisible',
+            props.aside?.className,
+          )}
+          style={
+            {
+              ...props.aside?.style,
+              '--fd-sidebar-height':
+                'calc(100dvh - var(--fd-banner-height) - var(--fd-nav-height))',
+              '--fd-sidebar-offset':
+                'calc(var(--fd-c-sidebar) - var(--fd-sidebar-width))',
+            } as object
+          }
+        >
+          {props.banner}
+          {hasSearch ? (
+            <LargeSearchToggle className="mx-4 rounded-lg max-md:hidden md:mx-3" />
+          ) : null}
+          <ViewportContent>{props.children}</ViewportContent>
+          {props.footer}
+        </Base.SidebarList>
+      </Context.Provider>
+    );
+  },
+);
 
-function ViewportContent({
-  children,
-}: {
-  children: React.ReactNode;
-}): React.ReactElement {
+Sidebar.displayName = 'Sidebar';
+
+function ViewportContent({ children }: { children: ReactNode }): ReactNode {
   const { root } = useTreeContext();
 
   return (
@@ -197,7 +189,7 @@ function PageNode({
   item: { icon, external = false, url, name },
 }: {
   item: PageTree.Item;
-}): React.ReactElement {
+}): ReactNode {
   const pathname = usePathname();
   const active = isActive(url, pathname, false);
   const { prefetch } = useContext(Context);
@@ -222,7 +214,7 @@ function FolderNode({
 }: {
   item: PageTree.Folder;
   level: number;
-}): React.ReactElement {
+}): ReactNode {
   const { defaultOpenLevel, prefetch } = useContext(Context);
   const pathname = usePathname();
   const active =

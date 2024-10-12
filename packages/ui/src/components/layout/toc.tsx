@@ -61,17 +61,9 @@ export function Toc({ header, footer, children }: TOCProps): ReactElement {
   );
 }
 
-export function TocPopover({
-  items,
-  ...props
-}: TOCProps & { items: TOCItemType[]; className?: string }): ReactElement {
-  const { text } = useI18n();
+function TocNav(props: { className?: string; children: ReactNode }): ReactNode {
   const { open } = useSidebar();
   const { isTransparent } = useContext(NavContext);
-  const active = Primitive.useActiveAnchor();
-  const current = useMemo(() => {
-    return items.find((item) => active === item.url.slice(1))?.title;
-  }, [items, active]);
 
   return (
     <div
@@ -89,6 +81,23 @@ export function TocPopover({
         } as object
       }
     >
+      {props.children}
+    </div>
+  );
+}
+
+export function TocPopover({
+  items,
+  ...props
+}: TOCProps & { items: TOCItemType[]; className?: string }): ReactElement {
+  const { text } = useI18n();
+  const active = Primitive.useActiveAnchor();
+  const current = useMemo(() => {
+    return items.find((item) => active === item.url.slice(1))?.title;
+  }, [items, active]);
+
+  return (
+    <TocNav {...props}>
       <Popover>
         <PopoverTrigger className="inline-flex size-full items-center gap-2 text-nowrap px-4 py-2 text-left md:px-3">
           <Text className="size-4 shrink-0" />
@@ -115,7 +124,7 @@ export function TocPopover({
           {props.footer}
         </PopoverContent>
       </Popover>
-    </div>
+    </TocNav>
   );
 }
 

@@ -1,5 +1,11 @@
 'use client';
-import { type PointerEventHandler, useCallback, useRef, useState } from 'react';
+import {
+  type PointerEventHandler,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { SidebarIcon } from 'lucide-react';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { Sidebar, type SidebarProps } from '@/components/layout/sidebar';
@@ -12,10 +18,6 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
   const [hover, setHover] = useState(false);
   const timerRef = useRef(0);
   const closeTimeRef = useRef(0);
-
-  const onCollapse = useCallback(() => {
-    setCollapsed((v) => !v);
-  }, [setCollapsed]);
 
   useOnChange(collapsed, () => {
     setHover(false);
@@ -63,34 +65,39 @@ export function DynamicSidebar(props: SidebarProps): React.ReactElement {
               className: 'fixed start-4 bottom-2 z-10 max-md:hidden',
             }),
           )}
-          onClick={onCollapse}
+          onClick={() => {
+            setCollapsed((v) => !v);
+          }}
         >
           <SidebarIcon />
         </button>
       ) : null}
       <Sidebar
         {...props}
-        aside={{
-          'data-collapse': collapsed,
-          'data-hover': hover,
-          onPointerEnter: onEnter,
-          onPointerLeave: onLeave,
-          'aria-hidden': Boolean(collapsed && !hover),
-          style: {
-            // the offset given to docs content when the sidebar is collapsed
-            '--fd-content-offset':
-              'max(calc(var(--fd-c-sidebar) - 2 * var(--fd-sidebar-width)), var(--fd-sidebar-width) * -1)',
-          } as object,
-          className: cn(
-            'md:transition-[transform,padding,width,margin]',
-            collapsed && [
-              'md:me-[var(--fd-content-offset)] md:w-[var(--fd-sidebar-width)] md:rounded-xl md:border md:ps-0 md:shadow-md',
-              hover
-                ? 'md:translate-x-1 rtl:md:-translate-x-1'
-                : 'md:translate-x-[calc(var(--fd-sidebar-width)*-1)] rtl:md:translate-x-[var(--fd-sidebar-width)]',
-            ],
-          ),
-        }}
+        aside={useMemo(
+          () => ({
+            'data-collapse': collapsed,
+            'data-hover': hover,
+            onPointerEnter: collapsed ? onEnter : undefined,
+            onPointerLeave: collapsed ? onLeave : undefined,
+            'aria-hidden': Boolean(collapsed && !hover),
+            style: {
+              // the offset given to docs content when the sidebar is collapsed
+              '--fd-content-offset':
+                'max(calc(var(--fd-c-sidebar) - 2 * var(--fd-sidebar-width)), var(--fd-sidebar-width) * -1)',
+            } as object,
+            className: cn(
+              'md:transition-[transform,padding,width,margin]',
+              collapsed && [
+                'md:me-[var(--fd-content-offset)] md:w-[var(--fd-sidebar-width)] md:rounded-xl md:border md:ps-0 md:shadow-md',
+                hover
+                  ? 'md:translate-x-1 rtl:md:-translate-x-1'
+                  : 'md:translate-x-[calc(var(--fd-sidebar-width)*-1)] rtl:md:translate-x-[var(--fd-sidebar-width)]',
+              ],
+            ),
+          }),
+          [collapsed, hover, onEnter, onLeave],
+        )}
       />
     </>
   );

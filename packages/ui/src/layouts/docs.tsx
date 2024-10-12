@@ -30,7 +30,7 @@ declare const {
 
 export type { LinkItemType };
 
-interface SidebarOptions extends Omit<SidebarProps, 'items'> {
+interface SidebarOptions extends Omit<SidebarProps, 'children'> {
   enabled: boolean;
   component: ReactNode;
   collapsible: boolean;
@@ -163,7 +163,6 @@ export function DocsLayout({
             { enabled: sidebarEnabled, component: sidebarReplace },
             <Aside
               {...sidebar}
-              items={links.filter((v) => v.type !== 'icon')}
               banner={
                 <div className="flex flex-col gap-1 px-4 empty:hidden md:px-3 md:pb-2">
                   {header.length > 0 ? (
@@ -183,7 +182,15 @@ export function DocsLayout({
                   {sidebar.footer}
                 </>
               }
-            />,
+            >
+              <div className="flex flex-col px-4 pt-4 empty:hidden md:hidden">
+                {links
+                  .filter((v) => v.type !== 'icon')
+                  .map((item, i) => (
+                    <MenuItem key={i} item={item} />
+                  ))}
+              </div>
+            </Aside>,
           )}
           {props.children}
         </main>
