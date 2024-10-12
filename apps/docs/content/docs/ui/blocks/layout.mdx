@@ -13,9 +13,14 @@ Pass your page tree to the component.
 
 ```jsx
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { baseOptions } from '@/app/layout.config';
 
 export default function Layout({ children }) {
-  return <DocsLayout tree={tree}>{children}</DocsLayout>;
+  return (
+    <DocsLayout {...baseOptions} tree={tree}>
+      {children}
+    </DocsLayout>
+  );
 }
 ```
 

@@ -3,15 +3,26 @@ title: MDX Options
 description: Configure MDX processor for Fumadocs MDX
 ---
 
-## Default MDX Options
+## Introduction
 
-Fumadocs MDX uses [MDX Compiler](https://mdxjs.com/packages/mdx) to compile MDX files into JavaScript files.
+You can customise MDX options with [Global Config](/docs/mdx/global) and [Collection Config](/docs/mdx/collections).
 
-Since some options should be applied by default, it exposes a `getDefaultMDXOptions` function that applies these defaults on the input MDX options.
+```ts title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
 
-To allow changing the default settings, it supports a different set of options.
+export default defineConfig({
+  mdxOptions: {
+    remarkPlugins: [myPlugin],
+  },
+});
+```
 
-> MDX options from global config are always applied automatically.
+> Fumadocs MDX uses [MDX Compiler](https://mdxjs.com/packages/mdx) to compile MDX files into JavaScript files.
+
+## Extended MDX Options [#extended]
+
+Fumadocs MDX will apply some default plugins (e.g. syntax highlighting).
+Hence, it supports more options on top of [`ProcessorOptions`](https://mdxjs.com/packages/mdx/#processoroptions) to let you override the defaults.
 
 ### Remark Plugins
 
@@ -95,3 +106,17 @@ By default, it includes:
 - `toc` for the Remark Heading plugin
 - `structuredData` for the Remark Structure Plugin
 - `frontmatter` for the frontmatter of MDX (using `gray-matter`)
+
+### Apply Defaults
+
+Fumadocs MDX exposes a `getDefaultMDXOptions` function that applies default MDX configurations to the input object.
+
+```ts
+import { getDefaultMDXOptions } from 'fumadocs-mdx/config';
+
+const options = getDefaultMDXOptions({
+  // default applied
+});
+```
+
+> For the `mdxOptions` field in global config, you don't need it.

@@ -84,23 +84,37 @@ export const metaFiles = defineCollections({
 
 ### `mdxOptions`
 
-You can also customise MDX options from collections.
-Notice that passing `mdxOptions` to collection overrides all defaults from global config.
+Customise MDX options on collection level.
 
-```ts
+```ts title="source.config.ts"
+import { defineCollections, getDefaultMDXOptions } from 'fumadocs-mdx/config';
+
+export const blog = defineCollections({
+  type: 'doc',
+  mdxOptions: {
+    // mdx options
+  },
+});
+```
+
+By design, this will remove all default settings applied by your global config and Fumadocs MDX.
+
+#### With Defaults
+
+Use `getDefaultMDXOptions` to apply default configurations, it accepts the [Extended MDX Options](/docs/mdx/mdx#extended).
+
+```ts title="source.config.ts"
 import { defineCollections, getDefaultMDXOptions } from 'fumadocs-mdx/config';
 
 export const blog = defineCollections({
   type: 'doc',
   mdxOptions: getDefaultMDXOptions({
-    // mdx options
+    // extended mdx options
   }),
 });
 ```
 
-We use `getDefaultMDXOptions` to apply default MDX options, it accepts the [Default MDX Options](/docs/mdx/mdx).
-
-For full control over MDX options, you can pass MDX options without `getDefaultMDXOptions`, which means no defaults will be applied (except the ones from MDX.js).
+For full control over MDX options, you can pass MDX options without it, which means no defaults will be applied.
 
 > This API only available on `doc` type.
 

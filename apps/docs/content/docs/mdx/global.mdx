@@ -19,9 +19,23 @@ export default defineConfig({
 
 ### MDX Options
 
-Customise the default MDX options of all MDX files.
+Customise the MDX processor options for MDX files.
 
-See [Default MDX Options](/docs/mdx/mdx) for more details.
+```ts title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+import rehypeKatex from 'rehype-katex';
+import remarkMath from 'remark-math';
+
+export default defineConfig({
+  mdxOptions: {
+    remarkPlugins: [remarkMath],
+    // When order matters
+    rehypePlugins: (v) => [rehypeKatex, ...v],
+  },
+});
+```
+
+A set of default configurations is applied by Fumadocs MDX, see [Extended MDX Options](/docs/mdx/mdx#extended) to customise the defaults or add additional configurations.
 
 ### Manifest
 

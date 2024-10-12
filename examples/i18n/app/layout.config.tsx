@@ -5,6 +5,7 @@ export const baseOptions: BaseLayoutProps = {
   nav: {
     title: 'I18n Docs',
   },
+  githubUrl: 'https://github.com',
   links: [
     {
       type: 'main',

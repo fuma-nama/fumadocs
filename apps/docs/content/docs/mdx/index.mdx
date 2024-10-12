@@ -141,20 +141,4 @@ These properties are exported from MDX files by default.
 
 ### MDX Plugins
 
-You can customise the MDX options with [Global Config](/docs/mdx/global) or [Collection Config](/docs/mdx/collections).
-
-```ts title="source.config.ts"
-import { defineConfig } from 'fumadocs-mdx/config';
-import rehypeKatex from 'rehype-katex';
-import remarkMath from 'remark-math';
-
-export default defineConfig({
-  mdxOptions: {
-    remarkPlugins: [remarkMath],
-    // When order matters
-    rehypePlugins: (v) => [rehypeKatex, ...v],
-  },
-});
-```
-
-See [MDX Options](/docs/mdx/mdx) to learn more.
+See [MDX Options](/docs/mdx/mdx).

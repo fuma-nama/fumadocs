@@ -2,9 +2,9 @@ import Link from 'next/link';
 
 export default function HomePage() {
   return (
-    <main
+    <div
       style={{
-        height: '100vh',
+        flex: 1,
         display: 'flex',
         flexDirection: 'column',
         textAlign: 'center',
@@ -33,6 +33,6 @@ export default function HomePage() {
         </Link>{' '}
         and see the documentation.
       </p>
-    </main>
+    </div>
   );
 }

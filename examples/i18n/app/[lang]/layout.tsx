@@ -16,7 +16,7 @@ export default function Layout({
   children: ReactNode;
 }) {
   return (
-    <html lang={lang} className={inter.className}>
+    <html lang={lang} className={inter.className} suppressHydrationWarning>
       <body
         style={{
           display: 'flex',

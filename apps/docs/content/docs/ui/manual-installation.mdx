@@ -37,7 +37,7 @@ Make sure to create a `source.ts` file for content adapters, this allows Fumadoc
 
 ### Root Layout
 
-Wrap the entire application inside [Root Provider](/docs/ui/blocks/root-provider).
+Wrap the entire application inside [Root Provider](/docs/ui/blocks/root-provider), and add required styles to `body`.
 
 ```tsx
 import { RootProvider } from 'fumadocs-ui/provider';
@@ -46,7 +46,14 @@ import type { ReactNode } from 'react';
 export default function Layout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body>
+      <body
+        // you can use Tailwind CSS too
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: '100vh',
+        }}
+      >
         <RootProvider>{children}</RootProvider>
       </body>
     </html>
@@ -173,3 +180,8 @@ See the docs of your content source (e.g. Fumadocs MDX) to customise how content
 #### Routing
 
 See [Organizing Pages](/docs/ui/page-conventions) for customising routing.
+
+#### Other Pages
+
+You can use [Home Layout](/docs/ui/blocks/home-layout) for other pages of the site.
+It includes the theme toggle and global navigation links.

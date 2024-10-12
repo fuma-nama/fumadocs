@@ -32,6 +32,7 @@ const linkItems: LinkItemType[] = [
     text: 'Showcase',
     url: '/showcase',
     icon: <LayoutTemplateIcon />,
+    active: 'url',
   },
   {
     text: 'Sponsors',
