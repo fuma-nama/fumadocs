@@ -111,7 +111,7 @@ export const Sidebar = memo(
           {...props.aside}
           className={cn(
             'fixed top-fd-layout-top z-30 flex flex-col bg-fd-card pt-2 text-sm md:sticky md:h-[var(--fd-sidebar-height)] md:w-[var(--fd-c-sidebar)] md:min-w-[var(--fd-sidebar-width)] md:border-e md:ps-[var(--fd-sidebar-offset)] md:pt-4',
-            'max-md:inset-x-0 max-md:bottom-0 max-md:bg-fd-background/80 max-md:text-[15px] max-md:backdrop-blur-md max-md:data-[open=false]:invisible',
+            'max-md:inset-x-0 max-md:bottom-0 max-md:bg-fd-background/80 max-md:text-[15px] max-md:backdrop-blur-lg max-md:data-[open=false]:invisible',
             props.aside?.className,
           )}
           style={
@@ -135,8 +135,8 @@ export const Sidebar = memo(
                   'linear-gradient(to bottom, transparent 2px, white 16px)',
               }}
             >
-              <RootNodeList />
               {props.children}
+              <RootNodeList />
             </ScrollViewport>
           </ScrollArea>
           {props.footer}

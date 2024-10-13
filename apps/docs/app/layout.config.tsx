@@ -8,8 +8,9 @@ import {
   ComponentIcon,
   Heart,
   Layout,
-  LayoutTemplateIcon,
+  LayoutTemplate,
   MessageCircle,
+  Pencil,
   Server,
 } from 'lucide-react';
 import Image from 'next/image';
@@ -33,7 +34,7 @@ const linkItems: LinkItemType[] = [
   {
     text: 'Showcase',
     url: '/showcase',
-    icon: <LayoutTemplateIcon />,
+    icon: <LayoutTemplate />,
     active: 'url',
   },
   {
@@ -104,8 +105,9 @@ export const baseOptions: BaseLayoutProps = {
                 />
               </div>
             ),
-            className: 'lg:row-span-2',
+            className: 'md:row-span-2',
           },
+          icon: <Book />,
           text: 'Getting Started',
           description: 'Learn to use Fumadocs on your docs site.',
           url: '/docs/ui',
@@ -130,7 +132,7 @@ export const baseOptions: BaseLayoutProps = {
           },
         },
         {
-          icon: <Book />,
+          icon: <Pencil />,
           text: 'Markdown',
           description: 'Learn the writing format/syntax of Fumadocs.',
           url: '/docs/ui/markdown',

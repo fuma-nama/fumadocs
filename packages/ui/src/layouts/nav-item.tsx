@@ -91,12 +91,12 @@ function MenuItemContent({ item }: { item: MenuItem }): ReactNode {
                 menuProps.className,
               )}
             >
-              {banner}
-              {child.icon ? (
-                <div className="w-fit rounded-md border bg-fd-muted p-1 [&_svg]:size-4">
-                  {child.icon}
-                </div>
-              ) : null}
+              {banner ??
+                (child.icon ? (
+                  <div className="w-fit rounded-md border bg-fd-muted p-1 [&_svg]:size-4">
+                    {child.icon}
+                  </div>
+                ) : null)}
               <p className="-mb-1 text-sm font-medium">{child.text}</p>
               {child.description ? (
                 <p className="text-[13px] text-fd-muted-foreground">
@@ -150,6 +150,14 @@ export function MenuItem({ item, ...rest }: LinkItemProps): ReactNode {
           <MenuItem key={i} item={child} />
         ))}
       </div>
+    );
+  }
+
+  if (item.type === 'icon') {
+    return (
+      <NavigationMenuLink asChild>
+        <IconItem item={item} />
+      </NavigationMenuLink>
     );
   }
 

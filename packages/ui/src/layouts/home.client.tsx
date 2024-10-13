@@ -117,7 +117,7 @@ export function Nav({
                 ) : null}
                 <div className="flex flex-row items-center empty:hidden">
                   {menuItems.filter(isSecondary).map((item, i) => (
-                    <NavItem key={i} item={item} className="list-none" />
+                    <MenuItem key={i} item={item} />
                   ))}
                 </div>
                 {!props.disableThemeSwitch ? (

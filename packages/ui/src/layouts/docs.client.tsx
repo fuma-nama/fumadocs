@@ -42,8 +42,7 @@ export function SubNav({
       {...props}
       className={cn(
         'sticky top-[var(--fd-banner-height)] z-40 flex flex-row items-center border-b border-fd-foreground/10 px-4 transition-colors',
-        !isTransparent && 'bg-fd-background/80 backdrop-blur-md',
-        open && 'bg-fd-background',
+        (!isTransparent || open) && 'bg-fd-background/80 backdrop-blur-lg',
         props.className,
       )}
     >
