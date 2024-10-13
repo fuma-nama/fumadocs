@@ -29,7 +29,7 @@ const NavigationMenuContent = React.forwardRef<
   <Primitive.Content
     ref={ref}
     className={cn(
-      'sm:absolute sm:inset-x-0 sm:top-0 sm:data-[motion=from-end]:animate-fd-enterFromRight sm:data-[motion=from-start]:animate-fd-enterFromLeft sm:data-[motion=to-end]:animate-fd-exitToRight sm:data-[motion=to-start]:animate-fd-exitToLeft',
+      'absolute inset-x-0 top-0 data-[motion=from-end]:animate-fd-enterFromRight data-[motion=from-start]:animate-fd-enterFromLeft data-[motion=to-end]:animate-fd-exitToRight data-[motion=to-start]:animate-fd-exitToLeft',
       className,
     )}
     {...props}
@@ -47,7 +47,7 @@ const NavigationMenuViewport = React.forwardRef<
     <Primitive.Viewport
       {...props}
       className={cn(
-        'relative h-fit w-full origin-[top_center] overflow-hidden text-fd-popover-foreground duration-300 data-[state=closed]:animate-fd-nav-menu-out data-[state=open]:animate-fd-nav-menu-in sm:h-[var(--radix-navigation-menu-viewport-height)] sm:transition-[width,height]',
+        'relative h-[var(--radix-navigation-menu-viewport-height)] w-full origin-[top_center] overflow-hidden text-fd-popover-foreground transition-[width,height] duration-300 data-[state=closed]:animate-fd-nav-menu-out data-[state=open]:animate-fd-nav-menu-in',
         className,
       )}
     />

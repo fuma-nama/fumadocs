@@ -75,8 +75,6 @@ export interface MenuItem extends BaseItem {
     | CustomItem
   )[];
 
-  banner?: ReactNode;
-
   /**
    * @defaultValue false
    */

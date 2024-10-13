@@ -4,11 +4,13 @@ import {
 } from 'fumadocs-ui/layouts/docs';
 import {
   AlbumIcon,
-  BookIcon,
+  Book,
   ComponentIcon,
   Heart,
+  Layout,
   LayoutTemplateIcon,
   MessageCircle,
+  Server,
 } from 'lucide-react';
 import Image from 'next/image';
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
@@ -86,12 +88,24 @@ export const baseOptions: BaseLayoutProps = {
       type: 'menu',
       text: 'Documentation',
       url: '/docs/ui',
-      banner: (
-        <Image src={Preview} alt="Perview" className="size-full object-cover" />
-      ),
       items: [
         {
-          icon: <BookIcon />,
+          menu: {
+            banner: (
+              <div className="-mx-3 -mt-3">
+                <Image
+                  src={Preview}
+                  alt="Perview"
+                  className="rounded-t-lg object-cover"
+                  style={{
+                    maskImage:
+                      'linear-gradient(to bottom,white 60%,transparent)',
+                  }}
+                />
+              </div>
+            ),
+            className: 'lg:row-span-2',
+          },
           text: 'Getting Started',
           description: 'Learn to use Fumadocs on your docs site.',
           url: '/docs/ui',
@@ -103,6 +117,34 @@ export const baseOptions: BaseLayoutProps = {
           url: '/docs/ui/components',
           menu: {
             className: 'lg:col-start-2',
+          },
+        },
+        {
+          icon: <Server />,
+          text: 'OpenAPI',
+          description:
+            'Generate interactive playgrounds and docs for your OpenAPI schema.',
+          url: '/docs/ui/openapi',
+          menu: {
+            className: 'lg:col-start-2',
+          },
+        },
+        {
+          icon: <Book />,
+          text: 'Markdown',
+          description: 'Learn the writing format/syntax of Fumadocs.',
+          url: '/docs/ui/markdown',
+          menu: {
+            className: 'lg:col-start-3 lg:row-start-1',
+          },
+        },
+        {
+          icon: <Layout />,
+          text: 'Layouts',
+          description: 'See the available layouts of Fumadocs UI.',
+          url: '/docs/ui/blocks',
+          menu: {
+            className: 'lg:col-start-3',
           },
         },
       ],

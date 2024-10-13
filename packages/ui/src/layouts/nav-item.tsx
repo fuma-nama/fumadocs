@@ -74,11 +74,6 @@ export function NavItem({ item, ...props }: LinkItemProps): ReactNode {
 function MenuItemContent({ item }: { item: MenuItem }): ReactNode {
   return (
     <>
-      {item.banner ? (
-        <div className="row-span-3 overflow-hidden rounded-xl border-fd-foreground/10 bg-fd-muted">
-          {item.banner}
-        </div>
-      ) : null}
       {item.items.map((child, i) => {
         if (child.type === 'custom')
           return <Fragment key={i}>{child.children}</Fragment>;
@@ -92,19 +87,21 @@ function MenuItemContent({ item }: { item: MenuItem }): ReactNode {
               href={child.url}
               {...menuProps}
               className={cn(
-                'block rounded-lg border bg-fd-muted/50 p-3 text-sm transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground',
+                'flex flex-col gap-2 rounded-lg border bg-fd-card p-3 transition-colors hover:bg-fd-accent/80 hover:text-fd-accent-foreground',
                 menuProps.className,
               )}
             >
               {banner}
               {child.icon ? (
-                <div className="mb-1 w-fit rounded-md border bg-fd-muted p-1 [&_svg]:size-4">
+                <div className="w-fit rounded-md border bg-fd-muted p-1 [&_svg]:size-4">
                   {child.icon}
                 </div>
               ) : null}
-              <p className="font-medium">{child.text}</p>
+              <p className="-mb-1 text-sm font-medium">{child.text}</p>
               {child.description ? (
-                <p className="text-fd-muted-foreground">{child.description}</p>
+                <p className="text-[13px] text-fd-muted-foreground">
+                  {child.description}
+                </p>
               ) : null}
               {footer}
             </Link>

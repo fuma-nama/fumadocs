@@ -128,7 +128,17 @@ export const Sidebar = memo(
           {hasSearch ? (
             <LargeSearchToggle className="mx-4 rounded-lg max-md:hidden md:mx-3" />
           ) : null}
-          <ViewportContent>{props.children}</ViewportContent>
+          <ScrollArea className="flex-1">
+            <ScrollViewport
+              style={{
+                maskImage:
+                  'linear-gradient(to bottom, transparent 2px, white 16px)',
+              }}
+            >
+              <RootNodeList />
+              {props.children}
+            </ScrollViewport>
+          </ScrollArea>
           {props.footer}
         </Base.SidebarList>
       </Context.Provider>
@@ -138,21 +148,10 @@ export const Sidebar = memo(
 
 Sidebar.displayName = 'Sidebar';
 
-function ViewportContent({ children }: { children: ReactNode }): ReactNode {
+function RootNodeList(): ReactNode {
   const { root } = useTreeContext();
 
-  return (
-    <ScrollArea className="flex-1">
-      <ScrollViewport
-        style={{
-          maskImage: 'linear-gradient(to bottom, transparent 2px, white 16px)',
-        }}
-      >
-        {children}
-        <NodeList items={root.children} className="p-4 md:px-3" />
-      </ScrollViewport>
-    </ScrollArea>
-  );
+  return <NodeList items={root.children} className="p-4 md:px-3" />;
 }
 
 interface NodeListProps extends React.HTMLAttributes<HTMLDivElement> {
