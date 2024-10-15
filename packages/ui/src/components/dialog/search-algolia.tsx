@@ -26,6 +26,13 @@ export interface AlgoliaSearchDialogProps extends SharedProps {
    * @defaultValue false
    */
   showAlgolia?: boolean;
+
+  /**
+   * Allow to clear tag filters
+   *
+   * @defaultValue false
+   */
+  allowClear?: boolean;
 }
 
 export default function AlgoliaSearchDialog({
@@ -34,6 +41,7 @@ export default function AlgoliaSearchDialog({
   tags,
   defaultTag,
   showAlgolia = false,
+  allowClear = false,
   ...props
 }: AlgoliaSearchDialogProps): React.ReactElement {
   const [tag, setTag] = useState(defaultTag);
@@ -61,7 +69,12 @@ export default function AlgoliaSearchDialog({
       footer={
         tags ? (
           <>
-            <TagsList tag={tag} onTagChange={setTag} items={tags}>
+            <TagsList
+              tag={tag}
+              onTagChange={setTag}
+              items={tags}
+              allowClear={allowClear}
+            >
               {showAlgolia ? <AlgoliaTitle /> : null}
             </TagsList>
             {props.footer}

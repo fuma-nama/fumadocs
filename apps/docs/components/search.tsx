@@ -22,7 +22,8 @@ export default function CustomSearchDialog(
     <SearchDialog
       index={index}
       {...props}
-      defaultTag={useMode() ?? 'all'}
+      defaultTag={useMode() ?? 'ui'}
+      allowClear
       tags={[
         {
           name: 'Framework',
@@ -35,10 +36,6 @@ export default function CustomSearchDialog(
         {
           name: 'MDX',
           value: 'mdx',
-        },
-        {
-          name: 'All',
-          value: undefined,
         },
       ]}
       showAlgolia

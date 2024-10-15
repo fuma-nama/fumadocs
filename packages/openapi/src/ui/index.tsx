@@ -41,7 +41,7 @@ export function APIInfo({
     <div className={cn('min-w-0 flex-1', className)} {...props}>
       <div
         className={cn(
-          'sticky top-[var(--fd-api-info-top)] z-20 mb-4 flex flex-row items-center gap-2 rounded-lg border bg-fd-card px-3 py-2',
+          'sticky top-[calc(var(--fd-api-info-top)+36px)] z-20 mb-4 flex flex-row items-center gap-2 rounded-lg border bg-fd-card px-3 py-2 md:top-[var(--fd-api-info-top)]',
         )}
         style={
           {
@@ -127,7 +127,7 @@ export function APIExample(
       style={
         {
           '--fd-api-info-top':
-            'calc(var(--fd-nav-height) + var(--fd-banner-height) + 4px)',
+            'calc(var(--fd-nav-height) + var(--fd-banner-height) + 40px)',
           ...props.style,
         } as object
       }

@@ -31,6 +31,13 @@ export interface DefaultSearchDialogProps extends SharedProps {
   delayMs?: number;
 
   footer?: ReactNode;
+
+  /**
+   * Allow to clear tag filters
+   *
+   * @defaultValue false
+   */
+  allowClear?: boolean;
 }
 
 export default function DefaultSearchDialog({
@@ -39,6 +46,7 @@ export default function DefaultSearchDialog({
   api,
   delayMs,
   type = 'fetch',
+  allowClear = false,
   ...props
 }: DefaultSearchDialogProps): React.ReactElement {
   const { locale } = useI18n();
@@ -72,7 +80,12 @@ export default function DefaultSearchDialog({
       footer={
         tags ? (
           <>
-            <TagsList tag={tag} onTagChange={setTag} items={tags} />
+            <TagsList
+              tag={tag}
+              onTagChange={setTag}
+              items={tags}
+              allowClear={allowClear}
+            />
             {props.footer}
           </>
         ) : (
