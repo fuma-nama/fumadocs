@@ -1,16 +1,26 @@
 import { type ReactElement } from 'react';
-import { rehypeCode, remarkGfm, remarkImage } from 'fumadocs-core/mdx-plugins';
+import {
+  rehypeCode,
+  remarkGfm,
+  remarkImage,
+  type RehypeCodeOptions,
+} from 'fumadocs-core/mdx-plugins';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { remark } from 'remark';
 import remarkRehype from 'remark-rehype';
 import { toJsxRuntime, type Jsx } from 'hast-util-to-jsx-runtime';
 import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
+import { sharedTransformers } from '@/utils/shiki';
 
 const processor = remark()
   .use(remarkGfm)
   .use(remarkImage, { useImport: false })
   .use(remarkRehype)
-  .use(rehypeCode);
+  .use(rehypeCode, {
+    langs: [],
+    lazy: true,
+    transformers: sharedTransformers,
+  } satisfies Partial<RehypeCodeOptions>);
 
 export async function Markdown({
   text,

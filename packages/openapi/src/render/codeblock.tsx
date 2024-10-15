@@ -1,7 +1,7 @@
 import { Fragment, type HTMLAttributes } from 'react';
 import * as Base from 'fumadocs-ui/components/codeblock';
 import { codeToHast } from 'shiki';
-import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
+import { type Jsx, toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import { jsx, jsxs } from 'react/jsx-runtime';
 import { sharedTransformers } from '@/utils/shiki';
 
@@ -24,15 +24,13 @@ export async function CodeBlock({
 
   const codeblock = toJsxRuntime(html, {
     development: false,
-    // @ts-expect-error -- untyped
-    jsx,
-    // @ts-expect-error -- untyped
-    jsxs,
+    jsx: jsx as Jsx,
+    jsxs: jsxs as Jsx,
+    Fragment,
     components: {
       // eslint-disable-next-line react/no-unstable-nested-components -- server component
       pre: (props) => <Base.Pre {...props} {...options} />,
     },
-    Fragment,
   });
 
   return <Base.CodeBlock className="my-0">{codeblock}</Base.CodeBlock>;

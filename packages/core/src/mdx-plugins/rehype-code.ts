@@ -209,4 +209,4 @@ function transformerTab(): ShikiTransformer {
   };
 }
 
-export { type CodeBlockIcon, transformerIcon };
+export { type CodeBlockIcon, transformerIcon, transformerTab };

@@ -20,6 +20,8 @@ export interface ApiPageProps
   operations: Operation[];
   hasHead: boolean;
   renderer?: Partial<Renderer>;
+
+  disableCache?: boolean;
 }
 
 const cache = new Map<string, OpenAPI.Document>();
@@ -33,7 +35,7 @@ export async function APIPage(props: ApiPageProps): Promise<ReactElement> {
   const { operations, hasHead = true } = props;
   let document: OpenAPI.Document;
 
-  if (typeof props.document === 'string') {
+  if (typeof props.document === 'string' && !props.disableCache) {
     const cached = cache.get(props.document);
     document =
       cached ?? (await Parser.dereference<OpenAPI.Document>(props.document));
