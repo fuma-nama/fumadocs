@@ -123,4 +123,3 @@ export {
   LanguageToggle,
   LanguageToggleText,
 } from '@/components/layout/language-toggle';
-export { DynamicSidebar } from '@/components/layout/dynamic-sidebar';

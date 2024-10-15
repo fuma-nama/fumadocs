@@ -3,7 +3,6 @@
 import algo from 'algoliasearch/lite';
 import type { SharedProps } from 'fumadocs-ui/components/dialog/search';
 import SearchDialog from 'fumadocs-ui/components/dialog/search-algolia';
-import { modes } from '@/utils/modes';
 import { useMode } from '@/app/layout.client';
 
 const appId = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID;
@@ -23,11 +22,25 @@ export default function CustomSearchDialog(
     <SearchDialog
       index={index}
       {...props}
-      defaultTag={useMode() ?? 'ui'}
-      tags={modes.map((mode) => ({
-        name: mode.name,
-        value: mode.param,
-      }))}
+      defaultTag={useMode() ?? 'all'}
+      tags={[
+        {
+          name: 'Framework',
+          value: 'ui',
+        },
+        {
+          name: 'Core',
+          value: 'headless',
+        },
+        {
+          name: 'MDX',
+          value: 'mdx',
+        },
+        {
+          name: 'All',
+          value: undefined,
+        },
+      ]}
       showAlgolia
     />
   );

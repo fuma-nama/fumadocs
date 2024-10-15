@@ -3,6 +3,7 @@ import { type ReactNode, type HTMLAttributes, Fragment } from 'react';
 import Link from 'next/link';
 import { Languages, MoreHorizontal } from 'lucide-react';
 import { notFound } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import type { SidebarProps } from '@/components/layout/sidebar';
@@ -21,12 +22,15 @@ declare const {
   LanguageToggleText,
   LinksMenu,
   RootToggle,
-  DynamicSidebar,
   Sidebar,
   IconItem,
   MenuItem,
   NavProvider,
 }: typeof import('./docs.client');
+
+const DynamicSidebar = dynamic(
+  () => import('@/components/layout/dynamic-sidebar'),
+);
 
 export type { LinkItemType };
 

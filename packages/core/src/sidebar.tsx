@@ -32,13 +32,11 @@ export function SidebarProvider(
   props: SidebarProviderProps,
 ): React.ReactElement {
   const [openInner, setOpenInner] = useState(false);
-  const [open, setOpen] = [
-    props.open ?? openInner,
-    props.onOpenChange ?? setOpenInner,
-  ];
 
   return (
-    <SidebarContext.Provider value={[open, setOpen]}>
+    <SidebarContext.Provider
+      value={[props.open ?? openInner, props.onOpenChange ?? setOpenInner]}
+    >
       {props.children}
     </SidebarContext.Provider>
   );

@@ -14,7 +14,7 @@ Open with <kbd>⌘</kbd> <kbd>K</kbd> or <kbd>Ctrl</kbd> <kbd>K</kbd>.
 
 ### Configurations
 
-You can customize the search dialog from [Root Provider](/docs/ui/blocks/root-provider).
+You can customize search UI from the [Root Provider](/docs/ui/blocks/root-provider) component in root layout.
 
 When not specified, it uses the Default [`fetch` Search Client](/docs/headless/search/orama) powered by Orama.
 It is lazy loaded using [`next/dynamic`](https://nextjs.org/docs/app/building-your-application/optimizing/lazy-loading).
@@ -25,7 +25,7 @@ This allows a better initial loading performance.
 Add custom link items to search dialog.
 They are shown as fallbacks when the query is empty.
 
-```jsx
+```tsx title="app/layout.tsx"
 import { RootProvider } from 'fumadocs-ui/root-provider';
 
 <RootProvider

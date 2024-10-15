@@ -171,12 +171,12 @@ const itemVariants = cva(
 
 export interface TagItem {
   name: string;
-  value: string;
+  value: string | undefined;
 }
 
 export interface TagsListProps extends HTMLAttributes<HTMLDivElement> {
   tag?: string;
-  onTagChange: (tag: string) => void;
+  onTagChange: (tag: string | undefined) => void;
 
   items: TagItem[];
 }

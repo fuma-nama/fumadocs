@@ -18,8 +18,7 @@ Fumadocs has different parts:
 
 <Card icon={<CpuIcon className="text-purple-300" />} title='Fumadocs Core'>
 
-The core of Fumadocs.
-Just like the CPU, it handles most of the logic, including document search, content source adapters, and Markdown/MDX plugins.
+The core of Fumadocs handles most of the logic, including document search, content source adapters, and Markdown/MDX plugins.
 
 </Card>
 
@@ -31,7 +30,7 @@ The default theme of Fumadocs, it offers a beautiful look for documentation site
 
 <Card icon={<Database />} title='Content Source'>
 
-The input/source of your content, it can be a CMS, or local data layers like [Content Collections](https://www.content-collections.dev) and [Fumadocs MDX](/docs/mdx).
+The input/source of your content, it can be a CMS, or local data layers like [Content Collections](https://www.content-collections.dev) and [Fumadocs MDX](/docs/mdx), the official content source.
 
 </Card>
 
@@ -43,9 +42,7 @@ A command line tool to configure features automatically, and install UI componen
 
 </Cards>
 
-This gives Fumadocs great flexibility, theoretically any kind of format and source can be supported by Fumadocs.
-
-> Fumadocs MDX is the official content source of Fumadocs.
+Thanks to this model, theoretically all format and source can be supported by Fumadocs with a custom adapter.
 
 ### Use Cases
 
@@ -60,7 +57,7 @@ You can take this site as an example of docs site built with Fumadocs.
 
 Since Next.js is already a powerful framework, most features can be implemented with **only Next.js**.
 
-Fumadocs Core can process the content (e.g. syntax highlighting), and you can render it with the default theme (Fumadocs UI) or your custom theme.
+Fumadocs can process the content (e.g. syntax highlighting), and you can use the default theme (Fumadocs UI) or your custom theme.
 It is particularly helpful if you want to build complicated things like search.
 
 ### Terminology

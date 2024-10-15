@@ -11,6 +11,7 @@ import {
   getSingletonHighlighter,
   type ShikiTransformer,
   type BuiltinTheme,
+  bundledLanguages,
 } from 'shiki';
 import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
 import { createOnigurumaEngine } from 'shiki/engine/oniguruma';
@@ -47,7 +48,6 @@ export const rehypeCodeDefaultOptions: RehypeCodeOptions = {
     dark: 'github-dark',
   },
   defaultLanguage: 'plaintext',
-  lazy: true,
   experimentalJSEngine: false,
   defaultColor: false,
   transformers: [
@@ -165,7 +165,7 @@ export function rehypeCode(
       ? createJavaScriptRegexEngine()
       : createOnigurumaEngine(() => import('shiki/wasm')),
     themes: themeItems.filter(Boolean) as BuiltinTheme[],
-    langs: codeOptions.langs,
+    langs: codeOptions.langs ?? Object.keys(bundledLanguages),
   });
 
   const transformer = highlighter.then((instance) =>

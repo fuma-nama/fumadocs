@@ -4,7 +4,7 @@ import type { SearchIndex } from 'algoliasearch/lite';
 import { useDocsSearch } from 'fumadocs-core/search/client';
 import { type ReactNode, useState } from 'react';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
-import { SearchOptions } from '@algolia/client-search';
+import type { SearchOptions } from '@algolia/client-search';
 import {
   SearchDialog,
   type SharedProps,

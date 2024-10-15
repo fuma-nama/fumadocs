@@ -1,4 +1,4 @@
-import { HomeIcon } from 'lucide-react';
+import { Home } from 'lucide-react';
 import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 import { Callout } from 'fumadocs-ui/components/callout';
 import { File, Folder, Files } from 'fumadocs-ui/components/files';
@@ -12,8 +12,9 @@ import { RootToggle } from 'fumadocs-ui/components/layout/root-toggle';
 import { Banner } from 'fumadocs-ui/components/banner';
 import { InlineTOC } from 'fumadocs-ui/components/inline-toc';
 import { ImageZoom } from 'fumadocs-ui/components/image-zoom';
+import { getSidebarTabs } from 'fumadocs-ui/layouts/docs';
 import BannerImage from '@/public/banner.png';
-import { modes } from '@/utils/modes';
+import { source } from '@/app/source';
 import { Wrapper } from './wrapper';
 
 export default {
@@ -34,7 +35,7 @@ export default {
       <div className="rounded-lg bg-fd-background">
         <Card
           href="#"
-          icon={<HomeIcon />}
+          icon={<Home />}
           title="Hello World"
           description="Learn More about Caching and Revalidation"
         />
@@ -200,14 +201,7 @@ export default {
   'root-toggle': (
     <Wrapper>
       <div className="not-prose mx-auto grid max-w-[240px] rounded-xl bg-fd-background p-3">
-        <RootToggle
-          options={modes.map((mode) => ({
-            url: `/docs/${mode.param}`,
-            icon: <mode.icon />,
-            title: mode.name,
-            description: mode.description,
-          }))}
-        />
+        <RootToggle options={getSidebarTabs(source.pageTree)} />
       </div>
     </Wrapper>
   ),

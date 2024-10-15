@@ -13,7 +13,9 @@ import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import { useSidebar } from '@/contexts/sidebar';
 
-export function DynamicSidebar(props: SidebarProps): React.ReactElement {
+export default function DynamicSidebar(
+  props: SidebarProps,
+): React.ReactElement {
   const { collapsed, setCollapsed } = useSidebar();
   const [hover, setHover] = useState(false);
   const timerRef = useRef(0);
