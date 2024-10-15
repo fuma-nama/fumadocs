@@ -109,7 +109,7 @@
   },
   "optionalDependencies": {
     "algoliasearch": "4.24.0",
-    "next": "14.x.x || 15.x.x",
+    "next": "15.0.0-canary.192",
     "react": ">= 18",
     "react-dom": ">= 18"
   },

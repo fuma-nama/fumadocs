@@ -11,7 +11,7 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "next": "15.0.0-canary.183",
+    "next": "15.0.0-canary.192",
     "react": "18.3.1",
     "react-dom": "18.3.1"
   },

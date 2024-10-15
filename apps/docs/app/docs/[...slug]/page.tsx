@@ -14,7 +14,7 @@ import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 import { Callout } from 'fumadocs-ui/components/callout';
 import { TypeTable } from 'fumadocs-ui/components/type-table';
 import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
-import Preview from '@/components/preview';
+import * as Preview from '@/components/preview';
 import { createMetadata, metadataImage } from '@/utils/metadata';
 import { openapi, source } from '@/app/source';
 import { Wrapper } from '@/components/preview/wrapper';
@@ -50,7 +50,9 @@ export default async function Page(props: {
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>
-        {preview && preview in Preview ? Preview[preview] : null}
+        {preview && preview in Preview
+          ? Preview[preview as keyof typeof Preview]
+          : null}
         <page.data.body
           components={{
             ...defaultComponents,

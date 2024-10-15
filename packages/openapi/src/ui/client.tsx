@@ -1,5 +1,9 @@
 'use client';
-import { type ButtonHTMLAttributes, type HTMLAttributes } from 'react';
+import {
+  type ButtonHTMLAttributes,
+  type HTMLAttributes,
+  type ReactNode,
+} from 'react';
 import { Check, Copy } from 'lucide-react';
 import { cn, useCopyButton, buttonVariants } from 'fumadocs-ui/components/api';
 import dynamic from 'next/dynamic';
@@ -15,7 +19,7 @@ export function Root({
   baseUrl,
   className,
   ...props
-}: RootProps & HTMLAttributes<HTMLDivElement>): React.ReactElement {
+}: RootProps & HTMLAttributes<HTMLDivElement>): ReactNode {
   return (
     <div
       className={cn(
@@ -35,7 +39,7 @@ export function CopyRouteButton({
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & {
   route: string;
-}): React.ReactElement {
+}): ReactNode {
   const { baseUrl } = useApiContext();
 
   const [checked, onCopy] = useCopyButton(() => {
