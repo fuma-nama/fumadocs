@@ -16,7 +16,7 @@ import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { cn } from '@/utils/cn';
 import { useTreeContext } from '@/contexts/tree';
 import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
-import { hasActive, isActive } from '@/utils/shared';
+import { isActive } from '@/utils/shared';
 import { LargeSearchToggle } from '@/components/layout/search-toggle';
 import { useSearchContext } from '@/contexts/search';
 import { itemVariants } from '@/components/layout/variants';
@@ -215,13 +215,11 @@ function FolderNode({
   level: number;
 }): ReactNode {
   const { defaultOpenLevel, prefetch } = useContext(Context);
+  const { path } = useTreeContext();
   const pathname = usePathname();
   const active =
     item.index !== undefined && isActive(item.index.url, pathname, false);
-  const childActive = useMemo(
-    () => hasActive(item.children, pathname),
-    [item.children, pathname],
-  );
+  const childActive = useMemo(() => path.some((s) => s === item), [item, path]);
 
   const shouldExtend =
     active || childActive || (item.defaultOpen ?? defaultOpenLevel >= level);

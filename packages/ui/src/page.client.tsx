@@ -51,14 +51,15 @@ export function Footer({ items }: FooterProps): React.ReactElement {
   const pathname = usePathname();
   const { text } = useI18n();
 
-  const { previous = items?.previous, next = items?.next } = useMemo(() => {
-    const idx = tree.navigation.findIndex((item) => item.url === pathname);
+  const { previous, next } = useMemo(() => {
+    if (items) return items;
+    const neighbours = tree.getNeighbours(pathname);
 
     return {
-      previous: tree.navigation[idx - 1],
-      next: tree.navigation[idx + 1],
+      previous: neighbours[0],
+      next: neighbours[1],
     };
-  }, [pathname, tree.navigation]);
+  }, [items, pathname, tree]);
 
   return (
     <div className="grid grid-cols-2 gap-4 pb-6">

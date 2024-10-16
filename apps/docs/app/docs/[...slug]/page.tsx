@@ -7,7 +7,7 @@ import {
   DocsCategory,
 } from 'fumadocs-ui/page';
 import { notFound } from 'next/navigation';
-import { type ComponentProps, type FC, Fragment } from 'react';
+import { type ComponentProps, type FC, Fragment, type ReactNode } from 'react';
 import defaultComponents from 'fumadocs-ui/mdx';
 import { Popup, PopupContent, PopupTrigger } from 'fumadocs-twoslash/ui';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
@@ -19,6 +19,15 @@ import { createMetadata, metadataImage } from '@/utils/metadata';
 import { openapi, source } from '@/app/source';
 import { Wrapper } from '@/components/preview/wrapper';
 import { AutoTypeTable } from '@/components/type-table';
+
+function PreviewRenderer({ preview }: { preview: string }): ReactNode {
+  if (preview && preview in Preview) {
+    const Comp = Preview[preview as keyof typeof Preview];
+    return <Comp />;
+  }
+
+  return null;
+}
 
 export default async function Page(props: {
   params: Promise<{ slug: string[] }>;
@@ -50,9 +59,7 @@ export default async function Page(props: {
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>
-        {preview && preview in Preview
-          ? Preview[preview as keyof typeof Preview]
-          : null}
+        {preview ? <PreviewRenderer preview={preview} /> : null}
         <page.data.body
           components={{
             ...defaultComponents,
