@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
-import { SyntaxKind } from 'ts-morph';
+import { type Project, SyntaxKind } from 'ts-morph';
+import { log } from '@clack/prompts';
 import { exists } from '@/utils/fs';
-import { createEmptyProject } from '@/utils/typescript';
 
 const tailwindConfigPaths = [
   'tailwind.config.js',
@@ -18,17 +18,21 @@ async function findTailwindConfig(): Promise<string | undefined> {
   }
 }
 
-export async function transformTailwind(options: {
-  addContents: string[];
-}): Promise<void> {
+export async function transformTailwind(
+  project: Project,
+  options: {
+    addContents: string[];
+  },
+): Promise<void> {
   const file = await findTailwindConfig();
 
-  if (!file)
-    throw new Error(
+  if (!file) {
+    log.error(
       'Cannot find Tailwind CSS configuration file, Tailwind CSS is required for this.',
     );
+    return;
+  }
 
-  const project = createEmptyProject();
   const configFile = project.createSourceFile(
     file,
     await fs.readFile(file).then((res) => res.toString()),

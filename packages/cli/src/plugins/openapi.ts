@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { StructureKind } from 'ts-morph';
+import { type Project, StructureKind } from 'ts-morph';
 import { type Plugin } from '@/commands/init';
 import { createEmptyProject } from '@/utils/typescript';
 import { generated } from '@/generated';
@@ -14,9 +14,11 @@ export const openapiPlugin: Plugin = {
   }),
   dependencies: ['fumadocs-openapi', 'rimraf', 'shiki'],
   async transform(ctx) {
+    const project = createEmptyProject();
+
     await Promise.all([
-      transformSource(ctx),
-      transformTailwind({
+      transformSource(project, ctx),
+      transformTailwind(project, {
         addContents: [`./node_modules/fumadocs-openapi/dist/**/*.js`],
       }),
       addScript(),
@@ -67,14 +69,16 @@ async function addScript(): Promise<void> {
   await fs.writeFile('package.json', JSON.stringify(parsed, null, 2));
 }
 
-async function transformSource(config: Config): Promise<void> {
+async function transformSource(
+  project: Project,
+  config: Config,
+): Promise<void> {
   const source = path.join(
     config.aliases?.libDir ?? defaultConfig.aliases.libDir,
     'source.ts',
   );
-  const project = createEmptyProject();
-
-  const file = project.createSourceFile(source, undefined, {
+  const content = await fs.readFile(source).catch(() => '');
+  const file = project.createSourceFile(source, content.toString(), {
     overwrite: true,
   });
 
