@@ -15,12 +15,37 @@ export const blog = defineCollections({
   type: 'doc',
   dir: './content/blog',
   schema: z.object({
-    // allowed...
+    // schema
   }),
+  // other options
 });
 ```
 
-<AutoTypeTable path="./content/docs/mdx/props.ts" name="Collections" />
+### `type`
+
+The accepted type of collection.
+
+```ts
+import { defineCollections } from 'fumadocs-mdx/config';
+
+// only scan for json/yaml files
+export const metaFiles = defineCollections({
+  type: 'meta',
+  // options
+});
+```
+
+### `type: meta`
+
+Accept JSON/YAML Files, available options:
+
+<AutoTypeTable path="./content/docs/mdx/props.ts" name="MetaCollection" />
+
+### `type: doc`
+
+Markdown/MDX Documents, available options:
+
+<AutoTypeTable path="./content/docs/mdx/props.ts" name="DocCollection" />
 
 ### `dir`
 
@@ -61,24 +86,6 @@ export const blog = defineCollections({
       testPath: z.string().default(ctx.path),
     });
   },
-});
-```
-
-### `type`
-
-The accepted type of collection.
-
-| Type   | Description            |
-| ------ | ---------------------- |
-| `meta` | JSON/YAML File         |
-| `doc`  | Markdown/MDX Documents |
-
-```ts
-import { defineCollections } from 'fumadocs-mdx/config';
-
-// only scan for json/yaml files
-export const metaFiles = defineCollections({
-  type: 'meta',
 });
 ```
 
