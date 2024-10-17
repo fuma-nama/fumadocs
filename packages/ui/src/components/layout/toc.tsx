@@ -148,14 +148,14 @@ export function TOCItems({
 
   return (
     <ScrollArea className={cn('flex flex-col', isMenu && '-ms-3')}>
-      <ScrollViewport className="relative min-h-0 text-sm" ref={viewRef}>
-        {!isMenu ? (
-          <TocThumb
-            containerRef={containerRef}
-            className="absolute start-0 mt-[var(--fd-top)] h-[var(--fd-height)] w-px bg-fd-primary transition-all"
-          />
-        ) : null}
-        <Primitive.ScrollProvider containerRef={viewRef}>
+      <Primitive.ScrollProvider containerRef={viewRef}>
+        <ScrollViewport className="relative min-h-0 text-sm" ref={viewRef}>
+          {!isMenu ? (
+            <TocThumb
+              containerRef={containerRef}
+              className="absolute start-0 mt-[var(--fd-top)] h-[var(--fd-height)] w-px bg-fd-primary transition-all"
+            />
+          ) : null}
           <div
             ref={containerRef}
             className={cn(
@@ -167,8 +167,8 @@ export function TOCItems({
               <TOCItem key={item.url} item={item} />
             ))}
           </div>
-        </Primitive.ScrollProvider>
-      </ScrollViewport>
+        </ScrollViewport>
+      </Primitive.ScrollProvider>
     </ScrollArea>
   );
 }

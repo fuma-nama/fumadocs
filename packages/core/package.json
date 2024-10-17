@@ -72,10 +72,10 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@formatjs/intl-localematcher": "^0.5.4",
-    "@orama/orama": "^2.1.1",
-    "@shikijs/rehype": "^1.21.0",
-    "@shikijs/transformers": "^1.21.0",
+    "@formatjs/intl-localematcher": "^0.5.5",
+    "@orama/orama": "^3.0.0",
+    "@shikijs/rehype": "^1.22.0",
+    "@shikijs/transformers": "^1.22.0",
     "github-slugger": "^2.0.0",
     "hast-util-to-estree": "^3.1.0",
     "image-size": "^1.1.1",
@@ -84,7 +84,7 @@
     "remark": "^15.0.0",
     "remark-gfm": "^4.0.0",
     "scroll-into-view-if-needed": "^3.1.0",
-    "shiki": "^1.21.0",
+    "shiki": "^1.22.0",
     "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {
@@ -94,9 +94,9 @@
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.3",
     "@types/negotiator": "^0.6.3",
-    "@types/node": "22.7.4",
+    "@types/node": "22.7.6",
     "@types/react": "^18.3.11",
-    "@types/react-dom": "^18.3.0",
+    "@types/react-dom": "^18.3.1",
     "algoliasearch": "4.24.0",
     "eslint-config-custom": "workspace:*",
     "mdast-util-mdx-jsx": "^3.1.3",

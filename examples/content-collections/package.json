@@ -21,7 +21,7 @@
     "@content-collections/next": "^0.2.3",
     "@types/mdx": "^2.0.13",
     "@types/react": "^18.3.11",
-    "@types/react-dom": "^18.3.0",
-    "typescript": "^5.6.2"
+    "@types/react-dom": "^18.3.1",
+    "typescript": "^5.6.3"
   }
 }

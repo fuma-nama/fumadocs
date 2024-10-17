@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { cva } from 'class-variance-authority';
 import { cn } from '@/utils/cn';
 import { useI18n } from './contexts/i18n';
@@ -48,18 +47,17 @@ const itemLabel = cva(
 
 export function Footer({ items }: FooterProps): React.ReactElement {
   const tree = useTreeContext();
-  const pathname = usePathname();
   const { text } = useI18n();
 
   const { previous, next } = useMemo(() => {
     if (items) return items;
-    const neighbours = tree.getNeighbours(pathname);
+    const neighbours = tree.getNeighbours();
 
     return {
       previous: neighbours[0],
       next: neighbours[1],
     };
-  }, [items, pathname, tree]);
+  }, [items, tree]);
 
   return (
     <div className="grid grid-cols-2 gap-4 pb-6">

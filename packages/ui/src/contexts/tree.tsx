@@ -15,9 +15,10 @@ interface TreeContextType {
    */
   path: PageTree.Node[];
 
-  getNeighbours: (
-    path: string,
-  ) => [PageTree.Item | undefined, PageTree.Item | undefined];
+  /**
+   * Get neighbours of current `pathname`
+   */
+  getNeighbours: () => [PageTree.Item | undefined, PageTree.Item | undefined];
 
   root: PageTree.Root | PageTree.Folder;
 }
@@ -52,7 +53,7 @@ export function TreeContextProvider({
   children: ReactNode;
 }): ReactNode {
   const pathname = usePathname();
-  const cache = useRef(new WeakMap<PageTree.Root, PageTree.Item[]>());
+  const cache = useRef<WeakMap<PageTree.Root, PageTree.Item[]>>();
 
   const value = useMemo<TreeContextType>(() => {
     const path = searchPath(tree.children, pathname) ?? [];
@@ -63,7 +64,8 @@ export function TreeContextProvider({
     return {
       path,
       root,
-      getNeighbours(url) {
+      getNeighbours() {
+        cache.current ??= new WeakMap();
         let result = cache.current.get(root);
         if (!result) {
           result = [];
@@ -71,9 +73,9 @@ export function TreeContextProvider({
           cache.current.set(root, result);
         }
 
-        const idx = result.findIndex((item) => item.url === url);
+        const idx = result.findIndex((item) => item.url === pathname);
         if (idx === -1) return [undefined, undefined];
-        return [result.at(idx - 1), result.at(idx + 1)];
+        return [result[idx - 1], result[idx + 1]];
       },
     };
   }, [pathname, tree]);
