@@ -9,7 +9,7 @@
     "build:registry": "tsx ./scripts/build-registry.mts",
     "build:shaders": "glslx shaders/rain.glsl --output=shaders/rain.min.js --format=js --renaming=internal-only",
     "clean": "rimraf .next",
-    "dev": "next dev",
+    "dev": "next dev --turbo",
     "lint": "fumadocs-mdx && eslint .",
     "start": "next start"
   },
@@ -49,6 +49,7 @@
     "scroll-into-view-if-needed": "^3.1.0",
     "shiki": "^1.22.0",
     "tailwind-merge": "^2.5.4",
+    "ts-morph": "^24.0.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {

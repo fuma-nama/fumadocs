@@ -3,9 +3,9 @@ import { type ProcessorOptions } from '@mdx-js/mdx';
 import { type MDXOptions } from '@/utils/build-mdx';
 import {
   type BaseCollectionEntry,
-  type CollectionEntry,
+  type FileInfo,
   type GlobalConfig,
-  type SupportedType,
+  type MarkdownProps,
 } from '@/config/types';
 import { frontmatterSchema, metaSchema } from '@/utils/schema';
 
@@ -19,11 +19,7 @@ export interface TransformContext {
   buildMDX: (source: string, options?: ProcessorOptions) => Promise<string>;
 }
 
-export interface Collections<
-  Schema extends ZodTypeAny = ZodTypeAny,
-  Type extends SupportedType = SupportedType,
-  Output extends BaseCollectionEntry = CollectionEntry<Type, z.output<Schema>>,
-> {
+export interface BaseCollection<Schema> {
   /**
    * Directories to scan
    */
@@ -37,11 +33,13 @@ export interface Collections<
   files?: string[];
 
   schema?: Schema | ((ctx: TransformContext) => Schema);
+}
 
-  /**
-   * content type
-   */
-  type: Type;
+export interface MetaCollection<
+  Schema extends ZodTypeAny = ZodTypeAny,
+  TransformOutput = unknown,
+> extends BaseCollection<Schema> {
+  type: 'meta';
 
   /**
    * Do transformation in runtime.
@@ -49,33 +47,88 @@ export interface Collections<
    * This cannot be optimized by bundlers/loaders, avoid expensive calculations here.
    */
   transform?: (
-    entry: CollectionEntry<Type, z.output<Schema>>,
+    entry: {
+      data: z.output<Schema>;
+      file: FileInfo;
+    },
     globalConfig?: GlobalConfig,
-  ) => Output | Promise<Output>;
+  ) => TransformOutput | Promise<TransformOutput>;
+}
 
-  mdxOptions?: Type extends 'doc' ? MDXOptions : never;
+export interface DocCollection<
+  Schema extends ZodTypeAny = ZodTypeAny,
+  Async extends boolean = boolean,
+  TransformOutput = unknown,
+> extends BaseCollection<Schema> {
+  type: 'doc';
+
+  /**
+   * Do transformation in runtime.
+   *
+   * This cannot be optimized by bundlers/loaders, avoid expensive calculations here.
+   */
+  transform?: (
+    entry: {
+      data: z.output<Schema>;
+      file: FileInfo;
+      mdx: Async extends true ? MarkdownProps : never;
+    },
+    globalConfig?: GlobalConfig,
+  ) => TransformOutput | Promise<TransformOutput>;
+
+  mdxOptions?: MDXOptions;
+
+  /**
+   * Load files with async
+   */
+  async?: Async;
 }
 
 export function defineCollections<
-  Schema extends ZodTypeAny,
-  Type extends SupportedType,
-  Output extends BaseCollectionEntry = CollectionEntry<Type, z.output<Schema>>,
+  T extends 'doc' | 'meta',
+  Schema extends ZodTypeAny = ZodTypeAny,
+  Async extends boolean = false,
+  TransformOutput = unknown,
 >(
-  options: Collections<Schema, Type, Output>,
+  options: { type: T } & (T extends 'doc'
+    ? DocCollection<Schema, Async, TransformOutput>
+    : MetaCollection<Schema, TransformOutput>),
 ): {
   _doc: 'collections';
-} & Collections<Schema, Type, Output> {
+  type: T;
+
+  _type: {
+    async: Async;
+    transform: TransformOutput;
+
+    runtime: T extends 'doc'
+      ? Async extends true
+        ? z.infer<Schema> &
+            BaseCollectionEntry & {
+              load: () => Promise<MarkdownProps>;
+            }
+        : Omit<MarkdownProps, keyof z.infer<Schema>> &
+            z.infer<Schema> &
+            BaseCollectionEntry
+      : typeof options extends MetaCollection
+        ? z.infer<Schema> & BaseCollectionEntry
+        : never;
+  };
+} {
   return {
     _doc: 'collections',
+    // @ts-expect-error -- internal type inferring
+    _type: undefined,
     ...options,
   };
 }
 
 export function defineDocs<
-  F extends ZodTypeAny = typeof frontmatterSchema,
-  M extends ZodTypeAny = typeof metaSchema,
-  DocsOut extends BaseCollectionEntry = CollectionEntry<'doc', z.output<F>>,
-  MetaOut extends BaseCollectionEntry = CollectionEntry<'meta', z.output<M>>,
+  DocData extends ZodTypeAny = typeof frontmatterSchema,
+  MetaData extends ZodTypeAny = typeof metaSchema,
+  DocAsync extends boolean = false,
+  DocOut = unknown,
+  MetaOut = unknown,
 >(options?: {
   /**
    * The directory to scan files
@@ -84,11 +137,11 @@ export function defineDocs<
    */
   dir?: string | string[];
 
-  docs?: Omit<Partial<Collections<F, 'doc', DocsOut>>, 'dir'>;
-  meta?: Omit<Partial<Collections<M, 'meta', MetaOut>>, 'dir'>;
+  docs?: Partial<DocCollection<DocData, DocAsync, DocOut>>;
+  meta?: Partial<MetaCollection<MetaData, MetaOut>>;
 }): {
-  docs: Collections<F, 'doc', DocsOut>;
-  meta: Collections<M, 'meta', MetaOut>;
+  docs: ReturnType<typeof defineCollections<'doc', DocData, DocAsync, DocOut>>;
+  meta: ReturnType<typeof defineCollections<'meta', MetaData, false, MetaOut>>;
 } {
   const dir = options?.dir ?? 'content/docs';
 
@@ -96,13 +149,13 @@ export function defineDocs<
     docs: defineCollections({
       type: 'doc',
       dir,
-      schema: frontmatterSchema as unknown as F,
+      schema: frontmatterSchema as unknown as DocData,
       ...options?.docs,
     }),
     meta: defineCollections({
       type: 'meta',
       dir,
-      schema: metaSchema as unknown as M,
+      schema: metaSchema as unknown as MetaData,
       ...options?.meta,
     }),
   };

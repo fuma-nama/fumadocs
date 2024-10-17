@@ -4,7 +4,6 @@ import { parse } from 'node:querystring';
 import grayMatter from 'gray-matter';
 import { type LoaderContext } from 'webpack';
 import { type StructuredData } from 'fumadocs-core/mdx-plugins';
-import { findCollectionId } from '@/utils/find-collection';
 import { getConfigHash, loadConfigCached } from '@/config/cached';
 import { buildMDX } from '@/utils/build-mdx';
 import { getDefaultMDXOptions, type TransformContext } from '@/config';
@@ -75,13 +74,16 @@ export default async function loader(
   const query = getQuery(this.resourceQuery);
   const configHash = query.hash ?? (await getConfigHash(_ctx.configPath));
   const config = await loadConfigCached(_ctx.configPath, configHash);
-  const collectionId =
-    query.collection ?? findCollectionId(config, filePath, 'doc');
+  const collectionId = query.collection;
 
-  const collection =
+  let collection =
     collectionId !== undefined
       ? config.collections.get(collectionId)
       : undefined;
+
+  if (collection && collection.type !== 'doc') {
+    collection = undefined;
+  }
 
   const mdxOptions =
     collection?.mdxOptions ??

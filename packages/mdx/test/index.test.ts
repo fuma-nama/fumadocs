@@ -39,6 +39,7 @@ test('generate JS index file', async () => {
       _runtime: {
         files: new Map(),
       },
+      // @ts-expect-error -- test file
       collections: new Map([
         [
           'docs',
@@ -51,9 +52,39 @@ test('generate JS index file', async () => {
     },
     path.join(file, './fixtures/index.output.js'),
     'hash',
+    () => ({}),
   );
 
   await expect(out.replaceAll(process.cwd(), '$cwd')).toMatchFileSnapshot(
     './fixtures/index.output.js',
+  );
+});
+
+test('generate JS index file: async', async () => {
+  const out = await generateJS(
+    path.join(file, './fixtures/config.ts'),
+    {
+      _runtime: {
+        files: new Map(),
+      },
+      // @ts-expect-error -- test file
+      collections: new Map([
+        [
+          'docs',
+          defineCollections({
+            type: 'doc',
+            dir: path.join(file, './fixtures'),
+            async: true,
+          }),
+        ],
+      ]),
+    },
+    path.join(file, './fixtures/index-async.output.js'),
+    'hash',
+    () => ({}),
+  );
+
+  await expect(out.replaceAll(process.cwd(), '$cwd')).toMatchFileSnapshot(
+    './fixtures/index-async.output.js',
   );
 });

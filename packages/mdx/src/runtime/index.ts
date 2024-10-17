@@ -3,20 +3,14 @@ import {
   type PageData,
   type Source,
 } from 'fumadocs-core/source';
-import {
-  type EntryFromCollection,
-  type Collections,
-  type FileInfo,
-  type CollectionEntry,
-  type SupportedType,
-} from '@/config';
+import { type BaseCollectionEntry, type FileInfo } from '@/config';
 import { resolveFiles } from '@/runtime/resolve-files';
 
 export function toRuntime(
-  type: SupportedType,
+  type: 'doc' | 'meta',
   file: Record<string, unknown>,
   info: FileInfo,
-): EntryFromCollection<Collections> {
+): unknown {
   if (type === 'doc') {
     const { default: body, frontmatter, ...exports } = file;
 
@@ -35,9 +29,28 @@ export function toRuntime(
   };
 }
 
+export function toRuntimeAsync(
+  frontmatter: Record<string, unknown>,
+  load: () => Promise<Record<string, unknown>>,
+  info: FileInfo,
+): unknown {
+  return {
+    async load() {
+      const { default: body, ...res } = await load();
+
+      return {
+        body,
+        ...res,
+      };
+    },
+    ...frontmatter,
+    _file: info,
+  };
+}
+
 export function createMDXSource<
-  Doc extends CollectionEntry<'doc', PageData>,
-  Meta extends CollectionEntry<'meta', MetaData>,
+  Doc extends PageData & BaseCollectionEntry,
+  Meta extends MetaData & BaseCollectionEntry,
 >(
   docs: Doc[],
   meta: Meta[],

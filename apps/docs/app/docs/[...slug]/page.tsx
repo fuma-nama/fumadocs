@@ -7,7 +7,13 @@ import {
   DocsCategory,
 } from 'fumadocs-ui/page';
 import { notFound } from 'next/navigation';
-import { type ComponentProps, type FC, Fragment, type ReactNode } from 'react';
+import {
+  type ComponentProps,
+  type FC,
+  Fragment,
+  type ReactElement,
+  type ReactNode,
+} from 'react';
 import defaultComponents from 'fumadocs-ui/mdx';
 import { Popup, PopupContent, PopupTrigger } from 'fumadocs-twoslash/ui';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
@@ -15,10 +21,11 @@ import { Callout } from 'fumadocs-ui/components/callout';
 import { TypeTable } from 'fumadocs-ui/components/type-table';
 import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 import * as Preview from '@/components/preview';
-import { createMetadata, metadataImage } from '@/utils/metadata';
+import { createMetadata } from '@/utils/metadata';
 import { openapi, source } from '@/app/source';
 import { Wrapper } from '@/components/preview/wrapper';
 import { AutoTypeTable } from '@/components/type-table';
+import { metadataImage } from '@/utils/metadata-image';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -31,7 +38,7 @@ function PreviewRenderer({ preview }: { preview: string }): ReactNode {
 
 export default async function Page(props: {
   params: Promise<{ slug: string[] }>;
-}): Promise<React.ReactElement> {
+}): Promise<ReactElement> {
   const params = await props.params;
   const page = source.getPage(params.slug);
 
@@ -39,11 +46,12 @@ export default async function Page(props: {
 
   const path = `apps/docs/content/docs/${page.file.path}`;
   const preview = page.data.preview;
+  const { body: Mdx, toc, lastModified } = await page.data.load();
 
   return (
     <DocsPage
-      toc={page.data.toc}
-      lastUpdate={page.data.lastModified}
+      toc={toc}
+      lastUpdate={lastModified}
       full={page.data.full}
       tableOfContent={{
         style: 'clerk',
@@ -60,7 +68,7 @@ export default async function Page(props: {
       <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>
         {preview ? <PreviewRenderer preview={preview} /> : null}
-        <page.data.body
+        <Mdx
           components={{
             ...defaultComponents,
             Popup,

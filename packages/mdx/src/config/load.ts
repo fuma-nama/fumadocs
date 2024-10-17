@@ -2,7 +2,7 @@ import * as path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { build } from 'esbuild';
 import { validateConfig } from '@/config/validate';
-import { type Collections } from '@/config/define';
+import type { DocCollection, MetaCollection } from '@/config/define';
 import { type GlobalConfig } from '@/config/types';
 
 export function findConfigFile(): string {
@@ -10,7 +10,7 @@ export function findConfigFile(): string {
 }
 
 export interface LoadedConfig {
-  collections: Map<string, Collections>;
+  collections: Map<string, InternalDocCollection | InternalMetaCollection>;
   global?: GlobalConfig;
 
   _runtime: {
@@ -20,6 +20,9 @@ export interface LoadedConfig {
     files: Map<string, string>;
   };
 }
+
+export type InternalDocCollection = DocCollection;
+export type InternalMetaCollection = MetaCollection;
 
 export async function loadConfig(configPath: string): Promise<LoadedConfig> {
   const outputPath = path.resolve('.source/source.config.mjs');

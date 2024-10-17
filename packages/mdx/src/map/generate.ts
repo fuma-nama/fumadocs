@@ -1,50 +1,66 @@
 import * as path from 'node:path';
 import fg from 'fast-glob';
 import { getTypeFromPath } from '@/utils/get-type-from-path';
-import type { Collections, FileInfo } from '@/config';
-import { type LoadedConfig } from '@/config/load';
-
-interface VariableInfo {
-  name: string;
-  content: string;
-}
+import type { FileInfo } from '@/config/types';
+import {
+  type InternalDocCollection,
+  type InternalMetaCollection,
+  type LoadedConfig,
+} from '@/config/load';
 
 export async function generateJS(
   configPath: string,
   config: LoadedConfig,
   outputPath: string,
   hash: string,
+  getFrontmatter: (file: string) => Promise<unknown>,
 ): Promise<string> {
   const outDir = path.dirname(outputPath);
-
   const imports: ImportInfo[] = [
     {
       type: 'named',
-      names: ['toRuntime'],
+      names: ['toRuntime', 'toRuntimeAsync'],
       specifier: 'fumadocs-mdx',
     },
   ];
   const importedCollections = new Set<string>();
-  const variables: VariableInfo[] = [];
 
   config._runtime.files.clear();
-  const collected = await Promise.all(
-    Array.from(config.collections.entries()).map(async ([name, collection]) =>
-      processCollection(
-        name,
-        collection,
-        config,
-        hash,
-        outDir,
-        importedCollections,
-      ),
-    ),
-  );
+  const entries = Array.from(config.collections.entries());
+  const declares = entries.map(async ([k, collection]) => {
+    const files = await getCollectionFiles(collection);
+    const items = files.map(async (file, i) => {
+      config._runtime.files.set(file.absolutePath, k);
 
-  collected.forEach((v) => {
-    imports.push(...v.imports);
-    variables.push(v.variable);
+      if (collection.type === 'doc' && collection.async) {
+        const importPath = `${toImportPath(file.absolutePath, outDir)}?hash=${hash}&collection=${k}`;
+        const frontmatter = await getFrontmatter(file.absolutePath);
+
+        return `toRuntimeAsync(${JSON.stringify(frontmatter)}, async () => await import(${JSON.stringify(importPath)}), ${JSON.stringify(file)})`;
+      }
+
+      const importName = `${k}_${i.toString()}`;
+      imports.push({
+        type: 'namespace',
+        name: importName,
+        specifier: `${toImportPath(file.absolutePath, outDir)}?collection=${k}&hash=${hash}`,
+      });
+
+      return `toRuntime("${collection.type}", ${importName}, ${JSON.stringify(file)})`;
+    });
+    const resolvedItems = await Promise.all(items);
+
+    if (collection.transform) {
+      if (config.global) importedCollections.add('default'); // import global config
+      importedCollections.add(k);
+    }
+
+    return collection.transform
+      ? `export const ${k} = await Promise.all([${resolvedItems.join(', ')}].map(v => c_${k}.transform(v, c_default)));`
+      : `export const ${k} = [${resolvedItems.join(', ')}];`;
   });
+
+  const resolvedDeclares = await Promise.all(declares);
 
   if (importedCollections.size > 0) {
     imports.push({
@@ -56,10 +72,36 @@ export async function generateJS(
     });
   }
 
-  return [
-    ...imports.map(getImportCode),
-    ...variables.map((v) => `export const ${v.name} = ${v.content};`),
-  ].join('\n');
+  return [...imports.map(getImportCode), ...resolvedDeclares].join('\n');
+}
+
+async function getCollectionFiles(
+  collection: InternalDocCollection | InternalMetaCollection,
+): Promise<FileInfo[]> {
+  const files = new Map<string, FileInfo>();
+  const dirs = Array.isArray(collection.dir)
+    ? collection.dir
+    : [collection.dir];
+
+  await Promise.all(
+    dirs.map(async (dir) => {
+      const result = await fg(collection.files ?? '**/*', {
+        cwd: dir,
+        absolute: true,
+      });
+
+      result.forEach((item) => {
+        if (getTypeFromPath(item) !== collection.type) return;
+
+        files.set(item, {
+          path: path.relative(dir, item),
+          absolutePath: item,
+        });
+      });
+    }),
+  );
+
+  return Array.from(files.values());
 }
 
 type ImportInfo =
@@ -79,108 +121,6 @@ type ImportInfo =
       specifier: string;
     };
 
-async function processCollection(
-  name: string,
-  collection: Collections,
-  config: LoadedConfig,
-  configHash: string,
-  importDir: string,
-  requiredCollection: Set<string>,
-): Promise<{
-  variable: VariableInfo;
-  imports: ImportInfo[];
-}> {
-  const dirs = Array.isArray(collection.dir)
-    ? collection.dir
-    : [collection.dir];
-  // absolute path to file info
-  const files = new Map<string, FileInfo>();
-
-  for (const dir of dirs) {
-    const result = await fg(collection.files ?? ['**/*'], {
-      cwd: dir,
-      absolute: true,
-    });
-
-    result.forEach((file) => {
-      files.set(file, {
-        path: path.relative(dir, file),
-        absolutePath: file,
-      });
-    });
-  }
-
-  const output = processDirectory(
-    Array.from(files.values()),
-    config,
-    configHash,
-    name,
-    collection,
-    importDir,
-  );
-
-  if (collection.transform) {
-    if (config.global) requiredCollection.add('default'); // import global config
-    requiredCollection.add(name);
-  }
-
-  return {
-    imports: output.imports,
-    variable: {
-      name,
-      content: collection.transform
-        ? `await Promise.all([${output.entries.join(',')}].map(v => c_${name}.transform(v, c_default)))`
-        : `[${output.entries.join(',')}]`,
-    },
-  };
-}
-
-function processDirectory(
-  files: FileInfo[],
-  config: LoadedConfig,
-  configHash: string,
-  name: string,
-  collection: Collections,
-  importFrom: string,
-): {
-  imports: ImportInfo[];
-  entries: string[];
-} {
-  const imports: ImportInfo[] = [];
-  const entries: string[] = [];
-
-  for (const file of files) {
-    if (getTypeFromPath(file.absolutePath) !== collection.type) continue;
-    if (config._runtime.files.has(file.absolutePath)) {
-      const belongs = config._runtime.files.get(file.absolutePath);
-
-      console.warn(
-        `[MDX] Files cannot exist in multiple collections: ${file.path} (${belongs ?? ''} and ${name})`,
-      );
-
-      continue;
-    }
-
-    config._runtime.files.set(file.absolutePath, name);
-
-    const importName = `${name}_${entries.length.toString()}`;
-    imports.push({
-      type: 'namespace',
-      name: importName,
-      specifier: `${toImportPath(file.absolutePath, importFrom)}?collection=${name}&hash=${configHash}`,
-    });
-
-    entries.push(
-      `toRuntime("${collection.type}", ${importName}, ${JSON.stringify(file)})`,
-    );
-  }
-
-  return {
-    entries,
-    imports,
-  };
-}
-
 function getImportCode(info: ImportInfo): string {
   const specifier = JSON.stringify(info.specifier);
 
@@ -198,7 +138,7 @@ function getImportCode(info: ImportInfo): string {
   return `import ${specifier}`;
 }
 
-function toImportPath(file: string, dir: string): string {
+export function toImportPath(file: string, dir: string): string {
   let importPath = path.relative(dir, file);
 
   if (!path.isAbsolute(importPath) && !importPath.startsWith('.')) {
