@@ -1,7 +1,61 @@
-import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { DocsLayout, type DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
 import type { ReactNode } from 'react';
-import { docsOptions } from '@/app/layout.config';
+import { MessageCircle } from 'lucide-react';
+import { Slot } from '@radix-ui/react-slot';
+import { baseOptions, linkItems, logo } from '@/app/layout.config';
 import 'fumadocs-twoslash/twoslash.css';
+import { source } from '@/app/source';
+import { Trigger } from '@/components/ai/search-ai';
+import { cn } from '@/utils/cn';
+import { buttonVariants } from '@/components/ui/button';
+
+const docsOptions: DocsLayoutProps = {
+  ...baseOptions,
+  tree: source.pageTree,
+  nav: {
+    ...baseOptions.nav,
+    title: logo,
+    children: (
+      <Trigger
+        className={cn(
+          buttonVariants({
+            variant: 'secondary',
+            size: 'xs',
+            className:
+              'md:flex-1 px-2 ms-2 gap-1.5 text-fd-muted-foreground rounded-full',
+          }),
+        )}
+      >
+        <MessageCircle className="size-3" />
+        Ask AI
+      </Trigger>
+    ),
+  },
+  links: linkItems,
+  sidebar: {
+    tabs: {
+      transform(option, node) {
+        const meta = source.getNodeMeta(node);
+        if (!meta) return option;
+
+        return {
+          ...option,
+          icon: (
+            <Slot
+              className="mb-auto bg-gradient-to-t from-fd-background/80 p-1 [&_svg]:size-5"
+              style={{
+                color: `hsl(var(--${meta.file.dirname}-color))`,
+                backgroundColor: `hsl(var(--${meta.file.dirname}-color)/.3)`,
+              }}
+            >
+              {node.icon}
+            </Slot>
+          ),
+        };
+      },
+    },
+  },
+};
 
 export default function Layout({
   children,

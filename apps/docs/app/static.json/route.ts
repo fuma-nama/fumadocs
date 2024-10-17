@@ -4,20 +4,22 @@ import { source } from '@/app/source';
 
 export const revalidate = false;
 
-export function GET(): Response {
-  const results: DocumentRecord[] = [];
+export async function GET(): Promise<Response> {
   const pages = source.getPages();
+  const results = await Promise.all<DocumentRecord>(
+    pages.map(async (page) => {
+      const { structuredData } = await page.data.load();
 
-  for (const page of pages) {
-    results.push({
-      _id: page.url,
-      structured: page.data.structuredData,
-      tag: page.slugs[0],
-      url: page.url,
-      title: page.data.title,
-      description: page.data.description,
-    });
-  }
+      return {
+        _id: page.url,
+        structured: structuredData,
+        tag: page.slugs[0],
+        url: page.url,
+        title: page.data.title,
+        description: page.data.description,
+      };
+    }),
+  );
 
   return NextResponse.json(results);
 }

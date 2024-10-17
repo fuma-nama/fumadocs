@@ -1,7 +1,4 @@
-import {
-  type DocsLayoutProps,
-  type LinkItemType,
-} from 'fumadocs-ui/layouts/docs';
+import { type LinkItemType } from 'fumadocs-ui/layouts/docs';
 import {
   AlbumIcon,
   Book,
@@ -9,22 +6,16 @@ import {
   Heart,
   Layout,
   LayoutTemplate,
-  MessageCircle,
   Pencil,
   Server,
 } from 'lucide-react';
 import Image from 'next/image';
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
-import { Slot } from '@radix-ui/react-slot';
 import { FumadocsIcon } from '@/app/layout.client';
 import Logo from '@/public/logo.png';
-import { source } from '@/app/source';
-import { Trigger } from '@/components/ai/search-ai';
-import { cn } from '@/utils/cn';
-import { buttonVariants } from '@/components/ui/button';
 import Preview from '@/public/banner.png';
 
-const linkItems: LinkItemType[] = [
+export const linkItems: LinkItemType[] = [
   {
     icon: <AlbumIcon />,
     text: 'Blog',
@@ -55,7 +46,7 @@ const linkItems: LinkItemType[] = [
   },
 ];
 
-const logo = (
+export const logo = (
   <>
     <Image
       alt="Fumadocs"
@@ -153,52 +144,4 @@ export const baseOptions: BaseLayoutProps = {
     },
     ...linkItems,
   ],
-};
-
-export const docsOptions: DocsLayoutProps = {
-  ...baseOptions,
-  tree: source.pageTree,
-  nav: {
-    ...baseOptions.nav,
-    title: logo,
-    children: (
-      <Trigger
-        className={cn(
-          buttonVariants({
-            variant: 'secondary',
-            size: 'xs',
-            className:
-              'md:flex-1 px-2 ms-2 gap-1.5 text-fd-muted-foreground rounded-full',
-          }),
-        )}
-      >
-        <MessageCircle className="size-3" />
-        Ask AI
-      </Trigger>
-    ),
-  },
-  links: linkItems,
-  sidebar: {
-    tabs: {
-      transform(option, node) {
-        const meta = source.getNodeMeta(node);
-        if (!meta) return option;
-
-        return {
-          ...option,
-          icon: (
-            <Slot
-              className="mb-auto bg-gradient-to-t from-fd-background/80 p-1 [&_svg]:size-5"
-              style={{
-                color: `hsl(var(--${meta.file.dirname}-color))`,
-                backgroundColor: `hsl(var(--${meta.file.dirname}-color)/.3)`,
-              }}
-            >
-              {node.icon}
-            </Slot>
-          ),
-        };
-      },
-    },
-  },
 };
