@@ -40,7 +40,7 @@ export async function searchAdvanced(
   for (const item of result.groups ?? []) {
     const pageId = item.values[0] as string;
 
-    const page = await getByID(db, pageId);
+    const page = getByID(db, pageId);
     if (!page) continue;
 
     list.push({

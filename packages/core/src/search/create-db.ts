@@ -25,7 +25,7 @@ export async function createDB({
 }: AdvancedOptions): Promise<Orama<typeof advancedSchema>> {
   const items = typeof indexes === 'function' ? await indexes() : indexes;
 
-  const db = await create({
+  const db = create({
     ...rest,
     schema: advancedSchema,
     components: {

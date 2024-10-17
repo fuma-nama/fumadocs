@@ -58,21 +58,19 @@ export function createStaticClient({
     const data = (await res.json()) as ExportedData;
 
     if (data.type === 'i18n') {
-      const loadAll = Object.entries(data.data).map(async ([k, v]) => {
-        const db = await create({ schema: { _: 'string' } });
+      Object.entries(data.data).forEach(([k, v]) => {
+        const db = create({ schema: { _: 'string' } });
 
-        await load(db, v);
+        load(db, v);
         dbs.set(k, {
           type: v.type,
           db,
         });
       });
-
-      await Promise.all(loadAll);
     } else {
-      const db = await create({ schema: { _: 'string' } });
+      const db = create({ schema: { _: 'string' } });
 
-      await load(db, data);
+      load(db, data);
       dbs.set('', {
         type: data.type,
         db,

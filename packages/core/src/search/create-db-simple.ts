@@ -20,7 +20,7 @@ export async function createDBSimple({
   language,
 }: SimpleOptions): Promise<Orama<typeof schema>> {
   const items = typeof indexes === 'function' ? await indexes() : indexes;
-  const db = await create({
+  const db = create({
     language,
     schema: {
       url: 'string',

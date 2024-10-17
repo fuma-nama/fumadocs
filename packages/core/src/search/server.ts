@@ -106,7 +106,7 @@ export function initSimpleSearch(options: SimpleOptions): SearchServer {
     async export() {
       return {
         type: 'simple',
-        ...(await save(await doc)),
+        ...save(await doc),
       };
     },
     search: async (query) => {
@@ -142,7 +142,7 @@ export function initAdvancedSearch(options: AdvancedOptions): SearchServer {
     async export() {
       return {
         type: 'advanced',
-        ...(await save(await get)),
+        ...save(await get),
       };
     },
     search: async (query, searchOptions) => {
