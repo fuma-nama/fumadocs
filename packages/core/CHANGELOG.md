@@ -1,5 +1,71 @@
 # next-docs-zeta
 
+## 14.0.0
+
+### Major Changes
+
+- e45bc67: **Remove deprecated `fumadocs-core/middleware` export**
+
+  **migrate:** Use `fumadocs-core/i18n`.
+
+- d9e908e: **Remove deprecated `languages` and `defaultLanguage` option from loader**
+
+  **migrate:** Use I18n config API
+
+- 9a0b09f: **Change usage of `useDocsSearch`**
+
+  **why:** Allow static search
+
+  **migrate:**
+
+  Pass client option, it can be algolia, static, or fetch (default).
+
+  ```ts
+  import { useDocsSearch } from 'fumadocs-core/search/client';
+
+  const { search, setSearch, query } = useDocsSearch({
+    type: 'fetch',
+    api: '/api/search', // optional
+  });
+  ```
+
+- 9a0b09f: **Remove Algolia Search Client**
+
+  **why:** Replace by the new search client
+
+  **migrate:**
+
+  ```ts
+  import { useDocsSearch } from 'fumadocs-core/search/client';
+
+  const { search, setSearch, query } = useDocsSearch({
+    type: 'algolia',
+    index,
+    ...searchOptions,
+  });
+  ```
+
+- 9a0b09f: **Refactor import path of `fumadocs-core/search-algolia/server` to `fumadocs-core/search/algolia`**
+- d9e908e: Improved usage for `createI18nSearchAPI` (replaced `createI18nSearchAPIExperimental`)
+- d9e908e: Replace `fumadocs-core/search/shared` with `fumadocs-core/server`
+
+### Minor Changes
+
+- d9e908e: Create search api from source (Support i18n without modifying search route handler)
+- 367f4c3: Support referencing original page/meta from page tree nodes
+- e1ee822: Support hast nodes in `toc` variable
+- 979e301: Replace flexearch with Orama
+- 979e301: Support static search (without server)
+- d9e908e: Support creating metadata API from sources
+
+### Patch Changes
+
+- f949520: Support Shiki diff transformer
+- e612f2a: Make compatible with Next.js 15
+- 8ef00dc: Apply `hideLocale` to Source `getPage` APIs
+- 15781f0: Fix breadcrumb empty when `includePage` isn't specified
+- be820c4: Bump deps
+
 ## 13.4.10
 
 ### Patch Changes
