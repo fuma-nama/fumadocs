@@ -9,7 +9,7 @@ icon: Album
 Fumadocs MDX is the official content source of Fumadocs. It parses frontmatter and is bundled with many MDX
 plugins for building a good documentation site.
 
-> This package must be used with Fumadocs
+> This package uses Fumadocs core.
 
 ## Installation
 
@@ -36,7 +36,8 @@ const config = {
 export default withMDX(config);
 ```
 
-It generates a `.source` folder once you start the dev server or start building the app.
+It generates a `.source` folder in root directory once you start the dev server or start building the app.
+
 The folder contains all parsed files, you should add it to `.gitignore`.
 
 <Callout title="ESM Only" type='warn' className="mt-4">
@@ -82,7 +83,7 @@ export const source = loader({
 });
 ```
 
-> For more customisation options, check [Source API](/docs/headless/source-api).
+> We imported the `.source` folder with `@/.source`, you can also change it to your own import alias..
 
 ### Start Server
 
@@ -92,12 +93,11 @@ next dev
 
 A `.source` folder should be created. You can log and see if it is loaded correctly.
 
-See [Pages Conventions](/docs/ui/page-conventions)
-to learn how to organize your pages.
+See [Pages Conventions](/docs/ui/page-conventions) to learn how to organize your pages.
 
-### Usages
+### Usage
 
-Generally, you'll interact with Fumadocs MDX through the Source `loader` API.
+Generally, you'll interact with Fumadocs MDX through the [Source `loader` API](/docs/headless/source-api).
 You can see the type definitions to find available properties.
 
 To render the page, obtain the page from `source` and render the MDX component (`page.data.body`).

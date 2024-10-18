@@ -71,17 +71,7 @@ interface Components {
   Separator: React.FC<{ item: PageTree.Separator }>;
 }
 
-const defaultComponents: Components = {
-  Folder: FolderNode,
-  Separator: SeparatorNode,
-  Item: PageNode,
-};
-
-const Context = createContext<InternalContext>({
-  defaultOpenLevel: 0,
-  components: defaultComponents,
-  prefetch: true,
-});
+const Context = createContext<InternalContext | undefined>(undefined);
 
 export const Sidebar = memo(
   ({
@@ -97,7 +87,12 @@ export const Sidebar = memo(
     const context = useMemo<InternalContext>(
       () => ({
         defaultOpenLevel,
-        components: { ...defaultComponents, ...components },
+        components: {
+          Folder: FolderNode,
+          Separator: SeparatorNode,
+          Item: PageNode,
+          ...components,
+        },
         prefetch,
       }),
       [components, defaultOpenLevel, prefetch],
@@ -148,139 +143,136 @@ export const Sidebar = memo(
 
 Sidebar.displayName = 'Sidebar';
 
+const SeparatorNode = memo(({ item }: { item: PageTree.Separator }) => {
+  return <p className="mb-2 mt-8 px-2 font-medium first:mt-0">{item.name}</p>;
+});
+
+SeparatorNode.displayName = 'SeparatorNode';
+
 function RootNodeList(): ReactNode {
   const { root } = useTreeContext();
-
-  return <NodeList items={root.children} className="p-4 md:px-3" />;
-}
-
-interface NodeListProps extends React.HTMLAttributes<HTMLDivElement> {
-  items: PageTree.Node[];
-  level?: number;
-}
-
-function NodeList({
-  items,
-  level = 0,
-  ...props
-}: NodeListProps): React.ReactElement {
-  const { components } = useContext(Context);
+  const { components } = useInternalContext();
 
   return (
-    <div {...props}>
-      {items.map((item, i) => {
-        const id = `${item.type}_${i.toString()}`;
-
-        switch (item.type) {
-          case 'separator':
-            return <components.Separator key={id} item={item} />;
-          case 'folder':
-            return <components.Folder key={id} item={item} level={level + 1} />;
-          default:
-            return <components.Item key={item.url} item={item} />;
-        }
-      })}
+    <div className="p-4 md:px-3">
+      {renderList(root.children, 0, components)}
     </div>
   );
 }
 
-function PageNode({
-  item: { icon, external = false, url, name },
-}: {
-  item: PageTree.Item;
-}): ReactNode {
+function renderList(
+  items: PageTree.Node[],
+  level: number,
+  { Separator, Item, Folder }: Components,
+): ReactNode[] {
+  return items.map((item, i) => {
+    const id = `${item.type}_${i.toString()}`;
+
+    switch (item.type) {
+      case 'separator':
+        return <Separator key={id} item={item} />;
+      case 'folder':
+        return <Folder key={id} item={item} level={level + 1} />;
+      default:
+        return <Item key={item.url} item={item} />;
+    }
+  });
+}
+
+const PageNode = memo(({ item }: { item: PageTree.Item }) => {
   const pathname = usePathname();
-  const active = isActive(url, pathname, false);
-  const { prefetch } = useContext(Context);
+  const active = isActive(item.url, pathname, false);
+  const { prefetch } = useInternalContext();
 
   return (
     <Link
-      href={url}
-      external={external}
+      href={item.url}
+      external={item.external}
       data-active={active}
       className={cn(itemVariants())}
       prefetch={prefetch}
     >
-      {icon ?? (external ? <ExternalLinkIcon /> : null)}
-      {name}
+      {item.icon ?? (item.external ? <ExternalLinkIcon /> : null)}
+      {item.name}
     </Link>
   );
-}
+});
 
-function FolderNode({
-  item,
-  level,
-}: {
-  item: PageTree.Folder;
-  level: number;
-}): ReactNode {
-  const { defaultOpenLevel, prefetch } = useContext(Context);
-  const { path } = useTreeContext();
-  const pathname = usePathname();
-  const active =
-    item.index !== undefined && isActive(item.index.url, pathname, false);
-  const childActive = useMemo(() => path.some((s) => s === item), [item, path]);
+PageNode.displayName = 'PageNode';
 
-  const shouldExtend =
-    active || childActive || (item.defaultOpen ?? defaultOpenLevel >= level);
-  const [open, setOpen] = useState(shouldExtend);
+const FolderNode = memo(
+  ({ item, level }: { item: PageTree.Folder; level: number }) => {
+    const { defaultOpenLevel, prefetch, components } = useInternalContext();
+    const { path } = useTreeContext();
+    const pathname = usePathname();
+    const active =
+      item.index !== undefined && isActive(item.index.url, pathname, false);
 
-  useOnChange(shouldExtend, (v) => {
-    if (v) setOpen(v);
-  });
+    const shouldExtend =
+      active ||
+      path.includes(item) ||
+      (item.defaultOpen ?? defaultOpenLevel >= level);
+    const [open, setOpen] = useState(shouldExtend);
 
-  const content = (
-    <>
-      {item.icon}
-      {item.name}
-      <ChevronDown
-        data-icon
-        className={cn('ms-auto transition-transform', !open && '-rotate-90')}
-      />
-    </>
-  );
+    useOnChange(shouldExtend, (v) => {
+      if (v) setOpen(v);
+    });
 
-  return (
-    <Collapsible open={open} onOpenChange={setOpen}>
-      {item.index ? (
-        <Link
-          data-active={active}
-          className={cn(itemVariants())}
-          href={item.index.url}
-          onClick={(e) => {
-            if (
-              // clicking on icon
-              (e.target as HTMLElement).hasAttribute('data-icon') ||
-              active
-            ) {
-              setOpen((prev) => !prev);
-              e.preventDefault();
-            }
-          }}
-          prefetch={prefetch}
-        >
-          {content}
-        </Link>
-      ) : (
-        <CollapsibleTrigger data-active={active} className={cn(itemVariants())}>
-          {content}
-        </CollapsibleTrigger>
-      )}
-      <CollapsibleContent>
-        <NodeList
-          className="ms-2 flex flex-col border-s py-2 ps-2"
-          items={item.children}
-          level={level}
+    const content = (
+      <>
+        {item.icon}
+        {item.name}
+        <ChevronDown
+          data-icon
+          className={cn('ms-auto transition-transform', !open && '-rotate-90')}
         />
-      </CollapsibleContent>
-    </Collapsible>
-  );
-}
+      </>
+    );
 
-function SeparatorNode({
-  item,
-}: {
-  item: PageTree.Separator;
-}): React.ReactElement {
-  return <p className="mb-2 mt-8 px-2 font-medium first:mt-0">{item.name}</p>;
+    return (
+      <Collapsible open={open} onOpenChange={setOpen}>
+        {item.index ? (
+          <Link
+            data-active={active}
+            className={cn(itemVariants())}
+            href={item.index.url}
+            onClick={(e) => {
+              if (
+                // clicking on icon
+                (e.target as HTMLElement).hasAttribute('data-icon') ||
+                active
+              ) {
+                setOpen((prev) => !prev);
+                e.preventDefault();
+              }
+            }}
+            prefetch={prefetch}
+          >
+            {content}
+          </Link>
+        ) : (
+          <CollapsibleTrigger
+            data-active={active}
+            className={cn(itemVariants())}
+          >
+            {content}
+          </CollapsibleTrigger>
+        )}
+        <CollapsibleContent>
+          <div className="ms-2 border-s py-2 ps-2">
+            {renderList(item.children, level, components)}
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
+    );
+  },
+);
+
+FolderNode.displayName = 'FolderNode';
+
+function useInternalContext(): InternalContext {
+  const ctx = useContext(Context);
+  if (!ctx) throw new Error('<Sidebar /> component required.');
+
+  return ctx;
 }
