@@ -32,59 +32,74 @@ test('format errors', () => {
 });
 
 const file = path.dirname(fileURLToPath(import.meta.url));
-test('generate JS index file', async () => {
-  const out = await generateJS(
-    path.join(file, './fixtures/config.ts'),
-    {
-      _runtime: {
-        files: new Map(),
-      },
-      // @ts-expect-error -- test file
-      collections: new Map([
-        [
-          'docs',
-          defineCollections({
-            type: 'doc',
-            dir: path.join(file, './fixtures'),
-          }),
-        ],
-      ]),
+
+const cases = [
+  {
+    name: 'sync',
+    collection: defineCollections({
+      type: 'doc',
+      dir: path.join(file, './fixtures'),
+    }),
+  },
+  {
+    name: 'sync-transform',
+    collection: defineCollections({
+      type: 'doc',
+      dir: path.join(file, './fixtures'),
+      transform() {},
+    }),
+  },
+  {
+    name: 'sync-transform-global',
+    collection: defineCollections({
+      type: 'doc',
+      dir: path.join(file, './fixtures'),
+      transform() {},
+    }),
+    global: {
+      // empty
     },
-    path.join(file, './fixtures/index.output.js'),
-    'hash',
-    () => ({}),
-  );
+  },
+  {
+    name: 'async',
+    collection: defineCollections({
+      type: 'doc',
+      dir: path.join(file, './fixtures'),
+      async: true,
+    }),
+  },
+  {
+    name: 'async-transform',
+    collection: defineCollections({
+      type: 'doc',
+      dir: path.join(file, './fixtures'),
+      async: true,
+      transform() {},
+    }),
+  },
+];
 
-  await expect(out.replaceAll(process.cwd(), '$cwd')).toMatchFileSnapshot(
-    './fixtures/index.output.js',
-  );
-});
+for (const { name, collection, global } of cases) {
+  test(`generate JS index file: ${name}`, async () => {
+    console.log(global);
 
-test('generate JS index file: async', async () => {
-  const out = await generateJS(
-    path.join(file, './fixtures/config.ts'),
-    {
-      _runtime: {
-        files: new Map(),
+    const out = await generateJS(
+      path.join(file, './fixtures/config.ts'),
+      {
+        _runtime: {
+          files: new Map(),
+        },
+        // @ts-expect-error -- test file
+        collections: new Map([['docs', collection]]),
+        global,
       },
-      // @ts-expect-error -- test file
-      collections: new Map([
-        [
-          'docs',
-          defineCollections({
-            type: 'doc',
-            dir: path.join(file, './fixtures'),
-            async: true,
-          }),
-        ],
-      ]),
-    },
-    path.join(file, './fixtures/index-async.output.js'),
-    'hash',
-    () => ({}),
-  );
+      path.join(file, './fixtures/index-async.output.js'),
+      'hash',
+      () => ({}),
+    );
 
-  await expect(out.replaceAll(process.cwd(), '$cwd')).toMatchFileSnapshot(
-    './fixtures/index-async.output.js',
-  );
-});
+    await expect(out.replaceAll(process.cwd(), '$cwd')).toMatchFileSnapshot(
+      `./fixtures/index-${name}.output.js`,
+    );
+  });
+}

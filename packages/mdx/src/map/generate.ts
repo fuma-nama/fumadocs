@@ -36,7 +36,7 @@ export async function generateJS(
         const importPath = `${toImportPath(file.absolutePath, outDir)}?hash=${hash}&collection=${k}`;
         const frontmatter = await getFrontmatter(file.absolutePath);
 
-        return `toRuntimeAsync(${JSON.stringify(frontmatter)}, async () => await import(${JSON.stringify(importPath)}), ${JSON.stringify(file)})`;
+        return `toRuntimeAsync(${JSON.stringify(frontmatter)}, () => import(${JSON.stringify(importPath)}), ${JSON.stringify(file)})`;
       }
 
       const importName = `${k}_${i.toString()}`;
@@ -56,7 +56,7 @@ export async function generateJS(
     }
 
     return collection.transform
-      ? `export const ${k} = await Promise.all([${resolvedItems.join(', ')}].map(v => c_${k}.transform(v, c_default)));`
+      ? `export const ${k} = await Promise.all([${resolvedItems.join(', ')}].map(v => c_${k}.transform(v, ${config.global ? 'c_default' : 'undefined'})));`
       : `export const ${k} = [${resolvedItems.join(', ')}];`;
   });
 
