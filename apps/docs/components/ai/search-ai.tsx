@@ -78,7 +78,7 @@ let session: AnswerSession | undefined;
 export function AIDialog(): React.ReactElement {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  // eslint-disable-next-line react/hook-use-state -- rerender
+
   const [_, update] = useState<unknown>();
   const shouldFocus = useRef(false); // should focus on input on next render
   const [relatedQueries, setRelatedQueries] = useState<string[]>([]);
@@ -166,7 +166,6 @@ export function AIDialog(): React.ReactElement {
     <>
       <List className={cn(messages.length === 0 && 'hidden')}>
         {messages.map((item, i) => (
-          // eslint-disable-next-line react/no-array-index-key -- safe
           <Message key={i} {...item}>
             {!loading &&
             item.role === 'assistant' &&

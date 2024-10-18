@@ -38,7 +38,7 @@ export async function loadConfig(file = './cli.json'): Promise<Config> {
     const content = await fs.readFile(file);
 
     return JSON.parse(content.toString()) as Config;
-  } catch (_) {
+  } catch {
     return {};
   }
 }

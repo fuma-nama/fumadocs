@@ -12,7 +12,6 @@ import {
 import { fileURLToPath } from 'node:url';
 import remarkMdx from 'remark-mdx';
 import remarkGfm from 'remark-gfm';
-import remarkRehype from 'remark-rehype';
 import { createProcessor } from '@mdx-js/mdx';
 
 const cwd = path.dirname(fileURLToPath(import.meta.url));

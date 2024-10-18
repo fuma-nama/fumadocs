@@ -1,48 +1,55 @@
-const { resolve } = require('node:path');
+import js from '@eslint/js';
+import ts from 'typescript-eslint';
+import tailwind from 'eslint-plugin-tailwindcss';
+import tseslint from 'typescript-eslint';
+import reactPlugin from 'eslint-plugin-react';
+import hooksPlugin from 'eslint-plugin-react-hooks';
 
-const project = resolve(process.cwd(), 'tsconfig.json');
-
-module.exports = {
-  extends: [
-    ...[
-      '@vercel/style-guide/eslint/node',
-      '@vercel/style-guide/eslint/browser',
-      '@vercel/style-guide/eslint/typescript',
-      '@vercel/style-guide/eslint/react',
-      '@vercel/style-guide/eslint/next',
-    ].map(require.resolve),
-    'plugin:tailwindcss/recommended',
-  ],
-  parserOptions: {
-    project,
+export default [
+  {
+    ignores: ['node_modules/', 'dist/'],
   },
-  globals: {
-    React: true,
-    JSX: true,
-  },
-  settings: {
-    tailwindcss: {
-      config: resolve(process.cwd(), './tailwind.config.js'),
-      callees: ['clsx', 'cva', 'cn'],
+  js.configs.recommended,
+  ...ts.configs.recommended,
+  ...tseslint.configs.recommended,
+  reactPlugin.configs.flat.recommended,
+  reactPlugin.configs.flat['jsx-runtime'],
+  ...tailwind.configs['flat/recommended'],
+  {
+    plugins: {
+      'react-hooks': hooksPlugin,
     },
-    'import/resolver': {
-      typescript: {
-        project,
+    settings: {
+      react: {
+        version: '18.3.1'
+      },
+      tailwindcss: {
+        config: './tailwind.config.js',
+        callees: ['clsx', 'cva', 'cn'],
       },
     },
-  },
-  ignorePatterns: ['node_modules/', 'dist/'],
-  rules: {
-    'import/no-extraneous-dependencies': 'off',
-    // Next.js routes
-    'import/no-default-export': 'off',
+    rules: {
+      ...hooksPlugin.configs.recommended.rules,
+      'import/no-extraneous-dependencies': 'off',
+      // Next.js routes
+      'import/no-default-export': 'off',
 
-    // handled by typescript eslint
-    'import/default': 'off',
-    'import/export': 'off',
-    'import/namespace': 'off',
-    'import/no-unresolved': 'off',
+      // handled by typescript eslint
+      'react/prop-types': 'off',
+      'import/default': 'off',
+      'import/export': 'off',
+      'import/namespace': 'off',
+      'import/no-unresolved': 'off',
 
-    '@next/next/no-html-link-for-pages': 'off',
+      '@next/next/no-html-link-for-pages': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
+    },
   },
-};
+];

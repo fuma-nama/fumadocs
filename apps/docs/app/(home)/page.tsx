@@ -119,7 +119,6 @@ function Why(): React.ReactElement {
     >
       {new Array(10).fill(0).map((_, i) => (
         <div
-          // eslint-disable-next-line react/no-array-index-key -- static
           key={i}
           className="absolute -left-20 top-0 z-[-1] h-[1000px] max-h-[100vw] origin-top-right rotate-45 bg-gradient-to-b from-primary blur-xl"
           style={{

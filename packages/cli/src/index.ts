@@ -154,7 +154,7 @@ program
 
       try {
         nodes = JSON.parse(str ?? '') as JsonTreeNode[];
-      } catch (e) {
+      } catch {
         nodes = await runTree(str ?? './');
       }
 

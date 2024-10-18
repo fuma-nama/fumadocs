@@ -11,7 +11,7 @@ export async function transformRootLayout(
 
   try {
     content = await fs.readFile(filePath).then((res) => res.toString());
-  } catch (_) {
+  } catch {
     return;
   }
 

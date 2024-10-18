@@ -13,7 +13,7 @@ export async function transformSourceI18n(
 
   try {
     content = await fs.readFile(filePath).then((res) => res.toString());
-  } catch (e) {
+  } catch {
     return;
   }
   const sourceFile = project.createSourceFile(filePath, content, {

@@ -9,7 +9,7 @@ export async function transformLayoutConfig(
 
   try {
     content = await fs.readFile(filePath).then((res) => res.toString());
-  } catch (_) {
+  } catch {
     return;
   }
 

@@ -8,6 +8,7 @@ import {
 } from '@/source/loader';
 import { parseFilePath } from '@/source';
 import { PageTree } from '../dist/server';
+import type { ReactElement } from 'react';
 
 test('get slugs', () => {
   expect(getSlugs(parseFilePath('index.mdx'))).toStrictEqual([]);
@@ -90,7 +91,7 @@ test('Loader: Simple', () => {
 
 test('Nested Directories', async () => {
   const result = loader({
-    icon: (v) => v as any,
+    icon: (v) => v as unknown as ReactElement,
     pageTree: {
       noRef: true,
     },

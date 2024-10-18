@@ -28,7 +28,6 @@ export async function CodeBlock({
     jsxs: jsxs as Jsx,
     Fragment,
     components: {
-      // eslint-disable-next-line react/no-unstable-nested-components -- server component
       pre: (props) => <Base.Pre {...props} {...options} />,
     },
   });

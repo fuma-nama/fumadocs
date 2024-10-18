@@ -68,7 +68,6 @@ export function DocsLayout({
   const links = getLinks(props.links ?? [], props.githubUrl);
   const Aside = collapsible ? DynamicSidebar : Sidebar;
 
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Prevent people passing undefined page tree
   if (props.tree === undefined) notFound();
 
   const header: ReactNode[] = [];

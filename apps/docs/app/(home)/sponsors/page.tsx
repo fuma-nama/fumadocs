@@ -127,7 +127,6 @@ export default async function Page(): Promise<ReactNode> {
           strokeWidth="0.5"
         />
         {new Array(3).fill(null).map((_, i) => (
-          // eslint-disable-next-line react/no-array-index-key -- safe
           <Fragment key={i}>
             <rect
               x="368"

@@ -80,7 +80,6 @@ export function createMDX({
 
         config.plugins ||= [];
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return -- not provided
         return nextConfig.webpack?.(config, options) ?? config;
       },
     };

@@ -1,6 +1,5 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { type Stats } from 'node:fs';
 import { type Project } from 'ts-morph';
 import { isRelative } from '@/utils/fs';
 import {
@@ -26,13 +25,8 @@ export async function moveFiles(
    */
   originalDir = from,
 ): Promise<void> {
-  let stats: Stats;
-
-  try {
-    stats = await fs.lstat(from);
-  } catch (_) {
-    return;
-  }
+  const stats = await fs.lstat(from).catch(() => undefined);
+  if (!stats) return;
 
   if (stats.isDirectory()) {
     const items = await fs.readdir(from);
@@ -50,11 +44,9 @@ export async function moveFiles(
       }),
     );
 
-    try {
-      await fs.rmdir(from);
-    } catch (_) {
+    await fs.rmdir(from).catch(() => {
       // it is possible that some files are ignored, so the directory isn't empty
-    }
+    });
   }
 
   if (!stats.isFile()) return;
