@@ -82,9 +82,7 @@ export function DocsPage({
   footer = {},
   ...props
 }: DocsPageProps): React.ReactElement {
-  const tocPopoverOptions = {
-    ...props.tableOfContentPopover,
-  };
+  const tocPopoverOptions = props.tableOfContentPopover ?? {};
   const tocOptions = {
     // disable TOC on full mode, you can still enable it with `enabled` option.
     enabled: props.tableOfContent?.enabled ?? !full,
@@ -94,12 +92,15 @@ export function DocsPage({
   return (
     <AnchorProvider toc={toc} single={tocOptions.single}>
       <div
-        className={cn(
-          'mx-auto flex min-w-0 max-w-[860px] flex-1 flex-col',
-          !tocOptions.enabled &&
-            // ensure it's still centered when toc is hidden
-            'max-w-[1200px] md:ms-[max(0px,calc(50vw-min(50%,600px)-var(--fd-c-sidebar)))]',
-        )}
+        id="nd-page"
+        className="w-full min-w-0 max-w-[var(--fd-page-width)]"
+        style={
+          {
+            '--fd-page-width':
+              'calc(min(100vw, var(--fd-layout-width)) - var(--fd-sidebar-width) - var(--fd-toc-width))',
+            '--fd-toc-width': tocOptions.enabled ? undefined : '0px',
+          } as object
+        }
       >
         {replaceOrDefault(
           tocPopoverOptions,
@@ -116,7 +117,12 @@ export function DocsPage({
             )}
           </TocPopover>,
         )}
-        <article className="flex flex-1 flex-col gap-6 px-4 pt-10 md:px-6 md:pt-12">
+        <article
+          className={cn(
+            'mx-auto flex size-full flex-col gap-6 px-4 pt-10 md:px-6 md:pt-12',
+            tocOptions.enabled ? 'max-w-[860px]' : 'max-w-[1120px]',
+          )}
+        >
           {replaceOrDefault(breadcrumb, <Breadcrumb {...breadcrumb} />)}
           {props.children}
           <div role="none" className="flex-1" />
@@ -140,6 +146,7 @@ export function DocsPage({
             <TOCItems items={toc} />
           )}
         </Toc>,
+        <div role="none" className="flex-1" />,
       )}
     </AnchorProvider>
   );

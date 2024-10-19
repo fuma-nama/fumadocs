@@ -99,26 +99,24 @@ export const Sidebar = memo(
     );
 
     return (
-      <Context.Provider value={context}>
-        <Base.SidebarList
-          id="nd-sidebar"
-          blockScrollingWidth={768} // md
-          {...props.aside}
-          className={cn(
-            'fixed top-fd-layout-top z-30 flex flex-col bg-fd-card pt-2 text-sm md:sticky md:h-[var(--fd-sidebar-height)] md:w-[var(--fd-c-sidebar)] md:min-w-[var(--fd-sidebar-width)] md:border-e md:ps-[var(--fd-sidebar-offset)] md:pt-4',
-            'max-md:inset-x-0 max-md:bottom-0 max-md:bg-fd-background/80 max-md:text-[15px] max-md:backdrop-blur-lg max-md:data-[open=false]:invisible',
-            props.aside?.className,
-          )}
-          style={
-            {
-              ...props.aside?.style,
-              '--fd-sidebar-height':
-                'calc(100dvh - var(--fd-banner-height) - var(--fd-nav-height))',
-              '--fd-sidebar-offset':
-                'calc(var(--fd-c-sidebar) - var(--fd-sidebar-width))',
-            } as object
-          }
-        >
+      <Base.SidebarList
+        id="nd-sidebar"
+        blockScrollingWidth={768} // md
+        {...props.aside}
+        className={cn(
+          'fixed top-fd-layout-top z-30 bg-fd-card pt-2 text-sm md:sticky md:h-[var(--fd-sidebar-height)] md:flex-1 md:pt-4',
+          'max-md:inset-x-0 max-md:bottom-0 max-md:bg-fd-background/80 max-md:text-[15px] max-md:backdrop-blur-lg max-md:data-[open=false]:invisible',
+          props.aside?.className,
+        )}
+        style={
+          {
+            ...props.aside?.style,
+            '--fd-sidebar-height':
+              'calc(100dvh - var(--fd-banner-height) - var(--fd-nav-height))',
+          } as object
+        }
+      >
+        <div className="flex size-full flex-col md:ms-auto md:w-[var(--fd-sidebar-width)] md:border-e">
           {props.banner}
           {hasSearch ? (
             <LargeSearchToggle className="mx-4 rounded-lg max-md:hidden md:mx-3" />
@@ -131,12 +129,14 @@ export const Sidebar = memo(
               }}
             >
               {props.children}
-              <RootNodeList />
+              <Context.Provider value={context}>
+                <RootNodeList />
+              </Context.Provider>
             </ScrollViewport>
           </ScrollArea>
           {props.footer}
-        </Base.SidebarList>
-      </Context.Provider>
+        </div>
+      </Base.SidebarList>
     );
   },
 );

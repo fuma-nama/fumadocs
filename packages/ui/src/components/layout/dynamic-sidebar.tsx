@@ -50,29 +50,30 @@ export default function DynamicSidebar(
   return (
     <>
       {collapsed ? (
-        <div
-          className="fixed inset-y-0 start-0 w-6 max-md:hidden xl:w-[50px]"
-          onPointerEnter={onEnter}
-          onPointerLeave={onLeave}
-        />
-      ) : null}
-      {collapsed ? (
-        <button
-          type="button"
-          aria-label="Collapse Sidebar"
-          className={cn(
-            buttonVariants({
-              color: 'secondary',
-              size: 'icon',
-              className: 'fixed start-4 bottom-2 z-10 max-md:hidden',
-            }),
-          )}
-          onClick={() => {
-            setCollapsed((v) => !v);
-          }}
-        >
-          <SidebarIcon />
-        </button>
+        <>
+          <div
+            className="fixed inset-y-0 start-0 w-6 max-md:hidden"
+            onPointerEnter={onEnter}
+            onPointerLeave={onLeave}
+          />
+          <button
+            type="button"
+            aria-label="Collapse Sidebar"
+            className={cn(
+              buttonVariants({
+                color: 'secondary',
+                size: 'icon',
+                className: 'fixed start-4 bottom-2 z-10 max-md:hidden',
+              }),
+            )}
+            onClick={() => {
+              setCollapsed((v) => !v);
+            }}
+          >
+            <SidebarIcon />
+          </button>
+          <style>{`#nd-page { --fd-sidebar-width: 0px; }`}</style>
+        </>
       ) : null}
       <Sidebar
         {...props}
@@ -85,21 +86,25 @@ export default function DynamicSidebar(
             'aria-hidden': Boolean(collapsed && !hover),
             style: {
               // the offset given to docs content when the sidebar is collapsed
-              '--fd-content-offset':
-                'max(calc(var(--fd-c-sidebar) - 2 * var(--fd-sidebar-width)), var(--fd-sidebar-width) * -1)',
+              '--fd-content-offset': 'calc(var(--fd-sidebar-width) * -1)',
             } as object,
             className: cn(
-              'md:transition-[transform,padding,width,margin]',
+              'md:transition-[transform,flex]',
               collapsed && [
-                'md:me-[var(--fd-content-offset)] md:w-[var(--fd-sidebar-width)] md:rounded-xl md:border md:ps-0 md:shadow-md',
+                'md:me-[var(--fd-content-offset)] md:grow-0 md:shadow-md',
                 hover
-                  ? 'md:translate-x-1 rtl:md:-translate-x-1'
+                  ? 'md:translate-x-0'
                   : 'md:translate-x-[calc(var(--fd-sidebar-width)*-1)] rtl:md:translate-x-[var(--fd-sidebar-width)]',
               ],
+              ``,
             ),
           }),
           [collapsed, hover, onEnter, onLeave],
         )}
+      />
+      <div
+        role="none"
+        className={cn('transition-all max-md:hidden', collapsed && 'flex-1')}
       />
     </>
   );

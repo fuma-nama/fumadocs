@@ -80,12 +80,12 @@ export function SidebarCollapseTrigger(
         buttonVariants({
           color: 'ghost',
           size: 'icon',
-          className: props.className,
         }),
+        props.className,
       )}
-      onClick={useCallback(() => {
+      onClick={() => {
         setCollapsed((prev) => !prev);
-      }, [setCollapsed])}
+      }}
     >
       <SidebarIcon />
     </button>

@@ -165,8 +165,9 @@ export function steps(): ReactNode {
 export function rootToggle(): ReactNode {
   return (
     <Wrapper>
-      <div className="not-prose mx-auto grid max-w-[240px] rounded-xl bg-fd-background p-3">
+      <div className="not-prose mx-auto grid max-w-[240px] rounded-lg bg-fd-background">
         <RootToggle
+          className="p-3"
           options={[
             {
               title: 'Hello World',

@@ -129,11 +129,6 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
           '--fd-banner-height': '0px',
           '--fd-nav-height': '0px',
 
-          // computed
-          '--fd-doc':
-            'calc(min(100vw, var(--fd-layout-width)) - var(--fd-toc-width) - var(--fd-sidebar-width))',
-          '--fd-c-sidebar': 'var(--fd-sidebar-width)',
-
           '--fd-diff-remove-color': 'rgba(200,10,100,0.12)',
           '--fd-diff-remove-symbol-color': 'rgb(230,10,100)',
           '--fd-diff-add-color': 'rgba(14,180,100,0.12)',
@@ -155,8 +150,6 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
         '@screen lg': {
           ':root': {
             '--fd-toc-width': '240px',
-            '--fd-c-toc': 'calc(50vw - var(--fd-doc) / 2)',
-            '--fd-c-sidebar': 'calc(50vw - var(--fd-doc) / 2)',
           },
         },
         '@screen xl': {

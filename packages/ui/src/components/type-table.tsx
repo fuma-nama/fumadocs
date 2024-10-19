@@ -9,12 +9,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import type { ReactNode } from 'react';
 
-export function Info({
-  children,
-}: {
-  children: React.ReactNode;
-}): React.ReactElement {
+export function Info({ children }: { children: ReactNode }): ReactNode {
   return (
     <Popover>
       <PopoverTrigger>
@@ -31,9 +28,9 @@ interface ObjectType {
   /**
    * Additional description of the field
    */
-  description?: React.ReactNode;
+  description?: ReactNode;
   type: string;
-  typeDescription?: string;
+  typeDescription?: ReactNode;
   /**
    * Optional link to the type
    */
@@ -81,11 +78,7 @@ export function TypeTable({
                 <div className={field()}>
                   <code className={code()}>{value.type}</code>
                   {value.typeDescription ? (
-                    <Info>
-                      <pre className="overflow-auto bg-fd-secondary text-fd-secondary-foreground">
-                        {value.typeDescription}
-                      </pre>
-                    </Info>
+                    <Info>{value.typeDescription}</Info>
                   ) : null}
                   {value.typeDescriptionLink ? (
                     <Link href={value.typeDescriptionLink}>

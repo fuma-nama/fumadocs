@@ -173,7 +173,9 @@ export function DocsLayout({
                       {header}
                     </div>
                   ) : null}
-                  {tabs.length > 0 ? <RootToggle options={tabs} /> : null}
+                  {tabs.length > 0 ? (
+                    <RootToggle className="-mx-1" options={tabs} />
+                  ) : null}
                   {sidebar.banner}
                 </div>
               }

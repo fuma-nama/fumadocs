@@ -80,8 +80,9 @@ export function replaceOrDefault(
       }
     | undefined,
   def: ReactNode,
+  disabled?: ReactNode,
 ): ReactNode {
-  if (obj?.enabled === false) return;
+  if (obj?.enabled === false) return disabled;
   if (obj?.component !== undefined) return obj.component;
 
   return def;
