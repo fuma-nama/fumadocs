@@ -79,7 +79,7 @@
     "github-slugger": "^2.0.0",
     "hast-util-to-estree": "^3.1.0",
     "image-size": "^1.1.1",
-    "negotiator": "^0.6.3",
+    "negotiator": "^1.0.0",
     "react-remove-scroll": "^2.6.0",
     "remark": "^15.0.0",
     "remark-gfm": "^4.0.0",
