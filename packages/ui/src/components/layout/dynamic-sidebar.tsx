@@ -1,6 +1,7 @@
 'use client';
 import {
   type PointerEventHandler,
+  type ReactElement,
   useCallback,
   useMemo,
   useRef,
@@ -13,9 +14,7 @@ import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import { useSidebar } from '@/contexts/sidebar';
 
-export default function DynamicSidebar(
-  props: SidebarProps,
-): React.ReactElement {
+export default function DynamicSidebar(props: SidebarProps): ReactElement {
   const { collapsed, setCollapsed } = useSidebar();
   const [hover, setHover] = useState(false);
   const timerRef = useRef(0);
@@ -89,7 +88,7 @@ export default function DynamicSidebar(
               '--fd-content-offset': 'calc(var(--fd-sidebar-width) * -1)',
             } as object,
             className: cn(
-              'md:transition-[transform,flex]',
+              'md:transition-[transform,margin,flex]',
               collapsed && [
                 'md:me-[var(--fd-content-offset)] md:grow-0 md:shadow-md',
                 hover
