@@ -93,7 +93,7 @@ export function DocsPage({
     <AnchorProvider toc={toc} single={tocOptions.single}>
       <div
         id="nd-page"
-        className="w-full min-w-0 max-w-[var(--fd-page-width)] md:transition-[max-width]"
+        className="h-fit w-full min-w-0 max-w-[var(--fd-page-width)] md:transition-[max-width]"
         style={
           {
             '--fd-page-width':

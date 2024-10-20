@@ -1,4 +1,4 @@
-import { ChevronDown, ExternalLinkIcon } from 'lucide-react';
+import { ChevronDown, ExternalLink } from 'lucide-react';
 import type { PageTree } from 'fumadocs-core/server';
 import * as Base from 'fumadocs-core/sidebar';
 import { usePathname } from 'next/navigation';
@@ -194,7 +194,7 @@ const PageNode = memo(({ item }: { item: PageTree.Item }) => {
       className={cn(itemVariants())}
       prefetch={prefetch}
     >
-      {item.icon ?? (item.external ? <ExternalLinkIcon /> : null)}
+      {item.icon ?? (item.external ? <ExternalLink /> : null)}
       {item.name}
     </Link>
   );
@@ -209,7 +209,7 @@ const FolderNode = memo(
     const pathname = usePathname();
     const active =
       item.index !== undefined && isActive(item.index.url, pathname, false);
-    const className = cn(itemVariants(), 'w-full');
+    const className = cn(itemVariants(), 'w-full md:pe-1.5');
 
     const shouldExtend =
       active ||

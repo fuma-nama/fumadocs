@@ -2,7 +2,7 @@ import type { PageTree } from 'fumadocs-core/server';
 import type { Option } from '@/components/layout/root-toggle';
 
 export interface TabOptions {
-  transform?: (option: Option, node: PageTree.Folder) => Option;
+  transform?: (option: Option, node: PageTree.Folder) => Option | null;
 }
 
 export function getSidebarTabs(
@@ -20,7 +20,8 @@ export function getSidebarTabs(
         description: node.description,
       };
 
-      options.push(transform ? transform(option, node) : option);
+      const mapped = transform ? transform(option, node) : option;
+      if (mapped) options.push(mapped);
     }
 
     if (node.type === 'folder') node.children.forEach(traverse);

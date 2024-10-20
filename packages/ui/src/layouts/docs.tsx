@@ -181,14 +181,14 @@ export function DocsLayout({
               }
               footer={
                 <>
-                  <div className="flex flex-row items-center border-t py-1 empty:hidden max-md:gap-1.5 max-md:px-4 md:mx-3">
+                  <div className="flex flex-row items-center border-t py-1 empty:hidden max-md:gap-1.5 max-md:px-3 md:mx-3">
                     {footer}
                   </div>
                   {sidebar.footer}
                 </>
               }
             >
-              <div className="flex flex-col px-4 pt-4 empty:hidden md:hidden">
+              <div className="flex flex-col px-2 pt-4 empty:hidden md:hidden">
                 {links
                   .filter((v) => v.type !== 'icon')
                   .map((item, i) => (

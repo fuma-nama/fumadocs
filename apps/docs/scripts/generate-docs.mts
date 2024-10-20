@@ -3,7 +3,7 @@ import * as Typescript from 'fumadocs-typescript';
 import * as path from 'node:path';
 import { rimrafSync } from 'rimraf';
 
-rimrafSync('./content/docs/ui/museum', {
+rimrafSync('./content/docs/openapi', {
   filter(v) {
     return !v.endsWith('index.mdx') && !v.endsWith('meta.json');
   },
@@ -11,7 +11,7 @@ rimrafSync('./content/docs/ui/museum', {
 
 void OpenAPI.generateFiles({
   input: ['./museum.yaml'],
-  output: './content/docs/ui/museum',
+  output: './content/docs/openapi',
   per: 'operation',
 });
 
