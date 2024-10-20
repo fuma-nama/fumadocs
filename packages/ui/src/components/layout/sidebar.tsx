@@ -121,7 +121,7 @@ export const Sidebar = memo(
           {hasSearch ? (
             <LargeSearchToggle className="mx-4 rounded-lg max-md:hidden md:mx-3" />
           ) : null}
-          <ScrollArea className="flex-1">
+          <ScrollArea className="h-full">
             <ScrollViewport
               style={{
                 maskImage:
@@ -144,7 +144,9 @@ export const Sidebar = memo(
 Sidebar.displayName = 'Sidebar';
 
 const SeparatorNode = memo(({ item }: { item: PageTree.Separator }) => {
-  return <p className="mb-2 mt-8 px-2 font-medium first:mt-0">{item.name}</p>;
+  return (
+    <p className="mb-2 mt-8 px-2 text-sm font-medium first:mt-0">{item.name}</p>
+  );
 });
 
 SeparatorNode.displayName = 'SeparatorNode';
@@ -154,7 +156,7 @@ function RootNodeList(): ReactNode {
   const { components } = useInternalContext();
 
   return (
-    <div className="p-4 md:px-3">
+    <div className="px-2 py-4 md:px-3">
       {renderList(root.children, 0, components)}
     </div>
   );
@@ -207,6 +209,7 @@ const FolderNode = memo(
     const pathname = usePathname();
     const active =
       item.index !== undefined && isActive(item.index.url, pathname, false);
+    const className = cn(itemVariants(), 'w-full');
 
     const shouldExtend =
       active ||
@@ -234,7 +237,7 @@ const FolderNode = memo(
         {item.index ? (
           <Link
             data-active={active}
-            className={cn(itemVariants())}
+            className={className}
             href={item.index.url}
             onClick={(e) => {
               if (
@@ -251,15 +254,12 @@ const FolderNode = memo(
             {content}
           </Link>
         ) : (
-          <CollapsibleTrigger
-            data-active={active}
-            className={cn(itemVariants())}
-          >
+          <CollapsibleTrigger data-active={active} className={className}>
             {content}
           </CollapsibleTrigger>
         )}
         <CollapsibleContent>
-          <div className="ms-2 border-s py-2 ps-2">
+          <div className="ms-2 border-s py-1.5 ps-1">
             {renderList(item.children, level, components)}
           </div>
         </CollapsibleContent>

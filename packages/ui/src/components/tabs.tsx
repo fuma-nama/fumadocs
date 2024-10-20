@@ -12,6 +12,7 @@ import {
   useContext,
   useRef,
   useLayoutEffect,
+  useEffect,
 } from 'react';
 import { cn } from '@/utils/cn';
 import * as Primitive from './ui/tabs';
@@ -134,7 +135,7 @@ export function Tab({
   const v = toValue(value);
   const onValueChange = useContext(ValueChangeContext);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const hash = window.location.hash.slice(1);
 
     if (hash === props.id) {

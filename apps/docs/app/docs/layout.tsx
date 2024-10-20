@@ -31,7 +31,7 @@ const docsOptions: DocsLayoutProps = {
       </Trigger>
     ),
   },
-  links: linkItems,
+  links: [linkItems[linkItems.length - 1]],
   sidebar: {
     tabs: {
       transform(option, node) {

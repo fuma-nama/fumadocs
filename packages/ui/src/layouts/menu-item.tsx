@@ -26,7 +26,8 @@ export function MenuItem({ item, ...props }: MenuItemProps): ReactNode {
       <Collapsible className="flex flex-col">
         <CollapsibleTrigger
           {...props}
-          className={cn(itemVariants(), props.className, 'group/link')}
+          data-active={false}
+          className={cn(itemVariants(), 'group/link', props.className)}
         >
           {item.icon}
           {item.text}

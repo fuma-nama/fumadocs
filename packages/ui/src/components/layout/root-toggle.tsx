@@ -50,7 +50,7 @@ export function RootToggle({
       >
         {selected ? <Item {...selected} /> : null}
 
-        <ChevronDown className="size-4 text-fd-muted-foreground md:me-1.5" />
+        <ChevronDown className="size-4 text-fd-muted-foreground md:me-2" />
       </PopoverTrigger>
       <PopoverContent className="w-[var(--radix-popover-trigger-width)] overflow-hidden p-0">
         {options.map((item) => (
