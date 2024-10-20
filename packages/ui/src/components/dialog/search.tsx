@@ -48,6 +48,7 @@ interface SearchContentProps {
   items: SortedResult[];
 
   hideResults?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export function SearchDialog({
@@ -74,6 +75,7 @@ export function SearchDialog({
         {...props}
         items={props.results === 'empty' ? defaultItems : props.results}
         hideResults={props.results === 'empty' && defaultItems.length === 0}
+        onOpenChange={onOpenChange}
       />
       {footer ? (
         <div className="mt-auto flex flex-col border-t p-3">{footer}</div>
@@ -94,6 +96,7 @@ function Search({
   items,
   isLoading,
   hideResults = false,
+  onOpenChange = () => {}
 }: SearchContentProps): ReactElement {
   const { text } = useI18n();
   const router = useRouter();
@@ -103,6 +106,7 @@ function Search({
   const onOpen = (url: string): void => {
     router.push(url);
     setOpenSearch(false);
+    onOpenChange(false);
 
     if (location.pathname === url.split('#')[0]) {
       sidebar.setOpen(false);
@@ -116,6 +120,7 @@ function Search({
         onValueChange={onSearchChange}
         onClose={() => {
           setOpenSearch(false);
+          onOpenChange(false);
         }}
         placeholder={text.search}
       >
