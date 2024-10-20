@@ -3,6 +3,11 @@ import type { default as Slugger } from 'github-slugger';
 import { type Renderer } from '@/render/renderer';
 import type { EndpointSample } from '@/schema/sample';
 import type { CodeSample } from '@/render/operation';
+import type {
+  BuiltinTheme,
+  CodeOptionsThemes,
+  CodeToHastOptionsCommon,
+} from 'shiki';
 
 export interface RouteInformation {
   path: string;
@@ -40,4 +45,7 @@ export interface RenderContext {
    * Generate code samples for endpoint.
    */
   generateCodeSamples?: (endpoint: EndpointSample) => Awaitable<CodeSample[]>;
+
+  shikiOptions?: Omit<CodeToHastOptionsCommon, 'lang'> &
+    CodeOptionsThemes<BuiltinTheme>;
 }

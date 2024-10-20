@@ -9,6 +9,7 @@ import { cn, useCopyButton, buttonVariants } from 'fumadocs-ui/components/api';
 import dynamic from 'next/dynamic';
 import { ApiProvider, useApiContext } from '@/ui/contexts/api';
 import { type RootProps } from '@/render/renderer';
+import { RenderContext } from '@/types';
 
 export const APIPlayground = dynamic(() =>
   import('./playground').then((mod) => mod.APIPlayground),
@@ -18,8 +19,11 @@ export function Root({
   children,
   baseUrl,
   className,
+  shikiOptions,
   ...props
-}: RootProps & HTMLAttributes<HTMLDivElement>): ReactNode {
+}: RootProps & {
+  shikiOptions: RenderContext['shikiOptions'];
+} & HTMLAttributes<HTMLDivElement>): ReactNode {
   return (
     <div
       className={cn(
@@ -28,7 +32,9 @@ export function Root({
       )}
       {...props}
     >
-      <ApiProvider defaultBaseUrl={baseUrl}>{children}</ApiProvider>
+      <ApiProvider shikiOptions={shikiOptions} defaultBaseUrl={baseUrl}>
+        {children}
+      </ApiProvider>
     </div>
   );
 }

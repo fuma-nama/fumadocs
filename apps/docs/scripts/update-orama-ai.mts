@@ -31,7 +31,7 @@ export async function updateOramaAi(): Promise<void> {
   const files = await fg([
     './content/docs/**/*.mdx',
     '!*.model.mdx',
-    '!./content/docs/ui/museum/**/*',
+    '!./content/docs/openapi/**/*',
   ]);
   const records: unknown[] = [];
 

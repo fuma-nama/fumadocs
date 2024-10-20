@@ -1,67 +1,79 @@
-import { createContext, useContext, useEffect, useState } from 'react';
-import type { HighlighterCore } from 'shiki/core';
+import {
+  createContext,
+  type ReactNode,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
+import { useOnChange } from 'fumadocs-core/utils/use-on-change';
+import type { RenderContext } from '@/types';
+import { sharedTransformers } from '@/utils/shiki';
 
 export interface ApiProviderProps {
   /**
    * Base URL for API requests
    */
   defaultBaseUrl?: string;
+  shikiOptions: RenderContext['shikiOptions'];
 
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
 interface ApiContextType {
   baseUrl?: string;
   setBaseUrl: (value: string) => void;
-  highlighter: HighlighterCore | null;
+  highlight: (
+    lang: string,
+    code: string,
+  ) => ReturnType<(typeof import('shiki/bundle/web'))['codeToHast']>;
 }
 
-const ApiContext = createContext<ApiContextType>({
-  baseUrl: undefined,
-  setBaseUrl: () => undefined,
-  highlighter: null,
-});
+const ApiContext = createContext<ApiContextType | undefined>(undefined);
 
 export function useApiContext(): ApiContextType {
-  return useContext(ApiContext);
+  const ctx = useContext(ApiContext);
+  if (!ctx) throw new Error('Component must be used under <ApiProvider />');
+
+  return ctx;
 }
-
-async function initHighlighter(): Promise<HighlighterCore> {
-  const { getSingletonHighlighter } = await import('shiki/bundle/web');
-
-  return getSingletonHighlighter({
-    themes: ['github-light', 'github-dark'],
-    langs: ['json'],
-  });
-}
-
-let highlighterInstance: HighlighterCore | undefined;
 
 export function ApiProvider({
   defaultBaseUrl,
+  shikiOptions,
   children,
 }: ApiProviderProps): React.ReactElement {
-  const [highlighter, setHighlighter] = useState<HighlighterCore | null>(null);
   const [baseUrl, setBaseUrl] = useState(defaultBaseUrl);
 
   useEffect(() => {
     setBaseUrl((prev) => localStorage.getItem('apiBaseUrl') ?? prev);
-    if (highlighterInstance) {
-      setHighlighter(highlighterInstance);
-    } else {
-      void initHighlighter().then((res) => {
-        highlighterInstance = res;
-        setHighlighter(res);
-      });
-    }
   }, []);
 
-  useEffect(() => {
+  useOnChange(baseUrl, () => {
     if (baseUrl) localStorage.setItem('apiBaseUrl', baseUrl);
-  }, [baseUrl]);
+  });
 
   return (
-    <ApiContext.Provider value={{ baseUrl, setBaseUrl, highlighter }}>
+    <ApiContext.Provider
+      value={useMemo(
+        () => ({
+          baseUrl,
+          setBaseUrl,
+          highlight: async (lang, code) => {
+            const { codeToHast } = await import('shiki/bundle/web');
+
+            return codeToHast(code, {
+              lang,
+              themes: { light: 'github-light', dark: 'github-dark' },
+              transformers: sharedTransformers,
+              defaultColor: false,
+              ...shikiOptions,
+            });
+          },
+        }),
+        [baseUrl, shikiOptions],
+      )}
+    >
       {children}
     </ApiContext.Provider>
   );

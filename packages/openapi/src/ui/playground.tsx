@@ -330,10 +330,7 @@ function ResultDisplay({
       </div>
       <p className="text-sm text-fd-muted-foreground">{data.status}</p>
       {data.data ? (
-        <CodeBlock
-          code={JSON.stringify(data.data, null, 2)}
-          className="max-h-[288px]"
-        />
+        <CodeBlock code={JSON.stringify(data.data, null, 2)} />
       ) : null}
     </div>
   );

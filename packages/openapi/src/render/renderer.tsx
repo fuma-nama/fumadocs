@@ -12,6 +12,7 @@ import {
   ObjectCollapsible,
   APIPlayground,
 } from '@/ui';
+import type { RenderContext } from '@/types';
 
 export interface ResponsesProps {
   items: string[];
@@ -87,34 +88,48 @@ export type {
   ReferenceSchema,
 } from '@/render/playground';
 
-export const defaultRenderer: Renderer = {
-  Root,
-  API,
-  APIInfo,
-  APIExample,
-  Responses: Tabs,
-  Response: Tab,
-  ResponseTypes: (props) => (
-    <Accordions
-      type="single"
-      className="!-m-4 border-none pt-2"
-      defaultValue="Response"
-    >
-      {props.children}
-    </Accordions>
-  ),
-  ResponseType: (props) => (
-    <Accordion title={props.label}>
-      <CodeBlock code={props.code} lang={props.lang} />
-    </Accordion>
-  ),
-  Property,
-  ObjectCollapsible,
-  Requests: (props) => <Tabs groupId="fumadocs_openapi_requests" {...props} />,
-  Request: (props) => (
-    <Tab value={props.name}>
-      <CodeBlock lang={props.language} code={props.code} />
-    </Tab>
-  ),
-  APIPlayground,
-};
+export function createRenders(
+  shikiOptions: RenderContext['shikiOptions'],
+): Renderer {
+  return {
+    Root: (props) => (
+      <Root shikiOptions={shikiOptions} {...props}>
+        {props.children}
+      </Root>
+    ),
+    API,
+    APIInfo,
+    APIExample,
+    Responses: Tabs,
+    Response: Tab,
+    ResponseTypes: (props) => (
+      <Accordions
+        type="single"
+        className="!-m-4 border-none pt-2"
+        defaultValue="Response"
+      >
+        {props.children}
+      </Accordions>
+    ),
+    ResponseType: (props) => (
+      <Accordion title={props.label}>
+        <CodeBlock code={props.code} lang={props.lang} options={shikiOptions} />
+      </Accordion>
+    ),
+    Property,
+    ObjectCollapsible,
+    Requests: (props) => (
+      <Tabs groupId="fumadocs_openapi_requests" {...props} />
+    ),
+    Request: (props) => (
+      <Tab value={props.name}>
+        <CodeBlock
+          lang={props.language}
+          code={props.code}
+          options={shikiOptions}
+        />
+      </Tab>
+    ),
+    APIPlayground,
+  };
+}

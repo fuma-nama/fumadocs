@@ -93,7 +93,7 @@ export function DocsPage({
     <AnchorProvider toc={toc} single={tocOptions.single}>
       <div
         id="nd-page"
-        className="h-fit w-full min-w-0 max-w-[var(--fd-page-width)] md:transition-[max-width]"
+        className="flex w-full min-w-0 max-w-[var(--fd-page-width)] flex-col md:transition-[max-width]"
         style={
           {
             '--fd-page-width':
@@ -119,7 +119,7 @@ export function DocsPage({
         )}
         <article
           className={cn(
-            'mx-auto flex size-full flex-col gap-6 px-4 pt-10 md:px-6 md:pt-12',
+            'mx-auto flex w-full flex-1 flex-col gap-6 px-4 pt-10 md:px-6 md:pt-12',
             tocOptions.enabled ? 'max-w-[860px]' : 'max-w-[1120px]',
           )}
         >

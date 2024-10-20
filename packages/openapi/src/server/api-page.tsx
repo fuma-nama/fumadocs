@@ -5,12 +5,12 @@ import Parser from '@apidevtools/json-schema-ref-parser';
 import { Operation } from '@/render/operation';
 import type { RenderContext } from '@/types';
 import { createMethod } from '@/schema/method';
-import { defaultRenderer, type Renderer } from '@/render/renderer';
+import { createRenders, type Renderer } from '@/render/renderer';
 
 export interface ApiPageProps
   extends Pick<
     RenderContext,
-    'generateCodeSamples' | 'generateTypeScriptSchema'
+    'generateCodeSamples' | 'generateTypeScriptSchema' | 'shikiOptions'
   > {
   document: string | OpenAPI.Document;
 
@@ -77,9 +77,10 @@ function getContext(
   return {
     document,
     renderer: {
-      ...defaultRenderer,
+      ...createRenders(options.shikiOptions),
       ...options.renderer,
     },
+    shikiOptions: options.shikiOptions,
     generateTypeScriptSchema: options.generateTypeScriptSchema,
     generateCodeSamples: options.generateCodeSamples,
     baseUrl: document.servers?.[0].url ?? 'https://example.com',

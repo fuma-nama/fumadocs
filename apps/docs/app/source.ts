@@ -26,7 +26,14 @@ export const blog = loader({
   source: createMDXSource(blogPosts, []),
 });
 
-export const openapi = createOpenAPI();
+export const openapi = createOpenAPI({
+  shikiOptions: {
+    themes: {
+      dark: 'vesper',
+      light: 'vitesse-light',
+    },
+  },
+});
 
 export type Page = InferPageType<typeof source>;
 export type Meta = InferMetaType<typeof source>;
