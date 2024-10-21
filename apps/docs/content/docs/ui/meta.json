@@ -15,12 +15,11 @@
     "markdown",
     "page-conventions",
     "navigation",
+    "(files)",
     "---UI---",
     "theme",
     "components",
     "mdx",
-    "blocks",
-    "---Others---",
-    "(files)"
+    "blocks"
   ]
 }

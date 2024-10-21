@@ -23,6 +23,14 @@ export const registry: Registry = {
         '../contexts/i18n.tsx': 'fumadocs-ui/i18n',
       },
     },
+    {
+      name: 'layout/sidebar',
+      files: ['layout/sidebar.tsx'],
+      mapImportPath: {
+        '../contexts/sidebar.tsx': 'fumadocs-ui/provider',
+        '../contexts/search.tsx': 'fumadocs-ui/provider',
+      },
+    },
     { name: 'accordion', files: ['accordion.tsx'] },
     { name: 'banner', files: ['banner.tsx'] },
     { name: 'callout', files: ['callout.tsx'] },
