@@ -1,6 +1,13 @@
 import { fileURLToPath } from 'node:url';
 import type { Registry } from 'fumadocs/build';
 
+const contextsMap = {
+  '../contexts/sidebar.tsx': 'fumadocs-ui/provider',
+  '../contexts/search.tsx': 'fumadocs-ui/provider',
+  '../contexts/tree.tsx': 'fumadocs-ui/provider',
+  '../contexts/i18n.tsx': 'fumadocs-ui/i18n',
+};
+
 export const registry: Registry = {
   path: fileURLToPath(import.meta.url),
   rootDir: '../../',
@@ -12,24 +19,22 @@ export const registry: Registry = {
     {
       name: 'layout/root-toggle',
       files: ['layout/root-toggle.tsx'],
-      mapImportPath: {
-        '../contexts/sidebar.tsx': 'fumadocs-ui/provider',
-      },
+      mapImportPath: contextsMap,
     },
     {
       name: 'layout/language-toggle',
       files: ['layout/language-toggle.tsx'],
-      mapImportPath: {
-        '../contexts/i18n.tsx': 'fumadocs-ui/i18n',
-      },
+      mapImportPath: contextsMap,
     },
     {
       name: 'layout/sidebar',
       files: ['layout/sidebar.tsx'],
-      mapImportPath: {
-        '../contexts/sidebar.tsx': 'fumadocs-ui/provider',
-        '../contexts/search.tsx': 'fumadocs-ui/provider',
-      },
+      mapImportPath: contextsMap,
+    },
+    {
+      name: 'layout/dynamic-sidebar',
+      files: ['layout/dynamic-sidebar.tsx'],
+      mapImportPath: contextsMap,
     },
     { name: 'accordion', files: ['accordion.tsx'] },
     { name: 'banner', files: ['banner.tsx'] },
