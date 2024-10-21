@@ -22,7 +22,7 @@
     "@radix-ui/react-tooltip": "^1.1.3",
     "@shikijs/rehype": "^1.22.0",
     "@shikijs/transformers": "^1.22.0",
-    "algoliasearch": "5.10.0",
+    "algoliasearch": "4.24.0",
     "class-variance-authority": "^0.7.0",
     "fumadocs-core": "workspace:*",
     "fumadocs-docgen": "workspace:^",

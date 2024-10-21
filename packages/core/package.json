@@ -108,7 +108,7 @@
     "unified": "^11.0.5"
   },
   "optionalDependencies": {
-    "algoliasearch": "5.10.0",
+    "algoliasearch": "4.24.0",
     "next": "15.0.0",
     "react": ">= 18",
     "react-dom": ">= 18"

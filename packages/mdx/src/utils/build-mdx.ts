@@ -1,10 +1,10 @@
-import type {
-  Processor,
-  VFile,
-} from '@mdx-js/mdx/internal-create-format-aware-processors';
 import { createProcessor, type ProcessorOptions } from '@mdx-js/mdx';
+import type { VFile } from 'vfile';
 
-const cache = new Map<string, { processor: Processor; configHash: string }>();
+const cache = new Map<
+  string,
+  { processor: ReturnType<typeof createProcessor>; configHash: string }
+>();
 
 export interface MDXOptions extends ProcessorOptions {
   /**
