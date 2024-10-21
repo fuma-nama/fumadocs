@@ -1,5 +1,20 @@
 # fumadocs-docgen
 
+## 1.3.0
+
+### Minor Changes
+
+- f9adba6: Support inline type syntax in `AutoTypeTable` `type` prop
+
+### Patch Changes
+
+- be820c4: Bump deps
+- Updated dependencies [f9adba6]
+- Updated dependencies [f9adba6]
+- Updated dependencies [f9adba6]
+- Updated dependencies [be820c4]
+  - fumadocs-typescript@3.0.0
+
 ## 1.2.0
 
 ### Minor Changes
