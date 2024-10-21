@@ -136,7 +136,7 @@ async function downloadComponent(
       log.step(`downloaded ${outPath}`);
     }
 
-    downloadedFiles.add(outPath);
+    downloadedFiles.add(file.path);
   }
 
   for (const sub of comp.subComponents) {

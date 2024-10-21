@@ -8,12 +8,12 @@
     "start": "next start"
   },
   "dependencies": {
-    "@orama/stopwords": "^3.0.0",
-    "@orama/tokenizers": "^3.0.0",
+    "@orama/stopwords": "^3.0.1",
+    "@orama/tokenizers": "^3.0.1",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "next": "15.0.0-canary.192",
+    "next": "15.0.0",
     "react": "18.3.1",
     "react-dom": "18.3.1"
   },
