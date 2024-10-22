@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-ui",
-  "version": "14.0.0",
+  "version": "14.0.2",
   "description": "The framework for building a documentation website in Next.js",
   "keywords": [
     "NextJs",
@@ -70,6 +70,7 @@
     "@radix-ui/react-navigation-menu": "^1.2.1",
     "@radix-ui/react-popover": "^1.1.2",
     "@radix-ui/react-scroll-area": "^1.2.0",
+    "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-tabs": "^1.1.1",
     "@tailwindcss/typography": "^0.5.15",
     "class-variance-authority": "^0.7.0",
@@ -86,7 +87,7 @@
     "@types/react-dom": "^18.3.1",
     "algoliasearch": "4.24.0",
     "eslint-config-custom": "workspace:*",
-    "fumadocs": "workspace:^",
+    "@fumadocs/cli": "workspace:*",
     "lucide-react": "^0.453.0",
     "next": "15.0.0",
     "postcss": "^8.4.47",
@@ -103,7 +104,7 @@
   "optionalDependencies": {
     "@algolia/client-search": "^4.0.0",
     "algoliasearch": "^4.24.0",
-    "tailwindcss": "3.4.14"
+    "tailwindcss": "^3.4.14"
   },
   "publishConfig": {
     "access": "public"

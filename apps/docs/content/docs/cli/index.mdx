@@ -5,12 +5,16 @@ description: The CLI tool that automates setups and installing components.
 
 ## Installation
 
-The CLI doesn't need to install any extra packages, but It needs Fumadocs Core for minimal setup.
+Note that it needs Fumadocs Core for minimal setup.
+
+```package-install
+npm install @fumadocs/cli --save-dev
+```
 
 You can initialize a config for CLI.
 
-```package-install
-npx fumadocs config
+```bash
+pnpm fumadocs config
 ```
 
 It defines the output paths of components.
@@ -19,14 +23,14 @@ It defines the output paths of components.
 
 Select and install components.
 
-```package-install
-npx fumadocs add
+```bash
+pnpm fumadocs add
 ```
 
 You can pass component names.
 
-```package-install
-npx fumadocs add banner files
+```bash
+pnpm fumadocs add banner files
 ```
 
 #### How the magic works?
@@ -43,20 +47,20 @@ Make sure to use the latest version of CLI
 
 Generate files tree for Fumadocs UI `Files` component, using the `tree` command from your terminal.
 
-```package-install
-npx fumadocs tree ./my-dir ./output.tsx
+```bash
+pnpm fumadocs tree ./my-dir ./output.tsx
 ```
 
 You can output MDX file too:
 
-```package-install
-npx fumadocs tree ./my-dir ./output.mdx
+```bash
+pnpm fumadocs tree ./my-dir ./output.mdx
 ```
 
 See help for further details:
 
-```package-install
-npx fumadocs tree -h
+```bash
+pnpm fumadocs tree -h
 ```
 
 #### Example Output
@@ -85,8 +89,8 @@ export default (
 
 Some features of Fumadocs require copying code to get started, it is similar to `codemod` but for configuring features automatically.
 
-```package-install
-npx fumadocs init
+```bash
+pnpm fumadocs init
 ```
 
 Please note that some features may change your existing code, make sure to commit your changes to Git before running it.

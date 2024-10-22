@@ -81,7 +81,7 @@ export const Sidebar = memo(
     ...props
   }: SidebarProps & {
     aside?: HTMLAttributes<HTMLElement> & Record<string, unknown>;
-  }): React.ReactElement => {
+  }) => {
     const search = useSearchContext();
     const hasSearch = search.enabled && !props.hideSearch;
     const context = useMemo<InternalContext>(

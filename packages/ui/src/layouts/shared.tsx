@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import type { LinkItemType } from '@/layouts/links';
 import type { NavProviderProps, TitleProps } from '@/components/layout/nav';
+import { Slot } from '@radix-ui/react-slot';
 
 interface NavOptions extends SharedNavProps {
   enabled: boolean;
@@ -80,10 +81,12 @@ export function replaceOrDefault(
       }
     | undefined,
   def: ReactNode,
+  customComponentProps?: object,
   disabled?: ReactNode,
 ): ReactNode {
   if (obj?.enabled === false) return disabled;
-  if (obj?.component !== undefined) return obj.component;
+  if (obj?.component !== undefined)
+    return <Slot {...customComponentProps}>{obj.component}</Slot>;
 
   return def;
 }

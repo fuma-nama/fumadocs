@@ -1,5 +1,19 @@
 # next-docs-ui
 
+## 14.0.2
+
+### Patch Changes
+
+- bfc2bf2: Fix navbar issues
+  - fumadocs-core@14.0.2
+
+## 14.0.1
+
+### Patch Changes
+
+- 1a7d78a: Pass props to replaced layout components via Radix UI `<Slot />`
+  - fumadocs-core@14.0.1
+
 ## 14.0.0
 
 ### Major Changes

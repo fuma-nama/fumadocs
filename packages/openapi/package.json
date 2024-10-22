@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-openapi",
-  "version": "5.5.0",
+  "version": "5.5.2",
   "description": "Generate MDX docs for your OpenAPI spec",
   "keywords": [
     "NextJs",
@@ -57,7 +57,7 @@
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "22.7.7",
+    "@types/node": "22.7.8",
     "@types/openapi-sampler": "^1.0.3",
     "@types/react": "^18.3.11",
     "bunchee": "^5.5.1",

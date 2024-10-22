@@ -80,15 +80,19 @@ export function DocsPage({
   breadcrumb = {},
   full = false,
   footer = {},
+  tableOfContentPopover: {
+    enabled: tocPopoverEnabled = true,
+    component: tocPopoverReplace,
+    ...tocPopoverOptions
+  } = {},
+  tableOfContent: {
+    // disable TOC on full mode, you can still enable it with `enabled` option.
+    enabled: tocEnabled = !full,
+    component: tocReplace,
+    ...tocOptions
+  } = {},
   ...props
 }: DocsPageProps): React.ReactElement {
-  const tocPopoverOptions = props.tableOfContentPopover ?? {};
-  const tocOptions = {
-    // disable TOC on full mode, you can still enable it with `enabled` option.
-    enabled: props.tableOfContent?.enabled ?? !full,
-    ...props.tableOfContent,
-  };
-
   return (
     <AnchorProvider toc={toc} single={tocOptions.single}>
       <div
@@ -98,29 +102,28 @@ export function DocsPage({
           {
             '--fd-page-width':
               'calc(min(100vw, var(--fd-layout-width)) - var(--fd-sidebar-width) - var(--fd-toc-width))',
-            '--fd-toc-width': tocOptions.enabled ? undefined : '0px',
+            '--fd-toc-width': tocEnabled ? undefined : '0px',
           } as object
         }
       >
         {replaceOrDefault(
-          tocPopoverOptions,
-          <TocPopover
-            items={toc}
-            header={tocPopoverOptions.header}
-            footer={tocPopoverOptions.footer}
-            className={cn(tocPopoverOptions.enabled !== true && 'lg:hidden')}
-          >
+          { enabled: tocPopoverEnabled, component: tocPopoverReplace },
+          <TocPopover items={toc} {...tocPopoverOptions} className="lg:hidden">
             {tocPopoverOptions.style === 'clerk' ? (
               <ClerkTOCItems items={toc} isMenu />
             ) : (
               <TOCItems items={toc} isMenu />
             )}
           </TocPopover>,
+          {
+            items: toc,
+            ...tocPopoverOptions,
+          },
         )}
         <article
           className={cn(
             'mx-auto flex w-full flex-1 flex-col gap-6 px-4 pt-10 md:px-6 md:pt-12',
-            tocOptions.enabled ? 'max-w-[860px]' : 'max-w-[1120px]',
+            tocEnabled ? 'max-w-[860px]' : 'max-w-[1120px]',
           )}
         >
           {replaceOrDefault(breadcrumb, <Breadcrumb {...breadcrumb} />)}
@@ -138,14 +141,18 @@ export function DocsPage({
         </article>
       </div>
       {replaceOrDefault(
-        tocOptions,
-        <Toc header={tocOptions.header} footer={tocOptions.footer}>
+        { enabled: tocEnabled, component: tocReplace },
+        <Toc {...tocOptions}>
           {tocOptions.style === 'clerk' ? (
             <ClerkTOCItems items={toc} />
           ) : (
             <TOCItems items={toc} />
           )}
         </Toc>,
+        {
+          items: toc,
+          ...tocOptions,
+        },
         <div role="none" className="flex-1" />,
       )}
     </AnchorProvider>

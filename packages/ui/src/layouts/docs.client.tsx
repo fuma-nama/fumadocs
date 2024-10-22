@@ -5,7 +5,6 @@ import { Menu, SidebarIcon, X } from 'lucide-react';
 import {
   type ButtonHTMLAttributes,
   type ReactNode,
-  useCallback,
   useContext,
   useState,
 } from 'react';

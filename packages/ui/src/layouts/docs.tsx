@@ -1,5 +1,5 @@
 import type { PageTree } from 'fumadocs-core/server';
-import { type ReactNode, type HTMLAttributes, Fragment } from 'react';
+import { type ReactNode, type HTMLAttributes } from 'react';
 import Link from 'next/link';
 import { Languages, MoreHorizontal } from 'lucide-react';
 import { notFound } from 'next/navigation';
@@ -7,8 +7,8 @@ import dynamic from 'next/dynamic';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import type { SidebarProps } from '@/components/layout/sidebar';
-import { replaceOrDefault } from '@/layouts/shared';
-import type { LinkItemType } from '@/layouts/links';
+import { replaceOrDefault, type SharedNavProps } from '@/layouts/shared';
+import type { LinkItemType, IconItem as IconItemType } from '@/layouts/links';
 import { getSidebarTabs, type TabOptions } from '@/utils/get-sidebar-tabs';
 import type { Option } from '@/components/layout/root-toggle';
 import { type BaseLayoutProps, getLinks } from './shared';
@@ -32,8 +32,6 @@ const DynamicSidebar = dynamic(
   () => import('@/components/layout/dynamic-sidebar'),
 );
 
-export type { LinkItemType };
-
 interface SidebarOptions extends Omit<SidebarProps, 'children'> {
   enabled: boolean;
   component: ReactNode;
@@ -54,7 +52,12 @@ export interface DocsLayoutProps extends BaseLayoutProps {
 }
 
 export function DocsLayout({
-  nav: { transparentMode, ...nav } = {},
+  nav: {
+    enabled: navEnabled = true,
+    component: navReplace,
+    transparentMode,
+    ...nav
+  } = {},
   sidebar: {
     enabled: sidebarEnabled = true,
     collapsible = true,
@@ -67,127 +70,61 @@ export function DocsLayout({
 }: DocsLayoutProps): ReactNode {
   const links = getLinks(props.links ?? [], props.githubUrl);
   const Aside = collapsible ? DynamicSidebar : Sidebar;
-
   if (props.tree === undefined) notFound();
 
-  const header: ReactNode[] = [];
-  const footer: ReactNode[] = [];
-
-  if (nav.title)
-    header.push(
-      <Link
-        key="title"
-        href={nav.url ?? '/'}
-        className="inline-flex items-center gap-2.5 py-1 font-medium"
-      >
-        {nav.title}
-      </Link>,
-    );
-
-  if (nav.children)
-    header.push(<Fragment key="children">{nav.children}</Fragment>);
-
-  if (links.length > 0)
-    header.push(
-      <LinksMenu
-        key="links"
-        items={links.map((item, i) => (
-          <MenuItem key={i} item={item} />
-        ))}
-        className={cn(
-          buttonVariants({
-            size: 'icon',
-            color: 'ghost',
-            className: 'ms-auto',
-          }),
-        )}
-      >
-        <MoreHorizontal />
-      </LinksMenu>,
-    );
-
-  const iconLinks = links.filter((v) => v.type === 'icon');
-  if (iconLinks.length > 0) {
-    footer.push(
-      <div key="links" className="flex flex-row items-center md:hidden">
-        {iconLinks.map((item, i) => (
-          <IconItem key={i} item={item} className="text-fd-muted-foreground" />
-        ))}
-      </div>,
-    );
-  }
-
-  if (!props.disableThemeSwitch) {
-    footer.push(
-      <ThemeToggle
-        key="theme"
-        className={cn('md:me-auto', !i18n && 'max-md:ms-auto')}
-      />,
-    );
-  }
-
-  if (i18n) {
-    footer.push(
-      <LanguageToggle key="i18n" className="max-md:order-first max-md:me-auto">
-        <Languages className="size-5" />
-        <LanguageToggleText className="md:hidden" />
-      </LanguageToggle>,
-    );
-  }
-
-  if (collapsible) {
-    footer.push(
-      <SidebarCollapseTrigger key="sidebar" className="max-md:hidden" />,
-    );
-  }
-
   let tabs: Option[] = [];
-  if (Array.isArray(tabOptions)) tabs = tabOptions;
-  else if (typeof tabOptions === 'object')
+  if (Array.isArray(tabOptions)) {
+    tabs = tabOptions;
+  } else if (typeof tabOptions === 'object') {
     tabs = getSidebarTabs(props.tree, tabOptions);
-  else if (tabOptions !== false) tabs = getSidebarTabs(props.tree);
+  } else if (tabOptions !== false) {
+    tabs = getSidebarTabs(props.tree);
+  }
+
+  const banner = (
+    <div className="flex flex-col gap-1 px-4 empty:hidden md:px-3 md:pb-2">
+      <SidebarHeader {...nav} links={links} />
+      {tabs.length > 0 ? <RootToggle className="-mx-1" options={tabs} /> : null}
+      {sidebar.banner}
+    </div>
+  );
+
+  const footer = (
+    <>
+      <div className="flex flex-row items-center border-t py-1 empty:hidden max-md:gap-1.5 max-md:px-3 md:mx-3">
+        <SidebarFooter
+          sidebarCollapsible={collapsible}
+          i18n={i18n}
+          disableThemeSwitch={props.disableThemeSwitch ?? false}
+          iconItems={links.filter((v) => v.type === 'icon')}
+        />
+      </div>
+      {sidebar.footer}
+    </>
+  );
 
   return (
     <TreeContextProvider tree={props.tree}>
       <NavProvider transparentMode={transparentMode}>
-        {replaceOrDefault(nav, <SubNav className="h-14 md:hidden" {...nav} />)}
+        {replaceOrDefault(
+          { enabled: navEnabled, component: navReplace },
+          <SubNav className="h-14 md:hidden" {...nav} />,
+          nav,
+        )}
         <main
           id="nd-docs-layout"
           {...props.containerProps}
           className={cn(
             'flex flex-1 flex-row',
-            !nav.component &&
-              nav.enabled !== false &&
-              '[--fd-nav-height:3.5rem] md:[--fd-nav-height:0px]',
+            !navReplace && navEnabled
+              ? '[--fd-nav-height:3.5rem] md:[--fd-nav-height:0px]'
+              : null,
             props.containerProps?.className,
           )}
         >
           {replaceOrDefault(
             { enabled: sidebarEnabled, component: sidebarReplace },
-            <Aside
-              {...sidebar}
-              banner={
-                <div className="flex flex-col gap-1 px-4 empty:hidden md:px-3 md:pb-2">
-                  {header.length > 0 ? (
-                    <div className="flex flex-row items-center border-b pb-2 max-md:hidden">
-                      {header}
-                    </div>
-                  ) : null}
-                  {tabs.length > 0 ? (
-                    <RootToggle className="-mx-1" options={tabs} />
-                  ) : null}
-                  {sidebar.banner}
-                </div>
-              }
-              footer={
-                <>
-                  <div className="flex flex-row items-center border-t py-1 empty:hidden max-md:gap-1.5 max-md:px-3 md:mx-3">
-                    {footer}
-                  </div>
-                  {sidebar.footer}
-                </>
-              }
-            >
+            <Aside {...sidebar} banner={banner} footer={footer}>
               <div className="flex flex-col px-2 pt-4 empty:hidden md:hidden">
                 {links
                   .filter((v) => v.type !== 'icon')
@@ -196,6 +133,11 @@ export function DocsLayout({
                   ))}
               </div>
             </Aside>,
+            {
+              ...sidebar,
+              banner,
+              footer,
+            },
           )}
           {props.children}
         </main>
@@ -204,4 +146,99 @@ export function DocsLayout({
   );
 }
 
-export { getSidebarTabs, type TabOptions };
+function SidebarHeader({
+  links,
+  ...props
+}: SharedNavProps & { links: LinkItemType[] }): ReactNode {
+  if (!props.title && !props.children && links.length === 0) return null;
+
+  return (
+    <div className="flex flex-row items-center border-b pb-2 max-md:hidden">
+      {props.title ? (
+        <Link
+          href={props.url ?? '/'}
+          className="inline-flex items-center gap-2.5 py-1 font-medium"
+        >
+          {props.title}
+        </Link>
+      ) : null}
+      {props.children}
+      {links.length > 0 ? (
+        <LinksMenu
+          items={links.map((item, i) => (
+            <MenuItem key={i} item={item} />
+          ))}
+          className={cn(
+            buttonVariants({
+              size: 'icon',
+              color: 'ghost',
+            }),
+            'ms-auto',
+          )}
+        >
+          <MoreHorizontal />
+        </LinksMenu>
+      ) : null}
+    </div>
+  );
+}
+
+function SidebarFooter({
+  iconItems,
+  ...props
+}: {
+  i18n: boolean;
+  iconItems: IconItemType[];
+  disableThemeSwitch: boolean;
+  sidebarCollapsible: boolean;
+}): ReactNode {
+  if (props.i18n) {
+    return (
+      <>
+        {iconItems.length > 0 ? (
+          <div className="flex flex-row items-center md:hidden">
+            {iconItems.map((item, i) => (
+              <IconItem
+                key={i}
+                item={item}
+                className="text-fd-muted-foreground"
+              />
+            ))}
+          </div>
+        ) : null}
+        {!props.disableThemeSwitch ? <ThemeToggle /> : null}
+        <LanguageToggle className="max-md:order-first max-md:me-auto md:ms-auto">
+          <Languages className="size-5" />
+          <LanguageToggleText className="md:hidden" />
+        </LanguageToggle>
+        {props.sidebarCollapsible ? (
+          <SidebarCollapseTrigger className="max-md:hidden" />
+        ) : null}
+      </>
+    );
+  }
+
+  return (
+    <>
+      {iconItems.length > 0 ? (
+        <div className="flex flex-row items-center md:hidden">
+          {iconItems.map((item, i) => (
+            <IconItem
+              key={i}
+              item={item}
+              className="text-fd-muted-foreground"
+            />
+          ))}
+        </div>
+      ) : null}
+      {!props.disableThemeSwitch ? (
+        <ThemeToggle className="max-md:ms-auto" />
+      ) : null}
+      {props.sidebarCollapsible ? (
+        <SidebarCollapseTrigger className="ms-auto max-md:hidden" />
+      ) : null}
+    </>
+  );
+}
+
+export { getSidebarTabs, type TabOptions, type LinkItemType };
