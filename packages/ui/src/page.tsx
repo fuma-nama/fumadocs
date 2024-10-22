@@ -108,11 +108,7 @@ export function DocsPage({
       >
         {replaceOrDefault(
           { enabled: tocPopoverEnabled, component: tocPopoverReplace },
-          <TocPopover
-            items={toc}
-            {...tocPopoverOptions}
-            className={cn(!tocPopoverEnabled && 'lg:hidden')}
-          >
+          <TocPopover items={toc} {...tocPopoverOptions} className="lg:hidden">
             {tocPopoverOptions.style === 'clerk' ? (
               <ClerkTOCItems items={toc} isMenu />
             ) : (
