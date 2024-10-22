@@ -1,11 +1,10 @@
 import { ChevronRight } from 'lucide-react';
 import {
   type BreadcrumbOptions,
-  useBreadcrumb,
+  getBreadcrumbItemsFromPath,
 } from 'fumadocs-core/breadcrumb';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Fragment } from 'react';
+import { Fragment, useMemo } from 'react';
 import { useTreeContext } from '@/contexts/tree';
 
 export interface BreadcrumbProps
@@ -22,12 +21,13 @@ export function Breadcrumb({
   full = false,
   ...options
 }: BreadcrumbProps): React.ReactNode {
-  const { root } = useTreeContext();
-  const pathname = usePathname();
-  const items = useBreadcrumb(pathname, root, {
-    includePage: full,
-    ...options,
-  });
+  const { path, root } = useTreeContext();
+  const items = useMemo(() => {
+    return getBreadcrumbItemsFromPath(root, path, {
+      includePage: full,
+      ...options,
+    });
+  }, [full, options, path, root]);
 
   if (items.length === 0) return null;
 

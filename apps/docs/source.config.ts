@@ -3,22 +3,18 @@ import {
   defineDocs,
   defineCollections,
   frontmatterSchema,
+  metaSchema,
 } from 'fumadocs-mdx/config';
 import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins';
 import { transformerTwoslash } from 'fumadocs-twoslash';
 import remarkMath from 'remark-math';
-import {
-  fileGenerator,
-  remarkDocGen,
-  remarkInstall,
-  typescriptGenerator,
-} from 'fumadocs-docgen';
+import { fileGenerator, remarkDocGen, remarkInstall } from 'fumadocs-docgen';
 import rehypeKatex from 'rehype-katex';
 import { z } from 'zod';
-import { transformerRemoveNotationEscape } from '@shikijs/transformers';
 
 export const { docs, meta } = defineDocs({
   docs: {
+    async: true,
     schema: frontmatterSchema.extend({
       preview: z.string().optional(),
       index: z.boolean().default(false),
@@ -26,6 +22,11 @@ export const { docs, meta } = defineDocs({
        * API routes only
        */
       method: z.string().optional(),
+    }),
+  },
+  meta: {
+    schema: metaSchema.extend({
+      description: z.string().optional(),
     }),
   },
 });
@@ -40,7 +41,6 @@ export const blog = defineCollections({
 });
 
 export default defineConfig({
-  generateManifest: true,
   lastModifiedTime: 'git',
   mdxOptions: {
     rehypeCodeOptions: {
@@ -52,13 +52,29 @@ export default defineConfig({
       transformers: [
         ...(rehypeCodeDefaultOptions.transformers ?? []),
         transformerTwoslash(),
-        transformerRemoveNotationEscape(),
+        {
+          name: 'transformers:remove-notation-escape',
+          code(hast) {
+            for (const line of hast.children) {
+              if (line.type !== 'element') continue;
+
+              const lastSpan = line.children.findLast(
+                (v) => v.type === 'element',
+              );
+
+              const head = lastSpan?.children[0];
+              if (head?.type !== 'text') return;
+
+              head.value = head.value.replace(/\[\\!code/g, '[!code');
+            }
+          },
+        },
       ],
     },
     remarkPlugins: [
       remarkMath,
       [remarkInstall, { persist: { id: 'package-manager' } }],
-      [remarkDocGen, { generators: [typescriptGenerator(), fileGenerator()] }],
+      [remarkDocGen, { generators: [fileGenerator()] }],
     ],
     rehypePlugins: (v) => [rehypeKatex, ...v],
   },

@@ -3,7 +3,7 @@
 import { type HTMLAttributes, useCallback, useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@/utils/cn';
-import { buttonVariants } from '@/theme/variants';
+import { buttonVariants } from '@/components/ui/button';
 
 export function Banner({
   id,
@@ -25,7 +25,6 @@ export function Banner({
 }): React.ReactElement {
   const [open, setOpen] = useState(true);
   const globalKey = id ? `nd-banner-${id}` : undefined;
-  const cssFilter = `:not(.${globalKey ?? 'nd-banner-never'} *)`;
 
   useEffect(() => {
     if (globalKey) setOpen(localStorage.getItem(globalKey) !== 'true');
@@ -49,9 +48,7 @@ export function Banner({
     >
       {changeLayout && open ? (
         <style>{`
-        #nd-sidebar${cssFilter}, #nd-nav${cssFilter}, #nd-subnav${cssFilter}, [data-toc]${cssFilter} { top: 3rem; }
-        #nd-tocnav${cssFilter} { top: 6.5rem; }
-        #nd-sidebar${cssFilter}, [data-toc]${cssFilter} { height: calc(100dvh - 3rem); }
+        :root:not(.${globalKey ?? 'nd-banner-never'}) { --fd-banner-height: 3rem; }
         `}</style>
       ) : null}
       {globalKey ? (

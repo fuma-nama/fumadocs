@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { cva } from 'class-variance-authority';
 import { cn } from '@/utils/cn';
 import { useI18n } from './contexts/i18n';
@@ -22,7 +21,7 @@ export function LastUpdate(props: { date: Date }): React.ReactElement {
   }, [props.date]);
 
   return (
-    <p className="text-xs text-fd-muted-foreground">
+    <p className="text-sm text-fd-muted-foreground">
       {text.lastUpdate} {date}
     </p>
   );
@@ -48,17 +47,17 @@ const itemLabel = cva(
 
 export function Footer({ items }: FooterProps): React.ReactElement {
   const tree = useTreeContext();
-  const pathname = usePathname();
   const { text } = useI18n();
 
-  const { previous = items?.previous, next = items?.next } = useMemo(() => {
-    const idx = tree.navigation.findIndex((item) => item.url === pathname);
+  const { previous, next } = useMemo(() => {
+    if (items) return items;
+    const neighbours = tree.getNeighbours();
 
     return {
-      previous: tree.navigation[idx - 1],
-      next: tree.navigation[idx + 1],
+      previous: neighbours[0],
+      next: neighbours[1],
     };
-  }, [pathname, tree.navigation]);
+  }, [items, tree]);
 
   return (
     <div className="grid grid-cols-2 gap-4 pb-6">

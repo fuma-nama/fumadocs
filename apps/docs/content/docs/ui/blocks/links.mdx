@@ -14,9 +14,9 @@ A link to navigate to a URL/href, can be external.
 
 ```tsx title="app/layout.config.tsx"
 import { BookIcon } from 'lucide-react';
-import { type HomeLayoutProps } from 'fumadocs-ui/home-layout';
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 
-export const baseOptions: HomeLayoutProps = {
+export const baseOptions: BaseLayoutProps = {
   links: [
     {
       icon: <BookIcon />,
@@ -38,9 +38,9 @@ The conditions to be marked as active.
 | `none`       | Never be active                                             |
 
 ```tsx title="app/layout.config.tsx"
-import { type HomeLayoutProps } from 'fumadocs-ui/home-layout';
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 
-export const baseOptions: HomeLayoutProps = {
+export const baseOptions: BaseLayoutProps = {
   links: [
     {
       text: 'Blog',
@@ -56,9 +56,9 @@ export const baseOptions: HomeLayoutProps = {
 Set the item as secondary, secondary items will be displayed differently on navbar.
 
 ```tsx title="app/layout.config.tsx"
-import { type HomeLayoutProps } from 'fumadocs-ui/home-layout';
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 
-export const baseOptions: HomeLayoutProps = {
+export const baseOptions: BaseLayoutProps = {
   links: [
     {
       text: 'Blog',
@@ -74,9 +74,9 @@ export const baseOptions: HomeLayoutProps = {
 You can restrict where the item is displayed.
 
 ```tsx title="app/layout.config.tsx"
-import { type HomeLayoutProps } from 'fumadocs-ui/home-layout';
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 
-export const baseOptions: HomeLayoutProps = {
+export const baseOptions: BaseLayoutProps = {
   links: [
     {
       on: 'menu',
@@ -94,9 +94,9 @@ Icon items are secondary by default.
 
 ```tsx title="app/layout.config.tsx"
 import { BookIcon } from 'lucide-react';
-import { type HomeLayoutProps } from 'fumadocs-ui/home-layout';
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 
-export const baseOptions: HomeLayoutProps = {
+export const baseOptions: BaseLayoutProps = {
   links: [
     {
       type: 'icon',
@@ -114,9 +114,9 @@ export const baseOptions: HomeLayoutProps = {
 Same as link item, but is shown as a button.
 
 ```tsx title="app/layout.config.tsx"
-import { type HomeLayoutProps } from 'fumadocs-ui/home-layout';
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 
-export const baseOptions: HomeLayoutProps = {
+export const baseOptions: BaseLayoutProps = {
   links: [
     {
       type: 'button',
@@ -127,20 +127,55 @@ export const baseOptions: HomeLayoutProps = {
 };
 ```
 
-## Dropdown Menu
+## Navigation Menu
 
-A dropdown menu containing multiple items.
+A navigation menu containing link items.
 
 ```tsx title="app/layout.config.tsx"
-import { type HomeLayoutProps } from 'fumadocs-ui/home-layout';
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 
-export const baseOptions: HomeLayoutProps = {
+export const baseOptions: BaseLayoutProps = {
   links: [
     {
       type: 'menu',
       text: 'Guide',
       items: [
-        // child items
+        {
+          text: 'Getting Started',
+          description: 'Learn to use Fumadocs',
+          url: '/docs',
+        },
+      ],
+    },
+  ],
+};
+```
+
+Note that the `description` field will only be displayed on the navbar in Home Layout.
+
+### Menu Props
+
+Specify the props for Radix UI Navigation Menu item in Home Layout.
+
+```tsx title="app/layout.config.tsx"
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+export const baseOptions: BaseLayoutProps = {
+  links: [
+    {
+      type: 'menu',
+      text: 'Guide',
+      items: [
+        {
+          text: 'Getting Started',
+          url: '/docs',
+          menu: {
+            className: 'row-span-2',
+            // add banner to navigation menu card
+            // can be an image or other elements
+            banner: <div>Banner</div>,
+          },
+        },
       ],
     },
   ],
@@ -152,9 +187,9 @@ export const baseOptions: HomeLayoutProps = {
 Display a custom component.
 
 ```tsx title="app/layout.config.tsx"
-import { type HomeLayoutProps } from 'fumadocs-ui/home-layout';
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 
-export const baseOptions: HomeLayoutProps = {
+export const baseOptions: BaseLayoutProps = {
   links: [
     {
       type: 'custom',

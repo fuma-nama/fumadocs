@@ -1,17 +1,17 @@
 ---
-title: Getting Started
+title: Introduction
 description: Learn how to use Fumadocs MDX in your documentation
 icon: Album
 ---
 
-## Introduction
+## What is this?
 
-`fumadocs-mdx` is the official content source of Fumadocs. It parses frontmatter and is bundled with many MDX
+Fumadocs MDX is the official content source of Fumadocs. It parses frontmatter and is bundled with many MDX
 plugins for building a good documentation site.
 
-> This package must be used with Fumadocs
+> This package uses Fumadocs core.
 
-## Getting Started
+## Installation
 
 ### Install Dependencies
 
@@ -36,7 +36,8 @@ const config = {
 export default withMDX(config);
 ```
 
-It generates a `.source` folder once you start the dev server or start building the app.
+It generates a `.source` folder in root directory once you start the dev server or start building the app.
+
 The folder contains all parsed files, you should add it to `.gitignore`.
 
 <Callout title="ESM Only" type='warn' className="mt-4">
@@ -45,12 +46,14 @@ The Next.js config must be a `.mjs` file since Fumadocs is ESM-only.
 
 </Callout>
 
-To configure Fumadocs MDX, create a config file.
+Configure Fumadocs MDX by creating a `source.config.ts` file.
 
 ```ts title="source.config.ts"
 import { defineDocs } from 'fumadocs-mdx/config';
 
-export const { docs, meta } = defineDocs();
+export const { docs, meta } = defineDocs({
+  dir: '/content/docs',
+});
 ```
 
 ### Post Install
@@ -69,7 +72,7 @@ You can add a post install script to generate types before executing CLI tools (
 
 To integrate with Fumadocs, create:
 
-```ts title="app/source.ts"
+```ts title="lib/source.ts"
 import { docs, meta } from '@/.source';
 import { createMDXSource } from 'fumadocs-mdx';
 import { loader } from 'fumadocs-core/source';
@@ -80,7 +83,7 @@ export const source = loader({
 });
 ```
 
-> For more customisation options, check [Source API](/docs/headless/source-api).
+> We imported the `.source` folder with `@/.source`, you can also change it to your own import alias..
 
 ### Start Server
 
@@ -90,15 +93,30 @@ next dev
 
 A `.source` folder should be created. You can log and see if it is loaded correctly.
 
-See [Pages Conventions](/docs/ui/page-conventions)
-to learn how to organize your pages.
+See [Pages Conventions](/docs/ui/page-conventions) to learn how to organize your pages.
 
-### Usages
+### Usage
 
-Usually, you'll interact with Fumadocs MDX through Source API (the `loader`).
-You can see the type definitions to find the available properties.
+Generally, you'll interact with Fumadocs MDX through the [Source `loader` API](/docs/headless/source-api).
+You can see the type definitions to find available properties.
 
-To render the page, pass components to the body.
+To render the page, obtain the page from `source` and render the MDX component (`page.data.body`).
+
+```tsx
+import { notFound } from 'next/navigation';
+import { source } from '@/lib/source';
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+
+const page = source.getPage(['slugs']);
+if (!page) notFound();
+
+const MDX = page.data.body;
+
+// set your MDX components with `components` prop
+<MDX components={{ ...defaultMdxComponents }} />;
+```
+
+Eventually, it will look like:
 
 ```json doc-gen:file
 {
@@ -123,20 +141,4 @@ These properties are exported from MDX files by default.
 
 ### MDX Plugins
 
-You can customise the options passed to the MDX processor.
-
-```ts title="source.config.ts"
-import { defineConfig } from 'fumadocs-mdx/config';
-import rehypeKatex from 'rehype-katex';
-import remarkMath from 'remark-math';
-
-export default defineConfig({
-  mdxOptions: {
-    remarkPlugins: [remarkMath],
-    // When order matters
-    rehypePlugins: (v) => [rehypeKatex, ...v],
-  },
-});
-```
-
-See [Configuration](/docs/mdx/configuration) to learn more.
+See [MDX Options](/docs/mdx/mdx).

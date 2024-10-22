@@ -1,9 +1,9 @@
-import type { ElementContent, Element } from 'hast';
+import type { Element, ElementContent } from 'hast';
 import type { Code } from 'mdast';
 import { fromMarkdown } from 'mdast-util-from-markdown';
 import { gfmFromMarkdown } from 'mdast-util-gfm';
-import { toHast, defaultHandlers } from 'mdast-util-to-hast';
-import type { ShikiTransformerContextCommon, ShikiTransformer } from 'shiki';
+import { defaultHandlers, toHast } from 'mdast-util-to-hast';
+import type { ShikiTransformer, ShikiTransformerContextCommon } from 'shiki';
 import {
   transformerTwoslash as originalTransformer,
   type TransformerTwoslashIndexOptions,
@@ -17,6 +17,13 @@ export function transformerTwoslash(
   return originalTransformer({
     explicitTrigger: true,
     ...options,
+    twoslashOptions: {
+      ...options?.twoslashOptions,
+      compilerOptions: {
+        moduleResolution: 100,
+        ...options?.twoslashOptions?.compilerOptions,
+      },
+    },
     rendererRich: {
       classExtra: ignoreClass,
       renderMarkdown,

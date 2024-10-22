@@ -1,0 +1,92 @@
+---
+title: User Guide
+description: The CLI tool that automates setups and installing components.
+---
+
+## Installation
+
+The CLI doesn't need to install any extra packages, but It needs Fumadocs Core for minimal setup.
+
+You can initialize a config for CLI.
+
+```package-install
+npx fumadocs config
+```
+
+It defines the output paths of components.
+
+### Components
+
+Select and install components.
+
+```package-install
+npx fumadocs add
+```
+
+You can pass component names.
+
+```package-install
+npx fumadocs add banner files
+```
+
+#### How the magic works?
+
+The CLI fetches the latest version of component from the GitHub repository of Fumadocs.
+When you install the component, it is guaranteed to be up-to-date.
+
+In addition, it also transforms import paths.
+Make sure to use the latest version of CLI
+
+> This is highly Inspired by Shadcn UI.
+
+### Tree
+
+Generate files tree for Fumadocs UI `Files` component, using the `tree` command from your terminal.
+
+```package-install
+npx fumadocs tree ./my-dir ./output.tsx
+```
+
+You can output MDX file too:
+
+```package-install
+npx fumadocs tree ./my-dir ./output.mdx
+```
+
+See help for further details:
+
+```package-install
+npx fumadocs tree -h
+```
+
+#### Example Output
+
+```tsx title="output.tsx"
+import { File, Folder, Files } from 'fumadocs-ui/components/files';
+
+export default (
+  <Files>
+    <Folder name="app">
+      <File name="layout.tsx" />
+      <File name="page.tsx" />
+      <File name="global.css" />
+    </Folder>
+    <Folder name="components">
+      <File name="button.tsx" />
+      <File name="tabs.tsx" />
+      <File name="dialog.tsx" />
+    </Folder>
+    <File name="package.json" />
+  </Files>
+);
+```
+
+### Initialize Features
+
+Some features of Fumadocs require copying code to get started, it is similar to `codemod` but for configuring features automatically.
+
+```package-install
+npx fumadocs init
+```
+
+Please note that some features may change your existing code, make sure to commit your changes to Git before running it.

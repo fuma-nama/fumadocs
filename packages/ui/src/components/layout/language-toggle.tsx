@@ -1,7 +1,5 @@
 'use client';
-import { useState } from 'react';
-import type { PopoverProps } from '@radix-ui/react-popover';
-import { LanguagesIcon } from 'lucide-react';
+import { type ButtonHTMLAttributes, type HTMLAttributes } from 'react';
 import { useI18n } from '@/contexts/i18n';
 import {
   Popover,
@@ -9,24 +7,30 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { cn } from '@/utils/cn';
-import { buttonVariants } from '@/theme/variants';
+import { buttonVariants } from '@/components/ui/button';
 
-export type LanguageSelectProps = Omit<PopoverProps, 'open' | 'onOpenChange'>;
+export type LanguageSelectProps = ButtonHTMLAttributes<HTMLButtonElement>;
 
 export function LanguageToggle(props: LanguageSelectProps): React.ReactElement {
   const context = useI18n();
-  const [open, setOpen] = useState(false);
   if (!context.locales) throw new Error('Missing `<I18nProvider />`');
 
   return (
-    <Popover open={open} onOpenChange={setOpen} {...props}>
+    <Popover>
       <PopoverTrigger
         aria-label={context.text.chooseLanguage}
-        className={cn(buttonVariants({ size: 'icon', color: 'ghost' }))}
+        {...props}
+        className={cn(
+          buttonVariants({
+            color: 'ghost',
+            className: 'gap-1.5 p-1.5',
+          }),
+          props.className,
+        )}
       >
-        <LanguagesIcon />
+        {props.children}
       </PopoverTrigger>
-      <PopoverContent className="flex flex-col p-1">
+      <PopoverContent className="flex flex-col overflow-hidden p-0">
         <p className="mb-1 p-2 text-xs font-medium text-fd-muted-foreground">
           {context.text.chooseLanguage}
         </p>
@@ -35,7 +39,7 @@ export function LanguageToggle(props: LanguageSelectProps): React.ReactElement {
             key={item.locale}
             type="button"
             className={cn(
-              'rounded-md p-2 text-left text-sm transition-colors duration-100',
+              'p-2 text-start text-sm',
               item.locale === context.locale
                 ? 'bg-fd-primary/10 font-medium text-fd-primary'
                 : 'hover:bg-fd-accent hover:text-fd-accent-foreground',
@@ -50,4 +54,15 @@ export function LanguageToggle(props: LanguageSelectProps): React.ReactElement {
       </PopoverContent>
     </Popover>
   );
+}
+
+export function LanguageToggleText(
+  props: HTMLAttributes<HTMLSpanElement>,
+): React.ReactElement {
+  const context = useI18n();
+  const text = context.locales?.find(
+    (item) => item.locale === context.locale,
+  )?.name;
+
+  return <span {...props}>{text}</span>;
 }

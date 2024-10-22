@@ -1,5 +1,11 @@
 import { cva } from 'class-variance-authority';
-import { Heart, type LucideIcon, MousePointer } from 'lucide-react';
+import {
+  Heart,
+  type LucideIcon,
+  MousePointer,
+  Sparkle,
+  Terminal,
+} from 'lucide-react';
 import {
   BatteryChargingIcon,
   CpuIcon,
@@ -8,26 +14,24 @@ import {
   KeyboardIcon,
   LayoutIcon,
   LibraryIcon,
-  MessageCircleIcon,
   PaperclipIcon,
   PersonStandingIcon,
   RocketIcon,
   SearchIcon,
-  StarsIcon,
   TimerIcon,
 } from 'lucide-react';
 import { File, Files, Folder } from 'fumadocs-ui/components/files';
 import Link from 'next/link';
 import type { HTMLAttributes, ReactNode } from 'react';
 import Image from 'next/image';
-import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import { CodeBlock } from '@/components/code-block';
 import { UwuHero } from '@/app/(home)/uwu';
 import SourceImage from '@/public/source.png';
 import ContributorCounter from '@/components/contributor-count';
-import { CreateAppAnimation, Previews } from './page.client';
+import { AutoTypeTable } from '@/components/type-table';
+import { CreateAppAnimation, WhyInteractive } from './page.client';
 import {
   VercelLogo,
   NetlifyLogo,
@@ -35,12 +39,13 @@ import {
   OpenAPIIcon,
   EarthIcon,
 } from './icons';
+import Img from './img.png';
 
 const badgeVariants = cva(
   'mb-2 inline-flex size-7 items-center justify-center rounded-full bg-fd-primary font-medium text-fd-primary-foreground',
 );
 
-const code = `const frontmatterSchema = frontmatterSchema.extend({
+const code = `const schema = frontmatterSchema.extend({
   preview: z.string().optional()
 })`;
 
@@ -62,20 +67,17 @@ export default function Page(): React.ReactElement {
           }}
         >
           <div className="relative">
-            <StarsIcon
+            <Sparkle
               className="absolute -left-2 -top-2 z-10 size-4 xl:scale-[200%]"
-              stroke="none"
-              fill="currentColor"
-            />
-            <StarsIcon
-              className="absolute -bottom-2 -right-2 z-10 size-4 xl:scale-[200%]"
               stroke="none"
               fill="currentColor"
             />
             <Hero />
             <UwuHero />
           </div>
-          <div className="container border-x border-t py-24">
+          <Feedback />
+          <div className="container border-x border-t py-16 md:py-24">
+            <Terminal className="mx-auto mb-2 size-8 text-muted-foreground" />
             <h2 className="text-center text-2xl font-semibold sm:text-3xl">
               Start instantly.
               <br />
@@ -84,7 +86,6 @@ export default function Page(): React.ReactElement {
           </div>
           <Introduction />
           <Why />
-          <Highlights />
           <div
             className="container relative overflow-hidden border-x border-t py-16 sm:py-24"
             style={{
@@ -97,30 +98,9 @@ export default function Page(): React.ReactElement {
               <br />
               Built for developers.
             </h2>
-
-            <div
-              className="mx-auto mb-[-160px] mt-8 flex h-[240px] flex-row overflow-hidden rounded-xl border bg-fd-card/50 backdrop-blur-lg md:w-[70%]"
-              style={{
-                maskImage: 'linear-gradient(to bottom, white, transparent)',
-              }}
-            >
-              <div className="flex w-1/4 flex-col gap-4 border-r bg-fd-card p-4">
-                <div className="h-4 w-full rounded-full bg-fd-muted-foreground/20" />
-                <div className="h-4 w-1/2 rounded-full bg-fd-muted-foreground/20" />
-                <div className="h-4 w-1/2 rounded-full bg-fd-muted-foreground/20" />
-              </div>
-              <div className="flex flex-1 flex-col gap-4 px-4 py-8">
-                <div className="mb-3 h-6 w-1/4 rounded-full bg-fd-muted-foreground/20" />
-                <div className="h-4 w-1/3 rounded-full bg-fd-muted-foreground/20" />
-                <div className="h-4 w-full rounded-full bg-fd-muted-foreground/20" />
-                <div className="h-4 w-1/2 rounded-full bg-fd-muted-foreground/20" />
-              </div>
-              <div className="w-1/4 pt-8 max-lg:hidden">
-                <div className="h-4 w-1/2 rounded-full bg-fd-muted-foreground/20" />
-              </div>
-            </div>
           </div>
           <Features />
+          <Highlights />
           <Contributing />
           <End />
         </div>
@@ -129,33 +109,18 @@ export default function Page(): React.ReactElement {
   );
 }
 
-function WhyCard(props: HTMLAttributes<HTMLDivElement>): React.ReactElement {
-  return (
-    <div
-      className="rounded-xl border border-foreground/10 bg-fd-card/20 p-4 text-foreground/50 shadow-xl backdrop-blur-xl transition-colors hover:text-foreground"
-      style={{
-        transform: 'translate3d(12px,-24px,0)',
-      }}
-      {...props}
-    >
-      {props.children}
-    </div>
-  );
-}
-
 function Why(): React.ReactElement {
   return (
     <div
-      className="container relative overflow-hidden border-x border-t p-8"
+      className="container relative overflow-hidden border-x border-t px-8 pb-4 pt-12 md:pt-24"
       style={{
         perspective: '900px',
       }}
     >
       {new Array(10).fill(0).map((_, i) => (
         <div
-          // eslint-disable-next-line react/no-array-index-key -- static
           key={i}
-          className="absolute -left-10 top-0 z-[-1] h-[1000px] max-h-[100vw] origin-top-right rotate-45 bg-gradient-to-b from-primary blur-xl"
+          className="absolute -left-20 top-0 z-[-1] h-[1000px] max-h-[100vw] origin-top-right rotate-45 bg-gradient-to-b from-primary blur-xl"
           style={{
             width: Math.random() * 32,
             animation: `lightray ${((i + 2) * 2).toString()}s linear infinite`,
@@ -174,136 +139,98 @@ function Why(): React.ReactElement {
         }
         }`}
       </style>
-      <h2 className="bg-gradient-to-b from-foreground to-foreground/40 bg-clip-text text-2xl font-semibold text-transparent">
-        Docs can be Simple
-        <br />
-        with Fumadocs
+      <h2 className="bg-gradient-to-b from-foreground to-foreground/40 bg-clip-text text-center text-2xl font-semibold text-transparent md:text-4xl">
+        Build docs 100x faster and easier
+        <p className="max-md:hidden">with Fumadocs</p>
       </h2>
-      <p className="mt-4 text-foreground/50">
-        Fumadocs offers a complete toolchain to maintain your docs.
+      <p className="mt-4 text-center text-foreground/50">
+        Fumadocs offers a complete toolchain to build and maintain your docs.
       </p>
-      <Accordions
-        type="single"
-        className="mt-8 max-w-[400px] border-foreground/10 bg-card/50 backdrop-blur-lg"
-      >
-        <Accordion className="text-sm" title="Design System & Tailwind CSS">
-          <p>
-            Using our Tailwind CSS plugin, you can share the same design system
-            cross the docs and your app.
-          </p>
-          <Link
-            href="/docs/ui/theme"
-            className={cn(
-              buttonVariants({ className: 'mt-4', variant: 'outline' }),
-            )}
-          >
-            See Themes
-          </Link>
-        </Accordion>
-        <Accordion className="text-sm" title="Full-text Search">
-          <p>
-            Implementing search is difficult. Fumadocs offers native support for
-            Flexsearch and Algolia Search, it is as simple as plugging a route
-            handler.
-          </p>
-          <Link
-            href="/docs/headless/search"
-            className={cn(
-              buttonVariants({ className: 'mt-4', variant: 'outline' }),
-            )}
-          >
-            See Search
-          </Link>
-        </Accordion>
-        <Accordion className="text-sm" title="Other Search Solutions">
-          <p>
-            Fumadocs offers utilities to parse document into search indexes. You
-            can integrate with different search solutions seamlessly.
-          </p>
-          <p className="mt-4 text-muted-foreground">
-            In addition, you can plug your own search modal to allow full
-            control over the search UI.
-          </p>
-          <Link
-            href="/docs/headless/mdx/structure"
-            className={cn(
-              buttonVariants({ className: 'mt-4', variant: 'outline' }),
-            )}
-          >
-            See Plugin
-          </Link>
-        </Accordion>
-        <Accordion className="text-sm" title="Generate docs from TypeScript">
-          <p>
-            Fumadocs has a smart Type Table component that renders the
-            properties of interface/type automatically, powered by the
-            TypeScript Compiler API.
-          </p>
-          <Link
-            href="/docs/ui/typescript"
-            className={cn(
-              buttonVariants({ className: 'mt-4', variant: 'outline' }),
-            )}
-          >
-            TypeScript Integration
-          </Link>
-        </Accordion>
-        <Accordion className="text-sm" title="Generate docs from OpenAPI">
-          <p>
-            Fumadocs offers built-in OpenAPI playground and docs generator. You
-            can also try{' '}
-            <a
-              href="https://docs.scalar.com/swagger-editor"
-              rel="noreferrer noopener"
-            >
-              Scalar
-            </a>
-            , a beautiful alternative to Fumadocs OpenAPI.
-          </p>
-          <Link
-            href="/docs/ui/openapi"
-            className={cn(
-              buttonVariants({ className: 'mt-4', variant: 'outline' }),
-            )}
-          >
-            OpenAPI Integration
-          </Link>
-        </Accordion>
-        <Accordion className="text-sm" title="Interactive Examples">
-          <p>
-            Fumadocs offers different useful components, like Files and Zoomable
-            Image.
-          </p>
+      <WhyInteractive
+        typeTable={
+          <AutoTypeTable
+            name="MyType"
+            type={`
+export interface MyType {
+  /**
+  * The name of player
+  * @defaultValue 'hello'
+  */
+  name: string
 
-          <p className="mt-4">
-            With the magic of React Server Component and App Router, you can
-            have server component inside MDX documents, and import client
-            components from MDX files.
-          </p>
-        </Accordion>
-      </Accordions>
-      <div
-        className="absolute bottom-8 right-12 z-[-1] grid origin-center grid-cols-2 gap-4 rounded-lg border border-foreground/20 lg:max-w-[50%]"
-        style={{
-          backgroundImage:
-            'linear-gradient(hsl(var(--foreground)/.1) 1px, transparent 1px), linear-gradient(to right, hsl(var(--foreground)/.1) 1px, transparent 1px)',
-          backgroundSize: '14px 14px',
-          transform: 'rotate3d(1,0,0,40deg)',
-        }}
-      >
-        <WhyCard>
-          <h3 className="text-lg">Full-text Search</h3>
-        </WhyCard>
-        <WhyCard>
-          <h3 className="text-lg">Docs Automation</h3>
-        </WhyCard>
-        <WhyCard>
-          <h3 className="text-lg">Interactive Examples</h3>
-        </WhyCard>
-        <WhyCard>
-          <h3 className="text-lg">Custom Content Source</h3>
-        </WhyCard>
-      </div>
+  /**
+  * There's a codeblock:
+  * \`\`\`ts
+  * console.log('hello world')
+  * \`\`\`
+  */
+  code: string
+}`}
+          />
+        }
+        codeblockSearchRouter={
+          <CodeBlock
+            lang="ts"
+            code={`import { source } from '@/lib/source';
+import { createFromSource } from 'fumadocs-core/search/server';
+ 
+export const { GET } = createFromSource(source);`}
+          />
+        }
+        codeblockTheme={
+          <CodeBlock
+            lang="ts"
+            code={`import { createPreset } from 'fumadocs-ui/tailwind-plugin';
+ 
+/** @type {import('tailwindcss').Config} */
+export default {
+  darkMode: 'class',
+  presets: [createPreset()],
+  content: [
+    './node_modules/fumadocs-ui/dist/**/*.js',
+    './components/**/*.{ts,tsx}',
+    './app/**/*.{ts,tsx}',
+    './content/**/*.mdx',
+  ],
+};`}
+          />
+        }
+        codeblockInteractive={
+          <CodeBlock
+            lang="tsx"
+            code={`import { File, Folder, Files } from 'fumadocs-ui/components/files';
+ 
+<Files>
+  <Folder name="app" defaultOpen>
+    <File name="layout.tsx" />
+    <File name="page.tsx" />
+    <File name="global.css" />
+  </Folder>
+  <File name="package.json" />
+</Files>`}
+          />
+        }
+        codeblockMdx={
+          <CodeBlock
+            lang="tsx"
+            code={`import { db } from '@/server/db';
+
+export function ProductTable() {
+  const products = db.getProducts()
+    
+  return (
+    <ul>
+      {products.map(product => <li key={product.key}>{product.name}</li>)}
+    </ul>
+  );
+}
+
+## Products
+
+<ProductTable />`}
+          />
+        }
+      />
     </div>
   );
 }
@@ -527,18 +454,19 @@ function Highlight({
 
 function Hero(): React.ReactElement {
   return (
-    <div className="container relative z-[2] flex flex-col items-center overflow-hidden border-x border-t bg-fd-background px-6 pt-12 text-center md:pt-20 [.uwu_&]:hidden">
-      <h1 className="mb-6 text-4xl font-semibold md:text-5xl">
-        Build Your Docs.
+    <div className="container relative z-[2] flex flex-col overflow-hidden border-x border-t bg-fd-background px-6 pt-12 max-md:text-center md:px-12 md:pt-16 [.uwu_&]:hidden">
+      <h1 className="mb-8 text-4xl font-medium md:hidden">Build Your Docs</h1>
+      <h1 className="mb-8 max-w-[600px] text-4xl font-medium max-md:hidden">
+        Build excellent documentation site with less effort
       </h1>
-      <p className="mb-6 h-fit p-2 text-fd-muted-foreground md:max-w-[80%] md:text-xl">
-        Fumadocs is the documentation framework with{' '}
-        <b className="font-medium text-fd-foreground">
-          excellent UI and user experience
-        </b>
-        , powered by Next.js App Router. Designed to be flexible and fast.
+      <p className="mb-8 text-fd-muted-foreground md:max-w-[80%] md:text-xl">
+        Fumadocs is a <span className="text-fd-foreground">beautiful</span>{' '}
+        documentation framework with{' '}
+        <span className="text-fd-foreground">a complete toolchain</span>,
+        powered by <span className="text-foreground">Next.js App Router</span>.
+        Designed to be flexible and fast.
       </p>
-      <div className="inline-flex items-center gap-3">
+      <div className="inline-flex items-center gap-3 max-md:mx-auto">
         <Link
           href="/docs/ui"
           className={cn(
@@ -560,53 +488,77 @@ function Hero(): React.ReactElement {
           Open Demo
         </a>
       </div>
-      <svg
-        viewBox="0 0 500 500"
-        className="mb-[-150px] mt-16 size-[300px] duration-1000 animate-in slide-in-from-bottom-[500px] dark:invert md:mb-[-250px] md:size-[500px]"
-      >
-        <defs>
-          <filter id="noiseFilter">
-            <feTurbulence
-              type="fractalNoise"
-              baseFrequency="0.6"
-              numOctaves="1"
-              seed="15"
-              result="turbulence"
-            />
-            <feComposite in="SourceGraphic" in2="turbulence" operator="in" />
-            <feComposite in2="SourceGraphic" operator="lighter" />
-          </filter>
-          <radialGradient
-            id="Gradient1"
-            cx="50%"
-            cy="50%"
-            r="80%"
-            fx="10%"
-            fy="10%"
-          >
-            <stop stopColor="white" offset="35%" />
-            <stop stopColor="black" offset="100%" />
-          </radialGradient>
-        </defs>
-        <circle
-          cx="250"
-          cy="250"
-          r="250"
-          fill="url(#Gradient1)"
-          filter="url(#noiseFilter)"
-        />
-      </svg>
+      <Image
+        src={Img}
+        alt="preview"
+        className="mb-[-250px] mt-8 min-w-[800px] select-none duration-1000 animate-in fade-in slide-in-from-bottom-12 md:mb-[-370px] md:min-w-[1100px]"
+        priority
+      />
       <div
         className="absolute inset-0 z-[-1]"
         style={{
           backgroundImage: [
-            'radial-gradient(ellipse at top, transparent 60%, hsl(var(--primary) / 0.2))',
+            'radial-gradient(ellipse at top, transparent 60%, hsla(250,90%,90%,0.2))',
             'linear-gradient(to bottom, transparent 30%, hsl(var(--primary) / 0.2))',
             'linear-gradient(to bottom, hsl(var(--background)) 40%, transparent)',
             'repeating-linear-gradient(45deg, transparent,transparent 60px, hsl(var(--primary)) 61px, transparent 62px)',
           ].join(', '),
         }}
       />
+    </div>
+  );
+}
+
+function Feedback(): React.ReactElement {
+  return (
+    <div className="relative flex flex-col items-center overflow-hidden border-x border-t px-6 py-8 md:py-16">
+      <div
+        className="absolute inset-x-0 bottom-0 z-[-1] h-24 opacity-30 duration-1000 animate-in fade-in"
+        style={{
+          maskImage: 'linear-gradient(to bottom,transparent,white)',
+          backgroundImage:
+            'linear-gradient(to right, #4ebfff, transparent, #e92a67)',
+        }}
+      />
+      <p className="text-center font-medium text-muted-foreground">
+        Trusted by awesome teams and developers
+      </p>
+
+      <div className="mt-6 rounded-xl border bg-gradient-to-b from-secondary p-4 shadow-lg">
+        <p className="text-sm font-medium">
+          {`"A gorgeous documentation framework that composes beautifully into the
+          App Router."`}
+        </p>
+        <div className="mt-4 flex flex-row items-center gap-2">
+          <Image
+            src="https://avatars.githubusercontent.com/u/35677084"
+            alt="avatar"
+            width="32"
+            height="32"
+            className="size-8 rounded-full"
+          />
+          <div>
+            <a
+              href="https://shew.dev"
+              rel="noreferrer noopener"
+              className="text-sm font-medium"
+            >
+              Anthony Shew
+            </a>
+            <p className="text-xs text-fd-muted-foreground">
+              Turbo DX at Vercel
+            </p>
+          </div>
+          <Link
+            href="/showcase"
+            className={cn(
+              buttonVariants({ variant: 'outline', className: 'ml-auto' }),
+            )}
+          >
+            Showcase
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }
@@ -682,9 +634,24 @@ function Contributing(): React.ReactElement {
       <h2 className="mb-4 text-xl font-semibold sm:text-2xl">
         Made Possible by You.
       </h2>
-      <p className="mb-8 text-fd-muted-foreground">
+      <p className="mb-4 text-fd-muted-foreground">
         Fumadocs is 100% powered by passion and open source community.
       </p>
+      <div className="mb-8 flex flex-row items-center gap-2">
+        <Link
+          href="/sponsors"
+          className={cn(buttonVariants({ variant: 'outline' }))}
+        >
+          Sponsors
+        </Link>
+        <a
+          href="https://github.com/fuma-nama/fumadocs/graphs/contributors"
+          rel="noreferrer noopener"
+          className={cn(buttonVariants({ variant: 'ghost' }))}
+        >
+          Contributors
+        </a>
+      </div>
       <ContributorCounter repoOwner="fuma-nama" repoName="fumadocs" />
     </div>
   );
@@ -754,23 +721,24 @@ function Features(): React.ReactElement {
         <Search />
       </Feature>
       <Feature
-        icon={MessageCircleIcon}
-        subheading="Feedback"
-        heading="Loved by developers"
-        description="Fumadocs is trusted by many awesome developers, and we are making it better."
+        icon={Terminal}
+        subheading="Fumadocs CLI"
+        heading="The Shadcn UI for docs"
+        description="Fumadocs CLI creates interactive components for your docs, offering a rich experience to your users."
       >
-        <Link
-          href="/showcase"
-          className={cn(
-            buttonVariants({ variant: 'outline', className: 'mt-4' }),
-          )}
-        >
-          Showcase
-        </Link>
-
-        <div className="mt-8">
-          <Previews />
-        </div>
+        <CodeBlock
+          code="npx fumadocs add files"
+          lang="bash"
+          wrapper={{
+            title: 'Terminal',
+            allowCopy: false,
+          }}
+        />
+        <pre className="grid grid-cols-1 rounded-lg border bg-card p-4 text-xs leading-loose">
+          <code>Installing Files component...</code>
+          <code className="text-muted-foreground">{`-> ./components/files.tsx`}</code>
+          <code className="text-green-500">Successful</code>
+        </pre>
       </Feature>
       <Feature
         icon={CpuIcon}

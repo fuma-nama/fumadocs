@@ -12,24 +12,84 @@ The layout of documentation pages, it includes a sidebar and [navbar](/docs/ui/b
 Pass your page tree to the component.
 
 ```jsx
-import { DocsLayout } from 'fumadocs-ui/layout';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { baseOptions } from '@/app/layout.config';
 
 export default function Layout({ children }) {
-  return <DocsLayout tree={tree}>{children}</DocsLayout>;
+  return (
+    <DocsLayout {...baseOptions} tree={tree}>
+      {children}
+    </DocsLayout>
+  );
 }
 ```
 
-### Sidebar
+## Sidebar
 
 Provide elements to navigate between pages.
 
-```tsx
-import { DocsLayout } from 'fumadocs-ui/layout';
+```tsx title="layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 
-<DocsLayout sidebar={{ footer: <ShareButton /> }} />;
+<DocsLayout
+  sidebar={
+    {
+      // options
+    }
+  }
+/>;
 ```
 
-#### Disable Prefetching
+### Sidebar Tabs
+
+Add a navigation component to switch between root folders (Enabled by default).
+You can add items from the page tree (see [Root Folder](/docs/ui/page-conventions#multiple-page-trees)).
+
+<Callout title='Good to know'>
+
+You can also use [Root Toggle](/docs/ui/components/root-toggle) component.
+
+</Callout>
+
+#### Disable Tabs
+
+```tsx
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+
+<DocsLayout sidebar={{ tabs: false }} />;
+```
+
+#### Add Description
+
+Add `description` to the meta file of root folder.
+
+```json title="meta.json"
+{
+  "root": true,
+  "description": "The description of root folder"
+}
+```
+
+#### Decoration
+
+Change the icon/styles of tabs.
+
+```tsx
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+
+<DocsLayout
+  sidebar={{
+    tabs: {
+      transform: (option, node) => ({
+        ...option,
+        icon: 'my icon',
+      }),
+    },
+  }}
+/>;
+```
+
+### Disable Prefetching
 
 By default, it uses the Next.js Link component with prefetch enabled.
 When the link component appears into the browser viewport, the content (RSC payload) will be lazy loaded.
@@ -41,12 +101,12 @@ It can also hit the limits of some other hosting platforms.
 You can disable prefetching to reduce the amount of RSC requests.
 
 ```tsx
-import { DocsLayout } from 'fumadocs-ui/layout';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 
 <DocsLayout sidebar={{ prefetch: false }} />;
 ```
 
-#### Disable Sidebar from Pages
+### Disable Sidebar from Pages
 
 This is not supported.
 Due to the limitations of App Router, layouts are not re-rendered when navigating between pages.
@@ -57,11 +117,6 @@ You can consider:
 1. Disable sidebar from the entire layout.
 2. Create a [MDX Page](/docs/ui/blocks/page#mdx-page) in a layout that doesn't contain a sidebar.
 
-#### Reference
+### Reference
 
-```json doc-gen:typescript
-{
-  "file": "./content/docs/ui/props.ts",
-  "name": "SidebarProps"
-}
-```
+<AutoTypeTable path="./content/docs/ui/props.ts" name="SidebarProps" />

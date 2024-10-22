@@ -1,6 +1,7 @@
 import * as path from 'node:path';
 import { mkdir, writeFile, readFile } from 'node:fs/promises';
 import fg from 'fast-glob';
+import { getProject } from '@/get-project';
 import { generateMDX, type GenerateMDXOptions } from './mdx';
 
 export interface GenerateFilesOptions {
@@ -22,6 +23,8 @@ export async function generateFiles(
   options: GenerateFilesOptions,
 ): Promise<void> {
   const files = await fg(options.input, options.globOptions);
+  const project =
+    options.options?.project ?? getProject(options.options?.config);
 
   const produce = files.map(async (file) => {
     const absolutePath = path.resolve(file);
@@ -37,6 +40,7 @@ export async function generateFiles(
     let result = generateMDX(content, {
       basePath: path.dirname(absolutePath),
       ...options.options,
+      project,
     });
 
     if (options.transformOutput) {

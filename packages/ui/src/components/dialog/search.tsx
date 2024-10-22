@@ -1,14 +1,13 @@
 import { FileText, Hash, Loader2, SearchIcon, Text } from 'lucide-react';
-import type { SortedResult } from 'fumadocs-core/search/shared';
+import type { SortedResult } from 'fumadocs-core/server';
 import { useRouter } from 'next/navigation';
 import {
   useMemo,
-  useCallback,
   type ReactNode,
   type HTMLAttributes,
+  type ReactElement,
 } from 'react';
 import { cva } from 'class-variance-authority';
-import * as React from 'react';
 import { useI18n } from '@/contexts/i18n';
 import {
   CommandEmpty,
@@ -57,7 +56,7 @@ export function SearchDialog({
   footer,
   links = [],
   ...props
-}: SearchDialogProps): React.ReactElement {
+}: SearchDialogProps): ReactElement {
   const defaultItems: SortedResult[] = useMemo(
     () =>
       links.map(([name, link]) => ({
@@ -95,7 +94,7 @@ function Search({
   items,
   isLoading,
   hideResults = false,
-}: SearchContentProps): React.ReactElement {
+}: SearchContentProps): ReactElement {
   const { text } = useI18n();
   const router = useRouter();
   const { setOpenSearch } = useSearchContext();
@@ -115,9 +114,9 @@ function Search({
       <CommandInput
         value={search}
         onValueChange={onSearchChange}
-        onClose={useCallback(() => {
+        onClose={() => {
           setOpenSearch(false);
-        }, [setOpenSearch])}
+        }}
         placeholder={text.search}
       >
         <div className="relative size-4">
@@ -171,12 +170,13 @@ const itemVariants = cva(
 
 export interface TagItem {
   name: string;
-  value: string;
+  value: string | undefined;
 }
 
 export interface TagsListProps extends HTMLAttributes<HTMLDivElement> {
   tag?: string;
-  onTagChange: (tag: string) => void;
+  onTagChange: (tag: string | undefined) => void;
+  allowClear?: boolean;
 
   items: TagItem[];
 }
@@ -185,6 +185,7 @@ export function TagsList({
   tag,
   onTagChange,
   items,
+  allowClear,
   ...props
 }: TagsListProps): ReactNode {
   return (
@@ -198,7 +199,11 @@ export function TagsList({
           key={item.value}
           className={cn(itemVariants({ active: tag === item.value }))}
           onClick={() => {
-            onTagChange(item.value);
+            if (tag === item.value && allowClear) {
+              onTagChange(undefined);
+            } else {
+              onTagChange(item.value);
+            }
           }}
           tabIndex={-1}
         >

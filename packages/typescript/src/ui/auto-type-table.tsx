@@ -1,48 +1,135 @@
+/// <reference types="react/experimental" />
+import fs from 'node:fs/promises';
 import { TypeTable } from 'fumadocs-ui/components/type-table';
 import { type Jsx, toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import * as runtime from 'react/jsx-runtime';
+import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { renderMarkdownToHast } from '@/markdown';
-import { type GenerateOptions, generateDocumentation } from '../generate/base';
+import {
+  generateDocumentation,
+  type GenerateDocumentationOptions,
+} from '@/generate/base';
 import 'server-only';
+import { getProject } from '@/get-project';
+
+export interface AutoTypeTableProps {
+  /**
+   * The path to source TypeScript file.
+   */
+  path?: string;
+
+  /**
+   * Exported type name to generate from.
+   */
+  name?: string;
+
+  /**
+   * Set the type to generate from.
+   *
+   * When used with `name`, it generates the type with `name` as export name.
+   *
+   * ```ts
+   * export const myName = MyType;
+   * ```
+   *
+   * When `type` contains multiple lines, `export const` is not added.
+   * You need to export it manually, and specify the type name with `name`.
+   *
+   * ```tsx
+   * <AutoTypeTable
+   *   path="./file.ts"
+   *   type={`import { ReactNode } from "react"
+   *   export const MyName = ReactNode`}
+   *   name="MyName"
+   * />
+   * ```
+   */
+  type?: string;
+
+  options?: GenerateDocumentationOptions;
+}
+
+export function createTypeTable(options: GenerateDocumentationOptions = {}): {
+  AutoTypeTable: (
+    props: Omit<AutoTypeTableProps, 'options'>,
+  ) => React.ReactNode;
+} {
+  const project = options.project ?? getProject(options.config);
+
+  return {
+    AutoTypeTable(props) {
+      return <AutoTypeTable {...props} options={{ ...options, project }} />;
+    },
+  };
+}
 
 /**
  * **Server Component Only**
  *
  * Display properties in an exported interface via Type Table
  */
-export function AutoTypeTable({
+export async function AutoTypeTable({
   path,
   name,
-  options,
-}: {
-  path: string;
-  name: string;
-  options?: GenerateOptions;
-}): React.ReactElement {
-  const output = generateDocumentation(path, name, options);
+  type,
+  options = {},
+}: AutoTypeTableProps): Promise<React.ReactElement> {
+  let typeName = name;
+  let content = '';
 
-  if (!output) throw new Error(`${name} in ${path} doesn't exist`);
+  if (path) {
+    content = await fs.readFile(path).then((res) => res.toString());
+  }
+
+  if (type && type.split('\n').length > 1) {
+    content += `\n${type}`;
+  } else if (type) {
+    typeName ??= '$Fumadocs';
+    content += `\nexport type ${typeName} = ${type}`;
+  }
+
+  const output = generateDocumentation(
+    path ?? 'temp.ts',
+    typeName,
+    content,
+    options,
+  );
+
+  if (name && output.length === 0)
+    throw new Error(`${name} in ${path ?? 'empty file'} doesn't exist`);
 
   return (
-    <TypeTable
-      type={Object.fromEntries(
-        output.entries.map((entry) => [
-          entry.name,
-          {
-            type: entry.type,
-            description: renderMarkdown(entry.description),
-            default: entry.tags.default || entry.tags.defaultValue,
-          },
-        ]),
-      )}
-    />
+    <>
+      {output.map(async (item) => {
+        const entries = item.entries.map(
+          async (entry) =>
+            [
+              entry.name,
+              {
+                type: entry.type,
+                description: await renderMarkdown(entry.description),
+                default: entry.tags.default || entry.tags.defaultValue,
+              },
+            ] as const,
+        );
+
+        return (
+          <TypeTable
+            key={item.name}
+            type={Object.fromEntries(await Promise.all(entries))}
+          />
+        );
+      })}
+    </>
   );
 }
 
-function renderMarkdown(md: string): React.ReactElement {
-  return toJsxRuntime(renderMarkdownToHast(md), {
+async function renderMarkdown(md: string): Promise<React.ReactElement> {
+  return toJsxRuntime(await renderMarkdownToHast(md), {
     Fragment: runtime.Fragment,
     jsx: runtime.jsx as Jsx,
     jsxs: runtime.jsxs as Jsx,
+    // @ts-expect-error -- mdx components
+    components: { ...defaultMdxComponents, img: undefined },
   });
 }

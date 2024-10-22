@@ -16,7 +16,7 @@ export default defineConfig({
 ```
 
 During a production build (`next build`), Fumadocs MDX will output a manifest file in `.source/manifest.json`.
-You can use it to set up search indexes, like configuring Algolia Search.
+You can use it to collect build information.
 
 ### What is It?
 
@@ -41,48 +41,3 @@ const manifest = JSON.parse(
   readFileSync('.source/manifest.json').toString(),
 ) as Manifest;
 ```
-
-### Example
-
-To integrate with Algolia Search:
-
-```ts title="update-indexes.ts"
-import algosearch from 'algoliasearch';
-import { sync } from 'fumadocs-core/search-algolia/server';
-import type { Manifest } from 'fumadocs-mdx';
-import { createGetUrl, getSlugs, parseFilePath } from 'fumadocs-core/source';
-import path from 'node:path';
-
-const getUrl = createGetUrl('/docs'); // we need to estimate the URL of pages
-
-export async function updateSearchIndexes(manifest: Manifest): Promise<void> {
-  const client = algosearch(
-    process.env.NEXT_PUBLIC_ALGOLIA_APP_ID,
-    process.env.ALGOLIA_API_KEY,
-  );
-
-  await sync(client, {
-    document: process.env.NEXT_PUBLIC_ALGOLIA_INDEX ?? 'document',
-    documents: manifest.files
-      .filter((file) => file.collection === 'docs') // the collection name
-      .map((docs) => {
-        const url = getUrl(
-          getSlugs(parseFilePath(path.relative('content/docs', docs.path))),
-        );
-
-        if (!docs.data.structuredData)
-          throw new Error('`structuredData` is required');
-
-        return {
-          _id: docs.path,
-          title: docs.data.frontmatter.title as string,
-          description: docs.data.frontmatter.description as string,
-          url,
-          structured: docs.data.structuredData,
-        };
-      }),
-  });
-}
-```
-
-> `frontmatter` is untyped. With type check enabled, you need to cast them to the correct type.

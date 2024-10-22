@@ -1,8 +1,7 @@
-import { type z } from 'zod';
+import { type AnyZodObject, type z } from 'zod';
 import type { MDXProps } from 'mdx/types';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { TableOfContents } from 'fumadocs-core/server';
-import { type Collections } from '@/config/define';
 import { type DefaultMDXOptions } from '@/utils/mdx-options';
 
 export interface GlobalConfig {
@@ -25,25 +24,23 @@ export interface GlobalConfig {
   generateManifest?: boolean;
 }
 
-export type InferSchema<C> =
-  C extends Collections<infer Schema, any, any> ? Schema : never;
+export type InferSchema<CollectionOut> = CollectionOut extends {
+  _type: {
+    schema: infer T;
+  };
+}
+  ? T
+  : never;
 
-export type InferSchemaType<C> = z.output<InferSchema<C>>;
-
-export type InferCollectionsProps<C> = SupportedTypes[C extends Collections<
-  any,
-  infer Type,
-  any
->
-  ? Type
-  : never];
+export type InferSchemaType<C> =
+  InferSchema<C> extends AnyZodObject ? z.output<InferSchema<C>> : never;
 
 export interface FileInfo {
   path: string;
   absolutePath: string;
 }
 
-interface MarkdownProps {
+export interface MarkdownProps {
   body: (props: MDXProps) => React.ReactElement;
   structuredData: StructuredData;
   toc: TableOfContents;
@@ -55,29 +52,25 @@ interface MarkdownProps {
   lastModified?: Date;
 }
 
-export interface SupportedTypes {
-  // eslint-disable-next-line @typescript-eslint/ban-types -- empty object
-  meta: {};
-  doc: MarkdownProps;
-}
-
-export type SupportedType = keyof SupportedTypes;
-
-export type CollectionEntry<Type extends SupportedType, Output> = Omit<
-  SupportedTypes[Type],
-  keyof Output
-> &
-  Output &
-  BaseCollectionEntry;
+export type CollectionEntry<
+  CollectionOut extends {
+    _type: {
+      runtime: unknown;
+    };
+  },
+> = CollectionOut['_type']['runtime'];
 
 export interface BaseCollectionEntry {
   _file: FileInfo;
 }
 
-export type EntryFromCollection<C> =
-  C extends Collections<any, any, infer Output> ? Output : never;
-
 /**
  * Get output type of collections
  */
-export type GetOutput<C> = EntryFromCollection<C>[];
+export type GetOutput<
+  C extends {
+    _type: {
+      runtime: unknown;
+    };
+  },
+> = CollectionEntry<C>[];

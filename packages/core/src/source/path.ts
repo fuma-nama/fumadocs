@@ -1,6 +1,9 @@
 import slash from '@/utils/slash';
 
 export interface FileInfo {
+  /**
+   * The locale extension of file
+   */
   locale?: string;
 
   /**

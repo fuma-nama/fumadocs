@@ -13,6 +13,10 @@ export interface Item {
   url: string;
   external?: boolean;
   icon?: ReactElement;
+
+  $ref?: {
+    file: string;
+  };
 }
 
 export interface Separator {
@@ -21,13 +25,13 @@ export interface Separator {
 }
 
 export interface Folder {
-  /**
-   * Optional id to be attached to folders
-   */
-  id?: string;
+  $ref?: {
+    metaFile?: string;
+  };
 
   type: 'folder';
   name: ReactNode;
+  description?: ReactNode;
   root?: boolean;
   defaultOpen?: boolean;
   index?: Item;

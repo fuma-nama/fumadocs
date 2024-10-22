@@ -52,7 +52,6 @@ describe('Generate documents', () => {
   test('Generate Files', async () => {
     vi.mock('node:fs/promises', async (importOriginal) => {
       return {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- mock
         ...(await importOriginal<typeof import('node:fs/promises')>()),
         mkdir: vi.fn().mockImplementation(() => {
           // do nothing

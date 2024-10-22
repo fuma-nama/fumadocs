@@ -1,9 +1,10 @@
 import path from 'node:path';
-import type { Root, RootContent } from 'mdast';
+import type { Root } from 'mdast';
 import type { Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
 import sizeOf from 'image-size';
 import { type ISizeCalculationResult } from 'image-size/dist/types/interface';
+import type { MdxjsEsm } from 'mdast-util-mdxjs-esm';
 import slash from '@/utils/slash';
 
 const VALID_BLUR_EXT = ['.jpeg', '.png', '.webp', '.avif', '.jpg'];
@@ -185,7 +186,7 @@ export function remarkImage({
                 ],
               },
             },
-          }) as RootContent,
+          }) as MdxjsEsm,
       );
 
       tree.children.unshift(...imports);

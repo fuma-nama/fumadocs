@@ -21,20 +21,17 @@ export const typography = {
     '--tw-prose-pre-code': false,
     fontSize: '16px',
     maxWidth: 'none',
-    a: {
+    a: false,
+    'a:hover': false,
+    'a:not([data-card])': {
+      color: 'var(--tw-prose-links)',
       transition: 'opacity 0.3s',
       fontWeight: '400',
       textDecoration: 'underline',
       textUnderlineOffset: '2px',
       textDecorationColor: `theme('colors.fd-primary.DEFAULT')`,
     },
-    'h1 a,h2 a,h3 a,h4 a,h5 a,h6 a': {
-      // disable anchor styles on headings
-      textDecoration: 'inherit',
-      font: 'inherit',
-      color: 'inherit',
-    },
-    'a:hover': {
+    'a:not([data-card]):hover': {
       opacity: '80%',
     },
     table: {
@@ -42,6 +39,9 @@ export const typography = {
     },
     'thead th': {
       textAlign: 'start',
+    },
+    h2: {
+      fontWeight: '600',
     },
     code: {
       padding: '3px',

@@ -1,10 +1,15 @@
 'use client';
-import { type ButtonHTMLAttributes, type HTMLAttributes } from 'react';
+import {
+  type ButtonHTMLAttributes,
+  type HTMLAttributes,
+  type ReactNode,
+} from 'react';
 import { Check, Copy } from 'lucide-react';
 import { cn, useCopyButton, buttonVariants } from 'fumadocs-ui/components/api';
 import dynamic from 'next/dynamic';
 import { ApiProvider, useApiContext } from '@/ui/contexts/api';
 import { type RootProps } from '@/render/renderer';
+import { RenderContext } from '@/types';
 
 export const APIPlayground = dynamic(() =>
   import('./playground').then((mod) => mod.APIPlayground),
@@ -14,8 +19,11 @@ export function Root({
   children,
   baseUrl,
   className,
+  shikiOptions,
   ...props
-}: RootProps & HTMLAttributes<HTMLDivElement>): React.ReactElement {
+}: RootProps & {
+  shikiOptions: RenderContext['shikiOptions'];
+} & HTMLAttributes<HTMLDivElement>): ReactNode {
   return (
     <div
       className={cn(
@@ -24,7 +32,9 @@ export function Root({
       )}
       {...props}
     >
-      <ApiProvider defaultBaseUrl={baseUrl}>{children}</ApiProvider>
+      <ApiProvider shikiOptions={shikiOptions} defaultBaseUrl={baseUrl}>
+        {children}
+      </ApiProvider>
     </div>
   );
 }
@@ -35,7 +45,7 @@ export function CopyRouteButton({
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & {
   route: string;
-}): React.ReactElement {
+}): ReactNode {
   const { baseUrl } = useApiContext();
 
   const [checked, onCopy] = useCopyButton(() => {

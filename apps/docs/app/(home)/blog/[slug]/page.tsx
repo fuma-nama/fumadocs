@@ -8,15 +8,10 @@ import { createMetadata } from '@/utils/metadata';
 import { buttonVariants } from '@/components/ui/button';
 import { Control } from '@/app/(home)/blog/[slug]/page.client';
 
-interface Param {
-  slug: string;
-}
-
-export default function Page({
-  params,
-}: {
-  params: Param;
-}): React.ReactElement {
+export default async function Page(props: {
+  params: Promise<{ slug: string }>;
+}): Promise<React.ReactElement> {
+  const params = await props.params;
   const page = blog.getPage([params.slug]);
 
   if (!page) notFound();
@@ -46,12 +41,12 @@ export default function Page({
           Back
         </Link>
       </div>
-      <article className="container grid grid-cols-1 px-0 py-8 lg:grid-cols-[2fr_1fr] lg:px-4">
-        <div className="prose p-4">
+      <article className="container flex flex-col px-0 py-8 lg:flex-row lg:px-4">
+        <div className="prose min-w-0 flex-1 p-4">
           <InlineTOC items={page.data.toc} />
           <page.data.body components={defaultMdxComponents} />
         </div>
-        <div className="flex flex-col gap-4 border-l p-4 text-sm">
+        <div className="flex flex-col gap-4 border-l p-4 text-sm lg:w-[250px]">
           <div>
             <p className="mb-1 text-fd-muted-foreground">Written by</p>
             <p className="font-medium">{page.data.author}</p>
@@ -69,7 +64,10 @@ export default function Page({
   );
 }
 
-export function generateMetadata({ params }: { params: Param }): Metadata {
+export async function generateMetadata(props: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const params = await props.params;
   const page = blog.getPage([params.slug]);
 
   if (!page) notFound();
@@ -81,7 +79,7 @@ export function generateMetadata({ params }: { params: Param }): Metadata {
   });
 }
 
-export function generateStaticParams(): Param[] {
+export function generateStaticParams(): { slug: string }[] {
   return blog.getPages().map((page) => ({
     slug: page.slugs[0],
   }));

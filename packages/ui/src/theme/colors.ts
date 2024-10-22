@@ -313,11 +313,13 @@ const vitepress: Preset = {
         backgroundColor: 'theme(colors.fd-primary.DEFAULT / 10%)',
       },
     '#nd-sidebar': {
-      border: 'none',
       backgroundColor: 'hsl(240 6% 97%)',
     },
     '.dark #nd-sidebar': {
       backgroundColor: 'hsl(240 4% 9%)',
+    },
+    '#nd-sidebar > div': {
+      borderColor: 'transparent',
     },
     'button[data-search-full]': {
       backgroundColor: 'theme(colors.fd-background)',

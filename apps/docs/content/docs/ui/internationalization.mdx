@@ -2,6 +2,172 @@
 title: Internationalization
 description: Support multiple languages in your documentation
 icon: Globe
-_mdx:
-  mirror: ../headless/internationalization.mdx
 ---
+
+You can setup i18n using Fumadocs CLI or update the configurations manually.
+
+> Read the [Next.js Docs](https://nextjs.org/docs/app/building-your-application/routing/internationalization) to learn more about implementing I18n in Next.js.
+
+## Auto Setup
+
+Initialize i18n with CLI.
+
+```package-install
+npx fumadocs init i18n
+```
+
+## Manual Setup
+
+Define the i18n configurations in a file, we will import it with `@/ilb/i18n` in this guide.
+
+```json doc-gen:file
+{
+  "file": "../../examples/i18n/lib/i18n.ts",
+  "codeblock": {
+    "lang": "ts",
+    "meta": "title=\"lib/i18n.ts\""
+  }
+}
+```
+
+Change your current source configurations.
+
+```ts title="lib/source.ts"
+import { i18n } from '@/lib/i18n';
+import { loader } from 'fumadocs-core/source';
+
+export const source = loader({
+  i18n, // [!code highlight]
+  // other options
+});
+```
+
+Update the usages to your source:
+
+```ts
+import { source } from '@/lib/source';
+
+// get page tree
+source.pageTree[params.lang];
+
+// get page
+source.getPage(params.slug, params.lang);
+
+// get pages
+source.getPages(params.lang);
+```
+
+See [Source API](/docs/headless/source-api) for other usages.
+
+### Middleware
+
+Create a middleware that redirects users to appropriate locale.
+
+```json doc-gen:file
+{
+  "file": "../../examples/i18n/middleware.ts",
+  "codeblock": {
+    "lang": "ts",
+    "meta": "title=\"middleware.ts\""
+  }
+}
+```
+
+See [Middleware](/docs/headless/internationalization#middleware) for customisable options.
+
+### Root Layout
+
+Create a dynamic route `/app/[lang]`, and move all special files from `/app` to
+the folder.
+
+A `I18nProvider` is needed for localization. Wrap the root provider inside your I18n provider.
+
+```tsx
+import { RootProvider } from 'fumadocs-ui/provider';
+import { I18nProvider } from 'fumadocs-ui/i18n';
+
+export default function RootLayout({
+  params,
+  children,
+}: {
+  params: { lang: string };
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang={params.lang}>
+      <body>
+        <I18nProvider locale={params.lang}>
+          <RootProvider>{children}</RootProvider>
+        </I18nProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+### Docs Page
+
+Make sure to update references to `source` and configure Static Site Generation correctly.
+
+```json doc-gen:file
+{
+  "file": "../../examples/i18n/app/[lang]/docs/[[...slug]]/page.tsx",
+  "codeblock": {
+    "lang": "tsx",
+    "meta": "title=\"page.tsx\""
+  }
+}
+```
+
+### Writing Documents
+
+see [Page Conventions](/docs/ui/page-conventions#internationalization) to learn how to organize your documents.
+
+### Search
+
+Configure i18n on your search solution.
+
+You don't need further changes if you're using the `createFromSource` shortcut.
+
+For the built-in Orama search, see [Search I18n](/docs/headless/search/orama#internationalization).
+
+### Adding Translations
+
+We only provide English translation by default, you have to pass your translations to the provider.
+
+```tsx
+import { I18nProvider } from 'fumadocs-ui/i18n';
+
+<I18nProvider
+  locales={[
+    {
+      name: 'English',
+      locale: 'en',
+    },
+    {
+      name: 'Chinese',
+      locale: 'cn',
+    },
+  ]}
+  translations={
+    {
+      cn: {
+        search: 'Translated Content',
+      },
+    }[locale]
+  }
+  // other props
+/>;
+```
+
+### Add Language Switch
+
+To allow users changing their language, enable `i18n` on your layouts.
+
+```tsx title="app/layout.config.tsx" twoslash
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+export const baseOptions: BaseLayoutProps = {
+  i18n: true,
+};
+```

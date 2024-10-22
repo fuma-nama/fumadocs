@@ -1,22 +1,13 @@
 ---
-title: Theming
+title: Themes
 description: Add Theme to Fumadocs UI
-icon: Palette
 ---
 
 import { WidthTrigger } from './theme';
 
 ## Usage
 
-You can import the pre-built stylesheet.
-
-```tsx
-import 'fumadocs-ui/style.css';
-```
-
-> Notice that the stylesheet performs preflight (aka normalization)
-
-For Tailwind CSS projects, use the official Tailwind CSS plugin.
+Initialize Tailwind CSS on your Next.js app, use the official Tailwind CSS plugin:
 
 ```json doc-gen:file
 {
@@ -45,19 +36,46 @@ See [Root Provider](/docs/ui/blocks/root-provider#theme-provider) to learn more.
 
 ### RTL Layout
 
-RTL (Right-to-left) layout is supported. To enable RTL, pass the `dir` prop to body.
+RTL (Right-to-left) layout is supported.
+
+To enable RTL, set the `dir` prop to `rtl` in body and root provider (required for Radix UI).
 
 ```tsx
-<body dir="rtl"></body>
+import { RootProvider } from 'fumadocs-ui/provider';
+import type { ReactNode } from 'react';
+
+export default function RootLayout({
+  children,
+}: {
+  children: ReactNode;
+}): ReactNode {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body dir="rtl">
+        <RootProvider dir="rtl">{children}</RootProvider>
+      </body>
+    </html>
+  );
+}
 ```
 
-Also pass the same prop to root provider to configure Radix UI RTL layout.
+## CSS Variables
 
-```tsx
-import { RootProvider } from '@fumadocs-ui/provider';
+Fumadocs UI provides some CSS variables for customising the layout.
 
-<RootProvider dir="rtl"></RootProvider>;
+### Navbar Height
+
+When the default navbar is replaced, the layout may overlap with your new navbar.
+
+You should set the `--fd-nav-height` variable to the height of your navbar.
+
+```css
+:root {
+  --fd-nav-height: 40px !important;
+}
 ```
+
+> You can use it with CSS media queries.
 
 ### Layout Width
 
@@ -71,22 +89,19 @@ Customise the max width of docs layout with CSS Variables.
 
 <WidthTrigger />
 
-## Themes
+### Colors
 
-The design system was inspired by [Shadcn UI](https://ui.shadcn.com), you can easily customize all the properties using CSS variables.
+The design system was inspired by [Shadcn UI](https://ui.shadcn.com), you can easily customize all colors using CSS variables.
 
 ```css title="global.css"
 :root {
   /* hsl colors */
   /* use whitespace instead of comma */
-  --background: 0 0% 100%;
-  --foreground: 222.2 47.4% 11.2%;
+  --fd-background: 0 0% 100%;
+  --fd-foreground: 222.2 47.4% 11.2%;
 
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-
-  --popover: 0 0% 100%;
-  --popover-foreground: 222.2 47.4% 11.2%;
+  --fd-muted: 210 40% 96.1%;
+  --fd-muted-foreground: 215.4 16.3% 46.9%;
 }
 ```
 
@@ -115,6 +130,30 @@ export default {
 };
 ```
 
+#### `neutral`
+
+![Neutral](/themes/neutral.png)
+
+#### `vitepress`
+
+![Vitepress](/themes/vitepress.png)
+
+#### `dusk`
+
+![Dusk](/themes/dusk.png)
+
+#### `catppuccin`
+
+![Catppuccin](/themes/catppuccin.png)
+
+#### `ocean`
+
+![Ocean](/themes/ocean.png)
+
+#### `purple`
+
+![Purple](/themes/purple.png)
+
 ### Typography
 
 We use the [Tailwind CSS Typography](https://tailwindcss.com/docs/typography-plugin) plugin internally, you can customize it with CSS.
@@ -122,7 +161,9 @@ We use the [Tailwind CSS Typography](https://tailwindcss.com/docs/typography-plu
 The Tailwind CSS plugin overrides the default configuration for the Typography plugin. You can use the `prose` utility directly.
 
 ```tsx
-<div className="prose">...</div>
+<div className="prose">
+  <h1>Good Heading</h1>
+</div>
 ```
 
 ### Colors
@@ -140,23 +181,6 @@ export default {
   presets: [
     createPreset({
       addGlobalColors: true,
-    }),
-  ],
-};
-```
-
-### Layout Width
-
-Customise the max width of docs layout with Tailwind CSS plugin.
-
-```js
-import { createPreset } from 'fumadocs-ui/tailwind-plugin';
-
-/** @type {import('tailwindcss').Config} */
-export default {
-  presets: [
-    createPreset({
-      layoutWidth: '1400px',
     }),
   ],
 };

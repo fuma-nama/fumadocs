@@ -1,4 +1,4 @@
-import Link, { type LinkProps } from 'fumadocs-core/link';
+import Link from 'fumadocs-core/link';
 import type { HTMLAttributes, ReactNode } from 'react';
 import { cn } from '@/utils/cn';
 
@@ -15,11 +15,14 @@ export function Cards(
   );
 }
 
-export type CardProps = {
+export type CardProps = HTMLAttributes<HTMLElement> & {
   icon?: ReactNode;
-  title: string;
-  description?: string;
-} & Omit<LinkProps, 'title'>;
+  title: ReactNode;
+  description?: ReactNode;
+
+  href?: string;
+  external?: boolean;
+};
 
 export function Card({
   icon,
@@ -27,23 +30,32 @@ export function Card({
   description,
   ...props
 }: CardProps): React.ReactElement {
+  const E = props.href ? Link : 'div';
+
   return (
-    <Link
+    <E
       {...props}
+      data-card
       className={cn(
-        'not-prose block rounded-lg border bg-fd-card p-4 text-sm text-fd-card-foreground shadow-md transition-colors hover:bg-fd-accent/80',
+        'block rounded-lg border bg-fd-card p-4 text-fd-card-foreground shadow-md transition-colors',
+        props.href && 'hover:bg-fd-accent/80',
         props.className,
       )}
     >
       {icon ? (
-        <div className="mb-2 w-fit rounded-md border bg-fd-muted p-2 text-fd-muted-foreground [&_svg]:size-4">
+        <div className="not-prose mb-2 w-fit rounded-md border bg-fd-muted p-1.5 text-fd-muted-foreground [&_svg]:size-4">
           {icon}
         </div>
       ) : null}
-      <h3 className="mb-1 font-medium">{title}</h3>
+      <h3 className="not-prose mb-1 text-sm font-medium">{title}</h3>
       {description ? (
-        <p className="text-fd-muted-foreground">{description}</p>
+        <p className="my-0 text-sm text-fd-muted-foreground">{description}</p>
       ) : null}
-    </Link>
+      {props.children ? (
+        <div className="text-sm text-fd-muted-foreground prose-no-margin">
+          {props.children}
+        </div>
+      ) : null}
+    </E>
   );
 }

@@ -1,37 +1,32 @@
-const { resolve } = require('node:path');
+import js from '@eslint/js';
+import tseslint from 'typescript-eslint';
 
-const project = resolve(process.cwd(), 'tsconfig.json');
+export default [
+  {
+    ignores: ['node_modules/', 'dist/'],
+  },
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
+  {
+    rules: {
+      'no-console': 'off',
 
-module.exports = {
-  extends: [
-    '@vercel/style-guide/eslint/node',
-    '@vercel/style-guide/eslint/typescript',
-  ].map(require.resolve),
-  parserOptions: {
-    project,
-  },
-  globals: {
-    React: true,
-    JSX: true,
-  },
-  settings: {
-    'import/resolver': {
-      typescript: {
-        project,
-      },
+      'import/no-extraneous-dependencies': 'off',
+      'import/no-default-export': 'off',
+
+      // handled by typescript eslint
+      'import/default': 'off',
+      'import/export': 'off',
+      'import/namespace': 'off',
+      'import/no-unresolved': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
     },
   },
-  ignorePatterns: ['node_modules/', 'dist/'],
-  rules: {
-    'no-console': 'off',
-
-    'import/no-extraneous-dependencies': 'off',
-    'import/no-default-export': 'off',
-
-    // handled by typescript eslint
-    'import/default': 'off',
-    'import/export': 'off',
-    'import/namespace': 'off',
-    'import/no-unresolved': 'off',
-  },
-};
+];

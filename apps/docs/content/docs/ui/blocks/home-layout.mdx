@@ -11,11 +11,13 @@ Add a [navbar](/docs/ui/blocks/navbar) and search dialog across other pages.
 
 It doesn't contain a sidebar, a page tree is not required.
 
-```jsx
-import { HomeLayout } from 'fumadocs-ui/home-layout';
+```tsx title="/app/(home)/layout.tsx"
+import { HomeLayout } from 'fumadocs-ui/layouts/home';
+import { baseOptions } from '@/app/layout.config';
+import type { ReactNode } from 'react';
 
-export default function Layout({ children }) {
-  return <HomeLayout>{children}</HomeLayout>;
+export default function Layout({ children }: { children: ReactNode }) {
+  return <HomeLayout {...baseOptions}>{children}</HomeLayout>;
 }
 ```
 

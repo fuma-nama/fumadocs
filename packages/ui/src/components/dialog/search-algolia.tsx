@@ -1,12 +1,10 @@
 'use client';
 
 import type { SearchIndex } from 'algoliasearch/lite';
-import {
-  type Options,
-  useAlgoliaSearch,
-} from 'fumadocs-core/search-algolia/client';
+import { useDocsSearch } from 'fumadocs-core/search/client';
 import { type ReactNode, useState } from 'react';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
+import type { SearchOptions } from '@algolia/client-search';
 import {
   SearchDialog,
   type SharedProps,
@@ -16,7 +14,7 @@ import {
 
 export interface AlgoliaSearchDialogProps extends SharedProps {
   index: SearchIndex;
-  searchOptions?: Options;
+  searchOptions?: SearchOptions;
   footer?: ReactNode;
 
   defaultTag?: string;
@@ -28,6 +26,13 @@ export interface AlgoliaSearchDialogProps extends SharedProps {
    * @defaultValue false
    */
   showAlgolia?: boolean;
+
+  /**
+   * Allow to clear tag filters
+   *
+   * @defaultValue false
+   */
+  allowClear?: boolean;
 }
 
 export default function AlgoliaSearchDialog({
@@ -36,19 +41,19 @@ export default function AlgoliaSearchDialog({
   tags,
   defaultTag,
   showAlgolia = false,
+  allowClear = false,
   ...props
 }: AlgoliaSearchDialogProps): React.ReactElement {
   const [tag, setTag] = useState(defaultTag);
-  let filters = searchOptions?.filters;
-
-  if (tag) {
-    filters = filters ? `tag:${tag} AND (${filters})` : `tag:${tag}`;
-  }
-
-  const { search, setSearch, query } = useAlgoliaSearch(index, {
-    ...searchOptions,
-    filters,
-  });
+  const { search, setSearch, query } = useDocsSearch(
+    {
+      type: 'algolia',
+      index,
+      ...searchOptions,
+    },
+    undefined,
+    tag,
+  );
 
   useOnChange(defaultTag, (v) => {
     setTag(v);
@@ -64,7 +69,12 @@ export default function AlgoliaSearchDialog({
       footer={
         tags ? (
           <>
-            <TagsList tag={tag} onTagChange={setTag} items={tags}>
+            <TagsList
+              tag={tag}
+              onTagChange={setTag}
+              items={tags}
+              allowClear={allowClear}
+            >
               {showAlgolia ? <AlgoliaTitle /> : null}
             </TagsList>
             {props.footer}

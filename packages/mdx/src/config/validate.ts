@@ -1,5 +1,8 @@
-import { type LoadedConfig } from '@/config/load';
-import { type Collections } from '@/config/define';
+import {
+  type InternalDocCollection,
+  type InternalMetaCollection,
+  type LoadedConfig,
+} from '@/config/load';
 import { type GlobalConfig } from '@/config/types';
 
 export function validateConfig(
@@ -18,7 +21,10 @@ export function validateConfig(
     }
 
     if (typeof v === 'object' && '_doc' in v && v._doc === 'collections') {
-      out.collections.set(k, v as unknown as Collections);
+      out.collections.set(
+        k,
+        v as unknown as InternalMetaCollection | InternalDocCollection,
+      );
       continue;
     }
 

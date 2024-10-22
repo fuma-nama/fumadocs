@@ -1,19 +1,21 @@
-import type { Root, RootContent } from 'hast';
-import { type RehypeShikiOptions } from '@shikijs/rehype';
+import type { Root } from 'hast';
+import type { RehypeShikiOptions } from '@shikijs/rehype';
 import rehypeShikiFromHighlighter from '@shikijs/rehype/core';
 import {
+  transformerNotationDiff,
   transformerNotationHighlight,
   transformerNotationWordHighlight,
 } from '@shikijs/transformers';
 import type { Processor, Transformer } from 'unified';
 import {
   getSingletonHighlighter,
-  createJavaScriptRegexEngine,
-  createWasmOnigEngine,
   type ShikiTransformer,
-  bundledLanguages,
   type BuiltinTheme,
+  bundledLanguages,
 } from 'shiki';
+import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
+import { createOnigurumaEngine } from 'shiki/engine/oniguruma';
+import { createJavaScriptRegexEngine } from 'shiki/engine/javascript';
 import type { IconOptions, CodeBlockIcon } from './transformer-icon';
 import { transformerIcon } from './transformer-icon';
 
@@ -51,6 +53,7 @@ export const rehypeCodeDefaultOptions: RehypeCodeOptions = {
   transformers: [
     transformerNotationHighlight(),
     transformerNotationWordHighlight(),
+    transformerNotationDiff(),
   ],
   parseMetaString(meta) {
     const map: Record<string, string> = {};
@@ -160,18 +163,19 @@ export function rehypeCode(
   const highlighter = getSingletonHighlighter({
     engine: codeOptions.experimentalJSEngine
       ? createJavaScriptRegexEngine()
-      : createWasmOnigEngine(import('shiki/wasm')),
+      : createOnigurumaEngine(() => import('shiki/wasm')),
     themes: themeItems.filter(Boolean) as BuiltinTheme[],
     langs: codeOptions.langs ?? Object.keys(bundledLanguages),
   });
 
-  return async (tree, file) => {
-    const transformer = rehypeShikiFromHighlighter(
-      await highlighter,
-      codeOptions,
-    );
+  const transformer = highlighter.then((instance) =>
+    rehypeShikiFromHighlighter(instance, codeOptions),
+  );
 
-    await transformer(tree, file, () => {
+  return async (tree, file) => {
+    await (
+      await transformer
+    )(tree, file, () => {
       // nothing
     });
   };
@@ -180,6 +184,7 @@ export function rehypeCode(
 function transformerTab(): ShikiTransformer {
   return {
     name: 'rehype-code:tab',
+    // @ts-expect-error -- types not compatible with MDX
     root(root) {
       const meta = this.options.meta;
       if (typeof meta?.tab !== 'string') return root;
@@ -197,11 +202,11 @@ function transformerTab(): ShikiTransformer {
               { type: 'mdxJsxAttribute', name: 'value', value: meta.tab },
             ],
             children: root.children,
-          } as RootContent,
+          } as MdxJsxFlowElement,
         ],
-      } as ReturnType<NonNullable<ShikiTransformer['root']>>;
+      };
     },
   };
 }
 
-export { type CodeBlockIcon, transformerIcon };
+export { type CodeBlockIcon, transformerIcon, transformerTab };

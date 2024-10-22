@@ -8,9 +8,9 @@ description: Top navigation bar
 The navigation header provides common interactive elements.
 
 ```tsx
-import type { HomeLayoutProps } from 'fumadocs-ui/home-layout';
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 
-export const baseOptions: HomeLayoutProps = {
+export const baseOptions: BaseLayoutProps = {
   githubUrl: 'https://github.com/fuma-nama/fumadocs',
   nav: {
     title: 'My App',
@@ -28,9 +28,9 @@ To make the navbar background transparent, you can configure transparent mode.
 It uses the `none` mode by default.
 
 ```tsx
-import type { HomeLayoutProps } from 'fumadocs-ui/home-layout';
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 
-export const baseOptions: HomeLayoutProps = {
+export const baseOptions: BaseLayoutProps = {
   nav: {
     transparentMode: 'top',
   },
@@ -45,9 +45,4 @@ export const baseOptions: HomeLayoutProps = {
 
 ### Reference
 
-```json doc-gen:typescript
-{
-  "file": "./content/docs/ui/props.ts",
-  "name": "NavbarProps"
-}
-```
+<AutoTypeTable path="./content/docs/ui/props.ts" name="NavbarProps" />

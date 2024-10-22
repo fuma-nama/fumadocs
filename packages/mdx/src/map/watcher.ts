@@ -11,5 +11,6 @@ export function watcher(configPath: string, config: LoadedConfig): FSWatcher {
 
   return watch(deps, {
     ignoreInitial: true,
+    persistent: true,
   });
 }

@@ -50,11 +50,35 @@ stored in `localStorage`, with its id as the key.
 Set a default value by passing `defaultIndex`.
 
 ```mdx
-<Tabs
-  items={['Javascript', 'Rust']}
-  defaultIndex={1}
->...</Tab>
+<Tabs items={['Javascript', 'Rust']} defaultIndex={1}>
+  <Tab value="Javascript">Javascript is weird</Tab>
+  <Tab value="Rust">Rust is fast</Tab>
+</Tabs>
 ```
+
+### Link to Tab
+
+Use HTML `id` attribute to link to a specific tab.
+
+```mdx
+<Tabs items={['Javascript', 'Rust', 'C++']}>
+  <Tab value="Javascript">Javascript is weird</Tab>
+  <Tab value="Rust">Rust is fast</Tab>
+  <Tab id="tab-cpp" value="C++">
+    `Hello World`
+  </Tab>
+</Tabs>
+```
+
+You can add the hash `#tab-cpp` to your URL and reload, the C++ tab will be activated.
+
+<Tabs items={['Javascript', 'Rust', 'C++']}>
+  <Tab value="Javascript">Javascript is weird</Tab>
+  <Tab value="Rust">Rust is fast</Tab>
+  <Tab id="tab-cpp" value="C++">
+    `Hello World`
+  </Tab>
+</Tabs>
 
 ### Advanced
 

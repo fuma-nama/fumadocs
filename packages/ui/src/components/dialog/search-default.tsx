@@ -13,11 +13,9 @@ import {
 
 export interface DefaultSearchDialogProps extends SharedProps {
   /**
-   * Search tag
-   *
-   * @deprecated Use Tags API instead
+   * @defaultValue 'fetch'
    */
-  tag?: string;
+  type?: 'fetch' | 'static';
 
   defaultTag?: string;
   tags?: TagItem[];
@@ -33,6 +31,13 @@ export interface DefaultSearchDialogProps extends SharedProps {
   delayMs?: number;
 
   footer?: ReactNode;
+
+  /**
+   * Allow to clear tag filters
+   *
+   * @defaultValue false
+   */
+  allowClear?: boolean;
 }
 
 export default function DefaultSearchDialog({
@@ -40,11 +45,26 @@ export default function DefaultSearchDialog({
   tags,
   api,
   delayMs,
+  type = 'fetch',
+  allowClear = false,
   ...props
 }: DefaultSearchDialogProps): React.ReactElement {
   const { locale } = useI18n();
   const [tag, setTag] = useState(defaultTag);
-  const { search, setSearch, query } = useDocsSearch(locale, tag, api, delayMs);
+  const { search, setSearch, query } = useDocsSearch(
+    type === 'fetch'
+      ? {
+          type: 'fetch',
+          api,
+        }
+      : {
+          type: 'static',
+          from: api,
+        },
+    locale,
+    tag,
+    delayMs,
+  );
 
   useOnChange(defaultTag, (v) => {
     setTag(v);
@@ -60,7 +80,12 @@ export default function DefaultSearchDialog({
       footer={
         tags ? (
           <>
-            <TagsList tag={tag} onTagChange={setTag} items={tags} />
+            <TagsList
+              tag={tag}
+              onTagChange={setTag}
+              items={tags}
+              allowClear={allowClear}
+            />
             {props.footer}
           </>
         ) : (

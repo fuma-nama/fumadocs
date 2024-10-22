@@ -1,10 +1,11 @@
 import * as path from 'node:path';
-import { type TypescriptConfig, getProgram, getFileSymbol } from '@/program';
+import fs from 'node:fs';
+import { getProject } from '@/get-project';
 import {
   type DocEntry,
   type GeneratedDoc,
-  generate,
-  type GenerateOptions,
+  generateDocumentation,
+  type GenerateDocumentationOptions,
 } from './base';
 
 interface Templates {
@@ -12,13 +13,12 @@ interface Templates {
   property: (entry: DocEntry) => string;
 }
 
-export interface GenerateMDXOptions extends GenerateOptions {
+export interface GenerateMDXOptions extends GenerateDocumentationOptions {
   /**
    * a root directory to resolve relative file paths
    */
   basePath?: string;
   templates?: Partial<Templates>;
-  config?: TypescriptConfig;
 }
 
 // \r?\n is required for cross-platform compatibility
@@ -50,38 +50,22 @@ ${Object.entries(c.tags)
 
 export function generateMDX(
   source: string,
-  {
-    basePath = './',
-    templates: overrides,
-    config: options,
-    ...rest
-  }: GenerateMDXOptions = {},
+  { basePath = './', templates: overrides, ...rest }: GenerateMDXOptions = {},
 ): string {
   const templates = { ...defaultTemplates, ...overrides };
-  const program = getProgram(options);
+  const project = rest.project ?? getProject(rest.config);
 
   return source.replace(regex, (...args) => {
-    const groups = args[args.length - 1] as Record<string, string>;
+    const groups = args[args.length - 1] as {
+      file: string;
+      name: string | undefined;
+    };
     const file = path.resolve(basePath, groups.file);
-    const fileSymbol = getFileSymbol(file, program);
-    if (!fileSymbol) throw new Error(`${file} doesn't exist`);
-
-    let docs: GeneratedDoc[];
-
-    if (!groups.name) {
-      docs = program
-        .getTypeChecker()
-        .getExportsOfModule(fileSymbol)
-        .map((symbol) => generate(program, symbol, rest));
-    } else {
-      const symbol = program
-        .getTypeChecker()
-        .getExportsOfModule(fileSymbol)
-        .find((s) => s.getEscapedName().toString() === groups.name);
-      if (!symbol) throw new Error(`Type ${groups.name} doesn't exist`);
-
-      docs = [generate(program, symbol, rest)];
-    }
+    const content = fs.readFileSync(file);
+    const docs = generateDocumentation(file, groups.name, content.toString(), {
+      ...rest,
+      project,
+    });
 
     return docs
       .map((doc) =>

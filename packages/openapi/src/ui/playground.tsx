@@ -8,7 +8,6 @@ import {
   useEffect,
 } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
-import useSWRImmutable from 'swr/immutable';
 import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 import { cn, buttonVariants } from 'fumadocs-ui/components/api';
 import type {
@@ -72,7 +71,6 @@ export function APIPlayground({
 } & HTMLAttributes<HTMLFormElement>): React.ReactElement {
   const { baseUrl } = useApiContext();
   const dynamicRef = useRef(new Map<string, DynamicField>());
-  const [input, setInput] = useState<FormValues>();
   const form = useForm<FormValues>({
     defaultValues: {
       authorization: authorization?.defaultValue,
@@ -83,54 +81,46 @@ export function APIPlayground({
     },
   });
 
-  const testQuery = useSWRImmutable(
-    input ? [baseUrl, route, method, input, bodyType] : null,
-    async () => {
-      if (!input) return;
+  const testQuery = useQuery(async (input: FormValues) => {
+    const url = new URL(
+      `${baseUrl ?? window.location.origin}${createUrlFromInput(route, input.path, input.query)}`,
+    );
 
-      const url = new URL(
-        `${baseUrl ?? window.location.origin}${createUrlFromInput(route, input.path, input.query)}`,
-      );
+    const headers = new Headers();
+    if (bodyType !== 'form-data')
+      headers.append('Content-Type', 'application/json');
 
-      const headers = new Headers({
-        'Content-Type': 'application/json',
-      });
+    if (input.authorization) {
+      headers.append('Authorization', input.authorization);
+    }
 
-      if (input.authorization) {
-        headers.append('Authorization', input.authorization);
-      }
+    Object.keys(input.header).forEach((key) => {
+      const paramValue = input.header[key];
 
-      Object.keys(input.header).forEach((key) => {
-        const paramValue = input.header[key];
+      if (typeof paramValue === 'string' && paramValue.length > 0)
+        headers.append(key, paramValue);
+    });
 
-        if (typeof paramValue === 'string' && paramValue.length > 0)
-          headers.append(key, paramValue);
-      });
+    const bodyValue =
+      body && input.body && Object.keys(input.body).length > 0
+        ? createBodyFromValue(
+            bodyType,
+            input.body,
+            body,
+            schemas,
+            dynamicRef.current,
+          )
+        : undefined;
+    const response = await fetch(url, {
+      method,
+      headers,
+      body: bodyValue,
+    });
 
-      const bodyValue =
-        body && input.body && Object.keys(input.body).length > 0
-          ? createBodyFromValue(
-              bodyType,
-              input.body,
-              body,
-              schemas,
-              dynamicRef.current,
-            )
-          : undefined;
-      const response = await fetch(url, {
-        method,
-        headers,
-        body: bodyValue,
-      });
+    const data: unknown = await response.json().catch(() => undefined);
 
-      const data: unknown = await response.json().catch(() => undefined);
-
-      return { status: response.status, data };
-    },
-    {
-      shouldRetryOnError: false,
-    },
-  );
+    return { status: response.status, data };
+  });
 
   useEffect(() => {
     if (!authorization) return;
@@ -150,7 +140,7 @@ export function APIPlayground({
   }, []);
 
   const onSubmit = form.handleSubmit((value) => {
-    setInput(value);
+    testQuery.start(value);
   });
 
   function renderCustomField<
@@ -340,11 +330,41 @@ function ResultDisplay({
       </div>
       <p className="text-sm text-fd-muted-foreground">{data.status}</p>
       {data.data ? (
-        <CodeBlock
-          code={JSON.stringify(data.data, null, 2)}
-          className="max-h-[288px]"
-        />
+        <CodeBlock code={JSON.stringify(data.data, null, 2)} />
       ) : null}
     </div>
+  );
+}
+
+function useQuery<I, T>(
+  fn: (input: I) => Promise<T>,
+): {
+  start: (input: I) => void;
+  data?: T;
+  isLoading: boolean;
+} {
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState<T>();
+
+  return useMemo(
+    () => ({
+      isLoading: loading,
+      data,
+      start(input) {
+        setLoading(true);
+
+        void fn(input)
+          .then((res) => {
+            setData(res);
+          })
+          .catch(() => {
+            setData(undefined);
+          })
+          .finally(() => {
+            setLoading(false);
+          });
+      },
+    }),
+    [data, fn, loading],
   );
 }

@@ -76,7 +76,7 @@ export function generateSample(
       const prefix = getSecurityPrefix(security);
 
       params.push({
-        name: 'Authorization',
+        name: security.type === 'apiKey' ? security.name : 'Authorization',
         schema: {
           type: 'string',
         },

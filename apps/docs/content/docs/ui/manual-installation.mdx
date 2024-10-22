@@ -1,8 +1,9 @@
 ---
 title: Manual Installation
-description: Create a new fumadocs project from sketch.
-icon: Rocket
+description: Create a new fumadocs project from scratch.
 ---
+
+> Make sure to read the [Quick Start](/docs/ui) guide first.
 
 ## Getting Started
 
@@ -12,7 +13,7 @@ Create a new Next.js application with `create-next-app`, and install required pa
 fumadocs-ui fumadocs-core
 ```
 
-### Configuration
+### Content Source
 
 You can choose a **content source** you prefer.
 
@@ -20,13 +21,23 @@ There is a list of supported sources:
 
 - [Setup Fumadocs MDX](/docs/mdx)
 - [Setup Content Collections](/docs/headless/content-collections)
-- [Setup Contentlayer](/docs/headless/contentlayer) (Deprecated)
 
 You have to configure the library correctly following their setup guide before continuing.
 
+Make sure to create a `source.ts` file for content adapters, this allows Fumadocs to interact with your content source through a unified interface.
+
+```json doc-gen:file
+{
+  "file": "../../examples/next-mdx/lib/source.ts",
+  "codeblock": {
+    "meta": "title=\"lib/source.ts\""
+  }
+}
+```
+
 ### Root Layout
 
-Wrap the entire application inside [Root Provider](/docs/ui/blocks/root-provider).
+Wrap the entire application inside [Root Provider](/docs/ui/blocks/root-provider), and add required styles to `body`.
 
 ```tsx
 import { RootProvider } from 'fumadocs-ui/provider';
@@ -35,7 +46,14 @@ import type { ReactNode } from 'react';
 export default function Layout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body>
+      <body
+        // you can use Tailwind CSS too
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: '100vh',
+        }}
+      >
         <RootProvider>{children}</RootProvider>
       </body>
     </html>
@@ -45,19 +63,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 
 ### Styles
 
-<Tabs items={['Vanilla', 'Tailwind CSS']}>
-    <Tab value='Vanilla'>
-
-Import the pre-built stylesheet in the root layout.
-
-```ts title="layout.tsx"
-import 'fumadocs-ui/style.css';
-```
-
-    </Tab>
-    <Tab value='Tailwind CSS'>
-
-Use the official Tailwind CSS plugin.
+Setup Tailwind CSS on your Next.js app, and add the official Tailwind CSS plugin.
 
 ```json doc-gen:file
 {
@@ -68,10 +74,6 @@ Use the official Tailwind CSS plugin.
 }
 ```
 
-    </Tab>
-
-</Tabs>
-
 > It doesn't come with a default font, you may choose one from `next/font`.
 
 ### Layout
@@ -81,7 +83,9 @@ Create a `app/layout.config.tsx` file to put the shared options for our layouts.
 ```json doc-gen:file
 {
   "file": "../../examples/next-mdx/app/layout.config.tsx",
-  "codeblock": true
+  "codeblock": {
+    "meta": "title=\"app/layout.config.tsx\""
+  }
 }
 ```
 
@@ -90,7 +94,9 @@ Create a folder `/app/docs` for our docs, and give it a proper layout.
 ```json doc-gen:file
 {
   "file": "../../examples/next-mdx/app/docs/layout.tsx",
-  "codeblock": true
+  "codeblock": {
+    "meta": "title=\"app/docs/layout.tsx\""
+  }
 }
 ```
 
@@ -127,7 +133,7 @@ It may vary depending on your content source. You should configure static render
 
 ### Search
 
-Use the default document search based on Flexsearch.
+Use the default document search based on Orama.
 
 <Tabs groupId='content-source' items={['Fumadocs MDX', 'Content Collections']}>
 
@@ -155,4 +161,27 @@ Learn more about [Document Search](/docs/headless/search).
 
 ### Done
 
-You can start the dev server and start writing content.
+You can start the dev server and create MDX files.
+
+```mdx title="content/docs/index.mdx"
+---
+title: Hello World
+---
+
+## Introduction
+
+I love Anime.
+```
+
+#### Content
+
+See the docs of your content source (e.g. Fumadocs MDX) to customise how content are processed.
+
+#### Routing
+
+See [Organizing Pages](/docs/ui/page-conventions) for customising routing.
+
+#### Other Pages
+
+You can use [Home Layout](/docs/ui/blocks/home-layout) for other pages of the site.
+It includes the theme toggle and global navigation links.

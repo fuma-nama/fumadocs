@@ -1,10 +1,10 @@
-import type {
-  Processor,
-  VFile,
-} from '@mdx-js/mdx/internal-create-format-aware-processors';
 import { createProcessor, type ProcessorOptions } from '@mdx-js/mdx';
+import type { VFile } from 'vfile';
 
-const cache = new Map<string, { processor: Processor; configHash: string }>();
+const cache = new Map<
+  string,
+  { processor: ReturnType<typeof createProcessor>; configHash: string }
+>();
 
 export interface MDXOptions extends ProcessorOptions {
   /**
@@ -30,7 +30,7 @@ function cacheKey(group: string, format: string): string {
 }
 
 /**
- * @param group - The cache group of MDX content, usually the collection name or hash of MDX options
+ * @param group - The cache group of MDX content, usually the collection name
  * @param configHash - config hash
  * @param source - mdx content
  * @param options - MDX options

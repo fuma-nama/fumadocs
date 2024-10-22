@@ -6,7 +6,7 @@ export interface BreadcrumbItem {
   url?: string;
 }
 
-export interface BreadcrumbOptions extends SearchOptions {
+export interface BreadcrumbOptions {
   /**
    * Include the root itself in the breadcrumb items array.
    * Specify the url by passing an object instead
@@ -18,6 +18,20 @@ export interface BreadcrumbOptions extends SearchOptions {
     | {
         url: string;
       };
+
+  /**
+   * Include the page itself in the breadcrumb items array
+   *
+   * @defaultValue true
+   */
+  includePage?: boolean;
+
+  /**
+   * Count separator as an item
+   *
+   * @defaultValue false
+   */
+  includeSeparator?: boolean;
 }
 
 export function useBreadcrumb(
@@ -36,90 +50,103 @@ export function getBreadcrumbItems(
   tree: PageTree.Root,
   options: BreadcrumbOptions = {},
 ): BreadcrumbItem[] {
-  const { includeRoot, ...rest } = options;
-  const path = searchPath(tree.children, url, rest) ?? [];
+  return getBreadcrumbItemsFromPath(
+    tree,
+    searchPath(tree.children, url) ?? [],
+    options,
+  );
+}
+
+export function getBreadcrumbItemsFromPath(
+  tree: PageTree.Root,
+  path: PageTree.Node[],
+  options: BreadcrumbOptions,
+): BreadcrumbItem[] {
+  const { includePage = true, includeSeparator = false, includeRoot } = options;
+  let items: BreadcrumbItem[] = [];
+
+  path.forEach((item, i) => {
+    if (item.type === 'separator' && includeSeparator) {
+      items.push({
+        name: item.name,
+      });
+    }
+
+    if (item.type === 'folder') {
+      const next = path.at(i + 1);
+      if (next && item.index === next) return;
+
+      if (item.root) {
+        items = [];
+        return;
+      }
+
+      items.push({
+        name: item.name,
+        url: item.index?.url,
+      });
+    }
+
+    if (item.type === 'page' && includePage) {
+      items.push({
+        name: item.name,
+        url: item.url,
+      });
+    }
+  });
 
   if (includeRoot) {
-    path.unshift({
+    items.unshift({
       name: tree.name,
       url: typeof includeRoot === 'object' ? includeRoot.url : undefined,
     });
   }
 
-  return path;
-}
-
-interface SearchOptions {
-  /**
-   * Include the page itself in the breadcrumb items array
-   *
-   * @defaultValue true
-   */
-  includePage?: boolean;
-
-  /**
-   * Count separator as an item
-   *
-   * @defaultValue false
-   */
-  includeSeparator?: boolean;
+  return items;
 }
 
 /**
- * Search a node in the tree by a specified url
+ * Search the path of a node in the tree by a specified url
  *
- * - When an index page presents, use it as the item
  * - When the page doesn't exist, return null
  *
  * @returns The path to the target node from root
+ * @internal
  */
-function searchPath(
+export function searchPath(
   nodes: PageTree.Node[],
   url: string,
-  options: SearchOptions,
-): BreadcrumbItem[] | null {
-  const { includePage = true, includeSeparator = false } = options;
-  let separator: ReactNode | undefined;
+): (PageTree.Folder | PageTree.Item | PageTree.Separator)[] | null {
+  let separator: PageTree.Separator | undefined;
 
   for (const node of nodes) {
-    if (includeSeparator && node.type === 'separator') separator = node.name;
+    if (node.type === 'separator') separator = node;
 
     if (node.type === 'folder') {
       if (node.index?.url === url) {
-        const items: BreadcrumbItem[] = [];
+        const items: PageTree.Node[] = [];
 
-        if (separator) items.push({ name: separator });
-        if (options.includePage)
-          items.push({
-            name: node.index.name,
-            url: node.index.url,
-          });
+        if (separator) items.push(separator);
+        items.push(node, node.index);
 
         return items;
       }
 
-      const items = searchPath(node.children, url, options);
+      const items = searchPath(node.children, url);
 
       if (items) {
-        items.unshift({
-          name: node.name,
-          url: node.index?.url,
-        });
-        if (separator) items.unshift({ name: separator });
+        items.unshift(node);
+        if (separator) items.unshift(separator);
 
         return items;
       }
     }
 
     if (node.type === 'page' && node.url === url) {
-      const items: BreadcrumbItem[] = [];
+      const items: PageTree.Node[] = [];
 
-      if (separator) items.push({ name: separator });
-      if (includePage)
-        items.push({
-          name: node.name,
-          url: node.url,
-        });
+      if (separator) items.push(separator);
+      items.push(node);
 
       return items;
     }

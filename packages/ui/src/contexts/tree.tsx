@@ -1,44 +1,47 @@
 import type { PageTree } from 'fumadocs-core/server';
 import { usePathname } from 'next/navigation';
-import { createContext, useContext, type ReactNode, useMemo } from 'react';
-import { hasActive } from '@/utils/shared';
+import {
+  createContext,
+  useContext,
+  type ReactNode,
+  useMemo,
+  useRef,
+} from 'react';
+import { searchPath } from 'fumadocs-core/breadcrumb';
 
 interface TreeContextType {
-  tree: PageTree.Root;
-  navigation: PageTree.Item[];
+  /**
+   * The path to the current node
+   */
+  path: PageTree.Node[];
+
+  /**
+   * Get neighbours of current `pathname`
+   */
+  getNeighbours: () => [PageTree.Item | undefined, PageTree.Item | undefined];
+
   root: PageTree.Root | PageTree.Folder;
 }
 
 const TreeContext = createContext<TreeContextType | undefined>(undefined);
 
-function findRoot(
-  items: PageTree.Node[],
-  pathname: string,
-): PageTree.Folder | undefined {
-  for (const item of items) {
-    if (item.type === 'folder') {
-      const root = findRoot(item.children, pathname);
-
-      if (root) return root;
-      if (item.root === true && hasActive(item.children, pathname)) {
-        return item;
-      }
-    }
-  }
-}
-
-function getNavigationList(tree: PageTree.Node[]): PageTree.Item[] {
-  return tree.flatMap((node) => {
-    if (node.type === 'separator') return [];
+function scanNavigationList(
+  tree: PageTree.Node[],
+  list: PageTree.Item[],
+): void {
+  tree.forEach((node) => {
     if (node.type === 'folder') {
-      const children = getNavigationList(node.children);
+      if (node.index) {
+        list.push(node.index);
+      }
 
-      if (!node.root && node.index) children.unshift(node.index);
-      return children;
+      scanNavigationList(node.children, list);
+      return;
     }
 
-    // Only non-external links will be shown in the navigation list
-    return !node.external ? [node] : [];
+    if (node.type === 'page' && !node.external) {
+      list.push(node);
+    }
   });
 }
 
@@ -48,16 +51,32 @@ export function TreeContextProvider({
 }: {
   tree: PageTree.Root;
   children: ReactNode;
-}): React.ReactElement {
+}): ReactNode {
   const pathname = usePathname();
+  const cache = useRef<WeakMap<PageTree.Root, PageTree.Item[]>>();
+
   const value = useMemo<TreeContextType>(() => {
-    const root = findRoot(tree.children, pathname) ?? tree;
-    const navigation = getNavigationList(root.children);
+    const path = searchPath(tree.children, pathname) ?? [];
+    const root = (path.findLast(
+      (item) => item.type === 'folder' && item.root,
+    ) ?? tree) as PageTree.Root;
 
     return {
+      path,
       root,
-      navigation,
-      tree,
+      getNeighbours() {
+        cache.current ??= new WeakMap();
+        let result = cache.current.get(root);
+        if (!result) {
+          result = [];
+          scanNavigationList(root.children, result);
+          cache.current.set(root, result);
+        }
+
+        const idx = result.findIndex((item) => item.url === pathname);
+        if (idx === -1) return [undefined, undefined];
+        return [result[idx - 1], result[idx + 1]];
+      },
     };
   }, [pathname, tree]);
 

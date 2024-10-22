@@ -19,22 +19,29 @@ const regex = /\s*\[#(?<slug>[^]+?)]\s*$/;
 
 export interface RemarkHeadingOptions {
   slug?: (root: Root, heading: Heading, text: string) => string;
+
   /**
    * Allow custom headings ids
    *
-   * @defaultValue `true`
+   * @defaultValue true
    */
   customId?: boolean;
+
+  /**
+   * Attach an array of `TOCItemType` to `file.data.toc`
+   *
+   * @defaultValue true
+   */
+  generateToc?: boolean;
 }
 
 /**
  * Add heading ids and extract TOC
- *
- * Attach an array of `TOCItemType` to `file.data.toc`
  */
 export function remarkHeading({
   slug: defaultSlug,
   customId = true,
+  generateToc = true,
 }: RemarkHeadingOptions = {}): Transformer<Root, Root> {
   return (root, file) => {
     const toc: TOCItemType[] = [];
@@ -82,15 +89,16 @@ export function remarkHeading({
 
       heading.data.hProperties.id = id;
 
-      toc.push({
-        title: value,
-        url: `#${id}`,
-        depth: heading.depth,
-      });
+      if (generateToc)
+        toc.push({
+          title: value,
+          url: `#${id}`,
+          depth: heading.depth,
+        });
 
       return 'skip';
     });
 
-    file.data.toc = toc;
+    if (generateToc) file.data.toc = toc;
   };
 }

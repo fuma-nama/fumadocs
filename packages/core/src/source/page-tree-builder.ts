@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react';
 import type { I18nConfig } from '@/i18n';
+import { removeUndefined } from '@/utils/remove-undefined';
 import type * as PageTree from '../server/page-tree';
 import type { File, Folder, MetaFile, PageFile, Storage } from './file-system';
 import { resolvePath } from './path';
@@ -17,13 +18,12 @@ interface PageTreeBuilderContext {
 
 export interface BuildPageTreeOptions {
   /**
-   * Attach the `folder.id` property
+   * Remove references to the file path of original nodes (`$ref`)
    *
    * @defaultValue false
    */
-  attachFolderIds?: boolean;
+  noRef?: boolean;
 
-  // TODO: Rename to `attachPage` (major)
   attachFile?: (node: PageTree.Item, file?: PageFile) => PageTree.Item;
   attachFolder?: (
     node: PageTree.Folder,
@@ -171,7 +171,7 @@ function buildFolderNode(
     'page',
   );
 
-  const metadata = meta?.data.data;
+  const metadata = meta?.data;
   const index = indexFile ? buildFileNode(indexFile, ctx) : undefined;
 
   let children: PageTree.Node[];
@@ -209,13 +209,15 @@ function buildFolderNode(
     icon: ctx.options.resolveIcon?.(metadata?.icon) ?? index?.icon,
     root: metadata?.root,
     defaultOpen: metadata?.defaultOpen,
+    description: metadata?.description,
     index,
     children,
+    $ref: !ctx.options.noRef
+      ? {
+          metaFile: meta?.file.path,
+        }
+      : undefined,
   };
-
-  if (ctx.options.attachFolderIds) {
-    node.id = folder.file.flattenedPath;
-  }
 
   return removeUndefined(
     ctx.options.attachFolder?.(node, folder, meta) ?? node,
@@ -226,25 +228,19 @@ function buildFileNode(
   file: PageFile,
   ctx: PageTreeBuilderContext,
 ): PageTree.Item {
-  let urlLocale: string | undefined;
   const localized =
     findLocalizedFile(file.file.flattenedPath, 'page', ctx) ?? file;
-
-  const hideLocale = ctx.i18n?.hideLocale ?? 'never';
-  if (hideLocale === 'never') {
-    urlLocale = ctx.lang;
-  } else if (
-    hideLocale === 'default-locale' &&
-    ctx.lang !== ctx.i18n?.defaultLanguage
-  ) {
-    urlLocale = ctx.lang;
-  }
 
   const item: PageTree.Item = {
     type: 'page',
     name: localized.data.data.title,
     icon: ctx.options.resolveIcon?.(localized.data.data.icon),
-    url: ctx.options.getUrl(localized.data.slugs, urlLocale),
+    url: ctx.options.getUrl(localized.data.slugs, ctx.lang),
+    $ref: !ctx.options.noRef
+      ? {
+          file: localized.file.path,
+        }
+      : undefined,
   };
 
   return removeUndefined(ctx.options.attachFile?.(item, file) ?? item);
@@ -314,14 +310,4 @@ function pathToName(name: string, resolveGroup = false): string {
   }
 
   return result.join('');
-}
-
-function removeUndefined<T extends object>(value: T): T {
-  const obj = value as Record<string, unknown>;
-  Object.keys(obj).forEach((key) => {
-    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete -- Remove undefined values
-    if (obj[key] === undefined) delete obj[key];
-  });
-
-  return value;
 }

@@ -15,6 +15,8 @@ export interface CreateMDXOptions {
 const outDir = path.resolve('.source');
 const defaultPageExtensions = ['mdx', 'md', 'jsx', 'js', 'tsx', 'ts'];
 
+export { start };
+
 export function createMDX({
   configPath = findConfigFile(),
 }: CreateMDXOptions = {}) {
@@ -24,7 +26,9 @@ export function createMDX({
   const isDev = process.argv.includes('dev');
   const isBuild = process.argv.includes('build');
 
-  if (isDev || isBuild) {
+  if ((isDev || isBuild) && process.env._FUMADOCS_MDX !== '1') {
+    process.env._FUMADOCS_MDX = '1';
+
     void start(isDev, configPath, outDir);
   }
 
@@ -76,7 +80,6 @@ export function createMDX({
 
         config.plugins ||= [];
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return -- not provided
         return nextConfig.webpack?.(config, options) ?? config;
       },
     };

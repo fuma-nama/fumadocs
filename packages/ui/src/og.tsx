@@ -11,23 +11,6 @@ interface GenerateProps {
   site?: ReactNode;
 }
 
-export function getImageMeta(
-  baseUrl: string,
-  slugs: string[] = [],
-): {
-  alt: string;
-  url: string;
-  width: number;
-  height: number;
-} {
-  return {
-    alt: 'Banner',
-    url: `/${[...baseUrl.split('/'), ...slugs, 'og.png'].filter((v) => v.length > 0).join('/')}`,
-    width: 1200,
-    height: 630,
-  };
-}
-
 export function generateOGImage(
   options: GenerateProps & ImageResponseOptions,
 ): ImageResponse {
@@ -72,9 +55,8 @@ export function generate({
         height: '100%',
         color: 'white',
         padding: '4rem',
-        backgroundColor: '#000000',
-        backgroundImage: `linear-gradient(to top right, ${primaryColor}, transparent), linear-gradient(to top, #303030 2px, transparent 2px), linear-gradient(to right, #303030 2px, transparent 2px)`,
-        backgroundSize: '100% 100%, 40px 40px, 40px 40px',
+        backgroundColor: '#0c0c0c',
+        backgroundImage: `linear-gradient(to top right, ${primaryColor}, transparent)`,
       }}
     >
       <div
@@ -90,8 +72,8 @@ export function generate({
         {props.icon}
         <p
           style={{
-            fontSize: '64px',
-            fontWeight: 800,
+            fontSize: '56px',
+            fontWeight: 600,
           }}
         >
           {props.site}

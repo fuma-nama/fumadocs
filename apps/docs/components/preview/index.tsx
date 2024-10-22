@@ -1,23 +1,19 @@
-import { HomeIcon } from 'lucide-react';
-import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
-import { Callout } from 'fumadocs-ui/components/callout';
-import { File, Folder, Files } from 'fumadocs-ui/components/files';
-import { Step, Steps } from 'fumadocs-ui/components/steps';
-import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
-import { TypeTable } from 'fumadocs-ui/components/type-table';
-import { Card } from 'fumadocs-ui/components/card';
+'use client';
+import { Home } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { Heading } from 'fumadocs-ui/components/heading';
-import type { ReactNode } from 'react';
+import { Card } from 'fumadocs-ui/components/card';
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 import { RootToggle } from 'fumadocs-ui/components/layout/root-toggle';
-import { Banner } from 'fumadocs-ui/components/banner';
-import { InlineTOC } from 'fumadocs-ui/components/inline-toc';
-import { ImageZoom } from 'fumadocs-ui/components/image-zoom';
-import BannerImage from '@/public/banner.png';
-import { modes } from '@/utils/modes';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { type ReactNode } from 'react';
 import { Wrapper } from './wrapper';
 
-export default {
-  heading: (
+export function heading(): ReactNode {
+  return (
     <Wrapper>
       <div className="rounded-lg bg-fd-background p-4 prose-no-margin">
         <Heading id="preview" as="h3">
@@ -28,20 +24,26 @@ export default {
         </Heading>
       </div>
     </Wrapper>
-  ),
-  card: (
+  );
+}
+
+export function card(): ReactNode {
+  return (
     <Wrapper>
       <div className="rounded-lg bg-fd-background">
         <Card
           href="#"
-          icon={<HomeIcon />}
+          icon={<Home />}
           title="Hello World"
           description="Learn More about Caching and Revalidation"
         />
       </div>
     </Wrapper>
-  ),
-  tabs: (
+  );
+}
+
+export function tabs(): ReactNode {
+  return (
     <Wrapper>
       <div className="space-y-4 rounded-xl bg-fd-background p-4 text-sm">
         <Tabs
@@ -64,8 +66,11 @@ export default {
         </Tabs>
       </div>
     </Wrapper>
-  ),
-  'type-table': (
+  );
+}
+
+export function typeTable(): ReactNode {
+  return (
     <Wrapper>
       <div className="rounded-xl bg-fd-background px-4">
         <TypeTable
@@ -80,18 +85,20 @@ export default {
         />
       </div>
     </Wrapper>
-  ),
-  'zoom-image': (
+  );
+}
+
+const ZoomImage = dynamic(() => import('./image-zoom'));
+export function zoomImage(): ReactNode {
+  return (
     <Wrapper>
-      <ImageZoom
-        alt="banner"
-        src={BannerImage}
-        className="!my-0 rounded-xl bg-fd-background"
-        priority
-      />
+      <ZoomImage />
     </Wrapper>
-  ),
-  accordion: (
+  );
+}
+
+export function accordion(): ReactNode {
+  return (
     <Wrapper>
       <Accordions type="single" collapsible>
         <Accordion id="what-is-fumadocs" title="What is Fumadocs?">
@@ -102,82 +109,38 @@ export default {
         </Accordion>
       </Accordions>
     </Wrapper>
-  ),
-  callout: (
+  );
+}
+
+export function callout(): ReactNode {
+  return (
     <Wrapper>
       <Callout title="Title">Hello World</Callout>
     </Wrapper>
-  ),
-  files: (
+  );
+}
+
+const FilesPreview = dynamic(() => import('./files'));
+
+export function files(): ReactNode {
+  return (
     <Wrapper>
-      <Files>
-        <Folder name="app" defaultOpen>
-          <Folder name="[id]" defaultOpen>
-            <File name="page.tsx" />
-          </Folder>
-          <File name="layout.tsx" />
-          <File name="page.tsx" />
-          <File name="global.css" />
-        </Folder>
-        <Folder name="components">
-          <File name="button.tsx" />
-          <File name="tabs.tsx" />
-          <File name="dialog.tsx" />
-          <Folder name="empty" />
-        </Folder>
-        <File name="package.json" />
-      </Files>
+      <FilesPreview />
     </Wrapper>
-  ),
-  'inline-toc': (
+  );
+}
+
+const InlineTOC = dynamic(() => import('./inline-toc'));
+export function inlineTOC(): ReactNode {
+  return (
     <Wrapper>
-      <InlineTOC
-        items={[
-          {
-            title: 'Welcome',
-            url: '#welcome',
-            depth: 2,
-          },
-          {
-            title: 'Getting Started',
-            url: '#getting-started',
-            depth: 3,
-          },
-          {
-            title: 'Usage',
-            url: '#usage',
-            depth: 3,
-          },
-          {
-            title: 'Styling',
-            url: '#styling',
-            depth: 3,
-          },
-          {
-            title: 'Reference',
-            url: '#reference',
-            depth: 2,
-          },
-          {
-            title: 'Components',
-            url: '#components',
-            depth: 3,
-          },
-          {
-            title: 'APIs',
-            url: '#api',
-            depth: 3,
-          },
-          {
-            title: 'Credits',
-            url: '#credits',
-            depth: 2,
-          },
-        ]}
-      />
+      <InlineTOC />
     </Wrapper>
-  ),
-  steps: (
+  );
+}
+
+export function steps(): ReactNode {
+  return (
     <Wrapper>
       <div className="rounded-xl bg-fd-background p-3">
         <Steps>
@@ -196,41 +159,39 @@ export default {
         </Steps>
       </div>
     </Wrapper>
-  ),
-  'root-toggle': (
+  );
+}
+
+export function rootToggle(): ReactNode {
+  return (
     <Wrapper>
-      <div className="not-prose rounded-xl bg-fd-background p-3">
+      <div className="not-prose mx-auto grid max-w-[240px] rounded-lg bg-fd-background">
         <RootToggle
-          options={modes.map((mode) => ({
-            url: `/docs/${mode.param}`,
-            icon: <mode.icon />,
-            title: mode.name,
-            description: mode.description,
-          }))}
+          className="p-3"
+          options={[
+            {
+              title: 'Hello World',
+              description: 'The example item of root toggle',
+              url: '/docs/ui',
+            },
+            {
+              title: 'Other page',
+              description: 'The example item of root toggle',
+              url: '/docs/headless',
+            },
+          ]}
         />
       </div>
     </Wrapper>
-  ),
-  banner: (
+  );
+}
+
+const Banner = dynamic(() => import('./banner'));
+
+export function banner(): ReactNode {
+  return (
     <Wrapper>
-      <div className="flex flex-col gap-4">
-        <Banner className="z-0" changeLayout={false}>
-          Be careful, Fumadocs v99 has released
-        </Banner>
-        <Banner
-          className="z-0"
-          id="test-rainbow"
-          variant="rainbow"
-          changeLayout={false}
-        >
-          <span className="opacity-90 mix-blend-luminosity">
-            Using the <code>rainbow</code> variant
-          </span>
-        </Banner>
-        <Banner className="z-0" id="test" changeLayout={false}>
-          Be careful, this banner can be closed
-        </Banner>
-      </div>
+      <Banner />
     </Wrapper>
-  ),
-} as Record<string, ReactNode>;
+  );
+}
