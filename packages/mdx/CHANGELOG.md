@@ -1,5 +1,15 @@
 # next-docs-mdx
 
+## 11.0.0
+
+### Major Changes
+
+- e094284: **Require Fumadocs v14**
+
+### Patch Changes
+
+- fumadocs-core@14.0.1
+
 ## 10.1.0
 
 ### Minor Changes
