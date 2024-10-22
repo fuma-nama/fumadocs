@@ -150,7 +150,7 @@ function SidebarHeader({
   links,
   ...props
 }: SharedNavProps & { links: LinkItemType[] }): ReactNode {
-  if (!props.title || !props.children || links.length === 0) return null;
+  if (!props.title && !props.children && links.length === 0) return null;
 
   return (
     <div className="flex flex-row items-center border-b pb-2 max-md:hidden">
