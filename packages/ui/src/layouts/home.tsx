@@ -41,6 +41,12 @@ export function HomeLayout({
             disableThemeSwitch={disableThemeSwitch}
             {...nav}
           />,
+          {
+            items: finalLinks,
+            i18n,
+            disableThemeSwitch,
+            ...nav,
+          },
         )}
         {props.children}
       </main>
