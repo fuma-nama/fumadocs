@@ -1,5 +1,5 @@
 {
-  "name": "fumadocs",
+  "name": "@fumadocs/cli",
   "version": "0.0.1",
   "description": "The CLI tool for Fumadocs",
   "keywords": [
@@ -19,7 +19,9 @@
     }
   },
   "main": "./dist/index.js",
-  "bin": "./dist/index.js",
+  "bin": {
+    "fumadocs": "./dist/index.js"
+  },
   "files": [
     "dist/*"
   ],

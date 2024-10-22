@@ -168,6 +168,9 @@ importers:
         specifier: ^3.23.8
         version: 3.23.8
     devDependencies:
+      '@fumadocs/cli':
+        specifier: workspace:*
+        version: link:../../packages/cli
       '@next/bundle-analyzer':
         specifier: 15.0.0
         version: 15.0.0(bufferutil@4.0.8)
@@ -195,9 +198,6 @@ importers:
       fast-glob:
         specifier: ^3.3.1
         version: 3.3.2
-      fumadocs:
-        specifier: workspace:*
-        version: link:../../packages/cli
       glslify:
         specifier: ^7.1.1
         version: 7.1.1
@@ -1143,6 +1143,9 @@ importers:
         specifier: ^3.4.14
         version: 3.4.14
     devDependencies:
+      '@fumadocs/cli':
+        specifier: workspace:*
+        version: link:../cli
       '@next/eslint-plugin-next':
         specifier: ^15.0.0
         version: 15.0.0
@@ -1155,9 +1158,6 @@ importers:
       eslint-config-custom:
         specifier: workspace:*
         version: link:../eslint-config-custom
-      fumadocs:
-        specifier: workspace:^
-        version: link:../cli
       lucide-react:
         specifier: ^0.453.0
         version: 0.453.0(react@18.3.1)

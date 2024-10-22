@@ -87,7 +87,7 @@
     "@types/react-dom": "^18.3.1",
     "algoliasearch": "4.24.0",
     "eslint-config-custom": "workspace:*",
-    "fumadocs": "workspace:^",
+    "@fumadocs/cli": "workspace:*",
     "lucide-react": "^0.453.0",
     "next": "15.0.0",
     "postcss": "^8.4.47",

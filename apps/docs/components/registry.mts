@@ -1,4 +1,4 @@
-import { type Registry } from 'fumadocs/build';
+import { type Registry } from '@fumadocs/cli/build';
 import * as ui from '../../../packages/ui/src/components/registry';
 import { fileURLToPath } from 'node:url';
 

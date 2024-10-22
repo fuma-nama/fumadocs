@@ -1,5 +1,5 @@
 import { fileURLToPath } from 'node:url';
-import type { Registry } from 'fumadocs/build';
+import type { Registry } from '@fumadocs/cli/build';
 
 const contextsMap = {
   '../contexts/sidebar.tsx': 'fumadocs-ui/provider',
