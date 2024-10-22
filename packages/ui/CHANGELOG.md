@@ -1,5 +1,115 @@
 # next-docs-ui
 
+## 14.0.0
+
+### Major Changes
+
+- d9e908e: **Refactor import paths for layouts**
+
+  **migrate:** Use
+
+  ```ts
+  import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+
+  import { HomeLayout } from 'fumadocs-ui/layouts/home';
+
+  import { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+  ```
+
+  Instead of
+
+  ```ts
+  import { DocsLayout } from 'fumadocs-ui/layout';
+
+  import { HomeLayout } from 'fumadocs-ui/home-layout';
+
+  import { HomeLayoutProps } from 'fumadocs-ui/home-layout';
+  ```
+
+- 9a10262: **Move Twoslash UI components to `fumadocs-twoslash`**
+
+  **why:** Isolate logic from Fumadocs UI
+
+  **migrate:**
+
+  Before:
+
+  ```ts
+  import 'fumadocs-ui/twoslash.css';
+
+  import { Popup } from 'fumadocs-ui/twoslash/popup';
+  ```
+
+  After:
+
+  ```ts
+  import 'fumadocs-twoslash/twoslash.css';
+
+  import { Popup } from 'fumadocs-twoslash/ui';
+  ```
+
+  **Tailwind CSS is now required for Twoslash integration.**
+
+- d9e908e: **Remove `getImageMeta` from `fumadocs-ui/og`**
+
+  **migrate:** Use Metadata API from `fumadocs-core/server`
+
+- d9e908e: Replace `fumadocs-core/search/shared` with `fumadocs-core/server`
+- be53a0e: **`DocsCategory` now accept `from` prop instead of `pages` prop.**
+
+  **why:** This allows sharing the order of items with page tree.
+  **migrate:**
+
+  The component now takes `from` prop which is the Source API object.
+
+  ```tsx
+  import { source } from '@/lib/source';
+  import { DocsCategory } from 'fumadocs-ui/page';
+
+  const page = source.getPage(params.slug);
+
+  <DocsCategory page={page} from={source} />;
+  ```
+
+### Minor Changes
+
+- 34cf456: Support `disableThemeSwitch` on layouts
+- d9e908e: Bundle icons into dist
+- ad47fd8: Show i18n language toggle on home layout
+- 87063eb: Add root toggle to sidebar automatically
+- 64f0653: Introduce `--fd-nav-height` CSS variable for custom navbar
+- e1ee822: Support hast nodes in `toc` variable
+- 3d054a8: Support linking to a specific tab
+
+### Patch Changes
+
+- f949520: Support Shiki diff transformer
+- 367f4c3: Improve Root Toggle component
+- d9e908e: Change default URL of title on i18n mode
+- d9e908e: Add center to root toggle
+- e612f2a: Make compatible with Next.js 15
+- 3d0369a: Improve edit on GitHub button
+- be820c4: Bump deps
+- Updated dependencies [e45bc67]
+- Updated dependencies [d9e908e]
+- Updated dependencies [d9e908e]
+- Updated dependencies [f949520]
+- Updated dependencies [9a0b09f]
+- Updated dependencies [9a0b09f]
+- Updated dependencies [367f4c3]
+- Updated dependencies [e1ee822]
+- Updated dependencies [e612f2a]
+- Updated dependencies [9a0b09f]
+- Updated dependencies [d9e908e]
+- Updated dependencies [8ef00dc]
+- Updated dependencies [979e301]
+- Updated dependencies [d9e908e]
+- Updated dependencies [979e301]
+- Updated dependencies [15781f0]
+- Updated dependencies [be820c4]
+- Updated dependencies [d9e908e]
+  - fumadocs-core@14.0.0
+
 ## 13.4.10
 
 ### Patch Changes
