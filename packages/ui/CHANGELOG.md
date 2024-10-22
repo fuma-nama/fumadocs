@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 14.0.2
+
+### Patch Changes
+
+- bfc2bf2: Fix navbar issues
+  - fumadocs-core@14.0.2
+
 ## 14.0.1
 
 ### Patch Changes
