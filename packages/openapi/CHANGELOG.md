@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 5.5.3
+
+### Patch Changes
+
+- 35695be: Support multiple tags in OpenAPI `groupBy: tag` file generation
+
 ## 5.5.2
 
 ### Patch Changes
