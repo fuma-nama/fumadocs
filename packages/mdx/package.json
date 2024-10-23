@@ -59,7 +59,7 @@
     "@types/react": "^18.3.11",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
-    "next": "15.0.0",
+    "next": "15.0.1",
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
     "vfile": "^6.0.3",
