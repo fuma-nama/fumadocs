@@ -10,28 +10,29 @@
   "repository": "github:fuma-nama/fumadocs",
   "license": "MIT",
   "author": "Fuma Nama",
+  "type": "module",
   "exports": {
     "./loader-mdx": "./loader-mdx.js",
     "./config": {
-      "import": "./dist/config/index.mjs",
-      "types": "./dist/config/index.d.mts"
+      "import": "./dist/config/index.js",
+      "types": "./dist/config/index.d.ts"
     },
     "./next": {
-      "import": "./dist/next/index.mjs",
-      "types": "./dist/next/index.d.mts"
+      "import": "./dist/next/index.js",
+      "types": "./dist/next/index.d.ts"
     },
     ".": {
-      "import": "./dist/index.mjs",
-      "types": "./dist/index.mts"
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
     }
   },
-  "main": "./dist/index.mjs",
-  "types": "./dist/index.mts",
-  "bin": "./bin.mjs",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": "./bin.js",
   "files": [
     "dist/*",
     "loader-mdx.js",
-    "bin.mjs"
+    "bin.js"
   ],
   "scripts": {
     "build": "tsup",

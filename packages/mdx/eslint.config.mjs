@@ -6,7 +6,7 @@ export default [
       'dist/',
       'node_modules/',
       'test/**/*.output.js',
-      'bin.mjs',
+      'bin.js',
       'loader-mdx.js',
     ],
   },

@@ -75,6 +75,7 @@ export const baseOptions: BaseLayoutProps = {
     ),
     transparentMode: 'top',
   },
+  disableThemeSwitch: true,
   links: [
     {
       type: 'menu',
