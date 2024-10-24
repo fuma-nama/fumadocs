@@ -189,9 +189,20 @@ export default async function Page(): Promise<ReactNode> {
             <div className="inline-flex h-12 items-center gap-2 text-lg grayscale transition-all group-hover:grayscale-0">
               {sponsor.logo}
             </div>
-            {sponsor.tier === 'golden' ? (
-              <p className="text-xs text-fd-muted-foreground">Golden Sponsor</p>
-            ) : null}
+            {
+              {
+                golden: (
+                  <p className="text-xs text-fd-muted-foreground">
+                    Golden Sponsor
+                  </p>
+                ),
+                'golden-one-time': (
+                  <p className="text-xs text-fd-muted-foreground">
+                    Golden Sponsor
+                  </p>
+                ),
+              }[sponsor.tier ?? '']
+            }
           </a>
         ))}
       </div>

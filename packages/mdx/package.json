@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-mdx",
-  "version": "11.0.0",
+  "version": "11.1.0",
   "description": "The built-in source for Fumadocs",
   "keywords": [
     "NextJs",
@@ -10,28 +10,29 @@
   "repository": "github:fuma-nama/fumadocs",
   "license": "MIT",
   "author": "Fuma Nama",
+  "type": "module",
   "exports": {
-    "./loader-mdx": "./loader-mdx.js",
+    "./loader-mdx": "./loader-mdx.cjs",
     "./config": {
-      "import": "./dist/config/index.mjs",
-      "types": "./dist/config/index.d.mts"
+      "import": "./dist/config/index.js",
+      "types": "./dist/config/index.d.ts"
     },
     "./next": {
-      "import": "./dist/next/index.mjs",
-      "types": "./dist/next/index.d.mts"
+      "import": "./dist/next/index.js",
+      "types": "./dist/next/index.d.ts"
     },
     ".": {
-      "import": "./dist/index.mjs",
-      "types": "./dist/index.mts"
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
     }
   },
-  "main": "./dist/index.mjs",
-  "types": "./dist/index.mts",
-  "bin": "./bin.mjs",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": "./bin.js",
   "files": [
     "dist/*",
-    "loader-mdx.js",
-    "bin.mjs"
+    "loader-mdx.cjs",
+    "bin.js"
   ],
   "scripts": {
     "build": "tsup",
@@ -59,7 +60,7 @@
     "@types/react": "^18.3.11",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
-    "next": "15.0.0",
+    "next": "^15.0.1",
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
     "vfile": "^6.0.3",

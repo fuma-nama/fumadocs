@@ -1,4 +1,3 @@
-// @ts-check
 import createBundleAnalyzer from '@next/bundle-analyzer';
 import { createMDX } from 'fumadocs-mdx/next';
 
@@ -7,6 +6,7 @@ const withAnalyzer = createBundleAnalyzer({
 });
 
 /** @type {import('next').NextConfig} */
+
 const config = {
   output: 'export',
   reactStrictMode: true,

@@ -1,0 +1,72 @@
+openapi: 3.0.3
+info:
+  title: Inventory/Product API
+  description: A minimal test fixture for Inventory and Product operations.
+  version: 1.0.0
+
+tags:
+  - name: Products
+    description: Operations related to products.
+  - name: Inventory
+    description: Operations related to inventory.
+
+paths:
+  /products/{productId}:
+    get:
+      summary: Get product details
+      description: Retrieve details of a product by its ID.
+      operationId: getProductDetails
+      tags:
+        - Products
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          description: ID of the product to retrieve
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response with product details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: Product ID
+                  price:
+                    type: number
+                    description: Price of the product
+        '404':
+          description: Product not found
+
+  /inventory/{productId}:
+    get:
+      summary: Get product inventory
+      description: Retrieve inventory details for a specific product.
+      operationId: getInventoryForProduct
+      tags:
+        - Inventory
+        - Products
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          description: ID of the product to retrieve inventory information
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response with inventory details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  productId:
+                    type: string
+                    description: Product ID
+        '404':
+          description: Product not found

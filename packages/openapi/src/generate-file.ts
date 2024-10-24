@@ -91,7 +91,7 @@ export async function generateFiles(options: Config): Promise<void> {
 
         await Promise.all(
           results.map(async (result) => {
-            let outPath;
+            const outPaths = new Array<string>();
             if (!result.method.operationId) return;
             const id =
               result.method.operationId.split('.').at(-1) ??
@@ -102,18 +102,13 @@ export async function generateFiles(options: Config): Promise<void> {
               result.method.tags &&
               result.method.tags.length > 0
             ) {
-              if (result.method.tags.length > 1)
-                console.warn(
-                  `${result.route.path} has more than 1 tag, which isn't allowed under 'groupBy: tag'. Only the first tag will be considered.`,
+              for (const tag of result.method.tags) {
+                outPaths.push(
+                  join(outputDir, getFilename(tag), `${getFilename(id)}.mdx`),
                 );
-
-              outPath = join(
-                outputDir,
-                getFilename(result.method.tags[0]),
-                `${getFilename(id)}.mdx`,
-              );
+              }
             } else if (groupBy === 'route') {
-              outPath = join(
+              const outPath = join(
                 outputDir,
                 result.route.summary
                   ? getFilename(result.route.summary)
@@ -133,12 +128,16 @@ export async function generateFiles(options: Config): Promise<void> {
                 );
                 console.log(`Generated Meta: ${metaFile}`);
               }
+
+              outPaths.push(outPath);
             } else {
-              outPath = join(outputDir, `${getFilename(id)}.mdx`);
+              outPaths.push(join(outputDir, `${getFilename(id)}.mdx`));
             }
 
-            await write(outPath, result.content);
-            console.log(`Generated: ${outPath}`);
+            for (const outPath of outPaths) {
+              await write(outPath, result.content);
+              console.log(`Generated: ${outPath}`);
+            }
           }),
         );
         return;

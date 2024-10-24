@@ -1,5 +1,11 @@
 # next-docs-mdx
 
+## 11.1.0
+
+### Minor Changes
+
+- 28a9c3c: Migrate loaders to ESM only
+
 ## 11.0.0
 
 ### Major Changes

@@ -49,21 +49,21 @@ describe('Generate documents', () => {
     }
   });
 
-  test('Generate Files', async () => {
-    vi.mock('node:fs/promises', async (importOriginal) => {
-      return {
-        ...(await importOriginal<typeof import('node:fs/promises')>()),
-        mkdir: vi.fn().mockImplementation(() => {
-          // do nothing
-        }),
-        writeFile: vi.fn().mockImplementation(() => {
-          // do nothing
-        }),
-      };
-    });
+  vi.mock('node:fs/promises', async (importOriginal) => {
+    return {
+      ...(await importOriginal<typeof import('node:fs/promises')>()),
+      mkdir: vi.fn().mockImplementation(() => {
+        // do nothing
+      }),
+      writeFile: vi.fn().mockImplementation(() => {
+        // do nothing
+      }),
+    };
+  });
 
+  test('Generate Files', async () => {
     await generateFiles({
-      input: ['./fixtures/*.yaml'],
+      input: ['./fixtures/museum.yaml', './fixtures/petstore.yaml'],
       output: './out',
       per: 'file',
       cwd,
@@ -82,5 +82,43 @@ describe('Generate documents', () => {
     );
 
     expect(fs.mkdir).toBeCalledWith(join(cwd, './out'), expect.anything());
+  });
+
+  test('Generate Files - groupBy tag per operation', async () => {
+    await generateFiles({
+      input: ['./fixtures/products.yaml'],
+      output: './out',
+      per: 'operation',
+      groupBy: 'tag',
+      cwd,
+    });
+
+    const fs = await import('node:fs/promises');
+
+    expect(fs.writeFile).toBeCalledTimes(3);
+
+    expect(fs.writeFile).toBeCalledWith(
+      join(cwd, './out/products/get-product-details.mdx'),
+      expect.anything(),
+    );
+
+    expect(fs.writeFile).toBeCalledWith(
+      join(cwd, './out/products/get-inventory-for-product.mdx'),
+      expect.anything(),
+    );
+
+    expect(fs.writeFile).toBeCalledWith(
+      join(cwd, './out/inventory/get-inventory-for-product.mdx'),
+      expect.anything(),
+    );
+
+    expect(fs.mkdir).toBeCalledWith(
+      join(cwd, './out/inventory'),
+      expect.anything(),
+    );
+    expect(fs.mkdir).toBeCalledWith(
+      join(cwd, './out/products'),
+      expect.anything(),
+    );
   });
 });

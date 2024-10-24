@@ -1,6 +1,5 @@
 'use client';
 import {
-  useCallback,
   createContext,
   useContext,
   useEffect,
@@ -62,9 +61,9 @@ export function SidebarTrigger<T extends ElementType = 'button'>({
     <As
       aria-label="Toggle Sidebar"
       data-open={open}
-      onClick={useCallback(() => {
+      onClick={() => {
         setOpen(!open);
-      }, [open, setOpen])}
+      }}
       {...props}
     />
   );
