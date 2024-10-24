@@ -12,7 +12,7 @@
   "author": "Fuma Nama",
   "type": "module",
   "exports": {
-    "./loader-mdx": "./loader-mdx.js",
+    "./loader-mdx": "./loader-mdx.cjs",
     "./config": {
       "import": "./dist/config/index.js",
       "types": "./dist/config/index.d.ts"
@@ -31,7 +31,7 @@
   "bin": "./bin.js",
   "files": [
     "dist/*",
-    "loader-mdx.js",
+    "loader-mdx.cjs",
     "bin.js"
   ],
   "scripts": {
@@ -60,7 +60,7 @@
     "@types/react": "^18.3.11",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
-    "next": "15.0.1",
+    "next": "^15.0.1",
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
     "vfile": "^6.0.3",
