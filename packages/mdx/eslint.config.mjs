@@ -7,7 +7,7 @@ export default [
       'node_modules/',
       'test/**/*.output.js',
       'bin.js',
-      'loader-mdx.js',
+      'loader-mdx.cjs',
     ],
   },
   ...library,

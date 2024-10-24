@@ -91,7 +91,7 @@ export async function generateFiles(options: Config): Promise<void> {
 
         await Promise.all(
           results.map(async (result) => {
-            let outPaths = new Array<string>();
+            const outPaths = new Array<string>();
             if (!result.method.operationId) return;
             const id =
               result.method.operationId.split('.').at(-1) ??
@@ -108,7 +108,7 @@ export async function generateFiles(options: Config): Promise<void> {
                 );
               }
             } else if (groupBy === 'route') {
-              let outPath = join(
+              const outPath = join(
                 outputDir,
                 result.route.summary
                   ? getFilename(result.route.summary)
