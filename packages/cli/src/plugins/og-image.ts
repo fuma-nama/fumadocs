@@ -17,7 +17,8 @@ export const ogImagePlugin: Plugin = {
 
     return {
       'lib/metadata.ts': generated['lib/metadata'],
-      [route]: generated['app/docs-og/[...slug]/route'],
+      [ctx.src ? `src/${route}` : route]:
+        generated['app/docs-og/[...slug]/route'],
     };
   },
   dependencies: [],

@@ -13,9 +13,9 @@ import { createEmptyProject } from '@/utils/typescript';
 import { transformRootLayout } from '@/utils/i18n/transform-root-layout';
 
 export const i18nPlugin: Plugin = {
-  files: () => ({
+  files: ({ src }) => ({
     'lib/i18n.ts': generated['lib/i18n'],
-    'middleware.ts': generated.middleware,
+    [src ? 'src/middleware.ts' : 'middleware.ts']: generated.middleware,
   }),
   dependencies: [],
   instructions: () => [
