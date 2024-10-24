@@ -112,7 +112,13 @@ describe('Generate documents', () => {
       expect.anything(),
     );
 
-    expect(fs.mkdir).toBeCalledWith(join(cwd, './out/inventory'), expect.anything());
-    expect(fs.mkdir).toBeCalledWith(join(cwd, './out/products'), expect.anything());
+    expect(fs.mkdir).toBeCalledWith(
+      join(cwd, './out/inventory'),
+      expect.anything(),
+    );
+    expect(fs.mkdir).toBeCalledWith(
+      join(cwd, './out/products'),
+      expect.anything(),
+    );
   });
 });

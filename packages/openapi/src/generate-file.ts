@@ -103,14 +103,11 @@ export async function generateFiles(options: Config): Promise<void> {
               result.method.tags.length > 0
             ) {
               for (const tag of result.method.tags) {
-                outPaths.push(join(
-                  outputDir,
-                  getFilename(tag),
-                  `${getFilename(id)}.mdx`,
-                ));
+                outPaths.push(
+                  join(outputDir, getFilename(tag), `${getFilename(id)}.mdx`),
+                );
               }
             } else if (groupBy === 'route') {
-
               let outPath = join(
                 outputDir,
                 result.route.summary
@@ -132,9 +129,9 @@ export async function generateFiles(options: Config): Promise<void> {
                 console.log(`Generated Meta: ${metaFile}`);
               }
 
-              outPaths.push(outPath)
+              outPaths.push(outPath);
             } else {
-              outPaths.push(join(outputDir, `${getFilename(id)}.mdx`))
+              outPaths.push(join(outputDir, `${getFilename(id)}.mdx`));
             }
 
             for (const outPath of outPaths) {
