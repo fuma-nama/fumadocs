@@ -27,7 +27,7 @@
     "eslint-plugin-tailwindcss": "^3.17.5",
     "prettier": "^3.3.3",
     "rimraf": "^6.0.1",
-    "tsup": "8.3.4",
+    "tsup": "8.3.5",
     "turbo": "2.2.3",
     "typescript": "^5.6.3",
     "typescript-eslint": "^8.11.0",
