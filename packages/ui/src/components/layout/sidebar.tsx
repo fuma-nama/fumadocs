@@ -104,7 +104,7 @@ export const Sidebar = memo(
         blockScrollingWidth={768} // md
         {...props.aside}
         className={cn(
-          'fixed top-fd-layout-top z-30 bg-fd-card pt-2 text-sm md:sticky md:h-[var(--fd-sidebar-height)] md:flex-1 md:pt-4',
+          'fixed top-fd-layout-top z-30 bg-fd-card text-sm md:sticky md:h-[var(--fd-sidebar-height)] md:flex-1',
           'max-md:inset-x-0 max-md:bottom-0 max-md:bg-fd-background/80 max-md:text-[15px] max-md:backdrop-blur-lg max-md:data-[open=false]:invisible',
           props.aside?.className,
         )}
@@ -116,7 +116,7 @@ export const Sidebar = memo(
           } as object
         }
       >
-        <div className="flex size-full flex-col md:ms-auto md:w-[var(--fd-sidebar-width)] md:border-e">
+        <div className="flex size-full flex-col pt-2 md:ms-auto md:w-[var(--fd-sidebar-width)] md:border-e md:pt-4">
           {props.banner}
           {hasSearch ? (
             <LargeSearchToggle className="mx-4 rounded-lg max-md:hidden md:mx-3" />
