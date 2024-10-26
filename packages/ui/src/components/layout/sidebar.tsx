@@ -1,3 +1,4 @@
+'use client';
 import { ChevronDown, ExternalLink } from 'lucide-react';
 import type { PageTree } from 'fumadocs-core/server';
 import * as Base from 'fumadocs-core/sidebar';
