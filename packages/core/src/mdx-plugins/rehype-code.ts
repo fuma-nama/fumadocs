@@ -5,7 +5,7 @@ import {
   transformerNotationDiff,
   transformerNotationHighlight,
   transformerNotationWordHighlight,
-} from '@shikijs/transformers';
+} from 'shiki-transformers';
 import type { Processor, Transformer } from 'unified';
 import {
   getSingletonHighlighter,

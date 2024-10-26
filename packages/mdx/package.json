@@ -57,7 +57,7 @@
     "@types/mdast": "^4.0.3",
     "@types/mdx": "^2.0.13",
     "@types/micromatch": "^4.0.9",
-    "@types/react": "^18.3.11",
+    "@types/react": "^18.3.12",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "next": "^15.0.1",

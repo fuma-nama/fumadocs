@@ -42,7 +42,7 @@ import { Pre, CodeBlock } from 'fumadocs-ui/components/codeblock';
     // HTML `ref` attribute conflicts with `forwardRef`
     pre: ({ ref: _ref, ...props }) => (
       <CodeBlock {...props}>
-        <Pre>{props.children}</Pre>
+        <Pre>{props.children}</Pre> {/* [!code highlight] */}
       </CodeBlock>
     ),
   }}
