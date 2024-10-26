@@ -48,6 +48,10 @@
       "import": "./dist/utils/use-on-change.js",
       "types": "./dist/utils/use-on-change.d.ts"
     },
+    "./utils/use-shiki": {
+      "import": "./dist/utils/use-shiki.js",
+      "types": "./dist/utils/use-shiki.d.ts"
+    },
     "./link": {
       "import": "./dist/link.js",
       "types": "./dist/link.d.ts"
@@ -78,6 +82,7 @@
     "@shikijs/transformers": "^1.22.0",
     "github-slugger": "^2.0.0",
     "hast-util-to-estree": "^3.1.0",
+    "hast-util-to-jsx-runtime": "^2.3.2",
     "image-size": "^1.1.1",
     "negotiator": "^1.0.0",
     "react-remove-scroll": "^2.6.0",
