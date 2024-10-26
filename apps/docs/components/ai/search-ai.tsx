@@ -378,6 +378,11 @@ const Message = memo(
       void run();
     }, [message.content]);
 
+    const roleName = {
+      user: 'you',
+      assistant: 'fuma bot',
+    };
+
     return (
       <div
         className={cn(
@@ -392,7 +397,7 @@ const Message = memo(
             message.role === 'assistant' && 'text-fd-primary',
           )}
         >
-          {message.role}
+          {roleName[message.role]}
         </p>
         <div className="prose text-sm">{rendered}</div>
         {children}
