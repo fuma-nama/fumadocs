@@ -1,11 +1,5 @@
 import { cva } from 'class-variance-authority';
-import {
-  Heart,
-  type LucideIcon,
-  MousePointer,
-  Sparkle,
-  Terminal,
-} from 'lucide-react';
+import { Heart, type LucideIcon, MousePointer, Terminal } from 'lucide-react';
 import {
   BatteryChargingIcon,
   CpuIcon,
