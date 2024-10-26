@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-ui",
-  "version": "13.3.2",
+  "version": "14.0.2",
   "description": "The framework for building a documentation website in Next.js",
   "keywords": [
     "NextJs",
@@ -13,7 +13,6 @@
   "type": "module",
   "exports": {
     "./style.css": "./dist/style.css",
-    "./twoslash.css": "./dist/twoslash.css",
     "./image-zoom.css": "./dist/image-zoom.css",
     "./tailwind-plugin": {
       "import": "./dist/tailwind-plugin.js",
@@ -24,21 +23,13 @@
       "import": "./dist/components/*.js",
       "types": "./dist/components/*.d.ts"
     },
-    "./twoslash/*": {
-      "import": "./dist/twoslash/*.js",
-      "types": "./dist/twoslash/*.d.ts"
-    },
     "./i18n": {
       "import": "./dist/i18n.js",
       "types": "./dist/i18n.d.ts"
     },
-    "./layout": {
-      "import": "./dist/layout.js",
-      "types": "./dist/layout.d.ts"
-    },
-    "./home-layout": {
-      "import": "./dist/home-layout.js",
-      "types": "./dist/home-layout.d.ts"
+    "./layouts/*": {
+      "import": "./dist/layouts/*.js",
+      "types": "./dist/layouts/*.d.ts"
     },
     "./page": {
       "import": "./dist/page.js",
@@ -51,37 +42,10 @@
     "./mdx": {
       "import": "./dist/mdx.js",
       "types": "./dist/mdx.d.ts"
-    }
-  },
-  "typesVersions": {
-    "*": {
-      "tailwind-plugin": [
-        "./dist/tailwind-plugin.d.ts"
-      ],
-      "components/*": [
-        "./dist/components/*.d.ts"
-      ],
-      "twoslash/*": [
-        "./dist/twoslash/*.d.ts"
-      ],
-      "i18n": [
-        "./dist/i18n.d.ts"
-      ],
-      "layout": [
-        "./dist/layout.d.ts"
-      ],
-      "home-layout": [
-        "./dist/home-layout.d.ts"
-      ],
-      "page": [
-        "./dist/page.d.ts"
-      ],
-      "provider": [
-        "./dist/provider.d.ts"
-      ],
-      "mdx": [
-        "./dist/mdx.d.ts"
-      ]
+    },
+    "./og": {
+      "import": "./dist/og.js",
+      "types": "./dist/og.d.ts"
     }
   },
   "files": [
@@ -90,7 +54,7 @@
   "scripts": {
     "build": "pnpm build:layout && pnpm build:tailwind",
     "build:layout": "tsup",
-    "build:tailwind": "postcss css/*.css --dir dist",
+    "build:tailwind": "postcss css/*.css --dir dist && postcss src/components/*.css --dir dist/components",
     "clean": "rimraf dist",
     "dev": "concurrently \"pnpm dev:layout\" \"pnpm dev:tailwind\"",
     "dev:layout": "tsup --watch",
@@ -99,41 +63,48 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@radix-ui/react-accordion": "^1.2.0",
-    "@radix-ui/react-collapsible": "^1.1.0",
-    "@radix-ui/react-dialog": "^1.1.1",
+    "@radix-ui/react-accordion": "^1.2.1",
+    "@radix-ui/react-collapsible": "^1.1.1",
+    "@radix-ui/react-dialog": "^1.1.2",
     "@radix-ui/react-direction": "^1.1.0",
-    "@radix-ui/react-popover": "^1.1.1",
-    "@radix-ui/react-scroll-area": "^1.1.0",
-    "@radix-ui/react-tabs": "^1.1.0",
-    "@tailwindcss/typography": "^0.5.14",
+    "@radix-ui/react-navigation-menu": "^1.2.1",
+    "@radix-ui/react-popover": "^1.1.2",
+    "@radix-ui/react-scroll-area": "^1.2.0",
+    "@radix-ui/react-slot": "^1.1.0",
+    "@radix-ui/react-tabs": "^1.1.1",
+    "@tailwindcss/typography": "^0.5.15",
     "class-variance-authority": "^0.7.0",
     "cmdk": "^1.0.0",
     "fumadocs-core": "workspace:*",
-    "lucide-react": "^0.428.0",
     "next-themes": "^0.3.0",
-    "react-medium-image-zoom": "^5.2.8",
-    "swr": "^2.2.5",
-    "tailwind-merge": "^2.5.2"
+    "react-medium-image-zoom": "^5.2.10",
+    "tailwind-merge": "^2.5.4"
   },
   "devDependencies": {
-    "@algolia/client-search": "^4.24.0",
-    "@next/eslint-plugin-next": "^14.2.5",
-    "@types/react": "^18.3.3",
-    "@types/react-dom": "^18.3.0",
-    "algoliasearch": "^4.24.0",
+    "@algolia/client-search": "4.24.0",
+    "@next/eslint-plugin-next": "^15.0.0",
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.1",
+    "algoliasearch": "4.24.0",
     "eslint-config-custom": "workspace:*",
-    "next": "^14.2.5",
-    "postcss": "^8.4.41",
+    "@fumadocs/cli": "workspace:*",
+    "lucide-react": "^0.453.0",
+    "next": "15.0.1",
+    "postcss": "^8.4.47",
     "postcss-cli": "^11.0.0",
     "postcss-lightningcss": "^1.0.1",
-    "tailwindcss": "^3.4.10",
+    "tailwindcss": "^3.4.13",
     "tsconfig": "workspace:*"
   },
   "peerDependencies": {
-    "next": ">= 14.1.0",
+    "next": "14.x.x || 15.x.x",
     "react": ">= 18",
     "react-dom": ">= 18"
+  },
+  "optionalDependencies": {
+    "@algolia/client-search": "^4.0.0",
+    "algoliasearch": "^4.24.0",
+    "tailwindcss": "^3.4.14"
   },
   "publishConfig": {
     "access": "public"

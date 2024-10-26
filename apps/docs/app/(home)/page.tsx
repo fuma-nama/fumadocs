@@ -1,5 +1,11 @@
 import { cva } from 'class-variance-authority';
-import type { LucideIcon } from 'lucide-react';
+import {
+  Heart,
+  type LucideIcon,
+  MousePointer,
+  Sparkle,
+  Terminal,
+} from 'lucide-react';
 import {
   BatteryChargingIcon,
   CpuIcon,
@@ -8,12 +14,10 @@ import {
   KeyboardIcon,
   LayoutIcon,
   LibraryIcon,
-  MessageCircleIcon,
   PaperclipIcon,
   PersonStandingIcon,
   RocketIcon,
   SearchIcon,
-  StarsIcon,
   TimerIcon,
 } from 'lucide-react';
 import { File, Files, Folder } from 'fumadocs-ui/components/files';
@@ -26,7 +30,8 @@ import { CodeBlock } from '@/components/code-block';
 import { UwuHero } from '@/app/(home)/uwu';
 import SourceImage from '@/public/source.png';
 import ContributorCounter from '@/components/contributor-count';
-import { CreateAppAnimation, Previews } from './page.client';
+import { AutoTypeTable } from '@/components/type-table';
+import { CreateAppAnimation, WhyInteractive } from './page.client';
 import {
   VercelLogo,
   NetlifyLogo,
@@ -34,16 +39,17 @@ import {
   OpenAPIIcon,
   EarthIcon,
 } from './icons';
+import Img from './img.png';
 
 const badgeVariants = cva(
   'mb-2 inline-flex size-7 items-center justify-center rounded-full bg-fd-primary font-medium text-fd-primary-foreground',
 );
 
-const code = `const frontmatterSchema = defaultValidators.frontmatter.extend({
+const code = `const schema = frontmatterSchema.extend({
   preview: z.string().optional()
 })`;
 
-export default function HomePage(): React.ReactElement {
+export default function Page(): React.ReactElement {
   return (
     <>
       <div
@@ -61,20 +67,17 @@ export default function HomePage(): React.ReactElement {
           }}
         >
           <div className="relative">
-            <StarsIcon
+            <Sparkle
               className="absolute -left-2 -top-2 z-10 size-4 xl:scale-[200%]"
-              stroke="none"
-              fill="currentColor"
-            />
-            <StarsIcon
-              className="absolute -bottom-2 -right-2 z-10 size-4 xl:scale-[200%]"
               stroke="none"
               fill="currentColor"
             />
             <Hero />
             <UwuHero />
           </div>
-          <div className="container border-x border-t py-24">
+          <Feedback />
+          <div className="container border-x border-t py-16 md:py-24">
+            <Terminal className="mx-auto mb-2 size-8 text-muted-foreground" />
             <h2 className="text-center text-2xl font-semibold sm:text-3xl">
               Start instantly.
               <br />
@@ -82,6 +85,7 @@ export default function HomePage(): React.ReactElement {
             </h2>
           </div>
           <Introduction />
+          <Why />
           <div
             className="container relative overflow-hidden border-x border-t py-16 sm:py-24"
             style={{
@@ -94,36 +98,140 @@ export default function HomePage(): React.ReactElement {
               <br />
               Built for developers.
             </h2>
-
-            <div
-              className="mx-auto mb-[-160px] mt-8 flex h-[240px] flex-row overflow-hidden rounded-xl border bg-fd-card/50 backdrop-blur-lg md:w-[70%]"
-              style={{
-                maskImage: 'linear-gradient(to bottom, white, transparent)',
-              }}
-            >
-              <div className="flex w-1/4 flex-col gap-4 border-r bg-fd-card p-4">
-                <div className="h-4 w-full rounded-full bg-fd-muted-foreground/20" />
-                <div className="h-4 w-1/2 rounded-full bg-fd-muted-foreground/20" />
-                <div className="h-4 w-1/2 rounded-full bg-fd-muted-foreground/20" />
-              </div>
-              <div className="flex flex-1 flex-col gap-4 px-4 py-8">
-                <div className="mb-3 h-6 w-1/4 rounded-full bg-fd-muted-foreground/20" />
-                <div className="h-4 w-1/3 rounded-full bg-fd-muted-foreground/20" />
-                <div className="h-4 w-full rounded-full bg-fd-muted-foreground/20" />
-                <div className="h-4 w-1/2 rounded-full bg-fd-muted-foreground/20" />
-              </div>
-              <div className="w-1/4 pt-8 max-lg:hidden">
-                <div className="h-4 w-1/2 rounded-full bg-fd-muted-foreground/20" />
-              </div>
-            </div>
           </div>
-          <Highlights />
           <Features />
+          <Highlights />
           <Contributing />
           <End />
         </div>
       </main>
     </>
+  );
+}
+
+function Why(): React.ReactElement {
+  return (
+    <div
+      className="container relative overflow-hidden border-x border-t px-8 pb-4 pt-12 md:pt-24"
+      style={{
+        perspective: '900px',
+      }}
+    >
+      {new Array(10).fill(0).map((_, i) => (
+        <div
+          key={i}
+          className="absolute -left-20 top-0 z-[-1] h-[1000px] max-h-[100vw] origin-top-right rotate-45 bg-gradient-to-b from-primary blur-xl"
+          style={{
+            width: Math.random() * 32,
+            animation: `lightray ${((i + 2) * 2).toString()}s linear infinite`,
+          }}
+        />
+      ))}
+      <style>
+        {`@keyframes lightray {
+        from {
+        transform: rotate(40deg);
+        opacity: 100%;
+        }
+        to {
+        transform: rotate(-90deg);
+        opacity: 0%;
+        }
+        }`}
+      </style>
+      <h2 className="bg-gradient-to-b from-foreground to-foreground/40 bg-clip-text text-center text-2xl font-semibold text-transparent md:text-4xl">
+        Build docs 100x faster and easier
+        <p className="max-md:hidden">with Fumadocs</p>
+      </h2>
+      <p className="mt-4 text-center text-foreground/50">
+        Fumadocs offers a complete toolchain to build and maintain your docs.
+      </p>
+      <WhyInteractive
+        typeTable={
+          <AutoTypeTable
+            name="MyType"
+            type={`
+export interface MyType {
+  /**
+  * The name of player
+  * @defaultValue 'hello'
+  */
+  name: string
+
+  /**
+  * There's a codeblock:
+  * \`\`\`ts
+  * console.log('hello world')
+  * \`\`\`
+  */
+  code: string
+}`}
+          />
+        }
+        codeblockSearchRouter={
+          <CodeBlock
+            lang="ts"
+            code={`import { source } from '@/lib/source';
+import { createFromSource } from 'fumadocs-core/search/server';
+ 
+export const { GET } = createFromSource(source);`}
+          />
+        }
+        codeblockTheme={
+          <CodeBlock
+            lang="ts"
+            code={`import { createPreset } from 'fumadocs-ui/tailwind-plugin';
+ 
+/** @type {import('tailwindcss').Config} */
+export default {
+  darkMode: 'class',
+  presets: [createPreset()],
+  content: [
+    './node_modules/fumadocs-ui/dist/**/*.js',
+    './components/**/*.{ts,tsx}',
+    './app/**/*.{ts,tsx}',
+    './content/**/*.mdx',
+  ],
+};`}
+          />
+        }
+        codeblockInteractive={
+          <CodeBlock
+            lang="tsx"
+            code={`import { File, Folder, Files } from 'fumadocs-ui/components/files';
+ 
+<Files>
+  <Folder name="app" defaultOpen>
+    <File name="layout.tsx" />
+    <File name="page.tsx" />
+    <File name="global.css" />
+  </Folder>
+  <File name="package.json" />
+</Files>`}
+          />
+        }
+        codeblockMdx={
+          <CodeBlock
+            lang="tsx"
+            code={`import { db } from '@/server/db';
+
+export function ProductTable() {
+  const products = db.getProducts()
+    
+  return (
+    <ul>
+      {products.map(product => <li key={product.key}>{product.name}</li>)}
+    </ul>
+  );
+}
+
+## Products
+
+<ProductTable />`}
+          />
+        }
+      />
+    </div>
   );
 }
 
@@ -291,21 +399,29 @@ function Search(): React.ReactElement {
 function Highlights(): React.ReactElement {
   return (
     <div className="grid grid-cols-1 border-r md:grid-cols-2 lg:grid-cols-3">
+      <div className="col-span-full flex flex-row items-start justify-center border-l border-t p-8 pb-2 text-center">
+        <h2 className="bg-pink-300/50 pl-1 text-2xl font-semibold">
+          Highlights
+        </h2>
+        <MousePointer className="-ml-1 mt-8" />
+      </div>
       <Highlight icon={RocketIcon} heading="Light and Fast.">
-        Fully powered documentation site with Next.js App Router.
+        Powerful documentation site with Next.js App Router.
       </Highlight>
       <Highlight icon={TimerIcon} heading="Performance.">
         Less client components, less Javascript, optimized images.
       </Highlight>
       <Highlight icon={LayoutIcon} heading="Accessibility & UX first.">
-        Focus on user experience and accessibility, providing an excellent
-        experience for your users.
+        Focus on user experience and accessibility.
       </Highlight>
-      <Highlight icon={SearchIcon} heading="Powerful document search.">
-        Built-in search implemented with Flexsearch, with high flexibility and
-        performance.
+      <Highlight icon={SearchIcon} heading="Syntax Highlighting.">
+        Beautiful syntax highlighter, powered by{' '}
+        <a href="https://shiki.style" rel="noreferrer noopener">
+          Shiki
+        </a>
+        .
       </Highlight>
-      <Highlight icon={KeyboardIcon} heading="Developer Experience.">
+      <Highlight icon={KeyboardIcon} heading="Automation.">
         Useful remark/rehype plugins. Typescript Twoslash, OpenAPI docs
         generation, and more.
       </Highlight>
@@ -338,18 +454,19 @@ function Highlight({
 
 function Hero(): React.ReactElement {
   return (
-    <div className="container relative z-[2] flex flex-col items-center overflow-hidden border-x border-t bg-fd-background px-6 pt-12 text-center md:pt-20 [.uwu_&]:hidden">
-      <h1 className="mb-6 text-4xl font-semibold md:text-5xl">
-        Build Your Docs.
+    <div className="container relative z-[2] flex flex-col overflow-hidden border-x border-t bg-fd-background px-6 pt-12 max-md:text-center md:px-12 md:pt-16 [.uwu_&]:hidden">
+      <h1 className="mb-8 text-4xl font-medium md:hidden">Build Your Docs</h1>
+      <h1 className="mb-8 max-w-[600px] text-4xl font-medium max-md:hidden">
+        Build excellent documentation site with less effort
       </h1>
-      <p className="mb-6 h-fit p-2 text-fd-muted-foreground md:max-w-[80%] md:text-xl">
-        Fumadocs is the framework for building documentation with{' '}
-        <b className="font-medium text-fd-foreground">
-          excellent UI and user experience
-        </b>
-        . Using the power of Next.js App Router and React Component.
+      <p className="mb-8 text-fd-muted-foreground md:max-w-[80%] md:text-xl">
+        Fumadocs is a <span className="text-fd-foreground">beautiful</span>{' '}
+        documentation framework with{' '}
+        <span className="text-fd-foreground">a complete toolchain</span>,
+        powered by <span className="text-foreground">Next.js App Router</span>.
+        Designed to be flexible and fast.
       </p>
-      <div className="inline-flex items-center gap-3">
+      <div className="inline-flex items-center gap-3 max-md:mx-auto">
         <Link
           href="/docs/ui"
           className={cn(
@@ -371,53 +488,77 @@ function Hero(): React.ReactElement {
           Open Demo
         </a>
       </div>
-      <svg
-        viewBox="0 0 500 500"
-        className="mb-[-150px] mt-16 size-[300px] duration-1000 animate-in slide-in-from-bottom-[500px] dark:invert md:mb-[-250px] md:size-[500px]"
-      >
-        <defs>
-          <filter id="noiseFilter">
-            <feTurbulence
-              type="fractalNoise"
-              baseFrequency="0.6"
-              numOctaves="1"
-              seed="15"
-              result="turbulence"
-            />
-            <feComposite in="SourceGraphic" in2="turbulence" operator="in" />
-            <feComposite in2="SourceGraphic" operator="lighter" />
-          </filter>
-          <radialGradient
-            id="Gradient1"
-            cx="50%"
-            cy="50%"
-            r="80%"
-            fx="10%"
-            fy="10%"
-          >
-            <stop stopColor="white" offset="35%" />
-            <stop stopColor="black" offset="100%" />
-          </radialGradient>
-        </defs>
-        <circle
-          cx="250"
-          cy="250"
-          r="250"
-          fill="url(#Gradient1)"
-          filter="url(#noiseFilter)"
-        />
-      </svg>
+      <Image
+        src={Img}
+        alt="preview"
+        className="mb-[-250px] mt-8 min-w-[800px] select-none duration-1000 animate-in fade-in slide-in-from-bottom-12 md:mb-[-370px] md:min-w-[1100px]"
+        priority
+      />
       <div
         className="absolute inset-0 z-[-1]"
         style={{
           backgroundImage: [
-            'radial-gradient(ellipse at top, transparent 60%, hsl(var(--primary) / 0.2))',
+            'radial-gradient(ellipse at top, transparent 60%, hsla(250,90%,90%,0.2))',
             'linear-gradient(to bottom, transparent 30%, hsl(var(--primary) / 0.2))',
             'linear-gradient(to bottom, hsl(var(--background)) 40%, transparent)',
             'repeating-linear-gradient(45deg, transparent,transparent 60px, hsl(var(--primary)) 61px, transparent 62px)',
           ].join(', '),
         }}
       />
+    </div>
+  );
+}
+
+function Feedback(): React.ReactElement {
+  return (
+    <div className="relative flex flex-col items-center overflow-hidden border-x border-t px-6 py-8 md:py-16">
+      <div
+        className="absolute inset-x-0 bottom-0 z-[-1] h-24 opacity-30 duration-1000 animate-in fade-in"
+        style={{
+          maskImage: 'linear-gradient(to bottom,transparent,white)',
+          backgroundImage:
+            'linear-gradient(to right, #4ebfff, transparent, #e92a67)',
+        }}
+      />
+      <p className="text-center font-medium text-muted-foreground">
+        Trusted by awesome teams and developers
+      </p>
+
+      <div className="mt-6 rounded-xl border bg-gradient-to-b from-secondary p-4 shadow-lg">
+        <p className="text-sm font-medium">
+          {`"A gorgeous documentation framework that composes beautifully into the
+          App Router."`}
+        </p>
+        <div className="mt-4 flex flex-row items-center gap-2">
+          <Image
+            src="https://avatars.githubusercontent.com/u/35677084"
+            alt="avatar"
+            width="32"
+            height="32"
+            className="size-8 rounded-full"
+          />
+          <div>
+            <a
+              href="https://shew.dev"
+              rel="noreferrer noopener"
+              className="text-sm font-medium"
+            >
+              Anthony Shew
+            </a>
+            <p className="text-xs text-fd-muted-foreground">
+              Turbo DX at Vercel
+            </p>
+          </div>
+          <Link
+            href="/showcase"
+            className={cn(
+              buttonVariants({ variant: 'outline', className: 'ml-auto' }),
+            )}
+          >
+            Showcase
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }
@@ -489,12 +630,28 @@ function Introduction(): React.ReactElement {
 function Contributing(): React.ReactElement {
   return (
     <div className="flex flex-col items-center border-x border-t px-4 py-16 text-center">
+      <Heart className="mb-4" />
       <h2 className="mb-4 text-xl font-semibold sm:text-2xl">
         Made Possible by You.
       </h2>
-      <p className="mb-8 text-fd-muted-foreground">
+      <p className="mb-4 text-fd-muted-foreground">
         Fumadocs is 100% powered by passion and open source community.
       </p>
+      <div className="mb-8 flex flex-row items-center gap-2">
+        <Link
+          href="/sponsors"
+          className={cn(buttonVariants({ variant: 'outline' }))}
+        >
+          Sponsors
+        </Link>
+        <a
+          href="https://github.com/fuma-nama/fumadocs/graphs/contributors"
+          rel="noreferrer noopener"
+          className={cn(buttonVariants({ variant: 'ghost' }))}
+        >
+          Contributors
+        </a>
+      </div>
       <ContributorCounter repoOwner="fuma-nama" repoName="fumadocs" />
     </div>
   );
@@ -505,10 +662,19 @@ function Features(): React.ReactElement {
     <div className="grid grid-cols-1 border-r md:grid-cols-2">
       <Feature
         icon={PaperclipIcon}
-        subheading="Multiple Sources"
+        subheading="Source Agnostic"
         heading="Your source. Your choice"
-        description="Native support for different content sources including Content Collections
-          and the official MDX loader."
+        description={
+          <>
+            <span className="font-medium text-foreground">
+              Designed to integrate with any content source:{' '}
+            </span>
+            <span>
+              Fumadocs has native support for Content Collections and Fumadocs
+              MDX, and compatible with your own CMS.
+            </span>
+          </>
+        }
         className="overflow-hidden"
         style={{
           backgroundImage:
@@ -555,23 +721,24 @@ function Features(): React.ReactElement {
         <Search />
       </Feature>
       <Feature
-        icon={MessageCircleIcon}
-        subheading="Loved by developers"
-        heading="Heard of our users?"
-        description="Fumadocs is used by many awesome developers, and we are making it better."
+        icon={Terminal}
+        subheading="Fumadocs CLI"
+        heading="The Shadcn UI for docs"
+        description="Fumadocs CLI creates interactive components for your docs, offering a rich experience to your users."
       >
-        <Link
-          href="/showcase"
-          className={cn(
-            buttonVariants({ variant: 'outline', className: 'mt-4' }),
-          )}
-        >
-          Showcase
-        </Link>
-
-        <div className="mt-8">
-          <Previews />
-        </div>
+        <CodeBlock
+          code="npm fumadocs add files"
+          lang="bash"
+          wrapper={{
+            title: 'Terminal',
+            allowCopy: false,
+          }}
+        />
+        <pre className="grid grid-cols-1 rounded-lg border bg-card p-4 text-xs leading-loose">
+          <code>Installing Files component...</code>
+          <code className="text-muted-foreground">{`-> ./components/files.tsx`}</code>
+          <code className="text-green-500">Successful</code>
+        </pre>
       </Feature>
       <Feature
         icon={CpuIcon}
@@ -588,7 +755,7 @@ function Features(): React.ReactElement {
               <LayoutIcon />
               <h3 className="font-semibold">Fumadocs UI</h3>
               <p className="text-sm text-fd-muted-foreground">
-                Full-powered framework with an excellent UI.
+                Default theme of Fumadocs with many useful components.
               </p>
             </div>
           </Link>
@@ -599,7 +766,7 @@ function Features(): React.ReactElement {
             <LibraryIcon />
             <h3 className="font-semibold">Core</h3>
             <p className="text-sm text-fd-muted-foreground">
-              Headless library with an useful set of utilities.
+              Headless library with a useful set of utilities.
             </p>
           </Link>
         </div>

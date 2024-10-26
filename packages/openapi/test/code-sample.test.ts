@@ -10,7 +10,7 @@ import * as JS from '@/requests/javascript';
 import { generateSample } from '@/schema/sample';
 import { createMethod } from '@/schema/method';
 import { methodKeys } from '@/build-routes';
-import { defaultRenderer } from '@/render/renderer';
+import { createRenders } from '@/render/renderer';
 import { type RenderContext } from '@/types';
 
 const example = fileURLToPath(
@@ -21,7 +21,9 @@ const document = await Parser.dereference<OpenAPI.Document>(example);
 const ctx: RenderContext = {
   baseUrl: 'http://localhost:8080',
   document,
-  renderer: defaultRenderer,
+  renderer: createRenders({
+    theme: 'vitesse-dark',
+  }),
   slugger: new Slugger(),
 };
 

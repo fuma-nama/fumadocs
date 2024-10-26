@@ -1,15 +1,17 @@
 import type { LoaderOutput, Meta, Page } from './loader';
 
 export interface MetaData {
-  icon?: string;
-  title?: string;
-  root?: boolean;
-  pages?: string[];
-  defaultOpen?: boolean;
+  icon?: string | undefined;
+  title?: string | undefined;
+  root?: boolean | undefined;
+  pages?: string[] | undefined;
+  defaultOpen?: boolean | undefined;
+
+  description?: string | undefined;
 }
 
 export interface PageData {
-  icon?: string;
+  icon?: string | undefined;
   title: string;
 }
 

@@ -1,0 +1,187 @@
+---
+title: Collections
+description: Collection of content data for your app
+---
+
+## Define Collections
+
+Define a collection to parse a certain set of files.
+
+```ts
+import { defineCollections } from 'fumadocs-mdx/config';
+import { z } from 'zod';
+
+export const blog = defineCollections({
+  type: 'doc',
+  dir: './content/blog',
+  schema: z.object({
+    // schema
+  }),
+  // other options
+});
+```
+
+### `type`
+
+The accepted type of collection.
+
+```ts
+import { defineCollections } from 'fumadocs-mdx/config';
+
+// only scan for json/yaml files
+export const metaFiles = defineCollections({
+  type: 'meta',
+  // options
+});
+```
+
+### `type: meta`
+
+Accept JSON/YAML Files, available options:
+
+<AutoTypeTable path="./content/docs/mdx/props.ts" name="MetaCollection" />
+
+### `type: doc`
+
+Markdown/MDX Documents, available options:
+
+<AutoTypeTable path="./content/docs/mdx/props.ts" name="DocCollection" />
+
+### `dir`
+
+Directories to scan input files.
+
+### `schema`
+
+The Zod schema to validate file data (frontmatter on `doc` type, content on `meta` type).
+
+```ts
+import { defineCollections } from 'fumadocs-mdx/config';
+import { z } from 'zod';
+
+export const blog = defineCollections({
+  type: 'doc',
+  dir: './content/blog',
+  schema: z.object({
+    name: z.string(),
+  }),
+});
+```
+
+You can add additional properties to the output.
+Note that the validation is done by build time, hence the output must be serializable.
+
+You can also pass a function and receives the transform context.
+
+```ts
+import { defineCollections } from 'fumadocs-mdx/config';
+import { z } from 'zod';
+
+export const blog = defineCollections({
+  type: 'doc',
+  dir: './content/blog',
+  schema: (ctx) => {
+    return z.object({
+      name: z.string(),
+      testPath: z.string().default(ctx.path),
+    });
+  },
+});
+```
+
+### `mdxOptions`
+
+Customise MDX options on collection level.
+
+```ts title="source.config.ts"
+import { defineCollections, getDefaultMDXOptions } from 'fumadocs-mdx/config';
+
+export const blog = defineCollections({
+  type: 'doc',
+  mdxOptions: {
+    // mdx options
+  },
+});
+```
+
+By design, this will remove all default settings applied by your global config and Fumadocs MDX.
+
+#### With Defaults
+
+Use `getDefaultMDXOptions` to apply default configurations, it accepts the [Extended MDX Options](/docs/mdx/mdx#extended).
+
+```ts title="source.config.ts"
+import { defineCollections, getDefaultMDXOptions } from 'fumadocs-mdx/config';
+
+export const blog = defineCollections({
+  type: 'doc',
+  mdxOptions: getDefaultMDXOptions({
+    // extended mdx options
+  }),
+});
+```
+
+For full control over MDX options, you can pass MDX options without it, which means no defaults will be applied.
+
+> This API only available on `doc` type.
+
+### `transform`
+
+A function to perform runtime transformation on collection entries.
+
+See [Transform](/docs/mdx/transform).
+
+## Define Docs
+
+You can use `defineDocs` to define the required collections to work with Fumadocs.
+It offers the same API as `defineCollections`.
+
+```ts
+import { defineDocs } from 'fumadocs-mdx/config';
+
+export const { docs, meta } = defineDocs({
+  docs: {
+    // optional, you can pass options to each collection
+  },
+  meta: {
+    // optional, you can pass options to each collection
+  },
+});
+```
+
+The `docs` and `meta` are collections on their own.
+You can pass collection options to them as shown above.
+
+### `dir`
+
+Instead of per collection, you should customise `dir` from `defineDocs`:
+
+```ts
+import { defineDocs } from 'fumadocs-mdx/config';
+
+export const { docs, meta } = defineDocs({
+  dir: 'my/content/dir',
+});
+```
+
+### `schema`
+
+You can extend the default Zod schema of `docs` and `meta`.
+
+```ts
+import { frontmatterSchema, metaSchema, defineDocs } from 'fumadocs-mdx/config';
+import { z } from 'zod';
+
+export const { docs, meta } = defineDocs({
+  docs: {
+    schema: frontmatterSchema.extend({
+      index: z.boolean().default(false),
+    }),
+  },
+  meta: {
+    schema: metaSchema.extend({
+      // other props
+    }),
+  },
+});
+```

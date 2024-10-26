@@ -1,14 +1,10 @@
 'use client';
-import Link from 'fumadocs-core/link';
-import {
-  type HTMLAttributes,
-  type ReactNode,
-  useEffect,
-  useState,
-} from 'react';
+import Link, { type LinkProps } from 'fumadocs-core/link';
+import { createContext, type ReactNode, useEffect, useState } from 'react';
 import { cn } from '@/utils/cn';
+import { useI18n } from '@/contexts/i18n';
 
-export interface NavBoxProps {
+export interface NavProviderProps {
   /**
    * Use transparent background
    *
@@ -27,10 +23,18 @@ export interface TitleProps {
   url?: string;
 }
 
-export function NavBox({
+interface NavContextType {
+  isTransparent: boolean;
+}
+
+export const NavContext = createContext<NavContextType>({
+  isTransparent: false,
+});
+
+export function NavProvider({
   transparentMode = 'none',
-  ...props
-}: NavBoxProps & HTMLAttributes<HTMLElement>): React.ReactElement {
+  children,
+}: NavProviderProps & { children: ReactNode }): ReactNode {
   const [transparent, setTransparent] = useState(transparentMode !== 'none');
 
   useEffect(() => {
@@ -48,22 +52,28 @@ export function NavBox({
   }, [transparentMode]);
 
   return (
-    <header
-      {...props}
-      className={cn(
-        'sticky top-0 z-50 border-b transition-colors',
-        transparent
-          ? 'border-transparent'
-          : 'border-fd-foreground/10 bg-fd-background/60 backdrop-blur-md',
-        props.className,
-      )}
-    />
+    <NavContext.Provider value={{ isTransparent: transparent }}>
+      {children}
+    </NavContext.Provider>
   );
 }
 
-export function Title({ title, url = '/' }: TitleProps): React.ReactElement {
+export function Title({
+  title,
+  url,
+  ...props
+}: TitleProps & Omit<LinkProps, 'title'>): React.ReactElement {
+  const { locale } = useI18n();
+
   return (
-    <Link href={url} className="inline-flex items-center gap-2 font-semibold">
+    <Link
+      href={url ?? (locale ? `/${locale}` : '/')}
+      {...props}
+      className={cn(
+        'inline-flex items-center gap-2.5 font-semibold',
+        props.className,
+      )}
+    >
       {title}
     </Link>
   );

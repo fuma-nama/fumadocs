@@ -7,6 +7,7 @@
     "declaration": false,
     "declarationMap": false,
     "incremental": true,
+    "moduleResolution": "bundler",
     "jsx": "preserve",
     "lib": ["dom", "dom.iterable", "esnext"],
     "module": "esnext",

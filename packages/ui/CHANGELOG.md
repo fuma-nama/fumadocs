@@ -1,5 +1,230 @@
 # next-docs-ui
 
+## 14.0.2
+
+### Patch Changes
+
+- bfc2bf2: Fix navbar issues
+  - fumadocs-core@14.0.2
+
+## 14.0.1
+
+### Patch Changes
+
+- 1a7d78a: Pass props to replaced layout components via Radix UI `<Slot />`
+  - fumadocs-core@14.0.1
+
+## 14.0.0
+
+### Major Changes
+
+- d9e908e: **Refactor import paths for layouts**
+
+  **migrate:** Use
+
+  ```ts
+  import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+
+  import { HomeLayout } from 'fumadocs-ui/layouts/home';
+
+  import { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+  ```
+
+  Instead of
+
+  ```ts
+  import { DocsLayout } from 'fumadocs-ui/layout';
+
+  import { HomeLayout } from 'fumadocs-ui/home-layout';
+
+  import { HomeLayoutProps } from 'fumadocs-ui/home-layout';
+  ```
+
+- 9a10262: **Move Twoslash UI components to `fumadocs-twoslash`**
+
+  **why:** Isolate logic from Fumadocs UI
+
+  **migrate:**
+
+  Before:
+
+  ```ts
+  import 'fumadocs-ui/twoslash.css';
+
+  import { Popup } from 'fumadocs-ui/twoslash/popup';
+  ```
+
+  After:
+
+  ```ts
+  import 'fumadocs-twoslash/twoslash.css';
+
+  import { Popup } from 'fumadocs-twoslash/ui';
+  ```
+
+  **Tailwind CSS is now required for Twoslash integration.**
+
+- d9e908e: **Remove `getImageMeta` from `fumadocs-ui/og`**
+
+  **migrate:** Use Metadata API from `fumadocs-core/server`
+
+- d9e908e: Replace `fumadocs-core/search/shared` with `fumadocs-core/server`
+- be53a0e: **`DocsCategory` now accept `from` prop instead of `pages` prop.**
+
+  **why:** This allows sharing the order of items with page tree.
+  **migrate:**
+
+  The component now takes `from` prop which is the Source API object.
+
+  ```tsx
+  import { source } from '@/lib/source';
+  import { DocsCategory } from 'fumadocs-ui/page';
+
+  const page = source.getPage(params.slug);
+
+  <DocsCategory page={page} from={source} />;
+  ```
+
+### Minor Changes
+
+- 34cf456: Support `disableThemeSwitch` on layouts
+- d9e908e: Bundle icons into dist
+- ad47fd8: Show i18n language toggle on home layout
+- 87063eb: Add root toggle to sidebar automatically
+- 64f0653: Introduce `--fd-nav-height` CSS variable for custom navbar
+- e1ee822: Support hast nodes in `toc` variable
+- 3d054a8: Support linking to a specific tab
+
+### Patch Changes
+
+- f949520: Support Shiki diff transformer
+- 367f4c3: Improve Root Toggle component
+- d9e908e: Change default URL of title on i18n mode
+- d9e908e: Add center to root toggle
+- e612f2a: Make compatible with Next.js 15
+- 3d0369a: Improve edit on GitHub button
+- be820c4: Bump deps
+- Updated dependencies [e45bc67]
+- Updated dependencies [d9e908e]
+- Updated dependencies [d9e908e]
+- Updated dependencies [f949520]
+- Updated dependencies [9a0b09f]
+- Updated dependencies [9a0b09f]
+- Updated dependencies [367f4c3]
+- Updated dependencies [e1ee822]
+- Updated dependencies [e612f2a]
+- Updated dependencies [9a0b09f]
+- Updated dependencies [d9e908e]
+- Updated dependencies [8ef00dc]
+- Updated dependencies [979e301]
+- Updated dependencies [d9e908e]
+- Updated dependencies [979e301]
+- Updated dependencies [15781f0]
+- Updated dependencies [be820c4]
+- Updated dependencies [d9e908e]
+  - fumadocs-core@14.0.0
+
+## 13.4.10
+
+### Patch Changes
+
+- 4cb74d5: Expose more props to Image Zoom
+- Updated dependencies [6231ad3]
+  - fumadocs-core@13.4.10
+
+## 13.4.9
+
+### Patch Changes
+
+- bcf51a6: Improve banner rainbow variant
+- Updated dependencies [083f04a]
+  - fumadocs-core@13.4.9
+
+## 13.4.8
+
+### Patch Changes
+
+- 5581733: Add center to root toggle
+- 1a327cc: Fix props types of Root Toggle
+- Updated dependencies [78e59e7]
+  - fumadocs-core@13.4.8
+
+## 13.4.7
+
+### Patch Changes
+
+- 6e1923e: Fix ocean present background repeat
+- 6e1923e: Introduce `rainbow` variant on Banner component
+- Updated dependencies [6e1923e]
+  - fumadocs-core@13.4.7
+
+## 13.4.6
+
+### Patch Changes
+
+- b33aff0: Fix typography styles
+- afb697e: Fix Next.js 14.2.8 dynamic import problems
+- 6bcd263: Fix Banner component z-index
+- Updated dependencies [afb697e]
+- Updated dependencies [daa66d2]
+  - fumadocs-core@13.4.6
+
+## 13.4.5
+
+### Patch Changes
+
+- d46a3f1: Improve search dialog
+  - fumadocs-core@13.4.5
+
+## 13.4.4
+
+### Patch Changes
+
+- Updated dependencies [729928e]
+  - fumadocs-core@13.4.4
+
+## 13.4.3
+
+### Patch Changes
+
+- fumadocs-core@13.4.3
+
+## 13.4.2
+
+### Patch Changes
+
+- 0c251e5: Bump deps
+- 0c251e5: Support Shiki inline code
+- 0c251e5: Improve nested list styles
+- Updated dependencies [7dabbc1]
+- Updated dependencies [0c251e5]
+- Updated dependencies [3b56170]
+  - fumadocs-core@13.4.2
+
+## 13.4.1
+
+### Patch Changes
+
+- Updated dependencies [95dbba1]
+  - fumadocs-core@13.4.1
+
+## 13.4.0
+
+### Minor Changes
+
+- 26f5360: Support built-in OG Image generation
+
+### Patch Changes
+
+- fumadocs-core@13.4.0
+
+## 13.3.3
+
+### Patch Changes
+
+- Updated dependencies [f8cc167]
+  - fumadocs-core@13.3.3
+
 ## 13.3.2
 
 ### Patch Changes

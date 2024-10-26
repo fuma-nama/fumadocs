@@ -1,5 +1,51 @@
 # create-next-docs-app
 
+## 14.0.2
+
+## 14.0.1
+
+## 14.0.0
+
+## 13.4.10
+
+## 13.4.9
+
+## 13.4.8
+
+## 13.4.7
+
+### Patch Changes
+
+- 6e1923e: Fix typos
+
+## 13.4.6
+
+### Patch Changes
+
+- 9c2095e: Add home layout by default
+
+## 13.4.5
+
+## 13.4.4
+
+## 13.4.3
+
+### Patch Changes
+
+- e409799: Fix typos
+
+## 13.4.2
+
+### Patch Changes
+
+- 0c251e5: Bump deps
+
+## 13.4.1
+
+## 13.4.0
+
+## 13.3.3
+
 ## 13.3.2
 
 ## 13.3.1

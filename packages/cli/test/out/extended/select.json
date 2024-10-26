@@ -1,0 +1,17 @@
+{
+  "name": "select",
+  "files": [
+    {
+      "imports": {
+        "../../repo/components/button": "components:ui/button.tsx"
+      },
+      "content": "import { Button } from '../../repo/components/button';\n\nexport function Select(): string {\n  return Button();\n}\n",
+      "path": "components:select.ts"
+    }
+  ],
+  "subComponents": [
+    "button"
+  ],
+  "dependencies": {},
+  "devDependencies": {}
+}

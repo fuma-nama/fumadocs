@@ -3,29 +3,30 @@ title: Page Tree
 description: The structure of page tree.
 ---
 
-Page tree is a tree that includes all the pages, separator and folders.
+Page tree a tree structure that includes all the navigation links related to the docs, with separator and folders.
 
 It will be sent to the client and being referenced in navigation elements including the sidebar and breadcrumb.
 Hence, you shouldn't store any sensitive or large data in page tree.
 
 <Callout title="Note">
-  Unserializable data such as functions can't be passed to page tree.
+
+By design, page tree only contains necessary information of all pages and folders.
+
+Unserializable data such as functions can't be passed to page tree.
+
 </Callout>
 
 ## Conventions
 
 This is the definitions of Page Tree, you may refer to Page Conventions to learn how to structure your folders/pages.
 
+Certain nodes contain a `$ref` property to link to its original page/meta file, they are optional when hardcoding it.
+
 ### Root
 
 The initial root of page trees.
 
-```json doc-gen:typescript
-{
-  "file": "./content/docs/headless/props.ts",
-  "name": "PageTreeRoot"
-}
-```
+<AutoTypeTable path="./content/docs/headless/props.ts" name="PageTreeRoot" />
 
 ### Page
 
@@ -39,12 +40,7 @@ The initial root of page trees.
 
 > External urls are also supported
 
-```json doc-gen:typescript
-{
-  "file": "./content/docs/headless/props.ts",
-  "name": "PageTreeItem"
-}
-```
+<AutoTypeTable path="./content/docs/headless/props.ts" name="PageTreeItem" />
 
 ### Folder
 
@@ -62,12 +58,7 @@ The initial root of page trees.
 }
 ```
 
-```json doc-gen:typescript
-{
-  "file": "./content/docs/headless/props.ts",
-  "name": "PageTreeFolder"
-}
-```
+<AutoTypeTable path="./content/docs/headless/props.ts" name="PageTreeFolder" />
 
 #### As Root
 
@@ -86,12 +77,10 @@ A label between items.
 }
 ```
 
-```json doc-gen:typescript
-{
-  "file": "./content/docs/headless/props.ts",
-  "name": "PageTreeSeparator"
-}
-```
+<AutoTypeTable
+  path="./content/docs/headless/props.ts"
+  name="PageTreeSeparator"
+/>
 
 ## Icons
 
@@ -102,7 +91,9 @@ Icon is a `ReactElement`, supported by pages and folders.
 You can import the type from server package.
 
 ```ts
-import type { PageTree } from 'fumadocs-core/server'
+import type { PageTree } from 'fumadocs-core/server';
 
-const tree: PageTree = ...
+const tree: PageTree.Root = {
+  // props
+};
 ```

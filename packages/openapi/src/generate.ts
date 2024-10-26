@@ -187,6 +187,13 @@ export async function generateTags(
         }
       }
 
+      const displayName =
+        info &&
+        'x-displayName' in info &&
+        typeof info['x-displayName'] === 'string'
+          ? info['x-displayName']
+          : idToTitle(tag);
+
       return {
         tag,
         content: generateDocument({
@@ -197,7 +204,7 @@ export async function generateTags(
             hasHead: true,
           },
           dereferenced: document,
-          title: idToTitle(tag),
+          title: displayName,
           description: info?.description,
           context: {
             type: 'tag',

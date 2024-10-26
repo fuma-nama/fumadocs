@@ -1,22 +1,25 @@
 {
-  "title": "ui",
+  "title": "Framework",
+  "description": "The docs framework",
+  "icon": "Building2",
   "root": true,
   "pages": [
     "---Guide---",
     "index",
     "comparisons",
     "...",
+    "---Setup---",
+    "manual-installation",
+    "(integrations)",
     "---Writing---",
     "markdown",
     "page-conventions",
     "navigation",
-    "---References---",
+    "(files)",
+    "---UI---",
+    "theme",
     "components",
     "mdx",
-    "blocks",
-    "(integrations)",
-    "---Others---",
-    "museum",
-    "[Vercel](https://vercel.com)"
+    "blocks"
   ]
 }

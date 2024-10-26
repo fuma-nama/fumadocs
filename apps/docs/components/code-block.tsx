@@ -1,44 +1,53 @@
 import * as Base from 'fumadocs-ui/components/codeblock';
-import type { HTMLAttributes } from 'react';
-import { codeToHtml } from 'shiki';
+import { Fragment } from 'react';
+import { codeToHast } from 'shiki';
+import { toJsxRuntime, type Jsx } from 'hast-util-to-jsx-runtime';
+import { jsx, jsxs } from 'react/jsx-runtime';
 
-export type CodeBlockProps = HTMLAttributes<HTMLPreElement> & {
+export interface CodeBlockProps {
   code: string;
   wrapper?: Base.CodeBlockProps;
   lang: 'bash' | 'ts' | 'tsx';
-};
+}
 
 export async function CodeBlock({
   code,
   lang,
   wrapper,
-  ...props
 }: CodeBlockProps): Promise<React.ReactElement> {
-  const html = await codeToHtml(code, {
+  const hast = await codeToHast(code, {
     lang,
     defaultColor: false,
     themes: {
       light: 'github-light',
-      dark: 'github-dark',
+      dark: 'vesper',
     },
     transformers: [
       {
-        name: 'remove-pre',
-        root: (root) => {
-          if (root.children[0].type !== 'element') return;
-
-          return {
-            type: 'root',
-            children: root.children[0].children,
-          };
+        name: 'rehype-code:pre-process',
+        line(node) {
+          if (node.children.length === 0) {
+            // Keep the empty lines when using grid layout
+            node.children.push({
+              type: 'text',
+              value: ' ',
+            });
+          }
         },
       },
     ],
   });
 
-  return (
-    <Base.CodeBlock {...wrapper}>
-      <Base.Pre {...props} dangerouslySetInnerHTML={{ __html: html }} />
-    </Base.CodeBlock>
-  );
+  const rendered = toJsxRuntime(hast, {
+    jsx: jsx as Jsx,
+    jsxs: jsxs as Jsx,
+    Fragment,
+    development: false,
+    components: {
+      // @ts-expect-error -- JSX component
+      pre: Base.Pre,
+    },
+  });
+
+  return <Base.CodeBlock {...wrapper}>{rendered}</Base.CodeBlock>;
 }

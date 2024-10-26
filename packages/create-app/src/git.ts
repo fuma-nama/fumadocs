@@ -12,7 +12,7 @@ function isInGitRepository(cwd: string): boolean {
   try {
     execSync('git rev-parse --is-inside-work-tree', { stdio: 'ignore', cwd });
     return true;
-  } catch (_) {
+  } catch {
     return false;
   }
 }
@@ -21,7 +21,7 @@ function isInMercurialRepository(cwd: string): boolean {
   try {
     execSync('hg --cwd . root', { stdio: 'ignore', cwd });
     return true;
-  } catch (_) {
+  } catch {
     return false;
   }
 }
@@ -30,7 +30,7 @@ function isDefaultBranchSet(cwd: string): boolean {
   try {
     execSync('git config init.defaultBranch', { stdio: 'ignore', cwd });
     return true;
-  } catch (_) {
+  } catch {
     return false;
   }
 }
@@ -57,11 +57,11 @@ export function tryGitInit(root: string): boolean {
       cwd: root,
     });
     return true;
-  } catch (e) {
+  } catch {
     if (didInit) {
       try {
         rmSync(join(root, '.git'), { recursive: true, force: true });
-      } catch (_) {
+      } catch {
         // do nothing
       }
     }

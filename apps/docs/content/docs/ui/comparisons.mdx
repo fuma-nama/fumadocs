@@ -6,18 +6,18 @@ icon: GitCompareArrows
 
 ## Philosophy
 
-Fumadocs, unlike the other frameworks, expects you to write code and cooperate with other parts of your software.
+**Less Abstraction:** Fumadocs, unlike the other frameworks, expects you to write code and cooperate with the rest of your software.
 While most frameworks are configured with a configuration file, they usually lack of flexibility when you attempt to complete something more advanced.
-You can’t control how they render the page or the internal logic.
+You can’t control how they render the page nor the internal logic. Fumadocs shows you how the app works, instead of a single configuration file.
 
-**Fumadocs has no magic:** It gives you the utilities and a good-looking user interface.
-You are still using the features of Next.js App Router, configuring Static Site Generation same as a normal Next.js application.
+**Next.js Fundamentals:** It gives you the utilities and a good-looking UI.
+You are still using the features of Next.js App Router, configuring **Static Site Generation** same as a normal Next.js application.
 There is nothing new for Next.js developers, you can use it with confidence.
 
-For instance, in this docs, all index pages are rendered dynamically.
+For instance, in this docs, the cards of index pages are rendered dynamically.
 Feel free to take a look at the source code of this documentation.
 
-**Opinionated on UI:** The only thing Fumadocs UI offers is **User Interface**, it is opinionated on UI for the best mobile responsiveness and user experience.
+**Opinionated on UI:** The only thing Fumadocs UI (the default theme) offers is **User Interface**, it is opinionated on UI for the best mobile responsiveness and user experience.
 The design is regularly updated, and we welcome feedback about the UI.
 
 ## Nextra
@@ -25,10 +25,7 @@ The design is regularly updated, and we welcome feedback about the UI.
 Fumadocs is highly inspired by Nextra. For example, the Routing Conventions. That is why
 `meta.json` also exists in Fumadocs.
 
-**However, it is not a drop-in replacement for Nextra.**
-
-While we both support a lot of
-advanced usages, Nextra is more opinionated than Fumadocs. Fumadocs is accelerated by App Router. As a result, It provides many server-side functions, and you have to
+Nextra is more opinionated than Fumadocs. Fumadocs is accelerated by App Router. As a result, It provides many server-side functions, and you have to
 configure things manually compared to simply editing a configuration file.
 
 Fumadocs works great if you want more control over everything, such as
@@ -48,7 +45,7 @@ adding it to an existing codebase or implementing advanced routing.
 | Last Git Edit Time  | Yes          | Yes               |
 | Page Icons          | Yes          | No                |
 | RSC                 | Yes          | Pages Router Only |
-| Remote Source       | Yes          | Not Documented    |
+| Remote Source       | Yes          | Yes               |
 | SEO                 | Via Metadata | Yes               |
 | Built-in Components | Yes          | Yes               |
 | RTL Layout          | Yes          | Yes               |

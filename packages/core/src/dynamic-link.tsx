@@ -19,7 +19,8 @@ export const DynamicLink = forwardRef<HTMLAnchorElement, DynamicLinkProps>(
     const url = useMemo(() => {
       return href?.replace(/\[.*]/, (key) => {
         const mappedKey = key.slice(1, -1);
-        const value = mappedKey in params ? params[mappedKey] : 'undefined';
+        const value = mappedKey in params ? params[mappedKey] : undefined;
+        if (!value) return '';
 
         return typeof value === 'string' ? value : value.join('/');
       });

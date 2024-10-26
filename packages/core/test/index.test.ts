@@ -7,6 +7,8 @@ import {
 import { describe, expect, test } from 'vitest';
 import type { Root } from '@/server/page-tree';
 import { findNeighbour } from '@/server/page-tree-utils';
+import { PageTree } from '../dist/server';
+import { getBreadcrumbItems } from '@/breadcrumb';
 
 test('Find Neighbours', () => {
   const tree: Root = {
@@ -64,6 +66,13 @@ describe('Path utilities', () => {
       path: 'nested/test.cn.mdx',
     });
 
+    expect(parseFilePath('nested/test.01.mdx')).toEqual({
+      dirname: 'nested',
+      name: 'test.01',
+      flattenedPath: 'nested/test.01',
+      path: 'nested/test.01.mdx',
+    });
+
     expect(parseFilePath('nested\\test.cn.mdx')).toEqual(
       parseFilePath('nested/test.cn.mdx'),
     );
@@ -105,4 +114,41 @@ describe('Path utilities', () => {
     expect(splitPath('a//c')).toEqual(['a', 'c']);
     expect(splitPath('/a/c')).toEqual(['a', 'c']);
   });
+});
+
+test('Breadcrumbs', () => {
+  const tree: PageTree.Root = {
+    name: 'Hello World',
+    children: [
+      {
+        type: 'page',
+        name: 'Hello World',
+        url: '/docs',
+      },
+      {
+        type: 'page',
+        name: 'Hello World',
+        url: '/docs/test',
+      },
+      {
+        type: 'page',
+        name: 'Fumadocs',
+        url: '/docs/test2',
+      },
+      {
+        type: 'folder',
+        name: 'Hello World',
+        index: {
+          type: 'page',
+          name: 'World',
+          url: '/docs/folder',
+        },
+        children: [],
+      },
+    ],
+  };
+
+  expect(getBreadcrumbItems('/docs/folder', tree)).toStrictEqual([
+    { name: 'World', url: '/docs/folder' },
+  ]);
 });

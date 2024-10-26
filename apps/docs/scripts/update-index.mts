@@ -1,10 +1,11 @@
 import algosearch from 'algoliasearch';
-import { sync } from 'fumadocs-core/search-algolia/server';
-import type { SearchIndex } from 'fumadocs-mdx';
+import { DocumentRecord, sync } from 'fumadocs-core/search/algolia';
+import * as fs from 'node:fs/promises';
 
-export async function updateSearchIndexes(
-  indexes: SearchIndex[],
-): Promise<void> {
+export async function updateSearchIndexes(): Promise<void> {
+  const content = await fs.readFile('./out/static.json');
+  const records = JSON.parse(content.toString()) as DocumentRecord[];
+
   if (!process.env.ALGOLIA_API_KEY) {
     console.warn('Algolia API Key not found, skip updating search index.');
     return;
@@ -29,14 +30,7 @@ export async function updateSearchIndexes(
 
   await sync(client, {
     document: process.env.NEXT_PUBLIC_ALGOLIA_INDEX ?? 'document',
-    documents: indexes.map((docs) => ({
-      _id: docs.id,
-      title: docs.title,
-      description: docs.description,
-      url: docs.url,
-      structured: docs.structuredData,
-      tag: docs.url.split('/')[2],
-    })),
+    documents: records,
   });
 
   console.log('search updated');

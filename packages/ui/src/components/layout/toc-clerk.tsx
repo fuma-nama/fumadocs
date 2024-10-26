@@ -1,10 +1,10 @@
 'use client';
 import type { TOCItemType } from 'fumadocs-core/server';
 import * as Primitive from 'fumadocs-core/toc';
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/utils/cn';
 import { useI18n } from '@/contexts/i18n';
-import { useTocThumb } from '@/utils/use-toc-thumb';
+import { TocThumb } from '@/components/layout/toc-thumb';
 import { ScrollArea, ScrollViewport } from '../ui/scroll-area';
 
 export default function ClerkTOCItems({
@@ -15,15 +15,16 @@ export default function ClerkTOCItems({
   isMenu?: boolean;
 }): React.ReactElement {
   const { text } = useI18n();
+  const viewRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const pos = useTocThumb(containerRef);
+
   const [svg, setSvg] = useState<{
     path: string;
     width: number;
     height: number;
   }>();
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (!containerRef.current) return;
     const container = containerRef.current;
 
@@ -78,10 +79,7 @@ export default function ClerkTOCItems({
 
   return (
     <ScrollArea className={cn('flex flex-col', isMenu && '-ms-3')}>
-      <ScrollViewport
-        className="relative min-h-0 text-sm text-fd-muted-foreground"
-        ref={containerRef}
-      >
+      <ScrollViewport className="relative min-h-0" ref={viewRef}>
         {svg ? (
           <div
             className="absolute start-0 top-0 rtl:-scale-x-100"
@@ -96,17 +94,14 @@ export default function ClerkTOCItems({
               }")`,
             }}
           >
-            <div
-              className="bg-fd-primary transition-all"
-              style={{
-                marginTop: pos[0],
-                height: pos[1],
-              }}
+            <TocThumb
+              containerRef={containerRef}
+              className="mt-[var(--fd-top)] h-[var(--fd-height)] bg-fd-primary transition-all"
             />
           </div>
         ) : null}
-        <Primitive.ScrollProvider containerRef={containerRef}>
-          <div className="flex flex-col">
+        <Primitive.ScrollProvider containerRef={viewRef}>
+          <div className="flex flex-col" ref={containerRef}>
             {items.map((item, i) => (
               <TOCItem
                 key={item.url}
@@ -149,9 +144,9 @@ function TOCItem({
     <Primitive.TOCItem
       href={item.url}
       style={{
-        paddingInlineStart: `${getItemOffset(item.depth)}px`,
+        paddingInlineStart: getItemOffset(item.depth),
       }}
-      className="relative py-2 transition-colors [overflow-wrap:anywhere] first:pt-0 last:pb-0 data-[active=true]:text-fd-primary"
+      className="prose relative py-2 text-sm text-fd-muted-foreground transition-colors [overflow-wrap:anywhere] first:pt-0 last:pb-0 data-[active=true]:text-fd-primary"
     >
       {offset !== upperOffset ? (
         <svg

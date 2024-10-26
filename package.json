@@ -16,23 +16,24 @@
     "types:check": "turbo run types:check",
     "version": "changeset version && pnpm install --lockfile-only"
   },
-  "prettier": "@vercel/style-guide/prettier",
   "devDependencies": {
-    "@changesets/cli": "^2.27.7",
-    "@typescript-eslint/eslint-plugin": "^8.1.0",
-    "@typescript-eslint/parser": "^8.1.0",
-    "@vercel/style-guide": "^6.0.0",
-    "concurrently": "^8.2.2",
-    "eslint": "^8.57.0",
-    "eslint-plugin-tailwindcss": "^3.17.4",
+    "@changesets/cli": "^2.27.9",
+    "@eslint/js": "^9.13.0",
+    "@types/eslint__js": "^8.42.3",
+    "concurrently": "^9.0.1",
+    "eslint": "^9.13.0",
+    "eslint-plugin-react": "^7.37.1",
+    "eslint-plugin-react-hooks": "5.1.0-rc-fb9a90fa48-20240614",
+    "eslint-plugin-tailwindcss": "^3.17.5",
     "prettier": "^3.3.3",
     "rimraf": "^6.0.1",
-    "tsup": "8.2.4",
-    "turbo": "2.0.14",
-    "typescript": "^5.5.4",
-    "vitest": "^2.0.5"
+    "tsup": "8.3.4",
+    "turbo": "2.2.3",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.11.0",
+    "vitest": "^2.1.3"
   },
-  "packageManager": "pnpm@9.8.0",
+  "packageManager": "pnpm@9.12.2",
   "engines": {
     "node": ">= 18.17.0"
   }

@@ -36,20 +36,43 @@ export const animations = {
       from: { opacity: '1', transform: 'scale(1) translateY(0)' },
       to: { opacity: '0', transform: 'scale(0.95) translateY(-10px)' },
     },
-    'fd-sidebar-collapse': {
-      // retain the current styles until collapsed
-      '0%, 100%': {
-        top: '0',
-        height: '100dvh',
-        'border-radius': 'none',
-      },
-    },
     'fd-fade-in': {
       from: { opacity: '0' },
       to: { opacity: '1' },
     },
     'fd-fade-out': {
       to: { opacity: '0' },
+    },
+
+    'fd-enterFromRight': {
+      from: { opacity: '0', transform: 'translateX(200px)' },
+      to: { opacity: '1', transform: 'translateX(0)' },
+    },
+    'fd-enterFromLeft': {
+      from: { opacity: '0', transform: 'translateX(-200px)' },
+      to: { opacity: '1', transform: 'translateX(0)' },
+    },
+    'fd-exitToRight': {
+      from: { opacity: '1', transform: 'translateX(0)' },
+      to: { opacity: '0', transform: 'translateX(200px)' },
+    },
+    'fd-exitToLeft': {
+      from: { opacity: '1', transform: 'translateX(0)' },
+      to: { opacity: '0', transform: 'translateX(-200px)' },
+    },
+    'fd-nav-menu-in': {
+      from: { opacity: '0', height: '0px' },
+      to: {
+        opacity: '1',
+        height: 'var(--radix-navigation-menu-viewport-height)',
+      },
+    },
+    'fd-nav-menu-out': {
+      from: {
+        opacity: '1',
+        height: 'var(--radix-navigation-menu-viewport-height)',
+      },
+      to: { opacity: '0', height: '0px' },
     },
   },
   animation: {
@@ -63,6 +86,13 @@ export const animations = {
     'fd-collapsible-up': 'fd-collapsible-up 150ms ease-out',
     'fd-accordion-down': 'fd-accordion-down 200ms ease-out',
     'fd-accordion-up': 'fd-accordion-up 200ms ease-out',
-    'fd-sidebar-collapse': 'fd-sidebar-collapse 150ms',
+
+    'fd-nav-menu-in': 'fd-nav-menu-in 200ms ease',
+    'fd-nav-menu-out': 'fd-nav-menu-out 200ms ease',
+
+    'fd-enterFromLeft': 'fd-enterFromLeft 250ms ease',
+    'fd-enterFromRight': 'fd-enterFromRight 250ms ease',
+    'fd-exitToLeft': 'fd-exitToLeft 250ms ease',
+    'fd-exitToRight': 'fd-exitToRight 250ms ease',
   },
 };

@@ -1,7 +1,7 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import { tryGitInit } from '@/git';
-import localVersions from '../versions.json';
+import { versions as localVersions } from '@/versions';
 import versionPkg from '../../create-app-versions/package.json';
 import type { PackageManager } from './auto-install';
 import { autoInstall } from './auto-install';
@@ -132,6 +132,10 @@ function createPackageJson(
   }
 
   if (template === 'fuma-docs-mdx') {
+    Object.assign(packageJson.scripts, {
+      postinstall: 'fumadocs-mdx',
+    });
+
     Object.assign(packageJson.dependencies, {
       'fumadocs-mdx': localVersions['fumadocs-mdx'],
     });

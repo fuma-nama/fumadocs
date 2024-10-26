@@ -1,5 +1,138 @@
 # next-docs-zeta
 
+## 14.0.2
+
+## 14.0.1
+
+## 14.0.0
+
+### Major Changes
+
+- e45bc67: **Remove deprecated `fumadocs-core/middleware` export**
+
+  **migrate:** Use `fumadocs-core/i18n`.
+
+- d9e908e: **Remove deprecated `languages` and `defaultLanguage` option from loader**
+
+  **migrate:** Use I18n config API
+
+- 9a0b09f: **Change usage of `useDocsSearch`**
+
+  **why:** Allow static search
+
+  **migrate:**
+
+  Pass client option, it can be algolia, static, or fetch (default).
+
+  ```ts
+  import { useDocsSearch } from 'fumadocs-core/search/client';
+
+  const { search, setSearch, query } = useDocsSearch({
+    type: 'fetch',
+    api: '/api/search', // optional
+  });
+  ```
+
+- 9a0b09f: **Remove Algolia Search Client**
+
+  **why:** Replace by the new search client
+
+  **migrate:**
+
+  ```ts
+  import { useDocsSearch } from 'fumadocs-core/search/client';
+
+  const { search, setSearch, query } = useDocsSearch({
+    type: 'algolia',
+    index,
+    ...searchOptions,
+  });
+  ```
+
+- 9a0b09f: **Refactor import path of `fumadocs-core/search-algolia/server` to `fumadocs-core/search/algolia`**
+- d9e908e: Improved usage for `createI18nSearchAPI` (replaced `createI18nSearchAPIExperimental`)
+- d9e908e: Replace `fumadocs-core/search/shared` with `fumadocs-core/server`
+
+### Minor Changes
+
+- d9e908e: Create search api from source (Support i18n without modifying search route handler)
+- 367f4c3: Support referencing original page/meta from page tree nodes
+- e1ee822: Support hast nodes in `toc` variable
+- 979e301: Replace flexearch with Orama
+- 979e301: Support static search (without server)
+- d9e908e: Support creating metadata API from sources
+
+### Patch Changes
+
+- f949520: Support Shiki diff transformer
+- e612f2a: Make compatible with Next.js 15
+- 8ef00dc: Apply `hideLocale` to Source `getPage` APIs
+- 15781f0: Fix breadcrumb empty when `includePage` isn't specified
+- be820c4: Bump deps
+
+## 13.4.10
+
+### Patch Changes
+
+- 6231ad3: fix(types): PageData & MetaData exactOptionalPropertyTypes compat
+
+## 13.4.9
+
+### Patch Changes
+
+- 083f04a: Fix link items text
+
+## 13.4.8
+
+### Patch Changes
+
+- 78e59e7: Support to add icons to link items in meta.json
+
+## 13.4.7
+
+### Patch Changes
+
+- 6e1923e: Improve anchors observer
+
+## 13.4.6
+
+### Patch Changes
+
+- afb697e: Fix Next.js 14.2.8 dynamic import problems
+- daa66d2: Support generating static params automatically with Source API
+
+## 13.4.5
+
+## 13.4.4
+
+### Patch Changes
+
+- 729928e: Fix build error without JS engine
+
+## 13.4.3
+
+## 13.4.2
+
+### Patch Changes
+
+- 7dabbc1: Remark Image: Support relative imports
+- 0c251e5: Bump deps
+- 3b56170: Support to enable experiment Shiki JS engine
+
+## 13.4.1
+
+### Patch Changes
+
+- 95dbba1: Scan table into search indexes by default
+
+## 13.4.0
+
+## 13.3.3
+
+### Patch Changes
+
+- f8cc167: Ignore numeric locale file name
+
 ## 13.3.2
 
 ### Patch Changes

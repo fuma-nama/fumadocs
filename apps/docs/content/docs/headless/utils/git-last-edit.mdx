@@ -9,13 +9,12 @@ Pass your repository name, and the path to file.
 
 ```ts
 import { getGithubLastEdit } from 'fumadocs-core/server';
-import { resolve } from 'url';
 
 const time = await getGithubLastEdit({
   owner: 'fuma-nama',
   repo: 'fumadocs',
   // example: "content/docs/index.mdx"
-  path: resolve('content/docs/', page.file.path),
+  path: `content/docs/${page.file.path}`,
 });
 ```
 
@@ -28,7 +27,7 @@ Learn more about
 [Authenticating to the REST API](https://docs.github.com/en/rest/overview/authenticating-to-the-rest-api).
 
 ```ts
-import { getGitLastEditTime } from 'fumadocs-core/server'
+import { getGithubLastEdit } from 'fumadocs-core/server'
 
  const time = await getGithubLastEdit({
     ...,

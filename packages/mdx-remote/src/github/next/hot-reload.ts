@@ -2,9 +2,7 @@ import { type WebSocket } from 'ws';
 import dynamic from 'next/dynamic';
 import { createElement } from 'react';
 
-const Client = dynamic(() => import('./hot-reload.client'), {
-  ssr: false,
-});
+const Client = dynamic(() => import('./hot-reload.client'));
 
 interface HotReloadOptions {
   /**

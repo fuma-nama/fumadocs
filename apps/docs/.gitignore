@@ -1,5 +1,7 @@
 out
-content/docs/ui/museum/**/*.mdx
-!content/docs/ui/museum/index.mdx
+content/docs/openapi/**/*.mdx
+!content/docs/openapi/index.mdx
 
 content/docs/ui/(integrations)/typescript.mdx
+public/registry
+!next-env.d.ts

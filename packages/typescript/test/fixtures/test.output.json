@@ -47,7 +47,7 @@
   },
   {
     "name": "Test3",
-    "description": "",
+    "description": "Player in the room",
     "entries": [
       {
         "name": "name",

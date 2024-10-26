@@ -7,7 +7,10 @@ import { File, Files, Folder } from 'fumadocs-ui/components/files';
 
 ## Overview
 
-This is a shared convention for organizing your pages, followed by all file-system based content sources including Fumadocs MDX.
+This is a shared convention for organizing your documents.
+
+Fumadocs MDX, and other file-system based content sources generate slugs and page trees depending on your file structure.
+Meaning that you can customise the sidebar and other navigation elements by changing the file structure.
 
 ## File
 
@@ -37,13 +40,22 @@ full: false
 ## Learn More
 ```
 
+#### Slugs
+
+The generated slugs will be same as your file path.
+
+| path (relative to root folder) | slugs             |
+| ------------------------------ | ----------------- |
+| `./dir/page.mdx`               | `['dir', 'page']` |
+| `./dir/index.mdx`              | `['dir']`         |
+
 ## Folder
 
 Organize multiple pages. When not specified, the display name will be generated from its folder name.
 
-Pages are sorted alphabetically, except for `index.mdx` which is always ordered at the top.
+Pages are sorted alphabetically, except `index.mdx` which is always ordered at the top.
 
-To customise folders, see [Meta file](#meta).
+To customise folders, use [Meta file](#meta).
 
 ### Folder Group
 
@@ -181,11 +193,20 @@ Use the syntax `[Text](url)` to insert links.
 }
 ```
 
+You can add an icon too.
+
+```json
+{
+  "title": "Folder",
+  "pages": ["index", "[Triangle][Vercel](https://vercel.com)"]
+}
+```
+
 ## Icons
 
-Since Fumadocs doesn't include an icon library, you have to convert the icon names to JSX elements so that it can be rendered as a component.
+Since Fumadocs doesn't include an icon library, you have to convert the icon names to JSX elements in runtime, and render it as a component.
 
-For built-in content sources like Fumadocs MDX, you can use [the `icon` handler](/docs/headless/source-api#icons) from Source API.
+You can use [the `icon` handler](/docs/headless/source-api#icons) from Source API.
 
 ## Multiple Page Trees
 
@@ -200,7 +221,7 @@ Adding a `root` property in meta file can mark your folder as a **root**.
 
 When the user is browsing a page under a root folder, only the child items of the folder will be visible.
 
-For example, when you are in a root folder called `core`, the other folders (e.g. `ui`) are not shown on the sidebar (and other navigation elements).
+For example, when you are in a root folder called `core`, the other folders (e.g. `ui`) are not shown on the sidebar and other navigation elements.
 
 <Files>
   <Folder name="core" defaultOpen>
@@ -212,10 +233,23 @@ For example, when you are in a root folder called `core`, the other folders (e.g
   </Folder>
 </Files>
 
-To allow users switching between different roots, implement a component that navigates to a page under the root folders.
-On Fumadocs UI, this is available via the [Root Toggle](/docs/ui/components/root-toggle) component.
+<Callout title='Fumadocs UI'>
 
-> By default, index pages are not considered as the pages "under" a folder, you must specify them in the `pages` property.
+    When a root folder exists, Fumadocs UI will add a Tabs component to the sidebar.
+    It allows user to switch between different roots.
+
+    You can customise it via [`sidebar.tabs`](/docs/ui/blocks/layout#sidebar-tabs) in Docs Layout.
+
+</Callout>
+
+<HeadlessOnly>
+  To allow users switching root folders, implement a navigation component that
+  navigates to a page under the root folder.
+</HeadlessOnly>
+
+### Index Pages
+
+By default, index pages are not considered as a page "under" the folder, you must specify them in the `pages` property.
 
 ## Internationalization
 

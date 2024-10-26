@@ -1,5 +1,47 @@
 # @fumadocs/content-collections
 
+## 1.1.5
+
+### Patch Changes
+
+- 8ef00dc: Improve types
+- be820c4: Bump deps
+- Updated dependencies [e45bc67]
+- Updated dependencies [d9e908e]
+- Updated dependencies [d9e908e]
+- Updated dependencies [f949520]
+- Updated dependencies [9a0b09f]
+- Updated dependencies [9a0b09f]
+- Updated dependencies [367f4c3]
+- Updated dependencies [e1ee822]
+- Updated dependencies [e612f2a]
+- Updated dependencies [9a0b09f]
+- Updated dependencies [d9e908e]
+- Updated dependencies [8ef00dc]
+- Updated dependencies [979e301]
+- Updated dependencies [d9e908e]
+- Updated dependencies [979e301]
+- Updated dependencies [15781f0]
+- Updated dependencies [be820c4]
+- Updated dependencies [d9e908e]
+  - fumadocs-core@14.0.0
+
+## 1.1.4
+
+### Patch Changes
+
+- 0c251e5: Bump deps
+- Updated dependencies [7dabbc1]
+- Updated dependencies [0c251e5]
+- Updated dependencies [3b56170]
+  - fumadocs-core@13.4.2
+
+## 1.1.3
+
+### Patch Changes
+
+- dfd8ac4: Fix type errors
+
 ## 1.1.2
 
 ### Patch Changes

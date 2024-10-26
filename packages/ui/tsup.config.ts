@@ -25,19 +25,19 @@ const exportedComponents = [
 const injectImports = [
   './src/page.tsx',
   './src/mdx.tsx',
-  './src/layout.tsx',
-  './src/home-layout.tsx',
+  './src/layouts/docs.tsx',
+  './src/layouts/home.tsx',
   './src/components/api.tsx',
 ];
 
 export default defineConfig({
   entry: [
     `./src/components/{${exportedComponents.join(',')}}.tsx`,
-    './src/{i18n,home-layout,layout,page,provider,mdx,tailwind-plugin}.{ts,tsx}',
-    './src/twoslash/popup.tsx',
+    './src/layouts/{docs,shared,home}.tsx',
+    './src/{i18n,home-layout,layout,page,provider,mdx,tailwind-plugin,og}.{ts,tsx}',
     './src/**/*.client.tsx',
   ],
-  external: ['server-only', '../../dist/image-zoom.css', 'tailwindcss'],
+  external: ['server-only', './image-zoom.css', 'tailwindcss'],
   async onSuccess() {
     const replaceImports = injectImports.map((src) => injectImport(src));
 

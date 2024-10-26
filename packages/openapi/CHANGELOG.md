@@ -1,5 +1,193 @@
 # @fuma-docs/openapi
 
+## 5.5.3
+
+### Patch Changes
+
+- 35695be: Support multiple tags in OpenAPI `groupBy: tag` file generation
+
+## 5.5.2
+
+### Patch Changes
+
+- Updated dependencies [bfc2bf2]
+  - fumadocs-ui@14.0.2
+  - fumadocs-core@14.0.2
+
+## 5.5.1
+
+### Patch Changes
+
+- Updated dependencies [1a7d78a]
+  - fumadocs-ui@14.0.1
+  - fumadocs-core@14.0.1
+
+## 5.5.0
+
+### Minor Changes
+
+- 129923e: Support custom `shiki` options
+- 160e52e: Support `disableCache` prop on APIPage
+
+### Patch Changes
+
+- 61a3d14: Support `x-displayName` on tags
+- e612f2a: Make compatible with Next.js 15
+- 8a32f79: Fix header name in code samples
+- be820c4: Bump deps
+- 42c9701: Fix TypeScript schema generation
+- Updated dependencies [e45bc67]
+- Updated dependencies [34cf456]
+- Updated dependencies [d9e908e]
+- Updated dependencies [d9e908e]
+- Updated dependencies [d9e908e]
+- Updated dependencies [f949520]
+- Updated dependencies [ad47fd8]
+- Updated dependencies [9a0b09f]
+- Updated dependencies [9a0b09f]
+- Updated dependencies [d9e908e]
+- Updated dependencies [367f4c3]
+- Updated dependencies [87063eb]
+- Updated dependencies [367f4c3]
+- Updated dependencies [64f0653]
+- Updated dependencies [e1ee822]
+- Updated dependencies [d9e908e]
+- Updated dependencies [d9e908e]
+- Updated dependencies [e612f2a]
+- Updated dependencies [3d0369a]
+- Updated dependencies [9a0b09f]
+- Updated dependencies [d9e908e]
+- Updated dependencies [9a10262]
+- Updated dependencies [d9e908e]
+- Updated dependencies [3d054a8]
+- Updated dependencies [8ef00dc]
+- Updated dependencies [979e301]
+- Updated dependencies [d9e908e]
+- Updated dependencies [979e301]
+- Updated dependencies [15781f0]
+- Updated dependencies [be820c4]
+- Updated dependencies [be53a0e]
+- Updated dependencies [d9e908e]
+  - fumadocs-core@14.0.0
+  - fumadocs-ui@14.0.0
+
+## 5.4.14
+
+### Patch Changes
+
+- Updated dependencies [6231ad3]
+- Updated dependencies [4cb74d5]
+  - fumadocs-core@13.4.10
+  - fumadocs-ui@13.4.10
+
+## 5.4.13
+
+### Patch Changes
+
+- Updated dependencies [083f04a]
+- Updated dependencies [bcf51a6]
+  - fumadocs-core@13.4.9
+  - fumadocs-ui@13.4.9
+
+## 5.4.12
+
+### Patch Changes
+
+- Updated dependencies [5581733]
+- Updated dependencies [78e59e7]
+- Updated dependencies [1a327cc]
+  - fumadocs-ui@13.4.8
+  - fumadocs-core@13.4.8
+
+## 5.4.11
+
+### Patch Changes
+
+- Updated dependencies [6e1923e]
+- Updated dependencies [6e1923e]
+- Updated dependencies [6e1923e]
+  - fumadocs-core@13.4.7
+  - fumadocs-ui@13.4.7
+
+## 5.4.10
+
+### Patch Changes
+
+- Updated dependencies [b33aff0]
+- Updated dependencies [afb697e]
+- Updated dependencies [6bcd263]
+- Updated dependencies [daa66d2]
+  - fumadocs-ui@13.4.6
+  - fumadocs-core@13.4.6
+
+## 5.4.9
+
+### Patch Changes
+
+- 5bca46f: Support removing all code samples
+- Updated dependencies [d46a3f1]
+  - fumadocs-ui@13.4.5
+  - fumadocs-core@13.4.5
+
+## 5.4.8
+
+### Patch Changes
+
+- Updated dependencies [729928e]
+  - fumadocs-core@13.4.4
+  - fumadocs-ui@13.4.4
+
+## 5.4.7
+
+### Patch Changes
+
+- fumadocs-core@13.4.3
+- fumadocs-ui@13.4.3
+
+## 5.4.6
+
+### Patch Changes
+
+- 0cff470: Enable group id on tabs by default
+- 0c251e5: Bump deps
+- Updated dependencies [7dabbc1]
+- Updated dependencies [0c251e5]
+- Updated dependencies [3b56170]
+- Updated dependencies [0c251e5]
+- Updated dependencies [0c251e5]
+  - fumadocs-core@13.4.2
+  - fumadocs-ui@13.4.2
+
+## 5.4.5
+
+### Patch Changes
+
+- Updated dependencies [95dbba1]
+  - fumadocs-core@13.4.1
+  - fumadocs-ui@13.4.1
+
+## 5.4.4
+
+### Patch Changes
+
+- Updated dependencies [26f5360]
+  - fumadocs-ui@13.4.0
+  - fumadocs-core@13.4.0
+
+## 5.4.3
+
+### Patch Changes
+
+- Updated dependencies [f8cc167]
+  - fumadocs-core@13.3.3
+  - fumadocs-ui@13.3.3
+
+## 5.4.2
+
+### Patch Changes
+
+- 3d1ec96: Improve schema fields margins
+
 ## 5.4.1
 
 ### Patch Changes

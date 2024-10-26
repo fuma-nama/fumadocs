@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-typescript",
-  "version": "2.0.1",
+  "version": "3.0.0",
   "description": "Typescript Integration for Fumadocs",
   "keywords": [
     "NextJs",
@@ -24,13 +24,6 @@
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "typesVersions": {
-    "*": {
-      "ui": [
-        "./dist/ui/index.d.ts"
-      ]
-    }
-  },
   "files": [
     "dist/*"
   ],
@@ -42,21 +35,25 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
+    "@types/node": "22.7.8",
     "fast-glob": "^3.3.1",
-    "hast-util-to-jsx-runtime": "^2.3.0",
+    "hast-util-to-jsx-runtime": "^2.3.2",
     "mdast-util-from-markdown": "^2.0.1",
     "mdast-util-gfm": "^3.0.0",
-    "mdast-util-to-hast": "^13.2.0"
+    "mdast-util-to-hast": "^13.2.0",
+    "shiki": "^1.22.0",
+    "ts-morph": "^24.0.0"
   },
   "devDependencies": {
-    "@types/estree": "^1.0.5",
+    "@types/estree": "^1.0.6",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.3",
-    "@types/react": "18.3.3",
-    "@types/react-dom": "18.3.0",
+    "@types/react": "18.3.11",
+    "@types/react-dom": "18.3.1",
     "eslint-config-custom": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "tsconfig": "workspace:*"
+    "tsconfig": "workspace:*",
+    "typescript": "^5.6.3"
   },
   "peerDependencies": {
     "typescript": "*"

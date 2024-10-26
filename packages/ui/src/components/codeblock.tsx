@@ -16,7 +16,7 @@ import {
   ScrollViewport,
 } from '@/components/ui/scroll-area';
 import { useCopyButton } from '@/utils/use-copy-button';
-import { buttonVariants } from '@/theme/variants';
+import { buttonVariants } from '@/components/ui/button';
 
 export type CodeBlockProps = HTMLAttributes<HTMLElement> & {
   /**
@@ -84,7 +84,8 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
         ref={ref}
         className={cn(
           'not-prose group fd-codeblock relative my-6 overflow-hidden rounded-lg border bg-fd-secondary/50 text-sm',
-          keepBackground && 'fd-codeblock-keep-bg',
+          keepBackground &&
+            'bg-[var(--shiki-light-bg)] dark:bg-[var(--shiki-dark-bg)]',
           className,
         )}
         {...props}
@@ -113,7 +114,7 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
         ) : (
           allowCopy && (
             <CopyButton
-              className="absolute right-2 top-2 z-[2] backdrop-blur-sm"
+              className="absolute right-2 top-2 z-[2] backdrop-blur-md"
               onCopy={onCopy}
             />
           )

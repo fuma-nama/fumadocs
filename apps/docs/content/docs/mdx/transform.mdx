@@ -1,0 +1,69 @@
+---
+title: Transform
+description: Runtime Transformation on collection entries
+---
+
+## Introduction
+
+Fumadocs MDX bundles collection entries during build time, but this introduced some limitations on the configurations, forcing the output must be serializable.
+
+You can use `transform` to transform collection entries on Next.js runtime.
+It includes extra benefits:
+
+- Unserializable output (e.g. functions)
+- Server/Client Components
+- Reference other parts of your Next.js apps
+
+### How does it works?
+
+This is possible by performing a transformation again on the bundled collection entries.
+Everything is done on Next.js runtime, so using server/client components on `transform` is possible.
+
+Be careful that:
+
+- **Not cached by bundlers:** avoid expensive calculations in `transform`.
+- **Use async imports:** Fumadocs MDX has to bundle the config file with esbuild before loading it. If importing a specific file results in errors, consider to use async import (`await import()`) instead.
+
+### Usage
+
+Pass a transform function.
+
+```ts
+import { defineCollections } from 'fumadocs-mdx/config';
+
+export const blog = defineCollections({
+  type: 'doc',
+  transform: (entry) => {
+    return {
+      ...entry,
+      test: 'hello world',
+    };
+  },
+  // other props
+});
+```
+
+You can also use imports inside the function.
+
+```ts
+import React from 'react';
+import { defineCollections } from 'fumadocs-mdx/config';
+
+export const blog = defineCollections({
+  type: 'doc',
+  transform: async (entry) => {
+    const { Component } = await import('./my-server-component');
+    return {
+      ...entry,
+      test: React.createElement(Component, {
+        // props
+      }),
+    };
+  },
+  // other props
+});
+```
+
+### Build-time Transform
+
+To transform collection entries during build time, use [Schema](/docs/mdx/configuration#schema) with [Zod `transform`](https://zod.dev/?id=transform) instead.

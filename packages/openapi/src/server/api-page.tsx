@@ -5,12 +5,12 @@ import Parser from '@apidevtools/json-schema-ref-parser';
 import { Operation } from '@/render/operation';
 import type { RenderContext } from '@/types';
 import { createMethod } from '@/schema/method';
-import { defaultRenderer, type Renderer } from '@/render/renderer';
+import { createRenders, type Renderer } from '@/render/renderer';
 
 export interface ApiPageProps
   extends Pick<
     RenderContext,
-    'generateCodeSamples' | 'generateTypeScriptSchema'
+    'generateCodeSamples' | 'generateTypeScriptSchema' | 'shikiOptions'
   > {
   document: string | OpenAPI.Document;
 
@@ -20,6 +20,8 @@ export interface ApiPageProps
   operations: Operation[];
   hasHead: boolean;
   renderer?: Partial<Renderer>;
+
+  disableCache?: boolean;
 }
 
 const cache = new Map<string, OpenAPI.Document>();
@@ -33,7 +35,7 @@ export async function APIPage(props: ApiPageProps): Promise<ReactElement> {
   const { operations, hasHead = true } = props;
   let document: OpenAPI.Document;
 
-  if (typeof props.document === 'string') {
+  if (typeof props.document === 'string' && !props.disableCache) {
     const cached = cache.get(props.document);
     document =
       cached ?? (await Parser.dereference<OpenAPI.Document>(props.document));
@@ -75,9 +77,10 @@ function getContext(
   return {
     document,
     renderer: {
-      ...defaultRenderer,
+      ...createRenders(options.shikiOptions),
       ...options.renderer,
     },
+    shikiOptions: options.shikiOptions,
     generateTypeScriptSchema: options.generateTypeScriptSchema,
     generateCodeSamples: options.generateCodeSamples,
     baseUrl: document.servers?.[0].url ?? 'https://example.com',

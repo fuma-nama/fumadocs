@@ -1,4 +1,4 @@
-import { AlertTriangle, Info, OctagonAlert } from 'lucide-react';
+import { AlertTriangle, CircleX, Info } from 'lucide-react';
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import { cn } from '@/utils/cn';
 
@@ -35,9 +35,7 @@ export const Callout = forwardRef<HTMLDivElement, CalloutProps>(
             warn: (
               <AlertTriangle className="size-5 fill-orange-500 text-fd-card" />
             ),
-            error: (
-              <OctagonAlert className="size-5 fill-red-500 text-fd-card" />
-            ),
+            error: <CircleX className="size-5 fill-red-500 text-fd-card" />,
           }[type]}
         <div className="min-w-0 flex-1">
           {title ? <p className="not-prose mb-2 font-medium">{title}</p> : null}

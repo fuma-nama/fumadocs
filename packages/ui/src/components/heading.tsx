@@ -21,7 +21,7 @@ export function Heading<T extends Types = 'h1'>({
       className={cn('flex scroll-m-28 flex-row items-center gap-2', className)}
       {...props}
     >
-      <a href={`#${props.id}`} className="peer">
+      <a data-card="" href={`#${props.id}`} className="peer">
         {props.children}
       </a>
       <Link

@@ -1,5 +1,128 @@
 # next-docs-mdx
 
+## 11.1.0
+
+### Minor Changes
+
+- 28a9c3c: Migrate loaders to ESM only
+
+## 11.0.0
+
+### Major Changes
+
+- e094284: **Require Fumadocs v14**
+
+### Patch Changes
+
+- fumadocs-core@14.0.1
+
+## 10.1.0
+
+### Minor Changes
+
+- 5cef1f1: Move `dir` option from `defineDocs`
+- e1ee822: Support hast nodes in `toc` variable
+- df9e0e1: Support `async` output mode
+
+### Patch Changes
+
+- 9a964ca: expose `start` function from loader
+- e612f2a: Make compatible with Next.js 15
+- be820c4: Bump deps
+- Updated dependencies [e45bc67]
+- Updated dependencies [d9e908e]
+- Updated dependencies [d9e908e]
+- Updated dependencies [f949520]
+- Updated dependencies [9a0b09f]
+- Updated dependencies [9a0b09f]
+- Updated dependencies [367f4c3]
+- Updated dependencies [e1ee822]
+- Updated dependencies [e612f2a]
+- Updated dependencies [9a0b09f]
+- Updated dependencies [d9e908e]
+- Updated dependencies [8ef00dc]
+- Updated dependencies [979e301]
+- Updated dependencies [d9e908e]
+- Updated dependencies [979e301]
+- Updated dependencies [15781f0]
+- Updated dependencies [be820c4]
+- Updated dependencies [d9e908e]
+  - fumadocs-core@14.0.0
+
+## 10.0.2
+
+### Patch Changes
+
+- f21c871: Change cache path of manifest files
+- Updated dependencies [78e59e7]
+  - fumadocs-core@13.4.8
+
+## 10.0.1
+
+### Patch Changes
+
+- 7e23388: Fix windows compatibility
+  - fumadocs-core@13.4.5
+
+## 10.0.0
+
+### Major Changes
+
+- ed83d01: **Support declarative collections**
+
+  **why:** This allows Fumadocs MDX to be more flexible.
+
+  **migrate:**
+
+  You don't need `exports` anymore, properties are merged into one object by default.
+
+  ```diff
+  - page.data.exports.toc
+  + page.data.toc
+
+  - page.data.exports.default
+  + page.data.body
+  ```
+
+  A `source.config.ts` is now required.
+
+  ```ts
+  import { defineDocs, defineConfig } from 'fumadocs-mdx/config';
+
+  export const { docs, meta } = defineDocs();
+
+  export default defineConfig();
+  ```
+
+  The `mdx-components.tsx` file is no longer used, pass MDX components to body instead.
+
+  Search indexes API is now replaced by Manifest API.
+
+  Please refer to the docs for further details.
+
+### Patch Changes
+
+- 0c251e5: Bump deps
+- Updated dependencies [7dabbc1]
+- Updated dependencies [0c251e5]
+- Updated dependencies [3b56170]
+  - fumadocs-core@13.4.2
+
+## 9.0.4
+
+### Patch Changes
+
+- 95dbba1: Support passing remark structure options
+- Updated dependencies [95dbba1]
+  - fumadocs-core@13.4.1
+
+## 9.0.3
+
+### Patch Changes
+
+- c0d1faf: Store additional `_data` to search indexes
+  - fumadocs-core@13.4.0
+
 ## 9.0.2
 
 ### Patch Changes

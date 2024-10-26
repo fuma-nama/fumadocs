@@ -1,5 +1,5 @@
 import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
-import { Fragment, type ReactNode } from 'react';
+import { type ReactNode } from 'react';
 import { noRef } from '@/utils/schema';
 import type { RenderContext } from '@/types';
 import { combineSchema } from '@/utils/combine-schema';
@@ -155,16 +155,13 @@ export function Schema({
 
   if (fields.length > 0)
     child.push(
-      <p key="fields">
-        {fields.map((field, i) => (
-          <Fragment key={field.key}>
-            <span>
-              {field.key}: <code>{field.value}</code>
-            </span>
-            {i !== fields.length - 1 ? <br /> : null}
-          </Fragment>
+      <div key="fields" className="flex flex-col gap-2">
+        {fields.map((field) => (
+          <span key={field.key}>
+            {field.key}: <code>{field.value}</code>
+          </span>
         ))}
-      </p>,
+      </div>,
     );
 
   if ((isObject(schema) || schema.allOf) && !parseObject) {

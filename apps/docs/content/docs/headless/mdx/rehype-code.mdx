@@ -10,13 +10,11 @@ A wrapper of [Shiki](https://shiki.style), the built-in syntax highlighter.
 Add the rehype plugin.
 
 ```ts
-import { rehypeCode } from 'fumadocs-core/mdx-plugins'
+import { rehypeCode } from 'fumadocs-core/mdx-plugins';
 
 const config = {
-    rehypePlugins: [
-      [rehypeCode, { ... }]
-    ],
-}
+  rehypePlugins: [rehypeCode],
+};
 ```
 
 ### Output
@@ -40,6 +38,12 @@ console.log('Hello');
 ````
 
 You may filter the meta string before processing it with the `filterMetaString` option.
+
+### Inline Code
+
+`console.log("hello world"){:js}` works.
+
+See https://shiki.style/packages/rehype#inline-code.
 
 ### Icon
 

@@ -1,7 +1,7 @@
 import { cva } from 'class-variance-authority';
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { useCallback, type ButtonHTMLAttributes } from 'react';
+import { type ButtonHTMLAttributes } from 'react';
 import { cn } from '@/utils/cn';
 
 const buttonVariants = cva('size-6 rounded-full p-1 text-fd-muted-foreground', {
@@ -20,9 +20,9 @@ export function ThemeToggle({
 }: ButtonHTMLAttributes<HTMLButtonElement>): React.ReactElement {
   const { setTheme, resolvedTheme } = useTheme();
 
-  const onToggle = useCallback(() => {
+  const onToggle = (): void => {
     setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
-  }, [setTheme, resolvedTheme]);
+  };
 
   return (
     <button

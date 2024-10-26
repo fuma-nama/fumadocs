@@ -1,11 +1,11 @@
-import { type TableOfContents } from 'fumadocs-core/server';
+import { type PageTree, type TableOfContents } from 'fumadocs-core/server';
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
 import dynamic from 'next/dynamic';
-import type { Page } from 'fumadocs-core/source';
+import type { LoaderConfig, LoaderOutput, Page } from 'fumadocs-core/source';
 import { type AnchorProviderProps, AnchorProvider } from 'fumadocs-core/toc';
 import { Card, Cards } from '@/components/card';
 import type { EditOnGitHubOptions } from '@/components/layout/edit-on-github';
-import { replaceOrDefault } from './utils/shared';
+import { replaceOrDefault } from '@/layouts/shared';
 import { cn } from './utils/cn';
 import type { BreadcrumbProps, FooterProps, TOCProps } from './page.client';
 
@@ -19,8 +19,8 @@ declare const {
 }: typeof import('./page.client');
 
 const ClerkTOCItems = dynamic(() => import('@/components/layout/toc-clerk'));
-const EditOnGitHub = dynamic(() =>
-  import('@/components/layout/edit-on-github').then((mod) => mod.EditOnGitHub),
+const EditOnGitHub = dynamic(
+  () => import('@/components/layout/edit-on-github'),
 );
 
 type TableOfContentOptions = Omit<TOCProps, 'items' | 'children'> &
@@ -80,83 +80,80 @@ export function DocsPage({
   breadcrumb = {},
   full = false,
   footer = {},
+  tableOfContentPopover: {
+    enabled: tocPopoverEnabled = true,
+    component: tocPopoverReplace,
+    ...tocPopoverOptions
+  } = {},
+  tableOfContent: {
+    // disable TOC on full mode, you can still enable it with `enabled` option.
+    enabled: tocEnabled = !full,
+    component: tocReplace,
+    ...tocOptions
+  } = {},
   ...props
 }: DocsPageProps): React.ReactElement {
-  const tocPopoverOptions = {
-    ...props.tableOfContentPopover,
-  };
-  const tocOptions = {
-    // disable TOC on full mode, you can still enable it with `enabled` option.
-    enabled: props.tableOfContent?.enabled ?? !full,
-    ...props.tableOfContent,
-  };
-
-  if (props.editOnGithub) {
-    tocOptions.footer = (
-      <>
-        {tocOptions.footer}
-        <EditOnGitHub {...props.editOnGithub} />
-      </>
-    );
-
-    tocPopoverOptions.footer = (
-      <>
-        {tocPopoverOptions.footer}
-        <EditOnGitHub {...props.editOnGithub} />
-      </>
-    );
-  }
-
   return (
     <AnchorProvider toc={toc} single={tocOptions.single}>
       <div
-        className={cn(
-          'mx-auto flex min-w-0 max-w-[860px] flex-1 flex-col',
-          !tocOptions.enabled &&
-            // ensure it's still centered when toc is hidden
-            'max-w-[1200px] md:ms-[max(0px,calc(50vw-min(50%,600px)-var(--fd-c-sidebar)))]',
-        )}
+        id="nd-page"
+        className="flex w-full min-w-0 max-w-[var(--fd-page-width)] flex-col md:transition-[max-width]"
+        style={
+          {
+            '--fd-page-width':
+              'calc(min(100vw, var(--fd-layout-width)) - var(--fd-sidebar-width) - var(--fd-toc-width))',
+            '--fd-toc-width': tocEnabled ? undefined : '0px',
+          } as object
+        }
       >
         {replaceOrDefault(
-          tocPopoverOptions,
-          <div
-            className={cn(
-              'sticky top-14 z-10 border-b bg-fd-background/60 text-sm backdrop-blur-md md:top-1 md:mx-3 md:rounded-full md:border md:shadow-md',
-              tocPopoverOptions.enabled !== true && 'lg:hidden',
+          { enabled: tocPopoverEnabled, component: tocPopoverReplace },
+          <TocPopover items={toc} {...tocPopoverOptions} className="lg:hidden">
+            {tocPopoverOptions.style === 'clerk' ? (
+              <ClerkTOCItems items={toc} isMenu />
+            ) : (
+              <TOCItems items={toc} isMenu />
             )}
-          >
-            <TocPopover
-              items={toc}
-              header={tocPopoverOptions.header}
-              footer={tocPopoverOptions.footer}
-            >
-              {tocPopoverOptions.style === 'clerk' ? (
-                <ClerkTOCItems items={toc} isMenu />
-              ) : (
-                <TOCItems items={toc} isMenu />
-              )}
-            </TocPopover>
-          </div>,
+          </TocPopover>,
+          {
+            items: toc,
+            ...tocPopoverOptions,
+          },
         )}
-        <article className="flex flex-1 flex-col gap-6 px-4 pt-10 md:px-6 md:pt-12">
+        <article
+          className={cn(
+            'mx-auto flex w-full flex-1 flex-col gap-6 px-4 pt-10 md:px-6 md:pt-12',
+            tocEnabled ? 'max-w-[860px]' : 'max-w-[1120px]',
+          )}
+        >
           {replaceOrDefault(breadcrumb, <Breadcrumb {...breadcrumb} />)}
           {props.children}
-          <div className="mt-auto" />
-          {props.lastUpdate ? (
-            <LastUpdate date={new Date(props.lastUpdate)} />
-          ) : null}
+          <div role="none" className="flex-1" />
+          <div className="flex flex-row flex-wrap items-center justify-between gap-4 empty:hidden">
+            {props.editOnGithub ? (
+              <EditOnGitHub {...props.editOnGithub} />
+            ) : null}
+            {props.lastUpdate ? (
+              <LastUpdate date={new Date(props.lastUpdate)} />
+            ) : null}
+          </div>
           {replaceOrDefault(footer, <Footer items={footer.items} />)}
         </article>
       </div>
       {replaceOrDefault(
-        tocOptions,
-        <Toc header={tocOptions.header} footer={tocOptions.footer}>
+        { enabled: tocEnabled, component: tocReplace },
+        <Toc {...tocOptions}>
           {tocOptions.style === 'clerk' ? (
             <ClerkTOCItems items={toc} />
           ) : (
             <TOCItems items={toc} />
           )}
         </Toc>,
+        {
+          items: toc,
+          ...tocOptions,
+        },
+        <div role="none" className="flex-1" />,
       )}
     </AnchorProvider>
   );
@@ -211,23 +208,56 @@ export const DocsTitle = forwardRef<
 
 DocsTitle.displayName = 'DocsTitle';
 
+function findParent(
+  node: PageTree.Root | PageTree.Folder,
+  page: Page,
+): PageTree.Root | PageTree.Folder | undefined {
+  if ('index' in node && node.index?.$ref?.file === page.file.path) {
+    return node;
+  }
+
+  for (const child of node.children) {
+    if (child.type === 'folder') {
+      const parent = findParent(child, page);
+      if (parent) return parent;
+    }
+
+    if (child.type === 'page' && child.$ref?.file === page.file.path) {
+      return node;
+    }
+  }
+}
+
 export function DocsCategory({
   page,
-  pages,
+  from,
+  tree: forcedTree,
   ...props
 }: HTMLAttributes<HTMLDivElement> & {
   page: Page;
-  pages: Page[];
-}): React.ReactElement {
-  const filtered = pages.filter(
-    (item) =>
-      item.file.dirname === page.file.dirname &&
-      item.file.name !== page.file.name,
-  );
+  from: LoaderOutput<LoaderConfig>;
+  tree?: PageTree.Root;
+}): React.ReactNode {
+  const tree =
+    forcedTree ??
+    (from._i18n
+      ? (from as LoaderOutput<LoaderConfig & { i18n: true }>).pageTree[
+          page.locale ?? from._i18n.defaultLanguage
+        ]
+      : from.pageTree);
+
+  const parent = findParent(tree, page);
+  if (!parent) return null;
+
+  const items = parent.children.flatMap<Page>((item) => {
+    if (item.type !== 'page' || item.url === page.url) return [];
+
+    return from.getNodePage(item) ?? [];
+  });
 
   return (
     <Cards {...props}>
-      {filtered.map((item) => (
+      {items.map((item) => (
         <Card
           key={item.url}
           title={item.data.title}

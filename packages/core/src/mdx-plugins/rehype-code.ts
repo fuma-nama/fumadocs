@@ -1,11 +1,21 @@
-import type { Root, RootContent } from 'hast';
-import rehypeShiki, { type RehypeShikiOptions } from '@shikijs/rehype';
+import type { Root } from 'hast';
+import type { RehypeShikiOptions } from '@shikijs/rehype';
+import rehypeShikiFromHighlighter from '@shikijs/rehype/core';
 import {
+  transformerNotationDiff,
   transformerNotationHighlight,
   transformerNotationWordHighlight,
 } from '@shikijs/transformers';
 import type { Processor, Transformer } from 'unified';
-import type { ShikiTransformer } from 'shiki';
+import {
+  getSingletonHighlighter,
+  type ShikiTransformer,
+  type BuiltinTheme,
+  bundledLanguages,
+} from 'shiki';
+import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
+import { createOnigurumaEngine } from 'shiki/engine/oniguruma';
+import { createJavaScriptRegexEngine } from 'shiki/engine/javascript';
 import type { IconOptions, CodeBlockIcon } from './transformer-icon';
 import { transformerIcon } from './transformer-icon';
 
@@ -38,10 +48,12 @@ export const rehypeCodeDefaultOptions: RehypeCodeOptions = {
     dark: 'github-dark',
   },
   defaultLanguage: 'plaintext',
+  experimentalJSEngine: false,
   defaultColor: false,
   transformers: [
     transformerNotationHighlight(),
     transformerNotationWordHighlight(),
+    transformerNotationDiff(),
   ],
   parseMetaString(meta) {
     const map: Record<string, string> = {};
@@ -83,6 +95,13 @@ export type RehypeCodeOptions = RehypeShikiOptions & {
    * @defaultValue true
    */
   tab?: false;
+
+  /**
+   * Enable Shiki's experimental JS engine
+   *
+   * @defaultValue false
+   */
+  experimentalJSEngine?: boolean;
 };
 
 /**
@@ -133,12 +152,39 @@ export function rehypeCode(
     codeOptions.transformers = [...codeOptions.transformers, transformerTab()];
   }
 
-  return rehypeShiki.call(this, codeOptions) as Transformer<Root, Root>;
+  let themeItems: unknown[] = [];
+
+  if ('themes' in codeOptions) {
+    themeItems = Object.values(codeOptions.themes);
+  } else if ('theme' in codeOptions) {
+    themeItems = [codeOptions.theme];
+  }
+
+  const highlighter = getSingletonHighlighter({
+    engine: codeOptions.experimentalJSEngine
+      ? createJavaScriptRegexEngine()
+      : createOnigurumaEngine(() => import('shiki/wasm')),
+    themes: themeItems.filter(Boolean) as BuiltinTheme[],
+    langs: codeOptions.langs ?? Object.keys(bundledLanguages),
+  });
+
+  const transformer = highlighter.then((instance) =>
+    rehypeShikiFromHighlighter(instance, codeOptions),
+  );
+
+  return async (tree, file) => {
+    await (
+      await transformer
+    )(tree, file, () => {
+      // nothing
+    });
+  };
 }
 
 function transformerTab(): ShikiTransformer {
   return {
     name: 'rehype-code:tab',
+    // @ts-expect-error -- types not compatible with MDX
     root(root) {
       const meta = this.options.meta;
       if (typeof meta?.tab !== 'string') return root;
@@ -156,11 +202,11 @@ function transformerTab(): ShikiTransformer {
               { type: 'mdxJsxAttribute', name: 'value', value: meta.tab },
             ],
             children: root.children,
-          } as RootContent,
+          } as MdxJsxFlowElement,
         ],
-      } as ReturnType<NonNullable<ShikiTransformer['root']>>;
+      };
     },
   };
 }
 
-export { type CodeBlockIcon, transformerIcon };
+export { type CodeBlockIcon, transformerIcon, transformerTab };

@@ -1,0 +1,43 @@
+---
+title: Manifest
+description: Generate manifest for production builds
+---
+
+## Usage
+
+Enable it from global config.
+
+```ts
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  generateManifest: true,
+});
+```
+
+During a production build (`next build`), Fumadocs MDX will output a manifest file in `.source/manifest.json`.
+You can use it to collect build information.
+
+### What is It?
+
+The manifest file contains the compiled info of collection entries.
+This includes their frontmatter, `structuredData` and `toc` (Table of Contents).
+
+You can check the type definitions to see all available properties.
+
+```ts
+import type { Manifest } from 'fumadocs-mdx';
+```
+
+### Read Manifest
+
+You can read the file after the build is finished.
+
+```ts
+import type { Manifest } from 'fumadocs-mdx';
+import { readFileSync } from 'node:fs';
+
+const manifest = JSON.parse(
+  readFileSync('.source/manifest.json').toString(),
+) as Manifest;
+```

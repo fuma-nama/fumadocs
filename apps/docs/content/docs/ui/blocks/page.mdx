@@ -23,17 +23,24 @@ import {
 </DocsPage>;
 ```
 
+<Callout type='info' title='Good to know'>
+
+Instead of rendering the title with `DocsTitle` or your custom component in `page.tsx`, you can put the title into MDX file.
+This will render the title in the MDX body.
+
+</Callout>
+
 ### Page
 
 The main layout of docs pages.
 
 ### Title
 
-Page title.
+Optional, display the page title.
 
 ### Description
 
-Page description.
+Optional, display the page description.
 
 ### Body
 
@@ -51,17 +58,30 @@ import { DocsBody } from 'fumadocs-ui/page';
 
 ### Category
 
-Optional, display the other pages in its folder.
+Optional, display the other pages in its folder in page tree.
 
 > You can use this component without `<DocsPage />`.
 
-```tsx
-import { DocsPage, DocsCategory } from 'fumadocs-ui/page';
-import { getPages } from '@/app/source';
+```tsx title="page.tsx"
+import { source } from '@/lib/source';
+import { DocsCategory } from 'fumadocs-ui/page';
 
-<DocsPage>
-  <DocsCategory page={page} pages={getPages()} />
-</DocsPage>;
+const page = source.getPage(['...']);
+
+<DocsCategory page={page} from={source} />;
+```
+
+By default, it takes the `locale` property from `page` to find the corresponding page tree to traverse.
+You can also specify it.
+
+```tsx title="page.tsx (i18n enabled)"
+import { source } from '@/lib/source';
+import { DocsCategory } from 'fumadocs-ui/page';
+
+const page = source.getPage(['...'], 'cn');
+
+// force to use English page tree
+<DocsCategory page={page} from={source} tree={source.pageTree['en']} />;
 ```
 
 ## Configurations
@@ -101,12 +121,7 @@ import { DocsPage } from 'fumadocs-ui/page';
 <DocsPage tableOfContent={options}>...</DocsPage>;
 ```
 
-```json doc-gen:typescript
-{
-  "file": "./content/docs/ui/props.ts",
-  "name": "TOCProps"
-}
-```
+<AutoTypeTable path="./content/docs/ui/props.ts" name="TOCProps" />
 
 #### Popover Mode
 
@@ -119,21 +134,11 @@ import { DocsPage } from 'fumadocs-ui/page';
 <DocsPage tableOfContentPopover={options}>...</DocsPage>;
 ```
 
-```json doc-gen:typescript
-{
-  "file": "./content/docs/ui/props.ts",
-  "name": "TOCPopoverProps"
-}
-```
+<AutoTypeTable path="./content/docs/ui/props.ts" name="TOCPopoverProps" />
 
 ### Last Updated Time
 
-Since you might have different version controls (e.g. Github) or it's from
-remote sources like Sanity, Fumadocs UI doesn't display the last updated time by
-default.
-
-For Github hosted documents, you can use
-the [Git Last Modified](/docs/headless/utils/git-last-edit) utility.
+Display last updated time of the page.
 
 ```tsx
 import { DocsPage } from 'fumadocs-ui/page';
@@ -141,9 +146,36 @@ import { DocsPage } from 'fumadocs-ui/page';
 <DocsPage lastUpdate={new Date(lastModifiedTime)} />;
 ```
 
+Since you might have different version controls (e.g. Github) or it's from
+remote sources like Sanity, Fumadocs UI doesn't display the last updated time by
+default.
+
+For Github hosted documents, you can use
+the [`getGithubLastEdit`](/docs/headless/utils/git-last-edit) utility.
+
+```tsx
+import { DocsPage } from 'fumadocs-ui/page';
+import { getGithubLastEdit } from 'fumadocs-core/server';
+
+const time = await getGithubLastEdit({
+  owner: 'fuma-nama',
+  repo: 'fumadocs',
+  path: `content/docs/${page.file.path}`,
+});
+
+<DocsPage lastUpdate={new Date(time)} />;
+```
+
+<Callout type='info' title='Note'>
+
+    You can also manually specify the last updated time of documents (e.g. using frontmatter).
+    Don't forget to [update the schema type](/docs/mdx/validation) on Fumadocs MDX.
+
+</Callout>
+
 ### Edit on GitHub
 
-A shortcut to add "Edit on GitHub" button to TOC footer.
+Add "Edit on GitHub" button to the page.
 
 ```tsx
 import { DocsPage } from 'fumadocs-ui/page';
@@ -173,23 +205,13 @@ import { DocsPage, DocsBody } from 'fumadocs-ui/page';
 </DocsPage>;
 ```
 
-```json doc-gen:typescript
-{
-  "file": "./content/docs/ui/props.ts",
-  "name": "FooterProps"
-}
-```
+<AutoTypeTable path="./content/docs/ui/props.ts" name="FooterProps" />
 
 ### Breadcrumb
 
 A navigation element, shown only when user is navigating in folders.
 
-```json doc-gen:typescript
-{
-  "file": "./content/docs/ui/props.ts",
-  "name": "BreadcrumbProps"
-}
-```
+<AutoTypeTable path="./content/docs/ui/props.ts" name="BreadcrumbProps" />
 
 ### MDX Page
 

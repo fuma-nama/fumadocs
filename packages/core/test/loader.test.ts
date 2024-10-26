@@ -7,6 +7,8 @@ import {
   type SourceConfig,
 } from '@/source/loader';
 import { parseFilePath } from '@/source';
+import { PageTree } from '../dist/server';
+import type { ReactElement } from 'react';
 
 test('get slugs', () => {
   expect(getSlugs(parseFilePath('index.mdx'))).toStrictEqual([]);
@@ -47,6 +49,9 @@ test('Get URL: Base', () => {
 
 test('Loader: Simple', () => {
   const result = loader({
+    pageTree: {
+      noRef: true,
+    },
     source: {
       files: [
         {
@@ -86,6 +91,10 @@ test('Loader: Simple', () => {
 
 test('Nested Directories', async () => {
   const result = loader({
+    icon: (v) => v as unknown as ReactElement,
+    pageTree: {
+      noRef: true,
+    },
     source: {
       files: [
         {
@@ -106,7 +115,13 @@ test('Nested Directories', async () => {
           type: 'meta',
           path: 'meta.json',
           data: {
-            pages: ['...', '!hidden', 'nested', '[Text](https://google.com)'],
+            pages: [
+              '...',
+              '!hidden',
+              'nested',
+              '[Text](https://google.com)',
+              '[Icon][Text](https://google.com)',
+            ],
           },
         },
         {
@@ -159,6 +174,13 @@ test('Nested Directories', async () => {
         },
         {
           "external": true,
+          "name": "Text",
+          "type": "page",
+          "url": "https://google.com",
+        },
+        {
+          "external": true,
+          "icon": "Icon",
           "name": "Text",
           "type": "page",
           "url": "https://google.com",
@@ -239,17 +261,36 @@ test('Internationalized Routing', () => {
     source: i18nSource,
   });
 
+  expect(
+    result.getNodePage(result.pageTree['en'].children[0] as PageTree.Item),
+  ).toEqual(
+    expect.objectContaining({
+      data: {
+        title: 'Hello',
+      },
+    }),
+  );
+
   expect(result.pageTree['en'], 'Page Tree').toMatchInlineSnapshot(`
     {
       "children": [
         {
+          "$ref": {
+            "file": "test.mdx",
+          },
           "name": "Hello",
           "type": "page",
           "url": "/en/test",
         },
         {
+          "$ref": {
+            "metaFile": undefined,
+          },
           "children": [
             {
+              "$ref": {
+                "file": "nested/test.mdx",
+              },
               "name": "Nested Page",
               "type": "page",
               "url": "/en/nested/test",
@@ -267,13 +308,22 @@ test('Internationalized Routing', () => {
     {
       "children": [
         {
+          "$ref": {
+            "file": "test.cn.mdx",
+          },
           "name": "Hello Chinese",
           "type": "page",
           "url": "/cn/test",
         },
         {
+          "$ref": {
+            "metaFile": "nested/meta.cn.json",
+          },
           "children": [
             {
+              "$ref": {
+                "file": "nested/test.cn.mdx",
+              },
               "name": "Nested Page Chinese",
               "type": "page",
               "url": "/cn/nested/test",
@@ -298,6 +348,9 @@ test('Internationalized Routing: Hide Prefix', () => {
       languages: ['cn', 'en'],
       defaultLanguage: 'en',
       hideLocale: 'default-locale',
+    },
+    pageTree: {
+      noRef: true,
     },
     source: i18nSource,
   });
@@ -351,6 +404,6 @@ test('Internationalized Routing: Hide Prefix', () => {
   `);
 
   expect(result.getPages().length).toBe(2);
-  expect(result.getPage(['test'])?.url).toBe('/en/test');
+  expect(result.getPage(['test'])?.url).toBe('/test');
   expect(result.getPage(['test'], 'cn')?.url).toBe('/cn/test');
 });

@@ -1,23 +1,50 @@
-import { Document } from 'flexsearch';
+import {
+  type Orama,
+  type SearchParams,
+  type DefaultTokenizerConfig,
+  type Tokenizer,
+  type OramaPlugin,
+  type SorterConfig,
+  save,
+} from '@orama/orama';
 import { type NextRequest } from 'next/server';
 import type { StructuredData } from '@/mdx-plugins/remark-structure';
 import type { SortedResult } from '@/server/types';
 import { createEndpoint } from '@/search/create-endpoint';
+import {
+  type AdvancedDocument,
+  type advancedSchema,
+  createDB,
+} from '@/search/create-db';
+import { searchSimple } from '@/search/search/simple';
+import { searchAdvanced } from '@/search/search/advanced';
+import {
+  createDBSimple,
+  type schema,
+  type SimpleDocument,
+} from './create-db-simple';
 
 export interface SearchServer {
   search: (
     query: string,
     options?: { locale?: string; tag?: string },
   ) => Promise<SortedResult[]>;
+
+  /**
+   * Export the database
+   *
+   * You can reference the exported database to implement client-side search
+   */
+  export: () => Promise<unknown>;
 }
 
 export interface SearchAPI extends SearchServer {
   GET: (request: NextRequest) => Promise<Response>;
 
-  search: (
-    query: string,
-    options?: { locale?: string; tag?: string },
-  ) => Promise<SortedResult[]>;
+  /**
+   * `GET` route handler that exports search indexes for static search.
+   */
+  staticGET: () => Promise<Response>;
 }
 
 /**
@@ -25,21 +52,32 @@ export interface SearchAPI extends SearchServer {
  */
 export type Dynamic<T> = () => T[] | Promise<T[]>;
 
-export interface SimpleOptions {
-  indexes: Index[] | Dynamic<Index>;
+interface SharedOptions {
   language?: string;
+
+  sort?: SorterConfig;
+  tokenizer?: Tokenizer | DefaultTokenizerConfig;
+  plugins?: OramaPlugin[];
 }
 
-export interface AdvancedOptions {
+export interface SimpleOptions extends SharedOptions {
+  indexes: Index[] | Dynamic<Index>;
+
+  /**
+   * Customise search options on server
+   */
+  search?: Partial<SearchParams<Orama<typeof schema>, SimpleDocument>>;
+}
+
+export interface AdvancedOptions extends SharedOptions {
   indexes: AdvancedIndex[] | Dynamic<AdvancedIndex>;
 
   /**
-   * Enable search tags for filtering results
-   *
-   * @defaultValue false
+   * Customise search options on server
    */
-  tag?: boolean;
-  language?: string;
+  search?: Partial<
+    SearchParams<Orama<typeof advancedSchema>, AdvancedDocument>
+  >;
 }
 
 export function createSearchAPI<T extends 'simple' | 'advanced'>(
@@ -61,80 +99,20 @@ export interface Index {
   keywords?: string;
 }
 
-export function initSimpleSearch({
-  indexes,
-  language,
-}: SimpleOptions): SearchServer {
-  const store = ['title', 'url'];
+export function initSimpleSearch(options: SimpleOptions): SearchServer {
+  const doc = createDBSimple(options);
 
-  async function getDocument(): Promise<Document<Index, string[]>> {
-    const items = typeof indexes === 'function' ? await indexes() : indexes;
-    const index = new Document<Index, typeof store>({
-      language,
-      optimize: true,
-      cache: 100,
-      document: {
-        id: 'url',
-        store,
-        index: [
-          {
-            field: 'title',
-            tokenize: 'forward',
-            resolution: 9,
-          },
-          {
-            field: 'description',
-            tokenize: 'strict',
-            context: {
-              depth: 1,
-              resolution: 9,
-            },
-          },
-          {
-            field: 'content',
-            tokenize: 'strict',
-            context: {
-              depth: 1,
-              resolution: 9,
-            },
-          },
-          {
-            field: 'keywords',
-            tokenize: 'strict',
-            resolution: 9,
-          },
-        ],
-      },
-    });
-
-    for (const page of items) {
-      index.add({
-        title: page.title,
-        description: page.description,
-        url: page.url,
-        content: page.content,
-        keywords: page.keywords,
-      });
-    }
-    return index;
-  }
-
-  const doc = getDocument();
   return {
+    async export() {
+      return {
+        type: 'simple',
+        ...save(await doc),
+      };
+    },
     search: async (query) => {
-      const results = (await doc).search(query, 5, {
-        enrich: true,
-        suggest: true,
-      });
+      const db = await doc;
 
-      if (results.length === 0) return [];
-
-      return results[0].result.map<SortedResult>((page) => ({
-        type: 'page',
-        content: page.doc.title,
-        id: page.doc.url,
-        url: page.doc.url,
-      }));
+      return searchSimple(db, query, options.search);
     },
   };
 }
@@ -157,158 +135,23 @@ export interface AdvancedIndex {
   url: string;
 }
 
-interface InternalIndex {
-  id: string;
-  url: string;
-  page_id: string;
-  type: 'page' | 'heading' | 'text';
-  content: string;
-
-  tag?: string;
-  keywords?: string;
-}
-
-export function initAdvancedSearch({
-  indexes,
-  language,
-  tag = false,
-}: AdvancedOptions): SearchServer {
-  const store = ['id', 'url', 'content', 'page_id', 'type', 'keywords'];
-
-  async function getDocument(): Promise<Document<InternalIndex, string[]>> {
-    const items = typeof indexes === 'function' ? await indexes() : indexes;
-    const index = new Document<InternalIndex, typeof store>({
-      language,
-      cache: 100,
-      optimize: true,
-      document: {
-        id: 'id',
-        tag: tag ? 'tag' : undefined,
-        store,
-        index: [
-          {
-            field: 'content',
-            tokenize: 'forward',
-            context: { depth: 2, bidirectional: true, resolution: 9 },
-          },
-          {
-            field: 'keywords',
-            tokenize: 'strict',
-            resolution: 9,
-          },
-        ],
-      },
-    });
-
-    for (const page of items) {
-      const data = page.structuredData;
-      let id = 0;
-
-      index.add({
-        id: page.id,
-        page_id: page.id,
-        type: 'page',
-        content: page.title,
-        keywords: page.keywords,
-        tag: page.tag,
-        url: page.url,
-      });
-
-      if (page.description) {
-        index.add({
-          id: page.id + (id++).toString(),
-          page_id: page.id,
-          tag: page.tag,
-          type: 'text',
-          url: page.url,
-          content: page.description,
-        });
-      }
-
-      for (const heading of data.headings) {
-        index.add({
-          id: page.id + (id++).toString(),
-          page_id: page.id,
-          type: 'heading',
-          tag: page.tag,
-          url: `${page.url}#${heading.id}`,
-          content: heading.content,
-        });
-      }
-
-      for (const content of data.contents) {
-        index.add({
-          id: page.id + (id++).toString(),
-          page_id: page.id,
-          tag: page.tag,
-          type: 'text',
-          url: content.heading ? `${page.url}#${content.heading}` : page.url,
-          content: content.content,
-        });
-      }
-    }
-
-    return index;
-  }
-
-  const doc = getDocument();
+export function initAdvancedSearch(options: AdvancedOptions): SearchServer {
+  const get = createDB(options);
 
   return {
-    search: async (query, options) => {
-      const index = await doc;
-      const results = index.search(query, 5, {
-        enrich: true,
-        tag: options?.tag,
-        limit: 6,
-      });
+    async export() {
+      return {
+        type: 'advanced',
+        ...save(await get),
+      };
+    },
+    search: async (query, searchOptions) => {
+      const db = await get;
 
-      const map = new Map<string, SortedResult[]>();
-
-      for (const item of results[0]?.result ?? []) {
-        if (item.doc.type === 'page') {
-          if (!map.has(item.doc.id)) {
-            map.set(item.doc.id, []);
-          }
-
-          continue;
-        }
-
-        const list = map.get(item.doc.page_id) ?? [];
-
-        list.push({
-          id: item.doc.id,
-          content: item.doc.content,
-          type: item.doc.type,
-          url: item.doc.url,
-        });
-
-        map.set(item.doc.page_id, list);
-      }
-
-      const sortedResult: SortedResult[] = [];
-      for (const [id, items] of map.entries()) {
-        const page = (
-          index as unknown as {
-            get: (id: string) => InternalIndex | null;
-          }
-        ).get(id);
-
-        if (!page) continue;
-
-        sortedResult.push({
-          id: page.id,
-          content: page.content,
-          type: 'page',
-          url: page.url,
-        });
-        sortedResult.push(...items);
-      }
-
-      return sortedResult;
+      return searchAdvanced(db, query, searchOptions?.tag, options.search);
     },
   };
 }
 
-// TODO: Use new i18n API (major)
-export { createI18nSearchAPI as createI18nSearchAPIExperimental } from './i18n-api';
-export { createI18nSearchAPI } from './legacy-i18n-api';
+export { createFromSource } from './create-from-source';
+export { createI18nSearchAPI } from './i18n-api';

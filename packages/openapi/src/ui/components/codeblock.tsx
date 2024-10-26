@@ -1,37 +1,39 @@
-import { type HTMLAttributes, useLayoutEffect, useState } from 'react';
+import { Fragment, type ReactNode, useEffect, useState } from 'react';
 import * as Base from 'fumadocs-ui/components/codeblock';
 import { useApiContext } from '@/ui/contexts/api';
-import { sharedTransformers } from '@/utils/shiki';
+import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
+import { jsx, jsxs } from 'react/jsx-runtime';
 
-export type CodeBlockProps = HTMLAttributes<HTMLPreElement> & {
+export type CodeBlockProps = {
   code: string;
   lang?: string;
 };
 
-export function CodeBlock({
-  code,
-  lang = 'json',
-  ...props
-}: CodeBlockProps): React.ReactElement {
-  const { highlighter } = useApiContext();
-  const [html, setHtml] = useState('');
-
-  useLayoutEffect(() => {
-    if (!highlighter) return;
-
-    const themedHtml = highlighter.codeToHtml(code, {
-      lang,
-      defaultColor: false,
-      themes: { light: 'github-light', dark: 'github-dark' },
-      transformers: sharedTransformers,
-    });
-
-    setHtml(themedHtml);
-  }, [code, lang, highlighter]);
-
-  return (
-    <Base.CodeBlock className="my-0">
-      <Base.Pre {...props} dangerouslySetInnerHTML={{ __html: html }} />
-    </Base.CodeBlock>
+export function CodeBlock({ code, lang = 'json' }: CodeBlockProps): ReactNode {
+  const { highlight } = useApiContext();
+  const [rendered, setRendered] = useState<ReactNode>(
+    <Base.Pre className="max-h-[288px]">{code}</Base.Pre>,
   );
+
+  useEffect(() => {
+    void highlight(lang, code).then((res) => {
+      const output = toJsxRuntime(res, {
+        jsx,
+        jsxs,
+        development: false,
+        Fragment,
+        components: {
+          pre: (props) => (
+            <Base.Pre className="max-h-[288px]" {...props}>
+              {props.children}
+            </Base.Pre>
+          ),
+        },
+      });
+
+      setRendered(output);
+    });
+  }, [code, highlight, lang]);
+
+  return <Base.CodeBlock className="my-0">{rendered}</Base.CodeBlock>;
 }

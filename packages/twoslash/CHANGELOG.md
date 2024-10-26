@@ -1,5 +1,67 @@
 # fumadocs-twoslash
 
+## 2.0.0
+
+### Major Changes
+
+- 9a10262: **Move Twoslash UI components to `fumadocs-twoslash`**
+
+  **why:** Isolate logic from Fumadocs UI
+
+  **migrate:**
+
+  Before:
+
+  ```ts
+  import 'fumadocs-ui/twoslash.css';
+
+  import { Popup } from 'fumadocs-ui/twoslash/popup';
+  ```
+
+  After:
+
+  ```ts
+  import 'fumadocs-twoslash/twoslash.css';
+
+  import { Popup } from 'fumadocs-twoslash/ui';
+  ```
+
+  **Tailwind CSS is now required for Twoslash integration.**
+
+### Patch Changes
+
+- be820c4: Bump deps
+- Updated dependencies [34cf456]
+- Updated dependencies [d9e908e]
+- Updated dependencies [f949520]
+- Updated dependencies [ad47fd8]
+- Updated dependencies [d9e908e]
+- Updated dependencies [367f4c3]
+- Updated dependencies [87063eb]
+- Updated dependencies [64f0653]
+- Updated dependencies [e1ee822]
+- Updated dependencies [d9e908e]
+- Updated dependencies [d9e908e]
+- Updated dependencies [e612f2a]
+- Updated dependencies [3d0369a]
+- Updated dependencies [9a10262]
+- Updated dependencies [d9e908e]
+- Updated dependencies [3d054a8]
+- Updated dependencies [d9e908e]
+- Updated dependencies [be820c4]
+- Updated dependencies [be53a0e]
+  - fumadocs-ui@14.0.0
+
+## 1.1.3
+
+### Patch Changes
+
+- 0c251e5: Bump deps
+- Updated dependencies [0c251e5]
+- Updated dependencies [0c251e5]
+- Updated dependencies [0c251e5]
+  - fumadocs-ui@13.4.2
+
 ## 1.1.2
 
 ### Patch Changes

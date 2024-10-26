@@ -41,8 +41,14 @@ export function APIInfo({
     <div className={cn('min-w-0 flex-1', className)} {...props}>
       <div
         className={cn(
-          'sticky top-24 z-20 mb-4 flex flex-row items-center gap-2 rounded-lg border bg-fd-card px-3 py-2 md:top-12 lg:top-1',
+          'sticky top-[calc(var(--fd-api-info-top)+36px)] z-20 mb-4 flex flex-row items-center gap-2 rounded-lg border bg-fd-card px-3 py-2 md:top-[var(--fd-api-info-top)]',
         )}
+        style={
+          {
+            '--fd-api-info-top':
+              'calc(var(--fd-nav-height) + var(--fd-banner-height) + 4px)',
+          } as object
+        }
       >
         <span
           className={cn(
@@ -108,20 +114,25 @@ export function Property({
   );
 }
 
-export function APIExample({
-  children,
-  className,
-  ...props
-}: HTMLAttributes<HTMLDivElement>): React.ReactElement {
+export function APIExample(
+  props: HTMLAttributes<HTMLDivElement>,
+): React.ReactElement {
   return (
     <div
-      className={cn(
-        'prose-no-margin md:sticky md:top-12 lg:top-1 xl:w-[400px]',
-        className,
-      )}
       {...props}
+      className={cn(
+        'prose-no-margin md:sticky md:top-[var(--fd-api-info-top)] xl:w-[400px]',
+        props.className,
+      )}
+      style={
+        {
+          '--fd-api-info-top':
+            'calc(var(--fd-nav-height) + var(--fd-banner-height) + 40px)',
+          ...props.style,
+        } as object
+      }
     >
-      {children}
+      {props.children}
     </div>
   );
 }

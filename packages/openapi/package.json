@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-openapi",
-  "version": "5.4.1",
+  "version": "5.5.3",
   "description": "Generate MDX docs for your OpenAPI spec",
   "keywords": [
     "NextJs",
@@ -27,19 +27,6 @@
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "typesVersions": {
-    "*": {
-      ".": [
-        "./dist/index.d.ts"
-      ],
-      "ui": [
-        "./dist/ui/index.d.ts"
-      ],
-      "server": [
-        "./dist/server/index.d.ts"
-      ]
-    }
-  },
   "files": [
     "dist"
   ],
@@ -51,38 +38,37 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@apidevtools/json-schema-ref-parser": "^11.7.0",
-    "@mdx-js/mdx": "^3.0.1",
-    "@radix-ui/react-select": "^2.1.1",
+    "@apidevtools/json-schema-ref-parser": "^11.7.2",
+    "@fumari/json-schema-to-typescript": "^1.1.1",
+    "@radix-ui/react-select": "^2.1.2",
     "@radix-ui/react-slot": "^1.1.0",
-    "@types/mdx": "^2.0.13",
     "class-variance-authority": "^0.7.0",
     "fast-glob": "^3.3.1",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "github-slugger": "^2.0.0",
+    "hast-util-to-jsx-runtime": "^2.3.2",
     "js-yaml": "^4.1.0",
-    "json-schema-to-typescript": "^15.0.0",
-    "lucide-react": "^0.428.0",
     "openapi-sampler": "^1.5.1",
-    "react-hook-form": "^7.52.2",
-    "remark": "^15.0.0",
-    "shiki": "^1.13.0",
-    "swr": "^2.2.5"
+    "react-hook-form": "^7.53.1",
+    "remark": "^15.0.1",
+    "remark-rehype": "^11.1.1",
+    "shiki": "^1.22.0"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "22.3.0",
+    "@types/node": "22.7.8",
     "@types/openapi-sampler": "^1.0.3",
-    "@types/react": "^18.3.3",
-    "bunchee": "^5.3.2",
+    "@types/react": "^18.3.11",
+    "bunchee": "^5.5.1",
     "eslint-config-custom": "workspace:*",
-    "next": "^14.2.5",
+    "lucide-react": "^0.453.0",
+    "next": "15.0.1",
     "openapi-types": "^12.1.3",
     "tsconfig": "workspace:*"
   },
   "peerDependencies": {
-    "next": ">= 14.1.0",
+    "next": "14.x.x || 15.x.x",
     "react": ">= 18",
     "react-dom": ">= 18"
   },

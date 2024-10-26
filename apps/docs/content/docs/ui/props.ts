@@ -4,7 +4,7 @@ import type { File, Folder } from 'fumadocs-ui/components/files';
 import type { InlineTOC } from 'fumadocs-ui/components/inline-toc';
 import type { TypeTable } from 'fumadocs-ui/components/type-table';
 import type { Card } from 'fumadocs-ui/components/card';
-import type { DocsLayoutProps } from 'fumadocs-ui/layout';
+import type { DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
 import type { AnchorHTMLAttributes, ComponentPropsWithoutRef } from 'react';
 import type { DocsPageProps } from 'fumadocs-ui/page';
 import type { AutoTypeTable } from 'fumadocs-typescript/ui';
@@ -68,14 +68,3 @@ export type TOCPopoverProps = NonNullable<
 export type FooterProps = NonNullable<DocsPageProps['footer']>;
 
 export type AutoTypeTableProps = ComponentPropsWithoutRef<typeof AutoTypeTable>;
-
-export interface AutoTypeTableExample {
-  /**
-   * Markdown syntax like links, `code` are supported.
-   *
-   * See https://fumadocs.vercel.app/docs/ui/components/type-table
-   */
-  name: string;
-
-  options: Partial<{ a: unknown }>;
-}

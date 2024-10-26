@@ -1,6 +1,5 @@
 'use client';
 import {
-  useCallback,
   createContext,
   useContext,
   useEffect,
@@ -32,13 +31,11 @@ export function SidebarProvider(
   props: SidebarProviderProps,
 ): React.ReactElement {
   const [openInner, setOpenInner] = useState(false);
-  const [open, setOpen] = [
-    props.open ?? openInner,
-    props.onOpenChange ?? setOpenInner,
-  ];
 
   return (
-    <SidebarContext.Provider value={[open, setOpen]}>
+    <SidebarContext.Provider
+      value={[props.open ?? openInner, props.onOpenChange ?? setOpenInner]}
+    >
       {props.children}
     </SidebarContext.Provider>
   );
@@ -64,9 +61,9 @@ export function SidebarTrigger<T extends ElementType = 'button'>({
     <As
       aria-label="Toggle Sidebar"
       data-open={open}
-      onClick={useCallback(() => {
+      onClick={() => {
         setOpen(!open);
-      }, [open, setOpen])}
+      }}
       {...props}
     />
   );

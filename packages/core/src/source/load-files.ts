@@ -16,6 +16,11 @@ export interface VirtualFile {
    */
   path: string;
   type: 'page' | 'meta';
+
+  /**
+   * Specified Slugs for page
+   */
+  slugs?: string[];
   data: unknown;
 }
 
@@ -37,8 +42,7 @@ export function loadFiles(files: VirtualFile[], options: LoadOptions): Storage {
     const relativePath = normalizedPath.slice(rootDir.length);
 
     if (file.type === 'page') {
-      const parsedPath = parseFilePath(relativePath);
-      const slugs = options.getSlugs(parsedPath);
+      const slugs = file.slugs ?? options.getSlugs(parseFilePath(relativePath));
 
       storage.write(relativePath, file.type, {
         slugs,
@@ -47,9 +51,7 @@ export function loadFiles(files: VirtualFile[], options: LoadOptions): Storage {
     }
 
     if (file.type === 'meta') {
-      storage.write(relativePath, file.type, {
-        data: file.data as MetaData,
-      });
+      storage.write(relativePath, file.type, file.data as MetaData);
     }
   }
 
