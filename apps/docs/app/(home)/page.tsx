@@ -67,11 +67,6 @@ export default function Page(): React.ReactElement {
           }}
         >
           <div className="relative">
-            <Sparkle
-              className="absolute -left-2 -top-2 z-10 size-4 xl:scale-[200%]"
-              stroke="none"
-              fill="currentColor"
-            />
             <Hero />
             <UwuHero />
           </div>
