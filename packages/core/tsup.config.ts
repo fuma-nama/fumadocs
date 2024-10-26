@@ -19,6 +19,7 @@ export default defineConfig({
     'src/search/server.ts',
     'src/search/algolia.ts',
     'src/utils/use-on-change.ts',
+    'src/utils/use-shiki.tsx',
     'src/i18n/index.ts',
   ],
 });

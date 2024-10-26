@@ -522,6 +522,9 @@ importers:
       hast-util-to-estree:
         specifier: ^3.1.0
         version: 3.1.0
+      hast-util-to-jsx-runtime:
+        specifier: ^2.3.2
+        version: 2.3.2
       image-size:
         specifier: ^1.1.1
         version: 1.1.1

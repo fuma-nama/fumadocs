@@ -18,6 +18,7 @@ import { createOnigurumaEngine } from 'shiki/engine/oniguruma';
 import { createJavaScriptRegexEngine } from 'shiki/engine/javascript';
 import type { IconOptions, CodeBlockIcon } from './transformer-icon';
 import { transformerIcon } from './transformer-icon';
+import { createStyleTransformer, defaultThemes } from '@/server/shiki';
 
 interface MetaValue {
   name: string;
@@ -43,14 +44,12 @@ const metaValues: MetaValue[] = [
 ];
 
 export const rehypeCodeDefaultOptions: RehypeCodeOptions = {
-  themes: {
-    light: 'github-light',
-    dark: 'github-dark',
-  },
+  themes: defaultThemes,
+  defaultColor: false,
   defaultLanguage: 'plaintext',
   experimentalJSEngine: false,
-  defaultColor: false,
   transformers: [
+    createStyleTransformer(),
     transformerNotationHighlight(),
     transformerNotationWordHighlight(),
     transformerNotationDiff(),
@@ -127,15 +126,6 @@ export function rehypeCode(
 
         // Remove empty line at end
         return code.replace(/\n$/, '');
-      },
-      line(hast) {
-        if (hast.children.length === 0) {
-          // Keep the empty lines when using grid layout
-          hast.children.push({
-            type: 'text',
-            value: ' ',
-          });
-        }
       },
     },
     ...codeOptions.transformers,
