@@ -182,14 +182,14 @@ export function APIPlayground({
         )}
       >
         <form
-          className="not-prose flex flex-col gap-5 rounded-lg border bg-fd-card p-3"
+          className="not-prose flex flex-col gap-5 rounded-xl border bg-fd-card p-3"
           onSubmit={onSubmit as React.FormEventHandler}
         >
           <div className="flex flex-row gap-2">
             <RouteDisplay route={route} />
             <button
               type="submit"
-              className={cn(buttonVariants({ color: 'secondary' }))}
+              className={cn(buttonVariants({ color: 'outline' }))}
               disabled={testQuery.isLoading}
             >
               Send
@@ -202,7 +202,7 @@ export function APIPlayground({
           <Accordions
             type="multiple"
             className={cn(
-              '-m-3 border-0 text-sm',
+              '-m-3 border-0 bg-transparent text-sm',
               path.length === 0 &&
                 query.length === 0 &&
                 header.length === 0 &&

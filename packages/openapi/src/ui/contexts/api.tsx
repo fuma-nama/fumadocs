@@ -8,7 +8,6 @@ import {
 } from 'react';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import type { RenderContext } from '@/types';
-import { sharedTransformers } from '@/utils/shiki';
 
 export interface ApiProviderProps {
   /**
@@ -23,10 +22,7 @@ export interface ApiProviderProps {
 interface ApiContextType {
   baseUrl?: string;
   setBaseUrl: (value: string) => void;
-  highlight: (
-    lang: string,
-    code: string,
-  ) => ReturnType<(typeof import('shiki/bundle/web'))['codeToHast']>;
+  shikiOptions: RenderContext['shikiOptions'];
 }
 
 const ApiContext = createContext<ApiContextType | undefined>(undefined);
@@ -59,17 +55,7 @@ export function ApiProvider({
         () => ({
           baseUrl,
           setBaseUrl,
-          highlight: async (lang, code) => {
-            const { codeToHast } = await import('shiki/bundle/web');
-
-            return codeToHast(code, {
-              lang,
-              themes: { light: 'github-light', dark: 'github-dark' },
-              transformers: sharedTransformers,
-              defaultColor: false,
-              ...shikiOptions,
-            });
-          },
+          shikiOptions,
         }),
         [baseUrl, shikiOptions],
       )}
