@@ -5,7 +5,7 @@ import {
   useEffect,
   useState,
 } from 'react';
-import { highlight, type HighlightOptions } from '@/server';
+import { highlight, type HighlightOptions } from '@/server/shiki';
 
 export function useShiki(
   code: string,

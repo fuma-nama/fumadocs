@@ -2,15 +2,15 @@ import {
   type BundledLanguage,
   type CodeOptionsThemes,
   type ShikiTransformer,
-  codeToHast,
+  getSingletonHighlighter,
   type CodeOptionsMeta,
+  type HighlighterCoreOptions,
   type CodeToHastOptionsCommon,
 } from 'shiki';
 import type { BundledTheme } from 'shiki/themes';
 import { type Components, toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import { Fragment, type ReactNode } from 'react';
 import { jsx, jsxs } from 'react/jsx-runtime';
-import type { Root } from 'hast';
 
 export function createStyleTransformer(): ShikiTransformer {
   return {
@@ -33,6 +33,7 @@ export const defaultThemes = {
 };
 
 export type HighlightOptions = CodeToHastOptionsCommon<BundledLanguage> &
+  Pick<HighlighterCoreOptions, 'engine'> &
   Partial<CodeOptionsThemes<BundledTheme>> &
   CodeOptionsMeta & {
     components?: Partial<Components>;
@@ -42,27 +43,31 @@ export async function highlight(
   code: string,
   options: HighlightOptions,
 ): Promise<ReactNode> {
-  const { lang, components, ...rest } = options;
-  const baseOptions = {
-    ...rest,
-    lang,
-    transformers: [createStyleTransformer(), ...(rest.transformers ?? [])],
-  };
+  const { lang, components, engine, ...rest } = options;
 
-  let hast: Root;
+  let themes: CodeOptionsThemes<BundledTheme> = { themes: defaultThemes };
   if ('theme' in options && options.theme) {
-    hast = await codeToHast(code, {
-      ...baseOptions,
-      theme: options.theme,
-    });
-  } else {
-    hast = await codeToHast(code, {
-      ...baseOptions,
-      defaultColor: false,
-      themes:
-        'themes' in options && options.themes ? options.themes : defaultThemes,
-    });
+    themes = { theme: options.theme };
+  } else if ('themes' in options && options.themes) {
+    themes = { themes: options.themes };
   }
+
+  const highlighter = await getSingletonHighlighter({
+    langs: [lang],
+    engine,
+    themes:
+      'theme' in themes
+        ? [themes.theme]
+        : Object.values(themes.themes).filter((v) => v !== undefined),
+  });
+
+  const hast = highlighter.codeToHast(code, {
+    lang,
+    ...rest,
+    ...themes,
+    transformers: [createStyleTransformer(), ...(rest.transformers ?? [])],
+    defaultColor: 'themes' in themes ? false : undefined,
+  });
 
   return toJsxRuntime(hast, {
     jsx,
