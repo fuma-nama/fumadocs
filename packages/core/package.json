@@ -112,11 +112,25 @@
     "tsconfig": "workspace:*",
     "unified": "^11.0.5"
   },
-  "optionalDependencies": {
+  "peerDependencies": {
     "algoliasearch": "4.24.0",
-    "next": "15.0.1",
+    "next": "14.x.x || 15.x.x",
     "react": ">= 18",
     "react-dom": ">= 18"
+  },
+  "peerDependenciesMeta": {
+    "algoliasearch": {
+      "optional": true
+    },
+    "next": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
   },
   "publishConfig": {
     "access": "public"
