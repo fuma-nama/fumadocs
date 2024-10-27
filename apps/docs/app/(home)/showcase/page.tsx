@@ -19,6 +19,7 @@ import Expostarter from '@/public/showcases/expostarter.png';
 import Sunar from '@/public/showcases/sunar.png';
 import Supastarter from '@/public/showcases/supastarter.png';
 import BetterAuth from '@/public/showcases/better-auth.png';
+import LaunchFast from '@/public/showcases/launchfast.png';
 
 export const metadata = createMetadata({
   title: 'Showcase',
@@ -118,6 +119,11 @@ export default function Showcase(): React.ReactElement {
     {
       name: 'Typelytics',
       url: 'https://typelytics.rhyssul.com',
+    },
+    {
+      image: LaunchFast,
+      name: 'LaunchFast',
+      url: 'https://www.launchfa.st',
     },
   ];
 
