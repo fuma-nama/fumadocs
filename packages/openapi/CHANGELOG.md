@@ -1,5 +1,19 @@
 # @fuma-docs/openapi
 
+## 5.5.4
+
+### Patch Changes
+
+- d6d290c: Upgrade Shiki
+- d50750b: Improved UI design
+- Updated dependencies [b262d99]
+- Updated dependencies [d6d290c]
+- Updated dependencies [4a643ff]
+- Updated dependencies [b262d99]
+- Updated dependencies [90725c1]
+  - fumadocs-core@14.1.0
+  - fumadocs-ui@14.1.0
+
 ## 5.5.3
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # fumadocs-docgen
 
+## 1.3.1
+
+### Patch Changes
+
+- Updated dependencies [d6d290c]
+  - fumadocs-typescript@3.0.1
+
 ## 1.3.0
 
 ### Minor Changes
