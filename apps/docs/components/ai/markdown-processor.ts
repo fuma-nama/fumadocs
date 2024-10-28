@@ -3,14 +3,14 @@ import remarkGfm from 'remark-gfm';
 import remarkRehype from 'remark-rehype';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
-import rehypeShiki, { type RehypeShikiOptions } from '@shikijs/rehype';
-import {
-  type Components,
-  type Jsx,
-  toJsxRuntime,
-} from 'hast-util-to-jsx-runtime';
+import rehypeShikiFromHighlighter from '@shikijs/rehype/core';
+import { type Components, toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import { type ReactNode } from 'react';
 import { Fragment, jsx, jsxs } from 'react/jsx-runtime';
+import { createHighlighter } from 'shiki';
+import { createJavaScriptRegexEngine } from 'shiki/engine/javascript';
+import { createStyleTransformer } from 'fumadocs-core/server';
+import type { Root } from 'hast';
 
 interface MetaValue {
   name: string;
@@ -44,18 +44,20 @@ export function createProcessor(): Processor {
     return replaced;
   }
 
-  const processor = remark()
-    .use(remarkGfm)
-    .use(remarkMath)
-    .use(remarkRehype)
-    .use(rehypeKatex)
-    .use(rehypeShiki, {
+  const themes = {
+    light: 'vitesse-light',
+    dark: 'vitesse-dark',
+  };
+
+  const rehypeShiki = createHighlighter({
+    langs: [],
+    themes: Object.values(themes),
+    engine: createJavaScriptRegexEngine(),
+  }).then((highlighter) => {
+    return rehypeShikiFromHighlighter(highlighter, {
       defaultLanguage: 'text',
       defaultColor: false,
-      themes: {
-        light: 'vitesse-light',
-        dark: 'vitesse-dark',
-      },
+      themes,
       lazy: true,
       parseMetaString(meta) {
         const map: Record<string, string> = {};
@@ -72,27 +74,32 @@ export function createProcessor(): Processor {
       },
       transformers: [
         {
-          name: 'rehype-code:pre-process',
-          preprocess(code, { meta }) {
+          name: 'pre-process',
+          preprocess(_, { meta }) {
             if (meta) {
               meta.__raw = filterMetaString(meta.__raw ?? '');
             }
-
-            // Remove empty line at end
-            return code.replace(/\n$/, '');
-          },
-          line(hast) {
-            if (hast.children.length === 0) {
-              // Keep the empty lines when using grid layout
-              hast.children.push({
-                type: 'text',
-                value: ' ',
-              });
-            }
           },
         },
+        createStyleTransformer(),
       ],
-    } satisfies RehypeShikiOptions);
+    });
+  });
+
+  const processor = remark()
+    .use(remarkGfm)
+    .use(remarkMath)
+    .use(remarkRehype)
+    .use(rehypeKatex)
+    .use(() => {
+      return async (tree: Root, file) => {
+        const transformer = await rehypeShiki;
+
+        return transformer(tree, file, () => {
+          // do nothing
+        }) as Root;
+      };
+    });
 
   return {
     async process(content, components) {
@@ -100,8 +107,8 @@ export function createProcessor(): Processor {
       const hast = await processor.run(nodes);
       return toJsxRuntime(hast, {
         development: false,
-        jsx: jsx as Jsx,
-        jsxs: jsxs as Jsx,
+        jsx,
+        jsxs,
         Fragment,
         components,
       });

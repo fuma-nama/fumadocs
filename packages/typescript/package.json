@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-typescript",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Typescript Integration for Fumadocs",
   "keywords": [
     "NextJs",
@@ -35,20 +35,20 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@types/node": "22.7.8",
+    "@types/node": "22.8.1",
     "fast-glob": "^3.3.1",
     "hast-util-to-jsx-runtime": "^2.3.2",
-    "mdast-util-from-markdown": "^2.0.1",
+    "mdast-util-from-markdown": "^2.0.2",
     "mdast-util-gfm": "^3.0.0",
     "mdast-util-to-hast": "^13.2.0",
-    "shiki": "^1.22.0",
+    "shiki": "^1.22.2",
     "ts-morph": "^24.0.0"
   },
   "devDependencies": {
     "@types/estree": "^1.0.6",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.3",
-    "@types/react": "18.3.11",
+    "@types/react": "18.3.12",
     "@types/react-dom": "18.3.1",
     "eslint-config-custom": "workspace:*",
     "fumadocs-ui": "workspace:*",

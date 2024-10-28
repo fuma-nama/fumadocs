@@ -5,7 +5,11 @@ import {
   useEffect,
   useState,
 } from 'react';
-import { highlight, type HighlightOptions } from '@/server';
+import { highlight, type HighlightOptions } from '@/server/shiki';
+import { createJavaScriptRegexEngine } from 'shiki/engine/javascript';
+import type { RegexEngine } from 'shiki';
+
+let jsEngine: RegexEngine | undefined;
 
 export function useShiki(
   code: string,
@@ -25,11 +29,16 @@ export function useShiki(
     );
   });
 
+  if (!options.engine && !jsEngine) {
+    jsEngine = createJavaScriptRegexEngine();
+  }
+
   useEffect(
     () => {
-      void highlight(code, options).then((res) => {
-        setOut(res);
-      });
+      void highlight(code, {
+        ...options,
+        engine: options.engine ?? jsEngine,
+      }).then(setOut);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps -- custom deps
     deps ?? [code, options.lang],

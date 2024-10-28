@@ -10,7 +10,6 @@ import { remark } from 'remark';
 import remarkRehype from 'remark-rehype';
 import { toJsxRuntime, type Jsx } from 'hast-util-to-jsx-runtime';
 import { jsx, jsxs, Fragment } from 'react/jsx-runtime';
-import { sharedTransformers } from '@/utils/shiki';
 
 const processor = remark()
   .use(remarkGfm)
@@ -19,7 +18,6 @@ const processor = remark()
   .use(rehypeCode, {
     langs: [],
     lazy: true,
-    transformers: sharedTransformers,
   } satisfies Partial<RehypeCodeOptions>);
 
 export async function Markdown({

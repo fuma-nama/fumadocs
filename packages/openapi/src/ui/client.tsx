@@ -65,7 +65,11 @@ export function CopyRouteButton({
       aria-label="Copy route path"
       {...props}
     >
-      {checked ? <Check className="size-3" /> : <Copy className="size-3" />}
+      {checked ? (
+        <Check className="size-full" />
+      ) : (
+        <Copy className="size-full" />
+      )}
     </button>
   );
 }

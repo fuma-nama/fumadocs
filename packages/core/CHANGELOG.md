@@ -1,5 +1,18 @@
 # next-docs-zeta
 
+## 14.1.0
+
+### Minor Changes
+
+- b262d99: bundle default Shiki transformers
+- 90725c1: Support server-side `highlight` and client `useShiki` hook
+
+### Patch Changes
+
+- d6d290c: Upgrade Shiki
+- 4a643ff: Prefer `peerDependenciesMeta` over `optionalDependencies`
+- b262d99: Support JSX comment syntax on default Shiki transformers
+
 ## 14.0.2
 
 ## 14.0.1

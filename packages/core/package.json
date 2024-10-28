@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-core",
-  "version": "14.0.2",
+  "version": "14.1.0",
   "description": "The library for building a documentation website in Next.js",
   "keywords": [
     "NextJs",
@@ -76,10 +76,9 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@formatjs/intl-localematcher": "^0.5.5",
+    "@formatjs/intl-localematcher": "^0.5.6",
     "@orama/orama": "^3.0.1",
-    "@shikijs/rehype": "^1.22.0",
-    "@shikijs/transformers": "^1.22.0",
+    "@shikijs/rehype": "^1.22.2",
     "github-slugger": "^2.0.0",
     "hast-util-to-estree": "^3.1.0",
     "hast-util-to-jsx-runtime": "^2.3.2",
@@ -89,7 +88,7 @@
     "remark": "^15.0.0",
     "remark-gfm": "^4.0.0",
     "scroll-into-view-if-needed": "^3.1.0",
-    "shiki": "^1.22.0",
+    "shiki": "^1.22.2",
     "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {
@@ -99,8 +98,8 @@
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.3",
     "@types/negotiator": "^0.6.3",
-    "@types/node": "22.7.8",
-    "@types/react": "^18.3.11",
+    "@types/node": "22.8.1",
+    "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "algoliasearch": "4.24.0",
     "eslint-config-custom": "workspace:*",
@@ -109,14 +108,29 @@
     "next": "^15.0.0",
     "remark-mdx": "^3.1.0",
     "remark-rehype": "^11.1.1",
+    "shiki-transformers": "^1.0.0",
     "tsconfig": "workspace:*",
     "unified": "^11.0.5"
   },
-  "optionalDependencies": {
+  "peerDependencies": {
     "algoliasearch": "4.24.0",
-    "next": "15.0.1",
+    "next": "14.x.x || 15.x.x",
     "react": ">= 18",
     "react-dom": ">= 18"
+  },
+  "peerDependenciesMeta": {
+    "algoliasearch": {
+      "optional": true
+    },
+    "next": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
   },
   "publishConfig": {
     "access": "public"

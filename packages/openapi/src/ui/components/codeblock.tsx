@@ -1,8 +1,7 @@
-import { Fragment, type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode } from 'react';
 import * as Base from 'fumadocs-ui/components/codeblock';
 import { useApiContext } from '@/ui/contexts/api';
-import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
-import { jsx, jsxs } from 'react/jsx-runtime';
+import { useShiki } from 'fumadocs-core/utils/use-shiki';
 
 export type CodeBlockProps = {
   code: string;
@@ -10,30 +9,19 @@ export type CodeBlockProps = {
 };
 
 export function CodeBlock({ code, lang = 'json' }: CodeBlockProps): ReactNode {
-  const { highlight } = useApiContext();
-  const [rendered, setRendered] = useState<ReactNode>(
-    <Base.Pre className="max-h-[288px]">{code}</Base.Pre>,
-  );
+  const { shikiOptions } = useApiContext();
 
-  useEffect(() => {
-    void highlight(lang, code).then((res) => {
-      const output = toJsxRuntime(res, {
-        jsx,
-        jsxs,
-        development: false,
-        Fragment,
-        components: {
-          pre: (props) => (
-            <Base.Pre className="max-h-[288px]" {...props}>
-              {props.children}
-            </Base.Pre>
-          ),
-        },
-      });
-
-      setRendered(output);
-    });
-  }, [code, highlight, lang]);
+  const rendered = useShiki(code, {
+    lang,
+    ...shikiOptions,
+    components: {
+      pre: (props) => (
+        <Base.Pre className="max-h-[288px]" {...props}>
+          {props.children}
+        </Base.Pre>
+      ),
+    },
+  });
 
   return <Base.CodeBlock className="my-0">{rendered}</Base.CodeBlock>;
 }

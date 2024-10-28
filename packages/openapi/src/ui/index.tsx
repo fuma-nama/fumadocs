@@ -11,14 +11,14 @@ function Route({ route }: { route: string }): ReactNode {
   const segments = route.split('/').filter((part) => part.length > 0);
 
   return (
-    <div className="flex flex-row flex-wrap items-center gap-1 text-sm">
+    <div className="not-prose flex flex-row items-center gap-1 overflow-auto text-xs">
       {segments.map((part, index) => (
         <Fragment key={index}>
           <span className="text-fd-muted-foreground">/</span>
           {part.startsWith('{') && part.endsWith('}') ? (
-            <code className="text-fd-primary">{part}</code>
+            <code className="bg-fd-primary/10 text-fd-primary">{part}</code>
           ) : (
-            <span className="text-fd-foreground">{part}</span>
+            <code className="text-fd-foreground">{part}</code>
           )}
         </Fragment>
       ))}
@@ -39,17 +39,7 @@ export function APIInfo({
   }): React.ReactElement {
   return (
     <div className={cn('min-w-0 flex-1', className)} {...props}>
-      <div
-        className={cn(
-          'sticky top-[calc(var(--fd-api-info-top)+36px)] z-20 mb-4 flex flex-row items-center gap-2 rounded-lg border bg-fd-card px-3 py-2 md:top-[var(--fd-api-info-top)]',
-        )}
-        style={
-          {
-            '--fd-api-info-top':
-              'calc(var(--fd-nav-height) + var(--fd-banner-height) + 4px)',
-          } as object
-        }
-      >
+      <div className="sticky top-[var(--fd-api-info-top)] z-[4] mb-4 flex flex-row items-center gap-1.5 border-b border-fd-foreground/10 bg-fd-card/50 px-4 py-1.5 shadow-lg backdrop-blur-lg max-lg:-mx-3 max-md:-mx-4 md:rounded-full md:border md:px-1.5">
         <span
           className={cn(
             badgeVariants({ color: getBadgeColor(method) }),
@@ -60,7 +50,7 @@ export function APIInfo({
         </span>
         <Route route={route} />
 
-        <CopyRouteButton className="ms-auto size-6 p-1" route={route} />
+        <CopyRouteButton className="ms-auto size-6 p-1.5" route={route} />
       </div>
 
       <div className="prose-no-margin">{children}</div>
@@ -69,17 +59,23 @@ export function APIInfo({
 }
 
 export function API({
-  className,
   children,
   ...props
 }: HTMLAttributes<HTMLDivElement>): React.ReactElement {
   return (
     <div
-      className={cn(
-        'flex flex-col gap-x-6 gap-y-4 xl:flex-row xl:items-start',
-        className,
-      )}
       {...props}
+      className={cn(
+        'flex flex-col gap-x-6 gap-y-4 max-lg:[--fd-toc-height:46px] max-md:[--fd-toc-height:36px] xl:flex-row xl:items-start',
+        props.className,
+      )}
+      style={
+        {
+          '--fd-api-info-top':
+            'calc(var(--fd-nav-height) + var(--fd-banner-height) + var(--fd-toc-height, 0.5rem))',
+          ...props.style,
+        } as object
+      }
     >
       {children}
     </div>
@@ -95,7 +91,7 @@ export function Property({
 }: PropertyProps): React.ReactElement {
   return (
     <div className="mb-4 rounded-lg border bg-fd-card p-3 prose-no-margin">
-      <h4 className="flex flex-row items-center gap-4">
+      <h4 className="flex flex-row flex-wrap items-center gap-4">
         <code>{name}</code>
         {required ? (
           <div className={cn(badgeVariants({ color: 'red' }))}>Required</div>
@@ -124,13 +120,6 @@ export function APIExample(
         'prose-no-margin md:sticky md:top-[var(--fd-api-info-top)] xl:w-[400px]',
         props.className,
       )}
-      style={
-        {
-          '--fd-api-info-top':
-            'calc(var(--fd-nav-height) + var(--fd-banner-height) + 40px)',
-          ...props.style,
-        } as object
-      }
     >
       {props.children}
     </div>
