@@ -2,10 +2,11 @@ import {
   type BundledLanguage,
   type CodeOptionsThemes,
   type ShikiTransformer,
-  getSingletonHighlighter,
   type CodeOptionsMeta,
   type HighlighterCoreOptions,
   type CodeToHastOptionsCommon,
+  type Highlighter,
+  createHighlighter,
 } from 'shiki';
 import type { BundledTheme } from 'shiki/themes';
 import { type Components, toJsxRuntime } from 'hast-util-to-jsx-runtime';
@@ -39,11 +40,21 @@ export type HighlightOptions = CodeToHastOptionsCommon<BundledLanguage> &
     components?: Partial<Components>;
   };
 
+let instance: Promise<Highlighter> | undefined;
+
 export async function highlight(
   code: string,
   options: HighlightOptions,
 ): Promise<ReactNode> {
   const { lang, components, engine, ...rest } = options;
+
+  if (!instance) {
+    instance = createHighlighter({
+      langs: [],
+      themes: [],
+      engine,
+    });
+  }
 
   let themes: CodeOptionsThemes<BundledTheme> = { themes: defaultThemes };
   if ('theme' in options && options.theme) {
@@ -52,14 +63,18 @@ export async function highlight(
     themes = { themes: options.themes };
   }
 
-  const highlighter = await getSingletonHighlighter({
-    langs: [lang],
-    engine,
-    themes:
-      'theme' in themes
-        ? [themes.theme]
-        : Object.values(themes.themes).filter((v) => v !== undefined),
-  });
+  const highlighter = await instance;
+  await Promise.all([
+    highlighter.loadLanguage(lang as BundledLanguage),
+
+    'theme' in themes
+      ? highlighter.loadTheme(themes.theme as BundledTheme)
+      : highlighter.loadTheme(
+          ...(Object.values(themes.themes).filter(
+            (v) => v !== undefined,
+          ) as BundledTheme[]),
+        ),
+  ]);
 
   const hast = highlighter.codeToHast(code, {
     lang,

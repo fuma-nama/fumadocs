@@ -3,6 +3,8 @@ title: OpenAPI
 description: Generating docs for OpenAPI schema
 ---
 
+You can setup Fumadocs OpenAPI manually, or use Fumadocs CLI.
+
 ## Auto Setup
 
 Using Fumadocs CLI.
@@ -99,12 +101,10 @@ You can add the `attachFile` to decorate the page tree with Source API.
 It adds a badge to each page item.
 
 ```ts title="lib/source.ts"
-import { createMDXSource } from 'fumadocs-mdx';
 import { loader } from 'fumadocs-core/source';
 import { attachFile } from 'fumadocs-openapi/server';
 
 export const utils = loader({
-  source: createMDXSource(map),
   pageTree: {
     attachFile,
   },

@@ -55,6 +55,7 @@
     "@fumadocs/cli": "workspace:*",
     "@next/bundle-analyzer": "15.0.1",
     "@next/eslint-plugin-next": "15.0.1",
+    "@types/hast": "^3.0.4",
     "@types/mdx": "^2.0.13",
     "@types/node": "22.8.1",
     "@types/react": "^18.3.12",
