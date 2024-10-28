@@ -1,5 +1,12 @@
 # fumadocs-twoslash
 
+## 2.0.1
+
+### Patch Changes
+
+- d6d290c: Upgrade Shiki
+  - fumadocs-ui@14.1.0
+
 ## 2.0.0
 
 ### Major Changes

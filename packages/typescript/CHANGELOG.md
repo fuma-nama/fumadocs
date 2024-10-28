@@ -1,5 +1,11 @@
 # fumadocs-typescript
 
+## 3.0.1
+
+### Patch Changes
+
+- d6d290c: Upgrade Shiki
+
 ## 3.0.0
 
 ### Major Changes
