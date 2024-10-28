@@ -7,6 +7,7 @@ import {
   type CodeToHastOptionsCommon,
   type Highlighter,
   createHighlighter,
+  getSingletonHighlighter,
 } from 'shiki';
 import type { BundledTheme } from 'shiki/themes';
 import { type Components, toJsxRuntime } from 'hast-util-to-jsx-runtime';
@@ -49,11 +50,16 @@ export async function highlight(
   const { lang, components, engine, ...rest } = options;
 
   if (!instance) {
-    instance = createHighlighter({
-      langs: [],
-      themes: [],
-      engine,
-    });
+    if (!engine) {
+      // use existing one if not specified
+      instance = getSingletonHighlighter();
+    } else {
+      instance = createHighlighter({
+        langs: [],
+        themes: [],
+        engine,
+      });
+    }
   }
 
   let themes: CodeOptionsThemes<BundledTheme> = { themes: defaultThemes };
