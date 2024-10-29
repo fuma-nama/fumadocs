@@ -1,5 +1,13 @@
 # next-docs-mdx
 
+## 11.1.1
+
+### Patch Changes
+
+- 164b9e6: Fix non-absolute `dir` option
+- Updated dependencies [1573d63]
+  - fumadocs-core@14.1.1
+
 ## 11.1.0
 
 ### Minor Changes
