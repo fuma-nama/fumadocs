@@ -89,7 +89,7 @@
     "algoliasearch": "4.24.0",
     "eslint-config-custom": "workspace:*",
     "lucide-react": "^0.453.0",
-    "next": "15.0.1",
+    "next": "15.0.2",
     "postcss": "^8.4.47",
     "postcss-cli": "^11.0.0",
     "postcss-lightningcss": "^1.0.1",
