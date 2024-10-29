@@ -86,7 +86,7 @@ async function getCollectionFiles(
   await Promise.all(
     dirs.map(async (dir) => {
       const result = await fg(collection.files ?? '**/*', {
-        cwd: dir,
+        cwd: path.resolve(dir),
         absolute: true,
       });
 
