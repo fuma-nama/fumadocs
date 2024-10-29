@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 14.1.1
+
+### Patch Changes
+
+- 1573d63: Support URL format `publicDir` in Remark Image plugin
+
 ## 14.1.0
 
 ### Minor Changes
