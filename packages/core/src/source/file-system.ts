@@ -1,10 +1,6 @@
 import type { MetaData, PageData } from '@/source/types';
-import {
-  parseFilePath,
-  parseFolderPath,
-  splitPath,
-  type FileInfo,
-} from './path';
+import { parseFilePath, parseFolderPath, type FileInfo } from './path';
+import { splitPath } from '@/utils/path';
 
 export interface MetaFile {
   file: FileInfo;

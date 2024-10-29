@@ -81,8 +81,6 @@ const cases = [
 
 for (const { name, collection, global } of cases) {
   test(`generate JS index file: ${name}`, async () => {
-    console.log(global);
-
     const out = await generateJS(
       path.join(file, './fixtures/config.ts'),
       {

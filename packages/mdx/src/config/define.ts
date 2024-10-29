@@ -133,7 +133,7 @@ export function defineDocs<
   /**
    * The directory to scan files
    *
-   *  @defaultValue '/content/docs'
+   *  @defaultValue 'content/docs'
    */
   dir?: string | string[];
 

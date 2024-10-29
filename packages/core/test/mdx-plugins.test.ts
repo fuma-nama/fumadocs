@@ -68,6 +68,22 @@ test('Remark Image', async () => {
   );
 });
 
+test('Remark Image: With Path', async () => {
+  const file = path.resolve(cwd, './fixtures/remark-image.md');
+  const content = readFileSync(file);
+  const processor = remark()
+    .use(remarkImage, { publicDir: path.resolve(cwd, './fixtures') })
+    .use(remarkMdx);
+
+  const result = await processor.run(processor.parse(content), {
+    path: file,
+  });
+
+  expect(result).toMatchFileSnapshot(
+    path.resolve(cwd, './fixtures/remark-image.output.json'),
+  );
+});
+
 test('Remark Image: Without Import', async () => {
   const content = readFileSync(path.resolve(cwd, './fixtures/remark-image.md'));
   const result = await remark()
@@ -80,6 +96,23 @@ test('Remark Image: Without Import', async () => {
 
   expect(result.value).toMatchFileSnapshot(
     path.resolve(cwd, './fixtures/remark-image-without-import.output.mdx'),
+  );
+});
+
+test('Remark Image: `publicDir` with URL', async () => {
+  const content = readFileSync(
+    path.resolve(cwd, './fixtures/remark-image-public-dir.md'),
+  );
+  const result = await remark()
+    .use(remarkImage, {
+      publicDir: 'https://picsum.photos/id',
+      useImport: false,
+    })
+    .use(remarkMdx)
+    .process(content);
+
+  expect(result.value).toMatchFileSnapshot(
+    path.resolve(cwd, './fixtures/remark-image-public-dir.output.mdx'),
   );
 });
 
