@@ -3,7 +3,7 @@ import type { I18nConfig } from '@/i18n';
 import { removeUndefined } from '@/utils/remove-undefined';
 import type * as PageTree from '../server/page-tree';
 import type { File, Folder, MetaFile, PageFile, Storage } from './file-system';
-import { resolvePath } from './path';
+import { resolvePath } from '@/utils/path';
 import { type UrlFn } from './types';
 
 interface PageTreeBuilderContext {

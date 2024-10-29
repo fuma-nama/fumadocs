@@ -23,23 +23,12 @@ Supported:
 
 ### How It Works
 
-It transforms your `![image](./test.png)` into Next.js Image usage, and add required props like `width` and `height`.
+It transforms your `![image](/test.png)` into Next.js Image usage, and add required props like `width` and `height`.
 
-By default, it uses Next.js static imports to import local images, which supports the `placeholder` option of Next.js Image.
-
+By default, it uses **static imports** to import local images, which supports the `placeholder` option of Next.js Image.
 Next.js can handle image imports with its built-in image loader.
 
-```mdx
-import MyImage from './public/image.png';
-
-<img alt="image" src={MyImage} />
-```
-
-Otherwise, it obtains the image size from file-system or HTTP request.
-
-```mdx
-<img alt="image" src="/image.png" widht="1980" height="1080" />
-```
+Otherwise, it uses the file system or an HTTP request to download the image and obtain its size.
 
 ### Options
 
@@ -69,6 +58,8 @@ import HelloImage from './public/hello.png';
 />
 ```
 
+Where `./public/hello.png` points to the image in public directory.
+
 ### Example: Without Imports
 
 You can disable Next.js static imports on local images.
@@ -96,4 +87,49 @@ Yields:
   width="1980"
   height="1080"
 />
+```
+
+### Example: Relative Paths
+
+When `useImport` is enabled, you can reference local images using relative paths.
+
+```mdx
+![Hello](./hello.png)
+```
+
+Be careful that using it with `useImport` disabled **doesn't work**.
+Next.js will not add the image to public assets unless you have imported it in code.
+For images in public directory, you can just reference them without relative paths.
+
+### Example: Public Directory
+
+Customise the path of public directory
+
+```ts
+import { remarkImage } from 'fumadocs-core/mdx-plugins';
+import path from 'node:path';
+
+export default {
+  remarkPlugins: [
+    remarkImage,
+    {
+      publicDir: path.join(process.cwd(), 'dir'),
+    },
+  ],
+};
+```
+
+You can pass a URL too.
+
+```ts
+import { remarkImage } from 'fumadocs-core/mdx-plugins';
+
+export default {
+  remarkPlugins: [
+    remarkImage,
+    {
+      publicDir: 'http://localhost:3000/images',
+    },
+  ],
+};
 ```

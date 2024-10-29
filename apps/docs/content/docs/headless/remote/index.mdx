@@ -102,3 +102,10 @@ export default function Page({ params }: { params: { slug?: string[] } }) {
   );
 }
 ```
+
+#### Images
+
+On some platforms like Vercel, the original `public` folder (including static assets like images) will be removed after `next build`.
+`compileMDX` might no longer be able to access local images in `public`.
+
+When referencing images, make sure to use a URL.

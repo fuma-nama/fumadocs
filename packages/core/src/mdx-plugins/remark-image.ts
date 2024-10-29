@@ -5,14 +5,14 @@ import { visit } from 'unist-util-visit';
 import sizeOf from 'image-size';
 import { type ISizeCalculationResult } from 'image-size/dist/types/interface';
 import type { MdxjsEsm } from 'mdast-util-mdxjs-esm';
-import slash from '@/utils/slash';
+import { resolvePath, slash } from '@/utils/path';
 
 const VALID_BLUR_EXT = ['.jpeg', '.png', '.webp', '.avif', '.jpg'];
 const EXTERNAL_URL_REGEX = /^https?:\/\//;
 
 export interface RemarkImageOptions {
   /**
-   * Directory to resolve absolute image paths
+   * Directory or base URL to resolve absolute image paths
    */
   publicDir?: string;
 
@@ -63,27 +63,25 @@ export function remarkImage({
 
     function getImportPath(src: string): string {
       if (!src.startsWith('/')) return src;
+      const to = path.join(publicDir, src);
 
-      if (file.path) {
-        const relative = path.relative(
-          path.dirname(file.path),
-          path.join(publicDir, src),
-        );
+      if (file.dirname) {
+        const relative = slash(path.relative(file.dirname, to));
 
         return relative.startsWith('./') ? relative : `./${relative}`;
       }
 
-      return path.join(publicDir, src);
+      return slash(to);
     }
 
     visit(tree, 'image', (node) => {
-      const src = decodeURI(node.url);
-      if (!src) return;
-      const isExternal = EXTERNAL_URL_REGEX.test(src);
+      const url = decodeURI(node.url);
+      if (!url) return;
+      const isExternal = EXTERNAL_URL_REGEX.test(url);
 
       if ((isExternal && external) || !useImport) {
-        promises.push(
-          getImageSize(src, publicDir).then((size) => {
+        const task = getImageSize(url, publicDir)
+          .then((size) => {
             if (!size.width || !size.height) return;
 
             Object.assign(node, {
@@ -98,7 +96,7 @@ export function remarkImage({
                 {
                   type: 'mdxJsxAttribute',
                   name: 'src',
-                  value: src,
+                  value: url,
                 },
                 {
                   type: 'mdxJsxAttribute',
@@ -112,18 +110,24 @@ export function remarkImage({
                 },
               ],
             });
-          }),
-        );
+          })
+          .catch(() => {
+            console.error(
+              `[Remark Image] Failed obtain image size for ${url} with public directory ${publicDir}`,
+            );
+          });
+
+        promises.push(task);
       } else if (!isExternal) {
         // Unique variable name for the given static image URL
         const variableName = `__img${importsToInject.length.toString()}`;
         const hasBlur =
           placeholder === 'blur' &&
-          VALID_BLUR_EXT.some((ext) => src.endsWith(ext));
+          VALID_BLUR_EXT.some((ext) => url.endsWith(ext));
 
         importsToInject.push({
           variableName,
-          importPath: slash(getImportPath(src)),
+          importPath: getImportPath(url),
         });
 
         Object.assign(node, {
@@ -194,26 +198,24 @@ export function remarkImage({
   };
 }
 
-/**
- * Resolve `src` to an absolute path
- */
-function resolveSrc(src: string, dir: string): string {
-  return src.startsWith('/') || !path.isAbsolute(src)
-    ? path.join(dir, src)
-    : src;
-}
-
 async function getImageSize(
   src: string,
   dir: string,
 ): Promise<ISizeCalculationResult> {
-  if (EXTERNAL_URL_REGEX.test(src)) {
-    const res = await fetch(src);
+  const isRelative = src.startsWith('/') || !path.isAbsolute(src);
+  let url: string;
 
-    return sizeOf(
-      await res.arrayBuffer().then((buffer) => new Uint8Array(buffer)),
-    );
+  if (EXTERNAL_URL_REGEX.test(src)) {
+    url = src;
+  } else if (EXTERNAL_URL_REGEX.test(dir) && isRelative) {
+    const base = new URL(dir);
+    base.pathname = resolvePath(base.pathname, src);
+    url = base.toString();
+  } else {
+    return sizeOf(isRelative ? path.join(dir, src) : src);
   }
 
-  return sizeOf(resolveSrc(src, dir));
+  const buffer = await fetch(url).then((res) => res.arrayBuffer());
+
+  return sizeOf(new Uint8Array(buffer));
 }

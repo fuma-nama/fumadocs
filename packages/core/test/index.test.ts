@@ -1,14 +1,10 @@
-import {
-  resolvePath,
-  parseFilePath,
-  parseFolderPath,
-  splitPath,
-} from '@/source/path';
+import { parseFilePath, parseFolderPath } from '@/source/path';
 import { describe, expect, test } from 'vitest';
 import type { Root } from '@/server/page-tree';
 import { findNeighbour } from '@/server/page-tree-utils';
 import { PageTree } from '../dist/server';
 import { getBreadcrumbItems } from '@/breadcrumb';
+import { resolvePath, splitPath } from '@/utils/path';
 
 test('Find Neighbours', () => {
   const tree: Root = {
