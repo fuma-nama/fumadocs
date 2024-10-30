@@ -1,5 +1,5 @@
 import env from '@next/env';
-import { updateSearchIndexes } from './update-index.mjs';
+import { updateSearchIndexes } from './update-orama-index.mjs';
 import { updateOramaAi } from '@/scripts/update-orama-ai.mjs';
 
 env.loadEnvConfig(process.cwd());

@@ -81,12 +81,10 @@
     "tailwind-merge": "^2.5.4"
   },
   "devDependencies": {
-    "@algolia/client-search": "4.24.0",
     "@fumadocs/cli": "workspace:*",
     "@next/eslint-plugin-next": "^15.0.1",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
-    "algoliasearch": "4.24.0",
     "eslint-config-custom": "workspace:*",
     "lucide-react": "^0.453.0",
     "next": "15.0.2",
@@ -99,12 +97,13 @@
   "peerDependencies": {
     "next": "14.x.x || 15.x.x",
     "react": ">= 18",
-    "react-dom": ">= 18"
-  },
-  "optionalDependencies": {
-    "@algolia/client-search": "^4.0.0",
-    "algoliasearch": "^4.24.0",
+    "react-dom": ">= 18",
     "tailwindcss": "^3.4.14"
+  },
+  "peerDependenciesMeta": {
+    "tailwindcss": {
+      "optional": true
+    }
   },
   "publishConfig": {
     "access": "public"

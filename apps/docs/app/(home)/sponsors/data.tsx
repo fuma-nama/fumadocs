@@ -5,7 +5,7 @@ export const organizationUsers = ['marclave', 'rishi-raj-jain', 'handotdev'];
 
 export const sponsors = [
   {
-    url: '',
+    url: 'https://orama.com',
     label: 'Orama Search',
     tier: 'golden',
     logo: (

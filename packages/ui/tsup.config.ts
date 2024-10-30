@@ -18,6 +18,7 @@ const exportedComponents = [
   'dialog/search',
   'dialog/search-default',
   'dialog/search-algolia',
+  'dialog/search-orama',
   'layout/root-toggle',
   'layout/language-toggle',
 ];
