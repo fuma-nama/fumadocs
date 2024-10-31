@@ -117,7 +117,7 @@ function SearchInput({ search, onSearchChange, isLoading }: SearchValueProps) {
           onSearchChange(e.target.value);
         }}
         placeholder={text.search}
-        className="w-full min-w-0 bg-transparent py-3 text-base placeholder:text-fd-muted-foreground focus-visible:outline-none"
+        className="w-0 flex-1 bg-transparent py-3 text-base placeholder:text-fd-muted-foreground focus-visible:outline-none"
       />
       <button
         type="button"
@@ -273,9 +273,7 @@ function CommandItem({
       ref={ref}
       type="button"
       aria-selected={active === value}
-      onPointerEnter={() => {
-        onActiveChange(value);
-      }}
+      onPointerMove={() => onActiveChange(value)}
       {...props}
       className={cn(
         'flex min-h-10 select-none flex-row items-center gap-2.5 rounded-lg px-2 text-start text-sm aria-disabled:pointer-events-none aria-disabled:opacity-50 aria-selected:bg-fd-accent aria-selected:text-fd-accent-foreground',
