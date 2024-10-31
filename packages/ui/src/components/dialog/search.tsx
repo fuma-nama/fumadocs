@@ -77,7 +77,7 @@ export function SearchDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogOverlay className="fixed inset-0 z-50 bg-fd-background/50 backdrop-blur-sm data-[state=closed]:animate-fd-fade-out data-[state=open]:animate-fd-fade-in" />
       <DialogContent
-        aria-describedby={text.search}
+        aria-describedby={undefined}
         className="fixed left-1/2 top-[10vh] z-50 w-[98vw] max-w-screen-sm origin-left -translate-x-1/2 rounded-lg border bg-fd-popover text-fd-popover-foreground shadow-lg data-[state=closed]:animate-fd-dialog-out data-[state=open]:animate-fd-dialog-in"
       >
         <DialogTitle className="hidden">{text.search}</DialogTitle>
