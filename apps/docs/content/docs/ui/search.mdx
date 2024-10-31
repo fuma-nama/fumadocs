@@ -174,40 +174,6 @@ export default function Layout({ children }: { children: ReactNode }) {
 }
 ```
 
-## Algolia
-
-For the setup guide, see [Integrate Algolia Search](/docs/headless/search/algolia). Make sure you have `algoliasearch` installed on your project.
-
-While generally we recommend building your own search with their client-side
-SDK, you can also plug the built-in dialog interface.
-
-Create a new search dialog:
-
-```tsx title="components/search.tsx"
-'use client';
-import algo from 'algoliasearch/lite';
-import type { SharedProps } from 'fumadocs-ui/components/dialog/search';
-import SearchDialog from 'fumadocs-ui/components/dialog/search-algolia';
-
-const client = algo(appId, apiKey);
-const index = client.initIndex(indexName);
-
-export default function CustomSearchDialog(props: SharedProps) {
-  return <SearchDialog index={index} {...props} />;
-}
-```
-
-Replace `appId`, `apiKey` and `indexName` with your desired values.
-
-Replace the default search dialog with a separate client component, see [Replace Search Dialog](#replace-search-dialog) for details.
-
-<Callout title="Note" className='mt-4'>
-
-The built-in implementation doesn't use instant search (their official
-javascript client).
-
-</Callout>
-
 ### Tag Filter
 
 Same as the default search client, you can configure [Tag Filter](/docs/headless/search/algolia#tag-filter) on the dialog.
@@ -228,31 +194,64 @@ import SearchDialog from 'fumadocs-ui/components/dialog/search-algolia';
 
 ## Other Solutions
 
-To use other search solutions such as ElasticSearch, you can replace the
-default dialog with your own.
+To use other search solutions such as Algolia and ElasticSearch, you can [replace the
+default dialog with your own](#replace-search-dialog).
 
-Since you cannot pass a function to client components, wrap the provider in another client component, and use the new provider in your root layout instead.
+### Algolia
 
-```tsx
+For the setup guide, see [Integrate Algolia Search](/docs/headless/search/algolia).
+
+While generally we recommend building your own search with their client-side
+SDK, you can also plug the built-in dialog interface.
+
+```tsx title="components/search.tsx"
 'use client';
+import algo from 'algoliasearch/lite';
+import type { SharedProps } from 'fumadocs-ui/components/dialog/search';
+import SearchDialog from 'fumadocs-ui/components/dialog/search-algolia';
 
-import { RootProvider } from 'fumadocs-ui/provider';
-import dynamic from 'next/dynamic';
+const client = algo('appId', 'apiKey');
+const index = client.initIndex('indexName');
 
-const SearchDialog = dynamic(() => import('@/components/search'));
-
-export function Provider({ children }: { children: React.ReactNode }) {
-  return (
-    <RootProvider
-      search={{
-        SearchDialog,
-      }}
-    >
-      {children}
-    </RootProvider>
-  );
+export default function CustomSearchDialog(props: SharedProps) {
+  return <SearchDialog index={index} {...props} />;
 }
 ```
+
+1. Replace `appId`, `apiKey` and `indexName` with your desired values.
+
+2. [Replace the default search dialog](#replace-search-dialog) with your new component.
+
+<Callout title="Note" className='mt-4'>
+
+    The built-in implementation doesn't use instant search (their official
+    javascript client).
+
+</Callout>
+
+### Orama Cloud
+
+For the setup guide, see [Integrate Orama Cloud](/docs/headless/search/orama-cloud).
+
+```tsx title="components/search.tsx"
+'use client';
+
+import { OramaClient } from '@oramacloud/client';
+import type { SharedProps } from 'fumadocs-ui/components/dialog/search';
+import SearchDialog from 'fumadocs-ui/components/dialog/search-orama';
+
+const client = new OramaClient({
+  endpoint: 'endpoint',
+  api_key: 'apiKey',
+});
+
+export default function CustomSearchDialog(props: SharedProps) {
+  return <SearchDialog {...props} client={client} showOrama />;
+}
+```
+
+1. Replace `endpoint`, `apiKey` with your desired values.
+2. [Replace the default search dialog](#replace-search-dialog) with your new component.
 
 ## Built-in UI
 

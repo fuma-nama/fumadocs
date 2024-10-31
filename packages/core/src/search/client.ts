@@ -5,6 +5,7 @@ import { type FetchOptions } from '@/search/client/fetch';
 import { useOnChange } from '@/utils/use-on-change';
 import { type StaticClient, type StaticOptions } from '@/search/client/static';
 import { type AlgoliaOptions } from '@/search/client/algolia';
+import { type OramaCloudOptions } from '@/search/client/orama-cloud';
 
 interface UseDocsSearch {
   search: string;
@@ -27,7 +28,10 @@ type Client =
     } & StaticOptions)
   | ({
       type: 'algolia';
-    } & AlgoliaOptions);
+    } & AlgoliaOptions)
+  | ({
+      type: 'orama-cloud';
+    } & OramaCloudOptions);
 
 let staticClient: StaticClient | undefined;
 
@@ -55,8 +59,8 @@ export function useDocsSearch(
   const onStart = useRef<() => void>();
 
   const cacheKey = useMemo(() => {
-    return key ?? JSON.stringify([client, debouncedValue, locale, tag]);
-  }, [client, debouncedValue, locale, tag, key]);
+    return key ?? JSON.stringify([client.type, debouncedValue, locale, tag]);
+  }, [client.type, debouncedValue, locale, tag, key]);
 
   useOnChange(cacheKey, () => {
     const cached = cache.get(cacheKey);
@@ -94,6 +98,12 @@ export function useDocsSearch(
         return searchDocs(index, debouncedValue, tag, rest);
       }
 
+      if (client.type === 'orama-cloud') {
+        const { searchDocs } = await import('./client/orama-cloud');
+
+        return searchDocs(debouncedValue, tag, client);
+      }
+
       const { createStaticClient } = await import('./client/static');
       if (!staticClient) staticClient = createStaticClient(client);
 
@@ -118,3 +128,5 @@ export function useDocsSearch(
 
   return { search, setSearch, query: { isLoading, data: results, error } };
 }
+
+export type { OramaCloudOptions, FetchOptions, StaticOptions, AlgoliaOptions };

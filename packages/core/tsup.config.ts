@@ -18,6 +18,7 @@ export default defineConfig({
     'src/search/client.ts',
     'src/search/server.ts',
     'src/search/algolia.ts',
+    'src/search/orama-cloud.ts',
     'src/utils/use-on-change.ts',
     'src/utils/use-shiki.tsx',
     'src/i18n/index.ts',

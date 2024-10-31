@@ -14,7 +14,7 @@ export default async function Page(): Promise<ReactNode> {
           backgroundImage:
             'conic-gradient(at 50% 196px, transparent 20%, rgba(200,100,255,0.2) 40%, transparent, rgba(100,140,255,0.3) 60%, transparent 80%)',
           maskImage:
-            'radial-gradient(circle at center, white 20%, transparent 60%)',
+            'radial-gradient(circle at 50% 196px, transparent 80px, white 100px, transparent 80%)',
         }}
       />
       <Image
@@ -22,13 +22,13 @@ export default async function Page(): Promise<ReactNode> {
         alt="circuit"
         width="1231"
         height="536"
-        className="absolute top-16 z-[-1] w-full max-w-[1200px] opacity-30 invert dark:invert-0"
+        className="absolute top-16 z-[-1] w-full max-w-[1200px] opacity-10 dark:opacity-30"
       />
       <svg
         viewBox="0 0 100 100"
         className="absolute top-24 z-[-1] max-w-[200px]"
         style={{
-          maskImage: 'linear-gradient(to bottom,transparent 20%,white 80%)',
+          maskImage: 'linear-gradient(to bottom,transparent 80%,white 100%)',
         }}
       >
         <circle
@@ -36,7 +36,7 @@ export default async function Page(): Promise<ReactNode> {
           cx="50"
           cy="50"
           stroke="url(#circle)"
-          fill="hsl(var(--background))"
+          fill="none"
           strokeWidth="1"
         />
         <defs>

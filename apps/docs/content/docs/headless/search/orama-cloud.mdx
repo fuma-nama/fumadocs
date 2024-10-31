@@ -1,0 +1,70 @@
+---
+title: Orama Cloud
+description: Integrate with Orama Cloud
+---
+
+## Setup
+
+To begin, create an account on Orama Cloud.
+
+1. Create a new index from Dashboard.
+2. Use the following schema:
+
+   ```json
+   {
+     "id": "string",
+     "title": "string",
+     "url": "string",
+     "tag": "string",
+     "page_id": "string",
+     "section": "string",
+     "section_id": "string",
+     "content": "string"
+   }
+   ```
+
+3. Then, using the API key and index ID from dashboard, create a script to sync search indexes.
+
+   ```json doc-gen:file
+   {
+     "file": "../../examples/next-mdx/scripts/sync-orama-cloud.mjs",
+     "codeblock": {
+       "lang": "js",
+       "meta": "title=\"sync-index.mjs\""
+     }
+   }
+   ```
+
+4. Create a route handler in your Next.js app to export search indexes.
+
+   ```json doc-gen:file
+   {
+     "file": "../../examples/next-mdx/app/static.json/orama-cloud.ts",
+     "codeblock": {
+       "meta": "title=\"app/static.json/route.ts\""
+     }
+   }
+   ```
+
+5. Run the script after `next build`.
+
+### Search Client
+
+To search documents on the client side, use [Fumadocs UI Search Dialog](/docs/ui/search#orama-cloud), or make your own implementation.
+
+In addition, the headless search client of Fumadocs can handle state management for React.
+
+```ts
+import { useDocsSearch } from 'fumadocs-core/search/client';
+import { OramaClient } from '@oramacloud/client';
+
+const client = new OramaClient();
+
+const { search, setSearch, query } = useDocsSearch({
+  type: 'orama-cloud',
+  client,
+  params: {
+    // search params
+  },
+});
+```

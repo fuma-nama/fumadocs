@@ -26,8 +26,6 @@ export async function updateOramaAi(): Promise<void> {
   const manager = new CloudManager({ api_key: apiKey });
   const indexManager = manager.index(index);
 
-  await indexManager.empty();
-
   const files = await fg([
     './content/docs/**/*.mdx',
     '!*.model.mdx',
@@ -65,7 +63,7 @@ export async function updateOramaAi(): Promise<void> {
   await Promise.all(scan);
 
   console.log(`added ${records.length} records`);
-  await indexManager.insert(records);
+  await indexManager.snapshot(records);
   await indexManager.deploy();
 }
 

@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-ui",
-  "version": "14.1.1",
+  "version": "14.2.0",
   "description": "The framework for building a documentation website in Next.js",
   "keywords": [
     "NextJs",
@@ -74,22 +74,19 @@
     "@radix-ui/react-tabs": "^1.1.1",
     "@tailwindcss/typography": "^0.5.15",
     "class-variance-authority": "^0.7.0",
-    "cmdk": "^1.0.0",
     "fumadocs-core": "workspace:*",
     "next-themes": "^0.3.0",
     "react-medium-image-zoom": "^5.2.10",
     "tailwind-merge": "^2.5.4"
   },
   "devDependencies": {
-    "@algolia/client-search": "4.24.0",
     "@fumadocs/cli": "workspace:*",
     "@next/eslint-plugin-next": "^15.0.1",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
-    "algoliasearch": "4.24.0",
     "eslint-config-custom": "workspace:*",
     "lucide-react": "^0.453.0",
-    "next": "15.0.1",
+    "next": "15.0.2",
     "postcss": "^8.4.47",
     "postcss-cli": "^11.0.0",
     "postcss-lightningcss": "^1.0.1",
@@ -99,12 +96,13 @@
   "peerDependencies": {
     "next": "14.x.x || 15.x.x",
     "react": ">= 18",
-    "react-dom": ">= 18"
-  },
-  "optionalDependencies": {
-    "@algolia/client-search": "^4.0.0",
-    "algoliasearch": "^4.24.0",
+    "react-dom": ">= 18",
     "tailwindcss": "^3.4.14"
+  },
+  "peerDependenciesMeta": {
+    "tailwindcss": {
+      "optional": true
+    }
   },
   "publishConfig": {
     "access": "public"

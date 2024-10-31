@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 14.2.0
+
+### Minor Changes
+
+- e248a0f: Support Orama Cloud integration
+
 ## 14.1.1
 
 ### Patch Changes

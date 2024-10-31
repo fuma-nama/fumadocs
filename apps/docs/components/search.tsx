@@ -1,26 +1,20 @@
 'use client';
 
-import algo from 'algoliasearch/lite';
+import { OramaClient } from '@oramacloud/client';
 import type { SharedProps } from 'fumadocs-ui/components/dialog/search';
-import SearchDialog from 'fumadocs-ui/components/dialog/search-algolia';
+import SearchDialog from 'fumadocs-ui/components/dialog/search-orama';
 import { useMode } from '@/app/layout.client';
 
-const appId = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID;
-const apiKey = process.env.NEXT_PUBLIC_ALGOLIA_API_KEY;
-const indexName = process.env.NEXT_PUBLIC_ALGOLIA_INDEX;
-
-if (!appId || !apiKey || !indexName) throw new Error('Algolia credentials');
-
-const client = algo(appId, apiKey);
-
-const index = client.initIndex(indexName);
+const client = new OramaClient({
+  endpoint: 'https://cloud.orama.run/v1/indexes/docs-fk97oe',
+  api_key: 'oPZjdlFbq5BpR54bV5Vj57RYt83Xosk7',
+});
 
 export default function CustomSearchDialog(
   props: SharedProps,
 ): React.ReactElement {
   return (
     <SearchDialog
-      index={index}
       {...props}
       defaultTag={useMode() ?? 'ui'}
       allowClear
@@ -38,7 +32,8 @@ export default function CustomSearchDialog(
           value: 'mdx',
         },
       ]}
-      showAlgolia
+      client={client}
+      showOrama
     />
   );
 }

@@ -2,27 +2,27 @@
 
 import {
   useDocsSearch,
-  type AlgoliaOptions,
+  type OramaCloudOptions,
 } from 'fumadocs-core/search/client';
 import { type ReactNode, useState } from 'react';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { SearchDialog, type SharedProps } from './search';
 import { type TagItem, TagsList } from './tag-list';
 
-export interface AlgoliaSearchDialogProps extends SharedProps {
-  index: AlgoliaOptions['index'];
-  searchOptions?: Omit<AlgoliaOptions, 'index'>;
+export interface OramaSearchDialogProps extends SharedProps {
+  client: OramaCloudOptions['client'];
+  searchOptions?: OramaCloudOptions['params'];
   footer?: ReactNode;
 
   defaultTag?: string;
   tags?: TagItem[];
 
   /**
-   * Add the "Powered by Algolia" label, this is useful for free tier users
+   * Add the "Powered by Orama" label
    *
    * @defaultValue false
    */
-  showAlgolia?: boolean;
+  showOrama?: boolean;
 
   /**
    * Allow to clear tag filters
@@ -32,21 +32,24 @@ export interface AlgoliaSearchDialogProps extends SharedProps {
   allowClear?: boolean;
 }
 
-export default function AlgoliaSearchDialog({
-  index,
+/**
+ * Orama Cloud integration
+ */
+export default function OramaSearchDialog({
+  client,
   searchOptions,
   tags,
   defaultTag,
-  showAlgolia = false,
+  showOrama = false,
   allowClear = false,
   ...props
-}: AlgoliaSearchDialogProps): ReactNode {
+}: OramaSearchDialogProps): ReactNode {
   const [tag, setTag] = useState(defaultTag);
   const { search, setSearch, query } = useDocsSearch(
     {
-      type: 'algolia',
-      index,
-      ...searchOptions,
+      type: 'orama-cloud',
+      client,
+      params: searchOptions,
     },
     undefined,
     tag,
@@ -72,7 +75,7 @@ export default function AlgoliaSearchDialog({
               items={tags}
               allowClear={allowClear}
             >
-              {showAlgolia ? <AlgoliaTitle /> : null}
+              {showOrama ? <Label /> : null}
             </TagsList>
             {props.footer}
           </>
@@ -84,14 +87,14 @@ export default function AlgoliaSearchDialog({
   );
 }
 
-function AlgoliaTitle(): ReactNode {
+function Label(): ReactNode {
   return (
     <a
-      href="https://algolia.com"
+      href="https://orama.com"
       rel="noreferrer noopener"
       className="ms-auto text-xs text-fd-muted-foreground"
     >
-      Search powered by Algolia
+      Search powered by Orama
     </a>
   );
 }
