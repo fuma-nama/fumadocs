@@ -1,5 +1,17 @@
 # next-docs-ui
 
+## 14.2.0
+
+### Minor Changes
+
+- e248a0f: Support Orama Cloud integration
+- 7a5393b: Replace `cmdk` with custom implementation
+
+### Patch Changes
+
+- Updated dependencies [e248a0f]
+  - fumadocs-core@14.2.0
+
 ## 14.1.1
 
 ### Patch Changes
