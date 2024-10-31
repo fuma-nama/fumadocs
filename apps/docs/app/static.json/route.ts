@@ -1,17 +1,8 @@
 import { NextResponse } from 'next/server';
 import { source } from '@/app/source';
-import type { StructuredData } from 'fumadocs-core/mdx-plugins';
+import type { OramaDocument } from 'fumadocs-core/search/orama-cloud';
 
 export const revalidate = false;
-
-export type Static = {
-  id: string;
-  structured: StructuredData;
-  tag: string;
-  url: string;
-  title: string;
-  description?: string;
-};
 
 export async function GET(): Promise<Response> {
   const pages = source.getPages();
@@ -26,7 +17,7 @@ export async function GET(): Promise<Response> {
         url: page.url,
         title: page.data.title,
         description: page.data.description,
-      } satisfies Static;
+      } satisfies OramaDocument;
     }),
   );
 

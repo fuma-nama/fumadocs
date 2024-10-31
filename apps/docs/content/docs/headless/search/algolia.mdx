@@ -50,43 +50,17 @@ import { sync } from 'fumadocs-core/search/algolia';
 const client = algosearch('id', 'key');
 
 sync(client, {
-  documents: indexes, // [!code highlight]
+  documents: indexes, // search indexes, may be provided by your content source [!code highlight]
 });
 ```
 
-The `indexes` variable should be provided by your content source provider.
-With Source API, you can do:
+You can export the search indexes from Next.js using a route handler:
 
-```ts title="app/static.json/route.ts"
-import { NextResponse } from 'next/server';
-import { type DocumentRecord } from 'fumadocs-core/search/algolia';
-import { source } from '@/lib/source';
-
-export const revalidate = false;
-
-export function GET() {
-  const results: DocumentRecord[] = [];
-
-  for (const page of source.getPages()) {
-    results.push({
-      _id: page.url,
-      structured: page.data.structuredData,
-      url: page.url,
-      title: page.data.title,
-      description: page.data.description,
-    });
-  }
-
-  return NextResponse.json(results);
-}
-```
-
-And read it after build:
-
-```json title="package.json"
+```json doc-gen:file
 {
-  "scripts": {
-    "build": "next build && node ./update-index.mjs"
+  "file": "../../examples/next-mdx/app/static.json/algolia.ts",
+  "codeblock": {
+    "meta": "title=\"app/static.json/route.ts\""
   }
 }
 ```
@@ -98,7 +72,17 @@ const content = fs.readFileSync('.next/server/app/static.json.body');
 
 // now you can pass it to `sync`
 /** @type {import('fumadocs-core/search/algolia').DocumentRecord[]} **/
-const records = JSON.parse(content.toString());
+const indexes = JSON.parse(content.toString());
+```
+
+Make sure to run the script after build:
+
+```json title="package.json"
+{
+  "scripts": {
+    "build": "next build && node ./update-index.mjs"
+  }
+}
 ```
 
 ### Workflow
