@@ -145,6 +145,13 @@ function SearchList({ items, hideResults = false }: SearchResultProps) {
   const sidebar = useSidebar();
   const { setOpenSearch } = useSearchContext();
 
+  if (
+    items.length > 0 &&
+    (!active || items.every((item) => item.id !== active))
+  ) {
+    setActive(items[0].id);
+  }
+
   const listenerRef = useRef<(e: KeyboardEvent) => void>();
   listenerRef.current = (e) => {
     if (e.key === 'ArrowDown' || e.key == 'ArrowUp') {
@@ -213,7 +220,7 @@ function SearchList({ items, hideResults = false }: SearchResultProps) {
             />
           ) : null}
           {icons[item.type]}
-          <p className="truncate">{item.content}</p>
+          <p className="w-0 flex-1 truncate">{item.content}</p>
         </CommandItem>
       ))}
     </div>
