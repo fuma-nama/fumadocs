@@ -53,7 +53,7 @@ export async function searchDocs(
         id: doc.id,
         content: doc.content,
         type: doc.content === doc.section ? 'heading' : 'text',
-        url: doc.url,
+        url: doc.section_id ? `${doc.url}#${doc.section_id}` : doc.url,
       });
     }
   }

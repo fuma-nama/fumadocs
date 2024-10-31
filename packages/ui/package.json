@@ -74,7 +74,6 @@
     "@radix-ui/react-tabs": "^1.1.1",
     "@tailwindcss/typography": "^0.5.15",
     "class-variance-authority": "^0.7.0",
-    "cmdk": "^1.0.0",
     "fumadocs-core": "workspace:*",
     "next-themes": "^0.3.0",
     "react-medium-image-zoom": "^5.2.10",

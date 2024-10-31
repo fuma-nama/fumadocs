@@ -4,12 +4,8 @@ import { useDocsSearch } from 'fumadocs-core/search/client';
 import { type ReactNode, useState } from 'react';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { useI18n } from '@/contexts/i18n';
-import {
-  SearchDialog,
-  type SharedProps,
-  type TagItem,
-  TagsList,
-} from './search';
+import { SearchDialog, type SharedProps } from './search';
+import { type TagItem, TagsList } from './tag-list';
 
 export interface DefaultSearchDialogProps extends SharedProps {
   /**
@@ -48,7 +44,7 @@ export default function DefaultSearchDialog({
   type = 'fetch',
   allowClear = false,
   ...props
-}: DefaultSearchDialogProps): React.ReactElement {
+}: DefaultSearchDialogProps): ReactNode {
   const { locale } = useI18n();
   const [tag, setTag] = useState(defaultTag);
   const { search, setSearch, query } = useDocsSearch(

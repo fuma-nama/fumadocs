@@ -1,25 +1,27 @@
+'use client';
+
 import { FileText, Hash, Loader2, SearchIcon, Text } from 'lucide-react';
 import type { SortedResult } from 'fumadocs-core/server';
 import { useRouter } from 'next/navigation';
 import {
   useMemo,
   type ReactNode,
-  type HTMLAttributes,
-  type ReactElement,
+  useEffect,
+  useState,
+  useRef,
+  type ButtonHTMLAttributes,
 } from 'react';
-import { cva } from 'class-variance-authority';
 import { useI18n } from '@/contexts/i18n';
-import {
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandDialog,
-} from '@/components/ui/command';
 import { cn } from '@/utils/cn';
 import { useSearchContext } from '@/contexts/search';
 import { useSidebar } from '@/contexts/sidebar';
+import { buttonVariants } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogOverlay,
+  DialogTitle,
+} from '@radix-ui/react-dialog';
 
 export type SearchLink = [name: string, href: string];
 
@@ -33,20 +35,22 @@ export interface SharedProps {
   links?: SearchLink[];
 }
 
-interface SearchDialogProps
-  extends SharedProps,
-    Omit<SearchContentProps, 'items'> {
-  results: SortedResult[] | 'empty';
+type SearchDialogProps = SharedProps &
+  SearchValueProps &
+  Omit<SearchResultProps, 'items'> & {
+    results: SortedResult[] | 'empty';
 
-  footer?: ReactNode;
-}
+    footer?: ReactNode;
+  };
 
-interface SearchContentProps {
+interface SearchValueProps {
   search: string;
   onSearchChange: (v: string) => void;
   isLoading?: boolean;
-  items: SortedResult[];
+}
 
+interface SearchResultProps {
+  items: SortedResult[];
   hideResults?: boolean;
 }
 
@@ -56,8 +60,9 @@ export function SearchDialog({
   footer,
   links = [],
   ...props
-}: SearchDialogProps): ReactElement {
-  const defaultItems: SortedResult[] = useMemo(
+}: SearchDialogProps) {
+  const { text } = useI18n();
+  const defaultItems = useMemo<SortedResult[]>(
     () =>
       links.map(([name, link]) => ({
         type: 'page',
@@ -69,148 +74,208 @@ export function SearchDialog({
   );
 
   return (
-    <CommandDialog open={open} onOpenChange={onOpenChange}>
-      <Search
-        {...props}
-        items={props.results === 'empty' ? defaultItems : props.results}
-        hideResults={props.results === 'empty' && defaultItems.length === 0}
-      />
-      {footer ? (
-        <div className="mt-auto flex flex-col border-t p-3">{footer}</div>
-      ) : null}
-    </CommandDialog>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogOverlay className="fixed inset-0 z-50 bg-fd-background/50 backdrop-blur-sm data-[state=closed]:animate-fd-fade-out data-[state=open]:animate-fd-fade-in" />
+      <DialogContent
+        aria-describedby={text.search}
+        className="fixed left-1/2 top-[10vh] z-50 w-[98vw] max-w-screen-sm origin-left -translate-x-1/2 rounded-lg border bg-fd-popover text-fd-popover-foreground shadow-lg data-[state=closed]:animate-fd-dialog-out data-[state=open]:animate-fd-dialog-in"
+      >
+        <DialogTitle className="hidden">{text.search}</DialogTitle>
+        <SearchInput
+          search={props.search}
+          onSearchChange={props.onSearchChange}
+          isLoading={props.isLoading}
+        />
+        <SearchList
+          items={props.results === 'empty' ? defaultItems : props.results}
+          hideResults={props.results === 'empty' && defaultItems.length === 0}
+        />
+        {footer ? (
+          <div className="mt-auto flex flex-col border-t p-3">{footer}</div>
+        ) : null}
+      </DialogContent>
+    </Dialog>
   );
 }
 
 const icons = {
-  text: <Text />,
-  heading: <Hash />,
-  page: <FileText />,
+  text: <Text className="size-4 text-fd-muted-foreground" />,
+  heading: <Hash className="size-4 text-fd-muted-foreground" />,
+  page: <FileText className="size-4 text-fd-muted-foreground" />,
 };
 
-function Search({
-  search,
-  onSearchChange,
-  items,
-  isLoading,
-  hideResults = false,
-}: SearchContentProps): ReactElement {
+function SearchInput({ search, onSearchChange, isLoading }: SearchValueProps) {
   const { text } = useI18n();
-  const router = useRouter();
   const { setOpenSearch } = useSearchContext();
-  const sidebar = useSidebar();
-
-  const onOpen = (url: string): void => {
-    router.push(url);
-    setOpenSearch(false);
-
-    if (location.pathname === url.split('#')[0]) {
-      sidebar.setOpen(false);
-    }
-  };
 
   return (
-    <>
-      <CommandInput
+    <div className="flex flex-row items-center gap-2 px-3">
+      <LoadingIndicator isLoading={isLoading ?? false} />
+      <input
         value={search}
-        onValueChange={onSearchChange}
-        onClose={() => {
-          setOpenSearch(false);
+        onChange={(e) => {
+          onSearchChange(e.target.value);
         }}
         placeholder={text.search}
+        className="w-full min-w-0 bg-transparent py-3 text-base placeholder:text-fd-muted-foreground focus-visible:outline-none"
+      />
+      <button
+        type="button"
+        aria-label="Close Search"
+        onClick={() => {
+          setOpenSearch(false);
+        }}
+        className={cn(
+          buttonVariants({
+            color: 'outline',
+            className: 'text-xs p-1.5',
+          }),
+        )}
       >
-        <div className="relative size-4">
-          <Loader2
-            className={cn(
-              'absolute size-full animate-spin text-fd-primary transition-opacity',
-              !isLoading && 'opacity-0',
-            )}
-          />
-          <SearchIcon
-            className={cn(
-              'absolute size-full text-fd-muted-foreground transition-opacity',
-              isLoading && 'opacity-0',
-            )}
-          />
-        </div>
-      </CommandInput>
-      <CommandList className={cn(hideResults && 'hidden')}>
-        <CommandEmpty>{text.searchNoResult}</CommandEmpty>
-
-        <CommandGroup value="result">
-          {items.map((item) => (
-            <CommandItem
-              key={item.id}
-              value={item.id}
-              onSelect={() => {
-                onOpen(item.url);
-              }}
-              icon={icons[item.type]}
-              nested={item.type !== 'page'}
-            >
-              {item.content}
-            </CommandItem>
-          ))}
-        </CommandGroup>
-      </CommandList>
-    </>
+        Esc
+      </button>
+    </div>
   );
 }
 
-const itemVariants = cva(
-  'rounded-md border px-2 py-0.5 text-xs font-medium text-fd-muted-foreground transition-colors',
-  {
-    variants: {
-      active: {
-        true: 'bg-fd-accent text-fd-accent-foreground',
-      },
-    },
-  },
-);
+function SearchList({ items, hideResults = false }: SearchResultProps) {
+  const [active, setActive] = useState<string>();
+  const { text } = useI18n();
+  const router = useRouter();
+  const sidebar = useSidebar();
+  const { setOpenSearch } = useSearchContext();
 
-export interface TagItem {
-  name: string;
-  value: string | undefined;
-}
+  const listenerRef = useRef<(e: KeyboardEvent) => void>();
+  listenerRef.current = (e) => {
+    if (e.key === 'ArrowDown' || e.key == 'ArrowUp') {
+      setActive((cur) => {
+        const idx = items.findIndex((item) => item.id === cur);
+        if (idx === -1) return items.at(0)?.id;
 
-export interface TagsListProps extends HTMLAttributes<HTMLDivElement> {
-  tag?: string;
-  onTagChange: (tag: string | undefined) => void;
-  allowClear?: boolean;
+        return items.at(
+          (e.key === 'ArrowDown' ? idx + 1 : idx - 1) % items.length,
+        )?.id;
+      });
 
-  items: TagItem[];
-}
+      e.preventDefault();
+    }
 
-export function TagsList({
-  tag,
-  onTagChange,
-  items,
-  allowClear,
-  ...props
-}: TagsListProps): ReactNode {
+    if (e.key === 'Enter') {
+      const selected = items.find((item) => item.id === active);
+
+      if (selected) onOpen(selected.url);
+      e.preventDefault();
+    }
+  };
+
+  useEffect(() => {
+    const listener = (e: KeyboardEvent) => {
+      listenerRef.current?.(e);
+    };
+
+    window.addEventListener('keydown', listener);
+    return () => {
+      window.removeEventListener('keydown', listener);
+    };
+  }, []);
+
+  const onOpen = (url: string) => {
+    router.push(url);
+    setOpenSearch(false);
+    sidebar.setOpen(false);
+  };
+
   return (
     <div
-      {...props}
-      className={cn('flex flex-row items-center gap-1', props.className)}
+      className={cn(
+        'flex max-h-[460px] flex-col overflow-y-auto border-t p-2',
+        hideResults && 'hidden',
+      )}
     >
+      {items.length === 0 ? (
+        <div className="py-12 text-center text-sm">{text.searchNoResult}</div>
+      ) : null}
+
       {items.map((item) => (
-        <button
-          type="button"
-          key={item.value}
-          className={cn(itemVariants({ active: tag === item.value }))}
+        <CommandItem
+          key={item.id}
+          value={item.id}
+          active={active}
+          onActiveChange={setActive}
           onClick={() => {
-            if (tag === item.value && allowClear) {
-              onTagChange(undefined);
-            } else {
-              onTagChange(item.value);
-            }
+            onOpen(item.url);
           }}
-          tabIndex={-1}
         >
-          {item.name}
-        </button>
+          {item.type !== 'page' ? (
+            <div
+              role="none"
+              className="ms-2 h-full min-h-10 w-px bg-fd-border"
+            />
+          ) : null}
+          {icons[item.type]}
+          <p className="truncate">{item.content}</p>
+        </CommandItem>
       ))}
-      {props.children}
     </div>
+  );
+}
+
+function LoadingIndicator({ isLoading }: { isLoading: boolean }) {
+  return (
+    <div className="relative size-4">
+      <Loader2
+        className={cn(
+          'absolute size-full animate-spin text-fd-primary transition-opacity',
+          !isLoading && 'opacity-0',
+        )}
+      />
+      <SearchIcon
+        className={cn(
+          'absolute size-full text-fd-muted-foreground transition-opacity',
+          isLoading && 'opacity-0',
+        )}
+      />
+    </div>
+  );
+}
+
+function CommandItem({
+  active,
+  onActiveChange,
+  value,
+  ...props
+}: ButtonHTMLAttributes<HTMLButtonElement> & {
+  value: string;
+  active?: string;
+  onActiveChange: (value: string) => void;
+}) {
+  const ref = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const element = ref.current;
+
+    if (active === value && element) {
+      element.scrollIntoView({
+        block: 'nearest',
+      });
+    }
+  }, [active, value]);
+
+  return (
+    <button
+      ref={ref}
+      type="button"
+      aria-selected={active === value}
+      onPointerEnter={() => {
+        onActiveChange(value);
+      }}
+      {...props}
+      className={cn(
+        'flex min-h-10 select-none flex-row items-center gap-2.5 rounded-lg px-2 text-start text-sm aria-disabled:pointer-events-none aria-disabled:opacity-50 aria-selected:bg-fd-accent aria-selected:text-fd-accent-foreground',
+        props.className,
+      )}
+    >
+      {props.children}
+    </button>
   );
 }

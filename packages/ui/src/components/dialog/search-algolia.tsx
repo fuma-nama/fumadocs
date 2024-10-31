@@ -6,12 +6,8 @@ import {
 } from 'fumadocs-core/search/client';
 import { type ReactNode, useState } from 'react';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
-import {
-  SearchDialog,
-  type SharedProps,
-  type TagItem,
-  TagsList,
-} from './search';
+import { SearchDialog, type SharedProps } from './search';
+import { type TagItem, TagsList } from './tag-list';
 
 export interface AlgoliaSearchDialogProps extends SharedProps {
   index: AlgoliaOptions['index'];

@@ -94,17 +94,6 @@ export async function sync(
   if (autoDeploy) await index.deploy();
 }
 
-const a = {
-  id: 'string',
-  title: 'string',
-  url: 'string',
-  tag: 'string',
-  page_id: 'string',
-  section: 'string',
-  section_id: 'string',
-  content: 'string',
-};
-
 export async function syncI18n(
   cloudManager: CloudManager,
   options: I18nSyncOptions,
