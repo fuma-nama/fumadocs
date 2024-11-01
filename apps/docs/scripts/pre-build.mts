@@ -6,14 +6,18 @@ import * as path from 'node:path';
 import { getSlugs, parseFilePath } from 'fumadocs-core/source';
 import * as fs from 'node:fs/promises';
 import { getTableOfContents } from 'fumadocs-core/server';
+import matter from 'gray-matter';
 
 async function readFromPath(file: string) {
+  const content = await fs
+    .readFile(path.resolve(file))
+    .then((res) => res.toString());
+  const parsed = matter(content);
+
   return {
     path: file,
-    content: await fs
-      .readFile(path.resolve(file))
-      .then((res) => res.toString())
-      .catch(() => ''),
+    data: parsed.data,
+    content: parsed.content,
   };
 }
 
@@ -44,7 +48,9 @@ async function main() {
 
             return {
               value: getSlugs(info).slice(2),
-              hashes: toc.map((item) => item.url.slice(1)),
+              hashes: file.data?._mdx?.mirror
+                ? undefined
+                : toc.map((item) => item.url.slice(1)),
             };
           }),
         ),
@@ -55,8 +61,8 @@ async function main() {
     );
 
     const files = [
-      ...docsFiles.map((file) => path.resolve('content/docs', file.path)),
-      ...blogFiles.map((file) => path.resolve('content/blog', file.path)),
+      ...docsFiles.map((file) => path.resolve(file.path)),
+      ...blogFiles.map((file) => path.resolve(file.path)),
     ];
 
     printErrors(
