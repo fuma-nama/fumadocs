@@ -3,7 +3,7 @@ import * as path from 'node:path';
 
 export type PopulateParams = Record<string, string[][] | string[]>;
 
-export async function scanURLs(params: PopulateParams): Promise<Set<string>> {
+export async function scanURLs(params: PopulateParams) {
   const urls = new Set<string>();
 
   const files = await fg('**/page.tsx', {
