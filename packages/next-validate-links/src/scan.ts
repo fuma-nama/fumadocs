@@ -37,6 +37,13 @@ type UrlMeta = {
 
 const defaultMeta = {};
 const defaultPopulate: PopulateParams[string] = [{}];
+const defaultPopulateOptional: PopulateParams[string] = [
+  {},
+  {
+    // case when it's empty
+    value: [],
+  },
+];
 
 export async function scanURLs(options: ScanOptions): Promise<ScanResult> {
   async function getFiles() {
@@ -90,10 +97,11 @@ function populate(
       const next = populate(segments.slice(i + 1), options, newContextPath);
       const out: { url: string | RegExp; meta?: UrlMeta }[] = [];
 
-      const segmentParams =
-        options.populate && segmentPath in options.populate
-          ? options.populate[segmentPath]
-          : defaultPopulate;
+      let segmentParams = options.populate?.[segmentPath];
+
+      segmentParams ??= segment.startsWith('[[')
+        ? defaultPopulateOptional
+        : defaultPopulate;
 
       segmentParams.forEach((param) => {
         const value = param.value;
