@@ -1,34 +1,37 @@
 import { generateDocs } from '@/scripts/generate-docs.mjs';
 import { buildRegistry } from '@/scripts/build-registry.mjs';
-import { validateFiles, scanURLs } from 'next-validate-link';
+import { validateFiles, scanURLs, printErrors } from 'next-validate-link';
 import fg from 'fast-glob';
 import * as path from 'node:path';
 import { getSlugs, parseFilePath } from 'fumadocs-core/source';
 
 async function main() {
-  const files = await fg('**/*.mdx', {
-    cwd: path.resolve('content'),
+  const docsFiles = await fg('**/*.mdx', {
+    cwd: path.resolve('content/docs'),
+  });
+
+  const blogFiles = await fg('**/*.mdx', {
+    cwd: path.resolve('content/blog'),
   });
 
   await Promise.all([
     scanURLs({
-      '(home)/blog/[slug]': files
-        .filter((file) => file.startsWith('blog'))
-        .map((file) => {
-          const info = parseFilePath(file.slice('blog'.length));
-          return getSlugs(info)[0];
-        }),
-      'docs/[...slug]': files
-        .filter((file) => file.startsWith('docs'))
-        .map((file) => {
-          const info = parseFilePath(file.slice('docs'.length));
-          return getSlugs(info);
-        }),
+      '(home)/blog/[slug]': blogFiles.map((file) => {
+        const info = parseFilePath(file);
+        return getSlugs(info)[0];
+      }),
+      'docs/[...slug]': docsFiles.map((file) => {
+        const info = parseFilePath(file);
+        return getSlugs(info);
+      }),
     }).then(async (urls) => {
       console.log(`collected ${urls.size} URLs`);
-      const files = await fg('content/**/*.mdx');
+      const files = [
+        ...docsFiles.map((file) => path.resolve('content/docs', file)),
+        ...blogFiles.map((file) => path.resolve('content/blog', file)),
+      ];
 
-      return validateFiles(files, urls);
+      printErrors(await validateFiles(files, urls));
     }),
     generateDocs(),
     buildRegistry(),
