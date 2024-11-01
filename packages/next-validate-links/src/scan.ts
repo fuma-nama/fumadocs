@@ -1,13 +1,17 @@
 import fg from 'fast-glob';
 import * as path from 'node:path';
+import { stat } from 'node:fs/promises';
 
 export type PopulateParams = Record<string, string[][] | string[]>;
 
 export async function scanURLs(params: PopulateParams) {
   const urls = new Set<string>();
+  const isSrcDirectory = await stat('src/app')
+    .then((res) => res.isDirectory())
+    .catch(() => false);
 
   const files = await fg('**/page.tsx', {
-    cwd: path.resolve('app'),
+    cwd: isSrcDirectory ? path.resolve('src/app') : path.resolve('app'),
   });
 
   files.forEach((file) => {
