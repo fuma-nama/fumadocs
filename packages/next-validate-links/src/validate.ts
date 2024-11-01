@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { remark } from 'remark';
 import { visit } from 'unist-util-visit';
+import type { ScanResult } from '@/scan';
 
 const processor = remark();
 
@@ -9,41 +10,65 @@ export type ValidateError = {
   detected: DetectedError[];
 };
 
-type DetectedError = [url: string, line: number, column: number];
+type DetectedError = [
+  url: string,
+  line: number,
+  column: number,
+  reason: 'not-found' | 'invalid-fragment' | 'invalid-query',
+];
 
 export type ValidateConfig = {
   /**
-   * Available URLs (may include hashes and query parameters)
+   * Available URLs (including hashes and query parameters)
    */
-  urls: Set<string>;
+  scanned: ScanResult;
 
   /**
-   * validate the hash of URLs
+   * don't validate the fragment/hash of URLs
    *
    * @defaultValue false
    */
-  validateHash?: boolean;
+  ignoreFragment?: boolean;
 
   /**
-   * validate the query of URLs
+   * don't validate the query of URLs
    *
    * @defaultValue false
    */
-  validateQuery?: boolean;
+  ignoreQuery?: boolean;
 };
 
+type File =
+  | string
+  | {
+      path: string;
+      content: string;
+    };
+
+/**
+ * Validate markdown files
+ *
+ * @param files - file paths or file objects
+ * @param config - configurations
+ */
 export async function validateFiles(
-  files: string[],
+  files: File[],
   config: ValidateConfig,
 ): Promise<ValidateError[]> {
-  async function run(file: string): Promise<ValidateError> {
-    const content = await readFile(file)
-      .then((res) => res.toString())
-      .catch(() => '');
+  async function run(file: File): Promise<ValidateError> {
+    const finalFile =
+      typeof file === 'string'
+        ? {
+            path: file,
+            content: await readFile(file)
+              .then((res) => res.toString())
+              .catch(() => ''),
+          }
+        : file;
 
     return {
-      file,
-      detected: validateMarkdown(content, config),
+      file: finalFile.path,
+      detected: validateMarkdown(finalFile.content, config),
     };
   }
 
@@ -57,23 +82,61 @@ export function validateMarkdown(content: string, config: ValidateConfig) {
   const detected: DetectedError[] = [];
 
   visit(tree, 'link', (node) => {
-    let url = node.url;
+    // ignore generated nodes
+    if (!node.position || node.url.match(/https?:\/\//)) return;
 
-    if (!config.validateHash) {
-      url = url.split('#', 2)[0];
-    }
-
-    if (!config.validateQuery) {
-      url = url.split('?', 2)[0];
-    }
+    const [urlWithoutFragment, fragment] = node.url.split('#', 2);
+    const [url, query] = urlWithoutFragment.split('?', 2);
 
     if (url.length === 0) return;
 
-    if (!url.match(/https?:\/\//) && !config.urls.has(url) && node.position) {
+    let meta = config.scanned.urls.get(url);
+    if (!meta) {
+      meta = config.scanned.fallbackUrls.find((fallbackUrl) => {
+        return fallbackUrl.url.test(url);
+      })?.meta;
+    }
+
+    if (meta) {
+      const validFragment =
+        config.ignoreFragment ||
+        !fragment ||
+        !meta.hashes ||
+        meta.hashes.includes(fragment);
+
+      if (!validFragment) {
+        detected.push([
+          node.url,
+          node.position.start.line,
+          node.position.start.column,
+          'invalid-fragment',
+        ]);
+        return;
+      }
+
+      const validQuery =
+        config.ignoreQuery ||
+        !query ||
+        !meta.queries ||
+        meta.queries.some(
+          (item) => new URLSearchParams(item).toString() === query,
+        );
+
+      if (!validQuery) {
+        detected.push([
+          node.url,
+          node.position.start.line,
+          node.position.start.column,
+          'invalid-query',
+        ]);
+        return;
+      }
+    } else {
       detected.push([
         node.url,
         node.position.start.line,
         node.position.start.column,
+        'not-found',
       ]);
     }
   });

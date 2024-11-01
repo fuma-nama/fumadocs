@@ -9,9 +9,9 @@ export function printErrors(errors: ValidateError[]) {
       picocolors.bold(picocolors.redBright(`Invalid URLs in ${error.file}:`)),
     );
 
-    error.detected.forEach(([content, line, column]) => {
+    error.detected.forEach(([content, line, column, reason]) => {
       console.error(
-        `${picocolors.bold(content)} at line ${line}, column ${column}`,
+        `${picocolors.bold(content)}: ${reason} at line ${line} column ${column}`,
       );
     });
     console.error(picocolors.dim('------'));
