@@ -229,6 +229,33 @@ export default function CustomSearchDialog(props: SharedProps) {
 
 </Callout>
 
+### Trieve
+
+For the setup guide, see [Integrate Trieve Search](/docs/headless/search/trieve).
+
+While generally we recommend building your own search with their client-side
+SDK, you can also plug the built-in dialog interface.
+
+```tsx title="components/search.tsx"
+'use client';
+import type { SharedProps } from 'fumadocs-ui/components/dialog/search';
+import SearchDialog from 'trieve-fumadocs-adapter/components/dialog/search';
+import { TrieveSDK } from 'trieve-ts-sdk';
+
+const trieveClient = new TrieveSDK({
+  apiKey: 'readOnlyApiKey',
+  datasetId: 'datasetId',
+});
+
+export default function CustomSearchDialog(props: SharedProps) {
+  return <SearchDialog trieveClient={trieveClient} {...props} />;
+}
+```
+
+1. Replace `apiKey` and `datasetId` with your desired values.
+
+2. [Replace the default search dialog](#replace-search-dialog) with your new component.
+
 ### Orama Cloud
 
 For the setup guide, see [Integrate Orama Cloud](/docs/headless/search/orama-cloud).

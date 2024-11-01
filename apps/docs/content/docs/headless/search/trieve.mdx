@@ -1,0 +1,168 @@
+---
+title: Trieve Search
+description: Integrate Trieve Search with Fumadocs
+---
+
+## Introduction
+
+The Trieve Integration automatically configures Trieve Search for site search.
+
+By default, it creates a chunk for **each paragraph** in your document, it is
+officially recommended by Trieve.
+
+## Setup
+
+### Install Dependencies
+
+```package-install
+trieve-ts-sdk trieve-fumadocs-adapter
+```
+
+### Sign up on Trieve
+
+Sign up and create a dataset. Then obtain 2 API keys where one has only read access and the other has admin access to create and delete chunks.
+Store these credentials in environment variables.
+
+<Callout title="Notice">
+  One API Key should have only read access for the public facing search and the
+  other should have admin access to create and delete chunks.
+</Callout>
+
+### Sync Dataset
+
+The `sync` function will sync search indexes.
+
+```js title="update-index.mjs"
+import { sync } from 'trieve-fumadocs-adapter/search/sync';
+import { TrieveSDK } from 'trieve-ts-sdk';
+
+const client = new TrieveSDK({
+  apiKey: 'adminApiKey',
+  datasetId: 'datasetId',
+});
+
+sync(client, records);
+```
+
+You can export the search indexes from Next.js using a route handler:
+
+```json doc-gen:file
+{
+  "file": "../../examples/next-mdx/app/static.json/trieve.ts",
+  "codeblock": {
+    "meta": "title=\"app/static.json/route.ts\""
+  }
+}
+```
+
+```js title="update-index.mjs"
+import * as fs from 'node:fs';
+
+const content = fs.readFileSync('.next/server/app/static.json.body');
+
+// now you can pass it to `sync`
+/** @type {import('trieve-fumadocs-adapter/search/sync').TrieveDocument[]} **/
+const records = JSON.parse(content.toString());
+```
+
+Make sure to run the script after build:
+
+```json title="package.json"
+{
+  "scripts": {
+    "build": "next build && node ./update-index.mjs"
+  }
+}
+```
+
+### Workflow
+
+You may make it a script and manually sync with `node ./update-index.mjs`, or
+integrate it with your CI/CD pipeline.
+
+> Notice that it expects the `url` property of a page to be unique. In other words, you shouldn't have two pages with the same
+> url.
+
+<Callout type="warn" title="Typescript Usage">
+  If you are running the script with [TSX](https://github.com/privatenumber/tsx)
+  or other similar Typescript executors, ensure to name it `.mts` for best ESM
+  compatibility.
+</Callout>
+
+### Search Client
+
+To search documents on the client side, use [Fumadocs UI Search Dialog](/docs/ui/search#trieve), or make your own implementation.
+
+In addition, the headless search client of Fumadocs can handle state management for React.
+
+```ts
+import { TrieveSDK } from 'trieve-ts-sdk';
+import { useTrieveSearch } from 'fumadocs-core/search/client';
+
+const client = new TrieveSDK({
+  apiKey: 'readOnlyApiKey',
+  datasetId: 'datasetId',
+});
+
+const { search, setSearch, query } = useTrieveSearch(client);
+```
+
+## Options
+
+### Tag Filter
+
+To configure tag filtering, add a `tag` value to indexes.
+
+```js
+import { sync } from 'trieve-fumadocs-adapter/search/sync';
+import { TrieveSDK } from 'trieve-ts-sdk';
+
+const client = new TrieveSDK({
+  apiKey: 'adminApiKey',
+  datasetId: 'datasetId',
+});
+
+const documents = records.map((index) => ({
+    ...index,
+    tag: 'value', // [!code highlight]
+  })),
+
+sync(client, documents);
+```
+
+#### Search UI (Fumadocs UI) [#search-ui]
+
+Enable [Tag Filter](/docs/ui/search#tag-filter-1) on Search Dialog.
+
+#### Search Client
+
+The `tag_set` field is an attribute for filtering. To filter indexes by tag, use the filter
+
+```JSON
+{
+  "must": [{
+    "field": "tag_set",
+    "match": ["value"]
+  }]
+}
+```
+
+on Trieve search clients.
+
+On Fumadocs search client, you can add the tag filter like:
+
+```ts
+import { TrieveSDK } from 'trieve-ts-sdk';
+import { useTrieveSearch } from 'fumadocs-core/search/client';
+
+const client = new TrieveSDK({
+  apiKey: 'readOnlyApiKey',
+  datasetId: 'datasetId',
+});
+
+const { search, setSearch, query } = useTrieveSearch(
+  client,
+  undefined,
+  '<your tag value>',
+);
+```
