@@ -1,4 +1,4 @@
-import { glob } from 'fast-glob';
+import fg from 'fast-glob';
 import * as path from 'node:path';
 
 export type PopulateParams = Record<string, string[][] | string[]>;
@@ -6,7 +6,7 @@ export type PopulateParams = Record<string, string[][] | string[]>;
 export async function scanURLs(params: PopulateParams): Promise<Set<string>> {
   const urls = new Set<string>();
 
-  const files = await glob('**/page.tsx', {
+  const files = await fg('**/page.tsx', {
     cwd: path.resolve('app'),
   });
 
