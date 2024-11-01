@@ -122,6 +122,9 @@ importers:
       phenomenon:
         specifier: ^1.6.0
         version: 1.6.0
+      picocolors:
+        specifier: ^1.1.1
+        version: 1.1.1
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -161,6 +164,9 @@ importers:
       ts-morph:
         specifier: ^24.0.0
         version: 24.0.0
+      unist-util-visit:
+        specifier: ^5.0.0
+        version: 5.0.0
       zod:
         specifier: ^3.23.8
         version: 3.23.8

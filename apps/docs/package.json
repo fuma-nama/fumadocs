@@ -3,10 +3,9 @@
   "version": "0.1.3",
   "private": true,
   "scripts": {
-    "build": "pnpm build:registry && pnpm build:docs && next build && pnpm build:post",
-    "build:docs": "tsx ./scripts/generate-docs.mts",
+    "build": "pnpm build:pre && next build && pnpm build:post",
+    "build:pre": "tsx ./scripts/pre-build.mts",
     "build:post": "tsx ./scripts/post-build.mts",
-    "build:registry": "tsx ./scripts/build-registry.mts",
     "build:shaders": "glslx shaders/rain.glsl --output=shaders/rain.min.js --format=js --renaming=internal-only",
     "clean": "rimraf .next",
     "dev": "next dev --turbo",
@@ -36,6 +35,7 @@
     "lucide-react": "^0.453.0",
     "next": "15.0.2",
     "phenomenon": "^1.6.0",
+    "picocolors": "^1.1.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "rehype-katex": "^7.0.1",
@@ -49,6 +49,7 @@
     "shiki": "^1.22.2",
     "tailwind-merge": "^2.5.4",
     "ts-morph": "^24.0.0",
+    "unist-util-visit": "^5.0.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
