@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest';
 import { scanURLs } from '@/scan';
 
-test('validate-link: scan pages', async () => {
+test('scan pages', async () => {
   const scanned = await scanURLs({
     pages: ['page.tsx', 'docs/page.tsx', 'nested/docs/page.tsx'],
   });
@@ -18,7 +18,7 @@ test('validate-link: scan pages', async () => {
   `);
 });
 
-test('validate-link: scan pages with meta', async () => {
+test('scan pages with meta', async () => {
   const scanned = await scanURLs({
     pages: ['page.tsx', 'docs/page.tsx', 'nested/docs/page.tsx'],
     meta: {
@@ -44,7 +44,7 @@ test('validate-link: scan pages with meta', async () => {
   `);
 });
 
-test('validate-link: scan pages with params', async () => {
+test('scan pages with params', async () => {
   const scanned = await scanURLs({
     pages: [
       'page.tsx',
@@ -134,9 +134,14 @@ test('validate-link: scan pages with params', async () => {
   `);
 });
 
-test('validate-link: scan pages with dynamic params', async () => {
+test('scan pages with dynamic params', async () => {
   const scanned = await scanURLs({
-    pages: ['page.tsx', 'docs/page.tsx', 'docs/[...slug]/page.tsx'],
+    pages: [
+      'page.tsx',
+      'docs/page.tsx',
+      'docs/[...slug]/page.tsx',
+      'blog/[[...slug]]/page.tsx',
+    ],
   });
 
   expect(scanned).toMatchInlineSnapshot(`
@@ -146,10 +151,17 @@ test('validate-link: scan pages with dynamic params', async () => {
           "meta": {},
           "url": /\\^\\\\/docs\\\\/\\(\\.\\+\\)\\$/,
         },
+        {
+          "meta": {},
+          "url": /\\^\\\\/blog\\\\/\\(\\.\\+\\)\\$/,
+        },
       ],
       "urls": Map {
         "/" => {},
         "/docs" => {},
+        "/blog" => {
+          "value": [],
+        },
       },
     }
   `);
