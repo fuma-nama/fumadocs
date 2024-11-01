@@ -1,7 +1,7 @@
 import { generateDocs } from '@/scripts/generate-docs.mjs';
 import { buildRegistry } from '@/scripts/build-registry.mjs';
-import { scanURLs } from '@/scripts/check-links/scan';
-import { validateFiles } from '@/scripts/check-links/validate';
+import { scanURLs } from '@/scripts/check-links/scan.mjs';
+import { validateFiles } from '@/scripts/check-links/validate.mjs';
 import fg from 'fast-glob';
 import * as path from 'node:path';
 import { getSlugs, parseFilePath } from 'fumadocs-core/source';
