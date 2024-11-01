@@ -12,7 +12,13 @@ export type PopulateParams = Record<
 >;
 
 export type ScanOptions = {
-  populate: PopulateParams;
+  /**
+   * path of pages (e.g. `/docs/page.tsx`)
+   **/
+  pages?: string[];
+
+  populate?: PopulateParams;
+  meta?: Record<string, UrlMeta>;
 };
 
 export type ScanResult = {
@@ -33,17 +39,21 @@ const defaultMeta = {};
 const defaultPopulate: PopulateParams[string] = [{}];
 
 export async function scanURLs(options: ScanOptions): Promise<ScanResult> {
-  const result: ScanResult = { urls: new Map(), fallbackUrls: [] };
-  const isSrcDirectory = await stat('src/app')
-    .then((res) => res.isDirectory())
-    .catch(() => false);
+  async function getFiles() {
+    const isSrcDirectory = await stat('src/app')
+      .then((res) => res.isDirectory())
+      .catch(() => false);
 
-  const files = await fg('**/page.tsx', {
-    cwd: isSrcDirectory ? path.resolve('src/app') : path.resolve('app'),
-  });
+    return await fg('**/page.tsx', {
+      cwd: isSrcDirectory ? path.resolve('src/app') : path.resolve('app'),
+    });
+  }
+
+  const result: ScanResult = { urls: new Map(), fallbackUrls: [] };
+  const files = options.pages ?? (await getFiles());
 
   files.forEach((file) => {
-    const segments = file.split(path.sep).slice(0, -1);
+    const segments = file.split(path.sep);
     const out = populate(segments, options);
 
     out.forEach((entry) => {
@@ -64,22 +74,24 @@ export async function scanURLs(options: ScanOptions): Promise<ScanResult> {
 function populate(
   segments: string[],
   options: ScanOptions,
-  contextPath: string = '',
+  contextPath: string[] = [],
 ): { url: string | RegExp; meta?: UrlMeta }[] {
   const current: string[] = [];
 
-  for (let i = 0; i < segments.length; i++) {
+  for (let i = 0; i < segments.length - 1; i++) {
     const segment = segments[i];
 
     // route groups
     if (segment.startsWith('(') && segment.endsWith(')')) continue;
     if (segment.startsWith('[') && segment.endsWith(']')) {
-      const segmentPath = contextPath + segments.slice(0, i + 1).join('/');
-      const next = populate(segments.slice(i + 1), options, segmentPath);
+      const newContextPath = [...contextPath, ...segments.slice(0, i + 1)];
+
+      const segmentPath = newContextPath.join('/');
+      const next = populate(segments.slice(i + 1), options, newContextPath);
       const out: { url: string | RegExp; meta?: UrlMeta }[] = [];
 
       const segmentParams =
-        segmentPath in options.populate
+        options.populate && segmentPath in options.populate
           ? options.populate[segmentPath]
           : defaultPopulate;
 
@@ -126,9 +138,12 @@ function populate(
     current.push(segment);
   }
 
+  const segmentPath = [...contextPath, ...segments].join('/');
+
   return [
     {
       url: current.join('/'),
+      meta: options.meta?.[segmentPath],
     },
   ];
 }
