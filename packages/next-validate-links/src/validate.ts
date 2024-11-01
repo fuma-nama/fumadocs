@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { remark } from 'remark';
 import { visit } from 'unist-util-visit';
 import type { ScanResult } from '@/scan';
+import path from 'node:path';
 
 const processor = remark();
 
@@ -55,6 +56,8 @@ export async function validateFiles(
   files: File[],
   config: ValidateConfig,
 ): Promise<ValidateError[]> {
+  const mdExtensions = ['.md', '.mdx'];
+
   async function run(file: File): Promise<ValidateError> {
     const finalFile =
       typeof file === 'string'
@@ -65,6 +68,12 @@ export async function validateFiles(
               .catch(() => ''),
           }
         : file;
+
+    if (!mdExtensions.includes(path.extname(finalFile.path))) {
+      console.warn(`format unsupported: ${finalFile.path}`);
+
+      return { file: finalFile.path, detected: [] };
+    }
 
     return {
       file: finalFile.path,
