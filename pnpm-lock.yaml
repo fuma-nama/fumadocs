@@ -196,8 +196,8 @@ importers:
         specifier: ^4.0.3
         version: 4.0.3
       next-validate-link:
-        specifier: workspace:*
-        version: link:../../packages/next-validate-links
+        specifier: ^1.0.1
+        version: 1.0.1
       postcss:
         specifier: ^8.4.47
         version: 8.4.47
@@ -216,70 +216,6 @@ importers:
       tsx:
         specifier: ^4.19.2
         version: 4.19.2
-      typescript:
-        specifier: ^5.6.3
-        version: 5.6.3
-
-  apps/next-validate-link:
-    dependencies:
-      class-variance-authority:
-        specifier: ^0.7.0
-        version: 0.7.0
-      fast-glob:
-        specifier: ^3.3.1
-        version: 3.3.2
-      fumadocs-core:
-        specifier: workspace:*
-        version: link:../../packages/core
-      fumadocs-docgen:
-        specifier: workspace:*
-        version: link:../../packages/doc-gen
-      fumadocs-mdx:
-        specifier: workspace:*
-        version: link:../../packages/mdx
-      fumadocs-ui:
-        specifier: workspace:*
-        version: link:../../packages/ui
-      lucide-react:
-        specifier: ^0.454.0
-        version: 0.454.0(react@18.3.1)
-      next:
-        specifier: ^15.0.2
-        version: 15.0.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      next-validate-link:
-        specifier: workspace:^
-        version: link:../../packages/next-validate-links
-      react:
-        specifier: ^18.3.1
-        version: 18.3.1
-      react-dom:
-        specifier: ^18.3.1
-        version: 18.3.1(react@18.3.1)
-      tailwind-merge:
-        specifier: ^2.5.4
-        version: 2.5.4
-    devDependencies:
-      '@types/mdx':
-        specifier: ^2.0.13
-        version: 2.0.13
-      '@types/node':
-        specifier: 22.8.6
-        version: 22.8.6
-      '@types/react':
-        specifier: ^18.3.12
-        version: 18.3.12
-      '@types/react-dom':
-        specifier: ^18.3.1
-        version: 18.3.1
-      autoprefixer:
-        specifier: ^10.4.20
-        version: 10.4.20(postcss@8.4.47)
-      postcss:
-        specifier: ^8.4.47
-        version: 8.4.47
-      tailwindcss:
-        specifier: ^3.4.14
-        version: 3.4.14
       typescript:
         specifier: ^5.6.3
         version: 5.6.3
@@ -935,34 +871,6 @@ importers:
       vfile:
         specifier: ^6.0.3
         version: 6.0.3
-
-  packages/next-validate-links:
-    dependencies:
-      fast-glob:
-        specifier: ^3.3.1
-        version: 3.3.2
-      gray-matter:
-        specifier: ^4.0.3
-        version: 4.0.3
-      picocolors:
-        specifier: ^1.1.1
-        version: 1.1.1
-      remark:
-        specifier: ^15.0.1
-        version: 15.0.1
-      unist-util-visit:
-        specifier: ^5.0.0
-        version: 5.0.0
-    devDependencies:
-      '@types/node':
-        specifier: 22.8.6
-        version: 22.8.6
-      eslint-config-custom:
-        specifier: workspace:*
-        version: link:../eslint-config-custom
-      tsconfig:
-        specifier: workspace:*
-        version: link:../tsconfig
 
   packages/openapi:
     dependencies:
@@ -4819,6 +4727,9 @@ packages:
     peerDependencies:
       react: ^16.8 || ^17 || ^18
       react-dom: ^16.8 || ^17 || ^18
+
+  next-validate-link@1.0.1:
+    resolution: {integrity: sha512-36DGk4JAC5tFOl/1rw13taNSsrCoCjwVCpHBEavuoePCq1WMofqBEui77rSctRH1X9y5qVxKmd2j3oG1qMX6rQ==}
 
   next@15.0.2:
     resolution: {integrity: sha512-rxIWHcAu4gGSDmwsELXacqAPUk+j8dV/A9cDF5fsiCMpkBDYkO2AEaL1dfD+nNmDiU6QMCFN8Q30VEKapT9UHQ==}
@@ -10259,6 +10170,16 @@ snapshots:
     dependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
+
+  next-validate-link@1.0.1:
+    dependencies:
+      fast-glob: 3.3.2
+      gray-matter: 4.0.3
+      picocolors: 1.1.1
+      remark: 15.0.1
+      unist-util-visit: 5.0.0
+    transitivePeerDependencies:
+      - supports-color
 
   next@15.0.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
