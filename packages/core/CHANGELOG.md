@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 14.2.1
+
+### Patch Changes
+
+- ca94bfd: Support sync usage of `getTableOfContents`
+
 ## 14.2.0
 
 ### Minor Changes
