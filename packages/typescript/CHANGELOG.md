@@ -1,5 +1,11 @@
 # fumadocs-typescript
 
+## 3.0.2
+
+### Patch Changes
+
+- c042eb7: Fix private class members
+
 ## 3.0.1
 
 ### Patch Changes
