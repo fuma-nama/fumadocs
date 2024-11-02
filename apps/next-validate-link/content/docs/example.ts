@@ -34,22 +34,20 @@ async function checkLinks() {
   const scanned = await scanURLs({
     populate: {
       '(home)/blog/[slug]': blogFiles.map((file) => {
-        const info = parseFilePath(file.path);
+        const info = parseFilePath(path.relative('content/blog', file.path));
 
-        return { value: getSlugs(info)[2] };
+        return { value: getSlugs(info)[0] };
       }),
-      'docs/[[...slug]]': await Promise.all(
-        docsFiles.map(async (file) => {
-          const info = parseFilePath(file.path);
+      'docs/[[...slug]]': docsFiles.map((file) => {
+        const info = parseFilePath(path.relative('content/docs', file.path));
 
-          return {
-            value: getSlugs(info).slice(2),
-            hashes: (await getTableOfContents(file.content)).map((item) =>
-              item.url.slice(1),
-            ),
-          };
-        }),
-      ),
+        return {
+          value: getSlugs(info),
+          hashes: getTableOfContents(file.content).map((item) =>
+            item.url.slice(1),
+          ),
+        };
+      }),
     },
   });
 

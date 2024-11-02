@@ -207,6 +207,9 @@ importers:
       tailwindcss-animate:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.4.14)
+      ts-morph:
+        specifier: ^24.0.0
+        version: 24.0.0
       tsconfig:
         specifier: workspace:*
         version: link:../../packages/tsconfig

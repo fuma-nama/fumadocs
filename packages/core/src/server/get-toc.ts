@@ -15,10 +15,8 @@ export type TableOfContents = TOCItemType[];
  *
  * @param content - Markdown content
  */
-export async function getTableOfContents(
-  content: string,
-): Promise<TableOfContents> {
-  const result = await remark().use(remarkHeading).process(content);
+export function getTableOfContents(content: string): TableOfContents {
+  const result = remark().use(remarkHeading).processSync(content);
 
   if ('toc' in result.data) return result.data.toc as TableOfContents;
 
