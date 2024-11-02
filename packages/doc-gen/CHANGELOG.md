@@ -1,5 +1,12 @@
 # fumadocs-docgen
 
+## 1.3.2
+
+### Patch Changes
+
+- Updated dependencies [c042eb7]
+  - fumadocs-typescript@3.0.2
+
 ## 1.3.1
 
 ### Patch Changes
