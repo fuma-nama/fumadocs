@@ -6,8 +6,7 @@
     "build": "next build",
     "dev": "next dev",
     "start": "next start",
-    "postinstall": "fumadocs-mdx",
-    "types:check": "tsc --noEmit"
+    "types:check": "fumadocs-mdx && tsc --noEmit"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.0",
