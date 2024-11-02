@@ -111,12 +111,22 @@ export function generate(
       .getType()
       .getProperties()
       .map((prop) => getDocEntry(prop, entryContext))
-      .filter((entry) => allowInternal || !('internal' in entry.tags)),
+      .filter(
+        (entry) => entry && (allowInternal || !('internal' in entry.tags)),
+      ) as DocEntry[],
   };
 }
 
-function getDocEntry(prop: TsSymbol, context: EntryContext): DocEntry {
+function getDocEntry(
+  prop: TsSymbol,
+  context: EntryContext,
+): DocEntry | undefined {
   const { transform, program } = context;
+
+  if (context.type.isClass() && prop.getName().startsWith('#')) {
+    return;
+  }
+
   const subType = program
     .getTypeChecker()
     .getTypeOfSymbolAtLocation(prop, context.declaration);
