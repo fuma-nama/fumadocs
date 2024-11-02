@@ -3,6 +3,7 @@ import { remark } from 'remark';
 import { visit } from 'unist-util-visit';
 import type { ScanResult } from '@/scan';
 import path from 'node:path';
+import matter from 'gray-matter';
 
 const processor = remark();
 
@@ -87,7 +88,7 @@ export async function validateFiles(
 }
 
 export function validateMarkdown(content: string, config: ValidateConfig) {
-  const tree = processor.parse({ value: content });
+  const tree = processor.parse({ value: matter({ content }).content });
   const detected: DetectedError[] = [];
 
   visit(tree, 'link', (node) => {

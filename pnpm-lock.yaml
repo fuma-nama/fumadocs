@@ -217,6 +217,70 @@ importers:
         specifier: ^5.6.3
         version: 5.6.3
 
+  apps/next-validate-link:
+    dependencies:
+      class-variance-authority:
+        specifier: ^0.7.0
+        version: 0.7.0
+      fast-glob:
+        specifier: ^3.3.1
+        version: 3.3.2
+      fumadocs-core:
+        specifier: workspace:*
+        version: link:../../packages/core
+      fumadocs-docgen:
+        specifier: workspace:*
+        version: link:../../packages/doc-gen
+      fumadocs-mdx:
+        specifier: workspace:*
+        version: link:../../packages/mdx
+      fumadocs-ui:
+        specifier: workspace:*
+        version: link:../../packages/ui
+      lucide-react:
+        specifier: ^0.453.0
+        version: 0.453.0(react@18.3.1)
+      next:
+        specifier: ^15.0.2
+        version: 15.0.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      next-validate-link:
+        specifier: workspace:^
+        version: link:../../packages/next-validate-links
+      react:
+        specifier: ^18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: ^18.3.1
+        version: 18.3.1(react@18.3.1)
+      tailwind-merge:
+        specifier: ^2.5.4
+        version: 2.5.4
+    devDependencies:
+      '@types/mdx':
+        specifier: ^2.0.13
+        version: 2.0.13
+      '@types/node':
+        specifier: 22.8.1
+        version: 22.8.1
+      '@types/react':
+        specifier: ^18.3.12
+        version: 18.3.12
+      '@types/react-dom':
+        specifier: ^18.3.1
+        version: 18.3.1
+      autoprefixer:
+        specifier: ^10.4.20
+        version: 10.4.20(postcss@8.4.47)
+      postcss:
+        specifier: ^8.4.47
+        version: 8.4.47
+      tailwindcss:
+        specifier: ^3.4.14
+        version: 3.4.14
+      typescript:
+        specifier: ^5.6.3
+        version: 5.6.3
+
   examples/content-collections:
     dependencies:
       '@fumadocs/content-collections':
@@ -874,6 +938,9 @@ importers:
       fast-glob:
         specifier: ^3.3.1
         version: 3.3.2
+      gray-matter:
+        specifier: ^4.0.3
+        version: 4.0.3
       picocolors:
         specifier: ^1.1.1
         version: 1.1.1

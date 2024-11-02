@@ -45,6 +45,24 @@ test('validate links: valid', async () => {
   ).lengthOf(0, 'no error');
 });
 
+test('validate links: valid with frontmatter', async () => {
+  expect(
+    await validateFiles(
+      [
+        {
+          path: 'a.md',
+          content: `---
+title: hello world [hello](/sfd)
+---
+
+[hello](/)`,
+        },
+      ],
+      { scanned },
+    ),
+  ).lengthOf(0, 'no error');
+});
+
 test('validate links: not found', async () => {
   expect(
     await validateFiles(

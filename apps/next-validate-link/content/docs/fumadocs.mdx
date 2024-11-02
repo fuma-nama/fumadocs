@@ -1,0 +1,21 @@
+---
+title: Fumadocs
+description: Integrate with Fumadocs
+---
+
+## Setup
+
+```json doc-gen:file
+{
+  "file": "./content/docs/example.ts",
+  "codeblock": {
+    "meta": "title=\"lint.ts\""
+  }
+}
+```
+
+Run it during lint process or in a GitHub action.
+
+```bash
+bun run ./lint.ts
+```

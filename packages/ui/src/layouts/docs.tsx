@@ -91,7 +91,7 @@ export function DocsLayout({
 
   const footer = (
     <>
-      <div className="flex flex-row items-center border-t py-1 empty:hidden max-md:gap-1.5 max-md:px-3 md:mx-3">
+      <div className="flex flex-row items-center border-t py-2 empty:hidden max-md:gap-1.5 max-md:px-3 md:mx-3">
         <SidebarFooter
           sidebarCollapsible={collapsible}
           i18n={i18n}

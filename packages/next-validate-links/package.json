@@ -26,10 +26,11 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "unist-util-visit": "^5.0.0",
     "fast-glob": "^3.3.1",
+    "gray-matter": "^4.0.3",
+    "picocolors": "^1.1.1",
     "remark": "^15.0.1",
-    "picocolors": "^1.1.1"
+    "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {
     "@types/node": "22.8.1",
