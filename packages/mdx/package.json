@@ -63,7 +63,8 @@
     "next": "^15.0.2",
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
-    "vfile": "^6.0.3"
+    "vfile": "^6.0.3",
+    "webpack": "^5.96.1"
   },
   "peerDependencies": {
     "fumadocs-core": "^14.0.0",
