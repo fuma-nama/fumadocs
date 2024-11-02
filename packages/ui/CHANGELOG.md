@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 14.2.1
+
+### Patch Changes
+
+- 2949da3: Show 'ctrl' for windows in search toggle
+- Updated dependencies [ca94bfd]
+  - fumadocs-core@14.2.1
+
 ## 14.2.0
 
 ### Minor Changes
