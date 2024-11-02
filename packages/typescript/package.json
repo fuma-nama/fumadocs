@@ -35,7 +35,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@types/node": "22.8.1",
+    "@types/node": "22.8.6",
     "fast-glob": "^3.3.1",
     "hast-util-to-jsx-runtime": "^2.3.2",
     "mdast-util-from-markdown": "^2.0.2",

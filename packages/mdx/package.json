@@ -60,11 +60,10 @@
     "@types/react": "^18.3.12",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
-    "next": "^15.0.1",
+    "next": "^15.0.2",
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
-    "vfile": "^6.0.3",
-    "webpack": "^5.95.0"
+    "vfile": "^6.0.3"
   },
   "peerDependencies": {
     "fumadocs-core": "^14.0.0",

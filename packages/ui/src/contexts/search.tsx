@@ -1,8 +1,15 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import {
+  createContext,
+  type ReactNode,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import type { SearchLink, SharedProps } from '@/components/dialog/search';
 
 interface HotKey {
-  display: React.ReactNode;
+  display: ReactNode;
 
   /**
    * Key code or a function determining whether the key is pressed.
@@ -42,7 +49,7 @@ export interface SearchProviderProps {
    */
   options?: Partial<SharedProps>;
 
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
 interface SearchContextType {
@@ -61,6 +68,18 @@ export function useSearchContext(): SearchContextType {
   return useContext(SearchContext);
 }
 
+function MetaOrControl() {
+  const [key, setKey] = useState('⌘');
+
+  useEffect(() => {
+    const isWindows = window.navigator.userAgent.includes('Windows');
+
+    if (isWindows) setKey('Ctrl');
+  }, []);
+
+  return key;
+}
+
 export function SearchProvider({
   SearchDialog,
   children,
@@ -69,7 +88,7 @@ export function SearchProvider({
   hotKey = [
     {
       key: (e) => e.metaKey || e.ctrlKey,
-      display: '⌘',
+      display: <MetaOrControl />,
     },
     {
       key: 'k',
@@ -81,7 +100,7 @@ export function SearchProvider({
   const [isOpen, setIsOpen] = useState(preload ? false : undefined);
 
   useEffect(() => {
-    const handler = (e: KeyboardEvent): void => {
+    const handler = (e: KeyboardEvent) => {
       if (
         hotKey.every((v) =>
           typeof v.key === 'string' ? e.key === v.key : v.key(e),

@@ -36,14 +36,14 @@
   "dependencies": {
     "@clack/prompts": "^0.7.0",
     "commander": "^12.1.0",
-    "execa": "^9.5.0",
+    "execa": "^9.5.1",
     "package-manager-detector": "^0.2.2",
     "picocolors": "^1.1.1",
     "ts-morph": "^24.0.0"
   },
   "devDependencies": {
     "@types/cross-spawn": "^6.0.6",
-    "@types/node": "22.8.1",
+    "@types/node": "22.8.6",
     "@types/react": "^18.3.12",
     "eslint-config-custom": "workspace:*",
     "fast-glob": "^3.3.1",

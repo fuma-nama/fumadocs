@@ -15,7 +15,7 @@
     "fumadocs-docgen": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "lucide-react": "^0.453.0",
+    "lucide-react": "^0.454.0",
     "next": "^15.0.2",
     "next-validate-link": "workspace:^",
     "react": "^18.3.1",
@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "@types/mdx": "^2.0.13",
-    "@types/node": "22.8.1",
+    "@types/node": "22.8.6",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "autoprefixer": "^10.4.20",

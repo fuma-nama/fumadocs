@@ -33,7 +33,7 @@
     "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {
-    "@types/node": "22.8.1",
+    "@types/node": "22.8.6",
     "eslint-config-custom": "workspace:*",
     "tsconfig": "workspace:*"
   },

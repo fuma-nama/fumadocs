@@ -5,9 +5,7 @@ import { useI18n } from '@/contexts/i18n';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 
-export function SearchToggle(
-  props: ButtonHTMLAttributes<HTMLButtonElement>,
-): React.ReactElement {
+export function SearchToggle(props: ButtonHTMLAttributes<HTMLButtonElement>) {
   const { setOpenSearch } = useSearchContext();
 
   return (
@@ -33,7 +31,7 @@ export function SearchToggle(
 
 export function LargeSearchToggle(
   props: ButtonHTMLAttributes<HTMLButtonElement>,
-): React.ReactElement {
+) {
   const { hotKey, setOpenSearch } = useSearchContext();
   const { text } = useI18n();
 
