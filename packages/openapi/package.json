@@ -57,7 +57,7 @@
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "22.8.6",
+    "@types/node": "22.8.7",
     "@types/openapi-sampler": "^1.0.3",
     "@types/react": "^18.3.12",
     "bunchee": "^5.6.1",

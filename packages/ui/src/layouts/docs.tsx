@@ -21,7 +21,6 @@ declare const {
   LanguageToggle,
   LanguageToggleText,
   LinksMenu,
-  RootToggle,
   Sidebar,
   IconItem,
   MenuItem,
@@ -32,7 +31,7 @@ const DynamicSidebar = dynamic(
   () => import('@/components/layout/dynamic-sidebar'),
 );
 
-interface SidebarOptions extends Omit<SidebarProps, 'children'> {
+interface SidebarOptions extends Omit<SidebarProps, 'children' | 'tabs'> {
   enabled: boolean;
   component: ReactNode;
   collapsible: boolean;
@@ -82,11 +81,10 @@ export function DocsLayout({
   }
 
   const banner = (
-    <div className="flex flex-col gap-1 px-4 empty:hidden md:px-3 md:pb-2">
+    <>
       <SidebarHeader {...nav} links={links} />
-      {tabs.length > 0 ? <RootToggle className="-mx-1" options={tabs} /> : null}
       {sidebar.banner}
-    </div>
+    </>
   );
 
   const footer = (
@@ -124,7 +122,7 @@ export function DocsLayout({
         >
           {replaceOrDefault(
             { enabled: sidebarEnabled, component: sidebarReplace },
-            <Aside {...sidebar} banner={banner} footer={footer}>
+            <Aside {...sidebar} banner={banner} footer={footer} tabs={tabs}>
               <div className="flex flex-col px-2 pt-4 empty:hidden md:hidden">
                 {links
                   .filter((v) => v.type !== 'icon')
@@ -135,6 +133,7 @@ export function DocsLayout({
             </Aside>,
             {
               ...sidebar,
+              tabs,
               banner,
               footer,
             },

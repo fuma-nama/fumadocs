@@ -26,7 +26,7 @@ export function RootToggle({
   ...props
 }: {
   options: Option[];
-} & HTMLAttributes<HTMLButtonElement>): React.ReactElement {
+} & HTMLAttributes<HTMLButtonElement>) {
   const [open, setOpen] = useState(false);
   const { closeOnRedirect } = useSidebar();
   const pathname = usePathname();
@@ -34,7 +34,7 @@ export function RootToggle({
     return options.find((item) => isActive(item.url, pathname, true));
   }, [options, pathname]);
 
-  const onClick = (): void => {
+  const onClick = () => {
     closeOnRedirect.current = false;
     setOpen(false);
   };
@@ -44,7 +44,7 @@ export function RootToggle({
       <PopoverTrigger
         {...props}
         className={cn(
-          'flex flex-row items-center gap-2.5 rounded-lg p-1 hover:bg-fd-accent/50 hover:text-fd-accent-foreground',
+          'flex flex-row items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-fd-accent/50 hover:text-fd-accent-foreground',
           props.className,
         )}
       >
@@ -60,7 +60,7 @@ export function RootToggle({
             onClick={onClick}
             {...item.props}
             className={cn(
-              'flex w-full flex-row items-center gap-2.5 p-1.5',
+              'flex w-full flex-row items-center gap-2 px-2 py-1.5',
               selected === item
                 ? 'bg-fd-accent text-fd-accent-foreground'
                 : 'hover:bg-fd-accent/50',
@@ -75,11 +75,11 @@ export function RootToggle({
   );
 }
 
-function Item(props: Option): React.ReactElement {
+function Item(props: Option) {
   return (
     <>
       {props.icon}
-      <div className="flex-1 text-left">
+      <div className="flex-1 text-start">
         <p className="text-sm font-medium">{props.title}</p>
         {props.description ? (
           <p className="text-xs text-fd-muted-foreground">

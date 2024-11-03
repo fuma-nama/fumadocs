@@ -46,7 +46,7 @@
     "chokidar": "^4.0.1",
     "cross-spawn": "^7.0.3",
     "esbuild": "^0.24.0",
-    "estree-util-value-to-estree": "^3.1.2",
+    "estree-util-value-to-estree": "^3.2.1",
     "fast-glob": "^3.3.1",
     "gray-matter": "^4.0.3",
     "micromatch": "^4.0.8",

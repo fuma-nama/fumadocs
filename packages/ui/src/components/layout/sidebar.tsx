@@ -5,6 +5,7 @@ import * as Base from 'fumadocs-core/sidebar';
 import { usePathname } from 'next/navigation';
 import {
   createContext,
+  type FC,
   type HTMLAttributes,
   memo,
   type ReactNode,
@@ -26,6 +27,12 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '../ui/collapsible';
+import { type Option } from '@/components/layout/root-toggle';
+import dynamic from 'next/dynamic';
+
+const RootToggle = dynamic(() =>
+  import('@/components/layout/root-toggle').then((mod) => mod.RootToggle),
+);
 
 export interface SidebarProps {
   /**
@@ -48,6 +55,8 @@ export interface SidebarProps {
    */
   components?: Partial<Components>;
 
+  tabs?: Option[];
+
   banner?: ReactNode;
   children?: ReactNode;
   footer?: ReactNode;
@@ -67,9 +76,9 @@ interface InternalContext {
 }
 
 interface Components {
-  Item: React.FC<{ item: PageTree.Item }>;
-  Folder: React.FC<{ item: PageTree.Folder; level: number }>;
-  Separator: React.FC<{ item: PageTree.Separator }>;
+  Item: FC<{ item: PageTree.Item }>;
+  Folder: FC<{ item: PageTree.Folder; level: number }>;
+  Separator: FC<{ item: PageTree.Separator }>;
 }
 
 const Context = createContext<InternalContext | undefined>(undefined);
@@ -79,6 +88,7 @@ export const Sidebar = memo(
     components,
     defaultOpenLevel = 0,
     prefetch = true,
+    tabs = [],
     ...props
   }: SidebarProps & {
     aside?: HTMLAttributes<HTMLElement> & Record<string, unknown>;
@@ -118,7 +128,12 @@ export const Sidebar = memo(
         }
       >
         <div className="flex size-full flex-col pt-2 md:ms-auto md:w-[var(--fd-sidebar-width)] md:border-e md:pt-4">
-          {props.banner}
+          <div className="flex flex-col gap-1 px-4 empty:hidden md:px-3 md:pb-2">
+            {props.banner}
+            {tabs.length > 0 ? (
+              <RootToggle options={tabs} className="-mx-2" />
+            ) : null}
+          </div>
           {hasSearch ? (
             <LargeSearchToggle className="mx-4 rounded-lg max-md:hidden md:mx-3" />
           ) : null}
