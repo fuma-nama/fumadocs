@@ -17,7 +17,7 @@ import {
 import { cn } from '@/utils/cn';
 import * as Primitive from './ui/tabs';
 
-export * as Primitive from './ui/tabs';
+export { Primitive };
 
 type ChangeListener = (v: string) => void;
 const listeners = new Map<string, ChangeListener[]>();

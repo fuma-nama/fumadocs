@@ -1,3 +1,4 @@
+'use client';
 import { ChevronRight, Text } from 'lucide-react';
 import type { TOCItemType } from 'fumadocs-core/server';
 import * as Primitive from 'fumadocs-core/toc';
@@ -28,30 +29,14 @@ export interface TOCProps {
   children: ReactNode;
 }
 
-export function Toc({ header, footer, children }: TOCProps) {
+export function TocTitle() {
   const { text } = useI18n();
 
   return (
-    <div
-      data-toc=""
-      className="sticky top-fd-layout-top h-[var(--fd-toc-height)] flex-1 pb-2 pe-2 pt-12 max-lg:hidden"
-      style={
-        {
-          '--fd-toc-height':
-            'calc(100dvh - var(--fd-banner-height) - var(--fd-nav-height))',
-        } as object
-      }
-    >
-      <div className="flex h-full w-[var(--fd-toc-width)] max-w-full flex-col gap-3">
-        {header}
-        <h3 className="-ms-0.5 inline-flex items-center gap-1.5 text-sm text-fd-muted-foreground">
-          <Text className="size-4" />
-          {text.toc}
-        </h3>
-        {children}
-        {footer}
-      </div>
-    </div>
+    <h3 className="-ms-0.5 inline-flex items-center gap-1.5 text-sm text-fd-muted-foreground">
+      <Text className="size-4" />
+      {text.toc}
+    </h3>
   );
 }
 

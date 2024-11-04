@@ -7,17 +7,17 @@ import { Card, Cards } from '@/components/card';
 import type { EditOnGitHubOptions } from '@/components/layout/edit-on-github';
 import { replaceOrDefault } from '@/layouts/shared';
 import { cn } from './utils/cn';
+import { Footer, type FooterProps, LastUpdate } from './page.client';
 import {
   Breadcrumb,
   type BreadcrumbProps,
-  Footer,
-  type FooterProps,
-  LastUpdate,
-  Toc,
+} from '@/components/layout/breadcrumb';
+import {
   TOCItems,
   TocPopover,
   type TOCProps,
-} from './page.client';
+  TocTitle,
+} from '@/components/layout/toc';
 
 const ClerkTOCItems = dynamic(() => import('@/components/layout/toc-clerk'));
 const EditOnGitHub = dynamic(
@@ -143,13 +143,27 @@ export function DocsPage({
       </div>
       {replaceOrDefault(
         { enabled: tocEnabled, component: tocReplace },
-        <Toc {...tocOptions}>
-          {tocOptions.style === 'clerk' ? (
-            <ClerkTOCItems items={toc} />
-          ) : (
-            <TOCItems items={toc} />
-          )}
-        </Toc>,
+        <div
+          data-toc=""
+          className="sticky top-fd-layout-top h-[var(--fd-toc-height)] flex-1 pb-2 pe-2 pt-12 max-lg:hidden"
+          style={
+            {
+              '--fd-toc-height':
+                'calc(100dvh - var(--fd-banner-height) - var(--fd-nav-height))',
+            } as object
+          }
+        >
+          <div className="flex h-full w-[var(--fd-toc-width)] max-w-full flex-col gap-3">
+            {tocOptions.header}
+            <TocTitle />
+            {tocOptions.style === 'clerk' ? (
+              <ClerkTOCItems items={toc} />
+            ) : (
+              <TOCItems items={toc} />
+            )}
+            {tocOptions.footer}
+          </div>
+        </div>,
         {
           items: toc,
           ...tocOptions,

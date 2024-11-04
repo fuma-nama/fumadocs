@@ -8,9 +8,6 @@ import { cn } from '@/utils/cn';
 import { useI18n } from './contexts/i18n';
 import { useTreeContext } from './contexts/tree';
 
-export * from '@/components/layout/toc';
-export * from '@/components/layout/breadcrumb';
-
 export function LastUpdate(props: { date: Date }): React.ReactElement {
   const { text } = useI18n();
   const [date, setDate] = useState('');
