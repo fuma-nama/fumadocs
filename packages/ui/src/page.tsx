@@ -7,16 +7,17 @@ import { Card, Cards } from '@/components/card';
 import type { EditOnGitHubOptions } from '@/components/layout/edit-on-github';
 import { replaceOrDefault } from '@/layouts/shared';
 import { cn } from './utils/cn';
-import type { BreadcrumbProps, FooterProps, TOCProps } from './page.client';
-
-declare const {
-  Toc,
-  TocPopover,
+import {
   Breadcrumb,
+  type BreadcrumbProps,
   Footer,
-  TOCItems,
+  type FooterProps,
   LastUpdate,
-}: typeof import('./page.client');
+  Toc,
+  TOCItems,
+  TocPopover,
+  type TOCProps,
+} from './page.client';
 
 const ClerkTOCItems = dynamic(() => import('@/components/layout/toc-clerk'));
 const EditOnGitHub = dynamic(
@@ -92,7 +93,7 @@ export function DocsPage({
     ...tocOptions
   } = {},
   ...props
-}: DocsPageProps): React.ReactElement {
+}: DocsPageProps): ReactNode {
   return (
     <AnchorProvider toc={toc} single={tocOptions.single}>
       <div
@@ -237,7 +238,7 @@ export function DocsCategory({
   page: Page;
   from: LoaderOutput<LoaderConfig>;
   tree?: PageTree.Root;
-}): React.ReactNode {
+}): ReactNode {
   const tree =
     forcedTree ??
     (from._i18n
@@ -277,11 +278,7 @@ DocsBody.displayName = 'DocsBody';
 /**
  * For separate MDX page
  */
-export function withArticle({
-  children,
-}: {
-  children: React.ReactNode;
-}): React.ReactElement {
+export function withArticle({ children }: { children: ReactNode }): ReactNode {
   return (
     <main className="container py-12">
       <article className="prose">{children}</article>

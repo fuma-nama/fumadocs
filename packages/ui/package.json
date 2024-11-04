@@ -53,11 +53,10 @@
   ],
   "scripts": {
     "build": "pnpm build:layout && pnpm build:tailwind",
-    "build:layout": "tsup",
+    "build:layout": "tsc --project tsconfig.build.json && tsc-alias -p tsconfig.build.json",
     "build:tailwind": "postcss css/*.css --dir dist && postcss src/components/*.css --dir dist/components",
     "clean": "rimraf dist",
-    "dev": "concurrently \"pnpm dev:layout\" \"pnpm dev:tailwind\"",
-    "dev:layout": "tsup --watch",
+    "dev": "concurrently \"tsc -w --project tsconfig.build.json\" \"tsc-alias -w -p tsconfig.build.json\" \"pnpm dev:tailwind\"",
     "dev:tailwind": "postcss css/*.css --dir dist --watch",
     "lint": "eslint .",
     "types:check": "tsc --noEmit"
@@ -77,6 +76,7 @@
     "fumadocs-core": "workspace:*",
     "next-themes": "^0.3.0",
     "react-medium-image-zoom": "^5.2.10",
+    "lucide-react": "^0.454.0",
     "tailwind-merge": "^2.5.4"
   },
   "devDependencies": {
@@ -85,12 +85,12 @@
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "eslint-config-custom": "workspace:*",
-    "lucide-react": "^0.454.0",
     "next": "15.0.2",
     "postcss": "^8.4.47",
     "postcss-cli": "^11.0.0",
     "postcss-lightningcss": "^1.0.1",
     "tailwindcss": "^3.4.13",
+    "tsc-alias": "^1.8.10",
     "tsconfig": "workspace:*"
   },
   "peerDependencies": {

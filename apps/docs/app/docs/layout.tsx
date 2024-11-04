@@ -14,21 +14,11 @@ const docsOptions: DocsLayoutProps = {
   tree: source.pageTree,
   nav: {
     ...baseOptions.nav,
-    title: logo,
-    children: (
-      <Trigger
-        className={cn(
-          buttonVariants({
-            variant: 'secondary',
-            size: 'xs',
-            className:
-              'md:flex-1 px-2 ms-2 gap-1.5 text-fd-muted-foreground rounded-full',
-          }),
-        )}
-      >
-        <MessageCircle className="size-3" />
-        Ask AI
-      </Trigger>
+    title: (
+      <>
+        {logo}
+        Fumadocs
+      </>
     ),
   },
   links: [linkItems[linkItems.length - 1]],
@@ -42,7 +32,7 @@ const docsOptions: DocsLayoutProps = {
           ...option,
           icon: (
             <Slot
-              className="mb-auto bg-gradient-to-t from-fd-background/80 p-1 [&_svg]:size-5"
+              className="bg-gradient-to-t from-fd-background/80 p-1 [&_svg]:size-5"
               style={{
                 color: `hsl(var(--${meta.file.dirname}-color))`,
                 backgroundColor: `hsl(var(--${meta.file.dirname}-color)/.3)`,
@@ -57,11 +47,7 @@ const docsOptions: DocsLayoutProps = {
   },
 };
 
-export default function Layout({
-  children,
-}: {
-  children: ReactNode;
-}): React.ReactElement {
+export default function Layout({ children }: { children: ReactNode }) {
   return (
     <DocsLayout {...docsOptions}>
       <span
@@ -158,6 +144,17 @@ export default function Layout({
         </svg>
       </span>
       {children}
+      <Trigger
+        className={cn(
+          buttonVariants({
+            variant: 'secondary',
+          }),
+          'fixed bottom-0 left-1/2 h-fit -translate-x-1/2 gap-1.5 rounded-b-none rounded-t-2xl bg-secondary/50 pb-1 text-fd-muted-foreground shadow-lg backdrop-blur-lg',
+        )}
+      >
+        <MessageCircle className="size-4" />
+        Ask AI
+      </Trigger>
     </DocsLayout>
   );
 }

@@ -1,3 +1,4 @@
+'use client';
 import { cva } from 'class-variance-authority';
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';

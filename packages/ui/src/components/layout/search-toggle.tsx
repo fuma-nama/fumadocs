@@ -1,3 +1,4 @@
+'use client';
 import { type ButtonHTMLAttributes } from 'react';
 import { SearchIcon } from 'lucide-react';
 import { useSearchContext } from '@/contexts/search';

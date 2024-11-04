@@ -22,6 +22,8 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import type { SharedNavProps } from './shared';
+import type { LinkItemType } from '@/layouts/links';
+import { MenuItem } from '@/layouts/menu-item';
 
 export function SubNav({
   title,
@@ -92,7 +94,7 @@ export function SidebarCollapseTrigger(
 }
 
 interface LinksMenuProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  items?: ReactNode;
+  items: LinkItemType[];
 }
 
 export function LinksMenu({ items, ...props }: LinksMenuProps): ReactNode {
@@ -106,18 +108,9 @@ export function LinksMenu({ items, ...props }: LinksMenuProps): ReactNode {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger {...props} />
-      <PopoverContent className="flex flex-col p-1">{items}</PopoverContent>
+      <PopoverContent className="flex flex-col p-1">
+        {items?.map((item, i) => <MenuItem key={i} item={item} />)}
+      </PopoverContent>
     </Popover>
   );
 }
-
-export { IconItem } from '@/layouts/links';
-export { MenuItem } from '@/layouts/menu-item';
-export { NavProvider } from '@/components/layout/nav';
-export { Sidebar } from '@/components/layout/sidebar';
-export { TreeContextProvider } from '@/contexts/tree';
-export { ThemeToggle } from '@/components/layout/theme-toggle';
-export {
-  LanguageToggle,
-  LanguageToggleText,
-} from '@/components/layout/language-toggle';

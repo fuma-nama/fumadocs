@@ -11,7 +11,7 @@ function Route({ route }: { route: string }): ReactNode {
   const segments = route.split('/').filter((part) => part.length > 0);
 
   return (
-    <div className="not-prose flex flex-row items-center gap-1 overflow-auto text-xs">
+    <div className="not-prose flex flex-row items-center gap-1 overflow-auto text-nowrap text-xs">
       {segments.map((part, index) => (
         <Fragment key={index}>
           <span className="text-fd-muted-foreground">/</span>

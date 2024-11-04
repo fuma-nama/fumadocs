@@ -6,26 +6,29 @@ import { notFound } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
-import type { SidebarProps } from '@/components/layout/sidebar';
+import { Sidebar, type SidebarProps } from '@/components/layout/sidebar';
 import { replaceOrDefault, type SharedNavProps } from '@/layouts/shared';
-import type { LinkItemType, IconItem as IconItemType } from '@/layouts/links';
+import {
+  type LinkItemType,
+  IconItem as IconItemType,
+  IconItem,
+} from '@/layouts/links';
 import { getSidebarTabs, type TabOptions } from '@/utils/get-sidebar-tabs';
 import type { Option } from '@/components/layout/root-toggle';
 import { type BaseLayoutProps, getLinks } from './shared';
-
-declare const {
-  TreeContextProvider,
-  SidebarCollapseTrigger,
-  ThemeToggle,
-  SubNav,
+import {
   LanguageToggle,
   LanguageToggleText,
+} from '@/components/layout/language-toggle';
+import {
   LinksMenu,
-  Sidebar,
-  IconItem,
-  MenuItem,
-  NavProvider,
-}: typeof import('./docs.client');
+  SidebarCollapseTrigger,
+  SubNav,
+} from '@/layouts/docs.client';
+import { MenuItem } from '@/layouts/nav-item';
+import { TreeContextProvider } from '@/contexts/tree';
+import { NavProvider } from '@/components/layout/nav';
+import { ThemeToggle } from '@/components/layout/theme-toggle';
 
 const DynamicSidebar = dynamic(
   () => import('@/components/layout/dynamic-sidebar'),
@@ -89,7 +92,7 @@ export function DocsLayout({
 
   const footer = (
     <>
-      <div className="flex flex-row items-center border-t py-2 empty:hidden max-md:gap-1.5 max-md:px-3 md:mx-3">
+      <div className="flex flex-row items-center border-t p-3 empty:hidden max-md:gap-1.5">
         <SidebarFooter
           sidebarCollapsible={collapsible}
           i18n={i18n}
@@ -152,7 +155,7 @@ function SidebarHeader({
   if (!props.title && !props.children && links.length === 0) return null;
 
   return (
-    <div className="flex flex-row items-center border-b pb-2 max-md:hidden">
+    <div className="flex flex-row items-center max-md:hidden">
       {props.title ? (
         <Link
           href={props.url ?? '/'}
@@ -164,9 +167,7 @@ function SidebarHeader({
       {props.children}
       {links.length > 0 ? (
         <LinksMenu
-          items={links.map((item, i) => (
-            <MenuItem key={i} item={item} />
-          ))}
+          items={links}
           className={cn(
             buttonVariants({
               size: 'icon',

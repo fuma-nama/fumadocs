@@ -1,3 +1,4 @@
+'use client';
 import Link from 'fumadocs-core/link';
 import { usePathname } from 'next/navigation';
 import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';

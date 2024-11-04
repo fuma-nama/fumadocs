@@ -1,6 +1,3 @@
-declare const { _useCopyButton }: typeof import('./api.client');
-
-export const useCopyButton = _useCopyButton;
-
 export * from '@/utils/cn';
 export * from '@/components/ui/button';
+export { useCopyButton } from '@/utils/use-copy-button';

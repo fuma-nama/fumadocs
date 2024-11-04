@@ -127,8 +127,8 @@ export const Sidebar = memo(
           } as object
         }
       >
-        <div className="flex size-full flex-col pt-2 md:ms-auto md:w-[var(--fd-sidebar-width)] md:border-e md:pt-4">
-          <div className="flex flex-col gap-1 px-4 empty:hidden md:px-3 md:pb-2">
+        <div className="flex size-full flex-col pt-2 md:ms-auto md:w-[var(--fd-sidebar-width)] md:max-w-full md:border-e md:pt-4">
+          <div className="flex flex-col gap-2 px-4 empty:hidden md:px-3 md:pb-2">
             {props.banner}
             {tabs.length > 0 ? (
               <RootToggle options={tabs} className="-mx-2" />
@@ -167,7 +167,7 @@ const SeparatorNode = memo(({ item }: { item: PageTree.Separator }) => {
 
 SeparatorNode.displayName = 'SeparatorNode';
 
-function RootNodeList(): ReactNode {
+function RootNodeList() {
   const { root } = useTreeContext();
   const { components } = useInternalContext();
 

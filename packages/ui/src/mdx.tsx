@@ -12,10 +12,9 @@ import { Card, Cards } from '@/components/card';
 import { Callout } from '@/components/callout';
 import { Heading } from '@/components/heading';
 import { cn } from '@/utils/cn';
+import { Pre } from '@/mdx.client';
 
-declare const { Pre }: typeof import('./mdx.client');
-
-function Image(props: ImgHTMLAttributes<HTMLImageElement>): React.ReactElement {
+function Image(props: ImgHTMLAttributes<HTMLImageElement>) {
   return (
     <NextImage
       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 900px"
@@ -25,9 +24,7 @@ function Image(props: ImgHTMLAttributes<HTMLImageElement>): React.ReactElement {
   );
 }
 
-function Table(
-  props: TableHTMLAttributes<HTMLTableElement>,
-): React.ReactElement {
+function Table(props: TableHTMLAttributes<HTMLTableElement>) {
   return (
     <div className="relative overflow-auto">
       <table {...props} />
@@ -41,22 +38,22 @@ const defaultMdxComponents = {
   Cards,
   a: Link as FC<AnchorHTMLAttributes<HTMLAnchorElement>>,
   img: Image,
-  h1: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+  h1: (props: HTMLAttributes<HTMLHeadingElement>) => (
     <Heading as="h1" {...props} />
   ),
-  h2: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+  h2: (props: HTMLAttributes<HTMLHeadingElement>) => (
     <Heading as="h2" {...props} />
   ),
-  h3: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+  h3: (props: HTMLAttributes<HTMLHeadingElement>) => (
     <Heading as="h3" {...props} />
   ),
-  h4: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+  h4: (props: HTMLAttributes<HTMLHeadingElement>) => (
     <Heading as="h4" {...props} />
   ),
-  h5: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+  h5: (props: HTMLAttributes<HTMLHeadingElement>) => (
     <Heading as="h5" {...props} />
   ),
-  h6: (props: React.HTMLAttributes<HTMLHeadingElement>) => (
+  h6: (props: HTMLAttributes<HTMLHeadingElement>) => (
     <Heading as="h6" {...props} />
   ),
   table: Table,
@@ -74,6 +71,7 @@ const defaultMdxComponents = {
  *
  * @param c - MDX Components
  * @returns MDX Components with re-created client components
+ * @deprecated no longer used
  */
 export function createComponents<
   Components extends Record<string, FC<unknown>>,

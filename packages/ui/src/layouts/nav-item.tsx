@@ -1,3 +1,4 @@
+'use client';
 import { Fragment, type ReactNode } from 'react';
 import { cva } from 'class-variance-authority';
 import Link from 'fumadocs-core/link';

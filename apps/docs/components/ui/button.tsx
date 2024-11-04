@@ -10,7 +10,7 @@ const buttonVariants = cva(
         outline:
           'border bg-gradient-to-t from-fd-primary/10 shadow-inner shadow-fd-primary/10 hover:bg-fd-accent/50 hover:text-fd-accent-foreground',
         secondary:
-          'border bg-fd-secondary text-fd-secondary-foreground hover:bg-fd-secondary/80',
+          'border bg-fd-secondary text-fd-secondary-foreground hover:bg-fd-accent',
         ghost: 'hover:bg-fd-accent hover:text-fd-accent-foreground',
         link: 'text-fd-primary underline-offset-4 hover:underline',
       },

@@ -1,13 +1,7 @@
 import { ChevronRight, Text } from 'lucide-react';
 import type { TOCItemType } from 'fumadocs-core/server';
 import * as Primitive from 'fumadocs-core/toc';
-import {
-  type ReactElement,
-  type ReactNode,
-  useContext,
-  useMemo,
-  useRef,
-} from 'react';
+import { type ReactNode, useContext, useMemo, useRef } from 'react';
 import { cn } from '@/utils/cn';
 import { useI18n } from '@/contexts/i18n';
 import {
@@ -34,13 +28,13 @@ export interface TOCProps {
   children: ReactNode;
 }
 
-export function Toc({ header, footer, children }: TOCProps): ReactElement {
+export function Toc({ header, footer, children }: TOCProps) {
   const { text } = useI18n();
 
   return (
     <div
       data-toc=""
-      className="sticky top-fd-layout-top h-[var(--fd-toc-height)] flex-1 pb-2 pt-12 max-lg:hidden"
+      className="sticky top-fd-layout-top h-[var(--fd-toc-height)] flex-1 pb-2 pe-2 pt-12 max-lg:hidden"
       style={
         {
           '--fd-toc-height':
@@ -48,7 +42,7 @@ export function Toc({ header, footer, children }: TOCProps): ReactElement {
         } as object
       }
     >
-      <div className="flex h-full w-[var(--fd-toc-width)] flex-col gap-3 pe-2">
+      <div className="flex h-full w-[var(--fd-toc-width)] max-w-full flex-col gap-3">
         {header}
         <h3 className="-ms-0.5 inline-flex items-center gap-1.5 text-sm text-fd-muted-foreground">
           <Text className="size-4" />
@@ -61,7 +55,7 @@ export function Toc({ header, footer, children }: TOCProps): ReactElement {
   );
 }
 
-function TocNav(props: { className?: string; children: ReactNode }): ReactNode {
+function TocNav(props: { className?: string; children: ReactNode }) {
   const { open } = useSidebar();
   const { isTransparent } = useContext(NavContext);
 
@@ -89,7 +83,7 @@ function TocNav(props: { className?: string; children: ReactNode }): ReactNode {
 export function TocPopover({
   items,
   ...props
-}: TOCProps & { items: TOCItemType[]; className?: string }): ReactElement {
+}: TOCProps & { items: TOCItemType[]; className?: string }) {
   const { text } = useI18n();
   const active = Primitive.useActiveAnchor();
   const current = useMemo(() => {
@@ -134,7 +128,7 @@ export function TOCItems({
 }: {
   items: TOCItemType[];
   isMenu?: boolean;
-}): React.ReactElement {
+}) {
   const { text } = useI18n();
   const containerRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<HTMLDivElement>(null);
@@ -171,7 +165,7 @@ export function TOCItems({
   );
 }
 
-function TOCItem({ item }: { item: TOCItemType }): React.ReactElement {
+function TOCItem({ item }: { item: TOCItemType }) {
   return (
     <Primitive.TOCItem
       href={item.url}
