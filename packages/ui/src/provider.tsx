@@ -1,10 +1,9 @@
 'use client';
 
 import { ThemeProvider } from 'next-themes';
-import { type ReactNode } from 'react';
+import { ComponentPropsWithoutRef, type ReactNode } from 'react';
 import dynamic from 'next/dynamic';
 import { DirectionProvider } from '@radix-ui/react-direction';
-import type { ThemeProviderProps } from 'next-themes/dist/types';
 import type { DefaultSearchDialogProps } from '@/components/dialog/search-default';
 import { SidebarProvider } from './contexts/sidebar';
 import { SearchProvider, type SearchProviderProps } from './contexts/search';
@@ -34,7 +33,7 @@ export interface RootProviderProps {
   /**
    * Customise options of `next-themes`
    */
-  theme?: Partial<ThemeProviderProps> & {
+  theme?: Partial<ComponentPropsWithoutRef<typeof ThemeProvider>> & {
     /**
      * Enable `next-themes`
      *

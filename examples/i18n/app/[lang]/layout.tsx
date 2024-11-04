@@ -8,13 +8,14 @@ const inter = Inter({
   subsets: ['latin'],
 });
 
-export default function Layout({
-  params: { lang },
+export default async function Layout({
+  params,
   children,
 }: {
-  params: { lang: string };
+  params: Promise<{ lang: string }>;
   children: ReactNode;
 }) {
+  const { lang } = await params;
   return (
     <html lang={lang} className={inter.className} suppressHydrationWarning>
       <body

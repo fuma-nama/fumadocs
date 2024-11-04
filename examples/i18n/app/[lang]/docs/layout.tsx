@@ -3,15 +3,15 @@ import { source } from '@/lib/source';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { baseOptions } from '@/app/layout.config';
 
-export default function Layout({
+export default async function Layout({
   params,
   children,
 }: {
-  params: { lang: string };
+  params: Promise<{ lang: string }>;
   children: ReactNode;
 }) {
   return (
-    <DocsLayout {...baseOptions} tree={source.pageTree[params.lang]}>
+    <DocsLayout {...baseOptions} tree={source.pageTree[(await params).lang]}>
       {children}
     </DocsLayout>
   );

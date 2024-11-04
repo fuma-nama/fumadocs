@@ -21,11 +21,11 @@ import {
   LanguageToggleText,
 } from '@/components/layout/language-toggle';
 import {
+  MenuItem,
   LinksMenu,
   SidebarCollapseTrigger,
   SubNav,
 } from '@/layouts/docs.client';
-import { MenuItem } from '@/layouts/nav-item';
 import { TreeContextProvider } from '@/contexts/tree';
 import { NavProvider } from '@/components/layout/nav';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
@@ -232,7 +232,7 @@ function SidebarFooter({
         </div>
       ) : null}
       {!props.disableThemeSwitch ? (
-        <ThemeToggle className="max-md:ms-auto" />
+        <ThemeToggle className="p-0 max-md:ms-auto" />
       ) : null}
       {props.sidebarCollapsible ? (
         <SidebarCollapseTrigger className="ms-auto max-md:hidden" />

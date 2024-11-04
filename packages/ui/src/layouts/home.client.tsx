@@ -161,5 +161,3 @@ function isSecondary(item: LinkItemType): boolean {
     ('secondary' in item && item.secondary === true) || item.type === 'icon'
   );
 }
-
-export { NavProvider } from '@/components/layout/nav';

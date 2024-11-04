@@ -2,7 +2,8 @@ import type { HTMLAttributes } from 'react';
 import { replaceOrDefault } from '@/layouts/shared';
 import { cn } from '@/utils/cn';
 import { getLinks, type BaseLayoutProps } from './shared';
-import { Nav, NavProvider } from '@/layouts/home.client';
+import { Nav } from '@/layouts/home.client';
+import { NavProvider } from '@/components/layout/nav';
 
 export type HomeLayoutProps = BaseLayoutProps & HTMLAttributes<HTMLElement>;
 

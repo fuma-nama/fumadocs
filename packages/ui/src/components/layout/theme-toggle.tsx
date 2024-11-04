@@ -5,15 +5,18 @@ import { useTheme } from 'next-themes';
 import { type ButtonHTMLAttributes } from 'react';
 import { cn } from '@/utils/cn';
 
-const buttonVariants = cva('size-6 rounded-full p-1 text-fd-muted-foreground', {
-  variants: {
-    dark: {
-      true: 'dark:bg-fd-accent dark:text-fd-accent-foreground',
-      false:
-        'bg-fd-accent text-fd-accent-foreground dark:bg-transparent dark:text-fd-muted-foreground',
+const buttonVariants = cva(
+  'size-7 rounded-full p-1.5 text-fd-muted-foreground',
+  {
+    variants: {
+      dark: {
+        true: 'dark:bg-fd-accent dark:text-fd-accent-foreground',
+        false:
+          'bg-fd-accent text-fd-accent-foreground dark:bg-transparent dark:text-fd-muted-foreground',
+      },
     },
   },
-});
+);
 
 export function ThemeToggle({
   className,
@@ -29,7 +32,7 @@ export function ThemeToggle({
     <button
       type="button"
       className={cn(
-        'inline-flex items-center rounded-full border p-0.5',
+        'inline-flex items-center rounded-full border p-[3px]',
         className,
       )}
       data-theme-toggle=""

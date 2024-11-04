@@ -1,7 +1,7 @@
 'use client';
 
 import { SidebarTrigger } from 'fumadocs-core/sidebar';
-import { Menu, SidebarIcon, X } from 'lucide-react';
+import { ChevronDown, Menu, SidebarIcon, X } from 'lucide-react';
 import {
   type ButtonHTMLAttributes,
   type ReactNode,
@@ -22,8 +22,13 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import type { SharedNavProps } from './shared';
-import type { LinkItemType } from '@/layouts/links';
-import { MenuItem } from '@/layouts/menu-item';
+import { BaseLinkItem, ButtonItem, type LinkItemType } from '@/layouts/links';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import { itemVariants } from '@/components/layout/variants';
 
 export function SubNav({
   title,
@@ -112,5 +117,56 @@ export function LinksMenu({ items, ...props }: LinksMenuProps): ReactNode {
         {items?.map((item, i) => <MenuItem key={i} item={item} />)}
       </PopoverContent>
     </Popover>
+  );
+}
+
+interface MenuItemProps extends React.HTMLAttributes<HTMLElement> {
+  item: LinkItemType;
+}
+
+export function MenuItem({ item, ...props }: MenuItemProps): ReactNode {
+  if (item.type === 'custom')
+    return (
+      <div {...props} className={cn('grid', props.className)}>
+        {item.children}
+      </div>
+    );
+
+  if (item.type === 'menu') {
+    return (
+      <Collapsible className="flex flex-col">
+        <CollapsibleTrigger
+          {...props}
+          data-active={false}
+          className={cn(itemVariants(), 'group/link', props.className)}
+        >
+          {item.icon}
+          {item.text}
+          <ChevronDown className="ms-auto transition-transform group-data-[state=closed]/link:-rotate-90" />
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <div className="ms-2 flex flex-col border-s py-2 ps-2">
+            {item.items.map((child, i) => (
+              <MenuItem key={i} item={child} />
+            ))}
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
+    );
+  }
+
+  if (item.type === 'button') {
+    return <ButtonItem item={item} {...props} />;
+  }
+
+  return (
+    <BaseLinkItem
+      item={item}
+      {...props}
+      className={cn(itemVariants(), props.className)}
+    >
+      {item.icon}
+      {item.text}
+    </BaseLinkItem>
   );
 }
