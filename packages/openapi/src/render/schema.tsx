@@ -71,7 +71,11 @@ export function Schema({
   const child: ReactNode[] = [];
 
   // object type
-  if (isObject(schema) && parseObject) {
+  if (
+    isObject(schema) &&
+    parseObject &&
+    (schema.additionalProperties || schema.properties)
+  ) {
     const { additionalProperties, properties } = schema;
 
     if (additionalProperties === true) {
@@ -249,10 +253,21 @@ function getSchemaType(schema: OpenAPI.SchemaObject, ctx: Context): string {
       .map((one) => getSchemaType(noRef(one), ctx))
       .join(' | ');
 
-  if (schema.allOf)
-    return schema.allOf
-      .map((one) => getSchemaType(noRef(one), ctx))
-      .join(' & ');
+  if (schema.allOf) {
+    const allTypeNames = schema.allOf.map((one) =>
+      getSchemaType(noRef(one), ctx),
+    );
+    const hasNull = allTypeNames.includes('null');
+    const nonNullTypes = allTypeNames.filter((v) => v !== 'null');
+    const nonNullTypeNames = nonNullTypes.join(' & ');
+
+    if (!hasNull) return nonNullTypeNames;
+
+    if (nonNullTypes.length === 0) return 'null';
+    else if (nonNullTypes.length === 1 || !hasNull)
+      return `${nonNullTypeNames} | null`;
+    else return `(${nonNullTypeNames}) | null`;
+  }
 
   if (schema.not) return `not ${getSchemaType(noRef(schema.not), ctx)}`;
 

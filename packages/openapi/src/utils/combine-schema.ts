@@ -8,10 +8,14 @@ export function combineSchema(
   schema: OpenAPI.SchemaObject[],
 ): OpenAPI.SchemaObject {
   const result: OpenAPI.SchemaObject = {
-    type: 'object',
+    type: undefined,
   };
 
   function add(s: OpenAPI.SchemaObject): void {
+    if (s.type) {
+      result.type = result.type ? 'object' : s.type;
+    }
+
     if (s.properties) {
       result.properties ??= {};
       Object.assign(result.properties, s.properties);
@@ -30,6 +34,15 @@ export function combineSchema(
     if (s.required) {
       result.required ??= [];
       result.required.push(...s.required);
+    }
+
+    if (s.enum?.length > 0) {
+      result.enum ??= [];
+      result.enum.push(...s.enum);
+    }
+
+    if (s.nullable) {
+      result.nullable = true;
     }
 
     if (s.allOf) {
