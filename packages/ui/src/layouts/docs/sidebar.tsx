@@ -76,7 +76,7 @@ interface Components {
 
 const Context = createContext<InternalContext | undefined>(undefined);
 
-export const CollapsibleSidebar = memo((props: SidebarProps) => {
+export function CollapsibleSidebar(props: SidebarProps) {
   const { collapsed } = useSidebar();
   const [hover, setHover] = useState(false);
   const timerRef = useRef(0);
@@ -123,66 +123,62 @@ export const CollapsibleSidebar = memo((props: SidebarProps) => {
       )}
     />
   );
-});
+}
 
-CollapsibleSidebar.displayName = 'CollapsibleSidebar';
+export function Sidebar({
+  components,
+  defaultOpenLevel = 0,
+  prefetch = true,
+  inner,
+  ...props
+}: SidebarProps & { inner?: HTMLAttributes<HTMLDivElement> }) {
+  const context = useMemo<InternalContext>(
+    () => ({
+      defaultOpenLevel,
+      components: {
+        Folder: SidebarFolder,
+        Separator: SidebarSeparator,
+        Item: SidebarItem,
+        ...components,
+      },
+      prefetch,
+    }),
+    [components, defaultOpenLevel, prefetch],
+  );
 
-export const Sidebar = memo(
-  ({
-    components,
-    defaultOpenLevel = 0,
-    prefetch = true,
-    inner,
-    ...props
-  }: SidebarProps & { inner?: HTMLAttributes<HTMLDivElement> }) => {
-    const context = useMemo<InternalContext>(
-      () => ({
-        defaultOpenLevel,
-        components: {
-          Folder: SidebarFolder,
-          Separator: SidebarSeparator,
-          Item: SidebarItem,
-          ...components,
-        },
-        prefetch,
-      }),
-      [components, defaultOpenLevel, prefetch],
-    );
-
-    return (
-      <Context.Provider value={context}>
-        <Base.SidebarList
-          id="nd-sidebar"
-          blockScrollingWidth={768} // md
-          {...props}
+  return (
+    <Context.Provider value={context}>
+      <Base.SidebarList
+        id="nd-sidebar"
+        blockScrollingWidth={768} // md
+        {...props}
+        className={cn(
+          'fixed top-fd-layout-top z-30 bg-fd-card text-sm md:sticky md:h-[var(--fd-sidebar-height)] md:flex-1',
+          'max-md:inset-x-0 max-md:bottom-0 max-md:bg-fd-background/80 max-md:text-[15px] max-md:backdrop-blur-lg max-md:data-[open=false]:invisible',
+          props.className,
+        )}
+        style={
+          {
+            ...props.style,
+            '--fd-sidebar-offset': 'calc(var(--fd-sidebar-width) - 46px)',
+            '--fd-sidebar-height':
+              'calc(100dvh - var(--fd-banner-height) - var(--fd-nav-height))',
+          } as object
+        }
+      >
+        <div
+          {...inner}
           className={cn(
-            'fixed top-fd-layout-top z-30 bg-fd-card text-sm md:sticky md:h-[var(--fd-sidebar-height)] md:flex-1',
-            'max-md:inset-x-0 max-md:bottom-0 max-md:bg-fd-background/80 max-md:text-[15px] max-md:backdrop-blur-lg max-md:data-[open=false]:invisible',
-            props.className,
+            'flex size-full flex-col pt-2 md:ms-auto md:w-[var(--fd-sidebar-width)] md:border-e md:pt-4',
+            inner?.className,
           )}
-          style={
-            {
-              ...props.style,
-              '--fd-sidebar-offset': 'calc(var(--fd-sidebar-width) - 46px)',
-              '--fd-sidebar-height':
-                'calc(100dvh - var(--fd-banner-height) - var(--fd-nav-height))',
-            } as object
-          }
         >
-          <div
-            {...inner}
-            className={cn(
-              'flex size-full flex-col pt-2 md:ms-auto md:w-[var(--fd-sidebar-width)] md:border-e md:pt-4',
-              inner?.className,
-            )}
-          >
-            {props.children}
-          </div>
-        </Base.SidebarList>
-      </Context.Provider>
-    );
-  },
-);
+          {props.children}
+        </div>
+      </Base.SidebarList>
+    </Context.Provider>
+  );
+}
 
 export function SidebarSearchToggle(): ReactNode {
   const search = useSearchContext();
@@ -249,8 +245,6 @@ export function SidebarList() {
     </div>
   );
 }
-
-Sidebar.displayName = 'Sidebar';
 
 export const SidebarSeparator = memo(
   ({ item }: { item: PageTree.Separator }) => {
