@@ -36,7 +36,7 @@ export function combineSchema(
       result.required.push(...s.required);
     }
 
-    if (s.enum?.length > 0) {
+    if (s.enum && s.enum.length > 0) {
       result.enum ??= [];
       result.enum.push(...s.enum);
     }
