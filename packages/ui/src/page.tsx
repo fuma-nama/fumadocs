@@ -7,17 +7,27 @@ import { Card, Cards } from '@/components/card';
 import type { EditOnGitHubOptions } from '@/components/layout/edit-on-github';
 import { replaceOrDefault } from '@/layouts/shared';
 import { cn } from './utils/cn';
-import { Footer, type FooterProps, LastUpdate } from './page.client';
+import {
+  Footer,
+  type FooterProps,
+  LastUpdate,
+  PageContainer,
+} from './page.client';
 import {
   Breadcrumb,
   type BreadcrumbProps,
 } from '@/components/layout/breadcrumb';
 import {
+  Toc,
   TOCItems,
-  TocPopover,
   type TOCProps,
   TocTitle,
 } from '@/components/layout/toc';
+import {
+  TocPopoverTrigger,
+  TocPopover,
+  TocPopoverContent,
+} from '@/components/layout/toc-popover';
 
 const ClerkTOCItems = dynamic(() => import('@/components/layout/toc-clerk'));
 const EditOnGitHub = dynamic(
@@ -96,25 +106,26 @@ export function DocsPage({
 }: DocsPageProps): ReactNode {
   return (
     <AnchorProvider toc={toc} single={tocOptions.single}>
-      <div
-        id="nd-page"
-        className="flex w-full min-w-0 max-w-[var(--fd-page-width)] flex-col md:transition-[max-width]"
+      <PageContainer
         style={
           {
-            '--fd-page-width':
-              'calc(min(100vw, var(--fd-layout-width)) - var(--fd-sidebar-width) - var(--fd-toc-width))',
             '--fd-toc-width': tocEnabled ? undefined : '0px',
           } as object
         }
       >
         {replaceOrDefault(
           { enabled: tocPopoverEnabled, component: tocPopoverReplace },
-          <TocPopover items={toc} {...tocPopoverOptions} className="lg:hidden">
-            {tocPopoverOptions.style === 'clerk' ? (
-              <ClerkTOCItems items={toc} isMenu />
-            ) : (
-              <TOCItems items={toc} isMenu />
-            )}
+          <TocPopover {...tocPopoverOptions} className="lg:hidden">
+            <TocPopoverTrigger items={toc} />
+            <TocPopoverContent>
+              {tocPopoverOptions.header}
+              {tocPopoverOptions.style === 'clerk' ? (
+                <ClerkTOCItems items={toc} isMenu />
+              ) : (
+                <TOCItems items={toc} isMenu />
+              )}
+              {tocPopoverOptions.footer}
+            </TocPopoverContent>
           </TocPopover>,
           {
             items: toc,
@@ -140,19 +151,10 @@ export function DocsPage({
           </div>
           {replaceOrDefault(footer, <Footer items={footer.items} />)}
         </article>
-      </div>
+      </PageContainer>
       {replaceOrDefault(
         { enabled: tocEnabled, component: tocReplace },
-        <div
-          data-toc=""
-          className="sticky top-fd-layout-top h-[var(--fd-toc-height)] flex-1 pb-2 pe-2 pt-12 max-lg:hidden"
-          style={
-            {
-              '--fd-toc-height':
-                'calc(100dvh - var(--fd-banner-height) - var(--fd-nav-height))',
-            } as object
-          }
-        >
+        <Toc>
           <div className="flex h-full w-[var(--fd-toc-width)] max-w-full flex-col gap-3">
             {tocOptions.header}
             <TocTitle />
@@ -163,7 +165,7 @@ export function DocsPage({
             )}
             {tocOptions.footer}
           </div>
-        </div>,
+        </Toc>,
         {
           items: toc,
           ...tocOptions,

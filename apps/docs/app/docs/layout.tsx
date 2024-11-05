@@ -14,12 +14,6 @@ const docsOptions: DocsLayoutProps = {
   tree: source.pageTree,
   nav: {
     ...baseOptions.nav,
-    title: (
-      <>
-        {logo}
-        Fumadocs
-      </>
-    ),
   },
   links: [linkItems[linkItems.length - 1]],
   sidebar: {

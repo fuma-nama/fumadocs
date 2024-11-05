@@ -1,27 +1,19 @@
 'use client';
 
-import { SidebarTrigger } from 'fumadocs-core/sidebar';
-import { ChevronDown, Menu, SidebarIcon, X } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import {
   type ButtonHTMLAttributes,
-  type ReactNode,
-  useContext,
+  type HTMLAttributes,
   useState,
 } from 'react';
 import { usePathname } from 'next/navigation';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
-import { useSidebar } from '@/contexts/sidebar';
-import { useSearchContext } from '@/contexts/search';
-import { SearchToggle } from '@/components/layout/search-toggle';
 import { cn } from '@/utils/cn';
-import { buttonVariants } from '@/components/ui/button';
-import { NavContext, Title } from '@/components/layout/nav';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import type { SharedNavProps } from './shared';
 import { BaseLinkItem, ButtonItem, type LinkItemType } from '@/layouts/links';
 import {
   Collapsible,
@@ -30,79 +22,11 @@ import {
 } from '@/components/ui/collapsible';
 import { itemVariants } from '@/components/layout/variants';
 
-export function SubNav({
-  title,
-  url,
-  enableSearch = true,
-  ...props
-}: Omit<SharedNavProps, 'transparentMode'> & {
-  className?: string;
-}): React.ReactElement {
-  const { open } = useSidebar();
-  const { isTransparent } = useContext(NavContext);
-  const search = useSearchContext();
-
-  return (
-    <header
-      id="nd-subnav"
-      {...props}
-      className={cn(
-        'sticky top-[var(--fd-banner-height)] z-40 flex flex-row items-center border-b border-fd-foreground/10 px-4 transition-colors',
-        (!isTransparent || open) && 'bg-fd-background/80 backdrop-blur-lg',
-        props.className,
-      )}
-    >
-      <Title url={url} title={title} />
-      <div className="flex flex-1 flex-row items-center gap-1">
-        {props.children}
-      </div>
-      {search.enabled && enableSearch ? <SearchToggle /> : null}
-      <SidebarTrigger
-        className={cn(
-          buttonVariants({
-            color: 'ghost',
-            size: 'icon',
-            className: '-me-2 md:hidden',
-          }),
-        )}
-      >
-        {open ? <X /> : <Menu />}
-      </SidebarTrigger>
-    </header>
-  );
-}
-
-export function SidebarCollapseTrigger(
-  props: ButtonHTMLAttributes<HTMLButtonElement>,
-): React.ReactElement {
-  const { setCollapsed } = useSidebar();
-
-  return (
-    <button
-      type="button"
-      aria-label="Collapse Sidebar"
-      {...props}
-      className={cn(
-        buttonVariants({
-          color: 'ghost',
-          size: 'icon',
-        }),
-        props.className,
-      )}
-      onClick={() => {
-        setCollapsed((prev) => !prev);
-      }}
-    >
-      <SidebarIcon />
-    </button>
-  );
-}
-
-interface LinksMenuProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface LinksMenuProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   items: LinkItemType[];
 }
 
-export function LinksMenu({ items, ...props }: LinksMenuProps): ReactNode {
+export function LinksMenu({ items, ...props }: LinksMenuProps) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
@@ -120,11 +44,11 @@ export function LinksMenu({ items, ...props }: LinksMenuProps): ReactNode {
   );
 }
 
-interface MenuItemProps extends React.HTMLAttributes<HTMLElement> {
+interface MenuItemProps extends HTMLAttributes<HTMLElement> {
   item: LinkItemType;
 }
 
-export function MenuItem({ item, ...props }: MenuItemProps): ReactNode {
+export function MenuItem({ item, ...props }: MenuItemProps) {
   if (item.type === 'custom')
     return (
       <div {...props} className={cn('grid', props.className)}>

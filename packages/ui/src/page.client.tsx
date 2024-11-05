@@ -1,12 +1,36 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { type HTMLAttributes, useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { cva } from 'class-variance-authority';
 import { cn } from '@/utils/cn';
 import { useI18n } from './contexts/i18n';
 import { useTreeContext } from './contexts/tree';
+import { useSidebar } from '@/contexts/sidebar';
+
+export function PageContainer(props: HTMLAttributes<HTMLDivElement>) {
+  const { collapsed } = useSidebar();
+
+  return (
+    <div
+      id="nd-page"
+      {...props}
+      className={cn(
+        'flex w-full min-w-0 max-w-[var(--fd-page-width)] flex-col md:transition-[max-width]',
+        props.className,
+      )}
+      style={
+        {
+          ...props.style,
+          '--fd-page-width': collapsed
+            ? '100vw'
+            : 'calc(min(100vw, var(--fd-layout-width)) - var(--fd-sidebar-width) - var(--fd-toc-width))',
+        } as object
+      }
+    ></div>
+  );
+}
 
 export function LastUpdate(props: { date: Date }): React.ReactElement {
   const { text } = useI18n();

@@ -50,7 +50,7 @@ export async function start(
     const instance = watcher(configPath, config);
 
     instance.on('ready', () => {
-      if (!instance._readyEmitted) console.log('[MDX] started dev server');
+      console.log('[MDX] started dev server');
     });
 
     instance.on('all', (event: EventName, file: string) => {
