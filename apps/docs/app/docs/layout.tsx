@@ -12,7 +12,7 @@ import { buttonVariants } from '@/components/ui/button';
 const docsOptions: DocsLayoutProps = {
   ...baseOptions,
   tree: source.pageTree,
-  //links: [linkItems[linkItems.length - 1]],
+  links: [linkItems[linkItems.length - 1]],
   sidebar: {
     tabs: {
       transform(option, node) {

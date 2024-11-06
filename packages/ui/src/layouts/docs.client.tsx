@@ -32,7 +32,7 @@ import {
   SidebarItem,
   SidebarSeparator,
 } from '@/layouts/docs/sidebar';
-import { useTreeContext } from '@/contexts/tree';
+import { useTreeContext, useTreePath } from '@/contexts/tree';
 
 const itemVariants = cva(
   'flex flex-row items-center gap-2 rounded-md px-3 py-2.5 text-fd-muted-foreground transition-colors duration-100 [overflow-wrap:anywhere] hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 hover:transition-none md:px-2 md:py-1.5 [&_svg]:size-4',
@@ -110,11 +110,36 @@ export function MenuItem({ item, ...props }: MenuItemProps) {
   );
 }
 
-export function SidebarItems() {
+export function SidebarItems(props: {
+  components?: Partial<SidebarComponents>;
+}) {
   const { root } = useTreeContext();
 
   return (
-    <div className="px-3 py-4">{renderSidebarList(root.children, 1, {})}</div>
+    <div className="px-2 py-4 md:px-3">
+      {renderSidebarList(root.children, 1, props?.components ?? {})}
+    </div>
+  );
+}
+
+function PageTreeFolder({
+  item,
+  children,
+  level,
+}: {
+  item: PageTree.Folder;
+  level: number;
+  children: ReactNode;
+}) {
+  const path = useTreePath();
+
+  return (
+    <SidebarFolder
+      defaultOpen={item.defaultOpen || path.includes(item)}
+      level={level + 1}
+    >
+      {children}
+    </SidebarFolder>
   );
 }
 
@@ -139,7 +164,7 @@ function renderSidebarList(
         return Folder ? (
           <Folder key={id} item={item} level={level + 1} />
         ) : (
-          <SidebarFolder key={id} item={item} level={level + 1}>
+          <PageTreeFolder key={id} item={item} level={level + 1}>
             {item.index ? (
               <SidebarFolderLink
                 href={item.index.url}
@@ -157,7 +182,7 @@ function renderSidebarList(
             <SidebarFolderContent>
               {renderSidebarList(item.children, level + 1, customComps)}
             </SidebarFolderContent>
-          </SidebarFolder>
+          </PageTreeFolder>
         );
       default:
         return Item ? (

@@ -36,7 +36,7 @@ export function PageContainer(props: HTMLAttributes<HTMLDivElement>) {
   );
 }
 
-export function LastUpdate(props: { date: Date }): React.ReactElement {
+export function LastUpdate(props: { date: Date }) {
   const { text } = useI18n();
   const [date, setDate] = useState('');
 
@@ -93,7 +93,7 @@ function scanNavigationList(tree: PageTree.Node[]) {
 
 const listCache = new WeakMap<PageTree.Root, PageTree.Item[]>();
 
-export function Footer({ items }: FooterProps): React.ReactElement {
+export function Footer({ items }: FooterProps) {
   const { root } = useTreeContext();
   const { text } = useI18n();
   const pathname = usePathname();

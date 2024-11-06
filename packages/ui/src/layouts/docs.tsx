@@ -43,7 +43,9 @@ import { DocsNavbar } from '@/layouts/docs/navbar';
 interface SidebarOptions extends SidebarProps {
   enabled: boolean;
   component: ReactNode;
-  collapsible: boolean;
+
+  collapsible?: boolean;
+  components?: Partial<SidebarComponents>;
 
   /**
    * Root Toggle options
@@ -89,6 +91,7 @@ export function DocsLayout({
     tabs: tabOptions,
     banner: sidebarBanner,
     footer: sidebarFooter,
+    components: sidebarComponents,
     ...sidebar
   } = {},
   i18n = false,
@@ -156,14 +159,14 @@ export function DocsLayout({
                 <SidebarSearchToggle />
               </SidebarHeader>
               <SidebarViewport>
-                <div className="px-3 pt-4 empty:hidden md:hidden">
+                <div className="px-4 pt-4 empty:hidden md:hidden">
                   {links
                     .filter((v) => v.type !== 'icon')
                     .map((item, i) => (
                       <Fragment key={i}>{renderLinkItem(item)}</Fragment>
                     ))}
                 </div>
-                <SidebarItems />
+                <SidebarItems components={sidebarComponents} />
               </SidebarViewport>
               <SidebarFooter>{footer}</SidebarFooter>
             </Aside>,

@@ -1,6 +1,5 @@
 'use client';
 import { ChevronDown, ExternalLink, SidebarIcon } from 'lucide-react';
-import type { PageTree } from 'fumadocs-core/server';
 import * as Base from 'fumadocs-core/sidebar';
 import { usePathname } from 'next/navigation';
 import {
@@ -19,7 +18,6 @@ import {
 import Link, { type LinkProps } from 'fumadocs-core/link';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { cn } from '@/utils/cn';
-import { useTreePath } from '@/contexts/tree';
 import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
 import { isActive } from '@/utils/shared';
 import { LargeSearchToggle } from '@/components/layout/search-toggle';
@@ -53,11 +51,6 @@ export interface SidebarProps extends HTMLAttributes<HTMLElement> {
    * @defaultValue true
    */
   prefetch?: boolean;
-
-  /**
-   * @defaultValue true
-   */
-  collapsible?: boolean;
 }
 
 interface InternalContext {
@@ -66,7 +59,7 @@ interface InternalContext {
 }
 
 const itemVariants = cva(
-  'flex flex-row items-center gap-2 rounded-md px-3 py-2.5 text-fd-muted-foreground transition-colors duration-100 [overflow-wrap:anywhere] md:px-2 md:py-1.5 [&_svg]:size-4',
+  'flex flex-row items-center gap-2 rounded-md px-3 py-2 text-fd-muted-foreground transition-colors duration-100 [overflow-wrap:anywhere] md:px-2 md:py-1.5 [&_svg]:size-4',
   {
     variants: {
       active: {
@@ -132,9 +125,9 @@ export function CollapsibleSidebar(props: SidebarProps) {
         onPointerEnter={onEnter}
         onPointerLeave={onLeave}
         className={cn(
-          'transition-[margin,transform,opacity]',
+          'transition-[flex,margin,opacity,transform]',
           collapsed &&
-            'md:-me-[var(--fd-sidebar-offset)] md:w-fit md:flex-initial md:translate-x-[calc(var(--fd-sidebar-offset)*-1)] rtl:md:translate-x-[var(--fd-sidebar-offset)]',
+            'md:-me-[var(--fd-sidebar-offset)] md:flex-initial md:translate-x-[calc(var(--fd-sidebar-offset)*-1)] rtl:md:translate-x-[var(--fd-sidebar-offset)]',
           collapsed && hover && 'md:translate-x-0',
           collapsed && !hover && 'md:z-10 md:opacity-0',
           props.className,
@@ -195,7 +188,7 @@ export function Sidebar({
   );
 }
 
-export function SidebarSearchToggle(): ReactNode {
+export function SidebarSearchToggle() {
   const search = useSearchContext();
   if (!search.enabled) return null;
 
@@ -220,7 +213,10 @@ export function SidebarFooter(props: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       {...props}
-      className={cn('flex flex-col border-t p-3 empty:hidden', props.className)}
+      className={cn(
+        'flex flex-col border-t px-4 py-3 empty:hidden',
+        props.className,
+      )}
     >
       {props.children}
     </div>
@@ -280,21 +276,16 @@ export function SidebarItem({
 }
 
 export function SidebarFolder({
-  item,
   level,
   defaultOpen,
   ...props
 }: {
-  item?: PageTree.Folder;
   children: ReactNode;
   defaultOpen?: boolean;
   level: number;
 }) {
   const { defaultOpenLevel } = useInternalContext();
-  const path = useTreePath();
-
-  const shouldExtend =
-    (item && path.includes(item)) || (defaultOpen ?? defaultOpenLevel >= level);
+  const shouldExtend = defaultOpen ?? defaultOpenLevel >= level;
   const [open, setOpen] = useState(shouldExtend);
 
   useOnChange(shouldExtend, (v) => {
@@ -318,7 +309,7 @@ export function SidebarFolderTrigger(props: CollapsibleTriggerProps) {
   return (
     <CollapsibleTrigger
       {...props}
-      className={cn(itemVariants({ active: false }), 'w-full md:pe-1.5')}
+      className={cn(itemVariants({ active: false }), 'w-full pe-3.5 md:pe-1.5')}
     >
       {props.children}
       <ChevronDown
@@ -349,7 +340,7 @@ export function SidebarFolderLink(props: LinkProps) {
       data-active={active}
       className={cn(
         itemVariants({ active }),
-        'w-full md:pe-1.5',
+        'w-full pe-3.5 md:pe-1.5',
         props.className,
       )}
       onClick={(e) => {
@@ -376,7 +367,9 @@ export function SidebarFolderLink(props: LinkProps) {
 export function SidebarFolderContent(props: CollapsibleContentProps) {
   return (
     <CollapsibleContent {...props}>
-      <div className="ms-2 border-s py-1.5 ps-2">{props.children}</div>
+      <div className="ms-3 border-s py-1.5 ps-1.5 md:ms-2 md:ps-2">
+        {props.children}
+      </div>
     </CollapsibleContent>
   );
 }
