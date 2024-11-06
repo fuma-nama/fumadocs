@@ -6,7 +6,7 @@ import {
 } from 'fumadocs-core/breadcrumb';
 import Link from 'next/link';
 import { Fragment, useMemo } from 'react';
-import { useTreeContext } from '@/contexts/tree';
+import { useTreeContext, useTreePath } from '@/contexts/tree';
 
 export interface BreadcrumbProps
   extends Omit<BreadcrumbOptions, 'includePage'> {
@@ -19,7 +19,8 @@ export interface BreadcrumbProps
 }
 
 export function Breadcrumb({ full = false, ...options }: BreadcrumbProps) {
-  const { path, root } = useTreeContext();
+  const path = useTreePath();
+  const { root } = useTreeContext();
   const items = useMemo(() => {
     return getBreadcrumbItemsFromPath(root, path, {
       includePage: full,

@@ -19,7 +19,7 @@ import {
 import Link, { type LinkProps } from 'fumadocs-core/link';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { cn } from '@/utils/cn';
-import { useTreeContext } from '@/contexts/tree';
+import { useTreePath } from '@/contexts/tree';
 import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
 import { isActive } from '@/utils/shared';
 import { LargeSearchToggle } from '@/components/layout/search-toggle';
@@ -291,7 +291,7 @@ export function SidebarFolder({
   level: number;
 }) {
   const { defaultOpenLevel } = useInternalContext();
-  const { path } = useTreeContext();
+  const path = useTreePath();
 
   const shouldExtend =
     (item && path.includes(item)) || (defaultOpen ?? defaultOpenLevel >= level);

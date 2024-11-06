@@ -8,6 +8,8 @@ import { cn } from '@/utils/cn';
 import { useI18n } from './contexts/i18n';
 import { useTreeContext } from './contexts/tree';
 import { useSidebar } from '@/contexts/sidebar';
+import type { PageTree } from 'fumadocs-core/server';
+import { usePathname } from 'next/navigation';
 
 export function PageContainer(props: HTMLAttributes<HTMLDivElement>) {
   const { collapsed } = useSidebar();
@@ -68,19 +70,49 @@ const itemLabel = cva(
   'inline-flex items-center gap-0.5 text-fd-muted-foreground',
 );
 
+function scanNavigationList(tree: PageTree.Node[]) {
+  const list: PageTree.Item[] = [];
+
+  tree.forEach((node) => {
+    if (node.type === 'folder') {
+      if (node.index) {
+        list.push(node.index);
+      }
+
+      list.push(...scanNavigationList(node.children));
+      return;
+    }
+
+    if (node.type === 'page' && !node.external) {
+      list.push(node);
+    }
+  });
+
+  return list;
+}
+
+const listCache = new WeakMap<PageTree.Root, PageTree.Item[]>();
+
 export function Footer({ items }: FooterProps): React.ReactElement {
-  const tree = useTreeContext();
+  const { root } = useTreeContext();
   const { text } = useI18n();
+  const pathname = usePathname();
 
   const { previous, next } = useMemo(() => {
     if (items) return items;
-    const neighbours = tree.getNeighbours();
 
+    const cached = listCache.get(root);
+    const list = cached ?? scanNavigationList(root.children);
+    listCache.set(root, list);
+
+    const idx = list.findIndex((item) => item.url === pathname);
+
+    if (idx === -1) return {};
     return {
-      previous: neighbours[0],
-      next: neighbours[1],
+      previous: list[idx - 1],
+      next: list[idx + 1],
     };
-  }, [items, tree]);
+  }, [items, pathname, root]);
 
   return (
     <div className="grid grid-cols-2 gap-4 pb-6">
