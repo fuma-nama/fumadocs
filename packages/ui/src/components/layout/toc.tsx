@@ -1,5 +1,4 @@
 'use client';
-import { Text } from 'lucide-react';
 import type { TOCItemType } from 'fumadocs-core/server';
 import * as Primitive from 'fumadocs-core/toc';
 import { type HTMLAttributes, type ReactNode, useRef } from 'react';
@@ -41,17 +40,6 @@ export function Toc(props: HTMLAttributes<HTMLDivElement>) {
     >
       {props.children}
     </div>
-  );
-}
-
-export function TocTitle() {
-  const { text } = useI18n();
-
-  return (
-    <h3 className="-ms-0.5 inline-flex items-center gap-1.5 text-sm text-fd-muted-foreground">
-      <Text className="size-4" />
-      {text.toc}
-    </h3>
   );
 }
 

@@ -2,7 +2,6 @@ import {
   Sidebar,
   SidebarFooter,
   SidebarHeader,
-  SidebarList,
   SidebarViewport,
 } from '@/layouts/docs/sidebar';
 
@@ -11,9 +10,7 @@ export function Layout() {
     <>
       <Sidebar>
         <SidebarHeader></SidebarHeader>
-        <SidebarViewport>
-          <SidebarList />
-        </SidebarViewport>
+        <SidebarViewport></SidebarViewport>
         <SidebarFooter />
       </Sidebar>
     </>

@@ -6,18 +6,17 @@ import { usePathname } from 'next/navigation';
 import {
   type ButtonHTMLAttributes,
   createContext,
-  type FC,
   type HTMLAttributes,
-  memo,
   type PointerEventHandler,
   type ReactNode,
   useCallback,
   useContext,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from 'react';
-import Link from 'fumadocs-core/link';
+import Link, { type LinkProps } from 'fumadocs-core/link';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { cn } from '@/utils/cn';
 import { useTreeContext } from '@/contexts/tree';
@@ -25,7 +24,6 @@ import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
 import { isActive } from '@/utils/shared';
 import { LargeSearchToggle } from '@/components/layout/search-toggle';
 import { useSearchContext } from '@/contexts/search';
-import { itemVariants } from '@/components/layout/variants';
 import {
   Collapsible,
   CollapsibleContent,
@@ -34,6 +32,11 @@ import {
 import { type ScrollAreaProps } from '@radix-ui/react-scroll-area';
 import { useSidebar } from '@/contexts/sidebar';
 import { buttonVariants } from '@/components/ui/button';
+import { cva } from 'class-variance-authority';
+import type {
+  CollapsibleContentProps,
+  CollapsibleTriggerProps,
+} from '@radix-ui/react-collapsible';
 
 export interface SidebarProps extends HTMLAttributes<HTMLElement> {
   /**
@@ -52,11 +55,6 @@ export interface SidebarProps extends HTMLAttributes<HTMLElement> {
   prefetch?: boolean;
 
   /**
-   * Customise each of the component
-   */
-  components?: Partial<Components>;
-
-  /**
    * @defaultValue true
    */
   collapsible?: boolean;
@@ -64,17 +62,30 @@ export interface SidebarProps extends HTMLAttributes<HTMLElement> {
 
 interface InternalContext {
   defaultOpenLevel: number;
-  components: Components;
   prefetch: boolean;
 }
 
-interface Components {
-  Item: FC<{ item: PageTree.Item }>;
-  Folder: FC<{ item: PageTree.Folder; level: number }>;
-  Separator: FC<{ item: PageTree.Separator }>;
-}
+const itemVariants = cva(
+  'flex flex-row items-center gap-2 rounded-md px-3 py-2.5 text-fd-muted-foreground transition-colors duration-100 [overflow-wrap:anywhere] md:px-2 md:py-1.5 [&_svg]:size-4',
+  {
+    variants: {
+      active: {
+        true: 'bg-fd-primary/10 font-medium text-fd-primary',
+        false:
+          'hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 hover:transition-none',
+      },
+    },
+  },
+);
 
 const Context = createContext<InternalContext | undefined>(undefined);
+const FolderContext = createContext<
+  | {
+      open: boolean;
+      setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    }
+  | undefined
+>(undefined);
 
 export function CollapsibleSidebar(props: SidebarProps) {
   const { collapsed } = useSidebar();
@@ -109,42 +120,47 @@ export function CollapsibleSidebar(props: SidebarProps) {
   }, []);
 
   return (
-    <Sidebar
-      {...props}
-      data-fd-collapsed={collapsed && !hover}
-      onPointerEnter={onEnter}
-      onPointerLeave={onLeave}
-      className={cn(
-        'group transition-all',
-        collapsed &&
-          'md:-me-[var(--fd-sidebar-offset)] md:w-fit md:flex-initial md:translate-x-[calc(var(--fd-sidebar-offset)*-1)] rtl:md:translate-x-[var(--fd-sidebar-offset)]',
-        collapsed && hover && 'md:translate-x-0',
-        props.className,
-      )}
-    />
+    <>
+      <SidebarCollapseTrigger
+        className={cn(
+          'fixed bottom-3 start-2 z-20 transition-opacity max-md:hidden',
+          (!collapsed || hover) && 'opacity-0',
+        )}
+      />
+      <Sidebar
+        {...props}
+        onPointerEnter={onEnter}
+        onPointerLeave={onLeave}
+        className={cn(
+          'transition-[margin,transform,opacity]',
+          collapsed &&
+            'md:-me-[var(--fd-sidebar-offset)] md:w-fit md:flex-initial md:translate-x-[calc(var(--fd-sidebar-offset)*-1)] rtl:md:translate-x-[var(--fd-sidebar-offset)]',
+          collapsed && hover && 'md:translate-x-0',
+          collapsed && !hover && 'md:z-10 md:opacity-0',
+          props.className,
+        )}
+        style={
+          {
+            '--fd-sidebar-offset': 'calc(var(--fd-sidebar-width) - 30px)',
+          } as object
+        }
+      />
+    </>
   );
 }
 
 export function Sidebar({
-  components,
   defaultOpenLevel = 0,
   prefetch = true,
   inner,
   ...props
 }: SidebarProps & { inner?: HTMLAttributes<HTMLDivElement> }) {
-  const context = useMemo<InternalContext>(
-    () => ({
+  const context = useMemo<InternalContext>(() => {
+    return {
       defaultOpenLevel,
-      components: {
-        Folder: SidebarFolder,
-        Separator: SidebarSeparator,
-        Item: SidebarItem,
-        ...components,
-      },
       prefetch,
-    }),
-    [components, defaultOpenLevel, prefetch],
-  );
+    };
+  }, [defaultOpenLevel, prefetch]);
 
   return (
     <Context.Provider value={context}>
@@ -160,7 +176,6 @@ export function Sidebar({
         style={
           {
             ...props.style,
-            '--fd-sidebar-offset': 'calc(var(--fd-sidebar-width) - 46px)',
             '--fd-sidebar-height':
               'calc(100dvh - var(--fd-banner-height) - var(--fd-nav-height))',
           } as object
@@ -192,7 +207,7 @@ export function SidebarHeader(props: HTMLAttributes<HTMLDivElement>) {
     <div
       {...props}
       className={cn(
-        'flex flex-col gap-2 px-4 transition-opacity empty:hidden group-data-[fd-collapsed=true]:opacity-0 md:px-3',
+        'flex flex-col gap-2 px-4 empty:hidden md:px-3',
         props.className,
       )}
     >
@@ -205,10 +220,7 @@ export function SidebarFooter(props: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       {...props}
-      className={cn(
-        'flex flex-col border-t p-3 empty:hidden group-data-[fd-collapsed=true]:pe-1.5',
-        props.className,
-      )}
+      className={cn('flex flex-col border-t p-3 empty:hidden', props.className)}
     >
       {props.children}
     </div>
@@ -217,13 +229,7 @@ export function SidebarFooter(props: HTMLAttributes<HTMLDivElement>) {
 
 export function SidebarViewport(props: ScrollAreaProps) {
   return (
-    <ScrollArea
-      {...props}
-      className={cn(
-        'h-full transition-opacity group-data-[fd-collapsed=true]:opacity-0',
-        props.className,
-      )}
-    >
+    <ScrollArea {...props} className={cn('h-full', props.className)}>
       <ScrollViewport
         style={{
           maskImage: 'linear-gradient(to bottom, transparent 2px, white 16px)',
@@ -235,136 +241,145 @@ export function SidebarViewport(props: ScrollAreaProps) {
   );
 }
 
-export function SidebarList() {
-  const { root } = useTreeContext();
-  const { components } = useInternalContext();
-
+export function SidebarSeparator(props: HTMLAttributes<HTMLParagraphElement>) {
   return (
-    <div className="px-2 py-4 md:px-3">
-      {renderList(root.children, 0, components)}
-    </div>
+    <p
+      {...props}
+      className={cn(
+        'mb-2 mt-8 px-3 text-sm font-medium first:mt-0 md:px-2',
+        props.className,
+      )}
+    >
+      {props.children}
+    </p>
   );
 }
 
-export const SidebarSeparator = memo(
-  ({ item }: { item: PageTree.Separator }) => {
-    return (
-      <p className="mb-2 mt-8 px-2 text-sm font-medium first:mt-0">
-        {item.name}
-      </p>
-    );
-  },
-);
-
-SidebarSeparator.displayName = 'SidebarSeparator';
-
-function renderList(
-  items: PageTree.Node[],
-  level: number,
-  { Separator, Item, Folder }: Components,
-): ReactNode[] {
-  return items.map((item, i) => {
-    const id = `${item.type}_${i.toString()}`;
-
-    switch (item.type) {
-      case 'separator':
-        return <Separator key={id} item={item} />;
-      case 'folder':
-        return <Folder key={id} item={item} level={level + 1} />;
-      default:
-        return <Item key={item.url} item={item} />;
-    }
-  });
-}
-
-export const SidebarItem = memo(({ item }: { item: PageTree.Item }) => {
+export function SidebarItem({
+  icon,
+  ...props
+}: LinkProps & {
+  icon?: ReactNode;
+}) {
   const pathname = usePathname();
-  const active = isActive(item.url, pathname, false);
+  const active =
+    props.href !== undefined && isActive(props.href, pathname, false);
   const { prefetch } = useInternalContext();
 
   return (
     <Link
-      href={item.url}
-      external={item.external}
+      {...props}
       data-active={active}
-      className={cn(itemVariants())}
+      className={cn(itemVariants({ active }))}
       prefetch={prefetch}
     >
-      {item.icon ?? (item.external ? <ExternalLink /> : null)}
-      {item.name}
+      {icon ?? (props.external ? <ExternalLink /> : null)}
+      {props.children}
     </Link>
   );
-});
+}
 
-SidebarItem.displayName = 'SidebarItem';
+export function SidebarFolder({
+  item,
+  level,
+  defaultOpen,
+  ...props
+}: {
+  item?: PageTree.Folder;
+  children: ReactNode;
+  defaultOpen?: boolean;
+  level: number;
+}) {
+  const { defaultOpenLevel } = useInternalContext();
+  const { path } = useTreeContext();
 
-export const SidebarFolder = memo(
-  ({ item, level }: { item: PageTree.Folder; level: number }) => {
-    const { defaultOpenLevel, prefetch, components } = useInternalContext();
-    const { path } = useTreeContext();
-    const pathname = usePathname();
-    const active =
-      item.index !== undefined && isActive(item.index.url, pathname, false);
-    const className = cn(itemVariants(), 'w-full md:pe-1.5');
+  const shouldExtend =
+    (item && path.includes(item)) || (defaultOpen ?? defaultOpenLevel >= level);
+  const [open, setOpen] = useState(shouldExtend);
 
-    const shouldExtend =
-      active ||
-      path.includes(item) ||
-      (item.defaultOpen ?? defaultOpenLevel >= level);
-    const [open, setOpen] = useState(shouldExtend);
+  useOnChange(shouldExtend, (v) => {
+    if (v) setOpen(v);
+  });
 
-    useOnChange(shouldExtend, (v) => {
-      if (v) setOpen(v);
-    });
+  return (
+    <Collapsible open={open} onOpenChange={setOpen}>
+      <FolderContext.Provider
+        value={useMemo(() => ({ open, setOpen }), [open])}
+      >
+        {props.children}
+      </FolderContext.Provider>
+    </Collapsible>
+  );
+}
 
-    const content = (
-      <>
-        {item.icon}
-        {item.name}
-        <ChevronDown
-          data-icon
-          className={cn('ms-auto transition-transform', !open && '-rotate-90')}
-        />
-      </>
-    );
+export function SidebarFolderTrigger(props: CollapsibleTriggerProps) {
+  const { open } = useFolderContext();
 
-    return (
-      <Collapsible open={open} onOpenChange={setOpen}>
-        {item.index ? (
-          <Link
-            data-active={active}
-            className={className}
-            href={item.index.url}
-            onClick={(e) => {
-              if (
-                // clicking on icon
-                (e.target as HTMLElement).hasAttribute('data-icon') ||
-                active
-              ) {
-                setOpen((prev) => !prev);
-                e.preventDefault();
-              }
-            }}
-            prefetch={prefetch}
-          >
-            {content}
-          </Link>
-        ) : (
-          <CollapsibleTrigger data-active={active} className={className}>
-            {content}
-          </CollapsibleTrigger>
-        )}
-        <CollapsibleContent>
-          <div className="ms-2 border-s py-1.5 ps-2">
-            {renderList(item.children, level, components)}
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
-    );
-  },
-);
+  return (
+    <CollapsibleTrigger
+      {...props}
+      className={cn(itemVariants({ active: false }), 'w-full md:pe-1.5')}
+    >
+      {props.children}
+      <ChevronDown
+        data-icon
+        className={cn('ms-auto transition-transform', !open && '-rotate-90')}
+      />
+    </CollapsibleTrigger>
+  );
+}
 
-SidebarFolder.displayName = 'SidebarFolder';
+export function SidebarFolderLink(props: LinkProps) {
+  const { open, setOpen } = useFolderContext();
+  const { prefetch } = useInternalContext();
+
+  const pathname = usePathname();
+  const active =
+    props.href !== undefined && isActive(props.href, pathname, false);
+
+  useLayoutEffect(() => {
+    if (active) {
+      setOpen(true);
+    }
+  }, [active, setOpen]);
+
+  return (
+    <Link
+      {...props}
+      data-active={active}
+      className={cn(
+        itemVariants({ active }),
+        'w-full md:pe-1.5',
+        props.className,
+      )}
+      onClick={(e) => {
+        if (
+          // clicking on icon
+          (e.target as HTMLElement).hasAttribute('data-icon') ||
+          active
+        ) {
+          setOpen((prev) => !prev);
+          e.preventDefault();
+        }
+      }}
+      prefetch={prefetch}
+    >
+      {props.children}
+      <ChevronDown
+        data-icon
+        className={cn('ms-auto transition-transform', !open && '-rotate-90')}
+      />
+    </Link>
+  );
+}
+
+export function SidebarFolderContent(props: CollapsibleContentProps) {
+  return (
+    <CollapsibleContent {...props}>
+      <div className="ms-2 border-s py-1.5 ps-2">{props.children}</div>
+    </CollapsibleContent>
+  );
+}
 
 export function SidebarCollapseTrigger(
   props: ButtonHTMLAttributes<HTMLButtonElement>,
@@ -390,6 +405,13 @@ export function SidebarCollapseTrigger(
       <SidebarIcon />
     </button>
   );
+}
+
+function useFolderContext() {
+  const ctx = useContext(FolderContext);
+
+  if (!ctx) throw new Error('Missing sidebar folder');
+  return ctx;
 }
 
 function useInternalContext(): InternalContext {

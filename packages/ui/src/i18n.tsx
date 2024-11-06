@@ -37,7 +37,7 @@ export function I18nProvider({
   locales = [],
   locale,
   ...props
-}: I18nProviderProps): React.ReactElement {
+}: I18nProviderProps) {
   const context = useI18n();
   const router = useRouter();
   const segments = usePathname()
@@ -74,6 +74,12 @@ export function I18nProvider({
       {props.children}
     </I18nContext.Provider>
   );
+}
+
+export function I18nLabel(props: { label: keyof Translations }): string {
+  const { text } = useI18n();
+
+  return text[props.label];
 }
 
 export { type Translations };

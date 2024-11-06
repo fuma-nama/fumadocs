@@ -2,7 +2,7 @@ import { DocsLayout, type DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
 import type { ReactNode } from 'react';
 import { MessageCircle } from 'lucide-react';
 import { Slot } from '@radix-ui/react-slot';
-import { baseOptions, linkItems, logo } from '@/app/layout.config';
+import { baseOptions, linkItems } from '@/app/layout.config';
 import 'fumadocs-twoslash/twoslash.css';
 import { source } from '@/app/source';
 import { Trigger } from '@/components/ai/search-ai';
@@ -12,10 +12,7 @@ import { buttonVariants } from '@/components/ui/button';
 const docsOptions: DocsLayoutProps = {
   ...baseOptions,
   tree: source.pageTree,
-  nav: {
-    ...baseOptions.nav,
-  },
-  links: [linkItems[linkItems.length - 1]],
+  //links: [linkItems[linkItems.length - 1]],
   sidebar: {
     tabs: {
       transform(option, node) {

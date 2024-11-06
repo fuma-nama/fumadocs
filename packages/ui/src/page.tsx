@@ -1,10 +1,14 @@
 import { type PageTree, type TableOfContents } from 'fumadocs-core/server';
-import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
+import {
+  type AnchorHTMLAttributes,
+  forwardRef,
+  type HTMLAttributes,
+  type ReactNode,
+} from 'react';
 import dynamic from 'next/dynamic';
 import type { LoaderConfig, LoaderOutput, Page } from 'fumadocs-core/source';
 import { type AnchorProviderProps, AnchorProvider } from 'fumadocs-core/toc';
 import { Card, Cards } from '@/components/card';
-import type { EditOnGitHubOptions } from '@/components/layout/edit-on-github';
 import { replaceOrDefault } from '@/layouts/shared';
 import { cn } from './utils/cn';
 import {
@@ -17,22 +21,17 @@ import {
   Breadcrumb,
   type BreadcrumbProps,
 } from '@/components/layout/breadcrumb';
-import {
-  Toc,
-  TOCItems,
-  type TOCProps,
-  TocTitle,
-} from '@/components/layout/toc';
+import { Toc, TOCItems, type TOCProps } from '@/components/layout/toc';
 import {
   TocPopoverTrigger,
   TocPopover,
   TocPopoverContent,
 } from '@/components/layout/toc-popover';
+import { buttonVariants } from '@/components/ui/button';
+import { Edit, Text } from 'lucide-react';
+import { I18nLabel } from '@/i18n';
 
 const ClerkTOCItems = dynamic(() => import('@/components/layout/toc-clerk'));
-const EditOnGitHub = dynamic(
-  () => import('@/components/layout/edit-on-github'),
-);
 
 type TableOfContentOptions = Omit<TOCProps, 'items' | 'children'> &
   Pick<AnchorProviderProps, 'single'> & {
@@ -46,6 +45,24 @@ type TableOfContentOptions = Omit<TOCProps, 'items' | 'children'> &
   };
 
 type TableOfContentPopoverOptions = Omit<TableOfContentOptions, 'single'>;
+
+interface EditOnGitHubOptions
+  extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href' | 'children'> {
+  owner: string;
+  repo: string;
+
+  /**
+   * SHA or ref (branch or tag) name.
+   *
+   * @defaultValue main
+   */
+  sha?: string;
+
+  /**
+   * File path in the repo
+   */
+  path: string;
+}
 
 interface BreadcrumbOptions extends BreadcrumbProps {
   enabled: boolean;
@@ -157,7 +174,10 @@ export function DocsPage({
         <Toc>
           <div className="flex h-full w-[var(--fd-toc-width)] max-w-full flex-col gap-3">
             {tocOptions.header}
-            <TocTitle />
+            <h3 className="-ms-0.5 inline-flex items-center gap-1.5 text-sm text-fd-muted-foreground">
+              <Text className="size-4" />
+              <I18nLabel label="toc" />
+            </h3>
             {tocOptions.style === 'clerk' ? (
               <ClerkTOCItems items={toc} />
             ) : (
@@ -173,6 +193,35 @@ export function DocsPage({
         <div role="none" className="flex-1" />,
       )}
     </AnchorProvider>
+  );
+}
+
+function EditOnGitHub({
+  owner,
+  repo,
+  sha,
+  path,
+  ...props
+}: EditOnGitHubOptions) {
+  const href = `https://github.com/${owner}/${repo}/blob/${sha}/${path.startsWith('/') ? path.slice(1) : path}`;
+
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer noopener"
+      {...props}
+      className={cn(
+        buttonVariants({
+          color: 'secondary',
+          className: 'gap-1.5 py-1 text-fd-muted-foreground',
+        }),
+        props.className,
+      )}
+    >
+      <Edit className="size-3.5" />
+      <I18nLabel label="editOnGithub" />
+    </a>
   );
 }
 

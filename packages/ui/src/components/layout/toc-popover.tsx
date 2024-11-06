@@ -22,8 +22,8 @@ export function TocPopover(props: { className?: string; children: ReactNode }) {
     <div
       id="nd-tocnav"
       className={cn(
-        'sticky top-fd-layout-top z-10 border-b border-fd-foreground/10 text-sm transition-colors md:top-[var(--fd-toc-top-with-offset)] md:mx-3 md:rounded-full md:border',
-        !isTransparent && 'bg-fd-background/80 backdrop-blur-md md:shadow-md',
+        'sticky top-fd-layout-top z-10 border-b border-fd-foreground/10 text-sm transition-colors',
+        !isTransparent && 'bg-fd-background/80 backdrop-blur-md',
         open && 'opacity-0',
         props.className,
       )}

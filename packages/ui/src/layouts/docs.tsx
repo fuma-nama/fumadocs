@@ -1,5 +1,5 @@
 import type { PageTree } from 'fumadocs-core/server';
-import { type ReactNode, type HTMLAttributes } from 'react';
+import { type ReactNode, type HTMLAttributes, Fragment, type FC } from 'react';
 import Link from 'next/link';
 import { Languages, MoreHorizontal } from 'lucide-react';
 import { notFound } from 'next/navigation';
@@ -10,17 +10,22 @@ import {
   Sidebar,
   SidebarFooter,
   SidebarHeader,
-  SidebarList,
   SidebarCollapseTrigger,
   type SidebarProps,
   SidebarSearchToggle,
   SidebarViewport,
+  SidebarItem,
+  SidebarFolder,
+  SidebarFolderLink,
+  SidebarFolderTrigger,
+  SidebarFolderContent,
 } from '@/layouts/docs/sidebar';
 import { replaceOrDefault, type SharedNavProps } from '@/layouts/shared';
 import {
   type LinkItemType,
   IconItem as IconItemType,
   IconItem,
+  ButtonItem,
 } from '@/layouts/links';
 import { getSidebarTabs, type TabOptions } from '@/utils/get-sidebar-tabs';
 import { type Option, RootToggle } from '@/components/layout/root-toggle';
@@ -29,7 +34,7 @@ import {
   LanguageToggle,
   LanguageToggleText,
 } from '@/components/layout/language-toggle';
-import { MenuItem, LinksMenu } from '@/layouts/docs.client';
+import { SidebarItems, LinksMenu } from '@/layouts/docs.client';
 import { TreeContextProvider } from '@/contexts/tree';
 import { NavProvider } from '@/components/layout/nav';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
@@ -54,6 +59,12 @@ interface SidebarOptions extends SidebarProps {
    * @defaultValue false
    */
   hideSearch?: boolean;
+}
+
+export interface SidebarComponents {
+  Item: FC<{ item: PageTree.Item }>;
+  Folder: FC<{ item: PageTree.Folder; level: number }>;
+  Separator: FC<{ item: PageTree.Separator }>;
 }
 
 export interface DocsLayoutProps extends BaseLayoutProps {
@@ -144,16 +155,15 @@ export function DocsLayout({
                 ) : null}
                 <SidebarSearchToggle />
               </SidebarHeader>
-
               <SidebarViewport>
-                <div className="flex flex-col px-2 pt-4 empty:hidden md:hidden">
+                <div className="px-3 pt-4 empty:hidden md:hidden">
                   {links
                     .filter((v) => v.type !== 'icon')
                     .map((item, i) => (
-                      <MenuItem key={i} item={item} />
+                      <Fragment key={i}>{renderLinkItem(item)}</Fragment>
                     ))}
                 </div>
-                <SidebarList />
+                <SidebarItems />
               </SidebarViewport>
               <SidebarFooter>{footer}</SidebarFooter>
             </Aside>,
@@ -169,6 +179,43 @@ export function DocsLayout({
       </NavProvider>
     </TreeContextProvider>
   );
+}
+
+function renderLinkItem(item: LinkItemType): ReactNode {
+  if (!item.type || item.type === 'main' || item.type === 'icon')
+    return (
+      <SidebarItem href={item.url} icon={item.icon} external={item.external}>
+        {item.text}
+      </SidebarItem>
+    );
+
+  if (item.type === 'menu')
+    return (
+      <SidebarFolder level={1}>
+        {item.url ? (
+          <SidebarFolderLink href={item.url}>
+            {item.icon}
+            {item.text}
+          </SidebarFolderLink>
+        ) : (
+          <SidebarFolderTrigger>
+            {item.icon}
+            {item.text}
+          </SidebarFolderTrigger>
+        )}
+        <SidebarFolderContent>
+          {item.items.map((child, i) => (
+            <Fragment key={i}>{renderLinkItem(child)}</Fragment>
+          ))}
+        </SidebarFolderContent>
+      </SidebarFolder>
+    );
+
+  if (item.type === 'button') {
+    return <ButtonItem item={item} />;
+  }
+
+  if (item.type === 'custom') return item.children;
 }
 
 function CustomSidebarHeader({

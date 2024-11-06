@@ -18,10 +18,7 @@ export interface BreadcrumbProps
   full?: boolean;
 }
 
-export function Breadcrumb({
-  full = false,
-  ...options
-}: BreadcrumbProps): React.ReactNode {
+export function Breadcrumb({ full = false, ...options }: BreadcrumbProps) {
   const { path, root } = useTreeContext();
   const items = useMemo(() => {
     return getBreadcrumbItemsFromPath(root, path, {

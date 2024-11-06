@@ -5,6 +5,7 @@ import {
   useMemo,
   useRef,
   type MutableRefObject,
+  type ReactNode,
 } from 'react';
 import { usePathname } from 'next/navigation';
 import { SidebarProvider as BaseProvider } from 'fumadocs-core/sidebar';
@@ -33,8 +34,8 @@ export function useSidebar(): SidebarContext {
 export function SidebarProvider({
   children,
 }: {
-  children: React.ReactNode;
-}): React.ReactElement {
+  children: ReactNode;
+}): ReactNode {
   const closeOnRedirect = useRef(true);
   const [open, setOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);

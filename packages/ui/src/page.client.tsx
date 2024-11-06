@@ -28,7 +28,9 @@ export function PageContainer(props: HTMLAttributes<HTMLDivElement>) {
             : 'calc(min(100vw, var(--fd-layout-width)) - var(--fd-sidebar-width) - var(--fd-toc-width))',
         } as object
       }
-    ></div>
+    >
+      {props.children}
+    </div>
   );
 }
 

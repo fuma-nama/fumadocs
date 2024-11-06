@@ -4,6 +4,7 @@ import { ChevronDown } from 'lucide-react';
 import {
   type ButtonHTMLAttributes,
   type HTMLAttributes,
+  type ReactNode,
   useState,
 } from 'react';
 import { usePathname } from 'next/navigation';
@@ -20,7 +21,22 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import { itemVariants } from '@/components/layout/variants';
+import { cva } from 'class-variance-authority';
+import type { PageTree } from 'fumadocs-core/server';
+import type { SidebarComponents } from '@/layouts/docs';
+import {
+  SidebarFolder,
+  SidebarFolderContent,
+  SidebarFolderLink,
+  SidebarFolderTrigger,
+  SidebarItem,
+  SidebarSeparator,
+} from '@/layouts/docs/sidebar';
+import { useTreeContext } from '@/contexts/tree';
+
+const itemVariants = cva(
+  'flex flex-row items-center gap-2 rounded-md px-3 py-2.5 text-fd-muted-foreground transition-colors duration-100 [overflow-wrap:anywhere] hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 hover:transition-none md:px-2 md:py-1.5 [&_svg]:size-4',
+);
 
 interface LinksMenuProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   items: LinkItemType[];
@@ -61,7 +77,6 @@ export function MenuItem({ item, ...props }: MenuItemProps) {
       <Collapsible className="flex flex-col">
         <CollapsibleTrigger
           {...props}
-          data-active={false}
           className={cn(itemVariants(), 'group/link', props.className)}
         >
           {item.icon}
@@ -69,7 +84,7 @@ export function MenuItem({ item, ...props }: MenuItemProps) {
           <ChevronDown className="ms-auto transition-transform group-data-[state=closed]/link:-rotate-90" />
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <div className="ms-2 flex flex-col border-s py-2 ps-2">
+          <div className="flex flex-col py-2 ps-2">
             {item.items.map((child, i) => (
               <MenuItem key={i} item={child} />
             ))}
@@ -93,4 +108,70 @@ export function MenuItem({ item, ...props }: MenuItemProps) {
       {item.text}
     </BaseLinkItem>
   );
+}
+
+export function SidebarItems() {
+  const { root } = useTreeContext();
+
+  return (
+    <div className="px-3 py-4">{renderSidebarList(root.children, 1, {})}</div>
+  );
+}
+
+function renderSidebarList(
+  items: PageTree.Node[],
+  level: number,
+  customComps: Partial<SidebarComponents>,
+): ReactNode[] {
+  const { Separator, Item, Folder } = customComps;
+
+  return items.map((item, i) => {
+    const id = `${item.type}_${i.toString()}`;
+
+    switch (item.type) {
+      case 'separator':
+        return Separator ? (
+          <Separator key={id} item={item} />
+        ) : (
+          <SidebarSeparator key={id}>{item.name}</SidebarSeparator>
+        );
+      case 'folder':
+        return Folder ? (
+          <Folder key={id} item={item} level={level + 1} />
+        ) : (
+          <SidebarFolder key={id} item={item} level={level + 1}>
+            {item.index ? (
+              <SidebarFolderLink
+                href={item.index.url}
+                external={item.index.external}
+              >
+                {item.icon}
+                {item.name}
+              </SidebarFolderLink>
+            ) : (
+              <SidebarFolderTrigger>
+                {item.icon}
+                {item.name}
+              </SidebarFolderTrigger>
+            )}
+            <SidebarFolderContent>
+              {renderSidebarList(item.children, level + 1, customComps)}
+            </SidebarFolderContent>
+          </SidebarFolder>
+        );
+      default:
+        return Item ? (
+          <Item key={item.url} item={item} />
+        ) : (
+          <SidebarItem
+            key={item.url}
+            href={item.url}
+            external={item.external}
+            icon={item.icon}
+          >
+            {item.name}
+          </SidebarItem>
+        );
+    }
+  });
 }
