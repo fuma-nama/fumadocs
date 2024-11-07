@@ -1,10 +1,13 @@
 'use client';
 import Link from 'fumadocs-core/link';
 import { usePathname } from 'next/navigation';
-import { forwardRef, type HTMLAttributes, type ReactNode } from 'react';
-import { cn } from '@/utils/cn';
+import {
+  type AnchorHTMLAttributes,
+  forwardRef,
+  type HTMLAttributes,
+  type ReactNode,
+} from 'react';
 import { isActive } from '@/utils/shared';
-import { buttonVariants } from '@/components/ui/button';
 
 interface BaseItem {
   /**
@@ -15,7 +18,7 @@ interface BaseItem {
   on?: 'menu' | 'nav' | 'all';
 }
 
-interface BaseLinkItem extends BaseItem {
+export interface BaseLinkType extends BaseItem {
   url: string;
   /**
    * When the item is marked as active
@@ -26,14 +29,14 @@ interface BaseLinkItem extends BaseItem {
   external?: boolean;
 }
 
-export interface MainItem extends BaseLinkItem {
+export interface MainItemType extends BaseLinkType {
   type?: 'main';
   icon?: ReactNode;
   text: ReactNode;
   description?: ReactNode;
 }
 
-export interface IconItem extends BaseLinkItem {
+export interface IconItemType extends BaseLinkType {
   type: 'icon';
   /**
    * `aria-label` of icon button
@@ -47,7 +50,7 @@ export interface IconItem extends BaseLinkItem {
   secondary?: boolean;
 }
 
-interface ButtonItem extends BaseLinkItem {
+interface ButtonItem extends BaseLinkType {
   type: 'button';
   icon?: ReactNode;
   text: ReactNode;
@@ -57,14 +60,14 @@ interface ButtonItem extends BaseLinkItem {
   secondary?: boolean;
 }
 
-export interface MenuItem extends BaseItem {
+export interface MenuItemType extends BaseItem {
   type: 'menu';
   icon?: ReactNode;
   text: ReactNode;
 
   url?: string;
   items: (
-    | (MainItem & {
+    | (MainItemType & {
         /**
          * Options when displayed on navigation menu
          */
@@ -92,15 +95,15 @@ interface CustomItem extends BaseItem {
 }
 
 export type LinkItemType =
-  | MainItem
-  | IconItem
+  | MainItemType
+  | IconItemType
   | ButtonItem
-  | MenuItem
+  | MenuItemType
   | CustomItem;
 
 export const BaseLinkItem = forwardRef<
   HTMLAnchorElement,
-  { item: BaseLinkItem } & HTMLAttributes<HTMLAnchorElement>
+  Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> & { item: BaseLinkType }
 >(({ item, ...props }, ref) => {
   const pathname = usePathname();
   const activeType = item.active ?? 'url';
@@ -122,53 +125,3 @@ export const BaseLinkItem = forwardRef<
 });
 
 BaseLinkItem.displayName = 'BaseLinkItem';
-
-export const ButtonItem = forwardRef<
-  HTMLAnchorElement,
-  { item: ButtonItem } & HTMLAttributes<HTMLAnchorElement>
->(({ item, ...props }, ref) => {
-  return (
-    <Link
-      ref={ref}
-      href={item.url}
-      external={item.external}
-      {...props}
-      className={cn(
-        buttonVariants({ color: 'secondary' }),
-        'gap-1.5 [&_svg]:size-4',
-        props.className,
-      )}
-    >
-      {item.icon}
-      {item.text}
-    </Link>
-  );
-});
-
-ButtonItem.displayName = 'ButtonItem';
-
-export const IconItem = forwardRef<
-  HTMLAnchorElement,
-  { item: IconItem } & HTMLAttributes<HTMLAnchorElement>
->(({ item, ...props }, ref) => {
-  return (
-    <Link
-      ref={ref}
-      aria-label={item.label}
-      href={item.url}
-      external={item.external}
-      {...props}
-      className={cn(
-        buttonVariants({
-          size: 'icon',
-          color: 'ghost',
-        }),
-        props.className,
-      )}
-    >
-      {item.icon}
-    </Link>
-  );
-});
-
-IconItem.displayName = 'IconItem';

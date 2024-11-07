@@ -6,11 +6,19 @@ import { NavProvider, Title } from '@/components/layout/nav';
 import {
   NavigationMenuContent,
   NavigationMenuItem,
+  NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
 } from '@/components/ui/navigation-menu';
-import { MenuItem, Navbar, NavbarItem } from '@/layouts/home/navbar';
-import type { LinkItemType } from '@/layouts/links';
+import {
+  Navbar,
+  NavbarLink,
+  NavbarMenu,
+  NavbarMenuContent,
+  NavbarMenuItem,
+  NavbarMenuTrigger,
+} from '@/layouts/home/navbar';
+import { BaseLinkItem, type LinkItemType } from '@/layouts/links';
 import {
   LargeSearchToggle,
   SearchToggle,
@@ -23,6 +31,8 @@ import {
 import { ChevronDown, Languages } from 'lucide-react';
 import { buttonVariants } from '@/components/ui/button';
 import { SearchOnly } from '@/contexts/search';
+import Link from 'fumadocs-core/link';
+import { cva } from 'class-variance-authority';
 
 export type HomeLayoutProps = BaseLayoutProps & HTMLAttributes<HTMLElement>;
 
@@ -48,15 +58,9 @@ export function HomeLayout({
         id="nd-home-layout"
         {...props}
         className={cn(
-          'flex flex-1 flex-col pt-[var(--fd-nav-height)]',
+          'flex flex-1 flex-col pt-[var(--fd-nav-height)] [--fd-nav-height:48px] lg:[--fd-nav-height:56px]',
           props.className,
         )}
-        style={
-          {
-            '--fd-nav-height': '54px',
-            ...props.style,
-          } as object
-        }
       >
         {replaceOrDefault(
           nav,
@@ -75,7 +79,7 @@ export function HomeLayout({
                 {navItems
                   .filter((item) => !isSecondary(item))
                   .map((item, i) => (
-                    <NavbarItem key={i} item={item} className="text-sm" />
+                    <NavbarLinkItem key={i} item={item} className="text-sm" />
                   ))}
               </NavigationMenuList>
               <div className="flex flex-1 flex-row items-center justify-end lg:gap-1.5">
@@ -93,15 +97,13 @@ export function HomeLayout({
                     <Languages className="size-5" />
                   </LanguageToggle>
                 ) : null}
-
                 {navItems.filter(isSecondary).map((item, i) => (
-                  <NavbarItem
-                    item={item}
+                  <NavbarLinkItem
                     key={i}
+                    item={item}
                     className="-me-1.5 list-none max-lg:hidden"
                   />
                 ))}
-
                 <NavigationMenuItem className="list-none lg:hidden">
                   <NavigationMenuTrigger
                     className={cn(
@@ -118,7 +120,11 @@ export function HomeLayout({
                     {menuItems
                       .filter((item) => !isSecondary(item))
                       .map((item, i) => (
-                        <MenuItem key={i} item={item} className="sm:hidden" />
+                        <MenuLinkItem
+                          key={i}
+                          item={item}
+                          className="sm:hidden"
+                        />
                       ))}
                     <div className="-ms-1.5 flex flex-row items-center gap-1.5 max-sm:mt-2">
                       {i18n ? (
@@ -130,7 +136,7 @@ export function HomeLayout({
                       ) : null}
                       <div className="flex flex-row items-center empty:hidden">
                         {menuItems.filter(isSecondary).map((item, i) => (
-                          <MenuItem key={i} item={item} />
+                          <MenuLinkItem key={i} item={item} />
                         ))}
                       </div>
                       {!disableThemeSwitch ? (
@@ -153,6 +159,133 @@ export function HomeLayout({
         {props.children}
       </main>
     </NavProvider>
+  );
+}
+
+function NavbarLinkItem({
+  item,
+  ...props
+}: {
+  item: LinkItemType;
+  className?: string;
+}) {
+  if (item.type === 'custom') return <div {...props}>{item.children}</div>;
+
+  if (item.type === 'menu') {
+    return (
+      <NavbarMenu>
+        <NavbarMenuTrigger {...props}>
+          {item.url ? <Link href={item.url}>{item.text}</Link> : item.text}
+        </NavbarMenuTrigger>
+        <NavbarMenuContent>
+          {item.items.map((child, j) => {
+            if (child.type === 'custom')
+              return <div key={j}>{child.children}</div>;
+
+            const { banner, footer, ...rest } = child.menu ?? {};
+
+            return (
+              <NavbarMenuItem key={j} href={child.url} {...rest}>
+                {banner ??
+                  (child.icon ? (
+                    <div className="w-fit rounded-md border bg-fd-muted p-1 [&_svg]:size-4">
+                      {child.icon}
+                    </div>
+                  ) : null)}
+                <p className="-mb-1 text-sm font-medium">{child.text}</p>
+                {child.description ? (
+                  <p className="text-[13px] text-fd-muted-foreground">
+                    {child.description}
+                  </p>
+                ) : null}
+                {footer}
+              </NavbarMenuItem>
+            );
+          })}
+        </NavbarMenuContent>
+      </NavbarMenu>
+    );
+  }
+
+  return (
+    <NavbarLink
+      {...props}
+      item={item}
+      variant={item.type}
+      aria-label={item.type === 'icon' ? item.label : undefined}
+    >
+      {item.type === 'icon' ? item.icon : item.text}
+    </NavbarLink>
+  );
+}
+
+const menuItemVariants = cva(undefined, {
+  variants: {
+    variant: {
+      main: 'inline-flex items-center gap-2 py-1.5 transition-colors hover:text-fd-popover-foreground/50 data-[active=true]:font-medium data-[active=true]:text-fd-primary [&_svg]:size-4',
+      icon: buttonVariants({
+        size: 'icon',
+        color: 'ghost',
+      }),
+      button: buttonVariants({
+        color: 'secondary',
+        className: 'gap-1.5 [&_svg]:size-4',
+      }),
+    },
+  },
+  defaultVariants: {
+    variant: 'main',
+  },
+});
+
+function MenuLinkItem({
+  item,
+  ...props
+}: {
+  item: LinkItemType;
+  className?: string;
+}) {
+  if (item.type === 'custom')
+    return <div className={cn('grid', props.className)}>{item.children}</div>;
+
+  if (item.type === 'menu')
+    return (
+      <div className={cn('mb-4 flex flex-col', props.className)}>
+        <p className="mb-1 text-sm text-fd-muted-foreground">
+          {item.url ? (
+            <NavigationMenuLink asChild>
+              <Link href={item.url}>
+                {item.icon}
+                {item.text}
+              </Link>
+            </NavigationMenuLink>
+          ) : (
+            <>
+              {item.icon}
+              {item.text}
+            </>
+          )}
+        </p>
+        {item.items.map((child, i) => (
+          <MenuLinkItem key={i} item={child} />
+        ))}
+      </div>
+    );
+
+  return (
+    <NavigationMenuLink asChild>
+      <BaseLinkItem
+        item={item}
+        className={cn(
+          menuItemVariants({ variant: item.type }),
+          props.className,
+        )}
+        aria-label={item.type === 'icon' ? item.label : undefined}
+      >
+        {item.icon}
+        {item.type === 'icon' ? undefined : item.text}
+      </BaseLinkItem>
+    </NavigationMenuLink>
   );
 }
 

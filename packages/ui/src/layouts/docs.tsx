@@ -22,9 +22,8 @@ import {
 import { replaceOrDefault, type SharedNavProps } from '@/layouts/shared';
 import {
   type LinkItemType,
-  IconItem as IconItemType,
-  IconItem,
-  ButtonItem,
+  type IconItemType,
+  BaseLinkItem,
 } from '@/layouts/links';
 import { getSidebarTabs, type TabOptions } from '@/utils/get-sidebar-tabs';
 import { type Option, RootToggle } from '@/components/layout/root-toggle';
@@ -230,7 +229,20 @@ function renderLinkItem(item: LinkItemType): ReactNode {
     );
 
   if (item.type === 'button') {
-    return <ButtonItem item={item} />;
+    return (
+      <BaseLinkItem
+        item={item}
+        className={cn(
+          buttonVariants({
+            color: 'secondary',
+            className: 'gap-1.5 [&_svg]:size-4',
+          }),
+        )}
+      >
+        {item.icon}
+        {item.text}
+      </BaseLinkItem>
+    );
   }
 
   if (item.type === 'custom') return item.children;
@@ -280,16 +292,24 @@ function CustomSidebarFooter({
   iconItems: IconItemType[];
   disableThemeSwitch: boolean;
   sidebarCollapsible: boolean;
-}): ReactNode {
+}) {
+  const iconItem = cn(
+    buttonVariants({ size: 'icon', color: 'ghost' }),
+    'text-fd-muted-foreground md:hidden',
+  );
+
   if (props.i18n) {
     return (
       <div className="flex flex-row items-center">
         {iconItems.map((item, i) => (
-          <IconItem
+          <BaseLinkItem
             key={i}
             item={item}
-            className="text-fd-muted-foreground md:hidden"
-          />
+            className={iconItem}
+            aria-label={item.label}
+          >
+            {item.icon}
+          </BaseLinkItem>
         ))}
         {!props.disableThemeSwitch ? <ThemeToggle /> : null}
         <LanguageToggle className="max-md:order-first max-md:me-auto md:ms-auto">
@@ -306,11 +326,14 @@ function CustomSidebarFooter({
   return (
     <div className="flex flex-row items-center">
       {iconItems.map((item, i) => (
-        <IconItem
+        <BaseLinkItem
           key={i}
           item={item}
-          className="text-fd-muted-foreground md:hidden"
-        />
+          className={iconItem}
+          aria-label={item.label}
+        >
+          {item.icon}
+        </BaseLinkItem>
       ))}
       {!props.disableThemeSwitch ? (
         <ThemeToggle className="p-0 max-md:ms-auto" />

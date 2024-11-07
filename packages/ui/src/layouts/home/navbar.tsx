@@ -1,21 +1,14 @@
 'use client';
 import {
-  Fragment,
+  type ComponentProps,
   type HTMLAttributes,
-  type ReactNode,
   useContext,
   useState,
 } from 'react';
-import { cva } from 'class-variance-authority';
-import Link from 'fumadocs-core/link';
+import { cva, type VariantProps } from 'class-variance-authority';
+import Link, { type LinkProps } from 'fumadocs-core/link';
 import { cn } from '@/utils/cn';
-import {
-  BaseLinkItem,
-  ButtonItem,
-  IconItem,
-  type LinkItemType,
-  type MenuItem,
-} from '@/layouts/links';
+import { BaseLinkItem } from '@/layouts/links';
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -25,10 +18,11 @@ import {
   NavigationMenuViewport,
 } from '@/components/ui/navigation-menu';
 import { NavContext } from '@/components/layout/nav';
-
-interface LinkItemProps extends React.HTMLAttributes<HTMLElement> {
-  item: LinkItemType;
-}
+import type {
+  NavigationMenuContentProps,
+  NavigationMenuTriggerProps,
+} from '@radix-ui/react-navigation-menu';
+import { buttonVariants } from '@/components/ui/button';
 
 const navItemVariants = cva(
   'inline-flex items-center gap-1 p-2 text-fd-muted-foreground transition-colors hover:text-fd-accent-foreground data-[active=true]:text-fd-primary [&_svg]:size-4',
@@ -60,156 +54,82 @@ export function Navbar(props: HTMLAttributes<HTMLElement>) {
   );
 }
 
-export function NavbarItem({ item, ...props }: LinkItemProps) {
-  if (item.type === 'custom') return <div {...props}>{item.children}</div>;
+export const NavbarMenu = NavigationMenuItem;
 
-  if (item.type === 'menu') {
-    return (
-      <NavigationMenuItem {...props}>
-        <NavigationMenuTrigger className={cn(navItemVariants(), 'rounded-md')}>
-          {item.url ? <Link href={item.url}>{item.text}</Link> : item.text}
-        </NavigationMenuTrigger>
-        <NavigationMenuContent className="grid grid-cols-1 gap-3 px-4 pb-4 md:grid-cols-2 lg:grid-cols-3">
-          <MenuItemContent item={item} />
-        </NavigationMenuContent>
-      </NavigationMenuItem>
-    );
-  }
-
-  if (item.type === 'button') {
-    return (
-      <NavigationMenuItem {...props}>
-        <NavigationMenuLink asChild>
-          <ButtonItem item={item} />
-        </NavigationMenuLink>
-      </NavigationMenuItem>
-    );
-  }
-
-  if (item.type === 'icon') {
-    return (
-      <NavigationMenuItem {...props}>
-        <NavigationMenuLink asChild>
-          <IconItem item={item} />
-        </NavigationMenuLink>
-      </NavigationMenuItem>
-    );
-  }
-
+export function NavbarMenuContent(props: NavigationMenuContentProps) {
   return (
-    <NavigationMenuItem {...props}>
+    <NavigationMenuContent
+      {...props}
+      className={cn(
+        'grid grid-cols-1 gap-3 px-4 pb-4 md:grid-cols-2 lg:grid-cols-3',
+        props.className,
+      )}
+    >
+      {props.children}
+    </NavigationMenuContent>
+  );
+}
+
+export function NavbarMenuTrigger(props: NavigationMenuTriggerProps) {
+  return (
+    <NavigationMenuTrigger
+      {...props}
+      className={cn(navItemVariants(), 'rounded-md', props.className)}
+    >
+      {props.children}
+    </NavigationMenuTrigger>
+  );
+}
+
+const linkVariants = cva(undefined, {
+  variants: {
+    variant: {
+      main: navItemVariants(),
+      button: buttonVariants({
+        color: 'secondary',
+        className: 'gap-1.5 [&_svg]:size-4',
+      }),
+      icon: buttonVariants({
+        color: 'ghost',
+        size: 'icon',
+      }),
+    },
+  },
+  defaultVariants: {
+    variant: 'main',
+  },
+});
+
+export function NavbarLink({
+  item,
+  variant,
+  ...props
+}: ComponentProps<typeof BaseLinkItem> & VariantProps<typeof linkVariants>) {
+  return (
+    <NavigationMenuItem className="list-none">
       <NavigationMenuLink asChild>
-        <BaseLinkItem item={item} className={cn(navItemVariants())}>
-          {item.text}
+        <BaseLinkItem
+          {...props}
+          item={item}
+          className={cn(linkVariants({ variant }), props.className)}
+        >
+          {props.children}
         </BaseLinkItem>
       </NavigationMenuLink>
     </NavigationMenuItem>
   );
 }
 
-function MenuItemContent({ item }: { item: MenuItem }) {
-  return (
-    <>
-      {item.items.map((child, i) => {
-        if (child.type === 'custom')
-          return <Fragment key={i}>{child.children}</Fragment>;
-
-        const { banner, footer, ...menuProps } = child.menu ?? {};
-
-        return (
-          <NavigationMenuLink key={i} asChild>
-            <Link
-              external={child.external}
-              href={child.url}
-              {...menuProps}
-              className={cn(
-                'flex flex-col gap-2 rounded-lg border bg-fd-card p-3 transition-colors hover:bg-fd-accent/80 hover:text-fd-accent-foreground',
-                menuProps.className,
-              )}
-            >
-              {banner ??
-                (child.icon ? (
-                  <div className="w-fit rounded-md border bg-fd-muted p-1 [&_svg]:size-4">
-                    {child.icon}
-                  </div>
-                ) : null)}
-              <p className="-mb-1 text-sm font-medium">{child.text}</p>
-              {child.description ? (
-                <p className="text-[13px] text-fd-muted-foreground">
-                  {child.description}
-                </p>
-              ) : null}
-              {footer}
-            </Link>
-          </NavigationMenuLink>
-        );
-      })}
-    </>
-  );
-}
-
-export function MenuItem({ item, ...rest }: LinkItemProps) {
-  if (item.type === 'button') {
-    return (
-      <NavigationMenuLink asChild>
-        <ButtonItem item={item} {...rest} />
-      </NavigationMenuLink>
-    );
-  }
-
-  if (item.type === 'custom')
-    return (
-      <div {...rest} className={cn('grid', rest.className)}>
-        {item.children}
-      </div>
-    );
-
-  if (item.type === 'menu') {
-    return (
-      <div {...rest} className={cn('mb-4 flex flex-col', rest.className)}>
-        <p className="mb-1 text-sm text-fd-muted-foreground">
-          {item.url ? (
-            <NavigationMenuLink asChild>
-              <Link href={item.url}>
-                {item.icon}
-                {item.text}
-              </Link>
-            </NavigationMenuLink>
-          ) : (
-            <>
-              {item.icon}
-              {item.text}
-            </>
-          )}
-        </p>
-        {item.items.map((child, i) => (
-          <MenuItem key={i} item={child} />
-        ))}
-      </div>
-    );
-  }
-
-  if (item.type === 'icon') {
-    return (
-      <NavigationMenuLink asChild>
-        <IconItem item={item} />
-      </NavigationMenuLink>
-    );
-  }
-
+export function NavbarMenuItem(props: LinkProps) {
   return (
     <NavigationMenuLink asChild>
-      <BaseLinkItem
-        item={item}
-        {...rest}
+      <Link
+        {...props}
         className={cn(
-          'inline-flex items-center gap-2 py-1.5 transition-colors hover:text-fd-popover-foreground/50 data-[active=true]:font-medium data-[active=true]:text-fd-primary [&_svg]:size-4',
-          rest.className,
+          'flex flex-col gap-2 rounded-lg border bg-fd-card p-3 transition-colors hover:bg-fd-accent/80 hover:text-fd-accent-foreground',
+          props.className,
         )}
-      >
-        {item.icon}
-        {item.text}
-      </BaseLinkItem>
+      />
     </NavigationMenuLink>
   );
 }

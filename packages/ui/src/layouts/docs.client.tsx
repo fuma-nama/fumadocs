@@ -15,7 +15,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { BaseLinkItem, ButtonItem, type LinkItemType } from '@/layouts/links';
+import { BaseLinkItem, type LinkItemType } from '@/layouts/links';
 import {
   Collapsible,
   CollapsibleContent,
@@ -33,6 +33,7 @@ import {
   SidebarSeparator,
 } from '@/layouts/docs/sidebar';
 import { useTreeContext, useTreePath } from '@/contexts/tree';
+import { buttonVariants } from '@/components/ui/button';
 
 const itemVariants = cva(
   'flex flex-row items-center gap-2 rounded-md px-3 py-2.5 text-fd-muted-foreground transition-colors duration-100 [overflow-wrap:anywhere] hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 hover:transition-none md:px-2 md:py-1.5 [&_svg]:size-4',
@@ -94,15 +95,19 @@ export function MenuItem({ item, ...props }: MenuItemProps) {
     );
   }
 
-  if (item.type === 'button') {
-    return <ButtonItem item={item} {...props} />;
-  }
-
   return (
     <BaseLinkItem
       item={item}
       {...props}
-      className={cn(itemVariants(), props.className)}
+      className={cn(
+        item.type === 'button'
+          ? buttonVariants({
+              color: 'secondary',
+              className: 'gap-1.5 [&_svg]:size-4',
+            })
+          : itemVariants(),
+        props.className,
+      )}
     >
       {item.icon}
       {item.text}
