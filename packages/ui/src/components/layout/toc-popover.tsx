@@ -1,7 +1,5 @@
 'use client';
-import { type ReactNode, useContext, useMemo } from 'react';
-import { useSidebar } from '@/contexts/sidebar';
-import { NavContext } from '@/components/layout/nav';
+import { useMemo } from 'react';
 import { cn } from '@/utils/cn';
 import type { TOCItemType } from 'fumadocs-core/server';
 import { useI18n } from '@/contexts/i18n';
@@ -12,34 +10,17 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import type { PopoverContentProps } from '@radix-ui/react-popover';
+import type {
+  PopoverContentProps,
+  PopoverTriggerProps,
+} from '@radix-ui/react-popover';
 
-export function TocPopover(props: { className?: string; children: ReactNode }) {
-  const { open } = useSidebar();
-  const { isTransparent } = useContext(NavContext);
+export const TocPopover = Popover;
 
-  return (
-    <div
-      id="nd-tocnav"
-      className={cn(
-        'sticky top-fd-layout-top z-10 border-b border-fd-foreground/10 text-sm transition-colors',
-        !isTransparent && 'bg-fd-background/80 backdrop-blur-md',
-        open && 'opacity-0',
-        props.className,
-      )}
-      style={
-        {
-          '--fd-toc-top-with-offset':
-            'calc(4px + var(--fd-banner-height) + var(--fd-nav-height))',
-        } as object
-      }
-    >
-      <Popover>{props.children}</Popover>
-    </div>
-  );
-}
-
-export function TocPopoverTrigger({ items }: { items: TOCItemType[] }) {
+export function TocPopoverTrigger({
+  items,
+  ...props
+}: PopoverTriggerProps & { items: TOCItemType[] }) {
   const { text } = useI18n();
   const active = Primitive.useActiveAnchor();
   const current = useMemo(() => {
@@ -47,7 +28,13 @@ export function TocPopoverTrigger({ items }: { items: TOCItemType[] }) {
   }, [items, active]);
 
   return (
-    <PopoverTrigger className="inline-flex size-full items-center gap-2 text-nowrap px-4 py-2 text-left md:px-3">
+    <PopoverTrigger
+      {...props}
+      className={cn(
+        'inline-flex items-center gap-2 text-nowrap px-4 py-2 text-start md:px-3',
+        props.className,
+      )}
+    >
       <Text className="size-4 shrink-0" />
       {text.toc}
       {current ? (

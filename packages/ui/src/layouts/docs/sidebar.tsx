@@ -20,8 +20,6 @@ import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { cn } from '@/utils/cn';
 import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
 import { isActive } from '@/utils/shared';
-import { LargeSearchToggle } from '@/components/layout/search-toggle';
-import { useSearchContext } from '@/contexts/search';
 import {
   Collapsible,
   CollapsibleContent,
@@ -186,13 +184,6 @@ export function Sidebar({
       </Base.SidebarList>
     </Context.Provider>
   );
-}
-
-export function SidebarSearchToggle() {
-  const search = useSearchContext();
-  if (!search.enabled) return null;
-
-  return <LargeSearchToggle className="rounded-lg max-md:hidden" />;
 }
 
 export function SidebarHeader(props: HTMLAttributes<HTMLDivElement>) {

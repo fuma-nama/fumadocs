@@ -12,7 +12,6 @@ import {
   SidebarHeader,
   SidebarCollapseTrigger,
   type SidebarProps,
-  SidebarSearchToggle,
   SidebarViewport,
   SidebarItem,
   SidebarFolder,
@@ -36,9 +35,14 @@ import {
 } from '@/components/layout/language-toggle';
 import { SidebarItems, LinksMenu } from '@/layouts/docs.client';
 import { TreeContextProvider } from '@/contexts/tree';
-import { NavProvider } from '@/components/layout/nav';
+import { NavProvider, Title } from '@/components/layout/nav';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
-import { DocsNavbar } from '@/layouts/docs/navbar';
+import { Navbar, NavbarSidebarTrigger } from '@/layouts/docs/navbar';
+import {
+  LargeSearchToggle,
+  SearchToggle,
+} from '@/components/layout/search-toggle';
+import { SearchOnly } from '@/contexts/search';
 
 interface SidebarOptions extends SidebarProps {
   enabled: boolean;
@@ -134,7 +138,16 @@ export function DocsLayout({
       <NavProvider transparentMode={transparentMode}>
         {replaceOrDefault(
           { enabled: navEnabled, component: navReplace },
-          <DocsNavbar className="h-14 md:hidden" {...nav} />,
+          <Navbar className="h-14 md:hidden">
+            <Title url={nav.url} title={nav.title} />
+            <div className="flex flex-1 flex-row items-center gap-1">
+              {nav.children}
+            </div>
+            <SearchOnly>
+              <SearchToggle />
+            </SearchOnly>
+            <NavbarSidebarTrigger />
+          </Navbar>,
           nav,
         )}
         <main
@@ -156,7 +169,9 @@ export function DocsLayout({
                 {tabs.length > 0 ? (
                   <RootToggle options={tabs} className="-mx-2" />
                 ) : null}
-                <SidebarSearchToggle />
+                <SearchOnly>
+                  <LargeSearchToggle className="rounded-lg max-md:hidden" />
+                </SearchOnly>
               </SidebarHeader>
               <SidebarViewport>
                 <div className="px-4 pt-4 empty:hidden md:hidden">
@@ -301,7 +316,7 @@ function CustomSidebarFooter({
         <ThemeToggle className="p-0 max-md:ms-auto" />
       ) : null}
       {props.sidebarCollapsible ? (
-        <SidebarCollapseTrigger className="ms-auto max-md:hidden" />
+        <SidebarCollapseTrigger className="-me-1.5 ms-auto max-md:hidden" />
       ) : null}
     </div>
   );

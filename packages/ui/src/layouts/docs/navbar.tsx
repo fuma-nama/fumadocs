@@ -1,26 +1,15 @@
 'use client';
-import type { SharedNavProps } from '@/layouts/shared';
 import { useSidebar } from '@/contexts/sidebar';
-import { useContext } from 'react';
-import { NavContext, Title } from '@/components/layout/nav';
-import { useSearchContext } from '@/contexts/search';
+import { type HTMLAttributes, useContext } from 'react';
+import { NavContext } from '@/components/layout/nav';
 import { cn } from '@/utils/cn';
-import { SearchToggle } from '@/components/layout/search-toggle';
 import { SidebarTrigger } from 'fumadocs-core/sidebar';
 import { buttonVariants } from '@/components/ui/button';
 import { Menu, X } from 'lucide-react';
 
-export function DocsNavbar({
-  title,
-  url,
-  enableSearch = true,
-  ...props
-}: Omit<SharedNavProps, 'transparentMode'> & {
-  className?: string;
-}) {
+export function Navbar(props: HTMLAttributes<HTMLElement>) {
   const { open } = useSidebar();
   const { isTransparent } = useContext(NavContext);
-  const search = useSearchContext();
 
   return (
     <header
@@ -32,22 +21,25 @@ export function DocsNavbar({
         props.className,
       )}
     >
-      <Title url={url} title={title} />
-      <div className="flex flex-1 flex-row items-center gap-1">
-        {props.children}
-      </div>
-      {search.enabled && enableSearch ? <SearchToggle /> : null}
-      <SidebarTrigger
-        className={cn(
-          buttonVariants({
-            color: 'ghost',
-            size: 'icon',
-            className: '-me-2 md:hidden',
-          }),
-        )}
-      >
-        {open ? <X /> : <Menu />}
-      </SidebarTrigger>
+      {props.children}
     </header>
+  );
+}
+
+export function NavbarSidebarTrigger() {
+  const { open } = useSidebar();
+
+  return (
+    <SidebarTrigger
+      className={cn(
+        buttonVariants({
+          color: 'ghost',
+          size: 'icon',
+          className: '-me-2 md:hidden',
+        }),
+      )}
+    >
+      {open ? <X /> : <Menu />}
+    </SidebarTrigger>
   );
 }

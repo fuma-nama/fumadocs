@@ -16,6 +16,7 @@ import {
   type FooterProps,
   LastUpdate,
   PageContainer,
+  PageHeader,
 } from './page.client';
 import {
   Breadcrumb,
@@ -132,18 +133,20 @@ export function DocsPage({
       >
         {replaceOrDefault(
           { enabled: tocPopoverEnabled, component: tocPopoverReplace },
-          <TocPopover {...tocPopoverOptions} className="lg:hidden">
-            <TocPopoverTrigger items={toc} />
-            <TocPopoverContent>
-              {tocPopoverOptions.header}
-              {tocPopoverOptions.style === 'clerk' ? (
-                <ClerkTOCItems items={toc} isMenu />
-              ) : (
-                <TOCItems items={toc} isMenu />
-              )}
-              {tocPopoverOptions.footer}
-            </TocPopoverContent>
-          </TocPopover>,
+          <PageHeader className="lg:hidden">
+            <TocPopover>
+              <TocPopoverTrigger className="size-full" items={toc} />
+              <TocPopoverContent>
+                {tocPopoverOptions.header}
+                {tocPopoverOptions.style === 'clerk' ? (
+                  <ClerkTOCItems items={toc} isMenu />
+                ) : (
+                  <TOCItems items={toc} isMenu />
+                )}
+                {tocPopoverOptions.footer}
+              </TocPopoverContent>
+            </TocPopover>
+          </PageHeader>,
           {
             items: toc,
             ...tocPopoverOptions,

@@ -1,3 +1,4 @@
+'use client';
 import {
   createContext,
   type ReactNode,
@@ -135,4 +136,10 @@ export function SearchProvider({
       {children}
     </SearchContext.Provider>
   );
+}
+
+export function SearchOnly({ children }: { children: ReactNode }) {
+  const search = useSearchContext();
+
+  if (search.enabled) return children;
 }

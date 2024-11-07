@@ -1,5 +1,11 @@
 'use client';
-import { Fragment, type ReactNode } from 'react';
+import {
+  Fragment,
+  type HTMLAttributes,
+  type ReactNode,
+  useContext,
+  useState,
+} from 'react';
 import { cva } from 'class-variance-authority';
 import Link from 'fumadocs-core/link';
 import { cn } from '@/utils/cn';
@@ -11,11 +17,14 @@ import {
   type MenuItem,
 } from '@/layouts/links';
 import {
+  NavigationMenu,
   NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuTrigger,
+  NavigationMenuViewport,
 } from '@/components/ui/navigation-menu';
+import { NavContext } from '@/components/layout/nav';
 
 interface LinkItemProps extends React.HTMLAttributes<HTMLElement> {
   item: LinkItemType;
@@ -25,7 +34,33 @@ const navItemVariants = cva(
   'inline-flex items-center gap-1 p-2 text-fd-muted-foreground transition-colors hover:text-fd-accent-foreground data-[active=true]:text-fd-primary [&_svg]:size-4',
 );
 
-export function NavItem({ item, ...props }: LinkItemProps): ReactNode {
+export function Navbar(props: HTMLAttributes<HTMLElement>) {
+  const [value, setValue] = useState('');
+  const { isTransparent } = useContext(NavContext);
+
+  return (
+    <NavigationMenu value={value} onValueChange={setValue} asChild>
+      <header
+        id="nd-nav"
+        {...props}
+        className={cn(
+          'fixed left-1/2 top-[var(--fd-banner-height)] z-40 w-full max-w-fd-container -translate-x-1/2 border-b border-fd-foreground/10 transition-colors lg:mt-2 lg:w-[calc(100%-1rem)] lg:rounded-2xl lg:border',
+          value.length > 0 ? 'shadow-lg' : 'shadow-sm',
+          (!isTransparent || value.length > 0) &&
+            'bg-fd-background/80 backdrop-blur-lg',
+          props.className,
+        )}
+      >
+        <nav className="flex h-12 w-full flex-row items-center gap-6 px-4">
+          {props.children}
+        </nav>
+        <NavigationMenuViewport />
+      </header>
+    </NavigationMenu>
+  );
+}
+
+export function NavbarItem({ item, ...props }: LinkItemProps) {
   if (item.type === 'custom') return <div {...props}>{item.children}</div>;
 
   if (item.type === 'menu') {
@@ -72,7 +107,7 @@ export function NavItem({ item, ...props }: LinkItemProps): ReactNode {
   );
 }
 
-function MenuItemContent({ item }: { item: MenuItem }): ReactNode {
+function MenuItemContent({ item }: { item: MenuItem }) {
   return (
     <>
       {item.items.map((child, i) => {
@@ -113,7 +148,7 @@ function MenuItemContent({ item }: { item: MenuItem }): ReactNode {
   );
 }
 
-export function MenuItem({ item, ...rest }: LinkItemProps): ReactNode {
+export function MenuItem({ item, ...rest }: LinkItemProps) {
   if (item.type === 'button') {
     return (
       <NavigationMenuLink asChild>

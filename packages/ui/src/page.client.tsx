@@ -1,6 +1,12 @@
 'use client';
 
-import { type HTMLAttributes, useEffect, useMemo, useState } from 'react';
+import {
+  type HTMLAttributes,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { cva } from 'class-variance-authority';
@@ -10,6 +16,7 @@ import { useTreeContext } from './contexts/tree';
 import { useSidebar } from '@/contexts/sidebar';
 import type { PageTree } from 'fumadocs-core/server';
 import { usePathname } from 'next/navigation';
+import { NavContext } from '@/components/layout/nav';
 
 export function PageContainer(props: HTMLAttributes<HTMLDivElement>) {
   const { collapsed } = useSidebar();
@@ -28,6 +35,33 @@ export function PageContainer(props: HTMLAttributes<HTMLDivElement>) {
           '--fd-page-width': collapsed
             ? '100vw'
             : 'calc(min(100vw, var(--fd-layout-width)) - var(--fd-sidebar-width) - var(--fd-toc-width))',
+        } as object
+      }
+    >
+      {props.children}
+    </div>
+  );
+}
+
+export function PageHeader(props: HTMLAttributes<HTMLDivElement>) {
+  const { open } = useSidebar();
+  const { isTransparent } = useContext(NavContext);
+
+  return (
+    <div
+      id="nd-tocnav"
+      {...props}
+      className={cn(
+        'sticky top-fd-layout-top z-10 flex flex-row items-center border-b border-fd-foreground/10 text-sm transition-colors',
+        !isTransparent && 'bg-fd-background/80 backdrop-blur-md',
+        open && 'opacity-0',
+        props.className,
+      )}
+      style={
+        {
+          ...props.style,
+          '--fd-toc-top-with-offset':
+            'calc(4px + var(--fd-banner-height) + var(--fd-nav-height))',
         } as object
       }
     >
