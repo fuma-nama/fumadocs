@@ -3,11 +3,12 @@
  */
 export const organizationUsers = ['marclave', 'rishi-raj-jain', 'handotdev'];
 
-export const sponsors = [
+export const organizationSponsors = [
   {
     url: 'https://orama.com',
     label: 'Orama Search',
     tier: 'golden',
+    github: 'oramasearch',
     logo: (
       <svg
         className="h-full py-1"
@@ -283,6 +284,7 @@ export const sponsors = [
     url: 'https://mintlify.com',
     label: 'Mintlify',
     tier: 'golden',
+    github: 'mintlify',
     logo: (
       <svg
         viewBox="0 0 103 24"
@@ -320,6 +322,7 @@ export const sponsors = [
     url: 'https://inkeep.com',
     tier: 'golden',
     label: 'Inkeep',
+    github: 'inkeep',
     logo: (
       <svg
         viewBox="0 0 99 24"
@@ -373,11 +376,13 @@ export const sponsors = [
         ></path>
       </svg>
     ),
+    github: 'vercel',
     tier: 'golden-one-time',
     label: 'Vercel',
   },
   {
     url: 'https://unkey.com',
+    github: 'unkeyed',
     label: 'Unkey',
     logo: (
       <svg
@@ -396,6 +401,7 @@ export const sponsors = [
   {
     url: 'https://github.com/scalar/scalar',
     label: 'Scalar',
+    github: 'scalar',
     logo: (
       <>
         <svg
@@ -415,6 +421,7 @@ export const sponsors = [
   },
   {
     url: 'https://supastarter.dev',
+    github: 'supastarter',
     logo: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -441,6 +448,7 @@ export const sponsors = [
   {
     url: 'https://launchfa.st',
     label: 'launchfast',
+    github: 'launchfast',
     logo: (
       <>
         <svg

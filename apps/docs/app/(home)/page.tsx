@@ -697,7 +697,7 @@ function Features(): React.ReactElement {
         icon={SearchIcon}
         subheading="Search Integration"
         heading="Enhance your search experience."
-        description="Integrate with Algolia Search in your docs easily."
+        description="Integrate with Orama Search and Algolia Search in your docs easily."
       >
         <Link
           href="/docs/headless/search/algolia"

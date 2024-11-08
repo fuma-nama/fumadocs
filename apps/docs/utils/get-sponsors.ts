@@ -1,20 +1,23 @@
-interface UserSponsor {
+interface SponsorEntity {
+  __typename: 'User' | 'Organization';
   login: string;
   name: string;
   avatarUrl: string;
   websiteUrl?: string;
 }
 
-export async function getUserSponsors(
+export async function getSponsors(
   login: string,
   excluded: string[],
-): Promise<UserSponsor[]> {
+): Promise<SponsorEntity[]> {
   const query = `query {
   user(login:${JSON.stringify(login)}) {
     ... on Sponsorable {
       sponsors(first: 100) {
         nodes {
+          __typename
           ... on User { login, name, avatarUrl, websiteUrl }
+          ... on Organization { login, name, avatarUrl, websiteUrl }
         }
       }
     }
@@ -40,7 +43,7 @@ export async function getUserSponsors(
     data: {
       user: {
         sponsors: {
-          nodes: (UserSponsor | Record<string, never>)[];
+          nodes: (SponsorEntity | Record<string, never>)[];
         };
       };
     };
@@ -48,5 +51,5 @@ export async function getUserSponsors(
 
   return data.user.sponsors.nodes.filter(
     (sponsor) => 'name' in sponsor && !excluded.includes(sponsor.login),
-  ) as UserSponsor[];
+  ) as SponsorEntity[];
 }

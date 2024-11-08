@@ -1,11 +1,19 @@
 import { Fragment, type ReactNode } from 'react';
 import Image from 'next/image';
-import { organizationUsers, sponsors } from '@/app/(home)/sponsors/data';
+import {
+  organizationUsers,
+  organizationSponsors,
+} from '@/app/(home)/sponsors/data';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/utils/cn';
-import { getUserSponsors } from '@/utils/get-sponsors';
+import { getSponsors } from '@/utils/get-sponsors';
 
 export default async function Page(): Promise<ReactNode> {
+  const sponsors = await getSponsors('fuma-nama', [
+    ...organizationUsers,
+    ...organizationSponsors.map((sponsor) => sponsor.github),
+  ]);
+
   return (
     <main className="container flex flex-col items-center py-16 text-center">
       <div
@@ -178,7 +186,29 @@ export default async function Page(): Promise<ReactNode> {
       </svg>
       <h2 className="mt-12 font-mono text-xs">Organization Sponsors</h2>
       <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-        {sponsors.map((sponsor) => (
+        {[
+          ...organizationSponsors,
+          ...sponsors
+            .filter((sponsor) => sponsor.__typename === 'Organization')
+            .map((sponsor) => ({
+              label: sponsor.name,
+              logo: (
+                <>
+                  <Image
+                    alt="avatar"
+                    src={sponsor.avatarUrl}
+                    unoptimized
+                    width="30"
+                    height="30"
+                    className="rounded-lg"
+                  />
+                  {sponsor.name}
+                </>
+              ),
+              url: sponsor.websiteUrl ?? `https://github.com/${sponsor.login}`,
+              tier: '',
+            })),
+        ].map((sponsor) => (
           <a
             key={sponsor.label}
             href={sponsor.url}
@@ -209,8 +239,9 @@ export default async function Page(): Promise<ReactNode> {
 
       <h2 className="mt-12 font-mono text-xs">Individual Sponsors</h2>
       <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-        {(await getUserSponsors('fuma-nama', organizationUsers)).map(
-          (sponsor) => (
+        {sponsors
+          .filter((sponsor) => sponsor.__typename === 'User')
+          .map((sponsor) => (
             <a
               key={sponsor.name}
               href={sponsor.websiteUrl ?? `https://github.com/${sponsor.login}`}
@@ -228,8 +259,7 @@ export default async function Page(): Promise<ReactNode> {
               />
               {sponsor.name}
             </a>
-          ),
-        )}
+          ))}
       </div>
     </main>
   );
