@@ -1,5 +1,15 @@
 # @fuma-docs/openapi
 
+## 5.5.8
+
+### Patch Changes
+
+- 4e76165: Fix rendering of OpenAPI nullable defined with `allOf`.
+- Updated dependencies [80655b3]
+- Updated dependencies [b8a12ed]
+  - fumadocs-ui@14.3.0
+  - fumadocs-core@14.3.0
+
 ## 5.5.7
 
 ### Patch Changes
