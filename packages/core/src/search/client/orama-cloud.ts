@@ -37,7 +37,7 @@ export async function searchDocs(
     let addedHead = false;
 
     for (const hit of item.result) {
-      const doc = hit.document as OramaIndex;
+      const doc = hit.document as unknown as OramaIndex;
 
       if (!addedHead) {
         list.push({

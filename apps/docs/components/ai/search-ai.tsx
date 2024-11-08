@@ -39,7 +39,7 @@ const context =
 const endpoint = process.env.NEXT_PUBLIC_ORAMA_ENDPOINT;
 const apiKey = process.env.NEXT_PUBLIC_ORAMA_API_KEY;
 
-export async function createClient(): Promise<AnswerSession> {
+export async function createClient(): Promise<AnswerSession<boolean>> {
   const { OramaClient } = await import('@oramacloud/client');
   if (!endpoint || !apiKey) throw new Error('Failed to find api keys');
 
@@ -73,7 +73,7 @@ export async function createClient(): Promise<AnswerSession> {
   return instance;
 }
 
-let session: AnswerSession | undefined;
+let session: AnswerSession<boolean> | undefined;
 
 export function AIDialog(): React.ReactElement {
   const [message, setMessage] = useState('');
