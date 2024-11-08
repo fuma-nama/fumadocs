@@ -86,6 +86,15 @@ export function RootProvider({
 }
 
 export { useI18n, I18nLabel } from './contexts/i18n';
-export * from './contexts/search';
-export * from './contexts/sidebar';
-export * from './contexts/tree';
+export {
+  SearchProvider,
+  SearchOnly,
+  useSearchContext,
+  type SearchProviderProps,
+} from './contexts/search';
+export { SidebarProvider, useSidebar } from './contexts/sidebar';
+export {
+  useTreePath,
+  useTreeContext,
+  TreeContextProvider,
+} from './contexts/tree';
