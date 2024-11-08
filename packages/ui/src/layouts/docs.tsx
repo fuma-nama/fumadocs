@@ -113,25 +113,6 @@ export function DocsLayout({
     tabs = getSidebarTabs(props.tree);
   }
 
-  const banner = (
-    <>
-      <CustomSidebarHeader {...nav} links={links} />
-      {sidebarBanner}
-    </>
-  );
-
-  const footer = (
-    <>
-      <CustomSidebarFooter
-        sidebarCollapsible={collapsible}
-        i18n={i18n}
-        disableThemeSwitch={props.disableThemeSwitch ?? false}
-        iconItems={links.filter((v) => v.type === 'icon')}
-      />
-      {sidebarFooter}
-    </>
-  );
-
   return (
     <TreeContextProvider tree={props.tree}>
       <NavProvider transparentMode={transparentMode}>
@@ -164,7 +145,8 @@ export function DocsLayout({
             { enabled: sidebarEnabled, component: sidebarReplace },
             <Aside {...sidebar}>
               <SidebarHeader>
-                {banner}
+                <SidebarHeaderItems {...nav} links={links} />
+                {sidebarBanner}
                 {tabs.length > 0 ? (
                   <RootToggle options={tabs} className="-mx-2" />
                 ) : null}
@@ -173,7 +155,7 @@ export function DocsLayout({
                 </SearchOnly>
               </SidebarHeader>
               <SidebarViewport>
-                <div className="px-4 pt-4 empty:hidden md:hidden">
+                <div className="px-2 pt-4 empty:hidden md:hidden">
                   {links
                     .filter((v) => v.type !== 'icon')
                     .map((item, i) => (
@@ -182,13 +164,19 @@ export function DocsLayout({
                 </div>
                 <SidebarItems components={sidebarComponents} />
               </SidebarViewport>
-              <SidebarFooter>{footer}</SidebarFooter>
+              <SidebarFooter>
+                <SidebarFooterItems
+                  sidebarCollapsible={collapsible}
+                  i18n={i18n}
+                  disableThemeSwitch={props.disableThemeSwitch ?? false}
+                  iconItems={links.filter((v) => v.type === 'icon')}
+                />
+                {sidebarFooter}
+              </SidebarFooter>
             </Aside>,
             {
               ...sidebar,
               tabs,
-              banner,
-              footer,
             },
           )}
           {props.children}
@@ -248,7 +236,7 @@ function renderLinkItem(item: LinkItemType): ReactNode {
   if (item.type === 'custom') return item.children;
 }
 
-function CustomSidebarHeader({
+function SidebarHeaderItems({
   links,
   ...props
 }: SharedNavProps & { links: LinkItemType[] }): ReactNode {
@@ -284,7 +272,7 @@ function CustomSidebarHeader({
   );
 }
 
-function CustomSidebarFooter({
+function SidebarFooterItems({
   iconItems,
   ...props
 }: {
@@ -293,53 +281,33 @@ function CustomSidebarFooter({
   disableThemeSwitch: boolean;
   sidebarCollapsible: boolean;
 }) {
-  const iconItem = cn(
-    buttonVariants({ size: 'icon', color: 'ghost' }),
-    'text-fd-muted-foreground md:hidden',
-  );
-
-  if (props.i18n) {
-    return (
-      <div className="flex flex-row items-center">
-        {iconItems.map((item, i) => (
-          <BaseLinkItem
-            key={i}
-            item={item}
-            className={iconItem}
-            aria-label={item.label}
-          >
-            {item.icon}
-          </BaseLinkItem>
-        ))}
-        {!props.disableThemeSwitch ? <ThemeToggle /> : null}
-        <LanguageToggle className="max-md:order-first max-md:me-auto md:ms-auto">
-          <Languages className="size-5" />
-          <LanguageToggleText className="md:hidden" />
-        </LanguageToggle>
-        {props.sidebarCollapsible ? (
-          <SidebarCollapseTrigger className="max-md:hidden" />
-        ) : null}
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-row items-center">
       {iconItems.map((item, i) => (
         <BaseLinkItem
           key={i}
           item={item}
-          className={iconItem}
+          className={cn(
+            buttonVariants({ size: 'icon', color: 'ghost' }),
+            'text-fd-muted-foreground md:hidden',
+          )}
           aria-label={item.label}
         >
           {item.icon}
         </BaseLinkItem>
       ))}
+      <div role="separator" className="flex-1" />
+      {props.i18n ? (
+        <LanguageToggle className="me-1.5">
+          <Languages className="size-5" />
+          <LanguageToggleText className="md:hidden" />
+        </LanguageToggle>
+      ) : null}
       {!props.disableThemeSwitch ? (
-        <ThemeToggle className="p-0 max-md:ms-auto" />
+        <ThemeToggle className="p-0 md:order-first" />
       ) : null}
       {props.sidebarCollapsible ? (
-        <SidebarCollapseTrigger className="-me-1.5 ms-auto max-md:hidden" />
+        <SidebarCollapseTrigger className="-me-1.5 max-md:hidden" />
       ) : null}
     </div>
   );

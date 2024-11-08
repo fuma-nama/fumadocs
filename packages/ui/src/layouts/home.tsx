@@ -57,7 +57,7 @@ export function HomeLayout({
         id="nd-home-layout"
         {...props}
         className={cn(
-          'flex flex-1 flex-col pt-[var(--fd-nav-height)] [--fd-nav-height:48px] lg:[--fd-nav-height:56px]',
+          'flex flex-1 flex-col pt-[var(--fd-nav-height)] [--fd-nav-height:56px]',
           props.className,
         )}
       >
@@ -126,21 +126,18 @@ export function HomeLayout({
                         />
                       ))}
                     <div className="-ms-1.5 flex flex-row items-center gap-1.5 max-sm:mt-2">
+                      {menuItems.filter(isSecondary).map((item, i) => (
+                        <MenuLinkItem key={i} item={item} className="-me-1.5" />
+                      ))}
+                      <div role="separator" className="flex-1" />
                       {i18n ? (
-                        <LanguageToggle className="me-auto">
+                        <LanguageToggle>
                           <Languages className="size-5" />
                           <LanguageToggleText />
                           <ChevronDown className="size-3 text-fd-muted-foreground" />
                         </LanguageToggle>
                       ) : null}
-                      <div className="flex flex-row items-center empty:hidden">
-                        {menuItems.filter(isSecondary).map((item, i) => (
-                          <MenuLinkItem key={i} item={item} />
-                        ))}
-                      </div>
-                      {!disableThemeSwitch ? (
-                        <ThemeToggle className={cn(!i18n && 'ms-auto')} />
-                      ) : null}
+                      {!disableThemeSwitch ? <ThemeToggle /> : null}
                     </div>
                   </NavigationMenuContent>
                 </NavigationMenuItem>

@@ -76,10 +76,4 @@ export function I18nProvider({
   );
 }
 
-export function I18nLabel(props: { label: keyof Translations }): string {
-  const { text } = useI18n();
-
-  return text[props.label];
-}
-
 export { type Translations };

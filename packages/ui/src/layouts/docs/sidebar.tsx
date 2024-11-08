@@ -19,7 +19,7 @@ import Link, { type LinkProps } from 'fumadocs-core/link';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { cn } from '@/utils/cn';
 import { ScrollArea, ScrollViewport } from '@/components/ui/scroll-area';
-import { isActive } from '@/utils/shared';
+import { isActive } from '@/utils/is-active';
 import {
   Collapsible,
   CollapsibleContent,

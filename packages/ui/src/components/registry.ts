@@ -14,6 +14,7 @@ export const registry: Registry = {
   namespaces: {
     '': 'components',
     '../utils': 'lib',
+    '../layouts': 'components',
   },
   components: [
     {
@@ -27,13 +28,13 @@ export const registry: Registry = {
       mapImportPath: contextsMap,
     },
     {
-      name: 'layout/sidebar',
-      files: ['layout/sidebar.tsx'],
+      name: 'layouts/docs',
+      files: ['../layouts/docs.tsx'],
       mapImportPath: contextsMap,
     },
     {
-      name: 'layout/dynamic-sidebar',
-      files: ['layout/dynamic-sidebar.tsx'],
+      name: 'layouts/home',
+      files: ['../layouts/home.tsx'],
       mapImportPath: contextsMap,
     },
     { name: 'accordion', files: ['accordion.tsx'] },

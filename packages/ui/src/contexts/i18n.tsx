@@ -1,3 +1,4 @@
+'use client';
 import { createContext, useContext } from 'react';
 
 export interface Translations {
@@ -41,6 +42,12 @@ export const I18nContext = createContext<I18nContextType>({
     editOnGithub: 'Edit on GitHub',
   },
 });
+
+export function I18nLabel(props: { label: keyof Translations }): string {
+  const { text } = useI18n();
+
+  return text[props.label];
+}
 
 export function useI18n(): I18nContextType {
   return useContext(I18nContext);

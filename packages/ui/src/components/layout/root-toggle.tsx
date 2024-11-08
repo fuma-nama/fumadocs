@@ -4,7 +4,7 @@ import { type HTMLAttributes, type ReactNode, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/utils/cn';
-import { isActive } from '@/utils/shared';
+import { isActive } from '@/utils/is-active';
 import { useSidebar } from '@/contexts/sidebar';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 

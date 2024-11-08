@@ -7,7 +7,7 @@ import {
   type HTMLAttributes,
   type ReactNode,
 } from 'react';
-import { isActive } from '@/utils/shared';
+import { isActive } from '@/utils/is-active';
 
 interface BaseItem {
   /**

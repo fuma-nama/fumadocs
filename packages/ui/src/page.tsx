@@ -30,7 +30,7 @@ import {
 } from '@/components/layout/toc-popover';
 import { buttonVariants } from '@/components/ui/button';
 import { Edit, Text } from 'lucide-react';
-import { I18nLabel } from '@/i18n';
+import { I18nLabel } from '@/contexts/i18n';
 
 const ClerkTOCItems = dynamic(() => import('@/components/layout/toc-clerk'));
 

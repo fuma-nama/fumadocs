@@ -45,7 +45,7 @@ export function Navbar(props: HTMLAttributes<HTMLElement>) {
           props.className,
         )}
       >
-        <nav className="flex h-12 w-full flex-row items-center gap-6 px-4">
+        <nav className="flex h-14 w-full flex-row items-center gap-6 px-4 lg:h-12">
           {props.children}
         </nav>
         <NavigationMenuViewport />
