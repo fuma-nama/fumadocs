@@ -1,5 +1,16 @@
 # next-docs-ui
 
+## 14.3.0
+
+### Minor Changes
+
+- b8a12ed: Move to `tsc` (experimental)
+
+### Patch Changes
+
+- 80655b3: Improve padding of sidebar tabs and expose it to sidebar
+  - fumadocs-core@14.3.0
+
 ## 14.2.1
 
 ### Patch Changes

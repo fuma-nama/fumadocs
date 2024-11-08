@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 14.3.0
+
+### Patch Changes
+
+- 46d9208: Add option for ESLint
+
 ## 14.2.1
 
 ## 14.2.0
