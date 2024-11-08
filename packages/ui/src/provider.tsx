@@ -1,7 +1,7 @@
 'use client';
 
 import { ThemeProvider } from 'next-themes';
-import { ComponentPropsWithoutRef, type ReactNode } from 'react';
+import { type ComponentPropsWithoutRef, type ReactNode } from 'react';
 import dynamic from 'next/dynamic';
 import { DirectionProvider } from '@radix-ui/react-direction';
 import type { DefaultSearchDialogProps } from '@/components/dialog/search-default';
@@ -85,7 +85,7 @@ export function RootProvider({
   );
 }
 
-export { useI18n } from './contexts/i18n';
-export { useSearchContext } from './contexts/search';
-export { useSidebar } from './contexts/sidebar';
-export { useTreeContext } from './contexts/tree';
+export { useI18n, I18nLabel } from './contexts/i18n';
+export * from './contexts/search';
+export * from './contexts/sidebar';
+export * from './contexts/tree';
