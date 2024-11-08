@@ -28,12 +28,12 @@
   },
   "dependencies": {
     "@clack/prompts": "^0.7.0",
-    "cross-spawn": "^7.0.3",
+    "cross-spawn": "^7.0.5",
     "picocolors": "^1.1.1"
   },
   "devDependencies": {
     "@types/cross-spawn": "^6.0.6",
-    "@types/node": "22.8.7",
+    "@types/node": "22.9.0",
     "eslint-config-custom": "workspace:*",
     "fast-glob": "^3.3.1",
     "tsconfig": "workspace:*"

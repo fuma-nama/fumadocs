@@ -42,6 +42,7 @@ async function main(): Promise<void> {
           ],
         }),
       tailwindcss: () => confirm({ message: 'Use Tailwind CSS for styling?' }),
+      eslint: () => confirm({ message: 'Add default ESLint configuration?' }),
       installDeps: () =>
         confirm({
           message: `Do you want to install packages automatically? (detected as ${manager})`,
@@ -90,6 +91,7 @@ async function main(): Promise<void> {
     template: options.template,
     outputDir: dest,
     installDeps: options.installDeps,
+    eslint: options.eslint,
 
     log: (message) => {
       log.info(message);

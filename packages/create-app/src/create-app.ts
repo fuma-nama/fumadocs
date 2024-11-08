@@ -17,6 +17,7 @@ export interface Options {
 
   installDeps?: boolean;
   initializeGit?: boolean;
+  eslint?: boolean;
   log?: (message: string) => void;
 }
 
@@ -43,6 +44,11 @@ export async function create(options: Options): Promise<void> {
   if (options.tailwindcss) {
     await copy(path.join(sourceDir, `template/+tailwindcss`), dest);
     log('Configured Tailwind CSS');
+  }
+
+  if (options.eslint) {
+    await copy(path.join(sourceDir, `template/+eslint`), dest);
+    log('Configured ESLint');
   }
 
   const packageJson = createPackageJson(projectName, options);
@@ -90,10 +96,7 @@ async function copy(
   }
 }
 
-function createPackageJson(
-  projectName: string,
-  { template, tailwindcss }: Options,
-): string {
+function createPackageJson(projectName: string, options: Options): string {
   const packageJson = {
     name: projectName,
     version: '0.0.0',
@@ -102,24 +105,25 @@ function createPackageJson(
       build: 'next build',
       dev: 'next dev',
       start: 'next start',
-    },
+    } as Record<string, string>,
     dependencies: {
       next: versionPkg.dependencies.next,
       'fumadocs-ui': localVersions['fumadocs-ui'],
       'fumadocs-core': localVersions['fumadocs-core'],
       react: versionPkg.dependencies.react,
       'react-dom': versionPkg.dependencies['react-dom'],
-    },
+    } as Record<string, string>,
     devDependencies: {
       '@types/node': versionPkg.dependencies['@types/node'],
       '@types/react': versionPkg.dependencies['@types/react'],
       '@types/react-dom': versionPkg.dependencies['@types/react-dom'],
       typescript: versionPkg.dependencies.typescript,
-    },
+    } as Record<string, string>,
   };
 
-  if (template === 'content-collections') {
-    Object.assign(packageJson.dependencies, {
+  if (options.template === 'content-collections') {
+    packageJson.dependencies = {
+      ...packageJson.dependencies,
       '@fumadocs/content-collections':
         localVersions['@fumadocs/content-collections'],
       '@content-collections/core':
@@ -128,29 +132,41 @@ function createPackageJson(
         versionPkg.dependencies['@content-collections/mdx'],
       '@content-collections/next':
         versionPkg.dependencies['@content-collections/next'],
-    });
+    };
   }
 
-  if (template === 'fuma-docs-mdx') {
-    Object.assign(packageJson.scripts, {
+  if (options.template === 'fuma-docs-mdx') {
+    packageJson.scripts = {
+      ...packageJson.scripts,
       postinstall: 'fumadocs-mdx',
-    });
+    };
 
-    Object.assign(packageJson.dependencies, {
+    packageJson.dependencies = {
+      ...packageJson.dependencies,
       'fumadocs-mdx': localVersions['fumadocs-mdx'],
-    });
+    };
 
-    Object.assign(packageJson.devDependencies, {
+    packageJson.devDependencies = {
+      ...packageJson.devDependencies,
       '@types/mdx': versionPkg.dependencies['@types/mdx'],
-    });
+    };
   }
 
-  if (tailwindcss) {
-    Object.assign(packageJson.devDependencies, {
+  if (options.tailwindcss) {
+    packageJson.devDependencies = {
+      ...packageJson.devDependencies,
       autoprefixer: versionPkg.dependencies.autoprefixer,
       postcss: versionPkg.dependencies.postcss,
       tailwindcss: versionPkg.dependencies.tailwindcss,
-    });
+    };
+  }
+
+  if (options.eslint) {
+    packageJson.devDependencies = {
+      ...packageJson.devDependencies,
+      eslint: '^8',
+      'eslint-config-next': versionPkg.dependencies.next,
+    };
   }
 
   return JSON.stringify(packageJson, undefined, 2);

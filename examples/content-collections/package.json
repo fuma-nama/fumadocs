@@ -11,12 +11,12 @@
     "@fumadocs/content-collections": "workspace:*",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "next": "^15.0.2",
+    "next": "^15.0.3",
     "react": "18.3.1",
     "react-dom": "18.3.1"
   },
   "devDependencies": {
-    "@content-collections/core": "^0.7.2",
+    "@content-collections/core": "^0.7.3",
     "@content-collections/mdx": "^0.2.0",
     "@content-collections/next": "^0.2.3",
     "@types/mdx": "^2.0.13",

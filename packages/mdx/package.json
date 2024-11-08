@@ -44,7 +44,7 @@
   "dependencies": {
     "@mdx-js/mdx": "^3.1.0",
     "chokidar": "^4.0.1",
-    "cross-spawn": "^7.0.3",
+    "cross-spawn": "^7.0.5",
     "esbuild": "^0.24.0",
     "estree-util-value-to-estree": "^3.2.1",
     "fast-glob": "^3.3.1",
@@ -60,7 +60,7 @@
     "@types/react": "^18.3.12",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
-    "next": "^15.0.2",
+    "next": "^15.0.3",
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
     "vfile": "^6.0.3",
