@@ -97,7 +97,7 @@ In addition, the headless search client of Fumadocs can handle state management 
 
 ```ts
 import { TrieveSDK } from 'trieve-ts-sdk';
-import { useTrieveSearch } from 'fumadocs-core/search/client';
+import { useTrieveSearch } from 'trieve-fumadocs-adapter/search/trieve';
 
 const client = new TrieveSDK({
   apiKey: 'readOnlyApiKey',
@@ -153,7 +153,7 @@ On Fumadocs search client, you can add the tag filter like:
 
 ```ts
 import { TrieveSDK } from 'trieve-ts-sdk';
-import { useTrieveSearch } from 'fumadocs-core/search/client';
+import { useTrieveSearch } from 'trieve-fumadocs-adapter/search/trieve';
 
 const client = new TrieveSDK({
   apiKey: 'readOnlyApiKey',
