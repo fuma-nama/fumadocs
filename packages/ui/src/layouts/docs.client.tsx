@@ -4,7 +4,6 @@ import { ChevronDown } from 'lucide-react';
 import {
   type ButtonHTMLAttributes,
   type HTMLAttributes,
-  type ReactNode,
   useState,
 } from 'react';
 import { usePathname } from 'next/navigation';
@@ -22,17 +21,6 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { cva } from 'class-variance-authority';
-import type { PageTree } from 'fumadocs-core/server';
-import type { SidebarComponents } from '@/layouts/docs';
-import {
-  SidebarFolder,
-  SidebarFolderContent,
-  SidebarFolderLink,
-  SidebarFolderTrigger,
-  SidebarItem,
-  SidebarSeparator,
-} from '@/layouts/docs/sidebar';
-import { useTreeContext, useTreePath } from '@/contexts/tree';
 import { buttonVariants } from '@/components/ui/button';
 
 const itemVariants = cva(
@@ -55,7 +43,9 @@ export function LinksMenu({ items, ...props }: LinksMenuProps) {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger {...props} />
       <PopoverContent className="flex flex-col p-1">
-        {items?.map((item, i) => <MenuItem key={i} item={item} />)}
+        {items.map((item, i) => (
+          <MenuItem key={i} item={item} />
+        ))}
       </PopoverContent>
     </Popover>
   );
@@ -113,95 +103,4 @@ export function MenuItem({ item, ...props }: MenuItemProps) {
       {item.text}
     </BaseLinkItem>
   );
-}
-
-export function SidebarItems(props: {
-  components?: Partial<SidebarComponents>;
-}) {
-  const { root } = useTreeContext();
-
-  return (
-    <div className="px-2 py-4 md:px-3">
-      {renderSidebarList(root.children, 1, props?.components ?? {})}
-    </div>
-  );
-}
-
-function PageTreeFolder({
-  item,
-  children,
-  level,
-}: {
-  item: PageTree.Folder;
-  level: number;
-  children: ReactNode;
-}) {
-  const path = useTreePath();
-
-  return (
-    <SidebarFolder
-      defaultOpen={item.defaultOpen || path.includes(item)}
-      level={level + 1}
-    >
-      {children}
-    </SidebarFolder>
-  );
-}
-
-function renderSidebarList(
-  items: PageTree.Node[],
-  level: number,
-  customComps: Partial<SidebarComponents>,
-): ReactNode[] {
-  const { Separator, Item, Folder } = customComps;
-
-  return items.map((item, i) => {
-    const id = `${item.type}_${i.toString()}`;
-
-    switch (item.type) {
-      case 'separator':
-        return Separator ? (
-          <Separator key={id} item={item} />
-        ) : (
-          <SidebarSeparator key={id}>{item.name}</SidebarSeparator>
-        );
-      case 'folder':
-        return Folder ? (
-          <Folder key={id} item={item} level={level + 1} />
-        ) : (
-          <PageTreeFolder key={id} item={item} level={level + 1}>
-            {item.index ? (
-              <SidebarFolderLink
-                href={item.index.url}
-                external={item.index.external}
-              >
-                {item.icon}
-                {item.name}
-              </SidebarFolderLink>
-            ) : (
-              <SidebarFolderTrigger>
-                {item.icon}
-                {item.name}
-              </SidebarFolderTrigger>
-            )}
-            <SidebarFolderContent>
-              {renderSidebarList(item.children, level + 1, customComps)}
-            </SidebarFolderContent>
-          </PageTreeFolder>
-        );
-      default:
-        return Item ? (
-          <Item key={item.url} item={item} />
-        ) : (
-          <SidebarItem
-            key={item.url}
-            href={item.url}
-            external={item.external}
-            icon={item.icon}
-          >
-            {item.name}
-          </SidebarItem>
-        );
-    }
-  });
 }

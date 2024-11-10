@@ -27,7 +27,7 @@ export function Toc(props: HTMLAttributes<HTMLDivElement>) {
       {...props}
       data-toc=""
       className={cn(
-        'sticky top-fd-layout-top h-[var(--fd-toc-height)] flex-1 pb-2 pe-2 pt-12 max-lg:hidden',
+        'sticky top-fd-layout-top h-[var(--fd-toc-height)] flex-1 pb-2 pt-12 max-lg:hidden',
         props.className,
       )}
       style={
@@ -43,6 +43,16 @@ export function Toc(props: HTMLAttributes<HTMLDivElement>) {
   );
 }
 
+export function TocItemsEmpty() {
+  const { text } = useI18n();
+
+  return (
+    <div className="rounded-lg border bg-fd-card p-3 text-xs text-fd-muted-foreground">
+      {text.tocNoHeadings}
+    </div>
+  );
+}
+
 export function TOCItems({
   items,
   isMenu = false,
@@ -50,16 +60,10 @@ export function TOCItems({
   items: TOCItemType[];
   isMenu?: boolean;
 }) {
-  const { text } = useI18n();
   const containerRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<HTMLDivElement>(null);
 
-  if (items.length === 0)
-    return (
-      <div className="rounded-lg border bg-fd-card p-3 text-xs text-fd-muted-foreground">
-        {text.tocNoHeadings}
-      </div>
-    );
+  if (items.length === 0) return <TocItemsEmpty />;
 
   return (
     <ScrollArea className={cn('flex flex-col', isMenu && '-ms-3')}>

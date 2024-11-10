@@ -142,19 +142,6 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
           'background-color': `theme('colors.fd-background')`,
           color: `theme('colors.fd-foreground')`,
         },
-        '@screen md': {
-          ':root': {
-            '--fd-sidebar-width': '260px',
-          },
-        },
-        '@screen lg': {
-          ':root': {
-            '--fd-toc-width': '240px',
-          },
-        },
-        '@screen xl': {
-          ':root': { '--fd-toc-width': '260px' },
-        },
       });
 
       if (css) addComponents(css);

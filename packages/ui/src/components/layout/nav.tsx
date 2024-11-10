@@ -34,13 +34,13 @@ export const NavContext = createContext<NavContextType>({
 export function NavProvider({
   transparentMode = 'none',
   children,
-}: NavProviderProps & { children: ReactNode }): ReactNode {
+}: NavProviderProps & { children: ReactNode }) {
   const [transparent, setTransparent] = useState(transparentMode !== 'none');
 
   useEffect(() => {
     if (transparentMode !== 'top') return;
 
-    const listener = (): void => {
+    const listener = () => {
       setTransparent(window.scrollY < 10);
     };
 
@@ -62,7 +62,7 @@ export function Title({
   title,
   url,
   ...props
-}: TitleProps & Omit<LinkProps, 'title'>): React.ReactElement {
+}: TitleProps & Omit<LinkProps, 'title'>) {
   const { locale } = useI18n();
 
   return (

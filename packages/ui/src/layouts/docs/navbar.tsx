@@ -1,6 +1,10 @@
 'use client';
 import { useSidebar } from '@/contexts/sidebar';
-import { type HTMLAttributes, useContext } from 'react';
+import {
+  type ButtonHTMLAttributes,
+  type HTMLAttributes,
+  useContext,
+} from 'react';
 import { NavContext } from '@/components/layout/nav';
 import { cn } from '@/utils/cn';
 import { SidebarTrigger } from 'fumadocs-core/sidebar';
@@ -16,7 +20,7 @@ export function Navbar(props: HTMLAttributes<HTMLElement>) {
       id="nd-subnav"
       {...props}
       className={cn(
-        'sticky top-[var(--fd-banner-height)] z-40 flex flex-row items-center border-b border-fd-foreground/10 px-4 transition-colors',
+        'sticky top-[var(--fd-banner-height)] z-30 flex flex-row items-center border-b border-fd-foreground/10 px-4 transition-colors',
         (!isTransparent || open) && 'bg-fd-background/80 backdrop-blur-lg',
         props.className,
       )}
@@ -26,17 +30,20 @@ export function Navbar(props: HTMLAttributes<HTMLElement>) {
   );
 }
 
-export function NavbarSidebarTrigger() {
+export function NavbarSidebarTrigger(
+  props: ButtonHTMLAttributes<HTMLButtonElement>,
+) {
   const { open } = useSidebar();
 
   return (
     <SidebarTrigger
+      {...props}
       className={cn(
         buttonVariants({
           color: 'ghost',
           size: 'icon',
-          className: '-me-2 md:hidden',
         }),
+        props.className,
       )}
     >
       {open ? <X /> : <Menu />}

@@ -1,5 +1,6 @@
 'use client';
 import {
+  type ComponentType,
   createContext,
   type ReactNode,
   useContext,
@@ -43,7 +44,7 @@ export interface SearchProviderProps {
    *
    * It receives the `open` and `onOpenChange` prop, can be lazy loaded with `next/dynamic`
    */
-  SearchDialog: React.ComponentType<SharedProps>;
+  SearchDialog: ComponentType<SharedProps>;
 
   /**
    * Additional props to the dialog
@@ -97,7 +98,7 @@ export function SearchProvider({
     },
   ],
   links,
-}: SearchProviderProps): React.ReactElement {
+}: SearchProviderProps) {
   const [isOpen, setIsOpen] = useState(preload ? false : undefined);
 
   useEffect(() => {
@@ -138,6 +139,9 @@ export function SearchProvider({
   );
 }
 
+/**
+ * Show children only when search is enabled via React Context
+ */
 export function SearchOnly({ children }: { children: ReactNode }) {
   const search = useSearchContext();
 

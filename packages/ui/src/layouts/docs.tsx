@@ -1,5 +1,5 @@
 import type { PageTree } from 'fumadocs-core/server';
-import { type ReactNode, type HTMLAttributes, Fragment, type FC } from 'react';
+import { type ReactNode, type HTMLAttributes } from 'react';
 import Link from 'next/link';
 import { Languages, MoreHorizontal } from 'lucide-react';
 import { notFound } from 'next/navigation';
@@ -11,13 +11,7 @@ import {
   SidebarFooter,
   SidebarHeader,
   SidebarCollapseTrigger,
-  type SidebarProps,
   SidebarViewport,
-  SidebarItem,
-  SidebarFolder,
-  SidebarFolderLink,
-  SidebarFolderTrigger,
-  SidebarFolderContent,
 } from '@/layouts/docs/sidebar';
 import { replaceOrDefault, type SharedNavProps } from '@/layouts/shared';
 import {
@@ -26,13 +20,13 @@ import {
   BaseLinkItem,
 } from '@/layouts/links';
 import { getSidebarTabs, type TabOptions } from '@/utils/get-sidebar-tabs';
-import { type Option, RootToggle } from '@/components/layout/root-toggle';
+import { RootToggle } from '@/components/layout/root-toggle';
 import { type BaseLayoutProps, getLinks } from './shared';
 import {
   LanguageToggle,
   LanguageToggleText,
 } from '@/components/layout/language-toggle';
-import { SidebarItems, LinksMenu } from '@/layouts/docs.client';
+import { LinksMenu } from '@/layouts/docs.client';
 import { TreeContextProvider } from '@/contexts/tree';
 import { NavProvider, Title } from '@/components/layout/nav';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
@@ -42,35 +36,12 @@ import {
   SearchToggle,
 } from '@/components/layout/search-toggle';
 import { SearchOnly } from '@/contexts/search';
-
-interface SidebarOptions extends SidebarProps {
-  enabled: boolean;
-  component: ReactNode;
-
-  collapsible?: boolean;
-  components?: Partial<SidebarComponents>;
-
-  /**
-   * Root Toggle options
-   */
-  tabs?: Option[] | TabOptions | false;
-
-  banner?: ReactNode;
-  footer?: ReactNode;
-
-  /**
-   * Hide search trigger
-   *
-   * @defaultValue false
-   */
-  hideSearch?: boolean;
-}
-
-export interface SidebarComponents {
-  Item: FC<{ item: PageTree.Item }>;
-  Folder: FC<{ item: PageTree.Folder; level: number }>;
-  Separator: FC<{ item: PageTree.Separator }>;
-}
+import {
+  getSidebarTabsFromOptions,
+  SidebarLinkItem,
+  type SidebarOptions,
+} from '@/layouts/docs/shared';
+import { SidebarItems } from '@/layouts/docs/sidebar-items';
 
 export interface DocsLayoutProps extends BaseLayoutProps {
   tree: PageTree.Root;
@@ -104,14 +75,7 @@ export function DocsLayout({
   const Aside = collapsible ? CollapsibleSidebar : Sidebar;
   if (props.tree === undefined) notFound();
 
-  let tabs: Option[] = [];
-  if (Array.isArray(tabOptions)) {
-    tabs = tabOptions;
-  } else if (typeof tabOptions === 'object') {
-    tabs = getSidebarTabs(props.tree, tabOptions);
-  } else if (tabOptions !== false) {
-    tabs = getSidebarTabs(props.tree);
-  }
+  const tabs = getSidebarTabsFromOptions(tabOptions, props.tree) ?? [];
 
   return (
     <TreeContextProvider tree={props.tree}>
@@ -126,7 +90,7 @@ export function DocsLayout({
             <SearchOnly>
               <SearchToggle />
             </SearchOnly>
-            <NavbarSidebarTrigger />
+            <NavbarSidebarTrigger className="-me-2 md:hidden" />
           </Navbar>,
           nav,
         )}
@@ -134,13 +98,16 @@ export function DocsLayout({
           id="nd-docs-layout"
           {...props.containerProps}
           className={cn(
-            'flex flex-1 flex-row',
+            'flex flex-1 flex-row md:[--fd-sidebar-width:260px] lg:[--fd-toc-width:240px] xl:[--fd-toc-width:260px]',
             !navReplace && navEnabled
               ? '[--fd-nav-height:3.5rem] md:[--fd-nav-height:0px]'
               : null,
             props.containerProps?.className,
           )}
         >
+          {collapsible ? (
+            <SidebarCollapseTrigger className="fixed bottom-3 start-2 z-40 transition-opacity data-[collapsed=false]:pointer-events-none data-[collapsed=false]:opacity-0 max-md:hidden" />
+          ) : null}
           {replaceOrDefault(
             { enabled: sidebarEnabled, component: sidebarReplace },
             <Aside {...sidebar}>
@@ -159,10 +126,12 @@ export function DocsLayout({
                   {links
                     .filter((v) => v.type !== 'icon')
                     .map((item, i) => (
-                      <Fragment key={i}>{renderLinkItem(item)}</Fragment>
+                      <SidebarLinkItem key={i} item={item} />
                     ))}
                 </div>
-                <SidebarItems components={sidebarComponents} />
+                <div className="px-2 py-4 md:px-3">
+                  <SidebarItems components={sidebarComponents} />
+                </div>
               </SidebarViewport>
               <SidebarFooter>
                 <SidebarFooterItems
@@ -186,60 +155,10 @@ export function DocsLayout({
   );
 }
 
-function renderLinkItem(item: LinkItemType): ReactNode {
-  if (!item.type || item.type === 'main' || item.type === 'icon')
-    return (
-      <SidebarItem href={item.url} icon={item.icon} external={item.external}>
-        {item.text}
-      </SidebarItem>
-    );
-
-  if (item.type === 'menu')
-    return (
-      <SidebarFolder level={1}>
-        {item.url ? (
-          <SidebarFolderLink href={item.url}>
-            {item.icon}
-            {item.text}
-          </SidebarFolderLink>
-        ) : (
-          <SidebarFolderTrigger>
-            {item.icon}
-            {item.text}
-          </SidebarFolderTrigger>
-        )}
-        <SidebarFolderContent>
-          {item.items.map((child, i) => (
-            <Fragment key={i}>{renderLinkItem(child)}</Fragment>
-          ))}
-        </SidebarFolderContent>
-      </SidebarFolder>
-    );
-
-  if (item.type === 'button') {
-    return (
-      <BaseLinkItem
-        item={item}
-        className={cn(
-          buttonVariants({
-            color: 'secondary',
-            className: 'gap-1.5 [&_svg]:size-4',
-          }),
-        )}
-      >
-        {item.icon}
-        {item.text}
-      </BaseLinkItem>
-    );
-  }
-
-  if (item.type === 'custom') return item.children;
-}
-
 function SidebarHeaderItems({
   links,
   ...props
-}: SharedNavProps & { links: LinkItemType[] }): ReactNode {
+}: SharedNavProps & { links: LinkItemType[] }) {
   const isEmpty = !props.title && !props.children && links.length === 0;
   if (isEmpty) return null;
 

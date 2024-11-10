@@ -6,6 +6,7 @@ import { cn } from '@/utils/cn';
 import { useI18n } from '@/contexts/i18n';
 import { TocThumb } from '@/components/layout/toc-thumb';
 import { ScrollArea, ScrollViewport } from '../ui/scroll-area';
+import { TocItemsEmpty } from '@/components/layout/toc';
 
 export default function ClerkTOCItems({
   items,
@@ -70,12 +71,7 @@ export default function ClerkTOCItems({
     };
   }, [items]);
 
-  if (items.length === 0)
-    return (
-      <div className="rounded-lg border bg-fd-card p-3 text-xs text-fd-muted-foreground">
-        {text.tocNoHeadings}
-      </div>
-    );
+  if (items.length === 0) return <TocItemsEmpty />;
 
   return (
     <ScrollArea className={cn('flex flex-col', isMenu && '-ms-3')}>

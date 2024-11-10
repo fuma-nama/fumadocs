@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  Fragment,
   type HTMLAttributes,
   useContext,
   useEffect,
@@ -12,11 +13,15 @@ import Link from 'next/link';
 import { cva } from 'class-variance-authority';
 import { cn } from '@/utils/cn';
 import { useI18n } from './contexts/i18n';
-import { useTreeContext } from './contexts/tree';
+import { useTreeContext, useTreePath } from './contexts/tree';
 import { useSidebar } from '@/contexts/sidebar';
 import type { PageTree } from 'fumadocs-core/server';
 import { usePathname } from 'next/navigation';
 import { NavContext } from '@/components/layout/nav';
+import {
+  type BreadcrumbOptions,
+  getBreadcrumbItemsFromPath,
+} from 'fumadocs-core/breadcrumb';
 
 export function PageContainer(props: HTMLAttributes<HTMLDivElement>) {
   const { collapsed } = useSidebar();
@@ -171,6 +176,51 @@ export function Footer({ items }: FooterProps) {
           <p className="font-medium">{next.name}</p>
         </Link>
       ) : null}
+    </div>
+  );
+}
+
+export interface BreadcrumbProps extends BreadcrumbOptions {
+  /**
+   * Show the full path to the current page
+   *
+   * @defaultValue false
+   * @deprecated use `includePage` instead
+   */
+  full?: boolean;
+}
+
+export function Breadcrumb(options: BreadcrumbProps) {
+  const path = useTreePath();
+  const { root } = useTreeContext();
+  const items = useMemo(() => {
+    return getBreadcrumbItemsFromPath(root, path, {
+      includePage: options.includePage ?? false,
+      ...options,
+    });
+  }, [options, path, root]);
+
+  if (items.length === 0) return null;
+
+  return (
+    <div className="-mb-3 flex flex-row items-center gap-1 text-sm font-medium text-fd-muted-foreground">
+      {items.map((item, i) => (
+        <Fragment key={i}>
+          {i !== 0 && (
+            <ChevronRight className="size-4 shrink-0 rtl:rotate-180" />
+          )}
+          {item.url ? (
+            <Link
+              href={item.url}
+              className="truncate hover:text-fd-accent-foreground"
+            >
+              {item.name}
+            </Link>
+          ) : (
+            <span className="truncate">{item.name}</span>
+          )}
+        </Fragment>
+      ))}
     </div>
   );
 }

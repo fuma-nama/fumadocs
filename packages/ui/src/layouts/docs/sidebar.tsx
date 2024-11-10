@@ -10,7 +10,7 @@ import {
   type ReactNode,
   useCallback,
   useContext,
-  useLayoutEffect,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -111,32 +111,25 @@ export function CollapsibleSidebar(props: SidebarProps) {
   }, []);
 
   return (
-    <>
-      <SidebarCollapseTrigger
-        className={cn(
-          'fixed bottom-3 start-2 z-20 transition-opacity max-md:hidden',
-          (!collapsed || hover) && 'opacity-0',
-        )}
-      />
-      <Sidebar
-        {...props}
-        onPointerEnter={onEnter}
-        onPointerLeave={onLeave}
-        className={cn(
-          'transition-[flex,margin,opacity,transform]',
-          collapsed &&
-            'md:-me-[var(--fd-sidebar-offset)] md:flex-initial md:translate-x-[calc(var(--fd-sidebar-offset)*-1)] rtl:md:translate-x-[var(--fd-sidebar-offset)]',
-          collapsed && hover && 'md:translate-x-0',
-          collapsed && !hover && 'md:z-10 md:opacity-0',
-          props.className,
-        )}
-        style={
-          {
-            '--fd-sidebar-offset': 'calc(var(--fd-sidebar-width) - 30px)',
-          } as object
-        }
-      />
-    </>
+    <Sidebar
+      {...props}
+      onPointerEnter={onEnter}
+      onPointerLeave={onLeave}
+      data-collapsed={collapsed}
+      className={cn(
+        'transition-[flex,margin,opacity,transform]',
+        collapsed &&
+          'md:-me-[var(--fd-sidebar-width)] md:flex-initial md:translate-x-[calc(var(--fd-sidebar-offset)*-1)] rtl:md:translate-x-[var(--fd-sidebar-offset)]',
+        collapsed && hover && 'z-50 md:translate-x-0',
+        collapsed && !hover && 'md:opacity-0',
+        props.className,
+      )}
+      style={
+        {
+          '--fd-sidebar-offset': 'calc(var(--fd-sidebar-width) - 20px)',
+        } as object
+      }
+    />
   );
 }
 
@@ -175,7 +168,7 @@ export function Sidebar({
         <div
           {...inner}
           className={cn(
-            'flex size-full flex-col pt-2 md:ms-auto md:w-[var(--fd-sidebar-width)] md:border-e md:pt-4',
+            'flex size-full max-w-full flex-col pt-2 md:ms-auto md:w-[var(--fd-sidebar-width)] md:border-e md:pt-4',
             inner?.className,
           )}
         >
@@ -319,7 +312,7 @@ export function SidebarFolderLink(props: LinkProps) {
   const active =
     props.href !== undefined && isActive(props.href, pathname, false);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (active) {
       setOpen(true);
     }
@@ -368,12 +361,13 @@ export function SidebarFolderContent(props: CollapsibleContentProps) {
 export function SidebarCollapseTrigger(
   props: ButtonHTMLAttributes<HTMLButtonElement>,
 ) {
-  const { setCollapsed } = useSidebar();
+  const { collapsed, setCollapsed } = useSidebar();
 
   return (
     <button
       type="button"
       aria-label="Collapse Sidebar"
+      data-collapsed={collapsed}
       {...props}
       className={cn(
         buttonVariants({

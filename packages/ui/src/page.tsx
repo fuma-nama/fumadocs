@@ -5,7 +5,6 @@ import {
   type HTMLAttributes,
   type ReactNode,
 } from 'react';
-import dynamic from 'next/dynamic';
 import type { LoaderConfig, LoaderOutput, Page } from 'fumadocs-core/source';
 import { type AnchorProviderProps, AnchorProvider } from 'fumadocs-core/toc';
 import { Card, Cards } from '@/components/card';
@@ -17,11 +16,9 @@ import {
   LastUpdate,
   PageContainer,
   PageHeader,
-} from './page.client';
-import {
   Breadcrumb,
   type BreadcrumbProps,
-} from '@/components/layout/breadcrumb';
+} from './page.client';
 import { Toc, TOCItems, type TOCProps } from '@/components/layout/toc';
 import {
   TocPopoverTrigger,
@@ -31,8 +28,7 @@ import {
 import { buttonVariants } from '@/components/ui/button';
 import { Edit, Text } from 'lucide-react';
 import { I18nLabel } from '@/contexts/i18n';
-
-const ClerkTOCItems = dynamic(() => import('@/components/layout/toc-clerk'));
+import ClerkTOCItems from '@/components/layout/toc-clerk';
 
 type TableOfContentOptions = Omit<TOCProps, 'items' | 'children'> &
   Pick<AnchorProviderProps, 'single'> & {
@@ -175,7 +171,7 @@ export function DocsPage({
       {replaceOrDefault(
         { enabled: tocEnabled, component: tocReplace },
         <Toc>
-          <div className="flex h-full w-[var(--fd-toc-width)] max-w-full flex-col gap-3">
+          <div className="flex h-full w-[var(--fd-toc-width)] max-w-full flex-col gap-3 pe-2">
             {tocOptions.header}
             <h3 className="-ms-0.5 inline-flex items-center gap-1.5 text-sm text-fd-muted-foreground">
               <Text className="size-4" />
