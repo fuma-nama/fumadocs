@@ -58,11 +58,13 @@ export async function APIPage(props: ApiPageProps): Promise<ReactElement> {
 
         return (
           <Operation
-            servers={document.servers ?? []}
             key={`${item.path}:${item.method}`}
             method={method}
             path={item.path}
             ctx={ctx}
+            baseUrls={
+              document.servers ? document.servers.map((s) => s.url) : []
+            }
             hasHead={hasHead}
           />
         );

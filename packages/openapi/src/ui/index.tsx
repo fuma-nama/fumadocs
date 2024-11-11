@@ -1,5 +1,5 @@
 import { cn } from 'fumadocs-ui/components/api';
-import { Fragment, type HTMLAttributes, type ReactNode } from 'react';
+import { Fragment, useState, type HTMLAttributes, type ReactNode } from 'react';
 import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 import { badgeVariants, getBadgeColor } from '@/ui/components/variants';
 import type { APIInfoProps, PropertyProps } from '@/render/renderer';
@@ -31,15 +31,32 @@ export function APIInfo({
   className,
   route,
   badgeClassname,
+  baseUrls,
   method = 'GET',
   ...props
 }: APIInfoProps &
   HTMLAttributes<HTMLDivElement> & {
     badgeClassname?: string;
   }): React.ReactElement {
+  // create a dropdown list to be able to select from the list of servers
+
+  const [selectedServer, setSelectedServer] = useState(baseUrls[0]);
+
   return (
     <div className={cn('min-w-0 flex-1', className)} {...props}>
       <div className="sticky top-[var(--fd-api-info-top)] z-[4] mb-4 flex flex-row items-center gap-1.5 border-b border-fd-foreground/10 bg-fd-card/50 px-4 py-1.5 shadow-lg backdrop-blur-lg max-lg:-mx-3 max-md:-mx-4 md:rounded-full md:border md:px-1.5">
+        <select
+          value={selectedServer}
+          onChange={(e) => setSelectedServer(e.target.value)}
+          className="bg-transparent text-sm text-fd-foreground outline-none"
+        >
+          {baseUrls.map((server) => (
+            <option key={server} value={server}>
+              {server}
+            </option>
+          ))}
+        </select>
+
         <span
           className={cn(
             badgeVariants({ color: getBadgeColor(method) }),

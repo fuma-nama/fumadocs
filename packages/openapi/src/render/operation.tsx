@@ -33,13 +33,13 @@ interface CodeSampleCompiled {
 }
 
 export function Operation({
-  servers,
+  baseUrls,
   path,
   method,
   ctx,
   hasHead,
 }: {
-  servers: OpenAPI.ServerObject[];
+  baseUrls: string[];
   path: string;
   method: MethodInformation;
   ctx: RenderContext;
@@ -152,7 +152,7 @@ export function Operation({
       <ctx.renderer.APIInfo
         method={method.method}
         route={path}
-        servers={servers}
+        baseUrls={baseUrls}
       >
         {info}
       </ctx.renderer.APIInfo>
