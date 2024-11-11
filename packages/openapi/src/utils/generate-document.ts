@@ -16,7 +16,6 @@ export function generateDocument(
   options: GenerateOptions & {
     dereferenced: OpenAPI.Document;
     page: ApiPageProps;
-
     title: string;
     description?: string;
     context: DocumentContext;

@@ -13,6 +13,7 @@ import {
   APIPlayground,
 } from '@/ui';
 import type { RenderContext } from '@/types';
+import { type OpenAPIV3 as OpenAPI } from 'openapi-types';
 
 export interface ResponsesProps {
   items: string[];
@@ -27,6 +28,7 @@ export interface ResponseProps {
 export interface APIInfoProps {
   method: string;
   route: string;
+  servers: OpenAPI.ServerObject[];
   children: ReactNode;
 }
 
