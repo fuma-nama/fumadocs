@@ -3,7 +3,6 @@
 import {
   Fragment,
   type HTMLAttributes,
-  useContext,
   useEffect,
   useMemo,
   useState,
@@ -17,7 +16,7 @@ import { useTreeContext, useTreePath } from './contexts/tree';
 import { useSidebar } from '@/contexts/sidebar';
 import type { PageTree } from 'fumadocs-core/server';
 import { usePathname } from 'next/navigation';
-import { NavContext } from '@/components/layout/nav';
+import { useNav } from '@/components/layout/nav';
 import {
   type BreadcrumbOptions,
   getBreadcrumbItemsFromPath,
@@ -50,7 +49,7 @@ export function PageContainer(props: HTMLAttributes<HTMLDivElement>) {
 
 export function PageHeader(props: HTMLAttributes<HTMLDivElement>) {
   const { open } = useSidebar();
-  const { isTransparent } = useContext(NavContext);
+  const { isTransparent } = useNav();
 
   return (
     <div
@@ -180,15 +179,7 @@ export function Footer({ items }: FooterProps) {
   );
 }
 
-export interface BreadcrumbProps extends BreadcrumbOptions {
-  /**
-   * Show the full path to the current page
-   *
-   * @defaultValue false
-   * @deprecated use `includePage` instead
-   */
-  full?: boolean;
-}
+export type BreadcrumbProps = BreadcrumbOptions;
 
 export function Breadcrumb(options: BreadcrumbProps) {
   const path = useTreePath();

@@ -64,6 +64,14 @@ interface EditOnGitHubOptions
 interface BreadcrumbOptions extends BreadcrumbProps {
   enabled: boolean;
   component: ReactNode;
+
+  /**
+   * Show the full path to the current page
+   *
+   * @defaultValue false
+   * @deprecated use `includePage` instead
+   */
+  full?: boolean;
 }
 
 interface FooterOptions extends FooterProps {
@@ -154,7 +162,10 @@ export function DocsPage({
             tocEnabled ? 'max-w-[860px]' : 'max-w-[1120px]',
           )}
         >
-          {replaceOrDefault(breadcrumb, <Breadcrumb {...breadcrumb} />)}
+          {replaceOrDefault(
+            breadcrumb,
+            <Breadcrumb includePage={breadcrumb.full} {...breadcrumb} />,
+          )}
           {props.children}
           <div role="none" className="flex-1" />
           <div className="flex flex-row flex-wrap items-center justify-between gap-4 empty:hidden">

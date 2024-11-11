@@ -1,11 +1,7 @@
 'use client';
 import { useSidebar } from '@/contexts/sidebar';
-import {
-  type ButtonHTMLAttributes,
-  type HTMLAttributes,
-  useContext,
-} from 'react';
-import { NavContext } from '@/components/layout/nav';
+import { type ButtonHTMLAttributes, type HTMLAttributes } from 'react';
+import { useNav } from '@/components/layout/nav';
 import { cn } from '@/utils/cn';
 import { SidebarTrigger } from 'fumadocs-core/sidebar';
 import { buttonVariants } from '@/components/ui/button';
@@ -13,7 +9,7 @@ import { Menu, X } from 'lucide-react';
 
 export function Navbar(props: HTMLAttributes<HTMLElement>) {
   const { open } = useSidebar();
-  const { isTransparent } = useContext(NavContext);
+  const { isTransparent } = useNav();
 
   return (
     <header

@@ -11,6 +11,7 @@ import {
   SidebarFooter,
   SidebarHeader,
   SidebarViewport,
+  SidebarPageTree,
 } from '@/layouts/docs/sidebar';
 import { notFound } from 'next/navigation';
 import { RootToggle } from '@/components/layout/root-toggle';
@@ -40,13 +41,11 @@ import {
   type SidebarOptions,
 } from '@/layouts/docs/shared';
 import type { PageTree } from 'fumadocs-core/server';
-import { SidebarItems } from '@/layouts/docs/sidebar-items';
-import { LayoutBody } from '@/layouts/docs-notebook.client';
+import { LayoutBody } from './notebook.client';
 
-export interface DocsLayoutProps extends Omit<BaseLayoutProps, 'nav'> {
+export interface DocsLayoutProps extends BaseLayoutProps {
   tree: PageTree.Root;
 
-  nav: Omit<Exclude<BaseLayoutProps['nav'], undefined>, 'enabled'>;
   sidebar?: Omit<Partial<SidebarOptions>, 'component' | 'enabled'>;
 
   containerProps?: HTMLAttributes<HTMLDivElement>;
@@ -104,7 +103,7 @@ export function DocsLayout({
                 ))}
               </div>
               <div className="p-4 md:px-3">
-                <SidebarItems components={sidebarComponents} />
+                <SidebarPageTree components={sidebarComponents} />
               </div>
             </SidebarViewport>
             <SidebarFooter>{sidebarFooter}</SidebarFooter>
@@ -133,7 +132,7 @@ export function DocsLayout({
 function DocsNavbar({
   sidebarCollapsible,
   links,
-  nav,
+  nav = {},
   i18n,
 }: {
   nav: DocsLayoutProps['nav'];
@@ -237,7 +236,7 @@ function NavbarLinkItem({
 
 function SidebarHeaderItems({
   links,
-  nav,
+  nav = {},
   children,
 }: SharedNavProps & {
   nav: DocsLayoutProps['nav'];

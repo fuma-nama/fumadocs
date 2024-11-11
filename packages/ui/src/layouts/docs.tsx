@@ -12,6 +12,7 @@ import {
   SidebarHeader,
   SidebarCollapseTrigger,
   SidebarViewport,
+  SidebarPageTree,
 } from '@/layouts/docs/sidebar';
 import { replaceOrDefault, type SharedNavProps } from '@/layouts/shared';
 import {
@@ -41,7 +42,6 @@ import {
   SidebarLinkItem,
   type SidebarOptions,
 } from '@/layouts/docs/shared';
-import { SidebarItems } from '@/layouts/docs/sidebar-items';
 
 export interface DocsLayoutProps extends BaseLayoutProps {
   tree: PageTree.Root;
@@ -130,7 +130,7 @@ export function DocsLayout({
                     ))}
                 </div>
                 <div className="px-2 py-4 md:px-3">
-                  <SidebarItems components={sidebarComponents} />
+                  <SidebarPageTree components={sidebarComponents} />
                 </div>
               </SidebarViewport>
               <SidebarFooter>

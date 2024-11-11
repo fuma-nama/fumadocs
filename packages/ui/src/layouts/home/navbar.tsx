@@ -1,10 +1,5 @@
 'use client';
-import {
-  type ComponentProps,
-  type HTMLAttributes,
-  useContext,
-  useState,
-} from 'react';
+import { type ComponentProps, type HTMLAttributes, useState } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import Link, { type LinkProps } from 'fumadocs-core/link';
 import { cn } from '@/utils/cn';
@@ -17,7 +12,7 @@ import {
   NavigationMenuTrigger,
   NavigationMenuViewport,
 } from '@/components/ui/navigation-menu';
-import { NavContext } from '@/components/layout/nav';
+import { useNav } from '@/components/layout/nav';
 import type {
   NavigationMenuContentProps,
   NavigationMenuTriggerProps,
@@ -30,7 +25,7 @@ const navItemVariants = cva(
 
 export function Navbar(props: HTMLAttributes<HTMLElement>) {
   const [value, setValue] = useState('');
-  const { isTransparent } = useContext(NavContext);
+  const { isTransparent } = useNav();
 
   return (
     <NavigationMenu value={value} onValueChange={setValue} asChild>

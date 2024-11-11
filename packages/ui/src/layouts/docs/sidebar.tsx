@@ -10,7 +10,6 @@ import {
   type ReactNode,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useRef,
   useState,
@@ -33,6 +32,9 @@ import type {
   CollapsibleContentProps,
   CollapsibleTriggerProps,
 } from '@radix-ui/react-collapsible';
+import type { PageTree } from 'fumadocs-core/server';
+import { useTreeContext, useTreePath } from '@/contexts/tree';
+import type { SidebarComponents } from '@/layouts/docs/shared';
 
 export interface SidebarProps extends HTMLAttributes<HTMLElement> {
   /**
@@ -312,12 +314,6 @@ export function SidebarFolderLink(props: LinkProps) {
   const active =
     props.href !== undefined && isActive(props.href, pathname, false);
 
-  useEffect(() => {
-    if (active) {
-      setOpen(true);
-    }
-  }, [active, setOpen]);
-
   return (
     <Link
       {...props}
@@ -328,12 +324,9 @@ export function SidebarFolderLink(props: LinkProps) {
         props.className,
       )}
       onClick={(e) => {
-        if (
-          // clicking on icon
-          (e.target as HTMLElement).hasAttribute('data-icon') ||
-          active
-        ) {
-          setOpen((prev) => !prev);
+        setOpen((prev) => !active || !prev);
+
+        if ((e.target as HTMLElement).hasAttribute('data-icon')) {
           e.preventDefault();
         }
       }}
@@ -380,7 +373,7 @@ export function SidebarCollapseTrigger(
         setCollapsed((prev) => !prev);
       }}
     >
-      <SidebarIcon />
+      {props.children ?? <SidebarIcon />}
     </button>
   );
 }
@@ -397,4 +390,86 @@ function useInternalContext(): InternalContext {
   if (!ctx) throw new Error('<Sidebar /> component required.');
 
   return ctx;
+}
+
+/**
+ * Render sidebar items from page tree
+ */
+export function SidebarPageTree(props: {
+  components?: Partial<SidebarComponents>;
+}) {
+  const { root } = useTreeContext();
+
+  return useMemo(() => {
+    function renderSidebarList(
+      items: PageTree.Node[],
+      level: number,
+    ): ReactNode[] {
+      const { Separator, Item, Folder } = props.components ?? {};
+
+      return items.map((item, i) => {
+        const id = `${item.type}_${i.toString()}`;
+
+        switch (item.type) {
+          case 'separator':
+            if (Separator) return <Separator key={id} item={item} />;
+            return <SidebarSeparator key={id}>{item.name}</SidebarSeparator>;
+          case 'folder':
+            if (Folder)
+              return <Folder key={id} item={item} level={level + 1} />;
+            return (
+              <PageTreeFolder key={id} item={item} level={level + 1}>
+                {renderSidebarList(item.children, level + 1)}
+              </PageTreeFolder>
+            );
+          default:
+            if (Item) return <Item key={item.url} item={item} />;
+            return (
+              <SidebarItem
+                key={item.url}
+                href={item.url}
+                external={item.external}
+                icon={item.icon}
+              >
+                {item.name}
+              </SidebarItem>
+            );
+        }
+      });
+    }
+
+    return renderSidebarList(root.children, 1);
+  }, [root, props.components]);
+}
+
+function PageTreeFolder({
+  item,
+  children,
+  level,
+}: {
+  item: PageTree.Folder;
+  level: number;
+  children: ReactNode;
+}) {
+  const path = useTreePath();
+
+  return (
+    <SidebarFolder
+      defaultOpen={item.defaultOpen || path.includes(item)}
+      level={level + 1}
+    >
+      {item.index ? (
+        <SidebarFolderLink href={item.index.url} external={item.index.external}>
+          {item.icon}
+          {item.name}
+        </SidebarFolderLink>
+      ) : (
+        <SidebarFolderTrigger>
+          {item.icon}
+          {item.name}
+        </SidebarFolderTrigger>
+      )}
+      <SidebarFolderContent>{children}</SidebarFolderContent>
+    </SidebarFolder>
+  );
 }

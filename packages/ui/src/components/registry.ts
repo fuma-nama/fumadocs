@@ -37,6 +37,11 @@ export const registry: Registry = {
       files: ['../layouts/home.tsx'],
       mapImportPath: contextsMap,
     },
+    {
+      name: 'layouts/page',
+      files: ['components:../page.tsx'],
+      mapImportPath: contextsMap,
+    },
     { name: 'accordion', files: ['accordion.tsx'] },
     { name: 'banner', files: ['banner.tsx'] },
     { name: 'callout', files: ['callout.tsx'] },

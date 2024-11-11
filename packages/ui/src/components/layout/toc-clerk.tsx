@@ -3,7 +3,6 @@ import type { TOCItemType } from 'fumadocs-core/server';
 import * as Primitive from 'fumadocs-core/toc';
 import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/utils/cn';
-import { useI18n } from '@/contexts/i18n';
 import { TocThumb } from '@/components/layout/toc-thumb';
 import { ScrollArea, ScrollViewport } from '../ui/scroll-area';
 import { TocItemsEmpty } from '@/components/layout/toc';
@@ -14,8 +13,7 @@ export default function ClerkTOCItems({
 }: {
   items: TOCItemType[];
   isMenu?: boolean;
-}): React.ReactElement {
-  const { text } = useI18n();
+}) {
   const viewRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -131,7 +129,7 @@ function TOCItem({
   item: TOCItemType;
   upper?: number;
   lower?: number;
-}): React.ReactElement {
+}) {
   const offset = getLineOffset(item.depth),
     upperOffset = getLineOffset(upper),
     lowerOffset = getLineOffset(lower);

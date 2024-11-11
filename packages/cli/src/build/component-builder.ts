@@ -79,6 +79,8 @@ export function createComponentBuilder(
           return `${registry.namespaces[namespace]}:${relativePath}`;
         }
 
+      if (file.includes(':')) return file;
+
       return path.relative(rootDir, file);
     },
     getSubComponent(file) {

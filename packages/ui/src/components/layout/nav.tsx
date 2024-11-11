@@ -1,6 +1,12 @@
 'use client';
 import Link, { type LinkProps } from 'fumadocs-core/link';
-import { createContext, type ReactNode, useEffect, useState } from 'react';
+import {
+  createContext,
+  type ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 import { cn } from '@/utils/cn';
 import { useI18n } from '@/contexts/i18n';
 
@@ -27,7 +33,7 @@ interface NavContextType {
   isTransparent: boolean;
 }
 
-export const NavContext = createContext<NavContextType>({
+const NavContext = createContext<NavContextType>({
   isTransparent: false,
 });
 
@@ -56,6 +62,10 @@ export function NavProvider({
       {children}
     </NavContext.Provider>
   );
+}
+
+export function useNav(): NavContextType {
+  return useContext(NavContext);
 }
 
 export function Title({
