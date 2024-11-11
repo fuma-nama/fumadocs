@@ -1,6 +1,6 @@
 import type { Preset } from '@/tailwind-plugin';
 
-const defaultPreset: Preset = {
+const black: Preset = {
   light: {
     background: '0 0% 98%',
     foreground: '0 0% 3.9%',
@@ -20,26 +20,26 @@ const defaultPreset: Preset = {
     ring: '0 0% 63.9%',
   },
   dark: {
-    background: '0 0% 3.9%',
-    foreground: '0 0% 94%',
-    muted: '0 0% 12.9%',
-    'muted-foreground': '0 0% 60.9%',
-    popover: '0 0% 7%',
     'popover-foreground': '0 0% 88%',
-    card: '0 0% 6.0%',
     'card-foreground': '0 0% 98%',
-    border: '0 0% 15%',
     primary: '0 0% 98%',
     'primary-foreground': '0 0% 9%',
     secondary: '0 0% 12.9%',
     'secondary-foreground': '0 0% 98%',
-    accent: '0 0% 12.9%',
-    'accent-foreground': '0 0% 98%',
     ring: '0 0% 14.9%',
+    background: '0 0% 2%',
+    foreground: '0 0% 98%',
+    popover: '0 0% 4%',
+    card: '0 0% 4%',
+    muted: '0 0% 8%',
+    border: '0 0% 14%',
+    accent: '0 0% 15%',
+    'accent-foreground': '0 0% 100%',
+    'muted-foreground': '0 0% 60%',
   },
 };
 
-const oceanPreset: Preset = {
+const ocean: Preset = {
   light: {
     background: '0 0% 98%',
     foreground: '0 0% 3.9%',
@@ -273,7 +273,7 @@ const dusk: Preset = {
 
 const vitepress: Preset = {
   light: {
-    ...defaultPreset.light,
+    ...black.light,
     background: '0 0% 100%',
     card: '0 0% 100%',
     foreground: '240 6% 25%',
@@ -330,8 +330,9 @@ const vitepress: Preset = {
 export const presets = {
   vitepress,
   purple,
-  default: defaultPreset,
-  ocean: oceanPreset,
+  black,
+  default: neutral,
+  ocean,
   catppuccin,
   neutral,
   dusk,

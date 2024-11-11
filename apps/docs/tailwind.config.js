@@ -1,5 +1,5 @@
 // @ts-check
-import { createPreset, presets } from 'fumadocs-ui/tailwind-plugin';
+import { createPreset } from 'fumadocs-ui/tailwind-plugin';
 import animate from 'tailwindcss-animate';
 
 /** @type {import('tailwindcss').Config} */
@@ -14,7 +14,6 @@ export default {
   presets: [
     createPreset({
       addGlobalColors: true,
-      preset: 'neutral',
     }),
   ],
   theme: {

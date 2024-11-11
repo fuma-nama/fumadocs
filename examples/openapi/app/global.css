@@ -2,19 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  background-image: radial-gradient(
-      800px 500px at 90% 0%,
-      theme('colors.fd-primary.DEFAULT / 10%'),
-      transparent
-    ),
-    radial-gradient(
-      800px 500px at 50% 0%,
-      theme('colors.blue.300 / 5%'),
-      transparent
-    );
-}
-
 .prose {
-  --tw-prose-body: hsl(var(--muted-foreground));
+  /* --tw-prose-body: hsl(var(--muted-foreground)); */
 }

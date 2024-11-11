@@ -74,7 +74,7 @@
     "@tailwindcss/typography": "^0.5.15",
     "class-variance-authority": "^0.7.0",
     "fumadocs-core": "workspace:*",
-    "lucide-react": "^0.455.0",
+    "lucide-react": "^0.456.0",
     "next-themes": "^0.4.3",
     "react-medium-image-zoom": "^5.2.10",
     "tailwind-merge": "^2.5.4"
@@ -86,7 +86,7 @@
     "@types/react-dom": "^18.3.1",
     "eslint-config-custom": "workspace:*",
     "next": "15.0.3",
-    "postcss": "^8.4.47",
+    "postcss": "^8.4.48",
     "postcss-cli": "^11.0.0",
     "postcss-lightningcss": "^1.0.1",
     "tailwindcss": "^3.4.13",
