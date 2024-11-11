@@ -1,3 +1,4 @@
+'use client';
 import { cn } from 'fumadocs-ui/components/api';
 import { Fragment, useState, type HTMLAttributes, type ReactNode } from 'react';
 import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
@@ -44,32 +45,37 @@ export function APIInfo({
 
   return (
     <div className={cn('min-w-0 flex-1', className)} {...props}>
-      <div className="sticky top-[var(--fd-api-info-top)] z-[4] mb-4 flex flex-row items-center gap-1.5 border-b border-fd-foreground/10 bg-fd-card/50 px-4 py-1.5 shadow-lg backdrop-blur-lg max-lg:-mx-3 max-md:-mx-4 md:rounded-full md:border md:px-1.5">
-        <select
-          value={selectedServer}
-          onChange={(e) => setSelectedServer(e.target.value)}
-          className="bg-transparent text-sm text-fd-foreground outline-none"
-        >
-          {baseUrls.map((server) => (
-            <option key={server} value={server}>
-              {server}
-            </option>
-          ))}
-        </select>
+      <div className="sticky top-[var(--fd-api-info-top)] z-[4] mb-4 flex flex-col">
+        <div className="flex flex-row items-center gap-2">
+          <span className="text-sm text-fd-muted-foreground">
+            <strong>Server</strong>:{' '}
+          </span>
+          <select
+            value={selectedServer}
+            onChange={(e) => setSelectedServer(e.target.value)}
+            className="bg-transparent text-sm text-fd-foreground outline-none"
+          >
+            {baseUrls.map((server) => (
+              <option key={server} value={server}>
+                {server}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        <span
-          className={cn(
-            badgeVariants({ color: getBadgeColor(method) }),
-            badgeClassname,
-          )}
-        >
-          {method}
-        </span>
-        <Route route={route} />
-
-        <CopyRouteButton className="ms-auto size-6 p-1.5" route={route} />
+        <div className="flex flex-row  items-center gap-1.5 border-b border-fd-foreground/10 bg-fd-card/50 px-4 py-1.5 shadow-lg backdrop-blur-lg max-lg:-mx-3 max-md:-mx-4 md:rounded-full md:border md:px-1.5">
+          <span
+            className={cn(
+              badgeVariants({ color: getBadgeColor(method) }),
+              badgeClassname,
+            )}
+          >
+            {method}
+          </span>
+          <Route route={route} />
+          <CopyRouteButton className="ms-auto size-6 p-1.5" route={route} />
+        </div>
       </div>
-
       <div className="prose-no-margin">{children}</div>
     </div>
   );
