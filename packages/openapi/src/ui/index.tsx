@@ -1,10 +1,11 @@
 'use client';
 import { cn } from 'fumadocs-ui/components/api';
-import { Fragment, useState, type HTMLAttributes, type ReactNode } from 'react';
+import { Fragment, type HTMLAttributes, type ReactNode } from 'react';
 import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 import { badgeVariants, getBadgeColor } from '@/ui/components/variants';
 import type { APIInfoProps, PropertyProps } from '@/render/renderer';
 import { CopyRouteButton } from '@/ui/client';
+import { useApiContext } from './contexts/api';
 
 export { Root, useSchemaContext, APIPlayground } from './client';
 
@@ -41,7 +42,7 @@ export function APIInfo({
   }): React.ReactElement {
   // create a dropdown list to be able to select from the list of servers
 
-  const [selectedServer, setSelectedServer] = useState(baseUrls[0]);
+  const { baseUrl, setBaseUrl } = useApiContext();
 
   return (
     <div className={cn('min-w-0 flex-1', className)} {...props}>
@@ -51,8 +52,8 @@ export function APIInfo({
             <strong>Server</strong>:{' '}
           </span>
           <select
-            value={selectedServer}
-            onChange={(e) => setSelectedServer(e.target.value)}
+            value={baseUrl}
+            onChange={(e) => setBaseUrl(e.target.value)}
             className="bg-transparent text-sm text-fd-foreground outline-none"
           >
             {baseUrls.map((server) => (
