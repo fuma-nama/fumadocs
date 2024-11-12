@@ -1,5 +1,19 @@
 # next-docs-ui
 
+## 14.4.0
+
+### Minor Changes
+
+- 5fd4e2f: Make TOC collapse to a popover on `lg` screen size instead of `md`
+- 5fd4e2f: Support better table styles for Typography plugin
+- 8a3f5b0: Make `neutral` the default theme of Fumadocs UI
+
+### Patch Changes
+
+- 5145123: Fix sidebar footer issues
+- 64defe0: Support `fumadocs-ui/layouts/notebook` layout
+  - fumadocs-core@14.4.0
+
 ## 14.3.1
 
 ### Patch Changes
