@@ -3,6 +3,8 @@ import * as path from 'node:path';
 import { Project } from 'ts-morph';
 import { buildFile, merge, type ProcessedFiles } from '@/build/build-file';
 import { createComponentBuilder } from './component-builder';
+import { getFileNamespace } from '@/build/get-path-namespace';
+import { exists } from '@/utils/fs';
 
 export interface Component {
   name: string;
@@ -101,6 +103,7 @@ export interface OutputComponent {
 export async function build(registry: Registry): Promise<Output> {
   const registryDir = path.dirname(registry.path);
   const rootDir = path.join(registryDir, registry.rootDir);
+  const useSrc = await exists(path.join(rootDir, 'src'));
   const output: Output = {
     index: [],
     components: [],
@@ -111,23 +114,27 @@ export async function build(registry: Registry): Promise<Output> {
       ? path.join(registryDir, registry.tsconfigPath)
       : path.join(rootDir, 'tsconfig.json'),
   });
-  const packageJson =
-    typeof registry.packageJson !== 'string' && registry.packageJson
-      ? registry.packageJson
-      : await fs
-          .readFile(
-            registry.packageJson
-              ? path.join(registryDir, registry.packageJson)
-              : path.join(rootDir, 'package.json'),
-          )
-          .then((res) => JSON.parse(res.toString()) as PackageJson)
-          .catch(() => undefined);
 
+  function readPackageJson() {
+    if (typeof registry.packageJson !== 'string' && registry.packageJson)
+      return registry.packageJson;
+
+    return fs
+      .readFile(
+        registry.packageJson
+          ? path.join(registryDir, registry.packageJson)
+          : path.join(rootDir, 'package.json'),
+      )
+      .then((res) => JSON.parse(res.toString()) as PackageJson)
+      .catch(() => undefined);
+  }
+
+  const packageJson = await readPackageJson();
   const builder = createComponentBuilder(
     registry,
     packageJson,
     registryDir,
-    rootDir,
+    useSrc ? path.join(rootDir, 'src') : rootDir,
   );
 
   const buildExtendRegistries = Object.values(registry.on ?? {}).map(
@@ -154,25 +161,33 @@ export async function build(registry: Registry): Promise<Output> {
       dependencies: new Map(),
     };
 
-    const read = component.files
-      .map((file) => path.join(registryDir, file))
-      .map(async (file) => {
-        const content = await fs.readFile(file);
-        const sourceFile = project.createSourceFile(file, content.toString(), {
+    const read = component.files.map(async (sourcePath) => {
+      const parsed = getFileNamespace(sourcePath);
+      parsed.path = path.join(registryDir, parsed.path);
+
+      const content = await fs.readFile(parsed.path);
+      const sourceFile = project.createSourceFile(
+        parsed.path,
+        content.toString(),
+        {
           overwrite: true,
-        });
+        },
+      );
 
-        const outputPath = builder.resolveOutputPath(sourceFile.getFilePath());
+      const outputPath = builder.resolveOutputPath(
+        parsed.path,
+        parsed.namespace,
+      );
 
-        if (processedFiles.has(outputPath)) return;
-        return buildFile(
-          outputPath,
-          sourceFile,
-          builder,
-          component,
-          processedFiles,
-        );
-      });
+      if (processedFiles.has(outputPath)) return;
+      return buildFile(
+        outputPath,
+        sourceFile,
+        builder,
+        component,
+        processedFiles,
+      );
+    });
 
     const outFiles = await Promise.all(read);
     for (const file of outFiles) {

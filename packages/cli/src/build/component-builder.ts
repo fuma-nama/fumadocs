@@ -11,18 +11,23 @@ export interface DependencyInfo {
 }
 
 export interface ComponentBuilder {
-  rootDir: string;
   registryDir: string;
   resolveDep: (specifier: string) => DependencyInfo & { name: string };
-  resolveOutputPath: (path: string) => string;
+  resolveOutputPath: (path: string, namespace?: string) => string;
   getSubComponent: (path: string) => { component: Component } | undefined;
 }
 
+/**
+ * @param registry registry object
+ * @param packageJson parsed package json object
+ * @param registryDir directory of registry config file
+ * @param sourceDir source directory of project (e.g. `/src`), used to resolve the output paths of component files
+ */
 export function createComponentBuilder(
   registry: Registry,
   packageJson: PackageJson | undefined,
   registryDir: string,
-  rootDir: string,
+  sourceDir: string,
 ): ComponentBuilder {
   const fileToComponent = new Map<string, Component>();
 
@@ -38,7 +43,6 @@ export function createComponentBuilder(
 
   return {
     registryDir,
-    rootDir,
     resolveDep(specifier) {
       const name = specifier.startsWith('@')
         ? specifier.split('/').slice(0, 2).join('/')
@@ -67,21 +71,26 @@ export function createComponentBuilder(
       }
       return { type: 'runtime', name };
     },
-    resolveOutputPath(file) {
+    resolveOutputPath(file, forcedNamespace) {
       const relativeFile = path.relative(registryDir, file);
+
+      if (forcedNamespace) {
+        return `${forcedNamespace}:${path.relative(sourceDir, file)}`;
+      }
 
       if (registry.namespaces)
         for (const namespace of Object.keys(registry.namespaces)) {
           const relativePath = path.relative(namespace, relativeFile);
 
-          if (relativePath.startsWith('../') || path.isAbsolute(relativePath))
-            continue;
-          return `${registry.namespaces[namespace]}:${relativePath}`;
+          if (
+            !relativePath.startsWith('../') &&
+            !path.isAbsolute(relativePath)
+          ) {
+            return `${registry.namespaces[namespace]}:${relativePath}`;
+          }
         }
 
-      if (file.includes(':')) return file;
-
-      return path.relative(rootDir, file);
+      return path.relative(sourceDir, file);
     },
     getSubComponent(file) {
       const relativeFile = path.relative(registryDir, file);
