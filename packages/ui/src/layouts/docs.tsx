@@ -98,7 +98,7 @@ export function DocsLayout({
           id="nd-docs-layout"
           {...props.containerProps}
           className={cn(
-            'flex flex-1 flex-row md:[--fd-sidebar-width:260px] lg:[--fd-toc-width:240px] xl:[--fd-toc-width:260px]',
+            'flex flex-1 flex-row md:[--fd-sidebar-width:260px] xl:[--fd-toc-width:260px]',
             !navReplace && navEnabled
               ? '[--fd-nav-height:3.5rem] md:[--fd-nav-height:0px]'
               : null,

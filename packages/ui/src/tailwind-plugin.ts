@@ -5,7 +5,7 @@ import { presets } from './theme/colors';
 import { animations } from './theme/animations';
 import { typography as typographyConfig } from './theme/typography';
 
-interface DocsUIOptions {
+export interface DocsUIOptions {
   /**
    * Prefix to the variable name of colors
    *
@@ -38,6 +38,11 @@ interface DocsUIOptions {
    * Color preset
    */
   preset?: keyof typeof presets | Preset;
+
+  /**
+   * Disable custom table styles
+   */
+  disableRoundedTable?: boolean;
 }
 
 type Keys =
@@ -271,7 +276,7 @@ export function createPreset(options: DocsUIOptions = {}): PresetsConfig {
     theme: {
       extend: {
         typography: {
-          DEFAULT: typographyConfig,
+          DEFAULT: typographyConfig(options),
         },
       },
     },

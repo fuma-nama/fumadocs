@@ -76,7 +76,7 @@ export function DocsLayout({
         <LayoutBody
           {...props.containerProps}
           className={cn(
-            '[--fd-nav-height:3.5rem] md:[--fd-sidebar-width:260px] lg:[--fd-toc-width:240px] xl:[--fd-toc-width:260px]',
+            '[--fd-nav-height:3.5rem] md:[--fd-sidebar-width:260px] xl:[--fd-toc-width:260px]',
             props.containerProps?.className,
           )}
         >

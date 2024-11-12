@@ -27,7 +27,7 @@ export function Toc(props: HTMLAttributes<HTMLDivElement>) {
       {...props}
       data-toc=""
       className={cn(
-        'sticky top-fd-layout-top h-[var(--fd-toc-height)] flex-1 pb-2 pt-12 max-lg:hidden',
+        'sticky top-fd-layout-top h-[var(--fd-toc-height)] flex-1 pb-2 pt-12',
         props.className,
       )}
       style={

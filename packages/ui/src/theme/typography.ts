@@ -1,4 +1,34 @@
-export const typography = {
+import type { DocsUIOptions } from '@/tailwind-plugin';
+
+const tableStyles = {
+  table: {
+    borderCollapse: 'separate',
+    borderSpacing: '0',
+    '@apply bg-fd-card rounded-lg border overflow-hidden': '',
+  },
+  thead: {
+    border: '0',
+  },
+  th: {
+    '@apply p-2.5 border-l bg-muted': '',
+  },
+  'th:first-of-type': {
+    '@apply border-l-0': '',
+  },
+
+  'th, td:not(tr:last-of-type *)': {
+    '@apply border-b': '',
+  },
+
+  td: {
+    '@apply border-l p-2.5': '',
+  },
+  'td:first-of-type': {
+    '@apply border-l-0': '',
+  },
+};
+
+export const typography = ({ disableRoundedTable }: DocsUIOptions) => ({
   css: {
     '--tw-prose-body': `theme('colors.fd-foreground / 90%')`,
     '--tw-prose-headings': `theme('colors.fd-foreground')`,
@@ -68,5 +98,6 @@ export const typography = {
     'pre code::before': false,
     'code::after': false,
     'code::before': false,
+    ...(!disableRoundedTable ? tableStyles : undefined),
   },
-};
+});

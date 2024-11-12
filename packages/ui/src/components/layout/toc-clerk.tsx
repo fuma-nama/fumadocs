@@ -112,13 +112,13 @@ export default function ClerkTOCItems({
 }
 
 function getItemOffset(depth: number): number {
-  if (depth <= 2) return 16;
-  if (depth === 3) return 32;
+  if (depth <= 2) return 14;
+  if (depth === 3) return 26;
   return 48;
 }
 
 function getLineOffset(depth: number): number {
-  return depth >= 3 ? 12 : 0;
+  return depth >= 3 ? 10 : 0;
 }
 
 function TOCItem({
@@ -140,19 +140,19 @@ function TOCItem({
       style={{
         paddingInlineStart: getItemOffset(item.depth),
       }}
-      className="prose relative py-2 text-sm text-fd-muted-foreground transition-colors [overflow-wrap:anywhere] first:pt-0 last:pb-0 data-[active=true]:text-fd-primary"
+      className="prose relative py-1.5 text-sm text-fd-muted-foreground transition-colors [overflow-wrap:anywhere] first:pt-0 last:pb-0 data-[active=true]:text-fd-primary"
     >
       {offset !== upperOffset ? (
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 16 16"
-          className="absolute -top-2 start-0 size-4 rtl:-scale-x-100"
+          className="absolute -top-1.5 start-0 size-4 rtl:-scale-x-100"
         >
           <line
             x1={upperOffset}
             y1="0"
             x2={offset}
-            y2="16"
+            y2="12"
             className="stroke-fd-foreground/10"
             strokeWidth="1"
           />
@@ -161,8 +161,8 @@ function TOCItem({
       <div
         className={cn(
           'absolute inset-y-0 w-px bg-fd-foreground/10',
-          offset !== upperOffset && 'top-2',
-          offset !== lowerOffset && 'bottom-2',
+          offset !== upperOffset && 'top-1.5',
+          offset !== lowerOffset && 'bottom-1.5',
         )}
         style={{
           insetInlineStart: offset,
