@@ -5,7 +5,11 @@ import type { InlineTOC } from 'fumadocs-ui/components/inline-toc';
 import type { TypeTable } from 'fumadocs-ui/components/type-table';
 import type { Card } from 'fumadocs-ui/components/card';
 import type { DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
-import type { AnchorHTMLAttributes, ComponentPropsWithoutRef } from 'react';
+import type {
+  AnchorHTMLAttributes,
+  ComponentPropsWithoutRef,
+  HTMLAttributes,
+} from 'react';
 import type { DocsPageProps } from 'fumadocs-ui/page';
 import type { AutoTypeTable } from 'fumadocs-typescript/ui';
 
@@ -50,11 +54,14 @@ export type ObjectTypeProps = ComponentPropsWithoutRef<
   typeof TypeTable
 >['type'][string];
 
-export type LayoutProps = DocsLayoutProps;
+export type { DocsLayoutProps };
 
 export type NavbarProps = NonNullable<DocsLayoutProps['nav']>;
 
-export type SidebarProps = NonNullable<DocsLayoutProps['sidebar']>;
+export type SidebarProps = Omit<
+  NonNullable<DocsLayoutProps['sidebar']>,
+  keyof HTMLAttributes<HTMLElement>
+>;
 
 export type PageProps = DocsPageProps;
 

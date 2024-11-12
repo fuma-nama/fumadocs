@@ -134,8 +134,8 @@ export function WhyInteractive(props: {
   const [active, setActive] = useState(0);
   const duration = 1000 * 8;
   const items = [
-    'Design System & Tailwind CSS',
     'Full-text Search',
+    'Design System & Tailwind CSS',
     'Generate from TypeScript & OpenAPI',
     'Interactive Examples',
     'Automation & Server',
@@ -228,20 +228,6 @@ export function WhyInteractive(props: {
       <div className="flex-1">
         {active === 0 ? (
           <WhyPanel>
-            <h3 className="mb-2 text-lg font-semibold">Tailwind CSS Plugin</h3>
-            <p>Share the same design system cross the docs and your app.</p>
-            {props.codeblockTheme}
-            <Link
-              href="/docs/ui/theme"
-              className={cn(buttonVariants({ variant: 'outline' }))}
-            >
-              See Themes
-            </Link>
-          </WhyPanel>
-        ) : null}
-
-        {active === 1 ? (
-          <WhyPanel>
             <h3 className="mb-2 text-lg font-semibold">
               Implementing search is difficult, we made it simple.
             </h3>
@@ -268,6 +254,23 @@ export function WhyInteractive(props: {
                 Customise UI?
               </Link>
             </div>
+          </WhyPanel>
+        ) : null}
+
+        {active === 1 ? (
+          <WhyPanel>
+            <h3 className="mb-2 text-lg font-semibold">Tailwind CSS Plugin</h3>
+            <p>
+              Share the same design system cross the docs and your app with
+              Tailwind CSS. Works great with <b>Shadcn UI</b>.
+            </p>
+            {props.codeblockTheme}
+            <Link
+              href="/docs/ui/theme"
+              className={cn(buttonVariants({ variant: 'outline' }))}
+            >
+              See Themes
+            </Link>
           </WhyPanel>
         ) : null}
 
@@ -338,7 +341,7 @@ export function WhyInteractive(props: {
         {active === 5 ? (
           <WhyPanel>
             <h3 className="mb-2 text-lg font-semibold">
-              You own content source, search solution, everything.
+              Your own content source, search solution, everything.
             </h3>
             <p>
               Fumadocs is designed to be flexible, working with any content

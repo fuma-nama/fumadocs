@@ -11,11 +11,12 @@ The layout of documentation pages, it includes a sidebar and [navbar](/docs/ui/b
 
 Pass your page tree to the component.
 
-```jsx
+```tsx title="layout.tsx"
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { baseOptions } from '@/app/layout.config';
+import type { ReactNode } from 'react';
 
-export default function Layout({ children }) {
+export default function Layout({ children }: { children: ReactNode }) {
   return (
     <DocsLayout {...baseOptions} tree={tree}>
       {children}
@@ -117,6 +118,32 @@ You can consider:
 1. Disable sidebar from the entire layout.
 2. Create a [MDX Page](/docs/ui/blocks/page#mdx-page) in a layout that doesn't contain a sidebar.
 
-### Reference
+## Notebook
+
+Enable the notebook layout with `fumadocs-ui/layouts/notebook`.
+
+![Notebook](/docs/notebook.png)
+
+```tsx title="layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/notebook';
+import { baseOptions } from '@/app/layout.config';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <DocsLayout {...baseOptions} tree={tree}>
+      {children}
+    </DocsLayout>
+  );
+}
+```
+
+## References
+
+### Sidebar
 
 <AutoTypeTable path="./content/docs/ui/props.ts" name="SidebarProps" />
+
+### Layout
+
+<AutoTypeTable path="./content/docs/ui/props.ts" name="DocsLayoutProps" />

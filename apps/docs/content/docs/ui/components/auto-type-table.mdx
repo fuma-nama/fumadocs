@@ -30,6 +30,8 @@ description: Auto-generated type table
 
 </Wrapper>
 
+It generates a table for your docs based on TypeScript definitions.
+
 ## Usage
 
 ```package-install
@@ -52,7 +54,15 @@ const { AutoTypeTable } = createTypeTable();
 />;
 ```
 
-It accepts a `path` prop which should be a typescript file, and `name` for the exported type name.
+### From File
+
+It accepts a `path` prop that points to a typescript file, and `name` for the exported type name.
+
+```ts title="path/to/file.ts"
+export interface MyInterface {
+  name: string;
+}
+```
 
 ```mdx
 <AutoTypeTable path="./path/to/file.ts" name="MyInterface" />
@@ -64,7 +74,7 @@ You cannot use this in a client component.
 
 </Callout>
 
-### `type`
+### From Type
 
 You can specify the type to generate, without an actual TypeScript file.
 
@@ -107,13 +117,13 @@ export interface MyInterface {
 }
 ```
 
-### Auto Type Table
+### References
 
 <AutoTypeTable path="./content/docs/ui/props.ts" name="AutoTypeTableProps" />
 
 ### File System
 
-It relies on the file system, hence, the page referencing this component must be built in **build time**. Rendering the component in serverless runtime may cause problems.
+It relies on the file system, hence, the page referencing this component must be built in **build time**. Rendering the component on serverless runtime may cause problems.
 
 ### Deep Dive
 
