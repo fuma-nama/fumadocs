@@ -193,13 +193,24 @@ function SidebarHeaderItems({
 
 function SidebarFooterItems({
   iconItems,
-  ...props
+  i18n,
+  sidebarCollapsible,
+  disableThemeSwitch,
 }: {
   i18n: boolean;
   iconItems: IconItemType[];
   disableThemeSwitch: boolean;
   sidebarCollapsible: boolean;
 }) {
+  // empty footer items
+  if (
+    iconItems.length === 0 &&
+    !i18n &&
+    disableThemeSwitch &&
+    !sidebarCollapsible
+  )
+    return null;
+
   return (
     <div className="flex flex-row items-center">
       {iconItems.map((item, i) => (
@@ -216,16 +227,16 @@ function SidebarFooterItems({
         </BaseLinkItem>
       ))}
       <div role="separator" className="flex-1" />
-      {props.i18n ? (
+      {i18n ? (
         <LanguageToggle className="me-1.5">
           <Languages className="size-5" />
           <LanguageToggleText className="md:hidden" />
         </LanguageToggle>
       ) : null}
-      {!props.disableThemeSwitch ? (
+      {!disableThemeSwitch ? (
         <ThemeToggle className="p-0 md:order-first" />
       ) : null}
-      {props.sidebarCollapsible ? (
+      {sidebarCollapsible ? (
         <SidebarCollapseTrigger className="-me-1.5 max-md:hidden" />
       ) : null}
     </div>

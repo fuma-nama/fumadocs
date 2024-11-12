@@ -10,7 +10,7 @@ const tableStyles = {
     border: '0',
   },
   th: {
-    '@apply p-2.5 border-l bg-muted': '',
+    '@apply p-2.5 border-l bg-fd-muted': '',
   },
   'th:first-of-type': {
     '@apply border-l-0': '',
