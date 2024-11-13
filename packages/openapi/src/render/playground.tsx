@@ -145,7 +145,7 @@ function getAuthorizationField(
 
   return {
     type: 'string',
-    name: 'Authorization',
+    name: scheme.type === 'apiKey' ? scheme.name : 'Authorization',
     authType: scheme.type,
     defaultValue:
       scheme.type === 'oauth2' ||

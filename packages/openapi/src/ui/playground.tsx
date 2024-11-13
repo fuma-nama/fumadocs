@@ -90,8 +90,8 @@ export function APIPlayground({
     if (bodyType !== 'form-data')
       headers.append('Content-Type', 'application/json');
 
-    if (input.authorization) {
-      headers.append('Authorization', input.authorization);
+    if (input.authorization && authorization) {
+      headers.append(authorization.name, input.authorization);
     }
 
     Object.keys(input.header).forEach((key) => {
