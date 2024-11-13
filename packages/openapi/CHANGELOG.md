@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 5.5.11
+
+### Patch Changes
+
+- 47fc20e: Fix custom name in `apiKey` type authorization being ignored
+
 ## 5.5.10
 
 ### Patch Changes
