@@ -48,23 +48,23 @@ export function APIInfo({
     <div className={cn('min-w-0 flex-1', className)} {...props}>
       <div className="sticky top-[var(--fd-api-info-top)] z-[4] mb-4 flex flex-col">
         <div className="flex flex-row items-center gap-2">
-          <span className="text-sm text-fd-muted-foreground">
+          <span className="text-fd-muted-foreground text-sm">
             <strong>Server</strong>:{' '}
           </span>
           <select
             value={baseUrl}
             onChange={(e) => setBaseUrl(e.target.value)}
-            className="bg-transparent text-sm text-fd-foreground outline-none"
+            className="text-fd-foreground bg-transparent text-sm outline-none"
           >
-            {baseUrls.map((server) => (
-              <option key={server} value={server}>
-                {server}
+            {baseUrls.map((url) => (
+              <option key={url} value={url}>
+                {url}
               </option>
             ))}
           </select>
         </div>
 
-        <div className="flex flex-row  items-center gap-1.5 border-b border-fd-foreground/10 bg-fd-card/50 px-4 py-1.5 shadow-lg backdrop-blur-lg max-lg:-mx-3 max-md:-mx-4 md:rounded-full md:border md:px-1.5">
+        <div className="border-fd-foreground/10 bg-fd-card/50  flex flex-row items-center gap-1.5 border-b px-4 py-1.5 shadow-lg backdrop-blur-lg max-lg:-mx-3 max-md:-mx-4 md:rounded-full md:border md:px-1.5">
           <span
             className={cn(
               badgeVariants({ color: getBadgeColor(method) }),
@@ -114,7 +114,7 @@ export function Property({
   children,
 }: PropertyProps): React.ReactElement {
   return (
-    <div className="mb-4 rounded-lg border bg-fd-card p-3 prose-no-margin">
+    <div className="bg-fd-card prose-no-margin mb-4 rounded-lg border p-3">
       <h4 className="flex flex-row flex-wrap items-center gap-4">
         <code>{name}</code>
         {required ? (
@@ -125,7 +125,7 @@ export function Property({
             Deprecated
           </div>
         ) : null}
-        <span className="ms-auto font-mono text-[13px] text-fd-muted-foreground">
+        <span className="text-fd-muted-foreground ms-auto font-mono text-[13px]">
           {type}
         </span>
       </h4>
