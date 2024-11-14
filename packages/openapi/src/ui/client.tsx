@@ -74,4 +74,28 @@ export function CopyRouteButton({
   );
 }
 
+export function BaseUrlSelect({ baseUrls }: { baseUrls: string[] }) {
+  const { baseUrl, setBaseUrl } = useApiContext();
+  if (baseUrls.length === 0) return null;
+
+  return (
+    <div className="flex flex-row items-center gap-1 px-1">
+      <span className="p-0.5 text-xs font-medium text-fd-muted-foreground">
+        Server
+      </span>
+      <select
+        value={baseUrl}
+        onChange={(e) => setBaseUrl(e.target.value)}
+        className="flex-1 bg-transparent font-mono text-xs text-fd-foreground outline-none"
+      >
+        {baseUrls.map((url) => (
+          <option key={url} value={url}>
+            {url}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
 export { useSchemaContext } from './contexts/schema';

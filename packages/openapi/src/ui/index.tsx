@@ -1,11 +1,9 @@
-'use client';
 import { cn } from 'fumadocs-ui/components/api';
 import { Fragment, type HTMLAttributes, type ReactNode } from 'react';
 import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 import { badgeVariants, getBadgeColor } from '@/ui/components/variants';
 import type { APIInfoProps, PropertyProps } from '@/render/renderer';
-import { CopyRouteButton } from '@/ui/client';
-import { useApiContext } from './contexts/api';
+import { BaseUrlSelect, CopyRouteButton } from '@/ui/client';
 
 export { Root, useSchemaContext, APIPlayground } from './client';
 
@@ -39,32 +37,11 @@ export function APIInfo({
 }: APIInfoProps &
   HTMLAttributes<HTMLDivElement> & {
     badgeClassname?: string;
-  }): React.ReactElement {
-  // create a dropdown list to be able to select from the list of servers
-
-  const { baseUrl, setBaseUrl } = useApiContext();
-
+  }) {
   return (
     <div className={cn('min-w-0 flex-1', className)} {...props}>
-      <div className="sticky top-[var(--fd-api-info-top)] z-[4] mb-4 flex flex-col">
-        <div className="flex flex-row items-center gap-2">
-          <span className="text-fd-muted-foreground text-sm">
-            <strong>Server</strong>:{' '}
-          </span>
-          <select
-            value={baseUrl}
-            onChange={(e) => setBaseUrl(e.target.value)}
-            className="text-fd-foreground bg-transparent text-sm outline-none"
-          >
-            {baseUrls.map((url) => (
-              <option key={url} value={url}>
-                {url}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="border-fd-foreground/10 bg-fd-card/50  flex flex-row items-center gap-1.5 border-b px-4 py-1.5 shadow-lg backdrop-blur-lg max-lg:-mx-3 max-md:-mx-4 md:rounded-full md:border md:px-1.5">
+      <div className="sticky top-[var(--fd-api-info-top)] z-[4] mb-4 border-b border-fd-foreground/10 bg-fd-card/50 px-4 py-1.5 shadow-lg backdrop-blur-lg max-lg:-mx-3 max-md:-mx-4 md:rounded-xl md:border md:px-1.5">
+        <div className="mb-2 flex flex-row items-center gap-1.5">
           <span
             className={cn(
               badgeVariants({ color: getBadgeColor(method) }),
@@ -76,6 +53,7 @@ export function APIInfo({
           <Route route={route} />
           <CopyRouteButton className="ms-auto size-6 p-1.5" route={route} />
         </div>
+        <BaseUrlSelect baseUrls={baseUrls} />
       </div>
       <div className="prose-no-margin">{children}</div>
     </div>
@@ -114,7 +92,7 @@ export function Property({
   children,
 }: PropertyProps): React.ReactElement {
   return (
-    <div className="bg-fd-card prose-no-margin mb-4 rounded-lg border p-3">
+    <div className="mb-4 rounded-lg border bg-fd-card p-3 prose-no-margin">
       <h4 className="flex flex-row flex-wrap items-center gap-4">
         <code>{name}</code>
         {required ? (
@@ -125,7 +103,7 @@ export function Property({
             Deprecated
           </div>
         ) : null}
-        <span className="text-fd-muted-foreground ms-auto font-mono text-[13px]">
+        <span className="ms-auto font-mono text-[13px] text-fd-muted-foreground">
           {type}
         </span>
       </h4>
