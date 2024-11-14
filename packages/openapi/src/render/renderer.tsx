@@ -27,6 +27,7 @@ export interface ResponseProps {
 export interface APIInfoProps {
   method: string;
   route: string;
+  baseUrls: string[];
   children: ReactNode;
 }
 

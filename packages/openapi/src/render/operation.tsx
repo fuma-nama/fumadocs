@@ -33,11 +33,13 @@ interface CodeSampleCompiled {
 }
 
 export function Operation({
+  baseUrls,
   path,
   method,
   ctx,
   hasHead,
 }: {
+  baseUrls: string[];
   path: string;
   method: MethodInformation;
   ctx: RenderContext;
@@ -147,7 +149,11 @@ export function Operation({
 
   return (
     <ctx.renderer.API>
-      <ctx.renderer.APIInfo method={method.method} route={path}>
+      <ctx.renderer.APIInfo
+        method={method.method}
+        route={path}
+        baseUrls={baseUrls}
+      >
         {info}
       </ctx.renderer.APIInfo>
       <APIExample method={method} endpoint={endpoint} ctx={ctx} />

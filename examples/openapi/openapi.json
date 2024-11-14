@@ -1,7 +1,19 @@
 {
   "openapi": "3.0.0",
-  "info": { "title": "Unkey Api", "version": "1.0.0" },
-  "servers": [{ "url": "https://api.unkey.dev", "description": "Production" }],
+  "info": {
+    "title": "Unkey Api",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.unkey.dev",
+      "description": "Production"
+    },
+    {
+      "url": "https://example.com/api/v1",
+      "description": "Example API"
+    }
+  ],
   "x-speakeasy-retries": {
     "strategy": "backoff",
     "backoff": {
@@ -281,7 +293,9 @@
           },
           "meta": {
             "type": "object",
-            "additionalProperties": { "nullable": true },
+            "additionalProperties": {
+              "nullable": true
+            },
             "description": "Any additional metadata you want to store with the key",
             "example": {
               "roles": ["admin", "user"],
@@ -330,12 +344,18 @@
             },
             "required": ["interval", "amount"],
             "description": "Unkey allows you to refill remaining verifications on a key on a regular interval.",
-            "example": { "interval": "daily", "amount": 10 }
+            "example": {
+              "interval": "daily",
+              "amount": 10
+            }
           },
           "ratelimit": {
             "type": "object",
             "properties": {
-              "async": { "type": "boolean", "description": "" },
+              "async": {
+                "type": "boolean",
+                "description": ""
+              },
               "type": {
                 "type": "string",
                 "enum": ["fast", "consistent"],
@@ -368,17 +388,25 @@
             },
             "required": ["async", "limit", "duration"],
             "description": "Unkey comes with per-key ratelimiting out of the box.",
-            "example": { "async": true, "limit": 10, "duration": 60 }
+            "example": {
+              "async": true,
+              "limit": 10,
+              "duration": 60
+            }
           },
           "roles": {
             "type": "array",
-            "items": { "type": "string" },
+            "items": {
+              "type": "string"
+            },
             "description": "All roles this key belongs to",
             "example": ["admin", "finance"]
           },
           "permissions": {
             "type": "array",
-            "items": { "type": "string" },
+            "items": {
+              "type": "string"
+            },
             "description": "All permissions this key has",
             "example": ["domain.dns.create_record", "finance.read_receipt"]
           },
@@ -404,7 +432,9 @@
               },
               "meta": {
                 "type": "object",
-                "additionalProperties": { "nullable": true },
+                "additionalProperties": {
+                  "nullable": true
+                },
                 "description": "Any additional metadata attached to the identity"
               }
             },
@@ -439,7 +469,9 @@
           },
           "meta": {
             "type": "object",
-            "additionalProperties": { "nullable": true },
+            "additionalProperties": {
+              "nullable": true
+            },
             "description": "Any additional metadata you want to store with the key",
             "example": {
               "roles": ["admin", "user"],
@@ -472,7 +504,11 @@
             },
             "required": ["limit", "remaining", "reset"],
             "description": "The ratelimit configuration for this key. If this field is null or undefined, the key has no ratelimit.",
-            "example": { "limit": 10, "remaining": 9, "reset": 3600000 }
+            "example": {
+              "limit": 10,
+              "remaining": 9,
+              "reset": 3600000
+            }
           },
           "remaining": {
             "type": "integer",
@@ -500,7 +536,9 @@
           },
           "permissions": {
             "type": "array",
-            "items": { "type": "string" },
+            "items": {
+              "type": "string"
+            },
             "description": "A list of all the permissions this key is connected to.",
             "example": ["dns.record.update", "dns.record.delete"]
           },
@@ -512,11 +550,17 @@
           "identity": {
             "type": "object",
             "properties": {
-              "id": { "type": "string" },
-              "externalId": { "type": "string" },
+              "id": {
+                "type": "string"
+              },
+              "externalId": {
+                "type": "string"
+              },
               "meta": {
                 "type": "object",
-                "additionalProperties": { "nullable": true }
+                "additionalProperties": {
+                  "nullable": true
+                }
               }
             },
             "required": ["id", "externalId", "meta"],
@@ -529,7 +573,10 @@
         "nullable": true,
         "description": "A query for which permissions you require",
         "oneOf": [
-          { "title": "LiteralClause", "type": "string" },
+          {
+            "title": "LiteralClause",
+            "type": "string"
+          },
           {
             "title": "And",
             "type": "object",
@@ -537,7 +584,9 @@
             "properties": {
               "and": {
                 "type": "array",
-                "items": { "$ref": "#/components/schemas/PermissionQuery" }
+                "items": {
+                  "$ref": "#/components/schemas/PermissionQuery"
+                }
               }
             }
           },
@@ -548,7 +597,9 @@
             "properties": {
               "or": {
                 "type": "array",
-                "items": { "$ref": "#/components/schemas/PermissionQuery" }
+                "items": {
+                  "$ref": "#/components/schemas/PermissionQuery"
+                }
               }
             }
           }
@@ -571,7 +622,9 @@
           "authorization": {
             "type": "object",
             "properties": {
-              "permissions": { "$ref": "#/components/schemas/PermissionQuery" }
+              "permissions": {
+                "$ref": "#/components/schemas/PermissionQuery"
+              }
             },
             "description": "Perform RBAC checks"
           },
@@ -621,8 +674,16 @@
               "url": "https://www.unkey.com/docs/concepts/identities/ratelimits"
             },
             "example": [
-              { "name": "requests", "limit": 500, "duration": 3600000 },
-              { "name": "tokens", "limit": 20000, "duration": 86400000 }
+              {
+                "name": "requests",
+                "limit": 500,
+                "duration": 3600000
+              },
+              {
+                "name": "tokens",
+                "limit": 20000,
+                "duration": 86400000
+              }
             ]
           }
         },
@@ -692,7 +753,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -700,7 +763,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -708,7 +773,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -716,7 +783,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -724,7 +793,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -732,7 +803,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },
@@ -753,7 +826,11 @@
       "get": {
         "tags": ["keys"],
         "operationId": "getKey",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "schema": {
@@ -782,7 +859,9 @@
             "description": "The configuration for a single key",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/Key" }
+                "schema": {
+                  "$ref": "#/components/schemas/Key"
+                }
               }
             }
           },
@@ -790,7 +869,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -798,7 +879,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -806,7 +889,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -814,7 +899,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -822,7 +909,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -830,7 +919,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },
@@ -851,7 +942,11 @@
       "post": {
         "tags": ["keys"],
         "operationId": "deleteKey",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -876,7 +971,10 @@
             "description": "The key was successfully revoked, it may take up to 30s for this to take effect in all regions",
             "content": {
               "application/json": {
-                "schema": { "type": "object", "properties": {} }
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
               }
             }
           },
@@ -884,7 +982,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -892,7 +992,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -900,7 +1002,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -908,7 +1012,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -916,7 +1022,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -924,7 +1032,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },
@@ -945,7 +1055,11 @@
       "post": {
         "tags": ["keys"],
         "operationId": "createKey",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -988,7 +1102,9 @@
                   },
                   "meta": {
                     "type": "object",
-                    "additionalProperties": { "nullable": true },
+                    "additionalProperties": {
+                      "nullable": true
+                    },
                     "description": "This is a place for dynamic meta data, anything that feels useful for you should go here",
                     "example": {
                       "billingTier": "PRO",
@@ -1046,7 +1162,10 @@
                     },
                     "required": ["interval", "amount"],
                     "description": "Unkey enables you to refill verifications for each key at regular intervals.",
-                    "example": { "interval": "daily", "amount": 100 }
+                    "example": {
+                      "interval": "daily",
+                      "amount": 100
+                    }
                   },
                   "ratelimit": {
                     "type": "object",
@@ -1148,7 +1267,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -1156,7 +1277,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -1164,7 +1287,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -1172,7 +1297,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -1180,7 +1307,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -1188,7 +1317,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },
@@ -1234,7 +1365,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -1242,7 +1375,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -1250,7 +1385,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -1258,7 +1395,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -1266,7 +1405,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -1274,7 +1415,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },
@@ -1295,7 +1438,11 @@
       "post": {
         "tags": ["keys"],
         "operationId": "updateKey",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -1323,7 +1470,9 @@
                   "meta": {
                     "type": "object",
                     "nullable": true,
-                    "additionalProperties": { "nullable": true },
+                    "additionalProperties": {
+                      "nullable": true
+                    },
                     "description": "Any additional metadata you want to store with the key",
                     "example": {
                       "roles": ["admin", "user"],
@@ -1414,7 +1563,10 @@
                     },
                     "required": ["interval", "amount"],
                     "description": "Unkey enables you to refill verifications for each key at regular intervals.",
-                    "example": { "interval": "daily", "amount": 100 }
+                    "example": {
+                      "interval": "daily",
+                      "amount": 100
+                    }
                   },
                   "enabled": {
                     "type": "boolean",
@@ -1445,9 +1597,16 @@
                     "minItems": 1,
                     "description": "The roles you want to set for this key. This overwrites all existing roles.\n                Setting roles requires the `rbac.*.add_role_to_key` permission.",
                     "example": [
-                      { "id": "perm_123" },
-                      { "name": "dns.record.create" },
-                      { "name": "dns.record.delete", "create": true }
+                      {
+                        "id": "perm_123"
+                      },
+                      {
+                        "name": "dns.record.create"
+                      },
+                      {
+                        "name": "dns.record.delete",
+                        "create": true
+                      }
                     ]
                   },
                   "permissions": {
@@ -1474,9 +1633,16 @@
                     "minItems": 1,
                     "description": "The permissions you want to set for this key. This overwrites all existing permissions.\n                Setting permissions requires the `rbac.*.add_permission_to_key` permission.",
                     "example": [
-                      { "id": "perm_123" },
-                      { "name": "dns.record.create" },
-                      { "name": "dns.record.delete", "create": true }
+                      {
+                        "id": "perm_123"
+                      },
+                      {
+                        "name": "dns.record.create"
+                      },
+                      {
+                        "name": "dns.record.delete",
+                        "create": true
+                      }
                     ]
                   }
                 },
@@ -1491,7 +1657,10 @@
             "description": "The key was successfully updated, it may take up to 30s for this to take effect in all regions",
             "content": {
               "application/json": {
-                "schema": { "type": "object", "properties": {} }
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
               }
             }
           },
@@ -1499,7 +1668,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -1507,7 +1678,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -1515,7 +1688,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -1523,7 +1698,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -1531,7 +1708,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -1539,7 +1718,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },
@@ -1560,7 +1741,11 @@
       "post": {
         "tags": ["keys"],
         "operationId": "updateRemaining",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -1614,7 +1799,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -1622,7 +1809,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -1630,7 +1819,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -1638,7 +1829,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -1646,7 +1839,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -1654,7 +1849,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },
@@ -1675,7 +1872,11 @@
       "get": {
         "tags": ["keys"],
         "operationId": "getVerifications",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "schema": {
@@ -1786,7 +1987,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -1794,7 +1997,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -1802,7 +2007,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -1810,7 +2017,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -1818,7 +2027,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -1826,7 +2037,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },
@@ -1847,7 +2060,11 @@
       "post": {
         "tags": ["keys"],
         "operationId": "addPermissions",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -1921,7 +2138,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -1929,7 +2148,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -1937,7 +2158,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -1945,7 +2168,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -1953,7 +2178,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -1961,7 +2188,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },
@@ -1982,7 +2211,11 @@
       "post": {
         "tags": ["keys"],
         "operationId": "removePermissions",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -2015,8 +2248,12 @@
                     "minItems": 1,
                     "description": "The permissions you want to remove from this key.",
                     "example": [
-                      { "id": "perm_123" },
-                      { "name": "dns.record.create" }
+                      {
+                        "id": "perm_123"
+                      },
+                      {
+                        "name": "dns.record.create"
+                      }
                     ]
                   }
                 },
@@ -2030,7 +2267,10 @@
             "description": "Success",
             "content": {
               "application/json": {
-                "schema": { "type": "object", "properties": {} }
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
               }
             }
           },
@@ -2038,7 +2278,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -2046,7 +2288,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -2054,7 +2298,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -2062,7 +2308,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -2070,7 +2318,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -2078,7 +2328,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },
@@ -2099,7 +2351,11 @@
       "post": {
         "tags": ["keys"],
         "operationId": "setPermissions",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -2136,9 +2392,16 @@
                     "minItems": 1,
                     "description": "The permissions you want to set for this key. This overwrites all existing permissions.\n            Setting permissions requires the `rbac.*.add_permission_to_key` permission.",
                     "example": [
-                      { "id": "perm_123" },
-                      { "name": "dns.record.create" },
-                      { "name": "dns.record.delete", "create": true }
+                      {
+                        "id": "perm_123"
+                      },
+                      {
+                        "name": "dns.record.create"
+                      },
+                      {
+                        "name": "dns.record.delete",
+                        "create": true
+                      }
                     ]
                   }
                 },
@@ -2178,7 +2441,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -2186,7 +2451,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -2194,7 +2461,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -2202,7 +2471,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -2210,7 +2481,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -2218,7 +2491,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },
@@ -2239,7 +2514,11 @@
       "post": {
         "tags": ["keys"],
         "operationId": "addRoles",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -2276,9 +2555,16 @@
                     "minItems": 1,
                     "description": "The roles you want to set for this key. This overwrites all existing roles.\n          Setting roles requires the `rbac.*.add_role_to_key` permission.",
                     "example": [
-                      { "id": "role_123" },
-                      { "name": "dns.record.create" },
-                      { "name": "dns.record.delete", "create": true }
+                      {
+                        "id": "role_123"
+                      },
+                      {
+                        "name": "dns.record.create"
+                      },
+                      {
+                        "name": "dns.record.delete",
+                        "create": true
+                      }
                     ]
                   }
                 },
@@ -2318,7 +2604,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -2326,7 +2614,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -2334,7 +2624,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -2342,7 +2634,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -2350,7 +2644,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -2358,7 +2654,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },
@@ -2379,7 +2677,11 @@
       "post": {
         "tags": ["keys"],
         "operationId": "removeRoles",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -2412,8 +2714,12 @@
                     "minItems": 1,
                     "description": "The roles you want to remove from this key.",
                     "example": [
-                      { "id": "role_123" },
-                      { "name": "dns.record.create" }
+                      {
+                        "id": "role_123"
+                      },
+                      {
+                        "name": "dns.record.create"
+                      }
                     ]
                   }
                 },
@@ -2427,7 +2733,10 @@
             "description": "Success",
             "content": {
               "application/json": {
-                "schema": { "type": "object", "properties": {} }
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
               }
             }
           },
@@ -2435,7 +2744,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -2443,7 +2754,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -2451,7 +2764,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -2459,7 +2774,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -2467,7 +2784,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -2475,7 +2794,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },
@@ -2496,7 +2817,11 @@
       "post": {
         "tags": ["keys"],
         "operationId": "setRoles",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -2533,9 +2858,16 @@
                     "minItems": 1,
                     "description": "The roles you want to set for this key. This overwrites all existing roles.\n            Setting roles requires the `rbac.*.add_role_to_key` permission.",
                     "example": [
-                      { "id": "role_123" },
-                      { "name": "dns.record.create" },
-                      { "name": "dns.record.delete", "create": true }
+                      {
+                        "id": "role_123"
+                      },
+                      {
+                        "name": "dns.record.create"
+                      },
+                      {
+                        "name": "dns.record.delete",
+                        "create": true
+                      }
                     ]
                   }
                 },
@@ -2575,7 +2907,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -2583,7 +2917,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -2591,7 +2927,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -2599,7 +2937,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -2607,7 +2947,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -2615,7 +2957,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },
@@ -2636,7 +2980,11 @@
       "get": {
         "tags": ["apis"],
         "operationId": "getApi",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "schema": {
@@ -2683,7 +3031,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -2691,7 +3041,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -2699,7 +3051,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -2707,7 +3061,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -2715,7 +3071,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -2723,7 +3081,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },
@@ -2744,7 +3104,11 @@
       "post": {
         "tags": ["apis"],
         "operationId": "createApi",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -2787,7 +3151,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -2795,7 +3161,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -2803,7 +3171,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -2811,7 +3181,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -2819,7 +3191,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -2827,7 +3201,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },
@@ -2848,7 +3224,11 @@
       "get": {
         "tags": ["apis"],
         "operationId": "listKeys",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "schema": {
@@ -2925,7 +3305,9 @@
                   "properties": {
                     "keys": {
                       "type": "array",
-                      "items": { "$ref": "#/components/schemas/Key" }
+                      "items": {
+                        "$ref": "#/components/schemas/Key"
+                      }
                     },
                     "cursor": {
                       "type": "string",
@@ -2946,7 +3328,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -2954,7 +3338,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -2962,7 +3348,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -2970,7 +3358,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -2978,7 +3368,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -2986,7 +3378,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },
@@ -3007,7 +3401,11 @@
       "post": {
         "tags": ["apis"],
         "operationId": "deleteApi",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -3032,7 +3430,10 @@
             "description": "The api was successfully deleted, it may take up to 30s for this to take effect in all regions",
             "content": {
               "application/json": {
-                "schema": { "type": "object", "properties": {} }
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
               }
             }
           },
@@ -3040,7 +3441,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -3048,7 +3451,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -3056,7 +3461,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -3064,7 +3471,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -3072,7 +3481,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -3080,7 +3491,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },
@@ -3101,7 +3514,11 @@
       "post": {
         "tags": ["apis"],
         "operationId": "deleteKeys",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -3148,7 +3565,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -3156,7 +3575,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -3164,7 +3585,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -3172,7 +3595,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -3180,7 +3605,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -3188,7 +3615,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },
@@ -3209,7 +3638,11 @@
       "post": {
         "tags": ["ratelimits"],
         "operationId": "limit",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -3257,11 +3690,21 @@
                     "type": "object",
                     "additionalProperties": {
                       "anyOf": [
-                        { "type": "string" },
-                        { "type": "boolean" },
-                        { "type": "number" },
-                        { "nullable": true },
-                        { "nullable": true }
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "nullable": true
+                        },
+                        {
+                          "nullable": true
+                        }
                       ]
                     },
                     "description": "Attach any metadata to this request"
@@ -3290,11 +3733,21 @@
                           "type": "object",
                           "additionalProperties": {
                             "anyOf": [
-                              { "type": "string" },
-                              { "type": "boolean" },
-                              { "type": "number" },
-                              { "nullable": true },
-                              { "nullable": true }
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "boolean"
+                              },
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "nullable": true
+                              },
+                              {
+                                "nullable": true
+                              }
                             ]
                           },
                           "description": "Attach any metadata to this resources"
@@ -3304,7 +3757,11 @@
                     },
                     "description": "Resources that are about to be accessed by the user",
                     "example": [
-                      { "type": "project", "id": "p_123", "name": "dub" }
+                      {
+                        "type": "project",
+                        "id": "p_123",
+                        "name": "dub"
+                      }
                     ]
                   }
                 },
@@ -3351,7 +3808,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -3359,7 +3818,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -3367,7 +3828,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -3375,7 +3838,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -3383,7 +3848,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -3391,7 +3858,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },
@@ -3412,7 +3881,11 @@
       "post": {
         "tags": ["migrations"],
         "operationId": "v1.migrations.createKeys",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -3469,7 +3942,9 @@
                     },
                     "meta": {
                       "type": "object",
-                      "additionalProperties": { "nullable": true },
+                      "additionalProperties": {
+                        "nullable": true
+                      },
                       "description": "This is a place for dynamic meta data, anything that feels useful for you should go here",
                       "example": {
                         "billingTier": "PRO",
@@ -3528,7 +4003,10 @@
                       },
                       "required": ["interval", "amount"],
                       "description": "Unkey enables you to refill verifications for each key at regular intervals.",
-                      "example": { "interval": "daily", "amount": 100 }
+                      "example": {
+                        "interval": "daily",
+                        "amount": 100
+                      }
                     },
                     "ratelimit": {
                       "type": "object",
@@ -3609,7 +4087,9 @@
                   "properties": {
                     "keyIds": {
                       "type": "array",
-                      "items": { "type": "string" },
+                      "items": {
+                        "type": "string"
+                      },
                       "description": "The ids of the keys. This is not a secret and can be stored as a reference if you wish. You need the keyId to update or delete a key later.",
                       "example": ["key_123", "key_456"]
                     }
@@ -3623,7 +4103,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -3631,7 +4113,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -3639,7 +4123,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -3647,7 +4133,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -3655,7 +4143,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -3663,7 +4153,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },
@@ -3684,7 +4176,11 @@
       "post": {
         "tags": ["migrations"],
         "operationId": "v1.migrations.enqueueKeys",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -3747,7 +4243,9 @@
                         },
                         "meta": {
                           "type": "object",
-                          "additionalProperties": { "nullable": true },
+                          "additionalProperties": {
+                            "nullable": true
+                          },
                           "description": "This is a place for dynamic meta data, anything that feels useful for you should go here",
                           "example": {
                             "billingTier": "PRO",
@@ -3806,7 +4304,10 @@
                           },
                           "required": ["interval", "amount"],
                           "description": "Unkey enables you to refill verifications for each key at regular intervals.",
-                          "example": { "interval": "daily", "amount": 100 }
+                          "example": {
+                            "interval": "daily",
+                            "amount": 100
+                          }
                         },
                         "ratelimit": {
                           "type": "object",
@@ -3889,7 +4390,10 @@
             "description": "The key ids of all created keys",
             "content": {
               "application/json": {
-                "schema": { "type": "object", "properties": {} }
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
               }
             }
           },
@@ -3897,7 +4401,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -3905,7 +4411,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -3913,7 +4421,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -3921,7 +4431,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -3929,7 +4441,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -3937,7 +4451,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },
@@ -3958,7 +4474,11 @@
       "post": {
         "tags": ["permissions"],
         "operationId": "createPermission",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -4007,7 +4527,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -4015,7 +4537,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -4023,7 +4547,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -4031,7 +4557,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -4039,7 +4567,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -4047,7 +4577,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },
@@ -4068,7 +4600,11 @@
       "post": {
         "tags": ["permissions"],
         "operationId": "deletePermission",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -4092,7 +4628,10 @@
             "description": "Sucessfully deleted a permission",
             "content": {
               "application/json": {
-                "schema": { "type": "object", "properties": {} }
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
               }
             }
           },
@@ -4100,7 +4639,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -4108,7 +4649,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -4116,7 +4659,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -4124,7 +4669,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -4132,7 +4679,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -4140,7 +4689,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },
@@ -4161,7 +4712,11 @@
       "get": {
         "tags": ["permissions"],
         "operationId": "getPermission",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "schema": {
@@ -4208,7 +4763,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -4216,7 +4773,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -4224,7 +4783,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -4232,7 +4793,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -4240,7 +4803,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -4248,7 +4813,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },
@@ -4269,7 +4836,11 @@
       "get": {
         "tags": ["permissions"],
         "operationId": "listPermissions",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "The permissions in your workspace",
@@ -4306,7 +4877,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -4314,7 +4887,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -4322,7 +4897,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -4330,7 +4907,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -4338,7 +4917,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -4346,7 +4927,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },
@@ -4367,7 +4950,11 @@
       "post": {
         "tags": ["permissions"],
         "operationId": "createRole",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -4416,7 +5003,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -4424,7 +5013,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -4432,7 +5023,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -4440,7 +5033,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -4448,7 +5043,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -4456,7 +5053,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },
@@ -4477,7 +5076,11 @@
       "post": {
         "tags": ["permissions"],
         "operationId": "deleteRole",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -4501,7 +5104,10 @@
             "description": "Sucessfully deleted a role",
             "content": {
               "application/json": {
-                "schema": { "type": "object", "properties": {} }
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
               }
             }
           },
@@ -4509,7 +5115,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -4517,7 +5125,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -4525,7 +5135,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -4533,7 +5145,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -4541,7 +5155,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -4549,7 +5165,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },
@@ -4570,7 +5188,11 @@
       "get": {
         "tags": ["permissions"],
         "operationId": "getRole",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "schema": {
@@ -4617,7 +5239,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -4625,7 +5249,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -4633,7 +5259,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -4641,7 +5269,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -4649,7 +5279,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -4657,7 +5289,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },
@@ -4678,7 +5312,11 @@
       "get": {
         "tags": ["permissions"],
         "operationId": "listRoles",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "The Roles in your workspace",
@@ -4715,7 +5353,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -4723,7 +5363,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -4731,7 +5373,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -4739,7 +5383,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -4747,7 +5393,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -4755,7 +5403,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },
@@ -4776,7 +5426,11 @@
       "post": {
         "tags": ["identities"],
         "operationId": "createIdentity",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -4792,7 +5446,9 @@
                   },
                   "meta": {
                     "type": "object",
-                    "additionalProperties": { "nullable": true },
+                    "additionalProperties": {
+                      "nullable": true
+                    },
                     "description": "Attach metadata to this identity that you need to have access to when verifying a key.\n\nThis will be returned as part of the `verifyKey` response.\n"
                   },
                   "ratelimits": {
@@ -4851,7 +5507,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -4859,7 +5517,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -4867,7 +5527,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -4875,7 +5537,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -4883,7 +5547,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -4891,7 +5557,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },
@@ -4912,7 +5580,11 @@
       "get": {
         "tags": ["identities"],
         "operationId": "getIdentity",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "schema": {
@@ -4955,7 +5627,9 @@
                     },
                     "meta": {
                       "type": "object",
-                      "additionalProperties": { "nullable": true },
+                      "additionalProperties": {
+                        "nullable": true
+                      },
                       "description": "The meta object defined for this identity."
                     },
                     "ratelimits": {
@@ -4995,7 +5669,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -5003,7 +5679,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -5011,7 +5689,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -5019,7 +5699,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -5027,7 +5709,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -5035,7 +5719,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },
@@ -5056,13 +5742,23 @@
       "get": {
         "tags": ["identities"],
         "operationId": "listIdentities",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "x-speakeasy-pagination": {
           "type": "cursor",
           "inputs": [
-            { "name": "cursor", "in": "parameters", "type": "cursor" }
+            {
+              "name": "cursor",
+              "in": "parameters",
+              "type": "cursor"
+            }
           ],
-          "outputs": { "nextCursor": "$.cursor" }
+          "outputs": {
+            "nextCursor": "$.cursor"
+          }
         },
         "parameters": [
           {
@@ -5170,7 +5866,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -5178,7 +5876,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -5186,7 +5886,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -5194,7 +5896,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -5202,7 +5906,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -5210,7 +5916,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },
@@ -5231,7 +5939,11 @@
       "post": {
         "tags": ["identities"],
         "operationId": "updateIdentity",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -5258,7 +5970,9 @@
                   },
                   "meta": {
                     "type": "object",
-                    "additionalProperties": { "nullable": true },
+                    "additionalProperties": {
+                      "nullable": true
+                    },
                     "description": "Attach metadata to this identity that you need to have access to when verifying a key.\n\nSet to `{}` to clear.\n\nThis will be returned as part of the `verifyKey` response.\n"
                   },
                   "ratelimits": {
@@ -5313,9 +6027,13 @@
                     },
                     "meta": {
                       "type": "object",
-                      "additionalProperties": { "nullable": true },
+                      "additionalProperties": {
+                        "nullable": true
+                      },
                       "description": "The metadata attached to this identity.",
-                      "example": { "stripeSubscriptionId": "sub_1234" }
+                      "example": {
+                        "stripeSubscriptionId": "sub_1234"
+                      }
                     },
                     "ratelimits": {
                       "type": "array",
@@ -5351,7 +6069,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -5359,7 +6079,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -5367,7 +6089,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -5375,7 +6099,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -5383,7 +6109,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -5391,7 +6119,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },
@@ -5412,7 +6142,11 @@
       "post": {
         "tags": ["identities"],
         "operationId": "deleteIdentity",
-        "security": [{ "bearerAuth": [] }],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -5437,7 +6171,10 @@
             "description": "The identity was successfully deleted, it may take up to 30s for this to take effect in all regions",
             "content": {
               "application/json": {
-                "schema": { "type": "object", "properties": {} }
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
               }
             }
           },
@@ -5445,7 +6182,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -5453,7 +6192,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -5461,7 +6202,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -5469,7 +6212,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -5477,7 +6222,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -5485,7 +6232,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },
@@ -5542,7 +6291,9 @@
                   },
                   "meta": {
                     "type": "object",
-                    "additionalProperties": { "nullable": true },
+                    "additionalProperties": {
+                      "nullable": true
+                    },
                     "description": "This is a place for dynamic meta data, anything that feels useful for you should go here",
                     "example": {
                       "billingTier": "PRO",
@@ -5635,7 +6386,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -5643,7 +6396,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -5651,7 +6406,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -5659,7 +6416,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -5667,7 +6426,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -5675,7 +6436,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },
@@ -5751,7 +6514,9 @@
                     },
                     "meta": {
                       "type": "object",
-                      "additionalProperties": { "nullable": true },
+                      "additionalProperties": {
+                        "nullable": true
+                      },
                       "description": "Any additional metadata you want to store with the key",
                       "example": {
                         "roles": ["admin", "user"],
@@ -5825,7 +6590,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -5833,7 +6600,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -5841,7 +6610,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -5849,7 +6620,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -5857,7 +6630,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -5865,7 +6640,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },
@@ -5942,7 +6719,9 @@
                   "properties": {
                     "keys": {
                       "type": "array",
-                      "items": { "$ref": "#/components/schemas/Key" }
+                      "items": {
+                        "$ref": "#/components/schemas/Key"
+                      }
                     },
                     "total": {
                       "type": "integer",
@@ -5958,7 +6737,9 @@
             "description": "The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrBadRequest" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrBadRequest"
+                }
               }
             }
           },
@@ -5966,7 +6747,9 @@
             "description": "Although the HTTP standard specifies \"unauthorized\", semantically this response means \"unauthenticated\". That is, the client must authenticate itself to get the requested response.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrUnauthorized" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrUnauthorized"
+                }
               }
             }
           },
@@ -5974,7 +6757,9 @@
             "description": "The client does not have access rights to the content; that is, it is unauthorized, so the server is refusing to give the requested resource. Unlike 401 Unauthorized, the client's identity is known to the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrForbidden" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrForbidden"
+                }
               }
             }
           },
@@ -5982,7 +6767,9 @@
             "description": "The server cannot find the requested resource. In the browser, this means the URL is not recognized. In an API, this can also mean that the endpoint is valid but the resource itself does not exist. Servers may also send this response instead of 403 Forbidden to hide the existence of a resource from an unauthorized client. This response code is probably the most well known due to its frequent occurrence on the web.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrNotFound" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrNotFound"
+                }
               }
             }
           },
@@ -5990,7 +6777,9 @@
             "description": "This response is sent when a request conflicts with the current state of the server.",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrConflict" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrConflict"
+                }
               }
             }
           },
@@ -5998,7 +6787,9 @@
             "description": "The user has sent too many requests in a given amount of time (\"rate limiting\")",
             "content": {
               "application/json": {
-                "schema": { "$ref": "#/components/schemas/ErrTooManyRequests" }
+                "schema": {
+                  "$ref": "#/components/schemas/ErrTooManyRequests"
+                }
               }
             }
           },

@@ -62,6 +62,9 @@ export async function APIPage(props: ApiPageProps): Promise<ReactElement> {
             method={method}
             path={item.path}
             ctx={ctx}
+            baseUrls={
+              document.servers ? document.servers.map((s) => s.url) : []
+            }
             hasHead={hasHead}
           />
         );
