@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 5.6.0
+
+### Minor Changes
+
+- 196b78b: OpenAPI: Server selector to allow interacting with different API environments
+
 ## 5.5.11
 
 ### Patch Changes
