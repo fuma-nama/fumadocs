@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/scroll-area';
 import { useCopyButton } from '@/utils/use-copy-button';
 import { buttonVariants } from '@/components/ui/button';
+import type { ScrollAreaViewportProps } from '@radix-ui/react-scroll-area';
 
 export type CodeBlockProps = HTMLAttributes<HTMLElement> & {
   /**
@@ -39,12 +40,14 @@ export type CodeBlockProps = HTMLAttributes<HTMLElement> & {
    * @defaultValue false
    */
   keepBackground?: boolean;
+
+  viewportProps?: ScrollAreaViewportProps;
 };
 
 export const Pre = forwardRef<HTMLPreElement, HTMLAttributes<HTMLPreElement>>(
   ({ className, ...props }, ref) => {
     return (
-      <pre ref={ref} className={cn('max-h-[400px] p-4', className)} {...props}>
+      <pre ref={ref} className={cn('p-4', className)} {...props}>
         {props.children}
       </pre>
     );
@@ -60,7 +63,7 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
       allowCopy = true,
       keepBackground = false,
       icon,
-      className,
+      viewportProps,
       ...props
     },
     ref,
@@ -82,27 +85,29 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
     return (
       <figure
         ref={ref}
+        {...props}
         className={cn(
           'not-prose group fd-codeblock relative my-6 overflow-hidden rounded-lg border bg-fd-secondary/50 text-sm',
           keepBackground &&
             'bg-[var(--shiki-light-bg)] dark:bg-[var(--shiki-dark-bg)]',
-          className,
+          props.className,
         )}
-        {...props}
       >
         {title ? (
           <div className="flex flex-row items-center gap-2 border-b bg-fd-muted px-4 py-1.5">
             {icon ? (
               <div
                 className="text-fd-muted-foreground [&_svg]:size-3.5"
-                {...(typeof icon === 'string'
-                  ? {
-                      dangerouslySetInnerHTML: { __html: icon },
-                    }
-                  : {
-                      children: icon,
-                    })}
-              />
+                dangerouslySetInnerHTML={
+                  typeof icon === 'string'
+                    ? {
+                        __html: icon,
+                      }
+                    : undefined
+                }
+              >
+                {typeof icon !== 'string' ? icon : null}
+              </div>
             ) : null}
             <figcaption className="flex-1 truncate text-fd-muted-foreground">
               {title}
@@ -120,7 +125,12 @@ export const CodeBlock = forwardRef<HTMLElement, CodeBlockProps>(
           )
         )}
         <ScrollArea ref={areaRef} dir="ltr">
-          <ScrollViewport>{props.children}</ScrollViewport>
+          <ScrollViewport
+            {...viewportProps}
+            className={cn('max-h-[400px]', viewportProps?.className)}
+          >
+            {props.children}
+          </ScrollViewport>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
       </figure>
@@ -145,8 +155,8 @@ function CopyButton({
       className={cn(
         buttonVariants({
           color: 'ghost',
-          className: 'transition-all group-hover:opacity-100',
         }),
+        'transition-opacity group-hover:opacity-100',
         !checked && 'opacity-0',
         className,
       )}
