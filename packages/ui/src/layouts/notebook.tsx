@@ -76,7 +76,7 @@ export function DocsLayout({
         <LayoutBody
           {...props.containerProps}
           className={cn(
-            '[--fd-nav-height:3.5rem] md:[--fd-sidebar-width:260px] xl:[--fd-toc-width:260px]',
+            '[--fd-nav-height:3.5rem] md:[--fd-sidebar-width:260px] lg:[--fd-toc-width:260px] [&_#nd-toc]:max-lg:hidden [&_#nd-tocnav]:lg:hidden',
             props.containerProps?.className,
           )}
         >
@@ -141,15 +141,15 @@ function DocsNavbar({
   links: LinkItemType[];
 }) {
   return (
-    <Navbar className="h-14">
+    <Navbar id="nd-subnav" className="h-14 md:gap-1.5">
       {sidebarCollapsible ? (
-        <SidebarCollapseTrigger className="me-2 data-[collapsed=false]:hidden max-md:hidden" />
+        <SidebarCollapseTrigger className="-ms-1.5 text-fd-muted-foreground data-[collapsed=false]:hidden max-md:hidden" />
       ) : null}
       <SearchOnly>
         <LargeSearchToggle className="w-full max-w-[240px] rounded-lg max-md:hidden" />
       </SearchOnly>
       <Title url={nav.url} title={nav.title} className="md:hidden" />
-      <div className="ms-4 flex flex-1 flex-row items-center gap-6">
+      <div className="flex flex-1 flex-row items-center gap-6 px-2">
         {links
           .filter((item) => item.type !== 'icon')
           .map((item, i) => (
@@ -164,28 +164,30 @@ function DocsNavbar({
       <SearchOnly>
         <SearchToggle className="md:hidden" />
       </SearchOnly>
-      <NavbarSidebarTrigger className="-me-2 md:hidden" />
-      {links
-        .filter((item) => item.type === 'icon')
-        .map((item, i) => (
-          <BaseLinkItem
-            key={i}
-            item={item}
-            className={cn(
-              buttonVariants({ size: 'icon', color: 'ghost' }),
-              'text-fd-muted-foreground max-lg:hidden',
-            )}
-            aria-label={item.label}
-          >
-            {item.icon}
-          </BaseLinkItem>
-        ))}
+      <NavbarSidebarTrigger className="-me-1.5 max-lg:hidden md:hidden" />
+      <div className="flex flex-row items-center empty:hidden">
+        {links
+          .filter((item) => item.type === 'icon')
+          .map((item, i) => (
+            <BaseLinkItem
+              key={i}
+              item={item}
+              className={cn(
+                buttonVariants({ size: 'icon', color: 'ghost' }),
+                'text-fd-muted-foreground',
+              )}
+              aria-label={item.label}
+            >
+              {item.icon}
+            </BaseLinkItem>
+          ))}
+      </div>
       {i18n ? (
-        <LanguageToggle className="me-1.5">
+        <LanguageToggle>
           <Languages className="size-5" />
         </LanguageToggle>
       ) : null}
-      <ThemeToggle className="max-md:hidden" />
+      <ThemeToggle className="p-0 max-md:hidden" />
     </Navbar>
   );
 }

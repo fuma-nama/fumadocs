@@ -27,7 +27,6 @@ export function PageContainer(props: HTMLAttributes<HTMLDivElement>) {
 
   return (
     <div
-      id="nd-page"
       {...props}
       className={cn(
         'flex w-full min-w-0 max-w-[var(--fd-page-width)] flex-col md:transition-[max-width]',
@@ -52,8 +51,7 @@ export function PageHeader(props: HTMLAttributes<HTMLDivElement>) {
   const { isTransparent } = useNav();
 
   return (
-    <div
-      id="nd-tocnav"
+    <header
       {...props}
       className={cn(
         'sticky top-fd-layout-top z-10 flex flex-row items-center border-b border-fd-foreground/10 text-sm transition-colors',
@@ -70,7 +68,7 @@ export function PageHeader(props: HTMLAttributes<HTMLDivElement>) {
       }
     >
       {props.children}
-    </div>
+    </header>
   );
 }
 

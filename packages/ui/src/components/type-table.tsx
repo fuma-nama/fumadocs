@@ -57,7 +57,7 @@ export function TypeTable({
 }): React.ReactElement {
   return (
     <div className="not-prose overflow-auto whitespace-nowrap">
-      <table className="my-4 w-full text-left text-sm text-fd-muted-foreground">
+      <table className="my-4 w-full text-start text-sm text-fd-muted-foreground">
         <thead className="border-b">
           <tr>
             <th className={cn(th(), 'w-[45%]')}>Prop</th>
@@ -93,6 +93,7 @@ export function TypeTable({
                 ) : (
                   <span>-</span>
                 )}
+                √
               </td>
             </tr>
           ))}

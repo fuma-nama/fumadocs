@@ -129,6 +129,7 @@ export function DocsPage({
   return (
     <AnchorProvider toc={toc} single={tocOptions.single}>
       <PageContainer
+        id="nd-page"
         style={
           {
             '--fd-toc-width': tocEnabled ? undefined : '0px',
@@ -137,7 +138,7 @@ export function DocsPage({
       >
         {replaceOrDefault(
           { enabled: tocPopoverEnabled, component: tocPopoverReplace },
-          <PageHeader className="xl:hidden">
+          <PageHeader id="nd-tocnav">
             <TocPopover>
               <TocPopoverTrigger className="size-full" items={toc} />
               <TocPopoverContent>
@@ -158,7 +159,7 @@ export function DocsPage({
         )}
         <article
           className={cn(
-            'mx-auto flex w-full flex-1 flex-col gap-6 px-4 pt-10 md:px-8 md:pt-12',
+            'mx-auto flex w-full flex-1 flex-col gap-6 px-4 pt-10 md:px-7 md:pt-12',
             tocEnabled ? 'max-w-[860px]' : 'max-w-[1120px]',
           )}
         >
@@ -181,7 +182,7 @@ export function DocsPage({
       </PageContainer>
       {replaceOrDefault(
         { enabled: tocEnabled, component: tocReplace },
-        <Toc className="max-xl:hidden">
+        <Toc id="nd-toc">
           <div className="flex h-full w-[var(--fd-toc-width)] max-w-full flex-col gap-3 pe-2">
             {tocOptions.header}
             <h3 className="-ms-0.5 inline-flex items-center gap-1.5 text-sm text-fd-muted-foreground">

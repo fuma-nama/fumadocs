@@ -82,7 +82,7 @@ export function DocsLayout({
       <NavProvider transparentMode={transparentMode}>
         {replaceOrDefault(
           { enabled: navEnabled, component: navReplace },
-          <Navbar className="h-14 md:hidden">
+          <Navbar id="nd-subnav" className="h-14 md:hidden">
             <Title url={nav.url} title={nav.title} />
             <div className="flex flex-1 flex-row items-center gap-1">
               {nav.children}
@@ -98,7 +98,7 @@ export function DocsLayout({
           id="nd-docs-layout"
           {...props.containerProps}
           className={cn(
-            'flex flex-1 flex-row md:[--fd-sidebar-width:260px] xl:[--fd-toc-width:260px]',
+            'flex flex-1 flex-row md:[--fd-sidebar-width:260px] xl:[--fd-toc-width:260px] [&_#nd-toc]:max-xl:hidden [&_#nd-tocnav]:xl:hidden max-xl:[&_article]:mx-0',
             !navReplace && navEnabled
               ? '[--fd-nav-height:3.5rem] md:[--fd-nav-height:0px]'
               : null,
