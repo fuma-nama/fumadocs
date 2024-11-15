@@ -38,8 +38,6 @@ interface ObjectType {
   default?: string;
 }
 
-const th = cva('p-2 font-medium first:pl-0 last:pr-0');
-const td = cva('p-2 first:pl-0 last:pr-0');
 const field = cva('inline-flex flex-row items-center gap-1');
 const code = cva(
   'rounded-md bg-fd-secondary p-1 text-fd-secondary-foreground',
@@ -56,25 +54,25 @@ export function TypeTable({
   type: Record<string, ObjectType>;
 }): React.ReactElement {
   return (
-    <div className="not-prose overflow-auto whitespace-nowrap">
-      <table className="my-4 w-full text-start text-sm text-fd-muted-foreground">
-        <thead className="border-b">
+    <div className="overflow-auto whitespace-nowrap">
+      <table className="text-sm text-fd-muted-foreground">
+        <thead>
           <tr>
-            <th className={cn(th(), 'w-[45%]')}>Prop</th>
-            <th className={cn(th(), 'w-[30%]')}>Type</th>
-            <th className={cn(th(), 'w-1/4')}>Default</th>
+            <th className="w-[45%]">Prop</th>
+            <th className="w-[30%]">Type</th>
+            <th className="w-1/4">Default</th>
           </tr>
         </thead>
-        <tbody className="border-collapse divide-y divide-fd-border">
+        <tbody>
           {Object.entries(type).map(([key, value]) => (
             <tr key={key}>
-              <td className={td()}>
+              <td>
                 <div className={field()}>
                   <code className={cn(code({ color: 'primary' }))}>{key}</code>
                   {value.description ? <Info>{value.description}</Info> : null}
                 </div>
               </td>
-              <td className={td()}>
+              <td>
                 <div className={field()}>
                   <code className={code()}>{value.type}</code>
                   {value.typeDescription ? (
@@ -87,13 +85,12 @@ export function TypeTable({
                   ) : null}
                 </div>
               </td>
-              <td className={td()}>
+              <td>
                 {value.default ? (
                   <code className={code()}>{value.default}</code>
                 ) : (
                   <span>-</span>
                 )}
-                √
               </td>
             </tr>
           ))}
