@@ -34,7 +34,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@clack/prompts": "^0.7.0",
+    "@clack/prompts": "^0.8.0",
     "commander": "^12.1.0",
     "execa": "^9.5.1",
     "package-manager-detector": "^0.2.2",
