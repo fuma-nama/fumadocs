@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 14.4.2
+
+### Patch Changes
+
+- 0f1603a: Fix bugs
+  - fumadocs-core@14.4.2
+
 ## 14.4.1
 
 ### Patch Changes
