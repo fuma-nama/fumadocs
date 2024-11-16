@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 14.4.1
+
+### Patch Changes
+
+- 07474cb: fix codeblock paddings
+- 48a2c15: Control page styles from layouts
+  - fumadocs-core@14.4.1
+
 ## 14.4.0
 
 ### Minor Changes
