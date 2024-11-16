@@ -164,8 +164,8 @@ function DocsNavbar({
       <SearchOnly>
         <SearchToggle className="md:hidden" />
       </SearchOnly>
-      <NavbarSidebarTrigger className="-me-1.5 max-lg:hidden md:hidden" />
-      <div className="flex flex-row items-center empty:hidden">
+      <NavbarSidebarTrigger className="-me-1.5 md:hidden" />
+      <div className="flex flex-row items-center empty:hidden max-lg:hidden">
         {links
           .filter((item) => item.type === 'icon')
           .map((item, i) => (
