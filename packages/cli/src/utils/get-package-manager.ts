@@ -1,6 +1,6 @@
-import { detect } from 'package-manager-detector';
+import { detect, type AgentName } from 'package-manager-detector';
 
-export type PackageManager = 'npm' | 'pnpm' | 'yarn' | 'bun';
+export type PackageManager = AgentName;
 
 export async function getPackageManager(): Promise<PackageManager> {
   const result = await detect();
