@@ -41,7 +41,7 @@ export function APIInfo({
   return (
     <div className={cn('min-w-0 flex-1', className)} {...props}>
       <div className="sticky top-[var(--fd-api-info-top)] z-[4] mb-4 border-b border-fd-foreground/10 bg-fd-card/50 px-4 py-1.5 shadow-lg backdrop-blur-lg max-lg:-mx-3 max-md:-mx-4 md:rounded-xl md:border md:px-1.5">
-        <div className="mb-2 flex flex-row items-center gap-1.5">
+        <div className="flex flex-row items-center gap-1.5">
           <span
             className={cn(
               badgeVariants({ color: getBadgeColor(method) }),
@@ -68,7 +68,7 @@ export function API({
     <div
       {...props}
       className={cn(
-        'flex flex-col gap-x-6 gap-y-4 max-lg:[--fd-toc-height:46px] max-md:[--fd-toc-height:36px] xl:flex-row xl:items-start',
+        'flex flex-col gap-x-6 gap-y-4 max-xl:[--fd-toc-height:46px] max-md:[--fd-toc-height:36px] xl:flex-row xl:items-start',
         props.className,
       )}
       style={
