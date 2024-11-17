@@ -9,7 +9,6 @@ import { type ReactNode } from 'react';
 import { Fragment, jsx, jsxs } from 'react/jsx-runtime';
 import { createHighlighter } from 'shiki/bundle/web';
 import { createJavaScriptRegexEngine } from 'shiki/engine/javascript';
-import { createStyleTransformer } from 'fumadocs-core/server';
 import type { Root } from 'hast';
 
 interface MetaValue {
@@ -75,13 +74,21 @@ export function createProcessor(): Processor {
       transformers: [
         {
           name: 'pre-process',
+          line(hast) {
+            if (hast.children.length === 0) {
+              // Keep the empty lines when using grid layout
+              hast.children.push({
+                type: 'text',
+                value: ' ',
+              });
+            }
+          },
           preprocess(_, { meta }) {
             if (meta) {
               meta.__raw = filterMetaString(meta.__raw ?? '');
             }
           },
         },
-        createStyleTransformer(),
       ],
     });
   });

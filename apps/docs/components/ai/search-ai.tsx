@@ -140,7 +140,7 @@ function AIDialog({ type }: { type: EngineType }) {
 
   const messages = engine?.getHistory() ?? [];
   const activeBar = (
-    <div className="mt-2 border-t pt-1 flex flex-row items-center gap-2">
+    <div className="mt-2 flex flex-row items-center gap-2 border-t pt-1">
       <button
         type="button"
         className={cn(
@@ -275,7 +275,7 @@ function List(props: HTMLAttributes<HTMLDivElement>) {
     <div
       {...props}
       ref={containerRef}
-      className={cn('min-h-0 flex-1 overflow-auto px-2 py-2', props.className)}
+      className={cn('min-h-0 flex-1 overflow-auto p-2', props.className)}
     >
       <div className="flex flex-col gap-1">{props.children}</div>
     </div>
@@ -331,16 +331,20 @@ const Message = memo(
         const { createProcessor } = await import('./markdown-processor');
 
         processor ??= createProcessor();
-        const result = await processor
-          .process(
-            message.content,
-            // @ts-expect-error -- avoid conflicts between JSX types and React types
-            {
-              ...defaultMdxComponents,
-              img: undefined, // use JSX
-            },
-          )
-          .catch(() => undefined);
+        let result = map.get(message.content);
+
+        if (!result) {
+          result = await processor
+            .process(
+              message.content,
+              // @ts-expect-error -- avoid conflicts between JSX types and React types
+              {
+                ...defaultMdxComponents,
+                img: undefined, // use JSX
+              },
+            )
+            .catch(() => undefined);
+        }
 
         if (result) {
           map.set(message.content, result);
@@ -369,14 +373,14 @@ const Message = memo(
         </p>
         <div className="prose text-sm">{rendered}</div>
         {references.length > 0 ? (
-          <div className="flex flex-row items-center flex-wrap gap-1 mt-2">
+          <div className="mt-2 flex flex-row flex-wrap items-center gap-1">
             {references.map((item, i) => (
               <Link
                 key={i}
                 href={item.url}
-                className="block p-2 border rounded-lg bg-fd-secondary text-fd-secondary-foreground transition-colors hover:text-fd-accent-foreground hover:bg-fd-accent"
+                className="block rounded-lg border bg-fd-secondary p-2 text-fd-secondary-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground"
               >
-                <p className="font-medium text-sm">{item.title}</p>
+                <p className="text-sm font-medium">{item.title}</p>
                 <p className="text-xs text-fd-muted-foreground">
                   {item.description}
                 </p>
@@ -472,7 +476,7 @@ export function Trigger(props: ButtonHTMLAttributes<HTMLButtonElement>) {
                 Orama
               </button>
             </div>
-            <p className="text-xs text-fd-muted-foreground mt-2">
+            <p className="mt-2 text-xs text-fd-muted-foreground">
               Answers from AI may be inaccurate, please verify the information.
             </p>
           </div>

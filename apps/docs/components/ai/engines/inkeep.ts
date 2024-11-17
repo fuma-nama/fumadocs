@@ -36,7 +36,8 @@ export async function createInkeepEngine(): Promise<Engine> {
         integrationId: integrationId!,
         stream: true,
         chatSession: {
-          guidance: 'make sure to format code blocks',
+          guidance:
+            'make sure to format code blocks, and add language/title to it',
           messages,
         },
       });
