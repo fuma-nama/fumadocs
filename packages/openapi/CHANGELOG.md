@@ -1,5 +1,12 @@
 # @fuma-docs/openapi
 
+## 5.7.0
+
+### Minor Changes
+
+- c66df64: OpenAPI: Display the server selector only when more than one server is defined in the OpenAPI schema
+  OpenAPI: Improve APIInfo position for better visibility on smaller screens
+
 ## 5.6.2
 
 ### Patch Changes
