@@ -68,7 +68,7 @@ export function API({
     <div
       {...props}
       className={cn(
-        'flex flex-col gap-x-6 gap-y-4 max-lg:[--fd-toc-height:46px] max-md:[--fd-toc-height:36px] xl:flex-row xl:items-start',
+        'flex flex-col gap-x-6 gap-y-4 max-xl:[--fd-toc-height:46px] max-md:[--fd-toc-height:36px] xl:flex-row xl:items-start',
         props.className,
       )}
       style={
