@@ -7,7 +7,7 @@
   "dependencies": {
     "@content-collections/core": "^0.7.3",
     "@content-collections/mdx": "^0.2.0",
-    "@content-collections/next": "^0.2.3",
+    "@content-collections/next": "^0.2.4",
     "@types/mdx": "^2.0.13",
     "@types/node": "22.9.0",
     "@types/react": "^18.3.12",

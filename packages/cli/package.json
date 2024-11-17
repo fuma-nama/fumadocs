@@ -37,7 +37,7 @@
     "@clack/prompts": "^0.8.0",
     "commander": "^12.1.0",
     "execa": "^9.5.1",
-    "package-manager-detector": "^0.2.2",
+    "package-manager-detector": "^0.2.4",
     "picocolors": "^1.1.1",
     "ts-morph": "^24.0.0"
   },
