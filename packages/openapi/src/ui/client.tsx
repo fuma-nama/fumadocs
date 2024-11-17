@@ -76,10 +76,11 @@ export function CopyRouteButton({
 
 export function BaseUrlSelect({ baseUrls }: { baseUrls: string[] }) {
   const { baseUrl, setBaseUrl } = useApiContext();
-  if (baseUrls.length === 0) return null;
+
+  if (baseUrls.length <= 1) return null;
 
   return (
-    <div className="flex flex-row items-center gap-1 px-1">
+    <div className="flex flex-row items-center gap-1 px-1 mt-2">
       <span className="p-0.5 text-xs font-medium text-fd-muted-foreground">
         Server
       </span>
