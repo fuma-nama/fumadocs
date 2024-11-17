@@ -2,32 +2,45 @@ import type { Engine } from '@/components/ai/search-ai';
 import { InkeepAI } from '@inkeep/ai-api/sdk';
 import type { RecordsCited } from '@inkeep/ai-api/models/components';
 
+const integrationId = process.env.NEXT_PUBLIC_INKEEP_INTEGRATION_ID;
+const apiKey = process.env.NEXT_PUBLIC_INKEEP_API_KEY;
+
+if (!integrationId || !apiKey) throw new Error('Missing required api keys');
+
 export async function createInkeepEngine(): Promise<Engine> {
   const ai = new InkeepAI({
-    apiKey: process.env.NEXT_PUBLIC_INKEEP_API_KEY,
+    apiKey,
   });
+
   let messages: {
     role: 'user' | 'assistant';
     content: string;
     recordsCited?: RecordsCited;
   }[] = [];
-
+  let sessionId: string | undefined;
   let aborted = true;
 
   async function generateNew(
     onUpdate?: (full: string) => void,
     onEnd?: (full: string) => void,
   ) {
-    const result = await ai.chatSession.create({
-      integrationId: process.env.NEXT_PUBLIC_INKEEP_INTEGRATION_ID!,
-      stream: true,
-      chatSession: {
-        messages: messages.map((message) => ({
-          role: message.role,
-          content: message.content,
-        })),
-      },
-    });
+    let result;
+    if (sessionId) {
+      result = await ai.chatSession.continue(sessionId, {
+        integrationId: integrationId!,
+        message: messages.at(-1)!,
+        stream: true,
+      });
+    } else {
+      result = await ai.chatSession.create({
+        integrationId: integrationId!,
+        stream: true,
+        chatSession: {
+          guidance: 'make sure to format code blocks',
+          messages,
+        },
+      });
+    }
 
     if (result.chatResultStream == null) {
       const content =
@@ -58,6 +71,7 @@ export async function createInkeepEngine(): Promise<Engine> {
       if (event.event === 'message_chunk') {
         message.content += event.data.contentChunk;
 
+        sessionId = event.data.chatSessionId ?? sessionId;
         onUpdate?.(message.content);
       }
     }
@@ -97,6 +111,7 @@ export async function createInkeepEngine(): Promise<Engine> {
       }));
     },
     clearHistory() {
+      sessionId = undefined;
       messages = [];
     },
     abortAnswer() {

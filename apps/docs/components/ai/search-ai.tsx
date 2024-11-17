@@ -327,21 +327,25 @@ const Message = memo(
     );
 
     useEffect(() => {
-      const run = async (): Promise<void> => {
+      const run = async () => {
         const { createProcessor } = await import('./markdown-processor');
 
         processor ??= createProcessor();
-        const result = await processor.process(
-          message.content,
-          // @ts-expect-error -- avoid conflicts between JSX types and React types
-          {
-            ...defaultMdxComponents,
-            img: undefined, // use JSX
-          },
-        );
+        const result = await processor
+          .process(
+            message.content,
+            // @ts-expect-error -- avoid conflicts between JSX types and React types
+            {
+              ...defaultMdxComponents,
+              img: undefined, // use JSX
+            },
+          )
+          .catch(() => undefined);
 
-        map.set(message.content, result);
-        setRendered(result);
+        if (result) {
+          map.set(message.content, result);
+          setRendered(result);
+        }
       };
 
       void run();
