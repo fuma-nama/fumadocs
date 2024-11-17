@@ -7,7 +7,7 @@ import rehypeShikiFromHighlighter from '@shikijs/rehype/core';
 import { type Components, toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import { type ReactNode } from 'react';
 import { Fragment, jsx, jsxs } from 'react/jsx-runtime';
-import { createHighlighter } from 'shiki';
+import { createHighlighter } from 'shiki/bundle/web';
 import { createJavaScriptRegexEngine } from 'shiki/engine/javascript';
 import { createStyleTransformer } from 'fumadocs-core/server';
 import type { Root } from 'hast';

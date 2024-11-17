@@ -1,5 +1,5 @@
 import type { Engine } from '@/components/ai/search-ai';
-import { InkeepAI } from '@inkeep/ai-api';
+import { InkeepAI } from '@inkeep/ai-api/sdk';
 import type { RecordsCited } from '@inkeep/ai-api/models/components';
 
 export async function createInkeepEngine(): Promise<Engine> {
@@ -22,7 +22,10 @@ export async function createInkeepEngine(): Promise<Engine> {
       integrationId: process.env.NEXT_PUBLIC_INKEEP_INTEGRATION_ID!,
       stream: true,
       chatSession: {
-        messages,
+        messages: messages.map((message) => ({
+          role: message.role,
+          content: message.content,
+        })),
       },
     });
 

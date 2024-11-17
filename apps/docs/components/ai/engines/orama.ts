@@ -16,41 +16,29 @@ export async function createOramaEngine(): Promise<Engine> {
     endpoint,
     api_key: apiKey,
   });
-  let onSuggestions: (suggestions: string[]) => void | undefined;
-  let onSourceChange: (sources: MessageReference[]) => void | undefined;
 
   const instance = client.createAnswerSession({
     userContext: context,
     inferenceType: 'documentation',
     events: {
       onSourceChange(sources) {
-        onSourceChange?.(
-          (sources as unknown as typeof sources.hits).map(
-            (result) => result.document as MessageReference,
-          ),
-        );
+        const last = instance.getMessages().at(-1);
+
+        if (last) {
+          (last as MessageRecord).references = (
+            sources as unknown as typeof sources.hits
+          ).map((result) => result.document as MessageReference);
+        }
       },
       onRelatedQueries(queries) {
-        onSuggestions?.(queries);
+        const last = instance.getMessages().at(-1);
+
+        if (last) {
+          (last as MessageRecord).suggestions = queries;
+        }
       },
     },
   });
-
-  onSuggestions = (suggestions) => {
-    const last = instance.getMessages().at(-1);
-
-    if (last) {
-      (last as MessageRecord).suggestions = suggestions;
-    }
-  };
-
-  onSourceChange = (sources) => {
-    const last = instance.getMessages().at(-1);
-
-    if (last) {
-      (last as MessageRecord).references = sources;
-    }
-  };
 
   return {
     async prompt(text, onUpdate, onEnd) {
