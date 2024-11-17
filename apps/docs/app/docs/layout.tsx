@@ -140,7 +140,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           buttonVariants({
             variant: 'secondary',
           }),
-          'fixed bottom-0 left-1/2 h-fit -translate-x-1/2 gap-1.5 rounded-b-none rounded-t-2xl bg-secondary/50 pb-1 text-fd-muted-foreground shadow-lg backdrop-blur-lg',
+          'fixed bottom-4 right-4 md:bottom-8 md:right-8 gap-2 rounded-xl text-fd-secondary-foreground/80 bg-secondary/50 shadow-lg backdrop-blur-lg',
         )}
       >
         <MessageCircle className="size-4" />
