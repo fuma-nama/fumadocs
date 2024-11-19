@@ -13,6 +13,8 @@ import {
   useRef,
   useLayoutEffect,
   useEffect,
+  Children,
+  isValidElement,
 } from 'react';
 import { cn } from '@/utils/cn';
 import * as Primitive from './ui/tabs';
@@ -52,6 +54,11 @@ export interface TabsProps extends BaseProps {
   defaultIndex?: number;
 
   items?: string[];
+
+  /**
+   * If true, updates the URL hash based on the tab's id
+   */
+  updateAnchor?: boolean;
 }
 
 const ValueChangeContext = createContext<(v: string) => void>(() => undefined);
@@ -61,12 +68,24 @@ export function Tabs({
   items = [],
   persist = false,
   defaultIndex = 0,
+  updateAnchor = false,
   ...props
 }: TabsProps): React.ReactElement {
   const values = useMemo(() => items.map((item) => toValue(item)), [items]);
   const [value, setValue] = useState(values[defaultIndex]);
   const valuesRef = useRef(values);
   valuesRef.current = values;
+  const valueToIdMap = useMemo(() => {
+    const map = new Map<string, string>();
+    Children.forEach(props.children, (child, index) => {
+      if (isValidElement(child)) {
+        const v = values[index];
+        const id = child.props?.id;
+        if (v && id) map.set(v, id);
+      }
+    });
+    return map;
+  }, [props.children, values]);
 
   useLayoutEffect(() => {
     if (!groupId) return;
@@ -88,6 +107,13 @@ export function Tabs({
 
   const onValueChange = useCallback(
     (v: string) => {
+      if (updateAnchor) {
+        const id = valueToIdMap.get(v);
+        if (id) {
+          window.history.replaceState(null, '', `#${id}`);
+        }
+      }
+
       if (groupId) {
         listeners.get(groupId)?.forEach((item) => {
           item(v);
@@ -99,7 +125,7 @@ export function Tabs({
         setValue(v);
       }
     },
-    [groupId, persist],
+    [updateAnchor, groupId, valueToIdMap, persist],
   );
 
   return (
