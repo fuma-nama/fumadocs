@@ -125,7 +125,7 @@ export function Tabs({
         setValue(v);
       }
     },
-    [updateAnchor, groupId, valueToIdMap, persist],
+    [groupId, persist, updateAnchor, valueToIdMap]
   );
 
   return (
