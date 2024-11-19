@@ -1,9 +1,12 @@
-import typography from '@tailwindcss/typography';
 import plugin from 'tailwindcss/plugin';
 import type { CSSRuleObject, PresetsConfig } from 'tailwindcss/types/config';
 import { presets } from './theme/colors';
 import { animations } from './theme/animations';
-import { typography as typographyConfig } from './theme/typography';
+import {
+  type Options as TypographyOptions,
+  typography,
+} from './theme/typography';
+import { roundedTable } from '@/theme/typography/styles';
 
 export interface DocsUIOptions {
   /**
@@ -43,6 +46,8 @@ export interface DocsUIOptions {
    * Disable custom table styles
    */
   disableRoundedTable?: boolean;
+
+  typography?: TypographyOptions;
 }
 
 type Keys =
@@ -272,15 +277,20 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
 export function createPreset(options: DocsUIOptions = {}): PresetsConfig {
   return {
     darkMode: 'class',
-    plugins: [typography, docsUi(options)],
+    plugins: [typography(options.typography ?? {}), docsUi(options)],
     theme: {
       extend: {
         typography: {
-          DEFAULT: typographyConfig(options),
+          DEFAULT: {
+            css: {
+              ...(!options.disableRoundedTable ? roundedTable : undefined),
+            },
+          },
         },
       },
     },
   };
 }
 
+export { typography };
 export { presets } from './theme/colors';
