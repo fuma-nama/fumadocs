@@ -77,15 +77,15 @@ export function Tabs({
   valuesRef.current = values;
   const valueToIdMap = useMemo(() => {
     const map = new Map<string, string>();
-    Children.forEach(props.children, (child, index) => {
+    Children.forEach(props.children, (child) => {
       if (isValidElement(child)) {
-        const v = values[index];
+        const v = toValue(child.props?.value);
         const id = child.props?.id;
         if (v && id) map.set(v, id);
       }
     });
     return map;
-  }, [props.children, values]);
+  }, [props.children]);
 
   useLayoutEffect(() => {
     if (!groupId) return;
