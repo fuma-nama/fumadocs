@@ -13,8 +13,6 @@ import {
   useRef,
   useLayoutEffect,
   useEffect,
-  Children,
-  isValidElement,
 } from 'react';
 import { cn } from '@/utils/cn';
 import * as Primitive from './ui/tabs';
@@ -61,7 +59,13 @@ export interface TabsProps extends BaseProps {
   updateAnchor?: boolean;
 }
 
-const ValueChangeContext = createContext<(v: string) => void>(() => undefined);
+const ValueChangeContext = createContext<{
+  onValueChange: (v: string) => void,
+  valueToIdMap: Map<string, string>,
+} >({
+  onValueChange: () => undefined,
+  valueToIdMap: new Map(),
+});
 
 export function Tabs({
   groupId,
@@ -76,17 +80,8 @@ export function Tabs({
   const [value, setValue] = useState(values[defaultIndex]);
   const valuesRef = useRef(values);
   valuesRef.current = values;
-  const valueToIdMap = useMemo(() => {
-    const map = new Map<string, string>();
-    Children.forEach(children, (child) => {
-      if (isValidElement(child)) {
-        const v = child.props?.value;
-        const id = child.props?.id;
-        if (v && id) map.set(toValue(v), id);
-      }
-    });
-    return map;
-  }, [children]);
+
+  const valueToIdMapRef = useRef(new Map<string, string>());
 
   useLayoutEffect(() => {
     if (!groupId) return;
@@ -109,7 +104,7 @@ export function Tabs({
   const onValueChange = useCallback(
     (v: string) => {
       if (updateAnchor) {
-        const id = valueToIdMap.get(v);
+        const id = valueToIdMapRef.current.get(v);
         if (id) {
           window.history.replaceState(null, '', `#${id}`);
         }
@@ -126,7 +121,7 @@ export function Tabs({
         setValue(v);
       }
     },
-    [groupId, persist, valueToIdMap, updateAnchor]
+    [groupId, persist, updateAnchor]
   );
 
   return (
@@ -143,7 +138,7 @@ export function Tabs({
           </Primitive.TabsTrigger>
         ))}
       </Primitive.TabsList>
-      <ValueChangeContext.Provider value={onValueChange}>
+      <ValueChangeContext.Provider value={{ onValueChange, valueToIdMap: valueToIdMapRef.current }}>
         {children}
       </ValueChangeContext.Provider>
     </Primitive.Tabs>
@@ -160,7 +155,7 @@ export function Tab({
   ...props
 }: TabsContentProps): React.ReactElement {
   const v = toValue(value);
-  const onValueChange = useContext(ValueChangeContext);
+  const { onValueChange, valueToIdMap } = useContext(ValueChangeContext);
 
   useEffect(() => {
     const hash = window.location.hash.slice(1);
@@ -168,7 +163,17 @@ export function Tab({
     if (hash === props.id) {
       onValueChange(v);
     }
-  }, [onValueChange, props.id, v]);
+
+    if (props.id) {
+      valueToIdMap.set(v, props.id)
+    }
+
+    return () => {
+      if (props.id) {
+        valueToIdMap.delete(v);
+      }
+    }
+  }, [onValueChange, props.id, v, valueToIdMap]);
 
   return (
     <Primitive.TabsContent
