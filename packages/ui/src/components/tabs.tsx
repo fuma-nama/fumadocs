@@ -69,6 +69,7 @@ export function Tabs({
   persist = false,
   defaultIndex = 0,
   updateAnchor = false,
+  children,
   ...props
 }: TabsProps): React.ReactElement {
   const values = useMemo(() => items.map((item) => toValue(item)), [items]);
@@ -77,7 +78,7 @@ export function Tabs({
   valuesRef.current = values;
   const valueToIdMap = useMemo(() => {
     const map = new Map<string, string>();
-    Children.forEach(props.children, (child) => {
+    Children.forEach(children, (child) => {
       if (isValidElement(child)) {
         const v = child.props?.value;
         const id = child.props?.id;
@@ -85,7 +86,7 @@ export function Tabs({
       }
     });
     return map;
-  }, [props.children]);
+  }, [children]);
 
   useLayoutEffect(() => {
     if (!groupId) return;
@@ -125,7 +126,7 @@ export function Tabs({
         setValue(v);
       }
     },
-    [groupId, persist, updateAnchor, valueToIdMap]
+    [groupId, persist, valueToIdMap, updateAnchor]
   );
 
   return (
@@ -143,7 +144,7 @@ export function Tabs({
         ))}
       </Primitive.TabsList>
       <ValueChangeContext.Provider value={onValueChange}>
-        {props.children}
+        {children}
       </ValueChangeContext.Provider>
     </Primitive.Tabs>
   );
