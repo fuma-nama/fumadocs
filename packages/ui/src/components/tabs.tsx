@@ -79,9 +79,9 @@ export function Tabs({
     const map = new Map<string, string>();
     Children.forEach(props.children, (child) => {
       if (isValidElement(child)) {
-        const v = toValue(child.props?.value);
+        const v = child.props?.value;
         const id = child.props?.id;
-        if (v && id) map.set(v, id);
+        if (v && id) map.set(toValue(v), id);
       }
     });
     return map;
