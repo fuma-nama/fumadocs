@@ -1153,6 +1153,9 @@ importers:
       '@types/react-dom':
         specifier: ^18.3.1
         version: 18.3.1
+      autoprefixer:
+        specifier: ^10.4.20
+        version: 10.4.20(postcss@8.4.49)
       eslint-config-custom:
         specifier: workspace:*
         version: link:../eslint-config-custom
@@ -1165,9 +1168,6 @@ importers:
       postcss-cli:
         specifier: ^11.0.0
         version: 11.0.0(jiti@2.2.1)(postcss@8.4.49)
-      postcss-lightningcss:
-        specifier: ^1.0.1
-        version: 1.0.1(postcss@8.4.49)
       tailwindcss:
         specifier: ^3.4.15
         version: 3.4.15
