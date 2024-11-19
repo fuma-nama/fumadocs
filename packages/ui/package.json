@@ -75,12 +75,12 @@
     "lodash.merge": "^4.6.2",
     "lucide-react": "^0.460.0",
     "next-themes": "^0.4.3",
+    "fumadocs-core": "workspace:*",
     "postcss-selector-parser": "^7.0.0",
     "react-medium-image-zoom": "^5.2.11",
     "tailwind-merge": "^2.5.4"
   },
   "devDependencies": {
-    "fumadocs-core": "workspace:*",
     "@fumadocs/cli": "workspace:*",
     "@next/eslint-plugin-next": "^15.0.3",
     "@types/lodash.merge": "^4.6.9",
@@ -96,7 +96,6 @@
     "tsconfig": "workspace:*"
   },
   "peerDependencies": {
-    "fumadocs-core": "workspace:*",
     "next": "14.x.x || 15.x.x",
     "react": ">= 18",
     "react-dom": ">= 18",
