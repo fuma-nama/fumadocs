@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 14.5.1
+
+### Patch Changes
+
+- 6fd480f: Fix old browser compatibility
+  - fumadocs-core@14.5.1
+
 ## 14.5.0
 
 ### Minor Changes
