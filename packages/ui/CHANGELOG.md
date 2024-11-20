@@ -1,5 +1,19 @@
 # next-docs-ui
 
+## 14.5.0
+
+### Minor Changes
+
+- 66c70ec: **Replace official Tailwind CSS typography plugin**
+
+  - Other variants like `prose-sm` and `prose-gray` are removed, as it's supposed to only provide support for Fumadocs UI typography styles.
+
+- 05d224c: added the updateAnchor option for the Tabs ui component
+
+### Patch Changes
+
+- fumadocs-core@14.5.0
+
 ## 14.4.2
 
 ### Patch Changes
