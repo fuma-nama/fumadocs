@@ -60,9 +60,9 @@ export interface TabsProps extends BaseProps {
 }
 
 const TabsContext = createContext<{
-  onValueChange: (v: string) => void,
-  valueToIdMap: Map<string, string>,
-} >({
+  onValueChange: (v: string) => void;
+  valueToIdMap: Map<string, string>;
+}>({
   onValueChange: () => undefined,
   valueToIdMap: new Map(),
 });
@@ -121,13 +121,16 @@ export function Tabs({
         setValue(v);
       }
     },
-    [groupId, persist, updateAnchor]
+    [groupId, persist, updateAnchor],
   );
 
-  const contextValue = useMemo(() => ({
-    onValueChange,
-    valueToIdMap: valueToIdMapRef.current,
-  }), [onValueChange]);
+  const contextValue = useMemo(
+    () => ({
+      onValueChange,
+      valueToIdMap: valueToIdMapRef.current,
+    }),
+    [onValueChange],
+  );
 
   return (
     <Primitive.Tabs
@@ -170,14 +173,14 @@ export function Tab({
     }
 
     if (props.id) {
-      valueToIdMap.set(v, props.id)
+      valueToIdMap.set(v, props.id);
     }
 
     return () => {
       if (props.id) {
         valueToIdMap.delete(v);
       }
-    }
+    };
   }, [onValueChange, props.id, v, valueToIdMap]);
 
   return (
