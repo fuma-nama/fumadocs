@@ -16,10 +16,16 @@ import { cn } from '@/utils/cn';
 import { useCopyButton } from '@/utils/use-copy-button';
 import { buttonVariants } from '@/components/ui/button';
 
+interface CustomProps {
+  type?: 'single' | 'multiple';
+}
+
 export const Accordions = forwardRef<
   HTMLDivElement,
-  | Omit<AccordionSingleProps, 'value' | 'onValueChange'>
-  | Omit<AccordionMultipleProps, 'value' | 'onValueChange'>
+  (
+    | Omit<AccordionSingleProps, 'value' | 'onValueChange' | 'type'> & CustomProps
+    | Omit<AccordionMultipleProps, 'value' | 'onValueChange' | 'type'> & CustomProps
+  )
 >(({ type = 'single', className, defaultValue, ...props }, ref) => {
   const [value, setValue] = useState<string | string[]>(
     type === 'single' ? (defaultValue ?? '') : (defaultValue ?? []),
