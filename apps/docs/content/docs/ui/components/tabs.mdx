@@ -80,6 +80,35 @@ You can add the hash `#tab-cpp` to your URL and reload, the C++ tab will be acti
   </Tab>
 </Tabs>
 
+Additionally, the `updateAnchor` property can be set to `true` in the `Tabs` component
+to automatically update the URL hash whenever time a new tab is selected:
+
+```mdx
+<Tabs items={['Javascript', 'Rust', 'C++']} updateAnchor>
+  <Tab id="tab-js" value="Javascript">
+    Javascript is weird
+  </Tab>
+  <Tab id="tab-rs" value="Rust">
+    Rust is fast
+  </Tab>
+  <Tab id="tab-cpp" value="C++" >
+    `Hello World`
+  </Tab>
+</Tabs>
+```
+
+<Tabs items={['Javascript', 'Rust', 'C++']} updateAnchor>
+  <Tab id="tab-js" value="Javascript">
+    Javascript is weird
+  </Tab>
+  <Tab id="tab-rs" value="Rust">
+    Rust is fast
+  </Tab>
+  <Tab id="tab-cpp" value="C++" >
+    `Hello World`
+  </Tab>
+</Tabs>
+
 ### Advanced
 
 You can use the styled Radix UI primitive directly from exported `Primitive`.
