@@ -6,6 +6,8 @@ description:
 preview: tabs
 ---
 
+import { UrlBar } from './tabs.client';
+
 ## Usage
 
 Import it in your MDX documents.
@@ -96,6 +98,8 @@ to automatically update the URL hash whenever time a new tab is selected:
   </Tab>
 </Tabs>
 ```
+
+<UrlBar />
 
 <Tabs items={['Hello', 'World']} updateAnchor>
   <Tab id="tab-hello" value="Hello">

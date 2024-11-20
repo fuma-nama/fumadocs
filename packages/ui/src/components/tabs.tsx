@@ -98,9 +98,9 @@ export function Tabs({
     const hash = window.location.hash.slice(1);
     if (!hash) return;
 
-    const entry = valueToIdMapRef.current
-      .entries()
-      .find(([_, id]) => id === hash);
+    const entry = Array.from(valueToIdMapRef.current.entries()).find(
+      ([_, id]) => id === hash,
+    );
 
     if (entry) setValue(entry[0]);
   }, []);
