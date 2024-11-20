@@ -6,9 +6,10 @@ import {
   type Options as TypographyOptions,
   typography,
 } from './theme/typography';
-import { roundedTable } from '@/theme/typography/styles';
+import type { StyleOptions } from '@/theme/typography/styles';
 
-export interface DocsUIOptions {
+export interface DocsUIOptions
+  extends Pick<StyleOptions, 'disableRoundedTable'> {
   /**
    * Prefix to the variable name of colors
    *
@@ -41,11 +42,6 @@ export interface DocsUIOptions {
    * Color preset
    */
   preset?: keyof typeof presets | Preset;
-
-  /**
-   * Disable custom table styles
-   */
-  disableRoundedTable?: boolean;
 
   typography?: TypographyOptions;
 }
@@ -277,18 +273,13 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
 export function createPreset(options: DocsUIOptions = {}): PresetsConfig {
   return {
     darkMode: 'class',
-    plugins: [typography(options.typography ?? {}), docsUi(options)],
-    theme: {
-      extend: {
-        typography: {
-          DEFAULT: {
-            css: {
-              ...(!options.disableRoundedTable ? roundedTable : undefined),
-            },
-          },
-        },
-      },
-    },
+    plugins: [
+      typography({
+        disableRoundedTable: options.disableRoundedTable,
+        ...options.typography,
+      }),
+      docsUi(options),
+    ],
   };
 }
 

@@ -3,7 +3,7 @@ import plugin from 'tailwindcss/plugin';
 import merge from 'lodash.merge';
 import parser, { type Pseudo } from 'postcss-selector-parser';
 
-export interface Options {
+export interface Options extends styles.StyleOptions {
   className?: string;
 }
 
@@ -153,10 +153,10 @@ const SELECTORS = [
 ];
 
 export const typography = plugin.withOptions<Options>(
-  ({ className = 'prose' } = {}) => {
+  ({ className = 'prose', ...styleOptions } = {}) => {
     return ({ addVariant, addComponents, theme, ...rest }) => {
       const prefix = (rest as unknown as { prefix: Context['prefix'] }).prefix;
-      const modifiers = theme('typography') as Record<string, object>;
+      const modifiers = theme('typography') as typeof styles;
 
       for (const [name, ...values] of SELECTORS) {
         const selectors = values.length === 0 ? [name] : values;
@@ -172,7 +172,7 @@ export const typography = plugin.withOptions<Options>(
       }
 
       addComponents({
-        [`.${className}`]: configToCss(modifiers.DEFAULT, {
+        [`.${className}`]: configToCss(modifiers.DEFAULT(styleOptions), {
           className,
           modifier: 'DEFAULT',
           prefix,

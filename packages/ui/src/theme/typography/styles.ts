@@ -32,35 +32,98 @@ const colors = {
   '--tw-prose-kbd-shadows': `theme('colors.fd-primary.DEFAULT / 50%')`,
 };
 
-export const roundedTable = {
+const roundedTable = {
   table: {
     borderCollapse: 'separate',
     borderSpacing: '0',
     '@apply bg-fd-card rounded-lg border overflow-hidden': '',
   },
-  thead: {
-    border: '0',
-  },
   th: {
-    '@apply !p-2.5 border-s bg-fd-muted': '',
+    textAlign: 'start',
+    '@apply p-2.5 border-s bg-fd-muted': '',
   },
-  'th:first-of-type': {
+  'th:first-child': {
     '@apply border-s-0': '',
   },
-
-  'th, td:not(tr:last-of-type *)': {
+  'th:not(tr:last-child *), td:not(tr:last-child *)': {
     '@apply border-b': '',
   },
-
   td: {
-    '@apply border-s !p-2.5': '',
+    textAlign: 'start',
+    '@apply border-s p-2.5': '',
   },
-  'td:first-of-type': {
+  'td:first-child': {
     '@apply border-s-0': '',
+  },
+  'tfoot th, tfoot td': {
+    borderTopWidth: '1px',
+    borderTopColor: 'var(--tw-prose-th-borders)',
+  },
+  'thead th, thead td': {
+    borderBottomWidth: '1px',
+    borderBottomColor: 'var(--tw-prose-th-borders)',
   },
 };
 
-export const DEFAULT = {
+const normalTable = {
+  thead: {
+    borderBottomWidth: '1px',
+    borderBottomColor: 'var(--tw-prose-th-borders)',
+  },
+  'thead th': {
+    verticalAlign: 'bottom',
+    paddingInlineEnd: em(8, 14),
+    paddingBottom: em(8, 14),
+    paddingInlineStart: em(8, 14),
+  },
+  'thead th:first-child': {
+    paddingInlineStart: '0',
+  },
+  'thead th:last-child': {
+    paddingInlineEnd: '0',
+  },
+  'tbody td, tfoot td': {
+    paddingTop: em(8, 14),
+    paddingInlineEnd: em(8, 14),
+    paddingBottom: em(8, 14),
+    paddingInlineStart: em(8, 14),
+  },
+  'tbody td:first-child, tfoot td:first-child': {
+    paddingInlineStart: '0',
+  },
+  'tbody td:last-child, tfoot td:last-child': {
+    paddingInlineEnd: '0',
+  },
+  'tbody tr': {
+    borderBottomWidth: '1px',
+    borderBottomColor: 'var(--tw-prose-td-borders)',
+  },
+  'tbody tr:last-child': {
+    borderBottomWidth: '0',
+  },
+  'tbody td': {
+    verticalAlign: 'baseline',
+  },
+  tfoot: {
+    borderTopWidth: '1px',
+    borderTopColor: 'var(--tw-prose-th-borders)',
+  },
+  'tfoot td': {
+    verticalAlign: 'top',
+  },
+  'th, td': {
+    textAlign: 'start',
+  },
+};
+
+export interface StyleOptions {
+  /**
+   * Disable custom table styles
+   */
+  disableRoundedTable?: boolean;
+}
+
+export const DEFAULT = ({ disableRoundedTable }: StyleOptions) => ({
   css: [
     {
       color: 'var(--tw-prose-body)',
@@ -335,55 +398,9 @@ export const DEFAULT = {
         marginTop: em(32, 16),
         marginBottom: em(32, 16),
       },
-      thead: {
-        borderBottomWidth: '1px',
-        borderBottomColor: 'var(--tw-prose-th-borders)',
-      },
       'thead th': {
         color: 'var(--tw-prose-headings)',
         fontWeight: '600',
-        verticalAlign: 'bottom',
-        paddingInlineEnd: em(8, 14),
-        paddingBottom: em(8, 14),
-        paddingInlineStart: em(8, 14),
-      },
-      'thead th:first-child': {
-        paddingInlineStart: '0',
-      },
-      'thead th:last-child': {
-        paddingInlineEnd: '0',
-      },
-      'tbody td, tfoot td': {
-        paddingTop: em(8, 14),
-        paddingInlineEnd: em(8, 14),
-        paddingBottom: em(8, 14),
-        paddingInlineStart: em(8, 14),
-      },
-      'tbody td:first-child, tfoot td:first-child': {
-        paddingInlineStart: '0',
-      },
-      'tbody td:last-child, tfoot td:last-child': {
-        paddingInlineEnd: '0',
-      },
-      'tbody tr': {
-        borderBottomWidth: '1px',
-        borderBottomColor: 'var(--tw-prose-td-borders)',
-      },
-      'tbody tr:last-child': {
-        borderBottomWidth: '0',
-      },
-      'tbody td': {
-        verticalAlign: 'baseline',
-      },
-      tfoot: {
-        borderTopWidth: '1px',
-        borderTopColor: 'var(--tw-prose-th-borders)',
-      },
-      'tfoot td': {
-        verticalAlign: 'top',
-      },
-      'th, td': {
-        textAlign: 'start',
       },
 
       figure: {
@@ -422,5 +439,6 @@ export const DEFAULT = {
         marginBottom: '0',
       },
     },
+    disableRoundedTable ? normalTable : roundedTable,
   ],
-};
+});
