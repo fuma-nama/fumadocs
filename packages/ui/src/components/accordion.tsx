@@ -22,10 +22,10 @@ interface CustomProps {
 
 export const Accordions = forwardRef<
   HTMLDivElement,
-  (
-    | Omit<AccordionSingleProps, 'value' | 'onValueChange' | 'type'> & CustomProps
-    | Omit<AccordionMultipleProps, 'value' | 'onValueChange' | 'type'> & CustomProps
-  )
+  | (Omit<AccordionSingleProps, 'value' | 'onValueChange' | 'type'> &
+      CustomProps)
+  | (Omit<AccordionMultipleProps, 'value' | 'onValueChange' | 'type'> &
+      CustomProps)
 >(({ type = 'single', className, defaultValue, ...props }, ref) => {
   const [value, setValue] = useState<string | string[]>(
     type === 'single' ? (defaultValue ?? '') : (defaultValue ?? []),
