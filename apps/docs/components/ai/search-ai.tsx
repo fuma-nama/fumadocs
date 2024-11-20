@@ -449,13 +449,11 @@ export function Trigger(props: ButtonHTMLAttributes<HTMLButtonElement>) {
           <DialogClose
             aria-label="Close Dialog"
             tabIndex={-1}
-            className={cn(
-              'absolute right-1 top-1 rounded-full bg-fd-muted p-1.5 text-fd-muted-foreground hover:bg-fd-accent hover:text-fd-accent-foreground',
-            )}
+            className="absolute right-1 top-1 rounded-full p-1.5 text-fd-muted-foreground hover:bg-fd-accent hover:text-fd-accent-foreground"
           >
             <X className="size-4" />
           </DialogClose>
-          <div className="bg-fd-secondary px-2.5 py-2">
+          <div className="bg-fd-muted px-2.5 py-2">
             <div className="flex flex-row items-center">
               <button
                 className={cn(

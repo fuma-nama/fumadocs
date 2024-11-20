@@ -8,7 +8,7 @@ import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/utils/cn';
 import { getSponsors } from '@/utils/get-sponsors';
 
-export default async function Page(): Promise<ReactNode> {
+export default async function Page() {
   const sponsors = await getSponsors('fuma-nama', [
     ...organizationUsers,
     ...organizationSponsors.map((sponsor) => sponsor.github),
@@ -205,7 +205,7 @@ export default async function Page(): Promise<ReactNode> {
                   {sponsor.name}
                 </>
               ),
-              url: sponsor.websiteUrl ?? `https://github.com/${sponsor.login}`,
+              url: getSponsorHref(sponsor.login, sponsor.websiteUrl),
               tier: '',
             })),
         ].map((sponsor) => (
@@ -244,7 +244,7 @@ export default async function Page(): Promise<ReactNode> {
           .map((sponsor) => (
             <a
               key={sponsor.name}
-              href={sponsor.websiteUrl ?? `https://github.com/${sponsor.login}`}
+              href={getSponsorHref(sponsor.login, sponsor.websiteUrl)}
               rel="noreferrer noopener"
               target="_blank"
               className="inline-flex items-center gap-2 rounded-xl p-3 text-xs transition-colors hover:bg-fd-primary/10"
@@ -263,4 +263,10 @@ export default async function Page(): Promise<ReactNode> {
       </div>
     </main>
   );
+}
+
+function getSponsorHref(login: string, url?: string): string {
+  if (url) return url.startsWith('http') ? url : `https://${url}`;
+
+  return `https://github.com/${login}`;
 }
