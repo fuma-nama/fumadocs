@@ -59,7 +59,7 @@ export interface TabsProps extends BaseProps {
   updateAnchor?: boolean;
 }
 
-const ValueChangeContext = createContext<{
+const TabsContext = createContext<{
   onValueChange: (v: string) => void,
   valueToIdMap: Map<string, string>,
 } >({
@@ -139,9 +139,9 @@ export function Tabs({
           </Primitive.TabsTrigger>
         ))}
       </Primitive.TabsList>
-      <ValueChangeContext.Provider value={{ onValueChange, valueToIdMap }}>
+      <TabsContext.Provider value={{ onValueChange, valueToIdMap }}>
         {children}
-      </ValueChangeContext.Provider>
+      </TabsContext.Provider>
     </Primitive.Tabs>
   );
 }
@@ -156,7 +156,7 @@ export function Tab({
   ...props
 }: TabsContentProps): React.ReactElement {
   const v = toValue(value);
-  const { onValueChange, valueToIdMap } = useContext(ValueChangeContext);
+  const { onValueChange, valueToIdMap } = useContext(TabsContext);
 
   useEffect(() => {
     const hash = window.location.hash.slice(1);
