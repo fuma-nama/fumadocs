@@ -81,8 +81,7 @@ export function Tabs({
   const valuesRef = useRef(values);
   valuesRef.current = values;
 
-  const valueToIdMap = useMemo(() => new Map<string, string>(), []);
-  const valueToIdMapRef = useRef(valueToIdMap);
+  const valueToIdMapRef = useRef(new Map<string, string>());
 
   useLayoutEffect(() => {
     if (!groupId) return;
@@ -125,6 +124,11 @@ export function Tabs({
     [groupId, persist, updateAnchor]
   );
 
+  const contextValue = useMemo(() => ({
+    onValueChange,
+    valueToIdMap: valueToIdMapRef.current,
+  }), [onValueChange]);
+
   return (
     <Primitive.Tabs
       value={value}
@@ -139,7 +143,7 @@ export function Tabs({
           </Primitive.TabsTrigger>
         ))}
       </Primitive.TabsList>
-      <TabsContext.Provider value={{ onValueChange, valueToIdMap }}>
+      <TabsContext.Provider value={contextValue}>
         {children}
       </TabsContext.Provider>
     </Primitive.Tabs>
