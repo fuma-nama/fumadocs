@@ -1,5 +1,5 @@
 ---
-'fumadocs-ui': minor
+'fumadocs-ui': patch
 ---
 
 fix initial sidebar level to 0
