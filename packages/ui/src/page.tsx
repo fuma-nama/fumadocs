@@ -120,19 +120,25 @@ export function DocsPage({
   } = {},
   tableOfContent: {
     // disable TOC on full mode, you can still enable it with `enabled` option.
-    enabled: tocEnabled = !full,
+    enabled: tocEnabled,
     component: tocReplace,
     ...tocOptions
   } = {},
   ...props
 }: DocsPageProps): ReactNode {
+  tocEnabled ??=
+    !full &&
+    (toc.length > 0 ||
+      tocOptions.footer !== undefined ||
+      tocOptions.header !== undefined);
+
   return (
     <AnchorProvider toc={toc} single={tocOptions.single}>
       <PageContainer
         id="nd-page"
         style={
           {
-            '--fd-toc-width': tocEnabled ? undefined : '0px',
+            '--fd-toc-width': full && !tocEnabled ? '0px' : undefined,
           } as object
         }
       >
