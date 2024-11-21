@@ -131,6 +131,7 @@ export function DocsPage({
     (toc.length > 0 ||
       tocOptions.footer !== undefined ||
       tocOptions.header !== undefined);
+  const fullWidth = full && !tocEnabled;
 
   return (
     <AnchorProvider toc={toc} single={tocOptions.single}>
@@ -138,7 +139,7 @@ export function DocsPage({
         id="nd-page"
         style={
           {
-            '--fd-toc-width': full && !tocEnabled ? '0px' : undefined,
+            '--fd-toc-width': fullWidth ? '0px' : undefined,
           } as object
         }
       >
@@ -166,7 +167,7 @@ export function DocsPage({
         <article
           className={cn(
             'mx-auto flex w-full flex-1 flex-col gap-6 px-4 pt-10 md:px-7 md:pt-12',
-            tocEnabled ? 'max-w-[860px]' : 'max-w-[1120px]',
+            fullWidth ? 'max-w-[1120px]' : 'max-w-[860px]',
           )}
         >
           {replaceOrDefault(
@@ -320,7 +321,7 @@ export function DocsCategory({
   page: Page;
   from: LoaderOutput<LoaderConfig>;
   tree?: PageTree.Root;
-}): ReactNode {
+}) {
   const tree =
     forcedTree ??
     (from._i18n
@@ -354,8 +355,6 @@ export function DocsCategory({
     </Cards>
   );
 }
-
-DocsBody.displayName = 'DocsBody';
 
 /**
  * For separate MDX page
