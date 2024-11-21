@@ -17,6 +17,7 @@ import DokPloy from '@/public/showcases/dokploy.png';
 import CodeHike from '@/public/showcases/codehike.png';
 import Expostarter from '@/public/showcases/expostarter.png';
 import Sunar from '@/public/showcases/sunar.png';
+import OpenPanel from '@/public/showcases/openpanel.png';
 import Supastarter from '@/public/showcases/supastarter.png';
 import BetterAuth from '@/public/showcases/better-auth.png';
 import LaunchFast from '@/public/showcases/launchfast.png';
@@ -72,6 +73,11 @@ export default function Showcase(): React.ReactElement {
       image: BetterAuth,
       name: 'Better Auth',
       url: 'https://better-auth.com',
+    },
+    {
+      image: OpenPanel,
+      name: 'OpenPanel',
+      url: 'https://openpanel.dev',
     },
     {
       image: FrameGround,
