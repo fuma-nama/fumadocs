@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 14.5.2
+
+### Patch Changes
+
+- 072e349: fix initial sidebar level to 0
+  - fumadocs-core@14.5.2
+
 ## 14.5.1
 
 ### Patch Changes
