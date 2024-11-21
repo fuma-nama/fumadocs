@@ -438,7 +438,7 @@ export function SidebarPageTree(props: {
       });
     }
 
-    return renderSidebarList(root.children, 1);
+    return renderSidebarList(root.children, 0);
   }, [root, props.components]);
 }
 
