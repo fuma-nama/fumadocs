@@ -10,6 +10,7 @@ import {
   useState,
   useRef,
   type ButtonHTMLAttributes,
+  useCallback,
 } from 'react';
 import { useI18n } from '@/contexts/i18n';
 import { cn } from '@/utils/cn';
@@ -256,21 +257,18 @@ function CommandItem({
   active?: string;
   onActiveChange: (value: string) => void;
 }) {
-  const ref = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    const element = ref.current;
-
-    if (active === value && element) {
-      element.scrollIntoView({
-        block: 'nearest',
-      });
-    }
-  }, [active, value]);
-
   return (
     <button
-      ref={ref}
+      ref={useCallback(
+        (element: HTMLButtonElement | null) => {
+          if (active === value && element) {
+            element.scrollIntoView({
+              block: 'nearest',
+            });
+          }
+        },
+        [active, value],
+      )}
       type="button"
       aria-selected={active === value}
       onPointerMove={() => onActiveChange(value)}

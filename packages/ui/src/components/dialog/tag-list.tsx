@@ -5,6 +5,8 @@ import { cn } from '@/utils/cn';
 export interface TagItem {
   name: string;
   value: string | undefined;
+
+  props?: HTMLAttributes<HTMLButtonElement>;
 }
 
 export interface TagsListProps extends HTMLAttributes<HTMLDivElement> {
@@ -40,9 +42,13 @@ export function TagsList({
     >
       {items.map((item) => (
         <button
-          type="button"
           key={item.value}
-          className={cn(itemVariants({ active: tag === item.value }))}
+          type="button"
+          data-active={tag === item.value}
+          className={cn(
+            itemVariants({ active: tag === item.value }),
+            item.props?.className,
+          )}
           onClick={() => {
             if (tag === item.value && allowClear) {
               onTagChange(undefined);
@@ -51,6 +57,7 @@ export function TagsList({
             }
           }}
           tabIndex={-1}
+          {...item.props}
         >
           {item.name}
         </button>
