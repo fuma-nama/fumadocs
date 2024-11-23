@@ -11,17 +11,22 @@ export function getSidebarTabs(
 ): Option[] {
   const options: Option[] = [];
 
-  function traverse(node: PageTree.Node): void {
-    if (node.type === 'folder' && node.root && node.index) {
-      const option: Option = {
-        url: node.index.url,
-        title: node.name,
-        icon: node.icon,
-        description: node.description,
-      };
+  function traverse(node: PageTree.Node) {
+    if (node.type === 'folder' && node.root) {
+      const index = node.index ?? node.children.at(0);
 
-      const mapped = transform ? transform(option, node) : option;
-      if (mapped) options.push(mapped);
+      if (index?.type === 'page') {
+        const option: Option = {
+          url: index.url,
+          title: node.name,
+          icon: node.icon,
+          folder: node,
+          description: node.description,
+        };
+
+        const mapped = transform ? transform(option, node) : option;
+        if (mapped) options.push(mapped);
+      }
     }
 
     if (node.type === 'folder') node.children.forEach(traverse);

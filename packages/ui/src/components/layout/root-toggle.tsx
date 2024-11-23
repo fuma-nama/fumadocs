@@ -7,6 +7,8 @@ import { cn } from '@/utils/cn';
 import { isActive } from '@/utils/is-active';
 import { useSidebar } from '@/contexts/sidebar';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import type { PageTree } from 'fumadocs-core/server';
+import { useTreePath } from '@/contexts/tree';
 
 export interface Option {
   /**
@@ -17,6 +19,11 @@ export interface Option {
   icon?: ReactNode;
   title: ReactNode;
   description?: ReactNode;
+
+  /**
+   * Detect from page tree nodes
+   */
+  folder?: PageTree.Folder;
 
   props?: HTMLAttributes<HTMLElement>;
 }
@@ -30,9 +37,15 @@ export function RootToggle({
   const [open, setOpen] = useState(false);
   const { closeOnRedirect } = useSidebar();
   const pathname = usePathname();
+  const path = useTreePath();
+
   const selected = useMemo(() => {
-    return options.find((item) => isActive(item.url, pathname, true));
-  }, [options, pathname]);
+    return options.findLast((item) =>
+      item.folder
+        ? path.includes(item.folder)
+        : isActive(item.url, pathname, true),
+    );
+  }, [path, options, pathname]);
 
   const onClick = () => {
     closeOnRedirect.current = false;
