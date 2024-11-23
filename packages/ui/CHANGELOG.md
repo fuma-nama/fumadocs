@@ -1,5 +1,16 @@
 # next-docs-ui
 
+## 14.5.3
+
+### Patch Changes
+
+- c5a5ba0: fix sidebar `defaultOpenLevel`
+- f34e895: Support `props` in tag items
+- 4c82a3d: Hide toc when it has no items and custom banner & footer
+- f8e5157: Fix custom `theme` with Typography plugin
+- ad00dd3: Support folder groups on sidebar tabs
+  - fumadocs-core@14.5.3
+
 ## 14.5.2
 
 ### Patch Changes
