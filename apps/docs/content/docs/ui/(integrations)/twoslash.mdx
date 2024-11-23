@@ -15,31 +15,26 @@ Add to your Shiki transformers.
 
 <Callout title='Example for Fumadocs MDX'>
 
-```js title="next.config.mjs"
-import createMDX from 'fumadocs-mdx/config';
-import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins';
+```ts twoslash
+import { defineConfig } from 'fumadocs-mdx/config';
 import { transformerTwoslash } from 'fumadocs-twoslash';
+import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins';
 
-/** @type {import('next').NextConfig} */
-const withMDX = createMDX({
+export default defineConfig({
   mdxOptions: {
     rehypeCodeOptions: {
       transformers: [
-        ...rehypeCodeDefaultOptions.transformers,
-        transformerTwoslash(), // [!code highlight]
+        ...(rehypeCodeDefaultOptions.transformers ?? []),
+        transformerTwoslash(),
       ],
     },
   },
 });
-
-export default withMDX(config);
 ```
 
 </Callout>
 
-Add required styles and components.
-
-> Tailwind CSS Required
+Add required styles and components, note that you have to configure Tailwind CSS and the official Tailwind CSS plugin first.
 
 ```tsx title="layout.tsx"
 import 'fumadocs-twoslash/twoslash.css';
@@ -58,6 +53,14 @@ import defaultMdxComponents from 'fumadocs-ui/mdx';
   }}
 />;
 ```
+
+Now you can add `twoslash` meta string to codeblocks.
+
+````md
+```ts twoslash
+console.log('Hello World');
+```
+````
 
 ### Example
 

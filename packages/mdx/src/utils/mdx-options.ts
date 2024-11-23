@@ -31,7 +31,7 @@ export type DefaultMDXOptions = Omit<
   remarkStructureOptions?: StructureOptions | false;
   remarkHeadingOptions?: RemarkHeadingOptions;
   remarkImageOptions?: RemarkImageOptions | false;
-  rehypeCodeOptions?: RehypeCodeOptions | false;
+  rehypeCodeOptions?: Partial<RehypeCodeOptions> | false;
 };
 
 function pluginOption(
