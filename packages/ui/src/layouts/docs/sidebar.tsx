@@ -262,19 +262,15 @@ export function SidebarItem({
 }
 
 export function SidebarFolder({
-  level,
-  defaultOpen,
+  defaultOpen = false,
   ...props
 }: {
   children: ReactNode;
   defaultOpen?: boolean;
-  level: number;
 }) {
-  const { defaultOpenLevel } = useInternalContext();
-  const shouldExtend = defaultOpen ?? defaultOpenLevel >= level;
-  const [open, setOpen] = useState(shouldExtend);
+  const [open, setOpen] = useState(defaultOpen);
 
-  useOnChange(shouldExtend, (v) => {
+  useOnChange(defaultOpen, (v) => {
     if (v) setOpen(v);
   });
 
@@ -401,12 +397,12 @@ export function SidebarPageTree(props: {
   const { root } = useTreeContext();
 
   return useMemo(() => {
+    const { Separator, Item, Folder } = props.components ?? {};
+
     function renderSidebarList(
       items: PageTree.Node[],
       level: number,
     ): ReactNode[] {
-      const { Separator, Item, Folder } = props.components ?? {};
-
       return items.map((item, i) => {
         const id = `${item.type}_${i.toString()}`;
 
@@ -415,10 +411,9 @@ export function SidebarPageTree(props: {
             if (Separator) return <Separator key={id} item={item} />;
             return <SidebarSeparator key={id}>{item.name}</SidebarSeparator>;
           case 'folder':
-            if (Folder)
-              return <Folder key={id} item={item} level={level + 1} />;
+            if (Folder) return <Folder key={id} item={item} level={level} />;
             return (
-              <PageTreeFolder key={id} item={item} level={level + 1}>
+              <PageTreeFolder key={id} item={item} level={level}>
                 {renderSidebarList(item.children, level + 1)}
               </PageTreeFolder>
             );
@@ -438,7 +433,7 @@ export function SidebarPageTree(props: {
       });
     }
 
-    return renderSidebarList(root.children, 0);
+    return renderSidebarList(root.children, 1);
   }, [root, props.components]);
 }
 
@@ -451,12 +446,14 @@ function PageTreeFolder({
   level: number;
   children: ReactNode;
 }) {
+  const { defaultOpenLevel } = useInternalContext();
   const path = useTreePath();
 
   return (
     <SidebarFolder
-      defaultOpen={item.defaultOpen || path.includes(item)}
-      level={level + 1}
+      defaultOpen={
+        (item.defaultOpen ?? defaultOpenLevel >= level) || path.includes(item)
+      }
     >
       {item.index ? (
         <SidebarFolderLink href={item.index.url} external={item.index.external}>

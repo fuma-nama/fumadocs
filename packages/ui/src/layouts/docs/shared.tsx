@@ -46,7 +46,7 @@ export interface SidebarComponents {
 export function SidebarLinkItem({ item }: { item: LinkItemType }) {
   if (item.type === 'menu')
     return (
-      <SidebarFolder level={1}>
+      <SidebarFolder>
         {item.url ? (
           <SidebarFolderLink href={item.url}>
             {item.icon}
