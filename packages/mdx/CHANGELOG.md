@@ -1,5 +1,11 @@
 # next-docs-mdx
 
+## 11.1.2
+
+### Patch Changes
+
+- fe36593: Fix global config types
+
 ## 11.1.1
 
 ### Patch Changes
