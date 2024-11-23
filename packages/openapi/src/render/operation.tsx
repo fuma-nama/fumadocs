@@ -343,12 +343,13 @@ async function ResponseTabs({
   ctx: { renderer, generateTypeScriptSchema },
 }: {
   endpoint: EndpointSample;
-  operation: OpenAPI.OperationObject;
+  operation: MethodInformation;
   ctx: RenderContext;
 }): Promise<ReactElement | null> {
   const items: string[] = [];
   const children: ReactNode[] = [];
 
+  if (!operation.responses) return null;
   for (const code of Object.keys(operation.responses)) {
     const types: ResponseTypeProps[] = [];
     let description = noRef(operation.responses[code]).description;

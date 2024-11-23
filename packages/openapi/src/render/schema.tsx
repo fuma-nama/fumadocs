@@ -1,12 +1,11 @@
-import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
 import { type ReactNode } from 'react';
-import { noRef } from '@/utils/schema';
+import { isNullable, noRef, type ParsedSchema } from '@/utils/schema';
 import type { RenderContext } from '@/types';
 import { combineSchema } from '@/utils/combine-schema';
 import { Markdown } from './markdown';
 
 const keys: {
-  [T in keyof OpenAPI.SchemaObject]: string;
+  [T in keyof ParsedSchema]: string;
 } = {
   default: 'Default',
   minimum: 'Minimum',
@@ -37,12 +36,12 @@ interface Context {
    */
   allowFile?: boolean;
 
-  stack?: OpenAPI.SchemaObject[];
+  stack?: ParsedSchema[];
 
   render: RenderContext;
 }
 
-function isObject(schema: OpenAPI.SchemaObject): boolean {
+function isObject(schema: ParsedSchema): boolean {
   return (
     schema.type === 'object' ||
     schema.properties !== undefined ||
@@ -56,7 +55,7 @@ export function Schema({
   ctx,
 }: {
   name: string;
-  schema: OpenAPI.SchemaObject;
+  schema: ParsedSchema;
   ctx: Context;
 }): ReactNode {
   if (
@@ -145,7 +144,7 @@ export function Schema({
     if (key in schema) {
       fields.push({
         key: value,
-        value: JSON.stringify(schema[key as keyof OpenAPI.SchemaObject]),
+        value: JSON.stringify(schema[key as keyof ParsedSchema]),
       });
     }
   }
@@ -229,15 +228,19 @@ export function Schema({
 /**
  * Check if the schema needs another collapsible to explain
  */
-function isComplexType(schema: OpenAPI.SchemaObject): boolean {
+function isComplexType(schema: ParsedSchema): boolean {
   if (schema.anyOf ?? schema.oneOf ?? schema.allOf) return true;
 
   return isObject(schema) || schema.type === 'array';
 }
 
-function getSchemaType(schema: OpenAPI.SchemaObject, ctx: Context): string {
-  if (schema.nullable) {
-    const type = getSchemaType({ ...schema, nullable: false }, ctx);
+function getSchemaType(
+  schema: ParsedSchema,
+  ctx: Context,
+  nullable = true,
+): string {
+  if (nullable && isNullable(schema)) {
+    const type = getSchemaType(schema, ctx, false);
 
     // null if schema only contains `nullable`
     return type === 'unknown' ? 'null' : `${type} | null`;
@@ -246,20 +249,22 @@ function getSchemaType(schema: OpenAPI.SchemaObject, ctx: Context): string {
   if (schema.title) return schema.title;
 
   if (schema.type === 'array')
-    return `array<${getSchemaType(noRef(schema.items), ctx)}>`;
+    return `array<${getSchemaType(noRef(schema.items), ctx, nullable)}>`;
 
   if (schema.oneOf)
     return schema.oneOf
-      .map((one) => getSchemaType(noRef(one), ctx))
+      .map((one) => getSchemaType(noRef(one), ctx, nullable))
+      .filter((v) => v !== 'unknown')
       .join(' | ');
 
   if (schema.allOf) {
-    const allTypeNames = schema.allOf.map((one) =>
-      getSchemaType(noRef(one), ctx),
-    );
-    const hasNull = allTypeNames.includes('null');
+    const allTypeNames = schema.allOf
+      .map((one) => getSchemaType(noRef(one), ctx, nullable))
+      .filter((v) => v !== 'unknown');
+
     const nonNullTypes = allTypeNames.filter((v) => v !== 'null');
     const nonNullTypeNames = nonNullTypes.join(' & ');
+    const hasNull = nonNullTypes.length !== allTypeNames.length;
 
     if (!hasNull) return nonNullTypeNames;
 
@@ -269,17 +274,30 @@ function getSchemaType(schema: OpenAPI.SchemaObject, ctx: Context): string {
     else return `(${nonNullTypeNames}) | null`;
   }
 
-  if (schema.not) return `not ${getSchemaType(noRef(schema.not), ctx)}`;
+  if (schema.not)
+    return `not ${getSchemaType(noRef(schema.not), ctx, nullable)}`;
 
   if (schema.anyOf) {
     return `Any properties in ${schema.anyOf
-      .map((one) => getSchemaType(noRef(one), ctx))
+      .map((one) => getSchemaType(noRef(one), ctx, nullable))
+      .filter((v) => v !== 'unknown')
       .join(', ')}`;
   }
 
   if (schema.type === 'string' && schema.format === 'binary' && ctx.allowFile)
     return 'file';
-  if (schema.type) return schema.type;
+
+  if (schema.type) {
+    if (
+      !nullable &&
+      (schema.type === 'null' ||
+        (Array.isArray(schema.type) && schema.type.includes('null')))
+    ) {
+      return 'unknown';
+    }
+
+    return Array.isArray(schema.type) ? schema.type.join(' | ') : schema.type;
+  }
 
   if (isObject(schema)) return 'object';
 

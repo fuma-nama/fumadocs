@@ -1,13 +1,17 @@
-import { type OpenAPIV3 as OpenAPI } from 'openapi-types';
+import type {
+  Document,
+  SecurityRequirementObject,
+  SecuritySchemeObject,
+} from '@/types';
 import { noRef } from '@/utils/schema';
 
-export type Security = OpenAPI.SecuritySchemeObject & {
+export type Security = SecuritySchemeObject & {
   scopes: string[];
 };
 
 export function getSecurities(
-  requirement: OpenAPI.SecurityRequirementObject,
-  document: OpenAPI.Document,
+  requirement: SecurityRequirementObject,
+  document: Document,
 ): Security[] {
   const results: Security[] = [];
   const schemas = document.components?.securitySchemes ?? {};

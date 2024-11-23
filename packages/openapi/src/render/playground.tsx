@@ -1,7 +1,10 @@
-import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
 import type { ReactNode } from 'react';
-import type { MethodInformation, RenderContext } from '@/types';
-import { getPreferredType, noRef } from '@/utils/schema';
+import type {
+  MethodInformation,
+  ParameterObject,
+  RenderContext,
+} from '@/types';
+import { getPreferredType, noRef, type ParsedSchema } from '@/utils/schema';
 import { getSecurities } from '@/utils/get-security';
 
 interface BaseRequestField {
@@ -68,7 +71,7 @@ export type RequestSchema =
 interface Context {
   allowFile: boolean;
   schema: Record<string, RequestSchema>;
-  registered: WeakMap<OpenAPI.SchemaObject, string>;
+  registered: WeakMap<ParsedSchema, string>;
   nextId: () => string;
 }
 
@@ -160,7 +163,7 @@ function getAuthorizationField(
 }
 
 function getIdFromSchema(
-  schema: OpenAPI.SchemaObject,
+  schema: ParsedSchema,
   required: boolean,
   ctx: Context,
 ): string {
@@ -177,7 +180,7 @@ function getIdFromSchema(
 }
 
 function parameterToField(
-  v: OpenAPI.ParameterObject,
+  v: ParameterObject,
   ctx: Context,
 ): PrimitiveRequestField {
   return {
@@ -191,7 +194,7 @@ function parameterToField(
 }
 
 function toReference(
-  schema: OpenAPI.SchemaObject,
+  schema: ParsedSchema,
   required: boolean,
   ctx: Context,
 ): ReferenceSchema {
@@ -203,7 +206,7 @@ function toReference(
 }
 
 function toSchema(
-  schema: OpenAPI.SchemaObject,
+  schema: ParsedSchema,
   required: boolean,
   ctx: Context,
 ): RequestSchema {
@@ -296,6 +299,36 @@ function toSchema(
       type: 'file',
       isRequired: required,
       description: schema.description ?? schema.title,
+    };
+  }
+
+  if (Array.isArray(schema.type)) {
+    const items: Record<string, RequestSchema> = {};
+
+    for (const type of schema.type) {
+      if (type === 'array') {
+        items[type] = {
+          type,
+          items:
+            'items' in schema && schema.items
+              ? toSchema(schema.items, false, ctx)
+              : toSchema({}, required, ctx),
+          isRequired: required,
+        };
+      } else if (type !== 'null' && type !== 'object') {
+        items[type] = {
+          type: type === 'integer' ? 'number' : type,
+          isRequired: required,
+          defaultValue: schema.example ?? schema.default ?? '',
+        };
+      }
+    }
+
+    return {
+      type: 'switcher',
+      description: schema.description ?? schema.title,
+      items,
+      isRequired: required,
     };
   }
 
