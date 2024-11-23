@@ -1,0 +1,226 @@
+---
+title: Fumadocs MDX v10 Summary
+description: Migration Guide and Summary
+date: 2024-11-24
+author: Fuma Nama
+---
+
+## Features
+
+- More customisations via `source.config.ts`, a new config file for your content.
+- Introduced **collections**.
+- Turbopack support.
+- Build-time data validation support.
+
+## Migrate from v9
+
+### Refactor Imports
+
+Refactor the import in `next.config`.
+
+**From:**
+
+```ts
+import createMDX from 'fumadocs-mdx/config';
+
+const withMDX = createMDX();
+
+/** @type {import('next').NextConfig} */
+const config = {
+  reactStrictMode: true,
+};
+
+export default withMDX(config);
+```
+
+**To:**
+
+```ts
+import { createMDX } from 'fumadocs-mdx/next';
+
+const withMDX = createMDX();
+
+/** @type {import('next').NextConfig} */
+const config = {
+  reactStrictMode: true,
+};
+
+export default withMDX(config);
+```
+
+### Remove `mdx-components.tsx`
+
+`mdx-components.tsx` is no longer used. It now allows only MDX components passed from `MDX` body's `components` prop.
+
+```tsx
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+
+const MDX = page.data.body;
+
+// set your MDX components with `components` prop
+<MDX components={{ ...defaultMdxComponents }} />;
+```
+
+This encouraged explicit import of MDX components.
+
+Previously, `mdx-components.tsx` worked by injecting an import to every compiled Markdown/MDX file.
+It's a little unnecessary because you can always import the components explicitly, or replace default HTML tags like `img` from MDX body's `components` prop.
+
+### Define Collections
+
+Collection is now introduced on source config file (`source.config.ts`).
+It refers to a collection of files/content, like Markdown files, or JSON/YAML files.
+
+Every collection has its own config, you can have customised Zod schema to validate its data, or collection-level MDX options for content collections.
+
+You can create a source config file, and add the following:
+
+```ts
+import { defineDocs } from 'fumadocs-mdx/config';
+
+export const { docs, meta } = defineDocs({
+  dir: 'content/docs',
+});
+```
+
+`defineDocs` declares two collections, one with `doc` type that scans content files (e.g. `md/mdx`), one with `meta` type that scans meta files (e.g. `json`).
+
+Now you can generate types using `fumadocs-mdx` command, it's recommended to set it as a `postinstall` script.
+
+```json title="package.json"
+{
+  "scripts": {
+    "postinstall": "fumadocs-mdx"
+  }
+}
+```
+
+Starting the development server, a `.source` folder will be generated, it contains all parsed collections/files.
+You can add it to `.gitignore`, it will replace the old `.map` file.
+
+To access the collections, import them from the folder with their original name in `source.config.ts`.
+
+```ts
+import { docs, meta } from '@/.source';
+```
+
+Now to integrate it with Fumadocs framework, change your `source.ts` from:
+
+```ts
+import { map } from '@/.map';
+import { createMDXSource } from 'fumadocs-mdx';
+import { loader } from 'fumadocs-core/source';
+
+export const { getPage, getPages, pageTree } = loader({
+  baseUrl: '/docs',
+  rootDir: 'docs',
+  source: createMDXSource(map),
+});
+```
+
+to:
+
+```ts
+import { docs, meta } from '@/.source';
+import { createMDXSource } from 'fumadocs-mdx';
+import { loader } from 'fumadocs-core/source';
+
+export const source = loader({
+  baseUrl: '/docs',
+  source: createMDXSource(docs, meta),
+});
+```
+
+- we now recommend to export the output of `loader` directly as a single variable.
+- schema option is no longer defined in `source.ts`, it's handled by `source.config.ts`.
+- it takes two collections: `docs` (content) and `meta` (`meta.json`).
+  You can leave `meta` as an empty array if it is unused, so you can define only a collection for `docs`.
+
+### `page.data`
+
+When using with `loader`, you no longer need `data.frontmatter` to access frontmatter data.
+It is merged into the `page.data` object.
+
+```ts
+page.data.frontmatter.title; // [!code --]
+page.data.title; // [!code ++]
+```
+
+### MDX Options
+
+Instead of passing them to `next.config` file, define a global config in `source.config.ts`:
+
+```ts
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    // here!
+  },
+});
+```
+
+### Collection Schema
+
+The `schema` option of collection allow you to customise the validation schema, it accepts a Zod type.
+
+For `defineDocs`, see [`schema`](/docs/mdx/collections#schema-1).
+
+### Multiple Types
+
+Same as before, you can call `loader` multiple times for different types (e.g. for docs and blog).
+
+```ts
+import { createMDXSource } from 'fumadocs-mdx';
+import type { InferMetaType, InferPageType } from 'fumadocs-core/source';
+import { loader } from 'fumadocs-core/source';
+import { meta, docs, blog as blogPosts } from '@/.source';
+
+export const source = loader({
+  baseUrl: '/docs',
+  source: createMDXSource(docs, meta),
+});
+
+export const blog = loader({
+  baseUrl: '/blog',
+  // as mentioned before, you can leave `meta` an empty array
+  source: createMDXSource(blogPosts, []),
+});
+
+export type DocsPage = InferPageType<typeof source>;
+export type DocsMeta = InferMetaType<typeof source>;
+```
+
+and the corresponding `source.config.ts`:
+
+```ts
+import {
+  defineDocs,
+  defineCollections,
+  frontmatterSchema,
+} from 'fumadocs-mdx/config';
+import { z } from 'zod';
+
+export const { docs, meta } = defineDocs({
+  dir: 'content/docs',
+});
+
+export const blog = defineCollections({
+  type: 'doc',
+  dir: 'content/blog',
+  schema: frontmatterSchema.extend({
+    author: z.string(),
+    date: z.string().date().or(z.date()).optional(),
+  }),
+});
+```
+
+### Further Readings
+
+You can read the latest docs of Fumadocs MDX for details.
+
+<Cards>
+  <Card href="/docs/mdx" title="Fumadocs MDX">
+    The built-in content source, build a better content experience on Next.js.
+  </Card>
+</Cards>
