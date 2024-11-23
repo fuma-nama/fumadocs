@@ -6,10 +6,9 @@ import {
   type Options as TypographyOptions,
   typography,
 } from './theme/typography';
-import type { StyleOptions } from '@/theme/typography/styles';
 
 export interface DocsUIOptions
-  extends Pick<StyleOptions, 'disableRoundedTable'> {
+  extends Pick<TypographyOptions, 'disableRoundedTable'> {
   /**
    * Prefix to the variable name of colors
    *

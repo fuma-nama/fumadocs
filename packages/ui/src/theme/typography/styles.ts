@@ -32,7 +32,7 @@ const colors = {
   '--tw-prose-kbd-shadows': `theme('colors.fd-primary.DEFAULT / 50%')`,
 };
 
-const roundedTable = {
+export const roundedTable = {
   table: {
     borderCollapse: 'separate',
     borderSpacing: '0',
@@ -65,7 +65,7 @@ const roundedTable = {
   },
 };
 
-const normalTable = {
+export const normalTable = {
   thead: {
     borderBottomWidth: '1px',
     borderBottomColor: 'var(--tw-prose-th-borders)',
@@ -116,14 +116,11 @@ const normalTable = {
   },
 };
 
-export interface StyleOptions {
-  /**
-   * Disable custom table styles
-   */
-  disableRoundedTable?: boolean;
+export interface Config {
+  css?: Record<string, string | Record<string, string>>[];
 }
 
-export const DEFAULT = ({ disableRoundedTable }: StyleOptions) => ({
+export const DEFAULT: Config = {
   css: [
     {
       color: 'var(--tw-prose-body)',
@@ -189,7 +186,7 @@ export const DEFAULT = ({ disableRoundedTable }: StyleOptions) => ({
       },
       hr: {
         borderColor: 'var(--tw-prose-hr)',
-        borderTopWidth: 1,
+        borderTopWidth: '1px',
         marginTop: em(48, 16),
         marginBottom: em(48, 16),
       },
@@ -439,6 +436,5 @@ export const DEFAULT = ({ disableRoundedTable }: StyleOptions) => ({
         marginBottom: '0',
       },
     },
-    disableRoundedTable ? normalTable : roundedTable,
   ],
-});
+};

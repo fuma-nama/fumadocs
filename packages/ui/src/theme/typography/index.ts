@@ -2,9 +2,15 @@ import * as styles from './styles';
 import plugin from 'tailwindcss/plugin';
 import merge from 'lodash.merge';
 import parser, { type Pseudo } from 'postcss-selector-parser';
+import type { Config } from './styles';
 
-export interface Options extends styles.StyleOptions {
+export interface Options {
   className?: string;
+
+  /**
+   * Disable custom table styles
+   */
+  disableRoundedTable?: boolean;
 }
 
 interface Context {
@@ -32,7 +38,7 @@ function inWhere(
 }
 
 function configToCss(
-  config: object = {},
+  config: Config = {},
   { className, modifier, prefix }: Options & Context,
 ) {
   function updateSelector(
@@ -61,7 +67,7 @@ function configToCss(
     return [k, v];
   }
 
-  const css = 'css' in config ? config.css : [];
+  const css = config.css ?? [];
   return Object.fromEntries(
     Object.entries(merge({}, ...(Array.isArray(css) ? css : [css]))).map(
       ([k, v]) => updateSelector(k, v),
@@ -172,11 +178,22 @@ export const typography = plugin.withOptions<Options>(
       }
 
       addComponents({
-        [`.${className}`]: configToCss(modifiers.DEFAULT(styleOptions), {
-          className,
-          modifier: 'DEFAULT',
-          prefix,
-        }),
+        [`.${className}`]: configToCss(
+          {
+            ...modifiers.DEFAULT,
+            css: [
+              ...(modifiers.DEFAULT.css ?? []),
+              styleOptions.disableRoundedTable
+                ? modifiers.normalTable
+                : modifiers.roundedTable,
+            ],
+          },
+          {
+            className,
+            modifier: 'DEFAULT',
+            prefix,
+          },
+        ),
       });
     };
   },
