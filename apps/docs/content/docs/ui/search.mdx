@@ -4,11 +4,11 @@ description: Implement document search in your docs
 icon: Search
 ---
 
-> [Configure Document Search on Core](/docs/headless/search).
+Fumadocs UI provides a good-looking search UI for your docs, the search functionality is instead provided and documented on Fumadocs Core.
+
+See [Document Search](/docs/headless/search).
 
 ## Search UI
-
-Fumadocs UI provides a good-looking search dialog out-of-the-box.
 
 Open with <kbd>⌘</kbd> <kbd>K</kbd> or <kbd>Ctrl</kbd> <kbd>K</kbd>.
 
@@ -79,7 +79,8 @@ import { RootProvider } from 'fumadocs-ui/root-provider';
 
 ### Tag Filter
 
-Configure [Tag Filter](/docs/headless/search/orama#tag-filter) on the default search client.
+Add UI to change filters.
+Make sure to configure [Tag Filter](/docs/headless/search/orama#tag-filter) on search server first.
 
 ```tsx
 import { RootProvider } from 'fumadocs-ui/root-provider';
@@ -174,24 +175,6 @@ export default function Layout({ children }: { children: ReactNode }) {
 }
 ```
 
-### Tag Filter
-
-Same as the default search client, you can configure [Tag Filter](/docs/headless/search/algolia#tag-filter) on the dialog.
-
-```tsx title="components/search.tsx"
-import SearchDialog from 'fumadocs-ui/components/dialog/search-algolia';
-
-<SearchDialog
-  defaultTag="value"
-  tags={[
-    {
-      name: 'Tag Name',
-      value: 'value',
-    },
-  ]}
-/>;
-```
-
 ## Other Solutions
 
 To use other search solutions such as Algolia and ElasticSearch, you can [replace the
@@ -229,6 +212,24 @@ export default function CustomSearchDialog(props: SharedProps) {
 
 </Callout>
 
+#### Tag Filter
+
+Same as default search client, you can configure [Tag Filter](/docs/headless/search/algolia#tag-filter) on the dialog.
+
+```tsx title="components/search.tsx"
+import SearchDialog from 'fumadocs-ui/components/dialog/search-algolia';
+
+<SearchDialog
+  defaultTag="value"
+  tags={[
+    {
+      name: 'Tag Name',
+      value: 'value',
+    },
+  ]}
+/>;
+```
+
 ### Orama Cloud
 
 For the setup guide, see [Integrate Orama Cloud](/docs/headless/search/orama-cloud).
@@ -257,9 +258,7 @@ export default function CustomSearchDialog(props: SharedProps) {
 
 A list of integrations maintained by community.
 
-### Trieve
-
-See [Integrate Trieve Search](/docs/headless/search/trieve).
+- [Trieve Search](/docs/headless/search/trieve)
 
 ## Built-in UI
 

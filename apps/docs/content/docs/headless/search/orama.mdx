@@ -10,7 +10,7 @@ option since it's easier to setup and totally free.
 
 > If you're using a CMS, you may use the API provided by the CMS instead.
 
-## Advanced Search
+## Setup
 
 Returns a detailed result with matching headings and contents.
 
@@ -19,9 +19,7 @@ Orama. You can extract the structured data using the [Structure](/docs/headless/
 
 It cannot extract content from rehype plugin generated content (remark plugins are supported).
 
-### Usage
-
-#### From Source
+### From Source
 
 Create a route handler from Source API.
 
@@ -35,7 +33,7 @@ Create a route handler from Source API.
 }
 ```
 
-#### From Search Indexes
+### From Search Indexes
 
 Pass search indexes to the function, see type information for required properties.
 
@@ -49,23 +47,24 @@ Pass search indexes to the function, see type information for required propertie
 }
 ```
 
-#### Client
+### Client
 
-You can query it using headless search client.
+You can query it using:
 
-```ts twoslash
-import { useDocsSearch } from 'fumadocs-core/search/client';
+- **Fumadocs UI**: use the [built-in Search UI](/docs/ui/search).
+- **Search Client**:
 
-const client = useDocsSearch({
-  type: 'fetch',
-});
-```
+  ```ts twoslash
+  import { useDocsSearch } from 'fumadocs-core/search/client';
 
-Or use Fumadocs UI, which includes a built-in search UI.
+  const client = useDocsSearch({
+    type: 'fetch',
+  });
+  ```
 
 ### Tag Filter
 
-It's useful for implementing multi-docs similar to this documentation.
+Support filtering by tag, it's useful for implementing multi-docs similar to this documentation.
 
 ```json doc-gen:file
 {
@@ -77,27 +76,41 @@ It's useful for implementing multi-docs similar to this documentation.
 }
 ```
 
-<Callout title="For Fumadocs UI">
+and update your search client:
 
-Remember to configure [Tag Filter](/docs/ui/search#tag-filter) on Search UI.
+- **Fumadocs UI**:
+  Configure [Tag Filter](/docs/ui/search#tag-filter) on Search UI.
+- **Search Client**:
+  pass a tag to the hook.
 
-You don't need to follow the steps below if you're using the built-in Search UI.
+  ```ts
+  import { useDocsSearch } from 'fumadocs-core/search/client';
 
-</Callout>
+  // Pass `tag` in your custom search dialog
+  const client = useDocsSearch(
+    {
+      type: 'fetch',
+    },
+    undefined, // locale code, can be `undefined`
+    'tag',
+  );
+  ```
 
-On your search client, pass a tag to the hook.
+### Index by Content
 
-```ts
-import { useDocsSearch } from 'fumadocs-core/search/client';
+Index with the raw content of document (unrecommended).
 
-// Pass `tag` in your custom search dialog
-const client = useDocsSearch(
-  {
-    type: 'fetch',
-  },
-  undefined, // locale code, can be `undefined`
-  'tag',
-);
+```ts title="app/api/search/route.ts"
+import { allDocs } from 'content-collections';
+import { createSearchAPI } from 'fumadocs-core/search/server';
+
+export const { GET } = createSearchAPI('simple', {
+  indexes: allDocs.map((docs) => ({
+    title: docs.title,
+    content: docs.content, // Raw Content
+    url: docs.url,
+  })),
+});
 ```
 
 ## Internationalization
@@ -142,7 +155,7 @@ const { search, setSearch, query } = useDocsSearch(
 
 </div>
 
-### Chinese
+### Special Languages
 
 Orama requires extra configurations for Chinese, Japanese, and some other languages.
 
@@ -158,7 +171,7 @@ Orama requires extra configurations for Chinese, Japanese, and some other langua
 
 See [Orama Docs](https://docs.orama.com/open-source/supported-languages/using-chinese-with-orama) for more details.
 
-## Static Search
+## Static Export
 
 To work with Next.js static export, use `staticGET` from search server.
 
@@ -174,23 +187,23 @@ export const { staticGET: GET } = createFromSource(source);
 
 > `staticGET` is also available on `createSearchAPI`.
 
-### Search Client
+and update your search clients:
 
-On your search client, use `static` instead of `fetch`.
+- **Fumadocs UI**:
 
-```ts
-import { useDocsSearch } from 'fumadocs-core/search/client';
+  You can pass search options to Root Provider. See [`options`](/docs/ui/search#search-options).
 
-const client = useDocsSearch({
-  type: 'static',
-});
-```
+- **Search Client**:
 
-### Search UI
+  On your search client, use `static` instead of `fetch`.
 
-You can pass search options from the Root Provider.
+  ```ts
+  import { useDocsSearch } from 'fumadocs-core/search/client';
 
-See [Search UI `options`](/docs/ui/search#search-options).
+  const client = useDocsSearch({
+    type: 'static',
+  });
+  ```
 
 <Callout type='warn' title="Be Careful">
 
@@ -201,23 +214,6 @@ See [Search UI `options`](/docs/ui/search#search-options).
     You should use 3rd party solutions like Algolia for these cases.
 
 </Callout>
-
-## Simple Search
-
-Index with the raw content of document.
-
-```ts title="app/api/search/route.ts"
-import { allDocs } from 'content-collections';
-import { createSearchAPI } from 'fumadocs-core/search/server';
-
-export const { GET } = createSearchAPI('simple', {
-  indexes: allDocs.map((docs) => ({
-    title: docs.title,
-    content: docs.content, // Raw Content
-    url: docs.url,
-  })),
-});
-```
 
 ## Search Client
 
