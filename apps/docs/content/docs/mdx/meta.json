@@ -16,6 +16,6 @@
     "last-modified",
     "image",
     "manifest",
-    "transform"
+    "!transform"
   ]
 }

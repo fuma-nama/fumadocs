@@ -27,13 +27,13 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@clack/prompts": "^0.8.0",
-    "cross-spawn": "^7.0.5",
+    "@clack/prompts": "^0.8.2",
+    "cross-spawn": "^7.0.6",
     "picocolors": "^1.1.1"
   },
   "devDependencies": {
     "@types/cross-spawn": "^6.0.6",
-    "@types/node": "22.9.0",
+    "@types/node": "22.9.3",
     "eslint-config-custom": "workspace:*",
     "fast-glob": "^3.3.1",
     "tsconfig": "workspace:*"
