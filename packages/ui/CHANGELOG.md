@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 14.5.4
+
+### Patch Changes
+
+- 8e2cb31: fix trivial bugs
+  - fumadocs-core@14.5.4
+
 ## 14.5.3
 
 ### Patch Changes
