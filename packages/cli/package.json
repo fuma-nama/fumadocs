@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/cli",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "The CLI tool for Fumadocs",
   "keywords": [
     "NextJs",
