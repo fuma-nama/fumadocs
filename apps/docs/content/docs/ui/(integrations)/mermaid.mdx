@@ -16,12 +16,16 @@ Fumadocs doesn't have a built-in Mermaid wrapper provided, instead you can try d
 Add their remark plugin, for example (in Fumadocs MDX):
 
 ```ts title="source.config.ts"
-import { defineConfig } from 'fumadocs-mdx/define';
-import { remarkMermid } from '@theguild/remark-mermaid';
+import { defineDocs, defineConfig } from "fumadocs-mdx/config";
+import { remarkMermaid } from "@theguild/remark-mermaid";
+
+export const { docs, meta } = defineDocs({
+  dir: "content/docs",
+});
 
 export default defineConfig({
   mdxOptions: {
-    remarkPlugins: [remarkMermid],
+    remarkPlugins: [remarkMermaid],
   },
 });
 ```
