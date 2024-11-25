@@ -6,5 +6,11 @@
       "@/*": ["./src/*"]
     }
   },
-  "exclude": ["node_modules", "template", "dist", "scripts"]
+  "exclude": [
+    "node_modules",
+    "template",
+    "dist",
+    "scripts",
+    "eslint.config.mjs"
+  ]
 }
