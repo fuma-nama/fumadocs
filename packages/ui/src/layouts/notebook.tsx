@@ -17,7 +17,6 @@ import { notFound } from 'next/navigation';
 import { RootToggle } from '@/components/layout/root-toggle';
 import { TreeContextProvider } from '@/contexts/tree';
 import { NavProvider, Title } from '@/components/layout/nav';
-import { Navbar, NavbarSidebarTrigger } from '@/layouts/docs/navbar';
 import { SearchOnly } from '@/contexts/search';
 import {
   LargeSearchToggle,
@@ -41,7 +40,7 @@ import {
   type SidebarOptions,
 } from '@/layouts/docs/shared';
 import type { PageTree } from 'fumadocs-core/server';
-import { LayoutBody } from './notebook.client';
+import { LayoutBody, SubNavbar, NavbarSidebarTrigger } from './notebook.client';
 
 export interface DocsLayoutProps extends BaseLayoutProps {
   tree: PageTree.Root;
@@ -76,13 +75,16 @@ export function DocsLayout({
         <LayoutBody
           {...props.containerProps}
           className={cn(
-            '[--fd-nav-height:3.5rem] md:[--fd-sidebar-width:260px] lg:[--fd-toc-width:260px] [&_#nd-toc]:max-lg:hidden [&_#nd-tocnav]:lg:hidden',
+            '[--fd-nav-height:3.5rem] md:[--fd-sidebar-width:260px] lg:[--fd-toc-width:260px] [&_#nd-page]:mt-[var(--fd-nav-height)] [&_#nd-toc]:max-lg:hidden [&_#nd-tocnav]:lg:hidden',
             props.containerProps?.className,
           )}
         >
           <Aside
             {...sidebar}
-            className={cn('md:[--fd-nav-height:0px]', sidebar.className)}
+            className={cn(
+              'md:ps-[var(--fd-layout-offset)] md:[--fd-nav-height:0px]',
+              sidebar.className,
+            )}
           >
             <SidebarHeader>
               <SidebarHeaderItems nav={nav} links={links}>
@@ -108,21 +110,13 @@ export function DocsLayout({
             </SidebarViewport>
             <SidebarFooter>{sidebarFooter}</SidebarFooter>
           </Aside>
-          <div className="w-full min-w-0 max-w-[var(--fd-content-width)] [--fd-nav-height:3.5rem]">
-            <DocsNavbar
-              nav={nav}
-              links={links}
-              i18n={i18n}
-              sidebarCollapsible={sidebarCollapsible}
-            />
-            <div className="flex flex-row">{props.children}</div>
-          </div>
-          <div
-            className="min-w-[var(--fd-sidebar-width)] flex-1"
-            style={{
-              marginInlineStart: 'calc(var(--fd-sidebar-width) * -1)',
-            }}
+          <DocsNavbar
+            nav={nav}
+            links={links}
+            i18n={i18n}
+            sidebarCollapsible={sidebarCollapsible}
           />
+          {props.children}
         </LayoutBody>
       </NavProvider>
     </TreeContextProvider>
@@ -141,7 +135,7 @@ function DocsNavbar({
   links: LinkItemType[];
 }) {
   return (
-    <Navbar id="nd-subnav" className="h-14 md:gap-1.5">
+    <SubNavbar>
       {sidebarCollapsible ? (
         <SidebarCollapseTrigger className="-ms-1.5 text-fd-muted-foreground data-[collapsed=false]:hidden max-md:hidden" />
       ) : null}
@@ -188,7 +182,7 @@ function DocsNavbar({
         </LanguageToggle>
       ) : null}
       <ThemeToggle className="p-0 max-md:hidden" />
-    </Navbar>
+    </SubNavbar>
   );
 }
 

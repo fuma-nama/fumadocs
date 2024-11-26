@@ -119,9 +119,9 @@ export function CollapsibleSidebar(props: SidebarProps) {
       onPointerLeave={onLeave}
       data-collapsed={collapsed}
       className={cn(
-        'transition-[flex,margin,opacity,transform]',
+        'md:transition-all',
         collapsed &&
-          'md:-me-[var(--fd-sidebar-width)] md:flex-initial md:translate-x-[calc(var(--fd-sidebar-offset)*-1)] rtl:md:translate-x-[var(--fd-sidebar-offset)]',
+          'md:-me-[var(--fd-sidebar-width)] md:translate-x-[calc(var(--fd-sidebar-offset)*-1)] rtl:md:translate-x-[var(--fd-sidebar-offset)]',
         collapsed && hover && 'z-50 md:translate-x-0',
         collapsed && !hover && 'md:opacity-0',
         props.className,
@@ -155,7 +155,7 @@ export function Sidebar({
         blockScrollingWidth={768} // md
         {...props}
         className={cn(
-          'fixed top-fd-layout-top z-30 bg-fd-card text-sm md:sticky md:h-[var(--fd-sidebar-height)] md:flex-1',
+          'fixed top-fd-layout-top z-30 bg-fd-card text-sm md:sticky md:h-[var(--fd-sidebar-height)]',
           'max-md:inset-x-0 max-md:bottom-0 max-md:bg-fd-background/80 max-md:text-[15px] max-md:backdrop-blur-lg max-md:data-[open=false]:invisible',
           props.className,
         )}
@@ -262,19 +262,15 @@ export function SidebarItem({
 }
 
 export function SidebarFolder({
-  level,
-  defaultOpen,
+  defaultOpen = false,
   ...props
 }: {
   children: ReactNode;
   defaultOpen?: boolean;
-  level: number;
 }) {
-  const { defaultOpenLevel } = useInternalContext();
-  const shouldExtend = defaultOpen ?? defaultOpenLevel >= level;
-  const [open, setOpen] = useState(shouldExtend);
+  const [open, setOpen] = useState(defaultOpen);
 
-  useOnChange(shouldExtend, (v) => {
+  useOnChange(defaultOpen, (v) => {
     if (v) setOpen(v);
   });
 
@@ -401,12 +397,12 @@ export function SidebarPageTree(props: {
   const { root } = useTreeContext();
 
   return useMemo(() => {
+    const { Separator, Item, Folder } = props.components ?? {};
+
     function renderSidebarList(
       items: PageTree.Node[],
       level: number,
     ): ReactNode[] {
-      const { Separator, Item, Folder } = props.components ?? {};
-
       return items.map((item, i) => {
         const id = `${item.type}_${i.toString()}`;
 
@@ -415,10 +411,9 @@ export function SidebarPageTree(props: {
             if (Separator) return <Separator key={id} item={item} />;
             return <SidebarSeparator key={id}>{item.name}</SidebarSeparator>;
           case 'folder':
-            if (Folder)
-              return <Folder key={id} item={item} level={level + 1} />;
+            if (Folder) return <Folder key={id} item={item} level={level} />;
             return (
-              <PageTreeFolder key={id} item={item} level={level + 1}>
+              <PageTreeFolder key={id} item={item} level={level}>
                 {renderSidebarList(item.children, level + 1)}
               </PageTreeFolder>
             );
@@ -438,7 +433,7 @@ export function SidebarPageTree(props: {
       });
     }
 
-    return renderSidebarList(root.children, 0);
+    return renderSidebarList(root.children, 1);
   }, [root, props.components]);
 }
 
@@ -451,12 +446,14 @@ function PageTreeFolder({
   level: number;
   children: ReactNode;
 }) {
+  const { defaultOpenLevel } = useInternalContext();
   const path = useTreePath();
 
   return (
     <SidebarFolder
-      defaultOpen={item.defaultOpen || path.includes(item)}
-      level={level + 1}
+      defaultOpen={
+        (item.defaultOpen ?? defaultOpenLevel >= level) || path.includes(item)
+      }
     >
       {item.index ? (
         <SidebarFolderLink href={item.index.url} external={item.index.external}>

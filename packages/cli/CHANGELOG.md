@@ -1,5 +1,11 @@
 # fumadocs
 
+## 0.0.4
+
+### Patch Changes
+
+- b254ec2: Fix Windows path problems
+
 ## 0.0.3
 
 ### Patch Changes

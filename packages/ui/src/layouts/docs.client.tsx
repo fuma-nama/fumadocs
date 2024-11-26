@@ -22,6 +22,27 @@ import {
 } from '@/components/ui/collapsible';
 import { cva } from 'class-variance-authority';
 import { buttonVariants } from '@/components/ui/button';
+import { useSidebar } from '@/contexts/sidebar';
+
+export function LayoutBody(props: HTMLAttributes<HTMLElement>) {
+  const { collapsed } = useSidebar();
+
+  return (
+    <main
+      {...props}
+      style={
+        {
+          '--fd-page-width': collapsed
+            ? '100vw'
+            : 'calc(min(100vw, var(--fd-layout-width)) - var(--fd-sidebar-width) - var(--fd-toc-width))',
+          ...props.style,
+        } as object
+      }
+    >
+      {props.children}
+    </main>
+  );
+}
 
 const itemVariants = cva(
   'flex flex-row items-center gap-2 rounded-md px-3 py-2.5 text-fd-muted-foreground transition-colors duration-100 [overflow-wrap:anywhere] hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 hover:transition-none md:px-2 md:py-1.5 [&_svg]:size-4',
@@ -68,11 +89,11 @@ export function MenuItem({ item, ...props }: MenuItemProps) {
       <Collapsible className="flex flex-col">
         <CollapsibleTrigger
           {...props}
-          className={cn(itemVariants(), 'group/link', props.className)}
+          className={cn(itemVariants(), 'group', props.className)}
         >
           {item.icon}
           {item.text}
-          <ChevronDown className="ms-auto transition-transform group-data-[state=closed]/link:-rotate-90" />
+          <ChevronDown className="ms-auto transition-transform group-data-[state=closed]:-rotate-90" />
         </CollapsibleTrigger>
         <CollapsibleContent>
           <div className="flex flex-col py-2 ps-2">

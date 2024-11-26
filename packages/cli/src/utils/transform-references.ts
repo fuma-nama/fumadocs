@@ -67,21 +67,32 @@ export async function transformReferences(
   }
 }
 
+/**
+ * Return the import modifier for `sourceFile` to import `referenceFile`
+ *
+ * @example
+ * ```ts
+ * toReferencePath('index.ts', 'dir/hello.ts')
+ * // should output './dir/hello'
+ * ```
+ */
 export function toReferencePath(
   sourceFile: string,
   referenceFile: string,
 ): string {
   const extname = path.extname(referenceFile);
-  const importPath = path.relative(
-    path.dirname(sourceFile),
-    path.join(
-      path.dirname(referenceFile),
-      path.basename(
-        referenceFile,
-        typescriptExtensions.includes(extname) ? extname : undefined,
+  const importPath = path
+    .relative(
+      path.dirname(sourceFile),
+      path.join(
+        path.dirname(referenceFile),
+        path.basename(
+          referenceFile,
+          typescriptExtensions.includes(extname) ? extname : undefined,
+        ),
       ),
-    ),
-  );
+    )
+    .replaceAll(path.sep, '/');
 
   return importPath.startsWith('../') ? importPath : `./${importPath}`;
 }

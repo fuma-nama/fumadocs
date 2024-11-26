@@ -6,7 +6,9 @@ import { stopwords } from '@orama/stopwords/mandarin';
 
 export const { GET, search } = createFromSource(source, undefined, {
   localeMap: {
+    // the prop name should be its locale code in your i18n config, (e.g. `cn`)
     cn: {
+      // options for the language
       tokenizer: await createTokenizer({
         stopWords: stopwords,
       }),

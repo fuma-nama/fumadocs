@@ -36,12 +36,8 @@ import {
 import Img from './img.png';
 
 const badgeVariants = cva(
-  'mb-2 inline-flex size-7 items-center justify-center rounded-full bg-fd-primary font-medium text-fd-primary-foreground',
+  'inline-flex size-7 items-center justify-center rounded-full bg-fd-primary font-medium text-fd-primary-foreground',
 );
-
-const code = `const schema = frontmatterSchema.extend({
-  preview: z.string().optional()
-})`;
 
 export default function Page(): React.ReactElement {
   return (
@@ -555,7 +551,7 @@ function Feedback(): React.ReactElement {
 function Introduction(): React.ReactElement {
   return (
     <div className="grid grid-cols-1 border-r md:grid-cols-2">
-      <div className="flex flex-col border-l border-t px-6 py-12 md:py-16">
+      <div className="flex flex-col gap-2 border-l border-t px-6 py-12 md:py-16">
         <div className={cn(badgeVariants())}>1</div>
         <h3 className="text-xl font-bold">Create it.</h3>
         <p className="mb-8 text-fd-muted-foreground">
@@ -563,31 +559,37 @@ function Introduction(): React.ReactElement {
         </p>
         <CreateAppAnimation />
       </div>
-      <div className="flex flex-col border-l border-t px-6 py-12 md:py-16">
+      <div className="flex flex-col gap-2 border-l border-t px-6 py-12 md:py-16">
         <div className={cn(badgeVariants())}>2</div>
-        <h3 className="text-xl font-bold">Customise.</h3>
+        <h3 className="text-xl font-bold">Write.</h3>
         <p className="text-fd-muted-foreground">
-          Modify the code, in a comfortable way with Typescript auto-complete.
+          Write content, with automation tools & type-safe data validation.
         </p>
         <div className="relative flex flex-col">
           <CodeBlock
-            lang="ts"
+            lang="mdx"
             wrapper={{ className: 'absolute inset-x-2 top-0' }}
-            code={code}
+            code={`---
+title: My Documentation
+---
+
+## Introduction
+
+Hello World
+`}
           />
-          <Files className="z-[2] mt-20 shadow-xl">
+          <Files className="z-[2] mt-48 shadow-xl">
             <Folder name="content" defaultOpen>
               <File name="index.mdx" />
-              <File name="hello.mdx" />
               <File name="components.mdx" />
             </Folder>
           </Files>
         </div>
       </div>
-      <div className="col-span-full flex flex-col items-center border-l border-t px-6 py-12 text-center">
+      <div className="col-span-full flex flex-col items-center gap-2 border-l border-t px-6 py-12 text-center">
         <div className={cn(badgeVariants())}>3</div>
         <h3 className="text-2xl font-bold">Ship.</h3>
-        <p className="mb-2 text-fd-muted-foreground">
+        <p className="text-fd-muted-foreground">
           Deploy your docs easily with Next.js compatible hosting platforms.
         </p>
 

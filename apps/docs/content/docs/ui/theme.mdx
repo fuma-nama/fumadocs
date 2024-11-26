@@ -160,15 +160,18 @@ export default {
 
 ### Typography
 
-We have a built-in plugin based on [Tailwind CSS Typography](https://tailwindcss.com/docs/typography-plugin), you can customize it with CSS.
+We have a built-in plugin forked from [Tailwind CSS Typography](https://tailwindcss.com/docs/typography-plugin).
 
-The Tailwind CSS plugin adds a `prose` class.
+The plugin adds a `prose` class and variants to customise it.
 
 ```tsx
 <div className="prose">
   <h1>Good Heading</h1>
 </div>
 ```
+
+> The plugin works with and only with Fumadocs UI's MDX components, it may conflict with `@tailwindcss/typography`.
+> If you need to use `@tailwindcss/typography` over the default plugin, [set a class name option](https://github.com/tailwindlabs/tailwindcss-typography/blob/main/README.md#changing-the-default-class-name) to avoid conflicts.
 
 ### Colors
 

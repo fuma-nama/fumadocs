@@ -12,8 +12,7 @@ description: Integrate Algolia Search with Fumadocs
 
 The Algolia Integration automatically configures Algolia Search for document search.
 
-By default, it creates a record for **each paragraph** in your document, it is
-officially recommended by Algolia.
+It creates a record for **each paragraph** in your document, it is also recommended by Algolia.
 
 Each record contains searchable attributes:
 
@@ -25,6 +24,9 @@ Each record contains searchable attributes:
 
 The `section` field only exists in paragraphs under a heading. Headings and
 paragraphs are indexed as an individual record, grouped by their page ID.
+
+Notice that it expects the `url` property of a page to be unique, you shouldn't have two pages with the same
+url.
 
 ## Setup
 
@@ -90,20 +92,17 @@ Make sure to run the script after build:
 You may make it a script and manually sync with `node ./update-index.mjs`, or
 integrate it with your CI/CD pipeline.
 
-> Notice that it expects the `url` property of a page to be unique. In other words, you shouldn't have two pages with the same
-> url.
-
 <Callout type="warn" title="Typescript Usage">
   If you are running the script with [TSX](https://github.com/privatenumber/tsx)
   or other similar Typescript executors, ensure to name it `.mts` for best ESM
   compatibility.
 </Callout>
 
-### Search Client
+### Search UI
 
-To search documents on the client side, use [Fumadocs UI Search Dialog](/docs/ui/search#algolia), or make your own implementation.
+To implement a search UI, consider [Fumadocs UI Search Dialog](/docs/ui/search#algolia), or build your own.
 
-In addition, the headless search client of Fumadocs can handle state management for React.
+In addition, the headless search client of Fumadocs can handle state management on React.
 
 ```ts
 import algosearch from 'algoliasearch';
@@ -139,30 +138,28 @@ sync(client, {
 });
 ```
 
-#### Search UI (Fumadocs UI) [#search-ui]
+And update your search client:
 
-Enable [Tag Filter](/docs/ui/search#tag-filter-1) on Search Dialog.
+- **Fumadocs UI**: Enable [Tag Filter](/docs/ui/search#tag-filter-1) on Search Dialog.
+- **Search Client**: You can add the tag filter like:
 
-#### Search Client
+  ```ts
+  import algosearch from 'algoliasearch';
+  import { useDocsSearch } from 'fumadocs-core/search/client';
 
-The `tag` field is an attribute for faceting. To filter indexes by tag, use the filter `tag:value` on Algolia search clients.
-On Fumadocs search client, you can add the tag filter like:
+  const index = algosearch('id', 'key').initIndex('document');
 
-```ts
-import algosearch from 'algoliasearch';
-import { useDocsSearch } from 'fumadocs-core/search/client';
+  const { search, setSearch, query } = useDocsSearch(
+    {
+      type: 'algolia',
+      index,
+    },
+    undefined,
+    '<your tag value>',
+  );
+  ```
 
-const index = algosearch('id', 'key').initIndex('document');
-
-const { search, setSearch, query } = useDocsSearch(
-  {
-    type: 'algolia',
-    index,
-  },
-  undefined,
-  '<your tag value>',
-);
-```
+The `tag` field is an attribute for faceting. You can also use the filter `tag:value` on Algolia search clients.
 
 ### Customise Attributes & Settings
 

@@ -72,7 +72,7 @@
   "devDependencies": {
     "@types/mdx": "^2.0.13",
     "@types/micromatch": "^4.0.9",
-    "@types/node": "22.9.0",
+    "@types/node": "22.9.3",
     "@types/react": "^18.3.12",
     "@types/ws": "^8.5.13",
     "eslint-config-custom": "workspace:*",

@@ -63,10 +63,13 @@ export default async function Page(props: {
         sha: 'dev',
         path,
       }}
+      article={{
+        className: 'max-sm:pb-16',
+      }}
     >
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
-      <DocsBody>
+      <DocsBody className="text-fd-foreground/80">
         {preview ? <PreviewRenderer preview={preview} /> : null}
         <Mdx
           components={{

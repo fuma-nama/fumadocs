@@ -15,9 +15,14 @@
 }
 
 :root {
+  --fd-layout-width: 1400px;
   --headless-color: 250 80% 54%;
   --mdx-color: 0 0% 9%;
   --ui-color: 220deg 91% 54%;
+}
+
+body {
+  overscroll-behavior-y: none;
 }
 
 .dark {

@@ -35,13 +35,13 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@types/node": "22.9.0",
+    "@types/node": "22.9.3",
     "fast-glob": "^3.3.1",
     "hast-util-to-jsx-runtime": "^2.3.2",
     "mdast-util-from-markdown": "^2.0.2",
     "mdast-util-gfm": "^3.0.0",
     "mdast-util-to-hast": "^13.2.0",
-    "shiki": "^1.23.0",
+    "shiki": "^1.23.1",
     "ts-morph": "^24.0.0"
   },
   "devDependencies": {
@@ -53,7 +53,7 @@
     "eslint-config-custom": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "tsconfig": "workspace:*",
-    "typescript": "^5.6.3"
+    "typescript": "^5.7.2"
   },
   "peerDependencies": {
     "typescript": "*"

@@ -35,17 +35,17 @@ export const metaFiles = defineCollections({
 });
 ```
 
-### `type: meta`
+- `type: meta`
 
-Accept JSON/YAML Files, available options:
+  Accept JSON/YAML Files, available options:
 
-<AutoTypeTable path="./content/docs/mdx/props.ts" name="MetaCollection" />
+  <AutoTypeTable path="./content/docs/mdx/props.ts" name="MetaCollection" />
 
-### `type: doc`
+- `type: doc`
 
-Markdown/MDX Documents, available options:
+  Markdown/MDX Documents, available options:
 
-<AutoTypeTable path="./content/docs/mdx/props.ts" name="DocCollection" />
+  <AutoTypeTable path="./content/docs/mdx/props.ts" name="DocCollection" />
 
 ### `dir`
 
@@ -105,10 +105,9 @@ export const blog = defineCollections({
 ```
 
 By design, this will remove all default settings applied by your global config and Fumadocs MDX.
+You have full control over MDX options.
 
-#### With Defaults
-
-Use `getDefaultMDXOptions` to apply default configurations, it accepts the [Extended MDX Options](/docs/mdx/mdx#extended).
+You can use `getDefaultMDXOptions` to apply default configurations, it accepts the [Extended MDX Options](/docs/mdx/mdx#extended).
 
 ```ts title="source.config.ts"
 import { defineCollections, getDefaultMDXOptions } from 'fumadocs-mdx/config';
@@ -121,15 +120,7 @@ export const blog = defineCollections({
 });
 ```
 
-For full control over MDX options, you can pass MDX options without it, which means no defaults will be applied.
-
 > This API only available on `doc` type.
-
-### `transform`
-
-A function to perform runtime transformation on collection entries.
-
-See [Transform](/docs/mdx/transform).
 
 ## Define Docs
 

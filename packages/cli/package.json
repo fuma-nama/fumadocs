@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/cli",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "The CLI tool for Fumadocs",
   "keywords": [
     "NextJs",
@@ -34,7 +34,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@clack/prompts": "^0.8.0",
+    "@clack/prompts": "^0.8.2",
     "commander": "^12.1.0",
     "execa": "^9.5.1",
     "package-manager-detector": "^0.2.4",
@@ -43,7 +43,7 @@
   },
   "devDependencies": {
     "@types/cross-spawn": "^6.0.6",
-    "@types/node": "22.9.0",
+    "@types/node": "22.9.3",
     "@types/react": "^18.3.12",
     "eslint-config-custom": "workspace:*",
     "fast-glob": "^3.3.1",

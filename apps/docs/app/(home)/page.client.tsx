@@ -15,7 +15,7 @@ import scrollIntoView from 'scroll-into-view-if-needed';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 
-export function CreateAppAnimation(): React.ReactElement {
+export function CreateAppAnimation() {
   const installCmd = 'npm create fumadocs-app';
   const tickTime = 100;
   const timeCommandEnter = installCmd.length;
@@ -129,7 +129,7 @@ export function WhyInteractive(props: {
   codeblockInteractive: ReactNode;
   typeTable: ReactNode;
   codeblockMdx: ReactNode;
-}): ReactNode {
+}) {
   const [autoActive, setAutoActive] = useState(true);
   const [active, setActive] = useState(0);
   const duration = 1000 * 8;
@@ -153,19 +153,6 @@ export function WhyInteractive(props: {
     };
   }, [active, autoActive, duration, items.length]);
 
-  if (typeof window !== 'undefined') {
-    const element = document.getElementById(
-      `why-interactive-${active.toString()}`,
-    );
-
-    if (element) {
-      scrollIntoView(element, {
-        behavior: 'smooth',
-        boundary: document.getElementById('why-interactive'),
-      });
-    }
-  }
-
   return (
     <div
       id="why-interactive"
@@ -175,7 +162,14 @@ export function WhyInteractive(props: {
         {items.map((item, i) => (
           <button
             key={item}
-            id={`why-interactive-${i.toString()}`}
+            ref={(element) => {
+              if (!element || i !== active) return;
+
+              scrollIntoView(element, {
+                behavior: 'smooth',
+                boundary: document.getElementById('why-interactive'),
+              });
+            }}
             type="button"
             className={cn(
               'inline-flex flex-col-reverse text-nowrap rounded-lg py-1.5 text-left text-sm font-medium text-muted-foreground transition-colors max-lg:px-2 lg:flex-row',
@@ -186,7 +180,10 @@ export function WhyInteractive(props: {
             )}
             onClick={() => {
               if (active === i) setAutoActive((prev) => !prev);
-              else setActive(i);
+              else {
+                setAutoActive(false);
+                setActive(i);
+              }
             }}
           >
             {i === active && autoActive ? (
@@ -367,7 +364,7 @@ export function WhyInteractive(props: {
   );
 }
 
-function WhyPanel(props: HTMLProps<HTMLDivElement>): ReactNode {
+function WhyPanel(props: HTMLProps<HTMLDivElement>) {
   return (
     <div
       {...props}

@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-mdx",
-  "version": "11.1.1",
+  "version": "11.1.2",
   "description": "The built-in source for Fumadocs",
   "keywords": [
     "NextJs",
@@ -44,7 +44,7 @@
   "dependencies": {
     "@mdx-js/mdx": "^3.1.0",
     "chokidar": "^4.0.1",
-    "cross-spawn": "^7.0.5",
+    "cross-spawn": "^7.0.6",
     "esbuild": "^0.24.0",
     "estree-util-value-to-estree": "^3.2.1",
     "fast-glob": "^3.3.1",

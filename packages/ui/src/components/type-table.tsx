@@ -48,14 +48,10 @@ const code = cva(
   },
 );
 
-export function TypeTable({
-  type,
-}: {
-  type: Record<string, ObjectType>;
-}): React.ReactElement {
+export function TypeTable({ type }: { type: Record<string, ObjectType> }) {
   return (
-    <div className="overflow-auto whitespace-nowrap">
-      <table className="text-sm text-fd-muted-foreground">
+    <div className="prose my-6 overflow-auto prose-no-margin">
+      <table className="whitespace-nowrap text-sm text-fd-muted-foreground">
         <thead>
           <tr>
             <th className="w-[45%]">Prop</th>

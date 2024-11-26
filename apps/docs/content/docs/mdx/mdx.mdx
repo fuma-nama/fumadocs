@@ -3,9 +3,11 @@ title: MDX Options
 description: Configure MDX processor for Fumadocs MDX
 ---
 
-## Introduction
+## Customising MDX Processor
 
-You can customise MDX options with [Global Config](/docs/mdx/global) and [Collection Config](/docs/mdx/collections).
+Fumadocs MDX uses [MDX Compiler](https://mdxjs.com/packages/mdx) to compile MDX files into JavaScript files.
+
+You can customise it with [Global Config](/docs/mdx/global#mdx-options) or [Collection Config](/docs/mdx/collections#mdxoptions), there's an example using global config:
 
 ```ts title="source.config.ts"
 import { defineConfig } from 'fumadocs-mdx/config';
@@ -17,12 +19,12 @@ export default defineConfig({
 });
 ```
 
-> Fumadocs MDX uses [MDX Compiler](https://mdxjs.com/packages/mdx) to compile MDX files into JavaScript files.
-
 ## Extended MDX Options [#extended]
 
-Fumadocs MDX will apply some default plugins (e.g. syntax highlighting).
-Hence, it supports more options on top of [`ProcessorOptions`](https://mdxjs.com/packages/mdx/#processoroptions) to let you override the defaults.
+Fumadocs MDX will apply some default MDX options, to make features like **syntax highlighting** work out of the box.
+
+To allow overriding the defaults, Fumadocs MDX's `mdxOptions` option accepts **Extended MDX Options** on top of [`ProcessorOptions`](https://mdxjs.com/packages/mdx/#processoroptions).
+You can see the additional options below:
 
 ### Remark Plugins
 
@@ -119,4 +121,4 @@ const options = getDefaultMDXOptions({
 });
 ```
 
-> For the `mdxOptions` field in global config, you don't need it.
+Note that you do not need it for the `mdxOptions` field in global config.

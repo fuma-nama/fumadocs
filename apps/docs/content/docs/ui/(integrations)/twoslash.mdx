@@ -15,31 +15,26 @@ Add to your Shiki transformers.
 
 <Callout title='Example for Fumadocs MDX'>
 
-```js title="next.config.mjs"
-import createMDX from 'fumadocs-mdx/config';
-import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins';
+```ts twoslash title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
 import { transformerTwoslash } from 'fumadocs-twoslash';
+import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins';
 
-/** @type {import('next').NextConfig} */
-const withMDX = createMDX({
+export default defineConfig({
   mdxOptions: {
     rehypeCodeOptions: {
       transformers: [
-        ...rehypeCodeDefaultOptions.transformers,
-        transformerTwoslash(), // [!code highlight]
+        ...(rehypeCodeDefaultOptions.transformers ?? []),
+        transformerTwoslash(),
       ],
     },
   },
 });
-
-export default withMDX(config);
 ```
 
 </Callout>
 
-Add required styles and components.
-
-> Tailwind CSS Required
+Add required styles and components, note that you have to configure Tailwind CSS and the official Tailwind CSS plugin first.
 
 ```tsx title="layout.tsx"
 import 'fumadocs-twoslash/twoslash.css';
@@ -58,6 +53,14 @@ import defaultMdxComponents from 'fumadocs-ui/mdx';
   }}
 />;
 ```
+
+Now you can add `twoslash` meta string to codeblocks.
+
+````md
+```ts twoslash
+console.log('Hello World');
+```
+````
 
 ### Example
 
@@ -114,4 +117,89 @@ void generateFiles({
 const a = '123';
 
 a = 132;
+```
+
+### Using on Runtime
+
+To use it on Next.js runtime, add `typescript` and `twoslash` to `serverExternalPackages`:
+
+```ts title="next.config.mjs"
+import { createMDX } from 'fumadocs-mdx/next';
+
+const withMDX = createMDX();
+
+/** @type {import('next').NextConfig} */
+const config = {
+  reactStrictMode: true,
+  serverExternalPackages: ['twoslash', 'typescript'],
+};
+
+export default withMDX(config);
+```
+
+Install the external dependencies:
+
+```package-install
+typescript twoslash
+```
+
+Pass the transformer to Shiki, see https://shiki.style/packages/next for details.
+
+```tsx twoslash
+import React from 'react';
+import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
+import { createStyleTransformer } from 'fumadocs-core/server';
+import { transformerTwoslash } from 'fumadocs-twoslash';
+import { Popup, PopupContent, PopupTrigger } from 'fumadocs-twoslash/ui';
+import { getSingletonHighlighter, bundledLanguages } from 'shiki';
+import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
+import { Fragment, jsx, jsxs } from 'react/jsx-runtime';
+
+export async function Code({
+  code,
+  lang = 'ts',
+}: {
+  lang?: string;
+  code: string;
+}) {
+  const highlighter = await getSingletonHighlighter({
+    langs: Object.keys(bundledLanguages),
+    themes: ['vesper'],
+  });
+
+  const hast = highlighter.codeToHast(code, {
+    lang,
+    themes: {
+      light: 'vesper',
+      dark: 'vesper',
+    },
+    defaultColor: false,
+    transformers: [
+      createStyleTransformer(),
+      transformerTwoslash({
+        explicitTrigger: false,
+      }),
+    ],
+  });
+
+  const rendered = toJsxRuntime(hast, {
+    Fragment,
+    jsx,
+    jsxs,
+    development: false,
+    components: {
+      pre: (props) => (
+        <CodeBlock {...props}>
+          <Pre>{props.children}</Pre>
+        </CodeBlock>
+      ),
+      // @ts-expect-error -- Twoslash components
+      Popup,
+      PopupContent,
+      PopupTrigger,
+    },
+  });
+
+  return rendered;
+}
 ```
