@@ -27,7 +27,7 @@ import {
   LanguageToggle,
   LanguageToggleText,
 } from '@/components/layout/language-toggle';
-import { LinksMenu } from '@/layouts/docs.client';
+import { LayoutBody, LinksMenu } from '@/layouts/docs.client';
 import { TreeContextProvider } from '@/contexts/tree';
 import { NavProvider, Title } from '@/components/layout/nav';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
@@ -94,7 +94,7 @@ export function DocsLayout({
           </Navbar>,
           nav,
         )}
-        <main
+        <LayoutBody
           id="nd-docs-layout"
           {...props.containerProps}
           className={cn(
@@ -110,7 +110,10 @@ export function DocsLayout({
           ) : null}
           {replaceOrDefault(
             { enabled: sidebarEnabled, component: sidebarReplace },
-            <Aside {...sidebar}>
+            <Aside
+              {...sidebar}
+              className="md:flex-1 md:data-[collapsed=true]:flex-initial"
+            >
               <SidebarHeader>
                 <SidebarHeaderItems {...nav} links={links} />
                 {sidebarBanner}
@@ -149,7 +152,7 @@ export function DocsLayout({
             },
           )}
           {props.children}
-        </main>
+        </LayoutBody>
       </NavProvider>
     </TreeContextProvider>
   );

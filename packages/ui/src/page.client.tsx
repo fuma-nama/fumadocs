@@ -22,30 +22,6 @@ import {
   getBreadcrumbItemsFromPath,
 } from 'fumadocs-core/breadcrumb';
 
-export function PageContainer(props: HTMLAttributes<HTMLDivElement>) {
-  const { collapsed } = useSidebar();
-
-  return (
-    <div
-      {...props}
-      className={cn(
-        'flex w-full min-w-0 max-w-[var(--fd-page-width)] flex-col md:transition-[max-width]',
-        props.className,
-      )}
-      style={
-        {
-          ...props.style,
-          '--fd-page-width': collapsed
-            ? '100vw'
-            : 'calc(min(100vw, var(--fd-layout-width)) - var(--fd-sidebar-width) - var(--fd-toc-width))',
-        } as object
-      }
-    >
-      {props.children}
-    </div>
-  );
-}
-
 export function PageHeader(props: HTMLAttributes<HTMLDivElement>) {
   const { open } = useSidebar();
   const { isTransparent } = useNav();
@@ -54,8 +30,8 @@ export function PageHeader(props: HTMLAttributes<HTMLDivElement>) {
     <header
       {...props}
       className={cn(
-        'sticky top-fd-layout-top z-10 flex flex-row items-center border-b border-fd-foreground/10 text-sm transition-colors',
-        !isTransparent && 'bg-fd-background/80 backdrop-blur-md',
+        'sticky top-fd-layout-top z-10 flex flex-row items-center border-b border-fd-foreground/10 text-sm backdrop-blur-md transition-colors',
+        !isTransparent && 'bg-fd-background/80',
         open && 'opacity-0',
         props.className,
       )}

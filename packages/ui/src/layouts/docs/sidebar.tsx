@@ -119,9 +119,9 @@ export function CollapsibleSidebar(props: SidebarProps) {
       onPointerLeave={onLeave}
       data-collapsed={collapsed}
       className={cn(
-        'transition-[flex,margin,opacity,transform]',
+        'md:transition-all',
         collapsed &&
-          'md:-me-[var(--fd-sidebar-width)] md:flex-initial md:translate-x-[calc(var(--fd-sidebar-offset)*-1)] rtl:md:translate-x-[var(--fd-sidebar-offset)]',
+          'md:-me-[var(--fd-sidebar-width)] md:translate-x-[calc(var(--fd-sidebar-offset)*-1)] rtl:md:translate-x-[var(--fd-sidebar-offset)]',
         collapsed && hover && 'z-50 md:translate-x-0',
         collapsed && !hover && 'md:opacity-0',
         props.className,
@@ -155,7 +155,7 @@ export function Sidebar({
         blockScrollingWidth={768} // md
         {...props}
         className={cn(
-          'fixed top-fd-layout-top z-30 bg-fd-card text-sm md:sticky md:h-[var(--fd-sidebar-height)] md:flex-1',
+          'fixed top-fd-layout-top z-30 bg-fd-card text-sm md:sticky md:h-[var(--fd-sidebar-height)]',
           'max-md:inset-x-0 max-md:bottom-0 max-md:bg-fd-background/80 max-md:text-[15px] max-md:backdrop-blur-lg max-md:data-[open=false]:invisible',
           props.className,
         )}

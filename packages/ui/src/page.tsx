@@ -14,17 +14,18 @@ import {
   Footer,
   type FooterProps,
   LastUpdate,
-  PageContainer,
   PageHeader,
   Breadcrumb,
   type BreadcrumbProps,
 } from './page.client';
-import { Toc, TOCItems, type TOCProps } from '@/components/layout/toc';
 import {
+  Toc,
+  TOCItems,
   TocPopoverTrigger,
   TocPopover,
   TocPopoverContent,
-} from '@/components/layout/toc-popover';
+  type TOCProps,
+} from '@/components/layout/toc';
 import { buttonVariants } from '@/components/ui/button';
 import { Edit, Text } from 'lucide-react';
 import { I18nLabel } from '@/contexts/i18n';
@@ -105,14 +106,14 @@ export interface DocsPageProps {
   editOnGithub?: EditOnGitHubOptions;
   lastUpdate?: Date | string | number;
 
+  container?: HTMLAttributes<HTMLDivElement>;
+  article?: HTMLAttributes<HTMLElement>;
   children: ReactNode;
 }
 
 export function DocsPage({
   toc = [],
-  breadcrumb = {},
   full = false,
-  footer = {},
   tableOfContentPopover: {
     enabled: tocPopoverEnabled = true,
     component: tocPopoverReplace,
@@ -135,8 +136,13 @@ export function DocsPage({
 
   return (
     <AnchorProvider toc={toc} single={tocOptions.single}>
-      <PageContainer
+      <div
         id="nd-page"
+        {...props.container}
+        className={cn(
+          'flex w-full min-w-0 max-w-[var(--fd-page-width)] flex-col md:transition-[max-width]',
+          props.container?.className,
+        )}
         style={
           {
             '--fd-toc-width': fullWidth ? '0px' : undefined,
@@ -165,14 +171,19 @@ export function DocsPage({
           },
         )}
         <article
+          {...props.article}
           className={cn(
-            'mx-auto flex w-full flex-1 flex-col gap-6 px-4 pt-10 md:px-7 md:pt-12',
+            'mx-auto flex w-full flex-1 flex-col gap-6 px-4 pt-8 md:pt-12 lg:px-8',
             fullWidth ? 'max-w-[1120px]' : 'max-w-[860px]',
+            props.article?.className,
           )}
         >
           {replaceOrDefault(
-            breadcrumb,
-            <Breadcrumb includePage={breadcrumb.full} {...breadcrumb} />,
+            props.breadcrumb,
+            <Breadcrumb
+              includePage={props.breadcrumb?.full}
+              {...props.breadcrumb}
+            />,
           )}
           {props.children}
           <div role="none" className="flex-1" />
@@ -184,9 +195,12 @@ export function DocsPage({
               <LastUpdate date={new Date(props.lastUpdate)} />
             ) : null}
           </div>
-          {replaceOrDefault(footer, <Footer items={footer.items} />)}
+          {replaceOrDefault(
+            props.footer,
+            <Footer items={props.footer?.items} />,
+          )}
         </article>
-      </PageContainer>
+      </div>
       {replaceOrDefault(
         { enabled: tocEnabled, component: tocReplace },
         <Toc id="nd-toc">
@@ -232,7 +246,7 @@ function EditOnGitHub({
       className={cn(
         buttonVariants({
           color: 'secondary',
-          className: 'gap-1.5 py-1 text-fd-muted-foreground',
+          className: 'gap-1.5 text-fd-muted-foreground',
         }),
         props.className,
       )}
