@@ -6,7 +6,7 @@ import * as JS from '@/requests/javascript';
 import * as Go from '@/requests/go';
 import * as Python from '@/requests/python';
 import { type MethodInformation, type RenderContext } from '@/types';
-import { noRef, getPreferredType } from '@/utils/schema';
+import { noRef, getPreferredType, normalizeSchema } from '@/utils/schema';
 import { getTypescriptSchema } from '@/utils/get-typescript-schema';
 import { getSecurities, getSecurityPrefix } from '@/utils/get-security';
 import { Playground } from '@/render/playground';
@@ -90,7 +90,7 @@ export function Operation({
         {body.description ? <Markdown text={body.description} /> : null}
         <Schema
           name="body"
-          schema={noRef(body.content[type].schema ?? {})}
+          schema={normalizeSchema(noRef(body.content[type].schema ?? {}))}
           ctx={{
             readOnly: method.method === 'GET',
             writeOnly: method.method !== 'GET',
@@ -111,7 +111,7 @@ export function Operation({
       (item) => item.name === param.name && item.in === param.in,
     );
     if (!pInfo) continue;
-    const schema = pInfo.schema;
+    const schema = normalizeSchema(pInfo.schema);
     const groupName =
       {
         path: 'Path Parameters',
@@ -192,7 +192,7 @@ async function APIExample({
   method: MethodInformation;
   endpoint: EndpointSample;
   ctx: RenderContext;
-}): Promise<ReactElement> {
+}) {
   const renderer = ctx.renderer;
   const children: ReactNode[] = [];
 

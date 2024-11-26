@@ -59,6 +59,27 @@ export function normalizeSchema(schema: SchemaObject): ParsedSchema {
     delete parsed.example;
   }
 
+  for (const key of ['additionalProperties'] as const) {
+    if (typeof schema[key] === 'object') {
+      parsed[key] = normalizeSchema(noRef(schema[key]));
+    }
+  }
+
+  for (const key of ['anyOf', 'allOf', 'oneOf'] as const) {
+    if (Array.isArray(schema[key])) {
+      parsed[key] = schema[key].map(normalizeSchema);
+    }
+  }
+
+  if (schema.properties) {
+    Object.keys(schema.properties).forEach((key) => {
+      if (!schema.properties) return;
+
+      parsed.properties ??= {};
+      parsed.properties[key] = normalizeSchema(noRef(schema.properties[key]));
+    });
+  }
+
   return parsed;
 }
 

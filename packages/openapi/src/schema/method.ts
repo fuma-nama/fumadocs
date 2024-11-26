@@ -1,14 +1,14 @@
-import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
-import type { MethodInformation } from '@/types';
+import type { MethodInformation, OperationObject } from '@/types';
 import { noRef } from '@/utils/schema';
+import { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 
 /**
  * Summarize method endpoint information
  */
 export function createMethod(
   method: string,
-  path: OpenAPI.PathItemObject,
-  operation: OpenAPI.OperationObject,
+  path: OpenAPIV3.PathItemObject | OpenAPIV3_1.PathItemObject,
+  operation: OperationObject,
 ): MethodInformation {
   return {
     description: path.description,

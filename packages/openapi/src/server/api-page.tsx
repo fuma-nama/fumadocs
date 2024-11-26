@@ -1,18 +1,19 @@
+import { Document } from '@/types';
 import type { ReactElement } from 'react';
-import { type OpenAPIV3 as OpenAPI } from 'openapi-types';
 import Slugger from 'github-slugger';
 import Parser from '@apidevtools/json-schema-ref-parser';
 import { Operation } from '@/render/operation';
 import type { RenderContext } from '@/types';
 import { createMethod } from '@/schema/method';
 import { createRenders, type Renderer } from '@/render/renderer';
+import { OpenAPIV3_1 } from 'openapi-types';
 
 export interface ApiPageProps
   extends Pick<
     RenderContext,
     'generateCodeSamples' | 'generateTypeScriptSchema' | 'shikiOptions'
   > {
-  document: string | OpenAPI.Document;
+  document: string | Document;
 
   /**
    * An array of operations
@@ -24,31 +25,30 @@ export interface ApiPageProps
   disableCache?: boolean;
 }
 
-const cache = new Map<string, OpenAPI.Document>();
+const cache = new Map<string, Document>();
 
 export interface Operation {
   path: string;
-  method: OpenAPI.HttpMethods;
+  method: OpenAPIV3_1.HttpMethods;
 }
 
 export async function APIPage(props: ApiPageProps): Promise<ReactElement> {
   const { operations, hasHead = true } = props;
-  let document: OpenAPI.Document;
+  let document: Document;
 
   if (typeof props.document === 'string' && !props.disableCache) {
     const cached = cache.get(props.document);
-    document =
-      cached ?? (await Parser.dereference<OpenAPI.Document>(props.document));
+    document = cached ?? (await Parser.dereference<Document>(props.document));
     cache.set(props.document, document);
   } else {
-    document = await Parser.dereference<OpenAPI.Document>(props.document);
+    document = await Parser.dereference<Document>(props.document);
   }
 
   const ctx = getContext(document, props);
   return (
     <ctx.renderer.Root baseUrl={ctx.baseUrl}>
       {operations.map((item) => {
-        const pathItem = document.paths[item.path];
+        const pathItem = document.paths?.[item.path];
         if (!pathItem) return null;
 
         const operation = pathItem[item.method];
@@ -73,10 +73,7 @@ export async function APIPage(props: ApiPageProps): Promise<ReactElement> {
   );
 }
 
-function getContext(
-  document: OpenAPI.Document,
-  options: ApiPageProps,
-): RenderContext {
+function getContext(document: Document, options: ApiPageProps): RenderContext {
   return {
     document,
     renderer: {

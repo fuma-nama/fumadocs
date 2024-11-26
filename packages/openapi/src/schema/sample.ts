@@ -1,7 +1,11 @@
-import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
 import { sample } from 'openapi-sampler';
 import type { MethodInformation, RenderContext } from '@/types';
-import { toSampleInput, noRef, getPreferredType } from '@/utils/schema';
+import {
+  toSampleInput,
+  noRef,
+  getPreferredType,
+  type ParsedSchema,
+} from '@/utils/schema';
 import { getSecurities, getSecurityPrefix } from '@/utils/get-security';
 
 /**
@@ -14,7 +18,7 @@ export interface EndpointSample {
   url: string;
   method: string;
   body?: {
-    schema: OpenAPI.SchemaObject;
+    schema: ParsedSchema;
     mediaType: string;
     sample: unknown;
   };
@@ -25,13 +29,13 @@ export interface EndpointSample {
 interface ResponseSample {
   mediaType: string;
   sample: unknown;
-  schema: OpenAPI.SchemaObject;
+  schema: ParsedSchema;
 }
 
 interface ParameterSample {
   name: string;
   in: string;
-  schema: OpenAPI.SchemaObject;
+  schema: ParsedSchema;
   sample: unknown;
 }
 
@@ -101,7 +105,7 @@ export function generateSample(
     };
   }
 
-  for (const [code, value] of Object.entries(method.responses)) {
+  for (const [code, value] of Object.entries(method.responses ?? {})) {
     const content = noRef(value).content;
     if (!content) continue;
 
@@ -147,7 +151,7 @@ export function generateSample(
   };
 }
 
-function generateBody(method: string, schema: OpenAPI.SchemaObject): unknown {
+function generateBody(method: string, schema: ParsedSchema): unknown {
   return sample(schema as object, {
     skipReadOnly: method !== 'GET',
     skipWriteOnly: method === 'GET',

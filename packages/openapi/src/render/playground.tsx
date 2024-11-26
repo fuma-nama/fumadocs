@@ -4,7 +4,12 @@ import type {
   ParameterObject,
   RenderContext,
 } from '@/types';
-import { getPreferredType, noRef, type ParsedSchema } from '@/utils/schema';
+import {
+  getPreferredType,
+  noRef,
+  normalizeSchema,
+  type ParsedSchema,
+} from '@/utils/schema';
 import { getSecurities } from '@/utils/get-security';
 
 interface BaseRequestField {
@@ -186,7 +191,7 @@ function parameterToField(
   return {
     name: v.name,
     ...(toSchema(
-      noRef(v.schema) ?? { type: 'string' },
+      normalizeSchema(noRef(v.schema) ?? { type: 'string' }),
       v.required ?? false,
       ctx,
     ) as PrimitiveSchema),
