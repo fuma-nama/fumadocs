@@ -1,5 +1,5 @@
 import { type ReactNode } from 'react';
-import { isNullable, noRef, type ParsedSchema } from '@/utils/schema';
+import { isNullable, NoReference, type ParsedSchema } from '@/utils/schema';
 import type { RenderContext } from '@/types';
 import { combineSchema } from '@/utils/combine-schema';
 import { Markdown } from './markdown';
@@ -55,7 +55,7 @@ export function Schema({
   ctx,
 }: {
   name: string;
-  schema: ParsedSchema;
+  schema: NoReference<ParsedSchema>;
   ctx: Context;
 }): ReactNode {
   if (
@@ -90,7 +90,7 @@ export function Schema({
         <Schema
           key="additionalProperties"
           name="[key: string]"
-          schema={noRef(additionalProperties)}
+          schema={additionalProperties}
           ctx={{
             ...ctx,
             required: false,
@@ -106,7 +106,7 @@ export function Schema({
           <Schema
             key={key}
             name={key}
-            schema={noRef(value)}
+            schema={value}
             ctx={{
               ...ctx,
               required: schema.required?.includes(key) ?? false,
@@ -124,11 +124,7 @@ export function Schema({
 
   if (schema.allOf && parseObject) {
     return (
-      <Schema
-        name={name}
-        schema={combineSchema(noRef(schema.allOf))}
-        ctx={ctx}
-      />
+      <Schema name={name} schema={combineSchema(schema.allOf)} ctx={ctx} />
     );
   }
 
@@ -186,9 +182,7 @@ export function Schema({
       ...(schema.anyOf ?? schema.oneOf ?? []),
       ...(schema.not ? [schema.not] : []),
       ...(schema.type === 'array' ? [schema.items] : []),
-    ]
-      .map(noRef)
-      .filter((s) => isComplexType(s) && !stack.includes(s));
+    ].filter((s) => isComplexType(s) && !stack.includes(s));
 
     const renderedMentionedTypes = mentionedObjectTypes.map((s, idx) => {
       return (
@@ -198,7 +192,7 @@ export function Schema({
         >
           <Schema
             name="element"
-            schema={noRef(s)}
+            schema={s}
             ctx={{
               ...ctx,
               stack: [schema, ...stack],
@@ -249,17 +243,17 @@ function getSchemaType(
   if (schema.title) return schema.title;
 
   if (schema.type === 'array')
-    return `array<${getSchemaType(noRef(schema.items), ctx, nullable)}>`;
+    return `array<${getSchemaType(schema.items, ctx, nullable)}>`;
 
   if (schema.oneOf)
     return schema.oneOf
-      .map((one) => getSchemaType(noRef(one), ctx, nullable))
+      .map((one) => getSchemaType(one, ctx, nullable))
       .filter((v) => v !== 'unknown')
       .join(' | ');
 
   if (schema.allOf) {
     const allTypeNames = schema.allOf
-      .map((one) => getSchemaType(noRef(one), ctx, nullable))
+      .map((one) => getSchemaType(one, ctx, nullable))
       .filter((v) => v !== 'unknown');
 
     const nonNullTypes = allTypeNames.filter((v) => v !== 'null');
@@ -274,12 +268,11 @@ function getSchemaType(
     else return `(${nonNullTypeNames}) | null`;
   }
 
-  if (schema.not)
-    return `not ${getSchemaType(noRef(schema.not), ctx, nullable)}`;
+  if (schema.not) return `not ${getSchemaType(schema.not, ctx, nullable)}`;
 
   if (schema.anyOf) {
     return `Any properties in ${schema.anyOf
-      .map((one) => getSchemaType(noRef(one), ctx, nullable))
+      .map((one) => getSchemaType(one, ctx, nullable))
       .filter((v) => v !== 'unknown')
       .join(', ')}`;
   }

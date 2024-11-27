@@ -1,5 +1,4 @@
-import { Document } from '@/types';
-import type { ReactElement } from 'react';
+import type { Document } from '@/types';
 import Slugger from 'github-slugger';
 import Parser from '@apidevtools/json-schema-ref-parser';
 import { Operation } from '@/render/operation';
@@ -7,6 +6,7 @@ import type { RenderContext } from '@/types';
 import { createMethod } from '@/schema/method';
 import { createRenders, type Renderer } from '@/render/renderer';
 import { OpenAPIV3_1 } from 'openapi-types';
+import type { NoReference } from '@/utils/schema';
 
 export interface ApiPageProps
   extends Pick<
@@ -22,29 +22,37 @@ export interface ApiPageProps
   hasHead: boolean;
   renderer?: Partial<Renderer>;
 
+  /**
+   * By default, it is disabled on dev mode
+   */
   disableCache?: boolean;
 }
 
-const cache = new Map<string, Document>();
+const cache = new Map<string, NoReference<Document>>();
 
 export interface Operation {
   path: string;
   method: OpenAPIV3_1.HttpMethods;
 }
 
-export async function APIPage(props: ApiPageProps): Promise<ReactElement> {
-  const { operations, hasHead = true } = props;
-  let document: Document;
+export async function APIPage(props: ApiPageProps) {
+  const {
+    operations,
+    hasHead = true,
+    disableCache = process.env.NODE_ENV === 'development',
+  } = props;
+  let document: NoReference<Document>;
 
-  if (typeof props.document === 'string' && !props.disableCache) {
+  if (typeof props.document === 'string' && !disableCache) {
     const cached = cache.get(props.document);
-    document = cached ?? (await Parser.dereference<Document>(props.document));
+
+    document = cached ?? (await Parser.dereference(props.document));
     cache.set(props.document, document);
   } else {
-    document = await Parser.dereference<Document>(props.document);
+    document = await Parser.dereference(props.document);
   }
 
-  const ctx = getContext(document, props);
+  const ctx = await getContext(document, props);
   return (
     <ctx.renderer.Root baseUrl={ctx.baseUrl}>
       {operations.map((item) => {
@@ -62,9 +70,7 @@ export async function APIPage(props: ApiPageProps): Promise<ReactElement> {
             method={method}
             path={item.path}
             ctx={ctx}
-            baseUrls={
-              document.servers ? document.servers.map((s) => s.url) : []
-            }
+            baseUrls={document.servers?.map((s) => s.url) ?? []}
             hasHead={hasHead}
           />
         );
@@ -73,7 +79,10 @@ export async function APIPage(props: ApiPageProps): Promise<ReactElement> {
   );
 }
 
-function getContext(document: Document, options: ApiPageProps): RenderContext {
+async function getContext(
+  document: NoReference<Document>,
+  options: ApiPageProps,
+): Promise<RenderContext> {
   return {
     document,
     renderer: {

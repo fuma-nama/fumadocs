@@ -10,7 +10,8 @@ export async function getTypescriptSchema(
       // re-running on the same schema results in error
       // because it uses `defineProperty` to define internal references
       // we clone the schema to fix this problem
-      structuredClone(endpoint.responses[code].schema),
+      // @ts-expect-error any types
+      endpoint.responses[code].schema,
       'Response',
       {
         $refOptions: false,

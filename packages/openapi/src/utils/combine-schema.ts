@@ -1,4 +1,4 @@
-import { noRef, type ParsedSchema } from '@/utils/schema';
+import { type ParsedSchema } from '@/utils/schema';
 
 /**
  * Combine multiple object schemas into one
@@ -15,8 +15,11 @@ export function combineSchema(schema: ParsedSchema[]): ParsedSchema {
         result.type = [result.type];
       }
 
-      if (Array.isArray(s.type)) result.type.push(...s.type);
-      else result.type.push(s.type);
+      for (const v of Array.isArray(s.type) ? s.type : [s.type]) {
+        if (!result.type.includes(v)) {
+          result.type.push(v);
+        }
+      }
     }
 
     if (s.properties) {
@@ -45,7 +48,7 @@ export function combineSchema(schema: ParsedSchema[]): ParsedSchema {
     }
 
     if (s.allOf) {
-      noRef(s.allOf).forEach(add);
+      s.allOf.forEach(add);
     }
   }
 

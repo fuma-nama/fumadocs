@@ -6,7 +6,7 @@ import * as JS from '@/requests/javascript';
 import * as Go from '@/requests/go';
 import * as Python from '@/requests/python';
 import { type MethodInformation, type RenderContext } from '@/types';
-import { noRef, getPreferredType, normalizeSchema } from '@/utils/schema';
+import { getPreferredType } from '@/utils/schema';
 import { getTypescriptSchema } from '@/utils/get-typescript-schema';
 import { getSecurities, getSecurityPrefix } from '@/utils/get-security';
 import { Playground } from '@/render/playground';
@@ -46,7 +46,7 @@ export function Operation({
   hasHead?: boolean;
 }): ReactElement {
   let level = 2;
-  const body = noRef(method.requestBody);
+  const body = method.requestBody;
   const security = method.security ?? ctx.document.security;
   const info: ReactNode[] = [];
 
@@ -90,7 +90,7 @@ export function Operation({
         {body.description ? <Markdown text={body.description} /> : null}
         <Schema
           name="body"
-          schema={normalizeSchema(noRef(body.content[type].schema ?? {}))}
+          schema={body.content[type].schema ?? {}}
           ctx={{
             readOnly: method.method === 'GET',
             writeOnly: method.method !== 'GET',
@@ -106,12 +106,12 @@ export function Operation({
   const parameterGroups = new Map<string, ReactNode[]>();
   const endpoint = generateSample(path, method, ctx);
 
-  for (const param of method.parameters) {
+  for (const param of method.parameters ?? []) {
     const pInfo = endpoint.parameters.find(
       (item) => item.name === param.name && item.in === param.in,
     );
     if (!pInfo) continue;
-    const schema = normalizeSchema(pInfo.schema);
+    const schema = pInfo.schema;
     const groupName =
       {
         path: 'Path Parameters',
@@ -352,7 +352,7 @@ async function ResponseTabs({
   if (!operation.responses) return null;
   for (const code of Object.keys(operation.responses)) {
     const types: ResponseTypeProps[] = [];
-    let description = noRef(operation.responses[code]).description;
+    let description = operation.responses[code].description;
 
     if (!description && code in endpoint.responses)
       description = endpoint.responses[code].schema.description ?? '';

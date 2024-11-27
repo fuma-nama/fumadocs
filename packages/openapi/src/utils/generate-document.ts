@@ -1,11 +1,12 @@
 import { dump } from 'js-yaml';
-import { type OpenAPIV3 as OpenAPI } from 'openapi-types';
 import Slugger from 'github-slugger';
 import { type TableOfContents } from 'fumadocs-core/server';
 import { type StructuredData } from 'fumadocs-core/mdx-plugins';
 import { type ApiPageProps } from '@/server/api-page';
 import type { DocumentContext, GenerateOptions } from '@/generate';
 import { idToTitle } from '@/utils/id-to-title';
+import type { Document } from '@/types';
+import type { NoReference } from '@/utils/schema';
 
 interface StaticData {
   toc: TableOfContents;
@@ -14,7 +15,7 @@ interface StaticData {
 
 export function generateDocument(
   options: GenerateOptions & {
-    dereferenced: OpenAPI.Document;
+    dereferenced: NoReference<Document>;
     page: ApiPageProps;
     title: string;
     description?: string;
@@ -71,7 +72,7 @@ export function generateDocument(
 }
 
 function generateStaticData(
-  dereferenced: OpenAPI.Document,
+  dereferenced: NoReference<Document>,
   props: ApiPageProps,
 ): StaticData {
   const slugger = new Slugger();
@@ -79,7 +80,7 @@ function generateStaticData(
   const structuredData: StructuredData = { headings: [], contents: [] };
 
   for (const item of props.operations) {
-    const operation = dereferenced.paths[item.path]?.[item.method];
+    const operation = dereferenced.paths?.[item.path]?.[item.method];
     if (!operation) continue;
 
     if (props.hasHead && operation.operationId) {

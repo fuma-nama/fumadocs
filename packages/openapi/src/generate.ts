@@ -5,7 +5,8 @@ import { buildRoutes } from '@/build-routes';
 import { generateDocument } from '@/utils/generate-document';
 import { idToTitle } from '@/utils/id-to-title';
 import { type Operation } from '@/server/api-page';
-import type { MethodInformation, RouteInformation } from './types';
+import type { Document, MethodInformation, RouteInformation } from './types';
+import type { NoReference } from '@/utils/schema';
 
 export type DocumentContext =
   | {
@@ -74,10 +75,10 @@ export interface GenerateOperationOutput {
 }
 
 async function dereference(
-  pathOrDocument: string | OpenAPI.Document,
+  pathOrDocument: string | Document,
   options: GenerateOptions,
-): Promise<OpenAPI.Document> {
-  return await Parser.dereference<OpenAPI.Document>(
+): Promise<NoReference<Document>> {
+  return await Parser.dereference(
     // resolve paths
     typeof pathOrDocument === 'string' &&
       !pathOrDocument.startsWith('http://') &&
@@ -88,7 +89,7 @@ async function dereference(
 }
 
 export async function generateAll(
-  pathOrDocument: string | OpenAPI.Document,
+  pathOrDocument: string | Document,
   options: GenerateOptions = {},
 ): Promise<string> {
   const document = await dereference(pathOrDocument, options);
@@ -123,7 +124,7 @@ export async function generateAll(
 }
 
 export async function generateOperations(
-  pathOrDocument: string | OpenAPI.Document,
+  pathOrDocument: string | Document,
   options: GenerateOptions = {},
 ): Promise<GenerateOperationOutput[]> {
   const document = await dereference(pathOrDocument, options);
@@ -166,7 +167,7 @@ export async function generateOperations(
 }
 
 export async function generateTags(
-  pathOrDocument: string | OpenAPI.Document,
+  pathOrDocument: string | Document,
   options: GenerateOptions = {},
 ): Promise<GenerateTagOutput[]> {
   const document = await dereference(pathOrDocument, options);

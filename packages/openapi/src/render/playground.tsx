@@ -6,8 +6,7 @@ import type {
 } from '@/types';
 import {
   getPreferredType,
-  noRef,
-  normalizeSchema,
+  type NoReference,
   type ParsedSchema,
 } from '@/utils/schema';
 import { getSecurities } from '@/utils/get-security';
@@ -78,6 +77,7 @@ interface Context {
   schema: Record<string, RequestSchema>;
   registered: WeakMap<ParsedSchema, string>;
   nextId: () => string;
+  render: RenderContext;
 }
 
 export interface APIPlaygroundProps {
@@ -102,7 +102,7 @@ export function Playground({
   ctx: RenderContext;
 }): ReactNode {
   let currentId = 0;
-  const bodyContent = noRef(method.requestBody)?.content;
+  const bodyContent = method.requestBody?.content;
   const mediaType = bodyContent ? getPreferredType(bodyContent) : undefined;
 
   const context: Context = {
@@ -112,6 +112,7 @@ export function Playground({
       return String(currentId++);
     },
     registered: new WeakMap(),
+    render: ctx,
   };
 
   const props: APIPlaygroundProps = {
@@ -120,17 +121,17 @@ export function Playground({
     route: path,
     bodyType: mediaType === 'multipart/form-data' ? 'form-data' : 'json',
     path: method.parameters
-      .filter((v) => v.in === 'path')
+      ?.filter((v) => v.in === 'path')
       .map((v) => parameterToField(v, context)),
     query: method.parameters
-      .filter((v) => v.in === 'query')
+      ?.filter((v) => v.in === 'query')
       .map((v) => parameterToField(v, context)),
     header: method.parameters
-      .filter((v) => v.in === 'header')
+      ?.filter((v) => v.in === 'header')
       .map((v) => parameterToField(v, context)),
     body:
       bodyContent && mediaType && bodyContent[mediaType].schema
-        ? toSchema(noRef(bodyContent[mediaType].schema), true, context)
+        ? toSchema(bodyContent[mediaType].schema, true, context)
         : undefined,
     schemas: context.schema,
   };
@@ -185,13 +186,13 @@ function getIdFromSchema(
 }
 
 function parameterToField(
-  v: ParameterObject,
+  v: NoReference<ParameterObject>,
   ctx: Context,
 ): PrimitiveRequestField {
   return {
     name: v.name,
     ...(toSchema(
-      normalizeSchema(noRef(v.schema) ?? { type: 'string' }),
+      v.schema ?? { type: 'string' },
       v.required ?? false,
       ctx,
     ) as PrimitiveSchema),
@@ -211,7 +212,7 @@ function toReference(
 }
 
 function toSchema(
-  schema: ParsedSchema,
+  schema: NoReference<ParsedSchema>,
   required: boolean,
   ctx: Context,
 ): RequestSchema {
@@ -220,7 +221,7 @@ function toSchema(
       type: 'array',
       description: schema.description ?? schema.title,
       isRequired: required,
-      items: getIdFromSchema(noRef(schema.items), false, ctx),
+      items: getIdFromSchema(schema.items, false, ctx),
     };
   }
 
@@ -233,19 +234,19 @@ function toSchema(
 
     Object.entries(schema.properties ?? {}).forEach(([key, prop]) => {
       properties[key] = toReference(
-        noRef(prop),
+        prop,
         schema.required?.includes(key) ?? false,
         ctx,
       );
     });
 
     schema.allOf?.forEach((c) => {
-      const field = toSchema(noRef(c), true, ctx);
+      const field = toSchema(c, true, ctx);
 
       if (field.type === 'object') Object.assign(properties, field.properties);
     });
 
-    const additional = noRef(schema.additionalProperties);
+    const additional = schema.additionalProperties;
     let additionalProperties: string | boolean | undefined;
 
     if (additional && typeof additional === 'object') {
@@ -280,9 +281,7 @@ function toSchema(
         type: 'switcher',
         description: schema.description ?? schema.title,
         items: Object.fromEntries(
-          combine.map((c, idx) => {
-            const item = noRef(c);
-
+          combine.map((item, idx) => {
             return [
               item.title ?? item.type ?? `Item ${idx.toString()}`,
               toReference(item, true, ctx),
