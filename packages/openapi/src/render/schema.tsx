@@ -231,9 +231,9 @@ function isComplexType(schema: ParsedSchema): boolean {
 function getSchemaType(
   schema: ParsedSchema,
   ctx: Context,
-  nullable = true,
+  isRoot = true,
 ): string {
-  if (nullable && isNullable(schema)) {
+  if (isNullable(schema) && isRoot) {
     const type = getSchemaType(schema, ctx, false);
 
     // null if schema only contains `nullable`
@@ -243,36 +243,26 @@ function getSchemaType(
   if (schema.title) return schema.title;
 
   if (schema.type === 'array')
-    return `array<${getSchemaType(schema.items, ctx, nullable)}>`;
+    return `array<${getSchemaType(schema.items, ctx)}>`;
 
   if (schema.oneOf)
     return schema.oneOf
-      .map((one) => getSchemaType(one, ctx, nullable))
+      .map((one) => getSchemaType(one, ctx, false))
       .filter((v) => v !== 'unknown')
       .join(' | ');
 
   if (schema.allOf) {
-    const allTypeNames = schema.allOf
-      .map((one) => getSchemaType(one, ctx, nullable))
-      .filter((v) => v !== 'unknown');
-
-    const nonNullTypes = allTypeNames.filter((v) => v !== 'null');
-    const nonNullTypeNames = nonNullTypes.join(' & ');
-    const hasNull = nonNullTypes.length !== allTypeNames.length;
-
-    if (!hasNull) return nonNullTypeNames;
-
-    if (nonNullTypes.length === 0) return 'null';
-    else if (nonNullTypes.length === 1 || !hasNull)
-      return `${nonNullTypeNames} | null`;
-    else return `(${nonNullTypeNames}) | null`;
+    return schema.allOf
+      .map((one) => getSchemaType(one, ctx, false))
+      .filter((v) => v !== 'unknown')
+      .join(' & ');
   }
 
-  if (schema.not) return `not ${getSchemaType(schema.not, ctx, nullable)}`;
+  if (schema.not) return `not ${getSchemaType(schema.not, ctx, false)}`;
 
   if (schema.anyOf) {
     return `Any properties in ${schema.anyOf
-      .map((one) => getSchemaType(one, ctx, nullable))
+      .map((one) => getSchemaType(one, ctx, false))
       .filter((v) => v !== 'unknown')
       .join(', ')}`;
   }
@@ -280,16 +270,12 @@ function getSchemaType(
   if (schema.type === 'string' && schema.format === 'binary' && ctx.allowFile)
     return 'file';
 
-  if (schema.type) {
-    if (
-      !nullable &&
-      (schema.type === 'null' ||
-        (Array.isArray(schema.type) && schema.type.includes('null')))
-    ) {
-      return 'unknown';
-    }
+  if (schema.type && Array.isArray(schema.type)) {
+    const nonNullTypes = schema.type.filter((v) => v !== 'null');
 
-    return Array.isArray(schema.type) ? schema.type.join(' | ') : schema.type;
+    if (nonNullTypes.length > 0) return nonNullTypes.join(' | ');
+  } else if (schema.type && schema.type !== 'null') {
+    return schema.type;
   }
 
   if (isObject(schema)) return 'object';

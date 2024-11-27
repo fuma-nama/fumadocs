@@ -923,7 +923,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "string",
+              "type": ["string", "null"],
               "minLength": 1,
               "description": "The id of the key to fetch",
               "example": "key_1234"

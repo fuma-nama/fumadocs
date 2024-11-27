@@ -1,11 +1,14 @@
-import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
 import { Fragment, type ReactElement, type ReactNode } from 'react';
 import { generateSample, type EndpointSample } from '@/schema/sample';
 import * as CURL from '@/requests/curl';
 import * as JS from '@/requests/javascript';
 import * as Go from '@/requests/go';
 import * as Python from '@/requests/python';
-import { type MethodInformation, type RenderContext } from '@/types';
+import {
+  type MethodInformation,
+  type RenderContext,
+  type SecurityRequirementObject,
+} from '@/types';
 import { getPreferredType } from '@/utils/schema';
 import { getTypescriptSchema } from '@/utils/get-typescript-schema';
 import { getSecurities, getSecurityPrefix } from '@/utils/get-security';
@@ -262,7 +265,7 @@ function AuthSection({
   ctx: { document, renderer },
   requirements,
 }: {
-  requirements: OpenAPI.SecurityRequirementObject[];
+  requirements: SecurityRequirementObject[];
   ctx: RenderContext;
 }): ReactNode {
   let id = 0;
