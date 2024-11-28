@@ -274,6 +274,12 @@ function AuthSection({
   for (const requirement of requirements) {
     for (const schema of getSecurities(requirement, document)) {
       const prefix = getSecurityPrefix(schema);
+      const scopeElement =
+        schema.scopes.length > 0 ? (
+          <p>
+            Scope: <code>{schema.scopes.join(', ')}</code>
+          </p>
+        ) : null;
 
       if (schema.type === 'http') {
         info.push(
@@ -286,6 +292,7 @@ function AuthSection({
             {schema.description ? <Markdown text={schema.description} /> : null}
             <p>
               In: <code>header</code>
+              {scopeElement}
             </p>
           </renderer.Property>,
         );
@@ -303,11 +310,7 @@ function AuthSection({
             <p>
               In: <code>header</code>
             </p>
-            {schema.scopes.length > 0 ? (
-              <p>
-                Scope: <code>{schema.scopes.join(', ')}</code>
-              </p>
-            ) : null}
+            {scopeElement}
           </renderer.Property>,
         );
       }
@@ -318,6 +321,7 @@ function AuthSection({
             {schema.description ? <Markdown text={schema.description} /> : null}
             <p>
               In: <code>{schema.in}</code>
+              {scopeElement}
             </p>
           </renderer.Property>,
         );
@@ -331,6 +335,7 @@ function AuthSection({
             required
           >
             {schema.description ? <Markdown text={schema.description} /> : null}
+            {scopeElement}
           </renderer.Property>,
         );
       }
