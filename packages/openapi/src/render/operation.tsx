@@ -343,7 +343,7 @@ function AuthSection({
 async function ResponseTabs({
   endpoint,
   operation,
-  ctx: { renderer, generateTypeScriptSchema },
+  ctx: { renderer, generateTypeScriptSchema, dereferenceMap },
 }: {
   endpoint: EndpointSample;
   operation: MethodInformation;
@@ -372,7 +372,7 @@ async function ResponseTabs({
     if (generateTypeScriptSchema) {
       ts = await generateTypeScriptSchema(endpoint, code);
     } else if (generateTypeScriptSchema === undefined) {
-      ts = await getTypescriptSchema(endpoint, code);
+      ts = await getTypescriptSchema(endpoint, code, dereferenceMap);
     }
 
     if (ts) {

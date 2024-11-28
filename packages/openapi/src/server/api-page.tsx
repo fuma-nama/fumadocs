@@ -1,4 +1,4 @@
-import type { Document } from '@/types';
+import type { DereferenceMap, Document } from '@/types';
 import Slugger from 'github-slugger';
 import Parser from '@apidevtools/json-schema-ref-parser';
 import { Operation } from '@/render/operation';
@@ -28,7 +28,12 @@ export interface ApiPageProps
   disableCache?: boolean;
 }
 
-const cache = new Map<string, NoReference<Document>>();
+type ProcessedDocument = {
+  document: NoReference<Document>;
+  dereferenceMap: DereferenceMap;
+};
+
+const cache = new Map<string, ProcessedDocument>();
 
 export interface Operation {
   path: string;
@@ -41,18 +46,39 @@ export async function APIPage(props: ApiPageProps) {
     hasHead = true,
     disableCache = process.env.NODE_ENV === 'development',
   } = props;
-  let document: NoReference<Document>;
+  let processed: ProcessedDocument;
 
-  if (typeof props.document === 'string' && !disableCache) {
-    const cached = cache.get(props.document);
+  const cached =
+    !disableCache && typeof props.document === 'string'
+      ? cache.get(props.document)
+      : null;
 
-    document = cached ?? (await Parser.dereference(props.document));
-    cache.set(props.document, document);
+  if (!cached) {
+    const dereferenceMap: DereferenceMap = new Map();
+    const dereferenced = await Parser.dereference<NoReference<Document>>(
+      props.document,
+      {
+        dereference: {
+          onDereference($ref: string, schema: unknown) {
+            dereferenceMap.set(schema, $ref);
+          },
+        },
+      },
+    );
+
+    processed = {
+      document: dereferenced,
+      dereferenceMap,
+    };
+
+    if (!disableCache && typeof props.document === 'string')
+      cache.set(props.document, processed);
   } else {
-    document = await Parser.dereference(props.document);
+    processed = cached;
   }
 
-  const ctx = await getContext(document, props);
+  const ctx = await getContext(processed, props);
+  const { document } = processed;
   return (
     <ctx.renderer.Root baseUrl={ctx.baseUrl}>
       {operations.map((item) => {
@@ -80,11 +106,12 @@ export async function APIPage(props: ApiPageProps) {
 }
 
 async function getContext(
-  document: NoReference<Document>,
+  { document, dereferenceMap }: ProcessedDocument,
   options: ApiPageProps,
 ): Promise<RenderContext> {
   return {
-    document,
+    document: document,
+    dereferenceMap,
     renderer: {
       ...createRenders(options.shikiOptions),
       ...options.renderer,

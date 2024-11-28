@@ -87,7 +87,6 @@
       },
       "Butler_API_Entities_Project": {
         "type": "object",
-        "title": "Butler_API_Entities_Project",
         "properties": {
           "slug": {
             "type": "string"

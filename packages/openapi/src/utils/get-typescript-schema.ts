@@ -1,9 +1,11 @@
 import { compile } from '@fumari/json-schema-to-typescript';
 import type { EndpointSample } from '@/schema/sample';
+import { DereferenceMap } from '@/types';
 
 export async function getTypescriptSchema(
   endpoint: EndpointSample,
   code: string,
+  dereferenceMap: DereferenceMap,
 ): Promise<string | undefined> {
   if (code in endpoint.responses) {
     return compile(
@@ -15,6 +17,7 @@ export async function getTypescriptSchema(
       'Response',
       {
         $refOptions: false,
+        schemaToId: dereferenceMap,
         bannerComment: '',
         additionalProperties: false,
         format: true,

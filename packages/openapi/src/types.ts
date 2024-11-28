@@ -30,6 +30,11 @@ export type MethodInformation = NoReference<OperationObject> & {
 
 type Awaitable<T> = T | Promise<T>;
 
+/**
+ * Dereferenced value and its original `$ref` value
+ */
+export type DereferenceMap = Map<unknown, string>;
+
 export interface RenderContext {
   renderer: Renderer;
 
@@ -40,6 +45,8 @@ export interface RenderContext {
 
   baseUrl: string;
   slugger: Slugger;
+
+  dereferenceMap: DereferenceMap;
 
   /**
    * Generate TypeScript definitions from response schema.
