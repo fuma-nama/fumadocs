@@ -1,4 +1,4 @@
-import type { DereferenceMap, Document } from '@/types';
+import type { DereferenceMap, Document, OperationObject } from '@/types';
 import Slugger from 'github-slugger';
 import Parser from '@apidevtools/json-schema-ref-parser';
 import { Operation } from '@/render/operation';
@@ -7,6 +7,7 @@ import { createMethod } from '@/schema/method';
 import { createRenders, type Renderer } from '@/render/renderer';
 import { OpenAPIV3_1 } from 'openapi-types';
 import type { NoReference } from '@/utils/schema';
+import { Fragment } from 'react';
 
 export interface ApiPageProps
   extends Pick<
@@ -14,13 +15,16 @@ export interface ApiPageProps
     'generateCodeSamples' | 'generateTypeScriptSchema' | 'shikiOptions'
   > {
   document: string | Document;
+  hasHead: boolean;
+
+  renderer?: Partial<Renderer>;
 
   /**
    * An array of operations
    */
-  operations: Operation[];
-  hasHead: boolean;
-  renderer?: Partial<Renderer>;
+  operations?: OperationItem[];
+
+  webhooks?: WebhookItem[];
 
   /**
    * By default, it is disabled on dev mode
@@ -35,7 +39,11 @@ type ProcessedDocument = {
 
 const cache = new Map<string, ProcessedDocument>();
 
-export interface Operation {
+export interface WebhookItem {
+  name: string;
+}
+
+export interface OperationItem {
   path: string;
   method: OpenAPIV3_1.HttpMethods;
 }
@@ -44,6 +52,7 @@ export async function APIPage(props: ApiPageProps) {
   const {
     operations,
     hasHead = true,
+    webhooks,
     disableCache = process.env.NODE_ENV === 'development',
   } = props;
   let processed: ProcessedDocument;
@@ -81,7 +90,7 @@ export async function APIPage(props: ApiPageProps) {
   const { document } = processed;
   return (
     <ctx.renderer.Root baseUrl={ctx.baseUrl}>
-      {operations.map((item) => {
+      {operations?.map((item) => {
         const pathItem = document.paths?.[item.path];
         if (!pathItem) return null;
 
@@ -100,6 +109,34 @@ export async function APIPage(props: ApiPageProps) {
             hasHead={hasHead}
           />
         );
+      })}
+      {webhooks?.map((item) => {
+        const webhook = document.webhooks?.[item.name];
+        if (!webhook) return;
+
+        const children = Object.entries(webhook).map(
+          ([methodName, operation]) => {
+            const method = createMethod(
+              methodName,
+              webhook,
+              operation as NoReference<OperationObject>,
+            );
+
+            return (
+              <Operation
+                type="webhook"
+                key={methodName}
+                method={method}
+                ctx={ctx}
+                path={item.name}
+                baseUrls={document.servers?.map((s) => s.url) ?? []}
+                hasHead={hasHead}
+              />
+            );
+          },
+        );
+
+        return <Fragment key={item.name}>{children}</Fragment>;
       })}
     </ctx.renderer.Root>
   );

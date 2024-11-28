@@ -163,7 +163,7 @@ export function Schema({
       </div>,
     );
 
-  if ((isObject(schema) || schema.allOf) && !parseObject) {
+  if (isObject(schema) && !parseObject && !stack.includes(schema)) {
     child.push(
       <renderer.ObjectCollapsible key="attributes" name="Attributes">
         <Schema
@@ -173,6 +173,7 @@ export function Schema({
             ...ctx,
             parseObject: true,
             required: false,
+            stack: [schema, ...stack],
           }}
         />
       </renderer.ObjectCollapsible>,

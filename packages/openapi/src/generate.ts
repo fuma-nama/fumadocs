@@ -4,7 +4,7 @@ import { type OpenAPIV3 as OpenAPI } from 'openapi-types';
 import { buildRoutes } from '@/build-routes';
 import { generateDocument } from '@/utils/generate-document';
 import { idToTitle } from '@/utils/id-to-title';
-import { type Operation } from '@/server/api-page';
+import { type OperationItem } from '@/server/api-page';
 import type { Document, MethodInformation, RouteInformation } from './types';
 import type { NoReference } from '@/utils/schema';
 
@@ -94,7 +94,7 @@ export async function generateAll(
 ): Promise<string> {
   const document = await dereference(pathOrDocument, options);
   const routes = buildRoutes(document).get('all') ?? [];
-  const operations: Operation[] = [];
+  const operations: OperationItem[] = [];
 
   for (const route of routes) {
     for (const method of route.methods) {
@@ -177,7 +177,7 @@ export async function generateTags(
     .filter(([tag]) => tag !== 'all')
     .map(([tag, routes]) => {
       const info = document.tags?.find((t) => t.name === tag);
-      const operations: Operation[] = [];
+      const operations: OperationItem[] = [];
 
       for (const route of routes) {
         for (const method of route.methods) {

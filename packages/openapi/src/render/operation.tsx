@@ -36,12 +36,14 @@ interface CodeSampleCompiled {
 }
 
 export function Operation({
+  type = 'operation',
   baseUrls,
   path,
   method,
   ctx,
   hasHead,
 }: {
+  type?: 'webhook' | 'operation';
   baseUrls: string[];
   path: string;
   method: MethodInformation;
@@ -54,14 +56,11 @@ export function Operation({
   const info: ReactNode[] = [];
 
   if (hasHead) {
-    info.push(
-      heading(
-        level,
-        method.summary ??
-          (method.operationId ? idToTitle(method.operationId) : path),
-        ctx,
-      ),
-    );
+    const title =
+      method.summary ??
+      (method.operationId ? idToTitle(method.operationId) : path);
+
+    info.push(heading(level, title, ctx));
     level++;
 
     if (method.description) {
@@ -69,9 +68,10 @@ export function Operation({
     }
   }
 
-  info.push(
-    <Playground key="playground" path={path} method={method} ctx={ctx} />,
-  );
+  if (type === 'operation')
+    info.push(
+      <Playground key="playground" path={path} method={method} ctx={ctx} />,
+    );
 
   if (security) {
     info.push(heading(level, 'Authorization', ctx));
@@ -152,13 +152,15 @@ export function Operation({
 
   return (
     <ctx.renderer.API>
-      <ctx.renderer.APIInfo
-        method={method.method}
-        route={path}
-        baseUrls={baseUrls}
-      >
-        {info}
-      </ctx.renderer.APIInfo>
+      {path ? (
+        <ctx.renderer.APIInfo
+          method={method.method}
+          route={path}
+          baseUrls={type === 'operation' ? baseUrls : []}
+        >
+          {info}
+        </ctx.renderer.APIInfo>
+      ) : null}
       <APIExample method={method} endpoint={endpoint} ctx={ctx} />
     </ctx.renderer.API>
   );
