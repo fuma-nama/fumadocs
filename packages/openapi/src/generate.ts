@@ -1,36 +1,11 @@
 import { resolve } from 'node:path';
 import Parser from '@apidevtools/json-schema-ref-parser';
-import { type OpenAPIV3 as OpenAPI } from 'openapi-types';
-import { buildRoutes } from '@/build-routes';
-import { generateDocument } from '@/utils/generate-document';
+import { getAPIPageItems } from '@/build-routes';
+import { DocumentContext, generateDocument } from '@/utils/generate-document';
 import { idToTitle } from '@/utils/id-to-title';
-import { type OperationItem } from '@/server/api-page';
-import type { Document, MethodInformation, RouteInformation } from './types';
+import type { Document, OperationObject, PathItemObject } from './types';
 import type { NoReference } from '@/utils/schema';
-
-export type DocumentContext =
-  | {
-      type: 'tag';
-      tag: OpenAPI.TagObject | undefined;
-      routes: RouteInformation[];
-    }
-  | {
-      type: 'operation';
-
-      /**
-       * information of the route
-       */
-      route: RouteInformation;
-
-      /**
-       * information of the method (API Endpoint)
-       */
-      endpoint: MethodInformation;
-    }
-  | {
-      type: 'file';
-      routes: RouteInformation[];
-    };
+import { OperationItem, WebhookItem } from '@/server/api-page';
 
 export interface GenerateOptions {
   /**
@@ -67,12 +42,23 @@ export interface GenerateTagOutput {
   content: string;
 }
 
-export interface GenerateOperationOutput {
-  content: string;
+export type GeneratePageOutput =
+  | {
+      type: 'operation';
+      pathItem: NoReference<PathItemObject>;
+      operation: NoReference<OperationObject>;
 
-  method: MethodInformation;
-  route: RouteInformation;
-}
+      item: OperationItem;
+      content: string;
+    }
+  | {
+      type: 'webhook';
+      pathItem: NoReference<PathItemObject>;
+      operation: NoReference<OperationObject>;
+
+      item: WebhookItem;
+      content: string;
+    };
 
 async function dereference(
   pathOrDocument: string | Document,
@@ -93,17 +79,7 @@ export async function generateAll(
   options: GenerateOptions = {},
 ): Promise<string> {
   const document = await dereference(pathOrDocument, options);
-  const routes = buildRoutes(document).get('all') ?? [];
-  const operations: OperationItem[] = [];
-
-  for (const route of routes) {
-    for (const method of route.methods) {
-      operations.push({
-        method: method.method.toLowerCase() as OpenAPI.HttpMethods,
-        path: route.path,
-      });
-    }
-  }
+  const items = getAPIPageItems(document);
 
   return generateDocument({
     ...options,
@@ -111,59 +87,86 @@ export async function generateAll(
     title: document.info.title,
     description: document.info.description,
     page: {
-      operations,
+      operations: items.operations,
+      webhooks: items.webhooks,
       hasHead: true,
       document: pathOrDocument,
     },
 
     context: {
       type: 'file',
-      routes,
     },
   });
 }
 
-export async function generateOperations(
+export async function generatePages(
   pathOrDocument: string | Document,
   options: GenerateOptions = {},
-): Promise<GenerateOperationOutput[]> {
+): Promise<GeneratePageOutput[]> {
   const document = await dereference(pathOrDocument, options);
-  const routes = buildRoutes(document).get('all') ?? [];
+  const items = getAPIPageItems(document);
+  const result: GeneratePageOutput[] = [];
 
-  return routes.flatMap<GenerateOperationOutput>((route) => {
-    return route.methods.map((method) => {
-      if (!method.operationId)
-        throw new Error('Operation ID is required for generating docs.');
+  for (const item of items.operations) {
+    const pathItem = document.paths?.[item.path];
+    if (!pathItem) continue;
+    const operation = pathItem[item.method];
+    if (!operation) continue;
 
-      const content = generateDocument({
+    result.push({
+      type: 'operation',
+      pathItem,
+      operation,
+      item,
+      content: generateDocument({
         ...options,
         page: {
-          operations: [
-            {
-              path: route.path,
-              method: method.method.toLowerCase() as OpenAPI.HttpMethods,
-            },
-          ],
+          operations: [item],
           hasHead: false,
           document: pathOrDocument,
         },
         dereferenced: document,
-        title: method.summary ?? idToTitle(method.operationId),
-        description: method.description,
+        title:
+          operation.summary ??
+          pathItem.summary ??
+          idToTitle(operation.operationId ?? 'unknown'),
+        description: operation.description ?? pathItem.description,
         context: {
           type: 'operation',
-          endpoint: method,
-          route,
         },
-      });
-
-      return {
-        content,
-        route,
-        method,
-      } satisfies GenerateOperationOutput;
+      }),
     });
-  });
+  }
+
+  for (const item of items.webhooks) {
+    const pathItem = document.webhooks?.[item.name];
+    if (!pathItem) continue;
+    const operation = pathItem[item.method];
+    if (!operation) continue;
+
+    result.push({
+      type: 'webhook',
+      pathItem,
+      operation,
+      item,
+      content: generateDocument({
+        ...options,
+        page: {
+          webhooks: [item],
+          hasHead: false,
+          document: pathOrDocument,
+        },
+        dereferenced: document,
+        title: operation.summary ?? pathItem.summary ?? idToTitle(item.name),
+        description: operation.description ?? pathItem.description,
+        context: {
+          type: 'operation',
+        },
+      }),
+    });
+  }
+
+  return result;
 }
 
 export async function generateTags(
@@ -171,48 +174,40 @@ export async function generateTags(
   options: GenerateOptions = {},
 ): Promise<GenerateTagOutput[]> {
   const document = await dereference(pathOrDocument, options);
-  const tags = Array.from(buildRoutes(document).entries());
+  if (!document.tags) return [];
+  const items = getAPIPageItems(document);
 
-  return tags
-    .filter(([tag]) => tag !== 'all')
-    .map(([tag, routes]) => {
-      const info = document.tags?.find((t) => t.name === tag);
-      const operations: OperationItem[] = [];
+  return document.tags.map((tag) => {
+    const webhooks = items.webhooks.filter(
+      (v) => v.tags && v.tags.includes(tag.name),
+    );
+    const operations = items.operations.filter(
+      (v) => v.tags && v.tags.includes(tag.name),
+    );
 
-      for (const route of routes) {
-        for (const method of route.methods) {
-          operations.push({
-            method: method.method.toLowerCase() as OpenAPI.HttpMethods,
-            path: route.path,
-          });
-        }
-      }
+    const displayName =
+      tag && 'x-displayName' in tag && typeof tag['x-displayName'] === 'string'
+        ? tag['x-displayName']
+        : idToTitle(tag.name);
 
-      const displayName =
-        info &&
-        'x-displayName' in info &&
-        typeof info['x-displayName'] === 'string'
-          ? info['x-displayName']
-          : idToTitle(tag);
-
-      return {
-        tag,
-        content: generateDocument({
-          ...options,
-          page: {
-            document: pathOrDocument,
-            operations,
-            hasHead: true,
-          },
-          dereferenced: document,
-          title: displayName,
-          description: info?.description,
-          context: {
-            type: 'tag',
-            tag: info,
-            routes,
-          },
-        }),
-      } satisfies GenerateTagOutput;
-    });
+    return {
+      tag: tag.name,
+      content: generateDocument({
+        ...options,
+        page: {
+          document: pathOrDocument,
+          operations,
+          webhooks,
+          hasHead: true,
+        },
+        dereferenced: document,
+        title: displayName,
+        description: tag?.description,
+        context: {
+          type: 'tag',
+          tag,
+        },
+      }),
+    } satisfies GenerateTagOutput;
+  });
 }

@@ -3,6 +3,8 @@ title: Operations
 description: Operational information about the museum.
 full: true
 _openapi:
+  method: GET
+  route: /museum-hours
   toc:
     - depth: 2
       title: Get museum hours
@@ -16,4 +18,4 @@ _openapi:
         heading: get-museum-hours
 ---
 
-<APIPage document={"./fixtures/museum.yaml"} operations={[{"method":"get","path":"/museum-hours"}]} hasHead={true} />
+<APIPage document={"./fixtures/museum.yaml"} operations={[{"path":"/museum-hours","method":"get"}]} webhooks={[]} hasHead={true} />

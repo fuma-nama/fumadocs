@@ -1,10 +1,7 @@
-import {
-  type Document,
-  type MethodInformation,
-  type RouteInformation,
-} from '@/types';
-import { createMethod } from '@/schema/method';
+import { type Document } from '@/types';
 import type { NoReference } from '@/utils/schema';
+import type { OperationItem, WebhookItem } from '@/server/api-page';
+import type { OpenAPIV3_1 } from 'openapi-types';
 
 export const methodKeys = [
   'get',
@@ -15,43 +12,43 @@ export const methodKeys = [
   'put',
 ] as const;
 
-/**
- * Build the route information of tags, use `.get('all')` to get all entries
- */
-export function buildRoutes(
-  document: NoReference<Document>,
-): Map<string, RouteInformation[]> {
-  const map = new Map<string, RouteInformation[]>();
+type Result = {
+  webhooks: (WebhookItem & { tags?: string[] })[];
+  operations: (OperationItem & {
+    tags?: string[];
+  })[];
+};
+
+export function getAPIPageItems(document: NoReference<Document>): Result {
+  const result: Result = { webhooks: [], operations: [] };
 
   for (const [path, pathItem] of Object.entries(document.paths ?? {})) {
     if (!pathItem) continue;
-    const methodMap = new Map<string, MethodInformation[]>();
 
     for (const methodKey of methodKeys) {
-      const operation = pathItem[methodKey];
-      if (!operation) continue;
+      if (!pathItem[methodKey]) continue;
 
-      const info = createMethod(methodKey, pathItem, operation);
-      const tags = operation.tags ?? [];
-
-      for (const tag of [...tags, 'all']) {
-        const list = methodMap.get(tag) ?? [];
-        list.push(info);
-        methodMap.set(tag, list);
-      }
-    }
-
-    for (const [tag, methods] of methodMap.entries()) {
-      const list = map.get(tag) ?? [];
-      list.push({
-        ...pathItem,
+      result.operations.push({
+        method: methodKey as OpenAPIV3_1.HttpMethods,
         path,
-        methods,
+        tags: pathItem[methodKey]?.tags,
       });
-
-      map.set(tag, list);
     }
   }
 
-  return map;
+  for (const [name, pathItem] of Object.entries(document.webhooks ?? {})) {
+    if (!pathItem) continue;
+
+    for (const methodKey of methodKeys) {
+      if (!pathItem[methodKey]) continue;
+
+      result.webhooks.push({
+        method: methodKey as OpenAPIV3_1.HttpMethods,
+        name,
+        tags: pathItem[methodKey]?.tags,
+      });
+    }
+  }
+
+  return result;
 }

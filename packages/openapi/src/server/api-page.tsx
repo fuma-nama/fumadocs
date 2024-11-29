@@ -1,4 +1,4 @@
-import type { DereferenceMap, Document, OperationObject } from '@/types';
+import type { DereferenceMap, Document } from '@/types';
 import Slugger from 'github-slugger';
 import Parser from '@apidevtools/json-schema-ref-parser';
 import { Operation } from '@/render/operation';
@@ -7,7 +7,6 @@ import { createMethod } from '@/schema/method';
 import { createRenders, type Renderer } from '@/render/renderer';
 import { OpenAPIV3_1 } from 'openapi-types';
 import type { NoReference } from '@/utils/schema';
-import { Fragment } from 'react';
 
 export interface ApiPageProps
   extends Pick<
@@ -41,6 +40,7 @@ const cache = new Map<string, ProcessedDocument>();
 
 export interface WebhookItem {
   name: string;
+  method: OpenAPIV3_1.HttpMethods;
 }
 
 export interface OperationItem {
@@ -55,14 +55,14 @@ export async function APIPage(props: ApiPageProps) {
     webhooks,
     disableCache = process.env.NODE_ENV === 'development',
   } = props;
-  let processed: ProcessedDocument;
 
-  const cached =
-    !disableCache && typeof props.document === 'string'
-      ? cache.get(props.document)
-      : null;
+  async function processDocument() {
+    const cached =
+      !disableCache && typeof props.document === 'string'
+        ? cache.get(props.document)
+        : null;
 
-  if (!cached) {
+    if (cached) return cached;
     const dereferenceMap: DereferenceMap = new Map();
     const dereferenced = await Parser.dereference<NoReference<Document>>(
       props.document,
@@ -75,17 +75,18 @@ export async function APIPage(props: ApiPageProps) {
       },
     );
 
-    processed = {
+    const processed: ProcessedDocument = {
       document: dereferenced,
       dereferenceMap,
     };
 
     if (!disableCache && typeof props.document === 'string')
       cache.set(props.document, processed);
-  } else {
-    processed = cached;
+
+    return processed;
   }
 
+  const processed = await processDocument();
   const ctx = await getContext(processed, props);
   const { document } = processed;
   return (
@@ -114,29 +115,25 @@ export async function APIPage(props: ApiPageProps) {
         const webhook = document.webhooks?.[item.name];
         if (!webhook) return;
 
-        const children = Object.entries(webhook).map(
-          ([methodName, operation]) => {
-            const method = createMethod(
-              methodName,
-              webhook,
-              operation as NoReference<OperationObject>,
-            );
+        const hook = webhook[item.method];
+        if (!hook) return;
 
-            return (
-              <Operation
-                type="webhook"
-                key={methodName}
-                method={method}
-                ctx={ctx}
-                path={item.name}
-                baseUrls={document.servers?.map((s) => s.url) ?? []}
-                hasHead={hasHead}
-              />
-            );
-          },
+        const method = createMethod(item.method, webhook, hook);
+
+        return (
+          <Operation
+            type="webhook"
+            key={`${item.name}:${item.method}`}
+            method={method}
+            ctx={{
+              ...ctx,
+              baseUrl: 'http://localhost:8080',
+            }}
+            path={`/${item.name}`}
+            baseUrls={document.servers?.map((s) => s.url) ?? []}
+            hasHead={hasHead}
+          />
         );
-
-        return <Fragment key={item.name}>{children}</Fragment>;
       })}
     </ctx.renderer.Root>
   );

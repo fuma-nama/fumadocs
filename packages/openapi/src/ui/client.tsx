@@ -80,14 +80,14 @@ export function BaseUrlSelect({ baseUrls }: { baseUrls: string[] }) {
   if (baseUrls.length <= 1) return null;
 
   return (
-    <div className="flex flex-row items-center gap-1 px-1 mt-2">
+    <div className="mt-2 flex flex-row items-center gap-1 px-1">
       <span className="p-0.5 text-xs font-medium text-fd-muted-foreground">
         Server
       </span>
       <select
         value={baseUrl}
         onChange={(e) => setBaseUrl(e.target.value)}
-        className="min-w-0 flex-1 bg-transparent font-mono text-xs text-fd-foreground outline-none"
+        className="min-w-0 flex-1 bg-transparent text-xs text-fd-foreground outline-none"
       >
         {baseUrls.map((url) => (
           <option key={url} value={url}>

@@ -11,7 +11,7 @@ function Route({ route }: { route: string }): ReactNode {
   const segments = route.split('/').filter((part) => part.length > 0);
 
   return (
-    <div className="not-prose flex flex-row items-center gap-1 overflow-auto text-nowrap text-xs">
+    <div className="not-prose flex flex-row items-center gap-0.5 overflow-auto text-nowrap text-xs">
       {segments.map((part, index) => (
         <Fragment key={index}>
           <span className="text-fd-muted-foreground">/</span>
@@ -60,10 +60,7 @@ export function APIInfo({
   );
 }
 
-export function API({
-  children,
-  ...props
-}: HTMLAttributes<HTMLDivElement>): React.ReactElement {
+export function API({ children, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       {...props}
@@ -90,7 +87,7 @@ export function Property({
   required,
   deprecated,
   children,
-}: PropertyProps): React.ReactElement {
+}: PropertyProps) {
   return (
     <div className="mb-4 rounded-lg border bg-fd-card p-3 prose-no-margin">
       <h4 className="flex flex-row flex-wrap items-center gap-4">
@@ -112,9 +109,7 @@ export function Property({
   );
 }
 
-export function APIExample(
-  props: HTMLAttributes<HTMLDivElement>,
-): React.ReactElement {
+export function APIExample(props: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       {...props}
@@ -131,7 +126,7 @@ export function APIExample(
 export function ObjectCollapsible(props: {
   name: string;
   children: ReactNode;
-}): React.ReactElement {
+}) {
   return (
     <Accordions type="single">
       <Accordion title={props.name}>{props.children}</Accordion>

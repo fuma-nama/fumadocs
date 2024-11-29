@@ -16,6 +16,8 @@ export type ParameterObject = V3_1.ParameterObject;
 export type SecurityRequirementObject = V3_1.SecurityRequirementObject;
 export type SecuritySchemeObject = V3_1.SecuritySchemeObject;
 export type ReferenceObject = V3_1.ReferenceObject;
+export type PathItemObject = V3_1.PathItemObject;
+export type TagObject = V3_1.TagObject;
 
 export interface RouteInformation {
   path: string;

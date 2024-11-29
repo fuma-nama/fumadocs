@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join, parse } from 'node:path';
 import fg from 'fast-glob';
-import { generateOperations, type GenerateOptions } from './generate';
+import { generatePages, type GenerateOptions } from './generate';
 import { generateAll, generateTags } from './generate';
 
 export interface Config extends GenerateOptions {
@@ -71,78 +71,88 @@ export async function generateFiles(options: Config): Promise<void> {
     ...urlInputs,
   ];
 
-  await Promise.all(
-    resolvedInputs.map(async (pathOrUrl) => {
-      if (per === 'file') {
-        let filename = isUrl(pathOrUrl) ? 'index' : parse(pathOrUrl).name;
-        if (nameFn) filename = nameFn('file', filename);
+  async function generateFromDocument(pathOrUrl: string) {
+    if (per === 'file') {
+      let filename = isUrl(pathOrUrl) ? 'index' : parse(pathOrUrl).name;
+      if (nameFn) filename = nameFn('file', filename);
 
-        const outPath = join(outputDir, `${filename}.mdx`);
+      const outPath = join(outputDir, `${filename}.mdx`);
 
-        const result = await generateAll(pathOrUrl, options);
-        await write(outPath, result);
-        console.log(`Generated: ${outPath}`);
-        return;
-      }
+      const result = await generateAll(pathOrUrl, options);
+      await write(outPath, result);
+      console.log(`Generated: ${outPath}`);
+    }
 
-      if (per === 'operation') {
-        const metaFiles = new Set<string>();
-        const results = await generateOperations(pathOrUrl, options);
+    if (per === 'operation') {
+      const metaFiles = new Set<string>();
+      const results = await generatePages(pathOrUrl, options);
 
-        await Promise.all(
-          results.map(async (result) => {
-            const outPaths = new Array<string>();
-            if (!result.method.operationId) return;
-            const id =
-              result.method.operationId.split('.').at(-1) ??
-              result.method.operationId;
+      for (const result of results) {
+        let name =
+          result.type === 'operation'
+            ? result.operation.operationId
+            : result.item.name;
+        if (!name) return;
 
-            if (
-              groupBy === 'tag' &&
-              result.method.tags &&
-              result.method.tags.length > 0
-            ) {
-              for (const tag of result.method.tags) {
-                outPaths.push(
-                  join(outputDir, getFilename(tag), `${getFilename(id)}.mdx`),
-                );
-              }
-            } else if (groupBy === 'route') {
-              const outPath = join(
-                outputDir,
-                result.route.summary
-                  ? getFilename(result.route.summary)
-                  : getFilenameFromRoute(result.route.path),
-                `${getFilename(id)}.mdx`,
+        name = name.split('.').at(-1) ?? name;
+        const outPaths: string[] = [];
+
+        if (groupBy === 'tag') {
+          const tags = result.operation.tags;
+
+          if (tags && tags.length > 0) {
+            for (const tag of tags) {
+              outPaths.push(
+                join(outputDir, getFilename(tag), `${getFilename(name)}.mdx`),
+              );
+            }
+          } else {
+            outPaths.push(
+              result.type === 'operation'
+                ? join(outputDir, `${getFilename(name)}.mdx`)
+                : join(outputDir, 'webhooks', `${getFilename(name)}.mdx`),
+            );
+          }
+        }
+
+        if (groupBy === 'route') {
+          const dir = result.pathItem.summary
+            ? getFilename(result.pathItem.summary)
+            : getFilenameFromRoute(
+                result.type === 'operation'
+                  ? result.item.path
+                  : result.item.name,
               );
 
-              const metaFile = join(dirname(outPath), 'meta.json');
-              if (result.route.summary && !metaFiles.has(metaFile)) {
-                metaFiles.add(metaFile);
+          const outPath = join(outputDir, dir, `${getFilename(name)}.mdx`);
+          const metaFile = join(dirname(outPath), 'meta.json');
+          if (result.pathItem.summary && !metaFiles.has(metaFile)) {
+            metaFiles.add(metaFile);
 
-                await write(
-                  metaFile,
-                  JSON.stringify({
-                    title: result.route.summary,
-                  }),
-                );
-                console.log(`Generated Meta: ${metaFile}`);
-              }
+            await write(
+              metaFile,
+              JSON.stringify({
+                title: result.pathItem.summary,
+              }),
+            );
+            console.log(`Generated Meta: ${metaFile}`);
+          }
 
-              outPaths.push(outPath);
-            } else {
-              outPaths.push(join(outputDir, `${getFilename(id)}.mdx`));
-            }
+          outPaths.push(outPath);
+        }
 
-            for (const outPath of outPaths) {
-              await write(outPath, result.content);
-              console.log(`Generated: ${outPath}`);
-            }
-          }),
-        );
-        return;
+        if (groupBy === 'none') {
+          outPaths.push(join(outputDir, `${getFilename(name)}.mdx`));
+        }
+
+        for (const outPath of outPaths) {
+          await write(outPath, result.content);
+          console.log(`Generated: ${outPath}`);
+        }
       }
+    }
 
+    if (per === 'tag') {
       const results = await generateTags(pathOrUrl, options);
 
       for (const result of results) {
@@ -153,8 +163,10 @@ export async function generateFiles(options: Config): Promise<void> {
         await write(outPath, result.content);
         console.log(`Generated: ${outPath}`);
       }
-    }),
-  );
+    }
+  }
+
+  await Promise.all(resolvedInputs.map(generateFromDocument));
 }
 
 function isUrl(input: string): boolean {
