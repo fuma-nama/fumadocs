@@ -30,14 +30,11 @@ export function LayoutBody(props: HTMLAttributes<HTMLElement>) {
   return (
     <main
       {...props}
-      style={
-        {
-          '--fd-page-width': collapsed
-            ? '100vw'
-            : 'calc(min(100vw, var(--fd-layout-width)) - var(--fd-sidebar-width) - var(--fd-toc-width))',
-          ...props.style,
-        } as object
-      }
+      className={cn(
+        !collapsed &&
+          '[&_#nd-page]:max-w-[calc(min(100vw,var(--fd-layout-width))-var(--fd-sidebar-width)-var(--fd-toc-width))]',
+        props.className,
+      )}
     >
       {props.children}
     </main>

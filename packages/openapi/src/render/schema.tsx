@@ -1,12 +1,11 @@
-import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
 import { type ReactNode } from 'react';
-import { noRef } from '@/utils/schema';
+import { isNullable, NoReference, type ParsedSchema } from '@/utils/schema';
 import type { RenderContext } from '@/types';
 import { combineSchema } from '@/utils/combine-schema';
 import { Markdown } from './markdown';
 
 const keys: {
-  [T in keyof OpenAPI.SchemaObject]: string;
+  [T in keyof ParsedSchema]: string;
 } = {
   default: 'Default',
   minimum: 'Minimum',
@@ -37,12 +36,12 @@ interface Context {
    */
   allowFile?: boolean;
 
-  stack?: OpenAPI.SchemaObject[];
+  stack?: ParsedSchema[];
 
   render: RenderContext;
 }
 
-function isObject(schema: OpenAPI.SchemaObject): boolean {
+function isObject(schema: ParsedSchema): boolean {
   return (
     schema.type === 'object' ||
     schema.properties !== undefined ||
@@ -56,7 +55,7 @@ export function Schema({
   ctx,
 }: {
   name: string;
-  schema: OpenAPI.SchemaObject;
+  schema: NoReference<ParsedSchema>;
   ctx: Context;
 }): ReactNode {
   if (
@@ -91,7 +90,7 @@ export function Schema({
         <Schema
           key="additionalProperties"
           name="[key: string]"
-          schema={noRef(additionalProperties)}
+          schema={additionalProperties}
           ctx={{
             ...ctx,
             required: false,
@@ -107,7 +106,7 @@ export function Schema({
           <Schema
             key={key}
             name={key}
-            schema={noRef(value)}
+            schema={value}
             ctx={{
               ...ctx,
               required: schema.required?.includes(key) ?? false,
@@ -125,11 +124,7 @@ export function Schema({
 
   if (schema.allOf && parseObject) {
     return (
-      <Schema
-        name={name}
-        schema={combineSchema(noRef(schema.allOf))}
-        ctx={ctx}
-      />
+      <Schema name={name} schema={combineSchema(schema.allOf)} ctx={ctx} />
     );
   }
 
@@ -145,7 +140,7 @@ export function Schema({
     if (key in schema) {
       fields.push({
         key: value,
-        value: JSON.stringify(schema[key as keyof OpenAPI.SchemaObject]),
+        value: JSON.stringify(schema[key as keyof ParsedSchema]),
       });
     }
   }
@@ -168,7 +163,7 @@ export function Schema({
       </div>,
     );
 
-  if ((isObject(schema) || schema.allOf) && !parseObject) {
+  if (isObject(schema) && !parseObject && !stack.includes(schema)) {
     child.push(
       <renderer.ObjectCollapsible key="attributes" name="Attributes">
         <Schema
@@ -178,6 +173,7 @@ export function Schema({
             ...ctx,
             parseObject: true,
             required: false,
+            stack: [schema, ...stack],
           }}
         />
       </renderer.ObjectCollapsible>,
@@ -187,9 +183,7 @@ export function Schema({
       ...(schema.anyOf ?? schema.oneOf ?? []),
       ...(schema.not ? [schema.not] : []),
       ...(schema.type === 'array' ? [schema.items] : []),
-    ]
-      .map(noRef)
-      .filter((s) => isComplexType(s) && !stack.includes(s));
+    ].filter((s) => isComplexType(s) && !stack.includes(s));
 
     const renderedMentionedTypes = mentionedObjectTypes.map((s, idx) => {
       return (
@@ -199,7 +193,7 @@ export function Schema({
         >
           <Schema
             name="element"
-            schema={noRef(s)}
+            schema={s}
             ctx={{
               ...ctx,
               stack: [schema, ...stack],
@@ -229,15 +223,19 @@ export function Schema({
 /**
  * Check if the schema needs another collapsible to explain
  */
-function isComplexType(schema: OpenAPI.SchemaObject): boolean {
+function isComplexType(schema: ParsedSchema): boolean {
   if (schema.anyOf ?? schema.oneOf ?? schema.allOf) return true;
 
   return isObject(schema) || schema.type === 'array';
 }
 
-function getSchemaType(schema: OpenAPI.SchemaObject, ctx: Context): string {
-  if (schema.nullable) {
-    const type = getSchemaType({ ...schema, nullable: false }, ctx);
+function getSchemaType(
+  schema: ParsedSchema,
+  ctx: Context,
+  isRoot = true,
+): string {
+  if (isNullable(schema) && isRoot) {
+    const type = getSchemaType(schema, ctx, false);
 
     // null if schema only contains `nullable`
     return type === 'unknown' ? 'null' : `${type} | null`;
@@ -246,40 +244,40 @@ function getSchemaType(schema: OpenAPI.SchemaObject, ctx: Context): string {
   if (schema.title) return schema.title;
 
   if (schema.type === 'array')
-    return `array<${getSchemaType(noRef(schema.items), ctx)}>`;
+    return `array<${getSchemaType(schema.items, ctx)}>`;
 
   if (schema.oneOf)
     return schema.oneOf
-      .map((one) => getSchemaType(noRef(one), ctx))
+      .map((one) => getSchemaType(one, ctx, false))
+      .filter((v) => v !== 'unknown')
       .join(' | ');
 
   if (schema.allOf) {
-    const allTypeNames = schema.allOf.map((one) =>
-      getSchemaType(noRef(one), ctx),
-    );
-    const hasNull = allTypeNames.includes('null');
-    const nonNullTypes = allTypeNames.filter((v) => v !== 'null');
-    const nonNullTypeNames = nonNullTypes.join(' & ');
-
-    if (!hasNull) return nonNullTypeNames;
-
-    if (nonNullTypes.length === 0) return 'null';
-    else if (nonNullTypes.length === 1 || !hasNull)
-      return `${nonNullTypeNames} | null`;
-    else return `(${nonNullTypeNames}) | null`;
+    return schema.allOf
+      .map((one) => getSchemaType(one, ctx, false))
+      .filter((v) => v !== 'unknown')
+      .join(' & ');
   }
 
-  if (schema.not) return `not ${getSchemaType(noRef(schema.not), ctx)}`;
+  if (schema.not) return `not ${getSchemaType(schema.not, ctx, false)}`;
 
   if (schema.anyOf) {
     return `Any properties in ${schema.anyOf
-      .map((one) => getSchemaType(noRef(one), ctx))
+      .map((one) => getSchemaType(one, ctx, false))
+      .filter((v) => v !== 'unknown')
       .join(', ')}`;
   }
 
   if (schema.type === 'string' && schema.format === 'binary' && ctx.allowFile)
     return 'file';
-  if (schema.type) return schema.type;
+
+  if (schema.type && Array.isArray(schema.type)) {
+    const nonNullTypes = schema.type.filter((v) => v !== 'null');
+
+    if (nonNullTypes.length > 0) return nonNullTypes.join(' | ');
+  } else if (schema.type && schema.type !== 'null') {
+    return schema.type;
+  }
 
   if (isObject(schema)) return 'object';
 

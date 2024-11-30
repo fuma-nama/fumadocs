@@ -22,7 +22,7 @@ test('Remark Heading', async () => {
 
   const result = await remark().use(remarkHeading).process(content);
 
-  expect(result.data.toc).toMatchFileSnapshot(
+  await expect(result.data.toc).toMatchFileSnapshot(
     path.resolve(cwd, './fixtures/remark-heading.output.json'),
   );
 });
@@ -36,7 +36,7 @@ test('Remark Structure', async () => {
     .use(remarkStructure)
     .process(content);
 
-  expect(result.data.structuredData).toMatchFileSnapshot(
+  await expect(result.data.structuredData).toMatchFileSnapshot(
     path.resolve(cwd, './fixtures/remark-structure.output.json'),
   );
 });
@@ -50,7 +50,7 @@ test('Remark Admonition', async () => {
     .use(remarkMdx)
     .process(content);
 
-  expect(result.value).toMatchFileSnapshot(
+  await expect(result.value).toMatchFileSnapshot(
     path.resolve(cwd, './fixtures/remark-admonition.output.mdx'),
   );
 });
@@ -63,7 +63,7 @@ test('Remark Image', async () => {
 
   const result = await processor.run(processor.parse(content));
 
-  expect(result).toMatchFileSnapshot(
+  await expect(result).toMatchFileSnapshot(
     path.resolve(cwd, './fixtures/remark-image.output.json'),
   );
 });
@@ -79,7 +79,7 @@ test('Remark Image: With Path', async () => {
     path: file,
   });
 
-  expect(result).toMatchFileSnapshot(
+  await expect(result).toMatchFileSnapshot(
     path.resolve(cwd, './fixtures/remark-image.output.json'),
   );
 });
@@ -94,7 +94,7 @@ test('Remark Image: Without Import', async () => {
     .use(remarkMdx)
     .process(content);
 
-  expect(result.value).toMatchFileSnapshot(
+  await expect(result.value).toMatchFileSnapshot(
     path.resolve(cwd, './fixtures/remark-image-without-import.output.mdx'),
   );
 });
@@ -111,7 +111,7 @@ test('Remark Image: `publicDir` with URL', async () => {
     .use(remarkMdx)
     .process(content);
 
-  expect(result.value).toMatchFileSnapshot(
+  await expect(result.value).toMatchFileSnapshot(
     path.resolve(cwd, './fixtures/remark-image-public-dir.output.mdx'),
   );
 });
@@ -125,7 +125,7 @@ test('Rehype Toc', async () => {
   });
   const result = await processor.process({ value: content });
 
-  expect(result.value).toMatchFileSnapshot(
+  await expect(result.value).toMatchFileSnapshot(
     path.resolve(cwd, './fixtures/rehype-toc.output.js'),
   );
 });

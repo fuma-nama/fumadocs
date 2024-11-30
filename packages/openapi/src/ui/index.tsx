@@ -11,7 +11,7 @@ function Route({ route }: { route: string }): ReactNode {
   const segments = route.split('/').filter((part) => part.length > 0);
 
   return (
-    <div className="not-prose flex flex-row items-center gap-1 overflow-auto text-nowrap text-xs">
+    <div className="not-prose flex flex-row items-center gap-0.5 overflow-auto text-nowrap text-xs">
       {segments.map((part, index) => (
         <Fragment key={index}>
           <span className="text-fd-muted-foreground">/</span>
@@ -27,12 +27,12 @@ function Route({ route }: { route: string }): ReactNode {
 }
 
 export function APIInfo({
-  children,
   className,
   route,
   badgeClassname,
   baseUrls,
   method = 'GET',
+  head,
   ...props
 }: APIInfoProps &
   HTMLAttributes<HTMLDivElement> & {
@@ -40,6 +40,7 @@ export function APIInfo({
   }) {
   return (
     <div className={cn('min-w-0 flex-1', className)} {...props}>
+      {head}
       <div className="sticky top-[var(--fd-api-info-top)] z-[4] mb-4 border-b border-fd-foreground/10 bg-fd-card/50 px-4 py-1.5 shadow-lg backdrop-blur-lg max-lg:-mx-3 max-md:-mx-4 md:rounded-xl md:border md:px-1.5">
         <div className="flex flex-row items-center gap-1.5">
           <span
@@ -55,15 +56,12 @@ export function APIInfo({
         </div>
         <BaseUrlSelect baseUrls={baseUrls} />
       </div>
-      <div className="prose-no-margin">{children}</div>
+      <div className="prose-no-margin">{props.children}</div>
     </div>
   );
 }
 
-export function API({
-  children,
-  ...props
-}: HTMLAttributes<HTMLDivElement>): React.ReactElement {
+export function API({ children, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       {...props}
@@ -90,7 +88,7 @@ export function Property({
   required,
   deprecated,
   children,
-}: PropertyProps): React.ReactElement {
+}: PropertyProps) {
   return (
     <div className="mb-4 rounded-lg border bg-fd-card p-3 prose-no-margin">
       <h4 className="flex flex-row flex-wrap items-center gap-4">
@@ -112,9 +110,7 @@ export function Property({
   );
 }
 
-export function APIExample(
-  props: HTMLAttributes<HTMLDivElement>,
-): React.ReactElement {
+export function APIExample(props: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       {...props}
@@ -131,7 +127,7 @@ export function APIExample(
 export function ObjectCollapsible(props: {
   name: string;
   children: ReactNode;
-}): React.ReactElement {
+}) {
   return (
     <Accordions type="single">
       <Accordion title={props.name}>{props.children}</Accordion>

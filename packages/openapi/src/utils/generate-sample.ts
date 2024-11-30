@@ -1,7 +1,11 @@
-import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
 import { sample } from 'openapi-sampler';
 import type { MethodInformation, RenderContext } from '@/types';
-import { toSampleInput, noRef, getPreferredType } from '@/utils/schema';
+import {
+  toSampleInput,
+  getPreferredType,
+  type ParsedSchema,
+  type NoReference,
+} from '@/utils/schema';
 import { getSecurities, getSecurityPrefix } from '@/utils/get-security';
 
 /**
@@ -14,7 +18,7 @@ export interface EndpointSample {
   url: string;
   method: string;
   body?: {
-    schema: OpenAPI.SchemaObject;
+    schema: ParsedSchema;
     mediaType: string;
     sample: unknown;
   };
@@ -25,13 +29,13 @@ export interface EndpointSample {
 interface ResponseSample {
   mediaType: string;
   sample: unknown;
-  schema: OpenAPI.SchemaObject;
+  schema: ParsedSchema;
 }
 
 interface ParameterSample {
   name: string;
   in: string;
-  schema: OpenAPI.SchemaObject;
+  schema: ParsedSchema;
   sample: unknown;
 }
 
@@ -43,19 +47,19 @@ export function generateSample(
   const params: ParameterSample[] = [];
   const responses: EndpointSample['responses'] = {};
 
-  for (const param of method.parameters) {
+  for (const param of method.parameters ?? []) {
     if (param.schema) {
       params.push({
         name: param.name,
         in: param.in,
-        schema: noRef(param.schema),
+        schema: param.schema,
         sample: param.example ?? sample(param.schema as object),
       });
     } else if (param.content) {
       const key = getPreferredType(param.content);
       const content = key ? param.content[key] : undefined;
 
-      if (!key || !content?.schema)
+      if (!key || !content)
         throw new Error(
           `Cannot find parameter schema for ${param.name} in ${path} ${method.method}`,
         );
@@ -63,7 +67,7 @@ export function generateSample(
       params.push({
         name: param.name,
         in: param.in,
-        schema: noRef(content.schema),
+        schema: content.schema ?? {},
         sample:
           content.example ?? param.example ?? sample(content.schema as object),
       });
@@ -88,11 +92,13 @@ export function generateSample(
 
   let bodyOutput: EndpointSample['body'];
   if (method.requestBody) {
-    const body = noRef(method.requestBody).content;
+    const body = method.requestBody.content;
     const type = getPreferredType(body);
-    const schema = type ? noRef(body[type].schema) : undefined;
-    if (!type || !schema)
-      throw new Error(`Cannot find body schema for ${path} ${method.method}`);
+    if (!type)
+      throw new Error(
+        `Cannot find body schema for ${path} ${method.method}: missing media type`,
+      );
+    const schema = (type ? body[type].schema : undefined) ?? {};
 
     bodyOutput = {
       schema,
@@ -101,14 +107,14 @@ export function generateSample(
     };
   }
 
-  for (const [code, value] of Object.entries(method.responses)) {
-    const content = noRef(value).content;
+  for (const [code, response] of Object.entries(method.responses ?? {})) {
+    const content = response.content;
     if (!content) continue;
 
     const mediaType = getPreferredType(content) as string;
     if (!mediaType) continue;
 
-    const responseSchema = noRef(content[mediaType].schema);
+    const responseSchema = content[mediaType].schema;
     if (!responseSchema) continue;
 
     responses[code] = {
@@ -147,7 +153,10 @@ export function generateSample(
   };
 }
 
-function generateBody(method: string, schema: OpenAPI.SchemaObject): unknown {
+function generateBody(
+  method: string,
+  schema: NoReference<ParsedSchema>,
+): unknown {
   return sample(schema as object, {
     skipReadOnly: method !== 'GET',
     skipWriteOnly: method === 'GET',

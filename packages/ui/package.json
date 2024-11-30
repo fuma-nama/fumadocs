@@ -71,14 +71,14 @@
     "@radix-ui/react-scroll-area": "^1.2.1",
     "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-tabs": "^1.1.1",
-    "class-variance-authority": "^0.7.0",
+    "class-variance-authority": "^0.7.1",
     "fumadocs-core": "workspace:*",
     "lodash.merge": "^4.6.2",
-    "lucide-react": "^0.460.0",
+    "lucide-react": "^0.462.0",
     "next-themes": "^0.4.3",
     "postcss-selector-parser": "^7.0.0",
     "react-medium-image-zoom": "^5.2.11",
-    "tailwind-merge": "^2.5.4"
+    "tailwind-merge": "^2.5.5"
   },
   "devDependencies": {
     "@fumadocs/cli": "workspace:*",

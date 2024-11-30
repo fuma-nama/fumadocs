@@ -1,12 +1,17 @@
-import type { OpenAPIV3 as OpenAPI } from 'openapi-types';
+import type { ReferenceObject } from '@/types';
+import type { OpenAPIV3_1 } from 'openapi-types';
 
-type NoReference<T> = T extends (infer I)[]
+export type NoReference<T> = T extends (infer I)[]
   ? NoReference<I>[]
-  : Exclude<T, OpenAPI.ReferenceObject>;
+  : T extends ReferenceObject
+    ? Exclude<T, ReferenceObject>
+    : T extends object
+      ? {
+          [K in keyof T]: NoReference<T[K]>;
+        }
+      : T;
 
-export function noRef<T>(v: T): NoReference<T> {
-  return v as NoReference<T>;
-}
+export type ParsedSchema = OpenAPIV3_1.SchemaObject;
 
 export function getPreferredType<B extends Record<string, unknown>>(
   body: B,
@@ -21,4 +26,17 @@ export function getPreferredType<B extends Record<string, unknown>>(
  */
 export function toSampleInput(value: unknown): string {
   return typeof value === 'string' ? value : JSON.stringify(value, null, 2);
+}
+
+export function isNullable(
+  schema: NoReference<ParsedSchema>,
+  includeOneOf = true,
+): boolean {
+  if (Array.isArray(schema.type) && schema.type.includes('null')) return true;
+  if (includeOneOf && (schema.anyOf || schema.oneOf)) {
+    if (schema.anyOf?.some((item) => isNullable(item))) return true;
+    if (schema.oneOf?.some((item) => isNullable(item))) return true;
+  }
+
+  return false;
 }

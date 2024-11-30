@@ -3,5 +3,9 @@
 @tailwind utilities;
 
 .prose {
-  /* --tw-prose-body: hsl(var(--muted-foreground)); */
+  --tw-prose-body: hsl(var(--foreground) / 0.8);
+}
+
+:root {
+  --fd-layout-width: 1400px;
 }

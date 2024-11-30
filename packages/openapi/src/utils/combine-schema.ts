@@ -1,19 +1,25 @@
-import { type OpenAPIV3 as OpenAPI } from 'openapi-types';
-import { noRef } from '@/utils/schema';
+import { type ParsedSchema } from '@/utils/schema';
 
 /**
  * Combine multiple object schemas into one
  */
-export function combineSchema(
-  schema: OpenAPI.SchemaObject[],
-): OpenAPI.SchemaObject {
-  const result: OpenAPI.SchemaObject = {
+export function combineSchema(schema: ParsedSchema[]): ParsedSchema {
+  const result: ParsedSchema = {
     type: undefined,
   };
 
-  function add(s: OpenAPI.SchemaObject): void {
+  function add(s: ParsedSchema): void {
     if (s.type) {
-      result.type = result.type ? 'object' : s.type;
+      result.type ??= [];
+      if (!Array.isArray(result.type)) {
+        result.type = [result.type];
+      }
+
+      for (const v of Array.isArray(s.type) ? s.type : [s.type]) {
+        if (!result.type.includes(v)) {
+          result.type.push(v);
+        }
+      }
     }
 
     if (s.properties) {
@@ -41,12 +47,8 @@ export function combineSchema(
       result.enum.push(...s.enum);
     }
 
-    if (s.nullable) {
-      result.nullable = true;
-    }
-
     if (s.allOf) {
-      noRef(s.allOf).forEach(add);
+      s.allOf.forEach(add);
     }
   }
 

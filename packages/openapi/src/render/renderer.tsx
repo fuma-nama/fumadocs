@@ -28,6 +28,8 @@ export interface APIInfoProps {
   method: string;
   route: string;
   baseUrls: string[];
+
+  head: ReactNode;
   children: ReactNode;
 }
 

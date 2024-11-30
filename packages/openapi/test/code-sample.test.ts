@@ -1,34 +1,35 @@
 import { fileURLToPath } from 'node:url';
 import { describe, expect, test } from 'vitest';
-import Parser from '@apidevtools/json-schema-ref-parser';
-import { type OpenAPIV3 as OpenAPI } from 'openapi-types';
-import Slugger from 'github-slugger';
 import * as Python from '@/requests/python';
 import * as Go from '@/requests/go';
 import * as Curl from '@/requests/curl';
 import * as JS from '@/requests/javascript';
-import { generateSample } from '@/schema/sample';
-import { createMethod } from '@/schema/method';
+import { generateSample } from '@/utils/generate-sample';
+import { createMethod } from '@/server/create-method';
 import { methodKeys } from '@/build-routes';
-import { createRenders } from '@/render/renderer';
-import { type RenderContext } from '@/types';
+import { getContext } from '@/server/api-page';
+import { processDocument } from '@/utils/process-document';
 
 const example = fileURLToPath(
   new URL('./fixtures/petstore.yaml', import.meta.url),
 );
-const document = await Parser.dereference<OpenAPI.Document>(example);
 
-const ctx: RenderContext = {
-  baseUrl: 'http://localhost:8080',
-  document,
-  renderer: createRenders({
+const processed = await processDocument(example, true);
+processed.document.servers = [
+  {
+    url: 'http://localhost:8080',
+  },
+];
+const ctx = await getContext(processed, {
+  shikiOptions: {
     theme: 'vitesse-dark',
-  }),
-  slugger: new Slugger(),
-};
+  },
+});
+
+const { document } = processed;
 
 describe('Code Sample Generators', () => {
-  for (const [path, item] of Object.entries(document.paths)) {
+  for (const [path, item] of Object.entries(document.paths ?? {})) {
     if (!item) continue;
 
     for (const method of methodKeys) {

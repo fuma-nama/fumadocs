@@ -1,20 +1,37 @@
 import { dump } from 'js-yaml';
-import { type OpenAPIV3 as OpenAPI } from 'openapi-types';
 import Slugger from 'github-slugger';
 import { type TableOfContents } from 'fumadocs-core/server';
 import { type StructuredData } from 'fumadocs-core/mdx-plugins';
-import { type ApiPageProps } from '@/server/api-page';
-import type { DocumentContext, GenerateOptions } from '@/generate';
+import type {
+  ApiPageProps,
+  OperationItem,
+  WebhookItem,
+} from '@/server/api-page';
+import type { GenerateOptions } from '@/generate';
 import { idToTitle } from '@/utils/id-to-title';
+import type { Document, TagObject } from '@/types';
+import type { NoReference } from '@/utils/schema';
 
 interface StaticData {
   toc: TableOfContents;
   structuredData: StructuredData;
 }
 
+export type DocumentContext =
+  | {
+      type: 'tag';
+      tag: TagObject | undefined;
+    }
+  | {
+      type: 'operation';
+    }
+  | {
+      type: 'file';
+    };
+
 export function generateDocument(
   options: GenerateOptions & {
-    dereferenced: OpenAPI.Document;
+    dereferenced: NoReference<Document>;
     page: ApiPageProps;
     title: string;
     description?: string;
@@ -30,10 +47,12 @@ export function generateDocument(
   );
 
   let meta: object | undefined;
-  if (options.context.type === 'operation') {
+  if (options.page.operations?.length === 1) {
+    const operation = options.page.operations[0];
+
     meta = {
-      method: options.context.endpoint.method,
-      route: options.context.route.path,
+      method: operation.method.toUpperCase(),
+      route: operation.path,
     };
   }
 
@@ -71,15 +90,15 @@ export function generateDocument(
 }
 
 function generateStaticData(
-  dereferenced: OpenAPI.Document,
+  dereferenced: NoReference<Document>,
   props: ApiPageProps,
 ): StaticData {
   const slugger = new Slugger();
   const toc: TableOfContents = [];
   const structuredData: StructuredData = { headings: [], contents: [] };
 
-  for (const item of props.operations) {
-    const operation = dereferenced.paths[item.path]?.[item.method];
+  for (const item of props.operations ?? []) {
+    const operation = dereferenced.paths?.[item.path]?.[item.method];
     if (!operation) continue;
 
     if (props.hasHead && operation.operationId) {
@@ -110,5 +129,15 @@ function generateStaticData(
 }
 
 function pageContent(props: ApiPageProps): string {
-  return `<APIPage document={${JSON.stringify(props.document)}} operations={${JSON.stringify(props.operations)}} hasHead={${JSON.stringify(props.hasHead)}} />`;
+  // filter extra properties in props
+  const operations: OperationItem[] = (props.operations ?? []).map((item) => ({
+    path: item.path,
+    method: item.method,
+  }));
+  const webhooks: WebhookItem[] = (props.webhooks ?? []).map((item) => ({
+    name: item.name,
+    method: item.method,
+  }));
+
+  return `<APIPage document={${JSON.stringify(props.document)}} operations={${JSON.stringify(operations)}} webhooks={${JSON.stringify(webhooks)}} hasHead={${JSON.stringify(props.hasHead)}} />`;
 }

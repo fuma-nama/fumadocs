@@ -25,13 +25,13 @@
     "eslint-plugin-react": "^7.37.2",
     "eslint-plugin-react-hooks": "5.1.0-rc-fb9a90fa48-20240614",
     "eslint-plugin-tailwindcss": "^3.17.5",
-    "prettier": "^3.3.3",
+    "prettier": "^3.4.1",
     "rimraf": "^6.0.1",
     "tsup": "8.3.5",
-    "turbo": "2.3.1",
+    "turbo": "2.3.3",
     "typescript": "^5.7.2",
-    "typescript-eslint": "^8.15.0",
-    "vitest": "^2.1.5"
+    "typescript-eslint": "^8.16.0",
+    "vitest": "^2.1.6"
   },
   "packageManager": "pnpm@9.14.2",
   "engines": {

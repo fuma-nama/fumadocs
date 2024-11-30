@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.0",
+  "openapi": "3.1.0",
   "info": {
     "title": "Unkey Api",
     "version": "1.0.0"
@@ -25,6 +25,27 @@
     "statusCodes": ["5XX"],
     "retryConnectionErrors": true
   },
+  "webhooks": {
+    "newPet": {
+      "post": {
+        "requestBody": {
+          "description": "Information about a new pet in the system",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Pet"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Return a 200 status to indicate that the data was received successfully"
+          }
+        }
+      }
+    }
+  },
   "components": {
     "securitySchemes": {
       "bearerAuth": {
@@ -34,6 +55,109 @@
       }
     },
     "schemas": {
+      "Pet": {
+        "required": ["id", "name"],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "tag": {
+            "type": "string"
+          }
+        }
+      },
+      "Butler_API_Entities_UserPrivate": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "login": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "avatar_url": {
+            "type": "string"
+          },
+          "given_name": {
+            "type": "string"
+          },
+          "family_name": {
+            "type": "string"
+          },
+          "picture": {
+            "type": "string"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "supporter": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          },
+          "access_token": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "projects": {
+            "$ref": "#/components/schemas/Butler_API_Entities_Project"
+          }
+        },
+        "description": "Butler_API_Entities_UserPrivate model"
+      },
+      "Butler_API_Entities_Project": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "parent_project": {
+            "$ref": "#/components/schemas/Butler_API_Entities_Project"
+          },
+          "name": {
+            "type": "string",
+            "description": "Project Name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Project Description"
+          },
+          "repository_id": {
+            "type": "string",
+            "description": "Repository"
+          },
+          "code_repository_id": {
+            "type": "string",
+            "description": "Code Repository ID"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          }
+        },
+        "description": "Butler_API_Entities_Project model"
+      },
       "ErrBadRequest": {
         "type": "object",
         "properties": {
@@ -834,7 +958,7 @@
         "parameters": [
           {
             "schema": {
-              "type": "string",
+              "type": ["string", "null"],
               "minLength": 1,
               "description": "The id of the key to fetch",
               "example": "key_1234"
@@ -860,7 +984,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Key"
+                  "$ref": "#/components/schemas/Butler_API_Entities_UserPrivate"
                 }
               }
             }
