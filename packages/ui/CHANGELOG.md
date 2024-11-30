@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 14.5.5
+
+### Patch Changes
+
+- 06f66d8: improve notebook layout for transparent sidebar
+- 2d0501f: Fi sidebar icon trigger
+  - fumadocs-core@14.5.5
+
 ## 14.5.4
 
 ### Patch Changes

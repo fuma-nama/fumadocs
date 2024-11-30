@@ -1,5 +1,19 @@
 # @fuma-docs/openapi
 
+## 5.8.0
+
+### Minor Changes
+
+- 2d0501f: Support webhooks & callbacks
+- 2d0501f: Support OpenAPI 3.1
+
+### Patch Changes
+
+- Updated dependencies [06f66d8]
+- Updated dependencies [2d0501f]
+  - fumadocs-ui@14.5.5
+  - fumadocs-core@14.5.5
+
 ## 5.7.5
 
 ### Patch Changes
