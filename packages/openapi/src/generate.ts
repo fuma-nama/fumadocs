@@ -1,11 +1,14 @@
 import { resolve } from 'node:path';
-import Parser from '@apidevtools/json-schema-ref-parser';
 import { getAPIPageItems } from '@/build-routes';
-import { DocumentContext, generateDocument } from '@/utils/generate-document';
+import {
+  type DocumentContext,
+  generateDocument,
+} from '@/utils/generate-document';
 import { idToTitle } from '@/utils/id-to-title';
-import type { Document, OperationObject, PathItemObject } from './types';
+import type { OperationObject, PathItemObject } from './types';
 import type { NoReference } from '@/utils/schema';
-import { OperationItem, WebhookItem } from '@/server/api-page';
+import type { OperationItem, WebhookItem } from '@/server/api-page';
+import { type DocumentInput, processDocument } from '@/utils/process-document';
 
 export interface GenerateOptions {
   /**
@@ -61,21 +64,21 @@ export type GeneratePageOutput =
     };
 
 async function dereference(
-  pathOrDocument: string | Document,
+  pathOrDocument: DocumentInput,
   options: GenerateOptions,
-): Promise<NoReference<Document>> {
-  return await Parser.dereference(
+) {
+  return await processDocument(
     // resolve paths
     typeof pathOrDocument === 'string' &&
       !pathOrDocument.startsWith('http://') &&
       !pathOrDocument.startsWith('https://')
       ? resolve(options.cwd ?? process.cwd(), pathOrDocument)
       : pathOrDocument,
-  );
+  ).then((res) => res.document);
 }
 
 export async function generateAll(
-  pathOrDocument: string | Document,
+  pathOrDocument: DocumentInput,
   options: GenerateOptions = {},
 ): Promise<string> {
   const document = await dereference(pathOrDocument, options);
@@ -100,7 +103,7 @@ export async function generateAll(
 }
 
 export async function generatePages(
-  pathOrDocument: string | Document,
+  pathOrDocument: DocumentInput,
   options: GenerateOptions = {},
 ): Promise<GeneratePageOutput[]> {
   const document = await dereference(pathOrDocument, options);
@@ -170,7 +173,7 @@ export async function generatePages(
 }
 
 export async function generateTags(
-  pathOrDocument: string | Document,
+  pathOrDocument: DocumentInput,
   options: GenerateOptions = {},
 ): Promise<GenerateTagOutput[]> {
   const document = await dereference(pathOrDocument, options);

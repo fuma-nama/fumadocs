@@ -1,19 +1,19 @@
 import type { DereferenceMap, Document } from '@/types';
 import Slugger from 'github-slugger';
-import Parser from '@apidevtools/json-schema-ref-parser';
 import { Operation } from '@/render/operation';
 import type { RenderContext } from '@/types';
 import { createMethod } from '@/server/create-method';
 import { createRenders, type Renderer } from '@/render/renderer';
-import { OpenAPIV3_1 } from 'openapi-types';
+import type { OpenAPIV3_1 } from 'openapi-types';
 import type { NoReference } from '@/utils/schema';
+import { type DocumentInput, processDocument } from '@/utils/process-document';
 
 export interface ApiPageProps
   extends Pick<
     RenderContext,
     'generateCodeSamples' | 'generateTypeScriptSchema' | 'shikiOptions'
   > {
-  document: string | Document;
+  document: DocumentInput;
   hasHead: boolean;
 
   renderer?: Partial<Renderer>;
@@ -35,8 +35,6 @@ type ProcessedDocument = {
   document: NoReference<Document>;
   dereferenceMap: DereferenceMap;
 };
-
-const cache = new Map<string, ProcessedDocument>();
 
 export interface WebhookItem {
   name: string;
@@ -105,38 +103,6 @@ export async function APIPage(props: ApiPageProps) {
       })}
     </ctx.renderer.Root>
   );
-}
-
-export async function processDocument(
-  document: string | Document,
-  disableCache = false,
-): Promise<ProcessedDocument> {
-  const cached =
-    !disableCache && typeof document === 'string' ? cache.get(document) : null;
-
-  if (cached) return cached;
-  const dereferenceMap: DereferenceMap = new Map();
-  const dereferenced = await Parser.dereference<NoReference<Document>>(
-    document,
-    {
-      dereference: {
-        onDereference($ref: string, schema: unknown) {
-          dereferenceMap.set(schema, $ref);
-        },
-      },
-    },
-  );
-
-  const processed: ProcessedDocument = {
-    document: dereferenced,
-    dereferenceMap,
-  };
-
-  if (!disableCache && typeof document === 'string') {
-    cache.set(document, processed);
-  }
-
-  return processed;
 }
 
 export async function getContext(
