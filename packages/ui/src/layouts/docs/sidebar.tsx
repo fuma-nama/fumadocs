@@ -115,8 +115,8 @@ export function CollapsibleSidebar(props: SidebarProps) {
   return (
     <Sidebar
       {...props}
-      onPointerEnter={onEnter}
-      onPointerLeave={onLeave}
+      onPointerEnter={collapsed ? onEnter : undefined}
+      onPointerLeave={collapsed ? onLeave : undefined}
       data-collapsed={collapsed}
       className={cn(
         'md:transition-all',

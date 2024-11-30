@@ -140,7 +140,7 @@ export function DocsPage({
         id="nd-page"
         {...props.container}
         className={cn(
-          'flex w-full min-w-0 max-w-[var(--fd-page-width)] flex-col md:transition-[max-width]',
+          'flex w-full min-w-0 flex-col md:transition-[max-width]',
           props.container?.className,
         )}
         style={
