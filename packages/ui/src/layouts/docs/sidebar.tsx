@@ -320,10 +320,11 @@ export function SidebarFolderLink(props: LinkProps) {
         props.className,
       )}
       onClick={(e) => {
-        setOpen((prev) => !active || !prev);
-
         if ((e.target as HTMLElement).hasAttribute('data-icon')) {
+          setOpen((prev) => !prev);
           e.preventDefault();
+        } else {
+          setOpen((prev) => !active || !prev);
         }
       }}
       prefetch={prefetch}
