@@ -1,4 +1,4 @@
-import { type EndpointSample } from '@/schema/sample';
+import { type EndpointSample } from '@/utils/generate-sample';
 
 export function getSampleRequest(endpoint: EndpointSample): string {
   const headers = new Map<string, unknown>();

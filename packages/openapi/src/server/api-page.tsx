@@ -3,7 +3,7 @@ import Slugger from 'github-slugger';
 import Parser from '@apidevtools/json-schema-ref-parser';
 import { Operation } from '@/render/operation';
 import type { RenderContext } from '@/types';
-import { createMethod } from '@/schema/method';
+import { createMethod } from '@/server/create-method';
 import { createRenders, type Renderer } from '@/render/renderer';
 import { OpenAPIV3_1 } from 'openapi-types';
 import type { NoReference } from '@/utils/schema';
@@ -56,37 +56,7 @@ export async function APIPage(props: ApiPageProps) {
     disableCache = process.env.NODE_ENV === 'development',
   } = props;
 
-  async function processDocument() {
-    const cached =
-      !disableCache && typeof props.document === 'string'
-        ? cache.get(props.document)
-        : null;
-
-    if (cached) return cached;
-    const dereferenceMap: DereferenceMap = new Map();
-    const dereferenced = await Parser.dereference<NoReference<Document>>(
-      props.document,
-      {
-        dereference: {
-          onDereference($ref: string, schema: unknown) {
-            dereferenceMap.set(schema, $ref);
-          },
-        },
-      },
-    );
-
-    const processed: ProcessedDocument = {
-      document: dereferenced,
-      dereferenceMap,
-    };
-
-    if (!disableCache && typeof props.document === 'string')
-      cache.set(props.document, processed);
-
-    return processed;
-  }
-
-  const processed = await processDocument();
+  const processed = await processDocument(props.document, disableCache);
   const ctx = await getContext(processed, props);
   const { document } = processed;
   return (
@@ -139,9 +109,46 @@ export async function APIPage(props: ApiPageProps) {
   );
 }
 
-async function getContext(
+export async function processDocument(
+  document: string | Document,
+  disableCache = false,
+): Promise<ProcessedDocument> {
+  const cached =
+    !disableCache && typeof document === 'string' ? cache.get(document) : null;
+
+  if (cached) return cached;
+  const dereferenceMap: DereferenceMap = new Map();
+  const dereferenced = await Parser.dereference<NoReference<Document>>(
+    document,
+    {
+      dereference: {
+        onDereference($ref: string, schema: unknown) {
+          dereferenceMap.set(schema, $ref);
+        },
+      },
+    },
+  );
+
+  const processed: ProcessedDocument = {
+    document: dereferenced,
+    dereferenceMap,
+  };
+
+  if (!disableCache && typeof document === 'string') {
+    cache.set(document, processed);
+  }
+
+  return processed;
+}
+
+export async function getContext(
   { document, dereferenceMap }: ProcessedDocument,
-  options: ApiPageProps,
+  options: Pick<
+    Partial<RenderContext>,
+    'shikiOptions' | 'generateTypeScriptSchema' | 'generateCodeSamples'
+  > & {
+    renderer?: Partial<Renderer>;
+  } = {},
 ): Promise<RenderContext> {
   return {
     document: document,

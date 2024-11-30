@@ -1,5 +1,5 @@
 import { compile } from '@fumari/json-schema-to-typescript';
-import type { EndpointSample } from '@/schema/sample';
+import type { EndpointSample } from '@/utils/generate-sample';
 import { DereferenceMap } from '@/types';
 
 export async function getTypescriptSchema(

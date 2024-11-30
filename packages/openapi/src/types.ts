@@ -1,7 +1,7 @@
 import type { OpenAPIV3_1 as V3_1 } from 'openapi-types';
 import type { default as Slugger } from 'github-slugger';
 import { type Renderer } from '@/render/renderer';
-import type { EndpointSample } from '@/schema/sample';
+import type { EndpointSample } from '@/utils/generate-sample';
 import type { CodeSample } from '@/render/operation';
 import type {
   BuiltinTheme,

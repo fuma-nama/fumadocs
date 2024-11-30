@@ -1,5 +1,5 @@
 import { Fragment, type ReactElement, type ReactNode } from 'react';
-import { generateSample, type EndpointSample } from '@/schema/sample';
+import { generateSample, type EndpointSample } from '@/utils/generate-sample';
 import * as CURL from '@/requests/curl';
 import * as JS from '@/requests/javascript';
 import * as Go from '@/requests/go';
