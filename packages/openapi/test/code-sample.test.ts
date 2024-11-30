@@ -7,7 +7,8 @@ import * as JS from '@/requests/javascript';
 import { generateSample } from '@/utils/generate-sample';
 import { createMethod } from '@/server/create-method';
 import { methodKeys } from '@/build-routes';
-import { getContext, processDocument } from '@/server/api-page';
+import { getContext } from '@/server/api-page';
+import { processDocument } from '@/utils/process-document';
 
 const example = fileURLToPath(
   new URL('./fixtures/petstore.yaml', import.meta.url),
