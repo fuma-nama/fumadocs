@@ -76,7 +76,6 @@ export async function APIPage(props: ApiPageProps) {
             method={method}
             path={item.path}
             ctx={ctx}
-            baseUrls={document.servers?.map((s) => s.url) ?? []}
             hasHead={hasHead}
           />
         );
@@ -100,7 +99,6 @@ export async function APIPage(props: ApiPageProps) {
               baseUrl: 'http://localhost:8080',
             }}
             path={`/${item.name}`}
-            baseUrls={document.servers?.map((s) => s.url) ?? []}
             hasHead={hasHead}
           />
         );
@@ -161,6 +159,7 @@ export async function getContext(
     generateTypeScriptSchema: options.generateTypeScriptSchema,
     generateCodeSamples: options.generateCodeSamples,
     baseUrl: document.servers?.[0].url ?? 'https://example.com',
+    baseUrls: document.servers?.map((s) => s.url) ?? [],
     slugger: new Slugger(),
   };
 }

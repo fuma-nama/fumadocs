@@ -54,6 +54,24 @@ paths:
             examples:
               default_example:
                 $ref: '#/components/examples/CreateSpecialEventRequestExample'
+      callbacks:
+        createEvent:
+          '{$request.query.callbackUrl}?event={$request.query.event}':
+            post:
+              summary: Create Event Notification
+              requestBody:
+                content:
+                  application/json:
+                    schema:
+                      type: object
+                      properties:
+                        message:
+                          type: string
+                    example:
+                      message: Some event
+              responses:
+                '200':
+                  description: OK
       responses:
         '200':
           description: Success

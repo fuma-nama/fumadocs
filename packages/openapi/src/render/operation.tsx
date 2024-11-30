@@ -6,10 +6,11 @@ import * as Go from '@/requests/go';
 import * as Python from '@/requests/python';
 import {
   type MethodInformation,
+  OperationObject,
   type RenderContext,
   type SecurityRequirementObject,
 } from '@/types';
-import { getPreferredType } from '@/utils/schema';
+import { getPreferredType, NoReference } from '@/utils/schema';
 import { getTypescriptSchema } from '@/utils/get-typescript-schema';
 import { getSecurities, getSecurityPrefix } from '@/utils/get-security';
 import { Playground } from '@/render/playground';
@@ -18,6 +19,8 @@ import { type ResponseTypeProps } from '@/render/renderer';
 import { Markdown } from './markdown';
 import { heading } from './heading';
 import { Schema } from './schema';
+import { createMethod } from '@/server/create-method';
+import { methodKeys } from '@/build-routes';
 
 interface CustomProperty {
   'x-codeSamples'?: CodeSample[];
@@ -37,45 +40,41 @@ interface CodeSampleCompiled {
 
 export function Operation({
   type = 'operation',
-  baseUrls,
   path,
   method,
   ctx,
   hasHead,
+  headingLevel = 2,
 }: {
   type?: 'webhook' | 'operation';
-  baseUrls: string[];
   path: string;
   method: MethodInformation;
   ctx: RenderContext;
   hasHead?: boolean;
+
+  headingLevel?: number;
 }): ReactElement {
-  let level = 2;
+  const { baseUrls } = ctx;
   const body = method.requestBody;
   const security = method.security ?? ctx.document.security;
-  const info: ReactNode[] = [];
+  let headNode: ReactNode = null;
+  let bodyNode: ReactNode = null;
+  let callbacksNode: ReactNode = null;
 
   if (hasHead) {
     const title =
       method.summary ??
       (method.operationId ? idToTitle(method.operationId) : path);
 
-    info.push(heading(level, title, ctx));
-    level++;
-
-    if (method.description) {
-      info.push(<Markdown key="description" text={method.description} />);
-    }
-  }
-
-  if (type === 'operation')
-    info.push(
-      <Playground key="playground" path={path} method={method} ctx={ctx} />,
+    headNode = (
+      <>
+        {heading(headingLevel, title, ctx)}
+        {method.description ? (
+          <Markdown key="description" text={method.description} />
+        ) : null}
+      </>
     );
-
-  if (security) {
-    info.push(heading(level, 'Authorization', ctx));
-    info.push(<AuthSection key="auth" requirements={security} ctx={ctx} />);
+    headingLevel++;
   }
 
   if (body) {
@@ -83,9 +82,9 @@ export function Operation({
     if (!type)
       throw new Error(`No supported media type for body content: ${path}`);
 
-    info.push(
-      <Fragment key="body">
-        {heading(level, 'Request Body', ctx)}
+    bodyNode = (
+      <>
+        {heading(headingLevel, 'Request Body', ctx)}
         <div className="mb-8 flex flex-row items-center justify-between gap-2">
           <code>{type}</code>
           <span>{body.required ? 'Required' : 'Optional'}</span>
@@ -102,7 +101,7 @@ export function Operation({
             allowFile: type === 'multipart/form-data',
           }}
         />
-      </Fragment>,
+      </>
     );
   }
 
@@ -114,6 +113,7 @@ export function Operation({
       (item) => item.name === param.name && item.in === param.in,
     );
     if (!pInfo) continue;
+
     const schema = pInfo.schema;
     const groupName =
       {
@@ -146,24 +146,81 @@ export function Operation({
     parameterGroups.set(groupName, group);
   }
 
-  for (const [group, parameters] of Array.from(parameterGroups.entries())) {
-    info.push(heading(level, group, ctx), ...parameters);
+  if (method.callbacks) {
+    callbacksNode = (
+      <>
+        {heading(headingLevel, 'Webhooks', ctx)}
+        {Object.entries(method.callbacks).map(([name, callback]) => {
+          const nodes = Object.entries(callback).map(([path, pathItem]) => {
+            const pathNodes = methodKeys.map((method) => {
+              const operation = pathItem[method];
+              if (!operation) return null;
+
+              return (
+                <Operation
+                  key={method}
+                  type="webhook"
+                  hasHead
+                  path={path}
+                  headingLevel={headingLevel + 1}
+                  method={createMethod(
+                    method,
+                    pathItem,
+                    operation as NoReference<OperationObject>,
+                  )}
+                  ctx={ctx}
+                />
+              );
+            });
+
+            return <Fragment key={path}>{pathNodes}</Fragment>;
+          });
+
+          return <Fragment key={name}>{nodes}</Fragment>;
+        })}
+      </>
+    );
   }
 
-  return (
-    <ctx.renderer.API>
-      {path ? (
-        <ctx.renderer.APIInfo
-          method={method.method}
-          route={path}
-          baseUrls={type === 'operation' ? baseUrls : []}
-        >
-          {info}
-        </ctx.renderer.APIInfo>
+  const info = (
+    <ctx.renderer.APIInfo
+      head={headNode}
+      method={method.method}
+      route={path}
+      baseUrls={type === 'operation' ? baseUrls : []}
+    >
+      {type === 'operation' ? (
+        <Playground path={path} method={method} ctx={ctx} />
       ) : null}
-      <APIExample method={method} endpoint={endpoint} ctx={ctx} />
-    </ctx.renderer.API>
+      {security ? (
+        <>
+          {heading(headingLevel, 'Authorization', ctx)}
+          <AuthSection requirements={security} ctx={ctx} />
+        </>
+      ) : null}
+      {bodyNode}
+      {Array.from(parameterGroups.entries()).map(([group, params]) => {
+        return (
+          <Fragment key={group}>
+            {heading(headingLevel, group, ctx)}
+            {params}
+          </Fragment>
+        );
+      })}
+      {callbacksNode}
+    </ctx.renderer.APIInfo>
   );
+
+  if (type === 'operation') {
+    return (
+      <ctx.renderer.API>
+        {info}
+        <APIExample method={method} endpoint={endpoint} ctx={ctx} />
+      </ctx.renderer.API>
+    );
+  } else {
+    return info;
+  }
 }
 
 const defaultSamples: CodeSample[] = [

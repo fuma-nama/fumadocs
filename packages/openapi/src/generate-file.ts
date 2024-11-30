@@ -1,7 +1,11 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join, parse } from 'node:path';
 import fg from 'fast-glob';
-import { generatePages, type GenerateOptions } from './generate';
+import {
+  generatePages,
+  type GenerateOptions,
+  type GeneratePageOutput,
+} from './generate';
 import { generateAll, generateTags } from './generate';
 
 export interface Config extends GenerateOptions {
@@ -71,6 +75,44 @@ export async function generateFiles(options: Config): Promise<void> {
     ...urlInputs,
   ];
 
+  function getOutputPaths(name: string, result: GeneratePageOutput): string[] {
+    const outPaths: string[] = [];
+
+    if (groupBy === 'tag') {
+      const tags = result.operation.tags;
+
+      if (tags && tags.length > 0) {
+        for (const tag of tags) {
+          outPaths.push(
+            join(outputDir, getFilename(tag), `${getFilename(name)}.mdx`),
+          );
+        }
+      } else {
+        outPaths.push(
+          result.type === 'operation'
+            ? join(outputDir, `${getFilename(name)}.mdx`)
+            : join(outputDir, 'webhooks', `${getFilename(name)}.mdx`),
+        );
+      }
+    }
+
+    if (groupBy === 'route') {
+      const dir = result.pathItem.summary
+        ? getFilename(result.pathItem.summary)
+        : getFilenameFromRoute(
+            result.type === 'operation' ? result.item.path : result.item.name,
+          );
+
+      outPaths.push(join(outputDir, dir, `${getFilename(name)}.mdx`));
+    }
+
+    if (groupBy === 'none') {
+      outPaths.push(join(outputDir, `${getFilename(name)}.mdx`));
+    }
+
+    return outPaths;
+  }
+
   async function generateFromDocument(pathOrUrl: string) {
     if (per === 'file') {
       let filename = isUrl(pathOrUrl) ? 'index' : parse(pathOrUrl).name;
@@ -95,59 +137,29 @@ export async function generateFiles(options: Config): Promise<void> {
         if (!name) return;
 
         name = name.split('.').at(-1) ?? name;
-        const outPaths: string[] = [];
 
-        if (groupBy === 'tag') {
-          const tags = result.operation.tags;
+        for (const outPath of getOutputPaths(name, result)) {
+          await write(outPath, result.content);
+          console.log(`Generated: ${outPath}`);
 
-          if (tags && tags.length > 0) {
-            for (const tag of tags) {
-              outPaths.push(
-                join(outputDir, getFilename(tag), `${getFilename(name)}.mdx`),
-              );
-            }
-          } else {
-            outPaths.push(
-              result.type === 'operation'
-                ? join(outputDir, `${getFilename(name)}.mdx`)
-                : join(outputDir, 'webhooks', `${getFilename(name)}.mdx`),
-            );
-          }
-        }
+          if (groupBy === 'route') {
+            const metaFile = join(dirname(outPath), 'meta.json');
+            if (!result.pathItem.summary || metaFiles.has(metaFile)) continue;
 
-        if (groupBy === 'route') {
-          const dir = result.pathItem.summary
-            ? getFilename(result.pathItem.summary)
-            : getFilenameFromRoute(
-                result.type === 'operation'
-                  ? result.item.path
-                  : result.item.name,
-              );
-
-          const outPath = join(outputDir, dir, `${getFilename(name)}.mdx`);
-          const metaFile = join(dirname(outPath), 'meta.json');
-          if (result.pathItem.summary && !metaFiles.has(metaFile)) {
             metaFiles.add(metaFile);
 
             await write(
               metaFile,
-              JSON.stringify({
-                title: result.pathItem.summary,
-              }),
+              JSON.stringify(
+                {
+                  title: result.pathItem.summary,
+                },
+                null,
+                2,
+              ),
             );
             console.log(`Generated Meta: ${metaFile}`);
           }
-
-          outPaths.push(outPath);
-        }
-
-        if (groupBy === 'none') {
-          outPaths.push(join(outputDir, `${getFilename(name)}.mdx`));
-        }
-
-        for (const outPath of outPaths) {
-          await write(outPath, result.content);
-          console.log(`Generated: ${outPath}`);
         }
       }
     }

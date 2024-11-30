@@ -27,12 +27,12 @@ function Route({ route }: { route: string }): ReactNode {
 }
 
 export function APIInfo({
-  children,
   className,
   route,
   badgeClassname,
   baseUrls,
   method = 'GET',
+  head,
   ...props
 }: APIInfoProps &
   HTMLAttributes<HTMLDivElement> & {
@@ -40,6 +40,7 @@ export function APIInfo({
   }) {
   return (
     <div className={cn('min-w-0 flex-1', className)} {...props}>
+      {head}
       <div className="sticky top-[var(--fd-api-info-top)] z-[4] mb-4 border-b border-fd-foreground/10 bg-fd-card/50 px-4 py-1.5 shadow-lg backdrop-blur-lg max-lg:-mx-3 max-md:-mx-4 md:rounded-xl md:border md:px-1.5">
         <div className="flex flex-row items-center gap-1.5">
           <span
@@ -55,7 +56,7 @@ export function APIInfo({
         </div>
         <BaseUrlSelect baseUrls={baseUrls} />
       </div>
-      <div className="prose-no-margin">{children}</div>
+      <div className="prose-no-margin">{props.children}</div>
     </div>
   );
 }

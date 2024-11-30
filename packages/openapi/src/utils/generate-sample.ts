@@ -59,7 +59,7 @@ export function generateSample(
       const key = getPreferredType(param.content);
       const content = key ? param.content[key] : undefined;
 
-      if (!key || !content?.schema)
+      if (!key || !content)
         throw new Error(
           `Cannot find parameter schema for ${param.name} in ${path} ${method.method}`,
         );
@@ -67,7 +67,7 @@ export function generateSample(
       params.push({
         name: param.name,
         in: param.in,
-        schema: content.schema,
+        schema: content.schema ?? {},
         sample:
           content.example ?? param.example ?? sample(content.schema as object),
       });
@@ -94,9 +94,11 @@ export function generateSample(
   if (method.requestBody) {
     const body = method.requestBody.content;
     const type = getPreferredType(body);
-    const schema = type ? body[type].schema : undefined;
-    if (!type || !schema)
-      throw new Error(`Cannot find body schema for ${path} ${method.method}`);
+    if (!type)
+      throw new Error(
+        `Cannot find body schema for ${path} ${method.method}: missing media type`,
+      );
+    const schema = (type ? body[type].schema : undefined) ?? {};
 
     bodyOutput = {
       schema,

@@ -46,6 +46,8 @@ export interface RenderContext {
   document: NoReference<Document>;
 
   baseUrl: string;
+  baseUrls: string[];
+
   slugger: Slugger;
 
   dereferenceMap: DereferenceMap;
