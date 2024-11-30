@@ -8,7 +8,7 @@ Footer, and Breadcrumb.
 
 ## Usage
 
-```tsx
+```tsx title="page.tsx"
 import {
   DocsPage,
   DocsDescription,
@@ -135,6 +135,22 @@ import { DocsPage } from 'fumadocs-ui/page';
 ```
 
 <AutoTypeTable path="./content/docs/ui/props.ts" name="TOCPopoverProps" />
+
+#### Style
+
+You can choose another style for TOC, like `clerk` inspired by https://clerk.com:
+
+```tsx
+import { DocsPage } from 'fumadocs-ui/page';
+
+<DocsPage
+  tableOfContent={{
+    style: 'clerk',
+  }}
+>
+  ...
+</DocsPage>;
+```
 
 ### Last Updated Time
 

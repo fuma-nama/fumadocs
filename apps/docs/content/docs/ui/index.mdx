@@ -42,8 +42,6 @@ A command line tool to configure features automatically, and install UI componen
 
 </Cards>
 
-Thanks to this model, all format and content source can be supported by Fumadocs with a custom adapter.
-
 ### Use Cases
 
 ### Documentation
@@ -130,6 +128,17 @@ In the project, you can see:
 - `app/(home)`: The route group for your landing page and other pages.
 - `app/docs`: The documentation layout and pages.
 - `app/api/search/route.ts`: The Route Handler for search.
+
+#### Content Source
+
+Visit the docs of your content source, content source manages the validation and type definitions of content (e.g. frontmatter properties), and transform them to data on JavaScript runtime.
+
+For Fumadocs MDX, see [Introduction](/docs/mdx) for details:
+
+- `source.config.ts`: Config file for Fumadocs MDX.
+
+For other formats and content sources, they can be supported using a custom adapter.
+If you use a custom content source (e.g. Notion), you can [build a custom `loader` instead](/docs/headless/remote).
 
 ## FAQ
 
