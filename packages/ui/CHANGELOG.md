@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 14.5.6
+
+### Patch Changes
+
+- b7745f4: Fix references problem of sidebar tabs
+- Updated dependencies [9a18c14]
+  - fumadocs-core@14.5.6
+
 ## 14.5.5
 
 ### Patch Changes

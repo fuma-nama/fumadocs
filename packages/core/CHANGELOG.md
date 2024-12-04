@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 14.5.6
+
+### Patch Changes
+
+- 9a18c14: Downgrade Orama to v2 to fix external tokenizers
+
 ## 14.5.5
 
 ## 14.5.4
