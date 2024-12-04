@@ -9,10 +9,10 @@ export function getSidebarTabs(
   pageTree: PageTree.Root,
   { transform }: TabOptions = {},
 ): Option[] {
-  const options: Option[] = [];
+  function findOptions(node: PageTree.Folder): Option[] {
+    const results: Option[] = [];
 
-  function traverse(node: PageTree.Node) {
-    if (node.type === 'folder' && node.root) {
+    if (node.root) {
       const index = node.index ?? node.children.at(0);
 
       if (index?.type === 'page') {
@@ -20,18 +20,34 @@ export function getSidebarTabs(
           url: index.url,
           title: node.name,
           icon: node.icon,
-          folder: node,
           description: node.description,
+
+          urls: getFolderUrls(node),
         };
 
         const mapped = transform ? transform(option, node) : option;
-        if (mapped) options.push(mapped);
+        if (mapped) results.push(mapped);
       }
     }
 
-    if (node.type === 'folder') node.children.forEach(traverse);
+    for (const child of node.children) {
+      if (child.type === 'folder') results.push(...findOptions(child));
+    }
+
+    return results;
   }
 
-  pageTree.children.forEach(traverse);
-  return options;
+  return findOptions(pageTree as PageTree.Folder);
+}
+
+function getFolderUrls(folder: PageTree.Folder): string[] {
+  const results: string[] = [];
+  if (folder.index) results.push(folder.index.url);
+
+  for (const child of folder.children) {
+    if (child.type === 'page') results.push(child.url);
+    if (child.type === 'folder') results.push(...getFolderUrls(child));
+  }
+
+  return results;
 }

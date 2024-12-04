@@ -7,8 +7,6 @@ import { cn } from '@/utils/cn';
 import { isActive } from '@/utils/is-active';
 import { useSidebar } from '@/contexts/sidebar';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import type { PageTree } from 'fumadocs-core/server';
-import { useTreePath } from '@/contexts/tree';
 
 export interface Option {
   /**
@@ -21,50 +19,54 @@ export interface Option {
   description?: ReactNode;
 
   /**
-   * Detect from page tree nodes
+   * Detect from a list of urls
    */
-  folder?: PageTree.Folder;
+  urls?: string[];
 
   props?: HTMLAttributes<HTMLElement>;
 }
 
 export function RootToggle({
   options,
+  placeholder,
   ...props
 }: {
+  placeholder?: ReactNode;
   options: Option[];
 } & HTMLAttributes<HTMLButtonElement>) {
   const [open, setOpen] = useState(false);
   const { closeOnRedirect } = useSidebar();
   const pathname = usePathname();
-  const path = useTreePath();
 
   const selected = useMemo(() => {
     return options.findLast((item) =>
-      item.folder
-        ? path.includes(item.folder)
+      item.urls
+        ? item.urls.includes(pathname)
         : isActive(item.url, pathname, true),
     );
-  }, [path, options, pathname]);
+  }, [options, pathname]);
 
   const onClick = () => {
     closeOnRedirect.current = false;
     setOpen(false);
   };
 
+  const item = selected ? <Item {...selected} /> : placeholder;
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger
-        {...props}
-        className={cn(
-          'flex flex-row items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-fd-accent/50 hover:text-fd-accent-foreground',
-          props.className,
-        )}
-      >
-        {selected ? <Item {...selected} /> : null}
-
-        <ChevronDown className="me-1.5 size-4 text-fd-muted-foreground" />
-      </PopoverTrigger>
+      {item ? (
+        <PopoverTrigger
+          {...props}
+          className={cn(
+            'flex flex-row items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-fd-accent/50 hover:text-fd-accent-foreground',
+            props.className,
+          )}
+        >
+          {item}
+          <ChevronDown className="me-1.5 size-4 text-fd-muted-foreground" />
+        </PopoverTrigger>
+      ) : null}
       <PopoverContent className="w-[var(--radix-popover-trigger-width)] overflow-hidden p-0">
         {options.map((item) => (
           <Link
