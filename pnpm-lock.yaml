@@ -508,8 +508,8 @@ importers:
         specifier: ^0.5.8
         version: 0.5.8
       '@orama/orama':
-        specifier: ^2.1.1
-        version: 2.1.1
+        specifier: ^3.0.0
+        version: 3.0.2
       '@shikijs/rehype':
         specifier: ^1.24.0
         version: 1.24.0

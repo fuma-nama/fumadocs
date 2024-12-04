@@ -81,7 +81,7 @@
   },
   "dependencies": {
     "@formatjs/intl-localematcher": "^0.5.8",
-    "@orama/orama": "^2.1.1",
+    "@orama/orama": "^3.0.0",
     "@shikijs/rehype": "^1.24.0",
     "github-slugger": "^2.0.0",
     "hast-util-to-estree": "^3.1.0",
