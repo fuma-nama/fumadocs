@@ -272,11 +272,11 @@ importers:
   examples/i18n:
     dependencies:
       '@orama/stopwords':
-        specifier: ^3.0.2
-        version: 3.0.2
+        specifier: ^2.1.1
+        version: 2.1.1
       '@orama/tokenizers':
-        specifier: ^3.0.2
-        version: 3.0.2
+        specifier: ^2.1.1
+        version: 2.1.1
       fumadocs-core:
         specifier: workspace:*
         version: link:../../packages/core
@@ -508,8 +508,8 @@ importers:
         specifier: ^0.5.8
         version: 0.5.8
       '@orama/orama':
-        specifier: ^3.0.2
-        version: 3.0.2
+        specifier: ^2.1.1
+        version: 2.1.1
       '@shikijs/rehype':
         specifier: ^1.24.0
         version: 1.24.0
@@ -610,6 +610,9 @@ importers:
       tsconfig:
         specifier: workspace:*
         version: link:../tsconfig
+      typescript:
+        specifier: ^5.7.2
+        version: 5.7.2
       unified:
         specifier: ^11.0.5
         version: 11.0.5
@@ -2120,16 +2123,20 @@ packages:
   '@orama/cuid2@2.2.3':
     resolution: {integrity: sha512-Lcak3chblMejdlSHgYU2lS2cdOhDpU6vkfIJH4m+YKvqQyLqs1bB8+w6NT1MG5bO12NUK2GFc34Mn2xshMIQ1g==}
 
+  '@orama/orama@2.1.1':
+    resolution: {integrity: sha512-euTV/2kya290SNkl5m8e/H1na8iDygk74nNtl4E0YZNyYIrEMwE1JwamoroMKGZw2Uz+in/8gH3m1+2YfP0j1w==}
+    engines: {node: '>= 16.0.0'}
+
   '@orama/orama@3.0.2':
     resolution: {integrity: sha512-1dfxup89K2DB2bbfx9rXyr/IAvhCKbH79lZCXVh5HWvdJ9g0VAvPIs3+UzjiyOdycEHYTbYundCTN6+Ygj3z4w==}
     engines: {node: '>= 16.0.0'}
 
-  '@orama/stopwords@3.0.2':
-    resolution: {integrity: sha512-nGwv8TQjQdlxCbRsXB7A57vyh42jbQGw2xm2bYJD8vlFccJttFqeHqm9gHJji+tPPaQtys8gjkd+ly1c4KzLEg==}
+  '@orama/stopwords@2.1.1':
+    resolution: {integrity: sha512-zN/955DJBJgyE0OcB0YiuCxfrHpxNRTlZyTAQ8Quikn1EF8DaV9Tay8uzIR5qgF6GvpDJM9UD1O1SDB6zl/88Q==}
     engines: {node: '>= 16.0.0'}
 
-  '@orama/tokenizers@3.0.2':
-    resolution: {integrity: sha512-pXfvaOdKbNUaMcEfirSfR9EGZa45t+eaEldmm3VelbkLo4TROlpEP9XTpbgAAkSSn5swKkuj+vrqBmOFcv7Q+A==}
+  '@orama/tokenizers@2.1.1':
+    resolution: {integrity: sha512-q/u1CO/BhqN3w+k+bcsas/ThxtsdAo7snEfRBVAVk3G6zvRT6sXix7ADmWdSVJ8gNSG9JWF+EANPzktL7U6zDg==}
     engines: {node: '>= 18.0.0'}
 
   '@oramacloud/client@2.1.4':
@@ -7358,13 +7365,15 @@ snapshots:
     dependencies:
       '@noble/hashes': 1.6.0
 
+  '@orama/orama@2.1.1': {}
+
   '@orama/orama@3.0.2': {}
 
-  '@orama/stopwords@3.0.2': {}
+  '@orama/stopwords@2.1.1': {}
 
-  '@orama/tokenizers@3.0.2':
+  '@orama/tokenizers@2.1.1':
     dependencies:
-      '@orama/orama': 3.0.2
+      '@orama/orama': 2.1.1
 
   '@oramacloud/client@2.1.4':
     dependencies:
