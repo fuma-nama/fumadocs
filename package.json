@@ -23,7 +23,7 @@
     "concurrently": "^9.1.0",
     "eslint": "^9.16.0",
     "eslint-plugin-react": "^7.37.2",
-    "eslint-plugin-react-hooks": "5.1.0-rc-fb9a90fa48-20240614",
+    "eslint-plugin-react-hooks": "5.1.0",
     "eslint-plugin-tailwindcss": "^3.17.5",
     "prettier": "^3.4.2",
     "rimraf": "^6.0.1",
