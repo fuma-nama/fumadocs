@@ -129,7 +129,6 @@ async function renderMarkdown(md: string): Promise<React.ReactElement> {
     Fragment: runtime.Fragment,
     jsx: runtime.jsx as Jsx,
     jsxs: runtime.jsxs as Jsx,
-    // @ts-expect-error -- mdx components
     components: { ...defaultMdxComponents, img: undefined },
   });
 }

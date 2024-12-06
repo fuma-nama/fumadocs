@@ -24,10 +24,10 @@ function Popup({
 }: {
   delay?: number;
   children: React.ReactNode;
-}): JSX.Element {
+}) {
   const [open, setOpen] = useState(false);
-  const openTimeoutRef = useRef<number>();
-  const closeTimeoutRef = useRef<number>();
+  const openTimeoutRef = useRef<number>(undefined);
+  const closeTimeoutRef = useRef<number>(undefined);
 
   const handleOpen = (e: React.PointerEvent): void => {
     if (e.pointerType === 'touch') return;
@@ -86,7 +86,7 @@ const PopupTrigger = forwardRef<
 PopupTrigger.displayName = 'PopupTrigger';
 
 const PopupContent = forwardRef<
-  React.ElementRef<typeof PopoverContent>,
+  React.ComponentRef<typeof PopoverContent>,
   React.ComponentPropsWithoutRef<typeof PopoverContent>
 >((props, ref) => {
   const ctx = useContext(PopupContext);

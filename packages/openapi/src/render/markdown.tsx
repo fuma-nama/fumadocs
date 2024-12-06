@@ -33,7 +33,6 @@ export async function Markdown({
     jsx: jsx as Jsx,
     jsxs: jsxs as Jsx,
     Fragment,
-    // @ts-expect-error -- safe to use
     components: defaultMdxComponents,
   });
 }

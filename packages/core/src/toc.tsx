@@ -9,7 +9,9 @@ import { useAnchorObserver } from './utils/use-anchor-observer';
 
 const ActiveAnchorContext = createContext<string[]>([]);
 
-const ScrollContext = createContext<RefObject<HTMLElement>>({ current: null });
+const ScrollContext = createContext<RefObject<HTMLElement | null>>({
+  current: null,
+});
 
 /**
  * The estimated active heading ID
@@ -40,7 +42,7 @@ export interface ScrollProviderProps {
   /**
    * Scroll into the view of container when active
    */
-  containerRef: RefObject<HTMLElement>;
+  containerRef: RefObject<HTMLElement | null>;
 
   children?: ReactNode;
 }

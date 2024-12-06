@@ -20,8 +20,9 @@ export function useShiki(
 ): ReactNode {
   const [out, setOut] = useState<ReactNode>(() => {
     if (options.defaultValue) return options.defaultValue;
+    const Pre = (options.components?.pre ?? 'pre') as 'pre';
+    const Code = (options.components?.code ?? 'code') as 'code';
 
-    const { pre: Pre = 'pre', code: Code = 'code' } = options.components ?? {};
     return (
       <Pre>
         <Code>{code}</Code>

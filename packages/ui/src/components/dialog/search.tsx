@@ -153,8 +153,7 @@ function SearchList({ items, hideResults = false }: SearchResultProps) {
     setActive(items[0].id);
   }
 
-  const listenerRef = useRef<(e: KeyboardEvent) => void>();
-  listenerRef.current = (e) => {
+  function onKey(e: KeyboardEvent) {
     if (e.key === 'ArrowDown' || e.key == 'ArrowUp') {
       setActive((cur) => {
         const idx = items.findIndex((item) => item.id === cur);
@@ -174,12 +173,13 @@ function SearchList({ items, hideResults = false }: SearchResultProps) {
       if (selected) onOpen(selected.url);
       e.preventDefault();
     }
-  };
+  }
+
+  const listenerRef = useRef(onKey);
+  listenerRef.current = onKey;
 
   useEffect(() => {
-    const listener = (e: KeyboardEvent) => {
-      listenerRef.current?.(e);
-    };
+    const listener = (e: KeyboardEvent) => listenerRef.current?.(e);
 
     window.addEventListener('keydown', listener);
     return () => {

@@ -73,11 +73,12 @@ export function Tabs({
   const values = useMemo(() => items.map((item) => toValue(item)), [items]);
   const [value, setValue] = useState(values[defaultIndex]);
   const valueToIdMapRef = useRef(new Map<string, string>());
-  const onChangeRef = useRef<ChangeListener>();
-
-  onChangeRef.current = (v) => {
+  const onChange: ChangeListener = (v) => {
     if (values.includes(v)) setValue(v);
   };
+
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
 
   useLayoutEffect(() => {
     if (!groupId) return;

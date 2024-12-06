@@ -44,7 +44,7 @@ export function TocThumb({
   containerRef,
   ...props
 }: HTMLAttributes<HTMLDivElement> & {
-  containerRef: RefObject<HTMLElement>;
+  containerRef: RefObject<HTMLElement | null>;
 }): ReactNode {
   const active = Primitive.useActiveAnchors();
   const thumbRef = useRef<HTMLDivElement>(null);

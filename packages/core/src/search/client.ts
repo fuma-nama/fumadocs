@@ -56,7 +56,7 @@ export function useDocsSearch(
   const [error, setError] = useState<Error>();
   const [isLoading, setIsLoading] = useState(false);
   const debouncedValue = useDebounce(search, delayMs);
-  const onStart = useRef<() => void>();
+  const onStart = useRef<() => void>(undefined);
 
   const cacheKey = useMemo(() => {
     return key ?? JSON.stringify([client.type, debouncedValue, locale, tag]);
