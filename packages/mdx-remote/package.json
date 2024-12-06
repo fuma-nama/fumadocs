@@ -85,7 +85,7 @@
   "peerDependencies": {
     "fumadocs-core": "^13.2.1 || ^14.0.0",
     "next": "14.x.x || 15.x.x",
-    "react": ">= 18"
+    "react": "18.x.x || 19.x.x"
   },
   "publishConfig": {
     "access": "public"

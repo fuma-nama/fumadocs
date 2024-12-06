@@ -58,7 +58,7 @@
   },
   "peerDependencies": {
     "fumadocs-ui": "^13.0.0 || ^14.0.0",
-    "react": ">= 18",
+    "react": "18.x.x || 19.x.x",
     "shiki": "1.x.x"
   },
   "publishConfig": {

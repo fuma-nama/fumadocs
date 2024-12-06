@@ -97,8 +97,8 @@
   },
   "peerDependencies": {
     "next": "14.x.x || 15.x.x",
-    "react": ">= 18",
-    "react-dom": ">= 18",
+    "react": "18.x.x || 19.x.x",
+    "react-dom": "18.x.x || 19.x.x",
     "tailwindcss": "^3.4.14"
   },
   "peerDependenciesMeta": {

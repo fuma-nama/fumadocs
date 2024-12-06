@@ -529,10 +529,10 @@ importers:
         specifier: ^1.0.0
         version: 1.0.0
       react:
-        specifier: '>= 18'
+        specifier: 18.x.x || 19.x.x
         version: 19.0.0
       react-dom:
-        specifier: '>= 18'
+        specifier: 18.x.x || 19.x.x
         version: 19.0.0(react@19.0.0)
       react-remove-scroll:
         specifier: ^2.6.0
@@ -838,7 +838,7 @@ importers:
         specifier: ^4.0.8
         version: 4.0.8
       react:
-        specifier: '>= 18'
+        specifier: 18.x.x || 19.x.x
         version: 19.0.0
       ws:
         specifier: ^8.18.0
@@ -923,10 +923,10 @@ importers:
         specifier: ^1.6.1
         version: 1.6.1
       react:
-        specifier: '>= 18'
+        specifier: 18.x.x || 19.x.x
         version: 19.0.0
       react-dom:
-        specifier: '>= 18'
+        specifier: 18.x.x || 19.x.x
         version: 19.0.0(react@19.0.0)
       react-hook-form:
         specifier: ^7.53.2
@@ -992,7 +992,7 @@ importers:
         specifier: ^13.2.0
         version: 13.2.0
       react:
-        specifier: '>= 18'
+        specifier: 18.x.x || 19.x.x
         version: 19.0.0
       tailwind-merge:
         specifier: ^2.5.5
@@ -1135,10 +1135,10 @@ importers:
         specifier: ^7.0.0
         version: 7.0.0
       react:
-        specifier: '>= 18'
+        specifier: 18.x.x || 19.x.x
         version: 19.0.0
       react-dom:
-        specifier: '>= 18'
+        specifier: 18.x.x || 19.x.x
         version: 19.0.0(react@19.0.0)
       react-medium-image-zoom:
         specifier: ^5.2.11
