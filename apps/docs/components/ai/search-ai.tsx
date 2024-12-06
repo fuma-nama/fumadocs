@@ -2,7 +2,6 @@
 import {
   type ButtonHTMLAttributes,
   type HTMLAttributes,
-  memo,
   type ReactNode,
   type TextareaHTMLAttributes,
   useCallback,
@@ -64,9 +63,7 @@ const engines = new Map<EngineType, Engine>();
 
 function AIDialog({ type }: { type: EngineType }) {
   const [engine, setEngine] = useState(engines.get(type));
-  const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
-
   const [_, update] = useState(0);
   const shouldFocus = useRef(false); // should focus on input on next render
 
@@ -89,24 +86,6 @@ function AIDialog({ type }: { type: EngineType }) {
     }
   }, [type, engine]);
 
-  const onStart = useCallback(
-    (e?: React.FormEvent) => {
-      e?.preventDefault();
-      if (!engine || message.length === 0) return;
-
-      setLoading(true);
-      setMessage('');
-      void engine
-        .prompt(message, () => {
-          update((prev) => prev + 1);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    },
-    [message, engine],
-  );
-
   const onTry = useCallback(() => {
     if (!engine) return;
 
@@ -123,13 +102,24 @@ function AIDialog({ type }: { type: EngineType }) {
   const onClear = useCallback(() => {
     engine?.clearHistory();
     update((prev) => prev + 1);
-    shouldFocus.current = true;
   }, [engine]);
 
-  const onSelect = useCallback((suggestion: string) => {
-    shouldFocus.current = true;
-    setMessage(suggestion);
-  }, []);
+  const onSubmit = useCallback(
+    (message: string) => {
+      if (!engine || message.length === 0) return;
+
+      setLoading(true);
+      void engine
+        .prompt(message, () => {
+          update((prev) => prev + 1);
+        })
+        .finally(() => {
+          setLoading(false);
+          shouldFocus.current = true;
+        });
+    },
+    [engine],
+  );
 
   useEffect(() => {
     if (shouldFocus.current) {
@@ -172,7 +162,7 @@ function AIDialog({ type }: { type: EngineType }) {
     <>
       <List className={cn(messages.length === 0 && 'hidden')}>
         {messages.map((item, i) => (
-          <Message key={i} message={item} onSuggestionSelected={onSelect}>
+          <Message key={i} message={item} onSuggestionSelected={onSubmit}>
             {!loading && item.role === 'assistant' && i === messages.length - 1
               ? activeBar
               : null}
@@ -195,46 +185,66 @@ function AIDialog({ type }: { type: EngineType }) {
           Abort Answer
         </button>
       ) : null}
-      <form
-        className={cn(
-          'flex flex-row rounded-b-lg border-t pe-2 transition-colors',
-          loading && 'bg-fd-muted',
-        )}
-        onSubmit={onStart}
-      >
-        <Input
-          value={message}
-          placeholder={loading ? 'AI is answering...' : 'Ask AI something'}
-          disabled={loading}
-          onChange={(e) => {
-            setMessage(e.target.value);
-          }}
-          onKeyDown={(event) => {
-            if (!event.shiftKey && event.key === 'Enter') {
-              onStart();
-              event.preventDefault();
-            }
-          }}
-        />
-        {loading ? (
-          <Loader2 className="mt-2 size-5 animate-spin text-fd-muted-foreground" />
-        ) : (
-          <button
-            type="submit"
-            className={cn(
-              buttonVariants({
-                size: 'sm',
-                color: 'ghost',
-                className: 'rounded-full p-1',
-              }),
-            )}
-            disabled={message.length === 0}
-          >
-            <Send className="size-4" />
-          </button>
-        )}
-      </form>
+      <AIInput loading={loading} onSubmit={onSubmit} />
     </>
+  );
+}
+
+function AIInput({
+  loading,
+  onSubmit,
+}: {
+  loading: boolean;
+  onSubmit: (message: string) => void;
+}) {
+  const [message, setMessage] = useState('');
+
+  const onStart = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    setMessage('');
+    onSubmit(message);
+  };
+
+  return (
+    <form
+      className={cn(
+        'flex flex-row rounded-b-lg border-t pe-2 transition-colors',
+        loading && 'bg-fd-muted',
+      )}
+      onSubmit={onStart}
+    >
+      <Input
+        value={message}
+        placeholder={loading ? 'AI is answering...' : 'Ask AI something'}
+        disabled={loading}
+        onChange={(e) => {
+          setMessage(e.target.value);
+        }}
+        onKeyDown={(event) => {
+          if (!event.shiftKey && event.key === 'Enter') {
+            onStart();
+            event.preventDefault();
+          }
+        }}
+      />
+      {loading ? (
+        <Loader2 className="mt-2 size-5 animate-spin text-fd-muted-foreground" />
+      ) : (
+        <button
+          type="submit"
+          className={cn(
+            buttonVariants({
+              size: 'sm',
+              color: 'ghost',
+              className: 'rounded-full p-1',
+            }),
+          )}
+          disabled={message.length === 0}
+        >
+          <Send className="size-4" />
+        </button>
+      )}
+    </form>
   );
 }
 
@@ -311,107 +321,103 @@ const roleName: Record<string, string> = {
   assistant: 'fumadocs',
 };
 
-const Message = memo(
-  ({
-    children,
-    onSuggestionSelected,
-    message,
-  }: {
-    message: MessageRecord;
-    onSuggestionSelected: (suggestion: string) => void;
-    children: ReactNode;
-  }) => {
-    const { suggestions = [], references = [] } = message;
-    const [rendered, setRendered] = useState<ReactNode>(
-      map.get(message.content) ?? message.content,
-    );
+function Message({
+  children,
+  onSuggestionSelected,
+  message,
+}: {
+  message: MessageRecord;
+  onSuggestionSelected: (suggestion: string) => void;
+  children: ReactNode;
+}) {
+  const { suggestions = [], references = [] } = message;
+  const [rendered, setRendered] = useState<ReactNode>(
+    map.get(message.content) ?? message.content,
+  );
 
-    useEffect(() => {
-      const run = async () => {
-        const { createProcessor } = await import('./markdown-processor');
+  useEffect(() => {
+    const run = async () => {
+      const { createProcessor } = await import('./markdown-processor');
 
-        processor ??= createProcessor();
-        let result = map.get(message.content);
+      processor ??= createProcessor();
+      let result = map.get(message.content);
 
-        if (!result) {
-          result = await processor
-            .process(message.content, {
-              ...defaultMdxComponents,
-              img: undefined, // use JSX
-            })
-            .catch(() => undefined);
-        }
+      if (!result) {
+        result = await processor
+          .process(message.content, {
+            ...defaultMdxComponents,
+            img: undefined, // use JSX
+          })
+          .catch(() => undefined);
+      }
 
-        if (result) {
-          map.set(message.content, result);
-          setRendered(result);
-        }
-      };
+      if (result) {
+        map.set(message.content, result);
+        setRendered(result);
+      }
+    };
 
-      void run();
-    }, [message.content]);
+    void run();
+  }, [message.content]);
 
-    return (
-      <div
+  return (
+    <div
+      className={cn(
+        'rounded-lg border bg-fd-card px-2 py-1.5 text-fd-card-foreground',
+        message.role === 'user' &&
+          'bg-fd-secondary text-fd-secondary-foreground',
+      )}
+    >
+      <p
         className={cn(
-          'rounded-lg border bg-fd-card px-2 py-1.5 text-fd-card-foreground',
-          message.role === 'user' &&
-            'bg-fd-secondary text-fd-secondary-foreground',
+          'mb-1 text-xs font-medium text-fd-muted-foreground',
+          message.role === 'assistant' && 'text-fd-primary',
         )}
       >
-        <p
-          className={cn(
-            'mb-1 text-xs font-medium text-fd-muted-foreground',
-            message.role === 'assistant' && 'text-fd-primary',
-          )}
-        >
-          {roleName[message.role] ?? 'unknown'}
-        </p>
-        <div className="prose text-sm">{rendered}</div>
-        {references.length > 0 ? (
-          <div className="mt-2 flex flex-row flex-wrap items-center gap-1">
-            {references.map((item, i) => (
-              <Link
-                key={i}
-                href={item.url}
-                className="block rounded-lg border bg-fd-secondary p-2 text-fd-secondary-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground"
-              >
-                <p className="text-sm font-medium">{item.title}</p>
-                <p className="text-xs text-fd-muted-foreground">
-                  {item.description}
-                </p>
-              </Link>
-            ))}
-          </div>
-        ) : null}
-        {suggestions.length > 0 ? (
-          <div className="flex flex-row items-center gap-1 overflow-x-auto p-2">
-            {suggestions.map((item) => (
-              <button
-                key={item}
-                type="button"
-                className={cn(
-                  buttonVariants({
-                    color: 'secondary',
-                    className: 'py-1 text-nowrap',
-                  }),
-                )}
-                onClick={() => {
-                  onSuggestionSelected(item);
-                }}
-              >
-                {item}
-              </button>
-            ))}
-          </div>
-        ) : null}
-        {children}
-      </div>
-    );
-  },
-);
-
-Message.displayName = 'Message';
+        {roleName[message.role] ?? 'unknown'}
+      </p>
+      <div className="prose text-sm">{rendered}</div>
+      {references.length > 0 ? (
+        <div className="mt-2 flex flex-row flex-wrap items-center gap-1">
+          {references.map((item, i) => (
+            <Link
+              key={i}
+              href={item.url}
+              className="block rounded-lg border bg-fd-secondary p-2 text-fd-secondary-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground"
+            >
+              <p className="text-sm font-medium">{item.title}</p>
+              <p className="text-xs text-fd-muted-foreground">
+                {item.description}
+              </p>
+            </Link>
+          ))}
+        </div>
+      ) : null}
+      {suggestions.length > 0 ? (
+        <div className="flex flex-row items-center gap-1 overflow-x-auto p-2">
+          {suggestions.map((item) => (
+            <button
+              key={item}
+              type="button"
+              className={cn(
+                buttonVariants({
+                  color: 'secondary',
+                  className: 'py-1 text-nowrap',
+                }),
+              )}
+              onClick={() => {
+                onSuggestionSelected(item);
+              }}
+            >
+              {item}
+            </button>
+          ))}
+        </div>
+      ) : null}
+      {children}
+    </div>
+  );
+}
 
 const typeButtonVariants = cva(
   'inline-flex items-center justify-center rounded-lg px-2 py-1 text-sm font-medium transition-colors duration-100',
@@ -426,7 +432,14 @@ const typeButtonVariants = cva(
 );
 
 export function Trigger(props: ButtonHTMLAttributes<HTMLButtonElement>) {
-  const [type, setType] = useState<EngineType>('inkeep');
+  const engines = [
+    {
+      label: 'Inkeep',
+      value: 'inkeep',
+    },
+    { label: 'Orama', value: 'orama' },
+  ] as const;
+  const [type, setType] = useState<EngineType>(engines[0].value);
 
   return (
     <Dialog>
@@ -451,24 +464,19 @@ export function Trigger(props: ButtonHTMLAttributes<HTMLButtonElement>) {
           </DialogClose>
           <div className="bg-fd-muted px-2.5 py-2">
             <div className="flex flex-row items-center">
-              <button
-                className={cn(
-                  typeButtonVariants({ active: type === 'inkeep' }),
-                )}
-                onClick={() => {
-                  setType('inkeep');
-                }}
-              >
-                Inkeep
-              </button>
-              <button
-                className={cn(typeButtonVariants({ active: type === 'orama' }))}
-                onClick={() => {
-                  setType('orama');
-                }}
-              >
-                Orama
-              </button>
+              {engines.map((item) => (
+                <button
+                  key={item.value}
+                  className={cn(
+                    typeButtonVariants({ active: type === item.value }),
+                  )}
+                  onClick={() => {
+                    setType(item.value);
+                  }}
+                >
+                  {item.label}
+                </button>
+              ))}
             </div>
             <p className="mt-2 text-xs text-fd-muted-foreground">
               Answers from AI may be inaccurate, please verify the information.

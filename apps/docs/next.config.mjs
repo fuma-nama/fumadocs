@@ -15,6 +15,9 @@ const config = {
     ignoreDuringBuilds: true,
   },
   serverExternalPackages: ['ts-morph', 'typescript'],
+  experimental: {
+    reactCompiler: true,
+  },
   images: {
     unoptimized: true,
     remotePatterns: [

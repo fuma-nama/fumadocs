@@ -1,6 +1,5 @@
-import type { Engine } from '@/components/ai/search-ai';
+import type { Engine, MessageRecord } from '@/components/ai/search-ai';
 import { InkeepAI } from '@inkeep/ai-api/sdk';
-import type { RecordsCited } from '@inkeep/ai-api/models/components';
 
 const integrationId = process.env.NEXT_PUBLIC_INKEEP_INTEGRATION_ID;
 const apiKey = process.env.NEXT_PUBLIC_INKEEP_API_KEY;
@@ -12,11 +11,7 @@ export async function createInkeepEngine(): Promise<Engine> {
     apiKey,
   });
 
-  let messages: {
-    role: 'user' | 'assistant';
-    content: string;
-    recordsCited?: RecordsCited;
-  }[] = [];
+  let messages: MessageRecord[] = [];
   let sessionId: string | undefined;
   let aborted = true;
 
@@ -66,7 +61,12 @@ export async function createInkeepEngine(): Promise<Engine> {
     for await (const event of result.chatResultStream) {
       if (aborted) break;
       if (event.event === 'records_cited') {
-        message.recordsCited = event.data;
+        message.references = event.data.citations.map((cite) => ({
+          breadcrumbs: cite.record.breadcrumbs ?? [],
+          title: cite.record.title ?? 'Reference',
+          content: cite.record.description,
+          url: cite.hitUrl ?? '#',
+        }));
       }
 
       if (event.event === 'message_chunk') {
@@ -99,17 +99,7 @@ export async function createInkeepEngine(): Promise<Engine> {
       await generateNew(onUpdate, onEnd);
     },
     getHistory() {
-      return messages.map((v) => ({
-        role: v.role,
-        content: v.content,
-        references:
-          v.recordsCited?.citations.map((cite) => ({
-            breadcrumbs: cite.record.breadcrumbs ?? [],
-            title: cite.record.title ?? 'Reference',
-            content: cite.record.description,
-            url: cite.hitUrl ?? '#',
-          })) ?? [],
-      }));
+      return messages;
     },
     clearHistory() {
       sessionId = undefined;
