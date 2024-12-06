@@ -77,7 +77,7 @@
     "@types/ws": "^8.5.13",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
-    "next": "15.0.3",
+    "next": "15.0.4",
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
     "vfile": "^6.0.3"
