@@ -335,14 +335,10 @@ const Message = memo(
 
         if (!result) {
           result = await processor
-            .process(
-              message.content,
-              // @ts-expect-error -- avoid conflicts between JSX types and React types
-              {
-                ...defaultMdxComponents,
-                img: undefined, // use JSX
-              },
-            )
+            .process(message.content, {
+              ...defaultMdxComponents,
+              img: undefined, // use JSX
+            })
             .catch(() => undefined);
         }
 

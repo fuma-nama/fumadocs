@@ -19,7 +19,6 @@ export async function CodeBlock({
       dark: 'vesper',
     },
     components: {
-      // @ts-expect-error -- JSX component
       pre: Base.Pre,
     },
   });
