@@ -64,7 +64,7 @@
     "bunchee": "^6.0.0",
     "eslint-config-custom": "workspace:*",
     "lucide-react": "^0.465.0",
-    "next": "15.0.3",
+    "next": "15.0.4",
     "openapi-types": "^12.1.3",
     "tsconfig": "workspace:*"
   },
