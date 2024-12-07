@@ -5,7 +5,6 @@ import {
   type CodeOptionsMeta,
   type HighlighterCoreOptions,
   type CodeToHastOptionsCommon,
-  getSingletonHighlighter,
 } from 'shiki';
 import type { BundledTheme } from 'shiki/themes';
 import { type Components, toJsxRuntime } from 'hast-util-to-jsx-runtime';
@@ -43,6 +42,7 @@ export async function highlight(
   code: string,
   options: HighlightOptions,
 ): Promise<ReactNode> {
+  const { getSingletonHighlighter } = await import('shiki');
   const { lang, components, engine: defaultEngine, ...rest } = options;
 
   let themes: CodeOptionsThemes<BundledTheme> = { themes: defaultThemes };
