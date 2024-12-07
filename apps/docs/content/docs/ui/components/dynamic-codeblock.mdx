@@ -1,0 +1,41 @@
+---
+title: Code Block (Dynamic)
+description: A codeblock that also highlights code
+---
+
+import { Example } from './dynamic-codeblock';
+
+<Example />
+
+## Usage
+
+```tsx
+import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
+
+<DynamicCodeBlock lang="ts" code='console.log("Hello World")' />;
+```
+
+This component, different from the MDX [`CodeBlock`](/docs/ui/mdx/codeblock) component, can be used without MDX.
+It highlights the code with Shiki and use the default component to render it.
+
+Features:
+
+- Can be pre-rendered on server
+- load languages and themes on browser lazily
+
+### Options
+
+```tsx
+import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
+
+<DynamicCodeBlock
+  lang="ts"
+  code='console.log("Hello World")'
+  options={{
+    components: {
+      // add/override components
+    },
+    // or Shiki options
+  }}
+/>;
+```

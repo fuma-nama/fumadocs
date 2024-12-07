@@ -11,7 +11,6 @@ import type { BundledTheme } from 'shiki/themes';
 import { type Components, toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import { Fragment, type ReactNode } from 'react';
 import { jsx, jsxs } from 'react/jsx-runtime';
-import { createOnigurumaEngine } from 'shiki/engine/oniguruma';
 
 export function createStyleTransformer(): ShikiTransformer {
   return {
@@ -44,7 +43,7 @@ export async function highlight(
   code: string,
   options: HighlightOptions,
 ): Promise<ReactNode> {
-  const { lang, components, engine, ...rest } = options;
+  const { lang, components, engine: defaultEngine, ...rest } = options;
 
   let themes: CodeOptionsThemes<BundledTheme> = { themes: defaultThemes };
   if ('theme' in options && options.theme) {
@@ -53,9 +52,16 @@ export async function highlight(
     themes = { themes: options.themes };
   }
 
+  let engine = defaultEngine;
+  if (!engine) {
+    const { createOnigurumaEngine } = await import('shiki/engine/oniguruma');
+
+    engine = await createOnigurumaEngine(() => import('shiki/wasm'));
+  }
+
   const highlighter = await getSingletonHighlighter({
     langs: [lang],
-    engine: engine ?? createOnigurumaEngine(() => import('shiki/wasm')),
+    engine,
     themes:
       'theme' in themes
         ? [themes.theme]

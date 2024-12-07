@@ -18,7 +18,7 @@ import { createOnigurumaEngine } from 'shiki/engine/oniguruma';
 import { createJavaScriptRegexEngine } from 'shiki/engine/javascript';
 import type { IconOptions, CodeBlockIcon } from './transformer-icon';
 import { transformerIcon } from './transformer-icon';
-import { createStyleTransformer, defaultThemes } from '@/server/shiki';
+import { createStyleTransformer, defaultThemes } from '@/utils/shiki';
 
 interface MetaValue {
   name: string;
