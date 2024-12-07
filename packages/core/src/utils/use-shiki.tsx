@@ -8,10 +8,9 @@ import {
   useState,
 } from 'react';
 import { highlight, type HighlightOptions } from '@/utils/shiki';
-import { createJavaScriptRegexEngine } from 'shiki/engine/javascript';
 import type { RegexEngine } from 'shiki';
 
-let jsEngine: RegexEngine | undefined;
+let jsEngine: Promise<RegexEngine> | undefined;
 
 /**
  * Create `lazy` component that pre-renders codeblock on server
@@ -32,7 +31,9 @@ function getHighlightOptions(from: HighlightOptions): HighlightOptions {
   if (from.engine) return from;
 
   if (!jsEngine) {
-    jsEngine = createJavaScriptRegexEngine();
+    jsEngine = import('shiki/engine/javascript').then((res) =>
+      res.createJavaScriptRegexEngine(),
+    );
   }
 
   return {

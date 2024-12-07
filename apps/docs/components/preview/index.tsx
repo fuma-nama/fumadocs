@@ -186,6 +186,16 @@ export function rootToggle(): ReactNode {
   );
 }
 
+const DynamicCodeBlock = dynamic(() => import('./dynamic-codeblock'));
+
+export function dynamicCodeBlock() {
+  return (
+    <Wrapper>
+      <DynamicCodeBlock />
+    </Wrapper>
+  );
+}
+
 const Banner = dynamic(() => import('./banner'));
 
 export function banner(): ReactNode {
