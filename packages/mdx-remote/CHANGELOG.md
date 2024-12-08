@@ -1,5 +1,14 @@
 # @fumadocs/mdx-remote
 
+## 0.2.4
+
+### Patch Changes
+
+- 4766292: Support React 19
+- Updated dependencies [bebb16b]
+- Updated dependencies [4766292]
+  - fumadocs-core@14.6.0
+
 ## 0.2.3
 
 ### Patch Changes

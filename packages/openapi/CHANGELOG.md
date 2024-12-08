@@ -1,5 +1,16 @@
 # @fuma-docs/openapi
 
+## 5.8.2
+
+### Patch Changes
+
+- 4766292: Support React 19
+- Updated dependencies [bebb16b]
+- Updated dependencies [bebb16b]
+- Updated dependencies [4766292]
+  - fumadocs-ui@14.6.0
+  - fumadocs-core@14.6.0
+
 ## 5.8.1
 
 ### Patch Changes

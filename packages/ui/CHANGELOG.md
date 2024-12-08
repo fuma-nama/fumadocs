@@ -1,5 +1,18 @@
 # next-docs-ui
 
+## 14.6.0
+
+### Minor Changes
+
+- bebb16b: Support `DynamicCodeBlock` component
+
+### Patch Changes
+
+- 4766292: Support React 19
+- Updated dependencies [bebb16b]
+- Updated dependencies [4766292]
+  - fumadocs-core@14.6.0
+
 ## 14.5.6
 
 ### Patch Changes

@@ -1,5 +1,14 @@
 # fumadocs-twoslash
 
+## 2.0.2
+
+### Patch Changes
+
+- 4766292: Support React 19
+- Updated dependencies [bebb16b]
+- Updated dependencies [4766292]
+  - fumadocs-ui@14.6.0
+
 ## 2.0.1
 
 ### Patch Changes
