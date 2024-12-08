@@ -4,4 +4,8 @@ export * as PageTree from './page-tree';
 export * from './git-api';
 export * from './types';
 export * from './metadata';
-export * from '../utils/shiki';
+export {
+  highlight,
+  createStyleTransformer,
+  type HighlightOptions,
+} from '../utils/shiki';

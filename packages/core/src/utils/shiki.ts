@@ -10,6 +10,7 @@ import type { BundledTheme } from 'shiki/themes';
 import { type Components, toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import { Fragment, type ReactNode } from 'react';
 import { jsx, jsxs } from 'react/jsx-runtime';
+import type { Root } from 'hast';
 
 export function createStyleTransformer(): ShikiTransformer {
   return {
@@ -38,12 +39,9 @@ export type HighlightOptions = CodeToHastOptionsCommon<BundledLanguage> &
     components?: Partial<Components>;
   };
 
-export async function highlight(
-  code: string,
-  options: HighlightOptions,
-): Promise<ReactNode> {
+export async function _highlight(code: string, options: HighlightOptions) {
   const { getSingletonHighlighter } = await import('shiki');
-  const { lang, components, engine: defaultEngine, ...rest } = options;
+  const { lang, components: _, engine: defaultEngine, ...rest } = options;
 
   let themes: CodeOptionsThemes<BundledTheme> = { themes: defaultThemes };
   if ('theme' in options && options.theme) {
@@ -56,7 +54,7 @@ export async function highlight(
   if (!engine) {
     const { createOnigurumaEngine } = await import('shiki/engine/oniguruma');
 
-    engine = await createOnigurumaEngine(() => import('shiki/wasm'));
+    engine = await createOnigurumaEngine(await import('shiki/wasm'));
   }
 
   const highlighter = await getSingletonHighlighter({
@@ -68,19 +66,28 @@ export async function highlight(
         : Object.values(themes.themes).filter((v) => v !== undefined),
   });
 
-  const hast = highlighter.codeToHast(code, {
+  return highlighter.codeToHast(code, {
     lang,
     ...rest,
     ...themes,
     transformers: [createStyleTransformer(), ...(rest.transformers ?? [])],
     defaultColor: 'themes' in themes ? false : undefined,
   });
+}
 
+export function _renderHighlight(hast: Root, options?: HighlightOptions) {
   return toJsxRuntime(hast, {
     jsx,
     jsxs,
     development: false,
-    components,
+    components: options?.components,
     Fragment,
   });
+}
+
+export async function highlight(
+  code: string,
+  options: HighlightOptions,
+): Promise<ReactNode> {
+  return _renderHighlight(await _highlight(code, options), options);
 }
