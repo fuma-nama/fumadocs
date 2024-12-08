@@ -1,5 +1,15 @@
 # next-docs-zeta
 
+## 14.6.0
+
+### Minor Changes
+
+- bebb16b: Add support for pre-rendering to `useShiki` hook
+
+### Patch Changes
+
+- 4766292: Support React 19
+
 ## 14.5.6
 
 ### Patch Changes
