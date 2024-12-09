@@ -6,7 +6,7 @@ description:
 preview: tabs
 ---
 
-import { UrlBar } from './tabs.client';
+import { UrlBar, WithoutValueTest } from './tabs.client';
 
 ## Usage
 
@@ -20,6 +20,28 @@ import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
   <Tab value="Rust">Rust is fast</Tab>
 </Tabs>
 ```
+
+### Without `value`
+
+Without a `value`, it detects from the children index. Note that it might cause errors on re-renders, it's not encouraged if the tabs might change.
+
+```mdx
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+
+<Tabs items={['Javascript', 'Rust']}>
+  <Tab>Javascript is weird</Tab>
+  <Tab>Rust is fast</Tab>
+</Tabs>
+```
+
+#### Demo with Re-renders
+
+<Tabs items={['Javascript', 'Rust']}>
+  <Tab>Javascript is weird</Tab>
+  <Tab>Rust is fast</Tab>
+</Tabs>
+
+<WithoutValueTest />
 
 ### Shared Value
 

@@ -12,6 +12,8 @@ import {
   useContext,
   useRef,
   useLayoutEffect,
+  useId,
+  useEffect,
 } from 'react';
 import { cn } from '@/utils/cn';
 import * as Primitive from './ui/tabs';
@@ -58,9 +60,11 @@ export interface TabsProps extends BaseProps {
   updateAnchor?: boolean;
 }
 
-const ValueToMapContext = createContext<Map<string, string> | undefined>(
-  undefined,
-);
+const TabsContext = createContext<{
+  items: string[];
+  valueToIdMap: Map<string, string>;
+  collection: CollectionType;
+} | null>(null);
 
 export function Tabs({
   groupId,
@@ -72,7 +76,11 @@ export function Tabs({
 }: TabsProps) {
   const values = useMemo(() => items.map((item) => toValue(item)), [items]);
   const [value, setValue] = useState(values[defaultIndex]);
-  const valueToIdMapRef = useRef(new Map<string, string>());
+
+  const valueToIdMap = useMemo(() => new Map<string, string>(), []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- re-reconstruct the collection if items changed
+  const collection = useMemo(() => createCollection(), [items]);
+
   const onChange: ChangeListener = (v) => {
     if (values.includes(v)) setValue(v);
   };
@@ -82,7 +90,7 @@ export function Tabs({
 
   useLayoutEffect(() => {
     if (!groupId) return;
-    const onUpdate: ChangeListener = (v) => onChangeRef.current?.(v);
+    const onUpdate: ChangeListener = (v) => onChangeRef.current(v);
 
     const previous = persist
       ? localStorage.getItem(groupId)
@@ -99,17 +107,18 @@ export function Tabs({
     const hash = window.location.hash.slice(1);
     if (!hash) return;
 
-    const entry = Array.from(valueToIdMapRef.current.entries()).find(
-      ([_, id]) => id === hash,
-    );
-
-    if (entry) setValue(entry[0]);
-  }, []);
+    for (const [value, id] of valueToIdMap.entries()) {
+      if (id === hash) {
+        setValue(value);
+        break;
+      }
+    }
+  }, [valueToIdMap]);
 
   const onValueChange = useCallback(
     (v: string) => {
       if (updateAnchor) {
-        const id = valueToIdMapRef.current.get(v);
+        const id = valueToIdMap.get(v);
 
         if (id) {
           window.history.replaceState(null, '', `#${id}`);
@@ -127,7 +136,7 @@ export function Tabs({
         setValue(v);
       }
     },
-    [groupId, persist, updateAnchor],
+    [valueToIdMap, groupId, persist, updateAnchor],
   );
 
   return (
@@ -144,9 +153,14 @@ export function Tabs({
           </Primitive.TabsTrigger>
         ))}
       </Primitive.TabsList>
-      <ValueToMapContext.Provider value={valueToIdMapRef.current}>
+      <TabsContext.Provider
+        value={useMemo(
+          () => ({ items, valueToIdMap, collection }),
+          [valueToIdMap, collection, items],
+        )}
+      >
         {props.children}
-      </ValueToMapContext.Provider>
+      </TabsContext.Provider>
     </Primitive.Tabs>
   );
 }
@@ -155,12 +169,28 @@ function toValue(v: string): string {
   return v.toLowerCase().replace(/\s/, '-');
 }
 
-export function Tab({ value, className, ...props }: TabsContentProps) {
-  const v = toValue(value);
-  const valueToIdMap = useContext(ValueToMapContext);
+export type TabProps = Omit<TabsContentProps, 'value'> & {
+  /**
+   * Value of tab, detect from index if unspecified.
+   */
+  value?: TabsContentProps['value'];
+};
 
-  if (props.id) {
-    valueToIdMap?.set(v, props.id);
+export function Tab({ value, className, ...props }: TabProps) {
+  const ctx = useContext(TabsContext);
+  const resolvedValue =
+    value ??
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- `value` is not supposed to change
+    ctx?.items[useCollectionIndex()];
+  if (!resolvedValue)
+    throw new Error(
+      'Failed to resolve tab `value`, please pass a `value` prop to the Tab component.',
+    );
+
+  const v = toValue(resolvedValue);
+
+  if (props.id && ctx) {
+    ctx.valueToIdMap.set(v, props.id);
   }
 
   return (
@@ -171,6 +201,52 @@ export function Tab({ value, className, ...props }: TabsContentProps) {
         className,
       )}
       {...props}
-    />
+    >
+      {props.children}
+    </Primitive.TabsContent>
   );
+}
+
+type CollectionKey = string | symbol;
+type CollectionType = ReturnType<typeof createCollection>;
+
+function createCollection() {
+  return [] as CollectionKey[];
+}
+
+/**
+ * Inspired by Headless UI.
+ *
+ * Return the index of children, this is made possible by registering the order of render from children using React context.
+ * This is supposed by work with pre-rendering & pure client-side rendering.
+ */
+function useCollectionIndex() {
+  const key = useId();
+  const ctx = useContext(TabsContext);
+  if (!ctx) throw new Error('You must wrap your component in <Tabs>');
+
+  const list = ctx.collection;
+
+  function register() {
+    if (!list.includes(key)) list.push(key);
+  }
+
+  function unregister() {
+    const idx = list.indexOf(key);
+    if (idx !== -1) list.splice(idx, 1);
+  }
+
+  useMemo(() => {
+    // re-order the item to the bottom if exists
+    unregister();
+    register();
+    // eslint-disable-next-line -- register
+  }, [list]);
+
+  useEffect(() => {
+    return unregister;
+    // eslint-disable-next-line -- clean up only
+  }, []);
+
+  return list.indexOf(key);
 }
