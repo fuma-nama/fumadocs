@@ -19,8 +19,8 @@
   },
   "devDependencies": {
     "@types/mdx": "^2.0.13",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
+    "@types/react": "^19.0.1",
+    "@types/react-dom": "^19.0.1",
     "typescript": "^5.7.2"
   }
 }

@@ -73,7 +73,7 @@
     "@types/mdx": "^2.0.13",
     "@types/micromatch": "^4.0.9",
     "@types/node": "22.10.1",
-    "@types/react": "^19.0.0",
+    "@types/react": "^19.0.1",
     "@types/ws": "^8.5.13",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
