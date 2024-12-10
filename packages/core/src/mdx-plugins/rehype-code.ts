@@ -41,6 +41,10 @@ const metaValues: MetaValue[] = [
     name: 'tab',
     regex: /tab="(?<value>[^"]+)"/,
   },
+  {
+    name: 'tab',
+    regex: /tab/,
+  },
 ];
 
 export const rehypeCodeDefaultOptions: RehypeCodeOptions = {
@@ -58,22 +62,16 @@ export const rehypeCodeDefaultOptions: RehypeCodeOptions = {
     const map: Record<string, string> = {};
 
     for (const value of metaValues) {
-      const result = value.regex.exec(meta);
+      meta = meta.replace(value.regex, (_, ...args) => {
+        const first = args.at(0);
+        map[value.name] = typeof first === 'string' ? first : '';
 
-      if (result) {
-        map[value.name] = result[1];
-      }
+        return '';
+      });
     }
 
+    map.__parsed_raw = meta;
     return map;
-  },
-  filterMetaString(meta) {
-    let replaced = meta;
-    for (const value of metaValues) {
-      replaced = replaced.replace(value.regex, '');
-    }
-
-    return replaced;
   },
 };
 
@@ -120,6 +118,11 @@ export function rehypeCode(
     {
       name: 'rehype-code:pre-process',
       preprocess(code, { meta }) {
+        if (meta && '__parsed_raw' in meta) {
+          meta.__raw = meta.__parsed_raw;
+          delete meta.__parsed_raw;
+        }
+
         if (meta && codeOptions.filterMetaString) {
           meta.__raw = codeOptions.filterMetaString(meta.__raw ?? '');
         }
@@ -163,9 +166,7 @@ export function rehypeCode(
   );
 
   return async (tree, file) => {
-    await (
-      await transformer
-    )(tree, file, () => {
+    (await transformer)(tree, file, () => {
       // nothing
     });
   };
@@ -176,8 +177,8 @@ function transformerTab(): ShikiTransformer {
     name: 'rehype-code:tab',
     // @ts-expect-error -- types not compatible with MDX
     root(root) {
-      const meta = this.options.meta;
-      if (typeof meta?.tab !== 'string') return root;
+      const value = this.options.meta?.tab;
+      if (typeof value !== 'string') return root;
 
       return {
         type: 'root',
@@ -188,9 +189,10 @@ function transformerTab(): ShikiTransformer {
             data: {
               _codeblock: true,
             },
-            attributes: [
-              { type: 'mdxJsxAttribute', name: 'value', value: meta.tab },
-            ],
+            attributes:
+              value !== ''
+                ? [{ type: 'mdxJsxAttribute', name: 'value', value }]
+                : [],
             children: root.children,
           } as MdxJsxFlowElement,
         ],

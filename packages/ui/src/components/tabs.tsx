@@ -7,7 +7,6 @@ import type {
 import {
   useMemo,
   useState,
-  useCallback,
   createContext,
   useContext,
   useRef,
@@ -115,34 +114,29 @@ export function Tabs({
     }
   }, [valueToIdMap]);
 
-  const onValueChange = useCallback(
-    (v: string) => {
-      if (updateAnchor) {
-        const id = valueToIdMap.get(v);
-
-        if (id) {
-          window.history.replaceState(null, '', `#${id}`);
-        }
-      }
-
-      if (groupId) {
-        listeners.get(groupId)?.forEach((item) => {
-          item(v);
-        });
-
-        if (persist) localStorage.setItem(groupId, v);
-        else sessionStorage.setItem(groupId, v);
-      } else {
-        setValue(v);
-      }
-    },
-    [valueToIdMap, groupId, persist, updateAnchor],
-  );
-
   return (
     <Primitive.Tabs
       value={value}
-      onValueChange={onValueChange}
+      onValueChange={(v: string) => {
+        if (updateAnchor) {
+          const id = valueToIdMap.get(v);
+
+          if (id) {
+            window.history.replaceState(null, '', `#${id}`);
+          }
+        }
+
+        if (groupId) {
+          listeners.get(groupId)?.forEach((item) => {
+            item(v);
+          });
+
+          if (persist) localStorage.setItem(groupId, v);
+          else sessionStorage.setItem(groupId, v);
+        } else {
+          setValue(v);
+        }
+      }}
       {...props}
       className={cn('my-4', props.className)}
     >
@@ -181,7 +175,7 @@ export function Tab({ value, className, ...props }: TabProps) {
   const resolvedValue =
     value ??
     // eslint-disable-next-line react-hooks/rules-of-hooks -- `value` is not supposed to change
-    ctx?.items[useCollectionIndex()];
+    ctx?.items.at(useCollectionIndex());
   if (!resolvedValue)
     throw new Error(
       'Failed to resolve tab `value`, please pass a `value` prop to the Tab component.',
@@ -237,7 +231,7 @@ function useCollectionIndex() {
   }
 
   useMemo(() => {
-    // re-order the item to the bottom if exists
+    // re-order the item to the bottom if registered
     unregister();
     register();
     // eslint-disable-next-line -- register
