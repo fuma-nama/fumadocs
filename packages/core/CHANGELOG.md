@@ -1,5 +1,17 @@
 # next-docs-zeta
 
+## 14.6.0
+
+### Minor Changes
+
+- bebb16b: Add support for pre-rendering to `useShiki` hook
+- 050b326: Support codeblock `tab` meta without value
+
+### Patch Changes
+
+- 4dfde6b: support additional `components` option of Orama search
+- 4766292: Support React 19
+
 ## 14.5.6
 
 ### Patch Changes

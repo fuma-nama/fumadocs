@@ -1,5 +1,22 @@
 # next-docs-ui
 
+## 14.6.0
+
+### Minor Changes
+
+- 010da9e: Tabs: support usage without `value`
+- bebb16b: Support `DynamicCodeBlock` component
+
+### Patch Changes
+
+- 9585561: Fix Twoslash popups focus outline
+- 4766292: Support React 19
+- Updated dependencies [4dfde6b]
+- Updated dependencies [bebb16b]
+- Updated dependencies [4766292]
+- Updated dependencies [050b326]
+  - fumadocs-core@14.6.0
+
 ## 14.5.6
 
 ### Patch Changes
