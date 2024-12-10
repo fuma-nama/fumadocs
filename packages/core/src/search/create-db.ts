@@ -25,13 +25,13 @@ export async function createDB({
 }: AdvancedOptions): Promise<Orama<typeof advancedSchema>> {
   const items = typeof indexes === 'function' ? await indexes() : indexes;
 
-  const db = await create({
-    ...rest,
+  const db = (await create({
     schema: advancedSchema,
     components: {
       tokenizer,
     },
-  });
+    ...rest,
+  })) as unknown as Orama<typeof advancedSchema>;
 
   const mapTo: PartialSchemaDeep<AdvancedDocument>[] = [];
   items.forEach((page) => {

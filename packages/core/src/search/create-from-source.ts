@@ -14,7 +14,7 @@ import {
 import { type StructuredData } from '@/mdx-plugins';
 import { type LocaleMap } from '@/search/i18n-api';
 
-function defaultToIndex(page: Page): AdvancedIndex {
+function pageToIndex(page: Page): AdvancedIndex {
   if (!('structuredData' in page.data)) {
     throw new Error(
       'Cannot find structured data from page, please define the page to index function.',
@@ -39,7 +39,7 @@ type Options = Omit<AdvancedOptions, 'language' | 'indexes'> & {
 
 export function createFromSource<S extends LoaderOutput<LoaderConfig>>(
   source: S,
-  pageToIndex: (page: InferPageType<S>) => AdvancedIndex = defaultToIndex,
+  pageToIndexFn: (page: InferPageType<S>) => AdvancedIndex = pageToIndex,
   options: Options = {},
 ): SearchAPI {
   if (source._i18n) {
@@ -49,7 +49,7 @@ export function createFromSource<S extends LoaderOutput<LoaderConfig>>(
       indexes: source.getLanguages().flatMap((entry) => {
         return entry.pages.map((page) => {
           return {
-            ...pageToIndex(page as InferPageType<S>),
+            ...pageToIndexFn(page as InferPageType<S>),
             locale: entry.language,
           };
         });
@@ -60,7 +60,7 @@ export function createFromSource<S extends LoaderOutput<LoaderConfig>>(
   return createSearchAPI('advanced', {
     ...options,
     indexes: source.getPages().map((page) => {
-      return pageToIndex(page as InferPageType<S>);
+      return pageToIndexFn(page as InferPageType<S>);
     }),
   });
 }

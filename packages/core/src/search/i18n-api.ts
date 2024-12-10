@@ -138,7 +138,7 @@ export function createI18nSearchAPI<T extends 'simple' | 'advanced'>(
         data: Object.fromEntries(await Promise.all(entries)) as object,
       };
     },
-    search: async (query, searchOptions) => {
+    async search(query, searchOptions) {
       const map = await get;
 
       const locale = searchOptions?.locale ?? options.i18n.defaultLanguage;

@@ -1,12 +1,4 @@
-import {
-  type Orama,
-  type SearchParams,
-  type DefaultTokenizerConfig,
-  type Tokenizer,
-  type OramaPlugin,
-  type SorterConfig,
-  save,
-} from '@orama/orama';
+import { type Orama, type SearchParams, save, create } from '@orama/orama';
 import { type NextRequest } from 'next/server';
 import type { StructuredData } from '@/mdx-plugins/remark-structure';
 import type { SortedResult } from '@/server/types';
@@ -52,13 +44,12 @@ export interface SearchAPI extends SearchServer {
  */
 export type Dynamic<T> = () => T[] | Promise<T[]>;
 
-interface SharedOptions {
-  language?: string;
+type OramaInput = Parameters<typeof create>[0];
 
-  sort?: SorterConfig;
-  tokenizer?: Tokenizer | DefaultTokenizerConfig;
-  plugins?: OramaPlugin[];
-}
+type SharedOptions = Pick<OramaInput, 'sort' | 'components' | 'plugins'> & {
+  language?: string;
+  tokenizer?: Required<OramaInput>['components']['tokenizer'];
+};
 
 export interface SimpleOptions extends SharedOptions {
   indexes: Index[] | Dynamic<Index>;
@@ -109,7 +100,7 @@ export function initSimpleSearch(options: SimpleOptions): SearchServer {
         ...save(await doc),
       };
     },
-    search: async (query) => {
+    async search(query) {
       const db = await doc;
 
       return searchSimple(db, query, options.search);
@@ -145,7 +136,7 @@ export function initAdvancedSearch(options: AdvancedOptions): SearchServer {
         ...save(await get),
       };
     },
-    search: async (query, searchOptions) => {
+    async search(query, searchOptions) {
       const db = await get;
 
       return searchAdvanced(db, query, searchOptions?.tag, options.search);

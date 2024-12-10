@@ -27,7 +27,6 @@ export async function searchAdvanced(
     params = {
       ...params,
       term: query,
-      tolerance: 1,
       properties: ['content', 'keywords'],
       ...extraParams,
       where: params.where,

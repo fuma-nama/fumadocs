@@ -17,19 +17,17 @@ export const schema = {
 
 export async function createDBSimple({
   indexes,
-  language,
+  tokenizer,
+  ...rest
 }: SimpleOptions): Promise<Orama<typeof schema>> {
   const items = typeof indexes === 'function' ? await indexes() : indexes;
-  const db = await create({
-    language,
-    schema: {
-      url: 'string',
-      title: 'string',
-      description: 'string',
-      content: 'string',
-      keywords: 'string',
-    } as const,
-  });
+  const db = (await create({
+    schema,
+    components: {
+      tokenizer,
+    },
+    ...rest,
+  })) as unknown as Orama<typeof schema>;
 
   await insertMultiple(
     db,
