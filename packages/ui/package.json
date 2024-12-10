@@ -85,7 +85,7 @@
     "@next/eslint-plugin-next": "^15.0.4",
     "@types/lodash.merge": "^4.6.9",
     "@types/react": "^19.0.1",
-    "@types/react-dom": "^19.0.1",
+    "@types/react-dom": "^19.0.2",
     "autoprefixer": "^10.4.20",
     "eslint-config-custom": "workspace:*",
     "next": "15.0.4",

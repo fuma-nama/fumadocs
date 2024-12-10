@@ -50,7 +50,7 @@
     "fast-glob": "^3.3.1",
     "gray-matter": "^4.0.3",
     "micromatch": "^4.0.8",
-    "zod": "^3.23.8"
+    "zod": "^3.24.0"
   },
   "devDependencies": {
     "@types/cross-spawn": "^6.0.6",

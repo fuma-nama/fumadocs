@@ -67,7 +67,7 @@
     "gray-matter": "^4.0.3",
     "micromatch": "^4.0.8",
     "ws": "^8.18.0",
-    "zod": "^3.23.8"
+    "zod": "^3.24.0"
   },
   "devDependencies": {
     "@types/mdx": "^2.0.13",

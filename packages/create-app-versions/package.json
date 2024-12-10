@@ -11,7 +11,7 @@
     "@types/mdx": "^2.0.13",
     "@types/node": "22.10.1",
     "@types/react": "^19.0.1",
-    "@types/react-dom": "^19.0.1",
+    "@types/react-dom": "^19.0.2",
     "autoprefixer": "^10.4.20",
     "next": "15.0.4",
     "postcss": "^8.4.49",
