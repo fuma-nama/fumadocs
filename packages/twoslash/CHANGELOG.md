@@ -1,5 +1,17 @@
 # fumadocs-twoslash
 
+## 2.0.2
+
+### Patch Changes
+
+- 9585561: Fix Twoslash popups focus outline
+- 4766292: Support React 19
+- Updated dependencies [010da9e]
+- Updated dependencies [bebb16b]
+- Updated dependencies [9585561]
+- Updated dependencies [4766292]
+  - fumadocs-ui@14.6.0
+
 ## 2.0.1
 
 ### Patch Changes
