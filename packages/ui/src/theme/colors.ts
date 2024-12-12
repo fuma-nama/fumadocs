@@ -105,7 +105,7 @@ const neutral: Preset = {
     ring: '0 0% 63.9%',
   },
   dark: {
-    background: '0 0% 8.9%',
+    background: '0 0% 8.6%',
     foreground: '0 0% 92%',
     muted: '0 0% 12.9%',
     'muted-foreground': '0 0% 60.9%',

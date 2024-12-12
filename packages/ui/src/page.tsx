@@ -115,23 +115,30 @@ export function DocsPage({
   toc = [],
   full = false,
   tableOfContentPopover: {
-    enabled: tocPopoverEnabled = true,
+    enabled: tocPopoverEnabled,
     component: tocPopoverReplace,
     ...tocPopoverOptions
   } = {},
   tableOfContent: {
-    // disable TOC on full mode, you can still enable it with `enabled` option.
     enabled: tocEnabled,
     component: tocReplace,
     ...tocOptions
   } = {},
   ...props
 }: DocsPageProps): ReactNode {
-  tocEnabled ??=
-    !full &&
-    (toc.length > 0 ||
-      tocOptions.footer !== undefined ||
-      tocOptions.header !== undefined);
+  const isTocRequired =
+    toc.length > 0 ||
+    tocOptions.footer !== undefined ||
+    tocOptions.header !== undefined;
+
+  // disable TOC on full mode, you can still enable it with `enabled` option.
+  tocEnabled ??= !full && isTocRequired;
+
+  tocPopoverEnabled ??=
+    toc.length > 0 ||
+    tocPopoverOptions.header !== undefined ||
+    tocPopoverOptions.footer !== undefined;
+
   const fullWidth = full && !tocEnabled;
 
   return (
@@ -173,7 +180,7 @@ export function DocsPage({
         <article
           {...props.article}
           className={cn(
-            'mx-auto flex w-full flex-1 flex-col gap-6 px-4 pt-8 md:pt-12 lg:px-8',
+            'mx-auto flex w-full flex-1 flex-col gap-6 px-4 pt-8 max-xl:mx-0 md:pt-12 lg:px-8',
             fullWidth ? 'max-w-[1120px]' : 'max-w-[860px]',
             props.article?.className,
           )}

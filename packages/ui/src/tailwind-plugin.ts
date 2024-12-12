@@ -133,6 +133,7 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
           '--fd-layout-width': layoutWidth,
           '--fd-banner-height': '0px',
           '--fd-nav-height': '0px',
+          '--fd-tocnav-height': '0px',
 
           '--fd-diff-remove-color': 'rgba(200,10,100,0.12)',
           '--fd-diff-remove-symbol-color': 'rgb(230,10,100)',

@@ -228,7 +228,7 @@ export function SidebarSeparator(props: HTMLAttributes<HTMLParagraphElement>) {
     <p
       {...props}
       className={cn(
-        'mb-2 mt-8 px-3 text-sm font-medium first:mt-0 md:px-2',
+        'mb-2 mt-8 px-3 text-sm first:mt-0 md:px-2',
         props.className,
       )}
     >
@@ -341,7 +341,7 @@ export function SidebarFolderLink(props: LinkProps) {
 export function SidebarFolderContent(props: CollapsibleContentProps) {
   return (
     <CollapsibleContent {...props}>
-      <div className="ms-3 border-s py-1.5 ps-1.5 md:ms-2 md:ps-2">
+      <div className="ms-3 border-s py-1.5 ps-1.5 md:ms-2">
         {props.children}
       </div>
     </CollapsibleContent>

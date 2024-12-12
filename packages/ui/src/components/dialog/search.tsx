@@ -1,7 +1,6 @@
 'use client';
 
 import { FileText, Hash, Loader2, SearchIcon, Text } from 'lucide-react';
-import type { SortedResult } from 'fumadocs-core/server';
 import { useRouter } from 'next/navigation';
 import {
   useMemo,
@@ -23,8 +22,13 @@ import {
   DialogOverlay,
   DialogTitle,
 } from '@radix-ui/react-dialog';
+import type { SortedResult } from 'fumadocs-core/server';
 
 export type SearchLink = [name: string, href: string];
+
+type ReactSortedResult = SortedResult & {
+  content: ReactNode;
+};
 
 export interface SharedProps {
   open: boolean;
@@ -39,7 +43,7 @@ export interface SharedProps {
 type SearchDialogProps = SharedProps &
   SearchValueProps &
   Omit<SearchResultProps, 'items'> & {
-    results: SortedResult[] | 'empty';
+    results: ReactSortedResult[] | 'empty';
 
     footer?: ReactNode;
   };
@@ -63,7 +67,7 @@ export function SearchDialog({
   ...props
 }: SearchDialogProps) {
   const { text } = useI18n();
-  const defaultItems = useMemo<SortedResult[]>(
+  const defaultItems = useMemo<ReactSortedResult[]>(
     () =>
       links.map(([name, link]) => ({
         type: 'page',
