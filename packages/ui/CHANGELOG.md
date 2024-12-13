@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 14.6.1
+
+### Patch Changes
+
+- 9532855: Hide toc popover when no items
+  - fumadocs-core@14.6.1
+
 ## 14.6.0
 
 ### Minor Changes

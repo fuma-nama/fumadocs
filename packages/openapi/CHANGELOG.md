@@ -1,5 +1,17 @@
 # @fuma-docs/openapi
 
+## 5.9.0
+
+### Minor Changes
+
+- ec5fb2e: Replace `@apidevtools/json-schema-ref-parser` with `@scalar/openapi-parser`
+
+### Patch Changes
+
+- Updated dependencies [9532855]
+  - fumadocs-ui@14.6.1
+  - fumadocs-core@14.6.1
+
 ## 5.8.2
 
 ### Patch Changes
