@@ -3,6 +3,24 @@
  */
 export const organizationUsers = ['marclave', 'rishi-raj-jain', 'handotdev'];
 
+export const sponsorTiers = [
+  {
+    type: 'golden',
+    label: 'Golden Sponsor',
+  },
+  {
+    type: 'sliver',
+    label: 'Sliver Sponsor',
+  },
+];
+
+export const sponsorData: Record<
+  string,
+  (typeof sponsorTiers)[number]['type']
+> = {
+  hirosystems: 'sliver',
+};
+
 export const organizationSponsors = [
   {
     url: 'https://orama.com',
@@ -377,7 +395,7 @@ export const organizationSponsors = [
       </svg>
     ),
     github: 'vercel',
-    tier: 'golden-one-time',
+    tier: 'golden',
     label: 'Vercel',
   },
   {
