@@ -251,7 +251,7 @@ function toSchema(
 
     if (additional && typeof additional === 'object') {
       if (
-        !additional.type &&
+        (!additional.type || additional.type.length === 0) &&
         !additional.anyOf &&
         !additional.allOf &&
         !additional.oneOf
@@ -319,12 +319,15 @@ function toSchema(
               : toSchema({}, required, ctx),
           isRequired: required,
         };
-      } else if (type !== 'null' && type !== 'object') {
-        items[type] = {
-          type: type === 'integer' ? 'number' : type,
-          isRequired: required,
-          defaultValue: schema.example ?? schema.default ?? '',
-        };
+      } else {
+        items[type] = toSchema(
+          {
+            ...schema,
+            type,
+          },
+          true,
+          ctx,
+        );
       }
     }
 

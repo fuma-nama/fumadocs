@@ -15,11 +15,13 @@ export function getDefaultValue(
 
   if (item.type === 'array') return [];
   if (item.type === 'null') return null;
-  if (item.type === 'switcher')
-    return getDefaultValue(
-      resolve(Object.values(item.items)[0], references),
-      references,
-    );
+  if (item.type === 'switcher') {
+    const first = Object.values(item.items).at(0);
+    if (!first) return '';
+
+    return getDefaultValue(resolve(first, references), references);
+  }
+
   if (item.type === 'file') return undefined;
 
   return String(item.defaultValue);

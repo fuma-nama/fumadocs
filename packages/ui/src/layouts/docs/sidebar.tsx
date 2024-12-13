@@ -228,7 +228,7 @@ export function SidebarSeparator(props: HTMLAttributes<HTMLParagraphElement>) {
     <p
       {...props}
       className={cn(
-        'mb-2 mt-8 px-3 text-sm first:mt-0 md:px-2',
+        'mb-2 mt-8 px-3 text-sm font-medium first:mt-0 md:px-2',
         props.className,
       )}
     >
