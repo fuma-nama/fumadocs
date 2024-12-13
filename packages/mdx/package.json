@@ -50,7 +50,7 @@
     "fast-glob": "^3.3.1",
     "gray-matter": "^4.0.3",
     "micromatch": "^4.0.8",
-    "zod": "^3.24.0"
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@types/cross-spawn": "^6.0.6",
@@ -60,7 +60,7 @@
     "@types/react": "^19.0.1",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
-    "next": "^15.0.4",
+    "next": "^15.1.0",
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
     "vfile": "^6.0.3",

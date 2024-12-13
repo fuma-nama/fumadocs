@@ -1,8 +1,9 @@
 import type { DereferenceMap, Document } from '@/types';
-import Parser from '@apidevtools/json-schema-ref-parser';
 import type { NoReference } from '@/utils/schema';
 import type { OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
-import { upgrade } from '@scalar/openapi-parser';
+import { load, dereference, upgrade } from '@scalar/openapi-parser';
+import { fetchUrls } from '@scalar/openapi-parser/plugins/fetch-urls';
+import { readFiles } from '@scalar/openapi-parser/plugins/read-files';
 
 export type DocumentInput = string | OpenAPIV3_1.Document | OpenAPIV3.Document;
 
@@ -25,27 +26,21 @@ export async function processDocument(
 
   if (cached) return cached;
 
-  let bundled = await Parser.bundle<OpenAPIV3_1.Document | OpenAPIV3.Document>(
-    document,
-    { mutateInputSchema: false },
-  );
-  bundled = upgrade(bundled).specification;
-
   const dereferenceMap: DereferenceMap = new Map();
-  const dereferenced = await Parser.dereference<NoReference<Document>>(
-    bundled,
-    {
-      mutateInputSchema: true,
-      dereference: {
-        onDereference($ref: string, schema: unknown) {
-          dereferenceMap.set(schema, $ref);
-        },
-      },
+  const loaded = await load(document, {
+    plugins: [readFiles(), fetchUrls()],
+  });
+
+  // upgrade
+  loaded.specification = upgrade(loaded.specification).specification;
+  const { schema: dereferenced } = await dereference(loaded.filesystem, {
+    onDereference({ ref, schema }) {
+      dereferenceMap.set(schema, ref);
     },
-  );
+  });
 
   const processed: ProcessedDocument = {
-    document: dereferenced,
+    document: dereferenced as NoReference<Document>,
     dereferenceMap,
   };
 
