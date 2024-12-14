@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Menu, X } from 'lucide-react';
 import {
   type ButtonHTMLAttributes,
   type HTMLAttributes,
@@ -23,23 +23,8 @@ import {
 import { cva } from 'class-variance-authority';
 import { buttonVariants } from '@/components/ui/button';
 import { useSidebar } from '@/contexts/sidebar';
-
-export function LayoutBody(props: HTMLAttributes<HTMLElement>) {
-  const { collapsed } = useSidebar();
-
-  return (
-    <main
-      {...props}
-      className={cn(
-        !collapsed &&
-          '[&_#nd-page]:max-w-[calc(min(100vw,var(--fd-layout-width))-var(--fd-sidebar-width)-var(--fd-toc-width))]',
-        props.className,
-      )}
-    >
-      {props.children}
-    </main>
-  );
-}
+import { useNav } from '@/components/layout/nav';
+import { SidebarTrigger } from 'fumadocs-core/sidebar';
 
 const itemVariants = cva(
   'flex flex-row items-center gap-2 rounded-md px-3 py-2.5 text-fd-muted-foreground transition-colors duration-100 [overflow-wrap:anywhere] hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 hover:transition-none md:px-2 md:py-1.5 [&_svg]:size-4',
@@ -69,11 +54,51 @@ export function LinksMenu({ items, ...props }: LinksMenuProps) {
   );
 }
 
+export function Navbar(props: HTMLAttributes<HTMLElement>) {
+  const { open } = useSidebar();
+  const { isTransparent } = useNav();
+
+  return (
+    <header
+      id="nd-subnav"
+      {...props}
+      className={cn(
+        'sticky top-[var(--fd-banner-height)] z-30 flex h-14 flex-row items-center border-b border-fd-foreground/10 px-4 backdrop-blur-lg transition-colors',
+        (!isTransparent || open) && 'bg-fd-background/80',
+        props.className,
+      )}
+    >
+      {props.children}
+    </header>
+  );
+}
+
+export function NavbarSidebarTrigger(
+  props: ButtonHTMLAttributes<HTMLButtonElement>,
+) {
+  const { open } = useSidebar();
+
+  return (
+    <SidebarTrigger
+      {...props}
+      className={cn(
+        buttonVariants({
+          color: 'ghost',
+          size: 'icon',
+        }),
+        props.className,
+      )}
+    >
+      {open ? <X /> : <Menu />}
+    </SidebarTrigger>
+  );
+}
+
 interface MenuItemProps extends HTMLAttributes<HTMLElement> {
   item: LinkItemType;
 }
 
-export function MenuItem({ item, ...props }: MenuItemProps) {
+function MenuItem({ item, ...props }: MenuItemProps) {
   if (item.type === 'custom')
     return (
       <div {...props} className={cn('grid', props.className)}>

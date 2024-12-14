@@ -4,8 +4,8 @@ import {
   useState,
   useMemo,
   useRef,
-  type MutableRefObject,
   type ReactNode,
+  type RefObject,
 } from 'react';
 import { usePathname } from 'next/navigation';
 import { SidebarProvider as BaseProvider } from 'fumadocs-core/sidebar';
@@ -20,7 +20,7 @@ interface SidebarContext {
   /**
    * When set to false, don't close the sidebar when navigate to another page
    */
-  closeOnRedirect: MutableRefObject<boolean>;
+  closeOnRedirect: RefObject<boolean>;
 }
 
 const SidebarContext = createContext<SidebarContext | undefined>(undefined);

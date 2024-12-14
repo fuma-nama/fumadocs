@@ -14,6 +14,10 @@ import { getSidebarTabs, type TabOptions } from '@/utils/get-sidebar-tabs';
 import type { FC, ReactNode } from 'react';
 import type { Option } from '@/components/layout/root-toggle';
 
+export const layoutVariables = {
+  '--fd-layout-offset': 'max(calc(50vw - var(--fd-layout-width) / 2), 0px)',
+};
+
 export interface SidebarOptions extends SidebarProps {
   enabled: boolean;
   component: ReactNode;

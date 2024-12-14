@@ -1,20 +1,14 @@
 'use client';
 import type { PageTree } from 'fumadocs-core/server';
 import { usePathname } from 'next/navigation';
-import {
-  createContext,
-  useContext,
-  type ReactNode,
-  useMemo,
-  useRef,
-} from 'react';
+import { createContext, useContext, type ReactNode, useMemo } from 'react';
 import { searchPath } from 'fumadocs-core/breadcrumb';
 
 interface TreeContextType {
   root: PageTree.Root | PageTree.Folder;
 }
 
-const TreeContext = createContext<TreeContextType | undefined>(undefined);
+const TreeContext = createContext<TreeContextType | null>(null);
 const PathContext = createContext<PageTree.Node[]>([]);
 
 export function TreeContextProvider({
@@ -32,8 +26,6 @@ export function TreeContextProvider({
 
   const root = (path.findLast((item) => item.type === 'folder' && item.root) ??
     tree) as PageTree.Root;
-  const pathnameRef = useRef(pathname);
-  pathnameRef.current = pathname;
 
   return (
     <TreeContext.Provider value={useMemo(() => ({ root }), [root])}>

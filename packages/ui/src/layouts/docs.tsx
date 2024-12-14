@@ -27,11 +27,10 @@ import {
   LanguageToggle,
   LanguageToggleText,
 } from '@/components/layout/language-toggle';
-import { LayoutBody, LinksMenu } from '@/layouts/docs.client';
+import { LinksMenu, Navbar, NavbarSidebarTrigger } from '@/layouts/docs.client';
 import { TreeContextProvider } from '@/contexts/tree';
 import { NavProvider, Title } from '@/components/layout/nav';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
-import { Navbar, NavbarSidebarTrigger } from '@/layouts/docs/navbar';
 import {
   LargeSearchToggle,
   SearchToggle,
@@ -39,9 +38,11 @@ import {
 import { SearchOnly } from '@/contexts/search';
 import {
   getSidebarTabsFromOptions,
+  layoutVariables,
   SidebarLinkItem,
   type SidebarOptions,
 } from '@/layouts/docs/shared';
+import { type PageStyles, StylesProvider } from '@/contexts/layout';
 
 export interface DocsLayoutProps extends BaseLayoutProps {
   tree: PageTree.Root;
@@ -76,13 +77,24 @@ export function DocsLayout({
   if (props.tree === undefined) notFound();
 
   const tabs = getSidebarTabsFromOptions(tabOptions, props.tree) ?? [];
+  const variables = cn(
+    '[--fd-tocnav-height:36px] md:[--fd-sidebar-width:260px] xl:[--fd-toc-width:260px] xl:[--fd-tocnav-height:0px]',
+    !navReplace && navEnabled
+      ? '[--fd-nav-height:3.5rem] md:[--fd-nav-height:0px]'
+      : undefined,
+  );
+
+  const pageStyles: PageStyles = {
+    tocNav: cn('xl:hidden'),
+    toc: cn('max-xl:hidden'),
+  };
 
   return (
     <TreeContextProvider tree={props.tree}>
       <NavProvider transparentMode={transparentMode}>
         {replaceOrDefault(
           { enabled: navEnabled, component: navReplace },
-          <Navbar id="nd-subnav" className="h-14 md:hidden">
+          <Navbar className="md:hidden">
             <Title url={nav.url} title={nav.title} />
             <div className="flex flex-1 flex-row items-center gap-1">
               {nav.children}
@@ -94,16 +106,18 @@ export function DocsLayout({
           </Navbar>,
           nav,
         )}
-        <LayoutBody
+        <main
           id="nd-docs-layout"
           {...props.containerProps}
           className={cn(
-            'flex flex-1 flex-row md:[--fd-sidebar-width:260px] xl:[--fd-toc-width:260px] [&_#nd-toc]:max-xl:hidden [&_#nd-tocnav]:xl:hidden',
-            !navReplace && navEnabled
-              ? '[--fd-nav-height:3.5rem] md:[--fd-nav-height:0px]'
-              : null,
+            'flex flex-1 flex-row pe-[var(--fd-layout-offset)]',
+            variables,
             props.containerProps?.className,
           )}
+          style={{
+            ...layoutVariables,
+            ...props.containerProps?.style,
+          }}
         >
           {collapsible ? (
             <SidebarCollapseTrigger className="fixed bottom-3 start-2 z-40 transition-opacity data-[collapsed=false]:pointer-events-none data-[collapsed=false]:opacity-0 max-md:hidden" />
@@ -112,7 +126,10 @@ export function DocsLayout({
             { enabled: sidebarEnabled, component: sidebarReplace },
             <Aside
               {...sidebar}
-              className="md:flex-1 md:data-[collapsed=true]:flex-initial"
+              className={cn(
+                'md:ps-[var(--fd-layout-offset)]',
+                sidebar.className,
+              )}
             >
               <SidebarHeader>
                 <SidebarHeaderItems {...nav} links={links} />
@@ -151,8 +168,8 @@ export function DocsLayout({
               tabs,
             },
           )}
-          {props.children}
-        </LayoutBody>
+          <StylesProvider {...pageStyles}>{props.children}</StylesProvider>
+        </main>
       </NavProvider>
     </TreeContextProvider>
   );

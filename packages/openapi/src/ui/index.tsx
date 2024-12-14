@@ -66,13 +66,13 @@ export function API({ children, ...props }: HTMLAttributes<HTMLDivElement>) {
     <div
       {...props}
       className={cn(
-        'flex flex-col gap-x-6 gap-y-4 max-xl:[--fd-toc-height:46px] max-md:[--fd-toc-height:36px] xl:flex-row xl:items-start',
+        'flex flex-col gap-x-6 gap-y-4 xl:flex-row xl:items-start',
         props.className,
       )}
       style={
         {
           '--fd-api-info-top':
-            'calc(var(--fd-nav-height) + var(--fd-banner-height) + var(--fd-toc-height, 0.5rem))',
+            'calc(var(--fd-nav-height) + var(--fd-banner-height) + var(--fd-tocnav-height, 0px))',
           ...props.style,
         } as object
       }

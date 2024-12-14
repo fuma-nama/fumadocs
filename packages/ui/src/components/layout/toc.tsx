@@ -16,6 +16,7 @@ import type {
   PopoverTriggerProps,
 } from '@radix-ui/react-popover';
 import { ChevronRight, Text } from 'lucide-react';
+import { usePageStyles } from '@/contexts/layout';
 
 export interface TOCProps {
   /**
@@ -32,12 +33,15 @@ export interface TOCProps {
 }
 
 export function Toc(props: HTMLAttributes<HTMLDivElement>) {
+  const { toc } = usePageStyles();
+
   return (
     <div
+      id="nd-toc"
       {...props}
-      data-toc=""
       className={cn(
-        'sticky top-fd-layout-top h-[var(--fd-toc-height)] flex-1 pb-2 pt-12',
+        'sticky top-fd-layout-top h-[var(--fd-toc-height)] pb-2 pt-12',
+        toc,
         props.className,
       )}
       style={
@@ -48,7 +52,9 @@ export function Toc(props: HTMLAttributes<HTMLDivElement>) {
         } as object
       }
     >
-      {props.children}
+      <div className="flex h-full w-[var(--fd-toc-width)] max-w-full flex-col gap-3 pe-2">
+        {props.children}
+      </div>
     </div>
   );
 }

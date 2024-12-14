@@ -6,6 +6,7 @@ const contextsMap = {
   '../contexts/search.tsx': 'fumadocs-ui/provider',
   '../contexts/tree.tsx': 'fumadocs-ui/provider',
   '../contexts/i18n.tsx': 'fumadocs-ui/provider',
+  '../contexts/layout.tsx': 'fumadocs-ui/provider',
 };
 
 export const registry: Registry = {

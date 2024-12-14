@@ -14,9 +14,11 @@ import {
   Footer,
   type FooterProps,
   LastUpdate,
-  PageHeader,
+  TocNav,
   Breadcrumb,
   type BreadcrumbProps,
+  PageBody,
+  PageArticle,
 } from './page.client';
 import {
   Toc,
@@ -139,26 +141,21 @@ export function DocsPage({
     tocPopoverOptions.header !== undefined ||
     tocPopoverOptions.footer !== undefined;
 
-  const fullWidth = full && !tocEnabled;
-
   return (
     <AnchorProvider toc={toc} single={tocOptions.single}>
-      <div
-        id="nd-page"
+      <PageBody
         {...props.container}
-        className={cn(
-          'flex w-full min-w-0 flex-col md:transition-[max-width]',
-          props.container?.className,
-        )}
+        className={cn(props.container?.className)}
         style={
           {
-            '--fd-toc-width': fullWidth ? '0px' : undefined,
+            '--fd-tocnav-height': !tocPopoverEnabled ? '0px' : undefined,
+            ...props.container?.style,
           } as object
         }
       >
         {replaceOrDefault(
           { enabled: tocPopoverEnabled, component: tocPopoverReplace },
-          <PageHeader id="nd-tocnav">
+          <TocNav>
             <TocPopover>
               <TocPopoverTrigger className="size-full" items={toc} />
               <TocPopoverContent>
@@ -171,17 +168,16 @@ export function DocsPage({
                 {tocPopoverOptions.footer}
               </TocPopoverContent>
             </TocPopover>
-          </PageHeader>,
+          </TocNav>,
           {
             items: toc,
             ...tocPopoverOptions,
           },
         )}
-        <article
+        <PageArticle
           {...props.article}
           className={cn(
-            'mx-auto flex w-full flex-1 flex-col gap-6 px-4 pt-8 max-xl:mx-0 md:pt-12 lg:px-8',
-            fullWidth ? 'max-w-[1120px]' : 'max-w-[860px]',
+            full || !tocEnabled ? 'max-w-[1120px]' : 'max-w-[860px]',
             props.article?.className,
           )}
         >
@@ -206,30 +202,27 @@ export function DocsPage({
             props.footer,
             <Footer items={props.footer?.items} />,
           )}
-        </article>
-      </div>
+        </PageArticle>
+      </PageBody>
       {replaceOrDefault(
         { enabled: tocEnabled, component: tocReplace },
-        <Toc id="nd-toc">
-          <div className="flex h-full w-[var(--fd-toc-width)] max-w-full flex-col gap-3 pe-2">
-            {tocOptions.header}
-            <h3 className="-ms-0.5 inline-flex items-center gap-1.5 text-sm text-fd-muted-foreground">
-              <Text className="size-4" />
-              <I18nLabel label="toc" />
-            </h3>
-            {tocOptions.style === 'clerk' ? (
-              <ClerkTOCItems items={toc} />
-            ) : (
-              <TOCItems items={toc} />
-            )}
-            {tocOptions.footer}
-          </div>
+        <Toc>
+          {tocOptions.header}
+          <h3 className="-ms-0.5 inline-flex items-center gap-1.5 text-sm text-fd-muted-foreground">
+            <Text className="size-4" />
+            <I18nLabel label="toc" />
+          </h3>
+          {tocOptions.style === 'clerk' ? (
+            <ClerkTOCItems items={toc} />
+          ) : (
+            <TOCItems items={toc} />
+          )}
+          {tocOptions.footer}
         </Toc>,
         {
           items: toc,
           ...tocOptions,
         },
-        <div role="none" className="flex-1" />,
       )}
     </AnchorProvider>
   );
@@ -343,13 +336,15 @@ export function DocsCategory({
   from: LoaderOutput<LoaderConfig>;
   tree?: PageTree.Root;
 }) {
-  const tree =
-    forcedTree ??
-    (from._i18n
+  let tree = forcedTree;
+
+  if (!tree) {
+    tree = from._i18n
       ? (from as LoaderOutput<LoaderConfig & { i18n: true }>).pageTree[
           page.locale ?? from._i18n.defaultLanguage
         ]
-      : from.pageTree);
+      : from.pageTree;
+  }
 
   const parent = findParent(tree, page);
   if (!parent) return null;
