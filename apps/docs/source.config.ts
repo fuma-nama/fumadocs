@@ -33,12 +33,13 @@ export const { docs, meta } = defineDocs({
 });
 
 export const blog = defineCollections({
+  type: 'doc',
   dir: 'content/blog',
+  async: true,
   schema: frontmatterSchema.extend({
     author: z.string(),
     date: z.string().date().or(z.date()).optional(),
   }),
-  type: 'doc',
 });
 
 export default defineConfig({

@@ -131,6 +131,10 @@ export default function Showcase(): React.ReactElement {
       name: 'LaunchFast',
       url: 'https://www.launchfa.st',
     },
+    {
+      name: 'Swellchain',
+      url: 'https://build.swellnetwork.io',
+    },
   ];
 
   return (
