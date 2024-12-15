@@ -71,7 +71,7 @@ export function DocsLayout({
 
   const tabs = getSidebarTabsFromOptions(tabOptions, props.tree) ?? [];
   const variables = cn(
-    '[--fd-nav-height:3.5rem] [--fd-tocnav-height:36px] md:[--fd-sidebar-width:260px] xl:[--fd-toc-width:260px] xl:[--fd-tocnav-height:0px]',
+    '[--fd-nav-height:3.5rem] [--fd-tocnav-height:36px] md:[--fd-sidebar-width:268px] xl:[--fd-toc-width:268px] xl:[--fd-tocnav-height:0px]',
   );
 
   const pageStyles: PageStyles = {
@@ -112,16 +112,16 @@ export function DocsLayout({
               </SidebarHeaderItems>
               {sidebarBanner}
               {tabs.length > 0 ? (
-                <RootToggle options={tabs} className="md:-mx-2" />
+                <RootToggle options={tabs} className="-mx-2" />
               ) : null}
             </SidebarHeader>
             <SidebarViewport>
-              <div className="px-4 pt-4 empty:hidden md:px-3 lg:hidden">
+              <div className="pt-4 empty:hidden lg:hidden">
                 {links.map((item, i) => (
                   <SidebarLinkItem key={i} item={item} />
                 ))}
               </div>
-              <div className="p-4 md:px-3">
+              <div className="py-4">
                 <SidebarPageTree components={sidebarComponents} />
               </div>
             </SidebarViewport>

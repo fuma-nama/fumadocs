@@ -78,7 +78,7 @@ export function DocsLayout({
 
   const tabs = getSidebarTabsFromOptions(tabOptions, props.tree) ?? [];
   const variables = cn(
-    '[--fd-tocnav-height:36px] md:[--fd-sidebar-width:260px] xl:[--fd-toc-width:260px] xl:[--fd-tocnav-height:0px]',
+    '[--fd-tocnav-height:36px] md:[--fd-sidebar-width:268px] xl:[--fd-toc-width:268px] xl:[--fd-tocnav-height:0px]',
     !navReplace && navEnabled
       ? '[--fd-nav-height:3.5rem] md:[--fd-nav-height:0px]'
       : undefined,
@@ -147,14 +147,14 @@ export function DocsLayout({
                 </SearchOnly>
               </SidebarHeader>
               <SidebarViewport>
-                <div className="px-2 pt-4 empty:hidden md:hidden">
+                <div className="pt-4 empty:hidden md:hidden">
                   {links
                     .filter((v) => v.type !== 'icon')
                     .map((item, i) => (
                       <SidebarLinkItem key={i} item={item} />
                     ))}
                 </div>
-                <div className="px-2 py-4 md:px-3">
+                <div className="py-4">
                   <SidebarPageTree components={sidebarComponents} />
                 </div>
               </SidebarViewport>

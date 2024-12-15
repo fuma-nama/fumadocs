@@ -59,13 +59,13 @@ interface InternalContext {
 }
 
 const itemVariants = cva(
-  'flex flex-row items-center gap-2 rounded-md px-3 py-2 text-fd-muted-foreground transition-colors duration-100 [overflow-wrap:anywhere] md:px-2 md:py-1.5 [&_svg]:size-4',
+  'flex flex-row items-center gap-2 rounded-md p-2 text-fd-muted-foreground [overflow-wrap:anywhere] md:py-1.5 [&_svg]:size-4',
   {
     variants: {
       active: {
         true: 'bg-fd-primary/10 font-medium text-fd-primary',
         false:
-          'hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 hover:transition-none',
+          'transition-colors duration-100 hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 hover:transition-none',
       },
     },
   },
@@ -185,10 +185,7 @@ export function SidebarHeader(props: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       {...props}
-      className={cn(
-        'flex flex-col gap-2 px-4 empty:hidden md:px-3',
-        props.className,
-      )}
+      className={cn('flex flex-col gap-2 px-4 empty:hidden', props.className)}
     >
       {props.children}
     </div>
@@ -213,6 +210,7 @@ export function SidebarViewport(props: ScrollAreaProps) {
   return (
     <ScrollArea {...props} className={cn('h-full', props.className)}>
       <ScrollViewport
+        className="px-4"
         style={{
           maskImage: 'linear-gradient(to bottom, transparent 2px, white 16px)',
         }}
@@ -228,7 +226,7 @@ export function SidebarSeparator(props: HTMLAttributes<HTMLParagraphElement>) {
     <p
       {...props}
       className={cn(
-        'mb-2 mt-8 px-3 text-sm font-medium first:mt-0 md:px-2',
+        'mb-2 mt-8 px-2 text-sm font-medium first:mt-0',
         props.className,
       )}
     >
@@ -291,7 +289,7 @@ export function SidebarFolderTrigger(props: CollapsibleTriggerProps) {
   return (
     <CollapsibleTrigger
       {...props}
-      className={cn(itemVariants({ active: false }), 'w-full pe-3.5 md:pe-1.5')}
+      className={cn(itemVariants({ active: false }), 'w-full')}
     >
       {props.children}
       <ChevronDown
@@ -314,11 +312,7 @@ export function SidebarFolderLink(props: LinkProps) {
     <Link
       {...props}
       data-active={active}
-      className={cn(
-        itemVariants({ active }),
-        'w-full pe-3.5 md:pe-1.5',
-        props.className,
-      )}
+      className={cn(itemVariants({ active }), 'w-full', props.className)}
       onClick={(e) => {
         if ((e.target as HTMLElement).hasAttribute('data-icon')) {
           setOpen((prev) => !prev);

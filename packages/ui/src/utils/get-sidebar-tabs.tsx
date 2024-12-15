@@ -5,9 +5,20 @@ export interface TabOptions {
   transform?: (option: Option, node: PageTree.Folder) => Option | null;
 }
 
+const defaultTransform: TabOptions['transform'] = (option, node) => {
+  if (!node.icon) return option;
+
+  return {
+    ...option,
+    icon: (
+      <div className="bg-fd-background/80 p-1 [&_svg]:size-5">{node.icon}</div>
+    ),
+  };
+};
+
 export function getSidebarTabs(
   pageTree: PageTree.Root,
-  { transform }: TabOptions = {},
+  { transform = defaultTransform }: TabOptions = {},
 ): Option[] {
   function findOptions(node: PageTree.Folder): Option[] {
     const results: Option[] = [];

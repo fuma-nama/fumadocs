@@ -64,7 +64,7 @@ export function RootToggle({
           )}
         >
           {item}
-          <ChevronDown className="me-1.5 size-4 text-fd-muted-foreground" />
+          <ChevronDown className="me-2 size-4 text-fd-muted-foreground" />
         </PopoverTrigger>
       ) : null}
       <PopoverContent className="w-[var(--radix-popover-trigger-width)] overflow-hidden p-0">
