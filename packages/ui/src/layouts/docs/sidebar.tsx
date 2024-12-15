@@ -364,6 +364,7 @@ export function SidebarCollapseTrigger(
           color: 'ghost',
           size: 'icon',
         }),
+        'backdrop-blur-lg',
         props.className,
       )}
       onClick={() => {

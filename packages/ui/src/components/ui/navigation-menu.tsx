@@ -9,7 +9,7 @@ const NavigationMenuList = Primitive.List;
 const NavigationMenuItem = Primitive.Item;
 
 const NavigationMenuTrigger = React.forwardRef<
-  React.ElementRef<typeof Primitive.Trigger>,
+  React.ComponentRef<typeof Primitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof Primitive.Trigger>
 >(({ className, children, ...props }, ref) => (
   <Primitive.Trigger
@@ -23,7 +23,7 @@ const NavigationMenuTrigger = React.forwardRef<
 NavigationMenuTrigger.displayName = Primitive.Trigger.displayName;
 
 const NavigationMenuContent = React.forwardRef<
-  React.ElementRef<typeof Primitive.Content>,
+  React.ComponentRef<typeof Primitive.Content>,
   React.ComponentPropsWithoutRef<typeof Primitive.Content>
 >(({ className, ...props }, ref) => (
   <Primitive.Content
@@ -40,7 +40,7 @@ NavigationMenuContent.displayName = Primitive.Content.displayName;
 const NavigationMenuLink = Primitive.Link;
 
 const NavigationMenuViewport = React.forwardRef<
-  React.ElementRef<typeof Primitive.Viewport>,
+  React.ComponentRef<typeof Primitive.Viewport>,
   React.ComponentPropsWithoutRef<typeof Primitive.Viewport>
 >(({ className, ...props }, ref) => (
   <div ref={ref} className="flex w-full justify-center">

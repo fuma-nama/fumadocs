@@ -4,7 +4,7 @@ import * as React from 'react';
 import { cn } from '@/utils/cn';
 
 const Tabs = React.forwardRef<
-  React.ElementRef<typeof TabsPrimitive.Root>,
+  React.ComponentRef<typeof TabsPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.Root>
 >((props, ref) => {
   return (
@@ -22,7 +22,7 @@ const Tabs = React.forwardRef<
 Tabs.displayName = 'Tabs';
 
 const TabsList = React.forwardRef<
-  React.ElementRef<typeof TabsPrimitive.List>,
+  React.ComponentRef<typeof TabsPrimitive.List>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
 >((props, ref) => (
   <TabsPrimitive.List
@@ -37,7 +37,7 @@ const TabsList = React.forwardRef<
 TabsList.displayName = 'TabsList';
 
 const TabsTrigger = React.forwardRef<
-  React.ElementRef<typeof TabsPrimitive.Trigger>,
+  React.ComponentRef<typeof TabsPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
 >((props, ref) => (
   <TabsPrimitive.Trigger
@@ -52,7 +52,7 @@ const TabsTrigger = React.forwardRef<
 TabsTrigger.displayName = 'TabsTrigger';
 
 const TabsContent = React.forwardRef<
-  React.ElementRef<typeof TabsPrimitive.Content>,
+  React.ComponentRef<typeof TabsPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
 >((props, ref) => (
   <TabsPrimitive.Content

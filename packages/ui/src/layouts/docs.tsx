@@ -2,7 +2,6 @@ import type { PageTree } from 'fumadocs-core/server';
 import { type ReactNode, type HTMLAttributes } from 'react';
 import Link from 'next/link';
 import { Languages, MoreHorizontal } from 'lucide-react';
-import { notFound } from 'next/navigation';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import {
@@ -43,6 +42,7 @@ import {
   type SidebarOptions,
 } from '@/layouts/docs/shared';
 import { type PageStyles, StylesProvider } from '@/contexts/layout';
+import { notFound } from 'next/navigation';
 
 export interface DocsLayoutProps extends BaseLayoutProps {
   tree: PageTree.Root;
@@ -120,7 +120,12 @@ export function DocsLayout({
           }}
         >
           {collapsible ? (
-            <SidebarCollapseTrigger className="fixed bottom-3 start-2 z-40 transition-opacity data-[collapsed=false]:pointer-events-none data-[collapsed=false]:opacity-0 max-md:hidden" />
+            <SidebarCollapseTrigger
+              className="fixed bottom-3 z-30 data-[collapsed=false]:invisible max-md:hidden"
+              style={{
+                insetInlineStart: 'calc(var(--fd-layout-offset) + 0.5rem)',
+              }}
+            />
           ) : null}
           {replaceOrDefault(
             { enabled: sidebarEnabled, component: sidebarReplace },
