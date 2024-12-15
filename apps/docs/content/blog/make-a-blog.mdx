@@ -1,0 +1,189 @@
+---
+title: Making a Blog with Fumadocs
+description: Fumadocs + Blog
+author: Fuma Nama
+date: 2024-12-15
+---
+
+## Overview
+
+This guide helps you to build a blog site with Fumadocs and Fumadocs MDX.
+
+We will use Fumadocs MDX to manage the content, and implement our own UI with Tailwind CSS & Fumadocs UI.
+
+### Configure Content
+
+Define a `blogPosts` collection.
+
+```ts title="source.config.ts"
+import { defineCollections, frontmatterSchema } from 'fumadocs-mdx/config';
+
+export const blogPosts = defineCollections({
+  type: 'doc',
+  dir: 'content/blog',
+  // add required frontmatter properties
+  schema: frontmatterSchema.extend({
+    author: z.string(),
+    date: z.string().date().or(z.date()),
+  }),
+});
+```
+
+Parse the output collection in `source.ts`:
+
+```ts title="lib/source.ts"
+import { createMDXSource } from 'fumadocs-mdx';
+import { loader } from 'fumadocs-core/source';
+import { blogPosts } from '@/.source';
+
+export const blog = loader({
+  baseUrl: '/blog',
+  source: createMDXSource(blogPosts, []),
+});
+```
+
+You can now access the content from `blog`.
+
+### Implement UI
+
+Create an index page for blog posts.
+
+By default, there should be a `(home)` route group with `<HomeLayout />` inside.
+Let's put the index page under it, this way we can get the nice navbar on index page.
+
+```tsx title="app/(home)/blog/page.tsx"
+import Link from 'next/link';
+import { blog } from '@/lib/source';
+
+export default function Home() {
+  const posts = blog.getPages();
+
+  return (
+    <main className="grow container mx-auto px-4 py-8">
+      <h1 className="text-4xl font-bold mb-8">Latest Blog Posts</h1>
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {posts.map((post) => (
+          <Link
+            key={post.url}
+            href={post.url}
+            className="block bg-fd-secondary rounded-lg shadow-md overflow-hidden p-6"
+          >
+            <h2 className="text-xl font-semibold mb-2">{post.data.title}</h2>
+            <p className="mb-4">{post.data.description}</p>
+            <p className="text-sm text-fd-muted-foreground">
+              Published on {post.data.date}
+            </p>
+          </Link>
+        ))}
+      </div>
+    </main>
+  );
+}
+```
+
+<Callout title='Good to Know'>
+
+Colors like `text-fd-muted-foreground` are from the design system of Fumadocs UI, you may also use your own colors, or use Shadcn UI.
+
+</Callout>
+
+And create a page for blog posts.
+
+Note that blog posts won't have nested slugs like `/slug1/slug2`, we don't need a catch-all route for blog posts.
+
+```tsx title="app/(home)/blog/[slug]/page.tsx"
+import { notFound } from 'next/navigation';
+import Link from 'next/link';
+import { InlineTOC } from 'fumadocs-ui/components/inline-toc';
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+import { blog } from '@/app/source';
+import { buttonVariants } from '@/components/ui/button';
+
+export default async function Page(props: {
+  params: Promise<{ slug: string }>;
+}) {
+  const params = await props.params;
+  const page = blog.getPage([params.slug]);
+
+  if (!page) notFound();
+  const Mdx = page.data.body;
+
+  return (
+    <>
+      <div className="container rounded-xl border py-12 md:px-8">
+        <h1 className="mb-2 text-3xl font-bold">{page.data.title}</h1>
+        <p className="mb-4 text-fd-muted-foreground">{page.data.description}</p>
+        <Link
+          href="/blog"
+          className={buttonVariants({ size: 'sm', variant: 'secondary' })}
+        >
+          Back
+        </Link>
+      </div>
+      <article className="container flex flex-col px-4 py-8">
+        <div className="prose min-w-0">
+          <InlineTOC items={page.data.toc} />
+          <Mdx components={defaultMdxComponents} />
+        </div>
+        <div className="flex flex-col gap-4 text-sm">
+          <div>
+            <p className="mb-1 text-fd-muted-foreground">Written by</p>
+            <p className="font-medium">{page.data.author}</p>
+          </div>
+          <div>
+            <p className="mb-1 text-sm text-fd-muted-foreground">At</p>
+            <p className="font-medium">
+              {new Date(page.data.date).toDateString()}
+            </p>
+          </div>
+        </div>
+      </article>
+    </>
+  );
+}
+
+export function generateStaticParams(): { slug: string }[] {
+  return blog.getPages().map((page) => ({
+    slug: page.slugs[0],
+  }));
+}
+```
+
+And configure metadata:
+
+```tsx title="app/(home)/blog/[slug]/page.tsx"
+import { notFound } from 'next/navigation';
+import { blog } from '@/app/source';
+
+export async function generateMetadata(props: {
+  params: Promise<{ slug: string }>;
+}) {
+  const params = await props.params;
+  const page = blog.getPage([params.slug]);
+
+  if (!page) notFound();
+
+  return {
+    title: page.data.title,
+    description: page.data.description,
+  };
+}
+```
+
+### Write Posts
+
+The UI is now completed, you can write some blog posts under the `content/blog` directory, like:
+
+```mdx title="content/blog/hello.mdx"
+---
+title: Hello World
+author: Fuma Nama
+date: 2024-12-15
+---
+
+## Hello World
+
+This is an example!
+```
+
+Spinning up the development server with `next dev`, you should see the blog posts under `/blog` route.
