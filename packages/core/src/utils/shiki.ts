@@ -3,8 +3,9 @@ import {
   type CodeOptionsThemes,
   type ShikiTransformer,
   type CodeOptionsMeta,
-  type HighlighterCoreOptions,
   type CodeToHastOptionsCommon,
+  type RegexEngine,
+  type Awaitable,
 } from 'shiki';
 import type { BundledTheme } from 'shiki/themes';
 import { type Components, toJsxRuntime } from 'hast-util-to-jsx-runtime';
@@ -33,9 +34,9 @@ export const defaultThemes = {
 };
 
 export type HighlightOptions = CodeToHastOptionsCommon<BundledLanguage> &
-  Pick<HighlighterCoreOptions, 'engine'> &
-  Partial<CodeOptionsThemes<BundledTheme>> &
+  (CodeOptionsThemes<BundledTheme> | Record<never, never>) &
   CodeOptionsMeta & {
+    engine?: Awaitable<RegexEngine>;
     components?: Partial<Components>;
   };
 

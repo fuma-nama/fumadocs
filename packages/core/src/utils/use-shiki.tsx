@@ -4,6 +4,7 @@ import {
   type ReactNode,
   use,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -58,7 +59,10 @@ export function useShiki(
   },
   deps?: DependencyList,
 ): ReactNode {
-  const key = deps ? JSON.stringify(deps) : `${options.lang}:${code}`;
+  const key = useMemo(
+    () => (deps ? JSON.stringify(deps) : `${options.lang}:${code}`),
+    [code, deps, options.lang],
+  );
   const shikiOptions = getHighlightOptions(options);
   const currentTask = useRef<Task | undefined>({
     key,
