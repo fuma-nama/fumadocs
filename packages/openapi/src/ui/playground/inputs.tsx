@@ -24,10 +24,10 @@ import {
   FormLabel,
   labelVariants,
 } from '@/ui/components/form';
-import { resolve } from '@/ui/api/resolve';
+import { resolve } from '@/ui/playground/resolve';
 import { Input } from '@/ui/components/input';
-import { getDefaultValue } from '@/ui/api/get-default-values';
-import { useSchemaContext } from './contexts/schema';
+import { getDefaultValue } from '@/ui/playground/get-default-values';
+import { useSchemaContext } from '../contexts/schema';
 
 interface RenderOptions {
   field: RequestSchema;

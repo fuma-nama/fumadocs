@@ -1,9 +1,9 @@
-import { createContext, type MutableRefObject, useContext } from 'react';
+import { createContext, type RefObject, useContext } from 'react';
 import { type ReferenceSchema, type RequestSchema } from '@/render/playground';
 
 interface SchemaContextType {
   references: Record<string, RequestSchema>;
-  dynamic: MutableRefObject<Map<string, DynamicField>>;
+  dynamic: RefObject<Map<string, DynamicField>>;
 }
 
 export type DynamicField =

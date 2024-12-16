@@ -10,6 +10,10 @@ import {
   type ParsedSchema,
 } from '@/utils/schema';
 import { getSecurities } from '@/utils/get-security';
+import {
+  createBrowserFetcher,
+  type FetchOptions,
+} from '@/ui/playground/fetcher';
 
 interface BaseRequestField {
   name: string;
@@ -74,7 +78,7 @@ export type RequestSchema =
 
 interface Context {
   allowFile: boolean;
-  schema: Record<string, RequestSchema>;
+  references: Record<string, RequestSchema>;
   registered: WeakMap<ParsedSchema, string>;
   nextId: () => string;
   render: RenderContext;
@@ -90,6 +94,20 @@ export interface APIPlaygroundProps {
   header?: PrimitiveRequestField[];
   body?: RequestSchema;
   schemas: Record<string, RequestSchema>;
+
+  fetchAction?: typeof fetch;
+}
+
+async function fetch(
+  input: FetchOptions & {
+    bodySchema: RequestSchema | undefined;
+    references: Record<string, RequestSchema>;
+  },
+) {
+  'use server';
+  const baseFetcher = createBrowserFetcher(input.bodySchema, input.references);
+
+  return baseFetcher.fetch(input);
 }
 
 export function Playground({
@@ -107,13 +125,18 @@ export function Playground({
 
   const context: Context = {
     allowFile: mediaType === 'multipart/form-data',
-    schema: {},
+    references: {},
     nextId() {
       return String(currentId++);
     },
     registered: new WeakMap(),
     render: ctx,
   };
+
+  const bodySchema =
+    bodyContent && mediaType && bodyContent[mediaType].schema
+      ? toSchema(bodyContent[mediaType].schema, true, context)
+      : undefined;
 
   const props: APIPlaygroundProps = {
     authorization: getAuthorizationField(method, ctx),
@@ -129,11 +152,9 @@ export function Playground({
     header: method.parameters
       ?.filter((v) => v.in === 'header')
       .map((v) => parameterToField(v, context)),
-    body:
-      bodyContent && mediaType && bodyContent[mediaType].schema
-        ? toSchema(bodyContent[mediaType].schema, true, context)
-        : undefined,
-    schemas: context.schema,
+    body: bodySchema,
+    schemas: context.references,
+    fetchAction: ctx.enableServerActionProxy ? fetch : undefined,
   };
 
   return <ctx.renderer.APIPlayground {...props} />;
@@ -178,7 +199,7 @@ function getIdFromSchema(
   if (registered === undefined) {
     const id = ctx.nextId();
     ctx.registered.set(schema, id);
-    ctx.schema[id] = toSchema(schema, required, ctx);
+    ctx.references[id] = toSchema(schema, required, ctx);
     return id;
   }
 

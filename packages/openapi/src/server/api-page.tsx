@@ -11,7 +11,10 @@ import { type DocumentInput, processDocument } from '@/utils/process-document';
 export interface ApiPageProps
   extends Pick<
     RenderContext,
-    'generateCodeSamples' | 'generateTypeScriptSchema' | 'shikiOptions'
+    | 'generateCodeSamples'
+    | 'generateTypeScriptSchema'
+    | 'shikiOptions'
+    | 'enableServerActionProxy'
   > {
   document: DocumentInput;
   hasHead: boolean;

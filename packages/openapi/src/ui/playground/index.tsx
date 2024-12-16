@@ -18,16 +18,20 @@ import type {
 } from 'react-hook-form';
 import { useApiContext } from '@/ui/contexts/api';
 import { Form } from '@/ui/components/form';
-import { createBodyFromValue, getStatusInfo } from '@/ui/api/fetcher';
-import { getDefaultValue, getDefaultValues } from '@/ui/api/get-default-values';
-import { InputField, ObjectInput } from '@/ui/inputs';
+import type { Fetcher, FetchResult } from '@/ui/playground/fetcher';
+import {
+  getDefaultValue,
+  getDefaultValues,
+} from '@/ui/playground/get-default-values';
+import { InputField, ObjectInput } from '@/ui/playground/inputs';
 import type {
   APIPlaygroundProps,
   PrimitiveRequestField,
   RequestSchema,
 } from '@/render/playground';
 import { CodeBlock } from '@/ui/components/codeblock';
-import { type DynamicField, SchemaContext } from './contexts/schema';
+import { type DynamicField, SchemaContext } from '../contexts/schema';
+import { getStatusInfo } from '@/ui/playground/status-info';
 
 interface FormValues {
   authorization: string;
@@ -60,6 +64,7 @@ export function APIPlayground({
   body,
   fields = {},
   schemas,
+  fetchAction,
 }: APIPlaygroundProps & {
   fields?: {
     auth?: CustomField<'authorization', PrimitiveRequestField>;
@@ -68,7 +73,7 @@ export function APIPlayground({
     header?: CustomField<`header.${string}`, PrimitiveRequestField>;
     body?: CustomField<'body', RequestSchema>;
   };
-} & HTMLAttributes<HTMLFormElement>): React.ReactElement {
+} & HTMLAttributes<HTMLFormElement>) {
   const { baseUrl } = useApiContext();
   const dynamicRef = useRef(new Map<string, DynamicField>());
   const form = useForm<FormValues>({
@@ -82,44 +87,38 @@ export function APIPlayground({
   });
 
   const testQuery = useQuery(async (input: FormValues) => {
+    const fetcher: Fetcher = fetchAction
+      ? {
+          fetch(input) {
+            return fetchAction({
+              ...input,
+              bodySchema: body,
+              references: schemas,
+            });
+          },
+        }
+      : await import('./fetcher').then((mod) =>
+          mod.createBrowserFetcher(body, schemas),
+        );
+
     const url = new URL(
       `${baseUrl ?? window.location.origin}${createUrlFromInput(route, input.path, input.query)}`,
     );
 
-    const headers = new Headers();
-    if (bodyType !== 'form-data')
-      headers.append('Content-Type', 'application/json');
+    const header = { ...input.header };
 
     if (input.authorization && authorization) {
-      headers.append(authorization.name, input.authorization);
+      header[authorization.name] = input.authorization;
     }
 
-    Object.keys(input.header).forEach((key) => {
-      const paramValue = input.header[key];
-
-      if (typeof paramValue === 'string' && paramValue.length > 0)
-        headers.append(key, paramValue);
-    });
-
-    const bodyValue =
-      body && input.body && Object.keys(input.body).length > 0
-        ? createBodyFromValue(
-            bodyType,
-            input.body,
-            body,
-            schemas,
-            dynamicRef.current,
-          )
-        : undefined;
-    const response = await fetch(url, {
+    return fetcher.fetch({
+      type: bodyType,
+      url: url.toString(),
+      header,
+      body: input.body,
+      dynamicFields: dynamicRef.current,
       method,
-      headers,
-      body: bodyValue,
     });
-
-    const data: unknown = await response.json().catch(() => undefined);
-
-    return { status: response.status, data };
   });
 
   useEffect(() => {
@@ -146,12 +145,7 @@ export function APIPlayground({
   function renderCustomField<
     T extends FieldPath<FormValues>,
     F extends RequestSchema & { name?: string },
-  >(
-    fieldName: T,
-    info: F,
-    field: CustomField<T, F> | undefined,
-    key?: string,
-  ): ReactElement {
+  >(fieldName: T, info: F, field: CustomField<T, F> | undefined, key?: string) {
     if (field) {
       return (
         <Controller
@@ -172,6 +166,12 @@ export function APIPlayground({
       />
     );
   }
+
+  const isParamEmpty =
+    path.length === 0 &&
+    query.length === 0 &&
+    header.length === 0 &&
+    body === undefined;
 
   return (
     <Form {...form}>
@@ -199,72 +199,67 @@ export function APIPlayground({
           {authorization
             ? renderCustomField('authorization', authorization, fields.auth)
             : null}
-          <Accordions
-            type="multiple"
-            className={cn(
-              '-m-3 border-0 bg-transparent text-sm',
-              path.length === 0 &&
-                query.length === 0 &&
-                header.length === 0 &&
-                !body &&
-                'hidden',
-            )}
-          >
-            {path.length > 0 ? (
-              <Accordion title="Path">
-                <div className="flex flex-col gap-4">
-                  {path.map((field) =>
-                    renderCustomField(
-                      `path.${field.name}`,
-                      field,
-                      fields.path,
-                      field.name,
-                    ),
-                  )}
-                </div>
-              </Accordion>
-            ) : null}
+          {!isParamEmpty ? (
+            <Accordions
+              type="multiple"
+              className="-m-3 border-0 bg-transparent text-sm"
+            >
+              {path.length > 0 ? (
+                <Accordion title="Path">
+                  <div className="flex flex-col gap-4">
+                    {path.map((field) =>
+                      renderCustomField(
+                        `path.${field.name}`,
+                        field,
+                        fields.path,
+                        field.name,
+                      ),
+                    )}
+                  </div>
+                </Accordion>
+              ) : null}
 
-            {query.length > 0 ? (
-              <Accordion title="Query">
-                <div className="flex flex-col gap-4">
-                  {query.map((field) =>
-                    renderCustomField(
-                      `query.${field.name}`,
-                      field,
-                      fields.query,
-                      field.name,
-                    ),
-                  )}
-                </div>
-              </Accordion>
-            ) : null}
+              {query.length > 0 ? (
+                <Accordion title="Query">
+                  <div className="flex flex-col gap-4">
+                    {query.map((field) =>
+                      renderCustomField(
+                        `query.${field.name}`,
+                        field,
+                        fields.query,
+                        field.name,
+                      ),
+                    )}
+                  </div>
+                </Accordion>
+              ) : null}
 
-            {header.length > 0 ? (
-              <Accordion title="Headers">
-                <div className="flex flex-col gap-4">
-                  {header.map((field) =>
-                    renderCustomField(
-                      `header.${field.name}`,
-                      field,
-                      fields.header,
-                      field.name,
-                    ),
-                  )}
-                </div>
-              </Accordion>
-            ) : null}
+              {header.length > 0 ? (
+                <Accordion title="Headers">
+                  <div className="flex flex-col gap-4">
+                    {header.map((field) =>
+                      renderCustomField(
+                        `header.${field.name}`,
+                        field,
+                        fields.header,
+                        field.name,
+                      ),
+                    )}
+                  </div>
+                </Accordion>
+              ) : null}
 
-            {body ? (
-              <Accordion title="Body">
-                {body.type === 'object' && !fields.body ? (
-                  <ObjectInput field={body} fieldName="body" />
-                ) : (
-                  renderCustomField('body', body, fields.body)
-                )}
-              </Accordion>
-            ) : null}
-          </Accordions>
+              {body ? (
+                <Accordion title="Body">
+                  {body.type === 'object' && !fields.body ? (
+                    <ObjectInput field={body} fieldName="body" />
+                  ) : (
+                    renderCustomField('body', body, fields.body)
+                  )}
+                </Accordion>
+              ) : null}
+            </Accordions>
+          ) : null}
 
           {testQuery.data ? <ResultDisplay data={testQuery.data} /> : null}
         </form>
@@ -279,19 +274,20 @@ function createUrlFromInput(
   query: Record<string, unknown>,
 ): string {
   let pathname = route;
-  Object.keys(path).forEach((key) => {
+  for (const key of Object.keys(path)) {
     const paramValue = path[key];
 
     if (typeof paramValue === 'string' && paramValue.length > 0)
       pathname = pathname.replace(`{${key}}`, paramValue);
-  });
+  }
 
   const searchParams = new URLSearchParams();
-  Object.keys(query).forEach((key) => {
+  for (const key of Object.keys(query)) {
     const paramValue = query[key];
+
     if (typeof paramValue === 'string' && paramValue.length > 0)
       searchParams.append(key, paramValue);
-  });
+  }
 
   return searchParams.size > 0
     ? `${pathname}?${searchParams.toString()}`
@@ -315,11 +311,7 @@ function RouteDisplay({ route }: { route: string }): ReactElement {
   );
 }
 
-function ResultDisplay({
-  data,
-}: {
-  data: { status: number; data: unknown };
-}): ReactElement {
+function ResultDisplay({ data }: { data: FetchResult }) {
   const statusInfo = useMemo(() => getStatusInfo(data.status), [data.status]);
 
   return (
@@ -330,7 +322,18 @@ function ResultDisplay({
       </div>
       <p className="text-sm text-fd-muted-foreground">{data.status}</p>
       {data.data ? (
-        <CodeBlock code={JSON.stringify(data.data, null, 2)} />
+        <CodeBlock
+          lang={
+            typeof data.data === 'string' && data.data.length > 50000
+              ? 'text'
+              : data.type
+          }
+          code={
+            typeof data.data === 'string'
+              ? data.data
+              : JSON.stringify(data.data, null, 2)
+          }
+        />
       ) : null}
     </div>
   );

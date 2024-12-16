@@ -38,6 +38,8 @@ type Awaitable<T> = T | Promise<T>;
 export type DereferenceMap = Map<unknown, string>;
 
 export interface RenderContext {
+  enableServerActionProxy?: boolean;
+
   renderer: Renderer;
 
   /**

@@ -3,11 +3,12 @@ import { CodeBlock, Pre } from '@/components/codeblock';
 import type { HighlightOptions } from 'fumadocs-core/server';
 import { PrerenderScript, useShiki } from 'fumadocs-core/utils/use-shiki';
 import { useId } from 'react';
+import { cn } from '@/utils/cn';
 
 const components = {
   pre(props) {
     return (
-      <CodeBlock {...props}>
+      <CodeBlock {...props} className={cn('my-0', props.className)}>
         <Pre>{props.children}</Pre>
       </CodeBlock>
     );
