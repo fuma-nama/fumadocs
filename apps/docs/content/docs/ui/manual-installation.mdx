@@ -185,3 +185,21 @@ See [Organizing Pages](/docs/ui/page-conventions) for customising routing.
 
 You can use [Home Layout](/docs/ui/blocks/home-layout) for other pages of the site.
 It includes the theme toggle and global navigation links.
+
+### Deploying
+
+It should work out-of-the-box with Vercel & Netlify.
+
+#### Docker Deployment
+
+If you want to deploy your Fumadocs app using Docker with **Fumadocs MDX configured**, make sure to add the `source.config.ts` file to the `WORKDIR` in the Dockerfile.
+The following snippet is taken from the official [Next.js Dockerfile Exmaple](https://github.com/vercel/next.js/blob/canary/examples/with-docker/Dockerfile):
+
+```zsh title="Dockerfile"
+WORKDIR /app
+
+# Install dependencies based on the preferred package manager
+COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* .npmrc* source.config.ts ./
+```
+
+This ensures Fumadocs MDX can access your configuration file during builds.
