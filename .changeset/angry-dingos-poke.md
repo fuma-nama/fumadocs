@@ -2,4 +2,4 @@
 'fumadocs-openapi': minor
 ---
 
-Support Server Action Proxy
+Support Route Handler Proxy

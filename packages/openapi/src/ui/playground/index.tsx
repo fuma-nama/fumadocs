@@ -18,7 +18,7 @@ import type {
 } from 'react-hook-form';
 import { useApiContext } from '@/ui/contexts/api';
 import { Form } from '@/ui/components/form';
-import type { Fetcher, FetchResult } from '@/ui/playground/fetcher';
+import type { FetchResult } from '@/ui/playground/fetcher';
 import {
   getDefaultValue,
   getDefaultValues,
@@ -64,7 +64,7 @@ export function APIPlayground({
   body,
   fields = {},
   schemas,
-  fetchAction,
+  proxyUrl,
 }: APIPlaygroundProps & {
   fields?: {
     auth?: CustomField<'authorization', PrimitiveRequestField>;
@@ -87,23 +87,18 @@ export function APIPlayground({
   });
 
   const testQuery = useQuery(async (input: FormValues) => {
-    const fetcher: Fetcher = fetchAction
-      ? {
-          fetch(input) {
-            return fetchAction({
-              ...input,
-              bodySchema: body,
-              references: schemas,
-            });
-          },
-        }
-      : await import('./fetcher').then((mod) =>
-          mod.createBrowserFetcher(body, schemas),
-        );
-
-    const url = new URL(
-      `${baseUrl ?? window.location.origin}${createUrlFromInput(route, input.path, input.query)}`,
+    const fetcher = await import('./fetcher').then((mod) =>
+      mod.createBrowserFetcher(body, schemas),
     );
+    const targetUrl = `${baseUrl ?? window.location.origin}${createPathnameFromInput(route, input.path, input.query)}`;
+
+    let url: URL;
+    if (proxyUrl) {
+      url = new URL(proxyUrl, window.location.origin);
+      url.searchParams.append('url', targetUrl);
+    } else {
+      url = new URL(targetUrl);
+    }
 
     const header = { ...input.header };
 
@@ -268,7 +263,7 @@ export function APIPlayground({
   );
 }
 
-function createUrlFromInput(
+function createPathnameFromInput(
   route: string,
   path: Record<string, unknown>,
   query: Record<string, unknown>,
@@ -300,7 +295,7 @@ function RouteDisplay({ route }: { route: string }): ReactElement {
   });
 
   const pathname = useMemo(
-    () => createUrlFromInput(route, path, query),
+    () => createPathnameFromInput(route, path, query),
     [route, path, query],
   );
 

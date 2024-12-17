@@ -38,7 +38,10 @@ type Awaitable<T> = T | Promise<T>;
 export type DereferenceMap = Map<unknown, string>;
 
 export interface RenderContext {
-  enableServerActionProxy?: boolean;
+  /**
+   * The url of proxy to avoid CORS issues
+   */
+  proxyUrl?: string;
 
   renderer: Renderer;
 

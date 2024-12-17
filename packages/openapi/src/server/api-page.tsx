@@ -8,14 +8,15 @@ import type { OpenAPIV3_1 } from 'openapi-types';
 import type { NoReference } from '@/utils/schema';
 import { type DocumentInput, processDocument } from '@/utils/process-document';
 
-export interface ApiPageProps
-  extends Pick<
-    RenderContext,
-    | 'generateCodeSamples'
-    | 'generateTypeScriptSchema'
-    | 'shikiOptions'
-    | 'enableServerActionProxy'
-  > {
+type ApiPageContextProps = Pick<
+  Partial<RenderContext>,
+  | 'shikiOptions'
+  | 'generateTypeScriptSchema'
+  | 'generateCodeSamples'
+  | 'proxyUrl'
+>;
+
+export interface ApiPageProps extends ApiPageContextProps {
   document: DocumentInput;
   hasHead: boolean;
 
@@ -110,16 +111,14 @@ export async function APIPage(props: ApiPageProps) {
 
 export async function getContext(
   { document, dereferenceMap }: ProcessedDocument,
-  options: Pick<
-    Partial<RenderContext>,
-    'shikiOptions' | 'generateTypeScriptSchema' | 'generateCodeSamples'
-  > & {
+  options: ApiPageContextProps & {
     renderer?: Partial<Renderer>;
   } = {},
 ): Promise<RenderContext> {
   return {
     document: document,
     dereferenceMap,
+    proxyUrl: options.proxyUrl,
     renderer: {
       ...createRenders(options.shikiOptions),
       ...options.renderer,

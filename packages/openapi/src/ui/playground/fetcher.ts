@@ -60,7 +60,7 @@ export function createBrowserFetcher(
               input.dynamicFields ?? new Map(),
             )
           : undefined,
-        signal: AbortSignal.timeout(6000),
+        signal: AbortSignal.timeout(10 * 1000),
       })
         .then(async (res) => {
           const contentType = res.headers.get('Content-Type') ?? '';

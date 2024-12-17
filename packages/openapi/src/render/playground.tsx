@@ -10,10 +10,6 @@ import {
   type ParsedSchema,
 } from '@/utils/schema';
 import { getSecurities } from '@/utils/get-security';
-import {
-  createBrowserFetcher,
-  type FetchOptions,
-} from '@/ui/playground/fetcher';
 
 interface BaseRequestField {
   name: string;
@@ -94,20 +90,7 @@ export interface APIPlaygroundProps {
   header?: PrimitiveRequestField[];
   body?: RequestSchema;
   schemas: Record<string, RequestSchema>;
-
-  fetchAction?: typeof fetch;
-}
-
-async function fetch(
-  input: FetchOptions & {
-    bodySchema: RequestSchema | undefined;
-    references: Record<string, RequestSchema>;
-  },
-) {
-  'use server';
-  const baseFetcher = createBrowserFetcher(input.bodySchema, input.references);
-
-  return baseFetcher.fetch(input);
+  proxyUrl?: string;
 }
 
 export function Playground({
@@ -154,7 +137,7 @@ export function Playground({
       .map((v) => parameterToField(v, context)),
     body: bodySchema,
     schemas: context.references,
-    fetchAction: ctx.enableServerActionProxy ? fetch : undefined,
+    proxyUrl: ctx.proxyUrl,
   };
 
   return <ctx.renderer.APIPlayground {...props} />;

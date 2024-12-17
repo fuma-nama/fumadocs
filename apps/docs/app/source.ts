@@ -27,6 +27,7 @@ export const blog = loader({
 });
 
 export const openapi = createOpenAPI({
+  proxyUrl: '/api/proxy',
   shikiOptions: {
     themes: {
       dark: 'vesper',
