@@ -159,6 +159,20 @@ Use the default document search based on Orama.
 
 Learn more about [Document Search](/docs/headless/search).
 
+
+### Docker Deployment
+
+If you deploy your nextjs app using Docker, you need to add the `source.config.ts` file to the WORKDIR in the Dockerfile.
+The following snippet is taken from the official nextjs Dockerfile [ exmaple ](https://github.com/vercel/next.js/blob/canary/examples/with-docker/Dockerfile)
+```zsh title:"Dockerfile"
+WORKDIR /app
+
+# Install dependencies based on the preferred package manager
+COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* .npmrc* source.config.ts ./
+```
+
+> This prevents the docker build error `Could not resolve "/app/source.config.ts"`
+
 ### Done
 
 You can start the dev server and create MDX files.
