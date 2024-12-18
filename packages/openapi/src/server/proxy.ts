@@ -30,7 +30,11 @@ export function createProxy(allowedUrls?: string[]): Proxy {
       });
     }
 
-    const clonedReq = new Request(url, req);
+    const clonedReq = new Request(url, {
+      ...req,
+      cache: 'no-cache',
+      mode: 'cors',
+    });
     clonedReq.headers.forEach((_value, originalKey) => {
       const key = originalKey.toLowerCase();
       const notAllowed = key === 'origin';
@@ -40,9 +44,7 @@ export function createProxy(allowedUrls?: string[]): Proxy {
       }
     });
 
-    const res = await fetch(clonedReq, {
-      cache: 'no-cache',
-    }).catch((e) => new Error(e.toString()));
+    const res = await fetch(clonedReq).catch((e) => new Error(e.toString()));
     if (res instanceof Error) {
       return Response.json(`Failed to proxy request: ${res.message}`, {
         status: 400,
@@ -52,7 +54,8 @@ export function createProxy(allowedUrls?: string[]): Proxy {
     const headers = new Headers(res.headers);
     headers.forEach((_value, originalKey) => {
       const key = originalKey.toLowerCase();
-      const notAllowed = key.startsWith('access-control-');
+      const notAllowed =
+        key.startsWith('access-control-') || key === 'content-encoding';
 
       if (notAllowed) {
         headers.delete(originalKey);

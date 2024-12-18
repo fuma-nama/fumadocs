@@ -36,6 +36,9 @@ function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   return null;
 }
 
+export const dynamicParams = false;
+export const revalidate = false;
+
 export default async function Page(props: {
   params: Promise<{ slug: string[] }>;
 }): Promise<ReactElement> {

@@ -50,6 +50,7 @@ export function createBrowserFetcher(
 
       return fetch(input.url, {
         method: input.method,
+        cache: 'no-cache',
         headers,
         body: bodySchema
           ? createBodyFromValue(
