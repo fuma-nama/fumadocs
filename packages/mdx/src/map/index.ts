@@ -1,7 +1,6 @@
 import path from 'node:path';
 import fs from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
-import { type EventName } from 'chokidar/handler.js';
 import grayMatter from 'gray-matter';
 import { getConfigHash, loadConfigCached } from '@/config/cached';
 import { generateJS, generateTypes } from '@/map/generate';
@@ -53,7 +52,9 @@ export async function start(
       console.log('[MDX] started dev server');
     });
 
-    instance.on('all', (event: EventName, file: string) => {
+    instance.on('all', (event, file) => {
+      if (typeof file !== 'string') return;
+
       const onUpdate = async (): Promise<void> => {
         const isConfigFile = path.resolve(file) === configPath;
 
