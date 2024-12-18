@@ -1,6 +1,5 @@
 import path from 'node:path';
 import { type FSWatcher, watch as watchFn } from 'chokidar';
-import { type EventName } from 'chokidar/handler.js';
 
 export interface WatchOptions {
   files: string[];
@@ -30,7 +29,8 @@ export function watch(options: WatchOptions): FSWatcher {
     console.error('Development Server failed to start', e);
   });
 
-  watcher.on('all', (event: EventName, relativePath: string) => {
+  watcher.on('all', (event, relativePath) => {
+    if (typeof relativePath !== 'string') return;
     const absolutePath = path.resolve(cwd, relativePath);
 
     if (event === 'add') {
