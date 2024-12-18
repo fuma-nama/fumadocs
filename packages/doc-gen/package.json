@@ -27,6 +27,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
+    "@swc/wasm-typescript": "^1.10.1",
     "estree-util-value-to-estree": "^3.2.1",
     "fumadocs-typescript": "workspace:^",
     "hast-util-to-estree": "^3.1.0",
