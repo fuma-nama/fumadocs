@@ -113,7 +113,7 @@ const neutral: Preset = {
     'popover-foreground': '0 0% 88%',
     card: '0 0% 9.8%',
     'card-foreground': '0 0% 98%',
-    border: '0 0% 18%',
+    border: '0 0% 14%',
     primary: '0 0% 98%',
     'primary-foreground': '0 0% 9%',
     secondary: '0 0% 12.9%',
