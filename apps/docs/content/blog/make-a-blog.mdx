@@ -49,7 +49,7 @@ You can now access the content from `blog`.
 Create an index page for blog posts.
 
 By default, there should be a `(home)` route group with `<HomeLayout />` inside.
-Let's put the index page under it, this way we can get the nice navbar on index page.
+Let's put the blog pages under it, this way we can get the nice navbar on our blog site.
 
 ```tsx title="app/(home)/blog/page.tsx"
 import Link from 'next/link';
@@ -70,9 +70,6 @@ export default function Home() {
           >
             <h2 className="text-xl font-semibold mb-2">{post.data.title}</h2>
             <p className="mb-4">{post.data.description}</p>
-            <p className="text-sm text-fd-muted-foreground">
-              Published on {post.data.date}
-            </p>
           </Link>
         ))}
       </div>
@@ -96,8 +93,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { InlineTOC } from 'fumadocs-ui/components/inline-toc';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
-import { blog } from '@/app/source';
-import { buttonVariants } from '@/components/ui/button';
+import { blog } from '@/lib/source';
 
 export default async function Page(props: {
   params: Promise<{ slug: string }>;
@@ -113,12 +109,7 @@ export default async function Page(props: {
       <div className="container rounded-xl border py-12 md:px-8">
         <h1 className="mb-2 text-3xl font-bold">{page.data.title}</h1>
         <p className="mb-4 text-fd-muted-foreground">{page.data.description}</p>
-        <Link
-          href="/blog"
-          className={buttonVariants({ size: 'sm', variant: 'secondary' })}
-        >
-          Back
-        </Link>
+        <Link href="/blog">Back</Link>
       </div>
       <article className="container flex flex-col px-4 py-8">
         <div className="prose min-w-0">
@@ -153,7 +144,7 @@ And configure metadata:
 
 ```tsx title="app/(home)/blog/[slug]/page.tsx"
 import { notFound } from 'next/navigation';
-import { blog } from '@/app/source';
+import { blog } from '@/lib/source';
 
 export async function generateMetadata(props: {
   params: Promise<{ slug: string }>;
