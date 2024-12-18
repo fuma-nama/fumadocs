@@ -1,8 +1,8 @@
 import { PlusIcon } from 'lucide-react';
 import Image, { type StaticImageData } from 'next/image';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/cn';
 import { buttonVariants } from '@/components/ui/button';
-import { createMetadata } from '@/utils/metadata';
+import { createMetadata } from '@/lib/metadata';
 import NextFAQ from '@/public/showcases/next-faq.png';
 import Yeecord from '@/public/showcases/yeecord.png';
 import Nuqs from '@/public/showcases/nuqs.jpg';

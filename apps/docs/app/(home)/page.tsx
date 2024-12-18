@@ -18,7 +18,7 @@ import { File, Files, Folder } from 'fumadocs-ui/components/files';
 import Link from 'next/link';
 import type { HTMLAttributes, ReactNode } from 'react';
 import Image from 'next/image';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/cn';
 import { buttonVariants } from '@/components/ui/button';
 import { CodeBlock } from '@/components/code-block';
 import { UwuHero } from '@/app/(home)/uwu';

@@ -12,7 +12,7 @@ import {
 import { TerminalIcon } from 'lucide-react';
 import Link from 'next/link';
 import scrollIntoView from 'scroll-into-view-if-needed';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/cn';
 import { buttonVariants } from '@/components/ui/button';
 
 export function CreateAppAnimation() {

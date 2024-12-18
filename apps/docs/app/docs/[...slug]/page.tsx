@@ -21,11 +21,11 @@ import { Callout } from 'fumadocs-ui/components/callout';
 import { TypeTable } from 'fumadocs-ui/components/type-table';
 import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 import * as Preview from '@/components/preview';
-import { createMetadata } from '@/utils/metadata';
-import { openapi, source } from '@/app/source';
+import { createMetadata } from '@/lib/metadata';
+import { openapi, source } from '@/lib/source';
 import { Wrapper } from '@/components/preview/wrapper';
 import { AutoTypeTable } from '@/components/type-table';
-import { metadataImage } from '@/utils/metadata-image';
+import { metadataImage } from '@/lib/metadata-image';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {

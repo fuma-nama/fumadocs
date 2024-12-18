@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/cn';
 import { buttonVariants } from '@/components/ui/button';
 
 export function UrlBar() {

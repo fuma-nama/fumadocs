@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { type ImageResponse } from 'next/og';
-import { metadataImage } from '@/utils/metadata-image';
+import { metadataImage } from '@/lib/metadata-image';
 import { generateOGImage } from '@/app/og/[...slug]/og';
 
 const font = readFileSync('./app/og/[...slug]/Geist-Regular.ttf');

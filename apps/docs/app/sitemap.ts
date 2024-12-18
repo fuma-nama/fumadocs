@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next';
-import { baseUrl } from '@/utils/metadata';
-import { source } from '@/app/source';
+import { baseUrl } from '@/lib/metadata';
+import { source } from '@/lib/source';
 
 export const revalidate = false;
 

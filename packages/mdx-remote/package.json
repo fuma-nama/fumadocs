@@ -62,7 +62,7 @@
   "dependencies": {
     "@mdx-js/mdx": "^3.1.0",
     "bufferutil": "^4.0.8",
-    "chokidar": "^4.0.1",
+    "chokidar": "^4.0.2",
     "fast-glob": "^3.3.1",
     "gray-matter": "^4.0.3",
     "micromatch": "^4.0.8",
@@ -77,7 +77,7 @@
     "@types/ws": "^8.5.13",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
-    "next": "15.1.0",
+    "next": "15.1.1",
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
     "vfile": "^6.0.3"

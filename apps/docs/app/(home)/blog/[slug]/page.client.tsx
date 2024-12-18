@@ -6,7 +6,7 @@ import {
   TooltipTrigger,
 } from '@radix-ui/react-tooltip';
 import { useState } from 'react';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/cn';
 import { buttonVariants } from '@/components/ui/button';
 
 export function Control({ url }: { url: string }): React.ReactElement {

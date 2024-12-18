@@ -3,7 +3,7 @@ import './global.css';
 import type { Viewport } from 'next';
 import { GeistSans } from 'geist/font/sans';
 import { GeistMono } from 'geist/font/mono';
-import { baseUrl, createMetadata } from '@/utils/metadata';
+import { baseUrl, createMetadata } from '@/lib/metadata';
 import { Body } from '@/app/layout.client';
 import { Provider } from './provider';
 

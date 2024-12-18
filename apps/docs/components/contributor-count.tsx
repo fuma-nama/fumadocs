@@ -1,7 +1,7 @@
 import type { HTMLAttributes } from 'react';
 import Image from 'next/image';
-import { cn } from '@/utils/cn';
-import { fetchContributors } from '@/utils/get-contributors';
+import { cn } from '@/lib/cn';
+import { fetchContributors } from '@/lib/get-contributors';
 
 export interface ContributorCounterProps
   extends HTMLAttributes<HTMLDivElement> {

@@ -2,7 +2,7 @@ import { Building2, LibraryIcon } from 'lucide-react';
 import Link, { type LinkProps } from 'next/link';
 import Image from 'next/image';
 import { buttonVariants } from '@/components/ui/button';
-import { cn } from '@/utils/cn';
+import { cn } from '@/lib/cn';
 import Spot from '@/public/spot.png';
 
 export default function DocsPage(): React.ReactElement {

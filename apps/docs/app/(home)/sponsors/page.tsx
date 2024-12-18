@@ -7,8 +7,8 @@ import {
   sponsorTiers,
 } from '@/app/(home)/sponsors/data';
 import { buttonVariants } from '@/components/ui/button';
-import { cn } from '@/utils/cn';
-import { getSponsors } from '@/utils/get-sponsors';
+import { cn } from '@/lib/cn';
+import { getSponsors } from '@/lib/get-sponsors';
 
 export default async function Page() {
   const sponsors = await getSponsors('fuma-nama', [

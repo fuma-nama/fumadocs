@@ -11,7 +11,9 @@ const defaultTransform: TabOptions['transform'] = (option, node) => {
   return {
     ...option,
     icon: (
-      <div className="bg-fd-background/80 p-1 [&_svg]:size-5">{node.icon}</div>
+      <div className="rounded-md border bg-fd-secondary p-1 shadow-md [&_svg]:size-5">
+        {node.icon}
+      </div>
     ),
   };
 };
