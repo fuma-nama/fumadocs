@@ -1,5 +1,21 @@
 # @fuma-docs/openapi
 
+## 5.10.0
+
+### Minor Changes
+
+- 8aff7f4: Support Route Handler Proxy
+
+### Patch Changes
+
+- 1a2597a: Expose `--fd-tocnav-height` CSS variable
+- Updated dependencies [9908922]
+- Updated dependencies [2357d40]
+- Updated dependencies [ece734f]
+- Updated dependencies [1a2597a]
+  - fumadocs-ui@14.6.2
+  - fumadocs-core@14.6.2
+
 ## 5.9.0
 
 ### Minor Changes

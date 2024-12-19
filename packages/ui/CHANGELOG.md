@@ -1,5 +1,15 @@
 # next-docs-ui
 
+## 14.6.2
+
+### Patch Changes
+
+- 9908922: Add default icon styles (`transformer`) to sidebar tabs
+- ece734f: Support custom children of trigger on `InlineTOC` component
+- 1a2597a: Expose `--fd-tocnav-height` CSS variable
+- Updated dependencies [2357d40]
+  - fumadocs-core@14.6.2
+
 ## 14.6.1
 
 ### Patch Changes
