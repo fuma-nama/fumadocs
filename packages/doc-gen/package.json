@@ -27,11 +27,11 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@swc/wasm-typescript": "^1.10.1",
     "estree-util-value-to-estree": "^3.2.1",
     "fumadocs-typescript": "workspace:^",
     "hast-util-to-estree": "^3.1.0",
     "npm-to-yarn": "^3.0.0",
+    "oxc-transform": "^0.42.0",
     "ts-morph": "^24.0.0",
     "unist-util-visit": "^5.0.0",
     "zod": "^3.24.1"

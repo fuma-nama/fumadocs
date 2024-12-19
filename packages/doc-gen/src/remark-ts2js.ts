@@ -1,11 +1,10 @@
 import { Transformer } from 'unified';
 import { type Code, Root } from 'mdast';
 import { visit } from 'unist-util-visit';
-import { transform, Options as SWCOptions } from '@swc/wasm-typescript';
 import { createElement, expressionToAttribute } from '@/utils';
+import oxc from 'oxc-transform';
 
 export interface TypeScriptToJavaScriptOptions {
-  swc?: SWCOptions;
   /**
    * Persist Tab value (Fumadocs UI only)
    *
@@ -16,105 +15,115 @@ export interface TypeScriptToJavaScriptOptions {
         id: string;
       }
     | false;
+
+  /**
+   * Transform all TypeScript codeblocks by default, without a trigger
+   */
+  disableTrigger?: boolean;
 }
 
-export function remarkTs2js({
-  swc = {},
+/**
+ * A remark plugin to transform TypeScript codeblocks into two tabs of codeblocks with its JS variant.
+ *
+ * Add `ts2js` to enable transformation:
+ * ````md
+ * ```tsx ts2js
+ * import { ReactNode } from "react";
+ *
+ * export default function Layout({ children }: { children: ReactNode }) {
+ *     return <div>{children}</div>
+ * }
+ * ```
+ * ````
+ */
+export function remarkTypeScriptToJavaScript({
   persist = false,
+  disableTrigger = false,
 }: TypeScriptToJavaScriptOptions = {}): Transformer<Root> {
-  return async (tree, file) => {
-    const queue: Promise<void>[] = [];
-
+  return (tree, file) => {
     visit(tree, 'code', (node) => {
       if (node.lang !== 'ts' && node.lang !== 'tsx') return;
 
-      const task = transform(node.value, {
-        filename: `${file.path}.${node.lang}`,
-        transform: {
-          importExportAssignConfig: 'Preserve',
-          verbatimModuleSyntax: true,
+      if (!disableTrigger && !node.meta?.includes('ts2js')) return;
+
+      const result = oxc.transform(
+        `${file.path ?? 'test'}.${node.lang}`,
+        node.value,
+        {
+          sourcemap: false,
+          jsx: 'preserve',
         },
-        sourceMap: false,
-        ...swc,
-      })
-        .then((output) => {
-          const insert = createElement(
-            'Tabs',
-            [
-              ...(typeof persist === 'object'
-                ? [
-                    {
-                      type: 'mdxJsxAttribute',
-                      name: 'groupId',
-                      value: persist.id,
-                    },
-                    {
-                      type: 'mdxJsxAttribute',
-                      name: 'persist',
-                      value: null,
-                    },
-                  ]
-                : []),
-              expressionToAttribute('items', {
-                type: 'ArrayExpression',
-                elements: ['TypeScript', 'JavaScript'].map((name) => ({
-                  type: 'Literal',
-                  value: name,
-                })),
-              }),
-            ],
-            [
+      );
+
+      const insert = createElement(
+        'Tabs',
+        [
+          ...(typeof persist === 'object'
+            ? [
+                {
+                  type: 'mdxJsxAttribute',
+                  name: 'groupId',
+                  value: persist.id,
+                },
+                {
+                  type: 'mdxJsxAttribute',
+                  name: 'persist',
+                  value: null,
+                },
+              ]
+            : []),
+          expressionToAttribute('items', {
+            type: 'ArrayExpression',
+            elements: ['TypeScript', 'JavaScript'].map((name) => ({
+              type: 'Literal',
+              value: name,
+            })),
+          }),
+        ],
+        [
+          {
+            type: 'mdxJsxFlowElement',
+            name: 'Tab',
+            attributes: [
               {
-                type: 'mdxJsxFlowElement',
-                name: 'Tab',
-                attributes: [
-                  {
-                    type: 'mdxJsxAttribute',
-                    name: 'value',
-                    value: 'TypeScript',
-                  },
-                ],
-                children: [
-                  {
-                    type: 'code',
-                    lang: node.lang,
-                    meta: node.meta,
-                    value: node.value,
-                  } satisfies Code,
-                ],
-              },
-              {
-                type: 'mdxJsxFlowElement',
-                name: 'Tab',
-                attributes: [
-                  {
-                    type: 'mdxJsxAttribute',
-                    name: 'value',
-                    value: 'JavaScript',
-                  },
-                ],
-                children: [
-                  {
-                    type: 'code',
-                    lang: 'jsx',
-                    meta: node.meta,
-                    value: output.code,
-                  } satisfies Code,
-                ],
+                type: 'mdxJsxAttribute',
+                name: 'value',
+                value: 'TypeScript',
               },
             ],
-          );
+            children: [
+              {
+                type: 'code',
+                lang: node.lang,
+                meta: node.meta,
+                value: node.value,
+              } satisfies Code,
+            ],
+          },
+          {
+            type: 'mdxJsxFlowElement',
+            name: 'Tab',
+            attributes: [
+              {
+                type: 'mdxJsxAttribute',
+                name: 'value',
+                value: 'JavaScript',
+              },
+            ],
+            children: [
+              {
+                type: 'code',
+                lang: 'jsx',
+                meta: node.meta,
+                value: result.code,
+              } satisfies Code,
+            ],
+          },
+        ],
+      );
 
-          Object.assign(node, insert);
-        })
-        .catch((e) => {
-          // ignore node
-          console.error(e);
-        });
-
-      queue.push(task);
+      Object.assign(node, insert);
+      return 'skip';
     });
-
-    await Promise.all(queue);
   };
 }

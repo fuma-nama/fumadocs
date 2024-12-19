@@ -695,9 +695,6 @@ importers:
 
   packages/doc-gen:
     dependencies:
-      '@swc/wasm-typescript':
-        specifier: ^1.10.1
-        version: 1.10.1
       estree-util-value-to-estree:
         specifier: ^3.2.1
         version: 3.2.1
@@ -710,6 +707,9 @@ importers:
       npm-to-yarn:
         specifier: ^3.0.0
         version: 3.0.0
+      oxc-transform:
+        specifier: ^0.42.0
+        version: 0.42.0
       ts-morph:
         specifier: ^24.0.0
         version: 24.0.0
@@ -2156,6 +2156,46 @@ packages:
   '@oramacloud/client@2.1.4':
     resolution: {integrity: sha512-uNPFs4wq/iOPbggCwTkVNbIr64Vfd7ZS/h+cricXVnzXWocjDTfJ3wLL4lr0qiSu41g8z+eCAGBqJ30RO2O4AA==}
 
+  '@oxc-transform/binding-darwin-arm64@0.42.0':
+    resolution: {integrity: sha512-/csANDgbNfpMHUEDuPYV1ZErvkDHck60tHBA8pXt3IUUDRruv1neLY0PVmxKVoTMpXhJBATVBalwQug1CSbKRg==}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@oxc-transform/binding-darwin-x64@0.42.0':
+    resolution: {integrity: sha512-P5Vdi3mp8ArYSYlDTHh45jiR14haP5+ayoKp3PGB3BQpgaXFIZ9Yrhy0Ew57He1khxbozE869TP3Db4XDDJH4A==}
+    cpu: [x64]
+    os: [darwin]
+
+  '@oxc-transform/binding-linux-arm64-gnu@0.42.0':
+    resolution: {integrity: sha512-K2dUqks8Fl+NCVkubo2htgbRaRoEuaDVrGypK5IyajY2OTJeKFd13HMc2lc1L7vp7Cd7CcbPMupUvhJOVeGQrA==}
+    cpu: [arm64]
+    os: [linux]
+
+  '@oxc-transform/binding-linux-arm64-musl@0.42.0':
+    resolution: {integrity: sha512-jMsuaUex0dBSS9fMjxP9r4MHV7LvjJVGPaMKY5Q0d9spId3AssWypbgEG0nh757maryd6fmCrP2Zz77xX9cumQ==}
+    cpu: [arm64]
+    os: [linux]
+
+  '@oxc-transform/binding-linux-x64-gnu@0.42.0':
+    resolution: {integrity: sha512-RayahTPcfU8TIdTuTNrgACGc3yYGHeXYHHz0UO5DTBg3egbm+Hk5SOdrcU6KUD1vxaYnWDiK5mJKh0tQxqKcqA==}
+    cpu: [x64]
+    os: [linux]
+
+  '@oxc-transform/binding-linux-x64-musl@0.42.0':
+    resolution: {integrity: sha512-N87yYj55kbwyTclwy5XdPrNSOTjT2zFz+0GpVUx16eQ6C/z5lnUY18fbHiU6b23GLlJhG5PJdXzNCBqeY0FKaQ==}
+    cpu: [x64]
+    os: [linux]
+
+  '@oxc-transform/binding-win32-arm64-msvc@0.42.0':
+    resolution: {integrity: sha512-whVOuuk3C0alAwkV6HroQoPttopJ6NkOun9xwUL6ETQhHyiCodnKQJWP3SwGepHI2cLW0F5fTfxNBFa8xCYXaQ==}
+    cpu: [arm64]
+    os: [win32]
+
+  '@oxc-transform/binding-win32-x64-msvc@0.42.0':
+    resolution: {integrity: sha512-0Gup7nOJMCLhUCpukSWHR2PKZ5oF4CebDMKIF6qhxfTHXLkQcV78z89B6Ek05QwHuLK84NWFRCgZIe0q5xEiBg==}
+    cpu: [x64]
+    os: [win32]
+
   '@parcel/watcher-android-arm64@2.5.0':
     resolution: {integrity: sha512-qlX4eS28bUcQCdribHkg/herLe+0A9RyYC+mm2PXpncit8z5b3nSqGVzMNR3CmtAOgRutiZ02eIJJgP/b1iEFQ==}
     engines: {node: '>= 10.0.0'}
@@ -2949,9 +2989,6 @@ packages:
 
   '@swc/types@0.1.17':
     resolution: {integrity: sha512-V5gRru+aD8YVyCOMAjMpWR1Ui577DD5KSJsHP8RAxopAH22jFz6GZd/qxqjO6MJHQhcsjvjOFXyDhyLQUnMveQ==}
-
-  '@swc/wasm-typescript@1.10.1':
-    resolution: {integrity: sha512-k77Ltrgp4L1APToioEchu/bcZVE2Cdg3cTRkqQa14C5sllhmKEcJyElrjuxj/RbMGjLHSjA2rZuwFnPs+3eWBg==}
 
   '@theguild/remark-mermaid@0.2.0':
     resolution: {integrity: sha512-o8n57TJy0OI4PCrNw8z6S+vpHtrwoQZzTA5Y3fL0U1NDRIoMg/78duWgEBFsCZcWM1G6zjE91yg1aKCsDwgE2Q==}
@@ -5281,6 +5318,9 @@ packages:
   outdent@0.5.0:
     resolution: {integrity: sha512-/jHxFIzoMXdqPzTaCpFzAAWhpkSjZPF4Vsn6jAfNpmbH/ymsmd7Qc6VE9BGn0L6YMj6uwpQLxCECpus4ukKS9Q==}
 
+  oxc-transform@0.42.0:
+    resolution: {integrity: sha512-vkgXdj1YdVnb27FpaE8jvKKhTp+jcnMLtAzS1qo6EaTOwoF0upSS9sC/z7TvtjMn0tAvTr2Y4rB4sbUFpYGkSA==}
+
   p-filter@2.1.0:
     resolution: {integrity: sha512-ZBxxZ5sL2HghephhpGAQdoskxplTwr7ICaehZwLIlfL6acuVgZPm8yBNuRAFBGEqtD/hmUeq9eqLg2ys9Xr/yw==}
     engines: {node: '>=8'}
@@ -7462,6 +7502,30 @@ snapshots:
       '@orama/orama': 3.0.2
       lodash: 4.17.21
 
+  '@oxc-transform/binding-darwin-arm64@0.42.0':
+    optional: true
+
+  '@oxc-transform/binding-darwin-x64@0.42.0':
+    optional: true
+
+  '@oxc-transform/binding-linux-arm64-gnu@0.42.0':
+    optional: true
+
+  '@oxc-transform/binding-linux-arm64-musl@0.42.0':
+    optional: true
+
+  '@oxc-transform/binding-linux-x64-gnu@0.42.0':
+    optional: true
+
+  '@oxc-transform/binding-linux-x64-musl@0.42.0':
+    optional: true
+
+  '@oxc-transform/binding-win32-arm64-msvc@0.42.0':
+    optional: true
+
+  '@oxc-transform/binding-win32-x64-msvc@0.42.0':
+    optional: true
+
   '@parcel/watcher-android-arm64@2.5.0':
     optional: true
 
@@ -8187,8 +8251,6 @@ snapshots:
   '@swc/types@0.1.17':
     dependencies:
       '@swc/counter': 0.1.3
-
-  '@swc/wasm-typescript@1.10.1': {}
 
   '@theguild/remark-mermaid@0.2.0(react@19.0.0)':
     dependencies:
@@ -11195,6 +11257,17 @@ snapshots:
   os-tmpdir@1.0.2: {}
 
   outdent@0.5.0: {}
+
+  oxc-transform@0.42.0:
+    optionalDependencies:
+      '@oxc-transform/binding-darwin-arm64': 0.42.0
+      '@oxc-transform/binding-darwin-x64': 0.42.0
+      '@oxc-transform/binding-linux-arm64-gnu': 0.42.0
+      '@oxc-transform/binding-linux-arm64-musl': 0.42.0
+      '@oxc-transform/binding-linux-x64-gnu': 0.42.0
+      '@oxc-transform/binding-linux-x64-musl': 0.42.0
+      '@oxc-transform/binding-win32-arm64-msvc': 0.42.0
+      '@oxc-transform/binding-win32-x64-msvc': 0.42.0
 
   p-filter@2.1.0:
     dependencies:
