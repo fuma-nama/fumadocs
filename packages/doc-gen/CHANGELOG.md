@@ -1,5 +1,11 @@
 # fumadocs-docgen
 
+## 1.3.4
+
+### Patch Changes
+
+- 6d3c7d2: Use `oxc` for `ts2js` remark plugins
+
 ## 1.3.3
 
 ### Patch Changes
