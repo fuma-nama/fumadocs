@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 14.6.2
+
+### Patch Changes
+
+- 2357d40: Fix typings of `HighlightOptions`
+
 ## 14.6.1
 
 ## 14.6.0

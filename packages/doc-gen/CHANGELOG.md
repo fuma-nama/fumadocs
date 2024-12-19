@@ -1,5 +1,12 @@
 # fumadocs-docgen
 
+## 1.3.3
+
+### Patch Changes
+
+- 4ab0de6: Support TS2JS remark plugin [experimental]
+  - fumadocs-typescript@3.0.2
+
 ## 1.3.2
 
 ### Patch Changes
