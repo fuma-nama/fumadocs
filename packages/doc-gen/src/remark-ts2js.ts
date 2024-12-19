@@ -1,8 +1,7 @@
-import { Transformer } from 'unified';
+import { type Transformer } from 'unified';
 import { type Code, Root } from 'mdast';
 import { visit } from 'unist-util-visit';
 import { createElement, expressionToAttribute } from '@/utils';
-import oxc from 'oxc-transform';
 
 export interface TypeScriptToJavaScriptOptions {
   /**
@@ -40,10 +39,11 @@ export function remarkTypeScriptToJavaScript({
   persist = false,
   disableTrigger = false,
 }: TypeScriptToJavaScriptOptions = {}): Transformer<Root> {
-  return (tree, file) => {
+  return async (tree, file) => {
+    const oxc = await import('oxc-transform');
+
     visit(tree, 'code', (node) => {
       if (node.lang !== 'ts' && node.lang !== 'tsx') return;
-
       if (!disableTrigger && !node.meta?.includes('ts2js')) return;
 
       const result = oxc.transform(

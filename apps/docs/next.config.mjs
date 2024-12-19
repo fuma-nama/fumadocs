@@ -13,7 +13,7 @@ const config = {
     // Replaced by root workspace command
     ignoreDuringBuilds: true,
   },
-  serverExternalPackages: ['ts-morph', 'typescript'],
+  serverExternalPackages: ['ts-morph', 'typescript', 'oxc-transform'],
   experimental: {
     reactCompiler: true,
   },
