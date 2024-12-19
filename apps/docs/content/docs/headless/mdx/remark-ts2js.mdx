@@ -1,0 +1,76 @@
+---
+title: Remark TS to JS
+description: A remark plugin to transform TypeScript codeblocks into two tabs of codeblock with its JavaScript variant.
+---
+
+## Usage
+
+Install dependencies:
+
+```package-install
+fumadocs-docgen oxc-transform
+```
+
+Add `oxc-transform` to `serverExternalPackages` in `next.config.mjs`:
+
+```js title="next.config.mjs"
+import { createMDX } from 'fumadocs-mdx/next';
+
+/** @type {import('next').NextConfig} */
+const config = {
+  reactStrictMode: true,
+  serverExternalPackages: ['oxc-transform'],
+};
+
+const withMDX = createMDX();
+
+export default withMDX(config);
+```
+
+Add the remark plugin (e.g. for Fumadocs MDX):
+
+```ts title="source.config.ts"
+import { defineConfig } from 'fumadocs-mdx/config';
+import { remarkTypeScriptToJavaScript } from 'fumadocs-docgen';
+
+export default defineConfig({
+  mdxOptions: {
+    remarkPlugins: [remarkTypeScriptToJavaScript],
+  },
+});
+```
+
+Finally, make sure to define the required MDX components: `Tabs` and `Tab`.
+
+```tsx title="app/docs/[[...slug]]/page.tsx (Fumadocs MDX)"
+import defaultComponents from 'fumadocs-ui/mdx';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+
+<Mdx
+  components={{
+    ...defaultComponents,
+    Tabs,
+    Tab,
+  }}
+/>;
+```
+
+You can now enable it on TypeScript/TSX codeblocks, like:
+
+````md
+```tsx ts2js
+import { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return <div>{children}</div>;
+}
+```
+````
+
+```tsx ts2js
+import { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return <div>{children}</div>;
+}
+```
