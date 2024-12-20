@@ -8,6 +8,7 @@ import { readFileSync } from 'node:fs';
 import { remarkInstall } from '@/remark-install';
 import { remark } from 'remark';
 import { typescriptGenerator } from '@/typescript-generator';
+import { remarkTypeScriptToJavaScript } from '@/remark-ts2js';
 
 const cwd = path.dirname(fileURLToPath(import.meta.url));
 
@@ -20,7 +21,7 @@ test('File Generator', async () => {
 
   const result = await processor.process({ cwd, value: content });
 
-  expect(result.toString()).toMatchFileSnapshot(
+  await expect(result.toString()).toMatchFileSnapshot(
     path.resolve(cwd, './fixtures/file-gen.output.md'),
   );
 });
@@ -35,7 +36,7 @@ test('File Generator - Relative', async () => {
     })
     .process({ path: file, value: content, cwd });
 
-  expect(result.toString()).toMatchFileSnapshot(
+  await expect(result.toString()).toMatchFileSnapshot(
     path.resolve(cwd, './fixtures/file-gen.relative.output.md'),
   );
 });
@@ -46,10 +47,11 @@ test('Remark Install', async () => {
 
   const result = await createProcessor({
     remarkPlugins: [remarkInstall],
+    jsx: true,
   }).process(content);
 
-  expect(result.toString()).toMatchFileSnapshot(
-    path.resolve(cwd, './fixtures/remark-install.output.js'),
+  await expect(result.toString()).toMatchFileSnapshot(
+    path.resolve(cwd, './fixtures/remark-install.output.jsx'),
   );
 });
 
@@ -58,6 +60,7 @@ test('Remark Install', async () => {
   const content = readFileSync(file);
 
   const result = await createProcessor({
+    jsx: true,
     remarkPlugins: [
       [
         remarkInstall,
@@ -70,8 +73,8 @@ test('Remark Install', async () => {
     ],
   }).process(content);
 
-  expect(result.toString()).toMatchFileSnapshot(
-    path.resolve(cwd, './fixtures/remark-install-persist.output.js'),
+  await expect(result.toString()).toMatchFileSnapshot(
+    path.resolve(cwd, './fixtures/remark-install-persist.output.jsx'),
   );
 });
 
@@ -91,9 +94,24 @@ test('Typescript Generator', async () => {
         { generators: [typescriptGenerator({ config: tsconfig })] },
       ],
     ],
+    jsx: true,
   }).process({ value: content, cwd });
 
-  expect(result.toString()).toMatchFileSnapshot(
-    path.resolve(cwd, './fixtures/typescript-gen.output.js'),
+  await expect(result.toString()).toMatchFileSnapshot(
+    path.resolve(cwd, './fixtures/typescript-gen.output.jsx'),
+  );
+});
+
+test('TS to JS', async () => {
+  const file = path.resolve(cwd, './fixtures/ts2js.md');
+  const content = readFileSync(file);
+
+  const result = await createProcessor({
+    remarkPlugins: [remarkTypeScriptToJavaScript],
+    jsx: true,
+  }).process(content);
+
+  await expect(result.toString()).toMatchFileSnapshot(
+    path.resolve(cwd, './fixtures/ts2js.output.jsx'),
   );
 });

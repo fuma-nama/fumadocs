@@ -19,6 +19,9 @@ export interface TypeScriptToJavaScriptOptions {
    * Transform all TypeScript codeblocks by default, without a trigger
    */
   disableTrigger?: boolean;
+
+  Tabs?: string;
+  Tab?: string;
 }
 
 /**
@@ -38,6 +41,8 @@ export interface TypeScriptToJavaScriptOptions {
 export function remarkTypeScriptToJavaScript({
   persist = false,
   disableTrigger = false,
+  Tab = 'Tab',
+  Tabs = 'Tabs',
 }: TypeScriptToJavaScriptOptions = {}): Transformer<Root> {
   return async (tree, file) => {
     const oxc = await import('oxc-transform');
@@ -56,7 +61,7 @@ export function remarkTypeScriptToJavaScript({
       );
 
       const insert = createElement(
-        'Tabs',
+        Tabs,
         [
           ...(typeof persist === 'object'
             ? [
@@ -83,7 +88,7 @@ export function remarkTypeScriptToJavaScript({
         [
           {
             type: 'mdxJsxFlowElement',
-            name: 'Tab',
+            name: Tab,
             attributes: [
               {
                 type: 'mdxJsxAttribute',
@@ -102,7 +107,7 @@ export function remarkTypeScriptToJavaScript({
           },
           {
             type: 'mdxJsxFlowElement',
-            name: 'Tab',
+            name: Tab,
             attributes: [
               {
                 type: 'mdxJsxAttribute',

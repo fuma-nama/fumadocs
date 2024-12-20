@@ -115,7 +115,7 @@ describe('Get Files', () => {
       accessToken: 'token',
     });
 
-    expect(files).toMatchFileSnapshot(
+    await expect(files).toMatchFileSnapshot(
       path.resolve(cwd, './out/github-files.json5'),
     );
   });

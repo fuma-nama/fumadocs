@@ -13,7 +13,7 @@ const tsconfig: TypescriptConfig = {
   basePath: relative('../'),
 };
 
-test('Run', () => {
+test('Run', async () => {
   const file = relative('./fixtures/test.ts');
   const content = fs.readFileSync(file).toString();
 
@@ -23,16 +23,16 @@ test('Run', () => {
     }),
   );
 
-  expect(JSON.stringify(result, null, 2)).toMatchFileSnapshot(
+  await expect(JSON.stringify(result, null, 2)).toMatchFileSnapshot(
     './fixtures/test.output.json',
   );
 });
 
-test('Run on MDX files', () => {
+test('Run on MDX files', async () => {
   const file = relative('./fixtures/test.mdx');
   const content = fs.readFileSync(file).toString();
 
-  expect(
+  await expect(
     generateMDX(content, { basePath: path.dirname(file), config: tsconfig }),
   ).toMatchFileSnapshot('./fixtures/test.output.mdx');
 });
