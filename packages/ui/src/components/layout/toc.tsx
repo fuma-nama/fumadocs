@@ -52,7 +52,7 @@ export function Toc(props: HTMLAttributes<HTMLDivElement>) {
         } as object
       }
     >
-      <div className="flex h-full w-[var(--fd-toc-width)] max-w-full flex-col gap-3 pe-2">
+      <div className="flex h-full w-[var(--fd-toc-width)] max-w-full flex-col gap-3 pe-4">
         {props.children}
       </div>
     </div>

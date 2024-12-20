@@ -15,7 +15,6 @@
     "---Features---",
     "last-modified",
     "image",
-    "manifest",
-    "!transform"
+    "manifest"
   ]
 }

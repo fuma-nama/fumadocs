@@ -37,6 +37,12 @@ const config = {
 export default withMDX(config);
 ```
 
+<Callout title="ESM Only" type='warn' className="mt-4">
+
+    The Next.js config must be a `.mjs` file since Fumadocs is ESM-only.
+
+</Callout>
+
 ### Defining Collections
 
 **Collection** refers to a collection containing a certain type of files, there's two types of collections:
@@ -115,12 +121,6 @@ The two collections together will include all Markdown/MDX and JSON files under 
 Once you run `next dev` or `next build`, it generates a `.source` folder in root directory.
 
 The folder contains all output data and its types, you should add it to `.gitignore`.
-
-<Callout title="ESM Only" type='warn' className="mt-4">
-
-The Next.js config must be a `.mjs` file since Fumadocs is ESM-only.
-
-</Callout>
 
 The `fumadocs-mdx` command generates types for `.source` folder without running Next.js, you can add it as a post install script.
 
