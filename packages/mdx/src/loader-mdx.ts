@@ -6,7 +6,7 @@ import { type LoaderContext } from 'webpack';
 import { type StructuredData } from 'fumadocs-core/mdx-plugins';
 import { getConfigHash, loadConfigCached } from '@/config/cached';
 import { buildMDX } from '@/utils/build-mdx';
-import { getDefaultMDXOptions, type TransformContext } from '@/config';
+import { type TransformContext } from '@/config';
 import { getManifestEntryPath } from '@/map/manifest';
 import { formatError } from '@/utils/format-error';
 import { getGitTimestamp } from './utils/git-timestamp';
@@ -85,13 +85,11 @@ export default async function loader(
     collection = undefined;
   }
 
-  const mdxOptions =
-    collection?.mdxOptions ??
-    getDefaultMDXOptions(config.global?.mdxOptions ?? {});
+  const mdxOptions = collection?.mdxOptions ?? config.defaultMdxOptions;
 
   function getTransformContext(): TransformContext {
     return {
-      buildMDX: async (v, options = mdxOptions) => {
+      async buildMDX(v, options = mdxOptions) {
         const res = await buildMDX(
           collectionId ?? 'global',
           configHash,
@@ -148,6 +146,7 @@ export default async function loader(
         data: {
           lastModified: timestamp,
         },
+        _compiler: this,
       },
     );
 

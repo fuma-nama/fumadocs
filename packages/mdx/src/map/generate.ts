@@ -12,7 +12,7 @@ export async function generateJS(
   configPath: string,
   config: LoadedConfig,
   outputPath: string,
-  hash: string,
+  configHash: string,
   getFrontmatter: (file: string) => Promise<unknown>,
 ): Promise<string> {
   const outDir = path.dirname(outputPath);
@@ -33,7 +33,7 @@ export async function generateJS(
       config._runtime.files.set(file.absolutePath, k);
 
       if (collection.type === 'doc' && collection.async) {
-        const importPath = `${toImportPath(file.absolutePath, outDir)}?hash=${hash}&collection=${k}`;
+        const importPath = `${toImportPath(file.absolutePath, outDir)}?hash=${configHash}&collection=${k}`;
         const frontmatter = await getFrontmatter(file.absolutePath);
 
         return `toRuntimeAsync(${JSON.stringify(frontmatter)}, () => import(${JSON.stringify(importPath)}), ${JSON.stringify(file)})`;
@@ -43,7 +43,7 @@ export async function generateJS(
       imports.push({
         type: 'namespace',
         name: importName,
-        specifier: `${toImportPath(file.absolutePath, outDir)}?collection=${k}&hash=${hash}`,
+        specifier: `${toImportPath(file.absolutePath, outDir)}?collection=${k}&hash=${configHash}`,
       });
 
       return `toRuntime("${collection.type}", ${importName}, ${JSON.stringify(file)})`;
@@ -55,6 +55,7 @@ export async function generateJS(
       importedCollections.add(k);
     }
 
+    // TODO: remove `transform` API on next major, migrate to runtime transform (e.g. transform & re-export in `source.ts`)
     return collection.transform
       ? `export const ${k} = await Promise.all([${resolvedItems.join(', ')}].map(v => c_${k}.transform(v, ${config.global ? 'c_default' : 'undefined'})));`
       : `export const ${k} = [${resolvedItems.join(', ')}];`;
