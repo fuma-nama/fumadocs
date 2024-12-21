@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/content-collections",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "The Content Collections adapter for Fumadocs",
   "keywords": [
     "NextJs",

@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 14.6.3
+
+### Patch Changes
+
+- abc3677: Allow `className` to be used with `SidebarItem`
+  - fumadocs-core@14.6.3
+
 ## 14.6.2
 
 ### Patch Changes
