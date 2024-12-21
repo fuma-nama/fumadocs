@@ -34,17 +34,17 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@clack/prompts": "^0.8.2",
+    "@clack/prompts": "^0.9.0",
     "commander": "^12.1.0",
     "execa": "^9.5.2",
-    "package-manager-detector": "^0.2.7",
+    "package-manager-detector": "^0.2.8",
     "picocolors": "^1.1.1",
     "ts-morph": "^24.0.0"
   },
   "devDependencies": {
     "@types/cross-spawn": "^6.0.6",
     "@types/node": "22.10.2",
-    "@types/react": "^19.0.1",
+    "@types/react": "^19.0.2",
     "eslint-config-custom": "workspace:*",
     "fast-glob": "^3.3.1",
     "tsconfig": "workspace:*",
