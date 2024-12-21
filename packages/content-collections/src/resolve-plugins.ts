@@ -21,8 +21,10 @@ export function resolvePlugin<Param>(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- config type
   plugin: Plugin<[Param], any, any>,
   options: Param | boolean,
+  defaultOptions?: Param,
 ): Pluggable | false {
-  if (typeof options === 'boolean') return options ? plugin : false;
+  if (typeof options === 'boolean')
+    return options ? [plugin, defaultOptions] : false;
 
-  return [plugin, options];
+  return [plugin, { ...defaultOptions, ...options }];
 }

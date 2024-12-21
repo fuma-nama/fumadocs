@@ -1,12 +1,11 @@
-import path from 'node:path';
-import fs from 'node:fs/promises';
+import * as path from 'node:path';
+import * as fs from 'node:fs/promises';
 import { parse } from 'node:querystring';
 import grayMatter from 'gray-matter';
 import { type LoaderContext } from 'webpack';
 import { type StructuredData } from 'fumadocs-core/mdx-plugins';
 import { getConfigHash, loadConfigCached } from '@/config/cached';
 import { buildMDX } from '@/utils/build-mdx';
-import { type TransformContext } from '@/config';
 import { getManifestEntryPath } from '@/map/manifest';
 import { formatError } from '@/utils/format-error';
 import { getGitTimestamp } from './utils/git-timestamp';
@@ -38,7 +37,7 @@ export interface MetaFile {
   };
 }
 
-function getQuery(query: string): {
+function parseQuery(query: string): {
   collection?: string;
   hash?: string;
 } {
@@ -71,10 +70,11 @@ export default async function loader(
   const matter = grayMatter(source);
 
   // notice that `resourceQuery` can be missing (e.g. on Turbopack)
-  const query = getQuery(this.resourceQuery);
-  const configHash = query.hash ?? (await getConfigHash(_ctx.configPath));
+  const {
+    hash: configHash = await getConfigHash(_ctx.configPath),
+    collection: collectionId,
+  } = parseQuery(this.resourceQuery);
   const config = await loadConfigCached(_ctx.configPath, configHash);
-  const collectionId = query.collection;
 
   let collection =
     collectionId !== undefined
@@ -87,28 +87,25 @@ export default async function loader(
 
   const mdxOptions = collection?.mdxOptions ?? config.defaultMdxOptions;
 
-  function getTransformContext(): TransformContext {
-    return {
-      async buildMDX(v, options = mdxOptions) {
-        const res = await buildMDX(
-          collectionId ?? 'global',
-          configHash,
-          v,
-          options,
-        );
-        return String(res.value);
-      },
-      source,
-      path: filePath,
-    };
-  }
-
   let frontmatter = matter.data;
   if (collection?.schema) {
-    const schema =
-      typeof collection.schema === 'function'
-        ? collection.schema(getTransformContext())
-        : collection.schema;
+    let schema = collection.schema;
+
+    if (typeof schema === 'function') {
+      schema = schema({
+        async buildMDX(v, options = mdxOptions) {
+          const res = await buildMDX(
+            collectionId ?? 'global',
+            configHash,
+            v,
+            options,
+          );
+          return String(res.value);
+        },
+        source,
+        path: filePath,
+      });
+    }
 
     const result = await schema.safeParseAsync(frontmatter);
     if (result.error) {

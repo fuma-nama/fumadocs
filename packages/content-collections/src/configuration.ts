@@ -17,6 +17,7 @@ import {
   type RemarkHeadingOptions,
   type RehypeCodeOptions,
   type StructuredData,
+  type RemarkImageOptions,
 } from 'fumadocs-core/mdx-plugins';
 import type { z as Zod } from 'zod';
 import {
@@ -39,6 +40,7 @@ export interface TransformOptions
 
   remarkHeadingOptions?: RemarkHeadingOptions | boolean;
   rehypeCodeOptions?: RehypeCodeOptions | boolean;
+  remarkImageOptions?: RemarkImageOptions | boolean;
 }
 
 /**
@@ -85,6 +87,7 @@ export async function transformMDX<D extends BaseDoc>(
     generateStructuredData = true,
     rehypeCodeOptions,
     remarkHeadingOptions,
+    remarkImageOptions,
     ...rest
   } = options;
 
@@ -109,7 +112,6 @@ export async function transformMDX<D extends BaseDoc>(
           rehypePlugins: resolvePlugins(
             (plugins) => [
               resolvePlugin(rehypeCode, rehypeCodeOptions ?? true),
-              [remarkImage, { useImport: false }],
               ...plugins,
             ],
             rest.rehypePlugins,
@@ -118,6 +120,9 @@ export async function transformMDX<D extends BaseDoc>(
             (plugins) => [
               remarkGfm,
               resolvePlugin(remarkHeading, remarkHeadingOptions ?? true),
+              resolvePlugin(remarkImage, remarkImageOptions, {
+                useImport: false,
+              }),
               ...plugins,
               generateStructuredData && remarkStructure,
               () => {
