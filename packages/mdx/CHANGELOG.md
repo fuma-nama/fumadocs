@@ -1,5 +1,15 @@
 # next-docs-mdx
 
+## 11.2.0
+
+### Minor Changes
+
+- bd0a140: Support reusing content with `include` tag
+
+### Patch Changes
+
+- fumadocs-core@14.6.3
+
 ## 11.1.2
 
 ### Patch Changes
