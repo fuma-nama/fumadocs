@@ -5,6 +5,7 @@ import { getTableOfContents } from 'fumadocs-core/server';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import matter from 'gray-matter';
+import { remarkInclude } from 'fumadocs-mdx/config';
 
 async function readFromPath(file: string) {
   const content = await fs
@@ -28,23 +29,44 @@ async function checkLinks() {
     await fg('content/blog/**/*.mdx').then((files) => files.map(readFromPath)),
   );
 
+  const docs = docsFiles.map(async (file) => {
+    const info = parseFilePath(path.relative('content/docs', file.path));
+
+    return {
+      value: getSlugs(info),
+      hashes: (
+        await getTableOfContents(
+          {
+            path: file.path,
+            value: file.content,
+          },
+          [remarkInclude],
+        )
+      ).map((item) => item.url.slice(1)),
+    };
+  });
+
+  const blogs = blogFiles.map(async (file) => {
+    const info = parseFilePath(path.relative('content/blog', file.path));
+
+    return {
+      value: getSlugs(info)[0],
+      hashes: (
+        await getTableOfContents(
+          {
+            path: file.path,
+            value: file.content,
+          },
+          [remarkInclude],
+        )
+      ).map((item) => item.url.slice(1)),
+    };
+  });
+
   const scanned = await scanURLs({
     populate: {
-      '(home)/blog/[slug]': blogFiles.map((file) => {
-        const info = parseFilePath(path.relative('content/blog', file.path));
-
-        return { value: getSlugs(info)[0] };
-      }),
-      'docs/[...slug]': docsFiles.map((file) => {
-        const info = parseFilePath(path.relative('content/docs', file.path));
-
-        return {
-          value: getSlugs(info),
-          hashes: file.data?._mdx?.mirror
-            ? undefined
-            : getTableOfContents(file.content).map((item) => item.url.slice(1)),
-        };
-      }),
+      '(home)/blog/[slug]': await Promise.all(blogs),
+      'docs/[...slug]': await Promise.all(docs),
     },
   });
 

@@ -1,5 +1,5 @@
-import fs from 'node:fs';
-import path from 'node:path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import { type LoadedConfig } from '@/config/load';
 import type { MetaFile } from '@/loader-mdx';
 import { getTypeFromPath } from '@/utils/get-type-from-path';

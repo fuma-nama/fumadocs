@@ -1,12 +1,6 @@
 import { createProcessor, type ProcessorOptions } from '@mdx-js/mdx';
 import type { VFile } from 'vfile';
-import type { Transformer } from 'unified';
-import { visit } from 'unist-util-visit';
-import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
-import type { Literal } from 'mdast';
-import * as fs from 'node:fs/promises';
-import * as path from 'node:path';
-import matter from 'gray-matter';
+import { remarkInclude } from '@/mdx-plugins/remark-include';
 
 type Processor = ReturnType<typeof createProcessor>;
 
@@ -50,38 +44,6 @@ declare module 'vfile' {
   }
 }
 
-function remarkInclude(this: Processor): Transformer {
-  return async (tree, file) => {
-    const queue: Promise<void>[] = [];
-
-    visit(tree, 'mdxJsxFlowElement', (node: MdxJsxFlowElement) => {
-      if (node.name === 'include') {
-        const child = node.children.at(0) as Literal | undefined;
-
-        if (!child || child.type !== 'text') return;
-        const specifier = child.value;
-
-        const targetPath = path.resolve(path.dirname(file.path), specifier);
-
-        queue.push(
-          fs.readFile(targetPath).then((content) => {
-            const parsed = this.parse(matter(content).content);
-
-            if (file.data._compiler) {
-              file.data._compiler.addDependency(targetPath);
-            }
-            Object.assign(node, parsed);
-          }),
-        );
-      }
-
-      return 'skip';
-    });
-
-    await Promise.all(queue);
-  };
-}
-
 /**
  * @param group - The cache group of MDX content, usually the collection name
  * @param configHash - config hash
@@ -111,11 +73,7 @@ export function buildMDX(
         outputFormat: 'program',
         development: process.env.NODE_ENV === 'development',
         ...rest,
-        remarkPlugins: [
-          // @ts-expect-error -- processor
-          remarkInclude,
-          ...(rest.remarkPlugins ?? []),
-        ],
+        remarkPlugins: [remarkInclude, ...(rest.remarkPlugins ?? [])],
         format,
       }),
 
