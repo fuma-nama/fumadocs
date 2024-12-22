@@ -4,7 +4,7 @@ import type { Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
 import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
 import type { Literal } from 'mdast';
-import { readFileSync } from 'node:fs';
+import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import matter from 'gray-matter';
 
@@ -41,8 +41,19 @@ function cacheKey(group: string, format: string): string {
   return `${group}:${format}`;
 }
 
-function remarkInclude(this: Processor, options: CompilerOptions): Transformer {
-  return (tree, file) => {
+declare module 'vfile' {
+  interface DataMap {
+    /**
+     * The compiler object from loader
+     */
+    _compiler?: CompilerOptions;
+  }
+}
+
+function remarkInclude(this: Processor): Transformer {
+  return async (tree, file) => {
+    const queue: Promise<void>[] = [];
+
     visit(tree, 'mdxJsxFlowElement', (node: MdxJsxFlowElement) => {
       if (node.name === 'include') {
         const child = node.children.at(0) as Literal | undefined;
@@ -52,15 +63,22 @@ function remarkInclude(this: Processor, options: CompilerOptions): Transformer {
 
         const targetPath = path.resolve(path.dirname(file.path), specifier);
 
-        const content = readFileSync(targetPath);
-        const parsed = this.parse(matter(content).content);
+        queue.push(
+          fs.readFile(targetPath).then((content) => {
+            const parsed = this.parse(matter(content).content);
 
-        options.addDependency(targetPath);
-        Object.assign(node, parsed);
+            if (file.data._compiler) {
+              file.data._compiler.addDependency(targetPath);
+            }
+            Object.assign(node, parsed);
+          }),
+        );
       }
 
       return 'skip';
     });
+
+    await Promise.all(queue);
   };
 }
 
@@ -94,9 +112,8 @@ export function buildMDX(
         development: process.env.NODE_ENV === 'development',
         ...rest,
         remarkPlugins: [
-          options._compiler
-            ? ([remarkInclude, options._compiler] as any)
-            : null,
+          // @ts-expect-error -- processor
+          remarkInclude,
           ...(rest.remarkPlugins ?? []),
         ],
         format,
@@ -114,6 +131,7 @@ export function buildMDX(
     data: {
       ...data,
       frontmatter,
+      _compiler: options._compiler,
     },
   });
 }

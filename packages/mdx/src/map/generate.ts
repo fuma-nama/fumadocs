@@ -91,14 +91,14 @@ async function getCollectionFiles(
         absolute: true,
       });
 
-      result.forEach((item) => {
-        if (getTypeFromPath(item) !== collection.type) return;
+      for (const item of result) {
+        if (getTypeFromPath(item) !== collection.type) continue;
 
         files.set(item, {
           path: path.relative(dir, item),
           absolutePath: item,
         });
-      });
+      }
     }),
   );
 
