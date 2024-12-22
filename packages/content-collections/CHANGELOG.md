@@ -1,5 +1,12 @@
 # @fumadocs/content-collections
 
+## 1.1.6
+
+### Patch Changes
+
+- 3550efc: Fix remark image default config
+  - fumadocs-core@14.6.3
+
 ## 1.1.5
 
 ### Patch Changes
