@@ -19,7 +19,6 @@ import {
   type IconItemType,
   BaseLinkItem,
 } from '@/layouts/links';
-import { getSidebarTabs, type TabOptions } from '@/utils/get-sidebar-tabs';
 import { RootToggle } from '@/components/layout/root-toggle';
 import { type BaseLayoutProps, getLinks } from './shared';
 import {
@@ -268,4 +267,5 @@ function SidebarFooterItems({
   );
 }
 
-export { getSidebarTabs, type TabOptions, type LinkItemType };
+export { getSidebarTabsFromOptions, type TabOptions } from './docs/shared';
+export { type LinkItemType };

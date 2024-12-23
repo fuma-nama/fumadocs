@@ -10,13 +10,16 @@ import {
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import type { PageTree } from 'fumadocs-core/server';
-import { getSidebarTabs, type TabOptions } from '@/utils/get-sidebar-tabs';
 import type { FC, ReactNode } from 'react';
 import type { Option } from '@/components/layout/root-toggle';
 
 export const layoutVariables = {
   '--fd-layout-offset': 'max(calc(50vw - var(--fd-layout-width) / 2), 0px)',
 };
+
+export interface TabOptions {
+  transform?: (option: Option, node: PageTree.Folder) => Option | null;
+}
 
 export interface SidebarOptions extends SidebarProps {
   enabled: boolean;
@@ -107,4 +110,64 @@ export function getSidebarTabsFromOptions(
   } else if (options !== false) {
     return getSidebarTabs(tree);
   }
+}
+
+const defaultTransform: TabOptions['transform'] = (option, node) => {
+  if (!node.icon) return option;
+
+  return {
+    ...option,
+    icon: (
+      <div className="rounded-md border bg-fd-secondary p-1 shadow-md [&_svg]:size-5">
+        {node.icon}
+      </div>
+    ),
+  };
+};
+
+function getSidebarTabs(
+  pageTree: PageTree.Root,
+  { transform = defaultTransform }: TabOptions = {},
+): Option[] {
+  function findOptions(node: PageTree.Folder): Option[] {
+    const results: Option[] = [];
+
+    if (node.root) {
+      const index = node.index ?? node.children.at(0);
+
+      if (index?.type === 'page') {
+        const option: Option = {
+          url: index.url,
+          title: node.name,
+          icon: node.icon,
+          description: node.description,
+
+          urls: getFolderUrls(node),
+        };
+
+        const mapped = transform ? transform(option, node) : option;
+        if (mapped) results.push(mapped);
+      }
+    }
+
+    for (const child of node.children) {
+      if (child.type === 'folder') results.push(...findOptions(child));
+    }
+
+    return results;
+  }
+
+  return findOptions(pageTree as PageTree.Folder);
+}
+
+function getFolderUrls(folder: PageTree.Folder): string[] {
+  const results: string[] = [];
+  if (folder.index) results.push(folder.index.url);
+
+  for (const child of folder.children) {
+    if (child.type === 'page') results.push(child.url);
+    if (child.type === 'folder') results.push(...getFolderUrls(child));
+  }
+
+  return results;
 }

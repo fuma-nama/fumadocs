@@ -125,7 +125,12 @@ export function DocsLayout({
                 <SidebarPageTree components={sidebarComponents} />
               </div>
             </SidebarViewport>
-            <SidebarFooter>{sidebarFooter}</SidebarFooter>
+            <SidebarFooter className={cn(!sidebarFooter && 'md:hidden')}>
+              {!props.disableThemeSwitch ? (
+                <ThemeToggle className="w-fit md:hidden" />
+              ) : null}
+              {sidebarFooter}
+            </SidebarFooter>
           </Aside>
           <DocsNavbar
             nav={nav}
