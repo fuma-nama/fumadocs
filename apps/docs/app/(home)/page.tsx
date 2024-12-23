@@ -445,11 +445,12 @@ function Hero(): React.ReactElement {
         Build excellent documentation site with less effort
       </h1>
       <p className="mb-8 text-fd-muted-foreground md:max-w-[80%] md:text-xl">
-        Fumadocs is a <span className="text-fd-foreground">beautiful</span>{' '}
-        documentation framework with{' '}
-        <span className="text-fd-foreground">a complete toolchain</span>,
-        powered by <span className="text-foreground">Next.js App Router</span>.
-        Designed to be flexible and fast.
+        Fumadocs is a{' '}
+        <span className="text-fd-foreground">beautiful & robust</span>{' '}
+        documentation framework with a complete toolchain. Designed for{' '}
+        <span className="text-foreground">Flexibility</span>,{' '}
+        <span className="text-foreground">Performance</span> and{' '}
+        <span className="text-foreground">Next.js</span>.
       </p>
       <div className="inline-flex items-center gap-3 max-md:mx-auto">
         <Link

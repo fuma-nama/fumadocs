@@ -12,13 +12,6 @@ option since it's easier to setup and totally free.
 
 ## Setup
 
-Returns a detailed result with matching headings and contents.
-
-It accepts structured data processed from a markdown/MDX document, and index it with
-Orama. You can extract the structured data using the [Structure](/docs/headless/mdx/structure) remark plugin.
-
-It cannot extract content from rehype plugin generated content (remark plugins are supported).
-
 ### From Source
 
 Create a route handler from Source API.
@@ -37,6 +30,11 @@ Create a route handler from Source API.
 
 Pass search indexes to the function, see type information for required properties.
 
+For content indexing, each index needs a `structuredData` field.
+It can be processed from Markdown/MDX document, or provided by your content source (e.g. Fumadocs MDX).
+
+You can extract structured data using the [Structure](/docs/headless/mdx/structure) remark plugin.
+
 ```json doc-gen:file
 {
   "file": "../../examples/next-mdx/app/api/search/route-full.ts",
@@ -51,7 +49,7 @@ Pass search indexes to the function, see type information for required propertie
 
 You can query it using:
 
-- **Fumadocs UI**: use the [built-in Search UI](/docs/ui/search).
+- **Fumadocs UI**: The built-in [Search UI](/docs/ui/search) supports it out-of-the-box.
 - **Search Client**:
 
   ```ts twoslash
@@ -119,7 +117,7 @@ export const { GET } = createSearchAPI('simple', {
 
 <h4>Update the route handler (From Source)</h4>
 
-You don't need to change anything, it handles i18n automatically.
+Enable i18n from source object (in `loader` function).
 
 <h4>Update the route handler (From Search Indexes)</h4>
 
