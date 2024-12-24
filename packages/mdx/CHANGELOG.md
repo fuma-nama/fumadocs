@@ -1,5 +1,13 @@
 # next-docs-mdx
 
+## 11.2.1
+
+### Patch Changes
+
+- 3445182: Fix `include` hot-reload issues
+- Updated dependencies [b71064a]
+  - fumadocs-core@14.6.4
+
 ## 11.2.0
 
 ### Minor Changes
