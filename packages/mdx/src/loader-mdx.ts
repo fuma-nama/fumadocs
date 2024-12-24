@@ -19,15 +19,6 @@ export interface Options {
   };
 }
 
-interface InternalFrontmatter {
-  _mdx?: {
-    /**
-     * Mirror another MDX file
-     */
-    mirror?: string;
-  };
-}
-
 export interface MetaFile {
   path: string;
   data: {
@@ -114,16 +105,6 @@ export default async function loader(
     }
 
     frontmatter = result.data as Record<string, unknown>;
-  }
-
-  const props = (matter.data as InternalFrontmatter)._mdx ?? {};
-  if (props.mirror) {
-    const mirrorPath = path.resolve(path.dirname(filePath), props.mirror);
-    this.addDependency(mirrorPath);
-
-    matter.content = await fs
-      .readFile(mirrorPath)
-      .then((res) => grayMatter(res.toString()).content);
   }
 
   let timestamp: number | undefined;

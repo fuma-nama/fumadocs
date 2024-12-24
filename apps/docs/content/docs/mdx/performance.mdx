@@ -4,15 +4,36 @@ description: The performance of Fumadocs MDX
 icon: Rocket
 ---
 
-## About
+## Overview
 
 Fumadocs MDX is a bundler plugin, in other words, it has a higher performance bottleneck.
 With bundlers like Webpack and Turbopack, it is enough for large docs sites with nearly 500+ MDX files, which is sufficient for almost all docs sites.
 
-### Advantages
-
 Since Fumadocs MDX works with your bundler, you can import any files including client components in your MDX files.
 This allows a high flexibility and ensures everything is optimized by default.
+
+### Image Optimization
+
+Fumadocs MDX resolves images into static imports with [Remark Image](/docs/headless/mdx/remark-image).
+Therefore, your images will be optimized automatically by the Next.js Image API.
+
+```mdx
+![Hello](./hello.png)
+
+or in public folder
+
+![Hello](/hello.png)
+```
+
+Yields:
+
+```mdx
+import HelloImage from './hello.png';
+
+<img alt="Hello" src={HelloImage} />
+```
+
+![Banner](/banner.png)
 
 ### Caveats
 
@@ -26,22 +47,9 @@ This is because of:
 
 ## Alternative
 
-A popular alternative is `next-mdx-remote`, it allows rendering pages on-demand with SSG which can **highly increase your build speed.**
-However, you cannot use import in MDX files anymore.
-
 ### Remote Source
 
-`next-mdx-remote` supports remote sources.
+Remote sources don't need to pre-compile MDX files, it can compile them on-demand with SSG which can **highly increase your build speed.**
+However, you cannot use import in MDX files anymore.
 
-For a huge amount of files, we would also recommend using a remote source like GitHub.
-This allows you to fetch file content directly from your remote source and render it on-demand.
-
-This is very important because without a remote source to hold your files, the content of these files will be a part of your build.
-Since host platforms like Vercel are not supposed to hold a huge build output, you might hit the limit of their plans.
-
-### Integration
-
-Fumadocs doesn't provide an integration for `next-mdx-remote`, the main reason is `next-mdx-remote` supports remote sources, which are not necessarily file-system based.
-Fumadocs cannot generate a page tree for non file-system based sources.
-
-To use `next-mdx-remote` with Fumadocs, see [MDX Remote](/docs/headless/remote) for configuring remote sources.
+See [Remote Sources](/docs/headless/remote) for configuring remote sources.

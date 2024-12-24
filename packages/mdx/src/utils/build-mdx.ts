@@ -1,12 +1,6 @@
 import { createProcessor, type ProcessorOptions } from '@mdx-js/mdx';
 import type { VFile } from 'vfile';
-import type { Transformer } from 'unified';
-import { visit } from 'unist-util-visit';
-import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
-import type { Literal } from 'mdast';
-import { readFileSync } from 'node:fs';
-import * as path from 'node:path';
-import matter from 'gray-matter';
+import { remarkInclude } from '@/mdx-plugins/remark-include';
 
 type Processor = ReturnType<typeof createProcessor>;
 
@@ -41,27 +35,13 @@ function cacheKey(group: string, format: string): string {
   return `${group}:${format}`;
 }
 
-function remarkInclude(this: Processor, options: CompilerOptions): Transformer {
-  return (tree, file) => {
-    visit(tree, 'mdxJsxFlowElement', (node: MdxJsxFlowElement) => {
-      if (node.name === 'include') {
-        const child = node.children.at(0) as Literal | undefined;
-
-        if (!child || child.type !== 'text') return;
-        const specifier = child.value;
-
-        const targetPath = path.resolve(path.dirname(file.path), specifier);
-
-        const content = readFileSync(targetPath);
-        const parsed = this.parse(matter(content).content);
-
-        options.addDependency(targetPath);
-        Object.assign(node, parsed);
-      }
-
-      return 'skip';
-    });
-  };
+declare module 'vfile' {
+  interface DataMap {
+    /**
+     * The compiler object from loader
+     */
+    _compiler?: CompilerOptions;
+  }
 }
 
 /**
@@ -93,12 +73,7 @@ export function buildMDX(
         outputFormat: 'program',
         development: process.env.NODE_ENV === 'development',
         ...rest,
-        remarkPlugins: [
-          options._compiler
-            ? ([remarkInclude, options._compiler] as any)
-            : null,
-          ...(rest.remarkPlugins ?? []),
-        ],
+        remarkPlugins: [remarkInclude, ...(rest.remarkPlugins ?? [])],
         format,
       }),
 
@@ -114,6 +89,7 @@ export function buildMDX(
     data: {
       ...data,
       frontmatter,
+      _compiler: options._compiler,
     },
   });
 }

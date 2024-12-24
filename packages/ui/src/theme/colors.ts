@@ -91,7 +91,7 @@ const neutral: Preset = {
     foreground: '0 0% 3.9%',
     muted: '0 0% 96.1%',
     'muted-foreground': '0 0% 45.1%',
-    popover: '0 0% 100%',
+    popover: '0 0% 98%',
     'popover-foreground': '0 0% 15.1%',
     card: '0 0% 94.7%',
     'card-foreground': '0 0% 3.9%',
@@ -123,11 +123,6 @@ const neutral: Preset = {
     ring: '0 0% 14.9%',
   },
   css: {
-    '#nd-sidebar': {
-      '--muted': '0deg 0% 89%',
-      '--secondary': '0deg 0% 99%',
-      '--muted-foreground': '0 0% 30%',
-    },
     '.dark #nd-sidebar': {
       '--muted': '0deg 0% 16%',
       '--secondary': '0deg 0% 18%',
