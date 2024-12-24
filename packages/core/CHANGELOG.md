@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 14.6.4
+
+### Patch Changes
+
+- b71064a: Support remark plugins & vfile input on `getTableOfContents`
+
 ## 14.6.3
 
 ## 14.6.2
