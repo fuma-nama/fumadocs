@@ -1,4 +1,4 @@
-import { DocsLayout, type DocsLayoutProps } from 'fumadocs-ui/layouts/notebook';
+import { DocsLayout, type DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
 import type { ReactNode } from 'react';
 import { MessageCircle } from 'lucide-react';
 import { baseOptions, linkItems } from '@/app/layout.config';

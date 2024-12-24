@@ -4,6 +4,13 @@ description: Support multiple languages in your documentation
 icon: Globe
 ---
 
+<Callout title='Before you get started'>
+
+    Fumadocs is not a full-powered i18n library, you can also use other libraries like [next-intl](https://github.com/amannn/next-intl).
+    I18n functionality of Fumadocs works without the built-in middleware.
+
+</Callout>
+
 You can setup i18n using Fumadocs CLI or update the configurations manually.
 
 > Read the [Next.js Docs](https://nextjs.org/docs/app/building-your-application/routing/internationalization) to learn more about implementing I18n in Next.js.
@@ -42,7 +49,7 @@ export const source = loader({
 });
 ```
 
-Update the usages to your source:
+Update the usages to your source to include a locale code:
 
 ```ts
 import { source } from '@/lib/source';
@@ -57,7 +64,8 @@ source.getPage(params.slug, params.lang);
 source.getPages(params.lang);
 ```
 
-See [Source API](/docs/headless/source-api) for other usages.
+Note that without providing a locale code, it uses your default locale instead.
+You can see [Source API](/docs/headless/source-api) for other usages.
 
 ### Middleware
 
@@ -102,20 +110,6 @@ export default function RootLayout({
       </body>
     </html>
   );
-}
-```
-
-### Docs Page
-
-Make sure to update references to `source` and configure Static Site Generation correctly.
-
-```json doc-gen:file
-{
-  "file": "../../examples/i18n/app/[lang]/docs/[[...slug]]/page.tsx",
-  "codeblock": {
-    "lang": "tsx",
-    "meta": "title=\"page.tsx\""
-  }
 }
 ```
 
@@ -170,4 +164,18 @@ import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 export const baseOptions: BaseLayoutProps = {
   i18n: true,
 };
+```
+
+## Navigation
+
+Fumadocs will only handle i18n navigation for its own layouts (e.g. sidebar components),
+you have to re-create components like `<Link>` from `next/link` and `useParams` hook to auto attend the locale to `href`.
+
+In addition, the [`fumadocs-core/dynamic-link`](/docs/headless/components/link#dynamic-hrefs) component supports linking to dynamic hrefs, including the locale prefix.
+For Markdown/MDX content, you may use it instead of the default anchor (`a`) component:
+
+```mdx title="content.mdx"
+import { DynamicLink } from 'fumadocs-core/dynamic-link';
+
+<DynamicLink href="/[lang]/another-page">This is a link</DynamicLink>
 ```
