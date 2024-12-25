@@ -8,11 +8,11 @@ const inter = Inter({
   subsets: ['latin'],
 });
 
-export default function Layout({ params, children }: { params: { lang: string }, children: ReactNode }) {
+export default async function Layout({ params, children }: { params: Promise<{ lang: string }>, children: ReactNode }) {
   return (
     <html lang="en" className={inter.className} suppressHydrationWarning>
       <body>
-              <I18nProvider locale={params.lang} locales={[
+              <I18nProvider locale={(await params).lang} locales={[
                   { locale: 'en', name: 'English' }
               ]}>
                 <RootProvider>{children}</RootProvider>
