@@ -1,5 +1,11 @@
 # fumadocs
 
+## 0.0.5
+
+### Patch Changes
+
+- c8d9b08: support Next.js 15 i18n auto-config
+
 ## 0.0.4
 
 ### Patch Changes
