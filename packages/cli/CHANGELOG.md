@@ -1,5 +1,11 @@
 # fumadocs
 
+## 0.0.6
+
+### Patch Changes
+
+- 969da26: Improve i18n api
+
 ## 0.0.5
 
 ### Patch Changes
