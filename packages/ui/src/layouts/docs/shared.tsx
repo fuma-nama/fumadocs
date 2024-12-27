@@ -12,6 +12,7 @@ import { buttonVariants } from '@/components/ui/button';
 import type { PageTree } from 'fumadocs-core/server';
 import type { FC, ReactNode } from 'react';
 import type { Option } from '@/components/layout/root-toggle';
+import { notFound } from 'next/navigation';
 
 export const layoutVariables = {
   '--fd-layout-offset': 'max(calc(50vw - var(--fd-layout-width) / 2), 0px)',
@@ -96,6 +97,20 @@ export function SidebarLinkItem({ item }: { item: LinkItemType }) {
     <SidebarItem href={item.url} icon={item.icon} external={item.external}>
       {item.text}
     </SidebarItem>
+  );
+}
+
+export function checkPageTree(passed: unknown) {
+  if (!passed) notFound();
+  if (
+    typeof passed === 'object' &&
+    'children' in passed &&
+    Array.isArray(passed)
+  )
+    return;
+
+  throw new Error(
+    'You passed an invalid page tree to `<DocsLayout />`. Check your usage in layout.tsx if you have enabled i18n.',
   );
 }
 

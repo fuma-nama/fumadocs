@@ -13,7 +13,6 @@ import {
   SidebarViewport,
   SidebarPageTree,
 } from '@/layouts/docs/sidebar';
-import { notFound } from 'next/navigation';
 import { RootToggle } from '@/components/layout/root-toggle';
 import { TreeContextProvider } from '@/contexts/tree';
 import { NavProvider, Title } from '@/components/layout/nav';
@@ -35,6 +34,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import {
+  checkPageTree,
   getSidebarTabsFromOptions,
   layoutVariables,
   SidebarLinkItem,
@@ -65,9 +65,9 @@ export function DocsLayout({
   i18n = false,
   ...props
 }: DocsLayoutProps): ReactNode {
+  checkPageTree(props.tree);
   const links = getLinks(props.links ?? [], props.githubUrl);
   const Aside = sidebarCollapsible ? CollapsibleSidebar : Sidebar;
-  if (props.tree === undefined) notFound();
 
   const tabs = getSidebarTabsFromOptions(tabOptions, props.tree) ?? [];
   const variables = cn(
