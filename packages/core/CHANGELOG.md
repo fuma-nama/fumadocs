@@ -1,5 +1,7 @@
 # next-docs-zeta
 
+## 14.6.6
+
 ## 14.6.5
 
 ### Patch Changes

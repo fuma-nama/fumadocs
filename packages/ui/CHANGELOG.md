@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 14.6.6
+
+### Patch Changes
+
+- 9c930ea: fix runtime error
+  - fumadocs-core@14.6.6
+
 ## 14.6.5
 
 ### Patch Changes
