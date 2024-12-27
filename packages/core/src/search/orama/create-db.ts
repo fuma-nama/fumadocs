@@ -5,7 +5,7 @@ import {
   type PartialSchemaDeep,
   type TypedDocument,
 } from '@orama/orama';
-import { type AdvancedOptions } from '@/search/server';
+import { type AdvancedOptions, type SimpleOptions } from '@/search/server';
 
 export type AdvancedDocument = TypedDocument<Orama<typeof advancedSchema>>;
 export const advancedSchema = {
@@ -83,5 +83,42 @@ export async function createDB({
   });
 
   await insertMultiple(db, mapTo);
+  return db;
+}
+
+export type SimpleDocument = TypedDocument<Orama<typeof simpleSchema>>;
+export const simpleSchema = {
+  url: 'string',
+  title: 'string',
+  description: 'string',
+  content: 'string',
+  keywords: 'string',
+} as const;
+
+export async function createDBSimple({
+  indexes,
+  tokenizer,
+  ...rest
+}: SimpleOptions): Promise<Orama<typeof simpleSchema>> {
+  const items = typeof indexes === 'function' ? await indexes() : indexes;
+  const db = (await create({
+    schema: simpleSchema,
+    components: {
+      tokenizer,
+    },
+    ...rest,
+  })) as unknown as Orama<typeof simpleSchema>;
+
+  await insertMultiple(
+    db,
+    items.map((page) => ({
+      title: page.title,
+      description: page.description,
+      url: page.url,
+      content: page.content,
+      keywords: page.keywords,
+    })),
+  );
+
   return db;
 }

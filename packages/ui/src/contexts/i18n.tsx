@@ -28,19 +28,21 @@ interface I18nContextType {
   locales?: LocaleItem[];
 }
 
+export const defaultTranslations: Translations = {
+  search: 'Search',
+  searchNoResult: 'No results found',
+  toc: 'On this page',
+  tocNoHeadings: 'No Headings',
+  lastUpdate: 'Last updated on',
+  chooseLanguage: 'Choose a language',
+  nextPage: 'Next',
+  previousPage: 'Previous',
+  chooseTheme: 'Theme',
+  editOnGithub: 'Edit on GitHub',
+};
+
 export const I18nContext = createContext<I18nContextType>({
-  text: {
-    search: 'Search',
-    searchNoResult: 'No results found',
-    toc: 'On this page',
-    tocNoHeadings: 'No Headings',
-    lastUpdate: 'Last updated on',
-    chooseLanguage: 'Choose a language',
-    nextPage: 'Next',
-    previousPage: 'Previous',
-    chooseTheme: 'Theme',
-    editOnGithub: 'Edit on GitHub',
-  },
+  text: defaultTranslations,
 });
 
 export function I18nLabel(props: { label: keyof Translations }): string {

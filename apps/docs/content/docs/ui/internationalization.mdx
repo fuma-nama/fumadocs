@@ -49,24 +49,6 @@ export const source = loader({
 });
 ```
 
-Update the usages to your source to include a locale code:
-
-```ts
-import { source } from '@/lib/source';
-
-// get page tree
-source.pageTree[params.lang];
-
-// get page
-source.getPage(params.slug, params.lang);
-
-// get pages
-source.getPages(params.lang);
-```
-
-Note that without providing a locale code, it uses your default locale instead.
-You can see [Source API](/docs/headless/source-api) for other usages.
-
 ### Middleware
 
 Create a middleware that redirects users to appropriate locale.
@@ -83,28 +65,57 @@ Create a middleware that redirects users to appropriate locale.
 
 See [Middleware](/docs/headless/internationalization#middleware) for customisable options.
 
-### Root Layout
+### Routing
 
 Create a dynamic route `/app/[lang]`, and move all special files from `/app` to
 the folder.
 
-A `I18nProvider` is needed for localization. Wrap the root provider inside your I18n provider.
+A `I18nProvider` is needed for localization.
+Wrap the root provider inside your I18n provider, and provide available languages & translations to it.
+
+Note that only English translations are provided by default.
 
 ```tsx
 import { RootProvider } from 'fumadocs-ui/provider';
-import { I18nProvider } from 'fumadocs-ui/i18n';
+import { I18nProvider, type Translations } from 'fumadocs-ui/i18n';
 
-export default function RootLayout({
+const cn: Translations = {
+  search: 'Translated Content',
+  // other props
+};
+
+// available languages that will be displayed on UI
+// make sure `locale` is consistent with your i18n config
+const locales = [
+  {
+    name: 'English',
+    locale: 'en',
+  },
+  {
+    name: 'Chinese',
+    locale: 'cn',
+  },
+];
+
+export default async function RootLayout({
   params,
   children,
 }: {
-  params: { lang: string };
+  params: Promise<{ lang: string }>;
   children: React.ReactNode;
 }) {
   return (
-    <html lang={params.lang}>
+    <html lang={(await params).lang}>
       <body>
-        <I18nProvider locale={params.lang}>
+        <I18nProvider
+          locale={(await params).lang}
+          locales={locales}
+          translations={
+            {
+              cn,
+            }[(await params).lang]
+          }
+        >
           <RootProvider>{children}</RootProvider>
         </I18nProvider>
       </body>
@@ -112,6 +123,46 @@ export default function RootLayout({
   );
 }
 ```
+
+### Source
+
+Update the usages to your source to include a locale code:
+
+```ts
+import { source } from '@/lib/source';
+
+// get page tree
+source.pageTree[params.lang];
+
+// get page
+source.getPage(params.slug, params.lang);
+
+// get pages
+source.getPages(params.lang);
+```
+
+like:
+
+```tsx title="app/[lang]/layout.tsx"
+import { source } from '@/lib/source';
+import { DocsLayout } from 'fumadocs-ui/docs';
+import type { ReactNode } from 'react';
+
+export default async function Layout({
+  params,
+  children,
+}: {
+  params: Promise<{ lang: string }>;
+  children: ReactNode;
+}) {
+  const pageTree = source.pageTree[(await params).lang];
+
+  return <DocsLayout pageTree={pageTree}>{children}</DocsLayout>;
+}
+```
+
+Note that without providing a locale code, it uses your default locale instead.
+You can see [Source API](/docs/headless/source-api) for other usages.
 
 ### Writing Documents
 
@@ -121,38 +172,12 @@ see [Page Conventions](/docs/ui/page-conventions#internationalization) to learn 
 
 Configure i18n on your search solution.
 
-You don't need further changes if you're using the `createFromSource` shortcut.
-
-For the built-in Orama search, see [Search I18n](/docs/headless/search/orama#internationalization).
-
-### Adding Translations
-
-We only provide English translation by default, you have to pass your translations to the provider.
-
-```tsx
-import { I18nProvider } from 'fumadocs-ui/i18n';
-
-<I18nProvider
-  locales={[
-    {
-      name: 'English',
-      locale: 'en',
-    },
-    {
-      name: 'Chinese',
-      locale: 'cn',
-    },
-  ]}
-  translations={
-    {
-      cn: {
-        search: 'Translated Content',
-      },
-    }[locale]
-  }
-  // other props
-/>;
-```
+- Built-in Search (Orama):
+  - For `createFromSource` and most languages, no further changes are needed.
+  - For special languages like Chinese & Japanese, they require additional config.
+    See [Orama I18n](/docs/headless/search/orama#internationalization) guide.
+- Cloud Solutions (e.g. Algolia):
+  - They usually have official support for multilingual.
 
 ### Add Language Switch
 

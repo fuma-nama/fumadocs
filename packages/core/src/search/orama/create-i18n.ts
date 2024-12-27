@@ -10,9 +10,9 @@ import {
   type SearchServer,
   type SimpleOptions,
 } from '@/search/server';
-import { createEndpoint } from '@/search/create-endpoint';
+import { createEndpoint } from '@/search/orama/create-endpoint';
 import { type I18nConfig } from '@/i18n';
-import { STEMMERS } from '@/search/_stemmers';
+import { STEMMERS } from '@/search/orama/_stemmers';
 
 export type LocaleMap<O> = Record<string, Language | O>;
 

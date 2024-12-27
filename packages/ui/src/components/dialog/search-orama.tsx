@@ -6,8 +6,12 @@ import {
 } from 'fumadocs-core/search/client';
 import { type ReactNode, useState } from 'react';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
-import { SearchDialog, type SharedProps } from './search';
-import { type TagItem, TagsList } from './tag-list';
+import {
+  SearchDialog,
+  type SharedProps,
+  type TagItem,
+  TagsList,
+} from './search';
 
 export interface OramaSearchDialogProps extends SharedProps {
   client: OramaCloudOptions['client'];

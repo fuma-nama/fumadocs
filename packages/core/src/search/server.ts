@@ -2,19 +2,17 @@ import { type Orama, type SearchParams, save, create } from '@orama/orama';
 import { type NextRequest } from 'next/server';
 import type { StructuredData } from '@/mdx-plugins/remark-structure';
 import type { SortedResult } from '@/server/types';
-import { createEndpoint } from '@/search/create-endpoint';
+import { createEndpoint } from '@/search/orama/create-endpoint';
 import {
   type AdvancedDocument,
   type advancedSchema,
   createDB,
-} from '@/search/create-db';
-import { searchSimple } from '@/search/search/simple';
-import { searchAdvanced } from '@/search/search/advanced';
-import {
   createDBSimple,
-  type schema,
   type SimpleDocument,
-} from './create-db-simple';
+  simpleSchema,
+} from '@/search/orama/create-db';
+import { searchSimple } from '@/search/orama/search/simple';
+import { searchAdvanced } from '@/search/orama/search/advanced';
 
 export interface SearchServer {
   search: (
@@ -57,7 +55,7 @@ export interface SimpleOptions extends SharedOptions {
   /**
    * Customise search options on server
    */
-  search?: Partial<SearchParams<Orama<typeof schema>, SimpleDocument>>;
+  search?: Partial<SearchParams<Orama<typeof simpleSchema>, SimpleDocument>>;
 }
 
 export interface AdvancedOptions extends SharedOptions {
@@ -133,7 +131,7 @@ export function initAdvancedSearch(options: AdvancedOptions): SearchServer {
     async export() {
       return {
         type: 'advanced',
-        ...save(await get),
+        ...(await save(await get)),
       };
     },
     async search(query, searchOptions) {
@@ -144,5 +142,5 @@ export function initAdvancedSearch(options: AdvancedOptions): SearchServer {
   };
 }
 
-export { createFromSource } from './create-from-source';
-export { createI18nSearchAPI } from './i18n-api';
+export { createFromSource } from './orama/create-from-source';
+export { createI18nSearchAPI } from './orama/create-i18n';

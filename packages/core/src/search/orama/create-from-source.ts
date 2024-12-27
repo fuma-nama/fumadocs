@@ -12,7 +12,7 @@ import {
   type Page,
 } from '@/source';
 import { type StructuredData } from '@/mdx-plugins';
-import { type LocaleMap } from '@/search/i18n-api';
+import { type LocaleMap } from '@/search/orama/create-i18n';
 
 function pageToIndex(page: Page): AdvancedIndex {
   if (!('structuredData' in page.data)) {

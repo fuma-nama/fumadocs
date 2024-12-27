@@ -27,10 +27,10 @@ export const i18nPlugin: Plugin = {
       type: 'code',
       title: 'page.tsx',
       code: `
-export default function Page({
+export default async function Page({
   params,
 }: {
-  ${picocolors.underline(picocolors.bold('params: { lang: string; slug?: string[] };'))}
+  ${picocolors.underline(picocolors.bold('params: Promise<{ lang: string; slug?: string[] }>'))}
 })
 `.trim(),
     },

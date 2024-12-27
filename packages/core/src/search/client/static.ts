@@ -6,10 +6,12 @@ import {
   type RawData,
 } from '@orama/orama';
 import { type SortedResult } from '@/server';
-import { searchSimple } from '@/search/search/simple';
-import { searchAdvanced } from '@/search/search/advanced';
-import { type advancedSchema } from '@/search/create-db';
-import { type schema } from '@/search/create-db-simple';
+import { searchSimple } from '@/search/orama/search/simple';
+import { searchAdvanced } from '@/search/orama/search/advanced';
+import {
+  type advancedSchema,
+  type simpleSchema,
+} from '@/search/orama/create-db';
 
 export interface StaticOptions {
   /**
@@ -86,7 +88,10 @@ export function createStaticClient({
 
       if (!cached) return [];
       if (cached.type === 'simple')
-        return searchSimple(cached as unknown as Orama<typeof schema>, query);
+        return searchSimple(
+          cached as unknown as Orama<typeof simpleSchema>,
+          query,
+        );
 
       return searchAdvanced(
         cached.db as Orama<typeof advancedSchema>,
