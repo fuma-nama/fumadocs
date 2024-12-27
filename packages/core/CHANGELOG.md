@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 14.6.5
+
+### Patch Changes
+
+- 969da26: Improve i18n api
+
 ## 14.6.4
 
 ### Patch Changes

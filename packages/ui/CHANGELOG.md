@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 14.6.5
+
+### Patch Changes
+
+- 969da26: Improve i18n api
+- Updated dependencies [969da26]
+  - fumadocs-core@14.6.5
+
 ## 14.6.4
 
 ### Patch Changes
