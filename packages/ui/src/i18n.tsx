@@ -1,11 +1,12 @@
 'use client';
 
-import { useCallback, type ReactNode } from 'react';
+import { useCallback, type ReactNode, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import {
   useI18n,
   type Translations,
   I18nContext,
+  defaultTranslations,
   type LocaleItem,
 } from './contexts/i18n';
 
@@ -40,24 +41,26 @@ export function I18nProvider({
 }: I18nProviderProps) {
   const context = useI18n();
   const router = useRouter();
-  const segments = usePathname()
-    .split('/')
-    .filter((v) => v.length > 0);
+  const pathname = usePathname();
 
-  const onChange = useCallback(
-    (v: string) => {
-      // If locale prefix hidden
-      if (segments[0] !== locale) {
-        segments.unshift(v);
-      } else {
-        segments[0] = v;
-      }
+  const onChangeCallback = (locale: string) => {
+    const segments = pathname.split('/').filter((v) => v.length > 0);
 
-      router.push(`/${segments.join('/')}`);
-      router.refresh();
-    },
-    [locale, segments, router],
-  );
+    // If locale prefix hidden
+    if (segments[0] !== locale) {
+      segments.unshift(locale);
+    } else {
+      segments[0] = locale;
+    }
+
+    router.push(`/${segments.join('/')}`);
+    router.refresh();
+  };
+
+  const onChangeRef = useRef(onChangeCallback);
+  onChangeRef.current = onChangeCallback;
+
+  const onChange = useCallback((v: string) => onChangeRef.current(v), []);
 
   return (
     <I18nContext.Provider
@@ -76,4 +79,4 @@ export function I18nProvider({
   );
 }
 
-export { type Translations };
+export { defaultTranslations, type Translations };

@@ -46,7 +46,7 @@ export function runTransform(sourceFile: SourceFile): void {
       .join('\n');
 
     parent.setBodyText(
-      `<I18nProvider locale={params.lang} locales={[
+      `<I18nProvider locale={(await params).lang} locales={[
     { locale: 'en', name: 'English' }
 ]}>
   ${inner.trim()}
@@ -64,8 +64,10 @@ export function runTransform(sourceFile: SourceFile): void {
   const func = sourceFile
     .getDescendantsOfKind(SyntaxKind.FunctionDeclaration)
     .find((v) => v.isDefaultExport());
+  func?.toggleModifier('async', true);
+
   const param = func?.getParameters().at(0);
-  param?.setType(`{ params: { lang: string }, children: ReactNode }`);
+  param?.setType(`{ params: Promise<{ lang: string }>, children: ReactNode }`);
   param?.set({
     name: `{ params, children }`,
   });

@@ -35,13 +35,13 @@ import {
 } from '@/components/layout/search-toggle';
 import { SearchOnly } from '@/contexts/search';
 import {
+  checkPageTree,
   getSidebarTabsFromOptions,
   layoutVariables,
   SidebarLinkItem,
   type SidebarOptions,
 } from '@/layouts/docs/shared';
 import { type PageStyles, StylesProvider } from '@/contexts/layout';
-import { notFound } from 'next/navigation';
 
 export interface DocsLayoutProps extends BaseLayoutProps {
   tree: PageTree.Root;
@@ -71,9 +71,9 @@ export function DocsLayout({
   i18n = false,
   ...props
 }: DocsLayoutProps): ReactNode {
+  checkPageTree(props.tree);
   const links = getLinks(props.links ?? [], props.githubUrl);
   const Aside = collapsible ? CollapsibleSidebar : Sidebar;
-  if (props.tree === undefined) notFound();
 
   const tabs = getSidebarTabsFromOptions(tabOptions, props.tree) ?? [];
   const variables = cn(
