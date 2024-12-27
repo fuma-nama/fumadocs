@@ -105,7 +105,7 @@ export function checkPageTree(passed: unknown) {
   if (
     typeof passed === 'object' &&
     'children' in passed &&
-    Array.isArray(passed)
+    Array.isArray(passed.children)
   )
     return;
 
