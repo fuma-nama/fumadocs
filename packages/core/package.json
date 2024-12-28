@@ -60,6 +60,10 @@
       "import": "./dist/link.js",
       "types": "./dist/link.d.ts"
     },
+    "./dynamic-link": {
+      "import": "./dist/dynamic-link.js",
+      "types": "./dist/dynamic-link.d.ts"
+    },
     "./mdx-plugins": {
       "import": "./dist/mdx-plugins/index.js",
       "types": "./dist/mdx-plugins/index.d.ts"
