@@ -68,20 +68,20 @@ See [Middleware](/docs/headless/internationalization#middleware) for customisabl
 ### Routing
 
 Create a dynamic route `/app/[lang]`, and move all special files from `/app` to
-the folder.
+the folder (e.g. `page.tsx`, `layout.tsx`).
 
 A `I18nProvider` is needed for localization.
 Wrap the root provider inside your I18n provider, and provide available languages & translations to it.
 
 Note that only English translations are provided by default.
 
-```tsx
+```tsx title="app/[lang]/layout.tsx"
 import { RootProvider } from 'fumadocs-ui/provider';
 import { I18nProvider, type Translations } from 'fumadocs-ui/i18n';
 
-const cn: Translations = {
+const cn: Partial<Translations> = {
   search: 'Translated Content',
-  // other props
+  // other translations
 };
 
 // available languages that will be displayed on UI
@@ -104,16 +104,18 @@ export default async function RootLayout({
   params: Promise<{ lang: string }>;
   children: React.ReactNode;
 }) {
+  const lang = (await params).lang;
+
   return (
-    <html lang={(await params).lang}>
+    <html lang={lang}>
       <body>
         <I18nProvider
-          locale={(await params).lang}
+          locale={lang}
           locales={locales}
           translations={
             {
               cn,
-            }[(await params).lang]
+            }[lang]
           }
         >
           <RootProvider>{children}</RootProvider>
@@ -126,7 +128,7 @@ export default async function RootLayout({
 
 ### Source
 
-Update the usages to your source to include a locale code:
+Update the references to your `source` object to include a locale code:
 
 ```ts
 import { source } from '@/lib/source';
@@ -141,9 +143,10 @@ source.getPage(params.slug, params.lang);
 source.getPages(params.lang);
 ```
 
-like:
+In code editors, you can click on the variable in `lib/source.ts` to quickly find its references.
+For example, it looks like this for docs layout:
 
-```tsx title="app/[lang]/layout.tsx"
+```tsx title="app/[lang]/docs/layout.tsx"
 import { source } from '@/lib/source';
 import { DocsLayout } from 'fumadocs-ui/docs';
 import type { ReactNode } from 'react';
