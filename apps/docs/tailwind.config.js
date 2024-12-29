@@ -14,6 +14,7 @@ export default {
   presets: [
     createPreset({
       addGlobalColors: true,
+      cssPrefix: '',
     }),
   ],
   theme: {
