@@ -120,7 +120,7 @@ function createTailwindColors(
 }
 
 export const docsUi = plugin.withOptions<DocsUIOptions>(
-  ({ cssPrefix = '', preset = 'default', layoutWidth = '100vw' } = {}) => {
+  ({ cssPrefix = 'fd', preset = 'default', layoutWidth = '100vw' } = {}) => {
     return ({ addBase, addComponents, addUtilities }) => {
       const { light, dark, css } =
         typeof preset === 'string' ? presets[preset] : preset;
@@ -240,7 +240,7 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
     };
   },
   ({
-    cssPrefix = '',
+    cssPrefix = 'fd',
     modifyContainer = true,
     addGlobalColors = false,
   } = {}) => ({
