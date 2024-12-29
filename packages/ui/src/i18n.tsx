@@ -43,14 +43,14 @@ export function I18nProvider({
   const router = useRouter();
   const pathname = usePathname();
 
-  const onChangeCallback = (locale: string) => {
+  const onChangeCallback = (value: string) => {
     const segments = pathname.split('/').filter((v) => v.length > 0);
 
     // If locale prefix hidden
     if (segments[0] !== locale) {
-      segments.unshift(locale);
+      segments.unshift(value);
     } else {
-      segments[0] = locale;
+      segments[0] = value;
     }
 
     router.push(`/${segments.join('/')}`);
