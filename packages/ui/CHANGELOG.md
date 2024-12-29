@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 14.6.8
+
+### Patch Changes
+
+- e95be52: Fix i18n toggle
+- f3298ea: Add css prefix by default
+  - fumadocs-core@14.6.8
+
 ## 14.6.7
 
 ### Patch Changes
