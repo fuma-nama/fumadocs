@@ -1,3 +1,4 @@
+// @ts-check
 import { createPreset } from 'fumadocs-ui/tailwind-plugin';
 
 /** @type {import('tailwindcss').Config} */

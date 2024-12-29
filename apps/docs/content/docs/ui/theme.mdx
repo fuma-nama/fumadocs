@@ -44,11 +44,7 @@ To enable RTL, set the `dir` prop to `rtl` in body and root provider (required f
 import { RootProvider } from 'fumadocs-ui/provider';
 import type { ReactNode } from 'react';
 
-export default function RootLayout({
-  children,
-}: {
-  children: ReactNode;
-}): ReactNode {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body dir="rtl">
@@ -62,6 +58,26 @@ export default function RootLayout({
 ## CSS Variables
 
 Fumadocs UI provides some CSS variables for customising the layout.
+
+### Prefix
+
+By default, it has a `fd-` prefix to avoid conflicts with Shadcn UI or your own CSS variables.
+
+You can set or remove the prefix in `createPreset`:
+
+```js
+import { createPreset } from 'fumadocs-ui/tailwind-plugin';
+
+/** @type {import('tailwindcss').Config} */
+export default {
+  presets: [
+    createPreset({
+      // no prefix
+      cssPrefix: '',
+    }),
+  ],
+};
+```
 
 ### Navbar Height
 
