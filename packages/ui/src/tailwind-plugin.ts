@@ -240,7 +240,7 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
     };
   },
   ({
-    cssPrefix = '',
+    cssPrefix = 'fd',
     modifyContainer = true,
     addGlobalColors = false,
   } = {}) => ({
