@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@clack/prompts": "^0.9.0",
-    "commander": "^12.1.0",
+    "commander": "^13.0.0",
     "execa": "^9.5.2",
     "package-manager-detector": "^0.2.8",
     "picocolors": "^1.1.1",
