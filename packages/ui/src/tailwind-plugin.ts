@@ -12,7 +12,7 @@ export interface DocsUIOptions
   /**
    * Prefix to the variable name of colors
    *
-   * @defaultValue ''
+   * @defaultValue 'fd'
    */
   cssPrefix?: string;
 
@@ -143,6 +143,10 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
         '.dark': getThemeStyles(cssPrefix, dark),
         '*': {
           'border-color': `theme('colors.fd-border')`,
+        },
+
+        "[data-rmiz-modal-overlay='visible']": {
+          'background-color': `theme('colors.fd-background')`,
         },
         body: {
           'background-color': `theme('colors.fd-background')`,

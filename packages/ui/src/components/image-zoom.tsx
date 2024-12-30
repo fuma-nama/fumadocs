@@ -28,7 +28,7 @@ export function ImageZoom({
   children,
   rmiz,
   ...props
-}: ImageZoomProps): React.ReactElement {
+}: ImageZoomProps) {
   return (
     <Zoom
       zoomMargin={20}
