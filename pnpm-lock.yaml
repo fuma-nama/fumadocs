@@ -220,8 +220,8 @@ importers:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.4.17)
       ts-morph:
-        specifier: ^24.0.0
-        version: 24.0.0
+        specifier: ^25.0.0
+        version: 25.0.0
       tsconfig:
         specifier: workspace:*
         version: link:../../packages/tsconfig
@@ -456,8 +456,8 @@ importers:
         specifier: ^1.1.1
         version: 1.1.1
       ts-morph:
-        specifier: ^24.0.0
-        version: 24.0.0
+        specifier: ^25.0.0
+        version: 25.0.0
     devDependencies:
       '@types/cross-spawn':
         specifier: ^6.0.6
@@ -1071,8 +1071,8 @@ importers:
         specifier: ^1.24.3
         version: 1.24.3
       ts-morph:
-        specifier: ^24.0.0
-        version: 24.0.0
+        specifier: ^25.0.0
+        version: 25.0.0
     devDependencies:
       '@types/estree':
         specifier: ^1.0.6
@@ -2941,8 +2941,8 @@ packages:
     peerDependencies:
       react: ^18.2.0
 
-  '@ts-morph/common@0.25.0':
-    resolution: {integrity: sha512-kMnZz+vGGHi4GoHnLmMhGNjm44kGtKUXGnOvrKmMwAuvNjM/PgKVGfUnL7IDvK7Jb2QQ82jq3Zmp04Gy+r3Dkg==}
+  '@ts-morph/common@0.26.0':
+    resolution: {integrity: sha512-/RmKAtctStXqM5nECMQ46duT74Hoig/DBzhWXGHcodlDNrgRbsbwwHqSKFNbca6z9Xt/CUWMeXOsC9QEN1+rqw==}
 
   '@types/acorn@4.0.6':
     resolution: {integrity: sha512-veQTnWP+1D/xbxVrPC3zHnCZRjSrKfhbMUlEA43iMZLu7EsnTtkJklIuwrCPbOi8YkvDQAiW05VQQFvvz9oieQ==}
@@ -6115,8 +6115,8 @@ packages:
   ts-interface-checker@0.1.13:
     resolution: {integrity: sha512-Y/arvbn+rrz3JCKl9C4kVNfTfSm2/mEp5FSz5EsZSANGPSlQrpRI5M4PKF+mJnE52jOO90PnPSc3Ur3bTQw0gA==}
 
-  ts-morph@24.0.0:
-    resolution: {integrity: sha512-2OAOg/Ob5yx9Et7ZX4CvTCc0UFoZHwLEJ+dpDPSUi5TgwwlTlX47w+iFRrEwzUZwYACjq83cgjS/Da50Ga37uw==}
+  ts-morph@25.0.0:
+    resolution: {integrity: sha512-ERPTUVO5qF8cEGJgAejGOsCVlbk8d0SDyiJsucKQT5XgqoZslv0Qml+gnui6Yy6o+uQqw5SestyW2HvlVtT/Sg==}
 
   tsc-alias@1.8.10:
     resolution: {integrity: sha512-Ibv4KAWfFkFdKJxnWfVtdOmB0Zi1RJVxcbPGiCDsFpCQSsmpWyuzHG3rQyI5YkobWwxFPEyQfu1hdo4qLG2zPw==}
@@ -8142,11 +8142,11 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@ts-morph/common@0.25.0':
+  '@ts-morph/common@0.26.0':
     dependencies:
+      fast-glob: 3.3.2
       minimatch: 9.0.5
       path-browserify: 1.0.1
-      tinyglobby: 0.2.10
 
   '@types/acorn@4.0.6':
     dependencies:
@@ -12099,9 +12099,9 @@ snapshots:
 
   ts-interface-checker@0.1.13: {}
 
-  ts-morph@24.0.0:
+  ts-morph@25.0.0:
     dependencies:
-      '@ts-morph/common': 0.25.0
+      '@ts-morph/common': 0.26.0
       code-block-writer: 13.0.3
 
   tsc-alias@1.8.10:
