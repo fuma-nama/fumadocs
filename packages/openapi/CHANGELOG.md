@@ -1,5 +1,17 @@
 # @fuma-docs/openapi
 
+## 5.11.0
+
+### Minor Changes
+
+- 0e8be0e: Support XML request body
+
+### Patch Changes
+
+- Updated dependencies [97ed36c]
+  - fumadocs-core@14.7.0
+  - fumadocs-ui@14.7.0
+
 ## 5.10.6
 
 ### Patch Changes

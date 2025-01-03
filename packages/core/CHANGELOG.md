@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 14.7.0
+
+### Minor Changes
+
+- 97ed36c: Remove defaults from `loader` and deprecate `rootDir` options
+
 ## 14.6.8
 
 ## 14.6.7

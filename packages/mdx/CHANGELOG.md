@@ -1,5 +1,13 @@
 # next-docs-mdx
 
+## 11.2.2
+
+### Patch Changes
+
+- 97ed36c: Improve default settings
+- Updated dependencies [97ed36c]
+  - fumadocs-core@14.7.0
+
 ## 11.2.1
 
 ### Patch Changes
