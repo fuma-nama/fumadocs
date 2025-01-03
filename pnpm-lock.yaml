@@ -1049,9 +1049,6 @@ importers:
 
   packages/typescript:
     dependencies:
-      '@types/node':
-        specifier: 22.10.5
-        version: 22.10.5
       fast-glob:
         specifier: ^3.3.1
         version: 3.3.2
@@ -1083,6 +1080,9 @@ importers:
       '@types/mdast':
         specifier: ^4.0.3
         version: 4.0.4
+      '@types/node':
+        specifier: 22.10.5
+        version: 22.10.5
       '@types/react':
         specifier: 19.0.2
         version: 19.0.2
