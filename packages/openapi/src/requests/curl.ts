@@ -1,5 +1,5 @@
 import { type EndpointSample } from '@/utils/generate-sample';
-import { toSampleInput } from '@/utils/schema';
+import { inputToString } from '@/utils/schema';
 
 export function getSampleRequest(endpoint: EndpointSample): string {
   const s: string[] = [];
@@ -8,15 +8,13 @@ export function getSampleRequest(endpoint: EndpointSample): string {
 
   for (const param of endpoint.parameters) {
     if (param.in === 'header') {
-      const header = `${param.name}: ${toSampleInput(param.sample)}`;
+      const header = `${param.name}: ${param.sample}`;
 
       s.push(`-H "${header}"`);
     }
 
     if (param.in === 'cookie') {
-      const cookie = JSON.stringify(
-        `${param.name}=${toSampleInput(param.sample)}`,
-      );
+      const cookie = JSON.stringify(`${param.name}=${param.sample}`);
 
       s.push(`--cookie ${cookie}`);
     }
@@ -27,12 +25,14 @@ export function getSampleRequest(endpoint: EndpointSample): string {
 
     if (sample && typeof sample === 'object') {
       for (const [key, value] of Object.entries(sample)) {
-        s.push(`-F ${key}=${JSON.stringify(value, null, 2)}`);
+        s.push(`-F ${key}=${inputToString(value)}`);
       }
     }
   } else if (endpoint.body) {
-    s.push(`-H "Content-Type: application/json"`);
-    s.push(`-d '${toSampleInput(endpoint.body.sample)}'`);
+    s.push(`-H "Content-Type: ${endpoint.body.mediaType}"`);
+    s.push(
+      `-d ${inputToString(endpoint.body.sample, endpoint.body.mediaType, 'single-quote')}`,
+    );
   }
 
   return s

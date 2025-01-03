@@ -1,10 +1,9 @@
 import { type EndpointSample } from '@/utils/generate-sample';
-import { toSampleInput } from '@/utils/schema';
+import { inputToString } from '@/utils/schema';
 
 export function getSampleRequest(endpoint: EndpointSample): string {
   const imports = ['fmt', 'net/http', 'io/ioutil'];
   const headers = new Map<string, string>();
-  const cookies = new Map<string, string>();
   const variables = new Map<string, string>();
 
   // additional lines before initializing request
@@ -12,35 +11,21 @@ export function getSampleRequest(endpoint: EndpointSample): string {
 
   for (const p of endpoint.parameters) {
     if (p.in === 'header') headers.set(p.name, JSON.stringify(p.sample));
-    if (p.in === 'cookie') cookies.set(p.name, toSampleInput(p.sample));
   }
+
+  const cookies = endpoint.parameters.filter((p) => p.in === 'cookie');
 
   variables.set('url', JSON.stringify(endpoint.url));
 
-  if (cookies.size > 0)
+  if (cookies.length > 0)
     headers.set(
       'Cookie',
-      JSON.stringify(
-        Array.from(cookies.entries())
-          .map(([key, value]) => `${key}=${value}`)
-          .join('; '),
-      ),
+      JSON.stringify(cookies.map((p) => `${p.name}=${p.sample}`).join('; ')),
     );
 
   if (endpoint.body) {
     headers.set('Content-Type', `"${endpoint.body.mediaType}"`);
 
-    if (endpoint.body.mediaType === 'application/json') {
-      imports.push('strings');
-      variables.set(
-        'payload',
-        `strings.NewReader(\`${JSON.stringify(
-          endpoint.body.sample,
-          null,
-          2,
-        ).replaceAll('\n', '\n  ')}\`)`,
-      );
-    }
     if (
       endpoint.body.mediaType === 'multipart/form-data' &&
       typeof endpoint.body.sample === 'object'
@@ -52,9 +37,19 @@ export function getSampleRequest(endpoint: EndpointSample): string {
 
       for (const [key, value] of Object.entries(endpoint.body.sample ?? {})) {
         additional.push(
-          `mp.WriteField("${key}", ${JSON.stringify(toSampleInput(value))})`,
+          `mp.WriteField("${key}", ${inputToString(value, undefined, 'backtick')})`,
         );
       }
+    } else {
+      imports.push('strings');
+      variables.set(
+        'payload',
+        `strings.NewReader(${inputToString(
+          endpoint.body.sample,
+          endpoint.body.mediaType,
+          'backtick',
+        ).replaceAll('\n', '\n  ')})`,
+      );
     }
   }
 

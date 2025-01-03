@@ -54,7 +54,8 @@
     "react-hook-form": "^7.54.2",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.1",
-    "shiki": "^1.26.1"
+    "shiki": "^1.26.1",
+    "xml-js": "^1.6.11"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
