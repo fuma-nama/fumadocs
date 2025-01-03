@@ -35,13 +35,13 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@types/node": "22.10.2",
+    "@types/node": "22.10.5",
     "fast-glob": "^3.3.1",
     "hast-util-to-jsx-runtime": "^2.3.2",
     "mdast-util-from-markdown": "^2.0.2",
     "mdast-util-gfm": "^3.0.0",
     "mdast-util-to-hast": "^13.2.0",
-    "shiki": "^1.24.3",
+    "shiki": "^1.26.1",
     "ts-morph": "^25.0.0"
   },
   "devDependencies": {

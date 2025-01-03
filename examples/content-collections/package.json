@@ -11,7 +11,7 @@
     "@fumadocs/content-collections": "workspace:*",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "next": "^15.1.2",
+    "next": "^15.1.3",
     "react": "19.0.0",
     "react-dom": "19.0.0"
   },
