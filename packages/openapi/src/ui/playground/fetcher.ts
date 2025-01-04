@@ -171,12 +171,20 @@ function convertValue(
   }
 
   if (schema.type === 'switcher') {
-    const schema = resolve(
-      getDynamicFieldSchema(fieldName, dynamicFields),
+    return convertValue(
+      fieldName,
+      value,
+      resolve(
+        getDynamicFieldSchema(
+          fieldName,
+          dynamicFields,
+          Object.values(schema.items).at(0),
+        ),
+        references,
+      ),
       references,
+      dynamicFields,
     );
-
-    return convertValue(fieldName, value, schema, references, dynamicFields);
   }
 
   if (typeof value === 'object' && schema.type === 'object') {
@@ -231,10 +239,12 @@ function convertValue(
 function getDynamicFieldSchema(
   name: string,
   dynamicFields: Map<string, DynamicField>,
+  defaultValue?: RequestSchema | ReferenceSchema,
 ): RequestSchema | ReferenceSchema {
   const field = dynamicFields.get(name);
 
-  return field?.type === 'field'
-    ? field.schema
-    : { type: 'null', isRequired: false };
+  if (field?.type === 'field') return field.schema;
+  if (defaultValue) return defaultValue;
+
+  return { type: 'null', isRequired: false };
 }

@@ -1235,6 +1235,36 @@
                       "trialEnds": "2023-06-16T17:16:37.161Z"
                     }
                   },
+                  "parameters": {
+                    "type": "object",
+                    "required": ["media_input"],
+                    "properties": {
+                      "media_input": {
+                        "oneOf": [
+                          {
+                            "title": "Image Media",
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "const": "image"
+                              },
+                              "url": {
+                                "type": "string"
+                              }
+                            },
+                            "required": ["type", "url"],
+                            "examples": [
+                              {
+                                "type": "image",
+                                "url": "https://example.com/image.png"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  },
                   "roles": {
                     "type": "array",
                     "items": {
