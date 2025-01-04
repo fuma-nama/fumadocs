@@ -66,6 +66,7 @@ export function DocsLayout({
     banner: sidebarBanner,
     footer: sidebarFooter,
     components: sidebarComponents,
+    hideSearch: sidebarHideSearch,
     ...sidebar
   } = {},
   i18n = false,
@@ -120,7 +121,7 @@ export function DocsLayout({
         >
           {collapsible ? (
             <SidebarCollapseTrigger
-              className="fixed bottom-3 z-30 data-[collapsed=false]:invisible max-md:hidden"
+              className="fixed bottom-3 z-30 data-[collapsed=false]:hidden max-md:hidden"
               style={{
                 insetInlineStart: 'calc(var(--fd-layout-offset) + 0.5rem)',
               }}
@@ -141,9 +142,11 @@ export function DocsLayout({
                 {tabs.length > 0 ? (
                   <RootToggle options={tabs} className="-mx-2" />
                 ) : null}
-                <SearchOnly>
-                  <LargeSearchToggle className="rounded-lg max-md:hidden" />
-                </SearchOnly>
+                {!sidebarHideSearch ? (
+                  <SearchOnly>
+                    <LargeSearchToggle className="rounded-lg max-md:hidden" />
+                  </SearchOnly>
+                ) : null}
               </SidebarHeader>
               <SidebarViewport>
                 <div className="pt-4 empty:hidden md:hidden">

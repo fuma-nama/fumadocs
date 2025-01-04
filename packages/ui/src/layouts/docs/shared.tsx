@@ -38,7 +38,7 @@ export interface SidebarOptions extends SidebarProps {
   footer?: ReactNode;
 
   /**
-   * Hide search trigger
+   * Hide search trigger. You can also disable search for the entire site from `<RootProvider />`.
    *
    * @defaultValue false
    */
