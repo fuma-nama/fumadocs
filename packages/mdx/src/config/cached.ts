@@ -27,7 +27,7 @@ export async function loadConfigCached(
  * Generate hash based on the content of config
  */
 export async function getConfigHash(configPath: string): Promise<string> {
-  const hash = createHash('sha256');
+  const hash = createHash('md5');
   const rs = fs.createReadStream(configPath);
 
   for await (const chunk of rs) {
