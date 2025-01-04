@@ -1,5 +1,19 @@
 # @fuma-docs/openapi
 
+## 5.11.0
+
+### Minor Changes
+
+- 0e8be0e: Support XML request body
+
+### Patch Changes
+
+- 698b385: Fix switcher default value being ignored
+- Updated dependencies [a557bb4]
+- Updated dependencies [97ed36c]
+  - fumadocs-ui@14.7.0
+  - fumadocs-core@14.7.0
+
 ## 5.10.6
 
 ### Patch Changes
