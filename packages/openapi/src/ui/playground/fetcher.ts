@@ -5,11 +5,13 @@ import { type DynamicField } from '@/ui/contexts/schema';
 export interface FetchOptions {
   url: string;
   method: string;
-  type: 'form-data' | 'json';
 
   header: Record<string, unknown>;
 
-  body?: unknown;
+  body?: {
+    mediaType: string;
+    value: unknown;
+  };
   dynamicFields?: Map<string, DynamicField>;
 }
 
@@ -24,7 +26,7 @@ export interface Fetcher {
    * @param input - fetch request inputs
    * @param dynamicFields - schema of dynamic fields, given by the playground client
    */
-  fetch: (input: FetchOptions & {}) => Promise<FetchResult>;
+  fetch: (options: FetchOptions) => Promise<FetchResult>;
 }
 
 /**
@@ -36,31 +38,32 @@ export function createBrowserFetcher(
   references: Record<string, RequestSchema>,
 ): Fetcher {
   return {
-    async fetch(input) {
+    async fetch(options) {
       const headers = new Headers();
-      if (input.type !== 'form-data')
-        headers.append('Content-Type', 'application/json');
+      if (options.body && options.body.mediaType !== 'multipart/form-data')
+        headers.append('Content-Type', options.body.mediaType);
 
-      for (const key of Object.keys(input.header)) {
-        const paramValue = input.header[key];
+      for (const key of Object.keys(options.header)) {
+        const paramValue = options.header[key];
 
         if (typeof paramValue === 'string' && paramValue.length > 0)
           headers.append(key, paramValue.toString());
       }
 
-      return fetch(input.url, {
-        method: input.method,
+      return fetch(options.url, {
+        method: options.method,
         cache: 'no-cache',
         headers,
-        body: bodySchema
-          ? createBodyFromValue(
-              input.type,
-              input.body,
-              bodySchema,
-              references,
-              input.dynamicFields ?? new Map(),
-            )
-          : undefined,
+        body:
+          bodySchema && options.body
+            ? await createBodyFromValue(
+                options.body.mediaType,
+                options.body.value,
+                bodySchema,
+                references,
+                options.dynamicFields ?? new Map(),
+              )
+            : undefined,
         signal: AbortSignal.timeout(10 * 1000),
       })
         .then(async (res) => {
@@ -95,17 +98,26 @@ export function createBrowserFetcher(
 /**
  * Create request body from value
  */
-export function createBodyFromValue(
-  type: 'json' | 'form-data',
+export async function createBodyFromValue(
+  mediaType: string,
   value: unknown,
   schema: RequestSchema,
   references: Record<string, RequestSchema>,
   dynamicFields: Map<string, DynamicField>,
-): string | FormData {
+): Promise<string | FormData> {
   const result = convertValue('body', value, schema, references, dynamicFields);
 
-  if (type === 'json') {
+  if (mediaType === 'application/json') {
     return JSON.stringify(result);
+  }
+
+  if (mediaType === 'application/xml') {
+    const { js2xml } = await import('xml-js');
+
+    return js2xml(result as Record<string, unknown>, {
+      compact: true,
+      spaces: 2,
+    });
   }
 
   const formData = new FormData();

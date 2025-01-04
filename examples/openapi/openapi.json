@@ -1187,7 +1187,7 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
+            "application/xml": {
               "schema": {
                 "type": "object",
                 "properties": {
