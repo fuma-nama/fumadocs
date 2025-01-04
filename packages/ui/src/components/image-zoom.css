@@ -47,10 +47,6 @@
   background-color: transparent;
 }
 
-[data-rmiz-modal-overlay='visible'] {
-  @apply bg-fd-background;
-}
-
 [data-rmiz-modal-content] {
   width: 100%;
   height: 100%;

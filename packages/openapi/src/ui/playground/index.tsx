@@ -56,7 +56,6 @@ export interface CustomField<TName extends FieldPath<FormValues>, Info> {
 export function APIPlayground({
   route,
   method = 'GET',
-  bodyType,
   authorization,
   path = [],
   header = [],
@@ -107,10 +106,14 @@ export function APIPlayground({
     }
 
     return fetcher.fetch({
-      type: bodyType,
       url: url.toString(),
       header,
-      body: input.body,
+      body: body
+        ? {
+            mediaType: body.mediaType,
+            value: input.body,
+          }
+        : undefined,
       dynamicFields: dynamicRef.current,
       method,
     });

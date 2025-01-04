@@ -49,6 +49,7 @@ test('Get URL: Base', () => {
 
 test('Loader: Simple', () => {
   const result = loader({
+    baseUrl: '/',
     pageTree: {
       noRef: true,
     },
@@ -91,6 +92,7 @@ test('Loader: Simple', () => {
 
 test('Nested Directories', async () => {
   const result = loader({
+    baseUrl: '/',
     icon: (v) => v as unknown as ReactElement,
     pageTree: {
       noRef: true,
@@ -254,6 +256,7 @@ const i18nSource: Source<SourceConfig> = {
 
 test('Internationalized Routing', () => {
   const result = loader({
+    baseUrl: '/',
     i18n: {
       languages: ['cn', 'en'],
       defaultLanguage: 'en',
@@ -344,6 +347,7 @@ test('Internationalized Routing', () => {
 
 test('Internationalized Routing: Hide Prefix', () => {
   const result = loader({
+    baseUrl: '/',
     i18n: {
       languages: ['cn', 'en'],
       defaultLanguage: 'en',

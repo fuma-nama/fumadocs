@@ -20,7 +20,7 @@ export const source = loader({
 
 export const blog = loader({
   baseUrl: '/blog',
-  source: createMDXSource(blogPosts, []),
+  source: createMDXSource(blogPosts),
 });
 
 export const openapi = createOpenAPI({

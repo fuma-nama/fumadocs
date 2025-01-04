@@ -60,7 +60,7 @@ export default async function loader(
   const { _ctx } = this.getOptions();
   const matter = grayMatter(source);
 
-  // notice that `resourceQuery` can be missing (e.g. on Turbopack)
+  // notice that `resourceQuery` can be missing (e.g. `page.mdx`)
   const {
     hash: configHash = await getConfigHash(_ctx.configPath),
     collection: collectionId,

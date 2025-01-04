@@ -1,4 +1,5 @@
 import { type EndpointSample } from '@/utils/generate-sample';
+import { inputToString } from '@/utils/schema';
 
 export function getSampleRequest(endpoint: EndpointSample): string {
   const headers = new Map<string, unknown>();
@@ -8,6 +9,29 @@ export function getSampleRequest(endpoint: EndpointSample): string {
   for (const param of endpoint.parameters) {
     if (param.in === 'header') headers.set(param.name, param.sample);
     if (param.in === 'cookie') cookies.set(param.name, param.sample);
+  }
+
+  if (endpoint.body) {
+    switch (endpoint.body.mediaType) {
+      case 'application/json':
+        variables.set('json', JSON.stringify(endpoint.body.sample, null, 2));
+        break;
+      case 'multipart/form-data':
+        headers.set('Content-Type', endpoint.body.mediaType);
+        variables.set('data', JSON.stringify(endpoint.body.sample, null, 2));
+        break;
+      default:
+        headers.set('Content-Type', endpoint.body.mediaType);
+
+        variables.set(
+          'data',
+          inputToString(
+            endpoint.body.sample,
+            endpoint.body.mediaType,
+            'backtick',
+          ),
+        );
+    }
   }
 
   if (headers.size > 0) {
@@ -21,13 +45,6 @@ export function getSampleRequest(endpoint: EndpointSample): string {
     variables.set(
       'cookies',
       JSON.stringify(Object.fromEntries(cookies.entries()), null, 2),
-    );
-  }
-
-  if (endpoint.body) {
-    variables.set(
-      endpoint.body.mediaType === 'multipart/form-data' ? 'data' : 'json',
-      JSON.stringify(endpoint.body.sample, null, 2),
     );
   }
 

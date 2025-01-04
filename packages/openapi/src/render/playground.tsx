@@ -83,12 +83,13 @@ interface Context {
 export interface APIPlaygroundProps {
   route: string;
   method: string;
-  bodyType: 'json' | 'form-data';
   authorization?: PrimitiveRequestField & { authType: string };
   path?: PrimitiveRequestField[];
   query?: PrimitiveRequestField[];
   header?: PrimitiveRequestField[];
-  body?: RequestSchema;
+  body?: RequestSchema & {
+    mediaType: string;
+  };
   schemas: Record<string, RequestSchema>;
   proxyUrl?: string;
 }
@@ -125,7 +126,6 @@ export function Playground({
     authorization: getAuthorizationField(method, ctx),
     method: method.method,
     route: path,
-    bodyType: mediaType === 'multipart/form-data' ? 'form-data' : 'json',
     path: method.parameters
       ?.filter((v) => v.in === 'path')
       .map((v) => parameterToField(v, context)),
@@ -135,7 +135,13 @@ export function Playground({
     header: method.parameters
       ?.filter((v) => v.in === 'header')
       .map((v) => parameterToField(v, context)),
-    body: bodySchema,
+    body:
+      bodySchema && mediaType
+        ? {
+            ...bodySchema,
+            mediaType: mediaType as string,
+          }
+        : undefined,
     schemas: context.references,
     proxyUrl: ctx.proxyUrl,
   };

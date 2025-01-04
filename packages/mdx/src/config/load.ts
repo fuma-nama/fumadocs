@@ -1,6 +1,6 @@
 import * as path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { build } from 'esbuild';
+import { createJiti } from 'jiti';
 import type { DocCollection, MetaCollection } from '@/config/define';
 import { type GlobalConfig } from '@/config/types';
 import type { ProcessorOptions } from '@mdx-js/mdx';
@@ -26,36 +26,20 @@ export interface LoadedConfig {
 export type InternalDocCollection = DocCollection;
 export type InternalMetaCollection = MetaCollection;
 
+const jiti = createJiti(import.meta.url, {
+  moduleCache: false,
+});
+
 export async function loadConfig(configPath: string): Promise<LoadedConfig> {
-  const outputPath = path.resolve('.source/source.config.mjs');
+  const imported = await jiti
+    .import(pathToFileURL(configPath).href)
+    .catch((e) => {
+      throw new Error('failed to compile configuration file', e);
+    });
 
-  const transformed = await build({
-    entryPoints: [{ in: configPath, out: 'source.config' }],
-    bundle: true,
-    outdir: '.source',
-    target: 'node18',
-    write: true,
-    platform: 'node',
-    format: 'esm',
-    packages: 'external',
-    outExtension: {
-      '.js': '.mjs',
-    },
-    allowOverwrite: true,
-    splitting: true,
-  });
-
-  if (transformed.errors.length > 0) {
-    throw new Error('failed to compile configuration file');
-  }
-
-  const url = pathToFileURL(outputPath);
   const [err, config] = buildConfig(
     // every call to `loadConfig` will cause the previous cache to be ignored
-    (await import(`${url.toString()}?hash=${Date.now().toString()}`)) as Record<
-      string,
-      unknown
-    >,
+    imported as Record<string, unknown>,
   );
 
   if (err !== null) throw new Error(err);

@@ -24,13 +24,12 @@ export interface SourceConfig {
 
 export interface LoaderOptions {
   /**
+   * @deprecated It is now recommended to filter files on `source` level
    * @defaultValue `''`
    */
   rootDir?: string;
-  /**
-   * @defaultValue `'/'`
-   */
-  baseUrl?: string;
+
+  baseUrl: string;
 
   icon?: NonNullable<BuildPageTreeOptions['resolveIcon']>;
   slugs?: LoadOptions['getSlugs'];
@@ -216,13 +215,14 @@ export function loader<Options extends LoaderOptions>(
 }
 
 function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
-  const {
-    source,
-    rootDir = '',
-    baseUrl = '/',
-    slugs: slugsFn = getSlugs,
-    url: getUrl = createGetUrl(baseUrl, options.i18n),
-  } = options;
+  if (!options.url && !options.baseUrl) {
+    console.warn('`loader()` now requires a `baseUrl` option to be defined.');
+  }
+
+  const { source, rootDir = '', slugs: slugsFn = getSlugs } = options;
+  const getUrl =
+    options.url ?? createGetUrl(options.baseUrl ?? '/', options.i18n);
+
   const storage = loadFiles(
     typeof source.files === 'function' ? source.files(rootDir) : source.files,
     {

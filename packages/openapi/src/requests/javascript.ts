@@ -1,5 +1,5 @@
 import { type EndpointSample } from '@/utils/generate-sample';
-import { toSampleInput } from '@/utils/schema';
+import { inputToString } from '@/utils/schema';
 
 export function getSampleRequest(endpoint: EndpointSample): string {
   const s: string[] = [];
@@ -21,7 +21,7 @@ export function getSampleRequest(endpoint: EndpointSample): string {
     headers.set(
       'cookie',
       Array.from(cookies.entries())
-        .map(([key, value]) => `${key}=${toSampleInput(value)}`)
+        .map(([key, value]) => `${key}=${value}`)
         .join('; '),
     );
   }
@@ -29,11 +29,10 @@ export function getSampleRequest(endpoint: EndpointSample): string {
   if (headers.size > 0) {
     options.set(
       'headers',
-      JSON.stringify(
-        Object.fromEntries(headers.entries()),
-        undefined,
-        2,
-      ).replaceAll('\n', '\n  '),
+      JSON.stringify(Object.fromEntries(headers.entries()), null, 2).replaceAll(
+        '\n',
+        '\n  ',
+      ),
     );
   }
 
@@ -45,18 +44,30 @@ export function getSampleRequest(endpoint: EndpointSample): string {
     s.push(`const formData = new FormData();`);
 
     for (const [key, value] of Object.entries(endpoint.body.sample))
-      s.push(`formData.set(${key}, ${JSON.stringify(value)})`);
+      s.push(`formData.set(${key}, ${inputToString(value)})`);
 
     options.set('body', 'formData');
   } else if (endpoint.body) {
-    options.set(
-      'body',
-      `JSON.stringify(${JSON.stringify(
+    let code: string;
+
+    if (endpoint.body.mediaType === 'application/json') {
+      code =
+        typeof endpoint.body.sample === 'string'
+          ? inputToString(
+              endpoint.body.sample,
+              endpoint.body.mediaType,
+              'backtick',
+            )
+          : `JSON.stringify(${JSON.stringify(endpoint.body.sample, null, 2)})`;
+    } else {
+      code = inputToString(
         endpoint.body.sample,
-        null,
-        2,
-      ).replaceAll('\n', '\n  ')})`,
-    );
+        endpoint.body.mediaType,
+        'backtick',
+      );
+    }
+
+    options.set('body', code.replaceAll('\n', '\n  '));
   }
 
   const optionsStr = Array.from(options.entries())

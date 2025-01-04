@@ -1,7 +1,6 @@
 import { sample } from 'openapi-sampler';
 import type { MethodInformation, RenderContext } from '@/types';
 import {
-  toSampleInput,
   getPreferredType,
   type ParsedSchema,
   type NoReference,
@@ -131,13 +130,12 @@ export function generateSample(
 
   for (const param of params) {
     const value = generateBody(method.method, param.schema);
-    if (param.in === 'query')
-      queryParams.append(param.name, toSampleInput(value));
+    if (param.in === 'query') queryParams.append(param.name, String(value));
 
     if (param.in === 'path')
       pathWithParameters = pathWithParameters.replace(
         `{${param.name}}`,
-        toSampleInput(value),
+        String(value),
       );
   }
 

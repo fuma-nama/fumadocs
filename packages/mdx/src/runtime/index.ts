@@ -53,7 +53,7 @@ export function createMDXSource<
   Meta extends MetaData & BaseCollectionEntry,
 >(
   docs: Doc[],
-  meta: Meta[],
+  meta: Meta[] = [],
 ): Source<{
   pageData: Doc;
   metaData: Meta;

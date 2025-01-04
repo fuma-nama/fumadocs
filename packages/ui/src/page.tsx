@@ -264,17 +264,9 @@ export const DocsBody = forwardRef<
   HTMLDivElement,
   HTMLAttributes<HTMLDivElement>
 >((props, ref) => (
-  <div
-    ref={ref}
-    {...props}
-    className={cn('prose contain-content', props.className)}
-    style={
-      {
-        contentVisibility: 'auto',
-        ...props.style,
-      } as object
-    }
-  />
+  <div ref={ref} {...props} className={cn('prose', props.className)}>
+    {props.children}
+  </div>
 ));
 
 DocsBody.displayName = 'DocsBody';

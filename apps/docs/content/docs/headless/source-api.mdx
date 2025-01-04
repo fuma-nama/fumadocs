@@ -162,28 +162,6 @@ const entries = source.getLanguages();
 As mentioned, Source API doesn't rely on real file systems.
 During the process, your input source files will be parsed and form a virtual storage to avoid inconsistent behaviour between different OS.
 
-### Root Directory
-
-Filter the input files by its parent directory.
-
-```ts
-import { loader } from 'fumadocs-core/source';
-
-loader({
-  rootDir: 'test',
-});
-```
-
-Content sources only provide **a virtual file path** to the loader (like `test/index.mdx`).
-Relative paths such as `./` and `../` are not supported.
-
-<Callout type='warn' title='Be Careful'>
-
-This is not equivalent to your content directory configured on content source (e.g. Fumadocs MDX `dir` option).
-Please use relevant options on your source instead.
-
-</Callout>
-
 ### Transformer
 
 To perform virtual file-system operations before processing, you can add a transformer.
