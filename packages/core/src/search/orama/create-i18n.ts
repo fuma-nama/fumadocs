@@ -1,4 +1,4 @@
-import { type Language } from '@orama/orama';
+import { type Language, type Tokenizer } from '@orama/orama';
 import {
   type AdvancedIndex,
   type AdvancedOptions,
@@ -37,10 +37,28 @@ type WithLocale<T> = T & {
   locale: string;
 };
 
-function defaultLocaleMap(locale: string): string {
-  const map = STEMMERS;
+async function getTokenizer(
+  locale: string,
+): Promise<{ language: string } | { tokenizer: Tokenizer }> {
+  const mandarin = ['cn', 'zh'];
+  const language =
+    Object.keys(STEMMERS).find((lang) => STEMMERS[lang] === locale) ?? locale;
 
-  return Object.keys(map).find((lang) => map[lang] === locale) ?? locale;
+  if (
+    mandarin.some((code) => locale === code || locale.startsWith(`${code}-`))
+  ) {
+    const { createTokenizer } = await import(
+      '@orama/tokenizers/mandarin' as string
+    );
+
+    return {
+      tokenizer: await createTokenizer(),
+    };
+  }
+
+  return {
+    language,
+  };
 }
 
 async function initSimple(
@@ -59,7 +77,7 @@ async function initSimple(
   for (const locale of options.i18n.languages) {
     const localeIndexes = indexes.filter((index) => index.locale === locale);
     const searchLocale =
-      options.localeMap?.[locale] ?? defaultLocaleMap(locale);
+      options.localeMap?.[locale] ?? (await getTokenizer(locale));
 
     map.set(
       locale,
@@ -96,7 +114,7 @@ async function initAdvanced(
   for (const locale of options.i18n.languages) {
     const localeIndexes = indexes.filter((index) => index.locale === locale);
     const searchLocale =
-      options.localeMap?.[locale] ?? defaultLocaleMap(locale);
+      options.localeMap?.[locale] ?? (await getTokenizer(locale));
 
     map.set(
       locale,

@@ -104,8 +104,7 @@ import { RootProvider } from 'fumadocs-ui/root-provider';
 
 ### Search Options
 
-Pass options to the search client.
-For example, using `static` client:
+Pass options to the search client (e.g. the [options of Orama](/docs/headless/search/orama#options)).
 
 ```tsx
 import { RootProvider } from 'fumadocs-ui/root-provider';
@@ -113,7 +112,7 @@ import { RootProvider } from 'fumadocs-ui/root-provider';
 <RootProvider
   search={{
     options: {
-      type: 'static',
+      api: '/api/search/docs',
     },
   }}
 >

@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 14.7.1
+
+### Patch Changes
+
+- 18b00c1: Fix `hideSearch` option
+- Updated dependencies [72dc093]
+  - fumadocs-core@14.7.1
+
 ## 14.7.0
 
 ### Patch Changes

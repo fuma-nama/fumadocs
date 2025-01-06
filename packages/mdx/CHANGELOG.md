@@ -1,5 +1,13 @@
 # next-docs-mdx
 
+## 11.2.3
+
+### Patch Changes
+
+- 0a5b08c: Fix alias imports
+- Updated dependencies [72dc093]
+  - fumadocs-core@14.7.1
+
 ## 11.2.2
 
 ### Patch Changes

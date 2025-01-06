@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 14.7.1
+
+### Patch Changes
+
+- 72dc093: Add chinese i18n configuration for Orama search if not specified
+
 ## 14.7.0
 
 ### Minor Changes
