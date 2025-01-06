@@ -773,6 +773,9 @@ importers:
       cross-spawn:
         specifier: ^7.0.6
         version: 7.0.6
+      esbuild:
+        specifier: ^0.24.2
+        version: 0.24.2
       estree-util-value-to-estree:
         specifier: ^3.2.1
         version: 3.2.1
@@ -782,9 +785,6 @@ importers:
       gray-matter:
         specifier: ^4.0.3
         version: 4.0.3
-      jiti:
-        specifier: ^2.4.2
-        version: 2.4.2
       micromatch:
         specifier: ^4.0.8
         version: 4.0.8
@@ -10358,7 +10358,8 @@ snapshots:
 
   jiti@1.21.7: {}
 
-  jiti@2.4.2: {}
+  jiti@2.4.2:
+    optional: true
 
   joycon@3.1.1: {}
 
