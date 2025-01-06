@@ -565,6 +565,9 @@ importers:
       '@mdx-js/mdx':
         specifier: ^3.1.0
         version: 3.1.0(acorn@8.14.0)
+      '@orama/tokenizers':
+        specifier: ^2.1.1
+        version: 2.1.1
       '@oramacloud/client':
         specifier: ^2.1.4
         version: 2.1.4
