@@ -19,7 +19,7 @@ interface UseDocsSearch {
 
 const cache = new Map<string, SortedResult[] | 'empty'>();
 
-type Client =
+export type Client =
   | ({
       type: 'fetch';
     } & FetchOptions)

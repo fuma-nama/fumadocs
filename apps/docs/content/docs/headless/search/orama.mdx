@@ -12,9 +12,11 @@ option since it's easier to setup and totally free.
 
 ## Setup
 
+You can create the search route handler from the source object, or search indexes.
+
 ### From Source
 
-Create a route handler from Source API.
+Create a route handler from Source object.
 
 ```json doc-gen:file
 {
@@ -113,27 +115,34 @@ export const { GET } = createSearchAPI('simple', {
 
 ## Internationalization
 
-<div className='steps [&_h4]:step'>
+- `createFromSource()`:
 
-<h4>Update the route handler (From Source)</h4>
+  Configure i18n on source object (in `loader` function).
 
-Enable i18n from source object (in `loader` function).
+  ```ts title="lib/source.ts"
+  import { i18n } from '@/lib/i18n';
+  import { loader } from 'fumadocs-core/source';
 
-<h4>Update the route handler (From Search Indexes)</h4>
+  export const source = loader({
+    i18n, // [!code highlight]
+  });
+  ```
 
-Use `createI18nSearchAPI` for i18n functionality.
+- `createSearchAPI()`:
 
-```json doc-gen:file
-{
-  "file": "../../examples/i18n/app/api/search/route-full.ts",
-  "codeblock": {
-    "lang": "ts",
-    "meta": "title=\"app/api/search/route.ts\""
+  Use `createI18nSearchAPI` for i18n functionality.
+
+  ```json doc-gen:file
+  {
+    "file": "../../examples/i18n/app/api/search/route-full.ts",
+    "codeblock": {
+      "lang": "ts",
+      "meta": "title=\"app/api/search/route.ts\""
+    }
   }
-}
-```
+  ```
 
-<h4>Update search client</h4>
+### Update Search Client
 
 <Callout type="info" title="For Fumadocs UI">
   You can ignore this, Fumadocs UI handles this when you have i18n configured
@@ -150,8 +159,6 @@ const { search, setSearch, query } = useDocsSearch(
   locale,
 );
 ```
-
-</div>
 
 ### Special Languages
 
@@ -187,9 +194,7 @@ export const { staticGET: GET } = createFromSource(source);
 
 and update your search clients:
 
-- **Fumadocs UI**:
-
-  You can pass search options to Root Provider. See [`options`](/docs/ui/search#search-options).
+- **Fumadocs UI**: See [Static Export](/docs/ui/static-export#built-in-search) guide.
 
 - **Search Client**:
 
@@ -217,9 +222,7 @@ and update your search clients:
 
 `useDocsSearch` is a hook to search documents using the built-in search clients.
 
-### Client
-
-Choose the client to use.
+### Options
 
 ```ts
 import { useDocsSearch } from 'fumadocs-core/search/client';
@@ -230,26 +233,14 @@ const client = useDocsSearch({
 });
 ```
 
-| Type              | Description                                                      |
-| ----------------- | ---------------------------------------------------------------- |
-| `fetch` (default) | send HTTP request to a search server with `fetch`                |
-| `static`          | Load search map on client-side and query them                    |
-| `algolia`         | Use Algolia Search (See [Algolia](/docs/headless/search/algolia) |
+| Type              | Description                                       |
+| ----------------- | ------------------------------------------------- |
+| `fetch` (default) | send HTTP request to a search server with `fetch` |
+| `static`          | Load search map on client-side and query them     |
 
-### Return Type
+<AutoTypeTable type='Extract<import("fumadocs-core/search/client").Client, { type: "fetch" }>' />
 
-| Prop        | Type                  | Description                    |
-| ----------- | --------------------- | ------------------------------ |
-| `query`     | `Query`               | Query status and results       |
-| `search`    | `string`              | Searching text (not debounced) |
-| `setSearch` | `(v: string) => void` | Set searching text             |
-
-### Response Data
-
-| Type             |                                                 |
-| ---------------- | ----------------------------------------------- |
-| `empty`          | If the searching text is empty or blank         |
-| `SortedResult[]` | Array of matching pages, headings and contents. |
+<AutoTypeTable type='Extract<import("fumadocs-core/search/client").Client, { type: "static" }>' />
 
 ### Custom Algorithm
 
