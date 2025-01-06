@@ -566,8 +566,8 @@ importers:
         specifier: ^3.1.0
         version: 3.1.0(acorn@8.14.0)
       '@orama/tokenizers':
-        specifier: ^2.1.1
-        version: 2.1.1
+        specifier: ^3.0.0
+        version: 3.0.4
       '@oramacloud/client':
         specifier: ^2.1.4
         version: 2.1.4
@@ -2166,12 +2166,20 @@ packages:
     resolution: {integrity: sha512-1dfxup89K2DB2bbfx9rXyr/IAvhCKbH79lZCXVh5HWvdJ9g0VAvPIs3+UzjiyOdycEHYTbYundCTN6+Ygj3z4w==}
     engines: {node: '>= 16.0.0'}
 
+  '@orama/orama@3.0.4':
+    resolution: {integrity: sha512-ziYjwoxUty8WEvgnUZNeJlCHkYplxWFxjNVXWaNIh1wvQ37tl/qkM0kyLXiwHgSxrIPjuv6A2TwgKjjtwhP3jg==}
+    engines: {node: '>= 16.0.0'}
+
   '@orama/stopwords@2.1.1':
     resolution: {integrity: sha512-zN/955DJBJgyE0OcB0YiuCxfrHpxNRTlZyTAQ8Quikn1EF8DaV9Tay8uzIR5qgF6GvpDJM9UD1O1SDB6zl/88Q==}
     engines: {node: '>= 16.0.0'}
 
   '@orama/tokenizers@2.1.1':
     resolution: {integrity: sha512-q/u1CO/BhqN3w+k+bcsas/ThxtsdAo7snEfRBVAVk3G6zvRT6sXix7ADmWdSVJ8gNSG9JWF+EANPzktL7U6zDg==}
+    engines: {node: '>= 18.0.0'}
+
+  '@orama/tokenizers@3.0.4':
+    resolution: {integrity: sha512-C4XjqhRzVzMg/wmMAskWd8eKwaoWnwBZzHtiGaiRtE1goQXB0yANW3UZnhk0LkjHk09H8+dzJ1gzQwGMGX0Rkw==}
     engines: {node: '>= 18.0.0'}
 
   '@oramacloud/client@2.1.4':
@@ -7489,11 +7497,17 @@ snapshots:
 
   '@orama/orama@3.0.2': {}
 
+  '@orama/orama@3.0.4': {}
+
   '@orama/stopwords@2.1.1': {}
 
   '@orama/tokenizers@2.1.1':
     dependencies:
       '@orama/orama': 2.1.1
+
+  '@orama/tokenizers@3.0.4':
+    dependencies:
+      '@orama/orama': 3.0.4
 
   '@oramacloud/client@2.1.4':
     dependencies:
