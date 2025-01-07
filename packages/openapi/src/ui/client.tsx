@@ -7,9 +7,23 @@ import {
 import { Check, Copy } from 'lucide-react';
 import { cn, useCopyButton, buttonVariants } from 'fumadocs-ui/components/api';
 import dynamic from 'next/dynamic';
-import { ApiProvider, useApiContext } from '@/ui/contexts/api';
+import {
+  ApiProvider,
+  useApiContext,
+  useServerSelectContext,
+} from '@/ui/contexts/api';
 import { type RootProps } from '@/render/renderer';
-import { RenderContext } from '@/types';
+import type { RenderContext } from '@/types';
+import { labelVariants } from '@/ui/components/form';
+import { Input } from '@/ui/components/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/ui/components/select';
+import { getUrl } from '@/utils/server-url';
 
 export const APIPlayground = dynamic(() =>
   import('./playground').then((mod) => mod.APIPlayground),
@@ -20,6 +34,7 @@ export function Root({
   baseUrl,
   className,
   shikiOptions,
+  servers,
   ...props
 }: RootProps & {
   shikiOptions: RenderContext['shikiOptions'];
@@ -32,7 +47,11 @@ export function Root({
       )}
       {...props}
     >
-      <ApiProvider shikiOptions={shikiOptions} defaultBaseUrl={baseUrl}>
+      <ApiProvider
+        servers={servers}
+        shikiOptions={shikiOptions}
+        defaultBaseUrl={baseUrl}
+      >
         {children}
       </ApiProvider>
     </div>
@@ -46,10 +65,12 @@ export function CopyRouteButton({
 }: ButtonHTMLAttributes<HTMLButtonElement> & {
   route: string;
 }): ReactNode {
-  const { baseUrl } = useApiContext();
+  const { serverRef } = useApiContext();
 
   const [checked, onCopy] = useCopyButton(() => {
-    void navigator.clipboard.writeText(`${baseUrl ?? ''}${route}`);
+    void navigator.clipboard.writeText(
+      `${serverRef.current ? getUrl(serverRef.current.url, serverRef.current.variables) : ''}${route}`,
+    );
   });
 
   return (
@@ -74,28 +95,85 @@ export function CopyRouteButton({
   );
 }
 
-export function BaseUrlSelect({ baseUrls }: { baseUrls: string[] }) {
-  const { baseUrl, setBaseUrl } = useApiContext();
+export function ServerSelect() {
+  const { servers } = useApiContext();
+  const { server, setServer, setServerVariables } = useServerSelectContext();
 
-  if (baseUrls.length <= 1) return null;
+  if (servers.length <= 1) return null;
+
+  const schema = server
+    ? servers.find((item) => item.url === server.url)
+    : undefined;
 
   return (
-    <div className="mt-2 flex flex-row items-center gap-1 px-1">
-      <span className="p-0.5 text-xs font-medium text-fd-muted-foreground">
-        Server
-      </span>
-      <select
-        value={baseUrl}
-        onChange={(e) => setBaseUrl(e.target.value)}
-        className="min-w-0 flex-1 bg-transparent text-xs text-fd-foreground outline-none"
-      >
-        {baseUrls.map((url) => (
-          <option key={url} value={url}>
-            {url}
-          </option>
-        ))}
-      </select>
-    </div>
+    <>
+      <div className="not-prose mt-4 flex flex-row items-center gap-2">
+        <span className="text-xs font-medium">Server</span>
+        <select
+          value={server?.url}
+          onChange={(e) => setServer(e.target.value)}
+          className="min-w-0 flex-1 bg-transparent text-xs text-fd-foreground outline-none"
+        >
+          {servers.map((item) => (
+            <option key={item.url} value={item.url}>
+              {item.url}
+            </option>
+          ))}
+        </select>
+      </div>
+      {schema && schema.variables && server?.variables ? (
+        <div className="not-prose mt-2 flex flex-col gap-4">
+          {schema.description ? (
+            <p className="text-xs">{schema.description}</p>
+          ) : null}
+          {Object.entries(schema.variables).map(([key, variable]) => {
+            const id = `fd_server_select_${key}`;
+
+            return (
+              <fieldset key={key} className="flex flex-col gap-1">
+                <label className={cn(labelVariants())} htmlFor={id}>
+                  {key}
+                </label>
+                <p className="text-xs">{variable.description}</p>
+                {variable.enum ? (
+                  <Select
+                    value={server.variables[key]}
+                    onValueChange={(v) =>
+                      setServerVariables({
+                        ...server?.variables,
+                        [key]: v,
+                      })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {variable.enum.map((value) => (
+                        <SelectItem key={value} value={value}>
+                          {value}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Input
+                    id={id}
+                    value={server.variables[key]}
+                    onChange={(e) =>
+                      setServerVariables({
+                        ...server?.variables,
+                        [key]: e.target.value,
+                      })
+                    }
+                  />
+                )}
+              </fieldset>
+            );
+          })}
+        </div>
+      ) : null}
+    </>
   );
 }
 

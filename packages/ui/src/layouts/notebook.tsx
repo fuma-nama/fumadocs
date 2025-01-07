@@ -269,7 +269,7 @@ function SidebarHeaderItems({
       {nav.title ? (
         <Link
           href={nav.url ?? '/'}
-          className="inline-flex items-center gap-2.5 py-1 font-medium"
+          className="inline-flex items-center gap-2.5 py-1 font-medium md:px-2"
         >
           {nav.title}
         </Link>

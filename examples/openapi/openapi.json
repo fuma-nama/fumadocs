@@ -12,6 +12,19 @@
     {
       "url": "https://example.com/api/v1",
       "description": "Example API"
+    },
+    {
+      "url": "{protocol}://{domain}/api",
+      "description": "The API is running at `/api` of your Fumadocs.",
+      "variables": {
+        "protocol": {
+          "enum": ["http", "https"],
+          "default": "https"
+        },
+        "domain": {
+          "default": "fumadocs.example.com"
+        }
+      }
     }
   ],
   "x-speakeasy-retries": {

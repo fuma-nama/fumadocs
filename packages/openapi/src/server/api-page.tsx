@@ -62,7 +62,7 @@ export async function APIPage(props: ApiPageProps) {
   const ctx = await getContext(processed, props);
   const { document } = processed;
   return (
-    <ctx.renderer.Root baseUrl={ctx.baseUrl}>
+    <ctx.renderer.Root baseUrl={ctx.baseUrl} servers={ctx.servers}>
       {operations?.map((item) => {
         const pathItem = document.paths?.[item.path];
         if (!pathItem) return null;
@@ -127,7 +127,7 @@ export async function getContext(
     generateTypeScriptSchema: options.generateTypeScriptSchema,
     generateCodeSamples: options.generateCodeSamples,
     baseUrl: document.servers?.[0].url ?? 'https://example.com',
-    baseUrls: document.servers?.map((s) => s.url) ?? [],
+    servers: document.servers ?? [],
     slugger: new Slugger(),
   };
 }

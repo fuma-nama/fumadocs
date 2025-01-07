@@ -87,7 +87,7 @@ function InputContainer({
   ...props
 }: InputContainerProps): React.ReactElement {
   return (
-    <div {...props} className={cn('flex flex-col gap-2', props.className)}>
+    <div {...props} className={cn('flex flex-col gap-1', props.className)}>
       <div className={cn(labelVariants(), 'inline-flex items-center gap-1')}>
         {name}
         {required ? <span className="text-red-500">*</span> : null}

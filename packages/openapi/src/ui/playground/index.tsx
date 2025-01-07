@@ -32,6 +32,7 @@ import type {
 import { CodeBlock } from '@/ui/components/codeblock';
 import { type DynamicField, SchemaContext } from '../contexts/schema';
 import { getStatusInfo } from '@/ui/playground/status-info';
+import { getUrl } from '@/utils/server-url';
 
 interface FormValues {
   authorization: string;
@@ -73,7 +74,7 @@ export function APIPlayground({
     body?: CustomField<'body', RequestSchema>;
   };
 } & HTMLAttributes<HTMLFormElement>) {
-  const { baseUrl } = useApiContext();
+  const { serverRef } = useApiContext();
   const dynamicRef = useRef(new Map<string, DynamicField>());
   const form = useForm<FormValues>({
     defaultValues: {
@@ -89,7 +90,10 @@ export function APIPlayground({
     const fetcher = await import('./fetcher').then((mod) =>
       mod.createBrowserFetcher(body, schemas),
     );
-    const targetUrl = `${baseUrl ?? window.location.origin}${createPathnameFromInput(route, input.path, input.query)}`;
+    const serverUrl = serverRef.current
+      ? getUrl(serverRef.current.url, serverRef.current.variables)
+      : window.location.origin;
+    const targetUrl = `${serverUrl}${createPathnameFromInput(route, input.path, input.query)}`;
 
     let url: URL;
     if (proxyUrl) {

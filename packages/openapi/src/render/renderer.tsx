@@ -12,7 +12,7 @@ import {
   ObjectCollapsible,
   APIPlayground,
 } from '@/ui';
-import type { RenderContext } from '@/types';
+import type { RenderContext, ServerObject } from '@/types';
 
 export interface ResponsesProps {
   items: string[];
@@ -27,7 +27,6 @@ export interface ResponseProps {
 export interface APIInfoProps {
   method: string;
   route: string;
-  baseUrls: string[];
 
   head: ReactNode;
   children: ReactNode;
@@ -60,6 +59,7 @@ export interface ResponseTypeProps {
 
 export interface RootProps {
   baseUrl?: string;
+  servers: ServerObject[];
   children: ReactNode;
 }
 

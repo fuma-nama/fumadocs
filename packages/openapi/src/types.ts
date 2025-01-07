@@ -18,13 +18,7 @@ export type SecuritySchemeObject = V3_1.SecuritySchemeObject;
 export type ReferenceObject = V3_1.ReferenceObject;
 export type PathItemObject = V3_1.PathItemObject;
 export type TagObject = V3_1.TagObject;
-
-export interface RouteInformation {
-  path: string;
-  summary?: string;
-  description?: string;
-  methods: MethodInformation[];
-}
+export type ServerObject = NoReference<V3_1.ServerObject>;
 
 export type MethodInformation = NoReference<OperationObject> & {
   method: string;
@@ -51,7 +45,7 @@ export interface RenderContext {
   document: NoReference<Document>;
 
   baseUrl: string;
-  baseUrls: string[];
+  servers: ServerObject[];
 
   slugger: Slugger;
 
