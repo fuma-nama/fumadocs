@@ -7,6 +7,7 @@ import { createRenders, type Renderer } from '@/render/renderer';
 import type { OpenAPIV3_1 } from 'openapi-types';
 import type { NoReference } from '@/utils/schema';
 import { type DocumentInput, processDocument } from '@/utils/process-document';
+import { getUrl } from '@/utils/server-url';
 
 type ApiPageContextProps = Pick<
   Partial<RenderContext>,
@@ -115,6 +116,12 @@ export async function getContext(
     renderer?: Partial<Renderer>;
   } = {},
 ): Promise<RenderContext> {
+  const servers =
+    document.servers && document.servers.length > 0
+      ? document.servers
+      : [{ url: 'https://example.com' }];
+  const server = servers[0];
+
   return {
     document: document,
     dereferenceMap,
@@ -126,8 +133,15 @@ export async function getContext(
     shikiOptions: options.shikiOptions,
     generateTypeScriptSchema: options.generateTypeScriptSchema,
     generateCodeSamples: options.generateCodeSamples,
-    baseUrl: document.servers?.[0].url ?? 'https://example.com',
-    servers: document.servers ?? [],
+    baseUrl: getUrl(
+      server.url,
+      server.variables
+        ? Object.fromEntries(
+            Object.entries(server.variables).map(([k, v]) => [k, v.default]),
+          )
+        : {},
+    ),
+    servers,
     slugger: new Slugger(),
   };
 }
