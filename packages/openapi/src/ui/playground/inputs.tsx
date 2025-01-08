@@ -35,7 +35,7 @@ interface RenderOptions {
   className?: string;
 }
 
-function renderInner({ field, ...props }: RenderOptions): React.ReactNode {
+function renderInner({ field, ...props }: RenderOptions) {
   if (field.type === 'object')
     return (
       <ObjectInput

@@ -40,7 +40,7 @@ export function APIInfo({
   return (
     <div className={cn('min-w-0 flex-1', className)} {...props}>
       {head}
-      <div className="mb-4 border-b border-fd-foreground/10 bg-fd-card/50 px-4 py-1.5 shadow-lg md:rounded-xl md:border md:p-3">
+      <div className="not-prose mb-4 rounded-lg border bg-fd-card p-3 text-fd-card-foreground shadow-lg">
         <div className="-mx-1 flex flex-row items-center gap-1.5">
           <span
             className={cn(

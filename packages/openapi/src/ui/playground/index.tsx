@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
   useEffect,
+  type FC,
 } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
@@ -29,10 +30,10 @@ import type {
   PrimitiveRequestField,
   RequestSchema,
 } from '@/render/playground';
-import { CodeBlock } from '@/ui/components/codeblock';
 import { type DynamicField, SchemaContext } from '../contexts/schema';
 import { getStatusInfo } from '@/ui/playground/status-info';
 import { getUrl } from '@/utils/server-url';
+import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
 
 interface FormValues {
   authorization: string;
@@ -65,6 +66,8 @@ export function APIPlayground({
   fields = {},
   schemas,
   proxyUrl,
+  components: { ResultDisplay = DefaultResultDisplay } = {},
+  ...props
 }: APIPlaygroundProps & {
   fields?: {
     auth?: CustomField<'authorization', PrimitiveRequestField>;
@@ -73,6 +76,10 @@ export function APIPlayground({
     header?: CustomField<`header.${string}`, PrimitiveRequestField>;
     body?: CustomField<'body', RequestSchema>;
   };
+
+  components?: Partial<{
+    ResultDisplay: FC<{ data: FetchResult }>;
+  }>;
 } & HTMLAttributes<HTMLFormElement>) {
   const { serverRef } = useApiContext();
   const dynamicRef = useRef(new Map<string, DynamicField>());
@@ -93,14 +100,12 @@ export function APIPlayground({
     const serverUrl = serverRef.current
       ? getUrl(serverRef.current.url, serverRef.current.variables)
       : window.location.origin;
-    const targetUrl = `${serverUrl}${createPathnameFromInput(route, input.path, input.query)}`;
+    let url = `${serverUrl}${createPathnameFromInput(route, input.path, input.query)}`;
 
-    let url: URL;
     if (proxyUrl) {
-      url = new URL(proxyUrl, window.location.origin);
-      url.searchParams.append('url', targetUrl);
-    } else {
-      url = new URL(targetUrl);
+      const updated = new URL(proxyUrl, window.location.origin);
+      updated.searchParams.append('url', url);
+      url = updated.toString();
     }
 
     const header = { ...input.header };
@@ -184,7 +189,11 @@ export function APIPlayground({
         )}
       >
         <form
-          className="not-prose flex flex-col gap-5 rounded-xl border bg-fd-card p-3"
+          {...props}
+          className={cn(
+            'not-prose flex flex-col gap-5 rounded-xl border bg-fd-card p-3',
+            props.className,
+          )}
           onSubmit={onSubmit as React.FormEventHandler}
         >
           <div className="flex flex-row gap-2">
@@ -313,8 +322,9 @@ function RouteDisplay({ route }: { route: string }): ReactElement {
   );
 }
 
-function ResultDisplay({ data }: { data: FetchResult }) {
+function DefaultResultDisplay({ data }: { data: FetchResult }) {
   const statusInfo = useMemo(() => getStatusInfo(data.status), [data.status]);
+  const { shikiOptions } = useApiContext();
 
   return (
     <div className="flex flex-col gap-3 rounded-lg border bg-fd-card p-4">
@@ -324,7 +334,7 @@ function ResultDisplay({ data }: { data: FetchResult }) {
       </div>
       <p className="text-sm text-fd-muted-foreground">{data.status}</p>
       {data.data ? (
-        <CodeBlock
+        <DynamicCodeBlock
           lang={
             typeof data.data === 'string' && data.data.length > 50000
               ? 'text'
@@ -335,6 +345,7 @@ function ResultDisplay({ data }: { data: FetchResult }) {
               ? data.data
               : JSON.stringify(data.data, null, 2)
           }
+          {...shikiOptions}
         />
       ) : null}
     </div>
