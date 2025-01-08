@@ -4,7 +4,6 @@ import { readFile, writeFile } from 'node:fs/promises';
 import grayMatter from 'gray-matter';
 import { getConfigHash, loadConfigCached } from '@/config/cached';
 import { generateJS, generateTypes } from '@/map/generate';
-import { writeManifest } from '@/map/manifest';
 
 /**
  * Start a MDX server that builds index and manifest files.
@@ -18,7 +17,6 @@ export async function start(
 ): Promise<void> {
   let configHash = await getConfigHash(configPath);
   let config = await loadConfigCached(configPath, configHash);
-  const manifestPath = path.resolve(outDir, 'manifest.json');
   const jsOut = path.resolve(outDir, `index.js`);
   const typeOut = path.resolve(outDir, `index.d.ts`);
 
@@ -89,13 +87,6 @@ export async function start(
     process.on('exit', () => {
       console.log('[MDX] closing dev server');
       void instance.close();
-    });
-  }
-
-  if (config.global?.generateManifest && !dev) {
-    process.on('exit', () => {
-      console.log('[MDX] writing manifest');
-      writeManifest(manifestPath, config);
     });
   }
 }
