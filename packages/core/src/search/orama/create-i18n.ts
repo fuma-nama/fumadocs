@@ -40,24 +40,9 @@ type WithLocale<T> = T & {
 async function getTokenizer(
   locale: string,
 ): Promise<{ language: string } | { tokenizer: Tokenizer }> {
-  const mandarin = ['cn', 'zh'];
-  const language =
-    Object.keys(STEMMERS).find((lang) => STEMMERS[lang] === locale) ?? locale;
-
-  if (
-    mandarin.some((code) => locale === code || locale.startsWith(`${code}-`))
-  ) {
-    const { createTokenizer } = await import(
-      '@orama/tokenizers/mandarin' as string
-    );
-
-    return {
-      tokenizer: await createTokenizer(),
-    };
-  }
-
   return {
-    language,
+    language:
+      Object.keys(STEMMERS).find((lang) => STEMMERS[lang] === locale) ?? locale,
   };
 }
 
