@@ -1,5 +1,14 @@
 # @fuma-docs/openapi
 
+## 5.11.2
+
+### Patch Changes
+
+- 60fe635: Support variable server url
+- Updated dependencies [14b280c]
+  - fumadocs-core@14.7.2
+  - fumadocs-ui@14.7.2
+
 ## 5.11.1
 
 ### Patch Changes
