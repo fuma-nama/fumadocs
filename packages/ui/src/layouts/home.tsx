@@ -53,7 +53,7 @@ export function HomeLayout(props: HomeLayoutProps) {
         id="nd-home-layout"
         {...rest}
         className={cn(
-          'flex flex-1 flex-col pt-[var(--fd-nav-height)] [--fd-nav-height:56px]',
+          'flex flex-1 flex-col pt-[var(--fd-nav-height)] [--fd-nav-height:57px]',
           rest.className,
         )}
       >
