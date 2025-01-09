@@ -42,22 +42,6 @@ A command line tool to configure features automatically, and install UI componen
 
 </Cards>
 
-### Use Cases
-
-### Documentation
-
-Fumadocs focuses on **authoring experience**, it provides a beautiful theme and many docs automation tools.
-
-It helps you to iterate your codebase faster while never leaving your docs behind.
-You can take this site as an example of docs site built with Fumadocs.
-
-### Blog sites
-
-Since Next.js is already a powerful framework, most features can be implemented with **only Next.js**.
-
-Fumadocs provides additional tooling for Next.js, including syntax highlighting, document search, and a default theme (Fumadocs UI).
-It helps you to avoid reinventing the wheels.
-
 ### Terminology
 
 For a better understanding of the docs, there are some common terminologies you should know:
@@ -132,11 +116,9 @@ In the project, you can see:
 
 #### Content Source
 
-Visit the docs of your content source, content source manages the validation and type definitions of content (e.g. frontmatter properties), and transform them to data on JavaScript runtime.
+You can explore the docs of your content source, it manages the validation and type definitions of content (e.g. frontmatter properties), and transform them to data on JavaScript runtime.
 
-For Fumadocs MDX, see [Introduction](/docs/mdx) for details:
-
-- `source.config.ts`: Config file for Fumadocs MDX.
+For Fumadocs MDX, a `source.config.ts` config file is included by default. See [Introduction](/docs/mdx).
 
 For other formats and content sources that is not supported by default (e.g. Sanity), you can [build a custom content source](/docs/headless/remote).
 
@@ -258,11 +240,34 @@ Feel free to open the demo in CodeSandbox and see if it suits you.
 
 - Many built-in components.
 - Integrations with Typescript Twoslash, OpenAPI, Math (KaTeX).
-- Flexible and Fast by default.
+- Fast and optimized by default.
 - Built on App Router, no need for hydration over static content.
 - Use it in an existing Next.js project, without refactoring anything.
 
 Make sure to read [Comparisons](/docs/ui/comparisons) if you're interested.
+
+#### Flexibility
+
+Fumadocs is designed with flexibility in mind.
+
+You can use `fumadocs-core` as a headless UI library and bring your own styles.
+And `fumadocs-mdx` can be a useful content libraries like Content Collections, to handle MDX files easily in Next.js.
+
+### Use Cases
+
+#### Documentation
+
+Fumadocs focuses on **authoring experience**, it provides a beautiful theme and many docs automation tools.
+
+It helps you to iterate your codebase faster while never leaving your docs behind.
+You can take this site as an example of docs site built with Fumadocs.
+
+#### Blog sites
+
+Since Next.js is already a powerful framework, most features can be implemented with **only Next.js**.
+
+Fumadocs provides additional tooling for Next.js, including syntax highlighting, document search, and a default theme (Fumadocs UI).
+It helps you to avoid reinventing the wheels.
 
 ## Learn More
 
