@@ -111,14 +111,14 @@ export function ServerSelect() {
 
   return (
     <Collapsible className="-m-2 mt-2">
-      <CollapsibleTrigger className="flex w-full flex-row items-center justify-between p-2 text-xs font-medium">
+      <CollapsibleTrigger className="flex w-full flex-row items-center justify-between p-2 text-xs font-medium text-fd-muted-foreground">
         Configure Server
-        <ChevronDown className="size-4 text-fd-muted-foreground" />
+        <ChevronDown className="size-4" />
       </CollapsibleTrigger>
       <CollapsibleContent>
         <div className="flex flex-col gap-4 p-2">
           <Select value={server?.url} onValueChange={setServer}>
-            <SelectTrigger className="h-auto">
+            <SelectTrigger className="h-auto break-all">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
