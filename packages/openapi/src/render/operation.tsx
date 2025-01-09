@@ -54,7 +54,6 @@ export function Operation({
 
   headingLevel?: number;
 }): ReactElement {
-  const { baseUrls } = ctx;
   const body = method.requestBody;
   const security = method.security ?? ctx.document.security;
   let headNode: ReactNode = null;
@@ -183,12 +182,7 @@ export function Operation({
   }
 
   const info = (
-    <ctx.renderer.APIInfo
-      head={headNode}
-      method={method.method}
-      route={path}
-      baseUrls={type === 'operation' ? baseUrls : []}
-    >
+    <ctx.renderer.APIInfo head={headNode} method={method.method} route={path}>
       {type === 'operation' ? (
         <Playground path={path} method={method} ctx={ctx} />
       ) : null}

@@ -13,6 +13,18 @@ info:
 servers:
   - url: 'https://redocly.com/_mock/docs/openapi/museum-api'
   - url: 'https://example.com/api/v1'
+  - url: '{protocol}://{domain}/api'
+    description: Custom Name
+    variables:
+      protocol:
+        enum:
+          - http
+          - https
+        default: http
+      domain:
+        description: Where your app run
+        default: fumadocs.vercel.app
+
 paths:
   /museum-hours:
     get:

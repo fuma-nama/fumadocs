@@ -6,9 +6,15 @@ import {
   useRef,
   useState,
   useEffect,
+  type FC,
+  type ReactNode,
 } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
-import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from 'fumadocs-ui/components/ui/collapsible';
 import { cn, buttonVariants } from 'fumadocs-ui/components/api';
 import type {
   FieldPath,
@@ -29,9 +35,11 @@ import type {
   PrimitiveRequestField,
   RequestSchema,
 } from '@/render/playground';
-import { CodeBlock } from '@/ui/components/codeblock';
 import { type DynamicField, SchemaContext } from '../contexts/schema';
 import { getStatusInfo } from '@/ui/playground/status-info';
+import { getUrl } from '@/utils/server-url';
+import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
+import { ChevronDown } from 'lucide-react';
 
 interface FormValues {
   authorization: string;
@@ -64,6 +72,8 @@ export function APIPlayground({
   fields = {},
   schemas,
   proxyUrl,
+  components: { ResultDisplay = DefaultResultDisplay } = {},
+  ...props
 }: APIPlaygroundProps & {
   fields?: {
     auth?: CustomField<'authorization', PrimitiveRequestField>;
@@ -72,8 +82,12 @@ export function APIPlayground({
     header?: CustomField<`header.${string}`, PrimitiveRequestField>;
     body?: CustomField<'body', RequestSchema>;
   };
+
+  components?: Partial<{
+    ResultDisplay: FC<{ data: FetchResult }>;
+  }>;
 } & HTMLAttributes<HTMLFormElement>) {
-  const { baseUrl } = useApiContext();
+  const { serverRef } = useApiContext();
   const dynamicRef = useRef(new Map<string, DynamicField>());
   const form = useForm<FormValues>({
     defaultValues: {
@@ -89,14 +103,15 @@ export function APIPlayground({
     const fetcher = await import('./fetcher').then((mod) =>
       mod.createBrowserFetcher(body, schemas),
     );
-    const targetUrl = `${baseUrl ?? window.location.origin}${createPathnameFromInput(route, input.path, input.query)}`;
+    const serverUrl = serverRef.current
+      ? getUrl(serverRef.current.url, serverRef.current.variables)
+      : window.location.origin;
+    let url = `${serverUrl}${createPathnameFromInput(route, input.path, input.query)}`;
 
-    let url: URL;
     if (proxyUrl) {
-      url = new URL(proxyUrl, window.location.origin);
-      url.searchParams.append('url', targetUrl);
-    } else {
-      url = new URL(targetUrl);
+      const updated = new URL(proxyUrl, window.location.origin);
+      updated.searchParams.append('url', url);
+      url = updated.toString();
     }
 
     const header = { ...input.header };
@@ -165,12 +180,6 @@ export function APIPlayground({
     );
   }
 
-  const isParamEmpty =
-    path.length === 0 &&
-    query.length === 0 &&
-    header.length === 0 &&
-    body === undefined;
-
   return (
     <Form {...form}>
       <SchemaContext.Provider
@@ -180,14 +189,18 @@ export function APIPlayground({
         )}
       >
         <form
-          className="not-prose flex flex-col gap-5 rounded-xl border bg-fd-card p-3"
+          {...props}
+          className={cn(
+            'not-prose flex flex-col gap-5 rounded-xl border bg-fd-card p-3',
+            props.className,
+          )}
           onSubmit={onSubmit as React.FormEventHandler}
         >
           <div className="flex flex-row gap-2">
             <RouteDisplay route={route} />
             <button
               type="submit"
-              className={cn(buttonVariants({ color: 'outline' }))}
+              className={cn(buttonVariants({ color: 'secondary' }))}
               disabled={testQuery.isLoading}
             >
               Send
@@ -197,72 +210,79 @@ export function APIPlayground({
           {authorization
             ? renderCustomField('authorization', authorization, fields.auth)
             : null}
-          {!isParamEmpty ? (
-            <Accordions
-              type="multiple"
-              className="-m-3 border-0 bg-transparent text-sm"
-            >
-              {path.length > 0 ? (
-                <Accordion title="Path">
-                  <div className="flex flex-col gap-4">
-                    {path.map((field) =>
-                      renderCustomField(
-                        `path.${field.name}`,
-                        field,
-                        fields.path,
-                        field.name,
-                      ),
-                    )}
-                  </div>
-                </Accordion>
-              ) : null}
+          {path.length > 0 ? (
+            <CollapsiblePanel title="Path">
+              {path.map((field) =>
+                renderCustomField(
+                  `path.${field.name}`,
+                  field,
+                  fields.path,
+                  field.name,
+                ),
+              )}
+            </CollapsiblePanel>
+          ) : null}
 
-              {query.length > 0 ? (
-                <Accordion title="Query">
-                  <div className="flex flex-col gap-4">
-                    {query.map((field) =>
-                      renderCustomField(
-                        `query.${field.name}`,
-                        field,
-                        fields.query,
-                        field.name,
-                      ),
-                    )}
-                  </div>
-                </Accordion>
-              ) : null}
+          {query.length > 0 ? (
+            <CollapsiblePanel title="Query">
+              {query.map((field) =>
+                renderCustomField(
+                  `query.${field.name}`,
+                  field,
+                  fields.query,
+                  field.name,
+                ),
+              )}
+            </CollapsiblePanel>
+          ) : null}
 
-              {header.length > 0 ? (
-                <Accordion title="Headers">
-                  <div className="flex flex-col gap-4">
-                    {header.map((field) =>
-                      renderCustomField(
-                        `header.${field.name}`,
-                        field,
-                        fields.header,
-                        field.name,
-                      ),
-                    )}
-                  </div>
-                </Accordion>
-              ) : null}
+          {header.length > 0 ? (
+            <CollapsiblePanel title="Headers">
+              {header.map((field) =>
+                renderCustomField(
+                  `header.${field.name}`,
+                  field,
+                  fields.header,
+                  field.name,
+                ),
+              )}
+            </CollapsiblePanel>
+          ) : null}
 
-              {body ? (
-                <Accordion title="Body">
-                  {body.type === 'object' && !fields.body ? (
-                    <ObjectInput field={body} fieldName="body" />
-                  ) : (
-                    renderCustomField('body', body, fields.body)
-                  )}
-                </Accordion>
-              ) : null}
-            </Accordions>
+          {body ? (
+            <CollapsiblePanel title="Body">
+              {body.type === 'object' && !fields.body ? (
+                <ObjectInput field={body} fieldName="body" />
+              ) : (
+                renderCustomField('body', body, fields.body)
+              )}
+            </CollapsiblePanel>
           ) : null}
 
           {testQuery.data ? <ResultDisplay data={testQuery.data} /> : null}
         </form>
       </SchemaContext.Provider>
     </Form>
+  );
+}
+
+function CollapsiblePanel({
+  title,
+  children,
+}: {
+  title: string;
+  children: ReactNode;
+}) {
+  return (
+    <Collapsible className="-m-2">
+      <CollapsibleTrigger className="group flex w-full flex-row items-center justify-between p-2 font-medium">
+        {title}
+        <ChevronDown className="size-4 group-data-[state=open]:rotate-180" />
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        <div className="flex flex-col gap-4 p-2">{children}</div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 }
 
@@ -303,14 +323,15 @@ function RouteDisplay({ route }: { route: string }): ReactElement {
   );
 
   return (
-    <code className="flex-1 overflow-auto text-nowrap rounded-lg border bg-fd-muted px-2 py-1.5 text-sm text-fd-muted-foreground">
+    <code className="flex-1 overflow-auto text-nowrap rounded-lg border bg-fd-secondary px-2 py-1.5 text-sm text-fd-secondary-foreground">
       {pathname}
     </code>
   );
 }
 
-function ResultDisplay({ data }: { data: FetchResult }) {
+function DefaultResultDisplay({ data }: { data: FetchResult }) {
   const statusInfo = useMemo(() => getStatusInfo(data.status), [data.status]);
+  const { shikiOptions } = useApiContext();
 
   return (
     <div className="flex flex-col gap-3 rounded-lg border bg-fd-card p-4">
@@ -320,7 +341,7 @@ function ResultDisplay({ data }: { data: FetchResult }) {
       </div>
       <p className="text-sm text-fd-muted-foreground">{data.status}</p>
       {data.data ? (
-        <CodeBlock
+        <DynamicCodeBlock
           lang={
             typeof data.data === 'string' && data.data.length > 50000
               ? 'text'
@@ -331,6 +352,7 @@ function ResultDisplay({ data }: { data: FetchResult }) {
               ? data.data
               : JSON.stringify(data.data, null, 2)
           }
+          {...shikiOptions}
         />
       ) : null}
     </div>

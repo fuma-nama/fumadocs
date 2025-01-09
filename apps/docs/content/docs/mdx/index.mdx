@@ -163,7 +163,7 @@ We imported the `.source` folder with `@/.source`, you can also change it to you
 
 `meta` entries are only taken for building page trees.
 
-You can leave the second parameter an empty array if `meta.json` isn't used:
+You can leave the second parameter empty if `meta.json` isn't used:
 
 ```ts title="lib/source.ts"
 import { docs } from '@/.source';
@@ -172,7 +172,7 @@ import { loader } from 'fumadocs-core/source';
 
 export const source = loader({
   baseUrl: '/docs',
-  source: createMDXSource(docs, []),
+  source: createMDXSource(docs),
 });
 ```
 
@@ -194,7 +194,6 @@ Generally, you'll interact with Fumadocs MDX through the [Source](/docs/headless
 
 ```tsx
 import { source } from '@/lib/source';
-import defaultMdxComponents from 'fumadocs-ui/mdx';
 
 const page = source.getPage(['slugs']);
 
@@ -249,7 +248,7 @@ export const source = loader({
 
 export const blog = loader({
   baseUrl: '/blog',
-  source: createMDXSource(blogPosts, []),
+  source: createMDXSource(blogPosts),
 });
 ```
 

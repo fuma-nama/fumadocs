@@ -1,12 +1,10 @@
 import * as path from 'node:path';
-import * as fs from 'node:fs/promises';
 import { parse } from 'node:querystring';
 import grayMatter from 'gray-matter';
 import { type LoaderContext } from 'webpack';
 import { type StructuredData } from 'fumadocs-core/mdx-plugins';
 import { getConfigHash, loadConfigCached } from '@/config/cached';
 import { buildMDX } from '@/utils/build-mdx';
-import { getManifestEntryPath } from '@/map/manifest';
 import { formatError } from '@/utils/format-error';
 import { getGitTimestamp } from './utils/git-timestamp';
 
@@ -129,17 +127,6 @@ export default async function loader(
     );
 
     callback(undefined, String(file.value), file.map ?? undefined);
-
-    if (config.global?.generateManifest) {
-      await fs.mkdir('.next/cache/fumadocs', { recursive: true });
-      await fs.writeFile(
-        getManifestEntryPath(filePath),
-        JSON.stringify({
-          path: filePath,
-          data: file.data,
-        } as MetaFile),
-      );
-    }
   } catch (error) {
     if (!(error instanceof Error)) throw error;
 

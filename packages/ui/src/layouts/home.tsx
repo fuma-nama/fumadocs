@@ -52,27 +52,11 @@ export function HomeLayout(props: HomeLayoutProps) {
       <main
         id="nd-home-layout"
         {...rest}
-        className={cn(
-          'flex flex-1 flex-col pt-[var(--fd-nav-height)] [--fd-nav-height:56px]',
-          rest.className,
-        )}
+        className={cn('flex flex-1 flex-col pt-14', rest.className)}
       >
-        {replaceOrDefault(
-          nav,
-          <>
-            <div
-              aria-hidden="true"
-              className="fixed inset-x-0 top-[var(--fd-banner-height)] z-40 h-6 bg-fd-background"
-              style={{
-                maskImage: 'linear-gradient(to bottom,white,transparent)',
-              }}
-            />
-            <Header finalLinks={finalLinks} {...props} />
-          </>,
-          {
-            items: finalLinks,
-          },
-        )}
+        {replaceOrDefault(nav, <Header finalLinks={finalLinks} {...props} />, {
+          items: finalLinks,
+        })}
         {props.children}
       </main>
     </NavProvider>

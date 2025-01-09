@@ -1,6 +1,5 @@
 import type { ReferenceObject } from '@/types';
 import type { OpenAPIV3_1 } from 'openapi-types';
-import { js2xml, type ElementCompact } from 'xml-js';
 
 export type NoReference<T> = T extends (infer I)[]
   ? NoReference<I>[]
@@ -20,36 +19,6 @@ export function getPreferredType<B extends Record<string, unknown>>(
   if ('application/json' in body) return 'application/json';
 
   return Object.keys(body)[0];
-}
-
-/**
- * Convert input to string (with quotes)
- */
-export function inputToString(
-  value: unknown,
-  mediaType = 'application/json',
-  multiLine: 'single-quote' | 'backtick' | 'none' = 'none',
-): string {
-  const getStr = (v: string) => {
-    if (multiLine === 'none') return JSON.stringify(v);
-
-    const delimit = multiLine === 'backtick' ? `\`` : `'`;
-    return `${delimit}${v.replaceAll(delimit, `\\${delimit}`)}${delimit}`;
-  };
-
-  if (typeof value === 'string') return getStr(value);
-
-  if (mediaType === 'application/json' || mediaType === 'multipart/form-data') {
-    return getStr(JSON.stringify(value, null, 2));
-  }
-
-  if (mediaType === 'application/xml') {
-    return getStr(
-      js2xml(value as ElementCompact, { compact: true, spaces: 2 }),
-    );
-  }
-
-  throw new Error(`Unsupported media type: ${mediaType}`);
 }
 
 export function isNullable(

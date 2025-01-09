@@ -17,8 +17,6 @@ Open with <kbd>⌘</kbd> <kbd>K</kbd> or <kbd>Ctrl</kbd> <kbd>K</kbd>.
 You can customize search UI from the [Root Provider](/docs/ui/layouts/root-provider) component in root layout.
 
 When not specified, it uses the Default [`fetch` Search Client](/docs/headless/search/orama) powered by Orama.
-It is lazy loaded using [`next/dynamic`](https://nextjs.org/docs/app/building-your-application/optimizing/lazy-loading).
-This allows a better initial loading performance.
 
 ### Custom Links
 
@@ -104,7 +102,7 @@ import { RootProvider } from 'fumadocs-ui/root-provider';
 
 ### Search Options
 
-Pass options to the search client (e.g. the [options of Orama](/docs/headless/search/orama#options)).
+Pass options to the search client (e.g. the [options](/docs/headless/search/orama#options) for Orama).
 
 ```tsx
 import { RootProvider } from 'fumadocs-ui/root-provider';
@@ -127,8 +125,9 @@ You can replace the default Search Dialog with:
 ```tsx title="components/search.tsx"
 'use client';
 import SearchDialog from 'fumadocs-ui/components/dialog/search-default';
+import type { SharedProps } from 'fumadocs-ui/components/dialog/search';
 
-export default function CustomDialog(props) {
+export default function CustomDialog(props: SharedProps) {
   // your own logic here
   return <SearchDialog {...props} />;
 }
@@ -175,9 +174,6 @@ export default function Layout({ children }: { children: ReactNode }) {
 ```
 
 ## Other Solutions
-
-To use other search solutions such as Algolia and ElasticSearch, you can [replace the
-default dialog with your own](#replace-search-dialog).
 
 ### Algolia
 
@@ -267,10 +263,12 @@ you may use the `SearchDialog` component.
 ```tsx
 import {
   SearchDialog,
-  type SharedProps
-} from 'fumadocs-ui/components/dialog/search'
+  type SharedProps,
+} from 'fumadocs-ui/components/dialog/search';
 
-export default function CustomSearchDialog(props: SharedProps) { ... }
+export default function CustomSearchDialog(props: SharedProps) {
+  return <SearchDialog {...props} />;
+}
 ```
 
 <Callout type="warn" title="Unstable">

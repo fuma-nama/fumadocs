@@ -3,7 +3,7 @@ title: Manual Installation
 description: Create a new fumadocs project from scratch.
 ---
 
-> Make sure to read the [Quick Start](/docs/ui) guide first.
+> Read the [Quick Start](/docs/ui) guide first for basic concept.
 
 ## Getting Started
 
@@ -15,25 +15,14 @@ fumadocs-ui fumadocs-core
 
 ### Content Source
 
-You can choose a **content source** you prefer.
+Fumadocs supports different content sources, you can choose one you prefer.
 
-There is a list of supported sources:
+There is a list of officially supported sources:
 
 - [Setup Fumadocs MDX](/docs/mdx)
 - [Setup Content Collections](/docs/headless/content-collections)
 
-You have to configure the library correctly following their setup guide before continuing.
-
-Make sure to create a `source.ts` file for content adapters, this allows Fumadocs to interact with your content source through a unified interface.
-
-```json doc-gen:file
-{
-  "file": "../../examples/next-mdx/lib/source.ts",
-  "codeblock": {
-    "meta": "title=\"lib/source.ts\""
-  }
-}
-```
+Make sure to configure the library correctly following their setup guide before continuing, we will import the source adapter using `@/lib/source.ts` in this guide.
 
 ### Root Layout
 
@@ -193,7 +182,7 @@ It should work out-of-the-box with Vercel & Netlify.
 #### Docker Deployment
 
 If you want to deploy your Fumadocs app using Docker with **Fumadocs MDX configured**, make sure to add the `source.config.ts` file to the `WORKDIR` in the Dockerfile.
-The following snippet is taken from the official [Next.js Dockerfile Exmaple](https://github.com/vercel/next.js/blob/canary/examples/with-docker/Dockerfile):
+The following snippet is taken from the official [Next.js Dockerfile Example](https://github.com/vercel/next.js/blob/canary/examples/with-docker/Dockerfile):
 
 ```zsh title="Dockerfile"
 WORKDIR /app

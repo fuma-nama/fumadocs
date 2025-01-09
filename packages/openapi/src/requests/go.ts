@@ -1,5 +1,5 @@
 import { type EndpointSample } from '@/utils/generate-sample';
-import { inputToString } from '@/utils/schema';
+import { inputToString } from '@/utils/input-to-string';
 
 export function getSampleRequest(endpoint: EndpointSample): string {
   const imports = ['fmt', 'net/http', 'io/ioutil'];

@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 14.7.2
+
+### Patch Changes
+
+- 14b280c: Revert default i18n config
+
 ## 14.7.1
 
 ### Patch Changes
