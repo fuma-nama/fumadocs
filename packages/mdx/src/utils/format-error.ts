@@ -1,6 +1,6 @@
 import { type ZodError, type ZodFormattedError } from 'zod';
 
-export function formatError(file: string, error: ZodError): string {
+export function formatError(message: string, error: ZodError): string {
   const lines: string[] = [];
 
   function walk(
@@ -28,5 +28,5 @@ export function formatError(file: string, error: ZodError): string {
 
   walk(undefined, error.format());
 
-  return [`in ${file}:`, ...lines].join('\n');
+  return [message, ...lines].join('\n');
 }

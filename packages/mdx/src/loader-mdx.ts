@@ -2,7 +2,6 @@ import * as path from 'node:path';
 import { parse } from 'node:querystring';
 import grayMatter from 'gray-matter';
 import { type LoaderContext } from 'webpack';
-import { type StructuredData } from 'fumadocs-core/mdx-plugins';
 import { getConfigHash, loadConfigCached } from '@/config/cached';
 import { buildMDX } from '@/utils/build-mdx';
 import { formatError } from '@/utils/format-error';
@@ -14,15 +13,6 @@ export interface Options {
    */
   _ctx: {
     configPath: string;
-  };
-}
-
-export interface MetaFile {
-  path: string;
-  data: {
-    frontmatter: Record<string, unknown>;
-    structuredData?: StructuredData;
-    [key: string]: unknown;
   };
 }
 
@@ -98,7 +88,11 @@ export default async function loader(
 
     const result = await schema.safeParseAsync(frontmatter);
     if (result.error) {
-      callback(new Error(formatError(filePath, result.error)));
+      callback(
+        new Error(
+          formatError(`invalid frontmatter in ${filePath}:`, result.error),
+        ),
+      );
       return;
     }
 
