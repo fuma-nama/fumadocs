@@ -2,7 +2,7 @@ import * as path from 'node:path';
 import type { DocCollection, MetaCollection } from '@/config/define';
 import { type GlobalConfig } from '@/config/types';
 import type { ProcessorOptions } from '@mdx-js/mdx';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { pathToFileURL } from 'node:url';
 
 export function findConfigFile(): string {
   return path.resolve('source.config.ts');
