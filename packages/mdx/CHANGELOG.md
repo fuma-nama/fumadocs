@@ -1,5 +1,15 @@
 # next-docs-mdx
 
+## 11.3.0
+
+### Minor Changes
+
+- a4eb326: Deprecate `generateManifest` option: use a route handler to export build time information
+
+### Patch Changes
+
+- 7cc9f1f: Support CommonJs usage temporarily
+
 ## 11.2.3
 
 ### Patch Changes

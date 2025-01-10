@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 5.11.3
+
+### Patch Changes
+
+- 35a12cd: Add code sample generation support for variable url
+
 ## 5.11.2
 
 ### Patch Changes
