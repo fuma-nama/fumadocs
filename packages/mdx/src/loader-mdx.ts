@@ -64,7 +64,8 @@ export default async function loader(
     collection = undefined;
   }
 
-  const mdxOptions = collection?.mdxOptions ?? config.defaultMdxOptions;
+  const mdxOptions =
+    collection?.mdxOptions ?? (await config.getDefaultMDXOptions());
 
   let frontmatter = matter.data;
   if (collection?.schema) {
