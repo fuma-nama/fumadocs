@@ -157,7 +157,7 @@ function getSidebarTabs(
           icon: node.icon,
           description: node.description,
 
-          urls: getFolderUrls(node),
+          urls: getFolderUrls(node, new Set()),
         };
 
         const mapped = transform ? transform(option, node) : option;
@@ -175,14 +175,16 @@ function getSidebarTabs(
   return findOptions(pageTree as PageTree.Folder);
 }
 
-function getFolderUrls(folder: PageTree.Folder): string[] {
-  const results: string[] = [];
-  if (folder.index) results.push(folder.index.url);
+function getFolderUrls(
+  folder: PageTree.Folder,
+  output: Set<string>,
+): Set<string> {
+  if (folder.index) output.add(folder.index.url);
 
   for (const child of folder.children) {
-    if (child.type === 'page') results.push(child.url);
-    if (child.type === 'folder') results.push(...getFolderUrls(child));
+    if (child.type === 'page') output.add(child.url);
+    if (child.type === 'folder') getFolderUrls(child, output);
   }
 
-  return results;
+  return output;
 }

@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 14.7.3
+
+### Patch Changes
+
+- 041f230: Support trailing slash
+- ca1cf19: Support custom `<Banner />` height
+- Updated dependencies [041f230]
+  - fumadocs-core@14.7.3
+
 ## 14.7.2
 
 ### Patch Changes

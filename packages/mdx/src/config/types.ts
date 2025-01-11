@@ -8,7 +8,9 @@ export interface GlobalConfig {
   /**
    * Configure global MDX options
    */
-  mdxOptions?: DefaultMDXOptions;
+  mdxOptions?:
+    | DefaultMDXOptions
+    | (() => DefaultMDXOptions | Promise<DefaultMDXOptions>);
 
   /**
    * Fetch last modified time with specified version control

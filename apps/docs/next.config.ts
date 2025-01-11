@@ -1,22 +1,18 @@
 import createBundleAnalyzer from '@next/bundle-analyzer';
 import { createMDX } from 'fumadocs-mdx/next';
+import type { NextConfig } from 'next';
 
 const withAnalyzer = createBundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 });
 
-/** @type {import('next').NextConfig} */
-
-const config = {
+const config: NextConfig = {
   reactStrictMode: true,
   eslint: {
     // Replaced by root workspace command
     ignoreDuringBuilds: true,
   },
   serverExternalPackages: ['ts-morph', 'typescript', 'oxc-transform'],
-  experimental: {
-    reactCompiler: true,
-  },
   images: {
     unoptimized: true,
     remotePatterns: [

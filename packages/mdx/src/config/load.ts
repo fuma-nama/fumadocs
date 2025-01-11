@@ -2,7 +2,6 @@ import * as path from 'node:path';
 import type { DocCollection, MetaCollection } from '@/config/define';
 import { type GlobalConfig } from '@/config/types';
 import type { ProcessorOptions } from '@mdx-js/mdx';
-import { getDefaultMDXOptions } from '@/utils/mdx-options';
 import { pathToFileURL } from 'node:url';
 
 export function findConfigFile(): string {
@@ -11,7 +10,7 @@ export function findConfigFile(): string {
 
 export interface LoadedConfig {
   collections: Map<string, InternalDocCollection | InternalMetaCollection>;
-  defaultMdxOptions: ProcessorOptions;
+  getDefaultMDXOptions: () => Promise<ProcessorOptions>;
   global?: GlobalConfig;
 
   _runtime: {
@@ -26,8 +25,9 @@ export type InternalDocCollection = DocCollection;
 export type InternalMetaCollection = MetaCollection;
 
 export async function loadConfig(configPath: string): Promise<LoadedConfig> {
-  const outputPath = path.resolve('.source/source.config.mjs');
   const { build } = await import('esbuild');
+
+  const url = pathToFileURL(path.resolve('.source/source.config.mjs'));
   const transformed = await build({
     entryPoints: [{ in: configPath, out: 'source.config' }],
     bundle: true,
@@ -41,20 +41,18 @@ export async function loadConfig(configPath: string): Promise<LoadedConfig> {
       '.js': '.mjs',
     },
     allowOverwrite: true,
-    splitting: true,
   });
 
   if (transformed.errors.length > 0) {
     throw new Error('failed to compile configuration file');
   }
 
-  const url = pathToFileURL(outputPath);
+  // every call to `loadConfig` should cause the previous cache to be ignored
+  const loaded = await import(`${url.href}?hash=${Date.now().toString()}`);
+
   const [err, config] = buildConfig(
     // every call to `loadConfig` will cause the previous cache to be ignored
-    (await import(`${url.href}?hash=${Date.now().toString()}`)) as Record<
-      string,
-      unknown
-    >,
+    loaded as Record<string, unknown>,
   );
 
   if (err !== null) throw new Error(err);
@@ -91,12 +89,26 @@ function buildConfig(
     ];
   }
 
+  let cachedMdxOptions: ProcessorOptions | undefined;
+
   return [
     null,
     {
       global: globalConfig,
       collections,
-      defaultMdxOptions: getDefaultMDXOptions(globalConfig?.mdxOptions ?? {}),
+      async getDefaultMDXOptions() {
+        if (cachedMdxOptions) return cachedMdxOptions;
+        const { getDefaultMDXOptions } = await import('@/utils/mdx-options');
+
+        const mdxOptions = globalConfig?.mdxOptions ?? {};
+        if (typeof mdxOptions === 'function') {
+          cachedMdxOptions = getDefaultMDXOptions(await mdxOptions());
+        } else {
+          cachedMdxOptions = getDefaultMDXOptions(mdxOptions);
+        }
+
+        return cachedMdxOptions;
+      },
       _runtime: {
         files: new Map(),
       },

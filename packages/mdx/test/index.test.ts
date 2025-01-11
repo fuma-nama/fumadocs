@@ -22,7 +22,7 @@ test('format errors', () => {
   });
 
   if (result.error)
-    expect(formatError('index.mdx', result.error)).toMatchInlineSnapshot(`
+    expect(formatError('in index.mdx:', result.error)).toMatchInlineSnapshot(`
       "in index.mdx:
         text: Expected string, received number
         obj: 

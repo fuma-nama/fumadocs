@@ -22,6 +22,7 @@ import {
   getBreadcrumbItemsFromPath,
 } from 'fumadocs-core/breadcrumb';
 import { usePageStyles } from '@/contexts/layout';
+import { isActive } from '@/utils/is-active';
 
 export function TocNav(props: HTMLAttributes<HTMLDivElement>) {
   const { open } = useSidebar();
@@ -152,7 +153,7 @@ export function Footer({ items }: FooterProps) {
     const list = cached ?? scanNavigationList(root.children);
     listCache.set(root, list);
 
-    const idx = list.findIndex((item) => item.url === pathname);
+    const idx = list.findIndex((item) => isActive(item.url, pathname, false));
 
     if (idx === -1) return {};
     return {

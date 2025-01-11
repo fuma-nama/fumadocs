@@ -116,7 +116,9 @@ export function getBreadcrumbItemsFromPath(
 export function searchPath(
   nodes: PageTree.Node[],
   url: string,
-): (PageTree.Folder | PageTree.Item | PageTree.Separator)[] | null {
+): PageTree.Node[] | null {
+  if (url.endsWith('/')) url = url.slice(0, -1);
+
   let separator: PageTree.Separator | undefined;
 
   for (const node of nodes) {

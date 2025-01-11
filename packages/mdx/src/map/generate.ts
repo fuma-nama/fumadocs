@@ -25,29 +25,39 @@ export async function generateJS(
   ];
   const importedCollections = new Set<string>();
 
+  async function generateEntry(
+    file: FileInfo,
+    collectionName: string,
+    collection: InternalDocCollection | InternalMetaCollection,
+    importId: string,
+  ): Promise<string> {
+    if (collection.type === 'doc' && collection.async) {
+      const importPath = `${toImportPath(file.absolutePath, outDir)}?hash=${configHash}&collection=${collectionName}`;
+      const frontmatter = await getFrontmatter(file.absolutePath);
+
+      return `toRuntimeAsync(${JSON.stringify(frontmatter)}, () => import(${JSON.stringify(importPath)}), ${JSON.stringify(file)})`;
+    }
+
+    imports.push({
+      type: 'namespace',
+      name: importId,
+      specifier: `${toImportPath(file.absolutePath, outDir)}?collection=${collectionName}&hash=${configHash}`,
+    });
+
+    return `toRuntime("${collection.type}", ${importId}, ${JSON.stringify(file)})`;
+  }
+
   config._runtime.files.clear();
   const entries = Array.from(config.collections.entries());
+
   const declares = entries.map(async ([k, collection]) => {
     const files = await getCollectionFiles(collection);
     const items = files.map(async (file, i) => {
       config._runtime.files.set(file.absolutePath, k);
 
-      if (collection.type === 'doc' && collection.async) {
-        const importPath = `${toImportPath(file.absolutePath, outDir)}?hash=${configHash}&collection=${k}`;
-        const frontmatter = await getFrontmatter(file.absolutePath);
-
-        return `toRuntimeAsync(${JSON.stringify(frontmatter)}, () => import(${JSON.stringify(importPath)}), ${JSON.stringify(file)})`;
-      }
-
-      const importName = `${k}_${i.toString()}`;
-      imports.push({
-        type: 'namespace',
-        name: importName,
-        specifier: `${toImportPath(file.absolutePath, outDir)}?collection=${k}&hash=${configHash}`,
-      });
-
-      return `toRuntime("${collection.type}", ${importName}, ${JSON.stringify(file)})`;
+      return generateEntry(file, k, collection, `${k}_${i}`);
     });
+
     const resolvedItems = await Promise.all(items);
 
     if (collection.transform) {
