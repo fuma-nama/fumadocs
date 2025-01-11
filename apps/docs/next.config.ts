@@ -13,9 +13,6 @@ const config: NextConfig = {
     ignoreDuringBuilds: true,
   },
   serverExternalPackages: ['ts-morph', 'typescript', 'oxc-transform'],
-  experimental: {
-    reactCompiler: true,
-  },
   images: {
     unoptimized: true,
     remotePatterns: [

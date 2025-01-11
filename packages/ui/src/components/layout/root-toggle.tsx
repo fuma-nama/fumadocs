@@ -21,7 +21,7 @@ export interface Option {
   /**
    * Detect from a list of urls
    */
-  urls?: string[];
+  urls?: Set<string>;
 
   props?: HTMLAttributes<HTMLElement>;
 }
@@ -41,7 +41,9 @@ export function RootToggle({
   const selected = useMemo(() => {
     return options.findLast((item) =>
       item.urls
-        ? item.urls.includes(pathname)
+        ? item.urls.has(
+            pathname.endsWith('/') ? pathname.slice(0, -1) : pathname,
+          )
         : isActive(item.url, pathname, true),
     );
   }, [options, pathname]);
