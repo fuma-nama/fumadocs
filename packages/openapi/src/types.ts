@@ -19,6 +19,7 @@ export type ReferenceObject = V3_1.ReferenceObject;
 export type PathItemObject = V3_1.PathItemObject;
 export type TagObject = V3_1.TagObject;
 export type ServerObject = NoReference<V3_1.ServerObject>;
+export type CallbackObject = NoReference<V3_1.CallbackObject>;
 
 export type MethodInformation = NoReference<OperationObject> & {
   method: string;
@@ -70,4 +71,9 @@ export interface RenderContext {
 
   shikiOptions?: Omit<CodeToHastOptionsCommon, 'lang'> &
     CodeOptionsThemes<BuiltinTheme>;
+
+  /**
+   * Show full response schema instead of only example response & Typescript definitions
+   */
+  showResponseSchema?: boolean;
 }

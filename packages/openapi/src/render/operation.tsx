@@ -4,11 +4,12 @@ import * as CURL from '@/requests/curl';
 import * as JS from '@/requests/javascript';
 import * as Go from '@/requests/go';
 import * as Python from '@/requests/python';
-import {
-  type MethodInformation,
+import type {
+  CallbackObject,
+  MethodInformation,
   OperationObject,
-  type RenderContext,
-  type SecurityRequirementObject,
+  RenderContext,
+  SecurityRequirementObject,
 } from '@/types';
 import { getPreferredType, NoReference } from '@/utils/schema';
 import { getTypescriptSchema } from '@/utils/get-typescript-schema';
@@ -50,14 +51,15 @@ export function Operation({
   path: string;
   method: MethodInformation;
   ctx: RenderContext;
-  hasHead?: boolean;
 
+  hasHead?: boolean;
   headingLevel?: number;
 }): ReactElement {
   const body = method.requestBody;
   const security = method.security ?? ctx.document.security;
   let headNode: ReactNode = null;
   let bodyNode: ReactNode = null;
+  let responseNode: ReactNode = null;
   let callbacksNode: ReactNode = null;
 
   if (hasHead) {
@@ -100,6 +102,42 @@ export function Operation({
             allowFile: type === 'multipart/form-data',
           }}
         />
+      </>
+    );
+  }
+
+  if (method.responses && ctx.showResponseSchema) {
+    responseNode = (
+      <>
+        {heading(headingLevel, 'Response Body', ctx)}
+
+        {Object.entries(method.responses).map(([status, response]) => {
+          if (!response.content) return;
+
+          const mediaType = getPreferredType(response.content);
+          if (!mediaType) return null;
+
+          const content = response.content[mediaType];
+          if (!content.schema) return null;
+
+          return (
+            <Fragment key={status}>
+              {heading(headingLevel + 1, status, ctx)}
+              <Markdown text={response.description} />
+
+              <Schema
+                name="response"
+                schema={content.schema}
+                ctx={{
+                  render: ctx,
+                  writeOnly: false,
+                  readOnly: true,
+                  required: true,
+                }}
+              />
+            </Fragment>
+          );
+        })}
       </>
     );
   }
@@ -149,34 +187,14 @@ export function Operation({
     callbacksNode = (
       <>
         {heading(headingLevel, 'Webhooks', ctx)}
-        {Object.entries(method.callbacks).map(([name, callback]) => {
-          const nodes = Object.entries(callback).map(([path, pathItem]) => {
-            const pathNodes = methodKeys.map((method) => {
-              const operation = pathItem[method];
-              if (!operation) return null;
-
-              return (
-                <Operation
-                  key={method}
-                  type="webhook"
-                  hasHead
-                  path={path}
-                  headingLevel={headingLevel + 1}
-                  method={createMethod(
-                    method,
-                    pathItem,
-                    operation as NoReference<OperationObject>,
-                  )}
-                  ctx={ctx}
-                />
-              );
-            });
-
-            return <Fragment key={path}>{pathNodes}</Fragment>;
-          });
-
-          return <Fragment key={name}>{nodes}</Fragment>;
-        })}
+        {Object.entries(method.callbacks).map(([name, callback]) => (
+          <WebhookCallback
+            key={name}
+            callback={callback}
+            ctx={ctx}
+            headingLevel={headingLevel}
+          />
+        ))}
       </>
     );
   }
@@ -201,6 +219,7 @@ export function Operation({
           </Fragment>
         );
       })}
+      {responseNode}
       {callbacksNode}
     </ctx.renderer.APIInfo>
   );
@@ -298,6 +317,41 @@ async function APIExample({
   return <renderer.APIExample>{children}</renderer.APIExample>;
 }
 
+function WebhookCallback({
+  callback,
+  ctx,
+  headingLevel,
+}: {
+  callback: CallbackObject;
+  ctx: RenderContext;
+  headingLevel: number;
+}) {
+  return Object.entries(callback).map(([path, pathItem]) => {
+    const pathNodes = methodKeys.map((method) => {
+      const operation = pathItem[method];
+      if (!operation) return null;
+
+      return (
+        <Operation
+          key={method}
+          type="webhook"
+          hasHead
+          path={path}
+          headingLevel={headingLevel + 1}
+          method={createMethod(
+            method,
+            pathItem,
+            operation as NoReference<OperationObject>,
+          )}
+          ctx={ctx}
+        />
+      );
+    });
+
+    return <Fragment key={path}>{pathNodes}</Fragment>;
+  });
+}
+
 /**
  * Remove duplicated labels
  */
@@ -334,24 +388,7 @@ function AuthSection({
           </p>
         ) : null;
 
-      if (schema.type === 'http') {
-        info.push(
-          <renderer.Property
-            key={id++}
-            name="Authorization"
-            type={prefix ? `${prefix} <token>` : '<token>'}
-            required
-          >
-            {schema.description ? <Markdown text={schema.description} /> : null}
-            <p>
-              In: <code>header</code>
-              {scopeElement}
-            </p>
-          </renderer.Property>,
-        );
-      }
-
-      if (schema.type === 'oauth2') {
+      if (schema.type === 'http' || schema.type === 'oauth2') {
         info.push(
           <renderer.Property
             key={id++}
