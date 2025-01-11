@@ -9,8 +9,14 @@ export function Banner({
   id,
   variant = 'normal',
   changeLayout = true,
+  height = '3rem',
   ...props
 }: HTMLAttributes<HTMLDivElement> & {
+  /**
+   * @defaultValue 3rem
+   */
+  height?: string;
+
   /**
    * @defaultValue 'normal'
    */
@@ -22,9 +28,9 @@ export function Banner({
    * @defaultValue true
    */
   changeLayout?: boolean;
-}): React.ReactElement {
+}) {
   const [open, setOpen] = useState(true);
-  const globalKey = id ? `nd-banner-${id}` : undefined;
+  const globalKey = id ? `nd-banner-${id}` : null;
 
   useEffect(() => {
     if (globalKey) setOpen(localStorage.getItem(globalKey) !== 'true');
@@ -35,26 +41,30 @@ export function Banner({
     if (globalKey) localStorage.setItem(globalKey, 'true');
   }, [globalKey]);
 
+  if (!open) return null;
+
   return (
     <div
       id={id}
       {...props}
       className={cn(
-        'sticky top-0 z-40 flex h-12 flex-row items-center justify-center bg-fd-secondary px-4 text-center text-sm font-medium',
+        'sticky top-0 z-40 flex h-[var(--fd-banner-height)] flex-row items-center justify-center bg-fd-secondary px-4 text-center text-sm font-medium',
         variant === 'rainbow' && 'bg-fd-background',
         !open && 'hidden',
         props.className,
       )}
     >
       {changeLayout && open ? (
-        <style>{`
-        :root:not(.${globalKey ?? 'nd-banner-never'}) { --fd-banner-height: 3rem; }
-        `}</style>
+        <style>
+          {globalKey
+            ? `:root:not(.${globalKey}) { --fd-banner-height: ${height}; }`
+            : `:root { --fd-banner-height: ${height}; }`}
+        </style>
       ) : null}
       {globalKey ? (
         <style>{`.${globalKey} #${id} { display: none; }`}</style>
       ) : null}
-      {id ? (
+      {globalKey ? (
         <script
           dangerouslySetInnerHTML={{
             __html: `if (localStorage.getItem('${globalKey}') === 'true') document.documentElement.classList.add('${globalKey}');`,
