@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 14.7.3
+
+### Patch Changes
+
+- 041f230: Support trailing slash
+
 ## 14.7.2
 
 ### Patch Changes

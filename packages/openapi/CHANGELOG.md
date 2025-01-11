@@ -1,5 +1,15 @@
 # @fuma-docs/openapi
 
+## 5.11.4
+
+### Patch Changes
+
+- 056ab2c: Add `showResponseSchema` option to show the full response schema
+- Updated dependencies [041f230]
+- Updated dependencies [ca1cf19]
+  - fumadocs-core@14.7.3
+  - fumadocs-ui@14.7.3
+
 ## 5.11.3
 
 ### Patch Changes
