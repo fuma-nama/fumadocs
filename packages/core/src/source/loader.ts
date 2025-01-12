@@ -82,6 +82,8 @@ export interface LoaderOutput<Config extends LoaderConfig> {
     ? Record<string, PageTree.Root>
     : PageTree.Root;
 
+  getPageTree(locale?: string): PageTree.Root;
+
   _i18n?: I18nConfig;
 
   /**
@@ -276,6 +278,15 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
       if (!node.$ref?.metaFile) return;
 
       return walker.pathToMeta.get(node.$ref.metaFile);
+    },
+    getPageTree(locale) {
+      if (options.i18n) {
+        return pageTree[
+          (locale ?? options.i18n.defaultLanguage) as keyof typeof pageTree
+        ] as PageTree.Root;
+      }
+
+      return pageTree as PageTree.Root;
     },
     getNodePage(node) {
       if (!node.$ref?.file) return;

@@ -253,21 +253,4 @@ By default, index pages are not considered as a page "under" the folder, you mus
 
 ## Internationalization
 
-You can create a localized page for specific language by adding `.{locale}` to your file name. Pages can't be language-specific, you must create a page for default
-locale in order to have its localized version.
-
-This works for meta files too, you can add `.{locale}` to the file name like `meta.cn.json`.
-
-> If it's the default language, just leave it empty like `get-started.mdx`. Do
-> not add locale code to file name.
-
-### Example
-
-Assume your default language is `en`.
-
-| Name              |                                           |
-| ----------------- | ----------------------------------------- |
-| file.mdx          | Correct                                   |
-| file.cn.mdx       | Correct                                   |
-| file.en.mdx       | Default locale doesn't need a locale code |
-| components.cn.mdx | Pages can't be language-specific          |
+<include>../../shared/page-conventions.i18n.mdx</include>
