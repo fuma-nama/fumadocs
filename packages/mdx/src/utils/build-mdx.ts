@@ -27,7 +27,7 @@ export interface MDXOptions extends ProcessorOptions {
   _compiler?: CompilerOptions;
 }
 
-interface CompilerOptions {
+export interface CompilerOptions {
   addDependency: (file: string) => void;
 }
 
