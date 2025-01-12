@@ -160,13 +160,14 @@ export default async function Page({
 }: {
   params: Promise<{ lang: string; slug?: string[] }>;
 }) {
+  const { slug, lang } = await params;
   // get page
-  source.getPage((await params).slug); // [!code --]
-  source.getPage((await params).slug, (await params).lang); // [!code ++]
+  source.getPage(slug); // [!code --]
+  source.getPage(slug, lang); // [!code ++]
 
   // get pages
   source.getPages(); // [!code --]
-  source.getPages((await params).lang); // [!code ++]
+  source.getPages(lang); // [!code ++]
 }
 ```
 
