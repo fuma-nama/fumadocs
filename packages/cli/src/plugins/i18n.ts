@@ -1,5 +1,4 @@
 import path from 'node:path';
-import picocolors from 'picocolors';
 import { log } from '@clack/prompts';
 import { type Plugin } from '@/commands/init';
 import { generated } from '@/generated';
@@ -11,6 +10,7 @@ import { transformSourceI18n } from '@/utils/i18n/transform-source-i18n';
 import { defaultConfig } from '@/config';
 import { createEmptyProject } from '@/utils/typescript';
 import { transformRootLayout } from '@/utils/i18n/transform-root-layout';
+import picocolors from 'picocolors';
 
 export const i18nPlugin: Plugin = {
   files: ({ src }) => ({
@@ -20,8 +20,19 @@ export const i18nPlugin: Plugin = {
   dependencies: [],
   instructions: () => [
     {
-      type: 'text',
-      text: 'Make sure to update the params of page.tsx and route.ts (if necessary):',
+      type: 'title',
+      text: `1. Update the params of ${picocolors.bold('page.tsx')} and ${picocolors.bold('layout.tsx')}, and make them async if necessary.`,
+    },
+    {
+      type: 'code',
+      title: 'layout.tsx',
+      code: `
+export default async function Layout({
+  params,
+}: {
+  ${picocolors.underline(picocolors.bold('params: Promise<{ lang: string }>'))}
+})
+`.trim(),
     },
     {
       type: 'code',
@@ -35,19 +46,12 @@ export default async function Page({
 `.trim(),
     },
     {
+      type: 'title',
+      text: '2. Update references to your `source` object',
+    },
+    {
       type: 'text',
-      text: 'Update the usages to `source` with:',
-    },
-    {
-      type: 'code',
-      title: 'page.tsx',
-      code: `const page = source.getPage(params.slug, params.lang);
-const pages = source.getPage(params.lang);`,
-    },
-    {
-      type: 'code',
-      title: 'layout.tsx',
-      code: `const tree = source.pageTree[params.lang];`,
+      text: 'You can follow the instructions in https://fumadocs.vercel.app/docs/ui/internationalization#source section.',
     },
   ],
   async transform(ctx) {
