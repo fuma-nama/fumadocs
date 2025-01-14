@@ -1,5 +1,15 @@
 # next-docs-ui
 
+## 14.7.4
+
+### Patch Changes
+
+- 26d9ccb: Fix banner preview
+- 036f8e1: Disable hover to open navbar menu by default, can be enabled via `nav.enableHoverToOpen`
+- Updated dependencies [bb73a72]
+- Updated dependencies [69bd4fe]
+  - fumadocs-core@14.7.4
+
 ## 14.7.3
 
 ### Patch Changes

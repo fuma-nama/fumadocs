@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 14.7.4
+
+### Patch Changes
+
+- bb73a72: Fix search params being ignored in middleware redirection
+- 69bd4fe: Support `source.getPageTree()` function
+
 ## 14.7.3
 
 ### Patch Changes

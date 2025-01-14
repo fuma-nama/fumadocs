@@ -1,5 +1,14 @@
 # next-docs-mdx
 
+## 11.3.1
+
+### Patch Changes
+
+- 69bd4fe: Fix nested references for `<include />`
+- Updated dependencies [bb73a72]
+- Updated dependencies [69bd4fe]
+  - fumadocs-core@14.7.4
+
 ## 11.3.0
 
 ### Minor Changes
