@@ -20,22 +20,6 @@ You can define a config to share between utilities.
 }
 ```
 
-### Source API
-
-Change your current source configurations, loader will now generate multiple page trees for every locale.
-
-```ts title="lib/source.ts"
-import { i18n } from '@/lib/i18n';
-import { loader } from 'fumadocs-core/source';
-
-export const source = loader({
-  i18n, // [!code highlight]
-  // other options
-});
-```
-
-See [Source API](/docs/headless/source-api).
-
 ### Middleware
 
 Redirects users to appropriate locale.
@@ -78,7 +62,3 @@ It's **not recommended** to use `always`.
 On this mode, locale is stored as a cookie, read and set on the middleware.
 
 This may cause undesired cache problems on your hosting platform, and need to pay extra attention on SEO to ensure search engines can index your pages correctly.
-
-### Search
-
-For Orama, see [Setup I18n](/docs/headless/search/orama#internationalization).

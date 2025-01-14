@@ -76,7 +76,23 @@ export function NavbarMenuTrigger(props: NavigationMenuTriggerProps) {
   );
 }
 
-const linkVariants = cva(undefined, {
+export function NavbarMenuLink(props: LinkProps) {
+  return (
+    <NavigationMenuLink asChild>
+      <Link
+        {...props}
+        className={cn(
+          'flex flex-col gap-2 rounded-lg border bg-fd-card p-3 transition-colors hover:bg-fd-accent/80 hover:text-fd-accent-foreground',
+          props.className,
+        )}
+      >
+        {props.children}
+      </Link>
+    </NavigationMenuLink>
+  );
+}
+
+const linkVariants = cva('', {
   variants: {
     variant: {
       main: navItemVariants(),
@@ -101,7 +117,7 @@ export function NavbarLink({
   ...props
 }: ComponentProps<typeof BaseLinkItem> & VariantProps<typeof linkVariants>) {
   return (
-    <NavigationMenuItem className="list-none">
+    <NavigationMenuItem>
       <NavigationMenuLink asChild>
         <BaseLinkItem
           {...props}
@@ -112,19 +128,5 @@ export function NavbarLink({
         </BaseLinkItem>
       </NavigationMenuLink>
     </NavigationMenuItem>
-  );
-}
-
-export function NavbarMenuItem(props: LinkProps) {
-  return (
-    <NavigationMenuLink asChild>
-      <Link
-        {...props}
-        className={cn(
-          'flex flex-col gap-2 rounded-lg border bg-fd-card p-3 transition-colors hover:bg-fd-accent/80 hover:text-fd-accent-foreground',
-          props.className,
-        )}
-      />
-    </NavigationMenuLink>
   );
 }

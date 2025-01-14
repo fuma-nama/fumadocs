@@ -1,20 +1,15 @@
 import type { HTMLAttributes } from 'react';
-import { replaceOrDefault } from '@/layouts/shared';
+import { type NavOptions, replaceOrDefault } from '@/layouts/shared';
 import { cn } from '@/utils/cn';
 import { getLinks, type BaseLayoutProps } from './shared';
 import { NavProvider, Title } from '@/components/layout/nav';
-import {
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from '@/components/ui/navigation-menu';
+import { NavigationMenuList } from '@/components/ui/navigation-menu';
 import {
   Navbar,
   NavbarLink,
   NavbarMenu,
   NavbarMenuContent,
-  NavbarMenuItem,
+  NavbarMenuLink,
   NavbarMenuTrigger,
 } from '@/layouts/home/navbar';
 import { type LinkItemType } from '@/layouts/links';
@@ -28,12 +23,27 @@ import {
   LanguageToggleText,
 } from '@/components/layout/language-toggle';
 import { ChevronDown, Languages } from 'lucide-react';
-import { buttonVariants } from '@/components/ui/button';
 import { SearchOnly } from '@/contexts/search';
 import Link from 'fumadocs-core/link';
-import { MenuLinkItem } from '@/layouts/home/menu';
+import {
+  Menu,
+  MenuContent,
+  MenuLinkItem,
+  MenuTrigger,
+} from '@/layouts/home/menu';
 
-export type HomeLayoutProps = BaseLayoutProps & HTMLAttributes<HTMLElement>;
+export interface HomeLayoutProps
+  extends BaseLayoutProps,
+    HTMLAttributes<HTMLElement> {
+  nav?: Partial<
+    NavOptions & {
+      /**
+       * Open mobile menu when hovering the trigger
+       */
+      enableHoverToOpen?: boolean;
+    }
+  >;
+}
 
 export function HomeLayout(props: HomeLayoutProps) {
   const {
@@ -68,7 +78,7 @@ function Header({
   i18n = false,
   finalLinks,
   disableThemeSwitch,
-}: BaseLayoutProps & {
+}: HomeLayoutProps & {
   finalLinks: LinkItemType[];
 }) {
   const navItems = finalLinks.filter((item) =>
@@ -106,22 +116,17 @@ function Header({
           <NavbarLinkItem
             key={i}
             item={item}
-            className="-me-1.5 list-none max-lg:hidden"
+            className="-me-1.5 max-lg:hidden"
           />
         ))}
-        <NavigationMenuItem className="list-none lg:hidden">
-          <NavigationMenuTrigger
-            className={cn(
-              buttonVariants({
-                size: 'icon',
-                color: 'ghost',
-              }),
-              'group -me-2',
-            )}
+        <Menu className="lg:hidden">
+          <MenuTrigger
+            className="group -me-2"
+            enableHover={nav.enableHoverToOpen}
           >
             <ChevronDown className="size-3 transition-transform duration-300 group-data-[state=open]:rotate-180" />
-          </NavigationMenuTrigger>
-          <NavigationMenuContent className="flex flex-col p-4 sm:flex-row sm:items-center sm:justify-end">
+          </MenuTrigger>
+          <MenuContent className="sm:flex-row sm:items-center sm:justify-end">
             {menuItems
               .filter((item) => !isSecondary(item))
               .map((item, i) => (
@@ -141,8 +146,8 @@ function Header({
               ) : null}
               {!disableThemeSwitch ? <ThemeToggle /> : null}
             </div>
-          </NavigationMenuContent>
-        </NavigationMenuItem>
+          </MenuContent>
+        </Menu>
       </div>
     </Navbar>
   );
@@ -164,7 +169,7 @@ function NavbarLinkItem({
       const { banner, footer, ...rest } = child.menu ?? {};
 
       return (
-        <NavbarMenuItem key={j} href={child.url} {...rest}>
+        <NavbarMenuLink key={j} href={child.url} {...rest}>
           {banner ??
             (child.icon ? (
               <div className="w-fit rounded-md border bg-fd-muted p-1 [&_svg]:size-4">
@@ -178,7 +183,7 @@ function NavbarLinkItem({
             </p>
           ) : null}
           {footer}
-        </NavbarMenuItem>
+        </NavbarMenuLink>
       );
     });
 

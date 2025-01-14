@@ -1,3 +1,4 @@
+'use client';
 import * as React from 'react';
 import * as Primitive from '@radix-ui/react-navigation-menu';
 import { cn } from '@/utils/cn';
@@ -6,7 +7,20 @@ const NavigationMenu = Primitive.Root;
 
 const NavigationMenuList = Primitive.List;
 
-const NavigationMenuItem = Primitive.Item;
+const NavigationMenuItem = React.forwardRef<
+  React.ComponentRef<typeof Primitive.NavigationMenuItem>,
+  React.ComponentPropsWithoutRef<typeof Primitive.NavigationMenuItem>
+>(({ className, children, ...props }, ref) => (
+  <Primitive.NavigationMenuItem
+    ref={ref}
+    className={cn('list-none', className)}
+    {...props}
+  >
+    {children}
+  </Primitive.NavigationMenuItem>
+));
+
+NavigationMenuItem.displayName = Primitive.NavigationMenuItem.displayName;
 
 const NavigationMenuTrigger = React.forwardRef<
   React.ComponentRef<typeof Primitive.Trigger>,

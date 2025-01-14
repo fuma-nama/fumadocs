@@ -21,6 +21,8 @@ import OpenPanel from '@/public/showcases/openpanel.png';
 import Supastarter from '@/public/showcases/supastarter.png';
 import BetterAuth from '@/public/showcases/better-auth.png';
 import LaunchFast from '@/public/showcases/launchfast.png';
+import ArkType from '@/public/showcases/arktype.png';
+import AssistantUI from '@/public/showcases/assistant-ui.png';
 
 export const metadata = createMetadata({
   title: 'Showcase',
@@ -54,9 +56,9 @@ export default function Showcase(): React.ReactElement {
       url: 'https://million.dev',
     },
     {
-      image: Yeecord,
-      name: 'Yeecord Docs',
-      url: 'https://yeecord.com',
+      image: BetterAuth,
+      name: 'Better Auth',
+      url: 'https://better-auth.com',
     },
     { image: Nuqs, name: 'nuqs', url: 'https://nuqs.47ng.com' },
     {
@@ -70,9 +72,9 @@ export default function Showcase(): React.ReactElement {
       url: 'https://docs.hiro.so/stacks',
     },
     {
-      image: BetterAuth,
-      name: 'Better Auth',
-      url: 'https://better-auth.com',
+      image: ArkType,
+      name: 'Arktype',
+      url: 'https://arktype.io',
     },
     {
       image: OpenPanel,
@@ -90,6 +92,11 @@ export default function Showcase(): React.ReactElement {
       url: 'https://sunar.js.org',
     },
     {
+      image: Yeecord,
+      name: 'Yeecord Docs',
+      url: 'https://yeecord.com',
+    },
+    {
       image: Supastarter,
       name: 'SupaStarter',
       url: 'https://supastarter.dev',
@@ -98,6 +105,11 @@ export default function Showcase(): React.ReactElement {
       image: CodeHike,
       name: 'CodeHike',
       url: 'https://codehike.org',
+    },
+    {
+      image: AssistantUI,
+      name: 'assistant-ui',
+      url: 'https://assistant-ui.com',
     },
     {
       image: Expostarter,

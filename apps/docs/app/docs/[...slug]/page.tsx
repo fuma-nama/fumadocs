@@ -10,7 +10,6 @@ import { notFound } from 'next/navigation';
 import {
   type ComponentProps,
   type FC,
-  Fragment,
   type ReactElement,
   type ReactNode,
 } from 'react';
@@ -89,9 +88,6 @@ export default async function Page(props: {
             Wrapper,
             blockquote: Callout as unknown as FC<ComponentProps<'blockquote'>>,
             APIPage: openapi.APIPage,
-            HeadlessOnly:
-              params.slug[0] === 'headless' ? Fragment : () => undefined,
-            UIOnly: params.slug[0] === 'ui' ? Fragment : () => undefined,
           }}
         />
         {page.data.index ? <DocsCategory page={page} from={source} /> : null}

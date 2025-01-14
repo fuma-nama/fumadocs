@@ -47,6 +47,10 @@ export interface Plugin {
           type: 'text';
           text: string;
         }
+      | {
+          type: 'title';
+          text: string;
+        }
     )[]
   >;
 
@@ -144,6 +148,7 @@ export async function init(plugin: Plugin, config: Config = {}): Promise<void> {
 
     if (value) {
       await plugin.transform(ctx);
+
       note(
         `You can format the output with Prettier or other code formating tools
 prettier . --write`,
@@ -164,6 +169,10 @@ prettier . --write`,
 
     if (text.type === 'code') {
       note(text.code, text.title);
+    }
+
+    if (text.type === 'title') {
+      log.step(text.text);
     }
   }
 }

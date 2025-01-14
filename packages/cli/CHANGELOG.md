@@ -1,5 +1,11 @@
 # fumadocs
 
+## 0.0.7
+
+### Patch Changes
+
+- a16bb23: Improve instructions in i18n plugin
+
 ## 0.0.6
 
 ### Patch Changes

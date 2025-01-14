@@ -3,7 +3,7 @@ import { Fragment, type HTMLAttributes, type ReactNode } from 'react';
 import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 import { badgeVariants, getBadgeColor } from '@/ui/components/variants';
 import type { APIInfoProps, PropertyProps } from '@/render/renderer';
-import { ServerSelect, CopyRouteButton } from '@/ui/client';
+import { CopyRouteButton, ServerSelect } from '@/ui/client';
 
 export { Root, useSchemaContext, APIPlayground } from './client';
 
