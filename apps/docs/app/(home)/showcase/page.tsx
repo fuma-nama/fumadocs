@@ -22,6 +22,7 @@ import Supastarter from '@/public/showcases/supastarter.png';
 import BetterAuth from '@/public/showcases/better-auth.png';
 import LaunchFast from '@/public/showcases/launchfast.png';
 import ArkType from '@/public/showcases/arktype.png';
+import AssistantUI from '@/public/showcases/assistant-ui.png';
 
 export const metadata = createMetadata({
   title: 'Showcase',
@@ -104,6 +105,11 @@ export default function Showcase(): React.ReactElement {
       image: CodeHike,
       name: 'CodeHike',
       url: 'https://codehike.org',
+    },
+    {
+      image: AssistantUI,
+      name: 'assistant-ui',
+      url: 'https://assistant-ui.com',
     },
     {
       image: Expostarter,
