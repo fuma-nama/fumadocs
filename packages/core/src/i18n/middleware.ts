@@ -20,7 +20,9 @@ function getLocale(
 ): string {
   // Negotiator expects plain object so we need to transform headers
   const negotiatorHeaders: Record<string, string> = {};
-  request.headers.forEach((value, key) => (negotiatorHeaders[key] = value));
+  request.headers.forEach((value, key) => {
+    negotiatorHeaders[key] = value;
+  });
 
   // Use negotiator and intl-localematcher to get best locale
   const languages = new Negotiator({ headers: negotiatorHeaders }).languages(
@@ -62,16 +64,18 @@ export function createI18nMiddleware({
   }
 
   return (request) => {
-    const { pathname } = request.nextUrl;
+    const inputPath = `${request.nextUrl.pathname}${request.nextUrl.search}`;
 
     const pathLocale = languages.find(
       (locale) =>
-        pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`,
+        inputPath.startsWith(`/${locale}/`) || inputPath === `/${locale}`,
     );
 
     if (!pathLocale) {
       if (hideLocale === 'default-locale') {
-        return NextResponse.rewrite(getUrl(request, pathname, defaultLanguage));
+        return NextResponse.rewrite(
+          getUrl(request, inputPath, defaultLanguage),
+        );
       }
 
       const preferred = getLocale(request, languages, defaultLanguage);
@@ -79,14 +83,14 @@ export function createI18nMiddleware({
       if (hideLocale === 'always') {
         const locale = request.cookies.get(COOKIE)?.value ?? preferred;
 
-        return NextResponse.rewrite(getUrl(request, pathname, locale));
+        return NextResponse.rewrite(getUrl(request, inputPath, locale));
       }
 
-      return NextResponse.redirect(getUrl(request, pathname, preferred));
+      return NextResponse.redirect(getUrl(request, inputPath, preferred));
     }
 
     if (hideLocale === 'always') {
-      const path = pathname.slice(`/${pathLocale}`.length);
+      const path = inputPath.slice(`/${pathLocale}`.length);
 
       const res = NextResponse.redirect(getUrl(request, path));
       res.cookies.set(COOKIE, pathLocale);
@@ -96,9 +100,9 @@ export function createI18nMiddleware({
     // Remove explicit default locale
     // (Only possible for default locale)
     if (hideLocale === 'default-locale' && pathLocale === defaultLanguage) {
-      const path = pathname.slice(`/${pathLocale}`.length);
-
-      return NextResponse.redirect(getUrl(request, path));
+      return NextResponse.redirect(
+        getUrl(request, inputPath.slice(`/${pathLocale}`.length)),
+      );
     }
 
     return NextResponse.next();
