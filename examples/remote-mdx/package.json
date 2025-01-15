@@ -3,12 +3,13 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "next build && node ./scripts/build-indexes.mjs",
+    "build": "next build",
     "dev": "next dev",
     "start": "next start"
   },
   "dependencies": {
     "@fumadocs/mdx-remote": "workspace:*",
+    "fast-glob": "^3.3.3",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "next": "15.1.4",

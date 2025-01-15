@@ -406,6 +406,9 @@ importers:
       '@fumadocs/mdx-remote':
         specifier: workspace:*
         version: link:../../packages/mdx-remote
+      fast-glob:
+        specifier: ^3.3.3
+        version: 3.3.3
       fumadocs-core:
         specifier: workspace:*
         version: link:../../packages/core

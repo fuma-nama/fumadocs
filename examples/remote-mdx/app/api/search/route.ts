@@ -3,18 +3,32 @@ import {
   createSearchAPI,
 } from 'fumadocs-core/search/server';
 import * as fs from 'node:fs/promises';
+import { getPages } from '@/app/docs/utils';
+import { parseFrontmatter } from '@fumadocs/mdx-remote';
+import { structure } from 'fumadocs-core/mdx-plugins';
 
 export const { GET } = createSearchAPI('advanced', {
   indexes: async () => {
-    const content = await fs
-      .readFile(
-        process.env.NODE_ENV === 'production'
-          ? './.next/search-index.json'
-          : './dist/search-index.json',
-      )
-      .then((res) => res.toString())
-      .catch(() => '[]'); // skip if not built
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn(
+        'Firing the `/api/search` route handler will trigger all Markdown files to be parsed into build indexes, it may be slow.',
+      );
+    }
+    const pages = await getPages();
 
-    return JSON.parse(content) as AdvancedIndex[];
+    return Promise.all(
+      pages.map(async (page) => {
+        const content = (await fs.readFile(page.path)).toString();
+        const { frontmatter } = parseFrontmatter(content);
+
+        return {
+          id: page.path,
+          title: frontmatter.title,
+          description: frontmatter.description,
+          structuredData: structure(content),
+          url: `/docs/${page.slug.join('/')}`,
+        } satisfies AdvancedIndex;
+      }),
+    );
   },
 });

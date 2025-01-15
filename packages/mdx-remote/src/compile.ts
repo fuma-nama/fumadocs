@@ -9,12 +9,11 @@ import {
 } from 'fumadocs-core/mdx-plugins';
 import type { CompileOptions } from '@mdx-js/mdx';
 import type { MDXComponents } from 'mdx/types';
-import { pluginOption, type ResolvePlugins } from './utils';
+import { parseFrontmatter, pluginOption, type ResolvePlugins } from './utils';
 import { compile } from '@mdx-js/mdx';
 import type { VFile } from 'vfile';
 import type React from 'react';
 import type { TableOfContents } from 'fumadocs-core/server';
-import matter from 'gray-matter';
 import { renderMDX } from '@/render';
 
 export type MDXOptions = Omit<
@@ -56,11 +55,11 @@ export interface CompileMDXResult<TFrontmatter = Record<string, unknown>> {
   scope: object;
 }
 
-export async function compileMDX<Frontmatter extends Record<string, unknown>>(
-  options: CompileMDXOptions,
-): Promise<CompileMDXResult<Frontmatter>> {
+export async function compileMDX<
+  Frontmatter extends object = Record<string, unknown>,
+>(options: CompileMDXOptions): Promise<CompileMDXResult<Frontmatter>> {
   const { scope = {} } = options;
-  const { data: frontmatter, content } = matter(options.source);
+  const { frontmatter, content } = parseFrontmatter(options.source);
 
   const file = await compile(
     { value: content, path: options.filePath },
