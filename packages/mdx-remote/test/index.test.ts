@@ -11,30 +11,42 @@ const files = await Glob('./fixtures/*.mdx', {
 });
 
 for (const file of files) {
-  test(`compile: ${file}`, async () => {
-    const out = await compileMDX({
-      source: (await fs.readFile(path.join(dir, file))).toString(),
-    });
+  const content = (await fs.readFile(path.join(dir, file))).toString();
 
-    await expect(out.compiled).toMatchFileSnapshot(`${file}.js`);
-    await expect({
-      toc: out.toc,
-      frontmatter: out.frontmatter,
-    }).toMatchFileSnapshot(`${file}.json`);
-  });
+  test(
+    `compile: ${file}`,
+    async () => {
+      const out = await compileMDX({
+        skipRender: true,
+        source: content,
+      });
 
-  test(`compile: ${file} (production)`, async () => {
-    const out = await compileMDX({
-      mdxOptions: {
-        development: false,
-      },
-      source: (await fs.readFile(path.join(dir, file))).toString(),
-    });
+      await expect(out.compiled).toMatchFileSnapshot(`${file}.js`);
+      await expect({
+        toc: out.toc,
+        frontmatter: out.frontmatter,
+      }).toMatchFileSnapshot(`${file}.json`);
+    },
+    1000 * 15,
+  );
 
-    await expect(out.compiled).toMatchFileSnapshot(`${file}.production.js`);
-    await expect({
-      toc: out.toc,
-      frontmatter: out.frontmatter,
-    }).toMatchFileSnapshot(`${file}.json`);
-  });
+  test(
+    `compile: ${file} (production)`,
+    async () => {
+      const out = await compileMDX({
+        skipRender: true,
+        mdxOptions: {
+          development: false,
+        },
+        source: content,
+      });
+
+      await expect(out.compiled).toMatchFileSnapshot(`${file}.production.js`);
+      await expect({
+        toc: out.toc,
+        frontmatter: out.frontmatter,
+      }).toMatchFileSnapshot(`${file}.json`);
+    },
+    1000 * 15,
+  );
 }

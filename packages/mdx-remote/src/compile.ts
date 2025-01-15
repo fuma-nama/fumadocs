@@ -44,10 +44,12 @@ export interface CompileMDXOptions {
   mdxOptions?: MDXOptions;
   components?: MDXComponents;
   scope?: object;
+
+  skipRender?: boolean;
 }
 
 export interface CompileMDXResult<TFrontmatter = Record<string, unknown>> {
-  content: React.ReactElement;
+  content: React.ReactNode;
   compiled: string;
   frontmatter: TFrontmatter;
   toc: TableOfContents;
@@ -58,7 +60,7 @@ export interface CompileMDXResult<TFrontmatter = Record<string, unknown>> {
 export async function compileMDX<
   Frontmatter extends object = Record<string, unknown>,
 >(options: CompileMDXOptions): Promise<CompileMDXResult<Frontmatter>> {
-  const { scope = {} } = options;
+  const { scope = {}, skipRender } = options;
   const { frontmatter, content } = parseFrontmatter(options.source);
 
   const file = await compile(
@@ -70,7 +72,9 @@ export async function compileMDX<
   return {
     vfile: file,
     compiled,
-    content: await renderMDX(compiled, scope, options.components),
+    content: skipRender
+      ? null
+      : await renderMDX(compiled, scope, options.components),
     frontmatter: frontmatter as Frontmatter,
     toc: file.data.toc as TableOfContents,
     scope,
