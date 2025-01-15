@@ -1,6 +1,6 @@
 ---
-title: Remote Source
-description: Learn how to use a remote source with Fumadocs
+title: Custom Source
+description: Build your own content source
 ---
 
 ## Introduction
@@ -8,6 +8,13 @@ description: Learn how to use a remote source with Fumadocs
 **Fumadocs is very flexible.** You can integrate with any content source, even without an official adapter.
 
 > This guide assumes you are experienced with Next.js App Router.
+
+### Examples
+
+You can see examples to use Fumadocs with a CMS, which allows a nice experience on publishing content, and real-time update without re-building the app.
+
+BaseHub: https://github.com/fuma-nama/fumadocs-basehub
+Sanity: https://github.com/fuma-nama/fumadocs-sanity
 
 For a custom content source implementation, you will need:
 
@@ -17,6 +24,28 @@ You can either hardcode the page tree, or write some code to generate one.
 See [Definitions of Page Tree](/docs/headless/page-tree).
 
 Pass your Page Tree to `DocsLayout` (usually in a `layout.tsx`).
+
+```tsx title="layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <DocsLayout
+      nav={{ title: 'Example Docs' }}
+      tree={
+        {
+          /// your own tree
+        }
+      }
+    >
+      {children}
+    </DocsLayout>
+  );
+}
+```
+
+The page tree is like a smarter "sidebar items", they will be referenced everywhere in the UI for navigation elements, such as the page footer.
 
 ### Docs Page
 
@@ -31,7 +60,7 @@ It should return a list of parameters (`params`) to populate the `[[...slug]]` c
 
 In the main body of page, find the corresponding page according to the slug and render its content inside the `DocsPage` component.
 
-You also need a table of contents, which can be generated with your own implementation, or using the [`getTableOfContents`](/docs/headless/utils/get-toc) utility (Markdown/MDX only).
+You also need table of contents, which can be generated with your own implementation, or using the [`getTableOfContents`](/docs/headless/utils/get-toc) utility (Markdown/MDX only).
 
 ```tsx
 import { DocsPage, DocsBody } from 'fumadocs-ui/page';
@@ -52,7 +81,7 @@ export default function Page({ params }: { params: { slug?: string[] } }) {
 
 #### Metadata
 
-Next.js offers a Metadata API for SEO, you can configure it with `generateMetadata` (same as the code above).
+Next.js offers a Metadata API for SEO, you can configure it with `generateMetadata` (similar as the code above).
 
 ### Document Search
 
@@ -65,11 +94,8 @@ Fumadocs offers a simple [Algolia Search Adapter](/docs/headless/search/algolia)
 
 ## MDX Remote
 
-Fumadocs offers the **MDX Remote** package, it is a helper to integrate remote content sources with Fumadocs.
-
-<Callout type="warn" title="Take it on your own risk">
-  MDX Remote is still under development, it can be unstable.
-</Callout>
+Fumadocs offers the **MDX Remote** package, it is a helper to integrate Markdown-based content sources with Fumadocs.
+You can think it as a `next-mdx-remote` with built-in plugins for Fumadocs.
 
 ### Setup
 
@@ -78,7 +104,10 @@ Fumadocs offers the **MDX Remote** package, it is a helper to integrate remote c
 ```
 
 The main feature it offers is the MDX Compiler, it can compile MDX content to JSX nodes.
-Since it doesn't use a bundler, imports and exports are not supported.
+Since it doesn't use a bundler, there's some limitations:
+
+- No imports and exports in MDX files.
+- No JSX nodes in generated table of contents array.
 
 You can pass MDX components via the `components` option, it's compatible with Server Components.
 There's an example:
@@ -87,12 +116,13 @@ There's an example:
 import { compileMDX } from '@fumadocs/mdx-remote';
 import { getPage } from './my-content-source';
 import { DocsBody, DocsPage } from 'fumadocs-ui/page';
+import defaultMdxComponents from 'fumadocs-ui/mdx';
 
 export default function Page({ params }: { params: { slug?: string[] } }) {
   const page = getPage(params.slug);
   const compiled = compileMDX({
     source: page.content,
-    components: {},
+    components: { ...defaultMdxComponents },
   });
 
   return (

@@ -22,3 +22,6 @@ examples/openapi/content/docs/(api)/**/*.mdx
 apps/docs/content/docs/ui/typescript.mdx
 
 .content-collections/**/*
+
+packages/mdx-remote/test/fixtures/**/*.js
+packages/mdx-remote/test/fixtures/**/*.json

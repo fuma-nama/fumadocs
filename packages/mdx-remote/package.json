@@ -1,6 +1,6 @@
 {
   "name": "@fumadocs/mdx-remote",
-  "version": "0.2.4",
+  "version": "1.0.0",
   "description": "The remote MDX files adapter for Fumadocs",
   "keywords": [
     "NextJs",
@@ -14,18 +14,6 @@
   "author": "Fuma Nama",
   "type": "module",
   "exports": {
-    "./github": {
-      "import": "./dist/github/index.js",
-      "types": "./dist/github/index.d.ts"
-    },
-    "./github/next": {
-      "import": "./dist/github/next/index.js",
-      "types": "./dist/github/next/index.d.ts"
-    },
-    "./github/dev": {
-      "import": "./dist/github/dev/index.js",
-      "types": "./dist/github/dev/index.d.ts"
-    },
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
@@ -33,22 +21,6 @@
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "typesVersions": {
-    "*": {
-      ".": [
-        "./dist/index.d.ts"
-      ],
-      "github": [
-        "./dist/github/index.d.ts"
-      ],
-      "github/next": [
-        "./dist/github/next/index.d.ts"
-      ],
-      "github/dev": [
-        "./dist/github/dev/index.d.ts"
-      ]
-    }
-  },
   "files": [
     "dist/*"
   ],
@@ -61,20 +33,14 @@
   },
   "dependencies": {
     "@mdx-js/mdx": "^3.1.0",
-    "bufferutil": "^4.0.9",
-    "chokidar": "^4.0.3",
-    "fast-glob": "^3.3.3",
     "gray-matter": "^4.0.3",
-    "micromatch": "^4.0.8",
-    "ws": "^8.18.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "fast-glob": "^3.3.3",
     "@types/mdx": "^2.0.13",
-    "@types/micromatch": "^4.0.9",
     "@types/node": "22.10.6",
     "@types/react": "^19.0.7",
-    "@types/ws": "^8.5.13",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "next": "15.1.4",
