@@ -1,5 +1,15 @@
 # @fumadocs/mdx-remote
 
+## 1.0.0
+
+### Major Changes
+
+- 82ff9ec: **Remove GitHub remote integration**
+
+  **why:** It should be equivalent to `next-mdx-remote` but include extra functionalities by Fumadocs, like built-in MDX plugins, table of contents and frontmatter parsing.
+
+  **migrate:** Implement your own content source, or see our Sanity/BaseHub examples for CMS usages.
+
 ## 0.2.4
 
 ### Patch Changes
