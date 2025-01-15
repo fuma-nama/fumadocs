@@ -19,6 +19,6 @@
     "source-api",
     "content-collections/index",
     "contentlayer",
-    "remote/index"
+    "custom-source"
   ]
 }
