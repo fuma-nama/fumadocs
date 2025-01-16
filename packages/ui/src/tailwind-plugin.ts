@@ -43,6 +43,14 @@ export interface DocsUIOptions
   preset?: keyof typeof presets | Preset;
 
   typography?: TypographyOptions;
+
+  // TODO: disable by default at next major/minor
+  /**
+   * Add Fumadocs UI `fd-*` utilities
+   *
+   * @defaultValue true
+   */
+  addGlobalUtils?: boolean;
 }
 
 type Keys =
@@ -119,8 +127,51 @@ function createTailwindColors(
   return Object.fromEntries(v.entries());
 }
 
+function createTailwindUtilities(prefix: string): CSSRuleObject {
+  const append = prefix.length > 0 ? prefix + '-' : prefix;
+
+  return {
+    [`.${append}steps`]: {
+      'counter-reset': 'step',
+      'border-left-width': '1px',
+      'margin-left': '1rem',
+      'padding-left': '1.75rem',
+      position: 'relative',
+    },
+    [`.${append}step:before`]: {
+      'background-color': `theme('colors.fd-secondary.DEFAULT')`,
+      color: `theme('colors.fd-secondary.foreground')`,
+      content: 'counter(step)',
+      'counter-increment': 'step',
+      'border-radius': `theme('borderRadius.full')`,
+      'justify-content': 'center',
+      'align-items': 'center',
+      width: '2rem',
+      height: '2rem',
+      'font-size': '.875rem',
+      'line-height': '1.25rem',
+      display: 'flex',
+      position: 'absolute',
+      left: '-1rem',
+    },
+    '.prose-no-margin': {
+      '& > :first-child': {
+        marginTop: '0',
+      },
+      '& > :last-child': {
+        marginBottom: '0',
+      },
+    },
+  };
+}
+
 export const docsUi = plugin.withOptions<DocsUIOptions>(
-  ({ cssPrefix = 'fd', preset = 'default', layoutWidth = '100vw' } = {}) => {
+  ({
+    cssPrefix = 'fd',
+    preset = 'default',
+    layoutWidth = '100vw',
+    addGlobalUtils = true,
+  } = {}) => {
     return ({ addBase, addComponents, addUtilities }) => {
       const { light, dark, css } =
         typeof preset === 'string' ? presets[preset] : preset;
@@ -208,39 +259,11 @@ export const docsUi = plugin.withOptions<DocsUIOptions>(
         },
       });
 
-      addUtilities({
-        '.steps': {
-          'counter-reset': 'step',
-          'border-left-width': '1px',
-          'margin-left': '1rem',
-          'padding-left': '1.75rem',
-          position: 'relative',
-        },
-        '.step:before': {
-          'background-color': `theme('colors.fd-secondary.DEFAULT')`,
-          color: `theme('colors.fd-secondary.foreground')`,
-          content: 'counter(step)',
-          'counter-increment': 'step',
-          'border-radius': `theme('borderRadius.full')`,
-          'justify-content': 'center',
-          'align-items': 'center',
-          width: '2rem',
-          height: '2rem',
-          'font-size': '.875rem',
-          'line-height': '1.25rem',
-          display: 'flex',
-          position: 'absolute',
-          left: '-1rem',
-        },
-        '.prose-no-margin': {
-          '& > :first-child': {
-            marginTop: '0',
-          },
-          '& > :last-child': {
-            marginBottom: '0',
-          },
-        },
-      });
+      if (addGlobalUtils) {
+        addUtilities(createTailwindUtilities(''));
+      }
+
+      addUtilities(createTailwindUtilities('fd'));
     };
   },
   ({
