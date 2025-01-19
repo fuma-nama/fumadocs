@@ -1,11 +1,11 @@
-import React from 'react';
 import { type MDXComponents } from 'mdx/types';
+
+export type MdxContent = React.FC<{ components?: MDXComponents }>;
 
 export async function renderMDX(
   compiled: string,
   scope: object,
-  components?: MDXComponents,
-): Promise<React.ReactElement> {
+): Promise<MdxContent> {
   let jsxRuntime;
 
   if (process.env.NODE_ENV === 'production') {
@@ -24,7 +24,8 @@ export async function renderMDX(
   const hydrateFn = Reflect.construct(Function, keys.concat(compiled));
 
   const result = hydrateFn.apply(hydrateFn, values) as {
-    default: React.ElementType;
+    default: MdxContent;
   };
-  return React.createElement(result.default, { components });
+
+  return result.default;
 }

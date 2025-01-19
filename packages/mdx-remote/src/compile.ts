@@ -12,9 +12,9 @@ import type { MDXComponents } from 'mdx/types';
 import { parseFrontmatter, pluginOption, type ResolvePlugins } from './utils';
 import { compile } from '@mdx-js/mdx';
 import type { VFile } from 'vfile';
-import type React from 'react';
+import type { ReactNode } from 'react';
 import type { TableOfContents } from 'fumadocs-core/server';
-import { renderMDX } from '@/render';
+import { renderMDX, type MdxContent } from '@/render';
 
 export type MDXOptions = Omit<
   CompileOptions,
@@ -23,7 +23,7 @@ export type MDXOptions = Omit<
   remarkPlugins?: ResolvePlugins;
   rehypePlugins?: ResolvePlugins;
 
-  remarkHeadingOptions?: RemarkHeadingOptions;
+  remarkHeadingOptions?: RemarkHeadingOptions | false;
   rehypeCodeOptions?: RehypeCodeOptions | false;
 
   /**
@@ -32,6 +32,8 @@ export type MDXOptions = Omit<
    * @defaultValue './public'
    */
   imageDir?: string;
+
+  remarkImageOptions?: RemarkImageOptions | false;
 };
 
 export interface CompileMDXOptions {
@@ -49,7 +51,12 @@ export interface CompileMDXOptions {
 }
 
 export interface CompileMDXResult<TFrontmatter = Record<string, unknown>> {
-  content: React.ReactNode;
+  /**
+   * @deprecated use `body` instead
+   */
+  get content(): ReactNode;
+
+  body: MdxContent;
   compiled: string;
   frontmatter: TFrontmatter;
   toc: TableOfContents;
@@ -68,14 +75,25 @@ export async function compileMDX<
     getCompileOptions(options.mdxOptions),
   );
   const compiled = String(file);
+  const MdxContent = !skipRender ? await renderMDX(compiled, scope) : null;
 
   return {
     vfile: file,
     compiled,
-    content: skipRender
-      ? null
-      : await renderMDX(compiled, scope, options.components),
+    get content() {
+      return MdxContent?.({ components: options.components }) as ReactNode;
+    },
     frontmatter: frontmatter as Frontmatter,
+    body: (props) => {
+      if (!MdxContent)
+        throw new Error(
+          'Body cannot be rendered when `skipRender` is set to true',
+        );
+
+      return MdxContent({
+        components: { ...options.components, ...props.components },
+      });
+    },
     toc: file.data.toc as TableOfContents,
     scope,
   };
@@ -89,7 +107,10 @@ function getCompileOptions(mdxOptions: MDXOptions = {}): CompileOptions {
     remarkPlugins: pluginOption(
       (v) => [
         remarkGfm,
-        [remarkHeading, mdxOptions.remarkHeadingOptions],
+        mdxOptions.remarkHeadingOptions !== false && [
+          remarkHeading,
+          mdxOptions.remarkHeadingOptions,
+        ],
         ...v,
       ],
       mdxOptions.remarkPlugins,
@@ -100,11 +121,12 @@ function getCompileOptions(mdxOptions: MDXOptions = {}): CompileOptions {
           rehypeCode,
           mdxOptions.rehypeCodeOptions,
         ],
-        [
+        mdxOptions.remarkImageOptions !== false && [
           remarkImage,
           {
             useImport: false,
             publicDir: mdxOptions.imageDir ?? './public',
+            ...mdxOptions.remarkImageOptions,
           } satisfies RemarkImageOptions,
         ],
         ...v,
