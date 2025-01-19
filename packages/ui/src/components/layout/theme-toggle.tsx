@@ -1,18 +1,17 @@
 'use client';
 import { cva } from 'class-variance-authority';
-import { Moon, Sun } from 'lucide-react';
+import { Moon, Sun, Airplay } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { type ButtonHTMLAttributes } from 'react';
+import { type HTMLAttributes, useLayoutEffect, useState } from 'react';
 import { cn } from '@/utils/cn';
 
 const buttonVariants = cva(
   'size-7 rounded-full p-1.5 text-fd-muted-foreground',
   {
     variants: {
-      dark: {
-        true: 'dark:bg-fd-accent dark:text-fd-accent-foreground',
-        false:
-          'bg-fd-accent text-fd-accent-foreground dark:bg-transparent dark:text-fd-muted-foreground',
+      active: {
+        true: 'bg-fd-accent text-fd-accent-foreground',
+        false: 'text-fd-muted-foreground',
       },
     },
   },
@@ -20,28 +19,52 @@ const buttonVariants = cva(
 
 export function ThemeToggle({
   className,
+  mode = 'light-dark',
   ...props
-}: ButtonHTMLAttributes<HTMLButtonElement>): React.ReactElement {
-  const { setTheme, resolvedTheme } = useTheme();
+}: HTMLAttributes<HTMLDivElement> & {
+  mode?: 'light-dark' | 'light-dark-system';
+}) {
+  const { setTheme, theme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  let value = mode === 'light-dark' ? resolvedTheme : theme;
+  if (!mounted) value = undefined;
 
-  const onToggle = () => {
-    setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
-  };
+  useLayoutEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
-    <button
-      type="button"
+    <div
       className={cn(
         'inline-flex items-center rounded-full border p-[3px]',
         className,
       )}
       data-theme-toggle=""
-      aria-label="Toggle Theme"
-      onClick={onToggle}
       {...props}
     >
-      <Sun className={cn(buttonVariants({ dark: false }))} />
-      <Moon className={cn(buttonVariants({ dark: true }))} />
-    </button>
+      <button
+        className={cn(buttonVariants({ active: value === 'light' }))}
+        onClick={() => setTheme('light')}
+        aria-label="Light Theme"
+      >
+        <Sun className="size-full" />
+      </button>
+      <button
+        className={cn(buttonVariants({ active: value === 'dark' }))}
+        onClick={() => setTheme('dark')}
+        aria-label="Dark Theme"
+      >
+        <Moon className="size-full" />
+      </button>
+      {mode === 'light-dark-system' ? (
+        <button
+          className={cn(buttonVariants({ active: value === 'system' }))}
+          onClick={() => setTheme('system')}
+          aria-label="System Theme"
+        >
+          <Airplay className="size-full" />
+        </button>
+      ) : null}
+    </div>
   );
 }

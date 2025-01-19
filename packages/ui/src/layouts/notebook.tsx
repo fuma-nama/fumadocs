@@ -75,7 +75,7 @@ export function DocsLayout({
   );
 
   const pageStyles: PageStyles = {
-    tocNav: cn('lg:px-4 xl:hidden'),
+    tocNav: cn('xl:hidden'),
     toc: cn('max-xl:hidden'),
     page: cn('mt-[var(--fd-nav-height)]'),
   };
@@ -203,7 +203,7 @@ function DocsNavbar({
           <Languages className="size-5" />
         </LanguageToggle>
       ) : null}
-      <ThemeToggle className="p-0 max-md:hidden" />
+      <ThemeToggle className="max-md:hidden" mode="light-dark-system" />
     </Navbar>
   );
 }
