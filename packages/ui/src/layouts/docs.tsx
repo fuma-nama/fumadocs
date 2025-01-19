@@ -121,7 +121,7 @@ export function DocsLayout({
         >
           {collapsible ? (
             <SidebarCollapseTrigger
-              className="fixed bottom-3 z-30 data-[collapsed=false]:hidden max-md:hidden"
+              className="fixed bottom-3 z-30 backdrop-blur-lg data-[collapsed=false]:hidden max-md:hidden"
               style={{
                 insetInlineStart: 'calc(var(--fd-layout-offset) + 0.5rem)',
               }}

@@ -59,13 +59,13 @@ interface InternalContext {
 }
 
 const itemVariants = cva(
-  'flex flex-row items-center gap-2 rounded-md p-2 text-fd-muted-foreground [overflow-wrap:anywhere] md:py-1.5 [&_svg]:size-4',
+  'flex flex-row items-center gap-2 rounded-md p-2 text-start text-fd-muted-foreground [overflow-wrap:anywhere] md:py-1.5 [&_svg]:size-4 [&_svg]:shrink-0',
   {
     variants: {
       active: {
         true: 'bg-fd-primary/10 font-medium text-fd-primary',
         false:
-          'transition-colors duration-100 hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 hover:transition-none',
+          'transition-colors hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 hover:transition-none',
       },
     },
   },
@@ -358,7 +358,6 @@ export function SidebarCollapseTrigger(
           color: 'ghost',
           size: 'icon',
         }),
-        'backdrop-blur-lg',
         props.className,
       )}
       onClick={() => {
