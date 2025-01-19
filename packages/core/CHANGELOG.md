@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 14.7.5
+
+### Patch Changes
+
+- 777188b: [Page Tree Builder] Inline folders without children
+
 ## 14.7.4
 
 ### Patch Changes
