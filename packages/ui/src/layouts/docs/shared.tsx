@@ -51,10 +51,16 @@ export interface SidebarComponents {
   Separator: FC<{ item: PageTree.Separator }>;
 }
 
-export function SidebarLinkItem({ item }: { item: LinkItemType }) {
+export function SidebarLinkItem({
+  item,
+  ...props
+}: {
+  item: LinkItemType;
+  className?: string;
+}) {
   if (item.type === 'menu')
     return (
-      <SidebarFolder>
+      <SidebarFolder {...props}>
         {item.url ? (
           <SidebarFolderLink href={item.url}>
             {item.icon}
@@ -78,11 +84,13 @@ export function SidebarLinkItem({ item }: { item: LinkItemType }) {
     return (
       <BaseLinkItem
         item={item}
+        {...props}
         className={cn(
           buttonVariants({
             color: 'secondary',
-            className: 'gap-1.5 [&_svg]:size-4',
           }),
+          'gap-1.5 [&_svg]:size-4',
+          props.className,
         )}
       >
         {item.icon}
@@ -94,7 +102,12 @@ export function SidebarLinkItem({ item }: { item: LinkItemType }) {
   if (item.type === 'custom') return item.children;
 
   return (
-    <SidebarItem href={item.url} icon={item.icon} external={item.external}>
+    <SidebarItem
+      href={item.url}
+      icon={item.icon}
+      external={item.external}
+      {...props}
+    >
       {item.text}
     </SidebarItem>
   );

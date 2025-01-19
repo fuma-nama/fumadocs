@@ -23,7 +23,6 @@ import {
   LanguageToggleText,
 } from '@/components/layout/language-toggle';
 import { ChevronDown, Languages } from 'lucide-react';
-import { SearchOnly } from '@/contexts/search';
 import Link from 'fumadocs-core/link';
 import {
   Menu,
@@ -101,10 +100,13 @@ function Header({
       </NavigationMenuList>
       <div className="flex flex-1 flex-row items-center justify-end lg:gap-1.5">
         {enableSearch ? (
-          <SearchOnly>
-            <SearchToggle className="lg:hidden" />
-            <LargeSearchToggle className="w-full max-w-[240px] max-lg:hidden" />
-          </SearchOnly>
+          <>
+            <SearchToggle className="lg:hidden" hideIfDisabled />
+            <LargeSearchToggle
+              className="w-full max-w-[240px] max-lg:hidden"
+              hideIfDisabled
+            />
+          </>
         ) : null}
         {!disableThemeSwitch ? <ThemeToggle className="max-lg:hidden" /> : null}
         {i18n ? (

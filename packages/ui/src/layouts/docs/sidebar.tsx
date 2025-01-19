@@ -210,7 +210,7 @@ export function SidebarViewport(props: ScrollAreaProps) {
   return (
     <ScrollArea {...props} className={cn('h-full', props.className)}>
       <ScrollViewport
-        className="px-4"
+        className="p-4"
         style={{
           maskImage: 'linear-gradient(to bottom, transparent 2px, white 16px)',
         }}
@@ -225,10 +225,7 @@ export function SidebarSeparator(props: HTMLAttributes<HTMLParagraphElement>) {
   return (
     <p
       {...props}
-      className={cn(
-        'mb-2 mt-8 px-2 text-sm font-medium first:mt-0',
-        props.className,
-      )}
+      className={cn('mb-2 px-2 text-sm font-medium', props.className)}
     >
       {props.children}
     </p>
@@ -262,8 +259,7 @@ export function SidebarItem({
 export function SidebarFolder({
   defaultOpen = false,
   ...props
-}: {
-  children: ReactNode;
+}: HTMLAttributes<HTMLDivElement> & {
   defaultOpen?: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
@@ -273,7 +269,7 @@ export function SidebarFolder({
   });
 
   return (
-    <Collapsible open={open} onOpenChange={setOpen}>
+    <Collapsible open={open} onOpenChange={setOpen} {...props}>
       <FolderContext.Provider
         value={useMemo(() => ({ open, setOpen }), [open])}
       >
@@ -404,7 +400,11 @@ export function SidebarPageTree(props: {
         switch (item.type) {
           case 'separator':
             if (Separator) return <Separator key={id} item={item} />;
-            return <SidebarSeparator key={id}>{item.name}</SidebarSeparator>;
+            return (
+              <SidebarSeparator key={id} className={cn(i !== 0 && 'mt-8')}>
+                {item.name}
+              </SidebarSeparator>
+            );
           case 'folder':
             if (Folder) return <Folder key={id} item={item} level={level} />;
             return (
