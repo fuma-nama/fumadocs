@@ -411,3 +411,48 @@ test('Internationalized Routing: Hide Prefix', () => {
   expect(result.getPage(['test'])?.url).toBe('/test');
   expect(result.getPage(['test'], 'cn')?.url).toBe('/cn/test');
 });
+
+test('Loader: Without meta.json', () => {
+  const result = loader({
+    baseUrl: '/',
+    pageTree: {
+      noRef: true,
+    },
+    source: {
+      files: [
+        {
+          type: 'page',
+          path: 'test.mdx',
+          data: {
+            title: 'Hello',
+          },
+        },
+        {
+          type: 'page',
+          path: 'hello/index.mdx',
+          data: {
+            title: 'Hello',
+          },
+        },
+      ],
+    },
+  });
+
+  expect(result.pageTree, 'Page Tree').toMatchInlineSnapshot(`
+    {
+      "children": [
+        {
+          "name": "Hello",
+          "type": "page",
+          "url": "/hello",
+        },
+        {
+          "name": "Hello",
+          "type": "page",
+          "url": "/test",
+        },
+      ],
+      "name": "",
+    }
+  `);
+});

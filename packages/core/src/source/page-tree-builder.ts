@@ -59,6 +59,10 @@ const rest = '...';
 const extractPrefix = '...';
 const excludePrefix = '!';
 
+function isPageFile(node: Folder | File): node is PageFile {
+  return 'data' in node && node.format === 'page';
+}
+
 /**
  * @param nodes - All nodes to be built
  * @param ctx - Context
@@ -76,7 +80,7 @@ function buildAll(
   for (const node of [...nodes].sort((a, b) =>
     a.file.name.localeCompare(b.file.name),
   )) {
-    if ('data' in node && node.format === 'page' && !node.file.locale) {
+    if (isPageFile(node) && !node.file.locale) {
       const treeNode = buildFileNode(node, ctx);
 
       if (node.file.name === 'index') {
@@ -88,7 +92,15 @@ function buildAll(
     }
 
     if ('children' in node) {
-      folders.push(buildFolderNode(node, false, ctx));
+      if (
+        node.children.length === 1 &&
+        node.children[0].file.name === 'index' &&
+        isPageFile(node.children[0])
+      ) {
+        output.push(buildFileNode(node.children[0], ctx));
+      } else {
+        folders.push(buildFolderNode(node, false, ctx));
+      }
     }
   }
 
@@ -104,19 +116,19 @@ function resolveFolderItem(
 ): PageTree.Node[] | '...' {
   if (item === rest) return '...';
 
-  const separateResult = separator.exec(item);
-  if (separateResult?.groups) {
+  let match = separator.exec(item);
+  if (match?.groups) {
     const node: PageTree.Separator = {
       type: 'separator',
-      name: separateResult.groups.name,
+      name: match.groups.name,
     };
 
     return [ctx.options.attachSeparator?.(node) ?? node];
   }
 
-  const linkResult = link.exec(item);
-  if (linkResult?.groups) {
-    const { icon, url, name } = linkResult.groups;
+  match = link.exec(item);
+  if (match?.groups) {
+    const { icon, url, name } = match.groups;
     const isRelative =
       url.startsWith('/') || url.startsWith('#') || url.startsWith('.');
 
