@@ -1,5 +1,17 @@
 # @fumadocs/mdx-remote
 
+## 1.1.0
+
+### Minor Changes
+
+- f2e880f: Deprecate `content`, prefer `body` instead
+
+### Patch Changes
+
+- f2e880f: Support more options for `compile()`
+- Updated dependencies [777188b]
+  - fumadocs-core@14.7.5
+
 ## 1.0.0
 
 ### Major Changes

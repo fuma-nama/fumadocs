@@ -1,5 +1,15 @@
 # next-docs-ui
 
+## 14.7.5
+
+### Patch Changes
+
+- 5d41bf1: Enable system option for theme toggle on NoteBook layout
+- 900eb6c: Prevent shrink on sidebar icons by default
+- a959374: Support `fd-*` prefixes to Tailwind CSS utils
+- Updated dependencies [777188b]
+  - fumadocs-core@14.7.5
+
 ## 14.7.4
 
 ### Patch Changes
