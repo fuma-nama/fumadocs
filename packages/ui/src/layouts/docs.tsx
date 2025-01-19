@@ -33,7 +33,6 @@ import {
   LargeSearchToggle,
   SearchToggle,
 } from '@/components/layout/search-toggle';
-import { SearchOnly } from '@/contexts/search';
 import {
   checkPageTree,
   getSidebarTabsFromOptions,
@@ -99,9 +98,7 @@ export function DocsLayout({
             <div className="flex flex-1 flex-row items-center gap-1">
               {nav.children}
             </div>
-            <SearchOnly>
-              <SearchToggle />
-            </SearchOnly>
+            <SearchToggle hideIfDisabled />
             <NavbarSidebarTrigger className="-me-2 md:hidden" />
           </Navbar>,
           nav,
@@ -121,7 +118,7 @@ export function DocsLayout({
         >
           {collapsible ? (
             <SidebarCollapseTrigger
-              className="fixed bottom-3 z-30 data-[collapsed=false]:hidden max-md:hidden"
+              className="fixed bottom-3 z-30 backdrop-blur-lg data-[collapsed=false]:hidden max-md:hidden"
               style={{
                 insetInlineStart: 'calc(var(--fd-layout-offset) + 0.5rem)',
               }}
@@ -143,22 +140,21 @@ export function DocsLayout({
                   <RootToggle options={tabs} className="-mx-2" />
                 ) : null}
                 {!sidebarHideSearch ? (
-                  <SearchOnly>
-                    <LargeSearchToggle className="rounded-lg max-md:hidden" />
-                  </SearchOnly>
+                  <LargeSearchToggle
+                    hideIfDisabled
+                    className="rounded-lg max-md:hidden"
+                  />
                 ) : null}
               </SidebarHeader>
               <SidebarViewport>
-                <div className="pt-4 empty:hidden md:hidden">
+                <div className="mb-4 empty:hidden md:hidden">
                   {links
                     .filter((v) => v.type !== 'icon')
                     .map((item, i) => (
                       <SidebarLinkItem key={i} item={item} />
                     ))}
                 </div>
-                <div className="py-4">
-                  <SidebarPageTree components={sidebarComponents} />
-                </div>
+                <SidebarPageTree components={sidebarComponents} />
               </SidebarViewport>
               <SidebarFooter>
                 <SidebarFooterItems

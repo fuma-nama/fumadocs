@@ -6,8 +6,14 @@ import { useI18n } from '@/contexts/i18n';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 
-export function SearchToggle(props: ButtonHTMLAttributes<HTMLButtonElement>) {
-  const { setOpenSearch } = useSearchContext();
+export function SearchToggle({
+  hideIfDisabled,
+  ...props
+}: ButtonHTMLAttributes<HTMLButtonElement> & {
+  hideIfDisabled?: boolean;
+}) {
+  const { setOpenSearch, enabled } = useSearchContext();
+  if (hideIfDisabled && !enabled) return null;
 
   return (
     <button
@@ -16,8 +22,8 @@ export function SearchToggle(props: ButtonHTMLAttributes<HTMLButtonElement>) {
         buttonVariants({
           size: 'icon',
           color: 'ghost',
-          className: props.className,
         }),
+        props.className,
       )}
       data-search=""
       aria-label="Open Search"
@@ -30,11 +36,15 @@ export function SearchToggle(props: ButtonHTMLAttributes<HTMLButtonElement>) {
   );
 }
 
-export function LargeSearchToggle(
-  props: ButtonHTMLAttributes<HTMLButtonElement>,
-) {
-  const { hotKey, setOpenSearch } = useSearchContext();
+export function LargeSearchToggle({
+  hideIfDisabled,
+  ...props
+}: ButtonHTMLAttributes<HTMLButtonElement> & {
+  hideIfDisabled?: boolean;
+}) {
+  const { enabled, hotKey, setOpenSearch } = useSearchContext();
   const { text } = useI18n();
+  if (hideIfDisabled && !enabled) return null;
 
   return (
     <button

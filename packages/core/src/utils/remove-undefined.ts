@@ -1,8 +1,9 @@
 export function removeUndefined<T extends object>(value: T): T {
   const obj = value as Record<string, unknown>;
-  Object.keys(obj).forEach((key) => {
+
+  for (const key of Object.keys(obj)) {
     if (obj[key] === undefined) delete obj[key];
-  });
+  }
 
   return value;
 }

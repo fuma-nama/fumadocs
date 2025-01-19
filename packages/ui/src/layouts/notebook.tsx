@@ -16,7 +16,6 @@ import {
 import { RootToggle } from '@/components/layout/root-toggle';
 import { TreeContextProvider } from '@/contexts/tree';
 import { NavProvider, Title } from '@/components/layout/nav';
-import { SearchOnly } from '@/contexts/search';
 import {
   LargeSearchToggle,
   SearchToggle,
@@ -75,7 +74,7 @@ export function DocsLayout({
   );
 
   const pageStyles: PageStyles = {
-    tocNav: cn('lg:px-4 xl:hidden'),
+    tocNav: cn('xl:hidden'),
     toc: cn('max-xl:hidden'),
     page: cn('mt-[var(--fd-nav-height)]'),
   };
@@ -116,14 +115,12 @@ export function DocsLayout({
               ) : null}
             </SidebarHeader>
             <SidebarViewport>
-              <div className="pt-4 empty:hidden lg:hidden">
+              <div className="mb-4 empty:hidden lg:hidden">
                 {links.map((item, i) => (
                   <SidebarLinkItem key={i} item={item} />
                 ))}
               </div>
-              <div className="py-4">
-                <SidebarPageTree components={sidebarComponents} />
-              </div>
+              <SidebarPageTree components={sidebarComponents} />
             </SidebarViewport>
             <SidebarFooter className={cn(!sidebarFooter && 'md:hidden')}>
               {!props.disableThemeSwitch ? (
@@ -161,9 +158,10 @@ function DocsNavbar({
       {sidebarCollapsible ? (
         <SidebarCollapseTrigger className="-ms-1.5 text-fd-muted-foreground data-[collapsed=false]:hidden max-md:hidden" />
       ) : null}
-      <SearchOnly>
-        <LargeSearchToggle className="w-full max-w-[240px] rounded-lg max-md:hidden" />
-      </SearchOnly>
+      <LargeSearchToggle
+        hideIfDisabled
+        className="w-full max-w-[240px] rounded-lg max-md:hidden"
+      />
       <Title url={nav.url} title={nav.title} className="md:hidden" />
       <div className="flex flex-1 flex-row items-center gap-6 px-2">
         {links
@@ -177,9 +175,7 @@ function DocsNavbar({
           ))}
         {nav.children}
       </div>
-      <SearchOnly>
-        <SearchToggle className="md:hidden" />
-      </SearchOnly>
+      <SearchToggle hideIfDisabled className="md:hidden" />
       <NavbarSidebarTrigger className="-me-1.5 md:hidden" />
       <div className="flex flex-row items-center empty:hidden max-lg:hidden">
         {links
@@ -203,7 +199,7 @@ function DocsNavbar({
           <Languages className="size-5" />
         </LanguageToggle>
       ) : null}
-      <ThemeToggle className="p-0 max-md:hidden" />
+      <ThemeToggle className="max-md:hidden" mode="light-dark-system" />
     </Navbar>
   );
 }

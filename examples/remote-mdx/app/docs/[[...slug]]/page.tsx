@@ -17,19 +17,22 @@ export default async function Page(props: {
   const page = await getPage(params.slug);
   if (!page) notFound();
 
-  const { frontmatter, content, toc } = await compileMDX<Frontmatter>({
+  const {
+    frontmatter,
+    body: MdxContent,
+    toc,
+  } = await compileMDX<Frontmatter>({
     filePath: page.path,
     source: page.content,
-    components: {
-      ...defaultComponents,
-    },
   });
 
   return (
     <DocsPage toc={toc}>
       <DocsTitle>{frontmatter.title}</DocsTitle>
       <DocsDescription>{frontmatter.description}</DocsDescription>
-      <DocsBody>{content}</DocsBody>
+      <DocsBody>
+        <MdxContent components={{ ...defaultComponents }} />
+      </DocsBody>
     </DocsPage>
   );
 }
