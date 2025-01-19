@@ -5,66 +5,68 @@ import { useTheme } from 'next-themes';
 import { type HTMLAttributes, useLayoutEffect, useState } from 'react';
 import { cn } from '@/utils/cn';
 
-const buttonVariants = cva(
-  'size-7 rounded-full p-1.5 text-fd-muted-foreground',
-  {
-    variants: {
-      active: {
-        true: 'bg-fd-accent text-fd-accent-foreground',
-        false: 'text-fd-muted-foreground',
-      },
+const itemVariants = cva('size-7 rounded-full p-1.5 text-fd-muted-foreground', {
+  variants: {
+    active: {
+      true: 'bg-fd-accent text-fd-accent-foreground',
+      false: 'text-fd-muted-foreground',
     },
   },
-);
+});
 
 export function ThemeToggle({
   className,
   mode = 'light-dark',
   ...props
-}: HTMLAttributes<HTMLDivElement> & {
+}: HTMLAttributes<HTMLElement> & {
   mode?: 'light-dark' | 'light-dark-system';
 }) {
   const { setTheme, theme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  let value = mode === 'light-dark' ? resolvedTheme : theme;
-  if (!mounted) value = undefined;
 
   useLayoutEffect(() => {
     setMounted(true);
   }, []);
 
+  const container = cn(
+    'inline-flex items-center rounded-full border p-[3px]',
+    className,
+  );
+
+  if (mode === 'light-dark') {
+    const value = mounted ? resolvedTheme : null;
+
+    return (
+      <button
+        className={container}
+        onClick={() => setTheme(value === 'light' ? 'dark' : 'light')}
+        data-theme-toggle=""
+        {...props}
+      >
+        <Sun className={cn(itemVariants({ active: value === 'light' }))} />
+        <Moon className={cn(itemVariants({ active: value === 'dark' }))} />
+      </button>
+    );
+  }
+
+  const value = mounted ? theme : null;
+
   return (
-    <div
-      className={cn(
-        'inline-flex items-center rounded-full border p-[3px]',
-        className,
-      )}
-      data-theme-toggle=""
-      {...props}
-    >
-      <button
-        className={cn(buttonVariants({ active: value === 'light' }))}
-        onClick={() => setTheme('light')}
-        aria-label="Light Theme"
-      >
-        <Sun className="size-full" />
-      </button>
-      <button
-        className={cn(buttonVariants({ active: value === 'dark' }))}
-        onClick={() => setTheme('dark')}
-        aria-label="Dark Theme"
-      >
-        <Moon className="size-full" />
-      </button>
-      {mode === 'light-dark-system' ? (
+    <div className={container} data-theme-toggle="" {...props}>
+      {[
+        ['light', Sun] as const,
+        ['dark', Moon] as const,
+        ['system', Airplay] as const,
+      ].map(([key, Icon]) => (
         <button
-          className={cn(buttonVariants({ active: value === 'system' }))}
-          onClick={() => setTheme('system')}
-          aria-label="System Theme"
+          key={key}
+          aria-label={key}
+          className={cn(itemVariants({ active: value === key }))}
+          onClick={() => setTheme(key)}
         >
-          <Airplay className="size-full" />
+          <Icon className="size-full" />
         </button>
-      ) : null}
+      ))}
     </div>
   );
 }
