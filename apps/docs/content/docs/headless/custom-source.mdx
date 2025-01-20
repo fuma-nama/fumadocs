@@ -109,8 +109,7 @@ Since it doesn't use a bundler, there's some limitations:
 - No imports and exports in MDX files.
 - No JSX nodes in generated table of contents array.
 
-You can pass MDX components via the `components` option, it's compatible with Server Components.
-There's an example:
+It's compatible with Server Components. For example:
 
 ```tsx
 import { compileMDX } from '@fumadocs/mdx-remote';
@@ -118,16 +117,23 @@ import { getPage } from './my-content-source';
 import { DocsBody, DocsPage } from 'fumadocs-ui/page';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 
-export default function Page({ params }: { params: { slug?: string[] } }) {
+export default async function Page({
+  params,
+}: {
+  params: { slug?: string[] };
+}) {
   const page = getPage(params.slug);
-  const compiled = compileMDX({
+  const compiled = await compileMDX({
     source: page.content,
-    components: { ...defaultMdxComponents },
   });
+
+  const MdxContent = compiled.body;
 
   return (
     <DocsPage toc={compiled.toc}>
-      <DocsBody>{compiled.content}</DocsBody>
+      <DocsBody>
+        <MdxContent components={{ ...defaultMdxComponents }} />
+      </DocsBody>
     </DocsPage>
   );
 }
