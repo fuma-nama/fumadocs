@@ -1,5 +1,5 @@
 import type { Root } from 'hast';
-import type { RehypeShikiOptions } from '`@shikijs/rehype`';
+import type { RehypeShikiOptions } from '@shikijs/rehype';
 import rehypeShikiFromHighlighter from '@shikijs/rehype/core';
 import {
   transformerNotationDiff,
