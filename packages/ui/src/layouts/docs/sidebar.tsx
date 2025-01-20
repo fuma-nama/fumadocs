@@ -396,35 +396,42 @@ export function SidebarPageTree(props: {
     ): ReactNode[] {
       return items.map((item, i) => {
         const id = `${item.type}_${i.toString()}`;
-
-        switch (item.type) {
-          case 'separator':
-            if (Separator) return <Separator key={id} item={item} />;
-            return (
-              <SidebarSeparator key={id} className={cn(i !== 0 && 'mt-8')}>
-                {item.name}
-              </SidebarSeparator>
-            );
-          case 'folder':
-            if (Folder) return <Folder key={id} item={item} level={level} />;
-            return (
-              <PageTreeFolder key={id} item={item} level={level}>
-                {renderSidebarList(item.children, level + 1)}
-              </PageTreeFolder>
-            );
-          default:
-            if (Item) return <Item key={item.url} item={item} />;
-            return (
-              <SidebarItem
-                key={item.url}
-                href={item.url}
-                external={item.external}
-                icon={item.icon}
-              >
-                {item.name}
-              </SidebarItem>
-            );
+        if (item.type === 'separator') {
+          if (Separator) return <Separator key={id} item={item} />;
+          return (
+            <SidebarSeparator key={id} className={cn(i !== 0 && 'mt-8')}>
+              {item.name}
+            </SidebarSeparator>
+          );
         }
+
+        if (item.type === 'folder') {
+          const children = renderSidebarList(item.children, level + 1);
+
+          if (Folder)
+            return (
+              <Folder key={id} item={item} level={level}>
+                {children}
+              </Folder>
+            );
+          return (
+            <PageTreeFolder key={id} item={item} level={level}>
+              {children}
+            </PageTreeFolder>
+          );
+        }
+
+        if (Item) return <Item key={item.url} item={item} />;
+        return (
+          <SidebarItem
+            key={item.url}
+            href={item.url}
+            external={item.external}
+            icon={item.icon}
+          >
+            {item.name}
+          </SidebarItem>
+        );
       });
     }
 

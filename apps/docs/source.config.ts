@@ -55,6 +55,8 @@ export default defineConfig({
 
     return {
       rehypeCodeOptions: {
+        lazy: true,
+        langs: ['ts', 'js', 'html'],
         inline: 'tailing-curly-colon',
         themes: {
           light: 'catppuccin-latte',
