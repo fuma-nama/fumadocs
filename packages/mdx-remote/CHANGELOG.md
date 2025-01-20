@@ -1,5 +1,14 @@
 # @fumadocs/mdx-remote
 
+## 1.1.1
+
+### Patch Changes
+
+- b9601fb: Update Shiki
+- 1142b8c: Support `createCompiler` API
+- Updated dependencies [b9601fb]
+  - fumadocs-core@14.7.6
+
 ## 1.1.0
 
 ### Minor Changes

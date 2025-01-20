@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 14.7.6
+
+### Patch Changes
+
+- b9601fb: Update Shiki
+
 ## 14.7.5
 
 ### Patch Changes

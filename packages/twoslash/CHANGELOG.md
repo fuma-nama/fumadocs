@@ -1,5 +1,12 @@
 # fumadocs-twoslash
 
+## 2.0.3
+
+### Patch Changes
+
+- b9601fb: Update Shiki
+  - fumadocs-ui@14.7.6
+
 ## 2.0.2
 
 ### Patch Changes
