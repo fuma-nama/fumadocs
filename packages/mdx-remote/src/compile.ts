@@ -7,10 +7,9 @@ import {
   remarkImage,
   type RemarkImageOptions,
 } from 'fumadocs-core/mdx-plugins';
-import type { CompileOptions } from '@mdx-js/mdx';
+import { type CompileOptions, createProcessor } from '@mdx-js/mdx';
 import type { MDXComponents } from 'mdx/types';
 import { parseFrontmatter, pluginOption, type ResolvePlugins } from './utils';
-import { compile } from '@mdx-js/mdx';
 import type { VFile } from 'vfile';
 import type { ReactNode } from 'react';
 import type { TableOfContents } from 'fumadocs-core/server';
@@ -64,39 +63,59 @@ export interface CompileMDXResult<TFrontmatter = Record<string, unknown>> {
   scope: object;
 }
 
+export function createCompiler(mdxOptions?: MDXOptions) {
+  let format = mdxOptions?.format;
+  if (!format || format === 'detect') format = 'mdx';
+
+  const processor = createProcessor({
+    ...getCompileOptions(mdxOptions),
+    format,
+  });
+
+  return {
+    async compile<Frontmatter extends object = Record<string, unknown>>(
+      options: Omit<CompileMDXOptions, 'mdxOptions'>,
+    ): Promise<CompileMDXResult<Frontmatter>> {
+      const { scope = {}, skipRender } = options;
+      const { frontmatter, content } = parseFrontmatter(options.source);
+
+      const file = await processor.process({
+        value: content,
+        path: options.filePath,
+      });
+      const compiled = String(file);
+      const MdxContent = !skipRender ? await renderMDX(compiled, scope) : null;
+
+      return {
+        vfile: file,
+        compiled,
+        get content() {
+          return MdxContent?.({ components: options.components }) as ReactNode;
+        },
+        frontmatter: frontmatter as Frontmatter,
+        body: (props) => {
+          if (!MdxContent)
+            throw new Error(
+              'Body cannot be rendered when `skipRender` is set to true',
+            );
+
+          return MdxContent({
+            components: { ...options.components, ...props.components },
+          });
+        },
+        toc: file.data.toc as TableOfContents,
+        scope,
+      };
+    },
+  };
+}
+
 export async function compileMDX<
   Frontmatter extends object = Record<string, unknown>,
 >(options: CompileMDXOptions): Promise<CompileMDXResult<Frontmatter>> {
-  const { scope = {}, skipRender } = options;
-  const { frontmatter, content } = parseFrontmatter(options.source);
+  const compiler = createCompiler(options.mdxOptions);
 
-  const file = await compile(
-    { value: content, path: options.filePath },
-    getCompileOptions(options.mdxOptions),
-  );
-  const compiled = String(file);
-  const MdxContent = !skipRender ? await renderMDX(compiled, scope) : null;
-
-  return {
-    vfile: file,
-    compiled,
-    get content() {
-      return MdxContent?.({ components: options.components }) as ReactNode;
-    },
-    frontmatter: frontmatter as Frontmatter,
-    body: (props) => {
-      if (!MdxContent)
-        throw new Error(
-          'Body cannot be rendered when `skipRender` is set to true',
-        );
-
-      return MdxContent({
-        components: { ...options.components, ...props.components },
-      });
-    },
-    toc: file.data.toc as TableOfContents,
-    scope,
-  };
+  return compiler.compile(options);
 }
 
 function getCompileOptions(mdxOptions: MDXOptions = {}): CompileOptions {

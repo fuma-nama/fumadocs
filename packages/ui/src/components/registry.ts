@@ -34,6 +34,11 @@ export const registry: Registry = {
       mapImportPath: contextsMap,
     },
     {
+      name: 'layouts/notebook',
+      files: ['../layouts/notebook.tsx'],
+      mapImportPath: contextsMap,
+    },
+    {
       name: 'layouts/home',
       files: ['../layouts/home.tsx'],
       mapImportPath: contextsMap,

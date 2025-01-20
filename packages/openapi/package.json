@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-openapi",
-  "version": "5.11.6",
+  "version": "5.11.7",
   "description": "Generate MDX docs for your OpenAPI spec",
   "keywords": [
     "NextJs",
@@ -54,7 +54,7 @@
     "react-hook-form": "^7.54.2",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.1",
-    "shiki": "^1.27.2",
+    "shiki": "^2.0.3",
     "xml-js": "^1.6.11"
   },
   "devDependencies": {

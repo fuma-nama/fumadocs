@@ -1,5 +1,13 @@
 # fumadocs-docgen
 
+## 1.3.5
+
+### Patch Changes
+
+- b9601fb: Update Shiki
+- Updated dependencies [b9601fb]
+  - fumadocs-typescript@3.0.3
+
 ## 1.3.4
 
 ### Patch Changes

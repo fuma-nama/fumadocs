@@ -5,7 +5,7 @@ import {
   transformerNotationDiff,
   transformerNotationHighlight,
   transformerNotationWordHighlight,
-} from 'shiki-transformers';
+} from '@shikijs/transformers';
 import type { Processor, Transformer } from 'unified';
 import {
   getSingletonHighlighter,
@@ -54,9 +54,15 @@ export const rehypeCodeDefaultOptions: RehypeCodeOptions = {
   experimentalJSEngine: false,
   transformers: [
     createStyleTransformer(),
-    transformerNotationHighlight(),
-    transformerNotationWordHighlight(),
-    transformerNotationDiff(),
+    transformerNotationHighlight({
+      matchAlgorithm: 'v3',
+    }),
+    transformerNotationWordHighlight({
+      matchAlgorithm: 'v3',
+    }),
+    transformerNotationDiff({
+      matchAlgorithm: 'v3',
+    }),
   ],
   parseMetaString(meta) {
     const map: Record<string, string> = {};
@@ -106,67 +112,63 @@ export type RehypeCodeOptions = RehypeShikiOptions & {
  */
 export function rehypeCode(
   this: Processor,
-  options: Partial<RehypeCodeOptions> = {},
+  _options: Partial<RehypeCodeOptions> = {},
 ): Transformer<Root, Root> {
-  const codeOptions: RehypeCodeOptions = {
+  const options: RehypeCodeOptions = {
     ...rehypeCodeDefaultOptions,
-    ...options,
+    ..._options,
   };
 
-  codeOptions.transformers ||= [];
-  codeOptions.transformers = [
-    {
-      name: 'rehype-code:pre-process',
-      preprocess(code, { meta }) {
-        if (meta && '__parsed_raw' in meta) {
-          meta.__raw = meta.__parsed_raw;
-          delete meta.__parsed_raw;
-        }
+  const transformers = [...(options.transformers ?? [])];
+  transformers.unshift({
+    name: 'rehype-code:pre-process',
+    preprocess(code, { meta }) {
+      if (meta && '__parsed_raw' in meta) {
+        meta.__raw = meta.__parsed_raw;
+        delete meta.__parsed_raw;
+      }
 
-        if (meta && codeOptions.filterMetaString) {
-          meta.__raw = codeOptions.filterMetaString(meta.__raw ?? '');
-        }
+      if (meta && options.filterMetaString) {
+        meta.__raw = options.filterMetaString(meta.__raw ?? '');
+      }
 
-        // Remove empty line at end
-        return code.replace(/\n$/, '');
-      },
+      // Remove empty line at end
+      return code.replace(/\n$/, '');
     },
-    ...codeOptions.transformers,
-  ];
+  });
 
-  if (codeOptions.icon !== false) {
-    codeOptions.transformers = [
-      ...codeOptions.transformers,
-      transformerIcon(codeOptions.icon),
-    ];
+  if (options.icon !== false) {
+    transformers.push(transformerIcon(options.icon));
   }
 
-  if (codeOptions.tab !== false) {
-    codeOptions.transformers = [...codeOptions.transformers, transformerTab()];
-  }
-
-  let themeItems: unknown[] = [];
-
-  if ('themes' in codeOptions) {
-    themeItems = Object.values(codeOptions.themes);
-  } else if ('theme' in codeOptions) {
-    themeItems = [codeOptions.theme];
+  if (options.tab !== false) {
+    transformers.push(transformerTab());
   }
 
   const highlighter = getSingletonHighlighter({
-    engine: codeOptions.experimentalJSEngine
+    engine: options.experimentalJSEngine
       ? createJavaScriptRegexEngine()
       : createOnigurumaEngine(() => import('shiki/wasm')),
-    themes: themeItems.filter(Boolean) as BuiltinTheme[],
-    langs: codeOptions.langs ?? Object.keys(bundledLanguages),
+    themes:
+      'themes' in options
+        ? (Object.values(options.themes).filter(Boolean) as BuiltinTheme[])
+        : [options.theme],
+    langs:
+      options.langs ??
+      (options.lazy ? undefined : Object.keys(bundledLanguages)),
   });
 
   const transformer = highlighter.then((instance) =>
-    rehypeShikiFromHighlighter(instance, codeOptions),
+    rehypeShikiFromHighlighter(instance, {
+      ...options,
+      transformers,
+    }),
   );
 
   return async (tree, file) => {
-    (await transformer)(tree, file, () => {
+    await (
+      await transformer
+    )(tree, file, () => {
       // nothing
     });
   };

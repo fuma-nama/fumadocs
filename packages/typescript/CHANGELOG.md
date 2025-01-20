@@ -1,5 +1,11 @@
 # fumadocs-typescript
 
+## 3.0.3
+
+### Patch Changes
+
+- b9601fb: Update Shiki
+
 ## 3.0.2
 
 ### Patch Changes
