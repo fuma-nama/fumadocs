@@ -40,7 +40,7 @@
     "mdast-util-from-markdown": "^2.0.2",
     "mdast-util-gfm": "^3.0.0",
     "mdast-util-to-hast": "^13.2.0",
-    "shiki": "^1.27.2",
+    "shiki": "^2.0.3",
     "ts-morph": "^25.0.0"
   },
   "devDependencies": {
