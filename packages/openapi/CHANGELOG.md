@@ -1,5 +1,14 @@
 # @fuma-docs/openapi
 
+## 5.11.7
+
+### Patch Changes
+
+- b9601fb: Update Shiki
+- Updated dependencies [b9601fb]
+  - fumadocs-core@14.7.6
+  - fumadocs-ui@14.7.6
+
 ## 5.11.6
 
 ### Patch Changes
