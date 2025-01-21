@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 14.7.7
+
+### Patch Changes
+
+- 4f2538a: Support `children` prop in custom `Folder` component
+- 191012a: `DocsCategory` search based on file path when item isn't present in the tree
+- fb6b168: No longer rely on search context on search dialog
+  - fumadocs-core@14.7.7
+
 ## 14.7.6
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # @fumadocs/mdx-remote
 
+## 1.1.2
+
+### Patch Changes
+
+- 3bde5cc: Support JSX nodes in TOC
+  - fumadocs-core@14.7.7
+
 ## 1.1.1
 
 ### Patch Changes
