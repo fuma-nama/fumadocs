@@ -14,7 +14,6 @@ import {
 } from 'react';
 import { useI18n } from '@/contexts/i18n';
 import { cn } from '@/utils/cn';
-import { useSearchContext } from '@/contexts/search';
 import { useSidebar } from '@/contexts/sidebar';
 import { buttonVariants } from '@/components/ui/button';
 import {
@@ -28,7 +27,7 @@ import { cva } from 'class-variance-authority';
 
 export type SearchLink = [name: string, href: string];
 
-type ReactSortedResult = SortedResult & {
+type ReactSortedResult = Omit<SortedResult, 'content'> & {
   content: ReactNode;
 };
 
@@ -42,23 +41,14 @@ export interface SharedProps {
   links?: SearchLink[];
 }
 
-type SearchDialogProps = SharedProps &
-  SearchValueProps &
-  Omit<SearchResultProps, 'items'> & {
-    results: ReactSortedResult[] | 'empty';
-
-    footer?: ReactNode;
-  };
-
-interface SearchValueProps {
+interface SearchDialogProps extends SharedProps {
   search: string;
   onSearchChange: (v: string) => void;
   isLoading?: boolean;
-}
-
-interface SearchResultProps {
-  items: SortedResult[];
   hideResults?: boolean;
+  results: ReactSortedResult[] | 'empty';
+
+  footer?: ReactNode;
 }
 
 export function SearchDialog({
@@ -66,6 +56,9 @@ export function SearchDialog({
   onOpenChange,
   footer,
   links = [],
+  search,
+  onSearchChange,
+  isLoading,
   ...props
 }: SearchDialogProps) {
   const { text } = useI18n();
@@ -88,15 +81,36 @@ export function SearchDialog({
         className="fixed left-1/2 top-[10vh] z-50 w-[98vw] max-w-screen-sm origin-left -translate-x-1/2 rounded-lg border bg-fd-popover text-fd-popover-foreground shadow-lg data-[state=closed]:animate-fd-dialog-out data-[state=open]:animate-fd-dialog-in"
       >
         <DialogTitle className="hidden">{text.search}</DialogTitle>
-        <SearchInput
-          search={props.search}
-          onSearchChange={props.onSearchChange}
-          isLoading={props.isLoading}
-        />
-        <SearchList
-          items={props.results === 'empty' ? defaultItems : props.results}
-          hideResults={props.results === 'empty' && defaultItems.length === 0}
-        />
+        <div className="flex flex-row items-center gap-2 px-3">
+          <LoadingIndicator isLoading={isLoading ?? false} />
+          <input
+            value={search}
+            onChange={(e) => {
+              onSearchChange(e.target.value);
+            }}
+            placeholder={text.search}
+            className="w-0 flex-1 bg-transparent py-3 text-base placeholder:text-fd-muted-foreground focus-visible:outline-none"
+          />
+          <button
+            type="button"
+            aria-label="Close Search"
+            onClick={() => onOpenChange(false)}
+            className={cn(
+              buttonVariants({
+                color: 'outline',
+                className: 'text-xs p-1.5',
+              }),
+            )}
+          >
+            Esc
+          </button>
+        </div>
+        {props.results !== 'empty' || defaultItems.length > 0 ? (
+          <SearchResults
+            items={props.results === 'empty' ? defaultItems : props.results}
+            onSelect={() => onOpenChange(false)}
+          />
+        ) : null}
         {footer ? (
           <div className="mt-auto flex flex-col border-t p-3">{footer}</div>
         ) : null}
@@ -111,46 +125,18 @@ const icons = {
   page: <FileText className="size-4 text-fd-muted-foreground" />,
 };
 
-function SearchInput({ search, onSearchChange, isLoading }: SearchValueProps) {
-  const { text } = useI18n();
-  const { setOpenSearch } = useSearchContext();
-
-  return (
-    <div className="flex flex-row items-center gap-2 px-3">
-      <LoadingIndicator isLoading={isLoading ?? false} />
-      <input
-        value={search}
-        onChange={(e) => {
-          onSearchChange(e.target.value);
-        }}
-        placeholder={text.search}
-        className="w-0 flex-1 bg-transparent py-3 text-base placeholder:text-fd-muted-foreground focus-visible:outline-none"
-      />
-      <button
-        type="button"
-        aria-label="Close Search"
-        onClick={() => {
-          setOpenSearch(false);
-        }}
-        className={cn(
-          buttonVariants({
-            color: 'outline',
-            className: 'text-xs p-1.5',
-          }),
-        )}
-      >
-        Esc
-      </button>
-    </div>
-  );
-}
-
-function SearchList({ items, hideResults = false }: SearchResultProps) {
+function SearchResults({
+  items,
+  onSelect,
+  ...props
+}: HTMLAttributes<HTMLDivElement> & {
+  items: ReactSortedResult[];
+  onSelect?: (value: string) => void;
+}) {
   const [active, setActive] = useState<string>();
   const { text } = useI18n();
   const router = useRouter();
   const sidebar = useSidebar();
-  const { setOpenSearch } = useSearchContext();
 
   if (
     items.length > 0 &&
@@ -158,6 +144,12 @@ function SearchList({ items, hideResults = false }: SearchResultProps) {
   ) {
     setActive(items[0].id);
   }
+
+  const onOpen = (url: string) => {
+    router.push(url);
+    onSelect?.(url);
+    sidebar.setOpen(false);
+  };
 
   function onKey(e: KeyboardEvent) {
     if (e.key === 'ArrowDown' || e.key == 'ArrowUp') {
@@ -193,17 +185,12 @@ function SearchList({ items, hideResults = false }: SearchResultProps) {
     };
   }, []);
 
-  const onOpen = (url: string) => {
-    router.push(url);
-    setOpenSearch(false);
-    sidebar.setOpen(false);
-  };
-
   return (
     <div
+      {...props}
       className={cn(
         'flex max-h-[460px] flex-col overflow-y-auto border-t p-2',
-        hideResults && 'hidden',
+        props.className,
       )}
     >
       {items.length === 0 ? (
