@@ -1,11 +1,10 @@
 import { type MDXComponents } from 'mdx/types';
+import type { TableOfContents } from 'fumadocs-core/server';
+import type { FC } from 'react';
 
-export type MdxContent = React.FC<{ components?: MDXComponents }>;
+export type MdxContent = FC<{ components?: MDXComponents }>;
 
-export async function renderMDX(
-  compiled: string,
-  scope: object,
-): Promise<MdxContent> {
+export async function executeMdx(compiled: string, scope: object) {
   let jsxRuntime;
 
   if (process.env.NODE_ENV === 'production') {
@@ -23,9 +22,8 @@ export async function renderMDX(
 
   const hydrateFn = Reflect.construct(Function, keys.concat(compiled));
 
-  const result = hydrateFn.apply(hydrateFn, values) as {
+  return hydrateFn.apply(hydrateFn, values) as {
     default: MdxContent;
+    toc?: TableOfContents;
   };
-
-  return result.default;
 }

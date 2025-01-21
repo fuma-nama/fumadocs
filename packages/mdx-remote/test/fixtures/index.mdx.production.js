@@ -1,5 +1,6 @@
 "use strict";
 const {Fragment: _Fragment, jsx: _jsx, jsxs: _jsxs} = arguments[0];
+const toc = [];
 function _createMdxContent(props) {
   const _components = {
     code: "code",
@@ -96,5 +97,6 @@ function MDXContent(props = {}) {
   }) : _createMdxContent(props);
 }
 return {
+  toc,
   default: MDXContent
 };

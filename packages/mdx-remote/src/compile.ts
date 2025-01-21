@@ -1,6 +1,8 @@
 import {
   rehypeCode,
   type RehypeCodeOptions,
+  rehypeToc,
+  RehypeTocOptions,
   remarkGfm,
   remarkHeading,
   type RemarkHeadingOptions,
@@ -13,7 +15,7 @@ import { parseFrontmatter, pluginOption, type ResolvePlugins } from './utils';
 import type { VFile } from 'vfile';
 import type { ReactNode } from 'react';
 import type { TableOfContents } from 'fumadocs-core/server';
-import { renderMDX, type MdxContent } from '@/render';
+import { executeMdx, type MdxContent } from '@/render';
 
 export type MDXOptions = Omit<
   CompileOptions,
@@ -24,6 +26,7 @@ export type MDXOptions = Omit<
 
   remarkHeadingOptions?: RemarkHeadingOptions | false;
   rehypeCodeOptions?: RehypeCodeOptions | false;
+  rehypeTocOptions?: RehypeTocOptions | false;
 
   /**
    * The directory to find image sizes
@@ -84,26 +87,33 @@ export function createCompiler(mdxOptions?: MDXOptions) {
         path: options.filePath,
       });
       const compiled = String(file);
-      const MdxContent = !skipRender ? await renderMDX(compiled, scope) : null;
+      const exports = !skipRender ? await executeMdx(compiled, scope) : null;
 
       return {
         vfile: file,
         compiled,
         get content() {
-          return MdxContent?.({ components: options.components }) as ReactNode;
-        },
-        frontmatter: frontmatter as Frontmatter,
-        body: (props) => {
-          if (!MdxContent)
+          if (!exports)
             throw new Error(
               'Body cannot be rendered when `skipRender` is set to true',
             );
 
-          return MdxContent({
+          return exports.default({
+            components: options.components,
+          }) as ReactNode;
+        },
+        frontmatter: frontmatter as Frontmatter,
+        body: (props) => {
+          if (!exports)
+            throw new Error(
+              'Body cannot be rendered when `skipRender` is set to true',
+            );
+
+          return exports.default({
             components: { ...options.components, ...props.components },
           });
         },
-        toc: file.data.toc as TableOfContents,
+        toc: exports?.toc ?? (file.data.toc as TableOfContents),
         scope,
       };
     },
@@ -118,39 +128,41 @@ export async function compileMDX<
   return compiler.compile(options);
 }
 
-function getCompileOptions(mdxOptions: MDXOptions = {}): CompileOptions {
+function getCompileOptions({
+  rehypeCodeOptions,
+  remarkImageOptions,
+  rehypeTocOptions,
+  remarkHeadingOptions,
+  imageDir = './public',
+  ...options
+}: MDXOptions = {}): CompileOptions {
   return {
-    development: process.env.NODE_ENV !== 'production',
-    ...mdxOptions,
+    development: process.env.NODE_ENV === 'development',
+    ...options,
     outputFormat: 'function-body',
     remarkPlugins: pluginOption(
       (v) => [
         remarkGfm,
-        mdxOptions.remarkHeadingOptions !== false && [
-          remarkHeading,
-          mdxOptions.remarkHeadingOptions,
-        ],
+        remarkHeadingOptions !== false && [remarkHeading, remarkHeadingOptions],
         ...v,
       ],
-      mdxOptions.remarkPlugins,
+      options.remarkPlugins,
     ),
     rehypePlugins: pluginOption(
       (v) => [
-        mdxOptions.rehypeCodeOptions !== false && [
-          rehypeCode,
-          mdxOptions.rehypeCodeOptions,
-        ],
-        mdxOptions.remarkImageOptions !== false && [
+        rehypeCodeOptions !== false && [rehypeCode, rehypeCodeOptions],
+        rehypeTocOptions !== false && [rehypeToc, rehypeTocOptions],
+        remarkImageOptions !== false && [
           remarkImage,
           {
             useImport: false,
-            publicDir: mdxOptions.imageDir ?? './public',
-            ...mdxOptions.remarkImageOptions,
+            publicDir: imageDir,
+            ...remarkImageOptions,
           } satisfies RemarkImageOptions,
         ],
         ...v,
       ],
-      mdxOptions.rehypePlugins,
+      options.rehypePlugins,
     ),
   };
 }
