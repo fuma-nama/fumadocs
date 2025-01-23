@@ -103,7 +103,7 @@
     "next": "14.x.x || 15.x.x",
     "react": "18.x.x || 19.x.x",
     "react-dom": "18.x.x || 19.x.x",
-    "tailwindcss": "^3.4.14"
+    "tailwindcss": "^4.0.0"
   },
   "peerDependenciesMeta": {
     "tailwindcss": {
