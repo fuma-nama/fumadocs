@@ -13,12 +13,8 @@
   "type": "module",
   "exports": {
     "./style.css": "./dist/style.css",
+    "./css/*": "./css/*",
     "./image-zoom.css": "./dist/image-zoom.css",
-    "./tailwind-plugin": {
-      "import": "./dist/tailwind-plugin.js",
-      "types": "./dist/tailwind-plugin.d.ts",
-      "default": "./dist/tailwind-plugin.js"
-    },
     "./components/*": {
       "import": "./dist/components/*.js",
       "types": "./dist/components/*.d.ts"
@@ -46,15 +42,20 @@
     "./og": {
       "import": "./dist/og.js",
       "types": "./dist/og.d.ts"
+    },
+    "./theme/*": {
+      "import": "./dist/theme/*.js",
+      "types": "./dist/theme/*.d.ts"
     }
   },
   "files": [
-    "dist/*"
+    "dist/*",
+    "css/*"
   ],
   "scripts": {
     "build": "pnpm build:layout && pnpm build:tailwind",
     "build:layout": "tsc --project tsconfig.build.json && tsc-alias -p tsconfig.build.json",
-    "build:tailwind": "postcss css/*.css --dir dist && postcss src/components/*.css --dir dist/components",
+    "build:tailwind": "tailwindcss -i css/style.css -o ./dist/style.css && tailwindcss -i src/components/*.css -o dist/components/*.css",
     "clean": "rimraf dist",
     "dev": "concurrently \"tsc -w --project tsconfig.build.json\" \"tsc-alias -w -p tsconfig.build.json\" \"pnpm dev:tailwind\"",
     "dev:tailwind": "postcss css/*.css --dir dist --watch",
@@ -64,10 +65,10 @@
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.2",
     "@radix-ui/react-collapsible": "^1.1.2",
-    "@radix-ui/react-dialog": "^1.1.4",
+    "@radix-ui/react-dialog": "^1.1.5",
     "@radix-ui/react-direction": "^1.1.0",
-    "@radix-ui/react-navigation-menu": "^1.2.3",
-    "@radix-ui/react-popover": "^1.1.4",
+    "@radix-ui/react-navigation-menu": "^1.2.4",
+    "@radix-ui/react-popover": "^1.1.5",
     "@radix-ui/react-scroll-area": "^1.2.2",
     "@radix-ui/react-slot": "^1.1.1",
     "@radix-ui/react-tabs": "^1.1.2",
@@ -81,17 +82,19 @@
   },
   "devDependencies": {
     "@fumadocs/cli": "workspace:*",
-    "@next/eslint-plugin-next": "^15.1.5",
+    "@next/eslint-plugin-next": "^15.1.6",
+    "@tailwindcss/cli": "^4.0.0",
+    "@tailwindcss/postcss": "^4.0.0",
     "@types/lodash.merge": "^4.6.9",
     "@types/react": "^19.0.7",
     "@types/react-dom": "^19.0.3",
     "autoprefixer": "^10.4.20",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
-    "next": "15.1.5",
+    "next": "15.1.6",
     "postcss": "^8.5.1",
     "postcss-cli": "^11.0.0",
-    "tailwindcss": "^3.4.17",
+    "tailwindcss": "^4.0.0",
     "tsc-alias": "^1.8.10",
     "tsconfig": "workspace:*"
   },

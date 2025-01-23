@@ -1,0 +1,65 @@
+.shiki code span {
+  color: var(--shiki-light);
+}
+
+.dark .shiki code span {
+  color: var(--shiki-dark);
+}
+
+.fd-codeblock code {
+  display: grid;
+  font-size: 13px;
+}
+
+.shiki code .diff.remove {
+  background-color: var(--fd-diff-remove-color);
+  opacity: 0.7;
+}
+
+.shiki code .diff::before {
+  position: absolute;
+  left: 6px;
+}
+
+.shiki code .diff.remove::before {
+  content: '-';
+  color: var(--fd-diff-remove-symbol-color);
+}
+
+.shiki code .diff.add {
+  background-color: var(--fd-diff-add-color);
+}
+
+.shiki code .diff.add::before {
+  content: '+';
+  color: var(--fd-diff-add-symbol-color);
+}
+
+.shiki code .diff {
+  margin: 0 -16px;
+  padding: 0 16px;
+  position: relative;
+}
+
+.shiki .highlighted {
+  margin: 0 -16px;
+  padding: 0 16px;
+  background-color: color-mix(
+    in oklab,
+    var(--color-fd-primary) 10%,
+    transparent
+  );
+}
+
+.shiki .highlighted-word {
+  padding: 1px 2px;
+  margin: -1px -3px;
+  border: 1px solid
+    color-mix(in oklab, var(--color-fd-primary) 50%, transparent);
+  background-color: color-mix(
+    in oklab,
+    var(--color-fd-primary) 10%,
+    transparent
+  );
+  border-radius: 2px;
+}

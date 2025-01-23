@@ -23,9 +23,7 @@ export function useMode(): string | undefined {
   return Array.isArray(slug) && slug.length > 0 ? slug[0] : undefined;
 }
 
-export function FumadocsIcon(
-  props: React.SVGProps<SVGSVGElement>,
-): React.ReactElement {
+export function FumadocsIcon(props: React.SVGProps<SVGSVGElement>) {
   const id = useId();
   return (
     <svg
@@ -42,7 +40,7 @@ export function FumadocsIcon(
             dx="0"
             dy="0"
             stdDeviation="1"
-            floodColor="hsl(var(--primary))"
+            floodColor="var(--color-fd-primary)"
             floodOpacity="1"
           />
         </filter>
@@ -50,8 +48,8 @@ export function FumadocsIcon(
           id={`${id}-iconGradient`}
           gradientTransform="rotate(45)"
         >
-          <stop offset="45%" stopColor="hsl(var(--background))" />
-          <stop offset="100%" stopColor="hsl(var(--primary))" />
+          <stop offset="45%" stopColor="var(--color-fd-background)" />
+          <stop offset="100%" stopColor="var(--color-fd-primary)" />
         </linearGradient>
       </defs>
     </svg>

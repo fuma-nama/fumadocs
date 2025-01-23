@@ -1,6 +1,6 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@import './neutral.css';
+@import './preset.css';
 
 body {
   @apply flex flex-col min-h-screen;

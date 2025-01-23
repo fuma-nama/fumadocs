@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@clack/prompts": "^0.9.1",
-    "commander": "^13.0.0",
+    "commander": "^13.1.0",
     "execa": "^9.5.2",
     "package-manager-detector": "^0.2.8",
     "picocolors": "^1.1.1",
@@ -43,7 +43,7 @@
   },
   "devDependencies": {
     "@types/cross-spawn": "^6.0.6",
-    "@types/node": "22.10.7",
+    "@types/node": "22.10.9",
     "@types/react": "^19.0.7",
     "eslint-config-custom": "workspace:*",
     "fast-glob": "^3.3.3",

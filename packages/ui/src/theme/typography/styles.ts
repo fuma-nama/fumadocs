@@ -14,22 +14,23 @@ function em(px: number, base: number) {
 }
 
 const colors = {
-  '--tw-prose-body': `theme('colors.fd-foreground / 90%')`,
-  '--tw-prose-headings': `theme('colors.fd-foreground')`,
-  '--tw-prose-lead': `theme('colors.fd-foreground')`,
-  '--tw-prose-links': `theme('colors.fd-foreground')`,
-  '--tw-prose-bold': `theme('colors.fd-foreground')`,
-  '--tw-prose-counters': `theme('colors.fd-muted.foreground')`,
-  '--tw-prose-bullets': `theme('colors.fd-muted.foreground')`,
-  '--tw-prose-hr': `theme('colors.fd-border')`,
-  '--tw-prose-quotes': `theme('colors.fd-foreground')`,
-  '--tw-prose-quote-borders': `theme('colors.fd-border')`,
-  '--tw-prose-captions': `theme('colors.fd-foreground')`,
-  '--tw-prose-code': `theme('colors.fd-foreground')`,
-  '--tw-prose-th-borders': `theme('colors.fd-border')`,
-  '--tw-prose-td-borders': `theme('colors.fd-border')`,
-  '--tw-prose-kbd': `theme('colors.fd-foreground')`,
-  '--tw-prose-kbd-shadows': `theme('colors.fd-primary.DEFAULT / 50%')`,
+  '--tw-prose-body':
+    'color-mix(in oklab, var(--color-fd-foreground) 90%, transparent)',
+  '--tw-prose-headings': 'var(--color-fd-foreground)',
+  '--tw-prose-lead': `var(--color-fd-foreground)`,
+  '--tw-prose-links': `var(--color-fd-foreground)`,
+  '--tw-prose-bold': `var(--color-fd-foreground)`,
+  '--tw-prose-counters': `var(--color-fd-muted-foreground)`,
+  '--tw-prose-bullets': `var(--color-fd-muted-foreground)`,
+  '--tw-prose-hr': `var(--color-fd-border)`,
+  '--tw-prose-quotes': `var(--color-fd-foreground)`,
+  '--tw-prose-quote-borders': `var(--color-fd-border)`,
+  '--tw-prose-captions': `var(--color-fd-foreground)`,
+  '--tw-prose-code': `var(--color-fd-foreground)`,
+  '--tw-prose-th-borders': `var(--color-fd-border)`,
+  '--tw-prose-td-borders': `var(--color-fd-border)`,
+  '--tw-prose-kbd': `var(--color-fd-foreground)`,
+  '--tw-prose-kbd-shadows': `color-mix(in oklab, var(--color-fd-primary) 50%, transparent)`,
 };
 
 export const roundedTable = {
@@ -357,10 +358,10 @@ export const DEFAULT: Config = {
         padding: '3px',
         border: 'solid 1px',
         fontSize: '13px',
-        borderColor: `theme('colors.fd-border')`,
+        borderColor: `var(--color-fd-border)`,
         borderRadius: '5px',
         fontWeight: '400',
-        background: `theme('colors.fd-muted.DEFAULT')`,
+        background: `var(--color-fd-muted)`,
         color: 'var(--tw-prose-code)',
       },
       'a code': {
@@ -421,7 +422,7 @@ export const DEFAULT: Config = {
         fontWeight: '400',
         textDecoration: 'underline',
         textUnderlineOffset: '2px',
-        textDecorationColor: `theme('colors.fd-primary.DEFAULT')`,
+        textDecorationColor: 'var(--color-fd-primary)',
       },
       'a:not([data-card]):hover': {
         opacity: '80%',

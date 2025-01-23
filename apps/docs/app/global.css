@@ -1,23 +1,54 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+@import 'fumadocs-twoslash/twoslash.css';
+
+@source '../node_modules/fumadocs-ui/dist/**/*.js';
+@source '../node_modules/fumadocs-openapi/dist/**/*.js';
+@plugin 'tailwindcss-animate';
+
+@theme {
+  @keyframes stroke {
+    from {
+      stroke-dasharray: 1000;
+    }
+    to {
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 2000;
+    }
+  }
+
+  --animate-stroke: stroke 5s linear infinite;
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  --color-gradient-radial: radial-gradient(circle, var(--tw-gradient-stops));
+  --color-repeat-gradient-to-r: repeating-linear-gradient(
+    to right,
+    var(--tw-gradient-stops)
+  );
+  --color-repeat-gradient-to-br: repeating-linear-gradient(
+    to bottom right,
+    var(--tw-gradient-stops)
+  );
+}
 
 .ui {
-  --primary: var(--ui-color);
+  --color-fd-primary: var(--ui-color);
 }
 
 .headless {
-  --primary: var(--headless-color);
+  --color-fd-primary: var(--headless-color);
 }
 
 .mdx {
-  --primary: var(--mdx-color);
+  --color-fd-primary: var(--mdx-color);
 }
 
 :root {
-  --headless-color: 250 80% 54%;
-  --mdx-color: 0 0% 9%;
-  --ui-color: 220deg 91% 54%;
+  --headless-color: hsl(250, 80%, 54%);
+  --mdx-color: hsl(0, 0%, 9%);
+  --ui-color: hsl(220, 91%, 54%);
 }
 
 body {
@@ -25,32 +56,32 @@ body {
 }
 
 .dark {
-  --headless-color: 250 100% 80%;
-  --mdx-color: 0 0% 100%;
-  --ui-color: 217deg 92% 76%;
+  --headless-color: hsl(250 100% 80%);
+  --mdx-color: hsl(0 0% 100%);
+  --ui-color: hsl(217 92% 76%);
 }
 
 .uwu {
-  --background: 240 80% 94% !important;
-  --popover: 240 80% 94% !important;
-  --primary: 230 90% 72% !important;
-  --border: 230 30% 87% !important;
-  --accent: 250 80% 90% !important;
-  --secondary: 230 40% 94% !important;
-  --muted: 230 80% 92% !important;
-  --card: 230 90% 94% !important;
+  --color-fd-background: hsl(240 80% 94%) !important;
+  --color-fd-popover: hsl(240 80% 94%) !important;
+  --color-fd-primary: hsl(230 90% 72%) !important;
+  --color-fd-border: hsl(230 30% 87%) !important;
+  --color-fd-accent: hsl(250 80% 90%) !important;
+  --color-fd-secondary: hsl(230 40% 94%) !important;
+  --color-fd-muted: hsl(230 80% 92%) !important;
+  --color-fd-card: hsl(230 90% 94%) !important;
 }
 
 .uwu.dark {
-  --background: 240 40% 20% !important;
-  --popover: 240 20% 20% !important;
-  --primary: 250 70% 94% !important;
-  --border: 230 30% 30% !important;
-  --muted: 230 30% 36.3% !important;
-  --secondary: 250 30% 36.3% !important;
-  --accent: 250 20% 38.3% !important;
-  --muted-foreground: 230 80% 84% !important;
-  --card: 230 40% 26.3% !important;
+  --color-fd-background: hsl(240 40% 20%) !important;
+  --color-fd-primary: hsl(250 70% 94%) !important;
+  --color-fd-popover: hsl(240 20% 20%) !important;
+  --color-fd-border: hsl(230 30% 30%) !important;
+  --color-fd-muted: hsl(230 30% 36.3%) !important;
+  --color-fd-secondary: hsl(250 30% 36.3%) !important;
+  --color-fd-accent: hsl(250 20% 38.3%) !important;
+  --color-fd-muted-foreground: hsl(230 80% 84%) !important;
+  --color-fd-card: hsl(230 40% 26.3%) !important;
 }
 
 @keyframes circuit_1 {

@@ -38,12 +38,12 @@
   },
   "devDependencies": {
     "@types/mdx": "^2.0.13",
-    "@types/node": "22.10.7",
+    "@types/node": "22.10.9",
     "@types/react": "^19.0.7",
     "eslint-config-custom": "workspace:*",
     "fast-glob": "^3.3.3",
     "fumadocs-core": "workspace:*",
-    "next": "15.1.5",
+    "next": "15.1.6",
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
     "vfile": "^6.0.3"
