@@ -34,7 +34,7 @@ export function TocNav(props: HTMLAttributes<HTMLDivElement>) {
       id="nd-tocnav"
       {...props}
       className={cn(
-        'sticky top-fd-layout-top z-10 flex flex-row items-center border-b border-fd-foreground/10 text-sm backdrop-blur-md transition-colors',
+        'sticky top-[calc(var(--fd-banner-height)+var(--fd-nav-height))] z-10 flex flex-row items-center border-b border-fd-foreground/10 text-sm backdrop-blur-md transition-colors',
         !isTransparent && 'bg-fd-background/80',
         open && 'opacity-0',
         tocNav,

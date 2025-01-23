@@ -37,24 +37,30 @@ export const roundedTable = {
   table: {
     borderCollapse: 'separate',
     borderSpacing: '0',
-    '@apply bg-fd-card rounded-lg border overflow-hidden': '',
+    background: 'var(--color-fd-card)',
+    borderRadius: 'var(--radius-lg)',
+    border: '1p solid var(--color-fd-border)',
+    overflow: 'hidden',
   },
   th: {
     textAlign: 'start',
-    '@apply p-2.5 border-s bg-fd-muted': '',
+    padding: 'calc(var(--spacing) * 2.5)',
+    'border-inline-start': '1px solid var(--color-fd-border)',
+    background: 'var(--color-fd-muted)',
   },
   'th:first-child': {
-    '@apply border-s-0': '',
+    'border-inline-start': 'none',
   },
   'th:not(tr:last-child *), td:not(tr:last-child *)': {
-    '@apply border-b': '',
+    'border-bottom': '1px solid var(--color-fd-border)',
   },
   td: {
     textAlign: 'start',
-    '@apply border-s p-2.5': '',
+    'border-inline-start': '1px solid var(--color-fd-border)',
+    padding: 'calc(var(--spacing) * 2.5)',
   },
   'td:first-child': {
-    '@apply border-s-0': '',
+    'border-inline-start': 'none',
   },
   'tfoot th, tfoot td': {
     borderTopWidth: '1px',
