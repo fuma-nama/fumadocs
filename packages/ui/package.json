@@ -55,10 +55,10 @@
   "scripts": {
     "build": "pnpm build:layout && pnpm build:tailwind",
     "build:layout": "tsc --project tsconfig.build.json && tsc-alias -p tsconfig.build.json",
-    "build:tailwind": "tailwindcss -i css/style.css -o ./dist/style.css && tailwindcss -i src/components/*.css -o dist/components/*.css",
+    "build:tailwind": "tailwindcss -i css/style.css -o ./dist/style.css && tailwindcss -i src/components/image-zoom.css -o dist/components/image-zoom.css",
     "clean": "rimraf dist",
     "dev": "concurrently \"tsc -w --project tsconfig.build.json\" \"tsc-alias -w -p tsconfig.build.json\" \"pnpm dev:tailwind\"",
-    "dev:tailwind": "postcss css/*.css --dir dist --watch",
+    "dev:tailwind": "tailwindcss -i css/style.css -o ./dist/style.css -w && tailwindcss -i src/components/image-zoom.css -o dist/components/image-zoom.css -w",
     "lint": "eslint .",
     "types:check": "tsc --noEmit"
   },
@@ -84,16 +84,12 @@
     "@fumadocs/cli": "workspace:*",
     "@next/eslint-plugin-next": "^15.1.6",
     "@tailwindcss/cli": "^4.0.0",
-    "@tailwindcss/postcss": "^4.0.0",
     "@types/lodash.merge": "^4.6.9",
     "@types/react": "^19.0.7",
     "@types/react-dom": "^19.0.3",
-    "autoprefixer": "^10.4.20",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "next": "15.1.6",
-    "postcss": "^8.5.1",
-    "postcss-cli": "^11.0.0",
     "tailwindcss": "^4.0.0",
     "tsc-alias": "^1.8.10",
     "tsconfig": "workspace:*"
@@ -103,7 +99,7 @@
     "next": "14.x.x || 15.x.x",
     "react": "18.x.x || 19.x.x",
     "react-dom": "18.x.x || 19.x.x",
-    "tailwindcss": "^3.4.14"
+    "tailwindcss": "^3.4.14 || ^4.0.0"
   },
   "peerDependenciesMeta": {
     "tailwindcss": {
