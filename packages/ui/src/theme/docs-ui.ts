@@ -21,14 +21,6 @@ export interface DocsUIOptions {
    * @defaultValue '100vw'
    */
   layoutWidth?: string;
-
-  // TODO: disable by default at next major/minor
-  /**
-   * Add Fumadocs UI `fd-*` utilities without prefixes
-   *
-   * @defaultValue true
-   */
-  addGlobalUtils?: boolean;
 }
 
 type CSSRules = {
@@ -74,7 +66,7 @@ function createTailwindUtilities(prefix: string): CSSRules {
 }
 
 export const docsUi: unknown = plugin.withOptions<DocsUIOptions>(
-  ({ layoutWidth = '100vw', addGlobalUtils = true } = {}) => {
+  ({ layoutWidth = '100vw' } = {}) => {
     return ({ addBase, addUtilities }) => {
       addBase({
         ':root': {
@@ -91,11 +83,6 @@ export const docsUi: unknown = plugin.withOptions<DocsUIOptions>(
           '--fd-diff-add-symbol-color': 'rgb(10,200,100)',
         },
       });
-
-      if (addGlobalUtils) {
-        // @ts-expect-error -- buggy Tailwind CSS types
-        addUtilities(createTailwindUtilities(''));
-      }
 
       // @ts-expect-error -- buggy Tailwind CSS types
       addUtilities(createTailwindUtilities('fd'));

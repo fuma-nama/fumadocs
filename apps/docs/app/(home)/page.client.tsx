@@ -156,7 +156,7 @@ export function WhyInteractive(props: {
   return (
     <div
       id="why-interactive"
-      className="-mx-6 mt-8 flex flex-col gap-4 rounded-lg border border-foreground/10 bg-fd-muted/50 p-4 shadow-lg lg:flex-row lg:gap-6 lg:p-6"
+      className="-mx-6 mt-8 flex flex-col gap-4 rounded-lg border border-fd-foreground/10 bg-fd-muted/50 p-4 shadow-lg lg:flex-row lg:gap-6 lg:p-6"
     >
       <div className="-mt-1.5 flex flex-row overflow-x-auto max-lg:-mx-4 max-lg:items-center max-lg:px-2 lg:-ml-4 lg:flex-col">
         {items.map((item, i) => (
@@ -172,10 +172,10 @@ export function WhyInteractive(props: {
             }}
             type="button"
             className={cn(
-              'inline-flex flex-col-reverse text-nowrap rounded-lg py-1.5 text-left text-sm font-medium text-muted-foreground transition-colors max-lg:px-2 lg:flex-row',
+              'inline-flex flex-col-reverse text-nowrap rounded-lg py-1.5 text-start text-sm font-medium text-fd-muted-foreground transition-colors max-lg:px-2 lg:flex-row',
               i === active
-                ? 'text-primary max-lg:bg-primary/10'
-                : 'hover:text-accent-foreground/80',
+                ? 'text-primary max-lg:bg-fd-primary/10'
+                : 'hover:text-fd-accent-foreground/80',
               i === active && autoActive ? '' : 'max-lg:pb-2.5 lg:pl-3',
             )}
             onClick={() => {
@@ -188,7 +188,7 @@ export function WhyInteractive(props: {
           >
             {i === active && autoActive ? (
               <div
-                className="animate-[why-interactive-x] rounded-lg bg-primary max-lg:h-1 lg:mr-2 lg:w-1 lg:animate-[why-interactive-y]"
+                className="animate-[why-interactive-x] rounded-lg bg-fd-primary max-lg:h-1 lg:mr-2 lg:w-1 lg:animate-[why-interactive-y]"
                 style={{
                   animationDuration: `${duration.toString()}ms`,
                   animationFillMode: 'forwards',
@@ -233,7 +233,7 @@ export function WhyInteractive(props: {
               <b>Algolia Search</b>, it is as easy as plugging a route handler.
             </p>
             {props.codeblockSearchRouter}
-            <p className="mb-4 text-muted-foreground">
+            <p className="mb-4 text-fd-muted-foreground">
               In addition, you can plug your own search modal to allow full
               control over the search UI.
             </p>
