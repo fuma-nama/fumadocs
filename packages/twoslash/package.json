@@ -50,16 +50,13 @@
     "@types/react": "^19.0.7",
     "eslint-config-custom": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "postcss": "^8.5.1",
-    "postcss-lightningcss": "^1.0.1",
     "shiki": "^2.1.0",
-    "tailwindcss": "^4.0.0",
     "tsconfig": "workspace:*"
   },
   "peerDependencies": {
-    "fumadocs-ui": "^13.0.0 || ^14.0.0",
+    "fumadocs-ui": "^15.0.0",
     "react": "18.x.x || 19.x.x",
-    "shiki": "1.x.x"
+    "shiki": "1.x.x || 2.x.x"
   },
   "publishConfig": {
     "access": "public"

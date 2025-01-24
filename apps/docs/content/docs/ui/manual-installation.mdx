@@ -52,15 +52,15 @@ export default function Layout({ children }: { children: ReactNode }) {
 
 ### Styles
 
-Setup Tailwind CSS on your Next.js app, and add the official Tailwind CSS plugin.
+Setup Tailwind CSS on your Next.js app, add the following to `global.css`.
 
-```json doc-gen:file
-{
-  "file": "./content/docs/example/tailwind.config.js",
-  "codeblock": {
-    "meta": "title=\"tailwind.config.js\""
-  }
-}
+```css title="Tailwind CSS"
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+
+/* path of `fumadocs-ui` relative to the CSS file */
+@source '../node_modules/fumadocs-ui/dist/**/*.js';
 ```
 
 > It doesn't come with a default font, you may choose one from `next/font`.

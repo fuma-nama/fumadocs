@@ -5,7 +5,6 @@
 @plugin '../dist/theme/typography/index.js';
 
 @theme {
-  --spacing-fd-layout-top: calc(var(--fd-banner-height) + var(--fd-nav-height));
   --spacing-fd-container: 1400px;
 }
 

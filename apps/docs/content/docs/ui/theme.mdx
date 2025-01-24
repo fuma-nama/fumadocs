@@ -7,30 +7,25 @@ import { WidthTrigger } from './theme';
 
 ## Usage
 
-Initialize Tailwind CSS on your Next.js app, use the official Tailwind CSS plugin:
+Initialize Tailwind CSS on your Fumadocs app:
 
-```json doc-gen:file
-{
-  "file": "./content/docs/example/tailwind.config.js",
-  "codeblock": {
-    "meta": "title=\"tailwind.config.js\""
-  }
-}
+```css title="Tailwind CSS"
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+
+/* path of `fumadocs-ui` relative to the CSS file */
+@source '../node_modules/fumadocs-ui/dist/**/*.js';
 ```
 
-<Callout type="warn" title="ESM-Only">
-  Use ESM syntax on your configuration file.
-</Callout>
-
-### Global Styles
+### Preflight Changes
 
 By using the Tailwind CSS plugin, or the pre-built stylesheet, your default border, text and background
 colors will be changed.
 
 ### Light/Dark Modes
 
-Fumadocs supports light/dark modes with [`next-themes`](https://github.com/pacocoursey/next-themes).
-The Theme Provider is a part of Root Provider.
+Fumadocs supports light/dark modes with [`next-themes`](https://github.com/pacocoursey/next-themes), it is included in Root Provider.
 
 See [Root Provider](/docs/ui/layouts/root-provider#theme-provider) to learn more.
 
@@ -55,28 +50,17 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 }
 ```
 
-## CSS Variables
-
-Fumadocs UI provides some CSS variables for customising the layout.
-
 ### Prefix
 
-By default, it has a `fd-` prefix to avoid conflicts with Shadcn UI or your own CSS variables.
+Fumadocs UI has its own colors, animations, and utilities.
+By default, it adds a `fd-` prefix to avoid conflicts with Shadcn UI or your own CSS variables.
 
-You can set or remove the prefix in `createPreset`:
+You can use them without the prefix by adding some aliases:
 
-```js
-import { createPreset } from 'fumadocs-ui/tailwind-plugin';
-
-/** @type {import('tailwindcss').Config} */
-export default {
-  presets: [
-    createPreset({
-      // no prefix
-      cssPrefix: '',
-    }),
-  ],
-};
+```css title="Tailwind CSS"
+@theme {
+  --color-primary: var(--color-fd-primary);
+}
 ```
 
 ### Navbar Height
@@ -91,7 +75,7 @@ You should set the `--fd-nav-height` variable to the height of your navbar.
 }
 ```
 
-> You can use it with CSS media queries.
+> You can use it with CSS media queries for responsive design.
 
 ### Layout Width
 
@@ -107,43 +91,31 @@ Customise the max width of docs layout with CSS Variables.
 
 ### Colors
 
-The design system was inspired by [Shadcn UI](https://ui.shadcn.com), you can easily customize all colors using CSS variables.
+The design system was inspired by [Shadcn UI](https://ui.shadcn.com), you can easily customize the colors using CSS variables.
 
 ```css title="global.css"
 :root {
-  /* hsl colors */
-  /* use whitespace instead of comma */
-  --fd-background: 0 0% 100%;
-  --fd-foreground: 222.2 47.4% 11.2%;
+  --color-fd-background: hsl(0, 0%, 100%);
+}
 
-  --fd-muted: 210 40% 96.1%;
-  --fd-muted-foreground: 215.4 16.3% 46.9%;
+.dark {
+  --color-fd-background: hsl(0, 0%, 0%);
 }
 ```
 
-> Only a subset of colors are provided by Fumadocs UI.
->
-> It may not be compatible with Shadcn UI.
+## Tailwind CSS Preset
 
-## Tailwind CSS Plugin [#docsui-plugin]
+The Tailwind CSS preset introduces new colors and extra utilities including `fd-steps`.
 
-The official Tailwind CSS plugin introduces new colors and extra utilities including `steps`.
+### Themes
 
-### Presets
+It comes with many themes out-of-the-box, you can pick one you prefer.
 
-It comes with many theme presets out-of-the-box, you can pick one you prefer rather than the default one.
+```css
+@import 'fumadocs-ui/css/<theme>.css';
 
-```js
-import { createPreset } from 'fumadocs-ui/tailwind-plugin';
-
-/** @type {import('tailwindcss').Config} */
-export default {
-  presets: [
-    createPreset({
-      preset: 'ocean',
-    }),
-  ],
-};
+/* Example */
+@import 'fumadocs-ui/css/black.css';
 ```
 
 #### `neutral`
@@ -188,23 +160,3 @@ The plugin adds a `prose` class and variants to customise it.
 
 > The plugin works with and only with Fumadocs UI's MDX components, it may conflict with `@tailwindcss/typography`.
 > If you need to use `@tailwindcss/typography` over the default plugin, [set a class name option](https://github.com/tailwindlabs/tailwindcss-typography/blob/main/README.md#changing-the-default-class-name) to avoid conflicts.
-
-### Colors
-
-Fumadocs UI has its own colors, animations, and utilities.
-It adds the colors with a `fd-` prefix, you can reference them with the prefix like `bg-fd-background`.
-
-To remove the prefix, enable `addGlobalColors`.
-
-```js
-import { createPreset } from 'fumadocs-ui/tailwind-plugin';
-
-/** @type {import('tailwindcss').Config} */
-export default {
-  presets: [
-    createPreset({
-      addGlobalColors: true,
-    }),
-  ],
-};
-```

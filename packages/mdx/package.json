@@ -72,7 +72,7 @@
     "webpack": "^5.97.1"
   },
   "peerDependencies": {
-    "fumadocs-core": "^14.0.0",
+    "fumadocs-core": "^14.0.0 || ^15.0.0",
     "next": "14.x.x || 15.x.x"
   },
   "publishConfig": {

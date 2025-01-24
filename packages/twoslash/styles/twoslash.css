@@ -28,8 +28,8 @@
   border-radius: 6px;
   padding: 8px;
   z-index: 8;
-
-  @apply text-fd-popover-foreground bg-fd-popover;
+  color: var(--color-fd-popover-foreground);
+  background-color: var(--color-fd-popover);
 }
 
 .twoslash-query-presisted .twoslash-popup-container:hover,
@@ -47,8 +47,7 @@
   height: 6px;
   border-top-width: 1px;
   border-right-width: 1px;
-
-  @apply bg-fd-popover;
+  background-color: var(--color-fd-popover);
 }
 
 .twoslash-popup-docs-tag {
@@ -75,8 +74,7 @@
   font-size: 14px !important;
   line-height: 20px !important;
   margin-top: 8px !important;
-
-  @apply text-fd-muted-foreground;
+  color: var(--color-fd-muted-foreground);
 }
 
 /* ===== Hover Info ===== */
@@ -118,7 +116,7 @@
   height: 1em;
   left: -1px;
   content: ' ';
-  @apply bg-fd-foreground;
+  background-color: var(--color-fd-foreground);
 }
 
 .twoslash-completion-list li {
@@ -132,7 +130,7 @@
 }
 
 .twoslash-completion-list li span.twoslash-completions-unmatched {
-  @apply text-fd-muted-foreground;
+  color: var(--color-fd-muted-foreground);
 }
 
 .twoslash-completion-list .deprecated {
@@ -144,7 +142,7 @@
 .twoslash-completion-list .twoslash-completions-icon {
   width: 1em;
   flex: none;
-  @apply text-fd-muted-foreground;
+  color: var(--color-fd-muted-foreground);
 }
 
 /* Custom Tags */
@@ -191,5 +189,28 @@
 }
 
 .fd-twoslash-popover {
-  @apply z-50 min-w-[220px] max-w-[380px] max-h-[400px] overflow-auto rounded-lg border bg-fd-popover p-2 text-sm text-fd-popover-foreground shadow-md data-[state=closed]:animate-fd-popover-out data-[state=open]:animate-fd-popover-in focus-visible:outline-none;
+  z-index: 50;
+  min-width: 220px;
+  max-width: 380px;
+  max-height: 400px;
+  overflow: auto;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-fd-border);
+  background-color: var(--color-fd-popover);
+  padding: calc(var(--spacing) * 2);
+  font-size: var(--text-sm);
+  color: var(--color-fd-popover-foreground);
+  box-shadow: var(--shadow-md);
+}
+
+.fd-twoslash-popover[data-state='open'] {
+  animation: var(--animate-fd-popover-in);
+}
+
+.fd-twoslash-popover[data-state='closed'] {
+  animation: var(--animate-fd-popover-out);
+}
+
+.fd-twoslash-popover:focus-visible {
+  outline-style: none;
 }

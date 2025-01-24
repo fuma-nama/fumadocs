@@ -51,22 +51,19 @@ fumadocs-openapi shiki
 
 ### Generate Styles
 
-The interactive UI of OpenAPI integration is styled with Tailwind CSS, it doesn't include a pre-built stylesheet by default.
-You must use it in conjunction with the [official Tailwind CSS plugin](/docs/ui/theme#docsui-plugin).
+The interactive UI of OpenAPI integration is styled with Tailwind CSS, it doesn't include a pre-built stylesheet.
+You must use it with Tailwind CSS configured.
 
-Add the package to `content` under your Tailwind CSS configuration.
+Add the package to `@source` in your Tailwind CSS configuration.
 
-```js title="tailwind.config.js"
-import { createPreset } from 'fumadocs-ui/tailwind-plugin';
+```css title="Tailwind CSS"
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
 
-/** @type {import('tailwindcss').Config} */
-export default {
-  content: [
-    './node_modules/fumadocs-ui/dist/**/*.js',
-    './node_modules/fumadocs-openapi/dist/**/*.js',
-  ],
-  presets: [createPreset()],
-};
+@source '../node_modules/fumadocs-ui/dist/**/*.js';
+/* [!code highlight] */
+@source '../node_modules/fumadocs-openapi/dist/**/*.js';
 ```
 
 ### Configure Pages
