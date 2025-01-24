@@ -23,7 +23,9 @@
   --fd-muted: hsl(220, 50%, 10%);
   --fd-muted-foreground: hsl(220, 30%, 65%);
   --fd-popover: hsl(220, 50%, 10%);
+  --fd-popover-foreground: hsl(220, 60%, 94.5%);
   --fd-card: hsl(220, 50%, 10%);
+  --fd-card-foreground: hsl(220, 60%, 94.5%);
   --fd-border: hsl(220, 50%, 20%);
   --fd-primary: hsl(205, 100%, 85%);
   --fd-primary-foreground: hsl(0, 0%, 9%);

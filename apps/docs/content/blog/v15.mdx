@@ -1,0 +1,62 @@
+---
+title: Fumadocs v15
+description: Tailwind CSS v4
+author: Fuma Nama
+date: 2025-01-24
+---
+
+## Overview
+
+The purpose of v15 is mainly to support Tailwind CSS v4.
+Tailwind CSS v4 is a complete redesign of its API and internals, to fully adhere the new CSS-first config style, a breaking change is required.
+
+Fumadocs v15 has no other significant changes than migrating the config to Tailwind CSS v4.
+
+## Breaking Changes
+
+Before making the switch, upgrade your site to Tailwind CSS v4 following their [upgrade guide](https://tailwindcss.com/docs/upgrade-guide).
+You can remove the unused `tailwind.config.js` file and fully rely on the new CSS-first config.
+
+Add `@import` to the presets exported by Fumadocs UI, and include `fumadocs-ui` package into source.
+
+```css title="Tailwind CSS"
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+
+/* relative to the CSS file, make sure it's correct for your app */
+@source '../node_modules/fumadocs-ui/dist/**/*.js';
+```
+
+Since v15, you will no longer pass options in JavaScript to customise plugins.
+Instead, you can use the new alternatives in Tailwind CSS v4.
+
+### `addGlobalColors: true`
+
+Forward the colors again:
+
+```css
+@theme {
+  --color-primary: var(--color-fd-primary);
+  /* same for other colors */
+}
+```
+
+### CSS Variables
+
+Fumadocs no longer use `--fd-<color>` like `--fd-primary: 0 0% 0%` for colors, it directly defines and uses colors in `@theme`.
+Instead of the previous format, it uses `hsl()`:
+
+```css
+@theme {
+  --color-fd-primary: hsl(0, 0%, 100%);
+}
+```
+
+### Steps
+
+Previous Tailwind CSS utilities like `steps` & `steps` are renamed to `fd-steps` and `fd-step` to avoid conflicts.
+
+### Typography
+
+Typography utilities including `prose`, `prose-*` modifiers will continue to work. Please report problems if they are no longer working or have unexpected change in behaviours.

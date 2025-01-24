@@ -5,6 +5,8 @@ author: Fuma Nama
 date: 2024-12-15
 ---
 
+Fumadocs is a docs framework, but it's also a powerful tool to manage content in Next.js. You can use Fumadocs to build a blog site along with docs, on a single Next.js app.
+
 ## Overview
 
 This guide helps you to build a blog site with Fumadocs and Fumadocs MDX.
@@ -38,7 +40,7 @@ import { blogPosts } from '@/.source';
 
 export const blog = loader({
   baseUrl: '/blog',
-  source: createMDXSource(blogPosts, []),
+  source: createMDXSource(blogPosts),
 });
 ```
 
