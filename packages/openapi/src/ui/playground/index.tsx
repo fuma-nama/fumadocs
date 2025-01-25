@@ -7,14 +7,8 @@ import {
   useState,
   useEffect,
   type FC,
-  type ReactNode,
 } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from 'fumadocs-ui/components/ui/collapsible';
 import { cn, buttonVariants } from 'fumadocs-ui/components/api';
 import type {
   FieldPath,
@@ -39,7 +33,7 @@ import { type DynamicField, SchemaContext } from '../contexts/schema';
 import { getStatusInfo } from '@/ui/playground/status-info';
 import { getUrl } from '@/utils/server-url';
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
-import { ChevronDown } from 'lucide-react';
+import { CollapsiblePanel } from '@/ui/components/collapsible';
 
 interface FormValues {
   authorization: string;
@@ -191,21 +185,12 @@ export function APIPlayground({
         <form
           {...props}
           className={cn(
-            'not-prose flex flex-col gap-5 rounded-xl border bg-fd-card p-3',
+            'not-prose flex flex-col gap-2 rounded-xl border bg-fd-card p-3',
             props.className,
           )}
           onSubmit={onSubmit as React.FormEventHandler}
         >
-          <div className="flex flex-row gap-2">
-            <RouteDisplay route={route} />
-            <button
-              type="submit"
-              className={cn(buttonVariants({ color: 'secondary' }))}
-              disabled={testQuery.isLoading}
-            >
-              Send
-            </button>
-          </div>
+          <FormHeader route={route} isLoading={testQuery.isLoading} />
 
           {authorization
             ? renderCustomField('authorization', authorization, fields.auth)
@@ -266,26 +251,6 @@ export function APIPlayground({
   );
 }
 
-function CollapsiblePanel({
-  title,
-  children,
-}: {
-  title: string;
-  children: ReactNode;
-}) {
-  return (
-    <Collapsible className="-m-2">
-      <CollapsibleTrigger className="group flex w-full flex-row items-center justify-between p-2 font-medium">
-        {title}
-        <ChevronDown className="size-4 group-data-[state=open]:rotate-180" />
-      </CollapsibleTrigger>
-      <CollapsibleContent>
-        <div className="flex flex-col gap-4 p-2">{children}</div>
-      </CollapsibleContent>
-    </Collapsible>
-  );
-}
-
 function createPathnameFromInput(
   route: string,
   path: Record<string, unknown>,
@@ -312,7 +277,13 @@ function createPathnameFromInput(
     : pathname;
 }
 
-function RouteDisplay({ route }: { route: string }): ReactElement {
+function FormHeader({
+  route,
+  isLoading,
+}: {
+  route: string;
+  isLoading: boolean;
+}) {
   const [path, query] = useWatch<FormValues, ['path', 'query']>({
     name: ['path', 'query'],
   });
@@ -323,9 +294,21 @@ function RouteDisplay({ route }: { route: string }): ReactElement {
   );
 
   return (
-    <code className="flex-1 overflow-auto text-nowrap rounded-lg border bg-fd-secondary px-2 py-1.5 text-sm text-fd-secondary-foreground">
-      {pathname}
-    </code>
+    <div className="flex flex-row gap-2 mb-2">
+      <code className="inline-flex flex-row items-center rounded-full flex-1 overflow-auto text-nowrap border px-2 text-xs text-fd-secondary-foreground bg-fd-secondary">
+        {pathname}
+      </code>
+      <button
+        type="submit"
+        className={cn(
+          buttonVariants({ color: 'primary' }),
+          'px-3 py-1.5 rounded-full',
+        )}
+        disabled={isLoading}
+      >
+        Send
+      </button>
+    </div>
   );
 }
 

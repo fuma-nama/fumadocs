@@ -189,7 +189,12 @@ export function Schema({
       return (
         <renderer.ObjectCollapsible
           key={`mentioned:${idx.toString()}`}
-          name={s.title ?? `Object ${(idx + 1).toString()}`}
+          name={
+            s.title ??
+            (mentionedObjectTypes.length === 1
+              ? 'Show Attributes'
+              : `Object ${idx + 1}`)
+          }
         >
           <Schema
             name="element"

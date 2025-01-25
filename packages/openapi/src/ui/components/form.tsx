@@ -81,7 +81,7 @@ const FormItem = forwardRef<
 FormItem.displayName = 'FormItem';
 
 export const labelVariants = cva(
-  'font-mono text-xs text-fd-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
+  'font-medium text-[13px] text-fd-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
 );
 
 const FormLabel = forwardRef<
@@ -93,7 +93,7 @@ const FormLabel = forwardRef<
   return (
     <label
       ref={ref}
-      className={cn(labelVariants(), isError && 'text-red-500', className)}
+      className={cn(isError && 'text-red-500', className)}
       htmlFor={formItemId}
       {...props}
     />

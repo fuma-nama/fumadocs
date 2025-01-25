@@ -18,7 +18,7 @@
 }
 
 .dark {
-  --color-fd-background: hsl(0, 0%, 8.04%);
+  --color-fd-background: hsl(0, 0%, 7.04%);
   --color-fd-foreground: hsl(0, 0%, 92%);
   --color-fd-muted: hsl(0, 0%, 12.9%);
   --color-fd-muted-foreground: hsl(0, 0%, 60.9%);

@@ -53,6 +53,7 @@
 
 body {
   overscroll-behavior-y: none;
+  background-color: var(--color-fd-background);
 }
 
 .dark {

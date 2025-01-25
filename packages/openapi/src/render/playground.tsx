@@ -10,6 +10,7 @@ import {
   type ParsedSchema,
 } from '@/utils/schema';
 import { getSecurities } from '@/utils/get-security';
+import { ScalarPlayground } from '@/ui';
 
 interface BaseRequestField {
   name: string;
@@ -103,6 +104,10 @@ export function Playground({
   method: MethodInformation;
   ctx: RenderContext;
 }): ReactNode {
+  if (ctx.useScalar) {
+    return <ScalarPlayground method={method.method} path={path} />;
+  }
+
   let currentId = 0;
   const bodyContent = method.requestBody?.content;
   const mediaType = bodyContent ? getPreferredType(bodyContent) : undefined;

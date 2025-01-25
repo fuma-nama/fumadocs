@@ -18,6 +18,9 @@ export const APIPlayground = dynamic(() =>
 
 export const ServerSelect = dynamic(() => import('./server-select'));
 
+export const ScalarPlayground = dynamic(() => import('./scalar/index'));
+export const ScalarProvider = dynamic(() => import('./scalar/provider'));
+
 export function Root({
   children,
   baseUrl,

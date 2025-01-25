@@ -1,11 +1,17 @@
 import { cn } from 'fumadocs-ui/components/api';
 import { Fragment, type HTMLAttributes, type ReactNode } from 'react';
-import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 import { badgeVariants, getBadgeColor } from '@/ui/components/variants';
 import type { APIInfoProps, PropertyProps } from '@/render/renderer';
 import { CopyRouteButton, ServerSelect } from '@/ui/client';
+import { CollapsiblePanel } from '@/ui/components/collapsible';
 
-export { Root, useSchemaContext, APIPlayground } from './client';
+export {
+  Root,
+  useSchemaContext,
+  APIPlayground,
+  ScalarPlayground,
+  ScalarProvider,
+} from './client';
 
 function Route({ route }: { route: string }): ReactNode {
   const segments = route.split('/').filter((part) => part.length > 0);
@@ -28,34 +34,29 @@ function Route({ route }: { route: string }): ReactNode {
 
 export function APIInfo({
   className,
-  route,
-  badgeClassname,
-  method = 'GET',
-  head,
   ...props
-}: APIInfoProps &
-  HTMLAttributes<HTMLDivElement> & {
-    badgeClassname?: string;
-  }) {
+}: HTMLAttributes<HTMLDivElement>) {
   return (
     <div className={cn('min-w-0 flex-1', className)} {...props}>
-      {head}
-      <div className="not-prose mb-4 rounded-lg border bg-fd-card p-3 text-fd-card-foreground shadow-lg">
-        <div className="-mx-1 flex flex-row items-center gap-1.5">
-          <span
-            className={cn(
-              badgeVariants({ color: getBadgeColor(method) }),
-              badgeClassname,
-            )}
-          >
-            {method}
-          </span>
-          <Route route={route} />
-          <CopyRouteButton className="ms-auto size-6 p-1.5" route={route} />
-        </div>
-        <ServerSelect />
+      {props.children}
+    </div>
+  );
+}
+
+export function APIInfoHeader({
+  method,
+  route,
+}: Omit<APIInfoProps, 'head' | 'children'>) {
+  return (
+    <div className="not-prose mb-4 rounded-lg border bg-fd-card p-3 text-fd-card-foreground shadow-lg">
+      <div className="flex flex-row items-center gap-1.5">
+        <span className={cn(badgeVariants({ color: getBadgeColor(method) }))}>
+          {method}
+        </span>
+        <Route route={route} />
+        <CopyRouteButton className="ms-auto size-6 p-1.5" route={route} />
       </div>
-      <div className="prose-no-margin">{props.children}</div>
+      <ServerSelect />
     </div>
   );
 }
@@ -89,7 +90,7 @@ export function Property({
   children,
 }: PropertyProps) {
   return (
-    <div className="mb-4 rounded-lg border bg-fd-card p-3 prose-no-margin">
+    <div className="mb-4 rounded-xl border bg-fd-card p-3 prose-no-margin">
       <h4 className="flex flex-row flex-wrap items-center gap-4">
         <code>{name}</code>
         {required ? (
@@ -128,8 +129,6 @@ export function ObjectCollapsible(props: {
   children: ReactNode;
 }) {
   return (
-    <Accordions type="single">
-      <Accordion title={props.name}>{props.children}</Accordion>
-    </Accordions>
+    <CollapsiblePanel title={props.name}>{props.children}</CollapsiblePanel>
   );
 }

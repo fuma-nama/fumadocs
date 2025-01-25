@@ -10,6 +10,7 @@ export type DocumentInput = string | OpenAPIV3_1.Document | OpenAPIV3.Document;
 export type ProcessedDocument = {
   document: NoReference<Document>;
   dereferenceMap: DereferenceMap;
+  downloaded: Document;
 };
 
 const cache = new Map<string, ProcessedDocument>();
@@ -42,6 +43,7 @@ export async function processDocument(
   const processed: ProcessedDocument = {
     document: dereferenced as NoReference<Document>,
     dereferenceMap,
+    downloaded: loaded.specification as Document,
   };
 
   if (!disableCache && typeof document === 'string') {

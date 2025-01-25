@@ -11,6 +11,7 @@ import {
   Property,
   ObjectCollapsible,
   APIPlayground,
+  APIInfoHeader,
 } from '@/ui';
 import type { RenderContext, ServerObject } from '@/types';
 
@@ -93,6 +94,7 @@ export type {
 
 export function createRenders(
   shikiOptions: RenderContext['shikiOptions'],
+  useScalar: boolean,
 ): Renderer {
   return {
     Root: (props) => (
@@ -101,7 +103,13 @@ export function createRenders(
       </Root>
     ),
     API,
-    APIInfo,
+    APIInfo: ({ children, head, ...props }) => (
+      <APIInfo>
+        {head}
+        {!useScalar ? <APIInfoHeader {...props} /> : null}
+        {children}
+      </APIInfo>
+    ),
     APIExample,
     Responses: Tabs,
     Response: Tab,

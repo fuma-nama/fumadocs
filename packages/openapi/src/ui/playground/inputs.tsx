@@ -88,8 +88,8 @@ function InputContainer({
 }: InputContainerProps): React.ReactElement {
   return (
     <div {...props} className={cn('flex flex-col gap-1', props.className)}>
-      <div className={cn(labelVariants(), 'inline-flex items-center gap-1')}>
-        {name}
+      <div className="inline-flex items-center gap-1">
+        <span className={cn(labelVariants())}>{name}</span>
         {required ? <span className="text-red-500">*</span> : null}
         <div className="flex-1" />
         {type ? (
@@ -402,7 +402,7 @@ export function InputField({
       header={
         <>
           <FormLabel className="inline-flex items-center gap-1">
-            {name}
+            <span className={cn(labelVariants())}>{name}</span>
             {field.isRequired ? <span className="text-red-500">*</span> : null}
             <code className="ms-auto text-xs text-fd-muted-foreground">
               {field.type}
