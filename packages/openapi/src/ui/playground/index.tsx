@@ -4,11 +4,11 @@ import {
   type HTMLAttributes,
   useMemo,
   useRef,
-  useState,
   useEffect,
   type FC,
+  Fragment,
 } from 'react';
-import { Controller, useForm, useWatch } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { cn, buttonVariants } from 'fumadocs-ui/components/api';
 import type {
   FieldPath,
@@ -34,6 +34,9 @@ import { getStatusInfo } from '@/ui/playground/status-info';
 import { getUrl } from '@/utils/server-url';
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
 import { CollapsiblePanel } from '@/ui/components/collapsible';
+import { MethodLabel } from '@/ui/components/method-label';
+import { useQuery } from '@/utils/use-query';
+import ServerSelect from '@/ui/server-select';
 
 interface FormValues {
   authorization: string;
@@ -190,7 +193,11 @@ export function APIPlayground({
           )}
           onSubmit={onSubmit as React.FormEventHandler}
         >
-          <FormHeader route={route} isLoading={testQuery.isLoading} />
+          <FormHeader
+            method={method}
+            route={route}
+            isLoading={testQuery.isLoading}
+          />
 
           {authorization
             ? renderCustomField('authorization', authorization, fields.auth)
@@ -277,38 +284,61 @@ function createPathnameFromInput(
     : pathname;
 }
 
+function Route({
+  route,
+  ...props
+}: HTMLAttributes<HTMLDivElement> & { route: string }) {
+  const segments = route.split('/').filter((part) => part.length > 0);
+
+  return (
+    <div
+      {...props}
+      className={cn(
+        'flex flex-row items-center gap-0.5 overflow-auto text-nowrap text-xs',
+        props.className,
+      )}
+    >
+      {segments.map((part, index) => (
+        <Fragment key={index}>
+          <span className="text-fd-muted-foreground">/</span>
+          {part.startsWith('{') && part.endsWith('}') ? (
+            <code className="bg-fd-primary/10 text-fd-primary">{part}</code>
+          ) : (
+            <code className="text-fd-foreground">{part}</code>
+          )}
+        </Fragment>
+      ))}
+    </div>
+  );
+}
+
 function FormHeader({
   route,
+  method,
   isLoading,
 }: {
   route: string;
+  method: string;
   isLoading: boolean;
 }) {
-  const [path, query] = useWatch<FormValues, ['path', 'query']>({
-    name: ['path', 'query'],
-  });
-
-  const pathname = useMemo(
-    () => createPathnameFromInput(route, path, query),
-    [route, path, query],
-  );
-
   return (
-    <div className="flex flex-row gap-2 mb-2">
-      <code className="inline-flex flex-row items-center rounded-full flex-1 overflow-auto text-nowrap border px-2 text-xs text-fd-secondary-foreground bg-fd-secondary">
-        {pathname}
-      </code>
-      <button
-        type="submit"
-        className={cn(
-          buttonVariants({ color: 'primary' }),
-          'px-3 py-1.5 rounded-full',
-        )}
-        disabled={isLoading}
-      >
-        Send
-      </button>
-    </div>
+    <>
+      <div className="flex flex-row items-center gap-2">
+        <MethodLabel>{method}</MethodLabel>
+        <Route route={route} className="flex-1" />
+        <button
+          type="submit"
+          className={cn(
+            buttonVariants({ color: 'primary', size: 'sm' }),
+            'px-3 py-1.5',
+          )}
+          disabled={isLoading}
+        >
+          Send
+        </button>
+      </div>
+      <ServerSelect className="mb-4" />
+    </>
   );
 }
 
@@ -339,38 +369,5 @@ function DefaultResultDisplay({ data }: { data: FetchResult }) {
         />
       ) : null}
     </div>
-  );
-}
-
-function useQuery<I, T>(
-  fn: (input: I) => Promise<T>,
-): {
-  start: (input: I) => void;
-  data?: T;
-  isLoading: boolean;
-} {
-  const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<T>();
-
-  return useMemo(
-    () => ({
-      isLoading: loading,
-      data,
-      start(input) {
-        setLoading(true);
-
-        void fn(input)
-          .then((res) => {
-            setData(res);
-          })
-          .catch(() => {
-            setData(undefined);
-          })
-          .finally(() => {
-            setLoading(false);
-          });
-      },
-    }),
-    [data, fn, loading],
   );
 }

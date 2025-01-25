@@ -67,7 +67,6 @@ export function Schema({
   const parseObject = ctx.parseObject ?? true;
   const stack = ctx.stack ?? [];
   const { renderer } = ctx.render;
-  const child: ReactNode[] = [];
 
   // object type
   if (
@@ -75,20 +74,15 @@ export function Schema({
     parseObject &&
     (schema.additionalProperties || schema.properties)
   ) {
+    let body: ReactNode = null;
+    let footer: ReactNode = null;
     const { additionalProperties, properties } = schema;
 
     if (additionalProperties === true) {
-      child.push(
-        <renderer.Property
-          key="additionalProperties"
-          name="[key: string]"
-          type="any"
-        />,
-      );
+      footer = <renderer.Property name="[key: string]" type="any" />;
     } else if (additionalProperties) {
-      child.push(
+      footer = (
         <Schema
-          key="additionalProperties"
           name="[key: string]"
           schema={additionalProperties}
           ctx={{
@@ -96,12 +90,12 @@ export function Schema({
             required: false,
             parseObject: false,
           }}
-        />,
+        />
       );
     }
 
     if (properties) {
-      const rendered = Object.entries(properties).map(([key, value]) => {
+      body = Object.entries(properties).map(([key, value]) => {
         return (
           <Schema
             key={key}
@@ -115,11 +109,14 @@ export function Schema({
           />
         );
       });
-
-      child.push(...rendered);
     }
 
-    return child;
+    return (
+      <div className="flex flex-col gap-4">
+        {body}
+        {footer}
+      </div>
+    );
   }
 
   if (schema.allOf && parseObject) {
@@ -128,9 +125,7 @@ export function Schema({
     );
   }
 
-  if (schema.description)
-    child.push(<Markdown key="description" text={schema.description} />);
-
+  let footer: ReactNode = null;
   const fields: {
     key: string;
     value: string;
@@ -152,20 +147,9 @@ export function Schema({
     });
   }
 
-  if (fields.length > 0)
-    child.push(
-      <div key="fields" className="flex flex-col gap-2">
-        {fields.map((field) => (
-          <span key={field.key}>
-            {field.key}: <code>{field.value}</code>
-          </span>
-        ))}
-      </div>,
-    );
-
   if (isObject(schema) && !parseObject && !stack.includes(schema)) {
-    child.push(
-      <renderer.ObjectCollapsible key="attributes" name="Attributes">
+    footer = (
+      <renderer.ObjectCollapsible name="Show Attributes">
         <Schema
           name={name}
           schema={schema}
@@ -176,7 +160,7 @@ export function Schema({
             stack: [schema, ...stack],
           }}
         />
-      </renderer.ObjectCollapsible>,
+      </renderer.ObjectCollapsible>
     );
   } else {
     const mentionedObjectTypes = [
@@ -185,10 +169,10 @@ export function Schema({
       ...(schema.type === 'array' ? [schema.items] : []),
     ].filter((s) => isComplexType(s) && !stack.includes(s));
 
-    const renderedMentionedTypes = mentionedObjectTypes.map((s, idx) => {
+    footer = mentionedObjectTypes.map((s, idx) => {
       return (
         <renderer.ObjectCollapsible
-          key={`mentioned:${idx.toString()}`}
+          key={idx}
           name={
             s.title ??
             (mentionedObjectTypes.length === 1
@@ -209,8 +193,6 @@ export function Schema({
         </renderer.ObjectCollapsible>
       );
     });
-
-    child.push(...renderedMentionedTypes);
   }
 
   return (
@@ -220,7 +202,17 @@ export function Schema({
       required={ctx.required}
       deprecated={schema.deprecated}
     >
-      {child}
+      {schema.description ? <Markdown text={schema.description} /> : null}
+      {fields.length > 0 ? (
+        <div className="flex flex-col gap-2">
+          {fields.map((field) => (
+            <span key={field.key}>
+              {field.key}: <code>{field.value}</code>
+            </span>
+          ))}
+        </div>
+      ) : null}
+      {footer}
     </renderer.Property>
   );
 }

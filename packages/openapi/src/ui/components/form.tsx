@@ -81,7 +81,7 @@ const FormItem = forwardRef<
 FormItem.displayName = 'FormItem';
 
 export const labelVariants = cva(
-  'font-medium text-[13px] text-fd-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
+  'text-xs text-fd-foreground leading-tight peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
 );
 
 const FormLabel = forwardRef<

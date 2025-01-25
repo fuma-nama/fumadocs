@@ -2,6 +2,7 @@
 import { ApiClientModalProvider } from '@scalar/api-client-react';
 import { type ReactNode, useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
+import { cn } from 'fumadocs-ui/components/api';
 
 export default function ScalarProvider({
   spec,
@@ -18,7 +19,7 @@ export default function ScalarProvider({
   }, []);
 
   return (
-    <div className={mounted ? `${resolvedTheme}-mode` : ''}>
+    <div className={cn(mounted ? `${resolvedTheme}-mode` : '')}>
       <ApiClientModalProvider
         configuration={{
           themeId: 'moon',

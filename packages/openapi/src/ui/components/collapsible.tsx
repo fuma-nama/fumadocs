@@ -11,10 +11,11 @@ import { ChevronDown } from 'lucide-react';
 export function CollapsiblePanel({
   title,
   children,
+  innerClassName,
   ...props
 }: HTMLAttributes<HTMLDivElement> & {
   title: ReactNode;
-  children: ReactNode;
+  innerClassName?: string;
 }) {
   return (
     <Collapsible {...props}>
@@ -27,8 +28,10 @@ export function CollapsiblePanel({
         {title}
         <ChevronDown className="size-4 group-data-[state=open]:rotate-180" />
       </CollapsibleTrigger>
-      <CollapsibleContent className="-mx-2">
-        <div className="flex flex-col gap-4 p-2 pb-0">{children}</div>
+      <CollapsibleContent className="-mx-2 -mb-2">
+        <div className={cn('flex flex-col gap-4 p-2', innerClassName)}>
+          {children}
+        </div>
       </CollapsibleContent>
     </Collapsible>
   );

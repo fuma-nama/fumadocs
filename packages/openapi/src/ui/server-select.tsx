@@ -9,8 +9,9 @@ import {
 } from '@/ui/components/select';
 import { Input } from '@/ui/components/input';
 import { CollapsiblePanel } from '@/ui/components/collapsible';
+import type { HTMLAttributes } from 'react';
 
-export default function ServerSelect() {
+export default function ServerSelect(props: HTMLAttributes<HTMLDivElement>) {
   const { servers } = useApiContext();
   const { server, setServer, setServerVariables } = useServerSelectContext();
 
@@ -21,7 +22,7 @@ export default function ServerSelect() {
     : undefined;
 
   return (
-    <CollapsiblePanel title="Configure Server" className="mt-2">
+    <CollapsiblePanel title="Configure Server" {...props}>
       <Select value={server?.url} onValueChange={setServer}>
         <SelectTrigger className="h-auto break-all">
           <SelectValue />

@@ -1,8 +1,7 @@
 import { cn } from 'fumadocs-ui/components/api';
-import { Fragment, type HTMLAttributes, type ReactNode } from 'react';
-import { badgeVariants, getBadgeColor } from '@/ui/components/variants';
-import type { APIInfoProps, PropertyProps } from '@/render/renderer';
-import { CopyRouteButton, ServerSelect } from '@/ui/client';
+import { type HTMLAttributes, type ReactNode } from 'react';
+import { badgeVariants } from '@/ui/components/variants';
+import type { PropertyProps } from '@/render/renderer';
 import { CollapsiblePanel } from '@/ui/components/collapsible';
 
 export {
@@ -13,25 +12,6 @@ export {
   ScalarProvider,
 } from './client';
 
-function Route({ route }: { route: string }): ReactNode {
-  const segments = route.split('/').filter((part) => part.length > 0);
-
-  return (
-    <div className="not-prose flex flex-row items-center gap-0.5 overflow-auto text-nowrap text-xs">
-      {segments.map((part, index) => (
-        <Fragment key={index}>
-          <span className="text-fd-muted-foreground">/</span>
-          {part.startsWith('{') && part.endsWith('}') ? (
-            <code className="bg-fd-primary/10 text-fd-primary">{part}</code>
-          ) : (
-            <code className="text-fd-foreground">{part}</code>
-          )}
-        </Fragment>
-      ))}
-    </div>
-  );
-}
-
 export function APIInfo({
   className,
   ...props
@@ -39,24 +19,6 @@ export function APIInfo({
   return (
     <div className={cn('min-w-0 flex-1', className)} {...props}>
       {props.children}
-    </div>
-  );
-}
-
-export function APIInfoHeader({
-  method,
-  route,
-}: Omit<APIInfoProps, 'head' | 'children'>) {
-  return (
-    <div className="not-prose mb-4 rounded-lg border bg-fd-card p-3 text-fd-card-foreground shadow-lg">
-      <div className="flex flex-row items-center gap-1.5">
-        <span className={cn(badgeVariants({ color: getBadgeColor(method) }))}>
-          {method}
-        </span>
-        <Route route={route} />
-        <CopyRouteButton className="ms-auto size-6 p-1.5" route={route} />
-      </div>
-      <ServerSelect />
     </div>
   );
 }
@@ -90,8 +52,8 @@ export function Property({
   children,
 }: PropertyProps) {
   return (
-    <div className="mb-4 rounded-xl border bg-fd-card p-3 prose-no-margin">
-      <h4 className="flex flex-row flex-wrap items-center gap-4">
+    <div className="rounded-xl border bg-fd-card p-3 prose-no-margin">
+      <div className="flex flex-row flex-wrap items-center gap-4">
         <code>{name}</code>
         {required ? (
           <div className={cn(badgeVariants({ color: 'red' }))}>Required</div>
@@ -101,10 +63,10 @@ export function Property({
             Deprecated
           </div>
         ) : null}
-        <span className="ms-auto font-mono text-[13px] text-fd-muted-foreground">
+        <span className="ms-auto text-xs font-mono text-fd-muted-foreground">
           {type}
         </span>
-      </h4>
+      </div>
       {children}
     </div>
   );
@@ -129,6 +91,8 @@ export function ObjectCollapsible(props: {
   children: ReactNode;
 }) {
   return (
-    <CollapsiblePanel title={props.name}>{props.children}</CollapsiblePanel>
+    <CollapsiblePanel title={props.name} innerClassName="gap-2">
+      {props.children}
+    </CollapsiblePanel>
   );
 }

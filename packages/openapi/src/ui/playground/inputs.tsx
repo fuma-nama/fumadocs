@@ -85,7 +85,7 @@ function InputContainer({
   description,
   inline = false,
   ...props
-}: InputContainerProps): React.ReactElement {
+}: InputContainerProps) {
   return (
     <div {...props} className={cn('flex flex-col gap-1', props.className)}>
       <div className="inline-flex items-center gap-1">
@@ -111,7 +111,7 @@ export function ObjectInput({
   const { references } = useSchemaContext();
 
   return (
-    <div {...props} className={cn('flex flex-col gap-4', props.className)}>
+    <div {...props} className={cn('flex flex-col gap-6', props.className)}>
       {Object.entries(field.properties).map(([key, child]) => (
         <InputField
           key={key}
@@ -285,7 +285,7 @@ function Switcher({
   field,
   fieldName,
   ...props
-}: InputProps<'switcher'> & Partial<InputContainerProps>): React.ReactElement {
+}: InputProps<'switcher'> & Partial<InputContainerProps>) {
   const { references, dynamic } = useSchemaContext();
   const items = Object.keys(field.items);
   const [value, setValue] = useState<string>(() => {
