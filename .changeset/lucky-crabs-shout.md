@@ -2,7 +2,7 @@
 'fumadocs-ui': major
 ---
 
-### Migrate to Tailwind CSS v4
+**Migrate to Tailwind CSS v4**
 
 **migrate:**
 

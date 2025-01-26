@@ -8,6 +8,11 @@ const withAnalyzer = createBundleAnalyzer({
 
 const config: NextConfig = {
   reactStrictMode: true,
+  logging: {
+    fetches: {
+      fullUrl: true,
+    },
+  },
   eslint: {
     // Replaced by root workspace command
     ignoreDuringBuilds: true,

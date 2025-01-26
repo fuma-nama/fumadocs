@@ -63,7 +63,7 @@ const itemVariants = cva(
   {
     variants: {
       active: {
-        true: 'bg-fd-primary/10 font-medium text-fd-primary',
+        true: 'bg-fd-primary/10 text-fd-primary',
         false:
           'transition-colors hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 hover:transition-none',
       },

@@ -2,6 +2,7 @@ import {
   rehypeCode,
   type RehypeCodeOptions,
   rehypeToc,
+  remarkCodeTab,
   remarkGfm,
   remarkHeading,
   type RemarkHeadingOptions,
@@ -31,6 +32,7 @@ export type DefaultMDXOptions = Omit<
   remarkStructureOptions?: StructureOptions | false;
   remarkHeadingOptions?: RemarkHeadingOptions;
   remarkImageOptions?: RemarkImageOptions | false;
+  remarkCodeTabOptions?: false;
   rehypeCodeOptions?: Partial<RehypeCodeOptions> | false;
 };
 
@@ -55,6 +57,7 @@ export function getDefaultMDXOptions({
   remarkImageOptions,
   remarkHeadingOptions,
   remarkStructureOptions,
+  remarkCodeTabOptions,
   ...mdxOptions
 }: DefaultMDXOptions): ProcessorOptions {
   const mdxExports = [
@@ -75,6 +78,7 @@ export function getDefaultMDXOptions({
         },
       ],
       remarkImageOptions !== false && [remarkImage, remarkImageOptions],
+      remarkCodeTabOptions !== false && remarkCodeTab,
       ...v,
       remarkStructureOptions !== false && [
         remarkStructure,

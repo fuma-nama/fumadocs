@@ -170,7 +170,7 @@ You can specify the type of callout.
   Hello World
 </Callout>
 
-### Customisation
+### Customise Components
 
 See [all MDX components and available options](/docs/ui/mdx).
 
@@ -261,37 +261,31 @@ console.log('hewwo'); // [!code --]
 console.log('hello'); // [!code ++]
 ```
 
-### As Tab
+### Tab Groups
 
-You can use code block as a `<Tab />` component.
+You can use code blocks with the `<Tab />` component.
 
 ````mdx
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 
-<Tabs items={["Tab 1", "Tab 2"]}>
-
-```ts tab
+```ts tab="Tab 1"
 console.log('A');
 ```
 
-```ts tab
+```ts tab="Tab 2"
 console.log('B');
 ```
-
-</Tabs>
 ````
 
-<Tabs items={["Tab 1", "Tab 2"]}>
+> Note that you can add MDX components instead of importing them in MDX files.
 
-```ts tab
+```ts tab="Tab 1"
 console.log('A');
 ```
 
-```ts tab
+```ts tab="Tab 2"
 console.log('B');
 ```
-
-</Tabs>
 
 ### Using Typescript Twoslash
 
