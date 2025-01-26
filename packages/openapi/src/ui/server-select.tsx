@@ -8,8 +8,8 @@ import {
   SelectValue,
 } from '@/ui/components/select';
 import { Input } from '@/ui/components/input';
-import { CollapsiblePanel } from '@/ui/components/collapsible';
 import type { HTMLAttributes } from 'react';
+import { cn } from 'fumadocs-ui/components/api';
 
 export default function ServerSelect(props: HTMLAttributes<HTMLDivElement>) {
   const { servers } = useApiContext();
@@ -22,7 +22,7 @@ export default function ServerSelect(props: HTMLAttributes<HTMLDivElement>) {
     : undefined;
 
   return (
-    <CollapsiblePanel title="Configure Server" {...props}>
+    <div {...props} className={cn('flex flex-col gap-4', props.className)}>
       <Select value={server?.url} onValueChange={setServer}>
         <SelectTrigger className="h-auto break-all">
           <SelectValue />
@@ -44,10 +44,7 @@ export default function ServerSelect(props: HTMLAttributes<HTMLDivElement>) {
 
         return (
           <fieldset key={key} className="flex flex-col gap-1">
-            <label
-              className="font-mono text-xs text-fd-foreground"
-              htmlFor={id}
-            >
+            <label className="text-[13px] text-fd-foreground" htmlFor={id}>
               {key}
             </label>
             <p className="text-xs text-fd-muted-foreground empty:hidden">
@@ -89,6 +86,6 @@ export default function ServerSelect(props: HTMLAttributes<HTMLDivElement>) {
           </fieldset>
         );
       })}
-    </CollapsiblePanel>
+    </div>
   );
 }

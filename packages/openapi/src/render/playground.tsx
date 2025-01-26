@@ -105,7 +105,13 @@ export function Playground({
   ctx: RenderContext;
 }): ReactNode {
   if (ctx.useScalar) {
-    return <ScalarPlayground method={method.method} path={path} />;
+    return (
+      <ScalarPlayground
+        spec={ctx.schema.downloaded}
+        method={method.method}
+        path={path}
+      />
+    );
   }
 
   let currentId = 0;
@@ -156,16 +162,16 @@ export function Playground({
 
 function getAuthorizationField(
   method: MethodInformation,
-  ctx: RenderContext,
+  { schema: { document } }: RenderContext,
 ): (PrimitiveRequestField & { authType: string }) | undefined {
-  const security = method.security ?? ctx.document.security ?? [];
+  const security = method.security ?? document.security ?? [];
   if (security.length === 0) return;
   const singular = security.find(
     (requirements) => Object.keys(requirements).length === 1,
   );
   if (!singular) return;
 
-  const scheme = getSecurities(singular, ctx.document)[0];
+  const scheme = getSecurities(singular, document)[0];
 
   return {
     type: 'string',

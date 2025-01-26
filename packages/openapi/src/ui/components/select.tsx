@@ -16,7 +16,7 @@ const SelectTrigger = forwardRef<
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      'flex h-10 items-center rounded-md border px-3 py-2 text-start text-sm text-fd-foreground hover:bg-fd-accent focus:outline-none focus:ring-2 focus:ring-fd-ring disabled:cursor-not-allowed disabled:opacity-50',
+      'flex h-10 items-center w-full rounded-md border px-3 py-2 text-start text-sm text-fd-foreground hover:bg-fd-accent focus:outline-none focus:ring-2 focus:ring-fd-ring disabled:cursor-not-allowed disabled:opacity-50',
       className,
     )}
     {...props}
@@ -61,7 +61,7 @@ SelectScrollDownButton.displayName =
 const SelectContent = forwardRef<
   React.ComponentRef<typeof SelectPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
->(({ className, children, position = 'popper', ...props }, ref) => (
+>(({ className, children, position, ...props }, ref) => (
   <SelectPrimitive.Portal>
     <SelectPrimitive.Content
       ref={ref}
@@ -73,13 +73,7 @@ const SelectContent = forwardRef<
       {...props}
     >
       <SelectScrollUpButton />
-      <SelectPrimitive.Viewport
-        className={cn(
-          'p-1',
-          position === 'popper' &&
-            'h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]',
-        )}
-      >
+      <SelectPrimitive.Viewport className="p-1">
         {children}
       </SelectPrimitive.Viewport>
       <SelectScrollDownButton />

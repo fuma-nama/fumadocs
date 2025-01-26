@@ -2,6 +2,12 @@
 @import './neutral.css';
 @import './preset.css';
 
-body {
-  @apply flex flex-col min-h-screen;
+@layer base {
+  body {
+    @apply flex flex-col min-h-screen;
+  }
+
+  button {
+    cursor: pointer;
+  }
 }

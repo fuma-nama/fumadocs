@@ -7,8 +7,9 @@ import {
   useEffect,
   type FC,
   Fragment,
+  type ReactNode,
 } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
 import { cn, buttonVariants } from 'fumadocs-ui/components/api';
 import type {
   FieldPath,
@@ -17,13 +18,12 @@ import type {
   ControllerRenderProps,
 } from 'react-hook-form';
 import { useApiContext } from '@/ui/contexts/api';
-import { Form } from '@/ui/components/form';
 import type { FetchResult } from '@/ui/playground/fetcher';
 import {
   getDefaultValue,
   getDefaultValues,
 } from '@/ui/playground/get-default-values';
-import { InputField, ObjectInput } from '@/ui/playground/inputs';
+import { FieldSet, ObjectInput } from '@/ui/playground/inputs';
 import type {
   APIPlaygroundProps,
   PrimitiveRequestField,
@@ -33,10 +33,15 @@ import { type DynamicField, SchemaContext } from '../contexts/schema';
 import { getStatusInfo } from '@/ui/playground/status-info';
 import { getUrl } from '@/utils/server-url';
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
-import { CollapsiblePanel } from '@/ui/components/collapsible';
 import { MethodLabel } from '@/ui/components/method-label';
 import { useQuery } from '@/utils/use-query';
 import ServerSelect from '@/ui/server-select';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from 'fumadocs-ui/components/ui/collapsible';
+import { ChevronDown } from 'lucide-react';
 
 interface FormValues {
   authorization: string;
@@ -168,17 +173,12 @@ export function APIPlayground({
     }
 
     return (
-      <InputField
-        key={key}
-        name={info.name}
-        fieldName={fieldName}
-        field={info}
-      />
+      <FieldSet key={key} name={info.name} fieldName={fieldName} field={info} />
     );
   }
 
   return (
-    <Form {...form}>
+    <FormProvider {...form}>
       <SchemaContext.Provider
         value={useMemo(
           () => ({ references: schemas, dynamic: dynamicRef }),
@@ -188,7 +188,7 @@ export function APIPlayground({
         <form
           {...props}
           className={cn(
-            'not-prose flex flex-col gap-2 rounded-xl border bg-fd-card p-3',
+            'not-prose flex flex-col gap-2 rounded-xl border p-3 shadow-md',
             props.className,
           )}
           onSubmit={onSubmit as React.FormEventHandler}
@@ -198,10 +198,14 @@ export function APIPlayground({
             route={route}
             isLoading={testQuery.isLoading}
           />
-
-          {authorization
-            ? renderCustomField('authorization', authorization, fields.auth)
-            : null}
+          <CollapsiblePanel title="Server URL">
+            <ServerSelect />
+          </CollapsiblePanel>
+          {authorization ? (
+            <CollapsiblePanel title="Headers">
+              {renderCustomField('authorization', authorization, fields.auth)}
+            </CollapsiblePanel>
+          ) : null}
           {path.length > 0 ? (
             <CollapsiblePanel title="Path">
               {path.map((field) =>
@@ -254,7 +258,7 @@ export function APIPlayground({
           {testQuery.data ? <ResultDisplay data={testQuery.data} /> : null}
         </form>
       </SchemaContext.Provider>
-    </Form>
+    </FormProvider>
   );
 }
 
@@ -322,23 +326,20 @@ function FormHeader({
   isLoading: boolean;
 }) {
   return (
-    <>
-      <div className="flex flex-row items-center gap-2">
-        <MethodLabel>{method}</MethodLabel>
-        <Route route={route} className="flex-1" />
-        <button
-          type="submit"
-          className={cn(
-            buttonVariants({ color: 'primary', size: 'sm' }),
-            'px-3 py-1.5',
-          )}
-          disabled={isLoading}
-        >
-          Send
-        </button>
-      </div>
-      <ServerSelect className="mb-4" />
-    </>
+    <div className="flex flex-row items-center gap-2">
+      <MethodLabel>{method}</MethodLabel>
+      <Route route={route} className="flex-1" />
+      <button
+        type="submit"
+        className={cn(
+          buttonVariants({ color: 'primary', size: 'sm' }),
+          'px-3 py-1.5',
+        )}
+        disabled={isLoading}
+      >
+        Send
+      </button>
+    </div>
   );
 }
 
@@ -369,5 +370,28 @@ function DefaultResultDisplay({ data }: { data: FetchResult }) {
         />
       ) : null}
     </div>
+  );
+}
+
+export function CollapsiblePanel({
+  title,
+  children,
+  ...props
+}: HTMLAttributes<HTMLDivElement> & {
+  title: ReactNode;
+}) {
+  return (
+    <Collapsible
+      {...props}
+      className="border rounded-xl bg-fd-card text-fd-card-foreground overflow-hidden"
+    >
+      <CollapsibleTrigger className="group w-full inline-flex items-center gap-2 justify-between p-3 text-sm font-medium hover:bg-fd-accent">
+        {title}
+        <ChevronDown className="size-4 group-data-[state=open]:rotate-180" />
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        <div className="flex flex-col gap-4 p-3">{children}</div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 }

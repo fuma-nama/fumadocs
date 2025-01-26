@@ -1,15 +1,19 @@
-import { cn } from 'fumadocs-ui/components/api';
+import { buttonVariants, cn } from 'fumadocs-ui/components/api';
 import { type HTMLAttributes, type ReactNode } from 'react';
 import { badgeVariants } from '@/ui/components/variants';
 import type { PropertyProps } from '@/render/renderer';
-import { CollapsiblePanel } from '@/ui/components/collapsible';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from 'fumadocs-ui/components/ui/collapsible';
+import { ChevronDown } from 'lucide-react';
 
 export {
   Root,
   useSchemaContext,
   APIPlayground,
   ScalarPlayground,
-  ScalarProvider,
 } from './client';
 
 export function APIInfo({
@@ -91,8 +95,19 @@ export function ObjectCollapsible(props: {
   children: ReactNode;
 }) {
   return (
-    <CollapsiblePanel title={props.name} innerClassName="gap-2">
-      {props.children}
-    </CollapsiblePanel>
+    <Collapsible {...props}>
+      <CollapsibleTrigger
+        className={cn(
+          buttonVariants({ color: 'outline', size: 'sm' }),
+          'group rounded-full px-2 py-1.5 text-fd-muted-foreground',
+        )}
+      >
+        {props.name}
+        <ChevronDown className="size-4 group-data-[state=open]:rotate-180" />
+      </CollapsibleTrigger>
+      <CollapsibleContent className="-mx-2">
+        <div className="flex flex-col gap-2 p-2">{props.children}</div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 }

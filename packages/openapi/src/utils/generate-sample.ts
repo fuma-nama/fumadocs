@@ -41,7 +41,7 @@ interface ParameterSample {
 export function generateSample(
   path: string,
   method: MethodInformation,
-  { baseUrl, document }: RenderContext,
+  { baseUrl, schema: { document } }: RenderContext,
 ): EndpointSample {
   const params: ParameterSample[] = [];
   const responses: EndpointSample['responses'] = {};

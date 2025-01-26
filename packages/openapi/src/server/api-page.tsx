@@ -1,14 +1,15 @@
-import type { DereferenceMap, Document } from '@/types';
 import Slugger from 'github-slugger';
 import { Operation } from '@/render/operation';
 import type { RenderContext } from '@/types';
 import { createMethod } from '@/server/create-method';
 import { createRenders, type Renderer } from '@/render/renderer';
 import type { OpenAPIV3_1 } from 'openapi-types';
-import type { NoReference } from '@/utils/schema';
-import { type DocumentInput, processDocument } from '@/utils/process-document';
+import {
+  type DocumentInput,
+  processDocument,
+  type ProcessedDocument,
+} from '@/utils/process-document';
 import { getUrl } from '@/utils/server-url';
-import { ScalarProvider } from '@/ui';
 
 type ApiPageContextProps = Pick<
   Partial<RenderContext>,
@@ -39,11 +40,6 @@ export interface ApiPageProps extends ApiPageContextProps {
   disableCache?: boolean;
 }
 
-type ProcessedDocument = {
-  document: NoReference<Document>;
-  dereferenceMap: DereferenceMap;
-};
-
 export interface WebhookItem {
   name: string;
   method: OpenAPIV3_1.HttpMethods;
@@ -66,7 +62,7 @@ export async function APIPage(props: ApiPageProps) {
   const ctx = await getContext(processed, props);
   const { document } = processed;
 
-  const children = (
+  return (
     <ctx.renderer.Root baseUrl={ctx.baseUrl} servers={ctx.servers}>
       {operations?.map((item) => {
         const pathItem = document.paths?.[item.path];
@@ -112,20 +108,15 @@ export async function APIPage(props: ApiPageProps) {
       })}
     </ctx.renderer.Root>
   );
-
-  return ctx.useScalar ? (
-    <ScalarProvider spec={processed.downloaded}>{children}</ScalarProvider>
-  ) : (
-    children
-  );
 }
 
 export async function getContext(
-  { document, dereferenceMap }: ProcessedDocument,
+  schema: ProcessedDocument,
   options: ApiPageContextProps & {
     renderer?: Partial<Renderer>;
   } = {},
 ): Promise<RenderContext> {
+  const document = schema.document;
   const servers =
     document.servers && document.servers.length > 0
       ? document.servers
@@ -134,8 +125,7 @@ export async function getContext(
 
   return {
     useScalar: options.useScalar ?? false,
-    document: document,
-    dereferenceMap,
+    schema,
     proxyUrl: options.proxyUrl,
     showResponseSchema: options.showResponseSchema,
     renderer: {

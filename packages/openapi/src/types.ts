@@ -9,6 +9,7 @@ import type {
   CodeToHastOptionsCommon,
 } from 'shiki';
 import type { NoReference } from '@/utils/schema';
+import type { ProcessedDocument } from '@/utils/process-document';
 
 export type Document = V3_1.Document;
 export type OperationObject = V3_1.OperationObject;
@@ -45,17 +46,15 @@ export interface RenderContext {
 
   renderer: Renderer;
 
-  /**
-   * dereferenced schema
-   */
-  document: NoReference<Document>;
-
   baseUrl: string;
   servers: ServerObject[];
 
   slugger: Slugger;
 
-  dereferenceMap: DereferenceMap;
+  /**
+   * dereferenced schema
+   */
+  schema: ProcessedDocument;
 
   /**
    * Generate TypeScript definitions from response schema.
