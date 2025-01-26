@@ -16,14 +16,9 @@ import {
 } from '@/ui/components/select';
 import type { RequestSchema } from '@/render/playground';
 import { resolve } from '@/ui/playground/resolve';
-import { Input } from '@/ui/components/input';
+import { Input, labelVariants } from '@/ui/components/input';
 import { getDefaultValue } from '@/ui/playground/get-default-values';
 import { useSchemaContext } from '@/ui/contexts/schema';
-import { cva } from 'class-variance-authority';
-
-const labelVariants = cva(
-  'text-[13px] font-mono text-fd-card-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
-);
 
 type FieldOfType<Type> = Extract<RequestSchema, { type: Type }>;
 interface InputHeaderProps {
@@ -249,7 +244,7 @@ export function FieldInput({
         fieldName={fieldName}
         {...props}
         className={cn(
-          'rounded-lg border border-fd-primary/20 bg-fd-accent/40 p-3 shadow-sm',
+          'rounded-lg border border-fd-primary/20 bg-fd-card p-3 shadow-sm',
           props.className,
         )}
       />
@@ -439,9 +434,9 @@ function ArrayInput({
       {fields.map((item, index) => (
         <FieldSet
           key={item.id}
-          name={`Item ${String(index + 1)}`}
+          name={`${fieldName.split('.').at(-1)}[${index}]`}
           field={items}
-          fieldName={`${fieldName}.${String(index)}`}
+          fieldName={`${fieldName}.${index}`}
           toolbar={
             <button
               type="button"

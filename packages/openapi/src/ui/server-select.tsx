@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/ui/components/select';
-import { Input } from '@/ui/components/input';
+import { Input, labelVariants } from '@/ui/components/input';
 import type { HTMLAttributes } from 'react';
 import { cn } from 'fumadocs-ui/components/api';
 
@@ -44,7 +44,7 @@ export default function ServerSelect(props: HTMLAttributes<HTMLDivElement>) {
 
         return (
           <fieldset key={key} className="flex flex-col gap-1">
-            <label className="text-[13px] text-fd-foreground" htmlFor={id}>
+            <label className={cn(labelVariants())} htmlFor={id}>
               {key}
             </label>
             <p className="text-xs text-fd-muted-foreground empty:hidden">
