@@ -32,7 +32,7 @@ export default function ScalarPlayground({
         mounted ? `${resolvedTheme}-mode` : null,
       )}
     >
-      <MethodLabel>{method}</MethodLabel>
+      <MethodLabel className="text-xs">{method}</MethodLabel>
       <code className="flex-1 overflow-auto text-nowrap text-[13px] text-fd-muted-foreground">
         {path}
       </code>

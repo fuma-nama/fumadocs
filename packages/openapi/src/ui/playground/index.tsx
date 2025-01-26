@@ -298,7 +298,7 @@ function Route({
     <div
       {...props}
       className={cn(
-        'flex flex-row items-center gap-0.5 overflow-auto text-nowrap text-xs',
+        'flex flex-row items-center gap-0.5 overflow-auto text-nowrap',
         props.className,
       )}
     >
@@ -326,7 +326,7 @@ function FormHeader({
   isLoading: boolean;
 }) {
   return (
-    <div className="flex flex-row items-center gap-2">
+    <div className="flex flex-row items-center gap-2 text-sm">
       <MethodLabel>{method}</MethodLabel>
       <Route route={route} className="flex-1" />
       <button

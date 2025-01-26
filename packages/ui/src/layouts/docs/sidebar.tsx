@@ -59,7 +59,7 @@ interface InternalContext {
 }
 
 const itemVariants = cva(
-  'flex flex-row items-center gap-2 rounded-md p-2 text-start text-fd-muted-foreground [overflow-wrap:anywhere] md:py-1.5 [&_svg]:size-4 [&_svg]:shrink-0',
+  'relative flex flex-row items-center gap-2 rounded-md p-2 text-start text-fd-muted-foreground [overflow-wrap:anywhere] md:py-1.5 [&_svg]:size-4 [&_svg]:shrink-0',
   {
     variants: {
       active: {
@@ -221,11 +221,18 @@ export function SidebarViewport(props: ScrollAreaProps) {
   );
 }
 
-export function SidebarSeparator(props: HTMLAttributes<HTMLParagraphElement>) {
+export function SidebarSeparator({
+  level = 1,
+  ...props
+}: HTMLAttributes<HTMLParagraphElement> & { level?: number }) {
   return (
     <p
       {...props}
       className={cn('mb-2 px-2 text-sm font-medium', props.className)}
+      style={{
+        paddingInlineStart: getOffset(level),
+        ...props.style,
+      }}
     >
       {props.children}
     </p>
@@ -234,8 +241,10 @@ export function SidebarSeparator(props: HTMLAttributes<HTMLParagraphElement>) {
 
 export function SidebarItem({
   icon,
+  level = 1,
   ...props
 }: LinkProps & {
+  level?: number;
   icon?: ReactNode;
 }) {
   const pathname = usePathname();
@@ -249,7 +258,12 @@ export function SidebarItem({
       data-active={active}
       className={cn(itemVariants({ active }), props.className)}
       prefetch={prefetch}
+      style={{
+        paddingInlineStart: getOffset(level),
+        ...props.style,
+      }}
     >
+      <Border depth={level} active={active} />
       {icon ?? (props.external ? <ExternalLink /> : null)}
       {props.children}
     </Link>
@@ -279,14 +293,22 @@ export function SidebarFolder({
   );
 }
 
-export function SidebarFolderTrigger(props: CollapsibleTriggerProps) {
+export function SidebarFolderTrigger({
+  level = 1,
+  ...props
+}: CollapsibleTriggerProps & { level?: number }) {
   const { open } = useFolderContext();
 
   return (
     <CollapsibleTrigger
       {...props}
       className={cn(itemVariants({ active: false }), 'w-full')}
+      style={{
+        paddingInlineStart: getOffset(level),
+        ...props.style,
+      }}
     >
+      <Border depth={level} />
       {props.children}
       <ChevronDown
         data-icon
@@ -296,7 +318,10 @@ export function SidebarFolderTrigger(props: CollapsibleTriggerProps) {
   );
 }
 
-export function SidebarFolderLink(props: LinkProps) {
+export function SidebarFolderLink({
+  level = 1,
+  ...props
+}: LinkProps & { level?: number }) {
   const { open, setOpen } = useFolderContext();
   const { prefetch } = useInternalContext();
 
@@ -318,7 +343,12 @@ export function SidebarFolderLink(props: LinkProps) {
         }
       }}
       prefetch={prefetch}
+      style={{
+        paddingInlineStart: getOffset(level),
+        ...props.style,
+      }}
     >
+      <Border depth={level} active={active} />
       {props.children}
       <ChevronDown
         data-icon
@@ -329,13 +359,7 @@ export function SidebarFolderLink(props: LinkProps) {
 }
 
 export function SidebarFolderContent(props: CollapsibleContentProps) {
-  return (
-    <CollapsibleContent {...props}>
-      <div className="ms-3 border-s py-1.5 ps-1.5 md:ms-2">
-        {props.children}
-      </div>
-    </CollapsibleContent>
-  );
+  return <CollapsibleContent {...props}>{props.children}</CollapsibleContent>;
 }
 
 export function SidebarCollapseTrigger(
@@ -395,11 +419,16 @@ export function SidebarPageTree(props: {
       level: number,
     ): ReactNode[] {
       return items.map((item, i) => {
-        const id = `${item.type}_${i.toString()}`;
+        const id = `${item.type}_${i}`;
+
         if (item.type === 'separator') {
           if (Separator) return <Separator key={id} item={item} />;
           return (
-            <SidebarSeparator key={id} className={cn(i !== 0 && 'mt-8')}>
+            <SidebarSeparator
+              key={id}
+              className={cn(i !== 0 && 'mt-8')}
+              level={level}
+            >
               {item.name}
             </SidebarSeparator>
           );
@@ -428,6 +457,7 @@ export function SidebarPageTree(props: {
             href={item.url}
             external={item.external}
             icon={item.icon}
+            level={level}
           >
             {item.name}
           </SidebarItem>
@@ -441,12 +471,11 @@ export function SidebarPageTree(props: {
 
 function PageTreeFolder({
   item,
-  children,
   level,
-}: {
+  ...props
+}: HTMLAttributes<HTMLElement> & {
   item: PageTree.Folder;
   level: number;
-  children: ReactNode;
 }) {
   const { defaultOpenLevel } = useInternalContext();
   const path = useTreePath();
@@ -458,17 +487,44 @@ function PageTreeFolder({
       }
     >
       {item.index ? (
-        <SidebarFolderLink href={item.index.url} external={item.index.external}>
+        <SidebarFolderLink
+          href={item.index.url}
+          external={item.index.external}
+          level={level}
+          {...props}
+        >
           {item.icon}
           {item.name}
         </SidebarFolderLink>
       ) : (
-        <SidebarFolderTrigger>
+        <SidebarFolderTrigger level={level} {...props}>
           {item.icon}
           {item.name}
         </SidebarFolderTrigger>
       )}
-      <SidebarFolderContent>{children}</SidebarFolderContent>
+      <SidebarFolderContent className="relative">
+        {props.children}
+      </SidebarFolderContent>
     </SidebarFolder>
+  );
+}
+
+function getOffset(level: number) {
+  return `calc(var(--spacing) * ${(level > 1 ? level : 0) * 2 + 2})`;
+}
+
+function Border({ depth, active }: { depth: number; active?: boolean }) {
+  if (depth <= 1) return null;
+
+  return (
+    <div
+      className={cn(
+        'absolute w-px inset-y-0 bg-fd-border z-[2]',
+        active && 'bg-fd-primary',
+      )}
+      style={{
+        insetInlineStart: `calc(var(--spacing) * 2 + 1px)`,
+      }}
+    />
   );
 }

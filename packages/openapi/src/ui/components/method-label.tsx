@@ -2,7 +2,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import type { HTMLAttributes } from 'react';
 import { cn } from 'fumadocs-ui/components/api';
 
-const variants = cva('text-xs font-mono font-medium', {
+const variants = cva('font-mono font-medium', {
   variants: {
     color: {
       green: 'text-green-600 dark:text-green-400',
