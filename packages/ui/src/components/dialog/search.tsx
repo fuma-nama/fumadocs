@@ -313,7 +313,7 @@ export function TagsList({
   return (
     <div
       {...props}
-      className={cn('flex flex-row items-center gap-1', props.className)}
+      className={cn('flex flex-row items-center gap-1 flex-wrap', props.className)}
     >
       {items.map((item) => (
         <button
