@@ -150,7 +150,7 @@ export default function Showcase(): React.ReactElement {
   ];
 
   return (
-    <main className="pb-16">
+    <main className="pb-16 z-[2]">
       <div className="absolute inset-0 z-[-1] select-none overflow-hidden opacity-30">
         <Image
           alt="spot"

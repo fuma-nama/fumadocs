@@ -225,12 +225,12 @@ export function WhyInteractive(props: {
       <div className="flex-1">
         {active === 0 ? (
           <WhyPanel>
-            <h3 className="mb-2 text-lg font-semibold">
+            <h3 className="mb-2 text-lg font-medium">
               Implementing search is difficult, we made it simple.
             </h3>
             <p>
-              Fumadocs offers native support for <b>Orama</b> and{' '}
-              <b>Algolia Search</b>, it is as easy as plugging a route handler.
+              Fumadocs offers native support for Orama and Algolia Search, it is
+              as easy as plugging a route handler.
             </p>
             {props.codeblockSearchRouter}
             <p className="mb-4 text-fd-muted-foreground">
@@ -256,7 +256,7 @@ export function WhyInteractive(props: {
 
         {active === 1 ? (
           <WhyPanel>
-            <h3 className="mb-2 text-lg font-semibold">Tailwind CSS Plugin</h3>
+            <h3 className="mb-2 text-lg font-medium">Tailwind CSS Plugin</h3>
             <p>
               Share the same design system cross the docs and your app with
               Tailwind CSS. Works great with <b>Shadcn UI</b>.
@@ -273,7 +273,7 @@ export function WhyInteractive(props: {
 
         {active === 2 ? (
           <WhyPanel>
-            <h3 className="mb-2 text-lg font-semibold">
+            <h3 className="mb-2 text-lg font-medium">
               From the source of truth, never repeat yourself again.
             </h3>
             <p>
@@ -304,7 +304,7 @@ export function WhyInteractive(props: {
         ) : null}
         {active === 3 ? (
           <WhyPanel>
-            <h3 className="mb-2 text-lg font-semibold">
+            <h3 className="mb-2 text-lg font-medium">
               Interactive docs with React.
             </h3>
             <p>
@@ -322,7 +322,7 @@ export function WhyInteractive(props: {
         ) : null}
         {active === 4 ? (
           <WhyPanel>
-            <h3 className="mb-2 text-lg font-semibold">
+            <h3 className="mb-2 text-lg font-medium">
               Connect your content and server.
             </h3>
 
@@ -337,7 +337,7 @@ export function WhyInteractive(props: {
         ) : null}
         {active === 5 ? (
           <WhyPanel>
-            <h3 className="mb-2 text-lg font-semibold">
+            <h3 className="mb-2 text-lg font-medium">
               Your own content source, search solution, everything.
             </h3>
             <p>
@@ -369,7 +369,7 @@ function WhyPanel(props: HTMLProps<HTMLDivElement>) {
     <div
       {...props}
       className={cn(
-        'duration-700 animate-in fade-in slide-in-from-bottom-8',
+        'duration-700 animate-in fade-in slide-in-from-bottom-8 text-sm',
         props.className,
       )}
     >

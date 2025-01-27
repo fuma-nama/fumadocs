@@ -517,7 +517,7 @@ function Border({ level, active }: { level: number; active?: boolean }) {
   return (
     <div
       className={cn(
-        'absolute w-px inset-y-1.5 z-[2] start-3',
+        'absolute w-px inset-y-2 z-[2] start-3',
         active && 'bg-fd-primary',
       )}
     />
