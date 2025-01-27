@@ -59,7 +59,7 @@ interface InternalContext {
 }
 
 const itemVariants = cva(
-  'relative flex flex-row items-center gap-2 rounded-md p-2 text-start text-fd-muted-foreground [overflow-wrap:anywhere] md:py-1.5 [&_svg]:size-4 [&_svg]:shrink-0',
+  'relative flex flex-row items-center gap-2 rounded-md px-2 text-start text-fd-muted-foreground [overflow-wrap:anywhere] py-1.5 [&_svg]:size-4 [&_svg]:shrink-0',
   {
     variants: {
       active: {
@@ -359,7 +359,11 @@ export function SidebarFolderLink({
 }
 
 export function SidebarFolderContent(props: CollapsibleContentProps) {
-  return <CollapsibleContent {...props}>{props.children}</CollapsibleContent>;
+  return (
+    <CollapsibleContent {...props}>
+      <div className="pt-1">{props.children}</div>
+    </CollapsibleContent>
+  );
 }
 
 export function SidebarCollapseTrigger(
@@ -519,12 +523,9 @@ function Border({ depth, active }: { depth: number; active?: boolean }) {
   return (
     <div
       className={cn(
-        'absolute w-px inset-y-0 bg-fd-border z-[2]',
+        'absolute w-px inset-y-0 bg-fd-border z-[2] start-3',
         active && 'bg-fd-primary',
       )}
-      style={{
-        insetInlineStart: `calc(var(--spacing) * 2 + 1px)`,
-      }}
     />
   );
 }
