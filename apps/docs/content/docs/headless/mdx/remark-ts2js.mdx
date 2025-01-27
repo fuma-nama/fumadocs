@@ -27,16 +27,25 @@ const withMDX = createMDX();
 export default withMDX(config);
 ```
 
-Add the remark plugin (e.g. for Fumadocs MDX):
+Add the remark plugin:
 
-```ts title="source.config.ts"
-import { defineConfig } from 'fumadocs-mdx/config';
+```ts title="source.config.ts" tab="Fumadocs MDX"
 import { remarkTypeScriptToJavaScript } from 'fumadocs-docgen';
+import { defineConfig } from 'fumadocs-mdx/config';
 
 export default defineConfig({
   mdxOptions: {
     remarkPlugins: [remarkTypeScriptToJavaScript],
   },
+});
+```
+
+```ts tab="MDX Compiler"
+import { compile } from '@mdx-js/mdx';
+import { remarkTypeScriptToJavaScript } from 'fumadocs-docgen';
+
+await compile('...', {
+  remarkPlugins: [remarkTypeScriptToJavaScript],
 });
 ```
 

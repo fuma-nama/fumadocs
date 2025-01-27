@@ -11,12 +11,24 @@ fumadocs-docgen
 
 Add the remark plugin.
 
-```ts
+```ts title="source.config.ts" tab="Fumadocs MDX"
+import { remarkDocGen } from 'fumadocs-docgen';
+import { defineConfig } from 'fumadocs-mdx/config';
+
+export default defineConfig({
+  mdxOptions: {
+    remarkPlugins: [[remarkDocGen, { generators: [] }]],
+  },
+});
+```
+
+```ts tab="MDX Compiler"
+import { compile } from '@mdx-js/mdx';
 import { remarkDocGen } from 'fumadocs-docgen';
 
-const config = {
+await compile('...', {
   remarkPlugins: [[remarkDocGen, { generators: [] }]],
-};
+});
 ```
 
 Use generators in a markdown/MDX file with:

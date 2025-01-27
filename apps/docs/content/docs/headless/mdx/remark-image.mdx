@@ -7,13 +7,16 @@ description: Make images compatible with Next.js Image Optimization
 
 Add it to your Remark plugins.
 
-```ts
+```ts title="MDX Compiler"
+import { compile } from '@mdx-js/mdx';
 import { remarkImage } from 'fumadocs-core/mdx-plugins';
 
-export default {
+await compile('...', {
   remarkPlugins: [remarkImage],
-};
+});
 ```
+
+> This plugin is included by default on Fumadocs MDX.
 
 Supported:
 

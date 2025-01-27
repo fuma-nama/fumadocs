@@ -7,13 +7,16 @@ description: Process headings from your document
 
 Apply ids to headings.
 
-```ts
+```ts title="MDX Compiler"
+import { compile } from '@mdx-js/mdx';
 import { remarkHeading } from 'fumadocs-core/mdx-plugins';
 
-export default {
+await compile('...', {
   remarkPlugins: [remarkHeading],
-};
+});
 ```
+
+> This plugin is included by default on Fumadocs MDX.
 
 ### Extract TOC
 
