@@ -137,12 +137,8 @@ function Architecture() {
 
 function Why() {
   return (
-    <div className="relative overflow-hidden border-x border-t px-8 py-12 md:px-16 md:pt-24 md:min-h-[800px]">
-      <h2 className="bg-gradient-to-b from-fd-foreground to-fd-foreground/40 bg-clip-text text-center text-3xl font-semibold text-transparent md:text-4xl">
-        Build docs <span className="max-md:hidden">100x faster and</span> easier
-        <p className="max-md:hidden">with Fumadocs</p>
-      </h2>
-      <p className="mt-4 text-center text-fd-foreground/50">
+    <div className="relative overflow-hidden border-x border-t px-8 py-12 md:p-16 md:min-h-[700px]">
+      <p className="text-center font-medium text-fd-muted-foreground">
         Fumadocs offers a complete toolchain to build and maintain your docs.
       </p>
       <WhyInteractive
@@ -178,20 +174,12 @@ export const { GET } = createFromSource(source);`}
         }
         codeblockTheme={
           <CodeBlock
-            lang="ts"
-            code={`import { createPreset } from 'fumadocs-ui/tailwind-plugin';
- 
-/** @type {import('tailwindcss').Config} */
-export default {
-  darkMode: 'class',
-  presets: [createPreset()],
-  content: [
-    './node_modules/fumadocs-ui/dist/**/*.js',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './content/**/*.mdx',
-  ],
-};`}
+            lang="css"
+            code={`@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+
+@source '../node_modules/fumadocs-ui/dist/**/*.js';`}
           />
         }
         codeblockInteractive={

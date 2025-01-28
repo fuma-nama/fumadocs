@@ -5,6 +5,8 @@ author: Fuma Nama
 date: 2025-01-24
 ---
 
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+
 ## Overview
 
 The purpose of v15 is mainly to support Tailwind CSS v4.
@@ -60,3 +62,97 @@ Previous Tailwind CSS utilities like `steps` & `steps` are renamed to `fd-steps`
 ### Typography
 
 Typography utilities including `prose`, `prose-*` modifiers will continue to work. Please report problems if they are no longer working or have unexpected change in behaviours.
+
+## Improvements
+
+v15 also included some minor improvements to the UI and OpenAPI integration.
+
+### Code Block Tabs
+
+In the past, you need to write the `<Tabs />` manually when separating code blocks into tabs.
+
+````mdx
+<Tabs items={["Tab 1", "Tab 2"]}>
+
+```ts tab="Tab 1"
+console.log('Hello World');
+```
+
+```ts tab="Tab 2"
+console.log('Hello World');
+```
+
+</Tabs>
+````
+
+Now you can do:
+
+````mdx
+```ts tab="Tab 1"
+console.log('Hello World');
+```
+
+```ts tab="Tab 2"
+console.log('Hello World');
+```
+````
+
+Note that the previous usage still works for those who want to customise or pass props to the `<Tabs />` component.
+
+### Reversed Items in `meta.json`
+
+The rest item `...` in the `pages` property of `meta.json` now supports reversed order:
+
+```json
+{
+  "pages": ["z...a"]
+}
+```
+
+### OpenAPI Playground
+
+v15 improved the playground UI (inspired by the minimalism of Scalar), and brought Scalar API Client support to Fumadocs OpenAPI.
+
+You can enable the Scalar API Client using `useScalar` option in `createOpenAPI()`:
+
+```ts
+import { createOpenAPI } from 'fumadocs-openapi/server';
+
+export const openapi = createOpenAPI({
+  useScalar: true,
+});
+```
+
+And install & configure their `@scalar/api-client-react`:
+
+```package-install
+@scalar/api-client-react
+```
+
+```css title="global.css"
+@import '@scalar/api-client-react/style.css' layer(base);
+```
+
+<Callout>
+  Be careful that you must configure Tailwind CSS first, using the pre-built
+  stylesheet of Fumadocs UI will conflict with their `style.css` because both
+  libraries use Tailwind CSS for styling.
+</Callout>
+
+## Future Plans
+
+This update should be a simple migration for most developers updating to Tailwind CSS v4.
+
+In the future, we also want to make further improvements to Fumadocs MDX:
+
+- remove `transform` API - you can easily do the same with `.map()` on runtime like:
+
+```ts
+import { blog } from "@/.source"
+
+export const updatedBlog = blog.map(...)
+```
+
+- remove Manifest API - it was designed to export search indexes, but now it's recommended to implement using route handlers.
+
+- Mention more about our [MDX Remote](/docs/headless/custom-source#mdx-remote) package, it will be the primary solution to handle large docs sites with performance needs that bundler couldn't do, including lazy compilation of MDX files.

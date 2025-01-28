@@ -156,7 +156,7 @@ export function WhyInteractive(props: {
   return (
     <div
       id="why-interactive"
-      className="-mx-6 mt-8 flex flex-col gap-4 rounded-lg border border-fd-foreground/10 bg-fd-muted/50 p-4 shadow-lg lg:flex-row lg:gap-6 lg:p-6"
+      className="mt-8 flex flex-col gap-4 rounded-lg border border-fd-foreground/10 bg-fd-muted/50 p-4 shadow-lg lg:flex-row lg:gap-6 lg:p-6 max-lg:-mx-8"
     >
       <div className="-mt-1.5 flex flex-row overflow-x-auto max-lg:-mx-4 max-lg:items-center max-lg:px-2 lg:-ml-4 lg:flex-col">
         {items.map((item, i) => (
