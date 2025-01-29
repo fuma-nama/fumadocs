@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 15.0.0
+
+### Patch Changes
+
+- a89d6e0: Support Fumadocs v15
+
 ## 14.7.7
 
 ## 14.7.6
