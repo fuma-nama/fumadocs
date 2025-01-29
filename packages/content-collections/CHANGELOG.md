@@ -1,5 +1,15 @@
 # @fumadocs/content-collections
 
+## 1.1.7
+
+### Patch Changes
+
+- a89d6e0: Support Fumadocs v15
+- Updated dependencies [5b8cca8]
+- Updated dependencies [a763058]
+- Updated dependencies [581f4a5]
+  - fumadocs-core@15.0.0
+
 ## 1.1.6
 
 ### Patch Changes

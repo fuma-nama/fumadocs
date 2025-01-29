@@ -1,5 +1,18 @@
 # fumadocs-twoslash
 
+## 3.0.0
+
+### Major Changes
+
+- a89d6e0: Require Fumadocs v15 & Tailwind CSS v4
+
+### Patch Changes
+
+- Updated dependencies [a89d6e0]
+- Updated dependencies [a84f37a]
+- Updated dependencies [f2f9c3d]
+  - fumadocs-ui@15.0.0
+
 ## 2.0.3
 
 ### Patch Changes

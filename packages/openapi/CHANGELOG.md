@@ -1,5 +1,23 @@
 # @fuma-docs/openapi
 
+## 5.12.0
+
+### Minor Changes
+
+- 471478b: Support `useScalar` option
+
+### Patch Changes
+
+- 983b8a6: Use path of operation when id is not defined
+- Updated dependencies [5b8cca8]
+- Updated dependencies [a89d6e0]
+- Updated dependencies [a84f37a]
+- Updated dependencies [f2f9c3d]
+- Updated dependencies [a763058]
+- Updated dependencies [581f4a5]
+  - fumadocs-core@15.0.0
+  - fumadocs-ui@15.0.0
+
 ## 5.11.8
 
 ### Patch Changes
