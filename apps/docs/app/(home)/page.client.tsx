@@ -156,7 +156,7 @@ export function WhyInteractive(props: {
   return (
     <div
       id="why-interactive"
-      className="-mx-6 mt-8 flex flex-col gap-4 rounded-lg border border-foreground/10 bg-fd-muted/50 p-4 shadow-lg lg:flex-row lg:gap-6 lg:p-6"
+      className="mt-8 flex flex-col gap-4 rounded-lg border border-fd-foreground/10 bg-fd-muted/50 p-4 shadow-lg lg:flex-row lg:gap-6 lg:p-6 max-lg:-mx-8"
     >
       <div className="-mt-1.5 flex flex-row overflow-x-auto max-lg:-mx-4 max-lg:items-center max-lg:px-2 lg:-ml-4 lg:flex-col">
         {items.map((item, i) => (
@@ -172,10 +172,10 @@ export function WhyInteractive(props: {
             }}
             type="button"
             className={cn(
-              'inline-flex flex-col-reverse text-nowrap rounded-lg py-1.5 text-left text-sm font-medium text-muted-foreground transition-colors max-lg:px-2 lg:flex-row',
+              'inline-flex flex-col-reverse text-nowrap rounded-lg py-1.5 text-start text-sm font-medium text-fd-muted-foreground transition-colors max-lg:px-2 lg:flex-row',
               i === active
-                ? 'text-primary max-lg:bg-primary/10'
-                : 'hover:text-accent-foreground/80',
+                ? 'text-primary max-lg:bg-fd-primary/10'
+                : 'hover:text-fd-accent-foreground/80',
               i === active && autoActive ? '' : 'max-lg:pb-2.5 lg:pl-3',
             )}
             onClick={() => {
@@ -188,7 +188,7 @@ export function WhyInteractive(props: {
           >
             {i === active && autoActive ? (
               <div
-                className="animate-[why-interactive-x] rounded-lg bg-primary max-lg:h-1 lg:mr-2 lg:w-1 lg:animate-[why-interactive-y]"
+                className="animate-[why-interactive-x] rounded-lg bg-fd-primary max-lg:h-1 lg:mr-2 lg:w-1 lg:animate-[why-interactive-y]"
                 style={{
                   animationDuration: `${duration.toString()}ms`,
                   animationFillMode: 'forwards',
@@ -225,15 +225,15 @@ export function WhyInteractive(props: {
       <div className="flex-1">
         {active === 0 ? (
           <WhyPanel>
-            <h3 className="mb-2 text-lg font-semibold">
+            <h3 className="mb-2 text-lg font-medium">
               Implementing search is difficult, we made it simple.
             </h3>
             <p>
-              Fumadocs offers native support for <b>Orama</b> and{' '}
-              <b>Algolia Search</b>, it is as easy as plugging a route handler.
+              Fumadocs offers native support for Orama and Algolia Search, it is
+              as easy as plugging a route handler.
             </p>
             {props.codeblockSearchRouter}
-            <p className="mb-4 text-muted-foreground">
+            <p className="mb-4 text-fd-muted-foreground">
               In addition, you can plug your own search modal to allow full
               control over the search UI.
             </p>
@@ -256,7 +256,7 @@ export function WhyInteractive(props: {
 
         {active === 1 ? (
           <WhyPanel>
-            <h3 className="mb-2 text-lg font-semibold">Tailwind CSS Plugin</h3>
+            <h3 className="mb-2 text-lg font-medium">Tailwind CSS Plugin</h3>
             <p>
               Share the same design system cross the docs and your app with
               Tailwind CSS. Works great with <b>Shadcn UI</b>.
@@ -273,7 +273,7 @@ export function WhyInteractive(props: {
 
         {active === 2 ? (
           <WhyPanel>
-            <h3 className="mb-2 text-lg font-semibold">
+            <h3 className="mb-2 text-lg font-medium">
               From the source of truth, never repeat yourself again.
             </h3>
             <p>
@@ -304,7 +304,7 @@ export function WhyInteractive(props: {
         ) : null}
         {active === 3 ? (
           <WhyPanel>
-            <h3 className="mb-2 text-lg font-semibold">
+            <h3 className="mb-2 text-lg font-medium">
               Interactive docs with React.
             </h3>
             <p>
@@ -322,7 +322,7 @@ export function WhyInteractive(props: {
         ) : null}
         {active === 4 ? (
           <WhyPanel>
-            <h3 className="mb-2 text-lg font-semibold">
+            <h3 className="mb-2 text-lg font-medium">
               Connect your content and server.
             </h3>
 
@@ -337,7 +337,7 @@ export function WhyInteractive(props: {
         ) : null}
         {active === 5 ? (
           <WhyPanel>
-            <h3 className="mb-2 text-lg font-semibold">
+            <h3 className="mb-2 text-lg font-medium">
               Your own content source, search solution, everything.
             </h3>
             <p>
@@ -369,7 +369,7 @@ function WhyPanel(props: HTMLProps<HTMLDivElement>) {
     <div
       {...props}
       className={cn(
-        'duration-700 animate-in fade-in slide-in-from-bottom-8',
+        'duration-700 animate-in fade-in slide-in-from-bottom-8 text-sm',
         props.className,
       )}
     >

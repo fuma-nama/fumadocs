@@ -1,61 +1,28 @@
-import { cn } from 'fumadocs-ui/components/api';
-import { Fragment, type HTMLAttributes, type ReactNode } from 'react';
-import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
-import { badgeVariants, getBadgeColor } from '@/ui/components/variants';
-import type { APIInfoProps, PropertyProps } from '@/render/renderer';
-import { CopyRouteButton, ServerSelect } from '@/ui/client';
+import { buttonVariants, cn } from 'fumadocs-ui/components/api';
+import { type HTMLAttributes, type ReactNode } from 'react';
+import { badgeVariants } from '@/ui/components/variants';
+import type { PropertyProps } from '@/render/renderer';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from 'fumadocs-ui/components/ui/collapsible';
+import { ChevronDown } from 'lucide-react';
 
-export { Root, useSchemaContext, APIPlayground } from './client';
-
-function Route({ route }: { route: string }): ReactNode {
-  const segments = route.split('/').filter((part) => part.length > 0);
-
-  return (
-    <div className="not-prose flex flex-row items-center gap-0.5 overflow-auto text-nowrap text-xs">
-      {segments.map((part, index) => (
-        <Fragment key={index}>
-          <span className="text-fd-muted-foreground">/</span>
-          {part.startsWith('{') && part.endsWith('}') ? (
-            <code className="bg-fd-primary/10 text-fd-primary">{part}</code>
-          ) : (
-            <code className="text-fd-foreground">{part}</code>
-          )}
-        </Fragment>
-      ))}
-    </div>
-  );
-}
+export {
+  Root,
+  useSchemaContext,
+  APIPlayground,
+  ScalarPlayground,
+} from './client';
 
 export function APIInfo({
   className,
-  route,
-  badgeClassname,
-  method = 'GET',
-  head,
   ...props
-}: APIInfoProps &
-  HTMLAttributes<HTMLDivElement> & {
-    badgeClassname?: string;
-  }) {
+}: HTMLAttributes<HTMLDivElement>) {
   return (
     <div className={cn('min-w-0 flex-1', className)} {...props}>
-      {head}
-      <div className="not-prose mb-4 rounded-lg border bg-fd-card p-3 text-fd-card-foreground shadow-lg">
-        <div className="-mx-1 flex flex-row items-center gap-1.5">
-          <span
-            className={cn(
-              badgeVariants({ color: getBadgeColor(method) }),
-              badgeClassname,
-            )}
-          >
-            {method}
-          </span>
-          <Route route={route} />
-          <CopyRouteButton className="ms-auto size-6 p-1.5" route={route} />
-        </div>
-        <ServerSelect />
-      </div>
-      <div className="prose-no-margin">{props.children}</div>
+      {props.children}
     </div>
   );
 }
@@ -89,8 +56,8 @@ export function Property({
   children,
 }: PropertyProps) {
   return (
-    <div className="mb-4 rounded-lg border bg-fd-card p-3 prose-no-margin">
-      <h4 className="flex flex-row flex-wrap items-center gap-4">
+    <div className="rounded-xl border bg-fd-card p-3 prose-no-margin">
+      <div className="flex flex-row flex-wrap items-center gap-4">
         <code>{name}</code>
         {required ? (
           <div className={cn(badgeVariants({ color: 'red' }))}>Required</div>
@@ -100,10 +67,10 @@ export function Property({
             Deprecated
           </div>
         ) : null}
-        <span className="ms-auto font-mono text-[13px] text-fd-muted-foreground">
+        <span className="ms-auto text-xs font-mono text-fd-muted-foreground">
           {type}
         </span>
-      </h4>
+      </div>
       {children}
     </div>
   );
@@ -128,8 +95,19 @@ export function ObjectCollapsible(props: {
   children: ReactNode;
 }) {
   return (
-    <Accordions type="single">
-      <Accordion title={props.name}>{props.children}</Accordion>
-    </Accordions>
+    <Collapsible {...props}>
+      <CollapsibleTrigger
+        className={cn(
+          buttonVariants({ color: 'outline', size: 'sm' }),
+          'group rounded-full px-2 py-1.5 text-fd-muted-foreground',
+        )}
+      >
+        {props.name}
+        <ChevronDown className="size-4 group-data-[state=open]:rotate-180" />
+      </CollapsibleTrigger>
+      <CollapsibleContent className="-mx-2">
+        <div className="flex flex-col gap-2 p-2">{props.children}</div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 }

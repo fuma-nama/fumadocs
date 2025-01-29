@@ -7,13 +7,16 @@ description: Extract information from your documents, useful for implementing do
 
 Add it as a remark plugin.
 
-```ts
+```ts title="MDX Compiler"
+import { compile } from '@mdx-js/mdx';
 import { remarkStructure } from 'fumadocs-core/mdx-plugins';
 
-export default {
+const vfile = await compile('...', {
   remarkPlugins: [remarkStructure],
-};
+});
 ```
+
+> This plugin is included by default on Fumadocs MDX.
 
 Extracted information could be found in `vfile.data.structuredData`, you may
 write your own plugin to convert it into a MDX export.

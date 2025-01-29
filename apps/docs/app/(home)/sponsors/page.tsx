@@ -17,7 +17,7 @@ export default async function Page() {
   ]);
 
   return (
-    <main className="container flex flex-col items-center py-16 text-center">
+    <main className="container flex flex-col items-center py-16 text-center z-[2]">
       <div
         className="absolute inset-0 z-[-1]"
         style={{

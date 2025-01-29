@@ -77,7 +77,7 @@ export function DocsLayout({
 
   const tabs = getSidebarTabsFromOptions(tabOptions, props.tree) ?? [];
   const variables = cn(
-    '[--fd-tocnav-height:36px] md:[--fd-sidebar-width:268px] xl:[--fd-toc-width:268px] xl:[--fd-tocnav-height:0px]',
+    '[--fd-tocnav-height:36px] md:[--fd-sidebar-width:268px] xl:md:[--fd-sidebar-width:286px] xl:[--fd-toc-width:286px] xl:[--fd-tocnav-height:0px]',
     !navReplace && navEnabled
       ? '[--fd-nav-height:3.5rem] md:[--fd-nav-height:0px]'
       : undefined,

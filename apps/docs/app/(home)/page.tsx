@@ -34,26 +34,29 @@ import {
   EarthIcon,
 } from './icons';
 import Img from './img.png';
+import ArchImg from './arch.png';
 
 const badgeVariants = cva(
   'inline-flex size-7 items-center justify-center rounded-full bg-fd-primary font-medium text-fd-primary-foreground',
 );
 
-export default function Page(): React.ReactElement {
+export default function Page() {
+  const gridColor =
+    'color-mix(in oklab, var(--color-fd-primary) 10%, transparent)';
+
   return (
     <>
       <div
         className="absolute inset-x-0 top-[200px] h-[250px] max-md:hidden"
         style={{
-          background:
-            'repeating-linear-gradient(to right, hsl(var(--primary)/.1),hsl(var(--primary)/.1) 1px,transparent 1px,transparent 50px), repeating-linear-gradient(to bottom, hsl(var(--primary)/.1),hsl(var(--primary)/.1) 1px,transparent 1px,transparent 50px)',
+          background: `repeating-linear-gradient(to right, ${gridColor}, ${gridColor} 1px,transparent 1px,transparent 50px), repeating-linear-gradient(to bottom, ${gridColor}, ${gridColor} 1px,transparent 1px,transparent 50px)`,
         }}
       />
-      <main className="container relative max-w-[1100px] px-2 py-4 lg:py-16">
+      <main className="container relative max-w-[1100px] px-2 py-4 z-[2] lg:py-16">
         <div
           style={{
             background:
-              'repeating-linear-gradient(to bottom, transparent, hsl(var(--secondary)/.2) 500px, transparent 1000px)',
+              'repeating-linear-gradient(to bottom, transparent, color-mix(in oklab, var(--color-fd-primary) 1%, transparent) 500px, transparent 1000px)',
           }}
         >
           <div className="relative">
@@ -61,21 +64,13 @@ export default function Page(): React.ReactElement {
             <UwuHero />
           </div>
           <Feedback />
-          <div className="container border-x border-t py-16 md:py-24">
-            <Terminal className="mx-auto mb-2 size-8 text-muted-foreground" />
-            <h2 className="text-center text-2xl font-semibold sm:text-3xl">
-              Start instantly.
-              <br />
-              Make it yours, Ship within seconds.
-            </h2>
-          </div>
           <Introduction />
-          <Why />
+          <Architecture />
           <div
-            className="container relative overflow-hidden border-x border-t py-16 sm:py-24"
+            className="relative overflow-hidden border-x border-t px-8 py-16 sm:py-24"
             style={{
               backgroundImage:
-                'radial-gradient(circle at bottom center, hsl(var(--secondary)), hsl(var(--background)))',
+                'radial-gradient(circle at bottom center, var(--color-fd-secondary), var(--color-fd-background))',
             }}
           >
             <h2 className="bg-gradient-to-b from-fd-primary to-fd-foreground/40 bg-clip-text text-center text-2xl font-semibold text-transparent sm:text-3xl">
@@ -86,6 +81,7 @@ export default function Page(): React.ReactElement {
           </div>
           <Features />
           <Highlights />
+          <Why />
           <Contributing />
           <End />
         </div>
@@ -94,41 +90,55 @@ export default function Page(): React.ReactElement {
   );
 }
 
-function Why(): React.ReactElement {
+function Architecture() {
   return (
-    <div
-      className="container relative overflow-hidden border-x border-t px-8 pb-4 pt-12 md:pt-24"
-      style={{
-        perspective: '900px',
-      }}
-    >
-      {new Array(10).fill(0).map((_, i) => (
-        <div
-          key={i}
-          className="absolute -left-20 top-0 z-[-1] h-[1000px] max-h-[100vw] origin-top-right rotate-45 bg-gradient-to-b from-primary blur-xl"
-          style={{
-            width: Math.random() * 32,
-            animation: `lightray ${((i + 2) * 2).toString()}s linear infinite`,
-          }}
-        />
-      ))}
-      <style>
-        {`@keyframes lightray {
-        from {
-        transform: rotate(40deg);
-        opacity: 100%;
-        }
-        to {
-        transform: rotate(-90deg);
-        opacity: 0%;
-        }
-        }`}
-      </style>
-      <h2 className="bg-gradient-to-b from-foreground to-foreground/40 bg-clip-text text-center text-2xl font-semibold text-transparent md:text-4xl">
-        Build docs 100x faster and easier
-        <p className="max-md:hidden">with Fumadocs</p>
-      </h2>
-      <p className="mt-4 text-center text-foreground/50">
+    <div className="flex flex-col gap-4 border-x border-t px-8 py-16 md:py-24 lg:flex-row md:px-16">
+      <div className="shrink-0 flex-1 font-mono text-start">
+        <p className="px-2 py-1 text-sm bg-fd-primary text-fd-primary-foreground font-medium w-fit mb-4">
+          Designed with Love
+        </p>
+        <h2 className="text-xl font-medium mb-4 sm:text-2xl">
+          One framework to solve three problems.
+        </h2>
+        <p className="text-sm text-fd-muted-foreground mb-6">
+          Fumadocs makes it easy to build beautiful docs, and bring the power to
+          transform content into data, on Next.js.
+          <br />
+          Every part is handled with love - incredibly flexible and
+          customisable.
+        </p>
+        <div className="flex flex-row items-center -mx-4">
+          <a
+            href="https://github.com/fuma-nama/fumadocs-basehub"
+            rel="noreferrer noopener"
+            target="_blank"
+            className={cn(buttonVariants({ variant: 'link' }))}
+          >
+            BaseHub CMS example
+          </a>
+          <a
+            href="https://github.com/fuma-nama/fumadocs-sanity"
+            rel="noreferrer noopener"
+            target="_blank"
+            className={cn(buttonVariants({ variant: 'link' }))}
+          >
+            Sanity example
+          </a>
+        </div>
+      </div>
+      <Image
+        src={ArchImg}
+        alt="Architecture"
+        className="md:-mt-20 ms-auto w-full max-w-[450px] invert dark:invert-0"
+      />
+    </div>
+  );
+}
+
+function Why() {
+  return (
+    <div className="relative overflow-hidden border-x border-t px-8 py-12 md:p-16 md:min-h-[700px]">
+      <p className="text-center font-medium text-fd-muted-foreground">
         Fumadocs offers a complete toolchain to build and maintain your docs.
       </p>
       <WhyInteractive
@@ -164,20 +174,12 @@ export const { GET } = createFromSource(source);`}
         }
         codeblockTheme={
           <CodeBlock
-            lang="ts"
-            code={`import { createPreset } from 'fumadocs-ui/tailwind-plugin';
- 
-/** @type {import('tailwindcss').Config} */
-export default {
-  darkMode: 'class',
-  presets: [createPreset()],
-  content: [
-    './node_modules/fumadocs-ui/dist/**/*.js',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './content/**/*.mdx',
-  ],
-};`}
+            lang="css"
+            code={`@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+
+@source '../node_modules/fumadocs-ui/dist/**/*.js';`}
           />
         }
         codeblockInteractive={
@@ -335,7 +337,7 @@ function Integration({
           className="mx-auto size-[500px] rounded-full"
           style={{
             backgroundImage:
-              'radial-gradient(circle at 0% 100%, transparent 60%, hsl(var(--primary)))',
+              'radial-gradient(circle at 0% 100%, transparent 60%, var(--color-fd-primary))',
           }}
         />
       </div>
@@ -437,9 +439,9 @@ function Highlight({
   );
 }
 
-function Hero(): React.ReactElement {
+function Hero() {
   return (
-    <div className="container relative z-[2] flex flex-col overflow-hidden border-x border-t bg-fd-background px-6 pt-12 max-md:text-center md:px-12 md:pt-16 [.uwu_&]:hidden">
+    <div className="relative z-[2] flex flex-col overflow-hidden border-x border-t bg-fd-background px-6 pt-12 max-md:text-center md:px-12 md:pt-16 [.uwu_&]:hidden">
       <h1 className="mb-8 text-4xl font-medium md:hidden">Build Your Docs</h1>
       <h1 className="mb-8 max-w-[600px] text-4xl font-medium max-md:hidden">
         Build excellent documentation site with less effort
@@ -448,9 +450,9 @@ function Hero(): React.ReactElement {
         Fumadocs is a{' '}
         <span className="text-fd-foreground">beautiful & robust</span>{' '}
         documentation framework with a complete toolchain. Designed for{' '}
-        <span className="text-foreground">Flexibility</span>,{' '}
-        <span className="text-foreground">Performance</span> and{' '}
-        <span className="text-foreground">Next.js</span>.
+        <span className="text-fd-foreground">Flexibility</span>,{' '}
+        <span className="text-fd-foreground">Performance</span> and{' '}
+        <span className="text-fd-foreground">Next.js</span>.
       </p>
       <div className="inline-flex items-center gap-3 max-md:mx-auto">
         <Link
@@ -477,17 +479,15 @@ function Hero(): React.ReactElement {
       <Image
         src={Img}
         alt="preview"
-        className="mb-[-250px] mt-8 min-w-[800px] select-none duration-1000 animate-in fade-in slide-in-from-bottom-12 md:mb-[-370px] md:min-w-[1100px]"
+        className="mb-[-250px] mt-12 min-w-[800px] select-none duration-1000 animate-in fade-in slide-in-from-bottom-12 md:mb-[-340px] md:min-w-[1100px]"
         priority
       />
       <div
         className="absolute inset-0 z-[-1]"
         style={{
           backgroundImage: [
-            'radial-gradient(ellipse at top, transparent 60%, hsla(250,90%,90%,0.2))',
-            'linear-gradient(to bottom, transparent 30%, hsl(var(--primary) / 0.2))',
-            'linear-gradient(to bottom, hsl(var(--background)) 40%, transparent)',
-            'repeating-linear-gradient(45deg, transparent,transparent 60px, hsl(var(--primary)) 61px, transparent 62px)',
+            'radial-gradient(ellipse at top, transparent 80%, color-mix(in oklab, var(--color-fd-primary) 10%, transparent))',
+            'linear-gradient(to bottom, var(--color-fd-background) 80%, transparent)',
           ].join(', '),
         }}
       />
@@ -495,7 +495,7 @@ function Hero(): React.ReactElement {
   );
 }
 
-function Feedback(): React.ReactElement {
+function Feedback() {
   return (
     <div className="relative flex flex-col items-center overflow-hidden border-x border-t px-6 py-8 md:py-16">
       <div
@@ -506,7 +506,7 @@ function Feedback(): React.ReactElement {
             'linear-gradient(to right, #4ebfff, transparent, #e92a67)',
         }}
       />
-      <p className="text-center font-medium text-muted-foreground">
+      <p className="text-center font-medium text-fd-muted-foreground">
         Trusted by awesome teams and developers
       </p>
 
@@ -619,7 +619,7 @@ Hello World
   );
 }
 
-function Contributing(): React.ReactElement {
+function Contributing() {
   return (
     <div className="flex flex-col items-center border-x border-t px-4 py-16 text-center">
       <Heart className="mb-4" />
@@ -649,7 +649,7 @@ function Contributing(): React.ReactElement {
   );
 }
 
-function Features(): React.ReactElement {
+function Features() {
   return (
     <div className="grid grid-cols-1 border-r md:grid-cols-2">
       <Feature
@@ -658,7 +658,7 @@ function Features(): React.ReactElement {
         heading="Your source. Your choice"
         description={
           <>
-            <span className="font-medium text-foreground">
+            <span className="font-medium text-fd-foreground">
               Designed to integrate with any content source:{' '}
             </span>
             <span>
@@ -670,7 +670,7 @@ function Features(): React.ReactElement {
         className="overflow-hidden"
         style={{
           backgroundImage:
-            'radial-gradient(circle at 60% 50%,hsl(var(--secondary)),hsl(var(--background)) 80%)',
+            'radial-gradient(circle at 60% 50%,var(--color-fd-secondary),var(--color-fd-background) 80%)',
         }}
       >
         <div className="mt-8 flex flex-col">
@@ -724,9 +724,10 @@ function Features(): React.ReactElement {
           wrapper={{
             title: 'Terminal',
             allowCopy: false,
+            className: 'backdrop-blur-sm',
           }}
         />
-        <pre className="grid grid-cols-1 rounded-lg border bg-card p-4 text-xs leading-loose">
+        <pre className="grid grid-cols-1 rounded-lg border bg-fd-card/80 p-4 text-xs leading-loose">
           <code>Installing Files component...</code>
           <code className="text-muted-foreground">{`-> ./components/files.tsx`}</code>
           <code className="text-green-500">Successful</code>

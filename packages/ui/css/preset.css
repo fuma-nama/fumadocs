@@ -1,0 +1,37 @@
+@import './shiki.css';
+@import './animations.css';
+
+@plugin '../dist/theme/docs-ui.js';
+@plugin '../dist/theme/typography/index.js';
+
+@theme {
+  --spacing-fd-container: 1400px;
+}
+
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-fd-border, currentColor);
+  }
+
+  body {
+    background-color: var(--color-fd-background);
+    color: var(--color-fd-foreground);
+  }
+
+  [data-rmiz-modal-overlay='visible'] {
+    background-color: var(--color-fd-background);
+  }
+}
+
+@utility container {
+  margin-inline: auto;
+  padding-inline: 1rem;
+
+  @apply 2xl:max-w-[1400px];
+}
+
+@variant dark (&:where(.dark, .dark *));

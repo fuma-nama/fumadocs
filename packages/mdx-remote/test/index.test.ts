@@ -11,6 +11,7 @@ const files = await Glob('./fixtures/*.mdx', {
 });
 
 const compiler = createCompiler({
+  development: true,
   rehypeCodeOptions: {
     experimentalJSEngine: true,
     lazy: true,

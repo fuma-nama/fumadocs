@@ -4,17 +4,12 @@ import {
   type HTMLAttributes,
   useMemo,
   useRef,
-  useState,
   useEffect,
   type FC,
+  Fragment,
   type ReactNode,
 } from 'react';
-import { Controller, useForm, useWatch } from 'react-hook-form';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from 'fumadocs-ui/components/ui/collapsible';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
 import { cn, buttonVariants } from 'fumadocs-ui/components/api';
 import type {
   FieldPath,
@@ -23,13 +18,12 @@ import type {
   ControllerRenderProps,
 } from 'react-hook-form';
 import { useApiContext } from '@/ui/contexts/api';
-import { Form } from '@/ui/components/form';
 import type { FetchResult } from '@/ui/playground/fetcher';
 import {
   getDefaultValue,
   getDefaultValues,
 } from '@/ui/playground/get-default-values';
-import { InputField, ObjectInput } from '@/ui/playground/inputs';
+import { FieldSet, ObjectInput } from '@/ui/playground/inputs';
 import type {
   APIPlaygroundProps,
   PrimitiveRequestField,
@@ -39,6 +33,14 @@ import { type DynamicField, SchemaContext } from '../contexts/schema';
 import { getStatusInfo } from '@/ui/playground/status-info';
 import { getUrl } from '@/utils/server-url';
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
+import { MethodLabel } from '@/ui/components/method-label';
+import { useQuery } from '@/utils/use-query';
+import ServerSelect from '@/ui/server-select';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from 'fumadocs-ui/components/ui/collapsible';
 import { ChevronDown } from 'lucide-react';
 
 interface FormValues {
@@ -171,17 +173,12 @@ export function APIPlayground({
     }
 
     return (
-      <InputField
-        key={key}
-        name={info.name}
-        fieldName={fieldName}
-        field={info}
-      />
+      <FieldSet key={key} name={info.name} fieldName={fieldName} field={info} />
     );
   }
 
   return (
-    <Form {...form}>
+    <FormProvider {...form}>
       <SchemaContext.Provider
         value={useMemo(
           () => ({ references: schemas, dynamic: dynamicRef }),
@@ -191,25 +188,24 @@ export function APIPlayground({
         <form
           {...props}
           className={cn(
-            'not-prose flex flex-col gap-5 rounded-xl border bg-fd-card p-3',
+            'not-prose flex flex-col gap-2 rounded-xl border p-3 shadow-md',
             props.className,
           )}
           onSubmit={onSubmit as React.FormEventHandler}
         >
-          <div className="flex flex-row gap-2">
-            <RouteDisplay route={route} />
-            <button
-              type="submit"
-              className={cn(buttonVariants({ color: 'secondary' }))}
-              disabled={testQuery.isLoading}
-            >
-              Send
-            </button>
-          </div>
-
-          {authorization
-            ? renderCustomField('authorization', authorization, fields.auth)
-            : null}
+          <FormHeader
+            method={method}
+            route={route}
+            isLoading={testQuery.isLoading}
+          />
+          <CollapsiblePanel title="Server URL">
+            <ServerSelect />
+          </CollapsiblePanel>
+          {authorization ? (
+            <CollapsiblePanel title="Headers">
+              {renderCustomField('authorization', authorization, fields.auth)}
+            </CollapsiblePanel>
+          ) : null}
           {path.length > 0 ? (
             <CollapsiblePanel title="Path">
               {path.map((field) =>
@@ -262,27 +258,7 @@ export function APIPlayground({
           {testQuery.data ? <ResultDisplay data={testQuery.data} /> : null}
         </form>
       </SchemaContext.Provider>
-    </Form>
-  );
-}
-
-function CollapsiblePanel({
-  title,
-  children,
-}: {
-  title: string;
-  children: ReactNode;
-}) {
-  return (
-    <Collapsible className="-m-2">
-      <CollapsibleTrigger className="group flex w-full flex-row items-center justify-between p-2 font-medium">
-        {title}
-        <ChevronDown className="size-4 group-data-[state=open]:rotate-180" />
-      </CollapsibleTrigger>
-      <CollapsibleContent>
-        <div className="flex flex-col gap-4 p-2">{children}</div>
-      </CollapsibleContent>
-    </Collapsible>
+    </FormProvider>
   );
 }
 
@@ -312,20 +288,58 @@ function createPathnameFromInput(
     : pathname;
 }
 
-function RouteDisplay({ route }: { route: string }): ReactElement {
-  const [path, query] = useWatch<FormValues, ['path', 'query']>({
-    name: ['path', 'query'],
-  });
-
-  const pathname = useMemo(
-    () => createPathnameFromInput(route, path, query),
-    [route, path, query],
-  );
+function Route({
+  route,
+  ...props
+}: HTMLAttributes<HTMLDivElement> & { route: string }) {
+  const segments = route.split('/').filter((part) => part.length > 0);
 
   return (
-    <code className="flex-1 overflow-auto text-nowrap rounded-lg border bg-fd-secondary px-2 py-1.5 text-sm text-fd-secondary-foreground">
-      {pathname}
-    </code>
+    <div
+      {...props}
+      className={cn(
+        'flex flex-row items-center gap-0.5 overflow-auto text-nowrap',
+        props.className,
+      )}
+    >
+      {segments.map((part, index) => (
+        <Fragment key={index}>
+          <span className="text-fd-muted-foreground">/</span>
+          {part.startsWith('{') && part.endsWith('}') ? (
+            <code className="bg-fd-primary/10 text-fd-primary">{part}</code>
+          ) : (
+            <code className="text-fd-foreground">{part}</code>
+          )}
+        </Fragment>
+      ))}
+    </div>
+  );
+}
+
+function FormHeader({
+  route,
+  method,
+  isLoading,
+}: {
+  route: string;
+  method: string;
+  isLoading: boolean;
+}) {
+  return (
+    <div className="flex flex-row items-center gap-2 text-sm">
+      <MethodLabel>{method}</MethodLabel>
+      <Route route={route} className="flex-1" />
+      <button
+        type="submit"
+        className={cn(
+          buttonVariants({ color: 'primary', size: 'sm' }),
+          'px-3 py-1.5',
+        )}
+        disabled={isLoading}
+      >
+        Send
+      </button>
+    </div>
   );
 }
 
@@ -359,35 +373,25 @@ function DefaultResultDisplay({ data }: { data: FetchResult }) {
   );
 }
 
-function useQuery<I, T>(
-  fn: (input: I) => Promise<T>,
-): {
-  start: (input: I) => void;
-  data?: T;
-  isLoading: boolean;
-} {
-  const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<T>();
-
-  return useMemo(
-    () => ({
-      isLoading: loading,
-      data,
-      start(input) {
-        setLoading(true);
-
-        void fn(input)
-          .then((res) => {
-            setData(res);
-          })
-          .catch(() => {
-            setData(undefined);
-          })
-          .finally(() => {
-            setLoading(false);
-          });
-      },
-    }),
-    [data, fn, loading],
+export function CollapsiblePanel({
+  title,
+  children,
+  ...props
+}: HTMLAttributes<HTMLDivElement> & {
+  title: ReactNode;
+}) {
+  return (
+    <Collapsible
+      {...props}
+      className="border rounded-xl bg-fd-card text-fd-card-foreground overflow-hidden"
+    >
+      <CollapsibleTrigger className="group w-full inline-flex items-center gap-2 justify-between p-3 text-sm font-medium hover:bg-fd-accent">
+        {title}
+        <ChevronDown className="size-4 group-data-[state=open]:rotate-180" />
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        <div className="flex flex-col gap-4 p-3">{children}</div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 }

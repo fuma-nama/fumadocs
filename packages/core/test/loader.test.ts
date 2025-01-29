@@ -456,3 +456,55 @@ test('Loader: Without meta.json', () => {
     }
   `);
 });
+
+test('Loader: Rest operator', () => {
+  const result = loader({
+    baseUrl: '/',
+    pageTree: {
+      noRef: true,
+    },
+    source: {
+      files: [
+        {
+          type: 'meta',
+          path: 'meta.json',
+          data: {
+            pages: ['z...a'],
+          },
+        },
+        {
+          type: 'page',
+          path: '1-2.mdx',
+          data: {
+            title: '1.2',
+          },
+        },
+        {
+          type: 'page',
+          path: '2-2.mdx',
+          data: {
+            title: '2.2',
+          },
+        },
+      ],
+    },
+  });
+
+  expect(result.pageTree, 'Page Tree').toMatchInlineSnapshot(`
+    {
+      "children": [
+        {
+          "name": "2.2",
+          "type": "page",
+          "url": "/2-2",
+        },
+        {
+          "name": "1.2",
+          "type": "page",
+          "url": "/1-2",
+        },
+      ],
+      "name": "",
+    }
+  `);
+});

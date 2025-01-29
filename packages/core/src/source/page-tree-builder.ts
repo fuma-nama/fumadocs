@@ -55,7 +55,8 @@ export interface PageTreeBuilder {
 const group = /^\((?<name>.+)\)$/;
 const link = /^(?:\[(?<icon>[^\]]+)])?\[(?<name>[^\]]+)]\((?<url>[^)]+)\)$/;
 const separator = /^---(?<name>.*?)---$/;
-const rest = '...';
+const rest = '...' as const;
+const restReversed = 'z...a' as const;
 const extractPrefix = '...';
 const excludePrefix = '!';
 
@@ -113,8 +114,8 @@ function resolveFolderItem(
   item: string,
   ctx: PageTreeBuilderContext,
   addedNodePaths: Set<string>,
-): PageTree.Node[] | '...' {
-  if (item === rest) return '...';
+): PageTree.Node[] | typeof rest | typeof restReversed {
+  if (item === rest || item === restReversed) return item;
 
   let match = separator.exec(item);
   if (match?.groups) {
@@ -194,7 +195,9 @@ function buildFolderNode(
     const isRoot = metadata?.root ?? isGlobalRoot;
     const addedNodePaths = new Set<string>();
 
-    const resolved = metadata?.pages?.flatMap<PageTree.Node | '...'>((item) => {
+    const resolved = metadata?.pages?.flatMap<
+      PageTree.Node | typeof rest | typeof restReversed
+    >((item) => {
       return resolveFolderItem(folder, item, ctx, addedNodePaths);
     });
 
@@ -205,8 +208,10 @@ function buildFolderNode(
     );
 
     const nodes = resolved?.flatMap<PageTree.Node>((item) => {
-      if (item === '...') {
+      if (item === rest) {
         return restNodes;
+      } else if (item === restReversed) {
+        return restNodes.reverse();
       }
 
       return item;

@@ -294,7 +294,7 @@ export function EarthIcon(props: SVGProps<SVGSVGElement>): React.ReactElement {
           gradientUnits="userSpaceOnUse"
         >
           <stop stopColor="rgba(255,255,255,0)" />
-          <stop offset="0.5" stopColor="rgba(200,200,255,0.2)" />
+          <stop offset="0.5" stopColor="rgba(255,255,255,0.2)" />
           <stop offset="1" stopColor="rgba(255,255,255,0)" />
         </linearGradient>
       </defs>

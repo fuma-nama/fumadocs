@@ -47,7 +47,7 @@ export interface SidebarOptions extends SidebarProps {
 
 export interface SidebarComponents {
   Item: FC<{ item: PageTree.Item }>;
-  Folder: FC<{ item: PageTree.Folder; level: number }>;
+  Folder: FC<{ item: PageTree.Folder; level: number; children: ReactNode }>;
   Separator: FC<{ item: PageTree.Separator }>;
 }
 

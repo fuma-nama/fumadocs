@@ -56,7 +56,7 @@ export function Operation({
   headingLevel?: number;
 }): ReactElement {
   const body = method.requestBody;
-  const security = method.security ?? ctx.document.security;
+  const security = method.security ?? ctx.schema.document.security;
   let headNode: ReactNode = null;
   let bodyNode: ReactNode = null;
   let responseNode: ReactNode = null;
@@ -369,7 +369,10 @@ function dedupe(samples: CodeSample[]): CodeSample[] {
 }
 
 function AuthSection({
-  ctx: { document, renderer },
+  ctx: {
+    schema: { document },
+    renderer,
+  },
   requirements,
 }: {
   requirements: SecurityRequirementObject[];
@@ -438,7 +441,7 @@ function AuthSection({
 async function ResponseTabs({
   endpoint,
   operation,
-  ctx: { renderer, generateTypeScriptSchema, dereferenceMap },
+  ctx: { renderer, generateTypeScriptSchema, schema },
 }: {
   endpoint: EndpointSample;
   operation: MethodInformation;
@@ -467,7 +470,7 @@ async function ResponseTabs({
     if (generateTypeScriptSchema) {
       ts = await generateTypeScriptSchema(endpoint, code);
     } else if (generateTypeScriptSchema === undefined) {
-      ts = await getTypescriptSchema(endpoint, code, dereferenceMap);
+      ts = await getTypescriptSchema(endpoint, code, schema.dereferenceMap);
     }
 
     if (ts) {

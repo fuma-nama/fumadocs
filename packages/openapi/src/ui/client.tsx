@@ -16,7 +16,7 @@ export const APIPlayground = dynamic(() =>
   import('./playground').then((mod) => mod.APIPlayground),
 );
 
-export const ServerSelect = dynamic(() => import('./server-select'));
+export const ScalarPlayground = dynamic(() => import('./scalar/index'));
 
 export function Root({
   children,

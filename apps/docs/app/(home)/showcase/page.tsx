@@ -150,7 +150,7 @@ export default function Showcase(): React.ReactElement {
   ];
 
   return (
-    <main className="pb-16">
+    <main className="pb-16 z-[2]">
       <div className="absolute inset-0 z-[-1] select-none overflow-hidden opacity-30">
         <Image
           alt="spot"
@@ -226,8 +226,8 @@ function ShowcaseItem({
       className="flex aspect-[1.91/1] flex-col rounded-2xl border border-transparent p-8 text-center shadow-fd-primary/20 transition-all hover:shadow-fd-primary/30"
       style={{
         backgroundImage:
-          'radial-gradient(closest-side at center, hsl(var(--background)) 89%, transparent 90%),' +
-          'conic-gradient(from 0deg, hsl(var(--background)) 120deg, hsl(var(--primary)), hsl(var(--background)) 240deg),' +
+          'radial-gradient(closest-side at center, var(--color-fd-background) 89%, transparent 90%),' +
+          'conic-gradient(from 0deg, var(--color-fd-background) 120deg, var(--color-fd-primary), var(--color-fd-background) 240deg),' +
           'linear-gradient(to right bottom, black, rgb(200,200,200), black)',
         backgroundOrigin: 'border-box',
         boxShadow: 'inset 0px 12px 28px 4px var(--tw-shadow-color)',

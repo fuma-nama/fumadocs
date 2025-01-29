@@ -187,6 +187,26 @@ paths:
             planter.list({ unwatered: true });
 ```
 
+#### Disable Code Sample
+
+You can disable the code sample for a specific language, for example, to disable cURL:
+
+```ts
+import { createOpenAPI } from 'fumadocs-openapi/server';
+
+export const openapi = createOpenAPI({
+  generateCodeSamples(endpoint) {
+    return [
+      {
+        lang: 'curl',
+        label: 'cURL',
+        source: false,
+      },
+    ];
+  },
+});
+```
+
 ### Renderer
 
 Customise components in the page.

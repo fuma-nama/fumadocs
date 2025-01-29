@@ -1,0 +1,47 @@
+@theme {
+  --color-fd-popover: hsl(220, 22%, 92%);
+  --color-fd-popover-foreground: hsl(234, 16%, 35%);
+  --color-fd-secondary-foreground: hsl(234, 16%, 35%);
+  --color-fd-border: hsl(223, 16%, 83%);
+  --color-fd-primary: hsl(266, 85%, 58%);
+  --color-fd-primary-foreground: hsl(234, 16%, 35%);
+  --color-fd-muted: hsl(220, 22%, 92%);
+  --color-fd-card: hsl(220, 22%, 92%);
+  --color-fd-accent: hsl(223, 16%, 83%);
+  --color-fd-accent-foreground: hsl(234, 16%, 35%);
+  --color-fd-card-foreground: hsl(234, 16%, 35%);
+  --color-fd-muted-foreground: hsl(233, 10%, 47%);
+  --color-fd-foreground: hsl(234, 16%, 35%);
+  --color-fd-secondary: hsl(220, 22%, 92%);
+  --color-fd-background: hsl(220, 23%, 95%);
+  --color-fd-ring: hsl(267, 84%, 81%);
+}
+
+.dark {
+  --color-fd-background: hsl(240, 21%, 15%);
+  --color-fd-foreground: hsl(226, 64%, 88%);
+  --color-fd-ring: hsl(267, 84%, 81%);
+  --color-fd-primary: hsl(267, 84%, 81%);
+  --color-fd-popover: hsl(240, 23%, 9%);
+  --color-fd-card: hsl(240, 21%, 12%);
+  --color-fd-muted: hsl(240, 21%, 12%);
+  --color-fd-border: hsl(237, 16%, 23%);
+  --color-fd-accent: hsl(237, 16%, 23%);
+  --color-fd-secondary: hsl(240, 21%, 12%);
+  --color-fd-primary-foreground: hsl(240, 23%, 9%);
+  --color-fd-card-foreground: hsl(226, 64%, 88%);
+  --color-fd-secondary-foreground: hsl(226, 64%, 88%);
+  --color-fd-popover-foreground: hsl(226, 64%, 88%);
+  --color-fd-accent-foreground: hsl(226, 64%, 88%);
+  --color-fd-muted-foreground: hsl(228, 24%, 72%);
+}
+
+#nd-sidebar {
+  --color-fd-secondary: hsl(223, 16%, 83%);
+  --color-fd-muted: hsl(223, 16%, 83%);
+}
+
+.dark #nd-sidebar {
+  --color-fd-secondary: hsl(237, 16%, 23%);
+  --color-fd-muted: hsl(237, 16%, 23%);
+}

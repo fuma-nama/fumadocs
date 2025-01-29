@@ -18,6 +18,7 @@ export async function generateDocs() {
       input: ['./museum.yaml'],
       output: './content/docs/openapi',
       per: 'operation',
+      groupBy: 'tag',
     }),
     Typescript.generateFiles({
       input: ['./content/docs/**/*.model.mdx'],

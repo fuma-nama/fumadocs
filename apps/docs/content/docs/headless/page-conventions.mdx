@@ -114,7 +114,7 @@ When a meta file is present, items are not included unless you have explicitly a
 
 ### Path
 
-The items of `pages` property can be a relative path to a page or folder. File extensions are not required.
+The items of `pages` can also be a relative path to a page or folder, no file extensions needed.
 
 ```json
 {
@@ -157,6 +157,17 @@ Add a Rest (`...`) item to automatically add and sort remaining page items.
 {
   "title": "Folder",
   "pages": ["guide", "..."]
+}
+```
+
+#### Reversed Order
+
+Instead of soring alphabetically, you can also sort items reversely.
+
+```json
+{
+  "title": "Folder",
+  "pages": ["guide", "z...a"]
 }
 ```
 
@@ -244,7 +255,7 @@ For example, when you are in a root folder called `core`, the other folders (e.g
 
 ### Index Pages
 
-By default, index pages are not considered as a page "under" the folder, you must specify them in the `pages` property.
+By default, index pages are not considered as the child item of a folder, you must specify them in the `pages` property.
 
 ## Internationalization
 

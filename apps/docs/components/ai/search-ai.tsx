@@ -1,11 +1,14 @@
 'use client';
 import {
   type ButtonHTMLAttributes,
+  createContext,
   type HTMLAttributes,
   type ReactNode,
   type TextareaHTMLAttributes,
+  use,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -24,7 +27,6 @@ import { cn } from '@/lib/cn';
 import { buttonVariants } from '../../../../packages/ui/src/components/ui/button';
 import type { Processor } from './markdown-processor';
 import Link from 'fumadocs-core/link';
-import { cva } from 'class-variance-authority';
 
 export interface Engine {
   prompt: (
@@ -59,32 +61,19 @@ export interface MessageReference {
 
 type EngineType = 'orama' | 'inkeep';
 
-const engines = new Map<EngineType, Engine>();
+const Context = createContext<{
+  engine?: Engine;
+  loading: boolean;
+  setLoading: (loading: boolean) => void;
+}>({
+  loading: false,
+  setLoading: () => undefined,
+});
 
-function AIDialog({ type }: { type: EngineType }) {
-  const [engine, setEngine] = useState(engines.get(type));
-  const [loading, setLoading] = useState(false);
+function AIDialog() {
   const [_, update] = useState(0);
   const shouldFocus = useRef(false); // should focus on input on next render
-
-  useEffect(() => {
-    // preload processor
-    void import('./markdown-processor');
-
-    if (type === 'orama') {
-      void import('./engines/orama').then(async (res) => {
-        const instance = engines.get(type) ?? (await res.createOramaEngine());
-        engines.set(type, instance);
-        setEngine(instance);
-      });
-    } else if (type === 'inkeep') {
-      void import('./engines/inkeep').then(async (res) => {
-        const instance = engines.get(type) ?? (await res.createInkeepEngine());
-        engines.set(type, instance);
-        setEngine(instance);
-      });
-    }
-  }, [type, engine]);
+  const { loading, setLoading, engine } = use(Context);
 
   const onTry = useCallback(() => {
     if (!engine) return;
@@ -97,7 +86,7 @@ function AIDialog({ type }: { type: EngineType }) {
       .finally(() => {
         setLoading(false);
       });
-  }, [engine]);
+  }, [engine, setLoading]);
 
   const onClear = useCallback(() => {
     engine?.clearHistory();
@@ -118,7 +107,7 @@ function AIDialog({ type }: { type: EngineType }) {
           shouldFocus.current = true;
         });
     },
-    [engine],
+    [engine, setLoading],
   );
 
   useEffect(() => {
@@ -130,14 +119,14 @@ function AIDialog({ type }: { type: EngineType }) {
 
   const messages = engine?.getHistory() ?? [];
   const activeBar = (
-    <div className="mt-2 flex flex-row items-center gap-2 border-t pt-1">
+    <div className="flex flex-row shrink-0 items-center gap-2 border-t py-1 px-3">
       <button
         type="button"
         className={cn(
           buttonVariants({
             color: 'secondary',
-            className: 'gap-1.5',
           }),
+          'gap-1.5 rounded-full',
         )}
         onClick={onTry}
       >
@@ -150,10 +139,11 @@ function AIDialog({ type }: { type: EngineType }) {
           buttonVariants({
             color: 'ghost',
           }),
+          'rounded-full',
         )}
         onClick={onClear}
       >
-        Clear Messages
+        Clear History
       </button>
     </div>
   );
@@ -162,13 +152,10 @@ function AIDialog({ type }: { type: EngineType }) {
     <>
       <List className={cn(messages.length === 0 && 'hidden')}>
         {messages.map((item, i) => (
-          <Message key={i} message={item} onSuggestionSelected={onSubmit}>
-            {!loading && item.role === 'assistant' && i === messages.length - 1
-              ? activeBar
-              : null}
-          </Message>
+          <Message key={i} message={item} onSuggestionSelected={onSubmit} />
         ))}
       </List>
+      {!loading ? activeBar : null}
       {loading ? (
         <button
           type="button"
@@ -208,7 +195,7 @@ function AIInput({
   return (
     <form
       className={cn(
-        'flex flex-row rounded-b-lg border-t pe-2 transition-colors',
+        'flex flex-row items-start rounded-b-lg border-t pe-2 transition-colors',
         loading && 'bg-fd-muted',
       )}
       onSubmit={onStart}
@@ -234,9 +221,8 @@ function AIInput({
           type="submit"
           className={cn(
             buttonVariants({
-              size: 'sm',
               color: 'ghost',
-              className: 'rounded-full p-1',
+              className: 'rounded-full mt-2 p-1.5',
             }),
           )}
           disabled={message.length === 0}
@@ -322,50 +308,19 @@ const roleName: Record<string, string> = {
 };
 
 function Message({
-  children,
   onSuggestionSelected,
   message,
 }: {
   message: MessageRecord;
   onSuggestionSelected: (suggestion: string) => void;
-  children: ReactNode;
 }) {
   const { suggestions = [], references = [] } = message;
-  const [rendered, setRendered] = useState<ReactNode>(
-    map.get(message.content) ?? message.content,
-  );
-
-  useEffect(() => {
-    const run = async () => {
-      const { createProcessor } = await import('./markdown-processor');
-
-      processor ??= createProcessor();
-      let result = map.get(message.content);
-
-      if (!result) {
-        result = await processor
-          .process(message.content, {
-            ...defaultMdxComponents,
-            img: undefined, // use JSX
-          })
-          .catch(() => undefined);
-      }
-
-      if (result) {
-        map.set(message.content, result);
-        setRendered(result);
-      }
-    };
-
-    void run();
-  }, [message.content]);
 
   return (
     <div
       className={cn(
-        'rounded-lg border bg-fd-card px-2 py-1.5 text-fd-card-foreground',
         message.role === 'user' &&
-          'bg-fd-secondary text-fd-secondary-foreground',
+          'bg-fd-secondary text-fd-secondary-foreground border px-2 py-1.5 rounded-xl',
       )}
     >
       <p
@@ -376,14 +331,16 @@ function Message({
       >
         {roleName[message.role] ?? 'unknown'}
       </p>
-      <div className="prose text-sm">{rendered}</div>
+      <div className="prose text-sm">
+        <Markdown text={message.content} />
+      </div>
       {references.length > 0 ? (
         <div className="mt-2 flex flex-row flex-wrap items-center gap-1">
           {references.map((item, i) => (
             <Link
               key={i}
               href={item.url}
-              className="block rounded-lg border bg-fd-secondary p-2 text-fd-secondary-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground"
+              className="block rounded-lg border bg-fd-secondary px-2 py-1.5 text-fd-secondary-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground"
             >
               <p className="text-sm font-medium">{item.title}</p>
               <p className="text-xs text-fd-muted-foreground">
@@ -401,8 +358,8 @@ function Message({
               type="button"
               className={cn(
                 buttonVariants({
-                  color: 'secondary',
-                  className: 'py-1 text-nowrap',
+                  color: 'ghost',
+                  className: 'text-nowrap',
                 }),
               )}
               onClick={() => {
@@ -414,77 +371,124 @@ function Message({
           ))}
         </div>
       ) : null}
-      {children}
     </div>
   );
 }
 
-const typeButtonVariants = cva(
-  'inline-flex items-center justify-center rounded-lg px-2 py-1 text-sm font-medium transition-colors duration-100',
-  {
-    variants: {
-      active: {
-        true: 'bg-fd-primary/10 text-fd-primary',
-        false: 'text-fd-muted-foreground',
-      },
-    },
-  },
-);
+function Markdown({ text }: { text: string }) {
+  const [currentText, setCurrentText] = useState<string>();
+  const [rendered, setRendered] = useState<ReactNode>(map.get(text));
 
-export function Trigger(props: ButtonHTMLAttributes<HTMLButtonElement>) {
-  const engines = [
-    {
-      label: 'Inkeep',
-      value: 'inkeep',
-    },
-    { label: 'Orama', value: 'orama' },
-  ] as const;
-  const [type, setType] = useState<EngineType>(engines[0].value);
+  async function run() {
+    const { createProcessor } = await import('./markdown-processor');
+
+    processor ??= createProcessor();
+    let result = map.get(text);
+
+    if (!result) {
+      result = await processor
+        .process(text, {
+          ...defaultMdxComponents,
+          img: undefined, // use JSX
+        })
+        .catch(() => text);
+    }
+
+    map.set(text, result);
+    setRendered(result);
+  }
+
+  if (text !== currentText) {
+    setCurrentText(text);
+    void run();
+  }
+
+  return rendered ?? text;
+}
+
+function AIProvider({
+  type,
+  children,
+  loadEngine = false,
+}: {
+  type: EngineType;
+  children: ReactNode;
+  loadEngine?: boolean;
+}) {
+  const pendingRef = useRef(false);
+  const [loading, setLoading] = useState(false);
+  const [engine, setEngine] = useState<Engine>();
+
+  useEffect(() => {
+    if (!loadEngine || pendingRef.current) return;
+    pendingRef.current = true;
+    // preload processor
+    void import('./markdown-processor');
+
+    if (type === 'orama') {
+      void import('./engines/orama').then(async (res) => {
+        setEngine(await res.createOramaEngine());
+      });
+    } else if (type === 'inkeep') {
+      void import('./engines/inkeep').then(async (res) => {
+        setEngine(await res.createInkeepEngine());
+      });
+    }
+  }, [type, loadEngine]);
 
   return (
-    <Dialog>
+    <Context
+      value={useMemo(
+        () => ({
+          loading,
+          setLoading,
+          engine,
+        }),
+        [engine, loading],
+      )}
+    >
+      {children}
+    </Context>
+  );
+}
+
+export function Trigger(props: ButtonHTMLAttributes<HTMLButtonElement>) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger {...props} />
-      <DialogPortal>
-        <DialogOverlay className="fixed inset-0 z-50 bg-fd-background/50 backdrop-blur-sm data-[state=closed]:animate-fd-fade-out data-[state=open]:animate-fd-fade-in" />
-        <DialogContent
-          onOpenAutoFocus={(e) => {
-            document.getElementById('nd-ai-input')?.focus();
-            e.preventDefault();
-          }}
-          aria-describedby={undefined}
-          className="fixed left-1/2 z-50 my-[5vh] flex max-h-[90dvh] w-[98vw] max-w-[860px] origin-left -translate-x-1/2 flex-col rounded-lg border bg-fd-popover text-fd-popover-foreground shadow-lg focus-visible:outline-none data-[state=closed]:animate-fd-dialog-out data-[state=open]:animate-fd-dialog-in"
-        >
-          <DialogTitle className="sr-only">Search AI</DialogTitle>
-          <DialogClose
-            aria-label="Close Dialog"
-            tabIndex={-1}
-            className="absolute right-1 top-1 rounded-full p-1.5 text-fd-muted-foreground hover:bg-fd-accent hover:text-fd-accent-foreground"
+      <AIProvider type="inkeep" loadEngine={open}>
+        <DialogPortal>
+          <DialogOverlay className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm data-[state=closed]:animate-fd-fade-out data-[state=open]:animate-fd-fade-in" />
+          <DialogContent
+            onOpenAutoFocus={(e) => {
+              document.getElementById('nd-ai-input')?.focus();
+              e.preventDefault();
+            }}
+            aria-describedby={undefined}
+            className="fixed left-1/2 z-50 my-[5vh] flex max-h-[90dvh] w-[98vw] max-w-[860px] -translate-x-1/2 flex-col rounded-lg border bg-fd-popover text-fd-popover-foreground shadow-lg focus-visible:outline-none data-[state=closed]:animate-fd-dialog-out data-[state=open]:animate-fd-dialog-in"
           >
-            <X className="size-4" />
-          </DialogClose>
-          <div className="bg-fd-muted px-2.5 py-2">
-            <div className="flex flex-row items-center">
-              {engines.map((item) => (
-                <button
-                  key={item.value}
-                  className={cn(
-                    typeButtonVariants({ active: type === item.value }),
-                  )}
-                  onClick={() => {
-                    setType(item.value);
-                  }}
-                >
-                  {item.label}
-                </button>
-              ))}
+            <div className="bg-fd-muted px-2.5 py-2">
+              <DialogTitle className="text-sm w-fit bg-fd-primary text-fd-primary-foreground px-1 font-mono font-medium">
+                Prompt AI
+              </DialogTitle>
+              <p className="mt-2 text-xs text-fd-muted-foreground">
+                Answers from AI may be inaccurate, please verify the
+                information.
+              </p>
             </div>
-            <p className="mt-2 text-xs text-fd-muted-foreground">
-              Answers from AI may be inaccurate, please verify the information.
-            </p>
-          </div>
-          <AIDialog type={type} />
-        </DialogContent>
-      </DialogPortal>
+            <DialogClose
+              aria-label="Close Dialog"
+              tabIndex={-1}
+              className="absolute right-1 top-1 rounded-full p-1.5 text-fd-muted-foreground hover:bg-fd-accent hover:text-fd-accent-foreground"
+            >
+              <X className="size-4" />
+            </DialogClose>
+            <AIDialog />
+          </DialogContent>
+        </DialogPortal>
+      </AIProvider>
     </Dialog>
   );
 }

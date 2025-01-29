@@ -13,7 +13,7 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "next": "15.1.5",
+    "next": "15.1.6",
     "react": "19.0.0",
     "react-dom": "19.0.0"
   },

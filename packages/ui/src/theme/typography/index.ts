@@ -158,11 +158,10 @@ const SELECTORS = [
   ['lead', '[class~="lead"]'],
 ];
 
-export const typography = plugin.withOptions<Options>(
+export const typography: unknown = plugin.withOptions<Options>(
   ({ className = 'prose', ...styleOptions } = {}) => {
-    return ({ addVariant, addComponents, theme, ...rest }) => {
+    return ({ addVariant, addComponents, ...rest }) => {
       const prefix = (rest as unknown as { prefix: Context['prefix'] }).prefix;
-      const modifiers = theme('typography') as typeof styles;
 
       for (const [name, ...values] of SELECTORS) {
         const selectors = values.length === 0 ? [name] : values;
@@ -180,12 +179,12 @@ export const typography = plugin.withOptions<Options>(
       addComponents({
         [`.${className}`]: configToCss(
           {
-            ...modifiers.DEFAULT,
+            ...styles.DEFAULT,
             css: [
-              ...(modifiers.DEFAULT.css ?? []),
+              ...(styles.DEFAULT.css ?? []),
               styleOptions.disableRoundedTable
-                ? modifiers.normalTable
-                : modifiers.roundedTable,
+                ? styles.normalTable
+                : styles.roundedTable,
             ],
           },
           {
@@ -197,9 +196,6 @@ export const typography = plugin.withOptions<Options>(
       });
     };
   },
-  () => {
-    return {
-      theme: { typography: styles },
-    };
-  },
 );
+
+export default typography;

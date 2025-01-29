@@ -1,12 +1,14 @@
-import type { DereferenceMap, Document } from '@/types';
 import Slugger from 'github-slugger';
 import { Operation } from '@/render/operation';
 import type { RenderContext } from '@/types';
 import { createMethod } from '@/server/create-method';
 import { createRenders, type Renderer } from '@/render/renderer';
 import type { OpenAPIV3_1 } from 'openapi-types';
-import type { NoReference } from '@/utils/schema';
-import { type DocumentInput, processDocument } from '@/utils/process-document';
+import {
+  type DocumentInput,
+  processDocument,
+  type ProcessedDocument,
+} from '@/utils/process-document';
 import { getUrl } from '@/utils/server-url';
 
 type ApiPageContextProps = Pick<
@@ -16,6 +18,7 @@ type ApiPageContextProps = Pick<
   | 'generateCodeSamples'
   | 'proxyUrl'
   | 'showResponseSchema'
+  | 'useScalar'
 >;
 
 export interface ApiPageProps extends ApiPageContextProps {
@@ -36,11 +39,6 @@ export interface ApiPageProps extends ApiPageContextProps {
    */
   disableCache?: boolean;
 }
-
-type ProcessedDocument = {
-  document: NoReference<Document>;
-  dereferenceMap: DereferenceMap;
-};
 
 export interface WebhookItem {
   name: string;
@@ -63,6 +61,7 @@ export async function APIPage(props: ApiPageProps) {
   const processed = await processDocument(props.document, disableCache);
   const ctx = await getContext(processed, props);
   const { document } = processed;
+
   return (
     <ctx.renderer.Root baseUrl={ctx.baseUrl} servers={ctx.servers}>
       {operations?.map((item) => {
@@ -112,11 +111,12 @@ export async function APIPage(props: ApiPageProps) {
 }
 
 export async function getContext(
-  { document, dereferenceMap }: ProcessedDocument,
+  schema: ProcessedDocument,
   options: ApiPageContextProps & {
     renderer?: Partial<Renderer>;
   } = {},
 ): Promise<RenderContext> {
+  const document = schema.document;
   const servers =
     document.servers && document.servers.length > 0
       ? document.servers
@@ -124,12 +124,12 @@ export async function getContext(
   const server = servers[0];
 
   return {
-    document: document,
-    dereferenceMap,
+    useScalar: options.useScalar ?? false,
+    schema,
     proxyUrl: options.proxyUrl,
     showResponseSchema: options.showResponseSchema,
     renderer: {
-      ...createRenders(options.shikiOptions),
+      ...createRenders(options.shikiOptions, options.useScalar ?? false),
       ...options.renderer,
     },
     shikiOptions: options.shikiOptions,

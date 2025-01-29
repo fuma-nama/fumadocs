@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-openapi",
-  "version": "5.11.7",
+  "version": "5.12.0",
   "description": "Generate MDX docs for your OpenAPI spec",
   "keywords": [
     "NextJs",
@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "@fumari/json-schema-to-typescript": "^1.1.2",
-    "@radix-ui/react-select": "^2.1.4",
+    "@radix-ui/react-select": "^2.1.5",
     "@radix-ui/react-slot": "^1.1.1",
     "@scalar/openapi-parser": "0.10.4",
     "ajv-draft-04": "^1.0.0",
@@ -50,29 +50,38 @@
     "github-slugger": "^2.0.0",
     "hast-util-to-jsx-runtime": "^2.3.2",
     "js-yaml": "^4.1.0",
+    "next-themes": "^0.4.4",
     "openapi-sampler": "^1.6.1",
     "react-hook-form": "^7.54.2",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.1",
-    "shiki": "^2.0.3",
+    "shiki": "^2.1.0",
     "xml-js": "^1.6.11"
   },
   "devDependencies": {
+    "@scalar/api-client-react": "^1.1.17",
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "22.10.7",
+    "@types/node": "22.10.9",
     "@types/openapi-sampler": "^1.0.3",
     "@types/react": "^19.0.7",
     "bunchee": "^6.3.2",
     "eslint-config-custom": "workspace:*",
     "lucide-react": "^0.473.0",
-    "next": "15.1.5",
+    "next": "15.1.6",
     "openapi-types": "^12.1.3",
+    "tailwindcss": "^4.0.0",
     "tsconfig": "workspace:*"
   },
   "peerDependencies": {
+    "@scalar/api-client-react": "*",
     "next": "14.x.x || 15.x.x",
     "react": "18.x.x || 19.x.x",
     "react-dom": "18.x.x || 19.x.x"
+  },
+  "peerDependenciesMeta": {
+    "@scalar/api-client-react": {
+      "optional": true
+    }
   },
   "publishConfig": {
     "access": "public"

@@ -1,13 +1,12 @@
 import {
   type HTMLAttributes,
+  type LabelHTMLAttributes,
   type ReactNode,
-  useCallback,
   useState,
 } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
-import { useFieldArray, useFormContext } from 'react-hook-form';
+import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
 import { cn, buttonVariants } from 'fumadocs-ui/components/api';
-import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import {
   Select,
   SelectContent,
@@ -16,90 +15,37 @@ import {
   SelectValue,
 } from '@/ui/components/select';
 import type { RequestSchema } from '@/render/playground';
-import {
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  labelVariants,
-} from '@/ui/components/form';
 import { resolve } from '@/ui/playground/resolve';
-import { Input } from '@/ui/components/input';
+import { Input, labelVariants } from '@/ui/components/input';
 import { getDefaultValue } from '@/ui/playground/get-default-values';
-import { useSchemaContext } from '../contexts/schema';
+import { useSchemaContext } from '@/ui/contexts/schema';
 
-interface RenderOptions {
-  field: RequestSchema;
-  fieldName: string;
-  className?: string;
-}
-
-function renderInner({ field, ...props }: RenderOptions) {
-  if (field.type === 'object')
-    return (
-      <ObjectInput
-        field={field}
-        {...props}
-        className={cn('rounded-lg border bg-fd-accent/20 p-3', props.className)}
-      />
-    );
-  if (field.type === 'switcher')
-    return <Switcher inline field={field} {...props} />;
-  if (field.type === 'array')
-    return (
-      <ArrayInput
-        field={field}
-        {...props}
-        className={cn(
-          'rounded-lg border bg-fd-background p-3',
-          props.className,
-        )}
-      />
-    );
-  if (field.type === 'null') return null;
-
-  return <NormalInput field={field} {...props} />;
-}
-
-interface InputProps<Type> {
-  field: Extract<RequestSchema, { type: Type }>;
-  fieldName: string;
-}
-
-interface InputContainerProps extends HTMLAttributes<HTMLDivElement> {
+type FieldOfType<Type> = Extract<RequestSchema, { type: Type }>;
+interface InputHeaderProps {
   name?: string;
-  required: boolean;
+  required?: boolean;
   type?: string;
-  description?: string;
-
-  inline?: boolean;
-  toolbar?: ReactNode;
 }
 
-function InputContainer({
-  toolbar,
+function FieldHeader({
   name,
-  required,
+  required = false,
   type,
-  description,
-  inline = false,
   ...props
-}: InputContainerProps): React.ReactElement {
+}: InputHeaderProps & LabelHTMLAttributes<HTMLLabelElement>) {
   return (
-    <div {...props} className={cn('flex flex-col gap-1', props.className)}>
-      <div className={cn(labelVariants(), 'inline-flex items-center gap-1')}>
-        {name}
-        {required ? <span className="text-red-500">*</span> : null}
-        <div className="flex-1" />
-        {type ? (
-          <code className="text-xs text-fd-muted-foreground">{type}</code>
-        ) : null}
-        {toolbar}
-      </div>
-      {!inline ? <p className="text-xs">{description}</p> : null}
+    <label
+      {...props}
+      className={cn('w-full inline-flex items-center gap-1', props.className)}
+    >
+      <span className={cn(labelVariants())}>{name}</span>
+      {required ? <span className="text-red-500">*</span> : null}
+      <div className="flex-1" />
+      {type ? (
+        <code className="text-xs text-fd-muted-foreground">{type}</code>
+      ) : null}
       {props.children}
-    </div>
+    </label>
   );
 }
 
@@ -107,13 +53,16 @@ export function ObjectInput({
   field,
   fieldName,
   ...props
-}: InputProps<'object'> & HTMLAttributes<HTMLDivElement>): React.ReactElement {
+}: {
+  field: FieldOfType<'object'>;
+  fieldName: string;
+} & HTMLAttributes<HTMLDivElement>) {
   const { references } = useSchemaContext();
 
   return (
-    <div {...props} className={cn('flex flex-col gap-4', props.className)}>
+    <div {...props} className={cn('flex flex-col gap-6', props.className)}>
       {Object.entries(field.properties).map(([key, child]) => (
-        <InputField
+        <FieldSet
           key={key}
           name={key}
           field={resolve(child, references)}
@@ -136,7 +85,7 @@ function AdditionalProperties({
 }: {
   fieldName: string;
   type: boolean | string;
-}): React.ReactElement {
+}) {
   const { control, setValue } = useFormContext();
   const { references, dynamic } = useSchemaContext();
   const [nextName, setNextName] = useState('');
@@ -147,14 +96,12 @@ function AdditionalProperties({
     return [];
   });
 
-  useOnChange(properties, () => {
-    dynamic.current.set(`additional_${fieldName}`, {
-      type: 'object',
-      properties,
-    });
+  dynamic.current.set(`additional_${fieldName}`, {
+    type: 'object',
+    properties,
   });
 
-  const onAppend = useCallback(() => {
+  const onAppend = () => {
     const name = nextName.trim();
     if (name.length === 0) return;
 
@@ -165,7 +112,7 @@ function AdditionalProperties({
       setNextName('');
       return [...p, name];
     });
-  }, [nextName, setValue, fieldName]);
+  };
 
   const types =
     typeof type === 'string'
@@ -175,7 +122,7 @@ function AdditionalProperties({
   return (
     <>
       {properties.map((item) => (
-        <Switcher
+        <FieldSet
           key={item}
           name={item}
           field={{
@@ -208,18 +155,15 @@ function AdditionalProperties({
         <Input
           value={nextName}
           placeholder="Enter Property Name"
-          onChange={useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+          onChange={(e) => {
             setNextName(e.target.value);
-          }, [])}
-          onKeyDown={useCallback(
-            (e: React.KeyboardEvent<HTMLInputElement>) => {
-              if (e.key === 'Enter') {
-                onAppend();
-                e.preventDefault();
-              }
-            },
-            [onAppend],
-          )}
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              onAppend();
+              e.preventDefault();
+            }
+          }}
         />
         <button
           type="button"
@@ -281,15 +225,119 @@ anyFields.array = {
   },
 };
 
-function Switcher({
+export function FieldInput({
   field,
   fieldName,
   ...props
-}: InputProps<'switcher'> & Partial<InputContainerProps>): React.ReactElement {
+}: HTMLAttributes<HTMLElement> & {
+  field: Exclude<RequestSchema, { type: 'switcher' }>;
+  fieldName: string;
+}) {
+  const { control, register } = useFormContext();
+
+  if (field.type === 'null') return null;
+
+  if (field.type === 'object') {
+    return (
+      <ObjectInput
+        field={field}
+        fieldName={fieldName}
+        {...props}
+        className={cn(
+          'rounded-lg border border-fd-primary/20 bg-fd-card p-3 shadow-sm',
+          props.className,
+        )}
+      />
+    );
+  }
+
+  if (field.type === 'array') {
+    return (
+      <ArrayInput
+        fieldName={fieldName}
+        field={field}
+        {...props}
+        className={cn(
+          'rounded-lg border border-fd-primary/20 bg-fd-background p-3 shadow-sm',
+          props.className,
+        )}
+      />
+    );
+  }
+
+  if (field.type === 'file' || field.type === 'boolean') {
+    return (
+      <Controller
+        control={control}
+        name={fieldName}
+        render={({ field: { value, onChange, ...restField } }) =>
+          field.type === 'file' ? (
+            <input
+              id={fieldName}
+              type="file"
+              multiple={false}
+              onChange={(e) => {
+                if (!e.target.files) return;
+                onChange(e.target.files.item(0));
+              }}
+              {...props}
+              {...restField}
+            />
+          ) : (
+            <Select
+              value={value as string}
+              onValueChange={onChange}
+              disabled={restField.disabled}
+            >
+              <SelectTrigger
+                id={fieldName}
+                className={props.className}
+                {...restField}
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="true">True</SelectItem>
+                <SelectItem value="false">False</SelectItem>
+                {field.isRequired ? null : (
+                  <SelectItem value="null">Null</SelectItem>
+                )}
+              </SelectContent>
+            </Select>
+          )
+        }
+      />
+    );
+  }
+
+  return (
+    <Input
+      id={fieldName}
+      placeholder="Enter value"
+      type={field.type === 'string' ? 'text' : 'number'}
+      {...register(fieldName)}
+      {...props}
+    />
+  );
+}
+
+export function FieldSet({
+  field,
+  fieldName,
+  toolbar,
+  name,
+  ...props
+}: HTMLAttributes<HTMLElement> & {
+  name?: string;
+  field: RequestSchema;
+  fieldName: string;
+  toolbar?: ReactNode;
+}) {
   const { references, dynamic } = useSchemaContext();
-  const items = Object.keys(field.items);
   const [value, setValue] = useState<string>(() => {
+    if (field.type !== 'switcher') return '';
     const d = dynamic.current.get(fieldName);
+    const items = Object.keys(field.items);
 
     if (d?.type === 'field') {
       // schemas are passed from server components, they shouldn't be re-constructed
@@ -301,211 +349,66 @@ function Switcher({
     return items[0];
   });
 
-  useOnChange(value, () => {
-    if (!value) return;
+  if (field.type === 'null') return null;
 
+  if (value && field.type === 'switcher') {
     dynamic.current.set(fieldName, {
       type: 'field',
       schema: field.items[value],
     });
-  });
-
-  return (
-    <InputContainer
-      required={field.isRequired}
-      description={field.description}
-      {...props}
-      toolbar={
-        <>
-          <Select value={value} onValueChange={setValue}>
-            <SelectTrigger className="h-auto p-1 text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {items.map((item) => (
-                <SelectItem key={item} value={item}>
-                  {item}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {props.toolbar}
-        </>
-      }
-    >
-      {renderInner({
-        field: resolve(field.items[value], references),
-        fieldName,
-      })}
-    </InputContainer>
-  );
-}
-
-export function InputField({
-  field,
-  fieldName,
-  ...props
-}: {
-  field: RequestSchema;
-  fieldName: string;
-} & Partial<InputContainerProps>): React.ReactNode {
-  const { references } = useSchemaContext();
-
-  if (field.type === 'null') return null;
-
-  if (field.type === 'object') {
-    return (
-      <InputContainer
-        required={field.isRequired}
-        type={field.type}
-        description={field.description}
-        {...props}
-      >
-        <ObjectInput
-          field={field}
-          fieldName={fieldName}
-          className="rounded-lg border bg-fd-accent/20 p-3"
-        />
-      </InputContainer>
-    );
-  }
-
-  if (field.type === 'array') {
-    return (
-      <InputContainer
-        required={field.isRequired}
-        description={
-          field.description ?? resolve(field.items, references).description
-        }
-        type="array"
-        {...props}
-      >
-        <ArrayInput
-          fieldName={fieldName}
-          field={field}
-          className="rounded-lg border bg-fd-background p-3"
-        />
-      </InputContainer>
-    );
   }
 
   if (field.type === 'switcher') {
-    return <Switcher field={field} fieldName={fieldName} {...props} />;
-  }
+    const child = resolve(field.items[value], references);
 
-  const { toolbar, inline = false, name, ...rest } = props;
-
-  return (
-    <NormalInput
-      field={field}
-      fieldName={fieldName}
-      header={
-        <>
-          <FormLabel className="inline-flex items-center gap-1">
-            {name}
-            {field.isRequired ? <span className="text-red-500">*</span> : null}
-            <code className="ms-auto text-xs text-fd-muted-foreground">
-              {field.type}
-            </code>
-            {toolbar}
-          </FormLabel>
-          {!inline ? (
-            <FormDescription className="text-xs">
-              {field.description}
-            </FormDescription>
-          ) : null}
-        </>
-      }
-      {...rest}
-    />
-  );
-}
-
-function NormalInput({
-  fieldName,
-  header,
-  field,
-  ...props
-}: InputProps<'string' | 'boolean' | 'number' | 'file'> & {
-  header?: React.ReactNode;
-}): React.ReactElement {
-  const { control } = useFormContext();
-
-  if (field.type === 'file') {
     return (
-      <FormField
-        control={control}
-        name={fieldName}
-        render={({ field: { value: _value, onChange, ...restField } }) => (
-          <FormItem {...props}>
-            {header}
-            <FormControl>
-              <input
-                type="file"
-                multiple={false}
-                onChange={(e) => {
-                  if (!e.target.files) return;
-                  onChange(e.target.files.item(0));
-                }}
-                {...restField}
-              />
-            </FormControl>
-          </FormItem>
+      <fieldset
+        {...props}
+        className={cn('flex flex-col gap-1.5', props.className)}
+      >
+        <FieldHeader
+          name={name}
+          htmlFor={fieldName}
+          required={field.isRequired}
+        >
+          <select
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            className="text-xs"
+          >
+            {Object.keys(field.items).map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+          {toolbar}
+        </FieldHeader>
+        <p className="text-xs text-fd-muted-foreground">{field.description}</p>
+        {child.type === 'switcher' ? (
+          <FieldSet field={child} fieldName={fieldName} />
+        ) : (
+          <FieldInput field={child} fieldName={fieldName} />
         )}
-      />
-    );
-  }
-
-  if (field.type === 'boolean') {
-    return (
-      <FormField
-        control={control}
-        name={fieldName}
-        render={({ field: { value, onChange, ...restField } }) => (
-          <FormItem {...props}>
-            {header}
-            <Select
-              value={value as string}
-              onValueChange={onChange}
-              disabled={restField.disabled}
-            >
-              <FormControl>
-                <SelectTrigger {...restField}>
-                  <SelectValue />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                <SelectItem value="true">True</SelectItem>
-                <SelectItem value="false">False</SelectItem>
-                {field.isRequired ? null : (
-                  <SelectItem value="null">Null</SelectItem>
-                )}
-              </SelectContent>
-            </Select>
-          </FormItem>
-        )}
-      />
+      </fieldset>
     );
   }
 
   return (
-    <FormField
-      control={control}
-      name={fieldName}
-      render={({ field: { value, ...restField } }) => (
-        <FormItem {...props}>
-          {header}
-          <FormControl>
-            <Input
-              placeholder="Enter value"
-              type={field.type === 'string' ? 'text' : 'number'}
-              value={value as string}
-              {...restField}
-            />
-          </FormControl>
-        </FormItem>
-      )}
-    />
+    <fieldset
+      {...props}
+      className={cn('flex flex-col gap-1.5', props.className)}
+    >
+      <FieldHeader
+        htmlFor={fieldName}
+        name={name}
+        required={field.isRequired}
+        type={field.type}
+      >
+        {toolbar}
+      </FieldHeader>
+      <FieldInput field={field} fieldName={fieldName} />
+    </fieldset>
   );
 }
 
@@ -519,27 +422,21 @@ function ArrayInput({
     description?: string;
     items: RequestSchema | string;
   };
-} & HTMLAttributes<HTMLDivElement>): React.ReactElement {
+} & HTMLAttributes<HTMLDivElement>) {
   const { references } = useSchemaContext();
   const items = resolve(field.items, references);
   const { fields, append, remove } = useFieldArray({
     name: fieldName,
   });
 
-  const handleAppend = useCallback(() => {
-    append(getDefaultValue(items, references));
-  }, [append, references, items]);
-
   return (
-    <div {...props} className={cn('flex flex-col gap-4', props.className)}>
+    <div {...props} className={cn('flex flex-col gap-2', props.className)}>
       {fields.map((item, index) => (
-        <InputField
+        <FieldSet
           key={item.id}
-          inline
-          name={`Item ${String(index + 1)}`}
+          name={`${fieldName.split('.').at(-1)}[${index}]`}
           field={items}
-          fieldName={`${fieldName}.${String(index)}`}
-          className="flex-1"
+          fieldName={`${fieldName}.${index}`}
           toolbar={
             <button
               type="button"
@@ -562,9 +459,15 @@ function ArrayInput({
       <button
         type="button"
         className={cn(
-          buttonVariants({ color: 'secondary', className: 'gap-1.5' }),
+          buttonVariants({
+            color: 'outline',
+            className: 'gap-1.5 py-2',
+            size: 'sm',
+          }),
         )}
-        onClick={handleAppend}
+        onClick={() => {
+          append(getDefaultValue(items, references));
+        }}
       >
         <Plus className="size-4" />
         New Item

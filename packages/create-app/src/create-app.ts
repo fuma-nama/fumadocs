@@ -107,58 +107,51 @@ function createPackageJson(projectName: string, options: Options): string {
       start: 'next start',
     } as Record<string, string>,
     dependencies: {
-      next: versionPkg.dependencies.next,
-      'fumadocs-ui': localVersions['fumadocs-ui'],
-      'fumadocs-core': localVersions['fumadocs-core'],
-      react: versionPkg.dependencies.react,
-      'react-dom': versionPkg.dependencies['react-dom'],
+      ...pick(versionPkg.dependencies, ['next', 'react', 'react-dom']),
+      ...pick(localVersions, ['fumadocs-ui', 'fumadocs-core']),
     } as Record<string, string>,
-    devDependencies: {
-      '@types/node': versionPkg.dependencies['@types/node'],
-      '@types/react': versionPkg.dependencies['@types/react'],
-      '@types/react-dom': versionPkg.dependencies['@types/react-dom'],
-      typescript: versionPkg.dependencies.typescript,
-    } as Record<string, string>,
+    devDependencies: pick(versionPkg.dependencies, [
+      '@types/node',
+      '@types/react',
+      '@types/react-dom',
+      'typescript',
+    ]) as Record<string, string>,
   };
 
   if (options.template === 'content-collections') {
-    packageJson.dependencies = {
-      ...packageJson.dependencies,
-      '@fumadocs/content-collections':
-        localVersions['@fumadocs/content-collections'],
-      '@content-collections/core':
-        versionPkg.dependencies['@content-collections/core'],
-      '@content-collections/mdx':
-        versionPkg.dependencies['@content-collections/mdx'],
-      '@content-collections/next':
-        versionPkg.dependencies['@content-collections/next'],
-    };
+    Object.assign(
+      packageJson.dependencies,
+      pick(versionPkg.dependencies, [
+        '@content-collections/mdx',
+        '@content-collections/core',
+        '@content-collections/next',
+      ]),
+      pick(localVersions, ['@fumadocs/content-collections']),
+    );
   }
 
   if (options.template === 'fuma-docs-mdx') {
-    packageJson.scripts = {
-      ...packageJson.scripts,
-      postinstall: 'fumadocs-mdx',
-    };
+    packageJson.scripts.postinstall = 'fumadocs-mdx';
 
-    packageJson.dependencies = {
-      ...packageJson.dependencies,
-      'fumadocs-mdx': localVersions['fumadocs-mdx'],
-    };
-
-    packageJson.devDependencies = {
-      ...packageJson.devDependencies,
-      '@types/mdx': versionPkg.dependencies['@types/mdx'],
-    };
+    Object.assign(
+      packageJson.dependencies,
+      pick(localVersions, ['fumadocs-mdx']),
+    );
+    Object.assign(
+      packageJson.devDependencies,
+      pick(versionPkg.dependencies, ['@types/mdx']),
+    );
   }
 
   if (options.tailwindcss) {
-    packageJson.devDependencies = {
-      ...packageJson.devDependencies,
-      autoprefixer: versionPkg.dependencies.autoprefixer,
-      postcss: versionPkg.dependencies.postcss,
-      tailwindcss: versionPkg.dependencies.tailwindcss,
-    };
+    Object.assign(
+      packageJson.devDependencies,
+      pick(versionPkg.dependencies, [
+        '@tailwindcss/postcss',
+        'tailwindcss',
+        'postcss',
+      ]),
+    );
   }
 
   if (options.eslint) {
@@ -170,4 +163,19 @@ function createPackageJson(projectName: string, options: Options): string {
   }
 
   return JSON.stringify(packageJson, undefined, 2);
+}
+
+function pick<T extends object, K extends keyof T>(
+  obj: T,
+  keys: K[],
+): Pick<T, K> {
+  const result: Partial<T> = {};
+
+  for (const key of keys) {
+    if (key in obj) {
+      result[key] = obj[key];
+    }
+  }
+
+  return result as Pick<T, K>;
 }

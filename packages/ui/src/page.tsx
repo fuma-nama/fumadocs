@@ -308,26 +308,6 @@ export const DocsTitle = forwardRef<
 
 DocsTitle.displayName = 'DocsTitle';
 
-function findParent(
-  node: PageTree.Root | PageTree.Folder,
-  page: Page,
-): PageTree.Root | PageTree.Folder | undefined {
-  if ('index' in node && node.index?.$ref?.file === page.file.path) {
-    return node;
-  }
-
-  for (const child of node.children) {
-    if (child.type === 'folder') {
-      const parent = findParent(child, page);
-      if (parent) return parent;
-    }
-
-    if (child.type === 'page' && child.$ref?.file === page.file.path) {
-      return node;
-    }
-  }
-}
-
 export function DocsCategory({
   page,
   from,
@@ -340,22 +320,53 @@ export function DocsCategory({
 }) {
   let tree = forcedTree;
 
-  if (!tree) {
-    tree = from._i18n
-      ? (from as LoaderOutput<LoaderConfig & { i18n: true }>).pageTree[
-          page.locale ?? from._i18n.defaultLanguage
-        ]
-      : from.pageTree;
+  if (!tree && from._i18n) {
+    tree = (from as LoaderOutput<LoaderConfig & { i18n: true }>).pageTree[
+      page.locale ?? from._i18n.defaultLanguage
+    ];
+  } else if (!tree) {
+    tree = from.pageTree;
   }
 
-  const parent = findParent(tree, page);
-  if (!parent) return null;
+  function findParentFromTree(
+    node: PageTree.Root | PageTree.Folder,
+    page: Page,
+  ): PageTree.Root | PageTree.Folder | undefined {
+    if ('index' in node && node.index?.$ref?.file === page.file.path) {
+      return node;
+    }
 
-  const items = parent.children.flatMap<Page>((item) => {
-    if (item.type !== 'page' || item.url === page.url) return [];
+    for (const child of node.children) {
+      if (child.type === 'folder') {
+        const parent = findParentFromTree(child, page);
+        if (parent) return parent;
+      }
 
-    return from.getNodePage(item) ?? [];
-  });
+      if (child.type === 'page' && child.$ref?.file === page.file.path) {
+        return node;
+      }
+    }
+  }
+
+  let items;
+  const parent = findParentFromTree(tree, page);
+  if (parent) {
+    items = parent.children.flatMap<Page>((item) => {
+      if (item.type !== 'page' || item.url === page.url) return [];
+
+      return from.getNodePage(item) ?? [];
+    });
+  } else {
+    const pages = from.getPages(page.locale);
+
+    items = pages.filter(
+      (item) =>
+        item.file.dirname === page.file.dirname &&
+        item.file.path !== page.file.path,
+    );
+  }
+
+  if (items.length === 0) return null;
 
   return (
     <Cards {...props}>

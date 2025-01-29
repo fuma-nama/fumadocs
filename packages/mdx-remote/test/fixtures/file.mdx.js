@@ -1,5 +1,26 @@
 "use strict";
-const {jsxDEV: _jsxDEV} = arguments[0];
+const {Fragment: _Fragment, jsxDEV: _jsxDEV} = arguments[0];
+const toc = [{
+  depth: 2,
+  url: "#you-found-me",
+  title: _jsxDEV(_Fragment, {
+    children: ["You ", _jsxDEV("strong", {
+      children: "found"
+    }, undefined, false, {
+      fileName: "<source.js>",
+      lineNumber: 1,
+      columnNumber: 8
+    }, this), " ", _jsxDEV("code", {
+      children: "me"
+    }, undefined, false, {
+      fileName: "<source.js>",
+      lineNumber: 1,
+      columnNumber: 18
+    }, this), "!"]
+  }, undefined, true, {
+    fileName: "<source.js>"
+  }, this)
+}];
 function _createMdxContent(props) {
   const _components = {
     code: "code",
@@ -42,5 +63,6 @@ function MDXContent(props = {}) {
   }, this) : _createMdxContent(props);
 }
 return {
+  toc,
   default: MDXContent
 };

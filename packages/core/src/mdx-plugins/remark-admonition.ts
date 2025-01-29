@@ -5,7 +5,6 @@ import { flattenNode } from '@/mdx-plugins/remark-utils';
 
 export interface RemarkAdmonitionOptions {
   tag?: string;
-  types?: string[];
 
   /**
    * Map type to another type
@@ -21,78 +20,80 @@ export interface RemarkAdmonitionOptions {
 export function remarkAdmonition(
   options: RemarkAdmonitionOptions = {},
 ): Transformer<Root, Root> {
-  const types = options.types ?? ['warn', 'info', 'error'];
   const tag = options.tag ?? ':::';
   // compatible with Docusaurus
   const typeMap = options.typeMap ?? {
+    info: 'info',
+    warn: 'warn',
+
     note: 'info',
     tip: 'info',
     warning: 'warn',
     danger: 'error',
   };
 
-  function replaceNodes(nodes: RootContent[]): RootContent[] {
-    if (nodes.length === 0) return nodes;
-    let open = -1,
-      end = -1;
+  function replaceNodes(nodes: RootContent[]) {
+    if (nodes.length === 0) return;
 
-    const attributes = [];
+    let open = -1;
+    let attributes = [];
+    // if children contain nested admonitions
+    let hasIntercept = false;
 
     for (let i = 0; i < nodes.length; i++) {
       if (nodes[i].type !== 'paragraph') continue;
 
       const text = flattenNode(nodes[i]);
-      const start = types.find((type) => text.startsWith(`${tag}${type}`));
+      const typeName = Object.keys(typeMap).find((type) =>
+        text.startsWith(`${tag}${type}`),
+      );
 
-      if (start) {
-        if (open !== -1) throw new Error('Nested callout is not supported');
+      if (typeName) {
+        if (open !== -1) {
+          hasIntercept = true;
+          continue;
+        }
+
         open = i;
 
         attributes.push({
           type: 'mdxJsxAttribute',
           name: 'type',
-          value: start in typeMap ? typeMap[start] : start,
+          value: typeMap[typeName],
         });
 
-        const rest = text.slice(`${tag}${start}`.length);
-        if (rest.startsWith('[') && rest.endsWith(']')) {
+        const meta = text.slice(`${tag}${typeName}`.length);
+        if (meta.startsWith('[') && meta.endsWith(']')) {
           attributes.push({
             type: 'mdxJsxAttribute',
             name: 'title',
-            value: rest.slice(1, -1),
+            value: meta.slice(1, -1),
           });
         }
       }
 
       if (open !== -1 && text === tag) {
-        end = i;
-        break;
+        const children = nodes.slice(open + 1, i);
+
+        nodes.splice(open, i - open + 1, {
+          type: 'mdxJsxFlowElement',
+          name: 'Callout',
+          attributes,
+          children: hasIntercept ? replaceNodes(children) : children,
+        } as RootContent);
+        open = -1;
+        hasIntercept = false;
+        attributes = [];
+        i = open;
       }
     }
-
-    if (open === -1 || end === -1) return nodes;
-
-    return [
-      ...nodes.slice(0, open),
-      {
-        type: 'mdxJsxFlowElement',
-        name: 'Callout',
-        attributes,
-        children: nodes.slice(open + 1, end),
-      } as RootContent,
-      ...replaceNodes(nodes.slice(end + 1)),
-    ];
   }
 
   return (tree) => {
     visit(tree, (node) => {
-      if (!('children' in node)) return 'skip';
+      if (!('children' in node)) return;
 
-      const result = replaceNodes(node.children);
-      if (result === node.children) return;
-
-      node.children = result;
-      return 'skip';
+      replaceNodes(node.children);
     });
   };
 }

@@ -1,4 +1,4 @@
-:::info
+:::tip
 
 Hello World
 

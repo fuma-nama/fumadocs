@@ -1,5 +1,16 @@
 "use strict";
-const {jsx: _jsx, jsxs: _jsxs} = arguments[0];
+const {Fragment: _Fragment, jsx: _jsx, jsxs: _jsxs} = arguments[0];
+const toc = [{
+  depth: 2,
+  url: "#you-found-me",
+  title: _jsxs(_Fragment, {
+    children: ["You ", _jsx("strong", {
+      children: "found"
+    }), " ", _jsx("code", {
+      children: "me"
+    }), "!"]
+  })
+}];
 function _createMdxContent(props) {
   const _components = {
     code: "code",
@@ -26,5 +37,6 @@ function MDXContent(props = {}) {
   }) : _createMdxContent(props);
 }
 return {
+  toc,
   default: MDXContent
 };

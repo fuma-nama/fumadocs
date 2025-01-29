@@ -1,6 +1,5 @@
 import js from '@eslint/js';
 import ts from 'typescript-eslint';
-import tailwind from 'eslint-plugin-tailwindcss';
 import reactPlugin from 'eslint-plugin-react';
 import hooksPlugin from 'eslint-plugin-react-hooks';
 
@@ -12,7 +11,6 @@ export default [
   ...ts.configs.recommended,
   reactPlugin.configs.flat.recommended,
   reactPlugin.configs.flat['jsx-runtime'],
-  ...tailwind.configs['flat/recommended'],
   {
     plugins: {
       'react-hooks': hooksPlugin,

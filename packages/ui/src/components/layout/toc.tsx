@@ -40,7 +40,7 @@ export function Toc(props: HTMLAttributes<HTMLDivElement>) {
       id="nd-toc"
       {...props}
       className={cn(
-        'sticky top-fd-layout-top h-[var(--fd-toc-height)] pb-2 pt-12',
+        'sticky top-[calc(var(--fd-banner-height)+var(--fd-nav-height))] h-[var(--fd-toc-height)] pb-2 pt-12',
         toc,
         props.className,
       )}

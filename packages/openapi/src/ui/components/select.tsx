@@ -16,7 +16,7 @@ const SelectTrigger = forwardRef<
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      'flex h-10 items-center rounded-md border px-3 py-2 text-start text-sm text-fd-foreground hover:bg-fd-accent focus:outline-none focus:ring-2 focus:ring-fd-ring disabled:cursor-not-allowed disabled:opacity-50',
+      'flex h-10 items-center w-full rounded-md border px-3 py-2 text-start text-[13px] text-fd-foreground hover:bg-fd-accent focus:outline-none focus:ring-2 focus:ring-fd-ring disabled:cursor-not-allowed disabled:opacity-50',
       className,
     )}
     {...props}
@@ -61,25 +61,19 @@ SelectScrollDownButton.displayName =
 const SelectContent = forwardRef<
   React.ComponentRef<typeof SelectPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
->(({ className, children, position = 'popper', ...props }, ref) => (
+>(({ className, children, position, ...props }, ref) => (
   <SelectPrimitive.Portal>
     <SelectPrimitive.Content
       ref={ref}
       className={cn(
-        'z-50 overflow-hidden rounded-lg border bg-fd-popover text-fd-popover-foreground shadow-md data-[state=closed]:animate-fd-popover-out data-[state=open]:animate-fd-popover-in',
+        'z-50 overflow-hidden rounded-lg border bg-fd-popover text-fd-popover-foreground shadow-md',
         className,
       )}
       position={position}
       {...props}
     >
       <SelectScrollUpButton />
-      <SelectPrimitive.Viewport
-        className={cn(
-          'p-1',
-          position === 'popper' &&
-            'h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]',
-        )}
-      >
+      <SelectPrimitive.Viewport className="p-1">
         {children}
       </SelectPrimitive.Viewport>
       <SelectScrollDownButton />
@@ -107,7 +101,7 @@ const SelectItem = forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      'flex select-none flex-row items-center rounded-md py-1.5 pe-2 ps-6 text-sm outline-none focus:bg-fd-accent focus:text-fd-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+      'flex select-none flex-row items-center rounded-md py-1.5 pe-2 ps-6 text-[13px] outline-none focus:bg-fd-accent focus:text-fd-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
       className,
     )}
     {...props}

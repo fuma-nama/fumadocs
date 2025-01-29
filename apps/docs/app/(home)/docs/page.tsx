@@ -7,14 +7,14 @@ import Spot from '@/public/spot.png';
 
 export default function DocsPage(): React.ReactElement {
   return (
-    <main className="container flex flex-col items-center py-16 text-center">
+    <main className="container flex flex-col items-center py-16 text-center z-[2]">
       <div className="absolute inset-0 z-[-1] overflow-hidden duration-1000 animate-in fade-in [perspective:2000px]">
         <div
           className="absolute bottom-[20%] left-1/2 size-[1200px] origin-bottom bg-fd-primary/30 opacity-30"
           style={{
             transform: 'rotateX(75deg) translate(-50%, 400px)',
             backgroundImage:
-              'radial-gradient(50% 50% at center,transparent,hsl(var(--background))), repeating-linear-gradient(to right,hsl(var(--primary)),hsl(var(--primary)) 1px,transparent 2px,transparent 100px), repeating-linear-gradient(to bottom,hsl(var(--primary)),hsl(var(--primary)) 2px,transparent 3px,transparent 100px)',
+              'radial-gradient(50% 50% at center,transparent,var(--color-fd-background)), repeating-linear-gradient(to right,var(--color-fd-primary),var(--color-fd-primary) 1px,transparent 2px,transparent 100px), repeating-linear-gradient(to bottom,var(--color-fd-primary),var(--color-fd-primary) 2px,transparent 3px,transparent 100px)',
           }}
         />
       </div>
@@ -91,10 +91,10 @@ function Item(
   return (
     <Link
       {...props}
-      className="rounded-2xl border border-transparent p-6 shadow-lg transition-all hover:shadow-fd-primary/20"
+      className="rounded-2xl border border-transparent p-6 shadow-lg"
       style={{
         backgroundImage:
-          'linear-gradient(to right bottom, hsl(var(--background)) 10%, hsl(var(--accent)), hsl(var(--background)) 60%),' +
+          'linear-gradient(to right bottom, var(--color-fd-background) 10%, var(--color-fd-accent), var(--color-fd-background) 60%),' +
           'linear-gradient(to right bottom, rgb(40,40,40) 10%, rgb(180,180,180), rgb(30,30,30) 60%)',
         backgroundOrigin: 'border-box',
         backgroundClip: 'padding-box, border-box',

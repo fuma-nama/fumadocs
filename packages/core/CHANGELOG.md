@@ -1,5 +1,52 @@
 # next-docs-zeta
 
+## 15.0.0
+
+### Minor Changes
+
+- 581f4a5: **Support code block tabs without hardcoding `<Tabs />` items**
+
+  **migrate:** Use the `remarkCodeTab` plugin.
+
+  **before:**
+
+  ````mdx
+  import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+
+  <Tabs items={["Tab 1", "Tab 2"]}>
+
+  ```ts tab
+  console.log('A');
+  ```
+
+  ```ts tab
+  console.log('B');
+  ```
+
+  </Tabs>
+  ````
+
+  **after:**
+
+  ````mdx
+  import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+
+  ```ts tab="Tab 1"
+  console.log('A');
+  ```
+
+  ```ts tab="Tab 2"
+  console.log('B');
+  ```
+  ````
+
+### Patch Changes
+
+- 5b8cca8: Fix `remarkAdmonition` missing some types from Docusaurus
+- a763058: Support reversed rest items in `meta.json`
+
+## 14.7.7
+
 ## 14.7.6
 
 ### Patch Changes

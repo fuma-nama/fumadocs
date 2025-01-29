@@ -67,7 +67,6 @@ export default async function loader(
   const mdxOptions =
     collection?.mdxOptions ?? (await config.getDefaultMDXOptions());
 
-  let frontmatter = matter.data;
   if (collection?.schema) {
     let schema = collection.schema;
 
@@ -87,7 +86,7 @@ export default async function loader(
       });
     }
 
-    const result = await schema.safeParseAsync(frontmatter);
+    const result = await schema.safeParseAsync(matter.data);
     if (result.error) {
       callback(
         new Error(
@@ -97,7 +96,7 @@ export default async function loader(
       return;
     }
 
-    frontmatter = result.data as Record<string, unknown>;
+    matter.data = result.data as Record<string, unknown>;
   }
 
   let timestamp: number | undefined;
@@ -105,15 +104,20 @@ export default async function loader(
     timestamp = (await getGitTimestamp(filePath))?.getTime();
 
   try {
+    // ensure the line number is correct in dev mode
+    const lineOffset = '\n'.repeat(
+      this.mode === 'development' ? lines(source) - lines(matter.content) : 0,
+    );
+
     const file = await buildMDX(
       collectionId ?? 'global',
       configHash,
-      matter.content,
+      lineOffset + matter.content,
       {
         development: this.mode === 'development',
         ...mdxOptions,
         filePath,
-        frontmatter,
+        frontmatter: matter.data,
         data: {
           lastModified: timestamp,
         },
@@ -129,4 +133,14 @@ export default async function loader(
     error.message = `${fpath}:${error.name}: ${error.message}`;
     callback(error);
   }
+}
+
+function lines(s: string) {
+  let num = 0;
+
+  for (const c of s) {
+    if (c === '\n') num++;
+  }
+
+  return num;
 }

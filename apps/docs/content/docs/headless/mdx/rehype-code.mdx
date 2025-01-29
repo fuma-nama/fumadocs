@@ -9,13 +9,16 @@ A wrapper of [Shiki](https://shiki.style), the built-in syntax highlighter.
 
 Add the rehype plugin.
 
-```ts
-import { rehypeCode } from 'fumadocs-core/mdx-plugins';
+```ts title="MDX Compiler"
+import { compile } from '@mdx-js/mdx';
+import { remarkInstall } from 'fumadocs-docgen';
 
-const config = {
-  rehypePlugins: [rehypeCode],
-};
+await compile('...', {
+  remarkPlugins: [remarkInstall],
+});
 ```
+
+> This plugin is included by default on Fumadocs MDX.
 
 ### Output
 
@@ -55,37 +58,6 @@ It outputs HTML, you might need to render it with React `dangerouslySetInnerHTML
 ```
 
 Disable or customise icons with the `icon` option.
-
-### Tab
-
-Wrap the pre element in MDX `<Tab />` component.
-This is mainly for Fumadocs UI Integration, but you can use it with your own Tab component.
-
-````mdx
-<Tabs items={["Name"]}>
-
-```js tab="Name"
-console.log('Hello');
-```
-
-</Tabs>
-````
-
-Outputs:
-
-````mdx
-<Tabs items={["Name"]}>
-
-<Tab value="Name">
-
-```js
-console.log('Hello');
-```
-
-</Tab>
-
-</Tabs>
-````
 
 ### More Options
 

@@ -88,6 +88,7 @@ export default async function Page(props: {
             Wrapper,
             blockquote: Callout as unknown as FC<ComponentProps<'blockquote'>>,
             APIPage: openapi.APIPage,
+            DocsCategory: () => <DocsCategory page={page} from={source} />,
           }}
         />
         {page.data.index ? <DocsCategory page={page} from={source} /> : null}

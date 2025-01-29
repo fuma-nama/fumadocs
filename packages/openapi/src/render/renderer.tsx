@@ -93,6 +93,7 @@ export type {
 
 export function createRenders(
   shikiOptions: RenderContext['shikiOptions'],
+  _useScalar: boolean,
 ): Renderer {
   return {
     Root: (props) => (
@@ -101,7 +102,12 @@ export function createRenders(
       </Root>
     ),
     API,
-    APIInfo,
+    APIInfo: ({ children, head }) => (
+      <APIInfo>
+        {head}
+        {children}
+      </APIInfo>
+    ),
     APIExample,
     Responses: Tabs,
     Response: Tab,

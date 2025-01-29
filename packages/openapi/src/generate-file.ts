@@ -75,7 +75,22 @@ export async function generateFiles(options: Config): Promise<void> {
     ...urlInputs,
   ];
 
-  function getOutputPaths(name: string, result: GeneratePageOutput): string[] {
+  function getOutputPaths(result: GeneratePageOutput): string[] {
+    let file;
+
+    if (result.pathItem.summary) {
+      file = getFilename(result.pathItem.summary);
+    } else if (result.type === 'operation') {
+      file = result.operation.operationId
+        ? getFilename(result.operation.operationId)
+        : join(
+            getOutputPathFromRoute(result.item.path),
+            result.item.method.toLowerCase(),
+          );
+    } else {
+      file = getFilename(result.item.name);
+    }
+
     const outPaths: string[] = [];
 
     if (groupBy === 'tag') {
@@ -83,31 +98,19 @@ export async function generateFiles(options: Config): Promise<void> {
 
       if (tags && tags.length > 0) {
         for (const tag of tags) {
-          outPaths.push(
-            join(outputDir, getFilename(tag), `${getFilename(name)}.mdx`),
-          );
+          outPaths.push(join(outputDir, getFilename(tag), `${file}.mdx`));
         }
       } else {
         outPaths.push(
           result.type === 'operation'
-            ? join(outputDir, `${getFilename(name)}.mdx`)
-            : join(outputDir, 'webhooks', `${getFilename(name)}.mdx`),
+            ? join(outputDir, `${file}.mdx`)
+            : join(outputDir, 'webhooks', `${file}.mdx`),
         );
       }
     }
 
-    if (groupBy === 'route') {
-      const dir = result.pathItem.summary
-        ? getFilename(result.pathItem.summary)
-        : getFilenameFromRoute(
-            result.type === 'operation' ? result.item.path : result.item.name,
-          );
-
-      outPaths.push(join(outputDir, dir, `${getFilename(name)}.mdx`));
-    }
-
-    if (groupBy === 'none') {
-      outPaths.push(join(outputDir, `${getFilename(name)}.mdx`));
+    if (groupBy === 'route' || groupBy === 'none') {
+      outPaths.push(join(outputDir, `${file}.mdx`));
     }
 
     return outPaths;
@@ -130,15 +133,15 @@ export async function generateFiles(options: Config): Promise<void> {
       const results = await generatePages(pathOrUrl, options);
 
       for (const result of results) {
-        let name =
-          result.type === 'operation'
-            ? result.operation.operationId
-            : result.item.name;
-        if (!name) return;
+        const meta = JSON.stringify(
+          {
+            title: result.pathItem.summary,
+          },
+          null,
+          2,
+        );
 
-        name = name.split('.').at(-1) ?? name;
-
-        for (const outPath of getOutputPaths(name, result)) {
+        for (const outPath of getOutputPaths(result)) {
           await write(outPath, result.content);
           console.log(`Generated: ${outPath}`);
 
@@ -148,16 +151,7 @@ export async function generateFiles(options: Config): Promise<void> {
 
             metaFiles.add(metaFile);
 
-            await write(
-              metaFile,
-              JSON.stringify(
-                {
-                  title: result.pathItem.summary,
-                },
-                null,
-                2,
-              ),
-            );
+            await write(metaFile, meta);
             console.log(`Generated Meta: ${metaFile}`);
           }
         }
@@ -185,7 +179,7 @@ function isUrl(input: string): boolean {
   return input.startsWith('https://') || input.startsWith('http://');
 }
 
-function getFilenameFromRoute(path: string): string {
+function getOutputPathFromRoute(path: string): string {
   return (
     path
       .replaceAll('.', '/')

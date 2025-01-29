@@ -1,5 +1,54 @@
 # next-docs-ui
 
+## 15.0.0
+
+### Major Changes
+
+- a84f37a: **Migrate to Tailwind CSS v4**
+
+  **migrate:**
+
+  Follow https://tailwindcss.com/blog/tailwindcss-v4 for official migrate guide of Tailwind CSS v4.
+
+  Fumadocs UI v15 redesigned the Tailwind CSS config to fully adhere the new config style, no JavaScript and options needed for plugins.
+  Add the following to your CSS file:
+
+  ```css
+  @import 'tailwindcss';
+  @import 'fumadocs-ui/css/neutral.css';
+  @import 'fumadocs-ui/css/preset.css';
+  /* if you have Twoslash enabled */
+  @import 'fumadocs-twoslash/twoslash.css';
+
+  @source '../node_modules/fumadocs-ui/dist/**/*.js';
+  /* if you have OpenAPI enabled */
+  @source '../node_modules/fumadocs-openapi/dist/**/*.js';
+  ```
+
+  The `fumadocs-ui/css/preset.css` import is required, it declares necessary plugins & styles for Fumadocs UI, and `fumadocs-ui/css/neutral.css` defines the color palette of UI.
+
+  Like the previous `preset` option in Tailwind CSS plugin, you can import other color presets like `fumadocs-ui/css/vitepress.css`.
+
+  You should also pay attention to `@source`, the file paths are relative to the CSS file itself. For your project, it might not be `../node_modules/fumadocs-ui/dist/**/*.js`.
+
+### Patch Changes
+
+- a89d6e0: Support Fumadocs v15
+- f2f9c3d: Redesign sidebar
+- Updated dependencies [5b8cca8]
+- Updated dependencies [a763058]
+- Updated dependencies [581f4a5]
+  - fumadocs-core@15.0.0
+
+## 14.7.7
+
+### Patch Changes
+
+- 4f2538a: Support `children` prop in custom `Folder` component
+- 191012a: `DocsCategory` search based on file path when item isn't present in the tree
+- fb6b168: No longer rely on search context on search dialog
+  - fumadocs-core@14.7.7
+
 ## 14.7.6
 
 ### Patch Changes
