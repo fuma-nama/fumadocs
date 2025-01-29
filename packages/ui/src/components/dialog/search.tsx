@@ -28,6 +28,7 @@ import { cva } from 'class-variance-authority';
 export type SearchLink = [name: string, href: string];
 
 type ReactSortedResult = Omit<SortedResult, 'content'> & {
+  external?: boolean;
   content: ReactNode;
 };
 
@@ -145,8 +146,9 @@ function SearchResults({
     setActive(items[0].id);
   }
 
-  const onOpen = (url: string) => {
-    router.push(url);
+  const onOpen = ({ external, url }: ReactSortedResult) => {
+    if (external) window.open(url, '_blank')?.focus();
+    else router.push(url);
     onSelect?.(url);
     sidebar.setOpen(false);
   };
@@ -168,7 +170,7 @@ function SearchResults({
     if (e.key === 'Enter') {
       const selected = items.find((item) => item.id === active);
 
-      if (selected) onOpen(selected.url);
+      if (selected) onOpen(selected);
       e.preventDefault();
     }
   }
@@ -204,7 +206,7 @@ function SearchResults({
           active={active}
           onActiveChange={setActive}
           onClick={() => {
-            onOpen(item.url);
+            onOpen(item);
           }}
         >
           {item.type !== 'page' ? (
