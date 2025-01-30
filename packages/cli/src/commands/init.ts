@@ -150,7 +150,7 @@ export async function init(plugin: Plugin, config: Config = {}): Promise<void> {
       await plugin.transform(ctx);
 
       note(
-        `You can format the output with Prettier or other code formating tools
+        `You can format the output with Prettier or other code formatting tools
 prettier . --write`,
         picocolors.bold(picocolors.green('Changes Applied')),
       );
