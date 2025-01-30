@@ -475,7 +475,7 @@
               },
               "lastRefillAt": {
                 "type": "integer",
-                "description": "The unix timestamp in miliseconds when the key was last refilled.",
+                "description": "The unix timestamp in milliseconds when the key was last refilled.",
                 "example": 100
               }
             },
@@ -596,7 +596,7 @@
           },
           "name": {
             "type": "string",
-            "description": "The name of the key, give keys a name to easily identifiy their purpose",
+            "description": "The name of the key, give keys a name to easily identify their purpose",
             "example": "Customer X"
           },
           "ownerId": {
@@ -4673,7 +4673,7 @@
         },
         "responses": {
           "200": {
-            "description": "Sucessfully created a permission",
+            "description": "Successfully created a permission",
             "content": {
               "application/json": {
                 "schema": {
