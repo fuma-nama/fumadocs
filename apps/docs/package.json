@@ -47,7 +47,7 @@
     "remark-stringify": "^11.0.0",
     "scroll-into-view-if-needed": "^3.1.0",
     "shiki": "^2.1.0",
-    "tailwind-merge": "^2.6.0",
+    "tailwind-merge": "^3.0.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {

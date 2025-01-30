@@ -40,7 +40,7 @@ importers:
         version: 6.0.1
       tsup:
         specifier: 8.3.5
-        version: 8.3.5(@swc/core@1.10.9)(jiti@2.4.2)(postcss@8.5.1)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0)
+        version: 8.3.5(@swc/core@1.10.9(@swc/helpers@0.5.15))(jiti@2.4.2)(postcss@8.5.1)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0)
       turbo:
         specifier: 2.3.3
         version: 2.3.3
@@ -162,8 +162,8 @@ importers:
         specifier: ^2.1.0
         version: 2.1.0
       tailwind-merge:
-        specifier: ^2.6.0
-        version: 2.6.0
+        specifier: ^3.0.0
+        version: 3.0.0
       zod:
         specifier: ^3.24.1
         version: 3.24.1
@@ -842,7 +842,7 @@ importers:
         version: 6.0.3
       webpack:
         specifier: ^5.97.1
-        version: 5.97.1(@swc/core@1.10.9)(esbuild@0.24.2)
+        version: 5.97.1(@swc/core@1.10.9(@swc/helpers@0.5.15))(esbuild@0.24.2)
 
   packages/mdx-remote:
     dependencies:
@@ -1016,8 +1016,8 @@ importers:
         specifier: 18.x.x || 19.x.x
         version: 19.0.0
       tailwind-merge:
-        specifier: ^2.6.0
-        version: 2.6.0
+        specifier: ^3.0.0
+        version: 3.0.0
     devDependencies:
       '@types/hast':
         specifier: ^3.0.4
@@ -1153,8 +1153,8 @@ importers:
         specifier: ^5.2.13
         version: 5.2.13(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       tailwind-merge:
-        specifier: ^2.6.0
-        version: 2.6.0
+        specifier: ^3.0.0
+        version: 3.0.0
     devDependencies:
       '@fumadocs/cli':
         specifier: workspace:*
@@ -6609,6 +6609,9 @@ packages:
   tailwind-merge@2.6.0:
     resolution: {integrity: sha512-P+Vu1qXfzediirmHOC3xKGAYeZtPcV9g76X+xg2FD4tYgR71ewMA35Y3sCz3zhiN/dwefRpJX0yBcgwi1fXNQA==}
 
+  tailwind-merge@3.0.0:
+    resolution: {integrity: sha512-y6SRDRD+NJldSrsMcFBL2kuwwlnrzhNFuS6C/NI+dA1sqj7T5S4Jkl7bsltpD45cwEKlWlDnZA5PC+LDtz+vXQ==}
+
   tailwindcss-animate@1.0.7:
     resolution: {integrity: sha512-bl6mpH3T7I3UFxuvDEXLxy/VuFxBk5bbzplh7tXI68mwMokNYd1t9qPBHlnyTwfa4JGC4zP516I1hYYtQ/vspA==}
     peerDependencies:
@@ -9321,7 +9324,7 @@ snapshots:
       '@swc/core-win32-x64-msvc': 1.10.7
       '@swc/helpers': 0.5.15
 
-  '@swc/core@1.10.9':
+  '@swc/core@1.10.9(@swc/helpers@0.5.15)':
     dependencies:
       '@swc/counter': 0.1.3
       '@swc/types': 0.1.17
@@ -9336,6 +9339,7 @@ snapshots:
       '@swc/core-win32-arm64-msvc': 1.10.9
       '@swc/core-win32-ia32-msvc': 1.10.9
       '@swc/core-win32-x64-msvc': 1.10.9
+      '@swc/helpers': 0.5.15
     optional: true
 
   '@swc/counter@0.1.3': {}
@@ -13592,6 +13596,8 @@ snapshots:
 
   tailwind-merge@2.6.0: {}
 
+  tailwind-merge@3.0.0: {}
+
   tailwindcss-animate@1.0.7(tailwindcss@4.0.0):
     dependencies:
       tailwindcss: 4.0.0
@@ -13602,16 +13608,16 @@ snapshots:
 
   term-size@2.2.1: {}
 
-  terser-webpack-plugin@5.3.10(@swc/core@1.10.9)(esbuild@0.24.2)(webpack@5.97.1(@swc/core@1.10.9)(esbuild@0.24.2)):
+  terser-webpack-plugin@5.3.10(@swc/core@1.10.9(@swc/helpers@0.5.15))(esbuild@0.24.2)(webpack@5.97.1(@swc/core@1.10.9(@swc/helpers@0.5.15))(esbuild@0.24.2)):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.25
       jest-worker: 27.5.1
       schema-utils: 3.3.0
       serialize-javascript: 6.0.2
       terser: 5.37.0
-      webpack: 5.97.1(@swc/core@1.10.9)(esbuild@0.24.2)
+      webpack: 5.97.1(@swc/core@1.10.9(@swc/helpers@0.5.15))(esbuild@0.24.2)
     optionalDependencies:
-      '@swc/core': 1.10.9
+      '@swc/core': 1.10.9(@swc/helpers@0.5.15)
       esbuild: 0.24.2
 
   terser@5.37.0:
@@ -13698,7 +13704,7 @@ snapshots:
 
   tslib@2.8.1: {}
 
-  tsup@8.3.5(@swc/core@1.10.9)(jiti@2.4.2)(postcss@8.5.1)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0):
+  tsup@8.3.5(@swc/core@1.10.9(@swc/helpers@0.5.15))(jiti@2.4.2)(postcss@8.5.1)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0):
     dependencies:
       bundle-require: 5.0.0(esbuild@0.24.2)
       cac: 6.7.14
@@ -13717,7 +13723,7 @@ snapshots:
       tinyglobby: 0.2.10
       tree-kill: 1.2.2
     optionalDependencies:
-      '@swc/core': 1.10.9
+      '@swc/core': 1.10.9(@swc/helpers@0.5.15)
       postcss: 8.5.1
       typescript: 5.7.3
     transitivePeerDependencies:
@@ -14073,7 +14079,7 @@ snapshots:
 
   webpack-sources@3.2.3: {}
 
-  webpack@5.97.1(@swc/core@1.10.9)(esbuild@0.24.2):
+  webpack@5.97.1(@swc/core@1.10.9(@swc/helpers@0.5.15))(esbuild@0.24.2):
     dependencies:
       '@types/eslint-scope': 3.7.7
       '@types/estree': 1.0.6
@@ -14095,7 +14101,7 @@ snapshots:
       neo-async: 2.6.2
       schema-utils: 3.3.0
       tapable: 2.2.1
-      terser-webpack-plugin: 5.3.10(@swc/core@1.10.9)(esbuild@0.24.2)(webpack@5.97.1(@swc/core@1.10.9)(esbuild@0.24.2))
+      terser-webpack-plugin: 5.3.10(@swc/core@1.10.9(@swc/helpers@0.5.15))(esbuild@0.24.2)(webpack@5.97.1(@swc/core@1.10.9(@swc/helpers@0.5.15))(esbuild@0.24.2))
       watchpack: 2.4.2
       webpack-sources: 3.2.3
     transitivePeerDependencies:
