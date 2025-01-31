@@ -6,7 +6,6 @@ import {
   type ReactNode,
   type TextareaHTMLAttributes,
   use,
-  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -70,45 +69,51 @@ const Context = createContext<{
   setLoading: () => undefined,
 });
 
+const listeners: (() => void)[] = [];
+
+function onUpdate() {
+  for (const listener of listeners) listener();
+}
+
 function AIDialog() {
   const [_, update] = useState(0);
   const shouldFocus = useRef(false); // should focus on input on next render
   const { loading, setLoading, engine } = use(Context);
 
-  const onTry = useCallback(() => {
+  const onTry = () => {
     if (!engine) return;
 
     setLoading(true);
-    void engine
-      .regenerateLast(() => {
-        update((prev) => prev + 1);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [engine, setLoading]);
+    void engine.regenerateLast(onUpdate).finally(() => {
+      setLoading(false);
+    });
+  };
 
-  const onClear = useCallback(() => {
+  const onClear = () => {
     engine?.clearHistory();
-    update((prev) => prev + 1);
-  }, [engine]);
+    onUpdate();
+  };
 
-  const onSubmit = useCallback(
-    (message: string) => {
-      if (!engine || message.length === 0) return;
+  const onSubmit = (message: string) => {
+    if (!engine || message.length === 0) return;
 
-      setLoading(true);
-      void engine
-        .prompt(message, () => {
-          update((prev) => prev + 1);
-        })
-        .finally(() => {
-          setLoading(false);
-          shouldFocus.current = true;
-        });
-    },
-    [engine, setLoading],
-  );
+    setLoading(true);
+    void engine.prompt(message, onUpdate).finally(() => {
+      setLoading(false);
+      shouldFocus.current = true;
+    });
+  };
+
+  useEffect(() => {
+    const listener = () => {
+      update((prev) => prev + 1);
+    };
+
+    listeners.push(listener);
+    return () => {
+      listeners.splice(listeners.indexOf(listener), 1);
+    };
+  }, []);
 
   useEffect(() => {
     if (shouldFocus.current) {
@@ -118,35 +123,6 @@ function AIDialog() {
   });
 
   const messages = engine?.getHistory() ?? [];
-  const activeBar = (
-    <div className="flex flex-row shrink-0 items-center gap-2 border-t py-1 px-3">
-      <button
-        type="button"
-        className={cn(
-          buttonVariants({
-            color: 'secondary',
-          }),
-          'gap-1.5 rounded-full',
-        )}
-        onClick={onTry}
-      >
-        <RefreshCw className="size-4" />
-        Retry
-      </button>
-      <button
-        type="button"
-        className={cn(
-          buttonVariants({
-            color: 'ghost',
-          }),
-          'rounded-full',
-        )}
-        onClick={onClear}
-      >
-        Clear History
-      </button>
-    </div>
-  );
 
   return (
     <>
@@ -155,7 +131,35 @@ function AIDialog() {
           <Message key={i} message={item} onSuggestionSelected={onSubmit} />
         ))}
       </List>
-      {!loading ? activeBar : null}
+      {!loading && messages.at(-1)?.role === 'assistant' ? (
+        <div className="flex flex-row shrink-0 items-center gap-2 border-t p-2">
+          <button
+            type="button"
+            className={cn(
+              buttonVariants({
+                color: 'secondary',
+              }),
+              'gap-1.5 rounded-full',
+            )}
+            onClick={onTry}
+          >
+            <RefreshCw className="size-4" />
+            Retry
+          </button>
+          <button
+            type="button"
+            className={cn(
+              buttonVariants({
+                color: 'ghost',
+              }),
+              'rounded-full',
+            )}
+            onClick={onClear}
+          >
+            Clear Chat
+          </button>
+        </div>
+      ) : null}
       {loading ? (
         <button
           type="button"

@@ -10,9 +10,7 @@ const client = new OramaClient({
   api_key: 'oPZjdlFbq5BpR54bV5Vj57RYt83Xosk7',
 });
 
-export default function CustomSearchDialog(
-  props: SharedProps,
-): React.ReactElement {
+export default function CustomSearchDialog(props: SharedProps) {
   return (
     <SearchDialog
       {...props}
