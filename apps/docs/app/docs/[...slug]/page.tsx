@@ -97,6 +97,7 @@ export default async function Page(props: {
             DocsCategory: () => <DocsCategory page={page} from={source} />,
 
             ...(await import('@/content/docs/ui/components/tabs.client')),
+            ...(await import('@/content/docs/ui/theme.client')),
           }}
         />
         {page.data.index ? <DocsCategory page={page} from={source} /> : null}
