@@ -18,7 +18,6 @@ type ApiPageContextProps = Pick<
   | 'generateCodeSamples'
   | 'proxyUrl'
   | 'showResponseSchema'
-  | 'useScalar'
 >;
 
 export interface ApiPageProps extends ApiPageContextProps {
@@ -124,12 +123,11 @@ export async function getContext(
   const server = servers[0];
 
   return {
-    useScalar: options.useScalar ?? false,
     schema,
     proxyUrl: options.proxyUrl,
     showResponseSchema: options.showResponseSchema,
     renderer: {
-      ...createRenders(options.shikiOptions, options.useScalar ?? false),
+      ...createRenders(options.shikiOptions),
       ...options.renderer,
     },
     shikiOptions: options.shikiOptions,

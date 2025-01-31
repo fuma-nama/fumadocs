@@ -20,6 +20,10 @@
       "import": "./dist/ui/index.js",
       "types": "./dist/ui/index.d.ts"
     },
+    "./scalar": {
+      "import": "./dist/scalar/index.js",
+      "types": "./dist/scalar/index.d.ts"
+    },
     "./server": {
       "import": "./dist/server/index.js",
       "types": "./dist/server/index.d.ts"

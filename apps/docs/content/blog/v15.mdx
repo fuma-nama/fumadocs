@@ -115,9 +115,12 @@ You can enable the Scalar API Client using `useScalar` option in `createOpenAPI(
 
 ```ts
 import { createOpenAPI } from 'fumadocs-openapi/server';
+import { APIPlayground } from 'fumadocs-openapi/scalar';
 
 export const openapi = createOpenAPI({
-  useScalar: true,
+  renderer: {
+    APIPlayground,
+  },
 });
 ```
 
