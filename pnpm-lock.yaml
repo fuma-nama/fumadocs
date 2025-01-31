@@ -56,6 +56,9 @@ importers:
 
   apps/docs:
     dependencies:
+      '@fumadocs/mdx-remote':
+        specifier: workspace:*
+        version: link:../../packages/mdx-remote
       '@inkeep/ai-api':
         specifier: ^0.8.0
         version: 0.8.0(zod@3.24.1)
@@ -80,6 +83,9 @@ importers:
       '@shikijs/rehype':
         specifier: ^2.1.0
         version: 2.1.0
+      '@shikijs/twoslash':
+        specifier: ^2.1.0
+        version: 2.1.0(typescript@5.7.3)
       '@theguild/remark-mermaid':
         specifier: ^0.2.0
         version: 0.2.0(react@19.0.0)

@@ -23,6 +23,10 @@
       "types": "./dist/next/index.d.ts",
       "require": "./dist/next/index.cjs"
     },
+    "./runtime/mdx": {
+      "import": "./dist/runtime/mdx.js",
+      "types": "./dist/runtime/mdx.d.ts"
+    },
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts",

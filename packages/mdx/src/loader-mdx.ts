@@ -2,7 +2,7 @@ import * as path from 'node:path';
 import { parse } from 'node:querystring';
 import grayMatter from 'gray-matter';
 import { type LoaderContext } from 'webpack';
-import { getConfigHash, loadConfigCached } from '@/config/cached';
+import { getConfigHash, loadConfigCached } from '@/utils/cached';
 import { buildMDX } from '@/utils/build-mdx';
 import { formatError } from '@/utils/format-error';
 import { getGitTimestamp } from './utils/git-timestamp';

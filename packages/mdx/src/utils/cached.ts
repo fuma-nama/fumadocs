@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import * as fs from 'node:fs';
-import { loadConfig, type LoadedConfig } from '@/config/load';
+import { loadConfig, type LoadedConfig } from '@/utils/load-config';
 
 const cache = new Map<
   string,

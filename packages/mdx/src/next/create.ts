@@ -1,7 +1,7 @@
 import path from 'node:path';
 import type { NextConfig } from 'next';
 import type { Configuration } from 'webpack';
-import { findConfigFile } from '@/config/load';
+import { findConfigFile } from '@/utils/load-config';
 import { start } from '@/map';
 import { type Options as MDXLoaderOptions } from '../loader-mdx';
 

@@ -31,12 +31,12 @@ export function toRuntime(
 
 export function toRuntimeAsync(
   frontmatter: Record<string, unknown>,
-  load: () => Promise<Record<string, unknown>>,
+  loadContent: () => Promise<Record<string, unknown>>,
   info: FileInfo,
 ): unknown {
   return {
-    async load() {
-      const { default: body, ...res } = await load();
+    load: async () => {
+      const { default: body, ...res } = await loadContent();
 
       return {
         body,

@@ -12,6 +12,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@fumadocs/mdx-remote": "workspace:*",
     "@inkeep/ai-api": "^0.8.0",
     "@oramacloud/client": "^2.1.4",
     "@radix-ui/react-dialog": "^1.1.5",
@@ -20,6 +21,7 @@
     "@radix-ui/react-tooltip": "^1.1.7",
     "@scalar/api-client-react": "^1.1.17",
     "@shikijs/rehype": "^2.1.0",
+    "@shikijs/twoslash": "^2.1.0",
     "@theguild/remark-mermaid": "^0.2.0",
     "class-variance-authority": "^0.7.1",
     "fumadocs-core": "workspace:*",

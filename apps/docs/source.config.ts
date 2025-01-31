@@ -15,7 +15,6 @@ import {
 } from 'fumadocs-docgen';
 import rehypeKatex from 'rehype-katex';
 import { z } from 'zod';
-import { remarkMermaid } from '@theguild/remark-mermaid';
 
 export const { docs, meta } = defineDocs({
   docs: {
@@ -85,7 +84,6 @@ export default defineConfig({
         ],
       },
       remarkPlugins: [
-        remarkMermaid,
         remarkMath,
         [remarkInstall, { persist: { id: 'package-manager' } }],
         [remarkDocGen, { generators: [fileGenerator()] }],

@@ -4,7 +4,11 @@ import type { FC } from 'react';
 
 export type MdxContent = FC<{ components?: MDXComponents }>;
 
-export async function executeMdx(compiled: string, scope: object) {
+export async function executeMdx(
+  compiled: string,
+  scope: object,
+  baseUrl?: string | URL,
+) {
   let jsxRuntime;
 
   if (process.env.NODE_ENV === 'production') {
@@ -14,15 +18,19 @@ export async function executeMdx(compiled: string, scope: object) {
   }
 
   const fullScope = {
-    opts: jsxRuntime,
+    opts: {
+      ...jsxRuntime,
+      baseUrl,
+    },
     ...scope,
   };
-  const keys = Object.keys(fullScope);
+
   const values = Object.values(fullScope);
+  const params = Object.keys(fullScope);
+  params.push(`return (async () => { ${compiled} })()`);
+  const hydrateFn = new Function(...params);
 
-  const hydrateFn = Reflect.construct(Function, keys.concat(compiled));
-
-  return hydrateFn.apply(hydrateFn, values) as {
+  return (await hydrateFn.apply(hydrateFn, values)) as {
     default: MdxContent;
     toc?: TableOfContents;
   };
