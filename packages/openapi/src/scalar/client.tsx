@@ -8,6 +8,7 @@ import {
 import { MethodLabel } from '@/ui/components/method-label';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
+import type { OpenAPIV3_1 } from 'openapi-types';
 
 export default function ScalarPlayground({
   path,
@@ -60,7 +61,9 @@ function Trigger({ path, method }: { path: string; method: string }) {
         buttonVariants({ color: 'primary', size: 'sm' }),
         'px-3 py-1.5',
       )}
-      onClick={() => client?.open({ path, method })}
+      onClick={() =>
+        client?.open({ path, method: method as OpenAPIV3_1.HttpMethods })
+      }
     >
       Test
     </button>
