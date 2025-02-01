@@ -42,25 +42,6 @@ const cases = [
     }),
   },
   {
-    name: 'sync-transform',
-    collection: defineCollections({
-      type: 'doc',
-      dir: path.join(file, './fixtures'),
-      transform() {},
-    }),
-  },
-  {
-    name: 'sync-transform-global',
-    collection: defineCollections({
-      type: 'doc',
-      dir: path.join(file, './fixtures'),
-      transform() {},
-    }),
-    global: {
-      // empty
-    },
-  },
-  {
     name: 'async',
     collection: defineCollections({
       type: 'doc',
@@ -68,18 +49,9 @@ const cases = [
       async: true,
     }),
   },
-  {
-    name: 'async-transform',
-    collection: defineCollections({
-      type: 'doc',
-      dir: path.join(file, './fixtures'),
-      async: true,
-      transform() {},
-    }),
-  },
 ];
 
-for (const { name, collection, global } of cases) {
+for (const { name, collection } of cases) {
   test(`generate JS index file: ${name}`, async () => {
     const out = await generateJS(
       path.join(file, './fixtures/config.ts'),
@@ -89,7 +61,6 @@ for (const { name, collection, global } of cases) {
         },
         // @ts-expect-error -- test file
         collections: new Map([['docs', collection]]),
-        global,
       },
       path.join(file, './fixtures/index-async.output.js'),
       'hash',

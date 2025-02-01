@@ -74,23 +74,23 @@
     "@radix-ui/react-tabs": "^1.1.2",
     "class-variance-authority": "^0.7.1",
     "lodash.merge": "^4.6.2",
-    "lucide-react": "^0.473.0",
+    "lucide-react": "^0.474.0",
     "next-themes": "^0.4.4",
     "postcss-selector-parser": "^7.0.0",
     "react-medium-image-zoom": "^5.2.13",
-    "tailwind-merge": "^2.6.0"
+    "tailwind-merge": "^3.0.1"
   },
   "devDependencies": {
     "@fumadocs/cli": "workspace:*",
     "@next/eslint-plugin-next": "^15.1.6",
-    "@tailwindcss/cli": "^4.0.0",
+    "@tailwindcss/cli": "^4.0.2",
     "@types/lodash.merge": "^4.6.9",
-    "@types/react": "^19.0.7",
+    "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "next": "15.1.6",
-    "tailwindcss": "^4.0.0",
+    "tailwindcss": "^4.0.2",
     "tsc-alias": "^1.8.10",
     "tsconfig": "workspace:*"
   },

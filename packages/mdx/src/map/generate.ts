@@ -15,7 +15,6 @@ export async function generateJS(
   configHash: string,
   getFrontmatter: (file: string) => Promise<unknown>,
 ): Promise<string> {
-  const experimentalRemote = true;
   const outDir = path.dirname(outputPath);
   const imports: ImportInfo[] = [
     {
@@ -24,46 +23,8 @@ export async function generateJS(
       specifier: 'fumadocs-mdx',
     },
   ];
+  let asyncInit = false;
   const lines: string[] = [];
-
-  if (experimentalRemote) {
-    imports.push(
-      {
-        type: 'default',
-        specifier: 'node:fs/promises',
-        name: 'fs',
-      },
-      {
-        type: 'namespace',
-        specifier: toImportPath(configPath, outDir),
-        name: '_source',
-      },
-      {
-        type: 'named',
-        specifier: 'fumadocs-mdx/config',
-        names: ['buildConfig'],
-      },
-      {
-        type: 'named',
-        specifier: 'fumadocs-mdx/runtime/mdx',
-        names: ['remarkInclude'],
-      },
-      {
-        type: 'named',
-        specifier: '@fumadocs/mdx-remote',
-        names: ['compileMDX'],
-      },
-    );
-
-    lines.push(
-      'const [err, _sourceConfig] = buildConfig(_source)',
-      'if (err) throw new Error(err)',
-      'var _temp = _sourceConfig.global?.mdxOptions ?? {}',
-      '_temp = typeof _temp === "function"? await _temp() : _temp',
-      'const _temp_remark = _temp.remarkPlugins',
-      'const _mdxOptions = { ..._temp, remarkPlugins: (v) => typeof _temp_remark === "function"? [remarkInclude, ..._temp_remark(v)] : [remarkInclude, ...v, ...(_temp_remark ?? [])] }',
-    );
-  }
 
   async function generateEntry(
     file: FileInfo,
@@ -74,7 +35,48 @@ export async function generateJS(
     if (collection.type === 'doc' && collection.async) {
       const frontmatter = await getFrontmatter(file.absolutePath);
 
-      if (experimentalRemote)
+      if (collection.async) {
+        if (!asyncInit) {
+          imports.push(
+            {
+              type: 'default',
+              specifier: 'node:fs/promises',
+              name: 'fs',
+            },
+            {
+              type: 'namespace',
+              specifier: toImportPath(configPath, outDir),
+              name: '_source',
+            },
+            {
+              type: 'named',
+              specifier: 'fumadocs-mdx/config',
+              names: ['buildConfig'],
+            },
+            {
+              type: 'named',
+              specifier: 'fumadocs-mdx/runtime/mdx',
+              names: ['remarkInclude'],
+            },
+            {
+              type: 'named',
+              specifier: '@fumadocs/mdx-remote',
+              names: ['compileMDX'],
+            },
+          );
+
+          lines.unshift(
+            'const [err, _sourceConfig] = buildConfig(_source)',
+            'if (err) throw new Error(err)',
+            'var _temp = _sourceConfig.global?.mdxOptions ?? {}',
+            '_temp = typeof _temp === "function"? await _temp() : _temp',
+            'const _temp_remark = _temp.remarkPlugins',
+            'const _mdxOptions = { ..._temp, remarkPlugins: (v) => typeof _temp_remark === "function"? [remarkInclude, ..._temp_remark(v)] : [remarkInclude, ...v, ...(_temp_remark ?? [])] }',
+          );
+
+          asyncInit = true;
+        }
+
         return `toRuntimeAsync(${JSON.stringify(frontmatter)}, async () => {
 const source = await fs.readFile(${JSON.stringify(file.absolutePath)})
 const collection = _sourceConfig.collections.get(${JSON.stringify(collectionName)})
@@ -83,9 +85,7 @@ const mdxOptions = collection?.mdxOptions ?? _mdxOptions
 const { body, ...res } = await compileMDX({ source: source.toString(), filePath: ${JSON.stringify(file.absolutePath)}, mdxOptions })
 return { ...res, default: body }
 }, ${JSON.stringify(file)})`;
-
-      const importPath = `${toImportPath(file.absolutePath, outDir)}?hash=${configHash}&collection=${collectionName}`;
-      return `toRuntimeAsync(${JSON.stringify(frontmatter)}, () => import(${JSON.stringify(importPath)}), ${JSON.stringify(file)})`;
+      }
     }
 
     imports.push({

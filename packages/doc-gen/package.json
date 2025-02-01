@@ -31,7 +31,7 @@
     "fumadocs-typescript": "workspace:^",
     "hast-util-to-estree": "^3.1.1",
     "npm-to-yarn": "^3.0.1",
-    "oxc-transform": "^0.47.1",
+    "oxc-transform": "^0.48.1",
     "unist-util-visit": "^5.0.0",
     "zod": "^3.24.1"
   },
@@ -40,7 +40,7 @@
     "@types/estree": "^1.0.6",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.3",
-    "@types/node": "22.10.9",
+    "@types/node": "22.13.0",
     "eslint-config-custom": "workspace:*",
     "remark": "^15.0.0",
     "tsconfig": "workspace:*",

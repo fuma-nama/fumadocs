@@ -65,7 +65,7 @@
     "@types/mdast": "^4.0.3",
     "@types/mdx": "^2.0.13",
     "@types/micromatch": "^4.0.9",
-    "@types/react": "^19.0.7",
+    "@types/react": "^19.0.8",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "mdast-util-mdx-jsx": "^3.2.0",

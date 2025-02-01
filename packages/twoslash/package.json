@@ -37,20 +37,20 @@
   },
   "dependencies": {
     "@radix-ui/react-popover": "^1.1.5",
-    "@shikijs/twoslash": "^2.1.0",
+    "@shikijs/twoslash": "^2.2.0",
     "mdast-util-from-markdown": "^2.0.2",
     "mdast-util-gfm": "^3.0.0",
     "mdast-util-to-hast": "^13.2.0",
-    "tailwind-merge": "^2.6.0"
+    "tailwind-merge": "^3.0.1"
   },
   "devDependencies": {
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.3",
-    "@types/node": "22.10.9",
-    "@types/react": "^19.0.7",
+    "@types/node": "22.13.0",
+    "@types/react": "^19.0.8",
     "eslint-config-custom": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "shiki": "^2.1.0",
+    "shiki": "^2.2.0",
     "tsconfig": "workspace:*"
   },
   "peerDependencies": {

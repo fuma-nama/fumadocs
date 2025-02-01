@@ -86,8 +86,8 @@
   "dependencies": {
     "@formatjs/intl-localematcher": "^0.5.10",
     "@orama/orama": "^2.1.1",
-    "@shikijs/rehype": "^2.1.0",
-    "@shikijs/transformers": "^2.1.0",
+    "@shikijs/rehype": "^2.2.0",
+    "@shikijs/transformers": "^2.2.0",
     "github-slugger": "^2.0.0",
     "hast-util-to-estree": "^3.1.1",
     "hast-util-to-jsx-runtime": "^2.3.2",
@@ -97,7 +97,7 @@
     "remark": "^15.0.0",
     "remark-gfm": "^4.0.0",
     "scroll-into-view-if-needed": "^3.1.0",
-    "shiki": "^2.1.0",
+    "shiki": "^2.2.0",
     "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {
@@ -109,8 +109,8 @@
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.3",
     "@types/negotiator": "^0.6.3",
-    "@types/node": "22.10.9",
-    "@types/react": "^19.0.7",
+    "@types/node": "22.13.0",
+    "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "algoliasearch": "4.24.0",
     "eslint-config-custom": "workspace:*",
