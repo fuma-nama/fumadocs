@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 15.0.1
+
+### Patch Changes
+
+- 421166a: Fix border styles
+  - fumadocs-core@15.0.1
+
 ## 15.0.0
 
 ### Major Changes
