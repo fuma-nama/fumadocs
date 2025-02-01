@@ -1,5 +1,14 @@
 # @fuma-docs/openapi
 
+## 6.0.2
+
+### Patch Changes
+
+- a127dc4: Move to `tsc` for building package
+- Updated dependencies [421166a]
+  - fumadocs-ui@15.0.1
+  - fumadocs-core@15.0.1
+
 ## 6.0.1
 
 ### Patch Changes
