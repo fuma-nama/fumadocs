@@ -3,6 +3,7 @@ import type { MDXProps } from 'mdx/types';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { TableOfContents } from 'fumadocs-core/server';
 import { type DefaultMDXOptions } from '@/utils/mdx-options';
+import type { FC } from 'react';
 
 export interface GlobalConfig {
   /**
@@ -44,7 +45,7 @@ export interface FileInfo {
 }
 
 export interface MarkdownProps {
-  body: (props: MDXProps) => React.ReactElement;
+  body: FC<MDXProps>;
   structuredData: StructuredData;
   toc: TableOfContents;
   _exports: Record<string, unknown>;

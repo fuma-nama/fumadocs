@@ -26,90 +26,67 @@ export async function generateJS(
   let asyncInit = false;
   const lines: string[] = [];
 
-  async function generateEntry(
-    file: FileInfo,
-    collectionName: string,
-    collection: InternalDocCollection | InternalMetaCollection,
-    importId: string,
-  ): Promise<string> {
-    if (collection.type === 'doc' && collection.async) {
-      const frontmatter = await getFrontmatter(file.absolutePath);
-
-      if (collection.async) {
-        if (!asyncInit) {
-          imports.push(
-            {
-              type: 'default',
-              specifier: 'node:fs/promises',
-              name: 'fs',
-            },
-            {
-              type: 'namespace',
-              specifier: toImportPath(configPath, outDir),
-              name: '_source',
-            },
-            {
-              type: 'named',
-              specifier: 'fumadocs-mdx/config',
-              names: ['buildConfig'],
-            },
-            {
-              type: 'named',
-              specifier: 'fumadocs-mdx/runtime/mdx',
-              names: ['remarkInclude'],
-            },
-            {
-              type: 'named',
-              specifier: '@fumadocs/mdx-remote',
-              names: ['compileMDX'],
-            },
-          );
-
-          lines.unshift(
-            'const [err, _sourceConfig] = buildConfig(_source)',
-            'if (err) throw new Error(err)',
-            'var _temp = _sourceConfig.global?.mdxOptions ?? {}',
-            '_temp = typeof _temp === "function"? await _temp() : _temp',
-            'const _temp_remark = _temp.remarkPlugins',
-            'const _mdxOptions = { ..._temp, remarkPlugins: (v) => typeof _temp_remark === "function"? [remarkInclude, ..._temp_remark(v)] : [remarkInclude, ...v, ...(_temp_remark ?? [])] }',
-          );
-
-          asyncInit = true;
-        }
-
-        return `toRuntimeAsync(${JSON.stringify(frontmatter)}, async () => {
-const source = await fs.readFile(${JSON.stringify(file.absolutePath)})
-const collection = _sourceConfig.collections.get(${JSON.stringify(collectionName)})
-const mdxOptions = collection?.mdxOptions ?? _mdxOptions
-
-const { body, ...res } = await compileMDX({ source: source.toString(), filePath: ${JSON.stringify(file.absolutePath)}, mdxOptions })
-return { ...res, default: body }
-}, ${JSON.stringify(file)})`;
-      }
-    }
-
-    imports.push({
-      type: 'namespace',
-      name: importId,
-      specifier: `${toImportPath(file.absolutePath, outDir)}?collection=${collectionName}&hash=${configHash}`,
-    });
-
-    return `toRuntime("${collection.type}", ${importId}, ${JSON.stringify(file)})`;
-  }
-
   config._runtime.files.clear();
   const entries = Array.from(config.collections.entries());
 
   const declares = entries.map(async ([k, collection]) => {
     const files = await getCollectionFiles(collection);
+
+    if (collection.type === 'doc' && collection.async) {
+      if (!asyncInit) {
+        imports.push(
+          {
+            type: 'namespace',
+            specifier: toImportPath(configPath, outDir),
+            name: '_source',
+          },
+          {
+            type: 'named',
+            specifier: 'fumadocs-mdx/config',
+            names: ['buildConfig'],
+          },
+          {
+            type: 'named',
+            specifier: 'fumadocs-mdx/runtime/async',
+            names: ['asyncFiles'],
+          },
+        );
+
+        lines.unshift(
+          'const [err, _sourceConfig] = buildConfig(_source)',
+          'if (err) throw new Error(err)',
+          'const _mdxOptions = _sourceConfig.global?.mdxOptions ?? {}',
+        );
+
+        asyncInit = true;
+      }
+
+      const entries = files.map(async (file) => {
+        const frontmatter = await getFrontmatter(file.absolutePath);
+
+        return JSON.stringify({
+          frontmatter,
+          file,
+        });
+      });
+
+      return `export const ${k} = asyncFiles([${(await Promise.all(entries)).join(', ')}], _mdxOptions)`;
+    }
+
     const items = files.map(async (file, i) => {
       config._runtime.files.set(file.absolutePath, k);
+      const importId = `${k}_${i}`;
 
-      return generateEntry(file, k, collection, `${k}_${i}`);
+      imports.push({
+        type: 'namespace',
+        name: importId,
+        specifier: `${toImportPath(file.absolutePath, outDir)}?collection=${k}&hash=${configHash}`,
+      });
+
+      return `toRuntime("${collection.type}", ${importId}, ${JSON.stringify(file)})`;
     });
 
     const resolvedItems = await Promise.all(items);
-
     return `export const ${k} = [${resolvedItems.join(', ')}];`;
   });
 

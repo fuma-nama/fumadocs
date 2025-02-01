@@ -9,7 +9,10 @@ export function getDefaultValue(
     return Object.fromEntries(
       Object.entries(item.properties).map(([key, prop]) => [
         key,
-        getDefaultValue(references[prop.schema], references),
+        getDefaultValue(
+          prop.type === 'ref' ? references[prop.schema] : prop,
+          references,
+        ),
       ]),
     );
 

@@ -807,6 +807,9 @@ importers:
         specifier: ^3.24.1
         version: 3.24.1
     devDependencies:
+      '@fumadocs/mdx-remote':
+        specifier: workspace:*
+        version: link:../mdx-remote
       '@types/cross-spawn':
         specifier: ^6.0.6
         version: 6.0.6

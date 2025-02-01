@@ -23,9 +23,9 @@
       "types": "./dist/next/index.d.ts",
       "require": "./dist/next/index.cjs"
     },
-    "./runtime/mdx": {
-      "import": "./dist/runtime/mdx.js",
-      "types": "./dist/runtime/mdx.d.ts"
+    "./runtime/async": {
+      "import": "./dist/runtime/async.js",
+      "types": "./dist/runtime/async.d.ts"
     },
     ".": {
       "import": "./dist/index.js",
@@ -61,6 +61,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@fumadocs/mdx-remote": "workspace:*",
     "@types/cross-spawn": "^6.0.6",
     "@types/mdast": "^4.0.3",
     "@types/mdx": "^2.0.13",
@@ -77,7 +78,13 @@
   },
   "peerDependencies": {
     "fumadocs-core": "^14.0.0 || ^15.0.0",
+    "@fumadocs/mdx-remote": "workspace:*",
     "next": "14.x.x || 15.x.x"
+  },
+  "peerDependenciesMeta": {
+    "@fumadocs/mdx-remote": {
+      "optional": true
+    }
   },
   "publishConfig": {
     "access": "public"

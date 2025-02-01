@@ -57,11 +57,12 @@ export interface CompileMDXOptions {
 
 export interface CompileMDXResult<TFrontmatter = Record<string, unknown>> {
   body: MdxContent;
-  compiled: string;
   frontmatter: TFrontmatter;
   toc: TableOfContents;
   vfile: VFile;
-  scope: object;
+
+  compiled: string;
+  exports: Record<string, unknown> | null;
 }
 
 export function createCompiler(mdxOptions?: MDXOptions) {
@@ -108,7 +109,7 @@ export function createCompiler(mdxOptions?: MDXOptions) {
           });
         },
         toc: exports?.toc ?? (file.data.toc as TableOfContents),
-        scope,
+        exports,
       };
     },
   };
