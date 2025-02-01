@@ -1,5 +1,16 @@
 # next-docs-mdx
 
+## 11.4.0
+
+### Minor Changes
+
+- 421166a: Improve performance, remove unused imports
+
+### Patch Changes
+
+- 421166a: Fix Fumadocs 14 compatibility issues
+  - fumadocs-core@15.0.1
+
 ## 11.3.2
 
 ### Patch Changes

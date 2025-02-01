@@ -9,12 +9,7 @@ import {
 } from 'fumadocs-ui/components/ui/collapsible';
 import { ChevronDown } from 'lucide-react';
 
-export {
-  Root,
-  useSchemaContext,
-  APIPlayground,
-  ScalarPlayground,
-} from './client';
+export { Root, useSchemaContext, APIPlayground } from './client';
 
 export function APIInfo({
   className,

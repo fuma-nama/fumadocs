@@ -1,5 +1,5 @@
-import type { Engine, MessageRecord } from '@/components/ai/search-ai';
 import { InkeepAI } from '@inkeep/ai-api/sdk';
+import type { Engine, MessageRecord } from '@/components/ai/context';
 
 const integrationId = process.env.NEXT_PUBLIC_INKEEP_INTEGRATION_ID;
 const apiKey = process.env.NEXT_PUBLIC_INKEEP_API_KEY;

@@ -2,6 +2,7 @@ import { createMDXSource } from 'fumadocs-mdx';
 import { loader } from 'fumadocs-core/source';
 import { attachFile, createOpenAPI } from 'fumadocs-openapi/server';
 import { docs, meta } from '@/.source';
+import { APIPlayground } from 'fumadocs-openapi/scalar';
 
 export const source = loader({
   baseUrl: '/docs',
@@ -11,4 +12,8 @@ export const source = loader({
   },
 });
 
-export const openapi = createOpenAPI();
+export const openapi = createOpenAPI({
+  renderer: {
+    APIPlayground,
+  },
+});

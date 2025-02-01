@@ -15,7 +15,7 @@ import {
 } from 'fumadocs-docgen';
 import rehypeKatex from 'rehype-katex';
 import { z } from 'zod';
-import { remarkMermaid } from '@theguild/remark-mermaid';
+import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins';
 
 export const { docs, meta } = defineDocs({
   docs: {
@@ -49,13 +49,10 @@ export const blog = defineCollections({
 export default defineConfig({
   lastModifiedTime: 'git',
   mdxOptions: async () => {
-    const { rehypeCodeDefaultOptions } = await import(
-      'fumadocs-core/mdx-plugins'
-    );
-
     return {
       rehypeCodeOptions: {
         lazy: true,
+        experimentalJSEngine: true,
         langs: ['ts', 'js', 'html', 'tsx', 'mdx'],
         inline: 'tailing-curly-colon',
         themes: {
@@ -85,7 +82,6 @@ export default defineConfig({
         ],
       },
       remarkPlugins: [
-        remarkMermaid,
         remarkMath,
         [remarkInstall, { persist: { id: 'package-manager' } }],
         [remarkDocGen, { generators: [fileGenerator()] }],

@@ -25,6 +25,8 @@ import { openapi, source } from '@/lib/source';
 import { Wrapper } from '@/components/preview/wrapper';
 import { AutoTypeTable } from '@/components/type-table';
 import { metadataImage } from '@/lib/metadata-image';
+import { File, Folder, Files } from 'fumadocs-ui/components/files';
+import { Mermaid } from '@theguild/remark-mermaid/mermaid';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -81,14 +83,21 @@ export default async function Page(props: {
             PopupTrigger,
             Tabs,
             Tab,
+            Mermaid,
             TypeTable,
             AutoTypeTable,
             Accordion,
             Accordions,
             Wrapper,
+            File,
+            Folder,
+            Files,
             blockquote: Callout as unknown as FC<ComponentProps<'blockquote'>>,
             APIPage: openapi.APIPage,
             DocsCategory: () => <DocsCategory page={page} from={source} />,
+
+            ...(await import('@/content/docs/ui/components/tabs.client')),
+            ...(await import('@/content/docs/ui/theme.client')),
           }}
         />
         {page.data.index ? <DocsCategory page={page} from={source} /> : null}

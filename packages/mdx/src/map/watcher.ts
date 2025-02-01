@@ -1,5 +1,5 @@
 import { type FSWatcher, watch } from 'chokidar';
-import { type LoadedConfig } from '@/config/load';
+import { type LoadedConfig } from '@/utils/load-config';
 
 export function watcher(configPath: string, config: LoadedConfig): FSWatcher {
   const deps: string[] = [configPath];

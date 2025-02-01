@@ -4,7 +4,7 @@ import {
   type Source,
 } from 'fumadocs-core/source';
 import { type BaseCollectionEntry, type FileInfo } from '@/config';
-import { resolveFiles } from '@/runtime/resolve-files';
+import type { VirtualFile } from 'fumadocs-core/source';
 
 export function toRuntime(
   type: 'doc' | 'meta',
@@ -29,25 +29,6 @@ export function toRuntime(
   };
 }
 
-export function toRuntimeAsync(
-  frontmatter: Record<string, unknown>,
-  load: () => Promise<Record<string, unknown>>,
-  info: FileInfo,
-): unknown {
-  return {
-    async load() {
-      const { default: body, ...res } = await load();
-
-      return {
-        body,
-        ...res,
-      };
-    },
-    ...frontmatter,
-    _file: info,
-  };
-}
-
 export function createMDXSource<
   Doc extends PageData & BaseCollectionEntry,
   Meta extends MetaData & BaseCollectionEntry,
@@ -66,4 +47,39 @@ export function createMDXSource<
         rootDir,
       }),
   };
+}
+
+interface ResolveOptions {
+  docs: BaseCollectionEntry[];
+  meta: BaseCollectionEntry[];
+
+  rootDir?: string;
+}
+
+export function resolveFiles({
+  docs,
+  meta,
+  rootDir = '',
+}: ResolveOptions): VirtualFile[] {
+  const outputs: VirtualFile[] = [];
+
+  for (const entry of docs) {
+    if (!entry._file.path.startsWith(rootDir)) continue;
+
+    outputs.push({
+      type: 'page',
+      path: entry._file.path,
+      data: entry,
+    });
+  }
+
+  for (const entry of meta) {
+    outputs.push({
+      type: 'meta',
+      path: entry._file.path,
+      data: entry,
+    });
+  }
+
+  return outputs;
 }

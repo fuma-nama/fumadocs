@@ -1,6 +1,6 @@
 import * as path from 'node:path';
 import * as fs from 'node:fs';
-import { findConfigFile, loadConfig } from '@/config/load';
+import { findConfigFile, loadConfig } from '@/utils/load-config';
 import { generateTypes } from '@/map/generate';
 
 export async function postInstall(

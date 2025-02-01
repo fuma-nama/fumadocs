@@ -37,14 +37,14 @@
     "@clack/prompts": "^0.9.1",
     "commander": "^13.1.0",
     "execa": "^9.5.2",
-    "package-manager-detector": "^0.2.8",
+    "package-manager-detector": "^0.2.9",
     "picocolors": "^1.1.1",
     "ts-morph": "^25.0.0"
   },
   "devDependencies": {
     "@types/cross-spawn": "^6.0.6",
-    "@types/node": "22.10.9",
-    "@types/react": "^19.0.7",
+    "@types/node": "22.13.0",
+    "@types/react": "^19.0.8",
     "eslint-config-custom": "workspace:*",
     "fast-glob": "^3.3.3",
     "tsconfig": "workspace:*",

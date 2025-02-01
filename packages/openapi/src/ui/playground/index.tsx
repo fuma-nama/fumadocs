@@ -44,7 +44,12 @@ import {
 import { ChevronDown } from 'lucide-react';
 
 interface FormValues {
-  authorization: string;
+  authorization:
+    | string
+    | {
+        username: string;
+        password: string;
+      };
   path: Record<string, unknown>;
   query: Record<string, unknown>;
   header: Record<string, unknown>;
@@ -63,6 +68,18 @@ export interface CustomField<TName extends FieldPath<FormValues>, Info> {
   }) => ReactElement;
 }
 
+function defaultAuthValue(auth: APIPlaygroundProps['authorization']) {
+  if (!auth || auth.type === 'apiKey') return '';
+  if (auth.type === 'http' && auth.scheme === 'basic') {
+    return {
+      username: '',
+      password: '',
+    };
+  }
+
+  return 'Bearer';
+}
+
 export function APIPlayground({
   route,
   method = 'GET',
@@ -78,7 +95,7 @@ export function APIPlayground({
   ...props
 }: APIPlaygroundProps & {
   fields?: {
-    auth?: CustomField<'authorization', PrimitiveRequestField>;
+    auth?: CustomField<'authorization', RequestSchema>;
     path?: CustomField<`path.${string}`, PrimitiveRequestField>;
     query?: CustomField<`query.${string}`, PrimitiveRequestField>;
     header?: CustomField<`header.${string}`, PrimitiveRequestField>;
@@ -93,7 +110,7 @@ export function APIPlayground({
   const dynamicRef = useRef(new Map<string, DynamicField>());
   const form = useForm<FormValues>({
     defaultValues: {
-      authorization: authorization?.defaultValue,
+      authorization: defaultAuthValue(authorization),
       path: getDefaultValues(path, schemas),
       query: getDefaultValues(query, schemas),
       header: getDefaultValues(header, schemas),
@@ -105,21 +122,49 @@ export function APIPlayground({
     const fetcher = await import('./fetcher').then((mod) =>
       mod.createBrowserFetcher(body, schemas),
     );
+
+    const query = { ...input.query };
+    const header = { ...input.header };
+
+    if (input.authorization && authorization) {
+      if (authorization.type === 'apiKey') {
+        if (authorization.in === 'header') {
+          header[authorization.name] = input.authorization;
+        } else if (authorization.in === 'query') {
+          query[authorization.name] = input.authorization;
+        } else {
+          if ('cookie' in header) {
+            header.Cookie = header.cookie;
+            delete header.cookie;
+          }
+
+          header.Cookie = [
+            header.Cookie as string,
+            `${authorization.name}=${input.authorization}`,
+          ]
+            .filter((s) => s.length > 0)
+            .join('; ');
+        }
+      } else if (
+        authorization.type === 'http' &&
+        authorization.scheme === 'basic'
+      ) {
+        if (typeof input.authorization === 'object')
+          header.Authorization = `Basic ${btoa(`${input.authorization.username}:${input.authorization.password}`)}`;
+      } else {
+        header.Authorization = input.authorization;
+      }
+    }
+
     const serverUrl = serverRef.current
       ? getUrl(serverRef.current.url, serverRef.current.variables)
       : window.location.origin;
-    let url = `${serverUrl}${createPathnameFromInput(route, input.path, input.query)}`;
+    let url = `${serverUrl}${createPathnameFromInput(route, input.path, query)}`;
 
     if (proxyUrl) {
       const updated = new URL(proxyUrl, window.location.origin);
       updated.searchParams.append('url', url);
       url = updated.toString();
-    }
-
-    const header = { ...input.header };
-
-    if (input.authorization && authorization) {
-      header[authorization.name] = input.authorization;
     }
 
     return fetcher.fetch({
@@ -138,13 +183,14 @@ export function APIPlayground({
 
   useEffect(() => {
     if (!authorization) return;
-    const key = `__fumadocs_authorization_${authorization.authType}`;
+    const key = `__fumadocs_auth_${JSON.stringify(authorization)}`;
     const cached = localStorage.getItem(key);
-    if (cached) form.setValue('authorization', cached);
+    if (cached) form.setValue('authorization', JSON.parse(cached));
 
     const subscription = form.watch((value, { name }) => {
-      if (name !== 'authorization' || !value.authorization) return;
-      localStorage.setItem(key, value.authorization);
+      if (!name || !name.startsWith('authorization') || !value.authorization)
+        return;
+      localStorage.setItem(key, JSON.stringify(value.authorization));
     });
 
     return () => {
@@ -201,11 +247,56 @@ export function APIPlayground({
           <CollapsiblePanel title="Server URL">
             <ServerSelect />
           </CollapsiblePanel>
-          {authorization ? (
+
+          {header.length > 0 || authorization ? (
             <CollapsiblePanel title="Headers">
-              {renderCustomField('authorization', authorization, fields.auth)}
+              {authorization?.type === 'http' &&
+              authorization.scheme === 'basic'
+                ? renderCustomField(
+                    'authorization',
+                    {
+                      name: 'Authorization',
+                      type: 'object',
+                      isRequired: true,
+                      properties: {
+                        username: {
+                          type: 'string',
+                          isRequired: true,
+                          defaultValue: '',
+                        },
+                        password: {
+                          type: 'string',
+                          isRequired: true,
+                          defaultValue: '',
+                        },
+                      },
+                    },
+                    fields.auth,
+                  )
+                : authorization
+                  ? renderCustomField(
+                      'authorization',
+                      {
+                        name: 'Authorization',
+                        type: 'string',
+                        isRequired: true,
+                        description: 'The Authorization access token',
+                        defaultValue: '',
+                      },
+                      fields.auth,
+                    )
+                  : null}
+              {header.map((field) =>
+                renderCustomField(
+                  `header.${field.name}`,
+                  field,
+                  fields.header,
+                  field.name,
+                ),
+              )}
             </CollapsiblePanel>
           ) : null}
+
           {path.length > 0 ? (
             <CollapsiblePanel title="Path">
               {path.map((field) =>
@@ -226,19 +317,6 @@ export function APIPlayground({
                   `query.${field.name}`,
                   field,
                   fields.query,
-                  field.name,
-                ),
-              )}
-            </CollapsiblePanel>
-          ) : null}
-
-          {header.length > 0 ? (
-            <CollapsiblePanel title="Headers">
-              {header.map((field) =>
-                renderCustomField(
-                  `header.${field.name}`,
-                  field,
-                  fields.header,
                   field.name,
                 ),
               )}

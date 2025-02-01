@@ -6,7 +6,7 @@ import {
   type InternalDocCollection,
   type InternalMetaCollection,
   type LoadedConfig,
-} from '@/config/load';
+} from '@/utils/load-config';
 
 export async function generateJS(
   configPath: string,
@@ -19,71 +19,76 @@ export async function generateJS(
   const imports: ImportInfo[] = [
     {
       type: 'named',
-      names: ['toRuntime', 'toRuntimeAsync'],
+      names: ['toRuntime'],
       specifier: 'fumadocs-mdx',
     },
   ];
-  const importedCollections = new Set<string>();
-
-  async function generateEntry(
-    file: FileInfo,
-    collectionName: string,
-    collection: InternalDocCollection | InternalMetaCollection,
-    importId: string,
-  ): Promise<string> {
-    if (collection.type === 'doc' && collection.async) {
-      const importPath = `${toImportPath(file.absolutePath, outDir)}?hash=${configHash}&collection=${collectionName}`;
-      const frontmatter = await getFrontmatter(file.absolutePath);
-
-      return `toRuntimeAsync(${JSON.stringify(frontmatter)}, () => import(${JSON.stringify(importPath)}), ${JSON.stringify(file)})`;
-    }
-
-    imports.push({
-      type: 'namespace',
-      name: importId,
-      specifier: `${toImportPath(file.absolutePath, outDir)}?collection=${collectionName}&hash=${configHash}`,
-    });
-
-    return `toRuntime("${collection.type}", ${importId}, ${JSON.stringify(file)})`;
-  }
+  let asyncInit = false;
+  const lines: string[] = [];
 
   config._runtime.files.clear();
   const entries = Array.from(config.collections.entries());
 
   const declares = entries.map(async ([k, collection]) => {
     const files = await getCollectionFiles(collection);
+
+    if (collection.type === 'doc' && collection.async) {
+      if (!asyncInit) {
+        imports.push(
+          {
+            type: 'namespace',
+            specifier: toImportPath(configPath, outDir),
+            name: '_source',
+          },
+          {
+            type: 'named',
+            specifier: 'fumadocs-mdx/runtime/async',
+            names: ['asyncFiles', 'buildConfig'],
+          },
+        );
+
+        lines.unshift(
+          'const [err, _sourceConfig] = buildConfig(_source)',
+          'if (err) throw new Error(err)',
+        );
+
+        asyncInit = true;
+      }
+
+      const entries = files.map(async (file) => {
+        const frontmatter = await getFrontmatter(file.absolutePath);
+
+        return JSON.stringify({
+          frontmatter,
+          file,
+        });
+      });
+
+      return `export const ${k} = asyncFiles([${(await Promise.all(entries)).join(', ')}], "${k}", _sourceConfig)`;
+    }
+
     const items = files.map(async (file, i) => {
       config._runtime.files.set(file.absolutePath, k);
+      const importId = `${k}_${i}`;
 
-      return generateEntry(file, k, collection, `${k}_${i}`);
+      imports.push({
+        type: 'namespace',
+        name: importId,
+        specifier: `${toImportPath(file.absolutePath, outDir)}?collection=${k}&hash=${configHash}`,
+      });
+
+      return `toRuntime("${collection.type}", ${importId}, ${JSON.stringify(file)})`;
     });
 
     const resolvedItems = await Promise.all(items);
-
-    if (collection.transform) {
-      if (config.global) importedCollections.add('default'); // import global config
-      importedCollections.add(k);
-    }
-
-    // TODO: remove `transform` API on next major, migrate to runtime transform (e.g. transform & re-export in `source.ts`)
-    return collection.transform
-      ? `export const ${k} = await Promise.all([${resolvedItems.join(', ')}].map(v => c_${k}.transform(v, ${config.global ? 'c_default' : 'undefined'})));`
-      : `export const ${k} = [${resolvedItems.join(', ')}];`;
+    return `export const ${k} = [${resolvedItems.join(', ')}];`;
   });
 
   const resolvedDeclares = await Promise.all(declares);
 
-  if (importedCollections.size > 0) {
-    imports.push({
-      type: 'named',
-      names: Array.from(importedCollections.values())
-        .sort()
-        .map((v) => [v, `c_${v}`] as const),
-      specifier: toImportPath(configPath, outDir),
-    });
-  }
-
-  return [...imports.map(getImportCode), ...resolvedDeclares].join('\n');
+  return [...imports.map(getImportCode), ...lines, ...resolvedDeclares].join(
+    '\n',
+  );
 }
 
 async function getCollectionFiles(

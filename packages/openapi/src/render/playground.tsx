@@ -9,8 +9,8 @@ import {
   type NoReference,
   type ParsedSchema,
 } from '@/utils/schema';
-import { getSecurities } from '@/utils/get-security';
-import { ScalarPlayground } from '@/ui';
+import { getSecurities, type Security } from '@/utils/get-security';
+import { APIPlayground } from '@/ui';
 
 interface BaseRequestField {
   name: string;
@@ -48,7 +48,7 @@ interface FileSchema extends BaseSchema {
 
 interface ObjectSchema extends BaseSchema {
   type: 'object';
-  properties: Record<string, ReferenceSchema>;
+  properties: Record<string, RequestSchema | ReferenceSchema>;
 
   /**
    * Reference to schema, or true if it's `any`
@@ -84,7 +84,7 @@ interface Context {
 export interface APIPlaygroundProps {
   route: string;
   method: string;
-  authorization?: PrimitiveRequestField & { authType: string };
+  authorization?: Security;
   path?: PrimitiveRequestField[];
   query?: PrimitiveRequestField[];
   header?: PrimitiveRequestField[];
@@ -104,16 +104,6 @@ export function Playground({
   method: MethodInformation;
   ctx: RenderContext;
 }): ReactNode {
-  if (ctx.useScalar) {
-    return (
-      <ScalarPlayground
-        spec={ctx.schema.downloaded}
-        method={method.method}
-        path={path}
-      />
-    );
-  }
-
   let currentId = 0;
   const bodyContent = method.requestBody?.content;
   const mediaType = bodyContent ? getPreferredType(bodyContent) : undefined;
@@ -157,13 +147,13 @@ export function Playground({
     proxyUrl: ctx.proxyUrl,
   };
 
-  return <ctx.renderer.APIPlayground {...props} />;
+  return <APIPlayground {...props} />;
 }
 
 function getAuthorizationField(
   method: MethodInformation,
   { schema: { document } }: RenderContext,
-): (PrimitiveRequestField & { authType: string }) | undefined {
+): Security | undefined {
   const security = method.security ?? document.security ?? [];
   if (security.length === 0) return;
   const singular = security.find(
@@ -171,22 +161,7 @@ function getAuthorizationField(
   );
   if (!singular) return;
 
-  const scheme = getSecurities(singular, document)[0];
-
-  return {
-    type: 'string',
-    name: scheme.type === 'apiKey' ? scheme.name : 'Authorization',
-    authType: scheme.type,
-    defaultValue:
-      scheme.type === 'oauth2' ||
-      (scheme.type === 'http' && scheme.scheme === 'bearer')
-        ? 'Bearer'
-        : 'Basic',
-    isRequired: security.every(
-      (requirements) => Object.keys(requirements).length > 0,
-    ),
-    description: 'The Authorization access token',
-  };
+  return getSecurities(singular, document)[0];
 }
 
 function getIdFromSchema(
@@ -346,7 +321,7 @@ function toSchema(
             ...schema,
             type,
           },
-          true,
+          required,
           ctx,
         );
       }

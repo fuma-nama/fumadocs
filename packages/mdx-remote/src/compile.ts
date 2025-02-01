@@ -2,20 +2,21 @@ import {
   rehypeCode,
   type RehypeCodeOptions,
   rehypeToc,
-  RehypeTocOptions,
+  type RehypeTocOptions,
   remarkGfm,
   remarkHeading,
   type RemarkHeadingOptions,
   remarkImage,
+  remarkCodeTab,
   type RemarkImageOptions,
 } from 'fumadocs-core/mdx-plugins';
 import { type CompileOptions, createProcessor } from '@mdx-js/mdx';
 import type { MDXComponents } from 'mdx/types';
 import { parseFrontmatter, pluginOption, type ResolvePlugins } from './utils';
 import type { VFile } from 'vfile';
-import type { ReactNode } from 'react';
 import type { TableOfContents } from 'fumadocs-core/server';
 import { executeMdx, type MdxContent } from '@/render';
+import { pathToFileURL } from 'node:url';
 
 export type MDXOptions = Omit<
   CompileOptions,
@@ -27,11 +28,13 @@ export type MDXOptions = Omit<
   remarkHeadingOptions?: RemarkHeadingOptions | false;
   rehypeCodeOptions?: RehypeCodeOptions | false;
   rehypeTocOptions?: RehypeTocOptions | false;
+  remarkCodeTabOptions?: false;
 
   /**
    * The directory to find image sizes
    *
    * @defaultValue './public'
+   * @deprecated Use `remarkImageOptions.publicDir` instead
    */
   imageDir?: string;
 
@@ -53,17 +56,13 @@ export interface CompileMDXOptions {
 }
 
 export interface CompileMDXResult<TFrontmatter = Record<string, unknown>> {
-  /**
-   * @deprecated use `body` instead
-   */
-  get content(): ReactNode;
-
   body: MdxContent;
-  compiled: string;
   frontmatter: TFrontmatter;
   toc: TableOfContents;
   vfile: VFile;
-  scope: object;
+
+  compiled: string;
+  exports: Record<string, unknown> | null;
 }
 
 export function createCompiler(mdxOptions?: MDXOptions) {
@@ -87,23 +86,19 @@ export function createCompiler(mdxOptions?: MDXOptions) {
         path: options.filePath,
       });
       const compiled = String(file);
-      const exports = !skipRender ? await executeMdx(compiled, scope) : null;
+      const exports = !skipRender
+        ? await executeMdx(
+            compiled,
+            scope,
+            options.filePath ? pathToFileURL(options.filePath) : undefined,
+          )
+        : null;
 
       return {
         vfile: file,
         compiled,
-        get content() {
-          if (!exports)
-            throw new Error(
-              'Body cannot be rendered when `skipRender` is set to true',
-            );
-
-          return exports.default({
-            components: options.components,
-          }) as ReactNode;
-        },
         frontmatter: frontmatter as Frontmatter,
-        body: (props) => {
+        async body(props) {
           if (!exports)
             throw new Error(
               'Body cannot be rendered when `skipRender` is set to true',
@@ -114,7 +109,7 @@ export function createCompiler(mdxOptions?: MDXOptions) {
           });
         },
         toc: exports?.toc ?? (file.data.toc as TableOfContents),
-        scope,
+        exports,
       };
     },
   };
@@ -133,6 +128,7 @@ function getCompileOptions({
   remarkImageOptions,
   rehypeTocOptions,
   remarkHeadingOptions,
+  remarkCodeTabOptions,
   imageDir = './public',
   ...options
 }: MDXOptions = {}): CompileOptions {
@@ -144,14 +140,6 @@ function getCompileOptions({
       (v) => [
         remarkGfm,
         remarkHeadingOptions !== false && [remarkHeading, remarkHeadingOptions],
-        ...v,
-      ],
-      options.remarkPlugins,
-    ),
-    rehypePlugins: pluginOption(
-      (v) => [
-        rehypeCodeOptions !== false && [rehypeCode, rehypeCodeOptions],
-        rehypeTocOptions !== false && [rehypeToc, rehypeTocOptions],
         remarkImageOptions !== false && [
           remarkImage,
           {
@@ -160,6 +148,15 @@ function getCompileOptions({
             ...remarkImageOptions,
           } satisfies RemarkImageOptions,
         ],
+        remarkCodeTabOptions !== false && remarkCodeTab,
+        ...v,
+      ],
+      options.remarkPlugins,
+    ),
+    rehypePlugins: pluginOption(
+      (v) => [
+        rehypeCodeOptions !== false && [rehypeCode, rehypeCodeOptions],
+        rehypeTocOptions !== false && [rehypeToc, rehypeTocOptions],
         ...v,
       ],
       options.rehypePlugins,

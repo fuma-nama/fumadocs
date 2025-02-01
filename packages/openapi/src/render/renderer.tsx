@@ -1,7 +1,6 @@
 import type { ComponentType, ReactNode } from 'react';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
-import type { APIPlaygroundProps } from '@/render/playground';
 import { CodeBlock } from '@/render/codeblock';
 import {
   API,
@@ -10,9 +9,9 @@ import {
   APIExample,
   Property,
   ObjectCollapsible,
-  APIPlayground,
 } from '@/ui';
-import type { RenderContext, ServerObject } from '@/types';
+import type { MethodInformation, RenderContext, ServerObject } from '@/types';
+import { Playground } from '@/render/playground';
 
 export interface ResponsesProps {
   items: string[];
@@ -81,7 +80,11 @@ export interface Renderer {
    */
   ObjectCollapsible: ComponentType<ObjectCollapsibleProps>;
   Property: ComponentType<PropertyProps>;
-  APIPlayground: ComponentType<APIPlaygroundProps>;
+  APIPlayground: ComponentType<{
+    path: string;
+    method: MethodInformation;
+    ctx: RenderContext;
+  }>;
 }
 
 export type {
@@ -93,7 +96,6 @@ export type {
 
 export function createRenders(
   shikiOptions: RenderContext['shikiOptions'],
-  _useScalar: boolean,
 ): Renderer {
   return {
     Root: (props) => (
@@ -139,6 +141,6 @@ export function createRenders(
         />
       </Tab>
     ),
-    APIPlayground,
+    APIPlayground: Playground,
   };
 }

@@ -14,7 +14,6 @@ import type {
 import { getPreferredType, NoReference } from '@/utils/schema';
 import { getTypescriptSchema } from '@/utils/get-typescript-schema';
 import { getSecurities, getSecurityPrefix } from '@/utils/get-security';
-import { Playground } from '@/render/playground';
 import { idToTitle } from '@/utils/id-to-title';
 import { type ResponseTypeProps } from '@/render/renderer';
 import { Markdown } from './markdown';
@@ -202,7 +201,7 @@ export function Operation({
   const info = (
     <ctx.renderer.APIInfo head={headNode} method={method.method} route={path}>
       {type === 'operation' ? (
-        <Playground path={path} method={method} ctx={ctx} />
+        <ctx.renderer.APIPlayground path={path} method={method} ctx={ctx} />
       ) : null}
       {security ? (
         <>

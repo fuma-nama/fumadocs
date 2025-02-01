@@ -1,5 +1,54 @@
 # @fuma-docs/openapi
 
+## 6.0.2
+
+### Patch Changes
+
+- a127dc4: Move to `tsc` for building package
+- Updated dependencies [421166a]
+  - fumadocs-ui@15.0.1
+  - fumadocs-core@15.0.1
+
+## 6.0.1
+
+### Patch Changes
+
+- 127d9df: Fix type errors
+
+## 6.0.0
+
+### Major Changes
+
+- 1286a04: **Change interface for `useScalar`**
+
+  From:
+
+  ```tsx
+  import { createOpenAPI } from 'fumadocs-openapi/server';
+  import { APIPlayground } from 'fumadocs-openapi/scalar';
+
+  export const openapi = createOpenAPI({
+    useScalar: true,
+  });
+  ```
+
+  To:
+
+  ```tsx
+  import { createOpenAPI } from 'fumadocs-openapi/server';
+  import { APIPlayground } from 'fumadocs-openapi/scalar';
+
+  export const openapi = createOpenAPI({
+    renderer: {
+      APIPlayground,
+    },
+  });
+  ```
+
+### Minor Changes
+
+- 9e02460: Add built-in UI to basic auth input (username:password)
+
 ## 5.12.0
 
 ### Minor Changes

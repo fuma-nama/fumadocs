@@ -39,7 +39,7 @@ export const roundedTable = {
     borderSpacing: '0',
     background: 'var(--color-fd-card)',
     borderRadius: 'var(--radius-lg)',
-    border: '1p solid var(--color-fd-border)',
+    border: '1px solid var(--color-fd-border)',
     overflow: 'hidden',
   },
   th: {

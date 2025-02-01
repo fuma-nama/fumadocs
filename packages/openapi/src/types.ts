@@ -35,11 +35,6 @@ export type DereferenceMap = Map<unknown, string>;
 
 export interface RenderContext {
   /**
-   * Use Scalar for API Playground
-   */
-  useScalar: boolean;
-
-  /**
    * The url of proxy to avoid CORS issues
    */
   proxyUrl?: string;

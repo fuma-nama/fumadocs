@@ -1,114 +1,79 @@
 'use client';
 import {
-  type ButtonHTMLAttributes,
-  createContext,
   type HTMLAttributes,
   type ReactNode,
   type TextareaHTMLAttributes,
   use,
-  useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from 'react';
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogOverlay,
-  DialogPortal,
-  DialogTitle,
-  DialogTrigger,
-} from '@radix-ui/react-dialog';
 import { Loader2, RefreshCw, Send, X } from 'lucide-react';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { cn } from '@/lib/cn';
 import { buttonVariants } from '../../../../packages/ui/src/components/ui/button';
 import type { Processor } from './markdown-processor';
 import Link from 'fumadocs-core/link';
+import {
+  AIProvider,
+  Context,
+  type MessageRecord,
+} from '@/components/ai/context';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogOverlay,
+  DialogPortal,
+  type DialogProps,
+  DialogTitle,
+} from '@radix-ui/react-dialog';
 
-export interface Engine {
-  prompt: (
-    text: string,
-    onUpdate?: (full: string) => void,
-    onEnd?: (full: string) => void,
-  ) => Promise<void>;
+const listeners: (() => void)[] = [];
 
-  abortAnswer: () => void;
-  getHistory: () => MessageRecord[];
-  clearHistory: () => void;
-  regenerateLast: (
-    onUpdate?: (full: string) => void,
-    onEnd?: (full: string) => void,
-  ) => Promise<void>;
+function onUpdate() {
+  for (const listener of listeners) listener();
 }
 
-export interface MessageRecord {
-  role: 'user' | 'assistant';
-  content: string;
-
-  suggestions?: string[];
-  references?: MessageReference[];
-}
-
-export interface MessageReference {
-  breadcrumbs?: string[];
-  title: string;
-  description?: string;
-  url: string;
-}
-
-type EngineType = 'orama' | 'inkeep';
-
-const Context = createContext<{
-  engine?: Engine;
-  loading: boolean;
-  setLoading: (loading: boolean) => void;
-}>({
-  loading: false,
-  setLoading: () => undefined,
-});
-
-function AIDialog() {
+function View() {
   const [_, update] = useState(0);
   const shouldFocus = useRef(false); // should focus on input on next render
   const { loading, setLoading, engine } = use(Context);
 
-  const onTry = useCallback(() => {
+  const onTry = () => {
     if (!engine) return;
 
     setLoading(true);
-    void engine
-      .regenerateLast(() => {
-        update((prev) => prev + 1);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [engine, setLoading]);
+    void engine.regenerateLast(onUpdate).finally(() => {
+      setLoading(false);
+    });
+  };
 
-  const onClear = useCallback(() => {
+  const onClear = () => {
     engine?.clearHistory();
-    update((prev) => prev + 1);
-  }, [engine]);
+    onUpdate();
+  };
 
-  const onSubmit = useCallback(
-    (message: string) => {
-      if (!engine || message.length === 0) return;
+  const onSubmit = (message: string) => {
+    if (!engine || message.length === 0) return;
 
-      setLoading(true);
-      void engine
-        .prompt(message, () => {
-          update((prev) => prev + 1);
-        })
-        .finally(() => {
-          setLoading(false);
-          shouldFocus.current = true;
-        });
-    },
-    [engine, setLoading],
-  );
+    setLoading(true);
+    void engine.prompt(message, onUpdate).finally(() => {
+      setLoading(false);
+      shouldFocus.current = true;
+    });
+  };
+
+  useEffect(() => {
+    const listener = () => {
+      update((prev) => prev + 1);
+    };
+
+    listeners.push(listener);
+    return () => {
+      listeners.splice(listeners.indexOf(listener), 1);
+    };
+  }, []);
 
   useEffect(() => {
     if (shouldFocus.current) {
@@ -118,35 +83,6 @@ function AIDialog() {
   });
 
   const messages = engine?.getHistory() ?? [];
-  const activeBar = (
-    <div className="flex flex-row shrink-0 items-center gap-2 border-t py-1 px-3">
-      <button
-        type="button"
-        className={cn(
-          buttonVariants({
-            color: 'secondary',
-          }),
-          'gap-1.5 rounded-full',
-        )}
-        onClick={onTry}
-      >
-        <RefreshCw className="size-4" />
-        Retry
-      </button>
-      <button
-        type="button"
-        className={cn(
-          buttonVariants({
-            color: 'ghost',
-          }),
-          'rounded-full',
-        )}
-        onClick={onClear}
-      >
-        Clear History
-      </button>
-    </div>
-  );
 
   return (
     <>
@@ -155,7 +91,35 @@ function AIDialog() {
           <Message key={i} message={item} onSuggestionSelected={onSubmit} />
         ))}
       </List>
-      {!loading ? activeBar : null}
+      {!loading && messages.at(-1)?.role === 'assistant' ? (
+        <div className="flex flex-row shrink-0 items-center gap-2 border-t p-2">
+          <button
+            type="button"
+            className={cn(
+              buttonVariants({
+                color: 'secondary',
+              }),
+              'gap-1.5 rounded-full',
+            )}
+            onClick={onTry}
+          >
+            <RefreshCw className="size-4" />
+            Retry
+          </button>
+          <button
+            type="button"
+            className={cn(
+              buttonVariants({
+                color: 'ghost',
+              }),
+              'rounded-full',
+            )}
+            onClick={onClear}
+          >
+            Clear Chat
+          </button>
+        </div>
+      ) : null}
       {loading ? (
         <button
           type="button"
@@ -406,59 +370,11 @@ function Markdown({ text }: { text: string }) {
   return rendered ?? text;
 }
 
-function AIProvider({
-  type,
-  children,
-  loadEngine = false,
-}: {
-  type: EngineType;
-  children: ReactNode;
-  loadEngine?: boolean;
-}) {
-  const pendingRef = useRef(false);
-  const [loading, setLoading] = useState(false);
-  const [engine, setEngine] = useState<Engine>();
-
-  useEffect(() => {
-    if (!loadEngine || pendingRef.current) return;
-    pendingRef.current = true;
-    // preload processor
-    void import('./markdown-processor');
-
-    if (type === 'orama') {
-      void import('./engines/orama').then(async (res) => {
-        setEngine(await res.createOramaEngine());
-      });
-    } else if (type === 'inkeep') {
-      void import('./engines/inkeep').then(async (res) => {
-        setEngine(await res.createInkeepEngine());
-      });
-    }
-  }, [type, loadEngine]);
-
+export default function AISearch(props: DialogProps) {
   return (
-    <Context
-      value={useMemo(
-        () => ({
-          loading,
-          setLoading,
-          engine,
-        }),
-        [engine, loading],
-      )}
-    >
-      {children}
-    </Context>
-  );
-}
-
-export function Trigger(props: ButtonHTMLAttributes<HTMLButtonElement>) {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger {...props} />
-      <AIProvider type="inkeep" loadEngine={open}>
+    <Dialog {...props}>
+      {props.children}
+      <AIProvider type="inkeep" loadEngine={props.open}>
         <DialogPortal>
           <DialogOverlay className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm data-[state=closed]:animate-fd-fade-out data-[state=open]:animate-fd-fade-in" />
           <DialogContent
@@ -485,7 +401,7 @@ export function Trigger(props: ButtonHTMLAttributes<HTMLButtonElement>) {
             >
               <X className="size-4" />
             </DialogClose>
-            <AIDialog />
+            <View />
           </DialogContent>
         </DialogPortal>
       </AIProvider>

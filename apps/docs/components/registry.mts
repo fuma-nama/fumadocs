@@ -18,7 +18,7 @@ export const registry: Registry = {
   components: [
     {
       name: 'search-ai',
-      files: ['ai/search-ai.tsx'],
+      files: ['ai/index.tsx'],
       mapImportPath: {
         '../../../packages/ui/src/components/ui/button.tsx': {
           type: 'component',

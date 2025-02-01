@@ -22,7 +22,7 @@ Thanks to the support from **Next.js** community, I've received a lot of suggest
 
 In Web development, most _"robust"_ frameworks/libraries are incredibly heavy and fabulous, but it indeed made our developer experience fancy.
 
-On the top of Javascript, people bulit bundlers, transpilers, and even Typescript.
+On the top of Javascript, people built bundlers, transpilers, and even Typescript.
 It feels very surprisingly that Javascript, a high-level scripting language, is more similar to assembly code in modern Web development.
 We rarely use them without things like Webpack. This also applies to CSS, at least as my experience, I seldom use CSS without PostCSS.
 
@@ -41,13 +41,13 @@ This happens on many frameworks, they are overly magical.
 ## Fumadocs MDX
 
 As the recommended content source, It is actually a webpack hack.
-Since Next.js could only optimize static imports, it first transform your `.map.ts` to a file that roughy yields:
+Since Next.js could only optimize static imports, it first transform your `.map.ts` to a file that roughly yields:
 
 ```ts
 export default [import("./my/file.mdx"), ...];
 ```
 
-And then transform MDX files with a custom loader. It makes all magic possible, but it doesn't have the ablility of lazy-loading MDX files.
+And then transform MDX files with a custom loader. It makes all magic possible, but it doesn't have the ability of lazy-loading MDX files.
 Comparing to Nextra, it might be a suboptimal approach.
 
 Nextra does it even easier, it directly transforms MDX files into pages. Because the Pages Router adapts Javascript files as a single page, it is possible.
@@ -55,7 +55,7 @@ In App Router, this is not possible anymore. Therefore, I didn't take this appro
 
 ## Fumadocs Core
 
-The core of Fumadocs is a bunch of utilties and MDX plugins.
+The core of Fumadocs is a bunch of utilities and MDX plugins.
 
 - **Source API** construct page trees from content source, integrated with other content providers.
 - **Headless components** accelerate Fumadocs UI and other custom UI implementations.
@@ -75,7 +75,7 @@ The UI implementation of Fumadocs using Tailwind CSS and Radix UI.
 Its design system was inspired by Shadcn UI, using CSS variables for color utilities.
 
 Although the structure of Fumadocs UI is even simpler than core, I've used some subtle hacks to solve the problem of `"use client"` directive.
-The bundler I am using, [TSX](https://github.com/privatenumber/tsx), can't handle nested structures like client components imported from a server comopnent.
+The bundler I am using, [TSX](https://github.com/privatenumber/tsx), can't handle nested structures like client components imported from a server component.
 Therefore, I made a little hack to build server components and client components as an individual entry, then inject import statements after the process.
 
 Also it took me some time to come up with the [preset approach](https://fumadocs.vercel.app/docs/ui/theme#docsui-plugin) for integrating Fumadocs UI with Tailwind CSS projects.
@@ -86,7 +86,7 @@ We have a few built-in integrations, like `fumadocs-openapi` which takes an Open
 
 For the OpenAPI one, it simply parse the schema and convert it to MDX file through string templates.
 
-The Typescript integration does a bit more, it obtain type information with [Typscript Compiler API](https://github.com/Microsoft/TypeScript/wiki/Using-the-Compiler-API). Based on the information, it yields MDX files.
+The Typescript integration does a bit more, it obtain type information with [Typescript Compiler API](https://github.com/Microsoft/TypeScript/wiki/Using-the-Compiler-API). Based on the information, it yields MDX files.
 You can use it inside a server component, which is how `<AutoTypeTable />` works.
 
 ## CL/CI
