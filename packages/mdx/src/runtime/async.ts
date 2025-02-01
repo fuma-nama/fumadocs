@@ -6,6 +6,10 @@ import type { LoadedConfig } from '@/utils/load-config';
 import { remarkInclude } from '@/mdx-plugins/remark-include';
 import type { defineCollections } from '@/config/define';
 import type { frontmatterSchema } from '@/utils/schema';
+import {
+  remarkStructure,
+  type StructuredData,
+} from 'fumadocs-core/mdx-plugins';
 
 type T = ReturnType<
   typeof defineCollections<'doc', typeof frontmatterSchema, true>
@@ -39,8 +43,8 @@ export function asyncFiles(
         ...options,
         remarkPlugins: (v) =>
           typeof remarkPlugins === 'function'
-            ? [remarkInclude, ...remarkPlugins(v)]
-            : [remarkInclude, ...v, ...remarkPlugins],
+            ? [remarkInclude, ...remarkPlugins(v), remarkStructure]
+            : [remarkInclude, ...v, ...remarkPlugins, remarkStructure],
       };
     }
 
@@ -63,10 +67,7 @@ export function asyncFiles(
         return {
           body: out.body,
           toc: out.toc,
-          structuredData: {
-            headings: [],
-            contents: [],
-          },
+          structuredData: out.vfile.data.structuredData as StructuredData,
           _exports: out.exports ?? {},
         };
       },

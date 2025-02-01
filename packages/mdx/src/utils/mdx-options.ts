@@ -1,16 +1,4 @@
-import {
-  rehypeCode,
-  type RehypeCodeOptions,
-  rehypeToc,
-  remarkCodeTab,
-  remarkGfm,
-  remarkHeading,
-  type RemarkHeadingOptions,
-  remarkImage,
-  type RemarkImageOptions,
-  remarkStructure,
-  type StructureOptions,
-} from 'fumadocs-core/mdx-plugins';
+import * as plugins from 'fumadocs-core/mdx-plugins';
 import type { ProcessorOptions } from '@mdx-js/mdx';
 import type { Pluggable } from 'unified';
 import remarkMdxExport from '@/mdx-plugins/remark-exports';
@@ -29,11 +17,11 @@ export type DefaultMDXOptions = Omit<
    */
   valueToExport?: string[];
 
-  remarkStructureOptions?: StructureOptions | false;
-  remarkHeadingOptions?: RemarkHeadingOptions;
-  remarkImageOptions?: RemarkImageOptions | false;
+  remarkStructureOptions?: plugins.StructureOptions | false;
+  remarkHeadingOptions?: plugins.RemarkHeadingOptions;
+  remarkImageOptions?: plugins.RemarkImageOptions | false;
   remarkCodeTabOptions?: false;
-  rehypeCodeOptions?: RehypeCodeOptions | false;
+  rehypeCodeOptions?: plugins.RehypeCodeOptions | false;
 };
 
 function pluginOption(
@@ -69,19 +57,22 @@ export function getDefaultMDXOptions({
 
   const remarkPlugins = pluginOption(
     (v) => [
-      remarkGfm,
+      plugins.remarkGfm,
       [
-        remarkHeading,
+        plugins.remarkHeading,
         {
           generateToc: false,
           ...remarkHeadingOptions,
         },
       ],
-      remarkImageOptions !== false && [remarkImage, remarkImageOptions],
-      remarkCodeTabOptions !== false && remarkCodeTab,
+      remarkImageOptions !== false && [plugins.remarkImage, remarkImageOptions],
+      // Fumadocs 14 compatibility
+      'remarkCodeTab' in plugins &&
+        remarkCodeTabOptions !== false &&
+        plugins.remarkCodeTab,
       ...v,
       remarkStructureOptions !== false && [
-        remarkStructure,
+        plugins.remarkStructure,
         remarkStructureOptions,
       ],
       [remarkMdxExport, { values: mdxExports }],
@@ -91,9 +82,9 @@ export function getDefaultMDXOptions({
 
   const rehypePlugins = pluginOption(
     (v) => [
-      rehypeCodeOptions !== false && [rehypeCode, rehypeCodeOptions],
+      rehypeCodeOptions !== false && [plugins.rehypeCode, rehypeCodeOptions],
       ...v,
-      [rehypeToc],
+      [plugins.rehypeToc],
     ],
     mdxOptions.rehypePlugins,
   );
