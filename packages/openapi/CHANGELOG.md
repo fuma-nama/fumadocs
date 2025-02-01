@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 6.0.1
+
+### Patch Changes
+
+- 127d9df: Fix type errors
+
 ## 6.0.0
 
 ### Major Changes
