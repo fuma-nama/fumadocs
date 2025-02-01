@@ -1,5 +1,39 @@
 # @fuma-docs/openapi
 
+## 6.0.0
+
+### Major Changes
+
+- 1286a04: **Change interface for `useScalar`**
+
+  From:
+
+  ```tsx
+  import { createOpenAPI } from 'fumadocs-openapi/server';
+  import { APIPlayground } from 'fumadocs-openapi/scalar';
+
+  export const openapi = createOpenAPI({
+    useScalar: true,
+  });
+  ```
+
+  To:
+
+  ```tsx
+  import { createOpenAPI } from 'fumadocs-openapi/server';
+  import { APIPlayground } from 'fumadocs-openapi/scalar';
+
+  export const openapi = createOpenAPI({
+    renderer: {
+      APIPlayground,
+    },
+  });
+  ```
+
+### Minor Changes
+
+- 9e02460: Add built-in UI to basic auth input (username:password)
+
 ## 5.12.0
 
 ### Minor Changes
