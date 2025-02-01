@@ -15,6 +15,7 @@ import {
 } from 'fumadocs-docgen';
 import rehypeKatex from 'rehype-katex';
 import { z } from 'zod';
+import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins';
 
 export const { docs, meta } = defineDocs({
   docs: {
@@ -48,10 +49,6 @@ export const blog = defineCollections({
 export default defineConfig({
   lastModifiedTime: 'git',
   mdxOptions: async () => {
-    const { rehypeCodeDefaultOptions } = await import(
-      'fumadocs-core/mdx-plugins'
-    );
-
     return {
       rehypeCodeOptions: {
         lazy: true,

@@ -42,20 +42,14 @@ export async function generateJS(
           },
           {
             type: 'named',
-            specifier: 'fumadocs-mdx/config',
-            names: ['buildConfig'],
-          },
-          {
-            type: 'named',
             specifier: 'fumadocs-mdx/runtime/async',
-            names: ['asyncFiles'],
+            names: ['asyncFiles', 'buildConfig'],
           },
         );
 
         lines.unshift(
           'const [err, _sourceConfig] = buildConfig(_source)',
           'if (err) throw new Error(err)',
-          'const _mdxOptions = _sourceConfig.global?.mdxOptions ?? {}',
         );
 
         asyncInit = true;
@@ -70,7 +64,7 @@ export async function generateJS(
         });
       });
 
-      return `export const ${k} = asyncFiles([${(await Promise.all(entries)).join(', ')}], _mdxOptions)`;
+      return `export const ${k} = asyncFiles([${(await Promise.all(entries)).join(', ')}], "${k}", _sourceConfig)`;
     }
 
     const items = files.map(async (file, i) => {

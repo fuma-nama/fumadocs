@@ -1,14 +1,11 @@
-import {
-  type CollectionEntry,
-  type DefaultMDXOptions,
-  type defineCollections,
-  type FileInfo,
-  type frontmatterSchema,
-  remarkInclude,
-} from '@/config';
-import { createCompiler } from '@fumadocs/mdx-remote';
+import { type CollectionEntry, type FileInfo } from '@/config/types';
+import { createCompiler, type MDXOptions } from '@fumadocs/mdx-remote';
 import * as fs from 'node:fs/promises';
 import type { z } from 'zod';
+import type { LoadedConfig } from '@/utils/load-config';
+import { remarkInclude } from '@/mdx-plugins/remark-include';
+import type { defineCollections } from '@/config/define';
+import type { frontmatterSchema } from '@/utils/schema';
 
 type T = ReturnType<
   typeof defineCollections<'doc', typeof frontmatterSchema, true>
@@ -22,23 +19,42 @@ export function asyncFiles(
     file: FileInfo;
     frontmatter: Record<string, unknown>;
   }[],
-  mdxOptions: DefaultMDXOptions,
+  collection: string,
+  config: LoadedConfig,
 ): unknown[] {
-  const prevRemark = mdxOptions.remarkPlugins;
+  async function init() {
+    const col = config.collections.get(collection);
+    let mdxOptions: MDXOptions;
 
-  const compiler = createCompiler({
-    ...mdxOptions,
-    remarkPlugins: (v) =>
-      typeof prevRemark === 'function'
-        ? [remarkInclude, ...prevRemark(v)]
-        : [remarkInclude, ...v, ...(prevRemark ?? [])],
-  });
+    if (col?.type === 'doc' && col.mdxOptions) {
+      mdxOptions = col.mdxOptions as MDXOptions;
+    } else {
+      const options =
+        typeof config.global?.mdxOptions === 'function'
+          ? await config.global.mdxOptions()
+          : config.global?.mdxOptions;
+      const remarkPlugins = options?.remarkPlugins ?? [];
+
+      mdxOptions = {
+        ...options,
+        remarkPlugins: (v) =>
+          typeof remarkPlugins === 'function'
+            ? [remarkInclude, ...remarkPlugins(v)]
+            : [remarkInclude, ...v, ...remarkPlugins],
+      };
+    }
+
+    return createCompiler(mdxOptions);
+  }
+
+  const initCompiler = init();
 
   return files.map(({ file, frontmatter }) => {
     return {
       ...(frontmatter as z.infer<typeof frontmatterSchema>),
       _file: file,
       async load() {
+        const compiler = await initCompiler;
         const out = await compiler.compile({
           source: (await fs.readFile(file.absolutePath)).toString(),
           filePath: file.absolutePath,
@@ -51,9 +67,11 @@ export function asyncFiles(
             headings: [],
             contents: [],
           },
-          _exports: {},
+          _exports: out.exports ?? {},
         };
       },
     } satisfies CollectionEntry<T>;
   });
 }
+
+export { buildConfig } from '@/config/build';

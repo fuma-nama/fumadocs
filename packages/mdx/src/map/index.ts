@@ -2,7 +2,7 @@ import * as path from 'node:path';
 import * as fs from 'node:fs';
 import { writeFile } from 'node:fs/promises';
 import grayMatter from 'gray-matter';
-import { getConfigHash, loadConfigCached } from '@/utils/cached';
+import { getConfigHash, loadConfigCached } from '@/utils/config-cache';
 import { generateJS, generateTypes } from '@/map/generate';
 
 /**
