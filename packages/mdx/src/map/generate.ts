@@ -19,7 +19,7 @@ export async function generateJS(
   const imports: ImportInfo[] = [
     {
       type: 'named',
-      names: ['toRuntime', 'toRuntimeAsync'],
+      names: ['toRuntime'],
       specifier: 'fumadocs-mdx',
     },
   ];

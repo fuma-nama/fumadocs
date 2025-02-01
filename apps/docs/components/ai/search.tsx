@@ -1,73 +1,33 @@
 'use client';
 import {
-  type ButtonHTMLAttributes,
-  createContext,
   type HTMLAttributes,
   type ReactNode,
   type TextareaHTMLAttributes,
   use,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from 'react';
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogOverlay,
-  DialogPortal,
-  DialogTitle,
-  DialogTrigger,
-} from '@radix-ui/react-dialog';
 import { Loader2, RefreshCw, Send, X } from 'lucide-react';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { cn } from '@/lib/cn';
 import { buttonVariants } from '../../../../packages/ui/src/components/ui/button';
 import type { Processor } from './markdown-processor';
 import Link from 'fumadocs-core/link';
-
-export interface Engine {
-  prompt: (
-    text: string,
-    onUpdate?: (full: string) => void,
-    onEnd?: (full: string) => void,
-  ) => Promise<void>;
-
-  abortAnswer: () => void;
-  getHistory: () => MessageRecord[];
-  clearHistory: () => void;
-  regenerateLast: (
-    onUpdate?: (full: string) => void,
-    onEnd?: (full: string) => void,
-  ) => Promise<void>;
-}
-
-export interface MessageRecord {
-  role: 'user' | 'assistant';
-  content: string;
-
-  suggestions?: string[];
-  references?: MessageReference[];
-}
-
-export interface MessageReference {
-  breadcrumbs?: string[];
-  title: string;
-  description?: string;
-  url: string;
-}
-
-type EngineType = 'orama' | 'inkeep';
-
-const Context = createContext<{
-  engine?: Engine;
-  loading: boolean;
-  setLoading: (loading: boolean) => void;
-}>({
-  loading: false,
-  setLoading: () => undefined,
-});
+import {
+  AIProvider,
+  Context,
+  type MessageRecord,
+} from '@/components/ai/context';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogOverlay,
+  DialogPortal,
+  type DialogProps,
+  DialogTitle,
+} from '@radix-ui/react-dialog';
 
 const listeners: (() => void)[] = [];
 
@@ -75,7 +35,7 @@ function onUpdate() {
   for (const listener of listeners) listener();
 }
 
-function AIDialog() {
+function View() {
   const [_, update] = useState(0);
   const shouldFocus = useRef(false); // should focus on input on next render
   const { loading, setLoading, engine } = use(Context);
@@ -410,59 +370,11 @@ function Markdown({ text }: { text: string }) {
   return rendered ?? text;
 }
 
-function AIProvider({
-  type,
-  children,
-  loadEngine = false,
-}: {
-  type: EngineType;
-  children: ReactNode;
-  loadEngine?: boolean;
-}) {
-  const pendingRef = useRef(false);
-  const [loading, setLoading] = useState(false);
-  const [engine, setEngine] = useState<Engine>();
-
-  useEffect(() => {
-    if (!loadEngine || pendingRef.current) return;
-    pendingRef.current = true;
-    // preload processor
-    void import('./markdown-processor');
-
-    if (type === 'orama') {
-      void import('./engines/orama').then(async (res) => {
-        setEngine(await res.createOramaEngine());
-      });
-    } else if (type === 'inkeep') {
-      void import('./engines/inkeep').then(async (res) => {
-        setEngine(await res.createInkeepEngine());
-      });
-    }
-  }, [type, loadEngine]);
-
+export default function AISearch(props: DialogProps) {
   return (
-    <Context
-      value={useMemo(
-        () => ({
-          loading,
-          setLoading,
-          engine,
-        }),
-        [engine, loading],
-      )}
-    >
-      {children}
-    </Context>
-  );
-}
-
-export function Trigger(props: ButtonHTMLAttributes<HTMLButtonElement>) {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger {...props} />
-      <AIProvider type="inkeep" loadEngine={open}>
+    <Dialog {...props}>
+      {props.children}
+      <AIProvider type="inkeep" loadEngine={props.open}>
         <DialogPortal>
           <DialogOverlay className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm data-[state=closed]:animate-fd-fade-out data-[state=open]:animate-fd-fade-in" />
           <DialogContent
@@ -489,7 +401,7 @@ export function Trigger(props: ButtonHTMLAttributes<HTMLButtonElement>) {
             >
               <X className="size-4" />
             </DialogClose>
-            <AIDialog />
+            <View />
           </DialogContent>
         </DialogPortal>
       </AIProvider>
