@@ -53,7 +53,7 @@
     "chokidar": "^4.0.3",
     "cross-spawn": "^7.0.6",
     "esbuild": "^0.24.2",
-    "estree-util-value-to-estree": "^3.2.1",
+    "estree-util-value-to-estree": "^3.3.1",
     "fast-glob": "^3.3.3",
     "gray-matter": "^4.0.3",
     "micromatch": "^4.0.8",
@@ -77,8 +77,8 @@
     "webpack": "^5.97.1"
   },
   "peerDependencies": {
-    "fumadocs-core": "^14.0.0 || ^15.0.0",
     "@fumadocs/mdx-remote": "workspace:*",
+    "fumadocs-core": "^14.0.0 || ^15.0.0",
     "next": "14.x.x || 15.x.x"
   },
   "peerDependenciesMeta": {
