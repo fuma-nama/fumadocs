@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 15.0.2
+
+### Patch Changes
+
+- a8e9e1f: Bump deps
+  - fumadocs-core@15.0.2
+
 ## 15.0.1
 
 ### Patch Changes
