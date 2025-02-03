@@ -35,7 +35,7 @@
     "katex": "^0.16.21",
     "lucide-react": "^0.474.0",
     "next": "15.1.6",
-    "oxc-transform": "^0.48.1",
+    "oxc-transform": "^0.48.2",
     "phenomenon": "^1.6.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

@@ -126,8 +126,8 @@ importers:
         specifier: 15.1.6
         version: 15.1.6(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       oxc-transform:
-        specifier: ^0.48.1
-        version: 0.48.1
+        specifier: ^0.48.2
+        version: 0.48.2
       phenomenon:
         specifier: ^1.6.0
         version: 1.6.0
@@ -717,8 +717,8 @@ importers:
   packages/doc-gen:
     dependencies:
       estree-util-value-to-estree:
-        specifier: ^3.3.1
-        version: 3.3.1
+        specifier: ^3.3.2
+        version: 3.3.2
       fumadocs-typescript:
         specifier: workspace:^
         version: link:../typescript
@@ -729,8 +729,8 @@ importers:
         specifier: ^3.0.1
         version: 3.0.1
       oxc-transform:
-        specifier: ^0.48.1
-        version: 0.48.1
+        specifier: ^0.48.2
+        version: 0.48.2
       unist-util-visit:
         specifier: ^5.0.0
         version: 5.0.0
@@ -789,8 +789,8 @@ importers:
         specifier: ^0.24.2
         version: 0.24.2
       estree-util-value-to-estree:
-        specifier: ^3.3.1
-        version: 3.3.1
+        specifier: ^3.3.2
+        version: 3.3.2
       fast-glob:
         specifier: ^3.3.3
         version: 3.3.3
@@ -1978,6 +1978,9 @@ packages:
   '@hyperjump/uri@1.2.2':
     resolution: {integrity: sha512-Zn8AZb/j54KKUCckmcOzKCSCKpIpMVBc60zYaajD8Dq/1g4UN6TfAFi+uDa5o/6rf+I+5xDZjZpdzwfuhlC0xQ==}
 
+  '@hyperjump/uri@1.3.1':
+    resolution: {integrity: sha512-2ecKymxf6prQMgrNpAvlx4RhsuM5+PFT6oh6uUTZdv5qmBv0RZvxv8LJ7oR30ZxGhdPdZAl4We/1NFc0nqHeAw==}
+
   '@iconify/types@2.0.0':
     resolution: {integrity: sha512-+wluvCrRhXrhyOmRDJ3q8mux9JkKy5SJ/v8ol2tu4FVjyYvtEzkc/3pK15ET6RKg4b4w4BmTk1+gsCUhf21Ykg==}
 
@@ -2124,10 +2127,6 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.25':
     resolution: {integrity: sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ==}
-
-  '@js-temporal/polyfill@0.4.4':
-    resolution: {integrity: sha512-2X6bvghJ/JAoZO52lbgyAPFj8uCflhTo2g7nkFzEQdXd/D8rEeD4HtmTEpmtGCva260fcd66YNXBOYdnmHqSOg==}
-    engines: {node: '>=12'}
 
   '@jsdevtools/ono@7.1.3':
     resolution: {integrity: sha512-4JQNk+3mVzK3xh2rqd6RB4J46qUR19azEHBneZyTZM+c456qOrbbM/5xcR8huNCCcbVt7+UmizG6GuUvPvKUYg==}
@@ -2278,43 +2277,43 @@ packages:
   '@oramacloud/client@2.1.4':
     resolution: {integrity: sha512-uNPFs4wq/iOPbggCwTkVNbIr64Vfd7ZS/h+cricXVnzXWocjDTfJ3wLL4lr0qiSu41g8z+eCAGBqJ30RO2O4AA==}
 
-  '@oxc-transform/binding-darwin-arm64@0.48.1':
-    resolution: {integrity: sha512-1S0t1ypZo8FB+DYWr17snGIwg3XGFuxSO83dsjh5o78yiWXnJcqa3aUKARw8UEjvfiGjV0+3bAxvNQu+i6lTkA==}
+  '@oxc-transform/binding-darwin-arm64@0.48.2':
+    resolution: {integrity: sha512-JzctV+H6IDl+vwTlY/7+2JMqb+94HUHfgHii+hMUM76XNaLAOyKxn3Be26t/FgrscoIR+bO6kMYL/T0sDkP7fA==}
     cpu: [arm64]
     os: [darwin]
 
-  '@oxc-transform/binding-darwin-x64@0.48.1':
-    resolution: {integrity: sha512-wmnwmkmW1EvgFlMPmkJeQg6JHSsTDpeGiCJtqJZ2Panp4iIDCs+2+OaAtR9KiroBPm+HgG5nNwQS1IoTXNX+hA==}
+  '@oxc-transform/binding-darwin-x64@0.48.2':
+    resolution: {integrity: sha512-4yen3cHv/AUMb/mmDkrZXTxsFthqdzWbBb39hQgUNK81/AkFS3t+yrg7BBz1zdXunT6iJh/WQDp2ULWEV7Caiw==}
     cpu: [x64]
     os: [darwin]
 
-  '@oxc-transform/binding-linux-arm64-gnu@0.48.1':
-    resolution: {integrity: sha512-jkayGxh9bPB+xuh+xhE5rcS8CiaHymfv+J5GLtW6kI4wdMPmGkppVmh66oShLjhUXciqe95kyPFcIFuRXT2ALA==}
+  '@oxc-transform/binding-linux-arm64-gnu@0.48.2':
+    resolution: {integrity: sha512-LH5+AVb16tNDfkFbG9+aXjfGJTKmPjhIwl5ENHVAN5XlAz2w4rTp9873oo909G6uZWsdOtjxGpG3qzneXg6Aaw==}
     cpu: [arm64]
     os: [linux]
 
-  '@oxc-transform/binding-linux-arm64-musl@0.48.1':
-    resolution: {integrity: sha512-HWQ8aInNRPCmFfMndIATA6LmbrlCvP3quY9hOLuyZROR3sRZ7NJc14q6lzgkyuyEFFvxyLBwhL4TYsf+tGcdZA==}
+  '@oxc-transform/binding-linux-arm64-musl@0.48.2':
+    resolution: {integrity: sha512-jAP77atjtsfPfRtPhCcsDY3nLXy4oEVIsiuioBDWKuerAGwDPL6Q5GBhFXNH+yN2Yi5lZMgATM/4OGn9dVGM8A==}
     cpu: [arm64]
     os: [linux]
 
-  '@oxc-transform/binding-linux-x64-gnu@0.48.1':
-    resolution: {integrity: sha512-dpeYpZbzGn4ZJMn75edwkEMBwHRrdRdOJcJsJDQzcuPgYpzw9a2qYbUb5bSyQJFPVunj+0DQSn3dmPQpBFDerw==}
+  '@oxc-transform/binding-linux-x64-gnu@0.48.2':
+    resolution: {integrity: sha512-qx+xL9FZzSSdYZRzZbvQtqWPaQkDmaHU/EScAiVrELwuDp7Dinn8YmMmYV52iaZvVs2+blMLCOG8xaqIjJIfBA==}
     cpu: [x64]
     os: [linux]
 
-  '@oxc-transform/binding-linux-x64-musl@0.48.1':
-    resolution: {integrity: sha512-GLMIa07c5wys3swxy7ZS+8r9A3dn9xSYwJudbut2OLYHLecLJkA67Ld+wKPV61xyxfI1hR/QPvfEeIjf8wp0ZQ==}
+  '@oxc-transform/binding-linux-x64-musl@0.48.2':
+    resolution: {integrity: sha512-auPVLE2WXWNwjVsQBbN8pX1HDJtUeD4BNkI2byI9LSGpu7kmY9+GGxU5/3INmXNnaMuWTlBiuEKDIUVr9Znt7A==}
     cpu: [x64]
     os: [linux]
 
-  '@oxc-transform/binding-win32-arm64-msvc@0.48.1':
-    resolution: {integrity: sha512-IQtWUAgW+6CUBRrTytjQbPJm+7+ZA3I5DUhW5Bm582gRlooRmrxqWFThb84pTxbmduwK5Mg4mbt/iikheJugFA==}
+  '@oxc-transform/binding-win32-arm64-msvc@0.48.2':
+    resolution: {integrity: sha512-X/hpuxXEhzliwqkSvecxGBrvVpFggH3gnWKNhq4MaMRbPyBpFzRf0ygThzLQdOgUIu806jRXRAL2UY0XDBB7Ng==}
     cpu: [arm64]
     os: [win32]
 
-  '@oxc-transform/binding-win32-x64-msvc@0.48.1':
-    resolution: {integrity: sha512-shEObGZRfhtLUYt3DCwrH4xwDbI1J8Sjcj9q7evLBtCtm4Z5E3dBzEGxnhFiI7VjALMmQtUXv4eJEGsFBN0cyQ==}
+  '@oxc-transform/binding-win32-x64-msvc@0.48.2':
+    resolution: {integrity: sha512-CLa3NMLpKiWg3OTu09XVNPWlYci9go/vijoj658zlbccMwT5yioHjPTk+pomycBMNEG5ei6Ak8fWjCKpXXRJRA==}
     cpu: [x64]
     os: [win32]
 
@@ -4379,8 +4378,8 @@ packages:
   estree-util-to-js@2.0.0:
     resolution: {integrity: sha512-WDF+xj5rRWmD5tj6bIqRi6CkLIXbbNQUcxQHzGysQzvHmdYG2G7p/Tf0J0gpxGgkeMZNTIjT/AoSvC9Xehcgdg==}
 
-  estree-util-value-to-estree@3.3.1:
-    resolution: {integrity: sha512-fL5vv7eGyWFq0LJ4MMXMarRLkHsknJky6Azq1qu27gU0lLSxb0V4YvukBX37Waw9nEb4wieuSz4Qubny0OEkng==}
+  estree-util-value-to-estree@3.3.2:
+    resolution: {integrity: sha512-hYH1aSvQI63Cvq3T3loaem6LW4u72F187zW4FHpTrReJSm6W66vYTFNO1vH/chmcOulp1HlAj1pxn8Ag0oXI5Q==}
 
   estree-util-visit@2.0.0:
     resolution: {integrity: sha512-m5KgiH85xAhhW8Wta0vShLcUvOsh3LLPI2YVwcbio1l7E09NTLL1EyMZFM1OyWowoH0skScNbhOPl4kcBgzTww==}
@@ -4983,9 +4982,6 @@ packages:
     resolution: {integrity: sha512-wpxZs9NoxZaJESJGIZTyDEaYpl0FKSA+FB9aJiyemKhMwkxQg63h4T1KJgUGHpTqPDNRcmmYLugrRjJlBtWvRA==}
     hasBin: true
 
-  jsbi@4.3.0:
-    resolution: {integrity: sha512-SnZNcinB4RIcnEyZqFPdGPVgrg2AcnykiBy0sHVJQKHYeaLUvi3Exj+iaPpLnFVkDPZIV4U0yvgC9/R4uEAZ9g==}
-
   json-buffer@3.0.1:
     resolution: {integrity: sha512-4bV5BfR2mqfQTJm+V5tPPdf+ZpuhiIvTuAB5g8kcrXOZpTT/QwwVRWBywX1ozr6lEuPdbHxwaJlm9G6mI2sfSQ==}
 
@@ -5579,8 +5575,8 @@ packages:
     resolution: {integrity: sha512-qFOyK5PjiWZd+QQIh+1jhdb9LpxTF0qs7Pm8o5QHYZ0M3vKqSqzsZaEB6oWlxZ+q2sJBMI/Ktgd2N5ZwQoRHfg==}
     engines: {node: '>= 0.4'}
 
-  oxc-transform@0.48.1:
-    resolution: {integrity: sha512-Wu2aFvSl4IZ94oLaHAYcYFNWP7qMJTxWJEiWepYSa7ZF1mHLfwh60YdYzcHqJaYGtis9RsmBnL6oEVVALD76jQ==}
+  oxc-transform@0.48.2:
+    resolution: {integrity: sha512-SGXm/JNOo8aWUboNvF3KOJHAOI7rBRDiMqKyGQpAY2ffR+VfunCEi2tqYynKzG8gz0L6imgqFgyuASOuvJI8NA==}
 
   p-filter@2.1.0:
     resolution: {integrity: sha512-ZBxxZ5sL2HghephhpGAQdoskxplTwr7ICaehZwLIlfL6acuVgZPm8yBNuRAFBGEqtD/hmUeq9eqLg2ys9Xr/yw==}
@@ -7606,7 +7602,7 @@ snapshots:
   '@hyperjump/browser@1.2.0':
     dependencies:
       '@hyperjump/json-pointer': 1.1.0
-      '@hyperjump/uri': 1.2.2
+      '@hyperjump/uri': 1.3.1
       content-type: 1.0.5
       just-curry-it: 5.3.0
       type-is: 1.6.18
@@ -7629,6 +7625,8 @@ snapshots:
       just-curry-it: 5.3.0
 
   '@hyperjump/uri@1.2.2': {}
+
+  '@hyperjump/uri@1.3.1': {}
 
   '@iconify/types@2.0.0': {}
 
@@ -7762,11 +7760,6 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
-
-  '@js-temporal/polyfill@0.4.4':
-    dependencies:
-      jsbi: 4.3.0
-      tslib: 2.8.1
 
   '@jsdevtools/ono@7.1.3': {}
 
@@ -7954,28 +7947,28 @@ snapshots:
       '@orama/orama': 3.0.2
       lodash: 4.17.21
 
-  '@oxc-transform/binding-darwin-arm64@0.48.1':
+  '@oxc-transform/binding-darwin-arm64@0.48.2':
     optional: true
 
-  '@oxc-transform/binding-darwin-x64@0.48.1':
+  '@oxc-transform/binding-darwin-x64@0.48.2':
     optional: true
 
-  '@oxc-transform/binding-linux-arm64-gnu@0.48.1':
+  '@oxc-transform/binding-linux-arm64-gnu@0.48.2':
     optional: true
 
-  '@oxc-transform/binding-linux-arm64-musl@0.48.1':
+  '@oxc-transform/binding-linux-arm64-musl@0.48.2':
     optional: true
 
-  '@oxc-transform/binding-linux-x64-gnu@0.48.1':
+  '@oxc-transform/binding-linux-x64-gnu@0.48.2':
     optional: true
 
-  '@oxc-transform/binding-linux-x64-musl@0.48.1':
+  '@oxc-transform/binding-linux-x64-musl@0.48.2':
     optional: true
 
-  '@oxc-transform/binding-win32-arm64-msvc@0.48.1':
+  '@oxc-transform/binding-win32-arm64-msvc@0.48.2':
     optional: true
 
-  '@oxc-transform/binding-win32-x64-msvc@0.48.1':
+  '@oxc-transform/binding-win32-x64-msvc@0.48.2':
     optional: true
 
   '@parcel/watcher-android-arm64@2.5.1':
@@ -10487,9 +10480,8 @@ snapshots:
       astring: 1.9.0
       source-map: 0.7.4
 
-  estree-util-value-to-estree@3.3.1:
+  estree-util-value-to-estree@3.3.2:
     dependencies:
-      '@js-temporal/polyfill': 0.4.4
       '@types/estree': 1.0.6
 
   estree-util-visit@2.0.0:
@@ -11223,8 +11215,6 @@ snapshots:
   js-yaml@4.1.0:
     dependencies:
       argparse: 2.0.1
-
-  jsbi@4.3.0: {}
 
   json-buffer@3.0.1: {}
 
@@ -12109,16 +12099,16 @@ snapshots:
       object-keys: 1.1.1
       safe-push-apply: 1.0.0
 
-  oxc-transform@0.48.1:
+  oxc-transform@0.48.2:
     optionalDependencies:
-      '@oxc-transform/binding-darwin-arm64': 0.48.1
-      '@oxc-transform/binding-darwin-x64': 0.48.1
-      '@oxc-transform/binding-linux-arm64-gnu': 0.48.1
-      '@oxc-transform/binding-linux-arm64-musl': 0.48.1
-      '@oxc-transform/binding-linux-x64-gnu': 0.48.1
-      '@oxc-transform/binding-linux-x64-musl': 0.48.1
-      '@oxc-transform/binding-win32-arm64-msvc': 0.48.1
-      '@oxc-transform/binding-win32-x64-msvc': 0.48.1
+      '@oxc-transform/binding-darwin-arm64': 0.48.2
+      '@oxc-transform/binding-darwin-x64': 0.48.2
+      '@oxc-transform/binding-linux-arm64-gnu': 0.48.2
+      '@oxc-transform/binding-linux-arm64-musl': 0.48.2
+      '@oxc-transform/binding-linux-x64-gnu': 0.48.2
+      '@oxc-transform/binding-linux-x64-musl': 0.48.2
+      '@oxc-transform/binding-win32-arm64-msvc': 0.48.2
+      '@oxc-transform/binding-win32-x64-msvc': 0.48.2
 
   p-filter@2.1.0:
     dependencies:
@@ -12527,7 +12517,7 @@ snapshots:
     dependencies:
       '@types/mdast': 4.0.4
       estree-util-is-identifier-name: 3.0.0
-      estree-util-value-to-estree: 3.3.1
+      estree-util-value-to-estree: 3.3.2
       toml: 3.0.0
       unified: 11.0.5
       yaml: 2.7.0
