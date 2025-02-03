@@ -1,5 +1,15 @@
 # @fuma-docs/openapi
 
+## 6.0.3
+
+### Patch Changes
+
+- a8e9e1f: Bump deps
+- ab44e05: Add file extensions to imports
+- Updated dependencies [a8e9e1f]
+  - fumadocs-ui@15.0.2
+  - fumadocs-core@15.0.2
+
 ## 6.0.2
 
 ### Patch Changes

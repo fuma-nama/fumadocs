@@ -1,5 +1,12 @@
 # next-docs-mdx
 
+## 11.4.1
+
+### Patch Changes
+
+- a8e9e1f: Bump deps
+  - fumadocs-core@15.0.2
+
 ## 11.4.0
 
 ### Minor Changes
