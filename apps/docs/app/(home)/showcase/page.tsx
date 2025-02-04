@@ -23,6 +23,8 @@ import BetterAuth from '@/public/showcases/better-auth.png';
 import LaunchFast from '@/public/showcases/launchfast.png';
 import ArkType from '@/public/showcases/arktype.png';
 import AssistantUI from '@/public/showcases/assistant-ui.png';
+import TurboStarter from '@/public/showcases/turbostarter.png';
+import VisionUI from '@/public/showcases/vision-ui.png';
 
 export const metadata = createMetadata({
   title: 'Showcase',
@@ -131,8 +133,18 @@ export default function Showcase(): React.ReactElement {
       url: 'https://www.xlog.systems',
     },
     {
+      image: VisionUI,
       name: 'Vision UI',
       url: 'https://vision.uing.dev',
+    },
+    {
+      image: TurboStarter,
+      name: 'TurboStarter',
+      url: 'https://turbostarter.dev',
+    },
+    {
+      name: 'Rehooks',
+      url: 'https://rehooks.pyr33x.ir',
     },
     {
       name: 'Typelytics',
