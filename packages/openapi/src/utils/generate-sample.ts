@@ -48,11 +48,16 @@ export function generateSample(
 
   for (const param of method.parameters ?? []) {
     if (param.schema) {
+      let value = param.example ?? sample(param.schema as object);
+      if (param.schema.type && param.schema.type === value) {
+        // if no example is defined make sure its visible that there is still a placeholder, equal to auth <token>
+        value = `<${value}>`;
+      }
       params.push({
         name: param.name,
         in: param.in,
         schema: param.schema,
-        sample: param.example ?? sample(param.schema as object),
+        sample: value,
       });
     } else if (param.content) {
       const key = getPreferredType(param.content);
@@ -129,7 +134,11 @@ export function generateSample(
   const queryParams = new URLSearchParams();
 
   for (const param of params) {
-    const value = generateBody(method.method, param.schema);
+    let value = generateBody(method.method, param.schema);
+    if (param.schema.type && param.schema.type === value) {
+      // if no example is defined make sure its visible that there is still a placeholder, equal to auth <token>
+      value = `<${value}>`;
+    }
     if (param.in === 'query') queryParams.append(param.name, String(value));
 
     if (param.in === 'path')
@@ -143,7 +152,7 @@ export function generateSample(
     pathWithParameters = `${pathWithParameters}?${queryParams.toString()}`;
 
   return {
-    url: new URL(`${baseUrl}${pathWithParameters}`).toString(),
+    url: `${baseUrl}${pathWithParameters}`,
     body: bodyOutput,
     responses,
     method: method.method,
