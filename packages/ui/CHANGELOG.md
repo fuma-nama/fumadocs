@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 15.0.3
+
+### Patch Changes
+
+- 47171db: UI: fix ocean theme
+  - fumadocs-core@15.0.3
+
 ## 15.0.2
 
 ### Patch Changes
