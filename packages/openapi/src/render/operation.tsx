@@ -203,7 +203,7 @@ export function Operation({
       {type === 'operation' ? (
         <ctx.renderer.APIPlayground path={path} method={method} ctx={ctx} />
       ) : null}
-      {security ? (
+      {security && Object.keys(security).length ? (
         <>
           {heading(headingLevel, 'Authorization', ctx)}
           <AuthSection requirements={security} ctx={ctx} />
