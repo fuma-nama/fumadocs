@@ -40,27 +40,39 @@ describe('Code Sample Generators', () => {
       const endpoint = generateSample(path, info, ctx);
 
       test(`Go: ${method} ${path}`, async () => {
-        await expect(Go.getSampleRequest(endpoint)).toMatchFileSnapshot(
-          `./out/samples/${path}/${method}.go`,
-        );
+        await expect(
+          Go.getSampleRequest(
+            endpoint,
+            Object.keys(endpoint.body?.samples ?? {})[0],
+          ),
+        ).toMatchFileSnapshot(`./out/samples/${path}/${method}.go`);
       });
 
       test(`Curl: ${method} ${path}`, async () => {
-        await expect(Curl.getSampleRequest(endpoint)).toMatchFileSnapshot(
-          `./out/samples/${path}/${method}.bash`,
-        );
+        await expect(
+          Curl.getSampleRequest(
+            endpoint,
+            Object.keys(endpoint.body?.samples ?? {})[0],
+          ),
+        ).toMatchFileSnapshot(`./out/samples/${path}/${method}.bash`);
       });
 
       test(`Python: ${method} ${path}`, async () => {
-        await expect(Python.getSampleRequest(endpoint)).toMatchFileSnapshot(
-          `./out/samples/${path}/${method}.py`,
-        );
+        await expect(
+          Python.getSampleRequest(
+            endpoint,
+            Object.keys(endpoint.body?.samples ?? {})[0],
+          ),
+        ).toMatchFileSnapshot(`./out/samples/${path}/${method}.py`);
       });
 
       test(`JavaScript: ${method} ${path}`, async () => {
-        await expect(JS.getSampleRequest(endpoint)).toMatchFileSnapshot(
-          `./out/samples/${path}/${method}.js`,
-        );
+        await expect(
+          JS.getSampleRequest(
+            endpoint,
+            Object.keys(endpoint.body?.samples ?? {})[0],
+          ),
+        ).toMatchFileSnapshot(`./out/samples/${path}/${method}.js`);
       });
     }
   }

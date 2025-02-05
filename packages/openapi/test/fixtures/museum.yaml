@@ -58,6 +58,8 @@ paths:
             examples:
               default_example:
                 $ref: '#/components/examples/CreateSpecialEventRequestExample'
+              seconday_example:
+                $ref: '#/components/examples/SecondaryCreateSpecialEventRequestExample'
       responses:
         '200':
           description: Success
@@ -454,6 +456,7 @@ components:
         confirmationCode: ticket-event-9c55eg-8v82a
     CreateSpecialEventRequestExample:
       summary: Create special event
+      description: Create a special event for the museum.
       value:
         name: Mermaid Treasure Identification and Analysis
         location: Under the seaaa 🦀 🎶 🌊.
@@ -462,6 +465,17 @@ components:
           - 2023-09-05
           - 2023-09-08
         price: 0
+    SecondaryCreateSpecialEventRequestExample:
+      summary: Create special event with price
+      description: Create a special event with a price.
+      value:
+        name: Mermaid Treasure Identification and Analysis
+        location: Under the seaaa 🦀 🎶 🌊.
+        eventDescription: Join us as we review and classify a rare collection of 20 thingamabobs, gadgets, gizmos, whoosits, and whatsits, kindly donated by Ariel.
+        dates:
+          - 2023-09-05
+          - 2023-09-08
+        price: 1234
     CreateSpecialEventResponseExample:
       summary: Special event created
       value:

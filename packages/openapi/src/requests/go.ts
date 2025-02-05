@@ -1,7 +1,10 @@
 import { type EndpointSample } from '@/utils/generate-sample';
 import { inputToString } from '@/utils/input-to-string';
 
-export function getSampleRequest(endpoint: EndpointSample): string {
+export function getSampleRequest(
+  endpoint: EndpointSample,
+  sampleKey: string,
+): string {
   const imports = ['fmt', 'net/http', 'io/ioutil'];
   const headers = new Map<string, string>();
   const variables = new Map<string, string>();
@@ -28,14 +31,16 @@ export function getSampleRequest(endpoint: EndpointSample): string {
 
     if (
       endpoint.body.mediaType === 'multipart/form-data' &&
-      typeof endpoint.body.sample === 'object'
+      typeof endpoint.body.samples[sampleKey]?.value === 'object'
     ) {
       imports.push('mime/multipart', 'bytes');
 
       variables.set('payload', `new(bytes.Buffer)`);
       variables.set('mp', 'multipart.NewWriter(payload)');
 
-      for (const [key, value] of Object.entries(endpoint.body.sample ?? {})) {
+      for (const [key, value] of Object.entries(
+        endpoint.body.samples[sampleKey]?.value ?? {},
+      )) {
         additional.push(
           `mp.WriteField("${key}", ${inputToString(value, undefined, 'backtick')})`,
         );
@@ -45,7 +50,7 @@ export function getSampleRequest(endpoint: EndpointSample): string {
       variables.set(
         'payload',
         `strings.NewReader(${inputToString(
-          endpoint.body.sample,
+          endpoint.body.samples[sampleKey]?.value ?? '',
           endpoint.body.mediaType,
           'backtick',
         ).replaceAll('\n', '\n  ')})`,

@@ -29,7 +29,10 @@ interface CustomProperty {
 export interface CodeSample {
   lang: string;
   label: string;
-  source: string | ((endpoint: EndpointSample) => string | undefined) | false;
+  source:
+    | string
+    | ((endpoint: EndpointSample, exampleKey: string) => string | undefined)
+    | false;
 }
 
 interface CodeSampleCompiled {
@@ -262,46 +265,99 @@ async function APIExample({
   method,
   endpoint,
   ctx,
+  selectedSampleKey,
 }: {
   method: MethodInformation;
   endpoint: EndpointSample;
   ctx: RenderContext;
+  selectedSampleKey?: string;
 }) {
   const renderer = ctx.renderer;
   const children: ReactNode[] = [];
 
-  const samples = dedupe([
-    ...defaultSamples,
-    ...(ctx.generateCodeSamples ? await ctx.generateCodeSamples(endpoint) : []),
-    ...((method as CustomProperty)['x-codeSamples'] ?? []),
-  ]).flatMap<CodeSampleCompiled>((sample) => {
-    if (sample.source === false) return [];
+  const samples: Record<string, CodeSampleCompiled[]> = {};
+  for (const exampleKey in endpoint.body?.samples) {
+    samples[exampleKey] = dedupe([
+      ...defaultSamples,
+      ...(ctx.generateCodeSamples
+        ? await ctx.generateCodeSamples(endpoint)
+        : []),
+      ...((method as CustomProperty)['x-codeSamples'] ?? []),
+    ]).flatMap<CodeSampleCompiled>((sample) => {
+      if (sample.source === false) return [];
 
-    const result =
-      typeof sample.source === 'function'
-        ? sample.source(endpoint)
-        : sample.source;
-    if (result === undefined) return [];
+      const result =
+        typeof sample.source === 'function'
+          ? sample.source(endpoint, exampleKey)
+          : sample.source;
+      if (result === undefined) return [];
 
-    return {
-      ...sample,
-      source: result,
-    };
-  });
+      return {
+        ...sample,
+        source: result,
+      };
+    });
+  }
 
-  if (samples.length > 0) {
-    children.push(
-      <renderer.Requests key="requests" items={samples.map((s) => s.label)}>
-        {samples.map((s) => (
-          <renderer.Request
-            key={s.label}
-            name={s.label}
-            code={s.source}
-            language={s.lang}
-          />
-        ))}
-      </renderer.Requests>,
-    );
+  if (Object.keys(samples).length > 0) {
+    const sampleTabs: ReactNode[] = [];
+    const titles = [];
+    if (
+      endpoint.body?.samples &&
+      Object.keys(endpoint.body?.samples).length === 1 &&
+      endpoint.body?.samples['_default']
+    ) {
+      // if only the fallback or non described openapi legacy example is present, we dont use tabs
+      children.push(
+        <renderer.Requests
+          key={`requests-${'_default'}`}
+          items={samples['_default'].map((s) => s.label)}
+        >
+          {samples['_default'].map((s) => (
+            <renderer.Request
+              key={`requests-${'_default'}-${s.label}`}
+              name={s.label}
+              code={s.source}
+              language={s.lang}
+            />
+          ))}
+        </renderer.Requests>,
+      );
+    } else {
+      for (const sampleKey in samples) {
+        const title = endpoint.body?.samples[sampleKey].summary ?? sampleKey;
+        titles.push(title);
+        sampleTabs.push(
+          <renderer.Sample key={sampleKey} value={title}>
+            {endpoint.body?.samples[sampleKey].description && (
+              <Markdown text={endpoint.body?.samples[sampleKey].description} />
+            )}
+            <renderer.Requests
+              key={`requests-${sampleKey}`}
+              items={samples[sampleKey].map((s) => s.label)}
+            >
+              {samples[sampleKey].map((s) => (
+                <renderer.Request
+                  key={`requests-${sampleKey}-${s.label}`}
+                  name={s.label}
+                  code={s.source}
+                  language={s.lang}
+                />
+              ))}
+            </renderer.Requests>
+          </renderer.Sample>,
+        );
+      }
+      children.push(
+        <renderer.Samples
+          items={titles}
+          key="samples"
+          defaultValue={selectedSampleKey}
+        >
+          {sampleTabs}
+        </renderer.Samples>,
+      );
+    }
   }
 
   children.push(

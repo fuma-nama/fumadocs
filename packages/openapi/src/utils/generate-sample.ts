@@ -19,7 +19,14 @@ export interface EndpointSample {
   body?: {
     schema: ParsedSchema;
     mediaType: string;
-    sample: unknown;
+    samples: {
+      [key: string]: {
+        value?: unknown;
+        description?: string;
+        summary?: string;
+        externalValue?: string;
+      };
+    };
   };
   responses: Record<string, ResponseSample>;
   parameters: ParameterSample[];
@@ -102,7 +109,13 @@ export function generateSample(
     bodyOutput = {
       schema,
       mediaType: type as string,
-      sample: body[type].example ?? generateBody(method.method, schema),
+      samples: body[type].examples
+        ? body[type].examples
+        : {
+            _default: {
+              value: body[type].example ?? generateBody(method.method, schema),
+            },
+          },
     };
   }
 

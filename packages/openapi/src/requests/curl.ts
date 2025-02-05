@@ -1,7 +1,10 @@
 import { type EndpointSample } from '@/utils/generate-sample';
 import { inputToString } from '@/utils/input-to-string';
 
-export function getSampleRequest(endpoint: EndpointSample): string {
+export function getSampleRequest(
+  endpoint: EndpointSample,
+  sampleKey: string,
+): string {
   const s: string[] = [];
 
   s.push(`curl -X ${endpoint.method} "${endpoint.url}"`);
@@ -21,7 +24,7 @@ export function getSampleRequest(endpoint: EndpointSample): string {
   }
 
   if (endpoint.body?.mediaType === 'multipart/form-data') {
-    const sample = endpoint.body.sample;
+    const sample = endpoint.body.samples[sampleKey]?.value;
 
     if (sample && typeof sample === 'object') {
       for (const [key, value] of Object.entries(sample)) {
@@ -31,7 +34,7 @@ export function getSampleRequest(endpoint: EndpointSample): string {
   } else if (endpoint.body) {
     s.push(`-H "Content-Type: ${endpoint.body.mediaType}"`);
     s.push(
-      `-d ${inputToString(endpoint.body.sample, endpoint.body.mediaType, 'single-quote')}`,
+      `-d ${inputToString(endpoint.body.samples[sampleKey]?.value ?? '', endpoint.body.mediaType, 'single-quote')}`,
     );
   }
 
