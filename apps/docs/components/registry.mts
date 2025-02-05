@@ -18,6 +18,8 @@ export const registry: Registry = {
   components: [
     {
       name: 'search-ai',
+      description:
+        'Ask AI dialog for your docs, you need to configure Inkeep first',
       files: ['ai/index.tsx'],
       mapImportPath: {
         '../../../packages/ui/src/components/ui/button.tsx': {
