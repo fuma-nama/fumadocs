@@ -6,6 +6,7 @@ export default [
       'dist',
       'node_modules',
       '.next/',
+      '.source/',
       'out/',
       'next.config.mjs',
       'postcss.config.js',

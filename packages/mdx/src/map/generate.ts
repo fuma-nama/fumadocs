@@ -13,34 +13,38 @@ export async function generateJS(
   getFrontmatter: (file: string) => unknown | Promise<unknown>,
 ): Promise<string> {
   const outDir = path.dirname(outputPath);
-  const imports: ImportInfo[] = [
-    {
+  let asyncInit = false;
+  const lines: string[] = [
+    getImportCode({
       type: 'named',
       names: ['_runtime'],
       specifier: 'fumadocs-mdx',
-    },
-    {
+    }),
+    getImportCode({
       type: 'namespace',
       specifier: toImportPath(configPath, outDir),
       name: '_source',
-    },
+    }),
   ];
-  let asyncInit = false;
-  const lines: string[] = [];
 
   config._runtime.files.clear();
   const entries = Array.from(config.collections.entries());
 
-  async function getEntries(collectionName: string, files: FileInfo[]) {
+  async function getEntries(
+    collectionName: string,
+    collection: MetaCollection | DocCollection,
+    files: FileInfo[],
+  ) {
     const items = files.map(async (file, i) => {
       config._runtime.files.set(file.absolutePath, collectionName);
-      const importId = `${collectionName}_${i}`;
-
-      imports.push({
-        type: 'namespace',
-        name: importId,
-        specifier: `${toImportPath(file.absolutePath, outDir)}?collection=${collectionName}&hash=${configHash}`,
-      });
+      const importId = `${collectionName}_${collection.type}_${i}`;
+      lines.unshift(
+        getImportCode({
+          type: 'namespace',
+          name: importId,
+          specifier: `${toImportPath(file.absolutePath, outDir)}?collection=${collectionName}&hash=${configHash}`,
+        }),
+      );
 
       return `{ info: ${JSON.stringify(file)}, data: ${importId} }`;
     });
@@ -50,15 +54,14 @@ export async function generateJS(
 
   async function getAsyncEntries(files: FileInfo[]) {
     if (!asyncInit) {
-      imports.push({
-        type: 'named',
-        specifier: 'fumadocs-mdx/runtime/async',
-        names: ['_runtimeAsync', 'buildConfig'],
-      });
-
       lines.unshift(
+        getImportCode({
+          type: 'named',
+          specifier: 'fumadocs-mdx/runtime/async',
+          names: ['_runtimeAsync', 'buildConfig'],
+        }),
         'const [err, _sourceConfig] = buildConfig(_source)',
-        'if (err) throw new Error(err)',
+        'if (!_sourceConfig) throw new Error(err)',
       );
 
       asyncInit = true;
@@ -83,12 +86,21 @@ export async function generateJS(
 
       if (collection.docs.async) {
         const docsEntries = (await getAsyncEntries(docs)).join(', ');
-        const metaEntries = (await getEntries(k, metas)).join(', ');
+        const metaEntries = (await getEntries(k, collection.meta, metas)).join(
+          ', ',
+        );
 
         return `export const ${k} = _runtimeAsync.docs<typeof _source.${k}>([${docsEntries}], [${metaEntries}], "${k}", _sourceConfig)`;
       }
 
-      return `export const ${k} = _runtime.docs<typeof _source.${k}>([${(await getEntries(k, docs)).join(', ')}], [${(await getEntries(k, metas)).join(', ')}])`;
+      const docsEntries = (await getEntries(k, collection.docs, docs)).join(
+        ', ',
+      );
+      const metaEntries = (await getEntries(k, collection.meta, metas)).join(
+        ', ',
+      );
+
+      return `export const ${k} = _runtime.docs<typeof _source.${k}>([${docsEntries}], [${metaEntries}])`;
     }
 
     const files = await getCollectionFiles(collection);
@@ -97,14 +109,16 @@ export async function generateJS(
       return `export const ${k} = _runtimeAsync.doc<typeof _source.${k}>([${(await getAsyncEntries(files)).join(', ')}], "${k}", _sourceConfig)`;
     }
 
-    return `export const ${k} = _runtime.${collection.type}<typeof _source.${k}>([${(await getEntries(k, files)).join(', ')}]);`;
+    return `export const ${k} = _runtime.${collection.type}<typeof _source.${k}>([${(await getEntries(k, collection, files)).join(', ')}]);`;
   });
 
   const resolvedDeclares = await Promise.all(declares);
 
-  return [...imports.map(getImportCode), ...lines, ...resolvedDeclares].join(
-    '\n',
-  );
+  return [
+    `// @ts-nocheck -- skip type checking`,
+    ...lines,
+    ...resolvedDeclares,
+  ].join('\n');
 }
 
 async function getCollectionFiles(
@@ -171,7 +185,11 @@ function getImportCode(info: ImportInfo): string {
 }
 
 export function toImportPath(file: string, dir: string): string {
-  let importPath = path.relative(dir, file);
+  const ext = path.extname(file);
+  let importPath = path.relative(
+    dir,
+    ext === '.ts' ? file.substring(0, file.length - ext.length) : file,
+  );
 
   if (!path.isAbsolute(importPath) && !importPath.startsWith('.')) {
     importPath = `./${importPath}`;
