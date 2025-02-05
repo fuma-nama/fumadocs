@@ -144,7 +144,7 @@ export function createRenders(
     Requests: (props) => (
       <Tabs groupId="fumadocs_openapi_requests" {...props} />
     ),
-    Samples: (props) => <Tabs groupId="fumadocs_openapi_samples" {...props} />,
+    Samples: (props) => <Tabs {...props} />,
     Sample: Tab,
 
     Request: (props) => (
