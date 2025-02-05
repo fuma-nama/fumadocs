@@ -48,6 +48,8 @@ export function Operation({
   ctx,
   hasHead,
   headingLevel = 2,
+  selectedSampleKey,
+  exclusiveSampleKey,
 }: {
   type?: 'webhook' | 'operation';
   path: string;
@@ -56,6 +58,8 @@ export function Operation({
 
   hasHead?: boolean;
   headingLevel?: number;
+  selectedSampleKey?: string;
+  exclusiveSampleKey?: string;
 }): ReactElement {
   const body = method.requestBody;
   const security = method.security ?? ctx.schema.document.security;
@@ -230,7 +234,13 @@ export function Operation({
     return (
       <ctx.renderer.API>
         {info}
-        <APIExample method={method} endpoint={endpoint} ctx={ctx} />
+        <APIExample
+          method={method}
+          endpoint={endpoint}
+          ctx={ctx}
+          selectedSampleKey={selectedSampleKey}
+          exclusiveSampleKey={exclusiveSampleKey}
+        />
       </ctx.renderer.API>
     );
   } else {
@@ -266,11 +276,13 @@ async function APIExample({
   endpoint,
   ctx,
   selectedSampleKey,
+  exclusiveSampleKey,
 }: {
   method: MethodInformation;
   endpoint: EndpointSample;
   ctx: RenderContext;
   selectedSampleKey?: string;
+  exclusiveSampleKey?: string;
 }) {
   const renderer = ctx.renderer;
   const children: ReactNode[] = [];
@@ -303,19 +315,22 @@ async function APIExample({
     const sampleTabs: ReactNode[] = [];
     const titles = [];
     if (
-      endpoint.body?.samples &&
-      Object.keys(endpoint.body?.samples).length === 1 &&
-      endpoint.body?.samples['_default']
+      (endpoint.body?.samples &&
+        Object.keys(endpoint.body?.samples).length === 1 &&
+        endpoint.body?.samples['_default']) ||
+      (exclusiveSampleKey && endpoint.body?.samples[exclusiveSampleKey])
     ) {
-      // if only the fallback or non described openapi legacy example is present, we dont use tabs
+      // if exclusiveSampleKey is present, we don't use tabs
+      // if only the fallback or non described openapi legacy example is present, we don't use tabs
+      const sampleKey = exclusiveSampleKey ?? '_default';
       children.push(
         <renderer.Requests
-          key={`requests-${'_default'}`}
-          items={samples['_default'].map((s) => s.label)}
+          key={`requests-${sampleKey}`}
+          items={samples[sampleKey].map((s) => s.label)}
         >
-          {samples['_default'].map((s) => (
+          {samples[sampleKey].map((s) => (
             <renderer.Request
-              key={`requests-${'_default'}-${s.label}`}
+              key={`requests-${sampleKey}-${s.label}`}
               name={s.label}
               code={s.source}
               language={s.lang}
