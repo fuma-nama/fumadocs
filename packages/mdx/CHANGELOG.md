@@ -1,5 +1,18 @@
 # next-docs-mdx
 
+## 11.5.0
+
+### Minor Changes
+
+- 233a2d1: Support Standard Schema for collection `schema`
+- 432c7bd: Support `defineDocs` without re-exporting `docs` and `meta` collections
+
+### Patch Changes
+
+- Updated dependencies [69f20cb]
+  - @fumadocs/mdx-remote@1.2.0
+  - fumadocs-core@15.0.3
+
 ## 11.4.1
 
 ### Patch Changes
