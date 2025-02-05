@@ -106,7 +106,7 @@ export function APIPlayground({
     ResultDisplay: FC<{ data: FetchResult }>;
   }>;
 } & HTMLAttributes<HTMLFormElement>) {
-  const { serverRef } = useApiContext();
+  const { serverRef, servers } = useApiContext();
   const dynamicRef = useRef(new Map<string, DynamicField>());
   const form = useForm<FormValues>({
     defaultValues: {
@@ -244,9 +244,11 @@ export function APIPlayground({
             route={route}
             isLoading={testQuery.isLoading}
           />
-          <CollapsiblePanel title="Server URL">
-            <ServerSelect />
-          </CollapsiblePanel>
+          {servers.length > 1 ? (
+            <CollapsiblePanel title="Server URL">
+              <ServerSelect />
+            </CollapsiblePanel>
+          ) : null}
 
           {header.length > 0 || authorization ? (
             <CollapsiblePanel title="Headers">
