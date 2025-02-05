@@ -1,1 +1,1 @@
-curl -X GET "http://localhost:8080/pets/string"
+curl -X GET "http://localhost:8080/pets/<string>"

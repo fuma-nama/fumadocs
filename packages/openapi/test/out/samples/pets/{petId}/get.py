@@ -1,6 +1,6 @@
 import requests
 
-url = "http://localhost:8080/pets/string"
+url = "http://localhost:8080/pets/<string>"
 
 response = requests.request("GET", url)
 
