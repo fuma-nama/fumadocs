@@ -40,7 +40,7 @@ importers:
         version: 6.0.1
       tsup:
         specifier: 8.3.6
-        version: 8.3.6(@swc/core@1.10.12(@swc/helpers@0.5.15))(jiti@2.4.2)(postcss@8.5.1)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0)
+        version: 8.3.6(@swc/core@1.10.12)(jiti@2.4.2)(postcss@8.5.1)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0)
       turbo:
         specifier: 2.4.0
         version: 2.4.0
@@ -810,6 +810,9 @@ importers:
       '@fumadocs/mdx-remote':
         specifier: workspace:*
         version: link:../mdx-remote
+      '@standard-schema/spec':
+        specifier: ^1.0.0
+        version: 1.0.0
       '@types/cross-spawn':
         specifier: ^6.0.6
         version: 6.0.6
@@ -848,7 +851,7 @@ importers:
         version: 6.0.3
       webpack:
         specifier: ^5.97.1
-        version: 5.97.1(@swc/core@1.10.12(@swc/helpers@0.5.15))(esbuild@0.24.2)
+        version: 5.97.1(@swc/core@1.10.12)(esbuild@0.24.2)
 
   packages/mdx-remote:
     dependencies:
@@ -3089,6 +3092,9 @@ packages:
   '@sindresorhus/merge-streams@4.0.0':
     resolution: {integrity: sha512-tlqY9xq5ukxTUZBmoOp+m61cqwQD5pHJtFY3Mn8CA8ps6yghLH/Hw8UPdqg4OLmFW3IFlcXnQNmo/dh8HzXYIQ==}
     engines: {node: '>=18'}
+
+  '@standard-schema/spec@1.0.0':
+    resolution: {integrity: sha512-m2bOd0f2RT9k8QJx1JN85cZYyH1RqFBdlwtkSlf4tBDYLCiiZnv1fIIwacK6cqwXavOydf0NPToMQgpKq+dVlA==}
 
   '@swc/core-darwin-arm64@1.10.12':
     resolution: {integrity: sha512-pOANQegUTAriW7jq3SSMZGM5l89yLVMs48R0F2UG6UZsH04SiViCnDctOGlA/Sa++25C+rL9MGMYM1jDLylBbg==}
@@ -8947,6 +8953,8 @@ snapshots:
 
   '@sindresorhus/merge-streams@4.0.0': {}
 
+  '@standard-schema/spec@1.0.0': {}
+
   '@swc/core-darwin-arm64@1.10.12':
     optional: true
 
@@ -8977,7 +8985,7 @@ snapshots:
   '@swc/core-win32-x64-msvc@1.10.12':
     optional: true
 
-  '@swc/core@1.10.12(@swc/helpers@0.5.15)':
+  '@swc/core@1.10.12':
     dependencies:
       '@swc/counter': 0.1.3
       '@swc/types': 0.1.17
@@ -8992,7 +9000,6 @@ snapshots:
       '@swc/core-win32-arm64-msvc': 1.10.12
       '@swc/core-win32-ia32-msvc': 1.10.12
       '@swc/core-win32-x64-msvc': 1.10.12
-      '@swc/helpers': 0.5.15
     optional: true
 
   '@swc/counter@0.1.3': {}
@@ -13140,16 +13147,16 @@ snapshots:
 
   term-size@2.2.1: {}
 
-  terser-webpack-plugin@5.3.10(@swc/core@1.10.12(@swc/helpers@0.5.15))(esbuild@0.24.2)(webpack@5.97.1(@swc/core@1.10.12(@swc/helpers@0.5.15))(esbuild@0.24.2)):
+  terser-webpack-plugin@5.3.10(@swc/core@1.10.12)(esbuild@0.24.2)(webpack@5.97.1(@swc/core@1.10.12)(esbuild@0.24.2)):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.25
       jest-worker: 27.5.1
       schema-utils: 3.3.0
       serialize-javascript: 6.0.2
       terser: 5.37.0
-      webpack: 5.97.1(@swc/core@1.10.12(@swc/helpers@0.5.15))(esbuild@0.24.2)
+      webpack: 5.97.1(@swc/core@1.10.12)(esbuild@0.24.2)
     optionalDependencies:
-      '@swc/core': 1.10.12(@swc/helpers@0.5.15)
+      '@swc/core': 1.10.12
       esbuild: 0.24.2
 
   terser@5.37.0:
@@ -13234,7 +13241,7 @@ snapshots:
 
   tslib@2.8.1: {}
 
-  tsup@8.3.6(@swc/core@1.10.12(@swc/helpers@0.5.15))(jiti@2.4.2)(postcss@8.5.1)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0):
+  tsup@8.3.6(@swc/core@1.10.12)(jiti@2.4.2)(postcss@8.5.1)(tsx@4.19.2)(typescript@5.7.3)(yaml@2.7.0):
     dependencies:
       bundle-require: 5.1.0(esbuild@0.24.2)
       cac: 6.7.14
@@ -13253,7 +13260,7 @@ snapshots:
       tinyglobby: 0.2.10
       tree-kill: 1.2.2
     optionalDependencies:
-      '@swc/core': 1.10.12(@swc/helpers@0.5.15)
+      '@swc/core': 1.10.12
       postcss: 8.5.1
       typescript: 5.7.3
     transitivePeerDependencies:
@@ -13610,7 +13617,7 @@ snapshots:
 
   webpack-sources@3.2.3: {}
 
-  webpack@5.97.1(@swc/core@1.10.12(@swc/helpers@0.5.15))(esbuild@0.24.2):
+  webpack@5.97.1(@swc/core@1.10.12)(esbuild@0.24.2):
     dependencies:
       '@types/eslint-scope': 3.7.7
       '@types/estree': 1.0.6
@@ -13632,7 +13639,7 @@ snapshots:
       neo-async: 2.6.2
       schema-utils: 3.3.0
       tapable: 2.2.1
-      terser-webpack-plugin: 5.3.10(@swc/core@1.10.12(@swc/helpers@0.5.15))(esbuild@0.24.2)(webpack@5.97.1(@swc/core@1.10.12(@swc/helpers@0.5.15))(esbuild@0.24.2))
+      terser-webpack-plugin: 5.3.10(@swc/core@1.10.12)(esbuild@0.24.2)(webpack@5.97.1(@swc/core@1.10.12)(esbuild@0.24.2))
       watchpack: 2.4.2
       webpack-sources: 3.2.3
     transitivePeerDependencies:

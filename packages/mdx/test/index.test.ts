@@ -6,27 +6,30 @@ import { formatError } from '@/utils/format-error';
 import { generateJS } from '@/map/generate';
 import { defineCollections } from '@/config';
 
-test('format errors', () => {
+test('format errors', async () => {
   const schema = z.object({
     text: z.string(),
     obj: z.object({
       key: z.number(),
+      value: z.number(),
     }),
     value: z.string().max(4),
   });
 
-  const result = schema.safeParse({
+  const result = await schema['~standard'].validate({
     text: 4,
-    obj: {},
+    obj: {
+      value: 'string',
+    },
     value: 'asfdfsdfsdfsd',
   });
 
-  if (result.error)
-    expect(formatError('in index.mdx:', result.error)).toMatchInlineSnapshot(`
-      "in index.mdx:
+  if (result.issues)
+    expect(formatError('in index.mdx:', result.issues)).toMatchInlineSnapshot(`
+      "in index.mdx::
         text: Expected string, received number
-        obj: 
-          obj.key: Required
+        obj,key: Required
+        obj,value: Expected number, received string
         value: String must contain at most 4 character(s)"
     `);
 });

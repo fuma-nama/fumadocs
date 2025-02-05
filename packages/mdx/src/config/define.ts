@@ -1,4 +1,3 @@
-import { type ZodTypeAny, type z } from 'zod';
 import { type ProcessorOptions } from '@mdx-js/mdx';
 import { type MDXOptions } from '@/utils/build-mdx';
 import {
@@ -7,6 +6,7 @@ import {
   type MarkdownProps,
 } from '@/config/types';
 import { frontmatterSchema, metaSchema } from '@/utils/schema';
+import { StandardSchemaV1 } from '@standard-schema/spec';
 
 export interface TransformContext {
   path: string;
@@ -34,13 +34,14 @@ export interface BaseCollection<Schema> {
   schema?: Schema | ((ctx: TransformContext) => Schema);
 }
 
-export interface MetaCollection<Schema extends ZodTypeAny = ZodTypeAny>
-  extends BaseCollection<Schema> {
+export interface MetaCollection<
+  Schema extends StandardSchemaV1 = StandardSchemaV1,
+> extends BaseCollection<Schema> {
   type: 'meta';
 }
 
 export interface DocCollection<
-  Schema extends ZodTypeAny = ZodTypeAny,
+  Schema extends StandardSchemaV1 = StandardSchemaV1,
   Async extends boolean = boolean,
 > extends BaseCollection<Schema> {
   type: 'doc';
@@ -55,7 +56,7 @@ export interface DocCollection<
 
 export function defineCollections<
   T extends 'doc' | 'meta',
-  Schema extends ZodTypeAny = ZodTypeAny,
+  Schema extends StandardSchemaV1 = StandardSchemaV1,
   Async extends boolean = false,
 >(
   options: { type: T } & (T extends 'doc'
@@ -70,15 +71,15 @@ export function defineCollections<
 
     runtime: T extends 'doc'
       ? Async extends true
-        ? z.infer<Schema> &
+        ? StandardSchemaV1.InferOutput<Schema> &
             BaseCollectionEntry & {
               load: () => Promise<MarkdownProps>;
             }
-        : Omit<MarkdownProps, keyof z.infer<Schema>> &
-            z.infer<Schema> &
+        : Omit<MarkdownProps, keyof StandardSchemaV1.InferOutput<Schema>> &
+            StandardSchemaV1.InferOutput<Schema> &
             BaseCollectionEntry
       : typeof options extends MetaCollection
-        ? z.infer<Schema> & BaseCollectionEntry
+        ? StandardSchemaV1.InferOutput<Schema> & BaseCollectionEntry
         : never;
   };
 } {
@@ -91,8 +92,8 @@ export function defineCollections<
 }
 
 export function defineDocs<
-  DocData extends ZodTypeAny = typeof frontmatterSchema,
-  MetaData extends ZodTypeAny = typeof metaSchema,
+  DocData extends StandardSchemaV1 = typeof frontmatterSchema,
+  MetaData extends StandardSchemaV1 = typeof metaSchema,
   DocAsync extends boolean = false,
 >(options?: {
   /**
