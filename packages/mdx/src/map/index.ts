@@ -1,6 +1,6 @@
 import * as path from 'node:path';
 import * as fs from 'node:fs';
-import { writeFile } from 'node:fs/promises';
+import { writeFile, rm } from 'node:fs/promises';
 import { getConfigHash, loadConfigCached } from '@/utils/config-cache';
 import { generateJS } from '@/map/generate';
 import { readFrontmatter } from '@/utils/read-frontmatter';
@@ -15,17 +15,21 @@ export async function start(
   configPath: string,
   outDir: string,
 ): Promise<void> {
+  // delete previous output
+  void rm(path.resolve(outDir, `index.js`), { force: true });
+  void rm(path.resolve(outDir, `index.d.ts`), { force: true });
+
   let configHash = await getConfigHash(configPath);
   let config = await loadConfigCached(configPath, configHash);
-  const jsOut = path.resolve(outDir, `index.ts`);
+  const outPath = path.resolve(outDir, `index.ts`);
 
   const frontmatterCache = new Map<string, unknown>();
   let hookUpdate = false;
 
   fs.mkdirSync(outDir, { recursive: true });
   fs.writeFileSync(
-    jsOut,
-    await generateJS(configPath, config, jsOut, configHash, (file) => {
+    outPath,
+    await generateJS(configPath, config, outPath, configHash, (file) => {
       hookUpdate = true;
       const cached = frontmatterCache.get(file);
       if (cached) return cached;
@@ -61,11 +65,11 @@ export async function start(
           if (event === 'change') frontmatterCache.delete(file);
 
           await writeFile(
-            jsOut,
+            outPath,
             await generateJS(
               configPath,
               config,
-              jsOut,
+              outPath,
               configHash,
               readFrontmatter,
             ),
