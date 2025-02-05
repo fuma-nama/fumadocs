@@ -1,9 +1,9 @@
 import * as path from 'node:path';
 import * as fs from 'node:fs';
 import { writeFile } from 'node:fs/promises';
-import grayMatter from 'gray-matter';
 import { getConfigHash, loadConfigCached } from '@/utils/config-cache';
-import { generateJS, generateTypes } from '@/map/generate';
+import { generateJS } from '@/map/generate';
+import { readFrontmatter } from '@/utils/read-frontmatter';
 
 /**
  * Start a MDX server that builds index and manifest files.
@@ -17,64 +17,25 @@ export async function start(
 ): Promise<void> {
   let configHash = await getConfigHash(configPath);
   let config = await loadConfigCached(configPath, configHash);
-  const jsOut = path.resolve(outDir, `index.js`);
-  const typeOut = path.resolve(outDir, `index.d.ts`);
+  const jsOut = path.resolve(outDir, `index.ts`);
 
   const frontmatterCache = new Map<string, unknown>();
   let hookUpdate = false;
 
-  /**
-   * Read frontmatter via stream, it is faster for large Markdown/MDX files
-   */
-  async function readFrontmatter(file: string): Promise<unknown> {
-    hookUpdate = true;
-    const cached = frontmatterCache.get(file);
-    if (cached) return cached;
-
-    const readStream = fs.createReadStream(file, {
-      highWaterMark: 250,
-    });
-
-    return new Promise((res, rej) => {
-      let idx = 0;
-      let str = '';
-
-      readStream.on('data', (_chunk) => {
-        const chunk = _chunk.toString();
-        if (idx === 0 && !chunk.startsWith('---')) {
-          res({});
-          readStream.close();
-          return;
-        }
-
-        str += chunk;
-        idx++;
-
-        if (str.includes('\n---')) {
-          res(
-            grayMatter({
-              content: str,
-            }).data,
-          );
-
-          readStream.close();
-        }
-      });
-
-      readStream.on('end', () => res({}));
-      readStream.on('error', (e) => rej(e));
-    }).then((res) => {
-      frontmatterCache.set(file, res);
-      return res;
-    });
-  }
-
   fs.mkdirSync(outDir, { recursive: true });
   fs.writeFileSync(
     jsOut,
-    await generateJS(configPath, config, jsOut, configHash, readFrontmatter),
+    await generateJS(configPath, config, jsOut, configHash, (file) => {
+      hookUpdate = true;
+      const cached = frontmatterCache.get(file);
+      if (cached) return cached;
+
+      return readFrontmatter(file).then((res) => {
+        frontmatterCache.set(file, res);
+        return res;
+      });
+    }),
   );
-  fs.writeFileSync(typeOut, generateTypes(configPath, config, typeOut));
   console.log('[MDX] initialized map file');
 
   if (dev) {
@@ -94,8 +55,6 @@ export async function start(
         if (isConfigFile) {
           configHash = await getConfigHash(configPath);
           config = await loadConfigCached(configPath, configHash);
-          await writeFile(typeOut, generateTypes(configPath, config, typeOut));
-          console.log('[MDX] Updated map types');
         }
 
         if (isConfigFile || event !== 'change' || hookUpdate) {

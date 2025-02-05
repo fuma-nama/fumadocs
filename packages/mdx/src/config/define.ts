@@ -1,12 +1,8 @@
 import { type ProcessorOptions } from '@mdx-js/mdx';
 import { type MDXOptions } from '@/utils/build-mdx';
-import {
-  type BaseCollectionEntry,
-  type GlobalConfig,
-  type MarkdownProps,
-} from '@/config/types';
+import { type GlobalConfig } from '@/config/types';
 import { frontmatterSchema, metaSchema } from '@/utils/schema';
-import { StandardSchemaV1 } from '@standard-schema/spec';
+import type { StandardSchemaV1 } from '@standard-schema/spec';
 
 export interface TransformContext {
   path: string;
@@ -54,6 +50,12 @@ export interface DocCollection<
   async?: Async;
 }
 
+export interface DocsCollection {
+  type: 'docs';
+  docs: DocCollection;
+  meta: MetaCollection;
+}
+
 export function defineCollections<
   T extends 'doc' | 'meta',
   Schema extends StandardSchemaV1 = StandardSchemaV1,
@@ -63,28 +65,14 @@ export function defineCollections<
     ? DocCollection<Schema, Async>
     : MetaCollection<Schema>),
 ): {
-  _doc: 'collections';
   type: T;
 
   _type: {
     async: Async;
-
-    runtime: T extends 'doc'
-      ? Async extends true
-        ? StandardSchemaV1.InferOutput<Schema> &
-            BaseCollectionEntry & {
-              load: () => Promise<MarkdownProps>;
-            }
-        : Omit<MarkdownProps, keyof StandardSchemaV1.InferOutput<Schema>> &
-            StandardSchemaV1.InferOutput<Schema> &
-            BaseCollectionEntry
-      : typeof options extends MetaCollection
-        ? StandardSchemaV1.InferOutput<Schema> & BaseCollectionEntry
-        : never;
+    schema: Schema;
   };
 } {
   return {
-    _doc: 'collections',
     // @ts-expect-error -- internal type inferring
     _type: undefined,
     ...options,
@@ -103,15 +91,17 @@ export function defineDocs<
    */
   dir?: string | string[];
 
-  docs?: Partial<DocCollection<DocData, DocAsync>>;
-  meta?: Partial<MetaCollection<MetaData>>;
+  docs?: Omit<DocCollection<DocData, DocAsync>, 'dir' | 'type'>;
+  meta?: Omit<MetaCollection<MetaData>, 'dir' | 'type'>;
 }): {
+  type: 'docs';
   docs: ReturnType<typeof defineCollections<'doc', DocData, DocAsync>>;
   meta: ReturnType<typeof defineCollections<'meta', MetaData, false>>;
 } {
   const dir = options?.dir ?? 'content/docs';
 
   return {
+    type: 'docs',
     docs: defineCollections({
       type: 'doc',
       dir,

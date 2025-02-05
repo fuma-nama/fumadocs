@@ -61,6 +61,7 @@ export default async function loader(
       ? config.collections.get(collectionId)
       : undefined;
 
+  if (collection && collection.type === 'docs') collection = collection.docs;
   if (collection && collection.type !== 'doc') {
     collection = undefined;
   }

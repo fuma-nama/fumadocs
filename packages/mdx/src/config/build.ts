@@ -1,10 +1,11 @@
 import type { GlobalConfig } from '@/config/types';
 import type { ProcessorOptions } from '@mdx-js/mdx';
-import {
-  InternalDocCollection,
-  InternalMetaCollection,
-  LoadedConfig,
-} from '@/utils/load-config';
+import type { LoadedConfig } from '@/utils/load-config';
+import type {
+  DocsCollection,
+  DocCollection,
+  MetaCollection,
+} from '@/config/define';
 
 export function buildConfig(
   config: Record<string, unknown>,
@@ -17,12 +18,16 @@ export function buildConfig(
       continue;
     }
 
-    if (typeof v === 'object' && '_doc' in v && v._doc === 'collections') {
-      collections.set(
-        k,
-        v as unknown as InternalMetaCollection | InternalDocCollection,
-      );
-      continue;
+    if (typeof v === 'object' && 'type' in v) {
+      if (v.type === 'docs') {
+        collections.set(k, v as DocsCollection);
+        continue;
+      }
+
+      if (v.type === 'doc' || v.type === 'meta') {
+        collections.set(k, v as unknown as MetaCollection | DocCollection);
+        continue;
+      }
     }
 
     if (k === 'default') {

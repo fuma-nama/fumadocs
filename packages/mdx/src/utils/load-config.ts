@@ -1,5 +1,9 @@
 import * as path from 'node:path';
-import type { DocCollection, MetaCollection } from '@/config/define';
+import type {
+  DocCollection,
+  DocsCollection,
+  MetaCollection,
+} from '@/config/define';
 import { type GlobalConfig } from '@/config/types';
 import type { ProcessorOptions } from '@mdx-js/mdx';
 import { pathToFileURL } from 'node:url';
@@ -10,7 +14,7 @@ export function findConfigFile(): string {
 }
 
 export interface LoadedConfig {
-  collections: Map<string, InternalDocCollection | InternalMetaCollection>;
+  collections: Map<string, DocCollection | MetaCollection | DocsCollection>;
   getDefaultMDXOptions: () => Promise<ProcessorOptions>;
   global?: GlobalConfig;
 
@@ -21,9 +25,6 @@ export interface LoadedConfig {
     files: Map<string, string>;
   };
 }
-
-export type InternalDocCollection = DocCollection;
-export type InternalMetaCollection = MetaCollection;
 
 export async function loadConfig(configPath: string): Promise<LoadedConfig> {
   const { build } = await import('esbuild');

@@ -2,25 +2,27 @@ import * as path from 'node:path';
 import fg from 'fast-glob';
 import { getTypeFromPath } from '@/utils/get-type-from-path';
 import type { FileInfo } from '@/config/types';
-import {
-  type InternalDocCollection,
-  type InternalMetaCollection,
-  type LoadedConfig,
-} from '@/utils/load-config';
+import { type LoadedConfig } from '@/utils/load-config';
+import type { DocCollection, MetaCollection } from '@/config';
 
 export async function generateJS(
   configPath: string,
   config: LoadedConfig,
   outputPath: string,
   configHash: string,
-  getFrontmatter: (file: string) => Promise<unknown>,
+  getFrontmatter: (file: string) => unknown | Promise<unknown>,
 ): Promise<string> {
   const outDir = path.dirname(outputPath);
   const imports: ImportInfo[] = [
     {
       type: 'named',
-      names: ['toRuntime'],
+      names: ['_runtime'],
       specifier: 'fumadocs-mdx',
+    },
+    {
+      type: 'namespace',
+      specifier: toImportPath(configPath, outDir),
+      name: '_source',
     },
   ];
   let asyncInit = false;
@@ -29,59 +31,73 @@ export async function generateJS(
   config._runtime.files.clear();
   const entries = Array.from(config.collections.entries());
 
-  const declares = entries.map(async ([k, collection]) => {
-    const files = await getCollectionFiles(collection);
-
-    if (collection.type === 'doc' && collection.async) {
-      if (!asyncInit) {
-        imports.push(
-          {
-            type: 'namespace',
-            specifier: toImportPath(configPath, outDir),
-            name: '_source',
-          },
-          {
-            type: 'named',
-            specifier: 'fumadocs-mdx/runtime/async',
-            names: ['asyncFiles', 'buildConfig'],
-          },
-        );
-
-        lines.unshift(
-          'const [err, _sourceConfig] = buildConfig(_source)',
-          'if (err) throw new Error(err)',
-        );
-
-        asyncInit = true;
-      }
-
-      const entries = files.map(async (file) => {
-        const frontmatter = await getFrontmatter(file.absolutePath);
-
-        return JSON.stringify({
-          frontmatter,
-          file,
-        });
-      });
-
-      return `export const ${k} = asyncFiles([${(await Promise.all(entries)).join(', ')}], "${k}", _sourceConfig)`;
-    }
-
+  async function getEntries(collectionName: string, files: FileInfo[]) {
     const items = files.map(async (file, i) => {
-      config._runtime.files.set(file.absolutePath, k);
-      const importId = `${k}_${i}`;
+      config._runtime.files.set(file.absolutePath, collectionName);
+      const importId = `${collectionName}_${i}`;
 
       imports.push({
         type: 'namespace',
         name: importId,
-        specifier: `${toImportPath(file.absolutePath, outDir)}?collection=${k}&hash=${configHash}`,
+        specifier: `${toImportPath(file.absolutePath, outDir)}?collection=${collectionName}&hash=${configHash}`,
       });
 
-      return `toRuntime("${collection.type}", ${importId}, ${JSON.stringify(file)})`;
+      return `{ info: ${JSON.stringify(file)}, data: ${importId} }`;
     });
 
-    const resolvedItems = await Promise.all(items);
-    return `export const ${k} = [${resolvedItems.join(', ')}];`;
+    return Promise.all(items);
+  }
+
+  async function getAsyncEntries(files: FileInfo[]) {
+    if (!asyncInit) {
+      imports.push({
+        type: 'named',
+        specifier: 'fumadocs-mdx/runtime/async',
+        names: ['_runtimeAsync', 'buildConfig'],
+      });
+
+      lines.unshift(
+        'const [err, _sourceConfig] = buildConfig(_source)',
+        'if (err) throw new Error(err)',
+      );
+
+      asyncInit = true;
+    }
+
+    const entries = files.map(async (file) => {
+      const frontmatter = await getFrontmatter(file.absolutePath);
+
+      return JSON.stringify({
+        info: file,
+        data: frontmatter,
+      });
+    });
+
+    return Promise.all(entries);
+  }
+
+  const declares = entries.map(async ([k, collection]) => {
+    if (collection.type === 'docs') {
+      const docs = await getCollectionFiles(collection.docs);
+      const metas = await getCollectionFiles(collection.meta);
+
+      if (collection.docs.async) {
+        const docsEntries = (await getAsyncEntries(docs)).join(', ');
+        const metaEntries = (await getEntries(k, metas)).join(', ');
+
+        return `export const ${k} = _runtimeAsync.docs<typeof _source.${k}>([${docsEntries}], [${metaEntries}], "${k}", _sourceConfig)`;
+      }
+
+      return `export const ${k} = _runtime.docs<typeof _source.${k}>([${(await getEntries(k, docs)).join(', ')}], [${(await getEntries(k, metas)).join(', ')}])`;
+    }
+
+    const files = await getCollectionFiles(collection);
+
+    if (collection.type === 'doc' && collection.async) {
+      return `export const ${k} = _runtimeAsync.doc<typeof _source.${k}>([${(await getAsyncEntries(files)).join(', ')}], "${k}", _sourceConfig)`;
+    }
+
+    return `export const ${k} = _runtime.${collection.type}<typeof _source.${k}>([${(await getEntries(k, files)).join(', ')}]);`;
   });
 
   const resolvedDeclares = await Promise.all(declares);
@@ -92,7 +108,7 @@ export async function generateJS(
 }
 
 async function getCollectionFiles(
-  collection: InternalDocCollection | InternalMetaCollection,
+  collection: DocCollection | MetaCollection,
 ): Promise<FileInfo[]> {
   const files = new Map<string, FileInfo>();
   const dirs = Array.isArray(collection.dir)
@@ -162,25 +178,4 @@ export function toImportPath(file: string, dir: string): string {
   }
 
   return importPath.replaceAll(path.sep, '/');
-}
-
-export function generateTypes(
-  configPath: string,
-  config: LoadedConfig,
-  outputPath: string,
-): string {
-  const importPath = JSON.stringify(
-    toImportPath(configPath, path.dirname(outputPath)),
-  );
-  const lines: string[] = [
-    'import type { GetOutput } from "fumadocs-mdx/config"',
-  ];
-
-  for (const name of config.collections.keys()) {
-    lines.push(
-      `export declare const ${name}: GetOutput<typeof import(${importPath}).${name}>`,
-    );
-  }
-
-  return lines.join('\n');
 }
