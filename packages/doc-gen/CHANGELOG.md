@@ -1,5 +1,12 @@
 # fumadocs-docgen
 
+## 1.3.6
+
+### Patch Changes
+
+- a8e9e1f: Bump deps
+  - fumadocs-typescript@3.0.3
+
 ## 1.3.5
 
 ### Patch Changes

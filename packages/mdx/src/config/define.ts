@@ -1,12 +1,8 @@
-import { type ZodTypeAny, type z } from 'zod';
 import { type ProcessorOptions } from '@mdx-js/mdx';
 import { type MDXOptions } from '@/utils/build-mdx';
-import {
-  type BaseCollectionEntry,
-  type GlobalConfig,
-  type MarkdownProps,
-} from '@/config/types';
+import { type GlobalConfig } from '@/config/types';
 import { frontmatterSchema, metaSchema } from '@/utils/schema';
+import type { StandardSchemaV1 } from '@standard-schema/spec';
 
 export interface TransformContext {
   path: string;
@@ -34,13 +30,14 @@ export interface BaseCollection<Schema> {
   schema?: Schema | ((ctx: TransformContext) => Schema);
 }
 
-export interface MetaCollection<Schema extends ZodTypeAny = ZodTypeAny>
-  extends BaseCollection<Schema> {
+export interface MetaCollection<
+  Schema extends StandardSchemaV1 = StandardSchemaV1,
+> extends BaseCollection<Schema> {
   type: 'meta';
 }
 
 export interface DocCollection<
-  Schema extends ZodTypeAny = ZodTypeAny,
+  Schema extends StandardSchemaV1 = StandardSchemaV1,
   Async extends boolean = boolean,
 > extends BaseCollection<Schema> {
   type: 'doc';
@@ -53,37 +50,29 @@ export interface DocCollection<
   async?: Async;
 }
 
+export interface DocsCollection {
+  type: 'docs';
+  docs: DocCollection;
+  meta: MetaCollection;
+}
+
 export function defineCollections<
   T extends 'doc' | 'meta',
-  Schema extends ZodTypeAny = ZodTypeAny,
+  Schema extends StandardSchemaV1 = StandardSchemaV1,
   Async extends boolean = false,
 >(
   options: { type: T } & (T extends 'doc'
     ? DocCollection<Schema, Async>
     : MetaCollection<Schema>),
 ): {
-  _doc: 'collections';
   type: T;
 
   _type: {
     async: Async;
-
-    runtime: T extends 'doc'
-      ? Async extends true
-        ? z.infer<Schema> &
-            BaseCollectionEntry & {
-              load: () => Promise<MarkdownProps>;
-            }
-        : Omit<MarkdownProps, keyof z.infer<Schema>> &
-            z.infer<Schema> &
-            BaseCollectionEntry
-      : typeof options extends MetaCollection
-        ? z.infer<Schema> & BaseCollectionEntry
-        : never;
+    schema: Schema;
   };
 } {
   return {
-    _doc: 'collections',
     // @ts-expect-error -- internal type inferring
     _type: undefined,
     ...options,
@@ -91,8 +80,8 @@ export function defineCollections<
 }
 
 export function defineDocs<
-  DocData extends ZodTypeAny = typeof frontmatterSchema,
-  MetaData extends ZodTypeAny = typeof metaSchema,
+  DocData extends StandardSchemaV1 = typeof frontmatterSchema,
+  MetaData extends StandardSchemaV1 = typeof metaSchema,
   DocAsync extends boolean = false,
 >(options?: {
   /**
@@ -102,15 +91,17 @@ export function defineDocs<
    */
   dir?: string | string[];
 
-  docs?: Partial<DocCollection<DocData, DocAsync>>;
-  meta?: Partial<MetaCollection<MetaData>>;
+  docs?: Omit<DocCollection<DocData, DocAsync>, 'dir' | 'type'>;
+  meta?: Omit<MetaCollection<MetaData>, 'dir' | 'type'>;
 }): {
+  type: 'docs';
   docs: ReturnType<typeof defineCollections<'doc', DocData, DocAsync>>;
   meta: ReturnType<typeof defineCollections<'meta', MetaData, false>>;
 } {
   const dir = options?.dir ?? 'content/docs';
 
   return {
+    type: 'docs',
     docs: defineCollections({
       type: 'doc',
       dir,

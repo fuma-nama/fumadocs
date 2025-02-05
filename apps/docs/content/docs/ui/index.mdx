@@ -55,6 +55,8 @@ Some basic knowledge of Next.js App Router would be useful for further customisa
 
 Create a new app with `create-fumadocs-app`, it requires Node.js 18+.
 
+> Node.js 23.1.x might have problems with Next.js production build.
+
 <Tabs groupId='package-manager' persist items={['npm', 'pnpm', 'yarn', 'bun']}>
 
 ```bash tab="npm"
@@ -232,7 +234,11 @@ will replace the `/docs` page with your `page.tsx`.
 
 ### Why Fumadocs?
 
-Feel free to open the demo in CodeSandbox and see if it suits you.
+Fumadocs is designed with flexibility in mind.
+You can use `fumadocs-core` as a headless UI library and bring your own styles.
+And `fumadocs-mdx` can be a useful library to handle content/MDX files in Next.js similar to like Content Collections.
+
+And it also includes:
 
 - Many built-in components.
 - Integrations with Typescript Twoslash, OpenAPI, Math (KaTeX).
@@ -240,27 +246,20 @@ Feel free to open the demo in CodeSandbox and see if it suits you.
 - Built on App Router, no need for hydration over static content.
 - Use it in an existing Next.js project, without refactoring anything.
 
-Make sure to read [Comparisons](/docs/ui/comparisons) if you're interested.
+Feel free to open the demo in CodeSandbox, or read [Comparisons](/docs/ui/comparisons) if you're interested.
 
-#### Flexibility
+## Use Cases
 
-Fumadocs is designed with flexibility in mind.
-
-You can use `fumadocs-core` as a headless UI library and bring your own styles.
-And `fumadocs-mdx` can be a useful content library like Content Collections, to handle MDX files easily in Next.js.
-
-### Use Cases
-
-#### Documentation
+### Documentation
 
 Fumadocs focuses on **authoring experience**, it provides a beautiful theme and many docs automation tools.
 
 It helps you to iterate your codebase faster while never leaving your docs behind.
 You can take this site as an example of docs site built with Fumadocs.
 
-#### Blog sites
+### Blog sites
 
-Since Next.js is already a powerful framework, most features can be implemented with **only Next.js**.
+Since Next.js is already a powerful framework, most features can be implemented with **just Next.js**.
 
 Fumadocs provides additional tooling for Next.js, including syntax highlighting, document search, and a default theme (Fumadocs UI).
 It helps you to avoid reinventing the wheels.

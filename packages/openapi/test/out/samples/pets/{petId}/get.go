@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-  url := "http://localhost:8080/pets/string"
+  url := "http://localhost:8080/pets/<string>"
   
   req, _ := http.NewRequest("GET", url, nil)
   

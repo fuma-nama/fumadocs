@@ -17,7 +17,7 @@ import rehypeKatex from 'rehype-katex';
 import { z } from 'zod';
 import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins';
 
-export const { docs, meta } = defineDocs({
+export const docs = defineDocs({
   docs: {
     async: true,
     schema: frontmatterSchema.extend({

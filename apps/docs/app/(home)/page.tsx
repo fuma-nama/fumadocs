@@ -24,7 +24,6 @@ import { CodeBlock } from '@/components/code-block';
 import { UwuHero } from '@/app/(home)/uwu';
 import SourceImage from '@/public/source.png';
 import ContributorCounter from '@/components/contributor-count';
-import { AutoTypeTable } from '@/components/type-table';
 import { CreateAppAnimation, WhyInteractive } from './page.client';
 import {
   VercelLogo,
@@ -35,6 +34,7 @@ import {
 } from './icons';
 import Img from './img.png';
 import ArchImg from './arch.png';
+import { TypeTable } from 'fumadocs-ui/components/type-table';
 
 const badgeVariants = cva(
   'inline-flex size-7 items-center justify-center rounded-full bg-fd-primary font-medium text-fd-primary-foreground',
@@ -135,7 +135,7 @@ function Architecture() {
   );
 }
 
-function Why() {
+async function Why() {
   return (
     <div className="relative overflow-hidden border-x border-t px-8 py-12 md:p-16 md:min-h-[700px]">
       <p className="text-center font-medium text-fd-muted-foreground">
@@ -143,24 +143,20 @@ function Why() {
       </p>
       <WhyInteractive
         typeTable={
-          <AutoTypeTable
-            name="MyType"
-            type={`
-export interface MyType {
-  /**
-  * The name of player
-  * @defaultValue 'hello'
-  */
-  name: string
-
-  /**
-  * There's a codeblock:
-  * \`\`\`ts
-  * console.log('hello world')
-  * \`\`\`
-  */
-  code: string
-}`}
+          <TypeTable
+            type={{
+              name: {
+                type: 'string',
+                description: 'The name of player',
+                default: 'hello',
+              },
+              code: {
+                type: 'string',
+                description: (
+                  <CodeBlock lang="ts" code='console.log("Hello World")' />
+                ),
+              },
+            }}
           />
         }
         codeblockSearchRouter={

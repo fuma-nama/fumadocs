@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-mdx",
-  "version": "11.4.0",
+  "version": "11.5.0",
   "description": "The built-in source for Fumadocs",
   "keywords": [
     "NextJs",
@@ -53,7 +53,7 @@
     "chokidar": "^4.0.3",
     "cross-spawn": "^7.0.6",
     "esbuild": "^0.24.2",
-    "estree-util-value-to-estree": "^3.2.1",
+    "estree-util-value-to-estree": "^3.3.2",
     "fast-glob": "^3.3.3",
     "gray-matter": "^4.0.3",
     "micromatch": "^4.0.8",
@@ -62,6 +62,7 @@
   },
   "devDependencies": {
     "@fumadocs/mdx-remote": "workspace:*",
+    "@standard-schema/spec": "^1.0.0",
     "@types/cross-spawn": "^6.0.6",
     "@types/mdast": "^4.0.3",
     "@types/mdx": "^2.0.13",
@@ -77,8 +78,8 @@
     "webpack": "^5.97.1"
   },
   "peerDependencies": {
+    "@fumadocs/mdx-remote": "^1.2.0",
     "fumadocs-core": "^14.0.0 || ^15.0.0",
-    "@fumadocs/mdx-remote": "workspace:*",
     "next": "14.x.x || 15.x.x"
   },
   "peerDependenciesMeta": {

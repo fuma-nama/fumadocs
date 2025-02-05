@@ -1,5 +1,25 @@
 # @fuma-docs/openapi
 
+## 6.0.4
+
+### Patch Changes
+
+- f3ccad2: fix: openapi - preserve <> placeholder marker for params with no example value
+- ff9bf0f: Fix: Hide the server select panel, not just the select, if no or only one server is present
+- Updated dependencies [47171db]
+  - fumadocs-ui@15.0.3
+  - fumadocs-core@15.0.3
+
+## 6.0.3
+
+### Patch Changes
+
+- a8e9e1f: Bump deps
+- ab44e05: Add file extensions to imports
+- Updated dependencies [a8e9e1f]
+  - fumadocs-ui@15.0.2
+  - fumadocs-core@15.0.2
+
 ## 6.0.2
 
 ### Patch Changes

@@ -20,31 +20,37 @@ export const registry: Registry = {
   components: [
     {
       name: 'layout/root-toggle',
+      description: 'the UI of Sidebar Tabs',
       files: ['layout/root-toggle.tsx'],
       mapImportPath: contextsMap,
     },
     {
       name: 'layout/language-toggle',
+      description: 'Language Select',
       files: ['layout/language-toggle.tsx'],
       mapImportPath: contextsMap,
     },
     {
       name: 'layouts/docs',
+      description: 'Replace Docs Layout',
       files: ['../layouts/docs.tsx'],
       mapImportPath: contextsMap,
     },
     {
       name: 'layouts/notebook',
+      description: 'Replace Notebook Layout',
       files: ['../layouts/notebook.tsx'],
       mapImportPath: contextsMap,
     },
     {
       name: 'layouts/home',
+      description: 'Replace Home Layout',
       files: ['../layouts/home.tsx'],
       mapImportPath: contextsMap,
     },
     {
       name: 'layouts/page',
+      description: 'Replace Page Layout',
       files: ['components:../page.tsx'],
       mapImportPath: contextsMap,
     },

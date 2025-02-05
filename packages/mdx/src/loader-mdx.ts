@@ -6,6 +6,7 @@ import { getConfigHash, loadConfigCached } from '@/utils/config-cache';
 import { buildMDX } from '@/utils/build-mdx';
 import { formatError } from '@/utils/format-error';
 import { getGitTimestamp } from './utils/git-timestamp';
+import type { StandardSchemaV1 } from '@standard-schema/spec';
 
 export interface Options {
   /**
@@ -60,6 +61,7 @@ export default async function loader(
       ? config.collections.get(collectionId)
       : undefined;
 
+  if (collection && collection.type === 'docs') collection = collection.docs;
   if (collection && collection.type !== 'doc') {
     collection = undefined;
   }
@@ -70,7 +72,7 @@ export default async function loader(
   if (collection?.schema) {
     let schema = collection.schema;
 
-    if (typeof schema === 'function') {
+    if (typeof schema === 'function' && !('~standard' in schema)) {
       schema = schema({
         async buildMDX(v, options = mdxOptions) {
           const res = await buildMDX(
@@ -86,17 +88,21 @@ export default async function loader(
       });
     }
 
-    const result = await schema.safeParseAsync(matter.data);
-    if (result.error) {
-      callback(
-        new Error(
-          formatError(`invalid frontmatter in ${filePath}:`, result.error),
-        ),
+    if ('~standard' in schema) {
+      const result = await (schema as StandardSchemaV1)['~standard'].validate(
+        matter.data,
       );
-      return;
-    }
+      if (result.issues) {
+        callback(
+          new Error(
+            formatError(`invalid frontmatter in ${filePath}:`, result.issues),
+          ),
+        );
+        return;
+      }
 
-    matter.data = result.data as Record<string, unknown>;
+      matter.data = result.value as Record<string, unknown>;
+    }
   }
 
   let timestamp: number | undefined;

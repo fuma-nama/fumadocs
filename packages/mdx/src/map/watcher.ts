@@ -4,9 +4,17 @@ import { type LoadedConfig } from '@/utils/load-config';
 export function watcher(configPath: string, config: LoadedConfig): FSWatcher {
   const deps: string[] = [configPath];
 
+  function add(dir: string | string[]) {
+    if (Array.isArray(dir)) deps.push(...dir);
+    else deps.push(dir);
+  }
   for (const collection of config.collections.values()) {
-    if (Array.isArray(collection.dir)) deps.push(...collection.dir);
-    else deps.push(collection.dir);
+    if (collection.type === 'docs') {
+      add(collection.docs.dir);
+      add(collection.meta.dir);
+    } else {
+      add(collection.dir);
+    }
   }
 
   return watch(deps, {

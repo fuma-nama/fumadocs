@@ -124,24 +124,21 @@ export const blog = defineCollections({
 
 ## Define Docs
 
-You can use `defineDocs` to define the required collections to work with Fumadocs.
-It offers the same API as `defineCollections`.
+You can use `defineDocs` to define the required collection to work with Fumadocs.
 
 ```ts
 import { defineDocs } from 'fumadocs-mdx/config';
 
-export const { docs, meta } = defineDocs({
+export const docs = defineDocs({
+  dir: '/my/content/dir',
   docs: {
-    // optional, you can pass options to each collection
+    // optional, options of `doc` collection
   },
   meta: {
-    // optional, you can pass options to each collection
+    // optional, options of `meta` collection
   },
 });
 ```
-
-The `docs` and `meta` are collections on their own.
-You can pass collection options to them as shown above.
 
 ### `dir`
 
@@ -150,7 +147,7 @@ Instead of per collection, you should customise `dir` from `defineDocs`:
 ```ts
 import { defineDocs } from 'fumadocs-mdx/config';
 
-export const { docs, meta } = defineDocs({
+export const docs = defineDocs({
   dir: 'my/content/dir',
 });
 ```
@@ -163,7 +160,7 @@ You can extend the default Zod schema of `docs` and `meta`.
 import { frontmatterSchema, metaSchema, defineDocs } from 'fumadocs-mdx/config';
 import { z } from 'zod';
 
-export const { docs, meta } = defineDocs({
+export const docs = defineDocs({
   docs: {
     schema: frontmatterSchema.extend({
       index: z.boolean().default(false),
@@ -176,3 +173,5 @@ export const { docs, meta } = defineDocs({
   },
 });
 ```
+
+Note that other type validators compatible to Standard Schema works as well.

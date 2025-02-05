@@ -1,9 +1,9 @@
-import { type AnyZodObject, type z } from 'zod';
 import type { MDXProps } from 'mdx/types';
 import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { TableOfContents } from 'fumadocs-core/server';
 import { type DefaultMDXOptions } from '@/utils/mdx-options';
 import type { FC } from 'react';
+import type { StandardSchemaV1 } from '@standard-schema/spec';
 
 export interface GlobalConfig {
   /**
@@ -37,7 +37,9 @@ export type InferSchema<CollectionOut> = CollectionOut extends {
   : never;
 
 export type InferSchemaType<C> =
-  InferSchema<C> extends AnyZodObject ? z.output<InferSchema<C>> : never;
+  InferSchema<C> extends StandardSchemaV1
+    ? StandardSchemaV1.InferOutput<InferSchema<C>>
+    : never;
 
 export interface FileInfo {
   path: string;
@@ -56,25 +58,6 @@ export interface MarkdownProps {
   lastModified?: Date;
 }
 
-export type CollectionEntry<
-  CollectionOut extends {
-    _type: {
-      runtime: unknown;
-    };
-  },
-> = CollectionOut['_type']['runtime'];
-
 export interface BaseCollectionEntry {
   _file: FileInfo;
 }
-
-/**
- * Get output type of collections
- */
-export type GetOutput<
-  C extends {
-    _type: {
-      runtime: unknown;
-    };
-  },
-> = CollectionEntry<C>[];

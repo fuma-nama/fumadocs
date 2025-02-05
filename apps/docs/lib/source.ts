@@ -4,7 +4,7 @@ import { loader } from 'fumadocs-core/source';
 import { icons } from 'lucide-react';
 import { attachFile, createOpenAPI } from 'fumadocs-openapi/server';
 import { createElement } from 'react';
-import { meta, docs, blog as blogPosts } from '@/.source';
+import { docs, blog as blogPosts } from '@/.source';
 
 export const source = loader({
   baseUrl: '/docs',
@@ -12,7 +12,7 @@ export const source = loader({
     if (icon && icon in icons)
       return createElement(icons[icon as keyof typeof icons]);
   },
-  source: createMDXSource(docs, meta),
+  source: docs.toFumadocsSource(),
   pageTree: {
     attachFile,
   },
