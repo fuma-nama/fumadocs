@@ -9,6 +9,7 @@ icon: Album
 Fumadocs MDX is the official content source of Fumadocs.
 
 It provides the tool for Next.js to transform content into type-safe data, similar to Contentlayer and Content Collections.
+This library isn't Fumadocs-only, you can use it to handle blog and other contents.
 
 ## Getting Started
 
@@ -48,14 +49,14 @@ export default withMDX(config);
 - `doc`: Markdown/MDX documents
 - `meta`: JSON files
 
-For example, a `doc` collection will include only the `.md` files:
+For example, a `doc` collection will include only the `.md` and `.mdx` files:
 
 <Files>
   <Folder name="folder" defaultOpen>
     <File name="ui.md" />
   </Folder>
   <File name="hello.md" />
-  <File name="index.md" />
+  <File name="index.mdx" />
   <File
     name="meta.json"
     className="opacity-50 cursor-not-allowed"
@@ -63,9 +64,11 @@ For example, a `doc` collection will include only the `.md` files:
   />
 </Files>
 
-Fumadocs MDX will build collections into arrays of type-safe data, accessible in your Next.js app.
+Fumadocs MDX will transform collections into arrays of type-safe data, accessible in your Next.js app.
+Notably, Markdown/MDX content will be compiled into a React Server Component, with other useful properties like **Table of Contents**.
 
-For instance, you can define and configure collections by creating a config file: `source.config.ts`.
+You can define and configure collections by creating a `source.config.ts` file.
+For example, this is how you define a `doc` collection:
 
 ```ts title="source.config.ts"
 import { defineCollections } from 'fumadocs-mdx/config';
@@ -78,7 +81,7 @@ export const test = defineCollections({
 
 The above collection will include all Markdown/MDX files under the `content/docs` directory.
 
-For Fumadocs to work, you can use `defineDocs`:
+For Fumadocs to work, you can define a `docs` collection:
 
 ```ts title="source.config.ts"
 import { defineDocs } from 'fumadocs-mdx/config';
@@ -94,8 +97,8 @@ export const docs = defineDocs({
 });
 ```
 
-`defineDocs` defines the required collection for Fumadocs to work.
-It includes all Markdown/MDX and JSON files under your `content/docs` directory.
+The `docs` collection combines a `meta` and `doc` collection, which scans through all Markdown, MDX and JSON files under your `content/docs` directory.
+They are needed for Fumadocs to work.
 
 ### Output Folder
 
@@ -139,7 +142,7 @@ import { docs } from '@/.source';
 console.log(docs);
 ```
 
-To integrate with Fumadocs, you can use the `toFumadocsSource()` function of docs collection output:
+To integrate with Fumadocs, you can use the `toFumadocsSource()` function of `docs` collection output:
 
 ```ts title="lib/source.ts"
 import { docs } from '@/.source';
@@ -208,7 +211,7 @@ export const blogPosts = defineDocs({
 });
 ```
 
-And use `loader` for a simple way to interact with collection entries.
+And use `loader` for a simple way to interact with collection output.
 
 ```ts title="lib/source.ts"
 import { docs, blogPosts } from '@/.source';

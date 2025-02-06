@@ -15,6 +15,7 @@
     "---Features---",
     "include",
     "last-modified",
-    "manifest"
+    "manifest",
+    "async"
   ]
 }
