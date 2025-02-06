@@ -67,6 +67,10 @@ paths:
             examples:
               default_example:
                 $ref: '#/components/examples/CreateSpecialEventRequestExample'
+              secondary_example:
+                $ref: '#/components/examples/SecondaryCreateSpecialEventRequestExample'
+              tertiary_example:
+                $ref: '#/components/examples/TertiaryCreateSpecialEventRequestExample'
       responses:
         '201':
           description: Created.
@@ -464,7 +468,8 @@ components:
         ticketDate: '2023-09-05'
         confirmationCode: ticket-event-9c55eg-8v82a
     CreateSpecialEventRequestExample:
-      summary: Create special event
+      summary: Create special event 1
+      description: Example with no price.
       value:
         name: Mermaid Treasure Identification and Analysis
         location: Under the seaaa 🦀 🎶 🌊.
@@ -473,6 +478,28 @@ components:
           - '2023-09-05'
           - '2023-09-08'
         price: 0
+    SecondaryCreateSpecialEventRequestExample:
+      summary: Create special event 2
+      description: Example with a price.
+      value:
+        name: Mermaid Treasure Identification and Analysis
+        location: Under the seaaa 🦀 🎶 🌊.
+        eventDescription: Join us as we review and classify a rare collection of 20 thingamabobs, gadgets, gizmos, whoosits, and whatsits, kindly donated by Ariel.
+        dates:
+          - '2023-09-05'
+          - '2023-09-08'
+        price: 1234
+    TertiaryCreateSpecialEventRequestExample:
+      summary: Create special event 3 and a dang long title
+      description: Example with a price.
+      value:
+        name: Mermaid Treasure Identification and Analysis
+        location: Under the seaaa 🦀 🎶 🌊.
+        eventDescription: Join us as we review and classify a rare collection of 20 thingamabobs, gadgets, gizmos, whoosits, and whatsits, kindly donated by Ariel.
+        dates:
+          - '2023-09-05'
+          - '2023-09-08'
+        price: 1234
     CreateSpecialEventResponseExample:
       summary: Special event created
       value:

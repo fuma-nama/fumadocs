@@ -1,5 +1,9 @@
 import { Fragment, type ReactElement, type ReactNode } from 'react';
-import { generateSample, type EndpointSample } from '@/utils/generate-sample';
+import {
+  generateSample,
+  type EndpointSample,
+  EndpointSamples,
+} from '@/utils/generate-sample';
 import * as CURL from '@/requests/curl';
 import * as JS from '@/requests/javascript';
 import * as Go from '@/requests/go';
@@ -29,7 +33,10 @@ interface CustomProperty {
 export interface CodeSample {
   lang: string;
   label: string;
-  source: string | ((endpoint: EndpointSample) => string | undefined) | false;
+  source:
+    | string
+    | ((endpoint: EndpointSample, exampleKey: string) => string | undefined)
+    | false;
 }
 
 interface CodeSampleCompiled {
@@ -45,6 +52,8 @@ export function Operation({
   ctx,
   hasHead,
   headingLevel = 2,
+  selectedSampleKey,
+  exclusiveSampleKey,
 }: {
   type?: 'webhook' | 'operation';
   path: string;
@@ -53,6 +62,8 @@ export function Operation({
 
   hasHead?: boolean;
   headingLevel?: number;
+  selectedSampleKey?: string;
+  exclusiveSampleKey?: string;
 }): ReactElement {
   const body = method.requestBody;
   const security = method.security ?? ctx.schema.document.security;
@@ -227,7 +238,13 @@ export function Operation({
     return (
       <ctx.renderer.API>
         {info}
-        <APIExample method={method} endpoint={endpoint} ctx={ctx} />
+        <APIExample
+          method={method}
+          endpoint={endpoint}
+          ctx={ctx}
+          selectedSampleKey={selectedSampleKey}
+          exclusiveSampleKey={exclusiveSampleKey}
+        />
       </ctx.renderer.API>
     );
   } else {
@@ -262,46 +279,113 @@ async function APIExample({
   method,
   endpoint,
   ctx,
+  selectedSampleKey,
+  exclusiveSampleKey,
 }: {
   method: MethodInformation;
   endpoint: EndpointSample;
   ctx: RenderContext;
+  selectedSampleKey?: string;
+  exclusiveSampleKey?: string;
 }) {
   const renderer = ctx.renderer;
   const children: ReactNode[] = [];
 
-  const samples = dedupe([
-    ...defaultSamples,
-    ...(ctx.generateCodeSamples ? await ctx.generateCodeSamples(endpoint) : []),
-    ...((method as CustomProperty)['x-codeSamples'] ?? []),
-  ]).flatMap<CodeSampleCompiled>((sample) => {
-    if (sample.source === false) return [];
+  // fallback for methods that have no request body, we also want to show examples for
+  const existingSamples: EndpointSamples = endpoint.body?.samples ?? {
+    _default: {},
+  };
+  const samples: Record<
+    string,
+    { samples: CodeSampleCompiled[]; title: string; description?: string }
+  > = {};
+  for (const exampleKey in existingSamples) {
+    samples[exampleKey] = {
+      title: existingSamples[exampleKey]?.summary ?? exampleKey,
+      description: existingSamples[exampleKey]?.description,
+      samples: dedupe([
+        ...defaultSamples,
+        ...(ctx.generateCodeSamples
+          ? await ctx.generateCodeSamples(endpoint)
+          : []),
+        ...((method as CustomProperty)['x-codeSamples'] ?? []),
+      ]).flatMap<CodeSampleCompiled>((sample) => {
+        if (sample.source === false) return [];
 
-    const result =
-      typeof sample.source === 'function'
-        ? sample.source(endpoint)
-        : sample.source;
-    if (result === undefined) return [];
+        const result =
+          typeof sample.source === 'function'
+            ? sample.source(endpoint, exampleKey)
+            : sample.source;
+        if (result === undefined) return [];
 
-    return {
-      ...sample,
-      source: result,
+        return {
+          ...sample,
+          source: result,
+        };
+      }),
     };
-  });
+  }
 
-  if (samples.length > 0) {
-    children.push(
-      <renderer.Requests key="requests" items={samples.map((s) => s.label)}>
-        {samples.map((s) => (
-          <renderer.Request
-            key={s.label}
-            name={s.label}
-            code={s.source}
-            language={s.lang}
-          />
-        ))}
-      </renderer.Requests>,
-    );
+  if (Object.keys(samples).length > 0) {
+    const sampleTabs: ReactNode[] = [];
+    const titles = [];
+    if (
+      (samples && Object.keys(samples).length === 1 && samples['_default']) ||
+      (exclusiveSampleKey && samples[exclusiveSampleKey])
+    ) {
+      // if exclusiveSampleKey is present, we don't use tabs
+      // if only the fallback or non described openapi legacy example is present, we don't use tabs
+      const sampleKey = exclusiveSampleKey ?? '_default';
+      children.push(
+        <renderer.Requests
+          key={`requests-${sampleKey}`}
+          items={samples[sampleKey].samples.map((s) => s.label)}
+        >
+          {samples[sampleKey].samples.map((s) => (
+            <renderer.Request
+              key={`requests-${sampleKey}-${s.label}`}
+              name={s.label}
+              code={s.source}
+              language={s.lang}
+            />
+          ))}
+        </renderer.Requests>,
+      );
+    } else {
+      for (const sampleKey in samples) {
+        const title = samples[sampleKey].title;
+        titles.push(title);
+        sampleTabs.push(
+          <renderer.Sample key={sampleKey} value={title}>
+            {samples[sampleKey].description && (
+              <Markdown text={samples[sampleKey].description} />
+            )}
+            <renderer.Requests
+              key={`requests-${sampleKey}`}
+              items={samples[sampleKey].samples.map((s) => s.label)}
+            >
+              {samples[sampleKey].samples.map((s) => (
+                <renderer.Request
+                  key={`requests-${sampleKey}-${s.label}`}
+                  name={s.label}
+                  code={s.source}
+                  language={s.lang}
+                />
+              ))}
+            </renderer.Requests>
+          </renderer.Sample>,
+        );
+      }
+      children.push(
+        <renderer.Samples
+          items={titles}
+          key="samples"
+          defaultValue={selectedSampleKey}
+        >
+          {sampleTabs}
+        </renderer.Samples>,
+      );
+    }
   }
 
   children.push(

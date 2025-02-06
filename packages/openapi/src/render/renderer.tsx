@@ -50,6 +50,16 @@ export interface RequestProps {
   code: string;
 }
 
+export interface SampleProps {
+  value: string;
+  children: ReactNode;
+}
+export interface SamplesProps {
+  items: string[];
+  children: ReactNode;
+  defaultValue?: string;
+}
+
 export interface ResponseTypeProps {
   lang: string;
   code: string;
@@ -70,6 +80,8 @@ export interface Renderer {
 
   Responses: ComponentType<ResponsesProps>;
   Response: ComponentType<ResponseProps>;
+  Sample: ComponentType<SampleProps>;
+  Samples: ComponentType<SamplesProps>;
   Requests: ComponentType<{ items: string[]; children: ReactNode }>;
   Request: ComponentType<RequestProps>;
   ResponseTypes: ComponentType<{ children: ReactNode }>;
@@ -132,6 +144,9 @@ export function createRenders(
     Requests: (props) => (
       <Tabs groupId="fumadocs_openapi_requests" {...props} />
     ),
+    Samples: (props) => <Tabs {...props} />,
+    Sample: Tab,
+
     Request: (props) => (
       <Tab value={props.name}>
         <CodeBlock
