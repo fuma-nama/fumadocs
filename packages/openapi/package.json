@@ -43,8 +43,8 @@
   },
   "dependencies": {
     "@fumari/json-schema-to-typescript": "^1.1.2",
-    "@radix-ui/react-select": "^2.1.5",
-    "@radix-ui/react-slot": "^1.1.1",
+    "@radix-ui/react-select": "^2.1.6",
+    "@radix-ui/react-slot": "^1.1.2",
     "@scalar/openapi-parser": "0.10.4",
     "ajv-draft-04": "^1.0.0",
     "class-variance-authority": "^0.7.1",
@@ -60,13 +60,13 @@
     "react-hook-form": "^7.54.2",
     "remark": "^15.0.1",
     "remark-rehype": "^11.1.1",
-    "shiki": "^2.2.0",
+    "shiki": "^2.3.1",
     "xml-js": "^1.6.11"
   },
   "devDependencies": {
-    "@scalar/api-client-react": "^1.1.22",
+    "@scalar/api-client-react": "^1.1.24",
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "22.13.0",
+    "@types/node": "22.13.1",
     "@types/openapi-sampler": "^1.0.3",
     "@types/react": "^19.0.8",
     "eslint-config-custom": "workspace:*",
