@@ -46,7 +46,11 @@ export interface Runtime {
   docs: <Docs>(
     docs: RuntimeFile[],
     metas: RuntimeFile[],
-  ) => Docs extends DocsCollection
+  ) => Docs extends {
+    type: 'docs';
+    docs: unknown;
+    meta: unknown;
+  }
     ? {
         docs: ReturnType<typeof _runtime.doc<Docs['docs']>>;
         meta: ReturnType<typeof _runtime.meta<Docs['meta']>>;
