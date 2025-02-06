@@ -6,7 +6,6 @@ import {
 import {
   type BaseCollectionEntry,
   type defineCollections,
-  type DocsCollection,
   type FileInfo,
   type MarkdownProps,
 } from '@/config';
