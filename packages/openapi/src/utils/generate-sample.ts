@@ -6,7 +6,14 @@ import {
   type NoReference,
 } from '@/utils/schema';
 import { getSecurities, getSecurityPrefix } from '@/utils/get-security';
-
+export interface EndpointSamples {
+  [key: string]: {
+    value?: unknown;
+    description?: string;
+    summary?: string;
+    externalValue?: string;
+  };
+}
 /**
  * Sample info of endpoint
  */
@@ -19,14 +26,7 @@ export interface EndpointSample {
   body?: {
     schema: ParsedSchema;
     mediaType: string;
-    samples: {
-      [key: string]: {
-        value?: unknown;
-        description?: string;
-        summary?: string;
-        externalValue?: string;
-      };
-    };
+    samples: EndpointSamples;
   };
   responses: Record<string, ResponseSample>;
   parameters: ParameterSample[];

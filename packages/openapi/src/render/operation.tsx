@@ -1,5 +1,9 @@
 import { Fragment, type ReactElement, type ReactNode } from 'react';
-import { generateSample, type EndpointSample } from '@/utils/generate-sample';
+import {
+  generateSample,
+  type EndpointSample,
+  EndpointSamples,
+} from '@/utils/generate-sample';
 import * as CURL from '@/requests/curl';
 import * as JS from '@/requests/javascript';
 import * as Go from '@/requests/go';
@@ -287,38 +291,47 @@ async function APIExample({
   const renderer = ctx.renderer;
   const children: ReactNode[] = [];
 
-  const samples: Record<string, CodeSampleCompiled[]> = {};
-  for (const exampleKey in endpoint.body?.samples) {
-    samples[exampleKey] = dedupe([
-      ...defaultSamples,
-      ...(ctx.generateCodeSamples
-        ? await ctx.generateCodeSamples(endpoint)
-        : []),
-      ...((method as CustomProperty)['x-codeSamples'] ?? []),
-    ]).flatMap<CodeSampleCompiled>((sample) => {
-      if (sample.source === false) return [];
+  // fallback for methods that have no request body, we also want to show examples for
+  const existingSamples: EndpointSamples = endpoint.body?.samples ?? {
+    _default: {},
+  };
+  const samples: Record<
+    string,
+    { samples: CodeSampleCompiled[]; title: string; description?: string }
+  > = {};
+  for (const exampleKey in existingSamples) {
+    samples[exampleKey] = {
+      title: existingSamples[exampleKey]?.summary ?? exampleKey,
+      description: existingSamples[exampleKey]?.description,
+      samples: dedupe([
+        ...defaultSamples,
+        ...(ctx.generateCodeSamples
+          ? await ctx.generateCodeSamples(endpoint)
+          : []),
+        ...((method as CustomProperty)['x-codeSamples'] ?? []),
+      ]).flatMap<CodeSampleCompiled>((sample) => {
+        if (sample.source === false) return [];
 
-      const result =
-        typeof sample.source === 'function'
-          ? sample.source(endpoint, exampleKey)
-          : sample.source;
-      if (result === undefined) return [];
+        const result =
+          typeof sample.source === 'function'
+            ? sample.source(endpoint, exampleKey)
+            : sample.source;
+        if (result === undefined) return [];
 
-      return {
-        ...sample,
-        source: result,
-      };
-    });
+        return {
+          ...sample,
+          source: result,
+        };
+      }),
+    };
   }
 
   if (Object.keys(samples).length > 0) {
     const sampleTabs: ReactNode[] = [];
     const titles = [];
     if (
-      (endpoint.body?.samples &&
-        Object.keys(endpoint.body?.samples).length === 1 &&
-        endpoint.body?.samples['_default']) ||
-      (exclusiveSampleKey && endpoint.body?.samples[exclusiveSampleKey])
+      (samples && Object.keys(samples).length === 1 && samples['_default']) ||
+      (exclusiveSampleKey && samples[exclusiveSampleKey])
     ) {
       // if exclusiveSampleKey is present, we don't use tabs
       // if only the fallback or non described openapi legacy example is present, we don't use tabs
@@ -326,9 +339,9 @@ async function APIExample({
       children.push(
         <renderer.Requests
           key={`requests-${sampleKey}`}
-          items={samples[sampleKey].map((s) => s.label)}
+          items={samples[sampleKey].samples.map((s) => s.label)}
         >
-          {samples[sampleKey].map((s) => (
+          {samples[sampleKey].samples.map((s) => (
             <renderer.Request
               key={`requests-${sampleKey}-${s.label}`}
               name={s.label}
@@ -340,18 +353,18 @@ async function APIExample({
       );
     } else {
       for (const sampleKey in samples) {
-        const title = endpoint.body?.samples[sampleKey].summary ?? sampleKey;
+        const title = samples[sampleKey].title;
         titles.push(title);
         sampleTabs.push(
           <renderer.Sample key={sampleKey} value={title}>
-            {endpoint.body?.samples[sampleKey].description && (
-              <Markdown text={endpoint.body?.samples[sampleKey].description} />
+            {samples[sampleKey].description && (
+              <Markdown text={samples[sampleKey].description} />
             )}
             <renderer.Requests
               key={`requests-${sampleKey}`}
-              items={samples[sampleKey].map((s) => s.label)}
+              items={samples[sampleKey].samples.map((s) => s.label)}
             >
-              {samples[sampleKey].map((s) => (
+              {samples[sampleKey].samples.map((s) => (
                 <renderer.Request
                   key={`requests-${sampleKey}-${s.label}`}
                   name={s.label}
