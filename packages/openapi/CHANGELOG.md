@@ -1,5 +1,15 @@
 # @fuma-docs/openapi
 
+## 6.0.5
+
+### Patch Changes
+
+- 4e6425b: fix(packages/openapi): hide AuthSection is security is an empty array
+- Updated dependencies [5c4a818]
+- Updated dependencies [fd604f5]
+  - fumadocs-ui@15.0.4
+  - fumadocs-core@15.0.4
+
 ## 6.0.4
 
 ### Patch Changes
