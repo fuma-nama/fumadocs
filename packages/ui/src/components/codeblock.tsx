@@ -3,7 +3,6 @@ import { Check, Copy } from 'lucide-react';
 import {
   type ButtonHTMLAttributes,
   type HTMLAttributes,
-  type ReactElement,
   type ReactNode,
   forwardRef,
   useCallback,
@@ -150,7 +149,7 @@ function CopyButton({
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & {
   onCopy: () => void;
-}): ReactElement {
+}) {
   const [checked, onClick] = useCopyButton(onCopy);
 
   return (
@@ -160,22 +159,17 @@ function CopyButton({
         buttonVariants({
           color: 'ghost',
         }),
-        'transition-opacity group-hover:opacity-100',
-        !checked && 'opacity-0',
+        'transition-opacity group-hover:opacity-100 [&_svg]:size-3.5',
+        !checked && '[@media(hover:hover)]:opacity-0',
         className,
       )}
-      aria-label="Copy Text"
+      aria-label={checked ? 'Copied Text' : 'Copy Text'}
       onClick={onClick}
       {...props}
     >
-      <Check
-        className={cn('size-3.5 transition-transform', !checked && 'scale-0')}
-      />
+      <Check className={cn('transition-transform', !checked && 'scale-0')} />
       <Copy
-        className={cn(
-          'absolute size-3.5 transition-transform',
-          checked && 'scale-0',
-        )}
+        className={cn('absolute transition-transform', checked && 'scale-0')}
       />
     </button>
   );
