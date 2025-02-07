@@ -1,13 +1,5 @@
 # next-docs-ui
 
-## 15.0.4
-
-### Patch Changes
-
-- 5c4a818: Improve `DocsCategory` cards
-- fd604f5: Always show copy button on codeblocks on touch devices
-  - fumadocs-core@15.0.4
-
 ## 15.0.3
 
 ### Patch Changes
