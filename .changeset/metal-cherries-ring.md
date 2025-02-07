@@ -1,6 +1,5 @@
 ---
 "fumadocs-openapi": patch
-"docs": minor
 ---
 
 Feat: support multiple examples in openapi operation #1370
