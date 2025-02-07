@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 15.0.4
+
+### Patch Changes
+
+- 4be74f6: Improve CLI
+
 ## 15.0.3
 
 ## 15.0.2

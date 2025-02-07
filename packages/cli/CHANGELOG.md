@@ -1,5 +1,11 @@
 # fumadocs
 
+## 0.0.8
+
+### Patch Changes
+
+- 4be74f6: Improve CLI
+
 ## 0.0.7
 
 ### Patch Changes
