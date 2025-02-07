@@ -1,13 +1,5 @@
 import { Fragment, type ReactElement, type ReactNode } from 'react';
-import {
-  generateSample,
-  type EndpointSample,
-  EndpointSamples,
-} from '@/utils/generate-sample';
-import * as CURL from '@/requests/curl';
-import * as JS from '@/requests/javascript';
-import * as Go from '@/requests/go';
-import * as Python from '@/requests/python';
+import { generateSample, type EndpointSample } from '@/utils/generate-sample';
 import type {
   CallbackObject,
   MethodInformation,
@@ -15,20 +7,15 @@ import type {
   RenderContext,
   SecurityRequirementObject,
 } from '@/types';
-import { getPreferredType, NoReference } from '@/utils/schema';
-import { getTypescriptSchema } from '@/utils/get-typescript-schema';
+import { getPreferredType, type NoReference } from '@/utils/schema';
 import { getSecurities, getSecurityPrefix } from '@/utils/get-security';
 import { idToTitle } from '@/utils/id-to-title';
-import { type ResponseTypeProps } from '@/render/renderer';
 import { Markdown } from './markdown';
 import { heading } from './heading';
 import { Schema } from './schema';
 import { createMethod } from '@/server/create-method';
 import { methodKeys } from '@/build-routes';
-
-interface CustomProperty {
-  'x-codeSamples'?: CodeSample[];
-}
+import { APIExample } from '@/render/operation/api-example';
 
 export interface CodeSample {
   lang: string;
@@ -39,12 +26,6 @@ export interface CodeSample {
     | false;
 }
 
-interface CodeSampleCompiled {
-  lang: string;
-  label: string;
-  source: string;
-}
-
 export function Operation({
   type = 'operation',
   path,
@@ -52,8 +33,6 @@ export function Operation({
   ctx,
   hasHead,
   headingLevel = 2,
-  selectedSampleKey,
-  exclusiveSampleKey,
 }: {
   type?: 'webhook' | 'operation';
   path: string;
@@ -62,8 +41,6 @@ export function Operation({
 
   hasHead?: boolean;
   headingLevel?: number;
-  selectedSampleKey?: string;
-  exclusiveSampleKey?: string;
 }): ReactElement {
   const body = method.requestBody;
   const security = method.security ?? ctx.schema.document.security;
@@ -238,166 +215,12 @@ export function Operation({
     return (
       <ctx.renderer.API>
         {info}
-        <APIExample
-          method={method}
-          endpoint={endpoint}
-          ctx={ctx}
-          selectedSampleKey={selectedSampleKey}
-          exclusiveSampleKey={exclusiveSampleKey}
-        />
+        <APIExample method={method} endpoint={endpoint} ctx={ctx} />
       </ctx.renderer.API>
     );
   } else {
     return info;
   }
-}
-
-const defaultSamples: CodeSample[] = [
-  {
-    label: 'cURL',
-    source: CURL.getSampleRequest,
-    lang: 'bash',
-  },
-  {
-    label: 'JavaScript',
-    source: JS.getSampleRequest,
-    lang: 'js',
-  },
-  {
-    label: 'Go',
-    source: Go.getSampleRequest,
-    lang: 'go',
-  },
-  {
-    label: 'Python',
-    source: Python.getSampleRequest,
-    lang: 'python',
-  },
-];
-
-async function APIExample({
-  method,
-  endpoint,
-  ctx,
-  selectedSampleKey,
-  exclusiveSampleKey,
-}: {
-  method: MethodInformation;
-  endpoint: EndpointSample;
-  ctx: RenderContext;
-  selectedSampleKey?: string;
-  exclusiveSampleKey?: string;
-}) {
-  const renderer = ctx.renderer;
-  const children: ReactNode[] = [];
-
-  // fallback for methods that have no request body, we also want to show examples for
-  const existingSamples: EndpointSamples = endpoint.body?.samples ?? {
-    _default: {},
-  };
-  const samples: Record<
-    string,
-    { samples: CodeSampleCompiled[]; title: string; description?: string }
-  > = {};
-  for (const exampleKey in existingSamples) {
-    samples[exampleKey] = {
-      title: existingSamples[exampleKey]?.summary ?? exampleKey,
-      description: existingSamples[exampleKey]?.description,
-      samples: dedupe([
-        ...defaultSamples,
-        ...(ctx.generateCodeSamples
-          ? await ctx.generateCodeSamples(endpoint)
-          : []),
-        ...((method as CustomProperty)['x-codeSamples'] ?? []),
-      ]).flatMap<CodeSampleCompiled>((sample) => {
-        if (sample.source === false) return [];
-
-        const result =
-          typeof sample.source === 'function'
-            ? sample.source(endpoint, exampleKey)
-            : sample.source;
-        if (result === undefined) return [];
-
-        return {
-          ...sample,
-          source: result,
-        };
-      }),
-    };
-  }
-
-  if (Object.keys(samples).length > 0) {
-    const sampleTabs: ReactNode[] = [];
-    const titles = [];
-    if (
-      (samples && Object.keys(samples).length === 1 && samples['_default']) ||
-      (exclusiveSampleKey && samples[exclusiveSampleKey])
-    ) {
-      // if exclusiveSampleKey is present, we don't use tabs
-      // if only the fallback or non described openapi legacy example is present, we don't use tabs
-      const sampleKey = exclusiveSampleKey ?? '_default';
-      children.push(
-        <renderer.Requests
-          key={`requests-${sampleKey}`}
-          items={samples[sampleKey].samples.map((s) => s.label)}
-        >
-          {samples[sampleKey].samples.map((s) => (
-            <renderer.Request
-              key={`requests-${sampleKey}-${s.label}`}
-              name={s.label}
-              code={s.source}
-              language={s.lang}
-            />
-          ))}
-        </renderer.Requests>,
-      );
-    } else {
-      for (const sampleKey in samples) {
-        const title = samples[sampleKey].title;
-        titles.push(title);
-        sampleTabs.push(
-          <renderer.Sample key={sampleKey} value={title}>
-            {samples[sampleKey].description && (
-              <Markdown text={samples[sampleKey].description} />
-            )}
-            <renderer.Requests
-              key={`requests-${sampleKey}`}
-              items={samples[sampleKey].samples.map((s) => s.label)}
-            >
-              {samples[sampleKey].samples.map((s) => (
-                <renderer.Request
-                  key={`requests-${sampleKey}-${s.label}`}
-                  name={s.label}
-                  code={s.source}
-                  language={s.lang}
-                />
-              ))}
-            </renderer.Requests>
-          </renderer.Sample>,
-        );
-      }
-      children.push(
-        <renderer.Samples
-          items={titles}
-          key="samples"
-          defaultValue={selectedSampleKey}
-        >
-          {sampleTabs}
-        </renderer.Samples>,
-      );
-    }
-  }
-
-  children.push(
-    <ResponseTabs
-      key="responses"
-      operation={method}
-      ctx={ctx}
-      endpoint={endpoint}
-    />,
-  );
-
-  return <renderer.APIExample>{children}</renderer.APIExample>;
 }
 
 function WebhookCallback({
@@ -433,22 +256,6 @@ function WebhookCallback({
 
     return <Fragment key={path}>{pathNodes}</Fragment>;
   });
-}
-
-/**
- * Remove duplicated labels
- */
-function dedupe(samples: CodeSample[]): CodeSample[] {
-  const set = new Set<string>();
-  const out: CodeSample[] = [];
-
-  for (let i = samples.length - 1; i >= 0; i--) {
-    if (set.has(samples[i].label)) continue;
-
-    set.add(samples[i].label);
-    out.unshift(samples[i]);
-  }
-  return out;
 }
 
 function AuthSection({
@@ -519,67 +326,4 @@ function AuthSection({
   }
 
   return info;
-}
-
-async function ResponseTabs({
-  endpoint,
-  operation,
-  ctx: { renderer, generateTypeScriptSchema, schema },
-}: {
-  endpoint: EndpointSample;
-  operation: MethodInformation;
-  ctx: RenderContext;
-}): Promise<ReactElement | null> {
-  const items: string[] = [];
-  const children: ReactNode[] = [];
-
-  if (!operation.responses) return null;
-  for (const code of Object.keys(operation.responses)) {
-    const types: ResponseTypeProps[] = [];
-    let description = operation.responses[code].description;
-
-    if (!description && code in endpoint.responses)
-      description = endpoint.responses[code].schema.description ?? '';
-
-    if (code in endpoint.responses) {
-      types.push({
-        lang: 'json',
-        label: 'Response',
-        code: JSON.stringify(endpoint.responses[code].sample, null, 2),
-      });
-    }
-
-    let ts: string | undefined;
-    if (generateTypeScriptSchema) {
-      ts = await generateTypeScriptSchema(endpoint, code);
-    } else if (generateTypeScriptSchema === undefined) {
-      ts = await getTypescriptSchema(endpoint, code, schema.dereferenceMap);
-    }
-
-    if (ts) {
-      types.push({
-        code: ts,
-        lang: 'ts',
-        label: 'TypeScript',
-      });
-    }
-
-    items.push(code);
-    children.push(
-      <renderer.Response key={code} value={code}>
-        <Markdown text={description} />
-        {types.length > 0 ? (
-          <renderer.ResponseTypes>
-            {types.map((type) => (
-              <renderer.ResponseType key={type.lang} {...type} />
-            ))}
-          </renderer.ResponseTypes>
-        ) : null}
-      </renderer.Response>,
-    );
-  }
-
-  if (items.length === 0) return null;
-
-  return <renderer.Responses items={items}>{children}</renderer.Responses>;
 }

@@ -1,15 +1,43 @@
 import { buttonVariants, cn } from 'fumadocs-ui/components/api';
 import { type HTMLAttributes, type ReactNode } from 'react';
-import { badgeVariants } from '@/ui/components/variants';
-import type { PropertyProps } from '@/render/renderer';
+import { Badge } from '@/ui/components/method-label';
+import type { PropertyProps, RootProps } from '@/render/renderer';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from 'fumadocs-ui/components/ui/collapsible';
 import { ChevronDown } from 'lucide-react';
+import { ApiProvider } from '@/ui/contexts/api';
 
-export { Root, useSchemaContext, APIPlayground } from './client';
+export { useSchemaContext, APIPlayground } from './client';
+
+export function Root({
+  children,
+  baseUrl,
+  className,
+  shikiOptions,
+  servers,
+  ...props
+}: RootProps & HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div
+      className={cn(
+        'flex flex-col gap-24 text-sm text-fd-muted-foreground',
+        className,
+      )}
+      {...props}
+    >
+      <ApiProvider
+        servers={servers}
+        shikiOptions={shikiOptions}
+        defaultBaseUrl={baseUrl}
+      >
+        {children}
+      </ApiProvider>
+    </div>
+  );
+}
 
 export function APIInfo({
   className,
@@ -55,12 +83,14 @@ export function Property({
       <div className="flex flex-row flex-wrap items-center gap-4">
         <code>{name}</code>
         {required ? (
-          <div className={cn(badgeVariants({ color: 'red' }))}>Required</div>
+          <Badge color="red" className="text-xs">
+            Required
+          </Badge>
         ) : null}
         {deprecated ? (
-          <div className={cn(badgeVariants({ color: 'yellow' }))}>
+          <Badge color="yellow" className="text-xs">
             Deprecated
-          </div>
+          </Badge>
         ) : null}
         <span className="ms-auto text-xs font-mono text-fd-muted-foreground">
           {type}

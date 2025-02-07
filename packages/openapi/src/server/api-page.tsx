@@ -47,14 +47,6 @@ export interface WebhookItem {
 export interface OperationItem {
   path: string;
   method: OpenAPIV3_1.HttpMethods;
-  /**
-   * The key of the sample to be selected
-   */
-  selectedSampleKey?: string;
-  /**
-   * Only this sample will be shown
-   */
-  exclusiveSampleKey?: string;
 }
 
 export async function APIPage(props: ApiPageProps) {
@@ -87,8 +79,6 @@ export async function APIPage(props: ApiPageProps) {
             path={item.path}
             ctx={ctx}
             hasHead={hasHead}
-            selectedSampleKey={item.selectedSampleKey}
-            exclusiveSampleKey={item.exclusiveSampleKey}
           />
         );
       })}
