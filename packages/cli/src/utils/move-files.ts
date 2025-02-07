@@ -25,6 +25,13 @@ export async function moveFiles(
    */
   originalDir = from,
 ): Promise<void> {
+  function isIncluded(file: string) {
+    // moving files that can't be refactored will cause issues, e.g. relative paths in CSS file being overlooked
+    if (!transformExtensions.includes(path.extname(file))) return false;
+
+    return filter(path.resolve(file));
+  }
+
   const stats = await fs.lstat(from).catch(() => undefined);
   if (!stats) return;
 
@@ -34,8 +41,8 @@ export async function moveFiles(
     await Promise.all(
       items.map(async (item) => {
         await moveFiles(
-          path.resolve(from, item),
-          path.resolve(to, item),
+          path.join(from, item),
+          path.join(to, item),
           filter,
           project,
           src,
@@ -49,37 +56,36 @@ export async function moveFiles(
     });
   }
 
-  if (!stats.isFile()) return;
+  if (!stats.isFile() || !(await isIncluded(from))) return;
 
-  const allowed = await filter(path.resolve(from));
-  if (!allowed) return;
+  const content = await fs.readFile(from);
+  const sourceFile = project.createSourceFile(from, content.toString(), {
+    overwrite: true,
+  });
 
-  if (transformExtensions.includes(path.extname(from))) {
-    const content = await fs.readFile(from);
-    const sourceFile = project.createSourceFile(from, content.toString(), {
-      overwrite: true,
-    });
-
-    await transformReferences(
-      sourceFile,
-      {
-        alias: {
-          type: 'append',
-          dir: src ? 'src' : '',
-        },
-        relativeTo: path.dirname(from),
+  await transformReferences(
+    sourceFile,
+    {
+      alias: {
+        type: 'append',
+        dir: src ? 'src' : '',
       },
-      (resolved) => {
-        if (resolved.type !== 'file') return;
-        if (isRelative(originalDir, from) && filter(resolved.path)) return;
+      relativeTo: path.dirname(from),
+    },
+    async (resolved) => {
+      if (resolved.type !== 'file') return;
+      if (
+        // ignore if the file is also moved
+        isRelative(originalDir, from) &&
+        (await isIncluded(resolved.path))
+      )
+        return;
 
-        return toReferencePath(to, resolved.path);
-      },
-    );
+      return toReferencePath(to, resolved.path);
+    },
+  );
 
-    await sourceFile.save();
-  }
-
+  await sourceFile.save();
   await fs.mkdir(path.dirname(to), { recursive: true });
   await fs.rename(from, to);
 }

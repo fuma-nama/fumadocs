@@ -77,10 +77,10 @@ export default async function Page({
       resolveAppPath('./app', ctx.src),
       resolveAppPath('./app/[lang]', ctx.src),
       (v) => {
-        return (
-          path.basename(v, path.extname(v)) !== 'layout.config' &&
-          !isRelative('./app/api', v)
-        );
+        const parsed = path.parse(v);
+        if (parsed.ext === '.css') return false;
+
+        return parsed.name !== 'layout.config' && !isRelative('./app/api', v);
       },
       project,
       ctx.src,
