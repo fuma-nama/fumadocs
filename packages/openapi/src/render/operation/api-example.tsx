@@ -228,11 +228,7 @@ function ResponseTabs({
 
   return (
     <renderer.Responses items={codes}>
-      {codes.map((code) => (
-        <renderer.Response key={code} value={code}>
-          {renderResponse(code)}
-        </renderer.Response>
-      ))}
+      {codes.map((code) => renderResponse(code))}
     </renderer.Responses>
   );
 }
