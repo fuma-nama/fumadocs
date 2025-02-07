@@ -1,5 +1,19 @@
 # @fuma-docs/openapi
 
+## 6.0.5
+
+### Patch Changes
+
+- c892bd9: fix(packages/openapi): hide AuthSection is security is an empty array
+- cd894b1: Feat: support multiple examples in openapi operation #1370
+
+  Adds two new options to the ApiExample renderer "Samples" and "Sample"
+
+- Updated dependencies [c892bd9]
+- Updated dependencies [c892bd9]
+  - fumadocs-ui@15.0.4
+  - fumadocs-core@15.0.4
+
 ## 6.0.4
 
 ### Patch Changes
