@@ -18,6 +18,7 @@
         ".source/**",
         "!.contentlayer/.cache/**",
         ".next/**",
+        "content/openapi/**",
         "!.next/cache/**",
         "dist/**",
         "out"

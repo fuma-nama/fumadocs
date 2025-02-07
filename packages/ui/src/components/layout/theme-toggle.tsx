@@ -14,6 +14,12 @@ const itemVariants = cva('size-7 rounded-full p-1.5 text-fd-muted-foreground', {
   },
 });
 
+const full = [
+  ['light', Sun] as const,
+  ['dark', Moon] as const,
+  ['system', Airplay] as const,
+];
+
 export function ThemeToggle({
   className,
   mode = 'light-dark',
@@ -39,12 +45,21 @@ export function ThemeToggle({
     return (
       <button
         className={container}
+        aria-label={`Toggle Theme`}
         onClick={() => setTheme(value === 'light' ? 'dark' : 'light')}
         data-theme-toggle=""
         {...props}
       >
-        <Sun className={cn(itemVariants({ active: value === 'light' }))} />
-        <Moon className={cn(itemVariants({ active: value === 'dark' }))} />
+        {full.map(([key, Icon]) => {
+          if (key === 'system') return;
+
+          return (
+            <Icon
+              key={key}
+              className={cn(itemVariants({ active: value === key }))}
+            />
+          );
+        })}
       </button>
     );
   }
@@ -53,11 +68,7 @@ export function ThemeToggle({
 
   return (
     <div className={container} data-theme-toggle="" {...props}>
-      {[
-        ['light', Sun] as const,
-        ['dark', Moon] as const,
-        ['system', Airplay] as const,
-      ].map(([key, Icon]) => (
+      {full.map(([key, Icon]) => (
         <button
           key={key}
           aria-label={key}

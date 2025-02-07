@@ -40,14 +40,14 @@
     "mdast-util-from-markdown": "^2.0.2",
     "mdast-util-gfm": "^3.0.0",
     "mdast-util-to-hast": "^13.2.0",
-    "shiki": "^2.2.0",
-    "ts-morph": "^25.0.0"
+    "shiki": "^2.3.1",
+    "ts-morph": "^25.0.1"
   },
   "devDependencies": {
     "@types/estree": "^1.0.6",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.3",
-    "@types/node": "22.13.0",
+    "@types/node": "22.13.1",
     "@types/react": "19.0.8",
     "@types/react-dom": "19.0.3",
     "eslint-config-custom": "workspace:*",

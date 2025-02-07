@@ -1,7 +1,10 @@
 import { type EndpointSample } from '@/utils/generate-sample';
 import { inputToString } from '@/utils/input-to-string';
 
-export function getSampleRequest(endpoint: EndpointSample): string {
+export function getSampleRequest(
+  endpoint: EndpointSample,
+  sampleKey: string,
+): string {
   const headers = new Map<string, unknown>();
   const cookies = new Map<string, unknown>();
   const variables = new Map<string, string>();
@@ -14,11 +17,25 @@ export function getSampleRequest(endpoint: EndpointSample): string {
   if (endpoint.body) {
     switch (endpoint.body.mediaType) {
       case 'application/json':
-        variables.set('json', JSON.stringify(endpoint.body.sample, null, 2));
+        variables.set(
+          'json',
+          JSON.stringify(
+            endpoint.body.samples[sampleKey]?.value ?? {},
+            null,
+            2,
+          ),
+        );
         break;
       case 'multipart/form-data':
         headers.set('Content-Type', endpoint.body.mediaType);
-        variables.set('data', JSON.stringify(endpoint.body.sample, null, 2));
+        variables.set(
+          'data',
+          JSON.stringify(
+            endpoint.body.samples[sampleKey]?.value ?? {},
+            null,
+            2,
+          ),
+        );
         break;
       default:
         headers.set('Content-Type', endpoint.body.mediaType);
@@ -26,7 +43,7 @@ export function getSampleRequest(endpoint: EndpointSample): string {
         variables.set(
           'data',
           inputToString(
-            endpoint.body.sample,
+            endpoint.body.samples[sampleKey]?.value ?? '',
             endpoint.body.mediaType,
             'backtick',
           ),

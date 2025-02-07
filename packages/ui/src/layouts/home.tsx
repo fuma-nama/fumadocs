@@ -1,9 +1,8 @@
-import type { HTMLAttributes } from 'react';
+import { Fragment, type HTMLAttributes } from 'react';
 import { type NavOptions, replaceOrDefault } from '@/layouts/shared';
 import { cn } from '@/utils/cn';
 import { getLinks, type BaseLayoutProps } from './shared';
 import { NavProvider, Title } from '@/components/layout/nav';
-import { NavigationMenuList } from '@/components/ui/navigation-menu';
 import {
   Navbar,
   NavbarLink,
@@ -91,14 +90,14 @@ function Header({
     <Navbar>
       <Title title={nav.title} url={nav.url} />
       {nav.children}
-      <NavigationMenuList className="flex flex-row items-center gap-2 max-sm:hidden">
+      <ul className="flex flex-row items-center gap-2 px-6 max-sm:hidden">
         {navItems
           .filter((item) => !isSecondary(item))
           .map((item, i) => (
             <NavbarLinkItem key={i} item={item} className="text-sm" />
           ))}
-      </NavigationMenuList>
-      <div className="flex flex-1 flex-row items-center justify-end lg:gap-1.5">
+      </ul>
+      <div className="flex flex-row items-center justify-end gap-1.5 flex-1">
         {enableSearch ? (
           <>
             <SearchToggle className="lg:hidden" hideIfDisabled />
@@ -110,10 +109,12 @@ function Header({
         ) : null}
         {!disableThemeSwitch ? <ThemeToggle className="max-lg:hidden" /> : null}
         {i18n ? (
-          <LanguageToggle className="-me-1.5 max-lg:hidden">
+          <LanguageToggle className="max-lg:hidden">
             <Languages className="size-5" />
           </LanguageToggle>
         ) : null}
+      </div>
+      <ul className="flex flex-row items-center">
         {navItems.filter(isSecondary).map((item, i) => (
           <NavbarLinkItem
             key={i}
@@ -123,6 +124,7 @@ function Header({
         ))}
         <Menu className="lg:hidden">
           <MenuTrigger
+            aria-label="Toggle Menu"
             className="group -me-2"
             enableHover={nav.enableHoverToOpen}
           >
@@ -150,7 +152,7 @@ function Header({
             </div>
           </MenuContent>
         </Menu>
-      </div>
+      </ul>
     </Navbar>
   );
 }
@@ -162,11 +164,12 @@ function NavbarLinkItem({
   item: LinkItemType;
   className?: string;
 }) {
-  if (item.type === 'custom') return <div {...props}>{item.children}</div>;
+  if (item.type === 'custom') return item.children;
 
   if (item.type === 'menu') {
     const children = item.items.map((child, j) => {
-      if (child.type === 'custom') return <div key={j}>{child.children}</div>;
+      if (child.type === 'custom')
+        return <Fragment key={j}>{child.children}</Fragment>;
 
       const { banner, footer, ...rest } = child.menu ?? {};
 

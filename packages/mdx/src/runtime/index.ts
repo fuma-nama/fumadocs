@@ -6,7 +6,6 @@ import {
 import {
   type BaseCollectionEntry,
   type defineCollections,
-  type DocsCollection,
   type FileInfo,
   type MarkdownProps,
 } from '@/config';
@@ -46,7 +45,11 @@ export interface Runtime {
   docs: <Docs>(
     docs: RuntimeFile[],
     metas: RuntimeFile[],
-  ) => Docs extends DocsCollection
+  ) => Docs extends {
+    type: 'docs';
+    docs: unknown;
+    meta: unknown;
+  }
     ? {
         docs: ReturnType<typeof _runtime.doc<Docs['docs']>>;
         meta: ReturnType<typeof _runtime.meta<Docs['meta']>>;

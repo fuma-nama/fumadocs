@@ -2,7 +2,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import type { HTMLAttributes } from 'react';
 import { cn } from 'fumadocs-ui/components/api';
 
-const variants = cva('font-mono font-medium', {
+export const badgeVariants = cva('font-mono font-medium', {
   variants: {
     color: {
       green: 'text-green-600 dark:text-green-400',
@@ -14,7 +14,9 @@ const variants = cva('font-mono font-medium', {
   },
 });
 
-function getBadgeColor(method: string): VariantProps<typeof variants>['color'] {
+export function getBadgeColor(
+  method: string,
+): VariantProps<typeof badgeVariants>['color'] {
   switch (method.toUpperCase()) {
     case 'PUT':
       return 'yellow';
@@ -29,6 +31,27 @@ function getBadgeColor(method: string): VariantProps<typeof variants>['color'] {
   }
 }
 
+export function Badge({
+  className,
+  color,
+  ...props
+}: Omit<HTMLAttributes<HTMLSpanElement>, 'color'> &
+  VariantProps<typeof badgeVariants>) {
+  return (
+    <span
+      className={cn(
+        badgeVariants({
+          color,
+          className,
+        }),
+      )}
+      {...props}
+    >
+      {props.children}
+    </span>
+  );
+}
+
 export function MethodLabel({
   children,
   ...props
@@ -36,16 +59,8 @@ export function MethodLabel({
   children: string;
 }) {
   return (
-    <span
-      {...props}
-      className={cn(
-        variants({
-          color: getBadgeColor(children),
-        }),
-        props.className,
-      )}
-    >
+    <Badge {...props} color={getBadgeColor(children)}>
       {children.toUpperCase()}
-    </span>
+    </Badge>
   );
 }

@@ -1,7 +1,10 @@
 import { type EndpointSample } from '@/utils/generate-sample';
 import { inputToString } from '@/utils/input-to-string';
 
-export function getSampleRequest(endpoint: EndpointSample): string {
+export function getSampleRequest(
+  endpoint: EndpointSample,
+  sampleKey: string,
+): string {
   const s: string[] = [];
   const options = new Map<string, string>();
   const headers = new Map<string, unknown>();
@@ -38,12 +41,14 @@ export function getSampleRequest(endpoint: EndpointSample): string {
 
   if (
     endpoint.body?.mediaType === 'multipart/form-data' &&
-    typeof endpoint.body.sample === 'object' &&
-    endpoint.body.sample
+    typeof endpoint.body.samples[sampleKey]?.value === 'object' &&
+    endpoint.body.samples[sampleKey]?.value
   ) {
     s.push(`const formData = new FormData();`);
 
-    for (const [key, value] of Object.entries(endpoint.body.sample))
+    for (const [key, value] of Object.entries(
+      endpoint.body.samples[sampleKey]?.value,
+    ))
       s.push(`formData.set(${key}, ${inputToString(value)})`);
 
     options.set('body', 'formData');
@@ -52,16 +57,16 @@ export function getSampleRequest(endpoint: EndpointSample): string {
 
     if (endpoint.body.mediaType === 'application/json') {
       code =
-        typeof endpoint.body.sample === 'string'
+        typeof endpoint.body.samples[sampleKey]?.value === 'string'
           ? inputToString(
-              endpoint.body.sample,
+              endpoint.body.samples[sampleKey]?.value,
               endpoint.body.mediaType,
               'backtick',
             )
-          : `JSON.stringify(${JSON.stringify(endpoint.body.sample, null, 2)})`;
+          : `JSON.stringify(${JSON.stringify(endpoint.body.samples[sampleKey]?.value, null, 2)})`;
     } else {
       code = inputToString(
-        endpoint.body.sample,
+        endpoint.body.samples[sampleKey]?.value ?? '',
         endpoint.body.mediaType,
         'backtick',
       );

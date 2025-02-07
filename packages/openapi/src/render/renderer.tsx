@@ -12,6 +12,7 @@ import {
 } from '@/ui';
 import type { MethodInformation, RenderContext, ServerObject } from '@/types';
 import { Playground } from '@/render/playground';
+import { Sample, Samples } from '@/ui/client';
 
 export interface ResponsesProps {
   items: string[];
@@ -50,6 +51,21 @@ export interface RequestProps {
   code: string;
 }
 
+export interface SampleProps {
+  value: string;
+  children: ReactNode;
+}
+
+export interface SamplesProps {
+  items: {
+    title: string;
+    description?: ReactNode;
+    value: string;
+  }[];
+  children: ReactNode;
+  defaultValue?: string;
+}
+
 export interface ResponseTypeProps {
   lang: string;
   code: string;
@@ -58,6 +74,8 @@ export interface ResponseTypeProps {
 
 export interface RootProps {
   baseUrl?: string;
+  shikiOptions?: RenderContext['shikiOptions'];
+
   servers: ServerObject[];
   children: ReactNode;
 }
@@ -70,6 +88,8 @@ export interface Renderer {
 
   Responses: ComponentType<ResponsesProps>;
   Response: ComponentType<ResponseProps>;
+  Sample: ComponentType<SampleProps>;
+  Samples: ComponentType<SamplesProps>;
   Requests: ComponentType<{ items: string[]; children: ReactNode }>;
   Request: ComponentType<RequestProps>;
   ResponseTypes: ComponentType<{ children: ReactNode }>;
@@ -132,6 +152,9 @@ export function createRenders(
     Requests: (props) => (
       <Tabs groupId="fumadocs_openapi_requests" {...props} />
     ),
+    Samples,
+    Sample,
+
     Request: (props) => (
       <Tab value={props.name}>
         <CodeBlock

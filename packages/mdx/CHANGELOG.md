@@ -1,5 +1,11 @@
 # next-docs-mdx
 
+## 11.5.1
+
+### Patch Changes
+
+- 3730739: Fix types errors
+
 ## 11.5.0
 
 ### Minor Changes

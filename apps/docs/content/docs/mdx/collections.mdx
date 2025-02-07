@@ -53,7 +53,7 @@ Directories to scan input files.
 
 ### `schema`
 
-The Zod schema to validate file data (frontmatter on `doc` type, content on `meta` type).
+The schema to validate file data (frontmatter on `doc` type, content on `meta` type).
 
 ```ts
 import { defineCollections } from 'fumadocs-mdx/config';
@@ -68,9 +68,9 @@ export const blog = defineCollections({
 });
 ```
 
-You can add additional properties to the output.
-Note that the validation is done by build time, hence the output must be serializable.
+> [Standard Schema](https://standardschema.dev) compatible libraries, including Zod are supported.
 
+Note that the validation is done by build time, hence the output must be serializable.
 You can also pass a function and receives the transform context.
 
 ```ts
@@ -83,7 +83,10 @@ export const blog = defineCollections({
   schema: (ctx) => {
     return z.object({
       name: z.string(),
-      testPath: z.string().default(ctx.path),
+      testPath: z.string().default(
+        // original file path
+        ctx.path,
+      ),
     });
   },
 });
@@ -124,7 +127,7 @@ export const blog = defineCollections({
 
 ## Define Docs
 
-You can use `defineDocs` to define the required collection to work with Fumadocs.
+Define a collection for Fumadocs.
 
 ```ts
 import { defineDocs } from 'fumadocs-mdx/config';
@@ -173,5 +176,3 @@ export const docs = defineDocs({
   },
 });
 ```
-
-Note that other type validators compatible to Standard Schema works as well.

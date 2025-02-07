@@ -1,5 +1,9 @@
 import Link from 'next/link';
 
+export const metadata = {
+  title: 'My App',
+};
+
 export default function HomePage() {
   return (
     <main

@@ -1,0 +1,78 @@
+---
+title: Async Mode
+description: Runtime compilation of content files.
+---
+
+<Callout type="warn" title="Experimental">
+  This feature is still experimental, use it under your own risk.
+</Callout>
+
+## Introduction
+
+By default, all Markdown and MDX files need to be pre-compiled first, the same constraint also applies on development server.
+
+This may result in longer dev server start time for large docs sites, you can enable Async Mode on `doc` collections to improve this.
+
+### Setup
+
+Install required dependencies.
+
+```package-install
+@fumadocs/mdx-remote shiki
+```
+
+Enable Async Mode.
+
+```ts tab="Docs Collection"
+import { defineDocs } from 'fumadocs-mdx/config';
+
+export const docs = defineDocs({
+  dir: 'content/docs',
+  docs: {
+    async: true,
+  },
+});
+```
+
+```ts tab="Doc Collection"
+import { defineCollections } from 'fumadocs-mdx/config';
+
+export const doc = defineCollections({
+  type: 'doc',
+  dir: 'content/docs',
+  async: true,
+});
+```
+
+### Usage
+
+Async Mode allows on-demand compilation of Markdown and MDX content, by moving the compilation process from build time to Next.js runtime.
+
+However, you need to invoke the `load()` async function to load and compile content.
+
+For example:
+
+```ts title="lib/source.ts"
+import { loader } from 'fumadocs-core/source';
+import { docs } from '@/.source';
+
+export const source = loader({
+  baseUrl: '/docs',
+  source: docs.toFumadocsSource(),
+});
+
+// page.tsx
+const page = source.getPage(['...']);
+
+if (page) {
+  // frontmatter properties are available
+  console.log(page.data);
+
+  // Markdown content requires await
+  const { body, toc } = await page.data.load();
+
+  console.log(body, toc);
+}
+```
+
+When using Async Mode, we highly recommend to use 3rd services to implement search, which usually has a better capability to handle massive amount of content to index.

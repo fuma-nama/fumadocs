@@ -127,7 +127,7 @@ export function DocsPage({
     ...tocOptions
   } = {},
   ...props
-}: DocsPageProps): ReactNode {
+}: DocsPageProps) {
   const isTocRequired =
     toc.length > 0 ||
     tocOptions.footer !== undefined ||
@@ -318,13 +318,17 @@ export function DocsCategory({
   from: LoaderOutput<LoaderConfig>;
   tree?: PageTree.Root;
 }) {
-  let tree = forcedTree;
+  let tree;
 
-  if (!tree && from._i18n) {
+  if (forcedTree) {
+    tree = forcedTree;
+  } else if (from._i18n) {
+    const locale = page.locale ?? from._i18n.defaultLanguage;
+
     tree = (from as LoaderOutput<LoaderConfig & { i18n: true }>).pageTree[
-      page.locale ?? from._i18n.defaultLanguage
+      locale
     ];
-  } else if (!tree) {
+  } else {
     tree = from.pageTree;
   }
 
@@ -374,10 +378,7 @@ export function DocsCategory({
         <Card
           key={item.url}
           title={item.data.title}
-          description={
-            (item.data as { description?: string }).description ??
-            'No Description'
-          }
+          description={(item.data as { description?: ReactNode }).description}
           href={item.url}
         />
       ))}

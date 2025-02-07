@@ -1,9 +1,5 @@
 import { Fragment, type ReactElement, type ReactNode } from 'react';
 import { generateSample, type EndpointSample } from '@/utils/generate-sample';
-import * as CURL from '@/requests/curl';
-import * as JS from '@/requests/javascript';
-import * as Go from '@/requests/go';
-import * as Python from '@/requests/python';
 import type {
   CallbackObject,
   MethodInformation,
@@ -11,31 +7,23 @@ import type {
   RenderContext,
   SecurityRequirementObject,
 } from '@/types';
-import { getPreferredType, NoReference } from '@/utils/schema';
-import { getTypescriptSchema } from '@/utils/get-typescript-schema';
+import { getPreferredType, type NoReference } from '@/utils/schema';
 import { getSecurities, getSecurityPrefix } from '@/utils/get-security';
 import { idToTitle } from '@/utils/id-to-title';
-import { type ResponseTypeProps } from '@/render/renderer';
 import { Markdown } from './markdown';
 import { heading } from './heading';
 import { Schema } from './schema';
 import { createMethod } from '@/server/create-method';
 import { methodKeys } from '@/build-routes';
-
-interface CustomProperty {
-  'x-codeSamples'?: CodeSample[];
-}
+import { APIExample } from '@/render/operation/api-example';
 
 export interface CodeSample {
   lang: string;
   label: string;
-  source: string | ((endpoint: EndpointSample) => string | undefined) | false;
-}
-
-interface CodeSampleCompiled {
-  lang: string;
-  label: string;
-  source: string;
+  source:
+    | string
+    | ((endpoint: EndpointSample, exampleKey: string) => string | undefined)
+    | false;
 }
 
 export function Operation({
@@ -203,7 +191,7 @@ export function Operation({
       {type === 'operation' ? (
         <ctx.renderer.APIPlayground path={path} method={method} ctx={ctx} />
       ) : null}
-      {security ? (
+      {security && Object.keys(security).length > 0 ? (
         <>
           {heading(headingLevel, 'Authorization', ctx)}
           <AuthSection requirements={security} ctx={ctx} />
@@ -233,87 +221,6 @@ export function Operation({
   } else {
     return info;
   }
-}
-
-const defaultSamples: CodeSample[] = [
-  {
-    label: 'cURL',
-    source: CURL.getSampleRequest,
-    lang: 'bash',
-  },
-  {
-    label: 'JavaScript',
-    source: JS.getSampleRequest,
-    lang: 'js',
-  },
-  {
-    label: 'Go',
-    source: Go.getSampleRequest,
-    lang: 'go',
-  },
-  {
-    label: 'Python',
-    source: Python.getSampleRequest,
-    lang: 'python',
-  },
-];
-
-async function APIExample({
-  method,
-  endpoint,
-  ctx,
-}: {
-  method: MethodInformation;
-  endpoint: EndpointSample;
-  ctx: RenderContext;
-}) {
-  const renderer = ctx.renderer;
-  const children: ReactNode[] = [];
-
-  const samples = dedupe([
-    ...defaultSamples,
-    ...(ctx.generateCodeSamples ? await ctx.generateCodeSamples(endpoint) : []),
-    ...((method as CustomProperty)['x-codeSamples'] ?? []),
-  ]).flatMap<CodeSampleCompiled>((sample) => {
-    if (sample.source === false) return [];
-
-    const result =
-      typeof sample.source === 'function'
-        ? sample.source(endpoint)
-        : sample.source;
-    if (result === undefined) return [];
-
-    return {
-      ...sample,
-      source: result,
-    };
-  });
-
-  if (samples.length > 0) {
-    children.push(
-      <renderer.Requests key="requests" items={samples.map((s) => s.label)}>
-        {samples.map((s) => (
-          <renderer.Request
-            key={s.label}
-            name={s.label}
-            code={s.source}
-            language={s.lang}
-          />
-        ))}
-      </renderer.Requests>,
-    );
-  }
-
-  children.push(
-    <ResponseTabs
-      key="responses"
-      operation={method}
-      ctx={ctx}
-      endpoint={endpoint}
-    />,
-  );
-
-  return <renderer.APIExample>{children}</renderer.APIExample>;
 }
 
 function WebhookCallback({
@@ -349,22 +256,6 @@ function WebhookCallback({
 
     return <Fragment key={path}>{pathNodes}</Fragment>;
   });
-}
-
-/**
- * Remove duplicated labels
- */
-function dedupe(samples: CodeSample[]): CodeSample[] {
-  const set = new Set<string>();
-  const out: CodeSample[] = [];
-
-  for (let i = samples.length - 1; i >= 0; i--) {
-    if (set.has(samples[i].label)) continue;
-
-    set.add(samples[i].label);
-    out.unshift(samples[i]);
-  }
-  return out;
 }
 
 function AuthSection({
@@ -435,67 +326,4 @@ function AuthSection({
   }
 
   return info;
-}
-
-async function ResponseTabs({
-  endpoint,
-  operation,
-  ctx: { renderer, generateTypeScriptSchema, schema },
-}: {
-  endpoint: EndpointSample;
-  operation: MethodInformation;
-  ctx: RenderContext;
-}): Promise<ReactElement | null> {
-  const items: string[] = [];
-  const children: ReactNode[] = [];
-
-  if (!operation.responses) return null;
-  for (const code of Object.keys(operation.responses)) {
-    const types: ResponseTypeProps[] = [];
-    let description = operation.responses[code].description;
-
-    if (!description && code in endpoint.responses)
-      description = endpoint.responses[code].schema.description ?? '';
-
-    if (code in endpoint.responses) {
-      types.push({
-        lang: 'json',
-        label: 'Response',
-        code: JSON.stringify(endpoint.responses[code].sample, null, 2),
-      });
-    }
-
-    let ts: string | undefined;
-    if (generateTypeScriptSchema) {
-      ts = await generateTypeScriptSchema(endpoint, code);
-    } else if (generateTypeScriptSchema === undefined) {
-      ts = await getTypescriptSchema(endpoint, code, schema.dereferenceMap);
-    }
-
-    if (ts) {
-      types.push({
-        code: ts,
-        lang: 'ts',
-        label: 'TypeScript',
-      });
-    }
-
-    items.push(code);
-    children.push(
-      <renderer.Response key={code} value={code}>
-        <Markdown text={description} />
-        {types.length > 0 ? (
-          <renderer.ResponseTypes>
-            {types.map((type) => (
-              <renderer.ResponseType key={type.lang} {...type} />
-            ))}
-          </renderer.ResponseTypes>
-        ) : null}
-      </renderer.Response>,
-    );
-  }
-
-  if (items.length === 0) return null;
-
-  return <renderer.Responses items={items}>{children}</renderer.Responses>;
 }

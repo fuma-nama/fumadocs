@@ -9,6 +9,7 @@ import {
   NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
+  NavigationMenuList,
   NavigationMenuTrigger,
   NavigationMenuViewport,
 } from '@/components/ui/navigation-menu';
@@ -40,9 +41,12 @@ export function Navbar(props: HTMLAttributes<HTMLElement>) {
           props.className,
         )}
       >
-        <nav className="flex h-14 w-full flex-row items-center gap-6 px-4 lg:h-12">
-          {props.children}
-        </nav>
+        <NavigationMenuList
+          className="flex h-14 w-full flex-row items-center px-4 lg:h-12"
+          asChild
+        >
+          <nav>{props.children}</nav>
+        </NavigationMenuList>
         <NavigationMenuViewport />
       </header>
     </NavigationMenu>
