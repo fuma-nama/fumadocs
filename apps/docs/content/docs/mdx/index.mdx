@@ -120,7 +120,7 @@ The `fumadocs-mdx` command generates types for `.source` folder without running 
 
 **Collection Output** is the generated data of a collection, it can have a different type/shape depending on the collection type and schema.
 
-You can access the collection output from `.source` folder, with its original name:
+You can access the collection output from `.source` folder with its original name:
 
 ```ts
 // source.config.ts
@@ -142,7 +142,10 @@ import { docs } from '@/.source';
 console.log(docs);
 ```
 
-To integrate with Fumadocs, you can use the `toFumadocsSource()` function of `docs` collection output:
+In this guide, We will import the `.source` folder with `@/.source`, you can also change it to your own import alias.
+Make sure you are importing from `.source` rather than `source.config.ts`.
+
+To integrate with Fumadocs, you can use the `toFumadocsSource()` function of `docs` collection output.
 
 ```ts title="lib/source.ts"
 import { docs } from '@/.source';
@@ -154,7 +157,7 @@ export const source = loader({
 });
 ```
 
-We imported the `.source` folder with `@/.source`, you can also change it to your own import alias, but always make sure you are importing `.source` rather than `source.config.ts`.
+And for other types of collections, the output may different, you can also log them to see the differences.
 
 ### Start Server
 
@@ -197,7 +200,7 @@ return <MDX components={{ ...defaultMdxComponents }} />;
 
 ## Multiple Collections
 
-You can define other collections, see [Collections](/docs/mdx/collections) for available options.
+You can define more collections, see [Collections](/docs/mdx/collections) for available options.
 
 ```ts title="source.config.ts"
 import { defineDocs } from 'fumadocs-mdx/config';
@@ -239,6 +242,10 @@ These properties are exported from MDX files by default.
 | `frontmatter`    | Frontmatter                                     |
 | `toc`            | Table of Contents                               |
 | `structuredData` | Structured Data, useful for implementing search |
+
+### Customise Frontmatter
+
+Use the [`schema`](/docs/mdx/collections#schema-1) option to pass a validation schema to validate frontmatter and define its output properties.
 
 ### MDX Plugins
 
