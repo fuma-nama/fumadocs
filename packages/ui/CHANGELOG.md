@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 15.0.5
+
+### Patch Changes
+
+- 14b2f95: Improve accessibility
+  - fumadocs-core@15.0.5
+
 ## 15.0.4
 
 ### Patch Changes
