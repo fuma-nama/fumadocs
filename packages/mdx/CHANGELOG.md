@@ -1,5 +1,11 @@
 # next-docs-mdx
 
+## 11.5.3
+
+### Patch Changes
+
+- 65ae933: Fix dependencies
+
 ## 11.5.2
 
 ### Patch Changes
