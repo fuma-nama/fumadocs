@@ -779,6 +779,9 @@ importers:
       '@mdx-js/mdx':
         specifier: ^3.1.0
         version: 3.1.0(acorn@8.14.0)
+      '@standard-schema/spec':
+        specifier: ^1.0.0
+        version: 1.0.0
       chokidar:
         specifier: ^4.0.3
         version: 4.0.3
@@ -797,9 +800,6 @@ importers:
       gray-matter:
         specifier: ^4.0.3
         version: 4.0.3
-      micromatch:
-        specifier: ^4.0.8
-        version: 4.0.8
       unist-util-visit:
         specifier: ^5.0.0
         version: 5.0.0
@@ -810,9 +810,6 @@ importers:
       '@fumadocs/mdx-remote':
         specifier: workspace:*
         version: link:../mdx-remote
-      '@standard-schema/spec':
-        specifier: ^1.0.0
-        version: 1.0.0
       '@types/cross-spawn':
         specifier: ^6.0.6
         version: 6.0.6
@@ -822,9 +819,6 @@ importers:
       '@types/mdx':
         specifier: ^2.0.13
         version: 2.0.13
-      '@types/micromatch':
-        specifier: ^4.0.9
-        version: 4.0.9
       '@types/react':
         specifier: ^19.0.8
         version: 19.0.8
@@ -3175,9 +3169,6 @@ packages:
   '@types/acorn@4.0.6':
     resolution: {integrity: sha512-veQTnWP+1D/xbxVrPC3zHnCZRjSrKfhbMUlEA43iMZLu7EsnTtkJklIuwrCPbOi8YkvDQAiW05VQQFvvz9oieQ==}
 
-  '@types/braces@3.0.4':
-    resolution: {integrity: sha512-0WR3b8eaISjEW7RpZnclONaLFDf7buaowRHdqLp4vLj54AsSAYWfh3DRbfiYJY9XDxMgx1B4sE1Afw2PGpuHOA==}
-
   '@types/cross-spawn@6.0.6':
     resolution: {integrity: sha512-fXRhhUkG4H3TQk5dBhQ7m/JDdSNHKwR2BBia62lhwEIq9xGiQKLxd6LymNhn47SjXhsUEPmxi+PKw2OkW4LLjA==}
 
@@ -3318,9 +3309,6 @@ packages:
 
   '@types/mdx@2.0.13':
     resolution: {integrity: sha512-+OWZQfAYyio6YkJb3HLxDrvnx6SWWDbC0zVPfBRzUk0/nqoDyf6dNxQi3eArPe8rJ473nobTMQ/8Zk+LxJ+Yuw==}
-
-  '@types/micromatch@4.0.9':
-    resolution: {integrity: sha512-7V+8ncr22h4UoYRLnLXSpTxjQrNUXtWHGeMPRJt1nULXI57G9bIcpyrHlmrQ7QK24EyyuXvYcSSWAM8GA9nqCg==}
 
   '@types/ms@0.7.34':
     resolution: {integrity: sha512-nG96G3Wp6acyAgJqGasjODb+acrI7KltPiRxzHPXnP3NgI28bpQDRv53olbqGXbfcgF5aiiHmO3xpwEpS5Ld9g==}
@@ -8927,8 +8915,6 @@ snapshots:
     dependencies:
       '@types/estree': 1.0.6
 
-  '@types/braces@3.0.4': {}
-
   '@types/cross-spawn@6.0.6':
     dependencies:
       '@types/node': 22.13.1
@@ -9097,10 +9083,6 @@ snapshots:
       '@types/unist': 3.0.3
 
   '@types/mdx@2.0.13': {}
-
-  '@types/micromatch@4.0.9':
-    dependencies:
-      '@types/braces': 3.0.4
 
   '@types/ms@0.7.34': {}
 

@@ -114,6 +114,7 @@ export function defineDocs<
     type: 'meta';
     _type: {
       schema: MetaSchema;
+      async: false;
     };
   };
 } {

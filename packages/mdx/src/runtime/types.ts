@@ -36,10 +36,10 @@ export interface Runtime {
   }
     ? MetaOut<Schema>[]
     : never;
-  docs: <Docs>(
+  docs: <C>(
     docs: RuntimeFile[],
     metas: RuntimeFile[],
-  ) => Docs extends {
+  ) => C extends {
     type: 'docs';
 
     docs: {
@@ -91,12 +91,12 @@ export interface RuntimeAsync {
   }
     ? AsyncDocOut<Schema>[]
     : never;
-  docs: <Docs>(
+  docs: <C>(
     docs: RuntimeFile[],
     metas: RuntimeFile[],
     collection: string,
     config: LoadedConfig,
-  ) => Docs extends {
+  ) => C extends {
     type: 'docs';
 
     docs: {
