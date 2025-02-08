@@ -1,5 +1,7 @@
 # create-next-docs-app
 
+## 15.0.5
+
 ## 15.0.4
 
 ### Patch Changes
