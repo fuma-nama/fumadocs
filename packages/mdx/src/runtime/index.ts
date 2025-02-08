@@ -3,71 +3,11 @@ import {
   type PageData,
   type Source,
 } from 'fumadocs-core/source';
-import {
-  type BaseCollectionEntry,
-  type defineCollections,
-  type FileInfo,
-  type MarkdownProps,
-} from '@/config';
+import { type BaseCollectionEntry } from '@/config';
 import type { VirtualFile } from 'fumadocs-core/source';
-import type { StandardSchemaV1 } from '@standard-schema/spec';
+import type { Runtime } from '@/runtime/types';
 
-export interface RuntimeFile {
-  info: FileInfo;
-  data: Record<string, unknown>;
-}
-
-export interface Runtime {
-  doc: <C>(
-    files: RuntimeFile[],
-  ) => C extends ReturnType<
-    typeof defineCollections<
-      'doc',
-      infer Schema extends StandardSchemaV1,
-      false
-    >
-  >
-    ? (Omit<MarkdownProps, keyof StandardSchemaV1.InferOutput<Schema>> &
-        StandardSchemaV1.InferOutput<Schema> &
-        BaseCollectionEntry)[]
-    : never;
-  meta: <C>(
-    files: RuntimeFile[],
-  ) => C extends ReturnType<
-    typeof defineCollections<
-      'meta',
-      infer Schema extends StandardSchemaV1,
-      false
-    >
-  >
-    ? (StandardSchemaV1.InferOutput<Schema> & BaseCollectionEntry)[]
-    : never;
-  docs: <Docs>(
-    docs: RuntimeFile[],
-    metas: RuntimeFile[],
-  ) => Docs extends {
-    type: 'docs';
-    docs: unknown;
-    meta: unknown;
-  }
-    ? {
-        docs: ReturnType<typeof _runtime.doc<Docs['docs']>>;
-        meta: ReturnType<typeof _runtime.meta<Docs['meta']>>;
-        toFumadocsSource: () => Source<{
-          pageData: ReturnType<
-            typeof _runtime.doc<Docs['docs']>
-          >[number] extends PageData & BaseCollectionEntry
-            ? ReturnType<typeof _runtime.doc<Docs['docs']>>[number]
-            : never;
-          metaData: ReturnType<
-            typeof _runtime.meta<Docs['meta']>
-          >[number] extends MetaData & BaseCollectionEntry
-            ? ReturnType<typeof _runtime.meta<Docs['meta']>>[number]
-            : never;
-        }>;
-      }
-    : never;
-}
+export type { RuntimeFile } from '@/runtime/types';
 
 export const _runtime: Runtime = {
   doc(files) {

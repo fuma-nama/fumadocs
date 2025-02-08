@@ -50,10 +50,16 @@ export interface DocCollection<
   async?: Async;
 }
 
-export interface DocsCollection {
+export interface DocsCollection<
+  DocSchema extends StandardSchemaV1 = StandardSchemaV1,
+  MetaSchema extends StandardSchemaV1 = StandardSchemaV1,
+  Async extends boolean = boolean,
+> {
   type: 'docs';
-  docs: DocCollection;
-  meta: MetaCollection;
+  dir: string | string[];
+
+  docs: DocCollection<DocSchema, Async>;
+  meta: MetaCollection<MetaSchema>;
 }
 
 export function defineCollections<
@@ -80,9 +86,9 @@ export function defineCollections<
 }
 
 export function defineDocs<
-  DocData extends StandardSchemaV1 = typeof frontmatterSchema,
-  MetaData extends StandardSchemaV1 = typeof metaSchema,
-  DocAsync extends boolean = false,
+  DocSchema extends StandardSchemaV1 = typeof frontmatterSchema,
+  MetaSchema extends StandardSchemaV1 = typeof metaSchema,
+  Async extends boolean = false,
 >(options?: {
   /**
    * The directory to scan files
@@ -91,27 +97,46 @@ export function defineDocs<
    */
   dir?: string | string[];
 
-  docs?: Omit<DocCollection<DocData, DocAsync>, 'dir' | 'type'>;
-  meta?: Omit<MetaCollection<MetaData>, 'dir' | 'type'>;
+  docs?: Omit<DocCollection<DocSchema, Async>, 'dir' | 'type'>;
+  meta?: Omit<MetaCollection<MetaSchema>, 'dir' | 'type'>;
 }): {
   type: 'docs';
-  docs: ReturnType<typeof defineCollections<'doc', DocData, DocAsync>>;
-  meta: ReturnType<typeof defineCollections<'meta', MetaData, false>>;
+
+  docs: {
+    type: 'doc';
+    _type: {
+      schema: DocSchema;
+      async: Async;
+    };
+  };
+
+  meta: {
+    type: 'meta';
+    _type: {
+      schema: MetaSchema;
+    };
+  };
 } {
+  if (!options)
+    console.warn(
+      '[`source.config.ts`] Deprecated: please pass options to `defineDocs()` and specify a `dir`.',
+    );
   const dir = options?.dir ?? 'content/docs';
 
   return {
     type: 'docs',
+    // @ts-expect-error -- internal type inferring
     docs: defineCollections({
       type: 'doc',
       dir,
-      schema: frontmatterSchema as unknown as DocData,
+      schema: frontmatterSchema,
       ...options?.docs,
     }),
+    // @ts-expect-error -- internal type inferring
     meta: defineCollections({
       type: 'meta',
       dir,
-      schema: metaSchema as unknown as MetaData,
+      schema: metaSchema,
       ...options?.meta,
     }),
   };
