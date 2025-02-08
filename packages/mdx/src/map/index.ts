@@ -1,7 +1,6 @@
 import * as path from 'node:path';
-import * as fs from 'node:fs';
-import { writeFile, rm } from 'node:fs/promises';
-import { getConfigHash, loadConfigCached } from '@/utils/config-cache';
+import * as fs from 'node:fs/promises';
+import { getConfigHash, loadConfig } from '@/utils/config';
 import { generateJS } from '@/map/generate';
 import { readFrontmatter } from '@/utils/read-frontmatter';
 
@@ -16,31 +15,44 @@ export async function start(
   outDir: string,
 ): Promise<void> {
   // delete previous output
-  void rm(path.resolve(outDir, `index.js`), { force: true });
-  void rm(path.resolve(outDir, `index.d.ts`), { force: true });
+  void fs.rm(path.resolve(outDir, `index.js`), { force: true });
+  void fs.rm(path.resolve(outDir, `index.d.ts`), { force: true });
 
+  // init
+  await fs.mkdir(outDir, { recursive: true });
   let configHash = await getConfigHash(configPath);
-  let config = await loadConfigCached(configPath, configHash);
+  let config = await loadConfig(configPath, configHash, true);
   const outPath = path.resolve(outDir, `index.ts`);
 
   const frontmatterCache = new Map<string, unknown>();
   let hookUpdate = false;
 
-  fs.mkdirSync(outDir, { recursive: true });
-  fs.writeFileSync(
-    outPath,
-    await generateJS(configPath, config, outPath, configHash, (file) => {
-      hookUpdate = true;
-      const cached = frontmatterCache.get(file);
-      if (cached) return cached;
+  async function readFrontmatterWithCache(file: string) {
+    hookUpdate = true;
+    const cached = frontmatterCache.get(file);
+    if (cached) return cached;
 
-      return readFrontmatter(file).then((res) => {
-        frontmatterCache.set(file, res);
-        return res;
-      });
-    }),
-  );
-  console.log('[MDX] initialized map file');
+    const res = await readFrontmatter(file);
+    frontmatterCache.set(file, res);
+    return res;
+  }
+
+  async function updateMapFile() {
+    await fs.writeFile(
+      outPath,
+      await generateJS(
+        configPath,
+        config,
+        outPath,
+        configHash,
+        readFrontmatterWithCache,
+      ),
+    );
+  }
+
+  console.time(`[MDX] initialize map file`);
+  await updateMapFile();
+  console.timeEnd(`[MDX] initialize map file`);
 
   if (dev) {
     const { watcher } = await import('@/map/watcher');
@@ -53,28 +65,18 @@ export async function start(
     instance.on('all', (event, file) => {
       if (typeof file !== 'string') return;
 
-      const onUpdate = async (): Promise<void> => {
+      const onUpdate = async () => {
         const isConfigFile = path.resolve(file) === configPath;
 
         if (isConfigFile) {
           configHash = await getConfigHash(configPath);
-          config = await loadConfigCached(configPath, configHash);
+          config = await loadConfig(configPath, configHash, true);
         }
 
         if (isConfigFile || event !== 'change' || hookUpdate) {
           if (event === 'change') frontmatterCache.delete(file);
 
-          await writeFile(
-            outPath,
-            await generateJS(
-              configPath,
-              config,
-              outPath,
-              configHash,
-              readFrontmatter,
-            ),
-          );
-
+          await updateMapFile();
           console.log('[MDX] Updated map file');
         }
       };

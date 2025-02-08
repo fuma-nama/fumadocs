@@ -2,7 +2,7 @@ import * as path from 'node:path';
 import fg from 'fast-glob';
 import { getTypeFromPath } from '@/utils/get-type-from-path';
 import type { FileInfo } from '@/config/types';
-import { type LoadedConfig } from '@/utils/load-config';
+import { type LoadedConfig } from '@/utils/config';
 import type { DocCollection, MetaCollection } from '@/config';
 
 export async function generateJS(

@@ -94,7 +94,8 @@ export function useShiki(
   });
 
   if (typeof window === 'undefined') {
-    return use(highlight(code, shikiOptions));
+    // return promise on server
+    return highlight(code, shikiOptions) as ReactNode;
   }
 
   // on change

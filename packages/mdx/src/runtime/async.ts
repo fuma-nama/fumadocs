@@ -1,7 +1,7 @@
 import { type BaseCollectionEntry, type MarkdownProps } from '@/config/types';
 import { createCompiler, type MDXOptions } from '@fumadocs/mdx-remote';
 import * as fs from 'node:fs/promises';
-import type { LoadedConfig } from '@/utils/load-config';
+import type { LoadedConfig } from '@/utils/config';
 import { remarkInclude } from '@/mdx-plugins/remark-include';
 import type { defineCollections } from '@/config/define';
 import {

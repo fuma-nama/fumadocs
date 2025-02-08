@@ -1,6 +1,6 @@
 import type { GlobalConfig } from '@/config/types';
 import type { ProcessorOptions } from '@mdx-js/mdx';
-import type { LoadedConfig } from '@/utils/load-config';
+import type { LoadedConfig } from '@/utils/config';
 import type {
   DocsCollection,
   DocCollection,
