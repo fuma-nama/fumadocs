@@ -4,7 +4,7 @@ import { remarkInclude } from '@/mdx-plugins/remark-include';
 
 type Processor = ReturnType<typeof createProcessor>;
 
-const cache = new Map<string, { processor: Processor; configHash: string }>();
+const cache = new Map<string, Processor>();
 
 export interface MDXOptions extends ProcessorOptions {
   /**
@@ -31,10 +31,6 @@ export interface CompilerOptions {
   addDependency: (file: string) => void;
 }
 
-function cacheKey(group: string, format: string): string {
-  return `${group}:${format}`;
-}
-
 declare module 'vfile' {
   interface DataMap {
     /**
@@ -45,14 +41,12 @@ declare module 'vfile' {
 }
 
 /**
- * @param group - The cache group of MDX content, usually the collection name
- * @param configHash - config hash
+ * @param cacheKey -- key to cache processor
  * @param source - mdx content
  * @param options - MDX options
  */
-export function buildMDX(
-  group: string,
-  configHash: string,
+export async function buildMDX(
+  cacheKey: string,
   source: string,
   options: MDXOptions = {},
 ): Promise<VFile> {
@@ -63,27 +57,22 @@ export function buildMDX(
     format = filePath.endsWith('.mdx') ? 'mdx' : 'md';
   }
   format ??= 'mdx';
-
-  const key = cacheKey(group, format);
+  const key = `${cacheKey}:${format}`;
   let cached = cache.get(key);
 
-  if (cached === undefined || cached.configHash !== configHash) {
-    cached = {
-      processor: createProcessor({
-        outputFormat: 'program',
-        development: process.env.NODE_ENV === 'development',
-        ...rest,
-        remarkPlugins: [remarkInclude, ...(rest.remarkPlugins ?? [])],
-        format,
-      }),
-
-      configHash,
-    };
+  if (cached === undefined) {
+    cached = createProcessor({
+      outputFormat: 'program',
+      development: process.env.NODE_ENV === 'development',
+      ...rest,
+      remarkPlugins: [remarkInclude, ...(rest.remarkPlugins ?? [])],
+      format,
+    });
 
     cache.set(key, cached);
   }
 
-  return cached.processor.process({
+  return cached.process({
     value: source,
     path: filePath,
     data: {

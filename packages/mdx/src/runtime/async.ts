@@ -1,68 +1,23 @@
-import { type BaseCollectionEntry, type MarkdownProps } from '@/config/types';
 import { createCompiler, type MDXOptions } from '@fumadocs/mdx-remote';
 import * as fs from 'node:fs/promises';
-import type { LoadedConfig } from '@/utils/load-config';
+import type { LoadedConfig } from '@/utils/config';
 import { remarkInclude } from '@/mdx-plugins/remark-include';
-import type { defineCollections } from '@/config/define';
 import {
   remarkStructure,
   type StructuredData,
 } from 'fumadocs-core/mdx-plugins';
-import type { StandardSchemaV1 } from '@standard-schema/spec';
-import { _runtime, createMDXSource, type RuntimeFile } from '@/runtime/index';
-import type { MetaData, PageData, Source } from 'fumadocs-core/source';
-
-export interface RuntimeAsync {
-  doc: <C>(
-    files: RuntimeFile[],
-    collection: string,
-    config: LoadedConfig,
-  ) => C extends ReturnType<
-    typeof defineCollections<'doc', infer Schema extends StandardSchemaV1, true>
-  >
-    ? (StandardSchemaV1.InferOutput<Schema> &
-        BaseCollectionEntry & {
-          load: () => Promise<MarkdownProps>;
-        })[]
-    : never;
-  docs: <Docs>(
-    docs: RuntimeFile[],
-    metas: RuntimeFile[],
-    collection: string,
-    config: LoadedConfig,
-  ) => Docs extends {
-    type: 'docs';
-    docs: unknown;
-    meta: unknown;
-  }
-    ? {
-        docs: ReturnType<typeof _runtimeAsync.doc<Docs['docs']>>;
-        meta: ReturnType<typeof _runtime.meta<Docs['meta']>>;
-        toFumadocsSource: () => Source<{
-          pageData: ReturnType<
-            typeof _runtimeAsync.doc<Docs['docs']>
-          >[number] extends PageData & BaseCollectionEntry
-            ? ReturnType<typeof _runtimeAsync.doc<Docs['docs']>>[number]
-            : never;
-          metaData: ReturnType<
-            typeof _runtime.meta<Docs['meta']>
-          >[number] extends MetaData & BaseCollectionEntry
-            ? ReturnType<typeof _runtime.meta<Docs['meta']>>[number]
-            : never;
-        }>;
-      }
-    : never;
-}
+import { createMDXSource, _runtime } from '@/runtime/index';
+import type { RuntimeAsync } from '@/runtime/types';
 
 async function initCompiler(config: LoadedConfig, collection: string) {
-  let col = config.collections.get(collection);
-  if (col?.type === 'docs') col = col.docs;
+  let mdxOptions: MDXOptions | undefined;
 
-  let mdxOptions: MDXOptions;
+  const col = config.collections.get(collection);
+  if (col?.type === 'doc') mdxOptions = col.mdxOptions as MDXOptions;
+  else if (col?.type === 'docs')
+    mdxOptions = col.docs?.mdxOptions as MDXOptions;
 
-  if (col?.type === 'doc' && col.mdxOptions) {
-    mdxOptions = col.mdxOptions as MDXOptions;
-  } else {
+  if (!mdxOptions) {
     const options =
       typeof config.global?.mdxOptions === 'function'
         ? await config.global.mdxOptions()

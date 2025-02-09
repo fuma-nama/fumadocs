@@ -35,7 +35,7 @@ The input/source of your content, it can be a CMS, or local data layers like [Co
 
 <Card icon={<Terminal />} title='Fumadocs CLI'>
 
-A command line tool to configure features automatically, and install UI components (similar to Shadcn UI).
+A command line tool to install UI components similar to Shadcn UI and automate things.
 
 </Card>
 
@@ -115,11 +115,12 @@ In the project, you can see:
 - `app/docs`: The documentation layout and pages.
 - `app/api/search/route.ts`: The Route Handler for search.
 
-#### Content Source
+## Customise Content
 
-You can explore the docs of your content source, it manages the validation and type definitions of content (e.g. frontmatter properties), and transform them to readable data on JavaScript runtime.
+You can explore your content source, it handles all your content, including validation and type definitions (e.g. frontmatter data).
 
-For Fumadocs MDX, a `source.config.ts` config file is included by default. See [Introduction](/docs/mdx).
+For Fumadocs MDX, a `source.config.ts` config file is included. Make sure to read [Introduction](/docs/mdx) to learn how it handles your content,
+and customise different configurations like frontmatter schema.
 
 For other formats and content sources that is not supported by default (e.g. Sanity), you can [build a custom content source](/docs/headless/custom-source).
 
@@ -236,14 +237,13 @@ will replace the `/docs` page with your `page.tsx`.
 
 Fumadocs is designed with flexibility in mind.
 You can use `fumadocs-core` as a headless UI library and bring your own styles.
-And `fumadocs-mdx` can be a useful library to handle content/MDX files in Next.js similar to like Content Collections.
+And `fumadocs-mdx` can be a useful library to handle MDX content in Next.js similar to Content Collections.
 
 And it also includes:
 
 - Many built-in components.
-- Integrations with Typescript Twoslash, OpenAPI, Math (KaTeX).
-- Fast and optimized by default.
-- Built on App Router, no need for hydration over static content.
+- Typescript Twoslash, OpenAPI, and Math (KaTeX) integrations.
+- Fast and optimized by default, 100% built on App Router.
 - Use it in an existing Next.js project, without refactoring anything.
 
 Feel free to open the demo in CodeSandbox, or read [Comparisons](/docs/ui/comparisons) if you're interested.

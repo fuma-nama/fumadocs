@@ -2,7 +2,7 @@ import * as path from 'node:path';
 import { parse } from 'node:querystring';
 import grayMatter from 'gray-matter';
 import { type LoaderContext } from 'webpack';
-import { getConfigHash, loadConfigCached } from '@/utils/config-cache';
+import { getConfigHash, loadConfig } from '@/utils/config';
 import { buildMDX } from '@/utils/build-mdx';
 import { formatError } from '@/utils/format-error';
 import { getGitTimestamp } from './utils/git-timestamp';
@@ -54,7 +54,7 @@ export default async function loader(
     hash: configHash = await getConfigHash(_ctx.configPath),
     collection: collectionId,
   } = parseQuery(this.resourceQuery);
-  const config = await loadConfigCached(_ctx.configPath, configHash);
+  const config = await loadConfig(_ctx.configPath, configHash);
 
   let collection =
     collectionId !== undefined
@@ -76,8 +76,7 @@ export default async function loader(
       schema = schema({
         async buildMDX(v, options = mdxOptions) {
           const res = await buildMDX(
-            collectionId ?? 'global',
-            configHash,
+            `${configHash}:${collectionId ?? 'global'}`,
             v,
             options,
           );
@@ -116,8 +115,7 @@ export default async function loader(
     );
 
     const file = await buildMDX(
-      collectionId ?? 'global',
-      configHash,
+      `${configHash}:${collectionId ?? 'global'}`,
       lineOffset + matter.content,
       {
         development: this.mode === 'development',

@@ -3,7 +3,6 @@ import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import type { TableOfContents } from 'fumadocs-core/server';
 import { type DefaultMDXOptions } from '@/utils/mdx-options';
 import type { FC } from 'react';
-import type { StandardSchemaV1 } from '@standard-schema/spec';
 
 export interface GlobalConfig {
   /**
@@ -27,19 +26,6 @@ export interface GlobalConfig {
    */
   generateManifest?: boolean;
 }
-
-export type InferSchema<CollectionOut> = CollectionOut extends {
-  _type: {
-    schema: infer T;
-  };
-}
-  ? T
-  : never;
-
-export type InferSchemaType<C> =
-  InferSchema<C> extends StandardSchemaV1
-    ? StandardSchemaV1.InferOutput<InferSchema<C>>
-    : never;
 
 export interface FileInfo {
   path: string;

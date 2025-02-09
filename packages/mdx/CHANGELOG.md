@@ -1,5 +1,19 @@
 # next-docs-mdx
 
+## 11.5.3
+
+### Patch Changes
+
+- 65ae933: Fix dependencies
+
+## 11.5.2
+
+### Patch Changes
+
+- c571417: Improve performance
+- be3acf4: Improve types
+  - fumadocs-core@15.0.5
+
 ## 11.5.1
 
 ### Patch Changes
