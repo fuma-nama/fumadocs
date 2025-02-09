@@ -73,7 +73,7 @@ export default async function Page(props: {
     >
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
-      <DocsBody className="text-fd-foreground/80">
+      <DocsBody className="text-fd-foreground/80 text-[15px]">
         {preview ? <PreviewRenderer preview={preview} /> : null}
         <Mdx
           components={{

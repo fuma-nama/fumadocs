@@ -124,7 +124,10 @@ export function DocsLayout({
             </SidebarViewport>
             <SidebarFooter className={cn(!sidebarFooter && 'md:hidden')}>
               {!props.disableThemeSwitch ? (
-                <ThemeToggle className="w-fit md:hidden" />
+                <ThemeToggle
+                  className="w-fit md:hidden"
+                  mode="light-dark-system"
+                />
               ) : null}
               {sidebarFooter}
             </SidebarFooter>
@@ -265,7 +268,7 @@ function SidebarHeaderItems({
       {nav.title ? (
         <Link
           href={nav.url ?? '/'}
-          className="inline-flex items-center gap-2.5 py-1 font-medium md:px-2"
+          className="inline-flex items-center gap-2.5 py-1 font-medium"
         >
           {nav.title}
         </Link>

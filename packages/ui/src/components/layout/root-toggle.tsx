@@ -1,5 +1,5 @@
 'use client';
-import { ChevronDown } from 'lucide-react';
+import { ChevronsUpDown } from 'lucide-react';
 import { type HTMLAttributes, type ReactNode, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -61,12 +61,12 @@ export function RootToggle({
         <PopoverTrigger
           {...props}
           className={cn(
-            'flex flex-row items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-fd-accent/50 hover:text-fd-accent-foreground',
+            'flex flex-row items-center gap-2 rounded-lg ps-2 pe-4 py-1.5 hover:bg-fd-accent/50 hover:text-fd-accent-foreground',
             props.className,
           )}
         >
           {item}
-          <ChevronDown className="me-2 size-4 text-fd-muted-foreground" />
+          <ChevronsUpDown className="size-4 text-fd-muted-foreground" />
         </PopoverTrigger>
       ) : null}
       <PopoverContent className="w-[var(--radix-popover-trigger-width)] overflow-hidden p-0">

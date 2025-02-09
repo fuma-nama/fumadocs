@@ -260,7 +260,7 @@ function SidebarFooterItems({
         <ThemeToggle className="p-0 md:order-first" />
       ) : null}
       {sidebarCollapsible ? (
-        <SidebarCollapseTrigger className="-me-1.5 max-md:hidden" />
+        <SidebarCollapseTrigger className="max-md:hidden" />
       ) : null}
     </div>
   );

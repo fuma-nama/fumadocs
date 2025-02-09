@@ -39,7 +39,7 @@ export function FumadocsIcon(props: React.SVGProps<SVGSVGElement>) {
           <feDropShadow
             dx="0"
             dy="0"
-            stdDeviation="1"
+            stdDeviation="0.5"
             floodColor="var(--color-fd-primary)"
             floodOpacity="1"
           />

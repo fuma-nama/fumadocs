@@ -133,7 +133,7 @@ export const DEFAULT: Config = {
       color: 'var(--tw-prose-body)',
       maxWidth: 'none',
       fontSize: rem(16),
-      lineHeight: round(28 / 16),
+      lineHeight: '1.75rem',
 
       '[class~="lead"]': {
         fontSize: em(20, 16),
@@ -203,7 +203,7 @@ export const DEFAULT: Config = {
       },
       strong: {
         color: 'var(--tw-prose-bold)',
-        fontWeight: '600',
+        fontWeight: '500',
       },
       'a strong': {
         color: 'inherit',
@@ -424,14 +424,15 @@ export const DEFAULT: Config = {
 
       'a:not([data-card])': {
         color: 'var(--tw-prose-links)',
-        transition: 'opacity 0.3s',
-        fontWeight: '400',
+        transition: 'text-decoration-color .2s',
+        fontWeight: '500',
         textDecoration: 'underline',
-        textUnderlineOffset: '2px',
-        textDecorationColor: 'var(--color-fd-primary)',
+        textUnderlineOffset: '3.5px',
+        textDecorationColor:
+          'color-mix(in oklab, var(--tw-prose-links) 50%, transparent)',
       },
       'a:not([data-card]):hover': {
-        opacity: '80%',
+        textDecorationColor: 'var(--color-fd-primary)',
       },
     },
     colors,
