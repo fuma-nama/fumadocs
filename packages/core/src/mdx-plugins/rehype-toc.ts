@@ -1,5 +1,5 @@
 import type { Processor, Transformer } from 'unified';
-import type { Root } from 'hast';
+import type { Root, RootContent } from 'hast';
 import { toEstree } from 'hast-util-to-estree';
 import type { Declaration, JSXElement } from 'estree-jsx';
 import { visit } from '@/mdx-plugins/hast-utils';
@@ -12,6 +12,9 @@ export interface RehypeTocOptions {
    */
   exportToc?: boolean;
 }
+
+const TocOnlyTag = '[toc]';
+const NoTocTag = '[!toc]';
 
 export function rehypeToc(
   this: Processor,
@@ -27,6 +30,20 @@ export function rehypeToc(
     visit(tree, ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'], (element) => {
       const id = element.properties.id as string | undefined;
       if (!id) return 'skip';
+      let isTocOnly = false;
+
+      const last = element.children.at(-1);
+      if (last?.type === 'text' && last.value.endsWith(TocOnlyTag)) {
+        isTocOnly = true;
+        last.value = last.value
+          .substring(0, last.value.length - TocOnlyTag.length)
+          .trimEnd();
+      } else if (last?.type === 'text' && last.value.endsWith(NoTocTag)) {
+        last.value = last.value
+          .substring(0, last.value.length - NoTocTag.length)
+          .trimEnd();
+        return 'skip';
+      }
 
       const estree = toEstree(element, {
         elementAttributeNameCase: 'react',
@@ -39,6 +56,13 @@ export function rehypeToc(
           depth: Number(element.tagName.slice(1)),
           url: `#${id}`,
         });
+
+      if (isTocOnly) {
+        Object.assign(element, {
+          type: 'comment',
+          value: '',
+        } satisfies RootContent);
+      }
 
       return 'skip';
     });

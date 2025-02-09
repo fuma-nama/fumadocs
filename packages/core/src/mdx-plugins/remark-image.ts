@@ -1,4 +1,4 @@
-import path from 'node:path';
+import * as path from 'node:path';
 import type { Root } from 'mdast';
 import type { Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
@@ -168,33 +168,32 @@ export function remarkImage({
     });
 
     await Promise.all(promises);
+    if (importsToInject.length === 0) return;
 
-    if (importsToInject.length > 0) {
-      const imports = importsToInject.map(
-        ({ variableName, importPath }) =>
-          ({
-            type: 'mdxjsEsm',
-            data: {
-              estree: {
-                body: [
-                  {
-                    type: 'ImportDeclaration',
-                    source: { type: 'Literal', value: importPath },
-                    specifiers: [
-                      {
-                        type: 'ImportDefaultSpecifier',
-                        local: { type: 'Identifier', name: variableName },
-                      },
-                    ],
-                  },
-                ],
-              },
+    const imports = importsToInject.map(
+      ({ variableName, importPath }) =>
+        ({
+          type: 'mdxjsEsm',
+          data: {
+            estree: {
+              body: [
+                {
+                  type: 'ImportDeclaration',
+                  source: { type: 'Literal', value: importPath },
+                  specifiers: [
+                    {
+                      type: 'ImportDefaultSpecifier',
+                      local: { type: 'Identifier', name: variableName },
+                    },
+                  ],
+                },
+              ],
             },
-          }) as MdxjsEsm,
-      );
+          },
+        }) as MdxjsEsm,
+    );
 
-      tree.children.unshift(...imports);
-    }
+    tree.children.unshift(...imports);
   };
 }
 

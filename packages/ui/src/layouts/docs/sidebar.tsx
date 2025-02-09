@@ -199,7 +199,7 @@ export function SidebarFooter(props: HTMLAttributes<HTMLDivElement>) {
     <div
       {...props}
       className={cn(
-        'flex flex-col border-t ps-4 p-3 empty:hidden',
+        'flex flex-col border-t ps-4 pe-3 py-3 empty:hidden',
         props.className,
       )}
     >
