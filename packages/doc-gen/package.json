@@ -27,6 +27,7 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
+    "estree-util-to-js": "^2.0.0",
     "estree-util-value-to-estree": "^3.3.2",
     "fumadocs-typescript": "workspace:^",
     "hast-util-to-estree": "^3.1.1",
