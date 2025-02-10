@@ -1,5 +1,15 @@
 # @fuma-docs/openapi
 
+## 6.0.7
+
+### Patch Changes
+
+- e7b6f0a: Support `disablePlayground` option
+- Updated dependencies [08236e1]
+- Updated dependencies [a06af26]
+  - fumadocs-core@15.0.6
+  - fumadocs-ui@15.0.6
+
 ## 6.0.6
 
 ### Patch Changes

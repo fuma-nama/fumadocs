@@ -1,5 +1,12 @@
 # fumadocs-docgen
 
+## 1.3.7
+
+### Patch Changes
+
+- 260128f: Add `remarkShow` plugin
+  - fumadocs-typescript@3.0.3
+
 ## 1.3.6
 
 ### Patch Changes

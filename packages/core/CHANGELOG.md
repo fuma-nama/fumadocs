@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 15.0.6
+
+### Patch Changes
+
+- 08236e1: Support custom toc settings in headings
+- a06af26: Support pages without `title`
+
 ## 15.0.5
 
 ## 15.0.4

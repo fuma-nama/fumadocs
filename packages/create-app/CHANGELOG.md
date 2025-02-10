@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 15.0.6
+
+### Patch Changes
+
+- e9225e1: Support src directory config
+
 ## 15.0.5
 
 ## 15.0.4
