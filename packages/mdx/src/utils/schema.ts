@@ -10,7 +10,7 @@ export const metaSchema = z.object({
 });
 
 export const frontmatterSchema = z.object({
-  title: z.string().optional(),
+  title: z.string(),
   description: z.string().optional(),
   icon: z.string().optional(),
   full: z.boolean().optional(),
