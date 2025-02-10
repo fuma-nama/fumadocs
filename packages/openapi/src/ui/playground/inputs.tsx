@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/ui/components/select';
-import type { RequestSchema } from '@/render/playground';
+import type { RequestSchema } from '@/render/operation/playground';
 import { resolve } from '@/ui/playground/resolve';
 import { Input, labelVariants } from '@/ui/components/input';
 import { getDefaultValue } from '@/ui/playground/get-default-values';

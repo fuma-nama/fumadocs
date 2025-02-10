@@ -8,7 +8,6 @@ import {
   group,
   intro,
   isCancel,
-  log,
   outro,
   select,
   spinner,
