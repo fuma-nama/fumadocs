@@ -148,7 +148,7 @@ export async function transformMDX<D extends BaseDoc>(
 
 export function createDocSchema(z: typeof Zod) {
   return {
-    title: z.string(),
+    title: z.string().optional(),
     description: z.string().optional(),
     icon: z.string().optional(),
     full: z.boolean().optional(),
