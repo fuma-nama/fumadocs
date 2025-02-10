@@ -4,16 +4,17 @@ import { createProcessor } from '@mdx-js/mdx';
 import { fileGenerator } from '@/file-generator';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { readFileSync } from 'node:fs';
 import { remarkInstall } from '@/remark-install';
 import { remark } from 'remark';
 import { typescriptGenerator } from '@/typescript-generator';
 import { remarkTypeScriptToJavaScript } from '@/remark-ts2js';
+import { readFile } from 'node:fs/promises';
+import { remarkShow } from '@/remark-show';
 
 const cwd = path.dirname(fileURLToPath(import.meta.url));
 
 test('File Generator', async () => {
-  const content = readFileSync(path.resolve(cwd, './fixtures/file-gen.md'));
+  const content = await readFile(path.resolve(cwd, './fixtures/file-gen.md'));
 
   const processor = remark().use(remarkDocGen, {
     generators: [fileGenerator()],
@@ -28,7 +29,7 @@ test('File Generator', async () => {
 
 test('File Generator - Relative', async () => {
   const file = path.resolve(cwd, './fixtures/file-gen.relative.md');
-  const content = readFileSync(file);
+  const content = await readFile(file);
 
   const result = await remark()
     .use(remarkDocGen, {
@@ -43,7 +44,7 @@ test('File Generator - Relative', async () => {
 
 test('Remark Install', async () => {
   const file = path.resolve(cwd, './fixtures/remark-install.md');
-  const content = readFileSync(file);
+  const content = await readFile(file);
 
   const result = await createProcessor({
     remarkPlugins: [remarkInstall],
@@ -57,7 +58,7 @@ test('Remark Install', async () => {
 
 test('Remark Install', async () => {
   const file = path.resolve(cwd, './fixtures/remark-install-persist.md');
-  const content = readFileSync(file);
+  const content = await readFile(file);
 
   const result = await createProcessor({
     jsx: true,
@@ -80,7 +81,7 @@ test('Remark Install', async () => {
 
 test('Typescript Generator', async () => {
   const file = path.resolve(cwd, './fixtures/typescript-gen.md');
-  const content = readFileSync(file);
+  const content = await readFile(file);
 
   const tsconfig = {
     tsconfigPath: path.resolve(cwd, '../tsconfig.json'),
@@ -104,7 +105,7 @@ test('Typescript Generator', async () => {
 
 test('TS to JS', async () => {
   const file = path.resolve(cwd, './fixtures/ts2js.md');
-  const content = readFileSync(file);
+  const content = await readFile(file);
 
   const result = await createProcessor({
     remarkPlugins: [remarkTypeScriptToJavaScript],
@@ -113,5 +114,30 @@ test('TS to JS', async () => {
 
   await expect(result.toString()).toMatchFileSnapshot(
     path.resolve(cwd, './fixtures/ts2js.output.jsx'),
+  );
+});
+
+test('Remark Show', async () => {
+  const file = path.resolve(cwd, './fixtures/remark-show.mdx');
+  const content = await readFile(file);
+
+  const result = await createProcessor({
+    remarkPlugins: [
+      [
+        remarkShow,
+        {
+          variables: {
+            async test() {
+              return false;
+            },
+          },
+        },
+      ],
+    ],
+    jsx: true,
+  }).process(content);
+
+  await expect(result.toString()).toMatchFileSnapshot(
+    path.resolve(cwd, './fixtures/remark-show.output.jsx'),
   );
 });

@@ -15,6 +15,7 @@ export interface Options {
   tailwindcss: boolean;
   packageManager: PackageManager;
 
+  useSrcDir?: boolean;
   installDeps?: boolean;
   initializeGit?: boolean;
   eslint?: boolean;
@@ -29,26 +30,69 @@ export async function create(options: Options): Promise<void> {
   } = options;
   const projectName = path.basename(options.outputDir);
   const dest = path.resolve(cwd, options.outputDir);
-  await copy(path.join(sourceDir, `template/+shared`), dest, (name) => {
-    switch (name) {
-      case 'example.gitignore':
-        return '.gitignore';
-      default:
-        return name;
-    }
-  });
 
-  await copy(path.join(sourceDir, `template/${options.template}`), dest);
-  log('Configured Typescript');
+  function defaultRename(file: string): string {
+    file = file.replace('example.gitignore', '.gitignore');
+
+    if (!options.useSrcDir) {
+      return file;
+    }
+
+    for (const dir of ['app', 'lib']) {
+      const relative = path.relative(path.join(dest, dir), file);
+
+      if (!relative.startsWith('../')) {
+        return path.join(dest, 'src', dir, relative);
+      }
+    }
+
+    return file;
+  }
+
+  await copy(path.join(sourceDir, `template/+shared`), dest, defaultRename);
+
+  await copy(
+    path.join(sourceDir, `template/${options.template}`),
+    dest,
+    defaultRename,
+  );
 
   if (options.tailwindcss) {
-    await copy(path.join(sourceDir, `template/+tailwindcss`), dest);
+    await copy(
+      path.join(sourceDir, `template/+tailwindcss`),
+      dest,
+      defaultRename,
+    );
     log('Configured Tailwind CSS');
   }
 
   if (options.eslint) {
-    await copy(path.join(sourceDir, `template/+eslint`), dest);
+    await copy(path.join(sourceDir, `template/+eslint`), dest, defaultRename);
     log('Configured ESLint');
+  }
+
+  if (options.useSrcDir) {
+    const tsconfigPath = path.join(dest, 'tsconfig.json');
+    const content = (await fs.readFile(tsconfigPath)).toString();
+
+    const config = JSON.parse(content);
+
+    if (config.compilerOptions?.paths) {
+      Object.assign(config.compilerOptions.paths, {
+        '@/*': ['./src/*'],
+      });
+    }
+
+    await fs.writeFile(tsconfigPath, JSON.stringify(config, null, 2));
+
+    if (options.tailwindcss) {
+      const cssPath = path.join(dest, 'src/app/global.css');
+
+      await fs.writeFile(
+        cssPath,
+        (await fs.readFile(cssPath)).toString().replace('../', '../../'),
+      );
+    }
   }
 
   const packageJson = createPackageJson(projectName, options);
@@ -87,7 +131,7 @@ async function copy(
 
     await Promise.all(
       files.map((file) =>
-        copy(path.join(from, file), path.join(to, rename(file))),
+        copy(path.join(from, file), rename(path.join(to, file))),
       ),
     );
   } else {
@@ -155,11 +199,10 @@ function createPackageJson(projectName: string, options: Options): string {
   }
 
   if (options.eslint) {
-    packageJson.devDependencies = {
-      ...packageJson.devDependencies,
+    Object.assign(packageJson.devDependencies, {
       eslint: '^8',
       'eslint-config-next': versionPkg.dependencies.next,
-    };
+    });
   }
 
   return JSON.stringify(packageJson, undefined, 2);

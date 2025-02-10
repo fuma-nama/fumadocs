@@ -10,8 +10,6 @@ import {
 import { ChevronDown } from 'lucide-react';
 import { ApiProvider } from '@/ui/contexts/api';
 
-export { useSchemaContext, APIPlayground } from './client';
-
 export function Root({
   children,
   baseUrl,

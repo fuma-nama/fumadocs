@@ -126,47 +126,44 @@ export interface LoaderOutput<Config extends LoaderConfig> {
 function indexPages(
   storage: Storage,
   getUrl: UrlFn,
-  languages: string[] = [],
+  i18n?: I18nConfig,
 ): {
-  // locale -> (slugs -> page[])
-  i18n: Map<string, Map<string, Page>>;
+  // (locale.slugs -> page[])
+  pages: Map<string, Page>;
 
   pathToPage: Map<string, Page>;
   pathToMeta: Map<string, Meta>;
 } {
-  const i18n = new Map<string, Map<string, Page>>();
+  const defaultLanguage = i18n?.defaultLanguage ?? '';
+  const map = new Map<string, Page>();
   const pages = new Map<string, Page>();
   const metas = new Map<string, Meta>();
 
-  const defaultMap = new Map<string, Page>();
+  for (const item of storage.list()) {
+    if (item.format === 'meta') metas.set(item.file.path, fileToMeta(item));
 
-  i18n.set('', defaultMap);
-  for (const file of storage.list()) {
-    if (file.format === 'meta') metas.set(file.file.path, fileToMeta(file));
+    if (item.format === 'page') {
+      const page = fileToPage(item, getUrl, item.file.locale);
+      pages.set(item.file.path, page);
 
-    if (file.format === 'page') {
-      const page = fileToPage(file, getUrl, file.file.locale);
-      pages.set(file.file.path, page);
+      if (item.file.locale) continue;
+      map.set(`${defaultLanguage}.${page.slugs.join('/')}`, page);
+      if (!i18n) continue;
 
-      if (file.file.locale) continue;
-      defaultMap.set(page.slugs.join('/'), page);
-
-      for (const lang of languages) {
-        const langMap = i18n.get(lang) ?? new Map<string, Page>();
-
+      for (const lang of i18n.languages) {
         const localized = storage.read(
-          `${file.file.flattenedPath}.${lang}`,
+          `${item.file.flattenedPath}.${lang}`,
           'page',
         );
-        const localizedPage = fileToPage(localized ?? file, getUrl, lang);
-        langMap.set(localizedPage.slugs.join('/'), localizedPage);
-        i18n.set(lang, langMap);
+
+        const localizedPage = fileToPage(localized ?? item, getUrl, lang);
+        map.set(`${lang}.${localizedPage.slugs.join('/')}`, localizedPage);
       }
     }
   }
 
   return {
-    i18n,
+    pages: map,
     pathToPage: pages,
     pathToMeta: metas,
   };
@@ -233,7 +230,7 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
       getSlugs: slugsFn,
     },
   );
-  const walker = indexPages(storage, getUrl, options.i18n?.languages);
+  const walker = indexPages(storage, getUrl, options.i18n);
   const builder = createPageTreeBuilder();
   const pageTree =
     options.i18n === undefined
@@ -255,24 +252,29 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
     _i18n: options.i18n,
     pageTree: pageTree as LoaderOutput<LoaderConfig>['pageTree'],
     getPages(language = options.i18n?.defaultLanguage ?? '') {
-      return Array.from(walker.i18n.get(language)?.values() ?? []);
+      const pages: Page[] = [];
+
+      for (const key of walker.pages.keys()) {
+        if (key.startsWith(`${language}.`)) pages.push(walker.pages.get(key)!);
+      }
+
+      return pages;
     },
     getLanguages() {
       const list: LanguageEntry[] = [];
+      if (!options.i18n) return list;
 
-      for (const [language, pages] of walker.i18n) {
-        if (language === '') continue;
-
+      for (const language of options.i18n.languages) {
         list.push({
           language,
-          pages: Array.from(pages.values()),
+          pages: this.getPages(language),
         });
       }
 
       return list;
     },
     getPage(slugs = [], language = options.i18n?.defaultLanguage ?? '') {
-      return walker.i18n.get(language)?.get(slugs.join('/'));
+      return walker.pages.get(`${language}.${slugs.join('/')}`);
     },
     getNodeMeta(node) {
       if (!node.$ref?.metaFile) return;
@@ -304,7 +306,7 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
         );
       }
 
-      return Array.from(walker.i18n.get('')?.values() ?? []).map((page) => ({
+      return this.getPages().map((page) => ({
         [slug ?? 'slug']: page.slugs,
       }));
     },

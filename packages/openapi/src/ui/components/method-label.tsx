@@ -14,7 +14,7 @@ export const badgeVariants = cva('font-mono font-medium', {
   },
 });
 
-export function getBadgeColor(
+function getMethodColor(
   method: string,
 ): VariantProps<typeof badgeVariants>['color'] {
   switch (method.toUpperCase()) {
@@ -59,7 +59,7 @@ export function MethodLabel({
   children: string;
 }) {
   return (
-    <Badge {...props} color={getBadgeColor(children)}>
+    <Badge {...props} color={getMethodColor(children)}>
       {children.toUpperCase()}
     </Badge>
   );

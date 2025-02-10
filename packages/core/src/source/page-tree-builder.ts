@@ -222,7 +222,11 @@ function buildFolderNode(
 
   const node: PageTree.Folder = {
     type: 'folder',
-    name: metadata?.title ?? index?.name ?? pathToName(folder.file.name, true),
+    name:
+      metadata?.title ??
+      index?.name ??
+      // resolve folder groups like (group_name)
+      pathToName(group.exec(folder.file.name)?.[1] ?? folder.file.name),
     icon: ctx.options.resolveIcon?.(metadata?.icon) ?? index?.icon,
     root: metadata?.root,
     defaultOpen: metadata?.defaultOpen,
@@ -250,7 +254,7 @@ function buildFileNode(
 
   const item: PageTree.Item = {
     type: 'page',
-    name: localized.data.data.title,
+    name: localized.data.data.title ?? pathToName(localized.file.name),
     icon: ctx.options.resolveIcon?.(localized.data.data.icon),
     url: ctx.options.getUrl(localized.data.slugs, ctx.lang),
     $ref: !ctx.options.noRef
@@ -314,13 +318,10 @@ function findLocalizedFile<F extends File['format']>(
  * Get item name from file name
  *
  * @param name - file name
- * @param resolveGroup - resolve folder groups like (group_name)
  */
-function pathToName(name: string, resolveGroup = false): string {
-  const resolved = resolveGroup ? (group.exec(name)?.[1] ?? name) : name;
-
+function pathToName(name: string): string {
   const result = [];
-  for (const c of resolved) {
+  for (const c of name) {
     if (result.length === 0) result.push(c.toLocaleUpperCase());
     else if (c === '-') result.push(' ');
     else result.push(c);

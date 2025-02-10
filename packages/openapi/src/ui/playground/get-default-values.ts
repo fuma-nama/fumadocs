@@ -1,4 +1,7 @@
-import type { PrimitiveRequestField, RequestSchema } from '@/render/playground';
+import type {
+  PrimitiveRequestField,
+  RequestSchema,
+} from '@/render/operation/playground';
 import { resolve } from '@/ui/playground/resolve';
 
 export function getDefaultValue(

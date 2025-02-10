@@ -340,7 +340,129 @@ test('Internationalized Routing', () => {
     }
   `);
 
-  expect(result.getPages().length).toBe(2);
+  expect(result.getPages()).toMatchInlineSnapshot(`
+    [
+      {
+        "data": {
+          "title": "Hello",
+        },
+        "file": {
+          "dirname": "",
+          "flattenedPath": "test",
+          "locale": undefined,
+          "name": "test",
+          "path": "test.mdx",
+        },
+        "locale": "en",
+        "slugs": [
+          "test",
+        ],
+        "url": "/en/test",
+      },
+      {
+        "data": {
+          "title": "Nested Page",
+        },
+        "file": {
+          "dirname": "nested",
+          "flattenedPath": "nested/test",
+          "locale": undefined,
+          "name": "test",
+          "path": "nested/test.mdx",
+        },
+        "locale": "en",
+        "slugs": [
+          "nested",
+          "test",
+        ],
+        "url": "/en/nested/test",
+      },
+    ]
+  `);
+  expect(result.getLanguages()).toMatchInlineSnapshot(`
+    [
+      {
+        "language": "cn",
+        "pages": [
+          {
+            "data": {
+              "title": "Hello Chinese",
+            },
+            "file": {
+              "dirname": "",
+              "flattenedPath": "test.cn",
+              "locale": "cn",
+              "name": "test",
+              "path": "test.cn.mdx",
+            },
+            "locale": "cn",
+            "slugs": [
+              "test",
+            ],
+            "url": "/cn/test",
+          },
+          {
+            "data": {
+              "title": "Nested Page Chinese",
+            },
+            "file": {
+              "dirname": "nested",
+              "flattenedPath": "nested/test.cn",
+              "locale": "cn",
+              "name": "test",
+              "path": "nested/test.cn.mdx",
+            },
+            "locale": "cn",
+            "slugs": [
+              "nested",
+              "test",
+            ],
+            "url": "/cn/nested/test",
+          },
+        ],
+      },
+      {
+        "language": "en",
+        "pages": [
+          {
+            "data": {
+              "title": "Hello",
+            },
+            "file": {
+              "dirname": "",
+              "flattenedPath": "test",
+              "locale": undefined,
+              "name": "test",
+              "path": "test.mdx",
+            },
+            "locale": "en",
+            "slugs": [
+              "test",
+            ],
+            "url": "/en/test",
+          },
+          {
+            "data": {
+              "title": "Nested Page",
+            },
+            "file": {
+              "dirname": "nested",
+              "flattenedPath": "nested/test",
+              "locale": undefined,
+              "name": "test",
+              "path": "nested/test.mdx",
+            },
+            "locale": "en",
+            "slugs": [
+              "nested",
+              "test",
+            ],
+            "url": "/en/nested/test",
+          },
+        ],
+      },
+    ]
+  `);
   expect(result.getPage(['test'])?.url).toBe('/en/test');
   expect(result.getPage(['test'], 'cn')?.url).toBe('/cn/test');
 });

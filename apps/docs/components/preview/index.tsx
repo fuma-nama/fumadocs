@@ -72,7 +72,7 @@ export function tabs(): ReactNode {
 export function typeTable(): ReactNode {
   return (
     <Wrapper>
-      <div className="rounded-xl bg-fd-background px-4">
+      <div className="rounded-xl bg-fd-background">
         <TypeTable
           type={{
             percentage: {

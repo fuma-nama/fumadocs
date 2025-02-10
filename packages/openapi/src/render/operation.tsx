@@ -16,6 +16,7 @@ import { Schema } from './schema';
 import { createMethod } from '@/server/create-method';
 import { methodKeys } from '@/build-routes';
 import { APIExample } from '@/render/operation/api-example';
+import { MethodLabel } from '@/ui/components/method-label';
 
 export interface CodeSample {
   lang: string;
@@ -189,7 +190,16 @@ export function Operation({
   const info = (
     <ctx.renderer.APIInfo head={headNode} method={method.method} route={path}>
       {type === 'operation' ? (
-        <ctx.renderer.APIPlayground path={path} method={method} ctx={ctx} />
+        ctx.disablePlayground ? (
+          <div className="flex flex-row items-center gap-2.5 p-3 rounded-xl border bg-fd-card text-fd-card-foreground not-prose">
+            <MethodLabel className="text-xs">{method.method}</MethodLabel>
+            <code className="flex-1 overflow-auto text-nowrap text-[13px] text-fd-muted-foreground">
+              {path}
+            </code>
+          </div>
+        ) : (
+          <ctx.renderer.APIPlayground path={path} method={method} ctx={ctx} />
+        )
       ) : null}
       {security && Object.keys(security).length > 0 ? (
         <>

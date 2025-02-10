@@ -1,5 +1,14 @@
 # @fumadocs/content-collections
 
+## 1.1.8
+
+### Patch Changes
+
+- a06af26: Support pages without `title`
+- Updated dependencies [08236e1]
+- Updated dependencies [a06af26]
+  - fumadocs-core@15.0.6
+
 ## 1.1.7
 
 ### Patch Changes

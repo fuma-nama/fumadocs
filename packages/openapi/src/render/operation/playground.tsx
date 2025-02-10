@@ -10,7 +10,7 @@ import {
   type ParsedSchema,
 } from '@/utils/schema';
 import { getSecurities, type Security } from '@/utils/get-security';
-import { APIPlayground } from '@/ui';
+import { APIPlayground } from '@/ui/client';
 
 interface BaseRequestField {
   name: string;

@@ -21,15 +21,17 @@ function pageToIndex(page: Page): AdvancedIndex {
     );
   }
 
+  const structuredData = page.data.structuredData as StructuredData;
+
   return {
-    title: page.data.title,
+    title: page.data.title ?? page.file.name,
     description:
       'description' in page.data
         ? (page.data.description as string)
         : undefined,
     url: page.url,
     id: page.url,
-    structuredData: page.data.structuredData as StructuredData,
+    structuredData,
   };
 }
 

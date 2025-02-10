@@ -18,6 +18,7 @@ type ApiPageContextProps = Pick<
   | 'generateCodeSamples'
   | 'proxyUrl'
   | 'showResponseSchema'
+  | 'disablePlayground'
 >;
 
 export interface ApiPageProps extends ApiPageContextProps {
@@ -125,6 +126,7 @@ export async function getContext(
   return {
     schema,
     proxyUrl: options.proxyUrl,
+    disablePlayground: options.disablePlayground,
     showResponseSchema: options.showResponseSchema,
     renderer: {
       ...createRenders(options.shikiOptions),

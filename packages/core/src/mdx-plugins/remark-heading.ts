@@ -47,54 +47,40 @@ export function remarkHeading({
     const toc: TOCItemType[] = [];
     slugger.reset();
 
-    // Fumadocs OpenAPI Generated TOC
-    if (file.data.frontmatter) {
-      const frontmatter = file.data.frontmatter as {
-        _openapi?: {
-          toc?: TOCItemType[];
-        };
-      };
-
-      if (frontmatter._openapi?.toc) {
-        toc.push(...frontmatter._openapi.toc);
-      }
-    }
-
     visit(root, 'heading', (heading) => {
       heading.data ||= {};
       heading.data.hProperties ||= {};
+
+      let id = heading.data.hProperties.id;
       const lastNode = heading.children.at(-1);
 
-      if (
-        !heading.data.hProperties.id &&
-        lastNode?.type === 'text' &&
-        customId
-      ) {
+      if (!id && lastNode?.type === 'text' && customId) {
         const match = regex.exec(lastNode.value);
 
         if (match?.[1]) {
-          heading.data.hProperties.id = match[1];
+          id = match[1];
           lastNode.value = lastNode.value.slice(0, match.index);
         }
       }
 
-      const value = flattenNode(heading);
-
-      let id = heading.data.hProperties.id;
+      let flattened: string | undefined;
       if (!id) {
+        flattened ??= flattenNode(heading);
+
         id = defaultSlug
-          ? defaultSlug(root, heading, value)
-          : slugger.slug(value);
+          ? defaultSlug(root, heading, flattened)
+          : slugger.slug(flattened);
       }
 
       heading.data.hProperties.id = id;
 
-      if (generateToc)
+      if (generateToc) {
         toc.push({
-          title: value,
+          title: flattened ?? flattenNode(heading),
           url: `#${id}`,
           depth: heading.depth,
         });
+      }
 
       return 'skip';
     });

@@ -41,6 +41,11 @@ export interface RenderContext {
 
   renderer: Renderer;
 
+  /**
+   * Disable API Playground
+   */
+  disablePlayground?: boolean;
+
   baseUrl: string;
   servers: ServerObject[];
 

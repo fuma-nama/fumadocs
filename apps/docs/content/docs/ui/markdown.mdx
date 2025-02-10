@@ -174,16 +174,43 @@ You can specify the type of callout.
 
 See [all MDX components and available options](/docs/ui/mdx).
 
-## Heading Anchors
+## Headings
 
-An anchor is automatically applied to all headings, it sanitizes invalid characters like spaces. (e.g. `Hello World` to `hello-world`)
+An anchor is automatically applied to each heading, it sanitizes invalid characters like spaces. (e.g. `Hello World` to `hello-world`)
+
+```md
+# Hello `World`
+```
+
+### TOC Settings
+
+The table of contents (TOC) will be generated based on headings, you can also customise the effects of headings:
+
+```md
+# Heading [!toc]
+
+This heading will be hidden from TOC.
+
+# Another Heading [toc]
+
+This heading will **only** be visible in TOC, you can use it to add additional TOC items.
+Like headings rendered in a React component:
+
+<MyComp />
+```
 
 ### Custom Anchor
 
 You can add `[#slug]` to customise heading anchors.
 
-```mdx
+```md
 # heading [#my-heading-id]
+```
+
+You can also chain it with TOC settings like:
+
+```md
+# heading [toc] [#my-heading-id]
 ```
 
 To link people to a specific heading, add the heading id to hash fragment: `/page#my-heading-id`.

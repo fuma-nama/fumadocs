@@ -11,7 +11,7 @@ import {
   ObjectCollapsible,
 } from '@/ui';
 import type { MethodInformation, RenderContext, ServerObject } from '@/types';
-import { Playground } from '@/render/playground';
+import { Playground } from '@/render/operation/playground';
 import { Sample, Samples } from '@/ui/client';
 
 export interface ResponsesProps {
@@ -112,7 +112,7 @@ export type {
   RequestSchema,
   PrimitiveRequestField,
   ReferenceSchema,
-} from '@/render/playground';
+} from '@/render/operation/playground';
 
 export function createRenders(
   shikiOptions: RenderContext['shikiOptions'],

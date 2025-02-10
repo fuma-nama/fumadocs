@@ -28,7 +28,7 @@ import type {
   APIPlaygroundProps,
   PrimitiveRequestField,
   RequestSchema,
-} from '@/render/playground';
+} from '@/render/operation/playground';
 import { type DynamicField, SchemaContext } from '../contexts/schema';
 import { getStatusInfo } from '@/ui/playground/status-info';
 import { getUrl } from '@/utils/server-url';

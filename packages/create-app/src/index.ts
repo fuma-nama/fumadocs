@@ -8,7 +8,6 @@ import {
   group,
   intro,
   isCancel,
-  log,
   outro,
   select,
   spinner,
@@ -37,12 +36,22 @@ async function main(): Promise<void> {
           message: 'Choose a content source',
           initialValue: 'fuma-docs-mdx' as Template,
           options: [
-            { value: 'fuma-docs-mdx', label: 'Fumadocs MDX' },
+            {
+              value: 'fuma-docs-mdx',
+              label: 'Fumadocs MDX',
+              hint: 'recommended',
+            },
             { value: 'content-collections', label: 'Content Collections' },
           ],
         }),
+      src: () =>
+        confirm({ message: 'Use `/src` directory?', initialValue: false }),
       tailwindcss: () => confirm({ message: 'Use Tailwind CSS for styling?' }),
-      eslint: () => confirm({ message: 'Add default ESLint configuration?' }),
+      eslint: () =>
+        confirm({
+          message: 'Add default ESLint configuration?',
+          initialValue: false,
+        }),
       installDeps: () =>
         confirm({
           message: `Do you want to install packages automatically? (detected as ${manager})`,
@@ -92,9 +101,10 @@ async function main(): Promise<void> {
     outputDir: dest,
     installDeps: options.installDeps,
     eslint: options.eslint,
+    useSrcDir: options.src,
 
     log: (message) => {
-      log.info(message);
+      info.message(message);
     },
   });
 
