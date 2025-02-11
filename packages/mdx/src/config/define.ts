@@ -1,20 +1,13 @@
-import { type ProcessorOptions } from '@mdx-js/mdx';
 import { type MDXOptions } from '@/utils/build-mdx';
 import { type GlobalConfig } from '@/config/types';
 import { frontmatterSchema, metaSchema } from '@/utils/schema';
 import type { StandardSchemaV1 } from '@standard-schema/spec';
 
-export interface TransformContext {
-  path: string;
-  source: string;
+export type CollectionSchema<Schema extends StandardSchemaV1, Context> =
+  | Schema
+  | ((ctx: Context) => Schema);
 
-  /**
-   * Compile MDX to JavaScript
-   */
-  buildMDX: (source: string, options?: ProcessorOptions) => Promise<string>;
-}
-
-export interface BaseCollection<Schema> {
+export interface BaseCollection {
   /**
    * Directories to scan
    */
@@ -26,20 +19,20 @@ export interface BaseCollection<Schema> {
    * Include all files if not specified
    */
   files?: string[];
-
-  schema?: Schema | ((ctx: TransformContext) => Schema);
 }
 
 export interface MetaCollection<
   Schema extends StandardSchemaV1 = StandardSchemaV1,
-> extends BaseCollection<Schema> {
+> extends BaseCollection {
   type: 'meta';
+
+  schema?: CollectionSchema<Schema, { path: string; source: string }>;
 }
 
 export interface DocCollection<
   Schema extends StandardSchemaV1 = StandardSchemaV1,
   Async extends boolean = boolean,
-> extends BaseCollection<Schema> {
+> extends BaseCollection {
   type: 'doc';
 
   mdxOptions?: MDXOptions;
@@ -48,6 +41,8 @@ export interface DocCollection<
    * Load files with async
    */
   async?: Async;
+
+  schema?: CollectionSchema<Schema, { path: string; source: string }>;
 }
 
 export interface DocsCollection<

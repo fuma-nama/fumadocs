@@ -2,7 +2,7 @@ import { fileURLToPath } from 'node:url';
 import * as path from 'node:path';
 import { expect, test } from 'vitest';
 import { z } from 'zod';
-import { formatError } from '@/utils/format-error';
+import { formatError } from '@/utils/schema';
 import { generateJS } from '@/map/generate';
 import { defineCollections } from '@/config';
 
@@ -67,7 +67,6 @@ for (const { name, collection } of cases) {
       },
       path.join(file, './fixtures/index-async.output.js'),
       'hash',
-      () => ({}),
     );
 
     await expect(out.replaceAll(process.cwd(), '$cwd')).toMatchFileSnapshot(

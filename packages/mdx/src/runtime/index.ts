@@ -26,7 +26,7 @@ export const _runtime: Runtime = {
   meta(files) {
     return files.map((file) => {
       return {
-        ...(file.data.default as object),
+        ...file.data,
         _file: file.info,
       };
     }) as any;

@@ -4,9 +4,8 @@ import grayMatter from 'gray-matter';
 import { type LoaderContext } from 'webpack';
 import { getConfigHash, loadConfig } from '@/utils/config';
 import { buildMDX } from '@/utils/build-mdx';
-import { formatError } from '@/utils/format-error';
 import { getGitTimestamp } from './utils/git-timestamp';
-import type { StandardSchemaV1 } from '@standard-schema/spec';
+import { validate } from '@/utils/schema';
 
 export interface Options {
   /**
@@ -70,38 +69,15 @@ export default async function loader(
     collection?.mdxOptions ?? (await config.getDefaultMDXOptions());
 
   if (collection?.schema) {
-    let schema = collection.schema;
-
-    if (typeof schema === 'function' && !('~standard' in schema)) {
-      schema = schema({
-        async buildMDX(v, options = mdxOptions) {
-          const res = await buildMDX(
-            `${configHash}:${collectionId ?? 'global'}`,
-            v,
-            options,
-          );
-          return String(res.value);
-        },
+    matter.data = (await validate(
+      collection.schema,
+      matter.data,
+      {
         source,
         path: filePath,
-      });
-    }
-
-    if ('~standard' in schema) {
-      const result = await (schema as StandardSchemaV1)['~standard'].validate(
-        matter.data,
-      );
-      if (result.issues) {
-        callback(
-          new Error(
-            formatError(`invalid frontmatter in ${filePath}:`, result.issues),
-          ),
-        );
-        return;
-      }
-
-      matter.data = result.value as Record<string, unknown>;
-    }
+      },
+      `invalid frontmatter in ${filePath}:`,
+    )) as Record<string, unknown>;
   }
 
   let timestamp: number | undefined;
