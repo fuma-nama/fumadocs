@@ -24,15 +24,12 @@ import { CodeBlock } from '@/components/code-block';
 import { UwuHero } from '@/app/(home)/uwu';
 import SourceImage from '@/public/source.png';
 import ContributorCounter from '@/components/contributor-count';
-import { CreateAppAnimation, WhyInteractive } from './page.client';
 import {
-  VercelLogo,
-  NetlifyLogo,
-  NextSVG,
-  OpenAPIIcon,
-  EarthIcon,
-} from './icons';
-import Img from './img.png';
+  CreateAppAnimation,
+  PreviewImages,
+  WhyInteractive,
+} from './page.client';
+import { VercelLogo, NetlifyLogo, NextSVG, OpenAPIIcon } from './icons';
 import ArchImg from './arch.png';
 import { TypeTable } from 'fumadocs-ui/components/type-table';
 
@@ -47,12 +44,12 @@ export default function Page() {
   return (
     <>
       <div
-        className="absolute inset-x-0 top-[200px] h-[250px] max-md:hidden"
+        className="absolute inset-x-0 top-[360px] h-[250px] max-md:hidden"
         style={{
           background: `repeating-linear-gradient(to right, ${gridColor}, ${gridColor} 1px,transparent 1px,transparent 50px), repeating-linear-gradient(to bottom, ${gridColor}, ${gridColor} 1px,transparent 1px,transparent 50px)`,
         }}
       />
-      <main className="container relative max-w-[1100px] px-2 py-4 z-[2] lg:py-16">
+      <main className="container relative max-w-[1100px] px-2 py-4 z-[2] lg:py-8">
         <div
           style={{
             background:
@@ -70,10 +67,10 @@ export default function Page() {
             className="relative overflow-hidden border-x border-t px-8 py-16 sm:py-24"
             style={{
               backgroundImage:
-                'radial-gradient(circle at bottom center, var(--color-fd-secondary), var(--color-fd-background))',
+                'radial-gradient(circle at center, var(--color-fd-secondary), var(--color-fd-background) 40%)',
             }}
           >
-            <h2 className="bg-gradient-to-b from-fd-primary to-fd-foreground/40 bg-clip-text text-center text-2xl font-semibold text-transparent sm:text-3xl">
+            <h2 className="text-center text-2xl font-semibold sm:text-3xl">
               Loved by users.
               <br />
               Built for developers.
@@ -218,12 +215,14 @@ export function ProductTable() {
   );
 }
 
-function End(): React.ReactElement {
+function End() {
   return (
     <div className="grid grid-cols-1 border-b border-r md:grid-cols-2 lg:grid-cols-3">
       <div className="relative flex flex-col gap-8 overflow-hidden border-l border-t px-8 py-14">
-        <h2 className="text-3xl font-semibold md:text-4xl">Build Your Docs.</h2>
-        <ul className="mt-8 flex flex-col gap-6">
+        <h2 className="text-3xl font-bold font-mono uppercase text-fd-muted-foreground">
+          Build Your Docs
+        </h2>
+        <ul className="mt-4 flex flex-col gap-6">
           <li>
             <span className="flex flex-row items-center gap-2 font-medium">
               <BatteryChargingIcon className="size-5" />
@@ -383,7 +382,7 @@ function Highlights(): React.ReactElement {
   return (
     <div className="grid grid-cols-1 border-r md:grid-cols-2 lg:grid-cols-3">
       <div className="col-span-full flex flex-row items-start justify-center border-l border-t p-8 pb-2 text-center">
-        <h2 className="bg-pink-300/50 pl-1 text-2xl font-semibold">
+        <h2 className="bg-fd-primary text-fd-primary-foreground px-1 text-2xl font-semibold">
           Highlights
         </h2>
         <MousePointer className="-ml-1 mt-8" />
@@ -437,18 +436,14 @@ function Highlight({
 
 function Hero() {
   return (
-    <div className="relative z-[2] flex flex-col overflow-hidden border-x border-t bg-fd-background px-6 pt-12 max-md:text-center md:px-12 md:pt-16 [.uwu_&]:hidden">
+    <div className="relative z-[2] flex flex-col border-x border-t bg-fd-card/80 px-6 pt-12 max-md:text-center md:px-12 md:pt-16 [.uwu_&]:hidden max-lg:overflow-hidden">
       <h1 className="mb-8 text-4xl font-medium md:hidden">Build Your Docs</h1>
       <h1 className="mb-8 max-w-[600px] text-4xl font-medium max-md:hidden">
         Build excellent documentation site with less effort
       </h1>
       <p className="mb-8 text-fd-muted-foreground md:max-w-[80%] md:text-xl">
-        Fumadocs is a{' '}
-        <span className="text-fd-foreground">beautiful & robust</span>{' '}
-        documentation framework with a complete toolchain. Designed for{' '}
-        <span className="text-fd-foreground">Flexibility</span>,{' '}
-        <span className="text-fd-foreground">Performance</span> and{' '}
-        <span className="text-fd-foreground">Next.js</span>.
+        Fumadocs is a beautiful documentation framework for Developers, flexible
+        and performant, with all features from Next.js.
       </p>
       <div className="inline-flex items-center gap-3 max-md:mx-auto">
         <Link
@@ -472,21 +467,7 @@ function Hero() {
           Open Demo
         </a>
       </div>
-      <Image
-        src={Img}
-        alt="preview"
-        className="mb-[-250px] mt-12 min-w-[800px] select-none duration-1000 animate-in fade-in slide-in-from-bottom-12 md:mb-[-340px] md:min-w-[1100px]"
-        priority
-      />
-      <div
-        className="absolute inset-0 z-[-1]"
-        style={{
-          backgroundImage: [
-            'radial-gradient(ellipse at top, transparent 80%, color-mix(in oklab, var(--color-fd-primary) 10%, transparent))',
-            'linear-gradient(to bottom, var(--color-fd-background) 80%, transparent)',
-          ].join(', '),
-        }}
-      />
+      <PreviewImages />
     </div>
   );
 }
@@ -598,18 +579,6 @@ Hello World
             <NetlifyLogo className="h-auto w-32" />
           </a>
         </div>
-
-        <div
-          className="mt-8 w-full"
-          style={{
-            backgroundImage: [
-              'repeating-linear-gradient(to right,hsl(var(--primary)/.1),hsl(var(--primary)/.1) 1px,transparent 1px,transparent 40px)',
-              'repeating-linear-gradient(to bottom,hsl(var(--primary)/.1),hsl(var(--primary)/.1) 1px,transparent 1px,transparent 40px)',
-            ].join(','),
-          }}
-        >
-          <EarthIcon className="-my-8 mx-auto h-auto w-60" />
-        </div>
       </div>
     </div>
   );
@@ -715,7 +684,7 @@ function Features() {
         description="Fumadocs CLI creates interactive components for your docs, offering a rich experience to your users."
       >
         <CodeBlock
-          code="npm fumadocs add files"
+          code="npx fumadocs add accordion"
           lang="bash"
           wrapper={{
             title: 'Terminal',
@@ -723,11 +692,6 @@ function Features() {
             className: 'backdrop-blur-sm',
           }}
         />
-        <pre className="grid grid-cols-1 rounded-lg border bg-fd-card/80 p-4 text-xs leading-loose">
-          <code>Installing Files component...</code>
-          <code className="text-muted-foreground">{`-> ./components/files.tsx`}</code>
-          <code className="text-green-500">Successful</code>
-        </pre>
       </Feature>
       <Feature
         icon={CpuIcon}
