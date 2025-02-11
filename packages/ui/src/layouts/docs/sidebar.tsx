@@ -229,7 +229,10 @@ export function SidebarSeparator(props: HTMLAttributes<HTMLParagraphElement>) {
   return (
     <p
       {...props}
-      className={cn('mb-2 px-2 text-sm font-medium', props.className)}
+      className={cn(
+        'inline-flex items-center gap-2 mb-2 px-2 text-sm font-medium [&_svg]:size-4 [&_svg]:shrink-0',
+        props.className,
+      )}
       style={{
         paddingInlineStart: getOffset(level),
         ...props.style,
@@ -436,6 +439,7 @@ export function SidebarPageTree(props: {
           if (Separator) return <Separator key={id} item={item} />;
           return (
             <SidebarSeparator key={id} className={cn(i !== 0 && 'mt-8')}>
+              {item.icon}
               {item.name}
             </SidebarSeparator>
           );
