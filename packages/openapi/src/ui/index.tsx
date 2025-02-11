@@ -78,7 +78,7 @@ export function Property({
 }: PropertyProps) {
   return (
     <div className="rounded-xl border bg-fd-card p-3 prose-no-margin">
-      <div className="flex flex-row flex-wrap items-center gap-4">
+      <div className="flex flex-row flex-wrap items-center gap-4 mb-2">
         <code>{name}</code>
         {required ? (
           <Badge color="red" className="text-xs">

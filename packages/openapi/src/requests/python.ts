@@ -45,7 +45,7 @@ export function getSampleRequest(
           inputToString(
             endpoint.body.samples[sampleKey]?.value ?? '',
             endpoint.body.mediaType,
-            'backtick',
+            'python',
           ),
         );
     }

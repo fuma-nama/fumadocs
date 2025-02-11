@@ -125,7 +125,7 @@ export function Schema({
     );
   }
 
-  let footer: ReactNode = null;
+  let footer: ReactNode;
   const fields: {
     key: string;
     value: string;
