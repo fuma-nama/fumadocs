@@ -424,7 +424,7 @@ export function PreviewImages() {
         alt="preview"
         priority
         className={cn(
-          'w-full select-none duration-1000 animate-in fade-in slide-in-from-bottom-12 [mask-image:linear-gradient(to_bottom,white_70%,transparent_90%)]',
+          'w-full select-none duration-1000 animate-in fade-in slide-in-from-bottom-12 dark:[mask-image:linear-gradient(to_bottom,white_70%,transparent_90%)]',
           active !== 0 && 'hidden',
         )}
       />
@@ -434,7 +434,7 @@ export function PreviewImages() {
           alt="preview"
           priority
           className={cn(
-            'w-full select-none duration-1000 animate-in fade-in slide-in-from-bottom-12 [mask-image:linear-gradient(to_bottom,white_70%,transparent_90%)]',
+            'w-full select-none duration-1000 animate-in fade-in slide-in-from-bottom-12 dark:[mask-image:linear-gradient(to_bottom,white_70%,transparent_90%)]',
             active !== 1 && 'hidden',
           )}
         />

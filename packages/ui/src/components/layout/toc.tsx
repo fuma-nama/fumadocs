@@ -138,7 +138,7 @@ export function TocPopoverTrigger({
     <PopoverTrigger
       {...props}
       className={cn(
-        'inline-flex items-center gap-2 text-nowrap px-4 py-2 text-start',
+        'inline-flex items-center gap-2 text-nowrap px-4 py-2 text-start md:px-6 md:py-2.5',
         props.className,
       )}
     >

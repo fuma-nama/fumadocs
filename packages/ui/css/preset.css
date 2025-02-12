@@ -1,11 +1,21 @@
 @import './shiki.css';
 @import './animations.css';
 
-@plugin '../dist/theme/docs-ui.js';
 @plugin '../dist/theme/typography/index.js';
 
 @theme {
   --spacing-fd-container: 1400px;
+  --fd-sidebar-width: 0px;
+  --fd-toc-width: 0px;
+  --fd-layout-width: 100vw;
+  --fd-banner-height: 0px;
+  --fd-nav-height: 0px;
+  --fd-tocnav-height: 0px;
+
+  --fd-diff-remove-color: rgba(200, 10, 100, 0.12);
+  --fd-diff-remove-symbol-color: rgb(230, 10, 100);
+  --fd-diff-add-color: rgba(14, 180, 100, 0.12);
+  --fd-diff-add-symbol-color: rgb(10, 200, 100);
 }
 
 @layer base {
@@ -24,6 +34,41 @@
 
   [data-rmiz-modal-overlay='visible'] {
     background-color: var(--color-fd-background);
+  }
+}
+
+@layer utilities {
+  .fd-steps {
+    counter-reset: step;
+    border-left-width: 1px;
+    margin-left: 1rem;
+    padding-left: 1.75rem;
+    position: relative;
+  }
+
+  .fd-step:before {
+    background-color: var(--color-fd-secondary);
+    color: var(--color-fd-secondary-foreground);
+    content: counter(step);
+    counter-increment: step;
+    border-radius: 9999px;
+    justify-content: center;
+    align-items: center;
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    display: flex;
+    position: absolute;
+    left: -1rem;
+  }
+
+  .prose-no-margin > :first-child {
+    margin-top: 0;
+  }
+
+  .prose-no-margin > :last-child {
+    margin-bottom: 0;
   }
 }
 

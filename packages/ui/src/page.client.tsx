@@ -74,7 +74,7 @@ export function PageArticle(props: HTMLAttributes<HTMLElement>) {
     <article
       {...props}
       className={cn(
-        'flex w-full flex-1 flex-col gap-6 px-4 pt-8 md:pt-12 lg:px-8 xl:mx-auto',
+        'flex w-full flex-1 flex-col gap-6 px-4 pt-8 md:px-6 md:pt-12 xl:px-12 xl:mx-auto',
         article,
         props.className,
       )}
@@ -204,24 +204,29 @@ export function Breadcrumb(options: BreadcrumbProps) {
   if (items.length === 0) return null;
 
   return (
-    <div className="-mb-3 flex flex-row items-center gap-1 text-sm font-medium text-fd-muted-foreground">
-      {items.map((item, i) => (
-        <Fragment key={i}>
-          {i !== 0 && (
-            <ChevronRight className="size-4 shrink-0 rtl:rotate-180" />
-          )}
-          {item.url ? (
-            <Link
-              href={item.url}
-              className="truncate hover:text-fd-accent-foreground"
-            >
-              {item.name}
-            </Link>
-          ) : (
-            <span className="truncate">{item.name}</span>
-          )}
-        </Fragment>
-      ))}
+    <div className="flex flex-row items-center gap-1.5 text-sm text-fd-muted-foreground -mb-1.5">
+      {items.map((item, i) => {
+        const className = cn(
+          'truncate',
+          i === items.length - 1 && 'text-fd-primary font-medium',
+        );
+
+        return (
+          <Fragment key={i}>
+            {i !== 0 && <span className="text-fd-foreground/30">/</span>}
+            {item.url ? (
+              <Link
+                href={item.url}
+                className={cn(className, 'transition-opacity hover:opacity-80')}
+              >
+                {item.name}
+              </Link>
+            ) : (
+              <span className={className}>{item.name}</span>
+            )}
+          </Fragment>
+        );
+      })}
     </div>
   );
 }

@@ -424,15 +424,15 @@ export const DEFAULT: Config = {
 
       'a:not([data-card])': {
         color: 'var(--tw-prose-links)',
-        transition: 'text-decoration-color .2s',
+        transition: 'text-decoration .2s',
         fontWeight: '500',
         textDecoration: 'underline',
         textUnderlineOffset: '3.5px',
-        textDecorationColor:
-          'color-mix(in oklab, var(--tw-prose-links) 50%, transparent)',
+        textDecorationColor: 'var(--color-fd-primary)',
+        textDecorationThickness: '1.5px',
       },
       'a:not([data-card]):hover': {
-        textDecorationColor: 'var(--color-fd-primary)',
+        textDecorationThickness: '3px',
       },
     },
     colors,

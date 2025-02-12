@@ -219,10 +219,10 @@ function End() {
   return (
     <div className="grid grid-cols-1 border-b border-r md:grid-cols-2 lg:grid-cols-3">
       <div className="relative flex flex-col gap-8 overflow-hidden border-l border-t px-8 py-14">
-        <h2 className="text-3xl font-bold font-mono uppercase text-fd-muted-foreground">
+        <h2 className="text-3xl font-extrabold font-mono uppercase text-fd-muted-foreground/50">
           Build Your Docs
         </h2>
-        <ul className="mt-4 flex flex-col gap-6">
+        <ul className="mt-2 flex flex-col gap-6">
           <li>
             <span className="flex flex-row items-center gap-2 font-medium">
               <BatteryChargingIcon className="size-5" />
@@ -253,7 +253,7 @@ function End() {
             </span>
           </li>
         </ul>
-        <div className="flex flex-row flex-wrap gap-2 border-t pt-8">
+        <div className="flex flex-row flex-wrap gap-2 border-t pt-4">
           <Link href="/docs" className={cn(buttonVariants())}>
             Read docs
           </Link>
@@ -284,7 +284,7 @@ function Integration({
   return (
     <div
       className={cn(
-        'relative grid grid-cols-1 *:border-l *:border-t *:p-6 lg:grid-cols-3',
+        'relative grid grid-cols-2 *:border-l *:border-t *:p-6 lg:grid-cols-3',
         className,
       )}
       {...props}
@@ -305,7 +305,7 @@ function Integration({
       </Link>
       <Link
         href="/docs/headless/content-collections"
-        className={cn(linkItemVariants())}
+        className={cn(linkItemVariants(), 'col-span-2 lg:col-span-1')}
       >
         <Image
           alt="Content Collections logo"
@@ -327,7 +327,7 @@ function Integration({
           code="pnpm create fumadocs-app"
         />
       </div>
-      <div className="col-span-full h-[200px] overflow-hidden bg-gradient-to-b from-fd-primary/10">
+      <div className="relative col-span-full h-[200px] overflow-hidden bg-gradient-to-b from-fd-primary/10">
         <div
           className="mx-auto size-[500px] rounded-full"
           style={{
@@ -335,6 +335,9 @@ function Integration({
               'radial-gradient(circle at 0% 100%, transparent 60%, var(--color-fd-primary))',
           }}
         />
+        <p className="absolute bottom-2.5 inset-x-0 text-center font-mono text-xs text-fd-foreground/60">
+          light and gorgeous, just like the moon.
+        </p>
       </div>
     </div>
   );
@@ -443,7 +446,7 @@ function Hero() {
       </h1>
       <p className="mb-8 text-fd-muted-foreground md:max-w-[80%] md:text-xl">
         Fumadocs is a beautiful documentation framework for Developers, flexible
-        and performant, with all features from Next.js.
+        and performant, with everything from Next.js.
       </p>
       <div className="inline-flex items-center gap-3 max-md:mx-auto">
         <Link

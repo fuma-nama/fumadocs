@@ -183,10 +183,7 @@ export function DocsPage({
         >
           {replaceOrDefault(
             props.breadcrumb,
-            <Breadcrumb
-              includePage={props.breadcrumb?.full}
-              {...props.breadcrumb}
-            />,
+            <Breadcrumb {...props.breadcrumb} />,
           )}
           {props.children}
           <div role="none" className="flex-1" />
@@ -299,7 +296,7 @@ export const DocsTitle = forwardRef<
     <h1
       ref={ref}
       {...props}
-      className={cn('text-3xl font-bold', props.className)}
+      className={cn('text-3xl font-semibold', props.className)}
     >
       {props.children}
     </h1>

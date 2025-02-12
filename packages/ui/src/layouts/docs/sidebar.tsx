@@ -185,7 +185,7 @@ export function SidebarHeader(props: HTMLAttributes<HTMLDivElement>) {
     <div
       {...props}
       className={cn(
-        'flex flex-col gap-2 ps-4 pe-3 empty:hidden',
+        'flex flex-col gap-2 px-4 empty:hidden md:ps-5',
         props.className,
       )}
     >
@@ -199,7 +199,7 @@ export function SidebarFooter(props: HTMLAttributes<HTMLDivElement>) {
     <div
       {...props}
       className={cn(
-        'flex flex-col border-t ps-4 pe-3 py-3 empty:hidden',
+        'flex flex-col border-t px-4 py-3 empty:hidden md:ps-5',
         props.className,
       )}
     >
@@ -212,7 +212,7 @@ export function SidebarViewport(props: ScrollAreaProps) {
   return (
     <ScrollArea {...props} className={cn('h-full', props.className)}>
       <ScrollViewport
-        className="p-4 pe-3"
+        className="p-4 md:ps-5"
         style={{
           maskImage: 'linear-gradient(to bottom, transparent, white 12px)',
         }}
