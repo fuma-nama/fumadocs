@@ -259,10 +259,16 @@ function getSchemaType(
   if (schema.not) return `not ${getSchemaType(schema.not, ctx, false)}`;
 
   if (schema.anyOf) {
-    return `Any properties in ${schema.anyOf
+    const properties = schema.anyOf
       .map((one) => getSchemaType(one, ctx, false))
-      .filter((v) => v !== 'unknown')
-      .join(', ')}`;
+      .filter((v) => v !== 'unknown');
+
+    if (properties.length > 1) {
+      return `Any properties in ${properties.join(',')}`;
+    } else if (properties.length === 1) {
+      return properties[0];
+    }
+    // otherwise unknown
   }
 
   if (schema.type === 'string' && schema.format === 'binary' && ctx.allowFile)
