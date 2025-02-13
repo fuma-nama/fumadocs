@@ -41,7 +41,7 @@ export async function create(options: Options): Promise<void> {
     for (const dir of ['app', 'lib']) {
       const relative = path.relative(path.join(dest, dir), file);
 
-      if (!relative.startsWith('../')) {
+      if (!relative.startsWith(`..${path.sep}`)) {
         return path.join(dest, 'src', dir, relative);
       }
     }
