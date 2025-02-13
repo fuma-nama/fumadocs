@@ -5,6 +5,7 @@ import {
   type HTMLAttributes,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -23,33 +24,55 @@ import {
 } from 'fumadocs-core/breadcrumb';
 import { usePageStyles } from '@/contexts/layout';
 import { isActive } from '@/utils/is-active';
+import { TocPopover } from '@/components/layout/toc';
 
-export function TocNav(props: HTMLAttributes<HTMLDivElement>) {
-  const { open } = useSidebar();
+export function TocPopoverHeader(props: HTMLAttributes<HTMLDivElement>) {
+  const ref = useRef<HTMLElement>(null);
+  const [open, setOpen] = useState(false);
+  const sidebar = useSidebar();
   const { tocNav } = usePageStyles();
   const { isTransparent } = useNav();
 
+  useEffect(() => {
+    if (!open) return;
+
+    const onClick = (e: PointerEvent) => {
+      if (ref.current && !ref.current.contains(e.target as HTMLElement))
+        setOpen(false);
+    };
+
+    window.addEventListener('pointerdown', onClick);
+
+    return () => {
+      window.removeEventListener('pointerdown', onClick);
+    };
+  }, [open, setOpen]);
+
   return (
-    <header
-      id="nd-tocnav"
-      {...props}
-      className={cn(
-        'sticky top-[calc(var(--fd-banner-height)+var(--fd-nav-height))] z-10 flex flex-row items-center border-b border-fd-foreground/10 text-sm backdrop-blur-md transition-colors',
-        !isTransparent && 'bg-fd-background/80',
-        open && 'opacity-0',
-        tocNav,
-        props.className,
-      )}
-      style={
-        {
-          ...props.style,
-          '--fd-toc-top-with-offset':
-            'calc(4px + var(--fd-banner-height) + var(--fd-nav-height))',
-        } as object
-      }
+    <div
+      className="sticky overflow-visible z-10 h-8"
+      style={{
+        top: 'calc(var(--fd-banner-height) + var(--fd-nav-height))',
+      }}
     >
-      {props.children}
-    </header>
+      <TocPopover open={open} onOpenChange={setOpen} asChild>
+        <header
+          ref={ref}
+          id="nd-tocnav"
+          {...props}
+          className={cn(
+            'border-b border-fd-foreground/10 backdrop-blur-md transition-colors',
+            (!isTransparent || open) && 'bg-fd-background/80',
+            open && 'shadow-lg',
+            sidebar.open && 'opacity-0',
+            tocNav,
+            props.className,
+          )}
+        >
+          {props.children}
+        </header>
+      </TocPopover>
+    </div>
   );
 }
 

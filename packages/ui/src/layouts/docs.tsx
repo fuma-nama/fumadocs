@@ -114,7 +114,13 @@ export function DocsLayout({
         >
           {collapsible ? (
             <SidebarCollapseTrigger
-              className="fixed bottom-3 z-30 backdrop-blur-lg data-[collapsed=false]:hidden max-md:hidden"
+              className={cn(
+                buttonVariants({
+                  color: 'secondary',
+                  size: 'icon',
+                }),
+                'fixed bottom-3 z-30 data-[collapsed=false]:hidden max-md:hidden',
+              )}
               style={{
                 insetInlineStart: 'calc(var(--fd-layout-offset) + 0.5rem)',
               }}
@@ -197,7 +203,15 @@ function SidebarHeaderItems({
       ) : null}
       {props.children}
       {sidebarCollapsible && (
-        <SidebarCollapseTrigger className="ms-auto text-fd-muted-foreground max-md:hidden" />
+        <SidebarCollapseTrigger
+          className={cn(
+            buttonVariants({
+              color: 'ghost',
+              size: 'icon',
+            }),
+            'ms-auto text-fd-muted-foreground max-md:hidden',
+          )}
+        />
       )}
     </div>
   );
@@ -225,7 +239,7 @@ function SidebarFooterItems({
           item={item}
           className={cn(
             buttonVariants({ size: 'icon', color: 'ghost' }),
-            'text-fd-muted-foreground',
+            'text-fd-muted-foreground md:[&_svg]:size-4.5',
           )}
           aria-label={item.label}
         >
@@ -239,7 +253,7 @@ function SidebarFooterItems({
           <LanguageToggleText className="md:hidden" />
         </LanguageToggle>
       ) : null}
-      {!disableThemeSwitch ? <ThemeToggle /> : null}
+      {!disableThemeSwitch ? <ThemeToggle className="p-0" /> : null}
     </div>
   );
 }

@@ -14,7 +14,7 @@ import {
   Footer,
   type FooterProps,
   LastUpdate,
-  TocNav,
+  TocPopoverHeader,
   Breadcrumb,
   type BreadcrumbProps,
   PageBody,
@@ -24,7 +24,6 @@ import {
   Toc,
   TOCItems,
   TocPopoverTrigger,
-  TocPopover,
   TocPopoverContent,
   type TOCProps,
 } from '@/components/layout/toc';
@@ -155,20 +154,18 @@ export function DocsPage({
       >
         {replaceOrDefault(
           { enabled: tocPopoverEnabled, component: tocPopoverReplace },
-          <TocNav>
-            <TocPopover>
-              <TocPopoverTrigger className="size-full" items={toc} />
-              <TocPopoverContent>
-                {tocPopoverOptions.header}
-                {tocPopoverOptions.style === 'clerk' ? (
-                  <ClerkTOCItems items={toc} isMenu />
-                ) : (
-                  <TOCItems items={toc} isMenu />
-                )}
-                {tocPopoverOptions.footer}
-              </TocPopoverContent>
-            </TocPopover>
-          </TocNav>,
+          <TocPopoverHeader>
+            <TocPopoverTrigger className="w-full" items={toc} />
+            <TocPopoverContent>
+              {tocPopoverOptions.header}
+              {tocPopoverOptions.style === 'clerk' ? (
+                <ClerkTOCItems items={toc} isMenu />
+              ) : (
+                <TOCItems items={toc} isMenu />
+              )}
+              {tocPopoverOptions.footer}
+            </TocPopoverContent>
+          </TocPopoverHeader>,
           {
             items: toc,
             ...tocPopoverOptions,
@@ -205,7 +202,7 @@ export function DocsPage({
         { enabled: tocEnabled, component: tocReplace },
         <Toc>
           {tocOptions.header}
-          <h3 className="-ms-0.5 inline-flex items-center gap-1.5 text-sm text-fd-muted-foreground">
+          <h3 className="inline-flex items-center gap-1.5 text-sm text-fd-muted-foreground">
             <Text className="size-4" />
             <I18nLabel label="toc" />
           </h3>

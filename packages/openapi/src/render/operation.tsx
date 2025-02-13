@@ -315,6 +315,7 @@ function AuthSection({
           </renderer.Property>,
         );
       }
+
       if (schema.type === 'openIdConnect') {
         info.push(
           <renderer.Property

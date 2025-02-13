@@ -26,7 +26,6 @@ import {
 } from '@/components/ui/collapsible';
 import { type ScrollAreaProps } from '@radix-ui/react-scroll-area';
 import { useSidebar } from '@/contexts/sidebar';
-import { buttonVariants } from '@/components/ui/button';
 import { cva } from 'class-variance-authority';
 import type {
   CollapsibleContentProps,
@@ -169,7 +168,7 @@ export function Sidebar({
         <div
           {...inner}
           className={cn(
-            'flex size-full max-w-full flex-col pt-2 md:ms-auto md:w-[var(--fd-sidebar-width)] md:border-e md:pt-4',
+            'flex size-full max-w-full flex-col pt-2 md:ms-auto md:w-(--fd-sidebar-width) md:border-e md:pt-4',
             inner?.className,
           )}
         >
@@ -387,13 +386,6 @@ export function SidebarCollapseTrigger(
       aria-label="Collapse Sidebar"
       data-collapsed={collapsed}
       {...props}
-      className={cn(
-        buttonVariants({
-          color: 'ghost',
-          size: 'icon',
-        }),
-        props.className,
-      )}
       onClick={() => {
         setCollapsed((prev) => !prev);
       }}
