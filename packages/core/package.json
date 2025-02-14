@@ -56,6 +56,10 @@
       "import": "./dist/utils/use-shiki.js",
       "types": "./dist/utils/use-shiki.d.ts"
     },
+    "./utils/use-effect-event": {
+      "import": "./dist/utils/use-effect-event.js",
+      "types": "./dist/utils/use-effect-event.d.ts"
+    },
     "./link": {
       "import": "./dist/link.js",
       "types": "./dist/link.d.ts"

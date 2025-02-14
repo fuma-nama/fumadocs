@@ -25,6 +25,7 @@ import {
 import { usePageStyles } from '@/contexts/layout';
 import { isActive } from '@/utils/is-active';
 import { TocPopover } from '@/components/layout/toc';
+import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 
 export function TocPopoverHeader(props: HTMLAttributes<HTMLDivElement>) {
   const ref = useRef<HTMLElement>(null);
@@ -33,24 +34,28 @@ export function TocPopoverHeader(props: HTMLAttributes<HTMLDivElement>) {
   const { tocNav } = usePageStyles();
   const { isTransparent } = useNav();
 
-  useEffect(() => {
+  const onClick = useEffectEvent((e: Event) => {
     if (!open) return;
 
-    const onClick = (e: PointerEvent) => {
-      if (ref.current && !ref.current.contains(e.target as HTMLElement))
-        setOpen(false);
-    };
+    if (ref.current && !ref.current.contains(e.target as HTMLElement))
+      setOpen(false);
+  });
 
-    window.addEventListener('pointerdown', onClick);
+  useEffect(() => {
+    window.addEventListener('click', onClick);
 
     return () => {
-      window.removeEventListener('pointerdown', onClick);
+      window.removeEventListener('click', onClick);
     };
-  }, [open, setOpen]);
+  }, [onClick]);
 
   return (
     <div
-      className="sticky overflow-visible z-10 h-8"
+      className={cn(
+        'sticky overflow-visible z-10 h-8',
+        tocNav,
+        props.className,
+      )}
       style={{
         top: 'calc(var(--fd-banner-height) + var(--fd-nav-height))',
       }}
@@ -65,8 +70,6 @@ export function TocPopoverHeader(props: HTMLAttributes<HTMLDivElement>) {
             (!isTransparent || open) && 'bg-fd-background/80',
             open && 'shadow-lg',
             sidebar.open && 'opacity-0',
-            tocNav,
-            props.className,
           )}
         >
           {props.children}
@@ -227,7 +230,7 @@ export function Breadcrumb(options: BreadcrumbProps) {
   if (items.length === 0) return null;
 
   return (
-    <div className="flex flex-row items-center gap-1.5 text-sm text-fd-muted-foreground -mb-1.5">
+    <div className="flex flex-row items-center gap-1.5 text-[15px] text-fd-muted-foreground -mb-1.5">
       {items.map((item, i) => {
         const className = cn(
           'truncate',

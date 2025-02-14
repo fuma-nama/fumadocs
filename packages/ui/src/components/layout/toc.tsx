@@ -48,7 +48,7 @@ export function Toc(props: HTMLAttributes<HTMLDivElement>) {
       id="nd-toc"
       {...props}
       className={cn(
-        'sticky top-[calc(var(--fd-banner-height)+var(--fd-nav-height))] h-[var(--fd-toc-height)] pb-2 pt-12',
+        'sticky top-[calc(var(--fd-banner-height)+var(--fd-nav-height))] h-(--fd-toc-height) pb-2 pt-12',
         toc,
         props.className,
       )}
@@ -188,12 +188,12 @@ export function TocPopoverTrigger({
         className={cn(
           'size-4 shrink-0 text-fd-muted-foreground transition-all',
           !current && 'opacity-0',
-          open ? 'rotate-90' : '-mx-1.5',
+          open ? 'rotate-90' : '-ms-1.5',
         )}
       />
       <span
         className={cn(
-          'truncate text-fd-muted-foreground transition-opacity',
+          'truncate text-fd-muted-foreground transition-opacity -ms-1.5',
           (!current || open) && 'opacity-0',
         )}
       >

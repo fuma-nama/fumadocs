@@ -7,7 +7,6 @@ import {
   type ReactNode,
   useEffect,
   useState,
-  useRef,
   type ButtonHTMLAttributes,
   useCallback,
   type HTMLAttributes,
@@ -24,6 +23,7 @@ import {
 } from '@radix-ui/react-dialog';
 import type { SortedResult } from 'fumadocs-core/server';
 import { cva } from 'class-variance-authority';
+import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 
 export type SearchLink = [name: string, href: string];
 
@@ -153,7 +153,7 @@ function SearchResults({
     sidebar.setOpen(false);
   };
 
-  function onKey(e: KeyboardEvent) {
+  const onKey = useEffectEvent((e: KeyboardEvent) => {
     if (e.key === 'ArrowDown' || e.key == 'ArrowUp') {
       setActive((cur) => {
         const idx = items.findIndex((item) => item.id === cur);
@@ -173,17 +173,12 @@ function SearchResults({
       if (selected) onOpen(selected);
       e.preventDefault();
     }
-  }
-
-  const listenerRef = useRef(onKey);
-  listenerRef.current = onKey;
+  });
 
   useEffect(() => {
-    const listener = (e: KeyboardEvent) => listenerRef.current?.(e);
-
-    window.addEventListener('keydown', listener);
+    window.addEventListener('keydown', onKey);
     return () => {
-      window.removeEventListener('keydown', listener);
+      window.removeEventListener('keydown', onKey);
     };
   }, []);
 

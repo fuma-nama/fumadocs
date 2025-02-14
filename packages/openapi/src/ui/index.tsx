@@ -104,7 +104,7 @@ export function APIExample(props: HTMLAttributes<HTMLDivElement>) {
     <div
       {...props}
       className={cn(
-        'prose-no-margin md:sticky md:top-[var(--fd-api-info-top)] xl:w-[400px]',
+        'prose-no-margin md:sticky md:top-(--fd-api-info-top) xl:w-[400px]',
         props.className,
       )}
     >

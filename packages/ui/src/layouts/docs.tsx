@@ -1,7 +1,7 @@
 import type { PageTree } from 'fumadocs-core/server';
 import { type ReactNode, type HTMLAttributes } from 'react';
 import Link from 'next/link';
-import { Languages } from 'lucide-react';
+import { ChevronRight, Languages } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import {
@@ -103,7 +103,7 @@ export function DocsLayout({
           id="nd-docs-layout"
           {...props.containerProps}
           className={cn(
-            'flex flex-1 flex-row pe-[var(--fd-layout-offset)]',
+            'flex flex-1 flex-row pe-(--fd-layout-offset)',
             variables,
             props.containerProps?.className,
           )}
@@ -119,21 +119,17 @@ export function DocsLayout({
                   color: 'secondary',
                   size: 'icon',
                 }),
-                'fixed bottom-3 z-30 data-[collapsed=false]:hidden max-md:hidden',
+                'fixed top-1/2 -translate-y-1/2 start-0 z-40 text-fd-muted-foreground border-s-0 rounded-s-none shadow-md data-[collapsed=false]:hidden max-md:hidden',
               )}
-              style={{
-                insetInlineStart: 'calc(var(--fd-layout-offset) + 0.5rem)',
-              }}
-            />
+            >
+              <ChevronRight />
+            </SidebarCollapseTrigger>
           ) : null}
           {replaceOrDefault(
             { enabled: sidebarEnabled, component: sidebarReplace },
             <Aside
               {...sidebar}
-              className={cn(
-                'md:ps-[var(--fd-layout-offset)]',
-                sidebar.className,
-              )}
+              className={cn('md:ps-(--fd-layout-offset)', sidebar.className)}
             >
               <SidebarHeader>
                 <SidebarHeaderItems
@@ -209,7 +205,7 @@ function SidebarHeaderItems({
               color: 'ghost',
               size: 'icon',
             }),
-            'ms-auto text-fd-muted-foreground max-md:hidden',
+            'ms-auto text-fd-muted-foreground [&_svg]:size-4.5 max-md:hidden',
           )}
         />
       )}
