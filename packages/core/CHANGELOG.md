@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 15.0.7
+
+### Patch Changes
+
+- 5deaf40: Support icons in separators of `meta.json`
+
 ## 15.0.6
 
 ### Patch Changes

@@ -1,5 +1,13 @@
 # next-docs-mdx
 
+## 11.5.4
+
+### Patch Changes
+
+- fc5d7c0: Compile Meta files into inline JSON objects
+- Updated dependencies [5deaf40]
+  - fumadocs-core@15.0.7
+
 ## 11.5.3
 
 ### Patch Changes

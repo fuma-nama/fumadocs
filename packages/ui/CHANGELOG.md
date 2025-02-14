@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 15.0.7
+
+### Patch Changes
+
+- 5deaf40: Support icons in separators of `meta.json`
+- f782c2c: Improve sidebar design
+- Updated dependencies [5deaf40]
+  - fumadocs-core@15.0.7
+
 ## 15.0.6
 
 ### Patch Changes
