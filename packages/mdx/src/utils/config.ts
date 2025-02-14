@@ -28,13 +28,10 @@ export interface LoadedConfig {
   };
 }
 
-const cache = new Map<
-  string,
-  {
-    hash: string;
-    config: Promise<LoadedConfig>;
-  }
->();
+let cache: {
+  hash: string;
+  config: Promise<LoadedConfig>;
+} | null = null;
 
 async function compileConfig(configPath: string) {
   const { build } = await import('esbuild');
@@ -71,9 +68,8 @@ export async function loadConfig(
   hash: string,
   build = false,
 ): Promise<LoadedConfig> {
-  const cached = cache.get(configPath);
-  if (cached && cached.hash === hash) {
-    return await cached.config;
+  if (cache && cache.hash === hash) {
+    return await cache.config;
   }
 
   if (build) await compileConfig(configPath);
@@ -91,7 +87,7 @@ export async function loadConfig(
     return config;
   });
 
-  cache.set(configPath, { config, hash });
+  cache = { config, hash };
   return await config;
 }
 

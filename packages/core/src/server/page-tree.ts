@@ -22,6 +22,7 @@ export interface Item {
 export interface Separator {
   type: 'separator';
   name: ReactNode;
+  icon?: ReactElement;
 }
 
 export interface Folder {

@@ -9,7 +9,6 @@ import { TocItemsEmpty } from '@/components/layout/toc';
 
 export default function ClerkTOCItems({
   items,
-  isMenu = false,
 }: {
   items: TOCItemType[];
   isMenu?: boolean;
@@ -72,7 +71,7 @@ export default function ClerkTOCItems({
   if (items.length === 0) return <TocItemsEmpty />;
 
   return (
-    <ScrollArea className={cn('flex flex-col', isMenu && '-ms-3')}>
+    <ScrollArea className="flex flex-col ps-px">
       <ScrollViewport className="relative min-h-0" ref={viewRef}>
         {svg ? (
           <div
@@ -90,7 +89,7 @@ export default function ClerkTOCItems({
           >
             <TocThumb
               containerRef={containerRef}
-              className="mt-[var(--fd-top)] h-[var(--fd-height)] bg-fd-primary transition-all"
+              className="mt-(--fd-top) h-(--fd-height) bg-fd-primary transition-all"
             />
           </div>
         ) : null}

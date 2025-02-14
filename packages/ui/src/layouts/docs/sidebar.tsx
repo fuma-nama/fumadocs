@@ -26,7 +26,6 @@ import {
 } from '@/components/ui/collapsible';
 import { type ScrollAreaProps } from '@radix-ui/react-scroll-area';
 import { useSidebar } from '@/contexts/sidebar';
-import { buttonVariants } from '@/components/ui/button';
 import { cva } from 'class-variance-authority';
 import type {
   CollapsibleContentProps,
@@ -119,7 +118,7 @@ export function CollapsibleSidebar(props: SidebarProps) {
       className={cn(
         'md:transition-all',
         collapsed &&
-          'md:-me-[var(--fd-sidebar-width)] md:translate-x-[calc(var(--fd-sidebar-offset)*-1)] rtl:md:translate-x-[var(--fd-sidebar-offset)]',
+          'md:-me-(--fd-sidebar-width) md:translate-x-[calc(var(--fd-sidebar-offset)*-1)] rtl:md:translate-x-(--fd-sidebar-offset)',
         collapsed && hover && 'z-50 md:translate-x-0',
         collapsed && !hover && 'md:opacity-0',
         props.className,
@@ -154,7 +153,7 @@ export function Sidebar({
         blockScrollingWidth={768} // md
         {...props}
         className={cn(
-          'fixed top-[calc(var(--fd-banner-height)+var(--fd-nav-height))] z-30 bg-fd-card text-sm md:sticky md:h-[var(--fd-sidebar-height)]',
+          'fixed top-[calc(var(--fd-banner-height)+var(--fd-nav-height))] z-30 bg-fd-card text-sm md:sticky md:h-(--fd-sidebar-height)',
           'max-md:inset-x-0 max-md:bottom-0 max-md:bg-fd-background/80 max-md:text-[15px] max-md:backdrop-blur-lg max-md:data-[open=false]:invisible',
           props.className,
         )}
@@ -169,7 +168,7 @@ export function Sidebar({
         <div
           {...inner}
           className={cn(
-            'flex size-full max-w-full flex-col pt-2 md:ms-auto md:w-[var(--fd-sidebar-width)] md:border-e md:pt-4',
+            'flex size-full max-w-full flex-col pt-2 md:ms-auto md:w-(--fd-sidebar-width) md:border-e md:pt-4',
             inner?.className,
           )}
         >
@@ -185,7 +184,7 @@ export function SidebarHeader(props: HTMLAttributes<HTMLDivElement>) {
     <div
       {...props}
       className={cn(
-        'flex flex-col gap-2 ps-4 pe-3 empty:hidden',
+        'flex flex-col gap-2 px-4 empty:hidden md:ps-5',
         props.className,
       )}
     >
@@ -199,7 +198,7 @@ export function SidebarFooter(props: HTMLAttributes<HTMLDivElement>) {
     <div
       {...props}
       className={cn(
-        'flex flex-col border-t ps-4 pe-3 py-3 empty:hidden',
+        'flex flex-col border-t px-4 py-3 empty:hidden md:ps-5',
         props.className,
       )}
     >
@@ -212,7 +211,7 @@ export function SidebarViewport(props: ScrollAreaProps) {
   return (
     <ScrollArea {...props} className={cn('h-full', props.className)}>
       <ScrollViewport
-        className="p-4 pe-3"
+        className="p-4 md:ps-5"
         style={{
           maskImage: 'linear-gradient(to bottom, transparent, white 12px)',
         }}
@@ -229,7 +228,10 @@ export function SidebarSeparator(props: HTMLAttributes<HTMLParagraphElement>) {
   return (
     <p
       {...props}
-      className={cn('mb-2 px-2 text-sm font-medium', props.className)}
+      className={cn(
+        'inline-flex items-center gap-2 mb-2 px-2 text-sm font-medium [&_svg]:size-4 [&_svg]:shrink-0',
+        props.className,
+      )}
       style={{
         paddingInlineStart: getOffset(level),
         ...props.style,
@@ -384,13 +386,6 @@ export function SidebarCollapseTrigger(
       aria-label="Collapse Sidebar"
       data-collapsed={collapsed}
       {...props}
-      className={cn(
-        buttonVariants({
-          color: 'ghost',
-          size: 'icon',
-        }),
-        props.className,
-      )}
       onClick={() => {
         setCollapsed((prev) => !prev);
       }}
@@ -436,6 +431,7 @@ export function SidebarPageTree(props: {
           if (Separator) return <Separator key={id} item={item} />;
           return (
             <SidebarSeparator key={id} className={cn(i !== 0 && 'mt-8')}>
+              {item.icon}
               {item.name}
             </SidebarSeparator>
           );

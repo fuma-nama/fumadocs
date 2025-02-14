@@ -1,7 +1,7 @@
 import type { PageTree } from 'fumadocs-core/server';
 import { type ReactNode, type HTMLAttributes } from 'react';
 import Link from 'next/link';
-import { Languages, MoreHorizontal } from 'lucide-react';
+import { ChevronRight, Languages } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import {
@@ -14,18 +14,14 @@ import {
   SidebarPageTree,
 } from '@/layouts/docs/sidebar';
 import { replaceOrDefault, type SharedNavProps } from '@/layouts/shared';
-import {
-  type LinkItemType,
-  type IconItemType,
-  BaseLinkItem,
-} from '@/layouts/links';
+import { type LinkItemType, BaseLinkItem } from '@/layouts/links';
 import { RootToggle } from '@/components/layout/root-toggle';
 import { type BaseLayoutProps, getLinks } from './shared';
 import {
   LanguageToggle,
   LanguageToggleText,
 } from '@/components/layout/language-toggle';
-import { LinksMenu, Navbar, NavbarSidebarTrigger } from '@/layouts/docs.client';
+import { Navbar, NavbarSidebarTrigger } from '@/layouts/docs.client';
 import { TreeContextProvider } from '@/contexts/tree';
 import { NavProvider, Title } from '@/components/layout/nav';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
@@ -77,7 +73,7 @@ export function DocsLayout({
 
   const tabs = getSidebarTabsFromOptions(tabOptions, props.tree) ?? [];
   const variables = cn(
-    '[--fd-tocnav-height:36px] md:[--fd-sidebar-width:268px] xl:md:[--fd-sidebar-width:286px] xl:[--fd-toc-width:286px] xl:[--fd-tocnav-height:0px]',
+    '[--fd-tocnav-height:36px] md:[--fd-sidebar-width:268px] lg:[--fd-sidebar-width:286px] xl:[--fd-toc-width:286px] xl:[--fd-tocnav-height:0px]',
     !navReplace && navEnabled
       ? '[--fd-nav-height:3.5rem] md:[--fd-nav-height:0px]'
       : undefined,
@@ -107,7 +103,7 @@ export function DocsLayout({
           id="nd-docs-layout"
           {...props.containerProps}
           className={cn(
-            'flex flex-1 flex-row pe-[var(--fd-layout-offset)]',
+            'flex flex-1 flex-row pe-(--fd-layout-offset)',
             variables,
             props.containerProps?.className,
           )}
@@ -118,23 +114,29 @@ export function DocsLayout({
         >
           {collapsible ? (
             <SidebarCollapseTrigger
-              className="fixed bottom-3 z-30 backdrop-blur-lg data-[collapsed=false]:hidden max-md:hidden"
-              style={{
-                insetInlineStart: 'calc(var(--fd-layout-offset) + 0.5rem)',
-              }}
-            />
+              className={cn(
+                buttonVariants({
+                  color: 'secondary',
+                  size: 'icon',
+                }),
+                'fixed top-1/2 -translate-y-1/2 start-0 z-40 text-fd-muted-foreground border-s-0 rounded-s-none shadow-md data-[collapsed=false]:hidden max-md:hidden',
+              )}
+            >
+              <ChevronRight />
+            </SidebarCollapseTrigger>
           ) : null}
           {replaceOrDefault(
             { enabled: sidebarEnabled, component: sidebarReplace },
             <Aside
               {...sidebar}
-              className={cn(
-                'md:ps-[var(--fd-layout-offset)]',
-                sidebar.className,
-              )}
+              className={cn('md:ps-(--fd-layout-offset)', sidebar.className)}
             >
               <SidebarHeader>
-                <SidebarHeaderItems {...nav} links={links} />
+                <SidebarHeaderItems
+                  {...nav}
+                  links={links}
+                  sidebarCollapsible={collapsible}
+                />
                 {sidebarBanner}
                 {tabs.length > 0 ? (
                   <RootToggle options={tabs} className="-mx-2" />
@@ -158,10 +160,9 @@ export function DocsLayout({
               </SidebarViewport>
               <SidebarFooter>
                 <SidebarFooterItems
-                  sidebarCollapsible={collapsible}
+                  links={links}
                   i18n={i18n}
                   disableThemeSwitch={props.disableThemeSwitch ?? false}
-                  iconItems={links.filter((v) => v.type === 'icon')}
                 />
                 {sidebarFooter}
               </SidebarFooter>
@@ -180,8 +181,9 @@ export function DocsLayout({
 
 function SidebarHeaderItems({
   links,
+  sidebarCollapsible,
   ...props
-}: SharedNavProps & { links: LinkItemType[] }) {
+}: SharedNavProps & { links: LinkItemType[]; sidebarCollapsible: boolean }) {
   const isEmpty = !props.title && !props.children && links.length === 0;
   if (isEmpty) return null;
 
@@ -190,49 +192,40 @@ function SidebarHeaderItems({
       {props.title ? (
         <Link
           href={props.url ?? '/'}
-          className="inline-flex items-center gap-2.5 py-1 font-medium"
+          className="inline-flex text-[15px] items-center gap-2.5 py-1 font-medium"
         >
           {props.title}
         </Link>
       ) : null}
       {props.children}
-      {links.length > 0 ? (
-        <LinksMenu
-          items={links}
+      {sidebarCollapsible && (
+        <SidebarCollapseTrigger
           className={cn(
             buttonVariants({
-              size: 'icon',
               color: 'ghost',
+              size: 'icon',
             }),
-            'ms-auto',
+            'ms-auto text-fd-muted-foreground [&_svg]:size-4.5 max-md:hidden',
           )}
-        >
-          <MoreHorizontal />
-        </LinksMenu>
-      ) : null}
+        />
+      )}
     </div>
   );
 }
 
 function SidebarFooterItems({
-  iconItems,
   i18n,
-  sidebarCollapsible,
   disableThemeSwitch,
+  links,
 }: {
   i18n: boolean;
-  iconItems: IconItemType[];
+  links: LinkItemType[];
   disableThemeSwitch: boolean;
-  sidebarCollapsible: boolean;
 }) {
+  const iconItems = links.filter((v) => v.type === 'icon');
+
   // empty footer items
-  if (
-    iconItems.length === 0 &&
-    !i18n &&
-    disableThemeSwitch &&
-    !sidebarCollapsible
-  )
-    return null;
+  if (links.length === 0 && !i18n && disableThemeSwitch) return null;
 
   return (
     <div className="flex flex-row items-center">
@@ -242,7 +235,7 @@ function SidebarFooterItems({
           item={item}
           className={cn(
             buttonVariants({ size: 'icon', color: 'ghost' }),
-            'text-fd-muted-foreground md:hidden',
+            'text-fd-muted-foreground md:[&_svg]:size-4.5',
           )}
           aria-label={item.label}
         >
@@ -256,12 +249,7 @@ function SidebarFooterItems({
           <LanguageToggleText className="md:hidden" />
         </LanguageToggle>
       ) : null}
-      {!disableThemeSwitch ? (
-        <ThemeToggle className="p-0 md:order-first" />
-      ) : null}
-      {sidebarCollapsible ? (
-        <SidebarCollapseTrigger className="max-md:hidden" />
-      ) : null}
+      {!disableThemeSwitch ? <ThemeToggle className="p-0" /> : null}
     </div>
   );
 }

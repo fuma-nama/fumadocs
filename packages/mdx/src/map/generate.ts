@@ -1,16 +1,28 @@
 import * as path from 'node:path';
+import * as fs from 'node:fs/promises';
 import fg from 'fast-glob';
 import { getTypeFromPath } from '@/utils/get-type-from-path';
 import type { FileInfo } from '@/config/types';
 import { type LoadedConfig } from '@/utils/config';
 import type { DocCollection, MetaCollection } from '@/config';
+import { validate } from '@/utils/schema';
+import { fileCache } from '@/map/file-cache';
+import { readFrontmatter } from '@/utils/read-frontmatter';
+
+async function readFrontmatterWithCache(file: string) {
+  const cached = fileCache.read('read-frontmatter', file);
+  if (cached) return cached;
+
+  const res = await readFrontmatter(file);
+  fileCache.write('read-frontmatter', file, res);
+  return res;
+}
 
 export async function generateJS(
   configPath: string,
   config: LoadedConfig,
   outputPath: string,
   configHash: string,
-  getFrontmatter: (file: string) => unknown | Promise<unknown>,
 ): Promise<string> {
   const outDir = path.dirname(outputPath);
   let asyncInit = false;
@@ -37,7 +49,32 @@ export async function generateJS(
   ) {
     const items = files.map(async (file, i) => {
       config._runtime.files.set(file.absolutePath, collectionName);
-      const importId = `${collectionName}_${collection.type}_${i}`;
+
+      if (collection.type === 'meta') {
+        const cached = fileCache.read<string>('generate-js', file.absolutePath);
+        if (cached) return cached;
+
+        const source = (await fs.readFile(file.absolutePath)).toString();
+        let data = JSON.parse(source);
+
+        if (collection?.schema) {
+          data = await validate(
+            collection.schema,
+            data,
+            {
+              source,
+              path: file.absolutePath,
+            },
+            `invalid data in ${file.absolutePath}:`,
+          );
+        }
+
+        const entry = `{ info: ${JSON.stringify(file)}, data: ${JSON.stringify(data)} }`;
+        fileCache.write('generate-js', file.absolutePath, entry);
+        return entry;
+      }
+
+      const importId = `${collectionName}_${i}`;
       lines.unshift(
         getImportCode({
           type: 'namespace',
@@ -68,11 +105,9 @@ export async function generateJS(
     }
 
     const entries = files.map(async (file) => {
-      const frontmatter = await getFrontmatter(file.absolutePath);
-
       return JSON.stringify({
         info: file,
-        data: frontmatter,
+        data: await readFrontmatterWithCache(file.absolutePath),
       });
     });
 
@@ -83,20 +118,17 @@ export async function generateJS(
     if (collection.type === 'docs') {
       const docs = await getCollectionFiles(collection.docs);
       const metas = await getCollectionFiles(collection.meta);
+      const metaEntries = (await getEntries(k, collection.meta, metas)).join(
+        ', ',
+      );
 
       if (collection.docs.async) {
         const docsEntries = (await getAsyncEntries(docs)).join(', ');
-        const metaEntries = (await getEntries(k, collection.meta, metas)).join(
-          ', ',
-        );
 
         return `export const ${k} = _runtimeAsync.docs<typeof _source.${k}>([${docsEntries}], [${metaEntries}], "${k}", _sourceConfig)`;
       }
 
       const docsEntries = (await getEntries(k, collection.docs, docs)).join(
-        ', ',
-      );
-      const metaEntries = (await getEntries(k, collection.meta, metas)).join(
         ', ',
       );
 

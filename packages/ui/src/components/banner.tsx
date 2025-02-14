@@ -1,6 +1,6 @@
 'use client';
 
-import { type HTMLAttributes, useCallback, useEffect, useState } from 'react';
+import { type HTMLAttributes, useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
@@ -34,11 +34,6 @@ export function Banner({
 
   useEffect(() => {
     if (globalKey) setOpen(localStorage.getItem(globalKey) !== 'true');
-  }, [globalKey]);
-
-  const onClick = useCallback(() => {
-    setOpen(false);
-    if (globalKey) localStorage.setItem(globalKey, 'true');
   }, [globalKey]);
 
   if (!open) return null;
@@ -81,7 +76,10 @@ export function Banner({
         <button
           type="button"
           aria-label="Close Banner"
-          onClick={onClick}
+          onClick={() => {
+            setOpen(false);
+            if (globalKey) localStorage.setItem(globalKey, 'true');
+          }}
           className={cn(
             buttonVariants({
               color: 'ghost',

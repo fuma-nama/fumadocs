@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, type ReactNode, useRef } from 'react';
+import { type ReactNode } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import {
   useI18n,
@@ -9,6 +9,7 @@ import {
   defaultTranslations,
   type LocaleItem,
 } from './contexts/i18n';
+import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 
 interface I18nProviderProps {
   /**
@@ -43,7 +44,7 @@ export function I18nProvider({
   const router = useRouter();
   const pathname = usePathname();
 
-  const onChangeCallback = (value: string) => {
+  const onChange = useEffectEvent((value: string) => {
     const segments = pathname.split('/').filter((v) => v.length > 0);
 
     // If locale prefix hidden
@@ -55,12 +56,7 @@ export function I18nProvider({
 
     router.push(`/${segments.join('/')}`);
     router.refresh();
-  };
-
-  const onChangeRef = useRef(onChangeCallback);
-  onChangeRef.current = onChangeCallback;
-
-  const onChange = useCallback((v: string) => onChangeRef.current(v), []);
+  });
 
   return (
     <I18nContext.Provider

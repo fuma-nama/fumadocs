@@ -76,7 +76,7 @@ export function DocsLayout({
   const pageStyles: PageStyles = {
     tocNav: cn('xl:hidden'),
     toc: cn('max-xl:hidden'),
-    page: cn('mt-[var(--fd-nav-height)]'),
+    page: cn('mt-(--fd-nav-height)'),
   };
 
   return (
@@ -86,7 +86,7 @@ export function DocsLayout({
           id="nd-docs-layout"
           {...props.containerProps}
           className={cn(
-            'flex w-full flex-1 flex-row pe-[var(--fd-layout-offset)]',
+            'flex w-full flex-1 flex-row pe-(--fd-layout-offset)',
             variables,
             props.containerProps?.className,
           )}
@@ -98,7 +98,7 @@ export function DocsLayout({
           <Aside
             {...sidebar}
             className={cn(
-              'md:ps-[var(--fd-layout-offset)] md:[--fd-nav-height:0px]',
+              'md:ps-(--fd-layout-offset) md:[--fd-nav-height:0px]',
               sidebar.className,
             )}
           >
@@ -106,7 +106,15 @@ export function DocsLayout({
               <SidebarHeaderItems nav={nav} links={links}>
                 {nav.children}
                 {sidebarCollapsible ? (
-                  <SidebarCollapseTrigger className="ms-auto text-fd-muted-foreground" />
+                  <SidebarCollapseTrigger
+                    className={cn(
+                      buttonVariants({
+                        color: 'ghost',
+                        size: 'icon',
+                      }),
+                      'ms-auto text-fd-muted-foreground',
+                    )}
+                  />
                 ) : null}
               </SidebarHeaderItems>
               {sidebarBanner}
@@ -159,7 +167,15 @@ function DocsNavbar({
   return (
     <Navbar>
       {sidebarCollapsible ? (
-        <SidebarCollapseTrigger className="-ms-1.5 text-fd-muted-foreground data-[collapsed=false]:hidden max-md:hidden" />
+        <SidebarCollapseTrigger
+          className={cn(
+            buttonVariants({
+              color: 'ghost',
+              size: 'icon',
+            }),
+            '-ms-1.5 text-fd-muted-foreground data-[collapsed=false]:hidden max-md:hidden',
+          )}
+        />
       ) : null}
       <LargeSearchToggle
         hideIfDisabled

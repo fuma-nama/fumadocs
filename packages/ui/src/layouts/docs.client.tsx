@@ -1,19 +1,8 @@
 'use client';
 
 import { ChevronDown, Menu, X } from 'lucide-react';
-import {
-  type ButtonHTMLAttributes,
-  type HTMLAttributes,
-  useState,
-} from 'react';
-import { usePathname } from 'next/navigation';
-import { useOnChange } from 'fumadocs-core/utils/use-on-change';
+import { type ButtonHTMLAttributes, type HTMLAttributes } from 'react';
 import { cn } from '@/utils/cn';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
 import { BaseLinkItem, type LinkItemType } from '@/layouts/links';
 import {
   Collapsible,
@@ -30,30 +19,6 @@ const itemVariants = cva(
   'flex flex-row items-center gap-2 rounded-md px-3 py-2.5 text-fd-muted-foreground transition-colors duration-100 [overflow-wrap:anywhere] hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 hover:transition-none md:px-2 md:py-1.5 [&_svg]:size-4',
 );
 
-interface LinksMenuProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  items: LinkItemType[];
-}
-
-export function LinksMenu({ items, ...props }: LinksMenuProps) {
-  const [open, setOpen] = useState(false);
-  const pathname = usePathname();
-
-  useOnChange(pathname, () => {
-    setOpen(false);
-  });
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger {...props} />
-      <PopoverContent className="flex flex-col p-1">
-        {items.map((item, i) => (
-          <MenuItem key={i} item={item} />
-        ))}
-      </PopoverContent>
-    </Popover>
-  );
-}
-
 export function Navbar(props: HTMLAttributes<HTMLElement>) {
   const { open } = useSidebar();
   const { isTransparent } = useNav();
@@ -63,7 +28,7 @@ export function Navbar(props: HTMLAttributes<HTMLElement>) {
       id="nd-subnav"
       {...props}
       className={cn(
-        'sticky top-[var(--fd-banner-height)] z-30 flex h-14 flex-row items-center border-b border-fd-foreground/10 px-4 backdrop-blur-lg transition-colors',
+        'sticky top-(--fd-banner-height) z-30 flex h-14 flex-row items-center border-b border-fd-foreground/10 px-4 backdrop-blur-lg transition-colors',
         (!isTransparent || open) && 'bg-fd-background/80',
         props.className,
       )}

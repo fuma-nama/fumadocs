@@ -54,7 +54,7 @@ export interface PageTreeBuilder {
 
 const group = /^\((?<name>.+)\)$/;
 const link = /^(?:\[(?<icon>[^\]]+)])?\[(?<name>[^\]]+)]\((?<url>[^)]+)\)$/;
-const separator = /^---(?<name>.*?)---$/;
+const separator = /^---(?:\[(?<icon>[^\]]+)])?(?<name>.+)---$/;
 const rest = '...' as const;
 const restReversed = 'z...a' as const;
 const extractPrefix = '...';
@@ -121,10 +121,11 @@ function resolveFolderItem(
   if (match?.groups) {
     const node: PageTree.Separator = {
       type: 'separator',
+      icon: ctx.options.resolveIcon?.(match.groups.icon),
       name: match.groups.name,
     };
 
-    return [ctx.options.attachSeparator?.(node) ?? node];
+    return [removeUndefined(ctx.options.attachSeparator?.(node) ?? node)];
   }
 
   match = link.exec(item);
@@ -177,8 +178,9 @@ function buildFolderNode(
   ctx: PageTreeBuilderContext,
 ): PageTree.Folder {
   const metaPath = resolvePath(folder.file.path, 'meta');
-  let meta = ctx.storage.read(metaPath, 'meta');
-  meta = findLocalizedFile(metaPath, 'meta', ctx) ?? meta;
+  const meta =
+    findLocalizedFile(metaPath, 'meta', ctx) ??
+    ctx.storage.read(metaPath, 'meta');
   const indexFile = ctx.storage.read(
     resolvePath(folder.file.flattenedPath, 'index'),
     'page',

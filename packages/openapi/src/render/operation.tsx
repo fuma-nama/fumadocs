@@ -27,6 +27,13 @@ export interface CodeSample {
     | false;
 }
 
+const ParamTypes = {
+  path: 'Path Parameters',
+  query: 'Query Parameters',
+  header: 'Header Parameters',
+  cookie: 'Cookie Parameters',
+};
+
 export function Operation({
   type = 'operation',
   path,
@@ -130,46 +137,42 @@ export function Operation({
     );
   }
 
-  const parameterGroups = new Map<string, ReactNode[]>();
   const endpoint = generateSample(path, method, ctx);
 
-  for (const param of method.parameters ?? []) {
-    const pInfo = endpoint.parameters.find(
-      (item) => item.name === param.name && item.in === param.in,
+  const parameterNode = Object.entries(ParamTypes).map(([type, title]) => {
+    const params = endpoint.parameters.filter(
+      (param) => param.in === type && !param.isAuthOnly,
     );
-    if (!pInfo) continue;
+    if (params.length === 0) return;
 
-    const schema = pInfo.schema;
-    const groupName =
-      {
-        path: 'Path Parameters',
-        query: 'Query Parameters',
-        header: 'Header Parameters',
-        cookie: 'Cookie Parameters',
-      }[param.in] ?? 'Other Parameters';
-
-    const group = parameterGroups.get(groupName) ?? [];
-    group.push(
-      <Schema
-        key={param.name}
-        name={param.name}
-        schema={{
-          ...schema,
-          description: param.description ?? schema.description,
-          deprecated:
-            (param.deprecated ?? false) || (schema.deprecated ?? false),
-        }}
-        ctx={{
-          parseObject: false,
-          readOnly: method.method === 'GET',
-          writeOnly: method.method !== 'GET',
-          required: param.required ?? false,
-          render: ctx,
-        }}
-      />,
+    return (
+      <Fragment key={type}>
+        {heading(headingLevel, title, ctx)}
+        <div className="flex flex-col gap-4">
+          {params.map((param) => (
+            <Schema
+              key={param.name}
+              name={param.name}
+              schema={{
+                ...param.schema,
+                description: param.description ?? param.schema?.description,
+                deprecated:
+                  (param.deprecated ?? false) ||
+                  (param.schema?.deprecated ?? false),
+              }}
+              ctx={{
+                parseObject: false,
+                readOnly: method.method === 'GET',
+                writeOnly: method.method !== 'GET',
+                required: param.required ?? false,
+                render: ctx,
+              }}
+            />
+          ))}
+        </div>
+      </Fragment>
     );
-    parameterGroups.set(groupName, group);
-  }
+  });
 
   if (method.callbacks) {
     callbacksNode = (
@@ -208,14 +211,7 @@ export function Operation({
         </>
       ) : null}
       {bodyNode}
-      {Array.from(parameterGroups.entries()).map(([group, params]) => {
-        return (
-          <Fragment key={group}>
-            {heading(headingLevel, group, ctx)}
-            {params}
-          </Fragment>
-        );
-      })}
+      {parameterNode}
       {responseNode}
       {callbacksNode}
     </ctx.renderer.APIInfo>
@@ -277,7 +273,7 @@ function AuthSection({
 }: {
   requirements: SecurityRequirementObject[];
   ctx: RenderContext;
-}): ReactNode {
+}) {
   let id = 0;
   const info: ReactNode[] = [];
 
@@ -319,6 +315,7 @@ function AuthSection({
           </renderer.Property>,
         );
       }
+
       if (schema.type === 'openIdConnect') {
         info.push(
           <renderer.Property

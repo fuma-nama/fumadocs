@@ -69,7 +69,7 @@ export function RootToggle({
           <ChevronsUpDown className="size-4 text-fd-muted-foreground" />
         </PopoverTrigger>
       ) : null}
-      <PopoverContent className="w-[var(--radix-popover-trigger-width)] overflow-hidden p-0">
+      <PopoverContent className="w-(--radix-popover-trigger-width) overflow-hidden p-0">
         {options.map((item) => (
           <Link
             key={item.url}

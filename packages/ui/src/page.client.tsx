@@ -5,6 +5,7 @@ import {
   type HTMLAttributes,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -23,33 +24,58 @@ import {
 } from 'fumadocs-core/breadcrumb';
 import { usePageStyles } from '@/contexts/layout';
 import { isActive } from '@/utils/is-active';
+import { TocPopover } from '@/components/layout/toc';
+import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 
-export function TocNav(props: HTMLAttributes<HTMLDivElement>) {
-  const { open } = useSidebar();
+export function TocPopoverHeader(props: HTMLAttributes<HTMLDivElement>) {
+  const ref = useRef<HTMLElement>(null);
+  const [open, setOpen] = useState(false);
+  const sidebar = useSidebar();
   const { tocNav } = usePageStyles();
   const { isTransparent } = useNav();
 
+  const onClick = useEffectEvent((e: Event) => {
+    if (!open) return;
+
+    if (ref.current && !ref.current.contains(e.target as HTMLElement))
+      setOpen(false);
+  });
+
+  useEffect(() => {
+    window.addEventListener('click', onClick);
+
+    return () => {
+      window.removeEventListener('click', onClick);
+    };
+  }, [onClick]);
+
   return (
-    <header
-      id="nd-tocnav"
-      {...props}
+    <div
       className={cn(
-        'sticky top-[calc(var(--fd-banner-height)+var(--fd-nav-height))] z-10 flex flex-row items-center border-b border-fd-foreground/10 text-sm backdrop-blur-md transition-colors',
-        !isTransparent && 'bg-fd-background/80',
-        open && 'opacity-0',
+        'sticky overflow-visible z-10 h-8',
         tocNav,
         props.className,
       )}
-      style={
-        {
-          ...props.style,
-          '--fd-toc-top-with-offset':
-            'calc(4px + var(--fd-banner-height) + var(--fd-nav-height))',
-        } as object
-      }
+      style={{
+        top: 'calc(var(--fd-banner-height) + var(--fd-nav-height))',
+      }}
     >
-      {props.children}
-    </header>
+      <TocPopover open={open} onOpenChange={setOpen} asChild>
+        <header
+          ref={ref}
+          id="nd-tocnav"
+          {...props}
+          className={cn(
+            'border-b border-fd-foreground/10 backdrop-blur-md transition-colors',
+            (!isTransparent || open) && 'bg-fd-background/80',
+            open && 'shadow-lg',
+            sidebar.open && 'opacity-0',
+          )}
+        >
+          {props.children}
+        </header>
+      </TocPopover>
+    </div>
   );
 }
 
@@ -74,7 +100,7 @@ export function PageArticle(props: HTMLAttributes<HTMLElement>) {
     <article
       {...props}
       className={cn(
-        'flex w-full flex-1 flex-col gap-6 px-4 pt-8 md:pt-12 lg:px-8 xl:mx-auto',
+        'flex w-full flex-1 flex-col gap-6 px-4 pt-8 md:px-6 md:pt-12 xl:px-12 xl:mx-auto',
         article,
         props.className,
       )}
@@ -204,24 +230,29 @@ export function Breadcrumb(options: BreadcrumbProps) {
   if (items.length === 0) return null;
 
   return (
-    <div className="-mb-3 flex flex-row items-center gap-1 text-sm font-medium text-fd-muted-foreground">
-      {items.map((item, i) => (
-        <Fragment key={i}>
-          {i !== 0 && (
-            <ChevronRight className="size-4 shrink-0 rtl:rotate-180" />
-          )}
-          {item.url ? (
-            <Link
-              href={item.url}
-              className="truncate hover:text-fd-accent-foreground"
-            >
-              {item.name}
-            </Link>
-          ) : (
-            <span className="truncate">{item.name}</span>
-          )}
-        </Fragment>
-      ))}
+    <div className="flex flex-row items-center gap-1.5 text-[15px] text-fd-muted-foreground -mb-1.5">
+      {items.map((item, i) => {
+        const className = cn(
+          'truncate',
+          i === items.length - 1 && 'text-fd-primary font-medium',
+        );
+
+        return (
+          <Fragment key={i}>
+            {i !== 0 && <span className="text-fd-foreground/30">/</span>}
+            {item.url ? (
+              <Link
+                href={item.url}
+                className={cn(className, 'transition-opacity hover:opacity-80')}
+              >
+                {item.name}
+              </Link>
+            ) : (
+              <span className={className}>{item.name}</span>
+            )}
+          </Fragment>
+        );
+      })}
     </div>
   );
 }

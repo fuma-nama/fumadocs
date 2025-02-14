@@ -56,10 +56,7 @@ export const logo = (
       aria-label="Fumadocs"
     />
 
-    <FumadocsIcon
-      className="size-4 [.uwu_&]:hidden [header_&]:size-5"
-      fill="currentColor"
-    />
+    <FumadocsIcon className="size-5 [.uwu_&]:hidden" fill="currentColor" />
   </>
 );
 

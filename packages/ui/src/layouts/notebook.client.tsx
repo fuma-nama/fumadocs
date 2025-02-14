@@ -16,7 +16,7 @@ export function Navbar(props: HTMLAttributes<HTMLElement>) {
       id="nd-subnav"
       {...props}
       className={cn(
-        'fixed inset-x-0 top-[var(--fd-banner-height)] z-10 h-14 pe-[var(--fd-layout-offset)] backdrop-blur-lg transition-colors',
+        'fixed inset-x-0 top-(--fd-banner-height) z-10 h-14 pe-(--fd-layout-offset) backdrop-blur-lg transition-colors',
         (!isTransparent || open) && 'bg-fd-background/80',
         props.className,
       )}

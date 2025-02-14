@@ -6,7 +6,9 @@ import {
   type NoReference,
 } from '@/utils/schema';
 import { getSecurities, getSecurityPrefix } from '@/utils/get-security';
-export interface EndpointSamples {
+import type { OpenAPIV3_1 } from 'openapi-types';
+
+export interface Samples {
   [key: string]: {
     value?: unknown;
     description?: string;
@@ -26,7 +28,7 @@ export interface EndpointSample {
   body?: {
     schema: ParsedSchema;
     mediaType: string;
-    samples: EndpointSamples;
+    samples: Samples;
   };
   responses: Record<string, ResponseSample>;
   parameters: ParameterSample[];
@@ -38,11 +40,9 @@ interface ResponseSample {
   schema: ParsedSchema;
 }
 
-interface ParameterSample {
-  name: string;
-  in: string;
-  schema: ParsedSchema;
+interface ParameterSample extends NoReference<OpenAPIV3_1.ParameterObject> {
   sample: unknown;
+  isAuthOnly: boolean;
 }
 
 export function generateSample(
@@ -54,35 +54,34 @@ export function generateSample(
   const responses: EndpointSample['responses'] = {};
 
   for (const param of method.parameters ?? []) {
-    if (param.schema) {
-      let value = param.example ?? sample(param.schema as object);
-      if (param.schema.type && param.schema.type === value) {
-        // if no example is defined make sure its visible that there is still a placeholder, equal to auth <token>
-        value = `<${value}>`;
-      }
-      params.push({
-        name: param.name,
-        in: param.in,
-        schema: param.schema,
-        sample: value,
-      });
-    } else if (param.content) {
-      const key = getPreferredType(param.content);
-      const content = key ? param.content[key] : undefined;
+    let schema = param.schema,
+      value;
 
-      if (!key || !content)
+    if (!schema && param.content) {
+      const key = getPreferredType(param.content);
+
+      const content = key ? param.content[key] : undefined;
+      if (!content)
         throw new Error(
           `Cannot find parameter schema for ${param.name} in ${path} ${method.method}`,
         );
 
-      params.push({
-        name: param.name,
-        in: param.in,
-        schema: content.schema ?? {},
-        sample:
-          content.example ?? param.example ?? sample(content.schema as object),
-      });
+      schema = content.schema;
+      value = content.example ?? param.example ?? sample(schema as object);
+    } else {
+      value = param.example ?? sample(schema as object);
     }
+
+    if (schema?.type && param.schema?.type === value) {
+      // if no example is defined make sure its visible that there is still a placeholder, equal to auth <token>
+      value = `<${value}>`;
+    }
+
+    params.push({
+      ...param,
+      sample: value,
+      isAuthOnly: false,
+    });
   }
 
   const requirements = method.security ?? document.security;
@@ -97,6 +96,7 @@ export function generateSample(
         },
         sample: prefix ? `${prefix} <token>` : '<token>',
         in: 'header',
+        isAuthOnly: true,
       });
     }
   }
@@ -147,17 +147,13 @@ export function generateSample(
   const queryParams = new URLSearchParams();
 
   for (const param of params) {
-    let value = generateBody(method.method, param.schema);
-    if (param.schema.type && param.schema.type === value) {
-      // if no example is defined make sure its visible that there is still a placeholder, equal to auth <token>
-      value = `<${value}>`;
-    }
-    if (param.in === 'query') queryParams.append(param.name, String(value));
+    if (param.in === 'query')
+      queryParams.append(param.name, String(param.sample));
 
     if (param.in === 'path')
       pathWithParameters = pathWithParameters.replace(
         `{${param.name}}`,
-        String(value),
+        String(param.sample),
       );
   }
 

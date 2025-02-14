@@ -6,12 +6,15 @@ import { type ElementCompact, js2xml } from 'xml-js';
 export function inputToString(
   value: unknown,
   mediaType = 'application/json',
-  multiLine: 'single-quote' | 'backtick' | 'none' = 'none',
+  multiLine: 'single-quote' | 'backtick' | 'python' | 'none' = 'none',
 ): string {
   const getStr = (v: string) => {
     if (multiLine === 'none') return JSON.stringify(v);
 
-    const delimit = multiLine === 'backtick' ? `\`` : `'`;
+    const delimit = { backtick: `\``, 'single-quote': `'`, python: `"""` }[
+      multiLine
+    ];
+
     return `${delimit}${v.replaceAll(delimit, `\\${delimit}`)}${delimit}`;
   };
 

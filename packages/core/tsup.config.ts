@@ -21,6 +21,7 @@ export default defineConfig({
     'src/search/orama-cloud.ts',
     'src/utils/use-on-change.ts',
     'src/utils/use-shiki.tsx',
+    'src/utils/use-effect-event.ts',
     'src/i18n/index.ts',
   ],
 });

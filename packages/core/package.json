@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-core",
-  "version": "15.0.6",
+  "version": "15.0.7",
   "description": "The library for building a documentation website in Next.js",
   "keywords": [
     "NextJs",
@@ -55,6 +55,10 @@
     "./utils/use-shiki": {
       "import": "./dist/utils/use-shiki.js",
       "types": "./dist/utils/use-shiki.d.ts"
+    },
+    "./utils/use-effect-event": {
+      "import": "./dist/utils/use-effect-event.js",
+      "types": "./dist/utils/use-effect-event.d.ts"
     },
     "./link": {
       "import": "./dist/link.js",

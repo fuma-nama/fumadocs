@@ -9,13 +9,13 @@ import {
   useState,
   createContext,
   useContext,
-  useRef,
   useLayoutEffect,
   useId,
   useEffect,
 } from 'react';
 import { cn } from '@/utils/cn';
 import * as Primitive from './ui/tabs';
+import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 
 export { Primitive };
 
@@ -80,17 +80,12 @@ export function Tabs({
   // eslint-disable-next-line react-hooks/exhaustive-deps -- re-reconstruct the collection if items changed
   const collection = useMemo(() => createCollection(), [items]);
 
-  const onChange: ChangeListener = (v) => {
+  const onUpdate: ChangeListener = useEffectEvent((v) => {
     if (values.includes(v)) setValue(v);
-  };
-
-  const onChangeRef = useRef(onChange);
-  onChangeRef.current = onChange;
+  });
 
   useLayoutEffect(() => {
     if (!groupId) return;
-    const onUpdate: ChangeListener = (v) => onChangeRef.current(v);
-
     const previous = persist
       ? localStorage.getItem(groupId)
       : sessionStorage.getItem(groupId);
@@ -100,7 +95,7 @@ export function Tabs({
     return () => {
       removeChangeListener(groupId, onUpdate);
     };
-  }, [groupId, persist]);
+  }, [groupId, onUpdate, persist]);
 
   useLayoutEffect(() => {
     const hash = window.location.hash.slice(1);
