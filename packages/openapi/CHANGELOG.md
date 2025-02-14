@@ -1,5 +1,15 @@
 # @fuma-docs/openapi
 
+## 6.0.8
+
+### Patch Changes
+
+- f118e24: Fix gaps of property components under parameters section
+- Updated dependencies [5deaf40]
+- Updated dependencies [f782c2c]
+  - fumadocs-core@15.0.7
+  - fumadocs-ui@15.0.7
+
 ## 6.0.7
 
 ### Patch Changes

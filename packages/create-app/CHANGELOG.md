@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 15.0.7
+
+### Patch Changes
+
+- b3c0ee8: Fix windows problems
+
 ## 15.0.6
 
 ### Patch Changes
