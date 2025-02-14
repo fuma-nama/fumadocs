@@ -180,7 +180,7 @@ function SearchResults({
     return () => {
       window.removeEventListener('keydown', onKey);
     };
-  }, []);
+  }, [onKey]);
 
   return (
     <div
