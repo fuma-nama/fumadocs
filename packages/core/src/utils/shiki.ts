@@ -40,9 +40,10 @@ export type HighlightOptions = CodeToHastOptionsCommon<BundledLanguage> &
     components?: Partial<Components>;
   };
 
+let defaultEngine: RegexEngine | undefined;
 export async function _highlight(code: string, options: HighlightOptions) {
   const { getSingletonHighlighter } = await import('shiki');
-  const { lang, components: _, engine: defaultEngine, ...rest } = options;
+  const { lang, components: _, engine, ...rest } = options;
 
   let themes: CodeOptionsThemes<BundledTheme> = { themes: defaultThemes };
   if ('theme' in options && options.theme) {
@@ -51,16 +52,13 @@ export async function _highlight(code: string, options: HighlightOptions) {
     themes = { themes: options.themes };
   }
 
-  let engine = defaultEngine;
-  if (!engine) {
-    const { createOnigurumaEngine } = await import('shiki/engine/oniguruma');
-
-    engine = await createOnigurumaEngine(await import('shiki/wasm'));
-  }
-
   const highlighter = await getSingletonHighlighter({
     langs: [lang],
-    engine,
+    engine:
+      engine ??
+      (defaultEngine ??= await import('shiki/engine/oniguruma').then((res) =>
+        res.createOnigurumaEngine(import('shiki/wasm')),
+      )),
     themes:
       'theme' in themes
         ? [themes.theme]

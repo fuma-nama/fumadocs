@@ -1,5 +1,4 @@
-import { createHash } from 'node:crypto';
-import * as fs from 'node:fs';
+import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import type {
   DocCollection,
@@ -10,6 +9,7 @@ import { type GlobalConfig } from '@/config/types';
 import type { ProcessorOptions } from '@mdx-js/mdx';
 import { pathToFileURL } from 'node:url';
 import { buildConfig } from '@/config/build';
+import type { MDXOptions as RemoteMdxOptions } from '@fumadocs/mdx-remote';
 
 export function findConfigFile(): string {
   return path.resolve('source.config.ts');
@@ -17,7 +17,7 @@ export function findConfigFile(): string {
 
 export interface LoadedConfig {
   collections: Map<string, DocCollection | MetaCollection | DocsCollection>;
-  getDefaultMDXOptions: () => Promise<ProcessorOptions>;
+
   global?: GlobalConfig;
 
   _runtime: {
@@ -26,6 +26,14 @@ export interface LoadedConfig {
      */
     files: Map<string, string>;
   };
+
+  _mdx_loader?: {
+    cachedProcessorOptions?: ProcessorOptions;
+  };
+
+  _mdx_async?: {
+    cachedMdxOptions?: RemoteMdxOptions;
+  };
 }
 
 let cache: {
@@ -33,13 +41,13 @@ let cache: {
   config: Promise<LoadedConfig>;
 } | null = null;
 
-async function compileConfig(configPath: string) {
+async function compileConfig(configPath: string, outDir: string) {
   const { build } = await import('esbuild');
 
   const transformed = await build({
     entryPoints: [{ in: configPath, out: 'source.config' }],
     bundle: true,
-    outdir: '.source',
+    outdir: outDir,
     target: 'node18',
     write: true,
     platform: 'node',
@@ -72,12 +80,11 @@ export async function loadConfig(
     return await cache.config;
   }
 
-  if (build) await compileConfig(configPath);
+  if (build) await compileConfig(configPath, '.source');
 
   const url = pathToFileURL(path.resolve('.source/source.config.mjs'));
 
-  // every call to `loadConfig` should cause the previous cache to be ignored
-  const config = import(`${url.href}?hash=${configPath}`).then((loaded) => {
+  const config = import(`${url.href}?hash=${hash}`).then((loaded) => {
     const [err, config] = buildConfig(
       // every call to `loadConfig` will cause the previous cache to be ignored
       loaded as Record<string, unknown>,
@@ -95,12 +102,11 @@ export async function loadConfig(
  * Generate hash based on the content of config
  */
 export async function getConfigHash(configPath: string): Promise<string> {
-  const hash = createHash('md5');
-  const rs = fs.createReadStream(configPath);
+  const stats = await fs.stat(configPath).catch(() => undefined);
 
-  for await (const chunk of rs) {
-    hash.update(chunk as string);
+  if (stats) {
+    return stats.mtime.getTime().toString();
   }
 
-  return hash.digest('hex');
+  throw new Error('Cannot find config file');
 }
