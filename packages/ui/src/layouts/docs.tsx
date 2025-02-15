@@ -75,7 +75,7 @@ export function DocsLayout({
   const variables = cn(
     '[--fd-tocnav-height:36px] md:[--fd-sidebar-width:268px] lg:[--fd-sidebar-width:286px] xl:[--fd-toc-width:286px] xl:[--fd-tocnav-height:0px]',
     !navReplace && navEnabled
-      ? '[--fd-nav-height:3.5rem] md:[--fd-nav-height:0px]'
+      ? '[--fd-nav-height:calc(var(--spacing)*14)] md:[--fd-nav-height:0px]'
       : undefined,
   );
 
