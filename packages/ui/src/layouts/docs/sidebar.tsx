@@ -359,7 +359,7 @@ export function SidebarFolderContent(props: CollapsibleContentProps) {
 
   return (
     <CollapsibleContent {...props} className={cn('relative', props.className)}>
-      <Context
+      <Context.Provider
         value={useMemo(
           () => ({
             ...ctx,
@@ -370,7 +370,7 @@ export function SidebarFolderContent(props: CollapsibleContentProps) {
       >
         <div className="absolute w-px inset-y-0 bg-fd-border start-3" />
         {props.children}
-      </Context>
+      </Context.Provider>
     </CollapsibleContent>
   );
 }
