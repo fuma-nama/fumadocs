@@ -26,6 +26,7 @@ import {
   TocPopoverTrigger,
   TocPopoverContent,
   type TOCProps,
+  TOCScrollArea,
 } from '@/components/layout/toc';
 import { buttonVariants } from '@/components/ui/button';
 import { Edit, Text } from 'lucide-react';
@@ -158,11 +159,13 @@ export function DocsPage({
             <TocPopoverTrigger className="w-full" items={toc} />
             <TocPopoverContent>
               {tocPopoverOptions.header}
-              {tocPopoverOptions.style === 'clerk' ? (
-                <ClerkTOCItems items={toc} isMenu />
-              ) : (
-                <TOCItems items={toc} isMenu />
-              )}
+              <TOCScrollArea isMenu>
+                {tocPopoverOptions.style === 'clerk' ? (
+                  <ClerkTOCItems items={toc} />
+                ) : (
+                  <TOCItems items={toc} />
+                )}
+              </TOCScrollArea>
               {tocPopoverOptions.footer}
             </TocPopoverContent>
           </TocPopoverHeader>,
@@ -206,11 +209,13 @@ export function DocsPage({
             <Text className="size-4" />
             <I18nLabel label="toc" />
           </h3>
-          {tocOptions.style === 'clerk' ? (
-            <ClerkTOCItems items={toc} />
-          ) : (
-            <TOCItems items={toc} />
-          )}
+          <TOCScrollArea>
+            {tocOptions.style === 'clerk' ? (
+              <ClerkTOCItems items={toc} />
+            ) : (
+              <TOCItems items={toc} />
+            )}
+          </TOCScrollArea>
           {tocOptions.footer}
         </Toc>,
         {

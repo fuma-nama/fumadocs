@@ -139,7 +139,49 @@ export default function Layout({ children }: { children: ReactNode }) {
 }
 ```
 
-### Replacing Navbar
+### Nav Mode
+
+Customise the position of navbar.
+
+```tsx title="layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/notebook';
+import { baseOptions } from '@/app/layout.config';
+import { source } from '@/lib/source';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <DocsLayout
+      {...baseOptions}
+      nav={{ ...baseOptions, mode: 'top' }}
+      tree={source.pageTree}
+    >
+      {children}
+    </DocsLayout>
+  );
+}
+```
+
+### Tab Mode
+
+Customise the position of tabs (Sidebar Tabs).
+
+```tsx title="layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/notebook';
+import { baseOptions } from '@/app/layout.config';
+import { source } from '@/lib/source';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <DocsLayout {...baseOptions} tabMode="navbar" tree={source.pageTree}>
+      {children}
+    </DocsLayout>
+  );
+}
+```
+
+## Replacing Navbar
 
 Fumadocs uses CSS Variables to share the size of layout components, and fit each layout component into appropriate position.
 

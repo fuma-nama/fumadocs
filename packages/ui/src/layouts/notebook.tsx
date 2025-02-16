@@ -151,12 +151,19 @@ export function DocsLayout({
 
               <SidebarPageTree components={sidebarComponents} />
             </SidebarViewport>
-            <SidebarFooter className={cn(!sidebarFooter && 'md:hidden')}>
+            <SidebarFooter
+              className={cn(
+                'flex flex-row items-center',
+                !sidebarFooter && 'md:hidden',
+              )}
+            >
+              {i18n ? (
+                <LanguageToggle className="me-auto md:hidden">
+                  <Languages className="size-5 text-fd-muted-foreground" />
+                </LanguageToggle>
+              ) : null}
               {!props.disableThemeSwitch ? (
-                <ThemeToggle
-                  className="w-fit md:hidden"
-                  mode="light-dark-system"
-                />
+                <ThemeToggle className="md:hidden" mode="light-dark-system" />
               ) : null}
               {sidebarFooter}
             </SidebarFooter>
@@ -234,7 +241,7 @@ function DocsNavbar({
           )}
         />
 
-        <div className="flex flex-1 flex-row items-center justify-end md:gap-2">
+        <div className="flex flex-1 flex-row items-center justify-end">
           <div className="flex flex-row items-center gap-6 px-4 empty:hidden max-lg:hidden">
             {links
               .filter((item) => item.type !== 'icon')
@@ -256,8 +263,8 @@ function DocsNavbar({
                 key={i}
                 item={item}
                 className={cn(
-                  buttonVariants({ size: 'icon', color: 'ghost' }),
-                  'text-fd-muted-foreground [&_svg]:size-4.5 max-lg:hidden',
+                  buttonVariants({ size: 'icon-sm', color: 'ghost' }),
+                  'text-fd-muted-foreground max-lg:hidden',
                 )}
                 aria-label={item.label}
               >
@@ -265,11 +272,14 @@ function DocsNavbar({
               </BaseLinkItem>
             ))}
           {i18n ? (
-            <LanguageToggle>
-              <Languages className="size-5" />
+            <LanguageToggle className="max-md:hidden">
+              <Languages className="size-4.5 text-fd-muted-foreground" />
             </LanguageToggle>
           ) : null}
-          <ThemeToggle className="max-md:hidden" mode="light-dark-system" />
+          <ThemeToggle
+            className="ms-2 max-md:hidden"
+            mode="light-dark-system"
+          />
         </div>
       </div>
       {tabs.length > 0 ? (
