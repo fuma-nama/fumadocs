@@ -4,16 +4,9 @@ import * as Primitive from 'fumadocs-core/toc';
 import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/utils/cn';
 import { TocThumb } from '@/components/layout/toc-thumb';
-import { ScrollArea, ScrollViewport } from '../ui/scroll-area';
 import { TocItemsEmpty } from '@/components/layout/toc';
 
-export default function ClerkTOCItems({
-  items,
-}: {
-  items: TOCItemType[];
-  isMenu?: boolean;
-}) {
-  const viewRef = useRef<HTMLDivElement>(null);
+export default function ClerkTOCItems({ items }: { items: TOCItemType[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const [svg, setSvg] = useState<{
@@ -71,42 +64,38 @@ export default function ClerkTOCItems({
   if (items.length === 0) return <TocItemsEmpty />;
 
   return (
-    <ScrollArea className="flex flex-col ps-px">
-      <ScrollViewport className="relative min-h-0" ref={viewRef}>
-        {svg ? (
-          <div
-            className="absolute start-0 top-0 rtl:-scale-x-100"
-            style={{
-              width: svg.width,
-              height: svg.height,
-              maskImage: `url("data:image/svg+xml,${
-                // Inline SVG
-                encodeURIComponent(
-                  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${svg.width} ${svg.height}"><path d="${svg.path}" stroke="black" stroke-width="1" fill="none" /></svg>`,
-                )
-              }")`,
-            }}
-          >
-            <TocThumb
-              containerRef={containerRef}
-              className="mt-(--fd-top) h-(--fd-height) bg-fd-primary transition-all"
-            />
-          </div>
-        ) : null}
-        <Primitive.ScrollProvider containerRef={viewRef}>
-          <div className="flex flex-col" ref={containerRef}>
-            {items.map((item, i) => (
-              <TOCItem
-                key={item.url}
-                item={item}
-                upper={items[i - 1]?.depth}
-                lower={items[i + 1]?.depth}
-              />
-            ))}
-          </div>
-        </Primitive.ScrollProvider>
-      </ScrollViewport>
-    </ScrollArea>
+    <>
+      {svg ? (
+        <div
+          className="absolute start-0 top-0 rtl:-scale-x-100"
+          style={{
+            width: svg.width,
+            height: svg.height,
+            maskImage: `url("data:image/svg+xml,${
+              // Inline SVG
+              encodeURIComponent(
+                `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${svg.width} ${svg.height}"><path d="${svg.path}" stroke="black" stroke-width="1" fill="none" /></svg>`,
+              )
+            }")`,
+          }}
+        >
+          <TocThumb
+            containerRef={containerRef}
+            className="mt-(--fd-top) h-(--fd-height) bg-fd-primary transition-all"
+          />
+        </div>
+      ) : null}
+      <div className="flex flex-col" ref={containerRef}>
+        {items.map((item, i) => (
+          <TOCItem
+            key={item.url}
+            item={item}
+            upper={items[i - 1]?.depth}
+            lower={items[i + 1]?.depth}
+          />
+        ))}
+      </div>
+    </>
   );
 }
 

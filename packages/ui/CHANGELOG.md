@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 15.0.8
+
+### Patch Changes
+
+- 8f5993b: Support custom nav mode and tabs mode on Notebook layout
+  - fumadocs-core@15.0.8
+
 ## 15.0.7
 
 ### Patch Changes

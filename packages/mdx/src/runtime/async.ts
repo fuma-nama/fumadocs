@@ -18,22 +18,24 @@ async function initCompiler(config: LoadedConfig, collection: string) {
     mdxOptions = col.docs?.mdxOptions as MDXOptions;
 
   if (!mdxOptions) {
-    const options =
+    config._mdx_async ??= {};
+    config._mdx_async.cachedMdxOptions ??=
       typeof config.global?.mdxOptions === 'function'
         ? await config.global.mdxOptions()
-        : config.global?.mdxOptions;
-    const remarkPlugins = options?.remarkPlugins ?? [];
+        : (config.global?.mdxOptions ?? {});
 
-    mdxOptions = {
-      ...options,
-      remarkPlugins: (v) =>
-        typeof remarkPlugins === 'function'
-          ? [remarkInclude, ...remarkPlugins(v), remarkStructure]
-          : [remarkInclude, ...v, ...remarkPlugins, remarkStructure],
-    };
+    mdxOptions = config._mdx_async.cachedMdxOptions;
   }
 
-  return createCompiler(mdxOptions);
+  const remarkPlugins = mdxOptions.remarkPlugins ?? [];
+
+  return createCompiler({
+    ...mdxOptions,
+    remarkPlugins: (v) =>
+      typeof remarkPlugins === 'function'
+        ? [remarkInclude, ...remarkPlugins(v), remarkStructure]
+        : [remarkInclude, ...v, ...remarkPlugins, remarkStructure],
+  });
 }
 
 export const _runtimeAsync: RuntimeAsync = {

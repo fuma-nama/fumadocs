@@ -77,43 +77,52 @@ export function TocItemsEmpty() {
   );
 }
 
-export function TOCItems({
-  items,
+export function TOCScrollArea({
   isMenu,
-}: {
-  items: TOCItemType[];
-  isMenu?: boolean;
-}) {
-  const containerRef = useRef<HTMLDivElement>(null);
+  ...props
+}: ComponentProps<typeof ScrollArea> & { isMenu?: boolean }) {
   const viewRef = useRef<HTMLDivElement>(null);
 
-  if (items.length === 0) return <TocItemsEmpty />;
-
   return (
-    <ScrollArea className="flex flex-col ps-px">
+    <ScrollArea
+      {...props}
+      className={cn('flex flex-col ps-px', props.className)}
+    >
       <Primitive.ScrollProvider containerRef={viewRef}>
         <ScrollViewport
           className={cn(
-            'relative min-h-0  text-sm',
+            'relative min-h-0 text-sm',
             isMenu && 'mt-2 mb-4 mx-4 md:mx-6',
           )}
           ref={viewRef}
         >
-          <TocThumb
-            containerRef={containerRef}
-            className="absolute start-0 mt-(--fd-top) h-(--fd-height) w-px bg-fd-primary transition-all"
-          />
-          <div
-            ref={containerRef}
-            className="flex flex-col border-s border-fd-foreground/10"
-          >
-            {items.map((item) => (
-              <TOCItem key={item.url} item={item} />
-            ))}
-          </div>
+          {props.children}
         </ScrollViewport>
       </Primitive.ScrollProvider>
     </ScrollArea>
+  );
+}
+
+export function TOCItems({ items }: { items: TOCItemType[] }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  if (items.length === 0) return <TocItemsEmpty />;
+
+  return (
+    <>
+      <TocThumb
+        containerRef={containerRef}
+        className="absolute start-0 mt-(--fd-top) h-(--fd-height) w-px bg-fd-primary transition-all"
+      />
+      <div
+        ref={containerRef}
+        className="flex flex-col border-s border-fd-foreground/10"
+      >
+        {items.map((item) => (
+          <TOCItem key={item.url} item={item} />
+        ))}
+      </div>
+    </>
   );
 }
 
@@ -178,7 +187,7 @@ export function TocPopoverTrigger({
     <CollapsibleTrigger
       {...props}
       className={cn(
-        'inline-flex items-center text-sm gap-2 text-nowrap px-4 py-2 text-start md:px-6 md:py-3',
+        'inline-flex items-center text-sm gap-2 text-nowrap px-4 py-2 text-start md:px-6 md:py-3 focus-visible:outline-none',
         props.className,
       )}
     >

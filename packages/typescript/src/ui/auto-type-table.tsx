@@ -78,7 +78,7 @@ export async function AutoTypeTable({
   let content = '';
 
   if (path) {
-    content = await fs.readFile(path).then((res) => res.toString());
+    content = (await fs.readFile(path)).toString();
   }
 
   if (type && type.split('\n').length > 1) {

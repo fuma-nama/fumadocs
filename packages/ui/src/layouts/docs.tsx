@@ -75,7 +75,7 @@ export function DocsLayout({
   const variables = cn(
     '[--fd-tocnav-height:36px] md:[--fd-sidebar-width:268px] lg:[--fd-sidebar-width:286px] xl:[--fd-toc-width:286px] xl:[--fd-tocnav-height:0px]',
     !navReplace && navEnabled
-      ? '[--fd-nav-height:3.5rem] md:[--fd-nav-height:0px]'
+      ? '[--fd-nav-height:calc(var(--spacing)*14)] md:[--fd-nav-height:0px]'
       : undefined,
   );
 
@@ -203,9 +203,9 @@ function SidebarHeaderItems({
           className={cn(
             buttonVariants({
               color: 'ghost',
-              size: 'icon',
+              size: 'icon-sm',
             }),
-            'ms-auto text-fd-muted-foreground [&_svg]:size-4.5 max-md:hidden',
+            'ms-auto text-fd-muted-foreground max-md:hidden',
           )}
         />
       )}
@@ -245,7 +245,7 @@ function SidebarFooterItems({
       <div role="separator" className="flex-1" />
       {i18n ? (
         <LanguageToggle className="me-1.5">
-          <Languages className="size-5" />
+          <Languages className="size-4.5" />
           <LanguageToggleText className="md:hidden" />
         </LanguageToggle>
       ) : null}

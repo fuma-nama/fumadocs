@@ -1,5 +1,4 @@
 import type { GlobalConfig } from '@/config/types';
-import type { ProcessorOptions } from '@mdx-js/mdx';
 import type { LoadedConfig } from '@/utils/config';
 import type {
   DocsCollection,
@@ -41,26 +40,11 @@ export function buildConfig(
     ];
   }
 
-  let cachedMdxOptions: ProcessorOptions | undefined;
-
   return [
     null,
     {
       global: globalConfig,
       collections,
-      async getDefaultMDXOptions() {
-        if (cachedMdxOptions) return cachedMdxOptions;
-        const { getDefaultMDXOptions } = await import('@/utils/mdx-options');
-
-        const mdxOptions = globalConfig?.mdxOptions ?? {};
-        if (typeof mdxOptions === 'function') {
-          cachedMdxOptions = getDefaultMDXOptions(await mdxOptions());
-        } else {
-          cachedMdxOptions = getDefaultMDXOptions(mdxOptions);
-        }
-
-        return cachedMdxOptions;
-      },
       _runtime: {
         files: new Map(),
       },

@@ -24,7 +24,6 @@ const config: NextConfig = {
     '@shikijs/twoslash',
   ],
   images: {
-    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',

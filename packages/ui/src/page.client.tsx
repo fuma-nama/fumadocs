@@ -230,7 +230,7 @@ export function Breadcrumb(options: BreadcrumbProps) {
   if (items.length === 0) return null;
 
   return (
-    <div className="flex flex-row items-center gap-1.5 text-[15px] text-fd-muted-foreground -mb-1.5">
+    <div className="flex flex-row items-center gap-1.5 text-[15px] text-fd-muted-foreground">
       {items.map((item, i) => {
         const className = cn(
           'truncate',

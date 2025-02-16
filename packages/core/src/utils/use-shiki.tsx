@@ -45,8 +45,6 @@ interface Task {
   aborted: boolean;
 }
 
-const cache = new Map<string, ReactNode>();
-
 export function useShiki(
   code: string,
   {
@@ -71,16 +69,11 @@ export function useShiki(
 
   const [rendered, setRendered] = useState<ReactNode>(() => {
     if (defaultValue) return defaultValue;
-    const cached = cache.get(key);
-    if (cached) return cached;
-
     // @ts-expect-error -- use shiki is typed
     const hast = globalThis._use_shiki?.get(scriptKey);
 
     if (hast) {
-      const node = _renderHighlight(hast, shikiOptions);
-      cache.set(key, node);
-      return node;
+      return _renderHighlight(hast, shikiOptions);
     }
 
     currentTask.current = undefined;
@@ -111,7 +104,6 @@ export function useShiki(
     currentTask.current = task;
 
     highlight(code, shikiOptions).then((result) => {
-      cache.set(key, result);
       if (!task.aborted) setRendered(result);
     });
   }

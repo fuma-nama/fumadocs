@@ -65,8 +65,20 @@ export default async function loader(
     collection = undefined;
   }
 
-  const mdxOptions =
-    collection?.mdxOptions ?? (await config.getDefaultMDXOptions());
+  let mdxOptions = collection?.mdxOptions;
+
+  if (!mdxOptions) {
+    const { getDefaultMDXOptions } = await import('@/utils/mdx-options');
+    config._mdx_loader ??= {};
+
+    const extendedOptions = config.global?.mdxOptions;
+    config._mdx_loader.cachedProcessorOptions ??=
+      typeof extendedOptions === 'function'
+        ? getDefaultMDXOptions(await extendedOptions())
+        : getDefaultMDXOptions(extendedOptions ?? {});
+
+    mdxOptions = config._mdx_loader.cachedProcessorOptions;
+  }
 
   if (collection?.schema) {
     matter.data = (await validate(
