@@ -1,5 +1,12 @@
 # next-docs-mdx
 
+## 11.5.5
+
+### Patch Changes
+
+- e6df8aa: Improve performance
+  - fumadocs-core@15.0.8
+
 ## 11.5.4
 
 ### Patch Changes
