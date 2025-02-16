@@ -149,6 +149,8 @@ const Context = createContext<{
   setOpen: (open: boolean) => void;
 } | null>(null);
 
+const TocProvider = Context.Provider || Context;
+
 export function TocPopover({
   open,
   onOpenChange,
@@ -157,7 +159,7 @@ export function TocPopover({
 }: MakeRequired<ComponentProps<typeof Collapsible>, 'open' | 'onOpenChange'>) {
   return (
     <Collapsible open={open} onOpenChange={onOpenChange} {...props}>
-      <Context
+      <TocProvider
         value={useMemo(
           () => ({
             open,
@@ -167,7 +169,7 @@ export function TocPopover({
         )}
       >
         {props.children}
-      </Context>
+      </TocProvider>
     </Collapsible>
   );
 }
