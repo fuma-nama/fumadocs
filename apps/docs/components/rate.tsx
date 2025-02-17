@@ -43,8 +43,14 @@ function set(feedback: Feedback | null) {
   else localStorage.removeItem(key);
 }
 
+const clientId = process.env.NEXT_PUBLIC_OPENPANEL_CLIENT_ID;
+if (!clientId)
+  throw new Error(
+    'environment variable missing: `NEXT_PUBLIC_OPENPANEL_CLIENT_ID`',
+  );
+
 const op = new OpenPanel({
-  clientId: '9d67bc83-f661-4d57-8c2e-3e0eaf98b813',
+  clientId,
 });
 
 export function Rate() {
@@ -58,8 +64,8 @@ export function Rate() {
 
   function submit(e?: SyntheticEvent) {
     e?.preventDefault();
+    if (opinion == null) return;
 
-    if (opinion !== 'good' && opinion !== 'bad') return;
     const feedback: Feedback = {
       opinion,
       message,

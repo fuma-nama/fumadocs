@@ -27,7 +27,7 @@ import { AutoTypeTable } from '@/components/type-table';
 import { metadataImage } from '@/lib/metadata-image';
 import { File, Folder, Files } from 'fumadocs-ui/components/files';
 import { Mermaid } from '@theguild/remark-mermaid/mermaid';
-import { Rate } from '@/app/docs/[...slug]/page.client';
+import { Rate } from '@/components/rate';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {

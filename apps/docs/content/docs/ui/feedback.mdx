@@ -1,0 +1,35 @@
+---
+title: Feedback
+description: Receive feedback from your users
+---
+
+## Overview
+
+Feedback is crucial for knowing what your reader thinks, and help you to further improve documentation content.
+
+### Setup
+
+Copy the component.
+
+```json doc-gen:file
+{
+  "file": "./components/rate.tsx",
+  "codeblock": {
+    "lang": "tsx",
+    "meta": "title=\"components/rate.tsx\""
+  }
+}
+```
+
+The above example uses [OpenPanel](https://openpanel.dev), you can change the code in `submit()` to the platform you're using (e.g. PostHog).
+
+```ts
+import posthog from 'posthog-js';
+
+const feedback: Feedback = {
+  opinion,
+  message,
+};
+
+posthog.capture('on_rate_docs', feedback);
+```
