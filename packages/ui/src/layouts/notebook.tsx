@@ -111,9 +111,7 @@ export function DocsLayout({
             {...sidebar}
             className={cn(
               'md:ps-(--fd-layout-offset)',
-              navMode === 'top'
-                ? 'bg-transparent *:!pt-0'
-                : 'md:[--fd-nav-height:0px]',
+              navMode === 'top' ? 'bg-transparent' : 'md:[--fd-nav-height:0px]',
               sidebar.className,
             )}
           >

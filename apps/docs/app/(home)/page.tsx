@@ -89,22 +89,22 @@ export default function Page() {
 
 function Architecture() {
   return (
-    <div className="flex flex-col gap-4 border-x border-t px-8 py-16 md:py-24 lg:flex-row md:px-16">
-      <div className="shrink-0 flex-1 font-mono text-start">
-        <p className="px-2 py-1 text-sm bg-fd-primary text-fd-primary-foreground font-medium w-fit mb-4">
+    <div className="flex flex-col gap-4 border-x border-t px-8 py-16 md:py-24 lg:flex-row md:px-12">
+      <div className="shrink-0 flex-1 text-start">
+        <p className="px-2 py-1 text-sm font-mono bg-fd-primary text-fd-primary-foreground font-bold w-fit mb-4">
           Designed with Love
         </p>
-        <h2 className="text-xl font-medium mb-4 sm:text-2xl">
+        <h2 className="text-xl font-semibold mb-4 sm:text-2xl">
           One framework to solve three problems.
         </h2>
-        <p className="text-sm text-fd-muted-foreground mb-6">
-          Fumadocs makes it easy to build beautiful docs, and bring the power to
-          transform content into data, on Next.js.
+        <p className="text-fd-muted-foreground mb-6">
+          Fumadocs makes it easy to build beautiful docs, write content, and
+          transform content into data on Next.js.
           <br />
-          Every part is handled with love - incredibly flexible and
-          customisable.
+          <br />
+          Every part is handled with love, incredibly flexible and customisable.
         </p>
-        <div className="flex flex-row items-center -mx-4">
+        <div className="flex flex-row items-center font-mono -mx-4">
           <a
             href="https://github.com/fuma-nama/fumadocs-basehub"
             rel="noreferrer noopener"
@@ -134,10 +134,7 @@ function Architecture() {
 
 async function Why() {
   return (
-    <div className="relative overflow-hidden border-x border-t px-8 py-12 md:p-16 md:min-h-[700px]">
-      <p className="text-center font-medium text-fd-muted-foreground">
-        Fumadocs offers a complete toolchain to build and maintain your docs.
-      </p>
+    <div className="relative overflow-hidden border-x border-t px-8 py-12 md:py-16 md:min-h-[500px]">
       <WhyInteractive
         typeTable={
           <TypeTable
@@ -459,6 +456,8 @@ function Hero() {
         </Link>
         <a
           href="https://githubbox.com/fuma-nama/fumadocs-ui-template"
+          target="_blank"
+          rel="noreferrer noopener"
           className={cn(
             buttonVariants({
               size: 'lg',
@@ -534,7 +533,7 @@ function Introduction(): React.ReactElement {
     <div className="grid grid-cols-1 border-r md:grid-cols-2">
       <div className="flex flex-col gap-2 border-l border-t px-6 py-12 md:py-16">
         <div className={cn(badgeVariants())}>1</div>
-        <h3 className="text-xl font-bold">Create it.</h3>
+        <h3 className="text-xl font-semibold">Create it.</h3>
         <p className="mb-8 text-fd-muted-foreground">
           Initialize a new docs with a command.
         </p>
@@ -542,7 +541,7 @@ function Introduction(): React.ReactElement {
       </div>
       <div className="flex flex-col gap-2 border-l border-t px-6 py-12 md:py-16">
         <div className={cn(badgeVariants())}>2</div>
-        <h3 className="text-xl font-bold">Write.</h3>
+        <h3 className="text-xl font-semibold">Write.</h3>
         <p className="text-fd-muted-foreground">
           Write content, with automation tools & type-safe data validation.
         </p>
@@ -567,9 +566,9 @@ Hello World
           </Files>
         </div>
       </div>
-      <div className="col-span-full flex flex-col items-center gap-2 border-l border-t px-6 py-12 text-center">
+      <div className="col-span-full flex flex-col items-center gap-2 border-l border-t px-6 py-16 text-center">
         <div className={cn(badgeVariants())}>3</div>
-        <h3 className="text-2xl font-bold">Ship.</h3>
+        <h3 className="text-2xl font-semibold">Ship.</h3>
         <p className="text-fd-muted-foreground">
           Deploy your docs easily with Next.js compatible hosting platforms.
         </p>

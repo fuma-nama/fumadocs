@@ -1,0 +1,69 @@
+---
+title: Feedback
+description: Receive feedback from your users
+---
+
+## Overview
+
+Feedback is crucial for knowing what your reader thinks, and help you to further improve documentation content.
+
+### Installation
+
+Copy the component.
+
+```json doc-gen:file
+{
+  "file": "./components/rate.tsx",
+  "codeblock": {
+    "lang": "tsx",
+    "meta": "title=\"components/rate.tsx\""
+  }
+}
+```
+
+The above example uses [OpenPanel](https://openpanel.dev), you can change the code in `submit()` to the platform you're using (e.g. PostHog).
+
+```ts
+import posthog from 'posthog-js';
+
+const feedback: Feedback = {
+  opinion,
+  message,
+};
+
+posthog.capture('on_rate_docs', feedback);
+```
+
+### Add to Page
+
+Now add the `<Rate />` component to your docs page:
+
+```tsx
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+import {
+  DocsPage,
+  DocsTitle,
+  DocsDescription,
+  DocsBody,
+} from 'fumadocs-ui/page';
+import { Rate } from '@/components/rate';
+
+export default async function Page() {
+  // other logic
+
+  return (
+    <DocsPage toc={toc} full={page.data.full}>
+      <DocsTitle>{page.data.title}</DocsTitle>
+      <DocsDescription>{page.data.description}</DocsDescription>
+      <DocsBody>
+        <Mdx
+          components={{
+            ...defaultMdxComponents,
+          }}
+        />
+      </DocsBody>
+      <Rate />
+    </DocsPage>
+  );
+}
+```

@@ -34,16 +34,16 @@
   "dependencies": {
     "@mdx-js/mdx": "^3.1.0",
     "gray-matter": "^4.0.3",
-    "zod": "^3.24.1"
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@types/mdx": "^2.0.13",
-    "@types/node": "22.13.1",
-    "@types/react": "^19.0.8",
+    "@types/node": "22.13.4",
+    "@types/react": "^19.0.9",
     "eslint-config-custom": "workspace:*",
     "fast-glob": "^3.3.3",
     "fumadocs-core": "workspace:*",
-    "next": "15.1.6",
+    "next": "15.1.7",
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
     "vfile": "^6.0.3"
