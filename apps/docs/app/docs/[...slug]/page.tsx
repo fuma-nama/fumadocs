@@ -27,6 +27,7 @@ import { AutoTypeTable } from '@/components/type-table';
 import { metadataImage } from '@/lib/metadata-image';
 import { File, Folder, Files } from 'fumadocs-ui/components/files';
 import { Mermaid } from '@theguild/remark-mermaid/mermaid';
+import { Rate } from '@/app/docs/[...slug]/page.client';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -102,6 +103,7 @@ export default async function Page(props: {
         />
         {page.data.index ? <DocsCategory page={page} from={source} /> : null}
       </DocsBody>
+      <Rate />
     </DocsPage>
   );
 }

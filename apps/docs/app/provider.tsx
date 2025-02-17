@@ -4,6 +4,9 @@ import { RootProvider } from 'fumadocs-ui/provider';
 import dynamic from 'next/dynamic';
 import type { ReactNode } from 'react';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
+import posthog from 'posthog-js';
+import { PostHogProvider as PHProvider } from 'posthog-js/react';
+import { useEffect } from 'react';
 
 const SearchDialog = dynamic(() => import('@/components/search'), {
   ssr: false,
@@ -35,13 +38,27 @@ export function Provider({
         SearchDialog,
       }}
     >
-      <TooltipProvider>
-        <script
-          suppressHydrationWarning
-          dangerouslySetInnerHTML={{ __html: inject }}
-        />
-        {children}
-      </TooltipProvider>
+      <PostHogProvider>
+        <TooltipProvider>
+          <script
+            suppressHydrationWarning
+            dangerouslySetInnerHTML={{ __html: inject }}
+          />
+          {children}
+        </TooltipProvider>
+      </PostHogProvider>
     </RootProvider>
   );
+}
+
+function PostHogProvider({ children }: { children: ReactNode }) {
+  useEffect(() => {
+    posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
+      api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+      capture_pageview: false,
+      autocapture: false,
+    });
+  }, []);
+
+  return <PHProvider client={posthog}>{children}</PHProvider>;
 }
