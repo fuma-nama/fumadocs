@@ -11,7 +11,7 @@ import { cva } from 'class-variance-authority';
 import { OpenPanel } from '@openpanel/web';
 
 const rateButtonVariants = cva(
-  'inline-flex items-center gap-2 px-3 py-2 rounded-full font-medium border bg-fd-secondary text-fd-secondary-foreground text-sm [&_svg]:size-4 disabled:cursor-not-allowed',
+  'inline-flex items-center gap-2 px-3 py-2 rounded-full font-medium border text-sm [&_svg]:size-4 disabled:cursor-not-allowed',
   {
     variants: {
       active: {
@@ -142,12 +142,12 @@ export function Rate() {
             </button>
           </div>
         ) : (
-          <form className="flex flex-col gap-2" onSubmit={submit}>
+          <form className="flex flex-col gap-3" onSubmit={submit}>
             <textarea
               autoFocus
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              className="border rounded-xl bg-fd-secondary text-fd-secondary-foreground p-3 text-sm resize-none focus-visible:outline-none placeholder:text-fd-muted-foreground"
+              className="border rounded-lg bg-fd-secondary text-fd-secondary-foreground p-3 text-sm resize-none focus-visible:outline-none placeholder:text-fd-muted-foreground"
               placeholder="Leave your feedback..."
               onKeyDown={(e) => {
                 if (!e.shiftKey && e.key === 'Enter') {
@@ -157,7 +157,7 @@ export function Rate() {
             />
             <button
               type="submit"
-              className={cn(buttonVariants({ color: 'outline' }), 'w-fit px-4')}
+              className={cn(buttonVariants({ color: 'outline' }), 'w-fit px-3')}
             >
               Submit
             </button>

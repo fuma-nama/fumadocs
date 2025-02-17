@@ -7,7 +7,7 @@ description: Receive feedback from your users
 
 Feedback is crucial for knowing what your reader thinks, and help you to further improve documentation content.
 
-### Setup
+### Installation
 
 Copy the component.
 
@@ -32,4 +32,38 @@ const feedback: Feedback = {
 };
 
 posthog.capture('on_rate_docs', feedback);
+```
+
+### Add to Page
+
+Now add the `<Rate />` component to your docs page:
+
+```tsx
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+import {
+  DocsPage,
+  DocsTitle,
+  DocsDescription,
+  DocsBody,
+} from 'fumadocs-ui/page';
+import { Rate } from '@/components/rate';
+
+export default async function Page() {
+  // other logic
+
+  return (
+    <DocsPage toc={toc} full={page.data.full}>
+      <DocsTitle>{page.data.title}</DocsTitle>
+      <DocsDescription>{page.data.description}</DocsDescription>
+      <DocsBody>
+        <Mdx
+          components={{
+            ...defaultMdxComponents,
+          }}
+        />
+      </DocsBody>
+      <Rate />
+    </DocsPage>
+  );
+}
 ```
