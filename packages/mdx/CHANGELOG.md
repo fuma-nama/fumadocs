@@ -1,5 +1,12 @@
 # next-docs-mdx
 
+## 11.5.6
+
+### Patch Changes
+
+- 927ee8b: Fix hot reload
+  - fumadocs-core@15.0.9
+
 ## 11.5.5
 
 ### Patch Changes
