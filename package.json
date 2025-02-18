@@ -17,7 +17,7 @@
     "version": "changeset version && pnpm install --lockfile-only"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.27.12",
+    "@changesets/cli": "^2.28.0",
     "@eslint/js": "^9.20.0",
     "@types/eslint__js": "^8.42.3",
     "concurrently": "^9.1.2",
@@ -30,7 +30,7 @@
     "tsup": "8.3.6",
     "turbo": "2.4.2",
     "typescript": "^5.7.3",
-    "typescript-eslint": "^8.24.0",
+    "typescript-eslint": "^8.24.1",
     "vitest": "^3.0.4"
   },
   "packageManager": "pnpm@9.14.4",

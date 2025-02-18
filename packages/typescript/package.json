@@ -40,7 +40,7 @@
     "mdast-util-from-markdown": "^2.0.2",
     "mdast-util-gfm": "^3.1.0",
     "mdast-util-to-hast": "^13.2.0",
-    "shiki": "^2.4.1",
+    "shiki": "^3.0.0",
     "ts-morph": "^25.0.1"
   },
   "devDependencies": {
@@ -48,8 +48,8 @@
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.3",
     "@types/node": "22.13.4",
-    "@types/react": "19.0.9",
-    "@types/react-dom": "19.0.3",
+    "@types/react": "19.0.10",
+    "@types/react-dom": "19.0.4",
     "eslint-config-custom": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "tsconfig": "workspace:*",
