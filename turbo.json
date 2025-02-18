@@ -1,11 +1,10 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "globalEnv": [
-    "NEXT_PUBLIC_ALGOLIA_APP_ID",
-    "NEXT_PUBLIC_ALGOLIA_API_KEY",
-    "NEXT_PUBLIC_ALGOLIA_INDEX",
     "NEXT_PUBLIC_ORAMA_ENDPOINT",
     "NEXT_PUBLIC_ORAMA_API_KEY",
+    "GITHUB_APP_PRIVATE_KEY",
+    "GITHUB_APP_ID",
     "GITHUB_TOKEN"
   ],
   "ui": "stream",

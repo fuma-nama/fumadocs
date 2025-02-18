@@ -9,9 +9,10 @@ import {
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/cn';
 import { getSponsors } from '@/lib/get-sponsors';
+import { owner } from '@/lib/github';
 
 export default async function Page() {
-  const sponsors = await getSponsors('fuma-nama', [
+  const sponsors = await getSponsors(owner, [
     ...organizationUsers,
     ...organizationSponsors.map((sponsor) => sponsor.github),
   ]);

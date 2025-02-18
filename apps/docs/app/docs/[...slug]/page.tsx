@@ -28,6 +28,7 @@ import { metadataImage } from '@/lib/metadata-image';
 import { File, Folder, Files } from 'fumadocs-ui/components/files';
 import { Mermaid } from '@theguild/remark-mermaid/mermaid';
 import { Rate } from '@/components/rate';
+import { repo, owner, onRateAction } from '@/lib/github';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -63,8 +64,8 @@ export default async function Page(props: {
         single: false,
       }}
       editOnGithub={{
-        repo: 'fumadocs',
-        owner: 'fuma-nama',
+        repo,
+        owner,
         sha: 'dev',
         path,
       }}
@@ -103,7 +104,7 @@ export default async function Page(props: {
         />
         {page.data.index ? <DocsCategory page={page} from={source} /> : null}
       </DocsBody>
-      <Rate />
+      <Rate onRateAction={onRateAction} />
     </DocsPage>
   );
 }
