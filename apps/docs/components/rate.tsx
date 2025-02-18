@@ -8,7 +8,7 @@ import {
   CollapsibleContent,
 } from 'fumadocs-ui/components/ui/collapsible';
 import { cva } from 'class-variance-authority';
-import { OpenPanel } from '@openpanel/web';
+import { usePathname } from 'next/navigation';
 
 const rateButtonVariants = cva(
   'inline-flex items-center gap-2 px-3 py-2 rounded-full font-medium border text-sm [&_svg]:size-4 disabled:cursor-not-allowed',
@@ -22,21 +22,19 @@ const rateButtonVariants = cva(
   },
 );
 
-interface Feedback {
+export interface Feedback {
   opinion: 'good' | 'bad';
   message: string;
 }
 
-function get(): Feedback | null {
-  const url = window.location.pathname;
+function get(url: string): Feedback | null {
   const item = localStorage.getItem(`docs-feedback-${url}`);
 
   if (item === null) return null;
   return JSON.parse(item) as Feedback;
 }
 
-function set(feedback: Feedback | null) {
-  const url = window.location.pathname;
+function set(url: string, feedback: Feedback | null) {
   const key = `docs-feedback-${url}`;
 
   if (feedback) localStorage.setItem(key, JSON.stringify(feedback));
@@ -49,18 +47,19 @@ if (!clientId)
     'environment variable missing: `NEXT_PUBLIC_OPENPANEL_CLIENT_ID`',
   );
 
-const op = new OpenPanel({
-  clientId,
-});
-
-export function Rate() {
+export function Rate({
+  onRateAction,
+}: {
+  onRateAction: (url: string, feedback: Feedback) => Promise<void>;
+}) {
+  const url = usePathname();
   const [previous, setPrevious] = useState<Feedback | null>(null);
   const [opinion, setOpinion] = useState<'good' | 'bad' | null>(null);
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    setPrevious(get());
-  }, []);
+    setPrevious(get(url));
+  }, [url]);
 
   function submit(e?: SyntheticEvent) {
     e?.preventDefault();
@@ -71,12 +70,9 @@ export function Rate() {
       message,
     };
 
-    void op.track(
-      'on_rate_docs',
-      feedback as unknown as Record<string, string>,
-    );
+    void onRateAction(url, feedback);
 
-    set(feedback);
+    set(url, feedback);
     setPrevious(feedback);
     setMessage('');
     setOpinion(null);
@@ -134,7 +130,7 @@ export function Rate() {
               )}
               onClick={() => {
                 setOpinion(previous?.opinion);
-                set(null);
+                set(url, null);
                 setPrevious(null);
               }}
             >

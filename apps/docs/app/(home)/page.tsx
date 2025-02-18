@@ -32,6 +32,7 @@ import {
 import { VercelLogo, NetlifyLogo, NextSVG, OpenAPIIcon } from './icons';
 import ArchImg from './arch.png';
 import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { owner, repo } from '@/lib/github';
 
 const badgeVariants = cva(
   'inline-flex size-7 items-center justify-center rounded-full bg-fd-primary font-medium text-fd-primary-foreground',
@@ -611,7 +612,7 @@ function Contributing() {
           Contributors
         </a>
       </div>
-      <ContributorCounter repoOwner="fuma-nama" repoName="fumadocs" />
+      <ContributorCounter repoOwner={owner} repoName={repo} />
     </div>
   );
 }
