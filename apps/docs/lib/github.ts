@@ -5,37 +5,54 @@ export const repo = 'fumadocs';
 export const owner = 'fuma-nama';
 export const DocsCategory = 'Docs Feedback';
 
-const app = new App({
-  appId: process.env.GITHUB_APP_ID!,
-  privateKey: process.env.GITHUB_APP_PRIVATE_KEY!,
-});
+const octokit = await getOctokit();
+const destination = await getFeedbackDestination();
 
-const { data } = await app.octokit.request(
-  'GET /repos/{owner}/{repo}/installation',
-  {
-    owner,
-    repo,
-    headers: {
-      'X-GitHub-Api-Version': '2022-11-28',
+async function getOctokit() {
+  const appId = process.env.GITHUB_APP_ID;
+  const privateKey = process.env.GITHUB_APP_PRIVATE_KEY;
+  if (!appId || !privateKey) {
+    console.warn(
+      'No GitHub keys provided for Github app, docs feedback feature will not work.',
+    );
+    return;
+  }
+
+  const app = new App({
+    appId,
+    privateKey,
+  });
+
+  const { data } = await app.octokit.request(
+    'GET /repos/{owner}/{repo}/installation',
+    {
+      owner,
+      repo,
+      headers: {
+        'X-GitHub-Api-Version': '2022-11-28',
+      },
     },
-  },
-);
+  );
 
-const octokit = await app.getInstallationOctokit(data.id);
+  return app.getInstallationOctokit(data.id);
+}
 
-const {
-  repository,
-}: {
-  repository: {
-    id: string;
-    discussionCategories: {
-      nodes: {
-        id: string;
-        name: string;
-      }[];
+async function getFeedbackDestination() {
+  if (!octokit) return;
+
+  const {
+    repository,
+  }: {
+    repository: {
+      id: string;
+      discussionCategories: {
+        nodes: {
+          id: string;
+          name: string;
+        }[];
+      };
     };
-  };
-} = await octokit.graphql(`
+  } = await octokit.graphql(`
   query {
     repository(owner: "${owner}", name: "${repo}") {
       id
@@ -46,17 +63,21 @@ const {
   }
 `);
 
-const category = repository.discussionCategories.nodes.find(
-  (category) => category.name === DocsCategory,
-);
-
-if (!category)
-  throw new Error(
-    `No appropriate category on GitHub Discussion, needed: "${DocsCategory}"`,
-  );
+  return repository;
+}
 
 export async function onRateAction(url: string, feedback: Feedback) {
   'use server';
+  if (!octokit || !destination) return;
+
+  const category = destination.discussionCategories.nodes.find(
+    (category) => category.name === DocsCategory,
+  );
+
+  if (!category)
+    throw new Error(
+      `Please create a "${DocsCategory}" category in GitHub Discussion`,
+    );
 
   const title = `Feedback for ${url}`;
   const body = `**Forwarded from user feedback**\n\n**Opinion:** ${feedback.opinion}\n**Message:** ${feedback.message}`;
@@ -86,7 +107,7 @@ export async function onRateAction(url: string, feedback: Feedback) {
   } else {
     await octokit.graphql(`
             mutation {
-              createDiscussion(input: { repositoryId: "${repository.id}", categoryId: "${category!.id}", body: ${JSON.stringify(body)}, title: ${JSON.stringify(title)} }) {
+              createDiscussion(input: { repositoryId: "${destination.id}", categoryId: "${category!.id}", body: ${JSON.stringify(body)}, title: ${JSON.stringify(title)} }) {
                 discussion { id }
               }
             }`);

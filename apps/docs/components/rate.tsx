@@ -41,12 +41,6 @@ function set(url: string, feedback: Feedback | null) {
   else localStorage.removeItem(key);
 }
 
-const clientId = process.env.NEXT_PUBLIC_OPENPANEL_CLIENT_ID;
-if (!clientId)
-  throw new Error(
-    'environment variable missing: `NEXT_PUBLIC_OPENPANEL_CLIENT_ID`',
-  );
-
 export function Rate({
   onRateAction,
 }: {
