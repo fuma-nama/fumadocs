@@ -6,7 +6,7 @@
     "build": "turbo run build",
     "clean": "turbo run clean",
     "dev": "turbo run dev",
-    "start": "turbo run dev"
+    "start": "turbo run dev",
     "dev:all": "turbo run dev --filter=!./examples/*",
     "dev:examples": "turbo run dev --filter=./examples/*",
     "lint": "turbo run lint",
