@@ -80,7 +80,7 @@ export async function onRateAction(url: string, feedback: Feedback) {
     );
 
   const title = `Feedback for ${url}`;
-  const body = `**Forwarded from user feedback**\n\n**Opinion:** ${feedback.opinion}\n**Message:** ${feedback.message}`;
+  const body = `[${feedback.opinion}] ${feedback.message}\n\n> Forwarded from user feedback.`;
 
   const {
     search: { nodes: discussions },

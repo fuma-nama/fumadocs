@@ -1,10 +1,4 @@
-import {
-  type AnyOrama,
-  create,
-  load,
-  type Orama,
-  type RawData,
-} from '@orama/orama';
+import { type AnyOrama, create, load, type Orama } from '@orama/orama';
 import { type SortedResult } from '@/server';
 import { searchSimple } from '@/search/orama/search/simple';
 import { searchAdvanced } from '@/search/orama/search/advanced';
@@ -12,12 +6,15 @@ import {
   type advancedSchema,
   type simpleSchema,
 } from '@/search/orama/create-db';
+import type { ExportedData } from '@/search/server';
 
 export interface StaticOptions {
   /**
    * Where to download exported search indexes (URL)
    */
   from?: string;
+
+  initOrama?: (locale?: string) => Promise<Orama<unknown, never, never, never>>;
 }
 
 export interface StaticClient {
@@ -28,17 +25,9 @@ export interface StaticClient {
   ) => Promise<SortedResult[]>;
 }
 
-type Type = 'simple' | 'advanced';
-
-type ExportedData =
-  | (RawData & { type: Type })
-  | {
-      type: 'i18n';
-      data: Record<string, RawData & { type: Type }>;
-    };
-
 export function createStaticClient({
   from = '/api/search',
+  initOrama = (locale) => create({ schema: { _: 'string' }, language: locale }),
 }: StaticOptions): StaticClient {
   // locale -> db
   const dbs = new Map<
@@ -61,7 +50,7 @@ export function createStaticClient({
 
     if (data.type === 'i18n') {
       for (const [k, v] of Object.entries(data.data)) {
-        const db = await create({ schema: { _: 'string' } });
+        const db = await initOrama(k);
 
         await load(db, v);
         dbs.set(k, {
@@ -70,7 +59,7 @@ export function createStaticClient({
         });
       }
     } else {
-      const db = await create({ schema: { _: 'string' } });
+      const db = await initOrama();
 
       await load(db, data);
       dbs.set('', {
