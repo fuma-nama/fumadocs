@@ -69,7 +69,7 @@ export function TocPopoverHeader(props: HTMLAttributes<HTMLDivElement>) {
             'border-b border-fd-foreground/10 backdrop-blur-md transition-colors',
             (!isTransparent || open) && 'bg-fd-background/80',
             open && 'shadow-lg',
-            sidebar.open && 'opacity-0',
+            sidebar.open && 'max-md:hidden',
           )}
         >
           {props.children}
