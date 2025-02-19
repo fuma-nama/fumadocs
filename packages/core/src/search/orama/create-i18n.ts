@@ -138,7 +138,7 @@ export function createI18nSearchAPI<T extends 'simple' | 'advanced'>(
 
       return {
         type: 'i18n',
-        data: Object.fromEntries(await Promise.all(entries)) as object,
+        data: Object.fromEntries(await Promise.all(entries)),
       };
     },
     async search(query, searchOptions) {

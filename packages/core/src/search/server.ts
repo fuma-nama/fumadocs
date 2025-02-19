@@ -1,4 +1,10 @@
-import { type Orama, type SearchParams, save, create } from '@orama/orama';
+import {
+  type Orama,
+  type SearchParams,
+  save,
+  create,
+  type RawData,
+} from '@orama/orama';
 import { type NextRequest } from 'next/server';
 import type { StructuredData } from '@/mdx-plugins/remark-structure';
 import type { SortedResult } from '@/server/types';
@@ -14,6 +20,15 @@ import {
 import { searchSimple } from '@/search/orama/search/simple';
 import { searchAdvanced } from '@/search/orama/search/advanced';
 
+type SearchType = 'simple' | 'advanced';
+
+export type ExportedData =
+  | (RawData & { type: SearchType })
+  | {
+      type: 'i18n';
+      data: Record<string, RawData & { type: SearchType }>;
+    };
+
 export interface SearchServer {
   search: (
     query: string,
@@ -25,7 +40,7 @@ export interface SearchServer {
    *
    * You can reference the exported database to implement client-side search
    */
-  export: () => Promise<unknown>;
+  export: () => Promise<ExportedData>;
 }
 
 export interface SearchAPI extends SearchServer {
@@ -69,7 +84,7 @@ export interface AdvancedOptions extends SharedOptions {
   >;
 }
 
-export function createSearchAPI<T extends 'simple' | 'advanced'>(
+export function createSearchAPI<T extends SearchType>(
   type: T,
   options: T extends 'simple' ? SimpleOptions : AdvancedOptions,
 ): SearchAPI {
@@ -95,7 +110,7 @@ export function initSimpleSearch(options: SimpleOptions): SearchServer {
     async export() {
       return {
         type: 'simple',
-        ...save(await doc),
+        ...(await save(await doc)),
       };
     },
     async search(query) {
