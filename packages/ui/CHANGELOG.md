@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 15.0.10
+
+### Patch Changes
+
+- e8a3ab7: Add collapse button back to sidebar on Notebook layout
+- Updated dependencies [d95c21f]
+  - fumadocs-core@15.0.10
+
 ## 15.0.9
 
 ### Patch Changes
