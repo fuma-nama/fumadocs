@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 15.0.10
+
+### Patch Changes
+
+- d95c21f: add `initOrama` option to static client
+
 ## 15.0.9
 
 ## 15.0.8

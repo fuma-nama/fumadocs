@@ -22,7 +22,7 @@ export function Samples({
   return (
     <>
       <Select value={value} onValueChange={setValue}>
-        <SelectTrigger className="not-prose">
+        <SelectTrigger className="not-prose mb-2">
           <SelectValue
             placeholder={
               defaultItem ? <SelectDisplay {...defaultItem} /> : null

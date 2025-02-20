@@ -189,7 +189,7 @@ export function TocPopoverTrigger({
     <CollapsibleTrigger
       {...props}
       className={cn(
-        'inline-flex items-center text-sm gap-2 text-nowrap px-4 py-2 text-start md:px-6 md:py-3 focus-visible:outline-none',
+        'inline-flex items-center text-sm gap-2 text-nowrap px-4 py-2.5 text-start md:px-6 focus-visible:outline-none',
         props.className,
       )}
     >

@@ -1,5 +1,15 @@
 # @fuma-docs/openapi
 
+## 6.0.11
+
+### Patch Changes
+
+- 0a13c45: Support response examples
+- Updated dependencies [e8a3ab7]
+- Updated dependencies [d95c21f]
+  - fumadocs-ui@15.0.10
+  - fumadocs-core@15.0.10
+
 ## 6.0.10
 
 ### Patch Changes

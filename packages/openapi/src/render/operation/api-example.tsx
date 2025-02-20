@@ -7,8 +7,8 @@ import type { EndpointSample } from '@/utils/generate-sample';
 import { type ReactNode } from 'react';
 import { Markdown } from '@/render/markdown';
 import { type CodeSample } from '@/render/operation';
-import type { ResponseTypeProps } from '@/render/renderer';
 import { getTypescriptSchema } from '@/utils/get-typescript-schema';
+import { CodeBlock } from '@/render/codeblock';
 
 const defaultSamples: CodeSample[] = [
   {
@@ -111,16 +111,14 @@ export async function APIExample({
     );
   }
 
+  const exclusiveCodeSamples = method['x-exclusiveCodeSample'];
   if (
     (samples.size === 1 && samples.has('_default')) ||
-    (method['x-exclusiveCodeSample'] &&
-      samples.has(method['x-exclusiveCodeSample']))
+    (exclusiveCodeSamples && samples.has(exclusiveCodeSamples))
   ) {
     // if exclusiveSampleKey is present, we don't use tabs
     // if only the fallback or non described openapi legacy example is present, we don't use tabs
-    children = renderRequest(
-      samples.get(method['x-exclusiveCodeSample'] ?? '_default')!,
-    );
+    children = renderRequest(samples.get(exclusiveCodeSamples ?? '_default')!);
   } else if (samples.size > 0) {
     const entries = Array.from(samples.entries());
 
@@ -133,7 +131,7 @@ export async function APIExample({
           ) : null,
           value: key,
         }))}
-        defaultValue={method['x-selectedCodeSample']}
+        defaultValue={exclusiveCodeSamples}
       >
         {entries.map(([key, sample]) => (
           <renderer.Sample key={key} value={key}>
@@ -180,19 +178,13 @@ function ResponseTabs({
   if (!operation.responses) return null;
 
   async function renderResponse(code: string) {
-    const types: ResponseTypeProps[] = [];
+    const response =
+      code in endpoint.responses ? endpoint.responses[code] : null;
 
-    let description = operation.responses?.[code].description;
-    if (!description && code in endpoint.responses)
-      description = endpoint.responses[code].schema.description ?? '';
-
-    if (code in endpoint.responses) {
-      types.push({
-        lang: 'json',
-        label: 'Response',
-        code: JSON.stringify(endpoint.responses[code].sample, null, 2),
-      });
-    }
+    const description =
+      operation.responses?.[code].description ??
+      response?.schema.description ??
+      '';
 
     let ts: string | undefined;
     if (generateTypeScriptSchema) {
@@ -201,24 +193,53 @@ function ResponseTabs({
       ts = await getTypescriptSchema(endpoint, code, schema.dereferenceMap);
     }
 
-    if (ts) {
-      types.push({
-        code: ts,
-        lang: 'ts',
-        label: 'TypeScript',
+    const values: string[] = [];
+    let exampleSlot: ReactNode;
+
+    if (response?.samples._default) {
+      values.push('Response');
+
+      exampleSlot = (
+        <renderer.ResponseType label="Response">
+          <CodeBlock
+            lang="json"
+            code={JSON.stringify(
+              endpoint.responses[code].samples._default,
+              null,
+              2,
+            )}
+          />
+        </renderer.ResponseType>
+      );
+    } else if (response) {
+      exampleSlot = Object.entries(response.samples).map(([key, sample], i) => {
+        const title = sample?.summary ?? `Example ${i + 1}`;
+
+        values.push(title);
+        return (
+          <renderer.ResponseType key={key} label={title}>
+            {sample?.description ? (
+              <Markdown text={sample.description} />
+            ) : null}
+            <CodeBlock lang="json" code={JSON.stringify(sample, null, 2)} />
+          </renderer.ResponseType>
+        );
       });
     }
 
     return (
       <renderer.Response value={code}>
         {description ? <Markdown text={description} /> : null}
-        {types.length > 0 ? (
-          <renderer.ResponseTypes>
-            {types.map((type) => (
-              <renderer.ResponseType key={type.lang} {...type} />
-            ))}
+        {response && (
+          <renderer.ResponseTypes defaultValue={values[0]}>
+            {exampleSlot}
+            {ts ? (
+              <renderer.ResponseType label="TypeScript">
+                <CodeBlock code={ts} lang="ts" />
+              </renderer.ResponseType>
+            ) : null}
           </renderer.ResponseTypes>
-        ) : null}
+        )}
       </renderer.Response>
     );
   }

@@ -8,14 +8,15 @@ import {
 import { getSecurities, getSecurityPrefix } from '@/utils/get-security';
 import type { OpenAPIV3_1 } from 'openapi-types';
 
-export interface Samples {
-  [key: string]: {
+export type Samples = {
+  [key in '_default' | (string & {})]?: {
     value?: unknown;
     description?: string;
     summary?: string;
     externalValue?: string;
   };
-}
+};
+
 /**
  * Sample info of endpoint
  */
@@ -36,7 +37,7 @@ export interface EndpointSample {
 
 interface ResponseSample {
   mediaType: string;
-  sample: unknown;
+  samples: Samples;
   schema: ParsedSchema;
 }
 
@@ -134,11 +135,15 @@ export function generateSample(
     const responseSchema = content[mediaType].schema;
     if (!responseSchema) continue;
 
+    const examples = content[mediaType].examples ?? content.examples;
+    const example = content[mediaType].example ?? content.example;
     responses[code] = {
       mediaType,
-      sample:
-        content[mediaType].example ??
-        generateBody(method.method, responseSchema),
+      samples: examples
+        ? examples
+        : {
+            _default: example ?? generateBody(method.method, responseSchema),
+          },
       schema: responseSchema,
     };
   }
