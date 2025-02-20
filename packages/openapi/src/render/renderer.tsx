@@ -67,9 +67,8 @@ export interface SamplesProps {
 }
 
 export interface ResponseTypeProps {
-  lang: string;
-  code: string;
   label: string;
+  children: ReactNode;
 }
 
 export interface RootProps {
@@ -92,7 +91,7 @@ export interface Renderer {
   Samples: ComponentType<SamplesProps>;
   Requests: ComponentType<{ items: string[]; children: ReactNode }>;
   Request: ComponentType<RequestProps>;
-  ResponseTypes: ComponentType<{ children: ReactNode }>;
+  ResponseTypes: ComponentType<{ defaultValue?: string; children: ReactNode }>;
   ResponseType: ComponentType<ResponseTypeProps>;
 
   /**
@@ -137,15 +136,13 @@ export function createRenders(
       <Accordions
         type="single"
         className="!-m-4 border-none pt-2"
-        defaultValue="Response"
+        defaultValue={props.defaultValue}
       >
         {props.children}
       </Accordions>
     ),
     ResponseType: (props) => (
-      <Accordion title={props.label}>
-        <CodeBlock code={props.code} lang={props.lang} options={shikiOptions} />
-      </Accordion>
+      <Accordion title={props.label}>{props.children}</Accordion>
     ),
     Property,
     ObjectCollapsible,
