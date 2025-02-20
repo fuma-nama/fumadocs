@@ -155,7 +155,7 @@ export function DocsPage({
       >
         {replaceOrDefault(
           { enabled: tocPopoverEnabled, component: tocPopoverReplace },
-          <TocPopoverHeader>
+          <TocPopoverHeader className="h-10">
             <TocPopoverTrigger className="w-full" items={toc} />
             <TocPopoverContent>
               {tocPopoverOptions.header}

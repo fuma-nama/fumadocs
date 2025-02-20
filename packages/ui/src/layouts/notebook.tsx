@@ -117,10 +117,10 @@ export function DocsLayout({
           >
             <SidebarHeader>
               {navMode === 'auto' && (
-                <div className="flex flex-row items-center justify-between min-h-14 -my-2 max-md:hidden">
+                <div className="flex flex-row justify-between -mt-0.5 max-md:hidden">
                   <Link
                     href={nav.url ?? '/'}
-                    className="inline-flex items-center gap-2.5 py-1 font-medium"
+                    className="inline-flex items-center gap-2.5 font-medium"
                   >
                     {nav.title}
                   </Link>
@@ -130,7 +130,7 @@ export function DocsLayout({
                         color: 'ghost',
                         size: 'icon-sm',
                       }),
-                      'text-fd-muted-foreground',
+                      'text-fd-muted-foreground mb-auto',
                     )}
                   />
                 </div>
@@ -208,7 +208,6 @@ function DocsNavbar({
 
   return (
     <Navbar
-      className={cn('flex flex-col h-14', tabs.length > 0 && 'lg:h-26')}
       style={
         navMode === 'top'
           ? {
@@ -219,7 +218,7 @@ function DocsNavbar({
     >
       <div
         className={cn(
-          'flex flex-row border-b border-fd-foreground/10 px-4 flex-1',
+          'flex flex-row border-b border-fd-foreground/10 px-4 h-14',
           navMode === 'auto' && 'md:px-6',
         )}
       >
@@ -311,7 +310,7 @@ function DocsNavbar({
         </div>
       </div>
       {tabs.length > 0 ? (
-        <LayoutTabs className="px-6 border-b border-fd-foreground/10 max-lg:hidden">
+        <LayoutTabs className="px-6 border-b border-fd-foreground/10 h-10 max-lg:hidden">
           {tabs.map((tab) => (
             <LayoutTab key={tab.url} {...tab} />
           ))}

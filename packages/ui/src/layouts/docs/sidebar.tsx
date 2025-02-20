@@ -168,7 +168,7 @@ export function Sidebar({
         <div
           {...inner}
           className={cn(
-            'flex size-full max-w-full flex-col pt-2 md:ms-auto md:w-(--fd-sidebar-width) md:border-e',
+            'flex size-full max-w-full flex-col pt-2 md:ms-auto md:w-(--fd-sidebar-width) md:border-e md:pt-4',
             inner?.className,
           )}
         >

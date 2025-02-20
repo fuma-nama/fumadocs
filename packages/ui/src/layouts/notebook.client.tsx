@@ -20,7 +20,7 @@ export function Navbar(props: HTMLAttributes<HTMLElement>) {
       id="nd-subnav"
       {...props}
       className={cn(
-        'fixed inset-x-0 top-(--fd-banner-height) z-10 h-14 pe-(--fd-layout-offset) backdrop-blur-lg transition-colors',
+        'fixed inset-x-0 top-(--fd-banner-height) z-10 pe-(--fd-layout-offset) backdrop-blur-lg transition-colors',
         (!isTransparent || open) && 'bg-fd-background/80',
         props.className,
       )}
@@ -88,7 +88,7 @@ export function LayoutTab(item: Option) {
   return (
     <Link
       className={cn(
-        'inline-flex items-center py-2.5 border-b-2 border-transparent gap-2 text-fd-muted-foreground text-sm text-nowrap',
+        'inline-flex items-center py-2.5 border-b border-transparent gap-2 text-fd-muted-foreground text-sm text-nowrap',
         selected && 'text-fd-foreground font-medium border-fd-primary',
       )}
       href={item.url}
@@ -111,7 +111,7 @@ export function SidebarLayoutTab({
     <Link
       {...props}
       className={cn(
-        'flex flex-row items-center px-2 py-1.5 gap-2.5 text-fd-muted-foreground [&_svg]:!size-4.5',
+        'flex flex-row items-center px-2 -mx-2 py-1.5 gap-2.5 text-fd-muted-foreground [&_svg]:!size-4.5',
         selected
           ? 'text-fd-primary font-medium'
           : 'hover:text-fd-accent-foreground',

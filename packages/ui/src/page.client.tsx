@@ -51,11 +51,7 @@ export function TocPopoverHeader(props: HTMLAttributes<HTMLDivElement>) {
 
   return (
     <div
-      className={cn(
-        'sticky overflow-visible z-10 h-8',
-        tocNav,
-        props.className,
-      )}
+      className={cn('sticky overflow-visible z-10', tocNav, props.className)}
       style={{
         top: 'calc(var(--fd-banner-height) + var(--fd-nav-height))',
       }}
@@ -137,7 +133,7 @@ export interface FooterProps {
 }
 
 const itemVariants = cva(
-  'flex w-full flex-col gap-2 rounded-lg border bg-fd-card p-4 text-sm transition-colors hover:bg-fd-accent/80 hover:text-fd-accent-foreground',
+  'flex w-full flex-col gap-2 rounded-lg border p-4 text-sm transition-colors hover:bg-fd-accent/80 hover:text-fd-accent-foreground',
 );
 
 const itemLabel = cva(
@@ -196,7 +192,7 @@ export function Footer({ items }: FooterProps) {
             <ChevronLeft className="-ms-1 size-4 shrink-0 rtl:rotate-180" />
             <p>{text.previousPage}</p>
           </div>
-          <p className="font-medium">{previous.name}</p>
+          <p className="font-medium md:text-[15px]">{previous.name}</p>
         </Link>
       ) : null}
       {next ? (
@@ -208,7 +204,7 @@ export function Footer({ items }: FooterProps) {
             <ChevronRight className="-me-1 size-4 shrink-0 rtl:rotate-180" />
             <p>{text.nextPage}</p>
           </div>
-          <p className="font-medium">{next.name}</p>
+          <p className="font-medium md:text-[15px]">{next.name}</p>
         </Link>
       ) : null}
     </div>

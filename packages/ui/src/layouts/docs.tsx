@@ -13,7 +13,7 @@ import {
   SidebarViewport,
   SidebarPageTree,
 } from '@/layouts/docs/sidebar';
-import { replaceOrDefault, type SharedNavProps } from '@/layouts/shared';
+import { replaceOrDefault } from '@/layouts/shared';
 import { type LinkItemType, BaseLinkItem } from '@/layouts/links';
 import { RootToggle } from '@/components/layout/root-toggle';
 import { type BaseLayoutProps, getLinks } from './shared';
@@ -132,11 +132,26 @@ export function DocsLayout({
               className={cn('md:ps-(--fd-layout-offset)', sidebar.className)}
             >
               <SidebarHeader>
-                <SidebarHeaderItems
-                  {...nav}
-                  links={links}
-                  sidebarCollapsible={collapsible}
-                />
+                <div className="flex flex-row pt-1 max-md:hidden">
+                  <Link
+                    href={nav.url ?? '/'}
+                    className="inline-flex text-[15px] items-center gap-2.5 font-medium"
+                  >
+                    {nav.title}
+                  </Link>
+                  {nav.children}
+                  {collapsible && (
+                    <SidebarCollapseTrigger
+                      className={cn(
+                        buttonVariants({
+                          color: 'ghost',
+                          size: 'icon-sm',
+                        }),
+                        'ms-auto mb-auto text-fd-muted-foreground max-md:hidden',
+                      )}
+                    />
+                  )}
+                </div>
                 {sidebarBanner}
                 {tabs.length > 0 ? (
                   <RootToggle options={tabs} className="-mx-2" />
@@ -176,40 +191,6 @@ export function DocsLayout({
         </main>
       </NavProvider>
     </TreeContextProvider>
-  );
-}
-
-function SidebarHeaderItems({
-  links,
-  sidebarCollapsible,
-  ...props
-}: SharedNavProps & { links: LinkItemType[]; sidebarCollapsible: boolean }) {
-  const isEmpty = !props.title && !props.children && links.length === 0;
-  if (isEmpty) return null;
-
-  return (
-    <div className="flex flex-row items-center max-md:hidden">
-      {props.title ? (
-        <Link
-          href={props.url ?? '/'}
-          className="inline-flex text-[15px] items-center gap-2.5 py-1 font-medium"
-        >
-          {props.title}
-        </Link>
-      ) : null}
-      {props.children}
-      {sidebarCollapsible && (
-        <SidebarCollapseTrigger
-          className={cn(
-            buttonVariants({
-              color: 'ghost',
-              size: 'icon-sm',
-            }),
-            'ms-auto text-fd-muted-foreground max-md:hidden',
-          )}
-        />
-      )}
-    </div>
   );
 }
 
