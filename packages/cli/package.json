@@ -48,7 +48,7 @@
     "eslint-config-custom": "workspace:*",
     "fast-glob": "^3.3.3",
     "tsconfig": "workspace:*",
-    "tsx": "^4.19.2"
+    "tsx": "^4.19.3"
   },
   "publishConfig": {
     "access": "public"
