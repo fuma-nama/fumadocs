@@ -30,7 +30,7 @@
     "estree-util-to-js": "^2.0.0",
     "estree-util-value-to-estree": "^3.3.2",
     "fumadocs-typescript": "workspace:^",
-    "hast-util-to-estree": "^3.1.1",
+    "hast-util-to-estree": "^3.1.2",
     "npm-to-yarn": "^3.0.1",
     "oxc-transform": "^0.51.0",
     "unist-util-visit": "^5.0.0",

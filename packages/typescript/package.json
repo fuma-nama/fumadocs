@@ -36,7 +36,7 @@
   },
   "dependencies": {
     "fast-glob": "^3.3.3",
-    "hast-util-to-jsx-runtime": "^2.3.2",
+    "hast-util-to-jsx-runtime": "^2.3.3",
     "mdast-util-from-markdown": "^2.0.2",
     "mdast-util-gfm": "^3.1.0",
     "mdast-util-to-hast": "^13.2.0",

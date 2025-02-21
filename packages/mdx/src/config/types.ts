@@ -17,14 +17,6 @@ export interface GlobalConfig {
    * @defaultValue 'none'
    */
   lastModifiedTime?: 'git' | 'none';
-
-  /**
-   * Generate manifest file on build mode
-   *
-   * @defaultValue false
-   * @deprecated No longer needed, use a route handler to export build time info
-   */
-  generateManifest?: boolean;
 }
 
 export interface FileInfo {

@@ -35,7 +35,7 @@ The input/source of your content, it can be a CMS, or local data layers like [Co
 
 <Card icon={<Terminal />} title='Fumadocs CLI'>
 
-A command line tool to install UI components similar to Shadcn UI and automate things.
+A command line tool to install UI components and automate things, useful for customizing layouts.
 
 </Card>
 
@@ -98,8 +98,8 @@ npm run dev
 
 In the project, you can see:
 
-- `lib/source.ts`: Where you organize code for content source adapter, we use [`loader()`](/docs/headless/source-api) to parse and interact with your content source.
-- `app/layout.config.tsx`: Shared options for layouts, this is optional but preferred to keep.
+- `lib/source.ts`: Code for content source adapter, Fumadocs needs [`loader()`](/docs/headless/source-api) to interact with your content source.
+- `app/layout.config.tsx`: Shared options for layouts, optional but preferred to keep.
 - `app/(home)`: The route group for your landing page and other pages.
 - `app/docs`: The documentation layout and pages.
 - `app/api/search/route.ts`: The Route Handler for search.
@@ -108,16 +108,16 @@ In the project, you can see:
 
 Content source handles all your content, including validation and type definitions for data like frontmatter.
 
-For **Fumadocs MDX**, you can read the [Introduction](/docs/mdx) to learn how it handles your content,
-and customise different options like frontmatter schema. A `source.config.ts` config file has been included.
+- **Fumadocs MDX:** Read the [Introduction](/docs/mdx) to learn how it handles your content,
+  and customise different options like frontmatter schema. A `source.config.ts` config file has been included.
 
-For custom sources that is not supported by default (like Sanity), you can [build a custom content source](/docs/headless/custom-source).
+- **Custom Source:** For other sources like Sanity, you can [build a custom content source](/docs/headless/custom-source).
 
 ### Customise Sidebar
 
 Navigation elements like sidebar take a [Page Tree](/docs/headless/page-tree) to render navigation links, it's a tree that describes all available pages and folders.
 
-By default, the sidebar items (formally page tree) are generated from your file structure.
+Normally, the sidebar items (formally page tree) are generated from your file structure.
 You can learn how to customise the page tree from:
 
 <Cards>
@@ -141,24 +141,14 @@ You can refer to:
   />
 </Cards>
 
-## FAQ
+### Customise UI
 
-Some common questions you may encounter.
+Since the design system is built on Tailwind CSS, you can [customise colors with CSS Variables](/docs/ui/theme#colors).
 
-<Accordions>
-    <Accordion id='customise' title='How to Customise UI?'>
+Fumadocs UI offers pre-styled layouts and UI components, you can customise components with exposed props like `style` and `className`.
+We also provided many options to customise layouts ([See Available Options](/docs/ui/layouts)).
 
-Fumadocs UI offers Themes, Layouts and Components.
-
-The design system is built with Tailwind CSS, see [Themes](/docs/ui/theme).
-
-Components are pre-built elements to enhance your documentation,
-they are customisable with exposed props like `style` and `className`.
-
-Layouts are essential elements of docs, providing navigation and basic functionality.
-We provided many options to customise them, see [Layouts](/docs/ui/layouts).
-
-Fumadocs CLI offers a way to install Fumadocs components to your project, allowing you to fully customise them with code.
+If none of them suits you, Fumadocs CLI is a way to install Fumadocs UI components and layouts to your codebase, similar to Shadcn UI. Allowing you to fully customise with code:
 
 ```package-install
 @fumadocs/cli --save-dev
@@ -168,9 +158,11 @@ Fumadocs CLI offers a way to install Fumadocs components to your project, allowi
 pnpm fumadocs add
 ```
 
-This is inspired and very similar to Shadcn UI.
+## FAQ
 
-    </Accordion>
+Some common questions you may encounter.
+
+<Accordions>
     <Accordion id='fix-monorepo-styling' title="How to fix stylings not being applied in Monorepo?">
 
 Sometimes, `fumadocs-ui` is not installed in the workspace of your Tailwind CSS configuration file. (e.g. a monorepo setup).
