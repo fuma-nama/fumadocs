@@ -10,6 +10,7 @@ import {
   type ReactNode,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -351,11 +352,15 @@ export function SidebarFolderLink(props: LinkProps) {
   );
 }
 
-export function SidebarFolderContent(props: CollapsibleContentProps) {
+export function SidebarFolderContent(props: CollapsibleContentProps & { defaultOpen: boolean } ) {
   const ctx = useInternalContext();
+  const [isAnimationPrevented, setIsAnimationPrevented] = useState(defaultOpen);
+  useEffect(() => {
+    setIsAnimationPrevented(false);
+  }, []);
 
   return (
-    <CollapsibleContent {...props} className={cn('relative', props.className)}>
+    <CollapsibleContent {...props} className={cn('relative', props.className, isAnimationPrevented && '!animation-none')}>
       <Context.Provider
         value={useMemo(
           () => ({
@@ -476,12 +481,11 @@ function PageTreeFolder({
 }) {
   const { defaultOpenLevel, level } = useInternalContext();
   const path = useTreePath();
+  const defaultOpen = (item.defaultOpen ?? defaultOpenLevel >= level) || path.includes(item);
 
   return (
     <SidebarFolder
-      defaultOpen={
-        (item.defaultOpen ?? defaultOpenLevel >= level) || path.includes(item)
-      }
+      defaultOpen={defaultOpen}
     >
       {item.index ? (
         <SidebarFolderLink
@@ -498,7 +502,7 @@ function PageTreeFolder({
           {item.name}
         </SidebarFolderTrigger>
       )}
-      <SidebarFolderContent>{props.children}</SidebarFolderContent>
+      <SidebarFolderContent defaultOpen={defaultOpen}>{props.children}</SidebarFolderContent>
     </SidebarFolder>
   );
 }
