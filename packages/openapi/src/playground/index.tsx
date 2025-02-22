@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react';
 import type {
   MethodInformation,
   ParameterObject,
@@ -10,7 +9,6 @@ import {
   type ParsedSchema,
 } from '@/utils/schema';
 import { getSecurities, type Security } from '@/utils/get-security';
-import { Client } from './client.lazy';
 import { type ClientProps } from './client';
 
 interface BaseRequestField {
@@ -92,12 +90,13 @@ export interface APIPlaygroundProps {
 
 export type { ClientProps, CustomField } from './client';
 
-export function APIPlayground({
+export async function APIPlayground({
   path,
   method,
   ctx,
   client,
-}: APIPlaygroundProps): ReactNode {
+}: APIPlaygroundProps) {
+  const { ClientLazy } = await import('./client.lazy');
   let currentId = 0;
   const bodyContent = method.requestBody?.content;
   const mediaType = bodyContent ? getPreferredType(bodyContent) : undefined;
@@ -142,7 +141,7 @@ export function APIPlayground({
     ...client,
   };
 
-  return <Client {...props} />;
+  return <ClientLazy {...props} />;
 }
 
 function getAuthorizationField(

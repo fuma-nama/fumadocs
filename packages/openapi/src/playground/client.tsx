@@ -22,17 +22,14 @@ import type {
 } from 'react-hook-form';
 import { useApiContext } from '@/ui/contexts/api';
 import type { FetchResult } from '@/playground/fetcher';
-import {
-  getDefaultValue,
-  getDefaultValues,
-} from '@/playground/get-default-values';
-import { FieldSet, ObjectInput } from '@/playground/inputs';
+import { getDefaultValue, getDefaultValues } from './get-default-values';
+import { FieldSet, ObjectInput } from './inputs';
 import type {
   PrimitiveRequestField,
   ReferenceSchema,
   RequestSchema,
 } from '@/playground/index';
-import { getStatusInfo } from '@/playground/status-info';
+import { getStatusInfo } from './status-info';
 import { getUrl } from '@/utils/server-url';
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
 import { MethodLabel } from '@/ui/components/method-label';

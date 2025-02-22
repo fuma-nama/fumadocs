@@ -10,4 +10,4 @@ export const Sample = dynamic(() =>
 );
 
 // for compatibility
-export { Client as APIPlayground } from '@/playground/client.lazy';
+// export { Client as APIPlayground } from '@/playground/client.lazy';

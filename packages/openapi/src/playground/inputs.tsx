@@ -18,8 +18,8 @@ import {
 import type { RequestSchema } from '@/playground/index';
 import { resolve } from '@/playground/resolve';
 import { Input, labelVariants } from '@/ui/components/input';
-import { getDefaultValue } from '@/playground/get-default-values';
-import { useSchemaContext } from '@/playground/client';
+import { getDefaultValue } from './get-default-values';
+import { useSchemaContext } from './client';
 
 type FieldOfType<Type> = Extract<RequestSchema, { type: Type }>;
 interface InputHeaderProps {

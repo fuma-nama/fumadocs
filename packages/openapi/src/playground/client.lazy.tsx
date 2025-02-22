@@ -1,5 +1,6 @@
+'use client';
 import dynamic from 'next/dynamic';
 
-export const Client = dynamic(() =>
+export const ClientLazy = dynamic(() =>
   import('./client').then((mod) => mod.Client),
 );
