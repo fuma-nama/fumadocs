@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 15.0.11
+
+### Patch Changes
+
+- 886da49: Fix sidebar layout shifts with `defaultOpen` option
+- 04e6c6e: Fix Notebook layout paddings
+  - fumadocs-core@15.0.11
+
 ## 15.0.10
 
 ### Patch Changes
