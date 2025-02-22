@@ -8,12 +8,16 @@ import {
   type ReactNode,
   type ReactElement,
   type ComponentPropsWithoutRef,
+  useMemo,
 } from 'react';
 import { RemoveScroll } from 'react-remove-scroll';
 
-const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
+const SidebarContext = createContext<SidebarContextType | null>(null);
 
-type SidebarContextType = [open: boolean, setOpen: (value: boolean) => void];
+type SidebarContextType = {
+  open: boolean;
+  setOpen: (value: boolean) => void;
+};
 
 export interface SidebarProviderProps {
   open?: boolean;
@@ -27,14 +31,19 @@ function useSidebarContext(): SidebarContextType {
   return ctx;
 }
 
-export function SidebarProvider(
-  props: SidebarProviderProps,
-): React.ReactElement {
-  const [openInner, setOpenInner] = useState(false);
+export function SidebarProvider(props: SidebarProviderProps) {
+  const [open, setOpen] =
+    props.open === undefined
+      ? // eslint-disable-next-line react-hooks/rules-of-hooks
+        useState(false)
+      : [props.open, props.onOpenChange];
 
   return (
     <SidebarContext.Provider
-      value={[props.open ?? openInner, props.onOpenChange ?? setOpenInner]}
+      value={useMemo(
+        () => ({ open, setOpen: setOpen ?? (() => undefined) }),
+        [open, setOpen],
+      )}
     >
       {props.children}
     </SidebarContext.Provider>
@@ -54,7 +63,7 @@ export function SidebarTrigger<T extends ElementType = 'button'>({
   as,
   ...props
 }: SidebarTriggerProps<T>): ReactElement {
-  const [open, setOpen] = useSidebarContext();
+  const { open, setOpen } = useSidebarContext();
   const As = as ?? 'button';
 
   return (
@@ -81,7 +90,7 @@ export function SidebarList<T extends ElementType = 'aside'>({
   blockScrollingWidth,
   ...props
 }: SidebarContentProps<T>): ReactElement {
-  const [open] = useSidebarContext();
+  const { open } = useSidebarContext();
   const [isBlocking, setIsBlocking] = useState(false);
 
   useEffect(() => {

@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react';
 import type {
   MethodInformation,
   ParameterObject,
@@ -10,7 +9,7 @@ import {
   type ParsedSchema,
 } from '@/utils/schema';
 import { getSecurities, type Security } from '@/utils/get-security';
-import { APIPlayground } from '@/ui/client';
+import { type ClientProps } from './client';
 
 interface BaseRequestField {
   name: string;
@@ -82,28 +81,22 @@ interface Context {
 }
 
 export interface APIPlaygroundProps {
-  route: string;
-  method: string;
-  authorization?: Security;
-  path?: PrimitiveRequestField[];
-  query?: PrimitiveRequestField[];
-  header?: PrimitiveRequestField[];
-  body?: RequestSchema & {
-    mediaType: string;
-  };
-  schemas: Record<string, RequestSchema>;
-  proxyUrl?: string;
-}
-
-export function Playground({
-  path,
-  method,
-  ctx,
-}: {
   path: string;
   method: MethodInformation;
   ctx: RenderContext;
-}): ReactNode {
+
+  client?: Partial<ClientProps>;
+}
+
+export type { ClientProps, CustomField } from './client';
+
+export async function APIPlayground({
+  path,
+  method,
+  ctx,
+  client,
+}: APIPlaygroundProps) {
+  const { ClientLazy } = await import('./client.lazy');
   let currentId = 0;
   const bodyContent = method.requestBody?.content;
   const mediaType = bodyContent ? getPreferredType(bodyContent) : undefined;
@@ -123,7 +116,7 @@ export function Playground({
       ? toSchema(bodyContent[mediaType].schema, true, context)
       : undefined;
 
-  const props: APIPlaygroundProps = {
+  const props: ClientProps = {
     authorization: getAuthorizationField(method, ctx),
     method: method.method,
     route: path,
@@ -145,9 +138,10 @@ export function Playground({
         : undefined,
     schemas: context.references,
     proxyUrl: ctx.proxyUrl,
+    ...client,
   };
 
-  return <APIPlayground {...props} />;
+  return <ClientLazy {...props} />;
 }
 
 function getAuthorizationField(

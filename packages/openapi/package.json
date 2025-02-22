@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-openapi",
-  "version": "6.0.11",
+  "version": "6.1.0",
   "description": "Generate MDX docs for your OpenAPI spec",
   "keywords": [
     "NextJs",
@@ -23,6 +23,10 @@
     "./ui/client": {
       "import": "./dist/ui/client.js",
       "types": "./dist/ui/client.d.ts"
+    },
+    "./playground": {
+      "import": "./dist/playground/index.js",
+      "types": "./dist/playground/index.d.ts"
     },
     "./scalar": {
       "import": "./dist/scalar/index.js",

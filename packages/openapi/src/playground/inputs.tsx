@@ -1,3 +1,4 @@
+'use client';
 import {
   type HTMLAttributes,
   type LabelHTMLAttributes,
@@ -14,11 +15,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/ui/components/select';
-import type { RequestSchema } from '@/render/operation/playground';
-import { resolve } from '@/ui/playground/resolve';
+import type { RequestSchema } from '@/playground/index';
+import { resolve } from '@/playground/resolve';
 import { Input, labelVariants } from '@/ui/components/input';
-import { getDefaultValue } from '@/ui/playground/get-default-values';
-import { useSchemaContext } from '@/ui/contexts/schema';
+import { getDefaultValue } from './get-default-values';
+import { useSchemaContext } from './client';
 
 type FieldOfType<Type> = Extract<RequestSchema, { type: Type }>;
 interface InputHeaderProps {

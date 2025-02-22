@@ -65,6 +65,7 @@ export function DocsLayout({
     ...sidebar
   } = {},
   i18n = false,
+  children,
   ...props
 }: DocsLayoutProps): ReactNode {
   checkPageTree(props.tree);
@@ -187,7 +188,7 @@ export function DocsLayout({
               tabs,
             },
           )}
-          <StylesProvider {...pageStyles}>{props.children}</StylesProvider>
+          <StylesProvider {...pageStyles}>{children}</StylesProvider>
         </main>
       </NavProvider>
     </TreeContextProvider>

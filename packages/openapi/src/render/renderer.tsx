@@ -10,8 +10,8 @@ import {
   Property,
   ObjectCollapsible,
 } from '@/ui';
-import type { MethodInformation, RenderContext, ServerObject } from '@/types';
-import { Playground } from '@/render/operation/playground';
+import type { RenderContext, ServerObject } from '@/types';
+import { APIPlayground, type APIPlaygroundProps } from '@/playground';
 import { Sample, Samples } from '@/ui/client';
 
 export interface ResponsesProps {
@@ -99,19 +99,8 @@ export interface Renderer {
    */
   ObjectCollapsible: ComponentType<ObjectCollapsibleProps>;
   Property: ComponentType<PropertyProps>;
-  APIPlayground: ComponentType<{
-    path: string;
-    method: MethodInformation;
-    ctx: RenderContext;
-  }>;
+  APIPlayground: ComponentType<APIPlaygroundProps>;
 }
-
-export type {
-  APIPlaygroundProps,
-  RequestSchema,
-  PrimitiveRequestField,
-  ReferenceSchema,
-} from '@/render/operation/playground';
 
 export function createRenders(
   shikiOptions: RenderContext['shikiOptions'],
@@ -161,6 +150,6 @@ export function createRenders(
         />
       </Tab>
     ),
-    APIPlayground: Playground,
+    APIPlayground,
   };
 }

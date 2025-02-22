@@ -8,6 +8,9 @@ import {
   type FC,
   Fragment,
   type ReactNode,
+  type RefObject,
+  createContext,
+  useContext,
 } from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import { cn, buttonVariants } from 'fumadocs-ui/components/api';
@@ -18,19 +21,15 @@ import type {
   ControllerRenderProps,
 } from 'react-hook-form';
 import { useApiContext } from '@/ui/contexts/api';
-import type { FetchResult } from '@/ui/playground/fetcher';
-import {
-  getDefaultValue,
-  getDefaultValues,
-} from '@/ui/playground/get-default-values';
-import { FieldSet, ObjectInput } from '@/ui/playground/inputs';
+import type { FetchResult } from '@/playground/fetcher';
+import { getDefaultValue, getDefaultValues } from './get-default-values';
+import { FieldSet, ObjectInput } from './inputs';
 import type {
-  APIPlaygroundProps,
   PrimitiveRequestField,
+  ReferenceSchema,
   RequestSchema,
-} from '@/render/operation/playground';
-import { type DynamicField, SchemaContext } from '../contexts/schema';
-import { getStatusInfo } from '@/ui/playground/status-info';
+} from '@/playground/index';
+import { getStatusInfo } from './status-info';
 import { getUrl } from '@/utils/server-url';
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
 import { MethodLabel } from '@/ui/components/method-label';
@@ -42,6 +41,7 @@ import {
   CollapsibleTrigger,
 } from 'fumadocs-ui/components/ui/collapsible';
 import { ChevronDown } from 'lucide-react';
+import type { Security } from '@/utils/get-security';
 
 interface FormValues {
   authorization:
@@ -68,7 +68,56 @@ export interface CustomField<TName extends FieldPath<FormValues>, Info> {
   }) => ReactElement;
 }
 
-function defaultAuthValue(auth: APIPlaygroundProps['authorization']) {
+export type ClientProps = HTMLAttributes<HTMLFormElement> & {
+  route: string;
+  method: string;
+  authorization?: Security;
+  path?: PrimitiveRequestField[];
+  query?: PrimitiveRequestField[];
+  header?: PrimitiveRequestField[];
+  body?: RequestSchema & {
+    mediaType: string;
+  };
+  schemas: Record<string, RequestSchema>;
+  proxyUrl?: string;
+
+  fields?: {
+    auth?: CustomField<'authorization', RequestSchema>;
+    path?: CustomField<`path.${string}`, PrimitiveRequestField>;
+    query?: CustomField<`query.${string}`, PrimitiveRequestField>;
+    header?: CustomField<`header.${string}`, PrimitiveRequestField>;
+    body?: CustomField<'body', RequestSchema>;
+  };
+
+  components?: Partial<{
+    ResultDisplay: FC<{ data: FetchResult }>;
+  }>;
+};
+
+interface SchemaContextType {
+  references: Record<string, RequestSchema>;
+  dynamic: RefObject<Map<string, DynamicField>>;
+}
+
+export type DynamicField =
+  | {
+      type: 'object';
+      properties: string[];
+    }
+  | {
+      type: 'field';
+      schema: RequestSchema | ReferenceSchema;
+    };
+
+const SchemaContext = createContext<SchemaContextType | undefined>(undefined);
+
+export function useSchemaContext(): SchemaContextType {
+  const ctx = useContext(SchemaContext);
+  if (!ctx) throw new Error('Missing provider');
+  return ctx;
+}
+
+function defaultAuthValue(auth: ClientProps['authorization']) {
   if (!auth || auth.type === 'apiKey') return '';
   if (auth.type === 'http' && auth.scheme === 'basic') {
     return {
@@ -80,7 +129,7 @@ function defaultAuthValue(auth: APIPlaygroundProps['authorization']) {
   return 'Bearer';
 }
 
-export function APIPlayground({
+export function Client({
   route,
   method = 'GET',
   authorization,
@@ -93,19 +142,7 @@ export function APIPlayground({
   proxyUrl,
   components: { ResultDisplay = DefaultResultDisplay } = {},
   ...props
-}: APIPlaygroundProps & {
-  fields?: {
-    auth?: CustomField<'authorization', RequestSchema>;
-    path?: CustomField<`path.${string}`, PrimitiveRequestField>;
-    query?: CustomField<`query.${string}`, PrimitiveRequestField>;
-    header?: CustomField<`header.${string}`, PrimitiveRequestField>;
-    body?: CustomField<'body', RequestSchema>;
-  };
-
-  components?: Partial<{
-    ResultDisplay: FC<{ data: FetchResult }>;
-  }>;
-} & HTMLAttributes<HTMLFormElement>) {
+}: ClientProps) {
   const { serverRef, servers } = useApiContext();
   const dynamicRef = useRef(new Map<string, DynamicField>());
   const form = useForm<FormValues>({
@@ -453,7 +490,7 @@ function DefaultResultDisplay({ data }: { data: FetchResult }) {
   );
 }
 
-export function CollapsiblePanel({
+function CollapsiblePanel({
   title,
   children,
   ...props

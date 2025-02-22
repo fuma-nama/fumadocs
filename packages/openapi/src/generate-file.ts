@@ -75,6 +75,14 @@ export async function generateFiles(options: Config): Promise<void> {
     ...urlInputs,
   ];
 
+  if (resolvedInputs.length === 0) {
+    throw new Error(
+      `No input files found. Tried resolving: ${
+        typeof input === 'string' ? input : input.join(', ')
+      }`,
+    );
+  }
+
   function getOutputPaths(result: GeneratePageOutput): string[] {
     let file;
 

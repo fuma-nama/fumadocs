@@ -1,9 +1,6 @@
-import { resolve } from '@/ui/playground/resolve';
-import {
-  type ReferenceSchema,
-  type RequestSchema,
-} from '@/render/operation/playground';
-import { type DynamicField } from '@/ui/contexts/schema';
+import { resolve } from '@/playground/resolve';
+import { type ReferenceSchema, type RequestSchema } from '@/playground/index';
+import type { DynamicField } from '@/playground/client';
 
 export interface FetchOptions {
   url: string;

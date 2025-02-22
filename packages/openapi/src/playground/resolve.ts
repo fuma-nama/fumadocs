@@ -1,7 +1,4 @@
-import {
-  type ReferenceSchema,
-  type RequestSchema,
-} from '@/render/operation/playground';
+import { type ReferenceSchema, type RequestSchema } from '@/playground/index';
 
 /**
  * Resolve reference
