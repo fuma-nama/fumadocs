@@ -1,9 +1,8 @@
 'use client';
 
-import { type ReactNode } from 'react';
+import { type ReactNode, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import {
-  useI18n,
   type Translations,
   I18nContext,
   defaultTranslations,
@@ -40,35 +39,40 @@ export function I18nProvider({
   locale,
   ...props
 }: I18nProviderProps) {
-  const context = useI18n();
   const router = useRouter();
   const pathname = usePathname();
 
-  const onChange = useEffectEvent((value: string) => {
-    const segments = pathname.split('/').filter((v) => v.length > 0);
+  const onChange =
+    props.onChange ??
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- always controlled
+    useEffectEvent((value: string) => {
+      const segments = pathname.split('/').filter((v) => v.length > 0);
 
-    // If locale prefix hidden
-    if (segments[0] !== locale) {
-      segments.unshift(value);
-    } else {
-      segments[0] = value;
-    }
+      // If locale prefix hidden
+      if (segments[0] !== locale) {
+        segments.unshift(value);
+      } else {
+        segments[0] = value;
+      }
 
-    router.push(`/${segments.join('/')}`);
-    router.refresh();
-  });
+      router.push(`/${segments.join('/')}`);
+      router.refresh();
+    });
 
   return (
     <I18nContext.Provider
-      value={{
-        locale,
-        locales,
-        text: {
-          ...context.text,
-          ...props.translations,
-        },
-        onChange: props.onChange ?? onChange,
-      }}
+      value={useMemo(
+        () => ({
+          locale,
+          locales,
+          text: {
+            ...defaultTranslations,
+            ...props.translations,
+          },
+          onChange,
+        }),
+        [locale, locales, onChange, props.translations],
+      )}
     >
       {props.children}
     </I18nContext.Provider>

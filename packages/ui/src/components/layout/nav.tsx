@@ -5,6 +5,7 @@ import {
   type ReactNode,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from 'react';
 import { cn } from '@/utils/cn';
@@ -58,7 +59,9 @@ export function NavProvider({
   }, [transparentMode]);
 
   return (
-    <NavContext.Provider value={{ isTransparent: transparent }}>
+    <NavContext.Provider
+      value={useMemo(() => ({ isTransparent: transparent }), [transparent])}
+    >
       {children}
     </NavContext.Provider>
   );
