@@ -72,6 +72,12 @@
   }
 }
 
+@property --radix-collapsible-content-height {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
 @utility container {
   margin-inline: auto;
   padding-inline: 1rem;
