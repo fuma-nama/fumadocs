@@ -24,6 +24,10 @@
       "import": "./dist/ui/client.js",
       "types": "./dist/ui/client.d.ts"
     },
+    "./playground": {
+      "import": "./dist/playground/index.js",
+      "types": "./dist/playground/index.d.ts"
+    },
     "./scalar": {
       "import": "./dist/scalar/index.js",
       "types": "./dist/scalar/index.d.ts"
