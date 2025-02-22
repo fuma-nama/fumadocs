@@ -1,5 +1,19 @@
 # @fuma-docs/openapi
 
+## 6.1.0
+
+### Minor Changes
+
+- 3d211f3: throw error, when input file is not found
+
+### Patch Changes
+
+- 5730116: Improve experience to customise API Playground
+- Updated dependencies [886da49]
+- Updated dependencies [04e6c6e]
+  - fumadocs-ui@15.0.11
+  - fumadocs-core@15.0.11
+
 ## 6.0.11
 
 ### Patch Changes
