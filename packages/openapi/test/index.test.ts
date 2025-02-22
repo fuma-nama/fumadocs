@@ -84,6 +84,33 @@ describe('Generate documents', () => {
     expect(fs.mkdir).toBeCalledWith(join(cwd, './out'), expect.anything());
   });
 
+  test('Generate Files - throws error when no input files found', async () => {
+    await expect(
+      generateFiles({
+        input: ['./fixtures/non-existent-*.yaml'],
+        output: './out',
+        per: 'file',
+        cwd,
+      }),
+    ).rejects.toThrow(
+      'No input files found. Tried resolving: ./fixtures/non-existent-*.yaml',
+    );
+
+    await expect(
+      generateFiles({
+        input: [
+          './fixtures/non-existent-1.yaml',
+          './fixtures/non-existent-2.yaml',
+        ],
+        output: './out',
+        per: 'file',
+        cwd,
+      }),
+    ).rejects.toThrow(
+      'No input files found. Tried resolving: ./fixtures/non-existent-1.yaml, ./fixtures/non-existent-2.yaml',
+    );
+  });
+
   test('Generate Files - groupBy tag per operation', async () => {
     await generateFiles({
       input: ['./fixtures/products.yaml'],
