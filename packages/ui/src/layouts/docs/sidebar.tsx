@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import {
   type ButtonHTMLAttributes,
   createContext,
+  Fragment,
   type HTMLAttributes,
   type PointerEventHandler,
   type ReactNode,
@@ -462,8 +463,10 @@ export function SidebarPageTree(props: {
       });
     }
 
-    return renderSidebarList(root.children, 1);
-  }, [props.components, root.children]);
+    return (
+      <Fragment key={root.$id}>{renderSidebarList(root.children, 1)}</Fragment>
+    );
+  }, [props.components, root.$id]);
 }
 
 function PageTreeFolder({

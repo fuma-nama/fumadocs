@@ -9,6 +9,7 @@ import {
 import { parseFilePath } from '@/source';
 import { PageTree } from '../dist/server';
 import type { ReactElement } from 'react';
+import { removeUndefined } from '@/utils/remove-undefined';
 
 test('get slugs', () => {
   expect(getSlugs(parseFilePath('index.mdx'))).toStrictEqual([]);
@@ -73,18 +74,20 @@ test('Loader: Simple', () => {
     },
   });
 
-  expect(result.pageTree, 'Page Tree').toMatchInlineSnapshot(`
-    {
-      "children": [
-        {
-          "name": "Hello",
-          "type": "page",
-          "url": "/test",
-        },
-      ],
-      "name": "",
-    }
-  `);
+  expect(removeUndefined(result.pageTree, true), 'Page Tree')
+    .toMatchInlineSnapshot(`
+      {
+        "children": [
+          {
+            "$id": "test.mdx",
+            "name": "Hello",
+            "type": "page",
+            "url": "/test",
+          },
+        ],
+        "name": "",
+      }
+    `);
 
   expect(result.getPages().length).toBe(1);
   expect(result.getPage(['test'])).toBeDefined();
@@ -144,53 +147,59 @@ test('Nested Directories', async () => {
     },
   });
 
-  expect(result.pageTree, 'Page Tree').toMatchInlineSnapshot(`
-    {
-      "children": [
-        {
-          "name": "Hello",
-          "type": "page",
-          "url": "/test",
-        },
-        {
-          "children": [
-            {
-              "name": "Route Group Page",
-              "type": "page",
-              "url": "/hello",
-            },
-          ],
-          "name": "Nested",
-          "type": "folder",
-        },
-        {
-          "children": [
-            {
-              "name": "Nested Page",
-              "type": "page",
-              "url": "/nested/test",
-            },
-          ],
-          "name": "Nested",
-          "type": "folder",
-        },
-        {
-          "external": true,
-          "name": "Text",
-          "type": "page",
-          "url": "https://google.com",
-        },
-        {
-          "external": true,
-          "icon": "Icon",
-          "name": "Text",
-          "type": "page",
-          "url": "https://google.com",
-        },
-      ],
-      "name": "",
-    }
-  `);
+  expect(removeUndefined(result.pageTree, true), 'Page Tree')
+    .toMatchInlineSnapshot(`
+      {
+        "children": [
+          {
+            "$id": "test.mdx",
+            "name": "Hello",
+            "type": "page",
+            "url": "/test",
+          },
+          {
+            "$id": "(nested)",
+            "children": [
+              {
+                "$id": "(nested)/hello.mdx",
+                "name": "Route Group Page",
+                "type": "page",
+                "url": "/hello",
+              },
+            ],
+            "name": "Nested",
+            "type": "folder",
+          },
+          {
+            "$id": "nested",
+            "children": [
+              {
+                "$id": "nested/test.mdx",
+                "name": "Nested Page",
+                "type": "page",
+                "url": "/nested/test",
+              },
+            ],
+            "name": "Nested",
+            "type": "folder",
+          },
+          {
+            "external": true,
+            "name": "Text",
+            "type": "page",
+            "url": "https://google.com",
+          },
+          {
+            "external": true,
+            "icon": "Icon",
+            "name": "Text",
+            "type": "page",
+            "url": "https://google.com",
+          },
+        ],
+        "name": "",
+      }
+    `);
   expect(result.getPages().length).toBe(4);
   // page in folder
   expect(result.getPage(['nested', 'test'])).toBeDefined();
@@ -274,71 +283,77 @@ test('Internationalized Routing', () => {
     }),
   );
 
-  expect(result.pageTree['en'], 'Page Tree').toMatchInlineSnapshot(`
-    {
-      "children": [
-        {
-          "$ref": {
-            "file": "test.mdx",
-          },
-          "name": "Hello",
-          "type": "page",
-          "url": "/en/test",
-        },
-        {
-          "$ref": {
-            "metaFile": undefined,
-          },
-          "children": [
-            {
-              "$ref": {
-                "file": "nested/test.mdx",
-              },
-              "name": "Nested Page",
-              "type": "page",
-              "url": "/en/nested/test",
+  expect(removeUndefined(result.pageTree['en'], true), 'Page Tree')
+    .toMatchInlineSnapshot(`
+      {
+        "children": [
+          {
+            "$id": "test.mdx",
+            "$ref": {
+              "file": "test.mdx",
             },
-          ],
-          "name": "Nested",
-          "type": "folder",
-        },
-      ],
-      "name": "",
-    }
-  `);
+            "name": "Hello",
+            "type": "page",
+            "url": "/en/test",
+          },
+          {
+            "$id": "nested",
+            "$ref": {},
+            "children": [
+              {
+                "$id": "nested/test.mdx",
+                "$ref": {
+                  "file": "nested/test.mdx",
+                },
+                "name": "Nested Page",
+                "type": "page",
+                "url": "/en/nested/test",
+              },
+            ],
+            "name": "Nested",
+            "type": "folder",
+          },
+        ],
+        "name": "",
+      }
+    `);
 
-  expect(result.pageTree['cn'], 'Page Tree').toMatchInlineSnapshot(`
-    {
-      "children": [
-        {
-          "$ref": {
-            "file": "test.cn.mdx",
-          },
-          "name": "Hello Chinese",
-          "type": "page",
-          "url": "/cn/test",
-        },
-        {
-          "$ref": {
-            "metaFile": "nested/meta.cn.json",
-          },
-          "children": [
-            {
-              "$ref": {
-                "file": "nested/test.cn.mdx",
-              },
-              "name": "Nested Page Chinese",
-              "type": "page",
-              "url": "/cn/nested/test",
+  expect(removeUndefined(result.pageTree['cn'], true), 'Page Tree')
+    .toMatchInlineSnapshot(`
+      {
+        "children": [
+          {
+            "$id": "test.cn.mdx",
+            "$ref": {
+              "file": "test.cn.mdx",
             },
-          ],
-          "name": "Nested Chinese",
-          "type": "folder",
-        },
-      ],
-      "name": "Docs Chinese",
-    }
-  `);
+            "name": "Hello Chinese",
+            "type": "page",
+            "url": "/cn/test",
+          },
+          {
+            "$id": "nested",
+            "$ref": {
+              "metaFile": "nested/meta.cn.json",
+            },
+            "children": [
+              {
+                "$id": "nested/test.cn.mdx",
+                "$ref": {
+                  "file": "nested/test.cn.mdx",
+                },
+                "name": "Nested Page Chinese",
+                "type": "page",
+                "url": "/cn/nested/test",
+              },
+            ],
+            "name": "Nested Chinese",
+            "type": "folder",
+          },
+        ],
+        "name": "Docs Chinese",
+      }
+    `);
 
   expect(result.getPages()).toMatchInlineSnapshot(`
     [
@@ -481,53 +496,61 @@ test('Internationalized Routing: Hide Prefix', () => {
     source: i18nSource,
   });
 
-  expect(result.pageTree['en'], 'Page Tree').toMatchInlineSnapshot(`
-    {
-      "children": [
-        {
-          "name": "Hello",
-          "type": "page",
-          "url": "/test",
-        },
-        {
-          "children": [
-            {
-              "name": "Nested Page",
-              "type": "page",
-              "url": "/nested/test",
-            },
-          ],
-          "name": "Nested",
-          "type": "folder",
-        },
-      ],
-      "name": "",
-    }
-  `);
+  expect(removeUndefined(result.pageTree['en'], true), 'Page Tree')
+    .toMatchInlineSnapshot(`
+      {
+        "children": [
+          {
+            "$id": "test.mdx",
+            "name": "Hello",
+            "type": "page",
+            "url": "/test",
+          },
+          {
+            "$id": "nested",
+            "children": [
+              {
+                "$id": "nested/test.mdx",
+                "name": "Nested Page",
+                "type": "page",
+                "url": "/nested/test",
+              },
+            ],
+            "name": "Nested",
+            "type": "folder",
+          },
+        ],
+        "name": "",
+      }
+    `);
 
-  expect(result.pageTree['cn'], 'Page Tree').toMatchInlineSnapshot(`
-    {
-      "children": [
-        {
-          "name": "Hello Chinese",
-          "type": "page",
-          "url": "/cn/test",
-        },
-        {
-          "children": [
-            {
-              "name": "Nested Page Chinese",
-              "type": "page",
-              "url": "/cn/nested/test",
-            },
-          ],
-          "name": "Nested Chinese",
-          "type": "folder",
-        },
-      ],
-      "name": "Docs Chinese",
-    }
-  `);
+  expect(removeUndefined(result.pageTree['cn'], true), 'Page Tree')
+    .toMatchInlineSnapshot(`
+      {
+        "children": [
+          {
+            "$id": "test.cn.mdx",
+            "name": "Hello Chinese",
+            "type": "page",
+            "url": "/cn/test",
+          },
+          {
+            "$id": "nested",
+            "children": [
+              {
+                "$id": "nested/test.cn.mdx",
+                "name": "Nested Page Chinese",
+                "type": "page",
+                "url": "/cn/nested/test",
+              },
+            ],
+            "name": "Nested Chinese",
+            "type": "folder",
+          },
+        ],
+        "name": "Docs Chinese",
+      }
+    `);
 
   expect(result.getPages().length).toBe(2);
   expect(result.getPage(['test'])?.url).toBe('/test');
@@ -560,23 +583,26 @@ test('Loader: Without meta.json', () => {
     },
   });
 
-  expect(result.pageTree, 'Page Tree').toMatchInlineSnapshot(`
-    {
-      "children": [
-        {
-          "name": "Hello",
-          "type": "page",
-          "url": "/hello",
-        },
-        {
-          "name": "Hello",
-          "type": "page",
-          "url": "/test",
-        },
-      ],
-      "name": "",
-    }
-  `);
+  expect(removeUndefined(result.pageTree, true), 'Page Tree')
+    .toMatchInlineSnapshot(`
+      {
+        "children": [
+          {
+            "$id": "hello/index.mdx",
+            "name": "Hello",
+            "type": "page",
+            "url": "/hello",
+          },
+          {
+            "$id": "test.mdx",
+            "name": "Hello",
+            "type": "page",
+            "url": "/test",
+          },
+        ],
+        "name": "",
+      }
+    `);
 });
 
 test('Loader: Rest operator', () => {
@@ -612,21 +638,24 @@ test('Loader: Rest operator', () => {
     },
   });
 
-  expect(result.pageTree, 'Page Tree').toMatchInlineSnapshot(`
-    {
-      "children": [
-        {
-          "name": "2.2",
-          "type": "page",
-          "url": "/2-2",
-        },
-        {
-          "name": "1.2",
-          "type": "page",
-          "url": "/1-2",
-        },
-      ],
-      "name": "",
-    }
-  `);
+  expect(removeUndefined(result.pageTree, true), 'Page Tree')
+    .toMatchInlineSnapshot(`
+      {
+        "children": [
+          {
+            "$id": "2-2.mdx",
+            "name": "2.2",
+            "type": "page",
+            "url": "/2-2",
+          },
+          {
+            "$id": "1-2.mdx",
+            "name": "1.2",
+            "type": "page",
+            "url": "/1-2",
+          },
+        ],
+        "name": "",
+      }
+    `);
 });

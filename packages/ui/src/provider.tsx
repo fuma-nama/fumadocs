@@ -52,7 +52,7 @@ const DefaultSearchDialog = dynamic(
 
 export function RootProvider({
   children,
-  dir,
+  dir = 'ltr',
   theme: { enabled = true, ...theme } = {},
   search,
 }: RootProviderProps): React.ReactElement {
@@ -79,7 +79,7 @@ export function RootProvider({
     );
 
   return (
-    <DirectionProvider dir={dir ?? 'ltr'}>
+    <DirectionProvider dir={dir}>
       <SidebarProvider>{body}</SidebarProvider>
     </DirectionProvider>
   );

@@ -1,6 +1,8 @@
 import type { ReactElement, ReactNode } from 'react';
 
 export interface Root {
+  $id?: string;
+
   name: ReactNode;
   children: Node[];
 }
@@ -8,24 +10,28 @@ export interface Root {
 export type Node = Item | Separator | Folder;
 
 export interface Item {
+  $id?: string;
+  $ref?: {
+    file: string;
+  };
+
   type: 'page';
   name: ReactNode;
   url: string;
   external?: boolean;
   icon?: ReactElement;
-
-  $ref?: {
-    file: string;
-  };
 }
 
 export interface Separator {
+  $id?: string;
+
   type: 'separator';
   name: ReactNode;
   icon?: ReactElement;
 }
 
 export interface Folder {
+  $id?: string;
   $ref?: {
     metaFile?: string;
   };
