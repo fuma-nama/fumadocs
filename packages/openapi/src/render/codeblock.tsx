@@ -1,7 +1,7 @@
 import { type HTMLAttributes } from 'react';
 import * as Base from 'fumadocs-ui/components/codeblock';
 import type { RenderContext } from '@/types';
-import { highlight } from 'fumadocs-core/server';
+import { highlight } from 'fumadocs-core/highlight';
 
 export type CodeBlockProps = HTMLAttributes<HTMLPreElement> & {
   code: string;

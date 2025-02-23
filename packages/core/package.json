@@ -75,6 +75,14 @@
     "./i18n": {
       "import": "./dist/i18n/index.js",
       "types": "./dist/i18n/index.d.ts"
+    },
+    "./highlight": {
+      "import": "./dist/highlight/index.js",
+      "types": "./dist/highlight/index.d.ts"
+    },
+    "./highlight/client": {
+      "import": "./dist/highlight/client.js",
+      "types": "./dist/highlight/client.d.ts"
     }
   },
   "files": [
