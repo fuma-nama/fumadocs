@@ -1,8 +1,7 @@
 'use client';
 import { CodeBlock, Pre } from '@/components/codeblock';
 import type { HighlightOptions } from 'fumadocs-core/server';
-import { PrerenderScript, useShiki } from 'fumadocs-core/utils/use-shiki';
-import { useId } from 'react';
+import { useShiki } from 'fumadocs-core/highlight/client';
 import { cn } from '@/utils/cn';
 
 const components = {
@@ -24,26 +23,13 @@ export function DynamicCodeBlock({
   code: string;
   options?: Omit<HighlightOptions, 'lang'>;
 }) {
-  const scriptKey = useId();
-  const shikiOptions = {
+  return useShiki(code, {
     lang,
-    scriptKey,
     ...options,
     components: {
       ...components,
       ...options?.components,
     },
-  };
-  const children = useShiki(code, shikiOptions);
-
-  return (
-    <>
-      <PrerenderScript
-        scriptKey={scriptKey}
-        code={code}
-        options={shikiOptions}
-      />
-      {children}
-    </>
-  );
+    withPrerenderScript: true,
+  });
 }

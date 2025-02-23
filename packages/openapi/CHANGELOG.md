@@ -1,5 +1,16 @@
 # @fuma-docs/openapi
 
+## 6.1.1
+
+### Patch Changes
+
+- 3534a10: Move `fumadocs-core` highlighting utils to `fumadocs-core/highlight` and `fumadocs-core/highlight/client`
+- Updated dependencies [3534a10]
+- Updated dependencies [ecacb53]
+- Updated dependencies [93952db]
+  - fumadocs-core@15.0.12
+  - fumadocs-ui@15.0.12
+
 ## 6.1.0
 
 ### Minor Changes

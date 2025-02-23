@@ -23,5 +23,7 @@ export default defineConfig({
     'src/utils/use-shiki.tsx',
     'src/utils/use-effect-event.ts',
     'src/i18n/index.ts',
+    'src/highlight/index.ts',
+    'src/highlight/client.tsx',
   ],
 });

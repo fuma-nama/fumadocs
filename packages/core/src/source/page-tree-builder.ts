@@ -1,6 +1,5 @@
 import type { ReactElement } from 'react';
 import type { I18nConfig } from '@/i18n';
-import { removeUndefined } from '@/utils/remove-undefined';
 import type * as PageTree from '../server/page-tree';
 import type { File, Folder, MetaFile, PageFile, Storage } from './file-system';
 import { resolvePath } from '@/utils/path';
@@ -113,6 +112,7 @@ function resolveFolderItem(
   folder: Folder,
   item: string,
   ctx: PageTreeBuilderContext,
+  idx: number,
   addedNodePaths: Set<string>,
 ): PageTree.Node[] | typeof rest | typeof restReversed {
   if (item === rest || item === restReversed) return item;
@@ -120,12 +120,13 @@ function resolveFolderItem(
   let match = separator.exec(item);
   if (match?.groups) {
     const node: PageTree.Separator = {
+      $id: `${folder.file.path}#${idx}`,
       type: 'separator',
       icon: ctx.options.resolveIcon?.(match.groups.icon),
       name: match.groups.name,
     };
 
-    return [removeUndefined(ctx.options.attachSeparator?.(node) ?? node)];
+    return [ctx.options.attachSeparator?.(node) ?? node];
   }
 
   match = link.exec(item);
@@ -142,7 +143,7 @@ function resolveFolderItem(
       external: !isRelative,
     };
 
-    return [removeUndefined(ctx.options.attachFile?.(node) ?? node)];
+    return [ctx.options.attachFile?.(node) ?? node];
   }
 
   const isExcept = item.startsWith(excludePrefix),
@@ -187,20 +188,20 @@ function buildFolderNode(
   );
 
   const metadata = meta?.data;
+  const isRoot = metadata?.root ?? isGlobalRoot;
   const index = indexFile ? buildFileNode(indexFile, ctx) : undefined;
 
   let children: PageTree.Node[];
 
-  if (!meta) {
-    children = buildAll(folder.children, ctx, !isGlobalRoot);
+  if (!metadata?.pages) {
+    children = buildAll(folder.children, ctx, !isRoot);
   } else {
-    const isRoot = metadata?.root ?? isGlobalRoot;
     const addedNodePaths = new Set<string>();
 
     const resolved = metadata?.pages?.flatMap<
       PageTree.Node | typeof rest | typeof restReversed
-    >((item) => {
-      return resolveFolderItem(folder, item, ctx, addedNodePaths);
+    >((item, i) => {
+      return resolveFolderItem(folder, item, ctx, i, addedNodePaths);
     });
 
     const restNodes = buildAll(
@@ -235,6 +236,7 @@ function buildFolderNode(
     description: metadata?.description,
     index,
     children,
+    $id: folder.file.path,
     $ref: !ctx.options.noRef
       ? {
           metaFile: meta?.file.path,
@@ -242,9 +244,7 @@ function buildFolderNode(
       : undefined,
   };
 
-  return removeUndefined(
-    ctx.options.attachFolder?.(node, folder, meta) ?? node,
-  );
+  return ctx.options.attachFolder?.(node, folder, meta) ?? node;
 }
 
 function buildFileNode(
@@ -255,6 +255,7 @@ function buildFileNode(
     findLocalizedFile(file.file.flattenedPath, 'page', ctx) ?? file;
 
   const item: PageTree.Item = {
+    $id: localized.file.path,
     type: 'page',
     name: localized.data.data.title ?? pathToName(localized.file.name),
     icon: ctx.options.resolveIcon?.(localized.data.data.icon),
@@ -266,7 +267,7 @@ function buildFileNode(
       : undefined,
   };
 
-  return removeUndefined(ctx.options.attachFile?.(item, file) ?? item);
+  return ctx.options.attachFile?.(item, file) ?? item;
 }
 
 function build(ctx: PageTreeBuilderContext): PageTree.Root {

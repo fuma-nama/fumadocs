@@ -131,20 +131,19 @@ function indexPages(
   // (locale.slugs -> page[])
   pages: Map<string, Page>;
 
-  pathToPage: Map<string, Page>;
-  pathToMeta: Map<string, Meta>;
+  pathToFile: Map<string, Page | Meta>;
 } {
   const defaultLanguage = i18n?.defaultLanguage ?? '';
   const map = new Map<string, Page>();
-  const pages = new Map<string, Page>();
-  const metas = new Map<string, Meta>();
+  const pathToFile = new Map<string, Page | Meta>();
 
   for (const item of storage.list()) {
-    if (item.format === 'meta') metas.set(item.file.path, fileToMeta(item));
+    if (item.format === 'meta')
+      pathToFile.set(item.file.path, fileToMeta(item));
 
     if (item.format === 'page') {
       const page = fileToPage(item, getUrl, item.file.locale);
-      pages.set(item.file.path, page);
+      pathToFile.set(item.file.path, page);
 
       if (item.file.locale) continue;
       map.set(`${defaultLanguage}.${page.slugs.join('/')}`, page);
@@ -164,8 +163,7 @@ function indexPages(
 
   return {
     pages: map,
-    pathToPage: pages,
-    pathToMeta: metas,
+    pathToFile,
   };
 }
 
@@ -279,7 +277,7 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
     getNodeMeta(node) {
       if (!node.$ref?.metaFile) return;
 
-      return walker.pathToMeta.get(node.$ref.metaFile);
+      return walker.pathToFile.get(node.$ref.metaFile) as Meta;
     },
     getPageTree(locale) {
       if (options.i18n) {
@@ -291,9 +289,10 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
       return pageTree as PageTree.Root;
     },
     getNodePage(node) {
-      if (!node.$ref?.file) return;
+      const ref = node.$ref?.file ?? node.$id;
+      if (!ref) return;
 
-      return walker.pathToPage.get(node.$ref.file);
+      return walker.pathToFile.get(ref) as Page;
     },
     // @ts-expect-error -- ignore this
     generateParams(slug, lang) {

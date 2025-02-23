@@ -424,7 +424,7 @@ export const DEFAULT: Config = {
 
       'a:not([data-card])': {
         color: 'var(--tw-prose-links)',
-        transition: 'text-decoration .2s',
+        transition: 'opacity .2s',
         fontWeight: '500',
         textDecoration: 'underline',
         textUnderlineOffset: '3.5px',
@@ -432,7 +432,7 @@ export const DEFAULT: Config = {
         textDecorationThickness: '1.5px',
       },
       'a:not([data-card]):hover': {
-        textDecorationThickness: '3px',
+        opacity: '80%',
       },
     },
     colors,
