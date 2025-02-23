@@ -1,5 +1,15 @@
 # next-docs-ui
 
+## 15.0.12
+
+### Patch Changes
+
+- 3534a10: Move `fumadocs-core` highlighting utils to `fumadocs-core/highlight` and `fumadocs-core/highlight/client`
+- ecacb53: Improve performance
+- Updated dependencies [3534a10]
+- Updated dependencies [93952db]
+  - fumadocs-core@15.0.12
+
 ## 15.0.11
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 15.0.12
+
+### Patch Changes
+
+- 3534a10: Move `fumadocs-core` highlighting utils to `fumadocs-core/highlight` and `fumadocs-core/highlight/client`
+- 93952db: Generate a `$id` attribute to page tree nodes
+
 ## 15.0.11
 
 ## 15.0.10
