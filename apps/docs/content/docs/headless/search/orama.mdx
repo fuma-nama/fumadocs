@@ -8,8 +8,6 @@ Fumadocs supports searching document based on Orama.
 As the built-in search of Fumadocs, It is the default but also recommended
 option since it's easier to setup and totally free.
 
-> If you're using a CMS, you may use the API provided by the CMS instead.
-
 ## Setup
 
 You can create the search route handler from the source object, or search indexes.
@@ -30,12 +28,10 @@ Create a route handler from Source object.
 
 ### From Search Indexes
 
-Pass search indexes to the function, see type information for required properties.
+Pass search indexes to the function.
 
-For content indexing, each index needs a `structuredData` field.
-It can be processed from Markdown/MDX document, or provided by your content source (e.g. Fumadocs MDX).
-
-You can extract structured data using the [Structure](/docs/headless/mdx/structure) remark plugin.
+Each index needs a `structuredData` field.
+Usually, it has been provided by your content source (e.g. Fumadocs MDX).
 
 ```json doc-gen:file
 {
@@ -46,6 +42,8 @@ You can extract structured data using the [Structure](/docs/headless/mdx/structu
   }
 }
 ```
+
+It can also be processed from Markdown/MDX document using the [Structure](/docs/headless/mdx/structure) remark plugin.
 
 ### Client
 
@@ -61,6 +59,8 @@ You can query it using:
     type: 'fetch',
   });
   ```
+
+  <AutoTypeTable type='Extract<import("fumadocs-core/search/client").Client, { type: "fetch" }>' />
 
 ### Tag Filter
 
@@ -162,7 +162,7 @@ const { search, setSearch, query } = useDocsSearch(
 
 ### Special Languages
 
-Orama requires extra configurations for Chinese, Japanese, and some other languages.
+If your language is not on the Orama [Supported Languages](https://docs.orama.com/open-source/supported-languages#officially-supported-languages) list, you have to configure them manually:
 
 ```json doc-gen:file
 {
@@ -208,6 +208,8 @@ and update your search clients:
   });
   ```
 
+  <AutoTypeTable type='Extract<import("fumadocs-core/search/client").Client, { type: "static" }>' />
+
 <Callout type='warn' title="Be Careful">
 
     Static Search requires clients to download the exported search indexes.
@@ -218,31 +220,7 @@ and update your search clients:
 
 </Callout>
 
-## Search Client
-
-`useDocsSearch` is a hook to search documents using the built-in search clients.
-
-### Options
-
-```ts
-import { useDocsSearch } from 'fumadocs-core/search/client';
-
-const client = useDocsSearch({
-  type: 'static',
-  // you can pass options for the client you specified
-});
-```
-
-| Type              | Description                                       |
-| ----------------- | ------------------------------------------------- |
-| `fetch` (default) | send HTTP request to a search server with `fetch` |
-| `static`          | Load search map on client-side and query them     |
-
-<AutoTypeTable type='Extract<import("fumadocs-core/search/client").Client, { type: "fetch" }>' />
-
-<AutoTypeTable type='Extract<import("fumadocs-core/search/client").Client, { type: "static" }>' />
-
-### Custom Algorithm
+## Custom Algorithm
 
 You can port your own search algorithm by returning a list of `SortedResult`
 from your custom `/api/search/route.ts` route handler (API Endpoint). You can also integrate it

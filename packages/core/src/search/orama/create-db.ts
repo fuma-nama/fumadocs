@@ -27,10 +27,11 @@ export async function createDB({
 
   const db = (await create({
     schema: advancedSchema,
-    components: {
-      tokenizer,
-    },
     ...rest,
+    components: {
+      ...rest.components,
+      tokenizer: tokenizer ?? rest.components?.tokenizer,
+    },
   })) as unknown as Orama<typeof advancedSchema>;
 
   const mapTo: PartialSchemaDeep<AdvancedDocument>[] = [];
@@ -103,10 +104,11 @@ export async function createDBSimple({
   const items = typeof indexes === 'function' ? await indexes() : indexes;
   const db = (await create({
     schema: simpleSchema,
-    components: {
-      tokenizer,
-    },
     ...rest,
+    components: {
+      ...rest.components,
+      tokenizer: tokenizer ?? rest.components?.tokenizer,
+    },
   })) as unknown as Orama<typeof simpleSchema>;
 
   await insertMultiple(

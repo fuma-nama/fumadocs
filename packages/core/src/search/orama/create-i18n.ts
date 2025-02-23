@@ -16,7 +16,7 @@ import { STEMMERS } from '@/search/orama/_stemmers';
 
 export type LocaleMap<O> = Record<string, Language | O>;
 
-type Options<O extends SimpleOptions | AdvancedOptions, Idx> = Omit<
+type I18nOptions<O extends SimpleOptions | AdvancedOptions, Idx> = Omit<
   O,
   'language' | 'indexes'
 > & {
@@ -30,8 +30,8 @@ type Options<O extends SimpleOptions | AdvancedOptions, Idx> = Omit<
   indexes: WithLocale<Idx>[] | Dynamic<WithLocale<Idx>>;
 };
 
-type I18nSimpleOptions = Options<SimpleOptions, Index>;
-type I18nAdvancedOptions = Options<AdvancedOptions, AdvancedIndex>;
+type I18nSimpleOptions = I18nOptions<SimpleOptions, Index>;
+type I18nAdvancedOptions = I18nOptions<AdvancedOptions, AdvancedIndex>;
 
 type WithLocale<T> = T & {
   locale: string;
@@ -61,20 +61,19 @@ async function initSimple(
 
   for (const locale of options.i18n.languages) {
     const localeIndexes = indexes.filter((index) => index.locale === locale);
-    const searchLocale =
-      options.localeMap?.[locale] ?? (await getTokenizer(locale));
+    const mapped = options.localeMap?.[locale] ?? (await getTokenizer(locale));
 
     map.set(
       locale,
-      typeof searchLocale === 'object'
+      typeof mapped === 'object'
         ? initSimpleSearch({
             ...options,
-            ...searchLocale,
+            ...mapped,
             indexes: localeIndexes,
           })
         : initSimpleSearch({
             ...options,
-            language: searchLocale,
+            language: mapped,
             indexes: localeIndexes,
           }),
     );
@@ -98,20 +97,19 @@ async function initAdvanced(
 
   for (const locale of options.i18n.languages) {
     const localeIndexes = indexes.filter((index) => index.locale === locale);
-    const searchLocale =
-      options.localeMap?.[locale] ?? (await getTokenizer(locale));
+    const mapped = options.localeMap?.[locale] ?? (await getTokenizer(locale));
 
     map.set(
       locale,
-      typeof searchLocale === 'object'
+      typeof mapped === 'object'
         ? initAdvancedSearch({
             ...options,
             indexes: localeIndexes,
-            ...searchLocale,
+            ...mapped,
           })
         : initAdvancedSearch({
             ...options,
-            language: searchLocale,
+            language: mapped,
             indexes: localeIndexes,
           }),
     );

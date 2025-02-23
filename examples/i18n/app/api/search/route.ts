@@ -3,16 +3,21 @@ import { createFromSource } from 'fumadocs-core/search/server';
 // @ts-expect-error -- untyped
 import { createTokenizer } from '@orama/tokenizers/mandarin';
 
-export const { GET, search } = createFromSource(source, undefined, {
+export const { GET } = createFromSource(source, undefined, {
   localeMap: {
-    // the prop name should be its locale code in your i18n config, (e.g. `cn`)
+    // you can customise search configs for specific locales, like:
+    // [locale]: settings
+
+    // specify the tokenizer
     cn: {
-      // options for the language
       tokenizer: await createTokenizer(),
       search: {
         threshold: 0,
         tolerance: 0,
       },
     },
+
+    // use the English tokenizer
+    cs: 'english',
   },
 });
