@@ -17,7 +17,8 @@
     "./image-zoom.css": "./dist/image-zoom.css",
     "./components/*": {
       "import": "./dist/components/*.js",
-      "types": "./dist/components/*.d.ts"
+      "types": "./dist/components/*.d.ts",
+      "default": "./dist/components/*.js"
     },
     "./i18n": {
       "import": "./dist/i18n.js",
