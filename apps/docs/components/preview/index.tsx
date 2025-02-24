@@ -1,5 +1,4 @@
 import { Home } from 'lucide-react';
-import dynamic from 'next/dynamic';
 import { Heading } from 'fumadocs-ui/components/heading';
 import { Card } from 'fumadocs-ui/components/card';
 import { Callout } from 'fumadocs-ui/components/callout';
@@ -12,6 +11,16 @@ import { type ReactNode } from 'react';
 import { Wrapper } from './wrapper';
 import { GithubInfo } from 'fumadocs-ui/components/github-info';
 import { owner, repo } from '@/lib/github';
+import {
+  Banner,
+  DynamicCodeBlock,
+  InlineTOC,
+  Folder,
+  Files,
+  File,
+  ImageZoom,
+} from '@/components/preview/lazy';
+import BannerImage from '@/public/banner.png';
 
 export function heading(): ReactNode {
   return (
@@ -89,11 +98,15 @@ export function typeTable(): ReactNode {
   );
 }
 
-const ZoomImage = dynamic(() => import('./image-zoom'));
 export function zoomImage(): ReactNode {
   return (
     <Wrapper>
-      <ZoomImage />
+      <ImageZoom
+        alt="banner"
+        src={BannerImage}
+        className="!my-0 rounded-xl bg-fd-background"
+        priority
+      />
     </Wrapper>
   );
 }
@@ -121,21 +134,45 @@ export function callout(): ReactNode {
   );
 }
 
-const FilesPreview = dynamic(() => import('./files'));
-
 export function files(): ReactNode {
   return (
     <Wrapper>
-      <FilesPreview />
+      <Files>
+        <Folder name="app" defaultOpen>
+          <Folder name="[id]" defaultOpen>
+            <File name="page.tsx" />
+          </Folder>
+          <File name="layout.tsx" />
+          <File name="page.tsx" />
+          <File name="global.css" />
+        </Folder>
+        <Folder name="components">
+          <File name="button.tsx" />
+          <File name="tabs.tsx" />
+          <File name="dialog.tsx" />
+          <Folder name="empty" />
+        </Folder>
+        <File name="package.json" />
+      </Files>
     </Wrapper>
   );
 }
 
-const InlineTOC = dynamic(() => import('./inline-toc'));
 export function inlineTOC(): ReactNode {
   return (
     <Wrapper>
-      <InlineTOC />
+      <InlineTOC
+        items={[
+          { title: 'Welcome', url: '#welcome', depth: 2 },
+          { title: 'Getting Started', url: '#getting-started', depth: 3 },
+          { title: 'Usage', url: '#usage', depth: 3 },
+          { title: 'Styling', url: '#styling', depth: 3 },
+          { title: 'Reference', url: '#reference', depth: 2 },
+          { title: 'Components', url: '#components', depth: 3 },
+          { title: 'APIs', url: '#api', depth: 3 },
+          { title: 'Credits', url: '#credits', depth: 2 },
+        ]}
+      />
     </Wrapper>
   );
 }
@@ -187,8 +224,6 @@ export function rootToggle(): ReactNode {
   );
 }
 
-const DynamicCodeBlock = dynamic(() => import('./dynamic-codeblock'));
-
 export function dynamicCodeBlock() {
   return (
     <Wrapper>
@@ -197,12 +232,27 @@ export function dynamicCodeBlock() {
   );
 }
 
-const Banner = dynamic(() => import('./banner'));
-
 export function banner(): ReactNode {
   return (
     <Wrapper>
-      <Banner />
+      <div className="flex flex-col gap-4">
+        <Banner className="z-0" changeLayout={false}>
+          Be careful, Fumadocs v99 has released
+        </Banner>
+
+        <Banner
+          className="z-0"
+          id="test-rainbow"
+          variant="rainbow"
+          changeLayout={false}
+        >
+          Using the <code>rainbow</code> variant
+        </Banner>
+
+        <Banner className="z-0" id="test" changeLayout={false}>
+          Be careful, this banner can be closed
+        </Banner>
+      </div>
     </Wrapper>
   );
 }
