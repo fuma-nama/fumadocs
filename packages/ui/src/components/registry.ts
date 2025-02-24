@@ -55,6 +55,11 @@ export const registry: Registry = {
       mapImportPath: contextsMap,
     },
     { name: 'accordion', files: ['accordion.tsx'] },
+    {
+      name: 'github-info',
+      files: ['github-info.tsx'],
+      description: 'A card to display GitHub repo info',
+    },
     { name: 'banner', files: ['banner.tsx'] },
     { name: 'callout', files: ['callout.tsx'] },
     { name: 'card', files: ['card.tsx'] },

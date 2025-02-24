@@ -1,4 +1,3 @@
-'use client';
 import { Home } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { Heading } from 'fumadocs-ui/components/heading';
@@ -11,6 +10,8 @@ import { Step, Steps } from 'fumadocs-ui/components/steps';
 import { TypeTable } from 'fumadocs-ui/components/type-table';
 import { type ReactNode } from 'react';
 import { Wrapper } from './wrapper';
+import { GithubInfo } from 'fumadocs-ui/components/github-info';
+import { owner, repo } from '@/lib/github';
 
 export function heading(): ReactNode {
   return (
@@ -202,6 +203,19 @@ export function banner(): ReactNode {
   return (
     <Wrapper>
       <Banner />
+    </Wrapper>
+  );
+}
+
+export function githubInfo() {
+  return (
+    <Wrapper>
+      <GithubInfo
+        owner={owner}
+        repo={repo}
+        token={process.env.GITHUB_TOKEN}
+        className="not-prose bg-fd-card"
+      />
     </Wrapper>
   );
 }
