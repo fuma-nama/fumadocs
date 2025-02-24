@@ -37,16 +37,16 @@
   }
 }
 
-@layer utilities {
-  .fd-steps {
-    counter-reset: step;
-    border-left-width: 1px;
-    margin-left: 1rem;
-    padding-left: 1.75rem;
-    position: relative;
-  }
+@utility fd-steps {
+  counter-reset: step;
+  border-left-width: 1px;
+  margin-left: 1rem;
+  padding-left: 1.75rem;
+  position: relative;
+}
 
-  .fd-step:before {
+@utility fd-step {
+  &:before {
     background-color: var(--color-fd-secondary);
     color: var(--color-fd-secondary-foreground);
     content: counter(step);
@@ -62,12 +62,14 @@
     position: absolute;
     left: -1rem;
   }
+}
 
-  .prose-no-margin > :first-child {
+@utility prose-no-margin {
+  & > :first-child {
     margin-top: 0;
   }
 
-  .prose-no-margin > :last-child {
+  & > :last-child {
     margin-bottom: 0;
   }
 }
