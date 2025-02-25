@@ -7,7 +7,8 @@
         "name": "name",
         "description": "",
         "tags": {},
-        "type": "string"
+        "type": "string",
+        "required": true
       },
       {
         "name": "age",
@@ -15,7 +16,8 @@
         "tags": {
           "defaultValue": "4"
         },
-        "type": "number"
+        "type": "number",
+        "required": false
       }
     ]
   },
@@ -27,7 +29,8 @@
         "name": "name",
         "description": "",
         "tags": {},
-        "type": "string"
+        "type": "string",
+        "required": true
       },
       {
         "name": "age",
@@ -35,13 +38,15 @@
         "tags": {
           "defaultValue": "4"
         },
-        "type": "number"
+        "type": "number",
+        "required": false
       },
       {
         "name": "generic",
         "description": "",
         "tags": {},
-        "type": "GenericType<string, string, string>"
+        "type": "GenericType<string, string, string>",
+        "required": true
       }
     ]
   },
@@ -56,7 +61,8 @@
           "see": "https://fumadocs.vercel.app",
           "defaultValue": "Henry"
         },
-        "type": "string"
+        "type": "string",
+        "required": true
       },
       {
         "name": "age",
@@ -65,7 +71,8 @@
           "example": "```js\nconsole.log(\"Hello World\")\n```",
           "remarks": "`timestamp`\nReturned by API"
         },
-        "type": "timestamp"
+        "type": "timestamp",
+        "required": true
       }
     ]
   }

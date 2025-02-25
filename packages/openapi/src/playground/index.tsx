@@ -153,9 +153,26 @@ function getAuthorizationField(
   const singular = security.find(
     (requirements) => Object.keys(requirements).length === 1,
   );
-  if (!singular) return;
+  if (!singular) {
+    console.warn(
+      `Cannot find suitable security schema for API Playground from ${JSON.stringify(security, null, 2)}. Only one requirement is allowed`,
+    );
+    return;
+  }
 
-  return getSecurities(singular, document)[0];
+  const scheme = getSecurities(singular, document)[0];
+
+  if (scheme.type === 'oauth2') {
+    const flow = Object.keys(scheme.flows).at(0);
+    if (!flow) throw new Error("security scheme's `flows` must not be empty");
+
+    if (flow === 'implicit' || flow === 'password')
+      throw new Error(
+        `OAuth 2.0 flow type: ${flow} is not supported, consider other types like \`authorizationCode\` instead.`,
+      );
+  }
+
+  return scheme;
 }
 
 function getIdFromSchema(
