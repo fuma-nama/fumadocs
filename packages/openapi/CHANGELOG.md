@@ -1,5 +1,19 @@
 # @fuma-docs/openapi
 
+## 6.2.0
+
+### Minor Changes
+
+- ecf7288: Support OAuth 2.0 in-browser authorize dialog
+
+### Patch Changes
+
+- Updated dependencies [7608f4e]
+- Updated dependencies [89ff3ae]
+- Updated dependencies [16c8944]
+  - fumadocs-ui@15.0.13
+  - fumadocs-core@15.0.13
+
 ## 6.1.1
 
 ### Patch Changes

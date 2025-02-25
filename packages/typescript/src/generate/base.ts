@@ -18,6 +18,7 @@ export interface DocEntry {
   description: string;
   type: string;
   tags: Record<string, string>;
+  required: boolean;
 }
 
 interface EntryContext {
@@ -160,6 +161,7 @@ function getDocEntry(
     ),
     tags,
     type: typeName,
+    required: !prop.isOptional(),
   };
 
   transform?.call(context, entry, subType, prop);

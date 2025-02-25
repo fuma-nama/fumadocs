@@ -99,7 +99,7 @@ export function SidebarLinkItem({
     );
   }
 
-  if (item.type === 'custom') return item.children;
+  if (item.type === 'custom') return <div {...props}>{item.children}</div>;
 
   return (
     <SidebarItem

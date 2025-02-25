@@ -165,7 +165,7 @@ export function DocsLayout({
                 ) : null}
               </SidebarHeader>
               <SidebarViewport>
-                <div className="mb-4 empty:hidden md:hidden">
+                <div className="mb-4 empty:hidden">
                   {links
                     .filter((v) => v.type !== 'icon')
                     .map((item, i) => (

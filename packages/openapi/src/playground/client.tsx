@@ -42,6 +42,10 @@ import {
 } from 'fumadocs-ui/components/ui/collapsible';
 import { ChevronDown } from 'lucide-react';
 import type { Security } from '@/utils/get-security';
+import {
+  OauthDialog,
+  OauthDialogTrigger,
+} from '@/playground/auth/oauth-dialog';
 
 interface FormValues {
   authorization:
@@ -163,34 +167,32 @@ export function Client({
     const query = { ...input.query };
     const header = { ...input.header };
 
-    if (input.authorization && authorization) {
-      if (authorization.type === 'apiKey') {
-        if (authorization.in === 'header') {
-          header[authorization.name] = input.authorization;
-        } else if (authorization.in === 'query') {
-          query[authorization.name] = input.authorization;
-        } else {
-          if ('cookie' in header) {
-            header.Cookie = header.cookie;
-            delete header.cookie;
-          }
-
-          header.Cookie = [
-            header.Cookie as string,
-            `${authorization.name}=${input.authorization}`,
-          ]
-            .filter((s) => s.length > 0)
-            .join('; ');
-        }
-      } else if (
-        authorization.type === 'http' &&
-        authorization.scheme === 'basic'
-      ) {
-        if (typeof input.authorization === 'object')
-          header.Authorization = `Basic ${btoa(`${input.authorization.username}:${input.authorization.password}`)}`;
+    if (authorization?.type === 'apiKey') {
+      if (authorization.in === 'header') {
+        header[authorization.name] = input.authorization;
+      } else if (authorization.in === 'query') {
+        query[authorization.name] = input.authorization;
       } else {
-        header.Authorization = input.authorization;
+        if ('cookie' in header) {
+          header.Cookie = header.cookie;
+          delete header.cookie;
+        }
+
+        header.Cookie = [
+          header.Cookie as string,
+          `${authorization.name}=${input.authorization}`,
+        ]
+          .filter((s) => s.length > 0)
+          .join('; ');
       }
+    } else if (
+      authorization?.type === 'http' &&
+      authorization.scheme === 'basic'
+    ) {
+      if (typeof input.authorization === 'object')
+        header.Authorization = `Basic ${btoa(`${input.authorization.username}:${input.authorization.password}`)}`;
+    } else if (authorization) {
+      header.Authorization = input.authorization;
     }
 
     const serverUrl = serverRef.current
@@ -260,6 +262,144 @@ export function Client({
     );
   }
 
+  let authField: ReactNode = null;
+  if (authorization) {
+    authField = (
+      <>
+        {renderCustomField(
+          'authorization',
+          authorization?.type === 'http' && authorization.scheme === 'basic'
+            ? {
+                name: 'Authorization',
+                type: 'object',
+                isRequired: true,
+                properties: {
+                  username: {
+                    type: 'string',
+                    isRequired: true,
+                    defaultValue: '',
+                  },
+                  password: {
+                    type: 'string',
+                    isRequired: true,
+                    defaultValue: '',
+                  },
+                },
+              }
+            : {
+                name: 'Authorization',
+                type: 'string',
+                isRequired: true,
+                description: 'The Authorization access token',
+                defaultValue: '',
+              },
+          fields.auth,
+        )}
+        {authorization?.type === 'oauth2' && (
+          <OauthDialogTrigger
+            type="button"
+            className={cn(
+              buttonVariants({
+                color: 'secondary',
+              }),
+            )}
+          >
+            Open
+          </OauthDialogTrigger>
+        )}
+      </>
+    );
+  }
+
+  let children = (
+    <form
+      {...props}
+      className={cn(
+        'not-prose flex flex-col gap-2 rounded-xl border p-3 shadow-md',
+        props.className,
+      )}
+      onSubmit={onSubmit}
+    >
+      <FormHeader
+        method={method}
+        route={route}
+        isLoading={testQuery.isLoading}
+      />
+      {servers.length > 1 ? (
+        <CollapsiblePanel title="Server URL">
+          <ServerSelect />
+        </CollapsiblePanel>
+      ) : null}
+
+      {header.length > 0 || authorization ? (
+        <CollapsiblePanel title="Headers">
+          {authField}
+          {header.map((field) =>
+            renderCustomField(
+              `header.${field.name}`,
+              field,
+              fields.header,
+              field.name,
+            ),
+          )}
+        </CollapsiblePanel>
+      ) : null}
+
+      {path.length > 0 ? (
+        <CollapsiblePanel title="Path">
+          {path.map((field) =>
+            renderCustomField(
+              `path.${field.name}`,
+              field,
+              fields.path,
+              field.name,
+            ),
+          )}
+        </CollapsiblePanel>
+      ) : null}
+
+      {query.length > 0 ? (
+        <CollapsiblePanel title="Query">
+          {query.map((field) =>
+            renderCustomField(
+              `query.${field.name}`,
+              field,
+              fields.query,
+              field.name,
+            ),
+          )}
+        </CollapsiblePanel>
+      ) : null}
+
+      {body ? (
+        <CollapsiblePanel title="Body">
+          {body.type === 'object' && !fields.body ? (
+            <ObjectInput field={body} fieldName="body" />
+          ) : (
+            renderCustomField('body', body, fields.body)
+          )}
+        </CollapsiblePanel>
+      ) : null}
+
+      {testQuery.data ? <ResultDisplay data={testQuery.data} /> : null}
+    </form>
+  );
+
+  if (authorization?.type === 'oauth2') {
+    // only the first one, so it looks simpler :)
+    const flow = Object.keys(authorization.flows)[0];
+
+    children = (
+      <OauthDialog
+        flow={flow as keyof typeof authorization.flows}
+        scheme={authorization}
+        setToken={(token) => form.setValue('authorization', `Bearer ${token}`)}
+      >
+        {children}
+      </OauthDialog>
+    );
+  }
+
   return (
     <FormProvider {...form}>
       <SchemaContext.Provider
@@ -268,112 +408,7 @@ export function Client({
           [schemas],
         )}
       >
-        <form
-          {...props}
-          className={cn(
-            'not-prose flex flex-col gap-2 rounded-xl border p-3 shadow-md',
-            props.className,
-          )}
-          onSubmit={onSubmit as React.FormEventHandler}
-        >
-          <FormHeader
-            method={method}
-            route={route}
-            isLoading={testQuery.isLoading}
-          />
-          {servers.length > 1 ? (
-            <CollapsiblePanel title="Server URL">
-              <ServerSelect />
-            </CollapsiblePanel>
-          ) : null}
-
-          {header.length > 0 || authorization ? (
-            <CollapsiblePanel title="Headers">
-              {authorization?.type === 'http' &&
-              authorization.scheme === 'basic'
-                ? renderCustomField(
-                    'authorization',
-                    {
-                      name: 'Authorization',
-                      type: 'object',
-                      isRequired: true,
-                      properties: {
-                        username: {
-                          type: 'string',
-                          isRequired: true,
-                          defaultValue: '',
-                        },
-                        password: {
-                          type: 'string',
-                          isRequired: true,
-                          defaultValue: '',
-                        },
-                      },
-                    },
-                    fields.auth,
-                  )
-                : authorization
-                  ? renderCustomField(
-                      'authorization',
-                      {
-                        name: 'Authorization',
-                        type: 'string',
-                        isRequired: true,
-                        description: 'The Authorization access token',
-                        defaultValue: '',
-                      },
-                      fields.auth,
-                    )
-                  : null}
-              {header.map((field) =>
-                renderCustomField(
-                  `header.${field.name}`,
-                  field,
-                  fields.header,
-                  field.name,
-                ),
-              )}
-            </CollapsiblePanel>
-          ) : null}
-
-          {path.length > 0 ? (
-            <CollapsiblePanel title="Path">
-              {path.map((field) =>
-                renderCustomField(
-                  `path.${field.name}`,
-                  field,
-                  fields.path,
-                  field.name,
-                ),
-              )}
-            </CollapsiblePanel>
-          ) : null}
-
-          {query.length > 0 ? (
-            <CollapsiblePanel title="Query">
-              {query.map((field) =>
-                renderCustomField(
-                  `query.${field.name}`,
-                  field,
-                  fields.query,
-                  field.name,
-                ),
-              )}
-            </CollapsiblePanel>
-          ) : null}
-
-          {body ? (
-            <CollapsiblePanel title="Body">
-              {body.type === 'object' && !fields.body ? (
-                <ObjectInput field={body} fieldName="body" />
-              ) : (
-                renderCustomField('body', body, fields.body)
-              )}
-            </CollapsiblePanel>
-          ) : null}
-
-          {testQuery.data ? <ResultDisplay data={testQuery.data} /> : null}
-        </form>
+        {children}
       </SchemaContext.Provider>
     </FormProvider>
   );

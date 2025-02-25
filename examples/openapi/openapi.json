@@ -62,9 +62,16 @@
   "components": {
     "securitySchemes": {
       "bearerAuth": {
-        "bearerFormat": "root key",
-        "type": "http",
-        "scheme": "bearer"
+        "type": "oauth2",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://discord.com/oauth2/authorize",
+            "tokenUrl": "https://discord.com/api/oauth2/token",
+            "scopes": {
+              "identify": "Get profile information"
+            }
+          }
+        }
       }
     },
     "schemas": {

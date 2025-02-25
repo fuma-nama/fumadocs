@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-openapi",
-  "version": "6.1.1",
+  "version": "6.2.0",
   "description": "Generate MDX docs for your OpenAPI spec",
   "keywords": [
     "NextJs",
@@ -51,6 +51,7 @@
   },
   "dependencies": {
     "@fumari/json-schema-to-typescript": "^1.1.2",
+    "@radix-ui/react-dialog": "^1.1.6",
     "@radix-ui/react-select": "^2.1.6",
     "@radix-ui/react-slot": "^1.1.2",
     "@scalar/openapi-parser": "0.10.8",

@@ -1,34 +1,42 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
-export function useQuery<I, T>(
-  fn: (input: I) => Promise<T>,
+export function useQuery<I extends unknown[], T>(
+  fn: (...input: I) => Promise<T>,
 ): {
-  start: (input: I) => void;
+  start: (...input: I) => void;
   data?: T;
+  error?: unknown;
   isLoading: boolean;
 } {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<T>();
+  const [error, setError] = useState<T>();
+  const fnRef = useRef(fn);
+  fnRef.current = fn;
 
   return useMemo(
     () => ({
       isLoading: loading,
       data,
-      start(input) {
+      error,
+      start(...input) {
         setLoading(true);
 
-        void fn(input)
+        void fnRef
+          .current(...input)
           .then((res) => {
             setData(res);
+            setError(undefined);
           })
-          .catch(() => {
+          .catch((err) => {
             setData(undefined);
+            setError(err);
           })
           .finally(() => {
             setLoading(false);
           });
       },
     }),
-    [data, fn, loading],
+    [error, data, loading],
   );
 }
