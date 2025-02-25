@@ -1,5 +1,11 @@
 # fumadocs-typescript
 
+## 3.0.4
+
+### Patch Changes
+
+- 7608f4e: Support showing optional properties on TypeTable
+
 ## 3.0.3
 
 ### Patch Changes

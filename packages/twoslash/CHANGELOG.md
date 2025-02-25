@@ -1,5 +1,15 @@
 # fumadocs-twoslash
 
+## 3.0.1
+
+### Patch Changes
+
+- 0f59dfc: Update peer deps
+- Updated dependencies [7608f4e]
+- Updated dependencies [89ff3ae]
+- Updated dependencies [16c8944]
+  - fumadocs-ui@15.0.13
+
 ## 3.0.0
 
 ### Major Changes
