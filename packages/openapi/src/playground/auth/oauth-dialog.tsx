@@ -161,7 +161,7 @@ export function OauthDialog({
                   placeholder="Enter value"
                   type="text"
                   disabled={isLoading}
-                  {...form.register('clientId')}
+                  {...form.register('clientId', { required: true })}
                 />
               </fieldset>
               <fieldset className="flex flex-col gap-1.5">
@@ -176,7 +176,7 @@ export function OauthDialog({
                   placeholder="Enter value"
                   type="password"
                   disabled={isLoading}
-                  {...form.register('clientSecret')}
+                  {...form.register('clientSecret', { required: true })}
                 />
               </fieldset>
             </>
