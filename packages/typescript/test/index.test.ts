@@ -26,12 +26,14 @@ test('class members', () => {
           {
             "description": "",
             "name": "test",
+            "required": true,
             "tags": {},
             "type": "string",
           },
           {
             "description": "",
             "name": "age",
+            "required": true,
             "tags": {},
             "type": "number",
           },
@@ -62,12 +64,14 @@ test('interface members', () => {
           {
             "description": "",
             "name": "#name",
+            "required": true,
             "tags": {},
             "type": "string",
           },
           {
             "description": "",
             "name": "age",
+            "required": true,
             "tags": {},
             "type": "number",
           },
