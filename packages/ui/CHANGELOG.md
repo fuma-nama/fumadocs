@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 15.0.13
+
+### Patch Changes
+
+- 7608f4e: Support showing optional properties on TypeTable
+- 89ff3ae: Support GithubInfo component
+- 16c8944: Fix Tailwind CSS utilities
+  - fumadocs-core@15.0.13
+
 ## 15.0.12
 
 ### Patch Changes
