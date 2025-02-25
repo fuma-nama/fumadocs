@@ -103,7 +103,7 @@
     "github-slugger": "^2.0.0",
     "hast-util-to-estree": "^3.1.2",
     "hast-util-to-jsx-runtime": "^2.3.3",
-    "image-size": "^1.2.0",
+    "image-size": "^2.0.0",
     "negotiator": "^1.0.0",
     "react-remove-scroll": "^2.6.3",
     "remark": "^15.0.0",
