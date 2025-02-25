@@ -109,6 +109,7 @@ export async function AutoTypeTable({
                 type: entry.type,
                 description: await renderMarkdown(entry.description),
                 default: entry.tags.default || entry.tags.defaultValue,
+                required: entry.required,
               },
             ] as const,
         );

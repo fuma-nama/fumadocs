@@ -36,6 +36,8 @@ interface ObjectType {
    */
   typeDescriptionLink?: string;
   default?: string;
+
+  required?: boolean;
 }
 
 const field = cva('inline-flex flex-row items-center gap-1');
@@ -64,7 +66,10 @@ export function TypeTable({ type }: { type: Record<string, ObjectType> }) {
             <tr key={key}>
               <td>
                 <div className={field()}>
-                  <code className={cn(code({ color: 'primary' }))}>{key}</code>
+                  <code className={cn(code({ color: 'primary' }))}>
+                    {key}
+                    {!value.required && '?'}
+                  </code>
                   {value.description ? <Info>{value.description}</Info> : null}
                 </div>
               </td>
