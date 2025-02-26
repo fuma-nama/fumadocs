@@ -198,7 +198,31 @@ const MDX = page.data.body;
 return <MDX components={{ ...defaultMdxComponents }} />;
 ```
 
-## Multiple Collections
+## FAQ
+
+### Built-in Properties
+
+These properties are exported from MDX files by default.
+
+| Property         | Description                                     |
+| ---------------- | ----------------------------------------------- |
+| `frontmatter`    | Frontmatter                                     |
+| `toc`            | Table of Contents                               |
+| `structuredData` | Structured Data, useful for implementing search |
+
+### Customise Frontmatter
+
+Use the [`schema`](/docs/mdx/collections#schema-1) option to pass a validation schema to validate frontmatter and define its output properties.
+
+### Syntax Highlighting
+
+Use [`rehypeCodeOptions`](/docs/mdx/mdx#rehype-plugins) on global or collection-level config.
+
+### MDX Plugins
+
+For other customisation needs, see [MDX Options](/docs/mdx/mdx).
+
+### Multiple Collections
 
 You can define more collections, see [Collections](/docs/mdx/collections) for available options.
 
@@ -230,23 +254,3 @@ export const blog = loader({
   source: blogPosts.toFumadocsSource(),
 });
 ```
-
-## FAQ
-
-### Built-in Properties
-
-These properties are exported from MDX files by default.
-
-| Property         | Description                                     |
-| ---------------- | ----------------------------------------------- |
-| `frontmatter`    | Frontmatter                                     |
-| `toc`            | Table of Contents                               |
-| `structuredData` | Structured Data, useful for implementing search |
-
-### Customise Frontmatter
-
-Use the [`schema`](/docs/mdx/collections#schema-1) option to pass a validation schema to validate frontmatter and define its output properties.
-
-### MDX Plugins
-
-See [MDX Options](/docs/mdx/mdx).
