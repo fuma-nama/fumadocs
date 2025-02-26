@@ -28,10 +28,10 @@ export interface CodeSample {
 }
 
 const ParamTypes = {
-  path: 'Path Parameters',
-  query: 'Query Parameters',
-  header: 'Header Parameters',
-  cookie: 'Cookie Parameters',
+  path: 'Path parameters',
+  query: 'Query parameters',
+  header: 'Header parameters',
+  cookie: 'Cookie parameters',
 };
 
 export function Operation({
@@ -80,7 +80,7 @@ export function Operation({
 
     bodyNode = (
       <>
-        {heading(headingLevel, 'Request Body', ctx)}
+        {heading(headingLevel, 'Request body', ctx)}
         <div className="mb-8 flex flex-row items-center justify-between gap-2">
           <code>{type}</code>
           <span>{body.required ? 'Required' : 'Optional'}</span>
@@ -104,7 +104,7 @@ export function Operation({
   if (method.responses && ctx.showResponseSchema) {
     responseNode = (
       <>
-        {heading(headingLevel, 'Response Body', ctx)}
+        {heading(headingLevel, 'Response body', ctx)}
 
         {Object.entries(method.responses).map(([status, response]) => {
           if (!response.content) return;
