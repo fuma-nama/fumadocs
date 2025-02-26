@@ -1,7 +1,6 @@
 ---
 title: Internationalization
 description: Support multiple languages in your documentation
-icon: Globe
 ---
 
 <Callout title='Before you get started'>
@@ -61,9 +60,7 @@ See [Middleware](/docs/headless/internationalization#middleware) for customisabl
 
 Create a dynamic route `/app/[lang]`, and move all special files (e.g. `page.tsx`, `layout.tsx`) from `/app` to the folder.
 
-A `I18nProvider` is needed for localization.
-Wrap the root provider inside your I18n provider, and provide available languages & translations to it.
-
+Wrap the root provider inside `I18nProvider`, and provide available languages & translations to it.
 Note that only English translations are provided by default.
 
 ```tsx title="app/[lang]/layout.tsx"
@@ -115,10 +112,10 @@ export default async function RootLayout({
 
 ### Source
 
-`source` object is the API to interact with your content source.
-For example, `source.getPage()` allows you to get a page with its slugs.
+`source` object allows you to interact with your content source.
+For example, you can get a page with it slugs using `source.getPage()`.
 
-To get the page with appropriate locale, you need to pass the locale.
+To get the page with appropriate locale, you also need to pass the locale.
 
 Update the references to your `source` object in your `page.tsx` and `layout.tsx` files, and include a locale code:
 
@@ -186,14 +183,16 @@ export const baseOptions: BaseLayoutProps = {
 };
 ```
 
+This is optional, you can also add your own language switcher component.
+
 ## Writing Documents
 
 <include>../../shared/page-conventions.i18n.mdx</include>
 
 ## Navigation
 
-Fumadocs will only handle navigation for its own layouts (e.g. sidebar components).
-For other links, you can use the `useParams` hook to get the locale from url, and attend it to `href`.
+Fumadocs only handles navigation for its own layouts (e.g. sidebar).
+For other places, you can use the `useParams` hook to get the locale from url, and attend it to `href`.
 
 ```tsx
 import Link from 'next/link';

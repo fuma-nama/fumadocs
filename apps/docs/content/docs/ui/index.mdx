@@ -41,6 +41,10 @@ A command line tool to install UI components and automate things, useful for cus
 
 </Cards>
 
+<Callout title="Want to learn more?">
+  Read our in-depth [What is Fumadocs](/docs/ui/what-is-fumadocs) introduction.
+</Callout>
+
 ### Terminology
 
 **Markdown/MDX:** Markdown is a markup language for creating formatted text. Fumadocs supports Markdown and MDX (superset of Markdown) out-of-the-box.
@@ -49,9 +53,9 @@ Some basic knowledge of Next.js App Router would be useful for further customisa
 
 ## Automatic Installation
 
-Create a new app with `create-fumadocs-app`, it requires Node.js 18+.
+Create a new app with `create-fumadocs-app`.
 
-> Node.js 23.1.x might have problems with Next.js production build.
+Node.js 18 or above required, note that Node.js 23.1 might have problems with Next.js production build.
 
 <Tabs groupId='package-manager' persist items={['npm', 'pnpm', 'yarn', 'bun']}>
 
@@ -75,6 +79,12 @@ bun create fumadocs-app
 
 It will initialize a new fumadocs app.
 Now you can start hacking!
+
+<Callout title='From Existing Codebase?'>
+
+    You can follow the [Manual Installation](/docs/ui/manual-installation) guide to get started.
+
+</Callout>
 
 ### Enjoy!
 
@@ -106,12 +116,12 @@ In the project, you can see:
 
 ### Customise Content
 
-Content source handles all your content, including validation and type definitions for data like frontmatter.
+Content source handles all your content, like compiling Markdown files, and validating frontmatter.
 
 - **Fumadocs MDX:** Read the [Introduction](/docs/mdx) to learn how it handles your content,
   and customise different options like frontmatter schema. A `source.config.ts` config file has been included.
 
-- **Custom Source:** For other sources like Sanity, you can [build a custom content source](/docs/headless/custom-source).
+- **Custom Source:** Fumadocs is not Markdown-exclusive. For other sources like Sanity, you can [build a custom content source](/docs/headless/custom-source).
 
 ### Customise Sidebar
 
@@ -242,34 +252,6 @@ will replace the `/docs` page with your `page.tsx`.
 
 </Accordions>
 
-## Why Fumadocs?
-
-Fumadocs is designed with flexibility in mind.
-
-You can use `fumadocs-core` as a headless UI library and bring your own styles.
-Fumadocs MDX is also a useful library to handle MDX content in Next.js. It also includes:
-
-- Many built-in components.
-- Typescript Twoslash, OpenAPI, and Math (KaTeX) integrations.
-- Fast and optimized by default, natively built on App Router.
-- Tight integration with Next.js, you can add it to an existing Next.js project easily.
-
-Feel free to open the demo in CodeSandbox, or read [Comparisons](/docs/ui/comparisons) if you're interested.
-
-### Documentation
-
-Fumadocs focuses on **authoring experience**, it provides a beautiful theme and many docs automation tools.
-
-It helps you to iterate your codebase faster while never leaving your docs behind.
-You can take this site as an example of docs site built with Fumadocs.
-
-### Blog sites
-
-Since Next.js is already a powerful framework, most features can be implemented with **just Next.js**.
-
-Fumadocs provides additional tooling for Next.js, including syntax highlighting, document search, and a default theme (Fumadocs UI).
-It helps you to avoid reinventing the wheels.
-
 ## Learn More
 
 New to here? Don't worry, we are welcome for your questions.
@@ -296,17 +278,5 @@ If you find anything confusing, please give your feedback on [Github Discussion]
     href="/docs/ui/components"
     title="Components"
     description="See all available components to enhance your docs"
-  />
-</Cards>
-
-### From Existing Codebase?
-
-You can follow the Manual Installation guide to get started.
-
-<Cards>
-  <Card
-    href="/docs/ui/manual-installation"
-    title="Manual Installation"
-    description="Create fumadocs app from scratch"
   />
 </Cards>
