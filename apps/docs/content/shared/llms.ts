@@ -3,7 +3,6 @@ import fg from 'fast-glob';
 import matter from 'gray-matter';
 import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
-import { remarkInstall } from 'fumadocs-docgen';
 import remarkStringify from 'remark-stringify';
 import remarkMdx from 'remark-mdx';
 import { remarkInclude } from 'fumadocs-mdx/config';
@@ -37,10 +36,8 @@ async function processContent(content: string): Promise<string> {
     .use(remarkInclude)
     // gfm styles
     .use(remarkGfm)
-    // your remark plugins
-    .use(remarkInstall, { persist: { id: 'package-manager' } })
-    // to string
-    .use(remarkStringify)
+    // .use(your remark plugins)
+    .use(remarkStringify) // to string
     .process(content);
 
   return String(file);
