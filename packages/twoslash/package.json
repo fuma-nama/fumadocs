@@ -41,12 +41,12 @@
     "mdast-util-from-markdown": "^2.0.2",
     "mdast-util-gfm": "^3.1.0",
     "mdast-util-to-hast": "^13.2.0",
-    "tailwind-merge": "^3.0.2"
+    "tailwind-merge": "^3.0.1"
   },
   "devDependencies": {
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.3",
-    "@types/node": "22.13.5",
+    "@types/node": "22.13.4",
     "@types/react": "^19.0.10",
     "eslint-config-custom": "workspace:*",
     "fumadocs-ui": "workspace:*",

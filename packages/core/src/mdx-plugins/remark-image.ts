@@ -2,11 +2,10 @@ import * as path from 'node:path';
 import type { Root } from 'mdast';
 import type { Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
-import { imageSize } from 'image-size';
+import sizeOf from 'image-size';
+import { type ISizeCalculationResult } from 'image-size/dist/types/interface';
 import type { MdxjsEsm } from 'mdast-util-mdxjs-esm';
 import { resolvePath, slash } from '@/utils/path';
-import type { ISizeCalculationResult } from 'image-size/types/interface';
-import { imageSizeFromFile } from 'image-size/fromFile';
 
 const VALID_BLUR_EXT = ['.jpeg', '.png', '.webp', '.avif', '.jpg'];
 const EXTERNAL_URL_REGEX = /^https?:\/\//;
@@ -212,10 +211,10 @@ async function getImageSize(
     base.pathname = resolvePath(base.pathname, src);
     url = base.toString();
   } else {
-    return imageSizeFromFile(isRelative ? path.join(dir, src) : src);
+    return sizeOf(isRelative ? path.join(dir, src) : src);
   }
 
   const buffer = await fetch(url).then((res) => res.arrayBuffer());
 
-  return imageSize(new Uint8Array(buffer));
+  return sizeOf(new Uint8Array(buffer));
 }
