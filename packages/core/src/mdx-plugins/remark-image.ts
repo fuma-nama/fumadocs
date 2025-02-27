@@ -112,10 +112,12 @@ export function remarkImage({
               ],
             });
           })
-          .catch(() => {
+          .catch((e) => {
             console.error(
               `[Remark Image] Failed obtain image size for ${url} with public directory ${publicDir}`,
             );
+
+            throw e;
           });
 
         promises.push(task);
