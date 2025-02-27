@@ -1,5 +1,5 @@
 /// <reference types="react/experimental" />
-import fs from 'node:fs/promises';
+import * as fs from 'node:fs/promises';
 import { TypeTable } from 'fumadocs-ui/components/type-table';
 import { type Jsx, toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import * as runtime from 'react/jsx-runtime';
@@ -11,6 +11,7 @@ import {
 } from '@/generate/base';
 import 'server-only';
 import { getProject } from '@/get-project';
+import type { ReactNode } from 'react';
 
 export interface AutoTypeTableProps {
   /**
@@ -46,6 +47,11 @@ export interface AutoTypeTableProps {
    */
   type?: string;
 
+  /**
+   * Override the function to render markdown into JSX nodes
+   */
+  renderMarkdown?: typeof renderMarkdownDefault;
+
   options?: GenerateDocumentationOptions;
 }
 
@@ -72,6 +78,7 @@ export async function AutoTypeTable({
   path,
   name,
   type,
+  renderMarkdown = renderMarkdownDefault,
   options = {},
 }: AutoTypeTableProps): Promise<React.ReactElement> {
   let typeName = name;
@@ -125,7 +132,7 @@ export async function AutoTypeTable({
   );
 }
 
-async function renderMarkdown(md: string): Promise<React.ReactElement> {
+async function renderMarkdownDefault(md: string): Promise<ReactNode> {
   return toJsxRuntime(await renderMarkdownToHast(md), {
     Fragment: runtime.Fragment,
     jsx: runtime.jsx as Jsx,

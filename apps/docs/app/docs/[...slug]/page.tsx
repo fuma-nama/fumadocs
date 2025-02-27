@@ -29,6 +29,7 @@ import { File, Folder, Files } from 'fumadocs-ui/components/files';
 import { Mermaid } from '@theguild/remark-mermaid/mermaid';
 import { Rate } from '@/components/rate';
 import { repo, owner, onRateAction } from '@/lib/github';
+import type { MDXComponents } from 'mdx/types';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -80,6 +81,8 @@ export default async function Page(props: {
         <Mdx
           components={{
             ...defaultComponents,
+            ...((await import('lucide-react')) as unknown as MDXComponents),
+
             Popup,
             PopupContent,
             PopupTrigger,

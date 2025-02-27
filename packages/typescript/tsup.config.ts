@@ -1,7 +1,7 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  external: ['server-only', 'fumadocs-ui', 'react'],
+  external: ['server-only', 'fumadocs-ui', 'fumadocs-core', 'react'],
   dts: true,
   target: 'es6',
   format: 'esm',

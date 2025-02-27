@@ -1,64 +1,36 @@
-import { fromMarkdown } from 'mdast-util-from-markdown';
-import { gfmFromMarkdown } from 'mdast-util-gfm';
-import { toHast } from 'mdast-util-to-hast';
-import { getSingletonHighlighter, type LanguageRegistration } from 'shiki';
 import type { Nodes } from 'hast';
-import { type Code, type RootContent } from 'mdast';
+import { remark } from 'remark';
+import {
+  remarkGfm,
+  rehypeCode,
+  type RehypeCodeOptions,
+} from 'fumadocs-core/mdx-plugins';
+import remarkRehype from 'remark-rehype';
+
+const processor = remark()
+  .use(remarkGfm)
+  .use(remarkRehype)
+  .use(rehypeCode, {
+    lazy: true,
+
+    themes: {
+      light: 'github-light',
+      dark: 'github-dark',
+    },
+  } satisfies RehypeCodeOptions)
+  // @ts-expect-error -- safe
+  .use(() => {
+    return (tree, file: { data: Record<string, unknown> }) => {
+      file.data.tree = tree;
+
+      return '';
+    };
+  });
 
 export async function renderMarkdownToHast(md: string): Promise<Nodes> {
-  const mdast = fromMarkdown(
-    md.replace(/{@link (?<link>[^}]*)}/g, '$1'), // replace jsdoc links
-    { mdastExtensions: [gfmFromMarkdown()] },
-  );
+  md = md.replace(/{@link (?<link>[^}]*)}/g, '$1'); // replace jsdoc links
 
-  const highlighter = await getSingletonHighlighter({
-    themes: ['vitesse-light', 'vitesse-dark'],
-  });
+  const out = await processor.process(md);
 
-  async function preload(contents: RootContent[]): Promise<void> {
-    await Promise.all(
-      contents.map(async (c) => {
-        if ('children' in c) await preload(c.children);
-
-        if (c.type === 'code' && c.lang) {
-          await highlighter.loadLanguage(
-            c.lang as unknown as LanguageRegistration,
-          );
-        }
-      }),
-    );
-  }
-
-  await preload(mdast.children);
-
-  return toHast(mdast, {
-    handlers: {
-      // @ts-expect-error hast with mdx
-      code(_, node: Code) {
-        const lang = node.lang ?? 'plaintext';
-
-        return highlighter.codeToHast(node.value, {
-          lang,
-          themes: {
-            light: 'vitesse-light',
-            dark: 'vitesse-dark',
-          },
-          defaultColor: false,
-          transformers: [
-            {
-              name: 'rehype-code:pre-process',
-              line(hast) {
-                if (hast.children.length > 0) return;
-                // Keep the empty lines when using grid layout
-                hast.children.push({
-                  type: 'text',
-                  value: ' ',
-                });
-              },
-            },
-          ],
-        }).children;
-      },
-    },
-  });
+  return out.data.tree as Nodes;
 }
