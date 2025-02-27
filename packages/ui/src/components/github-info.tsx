@@ -1,6 +1,6 @@
+import { cn } from '@/utils/cn';
 import { Star } from 'lucide-react';
 import { type AnchorHTMLAttributes } from 'react';
-import { cn } from '@/utils/cn';
 
 async function getRepoStarsAndForks(
   owner: string,
@@ -48,6 +48,7 @@ export async function GithubInfo({
   token?: string;
 }) {
   const { stars } = await getRepoStarsAndForks(owner, repo, token);
+  const humanizedStars = humanizeNumber(stars);
 
   return (
     <a
@@ -69,8 +70,35 @@ export async function GithubInfo({
       </p>
       <p className="flex text-xs items-center gap-1 text-fd-muted-foreground">
         <Star className="size-3" />
-        {stars}
+        {humanizedStars}
       </p>
     </a>
   );
+}
+
+/**
+ * Converts a number to a human-readable string with K suffix for thousands
+ * @example 1500 -> "1.5K", 1000000 -> "1000000"
+ */
+function humanizeNumber(num: number): string {
+  if (num < 1000) {
+    return num.toString();
+  }
+
+  if (num < 100000) {
+    // For numbers between 1,000 and 99,999, show with one decimal (e.g., 1.5K)
+    const value = (num / 1000).toFixed(1);
+    // Remove trailing .0 if present
+    const formattedValue = value.endsWith('.0') ? value.slice(0, -2) : value;
+
+    return `${formattedValue}K`;
+  }
+
+  if (num < 1000000) {
+    // For numbers between 10,000 and 999,999, show as whole K (e.g., 10K, 999K)
+    return `${Math.floor(num / 1000)}K`;
+  }
+
+  // For 1,000,000 and above, just return the number
+  return num.toString();
 }
