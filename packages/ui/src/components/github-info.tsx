@@ -85,8 +85,8 @@ function humanizeNumber(num: number): string {
     return num.toString();
   }
 
-  if (num < 10000) {
-    // For numbers between 1,000 and 9,999, show with one decimal (e.g., 1.5K)
+  if (num < 100000) {
+    // For numbers between 1,000 and 99,999, show with one decimal (e.g., 1.5K)
     const value = (num / 1000).toFixed(1);
     // Remove trailing .0 if present
     const formattedValue = value.endsWith('.0') ? value.slice(0, -2) : value;
