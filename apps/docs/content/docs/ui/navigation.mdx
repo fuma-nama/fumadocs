@@ -1,11 +1,51 @@
 ---
 title: Navigation
-description: Configuring navigation elements
+description: Customise navigation on layouts
 ---
 
-## Adding Links to Layouts
+## Overview
 
-You can display links by customising the `links` option of layouts.
+Different from sidebar items (page tree), Fumadocs also allow adding global links to your layouts with a `links` prop, like linking to your "showcase" page.
+
+![Nav](/docs/nav.png)
+
+<Callout title="Just wanted to customise sidebar?">
+  See [Docs Layout](/docs/ui/layouts/docs).
+</Callout>
+
+## Adding Links
+
+You can add new links by customising the `links` option of layouts.
+
+```tsx title="app/layout.config.tsx"
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+export const baseOptions: BaseLayoutProps = {
+  links: [], // [!code highlight]
+  // other options
+};
+```
+
+While `baseOptions` defines the options for both home and docs layout, you can customise the links shown on each of them with props. (it's just how you use React components).
+
+```tsx
+import { DocsLayout, type DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
+import type { ReactNode } from 'react';
+import { baseOptions } from '@/app/layout.config';
+import { source } from '@/lib/source';
+
+const docsOptions: DocsLayoutProps = {
+  ...baseOptions,
+  tree: source.pageTree,
+  links: [], // [!code highlight]
+};
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return <DocsLayout {...docsOptions}>{children}</DocsLayout>;
+}
+```
+
+You can see all supported items below:
 
 ### Link Item
 
@@ -68,27 +108,9 @@ export const baseOptions: BaseLayoutProps = {
 };
 ```
 
-#### Filter
-
-You can restrict where the item is displayed.
-
-```tsx title="app/layout.config.tsx"
-import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
-
-export const baseOptions: BaseLayoutProps = {
-  links: [
-    {
-      on: 'menu',
-      url: '/blog',
-      text: 'Blog',
-    },
-  ],
-};
-```
-
 ### Icon Item
 
-Same as link item, but is shown as an icon button on navbar.
+Same as link item, but is shown as an icon button.
 Icon items are secondary by default.
 
 ```tsx title="app/layout.config.tsx"
@@ -189,25 +211,6 @@ export const baseOptions: BaseLayoutProps = {
 };
 ```
 
-## Customise Sidebar
-
-You can customise all navigation elements with Page Tree, a tree that describes all available pages.
-
-It can be hardcoded, or generated from your file structure for content sources like Fumadocs MDX.
-See [Organizing Pages](/docs/ui/page-conventions) to learn how to customise the generated page tree.
-
-Pass it to the [Docs Layout](/docs/ui/layouts/docs) component:
-
-```tsx
-import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-
-<DocsLayout
-  tree={
-    // page tree here
-  }
-/>;
-```
-
 ## Others
 
 ### Document Search
@@ -233,31 +236,6 @@ Layout Links -> Sidebar Tabs & Document Search -> Sidebar Items -> Page
 Nodes should not impact their upper nodes (ancestors).
 For example, clicking a page tree item on sidebar should not change the root of page tree.
 
-## Changing Routes
-
-The default routing structure of your docs can also be changed as it is essentially a Next.js app.
-
-### Remove the docs layout of a certain page
-
-The `/docs/[[...slug]]` route is a catch-all route.
-
-To use another layout for a certain page, move the page outside the `app/docs` folder, to a place that's accessible with the same base route `/docs`.
-
-This is possible using Next.js Route Group. For example, adding a `/docs` page without docs layout.
-
-<Files>
-  <Folder name="app" defaultOpen>
-    <File name="(home)/docs/page.tsx" />
-    <Folder name="docs" defaultOpen>
-      <File name="layout.tsx" />
-      <File name="[[...slug]]/page.tsx" />
-    </Folder>
-  </Folder>
-</Files>
-
-Ensure **there's no duplicated page** with the same URL in the catch-all route `[[...slug]]/page.tsx`.
-In the above example, a MDX file with the path `content/docs/index.mdx` will produce errors.
-
 ## FAQ
 
 ### Multi versions
@@ -270,3 +248,27 @@ To link to the sites of other versions, use the Links API or a custom navigation
 ### Multi Docs
 
 See [Multiple Page Trees](/docs/ui/page-conventions#multiple-page-trees).
+
+### Remove the docs layout of a certain page
+
+The `/docs/[[...slug]]` route is a catch-all route.
+
+To use another layout for a certain page, move it to a place outside the `app/docs` folder which renders in the docs layout.
+
+Using Next.js Route Group, you can still access the same page with same URL. For example, adding a `/docs` page without docs layout.
+
+<Files>
+  <Folder name="app" defaultOpen>
+    <File name="(home)/docs/page.tsx" />
+    <Folder name="docs" defaultOpen>
+      <File name="layout.tsx" />
+      <File name="[[...slug]]/page.tsx" />
+    </Folder>
+  </Folder>
+</Files>
+
+<Callout title="warn">
+  Ensure **there's no duplicated page** with the same URL in the catch-all route
+  `[[...slug]]/page.tsx`. In the above example, a MDX file with the path
+  `content/docs/index.mdx` will produce errors.
+</Callout>

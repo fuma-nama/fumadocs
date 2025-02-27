@@ -98,8 +98,8 @@
   "dependencies": {
     "@formatjs/intl-localematcher": "^0.6.0",
     "@orama/orama": "^2.1.1",
-    "@shikijs/rehype": "^3.0.0",
-    "@shikijs/transformers": "^3.0.0",
+    "@shikijs/rehype": "^3.1.0",
+    "@shikijs/transformers": "^3.1.0",
     "github-slugger": "^2.0.0",
     "hast-util-to-estree": "^3.1.2",
     "hast-util-to-jsx-runtime": "^2.3.5",
@@ -109,7 +109,7 @@
     "remark": "^15.0.0",
     "remark-gfm": "^4.0.1",
     "scroll-into-view-if-needed": "^3.1.0",
-    "shiki": "^3.0.0",
+    "shiki": "^3.1.0",
     "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {
@@ -128,7 +128,7 @@
     "eslint-config-custom": "workspace:*",
     "mdast-util-mdx-jsx": "^3.2.0",
     "mdast-util-mdxjs-esm": "^2.0.1",
-    "next": "^15.1.7",
+    "next": "^15.2.0",
     "remark-mdx": "^3.1.0",
     "remark-rehype": "^11.1.1",
     "tsconfig": "workspace:*",
