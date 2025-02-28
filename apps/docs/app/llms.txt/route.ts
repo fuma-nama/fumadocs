@@ -4,21 +4,16 @@ import matter from 'gray-matter';
 import path from 'node:path';
 import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
-import {
-  fileGenerator,
-  remarkDocGen,
-  remarkInstall,
-  typescriptGenerator,
-} from 'fumadocs-docgen';
+import { fileGenerator, remarkDocGen, remarkInstall } from 'fumadocs-docgen';
 import remarkStringify from 'remark-stringify';
 import remarkMdx from 'remark-mdx';
+import { remarkAutoTypeTable } from 'fumadocs-typescript';
 
 export const revalidate = false;
 
 export async function GET() {
   const files = await fg([
     './content/docs/**/*.mdx',
-    '!*.model.mdx',
     '!./content/docs/openapi/**/*',
   ]);
 
@@ -56,7 +51,8 @@ async function processContent(content: string): Promise<string> {
   const file = await remark()
     .use(remarkMdx)
     .use(remarkGfm)
-    .use(remarkDocGen, { generators: [typescriptGenerator(), fileGenerator()] })
+    .use(remarkAutoTypeTable)
+    .use(remarkDocGen, { generators: [fileGenerator()] })
     .use(remarkInstall, { persist: { id: 'package-manager' } })
     .use(remarkStringify)
     .process(content);

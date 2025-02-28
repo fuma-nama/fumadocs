@@ -725,12 +725,6 @@ importers:
       estree-util-value-to-estree:
         specifier: ^3.3.2
         version: 3.3.2
-      fumadocs-typescript:
-        specifier: workspace:^
-        version: link:../typescript
-      hast-util-to-estree:
-        specifier: ^3.1.2
-        version: 3.1.2
       npm-to-yarn:
         specifier: ^3.0.1
         version: 3.0.1
@@ -762,6 +756,9 @@ importers:
       eslint-config-custom:
         specifier: workspace:*
         version: link:../eslint-config-custom
+      mdast-util-mdx-jsx:
+        specifier: ^3.2.0
+        version: 3.2.0
       remark:
         specifier: ^15.0.0
         version: 15.0.1

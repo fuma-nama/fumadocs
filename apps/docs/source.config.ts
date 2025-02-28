@@ -7,12 +7,8 @@ import {
 } from 'fumadocs-mdx/config';
 import { transformerTwoslash } from 'fumadocs-twoslash';
 import remarkMath from 'remark-math';
-import {
-  fileGenerator,
-  remarkDocGen,
-  remarkInstall,
-  remarkTypeScriptToJavaScript,
-} from 'fumadocs-docgen';
+import { fileGenerator, remarkDocGen, remarkInstall } from 'fumadocs-docgen';
+import { remarkTypeScriptToJavaScript } from 'fumadocs-docgen/remark-ts2js';
 import rehypeKatex from 'rehype-katex';
 import { z } from 'zod';
 import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins';

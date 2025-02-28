@@ -68,6 +68,8 @@ export interface MyInterface {
 <AutoTypeTable path="./path/to/file.ts" name="MyInterface" />
 ```
 
+The path is relative to your project directory (`cwd`), because `AutoTypeTable` is a React Server Component, it cannot access build-time information like MDX file path.
+
 <Callout title="Server Component only" type="warn">
 
 You cannot use this in a client component.

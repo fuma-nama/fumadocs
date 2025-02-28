@@ -2,5 +2,4 @@ out
 content/docs/openapi/**/*.mdx
 !content/docs/openapi/index.mdx
 
-content/docs/ui/(integrations)/typescript.mdx
 public/registry

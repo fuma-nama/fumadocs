@@ -1,3 +1,4 @@
+/// <reference types="mdast-util-mdx-jsx" />
 import type { Transformer } from 'unified';
 import type { Root, RootContent } from 'mdast';
 import { visit } from 'unist-util-visit';
