@@ -16,6 +16,7 @@ import {
 import rehypeKatex from 'rehype-katex';
 import { z } from 'zod';
 import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins';
+import { remarkAutoTypeTable } from 'fumadocs-typescript';
 
 export const docs = defineDocs({
   docs: {
@@ -82,6 +83,7 @@ export default defineConfig({
     },
     remarkPlugins: [
       remarkMath,
+      remarkAutoTypeTable,
       [remarkInstall, { persist: { id: 'package-manager' } }],
       [remarkDocGen, { generators: [fileGenerator()] }],
       remarkTypeScriptToJavaScript,

@@ -1058,9 +1058,15 @@ importers:
 
   packages/typescript:
     dependencies:
+      estree-util-value-to-estree:
+        specifier: ^3.3.2
+        version: 3.3.2
       fast-glob:
         specifier: ^3.3.3
         version: 3.3.3
+      hast-util-to-estree:
+        specifier: ^3.1.2
+        version: 3.1.2
       hast-util-to-jsx-runtime:
         specifier: ^2.3.5
         version: 2.3.5
@@ -1076,7 +1082,13 @@ importers:
       ts-morph:
         specifier: ^25.0.1
         version: 25.0.1
+      unist-util-visit:
+        specifier: ^5.0.0
+        version: 5.0.0
     devDependencies:
+      '@mdx-js/mdx':
+        specifier: ^3.1.0
+        version: 3.1.0(acorn@8.14.0)
       '@types/estree':
         specifier: ^1.0.6
         version: 1.0.6
@@ -1110,6 +1122,9 @@ importers:
       typescript:
         specifier: ^5.7.3
         version: 5.7.3
+      unified:
+        specifier: ^11.0.5
+        version: 11.0.5
 
   packages/ui:
     dependencies:

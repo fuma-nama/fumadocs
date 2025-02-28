@@ -1,9 +1,14 @@
-import { generateDocumentation, generateMDX } from '../src';
+import {
+  generateDocumentation,
+  remarkAutoTypeTable,
+  type RemarkAutoTypeTableOptions,
+} from '../src';
 import { fileURLToPath } from 'url';
 import { expect, test } from 'vitest';
 import * as path from 'node:path';
-import * as fs from 'node:fs';
+import * as fs from 'node:fs/promises';
 import type { TypescriptConfig } from '@/get-project';
+import { createProcessor } from '@mdx-js/mdx';
 
 const relative = (s: string): string =>
   path.resolve(fileURLToPath(new URL(s, import.meta.url)));
@@ -15,7 +20,7 @@ const tsconfig: TypescriptConfig = {
 
 test('Run', async () => {
   const file = relative('./fixtures/test.ts');
-  const content = fs.readFileSync(file).toString();
+  const content = (await fs.readFile(file)).toString();
 
   const result = ['Test1', 'Test2', 'Test3'].flatMap((name) =>
     generateDocumentation(file, name, content, {
@@ -30,9 +35,24 @@ test('Run', async () => {
 
 test('Run on MDX files', async () => {
   const file = relative('./fixtures/test.mdx');
-  const content = fs.readFileSync(file).toString();
+  const processor = createProcessor({
+    remarkPlugins: [
+      [
+        remarkAutoTypeTable,
+        {
+          options: {
+            config: tsconfig,
+          },
+        } as RemarkAutoTypeTableOptions,
+      ],
+    ],
+  });
 
-  await expect(
-    generateMDX(content, { basePath: path.dirname(file), config: tsconfig }),
-  ).toMatchFileSnapshot('./fixtures/test.output.mdx');
+  const output = await processor.process({
+    path: file,
+    value: (await fs.readFile(file)).toString(),
+  });
+  await expect(String(output.value)).toMatchFileSnapshot(
+    './fixtures/test.output.js',
+  );
 });

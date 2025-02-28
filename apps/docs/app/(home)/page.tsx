@@ -501,6 +501,7 @@ function Feedback() {
             alt="avatar"
             width="32"
             height="32"
+            unoptimized
             className="size-8 rounded-full"
           />
           <div>

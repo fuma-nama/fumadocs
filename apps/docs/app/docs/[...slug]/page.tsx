@@ -40,7 +40,6 @@ function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   return null;
 }
 
-export const dynamicParams = false;
 export const revalidate = false;
 
 export default async function Page(props: {
@@ -134,6 +133,6 @@ export async function generateMetadata(props: {
   );
 }
 
-export function generateStaticParams(): { slug: string[] }[] {
+export function generateStaticParams() {
   return source.generateParams();
 }
