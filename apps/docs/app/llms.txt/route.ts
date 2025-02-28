@@ -8,6 +8,7 @@ import { fileGenerator, remarkDocGen, remarkInstall } from 'fumadocs-docgen';
 import remarkStringify from 'remark-stringify';
 import remarkMdx from 'remark-mdx';
 import { remarkAutoTypeTable } from 'fumadocs-typescript';
+import { remarkInclude } from 'fumadocs-mdx/config';
 
 export const revalidate = false;
 
@@ -29,11 +30,7 @@ export async function GET() {
       cli: 'Fumadocs CLI (the CLI tool for automating Fumadocs apps)',
     }[dir ?? ''];
 
-    if (data._mdx?.mirror) {
-      return;
-    }
-
-    const processed = await processContent(content);
+    const processed = await processContent(file, content);
     return `file: ${file}
 # ${category}: ${data.title}
 
@@ -47,15 +44,19 @@ ${processed}`;
   return new Response(scanned.join('\n\n'));
 }
 
-async function processContent(content: string): Promise<string> {
+async function processContent(path: string, content: string): Promise<string> {
   const file = await remark()
     .use(remarkMdx)
+    .use(remarkInclude)
     .use(remarkGfm)
     .use(remarkAutoTypeTable)
     .use(remarkDocGen, { generators: [fileGenerator()] })
     .use(remarkInstall, { persist: { id: 'package-manager' } })
     .use(remarkStringify)
-    .process(content);
+    .process({
+      path,
+      value: content,
+    });
 
   return String(file);
 }

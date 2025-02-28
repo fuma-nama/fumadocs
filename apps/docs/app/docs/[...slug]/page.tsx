@@ -46,6 +46,7 @@ export default async function Page(props: {
   params: Promise<{ slug: string[] }>;
 }): Promise<ReactElement> {
   const params = await props.params;
+  console.log('render', params.slug);
   const page = source.getPage(params.slug);
 
   if (!page) notFound();
@@ -134,5 +135,10 @@ export async function generateMetadata(props: {
 }
 
 export function generateStaticParams() {
-  return source.generateParams();
+  console.log(
+    source
+      .generateParams()
+      .filter((v) => v.slug[0] === 'ui' && v.slug[1] === 'mdx'),
+  );
+  return [...source.generateParams()];
 }
