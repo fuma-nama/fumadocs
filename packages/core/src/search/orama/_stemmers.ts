@@ -1,9 +1,9 @@
-/* Cloned from Orama codebase */
-
+/* Cloned from https://github.com/oramasearch/orama/blob/main/packages/orama/src/components/tokenizer/languages.ts */
 export const STEMMERS: Record<string, string> = {
   arabic: 'ar',
   armenian: 'am',
   bulgarian: 'bg',
+  czech: 'cz',
   danish: 'dk',
   dutch: 'nl',
   english: 'en',
