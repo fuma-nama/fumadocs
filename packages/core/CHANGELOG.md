@@ -1,5 +1,13 @@
 # next-docs-zeta
 
+## 15.0.14
+
+### Patch Changes
+
+- 37dc0a6: Update `image-size` to v2
+- 796cc5e: Upgrade to Orama v3
+- 2cc0be5: Support to add custom serialization to `remarkStructure` via `data._string`
+
 ## 15.0.13
 
 ## 15.0.12
