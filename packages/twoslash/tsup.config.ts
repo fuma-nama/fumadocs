@@ -8,5 +8,5 @@ export default defineConfig({
   async onSuccess() {
     await fs.copyFile('./styles/twoslash.css', './dist/twoslash.css');
   },
-  entry: ['src/index.ts', 'src/ui/index.ts'],
+  entry: ['src/index.ts', 'src/cache-fs.ts', 'src/ui/index.ts'],
 });

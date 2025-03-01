@@ -6,7 +6,6 @@ import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { remarkInstall } from '@/remark-install';
 import { remark } from 'remark';
-import { typescriptGenerator } from '@/typescript-generator';
 import { remarkTypeScriptToJavaScript } from '@/remark-ts2js';
 import { readFile } from 'node:fs/promises';
 import { remarkShow } from '@/remark-show';
@@ -76,30 +75,6 @@ test('Remark Install', async () => {
 
   await expect(result.toString()).toMatchFileSnapshot(
     path.resolve(cwd, './fixtures/remark-install-persist.output.jsx'),
-  );
-});
-
-test('Typescript Generator', async () => {
-  const file = path.resolve(cwd, './fixtures/typescript-gen.md');
-  const content = await readFile(file);
-
-  const tsconfig = {
-    tsconfigPath: path.resolve(cwd, '../tsconfig.json'),
-    basePath: path.resolve(cwd, '../'),
-  };
-
-  const result = await createProcessor({
-    remarkPlugins: [
-      [
-        remarkDocGen,
-        { generators: [typescriptGenerator({ config: tsconfig })] },
-      ],
-    ],
-    jsx: true,
-  }).process({ value: content, cwd });
-
-  await expect(result.toString()).toMatchFileSnapshot(
-    path.resolve(cwd, './fixtures/typescript-gen.output.jsx'),
   );
 });
 

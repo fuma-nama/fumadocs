@@ -1,5 +1,15 @@
 # fumadocs-typescript
 
+## 3.1.0
+
+### Minor Changes
+
+- 42d68a6: Support `remarkAutoTypeTable` plugin, deprecate MDX generator in favour of new remark plugin
+
+### Patch Changes
+
+- 5d0dd11: Support overriding `renderMarkdown` function
+
 ## 3.0.4
 
 ### Patch Changes

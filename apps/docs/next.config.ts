@@ -21,7 +21,7 @@ const config: NextConfig = {
     'ts-morph',
     'typescript',
     'oxc-transform',
-    '@shikijs/twoslash',
+    'twoslash',
   ],
   images: {
     remotePatterns: [

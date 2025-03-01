@@ -5,92 +5,124 @@ import { gfmFromMarkdown } from 'mdast-util-gfm';
 import { defaultHandlers, toHast } from 'mdast-util-to-hast';
 import type { ShikiTransformer, ShikiTransformerContextCommon } from 'shiki';
 import {
-  transformerTwoslash as originalTransformer,
+  createTransformerFactory,
   type TransformerTwoslashIndexOptions,
+  rendererRich,
 } from '@shikijs/twoslash';
+import {
+  createTwoslasher,
+  type TwoslashExecuteOptions,
+  type TwoslashReturn,
+} from 'twoslash';
+import type { TwoslashTypesCache } from '@/cache-fs';
 
-export function transformerTwoslash(
-  options?: TransformerTwoslashIndexOptions,
-): ShikiTransformer {
+export interface TransformerTwoslashOptions
+  extends TransformerTwoslashIndexOptions {
+  typesCache?: TwoslashTypesCache;
+}
+
+// Since some internals of Shiki Twoslash are not documented
+// This is highly inspired by https://github.com/shikijs/shiki/blob/main/packages/vitepress-twoslash
+export function transformerTwoslash({
+  typesCache,
+  ...options
+}: TransformerTwoslashOptions = {}): ShikiTransformer {
   const ignoreClass = 'nd-copy-ignore';
+  const defaultTwoslasher = createTwoslasher(options.twoslashOptions);
 
-  return originalTransformer({
+  let twoslasher = defaultTwoslasher;
+  // Wrap twoslasher with cache when `resultCache` is provided
+  if (typesCache) {
+    twoslasher = ((
+      code: string,
+      extension?: string,
+      options?: TwoslashExecuteOptions,
+    ): TwoslashReturn => {
+      const cached = typesCache.read(code); // Restore cache
+      if (cached) return cached;
+
+      const twoslashResult = defaultTwoslasher(code, extension, options);
+      typesCache.write(code, twoslashResult);
+      return twoslashResult;
+    }) as typeof defaultTwoslasher;
+    twoslasher.getCacheMap = defaultTwoslasher.getCacheMap;
+    typesCache?.init?.();
+  }
+
+  const renderer = rendererRich({
+    classExtra: ignoreClass,
+    renderMarkdown,
+    renderMarkdownInline,
+    ...options?.rendererRich,
+    hast: {
+      hoverToken: {
+        tagName: 'Popup',
+      },
+      hoverPopup: {
+        tagName: 'PopupContent',
+      },
+      hoverCompose: ({ popup, token }) => [
+        popup,
+        {
+          type: 'element',
+          tagName: 'PopupTrigger',
+          properties: {
+            asChild: true,
+          },
+          children: [
+            {
+              type: 'element',
+              tagName: 'span',
+              properties: {
+                class: 'twoslash-hover',
+              },
+              children: [token],
+            },
+          ],
+        },
+      ],
+      popupDocs: {
+        class: 'prose twoslash-popup-docs',
+      },
+      popupTypes: {
+        tagName: 'div',
+        class: 'shiki prose-no-margin',
+        children: (v) => {
+          if (
+            v.length === 1 &&
+            v[0].type === 'element' &&
+            v[0].tagName === 'pre'
+          )
+            return v;
+
+          return [
+            {
+              type: 'element',
+              tagName: 'code',
+              properties: {
+                class: 'twoslash-popup-code',
+              },
+              children: v,
+            },
+          ];
+        },
+      },
+      popupDocsTags: {
+        class: 'prose twoslash-popup-docs twoslash-popup-docs-tags',
+      },
+      nodesHighlight: {
+        class: 'highlighted-word twoslash-highlighted',
+      },
+      ...options?.rendererRich?.hast,
+    },
+  });
+
+  return createTransformerFactory(
+    twoslasher,
+    renderer,
+  )({
     explicitTrigger: true,
     ...options,
-    twoslashOptions: {
-      ...options?.twoslashOptions,
-      compilerOptions: {
-        moduleResolution: 100,
-        ...options?.twoslashOptions?.compilerOptions,
-      },
-    },
-    rendererRich: {
-      classExtra: ignoreClass,
-      renderMarkdown,
-      renderMarkdownInline,
-      hast: {
-        hoverToken: {
-          tagName: 'Popup',
-        },
-        hoverPopup: {
-          tagName: 'PopupContent',
-        },
-        hoverCompose: ({ popup, token }) => [
-          popup,
-          {
-            type: 'element',
-            tagName: 'PopupTrigger',
-            properties: {
-              asChild: true,
-            },
-            children: [
-              {
-                type: 'element',
-                tagName: 'span',
-                properties: {
-                  class: 'twoslash-hover',
-                },
-                children: [token],
-              },
-            ],
-          },
-        ],
-        popupDocs: {
-          class: 'prose twoslash-popup-docs',
-        },
-        popupTypes: {
-          tagName: 'div',
-          class: 'shiki prose-no-margin',
-          children: (v) => {
-            if (
-              v.length === 1 &&
-              v[0].type === 'element' &&
-              v[0].tagName === 'pre'
-            )
-              return v;
-
-            return [
-              {
-                type: 'element',
-                tagName: 'code',
-                properties: {
-                  class: 'twoslash-popup-code',
-                },
-                children: v,
-              },
-            ];
-          },
-        },
-        popupDocsTags: {
-          class: 'prose twoslash-popup-docs twoslash-popup-docs-tags',
-        },
-        nodesHighlight: {
-          class: 'highlighted-word twoslash-highlighted',
-        },
-        ...options?.rendererRich?.hast,
-      },
-      ...options?.rendererRich,
-    },
   });
 }
 

@@ -6,16 +6,14 @@ import {
   metaSchema,
 } from 'fumadocs-mdx/config';
 import { transformerTwoslash } from 'fumadocs-twoslash';
+import { createFileSystemTypesCache } from 'fumadocs-twoslash/cache-fs';
 import remarkMath from 'remark-math';
-import {
-  fileGenerator,
-  remarkDocGen,
-  remarkInstall,
-  remarkTypeScriptToJavaScript,
-} from 'fumadocs-docgen';
+import { fileGenerator, remarkDocGen, remarkInstall } from 'fumadocs-docgen';
+import { remarkTypeScriptToJavaScript } from 'fumadocs-docgen/remark-ts2js';
 import rehypeKatex from 'rehype-katex';
 import { z } from 'zod';
 import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins';
+import { remarkAutoTypeTable } from 'fumadocs-typescript';
 
 export const docs = defineDocs({
   docs: {
@@ -60,7 +58,9 @@ export default defineConfig({
       },
       transformers: [
         ...(rehypeCodeDefaultOptions.transformers ?? []),
-        transformerTwoslash(),
+        transformerTwoslash({
+          typesCache: createFileSystemTypesCache(),
+        }),
         {
           name: 'transformers:remove-notation-escape',
           code(hast) {
@@ -82,6 +82,7 @@ export default defineConfig({
     },
     remarkPlugins: [
       remarkMath,
+      remarkAutoTypeTable,
       [remarkInstall, { persist: { id: 'package-manager' } }],
       [remarkDocGen, { generators: [fileGenerator()] }],
       remarkTypeScriptToJavaScript,

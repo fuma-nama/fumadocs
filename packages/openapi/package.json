@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-openapi",
-  "version": "6.2.0",
+  "version": "6.2.1",
   "description": "Generate MDX docs for your OpenAPI spec",
   "keywords": [
     "NextJs",
@@ -54,7 +54,7 @@
     "@radix-ui/react-dialog": "^1.1.6",
     "@radix-ui/react-select": "^2.1.6",
     "@radix-ui/react-slot": "^1.1.2",
-    "@scalar/openapi-parser": "0.10.8",
+    "@scalar/openapi-parser": "0.10.9",
     "ajv-draft-04": "^1.0.0",
     "class-variance-authority": "^0.7.1",
     "fast-glob": "^3.3.3",
@@ -63,7 +63,7 @@
     "github-slugger": "^2.0.0",
     "hast-util-to-jsx-runtime": "^2.3.5",
     "js-yaml": "^4.1.0",
-    "lucide-react": "^0.476.0",
+    "lucide-react": "^0.477.0",
     "next-themes": "^0.4.4",
     "openapi-sampler": "^1.6.1",
     "react-hook-form": "^7.54.2",
@@ -73,9 +73,9 @@
     "xml-js": "^1.6.11"
   },
   "devDependencies": {
-    "@scalar/api-client-react": "^1.1.31",
+    "@scalar/api-client-react": "^1.1.33",
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "22.13.5",
+    "@types/node": "22.13.8",
     "@types/openapi-sampler": "^1.0.3",
     "@types/react": "^19.0.10",
     "eslint-config-custom": "workspace:*",

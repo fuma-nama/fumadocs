@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-core",
-  "version": "15.0.13",
+  "version": "15.0.14",
   "description": "The library for building a documentation website in Next.js",
   "keywords": [
     "NextJs",
@@ -97,7 +97,7 @@
   },
   "dependencies": {
     "@formatjs/intl-localematcher": "^0.6.0",
-    "@orama/orama": "^2.1.1",
+    "@orama/orama": "^3.1.1",
     "@shikijs/rehype": "^3.1.0",
     "@shikijs/transformers": "^3.1.0",
     "github-slugger": "^2.0.0",
@@ -115,13 +115,13 @@
   "devDependencies": {
     "@algolia/client-search": "4.24.0",
     "@mdx-js/mdx": "^3.1.0",
-    "@orama/tokenizers": "^2.1.1",
+    "@orama/tokenizers": "^3.1.1",
     "@oramacloud/client": "^2.1.4",
     "@types/estree-jsx": "^1.0.5",
     "@types/hast": "^3.0.4",
     "@types/mdast": "^4.0.3",
     "@types/negotiator": "^0.6.3",
-    "@types/node": "22.13.5",
+    "@types/node": "22.13.8",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "algoliasearch": "4.24.0",
@@ -132,7 +132,7 @@
     "remark-mdx": "^3.1.0",
     "remark-rehype": "^11.1.1",
     "tsconfig": "workspace:*",
-    "typescript": "^5.7.3",
+    "typescript": "^5.8.2",
     "unified": "^11.0.5",
     "vfile": "^6.0.3"
   },

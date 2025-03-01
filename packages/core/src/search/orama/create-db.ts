@@ -25,14 +25,14 @@ export async function createDB({
 }: AdvancedOptions): Promise<Orama<typeof advancedSchema>> {
   const items = typeof indexes === 'function' ? await indexes() : indexes;
 
-  const db = (await create({
+  const db = create({
     schema: advancedSchema,
     ...rest,
     components: {
       ...rest.components,
       tokenizer: tokenizer ?? rest.components?.tokenizer,
     },
-  })) as unknown as Orama<typeof advancedSchema>;
+  }) as Orama<typeof advancedSchema>;
 
   const mapTo: PartialSchemaDeep<AdvancedDocument>[] = [];
   items.forEach((page) => {
@@ -102,14 +102,14 @@ export async function createDBSimple({
   ...rest
 }: SimpleOptions): Promise<Orama<typeof simpleSchema>> {
   const items = typeof indexes === 'function' ? await indexes() : indexes;
-  const db = (await create({
+  const db = create({
     schema: simpleSchema,
     ...rest,
     components: {
       ...rest.components,
       tokenizer: tokenizer ?? rest.components?.tokenizer,
     },
-  })) as unknown as Orama<typeof simpleSchema>;
+  }) as Orama<typeof simpleSchema>;
 
   await insertMultiple(
     db,

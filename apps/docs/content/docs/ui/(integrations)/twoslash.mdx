@@ -11,6 +11,21 @@ Thanks to the Twoslash integration of [Shiki](https://github.com/shikijs/shiki),
 fumadocs-twoslash
 ```
 
+Add `twoslash` to your `serverExternalPackages` in Next.js config:
+
+```js
+import { createMDX } from 'fumadocs-mdx/next';
+
+const config = {
+  reactStrictMode: true,
+  serverExternalPackages: ['twoslash'],
+};
+
+const withMDX = createMDX();
+
+export default withMDX(config);
+```
+
 Add to your Shiki transformers.
 
 <Callout title='Example for Fumadocs MDX'>
@@ -205,4 +220,17 @@ export async function Code({
 
   return rendered;
 }
+```
+
+## Cache
+
+You can enable filesystem cache with `typesCache` option:
+
+```ts twoslash title="source.config.ts"
+import { transformerTwoslash } from 'fumadocs-twoslash';
+import { createFileSystemTypesCache } from 'fumadocs-twoslash/cache-fs';
+
+transformerTwoslash({
+  typesCache: createFileSystemTypesCache(),
+});
 ```

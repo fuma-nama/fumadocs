@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { generateDocumentation } from '@/generate/base';
+import { generateDocumentation } from '@/lib/base';
 
 test('class members', () => {
   const out = generateDocumentation(

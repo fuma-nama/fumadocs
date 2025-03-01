@@ -5,5 +5,5 @@ export default defineConfig({
   dts: true,
   target: 'es6',
   format: 'esm',
-  entry: ['src/index.ts'],
+  entry: ['src/index.ts', 'src/remark-ts2js.ts'],
 });

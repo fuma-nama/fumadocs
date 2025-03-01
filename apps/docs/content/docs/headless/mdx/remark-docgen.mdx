@@ -12,48 +12,24 @@ fumadocs-docgen
 Add the remark plugin.
 
 ```ts title="source.config.ts" tab="Fumadocs MDX"
-import { remarkDocGen } from 'fumadocs-docgen';
+import { remarkDocGen, fileGenerator } from 'fumadocs-docgen';
 import { defineConfig } from 'fumadocs-mdx/config';
 
 export default defineConfig({
   mdxOptions: {
-    remarkPlugins: [[remarkDocGen, { generators: [] }]],
+    remarkPlugins: [[remarkDocGen, { generators: [fileGenerator()] }]],
   },
 });
 ```
 
 ```ts tab="MDX Compiler"
+import { remarkDocGen, fileGenerator } from 'fumadocs-docgen';
 import { compile } from '@mdx-js/mdx';
-import { remarkDocGen } from 'fumadocs-docgen';
 
 await compile('...', {
-  remarkPlugins: [[remarkDocGen, { generators: [] }]],
+  remarkPlugins: [[remarkDocGen, { generators: [fileGenerator()] }]],
 });
 ```
-
-Use generators in a markdown/MDX file with:
-
-````mdx
-```json doc-gen:<generator>
-{
-  // options
-}
-```
-````
-
-## Generators
-
-You can add a generator to the `generators` array.
-
-```ts
-import { remarkDocGen, fileGenerator } from 'fumadocs-docgen';
-
-const config = {
-  remarkPlugins: [[remarkDocGen, { generators: [fileGenerator()] }]],
-};
-```
-
-The package is already bundled with several generators, you can import them from the package directly.
 
 ## File Generator
 
@@ -93,35 +69,3 @@ Or to specify the programming language and meta string:
 }
 ```
 ````
-
-## Typescript Generator
-
-> MDX Only.
-
-Generate docs from real Typescript definitions.
-This generator is powered by the [`fumadocs-typescript`](/docs/ui/typescript) package, which also offers a plenty of features.
-
-It takes the current working directory as root directory, then look for your Typescript configuration file (`tsconfig.json`).
-You may configure it with generator options.
-
-To use it, specify the Typescript file and exported type you want to generate from.
-
-````mdx
-```json doc-gen:typescript
-{
-  "file": "./my-file.ts",
-  "name": "MyInterface"
-}
-```
-````
-
-This will generate a type table:
-
-```mdx
-<TypeTable
-  type={{ name: { type: 'string', description: <>The name of player</> } }}
-/>
-```
-
-You can import the component from [`fumadocs-ui`](/docs/ui/components/type-table), or make your own implementation.
-The type definition of props can be found at `VirtualTypeTableProps`.

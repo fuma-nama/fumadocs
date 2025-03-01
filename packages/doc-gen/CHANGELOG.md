@@ -1,5 +1,44 @@
 # fumadocs-docgen
 
+## 2.0.0
+
+### Major Changes
+
+- 4642a86: **Remove `typescriptGenerator` from `fumadocs-docgen`**
+
+  **why:** Move dedicated parts to `fumadocs-typescript`, so all docs generation features for TypeScript can be put together in a single module.
+
+  **migrate:** Use `fumadocs-typescript` We made a new `remarkAutoTypeTable` remark plugin generating the type table but with a different syntax:
+
+  ```mdx
+  <auto-type-table path="./my-file.ts" name="MyInterface" />
+  ```
+
+  Instead of:
+
+  ````mdx
+  ```json doc-gen:typescript
+  {
+    "file": "./my-file.ts",
+    "name": "MyInterface"
+  }
+  ```
+  ````
+
+- 4642a86: **Move `remarkTypeScriptToJavaScript` plugin to `fumadocs-docgen/remark-ts2js`.**
+
+  **why:** Fix existing problems with `oxc-transform`.
+
+  **migrate:**
+
+  Import it like:
+
+  ```ts
+  import { remarkTypeScriptToJavaScript } from 'fumadocs-docgen/remark-ts2js';
+  ```
+
+  instead of importing from `fumadocs-docgen`.
+
 ## 1.3.8
 
 ### Patch Changes

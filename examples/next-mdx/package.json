@@ -20,6 +20,6 @@
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "algoliasearch": "4.24.0",
-    "typescript": "^5.7.3"
+    "typescript": "^5.8.2"
   }
 }
