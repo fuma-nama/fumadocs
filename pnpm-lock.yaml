@@ -80,9 +80,6 @@ importers:
       '@shikijs/rehype':
         specifier: ^3.1.0
         version: 3.1.0
-      '@shikijs/twoslash':
-        specifier: ^3.1.0
-        version: 3.1.0(typescript@5.8.2)
       '@theguild/remark-mermaid':
         specifier: ^0.2.0
         version: 0.2.0(react@19.0.0)
@@ -170,6 +167,9 @@ importers:
       tailwind-merge:
         specifier: ^3.0.2
         version: 3.0.2
+      twoslash:
+        specifier: ^0.3.1
+        version: 0.3.1(typescript@5.8.2)
       zod:
         specifier: ^3.24.2
         version: 3.24.2
@@ -1027,6 +1027,9 @@ importers:
       tailwind-merge:
         specifier: ^3.0.2
         version: 3.0.2
+      twoslash:
+        specifier: ^0.3.1
+        version: 0.3.1(typescript@5.8.2)
     devDependencies:
       '@types/hast':
         specifier: ^3.0.4

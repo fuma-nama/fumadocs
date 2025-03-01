@@ -6,6 +6,7 @@ import {
   metaSchema,
 } from 'fumadocs-mdx/config';
 import { transformerTwoslash } from 'fumadocs-twoslash';
+import { createFileSystemTypesCache } from 'fumadocs-twoslash/cache-fs';
 import remarkMath from 'remark-math';
 import { fileGenerator, remarkDocGen, remarkInstall } from 'fumadocs-docgen';
 import { remarkTypeScriptToJavaScript } from 'fumadocs-docgen/remark-ts2js';
@@ -57,7 +58,9 @@ export default defineConfig({
       },
       transformers: [
         ...(rehypeCodeDefaultOptions.transformers ?? []),
-        transformerTwoslash(),
+        transformerTwoslash({
+          typesCache: createFileSystemTypesCache(),
+        }),
         {
           name: 'transformers:remove-notation-escape',
           code(hast) {

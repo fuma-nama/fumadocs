@@ -20,7 +20,6 @@
     "@radix-ui/react-slot": "^1.1.2",
     "@radix-ui/react-tooltip": "^1.1.8",
     "@shikijs/rehype": "^3.1.0",
-    "@shikijs/twoslash": "^3.1.0",
     "@theguild/remark-mermaid": "^0.2.0",
     "class-variance-authority": "^0.7.1",
     "fumadocs-core": "workspace:*",
@@ -50,6 +49,7 @@
     "scroll-into-view-if-needed": "^3.1.0",
     "shiki": "^3.1.0",
     "tailwind-merge": "^3.0.2",
+    "twoslash": "^0.3.1",
     "zod": "^3.24.2"
   },
   "devDependencies": {
