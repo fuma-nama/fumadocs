@@ -14,7 +14,7 @@ export interface StaticOptions {
    */
   from?: string;
 
-  initOrama?: (locale?: string) => Promise<Orama<unknown, never, never, never>>;
+  initOrama?: (locale?: string) => AnyOrama | Promise<AnyOrama>;
 }
 
 export interface StaticClient {
@@ -52,7 +52,7 @@ export function createStaticClient({
       for (const [k, v] of Object.entries(data.data)) {
         const db = await initOrama(k);
 
-        await load(db, v);
+        load(db, v);
         dbs.set(k, {
           type: v.type,
           db,
@@ -61,7 +61,7 @@ export function createStaticClient({
     } else {
       const db = await initOrama();
 
-      await load(db, data);
+      load(db, data);
       dbs.set('', {
         type: data.type,
         db,

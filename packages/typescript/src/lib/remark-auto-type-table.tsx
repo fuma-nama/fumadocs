@@ -151,6 +151,17 @@ export function remarkAutoTypeTable({
                 properties,
               }),
             ],
+            data: {
+              // for Fumadocs `remarkStructure`
+              _string: [
+                doc.name,
+                doc.description,
+                ...doc.entries.flatMap((entry) => [
+                  `${entry.name}: ${entry.type}`,
+                  entry.description,
+                ]),
+              ],
+            },
             children: [],
           };
         });

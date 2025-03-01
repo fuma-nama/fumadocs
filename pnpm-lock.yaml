@@ -2240,10 +2240,6 @@ packages:
   '@orama/cuid2@2.2.3':
     resolution: {integrity: sha512-Lcak3chblMejdlSHgYU2lS2cdOhDpU6vkfIJH4m+YKvqQyLqs1bB8+w6NT1MG5bO12NUK2GFc34Mn2xshMIQ1g==}
 
-  '@orama/orama@3.0.2':
-    resolution: {integrity: sha512-1dfxup89K2DB2bbfx9rXyr/IAvhCKbH79lZCXVh5HWvdJ9g0VAvPIs3+UzjiyOdycEHYTbYundCTN6+Ygj3z4w==}
-    engines: {node: '>= 16.0.0'}
-
   '@orama/orama@3.1.1':
     resolution: {integrity: sha512-w60E72VyWk4QeGy5j0Nm6z4BYVu2MMgtXi8dE/kVluxvz1JVtU9fPXKUW6E0bfrpN+LQM/2w5Jq5v6stl+V0dQ==}
     engines: {node: '>= 16.0.0'}
@@ -5614,9 +5610,6 @@ packages:
   package-manager-detector@0.2.10:
     resolution: {integrity: sha512-1wlNZK7HW+UE3eGCcMv3hDaYokhspuIeH6enXSnCL1eEZSVDsy/dYwo/4CczhUsrKLA1SSXB+qce8Glw5DEVtw==}
 
-  package-manager-detector@0.2.9:
-    resolution: {integrity: sha512-+vYvA/Y31l8Zk8dwxHhL3JfTuHPm6tlxM2A3GeQyl7ovYnSp1+mzAxClxaOr0qO1TtPxbQxetI7v5XqKLJZk7Q==}
-
   parent-module@1.0.1:
     resolution: {integrity: sha512-GQ2EWRpQV8/o+Aw8YqtfZZPfNRWZYkbidE9k5rpl/hC3vtHHBfGm2Ifi6qWV+coDGkrUKZAxE3Lot5kcsRlh+g==}
     engines: {node: '>=6'}
@@ -7018,7 +7011,7 @@ snapshots:
       fs-extra: 7.0.1
       mri: 1.2.0
       p-limit: 2.3.0
-      package-manager-detector: 0.2.9
+      package-manager-detector: 0.2.10
       picocolors: 1.1.1
       resolve-from: 5.0.0
       semver: 7.7.1
@@ -8015,8 +8008,6 @@ snapshots:
     dependencies:
       '@noble/hashes': 1.6.0
 
-  '@orama/orama@3.0.2': {}
-
   '@orama/orama@3.1.1': {}
 
   '@orama/stopwords@3.1.1': {}
@@ -8028,7 +8019,7 @@ snapshots:
   '@oramacloud/client@2.1.4':
     dependencies:
       '@orama/cuid2': 2.2.3
-      '@orama/orama': 3.0.2
+      '@orama/orama': 3.1.1
       lodash: 4.17.21
 
   '@oxc-transform/binding-darwin-arm64@0.53.0':
@@ -12212,8 +12203,6 @@ snapshots:
   package-manager-detector@0.2.10:
     dependencies:
       quansync: 0.2.6
-
-  package-manager-detector@0.2.9: {}
 
   parent-module@1.0.1:
     dependencies:

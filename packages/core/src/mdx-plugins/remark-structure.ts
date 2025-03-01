@@ -3,7 +3,7 @@ import type { Root } from 'mdast';
 import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
 import type { PluggableList, Transformer } from 'unified';
-import { visit, type Test } from 'unist-util-visit';
+import { visit } from 'unist-util-visit';
 import { flattenNode } from './remark-utils';
 
 interface Heading {
@@ -26,11 +26,22 @@ export interface StructuredData {
 
 export interface StructureOptions {
   /**
-   * Types to be scanned.
+   * Types to be scanned as content.
    *
-   * @defaultValue ['paragraph', 'blockquote', 'heading', 'tableCell']
+   * @defaultValue ['paragraph', 'blockquote', 'tableCell']
    */
-  types?: Test;
+  types?: string[];
+}
+
+declare module 'mdast' {
+  interface Data {
+    /**
+     * Get content of unserializable element
+     *
+     * Needed for `remarkStructure` to generate search index
+     */
+    _string?: string[];
+  }
 }
 
 const slugger = new Slugger();
@@ -60,14 +71,14 @@ export function remarkStructure({
       }
     }
 
-    visit(node, types, (element) => {
+    visit(node, (element) => {
       if (element.type === 'root') return;
-      const content = flattenNode(element).trim();
 
       if (element.type === 'heading') {
         element.data ||= {};
         element.data.hProperties ||= {};
         const properties = element.data.hProperties;
+        const content = flattenNode(element).trim();
         const id = properties.id ?? slugger.slug(content);
 
         data.headings.push({
@@ -79,7 +90,21 @@ export function remarkStructure({
         return 'skip';
       }
 
-      if (content.length > 0) {
+      if (element.data?._string) {
+        for (const content of element.data._string) {
+          data.contents.push({
+            heading: lastHeading,
+            content,
+          });
+        }
+
+        return 'skip';
+      }
+
+      if (types.includes(element.type)) {
+        const content = flattenNode(element).trim();
+        if (content.length === 0) return;
+
         data.contents.push({
           heading: lastHeading,
           content,
