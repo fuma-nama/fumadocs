@@ -27,8 +27,8 @@ importers:
         specifier: ^7.37.4
         version: 7.37.4(eslint@9.20.1(jiti@2.4.2))
       eslint-plugin-react-hooks:
-        specifier: 5.1.0
-        version: 5.1.0(eslint@9.20.1(jiti@2.4.2))
+        specifier: 5.2.0
+        version: 5.2.0(eslint@9.20.1(jiti@2.4.2))
       eslint-plugin-tailwindcss:
         specifier: ^3.18.0
         version: 3.18.0(tailwindcss@4.0.9)
@@ -40,7 +40,7 @@ importers:
         version: 6.0.1
       tsup:
         specifier: 8.4.0
-        version: 8.4.0(@swc/core@1.11.5)(jiti@2.4.2)(postcss@8.5.3)(tsx@4.19.3)(typescript@5.8.2)(yaml@2.7.0)
+        version: 8.4.0(@swc/core@1.11.5(@swc/helpers@0.5.15))(jiti@2.4.2)(postcss@8.5.3)(tsx@4.19.3)(typescript@5.8.2)(yaml@2.7.0)
       turbo:
         specifier: 2.4.4
         version: 2.4.4
@@ -848,7 +848,7 @@ importers:
         version: 6.0.3
       webpack:
         specifier: ^5.97.1
-        version: 5.97.1(@swc/core@1.11.5)(esbuild@0.25.0)
+        version: 5.97.1(@swc/core@1.11.5(@swc/helpers@0.5.15))(esbuild@0.25.0)
 
   packages/mdx-remote:
     dependencies:
@@ -4279,8 +4279,8 @@ packages:
     resolution: {integrity: sha512-/veY75JbMK4j1yjvuUxuVsiS/hr/4iHs9FTT6cgTexxdE0Ly/glccBAkloH/DofkjRbZU3bnoj38mOmhkZ0lHw==}
     engines: {node: '>=12'}
 
-  eslint-plugin-react-hooks@5.1.0:
-    resolution: {integrity: sha512-mpJRtPgHN2tNAvZ35AMfqeB3Xqeo273QxrHJsbBEPWODRM4r0yB6jfoROqKEYrOn27UtRPpcpHc2UqyBSuUNTw==}
+  eslint-plugin-react-hooks@5.2.0:
+    resolution: {integrity: sha512-+f15FfK64YQwZdJNELETdn5ibXEUQmW1DZL6KXhNnc2heoy/sg9VJJeT7n8TlMWouzWqSWavFkIhHyIbIAEapg==}
     engines: {node: '>=10'}
     peerDependencies:
       eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0 || ^9.0.0
@@ -8898,7 +8898,7 @@ snapshots:
   '@swc/core-win32-x64-msvc@1.11.5':
     optional: true
 
-  '@swc/core@1.11.5':
+  '@swc/core@1.11.5(@swc/helpers@0.5.15)':
     dependencies:
       '@swc/counter': 0.1.3
       '@swc/types': 0.1.19
@@ -8913,6 +8913,7 @@ snapshots:
       '@swc/core-win32-arm64-msvc': 1.11.5
       '@swc/core-win32-ia32-msvc': 1.11.5
       '@swc/core-win32-x64-msvc': 1.11.5
+      '@swc/helpers': 0.5.15
     optional: true
 
   '@swc/counter@0.1.3': {}
@@ -10400,7 +10401,7 @@ snapshots:
 
   escape-string-regexp@5.0.0: {}
 
-  eslint-plugin-react-hooks@5.1.0(eslint@9.20.1(jiti@2.4.2)):
+  eslint-plugin-react-hooks@5.2.0(eslint@9.20.1(jiti@2.4.2)):
     dependencies:
       eslint: 9.20.1(jiti@2.4.2)
 
@@ -13024,16 +13025,16 @@ snapshots:
 
   term-size@2.2.1: {}
 
-  terser-webpack-plugin@5.3.10(@swc/core@1.11.5)(esbuild@0.25.0)(webpack@5.97.1(@swc/core@1.11.5)(esbuild@0.25.0)):
+  terser-webpack-plugin@5.3.10(@swc/core@1.11.5(@swc/helpers@0.5.15))(esbuild@0.25.0)(webpack@5.97.1(@swc/core@1.11.5(@swc/helpers@0.5.15))(esbuild@0.25.0)):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.25
       jest-worker: 27.5.1
       schema-utils: 3.3.0
       serialize-javascript: 6.0.2
       terser: 5.39.0
-      webpack: 5.97.1(@swc/core@1.11.5)(esbuild@0.25.0)
+      webpack: 5.97.1(@swc/core@1.11.5(@swc/helpers@0.5.15))(esbuild@0.25.0)
     optionalDependencies:
-      '@swc/core': 1.11.5
+      '@swc/core': 1.11.5(@swc/helpers@0.5.15)
       esbuild: 0.25.0
 
   terser@5.39.0:
@@ -13120,7 +13121,7 @@ snapshots:
 
   tslib@2.8.1: {}
 
-  tsup@8.4.0(@swc/core@1.11.5)(jiti@2.4.2)(postcss@8.5.3)(tsx@4.19.3)(typescript@5.8.2)(yaml@2.7.0):
+  tsup@8.4.0(@swc/core@1.11.5(@swc/helpers@0.5.15))(jiti@2.4.2)(postcss@8.5.3)(tsx@4.19.3)(typescript@5.8.2)(yaml@2.7.0):
     dependencies:
       bundle-require: 5.1.0(esbuild@0.25.0)
       cac: 6.7.14
@@ -13139,7 +13140,7 @@ snapshots:
       tinyglobby: 0.2.12
       tree-kill: 1.2.2
     optionalDependencies:
-      '@swc/core': 1.11.5
+      '@swc/core': 1.11.5(@swc/helpers@0.5.15)
       postcss: 8.5.3
       typescript: 5.8.2
     transitivePeerDependencies:
@@ -13500,7 +13501,7 @@ snapshots:
 
   webpack-sources@3.2.3: {}
 
-  webpack@5.97.1(@swc/core@1.11.5)(esbuild@0.25.0):
+  webpack@5.97.1(@swc/core@1.11.5(@swc/helpers@0.5.15))(esbuild@0.25.0):
     dependencies:
       '@types/eslint-scope': 3.7.7
       '@types/estree': 1.0.6
@@ -13522,7 +13523,7 @@ snapshots:
       neo-async: 2.6.2
       schema-utils: 3.3.0
       tapable: 2.2.1
-      terser-webpack-plugin: 5.3.10(@swc/core@1.11.5)(esbuild@0.25.0)(webpack@5.97.1(@swc/core@1.11.5)(esbuild@0.25.0))
+      terser-webpack-plugin: 5.3.10(@swc/core@1.11.5(@swc/helpers@0.5.15))(esbuild@0.25.0)(webpack@5.97.1(@swc/core@1.11.5(@swc/helpers@0.5.15))(esbuild@0.25.0))
       watchpack: 2.4.2
       webpack-sources: 3.2.3
     transitivePeerDependencies:
