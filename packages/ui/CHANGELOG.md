@@ -1,5 +1,15 @@
 # next-docs-ui
 
+## 15.0.14
+
+### Patch Changes
+
+- 6bc033a: Display humanized stars number to GitHub info component
+- Updated dependencies [37dc0a6]
+- Updated dependencies [796cc5e]
+- Updated dependencies [2cc0be5]
+  - fumadocs-core@15.0.14
+
 ## 15.0.13
 
 ### Patch Changes

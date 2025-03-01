@@ -1,5 +1,16 @@
 # fumadocs-twoslash
 
+## 3.1.0
+
+### Minor Changes
+
+- b49d236: Support `typesCache` option and `fumadocs-twoslash/cache-fs` similar to Vitepress
+
+### Patch Changes
+
+- Updated dependencies [6bc033a]
+  - fumadocs-ui@15.0.14
+
 ## 3.0.1
 
 ### Patch Changes
