@@ -142,11 +142,11 @@ void generateFiles({
 
 Add a comment to the top of generated files indicating they are auto-generated.
 
-| Value    | Description                                                |
-| -------- | ---------------------------------------------------------- |
-| `true`   | Adds a standardized comment (default)                      |
-| `false`  | No comment is added                                        |
-| `string` | Adds the provided custom comment                           |
+| Value    | Description                           |
+| -------- | ------------------------------------- |
+| `true`   | Adds a standardized comment (default) |
+| `false`  | No comment is added                   |
+| `string` | Adds the provided custom comment      |
 
 ```ts
 import { generateFiles } from 'fumadocs-openapi';
@@ -156,10 +156,10 @@ void generateFiles({
   output: './content/docs',
   // Add default comment
   addGeneratedComment: true,
-  
+
   // Or provide a custom comment
-  addGeneratedComment: "Custom auto-generated comment",
-  
+  addGeneratedComment: 'Custom auto-generated comment',
+
   // Or disable comments
   addGeneratedComment: false,
 });
@@ -190,7 +190,8 @@ _openapi:
 ```
 
 <Callout type="info">
-  When providing a custom comment, special YAML characters (`:#[]{}`) will be automatically removed to prevent formatting issues in the generated files.
+  When providing a custom comment, special YAML characters (`:#[]{}`) will be
+  automatically removed to prevent formatting issues in the generated files.
 </Callout>
 
 ### Tag Display Name
