@@ -47,6 +47,16 @@ export interface Config extends GenerateOptions {
    * @defaultValue 'none'
    */
   groupBy?: 'tag' | 'route' | 'none';
+
+  /**
+   * Add a comment to the top of generated files indicating they are auto-generated.
+   * - `true`: Adds a standardized comment
+   * - `false`: No comment is added
+   * - `string`: Adds the provided custom comment
+   *
+   * @defaultValue true
+   */
+  addGeneratedComment?: boolean | string;
 }
 
 export async function generateFiles(options: Config): Promise<void> {
@@ -57,6 +67,7 @@ export async function generateFiles(options: Config): Promise<void> {
     per = 'operation',
     groupBy = 'none',
     cwd = process.cwd(),
+    addGeneratedComment = true,
   } = options;
   const outputDir = join(cwd, output);
   const urlInputs: string[] = [];
