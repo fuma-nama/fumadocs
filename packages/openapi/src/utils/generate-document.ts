@@ -45,7 +45,6 @@ export function generateDocument(
     addGeneratedComment = true,
   } = options;
   const out: string[] = [];
-
   const extend = frontmatter?.(
     options.title,
     options.description,
@@ -67,7 +66,7 @@ export function generateDocument(
   const banner = dump({
     title: options.title,
     description: options.description,
-    full: true, 
+    full: true,
     ...extend,
     _openapi: {
       ...meta,
