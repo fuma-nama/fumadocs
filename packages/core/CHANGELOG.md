@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 15.0.15
+
+### Patch Changes
+
+- 9f6d39a: Fix peer deps
+
 ## 15.0.14
 
 ### Patch Changes
