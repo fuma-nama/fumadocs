@@ -85,7 +85,7 @@ export function generateDocument(
     }
 
     commentContent = commentContent.replace(/\*\//g, '*\\/');
-    
+
     out.push(`{/* ${commentContent} */}`);
   }
 
