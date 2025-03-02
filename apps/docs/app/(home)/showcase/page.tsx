@@ -25,6 +25,7 @@ import ArkType from '@/public/showcases/arktype.png';
 import AssistantUI from '@/public/showcases/assistant-ui.png';
 import TurboStarter from '@/public/showcases/turbostarter.png';
 import VisionUI from '@/public/showcases/vision-ui.png';
+import FlagsSDK from '@/public/showcases/flags-sdk.png';
 
 export const metadata = createMetadata({
   title: 'Showcase',
@@ -48,9 +49,9 @@ export default function Showcase(): React.ReactElement {
       url: 'https://turbo.build',
     },
     {
-      image: NextFAQ,
-      name: 'Next.js Discord Common Questions',
-      url: 'https://nextjs-faq.com',
+      image: FlagsSDK,
+      name: 'Vercel Flags SDK',
+      url: 'https://flags-sdk.dev',
     },
     {
       image: Million,
@@ -69,14 +70,19 @@ export default function Showcase(): React.ReactElement {
       url: 'https://dokploy.com',
     },
     {
-      image: Hiro,
-      name: 'Hiro',
-      url: 'https://docs.hiro.so/stacks',
+      image: NextFAQ,
+      name: 'Next.js Discord Common Questions',
+      url: 'https://nextjs-faq.com',
     },
     {
       image: ArkType,
       name: 'Arktype',
       url: 'https://arktype.io',
+    },
+    {
+      image: Hiro,
+      name: 'Hiro',
+      url: 'https://docs.hiro.so/stacks',
     },
     {
       image: OpenPanel,
