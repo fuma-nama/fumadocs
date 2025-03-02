@@ -31,6 +31,13 @@ export interface GenerateOptions {
   ) => Record<string, unknown>;
 
   /**
+   * Add description to document body
+   *
+   * @defaultValue false
+   */
+  includeDescription?: boolean;
+
+  /**
    * Add a comment to the top of generated files indicating they are auto-generated.
    * - `true`: Adds a standardized comment
    * - `false`: No comment is added
@@ -39,6 +46,8 @@ export interface GenerateOptions {
    * @defaultValue true
    */
   addGeneratedComment?: boolean | string;
+
+  cwd?: string;
 }
 
 export interface GenerateTagOutput {
