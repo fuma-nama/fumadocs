@@ -138,6 +138,27 @@ void generateFiles({
 });
 ```
 
+### Add Generated Comment
+
+Add a comment to the top of generated files indicating they are auto-generated.
+
+```ts
+import { generateFiles } from 'fumadocs-openapi';
+
+void generateFiles({
+  input: ['./petstore.yaml'],
+  output: './content/docs',
+  // Add default comment
+  addGeneratedComment: true,
+
+  // Or provide a custom comment
+  addGeneratedComment: 'Custom auto-generated comment',
+
+  // Or disable comments
+  addGeneratedComment: false,
+});
+```
+
 ### Tag Display Name
 
 Adding `x-displayName` to OpenAPI Schema can control the display name of your tags.

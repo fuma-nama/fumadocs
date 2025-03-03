@@ -37,6 +37,16 @@ export interface GenerateOptions {
    */
   includeDescription?: boolean;
 
+  /**
+   * Add a comment to the top of generated files indicating they are auto-generated.
+   * - `true`: Adds a standardized comment
+   * - `false`: No comment is added
+   * - `string`: Adds the provided custom comment
+   *
+   * @defaultValue true
+   */
+  addGeneratedComment?: boolean | string;
+
   cwd?: string;
 }
 
