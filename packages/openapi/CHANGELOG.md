@@ -1,5 +1,19 @@
 # @fuma-docs/openapi
 
+## 6.3.0
+
+### Minor Changes
+
+- 70d715d: Added auto-generated comments to top of generated openapi docs files
+
+### Patch Changes
+
+- Updated dependencies [9f6d39a]
+- Updated dependencies [0e5e14d]
+- Updated dependencies [2035cb1]
+  - fumadocs-core@15.0.15
+  - fumadocs-ui@15.0.15
+
 ## 6.2.1
 
 ### Patch Changes
