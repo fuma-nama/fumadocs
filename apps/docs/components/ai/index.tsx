@@ -1,9 +1,11 @@
 'use client';
 import { type ButtonHTMLAttributes, useState } from 'react';
 import dynamic from 'next/dynamic';
+import { cn } from '@/lib/cn';
+import { buttonVariants } from '@/components/ui/button';
 
 // lazy load the dialog
-const Dialog = dynamic(() => import('./search'));
+const SearchAI = dynamic(() => import('./search'), { ssr: false });
 
 /**
  * The trigger component for AI search dialog.
@@ -17,10 +19,20 @@ export function AISearchTrigger(
 
   return (
     <>
-      <button {...props} onClick={() => setOpen(true)} />
       {open !== undefined ? (
-        <Dialog open={open} onOpenChange={setOpen} />
+        <SearchAI open={open} onOpenChange={setOpen} />
       ) : null}
+      <button
+        {...props}
+        onClick={() => setOpen(true)}
+        className={cn(
+          buttonVariants({
+            variant: 'secondary',
+          }),
+          'fixed bottom-4 right-4 z-10 gap-2 rounded-xl bg-fd-secondary/50 text-fd-secondary-foreground/80 shadow-lg backdrop-blur-lg md:bottom-8 md:right-8',
+          props.className,
+        )}
+      />
     </>
   );
 }
