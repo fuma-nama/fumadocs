@@ -1,9 +1,9 @@
 'use client';
 import {
+  type FormHTMLAttributes,
   type HTMLAttributes,
   type ReactNode,
   type TextareaHTMLAttributes,
-  use,
   useEffect,
   useRef,
   useState,
@@ -16,9 +16,14 @@ import type { Processor } from './markdown-processor';
 import Link from 'fumadocs-core/link';
 import {
   AIProvider,
-  Context,
   type MessageRecord,
+  useAI,
+  useAIMessages,
 } from '@/components/ai/context';
+import {
+  ScrollArea,
+  ScrollViewport,
+} from 'fumadocs-ui/components/ui/scroll-area';
 import {
   Dialog,
   DialogClose,
@@ -29,125 +34,58 @@ import {
   DialogTitle,
 } from '@radix-ui/react-dialog';
 
-const listeners: (() => void)[] = [];
-
-function onUpdate() {
-  for (const listener of listeners) listener();
-}
-
-function View() {
-  const [_, update] = useState(0);
-  const shouldFocus = useRef(false); // should focus on input on next render
-  const { loading, setLoading, engine } = use(Context);
-
-  const onTry = () => {
-    if (!engine) return;
-
-    setLoading(true);
-    void engine.regenerateLast(onUpdate).finally(() => {
-      setLoading(false);
-    });
-  };
-
-  const onClear = () => {
-    engine?.clearHistory();
-    onUpdate();
-  };
-
-  const onSubmit = (message: string) => {
-    if (!engine || message.length === 0) return;
-
-    setLoading(true);
-    void engine.prompt(message, onUpdate).finally(() => {
-      setLoading(false);
-      shouldFocus.current = true;
-    });
-  };
-
-  useEffect(() => {
-    const listener = () => {
-      update((prev) => prev + 1);
-    };
-
-    listeners.push(listener);
-    return () => {
-      listeners.splice(listeners.indexOf(listener), 1);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (shouldFocus.current) {
-      document.getElementById('nd-ai-input')?.focus();
-      shouldFocus.current = false;
-    }
-  });
-
-  const messages = engine?.getHistory() ?? [];
+function SearchAIMessages() {
+  const messages = useAIMessages();
 
   return (
-    <>
-      <List className={cn(messages.length === 0 && 'hidden')}>
-        {messages.map((item, i) => (
-          <Message key={i} message={item} onSuggestionSelected={onSubmit} />
-        ))}
-      </List>
-      {!loading && messages.at(-1)?.role === 'assistant' ? (
-        <div className="flex flex-row shrink-0 items-center gap-2 border-t p-2">
-          <button
-            type="button"
-            className={cn(
-              buttonVariants({
-                color: 'secondary',
-              }),
-              'gap-1.5 rounded-full',
-            )}
-            onClick={onTry}
-          >
-            <RefreshCw className="size-4" />
-            Retry
-          </button>
-          <button
-            type="button"
-            className={cn(
-              buttonVariants({
-                color: 'ghost',
-              }),
-              'rounded-full',
-            )}
-            onClick={onClear}
-          >
-            Clear Chat
-          </button>
-        </div>
-      ) : null}
-      {loading ? (
+    <div className="flex flex-col gap-4 p-3 pb-0">
+      {messages.map((item, i) => (
+        <Message key={i} message={item} />
+      ))}
+    </div>
+  );
+}
+
+function SearchAIActions() {
+  const { loading, regenerateLast, clearMessages } = useAI();
+  const messages = useAIMessages();
+
+  if (messages.length === 0) return null;
+  return (
+    <div className="sticky bottom-0 bg-gradient-to-t from-fd-popover px-3 py-1.5 flex flex-row items-center justify-end gap-2 empty:hidden">
+      {!loading && messages.at(-1)?.role === 'assistant' && (
         <button
           type="button"
           className={cn(
             buttonVariants({
               color: 'secondary',
-              className: 'rounded-full mx-auto my-1',
             }),
+            'text-fd-muted-foreground rounded-full gap-1.5',
           )}
-          onClick={() => {
-            engine?.abortAnswer();
-          }}
+          onClick={regenerateLast}
         >
-          Abort Answer
+          <RefreshCw className="size-4" />
+          Retry
         </button>
-      ) : null}
-      <AIInput loading={loading} onSubmit={onSubmit} />
-    </>
+      )}
+      <button
+        type="button"
+        className={cn(
+          buttonVariants({
+            color: 'secondary',
+          }),
+          'text-fd-muted-foreground rounded-full',
+        )}
+        onClick={clearMessages}
+      >
+        Clear Chat
+      </button>
+    </div>
   );
 }
 
-function AIInput({
-  loading,
-  onSubmit,
-}: {
-  loading: boolean;
-  onSubmit: (message: string) => void;
-}) {
+function SearchAIInput(props: FormHTMLAttributes<HTMLFormElement>) {
+  const { loading, onSubmit, abortAnswer } = useAI();
   const [message, setMessage] = useState('');
 
   const onStart = (e?: React.FormEvent) => {
@@ -156,11 +94,17 @@ function AIInput({
     onSubmit(message);
   };
 
+  useEffect(() => {
+    if (!loading) document.getElementById('nd-ai-input')?.focus();
+  }, [loading]);
+
   return (
     <form
+      {...props}
       className={cn(
-        'flex flex-row items-start rounded-b-lg border-t pe-2 transition-colors',
+        'flex flex-row items-start rounded-xl border pe-2 bg-fd-popover text-fd-popover-foreground transition-colors shadow-lg',
         loading && 'bg-fd-muted',
+        props.className,
       )}
       onSubmit={onStart}
     >
@@ -179,7 +123,19 @@ function AIInput({
         }}
       />
       {loading ? (
-        <Loader2 className="mt-2 size-5 animate-spin text-fd-muted-foreground" />
+        <button
+          type="button"
+          className={cn(
+            buttonVariants({
+              color: 'secondary',
+              className: 'rounded-full mt-2 gap-2',
+            }),
+          )}
+          onClick={abortAnswer}
+        >
+          <Loader2 className="size-4 animate-spin text-fd-muted-foreground" />
+          Abort Answer
+        </button>
       ) : (
         <button
           type="submit"
@@ -198,7 +154,7 @@ function AIInput({
   );
 }
 
-function List(props: HTMLAttributes<HTMLDivElement>) {
+function List(props: Omit<HTMLAttributes<HTMLDivElement>, 'dir'>) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -232,19 +188,17 @@ function List(props: HTMLAttributes<HTMLDivElement>) {
   }, []);
 
   return (
-    <div
-      {...props}
-      ref={containerRef}
-      className={cn('min-h-0 flex-1 overflow-auto p-2', props.className)}
-    >
-      <div className="flex flex-col gap-1">{props.children}</div>
-    </div>
+    <ScrollArea {...props}>
+      <ScrollViewport ref={containerRef} className="max-h-[calc(100dvh-240px)]">
+        {props.children}
+      </ScrollViewport>
+    </ScrollArea>
   );
 }
 
 function Input(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
   const ref = useRef<HTMLDivElement>(null);
-  const shared = cn('col-start-1 row-start-1 max-h-60 min-h-12 px-3 py-1.5');
+  const shared = cn('col-start-1 row-start-1 max-h-60 min-h-12 p-3');
 
   return (
     <div className="grid flex-1">
@@ -271,22 +225,12 @@ const roleName: Record<string, string> = {
   assistant: 'fumadocs',
 };
 
-function Message({
-  onSuggestionSelected,
-  message,
-}: {
-  message: MessageRecord;
-  onSuggestionSelected: (suggestion: string) => void;
-}) {
+function Message({ message }: { message: MessageRecord }) {
+  const { onSubmit } = useAI();
   const { suggestions = [], references = [] } = message;
 
   return (
-    <div
-      className={cn(
-        message.role === 'user' &&
-          'bg-fd-secondary text-fd-secondary-foreground border px-2 py-1.5 rounded-xl',
-      )}
-    >
+    <div>
       <p
         className={cn(
           'mb-1 text-xs font-medium text-fd-muted-foreground',
@@ -304,11 +248,11 @@ function Message({
             <Link
               key={i}
               href={item.url}
-              className="block rounded-lg border bg-fd-secondary px-2 py-1.5 text-fd-secondary-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground"
+              className="block text-xs rounded-lg border p-3 hover:bg-fd-accent hover:text-fd-accent-foreground"
             >
-              <p className="text-sm font-medium">{item.title}</p>
-              <p className="text-xs text-fd-muted-foreground">
-                {item.description}
+              <p className="font-medium">{item.title}</p>
+              <p className="text-fd-muted-foreground">
+                {item.description ?? 'Reference'}
               </p>
             </Link>
           ))}
@@ -327,7 +271,7 @@ function Message({
                 }),
               )}
               onClick={() => {
-                onSuggestionSelected(item);
+                onSubmit(item);
               }}
             >
               {item}
@@ -370,38 +314,56 @@ function Markdown({ text }: { text: string }) {
   return rendered ?? text;
 }
 
+function ShowOnMessages({ children }: { children: ReactNode }) {
+  const messages = useAIMessages();
+
+  if (messages.length === 0) return null;
+  return children;
+}
+
 export default function AISearch(props: DialogProps) {
   return (
     <Dialog {...props}>
       {props.children}
       <AIProvider type="inkeep" loadEngine={props.open}>
         <DialogPortal>
-          <DialogOverlay className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm data-[state=closed]:animate-fd-fade-out data-[state=open]:animate-fd-fade-in" />
+          <DialogOverlay className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm data-[state=closed]:animate-fd-fade-out data-[state=open]:animate-fd-fade-in" />
           <DialogContent
             onOpenAutoFocus={(e) => {
               document.getElementById('nd-ai-input')?.focus();
               e.preventDefault();
             }}
             aria-describedby={undefined}
-            className="fixed left-1/2 z-50 my-[5vh] flex max-h-[90dvh] w-[98vw] max-w-[860px] -translate-x-1/2 flex-col rounded-lg border bg-fd-popover text-fd-popover-foreground shadow-lg focus-visible:outline-none data-[state=closed]:animate-fd-dialog-out data-[state=open]:animate-fd-dialog-in"
+            className="fixed bottom-20 left-1/2 z-50 w-[98vw] max-w-[860px] -translate-x-1/2 focus-visible:outline-none data-[state=closed]:animate-fd-dialog-out data-[state=open]:animate-fd-dialog-in"
           >
-            <div className="bg-fd-muted px-2.5 py-2">
-              <DialogTitle className="text-sm w-fit bg-fd-primary text-fd-primary-foreground px-1 font-mono font-medium">
-                Prompt AI
+            <ShowOnMessages>
+              <List className="bg-fd-popover rounded-xl mb-3 border shadow-lg">
+                <SearchAIMessages />
+                <SearchAIActions />
+              </List>
+            </ShowOnMessages>
+            <SearchAIInput className="rounded-b-none border-b-0" />
+            <div className="flex flex-row gap-2 items-center bg-fd-muted text-fd-muted-foreground px-3 py-1.5 rounded-b-xl border-b border-x shadow-lg">
+              <DialogTitle className="text-xs flex-1">
+                Powered by{' '}
+                <a
+                  href="https://inkeep.com"
+                  target="_blank"
+                  className="font-medium text-fd-popover-foreground"
+                  rel="noreferrer noopener"
+                >
+                  Inkeep AI
+                </a>
+                . AI can be inaccurate, please verify the information.
               </DialogTitle>
-              <p className="mt-2 text-xs text-fd-muted-foreground">
-                Answers from AI may be inaccurate, please verify the
-                information.
-              </p>
+              <DialogClose
+                aria-label="Close"
+                tabIndex={-1}
+                className="rounded-full p-1.5 -me-1.5 hover:bg-fd-accent hover:text-fd-accent-foreground"
+              >
+                <X className="size-4" />
+              </DialogClose>
             </div>
-            <DialogClose
-              aria-label="Close Dialog"
-              tabIndex={-1}
-              className="absolute right-1 top-1 rounded-full p-1.5 text-fd-muted-foreground hover:bg-fd-accent hover:text-fd-accent-foreground"
-            >
-              <X className="size-4" />
-            </DialogClose>
-            <View />
           </DialogContent>
         </DialogPortal>
       </AIProvider>

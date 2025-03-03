@@ -6,8 +6,6 @@ import { baseUrl, createMetadata } from '@/lib/metadata';
 import { Body } from '@/app/layout.client';
 import { Provider } from './provider';
 import { AISearchTrigger } from '@/components/ai';
-import { cn } from '@/lib/cn';
-import { buttonVariants } from '@/components/ui/button';
 import { MessageCircle } from 'lucide-react';
 import type { ReactNode } from 'react';
 
@@ -37,14 +35,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <Body>
         <Provider>
           {children}
-          <AISearchTrigger
-            className={cn(
-              buttonVariants({
-                variant: 'secondary',
-              }),
-              'fixed bottom-4 right-4 z-10 gap-2 rounded-xl bg-secondary/50 text-fd-secondary-foreground/80 shadow-lg backdrop-blur-lg md:bottom-8 md:right-8',
-            )}
-          >
+          <AISearchTrigger>
             <MessageCircle className="size-4" />
             Ask AI
           </AISearchTrigger>

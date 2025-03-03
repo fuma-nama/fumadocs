@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-core",
-  "version": "15.0.14",
+  "version": "15.0.15",
   "description": "The library for building a documentation website in Next.js",
   "keywords": [
     "NextJs",
@@ -115,7 +115,6 @@
   "devDependencies": {
     "@algolia/client-search": "4.24.0",
     "@mdx-js/mdx": "^3.1.0",
-    "@orama/tokenizers": "^3.1.1",
     "@oramacloud/client": "^2.1.4",
     "@types/estree-jsx": "^1.0.5",
     "@types/hast": "^3.0.4",
@@ -137,7 +136,6 @@
     "vfile": "^6.0.3"
   },
   "peerDependencies": {
-    "@orama/tokenizers": "2.x.x",
     "@oramacloud/client": "1.x.x || 2.x.x",
     "algoliasearch": "4.24.0",
     "next": "14.x.x || 15.x.x",
@@ -145,9 +143,6 @@
     "react-dom": "18.x.x || 19.x.x"
   },
   "peerDependenciesMeta": {
-    "@orama/tokenizers": {
-      "optional": true
-    },
     "@oramacloud/client": {
       "optional": true
     },

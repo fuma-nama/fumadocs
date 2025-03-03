@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useDebounce } from '@/utils/use-debounce';
 import type { SortedResult } from '@/server/types';
 import { type FetchOptions } from '@/search/client/fetch';
@@ -16,8 +16,6 @@ interface UseDocsSearch {
     error?: Error;
   };
 }
-
-const cache = new Map<string, SortedResult[] | 'empty'>();
 
 export type Client =
   | ({
@@ -58,23 +56,10 @@ export function useDocsSearch(
   const debouncedValue = useDebounce(search, delayMs);
   const onStart = useRef<() => void>(undefined);
 
-  const cacheKey = useMemo(() => {
-    return key ?? JSON.stringify([client.type, debouncedValue, locale, tag]);
-  }, [client.type, debouncedValue, locale, tag, key]);
-
-  useOnChange(cacheKey, () => {
-    const cached = cache.get(cacheKey);
-
+  useOnChange(key ?? [client, debouncedValue, locale, tag], () => {
     if (onStart.current) {
       onStart.current();
       onStart.current = undefined;
-    }
-
-    if (cached) {
-      setIsLoading(false);
-      setError(undefined);
-      setResults(cached);
-      return;
     }
 
     setIsLoading(true);
@@ -112,14 +97,13 @@ export function useDocsSearch(
 
     void run()
       .then((res) => {
-        cache.set(cacheKey, res);
         if (interrupt) return;
 
         setError(undefined);
         setResults(res);
       })
-      .catch((err: unknown) => {
-        setError(err as Error);
+      .catch((err: Error) => {
+        setError(err);
       })
       .finally(() => {
         setIsLoading(false);
