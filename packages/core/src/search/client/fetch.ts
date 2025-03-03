@@ -7,6 +7,8 @@ export interface FetchOptions {
   api?: string;
 }
 
+const cache = new Map<string, SortedResult[]>();
+
 export async function fetchDocs(
   query: string,
   locale: string | undefined,
@@ -18,10 +20,14 @@ export async function fetchDocs(
   if (locale) params.set('locale', locale);
   if (tag) params.set('tag', tag);
 
-  const res = await fetch(
-    `${options.api ?? '/api/search'}?${params.toString()}`,
-  );
+  const key = `${options.api ?? '/api/search'}?${params}`;
+  const cached = cache.get(key);
+  if (cached) return cached;
+
+  const res = await fetch(key);
 
   if (!res.ok) throw new Error(await res.text());
-  return (await res.json()) as SortedResult[];
+  const result = (await res.json()) as SortedResult[];
+  cache.set(key, result);
+  return result;
 }
