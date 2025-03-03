@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 15.0.15
+
+### Patch Changes
+
+- 0e5e14d: Use container media queries on Cards
+- Updated dependencies [9f6d39a]
+- Updated dependencies [2035cb1]
+  - fumadocs-core@15.0.15
+
 ## 15.0.14
 
 ### Patch Changes
