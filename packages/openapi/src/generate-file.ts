@@ -47,16 +47,6 @@ export interface Config extends GenerateOptions {
    * @defaultValue 'none'
    */
   groupBy?: 'tag' | 'route' | 'none';
-
-  /**
-   * Add a comment to the top of generated files indicating they are auto-generated.
-   * - `true`: Adds a standardized comment
-   * - `false`: No comment is added
-   * - `string`: Adds the provided custom comment
-   *
-   * @defaultValue true
-   */
-  addGeneratedComment?: boolean | string;
 }
 
 export async function generateFiles(options: Config): Promise<void> {
@@ -67,7 +57,6 @@ export async function generateFiles(options: Config): Promise<void> {
     per = 'operation',
     groupBy = 'none',
     cwd = process.cwd(),
-    addGeneratedComment = true,
   } = options;
   const outputDir = join(cwd, output);
   const urlInputs: string[] = [];
@@ -126,13 +115,20 @@ export async function generateFiles(options: Config): Promise<void> {
             : join(outputDir, 'webhooks', `${file}.mdx`),
         );
       }
-    }
-
-    if (groupBy === 'route' || groupBy === 'none') {
+    } else {
       outPaths.push(join(outputDir, `${file}.mdx`));
     }
 
     return outPaths;
+  }
+
+  const metaFiles = new Set<string>();
+  async function writeMetafile(file: string, data: object) {
+    if (metaFiles.has(file)) return;
+    metaFiles.add(file);
+
+    await write(file, JSON.stringify(data, null, 2));
+    console.log(`Generated Meta: ${file}`);
   }
 
   async function generateFromDocument(pathOrUrl: string) {
@@ -148,30 +144,17 @@ export async function generateFiles(options: Config): Promise<void> {
     }
 
     if (per === 'operation') {
-      const metaFiles = new Set<string>();
       const results = await generatePages(pathOrUrl, options);
 
       for (const result of results) {
-        const meta = JSON.stringify(
-          {
-            title: result.pathItem.summary,
-          },
-          null,
-          2,
-        );
-
         for (const outPath of getOutputPaths(result)) {
           await write(outPath, result.content);
           console.log(`Generated: ${outPath}`);
 
-          if (groupBy === 'route') {
-            const metaFile = join(dirname(outPath), 'meta.json');
-            if (!result.pathItem.summary || metaFiles.has(metaFile)) continue;
-
-            metaFiles.add(metaFile);
-
-            await write(metaFile, meta);
-            console.log(`Generated Meta: ${metaFile}`);
+          if (groupBy === 'route' && result.pathItem.summary) {
+            await writeMetafile(join(dirname(outPath), 'meta.json'), {
+              title: result.pathItem.summary,
+            });
           }
         }
       }
