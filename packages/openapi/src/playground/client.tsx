@@ -20,9 +20,8 @@ import type {
   ControllerFieldState,
   ControllerRenderProps,
 } from 'react-hook-form';
-import { useApiContext } from '@/ui/contexts/api';
+import { useApiContext, useServerSelectContext } from '@/ui/contexts/api';
 import type { FetchResult } from '@/playground/fetcher';
-import { getDefaultValue, getDefaultValues } from './get-default-values';
 import { FieldSet, ObjectInput } from './inputs';
 import type {
   PrimitiveRequestField,
@@ -46,6 +45,9 @@ import {
   OauthDialog,
   OauthDialogTrigger,
 } from '@/playground/auth/oauth-dialog';
+import { useRequestData } from '@/ui/contexts/code-example';
+import { getPathnameFromInput } from '@/utils/get-pathname-from-input';
+import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 
 interface FormValues {
   authorization:
@@ -54,9 +56,9 @@ interface FormValues {
         username: string;
         password: string;
       };
-  path: Record<string, unknown>;
-  query: Record<string, unknown>;
-  header: Record<string, unknown>;
+  path: Record<string, string>;
+  query: Record<string, string>;
+  header: Record<string, string>;
   body: unknown;
 }
 
@@ -147,16 +149,28 @@ export function Client({
   components: { ResultDisplay = DefaultResultDisplay } = {},
   ...props
 }: ClientProps) {
-  const { serverRef, servers } = useApiContext();
+  const { servers } = useApiContext();
+  const { server, setServer, setServerVariables } = useServerSelectContext();
+
   const dynamicRef = useRef(new Map<string, DynamicField>());
-  const form = useForm<FormValues>({
-    defaultValues: {
+  const requestData = useRequestData();
+  const defaultValues: FormValues = useMemo(
+    () => ({
       authorization: defaultAuthValue(authorization),
-      path: getDefaultValues(path, schemas),
-      query: getDefaultValues(query, schemas),
-      header: getDefaultValues(header, schemas),
-      body: body ? getDefaultValue(body, schemas) : undefined,
-    },
+      path: requestData.data.path,
+      query: requestData.data.query,
+      header: requestData.data.header,
+      body: requestData.data.body,
+    }),
+    [authorization, requestData],
+  );
+
+  const form = useForm<FormValues>({
+    defaultValues,
+  });
+
+  useOnChange(defaultValues, () => {
+    form.reset(defaultValues);
   });
 
   const testQuery = useQuery(async (input: FormValues) => {
@@ -164,41 +178,13 @@ export function Client({
       mod.createBrowserFetcher(body, schemas),
     );
 
+    const serverUrl = server
+      ? getUrl(server.url, server.variables)
+      : window.location.origin;
+
     const query = { ...input.query };
     const header = { ...input.header };
-
-    if (authorization?.type === 'apiKey') {
-      if (authorization.in === 'header') {
-        header[authorization.name] = input.authorization;
-      } else if (authorization.in === 'query') {
-        query[authorization.name] = input.authorization;
-      } else {
-        if ('cookie' in header) {
-          header.Cookie = header.cookie;
-          delete header.cookie;
-        }
-
-        header.Cookie = [
-          header.Cookie as string,
-          `${authorization.name}=${input.authorization}`,
-        ]
-          .filter((s) => s.length > 0)
-          .join('; ');
-      }
-    } else if (
-      authorization?.type === 'http' &&
-      authorization.scheme === 'basic'
-    ) {
-      if (typeof input.authorization === 'object')
-        header.Authorization = `Basic ${btoa(`${input.authorization.username}:${input.authorization.password}`)}`;
-    } else if (authorization) {
-      header.Authorization = input.authorization;
-    }
-
-    const serverUrl = serverRef.current
-      ? getUrl(serverRef.current.url, serverRef.current.variables)
-      : window.location.origin;
-    let url = `${serverUrl}${createPathnameFromInput(route, input.path, query)}`;
+    let url = `${serverUrl}${getPathnameFromInput(route, input.path, query)}`;
 
     if (proxyUrl) {
       const updated = new URL(proxyUrl, window.location.origin);
@@ -221,16 +207,43 @@ export function Client({
   });
 
   useEffect(() => {
-    if (!authorization) return;
-    const key = `__fumadocs_auth_${JSON.stringify(authorization)}`;
-    const cached = localStorage.getItem(key);
-    if (cached) form.setValue('authorization', JSON.parse(cached));
+    const key = authorization
+      ? `__fumadocs_auth_${JSON.stringify(authorization)}`
+      : null;
 
-    const subscription = form.watch((value, { name }) => {
-      if (!name || !name.startsWith('authorization') || !value.authorization)
-        return;
-      localStorage.setItem(key, JSON.stringify(value.authorization));
+    const subscription = form.watch((_value, { name }) => {
+      const value = _value as FormValues;
+
+      if (
+        authorization &&
+        name?.startsWith('authorization') &&
+        value.authorization
+      ) {
+        localStorage.setItem(key!, JSON.stringify(value.authorization));
+
+        writeAuthHeader(
+          authorization,
+          value.authorization,
+          value.header,
+          value.query,
+        );
+      }
+
+      requestData.saveData({
+        path: value.path,
+        method,
+        header: value.header,
+        body: value.body,
+        bodyMediaType: body?.mediaType as 'application/json',
+        cookie: {},
+        query: value.query,
+      });
     });
+
+    if (key) {
+      const cached = localStorage.getItem(key);
+      if (cached) form.setValue('authorization', JSON.parse(cached));
+    }
 
     return () => {
       subscription.unsubscribe();
@@ -327,7 +340,11 @@ export function Client({
       />
       {servers.length > 1 ? (
         <CollapsiblePanel title="Server URL">
-          <ServerSelect />
+          <ServerSelect
+            server={server}
+            onServerChanged={setServer}
+            onVariablesChanged={setServerVariables}
+          />
         </CollapsiblePanel>
       ) : null}
 
@@ -412,32 +429,6 @@ export function Client({
       </SchemaContext.Provider>
     </FormProvider>
   );
-}
-
-function createPathnameFromInput(
-  route: string,
-  path: Record<string, unknown>,
-  query: Record<string, unknown>,
-): string {
-  let pathname = route;
-  for (const key of Object.keys(path)) {
-    const paramValue = path[key];
-
-    if (typeof paramValue === 'string' && paramValue.length > 0)
-      pathname = pathname.replace(`{${key}}`, paramValue);
-  }
-
-  const searchParams = new URLSearchParams();
-  for (const key of Object.keys(query)) {
-    const paramValue = query[key];
-
-    if (typeof paramValue === 'string' && paramValue.length > 0)
-      searchParams.append(key, paramValue);
-  }
-
-  return searchParams.size > 0
-    ? `${pathname}?${searchParams.toString()}`
-    : pathname;
 }
 
 function Route({
@@ -546,4 +537,49 @@ function CollapsiblePanel({
       </CollapsibleContent>
     </Collapsible>
   );
+}
+
+function writeAuthHeader(
+  authorization: Security,
+  input: FormValues['authorization'],
+  header: Record<string, unknown>,
+  query: Record<string, unknown>,
+) {
+  if (authorization.type === 'apiKey') {
+    if (authorization.in === 'header') {
+      header[authorization.name] = input as string;
+    }
+
+    if (authorization.in === 'query') {
+      query[authorization.name] = input as string;
+    }
+
+    if (authorization.in === 'cookie') {
+      if ('cookie' in header) {
+        header.Cookie = header.cookie;
+        delete header.cookie;
+      }
+
+      header.Cookie = [
+        header.Cookie as string,
+        `${authorization.name}=${input}`,
+      ]
+        .filter((s) => s.length > 0)
+        .join('; ');
+    }
+    return;
+  }
+
+  if (
+    authorization.type === 'http' &&
+    authorization.scheme === 'basic' &&
+    typeof input === 'object'
+  ) {
+    header.Authorization = `Basic ${btoa(`${input.username}:${input.password}`)}`;
+    return;
+  }
+
+  if (typeof input === 'string') {
+    header.Authorization = input;
+  }
 }

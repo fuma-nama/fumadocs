@@ -1,75 +1,47 @@
-import { type EndpointSample } from '@/utils/generate-sample';
+'use client';
 import { inputToString } from '@/utils/input-to-string';
+import type { RequestData } from '@/ui/contexts/code-example';
+import { getUrl } from '@/requests/_shared';
 
-export function getSampleRequest(
-  endpoint: EndpointSample,
-  sampleKey: string,
-): string {
+export function getSampleRequest(url: string, data: RequestData): string {
   const s: string[] = [];
   const options = new Map<string, string>();
-  const headers = new Map<string, unknown>();
-  const cookies = new Map<string, unknown>();
+  const headers = { ...data.header };
 
-  for (const param of endpoint.parameters) {
-    if (param.in === 'header') {
-      headers.set(param.name, param.sample);
-    }
-
-    if (param.in === 'cookie') {
-      cookies.set(param.name, param.sample);
-    }
+  if (Object.keys(data.cookie).length > 0) {
+    headers['cookie'] = Object.entries(data.cookie)
+      .map(([key, value]) => `${key}=${value}`)
+      .join('; ');
   }
 
-  if (cookies.size > 0) {
-    headers.set(
-      'cookie',
-      Array.from(cookies.entries())
-        .map(([key, value]) => `${key}=${value}`)
-        .join('; '),
-    );
-  }
-
-  if (headers.size > 0) {
+  if (Object.keys(headers).length > 0) {
     options.set(
       'headers',
-      JSON.stringify(Object.fromEntries(headers.entries()), null, 2).replaceAll(
-        '\n',
-        '\n  ',
-      ),
+      JSON.stringify(headers, null, 2).replaceAll('\n', '\n  '),
     );
   }
 
   if (
-    endpoint.body?.mediaType === 'multipart/form-data' &&
-    typeof endpoint.body.samples[sampleKey]?.value === 'object' &&
-    endpoint.body.samples[sampleKey]?.value
+    data.bodyMediaType === 'multipart/form-data' &&
+    typeof data.body === 'object' &&
+    data.body
   ) {
     s.push(`const formData = new FormData();`);
 
-    for (const [key, value] of Object.entries(
-      endpoint.body.samples[sampleKey]?.value,
-    ))
+    for (const [key, value] of Object.entries(data.body))
       s.push(`formData.set(${key}, ${inputToString(value)})`);
 
     options.set('body', 'formData');
-  } else if (endpoint.body) {
+  } else if (data.body) {
     let code: string;
 
-    if (endpoint.body.mediaType === 'application/json') {
+    if (data.bodyMediaType === 'application/json') {
       code =
-        typeof endpoint.body.samples[sampleKey]?.value === 'string'
-          ? inputToString(
-              endpoint.body.samples[sampleKey]?.value,
-              endpoint.body.mediaType,
-              'backtick',
-            )
-          : `JSON.stringify(${JSON.stringify(endpoint.body.samples[sampleKey]?.value, null, 2)})`;
+        typeof data.body === 'string'
+          ? inputToString(data.body, data.bodyMediaType, 'backtick')
+          : `JSON.stringify(${JSON.stringify(data.body, null, 2)})`;
     } else {
-      code = inputToString(
-        endpoint.body.samples[sampleKey]?.value ?? '',
-        endpoint.body.mediaType,
-        'backtick',
-      );
+      code = inputToString(data.body, data.bodyMediaType, 'backtick');
     }
 
     options.set('body', code.replaceAll('\n', '\n  '));
@@ -79,7 +51,7 @@ export function getSampleRequest(
     .map(([k, v]) => `  ${k}: ${v}`)
     .join(',\n');
 
-  s.push(`fetch(${JSON.stringify(endpoint.url)}, {\n${optionsStr}\n});`);
+  s.push(`fetch(${JSON.stringify(getUrl(url, data))}, {\n${optionsStr}\n});`);
 
   return s.join('\n\n');
 }

@@ -1,5 +1,5 @@
 'use client';
-import { useApiContext, useServerSelectContext } from '@/ui/contexts/api';
+import { type SelectedServer, useApiContext } from '@/ui/contexts/api';
 import {
   Select,
   SelectContent,
@@ -11,19 +11,27 @@ import { Input, labelVariants } from '@/ui/components/input';
 import type { HTMLAttributes } from 'react';
 import { cn } from 'fumadocs-ui/components/api';
 
-export default function ServerSelect(props: HTMLAttributes<HTMLDivElement>) {
+export default function ServerSelect({
+  server,
+  onServerChanged,
+  onVariablesChanged,
+  ...props
+}: HTMLAttributes<HTMLDivElement> & {
+  server: SelectedServer | null;
+  onServerChanged: (value: string) => void;
+  onVariablesChanged: (value: Record<string, string>) => void;
+}) {
   const { servers } = useApiContext();
-  const { server, setServer, setServerVariables } = useServerSelectContext();
 
   if (servers.length <= 1) return null;
 
   const schema = server
     ? servers.find((item) => item.url === server.url)
-    : undefined;
+    : null;
 
   return (
     <div {...props} className={cn('flex flex-col gap-4', props.className)}>
-      <Select value={server?.url} onValueChange={setServer}>
+      <Select value={server?.url} onValueChange={onServerChanged}>
         <SelectTrigger className="h-auto break-all">
           <SelectValue />
         </SelectTrigger>
@@ -54,7 +62,7 @@ export default function ServerSelect(props: HTMLAttributes<HTMLDivElement>) {
               <Select
                 value={server.variables[key]}
                 onValueChange={(v) =>
-                  setServerVariables({
+                  onVariablesChanged({
                     ...server?.variables,
                     [key]: v,
                   })
@@ -76,7 +84,7 @@ export default function ServerSelect(props: HTMLAttributes<HTMLDivElement>) {
                 id={id}
                 value={server.variables[key]}
                 onChange={(e) =>
-                  setServerVariables({
+                  onVariablesChanged({
                     ...server?.variables,
                     [key]: e.target.value,
                   })

@@ -1,4 +1,4 @@
-import type { PrimitiveRequestField, RequestSchema } from '@/playground/index';
+import type { RequestSchema } from '@/playground/index';
 import { resolve } from '@/playground/resolve';
 
 export function getDefaultValue(
@@ -28,13 +28,4 @@ export function getDefaultValue(
   if (item.type === 'file') return undefined;
 
   return String(item.defaultValue);
-}
-
-export function getDefaultValues(
-  field: PrimitiveRequestField[],
-  context: Record<string, RequestSchema>,
-): Record<string, unknown> {
-  return Object.fromEntries(
-    field.map((p) => [p.name, getDefaultValue(p, context)]),
-  );
 }
