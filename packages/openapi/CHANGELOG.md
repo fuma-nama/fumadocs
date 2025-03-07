@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 7.0.0-beta.0
+
+### Major Changes
+
+- Auto-update generated API example as user interact with API Playground
+
 ## 6.3.0
 
 ### Minor Changes
