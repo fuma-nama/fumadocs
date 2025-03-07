@@ -3,7 +3,8 @@ import type { NoReference } from '@/utils/schema';
 import { sample } from 'openapi-sampler';
 import { getPreferredType, type ParsedSchema } from '@/utils/schema';
 import { getSecurities, getSecurityPrefix } from '@/utils/get-security';
-import type { RequestData } from '@/ui/contexts/code-example';
+
+import type { RequestData } from '@/requests/_shared';
 
 export function getRequestData(
   path: string,

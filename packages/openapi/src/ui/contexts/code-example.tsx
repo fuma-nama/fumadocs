@@ -1,5 +1,12 @@
 'use client';
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import {
+  createContext,
+  type HTMLAttributes,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { useApiContext, useServerSelectContext } from '@/ui/contexts/api';
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
 import type { CodeSample } from '@/render/operation';
@@ -13,6 +20,7 @@ import {
 } from '@/ui/components/select';
 import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 import { getUrl } from '@/utils/server-url';
+import type { RequestData } from '@/requests/_shared';
 
 type UpdateListener = (data: RequestData) => void;
 
@@ -31,21 +39,6 @@ const CodeExampleContext = createContext<{
   addListener: (listener: UpdateListener) => void;
   removeListener: (listener: UpdateListener) => void;
 } | null>(null);
-
-export interface RequestData {
-  method: string;
-
-  path: Record<string, string>;
-  query: Record<string, string>;
-  header: Record<string, string>;
-  cookie: Record<string, string>;
-  body?: unknown;
-
-  bodyMediaType?:
-    | 'multipart/form-data'
-    | 'application/json'
-    | 'application/xml';
-}
 
 export function CodeExampleProvider({
   route,
@@ -154,19 +147,19 @@ export function CodeExample(sample: CodeSample) {
 
 export function CodeExampleSelector({ items }: SamplesProps) {
   const { key, setKey } = useContext(CodeExampleContext)!;
-  const defaultItem = items.find((item) => item.value === key);
+  const item = items.find((item) => item.value === key);
 
   return (
     <Select value={key} onValueChange={setKey}>
       <SelectTrigger className="not-prose mb-2">
-        <SelectValue
-          placeholder={defaultItem ? <SelectDisplay {...defaultItem} /> : null}
-        />
+        <SelectValue asChild>
+          {item ? <SelectDisplay item={item} /> : null}
+        </SelectValue>
       </SelectTrigger>
       <SelectContent>
         {items.map((item) => (
           <SelectItem key={item.value} value={item.value}>
-            <SelectDisplay {...item} />
+            <SelectDisplay item={item} />
           </SelectItem>
         ))}
       </SelectContent>
@@ -174,12 +167,17 @@ export function CodeExampleSelector({ items }: SamplesProps) {
   );
 }
 
-function SelectDisplay(item: SamplesProps['items'][number]) {
+function SelectDisplay({
+  item,
+  ...props
+}: HTMLAttributes<HTMLDivElement> & {
+  item: SamplesProps['items'][number];
+}) {
   return (
-    <>
+    <div {...props}>
       <span className="font-medium text-sm">{item.title}</span>
       <span className="text-fd-muted-foreground">{item.description}</span>
-    </>
+    </div>
   );
 }
 

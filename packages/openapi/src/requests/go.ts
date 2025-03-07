@@ -1,7 +1,6 @@
 'use client';
 import { inputToString } from '@/utils/input-to-string';
-import type { RequestData } from '@/ui/contexts/code-example';
-import { getUrl } from '@/requests/_shared';
+import { getUrl, type RequestData } from '@/requests/_shared';
 
 export function getSampleRequest(url: string, data: RequestData): string {
   const imports = ['fmt', 'net/http', 'io/ioutil'];

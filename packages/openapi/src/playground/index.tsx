@@ -25,7 +25,6 @@ export type PrimitiveRequestField = BaseRequestField & PrimitiveSchema;
 
 interface PrimitiveSchema extends BaseSchema {
   type: 'boolean' | 'string' | 'number';
-  defaultValue: string;
 }
 
 export interface ReferenceSchema extends BaseSchema {
@@ -348,7 +347,6 @@ function toSchema(
 
   return {
     type: schema.type === 'integer' ? 'number' : schema.type,
-    defaultValue: (schema.example ?? '') as string,
     isRequired: required,
     description: schema.description ?? schema.title,
   };

@@ -11,6 +11,7 @@ import {
   type RefObject,
   createContext,
   useContext,
+  useState,
 } from 'react';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import { cn, buttonVariants } from 'fumadocs-ui/components/api';
@@ -46,8 +47,8 @@ import {
   OauthDialogTrigger,
 } from '@/playground/auth/oauth-dialog';
 import { useRequestData } from '@/ui/contexts/code-example';
-import { getPathnameFromInput } from '@/utils/get-pathname-from-input';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
+import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 
 interface FormValues {
   authorization:
@@ -123,18 +124,6 @@ export function useSchemaContext(): SchemaContextType {
   return ctx;
 }
 
-function defaultAuthValue(auth: ClientProps['authorization']) {
-  if (!auth || auth.type === 'apiKey') return '';
-  if (auth.type === 'http' && auth.scheme === 'basic') {
-    return {
-      username: '',
-      password: '',
-    };
-  }
-
-  return 'Bearer';
-}
-
 export function Client({
   route,
   method = 'GET',
@@ -154,15 +143,16 @@ export function Client({
 
   const dynamicRef = useRef(new Map<string, DynamicField>());
   const requestData = useRequestData();
+  const authInfo = usePersistentAuthInfo(authorization);
   const defaultValues: FormValues = useMemo(
     () => ({
-      authorization: defaultAuthValue(authorization),
+      authorization: authInfo.info,
       path: requestData.data.path,
       query: requestData.data.query,
       header: requestData.data.header,
       body: requestData.data.body,
     }),
-    [authorization, requestData],
+    [authInfo.info, requestData],
   );
 
   const form = useForm<FormValues>({
@@ -175,51 +165,31 @@ export function Client({
 
   const testQuery = useQuery(async (input: FormValues) => {
     const fetcher = await import('./fetcher').then((mod) =>
-      mod.createBrowserFetcher(body, schemas),
+      mod.createBrowserFetcher(),
     );
 
     const serverUrl = server
       ? getUrl(server.url, server.variables)
       : window.location.origin;
 
-    const query = { ...input.query };
-    const header = { ...input.header };
-    let url = `${serverUrl}${getPathnameFromInput(route, input.path, query)}`;
-
-    if (proxyUrl) {
-      const updated = new URL(proxyUrl, window.location.origin);
-      updated.searchParams.append('url', url);
-      url = updated.toString();
-    }
-
-    return fetcher.fetch({
-      url: url.toString(),
-      header,
-      body: body
-        ? {
-            mediaType: body.mediaType,
-            value: input.body,
-          }
-        : undefined,
-      dynamicFields: dynamicRef.current,
+    return fetcher.fetch(`${serverUrl}${route}`, {
+      proxyUrl,
+      path: input.path,
       method,
+      header: input.header,
+      body: input.body,
+      bodyMediaType: body?.mediaType as 'application/json',
+      cookie: {},
+      query: input.query,
     });
   });
 
   useEffect(() => {
-    const key = authorization
-      ? `__fumadocs_auth_${JSON.stringify(authorization)}`
-      : null;
-
-    const subscription = form.watch((_value, { name }) => {
+    const subscription = form.watch((_value) => {
       const value = _value as FormValues;
 
-      if (
-        authorization &&
-        name?.startsWith('authorization') &&
-        value.authorization
-      ) {
-        localStorage.setItem(key!, JSON.stringify(value.authorization));
+      if (authorization && value.authorization) {
+        authInfo.saveInfo(value.authorization);
 
         writeAuthHeader(
           authorization,
@@ -239,11 +209,6 @@ export function Client({
         query: value.query,
       });
     });
-
-    if (key) {
-      const cached = localStorage.getItem(key);
-      if (cached) form.setValue('authorization', JSON.parse(cached));
-    }
 
     return () => {
       subscription.unsubscribe();
@@ -290,12 +255,10 @@ export function Client({
                   username: {
                     type: 'string',
                     isRequired: true,
-                    defaultValue: '',
                   },
                   password: {
                     type: 'string',
                     isRequired: true,
-                    defaultValue: '',
                   },
                 },
               }
@@ -304,7 +267,6 @@ export function Client({
                 type: 'string',
                 isRequired: true,
                 description: 'The Authorization access token',
-                defaultValue: '',
               },
           fields.auth,
         )}
@@ -514,6 +476,40 @@ function DefaultResultDisplay({ data }: { data: FetchResult }) {
       ) : null}
     </div>
   );
+}
+
+function usePersistentAuthInfo(authorization?: Security) {
+  const key = authorization
+    ? `__fumadocs_auth_${JSON.stringify(authorization)}`
+    : null;
+  const [info, setInfo] = useState<FormValues['authorization']>(() => {
+    if (!authorization || authorization.type === 'apiKey') return '';
+    if (authorization.type === 'http' && authorization.scheme === 'basic') {
+      return {
+        username: '',
+        password: '',
+      };
+    }
+
+    return 'Bearer';
+  });
+
+  useEffect(() => {
+    if (!key) return;
+    const item = localStorage.getItem(key);
+
+    if (item) {
+      setInfo(JSON.parse(item));
+    }
+  }, [key]);
+
+  return {
+    info,
+    saveInfo: useEffectEvent((value: FormValues['authorization']) => {
+      if (!key) return;
+      localStorage.setItem(key, JSON.stringify(value));
+    }),
+  };
 }
 
 function CollapsiblePanel({

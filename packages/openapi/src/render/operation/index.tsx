@@ -20,7 +20,8 @@ import {
   getAPIExamples,
 } from '@/render/operation/api-example';
 import { MethodLabel } from '@/ui/components/method-label';
-import { type RequestData } from '@/ui/contexts/code-example';
+
+import type { RequestData } from '@/requests/_shared';
 
 export interface CodeSample {
   lang: string;

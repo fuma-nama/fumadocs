@@ -1,10 +1,12 @@
-import type { RequestSchema } from '@/playground/index';
+import type { ReferenceSchema, RequestSchema } from '@/playground/index';
 import { resolve } from '@/playground/resolve';
 
 export function getDefaultValue(
-  item: RequestSchema,
+  item: RequestSchema | ReferenceSchema,
   references: Record<string, RequestSchema>,
 ): unknown {
+  if (item.type === 'ref')
+    return getDefaultValue(resolve(item, references), references);
   if (item.type === 'object')
     return Object.fromEntries(
       Object.entries(item.properties).map(([key, prop]) => [
@@ -26,6 +28,7 @@ export function getDefaultValue(
   }
 
   if (item.type === 'file') return undefined;
-
-  return String(item.defaultValue);
+  if (item.type === 'string') return '';
+  if (item.type === 'number') return 0;
+  if (item.type === 'boolean') return false;
 }

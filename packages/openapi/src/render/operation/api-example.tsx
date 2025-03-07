@@ -8,14 +8,11 @@ import { Markdown } from '@/render/markdown';
 import { type CodeSample } from '@/render/operation/index';
 import { getTypescriptSchema } from '@/utils/get-typescript-schema';
 import { CodeBlock } from '@/render/codeblock';
-import {
-  CodeExample,
-  type RequestData,
-  CodeExampleProvider,
-} from '@/ui/contexts/code-example';
+import { CodeExample, CodeExampleProvider } from '@/ui/contexts/code-example';
 import { getPreferredType, type NoReference } from '@/utils/schema';
 import { getRequestData } from '@/render/operation/get-request-data';
 import { sample } from 'openapi-sampler';
+import type { RequestData } from '@/requests/_shared';
 
 const defaultSamples: CodeSample[] = [
   {

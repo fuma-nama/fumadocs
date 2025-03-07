@@ -5,7 +5,9 @@ import {
   useId,
   useMemo,
   useRef,
+  use,
   useState,
+  useLayoutEffect,
 } from 'react';
 import {
   _highlight,
@@ -33,12 +35,6 @@ function getHighlightOptions(from: HighlightOptions): HighlightOptions {
   };
 }
 
-declare global {
-  interface Window {
-    _use_shiki?: Map<string, Root>;
-  }
-}
-
 interface Task {
   key: string;
   aborted: boolean;
@@ -56,7 +52,7 @@ export function useShiki(
   },
   deps?: DependencyList,
 ): ReactNode {
-  const scriptKey = useId();
+  const markupId = useId();
   const key = useMemo(
     () => (deps ? JSON.stringify(deps) : `${options.lang}:${code}`),
     [code, deps, options.lang],
@@ -69,16 +65,15 @@ export function useShiki(
 
   const [rendered, setRendered] = useState<ReactNode>(() => {
     if (defaultValue) return defaultValue;
-    // @ts-expect-error -- use shiki is typed
-    const hast = globalThis._use_shiki?.get(scriptKey);
+    const element =
+      withPrerenderScript && typeof document !== 'undefined'
+        ? document.querySelector(`[data-markup-id="${markupId}"]`)
+        : null;
+    const attr = element?.getAttribute('data-markup');
 
-    if (hast && withPrerenderScript) {
-      return (
-        <>
-          <PrerenderScript scriptKey={scriptKey} tree={hast} />
-          {_renderHighlight(hast, shikiOptions)}
-        </>
-      );
+    if (attr) {
+      const hast = JSON.parse(attr);
+      return renderHighlightWithMarkup(markupId, hast, shikiOptions, attr);
     }
 
     currentTask.current = undefined;
@@ -91,22 +86,9 @@ export function useShiki(
     );
   });
 
-  if (typeof window === 'undefined') {
-    // return promise on server
-    return _highlight(code, shikiOptions).then((tree) => {
-      return (
-        <>
-          {withPrerenderScript && (
-            <PrerenderScript scriptKey={scriptKey} tree={tree} />
-          )}
-          {_renderHighlight(tree, shikiOptions)}
-        </>
-      );
-    }) as ReactNode;
-  }
+  useLayoutEffect(() => {
+    if (currentTask.current?.key === key) return;
 
-  // on change
-  if (!currentTask.current || currentTask.current.key !== key) {
     if (currentTask.current) {
       currentTask.current.aborted = true;
     }
@@ -120,20 +102,40 @@ export function useShiki(
     void highlight(code, shikiOptions).then((result) => {
       if (!task.aborted) setRendered(result);
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- listen for defined deps only
+  }, [key]);
+
+  if (typeof window === 'undefined') {
+    // return promise on server
+    return use(
+      _highlight(code, shikiOptions).then((tree) =>
+        renderHighlightWithMarkup(markupId, tree, shikiOptions),
+      ),
+    );
   }
 
   return rendered;
 }
 
-function PrerenderScript({
-  scriptKey,
-  tree,
-}: {
-  tree: Root;
-  scriptKey: string;
-}) {
-  return (
-    <script>{`if (typeof globalThis._use_shiki === "undefined") globalThis._use_shiki = new Map()
-globalThis._use_shiki.set(${JSON.stringify(scriptKey)}, ${JSON.stringify(tree)})`}</script>
-  );
+function renderHighlightWithMarkup(
+  id: string,
+  tree: Root,
+  shikiOptions: HighlightOptions,
+  rawAttr?: string,
+) {
+  const Pre = (shikiOptions.components?.pre ?? 'pre') as 'pre';
+
+  return _renderHighlight(tree, {
+    ...shikiOptions,
+    components: {
+      ...shikiOptions.components,
+      pre: (props) => (
+        <Pre
+          {...props}
+          data-markup-id={id}
+          data-markup={rawAttr ?? JSON.stringify(tree)}
+        />
+      ),
+    },
+  });
 }
