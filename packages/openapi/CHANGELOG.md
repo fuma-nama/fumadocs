@@ -1,5 +1,11 @@
 # @fuma-docs/openapi
 
+## 6.4.0
+
+### Minor Changes
+
+- d11f09e: Auto-update generated API example as user interact with API Playground
+
 ## 6.3.0
 
 ### Minor Changes
