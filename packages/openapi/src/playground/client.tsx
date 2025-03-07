@@ -47,8 +47,8 @@ import {
   OauthDialogTrigger,
 } from '@/playground/auth/oauth-dialog';
 import { useRequestData } from '@/ui/contexts/code-example';
-import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
+import type { RequestData } from '@/requests/_shared';
 
 interface FormValues {
   authorization:
@@ -60,6 +60,7 @@ interface FormValues {
   path: Record<string, string>;
   query: Record<string, string>;
   header: Record<string, string>;
+  cookie: Record<string, string>;
   body: unknown;
 }
 
@@ -124,6 +125,22 @@ export function useSchemaContext(): SchemaContextType {
   return ctx;
 }
 
+function toRequestData(
+  method: string,
+  mediaType: string | undefined,
+  value: FormValues,
+): RequestData {
+  return {
+    path: value.path,
+    method,
+    header: value.header,
+    body: value.body,
+    bodyMediaType: mediaType as RequestData['bodyMediaType'],
+    cookie: value.cookie,
+    query: value.query,
+  };
+}
+
 export function Client({
   route,
   method = 'GET',
@@ -151,16 +168,13 @@ export function Client({
       query: requestData.data.query,
       header: requestData.data.header,
       body: requestData.data.body,
+      cookie: requestData.data.cookie,
     }),
-    [authInfo.info, requestData],
+    [authInfo.info, requestData.data],
   );
 
   const form = useForm<FormValues>({
     defaultValues,
-  });
-
-  useOnChange(defaultValues, () => {
-    form.reset(defaultValues);
   });
 
   const testQuery = useQuery(async (input: FormValues) => {
@@ -174,15 +188,14 @@ export function Client({
 
     return fetcher.fetch(`${serverUrl}${route}`, {
       proxyUrl,
-      path: input.path,
-      method,
-      header: input.header,
-      body: input.body,
-      bodyMediaType: body?.mediaType as 'application/json',
-      cookie: {},
-      query: input.query,
+      ...toRequestData(method, body?.mediaType, input),
     });
   });
+
+  useEffect(() => {
+    form.reset(defaultValues);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- update default value
+  }, [defaultValues]);
 
   useEffect(() => {
     const subscription = form.watch((_value) => {
@@ -199,15 +212,7 @@ export function Client({
         );
       }
 
-      requestData.saveData({
-        path: value.path,
-        method,
-        header: value.header,
-        body: value.body,
-        bodyMediaType: body?.mediaType as 'application/json',
-        cookie: {},
-        query: value.query,
-      });
+      requestData.saveData(toRequestData(method, body?.mediaType, value));
     });
 
     return () => {

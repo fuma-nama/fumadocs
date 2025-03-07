@@ -26,7 +26,7 @@ import type { RequestData } from '@/requests/_shared';
 export interface CodeSample {
   lang: string;
   label: string;
-  source:
+  source?:
     | string
     | ((url: string, data: RequestData) => string | undefined)
     | false;

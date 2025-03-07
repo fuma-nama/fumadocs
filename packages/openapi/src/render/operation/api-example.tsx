@@ -1,14 +1,13 @@
-import * as CURL from '@/requests/curl';
-import * as JS from '@/requests/javascript';
-import * as Go from '@/requests/go';
-import * as Python from '@/requests/python';
 import type { MethodInformation, RenderContext } from '@/types';
 import { type ReactNode } from 'react';
 import { Markdown } from '@/render/markdown';
 import { type CodeSample } from '@/render/operation/index';
 import { getTypescriptSchema } from '@/utils/get-typescript-schema';
 import { CodeBlock } from '@/render/codeblock';
-import { CodeExample, CodeExampleProvider } from '@/ui/contexts/code-example';
+import {
+  CodeExample,
+  CodeExampleProvider,
+} from '@/ui/contexts/code-example.lazy';
 import { getPreferredType, type NoReference } from '@/utils/schema';
 import { getRequestData } from '@/render/operation/get-request-data';
 import { sample } from 'openapi-sampler';
@@ -17,22 +16,18 @@ import type { RequestData } from '@/requests/_shared';
 const defaultSamples: CodeSample[] = [
   {
     label: 'cURL',
-    source: CURL.getSampleRequest,
     lang: 'bash',
   },
   {
     label: 'JavaScript',
-    source: JS.getSampleRequest,
     lang: 'js',
   },
   {
     label: 'Go',
-    source: Go.getSampleRequest,
     lang: 'go',
   },
   {
     label: 'Python',
-    source: Python.getSampleRequest,
     lang: 'python',
   },
 ];
@@ -128,7 +123,7 @@ export async function APIExample({
     ...defaultSamples,
     ...(ctx.generateCodeSamples ? await ctx.generateCodeSamples(method) : []),
     ...(method['x-codeSamples'] ?? []),
-  ]);
+  ]).filter((generator) => generator.source !== false);
 
   const exclusiveSampleKey = method['x-exclusiveCodeSample'];
 

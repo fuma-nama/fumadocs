@@ -5,6 +5,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 import { useApiContext, useServerSelectContext } from '@/ui/contexts/api';
@@ -21,6 +22,7 @@ import {
 import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 import { getUrl } from '@/utils/server-url';
 import type { RequestData } from '@/requests/_shared';
+import { defaultSamples } from '@/requests';
 
 type UpdateListener = (data: RequestData) => void;
 
@@ -55,7 +57,7 @@ export function CodeExampleProvider({
   children: React.ReactNode;
 }) {
   const [key, setKey] = useState(initialKey ?? examples[0].key);
-  const listeners: UpdateListener[] = useMemo(() => [], []);
+  const listeners = useRef<UpdateListener[]>([]);
 
   const setData = useEffectEvent((newData: RequestData) => {
     for (const example of examples) {
@@ -65,7 +67,7 @@ export function CodeExampleProvider({
       }
     }
 
-    for (const listener of listeners) {
+    for (const listener of listeners.current) {
       listener(newData);
     }
   });
@@ -75,19 +77,17 @@ export function CodeExampleProvider({
     if (!data) return;
 
     setKey(newKey);
-    for (const listener of listeners) {
+    for (const listener of listeners.current) {
       listener(data);
     }
   });
 
   const addListener = useEffectEvent((listener: UpdateListener) => {
-    listeners.push(listener);
+    listeners.current.push(listener);
   });
 
   const removeListener = useEffectEvent((listener: UpdateListener) => {
-    const idx = listeners.indexOf(listener);
-
-    if (idx !== -1) listeners.splice(idx, 1);
+    listeners.current = listeners.current.filter((item) => item !== listener);
   });
 
   return (
@@ -110,7 +110,7 @@ export function CodeExampleProvider({
   );
 }
 
-export function CodeExample(sample: CodeSample) {
+export function CodeExample(props: CodeSample) {
   const { shikiOptions } = useApiContext();
   const { examples, key, route, addListener, removeListener } =
     useContext(CodeExampleContext)!;
@@ -118,6 +118,11 @@ export function CodeExample(sample: CodeSample) {
   const [data, setData] = useState(() => {
     return examples.find((example) => example.key === key)!.data;
   });
+
+  const sample = useMemo(() => {
+    if (props.source) return props;
+    return defaultSamples.find((item) => item.label === props.label);
+  }, [props]);
 
   useEffect(() => {
     const listener = setData;
@@ -129,16 +134,16 @@ export function CodeExample(sample: CodeSample) {
   }, [addListener, removeListener]);
 
   const code = useMemo(() => {
-    if (!sample.source || !server) return;
+    if (!sample?.source) return;
     if (typeof sample.source === 'string') return sample.source;
 
     return sample.source(
-      `${getUrl(server.url, server.variables)}${route}`,
+      `${server ? getUrl(server.url, server.variables) : '/'}${route}`,
       data,
     );
   }, [sample, server, route, data]);
 
-  if (!code) return null;
+  if (!code || !sample) return null;
 
   return (
     <DynamicCodeBlock lang={sample.lang} code={code} options={shikiOptions} />
@@ -184,15 +189,23 @@ function SelectDisplay({
 export function useRequestData() {
   const { examples, key, setData } = useContext(CodeExampleContext)!;
 
-  const data = examples.find((example) => example.key === key)!.data;
-
+  const data = useMemo(
+    () => examples.find((example) => example.key === key)!.data,
+    [examples, key],
+  );
   const saveData = useEffectEvent((data: RequestData) => {
     setData(data);
   });
 
   return useMemo(
     () => ({
+      /**
+       * initial request data
+       */
       data,
+      /**
+       * Save changes to request data, it won't trigger re-render on the component itself, which makes it safe to call in an effect with `data` as dep
+       */
       saveData,
     }),
     [data, saveData],
