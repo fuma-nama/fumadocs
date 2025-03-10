@@ -8,8 +8,8 @@
     "start": "next start"
   },
   "dependencies": {
-    "@orama/stopwords": "^3.1.1",
-    "@orama/tokenizers": "^3.1.1",
+    "@orama/stopwords": "^3.1.2",
+    "@orama/tokenizers": "^3.1.2",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-ui": "workspace:*",
