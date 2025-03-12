@@ -13,7 +13,12 @@ import {
   useContext,
   useState,
 } from 'react';
-import { Controller, FormProvider, useForm } from 'react-hook-form';
+import {
+  Controller,
+  FormProvider,
+  useForm,
+  useFormContext,
+} from 'react-hook-form';
 import { cn, buttonVariants } from 'fumadocs-ui/components/api';
 import type {
   FieldPath,
@@ -80,20 +85,22 @@ export type ClientProps = HTMLAttributes<HTMLFormElement> & {
   route: string;
   method: string;
   authorization?: Security;
-  path?: PrimitiveRequestField[];
-  query?: PrimitiveRequestField[];
-  header?: PrimitiveRequestField[];
+  parameters?: PrimitiveRequestField[];
   body?: RequestSchema & {
     mediaType: string;
   };
-  schemas: Record<string, RequestSchema>;
+  /**
+   * Resolver for reference schemas you've passed
+   */
+  references: Record<string, RequestSchema>;
   proxyUrl?: string;
 
   fields?: {
+    parameter?: CustomField<
+      `${PrimitiveRequestField['in']}.${string}`,
+      PrimitiveRequestField
+    >;
     auth?: CustomField<'authorization', RequestSchema>;
-    path?: CustomField<`path.${string}`, PrimitiveRequestField>;
-    query?: CustomField<`query.${string}`, PrimitiveRequestField>;
-    header?: CustomField<`header.${string}`, PrimitiveRequestField>;
     body?: CustomField<'body', RequestSchema>;
   };
 
@@ -145,18 +152,24 @@ export function Client({
   route,
   method = 'GET',
   authorization,
-  path = [],
-  header = [],
-  query = [],
+  parameters = [],
   body,
   fields = {},
-  schemas,
+  references,
   proxyUrl,
   components: { ResultDisplay = DefaultResultDisplay } = {},
   ...props
 }: ClientProps) {
   const { servers } = useApiContext();
   const { server, setServer, setServerVariables } = useServerSelectContext();
+  const params = useMemo(() => {
+    return {
+      headers: parameters.filter((v) => v.in === 'header'),
+      cookies: parameters.filter((v) => v.in === 'cookie'),
+      queries: parameters.filter((v) => v.in === 'query'),
+      paths: parameters.filter((v) => v.in === 'path'),
+    };
+  }, [parameters]);
 
   const dynamicRef = useRef(new Map<string, DynamicField>());
   const requestData = useRequestData();
@@ -209,6 +222,7 @@ export function Client({
           value.authorization,
           value.header,
           value.query,
+          value.cookie,
         );
       }
 
@@ -245,15 +259,144 @@ export function Client({
     );
   }
 
-  let authField: ReactNode = null;
-  if (authorization) {
-    authField = (
-      <>
-        {renderCustomField(
-          'authorization',
+  return (
+    <FormProvider {...form}>
+      <SchemaContext.Provider
+        value={useMemo(
+          () => ({ references: references, dynamic: dynamicRef }),
+          [references],
+        )}
+      >
+        <AuthProvider authorization={authorization}>
+          <form
+            {...props}
+            className={cn(
+              'not-prose flex flex-col gap-2 rounded-xl border p-3 shadow-md',
+              props.className,
+            )}
+            onSubmit={onSubmit}
+          >
+            <FormHeader
+              method={method}
+              route={route}
+              isLoading={testQuery.isLoading}
+            />
+            {servers.length > 1 ? (
+              <CollapsiblePanel title="Server URL">
+                <ServerSelect
+                  server={server}
+                  onServerChanged={setServer}
+                  onVariablesChanged={setServerVariables}
+                />
+              </CollapsiblePanel>
+            ) : null}
+
+            {params.headers.length > 0 || authorization ? (
+              <CollapsiblePanel title="Headers">
+                {authorization ? (
+                  <AuthField authorization={authorization} />
+                ) : null}
+                {params.headers.map((field) =>
+                  renderCustomField(
+                    `header.${field.name}`,
+                    field,
+                    fields.parameter,
+                    field.name,
+                  ),
+                )}
+              </CollapsiblePanel>
+            ) : null}
+
+            {params.paths.length > 0 ? (
+              <CollapsiblePanel title="Path">
+                {params.paths.map((field) =>
+                  renderCustomField(
+                    `path.${field.name}`,
+                    field,
+                    fields.parameter,
+                    field.name,
+                  ),
+                )}
+              </CollapsiblePanel>
+            ) : null}
+
+            {params.queries.length > 0 ? (
+              <CollapsiblePanel title="Query">
+                {params.queries.map((field) =>
+                  renderCustomField(
+                    `query.${field.name}`,
+                    field,
+                    fields.parameter,
+                    field.name,
+                  ),
+                )}
+              </CollapsiblePanel>
+            ) : null}
+
+            {params.cookies.length > 0 ? (
+              <CollapsiblePanel title="Cookies">
+                {params.cookies.map((field) =>
+                  renderCustomField(
+                    `cookie.${field.name}`,
+                    field,
+                    fields.parameter,
+                    field.name,
+                  ),
+                )}
+              </CollapsiblePanel>
+            ) : null}
+
+            {body ? (
+              <CollapsiblePanel title="Body">
+                {body.type === 'object' && !fields.body ? (
+                  <ObjectInput field={body} fieldName="body" />
+                ) : (
+                  renderCustomField('body', body, fields.body)
+                )}
+              </CollapsiblePanel>
+            ) : null}
+
+            {testQuery.data ? <ResultDisplay data={testQuery.data} /> : null}
+          </form>
+        </AuthProvider>
+      </SchemaContext.Provider>
+    </FormProvider>
+  );
+}
+
+function AuthProvider({
+  authorization,
+  children,
+}: {
+  authorization?: Security;
+  children: ReactNode;
+}) {
+  const form = useFormContext();
+  if (!authorization || authorization.type !== 'oauth2') return children;
+
+  // only the first one, so it looks simpler :)
+  const flow = Object.keys(authorization.flows)[0];
+
+  return (
+    <OauthDialog
+      flow={flow as keyof typeof authorization.flows}
+      scheme={authorization}
+      setToken={(token) => form.setValue('authorization', `Bearer ${token}`)}
+    >
+      {children}
+    </OauthDialog>
+  );
+}
+
+function AuthField({ authorization }: { authorization: Security }) {
+  return (
+    <>
+      <FieldSet
+        fieldName="authorization"
+        name="Authorization"
+        field={
           authorization?.type === 'http' && authorization.scheme === 'basic'
             ? {
-                name: 'Authorization',
                 type: 'object',
                 isRequired: true,
                 properties: {
@@ -268,133 +411,25 @@ export function Client({
                 },
               }
             : {
-                name: 'Authorization',
                 type: 'string',
                 isRequired: true,
                 description: 'The Authorization access token',
-              },
-          fields.auth,
-        )}
-        {authorization?.type === 'oauth2' && (
-          <OauthDialogTrigger
-            type="button"
-            className={cn(
-              buttonVariants({
-                color: 'secondary',
-              }),
-            )}
-          >
-            Open
-          </OauthDialogTrigger>
-        )}
-      </>
-    );
-  }
-
-  let children = (
-    <form
-      {...props}
-      className={cn(
-        'not-prose flex flex-col gap-2 rounded-xl border p-3 shadow-md',
-        props.className,
-      )}
-      onSubmit={onSubmit}
-    >
-      <FormHeader
-        method={method}
-        route={route}
-        isLoading={testQuery.isLoading}
+              }
+        }
       />
-      {servers.length > 1 ? (
-        <CollapsiblePanel title="Server URL">
-          <ServerSelect
-            server={server}
-            onServerChanged={setServer}
-            onVariablesChanged={setServerVariables}
-          />
-        </CollapsiblePanel>
-      ) : null}
-
-      {header.length > 0 || authorization ? (
-        <CollapsiblePanel title="Headers">
-          {authField}
-          {header.map((field) =>
-            renderCustomField(
-              `header.${field.name}`,
-              field,
-              fields.header,
-              field.name,
-            ),
+      {authorization?.type === 'oauth2' && (
+        <OauthDialogTrigger
+          type="button"
+          className={cn(
+            buttonVariants({
+              color: 'secondary',
+            }),
           )}
-        </CollapsiblePanel>
-      ) : null}
-
-      {path.length > 0 ? (
-        <CollapsiblePanel title="Path">
-          {path.map((field) =>
-            renderCustomField(
-              `path.${field.name}`,
-              field,
-              fields.path,
-              field.name,
-            ),
-          )}
-        </CollapsiblePanel>
-      ) : null}
-
-      {query.length > 0 ? (
-        <CollapsiblePanel title="Query">
-          {query.map((field) =>
-            renderCustomField(
-              `query.${field.name}`,
-              field,
-              fields.query,
-              field.name,
-            ),
-          )}
-        </CollapsiblePanel>
-      ) : null}
-
-      {body ? (
-        <CollapsiblePanel title="Body">
-          {body.type === 'object' && !fields.body ? (
-            <ObjectInput field={body} fieldName="body" />
-          ) : (
-            renderCustomField('body', body, fields.body)
-          )}
-        </CollapsiblePanel>
-      ) : null}
-
-      {testQuery.data ? <ResultDisplay data={testQuery.data} /> : null}
-    </form>
-  );
-
-  if (authorization?.type === 'oauth2') {
-    // only the first one, so it looks simpler :)
-    const flow = Object.keys(authorization.flows)[0];
-
-    children = (
-      <OauthDialog
-        flow={flow as keyof typeof authorization.flows}
-        scheme={authorization}
-        setToken={(token) => form.setValue('authorization', `Bearer ${token}`)}
-      >
-        {children}
-      </OauthDialog>
-    );
-  }
-
-  return (
-    <FormProvider {...form}>
-      <SchemaContext.Provider
-        value={useMemo(
-          () => ({ references: schemas, dynamic: dynamicRef }),
-          [schemas],
-        )}
-      >
-        {children}
-      </SchemaContext.Provider>
-    </FormProvider>
+        >
+          Open
+        </OauthDialogTrigger>
+      )}
+    </>
   );
 }
 
@@ -545,6 +580,7 @@ function writeAuthHeader(
   input: FormValues['authorization'],
   header: Record<string, unknown>,
   query: Record<string, unknown>,
+  cookie: Record<string, string>,
 ) {
   if (authorization.type === 'apiKey') {
     if (authorization.in === 'header') {
@@ -556,17 +592,7 @@ function writeAuthHeader(
     }
 
     if (authorization.in === 'cookie') {
-      if ('cookie' in header) {
-        header.Cookie = header.cookie;
-        delete header.cookie;
-      }
-
-      header.Cookie = [
-        header.Cookie as string,
-        `${authorization.name}=${input}`,
-      ]
-        .filter((s) => s.length > 0)
-        .join('; ');
+      cookie[authorization.name] = input as string;
     }
     return;
   }

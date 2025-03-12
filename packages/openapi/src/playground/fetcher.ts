@@ -32,12 +32,30 @@ export function createBrowserFetcher(): Fetcher {
         if (paramValue.length > 0) headers.append(key, paramValue.toString());
       }
 
+      const proxyUrl = options.proxyUrl
+        ? new URL(options.proxyUrl, window.location.origin)
+        : null;
+
+      if (typeof document !== 'undefined') {
+        for (const key in options.cookie) {
+          const value = options.cookie[key];
+          if (!value) continue;
+
+          document.cookie = [
+            `${key}=${value}`,
+            'HttpOnly',
+            proxyUrl && proxyUrl.origin !== window.location.origin
+              ? `domain=${proxyUrl.host}`
+              : 'path=/',
+          ].join(';');
+        }
+      }
+
       let url = getPathnameFromInput(route, options.path, options.query);
 
-      if (options.proxyUrl) {
-        const updated = new URL(options.proxyUrl, window.location.origin);
-        updated.searchParams.append('url', url);
-        url = updated.toString();
+      if (proxyUrl) {
+        proxyUrl.searchParams.append('url', url);
+        url = proxyUrl.toString();
       }
 
       return fetch(url, {

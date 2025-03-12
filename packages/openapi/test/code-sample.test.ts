@@ -3,7 +3,6 @@ import * as Python from '@/requests/python';
 import * as Go from '@/requests/go';
 import * as Curl from '@/requests/curl';
 import * as JS from '@/requests/javascript';
-import { methodKeys } from '@/build-routes';
 import type { RequestData } from '@/requests/_shared';
 
 describe('Code Sample Generators', () => {
