@@ -1,7 +1,6 @@
 import type { OpenAPIV3_1 as V3_1 } from 'openapi-types';
 import type { default as Slugger } from 'github-slugger';
 import { type Renderer } from '@/render/renderer';
-import type { EndpointSample } from '@/utils/generate-sample';
 import type { CodeSample } from '@/render/operation';
 import type {
   BuiltinTheme,
@@ -61,17 +60,22 @@ export interface RenderContext {
    *
    * Pass `false` to disable it.
    *
-   * @param endpoint - the API endpoint
-   * @param code - status code
+   * @param method - the operation object
+   * @param statusCode - status code
    */
   generateTypeScriptSchema?:
-    | ((endpoint: EndpointSample, code: string) => Awaitable<string>)
+    | ((
+        method: NoReference<MethodInformation>,
+        statusCode: string,
+      ) => Awaitable<string>)
     | false;
 
   /**
    * Generate code samples for endpoint.
    */
-  generateCodeSamples?: (endpoint: EndpointSample) => Awaitable<CodeSample[]>;
+  generateCodeSamples?: (
+    method: NoReference<MethodInformation>,
+  ) => Awaitable<CodeSample[]>;
 
   shikiOptions?: Omit<CodeToHastOptionsCommon, 'lang'> &
     CodeOptionsThemes<BuiltinTheme>;

@@ -1,7 +1,6 @@
 import type { ComponentType, ReactNode } from 'react';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
-import { CodeBlock } from '@/render/codeblock';
 import {
   API,
   Root,
@@ -12,7 +11,7 @@ import {
 } from '@/ui';
 import type { RenderContext, ServerObject } from '@/types';
 import { APIPlayground, type APIPlaygroundProps } from '@/playground';
-import { Sample, Samples } from '@/ui/client';
+import { CodeExampleSelector } from '@/ui/contexts/code-example.lazy';
 
 export interface ResponsesProps {
   items: string[];
@@ -46,13 +45,8 @@ export interface ObjectCollapsibleProps {
 }
 
 export interface RequestProps {
-  language: string;
   name: string;
-  code: string;
-}
 
-export interface SampleProps {
-  value: string;
   children: ReactNode;
 }
 
@@ -62,8 +56,6 @@ export interface SamplesProps {
     description?: ReactNode;
     value: string;
   }[];
-  children: ReactNode;
-  defaultValue?: string;
 }
 
 export interface ResponseTypeProps {
@@ -87,8 +79,7 @@ export interface Renderer {
 
   Responses: ComponentType<ResponsesProps>;
   Response: ComponentType<ResponseProps>;
-  Sample: ComponentType<SampleProps>;
-  Samples: ComponentType<SamplesProps>;
+  CodeExampleSelector: ComponentType<SamplesProps>;
   Requests: ComponentType<{ items: string[]; children: ReactNode }>;
   Request: ComponentType<RequestProps>;
   ResponseTypes: ComponentType<{ defaultValue?: string; children: ReactNode }>;
@@ -138,18 +129,9 @@ export function createRenders(
     Requests: (props) => (
       <Tabs groupId="fumadocs_openapi_requests" {...props} />
     ),
-    Samples,
-    Sample,
 
-    Request: (props) => (
-      <Tab value={props.name}>
-        <CodeBlock
-          lang={props.language}
-          code={props.code}
-          options={shikiOptions}
-        />
-      </Tab>
-    ),
+    CodeExampleSelector,
+    Request: (props) => <Tab value={props.name}>{props.children}</Tab>,
     APIPlayground,
   };
 }

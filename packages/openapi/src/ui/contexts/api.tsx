@@ -2,11 +2,9 @@
 import {
   createContext,
   type ReactNode,
-  type RefObject,
   useContext,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from 'react';
 import type { RenderContext, ServerObject } from '@/types';
@@ -23,15 +21,12 @@ export interface ApiProviderProps {
   children?: ReactNode;
 }
 
-interface SelectedServer {
+export interface SelectedServer {
   url: string;
   variables: Record<string, string>;
 }
 
-interface ApiContextType
-  extends Omit<ApiProviderProps, 'children' | 'defaultBaseUrl'> {
-  serverRef: RefObject<SelectedServer | null>;
-}
+type ApiContextType = Omit<ApiProviderProps, 'children' | 'defaultBaseUrl'>;
 
 interface ServerSelectType {
   server: SelectedServer | null;
@@ -76,9 +71,6 @@ export function ApiProvider({
       : null;
   });
 
-  const serverRef = useRef<SelectedServer | null>(server);
-  serverRef.current = server;
-
   useEffect(() => {
     const cached = localStorage.getItem('apiBaseUrl');
     if (!cached) return;
@@ -94,15 +86,7 @@ export function ApiProvider({
   }, []);
 
   return (
-    <ApiContext.Provider
-      value={useMemo(
-        () => ({
-          ...props,
-          serverRef,
-        }),
-        [props],
-      )}
-    >
+    <ApiContext.Provider value={props}>
       <ServerSelectContext.Provider
         value={useMemo(
           () => ({

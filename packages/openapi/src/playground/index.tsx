@@ -21,11 +21,13 @@ interface BaseSchema {
   isRequired: boolean;
 }
 
-export type PrimitiveRequestField = BaseRequestField & PrimitiveSchema;
+export type PrimitiveRequestField = BaseRequestField &
+  PrimitiveSchema & {
+    in: 'cookie' | 'header' | 'query' | 'path';
+  };
 
 interface PrimitiveSchema extends BaseSchema {
   type: 'boolean' | 'string' | 'number';
-  defaultValue: string;
 }
 
 export interface ReferenceSchema extends BaseSchema {
@@ -120,15 +122,7 @@ export async function APIPlayground({
     authorization: getAuthorizationField(method, ctx),
     method: method.method,
     route: path,
-    path: method.parameters
-      ?.filter((v) => v.in === 'path')
-      .map((v) => parameterToField(v, context)),
-    query: method.parameters
-      ?.filter((v) => v.in === 'query')
-      .map((v) => parameterToField(v, context)),
-    header: method.parameters
-      ?.filter((v) => v.in === 'header')
-      .map((v) => parameterToField(v, context)),
+    parameters: method.parameters?.map((v) => parameterToField(v, context)),
     body:
       bodySchema && mediaType
         ? {
@@ -136,7 +130,7 @@ export async function APIPlayground({
             mediaType: mediaType as string,
           }
         : undefined,
-    schemas: context.references,
+    references: context.references,
     proxyUrl: ctx.proxyUrl,
     ...client,
   };
@@ -196,8 +190,14 @@ function parameterToField(
   v: NoReference<ParameterObject>,
   ctx: Context,
 ): PrimitiveRequestField {
+  const allowed = ['header', 'cookie', 'query', 'path'] as const;
+
+  if (!allowed.includes(v.in as (typeof allowed)[number]))
+    throw new Error(`Unsupported parameter in: "${v.in}"`);
+
   return {
     name: v.name,
+    in: v.in as (typeof allowed)[number],
     ...(toSchema(
       v.schema ?? { type: 'string' },
       v.required ?? false,
@@ -348,7 +348,6 @@ function toSchema(
 
   return {
     type: schema.type === 'integer' ? 'number' : schema.type,
-    defaultValue: (schema.example ?? '') as string,
     isRequired: required,
     description: schema.description ?? schema.title,
   };

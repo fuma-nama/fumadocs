@@ -1,5 +1,4 @@
 import { Fragment, type ReactElement, type ReactNode } from 'react';
-import { generateSample, type EndpointSample } from '@/utils/generate-sample';
 import type {
   CallbackObject,
   MethodInformation,
@@ -10,20 +9,26 @@ import type {
 import { getPreferredType, type NoReference } from '@/utils/schema';
 import { getSecurities, getSecurityPrefix } from '@/utils/get-security';
 import { idToTitle } from '@/utils/id-to-title';
-import { Markdown } from './markdown';
-import { heading } from './heading';
-import { Schema } from './schema';
+import { Markdown } from '../markdown';
+import { heading } from '../heading';
+import { Schema } from '../schema';
 import { createMethod } from '@/server/create-method';
 import { methodKeys } from '@/build-routes';
-import { APIExample } from '@/render/operation/api-example';
+import {
+  APIExample,
+  APIExampleProvider,
+  getAPIExamples,
+} from '@/render/operation/api-example';
 import { MethodLabel } from '@/ui/components/method-label';
+
+import type { RequestData } from '@/requests/_shared';
 
 export interface CodeSample {
   lang: string;
   label: string;
-  source:
+  source?:
     | string
-    | ((endpoint: EndpointSample, exampleKey: string) => string | undefined)
+    | ((url: string, data: RequestData) => string | undefined)
     | false;
 }
 
@@ -137,13 +142,9 @@ export function Operation({
     );
   }
 
-  const endpoint = generateSample(path, method, ctx);
-
   const parameterNode = Object.entries(ParamTypes).map(([type, title]) => {
-    const params = endpoint.parameters.filter(
-      (param) => param.in === type && !param.isAuthOnly,
-    );
-    if (params.length === 0) return;
+    const params = method.parameters?.filter((param) => param.in === type);
+    if (!params || params.length === 0) return;
 
     return (
       <Fragment key={type}>
@@ -218,10 +219,14 @@ export function Operation({
   );
 
   if (type === 'operation') {
+    const examples = getAPIExamples(path, method, ctx);
+
     return (
       <ctx.renderer.API>
-        {info}
-        <APIExample method={method} endpoint={endpoint} ctx={ctx} />
+        <APIExampleProvider route={path} examples={examples} method={method}>
+          {info}
+          <APIExample examples={examples} method={method} ctx={ctx} />
+        </APIExampleProvider>
       </ctx.renderer.API>
     );
   } else {

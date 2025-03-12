@@ -1,46 +1,40 @@
-import { type EndpointSample } from '@/utils/generate-sample';
+'use client';
 import { inputToString } from '@/utils/input-to-string';
+import { getUrl, type RequestData } from '@/requests/_shared';
 
-export function getSampleRequest(
-  endpoint: EndpointSample,
-  sampleKey: string,
-): string {
+export function getSampleRequest(url: string, data: RequestData): string {
   const imports = ['fmt', 'net/http', 'io/ioutil'];
   const headers = new Map<string, string>();
   const variables = new Map<string, string>();
+  variables.set('url', JSON.stringify(getUrl(url, data)));
 
   // additional lines before initializing request
   const additional: string[] = [];
 
-  for (const p of endpoint.parameters) {
-    if (p.in === 'header') headers.set(p.name, JSON.stringify(p.sample));
+  for (const header in data.header) {
+    headers.set(header, JSON.stringify(data.header[header]));
   }
 
-  const cookies = endpoint.parameters.filter((p) => p.in === 'cookie');
-
-  variables.set('url', JSON.stringify(endpoint.url));
-
+  const cookies = Object.keys(data.cookie);
   if (cookies.length > 0)
     headers.set(
       'Cookie',
-      JSON.stringify(cookies.map((p) => `${p.name}=${p.sample}`).join('; ')),
+      JSON.stringify(cookies.map((p) => `${p}=${data.cookie[p]}`).join('; ')),
     );
 
-  if (endpoint.body) {
-    headers.set('Content-Type', `"${endpoint.body.mediaType}"`);
+  if (data.body) {
+    headers.set('Content-Type', `"${data.bodyMediaType}"`);
 
     if (
-      endpoint.body.mediaType === 'multipart/form-data' &&
-      typeof endpoint.body.samples[sampleKey]?.value === 'object'
+      data.bodyMediaType === 'multipart/form-data' &&
+      typeof data.body === 'object'
     ) {
       imports.push('mime/multipart', 'bytes');
 
       variables.set('payload', `new(bytes.Buffer)`);
       variables.set('mp', 'multipart.NewWriter(payload)');
 
-      for (const [key, value] of Object.entries(
-        endpoint.body.samples[sampleKey]?.value ?? {},
-      )) {
+      for (const [key, value] of Object.entries(data.body)) {
         additional.push(
           `mp.WriteField("${key}", ${inputToString(value, undefined, 'backtick')})`,
         );
@@ -50,8 +44,8 @@ export function getSampleRequest(
       variables.set(
         'payload',
         `strings.NewReader(${inputToString(
-          endpoint.body.samples[sampleKey]?.value ?? '',
-          endpoint.body.mediaType,
+          data.body,
+          data.bodyMediaType,
           'backtick',
         ).replaceAll('\n', '\n  ')})`,
       );
@@ -69,7 +63,7 @@ ${Array.from(variables.entries())
   .map(([k, v]) => `  ${k} := ${v}`)
   .join('\n')}
   ${additional.join('\n  ')}
-  req, _ := http.NewRequest("${endpoint.method}", url, ${variables.has('payload') ? 'payload' : 'nil'})
+  req, _ := http.NewRequest("${data.method}", url, ${variables.has('payload') ? 'payload' : 'nil'})
   ${Array.from(headers.entries())
     .map(([key, value]) => `req.Header.Add("${key}", ${value})`)
     .join('\n  ')}

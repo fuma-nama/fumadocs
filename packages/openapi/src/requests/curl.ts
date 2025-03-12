@@ -1,40 +1,33 @@
-import { type EndpointSample } from '@/utils/generate-sample';
+'use client';
 import { inputToString } from '@/utils/input-to-string';
+import { getUrl, type RequestData } from '@/requests/_shared';
 
-export function getSampleRequest(
-  endpoint: EndpointSample,
-  sampleKey: string,
-): string {
+export function getSampleRequest(url: string, data: RequestData): string {
   const s: string[] = [];
+  s.push(`curl -X ${data.method} "${getUrl(url, data)}"`);
 
-  s.push(`curl -X ${endpoint.method} "${endpoint.url}"`);
+  for (const header in data.header) {
+    const value = `${header}: ${data.header[header]}`;
 
-  for (const param of endpoint.parameters) {
-    if (param.in === 'header') {
-      const header = `${param.name}: ${param.sample}`;
-
-      s.push(`-H "${header}"`);
-    }
-
-    if (param.in === 'cookie') {
-      const cookie = JSON.stringify(`${param.name}=${param.sample}`);
-
-      s.push(`--cookie ${cookie}`);
-    }
+    s.push(`-H "${value}"`);
   }
 
-  if (endpoint.body?.mediaType === 'multipart/form-data') {
-    const sample = endpoint.body.samples[sampleKey]?.value;
+  for (const cookie in data.cookie) {
+    const value = JSON.stringify(`${cookie}=${data.cookie[cookie]}`);
 
-    if (sample && typeof sample === 'object') {
-      for (const [key, value] of Object.entries(sample)) {
+    s.push(`--cookie ${value}`);
+  }
+
+  if (data.bodyMediaType === 'multipart/form-data') {
+    if (data.body && typeof data.body === 'object') {
+      for (const [key, value] of Object.entries(data.body)) {
         s.push(`-F ${key}=${inputToString(value)}`);
       }
     }
-  } else if (endpoint.body) {
-    s.push(`-H "Content-Type: ${endpoint.body.mediaType}"`);
+  } else if (data.body) {
+    s.push(`-H "Content-Type: ${data.bodyMediaType}"`);
     s.push(
-      `-d ${inputToString(endpoint.body.samples[sampleKey]?.value ?? '', endpoint.body.mediaType, 'single-quote')}`,
+      `-d ${inputToString(data.body, data.bodyMediaType, 'single-quote')}`,
     );
   }
 

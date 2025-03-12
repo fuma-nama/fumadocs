@@ -1,34 +1,33 @@
-import * as CURL from '@/requests/curl';
-import * as JS from '@/requests/javascript';
-import * as Go from '@/requests/go';
-import * as Python from '@/requests/python';
 import type { MethodInformation, RenderContext } from '@/types';
-import type { EndpointSample } from '@/utils/generate-sample';
 import { type ReactNode } from 'react';
 import { Markdown } from '@/render/markdown';
-import { type CodeSample } from '@/render/operation';
+import { type CodeSample } from '@/render/operation/index';
 import { getTypescriptSchema } from '@/utils/get-typescript-schema';
 import { CodeBlock } from '@/render/codeblock';
+import {
+  CodeExample,
+  CodeExampleProvider,
+} from '@/ui/contexts/code-example.lazy';
+import { getPreferredType, type NoReference } from '@/utils/schema';
+import { getRequestData } from '@/render/operation/get-request-data';
+import { sample } from 'openapi-sampler';
+import type { RequestData } from '@/requests/_shared';
 
 const defaultSamples: CodeSample[] = [
   {
     label: 'cURL',
-    source: CURL.getSampleRequest,
     lang: 'bash',
   },
   {
     label: 'JavaScript',
-    source: JS.getSampleRequest,
     lang: 'js',
   },
   {
     label: 'Go',
-    source: Go.getSampleRequest,
     lang: 'go',
   },
   {
     label: 'Python',
-    source: Python.getSampleRequest,
     lang: 'python',
   },
 ];
@@ -39,113 +38,118 @@ interface CustomProperty {
   'x-exclusiveCodeSample'?: string;
 }
 
-interface CodeSampleCompiled {
-  lang: string;
-  label: string;
-  source: string;
+interface CodeExampleItem {
+  key: string;
+
+  name: string;
+  description?: string;
+  data: RequestData;
 }
 
-interface CollectedSample {
-  samples: CodeSampleCompiled[];
-  title: string;
-  description?: string;
+export function APIExampleProvider({
+  examples,
+  method,
+  children,
+  route,
+}: {
+  examples: CodeExampleItem[];
+  method: MethodInformation & CustomProperty;
+  route: string;
+  children: ReactNode;
+}) {
+  const exclusiveSampleKey = method['x-exclusiveCodeSample'];
+
+  return (
+    <CodeExampleProvider
+      initialKey={exclusiveSampleKey}
+      route={route}
+      examples={examples.map((example) => ({
+        key: example.key,
+        data: example.data,
+      }))}
+    >
+      {children}
+    </CodeExampleProvider>
+  );
+}
+
+export function getAPIExamples(
+  path: string,
+  method: MethodInformation,
+  ctx: RenderContext,
+): CodeExampleItem[] {
+  const media = method.requestBody
+    ? getPreferredType(method.requestBody.content)
+    : null;
+  const bodyOfType = media ? method.requestBody?.content[media] : null;
+
+  if (bodyOfType?.examples) {
+    const result: CodeExampleItem[] = [];
+
+    for (const [key, value] of Object.entries(bodyOfType.examples)) {
+      result.push({
+        key,
+        name: value.summary ?? key,
+        description: value.description,
+
+        data: getRequestData(path, method, key, ctx),
+      });
+    }
+
+    return result;
+  }
+
+  return [
+    {
+      key: '_default',
+      name: 'Default',
+      description: bodyOfType?.schema?.description,
+      data: getRequestData(path, method, null, ctx),
+    },
+  ];
 }
 
 export async function APIExample({
   method,
-  endpoint,
+  examples,
   ctx,
 }: {
+  examples: CodeExampleItem[];
   method: MethodInformation & CustomProperty;
-  endpoint: EndpointSample;
   ctx: RenderContext;
 }) {
   const renderer = ctx.renderer;
-  const samples = new Map<string, CollectedSample>();
-  let children: ReactNode;
+  const generators = dedupe([
+    ...defaultSamples,
+    ...(ctx.generateCodeSamples ? await ctx.generateCodeSamples(method) : []),
+    ...(method['x-codeSamples'] ?? []),
+  ]).filter((generator) => generator.source !== false);
 
-  for (const [key, sample] of Object.entries(
-    endpoint.body?.samples ?? {
-      // fallback for methods that have no request body, we also want to show examples for
-      _default: {},
-    },
-  )) {
-    samples.set(key, {
-      title: sample?.summary ?? key,
-      description: sample?.description,
-      samples: dedupe([
-        ...defaultSamples,
-        ...(ctx.generateCodeSamples
-          ? await ctx.generateCodeSamples(endpoint)
-          : []),
-        ...(method['x-codeSamples'] ?? []),
-      ]).flatMap((sample) => {
-        if (sample.source === false) return [];
-
-        const result =
-          typeof sample.source === 'function'
-            ? sample.source(endpoint, key)
-            : sample.source;
-        if (result === undefined) return [];
-
-        return {
-          ...sample,
-          source: result,
-        };
-      }),
-    });
-  }
-
-  function renderRequest(sample: CollectedSample) {
-    return (
-      <renderer.Requests items={sample.samples.map((s) => s.label)}>
-        {sample.samples.map((s) => (
-          <renderer.Request
-            key={s.label}
-            name={s.label}
-            code={s.source}
-            language={s.lang}
-          />
-        ))}
-      </renderer.Requests>
-    );
-  }
-
-  const exclusiveCodeSamples = method['x-exclusiveCodeSample'];
-  if (
-    (samples.size === 1 && samples.has('_default')) ||
-    (exclusiveCodeSamples && samples.has(exclusiveCodeSamples))
-  ) {
-    // if exclusiveSampleKey is present, we don't use tabs
-    // if only the fallback or non described openapi legacy example is present, we don't use tabs
-    children = renderRequest(samples.get(exclusiveCodeSamples ?? '_default')!);
-  } else if (samples.size > 0) {
-    const entries = Array.from(samples.entries());
-
-    children = (
-      <renderer.Samples
-        items={entries.map(([key, sample]) => ({
-          title: sample.title,
-          description: sample.description ? (
-            <Markdown text={sample.description} />
-          ) : null,
-          value: key,
-        }))}
-        defaultValue={exclusiveCodeSamples}
-      >
-        {entries.map(([key, sample]) => (
-          <renderer.Sample key={key} value={key}>
-            {renderRequest(sample)}
-          </renderer.Sample>
-        ))}
-      </renderer.Samples>
-    );
-  }
+  const exclusiveSampleKey = method['x-exclusiveCodeSample'];
 
   return (
     <renderer.APIExample>
-      {children}
-      <ResponseTabs operation={method} ctx={ctx} endpoint={endpoint} />
+      {examples.length > 1 && !exclusiveSampleKey && (
+        <renderer.CodeExampleSelector
+          items={examples.map((sample) => ({
+            title: sample.name,
+            description: sample.description ? (
+              <Markdown text={sample.description} />
+            ) : null,
+            value: sample.key,
+          }))}
+        />
+      )}
+      {generators.length > 0 && (
+        <renderer.Requests items={generators.map((s) => s.label)}>
+          {generators.map((generator) => (
+            <renderer.Request key={generator.label} name={generator.label}>
+              <CodeExample {...generator} />
+            </renderer.Request>
+          ))}
+        </renderer.Requests>
+      )}
+      <ResponseTabs operation={method} ctx={ctx} />
     </renderer.APIExample>
   );
 }
@@ -167,36 +171,64 @@ function dedupe(samples: CodeSample[]): CodeSample[] {
 }
 
 function ResponseTabs({
-  endpoint,
   operation,
   ctx: { renderer, generateTypeScriptSchema, schema },
 }: {
-  endpoint: EndpointSample;
-  operation: MethodInformation;
+  operation: NoReference<MethodInformation>;
   ctx: RenderContext;
 }) {
   if (!operation.responses) return null;
 
   async function renderResponse(code: string) {
     const response =
-      code in endpoint.responses ? endpoint.responses[code] : null;
+      operation.responses && code in operation.responses
+        ? operation.responses[code]
+        : null;
+
+    const media = getPreferredType(response?.content ?? {});
+    const responseOfType = media ? response?.content?.[media] : null;
 
     const description =
       operation.responses?.[code].description ??
-      response?.schema.description ??
+      responseOfType?.schema?.description ??
       '';
 
     let ts: string | undefined;
     if (generateTypeScriptSchema) {
-      ts = await generateTypeScriptSchema(endpoint, code);
-    } else if (generateTypeScriptSchema === undefined) {
-      ts = await getTypescriptSchema(endpoint, code, schema.dereferenceMap);
+      ts = await generateTypeScriptSchema(operation, code);
+    } else if (
+      generateTypeScriptSchema === undefined &&
+      responseOfType?.schema
+    ) {
+      ts = await getTypescriptSchema(
+        responseOfType?.schema,
+        schema.dereferenceMap,
+      );
     }
 
     const values: string[] = [];
     let exampleSlot: ReactNode;
 
-    if (response?.samples._default) {
+    if (responseOfType?.examples) {
+      exampleSlot = Object.entries(responseOfType.examples).map(
+        ([key, sample], i) => {
+          const title = sample?.summary ?? `Example ${i + 1}`;
+
+          values.push(title);
+          return (
+            <renderer.ResponseType key={key} label={title}>
+              {sample?.description ? (
+                <Markdown text={sample.description} />
+              ) : null}
+              <CodeBlock
+                lang="json"
+                code={JSON.stringify(sample.value, null, 2)}
+              />
+            </renderer.ResponseType>
+          );
+        },
+      );
+    } else if (responseOfType?.example || responseOfType?.schema) {
       values.push('Response');
 
       exampleSlot = (
@@ -204,33 +236,19 @@ function ResponseTabs({
           <CodeBlock
             lang="json"
             code={JSON.stringify(
-              endpoint.responses[code].samples._default,
+              responseOfType.example ?? sample(responseOfType.schema as object),
               null,
               2,
             )}
           />
         </renderer.ResponseType>
       );
-    } else if (response) {
-      exampleSlot = Object.entries(response.samples).map(([key, sample], i) => {
-        const title = sample?.summary ?? `Example ${i + 1}`;
-
-        values.push(title);
-        return (
-          <renderer.ResponseType key={key} label={title}>
-            {sample?.description ? (
-              <Markdown text={sample.description} />
-            ) : null}
-            <CodeBlock lang="json" code={JSON.stringify(sample, null, 2)} />
-          </renderer.ResponseType>
-        );
-      });
     }
 
     return (
       <renderer.Response value={code}>
         {description ? <Markdown text={description} /> : null}
-        {response && (
+        {exampleSlot ? (
           <renderer.ResponseTypes defaultValue={values[0]}>
             {exampleSlot}
             {ts ? (
@@ -239,7 +257,7 @@ function ResponseTabs({
               </renderer.ResponseType>
             ) : null}
           </renderer.ResponseTypes>
-        )}
+        ) : null}
       </renderer.Response>
     );
   }

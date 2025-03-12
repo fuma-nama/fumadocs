@@ -172,6 +172,10 @@ paths:
         - Events
       parameters:
         - $ref: '#/components/parameters/EventId'
+        - name: test
+          in: cookie
+          schema:
+            type: string
       responses:
         '204':
           description: Success - no content.

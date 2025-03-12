@@ -87,20 +87,20 @@ function AdditionalProperties({
   fieldName: string;
   type: boolean | string;
 }) {
-  const { control, setValue } = useFormContext();
-  const { references, dynamic } = useSchemaContext();
+  const { control, setValue, getValues } = useFormContext();
+  const { references } = useSchemaContext();
   const [nextName, setNextName] = useState('');
   const [properties, setProperties] = useState<string[]>(() => {
-    const d = dynamic.current.get(`additional_${fieldName}`);
-    if (d?.type === 'object') return d.properties;
+    const value = getValues(fieldName);
+    if (value) return Object.keys(value);
 
     return [];
   });
 
-  dynamic.current.set(`additional_${fieldName}`, {
-    type: 'object',
-    properties,
-  });
+  const types =
+    typeof type === 'string'
+      ? resolveDynamicTypes(references[type], references)
+      : anyFields;
 
   const onAppend = () => {
     const name = nextName.trim();
@@ -109,16 +109,14 @@ function AdditionalProperties({
     setProperties((p) => {
       if (p.includes(name)) return p;
 
-      setValue(`${fieldName}.${name}`, '');
+      setValue(
+        `${fieldName}.${name}`,
+        getDefaultValue(Object.values(types)[0], references),
+      );
       setNextName('');
       return [...p, name];
     });
   };
-
-  const types =
-    typeof type === 'string'
-      ? resolveDynamicTypes(references[type], references)
-      : undefined;
 
   return (
     <>
@@ -128,7 +126,7 @@ function AdditionalProperties({
           name={item}
           field={{
             type: 'switcher',
-            items: types ?? anyFields,
+            items: types,
             isRequired: false,
           }}
           fieldName={`${fieldName}.${item}`}
@@ -196,17 +194,14 @@ const anyFields: Record<string, RequestSchema> = {
   string: {
     type: 'string',
     isRequired: false,
-    defaultValue: '',
   },
   boolean: {
     type: 'boolean',
     isRequired: false,
-    defaultValue: '',
   },
   number: {
     type: 'number',
     isRequired: false,
-    defaultValue: '',
   },
   object: {
     type: 'object',
@@ -266,47 +261,57 @@ export function FieldInput({
     );
   }
 
-  if (field.type === 'file' || field.type === 'boolean') {
+  if (field.type === 'file') {
     return (
       <Controller
         control={control}
         name={fieldName}
-        render={({ field: { value, onChange, ...restField } }) =>
-          field.type === 'file' ? (
-            <input
+        render={({ field: { value: _, onChange, ...restField } }) => (
+          <input
+            id={fieldName}
+            type="file"
+            multiple={false}
+            onChange={(e) => {
+              if (!e.target.files) return;
+              onChange(e.target.files.item(0));
+            }}
+            {...props}
+            {...restField}
+          />
+        )}
+      />
+    );
+  }
+
+  if (field.type === 'boolean') {
+    return (
+      <Controller
+        control={control}
+        name={fieldName}
+        render={({ field: { value, onChange, ...restField } }) => (
+          <Select
+            value={String(value)}
+            onValueChange={(value) =>
+              onChange(value === 'null' ? null : value === 'true')
+            }
+            disabled={restField.disabled}
+          >
+            <SelectTrigger
               id={fieldName}
-              type="file"
-              multiple={false}
-              onChange={(e) => {
-                if (!e.target.files) return;
-                onChange(e.target.files.item(0));
-              }}
-              {...props}
+              className={props.className}
               {...restField}
-            />
-          ) : (
-            <Select
-              value={value as string}
-              onValueChange={onChange}
-              disabled={restField.disabled}
             >
-              <SelectTrigger
-                id={fieldName}
-                className={props.className}
-                {...restField}
-              >
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="true">True</SelectItem>
-                <SelectItem value="false">False</SelectItem>
-                {field.isRequired ? null : (
-                  <SelectItem value="null">Null</SelectItem>
-                )}
-              </SelectContent>
-            </Select>
-          )
-        }
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="true">True</SelectItem>
+              <SelectItem value="false">False</SelectItem>
+              {field.isRequired ? null : (
+                <SelectItem value="null">Null</SelectItem>
+              )}
+            </SelectContent>
+          </Select>
+        )}
       />
     );
   }
@@ -316,7 +321,9 @@ export function FieldInput({
       id={fieldName}
       placeholder="Enter value"
       type={field.type === 'string' ? 'text' : 'number'}
-      {...register(fieldName)}
+      {...register(fieldName, {
+        valueAsNumber: field.type === 'number',
+      })}
       {...props}
     />
   );
@@ -334,33 +341,38 @@ export function FieldSet({
   fieldName: string;
   toolbar?: ReactNode;
 }) {
+  const form = useFormContext();
   const { references, dynamic } = useSchemaContext();
-  const [value, setValue] = useState<string>(() => {
+  const [type, setType] = useState<string>(() => {
     if (field.type !== 'switcher') return '';
     const d = dynamic.current.get(fieldName);
     const items = Object.keys(field.items);
 
     if (d?.type === 'field') {
-      // schemas are passed from server components, they shouldn't be re-constructed
+      // schemas are passed from server components, object references are maintained
       const cached = items.find((item) => d.schema === field.items[item]);
 
       if (cached) return cached;
     }
 
-    return items[0];
+    const value = form.getValues(fieldName);
+    let type: string = typeof value;
+
+    if (Array.isArray(value)) {
+      type = 'array';
+    } else if (value instanceof File) {
+      type = 'file';
+    } else if (value === null) {
+      type = 'null';
+    }
+
+    return items.find((item) => field.items[item].type === type) ?? items[0];
   });
 
   if (field.type === 'null') return null;
 
-  if (value && field.type === 'switcher') {
-    dynamic.current.set(fieldName, {
-      type: 'field',
-      schema: field.items[value],
-    });
-  }
-
   if (field.type === 'switcher') {
-    const child = resolve(field.items[value], references);
+    const child = resolve(field.items[type], references);
 
     return (
       <fieldset
@@ -373,8 +385,21 @@ export function FieldSet({
           required={field.isRequired}
         >
           <select
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
+            value={type}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === type) return;
+
+              setType(value);
+              dynamic.current.set(fieldName, {
+                type: 'field',
+                schema: field.items[value],
+              });
+              form.setValue(
+                fieldName,
+                getDefaultValue(field.items[value], references),
+              );
+            }}
             className="text-xs"
           >
             {Object.keys(field.items).map((item) => (

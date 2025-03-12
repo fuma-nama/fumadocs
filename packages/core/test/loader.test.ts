@@ -228,6 +228,7 @@ const i18nSource: Source<SourceConfig> = {
       type: 'meta',
       path: 'meta.json',
       data: {
+        title: 'Docs English',
         pages: ['test', 'nested'],
       },
     },
@@ -314,7 +315,7 @@ test('Internationalized Routing', () => {
             "type": "folder",
           },
         ],
-        "name": "",
+        "name": "Docs English",
       }
     `);
 
@@ -520,7 +521,7 @@ test('Internationalized Routing: Hide Prefix', () => {
             "type": "folder",
           },
         ],
-        "name": "",
+        "name": "Docs English",
       }
     `);
 

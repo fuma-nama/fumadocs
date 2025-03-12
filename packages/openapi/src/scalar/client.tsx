@@ -39,7 +39,7 @@ export default function ScalarPlayground({
       </code>
       <ApiClientModalProvider
         configuration={{
-          themeId: 'moon',
+          theme: 'moon',
           spec: {
             content: spec,
           },

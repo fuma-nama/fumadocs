@@ -1,11 +1,11 @@
 ---
-title: Source API
+title: loader()
 description: Turn a content source into a unified interface
 ---
 
 ## Usage
 
-Source API is a helper to load file-system based content sources, it offers a unified interface to integrate content sources with Fumadocs.
+`loader()` provides an interface for Fumadocs to integrate with file-system based content sources, with a unified interface.
 
 ### What it does?
 
@@ -18,11 +18,11 @@ It doesn't rely on the real file system (zero `node:fs` usage), a virtual storag
 You can use it with built-in content sources like Fumadocs MDX.
 
 ```ts
-import { createMDXSource } from 'fumadocs-mdx';
 import { loader } from 'fumadocs-core/source';
+import { docs } from '@/.source';
 
 export const source = loader({
-  source: createMDXSource(docs, meta),
+  source: docs.toFumadocsSource(),
 });
 ```
 
