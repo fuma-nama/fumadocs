@@ -46,8 +46,11 @@ export function createBrowserFetcher(): Fetcher {
             'HttpOnly',
             proxyUrl && proxyUrl.origin !== window.location.origin
               ? `domain=${proxyUrl.host}`
-              : 'path=/',
-          ].join(';');
+              : false,
+            'path=/',
+          ]
+            .filter(Boolean)
+            .join(';');
         }
       }
 
