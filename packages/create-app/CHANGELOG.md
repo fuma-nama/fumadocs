@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 15.0.16
+
+### Patch Changes
+
+- 91c8568: add comments to generated template
+
 ## 15.0.15
 
 ## 15.0.14

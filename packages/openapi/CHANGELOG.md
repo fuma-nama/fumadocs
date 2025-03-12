@@ -1,5 +1,20 @@
 # @fuma-docs/openapi
 
+## 7.0.0
+
+### Major Changes
+
+- 190ec35: Auto-update generated API example as user interact with API Playground
+
+### Minor Changes
+
+- 670c179: Support cookie parameters
+
+### Patch Changes
+
+- fumadocs-core@15.0.16
+- fumadocs-ui@15.0.16
+
 ## 7.0.0-beta.0
 
 ### Major Changes
