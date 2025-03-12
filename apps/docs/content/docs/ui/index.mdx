@@ -6,8 +6,8 @@ icon: Album
 
 ## Introduction
 
-Fumadocs <span className='text-fd-muted-foreground text-sm'>(Foo-ma docs)</span> is a **documentation framework** based on Next.js, designed to be fast and flexible.
-It composes seamlessly into Next.js App Router, allowing high code flexibility.
+Fumadocs <span className='text-fd-muted-foreground text-sm'>(Foo-ma docs)</span> is a **documentation framework** based on Next.js, designed to be fast, flexible,
+and composes seamlessly into Next.js App Router.
 
 Fumadocs has different parts:
 
@@ -27,7 +27,7 @@ The default theme of Fumadocs offers a beautiful look for documentation sites an
 
 <Card icon={<Database />} title='Content Source'>
 
-The input/source of your content can be a CMS or local data layers like [Content Collections](https://www.content-collections.dev) and [Fumadocs MDX](/docs/mdx), the official content source.
+The source of your content, can be a CMS or local data layers like [Content Collections](https://www.content-collections.dev) and [Fumadocs MDX](/docs/mdx), the official content source.
 
 </Card>
 
@@ -106,11 +106,14 @@ npm run dev
 
 In the project, you can see:
 
-- `lib/source.ts`: Code for content source adapter, Fumadocs uses [`loader()`](/docs/headless/source-api) to interact with your content source, it also assigns a URL to your pages.
+- `lib/source.ts`: Code for content source adapter, [`loader()`](/docs/headless/source-api) provides an interface to interact with your content source, and assigns a URL to your pages.
 - `app/layout.config.tsx`: Shared options for layouts, optional but preferred to keep.
-- `app/(home)`: The route group for your landing page and other pages.
-- `app/docs`: The documentation layout and pages.
-- `app/api/search/route.ts`: The Route Handler for search.
+
+| Route                     | Description                                            |
+| ------------------------- | ------------------------------------------------------ |
+| `app/(home)`              | The route group for your landing page and other pages. |
+| `app/docs`                | The documentation layout and pages.                    |
+| `app/api/search/route.ts` | The Route Handler for search.                          |
 
 ### Customise Content
 
@@ -125,8 +128,7 @@ Content source handles all your content, like compiling Markdown files and valid
 
 Navigation elements like sidebar take a [Page Tree](/docs/headless/page-tree) to render navigation links, it's a tree that describes all available pages and folders.
 
-Normally, the sidebar items (formally page tree) are generated from your file structure.
-You can learn how to customise the page tree from:
+Normally, the tree (sidebar items) is generated from your file structure, you can learn how to customise it from:
 
 <Cards>
   <Card
@@ -154,9 +156,9 @@ You can refer to:
 Since the design system is built on Tailwind CSS, you can [customise colors with CSS Variables](/docs/ui/theme#colors).
 
 Fumadocs UI offers pre-styled layouts and UI components, you can customise components with exposed props like `style` and `className`.
-We also provided many options to customise layouts ([See Available Options](/docs/ui/layouts)).
+We also provided many options to [customise layouts](/docs/ui/layouts).
 
-If none of them suits you, Fumadocs CLI is a way to install Fumadocs UI components and layouts to your codebase, similar to Shadcn UI. Allowing you to fully customise with code:
+If none of them suits you, Fumadocs CLI is a way to install Fumadocs UI components and layouts to your codebase, similar to Shadcn UI. Allowing you to fully customise Fumadocs UI:
 
 ```package-install
 @fumadocs/cli --save-dev
