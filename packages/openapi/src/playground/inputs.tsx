@@ -23,7 +23,7 @@ import { useSchemaContext } from './client';
 
 type FieldOfType<Type> = Extract<RequestSchema, { type: Type }>;
 interface InputHeaderProps {
-  name?: string;
+  name?: ReactNode;
   required?: boolean;
   type?: string;
 }
@@ -240,7 +240,7 @@ export function FieldInput({
         fieldName={fieldName}
         {...props}
         className={cn(
-          'rounded-lg border border-fd-primary/20 bg-fd-card p-3 shadow-sm',
+          'rounded-lg border border-fd-primary/20 bg-fd-card/50 p-3 shadow-sm',
           props.className,
         )}
       />
@@ -254,7 +254,7 @@ export function FieldInput({
         field={field}
         {...props}
         className={cn(
-          'rounded-lg border border-fd-primary/20 bg-fd-background p-3 shadow-sm',
+          'rounded-lg border border-fd-primary/20 bg-fd-card/50 p-3 shadow-sm',
           props.className,
         )}
       />
@@ -336,7 +336,7 @@ export function FieldSet({
   name,
   ...props
 }: HTMLAttributes<HTMLElement> & {
-  name?: string;
+  name?: ReactNode;
   field: RequestSchema;
   fieldName: string;
   toolbar?: ReactNode;
@@ -460,7 +460,11 @@ function ArrayInput({
       {fields.map((item, index) => (
         <FieldSet
           key={item.id}
-          name={`${fieldName.split('.').at(-1)}[${index}]`}
+          name={
+            <span className="text-fd-muted-foreground">
+              {fieldName.split('.').at(-1)}[{index}]
+            </span>
+          }
           field={items}
           fieldName={`${fieldName}.${index}`}
           toolbar={

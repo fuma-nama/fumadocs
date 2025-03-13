@@ -32,7 +32,7 @@ export default function ServerSelect({
   return (
     <div {...props} className={cn('flex flex-col gap-4', props.className)}>
       <Select value={server?.url} onValueChange={onServerChanged}>
-        <SelectTrigger className="h-auto break-all">
+        <SelectTrigger className="break-all">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
