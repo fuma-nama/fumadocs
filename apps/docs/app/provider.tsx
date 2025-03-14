@@ -24,11 +24,7 @@ if (item === 'true') {
 }    
 `;
 
-export function Provider({
-  children,
-}: {
-  children: ReactNode;
-}): React.ReactElement {
+export function Provider({ children }: { children: ReactNode }) {
   return (
     <RootProvider
       search={{

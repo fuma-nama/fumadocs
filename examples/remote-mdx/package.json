@@ -12,7 +12,7 @@
     "fast-glob": "^3.3.3",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "next": "15.2.1",
+    "next": "15.2.2",
     "react": "19.0.0",
     "react-dom": "19.0.0"
   },

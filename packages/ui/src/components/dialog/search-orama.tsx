@@ -16,6 +16,8 @@ import {
 export interface OramaSearchDialogProps extends SharedProps {
   client: OramaCloudOptions['client'];
   searchOptions?: OramaCloudOptions['params'];
+  index?: OramaCloudOptions['index'];
+
   footer?: ReactNode;
 
   defaultTag?: string;
@@ -46,6 +48,7 @@ export default function OramaSearchDialog({
   defaultTag,
   showOrama = false,
   allowClear = false,
+  index,
   ...props
 }: OramaSearchDialogProps): ReactNode {
   const [tag, setTag] = useState(defaultTag);
@@ -53,6 +56,7 @@ export default function OramaSearchDialog({
     {
       type: 'orama-cloud',
       client,
+      index,
       params: searchOptions,
     },
     undefined,

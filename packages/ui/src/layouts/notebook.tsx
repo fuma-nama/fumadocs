@@ -1,5 +1,9 @@
 import { Fragment, type HTMLAttributes } from 'react';
-import { type BaseLayoutProps, getLinks } from '@/layouts/shared';
+import {
+  type BaseLayoutProps,
+  getLinks,
+  replaceOrDefault,
+} from '@/layouts/shared';
 import {
   CollapsibleSidebar,
   Sidebar,
@@ -70,6 +74,7 @@ export function DocsLayout({
     ...sidebar
   } = {},
   i18n = false,
+  themeSwitch,
   ...props
 }: DocsLayoutProps) {
   checkPageTree(props.tree);
@@ -177,9 +182,13 @@ export function DocsLayout({
                   <Languages className="size-5 text-fd-muted-foreground" />
                 </LanguageToggle>
               ) : null}
-              {!props.disableThemeSwitch ? (
-                <ThemeToggle className="md:hidden" mode="light-dark-system" />
-              ) : null}
+              {replaceOrDefault(
+                themeSwitch,
+                <ThemeToggle
+                  className="md:hidden"
+                  mode={themeSwitch?.mode ?? 'light-dark-system'}
+                />,
+              )}
               {sidebarFooter}
             </SidebarFooter>
           </Aside>

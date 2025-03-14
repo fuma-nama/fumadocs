@@ -271,7 +271,7 @@ export function Client({
           <form
             {...props}
             className={cn(
-              'not-prose flex flex-col gap-2 rounded-xl border p-3 shadow-md',
+              'not-prose flex flex-col rounded-xl border p-3 gap-3 shadow-md overflow-hidden',
               props.className,
             )}
             onSubmit={onSubmit}
@@ -465,13 +465,20 @@ function FormHeader({
   route,
   method,
   isLoading,
-}: {
+  ...props
+}: HTMLAttributes<HTMLDivElement> & {
   route: string;
   method: string;
   isLoading: boolean;
 }) {
   return (
-    <div className="flex flex-row items-center gap-2 text-sm">
+    <div
+      {...props}
+      className={cn(
+        'flex flex-row items-center gap-2 text-sm',
+        props.className,
+      )}
+    >
       <MethodLabel>{method}</MethodLabel>
       <Route route={route} className="flex-1" />
       <button
@@ -562,14 +569,14 @@ function CollapsiblePanel({
   return (
     <Collapsible
       {...props}
-      className="border rounded-xl bg-fd-card text-fd-card-foreground overflow-hidden"
+      className="rounded-xl bg-fd-card border text-fd-card-foreground"
     >
-      <CollapsibleTrigger className="group w-full inline-flex items-center gap-2 justify-between p-3 text-sm font-medium hover:bg-fd-accent">
+      <CollapsibleTrigger className="group w-full inline-flex items-center gap-2 p-3 text-sm font-medium">
         {title}
-        <ChevronDown className="size-4 group-data-[state=open]:rotate-180" />
+        <ChevronDown className="ms-auto size-4 text-fd-muted-foreground group-data-[state=open]:rotate-180" />
       </CollapsibleTrigger>
       <CollapsibleContent>
-        <div className="flex flex-col gap-4 p-3">{children}</div>
+        <div className="flex flex-col gap-3 p-3">{children}</div>
       </CollapsibleContent>
     </Collapsible>
   );

@@ -3,11 +3,13 @@ title: Orama Cloud
 description: Integrate with Orama Cloud
 ---
 
-## Setup
-
 To begin, create an account on Orama Cloud.
 
-1. Create a new index from Dashboard.
+## REST API
+
+REST API integration requires your docs to upload the indexes.
+
+1. Create a new REST API index from Dashboard.
 2. Use the following schema:
 
    ```json
@@ -23,7 +25,7 @@ To begin, create an account on Orama Cloud.
    }
    ```
 
-3. Then, using the API key and index ID from dashboard, create a script to sync search indexes.
+3. Then, using the private API key and index ID from dashboard, create a script to sync search indexes.
 
    ```json doc-gen:file
    {
@@ -67,4 +69,51 @@ const { search, setSearch, query } = useDocsSearch({
     // search params
   },
 });
+```
+
+## Web Crawler
+
+1. Create a Crawler index from dashboard, and configure it correctly with the "Documentation" preset.
+2. Copy the public API key and index ID from dashboard
+
+### Search Client
+
+Same as REST API integration, but make sure to set `index` to `crawler`.
+
+```ts
+import { useDocsSearch } from 'fumadocs-core/search/client';
+import { OramaClient } from '@oramacloud/client';
+
+const client = new OramaClient({
+  endpoint: '<endpoint_url>',
+  api_key: '<api_key>',
+});
+
+const { search, setSearch, query } = useDocsSearch({
+  type: 'orama-cloud',
+  index: 'crawler',
+  client,
+  params: {
+    // optional search params
+  },
+});
+```
+
+It's same for Fumadocs UI:
+
+```tsx
+'use client';
+
+import { OramaClient } from '@oramacloud/client';
+import type { SharedProps } from 'fumadocs-ui/components/dialog/search';
+import SearchDialog from 'fumadocs-ui/components/dialog/search-orama';
+
+const client = new OramaClient({
+  endpoint: '<endpoint_url>',
+  api_key: '<api_key>',
+});
+
+export default function CustomSearchDialog(props: SharedProps) {
+  return <SearchDialog {...props} index="crawler" client={client} />;
+}
 ```

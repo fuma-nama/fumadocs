@@ -3,8 +3,22 @@ import type { OramaClient, ClientSearchParams } from '@oramacloud/client';
 import { removeUndefined } from '@/utils/remove-undefined';
 import type { OramaIndex } from '@/search/orama-cloud';
 
+interface CrawlerIndex {
+  path: string;
+  title: string;
+  content: string;
+  section: string;
+  category: string;
+}
+
 export interface OramaCloudOptions {
   client: OramaClient;
+  /**
+   * The type of your index.
+   *
+   * You can set it to `crawler` if you use crawler instead of the JSON index with schema provided by Fumadocs
+   */
+  index?: 'default' | 'crawler';
   params?: ClientSearchParams;
 }
 
@@ -13,7 +27,48 @@ export async function searchDocs(
   tag: string | undefined,
   options: OramaCloudOptions,
 ): Promise<SortedResult[]> {
-  const { client, params: extraParams = {} } = options;
+  const list: SortedResult[] = [];
+  const { index = 'default', client, params: extraParams = {} } = options;
+
+  if (index === 'crawler') {
+    const result = await client.search({
+      ...extraParams,
+      term: query,
+      where: {
+        category: tag
+          ? {
+              eq: tag.slice(0, 1).toUpperCase() + tag.slice(1),
+            }
+          : undefined,
+        ...extraParams.where,
+      },
+      limit: 10,
+    });
+    if (!result) return list;
+
+    if (index === 'crawler') {
+      for (const hit of result.hits) {
+        const doc = hit.document as unknown as CrawlerIndex;
+
+        list.push(
+          {
+            id: hit.id,
+            type: 'page',
+            content: doc.title,
+            url: doc.path,
+          },
+          {
+            id: 'page' + hit.id,
+            type: 'text',
+            content: doc.content,
+            url: doc.path,
+          },
+        );
+      }
+
+      return list;
+    }
+  }
 
   const params: ClientSearchParams = {
     ...extraParams,
@@ -30,10 +85,9 @@ export async function searchDocs(
   };
 
   const result = await client.search(params);
-  if (!result) return [];
+  if (!result || !result.groups) return list;
 
-  const list: SortedResult[] = [];
-  for (const item of result.groups ?? []) {
+  for (const item of result.groups) {
     let addedHead = false;
 
     for (const hit of item.result) {
