@@ -19,8 +19,16 @@ export interface SharedNavProps extends TitleProps, NavProviderProps {
 }
 
 export interface BaseLayoutProps {
+  themeSwitch?: {
+    enabled?: boolean;
+    component?: ReactNode;
+    mode?: 'light-dark' | 'light-dark-system';
+  };
+
   /**
    * Remove theme switcher component
+   *
+   * @deprecated Use `themeSwitch.enabled` instead.
    */
   disableThemeSwitch?: boolean;
 

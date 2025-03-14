@@ -49,6 +49,7 @@ export function HomeLayout(props: HomeLayoutProps) {
     links,
     githubUrl,
     i18n: _i18n,
+    themeSwitch: _themeSwitch,
     disableThemeSwitch: _disableThemeSwitch,
     ...rest
   } = props;
@@ -75,7 +76,7 @@ function Header({
   nav: { enableSearch = true, ...nav } = {},
   i18n = false,
   finalLinks,
-  disableThemeSwitch,
+  themeSwitch,
 }: HomeLayoutProps & {
   finalLinks: LinkItemType[];
 }) {
@@ -107,7 +108,10 @@ function Header({
             />
           </>
         ) : null}
-        {!disableThemeSwitch ? <ThemeToggle className="max-lg:hidden" /> : null}
+        {replaceOrDefault(
+          themeSwitch,
+          <ThemeToggle className="max-lg:hidden" mode={themeSwitch?.mode} />,
+        )}
         {i18n ? (
           <LanguageToggle className="max-lg:hidden">
             <Languages className="size-5" />
@@ -148,7 +152,10 @@ function Header({
                   <ChevronDown className="size-3 text-fd-muted-foreground" />
                 </LanguageToggle>
               ) : null}
-              {!disableThemeSwitch ? <ThemeToggle /> : null}
+              {replaceOrDefault(
+                themeSwitch,
+                <ThemeToggle mode={themeSwitch?.mode} />,
+              )}
             </div>
           </MenuContent>
         </Menu>

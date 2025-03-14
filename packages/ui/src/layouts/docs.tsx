@@ -53,6 +53,7 @@ export function DocsLayout({
     transparentMode,
     ...nav
   } = {},
+  themeSwitch,
   sidebar: {
     enabled: sidebarEnabled = true,
     collapsible = true,
@@ -178,7 +179,7 @@ export function DocsLayout({
                 <SidebarFooterItems
                   links={links}
                   i18n={i18n}
-                  disableThemeSwitch={props.disableThemeSwitch ?? false}
+                  themeSwitch={themeSwitch}
                 />
                 {sidebarFooter}
               </SidebarFooter>
@@ -197,17 +198,18 @@ export function DocsLayout({
 
 function SidebarFooterItems({
   i18n,
-  disableThemeSwitch,
+  themeSwitch,
   links,
 }: {
   i18n: boolean;
   links: LinkItemType[];
-  disableThemeSwitch: boolean;
+  themeSwitch: DocsLayoutProps['themeSwitch'];
 }) {
   const iconItems = links.filter((v) => v.type === 'icon');
 
   // empty footer items
-  if (links.length === 0 && !i18n && disableThemeSwitch) return null;
+  if (links.length === 0 && !i18n && themeSwitch?.enabled === false)
+    return null;
 
   return (
     <div className="flex flex-row items-center">
@@ -231,7 +233,10 @@ function SidebarFooterItems({
           <LanguageToggleText className="md:hidden" />
         </LanguageToggle>
       ) : null}
-      {!disableThemeSwitch ? <ThemeToggle className="p-0" /> : null}
+      {replaceOrDefault(
+        themeSwitch,
+        <ThemeToggle className="p-0" mode={themeSwitch?.mode} />,
+      )}
     </div>
   );
 }
