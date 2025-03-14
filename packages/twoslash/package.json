@@ -41,7 +41,7 @@
   },
   "dependencies": {
     "@radix-ui/react-popover": "^1.1.6",
-    "@shikijs/twoslash": "^3.1.0",
+    "@shikijs/twoslash": "^3.2.1",
     "mdast-util-from-markdown": "^2.0.2",
     "mdast-util-gfm": "^3.1.0",
     "mdast-util-to-hast": "^13.2.0",
@@ -55,7 +55,7 @@
     "@types/react": "^19.0.10",
     "eslint-config-custom": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "shiki": "^3.1.0",
+    "shiki": "^3.2.1",
     "tsconfig": "workspace:*"
   },
   "peerDependencies": {

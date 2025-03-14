@@ -10,25 +10,25 @@
     "types:check": "fumadocs-mdx && tsc --noEmit"
   },
   "dependencies": {
-    "@scalar/api-client-react": "^1.1.42",
+    "@scalar/api-client-react": "^1.2.1",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-openapi": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "next": "15.2.1",
+    "next": "15.2.2",
     "react": "19.0.0",
     "react-dom": "19.0.0",
-    "shiki": "^3.1.0",
+    "shiki": "^3.2.1",
     "zod": "^3.24.2"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.0.12",
+    "@tailwindcss/postcss": "^4.0.14",
     "@types/mdx": "^2.0.13",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "postcss": "^8.5.3",
     "rimraf": "^6.0.1",
-    "tailwindcss": "^4.0.12",
+    "tailwindcss": "^4.0.14",
     "typescript": "^5.8.2"
   }
 }
