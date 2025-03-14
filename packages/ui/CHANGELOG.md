@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 15.0.17
+
+### Patch Changes
+
+- b790699: Support `themeSwitch` option in layouts to customise theme switch
+- Updated dependencies [72f79cf]
+  - fumadocs-core@15.0.17
+
 ## 15.0.16
 
 ### Patch Changes

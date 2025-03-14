@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 15.0.17
+
+### Patch Changes
+
+- 72f79cf: Support Orama Cloud crawler index
+
 ## 15.0.16
 
 ## 15.0.15
