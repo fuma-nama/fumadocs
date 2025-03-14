@@ -240,7 +240,7 @@ export function FieldInput({
         fieldName={fieldName}
         {...props}
         className={cn(
-          'rounded-lg border border-fd-primary/20 bg-fd-card/50 p-3 shadow-sm',
+          'rounded-lg border border-fd-primary/20 bg-fd-background/50 p-3 shadow-sm',
           props.className,
         )}
       />
@@ -254,7 +254,7 @@ export function FieldInput({
         field={field}
         {...props}
         className={cn(
-          'rounded-lg border border-fd-primary/20 bg-fd-card/50 p-3 shadow-sm',
+          'rounded-lg border border-fd-primary/20 bg-fd-background/50 p-3 shadow-sm',
           props.className,
         )}
       />

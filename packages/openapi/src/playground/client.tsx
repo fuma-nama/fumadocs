@@ -271,7 +271,7 @@ export function Client({
           <form
             {...props}
             className={cn(
-              'not-prose flex flex-col rounded-xl border shadow-md overflow-hidden',
+              'not-prose flex flex-col rounded-xl border p-3 gap-3 shadow-md overflow-hidden',
               props.className,
             )}
             onSubmit={onSubmit}
@@ -280,7 +280,6 @@ export function Client({
               method={method}
               route={route}
               isLoading={testQuery.isLoading}
-              className="p-3"
             />
             {servers.length > 1 ? (
               <CollapsiblePanel title="Server URL">
@@ -568,13 +567,16 @@ function CollapsiblePanel({
   title: ReactNode;
 }) {
   return (
-    <Collapsible {...props} className="border-t">
-      <CollapsibleTrigger className="group w-full text-fd-card-foreground inline-flex items-center gap-2 justify-between px-3 py-2 text-sm font-medium hover:bg-fd-accent">
+    <Collapsible
+      {...props}
+      className="rounded-xl bg-fd-card border text-fd-card-foreground"
+    >
+      <CollapsibleTrigger className="group w-full inline-flex items-center gap-2 p-3 text-sm font-medium">
         {title}
-        <ChevronDown className="size-4 text-fd-muted-foreground group-data-[state=open]:rotate-180" />
+        <ChevronDown className="ms-auto size-4 text-fd-muted-foreground group-data-[state=open]:rotate-180" />
       </CollapsibleTrigger>
       <CollapsibleContent>
-        <div className="flex flex-col gap-3 p-3 pb-6">{children}</div>
+        <div className="flex flex-col gap-3 p-3">{children}</div>
       </CollapsibleContent>
     </Collapsible>
   );
