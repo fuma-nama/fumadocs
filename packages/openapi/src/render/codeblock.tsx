@@ -6,18 +6,18 @@ import { highlight } from 'fumadocs-core/highlight';
 export type CodeBlockProps = HTMLAttributes<HTMLPreElement> & {
   code: string;
   lang: string;
-  options?: RenderContext['shikiOptions'];
+  ctx: RenderContext;
 };
 
 export async function CodeBlock({
   code,
   lang,
-  options,
+  ctx,
   ...rest
 }: CodeBlockProps): Promise<React.ReactElement> {
   const rendered = await highlight(code, {
     lang,
-    ...options,
+    ...ctx.shikiOptions,
     components: {
       pre: (props) => <Base.Pre {...props} {...rest} />,
     },

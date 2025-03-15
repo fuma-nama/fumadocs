@@ -172,11 +172,12 @@ function dedupe(samples: CodeSample[]): CodeSample[] {
 
 function ResponseTabs({
   operation,
-  ctx: { renderer, generateTypeScriptSchema, schema },
+  ctx,
 }: {
   operation: NoReference<MethodInformation>;
   ctx: RenderContext;
 }) {
+  const { renderer, generateTypeScriptSchema, schema } = ctx;
   if (!operation.responses) return null;
 
   async function renderResponse(code: string) {
@@ -223,6 +224,7 @@ function ResponseTabs({
               <CodeBlock
                 lang="json"
                 code={JSON.stringify(sample.value, null, 2)}
+                ctx={ctx}
               />
             </renderer.ResponseType>
           );
@@ -240,6 +242,7 @@ function ResponseTabs({
               null,
               2,
             )}
+            ctx={ctx}
           />
         </renderer.ResponseType>
       );
@@ -253,7 +256,7 @@ function ResponseTabs({
             {exampleSlot}
             {ts ? (
               <renderer.ResponseType label="TypeScript">
-                <CodeBlock code={ts} lang="ts" />
+                <CodeBlock lang="ts" code={ts} ctx={ctx} />
               </renderer.ResponseType>
             ) : null}
           </renderer.ResponseTypes>

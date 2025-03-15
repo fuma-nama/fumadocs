@@ -45,7 +45,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from 'fumadocs-ui/components/ui/collapsible';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Loader2 } from 'lucide-react';
 import type { Security } from '@/utils/get-security';
 import {
   OauthDialog,
@@ -152,24 +152,15 @@ export function Client({
   route,
   method = 'GET',
   authorization,
-  parameters = [],
+  parameters,
   body,
-  fields = {},
+  fields,
   references,
   proxyUrl,
   components: { ResultDisplay = DefaultResultDisplay } = {},
-  ...props
+  ...rest
 }: ClientProps) {
-  const { servers } = useApiContext();
-  const { server, setServer, setServerVariables } = useServerSelectContext();
-  const params = useMemo(() => {
-    return {
-      headers: parameters.filter((v) => v.in === 'header'),
-      cookies: parameters.filter((v) => v.in === 'cookie'),
-      queries: parameters.filter((v) => v.in === 'query'),
-      paths: parameters.filter((v) => v.in === 'path'),
-    };
-  }, [parameters]);
+  const { server } = useServerSelectContext();
 
   const dynamicRef = useRef(new Map<string, DynamicField>());
   const requestData = useRequestData();
@@ -239,26 +230,6 @@ export function Client({
     testQuery.start(value);
   });
 
-  function renderCustomField<
-    T extends FieldPath<FormValues>,
-    F extends RequestSchema & { name?: string },
-  >(fieldName: T, info: F, field: CustomField<T, F> | undefined, key?: string) {
-    if (field) {
-      return (
-        <Controller
-          key={key}
-          control={form.control}
-          render={(props) => field.render({ ...props, info })}
-          name={fieldName}
-        />
-      );
-    }
-
-    return (
-      <FieldSet key={key} name={info.name} fieldName={fieldName} field={info} />
-    );
-  }
-
   return (
     <FormProvider {...form}>
       <SchemaContext.Provider
@@ -269,98 +240,137 @@ export function Client({
       >
         <AuthProvider authorization={authorization}>
           <form
-            {...props}
+            {...rest}
             className={cn(
               'not-prose flex flex-col rounded-xl border p-3 gap-3 shadow-md overflow-hidden',
-              props.className,
+              rest.className,
             )}
             onSubmit={onSubmit}
           >
-            <FormHeader
-              method={method}
-              route={route}
-              isLoading={testQuery.isLoading}
-            />
-            {servers.length > 1 ? (
-              <CollapsiblePanel title="Server URL">
-                <ServerSelect
-                  server={server}
-                  onServerChanged={setServer}
-                  onVariablesChanged={setServerVariables}
-                />
-              </CollapsiblePanel>
-            ) : null}
-
-            {params.headers.length > 0 || authorization ? (
-              <CollapsiblePanel title="Headers">
-                {authorization ? (
-                  <AuthField authorization={authorization} />
-                ) : null}
-                {params.headers.map((field) =>
-                  renderCustomField(
-                    `header.${field.name}`,
-                    field,
-                    fields.parameter,
-                    field.name,
-                  ),
+            <div className="flex flex-row items-center gap-2 text-sm">
+              <MethodLabel>{method}</MethodLabel>
+              <Route route={route} className="flex-1" />
+              <button
+                type="submit"
+                className={cn(
+                  buttonVariants({ color: 'primary', size: 'sm' }),
+                  'px-3 py-1.5',
                 )}
-              </CollapsiblePanel>
-            ) : null}
-
-            {params.paths.length > 0 ? (
-              <CollapsiblePanel title="Path">
-                {params.paths.map((field) =>
-                  renderCustomField(
-                    `path.${field.name}`,
-                    field,
-                    fields.parameter,
-                    field.name,
-                  ),
-                )}
-              </CollapsiblePanel>
-            ) : null}
-
-            {params.queries.length > 0 ? (
-              <CollapsiblePanel title="Query">
-                {params.queries.map((field) =>
-                  renderCustomField(
-                    `query.${field.name}`,
-                    field,
-                    fields.parameter,
-                    field.name,
-                  ),
-                )}
-              </CollapsiblePanel>
-            ) : null}
-
-            {params.cookies.length > 0 ? (
-              <CollapsiblePanel title="Cookies">
-                {params.cookies.map((field) =>
-                  renderCustomField(
-                    `cookie.${field.name}`,
-                    field,
-                    fields.parameter,
-                    field.name,
-                  ),
-                )}
-              </CollapsiblePanel>
-            ) : null}
-
-            {body ? (
-              <CollapsiblePanel title="Body">
-                {body.type === 'object' && !fields.body ? (
-                  <ObjectInput field={body} fieldName="body" />
+                disabled={testQuery.isLoading}
+              >
+                {testQuery.isLoading ? (
+                  <Loader2 className="size-4 animate-spin" />
                 ) : (
-                  renderCustomField('body', body, fields.body)
+                  'Send'
                 )}
-              </CollapsiblePanel>
-            ) : null}
+              </button>
+            </div>
 
+            <FormBody
+              body={body}
+              fields={fields}
+              parameters={parameters}
+              authorization={authorization}
+            />
             {testQuery.data ? <ResultDisplay data={testQuery.data} /> : null}
           </form>
         </AuthProvider>
       </SchemaContext.Provider>
     </FormProvider>
+  );
+}
+
+const paramNames = ['Headers', 'Cookies', 'Query', 'Path'] as const;
+const paramTypes = ['header', 'cookie', 'query', 'path'] as const;
+
+function FormBody({
+  authorization,
+  parameters = [],
+  body,
+  fields = {},
+}: Pick<ClientProps, 'parameters' | 'authorization' | 'body' | 'fields'>) {
+  const { servers } = useApiContext();
+  const { server, setServer, setServerVariables } = useServerSelectContext();
+
+  const params = useMemo(() => {
+    return paramTypes.map((param) => parameters.filter((v) => v.in === param));
+  }, [parameters]);
+
+  return (
+    <>
+      {servers.length > 1 ? (
+        <CollapsiblePanel title="Server URL">
+          <ServerSelect
+            server={server}
+            onServerChanged={setServer}
+            onVariablesChanged={setServerVariables}
+          />
+        </CollapsiblePanel>
+      ) : null}
+
+      {params.map((param, i) => {
+        const name = paramNames[i];
+        const type = paramTypes[i];
+        if ((param.length === 0 && type !== 'header') || !authorization) return;
+
+        return (
+          <CollapsiblePanel key={name} title={name}>
+            {type === 'header' && authorization ? (
+              <AuthField authorization={authorization} />
+            ) : null}
+            {param.map((field) => {
+              const fieldName = `${type}.${field.name}` as const;
+
+              if (!fields?.parameter) {
+                return (
+                  <FieldSet
+                    key={fieldName}
+                    name={field.name}
+                    fieldName={fieldName}
+                    field={field}
+                  />
+                );
+              }
+
+              return renderCustomField(
+                fieldName,
+                field,
+                fields.parameter,
+                field.name,
+              );
+            })}
+          </CollapsiblePanel>
+        );
+      })}
+
+      {body ? (
+        <CollapsiblePanel title="Body">
+          {fields.body ? (
+            renderCustomField('body', body, fields.body)
+          ) : body.type === 'object' ? (
+            <ObjectInput field={body} fieldName="body" />
+          ) : (
+            <FieldSet field={body} fieldName="body" />
+          )}
+        </CollapsiblePanel>
+      ) : null}
+    </>
+  );
+}
+
+function renderCustomField(
+  fieldName: string,
+  info: RequestSchema & { name?: string },
+  field: CustomField<never, never>,
+  key?: string,
+) {
+  return (
+    <Controller
+      key={key}
+      // @ts-expect-error we use string here
+      render={(props) => field.render({ ...props, info })}
+      name={fieldName}
+    />
   );
 }
 
@@ -461,40 +471,6 @@ function Route({
   );
 }
 
-function FormHeader({
-  route,
-  method,
-  isLoading,
-  ...props
-}: HTMLAttributes<HTMLDivElement> & {
-  route: string;
-  method: string;
-  isLoading: boolean;
-}) {
-  return (
-    <div
-      {...props}
-      className={cn(
-        'flex flex-row items-center gap-2 text-sm',
-        props.className,
-      )}
-    >
-      <MethodLabel>{method}</MethodLabel>
-      <Route route={route} className="flex-1" />
-      <button
-        type="submit"
-        className={cn(
-          buttonVariants({ color: 'primary', size: 'sm' }),
-          'px-3 py-1.5',
-        )}
-        disabled={isLoading}
-      >
-        Send
-      </button>
-    </div>
-  );
-}
-
 function DefaultResultDisplay({ data }: { data: FetchResult }) {
   const statusInfo = useMemo(() => getStatusInfo(data.status), [data.status]);
   const { shikiOptions } = useApiContext();
@@ -518,7 +494,7 @@ function DefaultResultDisplay({ data }: { data: FetchResult }) {
               ? data.data
               : JSON.stringify(data.data, null, 2)
           }
-          {...shikiOptions}
+          options={shikiOptions}
         />
       ) : null}
     </div>
