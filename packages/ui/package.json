@@ -37,12 +37,9 @@
       "types": "./dist/provider.d.ts"
     },
     "./mdx": {
+      "node": "./dist/mdx.server.js",
       "import": "./dist/mdx.js",
       "types": "./dist/mdx.d.ts"
-    },
-    "./mdx.server": {
-      "import": "./dist/mdx.server.js",
-      "types": "./dist/mdx.server.d.ts"
     },
     "./og": {
       "import": "./dist/og.js",

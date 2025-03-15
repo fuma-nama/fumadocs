@@ -31,3 +31,5 @@ export function createRelativeLink(
     return <OverrideLink href={href} {...props} />;
   };
 }
+
+export { defaultMdxComponents as default };

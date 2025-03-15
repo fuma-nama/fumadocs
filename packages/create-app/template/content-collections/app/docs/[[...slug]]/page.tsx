@@ -8,8 +8,7 @@ import {
 } from 'fumadocs-ui/page';
 import { notFound } from 'next/navigation';
 import { MDXContent } from '@content-collections/mdx/react';
-import defaultMdxComponents from 'fumadocs-ui/mdx';
-import { createRelativeLink } from 'fumadocs-ui/mdx.server';
+import defaultMdxComponents, { createRelativeLink } from 'fumadocs-ui/mdx';
 
 export default async function Page(props: {
   params: Promise<{ slug?: string[] }>;

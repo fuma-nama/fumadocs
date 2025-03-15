@@ -17,11 +17,17 @@ import defaultMdxComponents from 'fumadocs-ui/mdx';
 To support links with relative file path in `href`, override the default `a` component with:
 
 ```ts
-import { createRelativeLink } from 'fumadocs-ui/mdx.server';
+import { createRelativeLink } from 'fumadocs-ui/mdx';
 import { source } from '@/lib/source';
 
 const page = source.getPage(['...']);
 const a = createRelativeLink(source, page);
 ```
+
+```mdx
+[My Link](./file.mdx)
+```
+
+[Example: `../(integrations)/open-graph.mdx`](<../(integrations)/open-graph.mdx>)
 
 <Callout type="warn">Server Component only.</Callout>
