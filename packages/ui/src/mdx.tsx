@@ -12,7 +12,7 @@ import { Card, Cards } from '@/components/card';
 import { Callout } from '@/components/callout';
 import { Heading } from '@/components/heading';
 import { cn } from '@/utils/cn';
-import { Pre } from '@/mdx.client';
+import { CodeBlock, Pre } from '@/components/codeblock';
 
 function Image(props: ImgHTMLAttributes<HTMLImageElement>) {
   return (
@@ -33,7 +33,11 @@ function Table(props: TableHTMLAttributes<HTMLTableElement>) {
 }
 
 const defaultMdxComponents = {
-  pre: Pre as FC<HTMLAttributes<HTMLPreElement>>,
+  pre: (props: HTMLAttributes<HTMLPreElement>) => (
+    <CodeBlock {...props}>
+      <Pre>{props.children}</Pre>
+    </CodeBlock>
+  ),
   Card,
   Cards,
   a: Link as FC<AnchorHTMLAttributes<HTMLAnchorElement>>,
@@ -59,5 +63,12 @@ const defaultMdxComponents = {
   table: Table,
   Callout,
 };
+
+export const createRelativeLink: typeof import('./mdx.server').createRelativeLink =
+  () => {
+    throw new Error(
+      '`createRelativeLink` is only supported in Node.js environment',
+    );
+  };
 
 export { defaultMdxComponents as default };

@@ -1,5 +1,14 @@
 # @fuma-docs/openapi
 
+## 7.0.2
+
+### Patch Changes
+
+- 30b7bd4: Fix codeblock highlight options being ignored
+- Updated dependencies [e7e2a2a]
+  - fumadocs-ui@15.0.18
+  - fumadocs-core@15.0.18
+
 ## 7.0.1
 
 ### Patch Changes

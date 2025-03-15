@@ -13,7 +13,6 @@ import {
   type ReactElement,
   type ReactNode,
 } from 'react';
-import defaultComponents from 'fumadocs-ui/mdx';
 import { Popup, PopupContent, PopupTrigger } from 'fumadocs-twoslash/ui';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 import { Callout } from 'fumadocs-ui/components/callout';
@@ -30,6 +29,7 @@ import { Mermaid } from '@theguild/remark-mermaid/mermaid';
 import { Rate } from '@/components/rate';
 import { repo, owner, onRateAction } from '@/lib/github';
 import type { MDXComponents } from 'mdx/types';
+import defaultMdxComponents, { createRelativeLink } from 'fumadocs-ui/mdx';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -79,8 +79,9 @@ export default async function Page(props: {
         {preview ? <PreviewRenderer preview={preview} /> : null}
         <Mdx
           components={{
-            ...defaultComponents,
+            ...defaultMdxComponents,
             ...((await import('lucide-react')) as unknown as MDXComponents),
+            a: createRelativeLink(source, page),
 
             Popup,
             PopupContent,

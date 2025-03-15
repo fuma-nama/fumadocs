@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 15.0.18
+
+### Patch Changes
+
+- e7e2a2a: Support `createRelativeLink` component factory for using relative file paths in `href`
+  - fumadocs-core@15.0.18
+
 ## 15.0.17
 
 ### Patch Changes

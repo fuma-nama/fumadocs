@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-ui",
-  "version": "15.0.17",
+  "version": "15.0.18",
   "description": "The framework for building a documentation website in Next.js",
   "keywords": [
     "NextJs",
@@ -37,6 +37,7 @@
       "types": "./dist/provider.d.ts"
     },
     "./mdx": {
+      "node": "./dist/mdx.server.js",
       "import": "./dist/mdx.js",
       "types": "./dist/mdx.d.ts"
     },
