@@ -40,6 +40,10 @@
       "import": "./dist/mdx.js",
       "types": "./dist/mdx.d.ts"
     },
+    "./mdx.server": {
+      "import": "./dist/mdx.server.js",
+      "types": "./dist/mdx.server.d.ts"
+    },
     "./og": {
       "import": "./dist/og.js",
       "types": "./dist/og.d.ts"

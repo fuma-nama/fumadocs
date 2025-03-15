@@ -14,6 +14,7 @@ import {
   type ReactNode,
 } from 'react';
 import defaultComponents from 'fumadocs-ui/mdx';
+import { createRelativeLink } from 'fumadocs-ui/mdx.server';
 import { Popup, PopupContent, PopupTrigger } from 'fumadocs-twoslash/ui';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 import { Callout } from 'fumadocs-ui/components/callout';
@@ -81,6 +82,7 @@ export default async function Page(props: {
           components={{
             ...defaultComponents,
             ...((await import('lucide-react')) as unknown as MDXComponents),
+            a: createRelativeLink(source, page),
 
             Popup,
             PopupContent,
