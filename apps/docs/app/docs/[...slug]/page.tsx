@@ -95,7 +95,7 @@ export default async function Page(props: {
               if (!found) return <Link href={href} {...props} />;
 
               return (
-                <HoverCard openDelay={100}>
+                <HoverCard>
                   <HoverCardTrigger asChild>
                     <Link
                       href={

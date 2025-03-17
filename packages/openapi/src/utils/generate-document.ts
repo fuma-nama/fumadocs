@@ -64,7 +64,7 @@ export function generateDocument(
 
   const banner = dump({
     title: options.title,
-    description: options.description,
+    description: !includeDescription ? options.description : undefined,
     full: true,
     ...extend,
     _openapi: {

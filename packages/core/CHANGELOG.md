@@ -1,5 +1,16 @@
 # next-docs-zeta
 
+## 15.1.0
+
+### Minor Changes
+
+- f491f6f: Lazy build page tree by default
+- f491f6f: Support `getPageByHref()` on loader API
+
+### Patch Changes
+
+- f491f6f: Fix `findNeighbour()` doesn't exclude other nodes of another root
+
 ## 15.0.18
 
 ## 15.0.17
