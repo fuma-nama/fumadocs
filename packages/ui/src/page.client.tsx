@@ -10,7 +10,6 @@ import {
 } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
-import { cva } from 'class-variance-authority';
 import { cn } from '@/utils/cn';
 import { useI18n } from './contexts/i18n';
 import { useTreeContext, useTreePath } from './contexts/tree';
@@ -122,23 +121,16 @@ export function LastUpdate(props: { date: Date }) {
   );
 }
 
+type Item = Pick<PageTree.Item, 'name' | 'description' | 'url'>;
 export interface FooterProps {
   /**
    * Items including information for the next and previous page
    */
   items?: {
-    previous?: { name: string; url: string };
-    next?: { name: string; url: string };
+    previous?: Item;
+    next?: Item;
   };
 }
-
-const itemVariants = cva(
-  'flex w-full flex-col gap-2 rounded-lg border p-4 text-sm transition-colors hover:bg-fd-accent/80 hover:text-fd-accent-foreground',
-);
-
-const itemLabel = cva(
-  'inline-flex items-center gap-0.5 text-fd-muted-foreground',
-);
 
 function scanNavigationList(tree: PageTree.Node[]) {
   const list: PageTree.Item[] = [];
@@ -165,7 +157,6 @@ const listCache = new WeakMap<PageTree.Root, PageTree.Item[]>();
 
 export function Footer({ items }: FooterProps) {
   const { root } = useTreeContext();
-  const { text } = useI18n();
   const pathname = usePathname();
 
   const { previous, next } = useMemo(() => {
@@ -185,29 +176,52 @@ export function Footer({ items }: FooterProps) {
   }, [items, pathname, root]);
 
   return (
-    <div className="grid grid-cols-2 gap-4 pb-6">
-      {previous ? (
-        <Link href={previous.url} className={cn(itemVariants())}>
-          <div className={cn(itemLabel())}>
-            <ChevronLeft className="-ms-1 size-4 shrink-0 rtl:rotate-180" />
-            <p>{text.previousPage}</p>
-          </div>
-          <p className="font-medium md:text-[15px]">{previous.name}</p>
-        </Link>
-      ) : null}
-      {next ? (
-        <Link
-          href={next.url}
-          className={cn(itemVariants({ className: 'col-start-2 text-end' }))}
-        >
-          <div className={cn(itemLabel({ className: 'flex-row-reverse' }))}>
-            <ChevronRight className="-me-1 size-4 shrink-0 rtl:rotate-180" />
-            <p>{text.nextPage}</p>
-          </div>
-          <p className="font-medium md:text-[15px]">{next.name}</p>
-        </Link>
-      ) : null}
+    <div
+      className={cn(
+        '@container grid gap-4 pb-6',
+        previous && next ? 'grid-cols-2' : 'grid-cols-1',
+      )}
+    >
+      {previous ? <FooterItem item={previous} index={0} /> : null}
+      {next ? <FooterItem item={next} index={1} /> : null}
     </div>
+  );
+}
+
+function FooterItem({ item, index }: { item: Item; index: 0 | 1 }) {
+  const { text } = useI18n();
+  const Icon = index === 0 ? ChevronLeft : ChevronRight;
+  const title = item.description ? item.name : null;
+  const description = item.description ?? item.name;
+
+  return (
+    <Link
+      href={item.url}
+      className={cn(
+        'flex flex-col gap-2 rounded-lg border p-4 text-sm transition-colors hover:bg-fd-accent/80 hover:text-fd-accent-foreground @max-lg:col-span-full',
+        index === 1 && 'text-end',
+      )}
+    >
+      <div
+        className={cn(
+          'inline-flex items-center gap-1.5',
+          index === 1 && 'flex-row-reverse',
+          title ? 'font-medium' : 'text-fd-muted-foreground',
+        )}
+      >
+        <Icon className="-mx-1 size-4 shrink-0 rtl:rotate-180" />
+        <p>{title ?? text.nextPage}</p>
+      </div>
+      <p
+        className={cn(
+          title
+            ? 'text-fd-muted-foreground truncate'
+            : 'font-medium md:text-[15px]',
+        )}
+      >
+        {description}
+      </p>
+    </Link>
   );
 }
 

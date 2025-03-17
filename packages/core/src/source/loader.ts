@@ -11,6 +11,7 @@ import type { BuildPageTreeOptions } from './page-tree-builder';
 import { createPageTreeBuilder } from './page-tree-builder';
 import { type FileInfo } from './path';
 import type { MetaFile, PageFile, Storage } from './file-system';
+import * as path from 'node:path';
 
 export interface LoaderConfig {
   source: SourceConfig;
@@ -82,7 +83,21 @@ export interface LoaderOutput<Config extends LoaderConfig> {
     ? Record<string, PageTree.Root>
     : PageTree.Root;
 
-  getPageTree(locale?: string): PageTree.Root;
+  getPageTree: (locale?: string) => PageTree.Root;
+  getPageByHref: (
+    href: string,
+    options?: {
+      /**
+       * resolve relative file paths in `href` from specified directory
+       */
+      dir?: string;
+    },
+  ) =>
+    | {
+        page: Page<Config['source']['pageData']>;
+        hash?: string;
+      }
+    | undefined;
 
   _i18n?: I18nConfig;
 
@@ -128,7 +143,7 @@ function indexPages(
   getUrl: UrlFn,
   i18n?: I18nConfig,
 ): {
-  // (locale.slugs -> page[])
+  // (locale.slugs -> page)
   pages: Map<string, Page>;
 
   pathToFile: Map<string, Page | Meta>;
@@ -168,6 +183,8 @@ function indexPages(
 }
 
 export function createGetUrl(baseUrl: string, i18n?: I18nConfig): UrlFn {
+  const baseSlugs = baseUrl.split('/');
+
   return (slugs, locale) => {
     const hideLocale = i18n?.hideLocale ?? 'never';
     let urlLocale: string | undefined;
@@ -181,9 +198,8 @@ export function createGetUrl(baseUrl: string, i18n?: I18nConfig): UrlFn {
       urlLocale = locale;
     }
 
-    const paths = urlLocale
-      ? [urlLocale, ...baseUrl.split('/'), ...slugs]
-      : [...baseUrl.split('/'), ...slugs];
+    const paths = [...baseSlugs, ...slugs];
+    if (urlLocale) paths.unshift(urlLocale);
 
     return `/${paths.filter((v) => v.length > 0).join('/')}`;
   };
@@ -230,25 +246,58 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
   );
   const walker = indexPages(storage, getUrl, options.i18n);
   const builder = createPageTreeBuilder();
-  const pageTree =
-    options.i18n === undefined
-      ? builder.build({
-          storage,
-          resolveIcon: options.icon,
-          getUrl,
-          ...options.pageTree,
-        })
-      : builder.buildI18n({
+  let pageTree: LoaderOutput<LoaderConfig>['pageTree'] | undefined;
+
+  return {
+    _i18n: options.i18n,
+    get pageTree() {
+      if (options.i18n) {
+        pageTree ??= builder.buildI18n({
           storage,
           resolveIcon: options.icon,
           getUrl,
           i18n: options.i18n,
           ...options.pageTree,
+        }) as unknown as LoaderOutput<LoaderConfig>['pageTree'];
+      } else {
+        pageTree ??= builder.build({
+          storage,
+          resolveIcon: options.icon,
+          getUrl,
+          ...options.pageTree,
         });
+      }
 
-  return {
-    _i18n: options.i18n,
-    pageTree: pageTree as LoaderOutput<LoaderConfig>['pageTree'],
+      return pageTree;
+    },
+    set pageTree(v) {
+      pageTree = v;
+    },
+    getPageByHref(href, { dir = '' } = {}) {
+      const pages = Array.from(walker.pages.values());
+      const [value, hash] = href.split('#', 2);
+
+      if (
+        value.startsWith('.') &&
+        (value.endsWith('.md') || value.endsWith('.mdx'))
+      ) {
+        const hrefPath = path.join(dir, value);
+        const target = pages.find((item) => item.file.path === hrefPath);
+
+        if (target)
+          return {
+            page: target,
+            hash,
+          };
+      }
+
+      const target = pages.find((item) => item.url === value);
+      if (target)
+        return {
+          page: target,
+          hash,
+        };
+    },
     getPages(language = options.i18n?.defaultLanguage ?? '') {
       const pages: Page[] = [];
 
@@ -281,12 +330,12 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
     },
     getPageTree(locale) {
       if (options.i18n) {
-        return pageTree[
+        return this.pageTree[
           (locale ?? options.i18n.defaultLanguage) as keyof typeof pageTree
-        ] as PageTree.Root;
+        ];
       }
 
-      return pageTree as PageTree.Root;
+      return this.pageTree;
     },
     getNodePage(node) {
       const ref = node.$ref?.file ?? node.$id;

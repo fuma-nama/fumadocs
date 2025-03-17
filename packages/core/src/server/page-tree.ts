@@ -19,6 +19,8 @@ export interface Item {
   name: ReactNode;
   url: string;
   external?: boolean;
+
+  description?: ReactNode;
   icon?: ReactElement;
 }
 
