@@ -67,7 +67,7 @@
     "eslint-config-custom": "workspace:*",
     "fast-glob": "^3.3.3",
     "gray-matter": "^4.0.3",
-    "next-validate-link": "^1.5.1",
+    "next-validate-link": "^1.5.2",
     "postcss": "^8.5.3",
     "tailwindcss": "^4.0.14",
     "tailwindcss-animate": "^1.0.7",

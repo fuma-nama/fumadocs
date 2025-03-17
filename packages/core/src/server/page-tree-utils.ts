@@ -52,16 +52,19 @@ export function findNeighbour(
 export function getPageTreeRoots(
   pageTree: PageTree.Root | PageTree.Folder,
 ): (PageTree.Root | PageTree.Folder)[] {
-  return pageTree.children.flatMap((child) => {
+  const result = pageTree.children.flatMap((child) => {
     if (child.type !== 'folder') return [];
     const roots = getPageTreeRoots(child);
 
     if (child.root) {
-      return [child, ...roots];
+      roots.push(child);
     }
 
     return roots;
   });
+
+  if (!('type' in pageTree)) result.push(pageTree);
+  return result;
 }
 
 /**

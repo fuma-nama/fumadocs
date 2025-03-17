@@ -1,6 +1,6 @@
 import fg from 'fast-glob';
 import { printErrors, scanURLs, validateFiles } from 'next-validate-link';
-import { getSlugs, parseFilePath } from 'fumadocs-core/source';
+import { createGetUrl, getSlugs, parseFilePath } from 'fumadocs-core/source';
 import { getTableOfContents } from 'fumadocs-core/server';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -74,9 +74,15 @@ async function checkLinks() {
     `collected ${scanned.urls.size} URLs, ${scanned.fallbackUrls.length} fallbacks`,
   );
 
+  const getUrl = createGetUrl('/docs');
   printErrors(
     await validateFiles([...docsFiles, ...blogFiles], {
       scanned,
+
+      pathToUrl(value) {
+        const info = parseFilePath(path.relative('content/docs', value));
+        return getUrl(getSlugs(info));
+      },
     }),
     true,
   );
