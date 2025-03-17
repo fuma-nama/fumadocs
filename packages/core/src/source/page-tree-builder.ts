@@ -258,6 +258,7 @@ function buildFileNode(
     $id: localized.file.path,
     type: 'page',
     name: localized.data.data.title ?? pathToName(localized.file.name),
+    description: localized.data.data.description,
     icon: ctx.options.resolveIcon?.(localized.data.data.icon),
     url: ctx.options.getUrl(localized.data.slugs, ctx.lang),
     $ref: !ctx.options.noRef

@@ -24,22 +24,44 @@ export function flattenTree(tree: PageTree.Node[]): PageTree.Item[] {
 export function findNeighbour(
   tree: PageTree.Root,
   url: string,
+  options?: {
+    separateRoot?: boolean;
+  },
 ): {
   previous?: PageTree.Item;
   next?: PageTree.Item;
 } {
-  const list = flattenTree(tree.children);
+  const { separateRoot = true } = options ?? {};
+  const roots = separateRoot ? getPageTreeRoots(tree) : [tree];
+  const lists = roots.map((node) => flattenTree(node.children));
 
-  for (let i = 0; i < list.length; i++) {
-    if (list[i].url === url) {
-      return {
-        next: list[i + 1],
-        previous: list[i - 1],
-      };
+  for (const list of lists) {
+    for (let i = 0; i < list.length; i++) {
+      if (list[i].url === url) {
+        return {
+          next: list[i + 1],
+          previous: list[i - 1],
+        };
+      }
     }
   }
 
   return {};
+}
+
+export function getPageTreeRoots(
+  pageTree: PageTree.Root | PageTree.Folder,
+): (PageTree.Root | PageTree.Folder)[] {
+  return pageTree.children.flatMap((child) => {
+    if (child.type !== 'folder') return [];
+    const roots = getPageTreeRoots(child);
+
+    if (child.root) {
+      return [child, ...roots];
+    }
+
+    return roots;
+  });
 }
 
 /**

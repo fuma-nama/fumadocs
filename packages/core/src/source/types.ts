@@ -13,6 +13,7 @@ export interface MetaData {
 export interface PageData {
   icon?: string | undefined;
   title?: string;
+  description?: string | undefined;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- infer types

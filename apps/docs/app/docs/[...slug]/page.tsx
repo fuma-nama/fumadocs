@@ -29,7 +29,13 @@ import { Mermaid } from '@theguild/remark-mermaid/mermaid';
 import { Rate } from '@/components/rate';
 import { repo, owner, onRateAction } from '@/lib/github';
 import type { MDXComponents } from 'mdx/types';
-import defaultMdxComponents, { createRelativeLink } from 'fumadocs-ui/mdx';
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from '@/components/ui/hover-card';
+import Link from 'fumadocs-core/link';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -81,8 +87,34 @@ export default async function Page(props: {
           components={{
             ...defaultMdxComponents,
             ...((await import('lucide-react')) as unknown as MDXComponents),
-            a: createRelativeLink(source, page),
+            a: ({ href, ...props }) => {
+              const found = source.getPageByHref(href ?? '', {
+                dir: page.file.dirname,
+              });
 
+              if (!found) return <Link href={href} {...props} />;
+
+              return (
+                <HoverCard openDelay={100}>
+                  <HoverCardTrigger asChild>
+                    <Link
+                      href={
+                        found.hash
+                          ? `${found.page.url}#${found.hash}`
+                          : found.page.url
+                      }
+                      {...props}
+                    />
+                  </HoverCardTrigger>
+                  <HoverCardContent className="text-sm">
+                    <p className="font-medium">{found.page.data.title}</p>
+                    <p className="text-fd-muted-foreground">
+                      {found.page.data.description}
+                    </p>
+                  </HoverCardContent>
+                </HoverCard>
+              );
+            },
             Popup,
             PopupContent,
             PopupTrigger,
