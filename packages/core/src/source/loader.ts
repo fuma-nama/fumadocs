@@ -9,7 +9,7 @@ import {
 import type { MetaData, PageData, UrlFn } from './types';
 import type { BuildPageTreeOptions } from './page-tree-builder';
 import { createPageTreeBuilder } from './page-tree-builder';
-import { type FileInfo } from './path';
+import { type FileInfo, getLocale } from './path';
 import type { MetaFile, PageFile, Storage } from './file-system';
 import * as path from 'node:path';
 
@@ -156,21 +156,25 @@ function indexPages(
     if (item.format === 'meta')
       pathToFile.set(item.file.path, fileToMeta(item));
 
-    if (item.format === 'page') {
-      const page = fileToPage(item, getUrl, item.file.locale);
+    if (
+      item.format === 'page' &&
+      (item.file.locale ?? defaultLanguage) === defaultLanguage
+    ) {
+      const page = fileToPage(item, getUrl, defaultLanguage);
       pathToFile.set(item.file.path, page);
 
-      if (item.file.locale) continue;
       map.set(`${defaultLanguage}.${page.slugs.join('/')}`, page);
       if (!i18n) continue;
+      const basePath = getLocale(item.file.flattenedPath)[0];
 
       for (const lang of i18n.languages) {
-        const localized = storage.read(
-          `${item.file.flattenedPath}.${lang}`,
-          'page',
-        );
+        if (lang === defaultLanguage) continue;
 
-        const localizedPage = fileToPage(localized ?? item, getUrl, lang);
+        const localizedPage = fileToPage(
+          storage.read(`${basePath}.${lang}`, 'page') ?? item,
+          getUrl,
+          lang,
+        );
         map.set(`${lang}.${localizedPage.slugs.join('/')}`, localizedPage);
       }
     }

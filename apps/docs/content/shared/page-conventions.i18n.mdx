@@ -1,16 +1,12 @@
-You can create a Markdown or meta file for specific language by adding `.{locale}` to your file name, like `page.fr.md` and `meta.fr.json`.
+You can add Markdown/meta files for different languages by attending `.{locale}` to your file name, like `page.fr.md` and `meta.fr.json`.
 
-Be aware that you must create a file for the default locale first.
+Make sure to create a file for the default locale first, the locale code is optional (e.g. both `get-started.mdx` and `get-started.en.mdx` are accepted).
 
-> For the default language, don't add the locale code to file name, just leave it like `get-started.mdx`.
-
-### Example
-
-Assume your default language is `en`.
-
-| Name              |                                               |
-| ----------------- | --------------------------------------------- |
-| file.mdx          | Correct                                       |
-| file.cn.mdx       | Correct                                       |
-| file.en.mdx       | Default locale doesn't need a locale code     |
-| components.cn.mdx | Missing `components.mdx` for default language |
+<Files>
+  <Folder name="content/docs" defaultOpen>
+    <File name="meta.json" />
+    <File name="meta.cn.json" />
+    <File name="get-started.mdx" />
+    <File name="get-started.cn.mdx" />
+  </Folder>
+</Files>

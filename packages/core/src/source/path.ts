@@ -62,7 +62,7 @@ export function parseFolderPath(path: string): FileInfo {
   };
 }
 
-function getLocale(name: string): [string, string?] {
+export function getLocale(name: string): [string, string?] {
   const sep = name.lastIndexOf('.');
   if (sep === -1) return [name];
   const locale = name.slice(sep + 1);
