@@ -77,7 +77,7 @@ function buildAll(
   const output: PageTree.Node[] = [];
   const folders: PageTree.Folder[] = [];
 
-  for (const node of nodes.toSorted((a, b) =>
+  for (const node of [...nodes].sort((a, b) =>
     a.file.name.localeCompare(b.file.name),
   )) {
     const locale = node.file.locale ?? ctx.defaultLanguage;
