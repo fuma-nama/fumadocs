@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import type { LinkItemType } from '@/layouts/links';
 import type { NavProviderProps, TitleProps } from '@/components/layout/nav';
 import { Slot } from '@radix-ui/react-slot';
+import type { I18nConfig } from 'fumadocs-core/i18n';
 
 export interface NavOptions extends SharedNavProps {
   enabled: boolean;
@@ -33,11 +34,11 @@ export interface BaseLayoutProps {
   disableThemeSwitch?: boolean;
 
   /**
-   * Enable Language Switch
+   * I18n options
    *
    * @defaultValue false
    */
-  i18n?: boolean;
+  i18n?: boolean | I18nConfig;
 
   /**
    * GitHub url

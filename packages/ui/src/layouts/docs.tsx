@@ -201,7 +201,7 @@ function SidebarFooterItems({
   themeSwitch,
   links,
 }: {
-  i18n: boolean;
+  i18n: Required<DocsLayoutProps>['i18n'];
   links: LinkItemType[];
   themeSwitch: DocsLayoutProps['themeSwitch'];
 }) {

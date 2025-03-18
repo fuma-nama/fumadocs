@@ -18,6 +18,6 @@ export const { GET } = createFromSource(source, undefined, {
     },
 
     // use the English tokenizer
-    cs: 'english',
+    'custom-locale': 'english',
   },
 });
