@@ -2,9 +2,18 @@ import { slash, splitPath } from '@/utils/path';
 
 export interface FileInfo {
   /**
-   * The locale extension of file
+   * locale extension from the last second `.`, like `.en`
+   *
+   * empty string if no locale
    */
-  locale?: string;
+  locale: string;
+
+  /**
+   * File path without extension
+   *
+   * @deprecated obtain it with `join(dirname, name)`
+   */
+  flattenedPath: string;
 
   /**
    * Original path of file
@@ -12,12 +21,28 @@ export interface FileInfo {
   path: string;
 
   /**
-   * File path without extension
+   * File name without locale and extension
    */
-  flattenedPath: string;
+  name: string;
 
   /**
-   * File name without locale and extension
+   * file extension from the last `.`, like `.md`
+   *
+   * empty string if no file extension
+   */
+  ext: string;
+
+  dirname: string;
+}
+
+export interface FolderInfo {
+  /**
+   * Original path of folder
+   */
+  path: string;
+
+  /**
+   * folder name
    */
   name: string;
 
@@ -28,47 +53,47 @@ export function parseFilePath(path: string): FileInfo {
   const segments = splitPath(slash(path));
 
   const dirname = segments.slice(0, -1).join('/');
-  const base = segments.at(-1) ?? '';
+  let name = segments.at(-1) ?? '';
+  let ext = '';
+  let locale = '';
 
-  const dotIdx = base.lastIndexOf('.');
-  const nameWithLocale = dotIdx !== -1 ? base.slice(0, dotIdx) : base;
+  let dotIdx = name.lastIndexOf('.');
+  if (dotIdx !== -1) {
+    ext = name.substring(dotIdx);
+    name = name.substring(0, dotIdx);
+  }
 
-  const flattenedPath = [dirname, nameWithLocale]
-    .filter((p) => p.length > 0)
-    .join('/');
+  dotIdx = name.lastIndexOf('.');
+  if (dotIdx !== -1 && isLocale(name.substring(dotIdx))) {
+    locale = name.substring(dotIdx);
+    name = name.substring(0, dotIdx);
+  }
 
-  const [name, locale] = getLocale(nameWithLocale);
   return {
     dirname,
     name,
-    flattenedPath,
     locale,
     path: segments.join('/'),
+    ext,
+    flattenedPath: [dirname, `${name}${locale}`]
+      .filter((p) => p.length > 0)
+      .join('/'),
   };
 }
 
-export function parseFolderPath(path: string): FileInfo {
+function isLocale(code: string): boolean {
+  return code.length > 0 && !/\d+/.test(code);
+}
+
+export function parseFolderPath(path: string): FolderInfo {
   const segments = splitPath(slash(path));
   const base = segments.at(-1) ?? '';
-  const [name, locale] = getLocale(base);
-  const flattenedPath = segments.join('/');
 
   return {
     dirname: segments.slice(0, -1).join('/'),
-    name,
-    flattenedPath,
-    locale,
-    path: flattenedPath,
+    name: base,
+    path: segments.join('/'),
   };
-}
-
-export function getLocale(name: string): [string, string?] {
-  const sep = name.lastIndexOf('.');
-  if (sep === -1) return [name];
-  const locale = name.slice(sep + 1);
-
-  if (/\d+/.exec(locale)) return [name];
-  return [name.slice(0, sep), locale];
 }
 
 /**

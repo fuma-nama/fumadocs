@@ -367,8 +367,9 @@ test('Internationalized Routing', () => {
             },
             "file": {
               "dirname": "",
+              "ext": ".mdx",
               "flattenedPath": "test.cn",
-              "locale": "cn",
+              "locale": ".cn",
               "name": "test",
               "path": "test.cn.mdx",
             },
@@ -384,8 +385,9 @@ test('Internationalized Routing', () => {
             },
             "file": {
               "dirname": "nested",
+              "ext": ".mdx",
               "flattenedPath": "nested/test.cn",
-              "locale": "cn",
+              "locale": ".cn",
               "name": "test",
               "path": "nested/test.cn.mdx",
             },
@@ -407,8 +409,9 @@ test('Internationalized Routing', () => {
             },
             "file": {
               "dirname": "",
+              "ext": ".mdx",
               "flattenedPath": "test",
-              "locale": undefined,
+              "locale": "",
               "name": "test",
               "path": "test.mdx",
             },
@@ -424,8 +427,9 @@ test('Internationalized Routing', () => {
             },
             "file": {
               "dirname": "nested",
+              "ext": ".mdx",
               "flattenedPath": "nested/test.en",
-              "locale": "en",
+              "locale": ".en",
               "name": "test",
               "path": "nested/test.en.mdx",
             },

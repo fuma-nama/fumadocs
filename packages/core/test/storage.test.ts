@@ -75,8 +75,9 @@ test('Building File Graph', () => {
         },
         "file": {
           "dirname": "",
+          "ext": ".mdx",
           "flattenedPath": "test",
-          "locale": undefined,
+          "locale": "",
           "name": "test",
           "path": "test.mdx",
         },
@@ -96,8 +97,9 @@ test('Building File Graph', () => {
             },
             "file": {
               "dirname": "nested",
+              "ext": ".mdx",
               "flattenedPath": "nested/test",
-              "locale": undefined,
+              "locale": "",
               "name": "test",
               "path": "nested/test.mdx",
             },
@@ -118,8 +120,9 @@ test('Building File Graph', () => {
                 },
                 "file": {
                   "dirname": "nested/nested",
+                  "ext": ".mdx",
                   "flattenedPath": "nested/nested/test",
-                  "locale": undefined,
+                  "locale": "",
                   "name": "test",
                   "path": "nested/nested/test.mdx",
                 },
@@ -128,8 +131,6 @@ test('Building File Graph', () => {
             ],
             "file": {
               "dirname": "nested",
-              "flattenedPath": "nested/nested",
-              "locale": undefined,
               "name": "nested",
               "path": "nested/nested",
             },
@@ -137,8 +138,6 @@ test('Building File Graph', () => {
         ],
         "file": {
           "dirname": "",
-          "flattenedPath": "nested",
-          "locale": undefined,
           "name": "nested",
           "path": "nested",
         },
@@ -166,8 +165,9 @@ test('Building File Graph - with root directory', () => {
         },
         "file": {
           "dirname": "",
+          "ext": ".mdx",
           "flattenedPath": "test",
-          "locale": undefined,
+          "locale": "",
           "name": "test",
           "path": "test.mdx",
         },
@@ -187,8 +187,9 @@ test('Building File Graph - with root directory', () => {
             },
             "file": {
               "dirname": "nested",
+              "ext": ".mdx",
               "flattenedPath": "nested/test",
-              "locale": undefined,
+              "locale": "",
               "name": "test",
               "path": "nested/test.mdx",
             },
@@ -197,8 +198,6 @@ test('Building File Graph - with root directory', () => {
         ],
         "file": {
           "dirname": "",
-          "flattenedPath": "nested",
-          "locale": undefined,
           "name": "nested",
           "path": "nested",
         },

@@ -2,9 +2,8 @@ import type { ReactElement } from 'react';
 import type { I18nConfig } from '@/i18n';
 import type * as PageTree from '../server/page-tree';
 import type { File, Folder, MetaFile, PageFile, Storage } from './file-system';
-import { resolvePath } from '@/utils/path';
+import { joinPath } from '@/utils/path';
 import { type UrlFn } from './types';
-import { getLocale } from '@/source/path';
 
 interface PageTreeBuilderContext {
   lang?: string;
@@ -80,14 +79,16 @@ function buildAll(
   for (const node of [...nodes].sort((a, b) =>
     a.file.name.localeCompare(b.file.name),
   )) {
-    const locale = node.file.locale ?? ctx.defaultLanguage;
+    if (isPageFile(node)) {
+      if (
+        node.file.locale.length > 0 &&
+        node.file.locale.slice(1) !== ctx.defaultLanguage
+      )
+        continue;
 
-    if (isPageFile(node) && locale === ctx.defaultLanguage) {
-      const localized = findFileOfLocale(
-        node.file.flattenedPath,
-        ctx.lang,
+      const localized = ctx.storage.read(
+        joinPath(node.file.dirname, `${node.file.name}.${ctx.lang}`),
         'page',
-        ctx,
       );
 
       const treeNode = buildFileNode(localized ?? node, ctx);
@@ -163,21 +164,15 @@ function resolveFolderItem(
     filename = item.slice(extractPrefix.length);
   }
 
-  const path = resolvePath(folder.file.path, filename);
+  const path = joinPath(folder.file.path, filename);
 
   let itemNode: Folder | PageFile | undefined = ctx.storage.readDir(path);
 
   if (!itemNode) {
-    itemNode = ctx.storage.read(path, 'page');
-
-    // find localized page
-    // use target locale if no forced locale, or specified file doesn't exist
-    if (ctx.lang && !itemNode?.file.locale) {
-      itemNode =
-        findFileOfLocale(path, ctx.lang, 'page', ctx) ??
-        // fallback to default
-        findFileOfLocale(path, ctx.defaultLanguage, 'page', ctx);
-    }
+    itemNode =
+      (ctx.lang ? ctx.storage.read(`${path}.${ctx.lang}`, 'page') : null) ??
+      ctx.storage.read(`${path}.${ctx.defaultLanguage}`, 'page') ??
+      ctx.storage.read(path, 'page');
   }
 
   if (!itemNode) return [];
@@ -199,13 +194,14 @@ function buildFolderNode(
   isGlobalRoot: boolean,
   ctx: PageTreeBuilderContext,
 ): PageTree.Folder {
-  const metaPath = resolvePath(folder.file.path, 'meta');
+  const metaPath = joinPath(folder.file.path, 'meta');
   const meta =
-    findFileOfLocale(metaPath, ctx.lang, 'meta', ctx) ??
-    findFileOfLocale(metaPath, ctx.defaultLanguage, 'meta', ctx);
+    ctx.storage.read(`${metaPath}.${ctx.lang}`, 'meta') ??
+    ctx.storage.read(`${metaPath}.${ctx.defaultLanguage}`, 'meta') ??
+    ctx.storage.read(metaPath, 'meta');
 
   const indexFile = ctx.storage.read(
-    resolvePath(folder.file.flattenedPath, 'index'),
+    joinPath(folder.file.path, 'index'),
     'page',
   );
 
@@ -325,24 +321,6 @@ export function createPageTreeBuilder(): PageTreeBuilder {
       return Object.fromEntries(entries);
     },
   };
-}
-
-function findFileOfLocale<F extends File['format']>(
-  path: string,
-  locale: string | undefined | null,
-  format: F,
-  ctx: PageTreeBuilderContext,
-): Extract<File, { format: F }> | undefined {
-  const pathWithoutLocale = getLocale(path)[0];
-
-  if (locale) {
-    const result = ctx.storage.read(`${pathWithoutLocale}.${locale}`, format);
-    if (result) return result;
-  }
-
-  if ((locale ?? ctx.defaultLanguage) === ctx.defaultLanguage) {
-    return ctx.storage.read(pathWithoutLocale, format);
-  }
 }
 
 /**

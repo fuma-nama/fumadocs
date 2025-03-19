@@ -4,7 +4,7 @@ import type { Transformer } from 'unified';
 import { visit } from 'unist-util-visit';
 import { imageSize } from 'image-size';
 import type { MdxjsEsm } from 'mdast-util-mdxjs-esm';
-import { resolvePath, slash } from '@/utils/path';
+import { joinPath, slash } from '@/utils/path';
 import type { ISizeCalculationResult } from 'image-size/types/interface';
 import { imageSizeFromFile } from 'image-size/fromFile';
 
@@ -211,7 +211,7 @@ async function getImageSize(
     url = src;
   } else if (EXTERNAL_URL_REGEX.test(dir) && isRelative) {
     const base = new URL(dir);
-    base.pathname = resolvePath(base.pathname, src);
+    base.pathname = joinPath(base.pathname, src);
     url = base.toString();
   } else {
     return imageSizeFromFile(isRelative ? path.join(dir, src) : src);

@@ -17,7 +17,7 @@ export function splitPath(path: string): string[] {
  * ['a', '../b/c'] // 'b/c'
  * ```
  */
-export function resolvePath(from: string, join: string): string {
+export function joinPath(from: string, join: string): string {
   const v1 = splitPath(from),
     v2 = splitPath(join);
 
