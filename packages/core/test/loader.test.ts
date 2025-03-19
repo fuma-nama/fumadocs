@@ -226,7 +226,7 @@ const i18nSource: Source<SourceConfig> = {
     },
     {
       type: 'meta',
-      path: 'meta.json',
+      path: 'meta.en.json',
       data: {
         title: 'Docs English',
         pages: ['test', 'nested'],
@@ -242,7 +242,7 @@ const i18nSource: Source<SourceConfig> = {
     },
     {
       type: 'page',
-      path: '/nested/test.mdx',
+      path: '/nested/test.en.mdx',
       data: {
         title: 'Nested Page',
       },
@@ -302,9 +302,9 @@ test('Internationalized Routing', () => {
             "$ref": {},
             "children": [
               {
-                "$id": "nested/test.mdx",
+                "$id": "nested/test.en.mdx",
                 "$ref": {
-                  "file": "nested/test.mdx",
+                  "file": "nested/test.en.mdx",
                 },
                 "name": "Nested Page",
                 "type": "page",
@@ -356,45 +356,6 @@ test('Internationalized Routing', () => {
       }
     `);
 
-  expect(result.getPages()).toMatchInlineSnapshot(`
-    [
-      {
-        "data": {
-          "title": "Hello",
-        },
-        "file": {
-          "dirname": "",
-          "flattenedPath": "test",
-          "locale": undefined,
-          "name": "test",
-          "path": "test.mdx",
-        },
-        "locale": "en",
-        "slugs": [
-          "test",
-        ],
-        "url": "/en/test",
-      },
-      {
-        "data": {
-          "title": "Nested Page",
-        },
-        "file": {
-          "dirname": "nested",
-          "flattenedPath": "nested/test",
-          "locale": undefined,
-          "name": "test",
-          "path": "nested/test.mdx",
-        },
-        "locale": "en",
-        "slugs": [
-          "nested",
-          "test",
-        ],
-        "url": "/en/nested/test",
-      },
-    ]
-  `);
   expect(result.getLanguages()).toMatchInlineSnapshot(`
     [
       {
@@ -406,8 +367,9 @@ test('Internationalized Routing', () => {
             },
             "file": {
               "dirname": "",
+              "ext": ".mdx",
               "flattenedPath": "test.cn",
-              "locale": "cn",
+              "locale": ".cn",
               "name": "test",
               "path": "test.cn.mdx",
             },
@@ -423,8 +385,9 @@ test('Internationalized Routing', () => {
             },
             "file": {
               "dirname": "nested",
+              "ext": ".mdx",
               "flattenedPath": "nested/test.cn",
-              "locale": "cn",
+              "locale": ".cn",
               "name": "test",
               "path": "nested/test.cn.mdx",
             },
@@ -446,8 +409,9 @@ test('Internationalized Routing', () => {
             },
             "file": {
               "dirname": "",
+              "ext": ".mdx",
               "flattenedPath": "test",
-              "locale": undefined,
+              "locale": "",
               "name": "test",
               "path": "test.mdx",
             },
@@ -463,10 +427,11 @@ test('Internationalized Routing', () => {
             },
             "file": {
               "dirname": "nested",
-              "flattenedPath": "nested/test",
-              "locale": undefined,
+              "ext": ".mdx",
+              "flattenedPath": "nested/test.en",
+              "locale": ".en",
               "name": "test",
-              "path": "nested/test.mdx",
+              "path": "nested/test.en.mdx",
             },
             "locale": "en",
             "slugs": [
@@ -511,7 +476,7 @@ test('Internationalized Routing: Hide Prefix', () => {
             "$id": "nested",
             "children": [
               {
-                "$id": "nested/test.mdx",
+                "$id": "nested/test.en.mdx",
                 "name": "Nested Page",
                 "type": "page",
                 "url": "/nested/test",

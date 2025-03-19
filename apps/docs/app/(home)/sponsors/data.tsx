@@ -437,6 +437,7 @@ export const organizationSponsors = [
       </>
     ),
   },
+  /*
   {
     url: 'https://supastarter.dev',
     github: 'supastarter',
@@ -463,6 +464,7 @@ export const organizationSponsors = [
     ),
     label: 'supastarter',
   },
+     */
   {
     url: 'https://launchfa.st',
     label: 'launchfast',

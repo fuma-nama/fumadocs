@@ -42,7 +42,7 @@ export interface RootProviderProps {
     enabled?: boolean;
   };
 
-  children: ReactNode;
+  children?: ReactNode;
 }
 
 const DefaultSearchDialog = dynamic(
@@ -53,9 +53,9 @@ const DefaultSearchDialog = dynamic(
 export function RootProvider({
   children,
   dir = 'ltr',
-  theme: { enabled = true, ...theme } = {},
+  theme = {},
   search,
-}: RootProviderProps): React.ReactElement {
+}: RootProviderProps) {
   let body = children;
 
   if (search?.enabled !== false)
@@ -65,7 +65,7 @@ export function RootProvider({
       </SearchProvider>
     );
 
-  if (enabled)
+  if (theme?.enabled !== false)
     body = (
       <ThemeProvider
         attribute="class"

@@ -1,5 +1,14 @@
 # next-docs-zeta
 
+## 15.1.1
+
+### Patch Changes
+
+- c5add28: use internal store for Shiki highlighter instances
+- f3cde4f: Support markdown files with default local code in file name
+- 7c8a690: Improve file info interface
+- b812457: Remove Next.js usage from search server
+
 ## 15.1.0
 
 ### Minor Changes

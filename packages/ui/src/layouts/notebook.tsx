@@ -215,7 +215,7 @@ function DocsNavbar({
 }: {
   nav: DocsLayoutProps['nav'];
   sidebarCollapsible: boolean;
-  i18n: boolean;
+  i18n: Required<DocsLayoutProps>['i18n'];
   links: LinkItemType[];
   tabs: Option[];
 }) {

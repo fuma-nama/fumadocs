@@ -1,6 +1,11 @@
 import type { MetaData, PageData } from '@/source/types';
-import { parseFilePath, parseFolderPath, type FileInfo } from './path';
-import { splitPath } from '@/utils/path';
+import {
+  parseFilePath,
+  parseFolderPath,
+  type FileInfo,
+  type FolderInfo,
+} from './path';
+import { joinPath, splitPath } from '@/utils/path';
 
 export interface MetaFile {
   file: FileInfo;
@@ -20,7 +25,7 @@ export interface PageFile {
 export type File = MetaFile | PageFile;
 
 export interface Folder {
-  file: FileInfo;
+  file: FolderInfo;
   children: (File | Folder)[];
 }
 
@@ -73,7 +78,13 @@ export class Storage {
 
     this.makeDir(node.file.dirname);
     this.readDir(node.file.dirname)?.children.push(node);
-    this.files.set(`${node.file.flattenedPath}.${node.format}`, node);
+    this.files.set(
+      joinPath(
+        node.file.dirname,
+        `${node.file.name}${node.file.locale}.${node.format}`,
+      ),
+      node,
+    );
   }
 
   list(): File[] {

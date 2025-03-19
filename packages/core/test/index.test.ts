@@ -4,7 +4,7 @@ import type { Root } from '@/server/page-tree';
 import { findNeighbour } from '@/server/page-tree-utils';
 import { PageTree } from '../dist/server';
 import { getBreadcrumbItems } from '@/breadcrumb';
-import { resolvePath, splitPath } from '@/utils/path';
+import { joinPath, splitPath } from '@/utils/path';
 
 test('Find Neighbours', () => {
   const tree: Root = {
@@ -38,71 +38,95 @@ test('Find Neighbours', () => {
 
 describe('Path utilities', () => {
   test('parse file path', () => {
-    expect(parseFilePath('test.mdx')).toEqual({
-      dirname: '',
-      name: 'test',
-      flattenedPath: 'test',
-      locale: undefined,
-      path: 'test.mdx',
-    });
+    expect(parseFilePath('test.mdx')).toMatchInlineSnapshot(`
+      {
+        "dirname": "",
+        "ext": ".mdx",
+        "flattenedPath": "test",
+        "locale": "",
+        "name": "test",
+        "path": "test.mdx",
+      }
+    `);
 
-    expect(parseFilePath('nested/test.mdx')).toEqual({
-      dirname: 'nested',
-      name: 'test',
-      flattenedPath: 'nested/test',
-      locale: undefined,
-      path: 'nested/test.mdx',
-    });
+    expect(parseFilePath('nested/test.mdx')).toMatchInlineSnapshot(`
+      {
+        "dirname": "nested",
+        "ext": ".mdx",
+        "flattenedPath": "nested/test",
+        "locale": "",
+        "name": "test",
+        "path": "nested/test.mdx",
+      }
+    `);
 
-    expect(parseFilePath('nested/test.cn.mdx')).toEqual({
-      dirname: 'nested',
-      name: 'test',
-      flattenedPath: 'nested/test.cn',
-      locale: 'cn',
-      path: 'nested/test.cn.mdx',
-    });
+    expect(parseFilePath('nested/test.cn.mdx')).toMatchInlineSnapshot(`
+      {
+        "dirname": "nested",
+        "ext": ".mdx",
+        "flattenedPath": "nested/test.cn",
+        "locale": ".cn",
+        "name": "test",
+        "path": "nested/test.cn.mdx",
+      }
+    `);
 
-    expect(parseFilePath('nested/test.01.mdx')).toEqual({
-      dirname: 'nested',
-      name: 'test.01',
-      flattenedPath: 'nested/test.01',
-      path: 'nested/test.01.mdx',
-    });
+    expect(parseFilePath('nested/test.01.mdx')).toMatchInlineSnapshot(`
+      {
+        "dirname": "nested",
+        "ext": ".mdx",
+        "flattenedPath": "nested/test.01",
+        "locale": "",
+        "name": "test.01",
+        "path": "nested/test.01.mdx",
+      }
+    `);
 
-    expect(parseFilePath('nested\\test.cn.mdx')).toEqual(
-      parseFilePath('nested/test.cn.mdx'),
-    );
+    expect(parseFilePath('nested\\test.cn.mdx')).toMatchInlineSnapshot(`
+      {
+        "dirname": "nested",
+        "ext": ".mdx",
+        "flattenedPath": "nested/test.cn",
+        "locale": ".cn",
+        "name": "test",
+        "path": "nested/test.cn.mdx",
+      }
+    `);
   });
 
   test('parse folder path', () => {
-    expect(parseFolderPath('nested')).toEqual({
-      dirname: '',
-      name: 'nested',
-      flattenedPath: 'nested',
-      locale: undefined,
-      path: 'nested',
-    });
+    expect(parseFolderPath('')).toMatchInlineSnapshot(`
+      {
+        "dirname": "",
+        "name": "",
+        "path": "",
+      }
+    `);
 
-    expect(parseFolderPath('nested/nested')).toEqual({
-      dirname: 'nested',
-      name: 'nested',
-      flattenedPath: 'nested/nested',
-      locale: undefined,
-      path: 'nested/nested',
-    });
+    expect(parseFolderPath('nested/nested')).toMatchInlineSnapshot(`
+      {
+        "dirname": "nested",
+        "name": "nested",
+        "path": "nested/nested",
+      }
+    `);
 
-    expect(parseFolderPath('nested\\nested')).toEqual(
-      parseFolderPath('nested/nested'),
-    );
+    expect(parseFolderPath('nested\\nested')).toMatchInlineSnapshot(`
+      {
+        "dirname": "nested",
+        "name": "nested",
+        "path": "nested/nested",
+      }
+    `);
   });
 
   test('resolve paths', () => {
-    expect(resolvePath('a', 'b')).toBe('a/b');
-    expect(resolvePath('/a', '')).toBe('a');
-    expect(resolvePath('a/', '/b')).toBe('a/b');
+    expect(joinPath('a', 'b')).toBe('a/b');
+    expect(joinPath('/a', '')).toBe('a');
+    expect(joinPath('a/', '/b')).toBe('a/b');
 
-    expect(resolvePath('a/', '../b/c')).toBe('b/c');
-    expect(resolvePath('a/', './b/c')).toBe('a/b/c');
+    expect(joinPath('a/', '../b/c')).toBe('b/c');
+    expect(joinPath('a/', './b/c')).toBe('a/b/c');
   });
 
   test('split paths', () => {

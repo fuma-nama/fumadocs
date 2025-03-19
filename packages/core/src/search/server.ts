@@ -5,7 +5,6 @@ import {
   create,
   type RawData,
 } from '@orama/orama';
-import { type NextRequest } from 'next/server';
 import type { StructuredData } from '@/mdx-plugins/remark-structure';
 import type { SortedResult } from '@/server/types';
 import { createEndpoint } from '@/search/orama/create-endpoint';
@@ -44,7 +43,7 @@ export interface SearchServer {
 }
 
 export interface SearchAPI extends SearchServer {
-  GET: (request: NextRequest) => Promise<Response>;
+  GET: (request: Request) => Promise<Response>;
 
   /**
    * `GET` route handler that exports search indexes for static search.

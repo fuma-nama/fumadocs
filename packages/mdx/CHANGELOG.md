@@ -1,5 +1,18 @@
 # next-docs-mdx
 
+## 11.5.7
+
+### Patch Changes
+
+- 5163e92: Support reusing codeblocks in `<include>`
+- Updated dependencies [c5add28]
+- Updated dependencies [6493817]
+- Updated dependencies [f3cde4f]
+- Updated dependencies [7c8a690]
+- Updated dependencies [b812457]
+  - fumadocs-core@15.1.1
+  - @fumadocs/mdx-remote@1.2.1
+
 ## 11.5.6
 
 ### Patch Changes

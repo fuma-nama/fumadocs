@@ -16,17 +16,11 @@ description: Support multiple languages in your documentation
 
 Define the i18n configurations in a file, we will import it with `@/ilb/i18n` in this guide.
 
-```json doc-gen:file
-{
-  "file": "../../examples/i18n/lib/i18n.ts",
-  "codeblock": {
-    "lang": "ts",
-    "meta": "title=\"lib/i18n.ts\""
-  }
-}
-```
+<include cwd meta='title="lib/i18n.ts"'>
+  ../../examples/i18n/lib/i18n.ts
+</include>
 
-Change your current source configurations.
+Pass it to the source loader.
 
 ```ts title="lib/source.ts"
 import { i18n } from '@/lib/i18n';
@@ -36,6 +30,20 @@ export const source = loader({
   i18n, // [!code highlight]
   // other options
 });
+```
+
+And update Fumadocs UI layout options.
+
+```tsx title="app/layout.config.tsx"
+import { i18n } from '@/lib/i18n';
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+export function baseOptions(locale: string): BaseLayoutProps {
+  return {
+    i18n,
+    // different props based on `locale`
+  };
+}
 ```
 
 ### Middleware
@@ -58,7 +66,7 @@ See [Middleware](/docs/headless/internationalization#middleware) for customisabl
 
 ### Routing
 
-Create a dynamic route `/app/[lang]`, and move all special files (e.g. `page.tsx`, `layout.tsx`) from `/app` to the folder.
+Create a `/app/[lang]` folder, and move all files (e.g. `page.tsx`, `layout.tsx`) from `/app` to the folder.
 
 Wrap the root provider inside `I18nProvider`, and provide available languages & translations to it.
 Note that only English translations are provided by default.
@@ -110,32 +118,52 @@ export default async function RootLayout({
 }
 ```
 
-### Source
+### Pass Locale
 
-`source` object allows you to interact with your content source.
-For example, you can get a page with it slugs using `source.getPage()`.
+Pass the locale to Fumadocs in your pages and layouts.
 
-To get the page with appropriate locale, you also need to pass the locale.
-
-Update the references to your `source` object in your `page.tsx` and `layout.tsx` files, and include a locale code:
-
-```ts title="layout.tsx"
-import { source } from '@/lib/source';
+```tsx title="/app/[lang]/(home)/layout.tsx" tab="Home Layout"
+import type { ReactNode } from 'react';
+import { HomeLayout } from 'fumadocs-ui/layouts/home';
+import { baseOptions } from '@/app/layout.config';
 
 export default async function Layout({
   params,
   children,
 }: {
   params: Promise<{ lang: string }>;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
-  // get page tree
-  source.pageTree; // [!code --]
-  source.pageTree[(await params).lang]; // [!code ++]
+  const { lang } = await params;
+
+  return <HomeLayout {...baseOptions(lang)}>{children}</HomeLayout>;
 }
 ```
 
-```ts title="page.tsx"
+```tsx title="/app/[lang]/docs/layout.tsx" tab="Docs Layout"
+import type { ReactNode } from 'react';
+import { source } from '@/lib/source';
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { baseOptions } from '@/app/layout.config';
+
+export default async function Layout({
+  params,
+  children,
+}: {
+  params: Promise<{ lang: string }>;
+  children: ReactNode;
+}) {
+  const { lang } = await params;
+
+  return (
+    <DocsLayout {...baseOptions(lang)} tree={source.pageTree[lang]}>
+      {children}
+    </DocsLayout>
+  );
+}
+```
+
+```ts title="page.tsx" tab="Docs Page"
 import { source } from '@/lib/source';
 
 export default async function Page({
@@ -154,11 +182,6 @@ export default async function Page({
 }
 ```
 
-<Callout title="Note">
-  Without providing a locale code, it uses your default locale instead. You can
-  see [Source API](/docs/headless/source-api#output) for other usages.
-</Callout>
-
 ### Search
 
 Configure i18n on your search solution.
@@ -170,20 +193,6 @@ Configure i18n on your search solution.
 
 - **Cloud Solutions (e.g. Algolia):**
   They usually have official support for multilingual.
-
-### Add Language Switch
-
-To allow users changing their language, enable `i18n` on your layouts.
-
-```tsx title="app/layout.config.tsx" twoslash
-import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
-
-export const baseOptions: BaseLayoutProps = {
-  i18n: true,
-};
-```
-
-This is optional, you can also add your own language switcher component.
 
 ## Writing Documents
 

@@ -11,7 +11,7 @@ import type { BuildPageTreeOptions } from './page-tree-builder';
 import { createPageTreeBuilder } from './page-tree-builder';
 import { type FileInfo } from './path';
 import type { MetaFile, PageFile, Storage } from './file-system';
-import * as path from 'node:path';
+import { joinPath } from '@/utils/path';
 
 export interface LoaderConfig {
   source: SourceConfig;
@@ -88,7 +88,7 @@ export interface LoaderOutput<Config extends LoaderConfig> {
     href: string,
     options?: {
       /**
-       * resolve relative file paths in `href` from specified directory
+       * resolve relative file paths in `href` from specified dirname, must be a virtual path.
        */
       dir?: string;
     },
@@ -157,20 +157,27 @@ function indexPages(
       pathToFile.set(item.file.path, fileToMeta(item));
 
     if (item.format === 'page') {
-      const page = fileToPage(item, getUrl, item.file.locale);
+      if (
+        item.file.locale.length > 0 &&
+        item.file.locale.slice(1) !== defaultLanguage
+      )
+        continue;
+
+      const page = fileToPage(item, getUrl, defaultLanguage);
       pathToFile.set(item.file.path, page);
 
-      if (item.file.locale) continue;
       map.set(`${defaultLanguage}.${page.slugs.join('/')}`, page);
       if (!i18n) continue;
+      const basePath = joinPath(item.file.dirname, item.file.name);
 
       for (const lang of i18n.languages) {
-        const localized = storage.read(
-          `${item.file.flattenedPath}.${lang}`,
-          'page',
-        );
+        if (lang === defaultLanguage) continue;
 
-        const localizedPage = fileToPage(localized ?? item, getUrl, lang);
+        const localizedPage = fileToPage(
+          storage.read(`${basePath}.${lang}`, 'page') ?? item,
+          getUrl,
+          lang,
+        );
         map.set(`${lang}.${localizedPage.slugs.join('/')}`, localizedPage);
       }
     }
@@ -281,7 +288,7 @@ function createOutput(options: LoaderOptions): LoaderOutput<LoaderConfig> {
         value.startsWith('.') &&
         (value.endsWith('.md') || value.endsWith('.mdx'))
       ) {
-        const hrefPath = path.join(dir, value);
+        const hrefPath = joinPath(dir, value);
         const target = pages.find((item) => item.file.path === hrefPath);
 
         if (target)

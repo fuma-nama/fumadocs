@@ -9,13 +9,14 @@ export function createEndpoint(server: SearchServer): SearchAPI {
       return Response.json(await server.export());
     },
     async GET(request) {
-      const query = request.nextUrl.searchParams.get('query');
+      const url = new URL(request.url);
+      const query = url.searchParams.get('query');
       if (!query) return Response.json([]);
 
       return Response.json(
         await search(query, {
-          tag: request.nextUrl.searchParams.get('tag') ?? undefined,
-          locale: request.nextUrl.searchParams.get('locale') ?? undefined,
+          tag: url.searchParams.get('tag') ?? undefined,
+          locale: url.searchParams.get('locale') ?? undefined,
         }),
       );
     },

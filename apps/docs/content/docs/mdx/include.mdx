@@ -1,14 +1,38 @@
 ---
 title: Include
-description: Reuse content from other Markdown files
+description: Reuse content from other files.
 ---
 
 ## Usage
 
-Specify the target Markdown file path in `<include>` tag (relative).
+### Markdown
+
+Specify the target Markdown file path in `<include>` tag (relative to the Markdown file itself).
 
 ```mdx title="page.mdx"
 <include>./another.mdx</include>
 ```
 
 This will display the content from target file (e.g. `another.mdx`).
+
+### CodeBlock
+
+For other types of files, it will become a codeblock:
+
+```mdx title="page.mdx"
+<include>./script.ts</include>
+
+<include lang="tsx" meta='title="lib.ts"'>
+  ./script.ts
+</include>
+```
+
+### `cwd`
+
+Resolve relative paths from cwd instead of Markdown file:
+
+```mdx
+<include cwd lang="tsx" meta='title="lib.ts"'>
+  ./script.ts
+</include>
+```

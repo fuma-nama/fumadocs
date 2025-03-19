@@ -9,4 +9,9 @@ export {
   type VirtualFile,
 } from './load-files';
 export type * from './types';
-export { type FileInfo, parseFilePath, parseFolderPath } from './path';
+export {
+  type FileInfo,
+  type FolderInfo,
+  parseFilePath,
+  parseFolderPath,
+} from './path';
