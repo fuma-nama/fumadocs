@@ -6,6 +6,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import matter from 'gray-matter';
 import { remarkInclude } from 'fumadocs-mdx/config';
+import remarkMdx from 'remark-mdx';
 
 async function readFromPath(file: string) {
   const content = await fs
@@ -40,7 +41,7 @@ async function checkLinks() {
             path: file.path,
             value: file.content,
           },
-          [remarkInclude],
+          [remarkMdx, remarkInclude],
         )
       ).map((item) => item.url.slice(1)),
     };
@@ -57,7 +58,7 @@ async function checkLinks() {
             path: file.path,
             value: file.content,
           },
-          [remarkInclude],
+          [remarkMdx, remarkInclude],
         )
       ).map((item) => item.url.slice(1)),
     };

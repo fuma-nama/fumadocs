@@ -26,11 +26,15 @@ export function remarkInclude(this: Processor): Transformer<Root, Root> {
   ) {
     const queue: Promise<void>[] = [];
 
-    visit(tree, 'mdxJsxFlowElement', (node) => {
+    visit(tree, ['mdxJsxFlowElement', 'mdxJsxTextElement'], (node) => {
       let specifier: string | undefined;
       const params: Record<string, string | null> = {};
 
-      if (node.name === TagName) {
+      if (
+        (node.type === 'mdxJsxFlowElement' ||
+          node.type === 'mdxJsxTextElement') &&
+        node.name === TagName
+      ) {
         const value = flattenNode(node);
 
         if (value.length > 0) {
@@ -58,27 +62,32 @@ export function remarkInclude(this: Processor): Transformer<Root, Root> {
         (!specifier.endsWith('.md') && !specifier.endsWith('.mdx'));
 
       queue.push(
-        fs.readFile(targetPath).then(async (content) => {
-          compiler?.addDependency(targetPath);
+        fs
+          .readFile(targetPath)
+          .then(async (content) => {
+            compiler?.addDependency(targetPath);
 
-          if (asCode) {
-            const lang = params.lang ?? path.extname(specifier).slice(1);
+            if (asCode) {
+              const lang = params.lang ?? path.extname(specifier).slice(1);
 
-            Object.assign(node, {
-              type: 'code',
-              lang,
-              meta: params.meta,
-              value: content.toString(),
-              data: {},
-            } satisfies Code);
-            return;
-          }
+              Object.assign(node, {
+                type: 'code',
+                lang,
+                meta: params.meta,
+                value: content.toString(),
+                data: {},
+              } satisfies Code);
+              return;
+            }
 
-          const parsed = processor.parse(matter(content).content);
+            const parsed = processor.parse(matter(content).content);
 
-          await update(parsed as Root, targetPath, processor, compiler);
-          Object.assign(node, parsed);
-        }),
+            await update(parsed as Root, targetPath, processor, compiler);
+            Object.assign(node, parsed);
+          })
+          .catch((e) => {
+            console.warn(`failed to read file: ${targetPath}`, e);
+          }),
       );
 
       return 'skip';

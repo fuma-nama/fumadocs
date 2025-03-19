@@ -93,15 +93,15 @@ export async function getHighlighter(
     let engine = options.engine;
 
     if (engineType === 'js') {
-      const { createJavaScriptRegexEngine } = await import(
-        'shiki/engine/javascript'
+      engine = import('shiki/engine/javascript').then((res) =>
+        res.createJavaScriptRegexEngine(),
       );
-      engine = createJavaScriptRegexEngine();
     }
 
     if (engineType === 'oniguruma' || !engine) {
-      const { createOnigurumaEngine } = await import('shiki/engine/oniguruma');
-      engine = createOnigurumaEngine(import('shiki/wasm'));
+      engine = import('shiki/engine/oniguruma').then((res) =>
+        res.createOnigurumaEngine(import('shiki/wasm')),
+      );
     }
 
     highlighter = createHighlighter({
