@@ -6,6 +6,8 @@ import {
   type CodeToHastOptionsCommon,
   type RegexEngine,
   type Awaitable,
+  type Highlighter,
+  type BundledHighlighterOptions,
 } from 'shiki';
 import type { BundledTheme } from 'shiki/themes';
 import { type Components, toJsxRuntime } from 'hast-util-to-jsx-runtime';
@@ -40,9 +42,9 @@ export type HighlightOptions = CodeToHastOptionsCommon<BundledLanguage> &
     components?: Partial<Components>;
   };
 
-let defaultEngine: RegexEngine | undefined;
+const highlighters = new Map<string, Promise<Highlighter>>();
+
 export async function _highlight(code: string, options: HighlightOptions) {
-  const { getSingletonHighlighter } = await import('shiki');
   const { lang, components: _, engine, ...rest } = options;
 
   let themes: CodeOptionsThemes<BundledTheme> = { themes: defaultThemes };
@@ -52,13 +54,9 @@ export async function _highlight(code: string, options: HighlightOptions) {
     themes = { themes: options.themes };
   }
 
-  const highlighter = await getSingletonHighlighter({
+  const highlighter = await getHighlighter('custom', {
+    engine,
     langs: [lang],
-    engine:
-      engine ??
-      (defaultEngine ??= await import('shiki/engine/oniguruma').then((res) =>
-        res.createOnigurumaEngine(import('shiki/wasm')),
-      )),
     themes:
       'theme' in themes
         ? [themes.theme]
@@ -81,6 +79,47 @@ export function _renderHighlight(hast: Root, options?: HighlightOptions) {
     development: false,
     components: options?.components,
     Fragment,
+  });
+}
+
+export async function getHighlighter(
+  engineType: 'js' | 'oniguruma' | 'custom',
+  options: BundledHighlighterOptions<BundledLanguage, BundledTheme>,
+) {
+  const { createHighlighter } = await import('shiki');
+  let highlighter = highlighters.get(engineType);
+
+  if (!highlighter) {
+    let engine = options.engine;
+
+    if (engineType === 'js') {
+      const { createJavaScriptRegexEngine } = await import(
+        'shiki/engine/javascript'
+      );
+      engine = createJavaScriptRegexEngine();
+    }
+
+    if (engineType === 'oniguruma' || !engine) {
+      const { createOnigurumaEngine } = await import('shiki/engine/oniguruma');
+      engine = createOnigurumaEngine(import('shiki/wasm'));
+    }
+
+    highlighter = createHighlighter({
+      ...options,
+      engine,
+    });
+  }
+
+  highlighters.set(engineType, highlighter);
+  return highlighter.then(async (instance) => {
+    await Promise.all([
+      // @ts-expect-error unknown
+      instance.loadLanguage(options.langs),
+      // @ts-expect-error unknown
+      instance.loadTheme(options.themes),
+    ]);
+
+    return instance;
   });
 }
 

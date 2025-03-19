@@ -8,17 +8,18 @@ import {
 } from '@shikijs/transformers';
 import type { Processor, Transformer } from 'unified';
 import {
-  getSingletonHighlighter,
   type ShikiTransformer,
   type BuiltinTheme,
   bundledLanguages,
 } from 'shiki';
 import type { MdxJsxFlowElement } from 'mdast-util-mdx-jsx';
-import { createOnigurumaEngine } from 'shiki/engine/oniguruma';
-import { createJavaScriptRegexEngine } from 'shiki/engine/javascript';
 import type { IconOptions, CodeBlockIcon } from './transformer-icon';
 import { transformerIcon } from './transformer-icon';
-import { createStyleTransformer, defaultThemes } from '@/highlight/shiki';
+import {
+  createStyleTransformer,
+  defaultThemes,
+  getHighlighter,
+} from '@/highlight/shiki';
 
 interface MetaValue {
   name: string;
@@ -145,21 +146,20 @@ export function rehypeCode(
     transformers.push(transformerTab());
   }
 
-  const highlighter = getSingletonHighlighter({
-    engine: options.experimentalJSEngine
-      ? createJavaScriptRegexEngine()
-      : createOnigurumaEngine(() => import('shiki/wasm')),
-    themes:
-      'themes' in options
-        ? (Object.values(options.themes).filter(Boolean) as BuiltinTheme[])
-        : [options.theme],
-    langs:
-      options.langs ??
-      (options.lazy ? undefined : Object.keys(bundledLanguages)),
-  });
+  const highlighter = getHighlighter(
+    options.experimentalJSEngine ? 'js' : 'oniguruma',
+    {
+      themes:
+        'themes' in options
+          ? (Object.values(options.themes).filter(Boolean) as BuiltinTheme[])
+          : [options.theme],
+      langs:
+        options.langs ?? (options.lazy ? [] : Object.keys(bundledLanguages)),
+    },
+  );
 
-  const transformer = highlighter.then((instance) =>
-    rehypeShikiFromHighlighter(instance, {
+  const transformer = highlighter.then((loaded) =>
+    rehypeShikiFromHighlighter(loaded, {
       ...options,
       transformers,
     }),
