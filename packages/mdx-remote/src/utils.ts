@@ -4,7 +4,7 @@ import matter from 'gray-matter';
 export type ResolvePlugins = Pluggable[] | ((v: Pluggable[]) => Pluggable[]);
 
 export function pluginOption(
-  def: (v: Pluggable[]) => (Pluggable | false)[],
+  def: (v: Pluggable[]) => (Pluggable | false | null)[],
   options: ResolvePlugins = [],
 ): Pluggable[] {
   const list = def(Array.isArray(options) ? options : []).filter(

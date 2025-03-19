@@ -1,15 +1,10 @@
-import {
-  rehypeCode,
-  type RehypeCodeOptions,
-  rehypeToc,
-  type RehypeTocOptions,
-  remarkGfm,
-  remarkHeading,
-  type RemarkHeadingOptions,
-  remarkImage,
-  remarkCodeTab,
-  type RemarkImageOptions,
+import type {
+  RehypeCodeOptions,
+  RehypeTocOptions,
+  RemarkHeadingOptions,
+  RemarkImageOptions,
 } from 'fumadocs-core/mdx-plugins';
+import * as Plugins from 'fumadocs-core/mdx-plugins';
 import { type CompileOptions, createProcessor } from '@mdx-js/mdx';
 import type { MDXComponents } from 'mdx/types';
 import { parseFrontmatter, pluginOption, type ResolvePlugins } from './utils';
@@ -132,6 +127,18 @@ function getCompileOptions({
   imageDir = './public',
   ...options
 }: MDXOptions = {}): CompileOptions {
+  function getPlugin<K extends keyof typeof Plugins>(
+    name: K,
+  ): (typeof Plugins)[K] | null {
+    return name in Plugins ? Plugins[name] : null;
+  }
+  const remarkGfm = getPlugin('remarkGfm');
+  const remarkHeading = getPlugin('remarkHeading');
+  const remarkCodeTab = getPlugin('remarkCodeTab');
+  const remarkImage = getPlugin('remarkImage');
+  const rehypeCode = getPlugin('rehypeCode');
+  const rehypeToc = getPlugin('rehypeToc');
+
   return {
     development: process.env.NODE_ENV === 'development',
     ...options,
@@ -139,24 +146,32 @@ function getCompileOptions({
     remarkPlugins: pluginOption(
       (v) => [
         remarkGfm,
-        remarkHeadingOptions !== false && [remarkHeading, remarkHeadingOptions],
-        remarkImageOptions !== false && [
-          remarkImage,
-          {
-            useImport: false,
-            publicDir: imageDir,
-            ...remarkImageOptions,
-          } satisfies RemarkImageOptions,
-        ],
-        remarkCodeTabOptions !== false && remarkCodeTab,
+        remarkHeading && remarkHeadingOptions !== false
+          ? [remarkHeading, remarkHeadingOptions]
+          : null,
+        remarkImage && remarkImageOptions !== false
+          ? [
+              remarkImage,
+              {
+                useImport: false,
+                publicDir: imageDir,
+                ...remarkImageOptions,
+              } satisfies RemarkImageOptions,
+            ]
+          : null,
+        remarkCodeTab && remarkCodeTabOptions !== false ? remarkCodeTab : null,
         ...v,
       ],
       options.remarkPlugins,
     ),
     rehypePlugins: pluginOption(
       (v) => [
-        rehypeCodeOptions !== false && [rehypeCode, rehypeCodeOptions],
-        rehypeTocOptions !== false && [rehypeToc, rehypeTocOptions],
+        rehypeCode && rehypeCodeOptions !== false
+          ? [rehypeCode, rehypeCodeOptions]
+          : null,
+        rehypeToc && rehypeTocOptions !== false
+          ? [rehypeToc, rehypeTocOptions]
+          : null,
         ...v,
       ],
       options.rehypePlugins,
