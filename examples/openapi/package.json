@@ -10,12 +10,12 @@
     "types:check": "fumadocs-mdx && tsc --noEmit"
   },
   "dependencies": {
-    "@scalar/api-client-react": "^1.2.5",
+    "@scalar/api-client-react": "^1.2.6",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-openapi": "workspace:*",
     "fumadocs-ui": "workspace:*",
-    "next": "15.2.2",
+    "next": "15.2.3",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "shiki": "^3.2.1",
@@ -24,7 +24,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.0.14",
     "@types/mdx": "^2.0.13",
-    "@types/react": "^19.0.10",
+    "@types/react": "^19.0.11",
     "@types/react-dom": "^19.0.4",
     "postcss": "^8.5.3",
     "rimraf": "^6.0.1",

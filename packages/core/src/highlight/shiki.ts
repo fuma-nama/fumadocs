@@ -108,15 +108,17 @@ export async function getHighlighter(
       ...options,
       engine,
     });
+
+    highlighters.set(engineType, highlighter);
+    return highlighter;
   }
 
-  highlighters.set(engineType, highlighter);
   return highlighter.then(async (instance) => {
     await Promise.all([
       // @ts-expect-error unknown
-      instance.loadLanguage(options.langs),
+      instance.loadLanguage(...options.langs),
       // @ts-expect-error unknown
-      instance.loadTheme(options.themes),
+      instance.loadTheme(...options.themes),
     ]);
 
     return instance;
