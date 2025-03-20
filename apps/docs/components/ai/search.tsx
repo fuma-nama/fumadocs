@@ -189,7 +189,10 @@ function List(props: Omit<HTMLAttributes<HTMLDivElement>, 'dir'>) {
 
   return (
     <ScrollArea {...props}>
-      <ScrollViewport ref={containerRef} className="max-h-[calc(100dvh-240px)]">
+      <ScrollViewport
+        ref={containerRef}
+        className="max-h-[calc(100dvh-240px)] *:!min-w-0 *:!flex *:flex-col"
+      >
         {props.children}
       </ScrollViewport>
     </ScrollArea>
@@ -210,7 +213,7 @@ function Input(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
         )}
         {...props}
       />
-      <div ref={ref} className={cn(shared, 'invisible whitespace-pre-wrap')}>
+      <div ref={ref} className={cn(shared, 'break-all invisible')}>
         {`${props.value?.toString() ?? ''}\n`}
       </div>
     </div>
