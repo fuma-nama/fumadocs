@@ -1,12 +1,14 @@
 'use client';
 
-import { Menu, X } from 'lucide-react';
+import { Menu, SidebarIcon, X } from 'lucide-react';
 import { type ButtonHTMLAttributes, type HTMLAttributes } from 'react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import { useSidebar } from '@/contexts/sidebar';
 import { useNav } from '@/components/layout/nav';
 import { SidebarTrigger } from 'fumadocs-core/sidebar';
+import { SidebarCollapseTrigger } from '@/layouts/docs/sidebar';
+import { SearchToggle } from '@/components/layout/search-toggle';
 
 export function Navbar(props: HTMLAttributes<HTMLElement>) {
   const { open } = useSidebar();
@@ -45,5 +47,26 @@ export function NavbarSidebarTrigger(
     >
       {open ? <X /> : <Menu />}
     </SidebarTrigger>
+  );
+}
+
+export function CollapsibleControl() {
+  const { collapsed } = useSidebar();
+  if (!collapsed) return;
+
+  return (
+    <div className="fixed flex flex-row items-center animate-fd-fade-in rounded-xl p-0.5 border bg-fd-muted text-fd-muted-foreground z-10 top-12 shadow-md max-md:hidden xl:top-4 xl:start-4 max-xl:end-4">
+      <SidebarCollapseTrigger
+        className={cn(
+          buttonVariants({
+            color: 'ghost',
+            size: 'icon-sm',
+          }),
+        )}
+      >
+        <SidebarIcon />
+      </SidebarCollapseTrigger>
+      <SearchToggle size="icon-sm" />
+    </div>
   );
 }

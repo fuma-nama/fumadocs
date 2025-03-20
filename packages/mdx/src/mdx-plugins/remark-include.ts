@@ -26,72 +26,79 @@ export function remarkInclude(this: Processor): Transformer<Root, Root> {
   ) {
     const queue: Promise<void>[] = [];
 
-    visit(tree, ['mdxJsxFlowElement', 'mdxJsxTextElement'], (node) => {
-      let specifier: string | undefined;
-      const params: Record<string, string | null> = {};
+    visit(
+      tree,
+      ['mdxJsxFlowElement', 'mdxJsxTextElement'],
+      (node, _, parent) => {
+        let specifier: string | undefined;
+        const params: Record<string, string | null> = {};
 
-      if (
-        (node.type === 'mdxJsxFlowElement' ||
-          node.type === 'mdxJsxTextElement') &&
-        node.name === TagName
-      ) {
-        const value = flattenNode(node);
+        if (
+          (node.type === 'mdxJsxFlowElement' ||
+            node.type === 'mdxJsxTextElement') &&
+          node.name === TagName
+        ) {
+          const value = flattenNode(node);
 
-        if (value.length > 0) {
-          for (const attr of node.attributes) {
-            if (
-              attr.type === 'mdxJsxAttribute' &&
-              (typeof attr.value === 'string' || attr.value === null)
-            ) {
-              params[attr.name] = attr.value;
+          if (value.length > 0) {
+            for (const attr of node.attributes) {
+              if (
+                attr.type === 'mdxJsxAttribute' &&
+                (typeof attr.value === 'string' || attr.value === null)
+              ) {
+                params[attr.name] = attr.value;
+              }
             }
+
+            specifier = value;
           }
-
-          specifier = value;
         }
-      }
 
-      if (!specifier) return;
+        if (!specifier) return;
 
-      const targetPath = path.resolve(
-        'cwd' in params ? process.cwd() : path.dirname(file),
-        specifier,
-      );
-      const asCode =
-        params.lang ||
-        (!specifier.endsWith('.md') && !specifier.endsWith('.mdx'));
+        const targetPath = path.resolve(
+          'cwd' in params ? process.cwd() : path.dirname(file),
+          specifier,
+        );
+        const asCode =
+          params.lang ||
+          (!specifier.endsWith('.md') && !specifier.endsWith('.mdx'));
 
-      queue.push(
-        fs
-          .readFile(targetPath)
-          .then(async (content) => {
-            compiler?.addDependency(targetPath);
+        queue.push(
+          fs
+            .readFile(targetPath)
+            .then(async (content) => {
+              compiler?.addDependency(targetPath);
 
-            if (asCode) {
-              const lang = params.lang ?? path.extname(specifier).slice(1);
+              if (asCode) {
+                const lang = params.lang ?? path.extname(specifier).slice(1);
 
-              Object.assign(node, {
-                type: 'code',
-                lang,
-                meta: params.meta,
-                value: content.toString(),
-                data: {},
-              } satisfies Code);
-              return;
-            }
+                Object.assign(node, {
+                  type: 'code',
+                  lang,
+                  meta: params.meta,
+                  value: content.toString(),
+                  data: {},
+                } satisfies Code);
+                return;
+              }
 
-            const parsed = processor.parse(matter(content).content);
+              const parsed = processor.parse(matter(content).content);
 
-            await update(parsed as Root, targetPath, processor, compiler);
-            Object.assign(node, parsed);
-          })
-          .catch((e) => {
-            console.warn(`failed to read file: ${targetPath}`, e);
-          }),
-      );
+              await update(parsed as Root, targetPath, processor, compiler);
+              Object.assign(
+                parent && parent.type === 'paragraph' ? parent : node,
+                parsed,
+              );
+            })
+            .catch((e) => {
+              console.warn(`failed to read file: ${targetPath}`, e);
+            }),
+        );
 
-      return 'skip';
-    });
+        return 'skip';
+      },
+    );
 
     await Promise.all(queue);
   }

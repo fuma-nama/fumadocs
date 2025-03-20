@@ -22,7 +22,7 @@ import {
 import { cn } from '@/utils/cn';
 import Link from 'next/link';
 import { buttonVariants } from '@/components/ui/button';
-import { ChevronDown, Languages } from 'lucide-react';
+import { ChevronDown, Languages, SidebarIcon } from 'lucide-react';
 import { BaseLinkItem, type LinkItemType } from '@/layouts/links';
 import { LanguageToggle } from '@/components/layout/language-toggle';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
@@ -143,7 +143,9 @@ export function DocsLayout({
                       }),
                       'text-fd-muted-foreground mb-auto',
                     )}
-                  />
+                  >
+                    <SidebarIcon />
+                  </SidebarCollapseTrigger>
                 </div>
               )}
               {nav.children}
@@ -252,7 +254,9 @@ function DocsNavbar({
                 }),
                 'text-fd-muted-foreground -ms-1.5 me-2 data-[collapsed=false]:hidden max-md:hidden',
               )}
-            />
+            >
+              <SidebarIcon />
+            </SidebarCollapseTrigger>
           ) : null}
           <Title
             url={nav.url}
@@ -320,7 +324,9 @@ function DocsNavbar({
                 }),
                 'ms-2 text-fd-muted-foreground rounded-full max-md:hidden',
               )}
-            />
+            >
+              <SidebarIcon />
+            </SidebarCollapseTrigger>
           ) : null}
         </div>
       </div>
