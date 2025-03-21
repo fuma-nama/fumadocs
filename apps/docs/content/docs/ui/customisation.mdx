@@ -1,0 +1,47 @@
+---
+title: Overview
+description: An overview of Fumadocs UI
+---
+
+## Architecture
+
+<UiOverview />
+
+|               |                                                         |
+| ------------- | ------------------------------------------------------- |
+| **Sidebar**   | Display site title and navigation elements.             |
+| **Page Tree** | Passed by you, mainly rendered as the items of sidebar. |
+| **Docs Page** | All content of the page.                                |
+| **TOC**       | Navigation within the article.                          |
+
+## Customisation
+
+### Layouts
+
+You can use the exposed options of different components:
+
+<DocsCategory slugs={['ui', 'layouts', 'home-layout']} />
+
+#### Sidebar Items
+
+Navigation elements like sidebar take a [Page Tree](/docs/headless/page-tree) to render navigation links, it's a tree that describes all available pages and folders.
+
+Normally, the tree (sidebar items) is generated from your file structure, you can learn [how to customise it](/docs/ui/page-conventions).
+
+### Components
+
+Fumadocs UI also offers styled components for interactive examples to enhance your docs, you can customise them with exposed props like `style` and `className`.
+
+See [Components](/docs/ui/components).
+
+### Design System
+
+Since the design system is built on Tailwind CSS, you can customise it [with CSS Variables](/docs/ui/theme#colors).
+
+### CLI
+
+If none of them suits you, Fumadocs CLI is a tool to install Fumadocs UI components and layouts to your codebase, similar to Shadcn UI. Allowing you to fully customise Fumadocs UI:
+
+```package-install
+npx fumadocs add
+```

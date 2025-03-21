@@ -61,18 +61,6 @@ You can use them without the prefix by adding some aliases:
 }
 ```
 
-### Navbar Height
-
-When the default navbar is replaced, the layout may overlap with your new navbar.
-
-You should set the `--fd-nav-height` variable to the height of your navbar.
-
-```css
-:root {
-  --fd-nav-height: 40px !important;
-}
-```
-
 > You can use it with CSS media queries for responsive design.
 
 ### Layout Width
@@ -86,20 +74,6 @@ Customise the max width of docs layout with CSS Variables.
 ```
 
 <WidthTrigger />
-
-### Colors
-
-The design system was inspired by [Shadcn UI](https://ui.shadcn.com), you can easily customize the colors using CSS variables.
-
-```css title="global.css"
-:root {
-  --color-fd-background: hsl(0, 0%, 100%);
-}
-
-.dark {
-  --color-fd-background: hsl(0, 0%, 0%);
-}
-```
 
 ## Tailwind CSS Preset
 
@@ -116,33 +90,65 @@ It comes with many themes out-of-the-box, you can pick one you prefer.
 @import 'fumadocs-ui/css/black.css';
 ```
 
-#### `neutral`
+<Tabs items={['neutral', 'black', 'vitepress', 'dusk', 'catppuccin', 'ocean', 'purple']}>
+
+    <Tab value='neutral'>
 
 ![Neutral](/themes/neutral.png)
 
-#### `black`
+    </Tab>
+
+    <Tab value='black'>
 
 ![Black](/themes/black.png)
 
-#### `vitepress`
+    </Tab>
+
+    <Tab value='vitepress'>
 
 ![Vitepress](/themes/vitepress.png)
 
-#### `dusk`
+    </Tab>
+
+    <Tab value='dusk'>
 
 ![Dusk](/themes/dusk.png)
 
-#### `catppuccin`
+    </Tab>
+
+    <Tab value='Catppuccin'>
 
 ![Catppuccin](/themes/catppuccin.png)
 
-#### `ocean`
+    </Tab>
+
+    <Tab value='ocean'>
 
 ![Ocean](/themes/ocean.png)
 
-#### `purple`
+    </Tab>
+
+    <Tab value='purple'>
 
 ![Purple](/themes/purple.png)
+
+    </Tab>
+
+</Tabs>
+
+### Colors
+
+The design system was inspired by [Shadcn UI](https://ui.shadcn.com), you can easily customize the colors using CSS variables.
+
+```css title="global.css"
+:root {
+  --color-fd-background: hsl(0, 0%, 100%);
+}
+
+.dark {
+  --color-fd-background: hsl(0, 0%, 0%);
+}
+```
 
 ### Typography
 

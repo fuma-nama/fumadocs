@@ -27,30 +27,22 @@ export default function Layout({ children }: { children: ReactNode }) {
 
 ## Sidebar
 
-Provide elements to navigate between pages.
-
 ```tsx title="layout.tsx"
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 
-<DocsLayout
-  sidebar={
-    {
-      // options
-    }
-  }
-/>;
+<DocsLayout sidebar={options} />;
 ```
 
 ### Sidebar Tabs
 
 Add a navigation component to switch between root folders (Enabled by default).
-You can add items from the page tree (see [Root Folder](/docs/ui/page-conventions#multiple-page-trees)).
+You can add items from the page tree (see [Root Folder](/docs/ui/page-conventions#root-folder)).
 
-<Callout title='Good to know'>
+<div className='max-w-[360px] mx-auto'>
 
-You can also use [Root Toggle](/docs/ui/components/root-toggle) component.
+![Sidebar Tabs](/docs/sidebar-tabs.png)
 
-</Callout>
+</div>
 
 #### Disable Tabs
 
@@ -90,34 +82,6 @@ import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 />;
 ```
 
-### Disable Prefetching
-
-By default, it uses the Next.js Link component with prefetch enabled.
-When the link component appears into the browser viewport, the content (RSC payload) will be lazy loaded.
-
-Unless you put most of the page items in folders, all page items on the sidebar will be lazy loaded.
-On Vercel, this may cause a high usage of serverless functions and Data Cache.
-It can also hit the limits of some other hosting platforms.
-
-You can disable prefetching to reduce the amount of RSC requests.
-
-```tsx
-import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-
-<DocsLayout sidebar={{ prefetch: false }} />;
-```
-
-### Disable Sidebar from Pages
-
-This is not supported.
-Due to the limitations of App Router, layouts are not re-rendered when navigating between pages.
-It is an anti-pattern to change your layout from a page.
-
-You can consider:
-
-1. Disable sidebar from the entire layout.
-2. Create a [MDX Page](/docs/ui/layouts/page#mdx-page) in a layout that doesn't contain a sidebar.
-
 ## Notebook
 
 Enable the notebook layout with `fumadocs-ui/layouts/notebook`, it's a more compact layout than the default one.
@@ -132,28 +96,12 @@ import type { ReactNode } from 'react';
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
-    <DocsLayout {...baseOptions} tree={source.pageTree}>
-      {children}
-    </DocsLayout>
-  );
-}
-```
-
-### Nav Mode
-
-Customise the position of navbar.
-
-```tsx title="layout.tsx"
-import { DocsLayout } from 'fumadocs-ui/layouts/notebook';
-import { baseOptions } from '@/app/layout.config';
-import { source } from '@/lib/source';
-import type { ReactNode } from 'react';
-
-export default function Layout({ children }: { children: ReactNode }) {
-  return (
     <DocsLayout
       {...baseOptions}
+      // the position of navbar
       nav={{ ...baseOptions.nav, mode: 'top' }}
+      // the position of Sidebar Tabs
+      tabMode="navbar"
       tree={source.pageTree}
     >
       {children}
@@ -162,26 +110,9 @@ export default function Layout({ children }: { children: ReactNode }) {
 }
 ```
 
-### Tab Mode
+## Advanced
 
-Customise the position of tabs (Sidebar Tabs).
-
-```tsx title="layout.tsx"
-import { DocsLayout } from 'fumadocs-ui/layouts/notebook';
-import { baseOptions } from '@/app/layout.config';
-import { source } from '@/lib/source';
-import type { ReactNode } from 'react';
-
-export default function Layout({ children }: { children: ReactNode }) {
-  return (
-    <DocsLayout {...baseOptions} tabMode="navbar" tree={source.pageTree}>
-      {children}
-    </DocsLayout>
-  );
-}
-```
-
-## Replacing Navbar
+### Replacing Navbar
 
 Fumadocs uses CSS Variables to share the size of layout components, and fit each layout component into appropriate position.
 
@@ -212,6 +143,32 @@ You need to override `--fd-nav-height` to the exact height of your custom navbar
   --fd-nav-height: 80px !important;
 }
 ```
+
+### Disable Prefetching
+
+By default, it uses the Next.js Link component with prefetch enabled.
+When the link component appears into the browser viewport, the content (RSC payload) will be prefetched.
+
+On Vercel, this may cause a high usage of serverless functions and Data Cache.
+It can also hit the limits of some other hosting platforms.
+
+You can disable prefetching to reduce the amount of RSC requests.
+
+```tsx
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+
+<DocsLayout sidebar={{ prefetch: false }} />;
+```
+
+### Disable Sidebar from Pages
+
+This is not supported due to the limitations of App Router, layouts are not re-rendered when navigating between pages.
+It is an anti-pattern to change your layout when navigating to another page.
+
+You can consider:
+
+1. Disable sidebar from the entire layout.
+2. Move the [MDX Page](/docs/ui/layouts/page#mdx-page) in a separate layout that doesn't contain a sidebar.
 
 Note that `!important` is required to override CSS variables.
 

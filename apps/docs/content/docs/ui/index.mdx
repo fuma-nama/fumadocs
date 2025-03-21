@@ -53,7 +53,7 @@ Some basic knowledge of Next.js App Router would be useful for further customisa
 
 Create a new app with `create-fumadocs-app`.
 
-Node.js 18 or above required, note that Node.js 23.1 might have problems with Next.js production build.
+Node.js 18 or above required, Node.js 23.1 might have problems with Next.js production build.
 
 <Tabs groupId='package-manager' persist items={['npm', 'pnpm', 'yarn', 'bun']}>
 
@@ -106,7 +106,7 @@ npm run dev
 
 In the project, you can see:
 
-- `lib/source.ts`: Code for content source adapter, [`loader()`](/docs/headless/source-api) provides an interface to interact with your content source, and assigns a URL to your pages.
+- `lib/source.ts`: Code for content source adapter, [`loader()`](/docs/headless/source-api) provides an interface to interact with your content source, and assigns URL to your pages.
 - `app/layout.config.tsx`: Shared options for layouts, optional but preferred to keep.
 
 | Route                     | Description                                            |
@@ -124,49 +124,14 @@ Content source handles all your content, like compiling Markdown files and valid
 
 - **Custom Source:** Fumadocs is not Markdown-exclusive. For other sources like Sanity, you can [build a custom content source](/docs/headless/custom-source).
 
-### Customise Sidebar
-
-Navigation elements like sidebar take a [Page Tree](/docs/headless/page-tree) to render navigation links, it's a tree that describes all available pages and folders.
-
-Normally, the tree (sidebar items) is generated from your file structure, you can learn how to customise it from:
-
-<Cards>
-  <Card
-    href="/docs/ui/page-conventions"
-    title="Organizing Pages"
-    description="Learn how to organize your pages"
-  />
-</Cards>
-
 ### Writing Content
 
 Despite the supported syntax of MDX, Fumadocs has some additional features for authoring content too.
-You can refer to:
-
-<Cards>
-  <Card
-    href="/docs/ui/markdown"
-    title="Markdown"
-    description="Learn how to write documents in Fumadocs"
-  />
-</Cards>
+You can refer to [Markdown](/docs/ui/markdown).
 
 ### Customise UI
 
-Since the design system is built on Tailwind CSS, you can [customise colors with CSS Variables](/docs/ui/theme#colors).
-
-Fumadocs UI offers pre-styled layouts and UI components, you can customise components with exposed props like `style` and `className`.
-We also provided many options to [customise layouts](/docs/ui/layouts).
-
-If none of them suits you, Fumadocs CLI is a way to install Fumadocs UI components and layouts to your codebase, similar to Shadcn UI. Allowing you to fully customise Fumadocs UI:
-
-```package-install
-@fumadocs/cli --save-dev
-```
-
-```bash
-pnpm fumadocs add
-```
+See [Customisation Guide](/docs/ui/customisation).
 
 ## FAQ
 
@@ -209,14 +174,12 @@ Since Fumadocs uses Next.js App Router, you can simply rename the route:
 
 And tell Fumadocs to use the new route in `source.ts`:
 
-```ts title="source.ts"
-import { createMDXSource } from 'fumadocs-mdx';
+```ts title="lib/source.ts"
 import { loader } from 'fumadocs-core/source';
-import { docs, meta } from '@/.source';
 
 export const source = loader({
   baseUrl: '/info',
-  source: createMDXSource(docs, meta),
+  // other options
 });
 ```
 

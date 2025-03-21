@@ -5,7 +5,8 @@ description: A shared convention for organizing your documents
 
 ## Overview
 
-On Fumadocs MDX, or other file-system based content sources, the way you structure your files/content also affect your sidebar and other navigation features.
+On Fumadocs MDX, or other file-system based content sources, the sidebar items (page tree) are generated from your file structure.
+This is similar to Next.js's file system based routing.
 
 ## File
 
@@ -142,7 +143,7 @@ You can define a separator in meta by adding a item surrounded with `---`.
 
 ### Rest
 
-Add a Rest (`...`) item to automatically add and sort remaining page items.
+Add a Rest (`...`) item to automatically add and sort remaining page items alphabetically.
 
 <Callout title="Note">
   Index pages won't be included, you must specify the order of `index`.
@@ -155,9 +156,7 @@ Add a Rest (`...`) item to automatically add and sort remaining page items.
 }
 ```
 
-#### Reversed Order
-
-Instead of sorting alphabetically, you can also sort items reversely.
+You can also sort items reversely.
 
 ```json
 {
@@ -212,9 +211,15 @@ You can add an icon too.
 
 Since Fumadocs doesn't include an icon library, you have to convert the icon names to JSX elements in runtime, and render it as a component.
 
-You can use [the `icon` handler](/docs/headless/source-api#icons) from Source API.
+You can add an [`icon` handler](/docs/headless/source-api#icons) to `loader()`.
 
-## Multiple Page Trees
+## Root Folder
+
+<div className='max-w-[360px] mx-auto'>
+
+![Sidebar Tabs](/docs/sidebar-tabs.png)
+
+</div>
 
 Adding a `root` property in meta file can mark your folder as a **root**.
 
@@ -227,22 +232,21 @@ Adding a `root` property in meta file can mark your folder as a **root**.
 
 When the user is browsing a page under a root folder, only the child items of the folder will be visible.
 
-For example, when you are in a root folder called `core`, the other folders (e.g. `ui`) are not shown on the sidebar and other navigation elements.
+For example, when you are in a root folder called `framework`, the other folders (e.g. `headless`) are not shown on the sidebar and other navigation elements.
 
 <Files>
-  <Folder name="core" defaultOpen>
+  <Folder name="framework" defaultOpen>
     <File name="Current Page" className="!text-fd-primary !bg-fd-primary/10" />
     <File name="Other Pages" />
   </Folder>
-  <Folder name="ui" className="opacity-50" disabled defaultOpen>
+  <Folder name="headless" className="opacity-50" disabled defaultOpen>
     <File name="Invisible Page" />
   </Folder>
 </Files>
 
 <Callout title='Fumadocs UI'>
 
-    When a root folder exists, Fumadocs UI will add a Tabs component to the sidebar.
-    It allows user to switch between different roots.
+    Fumadocs UI renders root folders as Sidebar Tabs, which allows user to switch between them.
 
     You can customise it via [`sidebar.tabs`](/docs/ui/layouts/docs#sidebar-tabs) in Docs Layout.
 

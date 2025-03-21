@@ -62,11 +62,12 @@ export function CollapsibleControl() {
             color: 'ghost',
             size: 'icon-sm',
           }),
+          'rounded-lg',
         )}
       >
         <SidebarIcon />
       </SidebarCollapseTrigger>
-      <SearchToggle size="icon-sm" />
+      <SearchToggle size="icon-sm" className="rounded-lg" />
     </div>
   );
 }
