@@ -12,7 +12,7 @@ import {
   SidebarCollapseTrigger,
   SidebarViewport,
   SidebarPageTree,
-} from '@/layouts/docs/sidebar';
+} from '@/components/layout/sidebar';
 import { replaceOrDefault } from '@/layouts/shared';
 import { type LinkItemType, BaseLinkItem } from '@/layouts/links';
 import { RootToggle } from '@/components/layout/root-toggle';
@@ -27,7 +27,6 @@ import {
   NavbarSidebarTrigger,
 } from '@/layouts/docs.client';
 import { TreeContextProvider } from '@/contexts/tree';
-import { NavProvider, Title } from '@/components/layout/nav';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
 import {
   LargeSearchToggle,
@@ -40,13 +39,20 @@ import {
   SidebarLinkItem,
   type SidebarOptions,
 } from '@/layouts/docs/shared';
-import { type PageStyles, StylesProvider } from '@/contexts/layout';
+import {
+  type PageStyles,
+  StylesProvider,
+  NavProvider,
+} from '@/contexts/layout';
 
 export interface DocsLayoutProps extends BaseLayoutProps {
   tree: PageTree.Root;
 
   sidebar?: Partial<SidebarOptions>;
 
+  /**
+   * Props for the `div` container
+   */
   containerProps?: HTMLAttributes<HTMLDivElement>;
 }
 
@@ -96,7 +102,12 @@ export function DocsLayout({
         {replaceOrDefault(
           { enabled: navEnabled, component: navReplace },
           <Navbar className="md:hidden">
-            <Title url={nav.url} title={nav.title} />
+            <Link
+              href={nav.url ?? '/'}
+              className="inline-flex items-center gap-2.5 font-semibold"
+            >
+              {nav.title}
+            </Link>
             <div className="flex flex-1 flex-row items-center gap-1">
               {nav.children}
             </div>
@@ -235,5 +246,5 @@ function SidebarFooterItems({
   );
 }
 
+export { CollapsibleControl, Navbar, NavbarSidebarTrigger, type LinkItemType };
 export { getSidebarTabsFromOptions, type TabOptions } from './docs/shared';
-export { type LinkItemType };

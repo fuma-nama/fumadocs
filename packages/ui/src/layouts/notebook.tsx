@@ -12,9 +12,8 @@ import {
   SidebarHeader,
   SidebarViewport,
   SidebarPageTree,
-} from '@/layouts/docs/sidebar';
+} from '@/components/layout/sidebar';
 import { TreeContextProvider } from '@/contexts/tree';
-import { NavProvider, Title } from '@/components/layout/nav';
 import {
   LargeSearchToggle,
   SearchToggle,
@@ -46,7 +45,11 @@ import {
   NavbarSidebarTrigger,
   SidebarLayoutTab,
 } from './notebook.client';
-import { type PageStyles, StylesProvider } from '@/contexts/layout';
+import {
+  type PageStyles,
+  StylesProvider,
+  NavProvider,
+} from '@/contexts/layout';
 import { type Option, RootToggle } from '@/components/layout/root-toggle';
 
 export interface DocsLayoutProps extends BaseLayoutProps {
@@ -258,14 +261,15 @@ function DocsNavbar({
               <SidebarIcon />
             </SidebarCollapseTrigger>
           ) : null}
-          <Title
-            url={nav.url}
-            title={nav.title}
+          <Link
+            href={nav.url ?? '/'}
             className={cn(
-              // show on sidebar on above md
+              'inline-flex items-center gap-2.5 font-semibold',
               navMode === 'auto' && 'md:hidden',
             )}
-          />
+          >
+            {nav.title}
+          </Link>
         </div>
 
         <LargeSearchToggle
@@ -384,3 +388,5 @@ function NavbarLinkItem({
     </BaseLinkItem>
   );
 }
+
+export { Navbar, NavbarSidebarTrigger };

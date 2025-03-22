@@ -16,12 +16,11 @@ import { useTreeContext, useTreePath } from './contexts/tree';
 import { useSidebar } from '@/contexts/sidebar';
 import type { PageTree } from 'fumadocs-core/server';
 import { usePathname } from 'next/navigation';
-import { useNav } from '@/components/layout/nav';
 import {
   type BreadcrumbOptions,
   getBreadcrumbItemsFromPath,
 } from 'fumadocs-core/breadcrumb';
-import { usePageStyles } from '@/contexts/layout';
+import { usePageStyles, useNav } from '@/contexts/layout';
 import { isActive } from '@/utils/is-active';
 import { TocPopover } from '@/components/layout/toc';
 import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';

@@ -5,9 +5,9 @@ import { type ButtonHTMLAttributes, type HTMLAttributes } from 'react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import { useSidebar } from '@/contexts/sidebar';
-import { useNav } from '@/components/layout/nav';
+import { useNav } from '@/contexts/layout';
 import { SidebarTrigger } from 'fumadocs-core/sidebar';
-import { SidebarCollapseTrigger } from '@/layouts/docs/sidebar';
+import { SidebarCollapseTrigger } from '@/components/layout/sidebar';
 import { SearchToggle } from '@/components/layout/search-toggle';
 
 export function Navbar(props: HTMLAttributes<HTMLElement>) {
