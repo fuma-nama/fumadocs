@@ -79,10 +79,7 @@ export class Storage {
     this.makeDir(node.file.dirname);
     this.readDir(node.file.dirname)?.children.push(node);
     this.files.set(
-      joinPath(
-        node.file.dirname,
-        `${node.file.name}${node.file.locale}.${node.format}`,
-      ),
+      joinPath(node.file.dirname, `${node.file.name}.${node.format}`),
       node,
     );
   }

@@ -43,7 +43,6 @@ describe('Path utilities', () => {
         "dirname": "",
         "ext": ".mdx",
         "flattenedPath": "test",
-        "locale": "",
         "name": "test",
         "path": "test.mdx",
       }
@@ -54,7 +53,6 @@ describe('Path utilities', () => {
         "dirname": "nested",
         "ext": ".mdx",
         "flattenedPath": "nested/test",
-        "locale": "",
         "name": "test",
         "path": "nested/test.mdx",
       }
@@ -65,8 +63,7 @@ describe('Path utilities', () => {
         "dirname": "nested",
         "ext": ".mdx",
         "flattenedPath": "nested/test.cn",
-        "locale": ".cn",
-        "name": "test",
+        "name": "test.cn",
         "path": "nested/test.cn.mdx",
       }
     `);
@@ -76,7 +73,6 @@ describe('Path utilities', () => {
         "dirname": "nested",
         "ext": ".mdx",
         "flattenedPath": "nested/test.01",
-        "locale": "",
         "name": "test.01",
         "path": "nested/test.01.mdx",
       }
@@ -87,8 +83,7 @@ describe('Path utilities', () => {
         "dirname": "nested",
         "ext": ".mdx",
         "flattenedPath": "nested/test.cn",
-        "locale": ".cn",
-        "name": "test",
+        "name": "test.cn",
         "path": "nested/test.cn.mdx",
       }
     `);
