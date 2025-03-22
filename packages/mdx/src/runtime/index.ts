@@ -56,11 +56,10 @@ export function createMDXSource<
   metaData: Meta;
 }> {
   return {
-    files: (rootDir) =>
+    files: () =>
       resolveFiles({
         docs,
         meta,
-        rootDir,
       }),
   };
 }
@@ -72,16 +71,10 @@ interface ResolveOptions {
   rootDir?: string;
 }
 
-export function resolveFiles({
-  docs,
-  meta,
-  rootDir = '',
-}: ResolveOptions): VirtualFile[] {
+export function resolveFiles({ docs, meta }: ResolveOptions): VirtualFile[] {
   const outputs: VirtualFile[] = [];
 
   for (const entry of docs) {
-    if (!entry._file.path.startsWith(rootDir)) continue;
-
     outputs.push({
       type: 'page',
       path: entry._file.path,
