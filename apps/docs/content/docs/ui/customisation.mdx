@@ -14,19 +14,32 @@ description: An overview of Fumadocs UI
 | **Docs Page** | All content of the page.                                |
 | **TOC**       | Navigation within the article.                          |
 
+### Page Tree
+
+Navigation elements like sidebar take a [Page Tree](/docs/headless/page-tree) to render navigation links, it's a tree that describes all available pages and folders.
+
+Normally, it is generated from your file structure using [`loader()`](/docs/headless/source-api), you can learn [how to organize pages](/docs/ui/page-conventions).
+
 ## Customisation
 
 ### Layouts
 
-You can use the exposed options of different components:
+You can use the exposed options of different layouts:
 
-<DocsCategory slugs={['ui', 'layouts', 'home-layout']} />
-
-#### Sidebar Items
-
-Navigation elements like sidebar take a [Page Tree](/docs/headless/page-tree) to render navigation links, it's a tree that describes all available pages and folders.
-
-Normally, the tree (sidebar items) is generated from your file structure, you can learn [how to customise it](/docs/ui/page-conventions).
+<Cards>
+  <Card title="Docs Layout" href="/docs/ui/layouts/docs">
+    Layout for docs
+  </Card>
+  <Card title="Docs Page" href="/docs/ui/layouts/page">
+    Layout for docs content
+  </Card>
+  <Card title="Notebook Layout" href="/docs/ui/layouts/notebook">
+    A more compact version of Docs Layout
+  </Card>
+  <Card title="Home Layout" href="/docs/ui/layouts/home">
+    Layout for other pages
+  </Card>
+</Cards>
 
 ### Components
 
