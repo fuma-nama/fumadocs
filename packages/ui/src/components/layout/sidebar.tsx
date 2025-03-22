@@ -1,5 +1,5 @@
 'use client';
-import { ChevronDown, ExternalLink, SidebarIcon } from 'lucide-react';
+import { ChevronDown, ExternalLink } from 'lucide-react';
 import * as Base from 'fumadocs-core/sidebar';
 import { usePathname } from 'next/navigation';
 import {
@@ -7,9 +7,7 @@ import {
   createContext,
   Fragment,
   type HTMLAttributes,
-  type PointerEventHandler,
   type ReactNode,
-  useCallback,
   useContext,
   useMemo,
   useRef,
@@ -89,32 +87,33 @@ export function CollapsibleSidebar(props: SidebarProps) {
     closeTimeRef.current = Date.now() + 150;
   });
 
-  const onEnter: PointerEventHandler = useCallback((e) => {
-    if (e.pointerType === 'touch' || closeTimeRef.current > Date.now()) return;
-    window.clearTimeout(timerRef.current);
-    setHover(true);
-  }, []);
-
-  const onLeave: PointerEventHandler = useCallback((e) => {
-    if (e.pointerType === 'touch') return;
-    window.clearTimeout(timerRef.current);
-
-    timerRef.current = window.setTimeout(
-      () => {
-        setHover(false);
-        closeTimeRef.current = Date.now() + 150;
-      },
-      Math.min(e.clientX, document.body.clientWidth - e.clientX) > 100
-        ? 0
-        : 500,
-    );
-  }, []);
-
   return (
     <Sidebar
       {...props}
-      onPointerEnter={collapsed ? onEnter : undefined}
-      onPointerLeave={collapsed ? onLeave : undefined}
+      onPointerEnter={(e) => {
+        if (
+          !collapsed ||
+          e.pointerType === 'touch' ||
+          closeTimeRef.current > Date.now()
+        )
+          return;
+        window.clearTimeout(timerRef.current);
+        setHover(true);
+      }}
+      onPointerLeave={(e) => {
+        if (!collapsed || e.pointerType === 'touch') return;
+        window.clearTimeout(timerRef.current);
+
+        timerRef.current = window.setTimeout(
+          () => {
+            setHover(false);
+            closeTimeRef.current = Date.now() + 150;
+          },
+          Math.min(e.clientX, document.body.clientWidth - e.clientX) > 100
+            ? 0
+            : 500,
+        );
+      }}
       data-collapsed={collapsed}
       className={cn(
         'md:transition-all',
@@ -154,7 +153,7 @@ export function Sidebar({
         blockScrollingWidth={768} // md
         {...props}
         className={cn(
-          'fixed top-[calc(var(--fd-banner-height)+var(--fd-nav-height))] z-30 bg-fd-card text-sm md:sticky md:h-(--fd-sidebar-height)',
+          'fixed top-[calc(var(--fd-banner-height)+var(--fd-nav-height))] z-20 bg-fd-card text-sm md:sticky md:h-(--fd-sidebar-height)',
           'max-md:inset-x-0 max-md:bottom-0 max-md:bg-fd-background/80 max-md:text-[15px] max-md:backdrop-blur-lg max-md:data-[open=false]:invisible',
           props.className,
         )}
@@ -388,7 +387,7 @@ export function SidebarCollapseTrigger(
         setCollapsed((prev) => !prev);
       }}
     >
-      {props.children ?? <SidebarIcon />}
+      {props.children}
     </button>
   );
 }
@@ -482,7 +481,8 @@ function PageTreeFolder({
   return (
     <SidebarFolder
       defaultOpen={
-        (item.defaultOpen ?? defaultOpenLevel >= level) || path.includes(item)
+        (item.defaultOpen ?? defaultOpenLevel >= level) ||
+        path.some((pathItem) => pathItem.$id === item.$id || pathItem === item)
       }
     >
       {item.index ? (

@@ -3,7 +3,7 @@ title: Docs Layout
 description: The layout of documentation
 ---
 
-The layout of documentation pages, it includes a sidebar and [navbar](/docs/ui/layouts/navbar).
+The layout of documentation pages, it includes a sidebar and mobile-only navbar.
 
 > It is a server component, you should not reference it in a client component.
 
@@ -25,34 +25,55 @@ export default function Layout({ children }: { children: ReactNode }) {
 }
 ```
 
-## Sidebar
+<AutoTypeTable
+  path="./content/docs/ui/props.ts"
+  type="Omit<DocsLayoutProps, 'children' | 'disableThemeSwitch'>"
+/>
 
-Provide elements to navigate between pages.
+## Sidebar
 
 ```tsx title="layout.tsx"
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 
 <DocsLayout
-  sidebar={
-    {
-      // options
-    }
-  }
+  sidebar={{
+    // sidebar options:
+    enabled: true,
+  }}
 />;
 ```
 
-### Sidebar Tabs
+<AutoTypeTable path="./content/docs/ui/props.ts" name="SidebarProps" />
 
-Add a navigation component to switch between root folders (Enabled by default).
-You can add items from the page tree (see [Root Folder](/docs/ui/page-conventions#multiple-page-trees)).
+## Sidebar Tabs
 
-<Callout title='Good to know'>
+A navigation component to switch between root folders.
 
-You can also use [Root Toggle](/docs/ui/components/root-toggle) component.
+<div className='max-w-[360px] mx-auto'>
 
-</Callout>
+![Sidebar Tabs](/docs/sidebar-tabs.png)
 
-#### Disable Tabs
+</div>
+
+You can add items from the page tree (see [Root Folder](/docs/ui/page-conventions#root-folder)), or specify them explicitly:
+
+```tsx
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+
+<DocsLayout
+  sidebar={{
+    tabs: [
+      {
+        title: 'Test',
+        description: 'Test Tab',
+        url: '/docs/test',
+      },
+    ],
+  }}
+/>;
+```
+
+Set it to `false` to disable:
 
 ```tsx
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
@@ -60,18 +81,7 @@ import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 <DocsLayout sidebar={{ tabs: false }} />;
 ```
 
-#### Add Description
-
-Add `description` to the meta file of root folder.
-
-```json title="meta.json"
-{
-  "root": true,
-  "description": "The description of root folder"
-}
-```
-
-#### Decoration
+### Decoration
 
 Change the icon/styles of tabs.
 
@@ -90,111 +100,21 @@ import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 />;
 ```
 
-### Disable Prefetching
+<include cwd>./content/shared/shared.nav.mdx</include>
 
-By default, it uses the Next.js Link component with prefetch enabled.
-When the link component appears into the browser viewport, the content (RSC payload) will be lazy loaded.
+### Replace Navbar
 
-Unless you put most of the page items in folders, all page items on the sidebar will be lazy loaded.
-On Vercel, this may cause a high usage of serverless functions and Data Cache.
-It can also hit the limits of some other hosting platforms.
-
-You can disable prefetching to reduce the amount of RSC requests.
-
-```tsx
-import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-
-<DocsLayout sidebar={{ prefetch: false }} />;
-```
-
-### Disable Sidebar from Pages
-
-This is not supported.
-Due to the limitations of App Router, layouts are not re-rendered when navigating between pages.
-It is an anti-pattern to change your layout from a page.
-
-You can consider:
-
-1. Disable sidebar from the entire layout.
-2. Create a [MDX Page](/docs/ui/layouts/page#mdx-page) in a layout that doesn't contain a sidebar.
-
-## Notebook
-
-Enable the notebook layout with `fumadocs-ui/layouts/notebook`, it's a more compact layout than the default one.
-
-![Notebook](/docs/notebook.png)
+To replace the navbar in Docs Layout, set `nav.component` to your own component.
 
 ```tsx title="layout.tsx"
-import { DocsLayout } from 'fumadocs-ui/layouts/notebook';
 import { baseOptions } from '@/app/layout.config';
-import { source } from '@/lib/source';
-import type { ReactNode } from 'react';
-
-export default function Layout({ children }: { children: ReactNode }) {
-  return (
-    <DocsLayout {...baseOptions} tree={source.pageTree}>
-      {children}
-    </DocsLayout>
-  );
-}
-```
-
-### Nav Mode
-
-Customise the position of navbar.
-
-```tsx title="layout.tsx"
 import { DocsLayout } from 'fumadocs-ui/layouts/notebook';
-import { baseOptions } from '@/app/layout.config';
-import { source } from '@/lib/source';
 import type { ReactNode } from 'react';
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
     <DocsLayout
       {...baseOptions}
-      nav={{ ...baseOptions.nav, mode: 'top' }}
-      tree={source.pageTree}
-    >
-      {children}
-    </DocsLayout>
-  );
-}
-```
-
-### Tab Mode
-
-Customise the position of tabs (Sidebar Tabs).
-
-```tsx title="layout.tsx"
-import { DocsLayout } from 'fumadocs-ui/layouts/notebook';
-import { baseOptions } from '@/app/layout.config';
-import { source } from '@/lib/source';
-import type { ReactNode } from 'react';
-
-export default function Layout({ children }: { children: ReactNode }) {
-  return (
-    <DocsLayout {...baseOptions} tabMode="navbar" tree={source.pageTree}>
-      {children}
-    </DocsLayout>
-  );
-}
-```
-
-## Replacing Navbar
-
-Fumadocs uses CSS Variables to share the size of layout components, and fit each layout component into appropriate position.
-
-To replace the navbar in Docs Layout, set `nav.component` to your own component.
-
-```tsx title="layout.tsx"
-import { DocsLayout } from 'fumadocs-ui/layouts/notebook';
-import type { ReactNode } from 'react';
-
-export default function Layout({ children }: { children: ReactNode }) {
-  return (
-    <DocsLayout
-      // other options
       nav={{
         component: <CustomNavbar />,
       }}
@@ -205,6 +125,8 @@ export default function Layout({ children }: { children: ReactNode }) {
 }
 ```
 
+Fumadocs uses **CSS Variables** to share the size of layout components, and fit each layout component into appropriate position.
+
 You need to override `--fd-nav-height` to the exact height of your custom navbar, this can be done with a CSS stylesheet (e.g. in `global.css`):
 
 ```css
@@ -213,14 +135,20 @@ You need to override `--fd-nav-height` to the exact height of your custom navbar
 }
 ```
 
-Note that `!important` is required to override CSS variables.
+## Advanced
 
-## References
+### Disable Prefetching
 
-### Sidebar
+By default, it uses the Next.js Link component with prefetch enabled.
+When the link component appears into the browser viewport, the content (RSC payload) will be prefetched.
 
-<AutoTypeTable path="./content/docs/ui/props.ts" name="SidebarProps" />
+On Vercel, this may cause a high usage of serverless functions and Data Cache.
+It can also hit the limits of some other hosting platforms.
 
-### Layout
+You can disable prefetching to reduce the amount of RSC requests.
 
-<AutoTypeTable path="./content/docs/ui/props.ts" name="DocsLayoutProps" />
+```tsx
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+
+<DocsLayout sidebar={{ prefetch: false }} />;
+```

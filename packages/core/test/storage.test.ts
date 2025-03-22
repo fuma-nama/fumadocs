@@ -77,7 +77,6 @@ test('Building File Graph', () => {
           "dirname": "",
           "ext": ".mdx",
           "flattenedPath": "test",
-          "locale": "",
           "name": "test",
           "path": "test.mdx",
         },
@@ -99,7 +98,6 @@ test('Building File Graph', () => {
               "dirname": "nested",
               "ext": ".mdx",
               "flattenedPath": "nested/test",
-              "locale": "",
               "name": "test",
               "path": "nested/test.mdx",
             },
@@ -122,7 +120,6 @@ test('Building File Graph', () => {
                   "dirname": "nested/nested",
                   "ext": ".mdx",
                   "flattenedPath": "nested/nested/test",
-                  "locale": "",
                   "name": "test",
                   "path": "nested/nested/test.mdx",
                 },
@@ -134,66 +131,6 @@ test('Building File Graph', () => {
               "name": "nested",
               "path": "nested/nested",
             },
-          },
-        ],
-        "file": {
-          "dirname": "",
-          "name": "nested",
-          "path": "nested",
-        },
-      },
-    ]
-  `);
-});
-
-test('Building File Graph - with root directory', () => {
-  const storage = loadFiles(demoFiles, {
-    rootDir: 'nested',
-    getSlugs,
-  });
-
-  expect(storage.root().children).toMatchInlineSnapshot(`
-    [
-      {
-        "data": {
-          "data": {
-            "title": "Nested Page",
-          },
-          "slugs": [
-            "test",
-          ],
-        },
-        "file": {
-          "dirname": "",
-          "ext": ".mdx",
-          "flattenedPath": "test",
-          "locale": "",
-          "name": "test",
-          "path": "test.mdx",
-        },
-        "format": "page",
-      },
-      {
-        "children": [
-          {
-            "data": {
-              "data": {
-                "title": "Nested Nested Page",
-              },
-              "slugs": [
-                "nested",
-                "test",
-              ],
-            },
-            "file": {
-              "dirname": "nested",
-              "ext": ".mdx",
-              "flattenedPath": "nested/test",
-              "locale": "",
-              "name": "test",
-              "path": "nested/test.mdx",
-            },
-            "format": "page",
           },
         ],
         "file": {

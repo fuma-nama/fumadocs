@@ -4,14 +4,17 @@ import { SearchIcon } from 'lucide-react';
 import { useSearchContext } from '@/contexts/search';
 import { useI18n } from '@/contexts/i18n';
 import { cn } from '@/utils/cn';
-import { buttonVariants } from '@/components/ui/button';
+import { type ButtonProps, buttonVariants } from '@/components/ui/button';
 
 export function SearchToggle({
   hideIfDisabled,
+  size = 'icon',
+  color = 'ghost',
   ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & {
-  hideIfDisabled?: boolean;
-}) {
+}: ButtonHTMLAttributes<HTMLButtonElement> &
+  ButtonProps & {
+    hideIfDisabled?: boolean;
+  }) {
   const { setOpenSearch, enabled } = useSearchContext();
   if (hideIfDisabled && !enabled) return null;
 
@@ -20,8 +23,8 @@ export function SearchToggle({
       type="button"
       className={cn(
         buttonVariants({
-          size: 'icon',
-          color: 'ghost',
+          size,
+          color,
         }),
         props.className,
       )}

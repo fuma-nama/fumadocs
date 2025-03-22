@@ -2,7 +2,7 @@ import { Fragment, type HTMLAttributes } from 'react';
 import { type NavOptions, replaceOrDefault } from '@/layouts/shared';
 import { cn } from '@/utils/cn';
 import { getLinks, type BaseLayoutProps } from './shared';
-import { NavProvider, Title } from '@/components/layout/nav';
+import { NavProvider } from '@/contexts/layout';
 import {
   Navbar,
   NavbarLink,
@@ -89,7 +89,12 @@ function Header({
 
   return (
     <Navbar>
-      <Title title={nav.title} url={nav.url} />
+      <Link
+        href={nav.url ?? '/'}
+        className="inline-flex items-center gap-2.5 font-semibold"
+      >
+        {nav.title}
+      </Link>
       {nav.children}
       <ul className="flex flex-row items-center gap-2 px-6 max-sm:hidden">
         {navItems

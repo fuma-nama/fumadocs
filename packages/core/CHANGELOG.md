@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 15.1.2
+
+### Patch Changes
+
+- 3f580c4: Support directory-based i18n routing
+
 ## 15.1.1
 
 ### Patch Changes

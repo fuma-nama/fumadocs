@@ -2,7 +2,7 @@
 import { cn } from '@/utils/cn';
 import { type ButtonHTMLAttributes, type HTMLAttributes } from 'react';
 import { useSidebar } from '@/contexts/sidebar';
-import { useNav } from '@/components/layout/nav';
+import { useNav } from '@/contexts/layout';
 import { SidebarTrigger } from 'fumadocs-core/sidebar';
 import { buttonVariants } from '@/components/ui/button';
 import { Menu, X } from 'lucide-react';

@@ -1,7 +1,7 @@
 import type { PageTree } from 'fumadocs-core/server';
 import { type ReactNode, type HTMLAttributes } from 'react';
 import Link from 'next/link';
-import { ChevronRight, Languages } from 'lucide-react';
+import { Languages, SidebarIcon } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import {
@@ -12,7 +12,7 @@ import {
   SidebarCollapseTrigger,
   SidebarViewport,
   SidebarPageTree,
-} from '@/layouts/docs/sidebar';
+} from '@/components/layout/sidebar';
 import { replaceOrDefault } from '@/layouts/shared';
 import { type LinkItemType, BaseLinkItem } from '@/layouts/links';
 import { RootToggle } from '@/components/layout/root-toggle';
@@ -21,9 +21,12 @@ import {
   LanguageToggle,
   LanguageToggleText,
 } from '@/components/layout/language-toggle';
-import { Navbar, NavbarSidebarTrigger } from '@/layouts/docs.client';
+import {
+  CollapsibleControl,
+  Navbar,
+  NavbarSidebarTrigger,
+} from '@/layouts/docs.client';
 import { TreeContextProvider } from '@/contexts/tree';
-import { NavProvider, Title } from '@/components/layout/nav';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
 import {
   LargeSearchToggle,
@@ -36,13 +39,20 @@ import {
   SidebarLinkItem,
   type SidebarOptions,
 } from '@/layouts/docs/shared';
-import { type PageStyles, StylesProvider } from '@/contexts/layout';
+import {
+  type PageStyles,
+  StylesProvider,
+  NavProvider,
+} from '@/contexts/layout';
 
 export interface DocsLayoutProps extends BaseLayoutProps {
   tree: PageTree.Root;
 
   sidebar?: Partial<SidebarOptions>;
 
+  /**
+   * Props for the `div` container
+   */
   containerProps?: HTMLAttributes<HTMLDivElement>;
 }
 
@@ -92,7 +102,12 @@ export function DocsLayout({
         {replaceOrDefault(
           { enabled: navEnabled, component: navReplace },
           <Navbar className="md:hidden">
-            <Title url={nav.url} title={nav.title} />
+            <Link
+              href={nav.url ?? '/'}
+              className="inline-flex items-center gap-2.5 font-semibold"
+            >
+              {nav.title}
+            </Link>
             <div className="flex flex-1 flex-row items-center gap-1">
               {nav.children}
             </div>
@@ -114,19 +129,7 @@ export function DocsLayout({
             ...props.containerProps?.style,
           }}
         >
-          {collapsible ? (
-            <SidebarCollapseTrigger
-              className={cn(
-                buttonVariants({
-                  color: 'secondary',
-                  size: 'icon',
-                }),
-                'fixed top-1/2 -translate-y-1/2 start-0 z-40 text-fd-muted-foreground border-s-0 rounded-s-none shadow-md data-[collapsed=false]:hidden max-md:hidden',
-              )}
-            >
-              <ChevronRight />
-            </SidebarCollapseTrigger>
-          ) : null}
+          {collapsible ? <CollapsibleControl /> : null}
           {replaceOrDefault(
             { enabled: sidebarEnabled, component: sidebarReplace },
             <Aside
@@ -151,7 +154,9 @@ export function DocsLayout({
                         }),
                         'ms-auto mb-auto text-fd-muted-foreground max-md:hidden',
                       )}
-                    />
+                    >
+                      <SidebarIcon />
+                    </SidebarCollapseTrigger>
                   )}
                 </div>
                 {sidebarBanner}
@@ -241,5 +246,5 @@ function SidebarFooterItems({
   );
 }
 
+export { CollapsibleControl, Navbar, NavbarSidebarTrigger, type LinkItemType };
 export { getSidebarTabsFromOptions, type TabOptions } from './docs/shared';
-export { type LinkItemType };

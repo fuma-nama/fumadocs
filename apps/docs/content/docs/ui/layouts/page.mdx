@@ -1,5 +1,5 @@
 ---
-title: Page
+title: Docs Page
 description: A page in your documentation
 ---
 
@@ -25,28 +25,14 @@ import {
 
 <Callout type='info' title='Good to know'>
 
-Instead of rendering the title with `DocsTitle` or your custom component in `page.tsx`, you can put the title into MDX file.
+Instead of rendering the title with `DocsTitle` in `page.tsx`, you can put the title into MDX file.
 This will render the title in the MDX body.
 
 </Callout>
 
-### Page
-
-The main layout of docs pages.
-
-### Title
-
-Optional, display the page title.
-
-### Description
-
-Optional, display the page description.
-
 ### Body
 
 It applies the [Typography](/docs/ui/theme#typography) styles, wrap your content inside.
-
-> You can use this component without `<DocsPage />`.
 
 ```tsx
 import { DocsBody } from 'fumadocs-ui/page';
@@ -75,19 +61,6 @@ const page = source.getPage(['...']);
 
 <DocsCategory />
 
-When i18n is configured, it takes the `locale` property from `page` to find the corresponding page tree to traverse.
-You can also specify a locale:
-
-```tsx title="page.tsx (i18n enabled)"
-import { source } from '@/lib/source';
-import { DocsCategory } from 'fumadocs-ui/page';
-
-const page = source.getPage(['...'], 'cn');
-
-// force to use English page tree
-<DocsCategory page={page} from={source} tree={source.pageTree['en']} />;
-```
-
 ## Configurations
 
 ### Full Mode
@@ -103,10 +76,9 @@ import { DocsPage } from 'fumadocs-ui/page';
 
 ### Table of Contents
 
-An overview of all the headings in your document.
+An overview of all the headings in your article, it requires an array of headings.
 
-It requires an array of headings. For Markdown and MDX
-documents, You can obtain it using the
+For Markdown and MDX documents, You can obtain it using the
 [TOC Utility](/docs/headless/utils/get-toc). Content sources like Fumadocs MDX offer this out-of-the-box.
 
 ```tsx
@@ -114,8 +86,6 @@ import { DocsPage } from 'fumadocs-ui/page';
 
 <DocsPage toc={headings}>...</DocsPage>;
 ```
-
-#### Options
 
 Customise or disable TOC from your documentation with the `tableOfContent` option.
 
@@ -126,19 +96,6 @@ import { DocsPage } from 'fumadocs-ui/page';
 ```
 
 <AutoTypeTable path="./content/docs/ui/props.ts" name="TOCProps" />
-
-#### Popover Mode
-
-On smaller devices, it is shown on a popover instead.
-Customise it with the `tableOfContentPopover` option.
-
-```tsx
-import { DocsPage } from 'fumadocs-ui/page';
-
-<DocsPage tableOfContentPopover={options}>...</DocsPage>;
-```
-
-<AutoTypeTable path="./content/docs/ui/props.ts" name="TOCPopoverProps" />
 
 #### Style
 
@@ -155,6 +112,19 @@ import { DocsPage } from 'fumadocs-ui/page';
   ...
 </DocsPage>;
 ```
+
+#### Popover Mode
+
+On smaller devices, it is shown on a popover instead.
+Customise it with the `tableOfContentPopover` option.
+
+```tsx
+import { DocsPage } from 'fumadocs-ui/page';
+
+<DocsPage tableOfContentPopover={options}>...</DocsPage>;
+```
+
+<AutoTypeTable path="./content/docs/ui/props.ts" name="TOCPopoverProps" />
 
 ### Last Updated Time
 

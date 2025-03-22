@@ -6,7 +6,7 @@ import {
   SidebarFolderTrigger,
   SidebarItem,
   type SidebarProps,
-} from '@/layouts/docs/sidebar';
+} from '@/components/layout/sidebar';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
 import type { PageTree } from 'fumadocs-core/server';

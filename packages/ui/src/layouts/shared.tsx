@@ -1,15 +1,21 @@
 import type { ReactNode } from 'react';
 import type { LinkItemType } from '@/layouts/links';
-import type { NavProviderProps, TitleProps } from '@/components/layout/nav';
+import type { NavProviderProps } from '@/contexts/layout';
 import { Slot } from '@radix-ui/react-slot';
 import type { I18nConfig } from 'fumadocs-core/i18n';
 
-export interface NavOptions extends SharedNavProps {
+export interface NavOptions extends NavProviderProps {
   enabled: boolean;
   component: ReactNode;
-}
 
-export interface SharedNavProps extends TitleProps, NavProviderProps {
+  title?: ReactNode;
+
+  /**
+   * Redirect url of title
+   * @defaultValue '/'
+   */
+  url?: string;
+
   /**
    * Show/hide search toggle
    *
@@ -53,6 +59,8 @@ export interface BaseLayoutProps {
 
   children?: ReactNode;
 }
+
+export { type LinkItemType };
 
 /**
  * Get Links Items with shortcuts

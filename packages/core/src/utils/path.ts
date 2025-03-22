@@ -7,8 +7,7 @@ export function splitPath(path: string): string[] {
 
 /**
  * Resolve paths, slashes within the path will be ignored
- * @param from - Path to resolve from
- * @param join - Paths to resolve
+ * @param paths - Paths to join
  * @example
  * ```
  * ['a','b'] // 'a/b'
@@ -17,25 +16,25 @@ export function splitPath(path: string): string[] {
  * ['a', '../b/c'] // 'b/c'
  * ```
  */
-export function joinPath(from: string, join: string): string {
-  const v1 = splitPath(from),
-    v2 = splitPath(join);
+export function joinPath(...paths: string[]): string {
+  const out = [];
+  const parsed = paths.flatMap(splitPath);
 
-  while (v2.length > 0) {
-    switch (v2[0]) {
+  while (parsed.length > 0) {
+    switch (parsed[0]) {
       case '..':
-        v1.pop();
+        out.pop();
         break;
       case '.':
         break;
       default:
-        v1.push(v2[0]);
+        out.push(parsed[0]);
     }
 
-    v2.shift();
+    parsed.shift();
   }
 
-  return v1.join('/');
+  return out.join('/');
 }
 
 export function slash(path: string): string {

@@ -6,15 +6,16 @@ import { joinPath } from '@/utils/path';
 import { type UrlFn } from './types';
 
 interface PageTreeBuilderContext {
-  lang?: string;
-  defaultLanguage?: string;
-
   storage: Storage;
+
+  locale?: string;
+  localeStorage?: Storage;
+
   builder: PageTreeBuilder;
-  options: BuildPageTreeOptions;
+  options: Options;
 }
 
-export interface BuildPageTreeOptions {
+interface Options {
   /**
    * Remove references to the file path of original nodes (`$ref`)
    *
@@ -30,12 +31,16 @@ export interface BuildPageTreeOptions {
   ) => PageTree.Folder;
   attachSeparator?: (node: PageTree.Separator) => PageTree.Separator;
 
-  storage: Storage;
   getUrl: UrlFn;
   resolveIcon?: (icon: string | undefined) => ReactElement | undefined;
 }
 
-export interface BuildPageTreeOptionsWithI18n extends BuildPageTreeOptions {
+export interface BuildPageTreeOptions extends Options {
+  storage: Storage;
+}
+
+export interface BuildPageTreeOptionsWithI18n extends Options {
+  storages: Record<string, Storage>;
   i18n: I18nConfig;
 }
 
@@ -63,7 +68,7 @@ function isPageFile(node: Folder | File): node is PageFile {
 }
 
 /**
- * @param nodes - All nodes to be built
+ * @param nodes - All nodes to be built (in default locale)
  * @param ctx - Context
  * @param skipIndex - Skip index
  * @returns Nodes with specified locale in context (sorted)
@@ -80,14 +85,8 @@ function buildAll(
     a.file.name.localeCompare(b.file.name),
   )) {
     if (isPageFile(node)) {
-      if (
-        node.file.locale.length > 0 &&
-        node.file.locale.slice(1) !== ctx.defaultLanguage
-      )
-        continue;
-
-      const localized = ctx.storage.read(
-        joinPath(node.file.dirname, `${node.file.name}.${ctx.lang}`),
+      const localized = ctx.localeStorage?.read(
+        joinPath(node.file.dirname, node.file.name),
         'page',
       );
 
@@ -166,15 +165,10 @@ function resolveFolderItem(
 
   const path = joinPath(folder.file.path, filename);
 
-  let itemNode: Folder | PageFile | undefined = ctx.storage.readDir(path);
-
-  if (!itemNode) {
-    itemNode =
-      (ctx.lang ? ctx.storage.read(`${path}.${ctx.lang}`, 'page') : null) ??
-      ctx.storage.read(`${path}.${ctx.defaultLanguage}`, 'page') ??
-      ctx.storage.read(path, 'page');
-  }
-
+  const itemNode =
+    ctx.storage.readDir(path) ??
+    ctx.localeStorage?.read(path, 'page') ??
+    ctx.storage.read(path, 'page');
   if (!itemNode) return [];
 
   addedNodePaths.add(itemNode.file.path);
@@ -196,8 +190,7 @@ function buildFolderNode(
 ): PageTree.Folder {
   const metaPath = joinPath(folder.file.path, 'meta');
   const meta =
-    ctx.storage.read(`${metaPath}.${ctx.lang}`, 'meta') ??
-    ctx.storage.read(`${metaPath}.${ctx.defaultLanguage}`, 'meta') ??
+    ctx.localeStorage?.read(metaPath, 'meta') ??
     ctx.storage.read(metaPath, 'meta');
 
   const indexFile = ctx.storage.read(
@@ -275,7 +268,7 @@ function buildFileNode(
     name: file.data.data.title ?? pathToName(file.file.name),
     description: file.data.data.description,
     icon: ctx.options.resolveIcon?.(file.data.data.icon),
-    url: ctx.options.getUrl(file.data.slugs, ctx.lang),
+    url: ctx.options.getUrl(file.data.slugs, ctx.locale),
     $ref: !ctx.options.noRef
       ? {
           file: file.file.path,
@@ -308,11 +301,11 @@ export function createPageTreeBuilder(): PageTreeBuilder {
     buildI18n({ i18n, ...options }) {
       const entries = i18n.languages.map<[string, PageTree.Root]>((lang) => {
         const tree = build({
-          lang,
           options,
           builder: this,
-          storage: options.storage,
-          defaultLanguage: i18n.defaultLanguage,
+          locale: lang,
+          storage: options.storages[i18n.defaultLanguage],
+          localeStorage: options.storages[lang],
         });
 
         return [lang, tree];

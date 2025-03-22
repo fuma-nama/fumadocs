@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-ui",
-  "version": "15.1.1",
+  "version": "15.1.2",
   "description": "The framework for building a documentation website in Next.js",
   "keywords": [
     "NextJs",
@@ -85,14 +85,14 @@
   "devDependencies": {
     "@fumadocs/cli": "workspace:*",
     "@next/eslint-plugin-next": "^15.2.3",
-    "@tailwindcss/cli": "^4.0.14",
+    "@tailwindcss/cli": "^4.0.15",
     "@types/lodash.merge": "^4.6.9",
-    "@types/react": "^19.0.11",
+    "@types/react": "^19.0.12",
     "@types/react-dom": "^19.0.4",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
     "next": "15.2.3",
-    "tailwindcss": "^4.0.14",
+    "tailwindcss": "^4.0.15",
     "tsc-alias": "^1.8.11",
     "tsconfig": "workspace:*"
   },

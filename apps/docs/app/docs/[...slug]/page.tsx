@@ -36,6 +36,7 @@ import {
   HoverCardTrigger,
 } from '@/components/ui/hover-card';
 import Link from 'fumadocs-core/link';
+import { UiOverview } from '@/components/ui-overview';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -131,7 +132,10 @@ export default async function Page(props: {
             Files,
             blockquote: Callout as unknown as FC<ComponentProps<'blockquote'>>,
             APIPage: openapi.APIPage,
-            DocsCategory: () => <DocsCategory page={page} from={source} />,
+            DocsCategory: ({ slugs = params.slug }: { slugs?: string[] }) => (
+              <DocsCategory page={source.getPage(slugs)!} from={source} />
+            ),
+            UiOverview,
 
             ...(await import('@/content/docs/ui/components/tabs.client')),
             ...(await import('@/content/docs/ui/theme.client')),

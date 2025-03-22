@@ -2,13 +2,6 @@ import { slash, splitPath } from '@/utils/path';
 
 export interface FileInfo {
   /**
-   * locale extension from the last second `.`, like `.en`
-   *
-   * empty string if no locale
-   */
-  locale: string;
-
-  /**
    * File path without extension
    *
    * @deprecated obtain it with `join(dirname, name)`
@@ -55,34 +48,20 @@ export function parseFilePath(path: string): FileInfo {
   const dirname = segments.slice(0, -1).join('/');
   let name = segments.at(-1) ?? '';
   let ext = '';
-  let locale = '';
 
-  let dotIdx = name.lastIndexOf('.');
+  const dotIdx = name.lastIndexOf('.');
   if (dotIdx !== -1) {
     ext = name.substring(dotIdx);
-    name = name.substring(0, dotIdx);
-  }
-
-  dotIdx = name.lastIndexOf('.');
-  if (dotIdx !== -1 && isLocale(name.substring(dotIdx))) {
-    locale = name.substring(dotIdx);
     name = name.substring(0, dotIdx);
   }
 
   return {
     dirname,
     name,
-    locale,
     path: segments.join('/'),
     ext,
-    flattenedPath: [dirname, `${name}${locale}`]
-      .filter((p) => p.length > 0)
-      .join('/'),
+    flattenedPath: [dirname, name].filter((p) => p.length > 0).join('/'),
   };
-}
-
-function isLocale(code: string): boolean {
-  return code.length > 0 && !/\d+/.test(code);
 }
 
 export function parseFolderPath(path: string): FolderInfo {

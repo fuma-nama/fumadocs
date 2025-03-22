@@ -13,7 +13,7 @@ import {
   NavigationMenuTrigger,
   NavigationMenuViewport,
 } from '@/components/ui/navigation-menu';
-import { useNav } from '@/components/layout/nav';
+import { useNav } from '@/contexts/layout';
 import type {
   NavigationMenuContentProps,
   NavigationMenuTriggerProps,

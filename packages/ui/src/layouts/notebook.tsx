@@ -12,9 +12,8 @@ import {
   SidebarHeader,
   SidebarViewport,
   SidebarPageTree,
-} from '@/layouts/docs/sidebar';
+} from '@/components/layout/sidebar';
 import { TreeContextProvider } from '@/contexts/tree';
-import { NavProvider, Title } from '@/components/layout/nav';
 import {
   LargeSearchToggle,
   SearchToggle,
@@ -22,7 +21,7 @@ import {
 import { cn } from '@/utils/cn';
 import Link from 'next/link';
 import { buttonVariants } from '@/components/ui/button';
-import { ChevronDown, Languages } from 'lucide-react';
+import { ChevronDown, Languages, SidebarIcon } from 'lucide-react';
 import { BaseLinkItem, type LinkItemType } from '@/layouts/links';
 import { LanguageToggle } from '@/components/layout/language-toggle';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
@@ -46,7 +45,11 @@ import {
   NavbarSidebarTrigger,
   SidebarLayoutTab,
 } from './notebook.client';
-import { type PageStyles, StylesProvider } from '@/contexts/layout';
+import {
+  type PageStyles,
+  StylesProvider,
+  NavProvider,
+} from '@/contexts/layout';
 import { type Option, RootToggle } from '@/components/layout/root-toggle';
 
 export interface DocsLayoutProps extends BaseLayoutProps {
@@ -143,7 +146,9 @@ export function DocsLayout({
                       }),
                       'text-fd-muted-foreground mb-auto',
                     )}
-                  />
+                  >
+                    <SidebarIcon />
+                  </SidebarCollapseTrigger>
                 </div>
               )}
               {nav.children}
@@ -252,16 +257,19 @@ function DocsNavbar({
                 }),
                 'text-fd-muted-foreground -ms-1.5 me-2 data-[collapsed=false]:hidden max-md:hidden',
               )}
-            />
+            >
+              <SidebarIcon />
+            </SidebarCollapseTrigger>
           ) : null}
-          <Title
-            url={nav.url}
-            title={nav.title}
+          <Link
+            href={nav.url ?? '/'}
             className={cn(
-              // show on sidebar on above md
+              'inline-flex items-center gap-2.5 font-semibold',
               navMode === 'auto' && 'md:hidden',
             )}
-          />
+          >
+            {nav.title}
+          </Link>
         </div>
 
         <LargeSearchToggle
@@ -320,7 +328,9 @@ function DocsNavbar({
                 }),
                 'ms-2 text-fd-muted-foreground rounded-full max-md:hidden',
               )}
-            />
+            >
+              <SidebarIcon />
+            </SidebarCollapseTrigger>
           ) : null}
         </div>
       </div>
@@ -378,3 +388,5 @@ function NavbarLinkItem({
     </BaseLinkItem>
   );
 }
+
+export { Navbar, NavbarSidebarTrigger };
