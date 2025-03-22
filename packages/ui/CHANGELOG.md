@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 15.1.2
+
+### Patch Changes
+
+- 44d5acf: Improve sidebar UI
+- Updated dependencies [3f580c4]
+  - fumadocs-core@15.1.2
+
 ## 15.1.1
 
 ### Patch Changes
