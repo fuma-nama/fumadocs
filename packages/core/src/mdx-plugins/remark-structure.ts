@@ -101,6 +101,32 @@ export function remarkStructure({
         return 'skip';
       }
 
+      if (element.type === 'mdxJsxFlowElement' && element.name) {
+        data.contents.push(
+          {
+            heading: lastHeading,
+            content: element.name,
+          },
+          ...element.attributes.flatMap((attribute) => {
+            const valueStr =
+              typeof attribute.value === 'string'
+                ? attribute.value
+                : attribute.value?.value;
+            if (!valueStr) return [];
+
+            return {
+              heading: lastHeading,
+              content:
+                attribute.type === 'mdxJsxAttribute'
+                  ? `${attribute.name}: ${valueStr}`
+                  : valueStr,
+            };
+          }),
+        );
+
+        return;
+      }
+
       if (types.includes(element.type)) {
         const content = flattenNode(element).trim();
         if (content.length === 0) return;
