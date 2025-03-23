@@ -41,17 +41,22 @@ fumadocs-typescript
 Initialize the TypeScript compiler and add it as a MDX component.
 
 ```tsx title="page.tsx"
-import { createTypeTable } from 'fumadocs-typescript/ui';
+import { createGenerator } from 'fumadocs-typescript';
+import { AutoTypeTable } from 'fumadocs-typescript/ui';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 
-const { AutoTypeTable } = createTypeTable();
+const generator = createGenerator();
 
-<MDX
-  components={{
-    ...defaultMdxComponents,
-    AutoTypeTable,
-  }}
-/>;
+return (
+  <MDX
+    components={{
+      ...defaultMdxComponents,
+      AutoTypeTable: (props) => (
+        <AutoTypeTable {...props} generator={generator} />
+      ),
+    }}
+  />
+);
 ```
 
 ### From File

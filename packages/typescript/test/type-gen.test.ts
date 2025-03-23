@@ -1,5 +1,5 @@
 import {
-  generateDocumentation,
+  createGenerator,
   remarkAutoTypeTable,
   type RemarkAutoTypeTableOptions,
 } from '../src';
@@ -18,14 +18,13 @@ const tsconfig: TypescriptConfig = {
   basePath: relative('../'),
 };
 
+const generator = createGenerator(tsconfig);
+
 test('Run', async () => {
   const file = relative('./fixtures/test.ts');
-  const content = (await fs.readFile(file)).toString();
 
   const result = ['Test1', 'Test2', 'Test3'].flatMap((name) =>
-    generateDocumentation(file, name, content, {
-      config: tsconfig,
-    }),
+    generator.generateDocumentation({ path: file }, name),
   );
 
   await expect(JSON.stringify(result, null, 2)).toMatchFileSnapshot(
@@ -40,9 +39,7 @@ test('Run on MDX files', async () => {
       [
         remarkAutoTypeTable,
         {
-          options: {
-            config: tsconfig,
-          },
+          generator,
         } as RemarkAutoTypeTableOptions,
       ],
     ],

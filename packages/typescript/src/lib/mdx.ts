@@ -1,11 +1,9 @@
 import * as path from 'node:path';
-import fs from 'node:fs';
-import { getProject } from '@/get-project';
 import {
   type DocEntry,
   type GeneratedDoc,
-  generateDocumentation,
-  type GenerateDocumentationOptions,
+  type Generator,
+  type GenerateOptions,
 } from './base';
 
 interface Templates {
@@ -13,7 +11,7 @@ interface Templates {
   property: (entry: DocEntry) => string;
 }
 
-export interface GenerateMDXOptions extends GenerateDocumentationOptions {
+export interface GenerateMDXOptions extends GenerateOptions {
   /**
    * a root directory to resolve relative file paths
    */
@@ -49,11 +47,11 @@ ${Object.entries(c.tags)
 };
 
 export function generateMDX(
+  generator: Generator,
   source: string,
   { basePath = './', templates: overrides, ...rest }: GenerateMDXOptions = {},
 ): string {
   const templates = { ...defaultTemplates, ...overrides };
-  const project = rest.project ?? getProject(rest.config);
 
   return source.replace(regex, (...args) => {
     const groups = args[args.length - 1] as {
@@ -61,11 +59,11 @@ export function generateMDX(
       name: string | undefined;
     };
     const file = path.resolve(basePath, groups.file);
-    const content = fs.readFileSync(file);
-    const docs = generateDocumentation(file, groups.name, content.toString(), {
-      ...rest,
-      project,
-    });
+    const docs = generator.generateDocumentation(
+      { path: file },
+      groups.name,
+      rest,
+    );
 
     return docs
       .map((doc) =>
