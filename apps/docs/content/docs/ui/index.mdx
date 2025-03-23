@@ -53,8 +53,6 @@ Some basic knowledge of Next.js App Router would be useful for further customisa
 
 Create a new app with `create-fumadocs-app`.
 
-Node.js 18 or above required, Node.js 23.1 might have problems with Next.js production build.
-
 <Tabs groupId='package-manager' persist items={['npm', 'pnpm', 'yarn', 'bun']}>
 
 ```bash tab="npm"
@@ -74,6 +72,8 @@ bun create fumadocs-app
 ```
 
 </Tabs>
+
+> Node.js 18 or above required, Node.js 23.1 might have problems with Next.js production build.
 
 It will initialize a new fumadocs app.
 Now you can start hacking!
@@ -119,15 +119,34 @@ In the project, you can see:
 
 Content source handles all your content, like compiling Markdown files and validating frontmatter.
 
-- **Fumadocs MDX:** Read the [Introduction](/docs/mdx) to learn how it handles your content,
-  and customise different options like frontmatter schema. A `source.config.ts` config file has been included.
+<Tabs items={['Fumadocs MDX', 'Custom Source']}>
 
-- **Custom Source:** Fumadocs is not Markdown-exclusive. For other sources like Sanity, you can [build a custom content source](/docs/headless/custom-source).
+    <Tab value='Fumadocs MDX'>
+
+Read the [Introduction](/docs/mdx) to learn how it handles your content.
+
+A `source.config.ts` config file has been included, you can customise different options like frontmatter schema.
+
+    </Tab>
+
+    <Tab value='Custom Source'>
+
+Fumadocs is not Markdown-exclusive. For other sources like Sanity, you can build a [custom content source](/docs/headless/custom-source).
+
+    </Tab>
+
+</Tabs>
 
 ### Writing Content
 
-Despite the supported syntax of MDX, Fumadocs has some additional features for authoring content too.
-You can refer to [Markdown](/docs/ui/markdown).
+<Cards>
+  <Card href="/docs/ui/markdown" title="Markdown">
+    Fumadocs has some additional features for authoring content too.
+  </Card>
+  <Card href="/docs/ui/page-conventions" title="Organizing Pages">
+    Learn how to organize your content.
+  </Card>
+</Cards>
 
 ### Customise UI
 

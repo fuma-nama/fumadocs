@@ -31,7 +31,7 @@ export function UwuHero(): React.ReactElement {
           Getting Started
         </Link>
         <a
-          href="https://githubbox.com/fuma-nama/fumadocs-ui-template"
+          href="https://stackblitz.com/~/github.com/fuma-nama/fumadocs-ui-template"
           className={cn(
             buttonVariants({
               size: 'lg',
