@@ -166,7 +166,7 @@ function getSidebarTabs(
 
       if (urls.size > 0) {
         const option: Option = {
-          url: urls.next().value,
+          url: urls.values().next().value,
           title: node.name,
           icon: node.icon,
           description: node.description,
