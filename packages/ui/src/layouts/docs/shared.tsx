@@ -157,13 +157,26 @@ function getSidebarTabs(
   pageTree: PageTree.Root,
   { transform = defaultTransform }: TabOptions = {},
 ): Option[] {
+
+  function getFirstInternalPage(node: PageTree.Folder): PageTree.Item | null {
+    if (node.index) return node.index;
+    for (const child of node.children) {
+      if (child.type == 'page' && !child.external) return child;
+      if (child.type == 'folder') {
+        const res = getFirstInternalPage(child);
+        if (res) return res;
+      }
+    }
+    return null;
+  }
+
   function findOptions(node: PageTree.Folder): Option[] {
     const results: Option[] = [];
 
     if (node.root) {
-      const index = node.index ?? node.children.at(0);
+      const index = node.index ?? getFirstInternalPage(node) ?? node.children.at(0);
 
-      if (index?.type === 'page') {
+      if (index?.type === 'page' && !index.external) {
         const option: Option = {
           url: index.url,
           title: node.name,
