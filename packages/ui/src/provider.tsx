@@ -1,8 +1,7 @@
 'use client';
 
 import { ThemeProvider } from 'next-themes';
-import { type ComponentPropsWithoutRef, type ReactNode } from 'react';
-import dynamic from 'next/dynamic';
+import { type ComponentPropsWithoutRef, lazy, type ReactNode } from 'react';
 import { DirectionProvider } from '@radix-ui/react-direction';
 import type { DefaultSearchDialogProps } from '@/components/dialog/search-default';
 import { SidebarProvider } from './contexts/sidebar';
@@ -45,9 +44,8 @@ export interface RootProviderProps {
   children?: ReactNode;
 }
 
-const DefaultSearchDialog = dynamic(
+const DefaultSearchDialog = lazy(
   () => import('@/components/dialog/search-default'),
-  { ssr: false },
 );
 
 export function RootProvider({

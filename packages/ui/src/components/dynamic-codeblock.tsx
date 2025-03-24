@@ -1,6 +1,6 @@
 'use client';
 import { CodeBlock, Pre } from '@/components/codeblock';
-import type { HighlightOptions } from 'fumadocs-core/server';
+import type { HighlightOptions } from 'fumadocs-core/highlight';
 import { useShiki } from 'fumadocs-core/highlight/client';
 import { cn } from '@/utils/cn';
 

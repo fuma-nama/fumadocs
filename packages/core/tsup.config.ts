@@ -20,10 +20,10 @@ export default defineConfig({
     'src/search/algolia.ts',
     'src/search/orama-cloud.ts',
     'src/utils/use-on-change.ts',
-    'src/utils/use-shiki.tsx',
     'src/utils/use-effect-event.ts',
     'src/i18n/index.ts',
     'src/highlight/index.ts',
     'src/highlight/client.tsx',
+    'src/framework/*',
   ],
 });

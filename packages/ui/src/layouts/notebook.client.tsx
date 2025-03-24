@@ -7,7 +7,7 @@ import { SidebarTrigger } from 'fumadocs-core/sidebar';
 import { buttonVariants } from '@/components/ui/button';
 import { Menu, X } from 'lucide-react';
 import Link from 'fumadocs-core/link';
-import { usePathname } from 'next/navigation';
+import { usePathname } from 'fumadocs-core/framework';
 import { isActive } from '@/utils/is-active';
 import type { Option } from '@/components/layout/root-toggle';
 

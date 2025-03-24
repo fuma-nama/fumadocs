@@ -19,7 +19,6 @@ import {
   SearchToggle,
 } from '@/components/layout/search-toggle';
 import { cn } from '@/utils/cn';
-import Link from 'next/link';
 import { buttonVariants } from '@/components/ui/button';
 import { ChevronDown, Languages, SidebarIcon } from 'lucide-react';
 import { BaseLinkItem, type LinkItemType } from '@/layouts/links';
@@ -51,6 +50,7 @@ import {
   NavProvider,
 } from '@/contexts/layout';
 import { type Option, RootToggle } from '@/components/layout/root-toggle';
+import Link from 'fumadocs-core/link';
 
 export interface DocsLayoutProps extends BaseLayoutProps {
   tree: PageTree.Root;

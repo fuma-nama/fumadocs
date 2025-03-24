@@ -1,6 +1,5 @@
 import type { PageTree } from 'fumadocs-core/server';
 import { type ReactNode, type HTMLAttributes } from 'react';
-import Link from 'next/link';
 import { Languages, SidebarIcon } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
@@ -44,6 +43,7 @@ import {
   StylesProvider,
   NavProvider,
 } from '@/contexts/layout';
+import Link from 'fumadocs-core/link';
 
 export interface DocsLayoutProps extends BaseLayoutProps {
   tree: PageTree.Root;

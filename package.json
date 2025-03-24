@@ -26,6 +26,7 @@
     "eslint-plugin-react-hooks": "5.2.0",
     "eslint-plugin-tailwindcss": "^3.18.0",
     "prettier": "^3.5.3",
+    "prettier-plugin-astro": "^0.14.1",
     "rimraf": "^6.0.1",
     "tsup": "8.4.0",
     "turbo": "2.4.4",

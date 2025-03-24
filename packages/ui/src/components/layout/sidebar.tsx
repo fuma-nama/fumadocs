@@ -1,7 +1,7 @@
 'use client';
 import { ChevronDown, ExternalLink } from 'lucide-react';
 import * as Base from 'fumadocs-core/sidebar';
-import { usePathname } from 'next/navigation';
+import { usePathname } from 'fumadocs-core/framework';
 import {
   type ButtonHTMLAttributes,
   createContext,

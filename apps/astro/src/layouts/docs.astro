@@ -1,0 +1,48 @@
+---
+import '../styles/global.css';
+import { type CollectionEntry, getCollection } from 'astro:content';
+import { Docs } from './docs';
+import { render } from 'astro:content';
+import { loader } from 'fumadocs-core/source';
+import * as path from 'node:path';
+
+type Props = CollectionEntry<'blog'>;
+
+const posts = await getCollection('blog');
+
+const source = loader({
+  baseUrl: '/blog',
+  source: {
+    files: posts.map((item) => ({
+      type: 'page',
+      path: path.relative('src/content/blog', item.filePath!),
+      data: item.data,
+    })),
+  },
+});
+
+const post = Astro.props;
+const { Content, headings } = await render(post);
+---
+
+<html lang="en">
+  <head> </head>
+  <body>
+    <Docs
+      client:load
+      title={post.data.title}
+      description={post.data.description}
+      pathname={Astro.url.pathname}
+      params={Astro.params}
+      tree={source.pageTree}
+      toc={headings.map((heading) => ({
+        title: heading.text,
+        url: '#' + heading.slug,
+        depth: heading.depth,
+      }))}
+    >
+      <slot />
+      />
+    </Docs>
+  </body>
+</html>

@@ -1,6 +1,6 @@
 'use client';
 import { createContext, useContext } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'fumadocs-core/framework';
 import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 import { type ReactNode, useMemo } from 'react';
 

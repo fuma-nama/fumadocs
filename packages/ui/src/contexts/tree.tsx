@@ -1,6 +1,6 @@
 'use client';
 import type { PageTree } from 'fumadocs-core/server';
-import { usePathname } from 'next/navigation';
+import { usePathname } from 'fumadocs-core/framework';
 import {
   createContext,
   useContext,

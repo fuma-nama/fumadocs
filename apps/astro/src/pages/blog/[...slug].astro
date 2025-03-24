@@ -1,0 +1,23 @@
+---
+import { type CollectionEntry, getCollection } from 'astro:content';
+import { render } from 'astro:content';
+import Layout from '../../layouts/docs.astro';
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+import Pre from '../../components/mdx/pre.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: post,
+  }));
+}
+type Props = CollectionEntry<'blog'>;
+
+const post = Astro.props;
+const { Content, headings } = await render(post);
+---
+
+<Layout {...post}>
+  <Content components={{ ...defaultMdxComponents, pre: Pre }} />
+</Layout>

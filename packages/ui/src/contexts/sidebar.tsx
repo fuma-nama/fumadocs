@@ -7,7 +7,7 @@ import {
   type ReactNode,
   type RefObject,
 } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname } from 'fumadocs-core/framework';
 import { SidebarProvider as BaseProvider } from 'fumadocs-core/sidebar';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 

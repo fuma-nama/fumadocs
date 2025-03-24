@@ -1,0 +1,11 @@
+---
+import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
+
+const props = Astro.props;
+---
+
+<CodeBlock client:load className={props.className} style={props.style}>
+  <Pre client:load>
+    <slot />
+  </Pre>
+</CodeBlock>

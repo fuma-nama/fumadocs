@@ -1,8 +1,8 @@
 'use client';
 
-import { useParams } from 'next/navigation';
 import { forwardRef, useMemo } from 'react';
 import Link, { type LinkProps } from './link';
+import { useParams } from '@/framework';
 
 export type DynamicLinkProps = LinkProps;
 
