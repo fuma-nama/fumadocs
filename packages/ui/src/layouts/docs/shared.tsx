@@ -158,32 +158,19 @@ function getSidebarTabs(
   { transform = defaultTransform }: TabOptions = {},
 ): Option[] {
 
-  function getFirstInternalPage(node: PageTree.Folder): PageTree.Item | null {
-    if (node.index) return node.index;
-    for (const child of node.children) {
-      if (child.type == 'page' && !child.external) return child;
-      if (child.type == 'folder') {
-        const res = getFirstInternalPage(child);
-        if (res) return res;
-      }
-    }
-    return null;
-  }
-
   function findOptions(node: PageTree.Folder): Option[] {
     const results: Option[] = [];
 
     if (node.root) {
-      const index = node.index ?? getFirstInternalPage(node) ?? node.children.at(0);
+      const urls = getFolderUrls(node);
 
-      if (index?.type === 'page' && !index.external) {
+      if (urls.length > 0) {
         const option: Option = {
-          url: index.url,
+          url: urls[0],
           title: node.name,
           icon: node.icon,
           description: node.description,
-
-          urls: getFolderUrls(node, new Set()),
+          urls,
         };
 
         const mapped = transform ? transform(option, node) : option;
@@ -203,12 +190,12 @@ function getSidebarTabs(
 
 function getFolderUrls(
   folder: PageTree.Folder,
-  output: Set<string>,
+  output: Set<string> = new Set(),
 ): Set<string> {
   if (folder.index) output.add(folder.index.url);
 
   for (const child of folder.children) {
-    if (child.type === 'page') output.add(child.url);
+    if (child.type === 'page' && !child.external) output.add(child.url);
     if (child.type === 'folder') getFolderUrls(child, output);
   }
 
