@@ -164,9 +164,9 @@ function getSidebarTabs(
     if (node.root) {
       const urls = getFolderUrls(node);
 
-      if (urls.length > 0) {
+      if (urls.size > 0) {
         const option: Option = {
-          url: urls[0],
+          url: urls.next().value,
           title: node.name,
           icon: node.icon,
           description: node.description,
