@@ -1,0 +1,69 @@
+---
+title: Sidebar Links
+description: Customise sidebar navigation links on Docs Layout.
+---
+
+## Overview
+
+**Sidebar items and the slugs of each page** are generated from your file structure, see [Organizing Pages](/docs/ui/page-conventions) for available patterns.
+
+<div className='flex justify-center items-center *:max-w-[200px] bg-gradient-to-br from-fd-primary/10 rounded-xl border'>
+
+    ![Sidebar](/docs/sidebar.png)
+
+</div>
+
+
+### Sidebar Tabs
+
+A navigation component to switch between tabs.
+
+<div className='flex justify-center items-center *:max-w-[360px] bg-gradient-to-br from-fd-primary/10 rounded-xl border'>
+
+    ![Sidebar Tabs](/docs/sidebar-tabs.png)
+
+</div>
+
+You can add items from page tree by creating a `meta.json` file ([Root Folder](/docs/ui/page-conventions#root-folder)):
+
+```json title="content/docs/my-folder/meta.json"
+{
+  "title": "Name of Folder",
+  "description": "The description of root folder (optional)",
+  "root": true
+}
+```
+
+Or specify them explicitly:
+
+```tsx title="/app/docs/layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+
+<DocsLayout
+  sidebar={{
+    tabs: [
+      {
+        title: 'Test',
+        description: 'Test Tab',
+        url: '/docs/test',
+      },
+    ],
+  }}
+/>;
+```
+
+Set it to `false` to disable:
+
+```tsx
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+
+<DocsLayout sidebar={{ tabs: false }} />;
+```
+
+<Callout title="Want further customisations?">
+    You can specify more props to the [Docs Layout](/docs/ui/layouts/docs) component.
+</Callout>
+
+### Document Search
+
+Search is also an important way to navigate between pages, you can refer to [Search](/docs/ui/search) to learn more about configuring document search.

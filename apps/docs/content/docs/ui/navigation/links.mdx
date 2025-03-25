@@ -1,19 +1,13 @@
 ---
-title: Navigation
-description: Customise navigation on layouts
+title: Layout Links
+description: Customise the shared navigation links on all layouts.
 ---
 
 ## Overview
 
-Different from sidebar items (page tree), Fumadocs also allow adding global links to your layouts with a `links` prop, like linking to your "showcase" page.
+Fumadocs allows adding additional links to your layouts with a `links` prop, like linking to your "showcase" page.
 
 ![Nav](/docs/nav.png)
-
-<Callout title="Just wanted to customise sidebar?">
-  See [Docs Layout](/docs/ui/layouts/docs).
-</Callout>
-
-## Adding Links
 
 You can add new links by customising the `links` option of layouts.
 
@@ -199,7 +193,7 @@ export const baseOptions: BaseLayoutProps = {
 };
 ```
 
-### GitHub Url
+### GitHub URL
 
 There's also a shortcut for adding GitHub repository link item.
 
@@ -210,65 +204,3 @@ export const baseOptions: BaseLayoutProps = {
   githubUrl: 'https://github.com',
 };
 ```
-
-## Others
-
-### Document Search
-
-Search is also an important way to navigate between pages, you can refer to [Search](/docs/ui/search) to learn more about configuring document search.
-
-### Hierarchy
-
-Hierarchy can create an intuition to users, Fumadocs UI is designed in:
-
-```
-Layout Links -> Sidebar Tabs & Document Search -> Sidebar Items -> Page
-```
-
-1. Layout links should redirect the user to another layout, like the blog page or landing page.
-
-2. A sidebar can have multiple tabs, each tab opens a different tree of navigation links.
-
-3. The active **page tree** will be shown on navigation elements like sidebar, allowing users to switch between pages.
-
-4. The page shows its content, with elements like **Table of Contents** to improve the reading experience.
-
-Nodes should not impact their upper nodes (ancestors).
-For example, clicking a page tree item on sidebar should not change the root of page tree.
-
-## FAQ
-
-### Multi versions
-
-Use a separate deployment for each version.
-
-On Vercel, this can be done by creating another branch for a specific version on your GitHub repository.
-To link to the sites of other versions, use the Links API or a custom navigation component.
-
-### Multi Docs
-
-See [Root Folder](/docs/ui/page-conventions#root-folder).
-
-### Remove the docs layout of a certain page
-
-The `/docs/[[...slug]]` route is a catch-all route.
-
-To use another layout for a certain page, move it to a place outside the `app/docs` folder which renders in the docs layout.
-
-Using Next.js Route Group, you can still access the same page with same URL. For example, adding a `/docs` page without docs layout.
-
-<Files>
-  <Folder name="app" defaultOpen>
-    <File name="(home)/docs/page.tsx" />
-    <Folder name="docs" defaultOpen>
-      <File name="layout.tsx" />
-      <File name="[[...slug]]/page.tsx" />
-    </Folder>
-  </Folder>
-</Files>
-
-<Callout type="warn">
-  Ensure **there's no duplicated page** with the same URL in the catch-all route
-  `[[...slug]]/page.tsx`. In the above example, a MDX file with the path
-  `content/docs/index.mdx` will produce errors.
-</Callout>
