@@ -157,7 +157,6 @@ function getSidebarTabs(
   pageTree: PageTree.Root,
   { transform = defaultTransform }: TabOptions = {},
 ): Option[] {
-
   function findOptions(node: PageTree.Folder): Option[] {
     const results: Option[] = [];
 
