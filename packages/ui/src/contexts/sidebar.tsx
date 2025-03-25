@@ -1,13 +1,11 @@
 import {
-  createContext,
-  useContext,
   useState,
   useMemo,
   useRef,
   type ReactNode,
   type RefObject,
 } from 'react';
-import { usePathname } from 'fumadocs-core/framework';
+import { createContext, usePathname } from 'fumadocs-core/framework';
 import { SidebarProvider as BaseProvider } from 'fumadocs-core/sidebar';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 
@@ -23,12 +21,10 @@ interface SidebarContext {
   closeOnRedirect: RefObject<boolean>;
 }
 
-const SidebarContext = createContext<SidebarContext | undefined>(undefined);
+const SidebarContext = createContext<SidebarContext>('SidebarContext');
 
 export function useSidebar(): SidebarContext {
-  const ctx = useContext(SidebarContext);
-  if (!ctx) throw new Error('Missing root provider');
-  return ctx;
+  return SidebarContext.use();
 }
 
 export function SidebarProvider({

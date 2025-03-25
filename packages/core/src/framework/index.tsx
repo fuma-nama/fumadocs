@@ -1,16 +1,7 @@
 'use client';
-import {
-  type ComponentProps,
-  createContext,
-  type FC,
-  type ReactNode,
-  useContext,
-  useMemo,
-} from 'react';
-import { map } from 'nanostores';
+import { type ComponentProps, type FC, type ReactNode, useMemo } from 'react';
+import { atom } from 'nanostores';
 import { useStore } from '@nanostores/react';
-
-const internal = map<Framework>();
 
 export interface ImageProps extends ComponentProps<'img'> {
   sizes?: string;
@@ -36,7 +27,7 @@ export interface Framework {
   Image?: FC<ImageProps>;
 }
 
-const FrameworkContext = createContext<Framework | null>(null);
+const FrameworkContext = createContext<Framework>('FrameworkContext');
 
 export function FrameworkProvider({
   children,
@@ -59,8 +50,6 @@ export function FrameworkProvider({
     ],
   );
 
-  internal.set(framework);
-
   return (
     <FrameworkContext.Provider value={framework}>
       {children}
@@ -69,12 +58,7 @@ export function FrameworkProvider({
 }
 
 export function useFramework(): Framework {
-  let ctx = useContext(FrameworkContext);
-  // eslint-disable-next-line react-hooks/rules-of-hooks -- fixed
-  ctx ??= useStore(internal);
-  if (!ctx) throw new Error('Fumadocs requires a `FrameworkProvider` to work.');
-
-  return ctx;
+  return FrameworkContext.use();
 }
 
 export function usePathname() {
@@ -92,4 +76,25 @@ export function useParams() {
 export function Image(props: ImageProps) {
   const { Image = 'img' } = useFramework();
   return <Image {...props} />;
+}
+
+export function createContext<T>(name: string, v?: T) {
+  const store = atom(v);
+
+  return {
+    Provider: (props: { value: T; children: ReactNode }) => {
+      store.set(props.value);
+      return props.children;
+    },
+    use: (errorMessage?: string): Exclude<T, undefined | null> => {
+      const value = useStore(store);
+      console.log('use', name);
+
+      if (!value)
+        throw new Error(
+          errorMessage ?? `Provider of ${name} is required but missing.`,
+        );
+      return value as Exclude<T, undefined | null>;
+    },
+  };
 }

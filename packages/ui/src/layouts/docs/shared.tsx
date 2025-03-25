@@ -22,9 +22,6 @@ export interface TabOptions {
 }
 
 export interface SidebarOptions extends SidebarProps {
-  enabled: boolean;
-  component: ReactNode;
-
   collapsible?: boolean;
   components?: Partial<SidebarComponents>;
 

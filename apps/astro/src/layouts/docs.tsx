@@ -1,24 +1,18 @@
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import { DocsBody, DocsPage, DocsTitle } from 'fumadocs-ui/page';
-import { type ReactNode, useMemo } from 'react';
+import { type ReactNode, useEffect, useMemo } from 'react';
 import { type Framework, FrameworkProvider } from 'fumadocs-core/framework';
 import { RootProvider } from 'fumadocs-ui/provider';
-import { type PageTree, type TableOfContents } from 'fumadocs-core/server';
+import { type PageTree } from 'fumadocs-core/server';
+import { navigate } from 'astro:transitions/client';
 
-export function Docs({
+export default function Docs({
   pathname,
-  title,
-  description,
-  toc,
   children,
   params,
   tree,
 }: {
   pathname: string;
   params: Record<string, string | string[]>;
-  toc: TableOfContents;
-  title: string;
-  description: string;
   tree: PageTree.Root;
   children: ReactNode;
 }) {
@@ -28,7 +22,7 @@ export function Docs({
       useParams: () => params,
       useRouter: () => ({
         push(path) {
-          window.open(path);
+          navigate(path);
         },
         refresh() {
           location.reload();
@@ -37,6 +31,14 @@ export function Docs({
       Link: ({ prefetch: _, ...props }) => <a {...props} />,
     };
   }, [pathname, params]);
+
+  useEffect(() => {
+    console.log('mount');
+
+    return () => {
+      console.log('unmount');
+    };
+  }, []);
 
   return (
     <FrameworkProvider {...values}>
@@ -47,10 +49,7 @@ export function Docs({
           }}
           tree={tree}
         >
-          <DocsPage toc={toc}>
-            <DocsTitle>{title}</DocsTitle>
-            <DocsBody>{children}</DocsBody>
-          </DocsPage>
+          {children}
         </DocsLayout>
       </RootProvider>
     </FrameworkProvider>

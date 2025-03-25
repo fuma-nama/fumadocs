@@ -60,7 +60,7 @@ export interface DocsLayoutProps extends BaseLayoutProps {
     mode?: 'top' | 'auto';
   };
 
-  sidebar?: Omit<Partial<SidebarOptions>, 'component' | 'enabled'>;
+  sidebar?: Partial<SidebarOptions>;
 
   containerProps?: HTMLAttributes<HTMLDivElement>;
 }

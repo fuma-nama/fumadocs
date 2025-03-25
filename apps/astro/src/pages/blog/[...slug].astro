@@ -1,9 +1,18 @@
 ---
+import type { TableOfContents } from 'fumadocs-core/dist/server';
 import { type CollectionEntry, getCollection } from 'astro:content';
 import { render } from 'astro:content';
 import Layout from '../../layouts/docs.astro';
+import DocsLayout from '../../layouts/docs';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import Pre from '../../components/mdx/pre.astro';
+import { source } from '../../source';
+import {
+  DocsPage,
+  DocsBody,
+  DocsTitle,
+  DocsDescription,
+} from 'fumadocs-ui/page';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
@@ -16,8 +25,33 @@ type Props = CollectionEntry<'blog'>;
 
 const post = Astro.props;
 const { Content, headings } = await render(post);
+
+const toc: TableOfContents = headings.map((heading) => ({
+  title: heading.text,
+  url: '#' + heading.slug,
+  depth: heading.depth,
+}));
 ---
 
-<Layout {...post}>
-  <Content components={{ ...defaultMdxComponents, pre: Pre }} />
+<Layout>
+  <DocsLayout
+    title={post.data.title}
+    description={post.data.description}
+    pathname={Astro.url.pathname}
+    params={Astro.params}
+    tree={source.pageTree}
+    client:load
+  >
+    <DocsPage
+      toc={toc}
+      tableOfContent={{ enabled: true, style: 'clerk' }}
+      client:load
+    >
+      <DocsTitle>{post.data.title}</DocsTitle>
+      <DocsDescription>{post.data.description}</DocsDescription>
+      <DocsBody>
+        <Content components={{ ...defaultMdxComponents, pre: Pre }} />
+      </DocsBody>
+    </DocsPage>
+  </DocsLayout>
 </Layout>
