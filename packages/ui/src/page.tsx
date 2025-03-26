@@ -19,7 +19,7 @@ import {
   type BreadcrumbProps,
   PageBody,
   PageArticle,
-} from './page.client';
+} from './page-client';
 import {
   Toc,
   TOCItems,

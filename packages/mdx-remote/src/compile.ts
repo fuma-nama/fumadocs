@@ -70,6 +70,13 @@ export function createCompiler(mdxOptions?: MDXOptions) {
   });
 
   return {
+    render(compiled: string, scope: object = {}, filePath?: string) {
+      return executeMdx(
+        compiled,
+        scope,
+        filePath ? pathToFileURL(filePath) : undefined,
+      );
+    },
     async compile<Frontmatter extends object = Record<string, unknown>>(
       options: Omit<CompileMDXOptions, 'mdxOptions'>,
     ): Promise<CompileMDXResult<Frontmatter>> {
@@ -82,11 +89,7 @@ export function createCompiler(mdxOptions?: MDXOptions) {
       });
       const compiled = String(file);
       const exports = !skipRender
-        ? await executeMdx(
-            compiled,
-            scope,
-            options.filePath ? pathToFileURL(options.filePath) : undefined,
-          )
+        ? await this.render(compiled, scope, options.filePath)
         : null;
 
       return {

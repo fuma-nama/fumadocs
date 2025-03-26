@@ -28,7 +28,7 @@ import {
   CollapsibleControl,
   Navbar,
   NavbarSidebarTrigger,
-} from '@/layouts/docs.client';
+} from '@/layouts/docs-client';
 import { TreeContextProvider } from '@/contexts/tree';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
 import {

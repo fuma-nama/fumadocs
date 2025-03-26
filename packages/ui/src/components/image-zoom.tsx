@@ -24,7 +24,7 @@ function getImageSrc(src: ImageProps['src']): string {
     // Next.js
     if ('default' in src)
       return (src as { default: { src: string } }).default.src;
-    return (src as Record<string, string>).src;
+    return src.src;
   }
 
   return '';

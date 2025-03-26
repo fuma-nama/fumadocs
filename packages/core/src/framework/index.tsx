@@ -1,10 +1,21 @@
 'use client';
-import { type ComponentProps, type FC, type ReactNode, useMemo } from 'react';
-import { atom } from 'nanostores';
-import { useStore } from '@nanostores/react';
+import React from 'react';
+import {
+  type ComponentProps,
+  type FC,
+  type ReactNode,
+  useMemo,
+  useContext,
+} from 'react';
+import type { StaticImport } from 'next/dist/shared/lib/get-img-props';
 
-export interface ImageProps extends ComponentProps<'img'> {
+export interface ImageProps extends Omit<ComponentProps<'img'>, 'src'> {
   sizes?: string;
+
+  /**
+   * Next.js Image component has other allowed type for `src`
+   */
+  src?: string | StaticImport;
 }
 
 export interface Router {
@@ -75,20 +86,22 @@ export function useParams() {
 
 export function Image(props: ImageProps) {
   const { Image = 'img' } = useFramework();
-  return <Image {...props} />;
+  return <Image {...(props as ComponentProps<'img'>)} />;
 }
 
 export function createContext<T>(name: string, v?: T) {
-  const store = atom(v);
+  const Context = React.createContext(v);
 
   return {
     Provider: (props: { value: T; children: ReactNode }) => {
-      store.set(props.value);
-      return props.children;
+      return (
+        <Context.Provider value={props.value}>
+          {props.children}
+        </Context.Provider>
+      );
     },
     use: (errorMessage?: string): Exclude<T, undefined | null> => {
-      const value = useStore(store);
-      console.log('use', name);
+      const value = useContext(Context);
 
       if (!value)
         throw new Error(
