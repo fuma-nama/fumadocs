@@ -1,6 +1,6 @@
 import { createFileRoute, notFound } from '@tanstack/react-router';
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-import { compiler, source } from '../../../lib/source';
+import { source } from '@/lib/source';
 import {
   DocsBody,
   DocsDescription,
@@ -11,6 +11,7 @@ import { executeMdxSync } from '@fumadocs/mdx-remote/client';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { createServerFn } from '@tanstack/react-start';
 import type { PageTree } from 'fumadocs-core/server';
+import { createCompiler } from '@fumadocs/mdx-remote';
 
 export const Route = createFileRoute('/docs/$')({
   component: Page,
@@ -19,6 +20,10 @@ export const Route = createFileRoute('/docs/$')({
 
     return loader({ data: slugs });
   },
+});
+
+const compiler = createCompiler({
+  development: false,
 });
 
 const loader = createServerFn({

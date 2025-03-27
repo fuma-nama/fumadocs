@@ -30,6 +30,11 @@ function contentHotReload(): PluginOption {
 
 export default defineConfig({
   server: {
+    esbuild: {
+      options: {
+        target: 'esnext',
+      },
+    },
     hooks: {
       'prerender:routes': (routes) => {
         const pages = source.getPages();
@@ -45,6 +50,19 @@ export default defineConfig({
     },
   },
   vite: {
+    build: {
+      rollupOptions: {
+        // Shiki results in a huge bundle because Rollup tries to bundle every language/theme
+        external: ['shiki'],
+        // most React.js libraries now include 'use client'
+        onwarn(warning, warn) {
+          if (warning.code === 'MODULE_LEVEL_DIRECTIVE') {
+            return;
+          }
+          warn(warning);
+        },
+      },
+    },
     plugins: [
       contentHotReload(),
       tsConfigPaths({

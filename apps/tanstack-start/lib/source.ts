@@ -8,7 +8,6 @@ import {
 } from 'fumadocs-core/source';
 import matter from 'gray-matter';
 import * as path from 'node:path';
-import { createCompiler } from '@fumadocs/mdx-remote';
 
 const files = await Glob('content/docs/**/*.mdx');
 
@@ -37,10 +36,6 @@ async function createSource(): Promise<
     ),
   };
 }
-
-export const compiler = createCompiler({
-  development: false,
-});
 
 export const source = loader({
   source: await createSource(),

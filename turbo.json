@@ -13,6 +13,7 @@
       "env": ["ALGOLIA_API_KEY", "ORAMA_INDEX_ID", "ORAMA_PRIVATE_API_KEY"],
       "dependsOn": ["^build"],
       "outputs": [
+        ".output",
         ".contentlayer/**",
         ".source/**",
         "!.contentlayer/.cache/**",

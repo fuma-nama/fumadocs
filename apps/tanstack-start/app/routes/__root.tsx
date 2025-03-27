@@ -75,8 +75,9 @@ function Provider({ children }: { children: ReactNode }) {
 
         return {
           push(url) {
-            // @ts-expect-error -- ignore
-            void router.navigate(url);
+            void router.navigate({
+              href: url,
+            });
           },
           refresh() {
             void router.invalidate();
