@@ -9,19 +9,19 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/mdx": "^4.2.1",
-    "@astrojs/react": "^4.2.1",
+    "@astrojs/mdx": "^4.2.2",
+    "@astrojs/react": "^4.2.2",
     "@astrojs/rss": "^4.0.11",
     "@astrojs/sitemap": "^3.3.0",
-    "@tailwindcss/vite": "^4.0.15",
-    "@types/node": "22.13.11",
+    "@tailwindcss/vite": "^4.0.17",
+    "@types/node": "22.13.14",
     "@types/react": "^19.0.12",
     "@types/react-dom": "^19.0.4",
-    "astro": "^5.5.4",
+    "astro": "^5.5.5",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "tailwindcss": "^4.0.15"
+    "tailwindcss": "^4.0.17"
   }
 }
