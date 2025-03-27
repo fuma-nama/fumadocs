@@ -1,7 +1,7 @@
 import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { type ReactNode, useEffect, useMemo } from 'react';
 import { type Framework, FrameworkProvider } from 'fumadocs-core/framework';
-import { RootProvider } from 'fumadocs-ui/provider';
+import { RootProvider } from 'fumadocs-ui/provider/base';
 import { type PageTree } from 'fumadocs-core/server';
 import { navigate } from 'astro:transitions/client';
 

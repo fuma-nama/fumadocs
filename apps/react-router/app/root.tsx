@@ -15,7 +15,7 @@ import type { Route } from './+types/root';
 import './app.css';
 import { type Framework, FrameworkProvider } from 'fumadocs-core/framework';
 import { type ComponentPropsWithoutRef, useMemo } from 'react';
-import { RootProvider } from 'fumadocs-ui/provider';
+import { RootProvider } from 'fumadocs-ui/provider/base';
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },

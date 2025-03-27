@@ -9,7 +9,7 @@ import {
   useRouter,
   Link,
 } from '@tanstack/react-router';
-import { RootProvider } from 'fumadocs-ui/provider';
+import { RootProvider } from 'fumadocs-ui/provider/base';
 import { type Framework, FrameworkProvider } from 'fumadocs-core/framework';
 // @ts-expect-error -- import CSS
 import appCss from '../app.css?url';

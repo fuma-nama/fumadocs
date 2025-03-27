@@ -33,8 +33,12 @@
       "types": "./dist/page.d.ts"
     },
     "./provider": {
-      "import": "./dist/provider.js",
-      "types": "./dist/provider.d.ts"
+      "import": "./dist/provider/index.js",
+      "types": "./dist/provider/index.d.ts"
+    },
+    "./provider/*": {
+      "import": "./dist/provider/*.js",
+      "types": "./dist/provider/*.d.ts"
     },
     "./mdx": {
       "node": "./dist/mdx.server.js",

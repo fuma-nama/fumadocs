@@ -4,7 +4,6 @@ import { RootProvider } from 'fumadocs-ui/provider';
 import dynamic from 'next/dynamic';
 import type { ReactNode } from 'react';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
-import { NextProvider } from 'fumadocs-core/framework/next';
 
 const SearchDialog = dynamic(() => import('@/components/search'), {
   ssr: false,
@@ -27,20 +26,18 @@ if (item === 'true') {
 
 export function Provider({ children }: { children: ReactNode }) {
   return (
-    <NextProvider>
-      <RootProvider
-        search={{
-          SearchDialog,
-        }}
-      >
-        <TooltipProvider>
-          <script
-            suppressHydrationWarning
-            dangerouslySetInnerHTML={{ __html: inject }}
-          />
-          {children}
-        </TooltipProvider>
-      </RootProvider>
-    </NextProvider>
+    <RootProvider
+      search={{
+        SearchDialog,
+      }}
+    >
+      <TooltipProvider>
+        <script
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{ __html: inject }}
+        />
+        {children}
+      </TooltipProvider>
+    </RootProvider>
   );
 }
