@@ -7,7 +7,7 @@ import type { PluginOption } from 'vite';
 
 function contentHotReload(): PluginOption {
   return {
-    name: 'i18n-hot-reload',
+    name: 'fumadocs-hot-reload',
     handleHotUpdate({ file, server }) {
       const isRelative = !path.relative('content', file).startsWith('..');
 
