@@ -1,6 +1,6 @@
 'use client';
 import { type AnchorHTMLAttributes, forwardRef } from 'react';
-import { useFramework } from '@/framework';
+import { Link as Base } from '@/framework';
 
 export interface LinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
   /**
@@ -30,8 +30,6 @@ const Link = forwardRef<HTMLAnchorElement, LinkProps>(
     },
     ref,
   ) => {
-    const { Link = 'a' } = useFramework();
-
     if (external) {
       return (
         <a
@@ -46,7 +44,7 @@ const Link = forwardRef<HTMLAnchorElement, LinkProps>(
       );
     }
 
-    return <Link ref={ref} href={href} prefetch={prefetch} {...props} />;
+    return <Base ref={ref} href={href} prefetch={prefetch} {...props} />;
   },
 );
 

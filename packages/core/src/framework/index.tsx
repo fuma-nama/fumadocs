@@ -1,12 +1,6 @@
 'use client';
 import React from 'react';
-import {
-  type ComponentProps,
-  type FC,
-  type ReactNode,
-  useMemo,
-  useContext,
-} from 'react';
+import type { ComponentProps, FC, ReactNode } from 'react';
 import type { StaticImport } from 'next/dist/shared/lib/get-img-props';
 
 export interface ImageProps extends Omit<ComponentProps<'img'>, 'src'> {
@@ -16,6 +10,15 @@ export interface ImageProps extends Omit<ComponentProps<'img'>, 'src'> {
    * Next.js Image component has other allowed type for `src`
    */
   src?: string | StaticImport;
+
+  /**
+   * priority of image (from Next.js)
+   */
+  priority?: boolean;
+}
+
+interface LinkProps extends ComponentProps<'a'> {
+  prefetch?: boolean;
 }
 
 export interface Router {
@@ -26,7 +29,6 @@ export interface Router {
 export interface Framework {
   usePathname: () => string;
   useParams: () => Record<string, string | string[]>;
-
   useRouter: () => Router;
 
   Link?: FC<
@@ -44,7 +46,7 @@ export function FrameworkProvider({
   children,
   ...props
 }: Framework & { children: ReactNode }) {
-  const framework = useMemo(
+  const framework = React.useMemo(
     () => ({
       usePathname: props.usePathname,
       useRouter: props.useRouter,
@@ -68,25 +70,44 @@ export function FrameworkProvider({
   );
 }
 
-export function useFramework(): Framework {
-  return FrameworkContext.use();
-}
-
 export function usePathname() {
-  return useFramework().usePathname();
+  return FrameworkContext.use().usePathname();
 }
 
 export function useRouter() {
-  return useFramework().useRouter();
+  return FrameworkContext.use().useRouter();
 }
 
 export function useParams() {
-  return useFramework().useParams();
+  return FrameworkContext.use().useParams();
 }
 
 export function Image(props: ImageProps) {
-  const { Image = 'img' } = useFramework();
-  return <Image {...(props as ComponentProps<'img'>)} />;
+  const { Image } = FrameworkContext.use();
+  if (!Image) {
+    const { src, alt, priority, ...rest } = props;
+
+    return (
+      <img
+        alt={alt}
+        src={src as string}
+        fetchPriority={priority ? 'high' : 'auto'}
+        {...rest}
+      />
+    );
+  }
+
+  return <Image {...props} />;
+}
+
+export function Link(props: LinkProps) {
+  const { Link } = FrameworkContext.use();
+  if (!Link) {
+    const { href, prefetch: _, ...rest } = props;
+    return <a href={href} {...rest} />;
+  }
+
+  return <Link {...props} />;
 }
 
 export function createContext<T>(name: string, v?: T) {
@@ -101,7 +122,7 @@ export function createContext<T>(name: string, v?: T) {
       );
     },
     use: (errorMessage?: string): Exclude<T, undefined | null> => {
-      const value = useContext(Context);
+      const value = React.useContext(Context);
 
       if (!value)
         throw new Error(
