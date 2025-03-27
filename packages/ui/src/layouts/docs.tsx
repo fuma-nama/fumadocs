@@ -1,5 +1,5 @@
 import type { PageTree } from 'fumadocs-core/server';
-import { type ReactNode, type HTMLAttributes } from 'react';
+import { type ReactNode, type HTMLAttributes, useMemo } from 'react';
 import { Languages, SidebarIcon } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';
@@ -176,7 +176,10 @@ export function DocsLayoutSidebar({
   links?: LinkItemType[];
   nav?: ReactNode;
 }) {
-  const tabs = getSidebarTabsFromOptions(tabOptions, tree) ?? [];
+  const tabs = useMemo(
+    () => getSidebarTabsFromOptions(tabOptions, tree) ?? [],
+    [tabOptions, tree],
+  );
   const Aside = collapsible ? CollapsibleSidebar : Sidebar;
 
   return (

@@ -96,8 +96,4 @@ export {
   useTreeContext,
   TreeContextProvider,
 } from './contexts/tree';
-export {
-  StylesProvider,
-  usePageStyles,
-  type PageStyles,
-} from './contexts/layout';
+export * from './contexts/layout';
