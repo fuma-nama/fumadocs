@@ -227,7 +227,7 @@ function DocsNavbar({
   const navMode = nav.mode ?? 'auto';
 
   return (
-    <Navbar className={cn(navMode === 'top' && 'pe-(--fd-layout-offset)')}>
+    <Navbar mode={navMode}>
       <div
         className={cn(
           'flex flex-row border-b border-fd-foreground/10 px-4 h-14',

@@ -6316,11 +6316,7 @@
       "post": {
         "tags": ["identities"],
         "operationId": "deleteIdentity",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
+        "security": [{}],
         "requestBody": {
           "required": true,
           "content": {
