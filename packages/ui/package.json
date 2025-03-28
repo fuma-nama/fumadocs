@@ -40,6 +40,10 @@
       "import": "./dist/provider/*.js",
       "types": "./dist/provider/*.d.ts"
     },
+    "./contexts/*": {
+      "import": "./dist/contexts/*.js",
+      "types": "./dist/contexts/*.d.ts"
+    },
     "./mdx": {
       "node": "./dist/mdx.server.js",
       "import": "./dist/mdx.js",

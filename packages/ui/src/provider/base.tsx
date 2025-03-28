@@ -82,5 +82,3 @@ export function RootProvider({
     </DirectionProvider>
   );
 }
-
-export * from './_contexts';
