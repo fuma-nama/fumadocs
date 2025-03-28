@@ -82,14 +82,7 @@ export function getDefaultMDXOptions({
 
   const rehypePlugins = pluginOption(
     (v) => [
-      rehypeCodeOptions !== false && [
-        plugins.rehypeCode,
-        {
-          lazy: true,
-          langs: ['ts', 'js', 'html', 'tsx', 'mdx'],
-          ...rehypeCodeOptions,
-        },
-      ],
+      rehypeCodeOptions !== false && [plugins.rehypeCode, rehypeCodeOptions],
       ...v,
       [plugins.rehypeToc],
     ],
