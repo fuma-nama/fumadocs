@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import { existsSync } from 'node:fs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {
@@ -68,9 +67,10 @@ async function main(): Promise<void> {
   const projectName = options.name.toLowerCase().replace(/\s/, '-');
   const dest = path.resolve(cwd, projectName);
 
-  if (existsSync(dest)) {
+  const destDir = await fs.readdir(dest).catch(() => null);
+  if (destDir && destDir.length > 0) {
     const del = await confirm({
-      message: `${projectName} already exists, do you want to delete it?`,
+      message: `directory ${projectName} already exists, do you want to delete its files?`,
     });
 
     if (isCancel(del)) {
@@ -80,14 +80,18 @@ async function main(): Promise<void> {
 
     if (del) {
       const info = spinner();
-      info.start(`Deleting ${projectName}`);
+      info.start(`Deleting files in ${projectName}`);
 
-      await fs.rm(dest, {
-        recursive: true,
-        force: true,
-      });
+      await Promise.all(
+        destDir.map((item) =>
+          fs.rm(item, {
+            recursive: true,
+            force: true,
+          }),
+        ),
+      );
 
-      info.stop(`Deleted ${projectName}`);
+      info.stop(`Deleted files in ${projectName}`);
     }
   }
 
