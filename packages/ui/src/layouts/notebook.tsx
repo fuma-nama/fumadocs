@@ -1,4 +1,4 @@
-import { Fragment, type HTMLAttributes, ReactNode, useMemo } from 'react';
+import { Fragment, type HTMLAttributes, useMemo } from 'react';
 import {
   type BaseLayoutProps,
   getLinks,
@@ -60,7 +60,7 @@ export interface DocsLayoutProps extends BaseLayoutProps {
     mode?: 'top' | 'auto';
   };
 
-  sidebar?: Partial<SidebarOptions>;
+  sidebar?: Omit<Partial<SidebarOptions>, 'component' | 'enabled'>;
 
   containerProps?: HTMLAttributes<HTMLDivElement>;
 }
@@ -202,25 +202,12 @@ export function DocsLayout({
             </SidebarFooter>
           </Aside>
           <DocsNavbar
-            mode={navMode}
-            title={
-              <Link
-                href={nav.url ?? '/'}
-                className={cn(
-                  'inline-flex items-center gap-2.5 font-semibold',
-                  navMode === 'auto' && 'md:hidden',
-                )}
-              >
-                {nav.title}
-              </Link>
-            }
+            nav={nav}
             links={links}
             i18n={i18n}
             sidebarCollapsible={sidebarCollapsible}
             tabs={tabMode == 'navbar' ? tabs : []}
-          >
-            {nav.children}
-          </DocsNavbar>
+          />
           <StylesProvider {...pageStyles}>{props.children}</StylesProvider>
         </main>
       </NavProvider>
@@ -232,37 +219,34 @@ function DocsNavbar({
   sidebarCollapsible,
   links,
   themeSwitch,
-  mode = 'auto',
-  title,
+  nav = {},
   i18n,
   tabs,
-  ...props
 }: {
-  title: ReactNode;
-  children?: ReactNode;
-
-  mode: 'top' | 'auto';
+  nav: DocsLayoutProps['nav'];
+  sidebarCollapsible: boolean;
   i18n: Required<DocsLayoutProps>['i18n'];
   themeSwitch?: DocsLayoutProps['themeSwitch'];
   links: LinkItemType[];
   tabs: Option[];
-  sidebarCollapsible: boolean;
 }) {
+  const navMode = nav.mode ?? 'auto';
+
   return (
-    <Navbar className={cn(mode === 'top' && 'pe-(--fd-layout-offset)')}>
+    <Navbar mode={navMode}>
       <div
         className={cn(
           'flex flex-row border-b border-fd-foreground/10 px-4 h-14',
-          mode === 'auto' && 'md:px-6',
+          navMode === 'auto' && 'md:px-6',
         )}
       >
         <div
           className={cn(
             'flex flex-row items-center',
-            mode === 'top' && 'flex-1 pe-4',
+            navMode === 'top' && 'flex-1 pe-4',
           )}
         >
-          {sidebarCollapsible && mode === 'auto' ? (
+          {sidebarCollapsible && navMode === 'auto' ? (
             <SidebarCollapseTrigger
               className={cn(
                 buttonVariants({
@@ -275,14 +259,22 @@ function DocsNavbar({
               <SidebarIcon />
             </SidebarCollapseTrigger>
           ) : null}
-          {title}
+          <Link
+            href={nav.url ?? '/'}
+            className={cn(
+              'inline-flex items-center gap-2.5 font-semibold',
+              navMode === 'auto' && 'md:hidden',
+            )}
+          >
+            {nav.title}
+          </Link>
         </div>
 
         <LargeSearchToggle
           hideIfDisabled
           className={cn(
             'w-full my-auto rounded-xl max-md:hidden',
-            mode === 'top' ? 'max-w-sm px-2' : 'max-w-[240px]',
+            navMode === 'top' ? 'max-w-sm px-2' : 'max-w-[240px]',
           )}
         />
 
@@ -298,7 +290,7 @@ function DocsNavbar({
                 />
               ))}
           </div>
-          {props.children}
+          {nav.children}
           <SearchToggle hideIfDisabled className="md:hidden" />
           <NavbarSidebarTrigger className="md:hidden" />
           {links
@@ -328,7 +320,7 @@ function DocsNavbar({
               mode={themeSwitch?.mode ?? 'light-dark-system'}
             />,
           )}
-          {sidebarCollapsible && mode === 'top' ? (
+          {sidebarCollapsible && navMode === 'top' ? (
             <SidebarCollapseTrigger
               className={cn(
                 buttonVariants({

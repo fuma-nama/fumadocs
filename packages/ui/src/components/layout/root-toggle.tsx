@@ -61,7 +61,7 @@ export function RootToggle({
         <PopoverTrigger
           {...props}
           className={cn(
-            'flex flex-row items-center gap-2.5 rounded-lg ps-2 pe-4 py-1.5 hover:bg-fd-accent/50 hover:text-fd-accent-foreground',
+            'flex flex-row items-center gap-2.5 rounded-lg ps-2 pe-4 py-1.5 hover:text-fd-accent-foreground',
             props.className,
           )}
         >

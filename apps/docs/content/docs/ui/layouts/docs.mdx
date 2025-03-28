@@ -45,43 +45,11 @@ import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 
 <AutoTypeTable path="./content/docs/ui/props.ts" name="SidebarProps" />
 
-## Sidebar Tabs
+### Sidebar Tabs
 
-A navigation component to switch between root folders.
+See [Navigation Guide](/docs/ui/navigation/sidebar#sidebar-tabs) for usages.
 
-<div className='max-w-[360px] mx-auto'>
-
-![Sidebar Tabs](/docs/sidebar-tabs.png)
-
-</div>
-
-You can add items from the page tree (see [Root Folder](/docs/ui/page-conventions#root-folder)), or specify them explicitly:
-
-```tsx
-import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-
-<DocsLayout
-  sidebar={{
-    tabs: [
-      {
-        title: 'Test',
-        description: 'Test Tab',
-        url: '/docs/test',
-      },
-    ],
-  }}
-/>;
-```
-
-Set it to `false` to disable:
-
-```tsx
-import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-
-<DocsLayout sidebar={{ tabs: false }} />;
-```
-
-### Decoration
+#### Decoration
 
 Change the icon/styles of tabs.
 
@@ -100,7 +68,51 @@ import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 />;
 ```
 
-<include cwd>./content/shared/shared.nav.mdx</include>
+## Nav
+
+A mobile-only navbar, we recommend to customise it from `baseOptions`.
+
+<div className='max-w-[460px] mx-auto'>
+
+![Docs Nav](/docs/docs-nav.png)
+
+</div>
+
+```tsx
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+export const baseOptions: BaseLayoutProps = {
+  githubUrl: 'https://github.com/fuma-nama/fumadocs',
+  nav: {
+    title: 'My App',
+  },
+};
+```
+
+<AutoTypeTable
+  path="./content/docs/ui/props.ts"
+  type="Omit<NavbarProps, 'children'>"
+/>
+
+### Transparent Mode
+
+To make the navbar background transparent, you can configure transparent mode.
+
+```tsx
+import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+
+export const baseOptions: BaseLayoutProps = {
+  nav: {
+    transparentMode: 'top',
+  },
+};
+```
+
+| Mode     | Description                              |
+| -------- | ---------------------------------------- |
+| `always` | Always use a transparent background      |
+| `top`    | When at the top of page                  |
+| `none`   | Disable transparent background (default) |
 
 ### Replace Navbar
 

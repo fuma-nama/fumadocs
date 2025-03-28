@@ -157,16 +157,15 @@ function getSidebarTabs(
     const results: Option[] = [];
 
     if (node.root) {
-      const index = node.index ?? node.children.at(0);
+      const urls = getFolderUrls(node);
 
-      if (index?.type === 'page') {
+      if (urls.size > 0) {
         const option: Option = {
-          url: index.url,
+          url: urls.values().next().value ?? '',
           title: node.name,
           icon: node.icon,
           description: node.description,
-
-          urls: getFolderUrls(node, new Set()),
+          urls,
         };
 
         const mapped = transform ? transform(option, node) : option;
@@ -186,12 +185,12 @@ function getSidebarTabs(
 
 function getFolderUrls(
   folder: PageTree.Folder,
-  output: Set<string>,
+  output: Set<string> = new Set(),
 ): Set<string> {
   if (folder.index) output.add(folder.index.url);
 
   for (const child of folder.children) {
-    if (child.type === 'page') output.add(child.url);
+    if (child.type === 'page' && !child.external) output.add(child.url);
     if (child.type === 'folder') getFolderUrls(child, output);
   }
 

@@ -5,8 +5,9 @@ description: A shared convention for organizing your documents
 
 ## Overview
 
-On Fumadocs MDX, or other file-system based content sources, the sidebar items (page tree) are generated from your file structure.
-This is similar to Next.js's file system based routing.
+Page slugs and sidebar items (page tree) are generated from your file structure, similar to file-system based routing in Next.js.
+
+> This only applies for file-system based content sources, such as Fumadocs MDX.
 
 ## File
 
@@ -68,11 +69,11 @@ To create a folder group, wrap the folder name in parentheses.
 
 ## Meta
 
-Customize a folder by creating a `meta.json` file in the folder.
+Customize a folder by creating a `meta.json` file in a folder under content folder.
 
 ### Display Name
 
-```json
+```json title="meta.json"
 {
   "title": "Name of Folder"
 }
@@ -95,7 +96,7 @@ Control the order of items.
 
 When a meta file is present, items are not included unless you have explicitly added them to `pages`.
 
-```json
+```json title="meta.json"
 {
   "title": "Name of Folder",
   "pages": ["guide", "components"]
@@ -112,7 +113,7 @@ When a meta file is present, items are not included unless you have explicitly a
 
 The items of `pages` can also be a relative path to a page or folder, no file extensions needed.
 
-```json
+```json title="meta.json"
 {
   "title": "Name of Folder",
   "pages": ["../headless/page"]
@@ -134,7 +135,7 @@ Force to open the folder by default.
 
 You can define a separator in meta by adding a item surrounded with `---`.
 
-```json
+```json title="meta.json"
 {
   "title": "Name of Folder",
   "pages": ["---Separator---"]
@@ -149,7 +150,7 @@ Add a Rest (`...`) item to automatically add and sort remaining page items alpha
   Index pages won't be included, you must specify the order of `index`.
 </Callout>
 
-```json
+```json title="meta.json"
 {
   "title": "Folder",
   "pages": ["guide", "..."]
@@ -158,7 +159,7 @@ Add a Rest (`...`) item to automatically add and sort remaining page items alpha
 
 You can also sort items reversely.
 
-```json
+```json title="meta.json"
 {
   "title": "Folder",
   "pages": ["guide", "z...a"]
@@ -169,7 +170,7 @@ You can also sort items reversely.
 
 In conjunction with the Rest item (`...`), you can use `!name` to exclude an item from the rest.
 
-```json
+```json title="meta.json"
 {
   "title": "Folder",
   "pages": ["...", "!hide-this-page"]
@@ -180,7 +181,7 @@ In conjunction with the Rest item (`...`), you can use `!name` to exclude an ite
 
 You can extract the items from a folder with `...folder_name`.
 
-```json
+```json title="meta.json"
 {
   "title": "Folder",
   "pages": ["guide", "...folder"]
@@ -191,7 +192,7 @@ You can extract the items from a folder with `...folder_name`.
 
 Use the syntax `[Text](url)` to insert links.
 
-```json
+```json title="meta.json"
 {
   "title": "Folder",
   "pages": ["index", "[Vercel](https://vercel.com)"]
@@ -200,7 +201,7 @@ Use the syntax `[Text](url)` to insert links.
 
 You can add an icon too.
 
-```json
+```json title="meta.json"
 {
   "title": "Folder",
   "pages": ["index", "[Triangle][Vercel](https://vercel.com)"]
@@ -215,13 +216,13 @@ You can add an [`icon` handler](/docs/headless/source-api#icons) to `loader()`.
 
 ## Root Folder
 
-<div className='max-w-[360px] mx-auto'>
+Marks the folder as a root folder.
 
-![Sidebar Tabs](/docs/sidebar-tabs.png)
+<Callout title='Fumadocs UI'>
 
-</div>
+    Fumadocs UI renders root folders as [Sidebar Tabs](/docs/ui/navigation/sidebar#sidebar-tabs), which allows user to switch between them.
 
-Adding a `root` property in meta file can mark your folder as a **root**.
+</Callout>
 
 ```json title="meta.json"
 {
@@ -231,7 +232,7 @@ Adding a `root` property in meta file can mark your folder as a **root**.
 }
 ```
 
-When the user is browsing a page under a root folder, only the child items of the folder will be visible.
+Only items in the current root folder will be considered.
 
 For example, when you are in a root folder called `framework`, the other folders (e.g. `headless`) are not shown on the sidebar and other navigation elements.
 
@@ -244,14 +245,6 @@ For example, when you are in a root folder called `framework`, the other folders
     <File name="Invisible Page" />
   </Folder>
 </Files>
-
-<Callout title='Fumadocs UI'>
-
-    Fumadocs UI renders root folders as Sidebar Tabs, which allows user to switch between them.
-
-    You can customise it via [`sidebar.tabs`](/docs/ui/layouts/docs#sidebar-tabs) in Docs Layout.
-
-</Callout>
 
 ### Index Pages
 

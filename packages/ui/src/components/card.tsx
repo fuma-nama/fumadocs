@@ -42,7 +42,7 @@ export function Card({ icon, title, description, ...props }: CardProps) {
       ) : null}
       <h3 className="not-prose mb-1 text-sm font-medium">{title}</h3>
       {description ? (
-        <p className="my-0 text-sm text-fd-muted-foreground">{description}</p>
+        <p className="!my-0 text-sm text-fd-muted-foreground">{description}</p>
       ) : null}
       {props.children ? (
         <div className="text-sm text-fd-muted-foreground prose-no-margin">
