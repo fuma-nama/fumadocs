@@ -8,7 +8,7 @@ import * as Plugins from 'fumadocs-core/mdx-plugins';
 import { type CompileOptions, createProcessor } from '@mdx-js/mdx';
 import type { MDXComponents } from 'mdx/types';
 import { parseFrontmatter, pluginOption, type ResolvePlugins } from './utils';
-import type { VFile } from 'vfile';
+import type { Compatible, VFile } from 'vfile';
 import type { TableOfContents } from 'fumadocs-core/server';
 import { executeMdx, type MdxContent } from '@/render';
 import { pathToFileURL } from 'node:url';
@@ -45,8 +45,11 @@ export interface CompileMDXOptions {
 
   mdxOptions?: MDXOptions;
   components?: MDXComponents;
-  scope?: object;
+  scope?: Record<string, unknown>;
 
+  /**
+   * @deprecated Use `compiler.compileFile` instead if you doesn't need to execute output JavaScript code.
+   */
   skipRender?: boolean;
 }
 
@@ -70,12 +73,24 @@ export function createCompiler(mdxOptions?: MDXOptions) {
   });
 
   return {
-    render(compiled: string, scope: object = {}, filePath?: string) {
-      return executeMdx(
-        compiled,
+    async render(
+      compiled: string,
+      scope?: Record<string, unknown>,
+      filePath?: string,
+    ) {
+      return executeMdx(compiled, {
         scope,
-        filePath ? pathToFileURL(filePath) : undefined,
-      );
+        baseUrl: filePath ? pathToFileURL(filePath) : undefined,
+        jsxRuntime: mdxOptions?.development
+          ? await import('react/jsx-dev-runtime')
+          : undefined,
+      });
+    },
+    /**
+     * Compile VFile
+     */
+    async compileFile(from: Compatible): Promise<VFile> {
+      return processor.process(from);
     },
     async compile<Frontmatter extends object = Record<string, unknown>>(
       options: Omit<CompileMDXOptions, 'mdxOptions'>,
@@ -83,7 +98,7 @@ export function createCompiler(mdxOptions?: MDXOptions) {
       const { scope = {}, skipRender } = options;
       const { frontmatter, content } = parseFrontmatter(options.source);
 
-      const file = await processor.process({
+      const file = await this.compileFile({
         value: content,
         path: options.filePath,
       });
@@ -143,7 +158,6 @@ function getCompileOptions({
   const rehypeToc = getPlugin('rehypeToc');
 
   return {
-    development: process.env.NODE_ENV === 'development',
     ...options,
     outputFormat: 'function-body',
     remarkPlugins: pluginOption(

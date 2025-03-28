@@ -35,10 +35,11 @@ const loader = createServerFn({
     if (!page) throw notFound();
 
     const { content, ...rest } = page.data;
-    const { compiled } = await compiler.compile({
-      source: content,
-      skipRender: true,
-    });
+    const compiled = String(
+      await compiler.compileFile({
+        value: content,
+      }),
+    );
 
     return {
       tree: source.pageTree as object,

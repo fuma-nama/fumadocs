@@ -27,10 +27,11 @@ export async function loader({ params }: Route.LoaderArgs) {
   const page = source.getPage(slugs);
   if (!page) throw new Error('Not found');
 
-  const { compiled } = await compiler.compile({
-    source: page.data.content,
-    skipRender: true,
-  });
+  const compiled = String(
+    await compiler.compileFile({
+      value: page.data.content,
+    }),
+  );
 
   return {
     page,
