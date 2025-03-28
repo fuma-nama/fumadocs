@@ -17,7 +17,6 @@
     "paths": {
       "~/*": ["./app/*"]
     },
-    "preserveSymlinks": true,
     "esModuleInterop": true,
     "verbatimModuleSyntax": true,
     "noEmit": true,

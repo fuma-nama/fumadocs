@@ -300,9 +300,6 @@ importers:
       '@react-router/serve':
         specifier: ^7.4.0
         version: 7.4.0(react-router@7.4.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(typescript@5.8.2)
-      fast-glob:
-        specifier: ^3.3.3
-        version: 3.3.3
       fumadocs-core:
         specifier: workspace:*
         version: link:../../packages/core

@@ -12,7 +12,6 @@
     "@fumadocs/mdx-remote": "workspace:*",
     "@react-router/node": "^7.4.0",
     "@react-router/serve": "^7.4.0",
-    "fast-glob": "^3.3.3",
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "gray-matter": "^4.0.3",
