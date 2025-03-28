@@ -3,47 +3,29 @@ import { type Jsx, toJsxRuntime } from 'hast-util-to-jsx-runtime';
 import * as runtime from 'react/jsx-runtime';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { renderMarkdownToHast } from '@/markdown';
-import { type GenerateDocumentationOptions } from '@/lib/base';
 import 'server-only';
-import { getProject } from '@/get-project';
 import type { ReactNode } from 'react';
 import {
   type BaseTypeTableProps,
+  type GenerateTypeTableOptions,
   getTypeTableOutput,
 } from '@/utils/type-table';
+import { type Generator } from '@/lib/base';
 
-export interface AutoTypeTableProps extends BaseTypeTableProps {
-  /**
-   * Override the function to render markdown into JSX nodes
-   */
-  renderMarkdown?: typeof renderMarkdownDefault;
-}
+export type AutoTypeTableProps = BaseTypeTableProps;
 
-export function createTypeTable(options: GenerateDocumentationOptions = {}): {
-  AutoTypeTable: (props: Omit<AutoTypeTableProps, 'options'>) => ReactNode;
-} {
-  const overrideOptions = {
-    ...options,
-    project: options.project ?? getProject(options.config),
-  };
-
-  return {
-    AutoTypeTable(props) {
-      return <AutoTypeTable {...props} options={overrideOptions} />;
-    },
-  };
-}
-
-/**
- * **Server Component Only**
- *
- * Display properties in an exported interface via Type Table
- */
 export async function AutoTypeTable({
+  generator,
+  options = {},
   renderMarkdown = renderMarkdownDefault,
   ...props
-}: AutoTypeTableProps): Promise<ReactNode> {
-  const output = await getTypeTableOutput(props);
+}: AutoTypeTableProps & {
+  generator: Generator;
+
+  renderMarkdown?: typeof renderMarkdownDefault;
+  options?: GenerateTypeTableOptions;
+}) {
+  const output = await getTypeTableOutput(generator, props, options);
 
   return output.map(async (item) => {
     const entries = item.entries.map(

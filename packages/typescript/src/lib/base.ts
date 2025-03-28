@@ -1,11 +1,12 @@
 import {
   type ExportedDeclarations,
-  type Project,
+  Project,
   type Symbol as TsSymbol,
   ts,
   type Type,
 } from 'ts-morph';
 import { getProject, type TypescriptConfig } from '@/get-project';
+import fs from 'node:fs';
 
 export interface GeneratedDoc {
   name: string;
@@ -49,44 +50,68 @@ export interface GenerateOptions {
   transform?: Transformer;
 }
 
-export interface GenerateDocumentationOptions extends GenerateOptions {
-  /**
-   * Typescript configurations
-   */
-  config?: TypescriptConfig;
-  project?: Project;
+export type Generator = ReturnType<typeof createGenerator>;
+
+export function createGenerator(config?: TypescriptConfig | Project) {
+  const project = config instanceof Project ? config : getProject(config);
+
+  return {
+    generateDocumentation(
+      file: {
+        path: string;
+        content?: string;
+      },
+      name: string | undefined,
+      options: GenerateOptions = {},
+    ) {
+      const sourceFile = project.createSourceFile(
+        file.path,
+        file.content ?? fs.readFileSync(file.path).toString(),
+        {
+          overwrite: true,
+        },
+      );
+      const out: GeneratedDoc[] = [];
+
+      for (const [k, d] of sourceFile.getExportedDeclarations()) {
+        if (name && name !== k) continue;
+
+        if (d.length > 1)
+          console.warn(
+            `export ${k} should not have more than one type declaration.`,
+          );
+
+        out.push(generate(project, k, d[0], options));
+      }
+
+      return out;
+    },
+  };
 }
 
 /**
  * Generate documentation for properties in an exported type/interface
+ *
+ * @deprecated use `createGenerator` instead
  */
 export function generateDocumentation(
   file: string,
   name: string | undefined,
   content: string,
-  options: GenerateDocumentationOptions = {},
+  options: GenerateOptions & {
+    /**
+     * Typescript configurations
+     */
+    config?: TypescriptConfig;
+    project?: Project;
+  } = {},
 ): GeneratedDoc[] {
-  const project = options.project ?? getProject(options.config);
-  const sourceFile = project.createSourceFile(file, content, {
-    overwrite: true,
-  });
-  const out: GeneratedDoc[] = [];
+  const gen = createGenerator(options.project ?? options.config);
 
-  for (const [k, d] of sourceFile.getExportedDeclarations()) {
-    if (name && name !== k) continue;
-
-    if (d.length > 1)
-      console.warn(
-        `export ${k} should not have more than one type declaration.`,
-      );
-
-    out.push(generate(project, k, d[0], options));
-  }
-
-  return out;
+  return gen.generateDocumentation({ path: file, content }, name, options);
 }
 
-export function generate(
+function generate(
   program: Project,
   name: string,
   declaration: ExportedDeclarations,

@@ -256,7 +256,7 @@ function End() {
             Read docs
           </Link>
           <a
-            href="https://githubbox.com/fuma-nama/fumadocs-ui-template"
+            href="https://stackblitz.com/~/github.com/fuma-nama/fumadocs-ui-template"
             rel="noreferrer noopener"
             className={cn(
               buttonVariants({
@@ -264,7 +264,7 @@ function End() {
               }),
             )}
           >
-            Open in CodeSandbox
+            Open Demo
           </a>
         </div>
       </div>
@@ -456,7 +456,7 @@ function Hero() {
           Getting Started
         </Link>
         <a
-          href="https://githubbox.com/fuma-nama/fumadocs-ui-template"
+          href="https://stackblitz.com/~/github.com/fuma-nama/fumadocs-ui-template"
           target="_blank"
           rel="noreferrer noopener"
           className={cn(

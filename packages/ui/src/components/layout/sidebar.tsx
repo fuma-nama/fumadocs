@@ -118,14 +118,15 @@ export function CollapsibleSidebar(props: SidebarProps) {
       className={cn(
         'md:transition-all',
         collapsed &&
-          'md:-me-(--fd-sidebar-width) md:translate-x-[calc(var(--fd-sidebar-offset)*-1)] rtl:md:translate-x-(--fd-sidebar-offset)',
+          'md:-me-(--fd-sidebar-width) md:-translate-x-(--fd-sidebar-offset) rtl:md:translate-x-(--fd-sidebar-offset)',
         collapsed && hover && 'z-50 md:translate-x-0',
         collapsed && !hover && 'md:opacity-0',
         props.className,
       )}
       style={
         {
-          '--fd-sidebar-offset': 'calc(var(--fd-sidebar-width) - 20px)',
+          '--fd-sidebar-offset': 'calc(var(--fd-sidebar-width) - 6px)',
+          ...props.style,
         } as object
       }
     />

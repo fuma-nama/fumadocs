@@ -1,39 +1,18 @@
 import type { Root } from 'mdast';
 import type { Transformer } from 'unified';
 import type { ExpressionStatement, ObjectExpression, Property } from 'estree';
-import type { Expression, Program } from 'estree';
-import type { DocEntry } from '@/lib/base';
+import type { Program } from 'estree';
+import { createGenerator, type DocEntry, type Generator } from '@/lib/base';
 import { renderMarkdownToHast } from '@/markdown';
 import { valueToEstree } from 'estree-util-value-to-estree';
 import { visit } from 'unist-util-visit';
 import {
   type BaseTypeTableProps,
+  type GenerateTypeTableOptions,
   getTypeTableOutput,
 } from '@/utils/type-table';
-import { getProject } from '@/get-project';
 import { toEstree } from 'hast-util-to-estree';
 import { dirname } from 'node:path';
-
-function expressionToAttribute(key: string, value: Expression) {
-  return {
-    type: 'mdxJsxAttribute',
-    name: key,
-    value: {
-      type: 'mdxJsxAttributeValueExpression',
-      data: {
-        estree: {
-          type: 'Program',
-          body: [
-            {
-              type: 'ExpressionStatement',
-              expression: value,
-            },
-          ],
-        } as Program,
-      },
-    },
-  };
-}
 
 async function mapProperty(
   entry: DocEntry,
@@ -91,9 +70,16 @@ export interface RemarkAutoTypeTableOptions {
   renderMarkdown?: typeof renderMarkdownToHast;
 
   /**
-   * Override some type table props
+   * Customise type table generation
    */
-  options?: BaseTypeTableProps['options'];
+  options?: GenerateTypeTableOptions;
+
+  /**
+   * generate required `value` property for `remark-stringify`
+   */
+  remarkStringify?: boolean;
+
+  generator?: Generator;
 }
 
 /**
@@ -106,9 +92,9 @@ export function remarkAutoTypeTable({
   outputName = 'TypeTable',
   renderMarkdown = renderMarkdownToHast,
   options = {},
+  remarkStringify = true,
+  generator = createGenerator(),
 }: RemarkAutoTypeTableOptions = {}): Transformer<Root, Root> {
-  const project = options.project ?? getProject(options.config);
-
   return async (tree, file) => {
     const queue: Promise<void>[] = [];
     let basePath = options?.basePath;
@@ -128,14 +114,14 @@ export function remarkAutoTypeTable({
       }
 
       async function run() {
-        const output = await getTypeTableOutput({
-          ...props,
-          options: {
+        const output = await getTypeTableOutput(
+          generator,
+          props as BaseTypeTableProps,
+          {
             ...options,
-            project,
             basePath,
           },
-        } as BaseTypeTableProps);
+        );
 
         const rendered = output.map(async (doc) => {
           const properties = await Promise.all(
@@ -146,22 +132,30 @@ export function remarkAutoTypeTable({
             type: 'mdxJsxFlowElement',
             name: outputName,
             attributes: [
-              expressionToAttribute('type', {
-                type: 'ObjectExpression',
-                properties,
-              }),
+              {
+                type: 'mdxJsxAttribute',
+                name: 'type',
+                value: {
+                  type: 'mdxJsxAttributeValueExpression',
+                  value: remarkStringify ? JSON.stringify(doc, null, 2) : '',
+                  data: {
+                    estree: {
+                      type: 'Program',
+                      sourceType: 'module',
+                      body: [
+                        {
+                          type: 'ExpressionStatement',
+                          expression: {
+                            type: 'ObjectExpression',
+                            properties,
+                          },
+                        },
+                      ],
+                    } satisfies Program,
+                  },
+                },
+              },
             ],
-            data: {
-              // for Fumadocs `remarkStructure`
-              _string: [
-                doc.name,
-                doc.description,
-                ...doc.entries.flatMap((entry) => [
-                  `${entry.name}: ${entry.type}`,
-                  entry.description,
-                ]),
-              ],
-            },
             children: [],
           };
         });

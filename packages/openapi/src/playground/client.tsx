@@ -311,7 +311,8 @@ function FormBody({
       {params.map((param, i) => {
         const name = paramNames[i];
         const type = paramTypes[i];
-        if ((param.length === 0 && type !== 'header') || !authorization) return;
+        if (type !== 'header' && param.length === 0) return;
+        if (type === 'header' && !authorization && param.length === 0) return;
 
         return (
           <CollapsiblePanel key={name} title={name}>

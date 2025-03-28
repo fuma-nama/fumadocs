@@ -18,22 +18,26 @@ It comes with the `AutoTypeTable` component. Learn more about [Auto Type Table](
 You can use it as a remark plugin:
 
 ```ts title="source.config.ts" tab="Fumadocs MDX"
-import { remarkAutoTypeTable } from 'fumadocs-typescript';
+import { remarkAutoTypeTable, createGenerator } from 'fumadocs-typescript';
 import { defineConfig } from 'fumadocs-mdx/config';
+
+const generator = createGenerator();
 
 export default defineConfig({
   mdxOptions: {
-    remarkPlugins: [remarkAutoTypeTable],
+    remarkPlugins: [[remarkAutoTypeTable, { generator }]],
   },
 });
 ```
 
 ```ts tab="MDX Compiler"
-import { remarkAutoTypeTable } from 'fumadocs-typescript';
+import { remarkAutoTypeTable, createGenerator } from 'fumadocs-typescript';
 import { compile } from '@mdx-js/mdx';
 
+const generator = createGenerator();
+
 await compile('...', {
-  remarkPlugins: [remarkAutoTypeTable],
+  remarkPlugins: [[remarkAutoTypeTable, { generator }]],
 });
 ```
 

@@ -11,7 +11,10 @@ import { usePathname } from 'next/navigation';
 import { isActive } from '@/utils/is-active';
 import type { Option } from '@/components/layout/root-toggle';
 
-export function Navbar(props: HTMLAttributes<HTMLElement>) {
+export function Navbar({
+  mode,
+  ...props
+}: HTMLAttributes<HTMLElement> & { mode: 'top' | 'auto' }) {
   const { open, collapsed } = useSidebar();
   const { isTransparent } = useNav();
 
@@ -20,18 +23,13 @@ export function Navbar(props: HTMLAttributes<HTMLElement>) {
       id="nd-subnav"
       {...props}
       className={cn(
-        'fixed inset-x-0 top-(--fd-banner-height) z-10 pe-(--fd-layout-offset) backdrop-blur-lg transition-colors',
+        'fixed inset-x-0 top-(--fd-banner-height) z-10 px-(--fd-layout-offset) backdrop-blur-lg transition-colors',
         (!isTransparent || open) && 'bg-fd-background/80',
+        mode === 'auto' &&
+          !collapsed &&
+          'ps-[calc(var(--fd-layout-offset)+var(--fd-sidebar-width))]',
         props.className,
       )}
-      style={
-        {
-          paddingInlineStart: collapsed
-            ? 'var(--fd-layout-offset)'
-            : 'calc(var(--fd-layout-offset) + var(--fd-sidebar-width))',
-          ...props.style,
-        } as object
-      }
     >
       {props.children}
     </header>

@@ -1,11 +1,13 @@
 import { expect, test } from 'vitest';
-import { generateDocumentation } from '@/lib/base';
+import { createGenerator } from '@/lib/base';
+
+const generator = createGenerator();
 
 test('class members', () => {
-  const out = generateDocumentation(
-    'index.ts',
-    'MyClass',
-    `
+  const out = generator.generateDocumentation(
+    {
+      path: 'index.ts',
+      content: `
     export class MyClass {
         #name: string;
         private test: string;
@@ -16,6 +18,8 @@ test('class members', () => {
         }
     }
     `,
+    },
+    'MyClass',
   );
 
   expect(out).toMatchInlineSnapshot(`
@@ -45,15 +49,17 @@ test('class members', () => {
 });
 
 test('interface members', () => {
-  const out = generateDocumentation(
-    'index.ts',
-    'MyInterface',
-    `
+  const out = generator.generateDocumentation(
+    {
+      path: 'index.ts',
+      content: `
     export interface MyInterface {
         "#name": string;
         age: number
     }
     `,
+    },
+    'MyInterface',
   );
 
   expect(out).toMatchInlineSnapshot(`

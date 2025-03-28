@@ -227,15 +227,7 @@ function DocsNavbar({
   const navMode = nav.mode ?? 'auto';
 
   return (
-    <Navbar
-      style={
-        navMode === 'top'
-          ? {
-              paddingInlineStart: 'var(--fd-layout-offset)',
-            }
-          : undefined
-      }
-    >
+    <Navbar mode={navMode}>
       <div
         className={cn(
           'flex flex-row border-b border-fd-foreground/10 px-4 h-14',

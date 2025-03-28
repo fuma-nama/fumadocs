@@ -144,17 +144,23 @@ function getAuthorizationField(
 ): Security | undefined {
   const security = method.security ?? document.security ?? [];
   if (security.length === 0) return;
-  const singular = security.find(
-    (requirements) => Object.keys(requirements).length === 1,
-  );
-  if (!singular) {
+
+  let item;
+  for (const requirements of security) {
+    const keys = Object.keys(requirements).length;
+
+    if (keys === 0) return;
+    else if (keys === 1) item = requirements;
+  }
+
+  if (!item) {
     console.warn(
       `Cannot find suitable security schema for API Playground from ${JSON.stringify(security, null, 2)}. Only one requirement is allowed`,
     );
     return;
   }
 
-  const scheme = getSecurities(singular, document)[0];
+  const scheme = getSecurities(item, document)[0];
 
   if (scheme.type === 'oauth2') {
     const flow = Object.keys(scheme.flows).at(0);

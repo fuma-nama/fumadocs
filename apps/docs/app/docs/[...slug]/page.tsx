@@ -22,7 +22,6 @@ import * as Preview from '@/components/preview';
 import { createMetadata } from '@/lib/metadata';
 import { openapi, source } from '@/lib/source';
 import { Wrapper } from '@/components/preview/wrapper';
-import { AutoTypeTable } from '@/components/type-table';
 import { metadataImage } from '@/lib/metadata-image';
 import { File, Folder, Files } from 'fumadocs-ui/components/files';
 import { Mermaid } from '@theguild/remark-mermaid/mermaid';
@@ -37,6 +36,8 @@ import {
 } from '@/components/ui/hover-card';
 import Link from 'fumadocs-core/link';
 import { UiOverview } from '@/components/ui-overview';
+import { AutoTypeTable } from 'fumadocs-typescript/ui';
+import { createGenerator } from 'fumadocs-typescript';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -46,6 +47,8 @@ function PreviewRenderer({ preview }: { preview: string }): ReactNode {
 
   return null;
 }
+
+const generator = createGenerator();
 
 export const revalidate = false;
 
@@ -123,7 +126,9 @@ export default async function Page(props: {
             Tab,
             Mermaid,
             TypeTable,
-            AutoTypeTable,
+            AutoTypeTable: (props) => (
+              <AutoTypeTable generator={generator} {...props} />
+            ),
             Accordion,
             Accordions,
             Wrapper,
