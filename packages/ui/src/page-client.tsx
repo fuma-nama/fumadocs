@@ -9,13 +9,13 @@ import {
   useState,
 } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import Link from 'next/link';
+import Link from 'fumadocs-core/link';
 import { cn } from '@/utils/cn';
 import { useI18n } from './contexts/i18n';
 import { useTreeContext, useTreePath } from './contexts/tree';
 import { useSidebar } from '@/contexts/sidebar';
 import type { PageTree } from 'fumadocs-core/server';
-import { usePathname } from 'next/navigation';
+import { usePathname } from 'fumadocs-core/framework';
 import {
   type BreadcrumbOptions,
   getBreadcrumbItemsFromPath,

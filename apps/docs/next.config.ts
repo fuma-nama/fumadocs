@@ -22,6 +22,7 @@ const config: NextConfig = {
     'typescript',
     'oxc-transform',
     'twoslash',
+    'shiki',
   ],
   images: {
     remotePatterns: [

@@ -6,19 +6,22 @@ import type {
   ImgHTMLAttributes,
   TableHTMLAttributes,
 } from 'react';
-import NextImage from 'next/image';
-import type { ImageProps } from 'next/image';
+import { Image as FrameworkImage } from 'fumadocs-core/framework';
 import { Card, Cards } from '@/components/card';
 import { Callout } from '@/components/callout';
 import { Heading } from '@/components/heading';
 import { cn } from '@/utils/cn';
 import { CodeBlock, Pre } from '@/components/codeblock';
 
-function Image(props: ImgHTMLAttributes<HTMLImageElement>) {
+function Image(
+  props: ImgHTMLAttributes<HTMLImageElement> & {
+    sizes?: string;
+  },
+) {
   return (
-    <NextImage
+    <FrameworkImage
       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 900px"
-      {...(props as ImageProps)}
+      {...props}
       className={cn('rounded-lg', props.className)}
     />
   );

@@ -12,7 +12,6 @@ import { buttonVariants } from '@/components/ui/button';
 import type { PageTree } from 'fumadocs-core/server';
 import type { FC, ReactNode } from 'react';
 import type { Option } from '@/components/layout/root-toggle';
-import { notFound } from 'next/navigation';
 
 export const layoutVariables = {
   '--fd-layout-offset': 'max(calc(50vw - var(--fd-layout-width) / 2), 0px)',
@@ -23,9 +22,6 @@ export interface TabOptions {
 }
 
 export interface SidebarOptions extends SidebarProps {
-  enabled: boolean;
-  component: ReactNode;
-
   collapsible?: boolean;
   components?: Partial<SidebarComponents>;
 
@@ -114,8 +110,8 @@ export function SidebarLinkItem({
 }
 
 export function checkPageTree(passed: unknown) {
-  if (!passed) notFound();
   if (
+    passed &&
     typeof passed === 'object' &&
     'children' in passed &&
     Array.isArray(passed.children)

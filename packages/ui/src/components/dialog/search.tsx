@@ -1,7 +1,6 @@
 'use client';
 
 import { FileText, Hash, Loader2, SearchIcon, Text } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import {
   useMemo,
   type ReactNode,
@@ -24,6 +23,7 @@ import {
 import type { SortedResult } from 'fumadocs-core/server';
 import { cva } from 'class-variance-authority';
 import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
+import { useRouter } from 'fumadocs-core/framework';
 
 export type SearchLink = [name: string, href: string];
 

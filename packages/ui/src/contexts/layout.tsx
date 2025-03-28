@@ -1,12 +1,6 @@
 'use client';
-import {
-  createContext,
-  type ReactNode,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import { type ReactNode, useEffect, useMemo, useState } from 'react';
+import { createContext } from 'fumadocs-core/framework';
 
 export interface PageStyles {
   tocNav?: string;
@@ -18,13 +12,13 @@ export interface PageStyles {
 /**
  * applied styles to different layout components in `Page` from layouts
  */
-const StylesContext = createContext<PageStyles>({
+const StylesContext = createContext<PageStyles>('StylesContext', {
   tocNav: 'xl:hidden',
   toc: 'max-xl:hidden',
 });
 
 export function usePageStyles() {
-  return useContext(StylesContext);
+  return StylesContext.use();
 }
 
 export function StylesProvider({
@@ -49,7 +43,7 @@ interface NavContextType {
   isTransparent: boolean;
 }
 
-const NavContext = createContext<NavContextType>({
+const NavContext = createContext<NavContextType>('NavContext', {
   isTransparent: false,
 });
 
@@ -83,5 +77,5 @@ export function NavProvider({
 }
 
 export function useNav(): NavContextType {
-  return useContext(NavContext);
+  return NavContext.use();
 }

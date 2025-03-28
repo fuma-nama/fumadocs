@@ -17,9 +17,13 @@
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
+    },
+    "./client": {
+      "import": "./dist/client/index.js",
+      "types": "./dist/client/index.d.ts"
     }
   },
-  "main": "./dist/index.js",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
     "dist/*"
@@ -38,19 +42,17 @@
   },
   "devDependencies": {
     "@types/mdx": "^2.0.13",
-    "@types/node": "22.13.11",
+    "@types/node": "22.13.14",
     "@types/react": "^19.0.12",
     "eslint-config-custom": "workspace:*",
     "fast-glob": "^3.3.3",
     "fumadocs-core": "workspace:*",
-    "next": "15.2.3",
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
     "vfile": "^6.0.3"
   },
   "peerDependencies": {
     "fumadocs-core": "^14.0.0 || ^15.0.0",
-    "next": "14.x.x || 15.x.x",
     "react": "18.x.x || 19.x.x"
   },
   "publishConfig": {

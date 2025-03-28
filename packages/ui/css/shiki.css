@@ -1,47 +1,47 @@
-.shiki code span {
+.fd-codeblock code span {
   color: var(--shiki-light);
 }
 
-.dark .shiki code span {
+.dark .fd-codeblock code span {
   color: var(--shiki-dark);
 }
 
-.fd-codeblock code {
+.fd-codeblock pre > * {
   display: grid;
   font-size: 13px;
 }
 
-.shiki code .diff.remove {
+.fd-codeblock code .diff.remove {
   background-color: var(--fd-diff-remove-color);
   opacity: 0.7;
 }
 
-.shiki code .diff::before {
+.fd-codeblock code .diff::before {
   position: absolute;
   left: 6px;
 }
 
-.shiki code .diff.remove::before {
+.fd-codeblock code .diff.remove::before {
   content: '-';
   color: var(--fd-diff-remove-symbol-color);
 }
 
-.shiki code .diff.add {
+.fd-codeblock code .diff.add {
   background-color: var(--fd-diff-add-color);
 }
 
-.shiki code .diff.add::before {
+.fd-codeblock code .diff.add::before {
   content: '+';
   color: var(--fd-diff-add-symbol-color);
 }
 
-.shiki code .diff {
+.fd-codeblock code .diff {
   margin: 0 -16px;
   padding: 0 16px;
   position: relative;
 }
 
-.shiki .highlighted {
+.fd-codeblock .highlighted {
   margin: 0 -16px;
   padding: 0 16px;
   background-color: color-mix(
@@ -51,7 +51,7 @@
   );
 }
 
-.shiki .highlighted-word {
+.fd-codeblock .highlighted-word {
   padding: 1px 2px;
   margin: -1px -3px;
   border: 1px solid

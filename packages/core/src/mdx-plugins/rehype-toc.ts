@@ -147,6 +147,7 @@ export function rehypeToc(
               ? {
                   type: 'ExportNamedDeclaration',
                   declaration,
+                  attributes: [],
                   specifiers: [],
                 }
               : declaration,
@@ -155,6 +156,6 @@ export function rehypeToc(
           comments: [],
         },
       },
-    });
+    } satisfies RootContent);
   };
 }

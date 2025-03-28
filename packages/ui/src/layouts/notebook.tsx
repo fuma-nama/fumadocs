@@ -1,4 +1,4 @@
-import { Fragment, type HTMLAttributes } from 'react';
+import { Fragment, type HTMLAttributes, useMemo } from 'react';
 import {
   type BaseLayoutProps,
   getLinks,
@@ -19,7 +19,6 @@ import {
   SearchToggle,
 } from '@/components/layout/search-toggle';
 import { cn } from '@/utils/cn';
-import Link from 'next/link';
 import { buttonVariants } from '@/components/ui/button';
 import { ChevronDown, Languages, SidebarIcon } from 'lucide-react';
 import { BaseLinkItem, type LinkItemType } from '@/layouts/links';
@@ -44,13 +43,14 @@ import {
   Navbar,
   NavbarSidebarTrigger,
   SidebarLayoutTab,
-} from './notebook.client';
+} from './notebook-client';
 import {
   type PageStyles,
   StylesProvider,
   NavProvider,
 } from '@/contexts/layout';
 import { type Option, RootToggle } from '@/components/layout/root-toggle';
+import Link from 'fumadocs-core/link';
 
 export interface DocsLayoutProps extends BaseLayoutProps {
   tree: PageTree.Root;
@@ -83,9 +83,13 @@ export function DocsLayout({
   checkPageTree(props.tree);
   const navMode = nav.mode ?? 'auto';
   const links = getLinks(props.links ?? [], props.githubUrl);
+  const tabs = useMemo(
+    () => getSidebarTabsFromOptions(tabOptions, props.tree) ?? [],
+    [tabOptions, props.tree],
+  );
+
   const Aside = sidebarCollapsible ? CollapsibleSidebar : Sidebar;
 
-  const tabs = getSidebarTabsFromOptions(tabOptions, props.tree) ?? [];
   const variables = cn(
     '[--fd-nav-height:calc(var(--spacing)*14)] [--fd-tocnav-height:36px] md:[--fd-sidebar-width:286px] xl:[--fd-toc-width:286px] xl:[--fd-tocnav-height:0px]',
     tabs.length > 0 &&
@@ -214,6 +218,7 @@ export function DocsLayout({
 function DocsNavbar({
   sidebarCollapsible,
   links,
+  themeSwitch,
   nav = {},
   i18n,
   tabs,
@@ -221,6 +226,7 @@ function DocsNavbar({
   nav: DocsLayoutProps['nav'];
   sidebarCollapsible: boolean;
   i18n: Required<DocsLayoutProps>['i18n'];
+  themeSwitch?: DocsLayoutProps['themeSwitch'];
   links: LinkItemType[];
   tabs: Option[];
 }) {
@@ -307,10 +313,13 @@ function DocsNavbar({
               <Languages className="size-4.5 text-fd-muted-foreground" />
             </LanguageToggle>
           ) : null}
-          <ThemeToggle
-            className="ms-2 max-md:hidden"
-            mode="light-dark-system"
-          />
+          {replaceOrDefault(
+            themeSwitch,
+            <ThemeToggle
+              className="ms-2 max-md:hidden"
+              mode={themeSwitch?.mode ?? 'light-dark-system'}
+            />,
+          )}
           {sidebarCollapsible && navMode === 'top' ? (
             <SidebarCollapseTrigger
               className={cn(
