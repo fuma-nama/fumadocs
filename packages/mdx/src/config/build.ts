@@ -45,9 +45,6 @@ export function buildConfig(
     {
       global: globalConfig,
       collections,
-      _runtime: {
-        files: new Map(),
-      },
     },
   ];
 }

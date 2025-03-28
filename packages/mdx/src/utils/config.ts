@@ -20,13 +20,6 @@ export interface LoadedConfig {
 
   global?: GlobalConfig;
 
-  _runtime: {
-    /**
-     * Absolute file path and their associated collections
-     */
-    files: Map<string, string>;
-  };
-
   _mdx_loader?: {
     cachedProcessorOptions?: ProcessorOptions;
   };

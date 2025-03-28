@@ -982,6 +982,9 @@ importers:
       gray-matter:
         specifier: ^4.0.3
         version: 4.0.3
+      lru-cache:
+        specifier: ^11.1.0
+        version: 11.1.0
       unist-util-visit:
         specifier: ^5.0.0
         version: 5.0.0
@@ -6984,6 +6987,10 @@ packages:
 
   lru-cache@11.0.0:
     resolution: {integrity: sha512-Qv32eSV1RSCfhY3fpPE2GNZ8jgM9X7rdAfemLWqTUxwiyIC4jJ6Sy0fZ8H+oLWevO6i4/bizg7c8d8i6bxrzbA==}
+    engines: {node: 20 || >=22}
+
+  lru-cache@11.1.0:
+    resolution: {integrity: sha512-QIXZUBJUx+2zHUdQujWejBkcD9+cs94tLn0+YL8UrCh+D5sCXZ4c7LaEH48pNwRY3MLDgqUFyhlCyjJPf1WP0A==}
     engines: {node: 20 || >=22}
 
   lru-cache@5.1.1:
@@ -16373,6 +16380,8 @@ snapshots:
   lru-cache@10.4.3: {}
 
   lru-cache@11.0.0: {}
+
+  lru-cache@11.1.0: {}
 
   lru-cache@5.1.1:
     dependencies:

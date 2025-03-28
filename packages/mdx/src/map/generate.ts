@@ -39,7 +39,6 @@ export async function generateJS(
     }),
   ];
 
-  config._runtime.files.clear();
   const entries = Array.from(config.collections.entries());
 
   async function getEntries(
@@ -48,8 +47,6 @@ export async function generateJS(
     files: FileInfo[],
   ) {
     const items = files.map(async (file, i) => {
-      config._runtime.files.set(file.absolutePath, collectionName);
-
       if (collection.type === 'meta') {
         const cached = fileCache.read<string>('generate-js', file.absolutePath);
         if (cached) return cached;
