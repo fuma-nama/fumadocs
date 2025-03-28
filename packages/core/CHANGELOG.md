@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 15.1.3
+
+### Patch Changes
+
+- b734f92: support `mdxJsxFlowElement` in `remarkStructure`
+
 ## 15.1.2
 
 ### Patch Changes
