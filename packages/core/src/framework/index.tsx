@@ -40,7 +40,17 @@ export interface Framework {
   Image?: FC<ImageProps>;
 }
 
-const FrameworkContext = createContext<Framework>('FrameworkContext');
+const notImplemented = () => {
+  throw new Error(
+    'You need to wrap your application inside `FrameworkProvider`.',
+  );
+};
+
+const FrameworkContext = createContext<Framework>('FrameworkContext', {
+  useParams: notImplemented,
+  useRouter: notImplemented,
+  usePathname: notImplemented,
+});
 
 export function FrameworkProvider({
   children,
