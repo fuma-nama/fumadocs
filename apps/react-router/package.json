@@ -1,5 +1,5 @@
 {
-  "name": "react-router",
+  "name": "example-react-router",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,7 +19,8 @@
     "isbot": "^5.1.17",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router": "^7.4.0"
+    "react-router": "^7.4.0",
+    "shiki": "^3.2.1"
   },
   "devDependencies": {
     "@react-router/dev": "^7.4.0",

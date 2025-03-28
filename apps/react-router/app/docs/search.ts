@@ -1,17 +1,28 @@
 import type { Route } from './+types/search';
-import { createSearchAPI, type Index } from 'fumadocs-core/search/server';
-import { source } from '~/source';
+import {
+  type AdvancedIndex,
+  createSearchAPI,
+} from 'fumadocs-core/search/server';
+import { getSource } from '~/source';
+import { structure } from 'fumadocs-core/mdx-plugins';
 
-const server = createSearchAPI('simple', {
-  indexes: source.getPages().map(
-    (page) =>
-      ({
-        title: page.data.title ?? '',
-        content: page.data.content,
-        url: page.url,
-        description: page.data.description,
-      }) satisfies Index,
-  ),
+const server = createSearchAPI('advanced', {
+  async indexes() {
+    const source = await getSource();
+
+    return await Promise.all(
+      source.getPages().map(
+        async (page) =>
+          ({
+            id: page.url,
+            title: page.data.title ?? '',
+            url: page.url,
+            description: page.data.description,
+            structuredData: structure(page.data.content),
+          }) satisfies AdvancedIndex,
+      ),
+    );
+  },
 });
 
 export async function loader({ request }: Route.LoaderArgs) {

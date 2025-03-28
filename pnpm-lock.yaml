@@ -324,6 +324,9 @@ importers:
       react-router:
         specifier: ^7.4.0
         version: 7.4.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      shiki:
+        specifier: ^3.2.1
+        version: 3.2.1
     devDependencies:
       '@react-router/dev':
         specifier: ^7.4.0
@@ -704,9 +707,6 @@ importers:
       '@formatjs/intl-localematcher':
         specifier: ^0.6.1
         version: 0.6.1
-      '@nanostores/react':
-        specifier: ^0.8.4
-        version: 0.8.4(nanostores@0.11.4)(react@19.0.0)
       '@orama/orama':
         specifier: ^3.1.3
         version: 3.1.3
@@ -728,9 +728,6 @@ importers:
       image-size:
         specifier: ^2.0.1
         version: 2.0.1
-      nanostores:
-        specifier: ^0.11.4
-        version: 0.11.4
       negotiator:
         specifier: ^1.0.0
         version: 1.0.0
@@ -768,6 +765,9 @@ importers:
       '@oramacloud/client':
         specifier: ^2.1.4
         version: 2.1.4
+      '@tanstack/react-router':
+        specifier: ^1.114.29
+        version: 1.114.29(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@types/estree-jsx':
         specifier: ^1.0.5
         version: 1.0.5
@@ -804,6 +804,9 @@ importers:
       next:
         specifier: ^15.2.4
         version: 15.2.4(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      react-router:
+        specifier: ^7.4.0
+        version: 7.4.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       remark-mdx:
         specifier: ^3.1.0
         version: 3.1.0
@@ -2639,13 +2642,6 @@ packages:
 
   '@mjackson/node-fetch-server@0.2.0':
     resolution: {integrity: sha512-EMlH1e30yzmTpGLQjlFmaDAjyOeZhng1/XCd7DExR8PNAnG/G1tyruZxEoUe11ClnwGhGrtsdnyyUx1frSzjng==}
-
-  '@nanostores/react@0.8.4':
-    resolution: {integrity: sha512-EciHSzDXg7GmGODjegGG1VldPEinbAK+12/Uz5+MAdHmxf082Rl6eXqKFxAAu4pZAcr5dNTpv6wMfEe7XacjkQ==}
-    engines: {node: ^18.0.0 || >=20.0.0}
-    peerDependencies:
-      nanostores: ^0.9.0 || ^0.10.0 || ^0.11.0
-      react: '>=18.0.0'
 
   '@napi-rs/wasm-runtime@0.2.7':
     resolution: {integrity: sha512-5yximcFK5FNompXfJFoWanu5l8v1hNGqNHh9du1xETp9HWk/B/PzvchX55WYOPaIeNglG8++68AAiauBAtbnzw==}
@@ -7335,10 +7331,6 @@ packages:
     engines: {node: ^18 || >=20}
     hasBin: true
 
-  nanostores@0.11.4:
-    resolution: {integrity: sha512-k1oiVNN4hDK8NcNERSZLQiMfRzEGtfnvZvdBvey3SQbgn8Dcrk0h1I6vpxApjb10PFUflZrgJ2WEZyJQ+5v7YQ==}
-    engines: {node: ^18.0.0 || >=20.0.0}
-
   natural-compare@1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
 
@@ -10975,11 +10967,6 @@ snapshots:
       langium: 3.0.0
 
   '@mjackson/node-fetch-server@0.2.0': {}
-
-  '@nanostores/react@0.8.4(nanostores@0.11.4)(react@19.0.0)':
-    dependencies:
-      nanostores: 0.11.4
-      react: 19.0.0
 
   '@napi-rs/wasm-runtime@0.2.7':
     dependencies:
@@ -17031,8 +17018,6 @@ snapshots:
   nanoid@3.3.11: {}
 
   nanoid@5.1.5: {}
-
-  nanostores@0.11.4: {}
 
   natural-compare@1.4.0: {}
 

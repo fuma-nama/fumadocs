@@ -6,10 +6,11 @@ import {
   DocsPage,
   DocsTitle,
 } from 'fumadocs-ui/page';
-import { compiler, source } from '~/source';
+import { getSource } from '~/source';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { executeMdxSync } from '@fumadocs/mdx-remote/client';
 import type { PageTree } from 'fumadocs-core/server';
+import { createCompiler } from '@fumadocs/mdx-remote';
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -17,8 +18,12 @@ export function meta({}: Route.MetaArgs) {
     { name: 'description', content: 'Welcome to React Router!' },
   ];
 }
+const compiler = createCompiler({
+  development: false,
+});
 
 export async function loader({ params }: Route.LoaderArgs) {
+  const source = await getSource();
   const slugs = params['*'].split('/').filter((v) => v.length > 0);
   const page = source.getPage(slugs);
   if (!page) throw new Error('Not found');

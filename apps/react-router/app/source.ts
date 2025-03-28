@@ -8,19 +8,16 @@ import {
 } from 'fumadocs-core/source';
 import matter from 'gray-matter';
 import * as path from 'node:path';
-import { createCompiler } from '@fumadocs/mdx-remote';
 
-const files = await Glob('content/docs/**/*.mdx');
+async function createSource() {
+  const files = await Glob('content/docs/**/*.mdx');
 
-async function createSource(): Promise<
-  Source<{
+  const source: Source<{
     pageData: PageData & {
       content: string;
     };
     metaData: MetaData;
-  }>
-> {
-  return {
+  }> = {
     files: await Promise.all(
       files.map(async (file) => {
         const { data, content } = matter(await readFile(file));
@@ -36,13 +33,15 @@ async function createSource(): Promise<
       }),
     ),
   };
+
+  return loader({
+    source,
+    baseUrl: '/docs',
+  });
 }
 
-export const compiler = createCompiler({
-  development: false,
-});
+const source = createSource();
 
-export const source = loader({
-  source: await createSource(),
-  baseUrl: '/docs',
-});
+export function getSource() {
+  return source;
+}

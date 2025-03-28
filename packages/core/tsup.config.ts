@@ -8,6 +8,8 @@ export default defineConfig({
     'next',
     'react',
     'react-dom',
+    '@tanstack/react-router',
+    'react-router',
   ],
   dts: true,
   target: 'es2022',

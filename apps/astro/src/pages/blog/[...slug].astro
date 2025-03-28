@@ -2,17 +2,10 @@
 import type { TableOfContents } from 'fumadocs-core/dist/server';
 import { type CollectionEntry, getCollection } from 'astro:content';
 import { render } from 'astro:content';
-import Layout from '../../layouts/docs.astro';
-import DocsLayout from '../../layouts/docs';
+import { Layout } from '../../layouts/layout';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
+import { ClientRouter } from 'astro:transitions';
 import Pre from '../../components/mdx/pre.astro';
-import { source } from '../../source';
-import {
-  DocsPage,
-  DocsBody,
-  DocsTitle,
-  DocsDescription,
-} from 'fumadocs-ui/page';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
@@ -33,25 +26,15 @@ const toc: TableOfContents = headings.map((heading) => ({
 }));
 ---
 
-<Layout>
-  <DocsLayout
-    title={post.data.title}
-    description={post.data.description}
-    pathname={Astro.url.pathname}
-    params={Astro.params}
-    tree={source.pageTree}
-    client:load
-  >
-    <DocsPage
-      toc={toc}
-      tableOfContent={{ enabled: true, style: 'clerk' }}
-      client:load
-    >
-      <DocsTitle>{post.data.title}</DocsTitle>
-      <DocsDescription>{post.data.description}</DocsDescription>
-      <DocsBody>
-        <Content components={{ ...defaultMdxComponents, pre: Pre }} />
-      </DocsBody>
-    </DocsPage>
-  </DocsLayout>
-</Layout>
+<html>
+  <head>
+    <ClientRouter />
+  </head>
+  <body>
+    <Layout client:load transition:persist>
+      <a href="/blog/using-mdx">MDX</a>
+      <a href="/blog/first-post">First</a>
+      <Content components={{ ...defaultMdxComponents, pre: Pre }} />
+    </Layout>
+  </body>
+</html>

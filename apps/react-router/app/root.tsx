@@ -1,21 +1,15 @@
 import {
   isRouteErrorResponse,
-  Link,
   Links,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
-  useLocation,
-  useNavigate,
-  useParams,
 } from 'react-router';
-
+import { RootProvider } from 'fumadocs-ui/provider/base';
+import { ReactRouterProvider } from 'fumadocs-core/framework/react-router';
 import type { Route } from './+types/root';
 import './app.css';
-import { type Framework, FrameworkProvider } from 'fumadocs-core/framework';
-import { type ComponentPropsWithoutRef, useMemo } from 'react';
-import { RootProvider } from 'fumadocs-ui/provider/base';
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -40,59 +34,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <FumadocsAdapter>{children}</FumadocsAdapter>
+        <ReactRouterProvider>
+          <RootProvider>{children}</RootProvider>
+        </ReactRouterProvider>
         <ScrollRestoration />
         <Scripts />
       </body>
     </html>
-  );
-}
-
-function FumadocsAdapter({ children }: { children: React.ReactNode }) {
-  const framework = useMemo<Framework>(
-    () => ({
-      usePathname() {
-        return useLocation().pathname;
-      },
-      useParams() {
-        const params = useParams();
-
-        return {
-          ...params,
-          slug: params['*'] ? params['*'].split('/') : params.slug,
-        } as Record<string, string>;
-      },
-      useRouter() {
-        const navigate = useNavigate();
-
-        return {
-          push(url) {
-            navigate(url);
-          },
-          refresh() {
-            navigate(window.location.href);
-          },
-        };
-      },
-      Link({ href, prefetch, ...props }) {
-        return (
-          <Link
-            to={href!}
-            prefetch={prefetch ? 'intent' : 'none'}
-            {...(props as ComponentPropsWithoutRef<'a'>)}
-          >
-            {props.children}
-          </Link>
-        );
-      },
-    }),
-    [],
-  );
-
-  return (
-    <FrameworkProvider {...framework}>
-      <RootProvider>{children}</RootProvider>
-    </FrameworkProvider>
   );
 }
 
