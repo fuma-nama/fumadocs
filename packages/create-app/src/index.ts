@@ -32,25 +32,34 @@ async function main(): Promise<void> {
         }),
       template: () =>
         select({
-          message: 'Choose a content source',
+          message: 'Choose a template',
           initialValue: 'fuma-docs-mdx' as Template,
           options: [
             {
               value: 'fuma-docs-mdx',
-              label: 'Fumadocs MDX',
+              label: 'Next.js: Fumadocs MDX',
               hint: 'recommended',
             },
-            { value: 'content-collections', label: 'Content Collections' },
+            {
+              value: 'content-collections',
+              label: 'Next.js: Content Collections',
+            },
+            {
+              value: 'react-router',
+              label: 'React Router: MDX Remote',
+            },
           ],
         }),
       src: () =>
         confirm({ message: 'Use `/src` directory?', initialValue: false }),
-      tailwindcss: () => confirm({ message: 'Use Tailwind CSS for styling?' }),
-      eslint: () =>
-        confirm({
+      eslint: (v) => {
+        if (v.results.template === 'react-router') return;
+
+        return confirm({
           message: 'Add default ESLint configuration?',
           initialValue: false,
-        }),
+        });
+      },
       installDeps: () =>
         confirm({
           message: `Do you want to install packages automatically? (detected as ${manager})`,
@@ -83,12 +92,12 @@ async function main(): Promise<void> {
       info.start(`Deleting files in ${projectName}`);
 
       await Promise.all(
-        destDir.map((item) =>
-          fs.rm(item, {
+        destDir.map((item) => {
+          return fs.rm(path.join(dest, item), {
             recursive: true,
             force: true,
-          }),
-        ),
+          });
+        }),
       );
 
       info.stop(`Deleted files in ${projectName}`);
@@ -100,11 +109,11 @@ async function main(): Promise<void> {
 
   await create({
     packageManager: manager,
-    tailwindcss: options.tailwindcss,
+    tailwindcss: true,
     template: options.template,
     outputDir: dest,
     installDeps: options.installDeps,
-    eslint: options.eslint,
+    eslint: options.eslint === true,
     useSrcDir: options.src,
 
     log: (message) => {

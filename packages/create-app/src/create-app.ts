@@ -7,7 +7,7 @@ import type { PackageManager } from './auto-install';
 import { autoInstall } from './auto-install';
 import { sourceDir, cwd } from './constants';
 
-export type Template = 'content-collections' | 'fuma-docs-mdx';
+export type Template = 'content-collections' | 'fuma-docs-mdx' | 'react-router';
 
 export interface Options {
   outputDir: string;
@@ -30,6 +30,9 @@ export async function create(options: Options): Promise<void> {
   } = options;
   const projectName = path.basename(options.outputDir);
   const dest = path.resolve(cwd, options.outputDir);
+  const isNext =
+    options.template === 'content-collections' ||
+    options.template === 'fuma-docs-mdx';
 
   function defaultRename(file: string): string {
     file = file.replace('example.gitignore', '.gitignore');
@@ -38,18 +41,28 @@ export async function create(options: Options): Promise<void> {
       return file;
     }
 
-    for (const dir of ['app', 'lib']) {
-      const relative = path.relative(path.join(dest, dir), file);
+    if (isNext) {
+      for (const dir of ['app', 'lib']) {
+        const relative = path.relative(path.join(dest, dir), file);
+
+        if (!relative.startsWith(`..${path.sep}`)) {
+          return path.join(dest, 'src', dir, relative);
+        }
+      }
+    } else if (options.template === 'react-router') {
+      const relative = path.relative(path.join(dest, 'app'), file);
 
       if (!relative.startsWith(`..${path.sep}`)) {
-        return path.join(dest, 'src', dir, relative);
+        return path.join(dest, 'src', relative);
       }
     }
 
     return file;
   }
 
-  await copy(path.join(sourceDir, `template/+shared`), dest, defaultRename);
+  if (isNext) {
+    await copy(path.join(sourceDir, `template/+next`), dest, defaultRename);
+  }
 
   await copy(
     path.join(sourceDir, `template/${options.template}`),
@@ -57,20 +70,34 @@ export async function create(options: Options): Promise<void> {
     defaultRename,
   );
 
-  if (options.tailwindcss) {
+  if (isNext && options.tailwindcss) {
     await copy(
-      path.join(sourceDir, `template/+tailwindcss`),
+      path.join(sourceDir, `template/+next+tailwindcss`),
       dest,
       defaultRename,
     );
+
+    if (options.useSrcDir) {
+      const cssPath = path.join(dest, 'src/app/global.css');
+
+      await fs.writeFile(
+        cssPath,
+        (await fs.readFile(cssPath)).toString().replace('../', '../../'),
+      );
+    }
     log('Configured Tailwind CSS');
   }
 
-  if (options.eslint) {
-    await copy(path.join(sourceDir, `template/+eslint`), dest, defaultRename);
+  if (isNext && options.eslint) {
+    await copy(
+      path.join(sourceDir, `template/+next+eslint`),
+      dest,
+      defaultRename,
+    );
     log('Configured ESLint');
   }
 
+  // update tsconfig.json for src dir
   if (options.useSrcDir) {
     const tsconfigPath = path.join(dest, 'tsconfig.json');
     const content = (await fs.readFile(tsconfigPath)).toString();
@@ -84,19 +111,13 @@ export async function create(options: Options): Promise<void> {
     }
 
     await fs.writeFile(tsconfigPath, JSON.stringify(config, null, 2));
-
-    if (options.tailwindcss) {
-      const cssPath = path.join(dest, 'src/app/global.css');
-
-      await fs.writeFile(
-        cssPath,
-        (await fs.readFile(cssPath)).toString().replace('../', '../../'),
-      );
-    }
   }
 
   const packageJson = createPackageJson(projectName, options);
-  await fs.writeFile(path.join(dest, 'package.json'), packageJson);
+  await fs.writeFile(
+    path.join(dest, 'package.json'),
+    JSON.stringify(packageJson, null, 2),
+  );
 
   const readMe = await getReadme(dest, projectName);
   await fs.writeFile(path.join(dest, 'README.md'), readMe);
@@ -140,8 +161,51 @@ async function copy(
   }
 }
 
-function createPackageJson(projectName: string, options: Options): string {
-  const packageJson = {
+function createPackageJson(projectName: string, options: Options): object {
+  if (options.template === 'react-router') {
+    return {
+      name: projectName,
+      private: true,
+      type: 'module',
+      scripts: {
+        build: 'react-router build',
+        dev: 'react-router dev',
+        start: 'react-router-serve ./build/server/index.js',
+        typecheck: 'react-router typegen && tsc',
+      },
+      dependencies: {
+        ...pick(localVersions, [
+          '@fumadocs/mdx-remote',
+          'fumadocs-core',
+          'fumadocs-ui',
+        ]),
+        ...pick(versionPkg.dependencies, [
+          '@react-router/node',
+          '@react-router/serve',
+          'gray-matter',
+          'isbot',
+          'react',
+          'react-dom',
+          'react-router',
+          'shiki',
+        ]),
+      },
+      devDependencies: pick(versionPkg.dependencies, [
+        '@react-router/dev',
+        '@tailwindcss/vite',
+        '@types/node',
+        '@types/react',
+        '@types/react-dom',
+        'react-router-devtools',
+        'tailwindcss',
+        'typescript',
+        'vite',
+        'vite-tsconfig-paths',
+      ]),
+    };
+  }
+
+  return {
     name: projectName,
     version: '0.0.0',
     private: true,
@@ -149,63 +213,54 @@ function createPackageJson(projectName: string, options: Options): string {
       build: 'next build',
       dev: 'next dev',
       start: 'next start',
-    } as Record<string, string>,
+      ...(options.template === 'fuma-docs-mdx'
+        ? {
+            postinstall: 'fumadocs-mdx',
+          }
+        : null),
+    },
     dependencies: {
       ...pick(versionPkg.dependencies, ['next', 'react', 'react-dom']),
       ...pick(localVersions, ['fumadocs-ui', 'fumadocs-core']),
-    } as Record<string, string>,
-    devDependencies: pick(versionPkg.dependencies, [
-      '@types/node',
-      '@types/react',
-      '@types/react-dom',
-      'typescript',
-    ]) as Record<string, string>,
+      ...(options.template === 'content-collections'
+        ? {
+            ...pick(versionPkg.dependencies, [
+              '@content-collections/mdx',
+              '@content-collections/core',
+              '@content-collections/next',
+            ]),
+            ...pick(localVersions, ['@fumadocs/content-collections']),
+          }
+        : null),
+      ...(options.template === 'fuma-docs-mdx'
+        ? pick(localVersions, ['fumadocs-mdx'])
+        : null),
+    },
+    devDependencies: {
+      ...pick(versionPkg.dependencies, [
+        '@types/node',
+        '@types/react',
+        '@types/react-dom',
+        'typescript',
+      ]),
+      ...(options.tailwindcss
+        ? pick(versionPkg.dependencies, [
+            '@tailwindcss/postcss',
+            'tailwindcss',
+            'postcss',
+          ])
+        : null),
+      ...(options.template === 'fuma-docs-mdx'
+        ? pick(versionPkg.dependencies, ['@types/mdx'])
+        : null),
+      ...(options.eslint
+        ? {
+            eslint: '^8',
+            'eslint-config-next': versionPkg.dependencies.next,
+          }
+        : null),
+    },
   };
-
-  if (options.template === 'content-collections') {
-    Object.assign(
-      packageJson.dependencies,
-      pick(versionPkg.dependencies, [
-        '@content-collections/mdx',
-        '@content-collections/core',
-        '@content-collections/next',
-      ]),
-      pick(localVersions, ['@fumadocs/content-collections']),
-    );
-  }
-
-  if (options.template === 'fuma-docs-mdx') {
-    packageJson.scripts.postinstall = 'fumadocs-mdx';
-
-    Object.assign(
-      packageJson.dependencies,
-      pick(localVersions, ['fumadocs-mdx']),
-    );
-    Object.assign(
-      packageJson.devDependencies,
-      pick(versionPkg.dependencies, ['@types/mdx']),
-    );
-  }
-
-  if (options.tailwindcss) {
-    Object.assign(
-      packageJson.devDependencies,
-      pick(versionPkg.dependencies, [
-        '@tailwindcss/postcss',
-        'tailwindcss',
-        'postcss',
-      ]),
-    );
-  }
-
-  if (options.eslint) {
-    Object.assign(packageJson.devDependencies, {
-      eslint: '^8',
-      'eslint-config-next': versionPkg.dependencies.next,
-    });
-  }
-
-  return JSON.stringify(packageJson, undefined, 2);
 }
 
 function pick<T extends object, K extends keyof T>(
