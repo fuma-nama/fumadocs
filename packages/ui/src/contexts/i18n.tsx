@@ -37,8 +37,8 @@ export const defaultTranslations: Translations = {
   tocNoHeadings: 'No Headings',
   lastUpdate: 'Last updated on',
   chooseLanguage: 'Choose a language',
-  nextPage: 'Next',
-  previousPage: 'Previous',
+  nextPage: 'Next Page',
+  previousPage: 'Previous Page',
   chooseTheme: 'Theme',
   editOnGithub: 'Edit on GitHub',
 };

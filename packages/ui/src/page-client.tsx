@@ -190,8 +190,6 @@ export function Footer({ items }: FooterProps) {
 function FooterItem({ item, index }: { item: Item; index: 0 | 1 }) {
   const { text } = useI18n();
   const Icon = index === 0 ? ChevronLeft : ChevronRight;
-  const title = item.description ? item.name : null;
-  const description = item.description ?? item.name;
 
   return (
     <Link
@@ -203,22 +201,15 @@ function FooterItem({ item, index }: { item: Item; index: 0 | 1 }) {
     >
       <div
         className={cn(
-          'inline-flex items-center gap-1.5',
+          'inline-flex items-center gap-1.5 font-medium',
           index === 1 && 'flex-row-reverse',
-          title ? 'font-medium' : 'text-fd-muted-foreground',
         )}
       >
         <Icon className="-mx-1 size-4 shrink-0 rtl:rotate-180" />
-        <p>{title ?? (index == 0 ? text.previousPage : text.nextPage) }</p>
+        <p>{item.name}</p>
       </div>
-      <p
-        className={cn(
-          title
-            ? 'text-fd-muted-foreground truncate'
-            : 'font-medium md:text-[15px]',
-        )}
-      >
-        {description}
+      <p className="text-fd-muted-foreground truncate">
+        {item.description ?? (index === 0 ? text.previousPage : text.nextPage)}
       </p>
     </Link>
   );

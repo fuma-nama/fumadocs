@@ -25,3 +25,4 @@ apps/docs/content/docs/ui/typescript.mdx
 
 packages/mdx-remote/test/fixtures/**/*.js
 packages/mdx-remote/test/fixtures/**/*.json
+build/

@@ -1292,6 +1292,9 @@ importers:
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
+      fumadocs-core:
+        specifier: workspace:*
+        version: link:../core
       lodash.merge:
         specifier: ^4.6.2
         version: 4.6.2
@@ -1338,9 +1341,6 @@ importers:
       eslint-config-custom:
         specifier: workspace:*
         version: link:../eslint-config-custom
-      fumadocs-core:
-        specifier: workspace:*
-        version: link:../core
       next:
         specifier: 15.2.4
         version: 15.2.4(@opentelemetry/api@1.9.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)

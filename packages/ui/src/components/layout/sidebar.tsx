@@ -482,8 +482,7 @@ function PageTreeFolder({
   return (
     <SidebarFolder
       defaultOpen={
-        (item.defaultOpen ?? defaultOpenLevel >= level) ||
-        path.some((pathItem) => pathItem.$id === item.$id || pathItem === item)
+        (item.defaultOpen ?? defaultOpenLevel >= level) || path.includes(item)
       }
     >
       {item.index ? (
