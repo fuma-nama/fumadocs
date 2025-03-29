@@ -1,5 +1,19 @@
 # @fumadocs/mdx-remote
 
+## 1.3.0
+
+### Minor Changes
+
+- 363055d: Support `/client` API for browser usage
+- cf87f9d: Support `compiler.compileFile`, deprecate `skipRender` option in favour of this
+- cf87f9d: Deprecate `executeMdx` in favour of `compiler.render`
+
+### Patch Changes
+
+- Updated dependencies [2fd325c]
+- Updated dependencies [a7cf4fa]
+  - fumadocs-core@15.2.0
+
 ## 1.2.1
 
 ### Patch Changes
