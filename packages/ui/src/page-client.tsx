@@ -209,7 +209,7 @@ function FooterItem({ item, index }: { item: Item; index: 0 | 1 }) {
         )}
       >
         <Icon className="-mx-1 size-4 shrink-0 rtl:rotate-180" />
-        <p>{title ?? text.nextPage}</p>
+        <p>{title ?? (index == 0 ? text.previousPage : text.nextPage) }</p>
       </div>
       <p
         className={cn(
