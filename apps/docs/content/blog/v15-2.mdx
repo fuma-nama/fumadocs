@@ -46,7 +46,21 @@ Please report issues if you found any public APIs are broken unexpectedly.
 
 15.2 also included some small performance improvements to Fumadocs, the time taken for Turbopack to start dev server and compile its first docs page is about 2-3 seconds.
 
-This change also potentially allowed Fumadocs to run on Vite, production build of minimal React Router setup only takes around 4s, which is also an attractive advantage.
+This change also potentially allowed Fumadocs to run on Vite, production build of minimal React Router setup only takes around 4s on a Macbook.
+
+## Try it out
+
+Upgrade from your existing Next.js docs:
+
+```bash
+pnpm update -i -r
+```
+
+If you want to try the React Router example:
+
+```bash
+pnpm create fumadocs-app
+```
 
 ### Future Plans
 
