@@ -1,5 +1,12 @@
 # next-docs-zeta
 
+## 15.2.0
+
+### Minor Changes
+
+- 2fd325c: Enable `lazy` on `rehypeCode` by default
+- a7cf4fa: Support other frameworks via `FrameworkProvider`
+
 ## 15.1.3
 
 ### Patch Changes
