@@ -53,7 +53,7 @@ export async function create(options: Options): Promise<void> {
       const relative = path.relative(path.join(dest, 'app'), file);
 
       if (!relative.startsWith(`..${path.sep}`)) {
-        return path.join(dest, 'src', relative);
+        return path.join(dest, 'app', relative);
       }
     }
 
