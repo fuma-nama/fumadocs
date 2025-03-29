@@ -1,8 +1,8 @@
 'use client';
 import { ChevronsUpDown } from 'lucide-react';
 import { type HTMLAttributes, type ReactNode, useMemo, useState } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import Link from 'fumadocs-core/link';
+import { usePathname } from 'fumadocs-core/framework';
 import { cn } from '@/utils/cn';
 import { isActive } from '@/utils/is-active';
 import { useSidebar } from '@/contexts/sidebar';
@@ -95,7 +95,7 @@ export function RootToggle({
 function Item(props: Option) {
   return (
     <>
-      {props.icon}
+      <>{props.icon}</>
       <div className="flex-1 text-start">
         <p className="text-sm font-medium">{props.title}</p>
         {props.description ? (

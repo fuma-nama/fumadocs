@@ -1,5 +1,16 @@
 # @fuma-docs/openapi
 
+## 7.0.7
+
+### Patch Changes
+
+- c37b12a: Fix security display issues
+- Updated dependencies [c5af09f]
+- Updated dependencies [2fd325c]
+- Updated dependencies [a7cf4fa]
+  - fumadocs-ui@15.2.0
+  - fumadocs-core@15.2.0
+
 ## 7.0.6
 
 ### Patch Changes

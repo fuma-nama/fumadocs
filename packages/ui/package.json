@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-ui",
-  "version": "15.1.3",
+  "version": "15.2.0",
   "description": "The framework for building a documentation website in Next.js",
   "keywords": [
     "NextJs",
@@ -33,8 +33,16 @@
       "types": "./dist/page.d.ts"
     },
     "./provider": {
-      "import": "./dist/provider.js",
-      "types": "./dist/provider.d.ts"
+      "import": "./dist/provider/index.js",
+      "types": "./dist/provider/index.d.ts"
+    },
+    "./provider/*": {
+      "import": "./dist/provider/*.js",
+      "types": "./dist/provider/*.d.ts"
+    },
+    "./contexts/*": {
+      "import": "./dist/contexts/*.js",
+      "types": "./dist/contexts/*.d.ts"
     },
     "./mdx": {
       "node": "./dist/mdx.server.js",
@@ -75,8 +83,9 @@
     "@radix-ui/react-slot": "^1.1.2",
     "@radix-ui/react-tabs": "^1.1.3",
     "class-variance-authority": "^0.7.1",
+    "fumadocs-core": "workspace:*",
     "lodash.merge": "^4.6.2",
-    "lucide-react": "^0.483.0",
+    "lucide-react": "^0.485.0",
     "next-themes": "^0.4.6",
     "postcss-selector-parser": "^7.1.0",
     "react-medium-image-zoom": "^5.2.14",
@@ -84,20 +93,19 @@
   },
   "devDependencies": {
     "@fumadocs/cli": "workspace:*",
-    "@next/eslint-plugin-next": "^15.2.3",
-    "@tailwindcss/cli": "^4.0.15",
+    "@next/eslint-plugin-next": "^15.2.4",
+    "@tailwindcss/cli": "^4.0.17",
     "@types/lodash.merge": "^4.6.9",
     "@types/react": "^19.0.12",
     "@types/react-dom": "^19.0.4",
     "eslint-config-custom": "workspace:*",
     "fumadocs-core": "workspace:*",
-    "next": "15.2.3",
-    "tailwindcss": "^4.0.15",
-    "tsc-alias": "^1.8.11",
+    "next": "15.2.4",
+    "tailwindcss": "^4.0.17",
+    "tsc-alias": "^1.8.12",
     "tsconfig": "workspace:*"
   },
   "peerDependencies": {
-    "fumadocs-core": "workspace:*",
     "next": "14.x.x || 15.x.x",
     "react": "18.x.x || 19.x.x",
     "react-dom": "18.x.x || 19.x.x",

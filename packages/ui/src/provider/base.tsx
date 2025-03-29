@@ -1,12 +1,11 @@
 'use client';
 
 import { ThemeProvider } from 'next-themes';
-import { type ComponentPropsWithoutRef, type ReactNode } from 'react';
-import dynamic from 'next/dynamic';
+import { type ComponentPropsWithoutRef, lazy, type ReactNode } from 'react';
 import { DirectionProvider } from '@radix-ui/react-direction';
 import type { DefaultSearchDialogProps } from '@/components/dialog/search-default';
-import { SidebarProvider } from './contexts/sidebar';
-import { SearchProvider, type SearchProviderProps } from './contexts/search';
+import { SidebarProvider } from '@/contexts/sidebar';
+import { SearchProvider, type SearchProviderProps } from '@/contexts/search';
 
 interface SearchOptions
   extends Omit<SearchProviderProps, 'options' | 'children'> {
@@ -45,9 +44,8 @@ export interface RootProviderProps {
   children?: ReactNode;
 }
 
-const DefaultSearchDialog = dynamic(
+const DefaultSearchDialog = lazy(
   () => import('@/components/dialog/search-default'),
-  { ssr: false },
 );
 
 export function RootProvider({
@@ -84,22 +82,3 @@ export function RootProvider({
     </DirectionProvider>
   );
 }
-
-export { useI18n, I18nLabel } from './contexts/i18n';
-export {
-  SearchProvider,
-  SearchOnly,
-  useSearchContext,
-  type SearchProviderProps,
-} from './contexts/search';
-export { SidebarProvider, useSidebar } from './contexts/sidebar';
-export {
-  useTreePath,
-  useTreeContext,
-  TreeContextProvider,
-} from './contexts/tree';
-export {
-  StylesProvider,
-  usePageStyles,
-  type PageStyles,
-} from './contexts/layout';

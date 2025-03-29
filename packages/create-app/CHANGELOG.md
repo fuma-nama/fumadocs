@@ -1,5 +1,13 @@
 # create-next-docs-app
 
+## 15.2.0
+
+### Patch Changes
+
+- 372843d: Add React Router example
+- d5193e7: improve install experience
+- 372843d: Remove Tailwind CSS option, enable by default
+
 ## 15.1.3
 
 ## 15.1.2

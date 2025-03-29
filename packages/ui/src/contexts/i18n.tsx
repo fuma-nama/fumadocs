@@ -1,6 +1,5 @@
 'use client';
-import { createContext, useContext } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { createContext, usePathname, useRouter } from 'fumadocs-core/framework';
 import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 import { type ReactNode, useMemo } from 'react';
 
@@ -38,13 +37,13 @@ export const defaultTranslations: Translations = {
   tocNoHeadings: 'No Headings',
   lastUpdate: 'Last updated on',
   chooseLanguage: 'Choose a language',
-  nextPage: 'Next',
-  previousPage: 'Previous',
+  nextPage: 'Next Page',
+  previousPage: 'Previous Page',
   chooseTheme: 'Theme',
   editOnGithub: 'Edit on GitHub',
 };
 
-export const I18nContext = createContext<I18nContextType>({
+export const I18nContext = createContext<I18nContextType>('I18nContext', {
   text: defaultTranslations,
 });
 
@@ -55,7 +54,7 @@ export function I18nLabel(props: { label: keyof Translations }): string {
 }
 
 export function useI18n(): I18nContextType {
-  return useContext(I18nContext);
+  return I18nContext.use();
 }
 
 export interface I18nProviderProps {

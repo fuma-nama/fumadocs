@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { type NextRequest } from 'next/server';
-import { notFound } from 'next/navigation';
 import {
   type InferPageType,
   type LoaderConfig,
@@ -133,8 +132,10 @@ export function createMetadataImage<
           input.slug.slice(0, -1), //remove filename
           lang,
         );
-
-        if (!page) notFound();
+        if (!page)
+          return new Response(null, {
+            status: 404,
+          });
 
         return handler(page as InferPageType<S>, req, { params: input });
       };

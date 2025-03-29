@@ -2,11 +2,11 @@ import { fileURLToPath } from 'node:url';
 import type { Registry } from '@fumadocs/cli/build';
 
 const contextsMap = {
-  '../contexts/sidebar.tsx': 'fumadocs-ui/provider',
-  '../contexts/search.tsx': 'fumadocs-ui/provider',
-  '../contexts/tree.tsx': 'fumadocs-ui/provider',
-  '../contexts/i18n.tsx': 'fumadocs-ui/provider',
-  '../contexts/layout.tsx': 'fumadocs-ui/provider',
+  '../contexts/sidebar.tsx': 'fumadocs-ui/contexts/sidebar',
+  '../contexts/search.tsx': 'fumadocs-ui/contexts/search',
+  '../contexts/tree.tsx': 'fumadocs-ui/contexts/tree',
+  '../contexts/i18n.tsx': 'fumadocs-ui/contexts/i18n',
+  '../contexts/layout.tsx': 'fumadocs-ui/contexts/layout',
 };
 
 export const registry: Registry = {

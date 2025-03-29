@@ -1,5 +1,14 @@
 # next-docs-ui
 
+## 15.2.0
+
+### Patch Changes
+
+- c5af09f: UI: Use `text.previousPage` for previous page navigation
+- Updated dependencies [2fd325c]
+- Updated dependencies [a7cf4fa]
+  - fumadocs-core@15.2.0
+
 ## 15.1.3
 
 ### Patch Changes

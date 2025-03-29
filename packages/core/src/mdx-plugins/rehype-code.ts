@@ -49,6 +49,7 @@ const metaValues: MetaValue[] = [
 ];
 
 export const rehypeCodeDefaultOptions: RehypeCodeOptions = {
+  lazy: true,
   themes: defaultThemes,
   defaultColor: false,
   defaultLanguage: 'plaintext',

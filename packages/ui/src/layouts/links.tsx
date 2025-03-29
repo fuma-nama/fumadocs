@@ -1,6 +1,6 @@
 'use client';
 import Link from 'fumadocs-core/link';
-import { usePathname } from 'next/navigation';
+import { usePathname } from 'fumadocs-core/framework';
 import {
   type AnchorHTMLAttributes,
   forwardRef,

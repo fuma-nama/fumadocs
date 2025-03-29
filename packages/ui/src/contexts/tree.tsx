@@ -1,13 +1,7 @@
 'use client';
 import type { PageTree } from 'fumadocs-core/server';
-import { usePathname } from 'next/navigation';
-import {
-  createContext,
-  useContext,
-  type ReactNode,
-  useMemo,
-  useRef,
-} from 'react';
+import { createContext, usePathname } from 'fumadocs-core/framework';
+import { type ReactNode, useMemo, useRef } from 'react';
 import { searchPath } from 'fumadocs-core/breadcrumb';
 
 type MakeRequired<O, K extends keyof O> = Omit<O, K> & Pick<Required<O>, K>;
@@ -16,8 +10,8 @@ interface TreeContextType {
   root: MakeRequired<PageTree.Root | PageTree.Folder, '$id'>;
 }
 
-const TreeContext = createContext<TreeContextType | null>(null);
-const PathContext = createContext<PageTree.Node[]>([]);
+const TreeContext = createContext<TreeContextType>('TreeContext');
+const PathContext = createContext<PageTree.Node[]>('PathContext', []);
 
 export function TreeContextProvider({
   children,
@@ -47,13 +41,9 @@ export function TreeContextProvider({
 }
 
 export function useTreePath(): PageTree.Node[] {
-  return useContext(PathContext);
+  return PathContext.use();
 }
 
 export function useTreeContext(): TreeContextType {
-  const ctx = useContext(TreeContext);
-
-  if (!ctx)
-    throw new Error('You must wrap this component under <DocsLayout />');
-  return ctx;
+  return TreeContext.use('You must wrap this component under <DocsLayout />');
 }

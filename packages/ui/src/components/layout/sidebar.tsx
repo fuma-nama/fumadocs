@@ -1,7 +1,7 @@
 'use client';
 import { ChevronDown, ExternalLink } from 'lucide-react';
 import * as Base from 'fumadocs-core/sidebar';
-import { usePathname } from 'next/navigation';
+import { usePathname } from 'fumadocs-core/framework';
 import {
   type ButtonHTMLAttributes,
   createContext,
@@ -482,8 +482,7 @@ function PageTreeFolder({
   return (
     <SidebarFolder
       defaultOpen={
-        (item.defaultOpen ?? defaultOpenLevel >= level) ||
-        path.some((pathItem) => pathItem.$id === item.$id || pathItem === item)
+        (item.defaultOpen ?? defaultOpenLevel >= level) || path.includes(item)
       }
     >
       {item.index ? (

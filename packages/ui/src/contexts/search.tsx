@@ -1,14 +1,13 @@
 'use client';
 import {
   type ComponentType,
-  createContext,
   type ReactNode,
-  useContext,
   useEffect,
   useMemo,
   useState,
 } from 'react';
 import type { SearchLink, SharedProps } from '@/components/dialog/search';
+import { createContext } from 'fumadocs-core/framework';
 
 interface HotKey {
   display: ReactNode;
@@ -60,14 +59,14 @@ interface SearchContextType {
   setOpenSearch: (value: boolean) => void;
 }
 
-const SearchContext = createContext<SearchContextType>({
+const SearchContext = createContext<SearchContextType>('SearchContext', {
   enabled: false,
   hotKey: [],
   setOpenSearch: () => undefined,
 });
 
 export function useSearchContext(): SearchContextType {
-  return useContext(SearchContext);
+  return SearchContext.use();
 }
 
 function MetaOrControl() {

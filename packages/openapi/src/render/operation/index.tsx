@@ -56,7 +56,6 @@ export function Operation({
   headingLevel?: number;
 }): ReactElement {
   const body = method.requestBody;
-  const security = method.security ?? ctx.schema.document.security;
   let headNode: ReactNode = null;
   let bodyNode: ReactNode = null;
   let responseNode: ReactNode = null;
@@ -191,6 +190,12 @@ export function Operation({
     );
   }
 
+  const security = (
+    method.security ??
+    ctx.schema.document.security ??
+    []
+  ).filter((v) => Object.keys(v).length > 0);
+
   const info = (
     <ctx.renderer.APIInfo head={headNode} method={method.method} route={path}>
       {type === 'operation' ? (
@@ -205,7 +210,7 @@ export function Operation({
           <ctx.renderer.APIPlayground path={path} method={method} ctx={ctx} />
         )
       ) : null}
-      {security && Object.keys(security).length > 0 ? (
+      {security.length > 0 ? (
         <>
           {heading(headingLevel, 'Authorization', ctx)}
           <AuthSection requirements={security} ctx={ctx} />

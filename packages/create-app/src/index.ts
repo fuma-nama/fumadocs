@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import { existsSync } from 'node:fs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {
@@ -33,25 +32,34 @@ async function main(): Promise<void> {
         }),
       template: () =>
         select({
-          message: 'Choose a content source',
+          message: 'Choose a template',
           initialValue: 'fuma-docs-mdx' as Template,
           options: [
             {
               value: 'fuma-docs-mdx',
-              label: 'Fumadocs MDX',
+              label: 'Next.js: Fumadocs MDX',
               hint: 'recommended',
             },
-            { value: 'content-collections', label: 'Content Collections' },
+            {
+              value: 'content-collections',
+              label: 'Next.js: Content Collections',
+            },
+            {
+              value: 'react-router',
+              label: 'React Router: MDX Remote',
+            },
           ],
         }),
       src: () =>
         confirm({ message: 'Use `/src` directory?', initialValue: false }),
-      tailwindcss: () => confirm({ message: 'Use Tailwind CSS for styling?' }),
-      eslint: () =>
-        confirm({
+      eslint: (v) => {
+        if (v.results.template === 'react-router') return;
+
+        return confirm({
           message: 'Add default ESLint configuration?',
           initialValue: false,
-        }),
+        });
+      },
       installDeps: () =>
         confirm({
           message: `Do you want to install packages automatically? (detected as ${manager})`,
@@ -68,9 +76,10 @@ async function main(): Promise<void> {
   const projectName = options.name.toLowerCase().replace(/\s/, '-');
   const dest = path.resolve(cwd, projectName);
 
-  if (existsSync(dest)) {
+  const destDir = await fs.readdir(dest).catch(() => null);
+  if (destDir && destDir.length > 0) {
     const del = await confirm({
-      message: `${projectName} already exists, do you want to delete it?`,
+      message: `directory ${projectName} already exists, do you want to delete its files?`,
     });
 
     if (isCancel(del)) {
@@ -80,14 +89,18 @@ async function main(): Promise<void> {
 
     if (del) {
       const info = spinner();
-      info.start(`Deleting ${projectName}`);
+      info.start(`Deleting files in ${projectName}`);
 
-      await fs.rm(dest, {
-        recursive: true,
-        force: true,
-      });
+      await Promise.all(
+        destDir.map((item) => {
+          return fs.rm(path.join(dest, item), {
+            recursive: true,
+            force: true,
+          });
+        }),
+      );
 
-      info.stop(`Deleted ${projectName}`);
+      info.stop(`Deleted files in ${projectName}`);
     }
   }
 
@@ -96,11 +109,11 @@ async function main(): Promise<void> {
 
   await create({
     packageManager: manager,
-    tailwindcss: options.tailwindcss,
+    tailwindcss: true,
     template: options.template,
     outputDir: dest,
     installDeps: options.installDeps,
-    eslint: options.eslint,
+    eslint: options.eslint === true,
     useSrcDir: options.src,
 
     log: (message) => {
