@@ -37,26 +37,17 @@ export async function create(options: Options): Promise<void> {
   function defaultRename(file: string): string {
     file = file.replace('example.gitignore', '.gitignore');
 
-    if (!options.useSrcDir) {
+    if (!options.useSrcDir || !isNext) {
       return file;
     }
 
-    if (isNext) {
-      for (const dir of ['app', 'lib']) {
-        const relative = path.relative(path.join(dest, dir), file);
-
-        if (!relative.startsWith(`..${path.sep}`)) {
-          return path.join(dest, 'src', dir, relative);
-        }
-      }
-    } else if (options.template === 'react-router') {
-      const relative = path.relative(path.join(dest, 'app'), file);
+    for (const dir of ['app', 'lib']) {
+      const relative = path.relative(path.join(dest, dir), file);
 
       if (!relative.startsWith(`..${path.sep}`)) {
-        return path.join(dest, 'src', relative);
+        return path.join(dest, 'src', dir, relative);
       }
     }
-
     return file;
   }
 
@@ -98,7 +89,7 @@ export async function create(options: Options): Promise<void> {
   }
 
   // update tsconfig.json for src dir
-  if (options.useSrcDir) {
+  if (isNext && options.useSrcDir) {
     const tsconfigPath = path.join(dest, 'tsconfig.json');
     const content = (await fs.readFile(tsconfigPath)).toString();
 

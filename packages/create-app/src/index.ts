@@ -50,8 +50,14 @@ async function main(): Promise<void> {
             },
           ],
         }),
-      src: () =>
-        confirm({ message: 'Use `/src` directory?', initialValue: false }),
+      src: (v) => {
+        if (v.results.template === 'react-router') return;
+
+        return confirm({
+          message: 'Use `/src` directory?',
+          initialValue: false,
+        });
+      },
       eslint: (v) => {
         if (v.results.template === 'react-router') return;
 
@@ -114,7 +120,7 @@ async function main(): Promise<void> {
     outputDir: dest,
     installDeps: options.installDeps,
     eslint: options.eslint === true,
-    useSrcDir: options.src,
+    useSrcDir: options.src === true,
 
     log: (message) => {
       info.message(message);
