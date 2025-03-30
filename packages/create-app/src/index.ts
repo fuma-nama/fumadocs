@@ -33,25 +33,30 @@ async function main(): Promise<void> {
       template: () =>
         select({
           message: 'Choose a template',
-          initialValue: 'fuma-docs-mdx' as Template,
+          initialValue: '+next+fuma-docs-mdx' as Template,
           options: [
             {
-              value: 'fuma-docs-mdx',
+              value: '+next+fuma-docs-mdx',
               label: 'Next.js: Fumadocs MDX',
               hint: 'recommended',
             },
             {
-              value: 'content-collections',
+              value: '+next+content-collections',
               label: 'Next.js: Content Collections',
             },
             {
               value: 'react-router',
               label: 'React Router: MDX Remote',
             },
+            {
+              value: 'tanstack-start',
+              label: 'Tanstack Start: MDX Remote',
+              hint: 'Experimental',
+            },
           ],
         }),
       src: (v) => {
-        if (v.results.template === 'react-router') return;
+        if (!v.results.template?.startsWith('+next')) return;
 
         return confirm({
           message: 'Use `/src` directory?',
@@ -59,7 +64,7 @@ async function main(): Promise<void> {
         });
       },
       eslint: (v) => {
-        if (v.results.template === 'react-router') return;
+        if (!v.results.template?.startsWith('+next')) return;
 
         return confirm({
           message: 'Add default ESLint configuration?',
