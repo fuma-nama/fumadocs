@@ -1,5 +1,11 @@
 # fumadocs-typescript
 
+## 4.0.1
+
+### Patch Changes
+
+- f67d20f: Fix `remark-auto-type-table` doesn't render `required` property
+
 ## 4.0.0
 
 ### Major Changes
