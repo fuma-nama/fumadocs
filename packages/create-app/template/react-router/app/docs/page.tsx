@@ -11,6 +11,7 @@ import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { executeMdxSync } from '@fumadocs/mdx-remote/client';
 import type { PageTree } from 'fumadocs-core/server';
 import { createCompiler } from '@fumadocs/mdx-remote';
+import * as path from 'node:path';
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -27,15 +28,14 @@ export async function loader({ params }: Route.LoaderArgs) {
   const page = source.getPage(slugs);
   if (!page) throw new Error('Not found');
 
-  const compiled = String(
-    await compiler.compileFile({
-      value: page.data.content,
-    }),
-  );
+  const compiled = await compiler.compileFile({
+    path: path.resolve('content/docs', page.file.path),
+    value: page.data.content,
+  });
 
   return {
     page,
-    compiled,
+    compiled: compiled.toString(),
     tree: source.pageTree,
   };
 }
