@@ -1,5 +1,12 @@
 # next-docs-ui
 
+## 15.2.1
+
+### Patch Changes
+
+- 22aeafb: Improve Tree context performance
+  - fumadocs-core@15.2.1
+
 ## 15.2.0
 
 ### Patch Changes

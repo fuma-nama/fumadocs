@@ -7,7 +7,11 @@ import type { PackageManager } from './auto-install';
 import { autoInstall } from './auto-install';
 import { sourceDir, cwd } from './constants';
 
-export type Template = 'content-collections' | 'fuma-docs-mdx' | 'react-router';
+export type Template =
+  | '+next+content-collections'
+  | '+next+fuma-docs-mdx'
+  | 'react-router'
+  | 'tanstack-start';
 
 export interface Options {
   outputDir: string;
@@ -30,33 +34,22 @@ export async function create(options: Options): Promise<void> {
   } = options;
   const projectName = path.basename(options.outputDir);
   const dest = path.resolve(cwd, options.outputDir);
-  const isNext =
-    options.template === 'content-collections' ||
-    options.template === 'fuma-docs-mdx';
+  const isNext = options.template.startsWith('+next');
 
   function defaultRename(file: string): string {
     file = file.replace('example.gitignore', '.gitignore');
 
-    if (!options.useSrcDir) {
+    if (!options.useSrcDir || !isNext) {
       return file;
     }
 
-    if (isNext) {
-      for (const dir of ['app', 'lib']) {
-        const relative = path.relative(path.join(dest, dir), file);
-
-        if (!relative.startsWith(`..${path.sep}`)) {
-          return path.join(dest, 'src', dir, relative);
-        }
-      }
-    } else if (options.template === 'react-router') {
-      const relative = path.relative(path.join(dest, 'app'), file);
+    for (const dir of ['app', 'lib']) {
+      const relative = path.relative(path.join(dest, dir), file);
 
       if (!relative.startsWith(`..${path.sep}`)) {
-        return path.join(dest, 'src', relative);
+        return path.join(dest, 'src', dir, relative);
       }
     }
-
     return file;
   }
 
@@ -98,7 +91,7 @@ export async function create(options: Options): Promise<void> {
   }
 
   // update tsconfig.json for src dir
-  if (options.useSrcDir) {
+  if (isNext && options.useSrcDir) {
     const tsconfigPath = path.join(dest, 'tsconfig.json');
     const content = (await fs.readFile(tsconfigPath)).toString();
 
@@ -205,6 +198,45 @@ function createPackageJson(projectName: string, options: Options): object {
     };
   }
 
+  if (options.template === 'tanstack-start') {
+    return {
+      name: projectName,
+      type: 'module',
+      scripts: {
+        dev: 'vinxi dev',
+        build: 'NODE_ENV=production vinxi build',
+        start: 'vinxi start',
+      },
+      private: true,
+      dependencies: {
+        ...pick(localVersions, [
+          '@fumadocs/mdx-remote',
+          'fumadocs-ui',
+          'fumadocs-core',
+        ]),
+        ...pick(versionPkg.dependencies, [
+          '@tanstack/react-router',
+          '@tanstack/react-start',
+          'fast-glob',
+          'gray-matter',
+          'react',
+          'react-dom',
+          'vinxi',
+        ]),
+      },
+      devDependencies: pick(versionPkg.dependencies, [
+        '@tailwindcss/vite',
+        '@types/react',
+        '@types/react-dom',
+        '@vitejs/plugin-react',
+        'tailwindcss',
+        'typescript',
+        'vite',
+        'vite-tsconfig-paths',
+      ]),
+    };
+  }
+
   return {
     name: projectName,
     version: '0.0.0',
@@ -213,7 +245,7 @@ function createPackageJson(projectName: string, options: Options): object {
       build: 'next build',
       dev: 'next dev',
       start: 'next start',
-      ...(options.template === 'fuma-docs-mdx'
+      ...(options.template === '+next+fuma-docs-mdx'
         ? {
             postinstall: 'fumadocs-mdx',
           }
@@ -222,7 +254,7 @@ function createPackageJson(projectName: string, options: Options): object {
     dependencies: {
       ...pick(versionPkg.dependencies, ['next', 'react', 'react-dom']),
       ...pick(localVersions, ['fumadocs-ui', 'fumadocs-core']),
-      ...(options.template === 'content-collections'
+      ...(options.template === '+next+content-collections'
         ? {
             ...pick(versionPkg.dependencies, [
               '@content-collections/mdx',
@@ -232,7 +264,7 @@ function createPackageJson(projectName: string, options: Options): object {
             ...pick(localVersions, ['@fumadocs/content-collections']),
           }
         : null),
-      ...(options.template === 'fuma-docs-mdx'
+      ...(options.template === '+next+fuma-docs-mdx'
         ? pick(localVersions, ['fumadocs-mdx'])
         : null),
     },
@@ -242,6 +274,7 @@ function createPackageJson(projectName: string, options: Options): object {
         '@types/react',
         '@types/react-dom',
         'typescript',
+        '@types/mdx',
       ]),
       ...(options.tailwindcss
         ? pick(versionPkg.dependencies, [
@@ -249,9 +282,6 @@ function createPackageJson(projectName: string, options: Options): object {
             'tailwindcss',
             'postcss',
           ])
-        : null),
-      ...(options.template === 'fuma-docs-mdx'
-        ? pick(versionPkg.dependencies, ['@types/mdx'])
         : null),
       ...(options.eslint
         ? {

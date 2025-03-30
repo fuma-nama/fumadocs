@@ -12,6 +12,15 @@ import { remarkInclude } from 'fumadocs-mdx/config';
 
 export const revalidate = false;
 
+const processor = remark()
+  .use(remarkMdx)
+  .use(remarkInclude)
+  .use(remarkGfm)
+  .use(remarkAutoTypeTable)
+  .use(remarkDocGen, { generators: [fileGenerator()] })
+  .use(remarkInstall, { persist: { id: 'package-manager' } })
+  .use(remarkStringify);
+
 export async function GET() {
   const files = await fg([
     './content/docs/**/*.mdx',
@@ -30,7 +39,10 @@ export async function GET() {
       cli: 'Fumadocs CLI (the CLI tool for automating Fumadocs apps)',
     }[dir ?? ''];
 
-    const processed = await processContent(file, content);
+    const processed = processor.process({
+      path: file,
+      value: content,
+    });
     return `file: ${file}
 # ${category}: ${data.title}
 
@@ -42,21 +54,4 @@ ${processed}`;
   const scanned = await Promise.all(scan);
 
   return new Response(scanned.join('\n\n'));
-}
-
-async function processContent(path: string, content: string): Promise<string> {
-  const file = await remark()
-    .use(remarkMdx)
-    .use(remarkInclude)
-    .use(remarkGfm)
-    .use(remarkAutoTypeTable)
-    .use(remarkDocGen, { generators: [fileGenerator()] })
-    .use(remarkInstall, { persist: { id: 'package-manager' } })
-    .use(remarkStringify)
-    .process({
-      path,
-      value: content,
-    });
-
-  return String(file);
 }

@@ -12,6 +12,7 @@ function _createMdxContent(props) {
           name: {
             "type": "string",
             "default": "Henry",
+            "required": true,
             description: _jsx(_Fragment, {
               children: _jsx(_components.p, {
                 children: "The name of player"
@@ -20,7 +21,8 @@ function _createMdxContent(props) {
           },
           age: {
             "type": "timestamp",
-            "default": undefined
+            "default": undefined,
+            "required": true
           }
         }
       })

@@ -21,6 +21,7 @@ async function mapProperty(
   const value = valueToEstree({
     type: entry.type,
     default: entry.tags.default || entry.tags.defaultValue,
+    required: entry.required,
   }) as ObjectExpression;
 
   if (entry.description) {

@@ -13,18 +13,20 @@ interface TreeContextType {
 const TreeContext = createContext<TreeContextType>('TreeContext');
 const PathContext = createContext<PageTree.Node[]>('PathContext', []);
 
-export function TreeContextProvider({
-  children,
-  tree,
-}: {
+export function TreeContextProvider(props: {
   tree: PageTree.Root;
   children: ReactNode;
 }) {
   const nextIdRef = useRef(0);
   const pathname = usePathname();
+
+  // I found that object-typed props passed from a RSC will be re-constructed, hence breaking all hooks' dependencies
+  // using the id here to make sure this never happens
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const tree = useMemo(() => props.tree, [props.tree.$id ?? props.tree]);
   const path = useMemo(
     () => searchPath(tree.children, pathname) ?? [],
-    [pathname, tree],
+    [tree, pathname],
   );
 
   const root =
@@ -33,9 +35,9 @@ export function TreeContextProvider({
 
   return (
     <TreeContext.Provider
-      value={useMemo(() => ({ root: root as TreeContextType['root'] }), [root])}
+      value={useMemo(() => ({ root }) as TreeContextType, [root])}
     >
-      <PathContext.Provider value={path}>{children}</PathContext.Provider>
+      <PathContext.Provider value={path}>{props.children}</PathContext.Provider>
     </TreeContext.Provider>
   );
 }
