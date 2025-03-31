@@ -100,7 +100,7 @@ function Architecture() {
         </h2>
         <p className="text-fd-muted-foreground mb-6">
           Fumadocs makes it easy to build beautiful docs, write content, and
-          transform content into data on Next.js.
+          transform content into data on your React.js framework.
           <br />
           <br />
           Every part is handled with love, incredibly flexible and customisable.
@@ -388,14 +388,15 @@ function Highlights(): React.ReactElement {
         </h2>
         <MousePointer className="-ml-1 mt-8" />
       </div>
-      <Highlight icon={RocketIcon} heading="Light and Fast.">
-        Powerful documentation site with Next.js App Router.
-      </Highlight>
-      <Highlight icon={TimerIcon} heading="Performance.">
-        Less client components, less Javascript, optimized images.
+      <Highlight icon={TimerIcon} heading="Light & Fast.">
+        Less Javascript with React Server Component, and optimized images.
       </Highlight>
       <Highlight icon={LayoutIcon} heading="Accessibility & UX first.">
         Focus on user experience and accessibility.
+      </Highlight>
+      <Highlight icon={RocketIcon} heading="Next.js First.">
+        Powerful documentation site with Next.js, React Router, or Tanstack
+        Start.
       </Highlight>
       <Highlight icon={SearchIcon} heading="Syntax Highlighting.">
         Beautiful syntax highlighter, powered by{' '}

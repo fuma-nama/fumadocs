@@ -3,33 +3,37 @@ import type { SourceFile, StringLiteral } from 'ts-morph';
 import type { ComponentBuilder } from '@/build/component-builder';
 import { type Component, type OutputFile } from '@/build/build-registry';
 
-export interface ProcessedFiles {
-  files: OutputFile[];
-  dependencies: Map<string, string>;
-  devDependencies: Map<string, string>;
-  subComponents: Set<string>;
-}
-
 export async function buildFile(
-  filePath: string,
+  outputPath: string,
   sourceFile: SourceFile,
   builder: ComponentBuilder,
   comp: Component,
-  processedFiles: Set<string>,
-): Promise<ProcessedFiles> {
-  processedFiles.add(filePath);
-
+  /**
+   * Resolve referenced files
+   */
+  onReference: (
+    reference:
+      | {
+          type: 'file';
+          file: string;
+        }
+      | {
+          type: 'dependency';
+          name: string;
+          version: string;
+          isDev: boolean;
+        }
+      | {
+          type: 'sub-component';
+          component: Component;
+          targetFile: string;
+        },
+  ) => string | undefined,
+): Promise<OutputFile> {
   const out: OutputFile = {
     imports: {},
     content: '',
-    path: filePath,
-  };
-
-  const processed: ProcessedFiles = {
-    files: [out],
-    dependencies: new Map(),
-    devDependencies: new Map(),
-    subComponents: new Set(),
+    path: outputPath,
   };
 
   /**
@@ -55,8 +59,17 @@ export async function buildFile(
 
         if (!specifiedFile) return;
       } else {
-        processed.subComponents.add(resolver.name);
-        out.imports[specifier.getLiteralValue()] = resolver.file;
+        const comp = builder.getComponentByName(resolver.name);
+        if (!comp)
+          throw new Error(`Failed to resolve component ${resolver.name}`);
+
+        const value = onReference({
+          type: 'sub-component',
+          component: comp,
+          targetFile: resolver.file,
+        });
+
+        if (value) out.imports[specifier.getLiteralValue()] = value;
         return;
       }
     }
@@ -64,41 +77,32 @@ export async function buildFile(
     if (specifiedFile.isInNodeModules() || specifiedFile.isDeclarationFile()) {
       const info = builder.resolveDep(specifier.getLiteralValue());
 
-      if (info.type === 'dev') {
-        processed.devDependencies.set(info.name, info.version ?? '');
-      } else {
-        processed.dependencies.set(info.name, info.version ?? '');
-      }
+      const value = onReference({
+        type: 'dependency',
+        name: info.name,
+        version: info.version ?? '',
+        isDev: info.type === 'dev',
+      });
+      if (value) out.imports[specifier.getLiteralValue()] = value;
       return;
     }
 
     const sub = builder.getSubComponent(specifiedFile.getFilePath());
     if (sub) {
-      processed.subComponents.add(sub.component.name);
-
-      out.imports[specifier.getLiteralValue()] = builder.resolveOutputPath(
-        specifiedFile.getFilePath(),
-      );
+      const value = onReference({
+        type: 'sub-component',
+        component: sub,
+        targetFile: specifiedFile.getFilePath(),
+      });
+      if (value) out.imports[specifier.getLiteralValue()] = value;
       return;
     }
 
-    const referenceOutputPath = builder.resolveOutputPath(
-      specifiedFile.getFilePath(),
-    );
-
-    if (!processedFiles.has(referenceOutputPath)) {
-      const outFile = await buildFile(
-        referenceOutputPath,
-        specifiedFile,
-        builder,
-        comp,
-        processedFiles,
-      );
-
-      merge(processed, outFile);
-    }
-
-    out.imports[specifier.getLiteralValue()] = referenceOutputPath;
+    const value = onReference({
+      type: 'file',
+      file: specifiedFile.getFilePath(),
+    });
+    if (value) out.imports[specifier.getLiteralValue()] = value;
   }
 
   for (const item of sourceFile.getImportDeclarations()) {
@@ -115,19 +119,5 @@ export async function buildFile(
   }
 
   out.content = sourceFile.getFullText();
-  return processed;
-}
-
-export function merge(to: ProcessedFiles, from: ProcessedFiles): void {
-  to.files.push(...from.files);
-
-  for (const [k, v] of from.dependencies.entries()) {
-    to.dependencies.set(k, v);
-  }
-
-  for (const [k, v] of from.devDependencies.entries()) {
-    to.devDependencies.set(k, v);
-  }
-
-  from.subComponents.forEach((item) => to.subComponents.add(item));
+  return out;
 }

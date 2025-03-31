@@ -10,12 +10,7 @@ export interface DependencyInfo {
   version?: string;
 }
 
-export interface ComponentBuilder {
-  registryDir: string;
-  resolveDep: (specifier: string) => DependencyInfo & { name: string };
-  resolveOutputPath: (path: string, namespace?: string) => string;
-  getSubComponent: (path: string) => { component: Component } | undefined;
-}
+export type ComponentBuilder = ReturnType<typeof createComponentBuilder>;
 
 /**
  * @param registry registry object
@@ -28,22 +23,24 @@ export function createComponentBuilder(
   packageJson: PackageJson | undefined,
   registryDir: string,
   sourceDir: string,
-): ComponentBuilder {
+) {
   const fileToComponent = new Map<string, Component>();
 
   for (const comp of registry.components) {
     for (const file of comp.files) {
-      if (fileToComponent.has(file))
+      const filePath = typeof file === 'string' ? file : file.in;
+
+      if (fileToComponent.has(filePath))
         console.warn(
           `the same file ${file} exists in multiple component, you should make the shared file a separate component.`,
         );
-      fileToComponent.set(file, comp);
+      fileToComponent.set(filePath, comp);
     }
   }
 
   return {
     registryDir,
-    resolveDep(specifier) {
+    resolveDep(specifier: string): DependencyInfo & { name: string } {
       const name = specifier.startsWith('@')
         ? specifier.split('/').slice(0, 2).join('/')
         : specifier.split('/')[0];
@@ -71,7 +68,12 @@ export function createComponentBuilder(
       }
       return { type: 'runtime', name };
     },
-    resolveOutputPath(file, forcedNamespace) {
+    getComponentByName(name: string): Component | undefined {
+      for (const comp of registry.components) {
+        if (comp.name === name) return comp;
+      }
+    },
+    resolveOutputPath(file: string, forcedNamespace?: string): string {
       const relativeFile = path.relative(registryDir, file);
 
       if (forcedNamespace) {
@@ -92,14 +94,12 @@ export function createComponentBuilder(
 
       return path.relative(sourceDir, file);
     },
-    getSubComponent(file) {
+    getSubComponent(file: string): Component | undefined {
       const relativeFile = path.relative(registryDir, file);
       const comp = fileToComponent.get(relativeFile);
 
       if (!comp) return;
-      return {
-        component: comp,
-      };
+      return comp;
     },
   };
 }
