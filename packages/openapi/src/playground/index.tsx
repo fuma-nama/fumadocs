@@ -8,8 +8,9 @@ import {
   type NoReference,
   type ParsedSchema,
 } from '@/utils/schema';
-import { getSecurities, type Security } from '@/utils/get-security';
+import { getSecurities } from '@/utils/get-security';
 import { type ClientProps } from './client';
+import { ClientLazy } from '@/playground/client.lazy';
 
 interface BaseRequestField {
   name: string;
@@ -98,7 +99,6 @@ export async function APIPlayground({
   ctx,
   client,
 }: APIPlaygroundProps) {
-  const { ClientLazy } = await import('./client.lazy');
   let currentId = 0;
   const bodyContent = method.requestBody?.content;
   const mediaType = bodyContent ? getPreferredType(bodyContent) : undefined;
@@ -141,7 +141,7 @@ export async function APIPlayground({
 function getAuthorizationField(
   method: MethodInformation,
   { schema: { document } }: RenderContext,
-): Security | undefined {
+): ClientProps['authorization'] {
   const security = method.security ?? document.security ?? [];
   if (security.length === 0) return;
 
@@ -172,7 +172,10 @@ function getAuthorizationField(
       );
   }
 
-  return scheme;
+  return {
+    persistentId: Object.keys(item)[0],
+    ...scheme,
+  };
 }
 
 function getIdFromSchema(

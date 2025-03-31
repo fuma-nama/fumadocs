@@ -84,7 +84,9 @@ export interface CustomField<TName extends FieldPath<FormValues>, Info> {
 export type ClientProps = HTMLAttributes<HTMLFormElement> & {
   route: string;
   method: string;
-  authorization?: Security;
+  authorization?: Security & {
+    persistentId: string;
+  };
   parameters?: PrimitiveRequestField[];
   body?: RequestSchema & {
     mediaType: string;
@@ -148,7 +150,7 @@ function toRequestData(
   };
 }
 
-export function Client({
+export default function Client({
   route,
   method = 'GET',
   authorization,
@@ -296,6 +298,56 @@ function FormBody({
     return paramTypes.map((param) => parameters.filter((v) => v.in === param));
   }, [parameters]);
 
+  function renderAuth() {
+    if (!authorization) return null;
+    const schema: RequestSchema =
+      authorization.type === 'http' && authorization.scheme === 'basic'
+        ? {
+            type: 'object',
+            isRequired: true,
+            properties: {
+              username: {
+                type: 'string',
+                isRequired: true,
+              },
+              password: {
+                type: 'string',
+                isRequired: true,
+              },
+            },
+          }
+        : {
+            type: 'string',
+            isRequired: true,
+            description: 'The Authorization access token',
+          };
+
+    if (fields?.auth)
+      return renderCustomField('authorization', schema, fields.auth);
+
+    return (
+      <>
+        <FieldSet
+          fieldName="authorization"
+          name="Authorization"
+          field={schema}
+        />
+        {authorization?.type === 'oauth2' && (
+          <OauthDialogTrigger
+            type="button"
+            className={cn(
+              buttonVariants({
+                color: 'secondary',
+              }),
+            )}
+          >
+            Open
+          </OauthDialogTrigger>
+        )}
+      </>
+    );
+  }
+
   return (
     <>
       {servers.length > 1 ? (
@@ -316,9 +368,7 @@ function FormBody({
 
         return (
           <CollapsiblePanel key={name} title={name}>
-            {type === 'header' && authorization ? (
-              <AuthField authorization={authorization} />
-            ) : null}
+            {type === 'header' ? renderAuth() : null}
             {param.map((field) => {
               const fieldName = `${type}.${field.name}` as const;
 
@@ -399,51 +449,6 @@ function AuthProvider({
   );
 }
 
-function AuthField({ authorization }: { authorization: Security }) {
-  return (
-    <>
-      <FieldSet
-        fieldName="authorization"
-        name="Authorization"
-        field={
-          authorization?.type === 'http' && authorization.scheme === 'basic'
-            ? {
-                type: 'object',
-                isRequired: true,
-                properties: {
-                  username: {
-                    type: 'string',
-                    isRequired: true,
-                  },
-                  password: {
-                    type: 'string',
-                    isRequired: true,
-                  },
-                },
-              }
-            : {
-                type: 'string',
-                isRequired: true,
-                description: 'The Authorization access token',
-              }
-        }
-      />
-      {authorization?.type === 'oauth2' && (
-        <OauthDialogTrigger
-          type="button"
-          className={cn(
-            buttonVariants({
-              color: 'secondary',
-            }),
-          )}
-        >
-          Open
-        </OauthDialogTrigger>
-      )}
-    </>
-  );
-}
-
 function Route({
   route,
   ...props
@@ -502,9 +507,9 @@ function DefaultResultDisplay({ data }: { data: FetchResult }) {
   );
 }
 
-function usePersistentAuthInfo(authorization?: Security) {
+function usePersistentAuthInfo(authorization?: ClientProps['authorization']) {
   const key = authorization
-    ? `__fumadocs_auth_${JSON.stringify(authorization)}`
+    ? `__fumadocs_auth_${authorization.persistentId}`
     : null;
   const [info, setInfo] = useState<FormValues['authorization']>(() => {
     if (!authorization || authorization.type === 'apiKey') return '';
