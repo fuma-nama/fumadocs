@@ -24,13 +24,13 @@
   "devDependencies": {
     "@react-router/dev": "^7.4.1",
     "@tailwindcss/vite": "^4.0.17",
-    "@types/node": "^22.13.14",
+    "@types/node": "^22.13.16",
     "@types/react": "^19.0.1",
     "@types/react-dom": "^19.0.1",
     "react-router-devtools": "^1.1.8",
     "tailwindcss": "^4.0.17",
     "typescript": "^5.7.2",
-    "vite": "^6.2.3",
+    "vite": "^6.2.4",
     "vite-tsconfig-paths": "^5.1.4"
   }
 }

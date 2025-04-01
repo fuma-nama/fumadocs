@@ -10,7 +10,7 @@
     "types:check": "fumadocs-mdx && tsc --noEmit"
   },
   "dependencies": {
-    "@scalar/api-client-react": "^1.2.9",
+    "@scalar/api-client-react": "^1.2.10",
     "fumadocs-core": "workspace:*",
     "fumadocs-mdx": "workspace:*",
     "fumadocs-openapi": "workspace:*",

@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@types/cross-spawn": "^6.0.6",
-    "@types/node": "22.13.14",
+    "@types/node": "22.13.16",
     "eslint-config-custom": "workspace:*",
     "fast-glob": "^3.3.3",
     "tsconfig": "workspace:*"
