@@ -1,9 +1,10 @@
 import { type Registry } from '@fumadocs/cli/build';
 import * as ui from '../../../packages/ui/src/_registry';
 import { fileURLToPath } from 'node:url';
+import * as path from 'node:path';
 
 export const registry: Registry = {
-  path: fileURLToPath(import.meta.url),
+  dir: path.dirname(fileURLToPath(import.meta.url)),
   on: {
     ui: {
       type: 'local',
@@ -26,7 +27,7 @@ export const registry: Registry = {
           type: 'component',
           registry: 'ui',
           name: 'button',
-          file: 'components:ui/button.tsx',
+          file: 'components/ui/button.tsx',
         },
       },
     },

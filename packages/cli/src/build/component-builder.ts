@@ -5,26 +5,41 @@ import {
   type PackageJson,
   type Registry,
 } from '@/build/build-registry';
+import { Project } from 'ts-morph';
+import * as fs from 'fs/promises';
 
 export interface DependencyInfo {
   type: 'runtime' | 'dev';
   version?: string;
 }
 
+type GetComponentResult =
+  | {
+      type: 'local';
+      registryName?: string;
+      component: Component;
+    }
+  | {
+      type: 'remote';
+      registryName: string;
+      component: OutputComponent;
+    };
 export type ComponentBuilder = ReturnType<typeof createComponentBuilder>;
 
 /**
  * @param registry registry object
  * @param packageJson parsed package json object
- * @param registryDir directory of registry config file
- * @param sourceDir source directory of project (e.g. `/src`), used to resolve the output paths of component files
  */
 export function createComponentBuilder(
   registry: Registry,
   packageJson: PackageJson | undefined,
-  registryDir: string,
-  sourceDir: string,
 ) {
+  const rootDir = path.join(registry.dir, registry.rootDir);
+  const project = new Project({
+    tsConfigFilePath: registry.tsconfigPath
+      ? path.join(rootDir, registry.tsconfigPath)
+      : path.join(rootDir, 'tsconfig.json'),
+  });
   const fileToComponent = new Map<string, Component>();
 
   for (const comp of registry.components) {
@@ -40,7 +55,7 @@ export function createComponentBuilder(
   }
 
   return {
-    registryDir,
+    registryDir: registry.dir,
     registry,
     resolveDep(specifier: string): DependencyInfo & { name: string } {
       const name = specifier.startsWith('@')
@@ -70,41 +85,76 @@ export function createComponentBuilder(
       }
       return { type: 'runtime', name };
     },
+    async createSourceFile(file: string) {
+      const content = await fs.readFile(file);
+
+      return project.createSourceFile(file, content.toString(), {
+        overwrite: true,
+      });
+    },
     getComponentByName(
       name: string,
       registryName?: string,
-    ): Component | OutputComponent | undefined {
-      const components = registryName
-        ? registry.on![registryName].registry.components
-        : registry.components;
+    ): GetComponentResult | undefined {
+      if (registryName) {
+        const child = registry.on![registryName];
+        const comp = child.registry.components.find(
+          (comp) => comp.name === name,
+        );
 
-      for (const comp of components) {
-        if (comp.name === name) return comp;
+        if (comp) {
+          return {
+            type: child.type,
+            registryName,
+            component: comp,
+          } as GetComponentResult;
+        }
+
+        return;
+      }
+
+      const comp = registry.components.find((comp) => comp.name === name);
+
+      if (comp) {
+        return {
+          type: 'local',
+          registryName,
+          component: comp,
+        };
       }
     },
-    resolveOutputPath(file: string, forcedNamespace?: string): string {
-      const relativeFile = path.relative(registryDir, file);
-
-      if (forcedNamespace) {
-        return `${forcedNamespace}:${path.relative(sourceDir, file)}`;
+    resolveOutputPath(
+      file: string,
+      registryName?: string,
+      forcedNamespace?: string,
+    ): string {
+      let _registry = registry;
+      if (registryName && registry.on![registryName].type === 'local') {
+        _registry = registry.on![registryName].registry;
       }
 
-      if (registry.namespaces)
-        for (const namespace of Object.keys(registry.namespaces)) {
+      const rootDir = path.join(_registry.dir, _registry.rootDir);
+      if (forcedNamespace) {
+        return `${forcedNamespace}:${path.relative(rootDir, file)}`;
+      }
+
+      const relativeFile = path.relative(_registry.dir, file);
+      if (_registry.namespaces)
+        for (const namespace in _registry.namespaces) {
           const relativePath = path.relative(namespace, relativeFile);
 
           if (
             !relativePath.startsWith('../') &&
             !path.isAbsolute(relativePath)
           ) {
-            return `${registry.namespaces[namespace]}:${relativePath}`;
+            return `${_registry.namespaces[namespace]}:${relativePath}`;
           }
         }
 
-      return path.relative(sourceDir, file);
+      return path.relative(rootDir, file);
     },
     getSubComponent(file: string): Component | undefined {
-      const relativeFile = path.relative(registryDir, file);
+      const relativeFile = path.relative(registry.dir, file);
       const comp = fileToComponent.get(relativeFile);
 
       if (!comp) return;

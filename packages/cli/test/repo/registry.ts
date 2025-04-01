@@ -1,8 +1,9 @@
 import { fileURLToPath } from 'node:url';
 import { type Registry } from '../../src/build';
+import * as path from 'node:path';
 
 export const registry: Registry = {
-  path: fileURLToPath(import.meta.url),
+  dir: path.dirname(fileURLToPath(import.meta.url)),
   rootDir: '.',
   namespaces: {
     './components': 'components',

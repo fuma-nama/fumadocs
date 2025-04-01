@@ -10,10 +10,10 @@ const contextsMap = {
   'contexts/layout.tsx': 'fumadocs-ui/contexts/layout',
 };
 
-const srcDir = path.join(fileURLToPath(import.meta.url), '../');
+const srcDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../');
 
 export const registry: Registry = {
-  path: srcDir,
+  dir: srcDir,
   rootDir: '../',
   namespaces: {
     components: 'components',
