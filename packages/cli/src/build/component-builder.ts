@@ -1,6 +1,7 @@
 import path from 'node:path';
 import {
   type Component,
+  type OutputComponent,
   type PackageJson,
   type Registry,
 } from '@/build/build-registry';
@@ -40,6 +41,7 @@ export function createComponentBuilder(
 
   return {
     registryDir,
+    registry,
     resolveDep(specifier: string): DependencyInfo & { name: string } {
       const name = specifier.startsWith('@')
         ? specifier.split('/').slice(0, 2).join('/')
@@ -68,8 +70,15 @@ export function createComponentBuilder(
       }
       return { type: 'runtime', name };
     },
-    getComponentByName(name: string): Component | undefined {
-      for (const comp of registry.components) {
+    getComponentByName(
+      name: string,
+      registryName?: string,
+    ): Component | OutputComponent | undefined {
+      const components = registryName
+        ? registry.on![registryName].registry.components
+        : registry.components;
+
+      for (const comp of components) {
         if (comp.name === name) return comp;
       }
     },

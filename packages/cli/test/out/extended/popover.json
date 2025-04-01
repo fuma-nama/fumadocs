@@ -12,13 +12,13 @@
     },
     {
       "imports": {},
-      "content": "export function useExample(): string {\n  return 'test';\n}\n",
-      "path": "hooks:use-example.ts"
+      "content": "export function Hello(): string {\n  return 'Hello';\n}\n",
+      "path": "components:nested/hello.tsx"
     },
     {
       "imports": {},
-      "content": "export function Hello(): string {\n  return 'Hello';\n}\n",
-      "path": "components:nested/hello.tsx"
+      "content": "export function useExample(): string {\n  return 'test';\n}\n",
+      "path": "hooks:use-example.ts"
     }
   ],
   "subComponents": [

@@ -25,7 +25,7 @@ export const registry: Registry = {
           type: 'component',
           registry: 'ui',
           name: 'button',
-          file: 'components:ui/button.tsx',
+          file: 'components/button.tsx',
         },
       },
     },

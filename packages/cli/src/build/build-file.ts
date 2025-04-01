@@ -1,7 +1,11 @@
 import * as path from 'node:path';
 import type { SourceFile, StringLiteral } from 'ts-morph';
 import type { ComponentBuilder } from '@/build/component-builder';
-import { type Component, type OutputFile } from '@/build/build-registry';
+import {
+  type Component,
+  OutputComponent,
+  type OutputFile,
+} from '@/build/build-registry';
 
 export async function buildFile(
   outputPath: string,
@@ -25,8 +29,13 @@ export async function buildFile(
         }
       | {
           type: 'sub-component';
-          component: Component;
+          component: Component | OutputComponent;
           targetFile: string;
+
+          /**
+           * If the component is from another registry
+           */
+          external: boolean;
         },
   ) => string | undefined,
 ): Promise<OutputFile> {
@@ -59,7 +68,10 @@ export async function buildFile(
 
         if (!specifiedFile) return;
       } else {
-        const comp = builder.getComponentByName(resolver.name);
+        const comp = builder.getComponentByName(
+          resolver.name,
+          resolver.registry,
+        );
         if (!comp)
           throw new Error(`Failed to resolve component ${resolver.name}`);
 
@@ -67,6 +79,7 @@ export async function buildFile(
           type: 'sub-component',
           component: comp,
           targetFile: resolver.file,
+          external: resolver.registry !== undefined,
         });
 
         if (value) out.imports[specifier.getLiteralValue()] = value;
@@ -93,6 +106,7 @@ export async function buildFile(
         type: 'sub-component',
         component: sub,
         targetFile: specifiedFile.getFilePath(),
+        external: false,
       });
       if (value) out.imports[specifier.getLiteralValue()] = value;
       return;

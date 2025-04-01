@@ -2,7 +2,10 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { Project } from 'ts-morph';
 import { buildFile } from '@/build/build-file';
-import { ComponentBuilder, createComponentBuilder } from './component-builder';
+import {
+  type ComponentBuilder,
+  createComponentBuilder,
+} from './component-builder';
 import { getFileNamespace } from '@/build/get-path-namespace';
 import { exists } from '@/utils/fs';
 
@@ -30,9 +33,13 @@ export interface Component {
     | string
     | {
         type: 'component';
-        registry: string;
         name: string;
         file: string;
+
+        /**
+         * Registry of the component, refer to the current registry if not specified
+         */
+        registry?: string;
       }
   >;
 }
@@ -160,7 +167,7 @@ export async function build(registry: Registry): Promise<Output> {
 
   const builtComps = await Promise.all(
     registry.components.map((component) =>
-      buildComponent(component, builder, registryDir, project),
+      buildComponent(component, builder, project),
     ),
   );
   for (const [input, comp] of builtComps) {
@@ -180,7 +187,6 @@ export async function build(registry: Registry): Promise<Output> {
 async function buildComponent(
   component: Component,
   builder: ComponentBuilder,
-  registryDir: string,
   project: Project,
 ) {
   const processedFiles = new Set<string>();
@@ -190,27 +196,28 @@ async function buildComponent(
   const files: OutputFile[] = [];
 
   async function build(file: string | { in: string; out: string }) {
-    const inFile = typeof file === 'string' ? file : file.in;
+    let inPath;
+    let outputPath;
 
-    if (processedFiles.has(inFile)) return;
-    processedFiles.add(inFile);
+    if (typeof file === 'string') {
+      const parsed = getFileNamespace(file);
+      parsed.path = path.join(builder.registryDir, parsed.path);
 
-    const parsed = getFileNamespace(inFile);
-    parsed.path = path.join(registryDir, parsed.path);
+      inPath = parsed.path;
+      outputPath = builder.resolveOutputPath(parsed.path, parsed.namespace);
+    } else {
+      inPath = path.join(builder.registryDir, file.in);
+      outputPath = file.out;
+    }
 
-    const content = await fs.readFile(parsed.path);
-    const sourceFile = project.createSourceFile(
-      parsed.path,
-      content.toString(),
-      {
-        overwrite: true,
-      },
-    );
+    if (processedFiles.has(inPath)) return;
+    processedFiles.add(inPath);
 
-    const outputPath =
-      typeof file === 'string'
-        ? builder.resolveOutputPath(parsed.path, parsed.namespace)
-        : file.out;
+    const content = await fs.readFile(inPath);
+    const sourceFile = project.createSourceFile(inPath, content.toString(), {
+      overwrite: true,
+    });
+
     const queue: string[] = [];
 
     files.push(
@@ -221,23 +228,34 @@ async function buildComponent(
         component,
         (reference) => {
           if (reference.type === 'file') {
-            queue.push(path.relative(registryDir, reference.file));
+            queue.push(path.relative(builder.registryDir, reference.file));
             return builder.resolveOutputPath(reference.file);
           }
 
           if (reference.type === 'sub-component') {
             subComponents.add(reference.component.name);
-            const targetFile = path.relative(registryDir, reference.targetFile);
+            const targetFile = reference.external
+              ? reference.targetFile
+              : path.relative(builder.registryDir, reference.targetFile);
 
             for (const childFile of reference.component.files) {
               if (typeof childFile === 'string' && childFile === targetFile) {
                 return builder.resolveOutputPath(
-                  path.join(registryDir, childFile),
+                  path.join(builder.registryDir, childFile),
                 );
               }
 
               if (
                 typeof childFile === 'object' &&
+                'path' in childFile &&
+                childFile.path === targetFile
+              ) {
+                return childFile.path;
+              }
+
+              if (
+                typeof childFile === 'object' &&
+                'in' in childFile &&
                 childFile.in === targetFile
               ) {
                 return childFile.out;
