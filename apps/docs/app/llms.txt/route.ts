@@ -39,7 +39,7 @@ export async function GET() {
       cli: 'Fumadocs CLI (the CLI tool for automating Fumadocs apps)',
     }[dir ?? ''];
 
-    const processed = processor.process({
+    const processed = await processor.process({
       path: file,
       value: content,
     });
