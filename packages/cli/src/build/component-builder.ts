@@ -126,28 +126,37 @@ export function createComponentBuilder(
     resolveOutputPath(
       file: string,
       registryName?: string,
-      forcedNamespace?: string,
+      namespace?: string,
     ): string {
-      let _registry = registry;
+      let targetRegistry = registry;
       if (registryName && registry.on![registryName].type === 'local') {
-        _registry = registry.on![registryName].registry;
+        targetRegistry = registry.on![registryName].registry;
       }
 
-      const rootDir = path.join(_registry.dir, _registry.rootDir);
-      if (forcedNamespace) {
-        return `${forcedNamespace}:${path.relative(rootDir, file)}`;
+      const parsed = file.split(':', 2);
+      if (parsed.length > 1) {
+        namespace ??= parsed[0];
+        file = parsed[1];
       }
 
-      const relativeFile = path.relative(_registry.dir, file);
-      if (_registry.namespaces)
-        for (const namespace in _registry.namespaces) {
-          const relativePath = path.relative(namespace, relativeFile);
+      if (!path.isAbsolute(file)) {
+        file = path.join(targetRegistry.dir, file);
+      }
 
-          if (
-            !relativePath.startsWith('../') &&
-            !path.isAbsolute(relativePath)
-          ) {
-            return `${_registry.namespaces[namespace]}:${relativePath}`;
+      const rootDir = path.join(targetRegistry.dir, targetRegistry.rootDir);
+      if (namespace) {
+        return `${namespace}:${path.relative(rootDir, file)}`;
+      }
+
+      if (targetRegistry.namespaces)
+        for (const namespace in targetRegistry.namespaces) {
+          const relativePath = path.relative(
+            path.join(targetRegistry.dir, namespace),
+            file,
+          );
+
+          if (!relativePath.startsWith('../')) {
+            return `${targetRegistry.namespaces[namespace]}:${relativePath}`;
           }
         }
 

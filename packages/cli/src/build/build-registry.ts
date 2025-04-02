@@ -5,7 +5,6 @@ import {
   type ComponentBuilder,
   createComponentBuilder,
 } from './component-builder';
-import { getFileNamespace } from '@/build/get-path-namespace';
 
 export interface Component {
   name: string;
@@ -178,15 +177,16 @@ async function buildComponent(component: Component, builder: ComponentBuilder) {
     let outputPath;
 
     if (typeof file === 'string') {
-      const parsed = getFileNamespace(file);
-      parsed.path = path.join(builder.registryDir, parsed.path);
+      let namespace;
+      const parsed = file.split(':', 2);
+      if (parsed.length > 1) {
+        namespace = parsed[0];
+        inputPath = path.join(builder.registryDir, parsed[1]);
+      } else {
+        inputPath = path.join(builder.registryDir, file);
+      }
 
-      inputPath = parsed.path;
-      outputPath = builder.resolveOutputPath(
-        parsed.path,
-        undefined,
-        parsed.namespace,
-      );
+      outputPath = builder.resolveOutputPath(file, undefined, namespace);
     } else {
       inputPath = path.join(builder.registryDir, file.in);
       outputPath = file.out;
@@ -217,20 +217,13 @@ async function buildComponent(component: Component, builder: ComponentBuilder) {
               return reference.targetFile;
             }
 
-            let dir = builder.registryDir;
-            if (resolved.registryName) {
-              dir = (
-                builder.registry.on![resolved.registryName].registry as Registry
-              ).dir;
-            }
-
             for (const childFile of resolved.component.files) {
               if (
                 typeof childFile === 'string' &&
                 childFile === reference.targetFile
               ) {
                 return builder.resolveOutputPath(
-                  path.join(dir, childFile),
+                  childFile,
                   reference.resolved.registryName,
                 );
               }

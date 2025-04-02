@@ -3,7 +3,6 @@ import type { PageTree } from 'fumadocs-core/server';
 import { type ReactNode, type ComponentProps, useMemo } from 'react';
 import { cn } from '@/utils/cn';
 import { TreeContextProvider, useTreeContext } from 'fumadocs-ui/contexts/tree';
-import { StylesProvider, NavProvider } from 'fumadocs-ui/contexts/layout';
 import Link from 'fumadocs-core/link';
 import { useSearchContext } from 'fumadocs-ui/contexts/search';
 import { useSidebar } from 'fumadocs-ui/contexts/sidebar';
@@ -17,33 +16,25 @@ export interface DocsLayoutProps {
 }
 
 export function DocsLayout({ tree, children }: DocsLayoutProps) {
-  const variables = cn(
-    '[--fd-tocnav-height:36px] xl:[--fd-toc-width:286px] xl:[--fd-tocnav-height:0px] [--fd-nav-height:56px]',
-  );
-
   return (
     <TreeContextProvider tree={tree}>
-      <NavProvider transparentMode="none">
-        <header className="sticky top-0 bg-fd-background h-14 z-20">
-          <nav className="flex flex-row items-center gap-2 size-full px-4">
-            <Link href="/" className="font-medium mr-auto">
-              My Docs
-            </Link>
+      <header className="sticky top-0 bg-fd-background h-14 z-20">
+        <nav className="flex flex-row items-center gap-2 size-full px-4">
+          <Link href="/" className="font-medium mr-auto">
+            My Docs
+          </Link>
 
-            <SearchToggle />
-            <NavbarSidebarTrigger className="md:hidden" />
-          </nav>
-        </header>
-        <main
-          id="nd-docs-layout"
-          className={cn('flex flex-1 flex-row', variables)}
-        >
-          <Sidebar />
-          <StylesProvider tocNav="xl:hidden" toc="max-xl:hidden">
-            {children}
-          </StylesProvider>
-        </main>
-      </NavProvider>
+          <SearchToggle />
+          <NavbarSidebarTrigger className="md:hidden" />
+        </nav>
+      </header>
+      <main
+        id="nd-docs-layout"
+        className="flex flex-1 flex-row [--fd-nav-height:56px]"
+      >
+        <Sidebar />
+        {children}
+      </main>
     </TreeContextProvider>
   );
 }
@@ -108,7 +99,7 @@ function Sidebar() {
 }
 
 const linkVariants = cva(
-  'flex items-center gap-2 w-full py-2 rounded-lg text-fd-foreground/80 [&_svg]:size-4',
+  'flex items-center gap-2 w-full py-1.5 rounded-lg text-fd-foreground/80 [&_svg]:size-4',
   {
     variants: {
       active: {

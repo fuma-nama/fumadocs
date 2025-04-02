@@ -11,26 +11,26 @@ Note that it needs Fumadocs Core for minimal setup.
 npm install @fumadocs/cli --save-dev
 ```
 
-You can initialize a config for CLI.
+Initialize a config for CLI:
 
-```bash
-pnpm fumadocs config
+```package-install
+npx fumadocs
 ```
 
-It defines the output paths of components.
+You can change the output paths of components in the config.
 
 ### Components
 
 Select and install components.
 
-```bash
-pnpm fumadocs add
+```package-install
+npx fumadocs add
 ```
 
-You can pass component names.
+You can pass component names directly.
 
-```bash
-pnpm fumadocs add banner files
+```package-install
+npx fumadocs add banner files
 ```
 
 #### How the magic works?
@@ -89,8 +89,8 @@ export default (
 
 Some features of Fumadocs require copying code to get started, it is similar to `codemod` but for configuring features automatically.
 
-```bash
-pnpm fumadocs init
+```package-install
+npx fumadocs init
 ```
 
 Please note that some features may change your existing code, make sure to commit your changes to Git before running it.

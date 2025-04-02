@@ -22,6 +22,23 @@ export const registry: Registry = {
   },
   components: [
     {
+      name: 'layouts/docs-min',
+      description: 'Replace Docs Layout (Minimal)',
+      files: [
+        {
+          in: '_registry/layout/docs-min.tsx',
+          out: 'components:layouts/docs.tsx',
+        },
+        {
+          in: '_registry/layout/page-min.tsx',
+          out: 'components:layouts/page.tsx',
+        },
+      ],
+      mapImportPath: contextsMap,
+      unlisted: true,
+    },
+
+    {
       name: 'layout/root-toggle',
       description: 'the UI of Sidebar Tabs',
       files: ['components/layout/root-toggle.tsx'],
@@ -37,12 +54,6 @@ export const registry: Registry = {
       name: 'layouts/docs',
       description: 'Replace Docs Layout (Full)',
       files: ['layouts/docs.tsx'],
-      mapImportPath: contextsMap,
-    },
-    {
-      name: 'layouts/docs-min',
-      description: 'Replace Docs Layout (Minimal)',
-      files: ['_registry/layout/docs-min.tsx'],
       mapImportPath: contextsMap,
     },
     {

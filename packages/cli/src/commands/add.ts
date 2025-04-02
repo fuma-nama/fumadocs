@@ -24,7 +24,7 @@ interface Context {
   resolver: Resolver;
 }
 
-type Resolver = (file: string) => Awaitable<object | undefined>;
+export type Resolver = (file: string) => Awaitable<object | undefined>;
 
 /**
  * A set of downloaded files

@@ -12,7 +12,12 @@ import {
   spinner,
 } from '@clack/prompts';
 import { init } from '@/commands/init';
-import { add, localResolver, remoteResolver } from '@/commands/add';
+import {
+  add,
+  localResolver,
+  remoteResolver,
+  type Resolver,
+} from '@/commands/add';
 import { initConfig, loadConfig } from '@/config';
 import { plugins } from '@/plugins';
 import {
@@ -23,27 +28,33 @@ import {
 import { runTree } from '@/utils/file-tree/run-tree';
 import { type OutputIndex } from '@/build';
 import packageJson from '../package.json';
+import { customise } from '@/commands/customise';
 
-const program = new Command();
+const program = new Command().option('--config <string>');
 
 program
   .name('fumadocs')
-  .description('CLI to setup Fumadocs')
-  .version(packageJson.version);
-
-program
-  .command('config')
-  .description('init a config for Fumadocs CLI')
+  .description('CLI to setup Fumadocs, init a config ')
+  .version(packageJson.version)
   .action(async () => {
     await initConfig();
-    console.log(picocolors.green('Successful: ./cli.json'));
+    console.log(picocolors.green('Initialized a `./cli.json` config file.'));
+  });
+
+program
+  .command('customise')
+  .alias('customize')
+  .description('simple way to customise layouts with Fumadocs UI')
+  .option('--dir <string>', 'the root url or directory to resolve registry')
+  .action(async (options: { config?: string; dir?: string }) => {
+    const resolver = getResolverFromDir(options.dir);
+    await customise(resolver, await loadConfig(options.config));
   });
 
 program
   .command('init')
   .description('init a new plugin to your docs')
   .argument('[string]', 'plugin name')
-  .option('--config <string>')
   .action(async (str: string | undefined, { config }) => {
     const loadedConfig = await loadConfig(config as string | undefined);
 
@@ -80,16 +91,9 @@ program
   .description('add a new component to your docs')
   .argument('[components...]', 'components to download')
   .option('--dir <string>', 'the root url or directory to resolve registry')
-  .option('--config <string>')
   .action(
     async (input: string[], options: { config?: string; dir?: string }) => {
-      let dir = options.dir ?? 'https://fumadocs.vercel.app/registry';
-      if (dir in dirShortcuts) dir = dirShortcuts[dir];
-
-      const resolver =
-        dir.startsWith('http://') || dir.startsWith('https://')
-          ? remoteResolver(dir)
-          : localResolver(dir);
+      const resolver = getResolverFromDir(options.dir);
       let target = input;
 
       if (input.length === 0) {
@@ -101,7 +105,9 @@ program
         spin.stop(picocolors.bold(picocolors.greenBright('registry fetched')));
 
         if (!registry) {
-          log.error(`Failed to fetch '_registry.json' file from ${dir}`);
+          log.error(
+            `Failed to fetch '_registry.json' file from ${options.dir ?? 'registry'}`,
+          );
           throw new Error(`Failed to fetch registry`);
         }
 
@@ -172,5 +178,15 @@ program
       }
     },
   );
+
+function getResolverFromDir(
+  dir: string = 'https://fumadocs.vercel.app/registry',
+): Resolver {
+  if (dir in dirShortcuts) dir = dirShortcuts[dir];
+
+  return dir.startsWith('http://') || dir.startsWith('https://')
+    ? remoteResolver(dir)
+    : localResolver(dir);
+}
 
 program.parse();
