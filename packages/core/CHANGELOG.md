@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 15.2.2
+
+### Patch Changes
+
+- 0829544: deprecate `blockScrollingWidth` in favour of `removeScrollOn`
+
 ## 15.2.1
 
 ## 15.2.0
