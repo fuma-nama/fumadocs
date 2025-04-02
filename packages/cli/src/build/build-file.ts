@@ -1,35 +1,55 @@
 import * as path from 'node:path';
 import type { SourceFile, StringLiteral } from 'ts-morph';
 import type { ComponentBuilder } from '@/build/component-builder';
-import { type Component, type OutputFile } from '@/build/build-registry';
-
-export interface ProcessedFiles {
-  files: OutputFile[];
-  dependencies: Map<string, string>;
-  devDependencies: Map<string, string>;
-  subComponents: Set<string>;
-}
+import type {
+  Component,
+  OutputComponent,
+  OutputFile,
+} from '@/build/build-registry';
 
 export async function buildFile(
-  filePath: string,
-  sourceFile: SourceFile,
+  inputPath: string,
+  outputPath: string,
   builder: ComponentBuilder,
   comp: Component,
-  processedFiles: Set<string>,
-): Promise<ProcessedFiles> {
-  processedFiles.add(filePath);
+  /**
+   * Resolve referenced files
+   */
+  onReference: (
+    reference:
+      | {
+          type: 'file';
+          file: string;
+        }
+      | {
+          type: 'dependency';
+          name: string;
+          version: string;
+          isDev: boolean;
+        }
+      | {
+          type: 'sub-component';
+          resolved:
+            | {
+                type: 'local';
+                component: Component;
+                registryName?: string;
+              }
+            | {
+                type: 'remote';
+                component: OutputComponent;
+                registryName: string;
+              };
 
+          targetFile: string;
+          filePath?: string;
+        },
+  ) => string | undefined,
+): Promise<OutputFile> {
   const out: OutputFile = {
     imports: {},
     content: '',
-    path: filePath,
-  };
-
-  const processed: ProcessedFiles = {
-    files: [out],
-    dependencies: new Map(),
-    devDependencies: new Map(),
-    subComponents: new Set(),
+    path: outputPath,
   };
 
   /**
@@ -55,8 +75,20 @@ export async function buildFile(
 
         if (!specifiedFile) return;
       } else {
-        processed.subComponents.add(resolver.name);
-        out.imports[specifier.getLiteralValue()] = resolver.file;
+        const sub = builder.getComponentByName(
+          resolver.name,
+          resolver.registry,
+        );
+        if (!sub)
+          throw new Error(`Failed to resolve sub component ${resolver.name}`);
+
+        const value = onReference({
+          type: 'sub-component',
+          resolved: sub,
+          targetFile: resolver.file,
+        });
+
+        if (value) out.imports[specifier.getLiteralValue()] = value;
         return;
       }
     }
@@ -64,42 +96,41 @@ export async function buildFile(
     if (specifiedFile.isInNodeModules() || specifiedFile.isDeclarationFile()) {
       const info = builder.resolveDep(specifier.getLiteralValue());
 
-      if (info.type === 'dev') {
-        processed.devDependencies.set(info.name, info.version ?? '');
-      } else {
-        processed.dependencies.set(info.name, info.version ?? '');
-      }
+      const value = onReference({
+        type: 'dependency',
+        name: info.name,
+        version: info.version ?? '',
+        isDev: info.type === 'dev',
+      });
+      if (value) out.imports[specifier.getLiteralValue()] = value;
       return;
     }
 
     const sub = builder.getSubComponent(specifiedFile.getFilePath());
     if (sub) {
-      processed.subComponents.add(sub.component.name);
-
-      out.imports[specifier.getLiteralValue()] = builder.resolveOutputPath(
-        specifiedFile.getFilePath(),
-      );
+      const value = onReference({
+        type: 'sub-component',
+        resolved: {
+          type: 'local',
+          component: sub,
+        },
+        targetFile: path.relative(
+          builder.registryDir,
+          specifiedFile.getFilePath(),
+        ),
+      });
+      if (value) out.imports[specifier.getLiteralValue()] = value;
       return;
     }
 
-    const referenceOutputPath = builder.resolveOutputPath(
-      specifiedFile.getFilePath(),
-    );
-
-    if (!processedFiles.has(referenceOutputPath)) {
-      const outFile = await buildFile(
-        referenceOutputPath,
-        specifiedFile,
-        builder,
-        comp,
-        processedFiles,
-      );
-
-      merge(processed, outFile);
-    }
-
-    out.imports[specifier.getLiteralValue()] = referenceOutputPath;
+    const value = onReference({
+      type: 'file',
+      file: specifiedFile.getFilePath(),
+    });
+    if (value) out.imports[specifier.getLiteralValue()] = value;
   }
+
+  const sourceFile = await builder.createSourceFile(inputPath);
 
   for (const item of sourceFile.getImportDeclarations()) {
     await process(item.getModuleSpecifier(), () =>
@@ -115,19 +146,5 @@ export async function buildFile(
   }
 
   out.content = sourceFile.getFullText();
-  return processed;
-}
-
-export function merge(to: ProcessedFiles, from: ProcessedFiles): void {
-  to.files.push(...from.files);
-
-  for (const [k, v] of from.dependencies.entries()) {
-    to.dependencies.set(k, v);
-  }
-
-  for (const [k, v] of from.devDependencies.entries()) {
-    to.devDependencies.set(k, v);
-  }
-
-  from.subComponents.forEach((item) => to.subComponents.add(item));
+  return out;
 }

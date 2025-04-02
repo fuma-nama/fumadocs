@@ -151,7 +151,7 @@ export function Sidebar({
     <Context.Provider value={context}>
       <Base.SidebarList
         id="nd-sidebar"
-        blockScrollingWidth={768} // md
+        removeScrollOn="(min-width: 768px)" // md
         {...props}
         className={cn(
           'fixed top-[calc(var(--fd-banner-height)+var(--fd-nav-height))] z-20 bg-fd-card text-sm md:sticky md:h-(--fd-sidebar-height)',

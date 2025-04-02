@@ -1,5 +1,12 @@
 # @fuma-docs/openapi
 
+## 7.0.9
+
+### Patch Changes
+
+- 70d7ab0: Change playground `localStorage` key for authorization info
+  - fumadocs-ui@15.2.1
+
 ## 7.0.8
 
 ### Patch Changes

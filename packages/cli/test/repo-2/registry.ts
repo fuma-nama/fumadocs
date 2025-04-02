@@ -1,9 +1,10 @@
 import { fileURLToPath } from 'node:url';
 import { type Registry } from '../../src/build';
 import * as ui from '../repo/registry';
+import * as path from 'node:path';
 
 export const registry: Registry = {
-  path: fileURLToPath(import.meta.url),
+  dir: path.dirname(fileURLToPath(import.meta.url)),
   on: {
     ui: {
       type: 'local',
@@ -25,7 +26,7 @@ export const registry: Registry = {
           type: 'component',
           registry: 'ui',
           name: 'button',
-          file: 'components:ui/button.tsx',
+          file: 'components/button.tsx',
         },
       },
     },

@@ -81,23 +81,35 @@ export function SidebarTrigger<T extends ElementType = 'button'>({
 export type SidebarContentProps<T extends ElementType> = AsProps<T> & {
   /**
    * Disable scroll blocking when the viewport width is larger than a certain number (in pixels)
+   *
+   * @deprecated use `removeScrollOn`
    */
   blockScrollingWidth?: number;
+
+  /**
+   * A media query.
+   *
+   * When the sidebar is opening and media query is matched, scrolling outside the sidebar will be blocked.
+   *
+   * @example (min-width: 1000px)
+   */
+  removeScrollOn?: string;
 };
 
 export function SidebarList<T extends ElementType = 'aside'>({
   as,
   blockScrollingWidth,
+  removeScrollOn = blockScrollingWidth
+    ? `(min-width: ${blockScrollingWidth}px)`
+    : undefined,
   ...props
 }: SidebarContentProps<T>): ReactElement {
   const { open } = useSidebarContext();
   const [isBlocking, setIsBlocking] = useState(false);
 
   useEffect(() => {
-    if (!blockScrollingWidth) return;
-    const mediaQueryList = window.matchMedia(
-      `(min-width: ${blockScrollingWidth.toString()}px)`,
-    );
+    if (!removeScrollOn) return;
+    const mediaQueryList = window.matchMedia(removeScrollOn);
 
     const handleChange = (): void => {
       setIsBlocking(!mediaQueryList.matches);
@@ -107,7 +119,7 @@ export function SidebarList<T extends ElementType = 'aside'>({
     return () => {
       mediaQueryList.removeEventListener('change', handleChange);
     };
-  }, [blockScrollingWidth]);
+  }, [removeScrollOn]);
 
   return (
     <RemoveScroll

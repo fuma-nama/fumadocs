@@ -53,7 +53,7 @@
     "@standard-schema/spec": "^1.0.0",
     "chokidar": "^4.0.3",
     "cross-spawn": "^7.0.6",
-    "esbuild": "^0.25.0",
+    "esbuild": "^0.25.2",
     "estree-util-value-to-estree": "^3.3.2",
     "fast-glob": "^3.3.3",
     "gray-matter": "^4.0.3",

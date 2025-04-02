@@ -1,15 +1,21 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import { Project } from 'ts-morph';
-import { buildFile, merge, type ProcessedFiles } from '@/build/build-file';
-import { createComponentBuilder } from './component-builder';
-import { getFileNamespace } from '@/build/get-path-namespace';
-import { exists } from '@/utils/fs';
+import { buildFile } from '@/build/build-file';
+import {
+  type ComponentBuilder,
+  createComponentBuilder,
+} from './component-builder';
 
 export interface Component {
   name: string;
   description?: string;
-  files: string[];
+  files: (
+    | string
+    | {
+        in: string;
+        out: string;
+      }
+  )[];
 
   /**
    * Don't list the component in registry index file
@@ -24,9 +30,13 @@ export interface Component {
     | string
     | {
         type: 'component';
-        registry: string;
         name: string;
         file: string;
+
+        /**
+         * Registry of the component, refer to the current registry if not specified
+         */
+        registry?: string;
       }
   >;
 }
@@ -40,9 +50,9 @@ export interface PackageJson {
 
 export interface Registry {
   /**
-   * The path of registry, needed to resolve relative paths
+   * The directory of registry, needed to resolve relative paths
    */
-  path: string;
+  dir: string;
 
   /**
    * Extend on existing registry
@@ -101,19 +111,10 @@ export interface OutputComponent {
 }
 
 export async function build(registry: Registry): Promise<Output> {
-  const registryDir = path.dirname(registry.path);
-  const rootDir = path.join(registryDir, registry.rootDir);
-  const useSrc = await exists(path.join(rootDir, 'src'));
   const output: Output = {
     index: [],
     components: [],
   };
-
-  const project = new Project({
-    tsConfigFilePath: registry.tsconfigPath
-      ? path.join(registryDir, registry.tsconfigPath)
-      : path.join(rootDir, 'tsconfig.json'),
-  });
 
   function readPackageJson() {
     if (typeof registry.packageJson !== 'string' && registry.packageJson)
@@ -122,20 +123,15 @@ export async function build(registry: Registry): Promise<Output> {
     return fs
       .readFile(
         registry.packageJson
-          ? path.join(registryDir, registry.packageJson)
-          : path.join(rootDir, 'package.json'),
+          ? path.join(registry.dir, registry.packageJson)
+          : path.join(registry.dir, registry.rootDir, 'package.json'),
       )
       .then((res) => JSON.parse(res.toString()) as PackageJson)
       .catch(() => undefined);
   }
 
   const packageJson = await readPackageJson();
-  const builder = createComponentBuilder(
-    registry,
-    packageJson,
-    registryDir,
-    useSrc ? path.join(rootDir, 'src') : rootDir,
-  );
+  const builder = createComponentBuilder(registry, packageJson);
 
   const buildExtendRegistries = Object.values(registry.on ?? {}).map(
     async (schema) => {
@@ -152,63 +148,10 @@ export async function build(registry: Registry): Promise<Output> {
     output.index.push(...built.index);
   }
 
-  const buildComps = registry.components.map(async (component) => {
-    const processedFiles = new Set<string>();
-    const collect: ProcessedFiles = {
-      files: [],
-      subComponents: new Set(),
-      devDependencies: new Map(),
-      dependencies: new Map(),
-    };
-
-    const read = component.files.map(async (sourcePath) => {
-      const parsed = getFileNamespace(sourcePath);
-      parsed.path = path.join(registryDir, parsed.path);
-
-      const content = await fs.readFile(parsed.path);
-      const sourceFile = project.createSourceFile(
-        parsed.path,
-        content.toString(),
-        {
-          overwrite: true,
-        },
-      );
-
-      const outputPath = builder.resolveOutputPath(
-        parsed.path,
-        parsed.namespace,
-      );
-
-      if (processedFiles.has(outputPath)) return;
-      return buildFile(
-        outputPath,
-        sourceFile,
-        builder,
-        component,
-        processedFiles,
-      );
-    });
-
-    const outFiles = await Promise.all(read);
-    for (const file of outFiles) {
-      if (!file) continue;
-
-      merge(collect, file);
-    }
-
-    return [
-      component,
-      {
-        name: component.name,
-        files: collect.files,
-        subComponents: Array.from(collect.subComponents),
-        dependencies: Object.fromEntries(collect.dependencies),
-        devDependencies: Object.fromEntries(collect.devDependencies),
-      },
-    ] as [Component, OutputComponent];
-  });
-
-  for (const [input, comp] of await Promise.all(buildComps)) {
+  const builtComps = await Promise.all(
+    registry.components.map((component) => buildComponent(component, builder)),
+  );
+  for (const [input, comp] of builtComps) {
     if (!input.unlisted) {
       output.index.push({
         name: input.name,
@@ -220,4 +163,106 @@ export async function build(registry: Registry): Promise<Output> {
   }
 
   return output;
+}
+
+async function buildComponent(component: Component, builder: ComponentBuilder) {
+  const processedFiles = new Set<string>();
+  const subComponents = new Set<string>();
+  const devDependencies = new Map<string, string>();
+  const dependencies = new Map<string, string>();
+  const files: OutputFile[] = [];
+
+  async function build(file: string | { in: string; out: string }) {
+    let inputPath;
+    let outputPath;
+
+    if (typeof file === 'string') {
+      let namespace;
+      const parsed = file.split(':', 2);
+      if (parsed.length > 1) {
+        namespace = parsed[0];
+        inputPath = path.join(builder.registryDir, parsed[1]);
+      } else {
+        inputPath = path.join(builder.registryDir, file);
+      }
+
+      outputPath = builder.resolveOutputPath(file, undefined, namespace);
+    } else {
+      inputPath = path.join(builder.registryDir, file.in);
+      outputPath = file.out;
+    }
+
+    if (processedFiles.has(inputPath)) return;
+    processedFiles.add(inputPath);
+
+    const queue: string[] = [];
+
+    files.push(
+      await buildFile(
+        inputPath,
+        outputPath,
+        builder,
+        component,
+        (reference) => {
+          if (reference.type === 'file') {
+            queue.push(path.relative(builder.registryDir, reference.file));
+            return builder.resolveOutputPath(reference.file);
+          }
+
+          if (reference.type === 'sub-component') {
+            const resolved = reference.resolved;
+            subComponents.add(resolved.component.name);
+
+            if (resolved.type === 'remote') {
+              return reference.targetFile;
+            }
+
+            for (const childFile of resolved.component.files) {
+              if (
+                typeof childFile === 'string' &&
+                childFile === reference.targetFile
+              ) {
+                return builder.resolveOutputPath(
+                  childFile,
+                  reference.resolved.registryName,
+                );
+              }
+
+              if (
+                typeof childFile === 'object' &&
+                childFile.in === reference.targetFile
+              ) {
+                return childFile.out;
+              }
+            }
+
+            throw new Error(
+              `Failed to find sub component ${resolved.component.name}'s ${reference.targetFile} referenced by ${inputPath}`,
+            );
+          }
+
+          if (reference.type === 'dependency') {
+            if (reference.isDev)
+              devDependencies.set(reference.name, reference.version);
+            else dependencies.set(reference.name, reference.version);
+          }
+        },
+      ),
+    );
+
+    await Promise.all(queue.map(build));
+  }
+
+  await Promise.all(component.files.map(build));
+
+  return [
+    component,
+    {
+      name: component.name,
+      files,
+      subComponents: Array.from(subComponents),
+      dependencies: Object.fromEntries(dependencies),
+      devDependencies: Object.fromEntries(devDependencies),
+    },
+  ] as [Component, OutputComponent];
 }
