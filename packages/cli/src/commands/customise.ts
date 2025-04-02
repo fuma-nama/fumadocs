@@ -1,4 +1,4 @@
-import { cancel, group, intro, select, confirm } from '@clack/prompts';
+import { cancel, group, intro, select, confirm, log } from '@clack/prompts';
 import picocolors from 'picocolors';
 import { add, type Resolver } from '@/commands/add';
 import type { Config } from '@/config';
@@ -31,12 +31,12 @@ export async function customise(resolver: Resolver, config: Config) {
               hint: 'for those who want to build their own variant from ground up.',
             },
             {
-              label: 'Start from the default one',
+              label: 'Start from default layout',
               value: 'full-default',
               hint: 'useful for adjusting small details.',
             },
             {
-              label: 'Start from the Notebook layout',
+              label: 'Start from Notebook layout',
               value: 'full-notebook',
               hint: 'useful for adjusting small details.',
             },
@@ -61,14 +61,33 @@ export async function customise(resolver: Resolver, config: Config) {
   );
 
   if (result.target === 'docs' && result.mode) {
+    if (result.page) await add('layouts/page', resolver, config);
+
     if (result.mode === 'minimal') {
       await add('layouts/docs-min', resolver, config);
-    } else if (result.mode === 'full-default') {
-      await add('layouts/docs', resolver, config);
-    } else if (result.mode === 'full-notebook') {
-      await add('layouts/notebook', resolver, config);
+    } else {
+      await add(
+        result.mode === 'full-default' ? 'layouts/docs' : 'layouts/notebook',
+        resolver,
+        config,
+      );
     }
 
-    if (result.page) await add('layouts/page', resolver, config);
+    log.info(
+      [
+        picocolors.bold('What is Next?'),
+        'You can check the installed components in `components/layouts`.',
+        picocolors.dim('---'),
+        'Open your `layout.tsx` files, replace the imports of components:',
+        picocolors.greenBright(
+          '`fumadocs-ui/layouts/docs` -> `@/components/layouts/docs`',
+        ),
+        result.page || result.mode === 'minimal'
+          ? picocolors.greenBright(
+              '`fumadocs-ui/page` -> `@/components/layouts/page`',
+            )
+          : '',
+      ].join('\n'),
+    );
   }
 }
