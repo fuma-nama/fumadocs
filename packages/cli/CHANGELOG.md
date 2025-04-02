@@ -1,5 +1,11 @@
 # fumadocs
 
+## 0.1.0
+
+### Minor Changes
+
+- 72a3e8c: Add customise command
+
 ## 0.0.8
 
 ### Patch Changes
