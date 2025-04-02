@@ -689,7 +689,7 @@ function Features() {
         description="Fumadocs CLI creates interactive components for your docs, offering a rich experience to your users."
       >
         <CodeBlock
-          code="npx fumadocs add accordion"
+          code="npx @fumadocs/cli add"
           lang="bash"
           wrapper={{
             title: 'Terminal',
