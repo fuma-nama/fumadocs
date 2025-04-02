@@ -170,9 +170,10 @@ async function buildComponent(component: Component, builder: ComponentBuilder) {
   const subComponents = new Set<string>();
   const devDependencies = new Map<string, string>();
   const dependencies = new Map<string, string>();
-  const files: OutputFile[] = [];
 
-  async function build(file: string | { in: string; out: string }) {
+  async function build(
+    file: string | { in: string; out: string },
+  ): Promise<OutputFile[]> {
     let inputPath;
     let outputPath;
 
@@ -192,74 +193,70 @@ async function buildComponent(component: Component, builder: ComponentBuilder) {
       outputPath = file.out;
     }
 
-    if (processedFiles.has(inputPath)) return;
+    if (processedFiles.has(inputPath)) return [];
     processedFiles.add(inputPath);
 
     const queue: string[] = [];
 
-    files.push(
-      await buildFile(
-        inputPath,
-        outputPath,
-        builder,
-        component,
-        (reference) => {
-          if (reference.type === 'file') {
-            queue.push(path.relative(builder.registryDir, reference.file));
-            return builder.resolveOutputPath(reference.file);
+    const result = await buildFile(
+      inputPath,
+      outputPath,
+      builder,
+      component,
+      (reference) => {
+        if (reference.type === 'file') {
+          queue.push(path.relative(builder.registryDir, reference.file));
+          return builder.resolveOutputPath(reference.file);
+        }
+
+        if (reference.type === 'sub-component') {
+          const resolved = reference.resolved;
+          subComponents.add(resolved.component.name);
+
+          if (resolved.type === 'remote') {
+            return reference.targetFile;
           }
 
-          if (reference.type === 'sub-component') {
-            const resolved = reference.resolved;
-            subComponents.add(resolved.component.name);
-
-            if (resolved.type === 'remote') {
-              return reference.targetFile;
+          for (const childFile of resolved.component.files) {
+            if (
+              typeof childFile === 'string' &&
+              childFile === reference.targetFile
+            ) {
+              return builder.resolveOutputPath(
+                childFile,
+                reference.resolved.registryName,
+              );
             }
 
-            for (const childFile of resolved.component.files) {
-              if (
-                typeof childFile === 'string' &&
-                childFile === reference.targetFile
-              ) {
-                return builder.resolveOutputPath(
-                  childFile,
-                  reference.resolved.registryName,
-                );
-              }
-
-              if (
-                typeof childFile === 'object' &&
-                childFile.in === reference.targetFile
-              ) {
-                return childFile.out;
-              }
+            if (
+              typeof childFile === 'object' &&
+              childFile.in === reference.targetFile
+            ) {
+              return childFile.out;
             }
-
-            throw new Error(
-              `Failed to find sub component ${resolved.component.name}'s ${reference.targetFile} referenced by ${inputPath}`,
-            );
           }
 
-          if (reference.type === 'dependency') {
-            if (reference.isDev)
-              devDependencies.set(reference.name, reference.version);
-            else dependencies.set(reference.name, reference.version);
-          }
-        },
-      ),
+          throw new Error(
+            `Failed to find sub component ${resolved.component.name}'s ${reference.targetFile} referenced by ${inputPath}`,
+          );
+        }
+
+        if (reference.type === 'dependency') {
+          if (reference.isDev)
+            devDependencies.set(reference.name, reference.version);
+          else dependencies.set(reference.name, reference.version);
+        }
+      },
     );
 
-    await Promise.all(queue.map(build));
+    return [result, ...(await Promise.all(queue.map(build))).flat()];
   }
-
-  await Promise.all(component.files.map(build));
 
   return [
     component,
     {
       name: component.name,
-      files,
+      files: (await Promise.all(component.files.map(build))).flat(),
       subComponents: Array.from(subComponents),
       dependencies: Object.fromEntries(dependencies),
       devDependencies: Object.fromEntries(devDependencies),
