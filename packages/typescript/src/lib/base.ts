@@ -7,6 +7,11 @@ import {
 } from 'ts-morph';
 import { getProject, type TypescriptConfig } from '@/get-project';
 import fs from 'node:fs';
+import {
+  type BaseTypeTableProps,
+  type GenerateTypeTableOptions,
+  getTypeTableOutput,
+} from '@/lib/type-table';
 
 export interface GeneratedDoc {
   name: string;
@@ -86,6 +91,12 @@ export function createGenerator(config?: TypescriptConfig | Project) {
 
       return out;
     },
+    generateTypeTable(
+      props: BaseTypeTableProps,
+      options?: GenerateTypeTableOptions,
+    ) {
+      return getTypeTableOutput(this, props, options);
+    },
   };
 }
 
@@ -162,9 +173,10 @@ function getDocEntry(
       .map((tag) => [tag.getName(), ts.displayPartsToString(tag.getText())]),
   );
 
-  let typeName = subType
-    .getNonNullableType()
-    .getText(undefined, ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope);
+  let typeName = subType.getText(
+    undefined,
+    ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope,
+  );
 
   if (
     subType.getAliasSymbol() &&

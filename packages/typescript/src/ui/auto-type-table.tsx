@@ -8,8 +8,7 @@ import type { ReactNode } from 'react';
 import {
   type BaseTypeTableProps,
   type GenerateTypeTableOptions,
-  getTypeTableOutput,
-} from '@/utils/type-table';
+} from '@/lib/type-table';
 import { type Generator } from '@/lib/base';
 
 export type AutoTypeTableProps = BaseTypeTableProps;
@@ -25,7 +24,7 @@ export async function AutoTypeTable({
   renderMarkdown?: typeof renderMarkdownDefault;
   options?: GenerateTypeTableOptions;
 }) {
-  const output = await getTypeTableOutput(generator, props, options);
+  const output = await generator.generateTypeTable(props, options);
 
   return output.map(async (item) => {
     const entries = item.entries.map(
