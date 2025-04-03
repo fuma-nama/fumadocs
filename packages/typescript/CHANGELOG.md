@@ -1,5 +1,11 @@
 # fumadocs-typescript
 
+## 4.0.2
+
+### Patch Changes
+
+- 38117c1: add `null | undefined` to optional props in a object type
+
 ## 4.0.1
 
 ### Patch Changes
