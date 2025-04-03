@@ -1,7 +1,7 @@
 'use client';
-import { createContext, usePathname, useRouter } from 'fumadocs-core/framework';
 import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
-import { type ReactNode, useMemo } from 'react';
+import { createContext, type ReactNode, useContext, useMemo } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 
 export interface Translations {
   search: string;
@@ -43,7 +43,7 @@ export const defaultTranslations: Translations = {
   editOnGithub: 'Edit on GitHub',
 };
 
-export const I18nContext = createContext<I18nContextType>('I18nContext', {
+export const I18nContext = createContext<I18nContextType>({
   text: defaultTranslations,
 });
 
@@ -54,7 +54,7 @@ export function I18nLabel(props: { label: keyof Translations }): string {
 }
 
 export function useI18n(): I18nContextType {
-  return I18nContext.use();
+  return useContext(I18nContext);
 }
 
 export interface I18nProviderProps {
