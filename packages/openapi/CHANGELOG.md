@@ -1,5 +1,14 @@
 # @fuma-docs/openapi
 
+## 7.0.11
+
+### Patch Changes
+
+- Updated dependencies [5e4e9ec]
+- Updated dependencies [293178f]
+  - fumadocs-ui@15.2.3
+  - fumadocs-core@15.2.3
+
 ## 7.0.10
 
 ### Patch Changes
