@@ -9,8 +9,7 @@ import { visit } from 'unist-util-visit';
 import {
   type BaseTypeTableProps,
   type GenerateTypeTableOptions,
-  getTypeTableOutput,
-} from '@/utils/type-table';
+} from '@/lib/type-table';
 import { toEstree } from 'hast-util-to-estree';
 import { dirname } from 'node:path';
 
@@ -115,8 +114,7 @@ export function remarkAutoTypeTable({
       }
 
       async function run() {
-        const output = await getTypeTableOutput(
-          generator,
+        const output = await generator.generateTypeTable(
           props as BaseTypeTableProps,
           {
             ...options,

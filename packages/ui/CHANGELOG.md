@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 15.2.2
+
+### Patch Changes
+
+- 0829544: Remove unused registry files from dist
+- Updated dependencies [0829544]
+  - fumadocs-core@15.2.2
+
 ## 15.2.1
 
 ### Patch Changes

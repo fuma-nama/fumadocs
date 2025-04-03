@@ -24,7 +24,7 @@ import { openapi, source } from '@/lib/source';
 import { Wrapper } from '@/components/preview/wrapper';
 import { metadataImage } from '@/lib/metadata-image';
 import { File, Folder, Files } from 'fumadocs-ui/components/files';
-import { Mermaid } from '@theguild/remark-mermaid/mermaid';
+import { Mermaid } from '@/components/mdx/mermaid';
 import { Rate } from '@/components/rate';
 import { repo, owner, onRateAction } from '@/lib/github';
 import type { MDXComponents } from 'mdx/types';

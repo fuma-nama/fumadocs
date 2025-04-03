@@ -3,35 +3,45 @@ title: Mermaid
 description: Rendering diagrams in your docs
 ---
 
-Fumadocs doesn't have a built-in Mermaid wrapper provided, instead you can try different approaches easily.
+Fumadocs doesn't have a built-in Mermaid wrapper provided, we recommend using `mermaid` directly.
 
 ## Setup
 
-`@theguild/remark-mermaid` converts codeblocks to JSX elements using MDX and render them in a React component. It renders the graph on client side.
+Install the required dependencies, `next-themes` is used with Fumadocs to manage the light/dark mode.
 
 ```package-install
-@theguild/remark-mermaid
+mermaid next-themes
 ```
 
-Add their remark plugin, for example (in Fumadocs MDX):
+Create the Mermaid component:
 
-```ts title="source.config.ts"
-import { defineDocs, defineConfig } from 'fumadocs-mdx/config';
-import { remarkMermaid } from '@theguild/remark-mermaid';
+<include cwd meta='title="components/mdx/mermaid.tsx"'>
+  ./components/mdx/mermaid.tsx
+</include>
 
-export const { docs, meta } = defineDocs({
-  dir: 'content/docs',
-});
+> This is originally inspired by [remark-mermaid](https://github.com/the-guild-org/docs/blob/main/packages/remark-mermaid/src/mermaid.tsx).
 
-export default defineConfig({
-  mdxOptions: {
-    remarkPlugins: [remarkMermaid],
-  },
-});
+Add the component as a MDX component:
+
+```tsx title="/docs/[[...slug]]/page.tsx"
+import defaultMdxComponents from 'fumadocs-ui/mdx';
+import { Mermaid } from '@/components/mdx/mermaid';
+
+<MdxContent
+  components={{
+    ...defaultMdxComponents,
+    Mermaid,
+  }}
+/>;
 ```
 
-````md
-```mermaid
+## Usage
+
+Use it in MDX files.
+
+```mdx
+<Mermaid
+  chart="
 graph TD;
 subgraph AA [Consumers]
 A[Mobile app];
@@ -49,9 +59,9 @@ B --> Z;
 C --> Z;
 Z --> E;
 Z --> F;
-Z --> G;
+Z --> G;"
+/>
 ```
-````
 
 <Mermaid
   chart="
