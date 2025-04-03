@@ -68,12 +68,12 @@ See [Middleware](/docs/headless/internationalization#middleware) for customisabl
 
 Create a `/app/[lang]` folder, and move all files (e.g. `page.tsx`, `layout.tsx`) from `/app` to the folder.
 
-Wrap the root provider inside `I18nProvider`, and provide available languages & translations to it.
+Provide i18n prop like available languages & translations to `<RootProvider />`.
 Note that only English translations are provided by default.
 
 ```tsx title="app/[lang]/layout.tsx"
 import { RootProvider } from 'fumadocs-ui/provider';
-import { I18nProvider, type Translations } from 'fumadocs-ui/i18n';
+import type { Translations } from 'fumadocs-ui/i18n';
 
 const cn: Partial<Translations> = {
   search: 'Translated Content',
@@ -105,13 +105,15 @@ export default async function RootLayout({
   return (
     <html lang={lang}>
       <body>
-        <I18nProvider
-          locale={lang}
-          locales={locales}
-          translations={{ cn }[lang]}
+        <RootProvider
+          i18n={{
+            locale: lang,
+            locales,
+            translations: { cn }[lang],
+          }}
         >
-          <RootProvider>{children}</RootProvider>
-        </I18nProvider>
+          {children}
+        </RootProvider>
       </body>
     </html>
   );

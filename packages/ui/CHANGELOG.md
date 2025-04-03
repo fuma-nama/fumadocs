@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 15.2.3
+
+### Patch Changes
+
+- 5e4e9ec: Deprecate I18nProvider in favour of `<RootProvider />` `i18n` prop
+- 293178f: revert framework migration on i18n provider
+  - fumadocs-core@15.2.3
+
 ## 15.2.2
 
 ### Patch Changes
