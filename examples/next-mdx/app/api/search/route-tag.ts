@@ -8,5 +8,5 @@ export const { GET } = createFromSource(source, (page) => ({
   id: page.url,
   structuredData: page.data.structuredData,
   // use your desired value, like page.slugs[0]
-  tag: "<value>"
+  tag: '<value>',
 }));
