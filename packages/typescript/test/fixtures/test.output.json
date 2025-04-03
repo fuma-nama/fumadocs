@@ -16,7 +16,7 @@
         "tags": {
           "defaultValue": "4"
         },
-        "type": "number | undefined",
+        "type": "number",
         "required": false
       }
     ]
@@ -38,7 +38,7 @@
         "tags": {
           "defaultValue": "4"
         },
-        "type": "number | undefined",
+        "type": "number",
         "required": false
       },
       {

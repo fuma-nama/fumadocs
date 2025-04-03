@@ -185,6 +185,12 @@ function getDocEntry(
     typeName = subType.getAliasSymbol()?.getEscapedName() ?? typeName;
   }
 
+  if (prop.isOptional() && typeName.endsWith('| undefined')) {
+    typeName = typeName
+      .slice(0, typeName.length - '| undefined'.length)
+      .trimEnd();
+  }
+
   if ('remarks' in tags) {
     typeName = /^`(?<name>.+)`/.exec(tags.remarks)?.[1] ?? typeName;
   }
