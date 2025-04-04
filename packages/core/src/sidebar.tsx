@@ -91,7 +91,7 @@ export type SidebarContentProps<T extends ElementType> = AsProps<T> & {
    *
    * When the sidebar is opening and media query is matched, scrolling outside the sidebar will be blocked.
    *
-   * @example (min-width: 1000px)
+   * @example (max-width: 1000px)
    */
   removeScrollOn?: string;
 };
@@ -100,7 +100,7 @@ export function SidebarList<T extends ElementType = 'aside'>({
   as,
   blockScrollingWidth,
   removeScrollOn = blockScrollingWidth
-    ? `(min-width: ${blockScrollingWidth}px)`
+    ? `(width < ${blockScrollingWidth}px)`
     : undefined,
   ...props
 }: SidebarContentProps<T>): ReactElement {
@@ -112,7 +112,7 @@ export function SidebarList<T extends ElementType = 'aside'>({
     const mediaQueryList = window.matchMedia(removeScrollOn);
 
     const handleChange = (): void => {
-      setIsBlocking(!mediaQueryList.matches);
+      setIsBlocking(mediaQueryList.matches);
     };
     handleChange();
     mediaQueryList.addEventListener('change', handleChange);
