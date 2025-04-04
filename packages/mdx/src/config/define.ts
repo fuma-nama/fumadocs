@@ -59,7 +59,7 @@ export interface DocsCollection<
 
 export function defineCollections<
   T extends 'doc' | 'meta',
-  Schema extends StandardSchemaV1 = StandardSchemaV1,
+  Schema extends StandardSchemaV1 = StandardSchemaV1<unknown, any>,
   Async extends boolean = false,
 >(
   options: { type: T } & (T extends 'doc'
