@@ -73,7 +73,6 @@ export interface MenuItemType extends BaseItem {
          */
         menu?: HTMLAttributes<HTMLElement> & {
           banner?: ReactNode;
-          footer?: ReactNode;
         };
       })
     | CustomItem

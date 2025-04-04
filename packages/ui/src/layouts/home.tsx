@@ -183,23 +183,28 @@ function NavbarLinkItem({
       if (child.type === 'custom')
         return <Fragment key={j}>{child.children}</Fragment>;
 
-      const { banner, footer, ...rest } = child.menu ?? {};
+      const {
+        banner = child.icon ? (
+          <div className="w-fit rounded-md border bg-fd-muted p-1 [&_svg]:size-4">
+            {child.icon}
+          </div>
+        ) : null,
+        ...rest
+      } = child.menu ?? {};
 
       return (
         <NavbarMenuLink key={j} href={child.url} {...rest}>
-          {banner ??
-            (child.icon ? (
-              <div className="w-fit rounded-md border bg-fd-muted p-1 [&_svg]:size-4">
-                {child.icon}
-              </div>
-            ) : null)}
-          <p className="-mb-1 text-sm font-medium">{child.text}</p>
-          {child.description ? (
-            <p className="text-[13px] text-fd-muted-foreground">
-              {child.description}
-            </p>
-          ) : null}
-          {footer}
+          {rest.children ?? (
+            <>
+              {banner}
+              <p className="-mb-1 text-sm font-medium">{child.text}</p>
+              {child.description ? (
+                <p className="text-[13px] text-fd-muted-foreground">
+                  {child.description}
+                </p>
+              ) : null}
+            </>
+          )}
         </NavbarMenuLink>
       );
     });
