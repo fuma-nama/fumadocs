@@ -1,7 +1,7 @@
 import { parseFilePath, parseFolderPath } from '@/source/path';
 import { describe, expect, test } from 'vitest';
 import type { Root } from '@/server/page-tree';
-import { findNeighbour } from '@/server/page-tree-utils';
+import { findNeighbour } from '@/utils/page-tree';
 import { PageTree } from '../dist/server';
 import { getBreadcrumbItems } from '@/breadcrumb';
 import { joinPath, splitPath } from '@/utils/path';
