@@ -56,6 +56,10 @@
     "./theme/*": {
       "import": "./dist/theme/*.js",
       "types": "./dist/theme/*.d.ts"
+    },
+    "./utils/*": {
+      "import": "./dist/utils/*.js",
+      "types": "./dist/utils/*.d.ts"
     }
   },
   "files": [
