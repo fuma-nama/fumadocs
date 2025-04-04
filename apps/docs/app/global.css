@@ -10,12 +10,6 @@
 @source '../node_modules/fumadocs-openapi/dist/**/*.js';
 @plugin 'tailwindcss-animate';
 
-@layer base {
-  button {
-    cursor: pointer;
-  }
-}
-
 @theme {
   @keyframes stroke {
     from {

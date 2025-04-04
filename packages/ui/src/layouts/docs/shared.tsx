@@ -1,5 +1,6 @@
-import { BaseLinkItem, type LinkItemType } from '@/layouts/links';
+import type { LinkItemType } from '@/layouts/links';
 import {
+  type SidebarComponents,
   SidebarFolder,
   SidebarFolderContent,
   SidebarFolderLink,
@@ -7,10 +8,8 @@ import {
   SidebarItem,
   type SidebarProps,
 } from '@/components/layout/sidebar';
-import { cn } from '@/utils/cn';
-import { buttonVariants } from '@/components/ui/button';
 import type { PageTree } from 'fumadocs-core/server';
-import type { FC, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import type { Option } from '@/components/layout/root-toggle';
 
 export const layoutVariables = {
@@ -41,12 +40,6 @@ export interface SidebarOptions extends SidebarProps {
   hideSearch?: boolean;
 }
 
-export interface SidebarComponents {
-  Item: FC<{ item: PageTree.Item }>;
-  Folder: FC<{ item: PageTree.Folder; level: number; children: ReactNode }>;
-  Separator: FC<{ item: PageTree.Separator }>;
-}
-
 export function SidebarLinkItem({
   item,
   ...props
@@ -75,25 +68,6 @@ export function SidebarLinkItem({
         </SidebarFolderContent>
       </SidebarFolder>
     );
-
-  if (item.type === 'button') {
-    return (
-      <BaseLinkItem
-        item={item}
-        {...props}
-        className={cn(
-          buttonVariants({
-            color: 'secondary',
-          }),
-          'gap-1.5 [&_svg]:size-4',
-          props.className,
-        )}
-      >
-        {item.icon}
-        {item.text}
-      </BaseLinkItem>
-    );
-  }
 
   if (item.type === 'custom') return <div {...props}>{item.children}</div>;
 

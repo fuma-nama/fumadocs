@@ -176,7 +176,7 @@ function NavbarLinkItem({
   item: LinkItemType;
   className?: string;
 }) {
-  if (item.type === 'custom') return item.children;
+  if (item.type === 'custom') return <div {...props}>{item.children}</div>;
 
   if (item.type === 'menu') {
     const children = item.items.map((child, j) => {

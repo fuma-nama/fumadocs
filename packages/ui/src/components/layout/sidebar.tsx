@@ -5,6 +5,7 @@ import { usePathname } from 'fumadocs-core/framework';
 import {
   type ButtonHTMLAttributes,
   createContext,
+  type FC,
   Fragment,
   type HTMLAttributes,
   type ReactNode,
@@ -32,7 +33,6 @@ import type {
 } from '@radix-ui/react-collapsible';
 import type { PageTree } from 'fumadocs-core/server';
 import { useTreeContext, useTreePath } from '@/contexts/tree';
-import type { SidebarComponents } from '@/layouts/docs/shared';
 
 export interface SidebarProps extends HTMLAttributes<HTMLElement> {
   /**
@@ -405,6 +405,12 @@ function useInternalContext(): InternalContext {
   if (!ctx) throw new Error('<Sidebar /> component required.');
 
   return ctx;
+}
+
+export interface SidebarComponents {
+  Item: FC<{ item: PageTree.Item }>;
+  Folder: FC<{ item: PageTree.Folder; level: number; children: ReactNode }>;
+  Separator: FC<{ item: PageTree.Separator }>;
 }
 
 /**

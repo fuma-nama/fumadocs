@@ -9,9 +9,7 @@ Fumadocs allows adding additional links to your layouts with a `links` prop, lik
 
 ![Nav](/docs/nav.png)
 
-You can add new links by customising the `links` option of layouts.
-
-```tsx title="app/layout.config.tsx"
+```tsx tab="Shared Options" title="app/layout.config.tsx"
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 
 export const baseOptions: BaseLayoutProps = {
@@ -20,22 +18,39 @@ export const baseOptions: BaseLayoutProps = {
 };
 ```
 
-While `baseOptions` defines the options for both home and docs layout, you can customise the links shown on each of them with props. (it's just how you use React components).
-
-```tsx
-import { DocsLayout, type DocsLayoutProps } from 'fumadocs-ui/layouts/docs';
-import type { ReactNode } from 'react';
+```tsx tab="Docs Layout"
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 import { baseOptions } from '@/app/layout.config';
 import { source } from '@/lib/source';
-
-const docsOptions: DocsLayoutProps = {
-  ...baseOptions,
-  tree: source.pageTree,
-  links: [], // [!code highlight]
-};
+import type { ReactNode } from 'react';
 
 export default function Layout({ children }: { children: ReactNode }) {
-  return <DocsLayout {...docsOptions}>{children}</DocsLayout>;
+  return (
+    <DocsLayout
+      {...baseOptions}
+      tree={source.pageTree}
+      links={[]} // [!code highlight]
+    >
+      {children}
+    </DocsLayout>
+  );
+}
+```
+
+```tsx tab="Home Layout"
+import { HomeLayout } from 'fumadocs-ui/layouts/home';
+import { baseOptions } from '@/app/layout.config';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <HomeLayout
+      {...baseOptions}
+      links={[]} // [!code highlight]
+    >
+      {children}
+    </HomeLayout>
+  );
 }
 ```
 
@@ -124,24 +139,6 @@ export const baseOptions: BaseLayoutProps = {
 };
 ```
 
-### Button Item
-
-Same as link item, but is shown as a button.
-
-```tsx title="app/layout.config.tsx"
-import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
-
-export const baseOptions: BaseLayoutProps = {
-  links: [
-    {
-      type: 'button',
-      text: 'Feedback',
-      url: '/feedback',
-    },
-  ],
-};
-```
-
 ### Navigation Menu
 
 A navigation menu containing link items.
@@ -187,7 +184,8 @@ export const baseOptions: BaseLayoutProps = {
   links: [
     {
       type: 'custom',
-      children: <div>Hey</div>,
+      children: <Button variant="primary">Login</Button>,
+      secondary: true,
     },
   ],
 };

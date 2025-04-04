@@ -63,3 +63,22 @@ import { DocsLayout } from 'fumadocs-ui/layouts/docs';
   You can specify more props to the [Docs Layout](/docs/ui/layouts/docs)
   component.
 </Callout>
+
+#### Decoration
+
+Change the icon/styles of tabs.
+
+```tsx
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+
+<DocsLayout
+  sidebar={{
+    tabs: {
+      transform: (option, node) => ({
+        ...option,
+        icon: 'my icon',
+      }),
+    },
+  }}
+/>;
+```
