@@ -9,7 +9,7 @@ import {
 } from '@/ui/components/select';
 import { Input, labelVariants } from '@/ui/components/input';
 import type { HTMLAttributes } from 'react';
-import { cn } from 'fumadocs-ui/components/api';
+import { cn } from 'fumadocs-ui/utils/cn';
 
 export default function ServerSelect({
   server,

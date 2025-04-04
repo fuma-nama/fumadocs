@@ -7,7 +7,6 @@ import {
 } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
-import { cn, buttonVariants } from 'fumadocs-ui/components/api';
 import {
   Select,
   SelectContent,
@@ -20,6 +19,8 @@ import { resolve } from '@/playground/resolve';
 import { Input, labelVariants } from '@/ui/components/input';
 import { getDefaultValue } from './get-default-values';
 import { useSchemaContext } from './client';
+import { cn } from 'fumadocs-ui/utils/cn';
+import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 
 type FieldOfType<Type> = Extract<RequestSchema, { type: Type }>;
 interface InputHeaderProps {
