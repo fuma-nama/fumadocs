@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 15.2.4
+
+### Patch Changes
+
+- 1057957: Fix type problems on dynamic codeblock
+
 ## 15.2.3
 
 ## 15.2.2
