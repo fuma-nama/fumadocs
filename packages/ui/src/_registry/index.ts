@@ -37,7 +37,35 @@ export const registry: Registry = {
       mapImportPath: contextsMap,
       unlisted: true,
     },
-
+    {
+      name: 'layouts/docs',
+      files: ['layouts/docs.tsx'],
+      unlisted: true,
+      mapImportPath: contextsMap,
+    },
+    {
+      name: 'layouts/notebook',
+      files: ['layouts/notebook.tsx'],
+      unlisted: true,
+      mapImportPath: contextsMap,
+    },
+    {
+      name: 'layouts/page',
+      files: [
+        {
+          in: 'page.tsx',
+          out: 'components:layouts/page.tsx',
+        },
+      ],
+      mapImportPath: contextsMap,
+      unlisted: true,
+    },
+    {
+      name: 'layouts/home',
+      files: ['layouts/home.tsx'],
+      mapImportPath: contextsMap,
+      unlisted: true,
+    },
     {
       name: 'layout/root-toggle',
       description: 'the UI of Sidebar Tabs',
@@ -48,30 +76,6 @@ export const registry: Registry = {
       name: 'layout/language-toggle',
       description: 'Language Select',
       files: ['components/layout/language-toggle.tsx'],
-      mapImportPath: contextsMap,
-    },
-    {
-      name: 'layouts/docs',
-      description: 'Replace Docs Layout (Full)',
-      files: ['layouts/docs.tsx'],
-      mapImportPath: contextsMap,
-    },
-    {
-      name: 'layouts/notebook',
-      description: 'Replace Notebook Layout',
-      files: ['layouts/notebook.tsx'],
-      mapImportPath: contextsMap,
-    },
-    {
-      name: 'layouts/home',
-      description: 'Replace Home Layout',
-      files: ['layouts/home.tsx'],
-      mapImportPath: contextsMap,
-    },
-    {
-      name: 'layouts/page',
-      description: 'Replace Page Layout',
-      files: ['components:page.tsx'],
       mapImportPath: contextsMap,
     },
     { name: 'accordion', files: ['components/accordion.tsx'] },

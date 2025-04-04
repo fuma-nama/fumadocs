@@ -17,6 +17,11 @@ export async function customise(resolver: Resolver, config: Config) {
               value: 'docs',
               hint: 'main UI of your docs',
             },
+            {
+              label: 'Home Layout',
+              value: 'home',
+              hint: 'the navbar for your other pages',
+            },
           ],
         }),
       mode: (v) => {
@@ -60,12 +65,17 @@ export async function customise(resolver: Resolver, config: Config) {
     },
   );
 
-  if (result.target === 'docs' && result.mode) {
-    if (result.page) await add('layouts/page', resolver, config);
-
+  if (result.target === 'docs') {
+    let pageAdded = false;
     if (result.mode === 'minimal') {
       await add('layouts/docs-min', resolver, config);
+      pageAdded = true;
     } else {
+      if (result.page) {
+        await add('layouts/page', resolver, config);
+        pageAdded = true;
+      }
+
       await add(
         result.mode === 'full-default' ? 'layouts/docs' : 'layouts/notebook',
         resolver,
@@ -82,11 +92,27 @@ export async function customise(resolver: Resolver, config: Config) {
         picocolors.greenBright(
           '`fumadocs-ui/layouts/docs` -> `@/components/layouts/docs`',
         ),
-        result.page || result.mode === 'minimal'
+        pageAdded
           ? picocolors.greenBright(
               '`fumadocs-ui/page` -> `@/components/layouts/page`',
             )
           : '',
+      ].join('\n'),
+    );
+  }
+
+  if (result.target === 'home') {
+    await add('layouts/home', resolver, config);
+
+    log.info(
+      [
+        picocolors.bold('What is Next?'),
+        'You can check the installed components in `components/layouts`.',
+        picocolors.dim('---'),
+        'Open your `layout.tsx` files, replace the imports of components:',
+        picocolors.greenBright(
+          '`fumadocs-ui/layouts/home` -> `@/components/layouts/home`',
+        ),
       ].join('\n'),
     );
   }
