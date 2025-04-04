@@ -42,25 +42,6 @@ import { DocsBody } from 'fumadocs-ui/page';
 </DocsBody>;
 ```
 
-### Category
-
-Optional, link the other pages in its (page tree) folder with cards.
-
-> You can use this component without `<DocsPage />`.
-
-```tsx title="page.tsx"
-import { source } from '@/lib/source';
-import { DocsCategory } from 'fumadocs-ui/page';
-
-const page = source.getPage(['...']);
-
-<DocsCategory page={page} from={source} />;
-```
-
-**Demo:**
-
-<DocsCategory />
-
 ## Configurations
 
 ### Full Mode
