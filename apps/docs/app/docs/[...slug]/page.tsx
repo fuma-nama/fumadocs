@@ -4,7 +4,6 @@ import {
   DocsBody,
   DocsTitle,
   DocsDescription,
-  DocsCategory,
 } from 'fumadocs-ui/page';
 import { notFound } from 'next/navigation';
 import {
@@ -38,6 +37,8 @@ import Link from 'fumadocs-core/link';
 import { UiOverview } from '@/components/ui-overview';
 import { AutoTypeTable } from 'fumadocs-typescript/ui';
 import { createGenerator } from 'fumadocs-typescript';
+import { getPageTreePeers } from 'fumadocs-core/server';
+import { Card, Cards } from 'fumadocs-ui/components/card';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -137,19 +138,31 @@ export default async function Page(props: {
             Files,
             blockquote: Callout as unknown as FC<ComponentProps<'blockquote'>>,
             APIPage: openapi.APIPage,
-            DocsCategory: ({ slugs = params.slug }: { slugs?: string[] }) => (
-              <DocsCategory page={source.getPage(slugs)!} from={source} />
-            ),
+            DocsCategory: ({ url }) => {
+              return <DocsCategory url={url ?? page.url} />;
+            },
             UiOverview,
 
             ...(await import('@/content/docs/ui/components/tabs.client')),
             ...(await import('@/content/docs/ui/theme.client')),
           }}
         />
-        {page.data.index ? <DocsCategory page={page} from={source} /> : null}
+        {page.data.index ? <DocsCategory url={page.url} /> : null}
       </DocsBody>
       <Rate onRateAction={onRateAction} />
     </DocsPage>
+  );
+}
+
+function DocsCategory({ url }: { url: string }) {
+  return (
+    <Cards>
+      {getPageTreePeers(source.pageTree, url).map((peer) => (
+        <Card key={peer.url} title={peer.name} href={peer.url}>
+          {peer.description}
+        </Card>
+      ))}
+    </Cards>
   );
 }
 

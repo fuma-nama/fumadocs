@@ -68,7 +68,7 @@ See [Middleware](/docs/headless/internationalization#middleware) for customisabl
 
 Create a `/app/[lang]` folder, and move all files (e.g. `page.tsx`, `layout.tsx`) from `/app` to the folder.
 
-Provide i18n prop like available languages & translations to `<RootProvider />`.
+Provide UI translations and other config to `<RootProvider />`.
 Note that only English translations are provided by default.
 
 ```tsx title="app/[lang]/layout.tsx"
@@ -108,7 +108,9 @@ export default async function RootLayout({
         <RootProvider
           i18n={{
             locale: lang,
+            // available languages
             locales,
+            // translations for UI
             translations: { cn }[lang],
           }}
         >

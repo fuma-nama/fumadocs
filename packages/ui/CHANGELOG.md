@@ -1,5 +1,13 @@
 # next-docs-ui
 
+## 15.2.4
+
+### Patch Changes
+
+- 1057957: Fix type problems on dynamic codeblock
+- Updated dependencies [1057957]
+  - fumadocs-core@15.2.4
+
 ## 15.2.3
 
 ### Patch Changes

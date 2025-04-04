@@ -45,6 +45,14 @@ console.log('Hello World');
 | Hello | World       |
 ````
 
+### Images
+
+Images are automatically optimized for `next/image`.
+
+```mdx
+![Image](/image.png)
+```
+
 ### Auto Links
 
 Internal links use the `next/link` component to allow prefetching and avoid hard-reload.
@@ -82,6 +90,7 @@ Useful for adding links, it is included by default.
   >
     Learn more about caching in Next.js
   </Card>
+  <Card title="href is optional">Learn more about `fetch` in Next.js.</Card>
 </Cards>
 ```
 
@@ -92,6 +101,7 @@ Useful for adding links, it is included by default.
   >
     Learn more about caching in Next.js
   </Card>
+  <Card title="href is optional">Learn more about `fetch` in Next.js.</Card>
 </Cards>
 
 #### Icon
@@ -114,21 +124,26 @@ import { HomeIcon } from 'lucide-react';
   </Card>
 </Cards>
 
-#### Without href
+#### "Further Reading" Section
 
-```mdx
+You can do something like:
+
+```tsx title="page.tsx"
+import { getPageTreePeers } from 'fumadocs-core/server';
+import { source } from '@/lib/source';
+
 <Cards>
-  <Card title="Fetching, Caching, and Revalidating">
-    Learn more about `fetch` in Next.js.
-  </Card>
-</Cards>
+  {getPageTreePeers(source.pageTree, '/docs/my-page').map((peer) => (
+    <Card key={peer.url} title={peer.name} href={peer.url}>
+      {peer.description}
+    </Card>
+  ))}
+</Cards>;
 ```
 
-<Cards>
-  <Card title="Fetching, Caching, and Revalidating">
-    Learn more about `fetch` in Next.js.
-  </Card>
-</Cards>
+This will show the other pages in the same folder as cards.
+
+<DocsCategory url="/docs/ui/navigation" />
 
 ### Callouts
 
@@ -136,17 +151,11 @@ Useful for adding tips/warnings, it is included by default.
 
 ```mdx
 <Callout>Hello World</Callout>
+
+<Callout title="Title">Hello World</Callout>
 ```
 
 <Callout>Hello World</Callout>
-
-#### Title
-
-Specify a callout title.
-
-```mdx
-<Callout title="Title">Hello World</Callout>
-```
 
 <Callout title="Title">Hello World</Callout>
 
@@ -167,10 +176,6 @@ You can specify the type of callout.
 <Callout title="Title" type="error">
   Hello World
 </Callout>
-
-### Customise Components
-
-See [all MDX components and available options](/docs/ui/mdx).
 
 ## Headings
 
@@ -318,15 +323,6 @@ Write Typescript codeblocks with hover type information and detected types error
 
 Not enabled by default. See [Twoslash](/docs/ui/twoslash).
 
-## Images
-
-All built-in content sources handle images properly.
-Images are automatically optimized for `next/image`.
-
-```mdx
-![Image](/image.png)
-```
-
 ## Optional
 
 Some optional plugins you can enable.
@@ -365,4 +361,4 @@ To enable, see [Remark Install](/docs/headless/mdx/install).
 
 ### More
 
-You can see [a list of plugins](/docs/headless/mdx) supported by Fumadocs.
+You can see [a list of plugins](/docs/headless/mdx) provided by Fumadocs.

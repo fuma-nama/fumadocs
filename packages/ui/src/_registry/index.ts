@@ -2,12 +2,14 @@ import { fileURLToPath } from 'node:url';
 import type { Registry } from '@fumadocs/cli/build';
 import * as path from 'node:path';
 
-const contextsMap = {
+const importMap = {
   'contexts/sidebar.tsx': 'fumadocs-ui/contexts/sidebar',
   'contexts/search.tsx': 'fumadocs-ui/contexts/search',
   'contexts/tree.tsx': 'fumadocs-ui/contexts/tree',
   'contexts/i18n.tsx': 'fumadocs-ui/contexts/i18n',
   'contexts/layout.tsx': 'fumadocs-ui/contexts/layout',
+  'utils/get-sidebar-tabs.tsx': 'fumadocs-ui/utils/get-sidebar-tabs',
+  'utils/use-copy-button.ts': 'fumadocs-ui/utils/use-copy-button',
 };
 
 const srcDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../');
@@ -34,45 +36,49 @@ export const registry: Registry = {
           out: 'components:layouts/page.tsx',
         },
       ],
-      mapImportPath: contextsMap,
+      mapImportPath: importMap,
       unlisted: true,
     },
-
+    {
+      name: 'layouts/docs',
+      files: ['layouts/docs.tsx'],
+      unlisted: true,
+      mapImportPath: importMap,
+    },
+    {
+      name: 'layouts/notebook',
+      files: ['layouts/notebook.tsx'],
+      unlisted: true,
+      mapImportPath: importMap,
+    },
+    {
+      name: 'layouts/page',
+      files: [
+        {
+          in: 'page.tsx',
+          out: 'components:layouts/page.tsx',
+        },
+      ],
+      mapImportPath: importMap,
+      unlisted: true,
+    },
+    {
+      name: 'layouts/home',
+      files: ['layouts/home.tsx'],
+      mapImportPath: importMap,
+      unlisted: true,
+    },
     {
       name: 'layout/root-toggle',
       description: 'the UI of Sidebar Tabs',
       files: ['components/layout/root-toggle.tsx'],
-      mapImportPath: contextsMap,
+      mapImportPath: importMap,
     },
     {
       name: 'layout/language-toggle',
       description: 'Language Select',
       files: ['components/layout/language-toggle.tsx'],
-      mapImportPath: contextsMap,
-    },
-    {
-      name: 'layouts/docs',
-      description: 'Replace Docs Layout (Full)',
-      files: ['layouts/docs.tsx'],
-      mapImportPath: contextsMap,
-    },
-    {
-      name: 'layouts/notebook',
-      description: 'Replace Notebook Layout',
-      files: ['layouts/notebook.tsx'],
-      mapImportPath: contextsMap,
-    },
-    {
-      name: 'layouts/home',
-      description: 'Replace Home Layout',
-      files: ['layouts/home.tsx'],
-      mapImportPath: contextsMap,
-    },
-    {
-      name: 'layouts/page',
-      description: 'Replace Page Layout',
-      files: ['components:page.tsx'],
-      mapImportPath: contextsMap,
+      mapImportPath: importMap,
     },
     { name: 'accordion', files: ['components/accordion.tsx'] },
     {

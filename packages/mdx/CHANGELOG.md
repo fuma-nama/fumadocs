@@ -1,5 +1,13 @@
 # next-docs-mdx
 
+## 11.5.8
+
+### Patch Changes
+
+- 6c5e47a: add default types for collection without schema
+- Updated dependencies [1057957]
+  - fumadocs-core@15.2.4
+
 ## 11.5.7
 
 ### Patch Changes

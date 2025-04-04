@@ -35,12 +35,16 @@ export const defaultThemes = {
   dark: 'github-dark',
 };
 
-export type HighlightOptions = CodeToHastOptionsCommon<BundledLanguage> &
-  (CodeOptionsThemes<BundledTheme> | Record<never, never>) &
+export type HighlightOptionsCommon = CodeToHastOptionsCommon<BundledLanguage> &
   CodeOptionsMeta & {
     engine?: Awaitable<RegexEngine>;
     components?: Partial<Components>;
   };
+
+export type HighlightOptionsThemes = CodeOptionsThemes<BundledTheme>;
+
+export type HighlightOptions = HighlightOptionsCommon &
+  (HighlightOptionsThemes | Record<never, never>);
 
 const highlighters = new Map<string, Promise<Highlighter>>();
 

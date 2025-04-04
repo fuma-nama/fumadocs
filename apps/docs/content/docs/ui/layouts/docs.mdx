@@ -49,25 +49,6 @@ import { DocsLayout } from 'fumadocs-ui/layouts/docs';
 
 See [Navigation Guide](/docs/ui/navigation/sidebar#sidebar-tabs) for usages.
 
-#### Decoration
-
-Change the icon/styles of tabs.
-
-```tsx
-import { DocsLayout } from 'fumadocs-ui/layouts/docs';
-
-<DocsLayout
-  sidebar={{
-    tabs: {
-      transform: (option, node) => ({
-        ...option,
-        icon: 'my icon',
-      }),
-    },
-  }}
-/>;
-```
-
 ## Nav
 
 A mobile-only navbar, we recommend to customise it from `baseOptions`.

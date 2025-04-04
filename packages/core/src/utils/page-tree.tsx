@@ -1,4 +1,4 @@
-import type * as PageTree from './page-tree';
+import type * as PageTree from '@/server/page-tree';
 
 /**
  * Flatten tree to an array of page nodes
@@ -80,4 +80,39 @@ export function separatePageTree(pageTree: PageTree.Root): PageTree.Root[] {
       children: child.children,
     };
   });
+}
+
+/**
+ * Get other page tree nodes that lives under the same parent
+ */
+export function getPageTreePeers(
+  tree: PageTree.Root,
+  url: string,
+): PageTree.Item[] {
+  const parent = findParentFromTree(tree, url);
+  if (!parent) return [];
+
+  return parent.children.filter(
+    (item) => item.type === 'page' && item.url !== url,
+  ) as PageTree.Item[];
+}
+
+function findParentFromTree(
+  node: PageTree.Root | PageTree.Folder,
+  url: string,
+): PageTree.Root | PageTree.Folder | undefined {
+  if ('index' in node && node.index?.url === url) {
+    return node;
+  }
+
+  for (const child of node.children) {
+    if (child.type === 'folder') {
+      const parent = findParentFromTree(child, url);
+      if (parent) return parent;
+    }
+
+    if (child.type === 'page' && child.url === url) {
+      return node;
+    }
+  }
 }

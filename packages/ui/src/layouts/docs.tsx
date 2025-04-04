@@ -36,7 +36,6 @@ import {
   SearchToggle,
 } from '@/components/layout/search-toggle';
 import {
-  checkPageTree,
   getSidebarTabsFromOptions,
   layoutVariables,
   SidebarLinkItem,
@@ -76,7 +75,6 @@ export function DocsLayout({
   children,
   ...props
 }: DocsLayoutProps): ReactNode {
-  checkPageTree(props.tree);
   const links = getLinks(props.links ?? [], props.githubUrl);
 
   const variables = cn(
@@ -277,4 +275,4 @@ export function DocsLayoutSidebarFooter({
 }
 
 export { CollapsibleControl, Navbar, NavbarSidebarTrigger, type LinkItemType };
-export { getSidebarTabsFromOptions, type TabOptions } from './docs/shared';
+export { getSidebarTabsFromOptions } from './docs/shared';

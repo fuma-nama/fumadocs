@@ -30,7 +30,6 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import {
-  checkPageTree,
   getSidebarTabsFromOptions,
   layoutVariables,
   SidebarLinkItem,
@@ -80,7 +79,6 @@ export function DocsLayout({
   themeSwitch,
   ...props
 }: DocsLayoutProps) {
-  checkPageTree(props.tree);
   const navMode = nav.mode ?? 'auto';
   const links = getLinks(props.links ?? [], props.githubUrl);
   const tabs = useMemo(
