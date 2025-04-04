@@ -1,6 +1,9 @@
 'use client';
 import { CodeBlock, Pre } from '@/components/codeblock';
-import type { HighlightOptions } from 'fumadocs-core/highlight';
+import type {
+  HighlightOptionsCommon,
+  HighlightOptionsThemes,
+} from 'fumadocs-core/highlight';
 import { useShiki } from 'fumadocs-core/highlight/client';
 import { cn } from '@/utils/cn';
 
@@ -12,7 +15,7 @@ const components = {
       </CodeBlock>
     );
   },
-} satisfies HighlightOptions['components'];
+} satisfies HighlightOptionsCommon['components'];
 
 export function DynamicCodeBlock({
   lang,
@@ -21,7 +24,7 @@ export function DynamicCodeBlock({
 }: {
   lang: string;
   code: string;
-  options?: Omit<HighlightOptions, 'lang'>;
+  options?: Omit<HighlightOptionsCommon, 'lang'> & HighlightOptionsThemes;
 }) {
   return useShiki(code, {
     lang,

@@ -27,7 +27,16 @@ export default function Example() {
           className="bg-transparent px-4 py-2 text-sm focus-visible:outline-none"
         />
       </div>
-      <DynamicCodeBlock lang={lang} code={code} options={{}} />
+      <DynamicCodeBlock
+        lang={lang}
+        code={code}
+        options={{
+          themes: {
+            light: 'catppuccin-latte',
+            dark: 'catppuccin-mocha',
+          },
+        }}
+      />
     </div>
   );
 }
