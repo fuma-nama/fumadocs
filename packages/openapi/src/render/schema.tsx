@@ -13,6 +13,7 @@ const keys: {
   minLength: 'Minimum length',
   maxLength: 'Maximum length',
   pattern: 'Pattern',
+  example: 'Example',
   format: 'Format',
 };
 
