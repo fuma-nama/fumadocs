@@ -1,21 +1,21 @@
-import { App } from 'octokit';
+import { App, Octokit } from 'octokit';
 import type { Feedback } from '@/components/rate';
 
 export const repo = 'fumadocs';
 export const owner = 'fuma-nama';
 export const DocsCategory = 'Docs Feedback';
 
-const octokit = await getOctokit();
-const destination = await getFeedbackDestination();
+let instance: Octokit | undefined;
 
-async function getOctokit() {
+async function getOctokit(): Promise<Octokit> {
+  if (instance) return instance;
   const appId = process.env.GITHUB_APP_ID;
   const privateKey = process.env.GITHUB_APP_PRIVATE_KEY;
+
   if (!appId || !privateKey) {
-    console.warn(
+    throw new Error(
       'No GitHub keys provided for Github app, docs feedback feature will not work.',
     );
-    return;
   }
 
   const app = new App({
@@ -34,24 +34,29 @@ async function getOctokit() {
     },
   );
 
-  return app.getInstallationOctokit(data.id);
+  instance = await app.getInstallationOctokit(data.id);
+  return instance;
 }
 
+interface RepositoryInfo {
+  id: string;
+  discussionCategories: {
+    nodes: {
+      id: string;
+      name: string;
+    }[];
+  };
+}
+
+let cachedDestination: RepositoryInfo | undefined;
 async function getFeedbackDestination() {
-  if (!octokit) return;
+  if (cachedDestination) return cachedDestination;
+  const octokit = await getOctokit();
 
   const {
     repository,
   }: {
-    repository: {
-      id: string;
-      discussionCategories: {
-        nodes: {
-          id: string;
-          name: string;
-        }[];
-      };
-    };
+    repository: RepositoryInfo;
   } = await octokit.graphql(`
   query {
     repository(owner: "${owner}", name: "${repo}") {
@@ -63,11 +68,13 @@ async function getFeedbackDestination() {
   }
 `);
 
-  return repository;
+  return (cachedDestination = repository);
 }
 
 export async function onRateAction(url: string, feedback: Feedback) {
   'use server';
+  const octokit = await getOctokit();
+  const destination = await getFeedbackDestination();
   if (!octokit || !destination) return;
 
   const category = destination.discussionCategories.nodes.find(

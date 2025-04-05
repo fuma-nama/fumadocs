@@ -1,13 +1,12 @@
 import './global.css';
 import type { Viewport } from 'next';
-import { GeistSans } from 'geist/font/sans';
-import { GeistMono } from 'geist/font/mono';
 import { baseUrl, createMetadata } from '@/lib/metadata';
 import { Body } from '@/app/layout.client';
 import { Provider } from './provider';
 import { AISearchTrigger } from '@/components/ai';
 import { MessageCircle } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { Geist, Geist_Mono } from 'next/font/google';
 
 export const metadata = createMetadata({
   title: {
@@ -16,6 +15,14 @@ export const metadata = createMetadata({
   },
   description: 'The Next.js framework for building documentation sites',
   metadataBase: baseUrl,
+});
+
+const geist = Geist({
+  variable: '--font-geist-sans',
+});
+
+const mono = Geist_Mono({
+  variable: '--font-geist-mono',
 });
 
 export const viewport: Viewport = {
@@ -29,7 +36,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="en"
-      className={`${GeistSans.variable} ${GeistMono.variable}`}
+      className={`${geist.variable} ${mono.variable}`}
       suppressHydrationWarning
     >
       <Body>
