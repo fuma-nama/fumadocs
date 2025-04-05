@@ -1,5 +1,11 @@
 # next-docs-zeta
 
+## 15.2.5
+
+### Patch Changes
+
+- c66ed79: Fix `removeScrollOn` on sidebar primitive
+
 ## 15.2.4
 
 ### Patch Changes
