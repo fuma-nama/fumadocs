@@ -54,7 +54,7 @@
     "mdast-util-mdx-jsx": "^3.2.0",
     "remark": "^15.0.0",
     "tsconfig": "workspace:*",
-    "typescript": "^5.8.2",
+    "typescript": "^5.8.3",
     "unified": "^11.0.5",
     "vfile": "^6.0.3"
   },

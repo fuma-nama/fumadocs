@@ -57,7 +57,7 @@
     "fumadocs-core": "workspace:*",
     "fumadocs-ui": "workspace:*",
     "tsconfig": "workspace:*",
-    "typescript": "^5.8.2",
+    "typescript": "^5.8.3",
     "unified": "^11.0.5"
   },
   "peerDependencies": {
