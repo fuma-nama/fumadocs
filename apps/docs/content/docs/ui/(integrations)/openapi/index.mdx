@@ -5,42 +5,6 @@ description: Generating docs for OpenAPI schema
 
 You can setup Fumadocs OpenAPI manually, or use Fumadocs CLI.
 
-## Auto Setup
-
-Using Fumadocs CLI.
-
-<Tabs groupId='package-manager' persist items={['npm', 'pnpm', 'yarn', 'bun']}>
-
-```bash tab="npm"
-# install the CLI package, if you haven't installed it yet
-npm install @fumadocs/cli --save-dev
-
-npx fumadocs init openapi
-```
-
-```bash tab="pnpm"
-# install the CLI package, if you haven't installed it yet
-pnpm add @fumadocs/cli --save-dev
-
-pnpm fumadocs init openapi
-```
-
-```bash tab="yarn"
-# install the CLI package, if you haven't installed it yet
-yarn add @fumadocs/cli ---dev
-
-yarn fumadocs init openapi
-```
-
-```bash tab="bun"
-# install the CLI package, if you haven't installed it yet
-bun add @fumadocs/cli ---dev
-
-bun fumadocs init openapi
-```
-
-</Tabs>
-
 ## Manual Setup
 
 Install the required packages.
@@ -71,7 +35,16 @@ Add the package to `@source` in your Tailwind CSS configuration.
 Create an OpenAPI instance on the server. Fumadocs OpenAPI renders the pages on server-side.
 
 ```ts title="lib/source.ts"
-import { createOpenAPI } from 'fumadocs-openapi/server';
+import { createOpenAPI, attachFile } from 'fumadocs-openapi/server';
+import { loader } from 'fumadocs-core/source';
+
+export const source = loader({
+  pageTree: {
+    // adds a badge to each page item in page tree
+    attachFile,
+  },
+  // other props
+});
 
 export const openapi = createOpenAPI({
   // options
@@ -115,24 +88,6 @@ Generate docs with the script:
 
 ```bash
 node ./scripts/generate-docs.mjs
-```
-
-### Generate Page Tree
-
-You can add the `attachFile` to decorate the page tree with Source API.
-
-It adds a badge to each page item.
-
-```ts title="lib/source.ts"
-import { loader } from 'fumadocs-core/source';
-import { attachFile } from 'fumadocs-openapi/server';
-
-export const utils = loader({
-  pageTree: {
-    attachFile,
-  },
-  // other props
-});
 ```
 
 ## Features

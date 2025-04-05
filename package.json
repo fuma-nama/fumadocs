@@ -19,7 +19,6 @@
   "devDependencies": {
     "@changesets/cli": "^2.28.1",
     "@eslint/js": "^9.24.0",
-    "@types/eslint__js": "^9.14.0",
     "concurrently": "^9.1.2",
     "eslint": "^9.24.0",
     "eslint-plugin-react": "^7.37.5",

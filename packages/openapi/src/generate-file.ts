@@ -102,18 +102,17 @@ export async function generateFiles(options: Config): Promise<void> {
     const outPaths: string[] = [];
 
     if (groupBy === 'tag') {
-      const tags = result.operation.tags;
-
-      if (tags && tags.length > 0) {
-        for (const tag of tags) {
-          outPaths.push(join(outputDir, getFilename(tag), `${file}.mdx`));
-        }
-      } else {
-        outPaths.push(
-          result.type === 'operation'
-            ? join(outputDir, `${file}.mdx`)
-            : join(outputDir, 'webhooks', `${file}.mdx`),
+      let tags = result.operation.tags;
+      if (!tags || tags.length === 0) {
+        console.warn(
+          'When `groupBy` is set to `tag`, make sure a `tags` is defined for every operation schema.',
         );
+
+        tags = ['unknown'];
+      }
+
+      for (const tag of tags) {
+        outPaths.push(join(outputDir, getFilename(tag), `${file}.mdx`));
       }
     } else {
       outPaths.push(join(outputDir, `${file}.mdx`));
@@ -147,16 +146,20 @@ export async function generateFiles(options: Config): Promise<void> {
       const results = await generatePages(pathOrUrl, options);
 
       for (const result of results) {
-        for (const outPath of getOutputPaths(result)) {
-          await write(outPath, result.content);
-          console.log(`Generated: ${outPath}`);
+        const outputPaths = getOutputPaths(result);
+        await Promise.all(
+          outputPaths.map(async (outPath) => {
+            await write(outPath, result.content);
 
-          if (groupBy === 'route' && result.pathItem.summary) {
-            await writeMetafile(join(dirname(outPath), 'meta.json'), {
-              title: result.pathItem.summary,
-            });
-          }
-        }
+            if (groupBy === 'route' && result.pathItem.summary) {
+              await writeMetafile(join(dirname(outPath), 'meta.json'), {
+                title: result.pathItem.summary,
+              });
+            }
+          }),
+        );
+
+        console.log(`Generated: ${outputPaths.join(', ')}`);
       }
     }
 
