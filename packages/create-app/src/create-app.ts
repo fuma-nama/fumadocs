@@ -243,7 +243,7 @@ function createPackageJson(projectName: string, options: Options): object {
     private: true,
     scripts: {
       build: 'next build',
-      dev: 'next dev',
+      dev: 'next dev --turbo',
       start: 'next start',
       ...(options.template === '+next+fuma-docs-mdx'
         ? {
