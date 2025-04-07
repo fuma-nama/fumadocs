@@ -22,7 +22,8 @@
         "!.next/cache/**",
         "dist/**",
         "out",
-        "build"
+        "build",
+        ".vercel"
       ]
     },
     "lint": {},
