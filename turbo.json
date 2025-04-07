@@ -21,7 +21,8 @@
         "content/openapi/**",
         "!.next/cache/**",
         "dist/**",
-        "out"
+        "out",
+        "build"
       ]
     },
     "lint": {},
