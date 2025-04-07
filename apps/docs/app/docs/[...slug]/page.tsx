@@ -13,21 +13,16 @@ import {
   type ReactNode,
 } from 'react';
 import { Popup, PopupContent, PopupTrigger } from 'fumadocs-twoslash/ui';
-import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 import { Callout } from 'fumadocs-ui/components/callout';
 import { TypeTable } from 'fumadocs-ui/components/type-table';
-import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 import * as Preview from '@/components/preview';
 import { createMetadata } from '@/lib/metadata';
 import { openapi, source } from '@/lib/source';
 import { Wrapper } from '@/components/preview/wrapper';
 import { metadataImage } from '@/lib/metadata-image';
-import { File, Folder, Files } from 'fumadocs-ui/components/files';
 import { Mermaid } from '@/components/mdx/mermaid';
 import { Rate } from '@/components/rate';
 import { repo, owner, onRateAction } from '@/lib/github';
-import type { MDXComponents } from 'mdx/types';
-import defaultMdxComponents from 'fumadocs-ui/mdx';
 import {
   HoverCard,
   HoverCardContent,
@@ -39,6 +34,7 @@ import { AutoTypeTable } from 'fumadocs-typescript/ui';
 import { createGenerator } from 'fumadocs-typescript';
 import { getPageTreePeers } from 'fumadocs-core/server';
 import { Card, Cards } from 'fumadocs-ui/components/card';
+import { getMDXComponents } from '@/mdx-components';
 
 function PreviewRenderer({ preview }: { preview: string }): ReactNode {
   if (preview && preview in Preview) {
@@ -89,9 +85,7 @@ export default async function Page(props: {
       <DocsBody className="text-fd-foreground/80">
         {preview ? <PreviewRenderer preview={preview} /> : null}
         <Mdx
-          components={{
-            ...defaultMdxComponents,
-            ...((await import('lucide-react')) as unknown as MDXComponents),
+          components={getMDXComponents({
             a: ({ href, ...props }) => {
               const found = source.getPageByHref(href ?? '', {
                 dir: page.file.dirname,
@@ -123,19 +117,12 @@ export default async function Page(props: {
             Popup,
             PopupContent,
             PopupTrigger,
-            Tabs,
-            Tab,
             Mermaid,
             TypeTable,
             AutoTypeTable: (props) => (
               <AutoTypeTable generator={generator} {...props} />
             ),
-            Accordion,
-            Accordions,
             Wrapper,
-            File,
-            Folder,
-            Files,
             blockquote: Callout as unknown as FC<ComponentProps<'blockquote'>>,
             APIPage: openapi.APIPage,
             DocsCategory: ({ url }) => {
@@ -145,7 +132,7 @@ export default async function Page(props: {
 
             ...(await import('@/content/docs/ui/components/tabs.client')),
             ...(await import('@/content/docs/ui/theme.client')),
-          }}
+          })}
         />
         {page.data.index ? <DocsCategory url={page.url} /> : null}
       </DocsBody>

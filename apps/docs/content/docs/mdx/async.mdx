@@ -56,8 +56,12 @@ export const source = loader({
   baseUrl: '/docs',
   source: docs.toFumadocsSource(),
 });
+```
 
-// page.tsx
+```tsx title="page.tsx"
+import { source } from '@/lib/source';
+import { getMDXComponents } from '@/mdx-components';
+
 const page = source.getPage(['...']);
 
 if (page) {
@@ -69,15 +73,7 @@ if (page) {
 
   console.log(toc);
 
-  return (
-    <MdxContent
-      components={
-        {
-          // your MDX components
-        }
-      }
-    />
-  );
+  return <MdxContent components={getMDXComponents()} />;
 }
 ```
 

@@ -57,18 +57,20 @@ Add required styles, Tailwind CSS is recommended.
 
 Add MDX components.
 
-```tsx title="page.tsx"
+```tsx title="mdx-components.tsx"
 import { Popup, PopupContent, PopupTrigger } from 'fumadocs-twoslash/ui';
-import defaultMdxComponents from 'fumadocs-ui/mdx';
+import defaultComponents from 'fumadocs-ui/mdx';
+import type { MDXComponents } from 'mdx/types';
 
-<MDX
-  components={{
-    ...defaultMdxComponents,
+export function getMDXComponents(components?: MDXComponents): MDXComponents {
+  return {
+    ...defaultComponents,
     Popup,
     PopupContent,
     PopupTrigger,
-  }}
-/>;
+    ...components,
+  };
+}
 ```
 
 Now you can add `twoslash` meta string to codeblocks.

@@ -207,12 +207,12 @@ if (page) {
 To render the page, use `page.data.body` as a component.
 
 ```tsx
-import defaultMdxComponents from 'fumadocs-ui/mdx';
+import { getMDXComponents } from '@/mdx-components';
 
 const MDX = page.data.body;
 
 // set your MDX components with `components` prop
-return <MDX components={{ ...defaultMdxComponents }} />;
+return <MDX components={getMDXComponents()} />;
 ```
 
 ## FAQ

@@ -53,16 +53,18 @@ export const openapi = createOpenAPI({
 
 Add `APIPage` to your MDX Components, so that you can use it in MDX files.
 
-```tsx title="page.tsx"
+```tsx title="mdx-components.tsx"
 import defaultComponents from 'fumadocs-ui/mdx';
 import { openapi } from '@/lib/source';
+import type { MDXComponents } from 'mdx/types';
 
-<MDX
-  components={{
+export function getMDXComponents(components?: MDXComponents): MDXComponents {
+  return {
     ...defaultComponents,
     APIPage: openapi.APIPage,
-  }}
-/>;
+    ...components,
+  };
+}
 ```
 
 > It is a React Server Component.

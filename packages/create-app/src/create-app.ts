@@ -36,6 +36,12 @@ export async function create(options: Options): Promise<void> {
   const dest = path.resolve(cwd, options.outputDir);
   const isNext = options.template.startsWith('+next');
 
+  function isRelative(dir: string, file: string) {
+    return !path
+      .relative(path.join(dest, dir), file)
+      .startsWith(`..${path.sep}`);
+  }
+
   function defaultRename(file: string): string {
     file = file.replace('example.gitignore', '.gitignore');
 
@@ -43,13 +49,14 @@ export async function create(options: Options): Promise<void> {
       return file;
     }
 
-    for (const dir of ['app', 'lib']) {
-      const relative = path.relative(path.join(dest, dir), file);
-
-      if (!relative.startsWith(`..${path.sep}`)) {
-        return path.join(dest, 'src', dir, relative);
-      }
+    if (
+      path.basename(file) === 'mdx-components.tsx' ||
+      isRelative('app', file) ||
+      isRelative('lib', file)
+    ) {
+      return path.join(dest, 'src', path.relative(dest, file));
     }
+
     return file;
   }
 

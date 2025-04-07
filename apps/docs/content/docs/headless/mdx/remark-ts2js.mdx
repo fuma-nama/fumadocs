@@ -51,17 +51,19 @@ await compile('...', {
 
 Finally, make sure to define the required MDX components: `Tabs` and `Tab`.
 
-```tsx title="app/docs/[[...slug]]/page.tsx (Fumadocs MDX)"
-import defaultComponents from 'fumadocs-ui/mdx';
+```tsx title="mdx-components.tsx (Fumadocs UI)"
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import defaultComponents from 'fumadocs-ui/mdx';
+import type { MDXComponents } from 'mdx/types';
 
-<Mdx
-  components={{
+export function getMDXComponents(components?: MDXComponents): MDXComponents {
+  return {
     ...defaultComponents,
-    Tabs,
     Tab,
-  }}
-/>;
+    Tabs,
+    ...components,
+  };
+}
 ```
 
 You can now enable it on TypeScript/TSX codeblocks, like:

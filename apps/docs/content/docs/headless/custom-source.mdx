@@ -114,7 +114,7 @@ It's compatible with Server Components. For example:
 import { compileMDX } from '@fumadocs/mdx-remote';
 import { getPage } from './my-content-source';
 import { DocsBody, DocsPage } from 'fumadocs-ui/page';
-import defaultMdxComponents from 'fumadocs-ui/mdx';
+import { getMDXComponents } from '@/mdx-components';
 
 export default async function Page({
   params,
@@ -131,7 +131,7 @@ export default async function Page({
   return (
     <DocsPage toc={compiled.toc}>
       <DocsBody>
-        <MdxContent components={{ ...defaultMdxComponents }} />
+        <MdxContent components={getMDXComponents()} />
       </DocsBody>
     </DocsPage>
   );

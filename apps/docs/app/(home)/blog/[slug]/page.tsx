@@ -2,13 +2,11 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { InlineTOC } from 'fumadocs-ui/components/inline-toc';
-import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { blog } from '@/lib/source';
 import { createMetadata } from '@/lib/metadata';
 import { buttonVariants } from '@/components/ui/button';
 import { Control } from '@/app/(home)/blog/[slug]/page.client';
-import { File, Files, Folder } from 'fumadocs-ui/components/files';
-import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { getMDXComponents } from '@/mdx-components';
 
 export default async function Page(props: {
   params: Promise<{ slug: string }>;
@@ -47,16 +45,7 @@ export default async function Page(props: {
       <article className="container flex flex-col px-0 py-8 lg:flex-row lg:px-4">
         <div className="prose min-w-0 flex-1 p-4">
           <InlineTOC items={toc} />
-          <Mdx
-            components={{
-              ...defaultMdxComponents,
-              File,
-              Files,
-              Folder,
-              Tabs,
-              Tab,
-            }}
-          />
+          <Mdx components={getMDXComponents()} />
         </div>
         <div className="flex flex-col gap-4 border-l p-4 text-sm lg:w-[250px]">
           <div>
