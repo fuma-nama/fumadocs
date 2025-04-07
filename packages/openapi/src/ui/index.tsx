@@ -1,4 +1,3 @@
-import { buttonVariants, cn } from 'fumadocs-ui/components/api';
 import { type HTMLAttributes, type ReactNode } from 'react';
 import { Badge } from '@/ui/components/method-label';
 import type { PropertyProps, RootProps } from '@/render/renderer';
@@ -9,6 +8,8 @@ import {
 } from 'fumadocs-ui/components/ui/collapsible';
 import { ChevronDown } from 'lucide-react';
 import { ApiProvider } from '@/ui/contexts/api';
+import { cn } from 'fumadocs-ui/utils/cn';
+import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 
 export function Root({
   children,

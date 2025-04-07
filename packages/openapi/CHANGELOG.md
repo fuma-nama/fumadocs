@@ -1,5 +1,14 @@
 # @fuma-docs/openapi
 
+## 7.0.13
+
+### Patch Changes
+
+- 4d89c13: Improve `generateFiles` warnings
+- Updated dependencies [c66ed79]
+  - fumadocs-core@15.2.5
+  - fumadocs-ui@15.2.5
+
 ## 7.0.12
 
 ### Patch Changes

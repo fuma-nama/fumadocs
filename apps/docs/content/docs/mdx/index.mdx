@@ -19,8 +19,6 @@ Setup Fumadocs MDX for your Fumadocs application.
 fumadocs-mdx @types/mdx
 ```
 
-> This package requires Fumadocs core.
-
 Add the plugin to your `next.config.mjs` file.
 
 ```js
@@ -64,11 +62,15 @@ For example, a `doc` collection will include only the `.md` and `.mdx` files:
   />
 </Files>
 
-Fumadocs MDX will transform collections into arrays of type-safe data, accessible in your Next.js app.
-Notably, Markdown/MDX content will be compiled into a React Server Component, with other useful properties like **Table of Contents**.
+Fumadocs MDX transforms collections into arrays of type-safe data, accessible in your Next.js app.
 
-You can define and configure collections by creating a `source.config.ts` file.
-For example, this is how you define a `doc` collection:
+You can define collections by creating a `source.config.ts` file.
+
+<Tabs items={["doc", "meta"]}>
+
+    <Tab value='doc'>
+
+        Markdown & MDX content will be compiled into a React Server Component, with other useful properties like **Table of Contents**.
 
 ```ts title="source.config.ts"
 import { defineCollections } from 'fumadocs-mdx/config';
@@ -79,7 +81,24 @@ export const test = defineCollections({
 });
 ```
 
-The above collection will include all Markdown/MDX files under the `content/docs` directory.
+    </Tab>
+
+    <Tab value='meta'>
+
+        JSON data will be transformed with `JSON.parse` into an array of objects.
+
+```ts title="source.config.ts"
+import { defineCollections } from 'fumadocs-mdx/config';
+
+export const test = defineCollections({
+  type: 'meta',
+  dir: 'content/docs',
+});
+```
+
+    </Tab>
+
+</Tabs>
 
 For Fumadocs to work, you can define a `docs` collection:
 
@@ -167,8 +186,6 @@ next dev
 
 A `.source` folder should be created. You can log and see if it is loaded correctly.
 
-See [Organizing Pages](/docs/ui/page-conventions) to learn how to organize your pages.
-
 ### Usage
 
 Generally, you'll interact with Fumadocs MDX through the [Source](/docs/headless/source-api#output) object (output of `loader`).
@@ -190,12 +207,12 @@ if (page) {
 To render the page, use `page.data.body` as a component.
 
 ```tsx
-import defaultMdxComponents from 'fumadocs-ui/mdx';
+import { getMDXComponents } from '@/mdx-components';
 
 const MDX = page.data.body;
 
 // set your MDX components with `components` prop
-return <MDX components={{ ...defaultMdxComponents }} />;
+return <MDX components={getMDXComponents()} />;
 ```
 
 ## FAQ

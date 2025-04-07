@@ -99,11 +99,10 @@ const docs = defineCollection({
 To use components from other packages like Fumadocs UI, pass them to your `<MDXContent />` component.
 
 ```tsx
-import defaultMdxComponents from 'fumadocs-ui/mdx';
-import { Callout } from 'fumadocs-ui/components/callout';
 import { MDXContent } from '@content-collections/mdx/react';
+import { getMDXComponents } from '@/mdx-components';
 
-<MDXContent code="..." components={{ ...defaultMdxComponents, Callout }} />;
+<MDXContent code="..." components={getMDXComponents()} />;
 ```
 
 You can also import them in MDX Files, but it is not recommended.

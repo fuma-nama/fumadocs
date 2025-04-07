@@ -1,6 +1,6 @@
 {
   "name": "fumadocs-core",
-  "version": "15.2.4",
+  "version": "15.2.5",
   "description": "The library for building a documentation website in Next.js",
   "keywords": [
     "NextJs",
@@ -117,11 +117,11 @@
     "mdast-util-mdx-jsx": "^3.2.0",
     "mdast-util-mdxjs-esm": "^2.0.1",
     "next": "^15.2.4",
-    "react-router": "^7.4.1",
+    "react-router": "^7.5.0",
     "remark-mdx": "^3.1.0",
     "remark-rehype": "^11.1.2",
     "tsconfig": "workspace:*",
-    "typescript": "^5.8.2",
+    "typescript": "^5.8.3",
     "unified": "^11.0.5",
     "vfile": "^6.0.3"
   },

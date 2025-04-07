@@ -29,7 +29,6 @@
     "fumadocs-twoslash": "workspace:^",
     "fumadocs-typescript": "workspace:^",
     "fumadocs-ui": "workspace:*",
-    "geist": "^1.3.1",
     "hast-util-to-jsx-runtime": "^2.3.6",
     "katex": "^0.16.21",
     "lucide-react": "^0.487.0",
@@ -59,7 +58,7 @@
     "@next/bundle-analyzer": "15.2.4",
     "@next/env": "15.2.4",
     "@next/eslint-plugin-next": "15.2.4",
-    "@tailwindcss/postcss": "^4.1.1",
+    "@tailwindcss/postcss": "^4.1.3",
     "@types/hast": "^3.0.4",
     "@types/mdx": "^2.0.13",
     "@types/node": "22.14.0",
@@ -70,11 +69,11 @@
     "gray-matter": "^4.0.3",
     "next-validate-link": "^1.5.2",
     "postcss": "^8.5.3",
-    "tailwindcss": "^4.1.1",
+    "tailwindcss": "^4.1.3",
     "tailwindcss-animate": "^1.0.7",
     "ts-morph": "^25.0.1",
     "tsconfig": "workspace:*",
     "tsx": "^4.19.3",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.3"
   }
 }

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { cn } from 'fumadocs-ui/components/api';
+import { cn } from 'fumadocs-ui/utils/cn';
 import { cva } from 'class-variance-authority';
 
 export type InputProps = React.InputHTMLAttributes<HTMLInputElement>;

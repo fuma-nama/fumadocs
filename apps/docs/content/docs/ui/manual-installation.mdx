@@ -13,6 +13,12 @@ Create a new Next.js application with `create-next-app`, and install required pa
 fumadocs-ui fumadocs-core
 ```
 
+### MDX Components
+
+<include cwd meta='title="mdx-components.tsx"'>
+  ../../examples/next-mdx/mdx-components.tsx
+</include>
+
 ### Content Source
 
 Fumadocs supports different content sources, you can choose one you prefer.
@@ -100,23 +106,9 @@ It may vary depending on your content source. You should configure static render
 
 <Tabs groupId='content-source' items={['Fumadocs MDX', 'Content Collections']}>
 
-```json doc-gen:file
-{
-  "file": "../../examples/next-mdx/app/docs/[[...slug]]/page.tsx",
-  "codeblock": {
-    "meta": "title=\"app/docs/[[...slug]]/page.tsx\" tab=\"Fumadocs MDX\""
-  }
-}
-```
+    <include cwd meta='title="app/docs/[[...slug]]/page.tsx" tab="Fumadocs MDX"'>../../examples/next-mdx/app/docs/[[...slug]]/page.tsx</include>
 
-```json doc-gen:file
-{
-  "file": "../../examples/content-collections/app/docs/[[...slug]]/page.tsx",
-  "codeblock": {
-    "meta": "title=\"app/docs/[[...slug]]/page.tsx\" tab=\"Content Collections\""
-  }
-}
-```
+    <include cwd meta='title="app/docs/[[...slug]]/page.tsx" tab="Content Collections"'>../../examples/content-collections/app/docs/[[...slug]]/page.tsx</include>
 
 </Tabs>
 
@@ -124,27 +116,9 @@ It may vary depending on your content source. You should configure static render
 
 Use the default document search based on Orama.
 
-<Tabs groupId='content-source' items={['Fumadocs MDX', 'Content Collections']}>
-
-```json doc-gen:file
-{
-  "file": "../../examples/next-mdx/app/api/search/route.ts",
-  "codeblock": {
-    "meta": "title=\"app/api/search/route.ts\" tab=\"Fumadocs MDX\""
-  }
-}
-```
-
-```json doc-gen:file
-{
-  "file": "../../examples/content-collections/app/api/search/route.ts",
-  "codeblock": {
-    "meta": "title=\"app/api/search/route.ts\" tab=\"Content Collections\""
-  }
-}
-```
-
-</Tabs>
+<include cwd meta='title="app/api/search/route.ts"'>
+  ../../examples/next-mdx/app/api/search/route.ts
+</include>
 
 Learn more about [Document Search](/docs/headless/search).
 
@@ -161,10 +135,6 @@ title: Hello World
 
 I love Anime.
 ```
-
-## Customise
-
-You can use [Home Layout](/docs/ui/layouts/home-layout) for other pages of the site, it includes a navbar with theme toggle.
 
 ## Deploying
 

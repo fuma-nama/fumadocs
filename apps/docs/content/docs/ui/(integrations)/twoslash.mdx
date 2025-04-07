@@ -8,17 +8,17 @@ description: Use Typescript Twoslash in your docs
 Thanks to the Twoslash integration of [Shiki](https://github.com/shikijs/shiki), the default code syntax highlighter, it is as simple as adding a transformer.
 
 ```package-install
-fumadocs-twoslash
+fumadocs-twoslash twoslash
 ```
 
-Add `twoslash` to your `serverExternalPackages` in Next.js config:
+Update your `serverExternalPackages` in Next.js config:
 
 ```js
 import { createMDX } from 'fumadocs-mdx/next';
 
 const config = {
   reactStrictMode: true,
-  serverExternalPackages: ['twoslash'],
+  serverExternalPackages: ['typescript', 'twoslash'],
 };
 
 const withMDX = createMDX();
@@ -28,9 +28,7 @@ export default withMDX(config);
 
 Add to your Shiki transformers.
 
-<Callout title='Example for Fumadocs MDX'>
-
-```ts twoslash title="source.config.ts"
+```ts twoslash title="source.config.ts (Fumadocs MDX)"
 import { defineConfig } from 'fumadocs-mdx/config';
 import { transformerTwoslash } from 'fumadocs-twoslash';
 import { rehypeCodeDefaultOptions } from 'fumadocs-core/mdx-plugins';
@@ -51,26 +49,28 @@ export default defineConfig({
 });
 ```
 
-</Callout>
-
-Add required styles and components, note that you have to configure Tailwind CSS first.
+Add required styles, Tailwind CSS is recommended.
 
 ```css title="Tailwind CSS"
 @import 'fumadocs-twoslash/twoslash.css';
 ```
 
-```tsx title="page.tsx"
-import { Popup, PopupContent, PopupTrigger } from 'fumadocs-twoslash/ui';
-import defaultMdxComponents from 'fumadocs-ui/mdx';
+Add MDX components.
 
-<MDX
-  components={{
-    ...defaultMdxComponents,
+```tsx title="mdx-components.tsx"
+import { Popup, PopupContent, PopupTrigger } from 'fumadocs-twoslash/ui';
+import defaultComponents from 'fumadocs-ui/mdx';
+import type { MDXComponents } from 'mdx/types';
+
+export function getMDXComponents(components?: MDXComponents): MDXComponents {
+  return {
+    ...defaultComponents,
     Popup,
     PopupContent,
     PopupTrigger,
-  }}
-/>;
+    ...components,
+  };
+}
 ```
 
 Now you can add `twoslash` meta string to codeblocks.
@@ -136,90 +136,6 @@ void generateFiles({
 const a = '123';
 
 a = 132;
-```
-
-### Using on Runtime
-
-To use it on Next.js runtime, add `typescript` and `twoslash` to `serverExternalPackages`:
-
-```ts title="next.config.mjs"
-import { createMDX } from 'fumadocs-mdx/next';
-
-const withMDX = createMDX();
-
-/** @type {import('next').NextConfig} */
-const config = {
-  reactStrictMode: true,
-  serverExternalPackages: ['twoslash', 'typescript'],
-};
-
-export default withMDX(config);
-```
-
-Install the external dependencies:
-
-```package-install
-typescript twoslash
-```
-
-Pass the transformer to Shiki, see https://shiki.style/packages/next for details.
-
-```tsx twoslash
-import React from 'react';
-import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock';
-import { createStyleTransformer } from 'fumadocs-core/highlight';
-import { transformerTwoslash } from 'fumadocs-twoslash';
-import { Popup, PopupContent, PopupTrigger } from 'fumadocs-twoslash/ui';
-import { getSingletonHighlighter, bundledLanguages } from 'shiki';
-import { toJsxRuntime } from 'hast-util-to-jsx-runtime';
-import { Fragment, jsx, jsxs } from 'react/jsx-runtime';
-
-export async function Code({
-  code,
-  lang = 'ts',
-}: {
-  lang?: string;
-  code: string;
-}) {
-  const highlighter = await getSingletonHighlighter({
-    langs: Object.keys(bundledLanguages),
-    themes: ['vesper'],
-  });
-
-  const hast = highlighter.codeToHast(code, {
-    lang,
-    themes: {
-      light: 'vesper',
-      dark: 'vesper',
-    },
-    defaultColor: false,
-    transformers: [
-      createStyleTransformer(),
-      transformerTwoslash({
-        explicitTrigger: false,
-      }),
-    ],
-  });
-
-  const rendered = toJsxRuntime(hast, {
-    Fragment,
-    jsx,
-    jsxs,
-    development: false,
-    components: {
-      pre: (props) => (
-        <CodeBlock {...props}>
-          <Pre>{props.children}</Pre>
-        </CodeBlock>
-      ),
-      Popup,
-      PopupContent,
-      PopupTrigger,
-    },
-  });
-
-  return rendered;
-}
 ```
 
 ## Cache

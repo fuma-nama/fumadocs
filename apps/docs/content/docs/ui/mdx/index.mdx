@@ -16,18 +16,19 @@ import defaultMdxComponents from 'fumadocs-ui/mdx';
 
 To support links with relative file path in `href`, override the default `a` component with:
 
-```tsx
+```tsx title="app/docs/[[...slug]]/page.tsx"
 import { createRelativeLink } from 'fumadocs-ui/mdx';
 import { source } from '@/lib/source';
+import { getMDXComponents } from '@/mdx-components';
 
 const page = source.getPage(['...']);
 
 return (
   <MdxContent
-    components={{
+    components={getMDXComponents({
       // override the `a` tag
       a: createRelativeLink(source, page),
-    }}
+    })}
   />
 );
 ```

@@ -1,5 +1,12 @@
 # create-next-docs-app
 
+## 15.2.5
+
+### Patch Changes
+
+- 74c4bb1: enable turbopack by default
+- 3aac8e0: Include `mdx-components.tsx` by default
+
 ## 15.2.4
 
 ## 15.2.3

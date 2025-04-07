@@ -3,10 +3,6 @@ title: Async Mode
 description: Runtime compilation of content files.
 ---
 
-<Callout type="warn" title="Experimental">
-  This feature is still experimental, use it under your own risk.
-</Callout>
-
 ## Introduction
 
 By default, all Markdown and MDX files need to be pre-compiled first, the same constraint also applies on development server.
@@ -60,8 +56,12 @@ export const source = loader({
   baseUrl: '/docs',
   source: docs.toFumadocsSource(),
 });
+```
 
-// page.tsx
+```tsx title="page.tsx"
+import { source } from '@/lib/source';
+import { getMDXComponents } from '@/mdx-components';
+
 const page = source.getPage(['...']);
 
 if (page) {
@@ -73,15 +73,7 @@ if (page) {
 
   console.log(toc);
 
-  return (
-    <MdxContent
-      components={
-        {
-          // your MDX components
-        }
-      }
-    />
-  );
+  return <MdxContent components={getMDXComponents()} />;
 }
 ```
 

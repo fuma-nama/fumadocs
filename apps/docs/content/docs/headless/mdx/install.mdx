@@ -33,15 +33,19 @@ await compile('...', {
 
 Define the required components.
 
-```tsx title="page.tsx (Fumadocs UI)"
+```tsx title="mdx-components.tsx (Fumadocs UI)"
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import defaultComponents from 'fumadocs-ui/mdx';
+import type { MDXComponents } from 'mdx/types';
 
-<MDX
-  components={{
+export function getMDXComponents(components?: MDXComponents): MDXComponents {
+  return {
+    ...defaultComponents,
     Tab,
     Tabs,
-  }}
-/>;
+    ...components,
+  };
+}
 ```
 
 | Component |                                   |

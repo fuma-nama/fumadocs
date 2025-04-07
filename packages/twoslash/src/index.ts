@@ -86,7 +86,7 @@ export function transformerTwoslash({
       },
       popupTypes: {
         tagName: 'div',
-        class: 'shiki prose-no-margin',
+        class: 'fd-codeblock prose-no-margin',
         children: (v) => {
           if (
             v.length === 1 &&

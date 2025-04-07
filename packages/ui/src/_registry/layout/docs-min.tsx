@@ -86,7 +86,7 @@ function Sidebar() {
 
   return (
     <SidebarPrimitive.SidebarList
-      removeScrollOn="(min-width: 768px)" // md
+      removeScrollOn="(width < 768px)" // md
       className={cn(
         'fixed flex flex-col shrink-0 p-4 top-14 z-20 text-sm overflow-auto md:sticky md:h-[calc(100dvh-56px)] md:w-[300px]',
         'max-md:inset-x-0 max-md:bottom-0 max-md:bg-fd-background',

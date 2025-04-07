@@ -27,7 +27,7 @@ The default theme of Fumadocs offers a beautiful look for documentation sites an
 
 <Card icon={<Database />} title='Content Source'>
 
-The source of your content, can be a CMS or local data layers like [Content Collections](https://www.content-collections.dev) and [Fumadocs MDX](/docs/mdx), the official content source.
+The source of your content, can be a CMS or local data layers like [Fumadocs MDX](/docs/mdx) (the official content source).
 
 </Card>
 
@@ -73,7 +73,12 @@ bun create fumadocs-app
 
 </Tabs>
 
-It will ask you the framework and content source to use, a new fumadocs app should be initialized. Now you can start hacking!
+It will ask you:
+
+- the React.js framework to use (the docs is only written for Next.js).
+- the content source to use.
+
+A new fumadocs app should be initialized. Now you can start hacking!
 
 <Callout title='From Existing Codebase?'>
 
@@ -105,6 +110,7 @@ In the project, you can see:
 
 - `lib/source.ts`: Code for content source adapter, [`loader()`](/docs/headless/source-api) provides an interface to interact with your content source, and assigns URL to your pages.
 - `app/layout.config.tsx`: Shared options for layouts, optional but preferred to keep.
+- `mdx-components.tsx`: MDX components.
 
 | Route                     | Description                                            |
 | ------------------------- | ------------------------------------------------------ |
@@ -118,10 +124,10 @@ For authoring docs, make sure to read:
 
 <Cards>
   <Card href="/docs/ui/markdown" title="Markdown">
-    Fumadocs has some additional features for authoring content too.
+    Fumadocs has some additional features for authoring content.
   </Card>
   <Card href="/docs/ui/navigation" title="Navigation">
-    Learn how to customise navigation links/sidebar items.
+    Learn how to customise navigation links and sidebar items.
   </Card>
 </Cards>
 
@@ -133,9 +139,9 @@ Content source handles all your content, like compiling Markdown files and valid
 
     <Tab value='Fumadocs MDX'>
 
-        Read the [Introduction](/docs/mdx) to learn how it handles your content.
-
         A `source.config.ts` config file has been included, you can customise different options like frontmatter schema.
+
+        Read the [Introduction](/docs/mdx) for further details.
 
     </Tab>
 

@@ -19,7 +19,6 @@ import {
   useForm,
   useFormContext,
 } from 'react-hook-form';
-import { cn, buttonVariants } from 'fumadocs-ui/components/api';
 import type {
   FieldPath,
   UseFormStateReturn,
@@ -54,6 +53,8 @@ import {
 import { useRequestData } from '@/ui/contexts/code-example';
 import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
 import type { RequestData } from '@/requests/_shared';
+import { buttonVariants } from 'fumadocs-ui/components/ui/button';
+import { cn } from 'fumadocs-ui/utils/cn';
 
 interface FormValues {
   authorization:

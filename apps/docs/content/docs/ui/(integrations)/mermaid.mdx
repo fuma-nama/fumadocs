@@ -23,16 +23,18 @@ Create the Mermaid component:
 
 Add the component as a MDX component:
 
-```tsx title="/docs/[[...slug]]/page.tsx"
+```tsx title="mdx-components.tsx"
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { Mermaid } from '@/components/mdx/mermaid';
+import type { MDXComponents } from 'mdx/types';
 
-<MdxContent
-  components={{
+export function getMDXComponents(components?: MDXComponents): MDXComponents {
+  return {
     ...defaultMdxComponents,
     Mermaid,
-  }}
-/>;
+    ...components,
+  };
+}
 ```
 
 ## Usage

@@ -1,4 +1,4 @@
-import { source, openapi } from '@/lib/source';
+import { source } from '@/lib/source';
 import {
   DocsPage,
   DocsBody,
@@ -6,8 +6,8 @@ import {
   DocsDescription,
 } from 'fumadocs-ui/page';
 import { notFound } from 'next/navigation';
-import defaultMdxComponents from 'fumadocs-ui/mdx';
 import { metadataImage } from '@/lib/metadata';
+import { getMDXComponents } from '@/mdx-components';
 
 export default async function Page(props: {
   params: Promise<{ slug?: string[] }>;
@@ -26,12 +26,7 @@ export default async function Page(props: {
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       <DocsBody>
-        <MDX
-          components={{
-            ...defaultMdxComponents,
-            APIPage: openapi.APIPage,
-          }}
-        />
+        <MDX components={getMDXComponents()} />
       </DocsBody>
     </DocsPage>
   );

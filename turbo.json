@@ -21,7 +21,9 @@
         "content/openapi/**",
         "!.next/cache/**",
         "dist/**",
-        "out"
+        "out",
+        "build",
+        ".vercel"
       ]
     },
     "lint": {},
