@@ -5,13 +5,53 @@ description: Customise sidebar navigation links on Docs Layout.
 
 ## Overview
 
-**Sidebar items and the slugs of each page** are generated from your file structure, see [Organizing Pages](/docs/ui/page-conventions) for available patterns.
-
 <div className='flex justify-center items-center *:max-w-[200px] bg-gradient-to-br from-fd-primary/10 rounded-xl border'>
 
     ![Sidebar](/docs/sidebar.png)
 
 </div>
+
+Sidebar items are rendered from the page tree you passed to `<DocsLayout />`.
+
+For `source.pageTree`, it generates the tree from your file structure (similar to the routing of Next.js), you can see [Organizing Pages](/docs/ui/page-conventions) for available patterns.
+
+```tsx title="layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import { source } from '@/lib/source';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <DocsLayout
+      tree={source.pageTree}
+      // other props
+    >
+      {children}
+    </DocsLayout>
+  );
+}
+```
+
+You may hardcode it too:
+
+```tsx title="layout.tsx"
+import { DocsLayout } from 'fumadocs-ui/layouts/docs';
+import type { ReactNode } from 'react';
+
+export default function Layout({ children }: { children: ReactNode }) {
+  return (
+    <DocsLayout
+      tree={{
+        name: 'docs',
+        children: [],
+      }}
+      // other props
+    >
+      {children}
+    </DocsLayout>
+  );
+}
+```
 
 ### Sidebar Tabs
 
