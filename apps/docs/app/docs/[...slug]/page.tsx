@@ -32,7 +32,7 @@ import Link from 'fumadocs-core/link';
 import { UiOverview } from '@/components/ui-overview';
 import { AutoTypeTable } from 'fumadocs-typescript/ui';
 import { createGenerator } from 'fumadocs-typescript';
-import { getPageTreePeers } from 'fumadocs-core/server';
+import { getGithubLastEdit, getPageTreePeers } from 'fumadocs-core/server';
 import { Card, Cards } from 'fumadocs-ui/components/card';
 import { getMDXComponents } from '@/mdx-components';
 
@@ -59,12 +59,19 @@ export default async function Page(props: {
 
   const path = `apps/docs/content/docs/${page.file.path}`;
   const preview = page.data.preview;
-  const { body: Mdx, toc, lastModified } = await page.data.load();
+  const { body: Mdx, toc } = await page.data.load();
+
+  const lastModified = await getGithubLastEdit({
+    repo,
+    owner,
+    path,
+    token: process.env.GITHUB_TOKEN,
+  });
 
   return (
     <DocsPage
       toc={toc}
-      lastUpdate={lastModified}
+      lastUpdate={lastModified ?? undefined}
       full={page.data.full}
       tableOfContent={{
         style: 'clerk',
