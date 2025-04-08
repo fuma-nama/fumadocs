@@ -1,13 +1,11 @@
-import { type PageTree, type TableOfContents } from 'fumadocs-core/server';
+import type { TableOfContents } from 'fumadocs-core/server';
 import {
   type AnchorHTMLAttributes,
   forwardRef,
   type HTMLAttributes,
   type ReactNode,
 } from 'react';
-import type { LoaderConfig, LoaderOutput, Page } from 'fumadocs-core/source';
 import { type AnchorProviderProps, AnchorProvider } from 'fumadocs-core/toc';
-import { Card, Cards } from '@/components/card';
 import { replaceOrDefault } from '@/layouts/shared';
 import { cn } from './utils/cn';
 import {
@@ -306,84 +304,6 @@ export const DocsTitle = forwardRef<
 });
 
 DocsTitle.displayName = 'DocsTitle';
-
-export function DocsCategory({
-  page,
-  from,
-  tree: forcedTree,
-  ...props
-}: HTMLAttributes<HTMLDivElement> & {
-  page: Page;
-  from: LoaderOutput<LoaderConfig>;
-  tree?: PageTree.Root;
-}) {
-  let tree;
-
-  if (forcedTree) {
-    tree = forcedTree;
-  } else if (from._i18n) {
-    const locale = page.locale ?? from._i18n.defaultLanguage;
-
-    tree = (from as LoaderOutput<LoaderConfig & { i18n: true }>).pageTree[
-      locale
-    ];
-  } else {
-    tree = from.pageTree;
-  }
-
-  function findParentFromTree(
-    node: PageTree.Root | PageTree.Folder,
-    page: Page,
-  ): PageTree.Root | PageTree.Folder | undefined {
-    if ('index' in node && node.index?.$ref?.file === page.file.path) {
-      return node;
-    }
-
-    for (const child of node.children) {
-      if (child.type === 'folder') {
-        const parent = findParentFromTree(child, page);
-        if (parent) return parent;
-      }
-
-      if (child.type === 'page' && child.$ref?.file === page.file.path) {
-        return node;
-      }
-    }
-  }
-
-  let items;
-  const parent = findParentFromTree(tree, page);
-  if (parent) {
-    items = parent.children.flatMap<Page>((item) => {
-      if (item.type !== 'page' || item.url === page.url) return [];
-
-      return from.getNodePage(item) ?? [];
-    });
-  } else {
-    const pages = from.getPages(page.locale);
-
-    items = pages.filter(
-      (item) =>
-        item.file.dirname === page.file.dirname &&
-        item.file.path !== page.file.path,
-    );
-  }
-
-  if (items.length === 0) return null;
-
-  return (
-    <Cards {...props}>
-      {items.map((item) => (
-        <Card
-          key={item.url}
-          title={item.data.title}
-          description={(item.data as { description?: ReactNode }).description}
-          href={item.url}
-        />
-      ))}
-    </Cards>
-  );
-}
 
 /**
  * For separate MDX page

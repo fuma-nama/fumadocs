@@ -29,8 +29,9 @@
       "types": "./dist/layouts/*.d.ts"
     },
     "./page": {
+      "node": "./dist/page.server.js",
       "import": "./dist/page.js",
-      "types": "./dist/page.d.ts"
+      "types": "./dist/page.server.d.ts"
     },
     "./provider": {
       "import": "./dist/provider/index.js",
