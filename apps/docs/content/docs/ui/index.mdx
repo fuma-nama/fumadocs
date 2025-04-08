@@ -108,9 +108,8 @@ npm run dev
 
 In the project, you can see:
 
-- `lib/source.ts`: Code for content source adapter, [`loader()`](/docs/headless/source-api) provides an interface to interact with your content source, and assigns URL to your pages.
+- `lib/source.ts`: Code for content source adapter, [`loader()`](/docs/headless/source-api) provides the interface to access your content.
 - `app/layout.config.tsx`: Shared options for layouts, optional but preferred to keep.
-- `mdx-components.tsx`: MDX components.
 
 | Route                     | Description                                            |
 | ------------------------- | ------------------------------------------------------ |
@@ -128,6 +127,9 @@ For authoring docs, make sure to read:
   </Card>
   <Card href="/docs/ui/navigation" title="Navigation">
     Learn how to customise navigation links and sidebar items.
+  </Card>
+  <Card href="/docs/ui/page-conventions" title="Routing">
+    Learn how to organise content.
   </Card>
 </Cards>
 

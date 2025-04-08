@@ -1,21 +1,41 @@
 ---
-title: Organizing Pages
+title: Routing
 description: A shared convention for organizing your documents
 ---
 
+<Callout title='Before reading'>
+
+    This guide only applies for content sources that uses `loader()` API, such as Fumadocs MDX.
+
+</Callout>
+
 ## Overview
 
-Page slugs and sidebar items (page tree) are generated from your file structure, similar to file-system based routing in Next.js.
+While Next.js handles routing, Fumadocs generates **page slugs** and **sidebar items** (page tree) from your content directory using [`loader()`](/docs/headless/source-api).
 
-> This only applies for file-system based content sources, such as Fumadocs MDX.
+You can define folders and pages similar to the file-system based routing of Next.js.
+
+<Files>
+  <Folder name="content/docs (content directory)" defaultOpen>
+    <File name="index.mdx" />
+    <File name="getting-started.mdx" />
+  </Folder>
+</Files>
 
 ## File
 
-A [MDX](https://mdxjs.com) or Markdown file.
+A [MDX](https://mdxjs.com) or Markdown file, you can customise its frontmatter.
 
-### Frontmatter
+```mdx
+---
+title: My Page
+description: Best document ever
+icon: HomeIcon
+full: true
+---
 
-By default, it includes:
+## Learn More
+```
 
 | name          | description                                        |
 | ------------- | -------------------------------------------------- |
@@ -24,22 +44,15 @@ By default, it includes:
 | `icon`        | The name of icon, see [Icons](#icons)              |
 | `full`        | Fill all available space on the page (Fumadocs UI) |
 
-You may extend your content source to add additional properties.
+<Callout title='Fumadocs MDX'>
 
-```mdx
----
-title: My Page
-description: Best document ever
-icon: HomeIcon
-full: false
----
+    You can use the [`schema`](/docs/mdx/collections#schema-1) option to add frontmatter properties.
 
-## Learn More
-```
+</Callout>
 
 ### Slugs
 
-The generated slugs will be same as your file path.
+The slugs of a page are generated from its file path.
 
 | path (relative to content folder) | slugs             |
 | --------------------------------- | ----------------- |
@@ -48,58 +61,47 @@ The generated slugs will be same as your file path.
 
 ## Folder
 
-Organize multiple pages. When not specified, the display name will be generated from its folder name.
-
-Pages are sorted alphabetically, except `index.mdx` which is always ordered at the top.
-
-To customise folders, use [Meta file](#meta).
+Organize multiple pages, you can create a [Meta file](#meta) to customise folders.
 
 ### Folder Group
 
-By default, putting a file into folder will change its slugs and generated page URL.
-You can use folder group to add a folder without impacting the slugs of child files.
+By default, putting a file into folder will change its slugs.
+You can wrap the folder name in parentheses to avoid impacting the slugs of child files.
 
-To create a folder group, wrap the folder name in parentheses.
-
-<Files>
-  <Folder name="(group-name)" defaultOpen>
-    <File name="file.mdx" />
-  </Folder>
-</Files>
+| path (relative to content folder) | slugs      |
+| --------------------------------- | ---------- |
+| `./(group-name)/page.mdx`         | `['page']` |
 
 ## Meta
 
-Customize a folder by creating a `meta.json` file in a folder under content folder.
-
-### Display Name
+Customise folders by creating a `meta.json` file in the folder.
 
 ```json title="meta.json"
 {
-  "title": "Name of Folder"
+  "title": "Display Name",
+  "icon": "MyIcon",
+  "pages": ["index", "getting-started"],
+  "defaultOpen": true
 }
 ```
 
-### Icon
-
-Specify an icon name for folder with the `icon` property, see [Icons](#icons).
-
-```json title="meta.json"
-{
-  "title": "My Folder",
-  "icon": "MyIcon"
-}
-```
+| name          | description                           |
+| ------------- | ------------------------------------- |
+| `title`       | Display name                          |
+| `icon`        | The name of icon, see [Icons](#icons) |
+| `pages`       | Folder items (see below)              |
+| `defaultOpen` | Open the folder by default            |
 
 ### Pages
 
-Control the order of items.
+By default, folder items are sorted alphabetically.
 
-When a meta file is present, items are not included unless you have explicitly added them to `pages`.
+You can control the order of items using `pages`, items are not included unless they are listed inside.
 
 ```json title="meta.json"
 {
   "title": "Name of Folder",
-  "pages": ["guide", "components"]
+  "pages": ["guide", "components", "./nested/page"]
 }
 ```
 
@@ -107,104 +109,55 @@ When a meta file is present, items are not included unless you have explicitly a
   <File name="meta.json" />
   <File name="guide.mdx" />
   <File name="components.mdx" />
+  <File name="nested/page.mdx" />
 </Files>
 
-### Path
-
-The items of `pages` can also be a relative path to a page or folder, no file extensions needed.
+#### Separator
 
 ```json title="meta.json"
 {
-  "title": "Name of Folder",
-  "pages": ["../headless/page"]
+  "pages": ["guide", "---My Separator---", "components"]
 }
 ```
 
-### Open by Default
+#### Rest
 
-Force to open the folder by default.
-
-```json title="meta.json"
-{
-  "title": "Name of Folder",
-  "defaultOpen": true
-}
-```
-
-### Separator
-
-You can define a separator in meta by adding a item surrounded with `---`.
+Add a `...` item to include remaining pages (sorted alphabetically), or `z...a` for descending order.
 
 ```json title="meta.json"
 {
-  "title": "Name of Folder",
-  "pages": ["---Separator---"]
-}
-```
-
-### Rest
-
-Add a Rest (`...`) item to automatically add and sort remaining page items alphabetically.
-
-<Callout title="Note">
-  Index pages won't be included, you must specify the order of `index`.
-</Callout>
-
-```json title="meta.json"
-{
-  "title": "Folder",
   "pages": ["guide", "..."]
 }
 ```
 
-You can also sort items reversely.
+You can add `!name` to prevent an item from being included.
 
 ```json title="meta.json"
 {
-  "title": "Folder",
-  "pages": ["guide", "z...a"]
+  "pages": ["guide", "...", "!components"]
 }
 ```
 
-### Except
-
-In conjunction with the Rest item (`...`), you can use `!name` to exclude an item from the rest.
-
-```json title="meta.json"
-{
-  "title": "Folder",
-  "pages": ["...", "!hide-this-page"]
-}
-```
-
-### Extract
+#### Extract
 
 You can extract the items from a folder with `...folder_name`.
 
 ```json title="meta.json"
 {
-  "title": "Folder",
-  "pages": ["guide", "...folder"]
+  "pages": ["guide", "...nested"]
 }
 ```
 
-### Link
+#### Link
 
-Use the syntax `[Text](url)` to insert links.
-
-```json title="meta.json"
-{
-  "title": "Folder",
-  "pages": ["index", "[Vercel](https://vercel.com)"]
-}
-```
-
-You can add an icon too.
+Use the syntax `[Text](url)` to insert links, or `[Icon][Text](url)` to add icon.
 
 ```json title="meta.json"
 {
-  "title": "Folder",
-  "pages": ["index", "[Triangle][Vercel](https://vercel.com)"]
+  "pages": [
+    "[Vercel](https://vercel.com)",
+    "[Triangle][Vercel](https://vercel.com)"
+  ]
 }
 ```
 
@@ -216,13 +169,7 @@ You can add an [`icon` handler](/docs/headless/source-api#icons) to `loader()`.
 
 ## Root Folder
 
-Marks the folder as a root folder.
-
-<Callout title='Fumadocs UI'>
-
-    Fumadocs UI renders root folders as [Sidebar Tabs](/docs/ui/navigation/sidebar#sidebar-tabs), which allows user to switch between them.
-
-</Callout>
+Marks the folder as a root folder, only items in the opened root folder will be considered.
 
 ```json title="meta.json"
 {
@@ -232,23 +179,29 @@ Marks the folder as a root folder.
 }
 ```
 
-Only items in the current root folder will be considered.
-
 For example, when you are in a root folder called `framework`, the other folders (e.g. `headless`) are not shown on the sidebar and other navigation elements.
+
+Index pages will also be hidden unless it is listed in the `pages` property.
 
 <Files>
   <Folder name="framework" defaultOpen>
-    <File name="Current Page" className="!text-fd-primary !bg-fd-primary/10" />
-    <File name="Other Pages" />
+    <File name="index.mdx (hidden)" className="opacity-50" />
+    <File
+      name="current-page.mdx"
+      className="!text-fd-primary !bg-fd-primary/10"
+    />
+    <File name="other-pages.mdx" />
   </Folder>
-  <Folder name="headless" className="opacity-50" disabled defaultOpen>
-    <File name="Invisible Page" />
+  <Folder name="headless (hidden)" className="opacity-50" disabled defaultOpen>
+    <File name="my-page.mdx" />
   </Folder>
 </Files>
 
-### Index Pages
+<Callout title='Fumadocs UI'>
 
-By default, index pages are not considered as the child item of a folder, you must specify them in the `pages` property.
+    Fumadocs UI renders root folders as [Sidebar Tabs](/docs/ui/navigation/sidebar#sidebar-tabs), which allows user to switch between them.
+
+</Callout>
 
 ## Internationalization
 
