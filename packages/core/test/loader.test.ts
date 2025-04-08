@@ -285,6 +285,18 @@ test('Internationalized Routing', () => {
       },
     }),
   );
+  expect(
+    result.getNodePage(
+      result.pageTree['en'].children[0] as PageTree.Item,
+      'cn',
+    ),
+  ).toEqual(
+    expect.objectContaining({
+      data: {
+        title: 'Hello Chinese',
+      },
+    }),
+  );
 
   expect(removeUndefined(result.pageTree['en'], true), 'Page Tree')
     .toMatchInlineSnapshot(`
@@ -444,8 +456,6 @@ test('Internationalized Routing', () => {
       },
     ]
   `);
-  expect(result.getPage(['test'])?.url).toBe('/en/test');
-  expect(result.getPage(['test'], 'cn')?.url).toBe('/cn/test');
 });
 
 test('Internationalized Routing: Hide Prefix', () => {
