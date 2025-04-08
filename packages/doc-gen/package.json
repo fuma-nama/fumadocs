@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "estree-util-to-js": "^2.0.0",
-    "estree-util-value-to-estree": "^3.3.2",
+    "estree-util-value-to-estree": "^3.3.3",
     "npm-to-yarn": "^3.0.1",
     "oxc-transform": "^0.62.0",
     "unist-util-visit": "^5.0.0",

@@ -54,7 +54,7 @@
     "chokidar": "^4.0.3",
     "cross-spawn": "^7.0.6",
     "esbuild": "^0.25.2",
-    "estree-util-value-to-estree": "^3.3.2",
+    "estree-util-value-to-estree": "^3.3.3",
     "fast-glob": "^3.3.3",
     "gray-matter": "^4.0.3",
     "lru-cache": "^11.1.0",
@@ -74,7 +74,7 @@
     "tsconfig": "workspace:*",
     "unified": "^11.0.5",
     "vfile": "^6.0.3",
-    "webpack": "^5.97.1"
+    "webpack": "^5.99.1"
   },
   "peerDependencies": {
     "@fumadocs/mdx-remote": "^1.2.0",
