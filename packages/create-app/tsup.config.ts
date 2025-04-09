@@ -1,10 +1,10 @@
 import { writeFileSync } from 'node:fs';
 import { defineConfig } from 'tsup';
-import corePkg from '../core/package.json';
-import uiPkg from '../ui/package.json';
-import mdxPkg from '../mdx/package.json';
-import mdxRemotePkg from '../mdx-remote/package.json';
 import contentCollectionsPkg from '../content-collections/package.json';
+import corePkg from '../core/package.json';
+import mdxRemotePkg from '../mdx-remote/package.json';
+import mdxPkg from '../mdx/package.json';
+import uiPkg from '../ui/package.json';
 
 const versions = {
   'fumadocs-core': corePkg.version,
@@ -25,4 +25,5 @@ export default defineConfig({
   entry: ['./src/index.ts', './src/create-app.ts'],
   format: 'esm',
   target: 'node18',
+  dts: true,
 });
