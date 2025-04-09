@@ -1,5 +1,11 @@
 # create-next-docs-app
 
+## 15.2.6
+
+### Patch Changes
+
+- e9f2b70: Allow code usage of `create()`
+
 ## 15.2.5
 
 ### Patch Changes

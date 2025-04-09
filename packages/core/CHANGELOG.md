@@ -1,5 +1,13 @@
 # next-docs-zeta
 
+## 15.2.6
+
+### Patch Changes
+
+- d49f9ae: Fix order of `<I18nProvider />`
+- b07e98c: fix `loader().getNodePage()` returning undefined for other locales
+- 3a4bd88: Fix wrong index files output in i18n page tree generation
+
 ## 15.2.5
 
 ### Patch Changes
