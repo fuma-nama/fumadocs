@@ -14,6 +14,8 @@
   "author": "Fuma Nama",
   "type": "module",
   "bin": "./dist/index.js",
+  "module": "./dist/create-app.js",
+  "types": "./dist/create-app.d.ts",
   "files": [
     "template/*",
     "dist/*"
